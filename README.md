@@ -2,8 +2,8 @@
 
 [This repository](https://github.com/conan-io/conan-center-index):
 
-  - Contains the recipes for the [conan-center](https://bintray.com/conan/conan-center) repository.
-  - A CI system that will build automatically the Binary packages for the recipes submitted in a [Pull Request](https://github.com/conan-io/conan-center-index/pulls) .
+  - Contains the Conan recipes for the [conan-center](https://bintray.com/conan/conan-center) repository.
+  - Have a CI system that will build automatically the Binary packages for the recipes submitted in a [Pull Request](https://github.com/conan-io/conan-center-index/pulls) .
 
 
 The documentation on what is the `Conan-Center-Index`, how it works and how to contribute can be found in 
