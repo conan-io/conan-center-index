@@ -6,8 +6,7 @@
   - Have a CI system that will build automatically the Binary packages for the recipes submitted in a [Pull Request](https://github.com/conan-io/conan-center-index/pulls) .
 
 
-The documentation on what is the `Conan-Center-Index`, how it works and how to contribute can be found in 
-[the Wiki of the project](https://github.com/conan-io/conan-center-index/wiki).
+### Check [the Wiki of the project](https://github.com/conan-io/conan-center-index/wiki) to read what is the `Conan-Center-Index`, how it works and how to contribute can be found in 
 
 
 ### Reporting Issues
