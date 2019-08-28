@@ -81,7 +81,7 @@ class ZlibConan(ConanFile):
 
     def _build_zlib(self):
         with tools.chdir(self._source_subfolder):
-            # https://github.com/madler/zlib/issues/268
+            # https://github.com/madler/zlib/issues/268 
             tools.replace_in_file('gzguts.h',
                                   '#if defined(_WIN32) || defined(__CYGWIN__)',
                                   '#if defined(_WIN32) || defined(__MINGW32__)')
