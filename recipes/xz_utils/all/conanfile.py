@@ -107,13 +107,12 @@ class XZUtils(ConanFile):
                 self.copy(pattern="*.dll", dst="bin", src=bin_dir, keep_path=False)
 
         # Remove/rename forbidden files/folders in central repository
-        pkg_config_dir = os.path.join(self.package_folder, 'lib', 'pkgconfig')
-        if os.path.exists(pkg_config_dir) and os.path.isdir(pkg_config_dir):
-            shutil.rmtree(pkg_config_dir)
-
-        share_dir = os.path.join(self.package_folder, 'share')
-        if os.path.exists(share_dir) and os.path.isdir(share_dir):
-            shutil.move(share_dir, os.path.join(self.package_folder, 'res'))
+        tools.rmdir(os.path.join(self.package_folder, 'lib', 'pkgconfig'))
+        tools.rmdir(os.path.join(self.package_folder, 'share'))
+        try:
+            os.remove(os.path.join(self.package_folder, "lib", "liblzma.la"))
+        except:
+            pass
 
     def package_info(self):
         if not self.options.shared:
