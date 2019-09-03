@@ -809,6 +809,7 @@ class BoostConan(ConanFile):
     def package(self):
         # This stage/lib is in source_folder... Face palm, looks like it builds in build but then
         # copy to source with the good lib name
+        self.copy("LICENSE_1_0.txt", dst="licenses", src=os.path.join(self.source_folder, self._folder_name))
         out_lib_dir = os.path.join(self._boost_dir, "stage", "lib")
         self.copy(pattern="*", dst="include/boost", src="%s/boost" % self._boost_dir)
         if not self.options.shared:
