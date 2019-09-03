@@ -1,3 +1,4 @@
+
 # Conan-Center Index
 
 [This repository](https://github.com/conan-io/conan-center-index):
@@ -11,14 +12,17 @@
 
 ### Reporting Issues
 
-* Please open an issue on this repository for any issues you experience while using our service, 
-  or any improvements you wish to discuss.
-  * When opening an issue, please make clear if it is a bug/problem you are experiencing or a request
-    for a new feature or improvement
-  * If you are submitting a bug report, please provide detailed steps to reproduce your issue. 
-  * To open an issue click 'Issues' above and please review the list of open issues.
-    * If your issue already exists, please select that issue and add any additional information that might 
-      help us resolve it, or click the reactions button and thumbs up (+1) if you want to indicate you are also 
-      experiencing this issue, but have no new information to add.
-    * If your issue/improvement is not on the list, please click the 'New Issue' button and provide details
+You can open an issue to:
+
+- Report **bugs/issues** in a package: 
+    - Use the [package] tag in the title of the issue to help identifying them. 
+    - If you detect any issue or missing feature in a package, for example, a build failure or a recipe that not support a         specific configuration.
+    - Specify the name and version (zlib/1.2.11) and any relevant details about the fail configuration: Applied profile,           building machine...
+- Request a **new library** to be added:
+    - Use the [request] tag in the title of the issue to help identifying them. 
+    - Indicate the name and the version of the library you would like to have in the repository. Also links to the project         website, source download/repository and in general any relevant information that helps creating a recipe for the             requested library.
+- Report **a failure** in the CI system:
+    - If you open a PR and get an unexpected error you might comment in the failing PR.
+    - If the service or repository is down or failing, use the [service] tag in the title of a new issue to help identifying them.
+
 * If your issue is not appropriate for a public discussion, please contact us via e-mail at info@conan.io.
