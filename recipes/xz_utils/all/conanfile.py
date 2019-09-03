@@ -1,8 +1,8 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-import shutil
 import os
 from conans import ConanFile, tools, AutoToolsBuildEnvironment, MSBuild
+from conans.tools import Version
 
 
 class XZUtils(ConanFile):
@@ -56,8 +56,7 @@ class XZUtils(ConanFile):
 
     def _build_msvc(self):
         # windows\INSTALL-MSVC.txt
-        compiler_version = float(self.settings.compiler.version.value)
-        msvc_version = 'vs2017' if compiler_version >= 15 else 'vs2013'
+        msvc_version = 'vs2017' if Version(self.settings.compiler.version) >= "15" else 'vs2013'
         with tools.chdir(os.path.join(self._source_subfolder, 'windows', msvc_version)):
             target = 'liblzma_dll' if self.options.shared else 'liblzma'
             msbuild = MSBuild(self)
@@ -66,7 +65,8 @@ class XZUtils(ConanFile):
                 targets=[target],
                 build_type=self._effective_msbuild_type(),
                 platforms={'x86': 'Win32', 'x86_64': 'x64'},
-                use_env=False)
+                use_env=False,
+                upgrade_project=False)
 
     def _build_configure(self):
         with tools.chdir(self._source_subfolder):
@@ -98,8 +98,7 @@ class XZUtils(ConanFile):
             self.copy(pattern="*.h", dst="include", src=inc_dir, keep_path=True)
             arch = {'x86': 'Win32', 'x86_64': 'x64'}.get(str(self.settings.arch))
             target = 'liblzma_dll' if self.options.shared else 'liblzma'
-            compiler_version = float(self.settings.compiler.version.value)
-            msvc_version = 'vs2017' if compiler_version >= 15 else 'vs2013'
+            msvc_version = 'vs2017' if Version(self.settings.compiler.version) >= "15" else 'vs2013'
             bin_dir = os.path.join(self._source_subfolder, 'windows', msvc_version,
                                    str(self._effective_msbuild_type()), arch, target)
             self.copy(pattern="*.lib", dst="lib", src=bin_dir, keep_path=False)
