@@ -13,7 +13,7 @@ class MSYS2Conan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "http://www.msys2.org"
     license = "MSYS license"
-    # build_requires = "7zip/19.00"
+    build_requires = "7zip/19.00"
     short_paths = True
     options = {"exclude_files": "ANY",  # Comma separated list of file patterns to exclude from the package
                "packages": "ANY",  # Comma separated
@@ -37,7 +37,7 @@ class MSYS2Conan(ConanFile):
         arch = str(self.settings.arch_build)
         tools.download(**self.conan_data["sources"][self.version][arch])
         filename = self.conan_data["sources"][self.version][arch]["filename"]
-        sha256 = self.conan_data["sources"][self.version]["checksum"][arch]["sha256"]
+        sha256 = self.conan_data["checksum"][self.version][arch]["sha256"]
         tools.check_sha256(filename, sha256)
         tar_name = filename.replace(".xz", "")
         self.run("7z.exe x {0}".format(filename))
