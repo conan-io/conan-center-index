@@ -20,11 +20,9 @@ class Package7Zip(ConanFile):
             raise ConanInvalidConfiguration("Only Windows supported")
 
     def source(self):
-        url = "https://www.7-zip.org/a/7z{}-src.7z".format(self.version.replace(".", ""))
-        filename="7zip.7z"
-        tools.download(url, filename=filename)
-        tools.check_sha256(filename, "9ba70a5e8485cf9061b30a2a84fe741de5aeb8dd271aab8889da0e9b3bf1868e")
-        self._uncompress_7z(filename)
+        tools.download(**self.conan_data["sources"][self.version])
+        tools.check_sha256(**self.conan_data["checksum"][self.version])
+        self._uncompress_7z(self.conan_data["sources"][self.version]["filename"])
 
     def _uncompress_7z(self, filename):
         """ We need 7z itself to uncompress the file, we have two options:
@@ -32,8 +30,7 @@ class Package7Zip(ConanFile):
             * booststrap using a previous version (7zip/9.22) where sources are in .tar.bz2. Right
               now it would we a loop in the Conan graph
         """
-        url = "https://www.7-zip.org/a/lzma920.tar.bz2"
-        tools.get(url, destination="lzma920", sha256="8ac221acdca8b6f6dd110120763af42b3707363752fc04e63c7bbff76774a445")
+        tools.get(**self.conan_data["externals"]["lzma"])
         self.run("lzma920\\7zr.exe x {}".format(filename))
 
     def build(self):
