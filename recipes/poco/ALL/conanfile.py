@@ -117,6 +117,9 @@ class PocoConan(ConanFile):
                 replace = 'Foundation ${OPENSSL_LIBRARIES}'
                 tools.replace_in_file(os.path.join(self._source_subfolder, "Crypto", "CMakeLists.txt"), replace, replace + " ws2_32 Crypt32.lib")
 
+        # Poco 1.9.x - CMAKE_SOURCE_DIR is required in many places
+        os.rename(os.path.join(self._source_subfolder, "CMakeLists.txt"), os.path.join(self._source_subfolder, "CMakeListsOriginal.cmake"))
+        os.rename("CMakeLists.txt", os.path.join(self._source_subfolder, "CMakeLists.txt"))
 
     def _configure_cmake(self):
         cmake = CMake(self, parallel=None)
@@ -130,7 +133,7 @@ class PocoConan(ConanFile):
         if self.settings.os == "Windows" and self.settings.compiler == "Visual Studio":  # MT or MTd
             cmake.definitions["POCO_MT"] = "ON" if "MT" in str(self.settings.compiler.runtime) else "OFF"
         self.output.info(cmake.definitions)
-        cmake.configure(build_dir=self._build_subfolder)
+        cmake.configure(build_dir=self._build_subfolder, source_dir=os.path.join("..", self._source_subfolder))
         return cmake
 
     def build(self):
