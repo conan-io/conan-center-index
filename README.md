@@ -17,7 +17,7 @@ You can open an issue to:
 - Report **bugs/issues** in a package: 
     - Use the [package] tag in the title of the issue to help identifying them. 
     - If you detect any issue or missing feature in a package, for example, a build failure or a recipe that not support a         specific configuration.
-    - Specify the name and version (zlib/1.2.11) and any relevant details about the fail configuration: Applied profile,           building machine...
+    - Specify the name and version `zlib/1.2.11` and any relevant details about the fail configuration: Applied profile,           building machine...
 - Request a **new library** to be added:
     - Use the [request] tag in the title of the issue to help identifying them. 
     - Indicate the name and the version of the library you would like to have in the repository. Also links to the project         website, source download/repository and in general any relevant information that helps creating a recipe for the             requested library.
