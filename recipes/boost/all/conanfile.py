@@ -28,6 +28,11 @@ class BoostConan(ConanFile):
     name = "boost"
     settings = "os", "arch", "compiler", "build_type"
     description = "Boost provides free peer-reviewed portable C++ source libraries"
+    url = "https://github.com/conan-io/conan-center-index"
+    homepage = "https://www.boost.org"
+    author = "Conan Community"
+    license = "BSL-1.0"
+    topics = ("conan", "boost", "libraries", "cpp")
     # The current python option requires the package to be built locally, to find default Python
     # implementation
     options = {
@@ -47,59 +52,70 @@ class BoostConan(ConanFile):
         "zlib": [True, False],
         "bzip2": [True, False],
         "lzma": [True, False],
-        "zstd": [True, False]
+        "zstd": [True, False],
+        "segmented_stacks": [True, False],
+        "extra_b2_flags": "ANY"  # custom b2 flags
     }
     options.update({"without_%s" % libname: [True, False] for libname in lib_list})
 
-    default_options = {"shared": False,
-                       "header_only": False,
-                       "error_code_header_only": False,
-                       "system_no_deprecated": False,
-                       "asio_no_deprecated": False,
-                       "filesystem_no_deprecated": False,
-                       "fPIC": True,
-                       "layout": "system",
-                       "magic_autolink": False,
-                       "python_executable": None,
-                       "python_version": None,
-                       "namespace": "boost",
-                       "namespace_alias": False,
-                       "zlib": True,
-                       "bzip2": True,
-                       "lzma": False,
-                       "zstd": False}
+    default_options = ["shared=False",
+                       "header_only=False",
+                       "error_code_header_only=False",
+                       "system_no_deprecated=False",
+                       "asio_no_deprecated=False",
+                       "filesystem_no_deprecated=False",
+                       "fPIC=True",
+                       "layout=system",
+                       "magic_autolink=False",
+                       "python_executable=None",
+                       "python_version=None",
+                       "namespace=boost",
+                       "namespace_alias=False",
+                       "zlib=True",
+                       "bzip2=True",
+                       "lzma=False",
+                       "zstd=False",
+                       "segmented_stacks=False",
+                       "extra_b2_flags=None"]
 
-    for libname in lib_list:
-        default_options["without_%s" % libname] = False
-    default_options["without_python"] = True
-
-    url = "https://github.com/lasote/conan-boost"
-    license = "Boost Software License - Version 1.0. http://www.boost.org/LICENSE_1_0.txt"
+    default_options.extend(["without_%s=False" % libname for libname in lib_list if libname != "python"])
+    default_options.append("without_python=True")
+    default_options = tuple(default_options)
     short_paths = True
     no_copy_source = True
-
     exports_sources = ['patches/*']
 
-    _bcp_dir = "custom-boost"
+    @property
+    def _bcp_dir(self):
+        return "custom-boost"
 
     @property
-    def folder_name(self):
+    def _folder_name(self):
         return "boost_%s" % self.version.replace(".", "_")
-
-    def config_options(self):
-        if self.settings.os == "Windows":
-            self.options.remove("fPIC")
 
     @property
     def _is_msvc(self):
         return self.settings.compiler == "Visual Studio"
 
     @property
-    def zip_bzip2_requires_needed(self):
+    def _zip_bzip2_requires_needed(self):
         return not self.options.without_iostreams and not self.options.header_only
 
-    def configure(self):
-        if self.zip_bzip2_requires_needed:
+    @property
+    def _python_executable(self):
+        """
+        obtain full path to the python interpreter executable
+        :return: path to the python interpreter executable, either set by option, or system default
+        """
+        exe = self.options.python_executable if self.options.python_executable else sys.executable
+        return str(exe).replace('\\', '/')
+
+    def config_options(self):
+        if self.settings.os == "Windows":
+            del self.options.fPIC
+
+    def requirements(self):
+        if self._zip_bzip2_requires_needed:
             if self.options.zlib:
                 self.requires("zlib/1.2.11")
             if self.options.bzip2:
@@ -124,22 +140,14 @@ class BoostConan(ConanFile):
         patches = self.conan_data["patches"][self.version]["patches"]
         patches = patches.split(",") if patches else []
         tools.get(**self.conan_data["sources"][self.version])
-
         for patch in patches:
             tools.patch(patch_file=os.path.join("patches", patch),
-                        base_path=os.path.join(self.source_folder, self.folder_name))
+                        base_path=os.path.join(self.source_folder, self._folder_name))
 
 
     ##################### BUILDING METHODS ###########################
 
-    @property
-    def _python_executable(self):
-        """
-        obtain full path to the python interpreter executable
-        :return: path to the python interpreter executable, either set by option, or system default
-        """
-        exe = self.options.python_executable if self.options.python_executable else sys.executable
-        return str(exe).replace('\\', '/')
+
 
     def _run_python_script(self, script):
         """
@@ -307,7 +315,7 @@ class BoostConan(ConanFile):
         raise Exception("couldn't locate python libraries - make sure you have installed python development files")
 
     def _clean(self):
-        src = os.path.join(self.source_folder, self.folder_name)
+        src = os.path.join(self.source_folder, self._folder_name)
         clean_dirs = [os.path.join(self.build_folder, "bin.v2"),
                       os.path.join(self.build_folder, "architecture"),
                       os.path.join(self.source_folder, self._bcp_dir),
@@ -323,12 +331,12 @@ class BoostConan(ConanFile):
 
     @property
     def _b2_exe(self):
-        folder = os.path.join(self.source_folder, self.folder_name, "tools", "build")
+        folder = os.path.join(self.source_folder, self._folder_name, "tools", "build")
         return os.path.join(folder, "b2.exe" if tools.os_info.is_windows else "b2")
 
     @property
     def _bcp_exe(self):
-        folder = os.path.join(self.source_folder, self.folder_name, "dist", "bin")
+        folder = os.path.join(self.source_folder, self._folder_name, "dist", "bin")
         return os.path.join(folder, "bcp.exe" if tools.os_info.is_windows else "bcp")
 
     @property
@@ -337,14 +345,14 @@ class BoostConan(ConanFile):
 
     @property
     def _boost_dir(self):
-        return self._bcp_dir if self._use_bcp else self.folder_name
+        return self._bcp_dir if self._use_bcp else self._folder_name
 
     @property
     def _boost_build_dir(self):
-        return os.path.join(self.source_folder, self.folder_name, "tools", "build")
+        return os.path.join(self.source_folder, self._folder_name, "tools", "build")
 
     def _build_bcp(self):
-        folder = os.path.join(self.source_folder, self.folder_name, 'tools', 'bcp')
+        folder = os.path.join(self.source_folder, self._folder_name, 'tools', 'bcp')
         with tools.vcvars(self.settings) if self._is_msvc else tools.no_op():
             with tools.chdir(folder):
                 command = "%s -j%s --abbreviate-paths -d2" % (self._b2_exe, tools.cpu_count())
@@ -357,13 +365,13 @@ class BoostConan(ConanFile):
                 os.mkdir(self._bcp_dir)
                 namespace = "--namespace=%s" % self.options.namespace
                 alias = "--namespace-alias" if self.options.namespace_alias else ""
-                boostdir = "--boost=%s" % self.folder_name
-                libraries = {"build", "boost-build.jam", "boostcpp.jam"}
-                for d in os.listdir(os.path.join(self.folder_name, "boost")):
-                    if os.path.isdir(os.path.join(self.folder_name, "boost", d)):
+                boostdir = "--boost=%s" % self._folder_name
+                libraries = {"build", "boost-build.jam", "boostcpp.jam", "boost_install", "headers"}
+                for d in os.listdir(os.path.join(self._folder_name, "boost")):
+                    if os.path.isdir(os.path.join(self._folder_name, "boost", d)):
                         libraries.add(d)
-                for d in os.listdir(os.path.join(self.folder_name, "libs")):
-                    if os.path.isdir(os.path.join(self.folder_name, "libs", d)):
+                for d in os.listdir(os.path.join(self._folder_name, "libs")):
+                    if os.path.isdir(os.path.join(self._folder_name, "libs", d)):
                         libraries.add(d)
                 libraries = ' '.join(libraries)
                 command = "{bcp} {namespace} {alias} " \
@@ -388,9 +396,9 @@ class BoostConan(ConanFile):
             self._build_bcp()
             self._run_bcp()
 
-        flags = self.get_build_flags()
+        flags = self._get_build_flags()
         # Help locating bzip2 and zlib
-        self.create_user_config_jam(self._boost_build_dir)
+        self._create_user_config_jam(self._boost_build_dir)
 
         # JOIN ALL FLAGS
         b2_flags = " ".join(flags)
@@ -471,10 +479,25 @@ class BoostConan(ConanFile):
         else:
             return None
 
-    def get_build_flags(self):
+    @property
+    def _gnu_cxx11_abi(self):
+        """Checks libcxx setting and returns value for the GNU C++11 ABI flag
+        _GLIBCXX_USE_CXX11_ABI= .  Returns None if C++ library cannot be
+        determined.
+        """
+        try:
+            if str(self.settings.compiler.libcxx) == "libstdc++":
+                return "0"
+            elif str(self.settings.compiler.libcxx) == "libstdc++11":
+                return "1"
+        except:
+            pass
+        return None
+
+    def _get_build_flags(self):
 
         if tools.cross_building(self.settings):
-            flags = self.get_build_cross_flags()
+            flags = self._get_build_cross_flags()
         else:
             flags = []
 
@@ -502,7 +525,7 @@ class BoostConan(ConanFile):
                 for define in self.deps_cpp_info[library].defines:
                     flags.append("define=%s" % define)
 
-        if self.zip_bzip2_requires_needed:
+        if self._zip_bzip2_requires_needed:
             add_defines(self.options.zlib, "zlib")
             add_defines(self.options.bzip2, "bzip2")
             add_defines(self.options.lzma, "lzma")
@@ -523,7 +546,7 @@ class BoostConan(ConanFile):
             if getattr(self.options, "without_%s" % libname):
                 flags.append("--without-%s" % libname)
 
-        toolset, _, _ = self.get_toolset_version_and_exe()
+        toolset, _, _ = self._get_toolset_version_and_exe()
         flags.append("toolset=%s" % toolset)
 
         if self.settings.get_safe("compiler.cppstd"):
@@ -544,10 +567,9 @@ class BoostConan(ConanFile):
         # Standalone toolchain fails when declare the std lib
         if self.settings.os != "Android":
             try:
-                if str(self.settings.compiler.libcxx) == "libstdc++":
-                    flags.append("define=_GLIBCXX_USE_CXX11_ABI=0")
-                elif str(self.settings.compiler.libcxx) == "libstdc++11":
-                    flags.append("define=_GLIBCXX_USE_CXX11_ABI=1")
+                if self._gnu_cxx11_abi:
+                    flags.append("define=_GLIBCXX_USE_CXX11_ABI=%s" % self._gnu_cxx11_abi)
+
                 if "clang" in str(self.settings.compiler):
                     if str(self.settings.compiler.libcxx) == "libc++":
                         cxx_flags.append("-stdlib=libc++")
@@ -565,6 +587,10 @@ class BoostConan(ConanFile):
             flags.append("define=BOOST_ASIO_NO_DEPRECATED=1")
         if self.options.filesystem_no_deprecated:
             flags.append("define=BOOST_FILESYSTEM_NO_DEPRECATED=1")
+        if self.options.segmented_stacks:
+            flags.extend(["segmented-stacks=on",
+                          "define=BOOST_USE_SEGMENTED_STACKS=1",
+                          "define=BOOST_USE_UCONTEXT=1"])
 
         if tools.is_apple_os(self.settings.os):
             if self.settings.get_safe("os.version"):
@@ -581,9 +607,12 @@ class BoostConan(ConanFile):
         cxx_flags = 'cxxflags="%s"' % " ".join(cxx_flags) if cxx_flags else ""
         flags.append(cxx_flags)
 
+        if self.options.extra_b2_flags:
+            flags.append(str(self.options.extra_b2_flags))
+
         return flags
 
-    def get_build_cross_flags(self):
+    def _get_build_cross_flags(self):
         arch = self.settings.get_safe('arch')
         flags = []
         self.output.info("Cross building, detecting compiler...")
@@ -594,6 +623,8 @@ class BoostConan(ConanFile):
         elif arch in ["x86", "x86_64"]:
             pass
         elif arch.startswith("ppc"):
+            pass
+        elif arch.startswith("mips"):
             pass
         else:
             raise Exception("I'm so sorry! I don't know the appropriate ABI for "
@@ -626,19 +657,19 @@ class BoostConan(ConanFile):
             return tools.XCRun(self.settings).cxx
         return None
 
-    def create_user_config_jam(self, folder):
+    def _create_user_config_jam(self, folder):
         """To help locating the zlib and bzip2 deps"""
         self.output.warn("Patching user-config.jam")
 
         compiler_command = self._cxx
 
         contents = ""
-        if self.zip_bzip2_requires_needed:
+        if self._zip_bzip2_requires_needed:
             def create_library_config(name):
-                version = self.deps_cpp_info[name].version
                 includedir = self.deps_cpp_info[name].include_paths[0].replace('\\', '/')
                 libdir = self.deps_cpp_info[name].lib_paths[0].replace('\\', '/')
                 lib = self.deps_cpp_info[name].libs[0]
+                version = self.deps_cpp_info[name].version
                 return "\nusing {name} : {version} : " \
                        "<include>{includedir} " \
                        "<search>{libdir} " \
@@ -654,7 +685,7 @@ class BoostConan(ConanFile):
             if self.options.bzip2:
                 contents += create_library_config("bzip2")
             if self.options.lzma:
-                contents += create_library_config("xz_utils")
+                contents += create_library_config("lzma")
             if self.options.zstd:
                 contents += create_library_config("zstd")
 
@@ -666,7 +697,7 @@ class BoostConan(ConanFile):
                         includes=self._python_includes,
                         libraries=self._python_libraries)
 
-        toolset, version, exe = self.get_toolset_version_and_exe()
+        toolset, version, exe = self._get_toolset_version_and_exe()
         exe = compiler_command or exe  # Prioritize CXX
 
         # Specify here the toolset with the binary if present if don't empty parameter : :
@@ -699,7 +730,7 @@ class BoostConan(ConanFile):
         filename = "%s/user-config.jam" % folder
         tools.save(filename,  contents)
 
-    def get_toolset_version_and_exe(self):
+    def _get_toolset_version_and_exe(self):
         compiler_version = str(self.settings.compiler.version)
         compiler = str(self.settings.compiler)
         if self._is_msvc:
@@ -742,10 +773,10 @@ class BoostConan(ConanFile):
             return "gcc" if self.settings.compiler == "gcc" else ""
 
         if tools.os_info.is_macos:
-            return "darwin"
+            return "clang"
 
-        with_toolset = {"apple-clang": "darwin"}.get(str(self.settings.compiler),
-                                                     str(self.settings.compiler))
+        with_toolset = {"apple-clang": "clang"}.get(str(self.settings.compiler),
+                                                    str(self.settings.compiler))
 
         # fallback for the case when no unversioned gcc/clang is available
         if with_toolset in ["gcc", "clang"] and not tools.which(with_toolset):
@@ -753,7 +784,7 @@ class BoostConan(ConanFile):
         return with_toolset
 
     def _bootstrap(self):
-        folder = os.path.join(self.source_folder, self.folder_name, "tools", "build")
+        folder = os.path.join(self.source_folder, self._folder_name, "tools", "build")
         try:
             bootstrap = "bootstrap.bat" if tools.os_info.is_windows else "./bootstrap.sh"
             with tools.vcvars(self.settings) if self._is_msvc else tools.no_op():
@@ -787,11 +818,6 @@ class BoostConan(ConanFile):
         self.copy(pattern="*.dylib*", dst="lib", src=out_lib_dir, keep_path=False)
         self.copy(pattern="*.lib", dst="lib", src=out_lib_dir, keep_path=False)
         self.copy(pattern="*.dll", dst="bin", src=out_lib_dir, keep_path=False)
-        self.copy(pattern="LICENSE*", dst="licenses", src=self._boost_dir, keep_path=False)
-
-        # When first call with source do not package anything
-        if not os.path.exists(os.path.join(self.package_folder, "lib")):
-            return
 
     def package_info(self):
         gen_libs = [] if self.options.header_only else tools.collect_libs(self)
@@ -833,6 +859,13 @@ class BoostConan(ConanFile):
 
         if self.options.filesystem_no_deprecated:
             self.cpp_info.defines.append("BOOST_FILESYSTEM_NO_DEPRECATED")
+
+        if self.options.segmented_stacks:
+            self.cpp_info.defines.extend(["BOOST_USE_SEGMENTED_STACKS", "BOOST_USE_UCONTEXT"])
+
+        if self.settings.os != "Android":
+            if self._gnu_cxx11_abi:
+                self.cpp_info.defines.append("_GLIBCXX_USE_CXX11_ABI=%s" % self._gnu_cxx11_abi)
 
         if not self.options.header_only:
             if self.options.error_code_header_only:

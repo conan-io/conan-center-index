@@ -18,15 +18,7 @@ sources:
     url: "https://dl.bintray.com/boostorg/release/1.71.0/source/boost_1_71_0.tar.bz2"
     sha256: "d73a8da01e8bf8c7eda40b4c84915071a8c8a0df4a6734537ddde4a8580524ee"
 patches:
-  1.66.0:
-    patches: ""
-  1.67.0:
-    patches: "python_base_prefix.patch,ops_gcc_x86_dcas.patch"
-  1.68.0:
-    patches: "python_base_prefix.patch"
-  1.69.0:
-    patches: "boost_build_asmflags.patch,python_base_prefix.patch"
   1.70.0:
-    patches: "boost_build_asmflags.patch,python_base_prefix.patch"
+    patches: "0001-beast-fix-moved-from-executor.patch,bcp_namespace_issues.patch,boost_build_qcc_fix_debug_build_parameter.patch,boost_core_qnx_cxx_provide___cxa_get_globals.patch,python_base_prefix.patch"
   1.71.0:
-    patches: "boost_build_asmflags.patch,python_base_prefix.patch"
+    patches: "bcp_namespace_issues.patch,boost_build_qcc_fix_debug_build_parameter.patch,boost_core_qnx_cxx_provide___cxa_get_globals.patch,python_base_prefix.patch"
