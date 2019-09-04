@@ -1,0 +1,66 @@
+labels:
+  # complexity
+  - name: complex: high
+    color: 2B6F17
+  - name: complex: huge
+    color: 1B460F
+  - name: complex: low
+    color: C1F6AF
+  - name: complex: medium
+    color: F3CEB7
+  # priority
+  - name: priority: critical
+    color: 793204
+  - name: priority: high
+    color: D76F2A
+  - name: priority: low
+    color: F3CEB7
+  - name: priority: medium
+    color: ee13f2
+  # stage
+  - name: stage: in-progress
+    color: C4DDF4
+  - name: stage: queue
+    color: EEB0BD
+  - name: stage: review
+    color: 6BAE58
+  - name: stage: triaging
+    color: FEF4AB
+  # type
+  - name: type: bug
+    color: FB2928
+  - name: type: engineering
+    color: C4DDF4
+  - name: type: feature
+    color: 0B52CA
+  - name: type: look into
+    color: C34B05
+  - name: type: question
+    color: CB317B
+  # various
+  - name: duplicate
+    color: CBCBCB
+  - name: feature approved
+    color: C1DFC6
+  - name: Feedback please!
+    color: C4DDF4
+  - name: fixed
+    color: 85d14b
+  - name: good first issue
+    color: E89594
+  - name: update upstream
+    color: d4c5f9
+  - name: whiteboard
+    color: FEFEFE
+  - name: wontfix
+    color: ffffff
+  - name: help wanted
+    color: 10971D
+  - name: inactive
+    color: 000000
+  - name: invalid
+    color: 000000
+  - name: obsolete
+    color: 000000
+  - name: to do
+    color: FDF1C0
