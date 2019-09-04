@@ -1,0 +1,5 @@
+versions:
+  1.9.3:
+    folder: ALL
+  1.8.1:
+    folder: ALL
