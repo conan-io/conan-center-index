@@ -7,11 +7,11 @@ from conans import ConanFile, CMake, tools
 
 class Bzip2Conan(ConanFile):
     name = "bzip2"
-    version = "1.0.6"
+    version = "1.0.8"
     url = "https://github.com/conan-community/conan-bzip2"
     homepage = "http://www.bzip.org"
     author = "Conan Community"
-    license = "bzip2-1.0.6"
+    license = "bzip2-1.0.8"
     description = "bzip2 is a free and open-source file compression program that uses the Burrows–Wheeler algorithm."
     topics = ("conan", "bzip2", "data-compressor", "file-compression")
     settings = "os", "compiler", "arch", "build_type"
@@ -48,7 +48,6 @@ class Bzip2Conan(ConanFile):
         return cmake
 
     def build(self):
-        tools.replace_in_file(os.path.join(self._source_subfolder, "bzip2.c"), r"<sys\stat.h>", "<sys/stat.h>")
         cmake = self._configure_cmake()
         cmake.build()
 
