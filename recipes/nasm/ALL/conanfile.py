@@ -47,6 +47,8 @@ class NASMConan(ConanFile):
             elif self.settings.arch_build == "x86_64":
                 self._autotools.flags.append("-m64")
             self._autotools.configure(configure_dir=self._source_subfolder)
+            # GCC9 - ‘pure’ attribute on function returning ‘void’
+            tools.replace_in_file("Makefile", "-Werror=attributes", "")
         return self._autotools
 
     def _build_configure(self):
