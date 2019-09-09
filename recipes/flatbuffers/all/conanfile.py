@@ -20,12 +20,15 @@ class FlatbuffersConan(ConanFile):
     options = {"shared": [True, False], "fPIC": [True, False]}
     default_options = {"shared": False, "fPIC": True}
     exports_sources = "CMakeLists.txt"
-    exports = "../../../LICENSE"
     generators = "cmake"
 
     @property
     def _source_subfolder(self):
         return "source_subfolder"
+
+    @property
+    def _build_subfolder(self):
+        return "build_subfolder"
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
@@ -43,7 +46,7 @@ class FlatbuffersConan(ConanFile):
         cmake.definitions["FLATBUFFERS_BUILD_FLATLIB"] = not self.options.shared
         cmake.definitions["FLATBUFFERS_BUILD_FLATC"] = False
         cmake.definitions["FLATBUFFERS_BUILD_FLATHASH"] = False
-        cmake.configure()
+        cmake.configure(build_folder=self._build_subfolder)
         return cmake
 
     def build(self):
