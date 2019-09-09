@@ -17,12 +17,15 @@ class FlatcConan(ConanFile):
     description = "Memory Efficient Serialization Library"
     settings = "os_build", "arch_build"
     exports_sources = "CMakeLists.txt"
-    exports = "../../../LICENSE"
     generators = "cmake"
 
     @property
     def _source_subfolder(self):
         return "source_subfolder"
+
+    @property
+    def _build_subfolder(self):
+        return "build_subfolder"
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
@@ -36,7 +39,7 @@ class FlatcConan(ConanFile):
         cmake.definitions["FLATBUFFERS_BUILD_FLATLIB"] = True
         cmake.definitions["FLATBUFFERS_BUILD_FLATC"] = True
         cmake.definitions["FLATBUFFERS_BUILD_FLATHASH"] = True
-        cmake.configure()
+        cmake.configure(build_folder=self._build_subfolder)
         return cmake
 
     def build(self):
@@ -46,8 +49,9 @@ class FlatcConan(ConanFile):
     def package(self):
         self.copy(pattern="LICENSE.txt", dst="licenses", src=self._source_subfolder)
         extension = ".exe" if self.settings.os_build == "Windows" else ""
-        self.copy(pattern="flatc" + extension, dst="bin", src="bin")
-        self.copy(pattern="flathash" + extension, dst="bin", src="bin")
+        bin_dir = os.path.join(self._build_subfolder, "bin")
+        self.copy(pattern="flatc" + extension, dst="bin", src=bin_dir)
+        self.copy(pattern="flathash" + extension, dst="bin", src=bin_dir)
 
     def package_info(self):
         bin_path = os.path.join(self.package_folder, "bin")

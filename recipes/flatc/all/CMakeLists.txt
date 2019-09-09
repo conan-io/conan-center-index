@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 2.8.11)
 
 message(STATUS "Conan CMake Wrapper")
-include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
+include(conanbuildinfo.cmake)
 conan_basic_setup()
 
 if (WIN32 AND MSVC AND FLATBUFFERS_BUILD_SHAREDLIB)
