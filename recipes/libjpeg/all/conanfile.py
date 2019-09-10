@@ -9,7 +9,6 @@ from conans.errors import ConanInvalidConfiguration
 
 class LibjpegConan(ConanFile):
     name = "libjpeg"
-    version = "9c"
     description = "Libjpeg is a widely used C library for reading and writing JPEG image files."
     url = "http://github.com/bincrafters/conan-libjpeg"
     license = "http://ijg.org/files/README"
