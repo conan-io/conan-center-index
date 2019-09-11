@@ -59,6 +59,9 @@ sources:
   1.0.2s:
     sha256: cabd5c9492825ce5bd23f3c3aeed6a97f8142f606d893df216411f07d1abab96
     url: https://www.openssl.org/source/openssl-1.0.2s.tar.gz
+  1.0.2t:
+    sha256: 14cb464efe7ac6b54799b34456bd69558a749a4931ecfd9cf9f71d7881cac7bc
+    url: https://www.openssl.org/source/openssl-1.0.2t.tar.gz
   1.1.0:
     sha256: f5c69ff9ac1472c80b868efc1c1c0d8dcfc746d29ebe563de2365dd56dbd8c82
     url: https://www.openssl.org/source/openssl-1.1.0.tar.gz
@@ -95,6 +98,9 @@ sources:
   1.1.0k:
     sha256: efa4965f4f773574d6cbda1cf874dbbe455ab1c0d4f906115f867d30444470b1
     url: https://www.openssl.org/source/openssl-1.1.0k.tar.gz
+  1.1.0l:
+    sha256: 74a2f756c64fd7386a29184dc0344f4831192d61dc2481a93a4c5dd727f41148
+    url: https://www.openssl.org/source/openssl-1.1.0l.tar.gz
   1.1.1:
     sha256: 2836875a0f89c03d0fdf483941512613a50cfb421d6fd94b9f41d7279d586a3d
     url: https://www.openssl.org/source/openssl-1.1.1.tar.gz
@@ -107,3 +113,6 @@ sources:
   1.1.1c:
     sha256: f6fb3079ad15076154eda9413fed42877d668e7069d9b87396d0804fdb3f4c90
     url: https://www.openssl.org/source/openssl-1.1.1c.tar.gz
+  1.1.1d:
+    sha256: 1e3a91bc1f9dfce01af26026f856e064eab4c8ee0a8f457b5ae30b40b8b711f2
+    url: https://www.openssl.org/source/openssl-1.1.1d.tar.gz
