@@ -1,0 +1,4 @@
+sources:
+  "2.2.7":
+    sha256: 42241742da97d40557857726cc4f02008cd14f2b44134c6e33af043967cd9d15
+    url: https://github.com/libexpat/libexpat/releases/download/R_2_2_7/expat-2.2.7.tar.gz
