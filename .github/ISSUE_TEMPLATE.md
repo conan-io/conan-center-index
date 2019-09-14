@@ -1,5 +1,8 @@
 To help us debug your issue please explain:
 
+- [ ] I'm asking a **general question** about the Index:
+    - [ ] I've used the `[question]` tag in the title.
+
 - [ ] I'm reporting a **bug/issue** in a package:
     - [ ] I've used the `[package]` tag in the title.
     - [ ] I've specified the name and version (zlib/1.2.11) and any relevant details about the fail configuration: Applied profile,
