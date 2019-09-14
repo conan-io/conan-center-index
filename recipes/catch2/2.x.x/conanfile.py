@@ -15,8 +15,6 @@ class ConanRecipe(ConanFile):
 
     settings = "os", "compiler", "build_type", "arch"
 
-    exports = "LICENSE.txt"
-
     generators = "cmake"
 
     _source_subfolder = "source_subfolder"
@@ -44,7 +42,8 @@ class ConanRecipe(ConanFile):
         cmake.build()
 
     def package(self):
-        self.copy(pattern="LICENSE.txt", dst="licenses")
+        self.copy(pattern="LICENSE.txt", dst="licenses",
+                  src=self._source_subfolder)
 
         cmake = self._configure_cmake()
         cmake.install()
