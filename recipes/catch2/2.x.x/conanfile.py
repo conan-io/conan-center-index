@@ -9,8 +9,8 @@ class ConanRecipe(ConanFile):
     name = "catch2"
     description = "A modern, C++-native, header-only, framework for unit-tests, TDD and BDD"
     topics = ("conan", "catch2", "header-only", "unit-test", "tdd", "bdd")
-    url = "https://github.com/catchorg/Catch2"
-    homepage = url
+    homepage = "https://github.com/catchorg/Catch2"
+    url = "https://github.com/conan-io/conan-center-index"
     license = "BSL-1.0"
 
     settings = "os", "compiler", "build_type", "arch"
