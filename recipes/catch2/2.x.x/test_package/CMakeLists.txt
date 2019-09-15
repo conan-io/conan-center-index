@@ -1,6 +1,9 @@
 cmake_minimum_required(VERSION 3.5)
 project(test_package)
 
+set(CMAKE_CXX_STANDARD 11)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+
 set(CMAKE_VERBOSE_MAKEFILE TRUE)
 
 include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
