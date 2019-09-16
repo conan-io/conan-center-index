@@ -12,7 +12,7 @@ class ExpectedLite(ConanFile):
     homepage = "https://github.com/martinmoene/expected-lite"
     description = "expected lite - Expected objects in C++11 and later in a single-file header-only library"
     author = "Martin Moene"
-    topics = ("conan", "cpp98", "cpp11", "cpp14", "cpp17", "expected", "expected-implementations")
+    topics = ("conan", "cpp11", "cpp14", "cpp17", "expected", "expected-implementations")
     license = "BSL-1.0"
     
     _source_subfolder = "source_subfolder"
