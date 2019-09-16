@@ -5,7 +5,7 @@ import os
 from conans import ConanFile, CMake, tools
 
 
-class OptionalLite(ConanFile):
+class ExpectedLite(ConanFile):
     name = "expected-lite"
     
     url = "https://github.com/conan-io/conan-center-index"
