@@ -13,7 +13,7 @@ class OptionalLite(ConanFile):
     description = "A single-file header-only version of a C++17-like optional, a nullable object for C++98, C++11 and later"
     author = "Martin Moene"
     topics = ("conan", "cpp98", "cpp17", "optional", "optional-implementations")
-    license = "Boost Software License - Version 1.0. http://www.boost.org/LICENSE_1_0.txt"
+    license = "BSL-1.0"
     
     _source_subfolder = "source_subfolder"
 
