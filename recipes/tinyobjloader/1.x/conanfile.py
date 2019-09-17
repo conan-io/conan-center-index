@@ -24,8 +24,7 @@ class TinyObjLoaderConan(ConanFile):
             del self.options.fPIC
 
     def source(self):
-        entry = self.conan_data["sources"][self.version]
-        tools.get(entry["url"], sha256=entry["sha256"])
+        tools.get(**self.conan_data["sources"][self.version])
         extracted_folder = self.name + '-' + self.version
         os.rename(extracted_folder, self._source_subfolder)
 
