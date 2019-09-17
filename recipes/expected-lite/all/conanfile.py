@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 import os
-from conans import ConanFile, CMake, tools
+from conans import ConanFile, tools
 
 
 class ExpectedLite(ConanFile):
@@ -14,6 +14,7 @@ class ExpectedLite(ConanFile):
     author = "Martin Moene"
     topics = ("conan", "cpp11", "cpp14", "cpp17", "expected", "expected-implementations")
     license = "BSL-1.0"
+    no_copy_source = True
     
     _source_subfolder = "source_subfolder"
 
