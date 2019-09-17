@@ -6,8 +6,6 @@ set(CMAKE_VERBOSE_MAKEFILE TRUE)
 include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
 conan_basic_setup()
 
-find_package(tinyobjloader CONFIG REQUIRED)
-
 configure_file(cube.obj cube.obj COPYONLY)
 configure_file(cube.mtl cube.mtl COPYONLY)
 
