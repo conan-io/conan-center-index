@@ -32,6 +32,7 @@ class TinyObjLoaderConan(ConanFile):
         cmake = CMake(self)
         if self.settings.os == "Windows" and self.options.shared:
             cmake.definitions["CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS"] = True
+        cmake.definitions["CMAKE_INSTALL_DOCDIR"] = "licenses"
         cmake.configure(build_dir=self._build_subfolder)
         return cmake
 
@@ -40,10 +41,11 @@ class TinyObjLoaderConan(ConanFile):
         cmake.build()
 
     def package(self):
-        self.copy("LICENSE", dst="licenses", src=self._source_subfolder)
         self.copy(pattern="*.pdb", dst="bin", keep_path=False)
         cmake = self._configure_cmake()
         cmake.install()
+        tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
+        tools.rmdir(os.path.join(self.package_folder, "lib", "tinyobjloader"))
 
     def package_info(self):
         self.cpp_info.libs = tools.collect_libs(self)
