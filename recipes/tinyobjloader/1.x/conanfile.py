@@ -8,7 +8,7 @@ class TinyObjLoaderConan(ConanFile):
     settings = "os", "arch", "build_type", "compiler"
     options = {"shared": [True, False], "fPIC": [True, False]}
     default_options = {'shared': False, "fPIC": True}
-    license = "MTI"
+    license = "MIT"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/syoyo/tinyobjloader"
     author = "Florian Stellbrink <flo@stellbr.ink>"
