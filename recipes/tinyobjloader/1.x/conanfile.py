@@ -41,7 +41,6 @@ class TinyObjLoaderConan(ConanFile):
         cmake.build()
 
     def package(self):
-        self.copy(pattern="*.pdb", dst="bin", keep_path=False)
         cmake = self._configure_cmake()
         cmake.install()
         tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
