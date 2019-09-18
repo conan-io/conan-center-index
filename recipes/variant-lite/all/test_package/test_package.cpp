@@ -6,7 +6,7 @@
 
 using nonstd::variant;
 
-using ErrorInfo = variant<int, std::string>;
+typedef variant<int, std::string> ErrorInfo;
 
 ErrorInfo to_int( char const * const text )
 {
@@ -20,7 +20,7 @@ int main( int argc, char * argv[] )
 {
     const char * text = argc > 1 ? argv[1] : "42";
 
-    auto val = to_int( text );
+    ErrorInfo val = to_int( text );
 
     if ( nonstd::get_if<int>(&val) ) std::cout << "'" << text << "' is " << nonstd::get<int>(val) << std::endl;
     else std::cout << "'" << text << "' isn't a number. Error: " << nonstd::get<std::string>(val) << std::endl;
