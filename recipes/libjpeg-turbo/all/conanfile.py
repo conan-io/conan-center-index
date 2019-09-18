@@ -44,8 +44,7 @@ class LibjpegTurboConan(ConanFile):
     _source_subfolder = "source_subfolder"
 
     def build_requirements(self):
-        if not tools.which("nasm"):
-            self.build_requires("nasm/2.14")
+        self.build_requires("nasm/2.14")
 
     def configure(self):
         del self.settings.compiler.libcxx
