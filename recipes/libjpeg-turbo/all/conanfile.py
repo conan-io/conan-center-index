@@ -3,6 +3,7 @@
 
 import os
 import shutil
+import glob
 from conans import ConanFile, CMake, tools
 
 
@@ -107,6 +108,8 @@ class LibjpegTurboConan(ConanFile):
                     os.remove(os.path.join(self.package_folder, 'bin', bin_program+ext))
                 except OSError:
                     pass
+        for pdb_file in glob.glob(os.path.join(self.package_folder, "bin", "*.pdb")):
+            os.unlink(pdb_file)
 
         self.copy("license*", src=self._source_subfolder, dst="licenses", ignore_case=True, keep_path=False)
         # Copying generated header
