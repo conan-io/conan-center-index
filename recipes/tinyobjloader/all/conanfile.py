@@ -30,8 +30,7 @@ class TinyObjLoaderConan(ConanFile):
 
     def _configure_cmake(self):
         cmake = CMake(self)
-        if self.settings.os == "Windows" and self.options.shared:
-            cmake.definitions["CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS"] = True
+        cmake.definitions["TINYOBJLOADER_COMPILATION_SHARED"] = self.options.shared
         cmake.definitions["CMAKE_INSTALL_DOCDIR"] = "licenses"
         cmake.configure(build_dir=self._build_subfolder)
         return cmake
