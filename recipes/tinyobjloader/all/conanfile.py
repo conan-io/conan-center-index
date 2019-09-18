@@ -4,7 +4,7 @@ from conans import ConanFile, CMake, tools
 
 class TinyObjLoaderConan(ConanFile):
     name = "tinyobjloader"
-    description = "Tiny but powerful single file wavefront obj loader - Builds on Windows, Linux and Macos/OSX"
+    description = "Tiny but powerful single file wavefront obj loader"
     settings = "os", "arch", "build_type", "compiler"
     options = {"shared": [True, False], "fPIC": [True, False]}
     default_options = {'shared': False, "fPIC": True}
