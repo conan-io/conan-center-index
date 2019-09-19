@@ -14,7 +14,8 @@ class OptionalLite(ConanFile):
     author = "Martin Moene"
     topics = ("conan", "cpp98", "cpp17", "optional", "optional-implementations")
     license = "BSL-1.0"
-    
+
+    no_copy_source = True
     _source_subfolder = "source_subfolder"
 
     def source(self):
