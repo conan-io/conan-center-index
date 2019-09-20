@@ -70,7 +70,9 @@ class ProtobufConan(ConanFile):
         self.copy("LICENSE", dst="licenses", src=self._source_subfolder)
         cmake = self._configure_cmake()
         cmake.install()
-        self.copy("*.pdb", dst="lib", src=self._build_subfolder, keep_path=False)
+        tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
+        tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
+
 
     def package_info(self):
         self.cpp_info.libs = tools.collect_libs(self)
