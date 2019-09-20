@@ -1,0 +1,4 @@
+sources:
+  "1.15":
+    url: "https://ftp.gnu.org/gnu/libiconv/libiconv-1.15.tar.gz"
+    sha256: "ccf536620a45458d26ba83887a983b96827001e92a13847b45e4925cc8913178"
