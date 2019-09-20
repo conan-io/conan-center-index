@@ -1,5 +1,7 @@
 #include "nonstd/span.hpp"
+#if span_CPP11_OR_GREATER
 #include <array>
+#endif        
 #include <vector>
 #include <iostream>
 
