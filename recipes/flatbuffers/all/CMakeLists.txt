@@ -1,4 +1,5 @@
 cmake_minimum_required(VERSION 2.8.11)
+project(conancmakewrapper)
 
 message(STATUS "Conan FlatBuffers Wrapper")
 include(conanbuildinfo.cmake)
