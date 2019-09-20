@@ -12,7 +12,7 @@ class FlatbuffersConan(ConanFile):
     name = "flatbuffers"
     license = "Apache-2.0"
     url = "https://github.com/conan-io/conan-center-index"
-    homepage = "http://google.github.io/flatbuffers/"
+    homepage = "http://google.github.io/flatbuffers"
     author = "Conan Community"
     topics = ("conan", "flatbuffers", "serialization", "rpc", "json-parser")
     description = "Memory Efficient Serialization Library"
