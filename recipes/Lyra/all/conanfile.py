@@ -3,7 +3,7 @@ import os.path
 
 
 class LyraConan(ConanFile):
-    name = "Lyra"
+    name = "lyra"
     homepage = "https://bfgroup.github.io/Lyra/"
     description = "A simple to use, composing, header only, command line arguments parser for C++ 11 and beyond."
     topics = ("conan", "cli", "c++11")
@@ -15,7 +15,7 @@ class LyraConan(ConanFile):
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
-        extracted_dir = self.name + "-" + \
+        extracted_dir = "Lyra-" + \
             os.path.basename(self.conan_data["sources"][self.version]['url']).replace(
                 ".tar.gz", "")
         os.rename(extracted_dir, "source")
