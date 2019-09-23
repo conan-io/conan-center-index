@@ -5,12 +5,13 @@ import shutil
 
 class BoostBuildConan(ConanFile):
     name = "boost_build"
-    url = "https://boostorg.github.io/build/"
+    homepage = "https://boostorg.github.io/build/"
+    url = "https://github.com/conan-io/conan-center-index"
     description = "B2 makes it easy to build C++ projects, everywhere."
+    topics = ("conan", "installer", "boost", "builder")
     license = "BSL-1.0"
     author = "Bincrafters <bincrafters@gmail.com>"
     settings = "os_build", "arch_build"
-    exports_sources = "*.jam"
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
