@@ -1,0 +1,4 @@
+sources:
+  "1.0.3":
+    url: "https://github.com/webmproject/libwebp/archive/v1.0.3.tar.gz"
+    sha256: "082d114bcb18a0e2aafc3148d43367c39304f86bf18ba0b2e766447e111a4a91"
