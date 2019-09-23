@@ -8,10 +8,10 @@ class LyraConan(ConanFile):
     description = "A simple to use, composing, header only, command line arguments parser for C++ 11 and beyond."
     topics = ("conan", "cli", "c++11")
     author = "Build Frameworks Group"
+    no_copy_source = True
 
     url = "https://github.com/conan-io/conan-center-index"
     license = "MIT"
-    settings = "os", "compiler", "arch", "build_type"
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
