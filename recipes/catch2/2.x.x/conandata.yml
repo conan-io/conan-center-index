@@ -1,0 +1,4 @@
+sources:
+  2.9.2:
+    url: https://github.com/catchorg/Catch2/archive/v2.9.2.tar.gz
+    sha256: 54BEA6D80A388A80F895CD0E2343FCA72B0D9093A776AF40904AEFCE49C13BDA
