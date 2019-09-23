@@ -11,7 +11,6 @@
 #include "fmt/format.h"
 #include "fmt/printf.h"
 #include "fmt/ostream.h"
-#include "fmt/time.h"
 
 
 void vreport(const char *format, fmt::format_args args) {
@@ -49,12 +48,6 @@ int main() {
     fmt::print(date);
 
     report("{} {} {}\n", "Conan", 42, 3.14159);
-
-    std::tm tm = std::tm();
-    tm.tm_year = 116;
-    tm.tm_mon  = 3;
-    tm.tm_mday = 25;
-    fmt::print("{}\n", fmt::format("The date is {:%Y-%m-%d}.", tm));
 
     fmt::print(std::cout, "{} {}\n", "Magic number", 42);
 
