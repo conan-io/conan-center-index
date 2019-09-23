@@ -1,0 +1,4 @@
+sources:
+  "3.2.0":
+    sha256: 069c92f6404878588be761d609b917a111b0231633a91f7f908288fc77eb24c8
+    url: https://github.com/martinmoene/optional-lite/archive/v3.2.0.tar.gz
