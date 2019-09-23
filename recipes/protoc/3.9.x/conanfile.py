@@ -61,6 +61,6 @@ class ProtocConan(ConanFile):
         bindir = os.path.join(self.package_folder, "bin")
         self.output.info("Appending PATH environment variable: {}".format(bindir))
         self.env_info.PATH.append(bindir)
-        self.cpp_info.builddirs = [os.path.join(self.package_folder, "lib", "cmake", "protoc")]
+        self.cpp_info.builddirs = [os.path.join("lib", "cmake", "protoc")]
         protoc = "protoc.exe" if self.settings.os_build == "Windows" else "protoc"
         self.env_info.PROTOC_BIN = os.path.normpath(os.path.join(self.package_folder, "bin", protoc))
