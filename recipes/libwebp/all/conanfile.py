@@ -87,3 +87,5 @@ class LibwebpConan(ConanFile):
             self.cpp_info.libs = [lib + '.dll' for lib in self.cpp_info.libs]
         if self.settings.os == "Linux":
             self.cpp_info.libs.append("pthread")
+        if self.settings.os == "Linux" or self.settings.os == "Android":
+            self.cpp_info.libs.append("m")
