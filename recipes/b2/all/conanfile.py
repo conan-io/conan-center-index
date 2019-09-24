@@ -3,8 +3,8 @@ import os
 import shutil
 
 
-class BoostBuildConan(ConanFile):
-    name = "boost_build"
+class B2Conan(ConanFile):
+    name = "b2"
     homepage = "https://boostorg.github.io/build/"
     url = "https://github.com/conan-io/conan-center-index"
     description = "B2 makes it easy to build C++ projects, everywhere."
