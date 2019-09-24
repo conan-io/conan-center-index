@@ -96,7 +96,7 @@ class LibpngConan(ConanFile):
                 self.cpp_info.libs = ['libpng16']
         else:
             self.cpp_info.libs = ["png16"]
-            if self.settings.os == "Linux":
+            if self.settings.os == "Linux" or self.settings.os == "Android":
                 self.cpp_info.libs.append("m")
         # use 'd' suffix everywhere except mingw
         if self.settings.build_type == "Debug" and not (self.settings.os == "Windows" and self.settings.compiler == "gcc"):
