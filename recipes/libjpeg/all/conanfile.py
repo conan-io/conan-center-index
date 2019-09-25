@@ -54,7 +54,7 @@ class LibjpegConan(ConanFile):
 
     def build_configure(self):
         # works for unix and mingw environments
-        env_build = AutoToolsBuildEnvironment(self, win_bash=self.settings.os == 'Windows')
+        env_build = AutoToolsBuildEnvironment(self, win_bash=tools.os_info.is_windows)
         env_build.fpic = True
         config_args = []
         if self.options.shared:
@@ -62,7 +62,7 @@ class LibjpegConan(ConanFile):
         else:
             config_args.extend(["--enable-shared=no", "--enable-static=yes"])
         prefix = os.path.abspath(self.package_folder)
-        if self.settings.os == 'Windows':
+        if tools.os_info.is_windows:
             prefix = tools.unix_path(prefix)
         config_args.append("--prefix=%s" % prefix)
 
