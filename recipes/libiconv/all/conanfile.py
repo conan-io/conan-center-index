@@ -24,8 +24,8 @@ class LibiconvConan(ConanFile):
     _source_subfolder = "source_subfolder"
 
     @property
-    def _is_mingw_windows(self):
-        return self.settings.os == 'Windows' and self.settings.compiler == 'gcc' and os.name == 'nt'
+    def _use_winbash(self):
+        return tools.os_info.is_windows and (self.settings.compiler == 'gcc' or tools.cross_building(self.settings))
 
     @property
     def _is_msvc(self):
@@ -53,15 +53,16 @@ class LibiconvConan(ConanFile):
         rc = None
         host = None
         build = None
-        if self._is_mingw_windows or self._is_msvc:
+        if self._use_winbash or self._is_msvc:
             prefix = prefix.replace('\\', '/')
             build = False
-            if self.settings.arch == "x86":
-                host = "i686-w64-mingw32"
-                rc = "windres --target=pe-i386"
-            elif self.settings.arch == "x86_64":
-                host = "x86_64-w64-mingw32"
-                rc = "windres --target=pe-x86-64"
+            if not tools.cross_building(self.settings):
+                if self.settings.arch == "x86":
+                    host = "i686-w64-mingw32"
+                    rc = "windres --target=pe-i386"
+                elif self.settings.arch == "x86_64":
+                    host = "x86_64-w64-mingw32"
+                    rc = "windres --target=pe-x86-64"
 
         #
         # If you pass --build when building for iPhoneSimulator, the configure script halts.
@@ -83,7 +84,7 @@ class LibiconvConan(ConanFile):
 
         env_vars = {}
 
-        if self._is_mingw_windows:
+        if self._use_winbash:
             configure_args.extend(['CPPFLAGS=-I%s/include' % prefix,
                                    'LDFLAGS=-L%s/lib' % prefix,
                                    'RANLIB=:'])
