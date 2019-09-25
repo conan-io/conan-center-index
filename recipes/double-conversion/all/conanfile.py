@@ -7,13 +7,12 @@ from conans.tools import Version
 
 class DoubleConversionConan(ConanFile):
     name = "double-conversion"
-    url = "https://github.com/bincrafters/conan-double-conversion"
+    url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/google/double-conversion"
     description = "Efficient binary-decimal and decimal-binary conversion routines for IEEE doubles."
     author = "Bincrafters <bincrafters@gmail.com>"
     license = "BSD-3-Clause"
     topics = ("conan", "double-conversion", "google", "decimal-binary", "conversion")
-    exports = ["LICENSE.md"]
     exports_sources = ["CMakeLists.txt"]
     generators = "cmake"
     settings = "os", "arch", "compiler", "build_type"
