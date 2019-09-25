@@ -42,6 +42,7 @@ class LibpqConan(ConanFile):
 
     def configure(self):
         del self.settings.compiler.libcxx
+        del self.settings.compiler.cppstd
         if self.settings.os == 'Windows' and self.options.shared:
             raise ConanInvalidConfiguration("libpq can not be built as shared library on Windows")
 
