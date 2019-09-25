@@ -9,7 +9,7 @@ import shutil
 class LibtiffConan(ConanFile):
     name = "libtiff"
     description = "Library for Tag Image File Format (TIFF)"
-    url = "http://github.com/bincrafters/conan-tiff"
+    url = "https://github.com/conan-io/conan-center-index"
     author = "Bincrafters <bincrafters@gmail.com>"
     license = "MIT"
     homepage = "http://www.simplesystems.org/libtiff"
