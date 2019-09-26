@@ -1,7 +1,3 @@
-#!/usr/bin/env python
-# -*- coding: utf-8 -*-
-# vim: tabstop=8 expandtab shiftwidth=4 softtabstop=4
-
 from conans import ConanFile, CMake, tools
 import os
 
@@ -12,8 +8,7 @@ class PCREConan(ConanFile):
     homepage = "https://www.pcre.org"
     author = "Bincrafters <bincrafters@gmail.com>"
     description = "Perl Compatible Regular Expressions"
-    license = "BSD"
-    exports = ["LICENSE.md"]
+    license = "BSD-3-Clause"
     exports_sources = ["CMakeLists.txt"]
     generators = "cmake"
     settings = "os", "arch", "compiler", "build_type"
@@ -39,6 +34,7 @@ class PCREConan(ConanFile):
     def configure(self):
         if not self.options.build_pcrecpp:
             del self.settings.compiler.libcxx
+            del self.settings.compiler.cppstd
         if self.options.with_unicode_properties:
             self.options.with_utf = True
 
