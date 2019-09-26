@@ -1,6 +1,3 @@
-#!/usr/bin/env python
-# -*- coding: utf-8 -*-
-
 from conans import ConanFile, CMake, tools
 import os
 import shutil
@@ -16,7 +13,6 @@ class FreetypeConan(ConanFile):
     license = "FTL"
     topics = ("conan", "freetype", "fonts")
     author = "Bincrafters <bincrafters@gmail.com>"
-    exports = ["LICENSE.md"]
     exports_sources = ["CMakeLists.txt"]
     generators = "cmake"
     settings = "os", "arch", "compiler", "build_type"
