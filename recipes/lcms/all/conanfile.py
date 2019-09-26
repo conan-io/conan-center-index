@@ -2,9 +2,9 @@
 # -*- coding: utf-8 -*-
 
 import os
-import shutil
 
 from conans import ConanFile, tools, AutoToolsBuildEnvironment, MSBuild
+from conans.tools import Version
 
 
 class LcmsConan(ConanFile):
@@ -35,13 +35,13 @@ class LcmsConan(ConanFile):
 
     def _build_visual_studio(self):
         # since VS2015 vsnprintf is built-in
-        if int(str(self.settings.compiler.version)) >= 14:
+        if Version(self.settings.compiler.version) >= "14":
             path = os.path.join(self._source_subfolder, 'src', 'lcms2_internal.h')
             tools.replace_in_file(path, '#       define vsnprintf  _vsnprintf', '')
 
         with tools.chdir(os.path.join(self._source_subfolder, 'Projects', 'VC2013')):
             target = 'lcms2_DLL' if self.options.shared else 'lcms2_static'
-            upgrade_project = True if int(str(self.settings.compiler.version)) > 12 else False
+            upgrade_project = Version(self.settings.compiler.version) > "12"
             # run build
             msbuild = MSBuild(self)
             msbuild.build("lcms2.sln", targets=[target], platforms={"x86": "Win32"}, upgrade_project=upgrade_project)
