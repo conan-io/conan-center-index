@@ -6,7 +6,7 @@ class LibnameConan(ConanFile):
     name = "yas"
     description = "Yet Another Serialization"
     topics = ("conan", "yas", "serialization")
-    url = "https://github.com/bincrafters/conan-yas"
+    url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/niXman/yas"
     author = "Bincrafters <bincrafters@gmail.com>"
     license = "BSL-1.0"
