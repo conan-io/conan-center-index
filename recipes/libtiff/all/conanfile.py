@@ -13,6 +13,7 @@ class LibtiffConan(ConanFile):
     author = "Bincrafters <bincrafters@gmail.com>"
     license = "MIT"
     homepage = "http://www.simplesystems.org/libtiff"
+    topics = ("tiff", "image", "bigtiff", "tagged-image-file-format")
     exports_sources = ["CMakeLists.txt"]
     generators = "cmake"
     settings = "os", "compiler", "build_type", "arch"
