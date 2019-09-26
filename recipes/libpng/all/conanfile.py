@@ -44,7 +44,7 @@ class LibpngConan(ConanFile):
                               "find_library(M_LIBRARY m)",
                               "set(M_LIBRARY m)")
 
-        if self.settings.os == "Windows":
+        if tools.os_info.is_windows:
             if self.settings.compiler == "Visual Studio":
                 tools.replace_in_file(os.path.join(self._source_subfolder, "CMakeLists.txt"),
                                      'OUTPUT_NAME "${PNG_LIB_NAME}_static',
@@ -96,7 +96,7 @@ class LibpngConan(ConanFile):
                 self.cpp_info.libs = ['libpng16']
         else:
             self.cpp_info.libs = ["png16"]
-            if self.settings.os == "Linux" or self.settings.os == "Android":
+            if str(self.settings.os) in ["Linux", "Android"]:
                 self.cpp_info.libs.append("m")
         # use 'd' suffix everywhere except mingw
         if self.settings.build_type == "Debug" and not (self.settings.os == "Windows" and self.settings.compiler == "gcc"):
