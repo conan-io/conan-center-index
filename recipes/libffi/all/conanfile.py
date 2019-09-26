@@ -6,7 +6,6 @@ from contextlib import contextmanager
 
 class LibffiConan(ConanFile):
     name = "libffi"
-    version = "3.2.1"
     description = "A portable, high level programming interface to various calling conventions"
     topics = ("conan", "libffi")
     url = "https://github.com/bincrafters/conan-libffi"
