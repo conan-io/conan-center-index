@@ -11,7 +11,6 @@ class LibnameConan(ConanFile):
     author = "Bincrafters <bincrafters@gmail.com>"
     license = "BSL-1.0"
     no_copy_source = True
-    exports = ["LICENSE.md"]
     _source_subfolder = "source_subfolder"
 
     def source(self):
