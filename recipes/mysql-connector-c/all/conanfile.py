@@ -1,6 +1,3 @@
-#!/usr/bin/env python
-# -*- coding: utf-8 -*-
-
 from conans import ConanFile, CMake, tools
 import os
 
@@ -14,7 +11,6 @@ class MysqlConnectorCConan(ConanFile):
     homepage = "https://dev.mysql.com/downloads/connector/c/"
     author = "Bincrafters <bincrafters@gmail.com>"
     license = "GPL-2.0"
-    exports = ["LICENSE.md"]
     exports_sources = ["CMakeLists.txt", "patches/*.patch"]
     generators = "cmake"
     settings = "os", "arch", "compiler", "build_type"
