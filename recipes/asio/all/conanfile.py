@@ -9,8 +9,8 @@ from conans.errors import ConanInvalidConfiguration
 class Asio(ConanFile):
     name = "asio"
     
-    url = "https://github.com/bincrafters/conan-asio"
-    homepage = "https://github.com/chriskohlhoff/asio"
+    url = "https://github.com/chriskohlhoff/asio"
+    homepage = "http://think-async.com/Asio"
     description = "Asio is a cross-platform C++ library for network and low-level I/O"
     topics = ("conan", "asio", "network", "io", "low-level")
     license = "BSL-1.0"
@@ -40,7 +40,7 @@ class Asio(ConanFile):
             self.requires.add("boost/1.69.0")
 
         if self.options.with_openssl:
-            self.requires.add("OpenSSL/1.0.2t")
+            self.requires.add("openssl/1.0.2t")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
