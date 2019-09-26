@@ -1,0 +1,7 @@
+sources:
+  "10.32":
+    url: "https://ftp.pcre.org/pub/pcre/pcre2-10.32.tar.gz"
+    sha256: "9ca9be72e1a04f22be308323caa8c06ebd0c51efe99ee11278186cafbc4fe3af"
+  "10.33":
+    url: "https://ftp.pcre.org/pub/pcre/pcre2-10.33.tar.gz"
+    sha256: "e2e2899a97489fc6ad1b0cc3da7952c7cca991b4a0f7db6649b75d9721025d31"
