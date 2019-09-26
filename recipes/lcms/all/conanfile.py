@@ -75,9 +75,9 @@ class LcmsConan(ConanFile):
                 self.copy(pattern='*.lib', src=os.path.join(self._source_subfolder, 'Lib', 'MS'), dst='lib',
                           keep_path=False)
         # remove entire share directory
-        shutil.rmtree(os.path.join(self.package_folder, 'share'), ignore_errors=True)
+        tools.rmdir(os.path.join(self.package_folder, 'share'))
         # remove pkgconfig
-        shutil.rmtree(os.path.join(self.package_folder, 'lib', 'pkgconfig'), ignore_errors=True)
+        tools.rmdir(os.path.join(self.package_folder, 'lib', 'pkgconfig'))
         # remove la files
         la = os.path.join(self.package_folder, 'lib', 'liblcms2.la')
         if os.path.isfile(la):
