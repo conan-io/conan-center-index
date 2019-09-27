@@ -1,5 +1,5 @@
 from conans import ConanFile, AutoToolsBuildEnvironment, CMake, tools
-from conans.errors import ConanException
+from conans.errors import ConanInvalidConfiguration
 import os
 import shutil
 
@@ -23,11 +23,13 @@ class LibelfConan(ConanFile):
 
     def config_options(self):
         if self.settings.os != "Linux":
-            del self.options.shared
             del self.options.fPIC
 
     def configure(self):
         del self.settings.compiler.libcxx
+        if self.settings.os != "Linux":
+            if self.options.shared:
+                raise ConanInvalidConfiguration("libelf can not be built as shared library on non linux platforms")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
@@ -50,9 +52,7 @@ class LibelfConan(ConanFile):
 
     def _configure_autotools(self):
         if not self._autotools:
-            args = None
-            if self.settings.os == "Linux":
-                args = ["--enable-shared={}".format("yes" if self.options.shared else "no")]
+            args = ["--enable-shared={}".format("yes" if self.options.shared else "no")]
             self._autotools = AutoToolsBuildEnvironment(self, win_bash=tools.os_info.is_windows)
             self._autotools.configure(configure_dir=self._source_subfolder, args=args)
         return self._autotools
