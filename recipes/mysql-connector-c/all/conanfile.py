@@ -1,5 +1,6 @@
 from conans import ConanFile, CMake, tools
 import os
+import glob
 
 
 
@@ -20,7 +21,7 @@ class MysqlConnectorCConan(ConanFile):
 
     def requirements(self):
         if self.options.with_ssl:
-            self.requires.add("openssl/1.0.2s")
+            self.requires.add("openssl/1.0.2t")
 
         if self.options.with_zlib:
             self.requires.add("zlib/1.2.11")
@@ -44,7 +45,7 @@ class MysqlConnectorCConan(ConanFile):
         del self.settings.compiler.libcxx
         del self.settings.compiler.cppstd
 
-    def build(self):
+    def _configure_cmake(self):
         cmake = CMake(self)
 
         cmake.definitions["DISABLE_SHARED"] = not self.options.shared
@@ -62,15 +63,24 @@ class MysqlConnectorCConan(ConanFile):
             cmake.definitions["WITH_ZLIB"] = "system"
 
         cmake.configure(source_dir=self._source_subfolder)
+        return cmake
+    
+    def build(self):
+        cmake = self._configure_cmake()
         cmake.build()
-        cmake.install()
         
     def package(self):
+        cmake = self._configure_cmake()
+        cmake.install()
         os.mkdir(os.path.join(self.package_folder, "licenses"))
         os.rename(os.path.join(self.package_folder, "COPYING"), os.path.join(self.package_folder, "licenses", "COPYING"))
         os.rename(os.path.join(self.package_folder, "COPYING-debug"), os.path.join(self.package_folder, "licenses", "COPYING-debug"))
         os.remove(os.path.join(self.package_folder, "README"))
         os.remove(os.path.join(self.package_folder, "README-debug"))
+        for f in glob.glob(os.path.join(self.package_folder, "bin", "*.pdb")):
+            os.remove(f)
+        for f in glob.glob(os.path.join(self.package_folder, "lib", "*.pdb")):
+            os.remove(f)
         tools.rmdir(os.path.join(self.package_folder, "docs"))
 
     def package_info(self):
