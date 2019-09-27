@@ -1,0 +1,7 @@
+sources:
+  "4.0.9":
+    url: "http://download.osgeo.org/libtiff/tiff-4.0.9.zip"
+    sha256: "e1af5558a71cef8e6baa8d41b875769b0fb549260595db579a932472dae64f66"
+  "4.0.8":
+    url: "http://download.osgeo.org/libtiff/tiff-4.0.8.zip"
+    sha256: "099c77cf0975a79c8425f22884fd2dc1d6ce072119e3f39f751c6f4480533e23"
