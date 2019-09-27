@@ -500,7 +500,7 @@ class OpenSSLConan(ConanFile):
 
     @property
     def _win_bash(self):
-        return tools.os_info.is_windows and self.settings.os == "Windows" and  self.settings.compiler == "gcc"
+        return tools.os_info.is_windows and (self.settings.compiler == "gcc" or tools.cross_building(self.settings))
 
     @property
     def _make_program(self):
