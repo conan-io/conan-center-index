@@ -107,6 +107,18 @@ class OpenSSLConan(ConanFile):
                 self.build_requires("nasm/2.14")
 
     @property
+    def _is_msvc(self):
+        return self.settings.compiler == "Visual Studio"
+
+    @property
+    def _is_clangcl(self):
+        return self.settings.compiler == "clang" and self.settings.os == "Windows"
+
+    @property
+    def _use_nmake(self):
+        return self._is_clangcl or self._is_msvc
+
+    @property
     def _full_version(self):
         return OpenSSLVersion(self.version)
 
@@ -148,7 +160,7 @@ class OpenSSLConan(ConanFile):
                                            self.settings.arch,
                                            self.settings.compiler,
                                            self.settings.compiler.version)
-        if self.settings.compiler == "Visual Studio":
+        if self._use_nmake:
             target = "VC-" + target  # VC- prefix is important as it's checked by Configure
         if self.settings.os == "Windows" and self.settings.compiler == "gcc":
             target = "mingw-" + target
@@ -423,7 +435,7 @@ class OpenSSLConan(ConanFile):
             command.extend(["-f", makefile])
         if targets:
             command.extend(targets)
-        if self.settings.compiler != "Visual Studio":
+        if not self._use_nmake:
             # workaround for random error: size too large (archive member extends past the end of the file)
             # /Library/Developer/CommandLineTools/usr/bin/ar: internal ranlib command failed
             if self.settings.os == "Macos" and self._full_version < "1.1.0":
@@ -443,6 +455,9 @@ class OpenSSLConan(ConanFile):
             # workaround for MinGW (https://github.com/openssl/openssl/issues/7653)
             if not os.path.isdir(os.path.join(self.package_folder, "bin")):
                 os.makedirs(os.path.join(self.package_folder, "bin"))
+            # workaround for clang-cl not producing .pdb files
+            if self._is_clangcl:
+                tools.save("ossl_static.pdb", "")
             args = " ".join(self._configure_args)
             self.output.info(self._configure_args)
 
@@ -450,7 +465,7 @@ class OpenSSLConan(ConanFile):
 
             self._patch_install_name()
 
-            if self.settings.compiler == "Visual Studio" and self._full_version < "1.1.0":
+            if self._use_nmake and self._full_version < "1.1.0":
                 if not self.options.no_asm and self.settings.arch == "x86":
                     self.run(r"ms\do_nasm")
                 else:
@@ -482,7 +497,7 @@ class OpenSSLConan(ConanFile):
         return "cc"
 
     def build(self):
-        with tools.vcvars(self.settings) if self.settings.compiler == "Visual Studio" else tools.no_op():
+        with tools.vcvars(self.settings) if self._use_nmake else tools.no_op():
             env_vars = {"PERL": self._perl}
             if self._full_version < "1.1.0":
                 cflags = " ".join(self._get_env_build().flags)
@@ -500,14 +515,16 @@ class OpenSSLConan(ConanFile):
 
     @property
     def _win_bash(self):
-        return tools.os_info.is_windows and (self.settings.compiler == "gcc" or tools.cross_building(self.settings))
+        return tools.os_info.is_windows and self.settings.os == "Windows" and  self.settings.compiler == "gcc"
 
     @property
     def _make_program(self):
-        if self.settings.compiler == "Visual Studio":
+        if self._use_nmake:
             return "nmake"
         make_program = tools.get_env("CONAN_MAKE_PROGRAM", tools.which("make") or tools.which('mingw32-make'))
         make_program = tools.unix_path(make_program) if tools.os_info.is_windows else make_program
+        if not make_program:
+            raise Exception('could not find "make" executable. please set "CONAN_MAKE_PROGRAM" environment variable')
         return make_program
 
     def _patch_install_name(self):
@@ -528,7 +545,7 @@ class OpenSSLConan(ConanFile):
             for filename in files:
                 if fnmatch.fnmatch(filename, "*.pdb"):
                     os.unlink(os.path.join(self.package_folder, root, filename))
-        if self.settings.os == "Windows" and self.settings.compiler == "Visual Studio":
+        if self._use_nmake:
             if self.settings.build_type == 'Debug' and self._full_version >= "1.1.0":
                 with tools.chdir(os.path.join(self.package_folder, 'lib')):
                     os.rename('libssl.lib', 'libssld.lib')
@@ -536,7 +553,7 @@ class OpenSSLConan(ConanFile):
         tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
 
     def package_info(self):
-        if self.settings.compiler == "Visual Studio":
+        if self._use_nmake:
             if self._full_version < "1.1.0":
                 self.cpp_info.libs = ["ssleay32", "libeay32"]
             else:
