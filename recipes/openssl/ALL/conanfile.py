@@ -555,6 +555,12 @@ class OpenSSLConan(ConanFile):
                 with tools.chdir(os.path.join(self.package_folder, 'lib')):
                     os.rename('libssl.lib', 'libssld.lib')
                     os.rename('libcrypto.lib', 'libcryptod.lib')
+        # Old OpenSSL version family has issues with permissions.
+        # See https://github.com/conan-io/conan/issues/5831
+        if self._full_version < "1.1.0" and self.options.shared and self.settings.os in ("Android", "FreeBSD", "Linux"):
+            with tools.chdir(os.path.join(self.package_folder, "lib")):
+                os.chmod("libssl.so.1.0.0", 0o755)
+                os.chmod("libcrypto.so.1.0.0", 0o755)
         tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
 
     def package_info(self):
