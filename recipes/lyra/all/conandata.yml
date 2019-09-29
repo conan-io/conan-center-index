@@ -2,3 +2,6 @@ sources:
   "1.0.0":
     sha256: ede5446cdd2b74a8cbaa12b998e820d0a1489574649bd76e7e67e69cb841ae22
     url: https://github.com/bfgroup/Lyra/archive/lyra-1.0.tar.gz
+  "1.1.0":
+    sha256: c2d70a926f698fb7decb99c7215bb55ab770100f9574c290998bf91416bd8217
+    url: https://github.com/bfgroup/Lyra/archive/1.1.tar.gz
