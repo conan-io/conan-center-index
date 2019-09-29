@@ -1,0 +1,15 @@
+sources:
+  "20190524":
+    x86:
+      url: http://repo.msys2.org/distrib/i686/msys2-base-i686-20190524.tar.xz
+      filename: msys2-base-i686-20190524.tar.xz
+    x86_64:
+      url: http://repo.msys2.org/distrib/x86_64/msys2-base-x86_64-20190524.tar.xz
+      filename: msys2-base-x86_64-20190524.tar.xz
+
+checksum:
+  "20190524":
+    x86:
+      sha256: 7a463afae8bf6ce8262f010a9a1648d056ad5cefc66d6eb69fe948c57d4ccb53
+    x86_64:
+      sha256: 168e156fa9f00d90a8445676c023c63be6e82f71487f4e2688ab5cb13b345383
