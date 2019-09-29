@@ -10,7 +10,6 @@ class NinjaConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/ninja-build/ninja"
     author = "Bincrafters <bincrafters@gmail.com>"
-    export = ["LICENSE.md"]
     settings = "os_build", "arch_build", "compiler"
     _source_subfolder = "source_subfolder"
 
