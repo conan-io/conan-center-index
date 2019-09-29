@@ -7,7 +7,7 @@ class NinjaConan(ConanFile):
     version = "1.9.0"
     description = "Ninja is a small build system with a focus on speed"
     license = "Apache-2.0"
-    url = "https://github.com/bincrafters/conan-ninja_installer"
+    url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/ninja-build/ninja"
     author = "Bincrafters <bincrafters@gmail.com>"
     export = ["LICENSE.md"]
