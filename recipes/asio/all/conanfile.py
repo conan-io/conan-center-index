@@ -14,7 +14,6 @@ class Asio(ConanFile):
     topics = ("conan", "asio", "network", "io", "low-level")
     license = "BSL-1.0"
 
-    settings = "os", "arch", "compiler", "build_type"
 
     no_copy_source = True
     _source_subfolder = "source_subfolder"
