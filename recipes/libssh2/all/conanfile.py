@@ -82,16 +82,10 @@ class Libssh2Conan(ConanFile):
         # cannot use cmake install into package_folder because of lib64 issue
         for libarch in ['lib', 'lib64']:
             arch_dir = os.path.join(self._install_subfolder, libarch)
-            cmake_dir_src = os.path.join(arch_dir, "cmake", "libssh2")
-            cmake_dir_dst = os.path.join("lib", "cmake", "libssh2")
-            pkgconfig_dir_src = os.path.join(arch_dir, "pkgconfig")
-            pkgconfig_dir_dst = os.path.join("lib", "pkgconfig")
 
             self.copy("*.lib", dst="lib", src=arch_dir, keep_path=False)
             self.copy("*.a", dst="lib", src=arch_dir, keep_path=False)
             self.copy("*.so*", dst="lib", src=arch_dir, keep_path=False)
-            self.copy("*.*", dst=cmake_dir_dst, src=cmake_dir_src)
-            self.copy("*.*", dst=pkgconfig_dir_dst, src=pkgconfig_dir_src)
 
     def package_info(self):
         self.cpp_info.libs = tools.collect_libs(self)
