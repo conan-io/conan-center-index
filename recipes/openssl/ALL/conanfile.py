@@ -115,6 +115,10 @@ class OpenSSLConan(ConanFile):
         return self.settings.compiler == "clang" and self.settings.os == "Windows"
 
     @property
+    def _is_mingw(self):
+        return self.settings.os == "Windows" and self.settings.compiler == "gcc"
+
+    @property
     def _use_nmake(self):
         return self._is_clangcl or self._is_msvc
 
@@ -162,7 +166,7 @@ class OpenSSLConan(ConanFile):
                                            self.settings.compiler.version)
         if self._use_nmake:
             target = "VC-" + target  # VC- prefix is important as it's checked by Configure
-        if self.settings.os == "Windows" and self.settings.compiler == "gcc":
+        if self._is_mingw:
             target = "mingw-" + target
         return target
 
@@ -515,8 +519,7 @@ class OpenSSLConan(ConanFile):
 
     @property
     def _win_bash(self):
-        is_mingw = self.settings.os == "Windows" and self.settings.compiler == "gcc"
-        return tools.os_info.is_windows and (is_mingw or tools.cross_building(self.settings))
+        return tools.os_info.is_windows and (self._is_mingw or tools.cross_building(self.settings))
 
     @property
     def _make_program(self):
