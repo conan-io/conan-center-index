@@ -8,7 +8,7 @@ from conans import ConanFile, tools
 class Asio(ConanFile):
     name = "asio"
     
-    url = "https://github.com/chriskohlhoff/asio"
+    url = "https://github.com/conan-io/conan-center-index"
     homepage = "http://think-async.com/Asio"
     description = "Asio is a cross-platform C++ library for network and low-level I/O"
     topics = ("conan", "asio", "network", "io", "low-level")
@@ -34,7 +34,7 @@ class Asio(ConanFile):
 
     def package_info(self):
         self.cpp_info.defines.append('ASIO_STANDALONE')
-        if self.settings.os == 'Linux':
+        if tools.os_info.is_linux:
             self.cpp_info.libs.append('pthread')
 
     def package_id(self):
