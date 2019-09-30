@@ -39,8 +39,29 @@ file(REMOVE
     source_subfolder/src/include/pg_config_os.h
 )
 
+file(READ source_subfolder/configure CONFIGURE_FILE)
+string(REGEX MATCH "PACKAGE_VERSION='([0-9]+)" _ "${CONFIGURE_FILE}")
+set(PG_MAJORVERSION ${CMAKE_MATCH_1})
+
+file(APPEND source_subfolder/src/include/pg_config.h.win32 "#define PG_MAJORVERSION \"${PG_MAJORVERSION}\"\n")
+file(APPEND source_subfolder/src/include/pg_config.h.win32 "#ifndef IGNORE_CONFIGURED_SETTINGS\n")
+file(APPEND source_subfolder/src/include/pg_config.h.win32 "#define USE_LDAP 1\n")
+file(APPEND source_subfolder/src/include/pg_config.h.win32 "#define RELSEG_SIZE 131072\n")
+file(APPEND source_subfolder/src/include/pg_config.h.win32 "#define USE_FLOAT4_BYVAL 1\n")
+file(APPEND source_subfolder/src/include/pg_config.h.win32 "#define FLOAT4PASSBYVAL true\n")
+file(APPEND source_subfolder/src/include/pg_config.h.win32 "#define FLOAT8PASSBYVAL false\n")
+
+set(VAL_CONFIGURE_ZLIB_VALUE "--without-zlib")
+if (USE_ZLIB)
+    set(VAL_CONFIGURE_ZLIB_VALUE "--with-zlib")
+endif()
+set(VAL_CONFIGURE_VALUE "#define VAL_CONFIGURE \"--enable-thread-safety --with-ldap ${VAL_CONFIGURE_ZLIB_VALUE}\"")
+
+file(APPEND source_subfolder/src/include/pg_config.h.win32 "${VAL_CONFIGURE_VALUE}\n")
+file(APPEND source_subfolder/src/include/pg_config.h.win32 "#define BLCKSZ 8192\n")
 file(APPEND source_subfolder/src/include/pg_config.h.win32 "#define BLCKSZ 8192\n")
 file(APPEND source_subfolder/src/include/pg_config.h.win32 "#define XLOG_BLCKSZ 8192\n")
+file(APPEND source_subfolder/src/include/pg_config.h.win32 "#endif /* IGNORE_CONFIGURED_SETTINGS */\n")
 
 
 configure_file(source_subfolder/src/include/pg_config.h.win32 include/pg_config.h)
@@ -61,18 +82,15 @@ set(pg_port_src
     source_subfolder/src/port/getaddrinfo.c
     source_subfolder/src/port/getopt.c
     source_subfolder/src/port/getopt_long.c
-    source_subfolder/src/port/getpeereid.c
     source_subfolder/src/port/getrusage.c
     source_subfolder/src/port/gettimeofday.c
     source_subfolder/src/port/inet_aton.c
     source_subfolder/src/port/inet_net_ntop.c
-    source_subfolder/src/port/isinf.c
     source_subfolder/src/port/kill.c
     source_subfolder/src/port/mkdtemp.c
     source_subfolder/src/port/noblock.c
     source_subfolder/src/port/open.c
     source_subfolder/src/port/path.c
-    source_subfolder/src/port/pg_crc32c_armv8_choose.c
     source_subfolder/src/port/pg_crc32c_sb8.c
     source_subfolder/src/port/pg_crc32c_sse42.c
     source_subfolder/src/port/pg_crc32c_sse42_choose.c
@@ -86,7 +104,6 @@ set(pg_port_src
     source_subfolder/src/port/qsort_arg.c
     source_subfolder/src/port/quotes.c
     source_subfolder/src/port/random.c
-    source_subfolder/src/port/rint.c
     source_subfolder/src/port/snprintf.c
     source_subfolder/src/port/sprompt.c
     source_subfolder/src/port/srandom.c
@@ -95,7 +112,6 @@ set(pg_port_src
     source_subfolder/src/port/system.c
     source_subfolder/src/port/tar.c
     source_subfolder/src/port/thread.c
-    source_subfolder/src/port/unsetenv.c
     source_subfolder/src/port/win32env.c
     source_subfolder/src/port/win32security.c
     source_subfolder/src/port/win32setlocale.c
@@ -110,32 +126,18 @@ include_directories(source_subfolder/src/include/port/win32 source_subfolder/src
 
 set(pg_backend_src
     source_subfolder/src/common/base64.c
-    source_subfolder/src/common/config_info.c
-    source_subfolder/src/common/controldata_utils.c
-    source_subfolder/src/common/fe_memutils.c
-    source_subfolder/src/common/file_perm.c
-    source_subfolder/src/common/file_utils.c
     source_subfolder/src/common/ip.c
-    source_subfolder/src/common/keywords.c
     source_subfolder/src/common/md5.c
-    source_subfolder/src/common/pg_lzcompress.c
-    source_subfolder/src/common/pgfnames.c
-    source_subfolder/src/common/psprintf.c
-    source_subfolder/src/common/restricted_token.c
-    source_subfolder/src/common/rmtree.c
     source_subfolder/src/common/saslprep.c
     source_subfolder/src/common/scram-common.c
-    source_subfolder/src/common/sha2.c
     source_subfolder/src/common/unicode_norm.c
-    source_subfolder/src/common/username.c
-    source_subfolder/src/common/wait_error.c
     source_subfolder/src/backend/utils/mb/wchar.c
     source_subfolder/src/backend/utils/mb/encnames.c
 )
 
 set(pg_libpq_src
-    source_subfolder/src/interfaces/libpq/fe-auth.c
     source_subfolder/src/interfaces/libpq/fe-auth-scram.c
+    source_subfolder/src/interfaces/libpq/fe-auth.c
     source_subfolder/src/interfaces/libpq/fe-connect.c
     source_subfolder/src/interfaces/libpq/fe-exec.c
     source_subfolder/src/interfaces/libpq/fe-lobj.c
@@ -144,10 +146,9 @@ set(pg_libpq_src
     source_subfolder/src/interfaces/libpq/fe-protocol2.c
     source_subfolder/src/interfaces/libpq/fe-protocol3.c
     source_subfolder/src/interfaces/libpq/fe-secure.c
-    source_subfolder/src/interfaces/libpq/fe-secure-common.c
+    source_subfolder/src/interfaces/libpq/libpq-dist.rc
     source_subfolder/src/interfaces/libpq/libpq-events.c
     source_subfolder/src/interfaces/libpq/pqexpbuffer.c
-    source_subfolder/src/interfaces/libpq/libpq-dist.rc
     source_subfolder/src/interfaces/libpq/pthread-win32.c
     source_subfolder/src/interfaces/libpq/win32.c
 )
@@ -168,9 +169,14 @@ set(pg_libpq_catalog_interface
 if (USE_OPENSSL)
     list(APPEND pg_libpq_src
         source_subfolder/src/interfaces/libpq/fe-secure-openssl.c
+        source_subfolder/src/interfaces/libpq/fe-secure-common.c
         )
     list(APPEND pg_backend_src
         source_subfolder/src/common/sha2_openssl.c
+        )
+else()
+    list(APPEND pg_backend_src
+        source_subfolder/src/common/sha2.c
         )
 endif()
 
@@ -180,13 +186,22 @@ if (USE_ZLIB)
         )
 endif()
 
-add_library(libpq ${pg_port_src} ${pg_backend_src} ${pg_libpq_src})
+set(DLL_DEF_FILE source_subfolder/src/interfaces/libpq/libpqdll.def)
 
-target_compile_definitions(libpq PRIVATE -DFRONTEND -DENABLE_THREAD_SAFETY ${OPENSSL_DEFINE} -D_CRT_SECURE_NO_WARNINGS)
-target_link_libraries(libpq PUBLIC ${CONAN_LIBS} ws2_32 secur32 advapi32 shell32 crypt32)
+set(BUILDING_DLL_DEFINE)
+if (BUILD_SHARED_LIBS)
+    set(BUILDING_DLL_DEFINE, -DBUILDING_DLL)
+endif()
 
+add_library(libpq ${pg_port_src} ${pg_backend_src} ${pg_libpq_src} ${DLL_DEF_FILE})
+target_compile_definitions(libpq PRIVATE -DFRONTEND -DENABLE_THREAD_SAFETY ${OPENSSL_DEFINE} -D_CRT_SECURE_NO_WARNINGS ${BUILDING_DLL_DEFINE})
+target_link_libraries(libpq PUBLIC ${CONAN_LIBS} ws2_32 wldap32 secur32 advapi32 shell32 crypt32)
 target_include_directories(libpq PRIVATE source_subfolder/src/include source_subfolder/src/port source_subfolder/src/backend ${CMAKE_BINARY_DIR}/include)
-set_target_properties(libpq PROPERTIES WINDOWS_EXPORT_ALL_SYMBOLS ON)
+
+if (NOT BUILD_SHARED_LIBS)
+    # we don't need this in shared build, as have .def file)
+    set_target_properties(libpq PROPERTIES WINDOWS_EXPORT_ALL_SYMBOLS ON)
+endif()
 
 install(TARGETS libpq
     ARCHIVE DESTINATION lib
