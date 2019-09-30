@@ -32,7 +32,7 @@ class Libxml2Conan(ConanFile):
         if self.options.zlib:
             self.requires("zlib/1.2.11")
         if self.options.lzma:
-            self.requires("lzma/5.2.4")
+            self.requires("xz_utils/5.2.4")
         if self.options.iconv:
             self.requires("libiconv/1.15")
         if self.options.icu:
@@ -186,6 +186,10 @@ class Libxml2Conan(ConanFile):
         la = os.path.join(self.package_folder, 'lib', 'libxml2.la')
         if os.path.isfile(la):
             os.unlink(la)
+
+        tools.rmdir(os.path.join(self.package_folder, 'share'))
+        tools.rmdir(os.path.join(self.package_folder, 'lib', 'cmake'))
+        tools.rmdir(os.path.join(self.package_folder, 'lib', 'pkgconfig'))
 
     def package_info(self):
         if self._is_msvc:
