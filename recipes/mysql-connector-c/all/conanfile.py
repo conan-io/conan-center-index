@@ -10,7 +10,6 @@ class MysqlConnectorCConan(ConanFile):
     description = "A MySQL client library for C development."
     topics = ("conan", "mysql", "sql", "connector", "database")
     homepage = "https://dev.mysql.com/downloads/connector/c/"
-    author = "Bincrafters <bincrafters@gmail.com>"
     license = "GPL-2.0"
     exports_sources = ["CMakeLists.txt", "patches/*.patch"]
     generators = "cmake"
