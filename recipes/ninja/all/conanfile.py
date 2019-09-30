@@ -4,7 +4,6 @@ from conans import ConanFile, tools, AutoToolsBuildEnvironment
 
 class NinjaConan(ConanFile):
     name = "ninja"
-    version = "1.9.0"
     description = "Ninja is a small build system with a focus on speed"
     license = "Apache-2.0"
     url = "https://github.com/conan-io/conan-center-index"
