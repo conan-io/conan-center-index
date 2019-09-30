@@ -3,5 +3,5 @@ sources:
     sha256: c8664851487200162b38b6f3c8db69850bd4f0e4c5ff5a6d161dbfb5cb76b6c4
     url: "http://dev.mysql.com/get/Downloads/Connector-C/mysql-connector-c-6.1.11-src.tar.gz"
 patches:
-    "6.1.11":
-        - "001-20028_all_mysql-5.6-gcc7.patch"
+  "6.1.11":
+    - "001-20028_all_mysql-5.6-gcc7.patch"
