@@ -84,7 +84,8 @@ class Libssh2Conan(ConanFile):
         tools.rmdir(os.path.join(self.package_folder, 'lib', 'pkgconfig'))
 
     def package_info(self):
-        self.cpp_info.libs = ["ssh2"]
+        lib_name = "libssh2" if self.settings.os == "Windows" else "ssh2"
+        self.cpp_info.libs = [lib_name]
 
         if self.settings.compiler == "Visual Studio":
             if not self.options.shared:
