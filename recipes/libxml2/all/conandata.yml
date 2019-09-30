@@ -1,0 +1,10 @@
+sources:
+  "2.9.9":
+    sha256: 94fb70890143e3c6549f265cee93ec064c80a84c42ad0f23e85ee1fd6540a871
+    url: http://xmlsoft.org/sources/libxml2-2.9.9.tar.gz
+  "2.9.8":
+    sha256: 0b74e51595654f958148759cfef0993114ddccccbb6f31aee018f3558e8e2732
+    url: http://xmlsoft.org/sources/libxml2-2.9.8.tar.gz
+  "2.9.3":
+    sha256: 4de9e31f46b44d34871c22f54bfc54398ef124d6f7cafb1f4a5958fbcd3ba12d
+    url: http://xmlsoft.org/sources/libxml2-2.9.3.tar.gz
