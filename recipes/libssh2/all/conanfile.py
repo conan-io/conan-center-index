@@ -45,6 +45,7 @@ class Libssh2Conan(ConanFile):
 
     def configure(self):
         del self.settings.compiler.libcxx
+        del self.settings.compiler.cppstd
 
     def requirements(self):
         if self.options.with_zlib:
