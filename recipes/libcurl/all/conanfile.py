@@ -88,7 +88,7 @@ class LibcurlConan(ConanFile):
         if self.options.with_openssl:
             # enforce shared linking due to openssl dependency
             if self.settings.os != "Macos" or not self.options.darwin_ssl:
-                self.options["OpenSSL"].shared = self.options.shared
+                self.options["openssl"].shared = self.options.shared
         if self.options.with_libssh2:
             if self.settings.compiler != "Visual Studio":
                 self.options["libssh2"].shared = self.options.shared
@@ -161,7 +161,7 @@ class LibcurlConan(ConanFile):
             params.append("--with-winssl")
             params.append("--without-ssl")
         elif self.options.with_openssl:
-            openssl_path = self.deps_cpp_info["OpenSSL"].rootpath.replace('\\', '/')
+            openssl_path = self.deps_cpp_info["openssl"].rootpath.replace('\\', '/')
             params.append("--with-ssl=%s" % openssl_path)
         else:
             params.append("--without-ssl")
