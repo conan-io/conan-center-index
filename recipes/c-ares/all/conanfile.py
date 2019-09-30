@@ -1,5 +1,4 @@
-#!/usr/bin/env python
-# -*- coding: utf-8 -*-
+# coding=utf-8
 
 import os
 import shutil
@@ -8,7 +7,6 @@ from conans import ConanFile, CMake, tools
 
 class CAresConan(ConanFile):
     name = "c-ares"
-
     license = "MIT"
     url = "https://github.com/conan-community/conan-c-ares"
     description = "A C library for asynchronous DNS requests"
@@ -26,6 +24,7 @@ class CAresConan(ConanFile):
 
     def configure(self):
         del self.settings.compiler.libcxx
+        del self.settings.compiler.cppstd
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
@@ -37,9 +36,6 @@ class CAresConan(ConanFile):
         cmake.definitions["CARES_SHARED"] = self.options.shared
         cmake.definitions["CARES_BUILD_TESTS"] = "OFF"
         cmake.definitions["CARES_MSVC_STATIC_RUNTIME"] = "OFF"
-        # Do not mess with runtime, Conan will.
-        if self.settings.os != "Windows":
-            cmake.definitions["CMAKE_POSITION_INDEPENDENT_CODE"] = self.options.fPIC or self.options.shared
         cmake.configure()
         return cmake
 
