@@ -72,6 +72,7 @@ class JanssonConan(ConanFile):
         # drop pc and cmake file
         tools.rmdir(os.path.join(self.package_folder, 'lib', 'pkgconfig'))
         tools.rmdir(os.path.join(self.package_folder, 'lib', 'cmake'))
+        tools.rmdir(os.path.join(self.package_folder, 'cmake'))
 
     def package_info(self):
         self.cpp_info.libs = tools.collect_libs(self)
