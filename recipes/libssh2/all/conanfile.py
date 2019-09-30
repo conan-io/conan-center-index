@@ -15,7 +15,6 @@ class Libssh2Conan(ConanFile):
     exports_sources = ["CMakeLists.txt"]
     generators = "cmake"
     _source_subfolder = "source_subfolder"
-    _install_subfolder = "install_subfolder"
 
     settings = "os", "arch", "compiler", "build_type"
     options = {
@@ -67,7 +66,6 @@ class Libssh2Conan(ConanFile):
             raise ConanInvalidConfiguration("Crypto backend must be specified")
         cmake.definitions['BUILD_EXAMPLES'] = False
         cmake.definitions['BUILD_TESTING'] = False
-        cmake.definitions['CMAKE_INSTALL_PREFIX'] = self._install_subfolder
 
         cmake.configure()
         cmake.build()
@@ -75,20 +73,17 @@ class Libssh2Conan(ConanFile):
 
     def package(self):
         self.copy("COPYING", dst="licenses", src=self._source_subfolder, keep_path=False)
-        self.copy("*", dst="include", src=os.path.join(self._install_subfolder, "include"))
-        self.copy("*.dll", dst="bin", src=os.path.join(self._install_subfolder, "bin"), keep_path=False)
-        self.copy("*.dylib", dst="lib", src=os.path.join(self._install_subfolder, "lib"), keep_path=False)
-        # rhel installs libraries into lib64
-        # cannot use cmake install into package_folder because of lib64 issue
-        for libarch in ['lib', 'lib64']:
-            arch_dir = os.path.join(self._install_subfolder, libarch)
+        if os.path.exists(os.path.join(self.package_folder, 'lib64')):
+            # rhel installs libraries into lib64
+            os.rename(os.path.join(self.package_folder, 'lib64'),
+                      os.path.join(self.package_folder, 'lib'))
 
-            self.copy("*.lib", dst="lib", src=arch_dir, keep_path=False)
-            self.copy("*.a", dst="lib", src=arch_dir, keep_path=False)
-            self.copy("*.so*", dst="lib", src=arch_dir, keep_path=False)
+        tools.rmdir(os.path.join(self.package_folder, 'share'))
+        tools.rmdir(os.path.join(self.package_folder, 'lib', 'cmake'))
+        tools.rmdir(os.path.join(self.package_folder, 'lib', 'pkgconfig'))
 
     def package_info(self):
-        self.cpp_info.libs = tools.collect_libs(self)
+        self.cpp_info.libs = ["ssh2"]
 
         if self.settings.compiler == "Visual Studio":
             if not self.options.shared:
