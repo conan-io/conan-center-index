@@ -29,7 +29,7 @@ class NinjaConan(ConanFile):
             env_build_vars = env_build.vars
             env_build_vars.update({'CXX': cxx})
             with tools.environment_append(env_build_vars):
-                self.run("python configure.py --bootstrap")
+                self.run("%s configure.py --bootstrap" % sys.executable)
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
