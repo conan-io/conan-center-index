@@ -43,8 +43,6 @@ class LibpqConan(ConanFile):
     def configure(self):
         del self.settings.compiler.libcxx
         del self.settings.compiler.cppstd
-        if self.settings.os == 'Windows' and self.options.shared:
-            raise ConanInvalidConfiguration("libpq can not be built as shared library on Windows")
 
     def requirements(self):
         if self.options.with_zlib:
@@ -122,4 +120,4 @@ class LibpqConan(ConanFile):
         if self.settings.os == "Linux":
             self.cpp_info.libs.append("pthread")
         elif self.settings.os == "Windows":
-            self.cpp_info.libs.extend(["ws2_32", "secur32", "advapi32", "shell32", "crypt32"])
+            self.cpp_info.libs.extend(["ws2_32", "secur32", "advapi32", "shell32", "crypt32", "wldap32"])
