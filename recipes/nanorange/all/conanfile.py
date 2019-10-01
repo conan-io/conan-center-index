@@ -22,7 +22,6 @@ class NanorangeConan(ConanFile):
             raise ConanInvalidConfiguration("nanoRange requires at least c++17")
 
     def source(self):
-        #self.run("git clone https://github.com/tcbrindle/NanoRange.git")
         tools.get(**self.conan_data["sources"][self.version])
 
     def package(self):
