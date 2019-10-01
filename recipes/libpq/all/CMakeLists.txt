@@ -185,7 +185,7 @@ add_library(libpq ${pg_port_src} ${pg_backend_src} ${pg_libpq_src})
 target_compile_definitions(libpq PRIVATE -DFRONTEND -DENABLE_THREAD_SAFETY ${OPENSSL_DEFINE} -D_CRT_SECURE_NO_WARNINGS)
 target_link_libraries(libpq PUBLIC ${CONAN_LIBS} ws2_32 secur32 advapi32 shell32 crypt32)
 
-target_include_directories(libpq PRIVATE source_subfolder/src/include source_subfolder/src/port ${CMAKE_BINARY_DIR}/include)
+target_include_directories(libpq PRIVATE source_subfolder/src/include source_subfolder/src/port source_subfolder/src/backend ${CMAKE_BINARY_DIR}/include)
 set_target_properties(libpq PROPERTIES WINDOWS_EXPORT_ALL_SYMBOLS ON)
 
 install(TARGETS libpq
