@@ -25,6 +25,7 @@ class LibevConan(ConanFile):
 
     def configure(self):
         del self.settings.compiler.libcxx
+        del self.settings.compiler.cppstd
         if self.settings.os == "Windows" and self.settings.compiler == "Visual Studio":
             raise ConanInvalidConfiguration("libev is not supported by Visual Studio")
         if self.settings.os == "Windows" and self.options.shared:
