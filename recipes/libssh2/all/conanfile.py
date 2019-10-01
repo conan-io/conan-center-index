@@ -11,6 +11,7 @@ class Libssh2Conan(ConanFile):
     description = "libssh2 is a client-side C library implementing the SSH2 protocol"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://libssh2.org"
+    topics = ("libssh", "ssh", "shell", "ssh2", "connection")
     license = "BSD 3-Clause"
     exports_sources = ["CMakeLists.txt"]
     generators = "cmake"
