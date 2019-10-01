@@ -54,9 +54,8 @@ class Libssh2Conan(ConanFile):
         if self.options.with_openssl:
             self.requires.add("openssl/1.0.2t")
 
-    def build(self):
+    def _configure_cmake(self):
         cmake = CMake(self)
-
         cmake.definitions['BUILD_SHARED_LIBS'] = self.options.shared
         cmake.definitions['ENABLE_ZLIB_COMPRESSION'] = self.options.with_zlib
         cmake.definitions['ENABLE_CRYPT_NONE'] = self.options.enable_crypt_none
@@ -68,12 +67,17 @@ class Libssh2Conan(ConanFile):
             raise ConanInvalidConfiguration("Crypto backend must be specified")
         cmake.definitions['BUILD_EXAMPLES'] = False
         cmake.definitions['BUILD_TESTING'] = False
-
         cmake.configure()
+        return cmake
+
+    def build(self):
+        cmake = self._configure_cmake()
         cmake.build()
-        cmake.install()
 
     def package(self):
+        cmake = self._configure_cmake()
+        cmake.install()
+
         self.copy("COPYING", dst="licenses", src=self._source_subfolder, keep_path=False)
         if os.path.exists(os.path.join(self.package_folder, 'lib64')):
             # rhel installs libraries into lib64
