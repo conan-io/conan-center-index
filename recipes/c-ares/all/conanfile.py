@@ -1,14 +1,14 @@
-# coding=utf-8
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
 
 import os
-import shutil
 from conans import ConanFile, CMake, tools
 
 
 class CAresConan(ConanFile):
     name = "c-ares"
     license = "MIT"
-    url = "https://github.com/conan-community/conan-c-ares"
+    url = "https://github.com/conan-io/conan-center-index"
     description = "A C library for asynchronous DNS requests"
     topics = ("conan", "c-ares", "dns")
     homepage = "https://c-ares.haxx.se/"
@@ -30,7 +30,7 @@ class CAresConan(ConanFile):
         tools.get(**self.conan_data["sources"][self.version])
         os.rename("c-ares-cares-{}".format(self.version.replace(".", "_")), "source_folder")
 
-    def cmake_configure(self):
+    def _cmake_configure(self):
         cmake = CMake(self)
         cmake.definitions["CARES_STATIC"] = not self.options.shared
         cmake.definitions["CARES_SHARED"] = self.options.shared
@@ -40,17 +40,17 @@ class CAresConan(ConanFile):
         return cmake
 
     def build(self):
-        cmake = self.cmake_configure()
+        cmake = self._cmake_configure()
         cmake.build()
         cmake.install()
 
     def package(self):
-        cmake = self.cmake_configure()
+        cmake = self._cmake_configure()
         cmake.install()
         self.copy("*LICENSE.md", src=self.source_folder, dst="licenses", keep_path=False)
 
-        shutil.rmtree(os.path.join(self.package_folder, 'lib', 'cmake'), ignore_errors=True)
-        shutil.rmtree(os.path.join(self.package_folder, 'lib', 'pkgconfig'), ignore_errors=True)
+        tools.rmdir(os.path.join(self.package_folder, 'lib', 'cmake'))
+        tools.rmdir(os.path.join(self.package_folder, 'lib', 'pkgconfig'))
 
     def package_info(self):
         self.cpp_info.libs = tools.collect_libs(self)
