@@ -9,7 +9,7 @@ class MesonInstallerConan(ConanFile):
     version = "0.51.2"
     description = "Meson is a project to create the best possible next-generation build system"
     topics = ("conan", "meson", "mesonbuild", "build-system")
-    url = "https://github.com/bincrafters/conan-meson_installer"
+    url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/mesonbuild/meson"
     license = "Apache-2.0"
     no_copy_source = True
