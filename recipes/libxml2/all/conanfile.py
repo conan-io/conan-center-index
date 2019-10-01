@@ -36,7 +36,7 @@ class Libxml2Conan(ConanFile):
         if self.options.iconv:
             self.requires("libiconv/1.15")
         if self.options.icu:
-            self.requires("icu/63.1")
+            self.requires("icu/64.2")
 
     @property
     def _is_msvc(self):
