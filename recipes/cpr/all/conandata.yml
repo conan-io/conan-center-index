@@ -1,0 +1,5 @@
+sources:
+  "1.3.0":
+    sha256: 8c48baf3babe0d505d16cfc0cf272589c66d3624264098213db0fb00034728e9
+    url: https://github.com/whoshuu/cpr/archive/1.3.0.tar.gz
+  
