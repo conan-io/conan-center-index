@@ -181,8 +181,12 @@ class Libxml2Conan(ConanFile):
         if self._is_msvc:
             # remove redundant libraries to avoid confusion
             os.unlink(os.path.join(self.package_folder, 'lib', 'libxml2_a_dll.lib'))
-            os.unlink(os.path.join(self.package_folder, 'lib',
-                                   'libxml2_a.lib' if self.options.shared else 'libxml2.lib'))
+            os.unlink(os.path.join(self.package_folder, 'lib', 'libxml2_a.lib' if self.options.shared else 'libxml2.lib'))
+
+            pdb_files = glob.glob(os.path.join(self.package_folder, 'bin', '*.pdb'), recursive=True)
+            for pdb in pdb_files:
+                os.unlink(pdb)
+
         la = os.path.join(self.package_folder, 'lib', 'libxml2.la')
         if os.path.isfile(la):
             os.unlink(la)
