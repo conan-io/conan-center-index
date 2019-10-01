@@ -11,7 +11,6 @@ class MesonInstallerConan(ConanFile):
     topics = ("conan", "meson", "mesonbuild", "build-system")
     url = "https://github.com/bincrafters/conan-meson_installer"
     homepage = "https://github.com/mesonbuild/meson"
-    author = "Bincrafters <bincrafters@gmail.com>"
     license = "Apache-2.0"
     no_copy_source = True
     exports = ["LICENSE.md"]
