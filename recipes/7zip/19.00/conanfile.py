@@ -33,13 +33,18 @@ class Package7Zip(ConanFile):
         tools.get(**self.conan_data["externals"]["lzma"])
         self.run("lzma920\\7zr.exe x {}".format(filename))
 
+    _msvc_platforms = {
+        'x86_64': 'x64',
+        'x86': 'x86',
+    }
+
     def build(self):
         if self.settings.compiler == "Visual Studio":
             env_build = VisualStudioBuildEnvironment(self)
             with tools.environment_append(env_build.vars):
                 vcvars = tools.vcvars_command(self.settings)
                 with tools.chdir("CPP/7zip"):
-                    self.run("%s && nmake /f makefile" % vcvars)
+                    self.run("%s && nmake /f makefile PLATFORM=%s" % (vcvars, self._msvc_platforms[str(self.settings.arch_build)]))
         else:
             # TODO: Enable non-Windows methods in configure
             env_build = AutoToolsBuildEnvironment(self)
