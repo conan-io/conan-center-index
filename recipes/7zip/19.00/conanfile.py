@@ -13,7 +13,7 @@ class Package7Zip(ConanFile):
     author = "Conan Community"
     homepage = "https://www.7-zip.org"
     topics = ("conan", "7zip", "zip", "compression", "decompression")
-    settings = "os_build", "arch_build"
+    settings = "os_build", "arch_build", "compiler"
 
     def configure(self):
         if self.settings.os_build != "Windows":
@@ -34,7 +34,7 @@ class Package7Zip(ConanFile):
         self.run("lzma920\\7zr.exe x {}".format(filename))
 
     def build(self):
-        if self.settings.os_build == "Windows":
+        if self.settings.compiler == "Visual Studio":
             env_build = VisualStudioBuildEnvironment(self)
             with tools.environment_append(env_build.vars):
                 vcvars = tools.vcvars_command(self.settings)
@@ -55,6 +55,9 @@ class Package7Zip(ConanFile):
             self.copy("*.dll", src="CPP/7zip", dst="bin", keep_path=False)
 
         # TODO: Package the libraries: binaries and headers (add the rest of settings)
+
+    def package_id(self):
+        del self.info.settings.compiler
 
     def package_info(self):
         bin_path = os.path.join(self.package_folder, "bin")
