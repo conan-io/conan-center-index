@@ -9,7 +9,7 @@ class YamlCppConan(ConanFile):
     name = "yaml-cpp"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/jbeder/yaml-cpp"
-    topics = ("conan", "yaml")
+    topics = ("conan", "yaml", "yaml-parser", "serialization", "data-serialization")
     description = "A YAML parser and emitter in C++"
     author = "Bincrafters <bincrafters@gmail.com>"
     license = "MIT"
