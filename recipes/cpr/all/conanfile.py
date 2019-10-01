@@ -17,7 +17,7 @@ class CprConan(ConanFile):
                "use_ssl": [True, False],
                "fPIC": [True, False]}
     default_options = {"shared": False,
-                       "libcurl:with_ldap": False,
+                       #"libcurl:with_ldap": False,
                        "use_ssl": True,
                        "fPIC": True}
 
@@ -62,6 +62,4 @@ class CprConan(ConanFile):
         self.copy(pattern="*.dylib", dst="lib", src="lib", keep_path=False)
 
     def package_info(self):
-        self.cpp_info.libs = tools.collect_libs(self)
-        if tools.os_info.is_macos:
-            self.cpp_info.libs.append("curl")
+        self.cpp_info.libs = ["cpr"]
