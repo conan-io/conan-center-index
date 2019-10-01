@@ -1,11 +1,11 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-from conans.errors import ConanInvalidConfiguration
 import os
 import re
 import shutil
 from conans import ConanFile, AutoToolsBuildEnvironment, RunEnvironment, CMake, tools
+from conans.errors import ConanInvalidConfiguration
 
 
 class LibcurlConan(ConanFile):
@@ -16,9 +16,8 @@ class LibcurlConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "http://curl.haxx.se"
     license = "MIT"
-    exports = ["LICENSE.md"]
     exports_sources = ["lib_Makefile_add.am", "CMakeLists.txt"]
-    generators = "cmake"
+    generators = "cmake", "pkg_config"
 
     settings = "os", "arch", "compiler", "build_type"
     options = {"shared": [True, False],
@@ -112,12 +111,12 @@ class LibcurlConan(ConanFile):
             elif self.settings.os == "Windows" and self.options.with_winssl:
                 pass
             else:
-                self.requires.add("openssl/1.1.1c")
+                self.requires.add("openssl/1.0.2t")
         if self.options.with_libssh2:
             if self.settings.compiler != "Visual Studio":
-                self.requires.add("libssh2/1.8.0@bincrafters/stable")
+                self.requires.add("libssh2/1.8.2")
         if self.options.with_nghttp2:
-            self.requires.add("nghttp2/1.38.0@bincrafters/stable")
+            self.requires.add("libnghttp2/1.39.2")
 
         self.requires.add("zlib/1.2.11")
 
@@ -172,7 +171,7 @@ class LibcurlConan(ConanFile):
             params.append("--without-libssh2")
 
         if self.options.with_nghttp2:
-            params.append("--with-nghttp2=%s" % self.deps_cpp_info["nghttp2"].rootpath.replace('\\', '/'))
+            params.append("--with-nghttp2=%s" % self.deps_cpp_info["libnghttp2"].rootpath.replace('\\', '/'))
         else:
             params.append("--without-nghttp2")
 
