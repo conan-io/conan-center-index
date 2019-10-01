@@ -7,7 +7,7 @@ from conans.errors import ConanInvalidConfiguration
 
 
 class Nghttp2Conan(ConanFile):
-    name = "nghttp2"
+    name = "libnghttp2"
 
     description = "HTTP/2 C Library and tools"
     topics = ("conan", "http")
