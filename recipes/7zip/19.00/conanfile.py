@@ -18,6 +18,8 @@ class Package7Zip(ConanFile):
     def configure(self):
         if self.settings.os_build != "Windows":
             raise ConanInvalidConfiguration("Only Windows supported")
+        if self.settings.arch_build not in ("x86", "x86_64"):
+            raise ConanInvalidConfiguration("Unsupported architecture")
 
     def source(self):
         tools.download(**self.conan_data["sources"][self.version])
@@ -38,19 +40,26 @@ class Package7Zip(ConanFile):
         'x86': 'x86',
     }
 
+    def _build_msvc(self):
+        env_build = VisualStudioBuildEnvironment(self)
+        with tools.environment_append(env_build.vars):
+            vcvars = tools.vcvars_command(self.settings)
+            with tools.chdir("CPP/7zip"):
+                self.run("%s && nmake /f makefile PLATFORM=%s" % (
+                vcvars, self._msvc_platforms[str(self.settings.arch_build)]))
+
+    def _build_autotools(self):
+        # TODO: Enable non-Windows methods in configure
+        env_build = AutoToolsBuildEnvironment(self)
+        with tools.environment_append(env_build.vars):
+            with tools.chdir("CPP/7zip/Bundles/LzmaCon"):
+                self.run("make -f makefile.gcc all")
+
     def build(self):
         if self.settings.compiler == "Visual Studio":
-            env_build = VisualStudioBuildEnvironment(self)
-            with tools.environment_append(env_build.vars):
-                vcvars = tools.vcvars_command(self.settings)
-                with tools.chdir("CPP/7zip"):
-                    self.run("%s && nmake /f makefile PLATFORM=%s" % (vcvars, self._msvc_platforms[str(self.settings.arch_build)]))
+            self._build_msvc()
         else:
-            # TODO: Enable non-Windows methods in configure
-            env_build = AutoToolsBuildEnvironment(self)
-            with tools.environment_append(env_build.vars):
-                with tools.chdir("CPP/7zip/Bundles/LzmaCon"):
-                    self.run("make -f makefile.gcc all")
+            self._build_autotools()
 
     def package(self):
         self.copy("DOC/License.txt", src="", dst="licenses")
