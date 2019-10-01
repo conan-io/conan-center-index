@@ -73,14 +73,14 @@ class LibpqConan(ConanFile):
 
     def _configure_cmake(self):
         cmake = CMake(self)
+        cmake.definitions["USE_OPENSSL"] = self.options.with_openssl
+        cmake.definitions["USE_ZLIB"] = self.options.with_zlib
         cmake.configure()
         return cmake
 
     def build(self):
         if self.settings.os == "Windows" and self.settings.compiler == "Visual Studio":
             cmake = self._configure_cmake()
-            cmake.definitions["USE_OPENSSL"] = self.options.with_openssl
-            cmake.definitions["USE_ZLIB"] = self.options.with_zlib
             cmake.build()
         else:
             autotools = self._configure_autotools()
