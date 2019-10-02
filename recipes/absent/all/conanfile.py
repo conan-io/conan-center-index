@@ -1,4 +1,6 @@
 from conans import ConanFile, CMake, tools
+from conans.errors import ConanInvalidConfiguration
+from conans.tools import Version
 import os.path
 
 
@@ -11,6 +13,7 @@ class AbsentConan(ConanFile):
     author = "Rafael Varago (rvarago)"
     topics = ("nullable-types", "composition", "monadic-interface", "declarative-programming")
     no_copy_source = True
+    settings = "compiler"
     generators = "cmake"
 
     @property
@@ -27,6 +30,15 @@ class AbsentConan(ConanFile):
         cmake.configure(source_folder=self._source_subfolder,
                         build_folder=self._build_subfolder)
         return cmake
+
+    def configure(self):
+        version = Version(self.settings.compiler.version)
+        compiler = self.settings.compiler
+        if (compiler == "gcc" and version < "7") or \
+           (compiler == "clang" and version < "5") or \
+           (compiler == "apple-clang" and version < "9") or \
+           (compiler == "Visual Studio" and version < "15"):
+            raise ConanInvalidConfiguration("Absent requires C++17 support")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
