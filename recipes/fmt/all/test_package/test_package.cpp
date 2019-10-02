@@ -42,7 +42,7 @@ int main() {
 
     fmt::memory_buffer buf;
     fmt::format_to(buf, "{}", 2.7182818);
-    fmt::print("Euler number: {}\n", buf.data());
+    fmt::print("Euler number: {}\n", fmt::to_string(buf.data()));
 
     const std::string date = fmt::format("The date is {}\n", Date(2012, 12, 9));
     fmt::print(date);
