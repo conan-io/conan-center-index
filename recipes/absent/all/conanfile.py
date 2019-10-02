@@ -10,7 +10,7 @@ class AbsentConan(ConanFile):
     license = "MIT"
     author = "Rafael Varago (rvarago)"
     topics = ("nullable-types", "composition", "monadic-interface", "declarative-programming")
-
+    no_copy_source = True
     generators = "cmake"
 
     @property
