@@ -43,10 +43,9 @@ class LibeventConan(ConanFile):
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
-        extracted_folder = "libevent-{0}-stable".format(self.version)
-        if self.version == '2.1.11':
-            # temporary fix due to missing files in dist package for 2.1.11, see upstream bug 863
-            extracted_folder = "libevent-release-{0}-stable".format(self.version)
+        # temporary fix due to missing files in dist package for 2.1.11, see upstream bug 863
+        # for other versions "libevent-{0}-stable".format(self.version) is enough
+        extracted_folder = "libevent-release-{0}-stable".format(self.version)
         os.rename(extracted_folder, self._source_subfolder)
 
         os.rename(os.path.join(self._source_subfolder, "CMakeLists.txt"),
