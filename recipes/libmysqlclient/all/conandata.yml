@@ -2,3 +2,7 @@ sources:
   "8.0.17":
     sha256: c6e3f38199a77bfd8a4925ca00b252d3b6159b90e4980c7232f1c58d6ca759d6
     url: "https://dev.mysql.com/get/Downloads/MySQL-8.0/mysql-8.0.17.tar.gz"
+patches:
+  "8.0.17":
+    base_path: "source_subfolder"
+    patch_file: "patches/0001-find-cmake.patch"
