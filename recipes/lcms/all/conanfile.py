@@ -54,6 +54,8 @@ class LcmsConan(ConanFile):
                 args.extend(['--disable-static', '--enable-shared'])
             else:
                 args.extend(['--disable-shared', '--enable-static'])
+            args.append('--without-tiff')
+            args.append('--without-jpeg')
             env_build.configure(args=args)
             env_build.make()
             env_build.make(args=['install'])
