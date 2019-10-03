@@ -15,8 +15,8 @@ class libMysqlClientCConan(ConanFile):
     exports_sources = ["CMakeLists.txt"]
     generators = "cmake"
     settings = "os", "arch", "compiler", "build_type"
-    options = {"shared": [True, False], "with_ssl": [True, False], "with_zlib": [True, False]}
-    default_options = {'shared': False, 'with_ssl': True, 'with_zlib': True}
+    options = {"shared": [True, False], "fPIC": [True, False], "with_ssl": [True, False], "with_zlib": [True, False]}
+    default_options = {"shared": False, "fPIC": True, "with_ssl": True, "with_zlib": True}
     _source_subfolder = "source_subfolder"
 
     def requirements(self):
@@ -30,18 +30,18 @@ class libMysqlClientCConan(ConanFile):
         archive_name = "mysql-" + self.version
         tools.get(**self.conan_data["sources"][self.version])
         os.rename(archive_name, self._source_subfolder)
-        
+
         tools.replace_in_file(os.path.join(self._source_subfolder, "CMakeLists.txt"), "INCLUDE(cmake/boost.cmake)", "", strict=True)
-        
+
         for lib in ["icu", "libevent", "re2", "rapidjson", "lz4", "protobuf"]:
             tools.rmdir(os.path.join(self._source_subfolder, "extra", lib))
             tools.replace_in_file(os.path.join(self._source_subfolder, "CMakeLists.txt"), "INCLUDE(%s)" % lib, "", strict=True)
             tools.replace_in_file(os.path.join(self._source_subfolder, "CMakeLists.txt"), "MYSQL_CHECK_%s()" % lib.upper(), "", strict=True)
-            
+
         for dir in ['client', 'man']:
             tools.replace_in_file(os.path.join(self._source_subfolder, "CMakeLists.txt"), "ADD_SUBDIRECTORY(%s)" % dir, "", strict=True)
             tools.rmdir(os.path.join(self._source_subfolder, dir))
-            
+
         tools.rmdir(os.path.join(self._source_subfolder, "extra", "libedit"))
         tools.replace_in_file(os.path.join(self._source_subfolder, "CMakeLists.txt"), "MYSQL_CHECK_EDITLINE()", "", strict=True)
 
@@ -79,11 +79,11 @@ class libMysqlClientCConan(ConanFile):
 
         cmake.configure(source_dir=self._source_subfolder)
         return cmake
-    
+
     def build(self):
         cmake = self._configure_cmake()
         cmake.build()
-        
+
     def package(self):
         cmake = self._configure_cmake()
         cmake.install()
