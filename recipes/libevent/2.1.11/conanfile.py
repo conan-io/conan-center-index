@@ -9,7 +9,6 @@ class LibeventConan(ConanFile):
     topics = ("conan", "libevent", "event")
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/libevent/libevent"
-    author = "Bincrafters <bincrafters@gmail.com>"
     license = "BSD-3-Clause"
     exports_sources = ["CMakeLists.txt"]
     settings = "os", "compiler", "build_type", "arch"
