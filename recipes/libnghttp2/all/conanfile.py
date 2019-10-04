@@ -8,7 +8,6 @@ from conans.errors import ConanInvalidConfiguration
 
 class Nghttp2Conan(ConanFile):
     name = "libnghttp2"
-
     description = "HTTP/2 C Library and tools"
     topics = ("conan", "http")
     url = "https://github.com/conan-io/conan-center-index"
@@ -16,7 +15,6 @@ class Nghttp2Conan(ConanFile):
     license = "MIT"
     exports_sources = ["CMakeLists.txt"]
     generators = "cmake", "pkg_config"
-
     settings = "os", "arch", "compiler", "build_type"
     options = {"shared": [True, False],
                "fPIC": [True, False],
@@ -83,14 +81,13 @@ class Nghttp2Conan(ConanFile):
     def _build_with_autotools(self):
         if self.options.with_app:
             os.rename('c-ares.pc', 'libcares.pc')
-            os.rename('OpenSSL.pc', 'openssl.pc')
 
         prefix = os.path.abspath(self.package_folder)
         with tools.chdir(self._source_subfolder):
             env_build = AutoToolsBuildEnvironment(self)
             if self.settings.os == 'Windows':
                 prefix = tools.unix_path(prefix)
-            args = ['--prefix=%s' % prefix]
+            args = []
             if self.options.shared:
                 args.extend(['--disable-static', '--enable-shared'])
             else:
