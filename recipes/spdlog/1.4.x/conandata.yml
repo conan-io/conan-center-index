@@ -1,0 +1,8 @@
+sources:
+  "1.4.1":
+    sha256: 3291958eb54ed942d1bd3aef1b4f8ccf70566cbc04d34296ec61eb96ceb73cff
+    url: https://github.com/gabime/spdlog/archive/v1.4.1.tar.gz
+patches:
+  "1.4.1":
+    base_path: source_subfolder
+    patch_file: patches/0001-header-only.patch
