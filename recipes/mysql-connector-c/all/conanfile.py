@@ -20,10 +20,10 @@ class MysqlConnectorCConan(ConanFile):
 
     def requirements(self):
         if self.options.with_ssl:
-            self.requires.add("openssl/1.0.2t")
+            self.requires.add("openssl/1.0.2t", private=self.options.shared)
 
         if self.options.with_zlib:
-            self.requires.add("zlib/1.2.11")
+            self.requires.add("zlib/1.2.11", private=self.options.shared)
 
     def source(self):
         archive_name = self.name + "-" + self.version + "-src"
