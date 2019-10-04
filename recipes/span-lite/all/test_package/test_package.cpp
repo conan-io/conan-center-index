@@ -17,9 +17,9 @@ int main()
     std::cout << 
         "C-array:" << size( arr ) <<
 #if span_CPP11_OR_GREATER
-        " array:"  << size( std::array <int, 2>{ 1, 2, } ) <<
+        " array:"  << size( std::array <int, 2>{ 1, 2, } )
 #endif        
-        " vector:" << size( std::vector<int   >( 3, 0)   );
+     ;
         
     return 0;
 }
