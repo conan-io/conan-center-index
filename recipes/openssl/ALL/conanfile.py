@@ -1,5 +1,6 @@
 import os
 import fnmatch
+import platform
 from functools import total_ordering
 from conans.errors import ConanInvalidConfiguration, ConanException
 from conans import ConanFile, AutoToolsBuildEnvironment, tools
@@ -521,9 +522,28 @@ class OpenSSLConan(ConanFile):
                     self._patch_makefile_org()
                 self._make()
 
+    @staticmethod
+    def detected_os():
+        if tools.OSInfo().is_macos:
+            return "Macos"
+        if tools.OSInfo().is_windows:
+            return "Windows"
+        return platform.system()
+
+    @property
+    def _cross_building(self):
+        if tools.cross_building(self.settings):
+            if self.settings.os == self.detected_os():
+                if self.settings.arch == "x86" and tools.detected_architecture() == "x86_64":
+                    return False
+            return True
+        return False
+
     @property
     def _win_bash(self):
-        return tools.os_info.is_windows and (self._is_mingw or tools.cross_building(self.settings))
+        return tools.os_info.is_windows and \
+               not self._use_nmake and \
+               (self._is_mingw or self._cross_building(self.settings))
 
     @property
     def _make_program(self):
