@@ -34,33 +34,33 @@ index 0b0cc090..04a3b32b 100644
  
  IF (LINUX)
    OPTION(WITH_SYSTEMD "Enable installation of systemd support files" OFF)
-@@ -1115,25 +1108,18 @@ MYSQL_CHECK_SSL()
+@@ -1115,25 +1108,9 @@ MYSQL_CHECK_SSL()
  MYSQL_CHECK_SSL_DLLS()
  
- # Add system/bundled editline.
+-# Add system/bundled editline.
 -MYSQL_CHECK_EDITLINE()
- # Add libevent
+-# Add libevent
 -MYSQL_CHECK_LIBEVENT()
- # Add lz4 library
+-# Add lz4 library
 -MYSQL_CHECK_LZ4()
- # Add re2 library
+-# Add re2 library
 -MYSQL_CHECK_RE2()
- # Add icu library
+-# Add icu library
 -MYSQL_CHECK_ICU()
  # Add SASL library
  MYSQL_CHECK_SASL()
- # Add protoc and libprotobuf
- IF(NOT WITHOUT_SERVER)
+-# Add protoc and libprotobuf
+-IF(NOT WITHOUT_SERVER)
 -  MYSQL_CHECK_PROTOBUF()
- ENDIF()
+-ENDIF()
  # Try and set CURL_LIBRARY
  MYSQL_CHECK_CURL()
- # Add RapidJSON library.
+-# Add RapidJSON library.
 -MYSQL_CHECK_RAPIDJSON()
  
  MACRO(MY_INCLUDE_SYSTEM_DIRECTORIES LIBRARY)
    IF(${WITH_${LIBRARY}} STREQUAL "bundled")
-@@ -1248,7 +1234,6 @@ IF(WITH_UNIT_TESTS)
+@@ -1248,7 +1225,6 @@ IF(WITH_UNIT_TESTS)
    ADD_SUBDIRECTORY(unittest/mytap/t)
  ENDIF()
  
@@ -68,11 +68,11 @@ index 0b0cc090..04a3b32b 100644
  ADD_SUBDIRECTORY(utilities)
  ADD_SUBDIRECTORY(share)
  ADD_SUBDIRECTORY(libservices)
-@@ -1290,7 +1275,6 @@ IF(NOT WITHOUT_SERVER)
+@@ -1290,7 +1266,4 @@ IF(NOT WITHOUT_SERVER)
  ENDIF()
  
- IF(UNIX)
+-IF(UNIX)
 -  ADD_SUBDIRECTORY(man)
- ENDIF()
+-ENDIF()
  
  IF(NOT WITHOUT_SERVER)
