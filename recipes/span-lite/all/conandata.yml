@@ -1,4 +1,4 @@
 sources:
-  "0.5.0":
-    url: https://github.com/martinmoene/span-lite/archive/v0.5.0.tar.gz
-    sha256: 405ae095bca3c63da28c72a3528369b9ba3996f1992f3ae90fcb01a9d8bdef38
+  "0.6.0":
+    url: https://github.com/martinmoene/span-lite/archive/v0.6.0.tar.gz
+    sha256: da97ea5922a3c6129fe2ce89b95b471ae40e2ad921b354e472236a5ad57c5053
