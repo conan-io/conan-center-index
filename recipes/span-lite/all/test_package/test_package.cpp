@@ -15,9 +15,9 @@ int main()
     int arr[] = { 1, };
     
     std::cout << 
-        "C-array:" << size( arr ) <<
+        "C-array:" << size( arr )
 #if span_CPP11_OR_GREATER
-        " array:"  << size( std::array <int, 2>{ 1, 2, } )
+        << " array:"  << size( std::array <int, 2>{ 1, 2, } )
 #endif        
      ;
         
