@@ -1,0 +1,4 @@
+sources:
+  "3.0.0":
+    url: "https://github.com/libsigcplusplus/libsigcplusplus/releases/download/3.0.0/libsigc++-3.0.0.tar.xz"
+    sha256: "50A0855C1EB26E6044FFE888DBE061938AB4241F96D8F3754EA7EAD38AB8ED06"
