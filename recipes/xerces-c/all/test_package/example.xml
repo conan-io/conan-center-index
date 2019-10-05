@@ -1,0 +1,28 @@
+<?xml version="1.0" ?>
+<corporate name="Big Biz">
+<department name="North">
+<figures type="sales" value="125000.00"/>
+<figures type="inventory" value="90000.00"/>
+<figures type="labor" value="110000.00">estimated</figures>
+</department>
+<department name="South">
+<figures type="sales" value="980000.00"/>
+<figures type="inventory" value="110000.00"/>
+<figures type="labor" value="115000.00">estimated</figures>
+</department>
+<department name="East">
+<figures type="sales" value="210000.00"/>
+<figures type="inventory" value="80000.00"/>
+<figures type="labor" value="95000.00">estimated</figures>
+</department>
+<department name="West">
+<figures type="sales" value="160000.00"/>
+<figures type="inventory" value="75000.00"/>
+<figures type="labor" value="130000.00">estimated</figures>
+</department>
+<department name="Central">
+<figures type="sales" value="723000.00"/>
+<figures type="inventory" value="11000.00"/>
+<figures type="labor" value="221000.00">estimated</figures>
+</department>
+</corporate>
