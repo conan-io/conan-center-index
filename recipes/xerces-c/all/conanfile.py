@@ -62,7 +62,7 @@ class XercesCConan(ConanFile):
         tools.rmdir(os.path.join(self.package_folder, 'share'))
         tools.rmdir(os.path.join(self.package_folder, 'lib', 'pkgconfig'))
         tools.rmdir(os.path.join(self.package_folder, 'lib', 'cmake'))
-        tools.rmdir(os.path.join(self.package_folder, 'share', 'doc'))
+        tools.rmdir(os.path.join(self.package_folder, 'cmake'))
 
     def package_info(self):
         version_tokens = self.version.split(".")
