@@ -39,7 +39,7 @@ class Libtorch(ConanFile):
                 return "libtorch-cxx11-abi-shared-with-deps-"
             return "libtorch-shared-with-deps-"
     
-    def build(self):
+    def source(self):
         url = self.url_base + self.getGPU() + self.getOS() + self.version + ".zip"
         tools.get(url)
 
