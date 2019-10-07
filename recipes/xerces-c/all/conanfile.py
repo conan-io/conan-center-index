@@ -50,6 +50,10 @@ class XercesCConan(ConanFile):
         cmake.configure(build_folder=self._build_subfolder)
         return cmake
 
+    def configure(self):
+        if self.settings.os not in ('Windows', 'Macos', 'Linux'):
+            raise ConanInvalidConfiguration("OS is not supported")
+
     def build(self):
         cmake = self._configure_cmake()
         cmake.build()
