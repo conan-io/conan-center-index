@@ -1,5 +1,6 @@
 from conans import ConanFile, CMake, tools
 from conans.errors import ConanInvalidConfiguration
+from conans.tools import Version
 import os
 import glob
 
@@ -53,6 +54,8 @@ class libMysqlClientCConan(ConanFile):
         del self.settings.compiler.cppstd
         if not self.options.shared:
             raise ConanInvalidConfiguration("libmysqlclient cannot be built as static library")
+        if self.settings.compiler == "Visual Studio" and Version(self.settings.compiler.version.value) < "16":
+            raise ConanInvalidConfiguration("Visual Studio 2017 update 15.8 or newer is required")
 
     def _configure_cmake(self):
         cmake = CMake(self)
