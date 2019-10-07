@@ -34,6 +34,10 @@ class libMysqlClientCConan(ConanFile):
         archive_name = "mysql-" + self.version
         tools.get(**self.conan_data["sources"][self.version])
         os.rename(archive_name, self._source_subfolder)
+        for lib in ["icu", "libevent", "re2", "rapidjson", "lz4", "protobuf", "libedit"]:
+            tools.rmdir(os.path.join(self._source_subfolder, "extra", lib))
+        for dir in ['client', 'man']:
+            tools.rmdir(os.path.join(self._source_subfolder, dir))
 
     def _patch(self):
         tools.patch(**self.conan_data["patches"][self.version])
