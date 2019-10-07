@@ -39,6 +39,7 @@ class libMysqlClientCConan(ConanFile):
             tools.rmdir(os.path.join(self._source_subfolder, "extra", lib))
         for folder in ['client', 'man']:
             tools.rmdir(os.path.join(self._source_subfolder, folder))
+        tools.rmdir(os.path.join(self._source_subfolder, "storage", "ndb"))
 
     def _patch(self):
         tools.patch(**self.conan_data["patches"][self.version])
