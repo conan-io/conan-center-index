@@ -36,8 +36,8 @@ class libMysqlClientCConan(ConanFile):
         os.rename(archive_name, self._source_subfolder)
         for lib in ["icu", "libevent", "re2", "rapidjson", "lz4", "protobuf", "libedit"]:
             tools.rmdir(os.path.join(self._source_subfolder, "extra", lib))
-        for dir in ['client', 'man']:
-            tools.rmdir(os.path.join(self._source_subfolder, dir))
+        for folder in ['client', 'man']:
+            tools.rmdir(os.path.join(self._source_subfolder, folder))
 
     def _patch(self):
         tools.patch(**self.conan_data["patches"][self.version])
@@ -45,6 +45,8 @@ class libMysqlClientCConan(ConanFile):
         sources_cmake_orig = os.path.join(self._source_subfolder, "CMakeListsOriginal.txt")
         os.rename(sources_cmake, sources_cmake_orig)
         os.rename("CMakeLists.txt", sources_cmake)
+        if self.settings.os == "Macos":
+            tools.replace_in_file(os.path.join(self._source_subfolder, "libmysql", "CMakeLists.txt"), "COMMAND $<TARGET_FILE:libmysql_api_test>", "COMMAND DYLD_LIBRARY_PATH=%s $<TARGET_FILE:libmysql_api_test>" % os.path.join(self.build_folder, "library_output_directory"))
 
     def configure(self):
         del self.settings.compiler.libcxx
@@ -61,6 +63,7 @@ class libMysqlClientCConan(ConanFile):
         cmake.definitions["WITH_UNIT_TESTS"] = False
         cmake.definitions["ENABLED_PROFILING"] = False
         cmake.definitions["WIX_DIR"] = False
+        cmake.verbose = True
 
         if self.settings.compiler == "Visual Studio":
             if self.settings.compiler.runtime == "MD" or self.settings.compiler.runtime == "MDd":
