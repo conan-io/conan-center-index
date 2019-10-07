@@ -2,14 +2,14 @@
 
 int main(int argc, char* argv[])
 {
-  try {
+	try {
 		xercesc::XMLPlatformUtils::Initialize();
-  }
-  catch (const xercesc::XMLException& toCatch) {
-    return 1;
-  }
+	}
+	catch (const xercesc::XMLException& toCatch) {
+		return 1;
+	}
 
 	xercesc::XMLPlatformUtils::Terminate();
 
-  return 0;
+	return 0;
 }
