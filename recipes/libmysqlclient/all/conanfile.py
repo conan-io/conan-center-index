@@ -37,7 +37,7 @@ class libMysqlClientCConan(ConanFile):
         os.rename(archive_name, self._source_subfolder)
         for lib in ["icu", "libevent", "re2", "rapidjson", "lz4", "protobuf", "libedit"]:
             tools.rmdir(os.path.join(self._source_subfolder, "extra", lib))
-        for folder in ['client', 'man']:
+        for folder in ['client', 'man', 'mysql-test']:
             tools.rmdir(os.path.join(self._source_subfolder, folder))
         tools.rmdir(os.path.join(self._source_subfolder, "storage", "ndb"))
 
@@ -76,7 +76,7 @@ class libMysqlClientCConan(ConanFile):
                 cmake.definitions["WINDOWS_RUNTIME_MD"] = True
 
         if self.options.with_ssl:
-            cmake.definitions["WITH_SSL"] = "system"
+            cmake.definitions["WITH_SSL"] = self.deps_cpp_info["openssl"].rootpath
 
         if self.options.with_zlib:
             cmake.definitions["WITH_ZLIB"] = "system"
