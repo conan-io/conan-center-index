@@ -9,12 +9,12 @@ class LibmountConan(ConanFile):
     topics = ("conan", "mount", "libmount", "linux", "util-linux")
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://git.kernel.org/pub/scm/utils/util-linux/util-linux.git"
-    author = "Bincrafters <bincrafters@gmail.com>"
     license = "GPL-2.0-or-later"
     settings = "os", "arch", "compiler", "build_type"
     options = {"shared": [True, False], "fPIC": [True, False]}
     default_options = {"shared": False, "fPIC": True}
     _source_subfolder = "source_subfolder"
+    _autotools = None
 
     def configure(self):
         del self.settings.compiler.libcxx
@@ -27,19 +27,26 @@ class LibmountConan(ConanFile):
         extracted_dir = "util-linux-" + self.version
         os.rename(extracted_dir, self._source_subfolder)
 
-    def build(self):
-        with tools.chdir(self._source_subfolder):
+    def _configure_autotools(self):
+        if not self._autotools:
             args = ["--disable-all-programs", "--enable-libmount", "--enable-libblkid"]
             if self.options.shared:
                 args.extend(["--disable-static", "--enable-shared"])
             else:
                 args.extend(["--disable-shared", "--enable-static"])
-            env_build = AutoToolsBuildEnvironment(self)
-            env_build.configure(args=args)
+            self._autotools = AutoToolsBuildEnvironment(self)
+            self._autotools.configure(args=args)
+        return self._autotools
+
+    def build(self):
+        with tools.chdir(self._source_subfolder):
+            env_build = self._configure_autotools()
             env_build.make()
-            env_build.install()
 
     def package(self):
+        with tools.chdir(self._source_subfolder):
+            env_build = self._configure_autotools()
+            env_build.install()
         self.copy(pattern="COPYING", dst="licenses", src=self._source_subfolder)
         tools.rmdir(os.path.join(self.package_folder, "sbin"))
         tools.rmdir(os.path.join(self.package_folder, "share"))
