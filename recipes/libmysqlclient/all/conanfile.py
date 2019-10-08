@@ -55,8 +55,8 @@ class libMysqlClientCConan(ConanFile):
         del self.settings.compiler.cppstd
         if not self.options.shared:
             raise ConanInvalidConfiguration("libmysqlclient cannot be built as static library")
-        if self.settings.compiler == "Visual Studio" and Version(self.settings.compiler.version.value) < "16":
-            raise ConanInvalidConfiguration("Visual Studio 2017 update 15.8 or newer is required")
+        if self.settings.compiler == "Visual Studio"
+            raise ConanInvalidConfiguration("Visual Studio is not supported yet")
         if self.settings.compiler == "gcc" and Version(self.settings.compiler.version.value) < "5.3":
             raise ConanInvalidConfiguration("GCC 5.3 or newer is required")
 
@@ -69,7 +69,6 @@ class libMysqlClientCConan(ConanFile):
         cmake.definitions["WITH_UNIT_TESTS"] = False
         cmake.definitions["ENABLED_PROFILING"] = False
         cmake.definitions["WIX_DIR"] = False
-        cmake.verbose = True
 
         if self.settings.compiler == "Visual Studio":
             if self.settings.compiler.runtime == "MD" or self.settings.compiler.runtime == "MDd":
