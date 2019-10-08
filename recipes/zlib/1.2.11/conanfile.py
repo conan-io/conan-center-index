@@ -9,7 +9,6 @@ class ZlibConan(ConanFile):
     version = "1.2.11"
     url = "http://github.com/conan-community/conan-zlib"
     homepage = "https://zlib.net"
-    author = "Conan-Community"
     license = "Zlib"
     description = ("A Massively Spiffy Yet Delicately Unobtrusive Compression Library "
                    "(Also Free, Not to Mention Unencumbered by Patents)")
@@ -26,6 +25,7 @@ class ZlibConan(ConanFile):
 
     def configure(self):
         del self.settings.compiler.libcxx
+        del self.settings.compiler.cppstd
 
     def source(self):
 
