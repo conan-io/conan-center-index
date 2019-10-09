@@ -5,7 +5,6 @@ import os
 import glob
 
 
-
 class libMysqlClientCConan(ConanFile):
     name = "libmysqlclient"
     url = "https://github.com/conan-io/conan-center-index"
@@ -62,7 +61,6 @@ class libMysqlClientCConan(ConanFile):
 
     def _configure_cmake(self):
         cmake = CMake(self)
-
         cmake.definitions["DISABLE_SHARED"] = not self.options.shared
         cmake.definitions["STACK_DIRECTION"] = "-1"  # stack grows downwards, on very few platforms stack grows upwards
         cmake.definitions["WITHOUT_SERVER"] = True
