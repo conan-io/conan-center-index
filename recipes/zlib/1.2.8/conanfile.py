@@ -8,7 +8,7 @@ from conans.errors import ConanException, NotFoundException
 class ZlibConan(ConanFile):
     name = "zlib"
     version = "1.2.8"
-    url = "http://github.com/conan-community/conan-zlib"
+    url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://zlib.net"
     license = "Zlib"
     description = ("A Massively Spiffy Yet Delicately Unobtrusive Compression Library "
