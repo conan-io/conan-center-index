@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-from conans import ConanFile, CMake, tools, RunEnvironment
+from conans import ConanFile, CMake
 import os
 
 
