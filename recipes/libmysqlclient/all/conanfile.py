@@ -55,7 +55,7 @@ class libMysqlClientCConan(ConanFile):
         del self.settings.compiler.cppstd
         if not self.options.shared:
             raise ConanInvalidConfiguration("libmysqlclient cannot be built as static library")
-        if self.settings.compiler == "Visual Studio"
+        if self.settings.compiler == "Visual Studio":
             raise ConanInvalidConfiguration("Visual Studio is not supported yet")
         if self.settings.compiler == "gcc" and Version(self.settings.compiler.version.value) < "5.3":
             raise ConanInvalidConfiguration("GCC 5.3 or newer is required")
