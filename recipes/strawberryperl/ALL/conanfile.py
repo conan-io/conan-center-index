@@ -31,9 +31,6 @@ class StrawberryperlConan(ConanFile):
         self.copy(pattern="*", src=os.path.join("c", "lib"), dst="lib")
         self.copy(pattern="*", src=os.path.join("c", "include"), dst="include")
         tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
-        tools.rmdir(os.path.join(self.package_folder, "lib", "Win32API", "File"))
-        tools.rmdir(os.path.join(self.package_folder, "lib", "Win32API", "Registry"))
-        tools.rmdir(os.path.join(self.package_folder, "lib", "Win32", "GuiTest"))
 
     def package_info(self):
         bin_path = os.path.join(self.package_folder, "bin")
