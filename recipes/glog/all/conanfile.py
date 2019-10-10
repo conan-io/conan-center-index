@@ -40,6 +40,9 @@ class GlogConan(ConanFile):
         return cmake
 
     def build(self):
+        if self.options.with_gflags:
+            tools.replace_in_file(os.path.join(self._source_subfolder, "CMakeLists.txt"),
+                                  "gflags 2.2.0", "gflags 2.2.1 REQUIRED")
         cmake = self._configure_cmake()
         cmake.build()
 
