@@ -1,0 +1,4 @@
+sources:
+  "4.13.2":
+    url: "https://github.com/InsightSoftwareConsortium/ITK/archive/v4.13.2.tar.gz"
+    sha256: "98c2fd826e1987d797521d83031fcaa328135daf6524f7823363d66ab288c545"
