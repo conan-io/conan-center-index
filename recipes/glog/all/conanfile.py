@@ -43,6 +43,9 @@ class GlogConan(ConanFile):
         if self.options.with_gflags:
             tools.replace_in_file(os.path.join(self._source_subfolder, "CMakeLists.txt"),
                                   "gflags 2.2.0", "gflags 2.2.1 REQUIRED")
+            tools.replace_in_file(os.path.join(self._source_subfolder, "CMakeLists.txt"),
+                                  "target_link_libraries (glog PUBLIC gflags)",
+                                  "target_link_libraries (glog PUBLIC ${CONAN_LIBS})")
         cmake = self._configure_cmake()
         cmake.build()
 
