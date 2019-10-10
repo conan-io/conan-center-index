@@ -1,0 +1,4 @@
+sources:
+  "5.1.4":
+    url: "https://downloads.sourceforge.net/project/giflib/giflib-5.1.4.tar.gz"
+    sha256: "34a7377ba834397db019e8eb122e551a49c98f49df75ec3fcc92b9a794a4f6d1"

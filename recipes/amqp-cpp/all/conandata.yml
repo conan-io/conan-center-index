@@ -1,0 +1,4 @@
+sources:
+  "4.1.5":
+    url: "https://github.com/CopernicaMarketingSoftware/AMQP-CPP/archive/v4.1.5.tar.gz"
+    sha256: "9840c7fb17bb0c0b601d269e528b7f9cac5ec008dcf8d66bef22434423b468aa"

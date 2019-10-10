@@ -1,5 +1,3 @@
-#!/usr/bin/env python
-# -*- coding: utf-8 -*-
 import os
 import stat
 import shutil
@@ -10,16 +8,14 @@ from conans.errors import ConanException, NotFoundException
 class ZlibConan(ConanFile):
     name = "zlib"
     version = "1.2.8"
-    url = "http://github.com/conan-community/conan-zlib"
+    url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://zlib.net"
-    author = "Conan Community"
     license = "Zlib"
     description = ("A Massively Spiffy Yet Delicately Unobtrusive Compression Library "
                   "(Also Free, Not to Mention Unencumbered by Patents)")
     settings = "os", "arch", "compiler", "build_type"
     options = {"shared": [True, False], "fPIC": [True, False]}
     default_options = "shared=False", "fPIC=True"
-    exports = "LICENSE"
     exports_sources = ["CMakeLists.txt"]
     generators = "cmake"
     _source_subfolder = "source_subfolder"
@@ -31,6 +27,7 @@ class ZlibConan(ConanFile):
 
     def configure(self):
         del self.settings.compiler.libcxx
+        del self.settings.compiler.cppstd
     
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
