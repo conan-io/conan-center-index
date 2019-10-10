@@ -54,6 +54,7 @@ class ExpatConan(ConanFile):
         tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
 
     def package_info(self):
+        self.cpp_info.name = "EXPAT"
         if self.settings.os == "Windows" and self.settings.build_type == "Debug":
             self.cpp_info.libs = ["expatd"]
         else:
