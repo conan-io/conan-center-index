@@ -1,6 +1,3 @@
-#!/usr/bin/env python
-# -*- coding: utf-8 -*-
-
 import os
 
 from conans import CMake, ConanFile, tools
@@ -10,11 +7,10 @@ class CppSortConan(ConanFile):
     name = "cpp-sort"
     description = "Additional sorting algorithms & related tools"
     topics = "conan", "cpp-sort", "sorting", "algorithms"
-    url = "https://github.com/Morwenn/cpp-sort"
+    url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/Morwenn/cpp-sort"
     author = "Morwenn <morwenn29@hotmail.fr>"
     license = "MIT"
-    exports = "license.txt"
     no_copy_source = True
 
     _source_subfolder = "source_subfolder"
@@ -28,7 +24,7 @@ class CppSortConan(ConanFile):
         # Install with CMake
         cmake = CMake(self)
         cmake.definitions["BUILD_TESTING"] = "OFF"
-        cmake.configure(_source_subfolder)
+        cmake.configure(source_folder=self._source_subfolder)
         cmake.install()
 
         # Copy license file
