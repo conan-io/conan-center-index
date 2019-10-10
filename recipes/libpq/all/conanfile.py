@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-from conans import ConanFile, AutoToolsBuildEnvironment, CMake, tools
+from conans import ConanFile, AutoToolsBuildEnvironment, tools
 from conans.errors import ConanInvalidConfiguration
 import os
 
@@ -13,7 +13,6 @@ class LibpqConan(ConanFile):
     homepage = "https://www.postgresql.org/docs/current/static/libpq.html"
     author = "Bincrafters <bincrafters@gmail.com>"
     license = "PostgreSQL"
-    exports_sources = ["CMakeLists.txt"]
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
@@ -25,6 +24,9 @@ class LibpqConan(ConanFile):
     generators = "cmake"
     _autotools = None
 
+    def build_requirements(self):
+        if self.settings.compiler == "Visual Studio":
+            self.build_requires("strawberryperl/5.30.0.1")
     @property
     def _source_subfolder(self):
         return "source_subfolder"
@@ -77,9 +79,18 @@ class LibpqConan(ConanFile):
         return cmake
 
     def build(self):
-        if self.settings.os == "Windows" and self.settings.compiler == "Visual Studio":
-            cmake = self._configure_cmake()
-            cmake.build()
+        if self.settings.compiler == "Visual Studio":
+            # https://www.postgresql.org/docs/8.3/install-win32-libpq.html
+            # https://github.com/postgres/postgres/blob/master/src/tools/msvc/README
+            if not self.options.shared:
+                tools.replace_in_file(os.path.join(self._source_subfolder, "src", "tools", "msvc", "MKvcbuild.pm"),
+                                      "$libpq = $solution->AddProject('libpq', 'dll', 'interfaces',",
+                                      "$libpq = $solution->AddProject('libpq', 'lib', 'interfaces',")
+            with tools.vcvars(self.settings):
+                config = "DEBUG" if self.settings.build_type == "Debug" else "RELEASE"
+                with tools.environment_append({"CONFIG": config}):
+                    with tools.chdir(os.path.join(self._source_subfolder, "src", "tools", "msvc")):
+                        self.run("perl build.pl libpq")
         else:
             autotools = self._configure_autotools()
             with tools.chdir(os.path.join(self._source_subfolder, "src", "backend")):
@@ -95,9 +106,18 @@ class LibpqConan(ConanFile):
 
     def package(self):
         self.copy(pattern="COPYRIGHT", dst="licenses", src=self._source_subfolder)
-        if self.settings.os == "Windows" and self.settings.compiler == "Visual Studio":
-            cmake = self._configure_cmake()
-            cmake.install()
+        if self.settings.compiler == "Visual Studio":
+            self.copy("*postgres_ext.h", src=self._source_subfolder, dst="include", keep_path=False)
+            self.copy("*pg_config.h", src=self._source_subfolder, dst="include", keep_path=False)
+            self.copy("*pg_config_ext.h", src=self._source_subfolder, dst="include", keep_path=False)
+            self.copy("*libpq-fe.h", src=self._source_subfolder, dst="include", keep_path=False)
+            self.copy("*libpq-events.h", src=self._source_subfolder, dst="include", keep_path=False)
+            self.copy("*.h", src=os.path.join(self._source_subfolder, "src", "include", "libpq"), dst=os.path.join("include", "libpq"), keep_path=False)
+            self.copy("*genbki.h", src=self._source_subfolder, dst=os.path.join("include", "catalog"), keep_path=False)
+            self.copy("*pg_type.h", src=self._source_subfolder, dst=os.path.join("include", "catalog"), keep_path=False)
+            self.copy("*.lib", src=self._source_subfolder, dst="lib", keep_path=False)
+            if self.options.shared:
+                self.copy("*.dll", src=self._source_subfolder, dst="bin", keep_path=False)
         else:
             autotools = self._configure_autotools()
             with tools.chdir(os.path.join(self._source_subfolder, "src", "common")):
