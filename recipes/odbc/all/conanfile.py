@@ -12,8 +12,8 @@ class OdbcConan(ConanFile):
     license = ('LGPL-2.1', 'GPL-2.1')
 
     settings = 'os', 'compiler', 'build_type', 'arch'
-    options = {'shared': [True, False], 'fPIC': [True, False]}
-    default_options = {'shared': False, 'fPIC': True}
+    options = {'shared': [True, False], 'fPIC': [True, False], 'with_libiconv': [True, False]}
+    default_options = {'shared': False, 'fPIC': True, 'with_libiconv': True}
     topics = ('odbc', 'database', 'dbms', 'data-access')
 
     _source_subfolder = 'source_subfolder'
@@ -24,6 +24,10 @@ class OdbcConan(ConanFile):
         if self.settings.os == "Windows":
             raise ConanInvalidConfiguration("Windows not supported yet. Please, open an issue if you need such support")
 
+    def requirements(self):
+        if self.options.with_libiconv:
+            self.requires("libiconv/1.15")
+        
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
         extracted_dir = 'unixODBC-%s' % self.version
@@ -33,9 +37,14 @@ class OdbcConan(ConanFile):
         env_build = AutoToolsBuildEnvironment(self)
         static_flag = 'no' if self.options.shared else 'yes'
         shared_flag = 'yes' if self.options.shared else 'no'
+        libiconv_flag = 'yes' if self.options.with_libiconv else 'no'
         args = ['--enable-static=%s' % static_flag,
                 '--enable-shared=%s' % shared_flag,
-                '--enable-ltdl-install']
+                '--enable-ltdl-install',
+                '--enable-iconv=%s' % libiconv_flag]
+        if self.options.with_libiconv:
+            libiconv_prefix = self.deps_cpp_info["libiconv"].rootpath
+            args.append('--with-libiconv-prefix=%s' % libiconv_prefix)
 
         env_build.configure(configure_dir=self._source_subfolder, args=args)
         env_build.make()
@@ -57,5 +66,3 @@ class OdbcConan(ConanFile):
         self.cpp_info.libs = ['odbc', 'odbccr', 'odbcinst', 'ltdl']
         if self.settings.os == 'Linux':
             self.cpp_info.libs.append('dl')
-        if self.settings.os == 'Macos':
-            self.cpp_info.libs.append('iconv')
