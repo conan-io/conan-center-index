@@ -9,7 +9,6 @@ class CppSortConan(ConanFile):
     topics = "conan", "cpp-sort", "sorting", "algorithms"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/Morwenn/cpp-sort"
-    author = "Morwenn <morwenn29@hotmail.fr>"
     license = "MIT"
     no_copy_source = True
 
