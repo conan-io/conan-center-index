@@ -63,6 +63,7 @@ class SpdlogConan(ConanFile):
         cmake.install()
         tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
         tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
+        tools.rmdir(os.path.join(self.package_folder, "lib", "spdlog", "cmake"))
 
     def package_id(self):
         if self.options.header_only:
