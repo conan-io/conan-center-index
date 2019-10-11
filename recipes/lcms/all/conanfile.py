@@ -20,7 +20,7 @@ class LcmsConan(ConanFile):
 
     def build_requirements(self):
         if tools.os_info.is_windows and "CONAN_BASH_PATH" not in os.environ:
-            self.build_requires("msys2_installer/latest@bincrafters/stable")
+            self.build_requires("msys2/20161025")
 
     def config_options(self):
         if self.settings.os == "Windows":
