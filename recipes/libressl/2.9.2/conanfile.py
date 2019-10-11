@@ -29,6 +29,10 @@ class LibreSSLConan(ConanFile):
         tools.get(**self.conan_data["sources"][self.version])
 
     def build(self):
+        # needed to properly overwrite MSVC runtime
+        tools.replace_in_file(os.path.join(self.libressl_src, "CMakeLists.txt"), "project (LibreSSL C ASM)", """project (LibreSSL C ASM)
+include(${CMAKE_CURRENT_BINARY_DIR}/conanbuildinfo.cmake)
+conan_basic_setup(TARGETS)""")
         cmake = CMake(self)
         cmake.definitions["BUILD_SHARED"] = self.options.shared
         cmake.definitions["USE_SHARED"] = self.options.shared
