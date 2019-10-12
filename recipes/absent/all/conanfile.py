@@ -36,7 +36,7 @@ class AbsentConan(ConanFile):
         compiler = self.settings.compiler
         if (compiler == "gcc" and version < "7") or \
            (compiler == "clang" and version < "5") or \
-           (compiler == "apple-clang" and version < "9") or \
+           (compiler == "apple-clang" and version < "10") or \
            (compiler == "Visual Studio" and version < "15"):
             raise ConanInvalidConfiguration("Absent requires C++17 support")
 
