@@ -8,7 +8,6 @@ from conans.errors import ConanInvalidConfiguration
 
 class GTestConan(ConanFile):
     name = "gtest"
-    version = "1.8.1"
     description = "Google's C++ test framework"
     url = "http://github.com/bincrafters/conan-gtest"
     homepage = "https://github.com/google/googletest"
@@ -16,7 +15,7 @@ class GTestConan(ConanFile):
     license = "BSD-3-Clause"
     topics = ("conan", "gtest", "testing", "google-testing", "unit-test")
     exports = ["LICENSE.md"]
-    exports_sources = ["CMakeLists.txt", "gtest.patch"]
+    exports_sources = ["CMakeLists.txt", "gtest-*.patch"]
     generators = "cmake"
     settings = "os", "arch", "compiler", "build_type"
     options = {"shared": [True, False], "build_gmock": [True, False], "fPIC": [True, False], "no_main": [True, False], "debug_postfix": "ANY", "hide_symbols": [True, False]}
@@ -58,7 +57,7 @@ class GTestConan(ConanFile):
         return cmake
 
     def build(self):
-        tools.patch(base_path=self._source_subfolder, patch_file="gtest.patch")
+        tools.patch(base_path=self._source_subfolder, patch_file="gtest-" + str(self.version) + ".patch")
         cmake = self._configure_cmake()
         cmake.build()
 
