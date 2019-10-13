@@ -8,7 +8,6 @@ class LibSigCppConan(ConanFile):
     name = "libsigcpp"
     url = "https://github.com/libsigcplusplus/libsigcplusplus"
     homepage = "https://libsigcplusplus.github.io/libsigcplusplus/"
-    author = "Conan Community"
     license = "LGPL"
     description = "Typesafe callback framework for C++"
     topics = ("libsigcpp", "callback")
