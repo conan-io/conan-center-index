@@ -3,7 +3,7 @@ from conans import ConanFile, CMake, tools
 
 class LibSigCppConan(ConanFile):
     name = "libsigcpp"
-    url = "https://github.com/libsigcplusplus/libsigcplusplus"
+    url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://libsigcplusplus.github.io/libsigcplusplus/"
     license = "LGPL"
     description = "Typesafe callback framework for C++"
