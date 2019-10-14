@@ -29,6 +29,8 @@ class LibSigCppConan(ConanFile):
 
     def _configure_cmake(self):
         cmake = CMake(self)
+        if self.settings.os == "Windows" and self.options.shared:
+            cmake.definitions["CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS"] = True
         cmake.definitions['LIBSIGCPP_BUILD_SHAREDLIB'] = self.options.shared
         cmake.configure(build_folder=self._build_subfolder)
         return cmake
