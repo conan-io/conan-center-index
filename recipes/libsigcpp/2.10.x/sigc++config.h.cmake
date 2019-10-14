@@ -45,9 +45,9 @@
  */
 # pragma warning(disable:4251)
 
-# define SIGC_MSVC_TEMPLATE_SPECIALIZATION_OPERATOR_OVERLOAD 1
-# define SIGC_NEW_DELETE_IN_LIBRARY_ONLY 1 /* To keep ABI compatibility */
-# define SIGC_PRAGMA_PUSH_POP_MACRO 1
+#cmakedefine SIGC_MSVC_TEMPLATE_SPECIALIZATION_OPERATOR_OVERLOAD 1
+#cmakedefine SIGC_NEW_DELETE_IN_LIBRARY_ONLY 1 /* To keep ABI compatibility */
+#cmakedefine SIGC_PRAGMA_PUSH_POP_MACRO 1
 
 #if (_MSC_VER < 1900) && !defined (noexcept)
 #define _ALLOW_KEYWORD_MACROS 1
