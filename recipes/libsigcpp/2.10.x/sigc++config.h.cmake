@@ -17,7 +17,6 @@
 # if defined(_MSC_VER)
 #  define SIGC_MSC 1
 #  define SIGC_WIN32 1
-#  define SIGC_DLL 1
 # elif defined(__CYGWIN__)
 #  define SIGC_CONFIGURE 1
 # elif defined(__MINGW32__)
