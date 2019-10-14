@@ -10,7 +10,7 @@ class LibSigCppConan(ConanFile):
     topics = ("libsigcpp", "callback")
     settings = "os", "compiler", "arch", "build_type"
     options = {"shared": [True, False],"fPIC": [True, False] }
-    default_options = {"shared": True }
+    default_options = {"shared": True, "fPIC": True }
     exports_sources = ["CMakeLists.txt", "config.h.cmake", "sigc++config.h.cmake"]
     generators = "cmake"
     no_copy_source = True
