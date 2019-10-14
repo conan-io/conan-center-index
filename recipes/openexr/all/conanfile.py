@@ -3,7 +3,7 @@ import os
 import shutil
 
 
-class OpenexrConan(ConanFile):
+class OpenEXRConan(ConanFile):
     name = "openexr"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/openexr/openexr"
@@ -11,8 +11,8 @@ class OpenexrConan(ConanFile):
     license = "BSD-3"
     description = "OpenEXR is a high dynamic-range (HDR) image file format for use in computer imaging applications"
     settings = "os", "compiler", "build_type", "arch"
-    options = {"shared": [True, False], "fPIC": [True, False]}
-    default_options = {"shared": False, 'fPIC': True}
+    options = {"shared": [True, False], "fPIC": [True, False], "namespace_versioning": [True, False]}
+    default_options = {"shared": False, "namespace_versionin":True, 'fPIC': True}
     generators = "cmake"
 
     exports_sources = ["CMakeLists.txt"]
@@ -35,8 +35,17 @@ class OpenexrConan(ConanFile):
         cmake = CMake(self)
         cmake.definitions["ZLIB_LIBRARY"] = self.deps_cpp_info["zlib"].libs[0]
         cmake.definitions["ZLIB_INCLUDE_DIR"] = self.deps_cpp_info["zlib"].include_paths[0]
-        cmake.definitions["BUILD_TESTING"] = "OFF"
-        cmake.definitions["OPENEXR_VIEWERS_ENABLE"] = "OFF"
+        cmake.definitions["OPENEXR_BUILD_PYTHON_LIBS"] = False
+        cmake.definitions["BUILD_TESTING"] = False
+        cmake.definitions["OPENEXR_VIEWERS_ENABLE"] = False
+        cmake.definitions["OPENEXR_BUILD_SHARED"] = self.options.shared
+        cmake.definitions["OPENEXR_BUILD_STATIC"] = not bool(self.options.shared)
+        cmake.definitions["OPENEXR_NAMESPACE_VERSIONING"] = self.options.namespace_versioning
+        cmake.definitions["OPENEXR_ENABLE_TESTS"] = False
+        cmake.definitions["OPENEXR_FORCE_CXX03"] = True
+        cmake.definitions["OPENEXR_BUILD_UTILS"] = False
+        cmake.definitions["ENABLE_TESTS"] = False
+        cmake.definitions["OPENEXR_BUILD_TESTS"] = False
         cmake.configure(source_folder=self._source_subfolder)
         return cmake
 
@@ -52,4 +61,22 @@ class OpenexrConan(ConanFile):
         self.copy("LICENSE", src=self._source_subfolder, dst="licenses", keep_path=False)
 
     def package_info(self):
-        self.cpp_info.libs = tools.collect_libs(self)
+        parsed_version = self.version.split('.')
+        version_suffix = "-%s_%s" % (parsed_version[0], parsed_version[1]) if self.options.namespace_versioning else ""
+        if not self.options.shared:
+            version_suffix += "_s"
+        if self.settings.compiler == 'Visual Studio' and self.settings.build_type == 'Debug':
+            version_suffix += "_d"
+
+        self.cpp_info.libs = ['IlmImf' + version_suffix,
+                              'IlmImfUtil' + version_suffix,
+                              'IlmThread' + version_suffix,
+                              'Iex' + version_suffix,
+                              'Half' + version_suffix]
+        
+        self.cpp_info.includedirs = [os.path.join('include', 'OpenEXR'), 'include']
+        if self.options.shared and self.settings.os == "Windows":
+            self.cpp_info.defines.append("OPENEXR_DLL")
+
+        if self.settings.os != "Windows":
+            self.cpp_info.cppflags = ["-pthread"]
