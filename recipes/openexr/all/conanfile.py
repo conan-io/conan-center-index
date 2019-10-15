@@ -12,7 +12,7 @@ class OpenEXRConan(ConanFile):
     description = "OpenEXR is a high dynamic-range (HDR) image file format for use in computer imaging applications"
     settings = "os", "compiler", "build_type", "arch"
     options = {"shared": [True, False], "fPIC": [True, False], "namespace_versioning": [True, False]}
-    default_options = {"shared": False, "namespace_versionin":True, 'fPIC': True}
+    default_options = {"shared": False, "namespace_versioning": True, 'fPIC': True}
     generators = "cmake"
 
     exports_sources = ["CMakeLists.txt"]
