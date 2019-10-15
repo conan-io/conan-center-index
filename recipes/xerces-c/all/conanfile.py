@@ -78,6 +78,5 @@ class XercesCConan(ConanFile):
                                   ("xerces-c-%s.%s" % (version_tokens[0], version_tokens[1]))]
         if self.settings.os == "Macos":
             self.cpp_info.frameworks = ['CoreFoundation', 'CoreServices']
-            self.cpp_info.sharedlinkflags = self.cpp_info.exelinkflags
         elif self.settings.os == "Linux":
             self.cpp_info.libs.append("pthread")
