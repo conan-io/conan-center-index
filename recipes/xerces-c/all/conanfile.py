@@ -31,7 +31,6 @@ class XercesCConan(ConanFile):
     def _configure_cmake(self):
         cmake = CMake(self)
         # https://xerces.apache.org/xerces-c/build-3.html
-        # TODO : check if we need options for that variants
         cmake.definitions["network-accessor"] = {"Windows": "winsock",
                                                  "Macos": "cfurl",
                                                  "Linux": "socket"}.get(str(self.settings.os))
