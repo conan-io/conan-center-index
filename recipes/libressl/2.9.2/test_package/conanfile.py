@@ -11,6 +11,9 @@ class PackageTest(ConanFile):
         cmake.configure()
         cmake.build()
 
+    def imports(self):
+        self.copy("*.dll", "", "bin")
+
     def test(self):
         if tools.cross_building(self.settings):
             # Handle mingw
