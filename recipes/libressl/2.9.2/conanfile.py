@@ -33,6 +33,11 @@ class LibreSSLConan(ConanFile):
         tools.replace_in_file(os.path.join(self.libressl_src, "CMakeLists.txt"), "project (LibreSSL C ASM)", """project (LibreSSL C ASM)
 include(${CMAKE_CURRENT_BINARY_DIR}/conanbuildinfo.cmake)
 conan_basic_setup(TARGETS)""")
+
+        # libressl adds a suffix to Windows dll names, which is really annoying for packaging
+        tools.replace_in_file(os.path.join(self.libressl_src, "crypto", "CMakeLists.txt"), "set(CRYPTO_POSTFIX -${CRYPTO_MAJOR_VERSION})", "set(CRYPTO_POSTFIX)")
+        tools.replace_in_file(os.path.join(self.libressl_src, "tls", "CMakeLists.txt"), "set(TLS_POSTFIX -${TLS_MAJOR_VERSION})", "set(TLS_POSTFIX)")
+        tools.replace_in_file(os.path.join(self.libressl_src, "ssl", "CMakeLists.txt"), "set(SSL_POSTFIX -${SSL_MAJOR_VERSION})", "set(SSL_POSTFIX)")
         cmake = CMake(self)
         cmake.definitions["BUILD_SHARED"] = self.options.shared
         cmake.definitions["USE_SHARED"] = self.options.shared
@@ -53,6 +58,8 @@ conan_basic_setup(TARGETS)""")
             self.copy("*.so*", dst="lib", symlinks=True, keep_path=False)
             self.copy("*.dylib", dst="lib", symlinks=True, keep_path=False)
             self.copy("*.dll", dst="bin", keep_path=False)
+            # do not forget import libraries
+            self.copy("*.lib", dst="lib", keep_path=False)
         else:
             self.copy("*.a", dst="lib", keep_path=False)
             self.copy("*.lib", dst="lib", keep_path=False)
