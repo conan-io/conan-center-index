@@ -15,7 +15,7 @@ class LibsolaceConan(ConanFile):
         "shared": [True, False],
         "fPIC": [True, False]
     }
-    default_options = "shared=False", "fPIC=True"
+    default_options = {"shared": False, "fPIC": True}
     generators = "cmake"
 
     @property
@@ -25,10 +25,6 @@ class LibsolaceConan(ConanFile):
     @property
     def _supported_cppstd(self):
         return ["17", "gnu17", "20", "gnu20"]
-
-    def config_options(self):
-        if self.settings.os == "Windows":
-            del self.options.fPIC
 
     def configure(self):
         if self.settings.os == "Windows":
@@ -43,7 +39,6 @@ class LibsolaceConan(ConanFile):
 
     def _configure_cmake(self):
         cmake = CMake(self, parallel=True)
-        cmake.definitions["BUILD_TESTING"] = "OFF"
         cmake.definitions["PKG_CONFIG"] = "OFF"
         cmake.definitions["SOLACE_GTEST_SUPPORT"] = "OFF"
         cmake.configure(source_folder=self._source_subfolder)
@@ -60,3 +55,5 @@ class LibsolaceConan(ConanFile):
 
     def package_info(self):
         self.cpp_info.libs = ["solace"]
+        if self.settings.os == "Linux":
+            self.cpp_info.libs.append("m")
