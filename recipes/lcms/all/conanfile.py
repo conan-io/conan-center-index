@@ -18,6 +18,10 @@ class LcmsConan(ConanFile):
     generators = "cmake"
     _source_subfolder = "source_subfolder"
 
+    def build_requirements(self):
+        if tools.os_info.is_windows and "CONAN_BASH_PATH" not in os.environ:
+            self.build_requires("msys2/20161025")
+
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
@@ -44,7 +48,7 @@ class LcmsConan(ConanFile):
             msbuild.build("lcms2.sln", targets=[target], platforms={"x86": "Win32"}, upgrade_project=upgrade_project)
 
     def _build_configure(self):
-        env_build = AutoToolsBuildEnvironment(self)
+        env_build = AutoToolsBuildEnvironment(self, win_bash=tools.os_info.is_windows)
         with tools.chdir(self._source_subfolder):
             args = ['prefix=%s' % self.package_folder]
             if self.options.shared:
