@@ -1,10 +1,10 @@
 ///////////////////////////////////////////////////////////////////////////
 //
-// Copyright (c) 2002, Industrial Light & Magic, a division of Lucas
+// Copyright (c) 2012, Industrial Light & Magic, a division of Lucas
 // Digital Ltd. LLC
-// 
+//
 // All rights reserved.
-// 
+//
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are
 // met:
@@ -16,8 +16,8 @@
 // distribution.
 // *       Neither the name of Industrial Light & Magic nor the names of
 // its contributors may be used to endorse or promote products derived
-// from this software without specific prior written permission. 
-// 
+// from this software without specific prior written permission.
+//
 // THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
 // "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
 // LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
@@ -31,40 +31,5 @@
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
 ///////////////////////////////////////////////////////////////////////////
+void lowLevelIoExamples ();
 
-
-
-#include "rgbaInterfaceExamples.h"
-#include "rgbaInterfaceTiledExamples.h"
-#include "generalInterfaceExamples.h"
-#include "generalInterfaceTiledExamples.h"
-#include "lowLevelIoExamples.h"
-#include "previewImageExamples.h"
-
-#include <iostream>
-#include <stdexcept>
-
-
-int
-main (int argc, char *argv[])
-{
-    try
-    {
-	rgbaInterfaceExamples();
-	generalInterfaceExamples();
-
-        rgbaInterfaceTiledExamples();
-        generalInterfaceTiledExamples();
-
-	lowLevelIoExamples();
-
-	previewImageExamples();
-    }
-    catch (const std::exception &exc)
-    {
-	std::cerr << exc.what() << std::endl;
-	return 1;
-    }
-
-    return 0;
-}
