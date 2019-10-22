@@ -10,16 +10,15 @@ class LibreSSLConan(ConanFile):
     license = ("OpenSSL", "BSD", "ISC")
     settings = "os", "compiler", "build_type", "arch"
     options = {"shared": [True, False], "fPIC": [True, False]}
-    default_options = {"shared": False}, {"fPIC": True}
+    default_options = {"shared": False, "fPIC": True}
+    exports_sources = "CMakeLists.txt"
     topics = ("SSL", "TLS", "openssl")
     description = ("LibreSSL is a version of the TLS/crypto stack forked from OpenSSL in 2014, "
                    "with goals of modernizing the codebase, improving security, and applying "
                    "best practice development processes.")
     generators = "cmake"
+    _source_subfolder = "source_subfolder"
 
-    @property
-    def libressl_src(self):
-        return "%s-%s" % (self.name, self.version)
 
     def config_options(self):
         del self.settings.compiler.libcxx
@@ -29,29 +28,23 @@ class LibreSSLConan(ConanFile):
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
+        extracted_dir = self.name + "-" + self.version
+        os.rename(extracted_dir, self._source_subfolder)
 
     def build(self):
-        # needed to properly overwrite MSVC runtime
-        tools.replace_in_file(os.path.join(self.libressl_src, "CMakeLists.txt"), "project (LibreSSL C ASM)", """project (LibreSSL C ASM)
-include(${CMAKE_CURRENT_BINARY_DIR}/conanbuildinfo.cmake)
-conan_basic_setup(TARGETS)""")
-
-        # libressl adds a suffix to Windows dll names, which is really annoying for packaging
-        tools.replace_in_file(os.path.join(self.libressl_src, "crypto", "CMakeLists.txt"), "set(CRYPTO_POSTFIX -${CRYPTO_MAJOR_VERSION})", "set(CRYPTO_POSTFIX)")
-        tools.replace_in_file(os.path.join(self.libressl_src, "tls", "CMakeLists.txt"), "set(TLS_POSTFIX -${TLS_MAJOR_VERSION})", "set(TLS_POSTFIX)")
-        tools.replace_in_file(os.path.join(self.libressl_src, "ssl", "CMakeLists.txt"), "set(SSL_POSTFIX -${SSL_MAJOR_VERSION})", "set(SSL_POSTFIX)")
         cmake = CMake(self)
         cmake.definitions["BUILD_SHARED"] = self.options.shared
         cmake.definitions["USE_SHARED"] = self.options.shared
         # LibreSSL's CMake install rules are a bit weird
-        # explicitly remove CMAKE_INSTALL_PREFIX to avoid installing certs
+        # explicitly remove CMAKE_INSTALL_PREFIX to avoid defining OPENSSLDIR
+        # as </absolute/path/to/package_folder/etc/ssl>
         cmake.definitions["CMAKE_INSTALL_PREFIX"] = ""
         cmake.definitions["LIBRESSL_APPS"] = "OFF"
-        cmake.configure(source_dir=self.libressl_src)
+        cmake.configure()
         cmake.build()
 
     def package(self):
-        libressl_include_dir = os.path.join(self.libressl_src, "include")
+        libressl_include_dir = os.path.join(self._source_subfolder, "include")
         self.copy("tls.h", dst="include", src=libressl_include_dir)
         self.copy("openssl/*", dst="include", src=libressl_include_dir)
 
