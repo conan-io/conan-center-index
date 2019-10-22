@@ -1,0 +1,25 @@
+diff --git OpenEXR/IlmImf/CMakeLists.txt OpenEXR/IlmImf/CMakeLists.txt
+index 165fed7..0b9e366 100644
+--- OpenEXR/IlmImf/CMakeLists.txt
++++ OpenEXR/IlmImf/CMakeLists.txt
+@@ -216,5 +216,5 @@ openexr_define_library(IlmImf
+     IlmBase::Half
+     IlmBase::Imath
+     IlmBase::IlmThread
+-    ZLIB::ZLIB
++    zlib::zlib
+   )
+diff --git OpenEXR/config/OpenEXRSetup.cmake OpenEXR/config/OpenEXRSetup.cmake
+index 5116726..e7bb7c1 100644
+--- OpenEXR/config/OpenEXRSetup.cmake
++++ OpenEXR/config/OpenEXRSetup.cmake
+@@ -133,7 +133,7 @@ if(NOT TARGET Threads::Threads)
+   endif()
+ endif()
+ 
+-find_package(ZLIB REQUIRED)
+-if(NOT TARGET ZLIB::ZLIB)
++find_package(zlib REQUIRED)
++if(NOT TARGET zlib::zlib)
+   message(FATAL_ERROR "Unable to find zlib library target which is required for OpenEXR")
+ endif()
