@@ -71,7 +71,7 @@ class SpdlogConan(ConanFile):
 
     def package_info(self):
         if self.options.header_only:
-            self.cpp_info.defines = ["SDPLOG_HEADER_ONLY", "SPDLOG_FMT_EXTERNAL"]
+            self.cpp_info.defines = ["SPDLOG_HEADER_ONLY", "SPDLOG_FMT_EXTERNAL"]
         else:
             self.cpp_info.libs = tools.collect_libs(self)
             self.cpp_info.defines = ["SDPLOG_COMPILED_LIB", "SPDLOG_FMT_EXTERNAL"]
