@@ -75,5 +75,5 @@ class OpenEXRConan(ConanFile):
         if self.options.shared and self.settings.os == "Windows":
             self.cpp_info.defines.append("OPENEXR_DLL")
 
-        if self.settings.os != "Windows":
-            self.cpp_info.cppflags = ["pthread"]
+        #if self.settings.os != "Windows":
+        #    self.cpp_info.cppflags = ["pthread"]
