@@ -895,3 +895,4 @@ class BoostConan(ConanFile):
                 self.cpp_info.libs.append("pthread")
 
         self.env_info.BOOST_ROOT = self.package_folder
+        self.cpp_info.name = "Boost"
