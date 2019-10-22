@@ -10,7 +10,6 @@ class LibsolaceConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/abbyssoul/libsolace"
     license = "Apache-2.0"
-    author = "Ivan Ryabov <abbyssoul@gmail.com>"
     settings = "os", "compiler", "build_type", "arch"
     options = {
         "shared": [True, False],
