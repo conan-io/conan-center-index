@@ -7,7 +7,7 @@ class LibreSSLConan(ConanFile):
     version = "2.9.2"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://www.libressl.org/"
-    license = "OpenSSL - OpenBSD"
+    license = ("OpenSSL", "BSD", "ISC")
     settings = "os", "compiler", "build_type", "arch"
     options = {"shared": [True, False], "fPIC": [True, False]}
     default_options = {"shared": False}, {"fPIC": True}
