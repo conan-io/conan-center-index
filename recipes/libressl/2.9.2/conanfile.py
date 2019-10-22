@@ -10,7 +10,7 @@ class LibreSSLConan(ConanFile):
     license = "OpenSSL - OpenBSD"
     settings = "os", "compiler", "build_type", "arch"
     options = {"shared": [True, False], "fPIC": [True, False]}
-    default_options = "shared=False", "fPIC=True"
+    default_options = {"shared": False}, {"fPIC": True}
     topics = ("SSL", "TLS", "openssl")
     description = "LibreSSL is a version of the TLS/crypto stack forked from OpenSSL in 2014, with goals of modernizing the codebase, improving security, and applying best practice development processes."
     generators = "cmake"
