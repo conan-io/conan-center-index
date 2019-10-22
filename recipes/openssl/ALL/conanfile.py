@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 import os
 import fnmatch
 from functools import total_ordering
@@ -355,6 +354,8 @@ class OpenSSLConan(ConanFile):
                 args.append("-DOPENSSL_CAPIENG_DIALOG=1")
         else:
             args.append("-fPIC" if self.options.fPIC else "")
+        if self.settings.os == "Neutrino":
+            args.append("-lsocket no-asm")
 
         if "zlib" in self.deps_cpp_info.deps:
             zlib_info = self.deps_cpp_info["zlib"]
