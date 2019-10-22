@@ -31,23 +31,22 @@ class LibsolaceConan(ConanFile):
         extracted_dir = self.name + "-" + self.version
         os.rename(extracted_dir, self._source_subfolder)
 
-    def build(self):
-        # Copy license file
+    def _configure_cmake(self):
         cmake = CMake(self, parallel=True)
         cmake.definitions["BUILD_TESTING"] = "OFF"
         cmake.definitions["PKG_CONFIG"] = "OFF"
         cmake.definitions["SOLACE_GTEST_SUPPORT"] = "OFF"
         cmake.configure(source_folder=self._source_subfolder)
-        cmake.install()
+        return cmake
+
+    def build(self):
+        cmake = self._configure_cmake()
+        cmake.build()
 
     def package(self):
+        cmake = self._configure_cmake()
+        cmake.install()
         self.copy(pattern="LICENSE", dst="licenses", src=self._source_subfolder)
-        self.copy("*.hpp", dst="include", src="include")
-        self.copy("*.lib", dst="lib", keep_path=False)
-        self.copy("*.dll", dst="bin", keep_path=False)
-        self.copy("*.dylib*", dst="lib", keep_path=False)
-        self.copy("*.so", dst="lib", keep_path=False)
-        self.copy("*.a", dst="lib", keep_path=False)
 
     def package_info(self):
         self.cpp_info.libs = ["solace"]
