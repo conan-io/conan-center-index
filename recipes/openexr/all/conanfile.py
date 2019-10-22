@@ -56,6 +56,7 @@ class OpenEXRConan(ConanFile):
         self.copy("LICENSE.md", src=self._source_subfolder, dst=os.path.join(self.package_folder, "licenses", "LICENSE"), keep_path=False)
         tools.rmdir(os.path.join(self.package_folder, "share"))
         tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
+        tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
 
     def package_info(self):
         parsed_version = self.version.split('.')
