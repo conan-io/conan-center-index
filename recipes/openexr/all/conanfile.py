@@ -52,7 +52,8 @@ class OpenEXRConan(ConanFile):
     def package(self):
         cmake = self._configure_cmake()
         cmake.install()
-        self.copy("LICENSE", src=self._source_subfolder, dst=self.package_folder, keep_path=False)
+        os.mkdir(os.path.join(self.package_folder, "licenses"))
+        self.copy("LICENSE.md", src=self._source_subfolder, dst=os.path.join(self.package_folder, "licenses", "LICENSE"), keep_path=False)
         tools.rmdir(os.path.join(self.package_folder, "share"))
         tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
 
