@@ -1,0 +1,4 @@
+sources:
+  "0.3.6":
+    sha256: ea9847005d0a680264986ddab5b1c077b04b80f02a2529cc38e8191b64ea97c7
+    url: https://github.com/abbyssoul/libsolace/archive/v0.3.6.zip
