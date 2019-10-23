@@ -26,6 +26,12 @@ class Nghttp2Conan(ConanFile):
 
     _source_subfolder = "source_subfolder"
 
+    def configure(self):
+        if self.settings.compiler == "gcc":
+            v = tools.Version(str(self.settings.compiler.version))
+            if v < "6.0":
+                raise ConanInvalidConfiguration("gcc >= 6.0 required")
+
     def config_options(self):
         if self.settings.os == 'Windows':
             del self.options.fPIC
