@@ -4,13 +4,13 @@ class OpenEXRConan(ConanFile):
     name = "openexr"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/openexr/openexr"
-    topics = ("conan")
-    license = "BSD-3"
+    topics = ("conan", "hdr", "image", "picture", "graphic")
+    license = "BSD-3-Clause"
     description = "OpenEXR is a high dynamic-range (HDR) image file format for use in computer imaging applications"
     settings = "os", "compiler", "build_type", "arch"
     options = {"shared": [True, False], "fPIC": [True, False], "namespace_versioning": [True, False]}
     default_options = {"shared": False, "namespace_versioning": True, 'fPIC': True}
-    generators = "cmake", "cmake_find_package"
+    generators = "cmake"
     exports_sources = ["CMakeLists.txt", "patches/0001-find-zlib.patch"]
     _source_subfolder = "source_subfolder"
 
@@ -57,8 +57,7 @@ class OpenEXRConan(ConanFile):
     def package(self):
         cmake = self._configure_cmake()
         cmake.install()
-        os.mkdir(os.path.join(self.package_folder, "licenses"))
-        self.copy("LICENSE.md", src=self._source_subfolder, dst=os.path.join(self.package_folder, "licenses", "LICENSE"), keep_path=False)
+        self.copy("LICENSE.md", src=self._source_subfolder, dst="licenses")
         tools.rmdir(os.path.join(self.package_folder, "share"))
         tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
         tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
@@ -80,5 +79,5 @@ class OpenEXRConan(ConanFile):
         if self.options.shared and self.settings.os == "Windows":
             self.cpp_info.defines.append("OPENEXR_DLL")
 
-        #if self.settings.os != "Windows":
-        #    self.cpp_info.cppflags = ["pthread"]
+        if self.settings.os == "Linux":
+            self.cpp_info.cppflags = ["pthread"]
