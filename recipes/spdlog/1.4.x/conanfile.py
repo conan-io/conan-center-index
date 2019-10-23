@@ -11,7 +11,7 @@ class SpdlogConan(ConanFile):
     topics = ("conan", "spdlog", "logging", "header-only")
     license = "MIT"
     exports_sources = ["CMakeLists.txt", "patches/*"]
-    generators = "cmake"
+    generators = "cmake", "cmake_find_package"
     settings = "os", "arch", "compiler", "build_type"
     options = {"shared": [True, False],
                "fPIC": [True, False],
