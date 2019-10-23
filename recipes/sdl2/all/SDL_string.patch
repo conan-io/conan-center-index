@@ -1,0 +1,18 @@
+--- a/src/stdlib/SDL_string.c	2019-07-25 06:32:36.000000000 +0200
++++ b/src/stdlib/SDL_string.c	2019-08-11 14:23:08.406453900 +0200
+@@ -311,6 +311,15 @@
+ #endif /* HAVE_MEMSET */
+ }
+ 
++#if !defined(HAVE_MEMSET)
++#pragma function(memset)
++void *
++memset(void *dst, int c, size_t len)
++{
++    return SDL_memset(dst, c, len);
++}
++#endif /* HAVE_MEMSET */
++
+ void *
+ SDL_memcpy(SDL_OUT_BYTECAP(len) void *dst, SDL_IN_BYTECAP(len) const void *src, size_t len)
+ {
