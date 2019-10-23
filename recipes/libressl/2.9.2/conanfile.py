@@ -60,9 +60,15 @@ class LibreSSLConan(ConanFile):
             self.copy("*.lib", dst="lib", keep_path=False)
 
     def package_info(self):
-        self.cpp_info.libs = ["tls", "ssl", "crypto"]
-        if self.settings.os == "Windows":
+        # LibreSSL adds a version number as a suffix to each library on Windows
+        if self.settings.os != "Windows":
+            self.cpp_info.libs = ["tls", "ssl", "crypto"]
+            if self.settings.os == "Linux":
+                self.cpp_info.libs.append("pthread")
+        else:
+            # On MinGW, the link order of libraries matter
+            libs = tools.collect_libs(self)
+            libs.sort(reverse=True)
+            self.cpp_info.libs = libs
             self.cpp_info.libs.append("ws2_32")
             self.cpp_info.defines.append("NOCRYPT")
-        elif self.settings.os == "Linux":
-            self.cpp_info.libs.append("pthread")
