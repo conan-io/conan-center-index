@@ -1,0 +1,4 @@
+sources:
+  "1.19.0":
+    url: "https://github.com/kcat/openal-soft/archive/openal-soft-1.19.0.tar.gz"
+    sha256: "bb26bc1d40010f059b3cffd336a09bf07f428b1115f00869ff995eb094a382b9"
