@@ -19,6 +19,13 @@ class OpenEXRConan(ConanFile):
         extracted_folder = "openexr-{}".format(self.version)
         os.rename(extracted_folder, self._source_subfolder)
 
+        patches = self.conan_data["patches"][self.version]["patches"]
+        patches = patches.split(",") if patches else []
+        tools.get(**self.conan_data["sources"][self.version])
+        for patch in patches:
+            tools.patch(patch_file=os.path.join("patches", patch),
+                        base_path=os.path.join(self.source_folder, self._folder_name))
+
     def config_options(self):
         if self.settings.os == "Windows":
             self.options.remove("fPIC")
@@ -44,10 +51,8 @@ class OpenEXRConan(ConanFile):
         return cmake
 
     def build(self):
-        with tools.chdir(self.source_folder):
-            tools.patch(base_path=self._source_subfolder, patch_file="patches/0001-find-zlib.patch")
-            cmake = self._configure_cmake()
-            cmake.build()
+        cmake = self._configure_cmake()
+        cmake.build()
 
     def package(self):
         cmake = self._configure_cmake()
