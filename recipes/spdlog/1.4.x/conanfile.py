@@ -68,7 +68,11 @@ class SpdlogConan(ConanFile):
         cmake.configure()
         return cmake
 
+    def _disable_werror(self):
+        tools.replace_in_file(os.path.join(self._source_subfolder, "cmake", "utils.cmake"), "/WX", "")
+
     def build(self):
+        self._disable_werror()
         if self.options.header_only:
             tools.patch(tools.get(**self.conan_data["patches"][self.version]))
         cmake = self._configure_cmake()
