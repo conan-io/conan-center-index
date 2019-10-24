@@ -8,7 +8,6 @@ class LibalsaConan(ConanFile):
     license = "LGPL-2.1"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/alsa-project/alsa-lib"
-    author = "Conan Community"
     topics = ("conan", "libalsa", "alsa", "sound", "audio", "midi")
     description = "Library of ALSA: The Advanced Linux Sound Architecture, that provides audio " \
                   "and MIDI functionality to the Linux operating system"
