@@ -1,0 +1,103 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 39e6878..d78d68d 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -75,50 +75,16 @@ find_package(Threads REQUIRED)
+ 
+ message(STATUS "Build type: " ${CMAKE_BUILD_TYPE})
+ 
+-#---------------------------------------------------------------------------------------
+-# Static/Shared library (shared not supported in windows yet)
+-#---------------------------------------------------------------------------------------
+-set(SPDLOG_SRCS
+-        src/spdlog.cpp
+-        src/stdout_sinks.cpp
+-        src/fmt.cpp
+-        src/color_sinks.cpp
+-        src/file_sinks.cpp
+-        src/async.cpp)
+-
+-set(SPDLOG_CFLAGS "${PROJECT_NAME}")
+-
+-if (SPDLOG_BUILD_SHARED)
+-    if(WIN32)
+-        message(FATAL_ERROR "spdlog shared lib is not yet supported under windows")
+-    endif()
+-    add_library(spdlog SHARED ${SPDLOG_SRCS} ${SPDLOG_ALL_HEADERS})
+-else()
+-    add_library(spdlog STATIC ${SPDLOG_SRCS} ${SPDLOG_ALL_HEADERS})
+-endif()
+-
+-add_library(spdlog::spdlog ALIAS spdlog)
+-
+-target_compile_definitions(spdlog PUBLIC SPDLOG_COMPILED_LIB)
+-target_include_directories(spdlog PUBLIC
+-        "$<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}/include>"
+-        "$<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>")
+-target_link_libraries(spdlog PUBLIC Threads::Threads)
+-spdlog_enable_warnings(spdlog)
+-
+-set_target_properties(spdlog PROPERTIES VERSION ${SPDLOG_VERSION} SOVERSION ${SPDLOG_VERSION_MAJOR})
+-set_target_properties(spdlog PROPERTIES DEBUG_POSTFIX d)
+-
+ #---------------------------------------------------------------------------------------
+ # Header only version
+ #---------------------------------------------------------------------------------------
+-add_library(spdlog_header_only INTERFACE)
+-add_library(spdlog::spdlog_header_only ALIAS spdlog_header_only)
++add_library(spdlog INTERFACE)
++add_library(spdlog::spdlog ALIAS spdlog)
+ 
+-target_include_directories(spdlog_header_only INTERFACE
++target_include_directories(spdlog INTERFACE
+         "$<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}/include>"
+         "$<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>")
+-target_link_libraries(spdlog_header_only INTERFACE Threads::Threads)
++target_link_libraries(spdlog INTERFACE Threads::Threads)
+ 
+ 
+ #---------------------------------------------------------------------------------------
+@@ -131,22 +97,16 @@ if(SPDLOG_FMT_EXTERNAL)
+ 
+     set(SPDLOG_CFLAGS "${SPDLOG_CFLAGS} -DSPDLOG_FMT_EXTERNAL")
+ 
+-    target_compile_definitions(spdlog PUBLIC SPDLOG_FMT_EXTERNAL)
+-    target_link_libraries(spdlog PUBLIC fmt::fmt)
+-
+-    target_compile_definitions(spdlog_header_only INTERFACE SPDLOG_FMT_EXTERNAL)
+-    target_link_libraries(spdlog_header_only INTERFACE fmt::fmt)
++    target_compile_definitions(spdlog INTERFACE SPDLOG_FMT_EXTERNAL)
++    target_link_libraries(spdlog INTERFACE fmt::fmt)
+ endif()
+ 
+ if(SPDLOG_WCHAR_SUPPORT)
+-	target_compile_definitions(spdlog PUBLIC SPDLOG_WCHAR_TO_UTF8_SUPPORT)
+-	target_compile_definitions(spdlog_header_only INTERFACE SPDLOG_WCHAR_TO_UTF8_SUPPORT)
++  target_compile_definitions(spdlog INTERFACE SPDLOG_WCHAR_TO_UTF8_SUPPORT)
+  endif()
+ 
+  if(SPDLOG_NO_EXCEPTIONS)
+-	target_compile_definitions(spdlog PUBLIC SPDLOG_NO_EXCEPTIONS)	
+-
+-	target_compile_definitions(spdlog_header_only INTERFACE SPDLOG_NO_EXCEPTIONS)
++  target_compile_definitions(spdlog INTERFACE SPDLOG_NO_EXCEPTIONS)	
+ 
+     if(NOT MSVC)
+         target_compile_options(spdlog PRIVATE -fno-exceptions)
+@@ -189,13 +149,9 @@ if (SPDLOG_INSTALL)
+     #---------------------------------------------------------------------------------------
+     # Include files
+     #---------------------------------------------------------------------------------------
+-    install(DIRECTORY include/ DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}" PATTERN "fmt/bundled" EXCLUDE)
+-    install(TARGETS spdlog spdlog_header_only EXPORT spdlog DESTINATION "${CMAKE_INSTALL_LIBDIR}/spdlog")
+-
+-    if(NOT SPDLOG_FMT_EXTERNAL)
+-        install(DIRECTORY include/${PROJECT_NAME}/fmt/bundled/
+-                DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}/${PROJECT_NAME}/fmt/bundled/")
+-    endif()
++    install(TARGETS spdlog EXPORT spdlog DESTINATION "${CMAKE_INSTALL_LIBDIR}/spdlog")
++    install(DIRECTORY include/${PROJECT_NAME}
++            DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}/")
+ 
+     #---------------------------------------------------------------------------------------
+     # Package and version files
