@@ -4,7 +4,6 @@ import os
 
 class MesonInstallerConan(ConanFile):
     name = "meson"
-    version = "0.51.2"
     description = "Meson is a project to create the best possible next-generation build system"
     topics = ("conan", "meson", "mesonbuild", "build-system")
     url = "https://github.com/conan-io/conan-center-index"
