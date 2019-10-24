@@ -2,6 +2,7 @@ import os
 
 from conans import CMake, ConanFile, tools
 from conans.errors import ConanInvalidConfiguration
+from conans.model.version import Version
 
 class LibsolaceConan(ConanFile):
     name = "libsolace"
@@ -27,10 +28,15 @@ class LibsolaceConan(ConanFile):
         return ["17", "gnu17", "20", "gnu20"]
 
     def configure(self):
+        compiler_version = Version(str(self.settings.compiler.version))
+
         if self.settings.os == "Windows":
           raise ConanInvalidConfiguration("This library is not yet compatible with Windows")
         if self.settings.compiler.cppstd and not self.settings.compiler.cppstd in self._supported_cppstd:
           raise ConanInvalidConfiguration("This library requires c++17 standard or higher. {} required".format(self.settings.compiler.cppstd))
+        # Exclude GCC 6 that claims to support C++17 but does not in practice
+        if self.settings.compiler == "gcc" and (compiler_version < "7.0"):
+          raise ConanInvalidConfiguration("This library requires C++17 or higher support standard. GCC {} is not supported".format(self.settings.compiler.version))
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
