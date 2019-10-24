@@ -15,6 +15,11 @@ class Package7Zip(ConanFile):
     topics = ("conan", "7zip", "zip", "compression", "decompression")
     settings = "os_build", "arch_build", "compiler"
 
+    def build_requirements(self):
+        if tools.os_info.is_windows and os.environ.get("CONAN_BASH_PATH", None) is None:
+            if self.settings.compiler != "Visual Studio":
+                self.build_requires("msys2/20161025")
+
     def configure(self):
         if self.settings.os_build != "Windows":
             raise ConanInvalidConfiguration("Only Windows supported")
