@@ -8,7 +8,6 @@ class OpenALConan(ConanFile):
     topics = ("conan", "openal", "audio", "api")
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://www.openal.org"
-    author = "Bincrafters <bincrafters@gmail.com>"
     license = "MIT"
     exports_sources = ["CMakeLists.txt"]
     generators = "cmake"
