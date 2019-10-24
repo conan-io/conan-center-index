@@ -1,5 +1,3 @@
-#!/usr/bin/env python
-# -*- coding: utf-8 -*-
 import os
 from conans import ConanFile, CMake, tools
 from conans.model.version import Version
@@ -9,12 +7,11 @@ from conans.errors import ConanInvalidConfiguration
 class GTestConan(ConanFile):
     name = "gtest"
     description = "Google's C++ test framework"
-    url = "http://github.com/bincrafters/conan-gtest"
+    url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/google/googletest"
     author = "Bincrafters <bincrafters@gmail.com>"
     license = "BSD-3-Clause"
     topics = ("conan", "gtest", "testing", "google-testing", "unit-test")
-    exports = ["LICENSE.md"]
     exports_sources = ["CMakeLists.txt", "gtest-*.patch"]
     generators = "cmake"
     settings = "os", "arch", "compiler", "build_type"
