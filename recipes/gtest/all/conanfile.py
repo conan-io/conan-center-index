@@ -55,7 +55,7 @@ class GTestConan(ConanFile):
         return cmake
 
     def build(self):
-        tools.patch(base_path=self._source_subfolder, patch_file="gtest-" + str(self.version) + ".patch")
+        tools.patch(**self.conan_data["patches"][self.version])
         cmake = self._configure_cmake()
         cmake.build()
 
