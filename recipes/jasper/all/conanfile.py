@@ -7,7 +7,6 @@ class JasperConan(ConanFile):
     license = "JasPer License Version 2.0"
     homepage = "https://github.com/mdadams/jasper"
     url = "https://github.com/conan-io/conan-center-index"
-    author = "Conan Community"
     topics = ("conan", "jasper", "tool-kit", "coding")
     description = "JasPer Image Processing/Coding Tool Kit"
     settings = "os", "compiler", "build_type", "arch"
