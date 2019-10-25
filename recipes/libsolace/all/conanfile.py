@@ -34,9 +34,11 @@ class LibsolaceConan(ConanFile):
           raise ConanInvalidConfiguration("This library is not yet compatible with Windows")
         if self.settings.compiler.cppstd and not self.settings.compiler.cppstd in self._supported_cppstd:
           raise ConanInvalidConfiguration("This library requires c++17 standard or higher. {} required".format(self.settings.compiler.cppstd))
-        # Exclude GCC 6 that claims to support C++17 but does not in practice
-        if self.settings.compiler == "gcc" and (compiler_version < "7.0"):
-          raise ConanInvalidConfiguration("This library requires C++17 or higher support standard. GCC {} is not supported".format(self.settings.compiler.version))
+        # Exclude compilers that claims to support C++17 but do not in practice
+        if (self.settings.compiler == "gcc" and compiler_version < "7") or \
+           (self.settings.compiler == "clang" and compiler_version < "5") or \
+           (self.settings.compiler == "apple-clang" and compiler_version < "9"):
+          raise ConanInvalidConfiguration("This library requires C++17 or higher support standard. {} {} is not supported".format(self.settings.compiler, self.settings.compiler.version))
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
