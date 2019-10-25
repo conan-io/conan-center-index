@@ -23,6 +23,7 @@ class OpenALConan(ConanFile):
         if self.settings.os == 'Windows':
             del self.options.fPIC
         del self.settings.compiler.libcxx
+        del self.settings.compiler.cppstd
 
     def requirements(self):
         if self.settings.os == "Linux":
@@ -48,10 +49,9 @@ class OpenALConan(ConanFile):
         cmake.build()
 
     def package(self):
-        self.copy(pattern="LICENSE", dst="licenses", src=self._source_subfolder)
         cmake = self._configure_cmake()
         cmake.install()
-        self.copy("*COPYING", dst="licenses", keep_path=False, ignore_case=True)
+        self.copy("COPYING", dst="licenses", src=self._source_subfolder)
         tools.rmdir(os.path.join(self.package_folder, "share"))
         tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
         tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
