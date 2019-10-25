@@ -1,7 +1,6 @@
 from conans import ConanFile, CMake, tools
 import os
 import glob
-import shutil
 
 
 class OpenjpegConan(ConanFile):
