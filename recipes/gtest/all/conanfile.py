@@ -1,3 +1,4 @@
+import glob
 import os
 from conans import ConanFile, CMake, tools
 from conans.model.version import Version
@@ -64,6 +65,8 @@ class GTestConan(ConanFile):
         cmake.install()
         tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
         tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
+        for pdb_file in glob.glob(os.path.join(self.package_folder, "lib", "*.pdb")):
+            os.unlink(pdb_file)
 
     def package_id(self):
         del self.info.options.no_main
