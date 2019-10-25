@@ -67,4 +67,3 @@ class LibalsaConan(ConanFile):
 
     def package_info(self):
         self.cpp_info.libs = ["asound", "dl", "m", "rt", "pthread"]
-        self.env_info.ALSA_CONFIG_DIR = os.path.join(self.package_folder, "share", "alsa")
