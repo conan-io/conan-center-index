@@ -11,7 +11,7 @@ class OpenEXRConan(ConanFile):
     options = {"shared": [True, False], "fPIC": [True, False], "namespace_versioning": [True, False]}
     default_options = {"shared": False, "namespace_versioning": True, 'fPIC': True}
     generators = "cmake", "cmake_find_package"
-    exports_sources = ["CMakeLists.txt", "patches/0001-find-zlib.patch"]
+    exports_sources = ["CMakeLists.txt", "patches/0001-fix-cpuid-x86.patch"]
     _source_subfolder = "source_subfolder"
 
     def source(self):
