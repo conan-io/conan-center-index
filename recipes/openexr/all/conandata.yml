@@ -7,8 +7,8 @@ sources:
     sha256: "4904C5EA7914A58F60A5E2FBC397BE67E7A25C380D7D07C1C31A3EEFFF1C92F1"
 patches:
   "2.3.0":
-    patch_file: "patches/0001-find-zlib.patch"
+    patch_file: "patches/0001-fix-cpuid-x86.patch"
     base_path: "source_subfolder"
   "2.4.0":
-    patch_file: "patches/0001-find-zlib.patch"
+    patch_file: "patches/0001-fix-cpuid-x86.patch"
     base_path: "source_subfolder"
