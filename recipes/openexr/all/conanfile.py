@@ -55,6 +55,9 @@ class OpenEXRConan(ConanFile):
         tools.rmdir(os.path.join(self.package_folder, "share"))
         tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
         tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
+        with tools.chdir(os.path.join(self.package_folder, "lib")):
+            for filename in glob.glob("*.la"):
+                os.unlink(filename)
 
     def package_info(self):
         parsed_version = self.version.split('.')
