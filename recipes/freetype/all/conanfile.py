@@ -13,7 +13,7 @@ class FreetypeConan(ConanFile):
     license = "FTL"
     topics = ("conan", "freetype", "fonts")
     author = "Bincrafters <bincrafters@gmail.com>"
-    exports_sources = ["CMakeLists.txt"]
+    exports_sources = ["CMakeLists.txt", "patches/*"]
     generators = "cmake"
     settings = "os", "arch", "compiler", "build_type"
     options = {
@@ -52,6 +52,8 @@ class FreetypeConan(ConanFile):
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
         os.rename('{0}-{1}'.format(self.name, self.version), self._source_subfolder)
+        tools.patch(**self.conan_data["patches"][self.version],
+                    base_path=os.path.join(self.source_folder, self._source_subfolder))
 
     def _configure_cmake(self):
         cmake = CMake(self)

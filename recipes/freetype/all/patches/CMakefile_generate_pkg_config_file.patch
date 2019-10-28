@@ -1,0 +1,13 @@
+diff -Naur a/CMakeLists.txt b/CMakeLists.txt
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -455,3 +455,7 @@ if (NOT SKIP_INSTALL_LIBRARIES AND NOT SKIP_INSTALL_ALL)
+            FREETYPE2_PC_IN ${FREETYPE2_PC_IN})
+     string(REPLACE "%LIBS_PRIVATE%" ""  # All libs support pkg-config
+            FREETYPE2_PC_IN ${FREETYPE2_PC_IN})
++    if(CMAKE_BUILD_TYPE STREQUAL "Debug")
++        string(REPLACE "-lfreetype" "-lfreetyde${CMAKE_DEBUG_POSTFIX}"
++               FREETYPE2_PC_IN ${FREETYPE2_PC_IN})
++    endif()
+
+     file(WRITE ${PROJECT_BINARY_DIR}/freetype2.pc ${FREETYPE2_PC_IN})
