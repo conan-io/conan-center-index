@@ -114,6 +114,7 @@ conan_staticlibs="{staticlibs}"
         if self.settings.os == "Linux":
             self.cpp_info.libs.append("m")
         self.cpp_info.includedirs.append(os.path.join("include", "freetype2"))
+        self.cpp_info.name = "freetype2"
         freetype_config = os.path.join(self.package_folder, "bin", "freetype-config")
         self.env_info.PATH.append(os.path.join(self.package_folder, "bin"))
         self.env_info.FT2_CONFIG = freetype_config
