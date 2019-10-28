@@ -361,6 +361,8 @@ class LibcurlConan(ConanFile):
         shutil.rmtree(os.path.join(self.package_folder, 'share'), ignore_errors=True)
         # no need for pc files 
         shutil.rmtree(os.path.join(self.package_folder, 'lib', 'pkgconfig'), ignore_errors=True)
+        # no need for cmake files 
+        shutil.rmtree(os.path.join(self.package_folder, 'lib', 'cmake'), ignore_errors=True)
         # Remove libtool files (*.la)
         if os.path.isfile(os.path.join(self.package_folder, 'lib', 'libcurl.la')):
             os.remove(os.path.join(self.package_folder, 'lib', 'libcurl.la'))
