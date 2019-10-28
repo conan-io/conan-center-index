@@ -23,7 +23,6 @@ class LibcurlConan(ConanFile):
                "with_winssl": [True, False],
                "disable_threads": [True, False],
                "with_ldap": [True, False],
-               "custom_cacert": [True, False],
                "darwin_ssl": [True, False],
                "with_libssh2": [True, False],
                "with_libidn": [True, False],
@@ -39,7 +38,6 @@ class LibcurlConan(ConanFile):
                        'with_winssl': False,
                        'disable_threads': False,
                        'with_ldap': False,
-                       'custom_cacert': False,
                        'darwin_ssl': True,
                        'with_libssh2': False,
                        'with_libidn': False,
@@ -186,9 +184,6 @@ class LibcurlConan(ConanFile):
 
         if not self.options.with_ldap:
             params.append("--disable-ldap")
-
-        if self.options.custom_cacert:
-            params.append('--with-ca-bundle=cacert.pem')
 
         # Cross building flags
         if tools.cross_building(self.settings):
@@ -354,9 +349,6 @@ class LibcurlConan(ConanFile):
         else:
             cmake = self._configure_cmake()
             cmake.install()
-
-        # Copy the certs to be used by client
-        self.copy("cacert.pem", keep_path=False)
 
         if self.settings.os == "Windows" and self.settings.compiler != "Visual Studio":
             # Handle only mingw libs
