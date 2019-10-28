@@ -101,8 +101,6 @@ conan_staticlibs="{staticlibs}"
         self.copy("FTL.TXT", dst="licenses", src=os.path.join(self._source_subfolder, "docs"))
         self.copy("GPLv2.TXT", dst="licenses", src=os.path.join(self._source_subfolder, "docs"))
         self.copy("LICENSE.TXT", dst="licenses", src=os.path.join(self._source_subfolder, "docs"))
-        tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
-        tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
 
     @staticmethod
     def _chmod_plus_x(filename):
