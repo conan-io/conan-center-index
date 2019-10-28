@@ -18,7 +18,7 @@ class NanorangeConan(ConanFile):
     # No settings/options are necessary, this is header only
 
     def configure(self):
-        if not any([self.settings.compiler.cppstd == std for std in ["17", "20", "gnu17", "gnu20"]]):
+        if not any([str(self.settings.compiler.cppstd) == std for std in ["17", "20", "gnu17", "gnu20"]]):
             raise ConanInvalidConfiguration("nanoRange requires at least c++17")
 
     def source(self):
