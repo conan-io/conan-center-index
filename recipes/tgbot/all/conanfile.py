@@ -8,7 +8,7 @@ from conans import ConanFile, CMake, tools
 
 
 class TgbotConan(ConanFile):
-    name = "tgbot-cpp"
+    name = "tgbot"
 
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "http://reo7sp.github.io/tgbot-cpp"
@@ -32,7 +32,7 @@ class TgbotConan(ConanFile):
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
-        extracted_dir = self.name + "-" + self._version_map[self.version]
+        extracted_dir = self.name + "-cpp-" + self._version_map[self.version]
         os.rename(extracted_dir, self._source_subfolder)
 
         boost_version = self.deps_cpp_info['boost'].version
