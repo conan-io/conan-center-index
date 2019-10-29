@@ -1,0 +1,10 @@
+sources:
+  "0.8.4":
+    url: https://github.com/xkbcommon/libxkbcommon/archive/xkbcommon-0.8.4.tar.gz
+    sha256: 299b47558188017047354995f5882d43c2c8a60367df553319dcecebadb73e1d
+  "0.9.0":
+    url: https://github.com/xkbcommon/libxkbcommon/archive/xkbcommon-0.9.0.tar.gz
+    sha256: 9248387e12febe2201f9ef467f16ef417133c31be5797eb8916a3f4212fda64b
+  "0.9.1":
+    url: https://github.com/xkbcommon/libxkbcommon/archive/xkbcommon-0.9.1.tar.gz
+    sha256: 4d869ed841a27ca4a2e5ca41ca6bacc97f8f6b42b1aa6ae9ee29c6e9768e2f1a
