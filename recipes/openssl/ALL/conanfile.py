@@ -1,5 +1,6 @@
 import os
 import fnmatch
+import platform
 from functools import total_ordering
 from conans.errors import ConanInvalidConfiguration, ConanException
 from conans import ConanFile, AutoToolsBuildEnvironment, tools
@@ -300,22 +301,25 @@ class OpenSSLConan(ConanFile):
     def _patch_makefile_org(self):
         # https://wiki.openssl.org/index.php/Compilation_and_Installation#Modifying_Build_Settings
         # its often easier to modify Configure and Makefile.org rather than trying to add targets to the configure scripts
+        def adjust_path(path):
+            return path.replace("\\", "/") if tools.os_info.is_windows else path
+
         makefile_org = os.path.join(self._source_subfolder, "Makefile.org")
         env_build = self._get_env_build()
         with tools.environment_append(env_build.vars):
             cc = os.environ.get("CC", "cc")
-            tools.replace_in_file(makefile_org, "CC= cc", "CC= %s %s" % (cc, os.environ["CFLAGS"]))
+            tools.replace_in_file(makefile_org, "CC= cc\n", "CC= %s %s\n" % (adjust_path(cc), os.environ["CFLAGS"]))
             if "AR" in os.environ:
-                tools.replace_in_file(makefile_org, "AR=ar", "AR=%s" % os.environ["AR"])
+                tools.replace_in_file(makefile_org, "AR=ar $(ARFLAGS) r\n", "AR=%s $(ARFLAGS) r\n" % adjust_path(os.environ["AR"]))
             if "RANLIB" in os.environ:
-                tools.replace_in_file(makefile_org, "RANLIB= ranlib", "RANLIB= %s" % os.environ["RANLIB"])
+                tools.replace_in_file(makefile_org, "RANLIB= ranlib\n", "RANLIB= %s\n" % adjust_path(os.environ["RANLIB"]))
             rc = os.environ.get("WINDRES", os.environ.get("RC"))
             if rc:
-                tools.replace_in_file(makefile_org, "RC= windres", "RC= %s" % rc)
+                tools.replace_in_file(makefile_org, "RC= windres\n", "RC= %s\n" % adjust_path(rc))
             if "NM" in os.environ:
-                tools.replace_in_file(makefile_org, "NM= nm", "NM= %s" % os.environ["NM"])
+                tools.replace_in_file(makefile_org, "NM= nm\n", "NM= %s\n" % adjust_path(os.environ["NM"]))
             if "AS" in os.environ:
-                tools.replace_in_file(makefile_org, "AS=$(CC) -c", "AS=%s" % os.environ["AS"])
+                tools.replace_in_file(makefile_org, "AS=$(CC) -c\n", "AS=%s\n" % adjust_path(os.environ["AS"]))
 
     def _get_env_build(self):
         if not self._env_build:
@@ -364,7 +368,7 @@ class OpenSSLConan(ConanFile):
                 lib_path = "%s/%s.lib" % (zlib_info.lib_paths[0], zlib_info.libs[0])
             else:
                 lib_path = zlib_info.lib_paths[0]  # Just path, linux will find the right file
-            if self.settings.os == "Windows":
+            if tools.os_info.is_windows:
                 # clang-cl doesn't like backslashes in #define CFLAGS (builldinf.h -> cversion.c)
                 include_path = include_path.replace('\\', '/')
                 lib_path = lib_path.replace('\\', '/')
@@ -518,9 +522,28 @@ class OpenSSLConan(ConanFile):
                     self._patch_makefile_org()
                 self._make()
 
+    @staticmethod
+    def detected_os():
+        if tools.OSInfo().is_macos:
+            return "Macos"
+        if tools.OSInfo().is_windows:
+            return "Windows"
+        return platform.system()
+
+    @property
+    def _cross_building(self):
+        if tools.cross_building(self.settings):
+            if self.settings.os == self.detected_os():
+                if self.settings.arch == "x86" and tools.detected_architecture() == "x86_64":
+                    return False
+            return True
+        return False
+
     @property
     def _win_bash(self):
-        return tools.os_info.is_windows and (self._is_mingw or tools.cross_building(self.settings))
+        return tools.os_info.is_windows and \
+               not self._use_nmake and \
+               (self._is_mingw or self._cross_building(self.settings))
 
     @property
     def _make_program(self):
