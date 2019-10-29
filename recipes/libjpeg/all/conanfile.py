@@ -1,6 +1,3 @@
-#!/usr/bin/env python
-# -*- coding: utf-8 -*-
-
 import os
 import shutil
 from conans import ConanFile, AutoToolsBuildEnvironment, tools
@@ -11,10 +8,10 @@ class LibjpegConan(ConanFile):
     name = "libjpeg"
     version = "9c"
     description = "Libjpeg is a widely used C library for reading and writing JPEG image files."
-    url = "http://github.com/bincrafters/conan-libjpeg"
+    url = "https://github.com/conan-io/conan-center-index"
+    topics = ("conan", "image", "format", "jpg", "jpeg", "picture", "multimedia", "graphics")
     license = "http://ijg.org/files/README"
     homepage = "http://ijg.org"
-    exports = ["LICENSE.md"]
     exports_sources = ["Win32.Mak"]
     settings = "os", "arch", "compiler", "build_type"
     options = {"shared": [True, False], "fPIC": [True, False]}
