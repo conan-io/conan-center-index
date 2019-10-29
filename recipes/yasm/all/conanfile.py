@@ -7,7 +7,7 @@ class YASMInstallerConan(ConanFile):
     version = "1.3.0"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/yasm/yasm"
-    description = "Yasm is a complete rewrite of the NASM assembler under the “new” BSD License"
+    description = 'Yasm is a complete rewrite of the NASM assembler under the "new" BSD License'
     license = "BSD"
     settings = "os_build", "arch_build", "compiler"
     _source_subfolder = "sources"
