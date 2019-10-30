@@ -102,7 +102,7 @@ class PocoConan(ConanFile):
            self.options.enable_netssl_win or \
            self.options.enable_crypto or \
            self.options.force_openssl:
-            self.requires.add("openssl/1.0.2s")
+            self.requires.add("openssl/1.0.2t")
 
     def _patch(self):
         if self.settings.compiler == "Visual Studio":
