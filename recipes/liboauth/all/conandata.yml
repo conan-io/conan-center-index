@@ -1,0 +1,4 @@
+sources:
+  "1.0.3":
+    sha256: bbe73b9f576fab0deefadb242c069f2f8bfa4068c738b7666ccd01381502c854
+    url: https://github.com/x42/liboauth/archive/v1.0.3.tar.gz
