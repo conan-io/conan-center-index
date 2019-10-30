@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 import os
 
 from conans import ConanFile, CMake, tools
@@ -130,6 +129,7 @@ class PocoConan(ConanFile):
             elif not option_name == "fPIC":
                 cmake.definitions[option_name.upper()] = "ON" if activated else "OFF"
 
+        cmake.definitions["CMAKE_INSTALL_SYSTEM_RUNTIME_LIBS_SKIP"] = True
         if self.settings.os == "Windows" and self.settings.compiler == "Visual Studio":  # MT or MTd
             cmake.definitions["POCO_MT"] = "ON" if "MT" in str(self.settings.compiler.runtime) else "OFF"
         self.output.info(cmake.definitions)
