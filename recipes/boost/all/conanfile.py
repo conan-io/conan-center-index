@@ -137,17 +137,11 @@ class BoostConan(ConanFile):
                 self.info.options.python_version = self._python_version
 
     def source(self):
-        patches = self.conan_data["patches"][self.version]["patches"]
-        patches = patches.split(",") if patches else []
         tools.get(**self.conan_data["sources"][self.version])
-        for patch in patches:
-            tools.patch(patch_file=os.path.join("patches", patch),
-                        base_path=os.path.join(self.source_folder, self._folder_name))
-
+        for patch in self.conan_data["patches"][self.version]:
+            tools.patch(**patch)
 
     ##################### BUILDING METHODS ###########################
-
-
 
     def _run_python_script(self, script):
         """
@@ -895,3 +889,4 @@ class BoostConan(ConanFile):
                 self.cpp_info.libs.append("pthread")
 
         self.env_info.BOOST_ROOT = self.package_folder
+        self.cpp_info.name = "Boost"
