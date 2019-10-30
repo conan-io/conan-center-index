@@ -40,7 +40,12 @@ class LibOauth(ConanFile):
             with tools.chdir(self._source_subfolder):
                 self.run("autoreconf -i")
                 self.run("autoconf")
-                self.run("./configure --prefix={}".format(self.package_folder))
+                args = ["--prefix={}".format(self.package_folder)]  # ["--disable-all-programs", "--enable-libmount", "--enable-libblkid"]
+                if self.options.shared:
+                    args.extend(["--disable-static", "--enable-shared"])
+                else:
+                    args.extend(["--disable-shared", "--enable-static"])
+                self.run("./configure {}".format(" ".join(args)))
                 self.run("make")
                 self.run("make install")
 
