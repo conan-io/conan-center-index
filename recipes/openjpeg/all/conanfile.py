@@ -70,6 +70,10 @@ class OpenjpegConan(ConanFile):
                    'set(PNG_LIBNAME "" PARENT_SCOPE)\n',
                    append=True)
 
+        # fix missing TIFF_INCLUDE_DIR by cmake generator
+        tools.replace_in_file(os.path.join(self._source_subfolder, 'thirdparty', 'CMakeLists.txt'),
+                              'set(TIFF_INCLUDE_DIRNAME ${TIFF_INCLUDE_DIR} PARENT_SCOPE)',
+                              'set(TIFF_INCLUDE_DIRNAME ${TIFF_INCLUDE_DIRS} PARENT_SCOPE)')
 
         cmake = CMake(self)
         cmake.definitions['BUILD_SHARED_LIBS'] = self.options.shared
