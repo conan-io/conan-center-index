@@ -14,6 +14,7 @@ class OpenjpegConan(ConanFile):
     generators = "cmake", "cmake_find_package"
     homepage = "https://github.com/uclouvain/openjpeg"
     license = "BSD 2-Clause"
+    exports_sources = ["CMakeLists.txt"]
 
     _source_subfolder = "source_subfolder"
 
@@ -79,7 +80,7 @@ class OpenjpegConan(ConanFile):
         cmake.definitions['BUILD_SHARED_LIBS'] = self.options.shared
         cmake.definitions['BUILD_STATIC_LIBS'] = not self.options.shared
         cmake.definitions['BUILD_PKGCONFIG_FILES'] = False
-        cmake.configure(source_folder=self._source_subfolder)
+        cmake.configure()
         cmake.build()
         cmake.install()
 
