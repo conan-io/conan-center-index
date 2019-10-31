@@ -38,6 +38,16 @@ class OpenjpegConan(ConanFile):
         extracted_dir = self.name + "-" + self.version
         os.rename(extracted_dir, self._source_subfolder)
 
+    def _configure_cmake(self):
+        cmake = CMake(self)
+        cmake.definitions['BUILD_SHARED_LIBS'] = self.options.shared
+        cmake.definitions['BUILD_STATIC_LIBS'] = not self.options.shared
+        cmake.definitions['BUILD_PKGCONFIG_FILES'] = False
+        cmake.definitions['CMAKE_INSTALL_SYSTEM_RUNTIME_LIBS_SKIP'] = True
+
+        cmake.configure()
+        return cmake
+
     def build(self):
         # ensure that bundled cmake files are not used
         os.unlink(os.path.join(self._source_subfolder, 'cmake', 'FindLCMS.cmake'))
@@ -76,16 +86,12 @@ class OpenjpegConan(ConanFile):
                               'set(TIFF_INCLUDE_DIRNAME ${TIFF_INCLUDE_DIR} PARENT_SCOPE)',
                               'set(TIFF_INCLUDE_DIRNAME ${TIFF_INCLUDE_DIRS} PARENT_SCOPE)')
 
-        cmake = CMake(self)
-        cmake.definitions['BUILD_SHARED_LIBS'] = self.options.shared
-        cmake.definitions['BUILD_STATIC_LIBS'] = not self.options.shared
-        cmake.definitions['BUILD_PKGCONFIG_FILES'] = False
-        cmake.definitions['CMAKE_INSTALL_SYSTEM_RUNTIME_LIBS_SKIP'] = True
-        cmake.configure()
+        cmake = self._configure_cmake()
         cmake.build()
-        cmake.install()
 
     def package(self):
+        cmake = self._configure_cmake()
+        cmake.install()
         self.copy(pattern="LICENSE", dst="licenses", src=self._source_subfolder)
         # remove pkgconfig
         tools.rmdir(os.path.join(self.package_folder, 'lib', 'pkgconfig'))
