@@ -1,5 +1,4 @@
-from conans.model.conan_file import ConanFile
-from conans import CMake, tools
+from conans import ConanFile, CMake, tools
 import os
 
 
@@ -11,10 +10,6 @@ class DefaultNameConan(ConanFile):
         cmake = CMake(self)
         cmake.configure()
         cmake.build()
-
-    def imports(self):
-        self.copy(pattern="*.dll", dst="bin", src="bin")
-        self.copy(pattern="*.dylib", dst="bin", src="lib")
 
     def test(self):
         imgfile = os.path.join(self.source_folder, 'comp_short_decode_piz.exr')
