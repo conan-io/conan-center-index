@@ -2,6 +2,7 @@
 import os
 import shutil
 from conans import ConanFile, tools, AutoToolsBuildEnvironment
+from conans.errors import ConanInvalidConfiguration
 
 
 class LibOauth(ConanFile):
@@ -26,6 +27,8 @@ class LibOauth(ConanFile):
             del self.options.fPIC
 
     def configure(self):
+        if self.settings.os == "Windows":
+            raise ConanInvalidConfiguration("Windows is not supported")
         del self.settings.compiler.libcxx
         del self.settings.compiler.cppstd
 
