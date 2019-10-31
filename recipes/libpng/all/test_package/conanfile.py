@@ -3,7 +3,7 @@ import re
 import subprocess
 import platform
 
-from conans import ConanFile, CMake, tools, RunEnvironment
+from conans import ConanFile, CMake, tools
 
 
 class TestPackageConan(ConanFile):

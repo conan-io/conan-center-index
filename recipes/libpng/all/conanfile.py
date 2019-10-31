@@ -1,6 +1,3 @@
-#!/usr/bin/env python
-# -*- coding: utf-8 -*-
-
 import os
 from conans import ConanFile, tools, CMake
 from conans.errors import ConanException
@@ -8,13 +5,10 @@ from conans.errors import ConanException
 
 class LibpngConan(ConanFile):
     name = "libpng"
-    version = "1.6.37"
     description = "libpng is the official PNG file format reference library."
-    url = "http://github.com/bincrafters/conan-libpng"
-    author = "Bincrafters <bincrafters@gmail.com>"
+    url = "https://github.com/conan-io/conan-center-index"
     homepage = "http://www.libpng.org"
     license = "libpng-2.0"
-    exports = ["LICENSE.md"]
     exports_sources = ["CMakeLists.txt", "patches/*"]
     generators = "cmake"
     settings = "os", "arch", "compiler", "build_type"
