@@ -11,6 +11,7 @@ class LibOauth(ConanFile):
     topics = ("conan", "oauth")
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/x42/liboauth"
+    license = "MIT"
 
     settings = "os", "compiler", "build_type", "arch"
     options = {"shared": [True, False], "fPIC": [True, False]}
@@ -53,6 +54,7 @@ class LibOauth(ConanFile):
                 self.run("make install")
 
     def package(self):
+        self.copy("COPYING.MIT*", dst="licenses", src=self._source_subfolder, ignore_case=True, keep_path=False)
         shutil.rmtree(os.path.join(self.package_folder, 'share'), ignore_errors=True)
         shutil.rmtree(os.path.join(self.package_folder, 'lib', 'pkgconfig'), ignore_errors=True)
         if os.path.isfile(os.path.join(self.package_folder, 'lib', 'liboauth.la')):
