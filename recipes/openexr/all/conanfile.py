@@ -14,7 +14,7 @@ class OpenEXRConan(ConanFile):
     options = {"shared": [True, False], "namespace_versioning": [True, False], "fPIC": [True, False]}
     default_options = {"shared": False, "namespace_versioning": True, "fPIC": True}
     generators = "cmake"
-    exports_sources = ["IlmImf__ImfSystemSpecific.cpp.patch"]
+    exports_sources = ["IlmImf__ImfSystemSpecific.cpp.patch", "CMakeLists.txt.patch"]
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -25,17 +25,6 @@ class OpenEXRConan(ConanFile):
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
-        tools.replace_in_file(os.path.join('openexr-{}'.format(self.version), 'CMakeLists.txt'),
-                              'project(OpenEXR VERSION ${OPENEXR_VERSION})',
-                              """project(OpenEXR VERSION ${OPENEXR_VERSION})
-include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
-conan_basic_setup(KEEP_RPATHS)
-
-set(OPENEXR_PACKAGE_PREFIX ${CMAKE_INSTALL_PREFIX})
-
-set(CMAKE_CXX_STANDARD 11)
-set(CMAKE_CXX_STANDARD_REQUIRED ON)
-""")
         for p in self.conan_data["patches"][self.version]:
             tools.patch(**p)
 
