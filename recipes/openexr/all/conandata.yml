@@ -6,3 +6,5 @@ patches:
   "2.3.0":
     - patch_file: "IlmImf__ImfSystemSpecific.cpp.patch"
       base_path: "openexr-2.3.0/OpenEXR"
+    - patch_file: "CMakeLists.txt.patch"
+      base_path: "openexr-2.3.0"
