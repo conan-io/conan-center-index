@@ -99,6 +99,12 @@ class LibcurlConan(ConanFile):
         if self.settings.os == "Windows":
             self.options.remove("fPIC")
 
+    def system_requirements(self):
+        # TODO: Declare tools needed to compile. The idea is Conan checking that they are
+        #   installed and providing a meaninful message before starting the compilation. It
+        #   would be much better than installed them (sudo required).
+        pass
+
     def requirements(self):
         if self.options.with_openssl:
             if self.settings.os == "Macos" and self.options.darwin_ssl:
