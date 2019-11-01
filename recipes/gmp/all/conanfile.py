@@ -74,6 +74,9 @@ class GmpConan(ConanFile):
             if os.path.isfile(la):
                 os.unlink(la)
 
+    def package_id(self):
+        del self.info.options.run_checks  # run_checks doesn't affect package's ID
+
     def package_info(self):
         self.cpp_info.libs = tools.collect_libs(self)
         self.cpp_info.name = "GMP"
