@@ -1,9 +1,5 @@
-#!/usr/bin/env python
-# -*- coding: utf-8 -*-
-
-from conans import ConanFile, AutoToolsBuildEnvironment, tools, MSBuild
+from conans import CMake, ConanFile, tools
 import os
-import shutil
 
 
 class LZ4Conan(ConanFile):
@@ -12,23 +8,20 @@ class LZ4Conan(ConanFile):
     license = ("BSD-2-Clause", "BSD-3-Clause")
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/lz4/lz4"
-    author = "Bincrafters <bincrafters@gmail.com>"
     topics = ("conan", "lz4", "compression")
+    exports_sources = "CMakeLists.txt", "patches/**"
+    generators = "cmake"
     settings = "os", "compiler", "build_type", "arch"
     options = {"shared": [True, False], "fPIC": [True, False]}
-    default_options = {'shared': False, 'fPIC': True}
+    default_options = {"shared": False, "fPIC": True}
 
     @property
     def _source_subfolder(self):
         return "source_subfolder"
 
-    @property
-    def _is_mingw_windows(self):
-        return self.settings.os == "Windows" and \
-               self.settings.compiler == "gcc" and \
-              os.name == "nt"
-
     def configure(self):
+        if self.options.shared:
+            del self.options.fPIC
         del self.settings.compiler.libcxx
         del self.settings.compiler.stdcpp
 
@@ -36,82 +29,46 @@ class LZ4Conan(ConanFile):
         if self.settings.os == "Windows":
             del self.options.fPIC
 
-    def build_requirements(self):
-        if self._is_mingw_windows:
-            self.build_requires("msys2/20161025")
-
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
         extracted_folder = "{0}-{1}".format(self.name, self.version)
         os.rename(extracted_folder, self._source_subfolder)
 
-    def _build_make(self):
-        prefix = self.package_folder
-        prefix = tools.unix_path(prefix) if self.settings.os == "Windows" else prefix
-        with tools.chdir(self._source_subfolder):
-            env_build = AutoToolsBuildEnvironment(self)
-            if self.options.shared:
-                args = ["BUILD_SHARED=yes", "BUILD_STATIC=no"]
-            else:
-                args = ["BUILD_SHARED=no", "BUILD_STATIC=yes"]
-            env_build.make(args=args)
-            args.extend(["PREFIX=%s" % prefix, "install"])
-            env_build.make(args=args)
+    def _configure_cmake(self):
+        cmake = CMake(self)
+        cmake.definitions["LZ4_BUNDLED_MODE"] = False
+        if "fPIC" in self.options:
+            cmake.definitions["LZ4_POSITION_INDEPENDENT_LIB"] = self.options.fPIC
+        cmake.configure()
+        return cmake
 
-            tools.rmdir(os.path.join(prefix, "share"))
-            tools.rmdir(os.path.join(prefix, "lib", "pkgconfig"))
-            tools.rmdir(os.path.join(prefix, "bin"))
+    def _patch_sources(self):
+        for patch in self.conan_data["patches"][self.version]:
+            tools.patch(**patch)
 
-            if self.settings.os == 'Macos' and self.options.shared:
-                lib_dir = os.path.join(prefix, 'lib')
-                old = '/usr/local/lib/liblz4.1.dylib'
-                new = 'liblz4.1.dylib'
-                for lib in os.listdir(lib_dir):
-                    if lib.endswith('.dylib'):
-                        self.run('install_name_tool -change %s %s %s' % (old, new, os.path.join(lib_dir, lib)))
-
-    def _build_vs(self):
-        shutil.copy(os.path.join(self._source_subfolder, "lib", "lz4.h"),
-                    os.path.join(self._source_subfolder, "visual", "VS2010", "liblz4-dll", "lz4.h"))
-        # Unable to load plug-in localespc.dll
-        for project in ["lz4", "liblz4", "liblz4-dll"]:
-            project_name = os.path.join(self._source_subfolder, "visual", "VS2010", project, "%s.vcxproj" % project)
-            tools.replace_in_file(project_name, "<RunCodeAnalysis>true</RunCodeAnalysis>", "")
-            tools.replace_in_file(project_name, "<TreatWarningAsError>true</TreatWarningAsError>", "")
-        with tools.chdir(os.path.join(self._source_subfolder, 'visual', 'VS2010')):
-            target = 'liblz4-dll' if self.options.shared else 'liblz4'
-
-            msbuild = MSBuild(self)
-            msbuild.build(project_file="lz4.sln", targets=[target], platforms={'x86': 'Win32'})
+        # Disable building and installing programs by default
+        cmakefile = os.path.join(self._source_subfolder, "contrib", "cmake_unofficial", "CMakeLists.txt")
+        tools.replace_in_file(cmakefile, "set(LZ4_PROGRAMS_BUILT lz4cli)", "")
+        tools.replace_in_file(cmakefile, "list(APPEND LZ4_PROGRAMS_BUILT lz4c)", "")
+        tools.save(cmakefile,
+                   "set_target_properties(lz4c PROPERTIES EXCLUDE_FROM_ALL 1 EXCLUDE_FROM_DEFAULT_BUILD 1)\n"
+                   "set_target_properties(lz4cli PROPERTIES EXCLUDE_FROM_ALL 1 EXCLUDE_FROM_DEFAULT_BUILD 1)",
+                   append=True)
 
     def build(self):
-        if self.settings.compiler == "Visual Studio":
-            self._build_vs()
-        else:
-            self._build_make()
+        self._patch_sources()
+        cmake = self._configure_cmake()
+        cmake.build()
 
     def package(self):
         self.copy(pattern="LICENSE", dst="licenses", src=self._source_subfolder)
-        if self.settings.compiler == "Visual Studio":
-            include_dir = os.path.join(self._source_subfolder, 'lib')
-            self.copy(pattern="lz4*.h", dst="include", src=include_dir, keep_path=False)
-            arch = 'Win32' if self.settings.arch == 'x86' else 'x64'
-            bin_dir = os.path.join(self._source_subfolder, 'visual', 'VS2010', 'bin', '%s_%s' %
-                                   (arch, self.settings.build_type))
-            self.copy("*.dll", dst='bin', src=bin_dir, keep_path=False)
-            self.copy("*.lib", dst='lib', src=bin_dir, keep_path=False)
-        elif self.settings.os == "Windows" and self.settings.compiler == "gcc":
-            # MinGW doesn't support install, so copy files manually
-            self.copy(pattern="*.h", src=os.path.join(self._source_subfolder, "lib"), dst="include")
-            self.copy(pattern="*.a", src=os.path.join(self._source_subfolder, "lib"), dst="lib", keep_path=False)
-            self.copy(pattern="*.dll", src=os.path.join(self._source_subfolder, "lib"), dst="bin", keep_path=False)
-            self.copy(pattern="*.lib", src=os.path.join(self._source_subfolder, "lib"), dst="lib", keep_path=False)
-            if self.options.shared:
-                with tools.chdir(os.path.join(self.package_folder, "bin")):
-                    shutil.move("liblz4.so.%s.dll" % self.version, "liblz4.dll")
-            else:
-                with tools.chdir(os.path.join(self.package_folder, "lib")):
-                    shutil.move("liblz4.a", "liblz4.lib")
+        cmake = self._configure_cmake()
+        cmake.install()
+
+        tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
+        tools.rmdir(os.path.join(self.package_folder, "share"))
 
     def package_info(self):
-        self.cpp_info.libs = tools.collect_libs(self)
+        self.cpp_info.libs = ["lz4"]
+        if self.settings.compiler == "Visual Studio" and self.options.shared:
+            self.cpp_info.defines.append("LZ4_DLL_IMPORT")

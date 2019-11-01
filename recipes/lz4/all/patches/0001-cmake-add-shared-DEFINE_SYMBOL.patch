@@ -1,0 +1,16 @@
+--- contrib/cmake_unofficial/CMakeLists.txt
++++ contrib/cmake_unofficial/CMakeLists.txt
+@@ -103,9 +103,13 @@
+ if(BUILD_SHARED_LIBS)
+   add_library(lz4_shared SHARED ${LZ4_SOURCES})
+   set_target_properties(lz4_shared PROPERTIES
+     OUTPUT_NAME lz4
+     SOVERSION "${LZ4_VERSION_MAJOR}"
+     VERSION "${LZ4_VERSION_STRING}")
+   list(APPEND LZ4_LIBRARIES_BUILT lz4_shared)
++   if(MSVC)
++     set_target_properties(lz4_shared PROPERTIES
++       DEFINE_SYMBOL LZ4_DLL_EXPORT=1)
++   endif()
+ endif()
+ if(BUILD_STATIC_LIBS)

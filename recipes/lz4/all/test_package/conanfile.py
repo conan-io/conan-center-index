@@ -1,4 +1,4 @@
-from conans import ConanFile, CMake, tools, RunEnvironment
+from conans import ConanFile, CMake
 import os
 
 
@@ -8,6 +8,7 @@ class TestPackageConan(ConanFile):
 
     def build(self):
         cmake = CMake(self)
+        cmake.definitions["TEST_SHARED_LIB"] = dict(self.options["lz4"].items()).get("fPIC", True)
         cmake.configure()
         cmake.build()
 
