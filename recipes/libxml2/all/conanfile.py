@@ -135,11 +135,10 @@ class Libxml2Conan(ConanFile):
             self.run("mingw32-make -f Makefile.mingw install")
 
     def _build_with_configure(self):
-        in_win = self.settings.os == "Windows"
-        env_build = AutoToolsBuildEnvironment(self, win_bash=in_win)
-        if not in_win:
+        env_build = AutoToolsBuildEnvironment(self, win_bash=tools.os_info.is_windows)
+        if self.settings.os != "Windows":
             env_build.fpic = self.options.fPIC
-        full_install_subfolder = tools.unix_path(self.package_folder) if in_win else self.package_folder
+        full_install_subfolder = tools.unix_path(self.package_folder) if tools.os_info.is_windows else self.package_folder
         # fix rpath
         if self.settings.os == "Macos":
             tools.replace_in_file(os.path.join(self._full_source_subfolder, "configure"), r"-install_name \$rpath/", "-install_name ")
@@ -162,7 +161,8 @@ class Libxml2Conan(ConanFile):
             build = False
 
         env_build.configure(args=configure_args, build=build, configure_dir=self._full_source_subfolder)
-        env_build.make(args=["install"])
+        env_build.make()
+        env_build.install()
 
     def package(self):
         # copy package license
@@ -193,8 +193,9 @@ class Libxml2Conan(ConanFile):
         tools.rmdir(os.path.join(self.package_folder, 'lib', 'pkgconfig'))
 
     def package_info(self):
+        self.cpp_info.name = "LibXml2"
         if self._is_msvc:
-            self.cpp_info.libs = ['libxml2' if self.options.shared else 'libxml2_a']
+            self.cpp_info.libs = tools.collect_libs(self)
         else:
             self.cpp_info.libs = ['xml2']
         self.cpp_info.includedirs = [os.path.join("include", "libxml2")]
