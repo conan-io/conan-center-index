@@ -139,6 +139,8 @@ class MozjpegConan(ConanFile):
             if os.path.isfile(la_file):
                 os.unlink(la_file)
 
+        tools.rmdir(os.path.join(self.package_folder, 'doc'))
+
     def package_info(self):
         self.cpp_info.libs = tools.collect_libs(self)
         if self.settings.os == "Linux":
