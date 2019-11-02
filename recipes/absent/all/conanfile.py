@@ -25,7 +25,7 @@ class AbsentConan(ConanFile):
         return "build_subfolder"
     
     def supports_cpp17(self):
-        supported_compilers = [("gcc", "7"), ("clang", "5"), ("apple-clang", "10"), ("Visual Studio", "15")]
+        supported_compilers = [("gcc", "7"), ("clang", "5"), ("apple-clang", "10"), ("Visual Studio", "15.7")]
         compiler = self.settings.compiler
         version = Version(self.settings.compiler.version)
         return any(compiler == e[0] and version >= e[1] for e in supported_compilers)
