@@ -83,6 +83,8 @@ class LibarchiveConan(ConanFile):
             self.requires.add("lz4/1.9.2")
         if self.options.with_zstd:
             self.requires.add("zstd/1.4.3")
+        if self.options.with_lzma:
+            self.requires("xz_utils/5.2.4")
         if self.options.with_libxml2:
             self.requires.add("libxml2/2.9.9")
         if self.options.with_expat:
