@@ -1,4 +1,5 @@
 from conans import ConanFile, CMake, tools
+from conans.errors import ConanInvalidConfiguration
 import os
 
 
@@ -64,6 +65,9 @@ class LibarchiveConan(ConanFile):
     def configure(self):
         del self.settings.compiler.libcxx
         del self.settings.compiler.cppstd
+
+        if self.options.with_expat and self.options.with_libxml2:
+            raise ConanInvalidConfiguration("Only libxml2 or expat can be used as XML engine")
 
     def requirements(self):
         self.requires.add('zlib/1.2.11')
