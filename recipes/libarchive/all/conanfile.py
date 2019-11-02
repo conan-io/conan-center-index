@@ -120,6 +120,8 @@ class LibarchiveConan(ConanFile):
         cmake.definitions["ENABLE_CPIO"] = False
         cmake.definitions["ENABLE_CAT"] = False
         cmake.definitions["ENABLE_TEST"] = False
+        # too strict check
+        cmake.definitions["ENABLE_WERROR"] = False
 
         cmake.configure(build_folder=self._build_subfolder)
         return cmake
