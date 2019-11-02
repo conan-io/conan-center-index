@@ -67,12 +67,12 @@ class LibarchiveConan(ConanFile):
         del self.settings.compiler.cppstd
 
         if self.options.with_expat and self.options.with_libxml2:
-            raise ConanInvalidConfiguration("Only libxml2 or expat can be used as XML engine")
+            raise ConanInvalidConfiguration("libxml2 and expat options are exclusive. They cannot be used together as XML engine")
 
     def requirements(self):
-        self.requires.add('zlib/1.2.11')
+        self.requires.add("zlib/1.2.11")
         if self.options.with_bzip2:
-            self.requires.add('bzip2/1.0.8')
+            self.requires.add("bzip2/1.0.8")
         if self.options.with_openssl:
             self.requires.add("openssl/1.1.1d")
         if self.options.with_lz4:
@@ -87,8 +87,10 @@ class LibarchiveConan(ConanFile):
             self.requires.add("expat/2.2.7")
         if self.options.with_iconv:
             self.requires("libiconv/1.15")
+        if self.options.with_pcreposix:
+            self.requires("pcre/8.41")
         # deps not covered yet:
-        # pcreposix, cng, nettle, libb2, lzma
+        # cng, nettle, libb2
 
     def _configure_cmake(self):
         cmake = CMake(self)
