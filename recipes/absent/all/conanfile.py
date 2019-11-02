@@ -23,7 +23,13 @@ class AbsentConan(ConanFile):
     @property
     def _build_subfolder(self):
         return "build_subfolder"
-
+    
+    def supports_cpp17(self):
+        supported_compilers = [("gcc", "7"), ("clang", "5"), ("apple-clang", "10"), ("Visual Studio", "15")]
+        compiler = self.settings.compiler
+        version = Version(self.settings.compiler.version)
+        return any(compiler == e[0] and version >= e[1] for e in supported_compilers)
+            
     def _configure_cmake(self):
         cmake = CMake(self)
         cmake.definitions["BUILD_TESTS"] = "OFF"
@@ -34,10 +40,7 @@ class AbsentConan(ConanFile):
     def configure(self):
         version = Version(self.settings.compiler.version)
         compiler = self.settings.compiler
-        if (compiler == "gcc" and version < "7") or \
-           (compiler == "clang" and version < "5") or \
-           (compiler == "apple-clang" and version < "10") or \
-           (compiler == "Visual Studio" and version < "15"):
+        if not self.supports_cpp17():
             raise ConanInvalidConfiguration("Absent requires C++17 support")
 
     def source(self):
