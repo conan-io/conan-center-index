@@ -9,7 +9,7 @@ class OggConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/xiph/ogg"
     license = "BSD-2-Clause"
-    exports_sources = ["CMakeLists.txt"]
+    exports_sources = ["CMakeLists.txt", "patches/*"]
     generators = "cmake"
 
     settings = "os", "arch", "build_type", "compiler"
@@ -31,6 +31,9 @@ class OggConan(ConanFile):
         tools.get(**self.conan_data["sources"][self.version])
         extracted_dir = self.name + "-" + self.version
         os.rename(extracted_dir, self._source_subfolder)
+
+        for patch in self.conan_data["patches"][self.version]:
+            tools.patch(**patch)
 
     def _configure_cmake(self):
         cmake = CMake(self)
