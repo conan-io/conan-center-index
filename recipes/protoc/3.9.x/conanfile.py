@@ -53,8 +53,8 @@ class ProtocConan(ConanFile):
         cmake = self._configure_cmake()
         cmake.install()
         cmake_folder = os.path.join(self.package_folder, self._cmake_base_path)
-        # os.unlink(os.path.join(cmake_folder, "protoc-config-version.cmake"))
-        # os.unlink(os.path.join(cmake_folder, "protoc-targets-noconfig.cmake"))
+        os.unlink(os.path.join(cmake_folder, "protoc-config-version.cmake"))
+        os.unlink(os.path.join(cmake_folder, "protoc-targets-noconfig.cmake"))
 
     def package_id(self):
         del self.info.settings.compiler
@@ -67,17 +67,15 @@ class ProtocConan(ConanFile):
         self.env_info.PATH.append(bindir)
         self.cpp_info.builddirs = [self._cmake_base_path]
         # INFO: Google Protoc exports a bunch of functions/macro that can be consumed by CMake
-        # protoc-tools.cmake: provides protobuf_generate function
+        # protoc-config.cmake: provides protobuf_generate function
         # protoc-module.cmake: provides legacy functions, PROTOBUF_GENERATE_CPP PROTOBUF_GENERATE_PYTHON
         # protoc-options.cmake: required by protoc-tools.cmake
         # protoc-targets.cmake: required by protoc-tools.cmake
         self.cpp_info.build_modules = [
             os.path.join(self._cmake_base_path, "protoc-config.cmake"),
-            os.path.join(self._cmake_base_path, "protoc-config-version.cmake"),
             os.path.join(self._cmake_base_path, "protoc-module.cmake"),
             os.path.join(self._cmake_base_path, "protoc-options.cmake"),
-            os.path.join(self._cmake_base_path, "protoc-targets.cmake"),
-            os.path.join(self._cmake_base_path, "protoc-targets-noconfig.cmake")
+            os.path.join(self._cmake_base_path, "protoc-targets.cmake")
         ]
 
         protoc = "protoc.exe" if self.settings.os_build == "Windows" else "protoc"
