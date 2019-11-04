@@ -1,6 +1,4 @@
-# -*- coding: utf-8 -*-
 import os
-
 from conans import ConanFile, CMake, tools
 from conans.errors import ConanInvalidConfiguration
 from conans.tools import Version
@@ -87,3 +85,4 @@ class ProtobufConan(ConanFile):
         if self.settings.os == "Windows":
             if self.options.shared:
                 self.cpp_info.defines = ["PROTOBUF_USE_DLLS"]
+        self.cpp_info.name = "Protobuf"
