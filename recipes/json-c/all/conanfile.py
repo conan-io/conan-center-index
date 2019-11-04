@@ -32,7 +32,6 @@ class JSONCConan(ConanFile):
         tools.get(**self.conan_data["sources"][self.version])
         extracted_dir = self.name + "-" + self.name + "-" + self.version + '-20180305'
         os.rename(extracted_dir, self._source_subfolder)
-        tools.patch(base_path=self._source_subfolder, patch_file="json-c.patch")
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -53,6 +52,7 @@ class JSONCConan(ConanFile):
         return cmake
 
     def build(self):
+        tools.patch(**self.conan_data["patches"][self.version])
         cmake = self._configure_cmake()
         cmake.build()
 
