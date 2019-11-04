@@ -37,6 +37,7 @@ class CorradeConan(ConanFile):
         "fPIC": [True, False],
         "build_deprecated": [True, False],
         "with_interconnect": [True, False],
+        "with_main": [True, False],
         "with_pluginmanager": [True, False],
         "with_testsuite": [True, False],
         "with_utility": [True, False],
@@ -46,6 +47,7 @@ class CorradeConan(ConanFile):
         "fPIC": True,
         "build_deprecated": True,
         "with_interconnect": True,
+        "with_main": True,
         "with_pluginmanager": True,
         "with_testsuite": True,
         "with_utility": True,
@@ -71,14 +73,16 @@ class CorradeConan(ConanFile):
 
     def _configure_cmake(self):
         cmake = CMake(self)
-        cmake.definitions["BUILD_STATIC"] = "ON" if not self.options.shared else "OFF"
-        cmake.definitions["BUILD_DEPRECARED"] = "ON" if not self.options["build_deprecated"] else "OFF"
-        cmake.definitions["WITH_INTERCONNECT"] = "ON" if not self.options["with_interconnect"] else "OFF"
-        cmake.definitions["WITH_PLUGINMANAGER"] = "ON" if not self.options["with_pluginmanager"] else "OFF"
-        cmake.definitions["WITH_TESTSUITE"] = "ON" if not self.options["with_testsuite"] else "OFF"
-        cmake.definitions["WITH_UTILITY"] = "ON" if not self.options["with_utility"] else "OFF"
+        cmake.definitions["BUILD_STATIC"] = not self.options.shared
+        cmake.definitions["BUILD_DEPRECARED"] = self.options["build_deprecated"]
+        cmake.definitions["WITH_INTERCONNECT"] = self.options["with_interconnect"]
+        cmake.definitions["WITH_MAIN"] = self.options["with_main"]
+        cmake.definitions["WITH_PLUGINMANAGER"] = self.options["with_pluginmanager"] 
+        cmake.definitions["WITH_TESTSUITE"] = self.options["with_testsuite"]
+        cmake.definitions["WITH_UTILITY"] = self.options["with_utility"]
 
-        cmake.definitions["WITH_RC"] = "OFF"  # This executable goes to its own package corrade-rc
+        # TODO: To enable cross-building this executable should probably be outsourced to a separate package corrade-rc
+        cmake.definitions["WITH_RC"] = "OFF"  
 
         # Corrade uses suffix on the resulting 'lib'-folder when running cmake.install()
         # Set it explicitly to empty, else Corrade might set it implicitly (eg. to "64")
