@@ -80,3 +80,4 @@ class XercesCConan(ConanFile):
             self.cpp_info.frameworks = ['CoreFoundation', 'CoreServices']
         elif self.settings.os == "Linux":
             self.cpp_info.libs.append("pthread")
+        self.cpp_info.name = 'XercesC'
