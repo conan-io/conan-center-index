@@ -1,6 +1,4 @@
-# -*- coding: utf-8 -*-
 import os
-
 from conans import ConanFile, CMake, tools
 
 
@@ -10,10 +8,9 @@ class ProtocConan(ConanFile):
     topics = ("conan", "protobuf", "protocol-buffers", "protocol-compiler", "serialization", "rpc", "protocol-compiler")
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/protocolbuffers/protobuf"
-    author = "Bincrafters <bincrafters@gmail.com>"
     license = "BSD-3-Clause"
-    exports_sources = ["CMakeLists.txt", "protoc.patch"]
-    generators = "cmake"
+    exports_sources = ["CMakeLists.txt", "patches/*"]
+    generators = "cmake", "cmake_find_package"
     short_paths = True
     settings = "os_build", "arch_build", "compiler", "arch"
 
@@ -24,6 +21,10 @@ class ProtocConan(ConanFile):
     @property
     def _build_subfolder(self):
         return "build_subfolder"
+
+    @property
+    def _cmake_base_path(self):
+        return os.path.join("lib", "cmake", "protoc")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
@@ -43,7 +44,7 @@ class ProtocConan(ConanFile):
         return cmake
 
     def build(self):
-        tools.patch(base_path=self._source_subfolder, patch_file="protoc.patch")
+        tools.patch(**self.conan_data["patches"][self.version])
         cmake = self._configure_cmake()
         cmake.build()
 
@@ -51,6 +52,9 @@ class ProtocConan(ConanFile):
         self.copy("LICENSE", dst="licenses", src=self._source_subfolder)
         cmake = self._configure_cmake()
         cmake.install()
+        cmake_folder = os.path.join(self.package_folder, self._cmake_base_path)
+        # os.unlink(os.path.join(cmake_folder, "protoc-config-version.cmake"))
+        # os.unlink(os.path.join(cmake_folder, "protoc-targets-noconfig.cmake"))
 
     def package_id(self):
         del self.info.settings.compiler
@@ -61,6 +65,20 @@ class ProtocConan(ConanFile):
         bindir = os.path.join(self.package_folder, "bin")
         self.output.info("Appending PATH environment variable: {}".format(bindir))
         self.env_info.PATH.append(bindir)
-        self.cpp_info.builddirs = [os.path.join("lib", "cmake", "protoc")]
+        self.cpp_info.builddirs = [self._cmake_base_path]
+        # INFO: Google Protoc exports a bunch of functions/macro that can be consumed by CMake
+        # protoc-tools.cmake: provides protobuf_generate function
+        # protoc-module.cmake: provides legacy functions, PROTOBUF_GENERATE_CPP PROTOBUF_GENERATE_PYTHON
+        # protoc-options.cmake: required by protoc-tools.cmake
+        # protoc-targets.cmake: required by protoc-tools.cmake
+        self.cpp_info.build_modules = [
+            os.path.join(self._cmake_base_path, "protoc-config.cmake"),
+            os.path.join(self._cmake_base_path, "protoc-config-version.cmake"),
+            os.path.join(self._cmake_base_path, "protoc-module.cmake"),
+            os.path.join(self._cmake_base_path, "protoc-options.cmake"),
+            os.path.join(self._cmake_base_path, "protoc-targets.cmake"),
+            os.path.join(self._cmake_base_path, "protoc-targets-noconfig.cmake")
+        ]
+
         protoc = "protoc.exe" if self.settings.os_build == "Windows" else "protoc"
         self.env_info.PROTOC_BIN = os.path.normpath(os.path.join(self.package_folder, "bin", protoc))
