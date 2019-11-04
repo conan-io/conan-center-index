@@ -13,8 +13,6 @@ class EnetConan(ConanFile):
     generators = "cmake"
 
     settings = "os", "arch", "compiler", "build_type"
-    options = {"shared": [True, False]}
-    default_options = {'shared': 'False'}
 
     _source_subfolder = "source_subfolder"
 
