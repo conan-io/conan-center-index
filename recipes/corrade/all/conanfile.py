@@ -104,10 +104,10 @@ class CorradeConan(ConanFile):
         self.copy("COPYING", dst="licenses", src=self._source_subfolder)
         cmake = self._configure_cmake()
         cmake.install()
+
         share_cmake = os.path.join(self.package_folder, 'share', 'cmake', 'Corrade')
-        os.remove(os.path.join(share_cmake, 'CorradeConfig.cmake'))
-        os.remove(os.path.join(share_cmake, 'FindCorrade.cmake'))
-        os.remove(os.path.join(share_cmake, 'CorradeLibSuffix.cmake'))
+        self.copy('UseCorrade.cmake', src=share_cmake, dst=os.path.join(self.package_folder, 'lib', 'cmake', 'Corrade'))
+        tools.rmdir(os.path.join(self.package_folder, 'share'))
 
     def package_info(self):
         # See dependency order here: https://doc.magnum.graphics/magnum/custom-buildsystems.html
@@ -127,7 +127,7 @@ class CorradeConan(ConanFile):
         builtLibs = tools.collect_libs(self)
         self.cpp_info.libs = sort_libs(correct_order=allLibs, libs=builtLibs, lib_suffix=suffix, reverse_result=True)
 
-        self.cpp_info.builddirs = [os.path.join(self.package_folder, 'share', 'cmake', 'Corrade')]
+        self.cpp_info.builddirs = [os.path.join(self.package_folder, 'lib', 'cmake', 'Corrade')]
 
         bindir = os.path.join(self.package_folder, "bin")
         self.output.info("Appending PATH environment variable: {}".format(bindir))
