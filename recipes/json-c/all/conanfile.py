@@ -52,7 +52,8 @@ class JSONCConan(ConanFile):
         return cmake
 
     def build(self):
-        tools.patch(**self.conan_data["patches"][self.version])
+        for patch in self.conan_data["patches"][self.version]:
+            tools.patch(**patch)
         cmake = self._configure_cmake()
         cmake.build()
 
