@@ -6,7 +6,6 @@ from conans.errors import ConanInvalidConfiguration
 
 class NanorangeConan(ConanFile):
     name = "nanorange"
-    version = "20191001"
     license = "Boost 1.0"
     author = "Paul M. Bendixen paulbendixen@gmail.com"
     url = "github.com/conan-io/conan-center-index"
@@ -18,14 +17,18 @@ class NanorangeConan(ConanFile):
     # No settings/options are necessary, this is header only
 
     def configure(self):
-        if not any([str(self.settings.compiler.cppstd) == std for std in ["17", "20", "gnu17", "gnu20"]]):
-            raise ConanInvalidConfiguration("nanoRange requires at least c++17")
+        if self.settings.compiler == "Visual Studio":
+            if not any([self.settings.compiler.cppstd == std for std in ["17", "20"]]):
+                raise ConanInvalidConfiguration("nanoRange requires at least c++17")
+        else:
+            if not any([str(self.settings.compiler.cppstd) == std for std in ["17", "20", "gnu17", "gnu20"]]):
+                raise ConanInvalidConfiguration("nanoRange requires at least c++17")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
 
     def package(self):
-        sourceSubfolder="NanoRange-{}".format( self.conan_data["sources"][self.version]["url"].split("/")[-1][:-4])
+        sourceSubfolder="NanoRange-{}".format( self.conan_data["sources"][self.version]["url"].split("/")[-1][:-7])
         self.copy("*.hpp", src="{}/include".format(sourceSubfolder), dst="include" )
         self.copy("LICENSE_1_0.txt", src=sourceSubfolder, dst="licenses")
 
