@@ -1,0 +1,17 @@
+--- CMakeLists.txt	2019-11-05 19:33:25.980141260 +0100
++++ CMakeLists.txt	2019-11-01 17:37:52.000000000 +0100
+@@ -44,7 +44,13 @@
+ target_include_directories(EASTL PUBLIC include)
+
+ #-------------------------------------------------------------------------------------------
+ # Dependencies
+ #-------------------------------------------------------------------------------------------
+-target_link_libraries(EASTL EABase)
++target_link_libraries(EASTL CONAN_PKG::EABase)
+
++include(GNUInstallDirs)
++install(TARGETS EASTL
++    RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
++    LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
++    ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR})
++install(DIRECTORY ${CMAKE_INSTALL_INCLUDEDIR}/EASTL DESTINATION include)
