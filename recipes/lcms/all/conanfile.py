@@ -48,6 +48,10 @@ class LcmsConan(ConanFile):
             msbuild.build("lcms2.sln", targets=[target], platforms={"x86": "Win32"}, upgrade_project=upgrade_project)
 
     def _build_configure(self):
+        if self.settings.os == "Android" and tools.os_info.is_windows:
+            # remove escape for quotation marks, to make ndk on windows happy
+            tools.replace_in_file(os.path.join(self._source_subfolder, 'configure'),
+                "s/[	 `~#$^&*(){}\\\\|;'\\\''\"<>?]/\\\\&/g", "s/[	 `~#$^&*(){}\\\\|;<>?]/\\\\&/g")
         env_build = AutoToolsBuildEnvironment(self, win_bash=tools.os_info.is_windows)
         with tools.chdir(self._source_subfolder):
             args = ['prefix=%s' % self.package_folder]
