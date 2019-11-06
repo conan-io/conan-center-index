@@ -1,0 +1,10 @@
+sources:
+  "0.16.0":
+    url: "https://github.com/apache/arrow/archive/apache-arrow-0.16.0.tar.gz"
+    sha256: "d7b3838758a365c8c47d55ab0df1006a70db951c6964440ba354f81f518b8d8d"
+patches:
+  "0.16.0":
+    - base_path: "source_subfolder"
+      patch_file: "patches/0001-cmake-16.0.patch"
+    - base_path: "source_subfolder"
+      patch_file: "patches/0002-jemalloc.patch"
