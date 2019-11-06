@@ -123,5 +123,8 @@ class LibHdf5Conan(ConanFile):
         if not self.options.shared and self.settings.os == "Windows":
             self.cpp_info.libs = ["lib" + libname for libname in self.cpp_info.libs]
 
+        if self.options.shared:
+            self.cpp_info.defines.append("H5_BUILT_AS_DYNAMIC_LIB")
+
         if self.settings.os != "Windows":
             self.cpp_info.libs.append("dl")
