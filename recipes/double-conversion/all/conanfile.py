@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 import os
 from conans import ConanFile, CMake, tools
 from conans.errors import ConanInvalidConfiguration
@@ -10,7 +9,6 @@ class DoubleConversionConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/google/double-conversion"
     description = "Efficient binary-decimal and decimal-binary conversion routines for IEEE doubles."
-    author = "Bincrafters <bincrafters@gmail.com>"
     license = "BSD-3-Clause"
     topics = ("conan", "double-conversion", "google", "decimal-binary", "conversion")
     exports_sources = ["CMakeLists.txt"]
