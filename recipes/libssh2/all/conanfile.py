@@ -1,19 +1,16 @@
-#!/usr/bin/env python
-# -*- coding: utf-8 -*-
-
 from conans import ConanFile, CMake, tools
 from conans.errors import ConanInvalidConfiguration
 import os
 
+
 class Libssh2Conan(ConanFile):
     name = "libssh2"
-
     description = "libssh2 is a client-side C library implementing the SSH2 protocol"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://libssh2.org"
     topics = ("libssh", "ssh", "shell", "ssh2", "connection")
-    license = "BSD 3-Clause"
-    exports_sources = ["CMakeLists.txt"]
+    license = "BSD-3-Clause"
+    exports_sources = "CMakeLists.txt"
     generators = "cmake"
     _source_subfolder = "source_subfolder"
 
@@ -24,7 +21,7 @@ class Libssh2Conan(ConanFile):
         "with_zlib": [True, False],
         "enable_crypt_none": [True, False],
         "enable_mac_none": [True, False],
-        "with_openssl": [True, False]
+        "crypto_backend": ["openssl", "mbedtls"],
     }
 
     default_options = {
@@ -33,7 +30,7 @@ class Libssh2Conan(ConanFile):
         "with_zlib": True,
         "enable_crypt_none": False,
         "enable_mac_none": False,
-        "with_openssl": True
+        "crypto_backend": "openssl",
     }
 
     def config_options(self):
@@ -51,8 +48,10 @@ class Libssh2Conan(ConanFile):
     def requirements(self):
         if self.options.with_zlib:
             self.requires.add("zlib/1.2.11")
-        if self.options.with_openssl:
-            self.requires.add("openssl/1.0.2t")
+        if self.options.crypto_backend == "openssl":
+            self.requires.add("openssl/1.1.1d")
+        elif self.options.crypto_backend == "mbedtls":
+            self.requires.add("mbedtls/2.16.3-gpl")
 
     def _configure_cmake(self):
         cmake = CMake(self)
@@ -60,11 +59,14 @@ class Libssh2Conan(ConanFile):
         cmake.definitions['ENABLE_ZLIB_COMPRESSION'] = self.options.with_zlib
         cmake.definitions['ENABLE_CRYPT_NONE'] = self.options.enable_crypt_none
         cmake.definitions['ENABLE_MAC_NONE'] = self.options.enable_mac_none
-        if self.options.with_openssl:
+        if self.options.crypto_backend == "openssl":
             cmake.definitions['CRYPTO_BACKEND'] = 'OpenSSL'
             cmake.definitions['OPENSSL_ROOT_DIR'] = self.deps_cpp_info['openssl'].rootpath
+        elif self.options.crypto_backend == "mbedtls":
+            cmake.definitions['CRYPTO_BACKEND'] = "mbedTLS"
         else:
             raise ConanInvalidConfiguration("Crypto backend must be specified")
+
         cmake.definitions['BUILD_EXAMPLES'] = False
         cmake.definitions['BUILD_TESTING'] = False
         cmake.configure()
