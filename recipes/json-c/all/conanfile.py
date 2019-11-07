@@ -14,15 +14,11 @@ class JSONCConan(ConanFile):
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
-        "fPIC": [True, False],
-        "use_urandom": [True, False],
-        "use_windows_cryptoapi": [True, False]
+        "fPIC": [True, False]
     }
     default_options = {
         'shared': False,
-        'fPIC': True,
-        'use_urandom': True,
-        'use_windows_cryptoapi': True
+        'fPIC': True
     }
 
     _source_subfolder = "source_subfolder"
