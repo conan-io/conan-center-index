@@ -11,7 +11,7 @@ class ICUBase(ConanFile):
     license = "ICU"
     description = "ICU is a mature, widely used set of C/C++ and Java libraries " \
                   "providing Unicode and Globalization support for software applications."
-    url = "https://github.com/bincrafters/conan-icu"
+    url = "https://github.com/conan-io/conan-center-index"
     topics = ("conan", "icu", "icu4c", "i see you", "unicode")
     _source_subfolder = "source_subfolder"
     _build_subfolder = "build_subfolder"
