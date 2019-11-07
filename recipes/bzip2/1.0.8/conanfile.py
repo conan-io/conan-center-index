@@ -1,6 +1,3 @@
-#!/usr/bin/env python
-# -*- coding: utf-8 -*-
-
 import os
 from conans import ConanFile, CMake, tools
 
@@ -8,7 +5,7 @@ from conans import ConanFile, CMake, tools
 class Bzip2Conan(ConanFile):
     name = "bzip2"
     version = "1.0.8"
-    url = "https://github.com/conan-community/conan-bzip2"
+    url = "https://github.com/conan-io/conan-center-index"
     homepage = "http://www.bzip.org"
     author = "Conan Community"
     license = "bzip2-1.0.8"
@@ -17,7 +14,6 @@ class Bzip2Conan(ConanFile):
     settings = "os", "compiler", "arch", "build_type"
     options = {"shared": [True, False], "fPIC": [True, False], "build_executable": [True, False]}
     default_options = {"shared": False, "fPIC": True, "build_executable": True}
-    exports = "LICENSE"
     exports_sources = "CMakeLists.txt"
     generators = "cmake"
 
@@ -57,6 +53,6 @@ class Bzip2Conan(ConanFile):
         cmake.install()
         tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
 
-
     def package_info(self):
-        self.cpp_info.libs = ['bz2']
+        self.cpp_info.name = "BZip2"
+        self.cpp_info.libs = tools.collect_libs(self)
