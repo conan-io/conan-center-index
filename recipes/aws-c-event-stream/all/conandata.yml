@@ -1,0 +1,10 @@
+sources:
+  "0.1.4":
+    sha256: "31d880d1c868d3f3df1e1f4b45e56ac73724a4dc3449d04d47fc0746f6f077b6"
+    url: "https://github.com/awslabs/aws-c-event-stream/archive/v0.1.4.tar.gz"
+patches:
+  "0.1.4":
+    - base_path: "source_subfolder"
+      patch_file: "patches/0001-disable-tests-bin.patch"
+    - base_path: "source_subfolder"
+      patch_file: "patches/0002-use-PROJECT_SOURCE_DIR.cmake"
