@@ -543,7 +543,7 @@ class OpenSSLConan(ConanFile):
     def _win_bash(self):
         return tools.os_info.is_windows and \
                not self._use_nmake and \
-               (self._is_mingw or self._cross_building(self.settings))
+               (self._is_mingw or self._cross_building)
 
     @property
     def _make_program(self):
