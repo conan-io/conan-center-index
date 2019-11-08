@@ -24,7 +24,7 @@ class LeptonicaConan(ConanFile):
                "fPIC": [True, False]
               }
     default_options = {'shared': False,
-                       'with_gif': True,
+                       'with_gif': False,
                        'with_jpeg': True,
                        'with_png': True,
                        'with_tiff': True,
