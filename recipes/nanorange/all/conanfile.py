@@ -7,7 +7,6 @@ from conans.errors import ConanInvalidConfiguration
 class NanorangeConan(ConanFile):
     name = "nanorange"
     license = "BSL-1.0"
-    author = "Paul M. Bendixen paulbendixen@gmail.com"
     url = "github.com/conan-io/conan-center-index"
     website = "https://github.com/tcbrindle/NanoRange"
     description = "NanoRange is a C++17 implementation of the C++20 Ranges proposals (formerly the Ranges TS)."
@@ -20,9 +19,14 @@ class NanorangeConan(ConanFile):
         if self.settings.compiler == "Visual Studio":
             if not any([self.settings.compiler.cppstd == std for std in ["17", "20"]]):
                 raise ConanInvalidConfiguration("nanoRange requires at least c++17")
+        elif not any([str(self.settings.compiler.cppstd) == std for std in ["17", "20", "gnu17", "gnu20"]]):
+            raise ConanInvalidConfiguration("nanoRange requires at least c++17")
         else:
-            if not any([str(self.settings.compiler.cppstd) == std for std in ["17", "20", "gnu17", "gnu20"]]):
-                raise ConanInvalidConfiguration("nanoRange requires at least c++17")
+            supported_compilers = [("gcc", "7"), ("clang", "5"), ("apple-clang", "10"), ("Visual Studio", "15.7")]
+            compiler = self.settings.compiler
+            version = Version(self.settings.compiler.version)
+            if not any(compiler == e[0] and version >= e[1] for e in supported_compilers):
+                raise ConanInvalidConfiguration("Your compiler does not support c++17")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
