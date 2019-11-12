@@ -89,8 +89,7 @@ class LibarchiveConan(ConanFile):
             self.requires("libiconv/1.15")
         if self.options.with_pcreposix:
             self.requires("pcre/8.41")
-        # deps not covered yet:
-        # cng, nettle, libb2
+        # TODO: deps not covered yet: cng, nettle, libb2
 
     def _configure_cmake(self):
         cmake = CMake(self)
