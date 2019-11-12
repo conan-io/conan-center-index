@@ -5,3 +5,6 @@ sources:
   "2.2.8":
     sha256: bd507cba42716ca9afe46dd3687fb0d46c09347517beb9770f53a435d2c67ea0
     url: https://github.com/libexpat/libexpat/releases/download/R_2_2_8/expat-2.2.8.tar.gz
+  "2.2.9":
+    sha256: 4456e0aa72ecc7e1d4b3368cd545a5eec7f9de5133a8dc37fdb1efa6174c4947
+    url: https://github.com/libexpat/libexpat/releases/download/R_2_2_9/expat-2.2.9.tar.gz
