@@ -7,8 +7,8 @@ from conans.tools import Version
 class NanorangeConan(ConanFile):
     name = "nanorange"
     license = "BSL-1.0"
-    url = "github.com/conan-io/conan-center-index"
-    website = "https://github.com/tcbrindle/NanoRange"
+    url = "https://github.com/conan-io/conan-center-index"
+    homepage = "https://github.com/tcbrindle/NanoRange"
     description = "NanoRange is a C++17 implementation of the C++20 Ranges proposals (formerly the Ranges TS)."
     topics = ("ranges", "C++17", "Ranges TS")
     no_copy_source = True
