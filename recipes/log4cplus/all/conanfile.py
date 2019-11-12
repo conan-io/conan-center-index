@@ -84,7 +84,6 @@ class Log4cplusConan(ConanFile):
     def package_info(self):
         self.cpp_info.libs = tools.collect_libs(self)
         if self.settings.os == "Linux":
-            self.cpp_info.libs.extend(["dl", "pthread"])
-
-        if self.settings.compiler == "Visual Studio":
-            self.cpp_info.libs.append('Ws2_32')
+            self.cpp_info.system_libs = ["dl", "pthread"]
+        elif self.settings.compiler == "Visual Studio":
+            self.cpp_info.system_libs = ['Ws2_32']
