@@ -6,7 +6,7 @@ from conans.errors import ConanInvalidConfiguration
 
 class NanorangeConan(ConanFile):
     name = "nanorange"
-    license = "Boost 1.0"
+    license = "BSL-1.0"
     author = "Paul M. Bendixen paulbendixen@gmail.com"
     url = "github.com/conan-io/conan-center-index"
     website = "https://github.com/tcbrindle/NanoRange"
