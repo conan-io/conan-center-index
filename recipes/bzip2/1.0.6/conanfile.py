@@ -6,10 +6,9 @@ class Bzip2Conan(ConanFile):
     name = "bzip2"
     version = "1.0.6"
     url = "https://github.com/conan-io/conan-center-index"
-    homepage = "http://www.bzip.org"
-    author = "Conan Community"
+    homepage = "http://www.bzip.org"    
     license = "bzip2-1.0.6"
-    description = "bzip2 is a free and open-source file compression program that uses the Burrows–Wheeler algorithm."
+    description = "bzip2 is a free and open-source file compression program that uses the Burrows Wheeler algorithm."
     topics = ("conan", "bzip2", "data-compressor", "file-compression")
     settings = "os", "compiler", "arch", "build_type"
     options = {"shared": [True, False], "fPIC": [True, False], "build_executable": [True, False]}
