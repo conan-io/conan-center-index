@@ -27,7 +27,7 @@ class JSONCConan(ConanFile):
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
         url = self.conan_data["sources"][self.version]["url"]
-        extracted_dir = url[url.rfind('/')+1:url.find(".tar.gz")]
+        extracted_dir = self.name + '-' + url[url.rfind('/')+1:url.find(".tar.gz")]
         os.rename(extracted_dir, self._source_subfolder)
 
     def config_options(self):
