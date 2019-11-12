@@ -20,9 +20,7 @@ class Log4cplusConan(ConanFile):
                "with_iconv": [True, False],
                "working_locale": [True, False],
                "working_c_locale": [True, False],
-               "decorated_name": [True, False],
-               "qt4_debug_appender": [True, False],
-               "qt5_debug_appender": [True, False]}
+               "decorated_name": [True, False]}
     default_options = {'shared': False,
                        'fPIC': True,
                        'single_threaded': False,
@@ -30,9 +28,7 @@ class Log4cplusConan(ConanFile):
                        'with_iconv': False,
                        'working_locale': False,
                        'working_c_locale': False,
-                       'decorated_name': False,
-                       'qt4_debug_appender': False,
-                       'qt5_debug_appender': False}
+                       'decorated_name': False}
     short_paths = True
     _source_subfolder = "source_subfolder"
     _build_subfolder = "build_subfolder"
@@ -45,12 +41,6 @@ class Log4cplusConan(ConanFile):
         if self.settings.os == 'Windows':
             del self.options.fPIC
 
-    def configure(self):
-        if self.options.qt4_debug_appender:
-            raise ConanInvalidConfiguration('Qt4 debug appender is not supported yet!')
-        if self.options.qt5_debug_appender:
-            raise ConanInvalidConfiguration('Qt5 debug appender is not supported yet!')
-
     def source(self):
         archive_name = self.name + "-" + self.version
         tools.get(**self.conan_data["sources"][self.version])
@@ -61,8 +51,8 @@ class Log4cplusConan(ConanFile):
         cmake.definitions['LOG4CPLUS_BUILD_TESTING'] = False
         cmake.definitions['WITH_UNIT_TESTS'] = False
         cmake.definitions["LOG4CPLUS_ENABLE_DECORATED_LIBRARY_NAME"] = self.options.decorated_name
-        cmake.definitions['LOG4CPLUS_QT4'] = self.options.qt4_debug_appender
-        cmake.definitions['LOG4CPLUS_QT5'] = self.options.qt5_debug_appender
+        cmake.definitions['LOG4CPLUS_QT4'] = False
+        cmake.definitions['LOG4CPLUS_QT5'] = False
         cmake.definitions['LOG4CPLUS_SINGLE_THREADED'] = self.options.single_threaded
         cmake.definitions['LOG4CPLUS_BUILD_LOGGINGSERVER'] = self.options.build_logging_server
         cmake.definitions['WITH_ICONV'] = self.options.with_iconv
