@@ -16,17 +16,22 @@ class NanorangeConan(ConanFile):
     # No settings/options are necessary, this is header only
 
     def configure(self):
-        if self.settings.compiler == "Visual Studio":
+        version = Version( self.settings.compiler.version )
+        compiler = self.settings.compiler
+        if compiler == "Visual Studio":
+            if version < "16":
+                raise ConanInvalidConfiguration("NanoRange requires at least Visual Studio version 15.9, please use 16")
             if not any([self.settings.compiler.cppstd == std for std in ["17", "20"]]):
                 raise ConanInvalidConfiguration("nanoRange requires at least c++17")
-        elif not any([str(self.settings.compiler.cppstd) == std for std in ["17", "20", "gnu17", "gnu20"]]):
+	else:
+            if ( compiler == gcc and version < "7" ) or ( compiler == clang and version < "5" ):
+                raise ConanInvalidConfiguration("NanoRange requires a compiler that supports at least C++17")
+            if compiler == apple-clang:
+                self.output.warn("NanoRange is not tested with apple-clang")
+                if version < "10":
+                    raise ConanInvalidConfiguration("NanoRange requires a compiler that supports at least C++17")
+        if not any([str(self.settings.compiler.cppstd) == std for std in ["17", "20", "gnu17", "gnu20"]]):
             raise ConanInvalidConfiguration("nanoRange requires at least c++17")
-        else:
-            supported_compilers = [("gcc", "7"), ("clang", "5"), ("apple-clang", "10"), ("Visual Studio", "15.7")]
-            compiler = self.settings.compiler
-            version = Version(self.settings.compiler.version)
-            if not any(compiler == e[0] and version >= e[1] for e in supported_compilers):
-                raise ConanInvalidConfiguration("Your compiler does not support c++17")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
