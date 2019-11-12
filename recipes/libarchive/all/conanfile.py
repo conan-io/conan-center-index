@@ -9,7 +9,7 @@ class LibarchiveConan(ConanFile):
     topics = ("conan", "libarchive", "tar", "data-compressor", "file-compression")
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://libarchive.org"
-    license = "https://raw.githubusercontent.com/libarchive/libarchive/master/COPYING"
+    license = "BSD"
     exports_sources = ["CMakeLists.txt"]
     generators = "cmake", "cmake_find_package"
     settings = "os", "arch", "compiler", "build_type"
