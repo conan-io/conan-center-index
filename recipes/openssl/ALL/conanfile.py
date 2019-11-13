@@ -63,7 +63,6 @@ class OpenSSLConan(ConanFile):
     settings = "os", "compiler", "arch", "build_type"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/openssl/openssl"
-    author = "Conan Community"
     license = "OpenSSL"
     topics = ("conan", "openssl", "ssl", "tls", "encryption", "security")
     description = "A toolkit for the Transport Layer Security (TLS) and Secure Sockets Layer (SSL) protocols"
