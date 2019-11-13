@@ -2,3 +2,9 @@ sources:
   "3.7.0":
     sha256: D51A3A8D3EFBB1139D7608E28782EA9EFEA7E7933157E8FF8184901EFD8EE760
     url: https://github.com/nlohmann/json/archive/v3.7.0.tar.gz
+  "3.7.1":
+    sha256: E25CF46631F1A3200D109CA33A683B84538411170EE99CD181DB8089A2513189
+    url: https://github.com/nlohmann/json/archive/v3.7.1.tar.gz
+  "3.7.2":
+    sha256: 914C4AF3F14BB98FF084172685FBA5D32E8CE4390EC8BA5DA45C63DAA305DF4D
+    url: https://github.com/nlohmann/json/archive/v3.7.2.tar.gz
