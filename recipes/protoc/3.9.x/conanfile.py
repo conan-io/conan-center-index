@@ -54,7 +54,9 @@ class ProtocConan(ConanFile):
         cmake.install()
         cmake_folder = os.path.join(self.package_folder, self._cmake_base_path)
         os.unlink(os.path.join(cmake_folder, "protoc-config-version.cmake"))
-        os.unlink(os.path.join(cmake_folder, "protoc-targets-noconfig.cmake"))
+        # FIXME: To find protoc the cmake generator is required
+        cmake_path = os.path.join(cmake_folder, "protoc-targets-noconfig.cmake")
+        tools.replace_in_file(cmake_path, "${_IMPORT_PREFIX}/bin/", "${CONAN_BIN_DIRS_PROTOC}/")
 
     def package_id(self):
         del self.info.settings.compiler
@@ -71,11 +73,13 @@ class ProtocConan(ConanFile):
         # protoc-module.cmake: provides legacy functions, PROTOBUF_GENERATE_CPP PROTOBUF_GENERATE_PYTHON
         # protoc-options.cmake: required by protoc-tools.cmake
         # protoc-targets.cmake: required by protoc-tools.cmake
+        # protoc-targets-noconfig.cmake: declare protobuf:protoc as target
         self.cpp_info.build_modules = [
             os.path.join(self._cmake_base_path, "protoc-config.cmake"),
             os.path.join(self._cmake_base_path, "protoc-module.cmake"),
             os.path.join(self._cmake_base_path, "protoc-options.cmake"),
-            os.path.join(self._cmake_base_path, "protoc-targets.cmake")
+            os.path.join(self._cmake_base_path, "protoc-targets.cmake"),
+            os.path.join(self._cmake_base_path, "protoc-targets-noconfig.cmake")
         ]
 
         protoc = "protoc.exe" if self.settings.os_build == "Windows" else "protoc"
