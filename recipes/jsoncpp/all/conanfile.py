@@ -1,5 +1,5 @@
 from conans import ConanFile, CMake, tools
-import os, shutil
+import os
 
 
 class JsoncppConan(ConanFile):
@@ -12,8 +12,8 @@ class JsoncppConan(ConanFile):
     settings = "os", "compiler", "arch", "build_type"
     options = {"shared": [True, False], "fPIC": [True, False]}
     default_options = {"shared": False, "fPIC": True}
-    exports_sources = "CMakeLists.txt",
-    generators  = "cmake",
+    exports_sources = "CMakeLists.txt"
+    generators = "cmake"
 
     _source_subfolder = "source_subfolder"
 
