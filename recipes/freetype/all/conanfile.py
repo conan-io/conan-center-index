@@ -12,7 +12,6 @@ class FreetypeConan(ConanFile):
     homepage = "https://www.freetype.org"
     license = "FTL"
     topics = ("conan", "freetype", "fonts")
-    author = "Bincrafters <bincrafters@gmail.com>"
     exports_sources = ["CMakeLists.txt"]
     generators = "cmake"
     settings = "os", "arch", "compiler", "build_type"
