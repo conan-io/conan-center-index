@@ -10,7 +10,6 @@ class LcmsConan(ConanFile):
     description = "A free, open source, CMM engine."
     license = "MIT"
     homepage = "https://github.com/mm2/Little-CMS"
-    author = "Bicrafters <bincrafters@gmail.com>"
     topics = ("conan", "lcms", "cmm", "icc", "cmm-engine")
     settings = "os", "arch", "compiler", "build_type"
     options = {"shared": [True, False], "fPIC": [True, False]}
