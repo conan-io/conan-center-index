@@ -14,7 +14,7 @@ class DefaultNameConan(ConanFile):
             cmake.definitions["HEADER_ONLY"] = "TRUE"
         else:
             cmake.definitions["Boost_USE_STATIC_LIBS"] = not self.options["boost"].shared
-        if self.options["boost"].python:
+        if not self.options["boost"].without_python:
             cmake.definitions["WITH_PYTHON"] = "TRUE"
 
         cmake.configure()
@@ -25,7 +25,7 @@ class DefaultNameConan(ConanFile):
             return
         bt = self.settings.build_type
         self.run('ctest --output-on-error -C %s' % bt, run_environment=True)
-        if self.options["boost"].python:
+        if not self.options["boost"].without_python:
             os.chdir("bin")
             sys.path.append(".")
             import hello_ext
