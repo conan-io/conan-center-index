@@ -10,7 +10,6 @@ class ProtobufConan(ConanFile):
     topics = ("conan", "protobuf", "protocol-buffers", "protocol-compiler", "serialization", "rpc", "protocol-compiler")
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/protocolbuffers/protobuf"
-    author = "Bincrafters <bincrafters@gmail.com>"
     license = "BSD-3-Clause"
     exports_sources = ["CMakeLists.txt", "protobuf.patch"]
     generators = "cmake"
