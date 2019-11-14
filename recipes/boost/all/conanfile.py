@@ -772,8 +772,11 @@ class BoostConan(ConanFile):
                                                     str(self.settings.compiler))
 
         # fallback for the case when no unversioned gcc/clang is available
-        if with_toolset in ["gcc", "clang"] and not tools.which(with_toolset):
-            with_toolset = "cc"
+        if with_toolset in ["gcc", "clang"]:
+            # check for C++ compiler, as b2 uses only C++ one, which may not be installed alongside C compiler
+            compiler = "g++" if with_toolset == "gcc" else "clang++"
+            if not tools.which(compiler):
+                with_toolset = "cxx" if Version(str(self.version)) >= "1.71" else "cc"
         return with_toolset
 
     def _bootstrap(self):
