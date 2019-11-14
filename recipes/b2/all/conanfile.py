@@ -10,7 +10,6 @@ class B2Conan(ConanFile):
     description = "B2 makes it easy to build C++ projects, everywhere."
     topics = ("conan", "installer", "boost", "builder")
     license = "BSL-1.0"
-    author = "Bincrafters <bincrafters@gmail.com>"
     settings = "os_build", "arch_build"
 
     def source(self):
