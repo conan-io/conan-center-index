@@ -10,7 +10,6 @@ class GTestConan(ConanFile):
     description = "Google's C++ test framework"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/google/googletest"
-    author = "Bincrafters <bincrafters@gmail.com>"
     license = "BSD-3-Clause"
     topics = ("conan", "gtest", "testing", "google-testing", "unit-test")
     exports_sources = ["CMakeLists.txt", "gtest-*.patch"]
