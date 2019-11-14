@@ -1,41 +1,35 @@
 diff --git a/CMakeLists.txt b/CMakeLists.txt
-index 9ec2b4a..4825877 100644
+index 9ec2b4a..877baa4 100644
 --- a/CMakeLists.txt
 +++ b/CMakeLists.txt
-@@ -25,6 +25,8 @@ set (PACKAGE_VERSION ${SIGCXX_MAJOR_VERSION}.${SIGCXX_MINOR_VERSION}.${SIGCXX_MI
- set (LIBSIGCPP_SOVERSION 0)
- 
- option (SIGCXX_DISABLE_DEPRECATED "Disable deprecated" OFF)
-+option (SIGCXX_BUILD_TESTS "Build tests" OFF)
-+option (SIGCXX_BUILD_EXAMPLES "Build examples" OFF)
- 
- project (sigc++)
- 
-@@ -71,8 +73,14 @@ enable_testing()
+@@ -71,8 +71,6 @@ enable_testing()
  
  
  add_subdirectory (sigc++)
-+
-+if(SIGCXX_BUILD_EXAMPLES)
- add_subdirectory (examples)
-+endif(SIGCXX_BUILD_EXAMPLES)
-+
-+if(SIGCXX_BUILD_TESTS)
- add_subdirectory (tests)
-+endif(SIGCXX_BUILD_TESTS)
+-add_subdirectory (examples)
+-add_subdirectory (tests)
  
  
  set (PROJECT_CMAKE_NAME		"${PROJECT_NAME}-3")
 diff --git a/sigc++/CMakeLists.txt b/sigc++/CMakeLists.txt
-index fa5a91a..d5707ba 100644
+index fa5a91a..a71ee6f 100644
 --- a/sigc++/CMakeLists.txt
 +++ b/sigc++/CMakeLists.txt
+@@ -23,7 +23,7 @@ set (SOURCE_FILES
+ 
+ set (SIGCPP_LIB_NAME sigc-${SIGCXX_API_VERSION})
+ 
+-add_library(${SIGCPP_LIB_NAME} SHARED ${SOURCE_FILES})
++add_library(${SIGCPP_LIB_NAME} ${SOURCE_FILES})
+ 
+ set_property (TARGET ${SIGCPP_LIB_NAME} PROPERTY VERSION ${PACKAGE_VERSION})
+ set_property(TARGET ${SIGCPP_LIB_NAME}  PROPERTY SOVERSION ${LIBSIGCPP_SOVERSION})
 @@ -42,6 +42,8 @@ set (PROJECT_CMAKE_NAME ${PROJECT_NAME}-3)
  install (
      TARGETS ${SIGCPP_LIB_NAME}
      EXPORT "${PROJECT_CMAKE_NAME}Targets"
-+	ARCHIVE DESTINATION "lib"
++    ARCHIVE DESTINATION "lib"
      LIBRARY DESTINATION "lib"
-+	RUNTIME DESTINATION "lib"
++    RUNTIME DESTINATION "bin"
      INCLUDES DESTINATION "${INCLUDE_INSTALL_DIR}"
  )
