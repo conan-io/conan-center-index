@@ -1,6 +1,3 @@
-#!/usr/bin/env python
-# -*- coding: utf-8 -*-
-
 from conans import AutoToolsBuildEnvironment, ConanFile, tools
 from conans.errors import ConanInvalidConfiguration
 import os
@@ -13,7 +10,6 @@ class GiflibConan(ConanFile):
     version = "5.1.4"
     description = 'A library and utilities for reading and writing GIF images.'
     url = "https://github.com/conan-io/conan-center-index"
-    author = "Bincrafters <bincrafters@gmail.com>"
     license = "MIT"
     homepage = "http://giflib.sourceforge.net"
     topics = ("conan", "giflib", "image", "multimedia", "format", "graphics")
