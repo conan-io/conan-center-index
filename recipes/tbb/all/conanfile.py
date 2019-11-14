@@ -145,4 +145,4 @@ that have future-proof scalability"""
         targets = self.get_targets()
         self.cpp_info.libs = ["{}{}".format(libs[target], suffix) for target in targets]
         if self.settings.os == "Linux":
-            self.cpp_info.system_libs.append("pthread")
+            self.cpp_info.system_libs.extend(["dl", "rt", "m", "pthread"])
