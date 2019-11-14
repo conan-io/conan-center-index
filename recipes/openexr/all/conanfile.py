@@ -14,7 +14,7 @@ class OpenEXRConan(ConanFile):
     options = {"shared": [True, False], "namespace_versioning": [True, False], "fPIC": [True, False]}
     default_options = {"shared": False, "namespace_versioning": True, "fPIC": True}
     generators = "cmake"
-    exports_sources = ["IlmImf__ImfSystemSpecific.cpp.patch", "CMakeLists.txt.patch"]
+    exports_sources = ["*.patch"]
 
     def config_options(self):
         if self.settings.os == "Windows":
