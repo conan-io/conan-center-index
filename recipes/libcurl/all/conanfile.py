@@ -11,7 +11,7 @@ class LibcurlConan(ConanFile):
     description = "command line tool and library for transferring data with URLs"
     topics = ("conan", "libcurl", "data-transfer")
     url = "https://github.com/conan-io/conan-center-index"
-    homepage = "http://curl.haxx.se"
+    homepage = "https://curl.haxx.se"
     license = "MIT"
     exports_sources = ["lib_Makefile_add.am", "CMakeLists.txt"]
     generators = "cmake", "pkg_config"
@@ -71,6 +71,7 @@ class LibcurlConan(ConanFile):
 
     def configure(self):
         del self.settings.compiler.libcxx
+        del self.settings.compiler.cppstd
 
         # be careful with those flags:
         # - with_openssl AND darwin_ssl uses darwin_ssl (to maintain recipe compatibilty)
@@ -341,8 +342,7 @@ class LibcurlConan(ConanFile):
         cmake.build()
 
     def package(self):
-        self.copy(pattern="COPYING*", dst="licenses", src=self._source_subfolder, ignore_case=True, keep_path=False)
-        self.copy(pattern="LICENSE", dst="licenses", src=self._source_subfolder)
+        self.copy(pattern="COPYING", dst="licenses", src=self._source_subfolder)
 
         # Execute install
         if self.settings.compiler != "Visual Studio":
@@ -363,21 +363,25 @@ class LibcurlConan(ConanFile):
             self.copy(pattern="*.def", dst="lib", keep_path=False)
             self.copy(pattern="*.lib", dst="lib", keep_path=False)
 
+        self.copy("cacert.pem", dst="res")
+
         # no need to distribute share folder (docs/man pages)
         shutil.rmtree(os.path.join(self.package_folder, 'share'), ignore_errors=True)
-        # no need for pc files 
+        # no need for pc files
         shutil.rmtree(os.path.join(self.package_folder, 'lib', 'pkgconfig'), ignore_errors=True)
-        # no need for cmake files 
+        # no need for cmake files
         shutil.rmtree(os.path.join(self.package_folder, 'lib', 'cmake'), ignore_errors=True)
         # Remove libtool files (*.la)
         if os.path.isfile(os.path.join(self.package_folder, 'lib', 'libcurl.la')):
             os.remove(os.path.join(self.package_folder, 'lib', 'libcurl.la'))
+        # library package should not contain executable
+        shutil.rmtree(os.path.join(self.package_folder, 'bin'), ignore_errors=True)
 
     def package_info(self):
         if self.settings.compiler != "Visual Studio":
             self.cpp_info.libs = ['curl']
             if self.settings.os == "Linux":
-                self.cpp_info.libs.extend(["rt", "pthread"])
+                self.cpp_info.system_libs.extend(["rt", "pthread"])
                 if self.options.with_libssh2:
                     self.cpp_info.libs.extend(["ssh2"])
                 if self.options.with_libidn:
@@ -388,21 +392,19 @@ class LibcurlConan(ConanFile):
                     self.cpp_info.libs.extend(["brotlidec"])
             if self.settings.os == "Macos":
                 if self.options.with_ldap:
-                    self.cpp_info.libs.extend(["ldap"])
+                    self.cpp_info.system_libs.extend(["ldap"])
                 if self.options.darwin_ssl:
-                    self.cpp_info.exelinkflags.append("-framework Cocoa")
-                    self.cpp_info.exelinkflags.append("-framework Security")
-                    self.cpp_info.sharedlinkflags = self.cpp_info.exelinkflags
+                    self.cpp_info.frameworks.extend(["Cocoa", "Security"])
         else:
             self.cpp_info.libs = ['libcurl_imp'] if self.options.shared else ['libcurl']
 
         if self.settings.os == "Windows":
             # used on Windows for VS build, native and cross mingw build
-            self.cpp_info.libs.append('ws2_32')
+            self.cpp_info.system_libs.append('ws2_32')
             if self.options.with_ldap:
-                self.cpp_info.libs.append("wldap32")
+                self.cpp_info.system_libs.append("wldap32")
             if self.options.with_winssl:
-                self.cpp_info.libs.append("Crypt32")
+                self.cpp_info.system_libs.append("Crypt32")
 
         if self.is_mingw:
             # provide pthread for dependent packages
