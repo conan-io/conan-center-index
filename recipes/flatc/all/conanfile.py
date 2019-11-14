@@ -1,6 +1,3 @@
-#!/usr/bin/env python
-# -*- coding: utf-8 -*-
-
 """Conan recipe package for Google FlatBuffers - Flatc
 """
 import os
@@ -10,9 +7,8 @@ from conans import ConanFile, CMake, tools
 class FlatcConan(ConanFile):
     name = "flatc"
     license = "Apache-2.0"
-    url = "https://github.com/uilianries/conan-center-index"
+    url = "https://github.com/conan-io/conan-center-index"
     homepage = "http://google.github.io/flatbuffers/"
-    author = "Conan Community"
     topics = ("conan", "flatbuffers", "serialization", "rpc", "json-parser", "installer")
     description = "Memory Efficient Serialization Library"
     settings = "os_build", "arch_build"
