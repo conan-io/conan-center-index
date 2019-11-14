@@ -1,6 +1,3 @@
-#!/usr/bin/env python
-# -*- coding: utf-8 -*-
-
 from conans import ConanFile, CMake, tools
 import os
 
@@ -9,8 +6,8 @@ class FmtConan(ConanFile):
     name = "fmt"
     homepage = "https://github.com/fmtlib/fmt"
     description = "A safe and fast alternative to printf and IOStreams."
+    topics = ("conan", "fmt", "format", "iostream", "printf")
     url = "https://github.com/conan-io/conan-center-index"
-    author = "Bincrafters <bincrafters@gmail.com>"
     license = "MIT"
     exports_sources = ['CMakeLists.txt']
     generators = 'cmake'
