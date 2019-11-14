@@ -5,7 +5,7 @@ import os
 
 class LibarchiveConan(ConanFile):
     name = "libarchive"
-    description = "C library for encoding, decoding and manipulating JSON data"
+    description = "Multi-format archive and compression library"
     topics = ("conan", "libarchive", "tar", "data-compressor", "file-compression")
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://libarchive.org"
