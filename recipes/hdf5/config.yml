@@ -1,0 +1,5 @@
+versions:
+  1.8.21:
+    folder: all
+  1.10.5:
+    folder: all
