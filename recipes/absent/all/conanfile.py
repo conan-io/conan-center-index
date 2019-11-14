@@ -10,7 +10,6 @@ class AbsentConan(ConanFile):
     homepage = "https://github.com/rvarago/absent"
     url = "https://github.com/conan-io/conan-center-index"
     license = "MIT"
-    author = "Rafael Varago (rvarago)"
     topics = ("nullable-types", "composition", "monadic-interface", "declarative-programming")
     no_copy_source = True
     settings = "compiler"
