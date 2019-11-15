@@ -30,6 +30,11 @@ class LibSigCppConan(ConanFile):
     def _supported_cppstd(self):
         return ["17", "gnu17", "20", "gnu20"]
 
+    def _has_support_for_cpp17(self):
+        supported_compilers = [("apple-clang", 10), ("clang", 5), ("gcc", 7), ("Visual Studio", 15.7)]
+        compiler, version = self.settings.compiler, Version(self.settings.compiler.version)
+        return any(compiler == sc[0] and version >= sc[1] for sc in supported_compilers)
+
     def configure(self):
         compiler_version = Version(self.settings.compiler.version)
         if self.settings.compiler.cppstd and \
@@ -37,14 +42,12 @@ class LibSigCppConan(ConanFile):
           raise ConanInvalidConfiguration("This library requires c++17 standard or higher."
                                           " {} required."
                                           .format(self.settings.compiler.cppstd))
-        if (self.settings.compiler == "gcc" and compiler_version < "7") or \
-           (self.settings.compiler == "Visual Studio" and compiler_version < "15") or \
-           (self.settings.compiler == "clang" and compiler_version < "5") or \
-           (self.settings.compiler == "apple-clang" and compiler_version < "9"):
-          raise ConanInvalidConfiguration("This library requires C++17 or higher support standard."
-                                          " {} {} is not supported."
-                                          .format(self.settings.compiler,
-                                                  self.settings.compiler.version))
+
+        if not self._has_support_for_cpp17():
+            raise ConanInvalidConfiguration("This library requires C++17 or higher support standard."
+                                            " {} {} is not supported."
+                                            .format(self.settings.compiler,
+                                                    self.settings.compiler.version))
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
