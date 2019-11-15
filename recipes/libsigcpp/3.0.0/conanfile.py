@@ -1,5 +1,8 @@
 import os
 from conans import ConanFile, CMake, tools
+from conans.errors import ConanInvalidConfiguration
+from conans.tools import Version
+
 
 class LibSigCppConan(ConanFile):
     name = "libsigcpp"
@@ -22,6 +25,26 @@ class LibSigCppConan(ConanFile):
     @property
     def _build_subfolder(self):
         return "build_subfolder"
+
+    @property
+    def _supported_cppstd(self):
+        return ["17", "gnu17", "20", "gnu20"]
+
+    def configure(self):
+        compiler_version = Version(self.settings.compiler.version)
+        if self.settings.compiler.cppstd and \
+           not self.settings.compiler.cppstd in self._supported_cppstd:
+          raise ConanInvalidConfiguration("This library requires c++17 standard or higher."
+                                          " {} required."
+                                          .format(self.settings.compiler.cppstd))
+        if (self.settings.compiler == "gcc" and compiler_version < "7") or \
+           (self.settings.compiler == "Visual Studio" and compiler_version < "15") or \
+           (self.settings.compiler == "clang" and compiler_version < "5") or \
+           (self.settings.compiler == "apple-clang" and compiler_version < "9"):
+          raise ConanInvalidConfiguration("This library requires C++17 or higher support standard."
+                                          " {} {} is not supported."
+                                          .format(self.settings.compiler,
+                                                  self.settings.compiler.version))
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
