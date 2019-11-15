@@ -22,6 +22,10 @@ class GlogConan(ConanFile):
         if self.settings.os == "Windows":
             del self.options.fPIC
 
+    def configure(self):
+        if self.options.with_gflags:
+            self.options["gflags"].shared = self.options.shared
+
     def requirements(self):
         if self.options.with_gflags:
             self.requires("gflags/2.2.2")
