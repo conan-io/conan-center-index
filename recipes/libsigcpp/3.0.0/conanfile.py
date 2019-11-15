@@ -35,6 +35,10 @@ class LibSigCppConan(ConanFile):
         compiler, version = self.settings.compiler, Version(self.settings.compiler.version)
         return any(compiler == sc[0] and version >= sc[1] for sc in supported_compilers)
 
+    def config_options(self):
+        if self.settings.os == "Windows":
+            del self.options.fPIC
+
     def configure(self):
         compiler_version = Version(self.settings.compiler.version)
         if self.settings.compiler.cppstd and \
