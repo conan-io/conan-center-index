@@ -13,7 +13,7 @@ class LibSigCppConan(ConanFile):
     description = "libsigc++ implements a typesafe callback system for standard C++."
     topics = ("conan", "libsigcpp", "callback")
     settings = "os", "compiler", "arch", "build_type"
-    options = {"shared": [True], "fPIC": [True, False]}
+    options = {"shared": [True, False], "fPIC": [True, False]}
     default_options = {"shared": True, "fPIC": True}
     exports_sources = ["CMakeLists.txt", "*.patch"]
     generators = "cmake"
@@ -41,6 +41,8 @@ class LibSigCppConan(ConanFile):
 
     def configure(self):
         compiler_version = Version(self.settings.compiler.version)
+        if not self.options.shared:
+            raise ConanInvalidConfiguration("This library supported shared option only")
         if self.settings.compiler.cppstd and \
            not self.settings.compiler.cppstd in self._supported_cppstd:
           raise ConanInvalidConfiguration("This library requires c++17 standard or higher."
