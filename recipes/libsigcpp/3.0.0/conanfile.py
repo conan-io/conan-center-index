@@ -13,8 +13,8 @@ class LibSigCppConan(ConanFile):
     description = "libsigc++ implements a typesafe callback system for standard C++."
     topics = ("conan", "libsigcpp", "callback")
     settings = "os", "compiler", "arch", "build_type"
-    options = {"shared": [True, False], "fPIC": [True, False]}
-    default_options = {"shared": False, "fPIC": True}
+    options = {"shared": [True], "fPIC": [True, False]}
+    default_options = {"shared": True, "fPIC": True}
     exports_sources = ["CMakeLists.txt", "*.patch"]
     generators = "cmake"
 
