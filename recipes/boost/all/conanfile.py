@@ -619,6 +619,8 @@ class BoostConan(ConanFile):
             pass
         elif arch.startswith("mips"):
             pass
+        elif arch.startswith("asm.js"):
+            pass
         else:
             raise Exception("I'm so sorry! I don't know the appropriate ABI for "
                             "your architecture. :'(")
@@ -732,6 +734,8 @@ class BoostConan(ConanFile):
             return "msvc", _msvc_version, ""
         elif self.settings.os == "Windows" and self.settings.compiler == "clang":
             return "clang-win", compiler_version, ""
+        elif self.settings.os == "Emscripten" and self.settings.compiler == "clang":
+            return "emscripten", compiler_version, self._cxx
         elif self.settings.compiler == "gcc" and tools.is_apple_os(self.settings.os):
             return "darwin", compiler_version, self._cxx
         elif compiler == "gcc" and compiler_version[0] >= "5":
