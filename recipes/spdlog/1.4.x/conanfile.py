@@ -74,7 +74,7 @@ class SpdlogConan(ConanFile):
     def build(self):
         self._disable_werror()
         if self.options.header_only:
-            tools.patch(tools.get(**self.conan_data["patches"][self.version]))
+            tools.patch(**self.conan_data["patches"][self.version])
         cmake = self._configure_cmake()
         cmake.build()
 
