@@ -8,3 +8,6 @@ sources:
   "3.7.2":
     sha256: 914C4AF3F14BB98FF084172685FBA5D32E8CE4390EC8BA5DA45C63DAA305DF4D
     url: https://github.com/nlohmann/json/archive/v3.7.2.tar.gz
+  "3.7.3":
+    sha256: 249548F4867417D66AE46B338DFE0A2805F3323E81C9E9B83C89F3ADBFDE6F31
+    url: https://github.com/nlohmann/json/archive/v3.7.3.tar.gz
