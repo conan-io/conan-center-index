@@ -1,0 +1,13 @@
+diff --git a/dist-build/emscripten.sh b/dist-build/emscripten.sh
+index cccfca64..eb493964 100755
+--- a/dist-build/emscripten.sh
++++ b/dist-build/emscripten.sh
+@@ -64,6 +64,7 @@ echo
+ emconfigure ./configure $CONFIG_EXTRA --disable-shared --prefix="$PREFIX" \
+                         --without-pthreads \
+                         --disable-ssp --disable-asm --disable-pie \
++                        --host=asmjs-unknown-linux \
+                         CFLAGS="$CFLAGS" && \
+ emmake make clean
+ [ $? = 0 ] || exit 1
+
