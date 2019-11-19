@@ -1,5 +1,5 @@
 diff --git a/CMakeLists.txt b/CMakeLists.txt
-index ee01e7c..e32b028 100644
+index ee01e7c..6a3a85a 100644
 --- a/CMakeLists.txt
 +++ b/CMakeLists.txt
 @@ -46,20 +46,16 @@ if(MSVC OR XCODE)
@@ -43,8 +43,15 @@ index ee01e7c..e32b028 100644
  endif()
  
  #============================================================================
-@@ -121,7 +113,6 @@ set(export_name "docopt-targets")
- install(TARGETS docopt EXPORT ${export_name} DESTINATION ${CMAKE_INSTALL_LIBDIR})
+@@ -118,10 +110,12 @@ endif()
+ set(export_name "docopt-targets")
+
+ # Runtime package
+-install(TARGETS docopt EXPORT ${export_name} DESTINATION ${CMAKE_INSTALL_LIBDIR})
++install(TARGETS docopt EXPORT ${export_name}
++	RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
++	ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
++	LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR})
  
  # Development package
 -install(TARGETS docopt_s EXPORT ${export_name} DESTINATION ${CMAKE_INSTALL_LIBDIR})

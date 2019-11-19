@@ -49,7 +49,7 @@ class DocoptCppConan(ConanFile):
         tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
 
     def package_info(self):
-        self.cpp_info.libs = tools.collect_libs(self)
+        self.cpp_info.libs = ["docopt"]
         if self.settings.os == "Linux":
             self.cpp_info.system_libs = ["m"]
         if self.settings.compiler == "Visual Studio" and self.options.shared:
