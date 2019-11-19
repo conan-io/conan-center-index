@@ -45,7 +45,6 @@ class TclConan(ConanFile):
         if self._is_mingw_windows:
             self.build_requires("msys2/20161025")
 
-
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
         extracted_dir = self.name + self.version
@@ -139,6 +138,8 @@ class TclConan(ConanFile):
     def build(self):
         self._fix_sources()
         if self.settings.compiler == "Visual Studio":
+            # do not treat warnings as errors 
+            tools.replace_in_file(os.path.join(self._source_subfolder, "win", "rules.vc"), "cwarn = $(cwarn) -WX", "")
             self._build_nmake()
         else:
             self._build_autotools()
