@@ -1,5 +1,4 @@
 import os
-
 from conans import ConanFile, CMake, tools
 
 
@@ -7,7 +6,6 @@ class DarknetTestConan(ConanFile):
     settings = "os", "compiler", "build_type", "arch"
     generators = "cmake"
 
-    arch="x86_64"
     def build(self):
         cmake = CMake(self)
         cmake.configure()
@@ -15,5 +13,5 @@ class DarknetTestConan(ConanFile):
 
     def test(self):
         if not tools.cross_building(self.settings):
-            os.chdir("bin")
-            self.run(".%sexample" % os.sep)
+            bin_path = os.path.join("bin", "example")
+            self.run(bin_path, run_environment=True)
