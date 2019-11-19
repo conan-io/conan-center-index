@@ -16,4 +16,4 @@ class TclTestConan(ConanFile):
         bin_path = os.path.join("bin", "test_package")
         self.run(bin_path, run_environment=True)
         assert(os.path.exists(os.environ["TCLSH"]))
-        self.run("{} {}".format(os.environ["TCLSH"], os.path.join(self.source_folder, "hello.tcl")))
+        self.run("{} {}".format(os.environ["TCLSH"], os.path.join(self.source_folder, "hello.tcl")), run_environment=True)
