@@ -82,9 +82,11 @@ class LibsodiumConan(ConanFile):
     def _runtime_prefix(self):
         return str(self.settings.compiler.runtime)[:2]
 
-    def config_options(self):
+    def configure(self):
         del self.settings.compiler.libcxx
         del self.settings.compiler.cppstd
+
+    def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
 
