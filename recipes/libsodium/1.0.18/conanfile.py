@@ -95,7 +95,7 @@ class LibsodiumConan(ConanFile):
         sln_path = os.path.join(self.build_folder, self._source_subfolder, "builds", "msvc", self._vs_sln_folder, "libsodium.sln")
 
         msbuild = MSBuild(self)
-        msbuild.build(sln_path, upgrade_project=True, platforms={"x86": "Win32"}, build_type=self._vs_configuration)
+        msbuild.build(sln_path, upgrade_project=False, platforms={"x86": "Win32"}, build_type=self._vs_configuration)
 
     def _build_autotools_impl(self, configure_args):
         win_bash = False
