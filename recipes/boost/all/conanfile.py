@@ -420,7 +420,7 @@ class BoostConan(ConanFile):
                 "watchOS": "iphone",
                 "tvOS": "appletv",
                 "FreeBSD": "freebsd",
-                "SunOS": "solatis"}.get(str(self.settings.os))
+                "SunOS": "solaris"}.get(str(self.settings.os))
 
     @property
     def _b2_address_model(self):
