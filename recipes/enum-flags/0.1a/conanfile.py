@@ -9,8 +9,8 @@ class EnumFlagsConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     topics = ("bitmask", "enum")
     license = "MIT"
-    options = {"disable_implicit_conversion": [True, False]}
-    default_options = "disable_implicit_conversion=True"
+    options = {"forbid_implicit_conversions": [True, False]}
+    default_options = {"forbid_implicit_conversions": True}
     generators = "cmake"
     _source_subfolder = "source_subfolder"
 
@@ -27,7 +27,7 @@ class EnumFlagsConan(ConanFile):
         # Yes, there is a typo in the macro name.
         # This macro is only useful when using regular C enums,
         # since enum classes prevent implicit conversions already.
-        if self.options.disable_implicit_conversion:
+        if self.options.forbid_implicit_conversions:
             self.cpp_info.defines = ["ENUM_CLASS_FLAGS_FORBID_IMPLICT_CONVERSION"]
 
     def package_id(self):
