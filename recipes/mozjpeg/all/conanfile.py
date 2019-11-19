@@ -52,8 +52,7 @@ class MozjpegConan(ConanFile):
         del self.settings.compiler.cppstd
 
     def build_requirements(self):
-        if not tools.which("nasm"):
-            self.build_requires("nasm/2.13.02")
+        self.build_requires("nasm/2.13.02")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
