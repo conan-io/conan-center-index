@@ -1,4 +1,4 @@
-from conans import ConanFile, AutoToolsBuildEnvironment, tools
+from conans import ConanFile, AutoToolsBuildEnvironment, tools, MSBuild
 from conans.errors import ConanInvalidConfiguration
 import os
 
@@ -29,11 +29,11 @@ class LibsodiumConan(ConanFile):
     }
 
     @property
-    def android_id_str(self):
+    def _android_id_str(self):
         return "androideabi" if str(self.settings.arch) in ["armv6", "armv7"] else "android"
 
     @property
-    def arch_id_str_compiler(self):
+    def _arch_id_str_compiler(self):
         return {"x86": "i686",
                 "armv6": "arm",
                 "armv7": "arm",
@@ -43,17 +43,17 @@ class LibsodiumConan(ConanFile):
                                         str(self.settings.arch))
 
     @property
-    def is_mingw(self):
+    def _is_mingw(self):
         return self.settings.os == "Windows" and self.settings.compiler == "gcc"
 
     @property
-    def vs_platform(self):
+    def _vs_platform(self):
         if self.settings.arch.value == "x86":
             return "Win32"
         return "x64"
 
     @property
-    def vs_configuration(self):
+    def _vs_configuration(self):
         configuration = ""
         if self.options.shared:
             configuration += "Dyn"
@@ -66,7 +66,7 @@ class LibsodiumConan(ConanFile):
         return configuration
 
     @property
-    def vs_sln_folder(self):
+    def _vs_sln_folder(self):
         if self.settings.compiler.version == "14":
             return "vs2015"
         elif self.settings.compiler.version == "15":
@@ -77,7 +77,7 @@ class LibsodiumConan(ConanFile):
             raise ConanInvalidConfiguration(f"Unsupported msvc version: {self.settings.compiler.version}")
 
     @property
-    def runtime_prefix(self):
+    def _runtime_prefix(self):
         return str(self.settings.compiler.runtime)[:2]
 
     def config_options(self):
@@ -91,72 +91,68 @@ class LibsodiumConan(ConanFile):
         extracted_dir = self.name + "-" + self.version
         os.rename(extracted_dir, self._source_subfolder)
 
-    def build_visual(self):
-        sln_path = os.path.join(self.build_folder, self._source_subfolder, "builds", "msvc", self.vs_sln_folder, "libsodium.sln")
-        build_command = tools.build_sln_command(self.settings, sln_path, upgrade_project=True)
-        self.output.info(build_command)
-        build_type = self.settings.build_type
-        patched_cmd = build_command.replace('''Configuration="%s"''' % build_type, "Configuration=%s" % self.vs_configuration)
-        patched_cmd = patched_cmd.replace('''Platform="%s"''' % self.settings.arch.value, '''Platform="%s"''' % self.vs_platform)
-        self.output.info(patched_cmd)
-        self.run(patched_cmd)
+    def _build_visual(self):
+        sln_path = os.path.join(self.build_folder, self._source_subfolder, "builds", "msvc", self._vs_sln_folder, "libsodium.sln")
 
-    def build_autotools_impl(self, configure_args):
+        msbuild = MSBuild(self)
+        msbuild.build(sln_path, upgrade_project=True, platforms={"x86": "Win32"}, build_type=self._vs_configuration)
+
+    def _build_autotools_impl(self, configure_args):
         win_bash = False
-        if self.is_mingw:
+        if self._is_mingw:
             win_bash = True
 
         autotools = AutoToolsBuildEnvironment(self, win_bash=win_bash)
-        if self.is_mingw:
+        if self._is_mingw:
             self.run("autoreconf -i", cwd=self._source_subfolder, win_bash=win_bash)
         autotools.configure(args=configure_args, configure_dir=self._source_subfolder, host=False)
         autotools.make(args=["-j%s" % str(tools.cpu_count())])
         autotools.make(target="install")
 
-    def build_autotools_linux(self, configure_args):
-        self.build_autotools_impl(configure_args)
+    def _build_autotools_linux(self, configure_args):
+        self._build_autotools_impl(configure_args)
 
-    def build_autotools_emscripten(self, configure_args):
+    def _build_autotools_emscripten(self, configure_args):
         self.run("./dist-build/emscripten.sh --standard", cwd=self._source_subfolder)
 
-    def build_autotools_android(self, configure_args):
-        host_arch = "%s-linux-%s" % (self.arch_id_str_compiler, self.android_id_str)
+    def _build_autotools_android(self, configure_args):
+        host_arch = "%s-linux-%s" % (self._arch_id_str_compiler, self._android_id_str)
         configure_args.append("--host=%s" % host_arch)
-        self.build_autotools_impl(configure_args)
+        self._build_autotools_impl(configure_args)
 
-    def build_autotools_mingw(self, configure_args):
+    def _build_autotools_mingw(self, configure_args):
         if self.settings.arch == "x86":
             arch = "i686"
         else:
             arch = "x86_64"
         host_arch = "%s-w64-mingw32" % arch
         configure_args.append("--host=%s" % host_arch)
-        self.build_autotools_impl(configure_args)
+        self._build_autotools_impl(configure_args)
 
-    def build_autotools_darwin(self, configure_args):
+    def _build_autotools_darwin(self, configure_args):
         if self.settings.os == "iOS":
             os = "ios"
         else:
             os = "darwin"
         host_arch = "%s-apple-%s" % (self.settings.arch, os)
         configure_args.append("--host=%s" % host_arch)
-        self.build_autotools_impl(configure_args)
+        self._build_autotools_impl(configure_args)
 
-    def build_autotools(self):
+    def _build_autotools(self):
         absolute_install_dir = os.path.abspath(os.path.join(".", "install"))
         absolute_install_dir = absolute_install_dir.replace("\\", "/")
-        configure_args = self.get_configure_args(absolute_install_dir)
+        configure_args = self._get_configure_args(absolute_install_dir)
 
         if self.settings.os == "Linux":
-            self.build_autotools_linux(configure_args)
+            self._build_autotools_linux(configure_args)
         elif self.settings.os == "Emscripten":
-            self.build_autotools_emscripten(configure_args)
+            self._build_autotools_emscripten(configure_args)
         elif self.settings.os == "Android":
-            self.build_autotools_android(configure_args)
+            self._build_autotools_android(configure_args)
         elif self.settings.os in ["Macos", "iOS", "watchOS", "tvOS"]:
-            self.build_autotools_darwin(configure_args)
+            self._build_autotools_darwin(configure_args)
         elif self.settings.os == "Windows" and self.settings.compiler == "gcc":
-            self.build_autotools_mingw(configure_args)
+            self._build_autotools_mingw(configure_args)
         else:
             raise ConanInvalidConfiguration(f"Unsupported os for libsodium: {self.settings.os}")
 
@@ -166,15 +162,15 @@ class LibsodiumConan(ConanFile):
         if self.settings.os == "Macos":
             tools.replace_in_file(os.path.join(self._source_subfolder, "configure"), r"-install_name \$rpath/", "-install_name ")
         if self.settings.compiler != "Visual Studio":
-            self.build_autotools()
+            self._build_autotools()
         else:
-            self.build_visual()
+            self._build_visual()
 
     def package(self):
         if self.settings.compiler == "Visual Studio":
-            self.package_visual()
+            self._package_visual()
         else:
-            self.package_autotools()
+            self._package_autotools()
 
     def package_info(self):
         if self.settings.compiler == "Visual Studio":
@@ -182,7 +178,7 @@ class LibsodiumConan(ConanFile):
                 self.cpp_info.defines = ["SODIUM_STATIC=1"]
         self.cpp_info.libs = tools.collect_libs(self)
 
-    def package_autotools(self):
+    def _package_autotools(self):
         if self.settings.os == "Emscripten":
             prefix = "%s/libsodium-js" % self._source_subfolder
         else:
@@ -194,26 +190,26 @@ class LibsodiumConan(ConanFile):
         self.copy("*.so*", dst="lib", src=lib_folder, symlinks=True)
         self.copy("*.dylib", dst="lib", src=lib_folder, symlinks=True)
 
-    def package_visual(self):
+    def _package_visual(self):
         self.copy("*LICENSE", dst="licenses", keep_path=False)
         self.copy("*.lib", dst="lib", keep_path=False)
         self.copy("*.dll", dst="bin", keep_path=False)
         inc_src = os.path.join(self._source_subfolder, "src", self.name, "include")
         self.copy("*.h", src=inc_src, dst="include", keep_path=True, excludes=("*/private/*"))
 
-    def autotools_bool_arg(self, arg_base_name, value):
+    def _autotools_bool_arg(self, arg_base_name, value):
         prefix = "--enable-" if value else "--disable-"
 
         return prefix + arg_base_name
 
-    def get_configure_args(self, absolute_install_dir):
+    def _get_configure_args(self, absolute_install_dir):
         args = [
             "--prefix=%s" % absolute_install_dir,
 
-            self.autotools_bool_arg("shared", self.options.shared),
-            self.autotools_bool_arg("static", not self.options.shared),
-            self.autotools_bool_arg("soname-versions", self.options.use_soname),
-            self.autotools_bool_arg("pie", self.options.use_pie)
+            self._autotools_bool_arg("shared", self.options.shared),
+            self._autotools_bool_arg("static", not self.options.shared),
+            self._autotools_bool_arg("soname-versions", self.options.use_soname),
+            self._autotools_bool_arg("pie", self.options.use_pie)
         ]
 
         if self.options.fPIC:
