@@ -12,6 +12,7 @@ class EnumFlagsConan(ConanFile):
     options = {"forbid_implicit_conversions": [True, False]}
     default_options = {"forbid_implicit_conversions": True}
     generators = "cmake"
+    no_copy_source = True
     _source_subfolder = "source_subfolder"
 
     def source(self):
