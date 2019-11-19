@@ -1,5 +1,6 @@
 import os
 from conans import ConanFile, tools, AutoToolsBuildEnvironment
+from conans.errors import ConanInvalidConfiguration
 
 
 class DarknetConan(ConanFile):
@@ -37,17 +38,22 @@ class DarknetConan(ConanFile):
         else:
             return "$(SLIB)"
 
+    @property
+    def _shared_lib_extension(self):
+        if self.settings.os == "Macos":
+            return ".dylib"
+        else:
+            return ".so"
+
     def _activate_makefile(self, option):
         makefileName = option.upper()
         with tools.chdir(self._source_subfolder):
             if getattr(self.options, option) == True:
                 tools.replace_in_file('Makefile', makefileName + '=0', makefileName + '=1')
 
-    def config_options(self):
-        if self.settings.os == "Windows":
-            del self.options.fPIC
-
     def configure(self):
+        if self.settings.os == "Windows":
+            raise ConanInvalidConfiguration("This library is not compatible with Windows")
         del self.settings.compiler.libcxx
         del self.settings.compiler.cppstd
 
@@ -66,6 +72,11 @@ class DarknetConan(ConanFile):
             tools.replace_in_file('Makefile', "-fPIC", "")
             tools.replace_in_file('Makefile', "CFLAGS=", "CFLAGS+=${CPPFLAGS} ")
             tools.replace_in_file('Makefile', "LDFLAGS=", "LDFLAGS+=${LIBS} ")
+            tools.replace_in_file(
+                'Makefile',
+                "SLIB=libdarknet.so",
+                "SLIB=libdarknet" + self._shared_lib_extension
+            )
             tools.replace_in_file(
                 'Makefile',
                 "all: obj backup results $(SLIB) $(ALIB) $(EXEC)",
