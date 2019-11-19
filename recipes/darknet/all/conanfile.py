@@ -13,7 +13,7 @@ class DarknetConan(ConanFile):
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
-        "OpenCV": [True, False],
+        "OpenCV": [True, False]
     }
     default_options = {
         "shared": False,
@@ -29,6 +29,13 @@ class DarknetConan(ConanFile):
     def _commit(self):
         url = self.conan_data["sources"][self.version]["url"]
         return url[url.rfind("/")+1:url.rfind(".")]
+
+    @property
+    def _lib_to_compile(self):
+        if not self.options.shared:
+            return "$(ALIB)"
+        else:
+            return "$(SLIB)"
 
     def _activate_makefile(self, option):
         makefileName = option.upper()
@@ -56,21 +63,25 @@ class DarknetConan(ConanFile):
     def build(self):
         self._activate_makefile("OpenCV")
         with tools.chdir(self._source_subfolder):
+            tools.replace_in_file('Makefile', "-fPIC", "")
             tools.replace_in_file('Makefile', "CFLAGS=", "CFLAGS+=${CPPFLAGS} ")
             tools.replace_in_file('Makefile', "LDFLAGS=", "LDFLAGS+=${LIBS} ")
+            tools.replace_in_file(
+                'Makefile',
+                "all: obj backup results $(SLIB) $(ALIB) $(EXEC)",
+                "all: obj backup results " + self._lib_to_compile
+            )
             env_build = AutoToolsBuildEnvironment(self)
             env_build.make()
 
     def package(self):
         self.copy("LICENSE*", dst="licenses", src=self._source_subfolder)
         self.copy("*.h", dst="include", src=os.path.join(self._source_subfolder, "include"))
-        if self.options.shared:
-            self.copy("*.dll", dst="bin", keep_path=False)
-            self.copy("*.so", dst="lib", keep_path=False)
-            self.copy("*.dylib", dst="lib", keep_path=False)
-        else:
-            self.copy("*.a", dst="lib", keep_path=False)
-            self.copy("*.lib", dst="lib", keep_path=False)
+        self.copy("*.dll", dst="bin", keep_path=False)
+        self.copy("*.so", dst="lib", keep_path=False)
+        self.copy("*.dylib", dst="lib", keep_path=False)
+        self.copy("*.a", dst="lib", keep_path=False)
+        self.copy("*.lib", dst="lib", keep_path=False)
 
     def package_info(self):
         self.cpp_info.libs = ["darknet"]
