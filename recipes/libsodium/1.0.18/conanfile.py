@@ -5,12 +5,14 @@ import os
 
 class LibsodiumConan(ConanFile):
     name        = "libsodium"
+    version     = "1.0.18"
     description = "A modern and easy-to-use crypto library."
     license     = "ISC"
     url         = "https://github.com/conan-io/conan-center-index"
     homepage    = "https://download.libsodium.org/doc/"
     exports_sources = ["patches/**"]
     settings    = "os", "compiler", "arch", "build_type"
+    topics = ("sodium", "libsodium", "encryption", "signature", "hashing")
     generators  = "cmake"
     _source_subfolder = "source_subfolder"
 
@@ -74,7 +76,7 @@ class LibsodiumConan(ConanFile):
         elif self.settings.compiler.version == "16":
             return "vs2019"
         else:
-            raise ConanInvalidConfiguration(f"Unsupported msvc version: {self.settings.compiler.version}")
+            raise ConanInvalidConfiguration("Unsupported msvc version: {}".format(self.settings.compiler.version))
 
     @property
     def _runtime_prefix(self):
@@ -167,6 +169,7 @@ class LibsodiumConan(ConanFile):
             self._build_visual()
 
     def package(self):
+        self.copy("*LICENSE", dst="licenses", keep_path=False)
         if self.settings.compiler == "Visual Studio":
             self._package_visual()
         else:
@@ -177,6 +180,8 @@ class LibsodiumConan(ConanFile):
             if not self.options.shared:
                 self.cpp_info.defines = ["SODIUM_STATIC=1"]
         self.cpp_info.libs = tools.collect_libs(self)
+        if self.settings.os == "Linux":
+            self.cpp_info.system_libs = ["pthread"]
 
     def _package_autotools(self):
         if self.settings.os == "Emscripten":
@@ -184,14 +189,12 @@ class LibsodiumConan(ConanFile):
         else:
             prefix = "install"
         lib_folder = os.path.join(prefix, "lib")
-        self.copy("*LICENSE", dst="licenses", keep_path=False)
         self.copy("*.h", dst="include", src=os.path.join(prefix, "include"))
         self.copy("*.a", dst="lib", src=lib_folder)
         self.copy("*.so*", dst="lib", src=lib_folder, symlinks=True)
         self.copy("*.dylib", dst="lib", src=lib_folder, symlinks=True)
 
     def _package_visual(self):
-        self.copy("*LICENSE", dst="licenses", keep_path=False)
         self.copy("*.lib", dst="lib", keep_path=False)
         self.copy("*.dll", dst="bin", keep_path=False)
         inc_src = os.path.join(self._source_subfolder, "src", self.name, "include")
