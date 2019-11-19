@@ -10,7 +10,7 @@ class DocoptCppConan(ConanFile):
     settings = "os", "compiler", "build_type", "arch"
     description = "C++11 port of docopt"
     options = {"shared": [True, False], "fPIC": [True, False]}
-    default_options = "shared=False", "fPIC=True"
+    default_options = {"shared": False, "fPIC": True}
     topics = ("CLI")
     generators = 'cmake'
     exports_sources = ['patches/**', 'CMakeLists.txt']
