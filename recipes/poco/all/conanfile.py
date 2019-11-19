@@ -7,8 +7,7 @@ from conans.errors import ConanInvalidConfiguration
 class PocoConan(ConanFile):
     name = "poco"
     url = "https://github.com/conan-io/conan-center-index"
-    homepage = "https://pocoproject.org"
-    author = "Poco Project <poco@pocoproject.org>"
+    homepage = "https://pocoproject.org"    
     topics = ("conan", "poco", "building", "networking", "server", "mobile", "embedded")
     exports_sources = "CMakeLists.txt"
     generators = "cmake"
