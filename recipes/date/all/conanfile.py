@@ -10,58 +10,20 @@ class DateConan(ConanFile):
     topics = ("date", "datetime", "timezone", "calendar", "time", "iana-database")
     license = "MIT"
     exports_sources = ["CMakeLists.txt", "patches/*"]
-    generators = "cmake"
-    settings = "os", "arch", "compiler", "build_type"
-    options = {"shared": [True, False], "fPIC": [True, False], "use_system_tz_db": [True, False], "use_tz_db_in_dot": [True, False]}
-    default_options = {'shared': False, 'fPIC': True, 'use_system_tz_db': True, 'use_tz_db_in_dot': False}
+    no_copy_source = True
 
     @property
     def _source_subfolder(self):
-        return "source_subfolder"
-
-    @property
-    def _build_subfolder(self):
-        return "build_subfolder"
-
-    def config_options(self):
-        if self.settings.os == "Windows":
-            self.options.remove("fPIC")
-
-    def requirements(self):
-        if not self.options.use_system_tz_db:
-            self.requires("libcurl/7.56.1")
+        return os.path.join(self.source_folder, "source_subfolder")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
         extracted_dir = self.name + "-" + self.version
         os.rename(extracted_dir, self._source_subfolder)
-
-    def _configure_cmake(self):
-        cmake = CMake(self)
-        cmake.definitions["ENABLE_DATE_TESTING"] = False
-        cmake.definitions["USE_SYSTEM_TZ_DB"] = self.options.use_system_tz_db
-        cmake.definitions["USE_TZ_DB_IN_DOT"] = self.options.use_tz_db_in_dot
-        cmake.configure(build_folder=self.build_folder)
-        return cmake
-
-    def build(self):
         for patch in self.conan_data["patches"][self.version]:
             tools.patch(**patch)
-        cmake = self._configure_cmake()
-        cmake.build()
 
     def package(self):
         self.copy(pattern="LICENSE.txt", dst="licenses", src=self._source_subfolder)
-        cmake = self._configure_cmake()
-        cmake.install()
-        tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
-        tools.rmdir(os.path.join(self.package_folder, "CMake"))
-
-    def package_info(self):
-        self.cpp_info.libs = tools.collect_libs(self)
-        if self.settings.os == "Linux":
-            self.cpp_info.libs.append("pthread")
-        use_system_tz_db = 0 if self.options.use_system_tz_db else 1
-        defines = ["USE_AUTOLOAD={}".format(use_system_tz_db),
-                   "HAS_REMOTE_API={}".format(use_system_tz_db)]
-        self.cpp_info.defines.extend(defines)
+        self.copy(pattern="date.h", dst=os.path.join("include", "date"),
+                  src=os.path.join(self._source_subfolder, "include", "date"))
