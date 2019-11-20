@@ -66,6 +66,12 @@ class TclConan(ConanFile):
         tools.replace_in_file(unix_makefile_in, "\nLDFLAGS\t", "\n#LDFLAGS\t")
         # Use CFLAGS and CPPFLAGS as argument to CC
         tools.replace_in_file(unix_makefile_in, "${CFLAGS}", "${CFLAGS} ${CPPFLAGS}")
+        # nmake creates a temporary file with mixed forward/backward slashes
+        # force the filename to avoid cryptic error messages
+        win_config_dir = self._get_configure_dir("win")
+        win_makefile_vc = os.path.join(win_config_dir, "makefile.vc")
+        tools.replace_in_file(win_makefile_vc, "@type << >$@", "type <<temp.tmp >$@")
+
 
     def config_options(self):
         if self.settings.compiler == "Visual Studio" or self.options.shared:
