@@ -34,7 +34,7 @@ class TclConan(ConanFile):
         # conan-center-index forbids having share/man folders at the package root
         # it also advises to put everything into a bin folder
         # until there is a better way, let's go for the bin/bin weirdness
-        return os.path.join(self.package_folder, "bin")
+        return os.path.join(self.package_folder, "bin").replace("\\", "/")
 
     def configure(self):
         if self.settings.compiler != "Visual Studio":
