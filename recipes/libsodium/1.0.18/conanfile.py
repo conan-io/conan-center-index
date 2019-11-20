@@ -5,7 +5,6 @@ import os
 
 class LibsodiumConan(ConanFile):
     name        = "libsodium"
-    version     = "1.0.18"
     description = "A modern and easy-to-use crypto library."
     license     = "ISC"
     url         = "https://github.com/conan-io/conan-center-index"
@@ -20,14 +19,14 @@ class LibsodiumConan(ConanFile):
         "shared" : [True, False],
         "fPIC": [True, False],
         "use_soname" : [True, False],
-        "use_pie"    : [True, False],
+        "PIE"    : [True, False],
     }
 
     default_options = {
         "shared": False,
         "fPIC": True,
         "use_soname": True,
-        "use_pie": False,
+        "PIE": False,
     }
 
     @property
@@ -35,24 +34,8 @@ class LibsodiumConan(ConanFile):
         return "androideabi" if str(self.settings.arch) in ["armv6", "armv7"] else "android"
 
     @property
-    def _arch_id_str_compiler(self):
-        return {"x86": "i686",
-                "armv6": "arm",
-                "armv7": "arm",
-                "armv7hf": "arm",
-                "armv8": "aarch64",
-                "mips64": "mips64"}.get(str(self.settings.arch),
-                                        str(self.settings.arch))
-
-    @property
     def _is_mingw(self):
         return self.settings.os == "Windows" and self.settings.compiler == "gcc"
-
-    @property
-    def _vs_platform(self):
-        if self.settings.arch.value == "x86":
-            return "Win32"
-        return "x64"
 
     @property
     def _vs_configuration(self):
@@ -61,26 +44,18 @@ class LibsodiumConan(ConanFile):
             configuration += "Dyn"
         else:
             configuration += "Static"
-        build_type = str(self.settings.build_type)
-        if build_type == "RelWithDebInfo":
-            build_type = "Release"
+        build_type = "Debug" if self.settings.build_type == "Debug" else "Release"
         configuration += build_type
         return configuration
 
     @property
     def _vs_sln_folder(self):
-        if self.settings.compiler.version == "14":
-            return "vs2015"
-        elif self.settings.compiler.version == "15":
-            return "vs2017"
-        elif self.settings.compiler.version == "16":
-            return "vs2019"
-        else:
+        folder = {"14": "vs2015",
+                  "15": "vs2017",
+                  "16": "vs2019"}.get(str(self.settings.compiler.version), None)
+        if not folder:
             raise ConanInvalidConfiguration("Unsupported msvc version: {}".format(self.settings.compiler.version))
-
-    @property
-    def _runtime_prefix(self):
-        return str(self.settings.compiler.runtime)[:2]
+        return folder
 
     def configure(self):
         del self.settings.compiler.libcxx
@@ -89,6 +64,11 @@ class LibsodiumConan(ConanFile):
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
+
+    def build_requirements(self):
+        # There are several unix tools used (bash scripts for Emscripten, autoreconf on MinGW, etc...)
+        if tools.os_info.is_windows:
+            self.build_requires("msys2/20161025")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
@@ -111,7 +91,7 @@ class LibsodiumConan(ConanFile):
             self.run("autoreconf -i", cwd=self._source_subfolder, win_bash=win_bash)
         autotools.configure(args=configure_args, configure_dir=self._source_subfolder, host=False)
         autotools.make(args=["-j%s" % str(tools.cpu_count())])
-        autotools.make(target="install")
+        autotools.install()
 
     def _build_autotools_linux(self, configure_args):
         self._build_autotools_impl(configure_args)
@@ -120,24 +100,18 @@ class LibsodiumConan(ConanFile):
         self.run("./dist-build/emscripten.sh --standard", cwd=self._source_subfolder)
 
     def _build_autotools_android(self, configure_args):
-        host_arch = "%s-linux-%s" % (self._arch_id_str_compiler, self._android_id_str)
+        host_arch = "%s-linux-%s" % (tools.to_android_abi(self.settings.arch), self._android_id_str)
         configure_args.append("--host=%s" % host_arch)
         self._build_autotools_impl(configure_args)
 
     def _build_autotools_mingw(self, configure_args):
-        if self.settings.arch == "x86":
-            arch = "i686"
-        else:
-            arch = "x86_64"
+        arch = "i686" if self.settings.arch == "x86" else self.settings.arch
         host_arch = "%s-w64-mingw32" % arch
         configure_args.append("--host=%s" % host_arch)
         self._build_autotools_impl(configure_args)
 
     def _build_autotools_darwin(self, configure_args):
-        if self.settings.os == "iOS":
-            os = "ios"
-        else:
-            os = "darwin"
+        os = "ios" if self.settings.os == "iOS" else "darwin"
         host_arch = "%s-apple-%s" % (self.settings.arch, os)
         configure_args.append("--host=%s" % host_arch)
         self._build_autotools_impl(configure_args)
@@ -153,9 +127,9 @@ class LibsodiumConan(ConanFile):
             self._build_autotools_emscripten(configure_args)
         elif self.settings.os == "Android":
             self._build_autotools_android(configure_args)
-        elif self.settings.os in ["Macos", "iOS", "watchOS", "tvOS"]:
+        elif tools.is_apple_os(self.settings.os):
             self._build_autotools_darwin(configure_args)
-        elif self.settings.os == "Windows" and self.settings.compiler == "gcc":
+        elif self._is_mingw:
             self._build_autotools_mingw(configure_args)
         else:
             raise ConanInvalidConfiguration(f"Unsupported os for libsodium: {self.settings.os}")
@@ -204,20 +178,16 @@ class LibsodiumConan(ConanFile):
 
     def _autotools_bool_arg(self, arg_base_name, value):
         prefix = "--enable-" if value else "--disable-"
-
         return prefix + arg_base_name
 
     def _get_configure_args(self, absolute_install_dir):
         args = [
             "--prefix=%s" % absolute_install_dir,
-
             self._autotools_bool_arg("shared", self.options.shared),
             self._autotools_bool_arg("static", not self.options.shared),
             self._autotools_bool_arg("soname-versions", self.options.use_soname),
-            self._autotools_bool_arg("pie", self.options.use_pie)
+            self._autotools_bool_arg("pie", self.options.PIE)
         ]
-
         if self.options.fPIC:
             args.append("--with-pic")
-
         return args
