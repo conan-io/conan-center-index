@@ -6,10 +6,6 @@ class DoctestTestConan(ConanFile):
     settings = "os", "compiler", "build_type", "arch"
     generators = "cmake"
 
-    def configure(self):
-        if tools.cross_building(self.settings):
-            del self.settings.compiler.libcxx
-
     def build(self):
         cmake = CMake(self)
         cmake.configure()
