@@ -174,20 +174,17 @@ class TclConan(ConanFile):
 
     def package_info(self):
         libs = []
+        systemlibs = []
         libdirs = []
         for root, _, _ in os.walk(os.path.join(self._install_folder, "lib"), topdown=False):
             newlibs = tools.collect_libs(self, root)
             if newlibs:
                 libs.extend(newlibs)
                 libdirs.append(root)
-        if self.settings.compiler == "Visual Studio":
-            libs.extend(["netapi32"])
+        if self.settings.os == "Windows":
+            systemlibs.extend(["ws2_32", "netapi32", "userenv"])
         else:
-            libs.extend(["m", "pthread"])
-            if self._is_mingw_windows:
-                libs.extend(["ws2_32", "netapi32", "userenv"])
-            else:
-                libs.append("dl")
+            systemlibs.extend(["m", "pthread", "dl"])
 
         defines = []
         if not self.options.shared:
@@ -197,6 +194,7 @@ class TclConan(ConanFile):
         self.cpp_info.bindirs = [os.path.join("bin", "bin")]
         self.cpp_info.libdirs = libdirs
         self.cpp_info.libs = libs
+        self.cpp_info.system_libs = systemlibs
         self.cpp_info.includedirs = [os.path.join("bin", "include")]
 
         if self.settings.os == "Macos":
