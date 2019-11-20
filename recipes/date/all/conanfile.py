@@ -9,7 +9,7 @@ class DateConan(ConanFile):
     description = "A date and time library based on the C++11/14/17 <chrono> header"
     topics = ("date", "datetime", "timezone", "calendar", "time", "iana-database")
     license = "MIT"
-    exports_sources = ["CMakeLists.txt", "patches/*"]
+    exports_sources = ["patches/*"]
     no_copy_source = True
 
     @property
