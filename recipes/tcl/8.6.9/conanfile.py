@@ -1,5 +1,5 @@
 from conans import ConanFile, AutoToolsBuildEnvironment, tools
-from conans.errors import ConanExceptionInUserConanfileMethod
+from conans.errors import ConanInvalidConfiguration
 from conans.util.env_reader import get_env
 import os
 import shutil
@@ -74,7 +74,7 @@ class TclConan(ConanFile):
 
 
     def config_options(self):
-        if self.settings.compiler == "Visual Studio" or self.options.shared:
+        if self.settings.os == "Windows":
             del self.options.fPIC
 
     def _get_default_build_system(self):
@@ -85,13 +85,13 @@ class TclConan(ConanFile):
         elif self.settings.os == "Windows":
             return "win"
         else:
-            raise ConanExceptionInUserConanfileMethod("Unknown settings.os={}".format(self.settings.os))
+            raise ConanInvalidConfiguration("Unknown settings.os={}".format(self.settings.os))
 
     def _get_configure_dir(self, build_system=None):
         if build_system is None:
             build_system = self._get_default_build_system()
         if build_system not in ["win", "unix", "macosx"]:
-            raise ConanExceptionInUserConanfileMethod("Invalid build system: {}".format(build_system))
+            raise ConanInvalidConfiguration("Invalid build system: {}".format(build_system))
         return os.path.join(self.source_folder, self._source_subfolder, build_system)
 
     def _get_auto_tools(self):
@@ -204,7 +204,7 @@ class TclConan(ConanFile):
         self.cpp_info.includedirs = [os.path.join("bin", "include")]
 
         if self.settings.os == "Macos":
-            self.cpp_info.exelinkflags.append("-framework Cocoa")
+            self.cpp_info.frameworks = ["Cocoa"]
             self.cpp_info.sharedlinkflags = self.cpp_info.exelinkflags
 
         tcl_library = os.path.join(self._install_folder, "lib", "{}{}".format(self.name, ".".join(self.version.split(".")[:2])))
