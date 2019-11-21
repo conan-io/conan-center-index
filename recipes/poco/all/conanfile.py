@@ -7,8 +7,7 @@ from conans.errors import ConanInvalidConfiguration
 class PocoConan(ConanFile):
     name = "poco"
     url = "https://github.com/conan-io/conan-center-index"
-    homepage = "https://pocoproject.org"
-    author = "Poco Project <poco@pocoproject.org>"
+    homepage = "https://pocoproject.org"    
     topics = ("conan", "poco", "building", "networking", "server", "mobile", "embedded")
     exports_sources = "CMakeLists.txt"
     generators = "cmake"
@@ -185,3 +184,5 @@ class PocoConan(ConanFile):
             self.cpp_info.defines.extend(["POCO_STATIC=ON", "POCO_NO_AUTOMATIC_LIBS"])
             if self.settings.compiler == "Visual Studio":
                 self.cpp_info.libs.extend(["ws2_32", "Iphlpapi", "Crypt32"])
+        self.cpp_info.name = "Poco"
+
