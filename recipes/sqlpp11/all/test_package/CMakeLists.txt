@@ -5,8 +5,6 @@ project(PackageTest)
 include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
 conan_basic_setup(TARGETS)
 
-set(CMAKE_CXX_STANDARD 11)
-set(CMAKE_CXX_EXTENSIONS OFF)
-
 add_executable(example example.cpp)
+set_property(TARGET example PROPERTY CXX_STANDARD 11)
 target_link_libraries(example CONAN_PKG::sqlpp11)
