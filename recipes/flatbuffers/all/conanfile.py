@@ -1,6 +1,3 @@
-#!/usr/bin/env python
-# -*- coding: utf-8 -*-
-
 """Conan recipe package for Google FlatBuffers
 """
 import os
@@ -13,7 +10,6 @@ class FlatbuffersConan(ConanFile):
     license = "Apache-2.0"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "http://google.github.io/flatbuffers"
-    author = "Conan Community"
     topics = ("conan", "flatbuffers", "serialization", "rpc", "json-parser")
     description = "Memory Efficient Serialization Library"
     settings = "os", "compiler", "build_type", "arch"
