@@ -29,13 +29,6 @@ class TclConan(ConanFile):
     def _is_mingw_windows(self):
         return self.settings.os == "Windows" and self.settings.compiler == "gcc"
 
-    @property
-    def _install_folder(self):
-        # conan-center-index forbids having share/man folders at the package root
-        # it also advises to put everything into a bin folder
-        # until there is a better way, let's go for the bin/bin weirdness
-        return os.path.join(self.package_folder, "bin").replace("\\", "/")
-
     def configure(self):
         if self.settings.compiler != "Visual Studio":
             del self.settings.compiler.libcxx
@@ -116,7 +109,7 @@ class TclConan(ConanFile):
             '{vcvars} && nmake -nologo -f "{cfgdir}/makefile.vc" shell INSTALLDIR="{pkgdir}" OPTS={opts} {target}'.format(
                 vcvars=vcvars_command,
                 cfgdir=self._get_configure_dir("win"),
-                pkgdir=self._install_folder,
+                pkgdir=self.package_folder,
                 opts=",".join(opts),
                 target=target,
             ), cwd=self._get_configure_dir("win"),
@@ -128,7 +121,7 @@ class TclConan(ConanFile):
             "--enable-shared" if self.options.shared else "--disable-shared",
             "--enable-symbols" if self.settings.build_type == "Debug" else "--disable-symbols",
             "--enable-64bit" if self.settings.arch == "x86_64" else "--disable-64bit",
-            "--prefix={}".format(self._install_folder),
+            "--prefix={}".format(self.package_folder),
         ]
         autoTools = self._get_auto_tools()
         autoTools.configure(configure_dir=self._get_configure_dir(), args=conf_args, vars={"PKG_CFG_ARGS": " ".join(conf_args)})
@@ -158,13 +151,16 @@ class TclConan(ConanFile):
                 autoTools = self._get_auto_tools()
                 autoTools.install()
                 autoTools.make(target="install-private-headers")
-            pkgconfig_dir = os.path.join(self._install_folder, "lib", "pkgconfig")
+            pkgconfig_dir = os.path.join(self.package_folder, "lib", "pkgconfig")
             if os.path.isdir(pkgconfig_dir):
                 shutil.rmtree(pkgconfig_dir)
         self.copy(pattern="license.terms", dst="licenses", src=self._source_subfolder)
 
-        tclConfigShPath = os.path.join(self._install_folder, "lib", "tclConfig.sh")
-        package_path = os.path.join(self._install_folder)
+        tools.rmdir(os.path.join(self.package_folder, "share"))
+        tools.rmdir(os.path.join(self.package_folder, "man"))
+
+        tclConfigShPath = os.path.join(self.package_folder, "lib", "tclConfig.sh")
+        package_path = os.path.join(self.package_folder)
         if self._is_mingw_windows:
             package_path = package_path.replace("\\", "/")
         tools.replace_in_file(tclConfigShPath,
@@ -182,7 +178,7 @@ class TclConan(ConanFile):
         libs = []
         systemlibs = []
         libdirs = []
-        for root, _, _ in os.walk(os.path.join(self._install_folder, "lib"), topdown=False):
+        for root, _, _ in os.walk(os.path.join(self.package_folder, "lib"), topdown=False):
             newlibs = tools.collect_libs(self, root)
             if newlibs:
                 libs.extend(newlibs)
@@ -197,30 +193,30 @@ class TclConan(ConanFile):
             defines.append("STATIC_BUILD")
         self.cpp_info.defines = defines
 
-        self.cpp_info.bindirs = [os.path.join("bin", "bin")]
+        self.cpp_info.bindirs = ["bin"]
         self.cpp_info.libdirs = libdirs
         self.cpp_info.libs = libs
         self.cpp_info.system_libs = systemlibs
-        self.cpp_info.includedirs = [os.path.join("bin", "include")]
+        self.cpp_info.includedirs = ["include"]
 
         if self.settings.os == "Macos":
             self.cpp_info.frameworks = ["Cocoa"]
             self.cpp_info.sharedlinkflags = self.cpp_info.exelinkflags
 
-        tcl_library = os.path.join(self._install_folder, "lib", "{}{}".format(self.name, ".".join(self.version.split(".")[:2])))
+        tcl_library = os.path.join(self.package_folder, "lib", "{}{}".format(self.name, ".".join(self.version.split(".")[:2])))
         self.output.info("Setting TCL_LIBRARY environment variable to {}".format(tcl_library))
         self.env_info.TCL_LIBRARY = tcl_library
 
-        tcl_root = self._install_folder
+        tcl_root = self.package_folder
         self.output.info("Setting TCL_ROOT environment variable to {}".format(tcl_root))
         self.env_info.TCL_ROOT = tcl_root
 
-        tclsh_list = list(filter(lambda fn: fn.startswith("tclsh"), os.listdir(os.path.join(self._install_folder, "bin"))))
+        tclsh_list = list(filter(lambda fn: fn.startswith("tclsh"), os.listdir(os.path.join(self.package_folder, "bin"))))
         assert(len(tclsh_list))
-        tclsh = os.path.join(self._install_folder, "bin", tclsh_list[0])
+        tclsh = os.path.join(self.package_folder, "bin", tclsh_list[0])
         self.output.info("Setting TCLSH environment variable to {}".format(tclsh))
         self.env_info.TCLSH = tclsh
 
-        bindir = os.path.join(self._install_folder, "bin")
+        bindir = os.path.join(self.package_folder, "bin")
         self.output.info("Adding PATH environment variable: {}".format(bindir))
         self.env_info.PATH.append(bindir)
