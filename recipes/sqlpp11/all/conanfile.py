@@ -4,7 +4,7 @@ import os
 
 class Sqlpp11Conan(ConanFile):
     name = "sqlpp11"
-    license = "BSD 2-Clause License"
+    license = "BSD-2-Clause"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/rbock/sqlpp11"
     description = "A type safe SQL template library for C++"
