@@ -7,7 +7,6 @@ from conans import ConanFile, CMake, tools
 
 class ConanSqlite3(ConanFile):
     name = "sqlite3"
-    version = "3.29.0"
     description = "Self-contained, serverless, in-process SQL database engine."
     url = "http://github.com/bincrafters/conan-sqlite3"
     homepage = "https://www.sqlite.org"
