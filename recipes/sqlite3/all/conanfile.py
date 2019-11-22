@@ -1,6 +1,3 @@
-#!/usr/bin/env python
-# -*- coding: utf-8 -*-
-
 import os
 from conans import ConanFile, CMake, tools
 
@@ -8,14 +5,12 @@ from conans import ConanFile, CMake, tools
 class ConanSqlite3(ConanFile):
     name = "sqlite3"
     description = "Self-contained, serverless, in-process SQL database engine."
-    url = "http://github.com/bincrafters/conan-sqlite3"
+    url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://www.sqlite.org"
-    author = "Bincrafters <bincrafters@gmail.com>"
     topics = ("conan", "sqlite", "database", "sql", "serverless")
     license = "Public Domain"
     generators = "cmake"
     settings = "os", "compiler", "arch", "build_type"
-    exports = ["LICENSE.md"]
     exports_sources = ["CMakeLists.txt"]
     options = {"shared": [True, False],
                "fPIC": [True, False],
