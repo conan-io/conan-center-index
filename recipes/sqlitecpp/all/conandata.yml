@@ -1,0 +1,8 @@
+sources:
+  "2.4.0":
+    url: "https://github.com/SRombauts/SQLiteCpp/archive/2.4.0.tar.gz"
+    sha256: "16bf963619786652a60533bcdc71a0412cad1ce132cd09ce43344af6ed7463d9"
+patches:
+  "2.4.0":
+    - base_path: "source_subfolder"
+      patch_file: "patches/2.4.0/0001-mingw.patch"
