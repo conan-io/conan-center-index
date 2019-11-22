@@ -21,7 +21,6 @@ class PicoJSONConan(ConanFile):
     def package(self):
         self.copy("{}.h".format(self.name), dst="include", src=self._source_subdir_name)
         self.copy("LICENSE", dst="licenses", src=self._source_subdir_name)
-        print(self.package_folder)
 
     def package_info(self):
         self.info.header_only()
