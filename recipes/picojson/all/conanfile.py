@@ -4,13 +4,11 @@ import os
 
 class PicoJSONConan(ConanFile):
     name = "picojson"
-    license = "BSD 2-Clause \"Simplified\" License"
+    license = "BSD-2-Clause"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/kazuho/picojson"
     description = "A C++ JSON parser/serializer"
     topics = ("picojson", "json", "header-only", "conan-recipe")
-
-    revision_mode = "scm"
 
     no_copy_source = True
 
