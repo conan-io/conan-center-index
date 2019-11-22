@@ -2,3 +2,6 @@ sources:
   "4.0.0":
     sha256: af615141c14858b67d71a278896523d3df0da0ff3c6495b6acf0ae2e8b44dd92
     url: https://github.com/boostorg/build/archive/4.0.0.tar.gz
+  "4.0.1":
+    sha256: 9ea9edb115fa0b0a82eaf4f00a4e348df9c3b1b891c3db32823ae5e27f284c07
+    url: https://github.com/boostorg/build/archive/4.0.1.tar.gz
