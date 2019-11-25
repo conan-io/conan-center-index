@@ -11,9 +11,11 @@ class PicoJSONTestConan(ConanFile):
         # Current dir is "test_package/build/<build_id>" and CMakeLists.txt is
         # in "test_package"
         cmake.configure()
+        self._is_multi_configuration = cmake.is_multi_configuration
         cmake.build()
 
     def test(self):
         if not tools.cross_building(self.settings):
-            os.chdir(str(self.settings.build_type))
+            if self._is_multi_configuration:
+                os.chdir(str(self.settings.build_type))
             self.run(".%sexample" % os.sep)
