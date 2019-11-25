@@ -1,0 +1,4 @@
+sources:
+  "3.3.1":
+    sha256: 72489ee89fee447ae97772bb85eed10418c739b529af9dd39dd46f3bc06e42c5
+    url: https://github.com/assimp/assimp/archive/v3.3.1.zip
