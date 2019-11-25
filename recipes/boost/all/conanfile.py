@@ -728,7 +728,12 @@ class BoostConan(ConanFile):
         compiler = str(self.settings.compiler)
         if self._is_msvc:
             cversion = self.settings.compiler.version
-            _msvc_version = "14.1" if Version(str(cversion)) >= "15" else "%s.0" % cversion
+            if Version(str(cversion)) >= "16":
+                _msvc_version = "14.2"
+            elif Version(str(cversion)) >= "15":
+                _msvc_version = "14.1"
+            else:
+                _msvc_version = "%s.0" % cversion
             return "msvc", _msvc_version, ""
         elif self.settings.os == "Windows" and self.settings.compiler == "clang":
             return "clang-win", compiler_version, ""
@@ -760,7 +765,12 @@ class BoostConan(ConanFile):
     def _get_boostrap_toolset(self):
         if self._is_msvc:
             comp_ver = self.settings.compiler.version
-            return "vc%s" % ("141" if Version(str(comp_ver)) >= "15" else comp_ver)
+            if Version(str(comp_ver)) >= "16":
+                return "vc142"
+            elif Version(str(comp_ver)) >= "15":
+                return "vc141"
+            else:
+                return "vc%s" % comp_ver
 
         if tools.os_info.is_windows:
             return "gcc" if self.settings.compiler == "gcc" else ""
