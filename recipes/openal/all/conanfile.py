@@ -9,7 +9,7 @@ class OpenALConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://www.openal.org"
     license = "MIT"
-    exports_sources = ["CMakeLists.txt"]
+    exports_sources = ["CMakeLists.txt", "patches/*"]
     generators = "cmake"
 
     settings = "os", "arch", "compiler", "build_type"
@@ -33,6 +33,8 @@ class OpenALConan(ConanFile):
         tools.get(**self.conan_data["sources"][self.version])
         extracted_dir = "openal-soft-openal-soft-" + self.version
         os.rename(extracted_dir, self._source_subfolder)
+        for patch in self.conan_data["patches"][self.version]:
+            tools.patch(**patch)
 
     def _configure_cmake(self):
         cmake = CMake(self)
