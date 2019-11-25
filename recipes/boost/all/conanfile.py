@@ -16,7 +16,6 @@ except ImportError:
 # From from *1 (see below, b2 --show-libraries), also ordered following linkage order
 # see https://github.com/Kitware/CMake/blob/master/Modules/FindBoost.cmake to know the order
 
-
 lib_list = ['math', 'wave', 'container', 'contract', 'exception', 'graph', 'iostreams', 'locale', 'log',
             'program_options', 'random', 'regex', 'mpi', 'serialization',
             'coroutine', 'fiber', 'context', 'timer', 'thread', 'chrono', 'date_time',
