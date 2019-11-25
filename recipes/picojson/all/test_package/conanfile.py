@@ -16,6 +16,7 @@ class PicoJSONTestConan(ConanFile):
 
     def test(self):
         if not tools.cross_building(self.settings):
+            bin_path = "example"
             if self._is_multi_configuration:
-                os.chdir(str(self.settings.build_type))
-            self.run(".%sexample" % os.sep)
+                bin_path = os.path.join(str(self.settings.build_type), bin_path)
+            self.run(bin_path, run_environment=True)
