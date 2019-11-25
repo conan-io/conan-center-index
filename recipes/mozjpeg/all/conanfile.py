@@ -10,7 +10,7 @@ class MozjpegConan(ConanFile):
     topics = ("conan", "image", "format", "mozjpeg", "jpg", "jpeg", "picture", "multimedia", "graphics")
     license = ("BSD", "BSD-3-Clause", "ZLIB")
     homepage = "https://github.com/mozilla/mozjpeg"
-    exports_sources = ("CMakeLists.txt", "mozjpeg.patch")
+    exports_sources = ("CMakeLists.txt", "patches/*")
     generators = "cmake"
     settings = "os", "arch", "compiler", "build_type"
     options = {
@@ -79,7 +79,8 @@ class MozjpegConan(ConanFile):
 
     def _configure_autotools(self):
         if not self._autotools:
-            self.run('autoreconf -fiv')
+            with tools.chdir(self._source_subfolder):
+                self.run('autoreconf -fiv')
             self._autotools = AutoToolsBuildEnvironment(self)
             args = []
             if self.options.shared:
@@ -96,18 +97,18 @@ class MozjpegConan(ConanFile):
             args.append('--with-turbojpeg' if self.options.turbojpeg else '--without-turbojpeg')
             args.append('--with-java' if self.options.java else '--without-java')
             args.append('--with-12bit' if self.options.enable12bit else '--without-12bit')
-            self._autotools.configure(args=args)
+            self._autotools.configure(configure_dir=self._source_subfolder, args=args)
         return self._autotools
 
     def build(self):
-        tools.patch(base_path=self._source_subfolder, patch_file="mozjpeg.patch")
+        for patch in self.conan_data["patches"][self.version]:
+            tools.patch(**patch)
         if self.settings.os == 'Windows':
             cmake = self._configure_cmake()
             cmake.build()
         else:
-            with tools.chdir(self._source_subfolder):
-                autotools = self._configure_autotools()
-                autotools.make()
+            autotools = self._configure_autotools()
+            autotools.make()
 
     def package(self):
         self.copy(pattern="LICENSE.md", dst="licenses", src=self._source_subfolder)
@@ -115,9 +116,8 @@ class MozjpegConan(ConanFile):
             cmake = self._configure_cmake()
             cmake.install()
         else:
-            with tools.chdir(self._source_subfolder):
-                autotools = self._configure_autotools()
-                autotools.install()
+            autotools = self._configure_autotools()
+            autotools.install()
         # drop pc and cmake file
         tools.rmdir(os.path.join(self.package_folder, 'share'))
         tools.rmdir(os.path.join(self.package_folder, 'lib', 'pkgconfig'))
