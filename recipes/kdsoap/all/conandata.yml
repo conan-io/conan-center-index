@@ -1,0 +1,4 @@
+sources:
+  "1.8.0":
+    sha256: dfcd7eeb3e1ce97678cf92e890a38230d9cf6596c196918bc0ec5c7745cda1f6
+    url: https://github.com/KDAB/KDSoap/archive/kdsoap-1.8.0-release.zip
