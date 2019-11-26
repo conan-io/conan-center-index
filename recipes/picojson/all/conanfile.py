@@ -11,7 +11,6 @@ class PicoJSONConan(ConanFile):
     topics = ("picojson", "json", "header-only", "conan-recipe")
 
     no_copy_source = True
-
     _source_subdir_name = "source_subdir"
 
     def source(self):
