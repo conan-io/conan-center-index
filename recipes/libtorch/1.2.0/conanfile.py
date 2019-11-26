@@ -4,7 +4,7 @@ class Libtorch(ConanFile):
     name = "libtorch"
     version = "1.2.0"
     license = "BSD"
-    url = "https://pytorch.org/"
+    homepage = "https://pytorch.org/"
     description = "PYTORCH C++ API"
     settings = {"os": ["Windows","Linux"],
         "build_type": ["Debug", "Release", "RelWithDebInfo"],
