@@ -1,0 +1,4 @@
+sources:
+  "1.2.0":
+    url: "https://github.com/pytorch/pytorch.git"
+    sha256: "8554416a199c4cec01c60c7015d8301d2bb39b64"
