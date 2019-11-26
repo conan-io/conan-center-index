@@ -35,6 +35,7 @@ class XZUtils(ConanFile):
         return 'Debug' if self.settings.build_type == 'Debug' else 'Release'
 
     def configure(self):
+        del self.settings.compiler.cppstd
         del self.settings.compiler.libcxx
         if self.settings.compiler == 'Visual Studio':
             del self.options.fPIC
