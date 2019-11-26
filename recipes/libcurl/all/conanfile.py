@@ -9,7 +9,7 @@ class LibcurlConan(ConanFile):
     name = "libcurl"
 
     description = "command line tool and library for transferring data with URLs"
-    topics = ("conan", "libcurl", "data-transfer")
+    topics = ("conan", "curl", "libcurl", "data-transfer")
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://curl.haxx.se"
     license = "MIT"
@@ -54,7 +54,7 @@ class LibcurlConan(ConanFile):
     _autotools = False
 
     @property
-    def is_mingw(self):
+    def _is_mingw(self):
         return self.settings.os == "Windows" and self.settings.compiler != "Visual Studio"
 
     def imports(self):
@@ -128,13 +128,13 @@ class LibcurlConan(ConanFile):
         tools.download("https://curl.haxx.se/ca/cacert.pem", "cacert.pem", verify=True)
 
     def build(self):
-        self.patch_misc_files()
+        self._patch_misc_files()
         if self.settings.compiler != "Visual Studio":
-            self.build_with_autotools()
+            self._build_with_autotools()
         else:
-            self.build_with_cmake()
+            self._build_with_cmake()
 
-    def patch_misc_files(self):
+    def _patch_misc_files(self):
         if self.options.with_largemaxwritesize:
             tools.replace_in_file(os.path.join(self._source_subfolder, 'include', 'curl', 'curl.h'),
                                   "define CURL_MAX_WRITE_SIZE 16384",
@@ -147,7 +147,7 @@ class LibcurlConan(ConanFile):
                                       '#define CURL_BUILD_MAC_10_13 MAC_OS_X_VERSION_MAX_ALLOWED >= 101300',
                                       '#define CURL_BUILD_MAC_10_13 0')
 
-    def get_configure_command_args(self):
+    def _get_configure_command_args(self):
         params = []
         params.append("--without-libidn2" if not self.options.with_libidn else "--with-libidn2")
         params.append("--without-librtmp" if not self.options.with_librtmp else "--with-librtmp")
@@ -195,11 +195,11 @@ class LibcurlConan(ConanFile):
         # Cross building flags
         if tools.cross_building(self.settings):
             if self.settings.os == "Linux" and "arm" in self.settings.arch:
-                params.append('--host=%s' % self.get_linux_arm_host())
+                params.append('--host=%s' % self._get_linux_arm_host())
 
         return params
 
-    def get_linux_arm_host(self):
+    def _get_linux_arm_host(self):
         arch = None
         if self.settings.os == 'Linux':
             arch = 'arm-linux-gnu'
@@ -208,19 +208,19 @@ class LibcurlConan(ConanFile):
                 arch = 'aarch64-linux-gnu'
             elif 'arm' in self.settings.arch and 'hf' in self.settings.arch:
                 arch = 'arm-linux-gnueabihf'
-            elif 'arm' in self.settings.arch and self.arm_version(str(self.settings.arch)) > 4:
+            elif 'arm' in self.settings.arch and self._arm_version(str(self.settings.arch)) > 4:
                 arch = 'arm-linux-gnueabi'
         return arch
 
-    def arm_version(self, arch):
+    def _arm_version(self, arch):
         version = None
         match = re.match(r"arm\w*(\d)", arch)
         if match:
             version = int(match.group(1))
         return version
 
-    def patch_mingw_files(self):
-        if not self.is_mingw:
+    def _patch_mingw_files(self):
+        if not self._is_mingw:
             return
         # patch autotools files
         # for mingw builds - do not compile curl tool, just library
@@ -257,14 +257,14 @@ class LibcurlConan(ConanFile):
                 added_content = tools.load(os.path.join(self.source_folder, 'lib_Makefile_add.am'))
                 tools.save(os.path.join('lib', 'Makefile.am'), added_content, append=True)
 
-    def build_with_autotools(self):
+    def _build_with_autotools(self):
         env_run = RunEnvironment(self)
         # run configure with *LD_LIBRARY_PATH env vars
         # it allows to pick up shared openssl
         self.output.info("Run vars: " + repr(env_run.vars))
         with tools.environment_append(env_run.vars):
             with tools.chdir(self._source_subfolder):
-                use_win_bash = self.is_mingw and not tools.cross_building(self.settings)
+                use_win_bash = self._is_mingw and not tools.cross_building(self.settings)
                 autotools, autotools_vars = self._configure_autotools()
 
                 # autoreconf
@@ -274,14 +274,14 @@ class LibcurlConan(ConanFile):
                 tools.replace_in_file("configure", "-install_name \\$rpath/", "-install_name ")
                 self.run("chmod +x configure")
 
-                configure_args = self.get_configure_command_args()
+                configure_args = self._get_configure_command_args()
                 autotools.configure(vars=autotools_vars, args=configure_args)
                 autotools.make(vars=autotools_vars)
 
     def _configure_autotools_vars(self):
         autotools_vars = self._autotools.vars
         # tweaks for mingw
-        if self.is_mingw:
+        if self._is_mingw:
             autotools_vars['RCFLAGS'] = '-O COFF'
             if self.settings.arch == "x86":
                 autotools_vars['RCFLAGS'] += ' --target=pe-i386'
@@ -294,7 +294,7 @@ class LibcurlConan(ConanFile):
 
     def _configure_autotools(self):
         if not self._autotools:
-            use_win_bash = self.is_mingw and not tools.cross_building(self.settings)
+            use_win_bash = self._is_mingw and not tools.cross_building(self.settings)
             self._autotools = AutoToolsBuildEnvironment(self, win_bash=use_win_bash)
 
             if self.settings.os != "Windows":
@@ -303,13 +303,13 @@ class LibcurlConan(ConanFile):
             autotools_vars = self._configure_autotools_vars()
 
             # tweaks for mingw
-            if self.is_mingw:
+            if self._is_mingw:
                 # patch autotools files
-                self.patch_mingw_files()
+                self._patch_mingw_files()
 
                 self._autotools.defines.append('_AMD64_')
 
-            configure_args = self.get_configure_command_args()
+            configure_args = self._get_configure_command_args()
             self._autotools.configure(vars=autotools_vars, args=configure_args)
 
         return self._autotools, self._configure_autotools_vars()
@@ -331,7 +331,7 @@ class LibcurlConan(ConanFile):
         cmake.configure(build_folder=self._build_subfolder)
         return cmake
 
-    def build_with_cmake(self):
+    def _build_with_cmake(self):
         # patch cmake files
         with tools.chdir(self._source_subfolder):
             tools.replace_in_file("CMakeLists.txt",
@@ -356,7 +356,7 @@ class LibcurlConan(ConanFile):
             cmake = self._configure_cmake()
             cmake.install()
 
-        if self.settings.os == "Windows" and self.settings.compiler != "Visual Studio":
+        if _is_mingw():
             # Handle only mingw libs
             self.copy(pattern="*.dll", dst="bin", keep_path=False)
             self.copy(pattern="*dll.a", dst="lib", keep_path=False)
@@ -404,7 +404,7 @@ class LibcurlConan(ConanFile):
             if self.options.with_winssl:
                 self.cpp_info.system_libs.append("Crypt32")
 
-        if self.is_mingw:
+        if self._is_mingw:
             # provide pthread for dependent packages
             self.cpp_info.cflags.append("-pthread")
             self.cpp_info.exelinkflags.append("-pthread")
