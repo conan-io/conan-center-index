@@ -8,7 +8,6 @@ class Sqlpp11Conan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/rbock/sqlpp11"
     description = "A type safe SQL template library for C++"
-    generators = "cmake"
     topics = ("SQL", "DSL", "embedded", "data-base")
     _source_subfolder = "source_subfolder"
 
