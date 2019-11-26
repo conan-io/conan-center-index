@@ -9,7 +9,7 @@ class IrrXMLConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     description = "irrXML is a simple and fast open source xml parser for C++"
     topics = ("xml", "xml-parser", "parser", "xml-reader")
-    exports_sources = ["CMakeLists.txt"]
+    exports_sources = ["CMakeLists.txt", "patches/*"]
     generators = "cmake"
     settings = "os", "compiler", "build_type", "arch"
     options = {
@@ -46,6 +46,8 @@ class IrrXMLConan(ConanFile):
         return cmake
 
     def build(self):
+        for patch in self.conan_data["patches"][self.version]:
+            tools.patch(**patch)
         cmake = self._configure_cmake()
         cmake.build()
 
