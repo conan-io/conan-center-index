@@ -21,7 +21,6 @@ class LibcurlConan(ConanFile):
                "fPIC": [True, False],
                "with_openssl": [True, False],
                "with_winssl": [True, False],
-               "disable_threads": [True, False],
                "with_ldap": [True, False],
                "darwin_ssl": [True, False],
                "with_libssh2": [True, False],
@@ -36,7 +35,6 @@ class LibcurlConan(ConanFile):
                        'fPIC': True,
                        'with_openssl': True,
                        'with_winssl': False,
-                       'disable_threads': False,
                        'with_ldap': False,
                        'darwin_ssl': True,
                        'with_libssh2': False,
@@ -185,9 +183,6 @@ class LibcurlConan(ConanFile):
         else:
             params.append("--enable-shared")
             params.append("--disable-static")
-
-        if self.options.disable_threads:
-            params.append("--disable-thread")
 
         if not self.options.with_ldap:
             params.append("--disable-ldap")
