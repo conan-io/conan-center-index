@@ -1,8 +1,8 @@
 diff --git a/CMakeLists.txt b/CMakeLists.txt
-index 39e6878..d78d68d 100644
+index 12320fb..756b493 100644
 --- a/CMakeLists.txt
 +++ b/CMakeLists.txt
-@@ -75,50 +75,16 @@ find_package(Threads REQUIRED)
+@@ -76,48 +76,16 @@ find_package(Threads REQUIRED)
  
  message(STATUS "Build type: " ${CMAKE_BUILD_TYPE})
  
@@ -16,8 +16,6 @@ index 39e6878..d78d68d 100644
 -        src/color_sinks.cpp
 -        src/file_sinks.cpp
 -        src/async.cpp)
--
--set(SPDLOG_CFLAGS "${PROJECT_NAME}")
 -
 -if (SPDLOG_BUILD_SHARED)
 -    if(WIN32)
@@ -57,10 +55,10 @@ index 39e6878..d78d68d 100644
  
  
  #---------------------------------------------------------------------------------------
-@@ -131,22 +97,16 @@ if(SPDLOG_FMT_EXTERNAL)
- 
-     set(SPDLOG_CFLAGS "${SPDLOG_CFLAGS} -DSPDLOG_FMT_EXTERNAL")
- 
+@@ -127,29 +95,22 @@ if(SPDLOG_FMT_EXTERNAL)
+     if (NOT TARGET fmt::fmt)
+         find_package(fmt REQUIRED)
+     endif ()
 -    target_compile_definitions(spdlog PUBLIC SPDLOG_FMT_EXTERNAL)
 -    target_link_libraries(spdlog PUBLIC fmt::fmt)
 -
@@ -68,36 +66,45 @@ index 39e6878..d78d68d 100644
 -    target_link_libraries(spdlog_header_only INTERFACE fmt::fmt)
 +    target_compile_definitions(spdlog INTERFACE SPDLOG_FMT_EXTERNAL)
 +    target_link_libraries(spdlog INTERFACE fmt::fmt)
+ 
+     set(PKG_CONFIG_REQUIRES fmt) # add dependecy to pkg-config
  endif()
  
  if(SPDLOG_WCHAR_SUPPORT)
 -	target_compile_definitions(spdlog PUBLIC SPDLOG_WCHAR_TO_UTF8_SUPPORT)
 -	target_compile_definitions(spdlog_header_only INTERFACE SPDLOG_WCHAR_TO_UTF8_SUPPORT)
-+  target_compile_definitions(spdlog INTERFACE SPDLOG_WCHAR_TO_UTF8_SUPPORT)
++	target_compile_definitions(spdlog INTERFACE SPDLOG_WCHAR_TO_UTF8_SUPPORT)
+  endif()
+ 
+  if(SPDLOG_WCHAR_FILENAMES)
+-	target_compile_definitions(spdlog PUBLIC SPDLOG_WCHAR_FILENAMES)
+-	target_compile_definitions(spdlog_header_only INTERFACE SPDLOG_WCHAR_FILENAMES)
++	target_compile_definitions(spdlog INTERFACE SPDLOG_WCHAR_FILENAMES)
   endif()
  
   if(SPDLOG_NO_EXCEPTIONS)
 -	target_compile_definitions(spdlog PUBLIC SPDLOG_NO_EXCEPTIONS)	
 -
 -	target_compile_definitions(spdlog_header_only INTERFACE SPDLOG_NO_EXCEPTIONS)
-+  target_compile_definitions(spdlog INTERFACE SPDLOG_NO_EXCEPTIONS)	
++	target_compile_definitions(spdlog INTERFACE SPDLOG_NO_EXCEPTIONS)
  
      if(NOT MSVC)
          target_compile_options(spdlog PRIVATE -fno-exceptions)
-@@ -189,13 +149,9 @@ if (SPDLOG_INSTALL)
+@@ -192,14 +153,9 @@ if (SPDLOG_INSTALL)
      #---------------------------------------------------------------------------------------
      # Include files
      #---------------------------------------------------------------------------------------
 -    install(DIRECTORY include/ DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}" PATTERN "fmt/bundled" EXCLUDE)
--    install(TARGETS spdlog spdlog_header_only EXPORT spdlog DESTINATION "${CMAKE_INSTALL_LIBDIR}/spdlog")
+-    install(TARGETS spdlog spdlog_header_only EXPORT spdlog DESTINATION "${CMAKE_INSTALL_LIBDIR}")
 -
 -    if(NOT SPDLOG_FMT_EXTERNAL)
 -        install(DIRECTORY include/${PROJECT_NAME}/fmt/bundled/
 -                DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}/${PROJECT_NAME}/fmt/bundled/")
 -    endif()
+-
 +    install(TARGETS spdlog EXPORT spdlog DESTINATION "${CMAKE_INSTALL_LIBDIR}/spdlog")
 +    install(DIRECTORY include/${PROJECT_NAME}
 +            DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}/")
- 
      #---------------------------------------------------------------------------------------
-     # Package and version files
+     # Install pkg-config file
+     #---------------------------------------------------------------------------------------
