@@ -26,7 +26,8 @@ if (WIN32 AND BUILD_SHARED_LIBS)
 endif()
 
 set_target_properties(${CMAKE_PROJECT_NAME} PROPERTIES
-                      PUBLIC_HEADER source_subfolder/src/irrXML.h)
+                      PUBLIC_HEADER source_subfolder/src/irrXML.h
+                      DEBUG_POSTFIX d)
 
 install(TARGETS ${CMAKE_PROJECT_NAME}
     ARCHIVE DESTINATION lib
