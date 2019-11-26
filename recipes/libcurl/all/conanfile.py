@@ -69,6 +69,15 @@ class LibcurlConan(ConanFile):
         if self.settings.os == "Macos":
             self.copy("*.dylib*", dst=self._source_subfolder, keep_path=False)
 
+    def config_options(self):
+        if self.settings.os != "Macos":
+            self.options.remove("darwin_ssl")
+        if self.settings.os != "Windows":
+            self.options.remove("with_winssl")
+
+        if self.settings.os == "Windows":
+            self.options.remove("fPIC")
+
     def configure(self):
         del self.settings.compiler.libcxx
         del self.settings.compiler.cppstd
@@ -80,6 +89,9 @@ class LibcurlConan(ConanFile):
         # - with_openssl AND NOT with_winssl uses openssl
         # Moreover darwin_ssl is set by default and with_winssl is not
 
+        if self.settings.os == "Windows" and self.options.with_winssl and self.options.with_openssl:
+            raise ConanInvalidConfiguration('Specify only with_winssl or with_openssl')
+
         if self.options.with_openssl:
             # enforce shared linking due to openssl dependency
             if self.settings.os != "Macos" or not self.options.darwin_ssl:
@@ -87,18 +99,6 @@ class LibcurlConan(ConanFile):
         if self.options.with_libssh2:
             if self.settings.compiler != "Visual Studio":
                 self.options["libssh2"].shared = self.options.shared
-
-    def config_options(self):
-        if self.settings.os != "Macos":
-            self.options.remove("darwin_ssl")
-        if self.settings.os != "Windows":
-            self.options.remove("with_winssl")
-
-        if self.settings.os == "Windows" and self.options.with_winssl and self.options.with_openssl:
-            raise ConanInvalidConfiguration('Specify only with_winssl or with_openssl')
-
-        if self.settings.os == "Windows":
-            self.options.remove("fPIC")
 
     def system_requirements(self):
         # TODO: Declare tools needed to compile. The idea is Conan checking that they are
