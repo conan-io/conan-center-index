@@ -356,7 +356,7 @@ class LibcurlConan(ConanFile):
             cmake = self._configure_cmake()
             cmake.install()
 
-        if _is_mingw():
+        if self._is_mingw:
             # Handle only mingw libs
             self.copy(pattern="*.dll", dst="bin", keep_path=False)
             self.copy(pattern="*dll.a", dst="lib", keep_path=False)
