@@ -1,6 +1,4 @@
-# -*- coding: utf-8 -*-
 import os
-
 from conans import ConanFile, CMake, tools
 from conans.errors import ConanInvalidConfiguration
 from conans.tools import Version
@@ -12,7 +10,6 @@ class ProtobufConan(ConanFile):
     topics = ("conan", "protobuf", "protocol-buffers", "protocol-compiler", "serialization", "rpc", "protocol-compiler")
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/protocolbuffers/protobuf"
-    author = "Bincrafters <bincrafters@gmail.com>"
     license = "BSD-3-Clause"
     exports_sources = ["CMakeLists.txt", "protobuf.patch"]
     generators = "cmake"
@@ -87,3 +84,4 @@ class ProtobufConan(ConanFile):
         if self.settings.os == "Windows":
             if self.options.shared:
                 self.cpp_info.defines = ["PROTOBUF_USE_DLLS"]
+        self.cpp_info.name = "Protobuf"

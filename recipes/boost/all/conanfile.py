@@ -16,7 +16,6 @@ except ImportError:
 # From from *1 (see below, b2 --show-libraries), also ordered following linkage order
 # see https://github.com/Kitware/CMake/blob/master/Modules/FindBoost.cmake to know the order
 
-
 lib_list = ['math', 'wave', 'container', 'contract', 'exception', 'graph', 'iostreams', 'locale', 'log',
             'program_options', 'random', 'regex', 'mpi', 'serialization',
             'coroutine', 'fiber', 'context', 'timer', 'thread', 'chrono', 'date_time',
@@ -30,7 +29,6 @@ class BoostConan(ConanFile):
     description = "Boost provides free peer-reviewed portable C++ source libraries"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://www.boost.org"
-    author = "Conan Community"
     license = "BSL-1.0"
     topics = ("conan", "boost", "libraries", "cpp")
     # The current python option requires the package to be built locally, to find default Python
@@ -137,17 +135,11 @@ class BoostConan(ConanFile):
                 self.info.options.python_version = self._python_version
 
     def source(self):
-        patches = self.conan_data["patches"][self.version]["patches"]
-        patches = patches.split(",") if patches else []
         tools.get(**self.conan_data["sources"][self.version])
-        for patch in patches:
-            tools.patch(patch_file=os.path.join("patches", patch),
-                        base_path=os.path.join(self.source_folder, self._folder_name))
-
+        for patch in self.conan_data["patches"][self.version]:
+            tools.patch(**patch)
 
     ##################### BUILDING METHODS ###########################
-
-
 
     def _run_python_script(self, script):
         """
@@ -355,7 +347,8 @@ class BoostConan(ConanFile):
         folder = os.path.join(self.source_folder, self._folder_name, 'tools', 'bcp')
         with tools.vcvars(self.settings) if self._is_msvc else tools.no_op():
             with tools.chdir(folder):
-                command = "%s -j%s --abbreviate-paths -d2" % (self._b2_exe, tools.cpu_count())
+                toolset, _, _ = self._get_toolset_version_and_exe()
+                command = "%s -j%s --abbreviate-paths -d2 toolset=%s" % (self._b2_exe, tools.cpu_count(), toolset)
                 self.output.warn(command)
                 self.run(command)
 
@@ -427,7 +420,7 @@ class BoostConan(ConanFile):
                 "watchOS": "iphone",
                 "tvOS": "appletv",
                 "FreeBSD": "freebsd",
-                "SunOS": "solatis"}.get(str(self.settings.os))
+                "SunOS": "solaris"}.get(str(self.settings.os))
 
     @property
     def _b2_address_model(self):
@@ -691,7 +684,7 @@ class BoostConan(ConanFile):
 
         if not self.options.without_python:
             # https://www.boost.org/doc/libs/1_70_0/libs/python/doc/html/building/configuring_boost_build.html
-            contents += "\nusing python : {version} : {executable} : {includes} :  {libraries} ;"\
+            contents += '\nusing python : {version} : "{executable}" : "{includes}" : "{libraries}" ;'\
                 .format(version=self._python_version,
                         executable=self._python_executable,
                         includes=self._python_includes,
@@ -735,7 +728,12 @@ class BoostConan(ConanFile):
         compiler = str(self.settings.compiler)
         if self._is_msvc:
             cversion = self.settings.compiler.version
-            _msvc_version = "14.1" if Version(str(cversion)) >= "15" else "%s.0" % cversion
+            if Version(str(cversion)) >= "16":
+                _msvc_version = "14.2"
+            elif Version(str(cversion)) >= "15":
+                _msvc_version = "14.1"
+            else:
+                _msvc_version = "%s.0" % cversion
             return "msvc", _msvc_version, ""
         elif self.settings.os == "Windows" and self.settings.compiler == "clang":
             return "clang-win", compiler_version, ""
@@ -767,7 +765,12 @@ class BoostConan(ConanFile):
     def _get_boostrap_toolset(self):
         if self._is_msvc:
             comp_ver = self.settings.compiler.version
-            return "vc%s" % ("141" if Version(str(comp_ver)) >= "15" else comp_ver)
+            if Version(str(comp_ver)) >= "16":
+                return "vc142"
+            elif Version(str(comp_ver)) >= "15":
+                return "vc141"
+            else:
+                return "vc%s" % comp_ver
 
         if tools.os_info.is_windows:
             return "gcc" if self.settings.compiler == "gcc" else ""
@@ -779,8 +782,11 @@ class BoostConan(ConanFile):
                                                     str(self.settings.compiler))
 
         # fallback for the case when no unversioned gcc/clang is available
-        if with_toolset in ["gcc", "clang"] and not tools.which(with_toolset):
-            with_toolset = "cc"
+        if with_toolset in ["gcc", "clang"]:
+            # check for C++ compiler, as b2 uses only C++ one, which may not be installed alongside C compiler
+            compiler = "g++" if with_toolset == "gcc" else "clang++"
+            if not tools.which(compiler):
+                with_toolset = "cxx" if Version(str(self.version)) >= "1.71" else "cc"
         return with_toolset
 
     def _bootstrap(self):
@@ -895,3 +901,4 @@ class BoostConan(ConanFile):
                 self.cpp_info.libs.append("pthread")
 
         self.env_info.BOOST_ROOT = self.package_folder
+        self.cpp_info.name = "Boost"

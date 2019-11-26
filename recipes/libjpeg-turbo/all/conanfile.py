@@ -1,6 +1,3 @@
-#!/usr/bin/env python
-# -*- coding: utf-8 -*-
-
 import os
 import shutil
 import glob
@@ -9,14 +6,11 @@ from conans import ConanFile, CMake, tools
 
 class LibjpegTurboConan(ConanFile):
     name = "libjpeg-turbo"
-    version = "2.0.2"
     description = "SIMD-accelerated libjpeg-compatible JPEG codec library"
     topics = ("conan", "jpeg", "libjpeg", "image", "multimedia", "format", "graphics")
-    url = "http://github.com/bincrafters/conan-libjpeg-turbo"
-    author = "Bincrafters <bincrafters@gmail.com>"
+    url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://libjpeg-turbo.org"
     license = "BSD-3-Clause, Zlib"
-    exports = ["LICENSE.md"]
     exports_sources = ["CMakeLists.txt"]
     generators = "cmake"
     settings = "os", "arch", "compiler", "build_type"

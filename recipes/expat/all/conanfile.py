@@ -8,7 +8,6 @@ class ExpatConan(ConanFile):
     topics = ("conan", "expat", "xml", "parsing")
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/libexpat/libexpat"
-    author = "Conan Community"
     license = "MIT"
     settings = "os", "compiler", "build_type", "arch"
     options = {"shared": [True, False], "fPIC": [True, False]}
@@ -52,11 +51,11 @@ class ExpatConan(ConanFile):
         cmake = self._configure_cmake()
         cmake.install()
         tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
+        tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
+        tools.rmdir(os.path.join(self.package_folder, "share"))
 
     def package_info(self):
-        if self.settings.os == "Windows" and self.settings.build_type == "Debug":
-            self.cpp_info.libs = ["expatd"]
-        else:
-            self.cpp_info.libs = ["expat"]
+        self.cpp_info.name = "EXPAT"
+        self.cpp_info.libs = tools.collect_libs(self)
         if not self.options.shared:
             self.cpp_info.defines = ["XML_STATIC"]

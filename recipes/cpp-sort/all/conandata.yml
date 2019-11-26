@@ -1,0 +1,4 @@
+sources:
+  "1.5.1":
+    sha256: 39925958dbd773f15d36d74d4ded48f075c05feef7fe604c7c5c4bfae2a4ec55
+    url: https://github.com/Morwenn/cpp-sort/archive/1.5.1.tar.gz

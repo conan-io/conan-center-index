@@ -1,6 +1,3 @@
-#!/usr/bin/env python
-# -*- coding: utf-8 -*-
-
 from conans import ConanFile, CMake, tools
 import os
 import shutil
@@ -85,3 +82,4 @@ class LibtiffConan(ConanFile):
             self.cpp_info.libs = [lib+'.dll' for lib in self.cpp_info.libs]
         if self.settings.os == "Linux":
             self.cpp_info.libs.append("m")
+        self.cpp_info.name = "TIFF"

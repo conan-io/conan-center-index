@@ -2,3 +2,11 @@ sources:
   "0.9.9.5":
     url: "https://github.com/g-truc/glm/archive/0.9.9.5.tar.gz"
     sha256: "5e33b6131cea6a904339734b015110d4342b7dc02d995164fdb86332d28a5aa4"
+  "0.9.9.6":
+    url: "https://github.com/g-truc/glm/archive/0.9.9.6.tar.gz"
+    sha256: "30b05f31f5d8528caa9fc8fe8132e5a0444d55b1c39db53fe4db8857654afafc"
+patches:
+  "0.9.9.5":
+    - patch_file: "patches/0001-Remove-architecture-check-from-CMake-package.patch"
+      base_path: "source_subfolder"
+  "0.9.9.6": []

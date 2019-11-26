@@ -4,13 +4,11 @@
 #include <vector>
 #include <limits>
 
-#ifdef FMT_HEADER_ONLY
-    #define FMT_EXTENDED_COLORS
-#endif
 
 #include "fmt/format.h"
 #include "fmt/printf.h"
 #include "fmt/ostream.h"
+#include "fmt/color.h"
 
 
 void vreport(const char *format, fmt::format_args args) {
@@ -42,7 +40,7 @@ int main() {
 
     fmt::memory_buffer buf;
     fmt::format_to(buf, "{}", 2.7182818);
-    fmt::print("Euler number: {}\n", buf.data());
+    fmt::print("Euler number: {}\n", fmt::to_string(buf));
 
     const std::string date = fmt::format("The date is {}\n", Date(2012, 12, 9));
     fmt::print(date);
@@ -51,9 +49,7 @@ int main() {
 
     fmt::print(std::cout, "{} {}\n", "Magic number", 42);
 
-#ifdef FMT_EXTENDED_COLORS
-    fmt::print(fmt::color::aqua, "Bincrafters\n");
-#endif
+    fmt::print(fg(fmt::color::aqua), "Bincrafters\n");
 
     return EXIT_SUCCESS;
 }

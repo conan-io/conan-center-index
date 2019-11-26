@@ -1,0 +1,7 @@
+sources:
+  "0.0.1":
+    sha256: 4fa1e40cc06c2147f5308e63f51a8785fcc41515b6a6a7c280459d005f1c0aeb
+    url: https://github.com/rvarago/absent/archive/0.0.1.tar.gz
+  "0.1.0":
+    sha256: 32be167191d695f7663cd6043b226c83798aeb617504ad6c82ddf3b3fdb08498
+    url: https://github.com/rvarago/absent/archive/0.1.0.tar.gz
