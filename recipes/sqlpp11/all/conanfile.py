@@ -9,7 +9,7 @@ class Sqlpp11Conan(ConanFile):
     homepage = "https://github.com/rbock/sqlpp11"
     description = "A type safe SQL template library for C++"
     generators = "cmake"
-    topics = ("SQL")
+    topics = ("SQL", "DSL", "embedded", "data-base")
     _source_subfolder = "source_subfolder"
 
     def requirements(self):
