@@ -374,8 +374,6 @@ class LibcurlConan(ConanFile):
         # Remove libtool files (*.la)
         if os.path.isfile(os.path.join(self.package_folder, 'lib', 'libcurl.la')):
             os.remove(os.path.join(self.package_folder, 'lib', 'libcurl.la'))
-        # library package should not contain executable
-        shutil.rmtree(os.path.join(self.package_folder, 'bin'), ignore_errors=True)
 
     def package_info(self):
         if self.settings.compiler != "Visual Studio":
