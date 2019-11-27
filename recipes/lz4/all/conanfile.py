@@ -23,7 +23,7 @@ class LZ4Conan(ConanFile):
         if self.options.shared:
             del self.options.fPIC
         del self.settings.compiler.libcxx
-        del self.settings.compiler.stdcpp
+        del self.settings.compiler.cppstd
 
     def config_options(self):
         if self.settings.os == "Windows":
