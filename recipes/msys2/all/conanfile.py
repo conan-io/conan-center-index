@@ -1,18 +1,16 @@
-#!/usr/bin/env python
-# -*- coding: utf-8 -*-
-
 from conans import ConanFile, tools
 from conans.errors import ConanInvalidConfiguration
 import os
+import shutil
 
 
 class MSYS2Conan(ConanFile):
     name = "msys2"
-    version = "20161025"
     description = "MSYS2 is a software distro and building platform for Windows"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "http://www.msys2.org"
     license = "MSYS license"
+    topics = ("conan", "msys", "unix", "subsystem")
     build_requires = "7zip/19.00"
     short_paths = True
     options = {"exclude_files": "ANY",  # Comma separated list of file patterns to exclude from the package
@@ -21,7 +19,6 @@ class MSYS2Conan(ConanFile):
     default_options = {"exclude_files": "*/link.exe",
                        "packages": "base-devel,binutils,gcc",
                        "additional_packages": None}
-    exports = "LICENSE.md"
     settings = "os_build", "arch_build"
 
     def configure(self):
@@ -33,12 +30,18 @@ class MSYS2Conan(ConanFile):
         # source files downloaded will be different based on architecture or OS
         pass
 
-    def build(self):
-        arch = str(self.settings.arch_build)
-        tools.download(**self.conan_data["sources"][self.version][arch])
-        filename = self.conan_data["sources"][self.version][arch]["filename"]
-        sha256 = self.conan_data["checksum"][self.version][arch]["sha256"]
+    def _download(self, url, sha256):
+        from six.moves.urllib.parse import urlparse
+        filename = os.path.basename(urlparse(url).path)
+        tools.download(url, filename)
         tools.check_sha256(filename, sha256)
+        return filename
+
+    def build(self):
+        arch = 0 if self.settings.arch_build == "x86" else 1  # index in the sources list
+        url = self.conan_data["sources"][self.version][arch]["url"]
+        sha256 = self.conan_data["sources"][self.version][arch]["sha256"]
+        filename = self._download(**self.conan_data["sources"][self.version][arch])
         tar_name = filename.replace(".xz", "")
         self.run("7z.exe x {0}".format(filename))
         self.run("7z.exe x {0}".format(tar_name))
@@ -72,7 +75,9 @@ class MSYS2Conan(ConanFile):
         if self.options.exclude_files:
             excludes = tuple(str(self.options.exclude_files).split(","))
         self.copy("*", dst="bin", src=msys_dir, excludes=excludes)
-        self.copy("LICENSE.md", dst="licenses")
+        shutil.copytree(os.path.join(self.package_folder, "bin", "usr", "share", "licenses"),
+                        os.path.join(self.package_folder, "licenses"))
+
 
     def package_info(self):
         msys_root = os.path.join(self.package_folder, "bin")
