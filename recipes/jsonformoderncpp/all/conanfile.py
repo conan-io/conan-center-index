@@ -27,6 +27,9 @@ class JsonformoderncppConan(ConanFile):
         extracted_dir = "json-" + self.version
         os.rename(extracted_dir, self._source_subfolder)
 
+    def configure(self):
+        self.output.warn("[DEPRECATED] Package jsonformoderncpp is being deprecated. Change yours to require nlohmann_json instead")
+
     def _configure_cmake(self):
         cmake = CMake(self)
         cmake.definitions["JSON_BuildTests"] = False
@@ -47,7 +50,6 @@ class JsonformoderncppConan(ConanFile):
             os.remove(os.path.join(self.package_folder, "nlohmann_json.natvis"))
         except FileNotFoundError:
             pass
-
 
     def package_id(self):
         self.info.header_only()
