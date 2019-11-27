@@ -77,4 +77,4 @@ class Bzip2Conan(ConanFile):
         self.cpp_info.name = "EASTL"
         self.cpp_info.libs = ["EASTL"]
         if self.settings.os in ("Android", "Linux", "Macos", "watchOS", "tvOS"):
-            self.cpp_info.libs.append("pthread")
+            self.cpp_info.system_libs.append("pthread")
