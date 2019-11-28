@@ -508,6 +508,7 @@ class BoostConan(ConanFile):
 
         flags.append("--layout=%s" % self.options.layout)
         flags.append("-sBOOST_BUILD_PATH=%s" % self._boost_build_dir)
+        flags.append("--user-config=%s" % os.path.join(self._boost_build_dir, 'user-config.jam'))
         flags.append("-sNO_ZLIB=%s" % ("0" if self.options.zlib else "1"))
         flags.append("-sNO_BZIP2=%s" % ("0" if self.options.bzip2 else "1"))
         flags.append("-sNO_LZMA=%s" % ("0" if self.options.lzma else "1"))
