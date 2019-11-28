@@ -802,7 +802,18 @@ class BoostConan(ConanFile):
                         option = "" if tools.os_info.is_windows else "-with-toolset="
                         cmd = "%s %s%s" % (bootstrap, option, self._get_boostrap_toolset())
                     self.output.info(cmd)
-                    with tools.environment_append({"CC": None, "CXX": None, "CFLAGS": None, "CXXFLAGS": None}):
+
+                    removed_environment_variables = [
+                        "CC",
+                        "CXX",
+                        "CFLAGS",
+                        "CXXFLAGS",
+                        "SDKROOT",
+                        "IPHONEOS_DEPLOYMENT_TARGET"
+                    ]
+                    removed_environment_variables = dict((env_var, None) for env_var in removed_environment_variables)
+
+                    with tools.environment_append(removed_environment_variables):
                         self.run(cmd)
 
         except Exception as exc:
