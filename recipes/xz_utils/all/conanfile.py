@@ -1,5 +1,3 @@
-#!/usr/bin/env python
-# -*- coding: utf-8 -*-
 import os
 from conans import ConanFile, tools, AutoToolsBuildEnvironment, MSBuild
 from conans.tools import Version
@@ -35,6 +33,7 @@ class XZUtils(ConanFile):
         return 'Debug' if self.settings.build_type == 'Debug' else 'Release'
 
     def configure(self):
+        del self.settings.compiler.cppstd
         del self.settings.compiler.libcxx
         if self.settings.compiler == 'Visual Studio':
             del self.options.fPIC
@@ -43,11 +42,11 @@ class XZUtils(ConanFile):
         # Relax Windows SDK restriction
         tools.replace_in_file(os.path.join(self._source_subfolder, 'windows', 'vs2017', 'liblzma.vcxproj'),
                               "<WindowsTargetPlatformVersion>10.0.15063.0</WindowsTargetPlatformVersion>",
-                              "")
+                              "<WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>")
 
         tools.replace_in_file(os.path.join(self._source_subfolder, 'windows', 'vs2017', 'liblzma_dll.vcxproj'),
                               "<WindowsTargetPlatformVersion>10.0.15063.0</WindowsTargetPlatformVersion>",
-                              "")
+                              "<WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
@@ -56,6 +55,19 @@ class XZUtils(ConanFile):
 
     def _build_msvc(self):
         # windows\INSTALL-MSVC.txt
+
+        if self.settings.compiler.version == 15:
+            # emulate VS2019+ meaning of WindowsTargetPlatformVersion == '10.0'
+            # undocumented method, but officially recommended workaround by microsoft at at
+            # https://developercommunity.visualstudio.com/content/problem/140294/windowstargetplatformversion-makes-it-impossible-t.html
+            tools.replace_in_file(os.path.join(self._source_subfolder, 'windows', 'vs2017', 'liblzma.vcxproj'),
+                                  "<WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>",
+                                  "<WindowsTargetPlatformVersion>$([Microsoft.Build.Utilities.ToolLocationHelper]::GetLatestSDKTargetPlatformVersion('Windows', '10.0'))</WindowsTargetPlatformVersion>")
+
+            tools.replace_in_file(os.path.join(self._source_subfolder, 'windows', 'vs2017', 'liblzma_dll.vcxproj'),
+                                  "<WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>",
+                                  "<WindowsTargetPlatformVersion>$([Microsoft.Build.Utilities.ToolLocationHelper]::GetLatestSDKTargetPlatformVersion('Windows', '10.0'))</WindowsTargetPlatformVersion>")
+
         msvc_version = 'vs2017' if Version(self.settings.compiler.version) >= "15" else 'vs2013'
         with tools.chdir(os.path.join(self._source_subfolder, 'windows', msvc_version)):
             target = 'liblzma_dll' if self.options.shared else 'liblzma'
