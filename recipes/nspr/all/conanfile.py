@@ -1,0 +1,165 @@
+from conans import ConanFile, tools, AutoToolsBuildEnvironment
+from contextlib import contextmanager
+import os
+
+
+class NsprConan(ConanFile):
+    name = "nspr"
+    homepage = "https://developer.mozilla.org/en-US/docs/Mozilla/Projects/NSPR"
+    description = "Netscape Portable Runtime (NSPR) provides a platform-neutral API for system level and libc-like functions."
+    topics = ("conan", "nspr", "libc")
+    url = "https://github.com/conan-io/conan-center-index"
+    settings = "os", "compiler", "arch", "build_type"
+    license = "MPL-2.0"
+    options = {
+        "shared": [True, False],
+        "fPIC": [True, False],
+        "with_mozilla": [True, False],
+        "win32_target": ["winnt", "win95"]
+    }
+    default_options = {
+        "shared": False,
+        "fPIC": True,
+        "with_mozilla": True,
+        "win32_target": "winnt",
+    }
+    generators = "cmake"
+
+    _autotools = None
+
+    @property
+    def _source_subfolder(self):
+        return "source_subfolder"
+
+    def config_options(self):
+        if self.settings.os == "Windows":
+            del self.options.fPIC
+        else:
+            del self.options.win32_target
+
+    def configure(self):
+        del self.settings.compiler.cppstd
+        del self.settings.compiler.libcxx
+        if self.options.shared:
+            del self.options.fPIC
+
+    def source(self):
+        tools.get(**self.conan_data["sources"][self.version])
+        extracted_dir = os.path.join("nspr-" + self.version, "nspr")
+        os.rename(extracted_dir, self._source_subfolder)
+        tools.rmdir(os.path.join("nspr-" + self.version))
+
+    def build_requirements(self):
+        if tools.os_info.is_windows:
+            self.build_requires("mozilla-build/3.3")
+        if tools.os_info.is_windows and "CONAN_BASH_PATH" not in os.environ:
+            self.build_requires("msys2/20190524")
+
+    @contextmanager
+    def _build_context(self):
+        if self.settings.compiler == "Visual Studio":
+            with tools.vcvars(self.settings):
+                with tools.environment_append({"CC": "cl", "CXX": "cl", "LD": "link"}):
+                    yield
+        else:
+            with tools.no_op():
+                yield
+
+    def _configure_autotools(self):
+        if self._autotools:
+            return self._autotools
+        conf_args = [
+            "--with-mozilla" if self.options.with_mozilla else "--without-mozilla",
+            "--disable-cplus",
+            "--enable-64bit" if self.settings.arch == "x86_64" else "--disable-64bit",
+            "--disable-strip" if self.settings.build_type == "RelWithDebInfo" else "--enable-strip",
+            "--enable-debug" if self.settings.build_type == "Debug" else "--disable-debug",
+        ]
+        if self.settings.compiler == "Visual Studio":
+            conf_args.extend([
+                "{}-pc-mingw32".format("x86_64" if self.settings.arch == "x86_64" else "x86"),
+                "--enable-static-rtl" if "MT" in str(self.settings.compiler.runtime) else "--disable-static-rtl",
+                "--enable-debug-rtl" if "d" in str(self.settings.compiler.runtime) else "--disable-debug-rtl",
+            ])
+        elif self.settings.os == "Android":
+            conf_args.extend([
+                "--with-android-ndk={}".format(os.environ["NDK_ROOT"]),
+                "--with-android-version={}".format(self.settings.os.api_level),
+                "--with-android-platform={}".format(os.environ["ANDROID_PLATFORM"]),
+                "--with-android-toolchain={}".format(os.environ["ANDROID_TOOLCHAIN"]),
+            ])
+        elif self.settings.os == "Windows":
+            conf_args.append("--enable-win32-target={}".format(self.options.win32_target))
+        self._autotools = AutoToolsBuildEnvironment(self, win_bash=tools.os_info.is_windows)
+        self._autotools.configure(args=conf_args)
+        return self._autotools
+
+    def build(self):
+        with tools.chdir(self._source_subfolder):
+            with self._build_context():
+                autotools = self._configure_autotools()
+                autotools.make()
+
+    def package(self):
+        self.copy(pattern="LICENSE", dst="licenses", src=self._source_subfolder)
+        with tools.chdir(self._source_subfolder):
+            with self._build_context():
+                autotools = self._configure_autotools()
+                autotools.install()
+        tools.rmdir(os.path.join(self.package_folder, "bin"))
+        tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
+        tools.rmdir(os.path.join(self.package_folder, "share"))
+        if self.settings.os == "Windows":
+            if self.options.shared:
+                os.mkdir(os.path.join(self.package_folder, "bin"))
+            for lib in self._library_names:
+                libsuffix = "lib" if self.settings.compiler == "Visual Studio" else "a"
+                libprefix = "" if self.settings.compiler == "Visual Studio" else "lib"
+                if self.options.shared:
+                    os.unlink(os.path.join(self.package_folder, "lib", "{}{}_s.{}".format(libprefix, lib, libsuffix)))
+                    os.rename(os.path.join(self.package_folder, "lib", "{}.dll".format(lib)),
+                              os.path.join(self.package_folder, "bin", "{}.dll".format(lib)))
+                else:
+                    os.unlink(os.path.join(self.package_folder, "lib", "{}{}.{}".format(libprefix, lib, libsuffix)))
+                    os.unlink(os.path.join(self.package_folder, "lib", "{}.dll".format(lib)))
+            if not self.options.shared:
+                tools.replace_in_file(os.path.join(self.package_folder, "include", "nspr", "prtypes.h"),
+                                      "#define NSPR_API(__type) PR_IMPORT(__type)",
+                                      "#define NSPR_API(__type) extern __type")
+                tools.replace_in_file(os.path.join(self.package_folder, "include", "nspr", "prtypes.h"),
+                                      "#define NSPR_DATA_API(__type) PR_IMPORT_DATA(__type)",
+                                      "#define NSPR_DATA_API(__type) extern __type")
+        elif self.settings.os == "Macos":
+            for lib in self._library_names:
+                if self.options.shared:
+                    os.unlink(os.path.join(self.package_folder, "lib", "lib{}.a".format(lib)))
+                else:
+                    os.unlink(os.path.join(self.package_folder, "lib", "lib{}.dylib".format(lib)))
+
+        if self.settings.compiler == "Visual Studio":
+            if self.settings.build_type == "Debug":
+                for lib in self._library_names:
+                    os.remove(os.path.join(self.package_folder, "lib", "{}.pdb".format(lib)))
+
+        if not self.options.shared or self.settings.os == "Windows":
+            for f in os.listdir(os.path.join(self.package_folder, "lib")):
+                os.chmod(os.path.join(self.package_folder, "lib", f), 0o644)
+
+    @property
+    def _library_names(self):
+        return ["plds4", "plc4", "nspr4"]
+
+    def package_info(self):
+        libs = self._library_names
+        if self.settings.os == "Windows" and not self.options.shared:
+            libs = list("{}_s".format(l) for l in libs)
+        self.cpp_info.libs = libs
+        if self.settings.arch == "x86":
+            self.cpp_info.defines.append("_M_IX86")
+        elif self.settings.arch == "x86_64":
+            self.cpp_info.defines.append("_M_X64")
+        self.cpp_info.includedirs.append(os.path.join("include", "nspr"))
+        if self.settings.os == "Linux":
+            self.cpp_info.system_libs.extend(["dl", "pthread"])
+        elif self.settings.os == "Windows":
+            self.cpp_info.system_libs.extend(["winmm", "ws2_32"])

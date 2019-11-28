@@ -1,0 +1,4 @@
+sources:
+  "4.24":
+    sha256: 90a59a0df6a11528749647fe18401cc7e03881e3e63c309f8c520ce06dd413d0
+    url: https://ftp.mozilla.org/pub/nspr/releases/v4.24/src/nspr-4.24.tar.gz
