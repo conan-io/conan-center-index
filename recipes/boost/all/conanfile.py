@@ -644,7 +644,7 @@ class BoostConan(ConanFile):
 
     @property
     def _cxx(self):
-        if "CXX" in os.environ:
+        if "CXX" in os.environ and os.path.exists(os.environ["CXX"]):
             return os.environ["CXX"]
         if tools.is_apple_os(self.settings.os) and self.settings.compiler == "apple-clang":
             return tools.XCRun(self.settings).cxx
