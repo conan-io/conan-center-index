@@ -1,15 +1,4 @@
 sources:
   "19.00":
     url: https://www.7-zip.org/a/7z1900-src.7z
-    filename: 7zip.7z
-
-checksum:
-  "19.00":
-    file_path: 7zip.7z
-    signature: 9ba70a5e8485cf9061b30a2a84fe741de5aeb8dd271aab8889da0e9b3bf1868e
-
-externals:
-  lzma:
-    url: https://www.7-zip.org/a/lzma920.tar.bz2
-    destination: lzma920
-    sha256: 8ac221acdca8b6f6dd110120763af42b3707363752fc04e63c7bbff76774a445
+    sha256: 9ba70a5e8485cf9061b30a2a84fe741de5aeb8dd271aab8889da0e9b3bf1868e

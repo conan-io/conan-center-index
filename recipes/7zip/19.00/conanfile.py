@@ -1,7 +1,6 @@
 
 import os
 from conans import ConanFile, tools, AutoToolsBuildEnvironment, VisualStudioBuildEnvironment
-from conans.errors import ConanInvalidConfiguration
 
 
 class Package7Zip(ConanFile):
@@ -10,35 +9,26 @@ class Package7Zip(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     description = "7-Zip is a file archiver with a high compression ratio"
     license = ("LGPL-2.1", "BSD-3-Clause", "Unrar")
-    author = "Conan Community"
     homepage = "https://www.7-zip.org"
     topics = ("conan", "7zip", "zip", "compression", "decompression")
     settings = "os_build", "arch_build", "compiler"
-
-    def configure(self):
-        if self.settings.os_build != "Windows":
-            raise ConanInvalidConfiguration("Only Windows supported")
-        if self.settings.arch_build not in ("x86", "x86_64"):
-            raise ConanInvalidConfiguration("Unsupported architecture")
-
-    def source(self):
-        tools.download(**self.conan_data["sources"][self.version])
-        tools.check_sha256(**self.conan_data["checksum"][self.version])
-        self._uncompress_7z(self.conan_data["sources"][self.version]["filename"])
-
-    def _uncompress_7z(self, filename):
-        """ We need 7z itself to uncompress the file, we have two options:
-            * download an executable and run it
-            * booststrap using a previous version (7zip/9.22) where sources are in .tar.bz2. Right
-              now it would we a loop in the Conan graph
-        """
-        tools.get(**self.conan_data["externals"]["lzma"])
-        self.run("lzma920\\7zr.exe x {}".format(filename))
+    build_requires = "lzma_sdk/9.20"
 
     _msvc_platforms = {
         'x86_64': 'x64',
         'x86': 'x86',
     }
+
+    def source(self):
+        tools.download(self.conan_data["sources"][self.version]["url"], "7zip.7z")
+        tools.check_sha256("7zip.7z", self.conan_data["sources"][self.version]["sha256"])
+        self.run("7zr x 7zip.7z")
+
+    def build(self):
+        if self.settings.compiler == "Visual Studio":
+            self._build_msvc()
+        else:
+            self._build_autotools()
 
     def _build_msvc(self):
         env_build = VisualStudioBuildEnvironment(self)
@@ -55,20 +45,12 @@ class Package7Zip(ConanFile):
             with tools.chdir("CPP/7zip/Bundles/LzmaCon"):
                 self.run("make -f makefile.gcc all")
 
-    def build(self):
-        if self.settings.compiler == "Visual Studio":
-            self._build_msvc()
-        else:
-            self._build_autotools()
-
     def package(self):
         self.copy("DOC/License.txt", src="", dst="licenses")
         self.copy("DOC/unRarLicense.txt", src="", dst="licenses")
         if self.settings.os_build == "Windows":
             self.copy("*.exe", src="CPP/7zip", dst="bin", keep_path=False)
             self.copy("*.dll", src="CPP/7zip", dst="bin", keep_path=False)
-
-        # TODO: Package the libraries: binaries and headers (add the rest of settings)
 
     def package_id(self):
         del self.info.settings.compiler
