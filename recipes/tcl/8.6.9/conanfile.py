@@ -22,7 +22,7 @@ class TclConan(ConanFile):
         "fPIC": True,
         "shared": False,
     }
-    _source_subfolder = "sources"
+    _source_subfolder = "source_subfolder"
     requires = ("zlib/1.2.11")
 
     @property
