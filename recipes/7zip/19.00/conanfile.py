@@ -1,5 +1,5 @@
 import os
-from conans import ConanFile, tools, AutoToolsBuildEnvironment, VisualStudioBuildEnvironment
+from conans import ConanFile, tools, AutoToolsBuildEnvironment
 from conans.errors import ConanInvalidConfiguration
 
 
@@ -27,10 +27,14 @@ class Package7Zip(ConanFile):
         tools.download(url, filename)
         tools.check_sha256(filename, sha256)
         self._uncompress_7z(filename)
+        os.unlink(filename)
 
     def build_requirements(self):
         if not tools.which("7zr"):
             self.build_requires("lzma_sdk/9.20")
+
+        if tools.os_info.is_windows and "make" not in os.environ.get("CONAN_MAKE_PROGRAM", ""):
+            self.build_requires("make/4.2.1")
 
     def _uncompress_7z(self, filename):
         self.run("7zr x {}".format(filename))
@@ -48,10 +52,13 @@ class Package7Zip(ConanFile):
 
     def _build_autotools(self):
         # TODO: Enable non-Windows methods in configure
-        env_build = AutoToolsBuildEnvironment(self)
-        with tools.environment_append(env_build.vars):
-            with tools.chdir("CPP/7zip/Bundles/LzmaCon"):
-                self.run("make -f makefile.gcc all")
+        autotools = AutoToolsBuildEnvironment(self)
+        extra_env = {}
+        if self.settings.os_build == "Windows" and self.settings.compiler == "gcc":
+            extra_env["IS_MINGW"] = "1"
+        with tools.environment_append(extra_env):
+            with tools.chdir(os.path.join("CPP", "7zip", "Bundles", "LzmaCon")):
+                autotools.make(args=["-f", "makefile.gcc"], target="all")
 
     def _patch_sources(self):
         if self.settings.compiler == "Visual Studio":
