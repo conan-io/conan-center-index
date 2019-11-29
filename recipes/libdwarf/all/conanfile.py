@@ -58,7 +58,6 @@ class LibdwarfConan(ConanFile):
         cmake = self._configure_cmake()
         cmake.install()
         tools.rmdir(os.path.join(self.package_folder, "share"))
-        tools.rmdir(os.path.join(self.package_folder, "bin"))
         tools.rmdir(os.path.join(self.package_folder, "res"))
 
     def package_info(self):

@@ -1,5 +1,5 @@
 diff --git a/CMakeLists.txt b/CMakeLists.txt
-index 2607e56..113581b 100644
+index 2607e56..b88f0f8 100644
 --- a/CMakeLists.txt
 +++ b/CMakeLists.txt
 @@ -73,9 +73,9 @@ check_include_file( "unistd.h"        HAVE_UNISTD_H   )
@@ -80,6 +80,14 @@ index 2607e56..113581b 100644
  
  if(BUILD_NON_SHARED)
  	set(DWARF_TARGETS dwarf-static)
+@@ -395,7 +405,6 @@ if(BUILD_SHARED)
+ endif()
+ 
+ add_subdirectory(libdwarf)
+-add_subdirectory(dwarfdump)
+ if ( BUILD_DWARFGEN )
+ 	if ( DWARF_WITH_LIBELF )
+ 	    add_subdirectory(dwarfgen)
 diff --git a/dwarfdump/CMakeLists.txt b/dwarfdump/CMakeLists.txt
 index b94f6c8..e688ea0 100644
 --- a/dwarfdump/CMakeLists.txt
