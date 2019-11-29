@@ -36,17 +36,15 @@ class Package7Zip(ConanFile):
         self.run("7zr x {}".format(filename))
 
     _msvc_platforms = {
-        'x86_64': 'x64',
-        'x86': 'x86',
+        "x86_64": "x64",
+        "x86": "x86",
     }
 
     def _build_msvc(self):
-        env_build = VisualStudioBuildEnvironment(self)
-        with tools.environment_append(env_build.vars):
-            vcvars = tools.vcvars_command(self.settings)
-            with tools.chdir("CPP/7zip"):
-                self.run("%s && nmake /f makefile PLATFORM=%s" % (
-                vcvars, self._msvc_platforms[str(self.settings.arch_build)]))
+        with tools.vcvars(self.settings):
+            with tools.chdir(os.path.join("CPP", "7zip")):
+                self.run("nmake /f makefile PLATFORM=%s" % (
+                self._msvc_platforms[str(self.settings.arch_build)]))
 
     def _build_autotools(self):
         # TODO: Enable non-Windows methods in configure
@@ -55,7 +53,15 @@ class Package7Zip(ConanFile):
             with tools.chdir("CPP/7zip/Bundles/LzmaCon"):
                 self.run("make -f makefile.gcc all")
 
+    def _patch_sources(self):
+        if self.settings.compiler == "Visual Studio":
+            fn = os.path.join("CPP", "Build.mak")
+            os.chmod(fn, 0o644)
+            tools.replace_in_file(fn, "-MT", "-{}".format(str(self.settings.compiler.runtime)))
+            tools.replace_in_file(fn, "-MD", "-{}".format(str(self.settings.compiler.runtime)))
+
     def build(self):
+        self._patch_sources()
         if self.settings.compiler == "Visual Studio":
             self._build_msvc()
         else:
