@@ -51,7 +51,14 @@ class Package7Zip(ConanFile):
         self.copy("DOC/unRarLicense.txt", src="", dst="licenses")
         self.copy("*.exe", src="CPP/7zip", dst="bin", keep_path=False)
         self.copy("*.dll", src="CPP/7zip", dst="bin", keep_path=False)
-        self.copy("7z*", src="CPP/7zip", dst="bin", keep_path=False)
+        self.copy("7z*.so", src="CPP/7zip", dst="bin", keep_path=False)
+        self.copy("7z", src="CPP/7zip", dst="bin", keep_path=False)
+        self.copy("7za", src="CPP/7zip", dst="bin", keep_path=False)
+        self.copy("7zcl", src="CPP/7zip", dst="bin", keep_path=False)
+        self.copy("7zFM", src="CPP/7zip", dst="bin", keep_path=False)
+        self.copy("7zG", src="CPP/7zip", dst="bin", keep_path=False)
+        self.copy("7zr", src="CPP/7zip", dst="bin", keep_path=False)
+        self.copy("lzma", src="CPP/7zip", dst="bin", keep_path=False)
 
     def package_id(self):
         del self.info.settings.compiler
