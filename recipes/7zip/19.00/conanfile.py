@@ -49,9 +49,9 @@ class Package7Zip(ConanFile):
     def package(self):
         self.copy("DOC/License.txt", src="", dst="licenses")
         self.copy("DOC/unRarLicense.txt", src="", dst="licenses")
-        if self.settings.os_build == "Windows":
-            self.copy("*.exe", src="CPP/7zip", dst="bin", keep_path=False)
-            self.copy("*.dll", src="CPP/7zip", dst="bin", keep_path=False)
+        self.copy("*.exe", src="CPP/7zip", dst="bin", keep_path=False)
+        self.copy("*.dll", src="CPP/7zip", dst="bin", keep_path=False)
+        self.copy("7z*", src="CPP/7zip", dst="bin", keep_path=False)
 
     def package_id(self):
         del self.info.settings.compiler
