@@ -22,7 +22,7 @@ class Package7Zip(ConanFile):
     def source(self):
         tools.download(self.conan_data["sources"][self.version]["url"], "7zip.7z")
         tools.check_sha256("7zip.7z", self.conan_data["sources"][self.version]["sha256"])
-        self.run("7zr x 7zip.7z")
+        self.run("7zDec x 7zip.7z")
         os.unlink("7zip.7z")
 
     def build(self):
