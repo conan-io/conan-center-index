@@ -37,9 +37,9 @@ class GmpConan(ConanFile):
 
     def _configure_autotools(self):
         if not self._autotools:
-            self._autotools = AutoToolsBuildEnvironment(self)
+            self._autotools = AutoToolsBuildEnvironment(self, win_bash=tools.os_info.is_windows)
             if self.settings.os == "Macos":
-                configure_file = os.path.join(self._source_subfolder, "configure")
+                configure_file = "configure"
                 tools.replace_in_file(configure_file, r"-install_name \$rpath/", "-install_name ")
                 configure_stats = os.stat(configure_file)
                 os.chmod(configure_file, configure_stats.st_mode | stat.S_IEXEC)
@@ -52,12 +52,13 @@ class GmpConan(ConanFile):
                 configure_args.extend(["--disable-shared", "--enable-static"])
             if self.options.enable_cxx:
                 configure_args.append('--enable-cxx')
-            self._autotools.configure(args=configure_args, configure_dir=self._source_subfolder)
+            self._autotools.configure(args=configure_args)
         return self._autotools
 
     def build(self):
-        autotools = self._configure_autotools()
-        autotools.make()
+        with tools.chdir(self._source_subfolder):
+            autotools = self._configure_autotools()
+            autotools.make()
         # INFO: According to the gmp readme file, make check should not be omitted, but it causes timeouts on the CI server.
         if self.options.run_checks:
             autotools.make(args=['check'])
@@ -65,8 +66,9 @@ class GmpConan(ConanFile):
     def package(self):
         self.copy("COPYINGv2", dst="licenses", src=self._source_subfolder)
         self.copy("COPYING.LESSERv3", dst="licenses", src=self._source_subfolder)
-        autotools = self._configure_autotools()
-        autotools.install()
+        with tools.chdir(self._source_subfolder):
+            autotools = self._configure_autotools()
+            autotools.install()
         tools.rmdir(os.path.join(self.package_folder, "share"))
         # remove la files
         for la_name in ['libgmp.la', 'libgmpxx.la']:
