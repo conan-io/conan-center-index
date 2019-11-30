@@ -1,6 +1,8 @@
 from conans import ConanFile, CMake, tools
 import os
 
+def version_to_date(ver):
+    return ver[0:4] + "-" + ver[4:6] + "-" + ver[6:8]
 
 class Re2Conan(ConanFile):
     name = "re2"
@@ -31,10 +33,8 @@ class Re2Conan(ConanFile):
             self.options.remove("fPIC")
 
     def source(self):
-        version_src = self.conan_data["sources"][self.version].copy()
-        del version_src["compressed_dirname"]
-        tools.get(**version_src)
-        os.rename(self.conan_data["sources"][self.version]["compressed_dirname"], self._source_subfolder)
+        tools.get(**self.conan_data["sources"][self.version])
+        os.rename("re2-" + version_to_date(self.version), self._source_subfolder)
 
     def _configure_cmake(self):
         cmake = CMake(self)
