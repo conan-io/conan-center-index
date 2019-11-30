@@ -1,0 +1,5 @@
+sources:
+  "20191101":
+    url: "https://github.com/google/re2/archive/2019-11-01.tar.gz"
+    sha256: "5229d7e801bdb3d62a1b9d82de7c74eda223cb5e264d5bd04bcf31a933245d27"
+    compressed_dirname: re2-2019-11-01 
