@@ -20,7 +20,7 @@ int main(int argc, const char * const argv[])
     {
         if (int const * mi = boost::get_error_info<my_info>(x))
         {
-            std::cerr << "My info: " << *mi;
+            std::cerr << "My info: " << *mi << "\n";
         }
     }
 }
