@@ -14,14 +14,14 @@ class DefaultNameConan(ConanFile):
             cmake.definitions["HEADER_ONLY"] = "TRUE"
         else:
             cmake.definitions["Boost_USE_STATIC_LIBS"] = not self.options["boost"].shared
-        if not self.options["boost"].without_exception:
-            cmake.definitions["WITH_EXCEPTION"] = "TRUE"
         if not self.options["boost"].without_python:
             cmake.definitions["WITH_PYTHON"] = "TRUE"
         if not self.options["boost"].without_regex:
             cmake.definitions["WITH_REGEX"] = "TRUE"
         if not self.options["boost"].without_test:
             cmake.definitions["WITH_TEST"] = "TRUE"
+        if not self.options["boost"].without_timer:
+            cmake.definitions["WITH_TIMER"] = "TRUE"
 
         cmake.configure()
         cmake.build()
