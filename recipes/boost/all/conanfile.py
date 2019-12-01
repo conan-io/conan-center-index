@@ -817,6 +817,25 @@ class BoostConan(ConanFile):
         self.copy(pattern="*.lib", dst="lib", src=out_lib_dir, keep_path=False)
         self.copy(pattern="*.dll", dst="bin", src=out_lib_dir, keep_path=False)
 
+        arch = self.settings.get_safe('arch')
+        if arch.startswith("asm.js"):
+            # Boost Build creates the libraries we need, but needs us to run
+            # one more step to finish.
+            so
+            for file in os.listdir(os.path.join(self.source_folder, out_lib_dir)):
+                if file.startswith("lib") and file.endswith(".bc"):
+                    a_file = file[:-3] + ".a"
+                    cmd = "emar q {dst} {src}".format(
+                        dst=os.path.join(self.package_folder, "lib", a_file),
+                        src=os.path.join(self.source_folder, out_lib_dir, file),
+                    )
+                    print(cmd)
+                    self.run(cmd)
+
+            # emar q .a .bc
+            #
+        # self.copy(pattern="*.bc", dst="lib", src=out_lib_dir, keep_path=False)
+
     def package_info(self):
         gen_libs = [] if self.options.header_only else tools.collect_libs(self)
 
