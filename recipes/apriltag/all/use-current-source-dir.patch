@@ -1,0 +1,20 @@
+--- CMakeLists.txt	2019-06-13 16:21:58.000000000 -0700
++++ CMakeLists_fix.txt	2019-11-13 14:35:43.196151985 -0800
+@@ -34,7 +34,7 @@
+     LIBRARY_OUTPUT_DIRECTORY ${CMAKE_INSTALL_LIBDIR}
+ )
+ 
+-file(GLOB TAG_FILES ${CMAKE_SOURCE_DIR}/tag*.c)
++file(GLOB TAG_FILES ${CMAKE_CURRENT_SOURCE_DIR}/tag*.c)
+ set_source_files_properties(SOURCE ${TAG_FILES} PROPERTIES COMPILE_FLAGS -O0)
+ 
+ # install library
+@@ -44,7 +44,7 @@
+ )
+ 
+ # install header file hierarchy
+-file(GLOB_RECURSE HEADER_FILES RELATIVE ${CMAKE_SOURCE_DIR} *.h)
++file(GLOB_RECURSE HEADER_FILES RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} *.h)
+ foreach(HEADER ${HEADER_FILES})
+     string(REGEX MATCH "(.*)[/\\]" DIR ${HEADER})
+     install(FILES ${HEADER} DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/${PROJECT_NAME}/${DIR})
