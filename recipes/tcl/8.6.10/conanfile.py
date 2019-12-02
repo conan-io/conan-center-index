@@ -1,13 +1,11 @@
 from conans import ConanFile, AutoToolsBuildEnvironment, tools
 from conans.errors import ConanInvalidConfiguration
-from conans.util.env_reader import get_env
 import os
-import shutil
-import tempfile
 
 
 class TclConan(ConanFile):
     name = "tcl"
+    version = "8.6.10"
     description = "Tcl is a very powerful but easy to learn dynamic programming language."
     topics = ("conan", "tcl", "scripting", "programming")
     url = "https://github.com/conan-io/conan-center-index"
@@ -34,7 +32,7 @@ class TclConan(ConanFile):
         del self.settings.compiler.cppstd
 
     def build_requirements(self):
-        if self._is_mingw_windows:
+        if self._is_mingw_windows and "CONAN_BASH_PATH" not in os.environ:
             self.build_requires("msys2/20161025")
 
     def source(self):
@@ -197,6 +195,7 @@ class TclConan(ConanFile):
         self.cpp_info.libs = libs
         self.cpp_info.system_libs = systemlibs
         self.cpp_info.includedirs = ["include"]
+        self.cpp_info.names["cmake_find_package"] = "TCL"
 
         if self.settings.os == "Macos":
             self.cpp_info.frameworks = ["Cocoa"]
@@ -211,7 +210,6 @@ class TclConan(ConanFile):
         self.env_info.TCL_ROOT = tcl_root
 
         tclsh_list = list(filter(lambda fn: fn.startswith("tclsh"), os.listdir(os.path.join(self.package_folder, "bin"))))
-        assert(len(tclsh_list))
         tclsh = os.path.join(self.package_folder, "bin", tclsh_list[0])
         self.output.info("Setting TCLSH environment variable to {}".format(tclsh))
         self.env_info.TCLSH = tclsh
