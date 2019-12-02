@@ -1,0 +1,13 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index b97f24e..45b95f4 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -10,7 +10,7 @@ aux_source_directory(. APRILTAG_SRCS)
+ set(CMAKE_BUILD_TYPE Release)
+ 
+ # Library
+-add_library(${PROJECT_NAME} SHARED ${APRILTAG_SRCS} ${COMMON_SRC})
++add_library(${PROJECT_NAME} ${APRILTAG_SRCS} ${COMMON_SRC})
+ if (MSVC)
+     # FindThreads will not find pthread.h with MSVC
+     # winmm is necessary for __imp_timeGetTime
