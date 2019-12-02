@@ -30,9 +30,8 @@ class TclConan(ConanFile):
         return self.settings.os == "Windows" and self.settings.compiler == "gcc"
 
     def configure(self):
-        if self.settings.compiler != "Visual Studio":
-            del self.settings.compiler.libcxx
-            del self.settings.compiler.cppstd
+        del self.settings.compiler.libcxx
+        del self.settings.compiler.cppstd
 
     def build_requirements(self):
         if self._is_mingw_windows:
