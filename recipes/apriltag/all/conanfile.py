@@ -6,7 +6,7 @@ from conans.errors import ConanException
 
 class apriltagConan(ConanFile):
     name = "apriltag"
-    license = "BSD 2-Clause"
+    license = "BSD-2-Clause"
     homepage = "https://april.eecs.umich.edu/software/apriltag"
     url = "https://github.com/conan-io/conan-center-index"
     description = ("AprilTag is a visual fiducial system, useful for a wide variety of tasks \
