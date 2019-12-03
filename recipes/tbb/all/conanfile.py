@@ -15,7 +15,7 @@ that have future-proof scalability"""
     topics = ("conan", "tbb", "threading", "parallelism", "tbbmalloc")
     settings = "os", "compiler", "build_type", "arch"
     options = {"shared": [True, False], "fPIC": [True, False], "tbbmalloc": [True, False], "tbbproxy": [True, False]}
-    default_options = {"shared": False, "fPIC": True, "tbbmalloc": False, "tbbproxy": False}
+    default_options = {"shared": True, "fPIC": True, "tbbmalloc": False, "tbbproxy": False}
     _source_subfolder = "source_subfolder"
 
     def build_requirements(self):
@@ -32,17 +32,12 @@ that have future-proof scalability"""
            self.settings.compiler == "apple-clang" and \
            Version(self.settings.compiler.version.value) < "8.0":
             raise ConanInvalidConfiguration("%s %s couldn't be built by apple-clang < 8.0" % (self.name, self.version))
-        if self.settings.os != "Windows" and self.options.shared:
+        if self.options.shared:
             self.output.warn("Intel-TBB strongly discourages usage of static linkage")
-        if self.settings.os != "Windows" and self.options.tbbproxy and \
+        if self.options.tbbproxy and \
            (not self.options.shared or \
             not self.options.tbbmalloc):
             raise ConanInvalidConfiguration("tbbproxy needs tbbmaloc and shared options")
-        if self.settings.os == "Windows" and self.options.tbbproxy and \
-           not self.options.tbbmalloc:
-            raise ConanInvalidConfiguration("tbbproxy needs tbbmaloc and shared options")
-        if self.settings.os == "Windows" and not self.options.shared:
-            raise ConanInvalidConfiguration("TBB could not be built as static lib on Windows")
 
     @property
     def is_msvc(self):
@@ -103,7 +98,7 @@ that have future-proof scalability"""
                 add_flag('CFLAGS', '-mrtm')
                 add_flag('CXXFLAGS', '-mrtm')
 
-            targets = self.get_targets()
+            targets = ["tbb", "tbbmalloc", "tbbproxy"]
             if self.is_msvc:
                 # intentionally not using vcvars for clang-cl yet
                 with tools.vcvars(self.settings):
@@ -138,6 +133,10 @@ that have future-proof scalability"""
                 for fpath in os.listdir(outputlibdir):
                     self.run("ln -s \"%s\" \"%s\"" %
                              (fpath, fpath[0:fpath.rfind("." + extension) + len(extension) + 1]))
+
+    def package_id(self):
+        del self.info.options.tbbmalloc
+        del self.info.options.tbbmalloc_proxy
 
     def package_info(self):
         suffix = "_debug" if self.settings.build_type == "Debug" else ""
