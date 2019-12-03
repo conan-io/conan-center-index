@@ -34,10 +34,10 @@ class apriltagConan(ConanFile):
         tools.get(**self.conan_data["sources"][self.version])
         extracted_dir = self.name + "-" + self.version
         os.rename(extracted_dir, self._source_subfolder)
-
-    def build(self):
         for patch in self.conan_data["patches"][self.version]:
             tools.patch(**patch)
+
+    def build(self):
         cmake = self._configure_cmake()
         cmake.build()
 
