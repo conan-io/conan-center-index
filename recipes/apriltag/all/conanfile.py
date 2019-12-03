@@ -52,4 +52,4 @@ class apriltagConan(ConanFile):
         self.cpp_info.libs = tools.collect_libs(self)
         if self.settings.os == "Linux":
             self.cpp_info.system_libs = ["m", "pthread"]
-        self.cpp_info.includedirs = [os.path.join("include","apriltag")]
+        self.cpp_info.includedirs = ["include",os.path.join("include","apriltag")]
