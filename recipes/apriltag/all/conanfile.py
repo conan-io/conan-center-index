@@ -1,6 +1,5 @@
 import os
 import stat
-import shutil
 from conans import ConanFile, tools, CMake, AutoToolsBuildEnvironment
 from conans.errors import ConanException
 
@@ -45,11 +44,12 @@ class apriltagConan(ConanFile):
         self.copy("LICENSE.md", src=self._source_subfolder, dst="licenses")
         cmake = self._configure_cmake()
         cmake.install()
-        shutil.rmtree(self.package_folder + "/share")
-        shutil.rmtree(self.package_folder + "/lib/pkgconfig")
+        tools.rmdir(os.path.join(self.package_folder, "share"))
+        tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
+        tools.rmdir(os.path.join(self.package_folder, "bin"))
 
     def package_info(self):
         self.cpp_info.libs = tools.collect_libs(self)
         if self.settings.os == "Linux":
             self.cpp_info.system_libs = ["m", "pthread"]
-        self.cpp_info.includedirs = ['include/apriltag']  # Ordered list of include paths
+        self.cpp_info.includedirs = [os.path.join("include","apriltag")]
