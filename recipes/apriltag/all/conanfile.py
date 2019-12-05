@@ -1,12 +1,11 @@
 import os
 import stat
-import shutil
 from conans import ConanFile, tools, CMake, AutoToolsBuildEnvironment
-from conans.errors import ConanException
+from conans.errors import ConanException,ConanInvalidConfiguration
 
 class apriltagConan(ConanFile):
     name = "apriltag"
-    license = "BSD 2-Clause"
+    license = "BSD-2-Clause"
     homepage = "https://april.eecs.umich.edu/software/apriltag"
     url = "https://github.com/conan-io/conan-center-index"
     description = ("AprilTag is a visual fiducial system, useful for a wide variety of tasks \
@@ -26,9 +25,9 @@ class apriltagConan(ConanFile):
             self._cmake.configure()
         return self._cmake
 
-    def config_options(self):
-        if self.settings.os == "Windows":
-            del self.options.fPIC
+    def configure(self):
+        if self.settings.os != "Linux":
+            raise ConanInvalidConfiguration("Apriltag officially supported only on Linux")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
@@ -45,9 +44,12 @@ class apriltagConan(ConanFile):
         self.copy("LICENSE.md", src=self._source_subfolder, dst="licenses")
         cmake = self._configure_cmake()
         cmake.install()
-        shutil.rmtree(self.package_folder + "/share")
-        shutil.rmtree(self.package_folder + "/lib/pkgconfig")
+        tools.rmdir(os.path.join(self.package_folder, "share"))
+        tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
+        tools.rmdir(os.path.join(self.package_folder, "bin"))
 
     def package_info(self):
         self.cpp_info.libs = tools.collect_libs(self)
-        self.cpp_info.includedirs = ['include/apriltag']  # Ordered list of include paths
+        if self.settings.os == "Linux":
+            self.cpp_info.system_libs = ["m", "pthread"]
+        self.cpp_info.includedirs = ["include",os.path.join("include","apriltag")]
