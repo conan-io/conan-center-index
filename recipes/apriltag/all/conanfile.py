@@ -1,7 +1,7 @@
 import os
 import stat
 from conans import ConanFile, tools, CMake, AutoToolsBuildEnvironment
-from conans.errors import ConanException
+from conans.errors import ConanException,ConanInvalidConfiguration
 
 class apriltagConan(ConanFile):
     name = "apriltag"
@@ -25,9 +25,9 @@ class apriltagConan(ConanFile):
             self._cmake.configure()
         return self._cmake
 
-    def config_options(self):
-        if self.settings.os == "Windows":
-            del self.options.fPIC
+    def configure(self):
+        if self.settings.os != "Linux":
+            raise ConanInvalidConfiguration("Apriltag officially supported only on Linux")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
