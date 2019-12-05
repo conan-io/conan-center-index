@@ -110,8 +110,7 @@ class Assimp(ConanFile):
 
     def requirements(self):
         if not self.options.internal_irrxml:
-            # Using requirement from conan-center
-            self.requires.add("IrrXML/1.2@conan/stable")
+            self.requires.add("irrxml/1.2")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
