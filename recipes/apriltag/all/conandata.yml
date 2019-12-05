@@ -4,7 +4,5 @@ sources:
     sha256: "7349e1fcc8b2979230b46c0d62ccf2ba2bbd611d87ef80cfd37ffe74425f5efb"
 patches:
   "3.1.1":
-    - patch_file: "use-current-source-dir.patch"
-      base_path: "source_subfolder"
-    - patch_file: "remove-hardcoded-shared.patch"
+    - patch_file: "patches/fix-cmake.patch"
       base_path: "source_subfolder"
