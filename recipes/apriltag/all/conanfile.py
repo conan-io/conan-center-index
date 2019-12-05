@@ -16,7 +16,7 @@ class apriltagConan(ConanFile):
     default_options = {'shared': False, "fPIC": True}
     generators = "cmake"
     topics = ("conan", "apriltag", "robotics")
-    exports_sources = ["CMakeLists.txt", "*.patch"]
+    exports_sources = ["CMakeLists.txt", "patches/*"]
     _source_subfolder = "source_subfolder"
     _cmake = None
 
