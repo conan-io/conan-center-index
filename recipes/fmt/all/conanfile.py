@@ -1,4 +1,6 @@
 from conans import ConanFile, CMake, tools
+from conans.errors import ConanInvalidConfiguration
+from conans.tools import Version
 import os
 
 
@@ -32,6 +34,13 @@ class FmtConan(ConanFile):
             self.settings.clear()
             del self.options.fPIC
             del self.options.shared
+        elif self.version == "6.1.0" and \
+             self.settings.os == "Windows" and \
+             self.settings.compiler == "Visual Studio" and \
+             Version(self.settings.compiler.version) < "16" and \
+             self.options.shared:
+            raise ConanInvalidConfiguration("Could not support this specific configuration. "
+                                            "Try static or header-only instead.")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
