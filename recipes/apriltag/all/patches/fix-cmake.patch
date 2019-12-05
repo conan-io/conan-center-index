@@ -1,8 +1,6 @@
-diff --git a/CMakeLists.txt b/CMakeLists.txt
-index b97f24e..ff4af67 100644
---- a/CMakeLists.txt
-+++ b/CMakeLists.txt
-@@ -10,7 +10,8 @@ aux_source_directory(. APRILTAG_SRCS)
+--- CMakeLists.txt	2019-06-13 16:21:58.000000000 -0700
++++ CMakeLists_fix.txt	2019-12-05 14:16:17.484307439 -0800
+@@ -10,7 +10,8 @@
  set(CMAKE_BUILD_TYPE Release)
  
  # Library
@@ -12,7 +10,7 @@ index b97f24e..ff4af67 100644
  if (MSVC)
      # FindThreads will not find pthread.h with MSVC
      # winmm is necessary for __imp_timeGetTime
-@@ -34,7 +35,7 @@ set_target_properties(${PROJECT_NAME} PROPERTIES
+@@ -34,7 +35,7 @@
      LIBRARY_OUTPUT_DIRECTORY ${CMAKE_INSTALL_LIBDIR}
  )
  
@@ -21,7 +19,7 @@ index b97f24e..ff4af67 100644
  set_source_files_properties(SOURCE ${TAG_FILES} PROPERTIES COMPILE_FLAGS -O0)
  
  # install library
-@@ -44,7 +45,7 @@ install(TARGETS ${PROJECT_NAME} EXPORT apriltag
+@@ -44,7 +45,7 @@
  )
  
  # install header file hierarchy
@@ -30,3 +28,17 @@ index b97f24e..ff4af67 100644
  foreach(HEADER ${HEADER_FILES})
      string(REGEX MATCH "(.*)[/\\]" DIR ${HEADER})
      install(FILES ${HEADER} DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/${PROJECT_NAME}/${DIR})
+@@ -64,11 +65,13 @@
+ # Examples
+ # apriltag_demo
+ add_executable(apriltag_demo example/apriltag_demo.c)
++set_target_properties(apriltag_demo PROPERTIES C_STANDARD 99)
+ target_link_libraries(apriltag_demo apriltag)
+ 
+ # opencv_demo
+ if(OpenCV_FOUND)
+     add_executable(opencv_demo example/opencv_demo.cc)
++    set_target_properties(opencv_demo PROPERTIES C_STANDARD 99 CXX_STANDARD 11)
+     target_link_libraries(opencv_demo apriltag ${OpenCV_LIBRARIES})
+     install(TARGETS opencv_demo RUNTIME DESTINATION bin)
+ endif(OpenCV_FOUND)
