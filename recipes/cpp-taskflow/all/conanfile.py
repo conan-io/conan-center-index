@@ -11,7 +11,6 @@ class CppTaskflowConan(ConanFile):
     topics = ("conan", "cpp-taskflow", "tasking", "parallelism")
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/cpp-taskflow/cpp-taskflow"
-    author = "Hopobcn <hopobcn@gmail.com>"
     license = "MIT"
 
     no_copy_source = True
