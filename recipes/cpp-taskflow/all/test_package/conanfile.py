@@ -10,7 +10,6 @@ class TestPackageConan(ConanFile):
 
     def configure(self):    
         if not self.settings.compiler.cppstd:
-            self.settings.compiler.cppstd = 17
         elif self.settings.compiler.cppstd.value < "17":
             raise ConanInvalidConfiguration("cpp-taskflow requires c++17")
     
