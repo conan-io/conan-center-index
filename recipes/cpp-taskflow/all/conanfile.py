@@ -34,7 +34,7 @@ class CppTaskflowConan(ConanFile):
         # Exclude compilers not supported by cpp-taskflow
         if (compiler == "gcc" and compiler_version < "7.3") or \
            (compiler == "clang" and compiler_version < "6") or \
-           (compiler == "apple-clang" and compiler_version < "9") or \
+           (compiler == "apple-clang" and compiler_version < "10.0") or \
            (compiler == "Visual Studio" and compiler_version < "15"):
           raise ConanInvalidConfiguration("cpp-taskflow requires C++17 standard or higher. {} {} is not supported.".format(compiler, compiler.version))
 
