@@ -1,6 +1,8 @@
 from conans import ConanFile, tools, AutoToolsBuildEnvironment
+from conans.errors import ConanInvalidConfiguration
 import os
 import platform
+import shutil
 from contextlib import contextmanager
 
 
@@ -10,7 +12,6 @@ class LibffiConan(ConanFile):
     topics = ("conan", "libffi", "runtime", "foreign-function-interface", "runtime-library")
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://sourceware.org/libffi/"
-    author = "Bincrafters <bincrafters@gmail.com>"
     license = "MIT"
     settings = "os", "compiler", "build_type", "arch"
     options = {
@@ -21,7 +22,7 @@ class LibffiConan(ConanFile):
         "shared": False,
         "fPIC": True,
     }
-    _source_subfolder = "sources"
+    _source_subfolder = "source_subfolder"
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
@@ -237,6 +238,7 @@ class LibffiConan(ConanFile):
                 autotools.make(target="check")
 
     def package(self):
+        self.copy("LICENSE", src=os.path.join(self.source_folder, self._source_subfolder), dst="licenses")
         if self.settings.os == "Windows":
             self.copy("*.h", src="{}/include".format(self.build_folder), dst="include")
         if self.settings.compiler == "Visual Studio":
@@ -247,24 +249,24 @@ class LibffiConan(ConanFile):
             with self._create_auto_tools_environment(autotools):
                 with tools.chdir(self.build_folder):
                     autotools.install()
-        tools.rmdir(os.path.join(self.package_folder, "share"))
-        tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
-        pc = os.path.join(self.package_folder, "lib", "libffi.la")
-        if os.path.isfile(pc):
-            os.unlink(pc)
-        self.copy("LICENSE", src=os.path.join(self.source_folder, self._source_subfolder), dst="licenses")
+            os.rename(os.path.join(self.package_folder, "lib", "libffi-{}".format(self.version), "include"),
+                      os.path.join(self.package_folder, "include"))
+            tools.rmdir(os.path.join(self.package_folder, "lib", "libffi-{}".format(self.version)))
+            tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
+            tools.rmdir(os.path.join(self.package_folder, "share"))
+
+            if self.settings.arch == "x86_64":
+                lib_arch_path = os.path.join(self.package_folder, "lib64")
+            elif self.settings.arch == "x86":
+                lib_arch_path = os.path.join(self.package_folder, "lib32")
+            else:
+                raise ConanInvalidConfiguration("Unsupported architecture")
+            for f in os.listdir(os.path.join(lib_arch_path)):
+                shutil.move(os.path.join(lib_arch_path, f), os.path.join(self.package_folder, "lib"))
+            tools.rmdir(lib_arch_path)
+            os.unlink(os.path.join(self.package_folder, "lib", "libffi.la"))
 
     def package_info(self):
-        if self.settings.os == "Windows":
-            self.cpp_info.includedirs = ["include"]
-        else:
-            self.cpp_info.includedirs = [os.path.join("lib", "{}-{}".format(self.name, self.version), "include")]
-        libdirs = ["lib"]
         if not self.options.shared:
             self.cpp_info.defines += ["FFI_STATIC"]
-        if os.path.exists(os.path.join(self.package_folder, "lib64")):
-            libdirs.append("lib64")
-        if os.path.exists(os.path.join(self.package_folder, "lib32")):
-            libdirs.append("lib32")
-        self.cpp_info.libdirs = libdirs
         self.cpp_info.libs = tools.collect_libs(self)
