@@ -5,14 +5,14 @@ Subject: [PATCH 1/2] This bug was fixed in VC++ 2013, workaround no longer
  applicable.
 
 ---
- include/boost/proto/expr.hpp     | 2 +-
- include/boost/proto/generate.hpp | 2 +-
+ boost/proto/expr.hpp     | 2 +-
+ boost/proto/generate.hpp | 2 +-
  2 files changed, 2 insertions(+), 2 deletions(-)
 
-diff --git a/include/boost/proto/expr.hpp b/include/boost/proto/expr.hpp
+diff --git a/boost/proto/expr.hpp b/boost/proto/expr.hpp
 index 1bd64985..2c355c2b 100644
---- a/include/boost/proto/expr.hpp
-+++ b/include/boost/proto/expr.hpp
+--- a/boost/proto/expr.hpp
++++ b/boost/proto/expr.hpp
 @@ -92,7 +92,7 @@ namespace boost { namespace proto
  
          // Work-around for:
@@ -22,10 +22,10 @@ index 1bd64985..2c355c2b 100644
          template<typename T, typename Expr, typename C, typename U>
          BOOST_FORCEINLINE
          Expr make_terminal(T &t, Expr *, proto::term<U C::*> *)
-diff --git a/include/boost/proto/generate.hpp b/include/boost/proto/generate.hpp
+diff --git a/boost/proto/generate.hpp b/boost/proto/generate.hpp
 index 47627411..3a600c48 100644
---- a/include/boost/proto/generate.hpp
-+++ b/include/boost/proto/generate.hpp
+--- a/boost/proto/generate.hpp
++++ b/boost/proto/generate.hpp
 @@ -230,7 +230,7 @@ namespace boost { namespace proto
  
          // Work-around for:
@@ -43,14 +43,14 @@ Subject: [PATCH 2/2] Suppress C4180 warning from extends operators
 
 The warning is harmless and can be safely suppressed.
 ---
- include/boost/proto/extends.hpp   | 4 ++++
- include/boost/proto/proto_fwd.hpp | 2 ++
+ boost/proto/extends.hpp   | 4 ++++
+ boost/proto/proto_fwd.hpp | 2 ++
  2 files changed, 6 insertions(+)
 
-diff --git a/include/boost/proto/extends.hpp b/include/boost/proto/extends.hpp
+diff --git a/boost/proto/extends.hpp b/boost/proto/extends.hpp
 index 1fb04290..38217261 100644
---- a/include/boost/proto/extends.hpp
-+++ b/include/boost/proto/extends.hpp
+--- a/boost/proto/extends.hpp
++++ b/boost/proto/extends.hpp
 @@ -74,6 +74,7 @@ namespace boost { namespace proto
      ///
      #define BOOST_PROTO_DEFINE_FUN_OP_IMPL_(Z, N, DATA, Const)                                      \
@@ -83,10 +83,10 @@ index 1fb04290..38217261 100644
          BOOST_PROTO_DISABLE_MSVC_C4714 BOOST_FORCEINLINE                                            \
          typename BOOST_PROTO_RESULT_OF<                                                             \
              proto_generator(                                                                        \
-diff --git a/include/boost/proto/proto_fwd.hpp b/include/boost/proto/proto_fwd.hpp
+diff --git a/boost/proto/proto_fwd.hpp b/boost/proto/proto_fwd.hpp
 index 2078dfca..56ae7517 100644
---- a/include/boost/proto/proto_fwd.hpp
-+++ b/include/boost/proto/proto_fwd.hpp
+--- a/boost/proto/proto_fwd.hpp
++++ b/boost/proto/proto_fwd.hpp
 @@ -124,9 +124,11 @@
  #endif
  
