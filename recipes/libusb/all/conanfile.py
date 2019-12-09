@@ -91,6 +91,10 @@ class LibUSBConan(ConanFile):
 
     def build(self):
         if self._is_msvc:
+            for vcxproj in ["fxload_2017", "getopt_2017", "hotplugtest_2017", "libusb_dll_2017",
+                            "libusb_static_2017", "listdevs_2017", "stress_2017", "testlibusb_2017", "xusb_2017"]:
+                vcxproj_path = os.path.join(self._source_subfolder, "msvc", "%s.vcxproj" % vcxproj)
+                tools.replace_in_file(vcxproj_path, "<WindowsTargetPlatformVersion>10.0.16299.0</WindowsTargetPlatformVersion>", "")
             self._build_visual_studio()
         else:
             autotools = self._configure_autotools()
