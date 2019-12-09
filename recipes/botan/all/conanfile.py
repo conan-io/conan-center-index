@@ -60,18 +60,18 @@ class BotanConan(ConanFile):
 
     def requirements(self):
         if self.options.bzip2:
-            self.requires('bzip2/1.0.6@conan/stable')
+            self.requires("bzip2/1.0.6")
         if self.options.openssl:
-            self.requires('OpenSSL/1.0.2o@conan/stable')
+            self.requires("OpenSSL/1.0.2s")
         if self.options.zlib:
-            self.requires('zlib/1.2.11@conan/stable')
+            self.requires("zlib/1.2.11")
         if self.options.sqlite3:
-            self.requires('sqlite3/3.25.3@bincrafters/stable')
+            self.requires("sqlite3/3.30.1")
         if self.options.boost:
-            self.requires("boost/1.69.0@conan/stable")
+            self.requires("boost/1.70.0")
 
     def config_options(self):
-        if self.settings.compiler != 'Visual Studio':
+        if self.settings.compiler != "Visual Studio":
             self.check_cxx_abi_settings()
 
         if self.options.single_amalgamation:
