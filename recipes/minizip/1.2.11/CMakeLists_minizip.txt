@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 2.8)
-#project(minizip)
+project(minizip)
 
-include(../../../conanbuildinfo.cmake)
+include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
 conan_basic_setup()
 
 set(SOURCES ioapi.c mztools.c unzip.c zip.c)
@@ -22,11 +22,7 @@ target_include_directories(minizip PRIVATE
   ${CMAKE_CURRENT_SOURCE_DIR}/../../_build
   ${CMAKE_CURRENT_SOURCE_DIR}/../../_build/source_subfolder)
 
-find_library(ZLIB_LIBRARY NAMES z zlib zlibd zlibstatic zlibstaticd PATHS
-  ${CMAKE_CURRENT_SOURCE_DIR}/../../_build
-  ${CMAKE_CURRENT_SOURCE_DIR}/../../_build/lib)
-
-target_link_libraries(minizip PRIVATE ${ZLIB_LIBRARY})
+target_link_libraries(minizip PRIVATE ${CONAN_LIBS})
 target_compile_definitions(minizip PRIVATE MINIZIP_BUILDING)
 if(BUILD_SHARED_LIBS)
   set_target_properties(minizip PROPERTIES INSTALL_RPATH "$ORIGIN" BUILD_WITH_INSTALL_RPATH True)
