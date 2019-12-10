@@ -15,6 +15,10 @@ class PthreadWin32Conan(ConanFile):
     default_options = {'shared': 'False'}
     _source_subfolder = "source_subfolder"
 
+    def configure(self):
+        del self.settings.compiler.libcxx
+        del self.settings.compiler.cppstd
+   
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
         os.rename('pthread-win32-19fd5054b29af1b4e3b3278bfffbb6274c6c89f5', self._source_subfolder)
@@ -30,7 +34,7 @@ class PthreadWin32Conan(ConanFile):
             msbuild.build(solution_name, targets=targets, platforms={"x86": "Win32"})
 
     def package(self):
-        self.copy(pattern="LICENSE", dst="COPYING", src=self._source_subfolder)
+        self.copy(pattern="COPYING", dst="licenses", src=self._source_subfolder)
         self.copy(pattern="pthread.h", dst="include", src=self._source_subfolder)
         self.copy(pattern="sched.h", dst="include", src=self._source_subfolder)
         self.copy(pattern="semaphore.h", dst="include", src=self._source_subfolder)
