@@ -19,7 +19,7 @@ class CprConan(ConanFile):
                        "use_ssl": True,
                        "fPIC": True}
 
-    generators = "cmake"
+    generators = "cmake", "cmake_find_package"
     _source_subfolder = "cpr"
 
     def requirements(self):
