@@ -72,6 +72,6 @@ class VorbisConan(ConanFile):
     def package_info(self):
         self.cpp_info.libs = ['vorbisfile', 'vorbisenc', 'vorbis']
         if self.settings.os == "Linux":
-            self.cpp_info.libs.append("m")
+            self.cpp_info.system_libs.append("m")
         self.cpp_info.name = 'VORBIS'
         self.cpp_info.names['pkg_config'] = 'vorbis'
