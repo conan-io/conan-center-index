@@ -88,7 +88,9 @@ class LibMP3LameConan(ConanFile):
             shutil.move(os.path.join(self.package_folder, 'lib', name),
                         os.path.join(self.package_folder, 'lib', 'mp3lame.lib'))
         tools.rmdir(os.path.join(self.package_folder, 'share'))
-        os.remove(os.path.join(self.package_folder, 'lib', 'libmp3lame.la'))
+        la_file = os.path.join(self.package_folder, "lib", "libmp3lame.la")
+        if os.path.isfile(la_file):
+            os.unlink(la_file)
 
     def package_info(self):
         self.cpp_info.libs = ['mp3lame']
