@@ -15,24 +15,22 @@ class TgbotConan(ConanFile):
     default_options = {"fPIC": True, "shared": False}
 
     generators = "cmake", "cmake_find_package"
-    exports_sources = ['CMakeLists.txt']
+    exports_sources = ['CMakeLists.txt', 'patches/*']
     requires = (
         "boost/1.71.0",
         "openssl/1.1.1d",
-        "libcurl/7.66.0"
+        "libcurl/7.67.0"
     )
 
-    _source_subfolder = "source_subfolder"
+    _source_subfolder = "tgbot"
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
         extracted_dir = self.name + "-cpp-" + self.version
         os.rename(extracted_dir, self._source_subfolder)
 
-        boost_version = self.deps_cpp_info['boost'].version
-        tools.replace_in_file(os.path.join(self._source_subfolder, "CMakeLists.txt"),
-                              "find_package(Boost 1.59.0 COMPONENTS system REQUIRED)",
-                              "find_package(Boost {} COMPONENTS system REQUIRED)".format(boost_version))
+        for patch in self.conan_data["patches"][self.version]:
+            tools.patch(**patch)
 
     def config_options(self):
         if self.settings.os == "Windows":
