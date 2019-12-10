@@ -213,16 +213,6 @@ class BotanConan(ConanFile):
         if self.options.boost:
             build_flags.append('--with-boost')
             build_flags.extend(self._dependency_build_flags("boost"))
-            # required boost libraries are listed in Botan's src/utils/boost/info.txt
-            # under the <libs></libs> tag...
-            # Note that boost_system is actually a header-only library as of
-            # boost 1.69. We are linking this for compatibility with older boost
-            # versions...
-            boost_system = [lib for lib in self.deps_cpp_info["boost"].libs if "boost_system" in lib]
-            if len(boost_system) != 1:
-                raise ConanException("did not find a comprehensive boost_system library name: " + str(boost_system))
-            boost_system_name = boost_system[0] + ".lib" if self.settings.os == "Windows" else boost_system[0]
-            build_flags.append('--boost-library-name={}'.format(boost_system_name))
 
         if self.settings.build_type == 'RelWithDebInfo' or self.options.debug_info:
             build_flags.append('--with-debug-info')
