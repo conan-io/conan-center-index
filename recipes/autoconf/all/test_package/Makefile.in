@@ -1,0 +1,12 @@
+SRCS = test_package.c test_package.cpp
+
+OBJS := $(patsubst %, %.o, $(SRCS))
+
+test_package: $(OBJS)
+	@CXX@ $^ -o $@
+
+%.cpp.o: %.cpp
+	@CXX@ @CXXFLAGS@ @CPPFLAGS@ -c $< -o $@
+
+%.c.o: %.c
+	@CC@ @CFLAGS@ @CPPFLAGS@ -c $< -o $@
