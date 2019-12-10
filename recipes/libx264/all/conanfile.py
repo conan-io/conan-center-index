@@ -108,7 +108,7 @@ class LibX264Conan(ConanFile):
         else:
             self.cpp_info.libs = ['x264']
         if self.settings.os == "Linux":
-            self.cpp_info.libs.extend(['dl', 'pthread', 'm'])
+            self.cpp_info.system_libs.extend(['dl', 'pthread', 'm'])
         if self.settings.os == "Android":
-            self.cpp_info.libs.extend(['dl', 'm'])
+            self.cpp_info.system_libs.extend(['dl', 'm'])
         self.cpp_info.names['pkg_config'] = 'x264'
