@@ -1,9 +1,4 @@
-
-#!/usr/bin/env python
-# -*- coding: utf-8 -*-
-
 import os
-
 from conans import ConanFile, CMake, tools
 
 
@@ -28,18 +23,16 @@ class TgbotConan(ConanFile):
     )
 
     _source_subfolder = "source_subfolder"
-    _version_map = {'89ec4e3': '89ec4e3d1186e1a250adb18cb6a8cce7c4756bf6'}
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
-        extracted_dir = self.name + "-cpp-" + self._version_map[self.version]
+        extracted_dir = self.name + "-cpp-" + self.version
         os.rename(extracted_dir, self._source_subfolder)
 
         boost_version = self.deps_cpp_info['boost'].version
         tools.replace_in_file(os.path.join(self._source_subfolder, "CMakeLists.txt"),
                               "find_package(Boost 1.59.0 COMPONENTS system REQUIRED)",
                               "find_package(Boost {} COMPONENTS system REQUIRED)".format(boost_version))
-
 
     def config_options(self):
         if self.settings.os == "Windows":
