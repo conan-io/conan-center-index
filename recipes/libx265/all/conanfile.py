@@ -1,6 +1,7 @@
 from conans import ConanFile, CMake, tools
 import os
 import shutil
+import glob
 
 
 class LibX265Conan(ConanFile):
@@ -27,45 +28,34 @@ class LibX265Conan(ConanFile):
         os.rename(extracted_dir, "sources")
 
     def build(self):
-        if self.settings.compiler == 'Visual Studio':
-            with tools.vcvars(self.settings, filter_known_paths=False):
-                self.build_cmake()
-        else:
-            self.build_cmake()
-
-    def build_cmake(self):
-        if self.settings.os == 'Windows':
-            tools.replace_in_file(os.path.join('sources', 'source', 'CMakeLists.txt'),
-                                  '${PROJECT_BINARY_DIR}/Debug/x265.pdb',
-                                  '${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/x265.pdb')
-            tools.replace_in_file(os.path.join('sources', 'source', 'CMakeLists.txt'),
-                                  '${PROJECT_BINARY_DIR}/x265.pdb',
-                                  '${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/x265.pdb')
-        elif self.settings.os == "Android":
-            tools.replace_in_file(os.path.join('sources', 'source', 'CMakeLists.txt'),
-                "list(APPEND PLATFORM_LIBS pthread)", "")
-            tools.replace_in_file(os.path.join('sources', 'source', 'CMakeLists.txt'),
-                "list(APPEND PLATFORM_LIBS rt)", "")
-        cmake = CMake(self, set_cmake_flags=True)
-        cmake.definitions['ENABLE_SHARED'] = self.options.shared
-        cmake.definitions['ENABLE_LIBNUMA'] = False
-        if self.settings.os == "Macos":
-            cmake.definitions['CMAKE_SHARED_LINKER_FLAGS'] = '-Wl,-read_only_relocs,suppress'
-        if self.settings.os != 'Windows':
-            cmake.definitions['CMAKE_POSITION_INDEPENDENT_CODE'] = self.options.fPIC
-            cmake.definitions['ENABLE_PIC'] = self.options.fPIC
-        cmake.definitions['HIGH_BIT_DEPTH'] = self.options.bit_depth != 8
-        cmake.definitions['MAIN12'] = self.options.bit_depth == 12
-        cmake.definitions['ENABLE_HDR10_PLUS'] = self.options.HDR10
-        if self.settings.os == "Linux":
-            cmake.definitions["PLATFORM_LIBS"] = "dl"
-        cmake.configure()
-        cmake.build()
-        cmake.install()
+        with tools.vcvars(self.settings, filter_known_paths=False):
+            if self.settings.os == "Android":
+                tools.replace_in_file(os.path.join('sources', 'source', 'CMakeLists.txt'),
+                    "list(APPEND PLATFORM_LIBS pthread)", "")
+                tools.replace_in_file(os.path.join('sources', 'source', 'CMakeLists.txt'),
+                    "list(APPEND PLATFORM_LIBS rt)", "")
+            cmake = CMake(self, set_cmake_flags=True)
+            cmake.definitions['ENABLE_SHARED'] = self.options.shared
+            cmake.definitions['ENABLE_LIBNUMA'] = False
+            if self.settings.os == "Macos":
+                cmake.definitions['CMAKE_SHARED_LINKER_FLAGS'] = '-Wl,-read_only_relocs,suppress'
+            if self.settings.os != 'Windows':
+                cmake.definitions['CMAKE_POSITION_INDEPENDENT_CODE'] = self.options.fPIC
+                cmake.definitions['ENABLE_PIC'] = self.options.fPIC
+            cmake.definitions['HIGH_BIT_DEPTH'] = self.options.bit_depth != 8
+            cmake.definitions['MAIN12'] = self.options.bit_depth == 12
+            cmake.definitions['ENABLE_HDR10_PLUS'] = self.options.HDR10
+            if self.settings.os == "Linux":
+                cmake.definitions["PLATFORM_LIBS"] = "dl"
+            cmake.configure()
+            cmake.build()
+            cmake.install()
 
     def package(self):
         self.copy(pattern="COPYING", src='sources', dst='licenses')
         if self.settings.compiler == 'Visual Studio':
+            for pdb_file in glob.glob(os.path.join(self.package_folder, "bin", "*.pdb")):
+                os.unlink(pdb_file)
             name = 'libx265.lib' if self.options.shared else 'x265-static.lib'
             shutil.move(os.path.join(self.package_folder, 'lib', name),
                         os.path.join(self.package_folder, 'lib', 'x265.lib'))
