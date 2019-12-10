@@ -15,4 +15,4 @@ class TestPackageConan(ConanFile):
         if not tools.cross_building(self.settings, skip_x64_x86=True):
             bin_path = os.path.join("bin", "test_package")
             arguments = "%sw+ Bincrafters" % ("\\" if self.settings.os == "Windows" else "\\\\")
-            self.run("%s %s" % (bin_path, arguments))
+            self.run("%s %s" % (bin_path, arguments), run_environment=True)
