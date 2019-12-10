@@ -1,0 +1,7 @@
+sources:
+  "1.2.0":
+    sha256: 3a189cb8717efbf0442da1d62109b7e881c158ab8167f8997e79cdb3a2cd7c9a
+    url: https://github.com/timsort/cpp-TimSort/archive/v1.2.0.tar.gz
+  "2.0.0":
+    sha256: 6cb23b0efb83e1d4f6eab58cddd35b36ca49cd927a46294575b9c0d304a2e833
+    url: https://github.com/timsort/cpp-TimSort/archive/v2.0.0.tar.gz
