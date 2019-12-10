@@ -18,19 +18,12 @@ class CppTaskflowConan(ConanFile):
     settings = "os", "compiler"
     
     _source_subfolder = "source_subfolder"
-
-    @property
-    def _supported_cppstd(self):
-        if self.settings.compiler == "Visual Studio":
-            return ["17", "20"]
-        else:
-            return ["17", "gnu17", "20", "gnu20"]
-
+    
     def configure(self):
+        tools.check_min_cppstd(self, "17")
+
         compiler = self.settings.compiler
         compiler_version = Version(self.settings.compiler.version.value)
-        if compiler.cppstd and not compiler.cppstd in self._supported_cppstd:
-            raise ConanInvalidConfiguration("cpp-taskflow requires C++17 standard or higher. {} required.".format(self.settings.compiler.cppstd))
         # Exclude compilers not supported by cpp-taskflow
         if (compiler == "gcc" and compiler_version < "7.3") or \
            (compiler == "clang" and compiler_version < "6") or \
