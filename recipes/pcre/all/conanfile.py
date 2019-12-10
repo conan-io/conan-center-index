@@ -91,3 +91,4 @@ class PCREConan(ConanFile):
             self.cpp_info.libs = ['pcreposix', 'pcre']
         if not self.options.shared:
             self.cpp_info.defines.append("PCRE_STATIC=1")
+        self.cpp_info.names['pkg_config'] = 'libpcre'
