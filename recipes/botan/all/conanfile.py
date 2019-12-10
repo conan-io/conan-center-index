@@ -42,11 +42,20 @@ class BotanConan(ConanFile):
                        'system_cert_bundle': None}
 
     def configure(self):
-        msvc_too_old = self.settings.os == "Windows" and \
-                       self.settings.compiler == "Visual Studio" and \
-                       Version(self.settings.compiler.version.value) < "14"
-        if msvc_too_old:
+        compiler = self.settings.compiler
+        version = Version(self.settings.compiler.version.value)
+
+        if self.settings.os == "Windows" and compiler == "Visual Studio" and version < "14":
             raise ConanInvalidConfiguration("Botan doesn't support MSVC < 14")
+
+        elif compiler == "gcc" and version >= "5" and compiler.libcxx != "libstdc++11":
+            raise ConanInvalidConfiguration(
+                'Using Botan with GCC >= 5 on Linux requires "compiler.libcxx=libstdc++11"')
+
+        elif compiler == "clang" and compiler.libcxx not in ["libstdc++11", "libc++"]:
+            raise ConanInvalidConfiguration(
+                'Using Botan with Clang on Linux requires either "compiler.libcxx=libstdc++11" ' \
+                'or "compiler.libcxx=libc++"')
 
         if self.options.boost:
             self.options["boost"].add("shared=False")
@@ -71,9 +80,6 @@ class BotanConan(ConanFile):
             self.requires("boost/1.70.0")
 
     def config_options(self):
-        if self.settings.compiler != "Visual Studio":
-            self.check_cxx_abi_settings()
-
         if self.options.single_amalgamation:
             self.options.amalgamation = True
 
@@ -267,21 +273,6 @@ class BotanConan(ConanFile):
     @property
     def _make_cmd(self):
         return self._jom_cmd if self.settings.compiler == 'Visual Studio' else self._gnumake_cmd
-
-    def check_cxx_abi_settings(self):
-        compiler = self.settings.compiler
-        version = float(self.settings.compiler.version.value)
-        libcxx = compiler.libcxx
-        if compiler == 'gcc' and version > 5 and libcxx != 'libstdc++11':
-            raise ConanException(
-                'Using Botan with GCC > 5 on Linux requires '
-                '"compiler.libcxx=libstdc++11"')
-        elif compiler == 'clang' and libcxx not in ['libstdc++11', 'libc++']:
-            raise ConanException(
-                'Using Botan with Clang on Linux requires either '
-                '"compiler.libcxx=libstdc++11" '
-                'or '
-                '"compiler.libcxx=libc++"')
 
     @property
     def _make_program(self):
