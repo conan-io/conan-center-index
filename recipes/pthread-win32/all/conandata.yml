@@ -1,0 +1,4 @@
+sources:
+  "2.9.1":
+    url: "https://codeload.github.com/GerHobbelt/pthread-win32/zip/19fd5054b29af1b4e3b3278bfffbb6274c6c89f5"
+    sha256: "52b34486d992f89a1f71d048aa5691773ae26c41b5cd0b44f65ebea7c6891c96"
