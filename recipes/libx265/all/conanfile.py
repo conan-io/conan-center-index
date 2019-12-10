@@ -62,9 +62,6 @@ class LibX265Conan(ConanFile):
         cmake.configure()
         cmake.build()
         cmake.install()
-        if self.settings.os == 'Linux':
-            tools.replace_in_file(os.path.join(self.package_folder, 'lib', 'pkgconfig', 'x265.pc'),
-                                  'Libs.private:', 'Libs.private: -lpthread')
 
     def package(self):
         self.copy(pattern="COPYING", src='sources', dst='licenses')
