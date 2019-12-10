@@ -63,10 +63,6 @@ class BotanConan(ConanFile):
             self.options["boost"].add("without_coroutine=False")
             self.options["boost"].add("without_system=False")
 
-    def build_requirements(self):
-        if self.settings.os == "Windows":
-            self.build_requires("jom_installer/1.1.2@bincrafters/stable")
-
     def requirements(self):
         if self.options.bzip2:
             self.requires("bzip2/1.0.6")
@@ -268,7 +264,7 @@ class BotanConan(ConanFile):
 
     @property
     def _make_cmd(self):
-        return self._jom_cmd if self.settings.compiler == 'Visual Studio' else self._gnumake_cmd
+        return self._nmake_cmd if self.settings.compiler == 'Visual Studio' else self._gnumake_cmd
 
     @property
     def _make_program(self):
@@ -291,16 +287,16 @@ class BotanConan(ConanFile):
         return make_cmd
 
     @property
-    def _jom_cmd(self):
+    def _nmake_cmd(self):
         vcvars = tools.vcvars_command(self.settings)
-        make_cmd = vcvars + ' && jom -j {}'.format(tools.cpu_count())
+        make_cmd = vcvars + ' && nmake'
         return make_cmd
 
     @property
     def _make_install_cmd(self):
         if self.settings.compiler == 'Visual Studio':
             vcvars = tools.vcvars_command(self.settings)
-            make_install_cmd = vcvars + ' && jom install'
+            make_install_cmd = vcvars + ' && nmake install'
         else:
             make_install_cmd = '{make} install'.format(make=self._make_program)
         return make_install_cmd
