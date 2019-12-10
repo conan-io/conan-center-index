@@ -8,6 +8,7 @@ class TgbotConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "http://reo7sp.github.io/tgbot-cpp"
     description = "C++ library for Telegram bot API"
+    license = "MIT"
 
     settings = "os", "arch", "compiler", "build_type"
     options = {"fPIC": [True, False],
