@@ -109,3 +109,4 @@ class OpenjpegConan(ConanFile):
         if self.settings.os == "Linux":
             self.cpp_info.libs.append("pthread")
         self.cpp_info.name = 'OpenJPEG'
+        self.cpp_info.names['pkg_config'] = 'libopenjp2'
