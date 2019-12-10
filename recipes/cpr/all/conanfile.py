@@ -1,16 +1,14 @@
-#!/usr/bin/env python
-# -*- coding: utf-8 -*-
-
-from conans import ConanFile, CMake, tools
 import os
+from conans import ConanFile, CMake, tools
 
 
 class CprConan(ConanFile):
     name = "cpr"
 
-    url = "https://github.com/DEGoodmanWilson/conan-cpr"
+    url = "https://github.com/conan-io/conan-center-index"
     description = "Keep it short"
     license = "https://github.com/whoshuu/cpr/blob/1.3.0/LICENSE"
+    homepage = "https://whoshuu.github.io/cpr/"
     exports_sources = ["CMakeLists.txt", "patches/*"]
     settings = "os", "arch", "compiler", "build_type"
     options = {"shared": [True, False],
@@ -22,7 +20,7 @@ class CprConan(ConanFile):
                        "fPIC": True}
 
     generators = "cmake"
-    _source_subfolder = "source_subfolder"
+    _source_subfolder = "cpr"
 
     def requirements(self):
         self.requires("libcurl/7.66.0")
@@ -40,8 +38,8 @@ class CprConan(ConanFile):
         extracted_dir = self.name + "-" + self.version
         os.rename(extracted_dir, self._source_subfolder)
 
-        for it in self.conan_data["patches"][self.version]:
-            tools.patch(patch_file=it, base_path=os.path.join(self.source_folder, self._source_subfolder))
+        for patch in self.conan_data["patches"][self.version]:
+            tools.patch(**patch)
 
     def build(self):
         cmake = CMake(self)
