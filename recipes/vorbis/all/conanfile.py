@@ -1,5 +1,6 @@
 from conans import ConanFile, tools, CMake
 import os
+import glob
 
 
 class VorbisConan(ConanFile):
@@ -51,7 +52,6 @@ class VorbisConan(ConanFile):
         if self.settings.compiler == "Visual Studio":
             if self.options.shared:
                 self.copy(pattern="*.dll", dst="bin", keep_path=False)
-            self.copy(pattern="*.pdb", dst="bin", keep_path=False)
             self.copy(pattern="*.lib", dst="lib", keep_path=False)
         else:
             if self.options.shared:
@@ -64,10 +64,8 @@ class VorbisConan(ConanFile):
                     self.copy(pattern="*.so*", dst="lib", keep_path=False)
             else:
                 self.copy(pattern="*.a", dst="lib", keep_path=False)
-        for f in ['vorbis', 'vorbisenc', 'vorbisfile']:
-            f = os.path.join(self.package_folder, 'bin', '%s.pdb' % f)
-            if os.path.isfile(f):
-                os.remove(f)
+        for pdb_file in glob.glob(os.path.join(self.package_folder, "bin", "*.pdb")):
+            os.unlink(pdb_file)
 
     def package_info(self):
         self.cpp_info.libs = ['vorbisfile', 'vorbisenc', 'vorbis']
