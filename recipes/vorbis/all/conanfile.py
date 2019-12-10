@@ -64,6 +64,10 @@ class VorbisConan(ConanFile):
                     self.copy(pattern="*.so*", dst="lib", keep_path=False)
             else:
                 self.copy(pattern="*.a", dst="lib", keep_path=False)
+        for f in ['vorbis', 'vorbisenc', 'vorbisfile']:
+            f = os.path.join(self.package_folder, 'bin', '%s.pdb' % f)
+            if os.path.isfile(f):
+                os.remove(f)
 
     def package_info(self):
         self.cpp_info.libs = ['vorbisfile', 'vorbisenc', 'vorbis']
