@@ -6,7 +6,6 @@ class PCREConan(ConanFile):
     name = "pcre"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://www.pcre.org"
-    author = "Bincrafters <bincrafters@gmail.com>"
     description = "Perl Compatible Regular Expressions"
     license = "BSD-3-Clause"
     exports_sources = ["CMakeLists.txt"]
