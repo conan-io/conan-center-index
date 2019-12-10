@@ -1,4 +1,4 @@
-from conans import ConanFile, CMake, tools, RunEnvironment
+from conans import ConanFile, CMake, tools
 import os
 
 
@@ -12,13 +12,7 @@ class TestPackageConan(ConanFile):
         cmake.build()
 
     def test(self):
-        if not tools.cross_building(self.settings):
-            with tools.environment_append(RunEnvironment(self).vars):
-                bin_path = os.path.join("bin", "test_package")
-                arguments = "%sw+ Bincrafters" % ("\\" if self.settings.os == "Windows" else "\\\\")
-                if self.settings.os == "Windows":
-                    self.run("%s %s" % (bin_path, arguments))
-                elif self.settings.os == "Macos":
-                    self.run("DYLD_LIBRARY_PATH=%s %s %s" % (os.environ.get('DYLD_LIBRARY_PATH', ''), bin_path, arguments))
-                else:
-                    self.run("LD_LIBRARY_PATH=%s %s %s" % (os.environ.get('LD_LIBRARY_PATH', ''), bin_path, arguments))
+        if not tools.cross_building(self.settings, skip_x64_x86=True):
+            bin_path = os.path.join("bin", "test_package")
+            arguments = "%sw+ Bincrafters" % ("\\" if self.settings.os == "Windows" else "\\\\")
+            self.run("%s %s" % (bin_path, arguments))
