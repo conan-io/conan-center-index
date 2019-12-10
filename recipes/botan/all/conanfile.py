@@ -8,7 +8,7 @@ class BotanConan(ConanFile):
     name = 'botan'
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/randombit/botan"
-    license = "BSD 2-clause"
+    license = "BSD-2-Clause"
     exports = ["patches/*"]
     description = "Botan is a cryptography library written in C++11."
     settings = 'os', 'arch', 'compiler', 'build_type'
@@ -62,7 +62,7 @@ class BotanConan(ConanFile):
         if self.options.bzip2:
             self.requires("bzip2/1.0.6")
         if self.options.openssl:
-            self.requires("OpenSSL/1.0.2s")
+            self.requires("openssl/1.0.2t")
         if self.options.zlib:
             self.requires("zlib/1.2.11")
         if self.options.sqlite3:
@@ -101,15 +101,15 @@ class BotanConan(ConanFile):
         else:
             self.cpp_info.libs.extend(['botan-2'])
             if self.settings.os != 'Windows':
-                self.cpp_info.libs.append('dl')
+                self.cpp_info.system_libs.append('dl')
             if self.settings.os == 'Linux':
-                self.cpp_info.libs.append('rt')
+                self.cpp_info.system_libs.append('rt')
             if self.settings.os == 'Macos':
-                self.cpp_info.exelinkflags = ['-framework Security', '-framework CoreFoundation']
+                self.cpp_info.framework = ['Security', 'CoreFoundation']
             if not self.options.shared:
-                self.cpp_info.libs.append('pthread')
+                self.cpp_info.system_libs.append('pthread')
         if self.settings.os == "Windows":
-            self.cpp_info.libs.extend(["ws2_32", "Crypt32"])
+            self.cpp_info.system_libs.extend(["ws2_32", "Crypt32"])
 
         self.cpp_info.libdirs = ['lib']
         self.cpp_info.bindirs = ['lib', 'bin']
