@@ -2,3 +2,7 @@ sources:
   "1.2":
     sha256: 6d5158db38fb092e12060080a611ccdccde35cfb85f030996daee9619bebc513
     url: https://github.com/reo7sp/tgbot-cpp/archive/v1.2.tar.gz
+patches:
+  "1.2":
+    - patch_file: "patches/001-build-system.patch"
+      base_path: "tgbot"
