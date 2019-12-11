@@ -14,16 +14,15 @@ class Bzip2Conan(ConanFile):
     exports_sources = "CMakeLists.txt", "patches/**"
     generators = "cmake"
     settings = "os", "compiler", "arch", "build_type"
-    options = {"shared": [True, False], "fPIC": [True, False], }
-    default_options = {"shared": False, "fPIC": True, }
+    options = {"shared": [True, False], "fPIC": [True, False]}
+    default_options = {"shared": False, "fPIC": True}
 
     _source_subfolder = "source_subfolder"
+    _minimum_cpp_standard = 14
 
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
-
-    _minimum_cpp_standard = 14
 
     def configure(self):
         if not self.settings.compiler.cppstd:
