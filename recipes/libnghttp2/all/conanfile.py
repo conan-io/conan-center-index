@@ -26,29 +26,31 @@ class Nghttp2Conan(ConanFile):
 
     _source_subfolder = "source_subfolder"
 
+    def config_options(self):
+        if self.settings.os == 'Windows':
+            del self.options.fPIC
+
     def configure(self):
+        if self.options.shared:
+            del self.options.fPIC
+        if self.options.with_asio and self.settings.compiler == "Visual Studio":
+            raise ConanInvalidConfiguration("Build with asio and MSVC is not supported yet, see upstream bug #589")
         if self.settings.compiler == "gcc":
             v = tools.Version(str(self.settings.compiler.version))
             if v < "6.0":
                 raise ConanInvalidConfiguration("gcc >= 6.0 required")
 
-    def config_options(self):
-        if self.settings.os == 'Windows':
-            del self.options.fPIC
-        if self.options.with_asio and self.settings.compiler == "Visual Studio":
-            raise ConanInvalidConfiguration("Build with asio and MSVC is not supported yet, see upstream bug #589")
-
     def requirements(self):
         self.requires.add("zlib/1.2.11")
         if self.options.with_app:
-            self.requires.add("openssl/1.0.2t")
+            self.requires.add("openssl/1.1.1d")
             self.requires.add("c-ares/1.15.0")
-            self.requires.add("libev/4.25")
+            self.requires.add("libev/4.27")
             self.requires.add("libxml2/2.9.9")
         if self.options.with_hpack:
             self.requires.add("jansson/2.12")
         if self.options.with_asio:
-            self.requires.add("boost/1.70.0")
+            self.requires.add("boost/1.71.0")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
