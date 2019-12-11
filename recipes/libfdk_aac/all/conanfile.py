@@ -88,5 +88,5 @@ class FDKAACConan(ConanFile):
         else:
             self.cpp_info.libs = ['fdk-aac']
         if self.settings.os == "Linux" or self.settings.os == "Android":
-            self.cpp_info.libs.append("m")
+            self.cpp_info.system_libs.append("m")
         self.cpp_info.names['pkg_config'] = 'fdk-aac'
