@@ -2,3 +2,6 @@ sources:
   "1.39.2":
     sha256: 92a23e4522328c8565028ee0c7270e74add7990614fd1148f2a79d873bc2a1d0
     url: https://github.com/nghttp2/nghttp2/releases/download/v1.39.2/nghttp2-1.39.2.tar.bz2
+  "1.40.0":
+    sha256: 82758e13727945f2408d0612762e4655180b039f058d5ff40d055fa1497bd94f
+    url: https://github.com/nghttp2/nghttp2/releases/download/v1.40.0/nghttp2-1.40.0.tar.bz2
