@@ -1,4 +1,5 @@
 from conans import ConanFile, tools, CMake
+from conans.tools import Version
 import os
 import shutil
 
@@ -24,7 +25,7 @@ class OpusConan(ConanFile):
         del self.settings.compiler.cppstd
 
         if self.settings.os == "Windows" and \
-                (self.settings.compiler == "Visual Studio" and int(str(self.settings.compiler.version)) < 14):
+                self.settings.compiler == "Visual Studio" and Version(self.settings.compiler.version) < "14":
             raise tools.ConanException("On Windows, the opus package can only be built with the "
                                        "Visual Studio 2015 or higher.")
 
