@@ -18,9 +18,17 @@ class Package7Zip(ConanFile):
     def _source_subfolder(self):
         return "source_subfolder"
 
+    @property
+    def _7zip_folder(self):
+        return os.path.join(self._source_subfolder, "CPP", "7zip")
+
+    @property
+    def _lzma_folder(self):
+        return os.path.join(self._7zip_folder, "Bundles", "LzmaCon")
+
     def configure(self):
-        if self.settings.os_build != "Windows":
-            raise ConanInvalidConfiguration("Only Windows supported")
+        #if self.settings.os_build != "Windows":
+        #    raise ConanInvalidConfiguration("Only Windows supported")
         if self.settings.arch_build not in ("x86", "x86_64"):
             raise ConanInvalidConfiguration("Unsupported architecture")
 
@@ -40,15 +48,18 @@ class Package7Zip(ConanFile):
         env_build = VisualStudioBuildEnvironment(self)
         with tools.environment_append(env_build.vars):
             vcvars = tools.vcvars_command(self.settings)
-            with tools.chdir(os.path.join(self._source_subfolder, "CPP", "7zip")):
+            with tools.chdir(self._7zip_folder):
                 self.run("%s && nmake /f makefile PLATFORM=%s" % (
                 vcvars, self._msvc_platforms[str(self.settings.arch_build)]))
 
     def _build_autotools(self):
         # TODO: Enable non-Windows methods in configure
+
         env_build = AutoToolsBuildEnvironment(self)
+        if self.settings.arch_build == "x86":
+            tools.replace_in_file(os.path.join(self._lzma_folder, "makefile.gcc"), "CFLAGS =", "CFLAGS = -m32")
         with tools.environment_append(env_build.vars):
-            with tools.chdir(os.path.join(self._source_subfolder, "CPP", "7zip", "Bundles", "LzmaCon")):
+            with tools.chdir(self._lzma_folder):
                 self.run("make -f makefile.gcc all")
 
     def build(self):
@@ -58,13 +69,14 @@ class Package7Zip(ConanFile):
             self._build_autotools()
 
     def package(self):
+        # TODO: Package the libraries: binaries and headers (add the rest of settings)
         self.copy("License.txt", src=os.path.join(self._source_subfolder, "DOC"), dst="licenses")
         self.copy("unRarLicense.txt", src=os.path.join(self._source_subfolder, "DOC"), dst="licenses")
         if self.settings.os_build == "Windows":
-            self.copy("*.exe", src=os.path.join(self._source_subfolder, "CPP", "7zip"), dst="bin", keep_path=False)
-            self.copy("*.dll", src=os.path.join(self._source_subfolder, "CPP", "7zip"), dst="bin", keep_path=False)
-
-        # TODO: Package the libraries: binaries and headers (add the rest of settings)
+            self.copy("*.exe", src=self._7zip_folder, dst="bin", keep_path=False)
+            self.copy("*.dll", src=self._7zip_folder, dst="bin", keep_path=False)
+        elif self.settings.os_build == "Linux":
+            self.copy("lzma", src=self._lzma_folder, dst="bin")
 
     def package_id(self):
         del self.info.settings.compiler
