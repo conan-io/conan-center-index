@@ -5,13 +5,12 @@ import glob
 
 class VorbisConan(ConanFile):
     name = "vorbis"
-    version = "1.3.6"
     description = "The VORBIS audio codec library"
     topics = ("conan", "vorbis", "audio", "codec")
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://xiph.org/vorbis/"
     license = "BSD-3-Clause"
-    exports_sources = ["CMakeLists.txt", "FindVORBIS.cmake"]
+    exports_sources = ["CMakeLists.txt"]
     _source_subfolder = "source_subfolder"
     settings = "os", "arch", "build_type", "compiler"
     options = {"shared": [True, False], "fPIC": [True, False]}
@@ -21,7 +20,7 @@ class VorbisConan(ConanFile):
 
     def config_options(self):
         if self.settings.os == "Windows":
-            self.options.remove("fPIC")
+            del self.options.fPIC
 
     def configure(self):
         del self.settings.compiler.libcxx
@@ -31,12 +30,12 @@ class VorbisConan(ConanFile):
         tools.get(**self.conan_data["sources"][self.version])
         extracted_dir = self.name + "-" + self.version
         os.rename(extracted_dir, self._source_subfolder)
+
+    def build(self):
         if self.settings.os == 'Windows':
             with tools.chdir(self._source_subfolder):
                 tools.replace_in_file('vorbis.pc.in', 'Libs.private: -lm', 'Libs.private:')
-
-    def build(self):
-        if self.settings.os == "Linux":
+        elif self.settings.os == "Linux":
             if 'LDFLAGS' in os.environ:
                 os.environ['LDFLAGS'] = os.environ['LDFLAGS'] + ' -lm'
             else:
@@ -47,7 +46,7 @@ class VorbisConan(ConanFile):
 
     def package(self):
         self.copy("include/vorbis/*", ".", "%s" % self._source_subfolder, keep_path=True)
-        self.copy("%s/copying*" % self._source_subfolder, dst="licenses",  ignore_case=True, keep_path=False)
+        self.copy("COPYING", dst="licenses",  src=self._source_subfolder)
 
         if self.settings.compiler == "Visual Studio":
             if self.options.shared:
