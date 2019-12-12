@@ -1,15 +1,12 @@
-
-#include <iostream>
 #include <cpr/cpr.h>
 
-int main()
-{
-    auto r = cpr::Get(cpr::Url{"https://api.github.com/repos/whoshuu/cpr/contributors"},
-                      cpr::Authentication{"user", "pass"},
-                      cpr::Parameters{{"anon", "true"}, {"key", "value"}});
-    std::cout << r.status_code << std::endl;                  // 200
-    std::cout << r.header["content-type"] << std::endl;       // application/json; charset=utf-8
-    std::cout << r.text << std::endl;  
+#include <iostream>
 
-    return EXIT_SUCCESS;
+int main(int argc, char** argv) {
+    auto r = cpr::Get(cpr::Url{"https://jsonplaceholder.typicode.com/todos"},
+        cpr::Parameters{{"Accept", "application/json"}});
+    std::cout << "status code: " << r.status_code << '\n';                  // 200
+    std::cout << "headers:     " << r.header["content-type"] << '\n';       // application/json; charset=utf-8
+    std::cout << "text:        " << r.text << '\n';                         // JSON text string
+    return 0;
 }
