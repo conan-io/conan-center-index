@@ -1,6 +1,5 @@
 from conans import ConanFile, CMake, tools
 import os
-import shutil
 
 
 class LibeventConan(ConanFile):
@@ -28,6 +27,8 @@ class LibeventConan(ConanFile):
             del self.options.fPIC
 
     def configure(self):
+        if self.options.shared:
+            del self.options.fPIC
         del self.settings.compiler.libcxx
         del self.settings.compiler.cppstd
         if self.options.with_openssl and self.options.shared:
@@ -47,29 +48,13 @@ class LibeventConan(ConanFile):
         extracted_folder = "libevent-release-{0}-stable".format(self.version)
         os.rename(extracted_folder, self._source_subfolder)
 
-        os.rename(os.path.join(self._source_subfolder, "CMakeLists.txt"),
-                  os.path.join(self._source_subfolder, "CMakeListsOriginal.txt"))
-        shutil.copy("CMakeLists.txt",
-                    os.path.join(self._source_subfolder, "CMakeLists.txt"))
-
-        # patch 'beta' to 'stable' because there is no git repository which cmake uses to determine stage name
+    def _patch_sources(self):
+        # patch "beta" to "stable" because there is no git repository which cmake uses to determine stage name
         # needed for 2.1.10, not needed for 2.1.11 so marked as non-strict
         tools.replace_in_file(os.path.join(self._source_subfolder, "cmake", "VersionViaGit.cmake"),
                               'set(EVENT_GIT___VERSION_STAGE "beta")',
                               'set(EVENT_GIT___VERSION_STAGE "stable")',
                               strict=False)
-
-    def imports(self):
-        # Copy shared libraries for dependencies to fix DYLD_LIBRARY_PATH problems
-        #
-        # Configure script creates conftest that cannot execute without shared openssl binaries.
-        # Ways to solve the problem:
-        # 1. set *LD_LIBRARY_PATH (works with Linux with RunEnvironment
-        #     but does not work on OS X 10.11 with SIP)
-        # 2. copying dylib's to the build directory (fortunately works on OS X)
-
-        if self.settings.os == "Macos":
-            self.copy("*.dylib*", dst=self._source_subfolder, keep_path=False)
 
     def _configure_cmake(self):
         cmake = CMake(self)
@@ -88,6 +73,7 @@ class LibeventConan(ConanFile):
         return cmake
 
     def build(self):
+        self._patch_sources()
         cmake = self._configure_cmake()
         cmake.build()
 
@@ -96,16 +82,16 @@ class LibeventConan(ConanFile):
         cmake = self._configure_cmake()
         cmake.install()
         # drop pc and cmake file
-        tools.rmdir(os.path.join(self.package_folder, 'lib', 'pkgconfig'))
-        tools.rmdir(os.path.join(self.package_folder, 'lib', 'cmake'))
-        tools.rmdir(os.path.join(self.package_folder, 'cmake'))
+        tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
+        tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
+        tools.rmdir(os.path.join(self.package_folder, "cmake"))
 
     def package_info(self):
         self.cpp_info.libs = tools.collect_libs(self)
         if self.settings.os == "Linux":
-            self.cpp_info.libs.extend(["rt"])
+            self.cpp_info.system_libs.extend(["rt"])
 
         if self.settings.os == "Windows":
-            self.cpp_info.libs.append('ws2_32')
+            self.cpp_info.system_libs.append("ws2_32")
             if self.options.with_openssl:
-                self.cpp_info.defines.append('EVENT__HAVE_OPENSSL=1')
+                self.cpp_info.defines.append("EVENT__HAVE_OPENSSL=1")
