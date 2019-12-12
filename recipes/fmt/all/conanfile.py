@@ -76,11 +76,14 @@ class FmtConan(ConanFile):
         tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
         tools.rmdir(os.path.join(self.package_folder, "share"))
 
+    def package_id(self):
+        if self.options.header_only:
+            self.info.header_only()
+
     def package_info(self):
         if self.options.with_fmt_alias:
             self.cpp_info.defines.append("FMT_STRING_ALIAS=1")
         if self.options.header_only:
-            self.info.header_only()
             self.cpp_info.defines = ["FMT_HEADER_ONLY"]
         else:
             self.cpp_info.libs = tools.collect_libs(self)
