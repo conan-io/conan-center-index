@@ -10,7 +10,6 @@ class Package7Zip(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     description = "7-Zip is a file archiver with a high compression ratio"
     license = ("LGPL-2.1", "BSD-3-Clause", "Unrar")
-    author = "Conan Community"
     homepage = "https://www.7-zip.org"
     topics = ("conan", "7zip", "zip", "compression", "decompression")
     settings = "os_build", "arch_build", "compiler"
@@ -27,7 +26,9 @@ class Package7Zip(ConanFile):
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
-        extracted_folder = "ccooo"
+        url = self.conan_data["sources"][self.version]["url"]
+        commit = url[url.rfind("/")+1:url.rfind(".")]
+        extracted_folder = "7z-" + commit
         os.rename(extracted_folder, self._source_subfolder)
 
     _msvc_platforms = {
@@ -39,7 +40,7 @@ class Package7Zip(ConanFile):
         env_build = VisualStudioBuildEnvironment(self)
         with tools.environment_append(env_build.vars):
             vcvars = tools.vcvars_command(self.settings)
-            with tools.chdir("CPP/7zip"):
+            with tools.chdir(os.path.join(self._source_subfolder, "CPP", "7zip")):
                 self.run("%s && nmake /f makefile PLATFORM=%s" % (
                 vcvars, self._msvc_platforms[str(self.settings.arch_build)]))
 
@@ -47,7 +48,7 @@ class Package7Zip(ConanFile):
         # TODO: Enable non-Windows methods in configure
         env_build = AutoToolsBuildEnvironment(self)
         with tools.environment_append(env_build.vars):
-            with tools.chdir("CPP/7zip/Bundles/LzmaCon"):
+            with tools.chdir(os.path.join(self._source_subfolder, "CPP", "7zip", "Bundles", "LzmaCon")):
                 self.run("make -f makefile.gcc all")
 
     def build(self):
@@ -57,11 +58,11 @@ class Package7Zip(ConanFile):
             self._build_autotools()
 
     def package(self):
-        self.copy("DOC/License.txt", src="", dst="licenses")
-        self.copy("DOC/unRarLicense.txt", src="", dst="licenses")
+        self.copy("License.txt", src=os.path.join(self._source_subfolder, "DOC"), dst="licenses")
+        self.copy("unRarLicense.txt", src=os.path.join(self._source_subfolder, "DOC"), dst="licenses")
         if self.settings.os_build == "Windows":
-            self.copy("*.exe", src="CPP/7zip", dst="bin", keep_path=False)
-            self.copy("*.dll", src="CPP/7zip", dst="bin", keep_path=False)
+            self.copy("*.exe", src=os.path.join(self._source_subfolder, "CPP", "7zip"), dst="bin", keep_path=False)
+            self.copy("*.dll", src=os.path.join(self._source_subfolder, "CPP", "7zip"), dst="bin", keep_path=False)
 
         # TODO: Package the libraries: binaries and headers (add the rest of settings)
 

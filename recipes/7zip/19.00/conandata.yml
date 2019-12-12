@@ -1,4 +1,4 @@
 sources:
   "19.00":
     url: https://github.com/kornelski/7z/archive/4a960640a340a848a2d2c27f19b339c2c3d3f734.zip
-    checksum: 9ba70a5e8485cf9061b30a2a84fe741de5aeb8dd271aab8889da0e9b3bf1868e
+    sha256: 550d125a7309dfb09b174c0b6ebac4e4d453d6af6dceb3bc385dd734ada60059
