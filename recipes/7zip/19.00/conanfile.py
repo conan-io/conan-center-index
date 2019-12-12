@@ -15,6 +15,10 @@ class Package7Zip(ConanFile):
     topics = ("conan", "7zip", "zip", "compression", "decompression")
     settings = "os_build", "arch_build", "compiler"
 
+    @property
+    def _source_subfolder(self):
+        return "source_subfolder"
+
     def configure(self):
         if self.settings.os_build != "Windows":
             raise ConanInvalidConfiguration("Only Windows supported")
@@ -22,18 +26,9 @@ class Package7Zip(ConanFile):
             raise ConanInvalidConfiguration("Unsupported architecture")
 
     def source(self):
-        tools.download(**self.conan_data["sources"][self.version])
-        tools.check_sha256(**self.conan_data["checksum"][self.version])
-        self._uncompress_7z(self.conan_data["sources"][self.version]["filename"])
-
-    def _uncompress_7z(self, filename):
-        """ We need 7z itself to uncompress the file, we have two options:
-            * download an executable and run it
-            * booststrap using a previous version (7zip/9.22) where sources are in .tar.bz2. Right
-              now it would we a loop in the Conan graph
-        """
-        tools.get(**self.conan_data["externals"]["lzma"])
-        self.run("lzma920\\7zr.exe x {}".format(filename))
+        tools.get(**self.conan_data["sources"][self.version])
+        extracted_folder = "ccooo"
+        os.rename(extracted_folder, self._source_subfolder)
 
     _msvc_platforms = {
         'x86_64': 'x64',
