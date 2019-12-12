@@ -116,6 +116,8 @@ class XZUtils(ConanFile):
             self.copy(pattern="*.lib", dst="lib", src=bin_dir, keep_path=False)
             if self.options.shared:
                 self.copy(pattern="*.dll", dst="bin", src=bin_dir, keep_path=False)
+            os.rename(os.path.join(self.package_folder, 'lib', 'liblzma.lib'),
+                      os.path.join(self.package_folder, 'lib', 'lzma.lib'))
 
         # Remove/rename forbidden files/folders in central repository
         tools.rmdir(os.path.join(self.package_folder, 'lib', 'pkgconfig'))
@@ -128,7 +130,4 @@ class XZUtils(ConanFile):
     def package_info(self):
         if not self.options.shared:
             self.cpp_info.defines.append('LZMA_API_STATIC')
-        if self.settings.os == "Windows":
-            self.cpp_info.libs = ["liblzma"]
-        else:
-            self.cpp_info.libs = ["lzma"]
+        self.cpp_info.libs = tools.collect_libs(self)
