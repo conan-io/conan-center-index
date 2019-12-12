@@ -49,50 +49,44 @@ class LibX264Conan(ConanFile):
         ret.update(self._override_env)
         return ret
 
-    def _build_configure(self):
-        with tools.chdir(self._source_subfolder):
-            prefix = tools.unix_path(self.package_folder)
-            args = ['--disable-cli', '--prefix={}'.format(prefix)]
-            if self.options.shared:
-                args.append('--enable-shared')
-            else:
-                args.append('--enable-static')
-            if self.settings.os != 'Windows' and self.options.fPIC:
-                args.append('--enable-pic')
-            if self.settings.build_type == 'Debug':
-                args.append('--enable-debug')
-            args.append('--bit-depth=%s' % str(self.options.bit_depth))
-
-            if tools.cross_building(self.settings):
-                if self.settings.os == "Android":
-                    # the as of ndk does not work well for building libx264
-                    self._override_env["AS"] = os.environ["CC"]
-                    ndk_root = tools.unix_path(os.environ["NDK_ROOT"])
-                    arch = {'armv7': 'arm',
-                            'armv8': 'aarch64',
-                            'x86': 'i686',
-                            'x86_64': 'x86_64'}.get(str(self.settings.arch))
-                    abi = 'androideabi' if self.settings.arch == 'armv7' else 'android'
-                    cross_prefix = "%s/bin/%s-linux-%s-" % (ndk_root, arch, abi)
-                    args.append('--cross-prefix=%s' % cross_prefix)
-
-            if self._is_msvc:
-                self._override_env['CC'] = 'cl'
-            env_build = AutoToolsBuildEnvironment(self, win_bash=tools.os_info.is_windows)
-            if self._is_msvc:
-                env_build.flags.append('-%s' % str(self.settings.compiler.runtime))
-                # cannot open program database ... if multiple CL.EXE write to the same .PDB file, please use /FS
-                env_build.flags.append('-FS')
-            env_build.configure(args=args, build=False, vars=self._override_env)
-            env_build.make()
-            env_build.install()
-
     def build(self):
-        if self._is_msvc:
-            with tools.vcvars(self.settings):
-                self._build_configure()
-        else:
-            self._build_configure()
+        with tools.vcvars(self.settings):
+            with tools.chdir(self._source_subfolder):
+                prefix = tools.unix_path(self.package_folder)
+                args = ['--disable-cli', '--prefix={}'.format(prefix)]
+                if self.options.shared:
+                    args.append('--enable-shared')
+                else:
+                    args.append('--enable-static')
+                if self.settings.os != 'Windows' and self.options.fPIC:
+                    args.append('--enable-pic')
+                if self.settings.build_type == 'Debug':
+                    args.append('--enable-debug')
+                args.append('--bit-depth=%s' % str(self.options.bit_depth))
+
+                if tools.cross_building(self.settings):
+                    if self.settings.os == "Android":
+                        # the as of ndk does not work well for building libx264
+                        self._override_env["AS"] = os.environ["CC"]
+                        ndk_root = tools.unix_path(os.environ["NDK_ROOT"])
+                        arch = {'armv7': 'arm',
+                                'armv8': 'aarch64',
+                                'x86': 'i686',
+                                'x86_64': 'x86_64'}.get(str(self.settings.arch))
+                        abi = 'androideabi' if self.settings.arch == 'armv7' else 'android'
+                        cross_prefix = "%s/bin/%s-linux-%s-" % (ndk_root, arch, abi)
+                        args.append('--cross-prefix=%s' % cross_prefix)
+
+                if self._is_msvc:
+                    self._override_env['CC'] = 'cl'
+                env_build = AutoToolsBuildEnvironment(self, win_bash=tools.os_info.is_windows)
+                if self._is_msvc:
+                    env_build.flags.append('-%s' % str(self.settings.compiler.runtime))
+                    # cannot open program database ... if multiple CL.EXE write to the same .PDB file, please use /FS
+                    env_build.flags.append('-FS')
+                env_build.configure(args=args, build=False, vars=self._override_env)
+                env_build.make()
+                env_build.install()
 
     def package(self):
         self.copy(pattern="COPYING", src='sources', dst='licenses')
