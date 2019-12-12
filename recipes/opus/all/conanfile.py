@@ -1,5 +1,7 @@
 from conans import ConanFile, tools, CMake
 from conans.tools import Version
+from conans.errors import ConanInvalidConfiguration
+
 import os
 import shutil
 
@@ -11,7 +13,7 @@ class OpusConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://opus-codec.org"
     license = "BSD-3-Clause"
-    exports_sources = ["CMakeLists.txt","FindOPUS.cmake","opus_buildtype.cmake"]
+    exports_sources = ["CMakeLists.txt","opus_buildtype.cmake"]
     generators = "cmake"
 
     settings = "os", "arch", "compiler", "build_type"
@@ -24,14 +26,13 @@ class OpusConan(ConanFile):
         del self.settings.compiler.libcxx
         del self.settings.compiler.cppstd
 
-        if self.settings.os == "Windows" and \
-                self.settings.compiler == "Visual Studio" and Version(self.settings.compiler.version) < "14":
-            raise tools.ConanException("On Windows, the opus package can only be built with the "
-                                       "Visual Studio 2015 or higher.")
+        if self.settings.compiler == "Visual Studio" and Version(self.settings.compiler.version) < "14":
+            raise ConanInvalidConfiguration("On Windows, the opus package can only be built with "
+                                            "Visual Studio 2015 or higher.")
 
     def config_options(self):
         if self.settings.os == "Windows":
-            self.options.remove("fPIC")
+             del self.options.fPIC
 
 
     def source(self):
