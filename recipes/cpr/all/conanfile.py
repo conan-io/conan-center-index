@@ -36,7 +36,7 @@ class CprConan(ConanFile):
         if self.options.with_openssl:
             if self.options["libcurl"].with_openssl == False:
                 raise ConanInvalidConfiguration("libcurl must be built with openssl support")
-        self.options["libcurl"].with_openssl = True
+            self.options["libcurl"].with_openssl = True
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
