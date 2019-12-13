@@ -33,8 +33,6 @@ class CprConan(ConanFile):
     def configure(self):
         if self.options.shared:
             del self.options.fPIC
-        if self.options.with_openssl and not self.options["libcurl"].with_openssl:
-            raise ConanInvalidConfiguration("libcurl must be built with openssl support")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
@@ -60,6 +58,8 @@ class CprConan(ConanFile):
         return cmake
 
     def build(self):
+        if self.options.with_openssl and not self.options["libcurl"].with_openssl:
+            raise ConanInvalidConfiguration("libcurl must be built with openssl support")
         self._patch_sources()
         cmake = self._configure_cmake()
         cmake.build()
