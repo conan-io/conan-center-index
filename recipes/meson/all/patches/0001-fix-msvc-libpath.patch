@@ -1,0 +1,35 @@
+From 6eee9e48bbf43e2be511fbdf1b2bcfee32f614ef Mon Sep 17 00:00:00 2001
+From: Aleksey Gurtovoy <agurtovoy@acm.org>
+Date: Fri, 25 Oct 2019 14:42:36 -0500
+Subject: [PATCH] MSVC: support -LIBPATH
+
+Fixes #6101 (with a test), following up #5881
+---
+ mesonbuild/compilers/mixins/visualstudio.py | 6 ++++--
+ run_unittests.py                            | 3 ++-
+ 2 files changed, 6 insertions(+), 3 deletions(-)
+
+diff --git a/mesonbuild/compilers/mixins/visualstudio.py b/mesonbuild/compilers/mixins/visualstudio.py
+index 9fddbb41b3..ebf51ff4dd 100644
+--- a/mesonbuild/compilers/mixins/visualstudio.py
++++ b/mesonbuild/compilers/mixins/visualstudio.py
+@@ -217,7 +217,9 @@ def unix_args_to_native(cls, args: typing.List[str]) -> typing.List[str]:
+             # -pthread is only valid for GCC
+             if i in ('-mms-bitfields', '-pthread'):
+                 continue
+-            if i.startswith('-L'):
++            if i.startswith('-LIBPATH:'):
++                i = '/LIBPATH:' + i[9:]
++            elif i.startswith('-L'):
+                 i = '/LIBPATH:' + i[2:]
+             # Translate GNU-style -lfoo library name to the import library
+             elif i.startswith('-l'):
+@@ -250,7 +252,7 @@ def unix_args_to_native(cls, args: typing.List[str]) -> typing.List[str]:
+     def native_args_to_unix(cls, args: typing.List[str]) -> typing.List[str]:
+         result = []
+         for arg in args:
+-            if arg.startswith('/LIBPATH:'):
++            if arg.startswith(('/LIBPATH:', '-LIBPATH:')):
+                 result.append('-L' + arg[9:])
+             elif arg.endswith(('.a', '.lib')) and not os.path.isabs(arg):
+                 result.append('-l' + arg)

@@ -8,6 +8,7 @@ class MesonInstallerConan(ConanFile):
     topics = ("conan", "meson", "mesonbuild", "build-system")
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/mesonbuild/meson"
+    exports_sources = "patches/**"
     license = "Apache-2.0"
     no_copy_source = True
     requires = "ninja/1.9.0"
@@ -25,6 +26,9 @@ exec "$meson_dir/meson.py" "$@"
         extracted_dir = "meson-" + self.version
         os.rename(extracted_dir, self._source_subfolder)
 
+        for patch in self.conan_data["patches"][self.version]:
+            tools.patch(**patch)
+            
         # create wrapper scripts
         with open(os.path.join(self._source_subfolder, "meson.cmd"), "w") as f:
             f.write(self._meson_cmd)

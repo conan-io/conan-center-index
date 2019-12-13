@@ -8,3 +8,7 @@ sources:
   "0.52.1":
     url: "https://github.com/mesonbuild/meson/archive/0.52.1.tar.gz"
     sha256: "ad8dbad61d4c22cb7d768cb1f8a212b4abf0f3fbc17c298d816140ecd9f5d1df"
+patches:
+  "0.52.1":
+    - patch_file: "patches/0001-fix-msvc-libpath.patch"
+      base_path: "source_subfolder"
