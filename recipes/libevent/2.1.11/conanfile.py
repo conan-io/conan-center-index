@@ -9,7 +9,7 @@ class LibeventConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/libevent/libevent"
     license = "BSD-3-Clause"
-    exports_sources = ["CMakeLists.txt"]
+    exports_sources = ["CMakeLists.txt", "patches/**"]
     settings = "os", "compiler", "build_type", "arch"
     options = {"shared": [True, False],
                "fPIC": [True, False],
@@ -19,7 +19,7 @@ class LibeventConan(ConanFile):
                        "fPIC": True,
                        "with_openssl": True,
                        "disable_threads": False}
-    generators = "cmake"
+    generators = "cmake", "cmake_find_package"
     _source_subfolder = "source_subfolder"
 
     def config_options(self):
@@ -31,11 +31,6 @@ class LibeventConan(ConanFile):
             del self.options.fPIC
         del self.settings.compiler.libcxx
         del self.settings.compiler.cppstd
-        if self.options.with_openssl and self.options.shared:
-            # static OpenSSL cannot be properly detected because libevent picks up system ssl first
-            # so enforce shared openssl
-            self.output.warn("Enforce shared OpenSSL for shared build")
-            self.options["openssl"].shared = self.options.shared
 
     def requirements(self):
         if self.options.with_openssl:
@@ -49,12 +44,8 @@ class LibeventConan(ConanFile):
         os.rename(extracted_folder, self._source_subfolder)
 
     def _patch_sources(self):
-        # patch "beta" to "stable" because there is no git repository which cmake uses to determine stage name
-        # needed for 2.1.10, not needed for 2.1.11 so marked as non-strict
-        tools.replace_in_file(os.path.join(self._source_subfolder, "cmake", "VersionViaGit.cmake"),
-                              'set(EVENT_GIT___VERSION_STAGE "beta")',
-                              'set(EVENT_GIT___VERSION_STAGE "stable")',
-                              strict=False)
+        for patch in self.conan_data["patches"][self.version]:
+            tools.patch(**patch)
 
     def _configure_cmake(self):
         cmake = CMake(self)
