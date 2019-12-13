@@ -57,7 +57,7 @@ class Package7Zip(ConanFile):
 
         env_build = AutoToolsBuildEnvironment(self)
         if self.settings.arch_build == "x86":
-            tools.replace_in_file(os.path.join(self._lzma_folder, "makefile.gcc"), "CFLAGS =", "CFLAGS = -m32")
+            tools.replace_in_file(os.path.join(self._lzma_folder, "makefile.gcc"), "-O2", "-O2 -m32")
         with tools.environment_append(env_build.vars):
             with tools.chdir(self._lzma_folder):
                 self.run("make -f makefile.gcc all")
@@ -75,7 +75,7 @@ class Package7Zip(ConanFile):
         if self.settings.os_build == "Windows":
             self.copy("*.exe", src=self._7zip_folder, dst="bin", keep_path=False)
             self.copy("*.dll", src=self._7zip_folder, dst="bin", keep_path=False)
-        elif self.settings.os_build == "Linux":
+        else:
             self.copy("lzma", src=self._lzma_folder, dst="bin")
 
     def package_id(self):
