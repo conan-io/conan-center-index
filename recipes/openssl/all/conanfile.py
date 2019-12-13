@@ -1,9 +1,10 @@
+from conans.errors import ConanInvalidConfiguration, ConanException
+from conans import ConanFile, AutoToolsBuildEnvironment, tools
+from contextlib import contextmanager
 import os
 import fnmatch
 import platform
 from functools import total_ordering
-from conans.errors import ConanInvalidConfiguration, ConanException
-from conans import ConanFile, AutoToolsBuildEnvironment, tools
 
 
 @total_ordering
@@ -136,15 +137,18 @@ class OpenSSLConan(ConanFile):
         extracted_folder = "openssl-" + self.version
         os.rename(extracted_folder, self._source_subfolder)
 
+    def config_options(self):
+        if self.settings.os == "Windows":
+            del self.options.fPIC
+        else:
+            del self.options.capieng_dialog
+
     def configure(self):
+        if self.options.shared:
+            del self.options.fPIC
+
         del self.settings.compiler.libcxx
         del self.settings.compiler.cppstd
-
-    def config_options(self):
-        if self.settings.os != "Windows":
-            del self.options.capieng_dialog
-        else:
-            del self.options.fPIC
 
     def requirements(self):
         if not self.options.no_zlib:
@@ -459,6 +463,10 @@ class OpenSSLConan(ConanFile):
             return os.path.join(self.deps_cpp_info["strawberryperl"].rootpath, "bin", "perl.exe")
         return "perl"
 
+    @property
+    def _nmake_makefile(self):
+        return r"ms\ntdll.mak" if self.options.shared else r"ms\nt.mak"
+
     def _make(self):
         with tools.chdir(self._source_subfolder):
             # workaround for MinGW (https://github.com/openssl/openssl/issues/7653)
@@ -479,7 +487,6 @@ class OpenSSLConan(ConanFile):
                     self.run(r"ms\do_nasm")
                 else:
                     self.run(r"ms\do_ms" if self.settings.arch == "x86" else r"ms\do_win64a")
-                makefile = r"ms\ntdll.mak" if self.options.shared else r"ms\nt.mak"
 
                 self._replace_runtime_in_file(os.path.join("ms", "nt.mak"))
                 self._replace_runtime_in_file(os.path.join("ms", "ntdll.mak"))
@@ -487,11 +494,9 @@ class OpenSSLConan(ConanFile):
                     tools.replace_in_file(os.path.join("ms", "nt.mak"), "-WX", "")
                     tools.replace_in_file(os.path.join("ms", "ntdll.mak"), "-WX", "")
 
-                self._run_make(makefile=makefile)
-                self._run_make(makefile=makefile, targets=["install"], parallel=False)
+                self._run_make(makefile=self._nmake_makefile)
             else:
                 self._run_make()
-                self._run_make(targets=["install_sw"], parallel=False)
 
     @property
     def _cc(self):
@@ -507,7 +512,8 @@ class OpenSSLConan(ConanFile):
             return "gcc"
         return "cc"
 
-    def build(self):
+    @contextmanager
+    def _build_environment(self):
         with tools.vcvars(self.settings) if self._use_nmake else tools.no_op():
             env_vars = {"PERL": self._perl}
             if self._full_version < "1.1.0":
@@ -518,11 +524,15 @@ class OpenSSLConan(ConanFile):
                 env_vars["CROSS_SDK"] = os.path.basename(xcrun.sdk_path)
                 env_vars["CROSS_TOP"] = os.path.dirname(os.path.dirname(xcrun.sdk_path))
             with tools.environment_append(env_vars):
-                if self._full_version >= "1.1.0":
-                    self._create_targets()
-                else:
-                    self._patch_makefile_org()
-                self._make()
+                yield
+
+    def build(self):
+        with self._build_environment():
+            if self._full_version >= "1.1.0":
+                self._create_targets()
+            else:
+                self._patch_makefile_org()
+            self._make()
 
     @staticmethod
     def detected_os():
@@ -570,6 +580,13 @@ class OpenSSLConan(ConanFile):
             tools.replace_in_file(filename, "/%s " % e, "/%s " % self.settings.compiler.runtime, strict=False)
 
     def package(self):
+        with self._build_environment():
+            with tools.chdir(self._source_subfolder):
+                if self._use_nmake and self._full_version < "1.1.0":
+                    self._run_make(makefile=self._nmake_makefile, targets=["install"], parallel=False)
+                else:
+                    self._run_make(targets=["install_sw"], parallel=False)
+
         self.copy(src=self._source_subfolder, pattern="*LICENSE", dst="licenses")
         for root, _, files in os.walk(self.package_folder):
             for filename in files:
@@ -588,18 +605,35 @@ class OpenSSLConan(ConanFile):
                 os.chmod("libcrypto.so.1.0.0", 0o755)
         tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
 
-    def package_info(self):
-        self.cpp_info.name = "OpenSSL"
+    @property
+    def _ssl_library(self):
         if self._use_nmake:
             if self._full_version < "1.1.0":
-                self.cpp_info.libs = ["ssleay32", "libeay32"]
+                return "ssleay32"
             else:
                 if self.settings.build_type == "Debug":
-                    self.cpp_info.libs = ['libssld', 'libcryptod']
+                    return "libssld"
                 else:
-                    self.cpp_info.libs = ['libssl', 'libcrypto']
+                    return "libssl"
         else:
-            self.cpp_info.libs = ["ssl", "crypto"]
+            return "ssl"
+
+    @property
+    def _crypto_library(self):
+        if self._use_nmake:
+            if self._full_version < "1.1.0":
+                return "libeay32"
+            else:
+                if self.settings.build_type == "Debug":
+                    return "libcryptod"
+                else:
+                    return "libcrypto"
+        else:
+            return "crypto"
+
+    def package_info(self):
+        self.cpp_info.name = "OpenSSL"
+        self.cpp_info.libs = [self._ssl_library, self._crypto_library]
         if self.settings.os == "Windows":
             self.cpp_info.libs.extend(["crypt32", "msi", "ws2_32", "advapi32", "user32", "gdi32"])
         elif self.settings.os == "Linux":
