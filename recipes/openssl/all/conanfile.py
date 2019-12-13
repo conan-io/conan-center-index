@@ -95,8 +95,9 @@ class OpenSSLConan(ConanFile):
     default_options = {key: False for key in options.keys()}
     default_options["fPIC"] = True
     default_options["openssldir"] = None
+    exports_sources = "openssl_extra.cmake"
     _env_build = None
-    _source_subfolder = "sources"
+    _source_subfolder = "source_subfolder"
 
     def build_requirements(self):
         # useful for example for conditional build_requires
@@ -579,7 +580,20 @@ class OpenSSLConan(ConanFile):
         for e in ["MDd", "MTd", "MD", "MT"]:
             tools.replace_in_file(filename, "/%s " % e, "/%s " % self.settings.compiler.runtime, strict=False)
 
+    @property
+    def _find_cmake_dict(self):
+        return {
+            "@CONAN_SSL_LIBRARY@": self._ssl_library,
+            "@CONAN_CRYPTO_LIBRARY@": self._crypto_library,
+        }
+
     def package(self):
+        cmake_text = open("openssl_extra.cmake").read()
+        for key, value in self._find_cmake_dict.items():
+            cmake_text = cmake_text.replace(key, value)
+        cmake_dir = os.path.join(self.package_folder, "lib", "cmake", "openssl")
+        tools.mkdir(cmake_dir)
+        open(os.path.join(cmake_dir, "openssl_extra.cmake"), "w").write(cmake_text)
         with self._build_environment():
             with tools.chdir(self._source_subfolder):
                 if self._use_nmake and self._full_version < "1.1.0":
@@ -635,6 +649,8 @@ class OpenSSLConan(ConanFile):
         self.cpp_info.name = "OpenSSL"
         self.cpp_info.libs = [self._ssl_library, self._crypto_library]
         if self.settings.os == "Windows":
-            self.cpp_info.libs.extend(["crypt32", "msi", "ws2_32", "advapi32", "user32", "gdi32"])
+            self.cpp_info.system_libs.extend(["crypt32", "msi", "ws2_32", "advapi32", "user32", "gdi32"])
         elif self.settings.os == "Linux":
-            self.cpp_info.libs.extend(["dl", "pthread"])
+            self.cpp_info.system_libs.extend(["dl", "pthread"])
+        self.cpp_info.build_modules = [os.path.join("lib", "cmake", "openssl", "openssl_extra.cmake")]
+        self.cpp_info.builddirs = [os.path.join("lib", "cmake", "openssl")]
