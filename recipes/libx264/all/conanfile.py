@@ -10,13 +10,12 @@ class LibX264Conan(ConanFile):
                   "H.264/MPEG-4 AVC compression format"
     topics = ("conan", "libx264", "video", "encoding")
     license = "GPL-2.0"
-    exports_sources = ["CMakeLists.txt"]
     settings = "os", "arch", "compiler", "build_type"
     options = {"shared": [True, False], "fPIC": [True, False], "bit_depth": [8, 10, "all"]}
     default_options = {'shared': False, 'fPIC': True, 'bit_depth': 'all'}
     build_requires = "nasm/2.13.02"
-    _source_subfolder = "sources"
     _override_env = {}
+    _autotools = None
 
     @property
     def _is_mingw(self):
@@ -25,6 +24,10 @@ class LibX264Conan(ConanFile):
     @property
     def _is_msvc(self):
         return self.settings.compiler == 'Visual Studio'
+
+    @property
+    def _source_subfolder(self):
+        return "source_subfolder"
 
     def build_requirements(self):
         if "CONAN_BASH_PATH" not in os.environ and tools.os_info.is_windows:
@@ -49,9 +52,9 @@ class LibX264Conan(ConanFile):
         ret.update(self._override_env)
         return ret
 
-    def build(self):
-        with tools.vcvars(self.settings):
-            with tools.chdir(self._source_subfolder):
+    def _configure_autotools(self):
+        if not self._autotools:
+            with tools.vcvars(self.settings):
                 prefix = tools.unix_path(self.package_folder)
                 args = ['--disable-cli', '--prefix={}'.format(prefix)]
                 if self.options.shared:
@@ -79,17 +82,22 @@ class LibX264Conan(ConanFile):
 
                 if self._is_msvc:
                     self._override_env['CC'] = 'cl'
-                env_build = AutoToolsBuildEnvironment(self, win_bash=tools.os_info.is_windows)
+                self._autotools = AutoToolsBuildEnvironment(self, win_bash=tools.os_info.is_windows)
                 if self._is_msvc:
-                    env_build.flags.append('-%s' % str(self.settings.compiler.runtime))
+                    self._autotools.flags.append('-%s' % str(self.settings.compiler.runtime))
                     # cannot open program database ... if multiple CL.EXE write to the same .PDB file, please use /FS
-                    env_build.flags.append('-FS')
-                env_build.configure(args=args, build=False, vars=self._override_env)
-                env_build.make()
-                env_build.install()
+                    self._autotools.flags.append('-FS')
+                self._autotools.configure(args=args, build=False, vars=self._override_env, configure_dir=self._source_subfolder)
+        return self._autotools
+
+    def build(self):
+        autotools = self._configure_autotools()
+        autotools.make()
 
     def package(self):
-        self.copy(pattern="COPYING", src='sources', dst='licenses')
+        autotools = self._configure_autotools()
+        autotools.install()
+        self.copy(pattern="COPYING", src=self._source_subfolder, dst='licenses')
         tools.rmdir(os.path.join(self.package_folder, 'lib', 'pkgconfig'))
 
     def package_info(self):
@@ -103,6 +111,6 @@ class LibX264Conan(ConanFile):
             self.cpp_info.libs = ['x264']
         if self.settings.os == "Linux":
             self.cpp_info.system_libs.extend(['dl', 'pthread', 'm'])
-        if self.settings.os == "Android":
+        elif self.settings.os == "Android":
             self.cpp_info.system_libs.extend(['dl', 'm'])
         self.cpp_info.names['pkg_config'] = 'x264'
