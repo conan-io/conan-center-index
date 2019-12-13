@@ -34,6 +34,7 @@ class CprConan(ConanFile):
         if self.options.shared:
             del self.options.fPIC
         if self.options.with_openssl:
+            # If using OpenSSL, we need it to be active in libcurl too
             if self.options["libcurl"].with_openssl == False:
                 raise ConanInvalidConfiguration("libcurl must be built with openssl support")
             self.options["libcurl"].with_openssl = True
