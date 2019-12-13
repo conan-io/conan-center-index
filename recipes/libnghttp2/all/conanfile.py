@@ -23,7 +23,7 @@ class Nghttp2Conan(ConanFile):
                        "fPIC": True,
                        "with_app": True,
                        "with_hpack": True,
-                       "with_jemalloc": True,
+                       "with_jemalloc": False,
                        "with_asio": False}
 
     _source_subfolder = "source_subfolder"
