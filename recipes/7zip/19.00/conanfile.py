@@ -27,8 +27,6 @@ class Package7Zip(ConanFile):
         return os.path.join(self._7zip_folder, "Bundles", "LzmaCon")
 
     def configure(self):
-        #if self.settings.os_build != "Windows":
-        #    raise ConanInvalidConfiguration("Only Windows supported")
         if self.settings.arch_build not in ("x86", "x86_64"):
             raise ConanInvalidConfiguration("Unsupported architecture")
 
