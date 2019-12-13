@@ -46,6 +46,8 @@ class JemallocConan(ConanFile):
             del self.options.fPIC
 
     def configure(self):
+        if self.settings.compiler.get_safe("libcxx") == "libc++":
+            raise ConanInvalidConfiguration("libc++ is missing a mutex implementation.  Remove this when it is added")
         if self.options.shared:
             del self.options.fPIC
         if not self.options.enable_cxx:
