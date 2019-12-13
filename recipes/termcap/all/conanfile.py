@@ -53,9 +53,17 @@ class TermcapConan(ConanFile):
         cmake.configure()
         return cmake
 
-    def build(self):
+    def _patch_sources(self):
         for patch in self.conan_data["patches"][self.version]:
             tools.patch(**patch)
+        for src in self._extract_sources()[0]:
+            txt = open(src).read()
+            with open(src, "w") as f:
+                f.write("#include \"termcap_intern.h\"\n\n")
+                f.write(txt)
+
+    def build(self):
+        self._patch_sources()
         cmake = self._configure_cmake()
         cmake.build()
 
