@@ -1,6 +1,5 @@
 from conans import ConanFile
 from conans import tools
-from conans.client.build.cppstd_flags import cppstd_flag
 from conans.model.version import Version
 from conans.errors import ConanException
 
@@ -473,18 +472,15 @@ class BoostConan(ConanFile):
             return None
 
     @property
-    def _gnu_cxx11_abi(self):
-        """Checks libcxx setting and returns value for the GNU C++11 ABI flag
-        _GLIBCXX_USE_CXX11_ABI= .  Returns None if C++ library cannot be
-        determined.
+    def _gnu_cxx11_abi_define(self):
+        """Checks libcxx setting and returns the _GLIBCXX_USE_CXX11_ABI define if needed, None otherwise.
         """
-        try:
-            if str(self.settings.compiler.libcxx) == "libstdc++":
-                return "0"
-            elif str(self.settings.compiler.libcxx) == "libstdc++11":
-                return "1"
-        except:
-            pass
+        libcxx = self.settings.get_safe("compiler.libcxx")
+        if libcxx:
+            if str(libcxx) == "libstdc++":
+                return "_GLIBCXX_USE_CXX11_ABI=0"
+            if str(libcxx) == "libstdc++11":
+                return "_GLIBCXX_USE_CXX11_ABI=1"
         return None
 
     def _get_build_flags(self):
@@ -543,36 +539,6 @@ class BoostConan(ConanFile):
         toolset, _, _ = self._get_toolset_version_and_exe()
         flags.append("toolset=%s" % toolset)
 
-        if self.settings.get_safe("compiler.cppstd"):
-            flags.append("cxxflags=%s" % cppstd_flag(
-                    self.settings.get_safe("compiler"),
-                    self.settings.get_safe("compiler.version"),
-                    self.settings.get_safe("compiler.cppstd")
-                )
-            )
-
-        # CXX FLAGS
-        cxx_flags = []
-        # fPIC DEFINITION
-        if self.settings.os != "Windows":
-            if self.options.fPIC:
-                cxx_flags.append("-fPIC")
-
-        # Standalone toolchain fails when declare the std lib
-        if self.settings.os != "Android":
-            try:
-                if self._gnu_cxx11_abi:
-                    flags.append("define=_GLIBCXX_USE_CXX11_ABI=%s" % self._gnu_cxx11_abi)
-
-                if "clang" in str(self.settings.compiler):
-                    if str(self.settings.compiler.libcxx) == "libc++":
-                        cxx_flags.append("-stdlib=libc++")
-                        flags.append('linkflags="-stdlib=libc++"')
-                    else:
-                        cxx_flags.append("-stdlib=libstdc++")
-            except:
-                pass
-
         if self.options.error_code_header_only:
             flags.append("define=BOOST_ERROR_CODE_HEADER_ONLY=1")
         if self.options.system_no_deprecated:
@@ -585,6 +551,23 @@ class BoostConan(ConanFile):
             flags.extend(["segmented-stacks=on",
                           "define=BOOST_USE_SEGMENTED_STACKS=1",
                           "define=BOOST_USE_UCONTEXT=1"])
+
+        # CXX standard
+        if toolset == 'clang-darwin':
+            if str(self.settings.compiler.libcxx) == "libc++":
+                flags.append("cxxstd=11")
+
+        # glibc ABI
+        if self._gnu_cxx11_abi_define is not None and self.settings.os != "Android":
+            flags.append("define=%s" % self._gnu_cxx11_abi_define)
+
+        # CXX flags
+        cxx_flags = []
+
+        # fPIC DEFINITION
+        if self.settings.os != "Windows":
+            if self.options.fPIC:
+                cxx_flags.append("-fPIC")
 
         if tools.is_apple_os(self.settings.os):
             if self.settings.get_safe("os.version"):
@@ -871,9 +854,8 @@ class BoostConan(ConanFile):
         if self.options.segmented_stacks:
             self.cpp_info.defines.extend(["BOOST_USE_SEGMENTED_STACKS", "BOOST_USE_UCONTEXT"])
 
-        if self.settings.os != "Android":
-            if self._gnu_cxx11_abi:
-                self.cpp_info.defines.append("_GLIBCXX_USE_CXX11_ABI=%s" % self._gnu_cxx11_abi)
+        if self._gnu_cxx11_abi_define is not None and self.settings.os != "Android":
+            self.cpp_info.defines.append(self._gnu_cxx11_abi_define)
 
         if not self.options.header_only:
             if self.options.error_code_header_only:
