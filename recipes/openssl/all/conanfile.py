@@ -582,9 +582,10 @@ class OpenSSLConan(ConanFile):
 
     @property
     def _find_cmake_dict(self):
+        ssl, crypto = self._ssl_crypto_library
         return {
-            "@CONAN_SSL_LIBRARY@": self._ssl_library,
-            "@CONAN_CRYPTO_LIBRARY@": self._crypto_library,
+            "@CONAN_SSL_LIBRARY@": ssl,
+            "@CONAN_CRYPTO_LIBRARY@": crypto,
         }
 
     def package(self):
@@ -620,34 +621,21 @@ class OpenSSLConan(ConanFile):
         tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
 
     @property
-    def _ssl_library(self):
+    def _ssl_crypto_library(self):
         if self._use_nmake:
             if self._full_version < "1.1.0":
-                return "ssleay32"
+                return "ssleay32", "libeay32"
             else:
                 if self.settings.build_type == "Debug":
-                    return "libssld"
+                    return "libssld", "libcryptod"
                 else:
-                    return "libssl"
+                    return "libssl", "libcrypto"
         else:
-            return "ssl"
-
-    @property
-    def _crypto_library(self):
-        if self._use_nmake:
-            if self._full_version < "1.1.0":
-                return "libeay32"
-            else:
-                if self.settings.build_type == "Debug":
-                    return "libcryptod"
-                else:
-                    return "libcrypto"
-        else:
-            return "crypto"
+            return "ssl", "crypto"
 
     def package_info(self):
         self.cpp_info.name = "OpenSSL"
-        self.cpp_info.libs = [self._ssl_library, self._crypto_library]
+        self.cpp_info.libs = [*self._ssl_crypto_library]
         if self.settings.os == "Windows":
             self.cpp_info.system_libs.extend(["crypt32", "msi", "ws2_32", "advapi32", "user32", "gdi32"])
         elif self.settings.os == "Linux":
