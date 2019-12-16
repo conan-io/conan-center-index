@@ -6,7 +6,6 @@ from conans.errors import ConanException
 
 import os
 import sys
-import shutil
 
 try:
     from cStringIO import StringIO
@@ -90,6 +89,11 @@ class BoostConan(ConanFile):
     @property
     def _folder_name(self):
         return "boost_%s" % self.version.replace(".", "_")
+
+    @property
+    def _boost_dist_root(self):
+        """Folder where the boost package is extracted"""
+        return os.path.join(self.source_folder, self._folder_name)
 
     @property
     def _is_msvc(self):
@@ -306,29 +310,13 @@ class BoostConan(ConanFile):
                     return python_lib.replace('\\', '/')
         raise Exception("couldn't locate python libraries - make sure you have installed python development files")
 
-    def _clean(self):
-        src = os.path.join(self.source_folder, self._folder_name)
-        clean_dirs = [os.path.join(self.build_folder, "bin.v2"),
-                      os.path.join(self.build_folder, "architecture"),
-                      os.path.join(self.source_folder, self._bcp_dir),
-                      os.path.join(src, "dist", "bin"),
-                      os.path.join(src, "stage"),
-                      os.path.join(src, "tools", "build", "src", "engine", "bootstrap"),
-                      os.path.join(src, "tools", "build", "src", "engine", "bin.ntx86"),
-                      os.path.join(src, "tools", "build", "src", "engine", "bin.ntx86_64")]
-        for d in clean_dirs:
-            if os.path.isdir(d):
-                self.output.warn('removing "%s"' % d)
-                shutil.rmtree(d)
-
     @property
     def _b2_exe(self):
-        folder = os.path.join(self.source_folder, self._folder_name, "tools", "build")
-        return os.path.join(folder, "b2.exe" if tools.os_info.is_windows else "b2")
+        return os.path.join(self.build_folder, "b2.exe" if tools.os_info.is_windows else "b2")
 
     @property
     def _bcp_exe(self):
-        folder = os.path.join(self.source_folder, self._folder_name, "dist", "bin")
+        folder = os.path.join(self._boost_source_root, "dist", "bin")
         return os.path.join(folder, "bcp.exe" if tools.os_info.is_windows else "bcp")
 
     @property
@@ -339,12 +327,8 @@ class BoostConan(ConanFile):
     def _boost_dir(self):
         return self._bcp_dir if self._use_bcp else self._folder_name
 
-    @property
-    def _boost_build_dir(self):
-        return os.path.join(self.source_folder, self._folder_name, "tools", "build")
-
     def _build_bcp(self):
-        folder = os.path.join(self.source_folder, self._folder_name, 'tools', 'bcp')
+        folder = os.path.join(self._boost_source_root, 'tools', 'bcp')
         with tools.vcvars(self.settings) if self._is_msvc else tools.no_op():
             with tools.chdir(folder):
                 toolset, _, _ = self._get_toolset_version_and_exe()
@@ -382,7 +366,6 @@ class BoostConan(ConanFile):
             self.output.warn("Header only package, skipping build")
             return
 
-        self._clean()
         self._bootstrap()
 
         if self._use_bcp:
@@ -391,23 +374,25 @@ class BoostConan(ConanFile):
 
         flags = self._get_build_flags()
         # Help locating bzip2 and zlib
-        self._create_user_config_jam(self._boost_build_dir)
+        self._create_user_config_jam(self.build_folder)
 
         # JOIN ALL FLAGS
-        b2_flags = " ".join(flags)
-        full_command = "%s %s -j%s --abbreviate-paths -d2" % (self._b2_exe, b2_flags, tools.cpu_count())
+        cmd = self._b2_exe
+        cmd += " " + " ".join(flags)
+        cmd += " -j%s" % tools.cpu_count()
+        cmd += " --abbreviate-paths"
         # -d2 is to print more debug info and avoid travis timing out without output
-        sources = os.path.join(self.source_folder, self._boost_dir)
-        full_command += ' --debug-configuration --build-dir="%s"' % self.build_folder
-        self.output.warn(full_command)
+        cmd += " -d2"
+        cmd += " --debug-configuration"
+        cmd += " --build-dir=\"%s\"" % self.build_folder
+        cmd += " --stagedir=\"%s\"" % self.build_folder
+        self.output.warn(cmd)
 
         with tools.vcvars(self.settings) if self._is_msvc else tools.no_op():
-            with tools.chdir(sources):
-                # to locate user config jam (BOOST_BUILD_PATH)
-                with tools.environment_append({"BOOST_BUILD_PATH": self._boost_build_dir}):
-                    # To show the libraries *1
-                    # self.run("%s --show-libraries" % b2_exe)
-                    self.run(full_command)
+            with tools.chdir(self._boost_dist_root):
+                # To show the libraries *1
+                # self.run("%s --show-libraries" % b2_exe)
+                self.run(cmd)
 
     @property
     def _b2_os(self):
@@ -507,8 +492,9 @@ class BoostConan(ConanFile):
             flags.append("abi=%s" % self._b2_abi)
 
         flags.append("--layout=%s" % self.options.layout)
-        flags.append("-sBOOST_BUILD_PATH=%s" % self._boost_build_dir)
-        flags.append("--user-config=%s" % os.path.join(self._boost_build_dir, 'user-config.jam'))
+        flags.append("-sBOOST_BUILD_PATH=%s" % self.build_folder)
+        flags.append("-sBOOST_ROOT=%s" % self._boost_dist_root)
+        flags.append("--user-config=%s" % os.path.join(self.build_folder, 'user-config.jam'))
         flags.append("-sNO_ZLIB=%s" % ("0" if self.options.zlib else "1"))
         flags.append("-sNO_BZIP2=%s" % ("0" if self.options.bzip2 else "1"))
         flags.append("-sNO_LZMA=%s" % ("0" if self.options.lzma else "1"))
@@ -722,7 +708,7 @@ class BoostConan(ConanFile):
 
         self.output.warn(contents)
         filename = "%s/user-config.jam" % folder
-        tools.save(filename,  contents)
+        tools.save(filename, contents)
 
     def _get_toolset_version_and_exe(self):
         compiler_version = str(self.settings.compiler.version)
@@ -791,11 +777,12 @@ class BoostConan(ConanFile):
         return with_toolset
 
     def _bootstrap(self):
-        folder = os.path.join(self.source_folder, self._folder_name, "tools", "build")
         try:
-            bootstrap = "bootstrap.bat" if tools.os_info.is_windows else "./bootstrap.sh"
+            bootstrap = \
+                os.path.join(self._boost_dist_root,
+                             "bootstrap.bat" if tools.os_info.is_windows else "bootstrap.sh")
             with tools.vcvars(self.settings) if self._is_msvc else tools.no_op():
-                with tools.chdir(folder):
+                with tools.chdir(self.build_folder):
                     if tools.cross_building(self.settings):
                         cmd = bootstrap
                     else:
@@ -807,18 +794,17 @@ class BoostConan(ConanFile):
 
         except Exception as exc:
             self.output.warn(str(exc))
-            if os.path.exists(os.path.join(folder, "bootstrap.log")):
-                self.output.warn(tools.load(os.path.join(folder, "bootstrap.log")))
+            bootstrap_log = os.path.join(self.build_folder, "bootstrap.log")
+            if os.path.exists(bootstrap_log):
+                self.output.warn(tools.load(bootstrap_log))
             raise
 
     ####################################################################
 
     def package(self):
-        # This stage/lib is in source_folder... Face palm, looks like it builds in build but then
-        # copy to source with the good lib name
-        self.copy("LICENSE_1_0.txt", dst="licenses", src=os.path.join(self.source_folder, self._folder_name))
-        out_lib_dir = os.path.join(self._boost_dir, "stage", "lib")
-        self.copy(pattern="*", dst="include/boost", src="%s/boost" % self._boost_dir)
+        self.copy("LICENSE_1_0.txt", dst="licenses", src=self._boost_dist_root)
+        out_lib_dir = os.path.join(self.build_folder, "lib")
+        self.copy(pattern="*", dst="include/boost", src="%s/boost" % self._boost_dist_root)
         if not self.options.shared:
             self.copy(pattern="*.a", dst="lib", src=out_lib_dir, keep_path=False)
         self.copy(pattern="*.so", dst="lib", src=out_lib_dir, keep_path=False, symlinks=True)
