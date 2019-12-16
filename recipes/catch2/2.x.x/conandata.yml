@@ -2,3 +2,6 @@ sources:
   2.9.2:
     url: https://github.com/catchorg/Catch2/archive/v2.9.2.tar.gz
     sha256: 54BEA6D80A388A80F895CD0E2343FCA72B0D9093A776AF40904AEFCE49C13BDA
+  2.11.0:
+    url: https://github.com/catchorg/Catch2/archive/v2.11.0.tar.gz
+    sha256: b9957af46a04327d80833960ae51cf5e67765fd264389bd1e275294907f1a3e0
