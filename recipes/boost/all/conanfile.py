@@ -553,9 +553,9 @@ class BoostConan(ConanFile):
                           "define=BOOST_USE_UCONTEXT=1"])
 
         # CXX standard
-        if toolset == 'clang-darwin':
-            if str(self.settings.compiler.libcxx) == "libc++":
-                flags.append("cxxstd=11")
+        # Cover "clang" and "apple-clang"
+        if "clang" in str(self.settings.compiler):
+            flags.append("cxxstd=11")
 
         # glibc ABI
         if self._gnu_cxx11_abi_define is not None:
