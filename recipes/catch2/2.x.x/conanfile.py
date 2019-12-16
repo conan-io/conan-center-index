@@ -50,6 +50,4 @@ class ConanRecipe(ConanFile):
         self.info.header_only()
 
     def package_info(self):
-        self.cpp_info.builddirs = [
-            os.path.join("lib", "cmake", "Catch2").replace("\\", "/")
-        ]
+        self.cpp_info.builddirs = [os.path.join("lib", "cmake", "Catch2")]
