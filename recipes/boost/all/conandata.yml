@@ -18,6 +18,13 @@ sources:
     url: "https://dl.bintray.com/boostorg/release/1.71.0/source/boost_1_71_0.tar.bz2"
     sha256: "d73a8da01e8bf8c7eda40b4c84915071a8c8a0df4a6734537ddde4a8580524ee"
 patches:
+  1.69.0:
+    - patch_file: "patches/boost_build_asmflags.patch"
+      base_path: "boost_1_69_0"
+    - patch_file: "patches/python_base_prefix.patch"
+      base_path: "boost_1_69_0"
+    - patch_file: "patches/static_object_init.patch"
+      base_path: "boost_1_69_0"
   1.70.0:
     - patch_file: "patches/0001-beast-fix-moved-from-executor.patch"
       base_path: "boost_1_70_0"
