@@ -552,17 +552,23 @@ class BoostConan(ConanFile):
                           "define=BOOST_USE_SEGMENTED_STACKS=1",
                           "define=BOOST_USE_UCONTEXT=1"])
 
-        # CXX standard
-        # Cover "clang" and "apple-clang"
+        # CXX flags
+        cxx_flags = []
+
+        # Configure clang
         if "clang" in str(self.settings.compiler):
+            # C++11 is not enabled by default
             flags.append("cxxstd=11")
+
+            # Stdlib
+            libcxx = self.settings.get_safe("compiler.libcxx")
+            if libcxx:
+                cxx_flags.append("-stdlib=%s" % libcxx)
+                flags.append('linkflags="-stdlib=%s"' % libcxx)
 
         # glibc ABI
         if self._gnu_cxx11_abi_define is not None:
             flags.append("define=%s" % self._gnu_cxx11_abi_define)
-
-        # CXX flags
-        cxx_flags = []
 
         # fPIC DEFINITION
         if self.settings.os != "Windows":
