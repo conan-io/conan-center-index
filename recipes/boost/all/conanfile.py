@@ -558,7 +558,7 @@ class BoostConan(ConanFile):
                 flags.append("cxxstd=11")
 
         # glibc ABI
-        if self._gnu_cxx11_abi_define is not None and self.settings.os != "Android":
+        if self._gnu_cxx11_abi_define is not None:
             flags.append("define=%s" % self._gnu_cxx11_abi_define)
 
         # CXX flags
@@ -854,7 +854,7 @@ class BoostConan(ConanFile):
         if self.options.segmented_stacks:
             self.cpp_info.defines.extend(["BOOST_USE_SEGMENTED_STACKS", "BOOST_USE_UCONTEXT"])
 
-        if self._gnu_cxx11_abi_define is not None and self.settings.os != "Android":
+        if self._gnu_cxx11_abi_define is not None:
             self.cpp_info.defines.append(self._gnu_cxx11_abi_define)
 
         if not self.options.header_only:
