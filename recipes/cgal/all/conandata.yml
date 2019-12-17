@@ -1,0 +1,4 @@
+sources:
+  "5.0":
+    sha256: 060ccfdf8ac48d1c1bd0567f7c89cd625a7b47c624616b18b664750410b38139
+    url: https://github.com/CGAL/cgal/archive/releases/CGAL-5.0-branch.zip
