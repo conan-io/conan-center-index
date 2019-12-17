@@ -1,6 +1,5 @@
 from conans import ConanFile, AutoToolsBuildEnvironment, tools
 import os
-import shutil
 
 
 class MpfrConan(ConanFile):
