@@ -16,19 +16,15 @@ class CgalConan(ConanFile):
     _source_subfolder = "source_subfolder"
 
     options = {
-        "with_examples": [True, False],
-        "with_demos": [True, False],
         "with_cgal_core": [True, False],
         "with_cgal_qt5": [True, False],
         "with_cgal_imageio": [True, False]
     }
 
     default_options = {
-        "with_examples": False,
-        "with_demos": False,
         "with_cgal_core": True,
         "with_cgal_qt5": False,
-        "with_cgal_imageio": True
+        "with_cgal_imageio": False
     }
 
     generators = "cmake"
@@ -48,8 +44,6 @@ conan_basic_setup()''')
 
     def build(self):
         cmake = CMake(self)
-        cmake.definitions["WITH_examples"] = self.options.with_examples
-        cmake.definitions["WITH_demos"] = self.options.with_demos
         cmake.definitions["WITH_CGAL_Core"] = self.options.with_cgal_core
         cmake.definitions["WITH_CGAL_Qt5"] = self.options.with_cgal_qt5
         cmake.definitions["WITH_CGAL_ImageIO"] = self.options.with_cgal_imageio
