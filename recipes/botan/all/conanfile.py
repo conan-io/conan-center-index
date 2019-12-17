@@ -107,7 +107,7 @@ class BotanConan(ConanFile):
             if self.settings.os == 'Linux':
                 self.cpp_info.system_libs.append('rt')
             if self.settings.os == 'Macos':
-                self.cpp_info.framework = ['Security', 'CoreFoundation']
+                self.cpp_info.frameworks = ['Security', 'CoreFoundation']
             if not self.options.shared:
                 self.cpp_info.system_libs.append('pthread')
         if self.settings.os == "Windows":
