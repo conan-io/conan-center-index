@@ -1,0 +1,4 @@
+sources:
+  "4.0.2":
+    sha256: ae26cace63a498f07047a784cd3b0e4d010b44d2b193bab82af693de57a19a78
+    url: https://www.mpfr.org/mpfr-current/mpfr-4.0.2.tar.gz
