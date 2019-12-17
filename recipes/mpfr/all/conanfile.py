@@ -2,6 +2,7 @@ from conans import ConanFile, AutoToolsBuildEnvironment, tools
 import os
 import shutil
 
+
 class MpfrConan(ConanFile):
     name = "mpfr"
     description = "The MPFR library is a C library for multiple-precision floating-point computations with " \
@@ -53,8 +54,10 @@ class MpfrConan(ConanFile):
         la = os.path.join(self.package_folder, "lib", "libmpfr.la")
         if os.path.isfile(la):
             os.unlink(la)
-        shutil.rmtree(os.path.join(self.package_folder, "share"), ignore_errors=True)
-        shutil.rmtree(os.path.join(self.package_folder, "lib", "pkgconfig"), ignore_errors=True)
+        shutil.rmtree(os.path.join(self.package_folder, "share"),
+                      ignore_errors=True)
+        shutil.rmtree(os.path.join(self.package_folder, "lib", "pkgconfig"),
+                      ignore_errors=True)
 
     def package_info(self):
         self.cpp_info.libs = ["mpfr"]
