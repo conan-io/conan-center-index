@@ -16,7 +16,6 @@ class MpfrConan(ConanFile):
     requires = "gmp/6.1.2"
 
     _source_subfolder = "source_subfolder"
-    _build_subfolder = "build_subfolder"
     _autotools = None
 
     def config_options(self):
