@@ -1,6 +1,5 @@
 from conans import ConanFile, AutoToolsBuildEnvironment, tools
 import os
-import shutil
 
 
 class MpfrConan(ConanFile):
@@ -14,9 +13,11 @@ class MpfrConan(ConanFile):
     settings = "os", "arch", "compiler", "build_type"
     options = {"shared": [True, False], "fPIC": [True, False]}
     default_options = {"shared": False, "fPIC": True}
+    requires = "gmp/6.1.2"
+
     _source_subfolder = "source_subfolder"
     _build_subfolder = "build_subfolder"
-    requires = "gmp/6.1.2"
+    _autotools = None
 
     def config_options(self):
         if self.settings.os == 'Windows':
@@ -31,8 +32,8 @@ class MpfrConan(ConanFile):
         extracted_dir = self.name + "-" + self.version
         os.rename(extracted_dir, self._source_subfolder)
 
-    def build(self):
-        with tools.chdir(self._source_subfolder):
+    def _configure_autotools(self):
+        if not self._autotools:
             args = ["--enable-thread-safe"]
             if self.options.shared:
                 args.extend(["--disable-static", "--enable-shared"])
@@ -44,20 +45,23 @@ class MpfrConan(ConanFile):
             if self.settings.compiler == "clang" and self.settings.arch == "x86":
                 # fatal error: error in backend: Unsupported library call operation!
                 args.append("--disable-float128")
-            env_build = AutoToolsBuildEnvironment(self)
-            env_build.configure(args=args)
-            env_build.make(args=["V=0"])
-            env_build.install()
+            self._autotools = AutoToolsBuildEnvironment(self)
+            self._autotools.configure(args=args, configure_dir=self._source_subfolder)
+        return self._autotools
+
+    def build(self):
+        autotools = self._configure_autotools()
+        autotools.make(args=["V=0"])
 
     def package(self):
         self.copy("COPYING", dst="licenses", src=self._source_subfolder)
+        autotools = self._configure_autotools()
+        autotools.install()
         la = os.path.join(self.package_folder, "lib", "libmpfr.la")
         if os.path.isfile(la):
             os.unlink(la)
-        shutil.rmtree(os.path.join(self.package_folder, "share"),
-                      ignore_errors=True)
-        shutil.rmtree(os.path.join(self.package_folder, "lib", "pkgconfig"),
-                      ignore_errors=True)
+        tools.rmdir(os.path.join(self.package_folder, "share"))
+        tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
 
     def package_info(self):
         self.cpp_info.libs = ["mpfr"]
