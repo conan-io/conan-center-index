@@ -1,6 +1,5 @@
 import os
 from conans import ConanFile, tools
-from conans.errors import ConanException
 
 class eigenConan(ConanFile):
     name = "eigen"
@@ -39,5 +38,7 @@ class eigenConan(ConanFile):
         self.info.header_only()
 
     def package_info(self):
-        self.cpp_info.libs = tools.collect_libs(self)
+        self.cpp_info.name = "Eigen3"
         self.cpp_info.includedirs = [os.path.join("include","eigen3")]
+        if tools.os_info.is_linux:
+            self.cpp_info.system_libs = ["m"]
