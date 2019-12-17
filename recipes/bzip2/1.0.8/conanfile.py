@@ -6,7 +6,7 @@ class Bzip2Conan(ConanFile):
     name = "bzip2"
     version = "1.0.8"
     url = "https://github.com/conan-io/conan-center-index"
-    homepage = "http://www.bzip.org"    
+    homepage = "http://www.bzip.org"
     license = "bzip2-1.0.8"
     description = "bzip2 is a free and open-source file compression program that uses the Burrows Wheeler algorithm."
     topics = ("conan", "bzip2", "data-compressor", "file-compression")
@@ -54,4 +54,5 @@ class Bzip2Conan(ConanFile):
 
     def package_info(self):
         self.cpp_info.name = "BZip2"
+        self.cpp_info.names["pkg_config"] = "bzip2"
         self.cpp_info.libs = tools.collect_libs(self)

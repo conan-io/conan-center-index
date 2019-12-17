@@ -80,7 +80,7 @@ class ZlibConan(ConanFile):
 
     def _build_zlib(self):
         with tools.chdir(self._source_subfolder):
-            # https://github.com/madler/zlib/issues/268 
+            # https://github.com/madler/zlib/issues/268
             tools.replace_in_file('gzguts.h',
                                   '#if defined(_WIN32) || defined(__CYGWIN__)',
                                   '#if defined(_WIN32) || defined(__MINGW32__)')
@@ -164,4 +164,5 @@ class ZlibConan(ConanFile):
                 self.cpp_info.defines.append('MINIZIP_DLL')
         self.cpp_info.libs.append('zlib' if self.settings.os == "Windows" else "z")
         self.cpp_info.name = "ZLIB"
+        self.cpp_info.names["pkg_config"] = "zlib"
 

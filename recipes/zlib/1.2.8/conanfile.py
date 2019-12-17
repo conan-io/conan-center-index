@@ -20,7 +20,7 @@ class ZlibConan(ConanFile):
     generators = "cmake"
     _source_subfolder = "source_subfolder"
     _build_subfolder = "build_subfolder"
-    
+
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
@@ -28,7 +28,7 @@ class ZlibConan(ConanFile):
     def configure(self):
         del self.settings.compiler.libcxx
         del self.settings.compiler.cppstd
-    
+
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
         os.rename("{}-{}".format(self.name, self.version), self._source_subfolder)
@@ -37,7 +37,7 @@ class ZlibConan(ConanFile):
             configure_file = os.path.join(self._source_subfolder, "configure")
             st = os.stat(configure_file)
             os.chmod(configure_file, st.st_mode | stat.S_IEXEC)
-                
+
     def build(self):
         if self.settings.os != "Windows":
             with tools.chdir(self._source_subfolder):
@@ -101,6 +101,7 @@ class ZlibConan(ConanFile):
                 self.copy(pattern="*.a", dst="lib", src=self._source_subfolder, keep_path=False)
 
     def package_info(self):
+        self.cpp_info.names["pkg_config"] = "zlib"
         if self.settings.os == "Windows":
             self.cpp_info.libs = ['zlib']
             if self.settings.build_type == "Debug" and self.settings.compiler == "Visual Studio":
