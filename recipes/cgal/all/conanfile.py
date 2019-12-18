@@ -26,7 +26,7 @@ class CgalConan(ConanFile):
     default_options = {
         "with_cgal_core": True,
         "with_cgal_qt5": False,
-        "with_cgal_imageio": False
+        "with_cgal_imageio": True
     }
 
     def _configure_cmake(self):
