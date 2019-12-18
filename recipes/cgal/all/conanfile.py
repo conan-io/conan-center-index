@@ -52,21 +52,13 @@ conan_basic_setup()''')
 
     def package(self):
         # https://github.com/CGAL/cgal/blob/releases/CGAL-5.0-branch/Installation/lib/cmake/CGAL/CGALConfig.cmake
+        destination_dir = os.path.join("include", "CGAL")
         for root, _, _ in os.walk(self.source_folder):
-            if os.path.isdir(os.path.join(root, "include")) and os.path.isdir(
+            if os.path.isdir(os.path.join(root, "include", "CGAL")) and os.path.isdir(
                     os.path.join(root, "package_info")):
                 subdir = os.path.basename(root)
-                self.copy("*.h*",
-                          dst=os.path.join("include", subdir, "include"),
-                          src=os.path.join(root, "include"))
-        self.copy("LICENSE*",
-                  dst="licenses",
-                  src=os.path.join(self._source_subfolder, "Installation"))
-
-    def package_info(self):
-        for root, _, _ in os.walk(self.package_folder):
-            if os.path.isdir(os.path.join(root, "include")):
-                self.cpp_info.includedirs.append(os.path.join(root, "include"))
+                self.copy("*.h*", dst=destination_dir, src=os.path.join(root, "include", "CGAL"))
+        self.copy("LICENSE*", dst="licenses", src=os.path.join(self._source_subfolder, "Installation"))
 
     def package_id(self):
         self.info.header_only()
