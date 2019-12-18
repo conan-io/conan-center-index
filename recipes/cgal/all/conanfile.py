@@ -12,8 +12,10 @@ class CgalConan(ConanFile):
     topics = ("geometry", "algorithms")
     settings = "os", "compiler", "build_type", "arch"
     requires = "gmp/6.1.2", "mpfr/4.0.2", "boost/1.71.0", "eigen/3.3.7"
+    generators = "cmake"
 
     _source_subfolder = "source_subfolder"
+    _cmake = None
 
     options = {
         "with_cgal_core": [True, False],
@@ -27,7 +29,14 @@ class CgalConan(ConanFile):
         "with_cgal_imageio": False
     }
 
-    generators = "cmake"
+    def _configure_cmake(self):
+        if not self._cmake:
+            self._cmake = CMake(self)
+            self._cmake.definitions["WITH_CGAL_Core"] = self.options.with_cgal_core
+            self._cmake.definitions["WITH_CGAL_Qt5"] = self.options.with_cgal_qt5
+            self._cmake.definitions["WITH_CGAL_ImageIO"] = self.options.with_cgal_imageio
+            self._cmake.configure(source_folder=self._source_subfolder)
+        return self._cmake
 
     def _patch_sources(self):
         tools.replace_in_file(
@@ -38,27 +47,21 @@ conan_basic_setup()''')
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
-        extracted_dir = "cgal-releases-CGAL-{}-branch".format(self.version)
+        extracted_dir = "CGAL-{}".format(self.version)
         os.rename(extracted_dir, self._source_subfolder)
         self._patch_sources()
 
     def build(self):
-        cmake = CMake(self)
-        cmake.definitions["WITH_CGAL_Core"] = self.options.with_cgal_core
-        cmake.definitions["WITH_CGAL_Qt5"] = self.options.with_cgal_qt5
-        cmake.definitions["WITH_CGAL_ImageIO"] = self.options.with_cgal_imageio
-        cmake.configure(source_folder=self._source_subfolder)
+        cmake = self._configure_cmake()
         cmake.build()
 
     def package(self):
-        # https://github.com/CGAL/cgal/blob/releases/CGAL-5.0-branch/Installation/lib/cmake/CGAL/CGALConfig.cmake
-        destination_dir = os.path.join("include", "CGAL")
-        for root, _, _ in os.walk(self.source_folder):
-            if os.path.isdir(os.path.join(root, "include", "CGAL")) and os.path.isdir(
-                    os.path.join(root, "package_info")):
-                subdir = os.path.basename(root)
-                self.copy("*.h*", dst=destination_dir, src=os.path.join(root, "include", "CGAL"))
-        self.copy("LICENSE*", dst="licenses", src=os.path.join(self._source_subfolder, "Installation"))
+        self.copy("LICENSE*", dst="licenses", src=os.path.join(self._source_subfolder))
+        cmake = self._configure_cmake()
+        cmake.install()
+        tools.rmdir(os.path.join(self.package_folder, "share"))
+        tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
+        tools.rmdir(os.path.join(self.package_folder, "bin"))
 
     def package_id(self):
         self.info.header_only()
