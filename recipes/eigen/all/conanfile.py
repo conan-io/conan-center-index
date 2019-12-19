@@ -9,6 +9,7 @@ class eigenConan(ConanFile):
                    numerical solvers, and related algorithms."
     license = "MPL-2.0"
     topics = ("eigen", "algebra", "linear-algebra", "vector", "numerical")
+    settings = "os", "compiler", "arch", "build_type"
     _source_subfolder = "_source_subfolder"
     no_copy_source = True
 
@@ -40,5 +41,5 @@ class eigenConan(ConanFile):
     def package_info(self):
         self.cpp_info.name = "Eigen3"
         self.cpp_info.includedirs = [os.path.join("include","eigen3")]
-        if tools.os_info.is_linux:
+        if self.settings.os == "Linux":
             self.cpp_info.system_libs = ["m"]
