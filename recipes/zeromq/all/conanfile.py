@@ -30,10 +30,6 @@ class ZeroMQConan(ConanFile):
         if self.settings.os == "Windows":
             del self.options.fPIC
 
-    def configure(self):
-        if self.options.shared:
-            del self.options.fPIC
-
     def requirements(self):
         if self.options.encryption == "libsodium":
             self.requires.add("libsodium/1.0.18")
@@ -44,7 +40,6 @@ class ZeroMQConan(ConanFile):
 
     def _configure_cmake(self):
         cmake = CMake(self)
-        cmake.definitions["CONANBUILDINFO_PATH"] = self.build_folder
         cmake.definitions["ENABLE_CURVE"] = self.options.encryption is not None
         cmake.definitions["WITH_LIBSODIUM"] = self.options.encryption == "libsodium"
         cmake.definitions["ZMQ_BUILD_TESTS"] = False
@@ -71,10 +66,8 @@ class ZeroMQConan(ConanFile):
         self.copy("zeromq_extra.cmake", dst=os.path.join(self.package_folder, "lib", "cmake", "zeromq"))
 
     def package_info(self):
+        self.cpp_info.name = "ZeroMQ"
         self.cpp_info.names["pkg_config"] = "libzmq"
-        self.cpp_info.names["cmake"] = "ZeroMQ"
-        self.cpp_info.names["cmake_find_package"] = "ZeroMQ"
-        self.cpp_info.names["cmake_find_package_multi"] = "ZeroMQ"
         if self.settings.compiler == "Visual Studio":
             version = "_".join(self.version.split("."))
             if self.settings.build_type == "Debug":
