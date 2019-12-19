@@ -44,8 +44,6 @@ class BoostConan(ConanFile):
         "magic_autolink": [True, False],  # enables BOOST_ALL_NO_LIB
         "python_executable": "ANY",  # system default python installation is used, if None
         "python_version": "ANY",  # major.minor; computed automatically, if None
-        "namespace": "ANY",  # custom boost namespace for bcp, e.g. myboost
-        "namespace_alias": [True, False],  # enable namespace alias for bcp, boost=myboost
         "zlib": [True, False],
         "bzip2": [True, False],
         "lzma": [True, False],
@@ -66,8 +64,6 @@ class BoostConan(ConanFile):
                        "magic_autolink=False",
                        "python_executable=None",
                        "python_version=None",
-                       "namespace=boost",
-                       "namespace_alias=False",
                        "zlib=True",
                        "bzip2=True",
                        "lzma=False",
@@ -81,10 +77,6 @@ class BoostConan(ConanFile):
     short_paths = True
     no_copy_source = True
     exports_sources = ['patches/*']
-
-    @property
-    def _bcp_dir(self):
-        return "custom-boost"
 
     @property
     def _folder_name(self):
@@ -314,63 +306,12 @@ class BoostConan(ConanFile):
     def _b2_exe(self):
         return os.path.join(self.build_folder, "b2.exe" if tools.os_info.is_windows else "b2")
 
-    @property
-    def _bcp_exe(self):
-        folder = os.path.join(self._boost_source_root, "dist", "bin")
-        return os.path.join(folder, "bcp.exe" if tools.os_info.is_windows else "bcp")
-
-    @property
-    def _use_bcp(self):
-        return self.options.namespace != "boost"
-
-    @property
-    def _boost_dir(self):
-        return self._bcp_dir if self._use_bcp else self._folder_name
-
-    def _build_bcp(self):
-        folder = os.path.join(self._boost_source_root, 'tools', 'bcp')
-        with tools.vcvars(self.settings) if self._is_msvc else tools.no_op():
-            with tools.chdir(folder):
-                toolset, _, _ = self._get_toolset_version_and_exe()
-                command = "%s -j%s --abbreviate-paths -d2 toolset=%s" % (self._b2_exe, tools.cpu_count(), toolset)
-                self.output.warn(command)
-                self.run(command)
-
-    def _run_bcp(self):
-        with tools.vcvars(self.settings) if self._is_msvc else tools.no_op():
-            with tools.chdir(self.source_folder):
-                os.mkdir(self._bcp_dir)
-                namespace = "--namespace=%s" % self.options.namespace
-                alias = "--namespace-alias" if self.options.namespace_alias else ""
-                boostdir = "--boost=%s" % self._folder_name
-                libraries = {"build", "boost-build.jam", "boostcpp.jam", "boost_install", "headers"}
-                for d in os.listdir(os.path.join(self._folder_name, "boost")):
-                    if os.path.isdir(os.path.join(self._folder_name, "boost", d)):
-                        libraries.add(d)
-                for d in os.listdir(os.path.join(self._folder_name, "libs")):
-                    if os.path.isdir(os.path.join(self._folder_name, "libs", d)):
-                        libraries.add(d)
-                libraries = ' '.join(libraries)
-                command = "{bcp} {namespace} {alias} " \
-                          "{boostdir} {libraries} {outdir}".format(bcp=self._bcp_exe,
-                                                                   namespace=namespace,
-                                                                   alias=alias,
-                                                                   libraries=libraries,
-                                                                   boostdir=boostdir,
-                                                                   outdir=self._bcp_dir)
-                self.output.warn(command)
-                self.run(command)
-
     def build(self):
         if self.options.header_only:
             self.output.warn("Header only package, skipping build")
             return
 
         self._bootstrap()
-
-        if self._use_bcp:
-            self._build_bcp()
-            self._run_bcp()
 
         flags = self._get_build_flags()
         # Help locating bzip2 and zlib
