@@ -13,6 +13,7 @@ class Libxml2Conan(ConanFile):
     homepage = "https://xmlsoft.org"
     license = "MIT"
     settings = "os", "arch", "compiler", "build_type"
+    exports_sources = "patches/**"
     generators = "pkg_config"
     options = {"shared": [True, False],
                "fPIC": [True, False],
@@ -136,6 +137,7 @@ class Libxml2Conan(ConanFile):
             self.run("mingw32-make -f Makefile.mingw")
 
     def _package_mingw(self):
+        tools.mkdir(os.path.join(self.package_folder, "include", "libxml2"))
         with tools.chdir(os.path.join(self._source_subfolder, 'win32')):
             self.run("mingw32-make -f Makefile.mingw install")
 
@@ -170,6 +172,9 @@ class Libxml2Conan(ConanFile):
         return autotools
 
     def _patch_sources(self):
+        for patch in self.conan_data["patches"][self.version]:
+            tools.patch(**patch)
+
         # Break dependency of install on build
         for makefile in ("Makefile.mingw", "Makefile.msvc"):
             tools.replace_in_file(os.path.join(self._source_subfolder, "win32", makefile),
@@ -196,6 +201,7 @@ class Libxml2Conan(ConanFile):
         else:
             autotools = self._configure_autotools()
             autotools.install()
+            os.unlink(os.path.join(self.package_folder, 'lib', 'libxml2.la'))
 
         for prefix in ["run", "test"]:
             for test in glob.glob("%s/bin/%s*" % (self.package_folder, prefix)):
@@ -204,28 +210,27 @@ class Libxml2Conan(ConanFile):
             self.copy(pattern=header, src=os.path.join(self._source_subfolder, "include"),
                       dst=os.path.join("include", "libxml2"), keep_path=False)
         if self._is_msvc:
+            # remove redundant libraries to avoid confusion
             if not self.options.shared:
                 os.unlink(os.path.join(self.package_folder, "bin", "libxml2.dll"))
-            # remove redundant libraries to avoid confusion
             os.unlink(os.path.join(self.package_folder, 'lib', 'libxml2_a_dll.lib'))
             os.unlink(os.path.join(self.package_folder, 'lib', 'libxml2_a.lib' if self.options.shared else 'libxml2.lib'))
 
             pdb_files = glob.glob(os.path.join(self.package_folder, 'bin', '*.pdb'), recursive=True)
             for pdb in pdb_files:
                 os.unlink(pdb)
+        elif self._is_mingw:
+            if self.options.shared:
+                os.unlink(os.path.join(self.package_folder, "lib", "libxml2.a"))
+                os.rename(os.path.join(self.package_folder, "lib", "libxml2.lib"),
+                          os.path.join(self.package_folder, "lib", "libxml2.a"))
+            else:
+                os.unlink(os.path.join(self.package_folder, "bin", "libxml2.dll"))
+                os.unlink(os.path.join(self.package_folder, "lib", "libxml2.lib"))
 
         tools.rmdir(os.path.join(self.package_folder, 'share'))
         tools.rmdir(os.path.join(self.package_folder, 'lib', 'cmake'))
         tools.rmdir(os.path.join(self.package_folder, 'lib', 'pkgconfig'))
-
-        for lib in glob.glob(os.path.join(self.package_folder, "lib", "*")):
-            _, ext = os.path.splitext(lib)
-            if self._is_msvc:
-                if ext != ".lib":
-                    os.unlink(lib)
-            else:
-                if ext != ".a":
-                    os.unlink(lib)
 
     def package_info(self):
         if self._is_msvc:
