@@ -29,7 +29,14 @@ class LibX265Conan(ConanFile):
 
     def build(self):
         with tools.vcvars(self.settings, filter_known_paths=False):
-            if self.settings.os == "Android":
+            if self.settings.os == 'Windows':
+                tools.replace_in_file(os.path.join('sources', 'source', 'CMakeLists.txt'),
+                                    '${PROJECT_BINARY_DIR}/Debug/x265.pdb',
+                                    '${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/x265.pdb')
+                tools.replace_in_file(os.path.join('sources', 'source', 'CMakeLists.txt'),
+                                    '${PROJECT_BINARY_DIR}/x265.pdb',
+                                    '${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/x265.pdb')
+            elif self.settings.os == "Android":
                 tools.replace_in_file(os.path.join('sources', 'source', 'CMakeLists.txt'),
                     "list(APPEND PLATFORM_LIBS pthread)", "")
                 tools.replace_in_file(os.path.join('sources', 'source', 'CMakeLists.txt'),
