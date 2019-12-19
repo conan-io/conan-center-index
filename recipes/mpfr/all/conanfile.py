@@ -14,9 +14,15 @@ class MpfrConan(ConanFile):
     options = {"shared": [True, False], "fPIC": [True, False]}
     default_options = {"shared": False, "fPIC": True}
     requires = "gmp/6.1.2"
+<<<<<<< HEAD
 
     _source_subfolder = "source_subfolder"
     _build_subfolder = "build_subfolder"
+    _autotools = None
+=======
+>>>>>>> ab779e5fe2dc45e65ace176ff34cb7d147a0ba51
+
+    _source_subfolder = "source_subfolder"
     _autotools = None
 
     def config_options(self):
