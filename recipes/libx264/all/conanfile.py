@@ -54,49 +54,50 @@ class LibX264Conan(ConanFile):
 
     def _configure_autotools(self):
         if not self._autotools:
-            with tools.vcvars(self.settings):
-                prefix = tools.unix_path(self.package_folder)
-                args = ['--disable-cli', '--prefix={}'.format(prefix)]
-                if self.options.shared:
-                    args.append('--enable-shared')
-                else:
-                    args.append('--enable-static')
-                if self.settings.os != 'Windows' and self.options.fPIC:
-                    args.append('--enable-pic')
-                if self.settings.build_type == 'Debug':
-                    args.append('--enable-debug')
-                args.append('--bit-depth=%s' % str(self.options.bit_depth))
+            prefix = tools.unix_path(self.package_folder)
+            args = ['--disable-cli', '--prefix={}'.format(prefix)]
+            if self.options.shared:
+                args.append('--enable-shared')
+            else:
+                args.append('--enable-static')
+            if self.settings.os != 'Windows' and self.options.fPIC:
+                args.append('--enable-pic')
+            if self.settings.build_type == 'Debug':
+                args.append('--enable-debug')
+            args.append('--bit-depth=%s' % str(self.options.bit_depth))
 
-                if tools.cross_building(self.settings):
-                    if self.settings.os == "Android":
-                        # the as of ndk does not work well for building libx264
-                        self._override_env["AS"] = os.environ["CC"]
-                        ndk_root = tools.unix_path(os.environ["NDK_ROOT"])
-                        arch = {'armv7': 'arm',
-                                'armv8': 'aarch64',
-                                'x86': 'i686',
-                                'x86_64': 'x86_64'}.get(str(self.settings.arch))
-                        abi = 'androideabi' if self.settings.arch == 'armv7' else 'android'
-                        cross_prefix = "%s/bin/%s-linux-%s-" % (ndk_root, arch, abi)
-                        args.append('--cross-prefix=%s' % cross_prefix)
+            if tools.cross_building(self.settings):
+                if self.settings.os == "Android":
+                    # the as of ndk does not work well for building libx264
+                    self._override_env["AS"] = os.environ["CC"]
+                    ndk_root = tools.unix_path(os.environ["NDK_ROOT"])
+                    arch = {'armv7': 'arm',
+                            'armv8': 'aarch64',
+                            'x86': 'i686',
+                            'x86_64': 'x86_64'}.get(str(self.settings.arch))
+                    abi = 'androideabi' if self.settings.arch == 'armv7' else 'android'
+                    cross_prefix = "%s/bin/%s-linux-%s-" % (ndk_root, arch, abi)
+                    args.append('--cross-prefix=%s' % cross_prefix)
 
-                if self._is_msvc:
-                    self._override_env['CC'] = 'cl'
-                self._autotools = AutoToolsBuildEnvironment(self, win_bash=tools.os_info.is_windows)
-                if self._is_msvc:
-                    self._autotools.flags.append('-%s' % str(self.settings.compiler.runtime))
-                    # cannot open program database ... if multiple CL.EXE write to the same .PDB file, please use /FS
-                    self._autotools.flags.append('-FS')
-                self._autotools.configure(args=args, build=False, vars=self._override_env, configure_dir=self._source_subfolder)
+            if self._is_msvc:
+                self._override_env['CC'] = 'cl'
+            self._autotools = AutoToolsBuildEnvironment(self, win_bash=tools.os_info.is_windows)
+            if self._is_msvc:
+                self._autotools.flags.append('-%s' % str(self.settings.compiler.runtime))
+                # cannot open program database ... if multiple CL.EXE write to the same .PDB file, please use /FS
+                self._autotools.flags.append('-FS')
+            self._autotools.configure(args=args, build=False, vars=self._override_env, configure_dir=self._source_subfolder)
         return self._autotools
 
     def build(self):
-        autotools = self._configure_autotools()
-        autotools.make()
+        with tools.vcvars(self.settings):
+            autotools = self._configure_autotools()
+            autotools.make()
 
     def package(self):
-        autotools = self._configure_autotools()
-        autotools.install()
+        with tools.vcvars(self.settings):
+            autotools = self._configure_autotools()
+            autotools.install()
         self.copy(pattern="COPYING", src=self._source_subfolder, dst='licenses')
         tools.rmdir(os.path.join(self.package_folder, 'lib', 'pkgconfig'))
 
