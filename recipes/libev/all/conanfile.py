@@ -1,5 +1,6 @@
 from conans import ConanFile, AutoToolsBuildEnvironment, tools
 from conans.errors import ConanInvalidConfiguration
+from functools import lru_cache
 import os
 
 
@@ -30,22 +31,25 @@ class LibevConan(ConanFile):
             # libtool:   error: can't build i686-pc-mingw32 shared library unless -no-undefined is specified
             raise ConanInvalidConfiguration("libev can't be built as shared on Windows")
 
+    def build_requirements(self):
+        if tools.os_info.is_windows and "CONAN_BASH_PATH" not in os.environ:
+            self.build_requires("msys2/20190524")
+
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
         extracted_folder = "libev-{0}".format(self.version)
         os.rename(extracted_folder, self._source_subfolder)
 
+    @lru_cache(1)
     def _configure_autotools(self):
-        if not hasattr(self, '__autotools'):
-            autotools = AutoToolsBuildEnvironment(self, win_bash=tools.os_info.is_windows)
-            args = []
-            if self.options.shared:
-                args.extend(['--disable-static', '--enable-shared'])
-            else:
-                args.extend(['--disable-shared', '--enable-static'])
-            autotools.configure(configure_dir=self._source_subfolder, args=args)
-            setattr(self, '__autotools', autotools)
-        return getattr(self, '__autotools')
+        autotools = AutoToolsBuildEnvironment(self, win_bash=tools.os_info.is_windows)
+        args = []
+        if self.options.shared:
+            args.extend(['--disable-static', '--enable-shared'])
+        else:
+            args.extend(['--disable-shared', '--enable-static'])
+        autotools.configure(configure_dir=self._source_subfolder, args=args)
+        return autotools
 
     def build(self):
         autotools = self._configure_autotools()
