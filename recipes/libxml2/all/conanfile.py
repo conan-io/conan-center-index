@@ -1,6 +1,8 @@
+from conans import ConanFile, tools, AutoToolsBuildEnvironment, VisualStudioBuildEnvironment
+from contextlib import contextmanager
 import glob
 import os
-from conans import ConanFile, tools, AutoToolsBuildEnvironment, VisualStudioBuildEnvironment
+from functools import lru_cache
 
 
 class Libxml2Conan(ConanFile):
@@ -11,6 +13,7 @@ class Libxml2Conan(ConanFile):
     homepage = "https://xmlsoft.org"
     license = "MIT"
     settings = "os", "arch", "compiler", "build_type"
+    generators = "pkg_config"
     options = {"shared": [True, False],
                "fPIC": [True, False],
                "zlib": [True, False],
@@ -43,10 +46,6 @@ class Libxml2Conan(ConanFile):
     def _is_mingw(self):
         return self.settings.compiler == 'gcc' and self.settings.os == 'Windows'
 
-    @property
-    def _full_source_subfolder(self):
-        return os.path.join(self.source_folder, self._source_subfolder)
-
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
         os.rename("libxml2-{0}".format(self.version), self._source_subfolder)
@@ -59,61 +58,62 @@ class Libxml2Conan(ConanFile):
         del self.settings.compiler.libcxx
         del self.settings.compiler.cppstd
 
-    def build(self):
-        if self._is_msvc:
-            self._build_windows()
-        elif self._is_mingw:
-            self._build_mingw()
-        else:
-            self._build_with_configure()
+    @contextmanager
+    def _msvc_build_environment(self):
+        with tools.chdir(os.path.join(self._source_subfolder, 'win32')):
+            with tools.vcvars(self.settings):
+                with tools.environment_append(VisualStudioBuildEnvironment(self).vars):
+                    yield
 
-    def _build_windows(self):
-        with tools.chdir(os.path.join(self._full_source_subfolder, 'win32')):
+    def _build_msvc(self):
+        with self._msvc_build_environment():
             debug = "yes" if self.settings.build_type == "Debug" else "no"
             static = "no" if self.options.shared else "yes"
 
-            with tools.vcvars(self.settings):
-                args = ["cscript",
-                        "configure.js",
-                        "zlib=%d" % (1 if self.options.zlib else 0),
-                        "lzma=%d" % (1 if self.options.lzma else 0),
-                        "iconv=%d" % (1 if self.options.iconv else 0),
-                        "icu=%d" % (1 if self.options.icu else 0),
-                        "compiler=msvc",
-                        "prefix=%s" % self.package_folder,
-                        "cruntime=/%s" % self.settings.compiler.runtime,
-                        "debug=%s" % debug,
-                        "static=%s" % static,
-                        'include="%s"' % ";".join(self.deps_cpp_info.include_paths),
-                        'lib="%s"' % ";".join(self.deps_cpp_info.lib_paths)]
-                configure_command = ' '.join(args)
-                self.output.info(configure_command)
-                self.run(configure_command)
+            args = ["cscript",
+                    "configure.js",
+                    "zlib=%d" % (1 if self.options.zlib else 0),
+                    "lzma=%d" % (1 if self.options.lzma else 0),
+                    "iconv=%d" % (1 if self.options.iconv else 0),
+                    "icu=%d" % (1 if self.options.icu else 0),
+                    "compiler=msvc",
+                    "prefix=%s" % self.package_folder,
+                    "cruntime=/%s" % self.settings.compiler.runtime,
+                    "debug=%s" % debug,
+                    "static=%s" % static,
+                    'include="%s"' % ";".join(self.deps_cpp_info.include_paths),
+                    'lib="%s"' % ";".join(self.deps_cpp_info.lib_paths)]
+            configure_command = ' '.join(args)
+            self.output.info(configure_command)
+            self.run(configure_command)
 
-                # Fix library names because they can be not just zlib.lib
-                def fix_library(option, package, old_libname):
-                    if option:
-                        libs = []
-                        for lib in self.deps_cpp_info[package].libs:
-                            libname = lib
-                            if not libname.endswith('.lib'):
-                                libname += '.lib'
-                            libs.append(libname)
-                        tools.replace_in_file("Makefile.msvc",
-                                              "LIBS = $(LIBS) %s" % old_libname,
-                                              "LIBS = $(LIBS) %s" % ' '.join(libs))
+            # Fix library names because they can be not just zlib.lib
+            def fix_library(option, package, old_libname):
+                if option:
+                    libs = []
+                    for lib in self.deps_cpp_info[package].libs:
+                        libname = lib
+                        if not libname.endswith('.lib'):
+                            libname += '.lib'
+                        libs.append(libname)
+                    tools.replace_in_file("Makefile.msvc",
+                                          "LIBS = $(LIBS) %s" % old_libname,
+                                          "LIBS = $(LIBS) %s" % ' '.join(libs))
 
-                fix_library(self.options.zlib, 'zlib', 'zlib.lib')
-                fix_library(self.options.lzma, 'lzma', 'liblzma.lib')
-                fix_library(self.options.iconv, 'libiconv', 'iconv.lib')
-                fix_library(self.options.icu, 'icu', 'advapi32.lib sicuuc.lib sicuin.lib sicudt.lib')
-                fix_library(self.options.icu, 'icu', 'icuuc.lib icuin.lib icudt.lib')
+            fix_library(self.options.zlib, 'zlib', 'zlib.lib')
+            fix_library(self.options.lzma, 'lzma', 'liblzma.lib')
+            fix_library(self.options.iconv, 'libiconv', 'iconv.lib')
+            fix_library(self.options.icu, 'icu', 'advapi32.lib sicuuc.lib sicuin.lib sicudt.lib')
+            fix_library(self.options.icu, 'icu', 'icuuc.lib icuin.lib icudt.lib')
 
-                with tools.environment_append(VisualStudioBuildEnvironment(self).vars):
-                    self.run("nmake /f Makefile.msvc install")
+            self.run("nmake /f Makefile.msvc")
+
+    def _package_msvc(self):
+        with self._msvc_build_environment():
+            self.run("nmake /f Makefile.msvc install")
 
     def _build_mingw(self):
-        with tools.chdir(os.path.join(self._full_source_subfolder, 'win32')):
+        with tools.chdir(os.path.join(self._source_subfolder, 'win32')):
             debug = "yes" if self.settings.build_type == "Debug" else "no"
             static = "no" if self.options.shared else "yes"
 
@@ -132,19 +132,24 @@ class Libxml2Conan(ConanFile):
             configure_command = ' '.join(args)
             self.output.info(configure_command)
             self.run(configure_command)
+
+            self.run("mingw32-make -f Makefile.mingw")
+
+    def _package_mingw(self):
+        with tools.chdir(os.path.join(self._source_subfolder, 'win32')):
             self.run("mingw32-make -f Makefile.mingw install")
 
-    def _build_with_configure(self):
-        in_win = self.settings.os == "Windows"
-        env_build = AutoToolsBuildEnvironment(self, win_bash=in_win)
-        if not in_win:
-            env_build.fpic = self.options.fPIC
-        full_install_subfolder = tools.unix_path(self.package_folder) if in_win else self.package_folder
+    @lru_cache(1)
+    def _configure_autotools(self):
+        autotools = AutoToolsBuildEnvironment(self, win_bash=tools.os_info.is_windows)
+        if not tools.os_info.is_windows:
+            autotools.fpic = self.options.fPIC
+        full_install_subfolder = tools.unix_path(self.package_folder) if tools.os_info.is_windows else self.package_folder
         # fix rpath
         if self.settings.os == "Macos":
-            tools.replace_in_file(os.path.join(self._full_source_subfolder, "configure"), r"-install_name \$rpath/", "-install_name ")
+            tools.replace_in_file(os.path.join(self._source_subfolder, "configure"), r"-install_name \$rpath/", "-install_name ")
         configure_args = ['--with-python=no', '--prefix=%s' % full_install_subfolder]
-        if env_build.fpic:
+        if autotools.fpic:
             configure_args.extend(['--with-pic'])
         if self.options.shared:
             configure_args.extend(['--enable-shared', '--disable-static'])
@@ -161,21 +166,46 @@ class Libxml2Conan(ConanFile):
         if self.settings.os == "iOS" and self.settings.arch == "x86_64":
             build = False
 
-        env_build.configure(args=configure_args, build=build, configure_dir=self._full_source_subfolder)
-        env_build.make(args=["install"])
+        autotools.configure(args=configure_args, build=build, configure_dir=self._source_subfolder)
+        return autotools
+
+    def _patch_sources(self):
+        # Break dependency of install on build
+        for makefile in ("Makefile.mingw", "Makefile.msvc"):
+            tools.replace_in_file(os.path.join(self._source_subfolder, "win32", makefile),
+                                               "install-libs : all",
+                                               "install-libs :")
+
+    def build(self):
+        self._patch_sources()
+        if self._is_msvc:
+            self._build_msvc()
+        elif self._is_mingw:
+            self._build_mingw()
+        else:
+            autotools = self._configure_autotools()
+            autotools.make()
 
     def package(self):
         # copy package license
-        self.copy("COPYING", src=self._full_source_subfolder, dst="licenses", ignore_case=True, keep_path=False)
-        if self.settings.os == "Windows":
-            # There is no way to avoid building the tests, but at least we don't want them in the package
-            for prefix in ["run", "test"]:
-                for test in glob.glob("%s/bin/%s*" % (self.package_folder, prefix)):
-                    os.remove(test)
+        self.copy("COPYING", src=self._source_subfolder, dst="licenses", ignore_case=True, keep_path=False)
+        if self._is_msvc:
+            self._package_msvc()
+        elif self._is_mingw:
+            self._package_mingw()
+        else:
+            autotools = self._configure_autotools()
+            autotools.install()
+
+        for prefix in ["run", "test"]:
+            for test in glob.glob("%s/bin/%s*" % (self.package_folder, prefix)):
+                os.remove(test)
         for header in ["win32config.h", "wsockcompat.h"]:
-            self.copy(pattern=header, src=os.path.join(self._full_source_subfolder, "include"),
+            self.copy(pattern=header, src=os.path.join(self._source_subfolder, "include"),
                       dst=os.path.join("include", "libxml2"), keep_path=False)
         if self._is_msvc:
+            if not self.options.shared:
+                os.unlink(os.path.join(self.package_folder, "bin", "libxml2.dll"))
             # remove redundant libraries to avoid confusion
             os.unlink(os.path.join(self.package_folder, 'lib', 'libxml2_a_dll.lib'))
             os.unlink(os.path.join(self.package_folder, 'lib', 'libxml2_a.lib' if self.options.shared else 'libxml2.lib'))
@@ -184,13 +214,18 @@ class Libxml2Conan(ConanFile):
             for pdb in pdb_files:
                 os.unlink(pdb)
 
-        la = os.path.join(self.package_folder, 'lib', 'libxml2.la')
-        if os.path.isfile(la):
-            os.unlink(la)
-
         tools.rmdir(os.path.join(self.package_folder, 'share'))
         tools.rmdir(os.path.join(self.package_folder, 'lib', 'cmake'))
         tools.rmdir(os.path.join(self.package_folder, 'lib', 'pkgconfig'))
+
+        for lib in glob.glob(os.path.join(self.package_folder, "lib", "*")):
+            _, ext = os.path.splitext(lib)
+            if self._is_msvc:
+                if ext != ".lib":
+                    os.unlink(lib)
+            else:
+                if ext != ".a":
+                    os.unlink(lib)
 
     def package_info(self):
         if self._is_msvc:
