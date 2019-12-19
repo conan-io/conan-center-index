@@ -28,6 +28,11 @@ class LibjpegConan(ConanFile):
         if self.settings.compiler == 'Visual Studio' and self.options.shared:
             raise ConanInvalidConfiguration("shared builds aren't supported for MSVC")
 
+    def build_requirements(self):
+        if tools.os_info.is_windows and self.settings.compiler != "Visual Studio":
+            if "CONAN_BASH_PATH" not in os.environ:
+                self.build_requires("msys2/20190524")
+
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
         os.rename("jpeg-" + self.version, self.source_subfolder)
