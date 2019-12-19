@@ -9,7 +9,7 @@ class sqlpp11Conan(ConanFile):
     settings = "os", "compiler", "build_type", "arch"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/rbock/sqlpp11-connector-sqlite3"
-    license = "BSD 2-Clause"
+    license = "BSD-2-Clause"
     exports_sources = ["CMakeLists.txt"]
     generators = "cmake"
     options = {"shared": [True, False], "fPIC": [True, False]}
