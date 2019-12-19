@@ -1,12 +1,7 @@
 cmake_minimum_required(VERSION 2.8.12)
 project(cmake_wrapper)
 
-set(CONANBUILDINFO_PATH "" CACHE FILEPATH "Path to folder containing conanbuildinfo.cmake")
-if(NOT CONANBUILDINFO_PATH)
-    message(FATAL_ERROR "CONANBUILDIFO_PATH not set")
-endif()
-
-include("${CONANBUILDINFO_PATH}/conanbuildinfo.cmake")
+include("conanbuildinfo.cmake")
 conan_basic_setup()
 
 if(MSVC)
