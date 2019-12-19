@@ -43,7 +43,7 @@ class LibUSBConan(ConanFile):
     def system_requirements(self):
         if self.settings.os == "Linux":
             if self.options.enable_udev:
-                package_tool = tools.SystemPackageTool()
+                package_tool = tools.SystemPackageTool(conanfile=self)
                 libudev_name = ""
                 os_info = tools.OSInfo()
                 if os_info.with_apt:
@@ -53,10 +53,11 @@ class LibUSBConan(ConanFile):
                 elif os_info.with_zypper:
                     libudev_name = "libudev-devel"
                 elif os_info.with_pacman:
-                    libudev_name = "libsystemd"
-                if not package_tool._installed(libudev_name):
-                    libudev_name = " Install the package '" + libudev_name + "'."
-            self.output.warn("The option 'enable_udev' requires libudev installed." + libudev_name)
+                    libudev_name = "libsystemd systemd"
+                else:
+                    self.output.warn("Could not install libudev: Undefined package name for current platform.")
+                    return
+                package_tool.install(packages=libudev_name, update=True)
 
     def _build_visual_studio(self):
         with tools.chdir(self._source_subfolder):
