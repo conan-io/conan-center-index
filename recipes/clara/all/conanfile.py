@@ -13,15 +13,16 @@ class ClaraConan(ConanFile):
 
     _source_subfolder = "source_subfolder"
 
+    def configure(self):
+        self.output.warn("clara is unmaintained. Consider updating to lyra/1.2")
+
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
-        os.rename("clara-{}".format(self.version), self._source_subfolder)
+        os.rename("Clara-{}".format(self.version), self._source_subfolder)
 
     def package(self):
         self.copy(pattern="LICENSE.txt", src=self._source_subfolder, dst="licenses")
         self.copy(pattern="*", src=os.path.join(self._source_subfolder, "include"), dst="include", keep_path=True)
+
     def package_id(self):
         self.info.header_only()
-
-    def package_info(self):
-        self.output.warn("clara is unmaintained. Consider updating to lyra.")
