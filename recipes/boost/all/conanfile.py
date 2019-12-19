@@ -319,6 +319,7 @@ class BoostConan(ConanFile):
 
         # JOIN ALL FLAGS
         cmd = self._b2_exe
+        cmd += "install" # Run the install target
         cmd += " " + " ".join(flags)
         cmd += " -j%s" % tools.cpu_count()
         cmd += " --abbreviate-paths"
@@ -327,6 +328,7 @@ class BoostConan(ConanFile):
         cmd += " --debug-configuration"
         cmd += " --build-dir=\"%s\"" % self.build_folder
         cmd += " --stagedir=\"%s\"" % self.build_folder
+        cmd += " --prefix=\"%s\"" % os.path.join(self.build_folder, "install") # where to install
         self.output.warn(cmd)
 
         with tools.vcvars(self.settings) if self._is_msvc else tools.no_op():
@@ -743,16 +745,11 @@ class BoostConan(ConanFile):
     ####################################################################
 
     def package(self):
-        self.copy("LICENSE_1_0.txt", dst="licenses", src=self._boost_dist_root)
-        out_lib_dir = os.path.join(self.build_folder, "lib")
-        self.copy(pattern="*", dst="include/boost", src="%s/boost" % self._boost_dist_root)
-        if not self.options.shared:
-            self.copy(pattern="*.a", dst="lib", src=out_lib_dir, keep_path=False)
-        self.copy(pattern="*.so", dst="lib", src=out_lib_dir, keep_path=False, symlinks=True)
-        self.copy(pattern="*.so.*", dst="lib", src=out_lib_dir, keep_path=False, symlinks=True)
-        self.copy(pattern="*.dylib*", dst="lib", src=out_lib_dir, keep_path=False)
-        self.copy(pattern="*.lib", dst="lib", src=out_lib_dir, keep_path=False)
-        self.copy(pattern="*.dll", dst="bin", src=out_lib_dir, keep_path=False)
+        # Copy from the install folder generated during build
+        self.copy(pattern="*", excludes="*.dll", src="install/lib", dst="lib")
+        self.copy(pattern="*", src="install/include", dst="include")
+        # By convention the dlls are stored in the bin folder
+        self.copy(pattern="*.dll", src="install/lib", dst="bin")
 
     def package_info(self):
         gen_libs = [] if self.options.header_only else tools.collect_libs(self)
