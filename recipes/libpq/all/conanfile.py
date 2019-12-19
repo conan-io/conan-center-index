@@ -9,7 +9,6 @@ class LibpqConan(ConanFile):
     topics = ("conan", "libpq", "postgresql", "database", "db")
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://www.postgresql.org/docs/current/static/libpq.html"
-    author = "Bincrafters <bincrafters@gmail.com>"
     license = "PostgreSQL"
     settings = "os", "arch", "compiler", "build_type"
     options = {
