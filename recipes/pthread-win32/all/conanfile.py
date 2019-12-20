@@ -8,7 +8,7 @@ class PthreadWin32Conan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "http://www.sourceware.org/pthreads-win32/"
     topics = ("pthread", "posix", "win32-port", "multithreaded", "thread")
-    license = "GNU LGPL"
+    license = "LGPLG-2.1"
 
     # Options may need to change depending on the packaged library.
     settings = {"os": "Windows", "arch": None, "compiler": "Visual Studio", "build_type": None}
@@ -19,7 +19,7 @@ class PthreadWin32Conan(ConanFile):
     def configure(self):
         del self.settings.compiler.libcxx
         del self.settings.compiler.cppstd
-   
+
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
         os.rename('pthread-win32-19fd5054b29af1b4e3b3278bfffbb6274c6c89f5', self._source_subfolder)
