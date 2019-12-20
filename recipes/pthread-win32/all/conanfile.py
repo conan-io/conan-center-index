@@ -32,7 +32,7 @@ class PthreadWin32Conan(ConanFile):
                              12: 'pthread.2013.sln'}.get(int(str(self.settings.compiler.version)))
             targets = ['pthread_dll'] if self.options.shared else ['pthread_lib']
             msbuild = MSBuild(self)
-            msbuild.build(solution_name, targets=targets, platforms={"x86": "Win32"})
+            msbuild.build(solution_name, targets=targets, upgrade_project=False, platforms={"x86": "Win32"})
 
     def package(self):
         self.copy(pattern="COPYING", dst="licenses", src=self._source_subfolder)
