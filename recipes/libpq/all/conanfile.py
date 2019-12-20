@@ -1,5 +1,6 @@
 from conans import ConanFile, AutoToolsBuildEnvironment, tools
 from conans.errors import ConanInvalidConfiguration
+from conans.tools import os_info
 import os
 
 
@@ -24,7 +25,7 @@ class LibpqConan(ConanFile):
         if self.settings.compiler == "Visual Studio":
             self.build_requires("strawberryperl/5.30.0.1")
         elif tools.os_info.is_windows:
-            if "CONAN_BASH_PATH" not in os.environ:
+            if "CONAN_BASH_PATH" not in os.environ and os_info.detect_windows_subsystem() != 'msys2':
                 self.build_requires("msys2/20190524")
     @property
     def _source_subfolder(self):
