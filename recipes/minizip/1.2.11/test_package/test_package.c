@@ -2,14 +2,14 @@
 #include <stdio.h>
 #include <string.h>
 
-#include <zip.h>
-#include <unzip.h>
+#include <minizip/zip.h>
+#include <minizip/unzip.h>
 #ifdef _WIN32
-    #include <iowin32.h>
+    #include <minizip/iowin32.h>
 #endif
 
-#include <crypt.h>
-#include <mztools.h>
+#include <minizip/crypt.h>
+#include <minizip/mztools.h>
 
 const char text[] = ""
 "Conveying or northward offending admitting perfectly my. Colonel gravity get thought fat smiling add but. Wonder twenty hunted and put income set desire expect. Am cottage calling my is mistake cousins talking up. Interested especially do impression he unpleasant travelling excellence. All few our knew time done draw ask.\n"
