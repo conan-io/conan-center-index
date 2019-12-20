@@ -8,7 +8,7 @@ class PthreadWin32Conan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "http://www.sourceware.org/pthreads-win32/"
     topics = ("pthread", "posix", "win32-port", "multithreaded", "thread")
-    license = "LGPLG-2.1"
+    license = "LGPL-2.1"
 
     # Options may need to change depending on the packaged library.
     settings = {"os": "Windows", "arch": None, "compiler": "Visual Studio", "build_type": None}
