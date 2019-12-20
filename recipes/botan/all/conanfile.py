@@ -73,7 +73,7 @@ class BotanConan(ConanFile):
         if self.options.sqlite3:
             self.requires("sqlite3/3.30.1")
         if self.options.boost:
-            self.requires("boost/1.70.0")
+            self.requires("boost/1.71.0")
 
     def config_options(self):
         if self.options.single_amalgamation:
