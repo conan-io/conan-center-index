@@ -1,0 +1,4 @@
+sources:
+  "5.0.0":
+    sha256: "b0110a91650d6bb4000e3d5c2185bf77b0ff0a2e7a284bc2c4af81b33988b63c"
+    url: "https://github.com/assimp/assimp/archive/v5.0.0.tar.gz"
