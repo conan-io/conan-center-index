@@ -20,7 +20,6 @@ class tinycborConan(ConanFile):
     def _configure_autotools(self):
         if not self._env_build:
             self._env_build = AutoToolsBuildEnvironment(self)
-            self._env_build.fpic = self.options.fPIC
             self._env_vars = self._env_build.vars
             self._env_vars['DESTDIR'] = self.package_folder
             if self.settings.os == "Windows":
@@ -29,6 +28,7 @@ class tinycborConan(ConanFile):
             else:
                 self._env_vars["BUILD_SHARED"] = "1" if self.options.shared else "0"
                 self._env_vars["BUILD_STATIC"] = "1" if not self.options.shared else "0"
+                self._env_build.fpic = self.options.fPIC
         return self._env_build, self._env_vars
 
     def configure(self):
