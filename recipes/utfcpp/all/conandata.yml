@@ -1,0 +1,4 @@
+sources:
+  "3.1":
+    url: "https://github.com/nemtrif/utfcpp/archive/v3.1.tar.gz"
+    sha256: "ab531c3fd5d275150430bfaca01d7d15e017a188183be932322f2f651506b096"
