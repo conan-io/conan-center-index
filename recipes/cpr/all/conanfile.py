@@ -59,7 +59,7 @@ class CprConan(ConanFile):
         cmake.definitions["GENERATE_COVERAGE"] = False
         cmake.definitions["USE_SYSTEM_GTEST"] = False
         cmake.definitions["CMAKE_USE_OPENSSL"] = self.options.with_openssl
-        if self.settings.os == "Windows" and self.options.shared:
+        if self.settings.os == "Windows" and self.settings.compiler == "Visual Studio" and self.options.shared:
             cmake.definitions["CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS"] = True
         cmake.configure(build_folder=self._build_subfolder)
         return cmake
