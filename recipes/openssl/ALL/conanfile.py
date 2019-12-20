@@ -4,6 +4,7 @@ import platform
 from functools import total_ordering
 from conans.errors import ConanInvalidConfiguration, ConanException
 from conans import ConanFile, AutoToolsBuildEnvironment, tools
+from conans.tools import os_info
 
 
 @total_ordering
@@ -105,7 +106,7 @@ class OpenSSLConan(ConanFile):
             if not self.options.no_asm and not tools.which("nasm"):
                 self.build_requires("nasm/2.14")
         if self._win_bash:
-            if "CONAN_BASH_PATH" not in os.environ:
+            if "CONAN_BASH_PATH" not in os.environ and os_info.detect_windows_subsystem() != 'msys2':
                 self.build_requires("msys2/20190524")
 
     @property
