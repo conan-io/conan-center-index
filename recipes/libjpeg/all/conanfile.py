@@ -2,6 +2,7 @@ import os
 import shutil
 from conans import ConanFile, AutoToolsBuildEnvironment, tools
 from conans.errors import ConanInvalidConfiguration
+from conans.tools import os_info
 
 
 class LibjpegConan(ConanFile):
@@ -30,7 +31,7 @@ class LibjpegConan(ConanFile):
 
     def build_requirements(self):
         if tools.os_info.is_windows and self.settings.compiler != "Visual Studio":
-            if "CONAN_BASH_PATH" not in os.environ:
+            if "CONAN_BASH_PATH" not in os.environ and os_info.detect_windows_subsystem() != 'msys2':
                 self.build_requires("msys2/20190524")
 
     def source(self):
