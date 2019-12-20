@@ -24,7 +24,7 @@ class ConanSqlite3(ConanFile):
                "enable_rtree": [True, False],
                "omit_load_extension": [True, False],
                "enable_unlock_notify": [True, False],
-               "enable_target_os_embedded": [True, False],
+               "disable_gethostuuid": [True, False],
                }
     default_options = {"shared": False,
                        "fPIC": True,
@@ -38,7 +38,7 @@ class ConanSqlite3(ConanFile):
                        "enable_rtree": True,
                        "omit_load_extension": False,
                        "enable_unlock_notify": True,
-                       "enable_target_os_embedded": False,
+                       "disable_gethostuuid": False,
                        }
     _source_subfolder = "source_subfolder"
 
@@ -82,8 +82,8 @@ class ConanSqlite3(ConanFile):
             cmake.definitions["HAVE_POSIX_FALLOCATE"] = False
         if self.settings.os == "Android":
             cmake.definitions["HAVE_POSIX_FALLOCATE"] = False
-        if self.options.enable_target_os_embedded:
-            cmake.definitions["TARGET_OS_EMBEDDED"] = True
+        if self.options.disable_gethostuuid:
+            cmake.definitions["DISABLE_GETHOSTUUID"] = True
         cmake.configure()
         return cmake
 
