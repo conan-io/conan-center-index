@@ -4,9 +4,10 @@ import os
 
 class PthreadWin32Conan(ConanFile):
     name = "pthread-win32"
-    description = "Keep it short"
+    description = "Open Source POSIX Threads for Win32"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "http://www.sourceware.org/pthreads-win32/"
+    topics = ("pthread", "posix", "win32-port", "multithreaded", "thread")
     license = "GNU LGPL"
 
     # Options may need to change depending on the packaged library.
