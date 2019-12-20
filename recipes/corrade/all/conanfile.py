@@ -128,6 +128,8 @@ class CorradeConan(ConanFile):
         suffix = '-d' if self.settings.build_type == "Debug" else ''
         builtLibs = tools.collect_libs(self)
         self.cpp_info.libs = sort_libs(correct_order=allLibs, libs=builtLibs, lib_suffix=suffix, reverse_result=True)
+        if self.settings.os == "Linux":
+            self.cpp_info.system_libs = ["m", "dl"]
 
         self.cpp_info.builddirs = [os.path.join(self.package_folder, 'lib', 'cmake', 'Corrade')]
 
