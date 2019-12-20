@@ -17,6 +17,21 @@ class tinycborConan(ConanFile):
     _env_build = None
     _env_vars = []
 
+    def config_options(self):
+        if self.settings.os == "Windows":
+            del self.options.fPIC
+            # INFO: shared options does not work on Windows
+            del self.options.shared
+
+    def configure(self):
+        del self.settings.compiler.libcxx
+        del self.settings.compiler.cppstd
+
+    def source(self):
+        tools.get(**self.conan_data["sources"][self.version])
+        extracted_dir = self.name + "-" + self.version
+        os.rename(extracted_dir, self._source_subfolder)
+
     def _configure_autotools(self):
         if not self._env_build:
             self._env_build = AutoToolsBuildEnvironment(self)
@@ -31,32 +46,42 @@ class tinycborConan(ConanFile):
                 self._env_build.fpic = self.options.fPIC
         return self._env_build, self._env_vars
 
-    def configure(self):
-        if self.settings.os == "Windows":
-            self.options.remove("fPIC")
-            self.options.remove("shared") # Shared lib only supported on unix systems
-        del self.settings.compiler.libcxx
-        del self.settings.compiler.cppstd
+    def _build_nmake(self):
+        with tools.chdir(self._source_subfolder):
+            vcvars_command = tools.vcvars_command(self.settings)
+            self.run("%s && nmake -f Makefile.nmake" % vcvars_command)
 
-    def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        extracted_dir = self.name + "-" + self.version
-        os.rename(extracted_dir, self._source_subfolder)
-
-    def build(self):
-        for patch in self.conan_data["patches"][self.version]:
-            tools.patch(**patch)
+    def _build_make(self):
         with tools.chdir(self._source_subfolder):
             env_build, env_vars = self._configure_autotools()
             env_build.make(vars=env_vars)
 
-    def package(self):
+    def build(self):
+        for patch in self.conan_data["patches"][self.version]:
+            tools.patch(**patch)
+        if self.settings.compiler == "Visual Studio":
+            self._build_nmake()
+        else:
+            self._build_make()
+
+    def _package_unix(self):
         with tools.chdir(self._source_subfolder):
             env_build, env_vars = self._configure_autotools()
             env_build.install(vars=env_vars)
-        self.copy("LICENSE", src=self._source_subfolder, dst="licenses")
         tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
         tools.rmdir(os.path.join(self.package_folder, "bin"))
+
+    def _package_visual(self):
+        self.copy("tinycbor.lib", src=os.path.join(self._source_subfolder, "lib"), dst="lib")
+        for header in ["cbor.h", "cborjson.h", "tinycbor-version.h"]:
+            self.copy(header, src=os.path.join(self._source_subfolder, "src"), dst="include")
+
+    def package(self):
+        self.copy("LICENSE", src=self._source_subfolder, dst="licenses")
+        if self.settings.compiler == "Visual Studio":
+            self._package_visual()
+        else:
+            self._package_unix()
 
     def package_info(self):
         self.cpp_info.libs = tools.collect_libs(self)
