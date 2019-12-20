@@ -19,6 +19,10 @@ class M4Conan(ConanFile):
     def _is_msvc(self):
         return self.settings.compiler == "Visual Studio"
 
+    @property
+    def _is_clang(self):
+        return str(self.settings.compiler).endswith("clang")
+
     def build_requirements(self):
         if tools.os_info.is_windows:
             self.build_requires("msys2/20161025")
@@ -51,6 +55,9 @@ class M4Conan(ConanFile):
                                  'STRIP=:',
                                  'AR=$PWD/build-aux/ar-lib lib',
                                  'RANLIB=:'])
+                elif self._is_clang:
+                    args.extend(['CFLAGS=-rtlib=compiler-rt'])
+
                 env_build = AutoToolsBuildEnvironment(self, win_bash=tools.os_info.is_windows)
                 env_build.configure(args=args)
                 env_build.make()
