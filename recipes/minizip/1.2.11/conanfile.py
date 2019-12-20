@@ -1,6 +1,6 @@
 import os
+import shutil
 from conans import ConanFile, tools, CMake
-from conans.errors import ConanException
 
 
 class MinizipConan(ConanFile):
@@ -12,19 +12,14 @@ class MinizipConan(ConanFile):
     description = "An experimental package to read and write files in .zip format, written on top of zlib"
     topics = ("zip", "compression", "inflate")
     settings = "os", "arch", "compiler", "build_type"
-    options = {"shared": [True, False], "fPIC": [True, False]}
-    default_options = {"shared": False, "fPIC": True}
-    exports_sources = ["CMakeLists.txt", "CMakeLists_minizip.txt", "minizip.patch"]
-    requires = ("zlib/1.2.11")
-    generators = "cmake"
+    options = {"shared": [True, False], "fPIC": [True, False], "bzip2": [True, False], "tools": [True, False]}
+    default_options = {"shared": False, "fPIC": True, "bzip2": True, "tools": False}
+    exports_sources = ["CMakeLists.txt", "*.patch"]
+    generators = "cmake", "cmake_find_package"
 
     @property
     def _source_subfolder(self):
         return "source_subfolder"
-
-    @property
-    def _minizip_folder(self):
-        return os.path.join(self._source_subfolder, 'contrib', 'minizip')
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -34,18 +29,25 @@ class MinizipConan(ConanFile):
         del self.settings.compiler.libcxx
         del self.settings.compiler.cppstd
 
+    def requirements(self):
+        self.requires("zlib/1.2.11")
+        if self.options.bzip2:
+            self.requires("bzip2/1.0.8")
+
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
         os.rename("zlib-{}".format(self.version), self._source_subfolder)
 
     def _configure_cmake(self):
         cmake = CMake(self)
-        cmake.configure(source_folder=self._minizip_folder)
+        cmake.definitions["ENABLE_BZIP2"] = self.options.bzip2
+        cmake.definitions["BUILD_TOOLS"] = self.options.tools
+        cmake.configure(source_folder=self._source_subfolder)
         return cmake
 
     def build(self):
         tools.patch(patch_file="minizip.patch", base_path=self._source_subfolder)
-        os.rename("CMakeLists_minizip.txt", os.path.join(self._minizip_folder, 'CMakeLists.txt'))
+        shutil.move("CMakeLists.txt", os.path.join(self._source_subfolder, 'CMakeLists.txt'))
         cmake = self._configure_cmake()
         cmake.build()
 
@@ -63,6 +65,7 @@ class MinizipConan(ConanFile):
 
     def package_info(self):
         self.cpp_info.libs = ["minizip"]
+        self.cpp_info.includedirs = ["include", os.path.join("include", "minizip")]
         if self.options.shared and self.settings.os == "Windows":
             self.cpp_info.defines.append('MINIZIP_DLL')
 
