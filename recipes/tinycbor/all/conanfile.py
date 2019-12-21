@@ -1,5 +1,6 @@
 import os
 from conans import ConanFile, tools, AutoToolsBuildEnvironment
+from conans.errors import ConanInvalidConfiguration
 
 class tinycborConan(ConanFile):
     name = "tinycbor"
@@ -20,12 +21,13 @@ class tinycborConan(ConanFile):
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
-            # INFO: shared options does not work on Windows
-            del self.options.shared
 
     def configure(self):
         del self.settings.compiler.libcxx
         del self.settings.compiler.cppstd
+        if self.settings.os == "Windows":
+            if self.options.shared:
+                raise ConanInvalidConfiguration("Shared library only supported on Unix systems")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
