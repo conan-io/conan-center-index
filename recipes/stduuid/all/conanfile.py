@@ -11,7 +11,7 @@ class StduuidConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/mariusbancila/stduuid"
     license = "MIT"
-
+    settings = "os", "compiler"
     requires = "ms-gsl/2.0.0"
 
     settings =  "compiler"
