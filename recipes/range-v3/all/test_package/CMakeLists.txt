@@ -1,8 +1,6 @@
 cmake_minimum_required(VERSION 3.5)
 project(test_package)
 
-set(CMAKE_VERBOSE_MAKEFILE TRUE)
-
 find_package(range-v3)
 
 add_executable(${PROJECT_NAME} test_package.cpp)
