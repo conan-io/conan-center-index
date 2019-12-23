@@ -1,3 +1,5 @@
+# This CMake file has been extracted from VCPKG and is under MIT license: 
+# https://github.com/microsoft/vcpkg/blob/master/ports/minizip/CMakeLists.txt
 cmake_minimum_required(VERSION 3.8)
 project(minizip C)
 
