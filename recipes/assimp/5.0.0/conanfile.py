@@ -138,6 +138,8 @@ class Assimp(ConanFile):
         return cmake
 
     def build(self):
+        for before, after in [("-fPIC", ""), ("-g ", ""), ('SET(CMAKE_CXX_FLAGS_DEBUG "/D_DEBUG /MDd /Ob2 /DEBUG:FULL /Zi")', "")]:
+            tools.replace_in_file(os.path.join(self._source_subfolder, "CMakeLists.txt"), before, after)
         cmake = self._configure_cmake()
         cmake.build()
 
