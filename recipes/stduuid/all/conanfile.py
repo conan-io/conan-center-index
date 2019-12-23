@@ -14,8 +14,6 @@ class StduuidConan(ConanFile):
     settings = "os", "compiler"
     requires = "ms-gsl/2.0.0"
 
-    settings =  "compiler"
-
     no_copy_source = True
     _source_subfolder = "source_subfolder"
 
