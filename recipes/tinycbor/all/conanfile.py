@@ -25,9 +25,8 @@ class tinycborConan(ConanFile):
     def configure(self):
         del self.settings.compiler.libcxx
         del self.settings.compiler.cppstd
-        if self.settings.os == "Windows":
-            if self.options.shared:
-                raise ConanInvalidConfiguration("Shared library only supported on Unix systems")
+        if self.settings.os != "Linux" and self.options.shared:
+            raise ConanInvalidConfiguration("Shared library only supported on Linux platform")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
