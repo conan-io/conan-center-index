@@ -1,0 +1,54 @@
+diff --git a/physx/source/compiler/cmake/android/CMakeLists.txt b/physx/source/compiler/cmake/android/CMakeLists.txt
+index d0874b3c..ec2d6da4 100644
+--- a/physx/source/compiler/cmake/android/CMakeLists.txt
++++ b/physx/source/compiler/cmake/android/CMakeLists.txt
+@@ -111,4 +111,12 @@ SET_PROPERTY(TARGET SimulationController PROPERTY FOLDER "PhysX SDK")
+ SET_PROPERTY(TARGET FastXml PROPERTY FOLDER "PhysX SDK")
+ SET_PROPERTY(TARGET PhysXPvdSDK PROPERTY FOLDER "PhysX SDK")
+ SET_PROPERTY(TARGET PhysXTask PROPERTY FOLDER "PhysX SDK")
+-SET_PROPERTY(TARGET PhysXFoundation PROPERTY FOLDER "PhysX SDK")
+\ No newline at end of file
++SET_PROPERTY(TARGET PhysXFoundation PROPERTY FOLDER "PhysX SDK")
++
++SET(PHYSXDISTRO_LIBS PhysXFoundation PhysX PhysXCharacterKinematic PhysXPvdSDK PhysXCommon PhysXCooking PhysXExtensions PhysXVehicle)
++
++INSTALL(
++	TARGETS ${PHYSXDISTRO_LIBS}
++	EXPORT PhysXSDK
++	DESTINATION $<$<CONFIG:debug>:${PX_ROOT_LIB_DIR}/debug>$<$<CONFIG:release>:${PX_ROOT_LIB_DIR}/release>$<$<CONFIG:checked>:${PX_ROOT_LIB_DIR}/checked>$<$<CONFIG:profile>:${PX_ROOT_LIB_DIR}/profile>	
++	)
+diff --git a/physx/source/compiler/cmake/ios/CMakeLists.txt b/physx/source/compiler/cmake/ios/CMakeLists.txt
+index 9d713c91..20e4c12c 100644
+--- a/physx/source/compiler/cmake/ios/CMakeLists.txt
++++ b/physx/source/compiler/cmake/ios/CMakeLists.txt
+@@ -89,4 +89,12 @@ SET_PROPERTY(TARGET SimulationController PROPERTY FOLDER "PhysX SDK")
+ SET_PROPERTY(TARGET FastXml PROPERTY FOLDER "PhysX SDK")
+ SET_PROPERTY(TARGET PhysXPvdSDK PROPERTY FOLDER "PhysX SDK")
+ SET_PROPERTY(TARGET PhysXTask PROPERTY FOLDER "PhysX SDK")
+-SET_PROPERTY(TARGET PhysXFoundation PROPERTY FOLDER "PhysX SDK")
+\ No newline at end of file
++SET_PROPERTY(TARGET PhysXFoundation PROPERTY FOLDER "PhysX SDK")
++
++SET(PHYSXDISTRO_LIBS PhysXFoundation PhysX PhysXCharacterKinematic PhysXPvdSDK PhysXCommon PhysXCooking PhysXExtensions PhysXVehicle)
++
++INSTALL(
++	TARGETS ${PHYSXDISTRO_LIBS}
++	EXPORT PhysXSDK
++	DESTINATION $<$<CONFIG:debug>:${PX_ROOT_LIB_DIR}/debug>$<$<CONFIG:release>:${PX_ROOT_LIB_DIR}/release>$<$<CONFIG:checked>:${PX_ROOT_LIB_DIR}/checked>$<$<CONFIG:profile>:${PX_ROOT_LIB_DIR}/profile>	
++	)
+diff --git a/physx/source/compiler/cmake/mac/CMakeLists.txt b/physx/source/compiler/cmake/mac/CMakeLists.txt
+index a5c6dedc..5b51f354 100644
+--- a/physx/source/compiler/cmake/mac/CMakeLists.txt
++++ b/physx/source/compiler/cmake/mac/CMakeLists.txt
+@@ -97,3 +97,11 @@ SET_PROPERTY(TARGET FastXml PROPERTY FOLDER "PhysX SDK")
+ SET_PROPERTY(TARGET PhysXPvdSDK PROPERTY FOLDER "PhysX SDK")
+ SET_PROPERTY(TARGET PhysXTask PROPERTY FOLDER "PhysX SDK")
+ SET_PROPERTY(TARGET PhysXFoundation PROPERTY FOLDER "PhysX SDK")
++
++SET(PHYSXDISTRO_LIBS PhysXFoundation PhysX PhysXCharacterKinematic PhysXPvdSDK PhysXCommon PhysXCooking PhysXExtensions PhysXVehicle)
++
++INSTALL(
++	TARGETS ${PHYSXDISTRO_LIBS}
++	EXPORT PhysXSDK
++	DESTINATION $<$<CONFIG:debug>:${PX_ROOT_LIB_DIR}/debug>$<$<CONFIG:release>:${PX_ROOT_LIB_DIR}/release>$<$<CONFIG:checked>:${PX_ROOT_LIB_DIR}/checked>$<$<CONFIG:profile>:${PX_ROOT_LIB_DIR}/profile>	
++	)
