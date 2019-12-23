@@ -30,6 +30,10 @@ class ZeroMQConan(ConanFile):
         if self.settings.os == "Windows":
             del self.options.fPIC
 
+    def configure(self):
+        if self.options.shared:
+            del self.options.fPIC
+
     def requirements(self):
         if self.options.encryption == "libsodium":
             self.requires.add("libsodium/1.0.18")
