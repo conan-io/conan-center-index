@@ -24,6 +24,10 @@ class StduuidConan(ConanFile):
         extracted_dir = self.name + "-" + self.version
         os.rename(extracted_dir, self._source_subfolder)
 
+    def requirements(self):
+        if self.settings.os != "Windows":
+            self.requires("libuuid/1.0.3")
+
     def configure(self):
         version = Version( self.settings.compiler.version )
         compiler = self.settings.compiler
