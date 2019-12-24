@@ -151,3 +151,5 @@ class LibGit2Conan(ConanFile):
             self.cpp_info.system_libs.extend(["winhttp", "rpcrt4", "crypt32"])
         if self.settings.os == "Linux" and self.options.threadsafe:
             self.cpp_info.system_libs.append("pthread")
+        if self.settings.os == "Macos":
+            self.cpp_info.system_libs.append("curl")
