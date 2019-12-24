@@ -1,0 +1,4 @@
+sources:
+  "0.27.9":
+    url: "https://github.com/libgit2/libgit2/archive/v0.27.9.tar.gz"
+    sha256: "adf17310b590e6e7618f070c742b5ee028aeeed2c60099bc4190c386b5060de1"

@@ -19,8 +19,8 @@ class LibGit2Conan(ConanFile):
         "threadsafe": [True, False],
         "with_iconv": [True, False],
         "with_libssh2": [True, False],
-        "with_https": [False, "openssl", "mbedtls", "winhttp", "security"],
-        "with_sha1": ["collisiondetection", "commoncrypto", "openssl", "mbedtls", "generic", "win32"],
+        "with_https": [False, "openssl", "winhttp", "security"],
+        "with_sha1": ["collisiondetection", "commoncrypto", "openssl",  "generic", "win32"],
     }
     default_options = {
         "shared": False,
@@ -59,19 +59,15 @@ class LibGit2Conan(ConanFile):
     def _need_openssl(self):
         return "openssl" in (self.options.with_https, self.options.with_sha1)
 
-    @property
-    def _need_mbedtls(self):
-        return "mbedtls" in (self.options.with_https, self.options.with_sha1)
-
     def requirements(self):
         self.requires("zlib/1.2.11")
         self.requires("http_parser/2.9.2")
         if self.options.with_libssh2:
             self.requires("libssh2/1.8.2")
+        if self.settings.os != "Windows":
+            self.requires("libcurl/7.67.0")
         if self._need_openssl:
             self.requires("openssl/1.1.1d")
-        if self._need_mbedtls:
-            self.requires("mbedtls/2.16.3-gpl")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
@@ -82,7 +78,6 @@ class LibGit2Conan(ConanFile):
         "openssl": "OpenSSL",
         "winhttp": "WinHTTP",
         "security": "SecureTransport",
-        "mbedtls": "mbedTLS",
         False: "OFF",
     }
 
@@ -90,7 +85,6 @@ class LibGit2Conan(ConanFile):
         "collisiondetection": "CollisionDetection",
         "commoncrypto": "CommonCrypto",
         "openssl": "OpenSSL",
-        "mbedtls": "mbedTLS",
         "generic": "Generic",
         "win32": "Win32",
     }
@@ -104,6 +98,7 @@ class LibGit2Conan(ConanFile):
             cmake.definitions["USE_ICONV"] = self.options.with_iconv
         else:
             cmake.definitions["USE_ICONV"] = True
+
 
         cmake.definitions["USE_HTTPS"] = self._cmake_https[str(self.options.with_https)]
         cmake.definitions["SHA1_BACKEND"] = self._cmake_sha1[str(self.options.with_sha1)]
@@ -126,6 +121,15 @@ class LibGit2Conan(ConanFile):
                               "\tSET(LIBSSH2_INCLUDE_DIRS ${libssh2_INCLUDE_DIRS})\n"
                               "\tSET(LIBSSH2_LIBRARIES ${libssh2_LIBRARIES})\n"
                               "\tSET(LIBSSH2_LIBRARY_DIRS ${libssh2_LIB_DIRS})")
+
+        tools.replace_in_file(os.path.join(self._source_subfolder, "src", "CMakeLists.txt"),
+                              "FIND_PKGLIBRARIES(CURL libcurl)",
+                              "FIND_PACKAGE(curl REQUIRED)\n"
+                              "\tSET(CURL_FOUND ON)\n"
+                              "\tSET(CURL_INCLUDE_DIRS ${curl_INCLUDE_DIRS})\n"
+                              "\tSET(CURL_LIBRARIES ${curl_LIBRARIES})\n"
+                              "\tSET(CURL_LDFLAGS ${curl_LIB_DIRS})")
+        
         tools.save("FindOpenSSL.cmake",
                    "set(OPENSSL_FOUND ${OpenSSL_FOUND})\n"
                    "set(OPENSSL_INCLUDE_DIR ${OpenSSL_INCLUDE_DIRS})\n"
