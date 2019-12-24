@@ -1,7 +1,12 @@
 cmake_minimum_required(VERSION 2.8.12)
 project(cmake_wrapper)
 
-include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
+
+if(EXISTS "${CMAKE_BINARY_DIR}/conanbuildinfo.cmake")
+  include("${CMAKE_BINARY_DIR}/conanbuildinfo.cmake")
+else()
+  include(conanbuildinfo.cmake)
+endif()
 conan_basic_setup()
 
 if (WIN32 AND BUILD_SHARED_LIBS)

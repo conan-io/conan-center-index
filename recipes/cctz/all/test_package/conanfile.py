@@ -15,3 +15,6 @@ class TestPackageConan(ConanFile):
         if not tools.cross_building(self.settings):
             bin_path = os.path.join("bin", "test_package")
             self.run(bin_path, run_environment=True)
+
+            if self.options["cctz"].build_tools:
+                self.run("time_tool --tz=Europe/Berlin")
