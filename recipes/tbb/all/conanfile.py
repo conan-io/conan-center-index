@@ -76,7 +76,6 @@ that have future-proof scalability"""
                 os.environ[name] = value
 
         if self.version == "2020.0" and self.settings.build_type == "Debug":
-            self.output.warn("Force debug mode")
             tools.replace_in_file(os.path.join(self._source_subfolder, "Makefile"), "release", "debug")
 
         extra = "" if self.settings.os == "Windows" or self.options.shared else "extra_inc=big_iron.inc"
