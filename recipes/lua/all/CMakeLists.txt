@@ -65,6 +65,21 @@ if(WIN32)
         target_compile_definitions(${PROJECT_NAME} PRIVATE -D_CRT_SECURE_NO_WARNINGS)
 endif()
 
+
+IF (UNIX)
+    IF (APPLE)
+        TARGET_COMPILE_DEFINITIONS (lua PUBLIC -DLUA_USE_DLOPEN)
+    ELSE ()
+        FIND_LIBRARY (LIB_DLOPEN NAMES dl)
+        IF (LIB_DLOPEN)
+            TARGET_COMPILE_DEFINITIONS (lua PUBLIC -DLUA_USE_DLOPEN)
+            TARGET_LINK_LIBRARIES (lua ${LIB_DLOPEN})
+        ENDIF ()
+    ENDIF ()
+ENDIF ()
+
+
+
 # Must use GNUInstallDirs to install libraries into correct
 # locations on all platforms.
 include(GNUInstallDirs)
