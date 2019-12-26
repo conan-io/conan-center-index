@@ -4,7 +4,7 @@ from conans import ConanFile, CMake, tools
 
 class TestPackageConan(ConanFile):
     settings = "os", "compiler", "arch", "build_type"
-    generators = "cmake", "pkg_config"
+    generators = "cmake"
 
     def build(self):
         cmake = CMake(self)
@@ -17,4 +17,4 @@ class TestPackageConan(ConanFile):
             return
 
         bin_path = os.path.join("bin", "test_package")
-        self.run("%s" % bin_path, run_environment=True)
+        self.run(bin_path, run_environment=True)
