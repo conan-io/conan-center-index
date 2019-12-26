@@ -11,7 +11,7 @@ class BotanConan(ConanFile):
     license = "BSD-2-Clause"
     exports = ["patches/*"]
     description = "Botan is a cryptography library written in C++11."
-    topics = ("crytography", "crypto", "C++11")
+    topics = ("cryptography", "crypto", "C++11", "tls")
     settings = 'os', 'arch', 'compiler', 'build_type'
     options = {
         'amalgamation': [True, False],
