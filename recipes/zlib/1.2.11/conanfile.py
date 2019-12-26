@@ -164,4 +164,5 @@ class ZlibConan(ConanFile):
                 self.cpp_info.defines.append('MINIZIP_DLL')
         self.cpp_info.libs.append('zlib' if self.settings.os == "Windows" else "z")
         self.cpp_info.name = "ZLIB"
+        self.cpp_info.names["pkg_config"] = "zlib"
 
