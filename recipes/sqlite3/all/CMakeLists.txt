@@ -19,6 +19,7 @@ option(HAVE_LOCALTIME_R "Use the threadsafe localtime_r()")
 option(HAVE_POSIX_FALLOCATE "Use posix_fallocate()")
 option(HAVE_STRERROR_R "Use strerror_r()")
 option(HAVE_USLEEP "Use usleep() system call to implement the xSleep method")
+option(DISABLE_GETHOSTUUID "Disable function gethostuuid")
 
 add_library(${PROJECT_NAME} source_subfolder/sqlite3.c
                             source_subfolder/sqlite3.h
@@ -67,6 +68,9 @@ if(HAVE_STRERROR_R)
 endif()
 if(HAVE_USLEEP)
     target_compile_definitions(${PROJECT_NAME}  PRIVATE HAVE_USLEEP)
+endif()
+if(DISABLE_GETHOSTUUID)
+    target_compile_definitions(${PROJECT_NAME}  PRIVATE HAVE_GETHOSTUUID=0)
 endif()
 target_compile_definitions(${PROJECT_NAME}  PRIVATE SQLITE_THREADSAFE=${THREADSAFE})
 
