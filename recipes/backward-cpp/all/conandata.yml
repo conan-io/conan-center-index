@@ -1,0 +1,8 @@
+sources:
+  "1.4":
+    url: "https://github.com/bombela/backward-cpp/archive/v1.4.tar.gz"
+    sha256: "ad73be31c5cfcbffbde7d34dba18158a42043a109e7f41946f0b0abd589ed55e"
+patches:
+  "1.4":
+    patch_file: "backward-cpp-1.4.patch"
+    base_path: "source_subfolder"  
