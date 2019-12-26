@@ -54,4 +54,5 @@ class Bzip2Conan(ConanFile):
 
     def package_info(self):
         self.cpp_info.name = "BZip2"
+        self.cpp_info.names["pkg_config"] = "bzip2"
         self.cpp_info.libs = tools.collect_libs(self)
