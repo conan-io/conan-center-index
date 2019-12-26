@@ -90,10 +90,12 @@ class OpenSSLConan(ConanFile):
                "no_async": [True, False],
                "no_dso": [True, False],
                "capieng_dialog": [True, False],
-               "openssldir": "ANY"}
+               "openssldir": "ANY",
+               "add_apple_flags": [True, False]}
     default_options = {key: False for key in options.keys()}
     default_options["fPIC"] = True
     default_options["openssldir"] = None
+    default_options["add_apple_flags"] = True    
     _env_build = None
     _source_subfolder = "sources"
 
@@ -324,12 +326,13 @@ class OpenSSLConan(ConanFile):
     def _get_env_build(self):
         if not self._env_build:
             self._env_build = AutoToolsBuildEnvironment(self)
-            if self.settings.compiler == "apple-clang":
-                self._env_build.flags.append("-arch %s" % tools.to_apple_arch(self.settings.arch))
-                self._env_build.flags.append("-isysroot %s" % tools.XCRun(self.settings).sdk_path)
-                if self.settings.get_safe("os.version"):
-                    self._env_build.flags.append(tools.apple_deployment_target_flag(self.settings.os,
-                                                                              self.settings.os.version))
+            if self.options.add_apple_flags:
+                if self.settings.compiler == "apple-clang":
+                    self._env_build.flags.append("-arch %s" % tools.to_apple_arch(self.settings.arch))
+                    self._env_build.flags.append("-isysroot %s" % tools.XCRun(self.settings).sdk_path)
+                    if self.settings.get_safe("os.version"):
+                        self._env_build.flags.append(tools.apple_deployment_target_flag(self.settings.os,
+                                                                                self.settings.os.version))
         return self._env_build
 
     @property
@@ -377,7 +380,7 @@ class OpenSSLConan(ConanFile):
 
         for option_name in self.options.values.fields:
             activated = getattr(self.options, option_name)
-            if activated and option_name not in ["fPIC", "openssldir", "capieng_dialog"]:
+            if activated and option_name not in ["fPIC", "openssldir", "capieng_dialog", "add_apple_flags"]:
                 self.output.info("activated option: %s" % option_name)
                 args.append(option_name.replace("_", "-"))
         return args
