@@ -3,8 +3,8 @@ from conans import ConanFile, CMake, tools
 
 
 class DataFrameConan(ConanFile):
-    name = "DataFrame"
-    license = "BSD 3-Clause"
+    name = "dataframe"
+    license = "BSD-3-Clause"
     url = "https://github.com/conan-io/conan-center-index"
     repo_url = "https://github.com/hosseinmoein/DataFrame"
     description = "C++ DataFrame -- R's and Pandas DataFrame in modern C++ using native types, continuous memory storage, and no virtual functions"
@@ -26,7 +26,7 @@ class DataFrameConan(ConanFile):
     }
 
     generators = "cmake"
-    exports_sources = "CMakeLists.txt"
+    exports_sources = ["CMakeLists.txt", "patches/*"]
 
     @property
     def _source_subfolder(self):
@@ -34,7 +34,7 @@ class DataFrameConan(ConanFile):
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
-        extracted_folder = self.name + "-V-" + self.version
+        extracted_folder = "DataFrame-V-" + self.version
         os.rename(extracted_folder, self._source_subfolder)
 
     def config_options(self):
@@ -47,6 +47,8 @@ class DataFrameConan(ConanFile):
         return cmake
 
     def build(self):
+        for patch in self.conan_data["patches"][self.version]:
+            tools.patch(**patch)
         cmake = self._configure_cmake()
         cmake.build()
 
