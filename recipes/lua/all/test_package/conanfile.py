@@ -8,6 +8,9 @@ class TestPackageConan(ConanFile):
 
     def build(self):
         cmake = CMake(self)
+        # Only for the test package, so we can choose which #include header to use
+        cmake.definitions["COMPILE_AS_CPP"] = self.options["lua"].compile_as_cpp
+
         cmake.configure()
         cmake.build()
 

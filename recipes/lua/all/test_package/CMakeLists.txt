@@ -8,5 +8,10 @@ conan_basic_setup()
 
 file(GLOB SOURCE_FILES *.cpp)
 
+
+
 add_executable(${PROJECT_NAME} ${SOURCE_FILES})
 target_link_libraries(${PROJECT_NAME} ${CONAN_LIBS})
+if( ${COMPILE_AS_CPP} )
+TARGET_COMPILE_DEFINITIONS (${PROJECT_NAME} PUBLIC -DCOMPILE_AS_CPP )
+endif()

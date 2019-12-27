@@ -1,6 +1,11 @@
 
+#if defined COMPILE_AS_CPP
+#include "lua.h"
+#include "lualib.h"
+#include "lauxlib.h"
+#else
 #include "lua.hpp"
-
+#endif
 #include <string>
 
 int main(int argc, char* argv[])
