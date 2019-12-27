@@ -51,3 +51,15 @@
 +    LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
 +    ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
  )
+
+--- backward.hpp.old	2019-12-27 13:11:07.097037784 +0100
++++ backward.hpp	2019-12-27 13:11:23.336703016 +0100
+@@ -1922,7 +1922,7 @@
+ 
+ 		dwarf_file_t file_handle;
+ 		file_handle.reset(open(filename_object.c_str(), O_RDONLY));
+-		if (file_handle < 0) {
++		if (file_handle < (void*)0) {
+ 			return r;
+ 		}
+ 
