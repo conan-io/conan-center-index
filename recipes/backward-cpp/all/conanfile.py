@@ -35,17 +35,18 @@ class BackwardCppConan(ConanFile):
 
     def _has_stack_details(self, type):
         return self.options.stack_details == type
-
-    def config_options(self):     
-        if self.settings.os == "Macos":
-            self.options.stack_details.remove("dw", "bfd", "dwarf")
-            
+    
     def configure(self):
         if self.settings.os not in ["Linux", "Macos", "Android"]:
             raise ConanInvalidConfiguration("upstream backward-cpp v{0} is not \
                 supported in {1}.".format(self.version, self.settings.os))
         # windows implementation only available in upstream master branch
 
+        if self.settings.os == "Macos" and \
+           not self._has_stack_details("backtrace_symbol"):
+            raise ConanInvalidConfiguration("only stack_details=backtrace_symbol"
+                                            " is supported on Macos")
+        
     def requirements(self):
         if self.settings.os in ["Linux", "Android"] and \
            self._has_stack_details("dwarf"):
