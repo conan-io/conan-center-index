@@ -10,7 +10,7 @@ int main(int argc, char *argv[]) {
 
   xt::xarray<double> res = xt::view(arr1, 1) + arr2;
 
-  std::cout << res;
+  std::cout << res << std::endl;
 
   return 0;
 }
