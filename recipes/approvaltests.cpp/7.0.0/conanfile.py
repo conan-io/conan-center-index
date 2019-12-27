@@ -34,10 +34,11 @@ class ApprovalTestsCppConan(ConanFile):
     def source(self):
         for source in self.conan_data["sources"][self.version]:
             url = source["url"]
-            filename = url[url.rfind("/")+1:]
+            filename = url[url.rfind("/") + 1:]
             tools.download(url, filename)
             tools.check_sha256(filename, source["sha256"])
-        os.rename("ApprovalTests.v.{}.hpp".format(self.version), self._header_file)
+        os.rename("ApprovalTests.v.{}.hpp".format(self.version),
+                  self._header_file)
 
         for patch in self.conan_data["patches"][self.version]:
             tools.patch(**patch)
@@ -48,11 +49,16 @@ class ApprovalTestsCppConan(ConanFile):
 
     def package_info(self):
         if self.options.test_framework == "catch2":
-            self.cpp_info.defines = ["APPROVALS_CATCH"]
+            """ Do not define APPROVALS_CATCH here.
+                It should only be defined in the main test application,
+                otherwise we end up with multiple definitions.
+                """
+            pass
         elif self.options.test_framework == "gtest":
             self.cpp_info.defines = ["APPROVALS_GOOGLETEST"]
             if not self.options["gtest"].no_main:
-                self.cpp_info.defines.append("APPROVALS_GOOGLETEST_EXISTING_MAIN")
+                self.cpp_info.defines.append(
+                    "APPROVALS_GOOGLETEST_EXISTING_MAIN")
         elif self.options.test_framework == "doctest":
             self.cpp_info.defines = ["APPROVALS_DOCTEST"]
         else:
