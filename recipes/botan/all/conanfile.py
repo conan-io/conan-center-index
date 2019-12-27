@@ -16,9 +16,7 @@ class BotanConan(ConanFile):
     options = {
         'amalgamation': [True, False],
         'bzip2': [True, False],
-        'debug_info': [True, False],
         'openssl': [True, False],
-        'quiet': [True, False],
         'shared': [True, False],
         'fPIC': [True, False],
         'single_amalgamation': [True, False],
@@ -30,9 +28,7 @@ class BotanConan(ConanFile):
     }
     default_options = {'amalgamation': True,
                        'bzip2': False,
-                       'debug_info': False,
                        'openssl': False,
-                       'quiet': True,
                        'shared': True,
                        'fPIC': True,
                        'single_amalgamation': False,
@@ -202,9 +198,6 @@ class BotanConan(ConanFile):
             build_flags.append('--with-openssl')
             build_flags.extend(self._dependency_build_flags("OpenSSL"))
 
-        if self.options.quiet:
-            build_flags.append('--quiet')
-
         if self.options.sqlite3:
             build_flags.append('--with-sqlite3')
             build_flags.extend(self._dependency_build_flags("sqlite3"))
@@ -217,7 +210,7 @@ class BotanConan(ConanFile):
             build_flags.append('--with-boost')
             build_flags.extend(self._dependency_build_flags("boost"))
 
-        if self.settings.build_type == 'RelWithDebInfo' or self.options.debug_info:
+        if self.settings.build_type == 'RelWithDebInfo':
             build_flags.append('--with-debug-info')
 
         if str(self.settings.build_type).lower() == 'debug':
@@ -275,15 +268,11 @@ class BotanConan(ConanFile):
     def _gnumake_cmd(self):
         make_ldflags = 'LDFLAGS=-lc++abi' if self._is_linux_clang_libcxx else ''
 
-        botan_quiet = '--quiet' if self.options.quiet else ''
-
         make_cmd = ('{ldflags}'
                     ' {make}'
-                    ' {quiet}'
                     ' -j{cpucount}').format(
                         ldflags=make_ldflags,
                         make=self._make_program,
-                        quiet=botan_quiet,
                         cpucount=tools.cpu_count())
         return make_cmd
 
