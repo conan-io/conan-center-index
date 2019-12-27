@@ -10,12 +10,16 @@ class MakeConan(ConanFile):
     homepage = "https://www.gnu.org/software/make/"
     license = "GPL-3.0-or-later"
     settings = "os_build", "arch_build", "compiler"
+    exports_sources = ["patches/*"]
     _source_subfolder = "source_subfolder"
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
         extracted_dir = "make-" + self.version
         os.rename(extracted_dir, self._source_subfolder)
+
+        for patch in self.conan_data["patches"][self.version]:
+            tools.patch(**patch)
 
     def configure(self):
         del self.settings.compiler.libcxx
