@@ -18,14 +18,14 @@ class MakeConan(ConanFile):
         extracted_dir = "make-" + self.version
         os.rename(extracted_dir, self._source_subfolder)
 
-        for patch in self.conan_data["patches"][self.version]:
-            tools.patch(**patch)
-
     def configure(self):
         del self.settings.compiler.libcxx
         del self.settings.compiler.cppstd
 
     def build(self):
+        for patch in self.conan_data["patches"][self.version]:
+            tools.patch(**patch)
+
         with tools.chdir(self._source_subfolder):
             # README.W32
             if self.settings.os_build == "Windows":
