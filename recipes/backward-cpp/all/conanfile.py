@@ -56,9 +56,24 @@ class BackwardCppConan(ConanFile):
         required_package = None
         if self.settings.os == "Linux":
             if self._has_stack_details("dw"):
-                required_package = "libdw-dev"
+                if tools.os_info.linux_distro in ["ubuntu", "debian"]:
+                    required_package = "libdw-dev"
+                elif tools.os_info.linux_distro in ["fedora", "centos"]:
+                    required_package = "elfutils-libs"
+                elif tools.os_info.linux_distro == "opensuse":
+                    required_package = "libdw-devel"
+                elif tools.os_info.linux_distro == "arch":
+                    required_package = "libelf"
+
             if self._has_stack_details("bfd"):
-                required_package = "binutils-dev"
+                if tools.os_info.linux_distro in ["ubuntu", "debian"]:
+                    required_package = "binutils-dev"
+                elif tools.os_info.linux_distro in ["fedora", "centos", "opensuse"]:
+                    required_package = "binutils-devel"
+                elif tools.os_info.linux_distro == "arch":
+                    required_package = "binutils"
+                elif tools.os_info.is_freebsd:
+                    required_package = "libbfd"
         
         if required_package != None:
             installer = tools.SystemPackageTool()
