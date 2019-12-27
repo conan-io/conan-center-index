@@ -62,6 +62,7 @@ class DataFrameConan(ConanFile):
             os.path.join("lib", "cmake"),
             os.path.join("lib", "share"),
             os.path.join("lib", "pkgconfig"),
+            "CMake"
         ]:
             tools.rmdir(os.path.join(self.package_folder, dir_to_remove))
 
