@@ -6,7 +6,7 @@ class DataFrameConan(ConanFile):
     name = "dataframe"
     license = "BSD-3-Clause"
     url = "https://github.com/conan-io/conan-center-index"
-    repo_url = "https://github.com/hosseinmoein/DataFrame"
+    homepage = "https://github.com/hosseinmoein/DataFrame"
     description = "C++ DataFrame -- R's and Pandas DataFrame in modern C++ using native types, continuous memory storage, and no virtual functions"
     topics = (
         "conan",
@@ -30,7 +30,7 @@ class DataFrameConan(ConanFile):
 
     @property
     def _source_subfolder(self):
-        return "source_subfolder"
+        return os.path.join(self.source_folder, "source_subfolder")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
