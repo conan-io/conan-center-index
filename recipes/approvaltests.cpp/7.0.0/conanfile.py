@@ -15,7 +15,7 @@ class ApprovalTestsCppConan(ConanFile):
     options = {"test_framework": ["catch2", "gtest", "doctest", "boost"]}
     default_options = {"test_framework": "catch2"}
     exports_sources = "patches/*"
-    no_copy_source = False
+    no_copy_source = True
 
     @property
     def _header_file(self):
