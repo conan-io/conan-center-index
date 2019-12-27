@@ -110,7 +110,6 @@ class Assimp(ConanFile):
     def _configure_cmake(self):
         cmake = CMake(self)
         cmake.definitions["SYSTEM_IRRXML"] = True
-
         cmake.definitions["BUILD_SHARED_LIBS"] = self.options.shared
         cmake.definitions["ASSIMP_DOUBLE_PRECISION"] = self.options.double_precision
         cmake.definitions["ASSIMP_NO_EXPORT"] = False
