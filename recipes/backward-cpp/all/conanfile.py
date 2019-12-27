@@ -15,24 +15,14 @@ class BackwardCppConan(ConanFile):
 
     settings = "os", "arch", "compiler", "build_type"
     options = {
-       "stack_walking_unwind": [True, False],
-       "stack_walking_backtrace": [True, False],
-       "stack_details_auto_detect": [False], # dont let backtrace auto decide
-       "stack_details_backtrace_symbol": [True, False],
-       "stack_details_dw": [True, False],
-       "stack_details_bfd": [True, False],
-       "stack_details_dwarf": [True, False],
+       "stack_walking" : ["unwind", "backtrace"],
+       "stack_details" : ["dw", "bfd", "dwarf", "backtrace_symbol"],
        "shared": [True, False],
        "fPIC": [True, False]
     }
     default_options = {
-       "stack_walking_unwind": True,
-       "stack_walking_backtrace": False,
-       "stack_details_auto_detect": False,
-       "stack_details_dw": False,
-       "stack_details_bfd": False,
-       "stack_details_dwarf": True,
-       "stack_details_backtrace_symbol": False,
+       "stack_walking": "unwind",
+       "stack_details": "dwarf",
        "shared": True,
        "fPIC": True
     }
@@ -40,56 +30,33 @@ class BackwardCppConan(ConanFile):
     _source_subfolder = "source_subfolder"
     _build_subfolder = "build_subfolder"
 
+    def _has_stack_walking(self, type):
+        return self.options.stack_walking == type
+
+    def _has_stack_details(self, type):
+        return self.options.stack_details == type
 
     def config_options(self):     
-          if self.settings.os == "Macos":
-            del self.options.stack_details_dw
-            del self.options.stack_details_bfd
-            del self.options.stack_details_dwarf
-    
-    def _check_options(self, options):
-        sum = 0
-        for name, value in self.options.values.as_list():
-            if value and name in options:
-                sum = sum + 1
-        if sum != 1:
-            return False
-        return True
-
+        if self.settings.os == "Macos":
+            self.options.stack_details.remove("dw", "bfd", "dwarf")
+            
     def configure(self):
         if self.settings.os not in ["Linux", "Macos", "Android"]:
             raise ConanInvalidConfiguration("upstream backward-cpp v{0} is not \
                 supported in {1}.".format(self.version, self.settings.os))
         # windows implementation only available in upstream master branch
-        
-        if not self._check_options(['stack_walking_unwind', 'stack_walking_backtrace']):
-            raise ConanInvalidConfiguration("Please select stack_walking_unwind"
-                                            " or stack_walking_backtrace.")
-
-        if self.settings.os in ["Linux", "Android"]:
-            if not self._check_options(['stack_details_dw', \
-                                        'stack_details_bfd', \
-                                        'stack_details_dwarf', \
-                                        'stack_details_backtrace_symbol']):
-                raise ConanInvalidConfiguration("Please select stack_details_dw"\
-                    ", stack_details_bfd, stack_details_dwarf or " \
-                    "stack_details_backtrace_symbol.")
-    
-        if self.settings.os == "Macos":            
-            if not self._check_options(['stack_details_backtrace_symbol']):
-                raise ConanInvalidConfiguration("Please select stack_details_backtrace_symbol.")
 
     def requirements(self):
         if self.settings.os in ["Linux", "Android"] and \
-           self.options.stack_details_dwarf:
+           self._has_stack_details("dwarf"):
             self.requires("libdwarf/20191104")
     
     def system_requirements(self):
         required_package = None
         if self.settings.os == "Linux":
-            if self.options.stack_details_dw:
+            if self._has_stack_details("dw"):
                 required_package = "libdw-dev"
-            if self.options.stack_details_bfd:
+            if self._has_stack_details("bfd"):
                 required_package = "binutils-dev"
         
         if required_package != None:
@@ -104,13 +71,13 @@ class BackwardCppConan(ConanFile):
 
     def _configure_cmake(self):
         cmake = CMake(self)
-        cmake.definitions['STACK_WALKING_UNWIND'] = self.options.stack_walking_unwind
-        cmake.definitions['STACK_WALKING_BACKTRACE'] = self.options.stack_walking_backtrace
-        cmake.definitions['STACK_DETAILS_AUTO_DETECT'] = self.options.stack_details_auto_detect
-        cmake.definitions['STACK_DETAILS_BACKTRACE_SYMBOL'] = self.options.stack_details_backtrace_symbol
-        cmake.definitions['STACK_DETAILS_DW'] = self.options.stack_details_dw
-        cmake.definitions['STACK_DETAILS_BFD'] = self.options.stack_details_bfd
-        cmake.definitions['STACK_DETAILS_DWARF'] = self.options.stack_details_dwarf
+        cmake.definitions['STACK_WALKING_UNWIND'] = self._has_stack_walking("unwind")
+        cmake.definitions['STACK_WALKING_BACKTRACE'] = self._has_stack_walking("backtrace")
+        cmake.definitions['STACK_DETAILS_AUTO_DETECT'] = False
+        cmake.definitions['STACK_DETAILS_BACKTRACE_SYMBOL'] = self._has_stack_details("backtrace_symbol")
+        cmake.definitions['STACK_DETAILS_DW'] = self._has_stack_details("dw")
+        cmake.definitions['STACK_DETAILS_BFD'] = self._has_stack_details("bfd")
+        cmake.definitions['STACK_DETAILS_DWARF'] = self._has_stack_details("dwarf")
         cmake.definitions['BACKWARD_SHARED'] = self.options.shared
         cmake.configure(build_folder=self._build_subfolder)
         return cmake
@@ -132,20 +99,20 @@ class BackwardCppConan(ConanFile):
         self.cpp_info.names["cmake_find_package"] = "Backward"
         self.cpp_info.names["cmake_find_package_multi"] = "Backward"
 
-        self.cpp_info.defines.append('BACKWARD_HAS_UNWIND={}'.format(int(self.options.stack_walking_unwind == True)))
-        self.cpp_info.defines.append('BACKWARD_HAS_BACKTRACE={}'.format(int(self.options.stack_walking_backtrace == True)))
+        self.cpp_info.defines.append('BACKWARD_HAS_UNWIND={}'.format(int(self._has_stack_walking("unwind"))))
+        self.cpp_info.defines.append('BACKWARD_HAS_BACKTRACE={}'.format(int(self._has_stack_walking("backtrace"))))
         
-        self.cpp_info.defines.append('BACKWARD_HAS_BACKTRACE_SYMBOL={}'.format(int(self.options.stack_details_backtrace_symbol == True)))
-        self.cpp_info.defines.append('BACKWARD_HAS_DW={}'.format(int(self.options.stack_details_dw == True)))
-        self.cpp_info.defines.append('BACKWARD_HAS_BFD={}'.format(int(self.options.stack_details_bfd == True)))
-        self.cpp_info.defines.append('BACKWARD_HAS_DWARF={}'.format(int(self.options.stack_details_dwarf == True)))
+        self.cpp_info.defines.append('BACKWARD_HAS_BACKTRACE_SYMBOL={}'.format(int(self._has_stack_details("backtrace_symbol"))))
+        self.cpp_info.defines.append('BACKWARD_HAS_DW={}'.format(int(self._has_stack_details("dw"))))
+        self.cpp_info.defines.append('BACKWARD_HAS_BFD={}'.format(int(self._has_stack_details("bfd"))))
+        self.cpp_info.defines.append('BACKWARD_HAS_DWARF={}'.format(int(self._has_stack_details("dwarf"))))
 
         self.cpp_info.libs = tools.collect_libs(self)
         if self.settings.os == "Linux":
             self.cpp_info.system_libs.extend(["dl"])
-            if self.options.stack_details_dw:
+            if self._has_stack_details("dw"):
                 self.cpp_info.libs.extend(["dw"])           
-            if self.options.stack_details_bfd:
+            if self._has_stack_details("bfd"):
                 self.cpp_info.libs.extend(["bfd"])
 
 
