@@ -1,5 +1,6 @@
 import os
-from conans import ConanFile, CMake, tools
+
+from conans import CMake, ConanFile, tools
 
 
 class XsimdConan(ConanFile):
@@ -28,11 +29,10 @@ class XsimdConan(ConanFile):
 
     def package(self):
         self.copy("LICENSE", dst="licenses", src=self._source_subfolder)
-        self.copy("*.hpp", dst="include", src=os.path.join(self._source_subfolder, "include"))
-
-    def package_id(self):
-        self.info.header_only()
+        self.copy(
+            "*.hpp", dst="include", src=os.path.join(self._source_subfolder, "include")
+        )
 
     def package_info(self):
         if self.options.xtl_complex:
-            self.cpp_info.defines["XSIMD_ENABLE_XTL_COMPLEX"] = "1"
+            self.cpp_info.defines = ["XSIMD_ENABLE_XTL_COMPLEX=1"]
