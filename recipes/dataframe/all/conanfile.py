@@ -70,4 +70,4 @@ class DataFrameConan(ConanFile):
 
         # in linux we need to link also with these libs
         if self.settings.os == "Linux":
-            self.cpp_info.libs.extend(["pthread", "dl", "rt"])
+            self.cpp_info.system_libs.extend(["pthread", "dl", "rt"])
