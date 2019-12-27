@@ -11,7 +11,7 @@ class Assimp(ConanFile):
     topics = ("conan", "assimp", "3d")
     license = "BSD-3-Clause"
 
-    requires = "zlib/1.2.11"
+    requires = "zlib/1.2.11", "irrxml/1.2"
 
     exports_sources = ["CMakeLists.txt"]
 
@@ -21,15 +21,11 @@ class Assimp(ConanFile):
     options = {
         "shared": [True, False],
         "double_precision": [True, False],
-        "no_export": [True, False],
-        "internal_irrxml": [True, False],
         "fPIC": [True, False],
     }
     default_options = {
         "shared": False,
         "double_precision": False,
-        "no_export": False,
-        "internal_irrxml": False,
         "fPIC": True,
     }
 
@@ -107,21 +103,17 @@ class Assimp(ConanFile):
         if self.settings.os == "Windows":
             del self.options.fPIC
 
-    def requirements(self):
-        if not self.options.internal_irrxml:
-            self.requires.add("irrxml/1.2")
-
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
         os.rename("assimp-%s" % self.version, self._source_subfolder)
 
     def _configure_cmake(self):
         cmake = CMake(self)
-        cmake.definitions["SYSTEM_IRRXML"] = not self.options.internal_irrxml
+        cmake.definitions["SYSTEM_IRRXML"] = True
 
         cmake.definitions["BUILD_SHARED_LIBS"] = self.options.shared
         cmake.definitions["ASSIMP_DOUBLE_PRECISION"] = self.options.double_precision
-        cmake.definitions["ASSIMP_NO_EXPORT"] = self.options.no_export
+        cmake.definitions["ASSIMP_NO_EXPORT"] = False
         cmake.definitions["ASSIMP_BUILD_ASSIMP_TOOLS"] = False
         cmake.definitions["ASSIMP_BUILD_TESTS"] = False
         cmake.definitions["ASSIMP_BUILD_SAMPLES"] = False
