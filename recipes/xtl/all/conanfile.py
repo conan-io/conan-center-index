@@ -23,6 +23,3 @@ class XtlConan(ConanFile):
     def package(self):
         self.copy("LICENSE", dst="licenses", src=self._source_subfolder)
         self.copy("*.hpp", dst="include", src=os.path.join(self._source_subfolder, "include"))
-
-    def package_id(self):
-        self.info.header_only()
