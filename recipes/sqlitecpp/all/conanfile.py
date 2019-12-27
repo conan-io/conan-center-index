@@ -18,10 +18,10 @@ class SQLiteCppConan(ConanFile):
     default_options = {"shared": False,
                        "fPIC": True,
                        "lint": False,
-                       "sqlite3:threadsafe": 2,
+                       "sqlite3:threadsafe": 1,
                        "sqlite3:enable_column_metadata": True
                        }
-    requires = ("sqlite3/3.29.0")
+    requires = ("sqlite3/3.30.1")
 
     @property
     def _source_subfolder(self):
@@ -38,10 +38,7 @@ class SQLiteCppConan(ConanFile):
     def config_options(self):
         if self.settings.os == 'Windows':
             del self.options.fPIC
-
-    def configure(self):
-        if self.settings.os == 'Windows' and self.options.shared:
-            raise ConanInvalidConfiguration("This library doesn't support DLL's on Windows")
+            del self.options.shared
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
@@ -78,6 +75,7 @@ class SQLiteCppConan(ConanFile):
         tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
 
     def package_info(self):
+        self.cpp_info.name = "SQLiteCpp"
         self.cpp_info.libs = tools.collect_libs(self)
         if self.settings.os == "Linux":
             self.cpp_info.system_libs = ["pthread", "dl", "m"]
