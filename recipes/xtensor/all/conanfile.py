@@ -1,4 +1,5 @@
 import os
+
 from conans import CMake, ConanFile, tools
 from conans.errors import ConanInvalidConfiguration
 
@@ -25,7 +26,9 @@ class XtensorConan(ConanFile):
 
     def configure(self):
         if self.options.tbb and self.options.openmp:
-            raise ConanInvalidConfiguration("The options 'tbb' and 'openmp' can not be used together.")
+            raise ConanInvalidConfiguration(
+                "The options 'tbb' and 'openmp' can not be used together."
+            )
 
     def requirements(self):
         self.requires("xtl/0.6.9")
@@ -37,10 +40,9 @@ class XtensorConan(ConanFile):
 
     def package(self):
         self.copy("LICENSE", dst="licenses", src=self._source_subfolder)
-        self.copy("*.hpp", dst="include", src=os.path.join(self._source_subfolder, "include"))
-
-    def package_id(self):
-        self.info.header_only()
+        self.copy(
+            "*.hpp", dst="include", src=os.path.join(self._source_subfolder, "include")
+        )
 
     def package_info(self):
         if self.options.xsimd:
