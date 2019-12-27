@@ -46,20 +46,3 @@ class ApprovalTestsCppConan(ConanFile):
     def package(self):
         self.copy(self._header_file, dst="include", src=self.source_folder)
         self.copy("LICENSE", dst="licenses", src=self.source_folder)
-
-    def package_info(self):
-        if self.options.test_framework == "catch2":
-            """ Do not define APPROVALS_CATCH here.
-                It should only be defined in the main test application,
-                otherwise we end up with multiple definitions.
-                """
-            pass
-        elif self.options.test_framework == "gtest":
-            self.cpp_info.defines = ["APPROVALS_GOOGLETEST"]
-            if not self.options["gtest"].no_main:
-                self.cpp_info.defines.append(
-                    "APPROVALS_GOOGLETEST_EXISTING_MAIN")
-        elif self.options.test_framework == "doctest":
-            self.cpp_info.defines = ["APPROVALS_DOCTEST"]
-        else:
-            self.cpp_info.defines = ["APPROVALS_UT"]
