@@ -132,13 +132,13 @@ class BackwardCppConan(ConanFile):
         self.cpp_info.names["cmake_find_package"] = "Backward"
         self.cpp_info.names["cmake_find_package_multi"] = "Backward"
 
-        self.cpp_info.defines.append('BACKTRACE_HAS_UNWIND={}'.format(int(self.options.stack_walking_unwind == True)))
-        self.cpp_info.defines.append('BACKTRACE_HAS_BACKTRACE={}'.format(int(self.options.stack_walking_backtrace == True)))
+        self.cpp_info.defines.append('BACKWARD_HAS_UNWIND={}'.format(int(self.options.stack_walking_unwind == True)))
+        self.cpp_info.defines.append('BACKWARD_HAS_BACKTRACE={}'.format(int(self.options.stack_walking_backtrace == True)))
         
-        self.cpp_info.defines.append('BACKTRACE_HAS_BACKTRACE_SYMBOL={}'.format(int(self.options.stack_details_backtrace_symbol == True)))
-        self.cpp_info.defines.append('BACKTRACE_HAS_DW={}'.format(int(self.options.stack_details_dw == True)))
-        self.cpp_info.defines.append('BACKTRACE_HAS_BFD={}'.format(int(self.options.stack_details_bfd == True)))
-        self.cpp_info.defines.append('BACKTRACE_HAS_DWARF={}'.format(int(self.options.stack_details_dwarf == True)))
+        self.cpp_info.defines.append('BACKWARD_HAS_BACKTRACE_SYMBOL={}'.format(int(self.options.stack_details_backtrace_symbol == True)))
+        self.cpp_info.defines.append('BACKWARD_HAS_DW={}'.format(int(self.options.stack_details_dw == True)))
+        self.cpp_info.defines.append('BACKWARD_HAS_BFD={}'.format(int(self.options.stack_details_bfd == True)))
+        self.cpp_info.defines.append('BACKWARD_HAS_DWARF={}'.format(int(self.options.stack_details_dwarf == True)))
 
         self.cpp_info.libs = tools.collect_libs(self)
         if self.settings.os == "Linux":
