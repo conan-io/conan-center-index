@@ -33,6 +33,7 @@ class LuaConan(ConanFile):
     def _configure_cmake(self):
         cmake = CMake(self)
         cmake.definitions["SOURCE_SUBDIR"] = self._source_subfolder
+        cmake.definitions["SKIP_INSTALL_TOOLS"] = True
         cmake.configure()
         return cmake
 
@@ -53,5 +54,16 @@ class LuaConan(ConanFile):
     def package_info(self):
         self.cpp_info.libs = tools.collect_libs(self)
         self.cpp_info.includedirs.append("include/lua")
-        if self.settings.os == "Linux":
+        # LUA_USE_DLOPEN was defined as PUBLIC in the CmakeLists.txt file.
+        # including it here as well.
+        self.cpp_info.defines.append( "LUA_USE_DLOPEN" )
+
+        if self.settings.os == "Windows" and self.options.shared:
+            self.cpp_info.defines.append( "LUA_BUILD_AS_DLL" )
+
+        # How do you target UNIX systems only? Trying to follow the IF pattern
+        # in the CMakeLists file
+        if self.settings.os != "Windows":
             self.cpp_info.system_libs = ["m"]
+            if self.settings.os != "Macos":
+                self.cpp_info.system_libs.append("dl")
