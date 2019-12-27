@@ -11,11 +11,12 @@ class LuaConan(ConanFile):
     generators = "cmake"
     settings = "os", "compiler", "arch", "build_type"
     exports_sources = ["CMakeLists.txt"]
+    options = {"shared": [False, True], "fPIC": [True, False], "compile_as_cpp": [True, False]}
+    default_options = {"shared": False, "fPIC": True, "compile_as_cpp": False}
 
-    _source_subfolder = "source_subfolder"
-
-    options = {"shared": [False, True], "fPIC": [True, False]}
-    default_options = {"shared": False, "fPIC": True}
+    @property
+    def _source_subfolder(self):
+        return "source_subfolder"
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
@@ -27,13 +28,15 @@ class LuaConan(ConanFile):
             del self.options.fPIC
 
     def configure(self):
-        del self.settings.compiler.libcxx
-        del self.settings.compiler.cppstd
+        if not self.options.compile_as_cpp:
+            del self.settings.compiler.libcxx
+            del self.settings.compiler.cppstd
 
     def _configure_cmake(self):
         cmake = CMake(self)
         cmake.definitions["SOURCE_SUBDIR"] = self._source_subfolder
         cmake.definitions["SKIP_INSTALL_TOOLS"] = True
+        cmake.definitions["COMPILE_AS_CPP"] = self.options.compile_as_cpp
         cmake.configure()
         return cmake
 
@@ -46,24 +49,17 @@ class LuaConan(ConanFile):
         tmp = tools.load( os.path.join( self._source_subfolder, "src", "lua.h") )
         license_contents = tmp[tmp.find("/***", 1):tmp.find("****/", 1)]
 
-        os.makedirs(os.path.join(self.package_folder, "licenses"))
         tools.save(os.path.join(self.package_folder, "licenses", "COPYING.txt"), license_contents)
         cmake = self._configure_cmake()
         cmake.install()
 
     def package_info(self):
         self.cpp_info.libs = tools.collect_libs(self)
-        self.cpp_info.includedirs.append("include/lua")
-        # LUA_USE_DLOPEN was defined as PUBLIC in the CmakeLists.txt file.
-        # including it here as well.
-        self.cpp_info.defines.append( "LUA_USE_DLOPEN" )
-
-        if self.settings.os == "Windows" and self.options.shared:
-            self.cpp_info.defines.append( "LUA_BUILD_AS_DLL" )
-
-        # How do you target UNIX systems only? Trying to follow the IF pattern
-        # in the CMakeLists file
+        self.cpp_info.includedirs.append(os.path.join("include", "lua"))
         if self.settings.os != "Windows":
+            self.cpp_info.defines.extend(["LUA_USE_DLOPEN", "LUA_USE_POSIX"])
             self.cpp_info.system_libs = ["m"]
             if self.settings.os != "Macos":
                 self.cpp_info.system_libs.append("dl")
+        elif self.settings.os == "Windows" and self.options.shared:
+            self.cpp_info.defines.append("LUA_BUILD_AS_DLL")
