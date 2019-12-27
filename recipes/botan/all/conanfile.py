@@ -15,26 +15,26 @@ class BotanConan(ConanFile):
     settings = 'os', 'arch', 'compiler', 'build_type'
     options = {
         'amalgamation': [True, False],
-        'bzip2': [True, False],
-        'openssl': [True, False],
+        'with_bzip2': [True, False],
+        'with_openssl': [True, False],
         'shared': [True, False],
         'fPIC': [True, False],
         'single_amalgamation': [True, False],
-        'sqlite3': [True, False],
-        'zlib': [True, False],
-        'boost': [True, False],
+        'with_sqlite3': [True, False],
+        'with_zlib': [True, False],
+        'with_boost': [True, False],
         'enable_modules': "ANY",
         'system_cert_bundle': "ANY"
     }
     default_options = {'amalgamation': True,
-                       'bzip2': False,
-                       'openssl': False,
+                       'with_bzip2': False,
+                       'with_openssl': False,
                        'shared': True,
                        'fPIC': True,
                        'single_amalgamation': False,
-                       'sqlite3': False,
-                       'zlib': False,
-                       'boost': False,
+                       'with_sqlite3': False,
+                       'with_zlib': False,
+                       'with_boost': False,
                        'enable_modules': None,
                        'system_cert_bundle': None}
 
@@ -54,22 +54,22 @@ class BotanConan(ConanFile):
                 'Using Botan with Clang on Linux requires either "compiler.libcxx=libstdc++11" ' \
                 'or "compiler.libcxx=libc++"')
 
-        if self.options.boost:
+        if self.options.with_boost:
             self.options["boost"].add("shared=False")
             self.options["boost"].add("magic_autolink=False")
             self.options["boost"].add("without_coroutine=False")
             self.options["boost"].add("without_system=False")
 
     def requirements(self):
-        if self.options.bzip2:
+        if self.options.with_bzip2:
             self.requires("bzip2/1.0.6")
-        if self.options.openssl:
+        if self.options.with_openssl:
             self.requires("openssl/1.0.2t")
-        if self.options.zlib:
+        if self.options.with_zlib:
             self.requires("zlib/1.2.11")
-        if self.options.sqlite3:
+        if self.options.with_sqlite3:
             self.requires("sqlite3/3.30.1")
-        if self.options.boost:
+        if self.options.with_boost:
             self.requires("boost/1.71.0")
 
     def config_options(self):
@@ -190,23 +190,23 @@ class BotanConan(ConanFile):
         if self.options.system_cert_bundle:
             build_flags.append('--system-cert-bundle={}'.format(self.options.system_cert_bundle))
 
-        if self.options.bzip2:
+        if self.options.with_bzip2:
             build_flags.append('--with-bzip2')
             build_flags.extend(self._dependency_build_flags("bzip2"))
 
-        if self.options.openssl:
+        if self.options.with_openssl:
             build_flags.append('--with-openssl')
             build_flags.extend(self._dependency_build_flags("OpenSSL"))
 
-        if self.options.sqlite3:
+        if self.options.with_sqlite3:
             build_flags.append('--with-sqlite3')
             build_flags.extend(self._dependency_build_flags("sqlite3"))
 
-        if self.options.zlib:
+        if self.options.with_zlib:
             build_flags.append('--with-zlib')
             build_flags.extend(self._dependency_build_flags("zlib"))
 
-        if self.options.boost:
+        if self.options.with_boost:
             build_flags.append('--with-boost')
             build_flags.extend(self._dependency_build_flags("boost"))
 
