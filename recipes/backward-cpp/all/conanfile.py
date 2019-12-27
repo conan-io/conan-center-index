@@ -10,7 +10,7 @@ class BackwardCppConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     topics = ("conan", "backward-cpp", "stack-trace")
     license = "MIT"
-    exports_sources = [ "CMakeLists.txt", "backward-cpp-*.patch" ]
+    exports_sources = [ "CMakeLists.txt", "patches/backward-cpp-*.patch" ]
     generators = "cmake"
 
     settings = "os", "arch", "compiler", "build_type"
@@ -116,7 +116,8 @@ class BackwardCppConan(ConanFile):
         return cmake
 
     def build(self):
-        tools.patch(**self.conan_data["patches"][self.version])
+        for patch in self.conan_data["patches"][self.version]:
+            tools.patch(**patch)
         cmake = self._configure_cmake()
         cmake.build()
 
