@@ -6,7 +6,7 @@ from conans import ConanFile, CMake, tools
 class ConanRecipe(ConanFile):
     name = "entt"
 
-    description = "Gaming meets modern C++ - a fast and reliable entity-component system (ECS) and much more "
+    description = "Gaming meets modern C++ - a fast and reliable entity-component system (ECS) and much more"
     topics = ("conan," "entt", "gaming", "entity", "ecs")
 
     homepage = "https://github.com/skypjack/entt"
