@@ -41,6 +41,10 @@ class DataFrameConan(ConanFile):
         if self.settings.os == "Windows":
             del self.options.fPIC
 
+    def configure(self):
+        if self.settings.compiler == "Visual Studio" and \
+           Version(self.settings.compiler.version) < "15":
+            raise ConanInvalidConfiguration("DataFrame requires Visual Studio >= 15")
     def _configure_cmake(self):
         cmake = CMake(self)
         cmake.configure()
