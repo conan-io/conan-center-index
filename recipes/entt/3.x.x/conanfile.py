@@ -28,7 +28,7 @@ class ConanRecipe(ConanFile):
 
     def configure(self):
         version = tools.Version(self.settings.compiler.version)
-        compiler = self.settings.compiler
+        compiler = str(self.settings.compiler)
 
         if self.settings.compiler.cppstd:
             tools.check_min_cppstd(self, "17")
