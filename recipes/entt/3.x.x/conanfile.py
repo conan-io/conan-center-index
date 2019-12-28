@@ -16,7 +16,7 @@ class ConanRecipe(ConanFile):
     license = "MIT"
 
     settings = "os", "compiler", "build_type", "arch"
-    generators = "cmake"
+    generators = "cmake", "cmake_find_package_multi"
 
     @property
     def _source_subfolder(self):
