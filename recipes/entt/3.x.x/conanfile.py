@@ -1,6 +1,7 @@
 import os
 
 from conans import ConanFile, CMake, tools
+from conans.errors import ConanInvalidConfiguration
 
 
 class ConanRecipe(ConanFile):
@@ -25,13 +26,36 @@ class ConanRecipe(ConanFile):
     def _build_subfolder(self):
         return "build_subfolder"
 
+    def configure(self):
+        version = tools.Version(self.settings.compiler.version)
+        compiler = self.settings.compiler
+
+        if self.settings.compiler.cppstd:
+            tools.check_min_cppstd(self, "17")
+            return
+
+        minimal_version = {
+            "Visual Studio": "16",
+            "gcc": "7",
+            "clang": "5",
+            "apple-clang": "10"
+        }
+
+        if compiler not in minimal_version:
+            self.output.warn(
+                "%s recipe lacks information about the %s compiler standard version support" % (self.name, compiler))
+            self.output.warn(
+                "%s requires a compiler that supports at least C++17" % self.name)
+            return
+
+        if version < minimal_version[compiler]:
+            raise ConanInvalidConfiguration(
+                "%s requires a compiler that supports at least C++17" % self.name)
+
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
         extracted_dir = "entt-" + self.version
         os.rename(extracted_dir, self._source_subfolder)
-
-    def configure(self):
-        tools.check_min_cppstd(self, "17")
 
     def _configure_cmake(self):
         cmake = CMake(self)
