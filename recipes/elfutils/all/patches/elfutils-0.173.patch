@@ -1,0 +1,224 @@
+diff --git a/backends/Makefile.in b/backends/Makefile.in
+index 1954957..a6316f6 100644
+--- a/backends/Makefile.in
++++ b/backends/Makefile.in
+@@ -442,7 +442,7 @@ AM_CFLAGS = -std=gnu99 -Wall -Wshadow -Wformat=2 \
+ 	    -Wold-style-definition -Wstrict-prototypes \
+ 	    $(LOGICAL_OP_WARNING) $(DUPLICATED_COND_WARNING) \
+ 	    $(NULL_DEREFERENCE_WARNING) $(IMPLICIT_FALLTHROUGH_WARNING) \
+-	    $(if $($(*F)_no_Werror),,-Werror) \
++	    $(if $($(*F)_no_Werror),,) \
+ 	    $(if $($(*F)_no_Wunused),,-Wunused -Wextra) \
+ 	    $(if $($(*F)_no_Wstack_usage),,$(STACK_USAGE_WARNING)) \
+ 	    $(if $($(*F)_no_Wpacked_not_aligned),-Wno-packed-not-aligned,) \
+diff --git a/configure.ac b/configure.ac
+index 1cf6245..6f0aaf0 100644
+--- a/configure.ac
++++ b/configure.ac
+@@ -130,7 +130,7 @@ AS_IF([test "x$ac_cv_c99" != xyes],
+ AC_CACHE_CHECK([whether gcc supports __attribute__((visibility()))],
+ 	ac_cv_visibility, [dnl
+ save_CFLAGS="$CFLAGS"
+-CFLAGS="$save_CFLAGS -Werror"
++CFLAGS="$save_CFLAGS "
+ AC_COMPILE_IFELSE([AC_LANG_SOURCE([dnl
+ int __attribute__((visibility("hidden")))
+ foo (int a)
+@@ -146,7 +146,7 @@ fi
+ AC_CACHE_CHECK([whether gcc supports __attribute__((gcc_struct))],
+ 	ac_cv_gcc_struct, [dnl
+ save_CFLAGS="$CFLAGS"
+-CFLAGS="$save_CFLAGS -Werror"
++CFLAGS="$save_CFLAGS "
+ AC_COMPILE_IFELSE([AC_LANG_SOURCE([dnl
+ struct test { int x; } __attribute__((gcc_struct));
+ ])], ac_cv_gcc_struct=yes, ac_cv_gcc_struct=no)
+@@ -158,7 +158,7 @@ fi
+ 
+ AC_CACHE_CHECK([whether gcc supports -fPIC], ac_cv_fpic, [dnl
+ save_CFLAGS="$CFLAGS"
+-CFLAGS="$save_CFLAGS -fPIC -Werror"
++CFLAGS="$save_CFLAGS -fPIC "
+ AC_COMPILE_IFELSE([AC_LANG_SOURCE()], ac_cv_fpic=yes, ac_cv_fpic=no)
+ CFLAGS="$save_CFLAGS"
+ ])
+@@ -171,7 +171,7 @@ AC_SUBST([fpic_CFLAGS])
+ 
+ AC_CACHE_CHECK([whether gcc supports -fPIE], ac_cv_fpie, [dnl
+ save_CFLAGS="$CFLAGS"
+-CFLAGS="$save_CFLAGS -fPIE -Werror"
++CFLAGS="$save_CFLAGS -fPIE "
+ AC_COMPILE_IFELSE([AC_LANG_SOURCE()], ac_cv_fpie=yes, ac_cv_fpie=no)
+ CFLAGS="$save_CFLAGS"
+ ])
+@@ -250,7 +250,7 @@ case "$CFLAGS" in
+     ;;
+   *)
+     save_CFLAGS="$CFLAGS"
+-    CFLAGS="-D_FORTIFY_SOURCE=2 -Werror $CFLAGS"
++    CFLAGS="-D_FORTIFY_SOURCE=2  $CFLAGS"
+     AC_COMPILE_IFELSE([AC_LANG_SOURCE([[
+       #include <string.h>
+       int main() { return 0; }
+@@ -410,7 +410,7 @@ AS_IF([test "x$enable_symbol_versioning" = "xno"],
+ 
+ AC_CACHE_CHECK([whether gcc accepts -Wstack-usage], ac_cv_stack_usage, [dnl
+ old_CFLAGS="$CFLAGS"
+-CFLAGS="$CFLAGS -Wstack-usage=262144 -Werror"
++CFLAGS="$CFLAGS -Wstack-usage=262144 "
+ AC_COMPILE_IFELSE([AC_LANG_SOURCE([])],
+ 		  ac_cv_stack_usage=yes, ac_cv_stack_usage=no)
+ CFLAGS="$old_CFLAGS"])
+@@ -419,7 +419,7 @@ AM_CONDITIONAL(ADD_STACK_USAGE_WARNING, [test "x$ac_cv_stack_usage" != "xno"])
+ # -Wlogical-op was too fragile in the past, make sure we get a sane one.
+ AC_CACHE_CHECK([whether gcc has a sane -Wlogical-op], ac_cv_logical_op, [dnl
+ old_CFLAGS="$CFLAGS"
+-CFLAGS="$CFLAGS -Wlogical-op -Werror"
++CFLAGS="$CFLAGS -Wlogical-op "
+ AC_COMPILE_IFELSE([AC_LANG_SOURCE(
+ 	[#define FLAG 1
+ 	int f (int r, int f) { return (r && (FLAG || (FLAG & f))); }])],
+@@ -431,7 +431,7 @@ AM_CONDITIONAL(SANE_LOGICAL_OP_WARNING,
+ # -Wduplicated-cond was added by GCC6
+ AC_CACHE_CHECK([whether gcc accepts -Wduplicated-cond], ac_cv_duplicated_cond, [dnl
+ old_CFLAGS="$CFLAGS"
+-CFLAGS="$CFLAGS -Wduplicated-cond -Werror"
++CFLAGS="$CFLAGS -Wduplicated-cond "
+ AC_COMPILE_IFELSE([AC_LANG_SOURCE([])],
+ 		  ac_cv_duplicated_cond=yes, ac_cv_duplicated_cond=no)
+ CFLAGS="$old_CFLAGS"])
+@@ -441,7 +441,7 @@ AM_CONDITIONAL(HAVE_DUPLICATED_COND_WARNING,
+ # -Wnull-dereference was added by GCC6
+ AC_CACHE_CHECK([whether gcc accepts -Wnull-dereference], ac_cv_null_dereference, [dnl
+ old_CFLAGS="$CFLAGS"
+-CFLAGS="$CFLAGS -Wnull-dereference -Werror"
++CFLAGS="$CFLAGS -Wnull-dereference "
+ AC_COMPILE_IFELSE([AC_LANG_SOURCE([])],
+ 		  ac_cv_null_dereference=yes, ac_cv_null_dereference=no)
+ CFLAGS="$old_CFLAGS"])
+@@ -451,7 +451,7 @@ AM_CONDITIONAL(HAVE_NULL_DEREFERENCE_WARNING,
+ # -Wimplicit-fallthrough was added by GCC7
+ AC_CACHE_CHECK([whether gcc accepts -Wimplicit-fallthrough], ac_cv_implicit_fallthrough, [dnl
+ old_CFLAGS="$CFLAGS"
+-CFLAGS="$CFLAGS -Wimplicit-fallthrough -Werror"
++CFLAGS="$CFLAGS -Wimplicit-fallthrough "
+ AC_COMPILE_IFELSE([AC_LANG_SOURCE([])],
+ 		  ac_cv_implicit_fallthrough=yes, ac_cv_implicit_fallthrough=no)
+ CFLAGS="$old_CFLAGS"])
+diff --git a/lib/Makefile.in b/lib/Makefile.in
+index 3e7d403..2a255e5 100644
+--- a/lib/Makefile.in
++++ b/lib/Makefile.in
+@@ -331,7 +331,7 @@ AM_CFLAGS = -std=gnu99 -Wall -Wshadow -Wformat=2 \
+ 	-Wold-style-definition -Wstrict-prototypes \
+ 	$(LOGICAL_OP_WARNING) $(DUPLICATED_COND_WARNING) \
+ 	$(NULL_DEREFERENCE_WARNING) $(IMPLICIT_FALLTHROUGH_WARNING) \
+-	$(if $($(*F)_no_Werror),,-Werror) $(if \
++	$(if $($(*F)_no_Werror),,) $(if \
+ 	$($(*F)_no_Wunused),,-Wunused -Wextra) $(if \
+ 	$($(*F)_no_Wstack_usage),,$(STACK_USAGE_WARNING)) $(if \
+ 	$($(*F)_no_Wpacked_not_aligned),-Wno-packed-not-aligned,) \
+diff --git a/libasm/Makefile.in b/libasm/Makefile.in
+index 844b0c4..e8b2f7a 100644
+--- a/libasm/Makefile.in
++++ b/libasm/Makefile.in
+@@ -384,7 +384,7 @@ AM_CFLAGS = -std=gnu99 -Wall -Wshadow -Wformat=2 \
+ 	    -Wold-style-definition -Wstrict-prototypes \
+ 	    $(LOGICAL_OP_WARNING) $(DUPLICATED_COND_WARNING) \
+ 	    $(NULL_DEREFERENCE_WARNING) $(IMPLICIT_FALLTHROUGH_WARNING) \
+-	    $(if $($(*F)_no_Werror),,-Werror) \
++	    $(if $($(*F)_no_Werror),,) \
+ 	    $(if $($(*F)_no_Wunused),,-Wunused -Wextra) \
+ 	    $(if $($(*F)_no_Wstack_usage),,$(STACK_USAGE_WARNING)) \
+ 	    $(if $($(*F)_no_Wpacked_not_aligned),-Wno-packed-not-aligned,) \
+diff --git a/libcpu/Makefile.in b/libcpu/Makefile.in
+index e9e723b..dbe8f4a 100644
+--- a/libcpu/Makefile.in
++++ b/libcpu/Makefile.in
+@@ -366,7 +366,7 @@ AM_CFLAGS = -std=gnu99 -Wall -Wshadow -Wformat=2 \
+ 	-Wold-style-definition -Wstrict-prototypes \
+ 	$(LOGICAL_OP_WARNING) $(DUPLICATED_COND_WARNING) \
+ 	$(NULL_DEREFERENCE_WARNING) $(IMPLICIT_FALLTHROUGH_WARNING) \
+-	$(if $($(*F)_no_Werror),,-Werror) $(if \
++	$(if $($(*F)_no_Werror),,) $(if \
+ 	$($(*F)_no_Wunused),,-Wunused -Wextra) $(if \
+ 	$($(*F)_no_Wstack_usage),,$(STACK_USAGE_WARNING)) $(if \
+ 	$($(*F)_no_Wpacked_not_aligned),-Wno-packed-not-aligned,) \
+diff --git a/libdw/Makefile.in b/libdw/Makefile.in
+index 2f193f8..74d5f28 100644
+--- a/libdw/Makefile.in
++++ b/libdw/Makefile.in
+@@ -436,7 +436,7 @@ AM_CFLAGS = -std=gnu99 -Wall -Wshadow -Wformat=2 \
+ 	-Wold-style-definition -Wstrict-prototypes \
+ 	$(LOGICAL_OP_WARNING) $(DUPLICATED_COND_WARNING) \
+ 	$(NULL_DEREFERENCE_WARNING) $(IMPLICIT_FALLTHROUGH_WARNING) \
+-	$(if $($(*F)_no_Werror),,-Werror) $(if \
++	$(if $($(*F)_no_Werror),,) $(if \
+ 	$($(*F)_no_Wunused),,-Wunused -Wextra) $(if \
+ 	$($(*F)_no_Wstack_usage),,$(STACK_USAGE_WARNING)) $(if \
+ 	$($(*F)_no_Wpacked_not_aligned),-Wno-packed-not-aligned,) \
+diff --git a/libdwelf/Makefile.in b/libdwelf/Makefile.in
+index 0e32ab1..a6de361 100644
+--- a/libdwelf/Makefile.in
++++ b/libdwelf/Makefile.in
+@@ -364,7 +364,7 @@ AM_CFLAGS = -std=gnu99 -Wall -Wshadow -Wformat=2 \
+ 	    -Wold-style-definition -Wstrict-prototypes \
+ 	    $(LOGICAL_OP_WARNING) $(DUPLICATED_COND_WARNING) \
+ 	    $(NULL_DEREFERENCE_WARNING) $(IMPLICIT_FALLTHROUGH_WARNING) \
+-	    $(if $($(*F)_no_Werror),,-Werror) \
++	    $(if $($(*F)_no_Werror),,) \
+ 	    $(if $($(*F)_no_Wunused),,-Wunused -Wextra) \
+ 	    $(if $($(*F)_no_Wstack_usage),,$(STACK_USAGE_WARNING)) \
+ 	    $(if $($(*F)_no_Wpacked_not_aligned),-Wno-packed-not-aligned,) \
+diff --git a/libdwfl/Makefile.in b/libdwfl/Makefile.in
+index b8e28d5..4f51bbf 100644
+--- a/libdwfl/Makefile.in
++++ b/libdwfl/Makefile.in
+@@ -420,7 +420,7 @@ AM_CFLAGS = -std=gnu99 -Wall -Wshadow -Wformat=2 \
+ 	    -Wold-style-definition -Wstrict-prototypes \
+ 	    $(LOGICAL_OP_WARNING) $(DUPLICATED_COND_WARNING) \
+ 	    $(NULL_DEREFERENCE_WARNING) $(IMPLICIT_FALLTHROUGH_WARNING) \
+-	    $(if $($(*F)_no_Werror),,-Werror) \
++	    $(if $($(*F)_no_Werror),,) \
+ 	    $(if $($(*F)_no_Wunused),,-Wunused -Wextra) \
+ 	    $(if $($(*F)_no_Wstack_usage),,$(STACK_USAGE_WARNING)) \
+ 	    $(if $($(*F)_no_Wpacked_not_aligned),-Wno-packed-not-aligned,) \
+diff --git a/libebl/Makefile.in b/libebl/Makefile.in
+index 13a6f81..562faa1 100644
+--- a/libebl/Makefile.in
++++ b/libebl/Makefile.in
+@@ -384,7 +384,7 @@ AM_CFLAGS = -std=gnu99 -Wall -Wshadow -Wformat=2 \
+ 	-Wold-style-definition -Wstrict-prototypes \
+ 	$(LOGICAL_OP_WARNING) $(DUPLICATED_COND_WARNING) \
+ 	$(NULL_DEREFERENCE_WARNING) $(IMPLICIT_FALLTHROUGH_WARNING) \
+-	$(if $($(*F)_no_Werror),,-Werror) $(if \
++	$(if $($(*F)_no_Werror),,) $(if \
+ 	$($(*F)_no_Wunused),,-Wunused -Wextra) $(if \
+ 	$($(*F)_no_Wstack_usage),,$(STACK_USAGE_WARNING)) $(if \
+ 	$($(*F)_no_Wpacked_not_aligned),-Wno-packed-not-aligned,) \
+diff --git a/libelf/Makefile.in b/libelf/Makefile.in
+index 602e66d..360927e 100644
+--- a/libelf/Makefile.in
++++ b/libelf/Makefile.in
+@@ -427,7 +427,7 @@ AM_CFLAGS = -std=gnu99 -Wall -Wshadow -Wformat=2 \
+ 	-Wold-style-definition -Wstrict-prototypes \
+ 	$(LOGICAL_OP_WARNING) $(DUPLICATED_COND_WARNING) \
+ 	$(NULL_DEREFERENCE_WARNING) $(IMPLICIT_FALLTHROUGH_WARNING) \
+-	$(if $($(*F)_no_Werror),,-Werror) $(if \
++	$(if $($(*F)_no_Werror),,) $(if \
+ 	$($(*F)_no_Wunused),,-Wunused -Wextra) $(if \
+ 	$($(*F)_no_Wstack_usage),,$(STACK_USAGE_WARNING)) $(if \
+ 	$($(*F)_no_Wpacked_not_aligned),-Wno-packed-not-aligned,) \
+diff --git a/src/Makefile.in b/src/Makefile.in
+index 82d6835..b8bd7f4 100644
+--- a/src/Makefile.in
++++ b/src/Makefile.in
+@@ -441,7 +441,7 @@ AM_CFLAGS = -std=gnu99 -Wall -Wshadow -Wformat=2 \
+ 	    -Wold-style-definition -Wstrict-prototypes \
+ 	    $(LOGICAL_OP_WARNING) $(DUPLICATED_COND_WARNING) \
+ 	    $(NULL_DEREFERENCE_WARNING) $(IMPLICIT_FALLTHROUGH_WARNING) \
+-	    $(if $($(*F)_no_Werror),,-Werror) \
++	    $(if $($(*F)_no_Werror),,) \
+ 	    $(if $($(*F)_no_Wunused),,-Wunused -Wextra) \
+ 	    $(if $($(*F)_no_Wstack_usage),,$(STACK_USAGE_WARNING)) \
+ 	    $(if $($(*F)_no_Wpacked_not_aligned),-Wno-packed-not-aligned,) \
