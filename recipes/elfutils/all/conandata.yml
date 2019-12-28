@@ -1,0 +1,8 @@
+sources:
+  "0.173":
+    url: "https://sourceware.org/elfutils/ftp/0.173/elfutils-0.173.tar.bz2"
+    sha256: "b76d8c133f68dad46250f5c223482c8299d454a69430d9aa5c19123345a000ff"
+patches:
+  "0.173":
+    base_path: "source_subfolder"
+    patch_file: "patches/elfutils-0.173.patch"
