@@ -17,8 +17,13 @@ class ConanRecipe(ConanFile):
     settings = "os", "compiler", "build_type", "arch"
     generators = "cmake"
 
-    _source_subfolder = "source_subfolder"
-    _build_subfolder = "build_subfolder"
+    @property
+    def _source_subfolder(self):
+        return "source_subfolder"
+
+    @property
+    def _build_subfolder(self):
+        return "build_subfolder"
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
