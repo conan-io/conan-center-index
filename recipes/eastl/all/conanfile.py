@@ -18,26 +18,37 @@ class Bzip2Conan(ConanFile):
     default_options = {"shared": False, "fPIC": True}
 
     _source_subfolder = "source_subfolder"
-    _minimum_cpp_standard = 14
 
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
 
     def configure(self):
-        if not self.settings.compiler.cppstd:
-            self.output.info("Settings c++ standard to {}".format(self._minimum_cpp_standard))
-            self.settings.compiler.cppstd = self._minimum_cpp_standard
+        version = tools.Version(self.settings.compiler.version)
+        compiler = str(self.settings.compiler)
 
-        unsupported_cppstd = ("98", "11")
-        for cppstd in unsupported_cppstd:
-            if cppstd in str(self.settings.compiler.cppstd):
-                raise ConanInvalidConfiguration("EASTL requires c++ {} or newer".format(self._minimum_cpp_standard))
+        minimal_cpp_standard = "14"
 
-        if (self.settings.compiler == "gcc" and Version(self.settings.compiler.version.value) < "5") or \
-                (self.settings.compiler == "clang" and Version(self.settings.compiler.version.value) < "3.4") or \
-                (self.settings.compiler == "Visual Studio" and Version(self.settings.compiler.version.value) < "2015"):
-            raise ConanInvalidConfiguration("Compiler is too old for c++ {}".format(self._minimum_cpp_standard))
+        if self.settings.compiler.cppstd:
+            tools.check_min_cppstd(self, minimal_cpp_standard)
+            return
+
+        minimal_version = {
+            "Visual Studio": "14",
+            "gcc": "5",
+            "clang": "3.4"
+        }
+
+        if compiler not in minimal_version:
+            self.output.warn(
+                "%s recipe lacks information about the %s compiler standard version support" % (self.name, compiler))
+            self.output.warn(
+                "%s requires a compiler that supports at least C++%s" % (self.name, minimal_cpp_standard))
+            return
+
+        if version < minimal_version[compiler]:
+            raise ConanInvalidConfiguration(
+                "%s requires a compiler that supports at least C++%s" % (self.name, minimal_cpp_standard))
 
     def requirements(self):
         self.requires("eabase/2.09.05")
@@ -68,7 +79,8 @@ class Bzip2Conan(ConanFile):
 
     def package(self):
         self.copy("LICENSE", src=self._source_subfolder, dst="licenses")
-        self.copy("3RDPARTYLICENSES.TXT", src=self._source_subfolder, dst="licenses")
+        self.copy("3RDPARTYLICENSES.TXT",
+                  src=self._source_subfolder, dst="licenses")
         cmake = self._configure_cmake()
         cmake.install()
 
