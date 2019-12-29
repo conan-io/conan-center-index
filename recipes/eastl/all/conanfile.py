@@ -26,14 +26,9 @@ class Bzip2Conan(ConanFile):
             del self.options.fPIC
 
     def configure(self):
-        version = tools.Version(self.settings.compiler.version)
-        compiler = str(self.settings.compiler)
-
         minimal_cpp_standard = "14"
-
         if self.settings.compiler.cppstd:
             tools.check_min_cppstd(self, minimal_cpp_standard)
-            return
 
         minimal_version = {
             "Visual Studio": "14",
@@ -41,6 +36,7 @@ class Bzip2Conan(ConanFile):
             "clang": "3.4"
         }
 
+        compiler = str(self.settings.compiler)
         if compiler not in minimal_version:
             self.output.warn(
                 "%s recipe lacks information about the %s compiler standard version support" % (self.name, compiler))
@@ -48,6 +44,7 @@ class Bzip2Conan(ConanFile):
                 "%s requires a compiler that supports at least C++%s" % (self.name, minimal_cpp_standard))
             return
 
+        version = tools.Version(self.settings.compiler.version)
         if version < minimal_version[compiler]:
             raise ConanInvalidConfiguration(
                 "%s requires a compiler that supports at least C++%s" % (self.name, minimal_cpp_standard))
