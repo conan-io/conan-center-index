@@ -20,16 +20,32 @@ class CppTaskflowConan(ConanFile):
     _source_subfolder = "source_subfolder"
     
     def configure(self):
-        tools.check_min_cppstd(self, "17")
+        compiler = str(self.settings.compiler)
+        compiler_version = tools.Version(self.settings.compiler.version)
 
-        compiler = self.settings.compiler
-        compiler_version = Version(self.settings.compiler.version.value)
+        if self.settings.compiler.cppstd:
+            tools.check_min_cppstd(self, "17")
+        else:
+            self.output.warn("%s recipe lacks information about the %s compiler"
+                             " standard version support" % (self.name, compiler))
+        
+        minimal_version = {
+            "Visual Studio": "16",
+            "gcc": "7.3",
+            "clang": "6",
+            "apple-clang": "10.0"
+        }
+
+        if compiler not in minimal_version:            
+            self.output.info("%s requires a compiler that supports at least"
+                             " C++17" % self.name)
+            return
+        
         # Exclude compilers not supported by cpp-taskflow
-        if (compiler == "gcc" and compiler_version < "7.3") or \
-           (compiler == "clang" and compiler_version < "6") or \
-           (compiler == "apple-clang" and compiler_version < "10.0") or \
-           (compiler == "Visual Studio" and compiler_version < "16"):
-          raise ConanInvalidConfiguration("cpp-taskflow requires C++17 standard or higher. {} {} is not supported.".format(compiler, compiler.version))
+        if compiler_version < minimal_version[compiler]:
+            raise ConanInvalidConfiguration("%s requires a compiler that supports"
+                                            " at least C++17. %s %s is not" 
+                                            " supported." % (self.name, compiler, Version(self.settings.compiler.version.value)))
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
