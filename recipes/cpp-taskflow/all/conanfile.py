@@ -46,4 +46,6 @@ class CppTaskflowConan(ConanFile):
     def package_info(self):
         if self.settings.os == "Linux":
             self.cpp_info.system_libs.append("pthread")
+        if self.settings.compiler == "Visual Studio":
+            self.cpp_info.defines.append("_ENABLE_EXTENDED_ALIGNED_STORAGE")
         
