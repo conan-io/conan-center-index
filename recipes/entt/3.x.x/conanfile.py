@@ -32,7 +32,7 @@ class ConanRecipe(ConanFile):
             tools.check_min_cppstd(self, minimal_cpp_standard)
 
         minimal_version = {
-            "Visual Studio": "16",
+            "Visual Studio": "15.9",
             "gcc": "7",
             "clang": "5",
             "apple-clang": "10"
