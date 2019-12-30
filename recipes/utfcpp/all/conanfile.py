@@ -7,6 +7,7 @@ class UtfCppConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/nemtrif/utfcpp"
     description = "UTF-8 with C++ in a Portable Way"
+    settings = "os", "compiler", "arch", "build_type"
     topics = ("utf", "utf8", "unicode", "text")
     license = "BSL-1.0"
     no_copy_source = True
