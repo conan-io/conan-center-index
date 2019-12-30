@@ -32,7 +32,7 @@ class Bzip2Conan(ConanFile):
 
         minimal_version = {
             "Visual Studio": "14",
-            "gcc": "5",
+            "gcc": "6",
             "clang": "3.4"
         }
 
