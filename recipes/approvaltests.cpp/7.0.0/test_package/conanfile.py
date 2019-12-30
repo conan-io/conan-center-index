@@ -5,6 +5,7 @@ from conans import ConanFile, CMake, tools
 class TestPackageConan(ConanFile):
     settings = "os", "compiler", "arch", "build_type"
     generators = "cmake"
+    options = {"approvaltests.cpp:test_framework": "catch2"}
 
     def build(self):
         cmake = CMake(self)
