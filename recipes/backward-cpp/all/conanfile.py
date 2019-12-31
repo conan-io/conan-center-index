@@ -127,7 +127,7 @@ class BackwardCppConan(ConanFile):
         if self.settings.os == "Linux":
             self.cpp_info.system_libs.extend(["dl"])
             if self._has_stack_details("dw"):
-                self.cpp_info.libs.extend(["dw"])           
+                self.cpp_info.system_libs.extend(["dw"])           
             if self._has_stack_details("bfd"):
                 self.cpp_info.libs.extend(["bfd"])
 
