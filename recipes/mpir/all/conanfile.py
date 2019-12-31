@@ -56,7 +56,7 @@ class MpirConan(ConanFile):
             msbuild.build(vcxproj_path, platforms=self._platforms, upgrade_project=False)
 
     def package(self):
-        self.copy("COPYING", dst="licenses", src=self._source_subfolder)        
+        self.copy("COPYING*", dst="licenses", src=self._source_subfolder)        
         lib_folder = os.path.join(self._source_subfolder, self._dll_or_lib, 
                                   self._platforms.get(str(self.settings.arch)), 
                                   str(self.settings.build_type))
