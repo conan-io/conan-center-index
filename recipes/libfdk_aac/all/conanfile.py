@@ -8,7 +8,6 @@ class FDKAACConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     description = "A standalone library of the Fraunhofer FDK AAC code from Android"
     license = "https://github.com/mstorsjo/fdk-aac/blob/master/NOTICE"
-    exports_sources = ["CMakeLists.txt"]
     settings = "os", "arch", "compiler", "build_type"
     homepage = "https://sourceforge.net/projects/opencore-amr/"
     topics = ("conan", "libfdk_aac", "multimedia", "audio", "fraunhofer", "aac", "decoder", "encoding", "decoding")
