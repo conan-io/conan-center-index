@@ -26,7 +26,7 @@ class FDKAACConan(ConanFile):
 
     def build_requirements(self):
         if self._use_winbash and self.settings.compiler != 'Visual Studio':
-            if "CONAN_BASH_PATH" not in os.environ and os_info.detect_windows_subsystem() != 'msys2':
+            if "CONAN_BASH_PATH" not in os.environ and tools.os_info.detect_windows_subsystem() != 'msys2':
                 self.build_requires("msys2/20190524")
 
     def source(self):
@@ -41,6 +41,9 @@ class FDKAACConan(ConanFile):
                     tools.replace_in_file('Makefile.vc',
                                           'CFLAGS   = /nologo /W3 /Ox /MT',
                                           'CFLAGS   = /nologo /W3 /Ox /%s' % str(self.settings.compiler.runtime))
+                    tools.replace_in_file('Makefile.vc',
+                                          'MKDIR_FLAGS = -p',
+                                          'MKDIR_FLAGS =')
                     self.run('nmake -f Makefile.vc')
                     self.run('nmake -f Makefile.vc prefix="%s" install' % os.path.abspath(self.package_folder))
 
@@ -85,7 +88,8 @@ class FDKAACConan(ConanFile):
                     for filename in fnmatch.filter(filenames, ext):
                         os.unlink(os.path.join(root, filename))
         tools.rmdir(os.path.join(self.package_folder, 'lib', 'pkgconfig'))
-        os.remove(os.path.join(self.package_folder, "lib", "libfdk-aac.la"))
+        if os.path.isfile(os.path.join(self.package_folder, "lib", "libfdk-aac.la")):
+            os.remove(os.path.join(self.package_folder, "lib", "libfdk-aac.la"))
 
     def package_info(self):
         if self.settings.compiler == 'Visual Studio' and self.options.shared:
