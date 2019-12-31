@@ -1,4 +1,5 @@
 from conans import ConanFile, tools, MSBuild
+from conans.errors import ConanInvalidConfiguration
 import os
 
 
@@ -25,6 +26,8 @@ class MpirConan(ConanFile):
             del self.options.fPIC
 
     def configure(self):
+        if self.settings.os != "Windows":
+          raise ConanInvalidConfiguration("This recipe is only compatible with Windows for the moment")
         del self.settings.compiler.libcxx
         del self.settings.compiler.cppstd
         self._dll_or_lib = "dll" if self.options.shared else "lib"
