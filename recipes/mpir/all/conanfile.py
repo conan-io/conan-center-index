@@ -33,6 +33,12 @@ class MpirConan(ConanFile):
         self._dll_or_lib = "dll" if self.options.shared else "lib"
         # maybe configure architecture
 
+    @property
+    def _vcxproj_path(self):
+        compiler_version = self.settings.compiler.version if int(str(self.settings.compiler.version))<16 else "15"
+        return os.path.join(self._source_subfolder,"build.vc{}".format(compiler_version),
+                                                   "{}_mpir_gc".format(self._dll_or_lib),
+                                                   "{}_mpir_gc.vcxproj".format(self._dll_or_lib))
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
         extracted_dir = self.name + "-" + self.version
@@ -50,13 +56,8 @@ class MpirConan(ConanFile):
                     tools.replace_in_file(props_path, "<RuntimeLibrary>MultiThreaded</RuntimeLibrary>",
                                                       "<RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>")
 
-            vcxproj_path = os.path.join(self._source_subfolder,
-                                        "build.vc{}".format(self.settings.compiler.version),
-                                        "{}_mpir_gc".format(self._dll_or_lib),
-                                        "{}_mpir_gc.vcxproj".format(self._dll_or_lib))
-            self.output.info(vcxproj_path)
             msbuild = MSBuild(self)
-            msbuild.build(vcxproj_path, platforms=self._platforms, upgrade_project=False)
+            msbuild.build(self._vcxproj_path, platforms=self._platforms, upgrade_project=False)
 
     def package(self):
         self.copy("COPYING*", dst="licenses", src=self._source_subfolder)        
