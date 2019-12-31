@@ -39,20 +39,8 @@ class BotanConan(ConanFile):
                        'system_cert_bundle': None}
 
     def configure(self):
-        compiler = self.settings.compiler
-        version = Version(self.settings.compiler.version.value)
+        self._validate_compiler_settings()
 
-        if self.settings.os == "Windows" and compiler == "Visual Studio" and version < "14":
-            raise ConanInvalidConfiguration("Botan doesn't support MSVC < 14")
-
-        elif compiler == "gcc" and version >= "5" and compiler.libcxx != "libstdc++11":
-            raise ConanInvalidConfiguration(
-                'Using Botan with GCC >= 5 on Linux requires "compiler.libcxx=libstdc++11"')
-
-        elif compiler == "clang" and compiler.libcxx not in ["libstdc++11", "libc++"]:
-            raise ConanInvalidConfiguration(
-                'Using Botan with Clang on Linux requires either "compiler.libcxx=libstdc++11" ' \
-                'or "compiler.libcxx=libc++"')
 
         if self.options.with_boost:
             self.options["boost"].add("shared=False")
@@ -113,6 +101,22 @@ class BotanConan(ConanFile):
         self.cpp_info.libdirs = ['lib']
         self.cpp_info.bindirs = ['lib', 'bin']
         self.cpp_info.includedirs = ['include/botan-2']
+
+    def _validate_compiler_settings(self):
+        compiler = self.settings.compiler
+        version = Version(self.settings.compiler.version.value)
+
+        if compiler == "Visual Studio" and version < "14":
+            raise ConanInvalidConfiguration("Botan doesn't support MSVC < 14")
+
+        elif compiler == "gcc" and version >= "5" and compiler.libcxx != "libstdc++11":
+            raise ConanInvalidConfiguration(
+                'Using Botan with GCC >= 5 on Linux requires "compiler.libcxx=libstdc++11"')
+
+        elif compiler == "clang" and compiler.libcxx not in ["libstdc++11", "libc++"]:
+            raise ConanInvalidConfiguration(
+                'Using Botan with Clang on Linux requires either "compiler.libcxx=libstdc++11" ' \
+                'or "compiler.libcxx=libc++"')
 
     @property
     def _is_mingw_windows(self):
