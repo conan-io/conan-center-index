@@ -24,6 +24,11 @@ class FDKAACConan(ConanFile):
         if self.settings.os == 'Windows':
             del self.options.fPIC
 
+    def build_requirements(self):
+        if self._use_winbash and self.settings.compiler != 'Visual Studio':
+            if "CONAN_BASH_PATH" not in os.environ and os_info.detect_windows_subsystem() != 'msys2':
+                self.build_requires("msys2/20190524")
+
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
         extracted_dir = "fdk-aac-" + self.version
