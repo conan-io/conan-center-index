@@ -41,6 +41,8 @@ class BotanConan(ConanFile):
     def configure(self):
         self._validate_compiler_settings()
 
+        if self.options.single_amalgamation:
+            self.options.amalgamation = True
 
         if self.options.with_boost:
             self.options["boost"].add("shared=False")
@@ -61,9 +63,6 @@ class BotanConan(ConanFile):
             self.requires("boost/1.71.0")
 
     def config_options(self):
-        if self.options.single_amalgamation:
-            self.options.amalgamation = True
-
         if self.settings.os == "Windows":
             del self.options.fPIC
 
