@@ -129,7 +129,7 @@ class BackwardCppConan(ConanFile):
             if self._has_stack_details("dw"):
                 self.cpp_info.system_libs.extend(["dw"])           
             if self._has_stack_details("bfd"):
-                self.cpp_info.libs.extend(["bfd"])
+                self.cpp_info.system_libs.extend(["bfd"])
 
 
         
