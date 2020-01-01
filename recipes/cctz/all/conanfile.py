@@ -56,8 +56,13 @@ class CCTZConan(ConanFile):
 
     def package(self):
         self.copy(pattern="LICENSE.txt", dst="licenses", src=self._source_subfolder)
+
         cmake = self._configure_cmake()
         cmake.install()
+
+        # CMake install doesn't package the .dll
+        self.copy(pattern="*.dll", dst="bin", keep_path=False)
+
         tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
 
     def package_info(self):
