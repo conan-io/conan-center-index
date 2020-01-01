@@ -34,10 +34,11 @@ class MpirConan(ConanFile):
 
     @property
     def _vcxproj_path(self):
-        compiler_version = self.settings.compiler.version if int(str(self.settings.compiler.version))<16 else "15"
+        compiler_version = self.settings.compiler.version if tools.Version(self.settings.compiler.version) < "16" else "15"
         return os.path.join(self._source_subfolder,"build.vc{}".format(compiler_version),
                                                    "{}_mpir_gc".format(self._dll_or_lib),
                                                    "{}_mpir_gc.vcxproj".format(self._dll_or_lib))
+
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
         extracted_dir = self.name + "-" + self.version
