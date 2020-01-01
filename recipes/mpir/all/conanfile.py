@@ -27,8 +27,6 @@ class MpirConan(ConanFile):
 
     def configure(self):
         self._dll_or_lib = "dll" if self.options.shared else "lib"
-        #del self.settings.compiler.libcxx
-        #del self.settings.compiler.cppstd
 
     @property
     def _vcxproj_path(self):
