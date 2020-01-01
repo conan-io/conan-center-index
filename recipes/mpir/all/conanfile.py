@@ -1,4 +1,4 @@
-from conans import ConanFile, tools, MSBuild
+from conans import ConanFile, tools, AutoToolsBuildEnvironment, MSBuild
 from conans.errors import ConanInvalidConfiguration
 import os
 
@@ -26,11 +26,9 @@ class MpirConan(ConanFile):
             del self.options.fPIC
 
     def configure(self):
-        if self.settings.os != "Windows":
-          raise ConanInvalidConfiguration("This recipe is only compatible with Windows for the moment")
-        del self.settings.compiler.libcxx
-        del self.settings.compiler.cppstd
         self._dll_or_lib = "dll" if self.options.shared else "lib"
+        #del self.settings.compiler.libcxx
+        #del self.settings.compiler.cppstd
 
     @property
     def _vcxproj_path(self):
@@ -40,13 +38,12 @@ class MpirConan(ConanFile):
                                                    "{}_mpir_gc.vcxproj".format(self._dll_or_lib))
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
+        tools.get(**self.conan_data["sources"][self.version], keep_permissions=True)
         extracted_dir = self.name + "-" + self.version
         os.rename(extracted_dir, self._source_subfolder)
 
-    def build(self):
-        if self.settings.os == "Windows" and self.settings.compiler == "Visual Studio":
-            if "MD" in self.settings.compiler.runtime and not self.options.shared:
+    def _build_visual_studio(self):
+        if "MD" in self.settings.compiler.runtime and not self.options.shared:
                 props_path = os.path.join(self._source_subfolder, "build.vc", 
                 "mpir_{}_{}.props".format(str(self.settings.build_type).lower(), self._dll_or_lib))
                 if self.settings.build_type == "Debug":
@@ -55,18 +52,47 @@ class MpirConan(ConanFile):
                 else:
                     tools.replace_in_file(props_path, "<RuntimeLibrary>MultiThreaded</RuntimeLibrary>",
                                                       "<RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>")
+        msbuild = MSBuild(self)
+        msbuild.build(self._vcxproj_path, platforms=self._platforms, upgrade_project=False)
 
-            msbuild = MSBuild(self)
-            msbuild.build(self._vcxproj_path, platforms=self._platforms, upgrade_project=False)
+    def _build_configure(self):
+        env_build = AutoToolsBuildEnvironment(self)
+        with tools.chdir(self._source_subfolder):
+            args = ['prefix=%s' % self.package_folder]
+            if self.options.shared:
+                args.extend(['--disable-static', '--enable-shared'])
+            else:
+                args.extend(['--disable-shared', '--enable-static'])
+
+            args.extend(['--disable-silent-rules', '--enable-gmpcompat', '--enable-cxx'])
+            env_build.configure(args=args)
+            env_build.make()
+            env_build.make(args=['install'])
+
+    def build(self):
+        if self.settings.compiler == "Visual Studio":
+            self._build_visual_studio()
+        else:
+            self._build_configure()            
 
     def package(self):
         self.copy("COPYING*", dst="licenses", src=self._source_subfolder)        
-        lib_folder = os.path.join(self._source_subfolder, self._dll_or_lib, 
-                                  self._platforms.get(str(self.settings.arch)), 
-                                  str(self.settings.build_type))
-        self.copy("*.h", dst="include", src=lib_folder, keep_path=True)
-        self.copy(pattern="*.dll*", dst="bin", src=lib_folder, keep_path=False)
-        self.copy(pattern="*.lib", dst="lib", src=lib_folder, keep_path=False)        
+        if self.settings.compiler == 'Visual Studio':
+            lib_folder = os.path.join(self._source_subfolder, self._dll_or_lib, 
+                                    self._platforms.get(str(self.settings.arch)), 
+                                    str(self.settings.build_type))
+            self.copy("*.h", dst="include", src=lib_folder, keep_path=True)
+            self.copy(pattern="*.dll*", dst="bin", src=lib_folder, keep_path=False)
+            self.copy(pattern="*.lib", dst="lib", src=lib_folder, keep_path=False)        
+        else:
+            # remove entire share directory
+            tools.rmdir(os.path.join(self.package_folder, 'share'))
+            # remove la files
+            las = [os.path.join(self.package_folder, 'lib', '{}.la'.format(la)) for la in [
+                'libgmp', 'libgmpxx', 'libmpir', 'libmpirxx']]
+            for la in las:
+                if os.path.isfile(la):
+                    os.unlink(la)
 
     def package_info(self):
         self.cpp_info.libs = ['mpir']
