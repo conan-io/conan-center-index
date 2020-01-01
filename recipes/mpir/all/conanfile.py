@@ -10,7 +10,7 @@ class MpirConan(ConanFile):
     topics = ("conan", "mpir", "multiprecision", "math", "mathematics")
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "http://mpir.org/"
-    license = "LGPL v3+"
+    license = "LGPL-3.0-or-later"
     settings = "os", "compiler", "arch", "build_type"
     options = {"shared": [True, False], "fPIC": [True, False]}
     default_options = {"shared": False, "fPIC": True}
