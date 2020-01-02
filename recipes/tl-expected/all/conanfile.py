@@ -10,6 +10,7 @@ class TlExpectedConan(ConanFile):
     description = "C++11/14/17 std::expected with functional-style extensions"
     topics = ("cpp11", "cpp14", "cpp17", "expected")
     license = "CC0-1.0"
+    no_copy_source = True
     _source_subfolder = "tl-expected"
 
     def source(self):
