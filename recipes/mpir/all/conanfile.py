@@ -1,7 +1,7 @@
 from conans import ConanFile, tools, AutoToolsBuildEnvironment, MSBuild
 from conans.errors import ConanInvalidConfiguration
 import os
-
+import glob
 
 class MpirConan(ConanFile):
     name = "mpir"
@@ -89,11 +89,9 @@ class MpirConan(ConanFile):
                 autotools = self._configure_autotools()
                 autotools.install()
             tools.rmdir(os.path.join(self.package_folder, 'share'))
-            las = [os.path.join(self.package_folder, 'lib', '{}.la'.format(la)) for la in [
-                'libgmp', 'libgmpxx', 'libmpir', 'libmpirxx']]
-            for la in las:
-                if os.path.isfile(la):
-                    os.unlink(la)
+            with tools.chdir(os.path.join(self.package_folder, "lib")):
+                for filename in glob.glob("*.la"):
+                    os.unlink(filename)
 
     def package_info(self):
         self.cpp_info.libs = ['mpir']
