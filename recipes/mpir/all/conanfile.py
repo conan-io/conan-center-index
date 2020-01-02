@@ -16,7 +16,8 @@ class MpirConan(ConanFile):
     default_options = {"shared": False, "fPIC": True}
     _dll_or_lib = "lib"
     _source_subfolder = "source_subfolder"
-    _platforms={'x86': 'Win32', 'x86_64': 'x64'}
+    _platforms = {'x86': 'Win32', 'x86_64': 'x64'}
+    _autotools = None
 
     def build_requirements(self):
         self.build_requires("yasm/1.3.0")
@@ -25,8 +26,9 @@ class MpirConan(ConanFile):
         if self.settings.os == "Windows":
             del self.options.fPIC
 
-    def configure(self):
-        self._dll_or_lib = "dll" if self.options.shared else "lib"
+    @property
+    def _dll_or_lib(self):
+        return "dll" if self.options.shared else "lib"
 
     @property
     def _vcxproj_path(self):
@@ -53,25 +55,26 @@ class MpirConan(ConanFile):
         msbuild = MSBuild(self)
         msbuild.build(self._vcxproj_path, platforms=self._platforms, upgrade_project=False)
 
-    def _build_configure(self):
-        env_build = AutoToolsBuildEnvironment(self)
-        with tools.chdir(self._source_subfolder):
-            args = ['prefix=%s' % self.package_folder]
+    def _configure_autotools(self):
+        if not self._autotools:
+            self._autotools = AutoToolsBuildEnvironment(self)
+            args = []
             if self.options.shared:
                 args.extend(['--disable-static', '--enable-shared'])
             else:
                 args.extend(['--disable-shared', '--enable-static'])
 
             args.extend(['--disable-silent-rules', '--enable-gmpcompat', '--enable-cxx'])
-            env_build.configure(args=args)
-            env_build.make()
-            env_build.make(args=['install'])
+            self._autotools.configure(args=args)
+        return self._autotools
 
     def build(self):
         if self.settings.compiler == "Visual Studio":
             self._build_visual_studio()
         else:
-            self._build_configure()            
+            with tools.chdir(self._source_subfolder):
+                autotools = self._configure_autotools()
+                autotools.make()
 
     def package(self):
         self.copy("COPYING*", dst="licenses", src=self._source_subfolder)        
@@ -83,9 +86,10 @@ class MpirConan(ConanFile):
             self.copy(pattern="*.dll*", dst="bin", src=lib_folder, keep_path=False)
             self.copy(pattern="*.lib", dst="lib", src=lib_folder, keep_path=False)        
         else:
-            # remove entire share directory
+            with tools.chdir(self._source_subfolder):
+                autotools = self._configure_autotools()
+                autotools.install()
             tools.rmdir(os.path.join(self.package_folder, 'share'))
-            # remove la files
             las = [os.path.join(self.package_folder, 'lib', '{}.la'.format(la)) for la in [
                 'libgmp', 'libgmpxx', 'libmpir', 'libmpirxx']]
             for la in las:
