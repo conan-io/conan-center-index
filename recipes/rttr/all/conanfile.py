@@ -1,6 +1,7 @@
+import os
+import glob
 from conans import ConanFile, tools, CMake
 from conans.errors import ConanInvalidConfiguration
-import os
 
 
 class RTTRConan(ConanFile):
@@ -74,6 +75,10 @@ class RTTRConan(ConanFile):
 
         tools.rmdir(os.path.join(self.package_folder, "cmake"))
         tools.rmdir(os.path.join(self.package_folder, "share"))
+
+        pdb_files = glob.glob(os.path.join(self.package_folder, 'bin', '*.pdb'), recursive=True)
+        for pdb in pdb_files:
+            os.unlink(pdb)
 
     def package_info(self):
         self.cpp_info.libs = tools.collect_libs(self)
