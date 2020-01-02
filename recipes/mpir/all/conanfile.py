@@ -14,7 +14,6 @@ class MpirConan(ConanFile):
     settings = "os", "compiler", "arch", "build_type"
     options = {"shared": [True, False], "fPIC": [True, False]}
     default_options = {"shared": False, "fPIC": True}
-    _dll_or_lib = "lib"
     _source_subfolder = "source_subfolder"
     _platforms = {'x86': 'Win32', 'x86_64': 'x64'}
     _autotools = None
