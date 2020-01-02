@@ -124,11 +124,11 @@ class LibGit2Conan(ConanFile):
 
         tools.replace_in_file(os.path.join(self._source_subfolder, "src", "CMakeLists.txt"),
                               "FIND_PKGLIBRARIES(CURL libcurl)",
-                              "FIND_PACKAGE(curl REQUIRED)\n"
+                              "FIND_PACKAGE(libcurl REQUIRED)\n"
                               "\tSET(CURL_FOUND ON)\n"
-                              "\tSET(CURL_INCLUDE_DIRS ${curl_INCLUDE_DIRS})\n"
-                              "\tSET(CURL_LIBRARIES ${curl_LIBRARIES})\n"
-                              "\tSET(CURL_LDFLAGS ${curl_LIB_DIRS})")
+                              "\tSET(CURL_INCLUDE_DIRS ${libcurl_INCLUDE_DIRS})\n"
+                              "\tSET(CURL_LIBRARIES ${libcurl_LIBRARIES})\n"
+                              "\tSET(CURL_LDFLAGS ${libcurl_LIB_DIRS})")
         
         tools.save("FindOpenSSL.cmake",
                    "set(OPENSSL_FOUND ${OpenSSL_FOUND})\n"
