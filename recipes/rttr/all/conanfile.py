@@ -30,7 +30,7 @@ class RTTRConan(ConanFile):
     _source_subfolder = "source_subfolder"
 
     def config_options(self):
-        if self.settings.os == "Windows" or self.options.shared:
+        if self.settings.os == "Windows":
             del self.options.fPIC
 
     def source(self):
@@ -47,12 +47,8 @@ class RTTRConan(ConanFile):
         cmake.definitions["BUILD_WITH_RTTI"] = self.options.with_rtti
         cmake.definitions["BUILD_PACKAGE"] = False
 
-        if self.options.shared:
-            cmake.definitions["BUILD_RTTR_DYNAMIC"] = True
-            cmake.definitions["BUILD_STATIC"] = False
-        else:
-            cmake.definitions["BUILD_STATIC"] = True
-            cmake.definitions["BUILD_RTTR_DYNAMIC"] = False
+        cmake.definitions["BUILD_RTTR_DYNAMIC"] = self.options.shared
+        cmake.definitions["BUILD_STATIC"] = not self.options.shared
 
         cmake.configure()
         
