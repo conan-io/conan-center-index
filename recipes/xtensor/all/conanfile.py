@@ -35,6 +35,11 @@ class XtensorConan(ConanFile):
                 "The options 'tbb' and 'openmp' can not be used together."
             )
 
+        if self.settings.compiler == "gcc":
+            v = tools.Version(str(self.settings.compiler.version))
+            if v < "6.0":
+                raise ConanInvalidConfiguration("gcc >= 6.0 required")
+
         if self.settings.compiler in ["gcc", "clang", "apple-clang"]:
             if str(self.settings.compiler.libcxx) == "libstdc++":
                 self.settings.compiler.libcxx = "libstdc++11"
