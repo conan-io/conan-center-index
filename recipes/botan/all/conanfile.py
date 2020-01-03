@@ -99,8 +99,6 @@ class BotanConan(ConanFile):
         if self.settings.os == "Windows":
             self.cpp_info.system_libs.extend(["ws2_32", "Crypt32"])
 
-        self.cpp_info.libdirs = ['lib']
-        self.cpp_info.bindirs = ['bin']
         self.cpp_info.includedirs = ['include/botan-2']
 
     def _validate_compiler_settings(self):
@@ -121,7 +119,7 @@ class BotanConan(ConanFile):
 
     @property
     def _is_mingw_windows(self):
-        return self.settings.os == "Windows" and self.settings.compiler == "gcc" and os.name == "nt"
+        return self.settings.os == "Windows" and self.settings.compiler == "gcc"
 
     @property
     def _botan_os(self):
