@@ -621,8 +621,7 @@ class BoostConan(ConanFile):
         elif arch.startswith("mips"):
             pass
         else:
-            raise Exception("I'm so sorry! I don't know the appropriate ABI for "
-                            "your architecture. :'(")
+            self.output.warn("Unable to detect the appropriate ABI for %s architecture." % arch)
         self.output.info("Cross building flags: %s" % flags)
 
         return flags
