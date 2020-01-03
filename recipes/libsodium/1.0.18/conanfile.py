@@ -123,7 +123,7 @@ class LibsodiumConan(ConanFile):
             if self.settings.arch == "armv7":
                 host_arch += "eabi"
         else:
-            raise ConanInvalidConfiguration(f"Unsupported arch or Neutrino version for libsodium: {self.settings.os} {self.setting.arch}")
+            raise ConanInvalidConfiguration(f"Unsupported arch or Neutrino version for libsodium: {self.settings.os} {self.settings.arch}")
         configure_args.append("--host=%s" % host_arch)
         self._build_autotools_impl(configure_args)
 
