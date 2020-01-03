@@ -9,7 +9,7 @@ class BotanConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/randombit/botan"
     license = "BSD-2-Clause"
-    exports = ["patches/*"]
+    exports = ["dll-dir.patch"]
     description = "Botan is a cryptography library written in C++11."
     topics = ("cryptography", "crypto", "C++11", "tls")
     settings = 'os', 'arch', 'compiler', 'build_type'
@@ -72,6 +72,8 @@ class BotanConan(ConanFile):
         os.rename(extracted_dir, "sources")
 
     def build(self):
+        for patch in self.conan_data["patches"][self.version]:
+            tools.patch(**patch)
         with tools.chdir('sources'):
             self.run(self._configure_cmd)
             self.run(self._make_cmd)
@@ -98,7 +100,7 @@ class BotanConan(ConanFile):
             self.cpp_info.system_libs.extend(["ws2_32", "Crypt32"])
 
         self.cpp_info.libdirs = ['lib']
-        self.cpp_info.bindirs = ['lib', 'bin']
+        self.cpp_info.bindirs = ['bin']
         self.cpp_info.includedirs = ['include/botan-2']
 
     def _validate_compiler_settings(self):
