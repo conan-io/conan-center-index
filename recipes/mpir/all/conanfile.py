@@ -42,7 +42,7 @@ class MpirConan(ConanFile):
         os.rename(extracted_dir, self._source_subfolder)
 
     def _build_visual_studio(self):
-        if "MD" in self.settings.compiler.runtime and not self.options.shared:
+        if "MD" in self.settings.compiler.runtime:
                 props_path = os.path.join(self._source_subfolder, "build.vc", 
                 "mpir_{}_{}.props".format(str(self.settings.build_type).lower(), self._dll_or_lib))
                 if self.settings.build_type == "Debug":
