@@ -6,7 +6,6 @@ class PCREConan(ConanFile):
     name = "pcre"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://www.pcre.org"
-    author = "Bincrafters <bincrafters@gmail.com>"
     description = "Perl Compatible Regular Expressions"
     license = "BSD-3-Clause"
     exports_sources = ["CMakeLists.txt"]
@@ -91,3 +90,4 @@ class PCREConan(ConanFile):
             self.cpp_info.libs = ['pcreposix', 'pcre']
         if not self.options.shared:
             self.cpp_info.defines.append("PCRE_STATIC=1")
+        self.cpp_info.names['pkg_config'] = 'libpcre'
