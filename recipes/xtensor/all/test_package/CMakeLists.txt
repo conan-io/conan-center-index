@@ -6,4 +6,5 @@ conan_basic_setup()
 
 add_executable(${PROJECT_NAME} test_package.cpp)
 target_link_libraries(${PROJECT_NAME} ${CONAN_LIBS})
-set_property(TARGET ${PROJECT} PROPERTY CXX_STANDARD 14)
+set_property(TARGET ${PROJECT} PROPERTY CXX_STANDARD 14 CXX_STANDARD_REQUIRED
+                                        ON CXX_EXTENSIONS OFF)
