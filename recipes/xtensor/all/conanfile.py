@@ -11,7 +11,12 @@ class XtensorConan(ConanFile):
     homepage = "https://github.com/xtensor-stack/xtensor"
     description = "C++ tensors with broadcasting and lazy computing"
     topics = ("conan", "numpy", "multidimensional-arrays", "tensors")
-    options = {"xsimd": [True, False], "tbb": [True, False], "openmp": [True, False]}
+    settings = "os", "arch", "compiler", "build_type"
+    options = {
+        "xsimd": [True, False],
+        "tbb": [True, False],
+        "openmp": [True, False],
+    }
     default_options = {"xsimd": True, "tbb": False, "openmp": False}
     no_copy_source = True
 
@@ -30,6 +35,10 @@ class XtensorConan(ConanFile):
                 "The options 'tbb' and 'openmp' can not be used together."
             )
 
+        if self.settings.compiler in ["gcc", "clang", "apple-clang"]:
+            if str(self.settings.compiler.libcxx) == "libstdc++":
+                self.settings.compiler.libcxx = "libstdc++11"
+
     def requirements(self):
         self.requires("xtl/0.6.9")
         self.requires("nlohmann_json/3.7.3")
@@ -43,6 +52,9 @@ class XtensorConan(ConanFile):
         self.copy(
             "*.hpp", dst="include", src=os.path.join(self._source_subfolder, "include")
         )
+
+    def package_id(self):
+        self.info.header_only()
 
     def package_info(self):
         if self.options.xsimd:
