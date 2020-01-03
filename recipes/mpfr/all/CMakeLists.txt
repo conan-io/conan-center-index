@@ -283,9 +283,6 @@ add_library(mpfr ${SRCS})
 target_compile_definitions(mpfr PRIVATE __MPFR_WITHIN_MPFR)
 target_compile_definitions(mpfr PRIVATE HAVE_STDINT_H)
 target_compile_definitions(mpfr PRIVATE HAVE_STDARG)
-if(BUILD_SHARED_LIBS)
-    target_compile_definitions(mpfr PRIVATE __GMP_LIBGMP_DLL)
-endif()
 
 target_link_libraries(mpfr ${GMP_LIBRARIES})
 
