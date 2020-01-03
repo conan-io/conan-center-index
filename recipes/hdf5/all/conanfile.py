@@ -45,15 +45,23 @@ class LibHdf5Conan(ConanFile):
         os.rename(extracted_dir, self._source_subfolder)
 
         # Strip the debug suffix from library names
+        if tools.Version(self.version) < "1.10.6":
+            suffix_var = "LIB_DEBUG_SUFFIX"
+        else:
+            suffix_var = "CMAKE_DEBUG_POSTFIX"
         for suffix in ["_D", "_debug"]:
             tools.replace_in_file(
                 os.path.join(self._source_subfolder, "config", "cmake_ext_mod", "HDFMacros.cmake"),
-                'set (LIB_DEBUG_SUFFIX "{}")'.format(suffix),
-                'set (LIB_DEBUG_SUFFIX "")'
+                'set ({} "{}")'.format(suffix_var, suffix),
+                'set ({} "")'.format(suffix_var)
             )
 
     def _configure_cmake(self):
         cmake = CMake(self)
+
+        # Needed to avoid constructing the static libraries
+        if tools.Version(self.version) >= "1.10.6":
+            cmake.definitions["ONLY_SHARED_LIBS"] = self.options.shared
 
         # Build only necessary modules
         cmake.definitions["BUILD_TESTING"] = "OFF"
@@ -103,7 +111,7 @@ class LibHdf5Conan(ConanFile):
                 os.remove(path)
 
         # Manually remove the .a/.lib files if we are building in shared mode
-        if self.options.shared:
+        if self.options.shared and tools.Version(self.version) < "1.10.6":
             wildcard_pattern = os.path.join(self.package_folder, "lib", "lib*")
             for extension in [".a", ".lib"]:
                 for static_lib in glob.glob(wildcard_pattern + extension):
