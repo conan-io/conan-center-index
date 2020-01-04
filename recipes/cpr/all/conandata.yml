@@ -1,0 +1,14 @@
+sources:
+  "1.3.0":
+    sha256: "82597627e8b2aef1f0482631c9b11595c63a7565bb462a5995d126da4419ac99"
+    url: https://github.com/whoshuu/cpr/archive/1.3.0.tar.gz
+patches:
+  "1.3.0":
+    - patch_file: "patches/001-fix-curl-define.patch"
+      base_path: "source_subfolder"
+    - patch_file: "patches/002-create-install.patch"
+      base_path: "source_subfolder"
+    - patch_file: "patches/003-zlib-use-target.patch"
+      base_path: "source_subfolder"
+    - patch_file: "patches/004-curl-global-scope.patch"
+      base_path: "source_subfolder"

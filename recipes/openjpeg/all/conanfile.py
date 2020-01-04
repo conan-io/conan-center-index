@@ -18,16 +18,9 @@ class OpenjpegConan(ConanFile):
 
     _source_subfolder = "source_subfolder"
 
-    requires = (
-        "zlib/1.2.11",
-        "lcms/2.9",
-        "libpng/1.6.37",
-        "libtiff/4.0.9"
-    )
-
     def config_options(self):
         if self.settings.os == "Windows":
-            self.options.remove("fPIC")
+            del self.options.fPIC
 
     def configure(self):
         del self.settings.compiler.libcxx
@@ -44,6 +37,7 @@ class OpenjpegConan(ConanFile):
         cmake.definitions['BUILD_STATIC_LIBS'] = not self.options.shared
         cmake.definitions['BUILD_PKGCONFIG_FILES'] = False
         cmake.definitions['CMAKE_INSTALL_SYSTEM_RUNTIME_LIBS_SKIP'] = True
+        cmake.definitions['BUILD_CODEC'] = False
 
         cmake.configure()
         return cmake
@@ -107,5 +101,6 @@ class OpenjpegConan(ConanFile):
         if not self.options.shared:
             self.cpp_info.defines.append('OPJ_STATIC')
         if self.settings.os == "Linux":
-            self.cpp_info.libs.append("pthread")
+            self.cpp_info.system_libs = ["pthread", "m"]
         self.cpp_info.name = 'OpenJPEG'
+        self.cpp_info.names['pkg_config'] = 'libopenjp2'

@@ -114,3 +114,4 @@ class LeptonicaConan(ConanFile):
         if self.settings.os == "Linux":
             self.cpp_info.system_libs = ["m"]
         self.cpp_info.name = 'Leptonica'
+        self.cpp_info.names['pkg_config'] = 'lept'

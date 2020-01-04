@@ -1,0 +1,7 @@
+sources:
+  "7.4.5":
+    sha256: 854c0506fb6f0c90a98b30a9407af1d06870338d6c7e63d21ddbbf8b7ce1dd42
+    url: https://github.com/xtensor-stack/xsimd/archive/7.4.5.tar.gz
+  "7.4.4":
+    sha256: a60d49f638b68117ae5aea73cf2d5586f4afda4de2435962de4310b11214de6a
+    url: https://github.com/xtensor-stack/xsimd/archive/7.4.4.tar.gz
