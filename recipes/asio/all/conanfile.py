@@ -1,19 +1,14 @@
-#!/usr/bin/env python
-# -*- coding: utf-8 -*-
-
 import os
 from conans import ConanFile, tools
 
 
 class Asio(ConanFile):
     name = "asio"
-    
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "http://think-async.com/Asio"
     description = "Asio is a cross-platform C++ library for network and low-level I/O"
     topics = ("conan", "asio", "network", "io", "low-level")
     license = "BSL-1.0"
-
 
     no_copy_source = True
     _source_subfolder = "source_subfolder"

@@ -1,6 +1,3 @@
-#!/usr/bin/env python
-# -*- coding: utf-8 -*-
-
 from conans import ConanFile, tools, AutoToolsBuildEnvironment
 from conans.errors import ConanInvalidConfiguration
 import os
@@ -9,14 +6,11 @@ import glob
 
 class LibiconvConan(ConanFile):
     name = "libiconv"
-    version = "1.15"
     description = "Convert text to and from Unicode"
-    url = "https://github.com/bincrafters/conan-libiconv"
+    url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://www.gnu.org/software/libiconv/"
-    author = "Bincrafters <bincrafters@gmail.com>"
     topics = "libiconv", "iconv", "text", "encoding", "locale", "unicode", "conversion"
     license = "LGPL-2.1"
-    exports = ["LICENSE.md"]
     settings = "os", "compiler", "build_type", "arch"
     options = {"shared": [True, False], "fPIC": [True, False]}
     default_options = {'shared': False, 'fPIC': True}
@@ -38,6 +32,7 @@ class LibiconvConan(ConanFile):
 
     def configure(self):
         del self.settings.compiler.libcxx
+        del self.settings.compiler.cppstd
 
     def config_options(self):
         if self.settings.os == 'Windows':

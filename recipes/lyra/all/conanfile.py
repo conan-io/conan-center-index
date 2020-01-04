@@ -7,7 +7,6 @@ class LyraConan(ConanFile):
     homepage = "https://bfgroup.github.io/Lyra/"
     description = "A simple to use, composing, header only, command line arguments parser for C++ 11 and beyond."
     topics = ("conan", "cli", "c++11")
-    author = "Build Frameworks Group"
     no_copy_source = True
 
     url = "https://github.com/conan-io/conan-center-index"

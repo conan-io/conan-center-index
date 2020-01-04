@@ -1,6 +1,3 @@
-#!/usr/bin/env python
-# -*- coding: utf-8 -*-
-
 from conans import ConanFile, CMake, tools
 import os
 
@@ -11,7 +8,6 @@ class JanssonConan(ConanFile):
     topics = ("conan", "jansson", "json", "encoding", "decoding", "manipulation")
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "http://www.digip.org/jansson/"
-    author = "Bincrafters <bincrafters@gmail.com>"
     license = "MIT"
     exports_sources = ["CMakeLists.txt"]
     generators = "cmake"

@@ -1,5 +1,4 @@
-#!/usr/bin/env python
-# -*- coding: utf-8 -*-
+import glob
 import os
 from conans import ConanFile, CMake, tools
 from conans.model.version import Version
@@ -8,15 +7,12 @@ from conans.errors import ConanInvalidConfiguration
 
 class GTestConan(ConanFile):
     name = "gtest"
-    version = "1.8.1"
     description = "Google's C++ test framework"
-    url = "http://github.com/bincrafters/conan-gtest"
+    url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/google/googletest"
-    author = "Bincrafters <bincrafters@gmail.com>"
     license = "BSD-3-Clause"
     topics = ("conan", "gtest", "testing", "google-testing", "unit-test")
-    exports = ["LICENSE.md"]
-    exports_sources = ["CMakeLists.txt", "gtest.patch"]
+    exports_sources = ["CMakeLists.txt", "patches/*"]
     generators = "cmake"
     settings = "os", "arch", "compiler", "build_type"
     options = {"shared": [True, False], "build_gmock": [True, False], "fPIC": [True, False], "no_main": [True, False], "debug_postfix": "ANY", "hide_symbols": [True, False]}
@@ -48,7 +44,7 @@ class GTestConan(ConanFile):
         if self.settings.build_type == "Debug":
             cmake.definitions["CUSTOM_DEBUG_POSTFIX"] = self.options.debug_postfix
         if self.settings.os == "Windows" and self.settings.get_safe("compiler.runtime"):
-            cmake.definitions["gtest_force_shared_crt"] = "MD" in str(self.settings.compiler.runtime)           
+            cmake.definitions["gtest_force_shared_crt"] = "MD" in str(self.settings.compiler.runtime)
         cmake.definitions["BUILD_GMOCK"] = self.options.build_gmock
         cmake.definitions["GTEST_NO_MAIN"] = self.options.no_main
         if self.settings.os == "Windows" and self.settings.compiler == "gcc":
@@ -58,7 +54,8 @@ class GTestConan(ConanFile):
         return cmake
 
     def build(self):
-        tools.patch(base_path=self._source_subfolder, patch_file="gtest.patch")
+        for patch in self.conan_data["patches"][self.version]:
+            tools.patch(**patch)
         cmake = self._configure_cmake()
         cmake.build()
 
@@ -68,6 +65,8 @@ class GTestConan(ConanFile):
         cmake.install()
         tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
         tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
+        for pdb_file in glob.glob(os.path.join(self.package_folder, "lib", "*.pdb")):
+            os.unlink(pdb_file)
 
     def package_id(self):
         del self.info.options.no_main
@@ -90,3 +89,4 @@ class GTestConan(ConanFile):
             if Version(self.settings.compiler.version.value) >= "15":
                 self.cpp_info.defines.append("GTEST_LANG_CXX11=1")
                 self.cpp_info.defines.append("GTEST_HAS_TR1_TUPLE=0")
+        self.cpp_info.name = "GTest"

@@ -1,8 +1,6 @@
-#!/usr/bin/env python
-# -*- coding: utf-8 -*-
-
-from conans import ConanFile, tools, CMake
+from conans import ConanFile, tools
 import os
+from distutils.dir_util import copy_tree
 
 
 license = """================================================================================
@@ -63,20 +61,16 @@ THE SOFTWARE."""
 
 class GlmConan(ConanFile):
     name = "glm"
-    version = "0.9.9.5"
     description = "OpenGL Mathematics (GLM)"
     topics = ("conan", "glm", "opengl", "mathematics")
-    url = "https://github.com/bincrafters/conan-glm"
+    url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/g-truc/glm"
-    author = "Bincrafters <bincrafters@gmail.com>"
     license = "MIT"
-    generators = "cmake"
     no_copy_source = True
 
-    exports = ["LICENSE.md"]
     exports_sources = [
         "CMakeLists.txt",
-        "0001-Remove-architecture-check-from-CMake-package.patch"
+        "patches/*.patch"
     ]
 
     _source_subfolder = "source_subfolder"
@@ -86,28 +80,14 @@ class GlmConan(ConanFile):
         tools.get(**self.conan_data["sources"][self.version])
         extracted_dir = "glm-" + self.version
         os.rename(extracted_dir, self._source_subfolder)
-
-    def _configure_cmake(self):
-        cmake = CMake(self)
-        cmake.definitions["GLM_TEST_ENABLE"] = False
-        cmake.definitions["BUILD_SHARED_LIBS"] = False
-        cmake.definitions["BUILD_STATIC_LIBS"] = False
-        cmake.configure(build_folder=self._build_subfolder)
-        return cmake
-
-    def build(self):
-        with tools.chdir(self.source_folder):
-            tools.patch(base_path=self._source_subfolder, patch_file="0001-Remove-architecture-check-from-CMake-package.patch")
-            cmake = self._configure_cmake()
-            cmake.build()
+        for patch in self.conan_data["patches"][self.version]:
+            tools.patch(**patch)
 
     def package(self):
         os.makedirs(os.path.join(self.package_folder, "licenses"))
         tools.save(os.path.join(self.package_folder, "licenses", "COPYING.txt"), license)
-        cmake = self._configure_cmake()
-        cmake.install()
-        tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
-        tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
+        copy_tree(os.path.join(self.source_folder, self._source_subfolder, "glm"),
+                  os.path.join(self.package_folder, "include", "glm"))
 
     def package_id(self):
         self.info.header_only()

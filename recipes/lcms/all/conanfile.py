@@ -10,13 +10,16 @@ class LcmsConan(ConanFile):
     description = "A free, open source, CMM engine."
     license = "MIT"
     homepage = "https://github.com/mm2/Little-CMS"
-    author = "Bicrafters <bincrafters@gmail.com>"
     topics = ("conan", "lcms", "cmm", "icc", "cmm-engine")
     settings = "os", "arch", "compiler", "build_type"
     options = {"shared": [True, False], "fPIC": [True, False]}
     default_options = {'shared': False, 'fPIC': True}
     generators = "cmake"
     _source_subfolder = "source_subfolder"
+
+    def build_requirements(self):
+        if tools.os_info.is_windows and "CONAN_BASH_PATH" not in os.environ:
+            self.build_requires("msys2/20161025")
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -44,7 +47,11 @@ class LcmsConan(ConanFile):
             msbuild.build("lcms2.sln", targets=[target], platforms={"x86": "Win32"}, upgrade_project=upgrade_project)
 
     def _build_configure(self):
-        env_build = AutoToolsBuildEnvironment(self)
+        if self.settings.os == "Android" and tools.os_info.is_windows:
+            # remove escape for quotation marks, to make ndk on windows happy
+            tools.replace_in_file(os.path.join(self._source_subfolder, 'configure'),
+                "s/[	 `~#$^&*(){}\\\\|;'\\\''\"<>?]/\\\\&/g", "s/[	 `~#$^&*(){}\\\\|;<>?]/\\\\&/g")
+        env_build = AutoToolsBuildEnvironment(self, win_bash=tools.os_info.is_windows)
         with tools.chdir(self._source_subfolder):
             args = ['prefix=%s' % self.package_folder]
             if self.options.shared:

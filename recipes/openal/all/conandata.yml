@@ -1,0 +1,8 @@
+sources:
+  "1.19.1":
+    url: "https://github.com/kcat/openal-soft/archive/openal-soft-1.19.1.tar.gz"
+    sha256: "9f3536ab2bb7781dbafabc6a61e0b34b17edd16bd6c2eaf2ae71bc63078f98c7"
+patches:
+  "1.19.1":
+    - base_path: "source_subfolder"
+      patch_file: "patches/1.19.1/patch.diff"

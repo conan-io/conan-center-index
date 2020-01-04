@@ -1,0 +1,7 @@
+sources:
+  "2019_u9":
+    url: "https://github.com/intel/tbb/archive/2019_U9.tar.gz"
+    sha256: "15652f5328cf00c576f065e5cd3eaf3317422fe82afb67a9bcec0dc065bd2abe"
+  "2020.0":
+    url: "https://github.com/intel/tbb/archive/v2020.0.tar.gz"
+    sha256: "8eed2377ac62e6ac10af5a8303ce861e4525ffe491a061b48e8fe094fc741ce9"

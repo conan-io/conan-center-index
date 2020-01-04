@@ -1,6 +1,3 @@
-#!/usr/bin/env python
-# -*- coding: utf-8 -*-
-
 import os
 from conans import ConanFile, CMake, tools
 
@@ -8,16 +5,14 @@ from conans import ConanFile, CMake, tools
 class Bzip2Conan(ConanFile):
     name = "bzip2"
     version = "1.0.6"
-    url = "https://github.com/conan-community/conan-bzip2"
-    homepage = "http://www.bzip.org"
-    author = "Conan Community"
+    url = "https://github.com/conan-io/conan-center-index"
+    homepage = "http://www.bzip.org"    
     license = "bzip2-1.0.6"
-    description = "bzip2 is a free and open-source file compression program that uses the Burrows–Wheeler algorithm."
+    description = "bzip2 is a free and open-source file compression program that uses the Burrows Wheeler algorithm."
     topics = ("conan", "bzip2", "data-compressor", "file-compression")
     settings = "os", "compiler", "arch", "build_type"
     options = {"shared": [True, False], "fPIC": [True, False], "build_executable": [True, False]}
     default_options = {"shared": False, "fPIC": True, "build_executable": True}
-    exports = "LICENSE"
     exports_sources = "CMakeLists.txt"
     generators = "cmake"
 
@@ -58,6 +53,6 @@ class Bzip2Conan(ConanFile):
         cmake.install()
         tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
 
-
     def package_info(self):
+        self.cpp_info.name = "BZip2"
         self.cpp_info.libs = ['bz2']

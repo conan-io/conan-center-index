@@ -204,3 +204,4 @@ class Libxml2Conan(ConanFile):
             self.cpp_info.libs.append('m')
         if self.settings.os == "Windows":
             self.cpp_info.libs.append('ws2_32')
+        self.cpp_info.name = 'LibXml2'
