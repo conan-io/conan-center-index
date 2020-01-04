@@ -1,4 +1,5 @@
-# from: https://github.com/microsoft/vcpkg/blob/master/ports/mpfr/CMakeLists.txt
+# parts from: https://github.com/microsoft/vcpkg/blob/master/ports/mpfr/CMakeLists.txt
+# modified to fix some issues linking with shared libs
 # Copyright (c) Microsoft Corporation
 
 # All rights reserved. 
@@ -29,13 +30,6 @@ project(MPFR VERSION 4.0.2 LANGUAGES C)
 
 include("${CMAKE_BINARY_DIR}/conanbuildinfo.cmake")
 conan_basic_setup()
-
-# Find GMP (or MPIR)
-find_library(GMP_LIBRARY NAMES gmp mpir)
-find_path(GMP_INCLUDE_DIR "gmp.h")
-
-set(GMP_LIBRARIES ${GMP_LIBRARY})
-set(GMP_INCLUDE_DIRS ${GMP_INCLUDE_DIR})
 
 # Sources
 set(SRCS
@@ -283,10 +277,12 @@ add_library(mpfr ${SRCS})
 target_compile_definitions(mpfr PRIVATE __MPFR_WITHIN_MPFR)
 target_compile_definitions(mpfr PRIVATE HAVE_STDINT_H)
 target_compile_definitions(mpfr PRIVATE HAVE_STDARG)
+if(BUILD_SHARED_LIBS)
+    target_compile_definitions(mpfr PRIVATE MSC_BUILD_DLL)
+endif()
+target_link_libraries(mpfr ${CONAN_LIBS})
 
-target_link_libraries(mpfr ${GMP_LIBRARIES})
-
-target_include_directories(mpfr PUBLIC ${GMP_INCLUDE_DIRS})
+target_include_directories(mpfr PUBLIC ${CONAN_INCLUDE_DIRS})
 target_include_directories(mpfr PRIVATE ${CMAKE_BINARY_DIR})
 target_include_directories(mpfr PRIVATE ${PROJECT_SOURCE_DIR})
 target_include_directories(mpfr PRIVATE ${PROJECT_SOURCE_DIR}/src)
