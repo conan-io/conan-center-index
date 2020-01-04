@@ -1,0 +1,4 @@
+sources:
+  "2.0.0":
+    sha256: EE0C626B7BC54FC4133B134325B00911084A5919D373C4A4FB3B3ACB2BF1D2E4
+    url: https://gitlab.com/eidheim/Simple-WebSocket-Server/-/archive/v2.0.0/Simple-WebSocket-Server-v2.0.0.tar.gz

@@ -1,22 +1,16 @@
-#!/usr/bin/env python
-# -*- coding: utf-8 -*-
-
 import os
 from conans import ConanFile, CMake, tools
 
 
 class ConanSqlite3(ConanFile):
     name = "sqlite3"
-    version = "3.29.0"
     description = "Self-contained, serverless, in-process SQL database engine."
-    url = "http://github.com/bincrafters/conan-sqlite3"
+    url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://www.sqlite.org"
-    author = "Bincrafters <bincrafters@gmail.com>"
     topics = ("conan", "sqlite", "database", "sql", "serverless")
     license = "Public Domain"
     generators = "cmake"
     settings = "os", "compiler", "arch", "build_type"
-    exports = ["LICENSE.md"]
     exports_sources = ["CMakeLists.txt"]
     options = {"shared": [True, False],
                "fPIC": [True, False],
@@ -28,19 +22,23 @@ class ConanSqlite3(ConanFile):
                "enable_fts5": [True, False],
                "enable_json1": [True, False],
                "enable_rtree": [True, False],
-               "omit_load_extension": [True, False]
+               "omit_load_extension": [True, False],
+               "enable_unlock_notify": [True, False],
+               "disable_gethostuuid": [True, False],
                }
     default_options = {"shared": False,
                        "fPIC": True,
-                       "threadsafe": 1,
-                       "enable_column_metadata": False,
+                       "threadsafe": 0,
+                       "enable_column_metadata": True,
                        "enable_explain_comments": False,
                        "enable_fts3": False,
                        "enable_fts4": False,
                        "enable_fts5": False,
                        "enable_json1": False,
-                       "enable_rtree": False,
-                       "omit_load_extension": False
+                       "enable_rtree": True,
+                       "omit_load_extension": False,
+                       "enable_unlock_notify": True,
+                       "disable_gethostuuid": False,
                        }
     _source_subfolder = "source_subfolder"
 
@@ -70,6 +68,7 @@ class ConanSqlite3(ConanFile):
         cmake.definitions["ENABLE_JSON1"] = self.options.enable_json1
         cmake.definitions["ENABLE_RTREE"] = self.options.enable_rtree
         cmake.definitions["OMIT_LOAD_EXTENSION"] = self.options.omit_load_extension
+        cmake.definitions["SQLITE_ENABLE_UNLOCK_NOTIFY"] = self.options.enable_unlock_notify
         cmake.definitions["HAVE_FDATASYNC"] = True
         cmake.definitions["HAVE_GMTIME_R"] = True
         cmake.definitions["HAVE_LOCALTIME_R"] = True
@@ -83,6 +82,8 @@ class ConanSqlite3(ConanFile):
             cmake.definitions["HAVE_POSIX_FALLOCATE"] = False
         if self.settings.os == "Android":
             cmake.definitions["HAVE_POSIX_FALLOCATE"] = False
+        if self.options.disable_gethostuuid:
+            cmake.definitions["DISABLE_GETHOSTUUID"] = True
         cmake.configure()
         return cmake
 

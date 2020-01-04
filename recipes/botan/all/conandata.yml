@@ -1,0 +1,8 @@
+sources:
+  "2.12.1":
+    url: "https://github.com/randombit/botan/archive/2.12.1.tar.gz"
+    sha256: "61d27332f053b0b1169659dc0fceb7de7d16cade230df3a14dfaa2c091888b98"
+patches:
+  "2.12.1":
+     - patch_file: "dll-dir.patch"
+       base_path: "sources"

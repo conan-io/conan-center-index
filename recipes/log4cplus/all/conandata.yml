@@ -1,0 +1,4 @@
+sources:
+  "2.0.4":
+    url: "https://github.com/log4cplus/log4cplus/releases/download/REL_2_0_4/log4cplus-2.0.4.tar.bz2"
+    sha256: "0c8a7b4cabff07032385f0c6d1a078d2a79c69b1c43b06991ca774fb85880252"

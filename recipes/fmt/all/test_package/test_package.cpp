@@ -4,13 +4,11 @@
 #include <vector>
 #include <limits>
 
-#ifdef FMT_HEADER_ONLY
-    #define FMT_EXTENDED_COLORS
-#endif
 
 #include "fmt/format.h"
 #include "fmt/printf.h"
 #include "fmt/ostream.h"
+#include "fmt/color.h"
 
 
 void vreport(const char *format, fmt::format_args args) {
@@ -51,9 +49,7 @@ int main() {
 
     fmt::print(std::cout, "{} {}\n", "Magic number", 42);
 
-#ifdef FMT_EXTENDED_COLORS
-    fmt::print(fmt::color::aqua, "Bincrafters\n");
-#endif
+    fmt::print(fg(fmt::color::aqua), "Bincrafters\n");
 
     return EXIT_SUCCESS;
 }

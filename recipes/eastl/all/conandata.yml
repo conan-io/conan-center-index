@@ -1,0 +1,8 @@
+sources:
+  3.15.00:
+    url: "https://github.com/electronicarts/EASTL/archive/3.15.00.tar.gz"
+    sha256: "1578a2935ca490920b96c960fb570dab025280bb978fba40c88eb9ac74760c14"
+patches:
+  3.15.00:
+    - patch_file: "patches/0001-cmake-use-conan-add-install.patch"
+      base_path: "source_subfolder"

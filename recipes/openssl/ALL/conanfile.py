@@ -1,6 +1,6 @@
-# -*- coding: utf-8 -*-
 import os
 import fnmatch
+import platform
 from functools import total_ordering
 from conans.errors import ConanInvalidConfiguration, ConanException
 from conans import ConanFile, AutoToolsBuildEnvironment, tools
@@ -63,7 +63,6 @@ class OpenSSLConan(ConanFile):
     settings = "os", "compiler", "arch", "build_type"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/openssl/openssl"
-    author = "Conan Community"
     license = "OpenSSL"
     topics = ("conan", "openssl", "ssl", "tls", "encryption", "security")
     description = "A toolkit for the Transport Layer Security (TLS) and Secure Sockets Layer (SSL) protocols"
@@ -301,22 +300,26 @@ class OpenSSLConan(ConanFile):
     def _patch_makefile_org(self):
         # https://wiki.openssl.org/index.php/Compilation_and_Installation#Modifying_Build_Settings
         # its often easier to modify Configure and Makefile.org rather than trying to add targets to the configure scripts
+        def adjust_path(path):
+            return path.replace("\\", "/") if tools.os_info.is_windows else path
+
         makefile_org = os.path.join(self._source_subfolder, "Makefile.org")
         env_build = self._get_env_build()
         with tools.environment_append(env_build.vars):
-            cc = os.environ.get("CC", "cc")
-            tools.replace_in_file(makefile_org, "CC= cc", "CC= %s %s" % (cc, os.environ["CFLAGS"]))
-            if "AR" in os.environ:
-                tools.replace_in_file(makefile_org, "AR=ar", "AR=%s" % os.environ["AR"])
-            if "RANLIB" in os.environ:
-                tools.replace_in_file(makefile_org, "RANLIB= ranlib", "RANLIB= %s" % os.environ["RANLIB"])
-            rc = os.environ.get("WINDRES", os.environ.get("RC"))
-            if rc:
-                tools.replace_in_file(makefile_org, "RC= windres", "RC= %s" % rc)
-            if "NM" in os.environ:
-                tools.replace_in_file(makefile_org, "NM= nm", "NM= %s" % os.environ["NM"])
-            if "AS" in os.environ:
-                tools.replace_in_file(makefile_org, "AS=$(CC) -c", "AS=%s" % os.environ["AS"])
+            if not "CROSS_COMPILE" in os.environ:
+                cc = os.environ.get("CC", "cc")
+                tools.replace_in_file(makefile_org, "CC= cc", "CC= %s %s" % (cc, os.environ["CFLAGS"]))
+                if "AR" in os.environ:
+                    tools.replace_in_file(makefile_org, "AR=ar", "AR=%s" % os.environ["AR"])
+                if "RANLIB" in os.environ:
+                    tools.replace_in_file(makefile_org, "RANLIB= ranlib", "RANLIB= %s" % os.environ["RANLIB"])
+                rc = os.environ.get("WINDRES", os.environ.get("RC"))
+                if rc:
+                    tools.replace_in_file(makefile_org, "RC= windres", "RC= %s" % rc)
+                if "NM" in os.environ:
+                    tools.replace_in_file(makefile_org, "NM= nm", "NM= %s" % os.environ["NM"])
+                if "AS" in os.environ:
+                    tools.replace_in_file(makefile_org, "AS=$(CC) -c", "AS=%s" % os.environ["AS"])
 
     def _get_env_build(self):
         if not self._env_build:
@@ -355,6 +358,8 @@ class OpenSSLConan(ConanFile):
                 args.append("-DOPENSSL_CAPIENG_DIALOG=1")
         else:
             args.append("-fPIC" if self.options.fPIC else "")
+        if self.settings.os == "Neutrino":
+            args.append("-lsocket no-asm")
 
         if "zlib" in self.deps_cpp_info.deps:
             zlib_info = self.deps_cpp_info["zlib"]
@@ -363,7 +368,7 @@ class OpenSSLConan(ConanFile):
                 lib_path = "%s/%s.lib" % (zlib_info.lib_paths[0], zlib_info.libs[0])
             else:
                 lib_path = zlib_info.lib_paths[0]  # Just path, linux will find the right file
-            if self.settings.os == "Windows":
+            if tools.os_info.is_windows:
                 # clang-cl doesn't like backslashes in #define CFLAGS (builldinf.h -> cversion.c)
                 include_path = include_path.replace('\\', '/')
                 lib_path = lib_path.replace('\\', '/')
@@ -490,6 +495,8 @@ class OpenSSLConan(ConanFile):
 
     @property
     def _cc(self):
+        if "CROSS_COMPILE" in os.environ:
+            return "gcc"
         if "CC" in os.environ:
             return os.environ["CC"]
         if self.settings.compiler == "apple-clang":
@@ -517,9 +524,28 @@ class OpenSSLConan(ConanFile):
                     self._patch_makefile_org()
                 self._make()
 
+    @staticmethod
+    def detected_os():
+        if tools.OSInfo().is_macos:
+            return "Macos"
+        if tools.OSInfo().is_windows:
+            return "Windows"
+        return platform.system()
+
+    @property
+    def _cross_building(self):
+        if tools.cross_building(self.settings):
+            if self.settings.os == self.detected_os():
+                if self.settings.arch == "x86" and tools.detected_architecture() == "x86_64":
+                    return False
+            return True
+        return False
+
     @property
     def _win_bash(self):
-        return tools.os_info.is_windows and (self._is_mingw or tools.cross_building(self.settings))
+        return tools.os_info.is_windows and \
+               not self._use_nmake and \
+               (self._is_mingw or self._cross_building)
 
     @property
     def _make_program(self):
@@ -554,9 +580,16 @@ class OpenSSLConan(ConanFile):
                 with tools.chdir(os.path.join(self.package_folder, 'lib')):
                     os.rename('libssl.lib', 'libssld.lib')
                     os.rename('libcrypto.lib', 'libcryptod.lib')
+        # Old OpenSSL version family has issues with permissions.
+        # See https://github.com/conan-io/conan/issues/5831
+        if self._full_version < "1.1.0" and self.options.shared and self.settings.os in ("Android", "FreeBSD", "Linux"):
+            with tools.chdir(os.path.join(self.package_folder, "lib")):
+                os.chmod("libssl.so.1.0.0", 0o755)
+                os.chmod("libcrypto.so.1.0.0", 0o755)
         tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
 
     def package_info(self):
+        self.cpp_info.name = "OpenSSL"
         if self._use_nmake:
             if self._full_version < "1.1.0":
                 self.cpp_info.libs = ["ssleay32", "libeay32"]

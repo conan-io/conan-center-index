@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 import os
 
 from conans import ConanFile, CMake, tools
@@ -8,8 +7,7 @@ from conans.errors import ConanInvalidConfiguration
 class PocoConan(ConanFile):
     name = "poco"
     url = "https://github.com/conan-io/conan-center-index"
-    homepage = "https://pocoproject.org"
-    author = "Poco Project <poco@pocoproject.org>"
+    homepage = "https://pocoproject.org"    
     topics = ("conan", "poco", "building", "networking", "server", "mobile", "embedded")
     exports_sources = "CMakeLists.txt"
     generators = "cmake"
@@ -103,7 +101,7 @@ class PocoConan(ConanFile):
            self.options.enable_netssl_win or \
            self.options.enable_crypto or \
            self.options.force_openssl:
-            self.requires.add("openssl/1.0.2s")
+            self.requires.add("openssl/1.0.2t")
 
     def _patch(self):
         if self.settings.compiler == "Visual Studio":
@@ -130,6 +128,7 @@ class PocoConan(ConanFile):
             elif not option_name == "fPIC":
                 cmake.definitions[option_name.upper()] = "ON" if activated else "OFF"
 
+        cmake.definitions["CMAKE_INSTALL_SYSTEM_RUNTIME_LIBS_SKIP"] = True
         if self.settings.os == "Windows" and self.settings.compiler == "Visual Studio":  # MT or MTd
             cmake.definitions["POCO_MT"] = "ON" if "MT" in str(self.settings.compiler.runtime) else "OFF"
         self.output.info(cmake.definitions)
@@ -185,3 +184,5 @@ class PocoConan(ConanFile):
             self.cpp_info.defines.extend(["POCO_STATIC=ON", "POCO_NO_AUTOMATIC_LIBS"])
             if self.settings.compiler == "Visual Studio":
                 self.cpp_info.libs.extend(["ws2_32", "Iphlpapi", "Crypt32"])
+        self.cpp_info.name = "Poco"
+

@@ -1,7 +1,5 @@
-#!/usr/bin/env python
-# -*- coding: utf-8 -*-
-
 from conans import ConanFile, CMake, tools
+from conans.errors import ConanInvalidConfiguration
 import os
 
 
@@ -11,14 +9,12 @@ class YamlCppConan(ConanFile):
     homepage = "https://github.com/jbeder/yaml-cpp"
     topics = ("conan", "yaml", "yaml-parser", "serialization", "data-serialization")
     description = "A YAML parser and emitter in C++"
-    author = "Bincrafters <bincrafters@gmail.com>"
     license = "MIT"
     exports_sources = ["CMakeLists.txt"]
     generators = "cmake"
     settings = "os", "arch", "compiler", "build_type"
     options = {"shared": [True, False], "fPIC": [True, False]}
     default_options = {"shared": False, "fPIC": True}
-
     _source_subfolder = "source_subfolder"
 
     def source(self):
@@ -32,7 +28,7 @@ class YamlCppConan(ConanFile):
 
     def configure(self):
         if self.settings.compiler == "Visual Studio" and self.settings.compiler.version == "12":
-            raise Exception("Visual Studio 12 not supported: Library needs C++11 standard")
+            raise ConanInvalidConfiguration("Visual Studio 12 not supported: Library needs C++11 standard")
 
     def _configure_cmake(self):
         cmake = CMake(self)
