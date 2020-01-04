@@ -188,6 +188,6 @@ class LibsodiumConan(ConanFile):
             self._autotools_bool_arg("soname-versions", self.options.use_soname),
             self._autotools_bool_arg("pie", self.options.PIE)
         ]
-        if self.options.fPIC:
+        if hasattr(self, 'options.fPIC') and self.options.fPIC:
             args.append("--with-pic")
         return args
