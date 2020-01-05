@@ -51,3 +51,4 @@ class ConanRecipe(ConanFile):
 
     def package_info(self):
         self.cpp_info.builddirs = [os.path.join("lib", "cmake", "Catch2")]
+        self.cpp_info.name = "Catch2"
