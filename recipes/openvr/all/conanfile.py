@@ -47,6 +47,7 @@ class OpenvrConan(ConanFile):
         self.copy("LICENSE", src=os.path.join(self.source_folder, self._source_subfolder), dst="licenses")
         cmake = self._configure_cmake()
         cmake.install()
+        self.copy(pattern="openvr_api*.dll", dst="bin", src="bin", keep_path=False)
 
         tools.rmdir(os.path.join(self.package_folder, "share"))
 
@@ -55,6 +56,9 @@ class OpenvrConan(ConanFile):
         
         if not self.options.shared:
             self.cpp_info.defines.append('OPENVR_BUILD_STATIC')
+
+        if self.settings.os == "Macos":
+            self.cpp_info.frameworks.append("Foundation")
 
         if self.settings.os != "Windows":
             self.cpp_info.system_libs.append("dl")
