@@ -1,0 +1,4 @@
+sources:
+  "1.9.15":
+    url: "https://github.com/ValveSoftware/openvr/archive/v1.9.15.tar.gz"
+    sha256: "de4945aa18fee18818830782c5af97dc297ae4e6045565a1a3fd00b13afd1b75"
