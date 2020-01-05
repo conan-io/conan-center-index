@@ -35,7 +35,7 @@ class OpenvrConan(ConanFile):
     def _configure_cmake(self):
         cmake = CMake(self)
         cmake.definitions["BUILD_SHARED"] = self.options.shared
-        cmake.definitions["USE_LIBCXX"] = str(self.settings.compiler.libcxx) == "libc++"
+        cmake.definitions["USE_LIBCXX"] = self.settings.compiler != "Visual Studio" and str(self.settings.compiler.libcxx) == "libc++"
 
         cmake.configure()
         
