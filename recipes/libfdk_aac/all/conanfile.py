@@ -57,8 +57,6 @@ class FDKAACConan(ConanFile):
                 args.extend(['--disable-static', '--enable-shared'])
             else:
                 args.extend(['--disable-shared', '--enable-static'])
-            if self.settings.os != 'Windows' and self.options.fPIC:
-                args.append('--with-pic')
             env_build = AutoToolsBuildEnvironment(self, win_bash=win_bash)
             self.run('autoreconf -fiv', win_bash=win_bash)
             if self.settings.os == "Android" and tools.os_info.is_windows:
@@ -67,7 +65,7 @@ class FDKAACConan(ConanFile):
                     "s/[	 `~#$^&*(){}\\\\|;'\\\''\"<>?]/\\\\&/g", "s/[	 `~#$^&*(){}\\\\|;<>?]/\\\\&/g")
             env_build.configure(args=args)
             env_build.make()
-            env_build.make(args=['install'])
+            env_build.install()
 
     def build(self):
         if self.settings.compiler == 'Visual Studio':
