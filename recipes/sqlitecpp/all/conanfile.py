@@ -31,7 +31,7 @@ class SQLiteCppConan(ConanFile):
 
     @property
     def _is_mingw_windows(self):
-        return self.settings.os == 'Windows' and self.settings.compiler == 'gcc' and os.name == 'nt'
+        return self.settings.os == 'Windows' and self.settings.compiler == 'gcc'
 
     def config_options(self):
         if self.settings.os == 'Windows':
