@@ -19,7 +19,6 @@ class SQLiteCppConan(ConanFile):
                        "fPIC": True,
                        "lint": False,
                        "sqlite3:threadsafe": 1,
-                       "sqlite3:enable_column_metadata": True
                        }
     requires = ("sqlite3/3.30.1")
 
