@@ -18,7 +18,6 @@ class SQLiteCppConan(ConanFile):
     default_options = {"shared": False,
                        "fPIC": True,
                        "lint": False,
-                       "sqlite3:threadsafe": 1,
                        }
     requires = ("sqlite3/3.30.1")
 
