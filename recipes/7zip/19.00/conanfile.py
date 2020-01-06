@@ -1,4 +1,3 @@
-
 import os
 from conans import ConanFile, tools, AutoToolsBuildEnvironment, VisualStudioBuildEnvironment
 from conans.errors import ConanInvalidConfiguration
@@ -10,7 +9,6 @@ class Package7Zip(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     description = "7-Zip is a file archiver with a high compression ratio"
     license = ("LGPL-2.1", "BSD-3-Clause", "Unrar")
-    author = "Conan Community"
     homepage = "https://www.7-zip.org"
     topics = ("conan", "7zip", "zip", "compression", "decompression")
     settings = "os_build", "arch_build", "compiler"
@@ -22,18 +20,20 @@ class Package7Zip(ConanFile):
             raise ConanInvalidConfiguration("Unsupported architecture")
 
     def source(self):
-        tools.download(**self.conan_data["sources"][self.version])
-        tools.check_sha256(**self.conan_data["checksum"][self.version])
-        self._uncompress_7z(self.conan_data["sources"][self.version]["filename"])
+        from six.moves.urllib.parse import urlparse
+        url = self.conan_data["sources"][self.version]["url"]
+        filename = os.path.basename(urlparse(url).path)
+        sha256 = self.conan_data["sources"][self.version]["sha256"]
+        tools.download(url, filename)
+        tools.check_sha256(filename, sha256)
+        self._uncompress_7z(filename)
+
+    def build_requirements(self):
+        if not tools.which("7zr"):
+            self.build_requires("lzma_sdk/9.20")
 
     def _uncompress_7z(self, filename):
-        """ We need 7z itself to uncompress the file, we have two options:
-            * download an executable and run it
-            * booststrap using a previous version (7zip/9.22) where sources are in .tar.bz2. Right
-              now it would we a loop in the Conan graph
-        """
-        tools.get(**self.conan_data["externals"]["lzma"])
-        self.run("lzma920\\7zr.exe x {}".format(filename))
+        self.run("7zr x {}".format(filename))
 
     _msvc_platforms = {
         'x86_64': 'x64',
