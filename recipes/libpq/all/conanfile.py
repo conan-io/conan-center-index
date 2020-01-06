@@ -64,6 +64,8 @@ class LibpqConan(ConanFile):
             args = ['--without-readline']
             args.append('--with-zlib' if self.options.with_zlib else '--without-zlib')
             args.append('--with-openssl' if self.options.with_openssl else '--without-openssl')
+            if tools.cross_building(self.settings) and not self.options.with_openssl:
+                args.append("--disable-strong-random")
             if self.settings.os != "Windows" and self.options.disable_rpath:
                 args.append('--disable-rpath')
             if self._is_clang8_x86:
