@@ -81,4 +81,5 @@ class GmpConan(ConanFile):
 
     def package_info(self):
         self.cpp_info.libs = tools.collect_libs(self)
-        self.cpp_info.name = "GMP"
+        self.cpp_info.names["cmake_find_package"] = "GMP"
+        self.cpp_info.names["cmake_find_package_multi"] = "GMP"
