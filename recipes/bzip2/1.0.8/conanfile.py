@@ -53,6 +53,6 @@ class Bzip2Conan(ConanFile):
         tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
 
     def package_info(self):
-        self.cpp_info.name = "BZip2"
-        self.cpp_info.names["pkg_config"] = "bzip2"
+        self.cpp_info.names["cmake_find_package"] = "BZip2"
+        self.cpp_info.names["cmake_find_package_multi"] = "BZip2"
         self.cpp_info.libs = tools.collect_libs(self)
