@@ -68,7 +68,8 @@ class OpenEXRConan(ConanFile):
         tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
 
     def package_info(self):
-        self.cpp_info.name = "OpenEXR"
+        self.cpp_info.names["cmake_find_package"] = "OpenEXR"
+        self.cpp_info.names["cmake_find_package_multi"] = "OpenEXR"
         parsed_version = self.version.split(".")
         lib_suffix = "-{}_{}".format(parsed_version[0], parsed_version[1])
         if self.settings.build_type == "Debug":
