@@ -204,4 +204,5 @@ class Libxml2Conan(ConanFile):
             self.cpp_info.libs.append('m')
         if self.settings.os == "Windows":
             self.cpp_info.libs.append('ws2_32')
-        self.cpp_info.name = 'LibXml2'
+        self.cpp_info.names["cmake_find_package"] = "LibXml2"
+        self.cpp_info.names["cmake_find_package_multi"] = "LibXml2"
