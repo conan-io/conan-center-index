@@ -73,7 +73,8 @@ class Bzip2Conan(ConanFile):
         cmake.install()
 
     def package_info(self):
-        self.cpp_info.name = "EASTL"
+        self.cpp_info.names["cmake_find_package"] = "EASTL"
+        self.cpp_info.names["cmake_find_package_multi"] = "EASTL"
         self.cpp_info.libs = ["EASTL"]
         if self.settings.os in ("Android", "Linux", "Macos", "watchOS", "tvOS"):
             self.cpp_info.system_libs.append("pthread")
