@@ -24,7 +24,7 @@ class ceressolverConan(ConanFile):
     default_options = {"shared": False,
                        "fPIC": True,
                        "use_glog": True,
-                       "use_gflags": True,
+                       "use_gflags": False,
                        "use_custom_blas": True,
                        "use_eigen_sparse": True,
                        "use_TBB": False,
