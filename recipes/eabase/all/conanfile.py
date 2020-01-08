@@ -39,6 +39,7 @@ class EABaseConan(ConanFile):
         cmake.install()
 
     def package_info(self):
-        self.cpp_info.name = "EABase"
+        self.cpp_info.names["cmake_find_package"] = "EABase"
+        self.cpp_info.names["cmake_find_package_multi"] = "EABase"
         self.cpp_info.includedirs.extend([os.path.join("include", "Common"),
                                           os.path.join("include", "Common", "EABase")])

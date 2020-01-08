@@ -1,0 +1,4 @@
+sources:
+  "1.1.3":
+    sha256: "128fdd846fe24f8594eed37d1d8929a0ea78df563537c0c1b1861a635013fff8"
+    url: "http://download.qt.io/official_releases/jom/jom_1_1_3.zip"
