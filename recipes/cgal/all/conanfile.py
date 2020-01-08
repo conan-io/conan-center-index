@@ -29,9 +29,6 @@ class CgalConan(ConanFile):
         "with_cgal_imageio": True
     }
 
-    def configure(self):
-        tools.check_min_cppstd(self, "14")
-
     def _configure_cmake(self):
         if not self._cmake:
             self._cmake = CMake(self)
@@ -65,6 +62,10 @@ conan_basic_setup()''')
         tools.rmdir(os.path.join(self.package_folder, "share"))
         tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
         tools.rmdir(os.path.join(self.package_folder, "bin"))
+
+    def package_info(self):
+        self.cpp_info.names["cmake_find_package"] = "CGAL"
+        self.cpp_info.names["cmake_find_package_multi"] = "CGAL"
 
     def package_id(self):
         self.info.header_only()
