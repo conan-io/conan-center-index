@@ -4,7 +4,7 @@ from conans import ConanFile, CMake, tools
 
 class CgalConan(ConanFile):
     name = "cgal"
-    license = "LGPL"
+    license = "LGPL-3.0-or-later"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/CGAL/cgal"
     description = "C++ library that aims to provide easy access to efficient and reliable algorithms"\
