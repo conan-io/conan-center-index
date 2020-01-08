@@ -67,5 +67,6 @@ class JsoncppConan(ConanFile):
         cmake.install()
 
     def package_info(self):
-        self.cpp_info.name = "JsonCpp"
+        self.cpp_info.names["cmake_find_package"] = "JsonCpp"
+        self.cpp_info.names["cmake_find_package_multi"] = "JsonCpp"
         self.cpp_info.libs = tools.collect_libs(self)
