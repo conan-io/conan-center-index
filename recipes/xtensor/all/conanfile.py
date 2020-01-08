@@ -35,14 +35,36 @@ class XtensorConan(ConanFile):
                 "The options 'tbb' and 'openmp' can not be used together."
             )
 
-        if self.settings.compiler == "gcc":
-            v = tools.Version(str(self.settings.compiler.version))
-            if v < "6.0":
-                raise ConanInvalidConfiguration("gcc >= 6.0 required")
-
-        if self.settings.compiler in ["gcc", "clang"]:
-            if str(self.settings.compiler.libcxx) == "libstdc++":
-                self.settings.compiler.libcxx = "libstdc++11"
+        # https://github.com/xtensor-stack/xtensor/blob/master/README.md
+        # - On Windows platforms, Visual C++ 2015 Update 2, or more recent
+        # - On Unix platforms, gcc 4.9 or a recent version of Clang
+        version = tools.Version(self.settings.compiler.version)
+        compiler = self.settings.compiler
+        if self.settings.compiler.cppstd and not any(
+            [
+                str(self.settings.compiler.cppstd) == std
+                for std in ["14", "17", "20", "gnu14", "gnu17", "gnu20"]
+            ]
+        ):
+            raise ConanInvalidConfiguration("xtensor requires at least C++14")
+        elif compiler == "Visual Studio":
+            if version < "16":
+                raise ConanInvalidConfiguration(
+                    "xtensor requires at least Visual Studio version 15.9, please use 16"
+                )
+            if not any(
+                [self.settings.compiler.cppstd == std for std in ["14", "17", "20"]]
+            ):
+                raise ConanInvalidConfiguration("xtensor requires at least C++14")
+        else:
+            if (compiler == "gcc" and version < "6.0") or (
+                compiler == "clang" and version < "4"
+            ):
+                raise ConanInvalidConfiguration("xtensor requires at least C++14")
+            elif compiler == "apple-clang":
+                self.output.warn("xtensor is not tested with apple-clang")
+                if version < "9":
+                    raise ConanInvalidConfiguration("xtensor requires at least C++14")
 
     def requirements(self):
         self.requires("xtl/0.6.9")
