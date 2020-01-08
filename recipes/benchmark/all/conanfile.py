@@ -51,7 +51,12 @@ class BenchmarkConan(ConanFile):
 
         # See https://github.com/google/benchmark/pull/638 for Windows 32 build explanation
         if self.settings.os != "Windows":
-            cmake.definitions["BENCHMARK_BUILD_32_BITS"] = "ON" if "64" not in str(self.settings.arch) else "OFF"
+            if tools.cross_building(self.settings):
+                cmake.definitions["HAVE_STD_REGEX"] = False
+                cmake.definitions["HAVE_POSIX_REGEX"] = False
+                cmake.definitions["HAVE_STEADY_CLOCK"] = False
+            else:
+                cmake.definitions["BENCHMARK_BUILD_32_BITS"] = "ON" if "64" not in str(self.settings.arch) else "OFF"
             cmake.definitions["BENCHMARK_USE_LIBCXX"] = "ON" if (str(self.settings.compiler.libcxx) == "libc++") else "OFF"
         else:
             cmake.definitions["BENCHMARK_USE_LIBCXX"] = "OFF"

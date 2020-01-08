@@ -131,3 +131,4 @@ class XZUtils(ConanFile):
         if not self.options.shared:
             self.cpp_info.defines.append('LZMA_API_STATIC')
         self.cpp_info.libs = tools.collect_libs(self)
+        self.cpp_info.names['pkg_config'] = 'liblzma'

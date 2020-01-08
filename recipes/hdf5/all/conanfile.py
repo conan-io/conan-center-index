@@ -110,7 +110,8 @@ class LibHdf5Conan(ConanFile):
                     os.remove(static_lib)
 
     def package_info(self):
-        self.cpp_info.name = "HDF5"
+        self.cpp_info.names["cmake_find_package"] = "HDF5"
+        self.cpp_info.names["cmake_find_package_multi"] = "HDF5"
 
         # Manually list the library names to avoid link order issues
         if self.options.hl:
@@ -127,4 +128,4 @@ class LibHdf5Conan(ConanFile):
             self.cpp_info.defines.append("H5_BUILT_AS_DYNAMIC_LIB")
 
         if self.settings.os != "Windows":
-            self.cpp_info.libs.append("dl")
+            self.cpp_info.system_libs.append("dl")
