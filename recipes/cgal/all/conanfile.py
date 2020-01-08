@@ -29,6 +29,9 @@ class CgalConan(ConanFile):
         "with_cgal_imageio": True
     }
 
+    def configure(self):
+        tools.check_min_cppstd(self, "14")
+
     def _configure_cmake(self):
         if not self._cmake:
             self._cmake = CMake(self)
