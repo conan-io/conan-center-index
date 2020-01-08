@@ -82,9 +82,6 @@ class Nghttp2Conan(ConanFile):
         return cmake
 
     def _build_with_autotools(self):
-        if self.options.with_app:
-            os.rename('c-ares.pc', 'libcares.pc')
-
         prefix = os.path.abspath(self.package_folder)
         with tools.chdir(self._source_subfolder):
             env_build = AutoToolsBuildEnvironment(self)
