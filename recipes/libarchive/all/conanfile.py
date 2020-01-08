@@ -182,6 +182,7 @@ class LibarchiveConan(ConanFile):
 
     def package_info(self):
         self.cpp_info.libs = tools.collect_libs(self)
-        self.cpp_info.name = "LibArchive"
+        self.cpp_info.names["cmake_find_package"] = "LibArchive"
+        self.cpp_info.names["cmake_find_package_multi"] = "LibArchive"
         if self.settings.compiler == "Visual Studio" and not self.options.shared:
             self.cpp_info.defines = ["LIBARCHIVE_STATIC"]
