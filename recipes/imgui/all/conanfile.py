@@ -4,7 +4,7 @@ from conans import ConanFile, CMake, tools
 
 class IMGUIConan(ConanFile):
     name = "imgui"
-    url = "https://github.com/bincrafters/conan-imgui"
+    url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/ocornut/imgui"
     description = "Bloat-free Immediate Mode Graphical User interface for C++ with minimal dependencies"
     topics = ("conan", "imgui", "gui", "graphical")
