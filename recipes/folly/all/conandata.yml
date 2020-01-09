@@ -1,0 +1,4 @@
+sources:
+  "2020.01.06":
+    sha256: d1870b6c578dd671b7d8c545cb7da1cbf2b80b4ce0ffa4fca3bca2b3b83f4ba3
+    url: https://github.com/facebook/folly/archive/v2020.01.06.00.tar.gz
