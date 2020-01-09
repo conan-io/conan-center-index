@@ -5,3 +5,6 @@ sources:
   "1.10.5":
     sha256: 22a4a48f94b013e9fd482c0bb0251de02ff9963787a107c5dde26a3f903b3b90
     url: https://github.com/live-clones/hdf5/archive/hdf5-1_10_5.tar.gz
+  "1.10.6":
+    sha256: e524b374b1c6f14f1aa87595c0761608c861fe7838549dab84639ae564ff48e8
+    url: https://github.com/live-clones/hdf5/archive/hdf5-1_10_6.tar.gz
