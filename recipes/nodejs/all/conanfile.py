@@ -1,6 +1,5 @@
 import os
-import sys
-from conans import ConanFile, tools, AutoToolsBuildEnvironment, MSBuild
+from conans import ConanFile, tools
 from conans.errors import ConanInvalidConfiguration
 
 
@@ -11,54 +10,35 @@ class NodejsInstallerConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://nodejs.org"
     license = "MIT"
-    settings = "os_build", "arch_build", "compiler", "build_type"
-    _autotools = None
+    settings = "os_build", "arch_build"
+    no_copy_source = True
 
     @property
     def _source_subfolder(self):
-        return "source_subfolder"
+        return os.path.join(self.source_folder, "source_subfolder")
 
-    @property
-    def _is_msvc(self):
-        return self.settings.os_build == "Windows" and self.settings.compiler == "Visual Studio"
+    def configure(self):
+        if self.settings.arch_build == "x86" and self.settings.os_build == "Linux":
+            raise ConanInvalidConfiguration("Linux x86 is not support by nodejs")
+        if self.settings.os_build not in ["Windows", "Macos", "Windows"]:
+            raise ConanInvalidConfiguration("The OS '%s' is not support by nodejs" % str(self.settings.os_build))
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        extracted_dir = "node-v" + self.version
-        os.rename(extracted_dir, self._source_subfolder)
-
-    def _configure_autotools(self):
-        if not self._autotools:
-            self._autotools = AutoToolsBuildEnvironment(self, win_bash=tools.os_info.is_windows)
-            self._autotools.configure()
-        return self._autotools
-
-    def build(self):
-        with tools.chdir(self._source_subfolder):
-            if self._is_msvc:
-                self.run("python configure.py --openssl-no-asm")
-                msbuild = MSBuild(self)
-                msbuild.build("node.sln", arch=self.settings.arch_build, targets=["node"])
-            else:
-                autotools = self._configure_autotools()
-                autotools.make()
+        for data in self.conan_data["sources"][self.version]:
+            oss, sha, url = data.values()
+            filename = url[url.rfind("/")+1:]
+            tools.download(url, filename)
+            tools.check_sha256(filename, sha)
+            if self.settings.os_build == oss:
+                tools.unzip(filename)
+                os.rename(filename[:filename.rfind(".")], self._source_subfolder)
 
     def package(self):
         self.copy(pattern="LICENSE", dst="licenses", src=self._source_subfolder)
-        with tools.chdir(self._source_subfolder):
-            if self._is_msvc:
-                # TODO
-                pass
-            else:
-                autotools = self._configure_autotools()
-                autotools.install()
-                for folder in ["share", "lib", "include"]:
-                    tools.rmdir(os.path.join(self.package_folder, folder))
-
-    def package_id(self):
-        self.info.include_build_settings()
-        del self.info.settings.compiler
-        del self.info.settings.build_type
+        self.copy(pattern="node", src=self._source_subfolder, dst="bin")
+        self.copy(pattern="node.exe", src=self._source_subfolder, dst="bin")
+        self.copy(pattern="npm", src=self._source_subfolder, dst="bin")
+        self.copy(pattern="npx", src=self._source_subfolder, dst="bin")
 
     def package_info(self):
         bin_dir = self.package_folder if tools.os_info.is_windows else os.path.join(self.package_folder, "bin")
