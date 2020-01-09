@@ -49,14 +49,14 @@ conan_basic_setup()''')
         tools.get(**self.conan_data["sources"][self.version])
         extracted_dir = "CGAL-{}".format(self.version)
         os.rename(extracted_dir, self._source_subfolder)
-        self._patch_sources()
 
     def build(self):
+        self._patch_sources()
         cmake = self._configure_cmake()
         cmake.build()
 
     def package(self):
-        self.copy("LICENSE*", dst="licenses", src=os.path.join(self._source_subfolder))
+        self.copy("LICENSE*", dst="licenses", src=self._source_subfolder)
         cmake = self._configure_cmake()
         cmake.install()
         tools.rmdir(os.path.join(self.package_folder, "share"))
