@@ -1,5 +1,6 @@
 import os
-from conans import ConanFile, tools, AutoToolsBuildEnvironment
+import sys
+from conans import ConanFile, tools, AutoToolsBuildEnvironment, MSBuild
 from conans.errors import ConanInvalidConfiguration
 
 
@@ -10,7 +11,7 @@ class NodejsInstallerConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://nodejs.org"
     license = "MIT"
-    settings = "os_build", "arch_build", "compiler"
+    settings = "os_build", "arch_build", "compiler", "build_type"
     _autotools = None
 
     @property
@@ -35,7 +36,9 @@ class NodejsInstallerConan(ConanFile):
     def build(self):
         with tools.chdir(self._source_subfolder):
             if self._is_msvc:
-                self.run("vcbuild.bat")
+                self.run("python configure.py --openssl-no-asm")
+                msbuild = MSBuild(self)
+                msbuild.build("node.sln", arch=self.settings.arch_build, targets=["node"])
             else:
                 autotools = self._configure_autotools()
                 autotools.make()
@@ -49,6 +52,13 @@ class NodejsInstallerConan(ConanFile):
             else:
                 autotools = self._configure_autotools()
                 autotools.install()
+                for folder in ["share", "lib", "include"]:
+                    tools.rmdir(os.path.join(self.package_folder, folder))
+
+    def package_id(self):
+        self.info.include_build_settings()
+        del self.info.settings.compiler
+        del self.info.settings.build_type
 
     def package_info(self):
         bin_dir = self.package_folder if tools.os_info.is_windows else os.path.join(self.package_folder, "bin")
