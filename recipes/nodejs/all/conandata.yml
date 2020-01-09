@@ -1,0 +1,7 @@
+sources:
+  "12.14.1":
+    sha256: 42a7f0777fea8825611cb9250ff927824dba4f7aea854b47d522798acf4bdbc6
+    url: https://nodejs.org/dist/v12.14.1/node-v12.14.1.tar.gz
+  "13.6.0":
+    sha256: c1db19b4cf23b3903ac3048dad44a05397a63854b2a159fedc454eb15650369a
+    url: https://nodejs.org/dist/v13.6.0/node-v13.6.0.tar.gz
