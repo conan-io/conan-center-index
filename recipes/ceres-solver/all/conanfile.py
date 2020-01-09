@@ -1,5 +1,6 @@
 import os
 from conans import ConanFile, tools, CMake
+from conans.errors import ConanInvalidConfiguration
 
 class ceressolverConan(ConanFile):
     name = "ceres-solver"
@@ -58,6 +59,10 @@ class ceressolverConan(ConanFile):
             self._cmake.definitions["SCHUR_SPECIALIZATIONS"] = self.options.use_schur_specializations
             self._cmake.configure()
         return self._cmake
+
+    def configure(self):
+        if self.settings.os != "Linux" and self.settings.build_type == "Debug" and self.options.use_glog:
+            raise ConanInvalidConfiguration("Ceres-solver only links against debug glog on linux")
 
     def requirements(self):
         self.requires.add("eigen/3.3.7")
