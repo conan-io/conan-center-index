@@ -44,9 +44,15 @@ class DataFrameConan(ConanFile):
             del self.options.fPIC
 
     def configure(self):
-        if self.settings.compiler == "Visual Studio" and \
-           Version(self.settings.compiler.version) < "15":
-            raise ConanInvalidConfiguration("DataFrame requires Visual Studio >= 15")
+        compiler = self.settings.compiler
+        if (
+            compiler == "Visual Studio"
+            and Version(self.settings.compiler.version) < "16"
+        ):
+            raise ConanInvalidConfiguration("DataFrame requires Visual Studio >= 16")
+        elif compiler == "apple-clang":
+            raise ConanInvalidConfiguration("DataFrame is not tested with apple-clang")
+
     def _configure_cmake(self):
         cmake = CMake(self)
         cmake.configure()
@@ -68,7 +74,7 @@ class DataFrameConan(ConanFile):
             os.path.join("lib", "cmake"),
             os.path.join("lib", "share"),
             os.path.join("lib", "pkgconfig"),
-            "CMake"
+            "CMake",
         ]:
             tools.rmdir(os.path.join(self.package_folder, dir_to_remove))
 
