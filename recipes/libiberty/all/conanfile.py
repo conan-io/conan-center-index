@@ -1,4 +1,5 @@
 from conans import ConanFile, tools, AutoToolsBuildEnvironment
+from conans.errors import ConanInvalidConfiguration
 import os
 
 
@@ -28,6 +29,8 @@ class LibibertyConan(ConanFile):
             del self.options.fPIC
 
     def configure(self):
+        if self.settings.compiler == "Visual Studio":
+            raise ConanInvalidConfiguration("libiberty can not be built by Visual Studio.")
         del self.settings.compiler.libcxx
         del self.settings.compiler.cppstd
 
