@@ -44,14 +44,18 @@ class DataFrameConan(ConanFile):
             del self.options.fPIC
 
     def configure(self):
+        version = tools.Version(self.settings.compiler.version)
         compiler = self.settings.compiler
         if (
             compiler == "Visual Studio"
             and Version(self.settings.compiler.version) < "16"
         ):
             raise ConanInvalidConfiguration("DataFrame requires Visual Studio >= 16")
-        elif compiler == "apple-clang":
-            raise ConanInvalidConfiguration("DataFrame is not tested with apple-clang")
+        else:
+            if (compiler == "gcc" and version < "6.0") or (
+                compiler == "clang" and version < "4"
+            ):
+                raise ConanInvalidConfiguration("DataFrame requires at least C++14")
 
     def _configure_cmake(self):
         cmake = CMake(self)
