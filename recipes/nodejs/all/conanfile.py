@@ -10,18 +10,12 @@ class NodejsInstallerConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://nodejs.org"
     license = "MIT"
-    settings = "os_build", "arch_build"
+    settings = {"os_build": ["Windows", "Linux", "Macos"], "arch_build": ["x86_64"]}
     no_copy_source = True
 
     @property
     def _source_subfolder(self):
         return os.path.join(self.source_folder, "source_subfolder")
-
-    def configure(self):
-        if self.settings.arch_build == "x86" and self.settings.os_build == "Linux":
-            raise ConanInvalidConfiguration("Linux x86 is not support by nodejs")
-        if self.settings.os_build not in ["Windows", "Macos", "Windows"]:
-            raise ConanInvalidConfiguration("The OS '%s' is not support by nodejs" % str(self.settings.os_build))
 
     def source(self):
         for data in self.conan_data["sources"][self.version]:
@@ -40,6 +34,6 @@ class NodejsInstallerConan(ConanFile):
         self.copy(pattern="npx", src=self._source_subfolder, dst="bin")
 
     def package_info(self):
-        bin_dir = self.package_folder if tools.os_info.is_windows else os.path.join(self.package_folder, "bin")
+        bin_dir = os.path.join(self.package_folder, "bin")
         self.output.info('Appending PATH environment variable: {}'.format(bin_dir))
         self.env_info.PATH.append(bin_dir)
