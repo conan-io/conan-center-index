@@ -61,10 +61,6 @@ class XtensorConan(ConanFile):
                 compiler == "clang" and version < "4"
             ):
                 raise ConanInvalidConfiguration("xtensor requires at least C++14")
-            elif compiler == "apple-clang":
-                raise ConanInvalidConfiguration(
-                    "xtensor is not tested with apple-clang"
-                )
 
     def requirements(self):
         self.requires("xtl/0.6.9")
