@@ -28,7 +28,7 @@ class ConanSqlite3(ConanFile):
                }
     default_options = {"shared": False,
                        "fPIC": True,
-                       "threadsafe": 1,
+                       "threadsafe": 0,
                        "enable_column_metadata": True,
                        "enable_explain_comments": False,
                        "enable_fts3": False,
@@ -68,7 +68,7 @@ class ConanSqlite3(ConanFile):
         cmake.definitions["ENABLE_JSON1"] = self.options.enable_json1
         cmake.definitions["ENABLE_RTREE"] = self.options.enable_rtree
         cmake.definitions["OMIT_LOAD_EXTENSION"] = self.options.omit_load_extension
-        cmake.definitions["SQLITE_ENABLE_UNLOCK_NOTIFY"] = self.options.enable_unlock_notify        
+        cmake.definitions["SQLITE_ENABLE_UNLOCK_NOTIFY"] = self.options.enable_unlock_notify
         cmake.definitions["HAVE_FDATASYNC"] = True
         cmake.definitions["HAVE_GMTIME_R"] = True
         cmake.definitions["HAVE_LOCALTIME_R"] = True

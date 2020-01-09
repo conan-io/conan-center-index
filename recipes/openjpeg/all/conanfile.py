@@ -102,5 +102,6 @@ class OpenjpegConan(ConanFile):
             self.cpp_info.defines.append('OPJ_STATIC')
         if self.settings.os == "Linux":
             self.cpp_info.system_libs = ["pthread", "m"]
-        self.cpp_info.name = 'OpenJPEG'
+        self.cpp_info.names["cmake_find_package"] = "OpenJPEG"
+        self.cpp_info.names["cmake_find_package_multi"] = "OpenJPEG"
         self.cpp_info.names['pkg_config'] = 'libopenjp2'

@@ -1,0 +1,28 @@
+From 7539d53b54f08f056dc9366c8d5c24c5d749cfce Mon Sep 17 00:00:00 2001
+From: Michael Truog <mjtruog@protonmail.com>
+Date: Sat, 22 Sep 2018 19:10:56 -0700
+Subject: [PATCH] Fix compilation for GCC (tested with 5.4.0)
+
+---
+ backward.hpp | 4 ++++
+ 1 file changed, 4 insertions(+)
+
+diff --git a/backward.hpp b/backward.hpp
+index c9a922f..69d5dba 100644
+--- a/backward.hpp
++++ b/backward.hpp
+@@ -3704,10 +3704,14 @@ class SignalHandling {
+ 					SA_RESETHAND);
+ 			sigfillset(&action.sa_mask);
+ 			sigdelset(&action.sa_mask, posix_signals[i]);
++#if defined(__clang__)
+ #pragma clang diagnostic push
+ #pragma clang diagnostic ignored "-Wdisabled-macro-expansion"
++#endif
+ 			action.sa_sigaction = &sig_handler;
++#if defined(__clang__)
+ #pragma clang diagnostic pop
++#endif
+ 
+ 			int r = sigaction(posix_signals[i], &action, nullptr);
+ 			if (r < 0) success = false;
