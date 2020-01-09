@@ -4,7 +4,7 @@ from conans.errors import ConanInvalidConfiguration
 
 class ceressolverConan(ConanFile):
     name = "ceres-solver"
-    license = "	BSD-3-Clause"
+    license = "BSD-3-Clause"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "http://ceres-solver.org/r"
     description = ("Ceres Solver is an open source C++ library for modeling\
@@ -61,8 +61,8 @@ class ceressolverConan(ConanFile):
         return self._cmake
 
     def configure(self):
-        if self.settings.os != "Linux" and self.settings.build_type == "Debug" and self.options.use_glog:
-            raise ConanInvalidConfiguration("Ceres-solver only links against debug glog on linux")
+        if self.settings.build_type == "Debug" and self.options.use_glog:
+            raise ConanInvalidConfiguration("Ceres-solver only links against the release version of glog")
 
     def requirements(self):
         self.requires.add("eigen/3.3.7")
