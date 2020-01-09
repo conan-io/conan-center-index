@@ -30,7 +30,6 @@ class NodejsInstallerConan(ConanFile):
             tools.download(url, filename)
             tools.check_sha256(filename, sha)
             if self.settings.os_build == oss:
-                tools.unzip(filename)
                 os.rename(filename[:filename.rfind(".")], self._source_subfolder)
 
     def package(self):
