@@ -81,5 +81,6 @@ class LibtiffConan(ConanFile):
             self.cpp_info.libs = [lib+'.dll' for lib in self.cpp_info.libs]
         if self.settings.os == "Linux":
             self.cpp_info.libs.append("m")
-        self.cpp_info.name = "TIFF"
+        self.cpp_info.names["cmake_find_package"] = "TIFF"
+        self.cpp_info.names["cmake_find_package_multi"] = "TIFF"
         self.cpp_info.names['pkg_config'] = 'libtiff-4'

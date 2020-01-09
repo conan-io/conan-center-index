@@ -110,7 +110,8 @@ class CorradeConan(ConanFile):
         tools.rmdir(os.path.join(self.package_folder, 'share'))
 
     def package_info(self):
-        self.cpp_info.name = "Corrade"
+        self.cpp_info.names["cmake_find_package"] = "Corrade"
+        self.cpp_info.names["cmake_find_package_multi"] = "Corrade"
 
         # See dependency order here: https://doc.magnum.graphics/magnum/custom-buildsystems.html
         allLibs = [

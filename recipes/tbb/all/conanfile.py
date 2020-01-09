@@ -142,7 +142,8 @@ that have future-proof scalability"""
         del self.info.options.tbbmalloc_proxy
 
     def package_info(self):
-        self.cpp_info.name = "TBB"
+        self.cpp_info.names["cmake_find_package"] = "TBB"
+        self.cpp_info.names["cmake_find_package_multi"] = "TBB"
         suffix = "_debug" if self.settings.build_type == "Debug" else ""
         libs = {"tbb": "tbb", "tbbproxy": "tbbmalloc_proxy", "tbbmalloc": "tbbmalloc"}
         targets = self._get_targets()

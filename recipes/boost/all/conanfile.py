@@ -1,9 +1,10 @@
 from conans import ConanFile
 from conans import tools
 from conans.client.build.cppstd_flags import cppstd_flag
-from conans.model.version import Version
+from conans.tools import Version
 from conans.errors import ConanException
 
+from conans.errors import ConanInvalidConfiguration
 import os
 import sys
 import shutil
@@ -56,29 +57,32 @@ class BoostConan(ConanFile):
     }
     options.update({"without_%s" % libname: [True, False] for libname in lib_list})
 
-    default_options = ["shared=False",
-                       "header_only=False",
-                       "error_code_header_only=False",
-                       "system_no_deprecated=False",
-                       "asio_no_deprecated=False",
-                       "filesystem_no_deprecated=False",
-                       "fPIC=True",
-                       "layout=system",
-                       "magic_autolink=False",
-                       "python_executable=None",
-                       "python_version=None",
-                       "namespace=boost",
-                       "namespace_alias=False",
-                       "zlib=True",
-                       "bzip2=True",
-                       "lzma=False",
-                       "zstd=False",
-                       "segmented_stacks=False",
-                       "extra_b2_flags=None"]
+    default_options = {
+        'shared': False,
+        'header_only': False,
+        'error_code_header_only': False,
+        'system_no_deprecated': False,
+        'asio_no_deprecated': False,
+        'filesystem_no_deprecated': False,
+        'fPIC': True,
+        'layout': 'system',
+        'magic_autolink': False,
+        'python_executable': 'None',
+        'python_version': 'None',
+        'namespace': 'boost',
+        'namespace_alias': False,
+        'zlib': True,
+        'bzip2': True,
+        'lzma': False,
+        'zstd': False,
+        'segmented_stacks': False,
+        'extra_b2_flags': 'None',
+    }
 
-    default_options.extend(["without_%s=False" % libname for libname in lib_list if libname != "python"])
-    default_options.append("without_python=True")
-    default_options = tuple(default_options)
+    for libname in lib_list:
+        if libname != "python":
+            default_options.update({"without_%s" % libname: False})
+    default_options.update({"without_python": True})
     short_paths = True
     no_copy_source = True
     exports_sources = ['patches/*']
@@ -210,7 +214,7 @@ class BoostConan(ConanFile):
                                           "import sys; "
                                           "print('%s.%s' % (sys.version_info[0], sys.version_info[1]))")
         if self.options.python_version and version != self.options.python_version:
-            raise Exception("detected python version %s doesn't match conan option %s" % (version,
+            raise ConanInvalidConfiguration("detected python version %s doesn't match conan option %s" % (version,
                                                                                           self.options.python_version))
         return version
 
@@ -304,7 +308,7 @@ class BoostConan(ConanFile):
                 if os.path.isfile(python_lib):
                     self.output.info('found python library: %s' % python_lib)
                     return python_lib.replace('\\', '/')
-        raise Exception("couldn't locate python libraries - make sure you have installed python development files")
+        raise ConanInvalidConfiguration("couldn't locate python libraries - make sure you have installed python development files")
 
     def _clean(self):
         src = os.path.join(self.source_folder, self._folder_name)
@@ -621,8 +625,7 @@ class BoostConan(ConanFile):
         elif arch.startswith("mips"):
             pass
         else:
-            raise Exception("I'm so sorry! I don't know the appropriate ABI for "
-                            "your architecture. :'(")
+            self.output.warn("Unable to detect the appropriate ABI for %s architecture." % arch)
         self.output.info("Cross building flags: %s" % flags)
 
         return flags
@@ -902,4 +905,6 @@ class BoostConan(ConanFile):
                 self.cpp_info.libs.append("pthread")
 
         self.env_info.BOOST_ROOT = self.package_folder
-        self.cpp_info.name = "Boost"
+        self.cpp_info.names["cmake_find_package"] = "Boost"
+        self.cpp_info.names["cmake_find_package_multi"] = "Boost"
+
