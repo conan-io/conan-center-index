@@ -28,8 +28,7 @@ class LiunwindConan(ConanFile):
         del self.settings.compiler.cppstd
 
     def source(self):
-        sha256 = "43997a3939b6ccdf2f669b50fdb8a4d3205374728c2923ddc2354c65260214f8"
-        tools.get("{0}/releases/download/v{1}/libunwind-{1}.tar.gz".format(self.homepage, self.version), sha256=sha256)
+        tools.get(**self.conan_data["sources"][self.version])
         extracted_dir = self.name + "-" + self.version
         os.rename(extracted_dir, self._source_subfolder)
 
@@ -65,4 +64,3 @@ class LiunwindConan(ConanFile):
         self.cpp_info.libs = tools.collect_libs(self)
         if self.settings.os == "Linux":
             self.cpp_info.libs.append("pthread")
-
