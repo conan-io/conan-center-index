@@ -30,7 +30,7 @@ class NodejsInstallerConan(ConanFile):
 
     def package(self):
         self.copy(pattern="LICENSE", dst="licenses", src=self._source_subfolder)
-        self.copy(pattern="node", src=self._source_subfolder, dst="bin")
+        self.copy(pattern="*", src=os.path.join(self._source_subfolder, "bin"), dst="bin")
         self.copy(pattern="node.exe", src=self._source_subfolder, dst="bin")
         self.copy(pattern="npm", src=self._source_subfolder, dst="bin")
         self.copy(pattern="npx", src=self._source_subfolder, dst="bin")
