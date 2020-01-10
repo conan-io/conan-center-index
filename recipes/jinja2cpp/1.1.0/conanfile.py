@@ -6,13 +6,13 @@ from conans import ConanFile, CMake, tools
 class Jinja2cppConan(ConanFile):
     name = "jinja2cpp"
     license = "MIT"
-    url = "https://jinja2cpp.dev/"
-    author = "Flex Ferrum"
+    homepage = "https://jinja2cpp.dev/"
+    url = "https://github.com/conan-io/conan-center-index"
     description = "Jinja2 C++ (and for C++) almost full-conformance template engine implementation"
     topics = ("conan", "cpp14", "cpp17", "jinja2", "string templates", "templates engine")
     settings = "os", "compiler", "build_type", "arch"
     options = {
-        "shared": [True, False],
+        "shared": [False],
     }
     default_options = {'shared': False}
     generators = "cmake_find_package"
