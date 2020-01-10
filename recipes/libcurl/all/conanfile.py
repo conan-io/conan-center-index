@@ -13,7 +13,7 @@ class LibcurlConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://curl.haxx.se"
     license = "MIT"
-    exports_sources = ["lib_Makefile_add.am", "CMakeLists.txt"]
+    exports_sources = ["lib_Makefile_add.am", "CMakeLists.txt", "patches/*"]
     generators = "cmake", "pkg_config"
 
     settings = "os", "arch", "compiler", "build_type"
@@ -124,11 +124,16 @@ class LibcurlConan(ConanFile):
         tools.download("https://curl.haxx.se/ca/cacert.pem", "cacert.pem", verify=True)
 
     def build(self):
+        self._patch_sources()
         self._patch_misc_files()
         if self.settings.compiler != "Visual Studio":
             self._build_with_autotools()
         else:
             self._build_with_cmake()
+
+    def _patch_sources(self):
+        for patch in self.conan_data["patches"][self.version]:
+            tools.patch(**patch)
 
     def _patch_misc_files(self):
         if self.options.with_largemaxwritesize:
