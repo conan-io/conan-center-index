@@ -18,13 +18,15 @@ class NodejsInstallerConan(ConanFile):
         return os.path.join(self.source_folder, "source_subfolder")
 
     def source(self):
+        os_name = {"Windows": "-win", "Macos": "-darwin", "Linux": "-linux"}
         for data in self.conan_data["sources"][self.version]:
-            oss, sha, url = data.values()
+            sha, url = data.values()
             filename = url[url.rfind("/")+1:]
             tools.download(url, filename)
             tools.check_sha256(filename, sha)
-            if self.settings.os_build == oss:
-                os.rename(filename[:filename.rfind(".")], self._source_subfolder)
+            if os_name[str(self.settings.os_build)] in url:
+                tools.unzip(filename)
+                os.rename(filename[:filename.rfind("x64")+3], self._source_subfolder)
 
     def package(self):
         self.copy(pattern="LICENSE", dst="licenses", src=self._source_subfolder)
