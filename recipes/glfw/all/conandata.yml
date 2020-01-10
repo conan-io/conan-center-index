@@ -1,0 +1,4 @@
+sources:
+  "3.3.1":
+    sha256: eb536768a3db392fa0675bb05552b28118af76382964cdedaa98cd1f526eef84
+    url: https://github.com/glfw/glfw/archive/3.3.1.zip
