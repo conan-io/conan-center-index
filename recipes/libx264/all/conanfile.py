@@ -90,12 +90,12 @@ class LibX264Conan(ConanFile):
         return self._autotools
 
     def build(self):
-        with tools.vcvars(self.settings):
+        with tools.vcvars(self.settings) if self._is_msvc else tools.no_op():
             autotools = self._configure_autotools()
             autotools.make()
 
     def package(self):
-        with tools.vcvars(self.settings):
+        with tools.vcvars(self.settings) if self._is_msvc else tools.no_op():
             autotools = self._configure_autotools()
             autotools.install()
         self.copy(pattern="COPYING", src=self._source_subfolder, dst='licenses')
