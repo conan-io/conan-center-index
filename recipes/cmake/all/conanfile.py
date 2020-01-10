@@ -58,8 +58,6 @@ class CMakeConan(ConanFile):
 
     def package_id(self):
         self.info.include_build_settings()
-        if self.settings.os_build == "Windows":
-            del self.info.settings.arch_build # same build is used for x86 and x86_64
         del self.info.settings.arch
         del self.info.settings.compiler
 
@@ -67,12 +65,19 @@ class CMakeConan(ConanFile):
         self.copy("Copyright.txt", dst="licenses", src=self._source_subfolder)
         cmake = self._configure_cmake()
         cmake.install()
+        tools.rmdir(os.path.join(self.package_folder, "doc"))
+        os.rename(os.path.join(self.package_folder, "share"),
+                  os.path.join(self.package_folder, "bin", "share"))
 
     def package_info(self):
         minor = self._minor_version()
-        self.env_info.PATH.append(os.path.join(self.package_folder, "bin"))
-        self.env_info.CMAKE_ROOT = self.package_folder
-        mod_path = os.path.join(self.package_folder, "share", "cmake-%s" % minor, "Modules")
+
+        bindir = os.path.join(self.package_folder, "bin")
+        self.output.info("Appending PATH environment variable: {}".format(bindir))
+        self.env_info.PATH.append(bindir)
+
+        self.env_info.CMAKE_ROOT = os.path.join(bindir, "share", "cmake-%s" % minor)
+        mod_path = os.path.join(bindir, "share", "cmake-%s" % minor, "Modules")
         self.env_info.CMAKE_MODULE_PATH = mod_path
         if not os.path.exists(mod_path):
             raise ConanException("Module path not found: %s" % mod_path)
