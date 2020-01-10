@@ -12,7 +12,7 @@ class Jinja2cppConan(ConanFile):
     topics = ("conan", "cpp14", "cpp17", "jinja2", "string templates", "templates engine")
     settings = "os", "compiler", "build_type", "arch"
     options = {
-        "shared": [False],
+        "shared": [True, False],
     }
     default_options = {'shared': False}
     generators = "cmake_find_package"
