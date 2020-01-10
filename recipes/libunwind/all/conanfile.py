@@ -23,7 +23,7 @@ class LiunwindConan(ConanFile):
 
     def configure(self):
         if self.settings.os not in ["Linux", "FreeBSD"]:
-            raise ConanInvalidConfiguration("libunwind is not supported by your platform")
+            raise ConanInvalidConfiguration("libunwind is only supported on Linux and FreeBSD")
         del self.settings.compiler.libcxx
         del self.settings.compiler.cppstd
 
@@ -63,4 +63,4 @@ class LiunwindConan(ConanFile):
     def package_info(self):
         self.cpp_info.libs = tools.collect_libs(self)
         if self.settings.os == "Linux":
-            self.cpp_info.libs.append("pthread")
+            self.cpp_info.system_libs.append("pthread")
