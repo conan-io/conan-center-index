@@ -12,5 +12,3 @@ patches:
   "0.9.9.5":
     - patch_file: "patches/0001-Remove-architecture-check-from-CMake-package.patch"
       base_path: "source_subfolder"
-  "0.9.9.6": []
-  "0.9.9.7": []
