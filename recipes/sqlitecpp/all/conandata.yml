@@ -9,6 +9,3 @@ patches:
   "2.4.0":
     - base_path: "source_subfolder"
       patch_file: "patches/2.4.0/0001-mingw.patch"
-  "2.5.0":
-    - base_path: "source_subfolder"
-      patch_file: "patches/2.5.0/0001-mingw.patch"
