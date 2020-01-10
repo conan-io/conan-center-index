@@ -95,8 +95,7 @@ class LibcurlConan(ConanFile):
             if self.settings.os != "Macos" or not self.options.darwin_ssl:
                 self.options["openssl"].shared = self.options.shared
         if self.options.with_libssh2:
-            if self.settings.compiler != "Visual Studio":
-                self.options["libssh2"].shared = self.options.shared
+            self.options["libssh2"].shared = self.options.shared
 
     def system_requirements(self):
         # TODO: Declare tools needed to compile. The idea is Conan checking that they are
@@ -113,8 +112,7 @@ class LibcurlConan(ConanFile):
             else:
                 self.requires.add("openssl/1.1.1d")
         if self.options.with_libssh2:
-            if self.settings.compiler != "Visual Studio":
-                self.requires.add("libssh2/1.9.0")
+            self.requires.add("libssh2/1.9.0")
         if self.options.with_nghttp2:
             self.requires.add("libnghttp2/1.40.0")
 
