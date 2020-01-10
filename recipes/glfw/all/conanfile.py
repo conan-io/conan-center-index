@@ -51,27 +51,25 @@ conan_basic_setup()''')
         cmake.definitions["GLFW_BUILD_EXAMPLES"] = False
         cmake.definitions["GLFW_BUILD_TESTS"] = False
         cmake.definitions["GLFW_BUILD_DOCS"] = False
-        cmake.configure(build_dir=self._build_subfolder)
+        cmake.configure(source_folder=self._source_subfolder)
         return cmake
 
     def build(self):
+        self._patch_sources()
         cmake = self._configure_cmake()
         cmake.build()
-        if self.settings.os == "Macos" and self.options.shared:
-            with tools.chdir(os.path.join(self._source_subfolder, 'src')):
-                for filename in glob.glob('*.dylib'):
-                    self.run(
-                        'install_name_tool -id {filename} {filename}'.format(
-                            filename=filename))
 
     def package(self):
         self.copy("LICENSE.md", dst="licenses", src=self._source_subfolder)
         self.copy(pattern="*.pdb", dst="bin", keep_path=False)
         cmake = self._configure_cmake()
         cmake.install()
+        tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
+        tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
 
     def package_info(self):
         self.cpp_info.libs = tools.collect_libs(self)
+        self.cpp_info.name = "glfw3"
         if self.settings.os == "Linux":
             self.cpp_info.system_libs.append([
                 'Xrandr', 'Xrender', 'Xi', 'Xinerama', 'Xcursor', 'GL', 'm',
