@@ -1,4 +1,7 @@
 sources:
-  "1.0.1":
+  "1.0.0":
+    url: https://github.com/TartanLlama/expected/archive/v1.0.0.zip
+    sha256: c1733556cbd3b532a02b68e2fbc2091b5bc2cccc279e4f6c6bd83877aabd4b02
+  "20190710":
     url: https://github.com/TartanLlama/expected/archive/6fe2af5191214cce620899f7f06585c047b9f1fc.zip
     sha256: 25b009593fcb27aafd3e836e0e726da351b4be7a20703b9bb709a5efd61c26d0
