@@ -38,8 +38,10 @@ class PremakeConan(ConanFile):
                 env_build.make(args=['config=release'])
 
     def package(self):
+        self.copy(pattern="LICENSE.txt", dst="licenses", src=self._source_subfolder)
         self.copy(pattern="*premake5.exe", dst="bin", keep_path=False)
         self.copy(pattern="*premake5", dst="bin", keep_path=False)
+
 
     def package_info(self):
         bindir = os.path.join(self.package_folder, "bin")
