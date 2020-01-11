@@ -36,7 +36,8 @@ class DataFrameConan(ConanFile):
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
-        extracted_folder = "DataFrame-V-" + self.version
+        v = "V-{}".format(self.version) if self.version == "1.5.0" else self.version
+        extracted_folder = "DataFrame-{}".format(v)
         os.rename(extracted_folder, self._source_subfolder)
 
     def config_options(self):
@@ -44,18 +45,20 @@ class DataFrameConan(ConanFile):
             del self.options.fPIC
 
     def configure(self):
+        # DataFrame v1.5.0 requires C++14, while v1.6.0 C++17 is required.
         version = tools.Version(self.settings.compiler.version)
         compiler = self.settings.compiler
         if (
             compiler == "Visual Studio"
-            and Version(self.settings.compiler.version) < "16"
+            and Version(self.settings.compiler.version) < "15"
         ):
-            raise ConanInvalidConfiguration("DataFrame requires Visual Studio >= 16")
-        else:
-            if (compiler == "gcc" and version < "6.0") or (
-                compiler == "clang" and version < "4"
-            ):
-                raise ConanInvalidConfiguration("DataFrame requires at least C++14")
+            raise ConanInvalidConfiguration("DataFrame requires Visual Studio >= 15")
+        if (
+            (compiler == "gcc" and version < "7")
+            or (compiler == "clang" and version < "6")
+            or (compiler == "apple-clang" and version < "9")
+        ):
+            raise ConanInvalidConfiguration("DataFrame v1.6.0 requires at least C++17")
 
     def _configure_cmake(self):
         cmake = CMake(self)

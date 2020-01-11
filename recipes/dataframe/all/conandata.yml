@@ -2,7 +2,13 @@ sources:
   "1.5.0":
     sha256: c8f2c1711c8eb8ca4d81780d27b140666c05b35124c7e5cccbec3f22aad7cf64
     url: https://github.com/hosseinmoein/DataFrame/archive/V-1.5.0.tar.gz
+  "1.6.0":
+    sha256: 8028f7b4e8d4fae3aa9308892b2106c59986a59ad70756566faa21ae6ce0435a
+    url: https://github.com/hosseinmoein/DataFrame/archive/1.6.0.tar.gz
 patches:
   "1.5.0":
     - base_path: source_subfolder
       patch_file: "patches/0001-remove-tests.patch"
+  "1.6.0":
+    - base_path: source_subfolder
+      patch_file: "patches/0002-remove-tests.patch"
