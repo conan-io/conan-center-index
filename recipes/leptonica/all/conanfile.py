@@ -116,3 +116,4 @@ class LeptonicaConan(ConanFile):
         self.cpp_info.names["cmake_find_package"] = "Leptonica"
         self.cpp_info.names["cmake_find_package_multi"] = "Leptonica"
         self.cpp_info.names['pkg_config'] = 'lept'
+        self.cpp_info.includedirs.append(os.path.join("include", "leptonica"))
