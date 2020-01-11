@@ -2,14 +2,14 @@ import os
 from conans import ConanFile, tools, CMake
 
 
-class ZeroMQConan(ConanFile):
-    name = "zeromq"
+class LibZMQConan(ConanFile):
+    name = "libzmq"
     homepage = "https://github.com/zeromq/libzmq"
     description = "ZeroMQ is a community of projects focused on decentralized messaging and computing"
     topics = ("conan", "zmq", "libzmq", "message-queue", "asynchronous")
     url = "https://github.com/conan-io/conan-center-index"
     license = "LGPL-3.0"
-    exports_sources = ["CMakeLists.txt", "zeromq_extra.cmake"]
+    exports_sources = ["CMakeLists.txt"]
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
@@ -67,11 +67,9 @@ class ZeroMQConan(ConanFile):
         tools.rmdir(os.path.join(self.package_folder, "share"))
         tools.rmdir(os.path.join(self.package_folder, "CMake"))
 
-        self.copy("zeromq_extra.cmake", dst=os.path.join(self.package_folder, "lib", "cmake", "zeromq"))
-
     def package_info(self):
-        self.cpp_info.name = "ZeroMQ"
-        self.cpp_info.names["pkg_config"] = "libzmq"
+        self.cpp_info.names["cmake_find_package"] = "ZeroMQ"
+        self.cpp_info.names["cmake_find_package_multi"] = "ZeroMQ"
         if self.settings.compiler == "Visual Studio":
             version = "_".join(self.version.split("."))
             if self.settings.build_type == "Debug":
@@ -94,5 +92,3 @@ class ZeroMQConan(ConanFile):
             self.cpp_info.system_libs.extend(["pthread", "rt", "m"])
         if not self.options.shared:
             self.cpp_info.defines.append("ZMQ_STATIC")
-        self.cpp_info.builddirs = [os.path.join("lib", "cmake", "zeromq")]
-        self.cpp_info.build_modules = [os.path.join("lib", "cmake", "zeromq", "zeromq_extra.cmake")]

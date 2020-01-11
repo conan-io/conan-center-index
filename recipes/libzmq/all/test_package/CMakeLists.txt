@@ -3,11 +3,6 @@ project(test_package)
 
 set(CMAKE_VERBOSE_MAKEFILE TRUE)
 
-find_package(ZeroMQ REQUIRED)
-if(NOT TARGET libzmq OR NOT TARGET libzmq-static)
-    message(FATAL_ERROR "No target libzmq or libzmq-static created")
-endif()
-
 include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
 conan_basic_setup()
 
