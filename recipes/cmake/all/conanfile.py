@@ -75,7 +75,7 @@ class CMakeConan(ConanFile):
         self.env_info.PATH.append(bindir)
 
         self.env_info.CMAKE_ROOT = self.package_folder
-        mod_path = os.path.join(bindir, "share", "cmake-%s" % minor, "Modules")
+        mod_path = os.path.join(self.package_folder, "share", "cmake-%s" % minor, "Modules")
         self.env_info.CMAKE_MODULE_PATH = mod_path
         if not os.path.exists(mod_path):
             raise ConanException("Module path not found: %s" % mod_path)
