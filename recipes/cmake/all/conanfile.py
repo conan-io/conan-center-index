@@ -66,8 +66,6 @@ class CMakeConan(ConanFile):
         cmake = self._configure_cmake()
         cmake.install()
         tools.rmdir(os.path.join(self.package_folder, "doc"))
-        os.rename(os.path.join(self.package_folder, "share"),
-                  os.path.join(self.package_folder, "bin", "share"))
 
     def package_info(self):
         minor = self._minor_version()
@@ -76,7 +74,7 @@ class CMakeConan(ConanFile):
         self.output.info("Appending PATH environment variable: {}".format(bindir))
         self.env_info.PATH.append(bindir)
 
-        self.env_info.CMAKE_ROOT = os.path.join(bindir, "share", "cmake-%s" % minor)
+        self.env_info.CMAKE_ROOT = self.package_folder
         mod_path = os.path.join(bindir, "share", "cmake-%s" % minor, "Modules")
         self.env_info.CMAKE_MODULE_PATH = mod_path
         if not os.path.exists(mod_path):
