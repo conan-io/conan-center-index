@@ -62,7 +62,8 @@ class BrotliConan(ConanFile):
         return libs
 
     def package_info(self):
-        self.cpp_info.name = "Brotli"
+        self.cpp_info.names["cmake_find_package"] = "Brotli"
+        self.cpp_info.names["cmake_find_package_multi"] = "Brotli"
         self.cpp_info.libs = self._get_libraries(self.options.shared)
         self.cpp_info.includedirs = ["include", os.path.join("include", "brotli")]
         if self.options.shared:
