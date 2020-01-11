@@ -8,8 +8,6 @@ class TestPackageConan(ConanFile):
     def test(self):
         if not tools.cross_building(self.settings):
             output = StringIO()
-            self.output.info(self.deps_env_info["cmake"].CMAKE_ROOT)
-            # cmake_path = os.path.abspath(os.path.join(self.deps_cpp_info["cmake"].rootpath, "bin"))
             self.run("cmake --version", output=output, run_environment=True)
             self.output.info("Installed: %s" % str(output.getvalue()))
             ver = str(self.requires["cmake"].ref.version)
