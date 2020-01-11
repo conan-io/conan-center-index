@@ -2,3 +2,6 @@ sources:
   "1.78.0":
     url: "https://github.com/DanBloomberg/leptonica/archive/1.78.0.tar.gz"
     sha256: "f8ac4d93cc76b524c2c81d27850bfc342e68b91368aa7a1f7d69e34ce13adbb4"
+  "1.79.0":
+    url: "https://github.com/DanBloomberg/leptonica/archive/1.79.0.tar.gz"
+    sha256: "bf9716f91a4844c2682a07ef21eaf68b6f1077af1f63f27c438394fd66218e17"
