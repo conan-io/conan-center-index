@@ -9,6 +9,11 @@ conan_basic_setup()
 
 # Flex
 
+set(FLEX_TARGET_COMPILE_FLAGS "")
+if(MSVC)
+    set(FLEX_TARGET_COMPILE_FLAGS "--wincompat")
+endif()
+
 find_package(FLEX)
 set(FLEX_VARS
     FLEX_FOUND
