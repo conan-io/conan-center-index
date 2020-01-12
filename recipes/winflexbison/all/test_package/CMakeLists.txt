@@ -32,7 +32,7 @@ endforeach()
 FLEX_TARGET(TestParser basic_nr.l "${CMAKE_CURRENT_BINARY_DIR}/lexer.cpp" COMPILE_FLAGS "${FLEX_TARGET_COMPILE_FLAGS}")
 add_executable(flex_test_package ${FLEX_TestParser_OUTPUTS})
 enable_testing()
-add_test(TestLexer flex_test_package "${CMAKE_CURRENT_LIST_DIR}/basic_nr.txt")
+add_test(TestLexer ${CMAKE_CURRENT_BINARY_DIR}/bin/flex_test_package "${CMAKE_CURRENT_LIST_DIR}/basic_nr.txt")
 
 # Bison
 
@@ -56,4 +56,4 @@ bison_target(bison_parser_target mc_parser.yy "${CMAKE_CURRENT_BINARY_DIR}/mc_pa
 add_executable(bison_test_package "${CMAKE_CURRENT_BINARY_DIR}/mc_parser.cpp" dummy_lex.cpp)
 target_include_directories(bison_test_package PRIVATE "${CMAKE_CURRENT_BINARY_DIR}")
 enable_testing()
-add_test(TestBison bison_test_package)
+add_test(TestBison ${CMAKE_CURRENT_BINARY_DIR}/bin/bison_test_package)

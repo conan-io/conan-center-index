@@ -6,7 +6,7 @@ class WinflexbisonConan(ConanFile):
     name = "winflexbison"
     description = "Flex and Bison for Windows"
     url = "https://github.com/conan-io/conan-center-index"
-    homepage = "https://github.com/uclouvain/openjpeg"
+    homepage = "https://github.com/lexxmark/winflexbison"
     topics = ("conan", "winflexbison", "flex", "bison")
 
     generators = "cmake"
