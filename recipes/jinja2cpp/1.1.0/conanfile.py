@@ -12,9 +12,9 @@ class Jinja2cppConan(ConanFile):
     topics = ("conan", "cpp14", "cpp17", "jinja2", "string templates", "templates engine")
     settings = "os", "compiler", "build_type", "arch"
     options = {
-        "shared": [True, False],
+        "shared": [True, False], "fPIC": [True, False]
     }
-    default_options = {'shared': False}
+    default_options = {'shared': False, "fPIC": True}
     generators = "cmake_find_package"
     requires = (
         "variant-lite/[>=1.2.2]",
@@ -42,7 +42,7 @@ class Jinja2cppConan(ConanFile):
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
-        extracted_dir = self.name + "-" + self.version
+        extracted_dir = "Jinja2Cpp-" + self.version
         os.rename(extracted_dir, self._source_subfolder)
 
     def build(self):
