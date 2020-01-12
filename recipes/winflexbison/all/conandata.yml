@@ -1,0 +1,4 @@
+sources:
+  "2.5.21":
+    url: "https://github.com/lexxmark/winflexbison/archive/v2.5.21.tar.gz"
+    sha256: "41e31960cc7e8ccd4b95bd770a6279d31ab7dee156e6fb4e55834f8f220637f4"
