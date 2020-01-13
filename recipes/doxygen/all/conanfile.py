@@ -5,6 +5,7 @@ class DoxygenConan(ConanFile):
     name = "doxygen"
     description = "A documentation system for C/C++"
     url = "https://github.com/conan-io/conan-center-index"
+    license = "GPL-2.0"
     homepage = "http://www.doxygen.nl/"
     settings = "os_build", "arch_build"
 
