@@ -13,6 +13,16 @@ class DoxygenConan(ConanFile):
     def _source_subfolder(self):
         return "source_subfolder"
 
+    def requirements(self):
+        self.requires("libiconv/1.15")
+
+    def build_requirements(self):
+        if not tools.which("flex"):
+            self.build_requires("flex/2.6.4@bincrafters/stable")
+
+        if not tools.which("bison"):
+            self.build_requires("bison/3.3.2@bincrafters/stable")
+
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
         extracted_dir = "{}-{}".format(self.name, self.version)
