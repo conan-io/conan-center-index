@@ -80,6 +80,8 @@ class FollyConan(ConanFile):
         os.rename(extracted_dir, self._source_subfolder)
         tools.replace_in_file(os.path.join(self._source_subfolder, 'CMake', 'folly-deps.cmake'), \
             'find_package(fmt CONFIG REQUIRED)', 'find_package(fmt REQUIRED)')
+        tools.replace_in_file(os.path.join(self._source_subfolder, 'CMake', 'folly-deps.cmake'), \
+            'find_package(Gflags MODULE)', 'find_package(gflags MODULE)')
 
     def _configure_cmake(self):
         cmake = CMake(self)
