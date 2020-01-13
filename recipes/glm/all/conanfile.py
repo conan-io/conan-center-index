@@ -80,8 +80,9 @@ class GlmConan(ConanFile):
         tools.get(**self.conan_data["sources"][self.version])
         extracted_dir = "glm-" + self.version
         os.rename(extracted_dir, self._source_subfolder)
-        for patch in self.conan_data["patches"][self.version]:
-            tools.patch(**patch)
+        if "patches" in self.conan_data:
+            for patch in self.conan_data["patches"][self.version]:
+                tools.patch(**patch)
 
     def package(self):
         os.makedirs(os.path.join(self.package_folder, "licenses"))
