@@ -10,6 +10,8 @@ class AutoconfConan(ConanFile):
     topics = ("conan", "autoconf", "configure", "build")
     license = ("GPL-2.0-or-later", "GPL-3.0-or-later")
 
+    _autotools = None
+
     @property
     def _source_subfolder(self):
         return os.path.join(self.source_folder, "source_subfolder")
@@ -23,12 +25,14 @@ class AutoconfConan(ConanFile):
             self.build_requires("msys2/20190524")
 
     def _configure_autotools(self):
-        autotools = AutoToolsBuildEnvironment(self, win_bash=tools.os_info.is_windows)
+        if self._autotools:
+            return self._autotools
+        self._autotools = AutoToolsBuildEnvironment(self, win_bash=tools.os_info.is_windows)
         conf_args = [
             "--datarootdir={}".format(os.path.join(self.package_folder, "bin", "share").replace("\\", "/")),
         ]
-        autotools.configure(args=conf_args, configure_dir=self._source_subfolder)
-        return autotools
+        self._autotools.configure(args=conf_args, configure_dir=self._source_subfolder)
+        return self._autotools
 
     def build(self):
         autotools = self._configure_autotools()
