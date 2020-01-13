@@ -1,0 +1,4 @@
+sources:
+    "1.8.17":
+      url: https://downloads.sourceforge.net/project/doxygen/rel-1.8.17/doxygen-1.8.17.src.tar.gz
+      sha256: 2cba988af2d495541cbbe5541b3bee0ee11144dcb23a81eada19f5501fd8b599
