@@ -20,10 +20,11 @@ class GlfwConan(ConanFile):
     _source_subfolder = "source_subfolder"
     _build_subfolder = "build_subfolder"
 
+
     def requirements(self):
+        self.requires("opengl_support/0.1")
         if self.settings.os == 'Linux':
-            pass
-            # check system
+            self.requires("x11_support/0.1")
 
     def config_options(self):
         if self.settings.os == "Windows":
