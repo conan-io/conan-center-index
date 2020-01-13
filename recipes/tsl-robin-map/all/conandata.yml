@@ -1,0 +1,4 @@
+sources:
+  "0.6.2":
+    url: "https://github.com/Tessil/robin-map/archive/v0.6.2.tar.gz"
+    sha256: "c08ec4b1bf1c85eb0d6432244a6a89862229da1cb834f3f90fba8dc35d8c8ef1"
