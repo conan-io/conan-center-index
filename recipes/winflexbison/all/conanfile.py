@@ -39,8 +39,18 @@ class WinflexbisonConan(ConanFile):
         self.copy(pattern="data/*", dst="bin", src="{}/bison".format(self._source_subfolder), keep_path=True)
         self.copy(pattern="FlexLexer.h", dst="include", src=os.path.join(self._source_subfolder, "flex", "src"), keep_path=False)
         self.copy(pattern="COPYING", dst="licenses", src=os.path.join(self._source_subfolder, "bison", "src"), keep_path=False)
+        os.rename(os.path.join(self.package_folder, "licenses", "COPYING"), os.path.join(self.package_folder, "licenses", "bison-license"))
+        self.copy(pattern="COPYING", dst="licenses", src=os.path.join(self._source_subfolder, "flex", "src"), keep_path=False)
+        os.rename(os.path.join(self.package_folder, "licenses", "COPYING"), os.path.join(self.package_folder, "licenses", "flex-license"))
         actual_build_path = "{}/bin/{}".format(self._source_subfolder, self.settings.build_type)
         self.copy(pattern="*.exe", dst="bin", src=actual_build_path, keep_path=False)
+
+        with open(os.path.join(self._source_subfolder, "bison", "data", "skeletons", "glr.cc")) as f:
+            content_lines = f.readlines()
+        license_content = []
+        for i in range(2, 16):
+            license_content.append(content_lines[i][2:-1])
+        tools.save(os.path.join(self.package_folder, "licenses", "license"), "\n".join(license_content))
 
     def package_id(self):
         self.info.include_build_settings()
