@@ -29,7 +29,14 @@ class Jinja2cppConan(ConanFile):
     _source_subfolder = "source_subfolder"
     _cpp_std = 14
 
+    def config_options(self):
+        if self.settings.os == "Windows":
+            del self.options.fPIC
+
     def configure(self):
+        if self.options.shared:
+            del self.options.fPIC
+
         cppstd = self.settings.get_safe("compiler.cppstd")
         if cppstd:
             cppstd_pattern = re.compile(r'^(gnu)?(?P<cppstd>\d+)$')
