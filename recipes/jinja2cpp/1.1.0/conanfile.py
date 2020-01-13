@@ -49,7 +49,7 @@ class Jinja2cppConan(ConanFile):
         cmake = CMake(self)
         cmake.definitions["JINJA2CPP_BUILD_TESTS"] = False
         cmake.definitions["JINJA2CPP_STRICT_WARNINGS"] = False
-        cmake.definitions["JINJA2CPP_BUILD_SHARED"] = False
+        cmake.definitions["JINJA2CPP_BUILD_SHARED"] = self.options.shared
         cmake.definitions["JINJA2CPP_DEPS_MODE"] = "conan-build"
         cmake.definitions["JINJA2CPP_CXX_STANDARD"] = self._cpp_std
         compiler = self.settings.get_safe("compiler")
@@ -61,11 +61,13 @@ class Jinja2cppConan(ConanFile):
         cmake.build()
 
     def package(self):
+        self.copy("LICENSE", dst="licenses", src=self._source_subfolder)
         self.copy("*.h", dst="include", src=os.path.join(self._source_subfolder, "include"))
         self.copy("*.hpp", dst="include", src=os.path.join(self._source_subfolder, "include"))
         self.copy("*.lib", dst="lib", keep_path=False)
         self.copy("*.dll", dst="bin", keep_path=False)
         self.copy("*.so", dst="lib", keep_path=False)
+        self.copy("*.so.*", dst="lib", keep_path=False)
         self.copy("*.dylib", dst="lib", keep_path=False)
         self.copy("*.a", dst="lib", keep_path=False)
 
