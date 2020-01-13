@@ -1,6 +1,6 @@
 import os
 from conans import ConanFile, CMake, tools
-# from conans.errors import ConanInvalidConfiguration
+from conans.errors import ConanInvalidConfiguration
 
 
 class Jinja2cppConan(ConanFile):
@@ -10,12 +10,13 @@ class Jinja2cppConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     description = "Jinja2 C++ (and for C++) almost full-conformance template engine implementation"
     topics = ("conan", "cpp14", "cpp17", "jinja2", "string templates", "templates engine")
+    exports_sources = ["CMakeLists.txt"]
+    generators = "cmake", "cmake_find_package"
     settings = "os", "compiler", "build_type", "arch"
     options = {
         "shared": [True, False], "fPIC": [True, False]
     }
     default_options = {'shared': False, "fPIC": True}
-    generators = "cmake_find_package"
     requires = (
         "variant-lite/[>=1.2.2]",
         "expected-lite/[>=0.3.0]",
@@ -27,6 +28,7 @@ class Jinja2cppConan(ConanFile):
     )
     
     _source_subfolder = "source_subfolder"
+    _build_subfolder = "build_subfolder"
     _cpp_std = 14
 
     def config_options(self):
@@ -64,7 +66,7 @@ class Jinja2cppConan(ConanFile):
             runtime = self.settings.get_safe("compiler.runtime")
             cmake.definitions["JINJA2CPP_MSVC_RUNTIME_TYPE"] = '/' + runtime
             
-        cmake.configure(source_folder=self._source_subfolder)
+        cmake.configure(build_folder=self._build_subfolder)
         cmake.build()
 
     def package(self):
