@@ -133,7 +133,17 @@ MALLOCPROXY.DEF =
             if self._is_msvc:
                 # intentionally not using vcvars for clang-cl yet
                 with tools.vcvars(self.settings):
-                    runtime = "vc14.2"
+                    if self.settings.get_safe("compiler.runtime") in ["MT", "MTd"]:
+                        runtime = "vc_mt"
+                    else:
+                        runtime = {"8": "vc8",
+                                   "9": "vc9",
+                                   "10": "vc10",
+                                   "11": "vc11",
+                                   "12": "vc12",
+                                   "14": "vc14",
+                                   "15": "vc14.1",
+                                   "16": "vc14.2"}.get(str(self.settings.compiler.version), "vc14.2")
                     self.run("%s arch=%s runtime=%s %s %s" % (make, arch, runtime, extra, " ".join(targets)))
             elif self._is_mingw:
                 self.run("%s arch=%s compiler=gcc %s %s" % (make, arch, extra, " ".join(targets)))
