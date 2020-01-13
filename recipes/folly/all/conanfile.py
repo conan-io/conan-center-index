@@ -23,7 +23,7 @@ class FollyConan(ConanFile):
         "glog/0.4.0",
         "libevent/2.1.11",
         "lz4/1.9.2",
-        "openssl/1.0.2t",
+        "openssl/1.1.1d",
         "zlib/1.2.11",
         "zstd/1.4.3",
         "snappy/1.1.7",
