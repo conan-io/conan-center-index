@@ -26,4 +26,4 @@ class Jinja2CppTestPackage(ConanFile):
             bin_path = "."
             extension = ""
 
-        self.run(os.path.join(bin_path, "jinja2cpp-test-package" + extension))
+        self.run(os.path.join(bin_path, "jinja2cpp-test-package" + extension), run_environment=True)
