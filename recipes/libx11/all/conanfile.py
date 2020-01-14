@@ -1,5 +1,7 @@
 import os
+import subprocess
 import shlex
+
 from conans import ConanFile, CMake, tools
 
 
@@ -27,7 +29,7 @@ class LibX11Conan(ConanFile):
         del self.settings.compiler.cppstd
 
     def _get_package_info(self, lib_name):
-        ret = os.system("pkg-config --cflags --libs {}".format(lib_name))
+        ret = subprocess.check_output("pkg-config --cflags --libs {}".format(lib_name), shell=True)
         flags = shlex.split(ret)
         include_dirs = []
         lib_dirs = []
