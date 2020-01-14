@@ -48,11 +48,16 @@ class DataFrameConan(ConanFile):
         # DataFrame v1.5.0 requires C++14, while v1.6.0 C++17 is required.
         version = tools.Version(self.settings.compiler.version)
         compiler = self.settings.compiler
-        if (
-            compiler == "Visual Studio"
-            and Version(self.settings.compiler.version) < "15"
-        ):
-            raise ConanInvalidConfiguration("DataFrame requires Visual Studio >= 15")
+
+        if compiler == "Visual Studio":
+            # remove runtime, use always default (MD/MDd)
+            del self.settings.compiler.runtime
+
+            if Version(self.settings.compiler.version) < "15":
+                raise ConanInvalidConfiguration(
+                    "DataFrame requires Visual Studio >= 15"
+                )
+
         if (
             (compiler == "gcc" and version < "7")
             or (compiler == "clang" and version < "6")
