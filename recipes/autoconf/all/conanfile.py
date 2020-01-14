@@ -21,7 +21,7 @@ class AutoconfConan(ConanFile):
         os.rename("{}-{}".format(self.name, self.version), self._source_subfolder)
 
     def build_requirements(self):
-        if tools.os_info.is_windows and "CONAN_BASH_PATH" not in os.environ:
+        if self.settings.os_build == "Windows" and "CONAN_BASH_PATH" not in os.environ:
             self.build_requires("msys2/20190524")
 
     def _configure_autotools(self):
