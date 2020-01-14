@@ -64,6 +64,10 @@ class Jinja2cppConan(ConanFile):
         compiler = self.settings.get_safe("compiler")
         if compiler == 'Visual Studio':
             runtime = self.settings.get_safe("compiler.runtime")
+            if runtime == 'MTd':
+                runtime = 'MT'
+            if runtime == 'MDd':
+                runtime = 'MD'
             cmake.definitions["JINJA2CPP_MSVC_RUNTIME_TYPE"] = '/' + runtime
             
         cmake.configure(build_folder=self._build_subfolder)
