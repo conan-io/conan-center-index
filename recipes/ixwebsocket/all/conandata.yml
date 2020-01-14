@@ -1,0 +1,4 @@
+sources:
+  "7.6.3":
+    url: "https://github.com/machinezone/IXWebSocket/archive/v7.6.3.zip"
+    sha256: "068C20425C7E70C840AE710095237DF6515B1C1A0EA4416FF873AAD2DA49C3D3"
