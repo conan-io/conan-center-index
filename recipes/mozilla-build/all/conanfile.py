@@ -23,7 +23,7 @@ class MozillaBuildConan(ConanFile):
         tools.download("https://www.mozilla.org/media/MPL/2.0/index.815ca599c9df.txt", "LICENSE")
 
     def package(self):
-        tools.save(os.path.join(self.package_folder, "licenses", "LICENSE"), "Mozilla Public License (MPL) version 2.0")
+        self.copy("LICENSE", dst="licenses")
         self.copy("nsinstall.exe", src="bin", dst="bin")
 
     def package_info(self):
