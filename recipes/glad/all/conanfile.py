@@ -11,7 +11,7 @@ class GladConan(ConanFile):
     homepage = "https://github.com/Dav1dde/glad"
     topics = ("conan", "glad", "opengl")
     license = "MIT"
-    exports_sources = ["CMakeLists.txt"]
+    exports_sources = ["CMakeLists.txt", "patches/*.patch"]
     generators = "cmake"
     settings = "os", "compiler", "build_type", "arch"
 
@@ -88,6 +88,9 @@ class GladConan(ConanFile):
         tools.get(**self.conan_data["sources"][self.version])
         extracted_dir = self.name + "-" + self.version
         os.rename(extracted_dir, self._source_subfolder)
+        if "patches" in self.conan_data:
+            for patch in self.conan_data["patches"][self.version]:
+                tools.patch(**patch)
 
     def build(self):
         cmake = self._configure_cmake()
