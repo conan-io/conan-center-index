@@ -4,7 +4,7 @@ import os
 
 class MozillaBuildConan(ConanFile):
     name = "mozilla-build"
-    homepage = "https://developer.mozilla.org/en-US/docs/Mozilla/Developer_guide/Build_Instructions/Windows_Prerequisites"
+    homepage = "https://wiki.mozilla.org/MozillaBuild"
     description = "Mozilla build requirements on Windows"
     topics = ("conan", "mozilla", "build")
     url = "https://github.com/conan-io/conan-center-index"
