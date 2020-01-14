@@ -57,6 +57,7 @@ class LibITKConan(ConanFile):
         self.requires("libtiff/4.0.9")
         self.requires("libpng/1.6.37")
         self.requires("zlib/1.2.11")
+        self.requires("icu/64.2")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
@@ -80,6 +81,7 @@ class LibITKConan(ConanFile):
         cmake.definitions["ITK_USE_SYSTEM_ZLIB"] = "ON"
         cmake.definitions["ITK_USE_SYSTEM_JPEG"] = "ON"
         cmake.definitions["ITK_USE_SYSTEM_EXPAT"] = "ON"
+        cmake.definitions["ITK_USE_SYSTEM_ICU"] = "ON"
 
         cmake.definitions["ITK_BUILD_DEFAULT_MODULES"] = "OFF"
         cmake.definitions["Module_ITKDeprecated"] = "OFF"
