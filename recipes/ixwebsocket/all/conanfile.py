@@ -41,7 +41,7 @@ class IXWebSocketConan(ConanFile):
             # Specifically, Windows is forced to use MbedTLS, while Mac can use
             # MBEDTLS or an Apple-specific SSL provider. UNIX can use OpenSSL or MbedTLS
             # So even though both these operating systems support it, it isn't used.
-            self.requires.add("OpenSSL/1.1.1c")
+            self.requires.add("openssl/1.1.1c")
 
         self.requires.add("zlib/1.2.11")
 
