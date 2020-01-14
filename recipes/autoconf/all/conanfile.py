@@ -9,7 +9,7 @@ class AutoconfConan(ConanFile):
     description = "Autoconf is an extensible package of M4 macros that produce shell scripts to automatically configure software source code packages"
     topics = ("conan", "autoconf", "configure", "build")
     license = ("GPL-2.0-or-later", "GPL-3.0-or-later")
-
+    settings = "os_build", "arch_build"
     _autotools = None
 
     @property
