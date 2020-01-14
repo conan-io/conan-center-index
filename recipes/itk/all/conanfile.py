@@ -186,6 +186,7 @@ class LibITKConan(ConanFile):
 
         # Disabled because Vxl vidl is not build anymore
         cmake.definitions["Module_ITKVideoBridgeVXL"] = "OFF"
+
         cmake.configure(build_folder=self._build_subfolder)
         return cmake
 
@@ -205,6 +206,11 @@ class LibITKConan(ConanFile):
         tools.rmdir(os.path.join(self.package_folder, "share"))
 
     def package_info(self):
+
+        # in linux we need to link also with these libs
+        if self.settings.os == "Linux":
+            self.cpp_info.libs.extend(["pthread", "dl", "rt"])
+
         self.cpp_info.builddirs = ['lib/cmake/ITK-{0}/'.format(
             self._upstream_version)]
         self.cpp_info.libs = tools.collect_libs(self)
