@@ -1,6 +1,7 @@
 import os
 
 from conans import ConanFile, CMake, tools
+from conans.errors import ConanInvalidConfiguration
 
 class GladConan(ConanFile):
     name = "glad"
@@ -17,23 +18,39 @@ class GladConan(ConanFile):
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
-        "profile": ["compatibility", "core"], # OpenGL profile.
-        "api_type": ["egl", "gl", "gles1", "gles2", "glx", "wgl"], # API type
-        "api_version": "ANY", # API version like "3.2, 4.1", no version means latest
-        "extensions": "ANY", # Path to extensions file or comma separated list of extensions, if missing all extensions are included
+        "no_loader": [True, False],
         "spec": ["gl", "egl", "glx", "wgl"], # Name of the spec
-        "no_loader": [True, False] # No loader
+        "extensions": "ANY", # Path to extensions file or comma separated list of extensions, if missing all extensions are included
+        # if specification is gl
+        "gl_profile": ["compatibility", "core"],
+        "gl_version": ["None", "1.0", "1.1", "1.2", "1.3", "1.4", "1.5", "2.0",
+                       "2.1", "3.0", "3.1", "3.2", "3.3", "4.0", "4.1", "4.2",
+                       "4.3", "4.4", "4.5", "4.6"],
+        "gles1_version": ["None", "1.0"],
+        "gles2_version": ["None", "2.0", "3.0", "3.1", "3.2"],
+        "glsc2_version": ["None", "2.0"],
+        # if specification is egl
+        "egl_version": ["None", "1.0", "1.1", "1.2", "1.3", "1.4", "1.5"],
+        # if specification is glx
+        "glx_version": ["None", "1.0", "1.1", "1.2", "1.3", "1.4"],
+        # if specification is wgl
+        "wgl_version": ["None", "1.0"]
     }
 
     default_options = {
-        'shared': False,
-        'fPIC': True,
-        'profile': 'compatibility',
-        'api_type': 'gl',
-        'api_version': '3.2',
-        'extensions': "''",
-        'spec': 'gl',
-        'no_loader': False
+        "shared": False,
+        "fPIC": True,
+        "no_loader": False,
+        "spec": "gl",
+        "extensions": "''",
+        "gl_profile": "compatibility",
+        "gl_version": "3.3",
+        "gles1_version": "None",
+        "gles2_version": "None",
+        "glsc2_version": "None",
+        "egl_version": "None",
+        "glx_version": "None",
+        "wgl_version": "None"
     }
 
     _source_subfolder = "source_subfolder"
@@ -47,6 +64,26 @@ class GladConan(ConanFile):
         del self.settings.compiler.libcxx
         del self.settings.compiler.cppstd
 
+        if self.options.spec != "gl":
+            del self.options.gl_profile
+            del self.options.gl_version
+            del self.options.gles1_version
+            del self.options.gles2_version
+            del self.options.glsc2_version
+
+        if self.options.spec != "egl":
+            del self.options.egl_version
+
+        if self.options.spec != "glx":
+            del self.options.glx_version
+
+        if self.options.spec != "wgl":
+            del self.options.wgl_version
+
+        if self.options.spec == "wgl" and self.settings.os != "Windows":
+            raise ConanInvalidConfiguration("{0} specification is not compatible with {1}".format(self.options.spec,
+                                                                                                  self.settings.os))
+
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
         extracted_dir = self.name + "-" + self.version
@@ -58,8 +95,9 @@ class GladConan(ConanFile):
 
     def _configure_cmake(self):
         cmake = CMake(self)
-        cmake.definitions["GLAD_PROFILE"] = self.options.profile
-        cmake.definitions["GLAD_API"] = "%s=%s" % (self.options.api_type, self.options.api_version)
+        if "gl_profile" in self.options:
+            cmake.definitions["GLAD_PROFILE"] = self.options.gl_profile
+        cmake.definitions["GLAD_API"] = self._get_api()
         cmake.definitions["GLAD_EXTENSIONS"] = self.options.extensions
         cmake.definitions["GLAD_SPEC"] = self.options.spec
         cmake.definitions["GLAD_NO_LOADER"] = self.options.no_loader
@@ -69,6 +107,22 @@ class GladConan(ConanFile):
 
         cmake.configure(build_folder=self._build_subfolder)
         return cmake
+
+    def _get_api(self):
+        api_concat = ""
+        if self.options.spec == "gl":
+            spec_api = {"gl": "gl_version", "gles1": "gles1_version", "gles2": "gles2_version", "glsc2": "glsc2_version"}
+        elif self.options.spec == "egl":
+            spec_api = {"egl": "egl_version"}
+        elif self.options.spec == "glx":
+            spec_api = {"glx": "glx_version"}
+        elif self.options.spec == "wgl":
+            spec_api = {"wgl": "wgl_version"}
+
+        api_concat += ",".join("{0}={1}".format(api, getattr(self.options, version_key))
+                               for api, version_key in spec_api.items() if getattr(self.options, version_key) != "None")
+
+        return api_concat
 
     def package(self):
         cmake = self._configure_cmake()
