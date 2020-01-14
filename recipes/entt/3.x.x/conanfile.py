@@ -82,4 +82,5 @@ class ConanRecipe(ConanFile):
         self.info.header_only()
 
     def package_info(self):
-        self.cpp_info.name = "EnTT"
+        self.cpp_info.names["cmake_find_package"] = "EnTT"
+        self.cpp_info.names["cmake_find_package_multi"] = "EnTT"
