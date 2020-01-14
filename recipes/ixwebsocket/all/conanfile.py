@@ -75,7 +75,7 @@ class IXWebSocketConan(ConanFile):
 
         # Library linking
         if (self.options.use_tls and not self.options.use_mbed_tls and not self.settings.os == "Windows" and not self.settings.os == "Macos"):
-            os.environ['OPENSSL_ROOT_DIR'] = self.deps_cpp_info["OpenSSL"].rootpath
+            os.environ['OPENSSL_ROOT_DIR'] = self.deps_cpp_info["openssl"].rootpath
         self.addLibrary("ZLIB", "zlib", cmake)
         if not self.options.use_vendored_third_party and (self.options.use_mbed_tls or self.options.use_tls and self.settings.os == "Windows"):
             self.addLibrary("MBEDTLS", "mbedtls", cmake, True)
