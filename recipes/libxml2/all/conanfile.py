@@ -2,7 +2,6 @@ from conans import ConanFile, tools, AutoToolsBuildEnvironment, VisualStudioBuil
 from contextlib import contextmanager
 import glob
 import os
-from functools import lru_cache
 
 
 class Libxml2Conan(ConanFile):
@@ -27,6 +26,8 @@ class Libxml2Conan(ConanFile):
                        "zlib": True,
                        "lzma": False,
                        "icu": False}
+
+    _autotools = None
     _source_subfolder = "source_subfolder"
 
     def requirements(self):
@@ -141,17 +142,18 @@ class Libxml2Conan(ConanFile):
         with tools.chdir(os.path.join(self._source_subfolder, 'win32')):
             self.run("mingw32-make -f Makefile.mingw install")
 
-    @lru_cache(1)
     def _configure_autotools(self):
-        autotools = AutoToolsBuildEnvironment(self, win_bash=tools.os_info.is_windows)
+        if self._autotools:
+            return self._autotools
+        self._autotools = AutoToolsBuildEnvironment(self, win_bash=tools.os_info.is_windows)
         if not tools.os_info.is_windows:
-            autotools.fpic = self.options.fPIC
+            self._autotools.fpic = self.options.fPIC
         full_install_subfolder = tools.unix_path(self.package_folder) if tools.os_info.is_windows else self.package_folder
         # fix rpath
         if self.settings.os == "Macos":
             tools.replace_in_file(os.path.join(self._source_subfolder, "configure"), r"-install_name \$rpath/", "-install_name ")
         configure_args = ['--with-python=no', '--prefix=%s' % full_install_subfolder]
-        if autotools.fpic:
+        if self._autotools.fpic:
             configure_args.extend(['--with-pic'])
         if self.options.shared:
             configure_args.extend(['--enable-shared', '--disable-static'])
@@ -168,8 +170,8 @@ class Libxml2Conan(ConanFile):
         if self.settings.os == "iOS" and self.settings.arch == "x86_64":
             build = False
 
-        autotools.configure(args=configure_args, build=build, configure_dir=self._source_subfolder)
-        return autotools
+        self._autotools.configure(args=configure_args, build=build, configure_dir=self._source_subfolder)
+        return self._autotools
 
     def _patch_sources(self):
         for patch in self.conan_data["patches"][self.version]:
