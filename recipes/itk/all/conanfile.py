@@ -54,7 +54,7 @@ class LibITKConan(ConanFile):
             self.requires("libjpeg/9c")
 
         self.requires("expat/2.2.9")
-        self.requires("libtiff/5.1.4")
+        self.requires("libtiff/4.0.9")
         self.requires("libpng/1.6.37")
         self.requires("zlib/1.2.11")
         self.requires("icu/64.2")
