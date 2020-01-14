@@ -2,7 +2,6 @@ from conans import ConanFile, tools, AutoToolsBuildEnvironment
 from conans.errors import ConanInvalidConfiguration
 import os
 import platform
-import shutil
 from contextlib import contextmanager
 
 
@@ -24,6 +23,19 @@ class LibffiConan(ConanFile):
         "fPIC": True,
     }
     _source_subfolder = "source_subfolder"
+
+    def config_options(self):
+        if self.settings.os == "Windows":
+            del self.options.fPIC
+
+    def configure(self):
+        if self.settings.compiler == "Visual Studio":
+            if self.settings.compiler.runtime == "MTd":
+                raise ConanInvalidConfiguration("libffi does not support MTd runtime")
+        if self.options.shared:
+            del self.options.fPIC
+        del self.settings.compiler.libcxx
+        del self.settings.compiler.cppstd
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
@@ -85,16 +97,6 @@ class LibffiConan(ConanFile):
 
             # https://android.googlesource.com/platform/external/libffi/+/7748bd0e4a8f7d7c67b2867a3afdd92420e95a9f
             tools.replace_in_file(sysv_s_src, "stmeqia", "stmiaeq")
-                
-    def config_options(self):
-        if self.settings.os == "Windows":
-            del self.options.fPIC
-
-    def configure(self):
-        if self.options.shared:
-            del self.options.fPIC
-        del self.settings.compiler.libcxx
-        del self.settings.compiler.cppstd
 
     def build_requirements(self):
         if tools.os_info.is_windows and "CONAN_BASH_PATH" not in os.environ:
