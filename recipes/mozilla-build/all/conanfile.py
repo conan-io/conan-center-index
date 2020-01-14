@@ -20,6 +20,7 @@ class MozillaBuildConan(ConanFile):
         tools.check_sha256("mozilla-build.exe", self.conan_data["sources"][self.version]["sha256"])
         self.run("7z x mozilla-build.exe")
         os.unlink("mozilla-build.exe")
+        tools.download("https://www.mozilla.org/media/MPL/2.0/index.815ca599c9df.txt", "LICENSE")
 
     def package(self):
         tools.save(os.path.join(self.package_folder, "licenses", "LICENSE"), "Mozilla Public License (MPL) version 2.0")
