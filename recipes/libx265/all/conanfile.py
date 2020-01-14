@@ -27,6 +27,22 @@ class LibX265Conan(ConanFile):
         extracted_dir = 'x265_%s' % self.version
         os.rename(extracted_dir, "sources")
 
+    def _configure_cmake(self):
+        cmake = CMake(self, set_cmake_flags=True)
+        cmake.definitions['ENABLE_SHARED'] = self.options.shared
+        cmake.definitions['ENABLE_LIBNUMA'] = False
+        if self.settings.os == "Macos":
+            cmake.definitions['CMAKE_SHARED_LINKER_FLAGS'] = '-Wl,-read_only_relocs,suppress'
+        if self.settings.os != 'Windows':
+            cmake.definitions['ENABLE_PIC'] = self.options.fPIC
+        cmake.definitions['HIGH_BIT_DEPTH'] = self.options.bit_depth != 8
+        cmake.definitions['MAIN12'] = self.options.bit_depth == 12
+        cmake.definitions['ENABLE_HDR10_PLUS'] = self.options.HDR10
+        if self.settings.os == "Linux":
+            cmake.definitions["PLATFORM_LIBS"] = "dl"
+        cmake.configure()
+        return cmake
+
     def build(self):
         with tools.vcvars(self.settings, filter_known_paths=False):
             if self.settings.os == 'Windows':
@@ -41,24 +57,13 @@ class LibX265Conan(ConanFile):
                     "list(APPEND PLATFORM_LIBS pthread)", "")
                 tools.replace_in_file(os.path.join('sources', 'source', 'CMakeLists.txt'),
                     "list(APPEND PLATFORM_LIBS rt)", "")
-            cmake = CMake(self, set_cmake_flags=True)
-            cmake.definitions['ENABLE_SHARED'] = self.options.shared
-            cmake.definitions['ENABLE_LIBNUMA'] = False
-            if self.settings.os == "Macos":
-                cmake.definitions['CMAKE_SHARED_LINKER_FLAGS'] = '-Wl,-read_only_relocs,suppress'
-            if self.settings.os != 'Windows':
-                cmake.definitions['CMAKE_POSITION_INDEPENDENT_CODE'] = self.options.fPIC
-                cmake.definitions['ENABLE_PIC'] = self.options.fPIC
-            cmake.definitions['HIGH_BIT_DEPTH'] = self.options.bit_depth != 8
-            cmake.definitions['MAIN12'] = self.options.bit_depth == 12
-            cmake.definitions['ENABLE_HDR10_PLUS'] = self.options.HDR10
-            if self.settings.os == "Linux":
-                cmake.definitions["PLATFORM_LIBS"] = "dl"
-            cmake.configure()
+            cmake = self._configure_cmake()
             cmake.build()
-            cmake.install()
 
     def package(self):
+        with tools.vcvars(self.settings, filter_known_paths=False):
+            cmake = self._configure_cmake()
+            cmake.install()
         self.copy(pattern="COPYING", src='sources', dst='licenses')
         if self.settings.compiler == 'Visual Studio':
             for pdb_file in glob.glob(os.path.join(self.package_folder, "bin", "*.pdb")):
