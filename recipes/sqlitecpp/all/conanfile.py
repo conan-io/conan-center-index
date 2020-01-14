@@ -63,8 +63,9 @@ class SQLiteCppConan(ConanFile):
         return cmake
 
     def build(self):
-        for patch in self.conan_data["patches"][self.version]:
-            tools.patch(**patch)
+        if "patches" in self.conan_data and self.version in self.conan_data["patches"]:
+            for patch in self.conan_data["patches"][self.version]:
+                tools.patch(**patch)
         self._patch_clang()
         cmake = self._configure_cmake()
         cmake.build()
