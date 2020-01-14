@@ -1,4 +1,5 @@
 import os
+import shlex
 from conans import ConanFile, CMake, tools
 
 
