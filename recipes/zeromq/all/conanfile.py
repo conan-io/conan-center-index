@@ -2,8 +2,8 @@ import os
 from conans import ConanFile, tools, CMake
 
 
-class LibZMQConan(ConanFile):
-    name = "libzmq"
+class ZeroMQConan(ConanFile):
+    name = "zeromq"
     homepage = "https://github.com/zeromq/libzmq"
     description = "ZeroMQ is a community of projects focused on decentralized messaging and computing"
     topics = ("conan", "zmq", "libzmq", "message-queue", "asynchronous")
@@ -23,6 +23,7 @@ class LibZMQConan(ConanFile):
     }
     generators = "cmake"
 
+    _cmake = None
     _source_subfolder = "source_subfolder"
     _build_subfolder = "build_subfolder"
 
@@ -43,16 +44,18 @@ class LibZMQConan(ConanFile):
         os.rename("libzmq-{}".format(self.version), self._source_subfolder)
 
     def _configure_cmake(self):
-        cmake = CMake(self)
-        cmake.definitions["ENABLE_CURVE"] = self.options.encryption is not None
-        cmake.definitions["WITH_LIBSODIUM"] = self.options.encryption == "libsodium"
-        cmake.definitions["ZMQ_BUILD_TESTS"] = False
-        cmake.definitions["WITH_PERF_TOOL"] = False
-        cmake.definitions["BUILD_SHARED"] = self.options.shared
-        cmake.definitions["BUILD_STATIC"] = not self.options.shared
-        cmake.definitions["ENABLE_CPACK"] = False
-        cmake.configure(build_folder=self._build_subfolder)
-        return cmake
+        if self._cmake:
+            return self._cmake
+        self._cmake = CMake(self)
+        self._cmake.definitions["ENABLE_CURVE"] = self.options.encryption is not None
+        self._cmake.definitions["WITH_LIBSODIUM"] = self.options.encryption == "libsodium"
+        self._cmake.definitions["ZMQ_BUILD_TESTS"] = False
+        self._cmake.definitions["WITH_PERF_TOOL"] = False
+        self._cmake.definitions["BUILD_SHARED"] = self.options.shared
+        self._cmake.definitions["BUILD_STATIC"] = not self.options.shared
+        self._cmake.definitions["ENABLE_CPACK"] = False
+        self._cmake.configure(build_folder=self._build_subfolder)
+        return self._cmake
 
     def build(self):
         cmake = self._configure_cmake()
