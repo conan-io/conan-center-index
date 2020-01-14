@@ -112,18 +112,22 @@ class GladConan(ConanFile):
         return cmake
 
     def _get_api(self):
-        api_concat = ""
         if self.options.spec == "gl":
-            spec_api = {"gl": "gl_version", "gles1": "gles1_version", "gles2": "gles2_version", "glsc2": "glsc2_version"}
+            spec_api = {
+                "gl": self.options.gl_version,
+                "gles1": self.options.gles1_version,
+                "gles2": self.options.gles2_version,
+                "glsc2": self.options.glsc2_version
+            }
         elif self.options.spec == "egl":
-            spec_api = {"egl": "egl_version"}
+            spec_api = {"egl": self.options.egl_version}
         elif self.options.spec == "glx":
-            spec_api = {"glx": "glx_version"}
+            spec_api = {"glx": self.options.glx_version}
         elif self.options.spec == "wgl":
-            spec_api = {"wgl": "wgl_version"}
+            spec_api = {"wgl": self.options.wgl_version}
 
-        api_concat += ",".join("{0}={1}".format(api, getattr(self.options, version_key))
-                               for api, version_key in spec_api.items() if getattr(self.options, version_key) != "None")
+        api_concat = ",".join("{0}={1}".format(api_name, api_version)
+                              for api_name, api_version in spec_api.items() if api_version != "None")
 
         return api_concat
 
