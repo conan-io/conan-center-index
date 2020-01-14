@@ -8,7 +8,7 @@ class LibX11Conan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://www.x.org/wiki/"
     description = "Client interface to the X Window System, otherwise known as \'Xlib\'",
-    settings = "os"
+    settings = "os", "compiler", "build_type", "arch"
     _required_system_package = "libx11-dev"
 
     def system_requirements(self):
