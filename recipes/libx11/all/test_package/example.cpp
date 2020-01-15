@@ -5,5 +5,6 @@ int main()
 {
   Display *mydisplay;
   mydisplay = XOpenDisplay("");
+  XCloseDisplay(mydisplay);
   return 0;
 }
