@@ -86,8 +86,8 @@ class PixmanConan(ConanFile):
     def package(self):
         if self.settings.compiler == "Visual Studio":
             self.copy(pattern="*.lib", dst="lib", keep_path=False)
-            self.copy(pattern="*{}pixman.h".format(os.sep), dst=self._includedir, keep_path=False)
-            self.copy(pattern="*{}pixman-version.h".format(os.sep), dst=self._includedir, keep_path=False)
+            self.copy(pattern="*{}pixman.h".format(os.sep), dst=self.includedir, keep_path=False)
+            self.copy(pattern="*{}pixman-version.h".format(os.sep), dst=self.includedir, keep_path=False)
         else:
             autotools = self._configure_autotools()
             autotools.install()
