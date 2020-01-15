@@ -21,7 +21,7 @@ class ZeroMQConan(ConanFile):
         "fPIC": True,
         "encryption": "libsodium",
     }
-    generators = "cmake"
+    generators = "cmake", "cmake_find_package"
 
     _cmake = None
     _source_subfolder = "source_subfolder"
@@ -57,7 +57,21 @@ class ZeroMQConan(ConanFile):
         self._cmake.configure(build_folder=self._build_subfolder)
         return self._cmake
 
+    def _patch_sources(self):
+        os.unlink(os.path.join(self._source_subfolder, "builds", "cmake", "Modules", "FindSodium.cmake"))
+        os.rename("Findlibsodium.cmake", "FindSodium.cmake")
+        tools.replace_in_file(os.path.join(self._source_subfolder, "CMakeLists.txt"),
+                                   "SODIUM_FOUND",
+                                   "libsodium_FOUND")
+        tools.replace_in_file(os.path.join(self._source_subfolder, "CMakeLists.txt"),
+                                   "SODIUM_INCLUDE_DIRS",
+                                   "libsodium_INCLUDE_DIRS")
+        tools.replace_in_file(os.path.join(self._source_subfolder, "CMakeLists.txt"),
+                                   "SODIUM_LIBRARIES",
+                                   "libsodium_LIBRARIES")
+
     def build(self):
+        self._patch_sources()
         cmake = self._configure_cmake()
         cmake.build()
 
