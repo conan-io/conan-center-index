@@ -91,7 +91,7 @@ class IXWebSocketConan(ConanFile):
 
     def package(self):
         # Include package license
-        self.copy("license*", dst="licenses", src="sources")
+        self.copy("LICENSE.txt", dst="licenses", src="sources")
 
         # Include binaries and headers
         self.copy("*.h", dst="include", src="include")
