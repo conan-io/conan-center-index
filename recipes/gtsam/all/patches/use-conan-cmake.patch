@@ -1,0 +1,12 @@
+--- CMakeLists.txt	2019-05-19 18:35:20.000000000 -0700
++++ CMakeLists_test.txt	2020-01-14 19:21:18.352502643 -0800
+@@ -2,6 +2,9 @@
+ project(GTSAM CXX C)
+ cmake_minimum_required(VERSION 3.0)
+ 
++include(../conanbuildinfo.cmake)
++conan_basic_setup()
++
+ # new feature to Cmake Version > 2.8.12
+ # Mac ONLY. Define Relative Path on Mac OS
+ if(NOT DEFINED CMAKE_MACOSX_RPATH)
