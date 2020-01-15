@@ -3,7 +3,7 @@ import subprocess
 import shlex
 
 from conans import ConanFile, CMake, tools
-
+from conans.errors import ConanInvalidConfiguration
 
 class LibX11Conan(ConanFile):
     name = "libx11"
