@@ -142,6 +142,6 @@ class IXWebSocketConan(ConanFile):
         if self.settings.os == "Linux":
             self.cpp_info.system_libs.append("pthread")
 
-        if self.settings.os == "Macos" and not self.options.use_openssl and not self.options.use_mbed_tls:
+        if self.settings.use_tls and self.settings.os == "Macos" and not self.options.use_openssl and not self.options.use_mbed_tls:
             # Required
-             self.cpp_info.frameworks = [ 'Security' ]
+             self.cpp_info.frameworks = [ 'Security', 'CoreFoundation' ]
