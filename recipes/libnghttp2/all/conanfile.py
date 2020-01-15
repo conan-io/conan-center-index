@@ -90,6 +90,12 @@ class Nghttp2Conan(ConanFile):
     def _patch_sources(self):
         for patch in self.conan_data["patches"][self.version]:
             tools.patch(**patch)
+        # tools.replace_in_file(os.path.join(self._source_subfolder, "lib", "CMakeLists.txt"),
+        #                       "set_target_properties(nghttp2_static ",
+        #                       "target_include_directories(nghttp2_static INTERFACE\n"
+        #                       "${CMAKE_CURRENT_BINARY_DIR}/includes\n"
+        #                       "${CMAKE_CURRENT_SOURCE_DIR}/includes)\n"
+        #                       "set_target_properties(nghttp2_static ")
         target_libnghttp2 = "nghttp2" if self.options.shared else "nghttp2_static"
         tools.replace_in_file(os.path.join(self._source_subfolder, "src", "CMakeLists.txt"),
                               "\n"
