@@ -25,7 +25,7 @@ class LibX11Conan(ConanFile):
         if not installer.installed(self._required_system_package):
             raise ConanInvalidConfiguration(
                 "{0} system library missing. Install {0} in your system with something like: "\
-                "sudo apt-get install {0}-dev"
+                "sudo apt-get install {0}"
                 .format(self._required_system_package))
 
     def configure(self):
