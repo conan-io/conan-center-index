@@ -1,6 +1,7 @@
 from conans import ConanFile, AutoToolsBuildEnvironment, tools
 from conans.errors import ConanInvalidConfiguration
 import os
+import glob
 
 
 class PixmanConan(ConanFile):
@@ -10,15 +11,15 @@ class PixmanConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://cairographics.org/"
     license = ("LGPL-2.1-only", "MPL-1.1")
-
     settings = "os", "arch", "compiler", "build_type"
     options = {"shared": [True, False], "fPIC": [True, False]}
     default_options = {'shared': False, 'fPIC': True}
-
-    includedir = os.path.join("include", "pixman-1")
-
     _autotools = None
-    
+
+    @property
+    def _includedir(self):
+        return os.path.join("include", "pixman-1")
+
     @property
     def _folder(self):
         return "{}-{}".format(self.name, self.version)
@@ -85,9 +86,8 @@ class PixmanConan(ConanFile):
     def package(self):
         if self.settings.compiler == "Visual Studio":
             self.copy(pattern="*.lib", dst="lib", keep_path=False)
-            self.copy(pattern="*.pdb", dst="lib", keep_path=False)
-            self.copy(pattern="*{}pixman.h".format(os.sep), dst=self.includedir, keep_path=False)
-            self.copy(pattern="*{}pixman-version.h".format(os.sep), dst=self.includedir, keep_path=False)
+            self.copy(pattern="*{}pixman.h".format(os.sep), dst=self._includedir, keep_path=False)
+            self.copy(pattern="*{}pixman-version.h".format(os.sep), dst=self._includedir, keep_path=False)
         else:
             autotools = self._configure_autotools()
             autotools.install()
@@ -99,6 +99,7 @@ class PixmanConan(ConanFile):
 
     def package_info(self):
         self.cpp_info.libs = tools.collect_libs(self)
-        self.cpp_info.includedirs = [self.includedir]
+        self.cpp_info.includedirs = [self._includedir]
         self.cpp_info.names['pkg_config'] = 'pixman-1'
-
+        if self.settings.os == "Linux":
+            self.cpp_info.system_libs = ["pthread", "m"]
