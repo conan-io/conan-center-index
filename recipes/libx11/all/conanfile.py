@@ -5,6 +5,10 @@ import shlex
 from conans import ConanFile, CMake, tools
 from conans.errors import ConanInvalidConfiguration
 
+def remove_prefix(s, prefix):
+    return s[len(prefix):] if s.startswith(prefix) else s
+
+
 class LibX11Conan(ConanFile):
     name = "libx11"
     license = "X11"
@@ -36,23 +40,20 @@ class LibX11Conan(ConanFile):
         del self.settings.compiler.libcxx
         del self.settings.compiler.cppstd
 
-    def _populate_cpp_info(self, lib_name):
-        def get_value(arg, prefix):
-            return arg[len(prefix):] if arg[:len(prefix)] == prefix else ""
-
-        ret = subprocess.check_output("pkg-config --cflags --libs {}".format(lib_name), shell=True)
-        args = shlex.split(ret)
-        self.cpp_info.includedirs.extend([get_value(arg, '-L') for arg in args if get_value(arg, '-L') != ""])
-        self.cpp_info.libdirs.extend([get_value(arg, '-I') for arg in args if get_value(arg, '-I') != ""])
-        self.cpp_info.libs.extend([get_value(arg, '-l') for arg in args if get_value(arg, '-l') != ""])
-        self.cpp_info.defines.extend([get_value(arg, '-D') for arg in args if get_value(arg, '-D') != ""])
-
     def package(self):
         self.copy("COPYING.txt", dst="licenses")
 
     def package_info(self):
         if self._system_packages().installed("pkg-config"):
-            self._populate_cpp_info("x11")
+            pkg = tools.PkgConfig("x11")
+            self.cpp_info.includedirs = [remove_prefix(x,'-I') for x in pkg.cflags_only_I]
+            self.cpp_info.libdirs = [remove_prefix(x,'-L') for x in pkg.libs_only_L]
+            self.cpp_info.libs = [remove_prefix(x,'-l') for x in pkg.libs_only_l]
+            self.cpp_info.defines = [remove_prefix(x,'-D') for x in pkg.cflags_only_other if x.startswith('-D')]
+            self.cpp_info.cflags = [x for x in pkg.cflags_only_other if not x.startswith('-D')]
+            self.cpp_info.cppflags = [x for x in pkg.cflags_only_other if not x.startswith('-D')]
+            self.cpp_info.sharedlinkflags = pkg.libs_only_other
+            self.cpp_info.exelinkflags = pkg.libs_only_other
         else:
             self.cpp_info.libs.append("X11")
 
