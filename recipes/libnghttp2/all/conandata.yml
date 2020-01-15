@@ -18,3 +18,5 @@ patches:
       base_path: "source_subfolder"
     - patch_file: "patches/fix-findLibevent.cmake"
       base_path: "source_subfolder"
+    - patch_file: "patches/nghttp_static_include_directories.patch"
+      base_path: "source_subfolder"
