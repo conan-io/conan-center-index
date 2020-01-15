@@ -46,7 +46,9 @@ int main() {
 
     angle = (0.5 / NUM_GRADIENTS + 1 / (double)NUM_GRADIENTS) * 720 - 180;
 
+#ifndef _WIN32
     src_img = pixman_image_create_conical_gradient (&c, pixman_double_to_fixed(angle), stops, NUM_STOPS);
+#endif
     pixman_image_unref (src_img);
 
     return EXIT_SUCCESS;
