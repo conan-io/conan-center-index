@@ -42,6 +42,12 @@ class IXWebSocketConan(ConanFile):
         # be a challenge.
         return True 
 
+    def configure(self):
+        if self.options.use_mbed_tls and not self.options.use_tls or self.options.get_safe("use_openssl") and not self.options.use_tls:
+            raise ConanInvalidConfiguration("TLS must be enabled to use mbedtls")
+        elif self.options.use_mbed_tls and self.options.get_safe("use_openssl"):
+            raise ConanInvalidConfiguration("Cannot use both OpenSSL and MbedTLS")
+
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
@@ -53,13 +59,9 @@ class IXWebSocketConan(ConanFile):
             del self.options.use_openssl
 
     def requirements(self):
-        if self.options.use_mbed_tls == True and self.options.use_tls == False:
-            raise ConanInvalidConfiguration("TLS must be enabled to use mbedtls")
-        elif self.options.use_mbed_tls == True and "use_openssl" in self.options and self.options["use_openssl"] == True:
-            raise ConanInvalidConfiguration("Cannot use both OpenSSL and MbedTLS")
 
         if(self.canUseOpenSSL() and not self.options.use_mbed_tls and self.options.use_tls 
-                                and ("use_openssl" not in self.options or self.options.use_openssl == True)):    
+                                and ("use_openssl" not in self.options or self.options.use_openssl)):    
             self.requires.add("openssl/1.1.1c")
 
         self.requires.add("zlib/1.2.11")
@@ -73,12 +75,10 @@ class IXWebSocketConan(ConanFile):
         tools.get(**self.conan_data["sources"][self.version])
         os.rename("IXWebSocket-" + self.version, "sources")
 
-    def addLibrary(self, keyBase, includeName, cmake, plural=False):
+    def addLibrary(self, keyBase, includeName, cmake):
         cmake.definitions[keyBase +
                           "_LIBRARY"] = self.deps_cpp_info[includeName].rootpath
         includePath = keyBase + "_INCLUDE_DIR"
-        if plural == True:
-            includePath += "S"
         cmake.definitions[includePath] = os.path.join(
             self.deps_cpp_info[includeName].rootpath, self.deps_cpp_info[includeName].includedirs[0])
 
@@ -96,9 +96,9 @@ class IXWebSocketConan(ConanFile):
             os.environ['OPENSSL_ROOT_DIR'] = self.deps_cpp_info["openssl"].rootpath
         self.addLibrary("ZLIB", "zlib", cmake)
         if not self.options.use_vendored_third_party and (self.options.use_mbed_tls or self.options.use_tls and self.settings.os == "Windows"):
-            self.addLibrary("MBEDTLS", "mbedtls", cmake, True)
-            self.addLibrary("MBEDCRYPTO", "mbedtls", cmake, True)
-            self.addLibrary("MBEDX509", "mbedtls", cmake, True)
+            self.addLibrary("MBEDTLS", "mbedtls", cmake)
+            self.addLibrary("MBEDCRYPTO", "mbedtls", cmake)
+            self.addLibrary("MBEDX509", "mbedtls", cmake)
         cmake.configure()
         return cmake
 
