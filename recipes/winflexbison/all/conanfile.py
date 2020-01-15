@@ -10,7 +10,7 @@ class WinflexbisonConan(ConanFile):
     topics = ("conan", "winflexbison", "flex", "bison")
 
     generators = "cmake"
-    license = "GPLv3"
+    license = "GPL-3.0-or-later"
     exports_sources = ["CMakeLists.txt"]
 
     settings = "os_build", "build_type", "arch", "compiler"
@@ -31,6 +31,14 @@ class WinflexbisonConan(ConanFile):
         cmake.configure()
         return cmake
 
+    def _extract_license(self):
+        with open(os.path.join(self._source_subfolder, "bison", "data", "skeletons", "glr.cc")) as f:
+            content_lines = f.readlines()
+        license_content = []
+        for i in range(2, 16):
+            license_content.append(content_lines[i][2:-1])
+        tools.save("COPYING.GPL3", "\n".join(license_content))
+
     def build(self):
         cmake = self._configure_cmake()
         cmake.build()
@@ -45,12 +53,8 @@ class WinflexbisonConan(ConanFile):
         actual_build_path = "{}/bin/{}".format(self._source_subfolder, self.settings.build_type)
         self.copy(pattern="*.exe", dst="bin", src=actual_build_path, keep_path=False)
 
-        with open(os.path.join(self._source_subfolder, "bison", "data", "skeletons", "glr.cc")) as f:
-            content_lines = f.readlines()
-        license_content = []
-        for i in range(2, 16):
-            license_content.append(content_lines[i][2:-1])
-        tools.save(os.path.join(self.package_folder, "licenses", "license"), "\n".join(license_content))
+        self._extract_license()
+        self.copy(pattern="COPYING.GPL3", dst="licenses")
 
     def package_id(self):
         self.info.include_build_settings()
