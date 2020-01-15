@@ -16,5 +16,5 @@ class IXWebSocketTestConan(ConanFile):
 
     def test(self):
         if not tools.cross_building(self.settings):
-            os.chdir("bin")
-            self.run(".%stests" % os.sep)
+            self.run(os.path.join("bin", "tests"), run_environment=True)
+
