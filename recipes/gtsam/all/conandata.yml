@@ -1,0 +1,8 @@
+sources:
+  "4.0.0":
+    url: "https://github.com/borglab/gtsam/archive/4.0.0.tar.gz"
+    sha256: "4711f2b3837c2681563e7fc0560ff2f9aba0eb7f3a72c1849db2dfcbce0e4f46"
+patches:
+  "4.0.0":
+    - patch_file: "patches/use-conan-cmake.patch"
+      base_path: "source_subfolder"
