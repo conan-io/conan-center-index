@@ -12,6 +12,7 @@ class LibX11Conan(ConanFile):
     homepage = "https://www.x.org/wiki/"
     description = "Client interface to the X Window System, otherwise known as \'Xlib\'",
     settings = "os", "compiler", "build_type", "arch"
+    exports = ["COPYING.txt"]
     _required_system_package = "libx11-dev"
     _system_package_tool = None
 
@@ -45,6 +46,9 @@ class LibX11Conan(ConanFile):
         self.cpp_info.libdirs.extend([get_value(arg, '-I') for arg in args if get_value(arg, '-I') != ""])
         self.cpp_info.libs.extend([get_value(arg, '-l') for arg in args if get_value(arg, '-l') != ""])
         self.cpp_info.defines.extend([get_value(arg, '-D') for arg in args if get_value(arg, '-D') != ""])
+
+    def package(self):
+        self.copy("COPYING.txt", dst="licenses")
 
     def package_info(self):
         if self._system_packages().installed("pkg-config"):
