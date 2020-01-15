@@ -18,7 +18,8 @@ class LibX11Conan(ConanFile):
         installer = tools.SystemPackageTool()
         if not installer.installed(self._required_system_package):
             raise ConanInvalidConfiguration(
-                "X11 compatibility requires {0}. Install {0} with something like: sudo apt-get install {0}"
+                "{0} system library missing. Install {0} in your system with something like: "\
+                "sudo apt-get install {0}-dev"
                 .format(self._required_system_package))
 
     def configure(self):
@@ -28,26 +29,20 @@ class LibX11Conan(ConanFile):
         del self.settings.compiler.libcxx
         del self.settings.compiler.cppstd
 
-    def _get_package_info(self, lib_name):
+    def _get_pkg_config_info(lib_name):
+        def get_value(arg, prefix):
+            return arg[len(prefix):]) if arg[:len(prefix)] == prefix else ""
+
         ret = subprocess.check_output("pkg-config --cflags --libs {}".format(lib_name), shell=True)
-        flags = shlex.split(ret)
-        include_dirs = []
-        lib_dirs = []
-        libs = []
-        for flag in flags:
-            if flag[:2] == '-L':
-                lib_dirs.append(flag[2:])
-            elif flag[:2] == '-I':
-                include_dirs.append(flag[2:])
-            elif flag[:2] == '-l':
-                libs.append(flag[2:])
-        return include_dirs, lib_dirs, libs
+        args = shlex.split(ret)
+        self.cpp_info.includedirs.extend([get_value(arg, '-L') for arg in args if get_value(arg, '-L') != ""])
+        self.cpp_info.libdirs.extend([get_value(arg, '-I') for arg in args if get_value(arg, '-I') != ""])
+        self.cpp_info.libs.extend([get_value(arg, '-l') for arg in args if get_value(arg, '-l') != ""])
+        self.cpp_info.defines.extend([get_value(arg, '-D') for arg in args if get_value(arg, '-D') != ""])
 
     def package_info(self):
-        includedirs, libdirs, libs = self._get_package_info("x11")
-        self.cpp_info.libs.extend(libs)
-        self.cpp_info.includedirs.extend(includedirs)
-        self.cpp_info.libdirs.extend(libdirs)
+        self._get_pkg_config_info("x11")
+
 
     def package_id(self):
         self.info.header_only()
