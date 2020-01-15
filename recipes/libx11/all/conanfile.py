@@ -13,9 +13,15 @@ class LibX11Conan(ConanFile):
     description = "Client interface to the X Window System, otherwise known as \'Xlib\'",
     settings = "os", "compiler", "build_type", "arch"
     _required_system_package = "libx11-dev"
+    _system_package_tool = None
+
+    def _system_packages(self):
+        if not self._system_package_tool:
+            self._system_package_tool = tools.SystemPackageTool()
+        return self._system_package_tool
 
     def system_requirements(self):
-        installer = tools.SystemPackageTool()
+        installer = self._system_packages()
         if not installer.installed(self._required_system_package):
             raise ConanInvalidConfiguration(
                 "{0} system library missing. Install {0} in your system with something like: "\
@@ -29,7 +35,7 @@ class LibX11Conan(ConanFile):
         del self.settings.compiler.libcxx
         del self.settings.compiler.cppstd
 
-    def _get_pkg_config_info(lib_name):
+    def _populate_cpp_info(self, lib_name):
         def get_value(arg, prefix):
             return arg[len(prefix):] if arg[:len(prefix)] == prefix else ""
 
@@ -41,8 +47,10 @@ class LibX11Conan(ConanFile):
         self.cpp_info.defines.extend([get_value(arg, '-D') for arg in args if get_value(arg, '-D') != ""])
 
     def package_info(self):
-        self._get_pkg_config_info("x11")
-
+        if self._system_packages().installed("pkg-config"):
+            self._populate_cpp_info("x11")
+        else:
+            self.cpp_info.libs.append("X11")
 
     def package_id(self):
         self.info.header_only()
