@@ -51,6 +51,11 @@ class ZMQConan(ConanFile):
         cmake.install()
         tools.rmdir(os.path.join(self.package_folder, 'share'))
         tools.rmdir(os.path.join(self.package_folder, 'lib', 'pkgconfig'))
+        tools.rmdir(os.path.join(self.package_folder, 'CMake'))
+        for f in ['concrt140.dll', 'msvcp140.dll', 'vcruntime140.dll']:
+            f = os.path.join(self.package_folder, 'bin', f)
+            if os.path.isfile(f):
+                os.unlink(f)
 
     def package_info(self):
         self.cpp_info.libs = tools.collect_libs(self)
