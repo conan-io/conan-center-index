@@ -68,9 +68,6 @@ class IXWebSocketConan(ConanFile):
                                                           and not self.canUseOpenSSL() or self.options.use_mbed_tls):
             self.requires.add("mbedtls/2.6.1")
 
-        if self.settings.os == "Macos" and not self.options.use_openssl and not self.options.use_mbed_tls:
-            # Required
-             self.cpp_info.frameworks = [ 'Security' ]
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
@@ -126,11 +123,11 @@ class IXWebSocketConan(ConanFile):
         self.cpp_info.libs = tools.collect_libs(self)
         if self.options.use_tls and self.settings.os == "Windows":
             # Include linking with the websocket
-            self.cpp_info.libs += ["Ws2_32"]
+            self.cpp_info.system_libs.append("Ws2_32")
         if self.options.use_tls and (self.options.use_mbed_tls and self.options.use_vendored_third_party or self.settings.os == "Windows"):
             # This doesn't really affect MSVC builds, but it might if the compiler changes in the future.
             if "mbedtls" not in self.cpp_info.libs:
-                self.cpp_info.libs += ["mbedtls", "mbedx509", "mbedcrypto"]
+                self.cpp_info.libs.extend(["mbedtls", "mbedx509", "mbedcrypto"])
             else:
                 pIdx = self.cpp_info.libs.index("mbedtls")
                 cIdx = self.cpp_info.libs.index("mbedcrypto")
@@ -143,4 +140,8 @@ class IXWebSocketConan(ConanFile):
                         x for x in self.cpp_info.libs if "mbed" not in x] + ["mbedtls", "mbedx509", "mbedcrypto"]
 
         if self.settings.os == "Linux":
-            self.cpp_info.libs.append("pthread")
+            self.cpp_info.system_libs.append("pthread")
+
+        if self.settings.os == "Macos" and not self.options.use_openssl and not self.options.use_mbed_tls:
+            # Required
+             self.cpp_info.frameworks = [ 'Security' ]
