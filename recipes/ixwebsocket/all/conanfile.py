@@ -73,10 +73,6 @@ class IXWebSocketConan(ConanFile):
         tools.get(**self.conan_data["sources"][self.version])
         os.rename("IXWebSocket-" + self.version, "sources")
 
-    def _add_library(self, keyBase, includeName, cmake):
-        cmake.definitions[keyBase +
-                          "_LIBRARY"] = self.deps_cpp_info[includeName].rootpath
-
     def _configure_cmake(self):
         cmake = CMake(self)
 
