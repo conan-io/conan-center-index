@@ -31,7 +31,7 @@ class LibX11Conan(ConanFile):
 
     def _get_pkg_config_info(lib_name):
         def get_value(arg, prefix):
-            return arg[len(prefix):]) if arg[:len(prefix)] == prefix else ""
+            return arg[len(prefix):] if arg[:len(prefix)] == prefix else ""
 
         ret = subprocess.check_output("pkg-config --cflags --libs {}".format(lib_name), shell=True)
         args = shlex.split(ret)
