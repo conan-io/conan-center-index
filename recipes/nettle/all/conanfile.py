@@ -8,7 +8,7 @@ class NettleTLS(ConanFile):
     description = "The Nettle and Hogweed low-level cryptographic libraries"
     homepage = "https://www.lysator.liu.se/~nisse/nettle"
     topics = ("conan", "nettle", "crypto", "low-level-cryptographic", "cryptographic")
-    license = ("GPL-2.0", "GPL-3.0")
+    license = ("GPL-2.0-or-later", "GPL-3.0-or-later")
     url = "https://github.com/conan-io/conan-center-index"
     settings = "os", "arch", "compiler", "build_type"
     options = {
