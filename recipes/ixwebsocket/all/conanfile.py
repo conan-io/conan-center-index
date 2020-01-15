@@ -1,4 +1,5 @@
 from conans import ConanFile, CMake, tools
+from conans.errors import ConanInvalidConfiguration
 import os
 
 
@@ -23,33 +24,53 @@ class IXWebSocketConan(ConanFile):
     options = {
         "use_mbed_tls": [False, True],
         "use_tls": [True, False],
+        "use_openssl": [False, True],
         "use_vendored_third_party": [True, False],
         "use_ws": [False, True],
         "fPIC": [True, False]
     }
     default_options = {k: v[0] for k, v in options.items()}
 
+    def intVersion(self):
+        return int(self.version.replace(".", ""))
+
+    def canUseOpenSSL(self):
+        if self.settings.os == "Windows":
+            # Future: support for OpenSSL was introduced in 7.9.3. Earlier versions force MbedTLS
+            return False if self.intVersion() < 793 else True
+        # The others do, by default, support OpenSSL and MbedTLS. Non-standard operating systems might
+        # be a challenge.
+        return True 
+
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
             self.default_options["use_mbed_tls"] = True
+            if not self.canUseOpenSSL():
+                del self.options.use_openssl
+        elif self.settings.os == "Linux":
+            # On Linux, if TLS is enabled and mbed is disabled, the only option is OpenSSL.
+            del self.options.use_openssl
 
     def requirements(self):
+        if self.options.use_mbed_tls == True and self.options.use_tls == False:
+            raise ConanInvalidConfiguration("TLS must be enabled to use mbedtls")
+        elif self.options.use_mbed_tls == True and "use_openssl" in self.options and self.options["use_openssl"] == True:
+            raise ConanInvalidConfiguration("Cannot use both OpenSSL and MbedTLS")
 
-        if(self.settings.os != "Windows" and self.settings.os != "Macos" and not self.options.use_mbed_tls and self.options.use_tls):
-            # On Windows and Mac, the current CMake config prefers different SSL providers.
-            # Specifically, Windows is forced to use MbedTLS, while Mac can use
-            # MBEDTLS or an Apple-specific SSL provider. UNIX can use OpenSSL or MbedTLS
-            # So even though both these operating systems support it, it isn't used.
+        if(self.canUseOpenSSL() and not self.options.use_mbed_tls and self.options.use_tls 
+                                and ("use_openssl" not in self.options or self.options.use_openssl == True)):    
             self.requires.add("openssl/1.1.1c")
 
         self.requires.add("zlib/1.2.11")
 
-        if (self.options.use_mbed_tls and not self.options.use_tls):
-            print("WARN: Attempting to use mbed tls without enabling TLS.")
-
-        if not self.options.use_vendored_third_party and (self.settings.os == "Windows" and self.options.use_tls or self.options.use_mbed_tls):
+        if not self.options.use_vendored_third_party and (self.settings.os == "Windows" and self.options.use_tls 
+                                                          and not self.canUseOpenSSL() or self.options.use_mbed_tls):
             self.requires.add("mbedtls/2.6.1")
+
+        if self.settings.os == "Macos" and not self.options.use_openssl and not self.options.use_mbed_tls:
+            # Required
+             self.cpp_info.frameworks = [ 'Security' ]
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
