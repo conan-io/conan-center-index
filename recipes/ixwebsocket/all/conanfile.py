@@ -26,7 +26,6 @@ class IXWebSocketConan(ConanFile):
         "use_mbed_tls": [False, True],
         "use_tls": [True, False],
         "use_openssl": [False, True],
-        "use_vendored_third_party": [True, False],
         "fPIC": [True, False]
     }
     default_options = {k: v[0] for k, v in options.items()}
@@ -46,7 +45,6 @@ class IXWebSocketConan(ConanFile):
         elif self.options.use_mbed_tls and self.options.get_safe("use_openssl"):
             raise ConanInvalidConfiguration("Cannot use both OpenSSL and MbedTLS")
 
-
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
@@ -65,9 +63,8 @@ class IXWebSocketConan(ConanFile):
 
         self.requires.add("zlib/1.2.11")
 
-        if not self.options.use_vendored_third_party and (self.settings.os == "Windows" and self.options.use_tls
-                                                          and not self._can_use_openssl() or self.options.use_mbed_tls):
-            self.requires.add("mbedtls/2.6.1")
+        if self.settings.os == "Windows" and self.options.use_tls and not self._can_use_openssl() or self.options.use_mbed_tls:
+            self.requires.add("mbedtls/2.16.3-apache")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
@@ -79,7 +76,6 @@ class IXWebSocketConan(ConanFile):
         # User-selectable options
         cmake.definitions["USE_TLS"] = self.options.use_tls
         cmake.definitions["USE_MBED_TLS"] = self.options.use_mbed_tls
-        cmake.definitions["USE_VENDORED_THIRD_PARTY"] = self.options.use_vendored_third_party
 
         cmake.configure()
         return cmake
@@ -87,7 +83,6 @@ class IXWebSocketConan(ConanFile):
     def build(self):
         cmake = self._configure_cmake()
         cmake.build()
-        cmake.install()
 
     def package(self):
         # Include package license
