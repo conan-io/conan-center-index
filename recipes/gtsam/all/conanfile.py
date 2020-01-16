@@ -42,7 +42,7 @@ class gtsamConan(ConanFile):
                         "pose3_expmap": False,
                         "rot3_expmap": False,
                         "enable_consistency_checks": False,
-                        "with_TBB": True,
+                        "with_TBB": False,
                         "with_eigen_MKL": False,
                         "with_eigen_MKL_OPENMP": False,
                         "throw_cheirality_exception": True,
