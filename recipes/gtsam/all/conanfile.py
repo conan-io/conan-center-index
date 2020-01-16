@@ -104,7 +104,7 @@ class gtsamConan(ConanFile):
         return self._cmake
 
     def configure(self):
-        self.requires("boost/1.68.0@conan/stable")
+        self.requires("boost/1.72.0")
         self.options["boost"].shared = not self.options.Boost_USE_STATIC_LIBS
         self.requires("eigen/3.3.7")
 
