@@ -14,7 +14,7 @@ class LibXrandrConan(ConanFile):
     license = "X11"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://www.x.org/wiki/"
-    description = "libXrandr provides an X Window System client interface to the RandR extension to the X protocol.",
+    description = "libXrandr provides an X Window System client interface to the RandR extension to the X protocol."
     settings = "os", "compiler", "build_type", "arch"
     _required_system_package = "libxrandr-dev"
     _system_package_tool = None
