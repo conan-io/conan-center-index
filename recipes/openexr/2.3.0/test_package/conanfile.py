@@ -1,4 +1,4 @@
-from conans import ConanFile, CMake, tools
+from conans import ConanFile, CMake
 import os
 
 
@@ -12,6 +12,6 @@ class DefaultNameConan(ConanFile):
         cmake.build()
 
     def test(self):
-        imgfile = os.path.join(self.source_folder, 'comp_short_decode_piz.exr')
-        with tools.chdir('bin'):
-            self.run(".%stestPackage %s" % (os.sep, imgfile), run_environment=True)
+        bin_path = os.path.join("bin", "test_package")
+        imgfile = os.path.join(self.source_folder, "comp_short_decode_piz.exr")
+        self.run("{} {}".format(bin_path, imgfile), run_environment=True)
