@@ -31,7 +31,6 @@ class gtsamConan(ConanFile):
                "build_unstable": [True, False],
                "disable_new_timers": [True, False],
                "build_type_postfixes": [True, False],
-               "boost_use_static_libs": [True, False],
                "install_matlab_toolbox": [True, False],
                "install_cython_toolbox": [True, False],
                "install_cppunitlite": [True, False],
@@ -56,7 +55,6 @@ class gtsamConan(ConanFile):
                         "build_unstable": True,
                         "disable_new_timers": False,
                         "build_type_postfixes": True,
-                        "boost_use_static_libs": True,
                         "install_matlab_toolbox": False,
                         "install_cython_toolbox": False,
                         "install_cppunitlite": True,
@@ -88,7 +86,6 @@ class gtsamConan(ConanFile):
             self._cmake.definitions["GTSAM_DISABLE_NEW_TIMERS"] = self.options.disable_new_timers
             self._cmake.definitions["GTSAM_BUILD_TYPE_POSTFIXES"] = self.options.build_type_postfixes
             self._cmake.definitions["GTSAM_BUILD_TESTS"] = False
-            self._cmake.definitions["Boost_USE_STATIC_LIBS"] = self.options.boost_use_static_libs
             self._cmake.definitions["Boost_NO_SYSTEM_PATHS"] = True
             self._cmake.definitions["GTSAM_BUILD_DOCS"] = False
             self._cmake.definitions["GTSAM_BUILD_DOC_HTML"] = False
@@ -109,7 +106,7 @@ class gtsamConan(ConanFile):
 
     def configure(self):
         self.requires("boost/1.72.0")
-        self.options["boost"].shared = not self.options.boost_use_static_libs
+        self.options["boost"].shared = False
         self.requires("eigen/3.3.7")
 
     def source(self):
