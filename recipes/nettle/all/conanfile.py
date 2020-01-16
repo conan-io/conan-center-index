@@ -22,6 +22,7 @@ class NettleTLS(ConanFile):
         "public_key": True,
     }
 
+    _autotools = None
     _source_subfolder = "source_subfolder"
 
     def config_options(self):
@@ -49,7 +50,9 @@ class NettleTLS(ConanFile):
             self.build_requires("msys2/20190524")
 
     def _configure_autotools(self):
-        autotools = AutoToolsBuildEnvironment(self, win_bash=tools.os_info.is_windows)
+        if self._autotools:
+            return self._autotools
+        self._autotools = AutoToolsBuildEnvironment(self, win_bash=tools.os_info.is_windows)
         conf_args = [
             "--enable-public-key" if self.options.public_key else "--disable-public-key",
         ]
@@ -61,8 +64,8 @@ class NettleTLS(ConanFile):
             conf_args.append("--enable-x86-aesni")
             if self.version >= "3.5":
                 conf_args.append("--enable-x86-sha-ni")
-        autotools.configure(args=conf_args, configure_dir=self._source_subfolder)
-        return autotools
+        self._autotools.configure(args=conf_args, configure_dir=self._source_subfolder)
+        return self._autotools
 
     def _patch_sources(self):
         makefile_in = os.path.join(self._source_subfolder, "Makefile.in")
