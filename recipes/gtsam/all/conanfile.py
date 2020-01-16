@@ -103,6 +103,10 @@ class gtsamConan(ConanFile):
             self._cmake.configure(source_folder=self._source_subfolder, build_folder=self._build_subfolder)
         return self._cmake
 
+    def config_options(self):
+        if self.settings.os == "Windows":
+            del self.options.fPIC
+
     def configure(self):
         self.requires("boost/1.72.0")
         self.options["boost"].shared = not self.options.Boost_USE_STATIC_LIBS
