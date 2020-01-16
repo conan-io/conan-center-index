@@ -117,3 +117,6 @@ conan_staticlibs="{staticlibs}"
         self.env_info.PATH.append(os.path.join(self.package_folder, "bin"))
         self.env_info.FT2_CONFIG = freetype_config
         self._chmod_plus_x(freetype_config)
+        self.cpp_info.names['cmake_find_package'] = 'Freetype'
+        self.cpp_info.names['cmake_find_package_multi'] = 'Freetype'
+        self.cpp_info.names['pkg_config'] = 'freetype2'

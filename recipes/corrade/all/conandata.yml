@@ -1,0 +1,4 @@
+sources:
+  "2019.10":
+    sha256: 19dbf3c0b28a06a7017d627ee7b84c23b994c469198c1134a8aeba9cfbff7ec3
+    url: https://github.com/mosra/corrade/archive/v2019.10.tar.gz

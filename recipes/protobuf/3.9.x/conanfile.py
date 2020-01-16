@@ -84,4 +84,5 @@ class ProtobufConan(ConanFile):
         if self.settings.os == "Windows":
             if self.options.shared:
                 self.cpp_info.defines = ["PROTOBUF_USE_DLLS"]
-        self.cpp_info.name = "Protobuf"
+        self.cpp_info.names["cmake_find_package"] = "Protobuf"
+        self.cpp_info.names["cmake_find_package_multi"] = "Protobuf"

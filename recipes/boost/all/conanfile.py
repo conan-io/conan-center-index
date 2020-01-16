@@ -1,9 +1,10 @@
 from conans import ConanFile
 from conans import tools
 from conans.client.build.cppstd_flags import cppstd_flag
-from conans.model.version import Version
+from conans.tools import Version
 from conans.errors import ConanException
 
+from conans.errors import ConanInvalidConfiguration
 import os
 import sys
 
@@ -53,27 +54,32 @@ class BoostConan(ConanFile):
     }
     options.update({"without_%s" % libname: [True, False] for libname in lib_list})
 
-    default_options = ["shared=False",
-                       "header_only=False",
-                       "error_code_header_only=False",
-                       "system_no_deprecated=False",
-                       "asio_no_deprecated=False",
-                       "filesystem_no_deprecated=False",
-                       "fPIC=True",
-                       "layout=system",
-                       "magic_autolink=False",
-                       "python_executable=None",
-                       "python_version=None",
-                       "zlib=True",
-                       "bzip2=True",
-                       "lzma=False",
-                       "zstd=False",
-                       "segmented_stacks=False",
-                       "extra_b2_flags=None"]
+    default_options = {
+        'shared': False,
+        'header_only': False,
+        'error_code_header_only': False,
+        'system_no_deprecated': False,
+        'asio_no_deprecated': False,
+        'filesystem_no_deprecated': False,
+        'fPIC': True,
+        'layout': 'system',
+        'magic_autolink': False,
+        'python_executable': 'None',
+        'python_version': 'None',
+        'namespace': 'boost',
+        'namespace_alias': False,
+        'zlib': True,
+        'bzip2': True,
+        'lzma': False,
+        'zstd': False,
+        'segmented_stacks': False,
+        'extra_b2_flags': 'None',
+    }
 
-    default_options.extend(["without_%s=False" % libname for libname in lib_list if libname != "python"])
-    default_options.append("without_python=True")
-    default_options = tuple(default_options)
+    for libname in lib_list:
+        if libname != "python":
+            default_options.update({"without_%s" % libname: False})
+    default_options.update({"without_python": True})
     short_paths = True
     no_copy_source = True
     exports_sources = ['patches/*']
@@ -206,7 +212,7 @@ class BoostConan(ConanFile):
                                           "import sys; "
                                           "print('%s.%s' % (sys.version_info[0], sys.version_info[1]))")
         if self.options.python_version and version != self.options.python_version:
-            raise Exception("detected python version %s doesn't match conan option %s" % (version,
+            raise ConanInvalidConfiguration("detected python version %s doesn't match conan option %s" % (version,
                                                                                           self.options.python_version))
         return version
 
@@ -300,7 +306,7 @@ class BoostConan(ConanFile):
                 if os.path.isfile(python_lib):
                     self.output.info('found python library: %s' % python_lib)
                     return python_lib.replace('\\', '/')
-        raise Exception("couldn't locate python libraries - make sure you have installed python development files")
+        raise ConanInvalidConfiguration("couldn't locate python libraries - make sure you have installed python development files")
 
     @property
     def _b2_exe(self):
@@ -333,6 +339,26 @@ class BoostConan(ConanFile):
             with tools.chdir(self._boost_dist_root):
                 # To show the libraries *1
                 # self.run("%s --show-libraries" % b2_exe)
+                self.run(cmd)
+
+        arch = self.settings.get_safe('arch')
+        if arch.startswith("asm.js"):
+            self._create_emscripten_libs()
+
+    def _create_emscripten_libs(self):
+        # Boost Build doesn't create the libraries, but it gets close,
+        # leaving .bc files where the libraries would be.
+        staged_libs = os.path.join(
+            self.source_folder, self._boost_dir, "stage", "lib"
+        )
+        for bc_file in os.listdir(staged_libs):
+            if bc_file.startswith("lib") and bc_file.endswith(".bc"):
+                a_file = bc_file[:-3] + ".a"
+                cmd = "emar q {dst} {src}".format(
+                    dst=os.path.join(staged_libs, a_file),
+                    src=os.path.join(staged_libs, bc_file),
+                )
+                self.output.info(cmd)
                 self.run(cmd)
 
     @property
@@ -547,9 +573,10 @@ class BoostConan(ConanFile):
             pass
         elif arch.startswith("mips"):
             pass
+        elif arch.startswith("asm.js"):
+            pass
         else:
-            raise Exception("I'm so sorry! I don't know the appropriate ABI for "
-                            "your architecture. :'(")
+            self.output.warn("Unable to detect the appropriate ABI for %s architecture." % arch)
         self.output.info("Cross building flags: %s" % flags)
 
         return flags
@@ -665,6 +692,8 @@ class BoostConan(ConanFile):
             return "msvc", _msvc_version, ""
         elif self.settings.os == "Windows" and self.settings.compiler == "clang":
             return "clang-win", compiler_version, ""
+        elif self.settings.os == "Emscripten" and self.settings.compiler == "clang":
+            return "emscripten", compiler_version, self._cxx
         elif self.settings.compiler == "gcc" and tools.is_apple_os(self.settings.os):
             return "darwin", compiler_version, self._cxx
         elif compiler == "gcc" and compiler_version[0] >= "5":
@@ -730,7 +759,18 @@ class BoostConan(ConanFile):
                         option = "" if tools.os_info.is_windows else "-with-toolset="
                         cmd = "%s %s%s" % (bootstrap, option, self._get_boostrap_toolset())
                     self.output.info(cmd)
-                    with tools.environment_append({"CC": None, "CXX": None, "CFLAGS": None, "CXXFLAGS": None}):
+
+                    removed_environment_variables = [
+                        "CC",
+                        "CXX",
+                        "CFLAGS",
+                        "CXXFLAGS",
+                        "SDKROOT",
+                        "IPHONEOS_DEPLOYMENT_TARGET"
+                    ]
+                    removed_environment_variables = dict((env_var, None) for env_var in removed_environment_variables)
+
+                    with tools.environment_append(removed_environment_variables):
                         self.run(cmd)
 
         except Exception as exc:
@@ -829,4 +869,6 @@ class BoostConan(ConanFile):
                 self.cpp_info.libs.append("pthread")
 
         self.env_info.BOOST_ROOT = self.package_folder
-        self.cpp_info.name = "Boost"
+        self.cpp_info.names["cmake_find_package"] = "Boost"
+        self.cpp_info.names["cmake_find_package_multi"] = "Boost"
+

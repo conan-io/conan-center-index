@@ -1,5 +1,6 @@
 from conans import ConanFile, AutoToolsBuildEnvironment, tools
 from conans.errors import ConanInvalidConfiguration
+from conans.tools import os_info
 import os
 
 
@@ -9,7 +10,6 @@ class LibpqConan(ConanFile):
     topics = ("conan", "libpq", "postgresql", "database", "db")
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://www.postgresql.org/docs/current/static/libpq.html"
-    author = "Bincrafters <bincrafters@gmail.com>"
     license = "PostgreSQL"
     settings = "os", "arch", "compiler", "build_type"
     options = {
@@ -24,6 +24,9 @@ class LibpqConan(ConanFile):
     def build_requirements(self):
         if self.settings.compiler == "Visual Studio":
             self.build_requires("strawberryperl/5.30.0.1")
+        elif tools.os_info.is_windows:
+            if "CONAN_BASH_PATH" not in os.environ and os_info.detect_windows_subsystem() != 'msys2':
+                self.build_requires("msys2/20190524")
     @property
     def _source_subfolder(self):
         return "source_subfolder"
@@ -61,6 +64,8 @@ class LibpqConan(ConanFile):
             args = ['--without-readline']
             args.append('--with-zlib' if self.options.with_zlib else '--without-zlib')
             args.append('--with-openssl' if self.options.with_openssl else '--without-openssl')
+            if tools.cross_building(self.settings) and not self.options.with_openssl:
+                args.append("--disable-strong-random")
             if self.settings.os != "Windows" and self.options.disable_rpath:
                 args.append('--disable-rpath')
             if self._is_clang8_x86:

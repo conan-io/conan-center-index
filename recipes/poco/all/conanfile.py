@@ -184,5 +184,5 @@ class PocoConan(ConanFile):
             self.cpp_info.defines.extend(["POCO_STATIC=ON", "POCO_NO_AUTOMATIC_LIBS"])
             if self.settings.compiler == "Visual Studio":
                 self.cpp_info.libs.extend(["ws2_32", "Iphlpapi", "Crypt32"])
-        self.cpp_info.name = "Poco"
-
+        self.cpp_info.names["cmake_find_package"] = "Poco"
+        self.cpp_info.names["cmake_find_package_multi"] = "Poco"

@@ -4,6 +4,7 @@ import platform
 from functools import total_ordering
 from conans.errors import ConanInvalidConfiguration, ConanException
 from conans import ConanFile, AutoToolsBuildEnvironment, tools
+from conans.tools import os_info
 
 
 @total_ordering
@@ -104,6 +105,9 @@ class OpenSSLConan(ConanFile):
                 self.build_requires("strawberryperl/5.30.0.1")
             if not self.options.no_asm and not tools.which("nasm"):
                 self.build_requires("nasm/2.14")
+        if self._win_bash:
+            if "CONAN_BASH_PATH" not in os.environ and os_info.detect_windows_subsystem() != 'msys2':
+                self.build_requires("msys2/20190524")
 
     @property
     def _is_msvc(self):
@@ -325,9 +329,13 @@ class OpenSSLConan(ConanFile):
         if not self._env_build:
             self._env_build = AutoToolsBuildEnvironment(self)
             if self.settings.compiler == "apple-clang":
-                self._env_build.flags.append("-arch %s" % tools.to_apple_arch(self.settings.arch))
-                self._env_build.flags.append("-isysroot %s" % tools.XCRun(self.settings).sdk_path)
-                if self.settings.get_safe("os.version"):
+                # add flags only if not already specified, avoid breaking Catalyst which needs very special flags
+                flags = " ".join(self._env_build.flags)
+                if "-arch" not in flags:
+                    self._env_build.flags.append("-arch %s" % tools.to_apple_arch(self.settings.arch))
+                if "-isysroot" not in flags:
+                    self._env_build.flags.append("-isysroot %s" % tools.XCRun(self.settings).sdk_path)
+                if self.settings.get_safe("os.version") and "-version-min=" not in flags and "-target" not in flags:
                     self._env_build.flags.append(tools.apple_deployment_target_flag(self.settings.os,
                                                                               self.settings.os.version))
         return self._env_build
