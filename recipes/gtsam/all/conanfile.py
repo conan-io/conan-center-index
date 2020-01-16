@@ -5,7 +5,7 @@ from conans import ConanFile, tools, CMake
 
 class gtsamConan(ConanFile):
     name = "gtsam"
-    license = "BSD-2-Clause"
+    license = "BSD-3-Clause"
     homepage = "https://github.com/borglab/gtsam"
     url = "https://github.com/conan-io/conan-center-index"
     description = ("GTSAM is a library of C++ classes that implement\
