@@ -108,6 +108,9 @@ class gtsamConan(ConanFile):
         self.requires("boost/1.72.0")
         self.options["boost"].shared = False
         self.requires("eigen/3.3.7")
+        if(self.options.with_TBB):
+            self.requires("tbb/2020.0")
+            self.options["tbb"].tbbmalloc = True
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
