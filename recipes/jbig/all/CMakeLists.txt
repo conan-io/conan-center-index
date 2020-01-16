@@ -20,11 +20,11 @@ if(NOT MSVC)
     target_link_libraries(jbgtopbm ${CMAKE_PROJECT_NAME})
     target_include_directories(jbgtopbm PRIVATE source_subfolder/libjbig)
 
-    install(TARGETS jbgtopbm pbmtojbg RUNTIME DESTINATION bin)
+    install(TARGETS jbgtopbm pbmtojbggit  RUNTIME DESTINATION bin)
 endif()
 
 
-install(TARGETS ${CMAKE_PROJECT_NAME} jbgtopbm pbmtojbg
+install(TARGETS ${CMAKE_PROJECT_NAME}
         RUNTIME DESTINATION bin
         LIBRARY DESTINATION lib
         ARCHIVE DESTINATION lib)
