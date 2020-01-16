@@ -14,53 +14,53 @@ class gtsamConan(ConanFile):
     settings = "os", "arch", "compiler", "build_type"
     options = {"shared": [True, False],
                "fPIC": [True, False],
-               "USE_QUATERNIONS": [True, False],
-               "POSE3_EXPMAP": [True, False],
-               "ROT3_EXPMAP": [True, False],
-               "ENABLE_CONSISTENCY_CHECKS": [True, False],
-               "WITH_TBB": [True, False],
-               "WITH_EIGEN_MKL": [True, False],
-               "WITH_EIGEN_MKL_OPENMP": [True, False],
-               "THROW_CHEIRALITY_EXCEPTION": [True, False],
-               "ALLOW_DEPRECATED_SINCE_V4": [True, False],
-               "TYPEDEF_POINTS_TO_VECTORS": [True, False],
-               "SUPPORT_NESTED_DISSECTION": [True, False],
-               "TANGENT_PREINTEGRATION": [True, False],
-               "BUILD_WRAP": [True, False],
-               "WRAP_SERIALIZATION": [True, False],
-               "BUILD_UNSTABLE": [True, False],
-               "DISABLE_NEW_TIMERS": [True, False],
-               "BUILD_TYPE_POSTFIXES": [True, False],
-               "Boost_USE_STATIC_LIBS": [True, False],
-               "INSTALL_MATLAB_TOOLBOX": [True, False],
-               "INSTALL_CYTHON_TOOLBOX": [True, False],
-               "INSTALL_CPPUNITLITE": [True, False],
-               "INSTALL_GEOGRAPHICLIB": [True, False]}
+               "use_quaternions": [True, False],
+               "pose3_expmap": [True, False],
+               "rot3_expmap": [True, False],
+               "enable_consistency_checks": [True, False],
+               "with_TBB": [True, False],
+               "with_eigen_MKL": [True, False],
+               "with_eigen_MKL_OPENMP": [True, False],
+               "throw_cheirality_exception": [True, False],
+               "allow_deprecated_since_V4": [True, False],
+               "typedef_points_to_vectors": [True, False],
+               "support_nested_dissection": [True, False],
+               "tangent_preintegration": [True, False],
+               "build_wrap": [True, False],
+               "wrap_serialization": [True, False],
+               "build_unstable": [True, False],
+               "disable_new_timers": [True, False],
+               "build_type_postfixes": [True, False],
+               "boost_use_static_libs": [True, False],
+               "install_matlab_toolbox": [True, False],
+               "install_cython_toolbox": [True, False],
+               "install_cppunitlite": [True, False],
+               "install_geographiclib": [True, False]}
 
     default_options = {"shared": False,
                        "fPIC": True,
-                        "USE_QUATERNIONS": False,
-                        "POSE3_EXPMAP": False,
-                        "ROT3_EXPMAP": False,
-                        "ENABLE_CONSISTENCY_CHECKS": False,
-                        "WITH_TBB": True,
-                        "WITH_EIGEN_MKL": False,
-                        "WITH_EIGEN_MKL_OPENMP": False,
-                        "THROW_CHEIRALITY_EXCEPTION": True,
-                        "ALLOW_DEPRECATED_SINCE_V4": True,
-                        "TYPEDEF_POINTS_TO_VECTORS": False,
-                        "SUPPORT_NESTED_DISSECTION": False,
-                        "TANGENT_PREINTEGRATION": False,
-                        "BUILD_WRAP": True,
-                        "WRAP_SERIALIZATION": True,
-                        "BUILD_UNSTABLE": True,
-                        "DISABLE_NEW_TIMERS": False,
-                        "BUILD_TYPE_POSTFIXES": True,
-                        "Boost_USE_STATIC_LIBS": True,
-                        "INSTALL_MATLAB_TOOLBOX": False,
-                        "INSTALL_CYTHON_TOOLBOX": False,
-                        "INSTALL_CPPUNITLITE": True,
-                        "INSTALL_GEOGRAPHICLIB": False}
+                        "use_quaternions": False,
+                        "pose3_expmap": False,
+                        "rot3_expmap": False,
+                        "enable_consistency_checks": False,
+                        "with_TBB": True,
+                        "with_eigen_MKL": False,
+                        "with_eigen_MKL_OPENMP": False,
+                        "throw_cheirality_exception": True,
+                        "allow_deprecated_since_V4": True,
+                        "typedef_points_to_vectors": False,
+                        "support_nested_dissection": False,
+                        "tangent_preintegration": False,
+                        "build_wrap": True,
+                        "wrap_serialization": True,
+                        "build_unstable": True,
+                        "disable_new_timers": False,
+                        "build_type_postfixes": True,
+                        "boost_use_static_libs": True,
+                        "install_matlab_toolbox": False,
+                        "install_cython_toolbox": False,
+                        "install_cppunitlite": True,
+                        "install_geographiclib": False}
     generators = "cmake"
     exports_sources = ["patches/*","CMakeLists.txt"]
     _source_subfolder = "source_subfolder"
@@ -72,33 +72,33 @@ class gtsamConan(ConanFile):
             self._cmake = CMake(self)
             self._cmake.verbose = False
             self._cmake.definitions["BUILD_SHARED_LIBS"] = self.options.shared
-            self._cmake.definitions["GTSAM_USE_QUATERNIONS"] = self.options.USE_QUATERNIONS
-            self._cmake.definitions["GTSAM_POSE3_EXPMAP"] = self.options.POSE3_EXPMAP
-            self._cmake.definitions["GTSAM_ROT3_EXPMAP"] = self.options.ROT3_EXPMAP
-            self._cmake.definitions["GTSAM_ENABLE_CONSISTENCY_CHECKS"] = self.options.ENABLE_CONSISTENCY_CHECKS
-            self._cmake.definitions["GTSAM_WITH_TBB"] = self.options.WITH_TBB
-            self._cmake.definitions["GTSAM_WITH_EIGEN_MKL"] = self.options.WITH_EIGEN_MKL
-            self._cmake.definitions["GTSAM_WITH_EIGEN_MKL_OPENMP"] = self.options.WITH_EIGEN_MKL_OPENMP
-            self._cmake.definitions["GTSAM_THROW_CHEIRALITY_EXCEPTION"] = self.options.THROW_CHEIRALITY_EXCEPTION
-            self._cmake.definitions["GTSAM_ALLOW_DEPRECATED_SINCE_V4"] = self.options.ALLOW_DEPRECATED_SINCE_V4
-            self._cmake.definitions["GTSAM_TYPEDEF_POINTS_TO_VECTORS"] = self.options.TYPEDEF_POINTS_TO_VECTORS
-            self._cmake.definitions["GTSAM_SUPPORT_NESTED_DISSECTION"] = self.options.SUPPORT_NESTED_DISSECTION
-            self._cmake.definitions["GTSAM_TANGENT_PREINTEGRATION"] = self.options.TANGENT_PREINTEGRATION
-            self._cmake.definitions["GTSAM_BUILD_UNSTABLE"] = self.options.BUILD_UNSTABLE
-            self._cmake.definitions["GTSAM_DISABLE_NEW_TIMERS"] = self.options.DISABLE_NEW_TIMERS
-            self._cmake.definitions["GTSAM_BUILD_TYPE_POSTFIXES"] = self.options.BUILD_TYPE_POSTFIXES
+            self._cmake.definitions["GTSAM_USE_QUATERNIONS"] = self.options.use_quaternions
+            self._cmake.definitions["GTSAM_POSE3_EXPMAP"] = self.options.pose3_expmap
+            self._cmake.definitions["GTSAM_ROT3_EXPMAP"] = self.options.rot3_expmap
+            self._cmake.definitions["GTSAM_ENABLE_CONSISTENCY_CHECKS"] = self.options.enable_consistency_checks
+            self._cmake.definitions["GTSAM_WITH_TBB"] = self.options.with_TBB
+            self._cmake.definitions["GTSAM_WITH_EIGEN_MKL"] = self.options.with_eigen_MKL
+            self._cmake.definitions["GTSAM_WITH_EIGEN_MKL_OPENMP"] = self.options.with_eigen_MKL_OPENMP
+            self._cmake.definitions["GTSAM_THROW_CHEIRALITY_EXCEPTION"] = self.options.throw_cheirality_exception
+            self._cmake.definitions["GTSAM_ALLOW_DEPRECATED_SINCE_V4"] = self.options.allow_deprecated_since_V4
+            self._cmake.definitions["GTSAM_TYPEDEF_POINTS_TO_VECTORS"] = self.options.typedef_points_to_vectors
+            self._cmake.definitions["GTSAM_SUPPORT_NESTED_DISSECTION"] = self.options.support_nested_dissection
+            self._cmake.definitions["GTSAM_TANGENT_PREINTEGRATION"] = self.options.tangent_preintegration
+            self._cmake.definitions["GTSAM_BUILD_UNSTABLE"] = self.options.build_unstable
+            self._cmake.definitions["GTSAM_DISABLE_NEW_TIMERS"] = self.options.disable_new_timers
+            self._cmake.definitions["GTSAM_BUILD_TYPE_POSTFIXES"] = self.options.build_type_postfixes
             self._cmake.definitions["GTSAM_BUILD_TESTS"] = False
-            self._cmake.definitions["Boost_USE_STATIC_LIBS"] = self.options.Boost_USE_STATIC_LIBS
+            self._cmake.definitions["Boost_USE_STATIC_LIBS"] = self.options.boost_use_static_libs
             self._cmake.definitions["Boost_NO_SYSTEM_PATHS"] = True
             self._cmake.definitions["GTSAM_BUILD_DOCS"] = False
             self._cmake.definitions["GTSAM_BUILD_DOC_HTML"] = False
             self._cmake.definitions["GTSAM_BUILD_EXAMPLES_ALWAYS"] = False
-            self._cmake.definitions["GTSAM_BUILD_WRAP"] = self.options.BUILD_WRAP
-            self._cmake.definitions["GTSAM_WRAP_SERIALIZATION"] = self.options.WRAP_SERIALIZATION
-            self._cmake.definitions["GTSAM_INSTALL_MATLAB_TOOLBOX"] = self.options.INSTALL_MATLAB_TOOLBOX
-            self._cmake.definitions["GTSAM_INSTALL_CYTHON_TOOLBOX"] = self.options.INSTALL_CYTHON_TOOLBOX
-            self._cmake.definitions["GTSAM_INSTALL_CPPUNITLITE"] = self.options.INSTALL_CPPUNITLITE
-            self._cmake.definitions["GTSAM_INSTALL_GEOGRAPHICLIB"] = self.options.INSTALL_GEOGRAPHICLIB
+            self._cmake.definitions["GTSAM_BUILD_WRAP"] = self.options.build_wrap
+            self._cmake.definitions["GTSAM_WRAP_SERIALIZATION"] = self.options.wrap_serialization
+            self._cmake.definitions["GTSAM_INSTALL_MATLAB_TOOLBOX"] = self.options.install_matlab_toolbox
+            self._cmake.definitions["GTSAM_INSTALL_CYTHON_TOOLBOX"] = self.options.install_cython_toolbox
+            self._cmake.definitions["GTSAM_INSTALL_CPPUNITLITE"] = self.options.install_cppunitlite
+            self._cmake.definitions["GTSAM_INSTALL_GEOGRAPHICLIB"] = self.options.install_geographiclib
             self._cmake.definitions["GTSAM_USE_SYSTEM_EIGEN"] = False
             self._cmake.configure(source_folder=self._source_subfolder, build_folder=self._build_subfolder)
         return self._cmake
@@ -109,7 +109,7 @@ class gtsamConan(ConanFile):
 
     def configure(self):
         self.requires("boost/1.72.0")
-        self.options["boost"].shared = not self.options.Boost_USE_STATIC_LIBS
+        self.options["boost"].shared = not self.options.boost_use_static_libs
         self.requires("eigen/3.3.7")
 
     def source(self):
