@@ -46,7 +46,7 @@ class VorbisConan(ConanFile):
 
     def package(self):
         self.copy("include/vorbis/*", ".", "%s" % self._source_subfolder, keep_path=True)
-        self.copy("COPYING", dst="licenses",  src=self._source_subfolder)
+        self.copy("COPYING", dst="licenses", src=self._source_subfolder)
 
         if self.settings.compiler == "Visual Studio":
             if self.options.shared:
