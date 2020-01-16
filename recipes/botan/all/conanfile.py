@@ -72,8 +72,9 @@ class BotanConan(ConanFile):
         os.rename(extracted_dir, "sources")
 
     def build(self):
-        for patch in self.conan_data["patches"][self.version]:
-            tools.patch(**patch)
+        if "patches" in self.conan_data:
+            for patch in self.conan_data["patches"][self.version]:
+                tools.patch(**patch)
         with tools.chdir('sources'):
             self.run(self._configure_cmd)
             self.run(self._make_cmd)
