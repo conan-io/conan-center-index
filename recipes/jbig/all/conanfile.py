@@ -1,6 +1,7 @@
 import os
 import glob
 from conans import ConanFile, CMake, tools
+from conans.errors import ConanInvalidConfiguration
 
 
 class ConanJBig(ConanFile):
@@ -34,6 +35,8 @@ class ConanJBig(ConanFile):
             del self.options.fPIC
 
     def configure(self):
+        if self.settings.compiler == "Visual Studio" and self.options.shared:
+            raise ConanInvalidConfiguration("The project jbig can not be built as shared lib by Visual Studio")
         del self.settings.compiler.libcxx
         del self.settings.compiler.cppstd
 
