@@ -43,7 +43,6 @@ class LibXrandrConan(ConanFile):
         tools.download("https://gitlab.freedesktop.org/xorg/lib/libxrandr/raw/master/COPYING", filename="COPYING")
         self.copy("COPYING", dst="licenses")
 
-
     def package_info(self):
         if self._system_packages().installed("pkg-config"):
             pkg = tools.PkgConfig("xrandr")
