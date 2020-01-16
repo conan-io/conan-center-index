@@ -1,4 +1,5 @@
 from conans import ConanFile, CMake, tools
+from conans.tools import Version
 import os
 import shutil
 
@@ -13,10 +14,8 @@ class LibtiffConan(ConanFile):
     exports_sources = ["CMakeLists.txt"]
     generators = "cmake"
     settings = "os", "compiler", "build_type", "arch"
-    options = {"shared": [True, False], "fPIC": [True, False]}
-    default_options = {'shared': False, 'fPIC': True}
-    requires = "zlib/1.2.11"
-
+    options = {"shared": [True, False], "fPIC": [True, False], "lzma": [True, False], "jpeg": [True, False]}
+    default_options = {'shared': False, 'fPIC': True, "lzma": True, "jpeg": True}
     _source_subfolder = "source_subfolder"
 
     def config_options(self):
@@ -33,6 +32,16 @@ class LibtiffConan(ConanFile):
         shutil.copy("CMakeLists.txt",
                     os.path.join(self._source_subfolder, "CMakeLists.txt"))
 
+    def requirements(self):
+        self.requires("zlib/1.2.11")
+        self.requires("zstd/1.4.3")
+        if self.options.lzma:
+            self.requires("xz_utils/5.2.4")
+        if self.options.jpeg:
+            self.requires.add("libjpeg/9c")
+        if Version(self.version) >= "4.1.0":
+            self.requires("libwebp/1.0.3")
+
     def build(self):
         cmake = CMake(self)
 
@@ -40,8 +49,8 @@ class LibtiffConan(ConanFile):
         cmake.definitions['CMAKE_INSTALL_BINDIR'] = 'bin'
         cmake.definitions['CMAKE_INSTALL_INCLUDEDIR'] = 'include'
 
-        cmake.definitions["lzma"] = False
-        cmake.definitions["jpeg"] = False
+        cmake.definitions["lzma"] = self.options.lzma
+        cmake.definitions["jpeg"] = self.options.jpeg
         cmake.definitions["jbig"] = False
         if self.options.shared and self.settings.compiler == "Visual Studio":
             # https://github.com/Microsoft/vcpkg/blob/master/ports/tiff/fix-cxx-shared-libs.patch
