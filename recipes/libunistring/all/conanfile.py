@@ -8,7 +8,7 @@ class LibUnistringConan(ConanFile):
     description = "This library provides functions for manipulating Unicode strings and for manipulating C strings according to the Unicode standard."
     homepage = "https://www.gnu.org/software/libunistring/"
     topics = ("conan", "libunistring", "unicode", "string")
-    license = "LGPL-2.1"
+    license = "LGPL-3.0-or-later"
     url = "https://github.com/conan-io/conan-center-index"
     settings = "os", "arch", "compiler", "build_type"
     options = {
