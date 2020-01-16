@@ -17,15 +17,9 @@ class LibXrandrConan(ConanFile):
     description = "libXrandr provides an X Window System client interface to the RandR extension to the X protocol."
     settings = "os", "compiler", "build_type", "arch"
     _required_system_package = "libxrandr-dev"
-    _system_package_tool = None
-
-    def _system_packages(self):
-        if not self._system_package_tool:
-            self._system_package_tool = tools.SystemPackageTool()
-        return self._system_package_tool
 
     def system_requirements(self):
-        installer = self._system_packages()
+        installer = tools.SystemPackageTool()
         if not installer.installed(self._required_system_package):
             raise ConanInvalidConfiguration(
                 "{0} system library missing. Install {0} in your system with something like: "\
@@ -44,7 +38,7 @@ class LibXrandrConan(ConanFile):
         self.copy("COPYING", dst="licenses")
 
     def package_info(self):
-        if self._system_packages().installed("pkg-config"):
+        if tools.which("pkg-config"):
             pkg = tools.PkgConfig("xrandr")
             self.cpp_info.includedirs = [remove_prefix(x,'-I') for x in pkg.cflags_only_I]
             self.cpp_info.libdirs = [remove_prefix(x,'-L') for x in pkg.libs_only_L]
