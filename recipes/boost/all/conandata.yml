@@ -49,7 +49,7 @@ patches:
       base_path: "boost_1_71_0"
     - patch_file: "patches/out_of_source_bootstrap_bat.patch"
       base_path: "boost_1_71_0"    
-1.72.0:
+  1.72.0:
     - patch_file: "patches/bcp_namespace_issues_1_72.patch"
       base_path: "boost_1_72_0"
     - patch_file: "patches/boost_build_qcc_fix_debug_build_parameter.patch"
