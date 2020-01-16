@@ -70,5 +70,6 @@ class VorbisConan(ConanFile):
         self.cpp_info.libs = ['vorbisfile', 'vorbisenc', 'vorbis']
         if self.settings.os == "Linux":
             self.cpp_info.system_libs.append("m")
-        self.cpp_info.name = 'VORBIS'
+        self.cpp_info.names["cmake_find_package"] = 'VORBIS'
+        self.cpp_info.names["cmake_find_package_multi"] = 'VORBIS'
         self.cpp_info.names['pkg_config'] = 'vorbis'
