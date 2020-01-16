@@ -1,7 +1,5 @@
 from conans import ConanFile, CMake, tools
 import os
-import subprocess
-import sys
 
 
 class TestPackageConan(ConanFile):
@@ -15,4 +13,5 @@ class TestPackageConan(ConanFile):
 
     def test(self):
         with tools.chdir("bin"):
-            self.run("test_package < %s > sample.ogg" % os.path.join(self.source_folder, '8kadpcm.wav'), run_environment=True)
+            self.run("test_package < %s > sample.ogg" % os.path.join(self.source_folder, '8kadpcm.wav'),
+                     run_environment=True)
