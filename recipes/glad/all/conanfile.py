@@ -9,7 +9,6 @@ class GladConan(ConanFile):
     topics = ("conan", "glad", "opengl")
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/Dav1dde/glad"
-    topics = ("conan", "glad", "opengl")
     license = "MIT"
     exports_sources = ["CMakeLists.txt", "patches/*.patch"]
     generators = "cmake"
