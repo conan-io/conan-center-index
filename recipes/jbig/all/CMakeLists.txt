@@ -13,17 +13,9 @@ add_library(${CMAKE_PROJECT_NAME} source_subfolder/libjbig/jbig.h
                                   source_subfolder/libjbig/jbig_tab.c)
 target_link_libraries(${CMAKE_PROJECT_NAME} ${CONAN_LIBS})
 
-add_executable(pbmtojbg source_subfolder/pbmtools/pbmtojbg.c)
-target_link_libraries(pbmtojbg ${CMAKE_PROJECT_NAME})
-target_include_directories(pbmtojbg PRIVATE source_subfolder/libjbig)
-
-add_executable(jbgtopbm source_subfolder/pbmtools/jbgtopbm.c)
-target_link_libraries(jbgtopbm ${CMAKE_PROJECT_NAME})
-target_include_directories(jbgtopbm PRIVATE source_subfolder/libjbig)
-
 include(GNUInstallDirs)
 
-install(TARGETS ${CMAKE_PROJECT_NAME} jbgtopbm pbmtojbg
+install(TARGETS ${CMAKE_PROJECT_NAME}
         RUNTIME DESTINATION bin
         LIBRARY DESTINATION lib
         ARCHIVE DESTINATION lib)
