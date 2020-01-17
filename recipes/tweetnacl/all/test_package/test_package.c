@@ -1,10 +1,9 @@
-#ifdef __cplusplus
-extern "C" {
-#endif
-#include "tweetnacl.h"
+#include <tweetnacl.h>
 
 /* Library needs external randombytes implemented */
 #include <stdlib.h>
+#include <stdio.h>
+#include <string.h>
 #include <time.h>
 
 void randombytes(unsigned char * ptr,unsigned int length)
@@ -16,14 +15,6 @@ void randombytes(unsigned char * ptr,unsigned int length)
         ptr[i] = (unsigned char)rand();
     }
 }
-
-#ifdef __cplusplus
-}
-#endif
-
-#include <stdio.h>
-#include <stdexcept>
-#include <string.h>
 
 typedef unsigned char u8;
 
@@ -97,7 +88,8 @@ int main() {
     // Check decrypted and original message
     if (strcmp(decryptedmessage+32, message) != 0) {
         free(decryptedmessage);
-        throw std::runtime_error("Decrypted message doesn't match with original message");
+        fprintf(stderr, "Decrypted message doesn't match with original message");
+        return 1;
     }
 
     free(decryptedmessage);
