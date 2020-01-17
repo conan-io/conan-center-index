@@ -23,7 +23,18 @@ class DateConan(ConanFile):
         for patch in self.conan_data["patches"][self.version]:
             tools.patch(**patch)
 
+    def _configure_cmake(self):
+        cmake = CMake(self)
+        cmake.definitions["ENABLE_DATE_TESTING"] = False
+        cmake.definitions["USE_SYSTEM_TZ_DB"] = True
+        cmake.configure(source_folder=self._source_subfolder)
+        return cmake
+
     def package(self):
         self.copy(pattern="LICENSE.txt", dst="licenses", src=self._source_subfolder)
-        self.copy(pattern="date.h", dst=os.path.join("include", "date"),
-                  src=os.path.join(self._source_subfolder, "include", "date"))
+        cmake = self._configure_cmake()
+        cmake.install()
+        tools.rmdir(os.path.join(self.package_folder, "lib"))
+
+    def package_id(self):
+        self.info.header_only()

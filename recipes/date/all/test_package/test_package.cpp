@@ -3,6 +3,7 @@
 #include <chrono>
 
 #include "date/date.h"
+#include "date/tz.h"
 
 int main() {
     using namespace std::chrono;
@@ -14,5 +15,8 @@ int main() {
     std::cout << date2 << '\n';
     auto date3 = 22_d/March/2015;
     std::cout << date3 << '\n';
+
+    std::cout << "current zone: " << date::current_zone()->name() << '\n';
+
     return EXIT_SUCCESS;
 }
