@@ -4,7 +4,6 @@ from conans import ConanFile, CMake, tools
 
 class Assimp(ConanFile):
     name = "assimp"
-    version = "5.0.0"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/assimp/assimp"
     description = "A library to import and export various 3d-model-formats including scene-post-processing to generate missing render data."
