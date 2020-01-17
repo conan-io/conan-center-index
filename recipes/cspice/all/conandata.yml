@@ -4,9 +4,9 @@ sources:
     sha256: "fae1e81f2b120801078415ddc78069543792b2ecf6f01e2ddd4f9d1fdff6d705"
 patches:
   "0066":
-    - patch_file: "patches/cspice0066-patches20171106.patch"
+    - patch_file: "patches/0066/patches20171106.patch"
       base_path: "source_subfolder"
-    - patch_file: "patches/isatty.patch"
+    - patch_file: "patches/0066/isatty.patch"
       base_path: "source_subfolder"
-    - patch_file: "patches/mktemp.patch"
+    - patch_file: "patches/0066/mktemp.patch"
       base_path: "source_subfolder"

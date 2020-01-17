@@ -2,6 +2,7 @@ import os
 import time
 
 from conans import ConanFile, CMake, tools
+from conans.errors import ConanInvalidConfiguration
 
 cspice_license = """THIS SOFTWARE AND ANY RELATED MATERIALS WERE CREATED BY THE
 CALIFORNIA INSTITUTE OF TECHNOLOGY (CALTECH) UNDER A U.S.
@@ -47,6 +48,59 @@ class CspiceConan(ConanFile):
     def _build_subfolder(self):
         return "build_subfolder"
 
+    @property
+    def _patch_per_os_arch_compiler(self):
+        return {
+            "Macos": {
+                "x86": {
+                    "apple-clang": "PC-Cygwin-GCC-32bit-To-MacIntel-OSX-AppleC-32bit"
+                },
+                "x86_64": {
+                    "apple-clang": "PC-Cygwin-GCC-32bit-To-MacIntel-OSX-AppleC-64bit"
+                }
+            },
+            "Linux": {
+                "x86": {
+                    "gcc": "PC-Cygwin-GCC-32bit-To-PC-Linux-GCC-32bit"
+                },
+                "x86_64": {
+                    "gcc": "PC-Cygwin-GCC-32bit-To-PC-Linux-GCC-64bit"
+                }
+            },
+            "Windows": {
+                "x86": {
+                    "Visual Studio": "PC-Cygwin-GCC-32bit-To-PC-Windows-VisualC-32bit"
+                },
+                "x86_64": {
+                    "Visual Studio": "PC-Cygwin-GCC-32bit-To-PC-Windows-VisualC-64bit"
+                }
+            },
+            "Windows-cygwin": {
+                "x86": {
+                    "gcc": None
+                },
+                "x86_64": {
+                    "gcc": "PC-Cygwin-GCC-32bit-To-PC-Cygwin-GCC-64bit"
+                }
+            },
+            "SunOs": {
+                "x86": {
+                    "sun-cc": "PC-Cygwin-GCC-32bit-To-SunIntel-Solaris-SunC-32bit"
+                },
+                "x86_64": {
+                    "sun-cc": "PC-Cygwin-GCC-32bit-To-SunIntel-Solaris-SunC-64bit"
+                },
+                "sparc": {
+                    "gcc": "PC-Cygwin-GCC-32bit-To-SunSPARC-Solaris-GCC-32bit",
+                    "sun-cc": "PC-Cygwin-GCC-32bit-To-SunSPARC-Solaris-SunC-32bit"
+                },
+                "sparcv9": {
+                    "gcc": "PC-Cygwin-GCC-32bit-To-SunSPARC-Solaris-GCC-64bit",
+                    "sun-cc": "PC-Cygwin-GCC-32bit-To-SunSPARC-Solaris-SunC-64bit"
+                }
+            }
+        }
+
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
@@ -54,6 +108,21 @@ class CspiceConan(ConanFile):
     def configure(self):
         del self.settings.compiler.libcxx
         del self.settings.compiler.cppstd
+
+        os_subsystem = self._get_os_subsystem()
+        arch = str(self.settings.arch)
+        compiler = str(self.settings.compiler)
+        if os_subsystem not in self._patch_per_os_arch_compiler or \
+           arch not in self._patch_per_os_arch_compiler[os_subsystem] or \
+           compiler not in self._patch_per_os_arch_compiler[os_subsystem][arch]:
+            raise ConanInvalidConfiguration("cspice is not compatible with {0} on {1} {2}".format(compiler,
+                                                                                                  os_subsystem, arch))
+
+    def _get_os_subsystem(self):
+        os_subsystem = str(self.settings.os)
+        if self.settings.os == "Windows" and self.settings.os.subsystem != "None":
+            os_subsystem += "-" + str(self.settings.os.subsystem)
+        return os_subsystem
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
@@ -64,12 +133,23 @@ class CspiceConan(ConanFile):
             time.sleep(10)
             os.rename(self.name, self._source_subfolder)
 
-    def build(self):
         if "patches" in self.conan_data:
             for patch in self.conan_data["patches"][self.version]:
                 tools.patch(**patch)
+
+    def build(self):
+        self._apply_specific_patch()
         cmake = self._configure_cmake()
         cmake.build()
+
+    def _apply_specific_patch(self):
+        os_subsystem = self._get_os_subsystem()
+        arch = str(self.settings.arch)
+        compiler = str(self.settings.compiler)
+        patch_filename = self._patch_per_os_arch_compiler[os_subsystem][arch][compiler]
+        if patch_filename is not None:
+            tools.patch(patch_file="patches/{0}/{1}.patch".format(self.version, patch_filename),
+                        base_path=self._source_subfolder)
 
     def _configure_cmake(self):
         cmake = CMake(self)

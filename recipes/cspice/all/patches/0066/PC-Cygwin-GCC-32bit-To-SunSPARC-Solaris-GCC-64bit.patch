@@ -1,0 +1,287 @@
+diff --git a/include/SpiceZpl.h b/include/SpiceZpl.h
+index b2e0565..76090dd 100644
+--- a/include/SpiceZpl.h
++++ b/include/SpiceZpl.h
+@@ -111,7 +111,7 @@
+ #define HAVE_PLATFORM_MACROS_H
+  
+  
+-   #define   CSPICE_PC_CYGWIN
++   #define   CSPICE_SUN_SOLARIS_64BIT_GCC
+  
+ #endif
+  
+diff --git a/src/cspice/SpiceZpl.h b/src/cspice/SpiceZpl.h
+index b2e0565..76090dd 100644
+--- a/src/cspice/SpiceZpl.h
++++ b/src/cspice/SpiceZpl.h
+@@ -111,7 +111,7 @@
+ #define HAVE_PLATFORM_MACROS_H
+  
+  
+-   #define   CSPICE_PC_CYGWIN
++   #define   CSPICE_SUN_SOLARIS_64BIT_GCC
+  
+ #endif
+  
+diff --git a/src/cspice/fndlun.c b/src/cspice/fndlun.c
+index 1792f4a..4cf55d9 100644
+--- a/src/cspice/fndlun.c
++++ b/src/cspice/fndlun.c
+@@ -23,7 +23,7 @@
+ 
+     /* Local variables */
+     static integer i__;
+-    static logical resvd[99], opened;
++    static logical resvd[63], opened;
+     static integer iostat;
+ 
+ /* $ Abstract */
+@@ -521,13 +521,13 @@
+ /*     Initialize RESVD if it hasn't already been done. */
+ 
+     if (first) {
+-	for (i__ = 1; i__ <= 99; ++i__) {
+-	    resvd[(i__1 = i__ - 1) < 99 && 0 <= i__1 ? i__1 : s_rnge("resvd", 
++	for (i__ = 1; i__ <= 63; ++i__) {
++	    resvd[(i__1 = i__ - 1) < 63 && 0 <= i__1 ? i__1 : s_rnge("resvd", 
+ 		    i__1, "fndlun_", (ftnlen)533)] = FALSE_;
+ 	}
+ 	for (i__ = 1; i__ <= 3; ++i__) {
+ 	    resvd[(i__2 = resnum[(i__1 = i__ - 1) < 3 && 0 <= i__1 ? i__1 : 
+-		    s_rnge("resnum", i__1, "fndlun_", (ftnlen)537)] - 1) < 99 
++		    s_rnge("resnum", i__1, "fndlun_", (ftnlen)537)] - 1) < 63 
+ 		    && 0 <= i__2 ? i__2 : s_rnge("resvd", i__2, "fndlun_", (
+ 		    ftnlen)537)] = TRUE_;
+ 	}
+@@ -538,8 +538,8 @@
+ /*     Cycle through the available units. Skip reserved units, */
+ /*     INQUIRE about others. */
+ 
+-    for (i__ = last + 1; i__ <= 99; ++i__) {
+-	if (resvd[(i__1 = i__ - 1) < 99 && 0 <= i__1 ? i__1 : s_rnge("resvd", 
++    for (i__ = last + 1; i__ <= 63; ++i__) {
++	if (resvd[(i__1 = i__ - 1) < 63 && 0 <= i__1 ? i__1 : s_rnge("resvd", 
+ 		i__1, "fndlun_", (ftnlen)551)]) {
+ 	    opened = TRUE_;
+ 	} else {
+@@ -579,7 +579,7 @@
+ 
+     i__1 = last;
+     for (i__ = 1; i__ <= i__1; ++i__) {
+-	if (resvd[(i__2 = i__ - 1) < 99 && 0 <= i__2 ? i__2 : s_rnge("resvd", 
++	if (resvd[(i__2 = i__ - 1) < 63 && 0 <= i__2 ? i__2 : s_rnge("resvd", 
+ 		i__2, "fndlun_", (ftnlen)578)]) {
+ 	    opened = TRUE_;
+ 	} else {
+@@ -801,13 +801,13 @@ L_reslun:
+ /*     Initialize RESVD if it hasn't already been done. */
+ 
+     if (first) {
+-	for (i__ = 1; i__ <= 99; ++i__) {
+-	    resvd[(i__1 = i__ - 1) < 99 && 0 <= i__1 ? i__1 : s_rnge("resvd", 
++	for (i__ = 1; i__ <= 63; ++i__) {
++	    resvd[(i__1 = i__ - 1) < 63 && 0 <= i__1 ? i__1 : s_rnge("resvd", 
+ 		    i__1, "fndlun_", (ftnlen)801)] = FALSE_;
+ 	}
+ 	for (i__ = 1; i__ <= 3; ++i__) {
+ 	    resvd[(i__2 = resnum[(i__1 = i__ - 1) < 3 && 0 <= i__1 ? i__1 : 
+-		    s_rnge("resnum", i__1, "fndlun_", (ftnlen)805)] - 1) < 99 
++		    s_rnge("resnum", i__1, "fndlun_", (ftnlen)805)] - 1) < 63 
+ 		    && 0 <= i__2 ? i__2 : s_rnge("resvd", i__2, "fndlun_", (
+ 		    ftnlen)805)] = TRUE_;
+ 	}
+@@ -817,8 +817,8 @@ L_reslun:
+ /*     If UNIT is in the proper range, set the corresponding flag */
+ /*     to TRUE. */
+ 
+-    if (*unit >= 1 && *unit <= 99) {
+-	resvd[(i__1 = *unit - 1) < 99 && 0 <= i__1 ? i__1 : s_rnge("resvd", 
++    if (*unit >= 1 && *unit <= 63) {
++	resvd[(i__1 = *unit - 1) < 63 && 0 <= i__1 ? i__1 : s_rnge("resvd", 
+ 		i__1, "fndlun_", (ftnlen)817)] = TRUE_;
+     }
+     return 0;
+@@ -1011,14 +1011,14 @@ L_frelun:
+ /*     Initialize RESVD if it hasn't already been done. */
+ 
+     if (first) {
+-	for (i__ = 1; i__ <= 99; ++i__) {
+-	    resvd[(i__1 = i__ - 1) < 99 && 0 <= i__1 ? i__1 : s_rnge("resvd", 
++	for (i__ = 1; i__ <= 63; ++i__) {
++	    resvd[(i__1 = i__ - 1) < 63 && 0 <= i__1 ? i__1 : s_rnge("resvd", 
+ 		    i__1, "fndlun_", (ftnlen)1022)] = FALSE_;
+ 	}
+ 	for (i__ = 1; i__ <= 3; ++i__) {
+ 	    resvd[(i__2 = resnum[(i__1 = i__ - 1) < 3 && 0 <= i__1 ? i__1 : 
+ 		    s_rnge("resnum", i__1, "fndlun_", (ftnlen)1026)] - 1) < 
+-		    99 && 0 <= i__2 ? i__2 : s_rnge("resvd", i__2, "fndlun_", 
++		    63 && 0 <= i__2 ? i__2 : s_rnge("resvd", i__2, "fndlun_", 
+ 		    (ftnlen)1026)] = TRUE_;
+ 	}
+ 	first = FALSE_;
+@@ -1027,14 +1027,14 @@ L_frelun:
+ /*     If UNIT is in the proper range and it has not been reserved by */
+ /*     default, set the corresponding flag to FALSE. */
+ 
+-    if (*unit >= 1 && *unit <= 99) {
++    if (*unit >= 1 && *unit <= 63) {
+ 	for (i__ = 1; i__ <= 3; ++i__) {
+ 	    if (*unit == resnum[(i__1 = i__ - 1) < 3 && 0 <= i__1 ? i__1 : 
+ 		    s_rnge("resnum", i__1, "fndlun_", (ftnlen)1040)]) {
+ 		return 0;
+ 	    }
+ 	}
+-	resvd[(i__1 = *unit - 1) < 99 && 0 <= i__1 ? i__1 : s_rnge("resvd", 
++	resvd[(i__1 = *unit - 1) < 63 && 0 <= i__1 ? i__1 : s_rnge("resvd", 
+ 		i__1, "fndlun_", (ftnlen)1045)] = FALSE_;
+     }
+     return 0;
+diff --git a/src/cspice/rdtext.c b/src/cspice/rdtext.c
+index fe80809..9915202 100644
+--- a/src/cspice/rdtext.c
++++ b/src/cspice/rdtext.c
+@@ -41,7 +41,7 @@ static integer c__1 = 1;
+     integer unit, i__;
+     extern /* Subroutine */ int chkin_(char *, ftnlen), errch_(char *, char *,
+ 	     ftnlen, ftnlen);
+-    static integer index, units[96];
++    static integer index, units[64];
+     extern integer isrchi_(integer *, integer *, integer *);
+     integer number;
+     extern /* Subroutine */ int sigerr_(char *, ftnlen), chkout_(char *, 
+@@ -637,7 +637,7 @@ static integer c__1 = 1;
+ /*           need a free logical unit. But only if we don't */
+ /*           have too many files open already. */
+ 
+-	    if (n == 96) {
++	    if (n == 64) {
+ 		setmsg_("Too many files open already.", (ftnlen)28);
+ 		sigerr_("SPICE(TOOMANYFILESOPEN)", (ftnlen)23);
+ 		chkout_("RDTEXT", (ftnlen)6);
+@@ -676,12 +676,12 @@ static integer c__1 = 1;
+ /*               - The index of the file within the UNITS array. */
+ 
+ 	    ++n;
+-	    units[(i__1 = n - 1) < 96 && 0 <= i__1 ? i__1 : s_rnge("units", 
++	    units[(i__1 = n - 1) < 64 && 0 <= i__1 ? i__1 : s_rnge("units", 
+ 		    i__1, "rdtext_", (ftnlen)659)] = unit;
+ 	    index = n;
+ 	}
+ 	s_copy(lstfil, file, (ftnlen)255, file_len);
+-	lstunt = units[(i__1 = index - 1) < 96 && 0 <= i__1 ? i__1 : s_rnge(
++	lstunt = units[(i__1 = index - 1) < 64 && 0 <= i__1 ? i__1 : s_rnge(
+ 		"units", i__1, "rdtext_", (ftnlen)665)];
+     }
+ 
+@@ -711,15 +711,15 @@ L100001:
+     *eof = iostat < 0;
+     if (iostat != 0) {
+ 	cl__1.cerr = 0;
+-	cl__1.cunit = units[(i__1 = index - 1) < 96 && 0 <= i__1 ? i__1 : 
++	cl__1.cunit = units[(i__1 = index - 1) < 64 && 0 <= i__1 ? i__1 : 
+ 		s_rnge("units", i__1, "rdtext_", (ftnlen)689)];
+ 	cl__1.csta = 0;
+ 	f_clos(&cl__1);
+ 	i__1 = n;
+ 	for (i__ = index + 1; i__ <= i__1; ++i__) {
+-	    units[(i__2 = i__ - 2) < 96 && 0 <= i__2 ? i__2 : s_rnge("units", 
++	    units[(i__2 = i__ - 2) < 64 && 0 <= i__2 ? i__2 : s_rnge("units", 
+ 		    i__2, "rdtext_", (ftnlen)692)] = units[(i__3 = i__ - 1) < 
+-		    96 && 0 <= i__3 ? i__3 : s_rnge("units", i__3, "rdtext_", 
++		    64 && 0 <= i__3 ? i__3 : s_rnge("units", i__3, "rdtext_", 
+ 		    (ftnlen)692)];
+ 	}
+ 	--n;
+@@ -971,11 +971,11 @@ L_cltext:
+     index = isrchi_(&number, &n, units);
+     if (index > 0) {
+ 	cl__1.cerr = 0;
+-	cl__1.cunit = units[(i__1 = index - 1) < 96 && 0 <= i__1 ? i__1 : 
++	cl__1.cunit = units[(i__1 = index - 1) < 64 && 0 <= i__1 ? i__1 : 
+ 		s_rnge("units", i__1, "rdtext_", (ftnlen)952)];
+ 	cl__1.csta = 0;
+ 	f_clos(&cl__1);
+-	if (units[(i__1 = index - 1) < 96 && 0 <= i__1 ? i__1 : s_rnge("units"
++	if (units[(i__1 = index - 1) < 64 && 0 <= i__1 ? i__1 : s_rnge("units"
+ 		, i__1, "rdtext_", (ftnlen)954)] == lstunt) {
+ 	    s_copy(lstfil, " ", (ftnlen)255, (ftnlen)1);
+ 	}
+@@ -985,9 +985,9 @@ L_cltext:
+ 
+ 	i__1 = n;
+ 	for (i__ = index + 1; i__ <= i__1; ++i__) {
+-	    units[(i__2 = i__ - 2) < 96 && 0 <= i__2 ? i__2 : s_rnge("units", 
++	    units[(i__2 = i__ - 2) < 64 && 0 <= i__2 ? i__2 : s_rnge("units", 
+ 		    i__2, "rdtext_", (ftnlen)963)] = units[(i__3 = i__ - 1) < 
+-		    96 && 0 <= i__3 ? i__3 : s_rnge("units", i__3, "rdtext_", 
++		    64 && 0 <= i__3 ? i__3 : s_rnge("units", i__3, "rdtext_", 
+ 		    (ftnlen)963)];
+ 	}
+ 	--n;
+diff --git a/src/cspice/stmp03.c b/src/cspice/stmp03.c
+index f6cc822..dfc8f41 100644
+--- a/src/cspice/stmp03.c
++++ b/src/cspice/stmp03.c
+@@ -27,7 +27,7 @@
+     extern /* Subroutine */ int chkin_(char *, ftnlen);
+     extern doublereal dpmax_(void);
+     extern /* Subroutine */ int errdp_(char *, doublereal *, ftnlen);
+-    static doublereal pairs[20], lbound;
++    static doublereal pairs[18], lbound;
+     extern /* Subroutine */ int sigerr_(char *, ftnlen), chkout_(char *, 
+ 	    ftnlen), setmsg_(char *, ftnlen);
+ 
+@@ -563,8 +563,8 @@
+ 
+     if (first) {
+ 	first = FALSE_;
+-	for (i__ = 1; i__ <= 20; ++i__) {
+-	    pairs[(i__1 = i__ - 1) < 20 && 0 <= i__1 ? i__1 : s_rnge("pairs", 
++	for (i__ = 1; i__ <= 18; ++i__) {
++	    pairs[(i__1 = i__ - 1) < 18 && 0 <= i__1 ? i__1 : s_rnge("pairs", 
+ 		    i__1, "stmp03_", (ftnlen)589)] = 1. / ((doublereal) i__ * 
+ 		    (doublereal) (i__ + 1));
+ 	}
+@@ -694,8 +694,8 @@
+ /*     LPAIR3 will be 18. */
+ 
+     *c3 = 1.;
+-    for (i__ = 20; i__ >= 4; i__ += -2) {
+-	*c3 = 1. - *x * pairs[(i__1 = i__ - 1) < 20 && 0 <= i__1 ? i__1 : 
++    for (i__ = 18; i__ >= 4; i__ += -2) {
++	*c3 = 1. - *x * pairs[(i__1 = i__ - 1) < 18 && 0 <= i__1 ? i__1 : 
+ 		s_rnge("pairs", i__1, "stmp03_", (ftnlen)733)] * *c3;
+     }
+     *c3 = pairs[1] * *c3;
+@@ -722,8 +722,8 @@
+ /*     LPAIR2 will be 17. */
+ 
+     *c2 = 1.;
+-    for (i__ = 19; i__ >= 3; i__ += -2) {
+-	*c2 = 1. - *x * pairs[(i__1 = i__ - 1) < 20 && 0 <= i__1 ? i__1 : 
++    for (i__ = 17; i__ >= 3; i__ += -2) {
++	*c2 = 1. - *x * pairs[(i__1 = i__ - 1) < 18 && 0 <= i__1 ? i__1 : 
+ 		s_rnge("pairs", i__1, "stmp03_", (ftnlen)764)] * *c2;
+     }
+     *c2 = pairs[0] * *c2;
+diff --git a/src/cspice/zzplatfm.c b/src/cspice/zzplatfm.c
+index 26a0c61..3b94230 100644
+--- a/src/cspice/zzplatfm.c
++++ b/src/cspice/zzplatfm.c
+@@ -346,11 +346,10 @@ static integer c__6 = 6;
+ 
+ /*        Platform/Environment specific assignments follow. */
+ 
+-	s_copy(attcpy + 32, "PC", (ftnlen)32, (ftnlen)2);
+-	s_copy(attcpy + 64, "MICROSOFT WINDOWS/CYGWIN", (ftnlen)32, (ftnlen)
+-		24);
+-	s_copy(attcpy + 96, "GCC", (ftnlen)32, (ftnlen)3);
+-	s_copy(attcpy + 128, "LTL-IEEE", (ftnlen)32, (ftnlen)8);
++	s_copy(attcpy + 32, "SUN", (ftnlen)32, (ftnlen)3);
++	s_copy(attcpy + 64, "SOLARIS", (ftnlen)32, (ftnlen)7);
++	s_copy(attcpy + 96, "GCC/64BIT", (ftnlen)32, (ftnlen)9);
++	s_copy(attcpy + 128, "BIG-IEEE", (ftnlen)32, (ftnlen)8);
+ 	s_copy(attcpy + 160, "LF", (ftnlen)32, (ftnlen)2);
+ 	s_copy(attcpy + 192, "BIG-IEEE LTL-IEEE", (ftnlen)32, (ftnlen)17);
+ 
