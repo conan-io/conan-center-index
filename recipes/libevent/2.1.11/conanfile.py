@@ -44,11 +44,19 @@ class LibeventConan(ConanFile):
         os.rename(extracted_folder, self._source_subfolder)
 
     def _patch_sources(self):
+        tools.replace_in_file(os.path.join(self._source_subfolder, "CMakeLists.txt"),
+                              "OPENSSL_INCLUDE_DIR",
+                              "OpenSSL_INCLUDE_DIRS")
+        tools.replace_in_file(os.path.join(self._source_subfolder, "CMakeLists.txt"),
+                              "OPENSSL_LIBRARIES",
+                              "OpenSSL_LIBRARIES")
         for patch in self.conan_data["patches"][self.version]:
             tools.patch(**patch)
 
     def _configure_cmake(self):
         cmake = CMake(self)
+        if self.options.with_openssl:
+            cmake.definitions["OPENSSL_ROOT_DIR"] = self.deps_cpp_info["openssl"].rootpath
         cmake.definitions["EVENT__LIBRARY_TYPE"] = "SHARED" if self.options.shared else "STATIC"
         cmake.definitions["EVENT__DISABLE_DEBUG_MODE"] = self.settings.build_type == "Release"
         cmake.definitions["EVENT__DISABLE_OPENSSL"] = not self.options.with_openssl
