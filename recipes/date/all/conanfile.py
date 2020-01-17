@@ -30,6 +30,10 @@ class DateConan(ConanFile):
         cmake.configure(source_folder=self._source_subfolder)
         return cmake
 
+    def build(self):
+        cmake = self._configure_cmake()
+        cmake.build()
+        
     def package(self):
         self.copy(pattern="LICENSE.txt", dst="licenses", src=self._source_subfolder)
         cmake = self._configure_cmake()
