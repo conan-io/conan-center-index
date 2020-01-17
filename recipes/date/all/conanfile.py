@@ -11,10 +11,10 @@ class DateConan(ConanFile):
               "calendar", "time", "iana-database")
     license = "MIT"
     exports_sources = ["patches/*"]
+    settings = "os", "arch", "compiler", "build_type"
     options = {"shared": [True, False],
                "fPIC": [True, False],
-               "use_system_tz_db": [True, False]
-               }
+               "use_system_tz_db": [True, False]}
     default_options = {"shared": False,
                        "fPIC": True,
                        "use_system_tz_db": False}
@@ -40,7 +40,7 @@ class DateConan(ConanFile):
     def requirements(self):
         if self.options.use_system_tz_db == False:
             self.requires("libcurl/7.67.0")
-        
+
     def build(self):
         cmake = self._configure_cmake()
         cmake.build()
