@@ -1,4 +1,5 @@
 from conans import ConanFile, CMake, tools
+from conans.errors import ConanInvalidConfiguration
 import os
 
 
@@ -24,16 +25,16 @@ class TweetnaclConan(ConanFile):
 
     def config_options(self):
         if self.settings.os == "Windows":
-            # tweetnacl needs a randombytes implementation, which must be supplied by the user of this library
-            del self.options.shared
             del self.options.fPIC
 
     def configure(self):
         del self.settings.compiler.cppstd
         del self.settings.compiler.libcxx
-        if self.settings.os != "Windows":
+        if self.options.shared:
+            del self.options.fPIC
+        if self.settings.os == "Windows":
             if self.options.shared:
-                del self.options.fPIC
+                raise ConanInvalidConfiguration("tweetnacl does not support shared on Windows: it needs a randombytes implementation")
 
     def source(self):
         for url_sha in self.conan_data["sources"][self.version]:
