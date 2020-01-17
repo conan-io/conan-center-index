@@ -1,7 +1,6 @@
 import os
 import glob
 from conans import ConanFile, CMake, tools
-from conans.errors import ConanInvalidConfiguration
 
 
 class ConanJBig(ConanFile):
