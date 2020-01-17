@@ -17,7 +17,6 @@ For more information, please refer to http://unlicense.org/
 
 class TweetnaclConan(ConanFile):
     name = "tweetnacl"
-    version = "20140427"
     license = "Public Domain"
     homepage = "https://tweetnacl.cr.yp.to"
     url = "https://github.com/conan-io/conan-center-index"
