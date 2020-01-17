@@ -21,7 +21,7 @@ class AutoconfConan(ConanFile):
         os.rename("{}-{}".format(self.name, self.version), self._source_subfolder)
 
     def build_requirements(self):
-        if self.settings.os_build == "Windows" and "CONAN_BASH_PATH" not in os.environ:
+        if tools.os_info.is_windows and "CONAN_BASH_PATH" not in os.environ:
             self.build_requires("msys2/20190524")
 
     def _configure_autotools(self):
@@ -44,6 +44,11 @@ class AutoconfConan(ConanFile):
         autotools.install()
         tools.rmdir(os.path.join(self.package_folder, "bin", "share", "info"))
         tools.rmdir(os.path.join(self.package_folder, "bin", "share", "man"))
+        if self.settings.os_build == "Windows":
+            for root, _, files in os.walk(os.path.join(self.package_folder, "bin")):
+                for filename in files:
+                    os.rename(os.path.join(root, filename),
+                              os.path.join(root, filename + ".exe"))
 
     def package_info(self):
         bin_path = os.path.join(self.package_folder, "bin")
