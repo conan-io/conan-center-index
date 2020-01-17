@@ -8,7 +8,7 @@ class Pthreads4WConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://sourceforge.net/projects/pthreads4w/"
     description = "POSIX Threads for Windows"
-    license = "LGPL-2.0"
+    license = "Apache-2.0"
     settings = "os", "arch", "compiler", "build_type"
     options = {"shared": [True, False],
         "exception_scheme": ["CPP", "SEH", "default"]}
