@@ -1,5 +1,5 @@
-from conans import ConanFile, tools
-from conans.errors import ConanInvalidConfiguration
+from conans import AutoToolsBuildEnvironment, ConanFile, tools
+from conans.errors import ConanException, ConanInvalidConfiguration
 import os
 
 
@@ -14,6 +14,7 @@ class Pthreads4WConan(ConanFile):
         "exception_scheme": ["CPP", "SEH", "default"]}
     default_options = {'shared': False, 'exception_scheme': 'default'}
 
+    _autotools = None
     _source_folder = "source_folder"
 
     def configure(self):
@@ -32,6 +33,15 @@ class Pthreads4WConan(ConanFile):
         for f in os.listdir():
             if os.path.isdir(f) and f.startswith('pthreads'):
                 os.rename(f, self._source_folder)
+
+    def _configure_autotools(self):
+        if self.settings.compiler == "Visual Studio":
+            raise ConanException("Visual Studio has no autotools support")
+        if self._autotools:
+            return self._autotools
+        self._autotools = AutoToolsBuildEnvironment(self, win_bash=tools.os_info.is_windows)
+        self._autotools.configure()
+        return self._autotools
 
     def build(self):
         with tools.chdir(self._source_folder):
@@ -52,26 +62,35 @@ class Pthreads4WConan(ConanFile):
                 with tools.vcvars(self.settings):
                     self.run('nmake %s' % ' '.join(args))
             else:
-                self.run('autoheader', win_bash=True)
-                self.run('autoconf', win_bash=True)
-                self.run('./configure', win_bash=True)
-                args = ['GCE' if self.options.exception_scheme == "CPP" \
-                        else 'GC']
+                self.run('autoheader', win_bash=tools.os_info.is_windows)
+                self.run('autoconf', win_bash=tools.os_info.is_windows)
+
+                autotools = self._configure_autotools()
+
+                make_target = 'GCE' if self.options.exception_scheme == "CPP" else 'GC'
                 if not self.options.shared:
-                    args[0] += '-static'
+                    make_target += '-static'
                 if self.settings.build_type == 'Debug':
-                    args[0] += '-debug'
-                self.run('make %s' % ' '.join(args), win_bash=True)
+                    make_target += '-debug'
+                autotools.make(target=make_target, args=["-j1"])
 
     def package(self):
+        self.copy('LICENSE', dst='licenses', src=self._source_folder)
         with tools.chdir(self._source_folder):
             if self.settings.compiler == "Visual Studio":
                 with tools.vcvars(self.settings):
                     self.run('nmake install DESTROOT=%s' % self.package_folder)
             else:
-                self.run('make install prefix=%s' % tools.unix_path(self.package_folder))
-        self.copy('LICENSE', dst='licenses', src=self._source_folder)
-
+                autotools = self._configure_autotools()
+                tools.mkdir(os.path.join(self.package_folder, "include"))
+                tools.mkdir(os.path.join(self.package_folder, "lib"))
+                autotools.make(target="install-headers")
+                if self.options.shared:
+                    tools.mkdir(os.path.join(self.package_folder, "bin"))
+                    autotools.make(target="install-dlls")
+                    autotools.make(target="install-implib-default")
+                else:
+                    autotools.make(target="install-lib-default")
 
     def package_info(self):
         self.cpp_info.libs = tools.collect_libs(self)
