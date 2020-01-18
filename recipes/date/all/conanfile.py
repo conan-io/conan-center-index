@@ -14,11 +14,9 @@ class DateConan(ConanFile):
     settings = "os", "arch", "compiler", "build_type"
     generators = "cmake", "cmake_find_package"
     options = {"shared": [True, False],
-               "fPIC": [True, False],
-               "use_system_tz_db": [True, False]}
+               "fPIC": [True, False]}
     default_options = {"shared": False,
-                       "fPIC": True,
-                       "use_system_tz_db": False}
+                       "fPIC": True}
     _source_subfolder = "source_subfolder"
     _build_subfolder = "build_subfolder"
 
@@ -32,13 +30,9 @@ class DateConan(ConanFile):
     def _configure_cmake(self):
         cmake = CMake(self)
         cmake.definitions["ENABLE_DATE_TESTING"] = False
-        cmake.definitions["USE_SYSTEM_TZ_DB"] = self.options.use_system_tz_db
-        cmake.configure(build_folder=self._build_subfolder)
+        cmake.definitions["USE_SYSTEM_TZ_DB"] = True
+        cmake.configure(source_folder=self._source_subfolder)
         return cmake
-
-    def requirements(self):
-        if self.options.use_system_tz_db == False:
-            self.requires("libcurl/7.67.0")
 
     def build(self):
         cmake = self._configure_cmake()
@@ -49,7 +43,7 @@ class DateConan(ConanFile):
                   src=self._source_subfolder)
         cmake = self._configure_cmake()
         cmake.install()
-        tools.rmdir(os.path.join(self.package_folder, "lib","cmake"))
+        tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
 
     def package_info(self):
         self.cpp_info.libs = tools.collect_libs(self)
