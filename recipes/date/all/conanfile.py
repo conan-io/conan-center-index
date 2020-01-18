@@ -19,10 +19,8 @@ class DateConan(ConanFile):
     default_options = {"shared": False,
                        "fPIC": True,
                        "use_system_tz_db": False}
-
-    @property
-    def _source_subfolder(self):
-        return os.path.join(self.source_folder, "source_subfolder")
+    _source_subfolder = "source_subfolder"
+    _build_subfolder = "build_subfolder"
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
@@ -35,7 +33,7 @@ class DateConan(ConanFile):
         cmake = CMake(self)
         cmake.definitions["ENABLE_DATE_TESTING"] = False
         cmake.definitions["USE_SYSTEM_TZ_DB"] = self.options.use_system_tz_db
-        cmake.configure(source_folder=self._source_subfolder)
+        cmake.configure(build_folder=self._build_subfolder)
         return cmake
 
     def requirements(self):
@@ -51,7 +49,7 @@ class DateConan(ConanFile):
                   src=self._source_subfolder)
         cmake = self._configure_cmake()
         cmake.install()
-        tools.rmdir(os.path.join(self.package_folder, "lib"))
+        tools.rmdir(os.path.join(self.package_folder, "lib","cmake"))
 
     def package_info(self):
         self.cpp_info.libs = tools.collect_libs(self)
