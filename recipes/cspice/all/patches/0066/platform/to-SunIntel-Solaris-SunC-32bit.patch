@@ -1,5 +1,3 @@
-diff --git a/include/SpiceZpl.h b/include/SpiceZpl.h
-index b2e0565..3f0d397 100644
 --- a/include/SpiceZpl.h
 +++ b/include/SpiceZpl.h
 @@ -111,7 +111,7 @@
@@ -11,8 +9,6 @@ index b2e0565..3f0d397 100644
   
  #endif
   
-diff --git a/src/cspice/SpiceZpl.h b/src/cspice/SpiceZpl.h
-index b2e0565..3f0d397 100644
 --- a/src/cspice/SpiceZpl.h
 +++ b/src/cspice/SpiceZpl.h
 @@ -111,7 +111,7 @@
@@ -24,8 +20,6 @@ index b2e0565..3f0d397 100644
   
  #endif
   
-diff --git a/src/cspice/zzplatfm.c b/src/cspice/zzplatfm.c
-index 26a0c61..d5242ae 100644
 --- a/src/cspice/zzplatfm.c
 +++ b/src/cspice/zzplatfm.c
 @@ -346,10 +346,9 @@ static integer c__6 = 6;

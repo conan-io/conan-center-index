@@ -1,5 +1,3 @@
-diff --git a/src/cspice/dskx02.c b/src/cspice/dskx02.c
-index d3a0d98..e1ebba3 100644
 --- a/src/cspice/dskx02.c
 +++ b/src/cspice/dskx02.c
 @@ -133,6 +133,7 @@ static integer c__0 = 0;
@@ -446,8 +444,6 @@ index d3a0d98..e1ebba3 100644
  				    }
  				}
  			    }
-diff --git a/src/cspice/subpnt.c b/src/cspice/subpnt.c
-index ddf10b6..181a5b3 100644
 --- a/src/cspice/subpnt.c
 +++ b/src/cspice/subpnt.c
 @@ -2095,6 +2095,13 @@ static integer c__3 = 3;

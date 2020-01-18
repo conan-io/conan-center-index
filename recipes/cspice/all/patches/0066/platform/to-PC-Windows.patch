@@ -1,31 +1,3 @@
-diff --git a/include/SpiceZpl.h b/include/SpiceZpl.h
-index b2e0565..227393b 100644
---- a/include/SpiceZpl.h
-+++ b/include/SpiceZpl.h
-@@ -111,7 +111,7 @@
- #define HAVE_PLATFORM_MACROS_H
-  
-  
--   #define   CSPICE_PC_CYGWIN
-+   #define   CSPICE_PC_MS
-  
- #endif
-  
-diff --git a/src/cspice/SpiceZpl.h b/src/cspice/SpiceZpl.h
-index b2e0565..227393b 100644
---- a/src/cspice/SpiceZpl.h
-+++ b/src/cspice/SpiceZpl.h
-@@ -111,7 +111,7 @@
- #define HAVE_PLATFORM_MACROS_H
-  
-  
--   #define   CSPICE_PC_CYGWIN
-+   #define   CSPICE_PC_MS
-  
- #endif
-  
-diff --git a/src/cspice/dasfm.c b/src/cspice/dasfm.c
-index 54cd538..0b36fa6 100644
 --- a/src/cspice/dasfm.c
 +++ b/src/cspice/dasfm.c
 @@ -684,7 +684,7 @@ static integer c__1 = 1;
@@ -69,8 +41,6 @@ index 54cd538..0b36fa6 100644
  		errint_("#", &iostat, (ftnlen)1);
  		sigerr_("SPICE(DASWRITEFAIL)", (ftnlen)19);
  		chkout_("DASUFS", (ftnlen)6);
-diff --git a/src/cspice/errdev.c b/src/cspice/errdev.c
-index 3666715..f846819 100644
 --- a/src/cspice/errdev.c
 +++ b/src/cspice/errdev.c
 @@ -16,7 +16,7 @@ static integer c__2 = 2;
@@ -132,8 +102,6 @@ index 3666715..f846819 100644
  	} else {
  
  /*           We assume we've got a file name... */
-diff --git a/src/cspice/outmsg.c b/src/cspice/outmsg.c
-index 6c458a9..335efac 100644
 --- a/src/cspice/outmsg.c
 +++ b/src/cspice/outmsg.c
 @@ -18,12 +18,12 @@ static integer c__1 = 1;
@@ -480,8 +448,6 @@ index 6c458a9..335efac 100644
      return 0;
  } /* outmsg_ */
  
-diff --git a/src/cspice/prompt.c b/src/cspice/prompt.c
-index 6feaf95..a263a32 100644
 --- a/src/cspice/prompt.c
 +++ b/src/cspice/prompt.c
 @@ -325,19 +325,13 @@ static integer c__1 = 1;
@@ -508,8 +474,6 @@ index 6feaf95..a263a32 100644
      iostat = s_wsfe(&ci__1);
      if (iostat != 0) {
  	goto L100001;
-diff --git a/src/cspice/prtpkg.c b/src/cspice/prtpkg.c
-index b9d5121..97e0e34 100644
 --- a/src/cspice/prtpkg.c
 +++ b/src/cspice/prtpkg.c
 @@ -36,7 +36,7 @@ logical prtpkg_0_(int n__, logical *short__, logical *long__, logical *expl,
@@ -558,8 +522,6 @@ index b9d5121..97e0e34 100644
      }
      return ret_val;
  } /* prtpkg_ */
-diff --git a/src/cspice/putdev.c b/src/cspice/putdev.c
-index 6a50897..228b3d7 100644
 --- a/src/cspice/putdev.c
 +++ b/src/cspice/putdev.c
 @@ -10,11 +10,9 @@
@@ -594,8 +556,6 @@ index 6a50897..228b3d7 100644
      return 0;
  } /* putdev_ */
  
-diff --git a/src/cspice/rdtext.c b/src/cspice/rdtext.c
-index fe80809..ec4d154 100644
 --- a/src/cspice/rdtext.c
 +++ b/src/cspice/rdtext.c
 @@ -16,11 +16,9 @@ static integer c__1 = 1;
@@ -714,8 +674,6 @@ index fe80809..ec4d154 100644
  		    (ftnlen)963)];
  	}
  	--n;
-diff --git a/src/cspice/stmp03.c b/src/cspice/stmp03.c
-index f6cc822..dfc8f41 100644
 --- a/src/cspice/stmp03.c
 +++ b/src/cspice/stmp03.c
 @@ -27,7 +27,7 @@
@@ -760,8 +718,6 @@ index f6cc822..dfc8f41 100644
  		s_rnge("pairs", i__1, "stmp03_", (ftnlen)764)] * *c2;
      }
      *c2 = pairs[0] * *c2;
-diff --git a/src/cspice/trcpkg.c b/src/cspice/trcpkg.c
-index afd42e8..a964d7f 100644
 --- a/src/cspice/trcpkg.c
 +++ b/src/cspice/trcpkg.c
 @@ -43,7 +43,7 @@ static integer c__0 = 0;
@@ -876,8 +832,6 @@ index afd42e8..a964d7f 100644
  		    53);
  	    return 0;
  	}
-diff --git a/src/cspice/writln.c b/src/cspice/writln.c
-index 92230f6..aa186a9 100644
 --- a/src/cspice/writln.c
 +++ b/src/cspice/writln.c
 @@ -379,6 +379,14 @@ static integer c__1 = 1;
@@ -895,8 +849,6 @@ index 92230f6..aa186a9 100644
  /*     Local variables */
  
  
-diff --git a/src/cspice/wrline.c b/src/cspice/wrline.c
-index d2e7aaf..a3a6bc3 100644
 --- a/src/cspice/wrline.c
 +++ b/src/cspice/wrline.c
 @@ -41,7 +41,7 @@ static integer c__2 = 2;
@@ -927,22 +879,3 @@ index d2e7aaf..a3a6bc3 100644
  	ci__1.cierr = 1;
  	ci__1.ciunit = 6;
  	ci__1.cifmt = "(A)";
-diff --git a/src/cspice/zzplatfm.c b/src/cspice/zzplatfm.c
-index 26a0c61..8020fde 100644
---- a/src/cspice/zzplatfm.c
-+++ b/src/cspice/zzplatfm.c
-@@ -347,11 +347,10 @@ static integer c__6 = 6;
- /*        Platform/Environment specific assignments follow. */
- 
- 	s_copy(attcpy + 32, "PC", (ftnlen)32, (ftnlen)2);
--	s_copy(attcpy + 64, "MICROSOFT WINDOWS/CYGWIN", (ftnlen)32, (ftnlen)
--		24);
--	s_copy(attcpy + 96, "GCC", (ftnlen)32, (ftnlen)3);
-+	s_copy(attcpy + 64, "MICROSOFT WINDOWS", (ftnlen)32, (ftnlen)17);
-+	s_copy(attcpy + 96, "MICROSOFT VISUAL C++", (ftnlen)32, (ftnlen)20);
- 	s_copy(attcpy + 128, "LTL-IEEE", (ftnlen)32, (ftnlen)8);
--	s_copy(attcpy + 160, "LF", (ftnlen)32, (ftnlen)2);
-+	s_copy(attcpy + 160, "CR-LF", (ftnlen)32, (ftnlen)5);
- 	s_copy(attcpy + 192, "BIG-IEEE LTL-IEEE", (ftnlen)32, (ftnlen)17);
- 
- /*        Don't execute these assignments again. */

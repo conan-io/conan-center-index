@@ -1,0 +1,34 @@
+--- a/include/SpiceZpl.h
++++ b/include/SpiceZpl.h
+@@ -111,7 +111,7 @@
+ #define HAVE_PLATFORM_MACROS_H
+  
+  
+-   #define   CSPICE_PC_CYGWIN
++   #define   CSPICE_PC_LINUX
+  
+ #endif
+  
+--- a/src/cspice/SpiceZpl.h
++++ b/src/cspice/SpiceZpl.h
+@@ -111,7 +111,7 @@
+ #define HAVE_PLATFORM_MACROS_H
+  
+  
+-   #define   CSPICE_PC_CYGWIN
++   #define   CSPICE_PC_LINUX
+  
+ #endif
+  
+--- a/src/cspice/zzplatfm.c
++++ b/src/cspice/zzplatfm.c
+@@ -347,8 +347,7 @@ static integer c__6 = 6;
+ /*        Platform/Environment specific assignments follow. */
+ 
+ 	s_copy(attcpy + 32, "PC", (ftnlen)32, (ftnlen)2);
+-	s_copy(attcpy + 64, "MICROSOFT WINDOWS/CYGWIN", (ftnlen)32, (ftnlen)
+-		24);
++	s_copy(attcpy + 64, "LINUX", (ftnlen)32, (ftnlen)5);
+ 	s_copy(attcpy + 96, "GCC", (ftnlen)32, (ftnlen)3);
+ 	s_copy(attcpy + 128, "LTL-IEEE", (ftnlen)32, (ftnlen)8);
+ 	s_copy(attcpy + 160, "LF", (ftnlen)32, (ftnlen)2);

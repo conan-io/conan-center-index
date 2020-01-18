@@ -1,5 +1,3 @@
-diff --git a/src/cspice/open.c b/src/cspice/open.c
-index fcff7da..a542f35 100644
 --- a/src/cspice/open.c
 +++ b/src/cspice/open.c
 @@ -324,7 +324,7 @@ static void

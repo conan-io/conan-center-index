@@ -53,50 +53,50 @@ class CspiceConan(ConanFile):
         return {
             "Macos": {
                 "x86": {
-                    "apple-clang": "PC-Cygwin-GCC-32bit-To-MacIntel-OSX-AppleC-32bit"
+                    "apple-clang": ["to-MacIntel-OSX.patch", "to-MacIntel-OSX-AppleC-32bit.patch"]
                 },
                 "x86_64": {
-                    "apple-clang": "PC-Cygwin-GCC-32bit-To-MacIntel-OSX-AppleC-64bit"
+                    "apple-clang": ["to-MacIntel-OSX.patch", "to-MacIntel-OSX-AppleC-64bit.patch"]
                 }
             },
             "Linux": {
                 "x86": {
-                    "gcc": "PC-Cygwin-GCC-32bit-To-PC-Linux-GCC-32bit"
+                    "gcc": ["to-PC-Linux-GCC-32bit.patch"]
                 },
                 "x86_64": {
-                    "gcc": "PC-Cygwin-GCC-32bit-To-PC-Linux-GCC-64bit"
+                    "gcc": ["to-PC-Linux-GCC-64bit.patch"]
                 }
             },
             "Windows": {
                 "x86": {
-                    "Visual Studio": "PC-Cygwin-GCC-32bit-To-PC-Windows-VisualC-32bit"
+                    "Visual Studio": ["to-PC-Windows.patch", "to-PC-Windows-VisualC-32bit.patch"]
                 },
                 "x86_64": {
-                    "Visual Studio": "PC-Cygwin-GCC-32bit-To-PC-Windows-VisualC-64bit"
+                    "Visual Studio": ["to-PC-Windows.patch", "to-PC-Windows-VisualC-64bit.patch"]
                 }
             },
             "Windows-cygwin": {
                 "x86": {
-                    "gcc": None
+                    "gcc": []
                 },
                 "x86_64": {
-                    "gcc": "PC-Cygwin-GCC-32bit-To-PC-Cygwin-GCC-64bit"
+                    "gcc": ["to-PC-Cygwin-GCC-64bit.patch"]
                 }
             },
             "SunOs": {
                 "x86": {
-                    "sun-cc": "PC-Cygwin-GCC-32bit-To-SunIntel-Solaris-SunC-32bit"
+                    "sun-cc": ["to-SunIntel-Solaris-SunC-32bit.patch"]
                 },
                 "x86_64": {
-                    "sun-cc": "PC-Cygwin-GCC-32bit-To-SunIntel-Solaris-SunC-64bit"
+                    "sun-cc": ["to-SunIntel-Solaris-SunC-64bit.patch"]
                 },
                 "sparc": {
-                    "gcc": "PC-Cygwin-GCC-32bit-To-SunSPARC-Solaris-GCC-32bit",
-                    "sun-cc": "PC-Cygwin-GCC-32bit-To-SunSPARC-Solaris-SunC-32bit"
+                    "gcc": ["to-SunSPARC-Solaris.patch", "to-SunSPARC-Solaris-GCC-32bit.patch"],
+                    "sun-cc": ["to-SunSPARC-Solaris.patch", "to-SunSPARC-Solaris-SunC-32bit.patch"]
                 },
                 "sparcv9": {
-                    "gcc": "PC-Cygwin-GCC-32bit-To-SunSPARC-Solaris-GCC-64bit",
-                    "sun-cc": "PC-Cygwin-GCC-32bit-To-SunSPARC-Solaris-SunC-64bit"
+                    "gcc": ["to-SunSPARC-Solaris.patch", "to-SunSPARC-Solaris-GCC-64bit.patch"],
+                    "sun-cc": ["to-SunSPARC-Solaris.patch", "to-SunSPARC-Solaris-SunC-64bit.patch"]
                 }
             }
         }
@@ -138,17 +138,16 @@ class CspiceConan(ConanFile):
                 tools.patch(**patch)
 
     def build(self):
-        self._apply_specific_patch()
+        self._apply_platform_patch()
         cmake = self._configure_cmake()
         cmake.build()
 
-    def _apply_specific_patch(self):
+    def _apply_platform_patch(self):
         os_subsystem = self._get_os_subsystem()
         arch = str(self.settings.arch)
         compiler = str(self.settings.compiler)
-        patch_filename = self._patch_per_os_arch_compiler[os_subsystem][arch][compiler]
-        if patch_filename is not None:
-            tools.patch(patch_file="patches/{0}/{1}.patch".format(self.version, patch_filename),
+        for patch_filename in self._patch_per_os_arch_compiler[os_subsystem][arch][compiler]:
+            tools.patch(patch_file="patches/{0}/platform/{1}".format(self.version, patch_filename),
                         base_path=self._source_subfolder)
 
     def _configure_cmake(self):

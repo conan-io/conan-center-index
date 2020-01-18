@@ -1,0 +1,40 @@
+--- a/include/SpiceZpl.h
++++ b/include/SpiceZpl.h
+@@ -111,7 +111,7 @@
+ #define HAVE_PLATFORM_MACROS_H
+  
+  
+-   #define   CSPICE_PC_CYGWIN
++   #define   CSPICE_SUN_SOLARIS_NATIVE
+  
+ #endif
+  
+--- a/src/cspice/SpiceZpl.h
++++ b/src/cspice/SpiceZpl.h
+@@ -111,7 +111,7 @@
+ #define HAVE_PLATFORM_MACROS_H
+  
+  
+-   #define   CSPICE_PC_CYGWIN
++   #define   CSPICE_SUN_SOLARIS_NATIVE
+  
+ #endif
+  
+--- a/src/cspice/zzplatfm.c
++++ b/src/cspice/zzplatfm.c
+@@ -346,11 +346,10 @@ static integer c__6 = 6;
+ 
+ /*        Platform/Environment specific assignments follow. */
+ 
+-	s_copy(attcpy + 32, "PC", (ftnlen)32, (ftnlen)2);
+-	s_copy(attcpy + 64, "MICROSOFT WINDOWS/CYGWIN", (ftnlen)32, (ftnlen)
+-		24);
+-	s_copy(attcpy + 96, "GCC", (ftnlen)32, (ftnlen)3);
+-	s_copy(attcpy + 128, "LTL-IEEE", (ftnlen)32, (ftnlen)8);
++	s_copy(attcpy + 32, "SUN", (ftnlen)32, (ftnlen)3);
++	s_copy(attcpy + 64, "SOLARIS", (ftnlen)32, (ftnlen)7);
++	s_copy(attcpy + 96, "SUN C", (ftnlen)32, (ftnlen)5);
++	s_copy(attcpy + 128, "BIG-IEEE", (ftnlen)32, (ftnlen)8);
+ 	s_copy(attcpy + 160, "LF", (ftnlen)32, (ftnlen)2);
+ 	s_copy(attcpy + 192, "BIG-IEEE LTL-IEEE", (ftnlen)32, (ftnlen)17);
+ 
