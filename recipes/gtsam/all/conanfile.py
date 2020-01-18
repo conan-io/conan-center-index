@@ -2,6 +2,7 @@ import os
 import stat
 import shutil
 from conans import ConanFile, tools, CMake
+from conans.errors import ConanInvalidConfiguration
 
 class gtsamConan(ConanFile):
     name = "gtsam"
@@ -104,6 +105,8 @@ class gtsamConan(ConanFile):
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
+            if self.settings.compiler == "Visual Studio" and tools.Version(self.settings.compiler.version) < 15:
+                raise ConanInvalidConfiguration ("GTSAM requirews MSVC >= 15")
 
     def configure(self):
         self.requires("boost/1.72.0")
