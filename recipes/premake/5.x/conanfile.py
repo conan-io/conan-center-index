@@ -1,4 +1,5 @@
 from conans import ConanFile, tools, AutoToolsBuildEnvironment, MSBuild
+from conans.errors import ConanInvalidConfiguration
 import os
 
 
@@ -13,6 +14,10 @@ class PremakeConan(ConanFile):
     settings = "os_build", "arch_build", "compiler"
     _source_subfolder = "source_subfolder"
     _build_subfolder = "build_subfolder"
+
+    def configure(self):
+        if self.settings.os_build == "Windows" and self.settings.compiler == "gcc":
+            raise ConanInvalidConfiguration("Building with MinGW isn't supported currently by the recipe")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
