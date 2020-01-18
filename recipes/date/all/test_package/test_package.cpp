@@ -16,7 +16,5 @@ int main() {
     auto date3 = 22_d/March/2015;
     std::cout << date3 << '\n';
 
-    std::cout << "current zone: " << date::current_zone()->name() << '\n';
-
     return EXIT_SUCCESS;
 }
