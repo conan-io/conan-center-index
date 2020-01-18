@@ -3,7 +3,7 @@
 #include <iostream>
 
 extern "C" {
-    int hello_from_c();
+    int hello_from_c(void);
 }
 
 void hello_from_cxx() {

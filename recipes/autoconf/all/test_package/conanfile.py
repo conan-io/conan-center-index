@@ -6,7 +6,11 @@ import shutil
 
 class TestPackageConan(ConanFile):
     settings = "os", "compiler", "build_type", "arch"
-    exports_sources = "configure.ac", "config.h.in", "Makefile.in", "test_package.c", "test_package.cpp",
+    exports_sources = "configure.ac", "config.h.in", "Makefile.in", "test_package_c.c", "test_package_cpp.cpp",
+
+    def configure(self):
+        self.options["cccl"].muffle = False
+        self.options["cccl"].verbose = False
 
     def build_requirements(self):
         if tools.os_info.is_windows and "CONAN_BASH_PATH" not in os.environ:
