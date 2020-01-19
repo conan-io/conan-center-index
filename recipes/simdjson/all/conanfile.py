@@ -1,5 +1,7 @@
 import os
 from conans import ConanFile, CMake, tools
+from conans.errors import ConanInvalidConfiguration
+from conans.tools import Version
 
 
 class SimdjsonConan(ConanFile):
@@ -22,9 +24,28 @@ class SimdjsonConan(ConanFile):
                        'avx': True}
     _source_subfolder = "source_subfolder"
 
+    @property
+    def _supported_cppstd(self):
+        return ["17", "gnu17", "20", "gnu20"]
+
+    def _has_support_for_cpp17(self):
+        supported_compilers = [("apple-clang", 10), ("clang", 6), ("gcc", 7), ("Visual Studio", 15.7)]
+        compiler, version = self.settings.compiler, Version(self.settings.compiler.version)
+        return any(compiler == sc[0] and version >= sc[1] for sc in supported_compilers)
+
     def configure(self):
         if self.settings.compiler == "Visual Studio":
             self.options.remove("fPIC")
+        if self.settings.compiler.cppstd and \
+           not self.settings.compiler.cppstd in self._supported_cppstd:
+          raise ConanInvalidConfiguration("This library requires c++17 standard or higher."
+                                          " {} required."
+                                          .format(self.settings.compiler.cppstd))
+
+        if not self._has_support_for_cpp17():
+            raise ConanInvalidConfiguration("This library requires C++17 or higher support standard."
+                                            " {} {} is not supported."
+                                            .format(self.settings.compiler, self.settings.compiler.version))
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
