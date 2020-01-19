@@ -52,6 +52,12 @@ class SimdjsonConan(ConanFile):
         extracted_dir = self.name + "-" + self.version
         os.rename(extracted_dir, self._source_subfolder)
 
+        # In version 0.2.1 CMAKE_CXX_FLAGS are ignored
+        tools.replace_in_file(os.path.join(self._source_subfolder, 'tools', 'cmake', 'FindOptions.cmake'),
+                              'set(CMAKE_CXX_FLAGS "${CXXSTD_FLAGS}',
+                              'set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${CXXSTD_FLAGS}',
+                              strict=False)
+
     def _configure_cmake(self):
         cmake = CMake(self)
         cmake.definitions['SIMDJSON_BUILD_STATIC'] = not self.options.shared
