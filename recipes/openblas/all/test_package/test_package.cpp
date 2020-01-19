@@ -1,4 +1,4 @@
-#include <cblas.h>
+#include <openblas/cblas.h>
 #include <stdio.h>
 
 int main()
