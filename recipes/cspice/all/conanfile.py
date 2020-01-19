@@ -49,14 +49,14 @@ class CspiceConan(ConanFile):
         return "build_subfolder"
 
     @property
-    def _patch_per_os_arch_compiler(self):
+    def _patch_per_platform(self):
         return {
             "Macos": {
                 "x86": {
-                    "apple-clang": ["to-MacIntel-OSX.patch", "to-MacIntel-OSX-AppleC-32bit.patch"]
+                    "apple-clang": ["to-MacIntel-OSX-or-SunSPARC-Solaris.patch", "to-MacIntel-OSX-AppleC-32bit.patch"]
                 },
                 "x86_64": {
-                    "apple-clang": ["to-MacIntel-OSX.patch", "to-MacIntel-OSX-AppleC-64bit.patch"]
+                    "apple-clang": ["to-MacIntel-OSX-or-SunSPARC-Solaris.patch", "to-MacIntel-OSX-AppleC-64bit.patch"]
                 }
             },
             "Linux": {
@@ -75,7 +75,7 @@ class CspiceConan(ConanFile):
                     "Visual Studio": ["to-PC-Windows.patch", "to-PC-Windows-VisualC-64bit.patch"]
                 }
             },
-            "Windows-cygwin": {
+            "cygwin": {
                 "x86": {
                     "gcc": []
                 },
@@ -91,12 +91,28 @@ class CspiceConan(ConanFile):
                     "sun-cc": ["to-SunIntel-Solaris-SunC-64bit.patch"]
                 },
                 "sparc": {
-                    "gcc": ["to-SunSPARC-Solaris.patch", "to-SunSPARC-Solaris-GCC-32bit.patch"],
-                    "sun-cc": ["to-SunSPARC-Solaris.patch", "to-SunSPARC-Solaris-SunC-32bit.patch"]
+                    "gcc": [
+                        "to-MacIntel-OSX-or-SunSPARC-Solaris.patch",
+                        "to-SunSPARC-Solaris.patch",
+                        "to-SunSPARC-Solaris-GCC-32bit.patch"
+                    ],
+                    "sun-cc": [
+                        "to-MacIntel-OSX-or-SunSPARC-Solaris.patch",
+                        "to-SunSPARC-Solaris.patch",
+                        "to-SunSPARC-Solaris-SunC-32bit.patch"
+                    ]
                 },
                 "sparcv9": {
-                    "gcc": ["to-SunSPARC-Solaris.patch", "to-SunSPARC-Solaris-GCC-64bit.patch"],
-                    "sun-cc": ["to-SunSPARC-Solaris.patch", "to-SunSPARC-Solaris-SunC-64bit.patch"]
+                    "gcc": [
+                        "to-MacIntel-OSX-or-SunSPARC-Solaris.patch",
+                        "to-SunSPARC-Solaris.patch",
+                        "to-SunSPARC-Solaris-GCC-64bit.patch"
+                    ],
+                    "sun-cc": [
+                        "to-MacIntel-OSX-or-SunSPARC-Solaris.patch",
+                        "to-SunSPARC-Solaris.patch",
+                        "to-SunSPARC-Solaris-SunC-64bit.patch"
+                    ]
                 }
             }
         }
@@ -109,20 +125,20 @@ class CspiceConan(ConanFile):
         del self.settings.compiler.libcxx
         del self.settings.compiler.cppstd
 
-        os_subsystem = self._get_os_subsystem()
+        os = self._get_os_or_subsystem()
         arch = str(self.settings.arch)
         compiler = str(self.settings.compiler)
-        if os_subsystem not in self._patch_per_os_arch_compiler or \
-           arch not in self._patch_per_os_arch_compiler[os_subsystem] or \
-           compiler not in self._patch_per_os_arch_compiler[os_subsystem][arch]:
-            raise ConanInvalidConfiguration("cspice is not compatible with {0} on {1} {2}".format(compiler,
-                                                                                                  os_subsystem, arch))
+        if os not in self._patch_per_platform or \
+           arch not in self._patch_per_platform[os] or \
+           compiler not in self._patch_per_platform[os][arch]:
+            raise ConanInvalidConfiguration("cspice does not support {0} on {1} {2}".format(compiler, os, arch))
 
-    def _get_os_subsystem(self):
-        os_subsystem = str(self.settings.os)
+    def _get_os_or_subsystem(self):
         if self.settings.os == "Windows" and self.settings.os.subsystem != "None":
-            os_subsystem += "-" + str(self.settings.os.subsystem)
-        return os_subsystem
+            os_or_subsystem = str(self.settings.os.subsystem)
+        else:
+            os_or_subsystem = str(self.settings.os)
+        return os_or_subsystem
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
@@ -143,10 +159,10 @@ class CspiceConan(ConanFile):
         cmake.build()
 
     def _apply_platform_patch(self):
-        os_subsystem = self._get_os_subsystem()
+        os = self._get_os_or_subsystem()
         arch = str(self.settings.arch)
         compiler = str(self.settings.compiler)
-        for patch_filename in self._patch_per_os_arch_compiler[os_subsystem][arch][compiler]:
+        for patch_filename in self._patch_per_platform[os][arch][compiler]:
             tools.patch(patch_file="patches/{0}/platform/{1}".format(self.version, patch_filename),
                         base_path=self._source_subfolder)
 
