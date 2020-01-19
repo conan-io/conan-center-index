@@ -29,9 +29,9 @@ ACTIONS OF RECIPIENT IN THE USE OF THE SOFTWARE"""
 
 class CspiceConan(ConanFile):
     name = "cspice"
-    description = "NASA C SPICE toolkit"
+    description = "NASA C SPICE library"
     license = "MIT"
-    topics = ("conan", "spice", "naif", "kernels", "space", "nasa", "jpl", "spacecraft", "planet", "robotic")
+    topics = ("conan", "spice", "naif", "kernels", "space", "nasa", "jpl", "spacecraft", "planet", "robotics")
     homepage = "https://naif.jpl.nasa.gov/naif/toolkit.html"
     url = "https://github.com/conan-io/conan-center-index"
     exports_sources = ["CMakeLists.txt", "patches/**"]
