@@ -48,6 +48,9 @@ class OpenBLAS(ConanFile):
         cmake.definitions["NOFORTRAN"] = not self.options.build_lapack
         cmake.definitions["BUILD_WITHOUT_LAPACK"] = not self.options.build_lapack
 
+        if self.settings.compiler == "Visual Studio" and not self.options.shared:
+            cmake.definitions["MSVC_STATIC_CRT"] = True
+
         cmake.configure(
             build_folder=self._build_subfolder,
             source_folder=self._source_subfolder)
