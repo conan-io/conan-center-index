@@ -69,6 +69,8 @@ class OpenBLAS(ConanFile):
 
     def package_info(self):
         self.cpp_info.libs = tools.collect_libs(self)
+        if self.settings.os == "Linux": 
+            self.cpp_info.system_libs = ["pthread"]
         self.cpp_info.builddirs.append(
             os.path.join('share', 'cmake', 'OpenBLAS'))
         self.cpp_info.names["cmake_find_package"] = "OpenBLAS"
