@@ -58,6 +58,13 @@ class SimdjsonConan(ConanFile):
                               'set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${CXXSTD_FLAGS}',
                               strict=False)
 
+        # Generating export files by CMake via __export_def (enabled by property WINDOWS_EXPORT_ALL_SYMBOLS)
+        # does not work with whole program optimization.
+        # So disable INTERPROCEDURAL_OPTIMIZATION
+        tools.replace_in_file(os.path.join(self._source_subfolder, 'CMakeLists.txt'),
+                              'set(CMAKE_INTERPROCEDURAL_OPTIMIZATION TRUE)',
+                              'set(CMAKE_INTERPROCEDURAL_OPTIMIZATION FALSE)')
+
     def _configure_cmake(self):
         cmake = CMake(self)
         cmake.definitions['SIMDJSON_BUILD_STATIC'] = not self.options.shared
