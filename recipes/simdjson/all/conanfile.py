@@ -9,7 +9,7 @@ class SimdjsonConan(ConanFile):
     description = "Parsing gigabytes of JSON per second"
     topics = ("conan", "json", "parser", "simd", "format")
     url = "https://github.com/conan-io/conan-center-index"
-    homepage = "Ahttps://github.com/lemire/simdjson"
+    homepage = "https://github.com/lemire/simdjson"
     license = "Apache-2.0"
     exports_sources = ["CMakeLists.txt"]
     generators = "cmake"
