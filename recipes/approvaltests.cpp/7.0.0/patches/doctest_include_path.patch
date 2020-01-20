@@ -1,0 +1,11 @@
+--- ApprovalTests.hpp	2019-12-26 12:20:09.319006140 -0600
++++ ApprovalTests_new.hpp	2019-12-26 12:17:35.250194161 -0600
+@@ -2569,7 +2569,7 @@
+
+ #define DOCTEST_CONFIG_IMPLEMENT_WITH_MAIN
+
+-#include <doctest.h>
++#include <doctest/doctest.h>
+
+ namespace ApprovalTests {
+ // anonymous namespace to prevent compiler -Wsubobject-linkage warnings
