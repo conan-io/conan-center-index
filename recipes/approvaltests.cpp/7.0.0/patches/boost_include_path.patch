@@ -1,0 +1,11 @@
+--- ApprovalTests.hpp	2019-12-26 12:20:09.319006140 -0600
++++ ApprovalTests_new.hpp	2019-12-26 12:17:35.250194161 -0600
+@@ -2776,7 +2776,7 @@
+ #error "The [Boost].UT integration with Approval Tests requires source_location support by the compiler"
+ #endif
+
+-#include <ut.hpp>
++#include <boost/ut.hpp>
+
+ namespace ApprovalTests
+ {
