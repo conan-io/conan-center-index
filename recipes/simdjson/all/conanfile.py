@@ -61,9 +61,10 @@ class SimdjsonConan(ConanFile):
         # Generating export files by CMake via __export_def (enabled by property WINDOWS_EXPORT_ALL_SYMBOLS)
         # does not work with whole program optimization.
         # So disable INTERPROCEDURAL_OPTIMIZATION
-        tools.replace_in_file(os.path.join(self._source_subfolder, 'CMakeLists.txt'),
-                              'set(CMAKE_INTERPROCEDURAL_OPTIMIZATION TRUE)',
-                              'set(CMAKE_INTERPROCEDURAL_OPTIMIZATION FALSE)')
+        if self.settings.compiler == "Visual Studio" and self.options.shared:
+            tools.replace_in_file(os.path.join(self._source_subfolder, 'CMakeLists.txt'),
+                                  'set(CMAKE_INTERPROCEDURAL_OPTIMIZATION TRUE)',
+                                  'set(CMAKE_INTERPROCEDURAL_OPTIMIZATION FALSE)')
 
     def _configure_cmake(self):
         cmake = CMake(self)
