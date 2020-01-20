@@ -11,7 +11,8 @@ class CspiceConan(ConanFile):
     topics = ("conan", "spice", "naif", "kernels", "space", "nasa", "jpl", "spacecraft", "planet", "robotics")
     homepage = "https://naif.jpl.nasa.gov/naif/toolkit.html"
     url = "https://github.com/conan-io/conan-center-index"
-    exports_sources = ["CMakeLists.txt", "TSPA.txt", "patches/**"]
+    exports_sources = ["CMakeLists.txt", "patches/**"]
+    exports = ["TSPA.txt"]
     generators = "cmake"
     settings = "os", "arch", "compiler", "build_type"
     options = {"shared": [True, False], "fPIC": [True, False]}
