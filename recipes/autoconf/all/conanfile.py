@@ -28,8 +28,14 @@ class AutoconfConan(ConanFile):
         if self._autotools:
             return self._autotools
         self._autotools = AutoToolsBuildEnvironment(self, win_bash=tools.os_info.is_windows)
+        datarootdir = os.path.join(self.package_folder, "bin", "share")
+        prefix = self.package_folder
+        if self.settings.os_build == "Windows":
+            datarootdir = tools.unix_path(datarootdir)
+            prefix = tools.unix_path(prefix)
         conf_args = [
-            "--datarootdir={}".format(os.path.join(self.package_folder, "bin", "share").replace("\\", "/")),
+            "--datarootdir={}".format(datarootdir),
+            "--prefix={}".format(prefix),
         ]
         self._autotools.configure(args=conf_args, configure_dir=self._source_subfolder)
         return self._autotools
@@ -56,13 +62,25 @@ class AutoconfConan(ConanFile):
         self.env_info.PATH.append(bin_path)
 
         autoconf = os.path.join(self.package_folder, "bin", "autoconf")
+        if self.settings.os_build == "Windows":
+            autoconf = tools.unix_path(autoconf) + ".exe"
         self.output.info("Setting AUTOCONF to {}".format(autoconf))
         self.env_info.AUTOCONF = autoconf
 
+        autoreconf = os.path.join(self.package_folder, "bin", "autoreconf")
+        if self.settings.os_build == "Windows":
+            autoreconf = tools.unix_path(autoreconf) + ".exe"
+        self.output.info("Setting AUTORECONF to {}".format(autoreconf))
+        self.env_info.AUTORECONF = autoreconf
+
         autoheader = os.path.join(self.package_folder, "bin", "autoheader")
+        if self.settings.os_build == "Windows":
+            autoheader = tools.unix_path(autoheader) + ".exe"
         self.output.info("Setting AUTOHEADER to {}".format(autoheader))
         self.env_info.AUTOHEADER = autoheader
 
         autom4te = os.path.join(self.package_folder, "bin", "autom4te")
+        if self.settings.os_build == "Windows":
+            autom4te = tools.unix_path(autom4te) + ".exe"
         self.output.info("Setting AUTOM4TE to {}".format(autom4te))
         self.env_info.AUTOM4TE = autom4te
