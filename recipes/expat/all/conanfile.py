@@ -1,4 +1,5 @@
 from conans import ConanFile, CMake, tools
+from conans.tools import Version
 import os
 
 
@@ -33,11 +34,19 @@ class ExpatConan(ConanFile):
 
     def _configure_cmake(self):
         cmake = CMake(self, parallel=True)
-        cmake.definitions["BUILD_doc"] = "Off"
-        cmake.definitions["BUILD_examples"] =  "Off"
-        cmake.definitions["BUILD_shared"] = self.options.shared
-        cmake.definitions["BUILD_tests"] = "Off"
-        cmake.definitions["BUILD_tools"] = "Off"
+        if Version(self.version) < "2.2.8":
+            cmake.definitions["BUILD_doc"] = "Off"
+            cmake.definitions["BUILD_examples"] =  "Off"
+            cmake.definitions["BUILD_shared"] = self.options.shared
+            cmake.definitions["BUILD_tests"] = "Off"
+            cmake.definitions["BUILD_tools"] = "Off"
+        else:
+            # These options were renamed in 2.2.8 to be more consistent
+            cmake.definitions["EXPAT_BUILD_DOCS"] = "Off"
+            cmake.definitions["EXPAT_BUILD_EXAMPLES"] =  "Off"
+            cmake.definitions["EXPAT_SHARED_LIBS"] = self.options.shared
+            cmake.definitions["EXPAT_BUILD_TESTS"] = "Off"
+            cmake.definitions["EXPAT_BUILD_TOOLS"] = "Off"
 
         cmake.configure(build_folder=self._build_subfolder)
         return cmake 
@@ -55,7 +64,8 @@ class ExpatConan(ConanFile):
         tools.rmdir(os.path.join(self.package_folder, "share"))
 
     def package_info(self):
-        self.cpp_info.name = "EXPAT"
+        self.cpp_info.names["cmake_find_package"] = "EXPAT"
+        self.cpp_info.names["cmake_find_package_multi"] = "EXPAT"
         self.cpp_info.libs = tools.collect_libs(self)
         if not self.options.shared:
             self.cpp_info.defines = ["XML_STATIC"]

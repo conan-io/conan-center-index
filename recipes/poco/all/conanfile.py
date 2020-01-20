@@ -170,8 +170,12 @@ class PocoConan(ConanFile):
                  else ("d" if self.settings.build_type=="Debug" else "")
         for flag, lib in libs:
             if getattr(self.options, flag):
+                if self.settings.os == "Windows" and flag == "enable_netssl" and self.options.enable_netssl_win:
+                    continue
+
                 if self.settings.os != "Windows" and flag == "enable_netssl_win":
                     continue
+
                 self.cpp_info.libs.append("%s%s" % (lib, suffix))
 
         self.cpp_info.libs.append("PocoFoundation%s" % suffix)
@@ -184,5 +188,5 @@ class PocoConan(ConanFile):
             self.cpp_info.defines.extend(["POCO_STATIC=ON", "POCO_NO_AUTOMATIC_LIBS"])
             if self.settings.compiler == "Visual Studio":
                 self.cpp_info.libs.extend(["ws2_32", "Iphlpapi", "Crypt32"])
-        self.cpp_info.name = "Poco"
-
+        self.cpp_info.names["cmake_find_package"] = "Poco"
+        self.cpp_info.names["cmake_find_package_multi"] = "Poco"

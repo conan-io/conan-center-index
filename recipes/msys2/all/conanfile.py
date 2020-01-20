@@ -37,6 +37,10 @@ class MSYS2Conan(ConanFile):
         tools.check_sha256(filename, sha256)
         return filename
 
+    @property
+    def _msys_dir(self):
+        return "msys64" if self.settings.arch_build == "x86_64" else "msys32"
+
     def build(self):
         arch = 0 if self.settings.arch_build == "x86" else 1  # index in the sources list
         url = self.conan_data["sources"][self.version][arch]["url"]
@@ -48,33 +52,34 @@ class MSYS2Conan(ConanFile):
         os.unlink(filename)
         os.unlink(tar_name)
 
-        msys_dir = "msys64" if self.settings.arch_build == "x86_64" else "msys32"
-
         packages = []
         if self.options.packages:
             packages.extend(str(self.options.packages).split(","))
         if self.options.additional_packages:
             packages.extend(str(self.options.additional_packages).split(","))
 
-        with tools.chdir(os.path.join(msys_dir, "usr", "bin")):
+        with tools.chdir(os.path.join(self._msys_dir, "usr", "bin")):
             for package in packages:
                 self.run('bash -l -c "pacman -S %s --noconfirm"' % package)
 
         # create /tmp dir in order to avoid
         # bash.exe: warning: could not find /tmp, please create!
-        tmp_dir = os.path.join(msys_dir, 'tmp')
+        tmp_dir = os.path.join(self._msys_dir, 'tmp')
         if not os.path.isdir(tmp_dir):
             os.makedirs(tmp_dir)
         tmp_name = os.path.join(tmp_dir, 'dummy')
         with open(tmp_name, 'a'):
             os.utime(tmp_name, None)
 
+        # Prepend the PKG_CONFIG_PATH environment variable with an eventual PKG_CONFIG_PATH environment variable
+        tools.replace_in_file(os.path.join(self._msys_dir, "etc", "profile"),
+                              'PKG_CONFIG_PATH="', 'PKG_CONFIG_PATH="$PKG_CONFIG_PATH:')
+
     def package(self):
-        msys_dir = "msys64" if self.settings.arch_build == "x86_64" else "msys32"
         excludes = None
         if self.options.exclude_files:
             excludes = tuple(str(self.options.exclude_files).split(","))
-        self.copy("*", dst="bin", src=msys_dir, excludes=excludes)
+        self.copy("*", dst="bin", src=self._msys_dir, excludes=excludes)
         shutil.copytree(os.path.join(self.package_folder, "bin", "usr", "share", "licenses"),
                         os.path.join(self.package_folder, "licenses"))
 

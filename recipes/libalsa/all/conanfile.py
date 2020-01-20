@@ -66,4 +66,6 @@ class LibalsaConan(ConanFile):
             os.unlink(la_file)
 
     def package_info(self):
-        self.cpp_info.libs = ["asound", "dl", "m", "rt", "pthread"]
+        self.cpp_info.libs = ["asound"]
+        self.cpp_info.system_libs = ["dl", "m", "rt", "pthread"]
+        self.cpp_info.names['pkg_config'] = 'alsa'

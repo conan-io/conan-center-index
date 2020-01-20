@@ -12,7 +12,7 @@ class GTestConan(ConanFile):
     homepage = "https://github.com/google/googletest"
     license = "BSD-3-Clause"
     topics = ("conan", "gtest", "testing", "google-testing", "unit-test")
-    exports_sources = ["CMakeLists.txt", "gtest-*.patch"]
+    exports_sources = ["CMakeLists.txt", "patches/*"]
     generators = "cmake"
     settings = "os", "arch", "compiler", "build_type"
     options = {"shared": [True, False], "build_gmock": [True, False], "fPIC": [True, False], "no_main": [True, False], "debug_postfix": "ANY", "hide_symbols": [True, False]}
@@ -54,7 +54,8 @@ class GTestConan(ConanFile):
         return cmake
 
     def build(self):
-        tools.patch(**self.conan_data["patches"][self.version])
+        for patch in self.conan_data["patches"][self.version]:
+            tools.patch(**patch)
         cmake = self._configure_cmake()
         cmake.build()
 
@@ -88,4 +89,5 @@ class GTestConan(ConanFile):
             if Version(self.settings.compiler.version.value) >= "15":
                 self.cpp_info.defines.append("GTEST_LANG_CXX11=1")
                 self.cpp_info.defines.append("GTEST_HAS_TR1_TUPLE=0")
-        self.cpp_info.name = "GTest"
+        self.cpp_info.names["cmake_find_package"] = "GTest"
+        self.cpp_info.names["cmake_find_package_multi"] = "GTest"
