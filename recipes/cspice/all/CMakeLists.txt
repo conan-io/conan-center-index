@@ -23,5 +23,5 @@ install(
   ARCHIVE DESTINATION lib
 )
 
-file(GLOB INCLUDE_FILES ${CMAKE_CURRENT_SOURCE_DIR}/source_subfolder/include/Spice*.h)
+file(GLOB INCLUDE_FILES ${CMAKE_CURRENT_SOURCE_DIR}/source_subfolder/include/*.h)
 install(FILES ${INCLUDE_FILES} DESTINATION include)
