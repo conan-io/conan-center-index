@@ -1,5 +1,6 @@
 import os
 from conans import AutoToolsBuildEnvironment, ConanFile, tools
+from contextlib import contextmanager
 
 
 class LibtoolConan(ConanFile):
@@ -11,80 +12,104 @@ class LibtoolConan(ConanFile):
     exports_sources = ["patches/**"]
     license = ("GPL-2.0-or-later", "GPL-3.0-or-later")
 
-    settings = "os", "arch", "compiler", "build_type"
-    options = {
-        "shared": [True, False],
-        "fPIC": [True, False],
-    }
-    default_options = {
-        "shared": False,
-        "fPIC": True,
-    }
+    settings = "os_build", "arch_build", "compiler"
+    _autotools = None
 
     @property
     def _source_subfolder(self):
         return os.path.join(self.source_folder, "source_subfolder")
 
     def config_options(self):
+        # libtool provides a ltdl library, which is not packaged by this recipe
+        # To make the hooks happy, remove the c++ related settings
         del self.settings.compiler.libcxx
         del self.settings.compiler.cppstd
-        if self.settings.os == "Windows":
-            del self.options.fPIC
-
-    def configure(self):
-        if self.options.shared:
-            del self.options.fPIC
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
         os.rename("{}-{}".format(self.name, self.version), self._source_subfolder)
 
+    def requirements(self):
+        self.requires("automake/1.16.1")
+
     def build_requirements(self):
         if tools.os_info.is_windows and "CONAN_BASH_PATH" not in os.environ:
             self.build_requires("msys2/20190524")
 
-    def _configure_autotools(self):
-        autotools = AutoToolsBuildEnvironment(self, win_bash=tools.os_info.is_windows)
-        conf_args = [
-            "--datarootdir={}".format(os.path.join(self.package_folder, "bin", "share").replace("\\", "/")),
-        ]
-        if self.options.shared:
-            conf_args.extend(["--enable-shared", "--disable-static"])
+    @contextmanager
+    def _build_context(self):
+        if self.settings.compiler == "Visual Studio":
+            with tools.vcvars(self.settings):
+                with tools.environment_append({"CC": "cl -nologo", "CXX": "cl -nologo",}):
+                    yield
         else:
-            conf_args.extend(["--disable-shared", "--enable-static"])
-            if self.settings.os != "Windows":
-                conf_args.append("--enable-pic" if self.options.fPIC else "--disable-pic")
-        autotools.configure(args=conf_args, configure_dir=self._source_subfolder)
-        return autotools
+            with tools.no_op():
+                yield
+
+    def _configure_autotools(self):
+        if self._autotools:
+            return self._autotools
+        self._autotools = AutoToolsBuildEnvironment(self, win_bash=tools.os_info.is_windows)
+        datarootdir = os.path.join(self.package_folder, "bin", "share")
+        prefix = self.package_folder
+        if self.settings.os_build == "Windows":
+            datarootdir = tools.unix_path(datarootdir)
+            prefix = tools.unix_path(prefix)
+        conf_args = [
+            "--datarootdir={}".format(datarootdir),
+            "--prefix={}".format(prefix),
+            "--disable-shared",
+            "--disable-static",
+            "--disable-ltdl-install",
+        ]
+        self._autotools.configure(args=conf_args, configure_dir=self._source_subfolder)
+        return self._autotools
 
     def build(self):
-        autotools = self._configure_autotools()
-        autotools.make()
+        with self._build_context():
+            autotools = self._configure_autotools()
+            autotools.make()
 
     def package(self):
         self.copy("COPYING*", src=self._source_subfolder, dst="licenses")
-        autotools = self._configure_autotools()
-        autotools.install()
+        with self._build_context():
+            autotools = self._configure_autotools()
+            autotools.install()
 
-        os.unlink(os.path.join(self.package_folder, "lib", "libltdl.la"))
+        tools.rmdir(os.path.join(self.package_folder, "lib"))
         tools.rmdir(os.path.join(self.package_folder, "bin", "share", "info"))
         tools.rmdir(os.path.join(self.package_folder, "bin", "share", "man"))
 
-    def package_info(self):
-        self.cpp_info.libs = ["ltdl"]
+        if self.settings.os_build == "Windows":
+            binpath = os.path.join(self.package_folder, "bin")
+            for filename in os.listdir(binpath):
+                fullpath = os.path.join(binpath, filename)
+                if not os.path.isfile(fullpath):
+                    continue
+                os.rename(fullpath, fullpath + ".exe")
 
+    def package_id(self):
+        del self.info.settings.compiler
+
+    def package_info(self):
         bin_path = os.path.join(self.package_folder, "bin")
         self.output.info("Appending PATH env var with : {}".format(bin_path))
         self.env_info.PATH.append(bin_path)
 
         libtool = os.path.join(self.package_folder, "bin", "libtool")
+        if self.settings.os_build == "Windows":
+            libtool = tools.unix_path(libtool) + ".exe"
         self.output.info("Setting LIBTOOL to {}".format(libtool))
         self.env_info.LIBTOOL = libtool
 
         libtoolize = os.path.join(self.package_folder, "bin", "libtoolize")
+        if self.settings.os_build == "Windows":
+            libtoolize = tools.unix_path(libtoolize) + ".exe"
         self.output.info("Setting LIBTOOLIZE to {}".format(libtoolize))
         self.env_info.LIBTOOLIZE = libtoolize
 
         libtool_aclocal = os.path.join(self.package_folder, "bin", "share", "aclocal")
+        if self.settings.os_build == "Windows":
+            libtool_aclocal = tools.unix_path(libtool_aclocal) + ".exe"
         self.output.info("Appending var to ACLOCAL_PATH: {}".format(libtool_aclocal))
         self.env_info.ACLOCAL_PATH.append(libtool_aclocal)
