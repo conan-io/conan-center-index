@@ -50,11 +50,14 @@ class AutoconfConan(ConanFile):
         autotools.install()
         tools.rmdir(os.path.join(self.package_folder, "bin", "share", "info"))
         tools.rmdir(os.path.join(self.package_folder, "bin", "share", "man"))
+
         if self.settings.os_build == "Windows":
-            for root, _, files in os.walk(os.path.join(self.package_folder, "bin")):
-                for filename in files:
-                    os.rename(os.path.join(root, filename),
-                              os.path.join(root, filename + ".exe"))
+            binpath = os.path.join(self.package_folder, "bin")
+            for filename in os.listdir(binpath):
+                fullpath = os.path.join(binpath, filename)
+                if not os.path.isfile(fullpath):
+                    continue
+                os.rename(fullpath, fullpath + ".exe")
 
     def package_info(self):
         bin_path = os.path.join(self.package_folder, "bin")
