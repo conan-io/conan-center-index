@@ -27,7 +27,6 @@ class OpenBLAS(ConanFile):
         "build_lapack": False
     }
     generators = "cmake", "cmake_find_package"
-    no_copy_source = True
     _source_subfolder = "source_subfolder"
     _build_subfolder = "build_subfolder"
 
