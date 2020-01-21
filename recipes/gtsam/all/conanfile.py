@@ -112,6 +112,9 @@ class gtsamConan(ConanFile):
                               "${CMAKE_BINARY_DIR}",
                               "${GTSAM_BINARY_DIR}")
 
+    def build_requirements(self):
+        self.build_requires("cmake_installer/3.15.0@conan/stable")
+
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
