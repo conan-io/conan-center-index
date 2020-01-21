@@ -46,13 +46,13 @@ class SqlcipherConan(ConanFile):
         libs = map(lambda lib : lib + ".lib", crypto_dep.libs)
 
         nmake_flags = [
-                "TCLDIR=%s" % self.deps_cpp_info["tcl"].rootpath,
                 "TLIBS=\"%s\"" % " ".join(libs),
                 "LTLIBPATHS=/LIBPATH:%s" % crypto_libdir,
                 "OPTS=\"-I%s -DSQLITE_HAS_CODEC\"" % (crypto_incdir),
                 "NO_TCL=1",
-                "USE_AMALGAMATION=0",
-                "OPT_FEATURE_FLAGS=-DSQLCIPHER_CRYPTO_OPENSSL"
+                "USE_AMALGAMATION=1",
+                "OPT_FEATURE_FLAGS=-DSQLCIPHER_CRYPTO_OPENSSL",
+                "TCLSH_CMD=%s" % self.deps_env_info.TCLSH,
                 ]
 
         main_target = "dll" if self.options.shared else "sqlcipher.lib"
@@ -65,7 +65,8 @@ class SqlcipherConan(ConanFile):
             nmake_flags.append("FOR_WIN10=1")
             platforms = {"x86": "x86", "x86_64": "x64"}
             nmake_flags.append("PLATFORM=%s" % platforms[self.settings.arch.value])
-        self.run("nmake /f Makefile.msc %s %s" % (main_target, " ".join(nmake_flags)), cwd=self._source_subfolder)
+        vcvars = tools.vcvars_command(self.settings)
+        self.run("%s && nmake /f Makefile.msc %s %s" % (vcvars, main_target, " ".join(nmake_flags)), cwd=self._source_subfolder)
 
     def _build_autotools(self):
         self.run('chmod +x configure', cwd=self._source_subfolder)
