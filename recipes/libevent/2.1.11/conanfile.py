@@ -20,7 +20,10 @@ class LibeventConan(ConanFile):
                        "with_openssl": True,
                        "disable_threads": False}
     generators = "cmake", "cmake_find_package"
+
+    _cmake = None
     _source_subfolder = "source_subfolder"
+    _build_subfolder = "build_subfolder"
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -54,22 +57,24 @@ class LibeventConan(ConanFile):
             tools.patch(**patch)
 
     def _configure_cmake(self):
-        cmake = CMake(self)
+        if self._cmake:
+            return self._cmake
+        self._cmake = CMake(self)
         if self.options.with_openssl:
-            cmake.definitions["OPENSSL_ROOT_DIR"] = self.deps_cpp_info["openssl"].rootpath
-        cmake.definitions["EVENT__LIBRARY_TYPE"] = "SHARED" if self.options.shared else "STATIC"
-        cmake.definitions["EVENT__DISABLE_DEBUG_MODE"] = self.settings.build_type == "Release"
-        cmake.definitions["EVENT__DISABLE_OPENSSL"] = not self.options.with_openssl
-        cmake.definitions["EVENT__DISABLE_THREAD_SUPPORT"] = self.options.disable_threads
-        cmake.definitions["EVENT__DISABLE_BENCHMARK"] = True
-        cmake.definitions["EVENT__DISABLE_TESTS"] = True
-        cmake.definitions["EVENT__DISABLE_REGRESS"] = True
-        cmake.definitions["EVENT__DISABLE_SAMPLES"] = True
+            self._cmake.definitions["OPENSSL_ROOT_DIR"] = self.deps_cpp_info["openssl"].rootpath
+        self._cmake.definitions["EVENT__LIBRARY_TYPE"] = "SHARED" if self.options.shared else "STATIC"
+        self._cmake.definitions["EVENT__DISABLE_DEBUG_MODE"] = self.settings.build_type == "Release"
+        self._cmake.definitions["EVENT__DISABLE_OPENSSL"] = not self.options.with_openssl
+        self._cmake.definitions["EVENT__DISABLE_THREAD_SUPPORT"] = self.options.disable_threads
+        self._cmake.definitions["EVENT__DISABLE_BENCHMARK"] = True
+        self._cmake.definitions["EVENT__DISABLE_TESTS"] = True
+        self._cmake.definitions["EVENT__DISABLE_REGRESS"] = True
+        self._cmake.definitions["EVENT__DISABLE_SAMPLES"] = True
         # libevent uses static runtime (MT) for static builds by default
-        cmake.definitions["EVENT__MSVC_STATIC_RUNTIME"] = self.settings.compiler == "Visual Studio" and \
+        self._cmake.definitions["EVENT__MSVC_STATIC_RUNTIME"] = self.settings.compiler == "Visual Studio" and \
                 self.settings.compiler.runtime == "MT"
-        cmake.configure(source_folder=self._source_subfolder)
-        return cmake
+        self._cmake.configure(build_folder=self._build_subfolder)
+        return self._cmake
 
     def build(self):
         self._patch_sources()
