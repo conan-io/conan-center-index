@@ -1,6 +1,5 @@
 import os
 import stat
-import shutil
 from conans import ConanFile, tools, CMake
 from conans.errors import ConanInvalidConfiguration
 
@@ -61,7 +60,7 @@ class gtsamConan(ConanFile):
                         "install_cppunitlite": True,
                         "install_geographiclib": False}
     generators = "cmake"
-    exports_sources = ["patches/*","CMakeLists.txt"]
+    exports_sources = ["CMakeLists.txt"]
     _source_subfolder = "source_subfolder"
     _build_subfolder = "build_subfolder"
     _cmake = None
@@ -99,8 +98,19 @@ class gtsamConan(ConanFile):
             self._cmake.definitions["GTSAM_INSTALL_CPPUNITLITE"] = self.options.install_cppunitlite
             self._cmake.definitions["GTSAM_INSTALL_GEOGRAPHICLIB"] = self.options.install_geographiclib
             self._cmake.definitions["GTSAM_USE_SYSTEM_EIGEN"] = False
-            self._cmake.configure(source_folder=self._source_subfolder, build_folder=self._build_subfolder)
+            self._cmake.configure(build_folder=self._build_subfolder)
         return self._cmake
+
+    def _patch_sources(self): #Needed to build GTSam as a subproject using the conan CMake Wrapper.
+        for cmake in (os.path.join(self._source_subfolder, "gtsam", "CMakeLists.txt"),
+                      os.path.join(self._source_subfolder, "wrap", "CMakeLists.txt"),
+                      os.path.join(self._source_subfolder, "cmake", "GtsamPythonWrap.cmake")):
+            tools.replace_in_file(cmake,
+                                  "${CMAKE_SOURCE_DIR}",
+                                  "${GTSAM_SOURCE_DIR}")
+        tools.replace_in_file(os.path.join(self._source_subfolder, "gtsam", "CMakeLists.txt"),
+                              "${CMAKE_BINARY_DIR}",
+                              "${GTSAM_BINARY_DIR}")
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -121,8 +131,7 @@ class gtsamConan(ConanFile):
         os.rename(extracted_dir, self._source_subfolder)
 
     def build(self):
-        for patch in self.conan_data["patches"][self.version]:
-            tools.patch(**patch)
+        self._patch_sources()
         cmake = self._configure_cmake()
         cmake.build()
 
