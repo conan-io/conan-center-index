@@ -26,7 +26,8 @@ class OpenBLAS(ConanFile):
         "fPIC": True,
         "build_lapack": False
     }
-    generators = "cmake", "cmake_find_package"
+    exports_sources = ["CMakeLists.txt"]
+    generators = "cmake"
     _source_subfolder = "source_subfolder"
     _build_subfolder = "build_subfolder"
 
@@ -50,9 +51,7 @@ class OpenBLAS(ConanFile):
         if self.settings.compiler == "Visual Studio" and not self.options.shared:
             cmake.definitions["MSVC_STATIC_CRT"] = True
 
-        cmake.configure(
-            build_folder=self._build_subfolder,
-            source_folder=self._source_subfolder)
+        cmake.configure(build_folder=self._build_subfolder)
         return cmake
 
     def build(self):
@@ -70,11 +69,12 @@ class OpenBLAS(ConanFile):
         tools.rmdir(os.path.join(self.package_folder, "share"))
 
     def package_info(self):
+        self.env_info.OpenBLAS_HOME = self.package_folder
         self.cpp_info.libs = tools.collect_libs(self)
         if self.settings.os == "Linux": 
-            self.cpp_info.system_libs = ["pthread", "m"]
-        self.cpp_info.builddirs.append(
-            os.path.join('share', 'cmake', 'OpenBLAS'))
+            self.cpp_info.system_libs = ["pthread"]
+            if self.options.build_lapack:
+                self.cpp_info.libs.append("gfortran")
         self.cpp_info.names["cmake_find_package"] = "OpenBLAS"
         self.cpp_info.names["cmake_find_package_multi"] = "OpenBLAS"
         self.cpp_info.names['pkg_config'] = "OpenBLAS"
