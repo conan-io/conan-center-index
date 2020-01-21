@@ -13,7 +13,6 @@ class PremakeConan(ConanFile):
     license = "BSD-3-Clause"
     settings = "os_build", "arch_build", "compiler"
     _source_subfolder = "source_subfolder"
-    _build_subfolder = "build_subfolder"
 
     def configure(self):
         if self.settings.os_build == "Windows" and self.settings.compiler == "gcc":
