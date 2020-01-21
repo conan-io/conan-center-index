@@ -39,7 +39,7 @@ class SqlcipherConan(ConanFile):
         extracted_dir = self.name + "-" + self.version
         os.rename(extracted_dir, self._source_subfolder)
 
-    def build_visual(self):
+    def _build_visual(self):
         crypto_dep = self.deps_cpp_info[str(self.options.crypto_library)]
         crypto_incdir = crypto_dep.include_paths[0]
         crypto_libdir = crypto_dep.lib_paths[0]
@@ -59,7 +59,7 @@ class SqlcipherConan(ConanFile):
 
         if self.settings.compiler.runtime in ["MD", "MDd"]:
             nmake_flags.append("USE_CRT_DLL=1")
-        if build_type == "Debug":
+        if self.settings.build_type == "Debug":
             nmake_flags.append("DEBUG=2")
         if platform.release() == "10":
             nmake_flags.append("FOR_WIN10=1")
@@ -67,7 +67,7 @@ class SqlcipherConan(ConanFile):
             nmake_flags.append("PLATFORM=%s" % platforms[self.settings.arch.value])
         self.run("nmake /f Makefile.msc %s %s" % (main_target, " ".join(nmake_flags)), cwd=self._source_subfolder)
 
-    def build_autotools(self):
+    def _build_autotools(self):
         self.run('chmod +x configure', cwd=self._source_subfolder)
         absolute_install_dir = os.path.abspath(os.path.join(".", "install"))
         absolute_install_dir = absolute_install_dir.replace("\\", "/")
@@ -89,7 +89,7 @@ class SqlcipherConan(ConanFile):
         elif self.settings.os == "iOS":
             host = "%s-apple-darwin" % self.settings.arch
 
-        configure_args = self.get_configure_args(absolute_install_dir)
+        configure_args = self._get_configure_args(absolute_install_dir)
         with tools.chdir(self._source_subfolder):
             # Hack, uname -p returns i386, configure guesses x86_64, we must force i386 so that cross-compilation is correctly detected.
             # Otherwise host/build are the same, and configure tries to launch a sample executable, and fails miserably.
@@ -109,7 +109,7 @@ class SqlcipherConan(ConanFile):
             autotools_env.make(args=["install"])
 
     @property
-    def arch_id_str_compiler(self):
+    def _arch_id_str_compiler(self):
         return {"x86": "i686",
                 "armv6": "arm",
                 "armv7": "arm",
@@ -119,12 +119,12 @@ class SqlcipherConan(ConanFile):
                 "mips64": "mips64"}.get(str(self.settings.arch),
                                         str(self.settings.arch))
 
-    def get_configure_args(self, absolute_install_dir):
+    def _get_configure_args(self, absolute_install_dir):
         args = [
             "--prefix=%s" % absolute_install_dir,
 
-            self.autotools_bool_arg("shared", self.options.shared),
-            self.autotools_bool_arg("static", not self.options.shared),
+            self._autotools_bool_arg("shared", self.options.shared),
+            self._autotools_bool_arg("static", not self.options.shared),
             "--enable-tempstore=yes",
             "--with-tcl={}".format(os.path.join(self.deps_env_info.TCL_ROOT, "lib"))
         ]
@@ -132,7 +132,7 @@ class SqlcipherConan(ConanFile):
             args.extend(["config_BUILD_EXEEXT='.exe'", "config_TARGET_EXEEXT='.exe'"])
         return args
 
-    def autotools_bool_arg(self, arg_base_name, value):
+    def _autotools_bool_arg(self, arg_base_name, value):
         prefix = "--enable-" if value else "--disable-"
 
         return prefix + arg_base_name
@@ -144,11 +144,11 @@ class SqlcipherConan(ConanFile):
             tools.replace_in_file(os.path.join(self._source_subfolder, "configure"), r"-install_name \$rpath/", "-install_name ")
 
         if self.settings.compiler == "Visual Studio":
-            self.build_visual()
+            self._build_visual()
         else:
-            self.build_autotools()
+            self._build_autotools()
 
-    def package_unix(self):
+    def _package_unix(self):
         self.copy("*sqlite3.h", src="install")
         self.copy("*.so*", dst="lib", src="install", keep_path=False, symlinks=True)
         self.copy("*.a", dst="lib", src="install", keep_path=False)
@@ -157,7 +157,7 @@ class SqlcipherConan(ConanFile):
         self.copy("*.dylib", dst="lib", src="install", keep_path=False)
         self.copy("*LICENSE", dst="licenses", keep_path=False)
 
-    def package_visual(self):
+    def _package_visual(self):
         self.copy("*.dll", dst="bin", keep_path=False)
         self.copy("*.lib", dst="lib", keep_path=False)
         self.copy("*LICENSE", dst="licenses", keep_path=False)
@@ -165,12 +165,12 @@ class SqlcipherConan(ConanFile):
 
     def package(self):
         if self.settings.compiler == "Visual Studio":
-            self.package_visual()
+            self._package_visual()
         else:
-            self.package_unix()
+            self._package_unix()
 
     def package_info(self):
         self.cpp_info.libs = ["sqlcipher"]
         if self.settings.os == "Linux":
-            self.cpp_info.libs.extend(["pthread", "dl"])
+            self.cpp_info.system_libs.extend(["pthread", "dl"])
         self.cpp_info.defines = ["SQLITE_HAS_CODEC", 'SQLCIPHER_CRYPTO_OPENSSL', 'SQLITE_TEMP_STORE=2']
