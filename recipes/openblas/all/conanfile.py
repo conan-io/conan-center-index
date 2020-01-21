@@ -6,7 +6,7 @@ import os
 class OpenBLAS(ConanFile):
     name = "openblas"
     version = "0.3.7"
-    license = "BSD 3-Clause"
+    license = "BSD-3-Clause"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://www.openblas.net"
     description = "An optimized BLAS library based on GotoBLAS2 1.13 BSD version"
