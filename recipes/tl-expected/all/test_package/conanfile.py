@@ -14,5 +14,4 @@ class ExpectedTestConan(ConanFile):
 
     def test(self):
         if not tools.cross_building(self.settings):
-            os.chdir("bin")
-            self.run(".%sexample" % os.sep)
+            self.run(os.path.join("bin", "example"), run_environment=True)
