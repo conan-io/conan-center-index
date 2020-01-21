@@ -113,7 +113,7 @@ class gtsamConan(ConanFile):
                               "${GTSAM_BINARY_DIR}")
 
     def build_requirements(self):
-        self.build_requires("cmake_installer/3.15.0@conan/stable")
+        self.build_requires("cmake/3.16.2")
 
     def config_options(self):
         if self.settings.os == "Windows":
