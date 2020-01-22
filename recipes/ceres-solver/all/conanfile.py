@@ -84,6 +84,10 @@ class ceressolverConan(ConanFile):
         os.rename(extracted_dir, self._source_subfolder)
 
     def build(self):
+        #Make sure that cmake finds gflags is use_gflags=True
+        tools.replace_in_file(os.path.join(self._source_subfolder, "CMakeLists.txt"),
+                              "find_package(Gflags)",
+                              "find_package(Gflags REQUIRED)")
         for patch in self.conan_data["patches"][self.version]:
             tools.patch(**patch)
         cmake = self._configure_cmake()
