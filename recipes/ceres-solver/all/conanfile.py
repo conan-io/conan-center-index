@@ -60,9 +60,13 @@ class ceressolverConan(ConanFile):
             self._cmake.configure()
         return self._cmake
 
-    def configure(self):
+    def config_options(self):
+        if self.settings.os == "Windows":
+            self.options.remove("fPIC")
         if self.settings.build_type == "Debug" and self.options.use_glog:
             raise ConanInvalidConfiguration("Ceres-solver only links against the release version of glog")
+        if self.options.use_glog and not self.options.use_gflags: #At this stage we can't check the value of self.options["glog"].with_gflags so we asume it is true because is the default value
+            raise ConanInvalidConfiguration("To depend on glog built with gflags (Default behavior) set use_gflags=True, otherwise Ceres may fail to link due to missing gflags symbols. ")
 
     def requirements(self):
         self.requires.add("eigen/3.3.7")
@@ -73,10 +77,6 @@ class ceressolverConan(ConanFile):
             self.options["gflags"].nothreads = False
         if self.options.use_TBB:
             self.requires.add("tbb/2020.0")
-
-    def config_options(self):
-        if self.settings.os == "Windows":
-            self.options.remove("fPIC")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
