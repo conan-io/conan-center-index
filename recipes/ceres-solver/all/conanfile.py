@@ -14,7 +14,7 @@ class ceressolverConan(ConanFile):
     generators = ["cmake"]
     options = {"shared": [True, False],
                "fPIC": [True, False],
-               "use_glog": [True, False],
+               "use_glog": False, #TODO Set to true once gflags with nothreads=False binaries are available. Using MINILOG has a big performance drawback.
                "use_gflags": [True, False],
                "use_custom_blas": [True, False],
                "use_eigen_sparse": [True, False],
