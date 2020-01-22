@@ -88,6 +88,10 @@ class ceressolverConan(ConanFile):
         tools.replace_in_file(os.path.join(self._source_subfolder, "CMakeLists.txt"),
                               "find_package(Gflags)",
                               "find_package(Gflags REQUIRED)")
+        #On windows the library names can be gflags.dll or gflags_static.lib
+        tools.replace_in_file(os.path.join(self._source_subfolder, "cmake", "FindGflags.cmake"),
+                              "find_library(GFLAGS_LIBRARY NAMES gflags",
+                              "find_library(GFLAGS_LIBRARY NAMES gflags gflags_static")
         for patch in self.conan_data["patches"][self.version]:
             tools.patch(**patch)
         cmake = self._configure_cmake()
