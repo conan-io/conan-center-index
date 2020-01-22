@@ -9,7 +9,6 @@ include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
 CONAN_BASIC_SETUP()
 
 ADD_EXECUTABLE(test_package test_catch.cpp)
-#ADD_EXECUTABLE(test_package test_boost.cpp)
 #ADD_EXECUTABLE(test_package test_gtest.cpp)
 #ADD_EXECUTABLE(test_package test_doctest.cpp)
 target_link_libraries(test_package ${CONAN_LIBS})
