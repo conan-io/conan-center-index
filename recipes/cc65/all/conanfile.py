@@ -43,6 +43,27 @@ class Cc65Conan(ConanFile):
     def _samplesdir(self):
         return os.path.join(self.package_folder, "samples")
 
+    @contextmanager
+    def _mock_settings(self):
+        """
+        This will temporarily copy the attributes arch_build and os_build of settings to arch and os.
+        Because cc65 does not provide x86_64 support for visual studio, x86 is built instead.
+        """
+        mock_settings = self.settings.copy()
+
+        if self.settings.compiler == "Visual Studio":
+            if self.settings.arch_build == "x86_64":
+                self.output.info("x86_64 detected: building x86 instead")
+                mock_settings.arch_build = "x86"
+
+        mock_settings._data["arch"] = mock_settings._data["arch_build"]
+        mock_settings._data["os"] = mock_settings._data["os_build"]
+
+        original_settings = self.settings
+        self.settings = mock_settings
+        yield
+        self.settings = original_settings
+
     def _build_msvc(self):
         msbuild = MSBuild(self)
         msvc_platforms = {
@@ -80,10 +101,11 @@ class Cc65Conan(ConanFile):
             autotools.make(args=self._make_args)
 
     def build(self):
-        if self.settings.compiler == "Visual Studio":
-            self._build_msvc()
-        else:
-            self._build_autotools()
+        with self._mock_settings():
+            if self.settings.compiler == "Visual Studio":
+                self._build_msvc()
+            else:
+                self._build_autotools()
 
     def _package_msvc(self):
         self.copy("*.exe", src=os.path.join(self._source_subfolder, "bin"), dst=os.path.join(self.package_folder, "bin"), keep_path=False)
@@ -107,6 +129,9 @@ class Cc65Conan(ConanFile):
 
     def package_id(self):
         self.info.include_build_settings()
+        if self.settings.compiler == "Visual Studio":
+            if self.settings.arch_build == "x86_64":
+                self.info.settings.arch_build = "x86"
         del self.info.settings.compiler
 
     def package_info(self):
