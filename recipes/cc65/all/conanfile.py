@@ -1,5 +1,7 @@
-import os
 from conans import AutoToolsBuildEnvironment, ConanFile, MSBuild, tools
+from conans.errors import ConanInvalidConfiguration
+from contextlib import contextmanager
+import os
 
 
 class Cc65Conan(ConanFile):
@@ -8,7 +10,7 @@ class Cc65Conan(ConanFile):
     homepage = "https://cc65.github.io/"
     description = "A freeware C compiler for 6502 based systems"
     license = "zlib"
-    topics = ("conan", "cc65", "compiler", "cmos", "6502", "8bit", "apple", "commodore")
+    topics = ("conan", "cc65", "compiler", "cmos", "6502", "8bit")
 
     settings = "os_build", "arch_build", "compiler", "arch"
 
@@ -16,12 +18,13 @@ class Cc65Conan(ConanFile):
     _source_subfolder = "source_subfolder"
 
     def configure(self):
-        # FIXME: MSBuild does not respect arch_build
+        # MSBuild needs a arch attribute. Make sure arch_build and arch are the same.
         self.settings.arch = self.settings.arch_build
+
         del self.settings.compiler.libcxx
         del self.settings.compiler.cppstd
-        # if self.settings.compiler not in ("gcc", "clang", ):
-        #     raise ConanInvalidConfiguration("Only gcc and clang are supported")
+        if self.settings.arch_build not in ("x86", "x86_64"):
+            raise ConanInvalidConfiguration("Invalid arch_build")
 
     def build_requirements(self):
         if self.settings.compiler == "Visual Studio":
@@ -63,15 +66,30 @@ class Cc65Conan(ConanFile):
             "samplesdir={}".format(samplesdir),
         ]
 
+    @contextmanager
+    def _alias_x86_64_arch(self):
+        # MSBuild uses only self.settings.arch to detect the current architecture.
+        # So change the arch to x86 when it is x86_64 since these are compatible.
+        settings_modified = self.settings.copy()
+        if self.settings.arch_build == "x86_64":
+            self.output.info("x86_64 arch detected. Aliasing to x86.")
+            settings_modified.arch_build = "x86"
+            settings_modified.arch = "x86"
+        settings_original = self.settings
+        self.settings = settings_modified
+        yield
+        self.settings = settings_original
+
     def _build_msvc(self):
-        msbuild = MSBuild(self)
-        msvc_platforms = {
-            "x86": "Win32",
-        }
-        msbuild.build(os.path.join(self._source_subfolder, "src", "cc65.sln"),
-                      build_type="Release", platforms=msvc_platforms, arch=self.settings.arch_build)
-        with tools.chdir(os.path.join(self._source_subfolder, "libsrc")):
-            self.run("{}".format(os.environ["CONAN_MAKE_PROGRAM"]))
+        with self._alias_x86_64_arch():
+            msbuild = MSBuild(self)
+            msvc_platforms = {
+                "x86": "Win32",
+            }
+            msbuild.build(os.path.join(self._source_subfolder, "src", "cc65.sln"),
+                          build_type="Release", platforms=msvc_platforms)  # , arch=self.settings.arch_build)
+            with tools.chdir(os.path.join(self._source_subfolder, "libsrc")):
+                self.run("{}".format(os.environ["CONAN_MAKE_PROGRAM"]))
 
     def _build_autotools(self):
         autotools = self._configure_autotools()
@@ -106,7 +124,6 @@ class Cc65Conan(ConanFile):
 
     def package_id(self):
         del self.info.settings.compiler
-        del self.info.settings.arch
 
     def package_info(self):
         bindir = os.path.join(self.package_folder, "bin")
