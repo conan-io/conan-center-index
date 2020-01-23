@@ -140,7 +140,7 @@ class BoostConan(ConanFile):
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
-        if self.conan_data["patches"][self.version]:
+        if self.version in self.conan_data["patches"]:
             for patch in self.conan_data["patches"][self.version]:
                 tools.patch(**patch)
 
