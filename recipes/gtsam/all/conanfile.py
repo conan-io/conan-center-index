@@ -50,7 +50,7 @@ class gtsamConan(ConanFile):
                         "typedef_points_to_vectors": False,
                         "support_nested_dissection": False,
                         "tangent_preintegration": False,
-                        "build_wrap": True,
+                        "build_wrap": False,
                         "wrap_serialization": True,
                         "build_unstable": True,
                         "disable_new_timers": False,
