@@ -78,6 +78,9 @@ class OpusFileConan(ConanFile):
             autotools = self._configure_autotools()
             autotools.install()
             tools.rmdir(os.path.join(self.package_folder, "share"))
+            tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
+            os.remove(os.path.join(self.package_folder, "lib", "libopusfile.la"))
+            os.remove(os.path.join(self.package_folder, "lib", "libopusurl.la"))
 
     def package_info(self):
         self.cpp_info.libs = ["opusfile"]
