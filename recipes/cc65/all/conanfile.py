@@ -72,7 +72,7 @@ class Cc65Conan(ConanFile):
         msbuild.build(os.path.join(self._source_subfolder, "src", "cc65.sln"),
                       build_type="Release", platforms=msvc_platforms, arch=self.settings.arch_build)
         with tools.chdir(os.path.join(self._source_subfolder, "libsrc")):
-            self.run("{}".format(os.environ["CONAN_MAKE_PROGRAM"]))
+            self.run("{} -j{}".format(os.environ["CONAN_MAKE_PROGRAM"], tools.cpu_count()))
 
     def _configure_autotools(self):
         if self._autotools:
