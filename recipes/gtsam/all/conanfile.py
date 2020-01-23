@@ -97,13 +97,14 @@ class gtsamConan(ConanFile):
             self._cmake.definitions["GTSAM_INSTALL_CYTHON_TOOLBOX"] = self.options.install_cython_toolbox
             self._cmake.definitions["GTSAM_INSTALL_CPPUNITLITE"] = self.options.install_cppunitlite
             self._cmake.definitions["GTSAM_INSTALL_GEOGRAPHICLIB"] = self.options.install_geographiclib
-            self._cmake.definitions["GTSAM_USE_SYSTEM_EIGEN"] = False
+            self._cmake.definitions["GTSAM_USE_SYSTEM_EIGEN"] = True #Set to false to use eigen sources contained in GTSAM
             self._cmake.configure(build_folder=self._build_subfolder)
         return self._cmake
 
     def _patch_sources(self): #Needed to build GTSam as a subproject using the conan CMake Wrapper.
         for cmake in (os.path.join(self._source_subfolder, "gtsam", "CMakeLists.txt"),
                       os.path.join(self._source_subfolder, "wrap", "CMakeLists.txt"),
+                      os.path.join(self._source_subfolder, "CMakeLists.txt"),
                       os.path.join(self._source_subfolder, "cmake", "GtsamPythonWrap.cmake")):
             tools.replace_in_file(cmake,
                                   "${CMAKE_SOURCE_DIR}",
