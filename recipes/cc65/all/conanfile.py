@@ -11,6 +11,7 @@ class Cc65Conan(ConanFile):
     description = "A freeware C compiler for 6502 based systems"
     license = "zlib"
     topics = ("conan", "cc65", "compiler", "cmos", "6502", "8bit")
+    exports_sources = "patches/**"
 
     settings = "os_build", "arch_build", "compiler"
 
@@ -100,7 +101,12 @@ class Cc65Conan(ConanFile):
         with tools.chdir(os.path.join(self._source_subfolder)):
             autotools.make(args=self._make_args)
 
+    def _patch_sources(self):
+        for patch in self.conan_data["patches"][self.version]:
+            tools.patch(**patch)
+
     def build(self):
+        self._patch_sources()
         with self._mock_settings():
             if self.settings.compiler == "Visual Studio":
                 self._build_msvc()
