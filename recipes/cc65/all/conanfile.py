@@ -26,9 +26,8 @@ class Cc65Conan(ConanFile):
                 raise ConanInvalidConfiguration("Invalid arch_build")
 
     def build_requirements(self):
-        if self.settings.compiler == "Visual Studio":
-            self.build_requires("make/4.2.1")
-        elif tools.os_info.is_windows:
+        if tools.os_info.is_windows:
+            # msys2 provides make for MSVC and mingw + install for mingw
             self.build_requires("msys2/20190524")
 
     def source(self):
@@ -72,8 +71,9 @@ class Cc65Conan(ConanFile):
         }
         msbuild.build(os.path.join(self._source_subfolder, "src", "cc65.sln"),
                       build_type="Release", platforms=msvc_platforms, arch=self.settings.arch_build)
+        autotools = self._configure_autotools()
         with tools.chdir(os.path.join(self._source_subfolder, "libsrc")):
-            self.run("{} -j{}".format(os.environ["CONAN_MAKE_PROGRAM"], tools.cpu_count()))
+            autotools.make()
 
     def _configure_autotools(self):
         if self._autotools:
