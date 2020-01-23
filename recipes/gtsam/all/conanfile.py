@@ -121,6 +121,8 @@ class gtsamConan(ConanFile):
             del self.options.fPIC
             if self.settings.compiler == "Visual Studio" and tools.Version(self.settings.compiler.version) < 15:
                 raise ConanInvalidConfiguration ("GTSAM requirews MSVC >= 15")
+            if self.settings.compiler.runtime=="MT" or  self.settings.compiler.runtime=="MTd":
+                raise ConanInvalidConfiguration ("GTSAM building fails with MT or MTd runtime")
 
     def configure(self):
         self.requires("boost/1.72.0")
