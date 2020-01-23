@@ -111,6 +111,7 @@ class Cc65Conan(ConanFile):
                     if not fn.endswith(".vcxproj"):
                         continue
                     tools.replace_in_file(fn, "v141", msvs_toolset(self.settings))
+                    tools.replace_in_file(fn, "<WindowsTargetPlatformVersion>10.0.16299.0</WindowsTargetPlatformVersion>", "")
 
     def build(self):
         self._patch_sources()
