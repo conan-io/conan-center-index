@@ -57,8 +57,8 @@ class Cc65Conan(ConanFile):
                 self.output.info("x86_64 detected: building x86 instead")
                 mock_settings.arch_build = "x86"
 
-        mock_settings._data["arch"] = mock_settings._data["arch_build"]
-        mock_settings._data["os"] = mock_settings._data["os_build"]
+        mock_settings._data["arch"] = mock_settings._data["arch_build"].copy()
+        mock_settings._data["os"] = mock_settings._data["os_build"].copy()
 
         original_settings = self.settings
         self.settings = mock_settings
