@@ -58,3 +58,5 @@ class ConanJBig(ConanFile):
         self.output.info("Appending PATH environment variable: {}".format(bindir))
         self.env_info.PATH.append(bindir)
         self.cpp_info.libs = [self.name]
+        if self.options.shared and self.settings.compiler == "Visual Studio":
+            self.cpp_info.defines = ["_JBIGDLL_"]
