@@ -50,6 +50,11 @@ class OpenBLAS(ConanFile):
         if self.settings.compiler == "Visual Studio" and not self.options.shared:
             cmake.definitions["MSVC_STATIC_CRT"] = True
 
+        if self.settings.os == "Linux":
+            # This is a workaround to add the libm dependency on linux,
+            # which is required to successfully compile on older gcc versions.
+            cmake.definitions["ANDROID"] = True
+
         cmake.configure(build_folder=self._build_subfolder)
         return cmake
 
@@ -70,7 +75,7 @@ class OpenBLAS(ConanFile):
     def package_info(self):
         self.env_info.OpenBLAS_HOME = self.package_folder
         self.cpp_info.libs = tools.collect_libs(self)
-        if self.settings.os == "Linux": 
+        if self.settings.os == "Linux":
             self.cpp_info.system_libs = ["pthread"]
             if self.options.build_lapack:
                 self.cpp_info.libs.append("gfortran")
