@@ -1,5 +1,5 @@
 diff --git a/Makefile.msc b/Makefile.msc
-index 9baa035..5113c6b 100644
+index 9baa035..841874d 100644
 --- a/Makefile.msc
 +++ b/Makefile.msc
 @@ -270,9 +270,9 @@ SQLITE3H = sqlite3.h
@@ -135,7 +135,35 @@ index 9baa035..5113c6b 100644
  
  # Enable/disable loadable extensions, and other optional features
  # based on configuration. (-DSQLITE_OMIT*, -DSQLITE_ENABLE*).
-@@ -1212,7 +1193,7 @@ LTLIBS = $(LTLIBS) $(LIBICU)
+@@ -1152,14 +1133,13 @@ LTLINKOPTS = $(LTLINKOPTS) "/LIBPATH:$(WP81LIBPATH)"
+ !ENDIF
+ LTLINKOPTS = $(LTLINKOPTS) /DYNAMICBASE
+ LTLINKOPTS = $(LTLINKOPTS) WindowsPhoneCore.lib RuntimeObject.lib PhoneAppModelHost.lib
+-LTLINKOPTS = $(LTLINKOPTS) /NODEFAULTLIB:kernel32.lib /NODEFAULTLIB:ole32.lib
+ !ENDIF
+ 
+ # When compiling for UWP or the Windows 10 platform, some extra linker
+ # options are also required.
+ #
+ !IF $(FOR_UWP)!=0 || $(FOR_WIN10)!=0
+-LTLINKOPTS = $(LTLINKOPTS) /DYNAMICBASE /NODEFAULTLIB:kernel32.lib
++LTLINKOPTS = $(LTLINKOPTS) /DYNAMICBASE
+ LTLINKOPTS = $(LTLINKOPTS) mincore.lib
+ !IFDEF PSDKLIBPATH
+ LTLINKOPTS = $(LTLINKOPTS) "/LIBPATH:$(PSDKLIBPATH)"
+@@ -1169,9 +1149,9 @@ LTLINKOPTS = $(LTLINKOPTS) "/LIBPATH:$(PSDKLIBPATH)"
+ !IF $(FOR_WIN10)!=0
+ LTLINKOPTS = $(LTLINKOPTS) /guard:cf "/LIBPATH:$(UCRTLIBPATH)"
+ !IF $(DEBUG)>1
+-LTLINKOPTS = $(LTLINKOPTS) /NODEFAULTLIB:libucrtd.lib /DEFAULTLIB:ucrtd.lib
+-!ELSE
+ LTLINKOPTS = $(LTLINKOPTS) /NODEFAULTLIB:libucrt.lib /DEFAULTLIB:ucrt.lib
++!ELSE
++LTLINKOPTS = $(LTLINKOPTS) /NODEFAULTLIB:libucrtd.lib /DEFAULTLIB:ucrtd.lib
+ !ENDIF
+ !ENDIF
+ 
+@@ -1212,7 +1192,7 @@ LTLIBS = $(LTLIBS) $(LIBICU)
  # <<mark>>
  # Object files for the SQLite library (non-amalgamation).
  #
@@ -144,7 +172,7 @@ index 9baa035..5113c6b 100644
           backup.lo bitvec.lo btmutex.lo btree.lo build.lo \
           callback.lo complete.lo ctime.lo \
           date.lo dbpage.lo dbstat.lo delete.lo \
-@@ -1702,7 +1683,7 @@ ALL_TCL_TARGETS =
+@@ -1702,7 +1682,7 @@ ALL_TCL_TARGETS =
  # This is the default Makefile target.  The objects listed here
  # are what get build when you type just "make" with no arguments.
  #
@@ -153,7 +181,7 @@ index 9baa035..5113c6b 100644
  
  # Targets that require the Tcl library.
  #
-@@ -1721,17 +1702,17 @@ dll:	$(SQLITE3DLL)
+@@ -1721,17 +1701,17 @@ dll:	$(SQLITE3DLL)
  shell:	$(SQLITE3EXE)
  
  # <<mark>>
@@ -178,7 +206,7 @@ index 9baa035..5113c6b 100644
  
  pkgIndex.tcl:	$(TOP)\VERSION
  	for /F %%V in ('type "$(TOP)\VERSION"') do ( \
-@@ -1739,17 +1720,17 @@ pkgIndex.tcl:	$(TOP)\VERSION
+@@ -1739,17 +1719,17 @@ pkgIndex.tcl:	$(TOP)\VERSION
  			| $(TCLSH_CMD) $(TOP)\tool\replace.tcl exact @version@ %%V > pkgIndex.tcl \
  	)
  
@@ -201,7 +229,7 @@ index 9baa035..5113c6b 100644
  		| $(TCLSH_CMD) $(TOP)\tool\replace.tcl include "^\s+1 _?(sqlite3(?:session|changeset|changegroup|rebaser)?_[^@]*)(?:@\d+)?$$" \1 \
  		| sort >> sqlite3.def
  # <</block2>>
-@@ -1927,6 +1908,15 @@ callback.lo:	$(TOP)\src\callback.c $(HDR)
+@@ -1927,6 +1907,15 @@ callback.lo:	$(TOP)\src\callback.c $(HDR)
  complete.lo:	$(TOP)\src\complete.c $(HDR)
  	$(LTCOMPILE) $(CORE_COMPILE_OPTS) -c $(TOP)\src\complete.c
  
