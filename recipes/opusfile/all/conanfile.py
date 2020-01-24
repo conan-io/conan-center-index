@@ -1,4 +1,5 @@
 from conans import ConanFile, MSBuild, AutoToolsBuildEnvironment, tools
+from conans.errors import ConanInvalidConfiguration
 import os
 
 
@@ -33,6 +34,8 @@ class OpusFileConan(ConanFile):
     def configure(self):
         del self.settings.compiler.libcxx
         del self.settings.compiler.cppstd
+        if self._is_msvc and self.options.shared:
+            raise ConanInvalidConfiguration("Opusfile doesn't support building as shared with Visual Studio")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
