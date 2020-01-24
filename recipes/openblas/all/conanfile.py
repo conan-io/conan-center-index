@@ -11,7 +11,7 @@ class OpenBLAS(ConanFile):
     description = "An optimized BLAS library based on GotoBLAS2 1.13 BSD version"
     topics = (
         "openblas",
-        "BLAS",
+        "blas",
         "lapack"
     )
     settings = "os", "compiler", "build_type", "arch"
