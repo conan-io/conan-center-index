@@ -4,14 +4,18 @@ project(jbig LANGUAGES C)
 include(conanbuildinfo.cmake)
 conan_basic_setup()
 
-if (WIN32 AND MSVC AND BUILD_SHARED_LIBS)
-    set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS ON)
-endif()
-
 add_library(${CMAKE_PROJECT_NAME} source_subfolder/libjbig/jbig.h
                                   source_subfolder/libjbig/jbig.c
                                   source_subfolder/libjbig/jbig_tab.c)
 target_link_libraries(${CMAKE_PROJECT_NAME} ${CONAN_LIBS})
+if (WIN32)
+    if (BUILD_SHARED_LIBS)
+        target_compile_definitions(${CMAKE_PROJECT_NAME} PRIVATE _JBIGDLL_=1)
+        if (MSVC)
+            target_compile_definitions(${CMAKE_PROJECT_NAME} PRIVATE jbig_EXPORT=1)
+        endif()
+    endif()
+endif()
 
 include(GNUInstallDirs)
 
