@@ -112,6 +112,13 @@ class gtsamConan(ConanFile):
         tools.replace_in_file(os.path.join(self._source_subfolder, "gtsam", "CMakeLists.txt"),
                               "${CMAKE_BINARY_DIR}",
                               "${GTSAM_BINARY_DIR}")
+        if self.settings.os == "Windows": #compiler.runtime field only exists on Windows
+            tools.replace_in_file(os.path.join(self._source_subfolder, "cmake", "GtsamBuildTypes.cmake"),
+                                  "/MD ",
+                                  "/{} ".format(self.settings.compiler.runtime))
+            tools.replace_in_file(os.path.join(self._source_subfolder, "cmake", "GtsamBuildTypes.cmake"),
+                                  "/MDd ",
+                                  "/{} ".format(self.settings.compiler.runtime))
 
     def build_requirements(self):
         self.build_requires("cmake/3.16.2")
@@ -121,8 +128,6 @@ class gtsamConan(ConanFile):
             del self.options.fPIC
             if self.settings.compiler == "Visual Studio" and tools.Version(self.settings.compiler.version) < 15:
                 raise ConanInvalidConfiguration ("GTSAM requirews MSVC >= 15")
-            if self.settings.compiler.runtime=="MT" or  self.settings.compiler.runtime=="MTd":
-                raise ConanInvalidConfiguration ("GTSAM building fails with MT or MTd runtime")
 
     def configure(self):
         self.requires("boost/1.72.0")
