@@ -68,7 +68,7 @@ class gtsamConan(ConanFile):
     def _configure_cmake(self):
         if not self._cmake:
             self._cmake = CMake(self)
-            self._cmake.verbose = False
+            self._cmake.verbose = True
             self._cmake.definitions["BUILD_SHARED_LIBS"] = self.options.shared
             self._cmake.definitions["GTSAM_USE_QUATERNIONS"] = self.options.use_quaternions
             self._cmake.definitions["GTSAM_POSE3_EXPMAP"] = self.options.pose3_expmap
@@ -124,6 +124,8 @@ class gtsamConan(ConanFile):
         self.build_requires("cmake/3.16.2")
 
     def config_options(self):
+        if self.settings.os != "Linux":
+            raise ConanInvalidConfiguration ("Build only linux binaries to debug faster.")
         if self.settings.os == "Windows":
             del self.options.fPIC
             if self.settings.compiler == "Visual Studio" and tools.Version(self.settings.compiler.version) < 15:
