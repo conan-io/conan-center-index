@@ -88,3 +88,5 @@ class OpusFileConan(ConanFile):
     def package_info(self):
         self.cpp_info.libs = ["opusfile"]
         self.cpp_info.includedirs.append(os.path.join("include", "opus"))
+        if self.settings.os == "Linux":
+            self.cpp_info.system_libs = ["m", "dl", "pthread"]
