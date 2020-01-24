@@ -1,8 +1,12 @@
-cmake_minimum_required(VERSION 3.4)
+cmake_minimum_required(VERSION 2.8.12)
 project(jbig LANGUAGES C)
 
 include(conanbuildinfo.cmake)
 conan_basic_setup()
+
+if(MSVC)
+    add_definitions(-D_CRT_SECURE_NO_WARNINGS)
+endif()
 
 add_library(${CMAKE_PROJECT_NAME} source_subfolder/libjbig/jbig.h
                                   source_subfolder/libjbig/jbig.c

@@ -5,4 +5,6 @@ sources:
 patches:
   "20160605":
     - base_path: source_subfolder
-      patch_file: patches/0001-export.patch
+      patch_file: patches/0001-add-missing-export.patch
+    - base_path: source_subfolder
+      patch_file: patches/0002-fix-msvc-export.patch
