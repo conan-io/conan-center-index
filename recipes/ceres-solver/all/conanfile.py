@@ -57,6 +57,8 @@ class ceressolverConan(ConanFile):
             self._cmake.definitions["CXX11_THREADS"] = self.options.use_CXX11_threads
             self._cmake.definitions["CXX11"] = self.options.use_CXX11
             self._cmake.definitions["SCHUR_SPECIALIZATIONS"] = self.options.use_schur_specializations
+            if self.settings.os == "Windows":
+                self._cmake.definitions["MSVC_USE_STATIC_CRT"] = str(self.settings.compiler.runtime) == "MT" or str(self.settings.compiler.runtime) == "MTd"
             self._cmake.configure()
         return self._cmake
 
