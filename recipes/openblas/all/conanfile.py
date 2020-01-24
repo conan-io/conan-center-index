@@ -13,7 +13,7 @@ class OpenBLAS(ConanFile):
     topics = (
         "OpenBLAS",
         "BLAS",
-        "LAPACK"
+        "lapack"
     )
     settings = "os", "compiler", "build_type", "arch"
     options = {
