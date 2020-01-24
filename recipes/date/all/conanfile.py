@@ -14,9 +14,13 @@ class DateConan(ConanFile):
     settings = "os", "arch", "compiler", "build_type"
     generators = "cmake", "cmake_find_package"
     options = {"shared": [True, False],
-               "fPIC": [True, False]}
+               "fPIC": [True, False],
+               "use_system_tz_db": [True, False],
+               "use_tz_db_in_dot": [True, False]}
     default_options = {"shared": False,
-                       "fPIC": True}
+                       "fPIC": True,
+                       "use_system_tz_db": True,
+                       "use_tz_db_in_dot": False}
     _source_subfolder = "source_subfolder"
     _build_subfolder = "build_subfolder"
 
@@ -34,9 +38,18 @@ class DateConan(ConanFile):
     def _configure_cmake(self):
         cmake = CMake(self)
         cmake.definitions["ENABLE_DATE_TESTING"] = False
-        cmake.definitions["USE_SYSTEM_TZ_DB"] = True
+        if self.settings.os == "Windows":
+            cmake.definitions["USE_TZ_DB_IN_DOT"] = False
+            cmake.definitions["USE_SYSTEM_TZ_DB"] = False
+        else:
+            cmake.definitions["USE_TZ_DB_IN_DOT"] = self.options.use_tz_db_in_dot
+            cmake.definitions["USE_SYSTEM_TZ_DB"] = self.options.use_system_tz_db
         cmake.configure(source_folder=self._source_subfolder)
         return cmake
+
+    def requirements(self):
+        if self.settings.os == "Windows" or not self.options.use_system_tz_db:
+            self.requires("libcurl/7.56.1")
 
     def build(self):
         cmake = self._configure_cmake()
@@ -54,3 +67,10 @@ class DateConan(ConanFile):
         self.cpp_info.libs = tools.collect_libs(self)
         if tools.os_info.is_linux:
             self.cpp_info.libs.append("pthread")
+        if self.settings.os == "Windows":
+            use_system_tz_db = 0
+        else:
+            use_system_tz_db = 0 if self.options.use_system_tz_db else 1
+        defines = ["USE_AUTOLOAD={}".format(use_system_tz_db),
+                   "HAS_REMOTE_API={}".format(use_system_tz_db)]
+        self.cpp_info.defines.extend(defines)
