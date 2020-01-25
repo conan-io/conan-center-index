@@ -45,9 +45,6 @@ class SpdlogConan(ConanFile):
             raise ConanInvalidConfiguration("wchar is not yet supported under windows")
 
     def requirements(self):
-        if self.version == "1.5.0":
-            self.requires("fmt/6.1.2")
-        else:
             self.requires("fmt/6.0.0")
 
     def source(self):
