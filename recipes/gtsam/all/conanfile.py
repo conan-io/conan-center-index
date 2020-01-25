@@ -2,6 +2,7 @@ import os
 import stat
 from conans import ConanFile, tools, CMake
 from conans.errors import ConanInvalidConfiguration
+from conans.tools import Version
 
 class gtsamConan(ConanFile):
     name = "gtsam"
@@ -124,12 +125,12 @@ class gtsamConan(ConanFile):
         self.build_requires("cmake/3.16.2")
 
     def config_options(self):
-        if self.settings.os != "Linux":
-            raise ConanInvalidConfiguration ("Build only linux binaries to debug faster.")
         if self.settings.os == "Windows":
             del self.options.fPIC
             if self.settings.compiler == "Visual Studio" and tools.Version(self.settings.compiler.version) < 15:
                 raise ConanInvalidConfiguration ("GTSAM requirews MSVC >= 15")
+        if self.settings.compiler == "gcc" and Version(self.settings.compiler.version) < 5:
+            raise ConanInvalidConfiguration ("This recipe won't build on gcc 4.9 until uilianries:hotfix/gcc49-glibc gets merged")
 
     def configure(self):
         self.requires("boost/1.72.0")
