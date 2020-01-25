@@ -1,6 +1,7 @@
 import os
 from conans import ConanFile, tools, CMake
 from conans.errors import ConanInvalidConfiguration
+from conans.tools import Version
 
 class ceressolverConan(ConanFile):
     name = "ceres-solver"
@@ -65,10 +66,15 @@ class ceressolverConan(ConanFile):
     def config_options(self):
         if self.settings.os == "Windows":
             self.options.remove("fPIC")
+
+    def configure(self):
         if self.settings.build_type == "Debug" and self.options.use_glog:
             raise ConanInvalidConfiguration("Ceres-solver only links against the release version of glog")
         if self.options.use_glog and not self.options.use_gflags: #At this stage we can't check the value of self.options["glog"].with_gflags so we asume it is true because is the default value
-            raise ConanInvalidConfiguration("To depend on glog built with gflags (Default behavior) set use_gflags=True, otherwise Ceres may fail to link due to missing gflags symbols. ")
+            raise ConanInvalidConfiguration("To depend on glog built with gflags (Default behavior) set use_gflags=True, otherwise Ceres may fail to link due to missing gflags symbols.")
+        if self.settings.compiler == "Visual Studio" and Version(self.settings.compiler.version) == "15":
+            raise ConanInvalidConfiguration("Ceres-Solver can't be built on VS15 because there is a bug in the compiller. If you have an updated version of VS15 you can disable this error.")
+
 
     def requirements(self):
         self.requires.add("eigen/3.3.7")
