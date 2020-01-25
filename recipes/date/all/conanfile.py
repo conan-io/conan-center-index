@@ -49,7 +49,7 @@ class DateConan(ConanFile):
 
     def requirements(self):
         if self.settings.os == "Windows" or not self.options.use_system_tz_db:
-            self.requires("libcurl/7.56.1")
+            self.requires("libcurl/7.67.0")
 
     def build(self):
         cmake = self._configure_cmake()
