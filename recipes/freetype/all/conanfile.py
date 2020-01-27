@@ -55,10 +55,22 @@ class FreetypeConan(ConanFile):
     def _configure_cmake(self):
         cmake = CMake(self)
         cmake.definitions["PROJECT_VERSION"] = self._libtool_version
-        cmake.definitions["WITH_ZLIB"] = self.options.with_zlib
-        cmake.definitions["WITH_PNG"] = self.options.with_png
-        cmake.definitions["WITH_BZip2"] = self.options.with_bzip2
-        cmake.definitions["WITH_HARFBUZZ"] = False
+        if self.options.with_zlib:
+            cmake.definitions["FT_WITH_ZLIB"] = True
+        else:
+            cmake.definitions["FT_WITH_ZLIB"] = False
+            cmake.definitions["CMAKE_DISABLE_FIND_PACKAGE_ZLIB"] = True
+        if self.options.with_png:
+            cmake.definitions["FT_WITH_PNG"] = self.options.with_png
+        else:
+            cmake.definitions["FT_WITH_PNG"] = False
+            cmake.definitions["CMAKE_DISABLE_FIND_PACKAGE_PNG"] = True
+        if self.options.with_bzip2:
+            cmake.definitions["FT_WITH_BZIP2"] = self.options.with_bzip2
+        else:
+            cmake.definitions["FT_WITH_BZIP2"] = False
+            cmake.definitions["CMAKE_DISABLE_FIND_PACKAGE_BZip2"] = True
+        cmake.definitions["FT_WITH_HARFBUZZ"] = False
         cmake.definitions["CMAKE_DISABLE_FIND_PACKAGE_HarfBuzz"] = True
         cmake.configure(build_dir=self._build_subfolder)
         return cmake
