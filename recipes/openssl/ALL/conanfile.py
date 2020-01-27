@@ -597,7 +597,8 @@ class OpenSSLConan(ConanFile):
         tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
 
     def package_info(self):
-        self.cpp_info.name = "OpenSSL"
+        self.cpp_info.names["cmake_find_package"] = "OpenSSL"
+        self.cpp_info.names["cmake_find_package_multi"] = "OpenSSL"
         if self._use_nmake:
             if self._full_version < "1.1.0":
                 self.cpp_info.libs = ["ssleay32", "libeay32"]
