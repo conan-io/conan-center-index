@@ -1,6 +1,7 @@
 from conans import ConanFile, tools, AutoToolsBuildEnvironment
-import os
+from contextlib import contextmanager
 import glob
+import os
 
 
 class M4Conan(ConanFile):
@@ -12,6 +13,8 @@ class M4Conan(ConanFile):
     license = "GPL-3.0-only"
     exports_sources = ["patches/*.patch"]
     settings = "os_build", "arch_build", "compiler"
+
+    _autotools = None
     _source_subfolder = "source_subfolder"
     _build_subfolder = "build_subfolder"
 
@@ -31,6 +34,33 @@ class M4Conan(ConanFile):
         tools.get(**self.conan_data["sources"][self.version])
         os.rename("m4-" + self.version, self._source_subfolder)
 
+    def _configure_autotools(self):
+        if self._autotools:
+            return self._autotools
+        args = []
+        if self._is_msvc:
+            args.extend(['CC={}/build-aux/compile cl -nologo'.format(tools.unix_path(self._source_subfolder)),
+                         'CXX={}/build-aux/compile cl -nologo'.format(tools.unix_path(self._source_subfolder)),
+                         'LD=link',
+                         'NM=dumpbin -symbols',
+                         'STRIP=:',
+                         'AR={}/build-aux/ar-lib lib'.format(tools.unix_path(self._source_subfolder)),
+                         'RANLIB=:'])
+        elif self._is_clang:
+            args.extend(['CFLAGS=-rtlib=compiler-rt'])
+
+        self._autotools = AutoToolsBuildEnvironment(self, win_bash=tools.os_info.is_windows)
+        self._autotools.configure(args=args, configure_dir=self._source_subfolder)
+        return self._autotools
+
+    @contextmanager
+    def _build_context(self):
+        if self._is_msvc:
+            with tools.vcvars(self.settings):
+                yield
+        else:
+            yield
+
     def build(self):
         # 0001-fflush-adjust-to-glibc-2.28-libio.h-removal.patch
         # 0002-fflush-be-more-paranoid-about-libio.h-change.patch
@@ -44,26 +74,14 @@ class M4Conan(ConanFile):
             self.output.info('applying patch "%s"' % filename)
             tools.patch(base_path=self._source_subfolder, patch_file=filename)
 
-        with tools.vcvars(self.settings) if self._is_msvc else tools.no_op():
-            with tools.chdir(self._source_subfolder):
-                args = []
-                if self._is_msvc:
-                    args.extend(['CC=$PWD/build-aux/compile cl -nologo',
-                                 'CXX=$PWD/build-aux/compile cl -nologo',
-                                 'LD=link',
-                                 'NM=dumpbin -symbols',
-                                 'STRIP=:',
-                                 'AR=$PWD/build-aux/ar-lib lib',
-                                 'RANLIB=:'])
-                elif self._is_clang:
-                    args.extend(['CFLAGS=-rtlib=compiler-rt'])
-
-                env_build = AutoToolsBuildEnvironment(self, win_bash=tools.os_info.is_windows)
-                env_build.configure(args=args)
-                env_build.make()
-                env_build.install()
+        with self._build_context():
+            autotools = self._configure_autotools()
+            autotools.make()
 
     def package(self):
+        with self._build_context():
+            autotools = self._configure_autotools()
+            autotools.install()
         self.copy(pattern="COPYING", dst="licenses", src=self._source_subfolder)
         tools.rmdir(os.path.join(self.package_folder, "share"))
 
