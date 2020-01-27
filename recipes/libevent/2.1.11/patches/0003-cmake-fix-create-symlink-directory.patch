@@ -1,0 +1,11 @@
+--- cmake/AddEventLibrary.cmake
++++ cmake/AddEventLibrary.cmake
+@@ -127,7 +127,7 @@
+                 COMMAND ${CMAKE_COMMAND} -E create_symlink
+                     "$<TARGET_FILE_NAME:${LIB_NAME}_shared>"
+                     "${LIB_LINK_NAME}"
+-                WORKING_DIRECTORY "lib")
++                WORKING_DIRECTORY "${CMAKE_BINARY_DIR}/lib")
+         endif()
+ 
+         list(APPEND LIBEVENT_SHARED_LIBRARIES "${LIB_NAME}_shared")
