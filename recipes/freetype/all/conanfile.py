@@ -61,12 +61,12 @@ class FreetypeConan(ConanFile):
             cmake.definitions["FT_WITH_ZLIB"] = False
             cmake.definitions["CMAKE_DISABLE_FIND_PACKAGE_ZLIB"] = True
         if self.options.with_png:
-            cmake.definitions["FT_WITH_PNG"] = self.options.with_png
+            cmake.definitions["FT_WITH_PNG"] = True
         else:
             cmake.definitions["FT_WITH_PNG"] = False
             cmake.definitions["CMAKE_DISABLE_FIND_PACKAGE_PNG"] = True
         if self.options.with_bzip2:
-            cmake.definitions["FT_WITH_BZIP2"] = self.options.with_bzip2
+            cmake.definitions["FT_WITH_BZIP2"] = True
         else:
             cmake.definitions["FT_WITH_BZIP2"] = False
             cmake.definitions["CMAKE_DISABLE_FIND_PACKAGE_BZip2"] = True
