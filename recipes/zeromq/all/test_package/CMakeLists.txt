@@ -3,11 +3,15 @@ project(test_package)
 
 set(CMAKE_VERBOSE_MAKEFILE TRUE)
 
-include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
+option(WITH_LIBSODIUM "zeromq is built with libsodium")
+
+include("${CMAKE_BINARY_DIR}/conanbuildinfo.cmake")
 conan_basic_setup()
 
+find_package(ZeroMQ REQUIRED)
+
 add_executable(${PROJECT_NAME} test_package.cpp)
-target_link_libraries(${PROJECT_NAME} ${CONAN_LIBS})
+target_link_libraries(${PROJECT_NAME} ZeroMQ::ZeroMQ)
 
 if(WITH_LIBSODIUM)
   target_compile_definitions(${PROJECT_NAME} PRIVATE "WITH_LIBSODIUM")

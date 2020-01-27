@@ -4,11 +4,11 @@ import os
 
 class TestPackageConan(ConanFile):
     settings = "os", "compiler", "build_type", "arch"
-    generators = "cmake"
+    generators = "cmake", "cmake_find_package"
 
     def build(self):
         cmake = CMake(self)
-        cmake.definitions["WITH_LIBSODIUM"] = self.options["zmq"].encryption == "libsodium"
+        cmake.definitions["WITH_LIBSODIUM"] = self.options["zeromq"].encryption == "libsodium"
         cmake.configure()
         cmake.build()
 
