@@ -2,3 +2,6 @@ sources:
   "9c":
     url: "http://ijg.org/files/jpegsrc.v9c.tar.gz"
     sha256: "650250979303a649e21f87b5ccd02672af1ea6954b911342ea491f351ceb7122"
+  "9d":
+    url: "http://ijg.org/files/jpegsrc.v9d.tar.gz"
+    sha256: "99cb50e48a4556bc571dadd27931955ff458aae32f68c4d9c39d624693f69c32"
