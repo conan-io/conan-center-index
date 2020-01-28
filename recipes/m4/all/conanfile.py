@@ -39,15 +39,15 @@ class M4Conan(ConanFile):
             return self._autotools
         args = []
         if self._is_msvc:
-            args.extend(['CC={}/build-aux/compile cl -nologo'.format(tools.unix_path(self._source_subfolder)),
-                         'CXX={}/build-aux/compile cl -nologo'.format(tools.unix_path(self._source_subfolder)),
-                         'LD=link',
-                         'NM=dumpbin -symbols',
-                         'STRIP=:',
-                         'AR={}/build-aux/ar-lib lib'.format(tools.unix_path(self._source_subfolder)),
-                         'RANLIB=:'])
+            args.extend(["CC={}/build-aux/compile cl -nologo".format(tools.unix_path(self._source_subfolder)),
+                         "CXX={}/build-aux/compile cl -nologo".format(tools.unix_path(self._source_subfolder)),
+                         "LD=link",
+                         "NM=dumpbin -symbols",
+                         "STRIP=:",
+                         "AR={}/build-aux/ar-lib lib".format(tools.unix_path(self._source_subfolder)),
+                         "RANLIB=:"])
         elif self._is_clang:
-            args.extend(['CFLAGS=-rtlib=compiler-rt'])
+            args.extend(["CFLAGS=-rtlib=compiler-rt"])
 
         self._autotools = AutoToolsBuildEnvironment(self, win_bash=tools.os_info.is_windows)
         self._autotools.configure(args=args, configure_dir=self._source_subfolder)
@@ -71,7 +71,7 @@ class M4Conan(ConanFile):
         # patch taken from https://github.com/macports/macports-ports/blob/master/devel/m4/files/secure_snprintf.patch
         # to fix invalid instruction error on OSX when running m4
         for patchargs in self.conan_data["patches"][self.version]:
-            self.output.info('applying patch "{}"'.format(patchargs["patch_file"]))
+            self.output.info("applying patch \"{}\"".format(patchargs["patch_file"]))
             tools.patch(**patchargs)
 
         with self._build_context():
