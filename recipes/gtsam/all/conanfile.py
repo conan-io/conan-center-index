@@ -133,7 +133,7 @@ class gtsamConan(ConanFile):
             raise ConanInvalidConfiguration ("This recipe won't build on gcc 4.9 until uilianries:hotfix/gcc49-glibc gets merged")
 
     def configure(self):
-        self.requires("boost/1.72.0")
+        self.requires("boost/1.71.0")
         self.requires("eigen/3.3.7")
         if self.options.with_TBB:
             self.requires("tbb/2020.0")
