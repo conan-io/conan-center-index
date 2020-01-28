@@ -77,6 +77,10 @@ class M4Conan(ConanFile):
         with self._build_context():
             autotools = self._configure_autotools()
             autotools.make()
+            if bool(os.environ.get("CONAN_RUN_TESTS", "")):
+                self.output.info("Running m4 checks...")
+                with tools.chdir("checks"):
+                    autotools.make(target="check-local")
 
     def package(self):
         with self._build_context():
