@@ -26,7 +26,7 @@ class DoctestConan(ConanFile):
 
         cmake_script_dirs = {
             "src": os.path.join(self._source_subfolder, "scripts/cmake"),
-            "dst": "lib/cmake/doctest"
+            "dst": "lib/cmake"
         }
 
         self.copy(pattern="doctest.cmake", **cmake_script_dirs)
@@ -38,7 +38,8 @@ class DoctestConan(ConanFile):
             # can't use destructors in thread_local with mingw
             self.cpp_info.defines.append("DOCTEST_THREAD_LOCAL=")
 
-        self.cpp_info.builddirs.append("lib/cmake/doctest")
+        self.cpp_info.builddirs.append("lib/cmake")
+        self.cpp_info.build_modules.append("lib/cmake/doctest.cmake")
 
     def package_id(self):
         self.info.header_only()

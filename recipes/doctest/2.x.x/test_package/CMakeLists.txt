@@ -12,6 +12,4 @@ target_link_libraries(${PROJECT_NAME} ${CONAN_LIBS})
 
 enable_testing()
 
-include(doctest)
 doctest_discover_tests(${PROJECT_NAME})
-
