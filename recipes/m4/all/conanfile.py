@@ -70,9 +70,9 @@ class M4Conan(ConanFile):
         # 0003-secure_snprintf.patch
         # patch taken from https://github.com/macports/macports-ports/blob/master/devel/m4/files/secure_snprintf.patch
         # to fix invalid instruction error on OSX when running m4
-        for filename in sorted(glob.glob("patches/*.patch")):
-            self.output.info('applying patch "%s"' % filename)
-            tools.patch(base_path=self._source_subfolder, patch_file=filename)
+        for patchargs in self.conan_data["patches"][self.version]:
+            self.output.info('applying patch "{}"'.format(patchargs["patch_file"]))
+            tools.patch(**patchargs)
 
         with self._build_context():
             autotools = self._configure_autotools()
