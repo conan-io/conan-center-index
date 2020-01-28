@@ -1,7 +1,7 @@
 import os
 from conans import tools, ConanFile, CMake
 from conans import __version__ as conan_version
-from conans.model.version import Version
+from conans.tools import Version
 from conans.errors import ConanInvalidConfiguration, NotFoundException, ConanException
 
 
