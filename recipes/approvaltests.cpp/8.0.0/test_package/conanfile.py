@@ -8,6 +8,14 @@ class TestPackageConan(ConanFile):
 
     def build(self):
         cmake = CMake(self)
+
+        if self.options["approvaltests.cpp"].test_framework == "catch2":
+            cmake.definitions["WITH_CATCH"] = True
+        elif self.options["approvaltests.cpp"].test_framework == "gtest":
+            cmake.definitions["WITH_GTEST"] = True
+        elif self.options["approvaltests.cpp"].test_framework == "doctest":
+            cmake.definitions["WITH_DOCTEST"] = True
+
         cmake.configure()
         cmake.build()
 
