@@ -2,12 +2,13 @@ import os
 
 from conans import ConanFile, CMake, tools
 from conans.errors import ConanInvalidConfiguration
+from conans.version import Version
 
 
 class PocoConan(ConanFile):
     name = "poco"
     url = "https://github.com/conan-io/conan-center-index"
-    homepage = "https://pocoproject.org"    
+    homepage = "https://pocoproject.org"
     topics = ("conan", "poco", "building", "networking", "server", "mobile", "embedded")
     exports_sources = "CMakeLists.txt"
     generators = "cmake"
@@ -110,10 +111,13 @@ class PocoConan(ConanFile):
             if self.options.shared:
                 self.output.warn("Adding ws2_32 dependency...")
                 replace = 'Net Util Foundation Crypt32.lib'
+                if Version(self.version) >= "1.10.0":
+                    replace = 'Poco::Net Poco::Util Crypt32.lib'
                 tools.replace_in_file(os.path.join(self._source_subfolder, "NetSSL_Win", "CMakeLists.txt"), replace, replace + " ws2_32 ")
 
-                replace = 'Foundation ${OPENSSL_LIBRARIES}'
-                tools.replace_in_file(os.path.join(self._source_subfolder, "Crypto", "CMakeLists.txt"), replace, replace + " ws2_32 Crypt32.lib")
+                if Version(self.version) < "1.10.0":
+                    replace = 'Foundation ${OPENSSL_LIBRARIES}'
+                    tools.replace_in_file(os.path.join(self._source_subfolder, "Crypto", "CMakeLists.txt"), replace, replace + " ws2_32 Crypt32.lib")
 
         # Poco 1.9.x - CMAKE_SOURCE_DIR is required in many places
         os.rename(os.path.join(self._source_subfolder, "CMakeLists.txt"), os.path.join(self._source_subfolder, "CMakeListsOriginal.cmake"))
