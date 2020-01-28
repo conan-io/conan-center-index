@@ -2,7 +2,7 @@ import os
 
 from conans import ConanFile, CMake, tools
 from conans.errors import ConanInvalidConfiguration
-from conans.version import Version
+from conans.tools import Version
 
 
 class PocoConan(ConanFile):
