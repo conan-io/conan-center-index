@@ -10,7 +10,7 @@ class DateConan(ConanFile):
     topics = ("date", "datetime", "timezone",
               "calendar", "time", "iana-database")
     license = "MIT"
-    exports_sources = ["patches/*"]
+    exports_sources = ["patches/*", "CMakeLists.txt"]
     settings = "os", "arch", "compiler", "build_type"
     generators = "cmake", "cmake_find_package"
     options = {"shared": [True, False],
