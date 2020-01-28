@@ -44,7 +44,7 @@ class DateConan(ConanFile):
         else:
             cmake.definitions["USE_TZ_DB_IN_DOT"] = self.options.use_tz_db_in_dot
             cmake.definitions["USE_SYSTEM_TZ_DB"] = self.options.use_system_tz_db
-        cmake.configure(source_folder=self._source_subfolder)
+        cmake.configure()
         return cmake
 
     def requirements(self):
