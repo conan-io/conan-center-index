@@ -6,3 +6,5 @@ patches:
   "2.69":
     - patch_file: "patches/0001-autom4te-relocatable.patch"
       base_path: "source_subfolder"
+    - patch_file: "patches/0002-no-perl-path-in-shebang.patch"
+      base_path: "source_subfolder"
