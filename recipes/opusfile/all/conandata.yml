@@ -1,0 +1,4 @@
+sources:
+  "0.11":
+    url: "https://github.com/xiph/opusfile/archive/v0.11.tar.gz"
+    sha256: "c2105cffc59545ffc0d2a65069e2f222a1712bbe579911ac0a3d3660edbbec57"
