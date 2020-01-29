@@ -9,11 +9,11 @@ class TestPackageConan(ConanFile):
     def build(self):
         cmake = CMake(self)
 
-        if self.options["approvaltests.cpp"].test_framework == "catch2":
+        if self.options["approvaltests.cpp"].with_catch2:
             cmake.definitions["WITH_CATCH"] = True
-        elif self.options["approvaltests.cpp"].test_framework == "gtest":
+        if self.options["approvaltests.cpp"].with_gtest:
             cmake.definitions["WITH_GTEST"] = True
-        elif self.options["approvaltests.cpp"].test_framework == "doctest":
+        if self.options["approvaltests.cpp"].with_doctest:
             cmake.definitions["WITH_DOCTEST"] = True
 
         cmake.configure()
@@ -25,4 +25,9 @@ class TestPackageConan(ConanFile):
             return
 
         bin_path = os.path.join("bin", "test_package")
-        self.run(bin_path, run_environment=True)
+        if self.options["approvaltests.cpp"].with_catch2:
+            self.run(bin_path + "_catch", run_environment=True)
+        if self.options["approvaltests.cpp"].with_gtest:
+            self.run(bin_path + "_gtest", run_environment=True)
+        elif self.options["approvaltests.cpp"].with_doctest:
+            self.run(bin_path + "_doctest", run_environment=True)
