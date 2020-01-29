@@ -188,6 +188,6 @@ class LibffiConan(ConanFile):
 
     def package_info(self):
         self.cpp_info.includedirs = ["include"]
-        if self.options.shared:
+        if not self.options.shared:
             self.cpp_info.defines += ["FFI_BUILDING"]
         self.cpp_info.libs = tools.collect_libs(self)
