@@ -38,7 +38,7 @@ class LibtiffConan(ConanFile):
         if self.options.lzma:
             self.requires("xz_utils/5.2.4")
         if self.options.jpeg:
-            self.requires.add("libjpeg/9c")
+            self.requires("libjpeg/9c")
         if Version(self.version) >= "4.1.0":
             self.requires("libwebp/1.0.3")
 
