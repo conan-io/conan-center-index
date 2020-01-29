@@ -61,10 +61,9 @@ class SqlcipherConan(ConanFile):
             nmake_flags.append("USE_CRT_DLL=1")
         if self.settings.build_type == "Debug":
             nmake_flags.append("DEBUG=2")
-        if platform.release() == "10":
-            nmake_flags.append("FOR_WIN10=1")
-            platforms = {"x86": "x86", "x86_64": "x64"}
-            nmake_flags.append("PLATFORM=%s" % platforms[self.settings.arch.value])
+        nmake_flags.append("FOR_WIN10=1")
+        platforms = {"x86": "x86", "x86_64": "x64"}
+        nmake_flags.append("PLATFORM=%s" % platforms[self.settings.arch.value])
         vcvars = tools.vcvars_command(self.settings)
         self.run("%s && nmake /f Makefile.msc %s %s" % (vcvars, main_target, " ".join(nmake_flags)), cwd=self._source_subfolder)
 
