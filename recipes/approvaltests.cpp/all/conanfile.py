@@ -33,3 +33,6 @@ class ApprovalTestsCppConan(ConanFile):
     def package_info(self):
         self.cpp_info.names["cmake_find_package"] = "ApprovalTests"
         self.cpp_info.names["cmake_find_package_multi"] = "ApprovalTests"
+
+    def package_id(self):
+        self.info.header_only()
