@@ -4,7 +4,6 @@ from conans import ConanFile, tools
 
 class ApprovalTestsCppConan(ConanFile):
     name = "approvaltests.cpp"
-    version = "8.0.0"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/approvals/ApprovalTests.cpp"
     license = "Apache-2.0"
@@ -40,3 +39,7 @@ class ApprovalTestsCppConan(ConanFile):
     def package(self):
         self.copy(self._header_file, dst="include", src=self.source_folder)
         self.copy("LICENSE", dst="licenses", src=self.source_folder)
+
+    def package_info(self):
+        self.cpp_info.names["cmake_find_package"] = "ApprovalTests"
+        self.cpp_info.names["cmake_find_package_multi"] = "ApprovalTests"
