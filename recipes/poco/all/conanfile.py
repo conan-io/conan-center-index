@@ -115,9 +115,10 @@ class PocoConan(ConanFile):
                     replace = 'Poco::Net Poco::Util Crypt32.lib'
                 tools.replace_in_file(os.path.join(self._source_subfolder, "NetSSL_Win", "CMakeLists.txt"), replace, replace + " ws2_32 ")
 
-                if Version(self.version) < "1.10.0":
-                    replace = 'Foundation ${OPENSSL_LIBRARIES}'
-                    tools.replace_in_file(os.path.join(self._source_subfolder, "Crypto", "CMakeLists.txt"), replace, replace + " ws2_32 Crypt32.lib")
+                replace = 'Foundation ${OPENSSL_LIBRARIES}'
+                if Version(self.version) >= "1.10.0":
+                    replace = 'Poco::Foundation OpenSSL::SSL OpenSSL::Crypto'
+                tools.replace_in_file(os.path.join(self._source_subfolder, "Crypto", "CMakeLists.txt"), replace, replace + " ws2_32 Crypt32.lib")
 
         # Poco 1.9.x - CMAKE_SOURCE_DIR is required in many places
         os.rename(os.path.join(self._source_subfolder, "CMakeLists.txt"), os.path.join(self._source_subfolder, "CMakeListsOriginal.cmake"))
