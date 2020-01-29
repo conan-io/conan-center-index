@@ -11,21 +11,11 @@ class ApprovalTestsCppConan(ConanFile):
                   "(such as a file) in one operation as opposed to writing " \
                   "test assertions for each element."
     topics = ("conan", "testing", "unit-testing", "header-only")
-    options = {"test_framework": ["catch2", "gtest", "doctest"]}
-    default_options = {"test_framework": "catch2"}
     no_copy_source = True
 
     @property
     def _header_file(self):
         return "ApprovalTests.hpp"
-
-    def requirements(self):
-        if self.options.test_framework == "catch2":
-            self.requires("catch2/2.11.0")
-        elif self.options.test_framework == "gtest":
-            self.requires("gtest/1.10.0")
-        elif self.options.test_framework == "doctest":
-            self.requires("doctest/2.3.5")
 
     def source(self):
         for source in self.conan_data["sources"][self.version]:
