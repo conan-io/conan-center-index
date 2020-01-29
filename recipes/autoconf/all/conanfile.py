@@ -107,5 +107,5 @@ class AutoconfConan(ConanFile):
         self.env_info.AUTOM4TE = autom4te
 
         autom4te_perllibdir = self._autoconf_datarootdir
-        self.output.info("Setting autom4te_perllibdir to {}".format(autom4te_perllibdir))
-        self.env_info.autom4te_perllibdir = autom4te_perllibdir
+        self.output.info("Setting AUTOM4TE_PERLLIBDIR to {}".format(autom4te_perllibdir))
+        self.env_info.AUTOM4TE_PERLLIBDIR = autom4te_perllibdir
