@@ -127,12 +127,16 @@ class gtsamConan(ConanFile):
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
-            if self.settings.compiler == "Visual Studio" and tools.Version(self.settings.compiler.version) < 15:
-                raise ConanInvalidConfiguration ("GTSAM requirews MSVC >= 15")
-        if self.settings.compiler == "gcc" and Version(self.settings.compiler.version) < 5:
-            raise ConanInvalidConfiguration ("This recipe won't build on gcc 4.9 until uilianries:hotfix/gcc49-glibc gets merged")
 
     def configure(self):
+        if self.settings.os == "Windows":
+            if self.settings.compiler == "Visual Studio" and tools.Version(self.settings.compiler.version) < 15:
+                raise ConanInvalidConfiguration ("GTSAM requires MSVC >= 15")
+        if self.settings.os == "Linux":
+            if self.settings.compiler == "gcc" and Version(self.settings.compiler.version) < 5:
+                raise ConanInvalidConfiguration ("This recipe won't build on gcc 4.9 until uilianries:hotfix/gcc49-glibc gets merged")
+
+    def requirements(self):
         self.requires("boost/1.71.0")
         self.requires("eigen/3.3.7")
         if self.options.with_TBB:
