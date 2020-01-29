@@ -8,7 +8,7 @@ class TestPackageConan(ConanFile):
     requires = [
         "catch2/2.11.0",
         "gtest/1.10.0",
-        "doctest/2.3.5"
+        "doctest/2.3.6"
     ]
 
     def build(self):
