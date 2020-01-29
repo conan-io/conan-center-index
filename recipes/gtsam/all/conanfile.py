@@ -121,8 +121,8 @@ class gtsamConan(ConanFile):
                                   "/MDd ",
                                   "/{} ".format(self.settings.compiler.runtime))
 
-    def build_requirements(self):
-        self.build_requires("cmake/3.16.2")
+    #def build_requirements(self):
+    #    self.build_requires("cmake/3.16.2")
 
     def config_options(self):
         if self.settings.os == "Windows":
