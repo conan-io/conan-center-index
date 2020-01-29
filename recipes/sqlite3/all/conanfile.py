@@ -7,7 +7,7 @@ class ConanSqlite3(ConanFile):
     description = "Self-contained, serverless, in-process SQL database engine."
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://www.sqlite.org"
-    topics = ("conan", "sqlite", "database", "sql", "serverless", "rdbms")
+    topics = ("conan", "sqlite", "database", "sql", "serverless")
     license = "Public Domain"
     generators = "cmake"
     settings = "os", "compiler", "arch", "build_type"
