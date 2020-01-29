@@ -10,3 +10,5 @@ patches:
       base_path: "source_subfolder"
     - patch_file: "patches/0003-secure_snprintf.patch"
       base_path: "source_subfolder"
+    - patch_file: "patches/0004-fix-checks.patch"
+      base_path: "source_subfolder"
