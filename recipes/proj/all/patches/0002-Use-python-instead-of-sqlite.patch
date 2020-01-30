@@ -1,0 +1,49 @@
+From fd091e736f87f623373b9362d3ee9867e9204419 Mon Sep 17 00:00:00 2001
+From: Brennan Ashton <bashton@brennanashton.com>
+Date: Thu, 30 Jan 2020 09:45:58 -0800
+Subject: [PATCH 2/2] Use python instead of sqlite
+
+---
+ CMakeLists.txt      | 5 -----
+ data/CMakeLists.txt | 6 +++++-
+ 2 files changed, 5 insertions(+), 6 deletions(-)
+
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 53a88de4..50c11238 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -117,11 +117,6 @@ include(policies)
+ ################################################################################
+ # Check for sqlite3
+ ################################################################################
+-find_program(EXE_SQLITE3 sqlite3)
+-if(NOT EXE_SQLITE3)
+-  message(SEND_ERROR "sqlite3 binary not found!")
+-endif()
+-
+ find_package(Sqlite3 REQUIRED)
+ if(NOT SQLITE3_FOUND)
+   message(SEND_ERROR "sqlite3 dependency not found!")
+diff --git a/data/CMakeLists.txt b/data/CMakeLists.txt
+index 8f3965f2..2e8f7c85 100644
+--- a/data/CMakeLists.txt
++++ b/data/CMakeLists.txt
+@@ -40,10 +40,14 @@ add_custom_command(
+ 
+ add_custom_target(generate_all_sql_in ALL DEPENDS ${ALL_SQL_IN})
+ 
++find_package(PythonInterp)
++if(NOT PYTHONINTERP_FOUND)
++  message(SEND_ERROR "python executable not found!")
++endif()
+ add_custom_command(
+   OUTPUT ${PROJ_DB}
+   COMMAND ${CMAKE_COMMAND} -E remove -f ${PROJ_DB}
+-  COMMAND ${EXE_SQLITE3} -init ${ALL_SQL_IN} ${PROJ_DB} .quit
++  COMMAND ${PYTHON_EXECUTABLE} ${CMAKE_SOURCE_DIR}/sqlite_init.py ${PROJ_DB} ${ALL_SQL_IN}
+   # note: we didn't port yet the foreign_key_check done in Makefile.am
+   DEPENDS generate_all_sql_in ${ALL_SQL_IN}
+   COMMENT "Generating proj.db"
+-- 
+2.20.1
+
