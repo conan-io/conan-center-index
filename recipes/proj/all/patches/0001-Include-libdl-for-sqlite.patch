@@ -1,0 +1,25 @@
+From abe15bcef2004069d5e356c94acd9ffbdf17f16e Mon Sep 17 00:00:00 2001
+From: Brennan Ashton <bashton@brennanashton.com>
+Date: Wed, 29 Jan 2020 22:59:46 -0800
+Subject: [PATCH 1/2] Include libdl for sqlite
+
+---
+ src/lib_proj.cmake | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/src/lib_proj.cmake b/src/lib_proj.cmake
+index bc27bafe..280bb959 100644
+--- a/src/lib_proj.cmake
++++ b/src/lib_proj.cmake
+@@ -441,7 +441,7 @@ if(USE_THREAD AND Threads_FOUND AND CMAKE_USE_PTHREADS_INIT)
+ endif()
+ 
+ include_directories(${SQLITE3_INCLUDE_DIR})
+-target_link_libraries(${PROJ_CORE_TARGET} ${SQLITE3_LIBRARY})
++target_link_libraries(${PROJ_CORE_TARGET} CONAN_PKG::sqlite3)
+ 
+ if(MSVC AND BUILD_LIBPROJ_SHARED)
+   target_compile_definitions(${PROJ_CORE_TARGET}
+-- 
+2.20.1
+
