@@ -8,3 +8,7 @@ patches:
       patch_file: patches/0001-help2man-no-discard-stderr.patch
     - base_path: source_subfolder
       patch_file: patches/0002-no-perl-path-in-shebang.patch
+    - base_path: source_subfolder
+      patch_file: patches/0003-remove-embedded-datadirs.patch
+    - base_path: source_subfolder
+      patch_file: patches/0004-introduce-automake_perllibdir.patch

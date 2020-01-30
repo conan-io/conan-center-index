@@ -18,6 +18,11 @@ class AutomakeConan(ConanFile):
     def _source_subfolder(self):
         return os.path.join(self.source_folder, "source_subfolder")
 
+    @property
+    def _version_major_minor(self):
+        [major, minor, _] = self.version.split(".", 2)
+        return '{}.{}'.format(major, minor)
+
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
         os.rename("{}-{}".format(self.name, self.version), self._source_subfolder)
@@ -30,11 +35,19 @@ class AutomakeConan(ConanFile):
         if self.settings.os_build == "Windows" and "CONAN_BASH_PATH" not in os.environ:
             self.build_requires("msys2/20190524")
 
+    @property
+    def _datarootdir(self):
+        return os.path.join(self.package_folder, "bin", "share")
+
+    @property
+    def _automake_perllibdir(self):
+        return os.path.join(self._datarootdir, "automake-{}".format(self._version_major_minor))
+
     def _configure_autotools(self):
         if self._autotools:
             return self._autotools
         self._autotools = AutoToolsBuildEnvironment(self, win_bash=tools.os_info.is_windows)
-        datarootdir = os.path.join(self.package_folder, "bin", "share")
+        datarootdir = self._datarootdir
         prefix = self.package_folder
         if tools.os_info.is_windows:
             datarootdir = tools.unix_path(datarootdir)
@@ -81,6 +94,18 @@ class AutomakeConan(ConanFile):
             aclocal = tools.unix_path(aclocal) + ".exe"
         self.output.info("Setting ACLOCAL to {}".format(aclocal))
         self.env_info.ACLOCAL = aclocal
+
+        automake_datadir = self._datarootdir
+        self.output.info("Setting AUTOMAKE_DATADIR to {}".format(automake_datadir))
+        if self.settings.os_build == "Windows":
+            automake_datadir = tools.unix_path(automake_datadir)
+        self.env_info.AUTOMAKE_DATADIR = automake_datadir
+
+        automake_perllibdir = self._automake_perllibdir
+        self.output.info("Setting AUTOMAKE_PERLLIBDIR to {}".format(automake_perllibdir))
+        if self.settings.os_build == "Windows":
+            automake_perllibdir = tools.unix_path(automake_perllibdir)
+        self.env_info.AUTOMAKE_PERLLIBDIR = automake_perllibdir
 
         automake = os.path.join(self.package_folder, "bin", "automake")
         if self.settings.os_build == "Windows":
