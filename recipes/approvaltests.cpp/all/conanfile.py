@@ -32,7 +32,7 @@ class ApprovalTestsCppConan(ConanFile):
             self.requires("catch2/2.11.0")
         if self.options.with_gtest:
             self.requires("gtest/1.10.0")
-        elif self.options.with_doctest:
+        if self.options.with_doctest:
             self.requires("doctest/2.3.6")
 
     def source(self):
