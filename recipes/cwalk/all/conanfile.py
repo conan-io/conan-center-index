@@ -42,6 +42,7 @@ class CwalkConan(ConanFile):
 
     def build(self):
         cmake = CMake(self)
+        cmake.definitions["CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS"] = True
         cmake.configure(build_folder=self._build_subfolder)
         cmake.build(target="cwalk")
 
