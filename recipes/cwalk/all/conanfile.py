@@ -1,13 +1,18 @@
 import os
 from conans import ConanFile, CMake, tools
 
+
 class CwalkConan(ConanFile):
     name = "cwalk"
-    description = "Path library for C/C++. Cross-Platform for Windows, MacOS and Linux. Supports UNIX and Windows path styles on those platforms."
+    description = "Path library for C/C++. Cross-Platform for Windows, " \
+                  "MacOS and Linux. Supports UNIX and Windows path styles " \
+                  "on those platforms."
     url = "https://github.com/conan-io/conan-center-index"
     license = "MIT"
     homepage = "https://likle.github.io/cwalk/"
-    topics = ("cwalk", "cross-platform", "windows", "macos", "osx", "linux", "path-manipulation", "path", "directory", "file", "file-system", "unc", "path-parsing", "file-path")
+    topics = ("cwalk", "cross-platform", "windows", "macos", "osx", "linux",
+              "path-manipulation", "path", "directory", "file", "file-system",
+              "unc", "path-parsing", "file-path")
     exports_sources = ["CMakeLists.txt"]
     generators = "cmake"
 
@@ -41,16 +46,18 @@ class CwalkConan(ConanFile):
         cmake.build(target="cwalk")
 
     def package(self):
-        self.copy("LICENSE.md", dst="licenses", src=self._source_subfolder)
-        self.copy("cwalk.h", dst="include", src=os.path.join(self._source_subfolder, 'include'))
+        include_dir = os.path.join(self._source_subfolder, 'include')
+        lib_dir = os.path.join(self._build_subfolder, "lib")
+        bin_dir = os.path.join(self._build_subfolder, "bin")
 
-        build_lib_dir = os.path.join(self._build_subfolder, "lib")
-        build_bin_dir = os.path.join(self._build_subfolder, "bin")
-        self.copy(pattern="*.a", dst="lib", src=build_lib_dir, keep_path=False)
-        self.copy(pattern="*.lib", dst="lib", src=build_lib_dir, keep_path=False)
-        self.copy(pattern="*.dylib", dst="lib", src=build_lib_dir, keep_path=False)
-        self.copy(pattern="*.so*", dst="lib", src=build_lib_dir, keep_path=False, symlinks=True)
-        self.copy(pattern="*.dll", dst="bin", src=build_bin_dir, keep_path=False)
+        self.copy("LICENSE.md", dst="licenses", src=self._source_subfolder)
+        self.copy("cwalk.h", dst="include", src=include_dir)
+        self.copy(pattern="*.a", dst="lib", src=lib_dir, keep_path=False)
+        self.copy(pattern="*.lib", dst="lib", src=lib_dir, keep_path=False)
+        self.copy(pattern="*.dylib", dst="lib", src=lib_dir, keep_path=False)
+        self.copy(pattern="*.so*", dst="lib", src=lib_dir, keep_path=False,
+                  symlinks=True)
+        self.copy(pattern="*.dll", dst="bin", src=bin_dir, keep_path=False)
 
     def package_info(self):
         self.cpp_info.libs = tools.collect_libs(self)
