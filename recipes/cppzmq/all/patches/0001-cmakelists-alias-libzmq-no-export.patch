@@ -1,6 +1,6 @@
 --- CMakeLists.txt
 +++ CMakeLists.txt
-@@ -7,6 +7,10 @@
+@@ -7,6 +7,11 @@
  project(cppzmq VERSION ${DETECTED_CPPZMQ_VERSION})
  
  find_package(ZeroMQ QUIET)
@@ -8,24 +8,7 @@
 +target_link_libraries(libzmq INTERFACE ZeroMQ::ZeroMQ)
 +add_library(libzmq-static INTERFACE)
 +target_link_libraries(libzmq-static INTERFACE ZeroMQ::ZeroMQ)
++install(TARGETS libzmq libzmq-static EXPORT ${PROJECT_NAME}-targets)
  
  # libzmq autotools install: fallback to pkg-config
  if(NOT ZeroMQ_FOUND)
-@@ -68,17 +72,12 @@
-                libzmq-pkg-config/FindZeroMQ.cmake
-                COPYONLY)
- 
--export(EXPORT ${PROJECT_NAME}-targets
--     FILE "${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}Targets.cmake")
- configure_package_config_file(${PROJECT_NAME}Config.cmake.in
-                               "${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}Config.cmake"
-                               INSTALL_DESTINATION ${CPPZMQ_CMAKECONFIG_INSTALL_DIR})
- write_basic_package_version_file(${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}ConfigVersion.cmake
-                                  VERSION ${CPPZMQ_VERSION}
-                                  COMPATIBILITY AnyNewerVersion)
--install(EXPORT ${PROJECT_NAME}-targets
--        FILE ${PROJECT_NAME}Targets.cmake
--        DESTINATION ${CPPZMQ_CMAKECONFIG_INSTALL_DIR})
- install(FILES ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}Config.cmake
-               ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}ConfigVersion.cmake
-               DESTINATION ${CPPZMQ_CMAKECONFIG_INSTALL_DIR})
