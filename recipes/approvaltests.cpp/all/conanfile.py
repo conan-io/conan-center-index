@@ -17,7 +17,7 @@ class ApprovalTestsCppConan(ConanFile):
         "with_doctest": [True, False]
     }
     default_options = {
-        "with_catch2": True,
+        "with_catch2": False,
         "with_gtest": False,
         "with_doctest": False
     }

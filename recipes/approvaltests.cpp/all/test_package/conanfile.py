@@ -5,6 +5,12 @@ from conans import ConanFile, CMake, tools
 class TestPackageConan(ConanFile):
     settings = "os", "compiler", "arch", "build_type"
     generators = "cmake"
+    default_options = {
+        "approvaltests.cpp:with_catch2": True,
+        "approvaltests.cpp:with_gtest": True,
+        "approvaltests.cpp:with_doctest": True
+    }
+
 
     def build(self):
         cmake = CMake(self)
