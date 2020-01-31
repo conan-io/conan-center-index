@@ -49,7 +49,8 @@ class OpusFileConan(ConanFile):
             msbuild = MSBuild(self)
             msbuild.build_env.include_paths.append(includedir)
             msbuild.build(project_file="opusfile.sln", targets=["opusfile"],
-                          platforms={"x86": "Win32"})
+                          platforms={"x86": "Win32"},
+                          upgrade_project=False)
 
     def _configure_autotools(self):
         if not self._autotools:
