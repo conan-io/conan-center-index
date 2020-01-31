@@ -9,6 +9,7 @@ class AutoconfConan(ConanFile):
     description = "Autoconf is an extensible package of M4 macros that produce shell scripts to automatically configure software source code packages"
     topics = ("conan", "autoconf", "configure", "build")
     license = ("GPL-2.0-or-later", "GPL-3.0-or-later")
+    exports_sources = "patches/**"
     settings = "os_build", "arch_build"
     _autotools = None
 
@@ -24,11 +25,19 @@ class AutoconfConan(ConanFile):
         if tools.os_info.is_windows and "CONAN_BASH_PATH" not in os.environ:
             self.build_requires("msys2/20190524")
 
+    @property
+    def _datarootdir(self):
+        return os.path.join(self.package_folder, "bin", "share")
+
+    @property
+    def _autoconf_datarootdir(self):
+        return os.path.join(self._datarootdir, "autoconf")
+
     def _configure_autotools(self):
         if self._autotools:
             return self._autotools
         self._autotools = AutoToolsBuildEnvironment(self, win_bash=tools.os_info.is_windows)
-        datarootdir = os.path.join(self.package_folder, "bin", "share")
+        datarootdir = self._datarootdir
         prefix = self.package_folder
         if self.settings.os_build == "Windows":
             datarootdir = tools.unix_path(datarootdir)
@@ -40,7 +49,12 @@ class AutoconfConan(ConanFile):
         self._autotools.configure(args=conf_args, configure_dir=self._source_subfolder)
         return self._autotools
 
+    def _patch_files(self):
+        for patch in self.conan_data["patches"][self.version]:
+            tools.patch(**patch)
+
     def build(self):
+        self._patch_files()
         autotools = self._configure_autotools()
         autotools.make()
 
@@ -63,6 +77,10 @@ class AutoconfConan(ConanFile):
         bin_path = os.path.join(self.package_folder, "bin")
         self.output.info("Appending PATH env var with : {}".format(bin_path))
         self.env_info.PATH.append(bin_path)
+
+        ac_macrodir = self._autoconf_datarootdir
+        self.output.info("Setting AC_MACRODIR to {}".format(ac_macrodir))
+        self.env_info.AC_MACRODIR = ac_macrodir
 
         autoconf = os.path.join(self.package_folder, "bin", "autoconf")
         if self.settings.os_build == "Windows":
@@ -87,3 +105,7 @@ class AutoconfConan(ConanFile):
             autom4te = tools.unix_path(autom4te) + ".exe"
         self.output.info("Setting AUTOM4TE to {}".format(autom4te))
         self.env_info.AUTOM4TE = autom4te
+
+        autom4te_perllibdir = self._autoconf_datarootdir
+        self.output.info("Setting AUTOM4TE_PERLLIBDIR to {}".format(autom4te_perllibdir))
+        self.env_info.AUTOM4TE_PERLLIBDIR = autom4te_perllibdir
