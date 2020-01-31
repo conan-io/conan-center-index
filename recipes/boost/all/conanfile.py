@@ -786,11 +786,20 @@ class BoostConan(ConanFile):
             return compiler, compiler_version, ""
         elif self.settings.compiler == "sun-cc":
             return "sunpro", compiler_version, ""
+        elif self.settings.compiler == "intel":
+            toolset = {"Macos": "intel-darwin",
+                       "Windows": "intel-win",
+                       "Linux": "intel-linux"}.get(str(self.settings.os))
+            return toolset, compiler_version, ""
         else:
             return compiler, compiler_version, ""
 
     ##################### BOOSTRAP METHODS ###########################
     def _get_boostrap_toolset(self):
+        if self.settings.compiler == "intel":
+            return {"Macos": "intel-darwin",
+                    "Windows": "intel-win32",
+                    "Linux": "intel-linux"}.get(str(self.settings.os))
         if self._is_msvc:
             comp_ver = self.settings.compiler.version
             if Version(str(comp_ver)) >= "16":
