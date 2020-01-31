@@ -2,12 +2,6 @@ sources:
   "1.2.2":
     url: "https://github.com/likle/cwalk/archive/v1.2.2.zip"
     sha256: "62094c2bb8882fd57fe7ea00fb196e6065b363e8ca57f9c693c19f4912747d88"
-  "1.2.1":
-    url: "https://github.com/likle/cwalk/archive/v1.2.1.zip"
-    sha256: "4bb7250e01a15f1c70e7f8d097e827d3f1a6ee77dcab3ee63de9c4bfd74fff67"
-  "1.2.0":
-    url: "https://github.com/likle/cwalk/archive/v1.2.0.zip"
-    sha256: "f74b4a97720ced5fac3e4507cab81274ae39d6844c16e319e81c02558c541805"
   "1.1.0":
     url: "https://github.com/likle/cwalk/archive/v1.1.0.zip"
     sha256: "44be1392d96bcbc66fb24e1ec5ecab273ee5add6ad8e2bab97552284db228e2e"
