@@ -49,7 +49,7 @@ class GeographiclibConan(ConanFile):
             tools.rmdir(os.path.join(os.path.join(self.package_folder, "bin")))
         elif self.settings.os == "Windows":
             for item in os.listdir(os.path.join(os.path.join(self.package_folder, "bin"))):
-                if item.endswith(".exe"):
+                if not item.startswith("Geographic"):
                     os.remove(os.path.join(self.package_folder, "bin", item))
 
 
