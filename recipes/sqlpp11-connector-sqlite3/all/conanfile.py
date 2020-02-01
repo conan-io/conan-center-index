@@ -4,7 +4,6 @@ import os
 
 class sqlpp11Conan(ConanFile):
     name = "sqlpp11-connector-sqlite3"
-    version = "0.29"
     description = "A C++ wrapper for sqlite3 meant to be used in combination with sqlpp11."
     settings = "os", "compiler", "build_type", "arch"
     url = "https://github.com/conan-io/conan-center-index"
@@ -47,3 +46,5 @@ class sqlpp11Conan(ConanFile):
 
     def package_info(self):
         self.cpp_info.libs = ["sqlpp11-connector-sqlite3"]
+        if self.settings.os == "Linux":
+            self.cpp_info.system_libs = ["m"]
