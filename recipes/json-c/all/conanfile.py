@@ -63,4 +63,5 @@ class JSONCConan(ConanFile):
 
     def package_info(self):
         self.cpp_info.libs = tools.collect_libs(self)
-        self.cpp_info.name = "JSONC"
+        self.cpp_info.names["cmake_find_package"] = "JSONC"
+        self.cpp_info.names["cmake_find_package_multi"] = "JSONC"

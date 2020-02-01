@@ -5,7 +5,7 @@ import shutil
 
 class FreetypeConan(ConanFile):
     name = "freetype"
-    
+
     _libtool_version = "23.0.17"  # check docs/version.txt, this is a different version mumber!
     description = "FreeType is a freely available software library to render fonts."
     url = "https://github.com/conan-io/conan-center-index"
@@ -55,10 +55,14 @@ class FreetypeConan(ConanFile):
     def _configure_cmake(self):
         cmake = CMake(self)
         cmake.definitions["PROJECT_VERSION"] = self._libtool_version
-        cmake.definitions["WITH_ZLIB"] = self.options.with_zlib
-        cmake.definitions["WITH_PNG"] = self.options.with_png
-        cmake.definitions["WITH_BZip2"] = self.options.with_bzip2
-        cmake.definitions["WITH_HARFBUZZ"] = False
+        cmake.definitions["FT_WITH_ZLIB"] = self.options.with_zlib
+        cmake.definitions["CMAKE_DISABLE_FIND_PACKAGE_ZLIB"] = not self.options.with_zlib
+        cmake.definitions["FT_WITH_PNG"] = self.options.with_png
+        cmake.definitions["CMAKE_DISABLE_FIND_PACKAGE_PNG"] = not self.options.with_png
+        cmake.definitions["FT_WITH_BZIP2"] = self.options.with_bzip2
+        cmake.definitions["CMAKE_DISABLE_FIND_PACKAGE_BZip2"] = not self.options.with_bzip2
+        # TODO: Harfbuzz can be added as an option as soon as it is available.
+        cmake.definitions["FT_WITH_HARFBUZZ"] = False
         cmake.definitions["CMAKE_DISABLE_FIND_PACKAGE_HarfBuzz"] = True
         cmake.configure(build_dir=self._build_subfolder)
         return cmake
@@ -118,4 +122,5 @@ conan_staticlibs="{staticlibs}"
         self.env_info.FT2_CONFIG = freetype_config
         self._chmod_plus_x(freetype_config)
         self.cpp_info.names['cmake_find_package'] = 'Freetype'
+        self.cpp_info.names['cmake_find_package_multi'] = 'Freetype'
         self.cpp_info.names['pkg_config'] = 'freetype2'
