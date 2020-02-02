@@ -1,0 +1,4 @@
+sources:
+  "4.2.0":
+    url: "https://github.com/zeromq/czmq/archive/v4.2.0.tar.gz"
+    sha256: "31185090b500b64855003be2450ced00efa6b58544639acfc68aa13c9ec249f8"
