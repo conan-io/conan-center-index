@@ -8,7 +8,7 @@ class LibmadConan(ConanFile):
     topics = ("conan", "mad", "MPEG", "audio", "decoder")
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://www.underbit.com/products/mad/"
-    license = "GPL-2.0-only"
+    license = "GPL-2.0-or-later"
     settings = "os", "arch", "compiler", "build_type"
     options = {"shared": [True, False], "fPIC": [True, False]}
     default_options = {"shared": False, "fPIC": True}
@@ -63,7 +63,9 @@ class LibmadConan(ConanFile):
             env_build.install()
 
     def package(self):
-        self.copy(pattern="LICENSE", dst="licenses", src=self._source_subfolder)
+        self.copy("COPYRIGHT", dst="licenses", src=self._source_subfolder)
+        self.copy("COPYING", dst="licenses", src=self._source_subfolder)
+        self.copy("CREDITS", dst="licenses", src=self._source_subfolder)
         if self._is_msvc:
             self.copy(pattern="*.lib", dst="lib", src=self._source_subfolder, keep_path=False)
             self.copy(pattern="mad.h", dst="include", src=os.path.join(self._source_subfolder, "msvc++"))
