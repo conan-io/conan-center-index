@@ -22,6 +22,7 @@ class LibffiConan(ConanFile):
         "shared": False,
         "fPIC": True,
     }
+    _autotools = None
     _source_subfolder = "source_subfolder"
 
     def source(self):
@@ -29,7 +30,7 @@ class LibffiConan(ConanFile):
         extracted_dir = "{}-{}".format(self.name, self.version)
         os.rename(extracted_dir, self._source_subfolder)
 
-    def _patch_files(self):
+    def _patch_sources(self):
         configure_path = os.path.join(self._source_subfolder, "configure")
         tools.replace_in_file(configure_path,
                               "LIBTOOL='$(SHELL) $(top_builddir)/libtool'\n",
@@ -167,26 +168,15 @@ class LibffiConan(ConanFile):
 
     def build_requirements(self):
         if tools.os_info.is_windows and "CONAN_BASH_PATH" not in os.environ:
-            self.build_requires("msys2/20161025")
-
-    def _get_auto_tools(self):
-        return AutoToolsBuildEnvironment(self, win_bash=tools.os_info.is_windows)
+            self.build_requires("msys2/20190524")
 
     @contextmanager
-    def _create_auto_tools_environment(self, autotools):
+    def _build_context(self):
         extra_env_vars = {}
         if self.settings.compiler == "Visual Studio":
             self.package_folder = tools.unix_path(self.package_folder)
             msvcc = tools.unix_path(os.path.join(self.source_folder, self._source_subfolder, "msvcc.sh"))
-            msvcc.replace("\\", "/")
             msvcc_args = []
-            autotools.defines.append("FFI_BUILDING")
-            if not self.options.shared:
-                autotools.defines.append("FFI_STATIC")
-            if "MT" in self.settings.compiler.runtime:
-                autotools.defines.append("USE_STATIC_RTL")
-            if "d" in self.settings.compiler.runtime:
-                autotools.defines.append("USE_DEBUG_RTL")
             if self.settings.arch == "x86_64":
                 msvcc_args.append("-m64")
             elif self.settings.arch == "x86":
@@ -206,14 +196,24 @@ class LibffiConan(ConanFile):
         with tools.environment_append(extra_env_vars):
             yield
 
-    def build(self):
-        self._patch_files()
+    def _configure_autotools(self):
+        if self._autotools:
+            return self._autotools
+        self._autotools = AutoToolsBuildEnvironment(self, win_bash=tools.os_info.is_windows)
         config_args = [
             "--enable-debug" if self.settings.build_type == "Debug" else "--disable-debug",
-            "--enable-shared" if self.options.shared else "--disable-shared",
-            "--disable-static" if self.options.shared else "--enable-static",
         ]
-        autotools = self._get_auto_tools()
+        if self.options.shared:
+            config_args.extend(["--enable-shared", "--disable-static"])
+        else:
+            config_args.extend(["--disable-shared", "--enable-static"])
+        self._autotools.defines.append("FFI_BUILDING")
+        if not self.options.shared:
+            self._autotools.defines.append("FFI_STATIC")
+        if "MT" in self.settings.compiler.runtime:
+            self._autotools.defines.append("USE_STATIC_RTL")
+        if "d" in self.settings.compiler.runtime:
+            self._autotools.defines.append("USE_DEBUG_RTL")
         build = None
         host = None
         if self.settings.compiler == "Visual Studio":
@@ -226,13 +226,15 @@ class LibffiConan(ConanFile):
                 "pc" if self.settings.arch == "x86" else "w64",
                 "cygwin")
         else:
-            if autotools.host and "x86-" in autotools.host:
-                autotools.host = autotools.host.replace("x86", "i686")
-        with self._create_auto_tools_environment(autotools):
-            autotools.configure(configure_dir=os.path.join(self.source_folder, self._source_subfolder),
-                                build=build,
-                                host=host,
-                                args=config_args)
+            if self._autotools.host and "x86-" in self._autotools.host:
+                self._autotools.host = self._autotools.host.replace("x86", "i686")
+        self._autotools.configure(args=config_args, configure_dir=self._source_subfolder, build=build, host=host)
+        return self._autotools
+
+    def build(self):
+        self._patch_sources()
+        with self._build_context():
+            autotools = self._configure_autotools()
             autotools.make()
             if tools.get_env("CONAN_RUN_TESTS", False):
                 autotools.make(target="check")
@@ -245,8 +247,8 @@ class LibffiConan(ConanFile):
             self.copy("*.lib", src="{}/.libs".format(self.build_folder), dst="lib")
             self.copy("*.dll", src="{}/.libs".format(self.build_folder), dst="bin")
         else:
-            autotools = self._get_auto_tools()
-            with self._create_auto_tools_environment(autotools):
+            with self._build_context():
+                autotools = self._configure_autotools()
                 with tools.chdir(self.build_folder):
                     autotools.install()
             os.rename(os.path.join(self.package_folder, "lib", "libffi-{}".format(self.version), "include"),
