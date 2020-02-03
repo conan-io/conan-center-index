@@ -22,6 +22,7 @@ class LibffiConan(ConanFile):
         "shared": False,
         "fPIC": True,
     }
+    exports_sources = "patches/**"
     _autotools = None
     _source_subfolder = "source_subfolder"
 
@@ -31,116 +32,9 @@ class LibffiConan(ConanFile):
         os.rename(extracted_dir, self._source_subfolder)
 
     def _patch_sources(self):
+        for patch in self.conan_data["patches"][self.version]:
+            tools.patch(**patch)
         configure_path = os.path.join(self._source_subfolder, "configure")
-        tools.replace_in_file(configure_path,
-                              "LIBTOOL='$(SHELL) $(top_builddir)/libtool'\n",
-                              "LIBTOOL='$(SHELL) $(top_builddir)/libtool.sh'\n")
-        tools.replace_in_file(configure_path,
-                              "ofile=libtool\n",
-                              "ofile=libtool.sh\n")
-
-        tools.replace_in_file(os.path.join(self._source_subfolder, "src", "x86", "win64.S"),
-                              "jmp\tSHORT",
-                              "jmp")
-
-        ffi_extern_src = "/* Need minimal decorations for DLLs to works on Windows. */\n" \
-                         "/* GCC has autoimport and autoexport.  Rely on Libtool to */\n" \
-                         "/* help MSVC export from a DLL, but always declare data   */\n" \
-                         "/* to be imported for MSVC clients.  This costs an extra  */\n" \
-                         "/* indirection for MSVC clients using the static version  */\n" \
-                         "/* of the library, but don't worry about that.  Besides,  */\n" \
-                         "/* as a workaround, they can define FFI_BUILDING if they  */\n" \
-                         "/* *know* they are going to link with the static library. */\n" \
-                         "#if defined _MSC_VER && !defined FFI_BUILDING\n" \
-                         "#define FFI_EXTERN extern __declspec(dllimport)\n" \
-                         "#else\n" \
-                         "#define FFI_EXTERN extern\n" \
-                         "#endif\n" \
-                         "\n"
-        ffi_extern_dst = "#if defined _MSC_VER\n" \
-                         "#  if !defined FFI_STATIC\n" \
-                         "#    if defined FFI_BUILDING\n" \
-                         "#      define FFI_EXTERN __declspec(dllexport)\n" \
-                         "#    else\n" \
-                         "#      define FFI_EXTERN __declspec(dllimport)\n" \
-                         "#    endif\n" \
-                         "#  else\n" \
-                         "#      define FFI_EXTERN extern\n" \
-                         "#  endif\n" \
-                         "#else\n" \
-                         "#  define FFI_EXTERN extern\n" \
-                         "#endif\n"
-
-        ffi_h_in = os.path.join(self._source_subfolder, "include", "ffi.h.in")
-        tools.replace_in_file(ffi_h_in, ffi_extern_src, "")
-        tools.replace_in_file(ffi_h_in,
-                              "#include <ffitarget.h>\n",
-                              "#include <ffitarget.h>\n" \
-                              "\n" \
-                              "{}".format(ffi_extern_dst))
-
-        functions = [
-            "ffi_status ffi_prep_cif_core(",
-            "void ffi_raw_call (",
-            "void ffi_ptrarray_to_raw (",
-            "void ffi_raw_to_ptrarray (",
-            "size_t ffi_raw_size (",
-            "void ffi_java_raw_call (",
-            "void ffi_java_ptrarray_to_raw (",
-            "void ffi_java_raw_to_ptrarray (",
-            "size_t ffi_java_raw_size (",
-            "void *ffi_closure_alloc (",
-            "void ffi_closure_free (",
-            "ffi_status\nffi_prep_closure (",
-            "ffi_status\nffi_prep_closure_loc (",
-            "ffi_status\nffi_prep_raw_closure (",
-            "ffi_status\nffi_prep_raw_closure_loc (",
-            "ffi_status\nffi_prep_java_raw_closure (",
-            "ffi_status\nffi_prep_java_raw_closure_loc (",
-            "ffi_status ffi_prep_cif(",
-            "ffi_status ffi_prep_cif_var(",
-            "void ffi_call(",
-        ]
-
-        for function in functions:
-            tools.replace_in_file(ffi_h_in,
-                                  function,
-                                  "FFI_EXTERN {}".format(function))
-
-        types_c_src = os.path.join(self._source_subfolder, "src", "types.c")
-        tools.replace_in_file(types_c_src,
-                              "#include <ffi_common.h>",
-                              "#include <ffi_common.h>\n"
-                              "\n"
-                              "#include <complex.h>")
-        tools.replace_in_file(types_c_src,
-                              "FFI_COMPLEX_TYPEDEF(name, type, maybe_const)",
-                              "FFI_COMPLEX_TYPEDEF(name, complex_type, maybe_const)")
-        tools.replace_in_file(types_c_src,
-                              "_Complex type",
-                              "complex_type")
-        tools.replace_in_file(types_c_src,
-                              "#ifdef FFI_TARGET_HAS_COMPLEX_TYPE",
-                              "#ifdef _MSC_VER"
-                              "\n#  define FLOAT_COMPLEX _C_float_complex"
-                              "\n#  define DOUBLE_COMPLEX _C_double_complex"
-                              "\n#  define LDOUBLE_COMPLEX _C_ldouble_complex"
-                              "\n#else"
-                              "\n#  define FLOAT_COMPLEX float _Complex"
-                              "\n#  define DOUBLE_COMPLEX double _Complex"
-                              "\n#  define LDOUBLE_COMPLEX long double _Complex"
-                              "\n#endif"
-                              "\n"
-                              "\n#ifdef FFI_TARGET_HAS_COMPLEX_TYPE")
-        tools.replace_in_file(types_c_src,
-                              "FFI_COMPLEX_TYPEDEF(float, float, const)",
-                              "FFI_COMPLEX_TYPEDEF(float, FLOAT_COMPLEX, const)")
-        tools.replace_in_file(types_c_src,
-                              "FFI_COMPLEX_TYPEDEF(double, double, const)",
-                              "FFI_COMPLEX_TYPEDEF(double, DOUBLE_COMPLEX, const)")
-        tools.replace_in_file(types_c_src,
-                              "FFI_COMPLEX_TYPEDEF(longdouble, long double, FFI_LDBL_CONST)",
-                              "FFI_COMPLEX_TYPEDEF(longdouble, LDOUBLE_COMPLEX, FFI_LDBL_CONST)")
         if self.settings.os == "Macos":
             tools.replace_in_file(configure_path, r"-install_name \$rpath/", "-install_name ")
 
@@ -153,11 +47,6 @@ class LibffiConan(ConanFile):
 
             # https://android.googlesource.com/platform/external/libffi/+/7748bd0e4a8f7d7c67b2867a3afdd92420e95a9f
             tools.replace_in_file(sysv_s_src, "stmeqia", "stmiaeq")
-
-        # Do not install libraries to arch-dependent directories
-        tools.replace_path_in_file(os.path.join(self._source_subfolder, "Makefile.in"),
-                                   "\ntoolexeclibdir = @toolexeclibdir@\n",
-                                   "\ntoolexeclibdir = @libdir@\n")
                 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -215,10 +104,11 @@ class LibffiConan(ConanFile):
         self._autotools.defines.append("FFI_BUILDING")
         if not self.options.shared:
             self._autotools.defines.append("FFI_STATIC")
-        if "MT" in self.settings.compiler.runtime:
-            self._autotools.defines.append("USE_STATIC_RTL")
-        if "d" in self.settings.compiler.runtime:
-            self._autotools.defines.append("USE_DEBUG_RTL")
+        if self.settings.compiler == "Visual Studio":
+            if "MT" in self.settings.compiler.runtime:
+                self._autotools.defines.append("USE_STATIC_RTL")
+            if "d" in self.settings.compiler.runtime:
+                self._autotools.defines.append("USE_DEBUG_RTL")
         build = None
         host = None
         if self.settings.compiler == "Visual Studio":
