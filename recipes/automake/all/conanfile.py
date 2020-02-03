@@ -32,7 +32,8 @@ class AutomakeConan(ConanFile):
         # automake requires perl-Thread-Queue package
 
     def build_requirements(self):
-        if self.settings.os_build == "Windows" and "CONAN_BASH_PATH" not in os.environ:
+        if self.settings.os_build == "Windows" and "CONAN_BASH_PATH" not in os.environ \
+                and tools.os_info.detect_windows_subsystem() != "msys2":
             self.build_requires("msys2/20190524")
 
     @property
@@ -89,26 +90,28 @@ class AutomakeConan(ConanFile):
         self.output.info("Appending PATH env var with : {}".format(bin_path))
         self.env_info.PATH.append(bin_path)
 
-        aclocal = os.path.join(self.package_folder, "bin", "aclocal")
+        bin_ext = ".exe" if self.settings.os_build == "Windows" else ""
+
+        aclocal = os.path.join(self.package_folder, "bin", "aclocal" + bin_ext)
         if self.settings.os_build == "Windows":
-            aclocal = tools.unix_path(aclocal) + ".exe"
+            aclocal = tools.unix_path(aclocal)
         self.output.info("Setting ACLOCAL to {}".format(aclocal))
         self.env_info.ACLOCAL = aclocal
 
         automake_datadir = self._datarootdir
-        self.output.info("Setting AUTOMAKE_DATADIR to {}".format(automake_datadir))
         if self.settings.os_build == "Windows":
             automake_datadir = tools.unix_path(automake_datadir)
+        self.output.info("Setting AUTOMAKE_DATADIR to {}".format(automake_datadir))
         self.env_info.AUTOMAKE_DATADIR = automake_datadir
 
         automake_perllibdir = self._automake_perllibdir
-        self.output.info("Setting AUTOMAKE_PERLLIBDIR to {}".format(automake_perllibdir))
         if self.settings.os_build == "Windows":
             automake_perllibdir = tools.unix_path(automake_perllibdir)
+        self.output.info("Setting AUTOMAKE_PERLLIBDIR to {}".format(automake_perllibdir))
         self.env_info.AUTOMAKE_PERLLIBDIR = automake_perllibdir
 
-        automake = os.path.join(self.package_folder, "bin", "automake")
+        automake = os.path.join(self.package_folder, "bin", "automake" + bin_ext)
         if self.settings.os_build == "Windows":
-            automake = tools.unix_path(automake) + ".exe"
+            automake = tools.unix_path(automake)
         self.output.info("Setting AUTOMAKE to {}".format(automake))
         self.env_info.AUTOMAKE = automake
