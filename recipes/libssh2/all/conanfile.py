@@ -10,7 +10,7 @@ class Libssh2Conan(ConanFile):
     homepage = "https://libssh2.org"
     topics = ("libssh", "ssh", "shell", "ssh2", "connection")
     license = "BSD-3-Clause"
-    exports_sources = "CMakeLists.txt"
+    exports_sources = ["CMakeLists.txt", "patches/*"]
     generators = "cmake"
     _source_subfolder = "source_subfolder"
 
@@ -72,6 +72,8 @@ class Libssh2Conan(ConanFile):
         return cmake
 
     def build(self):
+        for patch in self.conan_data["patches"][self.version]:
+            tools.patch(**patch)
         cmake = self._configure_cmake()
         cmake.build()
 
@@ -95,3 +97,5 @@ class Libssh2Conan(ConanFile):
 
         if self.settings.compiler == "Visual Studio" and not self.options.shared:
             self.cpp_info.system_libs.append('ws2_32')
+        elif self.settings.os == "Linux":
+            self.cpp_info.system_libs.append('pthread')
