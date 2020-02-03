@@ -10,7 +10,6 @@ class LibffiConan(ConanFile):
     topics = ("conan", "libffi", "runtime", "foreign-function-interface", "runtime-library")
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://sourceware.org/libffi/"
-    author = "Bincrafters <bincrafters@gmail.com>"
     license = "MIT"
     settings = "os", "compiler", "build_type", "arch"
     options = {
