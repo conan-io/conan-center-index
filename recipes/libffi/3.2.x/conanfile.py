@@ -153,6 +153,11 @@ class LibffiConan(ConanFile):
 
             # https://android.googlesource.com/platform/external/libffi/+/7748bd0e4a8f7d7c67b2867a3afdd92420e95a9f
             tools.replace_in_file(sysv_s_src, "stmeqia", "stmiaeq")
+
+        # Do not install libraries to arch-dependent directories
+        tools.replace_path_in_file(os.path.join(self._source_subfolder, "Makefile.in"),
+                                   "\ntoolexeclibdir = @toolexeclibdir@\n",
+                                   "\ntoolexeclibdir = @libdir@\n")
                 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -257,15 +262,6 @@ class LibffiConan(ConanFile):
             tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
             tools.rmdir(os.path.join(self.package_folder, "share"))
 
-            if self.settings.arch == "x86_64":
-                lib_arch_path = os.path.join(self.package_folder, "lib64")
-            elif self.settings.arch == "x86":
-                lib_arch_path = os.path.join(self.package_folder, "lib32")
-            else:
-                raise ConanInvalidConfiguration("Unsupported architecture")
-            for f in os.listdir(os.path.join(lib_arch_path)):
-                shutil.move(os.path.join(lib_arch_path, f), os.path.join(self.package_folder, "lib"))
-            tools.rmdir(lib_arch_path)
             os.unlink(os.path.join(self.package_folder, "lib", "libffi.la"))
 
     def package_info(self):
