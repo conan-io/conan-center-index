@@ -27,7 +27,8 @@ class Cc65Conan(ConanFile):
                 raise ConanInvalidConfiguration("Invalid arch_build")
 
     def build_requirements(self):
-        if tools.os_info.is_windows:
+        if tools.os_info.is_windows and "CONAN_BASH_PATH" not in os.environ \
+                and tools.os_info.detect_windows_subsystem() != "msys2":
             # msys2 provides make for MSVC and mingw + install for mingw
             self.build_requires("msys2/20190524")
 
@@ -156,20 +157,16 @@ class Cc65Conan(ConanFile):
         self.output.info("Seting CC65_HOME environment variable: %s" % self._datadir)
         self.env_info.CC65_HOME = self._datadir
 
-        cc65_cc = os.path.join(bindir, "cc65")
-        if self.settings.os_build == "Windows":
-            cc65_cc += ".exe"
+        bin_ext = ".exe" if self.settings.os_build == "Windows" else ""
+
+        cc65_cc = os.path.join(bindir, "cc65" + bin_ext)
         self.output.info("Seting CC65 environment variable: %s" % cc65_cc)
         self.env_info.CC65 = cc65_cc
 
-        cc65_as = os.path.join(bindir, "ca65")
-        if self.settings.os_build == "Windows":
-            cc65_as += ".exe"
+        cc65_as = os.path.join(bindir, "ca65" + bin_ext)
         self.output.info("Seting AS65 environment variable: %s" % cc65_as)
         self.env_info.AS65 = cc65_as
 
-        cc65_ld = os.path.join(bindir, "cl65")
-        if self.settings.os_build == "Windows":
-            cc65_ld += ".exe"
+        cc65_ld = os.path.join(bindir, "cl65" + bin_ext)
         self.output.info("Seting LD65 environment variable: %s" % cc65_ld)
         self.env_info.LD65 = cc65_ld
