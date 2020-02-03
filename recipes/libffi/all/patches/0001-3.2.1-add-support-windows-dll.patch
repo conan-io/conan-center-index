@@ -1,9 +1,9 @@
 --- include/ffi.h.in
 +++ include/ffi.h.in
 @@ -66,6 +66,18 @@
-
+ 
  #include <ffitarget.h>
-
+ 
 +#if defined _MSC_VER
 +#  if defined FFI_BUILDING_DLL /* Building libffi.DLL with msvcc.sh */
 +#    define FFI_EXTERN __declspec(dllexport)

@@ -102,8 +102,8 @@ class LibffiConan(ConanFile):
         else:
             config_args.extend(["--disable-shared", "--enable-static"])
         self._autotools.defines.append("FFI_BUILDING")
-        if not self.options.shared:
-            self._autotools.defines.append("FFI_STATIC")
+        if self.options.shared:
+            self._autotools.defines.append("FFI_BUILDING_DLL")
         if self.settings.compiler == "Visual Studio":
             if "MT" in self.settings.compiler.runtime:
                 self._autotools.defines.append("USE_STATIC_RTL")
@@ -146,9 +146,6 @@ class LibffiConan(ConanFile):
                 autotools = self._configure_autotools()
                 with tools.chdir(self.build_folder):
                     autotools.install()
-            os.rename(os.path.join(self.package_folder, "lib", "libffi-{}".format(self.version), "include"),
-                      os.path.join(self.package_folder, "include"))
-            tools.rmdir(os.path.join(self.package_folder, "lib", "libffi-{}".format(self.version)))
             tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
             tools.rmdir(os.path.join(self.package_folder, "share"))
 
@@ -156,5 +153,5 @@ class LibffiConan(ConanFile):
 
     def package_info(self):
         if not self.options.shared:
-            self.cpp_info.defines += ["FFI_STATIC"]
+            self.cpp_info.defines = ["FFI_BUILDING"]
         self.cpp_info.libs = tools.collect_libs(self)
