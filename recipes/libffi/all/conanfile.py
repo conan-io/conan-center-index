@@ -70,7 +70,6 @@ class LibffiConan(ConanFile):
     def _build_context(self):
         extra_env_vars = {}
         if self.settings.compiler == "Visual Studio":
-            self.package_folder = tools.unix_path(self.package_folder)
             msvcc = tools.unix_path(os.path.join(self.source_folder, self._source_subfolder, "msvcc.sh"))
             msvcc_args = []
             if self.settings.arch == "x86_64":
@@ -98,6 +97,7 @@ class LibffiConan(ConanFile):
         self._autotools = AutoToolsBuildEnvironment(self, win_bash=tools.os_info.is_windows)
         config_args = [
             "--enable-debug" if self.settings.build_type == "Debug" else "--disable-debug",
+            "--prefix={}".format(tools.unix_path(self.package_folder)),
         ]
         if self.options.shared:
             config_args.extend(["--enable-shared", "--disable-static"])
@@ -137,21 +137,19 @@ class LibffiConan(ConanFile):
                 autotools.make(target="check")
 
     def package(self):
-        self.copy("LICENSE", src=os.path.join(self.source_folder, self._source_subfolder), dst="licenses")
-        if self.settings.os == "Windows":
-            self.copy("*.h", src="{}/include".format(self.build_folder), dst="include")
+        self.copy("LICENSE", src=self._source_subfolder, dst="licenses")
+        with self._build_context():
+            autotools = self._configure_autotools()
+            with tools.chdir(self.build_folder):
+                autotools.install()
         if self.settings.compiler == "Visual Studio":
-            self.copy("*.lib", src="{}/.libs".format(self.build_folder), dst="lib")
+            self.copy("libffi_convenience.lib", src=".libs", dst="lib")
             self.copy("*.dll", src="{}/.libs".format(self.build_folder), dst="bin")
-        else:
-            with self._build_context():
-                autotools = self._configure_autotools()
-                with tools.chdir(self.build_folder):
-                    autotools.install()
-            tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
-            tools.rmdir(os.path.join(self.package_folder, "share"))
 
-            os.unlink(os.path.join(self.package_folder, "lib", "libffi.la"))
+        tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
+        tools.rmdir(os.path.join(self.package_folder, "share"))
+
+        os.unlink(os.path.join(self.package_folder, "lib", "libffi.la"))
 
     def package_info(self):
         if not self.options.shared:
