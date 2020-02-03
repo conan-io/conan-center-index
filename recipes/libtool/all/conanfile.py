@@ -97,20 +97,22 @@ class LibtoolConan(ConanFile):
         self.output.info("Appending PATH env var with : {}".format(bin_path))
         self.env_info.PATH.append(bin_path)
 
-        libtool = os.path.join(self.package_folder, "bin", "libtool")
+        bin_ext = ".exe" if self.settings.os_build == "Windows" else ""
+
+        libtool = os.path.join(self.package_folder, "bin", "libtool" + bin_ext)
         if self.settings.os_build == "Windows":
-            libtool = tools.unix_path(libtool) + ".exe"
+            libtool = tools.unix_path(libtool)
         self.output.info("Setting LIBTOOL to {}".format(libtool))
         self.env_info.LIBTOOL = libtool
 
-        libtoolize = os.path.join(self.package_folder, "bin", "libtoolize")
+        libtoolize = os.path.join(self.package_folder, "bin", "libtoolize" + bin_ext)
         if self.settings.os_build == "Windows":
-            libtoolize = tools.unix_path(libtoolize) + ".exe"
+            libtoolize = tools.unix_path(libtoolize)
         self.output.info("Setting LIBTOOLIZE to {}".format(libtoolize))
         self.env_info.LIBTOOLIZE = libtoolize
 
-        libtool_aclocal = os.path.join(self.package_folder, "bin", "share", "aclocal")
+        libtool_aclocal = os.path.join(self.package_folder, "bin", "share", "aclocal" + bin_ext)
         if self.settings.os_build == "Windows":
-            libtool_aclocal = tools.unix_path(libtool_aclocal) + ".exe"
+            libtool_aclocal = tools.unix_path(libtool_aclocal)
         self.output.info("Appending var to ACLOCAL_PATH: {}".format(libtool_aclocal))
         self.env_info.ACLOCAL_PATH.append(libtool_aclocal)
