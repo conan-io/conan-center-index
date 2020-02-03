@@ -98,4 +98,4 @@ class Libssh2Conan(ConanFile):
         if self.settings.compiler == "Visual Studio" and not self.options.shared:
             self.cpp_info.system_libs.append('ws2_32')
         elif self.settings.os == "Linux":
-            self.cpp_info.system_libs.append('pthread')
+            self.cpp_info.system_libs.extend(['pthread', 'dl'])
