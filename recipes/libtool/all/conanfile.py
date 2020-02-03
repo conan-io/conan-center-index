@@ -33,7 +33,8 @@ class LibtoolConan(ConanFile):
         self.requires("automake/1.16.1")
 
     def build_requirements(self):
-        if tools.os_info.is_windows and "CONAN_BASH_PATH" not in os.environ:
+        if tools.os_info.is_windows and "CONAN_BASH_PATH" not in os.environ \
+                and tools.os_info.detect_windows_subsystem() != "msys2":
             self.build_requires("msys2/20190524")
 
     @contextmanager
