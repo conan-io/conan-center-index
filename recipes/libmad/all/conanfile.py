@@ -40,7 +40,7 @@ class LibmadConan(ConanFile):
 
     def _build_msvc(self):
         with tools.chdir(os.path.join(self._source_subfolder, "msvc++")):
-            # cl : Command line error D8016: '/ZI' and '/Gy-' command-line options are incompatible 
+            # cl : Command line error D8016: '/ZI' and '/Gy-' command-line options are incompatible
             tools.replace_in_file("libmad.dsp", "/ZI ", "")
             if self.settings.arch == "x86_64":
                 tools.replace_in_file("libmad.dsp", "Win32", "x64")
@@ -61,6 +61,9 @@ class LibmadConan(ConanFile):
             env_build.configure(args=args)
             env_build.make()
             env_build.install()
+            la = os.path.join(self.package_folder, "lib", "libmad.la")
+            if os.path.isfile(la):
+                os.unlink(la)
 
     def package(self):
         self.copy("COPYRIGHT", dst="licenses", src=self._source_subfolder)
