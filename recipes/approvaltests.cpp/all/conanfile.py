@@ -45,8 +45,8 @@ class ApprovalTestsCppConan(ConanFile):
                   self._header_file)
 
     def package(self):
-        self.copy(self._header_file, dst="include", src=self.source_folder)
-        self.copy("LICENSE", dst="licenses", src=self.source_folder)
+        self.copy(self._header_file, dst="include")
+        self.copy("LICENSE", dst="licenses")
 
     def package_info(self):
         self.cpp_info.names["cmake_find_package"] = "ApprovalTests"
