@@ -24,6 +24,8 @@ class StbConan(ConanFile):
         self.copy("*.h", src=self._source_subfolder, dst="include")
         tools.rmdir(os.path.join(self.package_folder, "include", "tests"))
 
-    def package_info(self):
+    def package_id(self):
         self.info.header_only()
+    
+    def package_info(self):
         self.cpp_info.defines.append('STB_TEXTEDIT_KEYTYPE=unsigned')
