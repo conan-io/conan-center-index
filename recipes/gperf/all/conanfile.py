@@ -18,7 +18,7 @@ class GperfConan(ConanFile):
 
     @property
     def _is_mingw_windows(self):
-        return self.settings.os_build == "Windows" and self.settings.compiler == "gcc" and os.name == "nt"
+        return self.settings.os_build == "Windows" and tools.os_info.is_windows and self.settings.compiler == "gcc"
 
     def build_requirements(self):
         if self.settings.os_build == "Windows" and tools.os_info.is_windows:
