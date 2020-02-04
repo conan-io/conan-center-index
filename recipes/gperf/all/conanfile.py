@@ -37,16 +37,16 @@ class GperfConan(ConanFile):
             win_bash = self._is_msvc or self._is_mingw_windows
             if self._is_msvc:
                 args.extend(["CC={}/build-aux/compile cl -nologo".format(cwd),
-                                "CFLAGS=-{}".format(self.settings.compiler.runtime),
-                                "CXX={}/build-aux/compile cl -nologo".format(cwd),
-                                "CXXFLAGS=-{}".format(self.settings.compiler.runtime),
-                                "CPPFLAGS=-D_WIN32_WINNT=_WIN32_WINNT_WIN8 -I/usr/local/msvc32/include",
-                                "LDFLAGS=-L/usr/local/msvc32/lib",
-                                "LD=link",
-                                "NM=dumpbin -symbols",
-                                "STRIP=:",
-                                "AR={}/build-aux/ar-lib lib".format(cwd),
-                                "RANLIB=:"])
+                            "CFLAGS=-{}".format(self.settings.compiler.runtime),
+                            "CXX={}/build-aux/compile cl -nologo".format(cwd),
+                            "CXXFLAGS=-{}".format(self.settings.compiler.runtime),
+                            "CPPFLAGS=-D_WIN32_WINNT=_WIN32_WINNT_WIN8 -I/usr/local/msvc32/include",
+                            "LDFLAGS=-L/usr/local/msvc32/lib",
+                            "LD=link",
+                            "NM=dumpbin -symbols",
+                            "STRIP=:",
+                            "AR={}/build-aux/ar-lib lib".format(cwd),
+                            "RANLIB=:"])
 
             self._autotools = AutoToolsBuildEnvironment(self, win_bash=win_bash)
             self._autotools.configure(args=args)
