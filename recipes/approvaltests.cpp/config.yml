@@ -3,3 +3,7 @@ versions:
     folder: all
   8.1.0:
     folder: all
+  8.1.2:
+    folder: all
+  8.2.0:
+    folder: all
