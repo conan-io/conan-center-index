@@ -155,10 +155,11 @@ class NsprConan(ConanFile):
         if self.settings.os == "Windows" and not self.options.shared:
             libs = list("{}_s".format(l) for l in libs)
         self.cpp_info.libs = libs
-        if self.settings.arch == "x86":
-            self.cpp_info.defines.append("_M_IX86")
-        elif self.settings.arch == "x86_64":
-            self.cpp_info.defines.append("_M_X64")
+        if self.settings.compiler == "gcc" and self.settings.os == "Windows":
+            if self.settings.arch == "x86":
+                self.cpp_info.defines.append("_M_IX86")
+            elif self.settings.arch == "x86_64":
+                self.cpp_info.defines.append("_M_X64")
         self.cpp_info.includedirs.append(os.path.join("include", "nspr"))
         if self.settings.os == "Linux":
             self.cpp_info.system_libs.extend(["dl", "pthread"])
