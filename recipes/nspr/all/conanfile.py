@@ -129,17 +129,18 @@ class NsprConan(ConanFile):
                 tools.replace_in_file(os.path.join(self.package_folder, "include", "nspr", "prtypes.h"),
                                       "#define NSPR_DATA_API(__type) PR_IMPORT_DATA(__type)",
                                       "#define NSPR_DATA_API(__type) extern __type")
-        elif self.settings.os == "Macos":
+        else:
+            shared_ext = "dylib" if self.settings.os == "Macos" else "so"
             for lib in self._library_names:
                 if self.options.shared:
                     os.unlink(os.path.join(self.package_folder, "lib", "lib{}.a".format(lib)))
                 else:
-                    os.unlink(os.path.join(self.package_folder, "lib", "lib{}.dylib".format(lib)))
+                    os.unlink(os.path.join(self.package_folder, "lib", "lib{}.{}".format(lib, shared_ext)))
 
         if self.settings.compiler == "Visual Studio":
             if self.settings.build_type == "Debug":
                 for lib in self._library_names:
-                    os.remove(os.path.join(self.package_folder, "lib", "{}.pdb".format(lib)))
+                    os.unlink(os.path.join(self.package_folder, "lib", "{}.pdb".format(lib)))
 
         if not self.options.shared or self.settings.os == "Windows":
             for f in os.listdir(os.path.join(self.package_folder, "lib")):
