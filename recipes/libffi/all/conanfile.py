@@ -138,20 +138,26 @@ class LibffiConan(ConanFile):
 
     def package(self):
         self.copy("LICENSE", src=self._source_subfolder, dst="licenses")
-        with self._build_context():
-            autotools = self._configure_autotools()
-            with tools.chdir(self.build_folder):
-                autotools.install()
         if self.settings.compiler == "Visual Studio":
-            self.copy("libffi_convenience.lib", src=".libs", dst="lib")
-            self.copy("*.dll", src="{}/.libs".format(self.build_folder), dst="bin")
+            if self.options.shared:
+                self.copy("libffi.dll", src=".libs", dst="bin")
+            self.copy("libffi.lib", src=".libs", dst="lib")
+            self.copy("*.h", src="include", dst="include")
+        else:
+            with self._build_context():
+                autotools = self._configure_autotools()
+                with tools.chdir(self.build_folder):
+                    autotools.install()
 
-        tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
-        tools.rmdir(os.path.join(self.package_folder, "share"))
+            tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
+            tools.rmdir(os.path.join(self.package_folder, "share"))
 
-        os.unlink(os.path.join(self.package_folder, "lib", "libffi.la"))
+            os.unlink(os.path.join(self.package_folder, "lib", "libffi.la"))
 
     def package_info(self):
         if not self.options.shared:
             self.cpp_info.defines = ["FFI_BUILDING"]
-        self.cpp_info.libs = tools.collect_libs(self)
+        libffi = "ffi"
+        if self.settings.compiler == "Visual Studio":
+            libffi = "lib" + libffi
+        self.cpp_info.libs = [libffi]
