@@ -9,7 +9,6 @@ class LibtoolConan(ConanFile):
     homepage = "https://www.gnu.org/software/libtool/"
     description = "GNU libtool is a generic library support script. "
     topics = ("conan", "libtool", "configure", "library", "shared", "static")
-    exports_sources = ["patches/**"]
     license = ("GPL-2.0-or-later", "GPL-3.0-or-later")
 
     settings = "os_build", "arch_build", "compiler"
