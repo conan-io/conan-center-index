@@ -179,8 +179,13 @@ class OpenSSLConan(ConanFile):
         the_arch = str(self.settings.arch)
         the_os = str(self.settings.os)
         if the_os in ["iOS", "watchOS", "tvOS"]:
-            return "ios64" if the_arch in ["armv8", "armv8_32", "armv8.3", "x86_64"] else "ios32"
-        if str(self.settings.os) == "Android":
+            return {"armv7": "ios32",
+                    "armv7s": "ios32",
+                    "armv8": "ios64",
+                    "armv8_32": "ios64",
+                    "armv8.3": "ios64",
+                    "armv7k": "ios32"}.get(the_arch, None)
+        elif the_os == "Android":
             return {"armv7": "void",
                     "armv8": "linux64",
                     "mips": "o32",
@@ -191,10 +196,11 @@ class OpenSSLConan(ConanFile):
 
     @property
     def _asm_target(self):
-        if str(self.settings.os) in ["Android", "iOS", "watchOS", "tvOS"]:
+        the_os = str(self.settings.os)
+        if the_os in ["Android", "iOS", "watchOS", "tvOS"]:
             return {
-                "x86": "x86_asm",
-                "x86_64": "x86_64_asm",
+                "x86": "x86_asm" if the_os == "Android" else None,
+                "x86_64": "x86_64_asm" if the_os == "Android" else None,
                 "armv5el": "armv4_asm",
                 "armv5hf": "armv4_asm",
                 "armv6": "armv4_asm",
@@ -216,7 +222,7 @@ class OpenSSLConan(ConanFile):
                 "ppc64": "ppc64_asm",
                 "s390": "s390x_asm",
                 "s390x": "s390x_asm"
-            }.get(str(self.settings.arch), None)
+            }.get(the_os, None)
 
     @property
     def _targets(self):
