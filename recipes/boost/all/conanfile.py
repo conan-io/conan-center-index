@@ -944,12 +944,11 @@ class BoostConan(ConanFile):
                     self.output.info("Enabled magic autolinking (smart and magic decisions)")
 
                 # https://github.com/conan-community/conan-boost/issues/127#issuecomment-404750974
-                self.cpp_info.libs.append("bcrypt")
+                self.cpp_info.system_libs.append("bcrypt")
             elif self.settings.os == "Linux":
                 # https://github.com/conan-community/conan-boost/issues/135
-                self.cpp_info.libs.append("pthread")
+                self.cpp_info.system_libs.extend(["pthread", "rt"])
 
         self.env_info.BOOST_ROOT = self.package_folder
         self.cpp_info.names["cmake_find_package"] = "Boost"
         self.cpp_info.names["cmake_find_package_multi"] = "Boost"
-
