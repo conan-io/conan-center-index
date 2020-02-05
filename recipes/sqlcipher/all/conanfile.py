@@ -174,3 +174,5 @@ class SqlcipherConan(ConanFile):
         if self.settings.os == "Linux":
             self.cpp_info.system_libs.extend(["pthread", "dl"])
         self.cpp_info.defines = ["SQLITE_HAS_CODEC", 'SQLCIPHER_CRYPTO_OPENSSL', 'SQLITE_TEMP_STORE=2']
+        # Allow using #include <sqlite3.h> even with sqlcipher (for libs like sqlpp11-connector-sqlite3)
+        self.cpp_info.includedirs.append(os.path.join("include", "sqlcipher"))
