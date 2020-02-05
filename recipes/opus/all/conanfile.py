@@ -62,11 +62,11 @@ class OpusConan(ConanFile):
         tools.rmdir(os.path.join(self.package_folder, 'lib', 'cmake'))
 
     def package_info(self):
+        self.cpp_info.names['cmake_find_package'] = 'Opus'
+        self.cpp_info.names['cmake_find_package_multi'] = 'Opus'
         self.cpp_info.libs = tools.collect_libs(self)
         if self.settings.os == 'Linux' or self.settings.os == "Android":
             self.cpp_info.system_libs.append('m')
         if self.settings.os == "Windows" and self.settings.compiler != "Visual Studio":
             self.cpp_info.system_libs.append("ssp")
         self.cpp_info.includedirs.append(os.path.join('include', 'opus'))
-        self.cpp_info.name = 'OPUS'
-        self.cpp_info.names['pkg_config'] = 'opus'
