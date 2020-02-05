@@ -12,7 +12,7 @@ class LibX264Conan(ConanFile):
     license = "GPL-2.0"
     settings = "os", "arch", "compiler", "build_type"
     options = {"shared": [True, False], "fPIC": [True, False], "bit_depth": [8, 10, "all"]}
-    default_options = {'shared': False, 'fPIC': True, 'bit_depth': 'all'}
+    default_options = {'shared': False, 'fPIC': True, 'bit_depth': 'all', 'disable_asm': False}
     build_requires = "nasm/2.13.02"
     _override_env = {}
     _autotools = None
@@ -64,6 +64,8 @@ class LibX264Conan(ConanFile):
                 args.append('--enable-pic')
             if self.settings.build_type == 'Debug':
                 args.append('--enable-debug')
+            if self.settings.disable_asm:
+                args.append('--disable-asm')
             args.append('--bit-depth=%s' % str(self.options.bit_depth))
 
             if tools.cross_building(self.settings):
