@@ -1,5 +1,3 @@
-extern "C" {
-
 #if defined(_MSC_VER)
 #pragma runtime_checks("s", off)
 #endif
@@ -44,7 +42,7 @@ int main()
         ffi_call(&cif, FFI_FN(&print_uint), (void *) &rvalue, args);
         printf("ffi_call returns %d (should be %d)\n", rvalue, expected_ret);
         if (rvalue != expected_ret) {
-            puts("ffi_call FAILED\n");
+            printf("ffi_call FAILED. Expected %d, but got %d.\n", expected_ret, rvalue);
             return EXIT_FAILURE;
         }
         return EXIT_SUCCESS;
@@ -91,8 +89,6 @@ int main()
         #endif
     }
 	return EXIT_SUCCESS;
-}
-
 }
 
 #if defined(_MSC_VER)
