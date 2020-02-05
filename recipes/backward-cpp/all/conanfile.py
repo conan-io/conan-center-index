@@ -111,7 +111,6 @@ class BackwardCppConan(ConanFile):
         os.remove(os.path.join(self.package_folder, "lib", "backward", "BackwardConfig.cmake"))
 
     def package_info(self):
-        self.cpp_info.names["cmake"] = "Backward"
         self.cpp_info.names["cmake_find_package"] = "Backward"
         self.cpp_info.names["cmake_find_package_multi"] = "Backward"
 
