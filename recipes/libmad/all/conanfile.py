@@ -1,4 +1,5 @@
 from conans import ConanFile, tools, AutoToolsBuildEnvironment, MSBuild
+from conans.errors import ConanInvalidConfiguration
 import os
 
 
@@ -22,6 +23,8 @@ class LibmadConan(ConanFile):
     def configure(self):
         del self.settings.compiler.libcxx
         del self.settings.compiler.cppstd
+        if self._is_msvc and self.options.shared:
+            raise ConanInvalidConfiguration("libmad does not support shared library for MSVC")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
