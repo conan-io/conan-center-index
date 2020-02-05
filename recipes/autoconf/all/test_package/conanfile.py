@@ -19,8 +19,7 @@ class TestPackageConan(ConanFile):
                 with tools.environment_append({"CC": "cl -nologo", "CXX": "cl -nologo",}):
                     yield
         else:
-            with tools.no_op():
-                yield
+            yield
 
     def build(self):
         for src in self.exports_sources:
@@ -33,5 +32,5 @@ class TestPackageConan(ConanFile):
             autotools.make()
 
     def test(self):
-        bin_path = os.path.join(".", "test_package")
-        self.run(bin_path, run_environment=True)
+        if not tools.cross_building(self.settings):
+            self.run(os.path.join(".", "test_package"), run_environment=True)
