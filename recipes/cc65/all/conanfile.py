@@ -92,11 +92,14 @@ class Cc65Conan(ConanFile):
             datadir = tools.unix_path(datadir)
             prefix = tools.unix_path(prefix)
             samplesdir = tools.unix_path(samplesdir)
-        return [
+        args = [
             "PREFIX={}".format(prefix),
             "datadir={}".format(datadir),
             "samplesdir={}".format(samplesdir),
         ]
+        if self.settings.os_build == "Windows":
+            args.append("EXE_SUFFIX=.exe")
+        return args
 
     def _build_autotools(self):
         autotools = self._configure_autotools()
@@ -113,6 +116,13 @@ class Cc65Conan(ConanFile):
                         continue
                     tools.replace_in_file(fn, "v141", msvs_toolset(self.settings))
                     tools.replace_in_file(fn, "<WindowsTargetPlatformVersion>10.0.16299.0</WindowsTargetPlatformVersion>", "")
+        if self.settings.os_build == "Windows":
+            # Add ".exe" suffix to calls from cl65 to other utilities
+            for fn, var in (("cc65", "CC65"), ("ca65", "CA65"), ("co65", "CO65"), ("ld65", "LD65"), ("grc65", "GRC")):
+                v = "{},".format(var).ljust(5)
+                tools.replace_in_file(os.path.join(self._source_subfolder, "src", "cl65", "main.c"),
+                                      "CmdInit (&{v} CmdPath, \"{n}\");".format(v=v, n=fn),
+                                      "CmdInit (&{v} CmdPath, \"{n}.exe\");".format(v=v, n=fn))
 
     def build(self):
         self._patch_sources()
