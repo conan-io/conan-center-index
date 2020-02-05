@@ -45,7 +45,7 @@ class GeographiclibConan(ConanFile):
         cmake.install()
         for folder in ["share", os.path.join("lib", "python"), os.path.join("lib", "pkgconfig"), os.path.join("lib", "cmake"), "sbin", "python", "matlab", "doc", "cmake"]:
             tools.rmdir(os.path.join(os.path.join(self.package_folder, folder)))
-        if self.settings.os == "Linux":
+        if self.settings.os == "Linux" or self.settings.os == "Macos":
             tools.rmdir(os.path.join(os.path.join(self.package_folder, "bin")))
         elif self.settings.os == "Windows":
             for item in os.listdir(os.path.join(os.path.join(self.package_folder, "bin"))):
