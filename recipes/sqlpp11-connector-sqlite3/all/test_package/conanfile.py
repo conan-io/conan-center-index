@@ -22,7 +22,7 @@ class TestPackageConan(ConanFile):
             cursor.execute("select * from tab_sample")
         except sqlite3.DatabaseError:
             assert self.options["sqlpp11-connector-sqlite3"].with_sqlcipher
-            print("database is encrypted with sqlcipher")
+            self.output.info("database is encrypted with sqlcipher")
             return
         assert not self.options["sqlpp11-connector-sqlite3"].with_sqlcipher
         print("database is not encrypted")
