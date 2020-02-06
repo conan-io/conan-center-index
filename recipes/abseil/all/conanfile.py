@@ -20,20 +20,22 @@ class ConanRecipe(ConanFile):
     options = {"fPIC": [True, False]}
     default_options = {"fPIC": True}
 
+    generators = "cmake"
     short_paths = True
 
     @property
     def _source_subfolder(self):
         return "source_subfolder"
 
-    @property
-    def _build_subfolder(self):
-        return "build_subfolder"
-
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
         extracted_dir = glob.glob('abseil-cpp-*/')[0]
         os.rename(extracted_dir, self._source_subfolder)
+        tools.replace_in_file(
+            os.path.join(self._source_subfolder, "CMakeLists.txt"),
+            "project(absl CXX)", """project(absl CXX)
+include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
+conan_basic_setup()""")
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -65,8 +67,7 @@ class ConanRecipe(ConanFile):
         cmake = CMake(self)
         cmake.definitions["BUILD_TESTING"] = False
         cmake.configure(
-            source_folder=self._source_subfolder,
-            build_folder=self._build_subfolder
+            source_folder=self._source_subfolder
         )
         return cmake
 
