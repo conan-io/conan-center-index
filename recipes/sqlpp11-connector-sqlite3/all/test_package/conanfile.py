@@ -25,4 +25,4 @@ class TestPackageConan(ConanFile):
             self.output.info("database is encrypted with sqlcipher")
             return
         assert not self.options["sqlpp11-connector-sqlite3"].with_sqlcipher
-        print("database is not encrypted")
+        self.output.info("database is not encrypted")
