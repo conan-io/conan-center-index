@@ -41,7 +41,7 @@ class AutomakeConan(ConanFile):
         return os.path.join(self.package_folder, "bin", "share")
 
     @property
-    def _automake_perllibdir(self):
+    def _automake_libdir(self):
         return os.path.join(self._datarootdir, "automake-{}".format(self._version_major_minor))
 
     def _configure_autotools(self):
@@ -104,7 +104,13 @@ class AutomakeConan(ConanFile):
         self.output.info("Setting AUTOMAKE_DATADIR to {}".format(automake_datadir))
         self.env_info.AUTOMAKE_DATADIR = automake_datadir
 
-        automake_perllibdir = self._automake_perllibdir
+        automake_libdir = self._automake_libdir
+        if self.settings.os_build == "Windows":
+            automake_libdir = tools.unix_path(automake_libdir)
+        self.output.info("Setting AUTOMAKE_LIBDIR to {}".format(automake_libdir))
+        self.env_info.AUTOMAKE_LIBDIR = automake_libdir
+
+        automake_perllibdir = self._automake_libdir
         if self.settings.os_build == "Windows":
             automake_perllibdir = tools.unix_path(automake_perllibdir)
         self.output.info("Setting AUTOMAKE_PERLLIBDIR to {}".format(automake_perllibdir))
