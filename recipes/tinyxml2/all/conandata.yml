@@ -2,6 +2,3 @@ sources:
   "7.1.0":
     url: "https://github.com/leethomason/tinyxml2/archive/7.1.0.zip"
     sha256: "ACCDCFC004959309E6344FEDEEE8FE08A9F44785BDE263F85A6143B286737EB0"
-  "7.0.1":
-    url: "https://github.com/leethomason/tinyxml2/archive/7.0.1.zip"
-    sha256: "323B1F8BD3C849F853F4F7B804C620A7309D588B1880E90C52DA4B79395D664C"
