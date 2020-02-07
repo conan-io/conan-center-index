@@ -1,0 +1,236 @@
+From 5f00a3a9666ef5d33ee5c0d0a74ad0deed31850d Mon Sep 17 00:00:00 2001
+From: "Jimmy M. Gong" <jimmy.m.gong@gmail.com>
+Date: Fri, 7 Feb 2020 12:46:18 +0800
+Subject: [PATCH] patch for conan, remove tests
+
+---
+ CMakeLists.txt                            | 146 ----------------------
+ include/DataFrame/Utils/FixedSizeString.h |   2 +-
+ include/DataFrame/Vectors/HeteroVector.h  |   2 +-
+ include/DataFrame/Vectors/HeteroView.h    |   2 +-
+ include/DataFrame/Vectors/VectorPtrView.h |   2 +-
+ include/DataFrame/Vectors/VectorView.h    |   2 +-
+ 6 files changed, 5 insertions(+), 151 deletions(-)
+
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 362bd95..b33ed49 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -216,149 +216,3 @@ endif(MSVC)
+ 
+ # Add the uninstall target
+ include(AddUninstallTarget)
+-
+-# Build the test binary
+-add_executable(dataframe_tester  test/dataframe_tester.cc)
+-add_executable(dataframe_performance  test/dataframe_performance.cc)
+-add_executable(vectors_tester    test/vectors_tester.cc)
+-add_executable(vector_ptr_view_tester test/vector_ptr_view_tester.cc)
+-add_executable(date_time_tester  test/date_time_tester.cc)
+-add_executable(mmfile_tester     test/mmfile_tester.cc)
+-add_executable(obj_vector_tester test/obj_vector_tester.cc)
+-add_executable(obj_vector_erase_tester test/obj_vector_erase_tester.cc)
+-add_executable(sharedmem_tester  test/sharedmem_tester.cc)
+-add_executable(gen_rand_tester  test/gen_rand_tester.cc)
+-
+-# Link the DataFrame library to the test binary
+-target_link_libraries(dataframe_tester DataFrame)
+-
+-# Link the DataFrame library to the test binary
+-target_link_libraries(dataframe_performance DataFrame)
+-
+-# Link the DataFrame library to the test binary
+-target_link_libraries(vectors_tester DataFrame)
+-
+-# Link the DataFrame library to the test binary
+-target_link_libraries(vector_ptr_view_tester DataFrame)
+-
+-# Link the DataFrame library to the test binary
+-target_link_libraries(date_time_tester DataFrame)
+-
+-# Link the DataFrame library to the test binary
+-target_link_libraries(mmfile_tester DataFrame)
+-
+-# Link the DataFrame library to the test binary
+-target_link_libraries(obj_vector_tester DataFrame)
+-
+-# Link the DataFrame library to the test binary
+-target_link_libraries(obj_vector_erase_tester DataFrame)
+-
+-# Link the DataFrame library to the test binary
+-target_link_libraries(sharedmem_tester DataFrame)
+-
+-# Link the DataFrame library to the test binary
+-target_link_libraries(gen_rand_tester DataFrame)
+-
+-if (UNIX)
+-  # Find pthreads library
+-  set(THREADS_PREFER_PTHREAD_FLAG ON)
+-  find_package(Threads REQUIRED)
+-  target_link_libraries(dataframe_tester Threads::Threads)
+-  target_link_libraries(dataframe_performance Threads::Threads)
+-  target_link_libraries(vectors_tester Threads::Threads)
+-  target_link_libraries(vector_ptr_view_tester Threads::Threads)
+-  target_link_libraries(date_time_tester Threads::Threads)
+-  target_link_libraries(mmfile_tester Threads::Threads)
+-  target_link_libraries(obj_vector_tester Threads::Threads)
+-  target_link_libraries(obj_vector_erase_tester Threads::Threads)
+-  target_link_libraries(sharedmem_tester Threads::Threads)
+-  target_link_libraries(gen_rand_tester Threads::Threads)
+-endif (UNIX)
+-
+-if (UNIX AND NOT APPLE)
+-  target_link_libraries(dataframe_tester rt)
+-  target_link_libraries(dataframe_performance rt)
+-  target_link_libraries(vectors_tester rt)
+-  target_link_libraries(vector_ptr_view_tester rt)
+-  target_link_libraries(date_time_tester rt)
+-  target_link_libraries(mmfile_tester rt)
+-  target_link_libraries(obj_vector_tester rt)
+-  target_link_libraries(obj_vector_erase_tester rt)
+-  target_link_libraries(sharedmem_tester rt)
+-  target_link_libraries(gen_rand_tester rt)
+-endif()
+-
+-# Enable ctest, testing so we can see if unit tests pass or fail in CI
+-enable_testing()
+-add_test(NAME dataframe_tester
+-         COMMAND dataframe_tester
+-         WORKING_DIRECTORY $<TARGET_FILE_DIR:dataframe_tester>)
+-
+-# For some unknown reason to me, this test sigfaults in AppVeyor
+-#
+-# add_test(NAME vectors_tester
+-#          COMMAND vectors_tester
+-#          WORKING_DIRECTORY $<TARGET_FILE_DIR:vectors_tester>)
+-
+-add_test(NAME vector_ptr_view_tester
+-         COMMAND vector_ptr_view_tester
+-         WORKING_DIRECTORY $<TARGET_FILE_DIR:vector_ptr_view_tester>)
+-add_test(NAME date_time_tester
+-         COMMAND date_time_tester
+-         WORKING_DIRECTORY $<TARGET_FILE_DIR:date_time_tester>)
+-
+-# For some unknown reason to me, this test hangs in Travis CI
+-#
+-# add_test(NAME mmfile_tester
+-#          COMMAND mmfile_tester
+-#          WORKING_DIRECTORY $<TARGET_FILE_DIR:mmfile_tester>)
+-
+-add_test(NAME obj_vector_tester
+-         COMMAND obj_vector_tester
+-         WORKING_DIRECTORY $<TARGET_FILE_DIR:obj_vector_tester>)
+-
+-add_test(NAME obj_vector_erase_tester
+-         COMMAND obj_vector_erase_tester
+-         WORKING_DIRECTORY $<TARGET_FILE_DIR:obj_vector_erase_tester>)
+-add_test(NAME gen_rand_tester
+-         COMMAND gen_rand_tester
+-         WORKING_DIRECTORY $<TARGET_FILE_DIR:gen_rand_tester>)
+-
+-message("-- Copying files for testing")
+-# Ctest require this files in the build dir, on all platforms
+-add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
+-                   COMMAND ${CMAKE_COMMAND} -E copy
+-                   ${CMAKE_CURRENT_SOURCE_DIR}/test/sample_data.csv
+-                   ${CMAKE_CURRENT_BINARY_DIR}/sample_data.csv)
+-add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
+-                   COMMAND ${CMAKE_COMMAND} -E copy
+-                   ${CMAKE_CURRENT_SOURCE_DIR}/test/sample_data.json
+-                   ${CMAKE_CURRENT_BINARY_DIR}/sample_data.json)
+-add_custom_command(
+-    TARGET ${PROJECT_NAME} POST_BUILD
+-    COMMAND ${CMAKE_COMMAND} -E copy
+-    ${CMAKE_CURRENT_SOURCE_DIR}/test/sample_data_dt_index.csv
+-    ${CMAKE_CURRENT_BINARY_DIR}/sample_data_dt_index.csv)
+-add_custom_command(
+-    TARGET ${PROJECT_NAME} POST_BUILD
+-    COMMAND ${CMAKE_COMMAND} -E copy
+-    ${CMAKE_CURRENT_SOURCE_DIR}/test/sample_data_string_index.csv
+-    ${CMAKE_CURRENT_BINARY_DIR}/sample_data_string_index.csv)
+-
+-file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/test/sample_data.csv
+-          DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/bin/Debug)
+-file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/test/sample_data.csv
+-          DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/bin/Release)
+-file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/test/sample_data.json
+-          DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/bin/Debug)
+-file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/test/sample_data.json
+-          DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/bin/Release)
+-file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/test/sample_data_dt_index.csv
+-          DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/bin/Debug)
+-file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/test/sample_data_dt_index.csv
+-          DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/bin/Release)
+-file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/test/sample_data_string_index.csv
+-          DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/bin/Debug)
+-file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/test/sample_data_string_index.csv
+-          DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/bin/Release)
+-message("-- Copying files for testing - done")
+diff --git a/include/DataFrame/Utils/FixedSizeString.h b/include/DataFrame/Utils/FixedSizeString.h
+index 3195d67..fde6e5d 100644
+--- a/include/DataFrame/Utils/FixedSizeString.h
++++ b/include/DataFrame/Utils/FixedSizeString.h
+@@ -334,7 +334,7 @@ private:
+ //       responsibility of the programmer to take care of that.
+ //
+ template <unsigned int S>
+-class   FixedSizeString : public VirtualString  {
++class LIBRARY_API FixedSizeString : public VirtualString {
+ 
+ public:
+ 
+diff --git a/include/DataFrame/Vectors/HeteroVector.h b/include/DataFrame/Vectors/HeteroVector.h
+index 978f823..97dcd1d 100644
+--- a/include/DataFrame/Vectors/HeteroVector.h
++++ b/include/DataFrame/Vectors/HeteroVector.h
+@@ -43,7 +43,7 @@ namespace hmdf
+ // are partly inspired by Andy G's Blog at:
+ // https://gieseanw.wordpress.com/2017/05/03/a-true-heterogeneous-container/
+ //
+-struct  HeteroVector  {
++struct LIBRARY_API HeteroVector {
+ 
+ public:
+ 
+diff --git a/include/DataFrame/Vectors/HeteroView.h b/include/DataFrame/Vectors/HeteroView.h
+index a3c6650..9a2c7bd 100644
+--- a/include/DataFrame/Vectors/HeteroView.h
++++ b/include/DataFrame/Vectors/HeteroView.h
+@@ -39,7 +39,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ namespace hmdf
+ {
+ 
+-struct  HeteroView  {
++struct LIBRARY_API HeteroView  {
+ 
+ public:
+ 
+diff --git a/include/DataFrame/Vectors/VectorPtrView.h b/include/DataFrame/Vectors/VectorPtrView.h
+index de25ffd..ac47643 100644
+--- a/include/DataFrame/Vectors/VectorPtrView.h
++++ b/include/DataFrame/Vectors/VectorPtrView.h
+@@ -639,7 +639,7 @@ public:
+ // ----------------------------------------------------------------------------
+ 
+ template<typename T>
+-class   VectorConstPtrView  {
++class LIBRARY_API VectorConstPtrView {
+ 
+ private:
+ 
+diff --git a/include/DataFrame/Vectors/VectorView.h b/include/DataFrame/Vectors/VectorView.h
+index 49ccd15..5fd99a8 100644
+--- a/include/DataFrame/Vectors/VectorView.h
++++ b/include/DataFrame/Vectors/VectorView.h
+@@ -540,7 +540,7 @@ public:
+ // ----------------------------------------------------------------------------
+ 
+ template <typename T>
+-class   VectorConstView  {
++class LIBRARY_API VectorConstView {
+ 
+ public:
+ 
+-- 
+2.25.0
+
