@@ -3,12 +3,14 @@ import os
 
 class Tinyxml2Conan(ConanFile):
     name = "tinyxml2"
-    license = "MIT"
+    license = "Zlib"
+    homepage = "https://github.com/leethomason/tinyxml2"
     url = "https://github.com/conan-io/conan-center-index"
     description = "TinyXML2 is a simple, small, efficient, C++ XML parser that can be easily integrated into other programs."
+    topics = ("xml", "xml-parsel", tiny-xml")
     settings = "os", "compiler", "build_type", "arch"
-    options = {"shared": [True, False]}
-    default_options = "shared=False"
+    options = {"shared": [True, False], "fPIC": [True, False]}
+    default_options = {"shared": False, "fPIC": True}
     generators = "cmake"
     source_dir = "tinyxml2"
 
@@ -20,8 +22,12 @@ class Tinyxml2Conan(ConanFile):
     def _build_subfolder(self):
         return "build_subfolder"
 
+    def config_options(self):
+        if self.settings.os == "Windows":
+            del self.options.fPIC
     def configure(self):
         del self.settings.compiler.libcxx
+        del self.settings.compiler.cppstd        
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
@@ -38,10 +44,9 @@ conan_basic_setup()''')
     def build(self):
         cmake = CMake(self)
         cmake.definitions["BUILD_TESTING"] = False
-        if not self.options.shared:
-            cmake.definitions["BUILD_STATIC_LIBS"] = True
+        cmake.definitions["BUILD_STATIC_LIBS"] = not self.options.shared
 
-        cmake.configure(source_folder=self._source_subfolder)
+        cmake.configure(build_folder=self._build_subfolder)
         cmake.build()
 
     def package(self):
@@ -59,7 +64,7 @@ conan_basic_setup()''')
         tools.save("LICENSE", license_contents)
 
         # package the license file
-        self.copy("license", dst="licenses", ignore_case=True, keep_path=False)
+        self.copy("LICENSE.txt", dst="licenses", src=self._source_subfolder)
 
     def package_info(self):
         if not self.settings.build_type == "Debug":
