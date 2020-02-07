@@ -43,8 +43,7 @@ class LibtoolConan(ConanFile):
                 with tools.environment_append({"CC": "cl -nologo", "CXX": "cl -nologo",}):
                     yield
         else:
-            with tools.no_op():
-                yield
+            yield
 
     def _configure_autotools(self):
         if self._autotools:
