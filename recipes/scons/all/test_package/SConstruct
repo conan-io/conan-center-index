@@ -1,0 +1,3 @@
+SConscript('SConscript',
+            variant_dir = GetLaunchDir(),
+            duplicate = False)
