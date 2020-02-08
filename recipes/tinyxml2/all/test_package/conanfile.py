@@ -1,6 +1,6 @@
 import os
-
 from conans import ConanFile, CMake, tools
+
 
 class Tinyxml2TestConan(ConanFile):
     settings = "os", "compiler", "build_type", "arch"

@@ -1,6 +1,7 @@
 from conans import ConanFile, CMake, tools
 import os
 
+
 class Tinyxml2Conan(ConanFile):
     name = "tinyxml2"
     license = "Zlib"
@@ -24,20 +25,22 @@ class Tinyxml2Conan(ConanFile):
 
     def configure(self):
         del self.settings.compiler.libcxx
-        del self.settings.compiler.cppstd        
+        del self.settings.compiler.cppstd
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
         extracted_folder = self.name + "-" + self.version
         os.rename(extracted_folder, self._source_subfolder)
-    
+
     def _patch_sources(self):
         tools.replace_in_file(
             os.path.join(self._source_subfolder, "CMakeLists.txt"),
             "project(tinyxml2)", '''project(tinyxml2)
 include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
 conan_basic_setup()''')
-    
+        tools.replace_in_file(os.path.join(
+            self._source_subfolder, "CMakeLists.txt"), "set(CMAKE_POSITION_INDEPENDENT_CODE ON)", "")
+
     def build(self):
         self._patch_sources()
         cmake = CMake(self)
@@ -52,10 +55,9 @@ conan_basic_setup()''')
         cmake.install()
         tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
         tools.rmdir(os.path.join(self.package_folder, 'lib', 'pkgconfig'))
-        
+
         # package the license file
         self.copy("LICENSE.txt", dst="licenses", src=self._source_subfolder)
-
 
     def package_info(self):
         if not self.settings.build_type == "Debug":
