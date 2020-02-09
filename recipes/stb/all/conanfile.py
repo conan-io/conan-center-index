@@ -22,6 +22,7 @@ class StbConan(ConanFile):
     def package(self):
         self.copy("LICENSE", src=self._source_subfolder, dst="licenses")
         self.copy("*.h", src=self._source_subfolder, dst="include")
+        self.copy("stb_vorbis.c", src=self._source_subfolder, dst="include")
         tools.rmdir(os.path.join(self.package_folder, "include", "tests"))
 
     def package_id(self):
