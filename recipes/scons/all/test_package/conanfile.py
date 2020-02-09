@@ -24,6 +24,8 @@ class TestPackageConan(ConanFile):
         print(text)
         assert self.requires["scons"].ref.version in text
 
+        self.output.info("TMP={}".format(os.environ.get("TMP")))
+
         self.run("scons -C \"{}\" --conan-compiler={}".format(self.source_folder, self._script_tool[str(self.settings.compiler)]))
 
     def test(self):
