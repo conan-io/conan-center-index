@@ -50,12 +50,13 @@ class GperfConan(ConanFile):
                             "RANLIB=:"])
             elif self.settings.compiler == "gcc" and self.settings.os_build == "Windows":
                 args.append("LDFLAGS=-static -static-libgcc")
-            self._autotools.configure(args=args, configure_dir=self._source_subfolder)
+            self._autotools.configure(args=args)
         return self._autotools
 
     def _build_configure(self):
-        autotools = self._configure_autotools()
-        autotools.make()
+        with tools.chdir(self._source_subfolder):
+            autotools = self._configure_autotools()
+            autotools.make()
 
     def build(self):
         if self._is_msvc:
@@ -66,8 +67,9 @@ class GperfConan(ConanFile):
 
     def package(self):
         self.copy("COPYING", dst="licenses", src=self._source_subfolder)
-        autotools = self._configure_autotools()
-        autotools.install()
+        with tools.chdir(self._source_subfolder):
+            autotools = self._configure_autotools()
+            autotools.install()
         tools.rmdir(os.path.join(self.package_folder, "share"))
 
     def package_id(self):
