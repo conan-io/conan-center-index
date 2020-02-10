@@ -4,7 +4,6 @@ import os
 
 class GslLiteConan(ConanFile):
     name = "gsl-lite"
-    version = "0.34.0"
     license = "MIT"
     url = "https://github.com/conan-io/conan-center-index"
     generators = "cmake"
