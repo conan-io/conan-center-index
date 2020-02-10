@@ -63,7 +63,6 @@ class ArgparseConan(ConanFile):
         tools.rmdir(os.path.join(self.package_folder, "lib"))
 
     def package_id(self):
-        del self.info.settings.compiler
         self.info.header_only()
 
     def package_info(self):
