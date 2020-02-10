@@ -12,12 +12,16 @@ class Tinyxml2Conan(ConanFile):
     settings = "os", "compiler", "build_type", "arch"
     options = {"shared": [True, False], "fPIC": [True, False]}
     default_options = {"shared": False, "fPIC": True}
+    exports_sources = "CMakeLists.txt"
     generators = "cmake"
-    source_dir = "tinyxml2"
 
     @property
     def _source_subfolder(self):
         return "source_subfolder"
+
+    @property
+    def _build_subfolder(self):
+        return "build_subfolder"
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -33,34 +37,29 @@ class Tinyxml2Conan(ConanFile):
         os.rename(extracted_folder, self._source_subfolder)
 
     def _patch_sources(self):
-        tools.replace_in_file(
-            os.path.join(self._source_subfolder, "CMakeLists.txt"),
-            "project(tinyxml2)", '''project(tinyxml2)
-include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
-conan_basic_setup()''')
-        tools.replace_in_file(os.path.join(
-            self._source_subfolder, "CMakeLists.txt"), "set(CMAKE_POSITION_INDEPENDENT_CODE ON)", "")
+        tools.replace_in_file(os.path.join(self._source_subfolder, "CMakeLists.txt"),
+                              "set(CMAKE_POSITION_INDEPENDENT_CODE ON)", "")
+
+    def _configure_cmake(self):
+        cmake = CMake(self)
+        cmake.definitions["BUILD_TESTS"] = False
+        cmake.configure(build_folder=self._build_subfolder)
+        return cmake
 
     def build(self):
         self._patch_sources()
-        cmake = CMake(self)
-        cmake.definitions["BUILD_TESTING"] = False
-        cmake.definitions["BUILD_STATIC_LIBS"] = not self.options.shared
-
-        cmake.configure(source_folder=self._source_subfolder)
+        cmake = self._configure_cmake()
         cmake.build()
 
     def package(self):
-        cmake = CMake(self)
+        self.copy("LICENSE.txt", dst="licenses", src=self._source_subfolder)
+        cmake = self._configure_cmake()
         cmake.install()
         tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
         tools.rmdir(os.path.join(self.package_folder, 'lib', 'pkgconfig'))
 
-        # package the license file
-        self.copy("LICENSE.txt", dst="licenses", src=self._source_subfolder)
-
     def package_info(self):
-        if not self.settings.build_type == "Debug":
-            self.cpp_info.libs = ["tinyxml2"]
-        else:
-            self.cpp_info.libs = ["tinyxml2d"]
+        suffix = "d" if self.settings.build_type == "Debug" else ""
+        self.cpp_info.libs = ["tinyxml2{}".format(suffix)]
+        if self.settings.os == "Linux":
+            self.cpp_info.system_libs = ["m"]
