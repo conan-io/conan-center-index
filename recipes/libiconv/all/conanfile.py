@@ -11,19 +11,20 @@ class LibiconvConan(ConanFile):
     homepage = "https://www.gnu.org/software/libiconv/"
     topics = "libiconv", "iconv", "text", "encoding", "locale", "unicode", "conversion"
     license = "LGPL-2.1"
+    exports_sources = "patches/**"
     settings = "os", "compiler", "build_type", "arch"
     options = {"shared": [True, False], "fPIC": [True, False]}
-    default_options = {'shared': False, 'fPIC': True}
+    default_options = {"shared": False, "fPIC": True}
     short_paths = True
     _source_subfolder = "source_subfolder"
 
     @property
     def _use_winbash(self):
-        return tools.os_info.is_windows and (self.settings.compiler == 'gcc' or tools.cross_building(self.settings))
+        return tools.os_info.is_windows and (self.settings.compiler == "gcc" or tools.cross_building(self.settings))
 
     @property
     def _is_msvc(self):
-        return self.settings.compiler == 'Visual Studio'
+        return self.settings.compiler == "Visual Studio"
 
     def build_requirements(self):
         if tools.os_info.is_windows:
@@ -35,7 +36,7 @@ class LibiconvConan(ConanFile):
         del self.settings.compiler.cppstd
 
     def config_options(self):
-        if self.settings.os == 'Windows':
+        if self.settings.os == "Windows":
             del self.options.fPIC
 
     def source(self):
@@ -49,7 +50,7 @@ class LibiconvConan(ConanFile):
         host = None
         build = None
         if self._use_winbash or self._is_msvc:
-            prefix = prefix.replace('\\', '/')
+            prefix = prefix.replace("\\", "/")
             build = False
             if not tools.cross_building(self.settings):
                 if self.settings.arch == "x86":
@@ -71,52 +72,56 @@ class LibiconvConan(ConanFile):
         if self.settings.os != "Windows":
             env_build.fpic = self.options.fPIC
 
-        configure_args = ['--prefix=%s' % prefix]
+        configure_args = ["--prefix=%s" % prefix]
         if self.options.shared:
-            configure_args.extend(['--disable-static', '--enable-shared'])
+            configure_args.extend(["--disable-static", "--enable-shared"])
         else:
-            configure_args.extend(['--enable-static', '--disable-shared'])
+            configure_args.extend(["--enable-static", "--disable-shared"])
 
         env_vars = {}
 
         if self._use_winbash:
-            configure_args.extend(['CPPFLAGS=-I%s/include' % prefix,
-                                   'LDFLAGS=-L%s/lib' % prefix,
-                                   'RANLIB=:'])
+            configure_args.extend(["CPPFLAGS=-I%s/include" % prefix,
+                                   "LDFLAGS=-L%s/lib" % prefix,
+                                   "RANLIB=:"])
         if self._is_msvc:
             runtime = str(self.settings.compiler.runtime)
-            configure_args.extend(['CC=$PWD/build-aux/compile cl -nologo',
-                                   'CFLAGS=-%s' % runtime,
-                                   'CXX=$PWD/build-aux/compile cl -nologo',
-                                   'CXXFLAGS=-%s' % runtime,
-                                   'CPPFLAGS=-D_WIN32_WINNT=0x0600 -I%s/include' % prefix,
-                                   'LDFLAGS=-L%s/lib' % prefix,
-                                   'LD=link',
-                                   'NM=dumpbin -symbols',
-                                   'STRIP=:',
-                                   'AR=$PWD/build-aux/ar-lib lib',
-                                   'RANLIB=:'])
-            env_vars['win32_target'] = '_WIN32_WINNT_VISTA'
+            configure_args.extend(["CC=$PWD/build-aux/compile cl -nologo",
+                                   "CFLAGS=-%s" % runtime,
+                                   "CXX=$PWD/build-aux/compile cl -nologo",
+                                   "CXXFLAGS=-%s" % runtime,
+                                   "CPPFLAGS=-D_WIN32_WINNT=0x0600 -I%s/include" % prefix,
+                                   "LDFLAGS=-L%s/lib" % prefix,
+                                   "LD=link",
+                                   "NM=dumpbin -symbols",
+                                   "STRIP=:",
+                                   "AR=$PWD/build-aux/ar-lib lib",
+                                   "RANLIB=:"])
+            env_vars["win32_target"] = "_WIN32_WINNT_VISTA"
 
             with tools.chdir(self._source_subfolder):
-                tools.run_in_windows_bash(self, 'chmod +x build-aux/ar-lib build-aux/compile')
+                tools.run_in_windows_bash(self, "chmod +x build-aux/ar-lib build-aux/compile")
 
         if rc:
-            configure_args.extend(['RC=%s' % rc, 'WINDRES=%s' % rc])
+            configure_args.extend(["RC=%s" % rc, "WINDRES=%s" % rc])
 
         with tools.chdir(self._source_subfolder):
             with tools.environment_append(env_vars):
                 env_build.configure(args=configure_args, host=host, build=build)
-                env_build.make()
+                env_build.make(args=["V=1"])
                 env_build.install()
 
+    def _patch_sources(self):
+        for patchdata in self.conan_data["patches"][self.version]:
+            tools.patch(**patchdata)
+
     def build(self):
+        self._patch_sources()
         with tools.vcvars(self.settings) if self._is_msvc else tools.no_op():
             self._build_autotools()
 
     def package(self):
-        self.copy(os.path.join(self._source_subfolder, "COPYING.LIB"),
-                  dst="licenses", ignore_case=True, keep_path=False)
+        self.copy("COPYING.LIB", src=self._source_subfolder, dst="licenses")
         # remove libtool .la files - they have hard-coded paths
         tools.rmdir(os.path.join(self.package_folder, "share"))
         with tools.chdir(os.path.join(self.package_folder, "lib")):
@@ -124,8 +129,11 @@ class LibiconvConan(ConanFile):
                 os.unlink(filename)
 
     def package_info(self):
-        if self._is_msvc and self.options.shared:
-            self.cpp_info.libs = ['iconv.dll.lib']
-        else:
-            self.cpp_info.libs = ['iconv']
-        self.env_info.path.append(os.path.join(self.package_folder, "bin"))
+        lib = "iconv"
+        if self.settings.os == "Windows" and self.options.shared:
+            lib += ".dll" + ".lib" if self.settings.compiler == "Visual Studio" else ".a"
+        self.cpp_info.libs = [lib]
+
+        binpath = os.path.join(self.package_folder, "bin")
+        self.output.info("Appending PATH environment var: {}".format(binpath))
+        self.env_info.path.append(binpath)
