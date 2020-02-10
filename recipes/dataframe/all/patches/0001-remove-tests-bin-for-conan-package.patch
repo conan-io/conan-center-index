@@ -1,16 +1,11 @@
-From 5f00a3a9666ef5d33ee5c0d0a74ad0deed31850d Mon Sep 17 00:00:00 2001
+From 6cfbda5ec6f3d1d5987242c00af16ed4c1a65e7d Mon Sep 17 00:00:00 2001
 From: "Jimmy M. Gong" <jimmy.m.gong@gmail.com>
-Date: Fri, 7 Feb 2020 12:46:18 +0800
-Subject: [PATCH] patch for conan, remove tests
+Date: Mon, 10 Feb 2020 22:05:52 +0800
+Subject: [PATCH] remove tests bin for conan package
 
 ---
- CMakeLists.txt                            | 146 ----------------------
- include/DataFrame/Utils/FixedSizeString.h |   2 +-
- include/DataFrame/Vectors/HeteroVector.h  |   2 +-
- include/DataFrame/Vectors/HeteroView.h    |   2 +-
- include/DataFrame/Vectors/VectorPtrView.h |   2 +-
- include/DataFrame/Vectors/VectorView.h    |   2 +-
- 6 files changed, 5 insertions(+), 151 deletions(-)
+ CMakeLists.txt | 146 -------------------------------------------------
+ 1 file changed, 146 deletions(-)
 
 diff --git a/CMakeLists.txt b/CMakeLists.txt
 index 362bd95..b33ed49 100644
@@ -166,71 +161,6 @@ index 362bd95..b33ed49 100644
 -file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/test/sample_data_string_index.csv
 -          DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/bin/Release)
 -message("-- Copying files for testing - done")
-diff --git a/include/DataFrame/Utils/FixedSizeString.h b/include/DataFrame/Utils/FixedSizeString.h
-index 3195d67..fde6e5d 100644
---- a/include/DataFrame/Utils/FixedSizeString.h
-+++ b/include/DataFrame/Utils/FixedSizeString.h
-@@ -334,7 +334,7 @@ private:
- //       responsibility of the programmer to take care of that.
- //
- template <unsigned int S>
--class   FixedSizeString : public VirtualString  {
-+class LIBRARY_API FixedSizeString : public VirtualString {
- 
- public:
- 
-diff --git a/include/DataFrame/Vectors/HeteroVector.h b/include/DataFrame/Vectors/HeteroVector.h
-index 978f823..97dcd1d 100644
---- a/include/DataFrame/Vectors/HeteroVector.h
-+++ b/include/DataFrame/Vectors/HeteroVector.h
-@@ -43,7 +43,7 @@ namespace hmdf
- // are partly inspired by Andy G's Blog at:
- // https://gieseanw.wordpress.com/2017/05/03/a-true-heterogeneous-container/
- //
--struct  HeteroVector  {
-+struct LIBRARY_API HeteroVector {
- 
- public:
- 
-diff --git a/include/DataFrame/Vectors/HeteroView.h b/include/DataFrame/Vectors/HeteroView.h
-index a3c6650..9a2c7bd 100644
---- a/include/DataFrame/Vectors/HeteroView.h
-+++ b/include/DataFrame/Vectors/HeteroView.h
-@@ -39,7 +39,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
- namespace hmdf
- {
- 
--struct  HeteroView  {
-+struct LIBRARY_API HeteroView  {
- 
- public:
- 
-diff --git a/include/DataFrame/Vectors/VectorPtrView.h b/include/DataFrame/Vectors/VectorPtrView.h
-index de25ffd..ac47643 100644
---- a/include/DataFrame/Vectors/VectorPtrView.h
-+++ b/include/DataFrame/Vectors/VectorPtrView.h
-@@ -639,7 +639,7 @@ public:
- // ----------------------------------------------------------------------------
- 
- template<typename T>
--class   VectorConstPtrView  {
-+class LIBRARY_API VectorConstPtrView {
- 
- private:
- 
-diff --git a/include/DataFrame/Vectors/VectorView.h b/include/DataFrame/Vectors/VectorView.h
-index 49ccd15..5fd99a8 100644
---- a/include/DataFrame/Vectors/VectorView.h
-+++ b/include/DataFrame/Vectors/VectorView.h
-@@ -540,7 +540,7 @@ public:
- // ----------------------------------------------------------------------------
- 
- template <typename T>
--class   VectorConstView  {
-+class LIBRARY_API VectorConstView {
- 
- public:
- 
 -- 
 2.25.0
 

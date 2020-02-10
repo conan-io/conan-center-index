@@ -84,12 +84,6 @@ class DataFrameConan(ConanFile):
 
     def _configure_cmake(self):
         cmake = CMake(self)
-        if (
-            self.settings.os == "Windows"
-            and self.settings.compiler == "Visual Studio"
-            and self.options.shared
-        ):
-            cmake.definitions["CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS"] = True
         cmake.configure()
         return cmake
 
@@ -103,16 +97,6 @@ class DataFrameConan(ConanFile):
         self.copy("License", dst="licenses", src=self._source_subfolder)
         cmake = self._configure_cmake()
         cmake.install()
-
-        if self.options.shared:
-            self.copy("*.so*", dst="lib", symlinks=True, keep_path=False)
-            self.copy("*.dylib", dst="lib", symlinks=True, keep_path=False)
-            self.copy("*.dll", dst="bin", keep_path=False)
-            # do not forget import libraries
-            self.copy("*.lib", dst="lib", keep_path=False)
-        else:
-            self.copy("*.a", dst="lib", keep_path=False)
-            self.copy("*.lib", dst="lib", keep_path=False)
 
         # Remove packaging files & MS runtime files
         for dir_to_remove in [
