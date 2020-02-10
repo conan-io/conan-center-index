@@ -371,6 +371,9 @@ class LibcurlConan(ConanFile):
             os.remove(os.path.join(self.package_folder, 'lib', 'libcurl.la'))
 
     def package_info(self):
+        self.cpp_info.names['cmake_find_package'] = 'CURL'
+        self.cpp_info.names['cmake_find_package_multi'] = 'CURL'
+
         if self.settings.compiler != "Visual Studio":
             self.cpp_info.libs = ['curl']
             if self.settings.os == "Linux":

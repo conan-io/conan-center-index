@@ -6,7 +6,7 @@ from conans import ConanFile, CMake
 
 class TestZlibConan(ConanFile):
     settings = "os", "compiler", "arch", "build_type"
-    generators = "cmake"
+    generators = "cmake", "pkg_config"
 
     def configure(self):
         del self.settings.compiler.libcxx
@@ -19,6 +19,7 @@ class TestZlibConan(ConanFile):
 
     def test(self):
         assert os.path.exists(os.path.join(self.deps_cpp_info["zlib"].rootpath, "licenses", "LICENSE"))
+        assert os.path.exists(os.path.join(self.build_folder, "zlib.pc"))
         if "x86" in self.settings.arch:
             self.run(os.path.join("bin", "test"), run_environment=True)
             if self.options["zlib"].minizip:

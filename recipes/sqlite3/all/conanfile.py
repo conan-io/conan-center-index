@@ -23,11 +23,12 @@ class ConanSqlite3(ConanFile):
                "enable_json1": [True, False],
                "enable_rtree": [True, False],
                "omit_load_extension": [True, False],
-               "enable_unlock_notify": [True, False]
+               "enable_unlock_notify": [True, False],
+               "disable_gethostuuid": [True, False],
                }
     default_options = {"shared": False,
                        "fPIC": True,
-                       "threadsafe": 1,
+                       "threadsafe": 0,
                        "enable_column_metadata": True,
                        "enable_explain_comments": False,
                        "enable_fts3": False,
@@ -36,7 +37,8 @@ class ConanSqlite3(ConanFile):
                        "enable_json1": False,
                        "enable_rtree": True,
                        "omit_load_extension": False,
-                       "enable_unlock_notify": True
+                       "enable_unlock_notify": True,
+                       "disable_gethostuuid": False,
                        }
     _source_subfolder = "source_subfolder"
 
@@ -66,7 +68,7 @@ class ConanSqlite3(ConanFile):
         cmake.definitions["ENABLE_JSON1"] = self.options.enable_json1
         cmake.definitions["ENABLE_RTREE"] = self.options.enable_rtree
         cmake.definitions["OMIT_LOAD_EXTENSION"] = self.options.omit_load_extension
-        cmake.definitions["SQLITE_ENABLE_UNLOCK_NOTIFY"] = self.options.enable_unlock_notify        
+        cmake.definitions["SQLITE_ENABLE_UNLOCK_NOTIFY"] = self.options.enable_unlock_notify
         cmake.definitions["HAVE_FDATASYNC"] = True
         cmake.definitions["HAVE_GMTIME_R"] = True
         cmake.definitions["HAVE_LOCALTIME_R"] = True
@@ -80,6 +82,8 @@ class ConanSqlite3(ConanFile):
             cmake.definitions["HAVE_POSIX_FALLOCATE"] = False
         if self.settings.os == "Android":
             cmake.definitions["HAVE_POSIX_FALLOCATE"] = False
+        if self.options.disable_gethostuuid:
+            cmake.definitions["DISABLE_GETHOSTUUID"] = True
         cmake.configure()
         return cmake
 

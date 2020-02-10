@@ -1,0 +1,8 @@
+sources:
+  "20191104":
+    url: "https://www.prevanders.net/libdwarf-20191104.tar.gz"
+    sha256: "45f50a966314421b7dab525859853616df6c9680f0ccf2f44b030c505236eaba"
+patches:
+  "20191104":
+    - base_path: "source_subfolder"
+      patch_file: "patches/0001-patch.patch"

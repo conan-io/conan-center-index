@@ -27,9 +27,13 @@ class SnappyConan(ConanFile):
         if self.settings.os == 'Windows':
             del self.options.fPIC
 
+    def configure(self):
+        if self.options.shared:
+            del self.options.fPIC
+
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
-        extracted_dir = self.name + "-" + self.version
+        extracted_dir = "{}-{}".format(self.name, self.version)
         os.rename(extracted_dir, self._source_subfolder)
 
     def _configure_cmake(self):
@@ -49,4 +53,6 @@ class SnappyConan(ConanFile):
         tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
 
     def package_info(self):
+        self.cpp_info.names["cmake_find_package"] = "Snappy"
+        self.cpp_info.names["cmake_find_package_multi"] = "Snappy"
         self.cpp_info.libs = tools.collect_libs(self)
