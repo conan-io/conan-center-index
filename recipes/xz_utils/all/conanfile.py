@@ -25,7 +25,7 @@ class XZUtils(ConanFile):
         return self.settings.compiler == 'gcc' and self.settings.os == 'Windows' and os.name == 'nt'
 
     def build_requirements(self):
-        if self._is_mingw_windows:
+        if self._is_mingw_windows and "CONAN_BASH_PATH" not in os.environ and tools.os_info.detect_windows_subsystem() != 'msys2':
             self.build_requires("msys2/20161025")
 
     def _effective_msbuild_type(self):
@@ -131,3 +131,4 @@ class XZUtils(ConanFile):
         if not self.options.shared:
             self.cpp_info.defines.append('LZMA_API_STATIC')
         self.cpp_info.libs = tools.collect_libs(self)
+        self.cpp_info.names['pkg_config'] = 'liblzma'

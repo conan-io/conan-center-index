@@ -10,6 +10,7 @@ class MakeConan(ConanFile):
     homepage = "https://www.gnu.org/software/make/"
     license = "GPL-3.0-or-later"
     settings = "os_build", "arch_build", "compiler"
+    exports_sources = ["patches/*"]
     _source_subfolder = "source_subfolder"
 
     def source(self):
@@ -22,6 +23,9 @@ class MakeConan(ConanFile):
         del self.settings.compiler.cppstd
 
     def build(self):
+        for patch in self.conan_data["patches"][self.version]:
+            tools.patch(**patch)
+
         with tools.chdir(self._source_subfolder):
             # README.W32
             if self.settings.os_build == "Windows":

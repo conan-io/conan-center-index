@@ -2,12 +2,13 @@ import os
 
 from conans import ConanFile, CMake, tools
 from conans.errors import ConanInvalidConfiguration
+from conans.tools import Version
 
 
 class PocoConan(ConanFile):
     name = "poco"
     url = "https://github.com/conan-io/conan-center-index"
-    homepage = "https://pocoproject.org"    
+    homepage = "https://pocoproject.org"
     topics = ("conan", "poco", "building", "networking", "server", "mobile", "embedded")
     exports_sources = "CMakeLists.txt"
     generators = "cmake"
@@ -110,9 +111,13 @@ class PocoConan(ConanFile):
             if self.options.shared:
                 self.output.warn("Adding ws2_32 dependency...")
                 replace = 'Net Util Foundation Crypt32.lib'
+                if Version(self.version) >= "1.10.0":
+                    replace = 'Poco::Net Poco::Util Crypt32.lib'
                 tools.replace_in_file(os.path.join(self._source_subfolder, "NetSSL_Win", "CMakeLists.txt"), replace, replace + " ws2_32 ")
 
                 replace = 'Foundation ${OPENSSL_LIBRARIES}'
+                if Version(self.version) >= "1.10.0":
+                    replace = 'Poco::Foundation OpenSSL::SSL OpenSSL::Crypto'
                 tools.replace_in_file(os.path.join(self._source_subfolder, "Crypto", "CMakeLists.txt"), replace, replace + " ws2_32 Crypt32.lib")
 
         # Poco 1.9.x - CMAKE_SOURCE_DIR is required in many places
@@ -170,8 +175,12 @@ class PocoConan(ConanFile):
                  else ("d" if self.settings.build_type=="Debug" else "")
         for flag, lib in libs:
             if getattr(self.options, flag):
+                if self.settings.os == "Windows" and flag == "enable_netssl" and self.options.enable_netssl_win:
+                    continue
+
                 if self.settings.os != "Windows" and flag == "enable_netssl_win":
                     continue
+
                 self.cpp_info.libs.append("%s%s" % (lib, suffix))
 
         self.cpp_info.libs.append("PocoFoundation%s" % suffix)
@@ -184,5 +193,5 @@ class PocoConan(ConanFile):
             self.cpp_info.defines.extend(["POCO_STATIC=ON", "POCO_NO_AUTOMATIC_LIBS"])
             if self.settings.compiler == "Visual Studio":
                 self.cpp_info.libs.extend(["ws2_32", "Iphlpapi", "Crypt32"])
-        self.cpp_info.name = "Poco"
-
+        self.cpp_info.names["cmake_find_package"] = "Poco"
+        self.cpp_info.names["cmake_find_package_multi"] = "Poco"

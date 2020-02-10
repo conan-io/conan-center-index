@@ -1,0 +1,14 @@
+sources:
+  "4.5.0":
+    url: "https://github.com/zeromq/cppzmq/archive/v4.5.0.tar.gz"
+    sha256: "64eb4e58eaf0c77505391c6c9a606cffcb57c6086f3431567a1ef4a25b01fa36"
+  "4.6.0":
+    url: "https://github.com/zeromq/cppzmq/archive/v4.6.0.tar.gz"
+    sha256: "e9203391a0b913576153a2ad22a2dc1479b1ec325beb6c46a3237c669aef5a52"
+patches:
+  "4.5.0":
+    - base_path: "source_subfolder"
+      patch_file: "patches/0001-cmakelists-alias-libzmq-no-export.patch"
+  "4.6.0":
+    - base_path: "source_subfolder"
+      patch_file: "patches/0001-cmakelists-alias-libzmq-no-export.patch"

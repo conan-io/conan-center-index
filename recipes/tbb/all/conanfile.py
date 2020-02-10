@@ -40,15 +40,15 @@ that have future-proof scalability"""
             raise ConanInvalidConfiguration("tbbproxy needs tbbmaloc and shared options")
 
     @property
-    def is_msvc(self):
+    def _is_msvc(self):
         return self.settings.compiler == 'Visual Studio'
 
     @property
-    def is_mingw(self):
+    def _is_mingw(self):
         return self.settings.os == 'Windows' and self.settings.compiler == 'gcc'
 
     @property
-    def is_clanglc(self):
+    def _is_clanglc(self):
         return self.settings.os == 'Windows' and self.settings.compiler == 'clang'
 
     def source(self):
@@ -60,14 +60,14 @@ that have future-proof scalability"""
         tools.replace_in_file(linux_include, "shell gcc", "shell $(CC)")
         tools.replace_in_file(linux_include, "= gcc", "= $(CC)")
 
-    def get_targets(self):
+    def _get_targets(self):
         targets = ["tbb"]
         if self.options.tbbmalloc:
             targets.append("tbbmalloc")
         if self.options.tbbproxy:
             targets.append("tbbproxy")
         return targets
-    
+
     def build(self):
         def add_flag(name, value):
             if name in os.environ:
@@ -75,7 +75,38 @@ that have future-proof scalability"""
             else:
                 os.environ[name] = value
 
-        extra = "" if self.settings.os == "Windows" or self.options.shared else "extra_inc=big_iron.inc"
+        if self.version == "2020.0" and self.settings.build_type == "Debug":
+            tools.replace_in_file(os.path.join(self._source_subfolder, "Makefile"), "release", "debug")
+
+        if self._is_msvc:
+            tools.save(os.path.join(self._source_subfolder, "build", "big_iron_msvc.inc"),
+                       # copy of big_iron.inc adapted for MSVC
+                       """
+LIB_LINK_CMD = lib.exe
+LIB_OUTPUT_KEY = /OUT:
+LIB_LINK_FLAGS =
+LIB_LINK_LIBS =
+DYLIB_KEY =
+override CXXFLAGS += -D__TBB_DYNAMIC_LOAD_ENABLED=0 -D__TBB_SOURCE_DIRECTLY_INCLUDED=1
+ITT_NOTIFY =
+DLL = lib
+LIBEXT = lib
+LIBPREF =
+LIBDL =
+TBB.DLL = $(LIBPREF)tbb$(DEBUG_SUFFIX).$(LIBEXT)
+LINK_TBB.LIB = $(TBB.DLL)
+TBB.DEF =
+TBB_NO_VERSION.DLL =
+MALLOC.DLL = $(LIBPREF)tbbmalloc$(DEBUG_SUFFIX).$(LIBEXT)
+LINK_MALLOC.LIB = $(MALLOC.DLL)
+MALLOC.DEF =
+MALLOC_NO_VERSION.DLL =
+MALLOCPROXY.DLL =
+MALLOCPROXY.DEF =
+""")
+            extra = "" if self.options.shared else "extra_inc=big_iron_msvc.inc"
+        else:
+            extra = "" if self.options.shared else "extra_inc=big_iron.inc"
         arch = {"x86": "ia32",
                 "x86_64": "intel64",
                 "armv7":  "armv7",
@@ -94,17 +125,27 @@ that have future-proof scalability"""
 
         with tools.chdir(self._source_subfolder):
             # intentionally not using AutoToolsBuildEnvironment for now - it's broken for clang-cl
-            if self.is_clanglc:
+            if self._is_clanglc:
                 add_flag('CFLAGS', '-mrtm')
                 add_flag('CXXFLAGS', '-mrtm')
 
             targets = ["tbb", "tbbmalloc", "tbbproxy"]
-            if self.is_msvc:
+            if self._is_msvc:
                 # intentionally not using vcvars for clang-cl yet
                 with tools.vcvars(self.settings):
-                    runtime = "vc14.2"
+                    if self.settings.get_safe("compiler.runtime") in ["MT", "MTd"]:
+                        runtime = "vc_mt"
+                    else:
+                        runtime = {"8": "vc8",
+                                   "9": "vc9",
+                                   "10": "vc10",
+                                   "11": "vc11",
+                                   "12": "vc12",
+                                   "14": "vc14",
+                                   "15": "vc14.1",
+                                   "16": "vc14.2"}.get(str(self.settings.compiler.version), "vc14.2")
                     self.run("%s arch=%s runtime=%s %s %s" % (make, arch, runtime, extra, " ".join(targets)))
-            elif self.is_mingw:
+            elif self._is_mingw:
                 self.run("%s arch=%s compiler=gcc %s %s" % (make, arch, extra, " ".join(targets)))
             else:
                 self.run("%s arch=%s %s %s" % (make, arch, extra, " ".join(targets)))
@@ -139,9 +180,11 @@ that have future-proof scalability"""
         del self.info.options.tbbmalloc_proxy
 
     def package_info(self):
+        self.cpp_info.names["cmake_find_package"] = "TBB"
+        self.cpp_info.names["cmake_find_package_multi"] = "TBB"
         suffix = "_debug" if self.settings.build_type == "Debug" else ""
         libs = {"tbb": "tbb", "tbbproxy": "tbbmalloc_proxy", "tbbmalloc": "tbbmalloc"}
-        targets = self.get_targets()
+        targets = self._get_targets()
         self.cpp_info.libs = ["{}{}".format(libs[target], suffix) for target in targets]
         if self.settings.os == "Linux":
             self.cpp_info.system_libs.extend(["dl", "rt", "m", "pthread"])
