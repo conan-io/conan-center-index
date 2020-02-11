@@ -43,6 +43,8 @@ class LibtiffConan(ConanFile):
         cmake.definitions["lzma"] = False
         cmake.definitions["jpeg"] = False
         cmake.definitions["jbig"] = False
+        cmake.definitions["webp"] = False
+        cmake.definitions["zstd"] = False
         if self.options.shared and self.settings.compiler == "Visual Studio":
             # https://github.com/Microsoft/vcpkg/blob/master/ports/tiff/fix-cxx-shared-libs.patch
             tools.replace_in_file(os.path.join(self._source_subfolder, 'libtiff', 'CMakeLists.txt'),
