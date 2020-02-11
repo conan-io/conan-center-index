@@ -28,6 +28,8 @@ patches:
       base_path: "boost_1_69_0"
     - patch_file: "patches/static_object_init.patch"
       base_path: "boost_1_69_0"
+    - patch_file: "patches/support_msvc_2019.patch"
+      base_path: "boost_1_69_0"
   1.70.0:
     - patch_file: "patches/0001-beast-fix-moved-from-executor.patch"
       base_path: "boost_1_70_0"
