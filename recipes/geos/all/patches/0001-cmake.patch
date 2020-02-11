@@ -1,0 +1,57 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index c893fea..f248cc1 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -19,7 +19,7 @@ set(DEFAULT_BUILD_TYPE Release)
+ # Require CMake 3.13+ with VS generator for complete support of VS versions
+ # and support by AppVeyor.
+ if(${CMAKE_GENERATOR} MATCHES "Visual Studio")
+-  cmake_minimum_required(VERSION 3.13 FATAL_ERROR)
++  
+ endif()
+ 
+ list(APPEND CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake")
+@@ -259,12 +259,12 @@ endif()
+ #-----------------------------------------------------------------------------
+ # Benchmarks
+ #-----------------------------------------------------------------------------
+-add_subdirectory(benchmarks)
++
+ 
+ #-----------------------------------------------------------------------------
+ # Documentation/Examples
+ #-----------------------------------------------------------------------------
+-add_subdirectory(doc)
++
+ 
+ #-----------------------------------------------------------------------------
+ # Install and export targets - support 'make install' or equivalent
+@@ -281,7 +281,7 @@ configure_file(cmake/geos-config.cmake
+ 
+ install(TARGETS geos geos_cxx_flags
+   EXPORT geos-targets
+-  LIBRARY DESTINATION lib NAMELINK_SKIP
++  LIBRARY DESTINATION lib
+   ARCHIVE DESTINATION lib
+   RUNTIME DESTINATION bin
+   INCLUDES DESTINATION include
+@@ -312,7 +312,7 @@ install(DIRECTORY
+ install(FILES "${CMAKE_CURRENT_BINARY_DIR}/capi/geos_c.h"
+   DESTINATION include)
+ 
+-add_subdirectory(tools)
++
+ 
+ #-----------------------------------------------------------------------------
+ # Uninstall
+@@ -372,8 +372,8 @@ add_custom_target(check COMMAND ${CMAKE_BUILD_TOOL} test)
+ # "make distcheck" workalike
+ #-----------------------------------------------------------------------------
+ if(NOT _is_multi_config_generator)
+-  find_package(MakeDistCheck)
+-  AddMakeDistCheck()
++  
++  
+   message(STATUS "GEOS: Configured 'distcheck' target")
+ endif()
+ 
