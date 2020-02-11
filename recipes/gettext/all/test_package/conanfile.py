@@ -15,7 +15,7 @@ class TestPackageConan(ConanFile):
             directory = os.path.join(self.source_folder, locale, "LC_MESSAGES")
             if not os.path.isdir(directory):
                 os.makedirs(directory)
-            shutil.copy(os.path.join(self.source_folder, "po", locale, "conan.mo"),
+            shutil.copy(os.path.join(self.source_folder, "po", locale, "conan.mo.workaround_git_ignore"),
                         os.path.join(self.source_folder, locale, "LC_MESSAGES", "conan.mo"))
 
     def test(self):
