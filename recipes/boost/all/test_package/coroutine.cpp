@@ -12,7 +12,7 @@ void cooperative(coroutine<void>::push_type &sink)
 
 int main()
 {
-  coroutine<void>::pull_type source{cooperative};
+  coroutine<void>::pull_type source(cooperative);
   std::cout << ", ";
   source();
   std::cout << "!\n";
