@@ -1,4 +1,5 @@
 from conans import ConanFile, tools
+from conans.errors import ConanInvalidConfiguration
 import os
 
 
@@ -9,7 +10,11 @@ class JomInstallerConan(ConanFile):
     homepage = "http://wiki.qt.io/Jom"
     license = "GPL-3.0"
 
-    settings = {"os" : ["Windows"]}
+    settings = "os"
+
+    def configure(self):
+        if self.settings.os != "Windows":
+            raise ConanInvalidConfiguration("Only Windows supported")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
