@@ -66,4 +66,4 @@ class ArgparseConan(ConanFile):
         self.info.header_only()
 
     def package_info(self):
-        self.cpp_info.includedirs = ["include", os.path.join("include", "argparse")]
+        self.cpp_info.includedirs.append(os.path.join("include", "argparse"))
