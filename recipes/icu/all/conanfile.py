@@ -48,7 +48,7 @@ class ICUBase(ConanFile):
 
     def build_requirements(self):
         if self._the_os == "Windows":
-            self.build_requires("msys2/20161025")
+            self.build_requires("msys2/20190524")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
