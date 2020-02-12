@@ -13,6 +13,5 @@ class TestPackageConan(ConanFile):
         cmake.build()
 
     def test(self):
-        assert os.path.isfile(os.path.join(
         bin_path = os.path.join("bin", "test_package")
         self.run("%s -s" % bin_path, run_environment=True)
