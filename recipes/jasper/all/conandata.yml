@@ -2,3 +2,6 @@ sources:
   "2.0.14":
     url: "https://github.com/mdadams/jasper/archive/version-2.0.14.zip"
     sha256: "05de26be16cf7356f73e8202c0bf4e05597e2c2698a7100d8603253d65f8a790"
+  "2.0.16":
+    url: "https://github.com/mdadams/jasper/archive/version-2.0.16.zip"
+    sha256: "912495d1074de635fe36884085214cf389403e51f1075d50c6008602e8d9480a"
