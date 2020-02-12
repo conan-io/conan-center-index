@@ -1,7 +1,7 @@
 import os
 import glob
 from conans import ConanFile, CMake, tools
-from conans.errors import ConanInvalidConfiguration
+from conans.errors import ConanInvalidConfiguration, ConanException
 
 
 class ConanRecipe(ConanFile):
@@ -43,8 +43,16 @@ conan_basic_setup()""")
 
     def configure(self):
         minimal_cpp_standard = "11"
-        if self.settings.compiler.cppstd:
+
+        try:
             tools.check_min_cppstd(self, minimal_cpp_standard)
+        except ConanInvalidConfiguration:
+            raise
+        except ConanException:
+            # FIXME: We need to handle the case when Conan doesn't know
+            # about a user defined compiler's default standard version
+            self.output.warn(
+                "Unnable to determine the default standard version of the compiler")
 
         minimal_version = {
             "Visual Studio": "14",
