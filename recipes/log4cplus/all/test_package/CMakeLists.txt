@@ -8,7 +8,7 @@ conan_basic_setup()
 
 file(GLOB SOURCE_FILES *.cpp)
 
-if(MSVC)
+if(UNICODE)
     add_definitions("-DUNICODE")
     add_definitions("-D_UNICODE")
 endif()
