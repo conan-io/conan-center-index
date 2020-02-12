@@ -21,7 +21,7 @@ class JasperConan(ConanFile):
         if self.options.jpegturbo:
             self.requires.add('libjpeg-turbo/1.5.2')
         else:
-            self.requires.add('libjpeg/9c')
+            self.requires.add('libjpeg/9d')
 
     def config_options(self):
         if self.settings.os == "Windows":
