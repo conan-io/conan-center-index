@@ -1,4 +1,4 @@
-From 436e1dbe6fcd31523d261d18ad011392f1d6fbbc Mon Sep 17 00:00:00 2001
+From 188eac4acf37313fcec27d7b266c6517b99ed23d Mon Sep 17 00:00:00 2001
 From: Oliver Kowalke <oliver.kowalke@gmail.com>
 Date: Sun, 1 Dec 2019 20:40:28 +0100
 Subject: [PATCH] Revert "Cease dependence on Range"
@@ -11,7 +11,7 @@ see #44 (One test fails to compile after boostorg/coroutine submodule updated)
  1 file changed, 3 insertions(+), 9 deletions(-)
 
 diff --git a/boost/coroutine/asymmetric_coroutine.hpp b/boost/coroutine/asymmetric_coroutine.hpp
-index ea96981..640896f 100644
+index f2ae16f..78b1842 100644
 --- a/boost/coroutine/asymmetric_coroutine.hpp
 +++ b/boost/coroutine/asymmetric_coroutine.hpp
 @@ -14,6 +14,7 @@
@@ -22,7 +22,7 @@ index ea96981..640896f 100644
  #include <boost/throw_exception.hpp>
  #include <boost/utility/explicit_operator_bool.hpp>
  
-@@ -2354,19 +2355,12 @@ end( push_coroutine< R > & c)
+@@ -2390,19 +2391,12 @@ end( push_coroutine< R > & c)
  
  }
  
@@ -45,5 +45,5 @@ index ea96981..640896f 100644
  
  }
 -- 
-2.24.1
+2.21.0
 
