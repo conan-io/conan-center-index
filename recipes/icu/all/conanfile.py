@@ -3,6 +3,7 @@ import glob
 import platform
 import shutil
 from conans import ConanFile, tools, AutoToolsBuildEnvironment
+from conans.tools import Version
 
 
 class ICUBase(ConanFile):
@@ -82,7 +83,7 @@ class ICUBase(ConanFile):
             run_configure_icu_file = os.path.join(self._source_subfolder, 'source', 'runConfigureICU')
 
             flags = "-%s" % self.settings.compiler.runtime
-            if self.settings.get_safe("build_type") == 'Debug':
+            if self.settings.get_safe("build_type") in ['Debug', 'RelWithDebInfo'] and Version(self.settings.compiler.version) >= "12":
                 flags += " -FS"
             tools.replace_in_file(run_configure_icu_file, "-MDd", flags)
             tools.replace_in_file(run_configure_icu_file, "-MD", flags)
