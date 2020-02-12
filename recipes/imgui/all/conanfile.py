@@ -23,6 +23,8 @@ class IMGUIConan(ConanFile):
         "fPIC": True
     }
 
+    _cmake = None
+
     @property
     def _source_subfolder(self):
         return "source_subfolder"
@@ -35,11 +37,13 @@ class IMGUIConan(ConanFile):
         tools.get(**self.conan_data["sources"][self.version])
         extracted_dir = self.name + "-" + self.version
         os.rename(extracted_dir, self._source_subfolder)
-    
+
     def _configure_cmake(self):
-        cmake = CMake(self)
-        cmake.configure()
-        return cmake
+        if self._cmake:
+            return self._cmake
+        self._cmake = CMake(self)
+        self._cmake.configure()
+        return self._cmake
 
     def build(self):
         cmake = self._configure_cmake()
