@@ -5,7 +5,7 @@ import glob
 
 
 class GetTextConan(ConanFile):
-    name = "gettext"
+    name = "libgettext"
     description = "An internationalization and localization system for multilingual programs"
     topics = ("conan", "gettext", "intl", "libintl", "i18n")
     url = "https://github.com/conan-io/conan-center-index"
@@ -54,7 +54,7 @@ class GetTextConan(ConanFile):
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
-        extracted_dir = self.name + "-" + self.version
+        extracted_dir = "gettext-" + self.version
         os.rename(extracted_dir, self._source_subfolder)
 
     def build(self):
