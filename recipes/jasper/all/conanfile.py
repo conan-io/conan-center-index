@@ -1,6 +1,5 @@
 import glob
 import os
-import shutil
 from conans import ConanFile, CMake, tools
 
 
@@ -24,6 +23,10 @@ class JasperConan(ConanFile):
     @property
     def _source_subfolder(self):
         return "source_subfolder"
+
+    @property
+    def _build_subfolder(self):
+        return "build_subfolder"
 
     def requirements(self):
         if self.options.jpegturbo:
@@ -53,14 +56,10 @@ class JasperConan(ConanFile):
         self._cmake.definitions["JAS_ENABLE_SHARED"] = self.options.shared
         self._cmake.definitions["JAS_LIBJPEG_REQUIRED"] = "REQUIRED"
         self._cmake.definitions["JAS_ENABLE_OPENGL"] = False
-        self._cmake.configure(source_folder=self._source_subfolder)
+        self._cmake.configure(build_folder=self._build_subfolder)
         return self._cmake
 
     def build(self):
-        os.rename(os.path.join(self._source_subfolder, "CMakeLists.txt"),
-                  os.path.join(self._source_subfolder, "CMakeLists_original.txt"))
-        shutil.copy("CMakeLists.txt",
-                    os.path.join(self._source_subfolder, "CMakeLists.txt"))
         cmake = self._configure_cmake()
         cmake.build()
 

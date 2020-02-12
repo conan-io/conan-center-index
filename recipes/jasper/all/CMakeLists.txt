@@ -1,7 +1,9 @@
 cmake_minimum_required(VERSION 2.8.12)
 project(cmake_wrapper)
 
-include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
+include(conanbuildinfo.cmake)
 conan_basic_setup()
 
-include(CMakeLists_original.txt)
+set(CMAKE_MODULE_PATH ${CONAN_CMAKE_MODULE_PATH} ${CMAKE_SOURCE_DIR}/source_subfolder/build/cmake/modules ${CMAKE_MODULE_PATH})
+
+add_subdirectory(source_subfolder)
