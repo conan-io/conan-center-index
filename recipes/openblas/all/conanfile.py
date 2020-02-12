@@ -18,12 +18,16 @@ class OpenBLAS(ConanFile):
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
-        "build_lapack": [True, False]
+        "build_lapack": [True, False],
+        "use_thread": [True, False],
+        "dynamic_arch": [True, False],
     }
     default_options = {
         "shared": False,
         "fPIC": True,
-        "build_lapack": False
+        "build_lapack": False,
+        "use_thread": True,
+        "dynamic_arch": False
     }
     exports_sources = ["CMakeLists.txt"]
     generators = "cmake"
@@ -46,6 +50,12 @@ class OpenBLAS(ConanFile):
 
         cmake.definitions["NOFORTRAN"] = not self.options.build_lapack
         cmake.definitions["BUILD_WITHOUT_LAPACK"] = not self.options.build_lapack
+        cmake.definitions["DYNAMIC_ARCH"] = self.options.dynamic_arch
+        cmake.definitions["USE_THREAD"] = self.options.use_thread
+
+        if not self.options.use_thread:
+            # Required for safe concurrent calls to OpenBLAS routines
+            cmake.definitions["USE_LOCKING"] = True
 
         if self.settings.compiler == "Visual Studio" and not self.options.shared:
             cmake.definitions["MSVC_STATIC_CRT"] = True
