@@ -371,7 +371,6 @@ class LibcurlConan(ConanFile):
             os.remove(os.path.join(self.package_folder, 'lib', 'libcurl.la'))
 
     def package_info(self):
-        self.cpp_info.names['cmake'] = 'CURL'
         self.cpp_info.names['cmake_find_package'] = 'CURL'
         self.cpp_info.names['cmake_find_package_multi'] = 'CURL'
 

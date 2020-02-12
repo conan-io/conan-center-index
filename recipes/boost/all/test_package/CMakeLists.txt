@@ -25,6 +25,9 @@ IF(NOT HEADER_ONLY)
     if (WITH_REGEX)
         list(APPEND boost_components regex)
     endif()
+    if (WITH_CHRONO)
+        list(APPEND boost_components chrono)
+    endif()
 
     find_package(Boost COMPONENTS ${boost_components} REQUIRED)
 
@@ -51,6 +54,10 @@ IF(NOT HEADER_ONLY)
     if (WITH_COROUTINE)
         ADD_EXECUTABLE(coroutine_exe coroutine.cpp)
         TARGET_LINK_LIBRARIES(coroutine_exe ${Boost_LIBRARIES})
+
+    if (WITH_CHRONO)
+        ADD_EXECUTABLE(chrono_exe chrono.cpp)
+        TARGET_LINK_LIBRARIES(chrono_exe ${CONAN_LIBS})
     endif()
 
     if(WITH_PYTHON)
@@ -67,7 +74,7 @@ IF(NOT HEADER_ONLY)
                  COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} "$<TARGET_FILE:regex_exe>")
     endif()
 ELSE()
-	ADD_EXECUTABLE(lambda lambda.cpp)
+    ADD_EXECUTABLE(lambda lambda.cpp)
 ENDIF()
 
 ADD_TEST(NAME TestLambda
