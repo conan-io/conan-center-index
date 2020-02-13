@@ -35,6 +35,8 @@ class GlfwConan(ConanFile):
                     raise ConanException(
                         'System libraries missing: {0} not found. You can install using: "sudo apt install {0}"'
                         .format(" ".join(missing_system_libs)))
+            elif tools.os_info.with_dnf:
+                pass
             elif tools.os_info.with_yum:
                 pass
             elif tools.os_info.with_pacman:
