@@ -93,7 +93,7 @@ class LibcurlConan(ConanFile):
         if self.options.with_openssl:
             if self.settings.os != "Macos" or not self.options.darwin_ssl:
                 # warn about shared linking due to openssl dependency
-                self.output.info("It is not adviced to build a shared libcurl library with static openssl")
+                self.output.warn("Building libcurl library as shared with openssl as static is not recommended")
         if self.options.with_libssh2:
             if self.settings.compiler != "Visual Studio":
                 self.options["libssh2"].shared = self.options.shared
