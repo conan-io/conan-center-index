@@ -140,20 +140,12 @@ class TclConan(ConanFile):
         if self.settings.compiler == "Visual Studio":
             self._build_nmake(["install-binaries", "install-libraries"])
         else:
-            autoTools = self._configure_autotools()
-            if self.settings.os == "Windows":
-                # install-headers target is not available on Windows, so do a plain install
-                autoTools.install()
-                autoTools.make(target="install-private-headers")
-            else:
-                autoTools.make(target="install-binaries")
-                autoTools.make(target="install-libraries")
-                autoTools.make(target="install-msgs")
-                autoTools.make(target="install-tzdata")
-                autoTools.make(target="install-headers")
-                autoTools.make(target="install-private-headers")
+            autotools = self._configure_autotools()
+            autotools.install()
+            autotools.make(target="install-private-headers")
 
             tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
+            tools.rmdir(os.path.join(self.package_folder, "man"))
             tools.rmdir(os.path.join(self.package_folder, "share"))
 
         tclConfigShPath = os.path.join(self.package_folder, "lib", "tclConfig.sh")
