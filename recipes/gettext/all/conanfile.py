@@ -101,6 +101,7 @@ class GetTextConan(ConanFile):
                     env_build.make(self._make_args)
 
     def package(self):
+        self.copy(pattern="COPYING", dst="licenses", src=self._source_subfolder)
         with tools.vcvars(self.settings) if self._is_msvc else tools.no_op():
             with tools.environment_append(VisualStudioBuildEnvironment(self).vars) if self._is_msvc else tools.no_op():
                 with tools.chdir(os.path.join(self._source_subfolder, self._gettext_folder)):
