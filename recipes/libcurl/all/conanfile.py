@@ -91,16 +91,16 @@ class LibcurlConan(ConanFile):
             raise ConanInvalidConfiguration('Specify only with_winssl or with_openssl')
 
         if self.options.with_openssl:
-            # enforce shared linking due to openssl dependency
             if self.settings.os != "Macos" or not self.options.darwin_ssl:
-                self.options["openssl"].shared = self.options.shared
+                # warn about shared linking due to openssl dependency
+                self.output.info("It is not adviced to build a shared libcurl library with static openssl")
         if self.options.with_libssh2:
             if self.settings.compiler != "Visual Studio":
                 self.options["libssh2"].shared = self.options.shared
 
     def system_requirements(self):
         # TODO: Declare tools needed to compile. The idea is Conan checking that they are
-        #   installed and providing a meaninful message before starting the compilation. It
+        #   installed and providing a meaningful message before starting the compilation. It
         #   would be much better than installed them (sudo required).
         pass
 
@@ -120,6 +120,11 @@ class LibcurlConan(ConanFile):
 
         self.requires.add("zlib/1.2.11")
 
+    def build_requirements(self):
+        if tools.os_info.is_windows and "CONAN_BASH_PATH" not in os.environ and \
+                tools.os_info.detect_windows_subsystem() != "msys2":
+            self.build_requires("msys2/20190524")
+
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
         os.rename("curl-%s" % self.version, self._source_subfolder)
@@ -127,6 +132,11 @@ class LibcurlConan(ConanFile):
 
     def build(self):
         self._patch_misc_files()
+        # tweaks for mingw
+        if self._is_mingw:
+            # patch autotools files
+            self._patch_mingw_files()
+
         if self.settings.compiler != "Visual Studio":
             self._build_with_autotools()
         else:
@@ -184,7 +194,9 @@ class LibcurlConan(ConanFile):
             params.append("--enable-shared")
             params.append("--disable-static")
 
-        if not self.options.with_ldap:
+        if self.options.with_ldap:
+            params.append("--enable-ldap")
+        else:
             params.append("--disable-ldap")
 
         # Cross building flags
@@ -220,37 +232,37 @@ class LibcurlConan(ConanFile):
         # patch autotools files
         # for mingw builds - do not compile curl tool, just library
         # linking errors are much harder to fix than to exclude curl tool
-        tools.replace_in_file("Makefile.am",
+        tools.replace_in_file(os.path.join(self._source_subfolder, "Makefile.am"),
                               'SUBDIRS = lib src',
                               'SUBDIRS = lib')
 
-        tools.replace_in_file("Makefile.am",
+        tools.replace_in_file(os.path.join(self._source_subfolder, "Makefile.am"),
                               'include src/Makefile.inc',
                               '')
 
         # patch for zlib naming in mingw
         # when cross-building, the name is correct
         if not tools.cross_building(self.settings):
-            tools.replace_in_file("configure.ac",
+            tools.replace_in_file(os.path.join(self._source_subfolder, "configure.ac"),
                                   '-lz ',
                                   '-lzlib ')
 
         if self.options.shared:
             # patch for shared mingw build
-            tools.replace_in_file(os.path.join('lib', 'Makefile.am'),
+            tools.replace_in_file(os.path.join(self._source_subfolder, 'lib', 'Makefile.am'),
                                   'noinst_LTLIBRARIES = libcurlu.la',
                                   '')
-            tools.replace_in_file(os.path.join('lib', 'Makefile.am'),
+            tools.replace_in_file(os.path.join(self._source_subfolder, 'lib', 'Makefile.am'),
                                   'noinst_LTLIBRARIES =',
                                   '')
-            tools.replace_in_file(os.path.join('lib', 'Makefile.am'),
+            tools.replace_in_file(os.path.join(self._source_subfolder, 'lib', 'Makefile.am'),
                                   'lib_LTLIBRARIES = libcurl.la',
                                   'noinst_LTLIBRARIES = libcurl.la')
             # add directives to build dll
             # used only for native mingw-make
             if not tools.cross_building(self.settings):
-                added_content = tools.load(os.path.join(self.source_folder, 'lib_Makefile_add.am'))
-                tools.save(os.path.join('lib', 'Makefile.am'), added_content, append=True)
+                added_content = tools.load('lib_Makefile_add.am')
+                tools.save(os.path.join(self._source_subfolder, 'lib', 'Makefile.am'), added_content, append=True)
 
     def _build_with_autotools(self):
         env_run = RunEnvironment(self)
@@ -259,22 +271,18 @@ class LibcurlConan(ConanFile):
         self.output.info("Run vars: " + repr(env_run.vars))
         with tools.environment_append(env_run.vars):
             with tools.chdir(self._source_subfolder):
-                use_win_bash = self._is_mingw and not tools.cross_building(self.settings)
-                autotools, autotools_vars = self._configure_autotools()
-
                 # autoreconf
-                self.run('./buildconf', win_bash=use_win_bash)
-
+                self.run('./buildconf', win_bash=tools.os_info.is_windows)
                 # fix generated autotools files
                 tools.replace_in_file("configure", "-install_name \\$rpath/", "-install_name ")
                 self.run("chmod +x configure")
 
-                configure_args = self._get_configure_command_args()
-                autotools.configure(vars=autotools_vars, args=configure_args)
-                autotools.make(vars=autotools_vars)
+            autotools, autotools_vars = self._configure_autotools()
+            autotools.make(vars=autotools_vars)
 
     def _configure_autotools_vars(self):
-        autotools_vars = self._autotools.vars
+        autotools = AutoToolsBuildEnvironment(self)
+        autotools_vars = autotools.vars
         # tweaks for mingw
         if self._is_mingw:
             autotools_vars['RCFLAGS'] = '-O COFF'
@@ -288,26 +296,16 @@ class LibcurlConan(ConanFile):
         return autotools_vars
 
     def _configure_autotools(self):
-        if not self._autotools:
-            use_win_bash = self._is_mingw and not tools.cross_building(self.settings)
-            self._autotools = AutoToolsBuildEnvironment(self, win_bash=use_win_bash)
+        autotools_vars = self._configure_autotools_vars()
+        if self._autotools:
+            return self._autotools, autotools_vars
+        self._autotools = AutoToolsBuildEnvironment(self, win_bash=tools.os_info.is_windows)
 
-            if self.settings.os != "Windows":
-                self._autotools.fpic = self.options.fPIC
-
-            autotools_vars = self._configure_autotools_vars()
-
-            # tweaks for mingw
-            if self._is_mingw:
-                # patch autotools files
-                self._patch_mingw_files()
-
-                self._autotools.defines.append('_AMD64_')
-
-            configure_args = self._get_configure_command_args()
-            self._autotools.configure(vars=autotools_vars, args=configure_args)
-
-        return self._autotools, self._configure_autotools_vars()
+        configure_args = self._get_configure_command_args()
+        if self._is_mingw:
+            self._autotools.defines.append('_AMD64_')
+        self._autotools.configure(vars=autotools_vars, args=configure_args, configure_dir=self._source_subfolder)
+        return self._autotools, autotools_vars
 
     def _configure_cmake(self):
         cmake = CMake(self)
@@ -339,14 +337,11 @@ class LibcurlConan(ConanFile):
     def package(self):
         self.copy(pattern="COPYING", dst="licenses", src=self._source_subfolder)
 
-        # Execute install
         if self.settings.compiler != "Visual Studio":
             env_run = RunEnvironment(self)
-
             with tools.environment_append(env_run.vars):
-                with tools.chdir(self._source_subfolder):
-                    autotools, autotools_vars = self._configure_autotools()
-                    autotools.install(vars=autotools_vars)
+                autotools, autotools_vars = self._configure_autotools()
+                autotools.install(vars=autotools_vars)
         else:
             cmake = self._configure_cmake()
             cmake.install()
