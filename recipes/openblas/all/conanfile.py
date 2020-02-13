@@ -86,7 +86,9 @@ class OpenBLAS(ConanFile):
         self.env_info.OpenBLAS_HOME = self.package_folder
         self.cpp_info.libs = tools.collect_libs(self)
         if self.settings.os == "Linux":
-            self.cpp_info.system_libs = ["pthread"]
+            if self.options.use_thread:
+                self.cpp_info.system_libs = ["pthread"]
+
             if self.options.build_lapack:
                 self.cpp_info.system_libs.append("gfortran")
         self.cpp_info.names["cmake_find_package"] = "OpenBLAS"
