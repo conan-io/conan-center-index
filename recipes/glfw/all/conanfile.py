@@ -21,26 +21,33 @@ class GlfwConan(ConanFile):
     _source_subfolder = "source_subfolder"
     _build_subfolder = "build_subfolder"
 
+    def _check_system_libs(self, libs, install_command):
+        installer = tools.SystemPackageTool()
+        missing_system_libs=[]
+        for package_name in libs:
+            if not installer.installed(package_name):
+                missing_system_libs.append(package_name)
+        if len(missing_system_libs) > 0:
+            raise ConanException(
+                'System libraries missing: {0} not found. You can install using: "sudo {1} {0}"'
+                .format(" ".join(missing_system_libs), install_command))
+
     def system_requirements(self):
         if tools.os_info.is_linux:
-            installer = tools.SystemPackageTool()
+            apt_libs = ["libx11-dev", "libxrandr-dev", "libxinerama-dev", "libxkbcommon-dev", 
+                        "libxcursor-dev", "libxi-dev", "libglu1-mesa-dev"]
+            dnf_yum_libs = ["libX11-devel", "libXrandr-devel", "libXinerama-devel", "libxkbcommon-devel", 
+                            "libXcursor-devel", "libXi-devel", "mesa-libGL-devel"]
+            pacman_libs = ["libx11", "libxrandr", "libxinerama", "libxkbcommon-x11", 
+                           "libxcursor", "libxi", "libglvnd"]
             if tools.os_info.with_apt:
-                missing_system_libs=[]
-                for package_name in ["libx11-dev", "libxrandr-dev", "libxinerama-dev",
-                                     "libxkbcommon-dev", "libxcursor-dev", "libxi-dev",
-                                     "libglu1-mesa-dev"]:
-                    if not installer.installed(package_name):
-                        missing_system_libs.append(package_name)
-                if len(missing_system_libs) > 0:
-                    raise ConanException(
-                        'System libraries missing: {0} not found. You can install using: "sudo apt install {0}"'
-                        .format(" ".join(missing_system_libs)))
+                self._check_system_libs(apt_libs, "apt install")
             elif tools.os_info.with_dnf:
-                pass
+                self._check_system_libs(dnf_yum_libs, "dnf install")
             elif tools.os_info.with_yum:
-                pass
+                self._check_system_libs(dnf_yum_libs, "yum install")
             elif tools.os_info.with_pacman:
-                pass
+                self._check_system_libs(pacman_libs, "pacman -S")
             else:
                 self.output.warn("Could not find any package manager, please install x11, xrandr, xinerama," \
                                  "xkb, xcursor, xi and mesa libraries if not already installed.")
