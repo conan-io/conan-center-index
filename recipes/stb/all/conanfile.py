@@ -10,13 +10,11 @@ class StbConan(ConanFile):
     license = ("Public domain", "MIT")
     no_copy_source = True
     _source_subfolder = "source_subfolder"
-    _commits = {
-        "20200203": "0224a44a10564a214595797b4c88323f79a5f934",
-    }
 
     def source(self):
+        commit = os.path.splitext(os.path.basename(self.conan_data["sources"][self.version]["url"]))[0]
         tools.get(**self.conan_data["sources"][self.version])
-        extracted_dir = self.name + "-" + self._commits[self.version]
+        extracted_dir = self.name + "-" + commit
         os.rename(extracted_dir, self._source_subfolder)
 
     def package(self):
