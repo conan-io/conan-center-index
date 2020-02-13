@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 2.8)
+cmake_minimum_required(VERSION 3.5)
 project(test_package)
 enable_testing()
 
@@ -43,16 +43,16 @@ IF(NOT HEADER_ONLY)
 
     if (WITH_RANDOM)
         ADD_EXECUTABLE(random_exe random.cpp)
-        TARGET_LINK_LIBRARIES(random_exe ${Boost_LIBRARIES})
+        TARGET_LINK_LIBRARIES(random_exe Boost::random)
     endif()
     if (WITH_REGEX)
         ADD_EXECUTABLE(regex_exe regex.cpp)
-        TARGET_LINK_LIBRARIES(regex_exe ${Boost_LIBRARIES})
+        TARGET_LINK_LIBRARIES(regex_exe Boost::regex)
     endif()
 
     if (WITH_TEST)
         ADD_EXECUTABLE(test test.cpp)
-        TARGET_LINK_LIBRARIES(test ${CONAN_LIBS})
+        TARGET_LINK_LIBRARIES(test Boost::unit_test_framework)
     endif()
 
     if (WITH_COROUTINE)
@@ -62,7 +62,7 @@ IF(NOT HEADER_ONLY)
 
     if (WITH_CHRONO)
         ADD_EXECUTABLE(chrono_exe chrono.cpp)
-        TARGET_LINK_LIBRARIES(chrono_exe ${CONAN_LIBS})
+        TARGET_LINK_LIBRARIES(chrono_exe Boost::chrono)
     endif()
 
     if(WITH_PYTHON)
