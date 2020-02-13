@@ -91,8 +91,15 @@ class LibdbConan(ConanFile):
         else:
             conf_args.extend(["--disable-shared", "--enable-static"])
         if self.options.with_tcl:
-            conf_args.append("--with-tcl={}".format(os.path.join(self.deps_cpp_info["tcl"].rootpath, "lib")))
+            conf_args.append("--with-tcl={}".format(tools.unix_path(os.path.join(self.deps_cpp_info["tcl"].rootpath, "lib"))))
         self._autotools.configure(configure_dir=os.path.join(self.source_folder, self._source_subfolder, "dist"), args=conf_args)
+        if self.settings.os == "Windows" and self.options.shared:
+            tools.replace_in_file(os.path.join(self.build_folder, "libtool"),
+                                  "\ndeplibs_check_method=",
+                                  "\ndeplibs_check_method=pass_all\n#deplibs_check_method=")
+            tools.replace_in_file(os.path.join(self.build_folder, "Makefile"),
+                                  ".a",
+                                  ".dll.a")
         return self._autotools
 
     @property
@@ -139,7 +146,27 @@ class LibdbConan(ConanFile):
             autotools = self._configure_autotools()
             autotools.install()
 
+            bindir = os.path.join(self.package_folder, "bin")
             libdir = os.path.join(self.package_folder, "lib")
+            if self.settings.os == "Windows":
+                for fn in os.listdir(libdir):
+                    if fn.endswith(".dll"):
+                        os.rename(os.path.join(libdir, fn), os.path.join(bindir, fn))
+                for fn in os.listdir(bindir):
+                    if not fn.endswith(".dll"):
+                        binpath = os.path.join(bindir, fn)
+                        os.chmod(binpath, 0o755)  # Fixes PermissionError(errno.EACCES) on mingw
+                        os.remove(binpath)
+                if self.options.shared:
+                    dlls = ["lib{}-{}.dll".format(lib, ".".join(self._major_minor_version)) for lib in self._autotools_libs_no_suffix]
+                    for fn in os.listdir(bindir):
+                        if fn not in dlls:
+                            print("removing", fn, "in bin")
+                            os.remove(os.path.join(bindir, fn))
+
+                if not os.listdir(bindir):
+                    tools.rmdir(bindir)
+
             for lib in self._autotools_libs_no_suffix:
                 la_file = os.path.join(libdir, "lib{}-{}.la".format(lib, ".".join(self._major_minor_version)))
                 if os.path.exists(la_file):
@@ -150,13 +177,6 @@ class LibdbConan(ConanFile):
                     lib_version_fn = os.path.join(libdir, "lib{}-{}.a".format(lib, ".".join(self._major_minor_version)))
                     assert os.path.isfile(lib_version_fn)
                     os.remove(libfn)
-
-            bindir = os.path.join(self.package_folder, "bin")
-            for fn in os.listdir(bindir):
-                if not fn.endswith(".dll"):
-                    os.remove(os.path.join(bindir, fn))
-            if not os.listdir(bindir):
-                tools.rmdir(bindir)
 
             tools.rmdir(os.path.join(self.package_folder, "docs"))
 
