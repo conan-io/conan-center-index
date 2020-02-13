@@ -1,6 +1,7 @@
 import os
 import glob
 from conans import ConanFile, CMake, tools
+from conans.errors import ConanInvalidConfiguration, ConanException
 
 
 class GlfwConan(ConanFile):
@@ -16,27 +17,35 @@ class GlfwConan(ConanFile):
     exports = "LICENSE"
     generators = "cmake"
     options = {"shared": [True, False], "fPIC": [True, False]}
-    default_options = {'shared': False, "fPIC": True}
+    default_options = {"shared": False, "fPIC": True}
     _source_subfolder = "source_subfolder"
     _build_subfolder = "build_subfolder"
 
-
-    def requirements(self):
-        self.requires("opengl_support/0.1")
-        if self.settings.os == 'Linux':
-            self.requires("x11_support/0.1")
+    def system_requirements(self):
+        if tools.os_info.is_linux:
+            installer = tools.SystemPackageTool()
+            if tools.os_info.with_apt:
+                missing_system_libs=[]
+                for package_name in ["libx11-dev", "libxrandr-dev", "libxinerama-dev",
+                                     "libxkbcommon-dev", "libxcursor-dev", "libxi-dev",
+                                     "libglu1-mesa-dev"]:
+                    if not installer.installed(package_name):
+                        missing_system_libs.append(package_name)
+                if len(missing_system_libs) > 0:
+                    raise ConanException(
+                        'System libraries missing: {0} not found. You can install using: "sudo apt install {0}"'
+                        .format(" ".join(missing_system_libs)))
+            elif tools.os_info.with_yum:
+                pass
+            elif tools.os_info.with_pacman:
+                pass
+            else:
+                self.output.warn("Could not find any package manager, please install x11, xrandr, xinerama," \
+                                 "xkb, xcursor, xi and mesa libraries if not already installed.")
 
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
-
-    def _patch_sources(self):
-        tools.replace_in_file(
-            os.path.join(self._source_subfolder, "CMakeLists.txt"),
-            "project(GLFW VERSION 3.3.1 LANGUAGES C)",
-            '''project(GLFW VERSION 3.3.1 LANGUAGES C)
-include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
-conan_basic_setup()''')
 
     def configure(self):
         del self.settings.compiler.libcxx
@@ -56,9 +65,12 @@ conan_basic_setup()''')
         return cmake
 
     def build(self):
-        self._patch_sources()
         cmake = self._configure_cmake()
         cmake.build()
+        if self.settings.os == "Macos" and self.options.shared:
+            with tools.chdir(os.path.join(self._source_subfolder, 'src')):
+                for filename in glob.glob('*.dylib'):
+                    self.run('install_name_tool -id {filename} {filename}'.format(filename=filename))
 
     def package(self):
         self.copy("LICENSE.md", dst="licenses", src=self._source_subfolder)
@@ -70,14 +82,9 @@ conan_basic_setup()''')
 
     def package_info(self):
         self.cpp_info.libs = tools.collect_libs(self)
-        self.cpp_info.name = "glfw3"
+        #self.cpp_info.name = "glfw3"
         if self.settings.os == "Linux":
-            self.cpp_info.system_libs.append([
-                'Xrandr', 'Xrender', 'Xi', 'Xinerama', 'Xcursor', 'GL', 'm',
-                'dl', 'drm', 'Xdamage', 'X11-xcb', 'xcb-glx', 'xcb-dri2',
-                'xcb-dri3', 'xcb-present', 'xcb-sync', 'Xxf86vm', 'Xfixes',
-                'Xext', 'X11', 'pthread', 'xcb', 'Xau'
-            ])
+            self.cpp_info.system_libs.extend(['X11', 'm', 'dl', 'pthread'])
             if self.options.shared:
                 self.cpp_info.exelinkflags.append("-lrt -lm -ldl")
         elif self.settings.os == "Macos":
