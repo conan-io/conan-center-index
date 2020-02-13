@@ -1,0 +1,130 @@
+from conans import CMake, ConanFile, tools
+import os
+import shutil
+
+
+class Libx265Conan(ConanFile):
+    name = "libx265"
+    description = "x265 is the leading H.265 / HEVC encoder software library"
+    topics = ("conan", "libx265", "codec", "video", "H.265")
+    url = "https://github.com/conan-io/conan-center-index"
+    homepage = " https://bitbucket.org/multicoreware/x265"
+    exports_sources = "CMakeLists.txt"
+    generators = "cmake"
+    license = ("GPL-2.0-only", "commercial")  # https://bitbucket.org/multicoreware/x265/src/default/COPYING
+    settings = "os", "arch", "compiler", "build_type"
+    options = {
+        "shared": [True, False],
+        "fPIC": [True, False],
+        "bit_depth": [8, 10, 12],
+        "HDR10": [True, False],
+        "SVG_HEVC_encoder": [True, False],
+    }
+    default_options = {
+        "shared": False,
+        "fPIC": True,
+        "bit_depth": 8,
+        "HDR10": False,
+        "SVG_HEVC_encoder": False,
+    }
+
+    _cmake = None
+
+    @property
+    def _source_subfolder(self):
+        return "source_subfolder"
+
+    @property
+    def _build_subfolder(self):
+        return "build_subfolder"
+
+    def config_options(self):
+        if self.settings.os == "Windows":
+            del self.options.fPIC
+
+    def configure(self):
+        if self.options.shared:
+            del self.options.fPIC
+
+    def source(self):
+        tools.get(**self.conan_data["sources"][self.version])
+        os.rename("x265_{}".format(self.version), self._source_subfolder)
+
+    def _configure_cmake(self):
+        if self._cmake:
+            return self._cmake
+        self._cmake = CMake(self)
+        self._cmake.definitions["ENABLE_SHARED"] = self.options.shared
+        self._cmake.definitions["ENABLE_LIBNUMA"] = False
+        if self.settings.os == "Macos":
+            self._cmake.definitions["CMAKE_SHARED_LINKER_FLAGS"] = "-Wl,-read_only_relocs,suppress"
+        self._cmake.definitions["HIGH_BIT_DEPTH"] = self.options.bit_depth != 8
+        self._cmake.definitions["MAIN12"] = self.options.bit_depth == 12
+        self._cmake.definitions["ENABLE_HDR10_PLUS"] = self.options.HDR10
+        self._cmake.definitions["ENABLE_SVT_HEVC"] = self.options.SVG_HEVC_encoder
+        if self.settings.compiler == "Visual Studio":
+            self._cmake.definitions["STATIC_LINK_CRT"] = "T" in str(self.settings.compiler.runtime)
+        if self.settings.os == "Linux":
+            self._cmake.definitions["PLATFORM_LIBS"] = "dl"
+        self._cmake.configure(build_folder=self._build_subfolder)
+        return self._cmake
+
+    def _patch_sources(self):
+        cmakelists = os.path.join(self._source_subfolder, "source", "CMakeLists.txt")
+        if self.settings.os == "Windows":
+            tools.replace_in_file(cmakelists,
+                                  "${PROJECT_BINARY_DIR}/Debug/x265.pdb",
+                                  "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/x265.pdb")
+            tools.replace_in_file(cmakelists,
+                                  "${PROJECT_BINARY_DIR}/x265.pdb",
+                                  "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/x265.pdb")
+        elif self.settings.os == "Android":
+            tools.replace_in_file(cmakelists,
+                "list(APPEND PLATFORM_LIBS pthread)", "")
+            tools.replace_in_file(cmakelists,
+                "list(APPEND PLATFORM_LIBS rt)", "")
+
+    def build(self):
+        self._patch_sources()
+        cmake = self._configure_cmake()
+        cmake.build()
+
+    def package(self):
+        self.copy("COPYING", src=self._source_subfolder, dst="licenses")
+        cmake = self._configure_cmake()
+        cmake.install()
+
+        if self.options.shared:
+            if self.settings.compiler == "Visual Studio":
+                static_lib = "x265-static.lib"
+            else:
+                static_lib = "libx265.a"
+            os.unlink(os.path.join(self.package_folder, "lib", static_lib))
+
+        if self.settings.compiler == "Visual Studio":
+            name = "libx265.lib" if self.options.shared else "x265-static.lib"
+            shutil.move(os.path.join(self.package_folder, "lib", name),
+                        os.path.join(self.package_folder, "lib", "x265.lib"))
+
+        if self.settings.os != "Windows" or not self.options.shared:
+            tools.rmdir(os.path.join(self.package_folder, "bin"))
+        else:
+            for file in os.listdir(os.path.join(self.package_folder, "bin")):
+                if not file.endswith(".dll"):
+                    os.unlink(os.path.join(self.package_folder, "bin", file))
+        tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
+
+    def package_info(self):
+        self.cpp_info.names["pkg_config"] = "x265"
+        self.cpp_info.libs = ["x265"]
+        if self.settings.os == "Linux":
+            self.cpp_info.system_libs.extend(["dl", "pthread", "m"])
+        if self.settings.os == "Android":
+            self.cpp_info.libs.extend(["dl", "m"])
+        libcxx = self.settings.get_safe("compiler.libcxx")
+        if libcxx in ["libstdc++", "libstdc++11"]:
+            self.cpp_info.system_libs.append("stdc++")
+        elif libcxx == "libc++":
+            self.cpp_info.system_libs.append("c++")
+        elif libcxx in ["c++_static", "c++_shared"]:
+            self.cpp_info.system_libs.extend([libcxx, "c++abi"])

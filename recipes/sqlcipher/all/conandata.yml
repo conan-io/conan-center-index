@@ -1,0 +1,10 @@
+sources:
+  "4.3.0":
+    sha256: 41e1408465488e9c478ca5b7c5f8410405a10caa73b82db60ac115a76c563c05
+    url: https://github.com/sqlcipher/sqlcipher/archive/v4.3.0.zip
+patches:
+  4.3.0:
+    - patch_file: "patches/Makefile.in.patch"
+      base_path: "source_subfolder"
+    - patch_file: "patches/Makefile.msc.patch"
+      base_path: "source_subfolder"

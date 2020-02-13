@@ -7,7 +7,6 @@ from conans.tools import os_info
 
 class LibjpegConan(ConanFile):
     name = "libjpeg"
-    version = "9c"
     description = "Libjpeg is a widely used C library for reading and writing JPEG image files."
     url = "https://github.com/conan-io/conan-center-index"
     topics = ("conan", "image", "format", "jpg", "jpeg", "picture", "multimedia", "graphics")
