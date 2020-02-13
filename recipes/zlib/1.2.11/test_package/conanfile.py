@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 import os
-from conans import ConanFile, CMake
+from conans import ConanFile, CMake, tools
 
 
 class TestZlibConan(ConanFile):
@@ -20,7 +20,7 @@ class TestZlibConan(ConanFile):
     def test(self):
         assert os.path.exists(os.path.join(self.deps_cpp_info["zlib"].rootpath, "licenses", "LICENSE"))
         assert os.path.exists(os.path.join(self.build_folder, "zlib.pc"))
-        if "x86" in self.settings.arch:
+        if "x86" in self.settings.arch and not tools.cross_building(self.settings):
             self.run(os.path.join("bin", "test"), run_environment=True)
             if self.options["zlib"].minizip:
                 self.run(os.path.join("bin", "test_minizip"), run_environment=True)
