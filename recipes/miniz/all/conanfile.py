@@ -1,7 +1,4 @@
-import glob
 import os
-import shutil
-
 from conans import ConanFile, CMake, tools
 
 class MinizConan(ConanFile):
@@ -18,6 +15,8 @@ class MinizConan(ConanFile):
     settings = "os", "arch", "compiler", "build_type"
     options = {"shared": [True, False], "fPIC": [True, False]}
     default_options = {"shared": False, "fPIC": True}
+
+    _cmake = None
 
     @property
     def _source_subfolder(self):
@@ -39,26 +38,22 @@ class MinizConan(ConanFile):
         tools.get(**self.conan_data["sources"][self.version])
         os.rename(self.name + "-" + self.version, self._source_subfolder)
 
+    def _configure_cmake(self):
+        if self._cmake:
+            return self._cmake
+        self._cmake = CMake(self)
+        self._cmake.configure(build_folder=self._build_subfolder)
+        return self._cmake
+
     def build(self):
-        cmake = CMake(self)
-        cmake.configure(build_folder=self._build_subfolder)
-        cmake.build(target="miniz")
+        cmake = self._configure_cmake()
+        cmake.build(target=self.name)
 
     def package(self):
         self.copy("LICENSE", dst="licenses", src=self._source_subfolder)
-
-        include_dir = os.path.join(self.package_folder, "include")
-        tools.mkdir(include_dir)
-        for header_file in glob.glob(os.path.join(self._source_subfolder, "*.h")):
-            shutil.copy(header_file, include_dir)
-
-        build_lib_dir = os.path.join(self._build_subfolder, "lib")
-        build_bin_dir = os.path.join(self._build_subfolder, "bin")
-        self.copy(pattern="*.a", dst="lib", src=build_lib_dir, keep_path=False)
-        self.copy(pattern="*.lib", dst="lib", src=build_lib_dir, keep_path=False)
-        self.copy(pattern="*.dylib", dst="lib", src=build_lib_dir, keep_path=False)
-        self.copy(pattern="*.so", dst="lib", src=build_lib_dir, keep_path=False)
-        self.copy(pattern="*.dll", dst="bin", src=build_bin_dir, keep_path=False)
+        cmake = self._configure_cmake()
+        cmake.install()
 
     def package_info(self):
         self.cpp_info.libs = tools.collect_libs(self)
+        self.cpp_info.includedirs = ["include", os.path.join("include", "miniz")]
