@@ -93,7 +93,7 @@ class GlfwConan(ConanFile):
         self.cpp_info.libs = tools.collect_libs(self)
         #self.cpp_info.name = "glfw3"
         if self.settings.os == "Linux":
-            self.cpp_info.system_libs.extend(['X11', 'm', 'dl', 'pthread'])
+            self.cpp_info.system_libs.extend(['X11', 'GL', 'm', 'dl', 'pthread'])
             if self.options.shared:
                 self.cpp_info.exelinkflags.append("-lrt -lm -ldl")
         elif self.settings.os == "Macos":
