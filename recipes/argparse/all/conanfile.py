@@ -32,7 +32,7 @@ class ArgparseConan(ConanFile):
             if tools.Version(self.settings.compiler.version) < minimum_required_compiler_version:
                 raise ConanInvalidConfiguration("This package requires c++17 support. The current compiler does not support it.")
         except KeyError:
-            self.output.info("This recipe has no support for the current compiler. Please consider adding it.")
+            self.output.warn("This recipe has no support for the current compiler. Please consider adding it.")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
