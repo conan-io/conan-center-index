@@ -143,6 +143,9 @@ class LibcurlConan(ConanFile):
             self._build_with_cmake()
 
     def _patch_misc_files(self):
+        tools.replace_in_file(os.path.join(self._source_subfolder, 'configure.ac'),
+                              "OPENSSL_PCDIR=\"$OPT_SSL/lib/pkgconfig\"",
+                              "OPENSSL_PCDIR=\"${ac_pwd}\"")
         if self.options.with_largemaxwritesize:
             tools.replace_in_file(os.path.join(self._source_subfolder, 'include', 'curl', 'curl.h'),
                                   "define CURL_MAX_WRITE_SIZE 16384",
