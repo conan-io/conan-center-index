@@ -67,8 +67,9 @@ class LibsodiumConan(ConanFile):
 
     def build_requirements(self):
         # There are several unix tools used (bash scripts for Emscripten, autoreconf on MinGW, etc...)
-        if tools.os_info.is_windows:
-            self.build_requires("msys2/20161025")
+        if self.settings.compiler != "Visual Studio" and tools.os_info.is_windows and \
+                not "CONAN_BASH_PATH" in os.environ and tools.os_info.detect_windows_subsystem() != "Windows":
+            self.build_requires("msys2/20190524")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
@@ -115,7 +116,7 @@ class LibsodiumConan(ConanFile):
         host_arch = "%s-apple-%s" % (self.settings.arch, os)
         configure_args.append("--host=%s" % host_arch)
         self._build_autotools_impl(configure_args)
-        
+
     def _build_autotools_neutrino(self, configure_args):
         neutrino_archs = {"x86_64":"x86_64-pc", "x86":"i586-pc", "armv7":"arm-unknown", "armv8": "aarch64-unknown"}
         if self.settings.os.version == "7.0" and str(self.settings.arch) in neutrino_archs:
