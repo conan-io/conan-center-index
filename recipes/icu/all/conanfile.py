@@ -46,8 +46,9 @@ class ICUBase(ConanFile):
         return self._the_os == "Windows" and self.settings.compiler == "gcc"
 
     def build_requirements(self):
-        if self._the_os == "Windows":
-            self.build_requires("msys2/20161025")
+        if tools.os_info.is_windows and "CONAN_BASH_PATH" not in os.environ and \
+                tools.os_info.detect_windows_subsystem() != "msys2":
+            self.build_requires("msys2/20190524")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
