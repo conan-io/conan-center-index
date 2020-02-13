@@ -33,6 +33,8 @@ class TclConan(ConanFile):
             del self.options.fPIC
 
     def configure(self):
+        if self.settings.os not in ("Linux", "Macos", "Windows"):
+            raise ConanInvalidConfiguration("Unsupported os")
         if self.options.shared:
             del self.options.fPIC
         del self.settings.compiler.libcxx
@@ -48,26 +50,17 @@ class TclConan(ConanFile):
         extracted_dir = self.name + self.version
         os.rename(extracted_dir, self._source_subfolder)
 
-    def config_options(self):
-        if self.settings.os == "Windows":
-            del self.options.fPIC
+    def _get_default_build_system_subdir(self):
+            return {
+                "Macos": "macosx",
+                "Linux": "unix",
+                "Window": "win",
+            }[str(self.settings.os)]
 
-    def _get_default_build_system(self):
-        if self.settings.os == "Macos":
-            return "macosx"
-        elif self.settings.os == "Linux":
-            return "unix"
-        elif self.settings.os == "Windows":
-            return "win"
-        else:
-            raise ConanInvalidConfiguration("Unknown settings.os={}".format(self.settings.os))
-
-    def _get_configure_dir(self, build_system=None):
-        if build_system is None:
-            build_system = self._get_default_build_system()
-        if build_system not in ["win", "unix", "macosx"]:
-            raise ConanInvalidConfiguration("Invalid build system: {}".format(build_system))
-        return os.path.join(self.source_folder, self._source_subfolder, build_system)
+    def _get_configure_dir(self, build_system_subdir=None):
+        if build_system_subdir is None:
+            build_system_subdir = self._get_default_build_system_subdir()
+        return os.path.join(self.source_folder, self._source_subfolder, build_system_subdir)
 
     def _patch_sources(self):
         unix_config_dir = self._get_configure_dir("unix")
