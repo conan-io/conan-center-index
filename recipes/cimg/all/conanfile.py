@@ -53,9 +53,6 @@ class CImgConan(ConanFile):
         shutil.copytree(os.path.join(self.source_folder, self._source_subfolder, "plugins"),
                         os.path.join(self.package_folder, "include", "plugins"))
 
-    def build(self):
-        pass
-
     def package_id(self):
         self.info.header_only()
 
