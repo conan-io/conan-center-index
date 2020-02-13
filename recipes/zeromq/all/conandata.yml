@@ -2,3 +2,9 @@ sources:
   "4.3.2":
     url: "https://github.com/zeromq/libzmq/archive/v4.3.2.tar.gz"
     sha256: "02ecc88466ae38cf2c8d79f09cfd2675ba299a439680b64ade733e26a349edeb"
+patches:
+  "4.3.2":
+    - base_path: "source_subfolder"
+      patch_file: "patches/0001-problem-__try-and-__except-isn-t-universally-supported-on-windows.patch"
+    - base_path: "source_subfolder"
+      patch_file: "patches/0002-problem-invalid-syntax-for-calling-convention-on-function.patch"
