@@ -1,0 +1,4 @@
+sources:
+  "1.5.0":
+    url: "https://github.com/OSGeo/shapelib/archive/v1.5.0.zip"
+    sha256: "673b00ef6caef254fe16d831b982e6bbed7397615c57b9ed92cf8b59017dd06b"

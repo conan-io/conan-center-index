@@ -140,8 +140,9 @@ class BoostConan(ConanFile):
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
-        for patch in self.conan_data["patches"][self.version]:
-            tools.patch(**patch)
+        if self.version in self.conan_data["patches"]:
+            for patch in self.conan_data["patches"][self.version]:
+                tools.patch(**patch)
 
     ##################### BUILDING METHODS ###########################
 
@@ -413,6 +414,26 @@ class BoostConan(ConanFile):
                     # self.run("%s --show-libraries" % b2_exe)
                     self.run(full_command)
 
+        arch = self.settings.get_safe('arch')
+        if arch.startswith("asm.js"):
+            self._create_emscripten_libs()
+
+    def _create_emscripten_libs(self):
+        # Boost Build doesn't create the libraries, but it gets close,
+        # leaving .bc files where the libraries would be.
+        staged_libs = os.path.join(
+            self.source_folder, self._boost_dir, "stage", "lib"
+        )
+        for bc_file in os.listdir(staged_libs):
+            if bc_file.startswith("lib") and bc_file.endswith(".bc"):
+                a_file = bc_file[:-3] + ".a"
+                cmd = "emar q {dst} {src}".format(
+                    dst=os.path.join(staged_libs, a_file),
+                    src=os.path.join(staged_libs, bc_file),
+                )
+                self.output.info(cmd)
+                self.run(cmd)
+
     @property
     def _b2_os(self):
         return {"Windows": "windows",
@@ -624,6 +645,8 @@ class BoostConan(ConanFile):
             pass
         elif arch.startswith("mips"):
             pass
+        elif arch.startswith("asm.js"):
+            pass
         else:
             self.output.warn("Unable to detect the appropriate ABI for %s architecture." % arch)
         self.output.info("Cross building flags: %s" % flags)
@@ -741,6 +764,8 @@ class BoostConan(ConanFile):
             return "msvc", _msvc_version, ""
         elif self.settings.os == "Windows" and self.settings.compiler == "clang":
             return "clang-win", compiler_version, ""
+        elif self.settings.os == "Emscripten" and self.settings.compiler == "clang":
+            return "emscripten", compiler_version, self._cxx
         elif self.settings.compiler == "gcc" and tools.is_apple_os(self.settings.os):
             return "darwin", compiler_version, self._cxx
         elif compiler == "gcc" and compiler_version[0] >= "5":
@@ -762,11 +787,20 @@ class BoostConan(ConanFile):
             return compiler, compiler_version, ""
         elif self.settings.compiler == "sun-cc":
             return "sunpro", compiler_version, ""
+        elif self.settings.compiler == "intel":
+            toolset = {"Macos": "intel-darwin",
+                       "Windows": "intel-win",
+                       "Linux": "intel-linux"}.get(str(self.settings.os))
+            return toolset, compiler_version, ""
         else:
             return compiler, compiler_version, ""
 
     ##################### BOOSTRAP METHODS ###########################
     def _get_boostrap_toolset(self):
+        if self.settings.compiler == "intel":
+            return {"Macos": "intel-darwin",
+                    "Windows": "intel-win32",
+                    "Linux": "intel-linux"}.get(str(self.settings.os))
         if self._is_msvc:
             comp_ver = self.settings.compiler.version
             if Version(str(comp_ver)) >= "16":
@@ -805,7 +839,18 @@ class BoostConan(ConanFile):
                         option = "" if tools.os_info.is_windows else "-with-toolset="
                         cmd = "%s %s%s" % (bootstrap, option, self._get_boostrap_toolset())
                     self.output.info(cmd)
-                    with tools.environment_append({"CC": None, "CXX": None, "CFLAGS": None, "CXXFLAGS": None}):
+
+                    removed_environment_variables = [
+                        "CC",
+                        "CXX",
+                        "CFLAGS",
+                        "CXXFLAGS",
+                        "SDKROOT",
+                        "IPHONEOS_DEPLOYMENT_TARGET"
+                    ]
+                    removed_environment_variables = dict((env_var, None) for env_var in removed_environment_variables)
+
+                    with tools.environment_append(removed_environment_variables):
                         self.run(cmd)
 
         except Exception as exc:
@@ -899,12 +944,11 @@ class BoostConan(ConanFile):
                     self.output.info("Enabled magic autolinking (smart and magic decisions)")
 
                 # https://github.com/conan-community/conan-boost/issues/127#issuecomment-404750974
-                self.cpp_info.libs.append("bcrypt")
+                self.cpp_info.system_libs.append("bcrypt")
             elif self.settings.os == "Linux":
                 # https://github.com/conan-community/conan-boost/issues/135
-                self.cpp_info.libs.append("pthread")
+                self.cpp_info.system_libs.extend(["pthread", "rt"])
 
         self.env_info.BOOST_ROOT = self.package_folder
         self.cpp_info.names["cmake_find_package"] = "Boost"
         self.cpp_info.names["cmake_find_package_multi"] = "Boost"
-
