@@ -1,5 +1,6 @@
 from conans import AutoToolsBuildEnvironment, ConanFile, MSBuild, tools
 import os
+import shutil
 
 
 class LibdbConan(ConanFile):
@@ -135,6 +136,8 @@ class LibdbConan(ConanFile):
 
     def package(self):
         self.copy("LICENSE", src=self._source_subfolder, dst="licenses")
+        bindir = os.path.join(self.package_folder, "bin")
+        libdir = os.path.join(self.package_folder, "lib")
         if self.settings.compiler == "Visual Studio":
             build_windows = os.path.join(self._source_subfolder, "build_windows")
             build_dir = os.path.join(self._source_subfolder, "build_windows", self._msvc_arch, self._msvc_build_type)
@@ -142,12 +145,26 @@ class LibdbConan(ConanFile):
             self.copy("*.dll", src=build_dir, dst="bin")
             for fn in ("db.h", "db.cxx", "db_int.h", "dbstl_common.h"):
                 self.copy(fn, src=build_windows, dst="include")
+
+            def _lib_to_msvc_lib(lib):
+                shared_suffix = "" if self.options.shared else "s"
+                debug_suffix = "d" if self.settings.build_type == "Debug" else ""
+                version_suffix = "".join(self._major_minor_version)
+                return "{}{}{}{}".format(lib, version_suffix, shared_suffix, debug_suffix)
+
+            # MSVC does not build libdb_cxx but some dependencies depend on its existence
+            # ==> copy libdb to libdb_cxx
+            shutil.copy(os.path.join(libdir, _lib_to_msvc_lib("libdb")+".lib"),
+                        os.path.join(libdir, _lib_to_msvc_lib("libdb_cxx")+".lib"))
+
+            msvc_libs = [_lib_to_msvc_lib(lib) for lib in self._libs]
+            for lib, msvc_lib in zip(self._libs, msvc_libs):
+                os.rename(os.path.join(libdir, "{}.lib".format(msvc_lib)),
+                          os.path.join(libdir, "{}.lib".format(lib)))
         else:
             autotools = self._configure_autotools()
             autotools.install()
 
-            bindir = os.path.join(self.package_folder, "bin")
-            libdir = os.path.join(self.package_folder, "lib")
             if self.settings.os == "Windows":
                 for fn in os.listdir(libdir):
                     if fn.endswith(".dll"):
@@ -158,7 +175,7 @@ class LibdbConan(ConanFile):
                         os.chmod(binpath, 0o755)  # Fixes PermissionError(errno.EACCES) on mingw
                         os.remove(binpath)
                 if self.options.shared:
-                    dlls = ["lib{}-{}.dll".format(lib, ".".join(self._major_minor_version)) for lib in self._autotools_libs_no_suffix]
+                    dlls = ["lib{}-{}.dll".format(lib, ".".join(self._major_minor_version)) for lib in self._libs]
                     for fn in os.listdir(bindir):
                         if fn not in dlls:
                             print("removing", fn, "in bin")
@@ -167,16 +184,16 @@ class LibdbConan(ConanFile):
                 if not os.listdir(bindir):
                     tools.rmdir(bindir)
 
-            for lib in self._autotools_libs_no_suffix:
+            for lib in self._libs:
                 la_file = os.path.join(libdir, "lib{}-{}.la".format(lib, ".".join(self._major_minor_version)))
                 if os.path.exists(la_file):
                     os.remove(la_file)
                 if not self.options.shared:
-                    # autotools installs the static libraries twice as libXXX.a and libXXX-5.3.a
+                    # autotools installs the static libraries twice as libXXX.a and libXXX-5.3.a ==> remove libXXX-5.3.a
                     libfn = os.path.join(libdir, "lib{}.a".format(lib))
                     lib_version_fn = os.path.join(libdir, "lib{}-{}.a".format(lib, ".".join(self._major_minor_version)))
-                    assert os.path.isfile(lib_version_fn)
-                    os.remove(libfn)
+                    assert os.path.isfile(libfn)
+                    os.remove(lib_version_fn)
 
             tools.rmdir(os.path.join(self.package_folder, "docs"))
 
@@ -186,30 +203,17 @@ class LibdbConan(ConanFile):
         return major, minor
 
     @property
-    def _autotools_libs_no_suffix(self):
+    def _libs(self):
         libs = []
         if self.options.with_tcl:
             libs.append("db_tcl")
         libs.extend(["db_cxx", "db_stl", "db_sql", "db"])
-        return libs
-
-    @property
-    def _msvc_libs_no_suffix(self):
-        libs = []
-        if self.options.with_tcl:
-            libs.append("libdb_tcl")
-        libs.extend(["libdb_stl", "libdb_sql", "libdb"])
+        if self.settings.compiler == "Visual Studio":
+            libs = ["lib{}".format(lib) for lib in libs]
         return libs
 
     def package_info(self):
-        if self.settings.compiler == "Visual Studio":
-            version = "".join(self._major_minor_version)
-            shared_suffix = "" if self.options.shared else "s"
-            debug_suffix = "d" if self.settings.build_type == "Debug" else ""
-            libs = ["{}{}{}{}".format(lib, version, shared_suffix, debug_suffix) for lib in self._msvc_libs_no_suffix]
-        else:
-            libs = ["{}-{}".format(lib, ".".join(self._major_minor_version)) for lib in self._autotools_libs_no_suffix]
-        self.cpp_info.libs = libs
+        self.cpp_info.libs = self._libs
         if self.settings.compiler == "Visual Studio"and self.options.shared:
             self.cpp_info.defines = ["DB_USE_DLL"]
         if self.settings.os == "Windows" and not self.options.shared:
