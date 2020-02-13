@@ -16,6 +16,8 @@ class MinizConan(ConanFile):
     options = {"shared": [True, False], "fPIC": [True, False]}
     default_options = {"shared": False, "fPIC": True}
 
+    _cmake = None
+
     @property
     def _source_subfolder(self):
         return "source_subfolder"
@@ -37,9 +39,11 @@ class MinizConan(ConanFile):
         os.rename(self.name + "-" + self.version, self._source_subfolder)
 
     def _configure_cmake(self):
-        cmake = CMake(self)
-        cmake.configure(build_folder=self._build_subfolder)
-        return cmake
+        if self._cmake:
+            return self._cmake
+        self._cmake = CMake(self)
+        self._cmake.configure(build_folder=self._build_subfolder)
+        return self._cmake
 
     def build(self):
         cmake = self._configure_cmake()
