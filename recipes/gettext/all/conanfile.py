@@ -11,7 +11,7 @@ class GetTextConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://www.gnu.org/software/gettext"
     license = "GPL-3.0-or-later"
-    settings = "os_build", "arch_build", "compiler", "build_type"
+    settings = "os_build", "arch_build", "compiler"
     exports_sources = ["patches/*.patch"]
 
     _autotools = None
