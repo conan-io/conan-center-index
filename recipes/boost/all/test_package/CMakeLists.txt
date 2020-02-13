@@ -29,6 +29,9 @@ IF(NOT HEADER_ONLY)
     if (WITH_CHRONO)
         list(APPEND boost_components chrono)
     endif()
+    if (WITH_TEST)
+        list(APPEND boost_components unit_test_framework)
+    endif()
 
     find_package(Boost COMPONENTS ${boost_components} REQUIRED)
 
