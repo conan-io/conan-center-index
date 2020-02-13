@@ -51,8 +51,8 @@ IF(NOT HEADER_ONLY)
     endif()
 
     if (WITH_TEST)
-        ADD_EXECUTABLE(test test.cpp)
-        TARGET_LINK_LIBRARIES(test Boost::unit_test_framework)
+        ADD_EXECUTABLE(test_exe test.cpp)
+        TARGET_LINK_LIBRARIES(test_exe Boost::unit_test_framework)
     endif()
 
     if (WITH_COROUTINE)
