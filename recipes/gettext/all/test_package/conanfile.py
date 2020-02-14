@@ -6,5 +6,5 @@ class TestPackageConan(ConanFile):
     generators = "txt"
 
     def test(self):
-        self.run("gettext --version", run_environment=True)
-        self.run("ngettext --version", run_environment=True)
+        for exe in ['gettext', 'ngettext', 'msgcat', 'msgmerge']:
+            self.run("%s --version" % exe, run_environment=True)

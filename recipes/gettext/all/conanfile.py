@@ -14,6 +14,8 @@ class GetTextConan(ConanFile):
     settings = "os_build", "arch_build", "compiler"
     exports_sources = ["patches/*.patch"]
 
+    requires = [("libiconv/1.15", "private")]
+
     _autotools = None
 
     @property
@@ -23,10 +25,6 @@ class GetTextConan(ConanFile):
     @property
     def _is_msvc(self):
         return self.settings.compiler == "Visual Studio"
-
-    @property
-    def _gettext_folder(self):
-        return "gettext-runtime"
 
     @property
     def _make_args(self):
@@ -51,6 +49,8 @@ class GetTextConan(ConanFile):
     def _configure_autotools(self):
         if self._autotools:
             return self._autotools
+        libiconv_prefix = self.deps_cpp_info["libiconv"].rootpath
+        libiconv_prefix = tools.unix_path(libiconv_prefix) if tools.os_info.is_windows else libiconv_prefix
         args = ["HELP2MAN=/bin/true",
                 "EMACS=no",
                 "--disable-nls",
@@ -60,7 +60,8 @@ class GetTextConan(ConanFile):
                 "--disable-java",
                 "--disable-csharp",
                 "--disable-libasprintf",
-                "--disable-curses"]
+                "--disable-curses",
+                "--with-libiconv-prefix=%s" % libiconv_prefix]
         build = None
         host = None
         rc = None
@@ -96,7 +97,7 @@ class GetTextConan(ConanFile):
             tools.patch(**patch)   
         with tools.vcvars(self.settings) if self._is_msvc else tools.no_op():
             with tools.environment_append(VisualStudioBuildEnvironment(self).vars) if self._is_msvc else tools.no_op():
-                with tools.chdir(os.path.join(self._source_subfolder, self._gettext_folder)):
+                with tools.chdir(os.path.join(self._source_subfolder)):
                     env_build = self._configure_autotools()
                     env_build.make(self._make_args)
 
@@ -104,11 +105,12 @@ class GetTextConan(ConanFile):
         self.copy(pattern="COPYING", dst="licenses", src=self._source_subfolder)
         with tools.vcvars(self.settings) if self._is_msvc else tools.no_op():
             with tools.environment_append(VisualStudioBuildEnvironment(self).vars) if self._is_msvc else tools.no_op():
-                with tools.chdir(os.path.join(self._source_subfolder, self._gettext_folder)):
+                with tools.chdir(os.path.join(self._source_subfolder)):
                     env_build = self._configure_autotools()
                     env_build.install()
         tools.rmdir(os.path.join(self.package_folder, 'share'))
         tools.rmdir(os.path.join(self.package_folder, 'lib'))
+        tools.rmdir(os.path.join(self.package_folder, 'include'))
 
     def package_id(self):
         self.info.include_build_settings()
