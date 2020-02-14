@@ -18,8 +18,7 @@ class GetTextConan(ConanFile):
     options = {"shared": [True, False], "fPIC": [True, False]}
     default_options = {"shared": False, "fPIC": True}
 
-    requires = ("libiconv/1.15",
-                "libxml2/2.9.9")
+    requires = ("libiconv/1.15")
 
     def config_options(self):
         if self.settings.os == 'Windows':
@@ -61,9 +60,7 @@ class GetTextConan(ConanFile):
         for patch in self.conan_data["patches"][self.version]:
             tools.patch(**patch)    
         libiconv_prefix = self.deps_cpp_info["libiconv"].rootpath
-        libxml2_prefix = self.deps_cpp_info["libxml2"].rootpath
         libiconv_prefix = tools.unix_path(libiconv_prefix) if tools.os_info.is_windows else libiconv_prefix
-        libxml2_prefix = tools.unix_path(libxml2_prefix) if tools.os_info.is_windows else libxml2_prefix
         args = ["HELP2MAN=/bin/true",
                 "EMACS=no",
                 "--disable-nls",
@@ -74,12 +71,11 @@ class GetTextConan(ConanFile):
                 "--disable-csharp",
                 "--disable-libasprintf",
                 "--disable-curses",
-                "--with-libiconv-prefix=%s" % libiconv_prefix,
-                "--with-libxml2-prefix=%s" % libxml2_prefix]
+                "--with-libiconv-prefix=%s" % libiconv_prefix]
         build = None
         host = None
         rc = None
-        if self.options.get_safe("shared"):
+        if self.options.shared:
             args.extend(["--disable-static", "--enable-shared"])
         else:
             args.extend(["--disable-shared", "--enable-static"])
