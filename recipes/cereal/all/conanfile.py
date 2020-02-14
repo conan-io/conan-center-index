@@ -11,6 +11,7 @@ class CerealConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     exports_sources = "CMakeLists.txt"
     generators = "cmake"
+    settings = "os"
     options = {"thread_safe": [True, False]}
     default_options = {"thread_safe": False}
     no_copy_source = True
@@ -37,5 +38,5 @@ class CerealConan(ConanFile):
     def package_info(self):
         if self.options.thread_safe:
             self.cpp_info.defines = ["CEREAL_THREAD_SAFE=1"]
-            if tools.os_info.is_linux:
+            if self.settings.os == "Linux":
                 self.cpp_info.system_libs.append("pthread")
