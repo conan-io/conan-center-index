@@ -14,6 +14,7 @@ class MsgpackConan(ConanFile):
     settings = "os", "arch", "build_type", "compiler"
     options = {"fPIC": [True, False], "shared": [True, False], "header_only": [True, False], "with_boost": [True, False]}
     default_options = {"fPIC": True, "shared": False, "header_only": False, "with_boost": False}
+    _cmake = None
 
     @property
     def _source_subfolder(self):
@@ -38,7 +39,7 @@ class MsgpackConan(ConanFile):
 
     def requirements(self):
         if not self.options.header_only and self.options.with_boost:
-            self.requires.add("boost/1.69.0")
+            self.requires.add("boost/1.72.0")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
@@ -46,13 +47,15 @@ class MsgpackConan(ConanFile):
         os.rename(extracted_dir, self._source_subfolder)
 
     def _configure_cmake(self):
-        cmake = CMake(self)
-        cmake.definitions["MSGPACK_BOOST"] = self.options.with_boost
-        cmake.definitions["MSGPACK_32BIT"] = self.settings.arch == "x86"
-        cmake.definitions["MSGPACK_BUILD_EXAMPLE"] = False
-        cmake.definitions["MSGPACK_BUILD_TESTS"] = False
-        cmake.configure(build_folder=self._build_subfolder)
-        return cmake
+        if self._cmake:
+            return self._cmake
+        self._cmake = CMake(self)
+        self._cmake.definitions["MSGPACK_BOOST"] = self.options.with_boost
+        self._cmake.definitions["MSGPACK_32BIT"] = self.settings.arch == "x86"
+        self._cmake.definitions["MSGPACK_BUILD_EXAMPLE"] = False
+        self._cmake.definitions["MSGPACK_BUILD_TESTS"] = False
+        self._cmake.configure(build_folder=self._build_subfolder)
+        return self._cmake
 
     def build(self):
         if not self.options.header_only:
@@ -70,8 +73,10 @@ class MsgpackConan(ConanFile):
             tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
             tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
 
-    def package_info(self):
+    def package_id(self):
         if self.options.header_only:
             self.info.header_only()
-        else:
+
+    def package_info(self):
+        if not self.options.header_only:
             self.cpp_info.libs = tools.collect_libs(self)
