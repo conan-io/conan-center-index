@@ -61,13 +61,18 @@ class Jinja2cppConan(ConanFile):
         cmake.definitions["JINJA2CPP_BUILD_SHARED"] = self.options.shared
         cmake.definitions["JINJA2CPP_DEPS_MODE"] = "conan-build"
         cmake.definitions["JINJA2CPP_CXX_STANDARD"] = self._cpp_std
+        # Conan cmake generator omits the build_type flag for MSVC multiconfiguration CMake,
+        # but provide build-type-specific runtime type flag. For now, Jinja2C++ build scripts
+        # need to know the build type is being built in order to setup internal flags correctly
+        cmake.definitions["JINJA2CPP_CONAN_BUILD_TYPE"] = self.settings.build_type
         compiler = self.settings.get_safe("compiler")
         if compiler == 'Visual Studio':
-            runtime = self.settings.get_safe("compiler.runtime")
+            # Runtime type configuration for Jinja2C++ should be strictly '/MT' or '/MD'
+            runtime = self.settings.get_safe("compiler.runtime")            
             if runtime == 'MTd':
-                runtime = 'MTd'
+                runtime = 'MT'
             if runtime == 'MDd':
-                runtime = 'MDd'
+                runtime = 'MD'
             cmake.definitions["JINJA2CPP_MSVC_RUNTIME_TYPE"] = '/' + runtime
             
         cmake.configure(build_folder=self._build_subfolder)
