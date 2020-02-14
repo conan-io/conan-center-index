@@ -5,7 +5,7 @@ from conans import ConanFile, tools
 class NuklearConan(ConanFile):
     name = "nuklear"
     description = "A single-header ANSI C immediate mode cross-platform GUI library."
-    license = "MIT"
+    license = ["MIT", "Unlicense"]
     topics = ("conan", "nuklear", "gui", "header-only")
     homepage = "https://github.com/Immediate-Mode-UI/Nuklear"
     url = "https://github.com/conan-io/conan-center-index"
