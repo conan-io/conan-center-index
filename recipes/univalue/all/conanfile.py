@@ -1,4 +1,5 @@
 from conans import ConanFile, tools, AutoToolsBuildEnvironment
+from contextlib import contextmanager
 import os
 
 
@@ -48,40 +49,50 @@ class UnivalueConan(ConanFile):
         if self._autotools:
             return self._autotools
         self._autotools =  AutoToolsBuildEnvironment(self, win_bash=tools.os_info.is_windows)
-        conf_args = [
-        ]
+        if self.settings.compiler == "Visual Studio":
+            self._autotools.cxx_flags.append("-EHsc")
+        conf_args = []
         if self.options.shared:
             conf_args.extend(["--enable-shared", "--disable-static"])
         else:
             conf_args.extend(["--disable-shared", "--enable-static"])
         self._autotools.configure(args=conf_args, configure_dir=self._source_subfolder)
+        tools.replace_in_file("libtool", "-Wl,-DLL,-IMPLIB", "-link -DLL -link -DLL -link -IMPLIB")
         return self._autotools
-
-    def _build_nmake(self):
-        raise Exception
 
     def _patch_sources(self):
         for patch in self.conan_data["patches"][self.version]:
             tools.patch(**patch)
 
+    @contextmanager
+    def _build_context(self):
+        if self.settings.compiler == "Visual Studio":
+            with tools.vcvars(self.settings):
+                env = {
+                    "CC": "cl -nologo",
+                    "CXX": "cl -nologo",
+                    "CPP": "cl -nologo -EP",
+                    "LD": "link",
+                    "CXXLD": "link",
+                    "AR": "{} lib".format(tools.unix_path(self.deps_user_info["automake"].ar_lib)),
+                    "NM": "dumpbin -symbols",
+                }
+                with tools.environment_append(env):
+                    yield
+        else:
+            yield
+
     def build(self):
         self._patch_sources()
-        if self.settings.compiler == "Visual Studio":
-            self._build_nmake()
-        else:
-            with tools.chdir(self._source_subfolder):
-                self.run("{} --verbose --install --force".format(os.environ["AUTORECONF"]), win_bash=tools.os_info.is_windows)
+        with tools.chdir(self._source_subfolder):
+            self.run("{} --verbose --install --force".format(os.environ["AUTORECONF"]), win_bash=tools.os_info.is_windows)
+        with self._build_context():
             autotools = self._configure_autotools()
             autotools.make()
 
-    def _package_visual(self):
-        raise Exception
-
     def package(self):
         self.copy("COPYING", src=self._source_subfolder, dst="licenses")
-        if self.settings.compiler == "Visual Studio":
-            self._package_visual()
-        else:
+        with self._build_context():
             autotools = self._configure_autotools()
             autotools.install()
             tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))

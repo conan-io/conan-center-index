@@ -84,7 +84,6 @@ diff -ur source/source_subfolder/Makefile.am source_modified/source_subfolder/Ma
 -extern const UniValue NullUniValue;
 +UNIVALUE_API extern const UniValue NullUniValue;
 
--const UniValue& find_value( const UniValue& obj, const std::string& name);
-+UNIVALUE_API const UniValue& find_value( const UniValue& obj, const std::string& name);
+ const UniValue& find_value( const UniValue& obj, const std::string& name);
 
  #endif // __UNIVALUE_H__
