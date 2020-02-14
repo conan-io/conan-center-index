@@ -4,6 +4,10 @@ project(blake2 C)
 include("conanbuildinfo.cmake")
 conan_basic_setup()
 
+if(WIN32 AND BUILD_SHARED_LIBS AND MSVC)
+    set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS ON)
+endif()
+
 option(USE_SSE "Optimized for speed on CPUs supporting SSE2, SSSE3, SSE4.1, AVX, or XOP" OFF)
 option(USE_NEON "Optimiced for arm CPUs" OFF)
 
