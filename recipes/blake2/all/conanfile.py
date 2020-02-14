@@ -5,8 +5,8 @@ from conans import ConanFile, tools, AutoToolsBuildEnvironment
 
 class blake2Conan(ConanFile):
     name = "blake2"
-    version = "997fa5b" #BLAKE2 doesn't have versions so we use the commit hash instead
-    license = "	CC0-1.0, OpenSSL, APSL 2.0"
+    version = "20190723" #BLAKE2 doesn't have versions so we use the last commit date instead
+    license = ["CC0-1.0", "OpenSSL", "APSL-2.0"]
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/BLAKE2/BLAKE2"
     description = ("BLAKE2 is a cryptographic hash function faster than MD5, \
