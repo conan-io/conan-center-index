@@ -91,7 +91,6 @@ class GlfwConan(ConanFile):
 
     def package_info(self):
         self.cpp_info.libs = tools.collect_libs(self)
-        #self.cpp_info.name = "glfw3"
         if self.settings.os == "Linux":
             self.cpp_info.system_libs.extend(['X11', 'GL', 'm', 'dl', 'pthread'])
             if self.options.shared:
