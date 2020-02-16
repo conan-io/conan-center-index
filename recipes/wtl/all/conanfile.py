@@ -4,7 +4,7 @@ import os
 
 class WTLConan(ConanFile):
     name = "wtl"
-    license = "Microsoft Public License"
+    license = "MS-PL"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://sourceforge.net/projects/wtl"
     description = "Windows Template Library (WTL) is a C++ library for developing Windows applications and UI components."
