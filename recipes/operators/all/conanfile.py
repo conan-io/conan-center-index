@@ -3,7 +3,7 @@ from conans import ConanFile, CMake, tools
 
 
 class TaoCPPOperatorsConan(ConanFile):
-    name = "operators"
+    name = "taocpp-operators"
     license = "MIT"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/taocpp/operators"
@@ -17,7 +17,7 @@ class TaoCPPOperatorsConan(ConanFile):
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
-        extracted_dir = self.name + "-" + self.version
+        extracted_dir = "operators-" + self.version
         os.rename(extracted_dir, self._source_subfolder)
 
     def package(self):
