@@ -47,12 +47,8 @@ class LibpqxxRecipe(ConanFile):
             raise ConanInvalidConfiguration("%s requires a compiler that supports"
                                             " at least C++17. %s %s is not"
                                             " supported." % (self.name, compiler, compiler_version))
-        minimal_cpp_standard = "17"
         supported_cppstd = ["17", "20"]
-
-        if not self.settings.compiler.cppstd:
-            self.output.info("Settings c++ standard to {}".format(minimal_cpp_standard))
-            self.settings.compiler.cppstd = minimal_cpp_standard
+        minimal_cpp_standard = supported_cppstd[0]
 
         if not self.settings.compiler.cppstd in supported_cppstd:
             raise ConanInvalidConfiguration(
