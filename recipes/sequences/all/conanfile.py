@@ -3,7 +3,7 @@ from conans import ConanFile, CMake, tools
 
 
 class TaoCPPSequencesonan(ConanFile):
-    name = "sequences"
+    name = "taocpp-sequences"
     license = "MIT"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "hhttps://github.com/taocpp/sequences"
@@ -17,7 +17,7 @@ class TaoCPPSequencesonan(ConanFile):
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
-        extracted_dir = self.name + "-" + self.version
+        extracted_dir = "sequences-" + self.version
         os.rename(extracted_dir, self._source_subfolder)
 
     def package(self):
