@@ -42,9 +42,9 @@ class CpphttplibConan(ConanFile):
 
     def package_info(self):
         if self.options.with_openssl:
-            self.cpp_info.defines("CPPHTTPLIB_OPENSSL_SUPPORT")
+            self.cpp_info.defines.append("CPPHTTPLIB_OPENSSL_SUPPORT")
         if self.options.with_zlib:
-            self.cpp_info.defines("CPPHTTPLIB_ZLIB_SUPPORT")
+            self.cpp_info.defines.append("CPPHTTPLIB_ZLIB_SUPPORT")
         if self.settings.os == "Linux":
             self.cpp_info.system_libs.append("pthread")
         self.cpp_info.includedirs = ["include", os.path.join("include", "httplib")]
