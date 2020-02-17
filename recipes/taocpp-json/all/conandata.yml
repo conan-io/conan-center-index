@@ -1,0 +1,4 @@
+sources:
+  "1.0.0-beta.11":
+    sha256: d27f5d02cf62e7fea997abd6f540bdf05fdf36a952807db289dbdda0598de106
+    url: https://github.com/taocpp/json/archive/1.0.0-beta.11.tar.gz
