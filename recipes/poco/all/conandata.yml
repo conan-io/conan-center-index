@@ -20,3 +20,6 @@ sources:
   1.10.0:
     sha256: 8047800d5a965d3177e614b4a4a162381e2638220b24d1d15ff5d6cac1738be8
     url: http://github.com/pocoproject/poco/archive/poco-1.10.0-release.tar.gz
+  1.10.1:
+    sha256: 44592a488d2830c0b4f3bfe4ae41f0c46abbfad49828d938714444e858a00818
+    url: http://github.com/pocoproject/poco/archive/poco-1.10.1-release.tar.gz
