@@ -1,6 +1,7 @@
 import os
 from conans import ConanFile, CMake, tools
 from conans.tools import Version
+from conans.error import ConanInvalidConfiguration
 
 
 class TaoCPPJSONConan(ConanFile):
