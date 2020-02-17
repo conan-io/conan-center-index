@@ -1,0 +1,4 @@
+sources:
+  "2.0.1":
+    sha256: 6e37fdf7cda28678a61dfe55ec263aa2460b2f7383766b57f79a5636fb1495ad
+    url: https://github.com/taocpp/sequences/archive/2.0.1.tar.gz
