@@ -54,12 +54,6 @@ class LibpqxxRecipe(ConanFile):
             raise ConanInvalidConfiguration(
                 "%s requires a compiler that supports at least C++%s" % (self.name, minimal_cpp_standard))
 
-        if self.options.shared and \
-           self.settings.os == "Windows" and \
-           compiler == "Visual Studio":
-            self.output.info("Override libpq:shared to True.")
-            self.options["libpq"].shared = True
-
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
         extracted_dir = self.name + "-" + self.version
