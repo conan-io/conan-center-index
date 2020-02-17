@@ -102,7 +102,7 @@ class PhysXConan(ConanFile):
         # Comment out hard-coded PIC settings
         tools.replace_in_file(os.path.join(self._source_subfolder, "physx", "source", "compiler", "cmake", "CMakeLists.txt"),
                               "SET(CMAKE_POSITION_INDEPENDENT_CODE ON)",
-                              "# SET(CMAKE_POSITION_INDEPENDENT_CODE ON)")
+                              "SET(CMAKE_POSITION_INDEPENDENT_CODE ${PHYSX_CONAN_FPIC})")
         for cmake in (
                 "FastXml.cmake",
                 os.path.join("linux", "LowLevel.cmake"),
@@ -125,7 +125,7 @@ class PhysXConan(ConanFile):
             target, _ = os.path.splitext(os.path.basename(cmake))
             tools.replace_in_file(os.path.join(self._source_subfolder, "physx", "source", "compiler", "cmake", cmake),
                                   "SET_TARGET_PROPERTIES({} PROPERTIES POSITION_INDEPENDENT_CODE TRUE)".format(target),
-                                  "# SET_TARGET_PROPERTIES({} PROPERTIES POSITION_INDEPENDENT_CODE TRUE)".format(target))
+                                  "SET_TARGET_PROPERTIES({} PROPERTIES POSITION_INDEPENDENT_CODE ${{PHYSX_CONAN_FPIC}})".format(target))
 
         for cmake_os in ("linux", "mac", "android", "ios"):
             tools.replace_in_file(os.path.join(self._source_subfolder, "physx", "source", "compiler", "cmake", cmake_os, "CMakeLists.txt"),
@@ -136,6 +136,8 @@ class PhysXConan(ConanFile):
             return self._cmake
 
         self._cmake = CMake(self, build_type=self._get_physx_build_type())
+
+        self._cmake.definitions["PHYSX_CONAN_FPIC"] = "ON" if self.options["physx"].shared or "fPIC" not in self.options["physx"].fields or ("fPIC" in self.options["physx"].fields and self.options["physx"].fPIC) else "OFF"
 
         # Options defined in physx/compiler/public/CMakeLists.txt
         self._cmake.definitions["TARGET_BUILD_PLATFORM"] = self._get_target_build_platform()
