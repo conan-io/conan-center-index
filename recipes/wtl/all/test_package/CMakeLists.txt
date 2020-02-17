@@ -4,9 +4,7 @@ project(test_package CXX)
 include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
 conan_basic_setup()
 
-find_package(wtl REQUIRED)
+add_executable(${PROJECT_NAME} example.cpp)
+set_property(TARGET ${PROJECT_NAME} PROPERTY CXX_STANDARD 11)
 
-add_executable("${PROJECT_NAME}" example.cpp)
-set_property(TARGET "${PROJECT_NAME}" PROPERTY CXX_STANDARD 11)
-
-target_link_libraries("${PROJECT_NAME}" wtl::wtl)
+conan_target_link_libraries(${PROJECT_NAME})
