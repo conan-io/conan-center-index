@@ -30,6 +30,7 @@ class LibHdf5Conan(ConanFile):
 
     _source_subfolder = "source_subfolder"
     _build_subfolder = "build_subfolder"
+    _cmake = None
 
     def config_options(self):
         if self.settings.compiler == "Visual Studio":
@@ -57,23 +58,25 @@ class LibHdf5Conan(ConanFile):
             )
 
     def _configure_cmake(self):
-        cmake = CMake(self)
+        if self._cmake is not None:
+            return self._cmake
+        self._cmake = CMake(self)
 
         # Needed to avoid constructing the static libraries
         if tools.Version(self.version) >= "1.10.6":
-            cmake.definitions["ONLY_SHARED_LIBS"] = self.options.shared
+            self._cmake.definitions["ONLY_SHARED_LIBS"] = self.options.shared
 
         # Build only necessary modules
-        cmake.definitions["BUILD_TESTING"] = "OFF"
-        cmake.definitions["HDF5_BUILD_CPP_LIB"] = "ON"
-        cmake.definitions["HDF5_BUILD_EXAMPLES"] = "OFF"
-        cmake.definitions["HDF5_BUILD_TOOLS"] = "OFF"
+        self._cmake.definitions["BUILD_TESTING"] = "OFF"
+        self._cmake.definitions["HDF5_BUILD_CPP_LIB"] = "ON"
+        self._cmake.definitions["HDF5_BUILD_EXAMPLES"] = "OFF"
+        self._cmake.definitions["HDF5_BUILD_TOOLS"] = "OFF"
         # Modules depending on options
-        cmake.definitions["HDF5_BUILD_HL_LIB"] = self.options.hl
-        cmake.definitions["HDF5_ENABLE_Z_LIB_SUPPORT"] = self.options.with_zlib
+        self._cmake.definitions["HDF5_BUILD_HL_LIB"] = self.options.hl
+        self._cmake.definitions["HDF5_ENABLE_Z_LIB_SUPPORT"] = self.options.with_zlib
 
-        cmake.configure(build_folder=self._build_subfolder)
-        return cmake
+        self._cmake.configure(build_folder=self._build_subfolder)
+        return self._cmake
 
     def build(self):
         cmake = self._configure_cmake()
