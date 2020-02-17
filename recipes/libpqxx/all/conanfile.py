@@ -129,6 +129,6 @@ class LibpqxxRecipe(ConanFile):
         self.cpp_info.libs.append(pqxx_with_suffix if is_package_with_suffix else "pqxx")
 
         if self.settings.os == "Windows":
-            self.cpp_info.libs.extend(["wsock32 ", "Ws2_32"])
+            self.cpp_info.system_libs.extend(["wsock32 ", "ws2_32"])
         elif self.settings.os == "Linux":
             self.cpp_info.libs.append("pthread")
