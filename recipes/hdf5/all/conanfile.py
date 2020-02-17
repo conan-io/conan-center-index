@@ -11,7 +11,7 @@ class LibHdf5Conan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://portal.hdfgroup.org/display/support"
     license = "MIT"
-    exports = ["CMakeLists.txt"]
+    exports_sources = ["CMakeLists.txt"]
     generators = "cmake"
 
     settings = "os", "arch", "compiler", "build_type"
