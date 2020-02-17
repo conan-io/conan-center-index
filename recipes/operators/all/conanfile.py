@@ -9,7 +9,6 @@ class TaoCPPOperatorsConan(ConanFile):
     homepage = "https://github.com/taocpp/operators"
     description = "A highly efficient, move-aware operators library"
     topics = ("cpp", "cpp11", "header-only", "operators")
-    generators = "cmake"
     no_copy_source = True
 
     @property
