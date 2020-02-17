@@ -1,6 +1,6 @@
 from conans import ConanFile, tools
-
 import os
+
 
 class WTLConan(ConanFile):
     name = "wtl"
