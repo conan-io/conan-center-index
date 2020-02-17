@@ -1,0 +1,4 @@
+sources:
+  "1.0.0":
+    sha256: a35de253039fa1095244c2cc399458975a87b7f835e4d841fc10e8c8c14cc9dc
+    url: https://github.com/taocpp/tuple/archive/1.0.0.tar.gz
