@@ -1,4 +1,4 @@
-from conans import ConanFile, tools, AutoToolsBuildEnvironment, CMake
+from conans import ConanFile, tools, CMake
 from conans.errors import ConanInvalidConfiguration
 from conans.tools import Version
 import os
@@ -17,7 +17,6 @@ class LibpqxxRecipe(ConanFile):
     options = {"shared": [True, False], "fPIC": [True, False]}
     default_options = {"shared": False, "fPIC": True}
     requires = "libpq/11.5"
-    _autotools = None
     _cmake = None
 
     @property
@@ -27,10 +26,6 @@ class LibpqxxRecipe(ConanFile):
     @property
     def _build_subfolder(self):
         return "build_subfolder"
-
-    @property
-    def _using_cmake(self):
-        return self.settings.os == "Windows"
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -74,21 +69,6 @@ class LibpqxxRecipe(ConanFile):
         extracted_dir = self.name + "-" + self.version
         os.rename(extracted_dir, self._source_subfolder)
 
-    def _configure_autotools(self):
-        if not self._autotools:
-            args = [
-                "--disable-documentation",
-                "--with-postgres-include={}".format(os.path.join(self.deps_cpp_info["libpq"].rootpath, "include")),
-                "--with-postgres-lib={}".format(os.path.join(self.deps_cpp_info["libpq"].rootpath, "lib")),
-                "--enable-static={}".format("no" if self.options.shared else "yes"),
-                "--enable-shared={}".format("yes" if self.options.shared else "no")
-            ]
-            self._autotools = AutoToolsBuildEnvironment(self, win_bash=tools.os_info.is_windows)
-            env_vars = self._autotools.vars
-            env_vars["PG_CONFIG"] = os.path.join(self.deps_cpp_info["libpq"].rootpath, "bin", "pg_config")
-            self._autotools.configure(args=args, vars=env_vars)
-        return self._autotools
-
     def _configure_cmake(self):
         if not self._cmake:
             self._cmake = CMake(self)
@@ -105,29 +85,18 @@ class LibpqxxRecipe(ConanFile):
     def build(self):
         self._patch_files()
 
-        if self._using_cmake:
-            cmake = self._configure_cmake()
-            cmake.build()
-        else:
-            with tools.chdir(self._source_subfolder):
-                autotools = self._configure_autotools()
-                autotools.make()
+        cmake = self._configure_cmake()
+        cmake.build()
 
     def package(self):
         self.copy("COPYING", dst="licenses", src=self._source_subfolder)
-        if self._using_cmake:
-            cmake = self._configure_cmake()
-            cmake.install()
 
-        else:
-            with tools.chdir(self._source_subfolder):
-                autotools = self._configure_autotools()
-                autotools.install()
+        cmake = self._configure_cmake()
+        cmake.install()
 
     def package_info(self):
         pqxx_with_suffix = "pqxx-%s.%s" % tuple(self.version.split(".")[0:2])
-        is_package_with_suffix = not (self._using_cmake and self.settings.os == "Windows") and \
-                                 self.options.shared
+        is_package_with_suffix = self.settings.os != "Windows" and self.options.shared
         self.cpp_info.libs.append(pqxx_with_suffix if is_package_with_suffix else "pqxx")
 
         if self.settings.os == "Windows":
