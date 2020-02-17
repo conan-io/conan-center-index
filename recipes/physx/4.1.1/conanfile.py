@@ -127,6 +127,10 @@ class PhysXConan(ConanFile):
                                   "SET_TARGET_PROPERTIES({} PROPERTIES POSITION_INDEPENDENT_CODE TRUE)".format(target),
                                   "# SET_TARGET_PROPERTIES({} PROPERTIES POSITION_INDEPENDENT_CODE TRUE)".format(target))
 
+        for cmake_os in ("linux", "mac", "android", "ios"):
+            tools.replace_in_file(os.path.join(self._source_subfolder, "physx", "source", "compiler", "cmake", cmake_os, "CMakeLists.txt"),
+                                  "-Werror", "")
+
     def _configure_cmake(self):
         if self._cmake:
             return self._cmake
