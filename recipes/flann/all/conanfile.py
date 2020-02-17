@@ -28,6 +28,7 @@ class LibFlannConan(ConanFile):
 
     _source_subfolder = "source_subfolder"
     _build_subfolder = "build_subfolder"
+    _cmake = None
 
     def config_options(self):
         if self.settings.compiler == "Visual Studio":
@@ -59,23 +60,24 @@ class LibFlannConan(ConanFile):
         )
 
     def _configure_cmake(self):
-        cmake = CMake(self)
+        if self._cmake is not None:
+            return self._cmake
+        self._cmake = CMake(self)
 
-        # TODO: check options
         # Only build the C++ libraries
-        cmake.definitions["BUILD_DOC"] = "OFF"
-        cmake.definitions["BUILD_EXAMPLES"] = "OFF"
-        cmake.definitions["BUILD_TESTS"] = "OFF"
-        cmake.definitions["BUILD_C_BINDINGS"] = "OFF"
-        cmake.definitions["BUILD_MATLAB_BINDINGS"] = "OFF"
-        cmake.definitions["BUILD_PYTHON_BINDINGS"] = "OFF"
+        self._cmake.definitions["BUILD_DOC"] = "OFF"
+        self._cmake.definitions["BUILD_EXAMPLES"] = "OFF"
+        self._cmake.definitions["BUILD_TESTS"] = "OFF"
+        self._cmake.definitions["BUILD_C_BINDINGS"] = "OFF"
+        self._cmake.definitions["BUILD_MATLAB_BINDINGS"] = "OFF"
+        self._cmake.definitions["BUILD_PYTHON_BINDINGS"] = "OFF"
 
         # Workaround issue with flann_cpp
         if self.settings.os == "Windows" and self.options.shared:
-            cmake.definitions["CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS"] = True
+            self._cmake.definitions["CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS"] = True
 
-        cmake.configure(build_folder=self._build_subfolder)
-        return cmake
+        self._cmake.configure(build_folder=self._build_subfolder)
+        return self._cmake
 
     def build(self):
         cmake = self._configure_cmake()
