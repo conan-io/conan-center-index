@@ -40,7 +40,7 @@ class blake2Conan(ConanFile):
             del self.options.fPIC
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])        
+        tools.get(**self.conan_data["sources"][self.version])
         extracted_dir = glob.glob(self.name.upper() + "-*")[0]
         os.rename(extracted_dir, self._source_subfolder)
 
