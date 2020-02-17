@@ -1,3 +1,4 @@
+import glob
 import os
 
 from conans import ConanFile, CMake, tools
@@ -20,9 +21,9 @@ class LibFlannConan(ConanFile):
         "with_hdf5": [True, False]
     }
     default_options = {
-        "shared": True,
+        "shared": False,
         "fPIC": True,
-        "with_hdf5": True
+        "with_hdf5": False
     }
 
     _source_subfolder = "source_subfolder"
@@ -78,7 +79,22 @@ class LibFlannConan(ConanFile):
             if os.path.isfile(path):
                 os.remove(path)
 
+        # Remove static/dynamic libraries depending on the build mode
+        if self.options.shared:
+            for file_to_remove in glob.glob(os.path.join(self.package_folder, "lib", "flann_cpp_s*")):
+                os.remove(file_to_remove)
+        else:
+            if self.settings.os != "Linux":
+                tools.rmdir(os.path.join(self.package_folder, "bin"))
+            else:
+                for file_to_remove in glob.glob(os.path.join(self.package_folder, "lib", "*.so*")):
+                    os.remove(file_to_remove)
+
     def package_info(self):
         self.cpp_info.names["cmake_find_package"] = "FLANN"
         self.cpp_info.names["cmake_find_package_multi"] = "FLANN"
-        self.cpp_info.libs = tools.collect_libs(self) # TODO
+
+        if self.options.shared:
+            self.cpp_info.libs = ["flann_cpp"]
+        else:
+            self.cpp_info.libs = ["flann_cpp_s"]
