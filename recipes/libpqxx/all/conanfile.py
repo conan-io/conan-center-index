@@ -18,6 +18,7 @@ class LibpqxxRecipe(ConanFile):
     default_options = {"shared": False, "fPIC": True}
     requires = "libpq/11.5"
     _autotools = None
+    _cmake = None
 
     @property
     def _source_subfolder(self):
@@ -89,11 +90,12 @@ class LibpqxxRecipe(ConanFile):
         return self._autotools
 
     def _configure_cmake(self):
-        cmake = CMake(self)
-        cmake.definitions["BUILD_DOC"] = False
-        cmake.definitions["BUILD_TEST"] = False
-        cmake.configure(build_folder=self._build_subfolder)
-        return cmake
+        if not self._cmake:
+            self._cmake = CMake(self)
+            self._cmake.definitions["BUILD_DOC"] = False
+            self._cmake.definitions["BUILD_TEST"] = False
+            self._cmake.configure(build_folder=self._build_subfolder)
+        return self._cmake
 
     def _patch_files(self):
         if self.version in self.conan_data["patches"]:
