@@ -8,6 +8,7 @@ class TestPackageConan(ConanFile):
 
     def build(self):
         cmake = CMake(self)
+        cmake.definitions["TEST_SHARED_LIBRARY"] = self.options["physx"].shared or "fPIC" not in self.options["physx"].fields or self.options["physx"].fPIC
         cmake.configure()
         cmake.build()
 
