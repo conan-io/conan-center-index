@@ -42,6 +42,22 @@ class LibFlannConan(ConanFile):
         extracted_dir = self.name + "-" + self.version
         os.rename(extracted_dir, self._source_subfolder)
 
+        # Workaround issue with empty sources for a CMake target
+        flann_cpp_dir = os.path.join(self._source_subfolder, "src", "cpp")
+        with open(os.path.join(flann_cpp_dir, "empty.cpp"), "w") as fd:
+            fd.write("\n")  # touch
+
+        tools.replace_in_file(
+            os.path.join(flann_cpp_dir, "CMakeLists.txt"),
+            'add_library(flann_cpp SHARED "")',
+            'add_library(flann_cpp SHARED empty.cpp)'
+        )
+        tools.replace_in_file(
+            os.path.join(flann_cpp_dir, "CMakeLists.txt"),
+            'add_library(flann SHARED "")',
+            'add_library(flann SHARED empty.cpp)'
+        )
+
     def _configure_cmake(self):
         cmake = CMake(self)
 
