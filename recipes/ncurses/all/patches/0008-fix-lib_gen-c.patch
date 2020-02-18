@@ -1,0 +1,27 @@
+Fixes these kind of errors on MSVC
+../ncurses/lib_gen.c(23): error C2059: syntax error: '('
+
+(required for static build)
+
+../ncurses/lib_gen.c(30): error C2059: syntax error: '('
+../ncurses/lib_gen.c(37): error C2059: syntax error: '('
+../ncurses/lib_gen.c(44): error C2059: syntax error: '('
+../ncurses/lib_gen.c(51): error C2059: syntax error: '('
+../ncurses/lib_gen.c(58): error C2059: syntax error: '('
+../ncurses/lib_gen.c(65): error C2059: syntax error: '('
+../ncurses/lib_gen.c(72): error C2059: syntax error: '('
+../ncurses/lib_gen.c(79): error C2059: syntax error: '('
+../ncurses/lib_gen.c(86): error C2059: syntax error: '('
+(and more)
+
+--- ncurses/base/MKlib_gen.sh
++++ ncurses/base/MKlib_gen.sh
+@@ -178,7 +178,7 @@
+ 
+ if test "$USE" = generated ; then
+ cat >$ED4 <<EOF
+-	s/^\(.*\) \(.*\) (\(.*\))\$/NCURSES_EXPORT(\1) (\2) (\3)/
++	s/^\(.*\) \(.*\) (\(.*\))\$/NCURSES_EXPORT(\1)\n\2 (\3)/
+ 	/attr_[sg]et.* z)/s,z),z GCC_UNUSED),
+ EOF
+ else

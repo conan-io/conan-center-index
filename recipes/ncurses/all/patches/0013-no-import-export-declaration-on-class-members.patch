@@ -1,0 +1,37 @@
+Required for shared (MSVC)
+
+--- c++/cursslk.h
++++ c++/cursslk.h
+@@ -101,10 +101,10 @@
+   } Label_Layout;
+ 
+ private:
+-  static long NCURSES_IMPEXP count;               // Number of Key Sets
+-  static Label_Layout NCURSES_IMPEXP  format;     // Layout of the Key Sets
+-  static int  NCURSES_IMPEXP num_labels;          // Number Of Labels in Key Sets
+-  bool NCURSES_IMPEXP b_attrInit;                 // Are attributes initialized
++  static long count;               // Number of Key Sets
++  static Label_Layout  format;     // Layout of the Key Sets
++  static int  num_labels;          // Number Of Labels in Key Sets
++  bool b_attrInit;                 // Are attributes initialized
+ 
+   Soft_Label_Key *slk_array;       // The array of SLK's
+ 
+@@ -144,7 +144,7 @@
+ 
+   // This constructor assumes, that you already constructed a Key Set
+   // with a layout by the constructor above. This layout will be reused.
+-  NCURSES_IMPEXP Soft_Label_Key_Set();
++  Soft_Label_Key_Set();
+ 
+   Soft_Label_Key_Set& operator=(const Soft_Label_Key_Set& rhs)
+   {
+@@ -165,7 +165,7 @@
+   virtual ~Soft_Label_Key_Set() THROWS(NCursesException);
+ 
+   // Get Label# i. Label counting starts with 1!
+-  NCURSES_IMPEXP Soft_Label_Key& operator[](int i);
++  Soft_Label_Key& operator[](int i);
+ 
+   // Retrieve number of Labels
+   inline int labels() const { return num_labels; }
