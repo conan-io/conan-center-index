@@ -395,6 +395,8 @@ class BoostConan(ConanFile):
             self._run_bcp()
 
         flags = self._get_build_flags()
+        flags.append("install")
+        flags.append("--prefix=%s" % self.package_folder)
         # Help locating bzip2 and zlib
         self._create_user_config_jam(self._boost_build_dir)
 
@@ -865,6 +867,7 @@ class BoostConan(ConanFile):
         # This stage/lib is in source_folder... Face palm, looks like it builds in build but then
         # copy to source with the good lib name
         self.copy("LICENSE_1_0.txt", dst="licenses", src=os.path.join(self.source_folder, self._folder_name))
+        return  # install should copy everything!
         out_lib_dir = os.path.join(self._boost_dir, "stage", "lib")
         self.copy(pattern="*", dst="include/boost", src="%s/boost" % self._boost_dir)
         if not self.options.shared:
@@ -952,3 +955,4 @@ class BoostConan(ConanFile):
         self.env_info.BOOST_ROOT = self.package_folder
         self.cpp_info.names["cmake_find_package"] = "Boost"
         self.cpp_info.names["cmake_find_package_multi"] = "Boost"
+        self.cpp_info.builddirs.append(os.path.join("lib", "cmake"))
