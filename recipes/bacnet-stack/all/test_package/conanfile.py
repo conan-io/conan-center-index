@@ -15,5 +15,5 @@ class TestConan(ConanFile):
         self.copy("*.dylib*", dst="bin", src="lib")
     def test(self):
         if not tools.cross_building(self.settings):
-            os.chdir("bin")
+            bin_path = os.path.join("bin", "test_package")
             self.run(".%sexample" % os.sep)
