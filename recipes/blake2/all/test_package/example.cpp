@@ -1,24 +1,29 @@
+#include <array>
+#include <iomanip>
+#include <iostream>
 #include <blake2.h>
-#include <stdio.h>
 
-int main(int argc, char *argv[])
-{
-    char in[20] = "Conan";
-    char out[20];
-    char key[4] = "c++";
+int main() {
 
-    int result = blake2(out, 20, in, 20, key, 3);
+ 	const std::string input = "Conan";
+    const std::string key = "C++";
+    const std::string expected_hash = "aff48ebab1a2b9947c811248b52a157738159af3a2599993188fd3977d20c58e67a98636717e13b62b95183ff779abdb2dcad039599f5e54588d83a7b2fc3827";
+    std::array<unsigned char, BLAKE2B_OUTBYTES> output;
+    bool result; // Zero if OK
 
-    printf("Hashing the string: %s \n", in);
-    printf("Using key: %s \n", key);
+	result = blake2(output.data(), output.size(), input.data(), input.size(), key.data(), key.size());
 
-    if (result == 0){
-        printf("Hash: %s \n", out);
+    std::cout << "Hashing string: " << input << std::endl;
+    std::cout << "Using key: " << key << std::endl;
+    std::cout << "Expected hash: " << expected_hash << std::endl;
+
+    if (result != 0){
+        std::cout << "Error during hashing";
+    } else {
+        std::cout << "Computed hash: ";
+	    std::cout << std::setfill('0') << std::hex;
+	    for (auto byte : output)
+	    	std::cout << std::setw(2) << static_cast<unsigned>(byte);
+	    std::cout << std::endl;
     }
-    else
-    {
-        printf("Error during hashing \n");
-    }
-
-    return 0;
 }
