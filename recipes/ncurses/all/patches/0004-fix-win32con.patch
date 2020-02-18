@@ -1,0 +1,76 @@
+- Visual Studio needs winsock for the timestruct declaration.
+- Visual Studio does not support VLA's on the stack.
+
+(required for static build)
+
+--- ncurses/win32con/gettimeofday.c
++++ ncurses/win32con/gettimeofday.c
+@@ -40,6 +40,10 @@
+ 
+ #define JAN1970 116444736000000000LL	/* the value for 01/01/1970 00:00 */
+ 
++#ifdef _MSC_VER
++#include <winsock2.h>
++#endif
++
+ int
+ gettimeofday(struct timeval *tv, void *tz GCC_UNUSED)
+ {
+--- ncurses/win32con/win_driver.c
++++ ncurses/win32con/win_driver.c
+@@ -58,7 +58,7 @@
+ MODULE_ID("$Id: win_driver.c,v 1.63 2020/02/02 23:34:34 tom Exp $")
+ 
+ #ifndef __GNUC__
+-#  error We need GCC to compile for MinGW
++//#  error We need GCC to compile for MinGW
+ #endif
+ 
+ #define WINMAGIC NCDRV_MAGIC(NCDRV_WINCONSOLE)
+@@ -262,7 +262,7 @@
+ con_write16(TERMINAL_CONTROL_BLOCK * TCB, int y, int x, cchar_t *str, int limit)
+ {
+     int actual = 0;
+-    CHAR_INFO ci[limit];
++    CHAR_INFO * ci = (CHAR_INFO*) _alloca(sizeof(CHAR_INFO) * limit);
+     COORD loc, siz;
+     SMALL_RECT rec;
+     int i;
+@@ -311,7 +311,7 @@
+ static BOOL
+ con_write8(TERMINAL_CONTROL_BLOCK * TCB, int y, int x, chtype *str, int n)
+ {
+-    CHAR_INFO ci[n];
++    CHAR_INFO * ci = (CHAR_INFO*) _alloca(sizeof(CHAR_INFO) * n);
+     COORD loc, siz;
+     SMALL_RECT rec;
+     int i;
+@@ -510,7 +510,7 @@
+ 	if ((CurScreen(sp)->_clear || NewScreen(sp)->_clear)) {
+ 	    int x;
+ #if USE_WIDEC_SUPPORT
+-	    cchar_t empty[Width];
++	    cchar_t * empty = (cchar_t*) _alloca(sizeof(cchar_t) * Width);
+ 	    wchar_t blank[2] =
+ 	    {
+ 		L' ', L'\0'
+@@ -519,7 +519,7 @@
+ 	    for (x = 0; x < Width; x++)
+ 		setcchar(&empty[x], blank, 0, 0, 0);
+ #else
+-	    chtype empty[Width];
++        chtype * empty = (chtype*) _alloca(sizeof(chtype) * Width);
+ 
+ 	    for (x = 0; x < Width; x++)
+ 		empty[x] = ' ';
+@@ -675,8 +675,8 @@
+     int max_cells = (high * wide);
+     int i;
+ 
+-    CHAR_INFO this_screen[max_cells];
+-    CHAR_INFO that_screen[max_cells];
++    CHAR_INFO * this_screen = (CHAR_INFO*) _alloca(sizeof(CHAR_INFO) * max_cells);
++    CHAR_INFO * that_screen = (CHAR_INFO*) _alloca(sizeof(CHAR_INFO) * max_cells);
+     COORD this_size;
+     SMALL_RECT this_region;
+     COORD bufferCoord;

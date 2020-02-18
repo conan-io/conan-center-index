@@ -1,0 +1,55 @@
+Fixes:
+../ncurses/codes.c(137): error C2375: '_nc_boolcodes': redefinition; different linkage
+../include\term.h(713): note: see declaration of '_nc_boolcodes'
+../ncurses/codes.c(138): error C2375: '_nc_numcodes': redefinition; different linkage    ncurses/6.2: ../include\term.h(716): note: see declaration of '_nc_numcodes'
+../ncurses/codes.c(139): error C2375: '_nc_strcodes': redefinition; different linkage    ncurses/6.2: ../include\term.h(719): note: see declaration of '_nc_strcodes'
+
+../ncurses/names.c(320): error C2375: '_nc_boolnames': redefinition; different linkage
+../include\term.h(712): note: see declaration of '_nc_boolnames'
+../ncurses/names.c(321): error C2375: '_nc_boolfnames': redefinition; different linkage  ncurses/6.2: ../include\term.h(714): note: see declaration of '_nc_boolfnames'
+../ncurses/names.c(322): error C2375: '_nc_numnames': redefinition; different linkage    ncurses/6.2: ../include\term.h(715): note: see declaration of '_nc_numnames'
+../ncurses/names.c(323): error C2375: '_nc_numfnames': redefinition; different linkage   ncurses/6.2: ../include\term.h(717): note: see declaration of '_nc_numfnames'
+../ncurses/names.c(324): error C2375: '_nc_strnames': redefinition; different linkage    ncurses/6.2: ../include\term.h(718): note: see declaration of '_nc_strnames'
+../ncurses/names.c(325): error C2375: '_nc_strfnames': redefinition; different linkage   ncurses/6.2: ../include\term.h(720): note: see declaration of '_nc_strfnames'
+
+
+(required for shared MSVC)
+
+--- include/MKterm.h.awk.in
++++ include/MKterm.h.awk.in
+@@ -253,15 +253,15 @@
+ 	print  "#endif"
+ 	print  ""
+ 	print  "#if @BROKEN_LINKER@ || @cf_cv_enable_reentrant@"
+-	print  "NCURSES_WRAPPED_VAR(NCURSES_CONST char * const *, boolnames);"
++	print  "NCURSES_WRAPPED_VAR(NCURSES_IMPEXP NCURSES_CONST char * const *, boolnames);"
+-	print  "NCURSES_WRAPPED_VAR(NCURSES_CONST char * const *, boolcodes);"
++	print  "NCURSES_WRAPPED_VAR(NCURSES_IMPEXP NCURSES_CONST char * const *, boolcodes);"
+-	print  "NCURSES_WRAPPED_VAR(NCURSES_CONST char * const *, boolfnames);"
++	print  "NCURSES_WRAPPED_VAR(NCURSES_IMPEXP NCURSES_CONST char * const *, boolfnames);"
+-	print  "NCURSES_WRAPPED_VAR(NCURSES_CONST char * const *, numnames);"
++	print  "NCURSES_WRAPPED_VAR(NCURSES_IMPEXP NCURSES_CONST char * const *, numnames);"
+-	print  "NCURSES_WRAPPED_VAR(NCURSES_CONST char * const *, numcodes);"
++	print  "NCURSES_WRAPPED_VAR(NCURSES_IMPEXP NCURSES_CONST char * const *, numcodes);"
+-	print  "NCURSES_WRAPPED_VAR(NCURSES_CONST char * const *, numfnames);"
++	print  "NCURSES_WRAPPED_VAR(NCURSES_IMPEXP NCURSES_CONST char * const *, numfnames);"
+-	print  "NCURSES_WRAPPED_VAR(NCURSES_CONST char * const *, strnames);"
++	print  "NCURSES_WRAPPED_VAR(NCURSES_IMPEXP NCURSES_CONST char * const *, strnames);"
+-	print  "NCURSES_WRAPPED_VAR(NCURSES_CONST char * const *, strcodes);"
++	print  "NCURSES_WRAPPED_VAR(NCURSES_IMPEXP NCURSES_CONST char * const *, strcodes);"
+-	print  "NCURSES_WRAPPED_VAR(NCURSES_CONST char * const *, strfnames);"
++	print  "NCURSES_WRAPPED_VAR(NCURSES_IMPEXP NCURSES_CONST char * const *, strfnames);"
+ 	print  ""
+ 	print  "#define boolnames  NCURSES_PUBLIC_VAR(boolnames())"
+ 	print  "#define boolcodes  NCURSES_PUBLIC_VAR(boolcodes())"
+--- ncurses/build.priv.h
++++ ncurses/build.priv.h
+@@ -88,7 +88,7 @@
+ /* declare these, to avoid needing term.h */
+ #if BROKEN_LINKER || USE_REENTRANT
+ #define NCURSES_ARRAY(name) \
+-	NCURSES_WRAPPED_VAR(NCURSES_CONST char * const *, name)
++	NCURSES_WRAPPED_VAR(NCURSES_IMPEXP NCURSES_CONST char * const *, name)
+ 
+     NCURSES_ARRAY(boolnames);
+     NCURSES_ARRAY(boolfnames);

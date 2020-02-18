@@ -1,0 +1,17 @@
+MSVC misses STDIN_FILENO
+
+(required for static build)
+
+--- progs/progs.priv.h
++++ progs/progs.priv.h
+@@ -155,6 +155,10 @@
+ #endif /* gcc workarounds */
+ 
+ /* usually in <unistd.h> */
++#ifndef STDIN_FILENO
++#define STDIN_FILENO 1
++#endif
++
+ #ifndef STDOUT_FILENO
+ #define STDOUT_FILENO 1
+ #endif

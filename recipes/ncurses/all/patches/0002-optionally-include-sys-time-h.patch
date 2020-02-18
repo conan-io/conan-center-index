@@ -1,0 +1,27 @@
+Visual Studio has no sys/time.h
+
+(required for static build)
+
+--- include/nc_mingw.h
++++ include/nc_mingw.h
+@@ -52,7 +52,9 @@
+ #undef gettimeofday
+ #define gettimeofday(tv,tz) _nc_gettimeofday(tv,tz)
+ 
++#if HAVE_SYS_TIME_H
+ #include <sys/time.h>		/* for struct timeval */
++#endif
+ 
+ extern int _nc_gettimeofday(struct timeval *, void *);
+ 
+--- ncurses/tty/lib_twait.c
++++ ncurses/tty/lib_twait.c
+@@ -71,7 +71,7 @@
+ #  include <sys/select.h>
+ # endif
+ #endif
+-#ifdef _WIN32
++#if HAVE_SYS_TIME_H
+ #  include <sys/time.h>
+ #endif
+ #undef CUR
