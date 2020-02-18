@@ -1,7 +1,9 @@
+#include <array>
+#include "pqxx/pqxx"
+
 #include <cstdlib>
 #include <iostream>
 
-#include "pqxx/pqxx"
 
 int main()
 {
