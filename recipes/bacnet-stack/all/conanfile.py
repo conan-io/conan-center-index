@@ -44,7 +44,7 @@ class BacnetStackConan(ConanFile):
             return self._cmake
         self._cmake = CMake(self)
         self._cmake.definitions["BACNET_STACK_BUILD_APPS"] = False
-        cmake.configure()
+        self._cmake.configure(build_folder=self._build_subfolder)
         return cmake
 
     def build(self):
