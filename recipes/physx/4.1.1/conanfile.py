@@ -56,10 +56,12 @@ class PhysXConan(ConanFile):
     def configure(self):
         if self.options.shared:
             del self.options.fPIC
+
         if self.settings.os not in ["Windows", "Linux", "Macos", "Android", "iOS"]:
             raise ConanInvalidConfiguration("Current os is not supported")
 
-        if self.settings.build_type not in ["Debug", "RelWithDebInfo", "Release"]:
+        build_type = self.settings.build_type
+        if build_type not in ["Debug", "RelWithDebInfo", "Release"]:
             raise ConanInvalidConfiguration("Current build_type is not supported")
 
         if self.settings.os == "Windows" and self.settings.compiler != "Visual Studio":
@@ -68,13 +70,12 @@ class PhysXConan(ConanFile):
         if self.settings.compiler == "Visual Studio":
             if tools.Version(self.settings.compiler.version) < 9:
                 raise ConanInvalidConfiguration("Visual Studio versions < 9 are not supported")
-            if self.settings.build_type == "Debug":
-                if self.settings.compiler.runtime not in ["MDd", "MTd"]:
-                    raise ConanInvalidConfiguration("{} build_type requires runtime with debug enabled.".format(
-                        self.settings.build_type))
-            elif self.settings.compiler.runtime not in ["MD", "MT"]:
-                raise ConanInvalidConfiguration("{} build_type requires runtime wit debug disabled.".format(
-                    self.settings.build_type))
+
+            allowed_runtimes = ["MDd", "MTd"] if build_type == "Debug" else ["MD", "MT"]
+            runtime = self.settings.compiler.runtime
+            if runtime not in allowed_runtimes:
+                raise ConanInvalidConfiguration("Visual Studio Compiler runtime {0}" \
+                                                "is required for {1} build type".format(allowed_runtimes, build_type))
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
