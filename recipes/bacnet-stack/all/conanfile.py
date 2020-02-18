@@ -1,12 +1,12 @@
 import os
 from conans import CMake, ConanFile, tools
-from conans.errors import ConanInvalidConfiguration
 
 
 class BacnetStackConan(ConanFile):
     name = "bacnet-stack"
     license = "GPL-2.0-or-later"
-    url = "https://github.com/bacnet-stack/bacnet-stack/"
+    homepage = "https://github.com/bacnet-stack/bacnet-stack/"
+    url = "https://github.com/conan-io/conan-center-index"
     description = """
         BACnet Protocol Stack library provides a BACnet application layer,
         network layer and media access (MAC) layer communications services."""
@@ -26,6 +26,9 @@ class BacnetStackConan(ConanFile):
     def _source_subfolder(self):
         return "source_subfolder"
 
+    @property
+    def _build_subfolder(self):
+        return "build_subfolder"
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
@@ -62,4 +65,4 @@ class BacnetStackConan(ConanFile):
     def package_info(self):
         self.cpp_info.libs = tools.collect_libs(self)
         if tools.os_info.is_linux:
-            self.cpp_info.libs.append("pthread")
+            self.cpp_info.system_libs = ["pthread"]
