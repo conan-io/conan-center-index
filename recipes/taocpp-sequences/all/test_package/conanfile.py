@@ -1,6 +1,6 @@
 import os.path
 
-from conans import ConanFile, CMake
+from conans import ConanFile, CMake, tools
 
 
 class CppsortTestConan(ConanFile):
@@ -13,5 +13,6 @@ class CppsortTestConan(ConanFile):
         cmake.build()
 
     def test(self):
-        bin_path = os.path.join("bin", "test_package")
-        self.run(bin_path, run_environment=True)
+        if not tools.cross_building(self.settings):
+            bin_path = os.path.join("bin", "test_package")
+            self.run(bin_path, run_environment=True)
