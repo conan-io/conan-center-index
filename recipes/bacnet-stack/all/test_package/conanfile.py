@@ -13,7 +13,6 @@ class TestConan(ConanFile):
         cmake.build()
 
         self.copy("*.dylib*", dst="bin", src="lib")
-        self.copy('*.so*', dst='bin', src='lib')
     def test(self):
         if not tools.cross_building(self.settings):
             os.chdir("bin")
