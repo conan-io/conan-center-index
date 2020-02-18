@@ -43,7 +43,7 @@ class BacnetStackConan(ConanFile):
         if self._cmake:
             return self._cmake
         self._cmake = CMake(self)
-        cmake.definitions["BACNET_STACK_BUILD_APPS"] = False
+        self._cmake.definitions["BACNET_STACK_BUILD_APPS"] = False
         cmake.configure()
         return cmake
 
