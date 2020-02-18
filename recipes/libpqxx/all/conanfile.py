@@ -90,8 +90,8 @@ class LibpqxxRecipe(ConanFile):
 
     def package_info(self):
         pqxx_with_suffix = "pqxx-%s.%s" % tuple(self.version.split(".")[0:2])
-        is_package_with_suffix = self.settings.os != "Windows" and self.options.shared
-        self.cpp_info.libs.append(pqxx_with_suffix if is_package_with_suffix else "pqxx")
+        libname_with_suffix = self.settings.os != "Windows"
+        self.cpp_info.libs.append(pqxx_with_suffix if libname_with_suffix else "pqxx")
 
         if self.settings.os == "Windows":
             self.cpp_info.system_libs.extend(["wsock32 ", "ws2_32"])
