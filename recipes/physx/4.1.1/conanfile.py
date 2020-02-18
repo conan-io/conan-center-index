@@ -137,7 +137,8 @@ class PhysXConan(ConanFile):
 
         self._cmake = CMake(self, build_type=self._get_physx_build_type())
 
-        self._cmake.definitions["PHYSX_CONAN_FPIC"] = "ON" if self.options["physx"].shared or "fPIC" not in self.options["physx"].fields or ("fPIC" in self.options["physx"].fields and self.options["physx"].fPIC) else "OFF"
+        if self.settings.os != "Windows" and not self.options.shared:
+            self._cmake.definitions["PHYSX_CONAN_FPIC"] = self.options.fPIC
 
         # Options defined in physx/compiler/public/CMakeLists.txt
         self._cmake.definitions["TARGET_BUILD_PLATFORM"] = self._get_target_build_platform()
