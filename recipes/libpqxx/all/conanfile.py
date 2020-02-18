@@ -85,6 +85,7 @@ class LibpqxxRecipe(ConanFile):
         cmake.install()
 
         tools.rmdir(os.path.join(self.package_folder, "share"))
+        tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
 
     def package_info(self):
         pqxx_with_suffix = "pqxx-%s.%s" % tuple(self.version.split(".")[0:2])
