@@ -4,6 +4,7 @@ import time
 from conans import ConanFile, CMake, tools
 from conans.errors import ConanInvalidConfiguration
 
+
 class PhysXConan(ConanFile):
     name = "physx"
     description = "The NVIDIA PhysX SDK is a scalable multi-platform " \
@@ -19,17 +20,17 @@ class PhysXConan(ConanFile):
     short_paths = True
     options = {
         "shared": [True, False],
+        "fPIC": [True, False],
         "release_build_type": ["profile", "release"],
         "enable_simd": [True, False],
         "enable_float_point_precise_math": [True, False],
-        "fPIC": [True, False],
     }
     default_options = {
-        "shared": True,
+        "shared": False,
+        "fPIC": True,
         "release_build_type": "release",
         "enable_simd": True,
         "enable_float_point_precise_math": False,
-        "fPIC": True,
     }
 
     _cmake = None
@@ -43,7 +44,8 @@ class PhysXConan(ConanFile):
         return "build_subfolder"
 
     def config_options(self):
-        del self.options.fPIC # fpic is managed by physx build process (in physx/source/compiler/cmake/CMakeLists.txt)
+        if self.settings.os == "Windows":
+            del self.options.fPIC
         if self.settings.build_type != "Release":
             del self.options.release_build_type
         if self.settings.os != "Windows":
@@ -52,32 +54,27 @@ class PhysXConan(ConanFile):
             del self.options.enable_simd
 
     def configure(self):
-        os = self.settings.os
-        if os not in ["Windows", "Linux", "Macos", "Android", "iOS"]:
-            raise ConanInvalidConfiguration("{0} {1} is not supported on {2}".format(self.name, self.version, os))
+        if self.options.shared:
+            del self.options.fPIC
+        if self.settings.os not in ["Windows", "Linux", "Macos", "Android", "iOS"]:
+            raise ConanInvalidConfiguration("Current os is not supported")
 
-        build_type = self.settings.build_type
-        if build_type not in ["Debug", "RelWithDebInfo", "Release"]:
-            raise ConanInvalidConfiguration("{0} {1} does not support {2} build type".format(self.name, self.version,
-                                                                                             build_type))
+        if self.settings.build_type not in ["Debug", "RelWithDebInfo", "Release"]:
+            raise ConanInvalidConfiguration("Current build_type is not supported")
 
-        compiler = self.settings.compiler
-        if os == "Windows" and compiler != "Visual Studio":
-            raise ConanInvalidConfiguration("{0} {1} does not support {2} on {3}".format(self.name, self.version,
-                                                                                         compiler, os))
+        if self.settings.os == "Windows" and self.settings.compiler != "Visual Studio":
+            raise ConanInvalidConfiguration("{} only supports Visual Studio on Windows".format(self.name))
 
-        if compiler == "Visual Studio":
+        if self.settings.compiler == "Visual Studio":
             if tools.Version(self.settings.compiler.version) < 9:
-                raise ConanInvalidConfiguration("{0} {1} does not support Visual Studio < 9".format(self.name,
-                                                                                                    self.version))
-            runtime = self.settings.compiler.runtime
-            if build_type == "Debug":
-                if runtime not in ["MDd", "MTd"]:
-                    raise ConanInvalidConfiguration("Visual Studio Compiler runtime MDd or MTd " \
-                                                    "is required for {0} build type".format(build_type))
-            elif runtime not in ["MD", "MT"]:
-                raise ConanInvalidConfiguration("Visual Studio Compiler runtime MD or MT " \
-                                                "is required for {0} build type".format(build_type))
+                raise ConanInvalidConfiguration("Visual Studio versions < 9 are not supported")
+            if self.settings.build_type == "Debug":
+                if self.settings.compiler.runtime not in ["MDd", "MTd"]:
+                    raise ConanInvalidConfiguration("{} build_type requires runtime with debug enabled.".format(
+                        self.settings.build_type))
+            elif self.settings.compiler.runtime not in ["MD", "MT"]:
+                raise ConanInvalidConfiguration("{} build_type requires runtime wit debug disabled.".format(
+                    self.settings.build_type))
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
@@ -85,7 +82,7 @@ class PhysXConan(ConanFile):
         extracted_dir = "PhysX-" + os.path.splitext(os.path.basename(url))[0]
         try:
             os.rename(extracted_dir, self._source_subfolder)
-        except:
+        except OSError:
             # workaround for permission denied on windows
             time.sleep(10)
             os.rename(extracted_dir, self._source_subfolder)
@@ -102,11 +99,46 @@ class PhysXConan(ConanFile):
                               "#error Exactly one of NDEBUG and _DEBUG needs to be defined!",
                               "// #error Exactly one of NDEBUG and _DEBUG needs to be defined!")
 
+        # Comment out hard-coded PIC settings
+        tools.replace_in_file(os.path.join(self._source_subfolder, "physx", "source", "compiler", "cmake", "CMakeLists.txt"),
+                              "SET(CMAKE_POSITION_INDEPENDENT_CODE ON)",
+                              "SET(CMAKE_POSITION_INDEPENDENT_CODE ${PHYSX_CONAN_FPIC})")
+        for cmake in (
+                "FastXml.cmake",
+                os.path.join("linux", "LowLevel.cmake"),
+                os.path.join("linux", "PhysXCharacterKinematic.cmake"),
+                "LowLevel.cmake",
+                "LowLevelAABB.cmake",
+                "LowLevelDynamics.cmake",
+                "PhysX.cmake",
+                "PhysXCharacterKinematic.cmake",
+                "PhysXCommon.cmake",
+                "PhysXCooking.cmake",
+                "PhysXExtensions.cmake",
+                "PhysXFoundation.cmake",
+                "PhysXPvdSDK.cmake",
+                "PhysXTask.cmake",
+                "PhysXVehicle.cmake",
+                "SceneQuery.cmake",
+                "SimulationController.cmake",
+        ):
+            target, _ = os.path.splitext(os.path.basename(cmake))
+            tools.replace_in_file(os.path.join(self._source_subfolder, "physx", "source", "compiler", "cmake", cmake),
+                                  "SET_TARGET_PROPERTIES({} PROPERTIES POSITION_INDEPENDENT_CODE TRUE)".format(target),
+                                  "SET_TARGET_PROPERTIES({} PROPERTIES POSITION_INDEPENDENT_CODE ${{PHYSX_CONAN_FPIC}})".format(target))
+
+        for cmake_os in ("linux", "mac", "android", "ios"):
+            tools.replace_in_file(os.path.join(self._source_subfolder, "physx", "source", "compiler", "cmake", cmake_os, "CMakeLists.txt"),
+                                  "-Werror", "")
+
     def _configure_cmake(self):
         if self._cmake:
             return self._cmake
 
         self._cmake = CMake(self, build_type=self._get_physx_build_type())
+
+        if self.settings.os != "Windows" and not self.options.shared:
+            self._cmake.definitions["PHYSX_CONAN_FPIC"] = self.options.fPIC
 
         # Options defined in physx/compiler/public/CMakeLists.txt
         self._cmake.definitions["TARGET_BUILD_PLATFORM"] = self._get_target_build_platform()
