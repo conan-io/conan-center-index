@@ -5,7 +5,7 @@ from conans.errors import ConanInvalidConfiguration
 
 class BacnetStackConan(ConanFile):
     name = "bacnet-stack"
-    license = "BSD"
+    license = "GPL-2.0-or-later"
     url = "https://github.com/bacnet-stack/bacnet-stack/"
     description = """
         BACnet Protocol Stack library provides a BACnet application layer,
