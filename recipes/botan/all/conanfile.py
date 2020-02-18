@@ -23,6 +23,20 @@ class BotanConan(ConanFile):
         'with_sqlite3': [True, False],
         'with_zlib': [True, False],
         'with_boost': [True, False],
+        'with_sse2': [True, False],
+        'with_ssse3': [True, False],
+        'with_sse4_1': [True, False],
+        'with_sse4_2': [True, False],
+        'with_avx2': [True, False],
+        'with_bmi2': [True, False],
+        'with_rdrand': [True, False],
+        'with_rdseed': [True, False],
+        'with_aes_ni': [True, False],
+        'with_sha_ni': [True, False],
+        'with_altivec': [True, False],
+        'with_neon': [True, False],
+        'with_armv8crypto': [True, False],
+        'with_powercrypto': [True, False],
         'enable_modules': "ANY",
         'system_cert_bundle': "ANY"
     }
@@ -35,6 +49,20 @@ class BotanConan(ConanFile):
                        'with_sqlite3': False,
                        'with_zlib': False,
                        'with_boost': False,
+                       'with_sse2': True,
+                       'with_ssse3': True,
+                       'with_sse4_1': True,
+                       'with_sse4_2': True,
+                       'with_avx2': True,
+                       'with_bmi2': True,
+                       'with_rdrand': True,
+                       'with_rdseed': True,
+                       'with_aes_ni': True,
+                       'with_sha_ni': True,
+                       'with_altivec': True,
+                       'with_neon': True,
+                       'with_armv8crypto': True,
+                       'with_powercrypto': True,
                        'enable_modules': None,
                        'system_cert_bundle': None}
 
@@ -216,6 +244,48 @@ class BotanConan(ConanFile):
 
         if self.settings.build_type == 'RelWithDebInfo':
             build_flags.append('--with-debug-info')
+
+        if not self.options.with_sse2:
+            build_flags.append('--disable-sse2')
+
+        if not self.options.with_ssse3:
+            build_flags.append('--disable-ssse3')
+
+        if not self.options.with_sse4_1:
+            build_flags.append('--disable-sse4.1')
+
+        if not self.options.with_sse4_2:
+            build_flags.append('--disable-sse4.2')
+
+        if not self.options.with_avx2:
+            build_flags.append('--disable-avx2')
+
+        if not self.options.with_bmi2:
+            build_flags.append('--disable-bmi2')
+
+        if not self.options.with_rdrand:
+            build_flags.append('--disable-rdrand')
+
+        if not self.options.with_rdseed:
+            build_flags.append('--disable-rdseed')
+
+        if not self.options.with_aes_ni:
+            build_flags.append('--disable-aes-ni')
+
+        if not self.options.with_sha_ni:
+            build_flags.append('--disable-sha-ni')
+
+        if not self.options.with_altivec:
+            build_flags.append('--disable-altivec')
+
+        if not self.options.with_neon:
+            build_flags.append('--disable-neon')
+
+        if not self.options.with_armv8crypto:
+            build_flags.append('--disable-armv8crypto')
+
+        if not self.options.with_powercrypto:
+            build_flags.append('--disable-powercrypto')
 
         if str(self.settings.build_type).lower() == 'debug':
             build_flags.append('--debug-mode')
