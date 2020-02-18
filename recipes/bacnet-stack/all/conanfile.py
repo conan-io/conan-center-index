@@ -22,6 +22,8 @@ class BacnetStackConan(ConanFile):
     }
     generators = "cmake", "cmake_find_package"
 
+    _cmake = None
+
     @property
     def _source_subfolder(self):
         return "source_subfolder"
