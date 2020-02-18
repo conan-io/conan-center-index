@@ -39,7 +39,7 @@ class BacnetStackConan(ConanFile):
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
-        extracted_dir = self.name + "-" + self.version
+        extracted_dir = os.path.splitext(os.path.basename(self.conan_data["sources"][self.version]["url"]))[0]
         os.rename(extracted_dir, self._source_subfolder)
 
     def _configure_cmake(self):
