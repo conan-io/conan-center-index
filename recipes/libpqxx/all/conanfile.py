@@ -12,7 +12,7 @@ class LibpqxxRecipe(ConanFile):
     homepage = "https://github.com/jtv/libpqxx"
     license = "BSD-3-Clause"
     topics = ("conan", "libpqxx", "postgres", "postgresql", "database", "db")
-    generators = "cmake"
+    generators = "cmake", "cmake_find_package"
     exports_sources = ["CMakeLists.txt", "patches/*"]
     options = {"shared": [True, False], "fPIC": [True, False]}
     default_options = {"shared": False, "fPIC": True}
@@ -50,9 +50,8 @@ class LibpqxxRecipe(ConanFile):
         supported_cppstd = ["17", "20"]
         minimal_cpp_standard = supported_cppstd[0]
 
-        if not self.settings.compiler.cppstd in supported_cppstd:
-            raise ConanInvalidConfiguration(
-                "%s requires a compiler that supports at least C++%s" % (self.name, minimal_cpp_standard))
+        if self.settings.compiler.cppstd:
+            tools.check_min_cppstd(self, "17")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
@@ -89,11 +88,9 @@ class LibpqxxRecipe(ConanFile):
         tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
 
     def package_info(self):
-        pqxx_with_suffix = "pqxx-%s.%s" % tuple(self.version.split(".")[0:2])
-        libname_with_suffix = self.settings.os != "Windows"
-        self.cpp_info.libs.append(pqxx_with_suffix if libname_with_suffix else "pqxx")
+        self.cpp_info.libs = ["pqxx"]
 
         if self.settings.os == "Windows":
-            self.cpp_info.system_libs.extend(["wsock32 ", "ws2_32"])
+            self.cpp_info.system_libs = ["wsock32 ", "ws2_32"]
         elif self.settings.os == "Linux":
-            self.cpp_info.system_libs.append("pthread")
+            self.cpp_info.system_libs = ["pthread"]
