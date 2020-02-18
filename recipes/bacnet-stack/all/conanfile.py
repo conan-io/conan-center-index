@@ -11,6 +11,7 @@ class BacnetStackConan(ConanFile):
         BACnet Protocol Stack library provides a BACnet application layer,
         network layer and media access (MAC) layer communications services."""
     topics = ("bacnet")
+    exports_sources = "CMakeLists.txt"
     settings = "os", "compiler", "build_type", "arch"
     options = {
         "shared": [True, False],
@@ -58,7 +59,7 @@ class BacnetStackConan(ConanFile):
         cmake.build()
 
     def package(self):
-        self.copy("gpl-2.txt", dst='licenses', src=os.path.join(elf._source_subfolder, "license"))
+        self.copy("gpl-2.txt", dst='licenses', src=os.path.join(self._source_subfolder, "license"))
         cmake = self._configure_cmake()
         cmake.install()
         tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
