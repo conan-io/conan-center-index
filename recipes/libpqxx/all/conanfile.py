@@ -84,6 +84,8 @@ class LibpqxxRecipe(ConanFile):
         cmake = self._configure_cmake()
         cmake.install()
 
+        tools.rmdir(os.path.join(self.package_folder, "share"))
+
     def package_info(self):
         pqxx_with_suffix = "pqxx-%s.%s" % tuple(self.version.split(".")[0:2])
         is_package_with_suffix = self.settings.os != "Windows" and self.options.shared
