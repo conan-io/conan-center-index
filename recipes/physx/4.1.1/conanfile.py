@@ -231,6 +231,9 @@ class PhysXConan(ConanFile):
         return readme[begin:end]
 
     def _copy_external_bin(self):
+        # For Windows and Linux 64 bits, PhysXGpu (and PhysXDevice on Windows)
+        # precompiled shared libs must also be provided to end-user if
+        # application uses GPU features.
         external_bin_dir = os.path.join(self._source_subfolder, "physx", "bin")
         physx_build_type = self._get_physx_build_type()
         compiler_version = tools.Version(self.settings.compiler.version)
