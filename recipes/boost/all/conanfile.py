@@ -754,15 +754,17 @@ class BoostConan(ConanFile):
 
     def _get_toolset_version_and_exe(self):
         compiler_version = str(self.settings.compiler.version)
+        major = compiler_version.split(".")[0]
+        if "." not in compiler_version:
+            compiler_version += ".0"
         compiler = str(self.settings.compiler)
         if self._is_msvc:
-            cversion = self.settings.compiler.version
-            if Version(str(cversion)) >= "16":
+            if Version(compiler_version) >= "16":
                 _msvc_version = "14.2"
-            elif Version(str(cversion)) >= "15":
+            elif Version(compiler_version) >= "15":
                 _msvc_version = "14.1"
             else:
-                _msvc_version = "%s.0" % cversion
+                _msvc_version = compiler_version
             return "msvc", _msvc_version, ""
         elif self.settings.os == "Windows" and self.settings.compiler == "clang":
             return "clang-win", compiler_version, ""
@@ -770,16 +772,16 @@ class BoostConan(ConanFile):
             return "emscripten", compiler_version, self._cxx
         elif self.settings.compiler == "gcc" and tools.is_apple_os(self.settings.os):
             return "darwin", compiler_version, self._cxx
-        elif compiler == "gcc" and compiler_version[0] >= "5":
+        elif compiler == "gcc" and major >= "5":
             # For GCC >= v5 we only need the major otherwise Boost doesn't find the compiler
             # The NOT windows check is necessary to exclude MinGW:
-            if not tools.which("g++-%s" % compiler_version[0]):
+            if not tools.which("g++-%s" % major):
                 # In fedora 24, 25 the gcc is 6, but there is no g++-6 and the detection is 6.3.1
                 # so b2 fails because 6 != 6.3.1. Specify the exe to avoid the smart detection
                 executable = tools.which("g++") or ""
             else:
                 executable = ""
-            return compiler, compiler_version[0], executable
+            return compiler, compiler_version, executable
         elif self.settings.compiler == "apple-clang":
             return "clang-darwin", compiler_version, self._cxx
         elif self.settings.os == "Android" and self.settings.compiler == "clang":
