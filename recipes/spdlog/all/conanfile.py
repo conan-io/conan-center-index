@@ -1,6 +1,6 @@
-import os
 from conans import CMake, ConanFile, tools
 from conans.errors import ConanInvalidConfiguration
+import os
 
 
 class SpdlogConan(ConanFile):
@@ -25,6 +25,8 @@ class SpdlogConan(ConanFile):
                        "wchar_support": False,
                        "wchar_filenames": False,
                        "no_exceptions": False}
+
+    _cmake = None
 
     @property
     def _source_subfolder(self):
@@ -53,20 +55,22 @@ class SpdlogConan(ConanFile):
         os.rename(extracted_dir, self._source_subfolder)
 
     def _configure_cmake(self):
-        cmake = CMake(self)
-        cmake.definitions["SPDLOG_BUILD_EXAMPLE"] = False
-        cmake.definitions["SPDLOG_BUILD_EXAMPLE_HO"] = False
-        cmake.definitions["SPDLOG_BUILD_TESTS"] = False
-        cmake.definitions["SPDLOG_BUILD_TESTS_HO"] = False
-        cmake.definitions["SPDLOG_BUILD_BENCH"] = False
-        cmake.definitions["SPDLOG_FMT_EXTERNAL"] = True
-        cmake.definitions["SPDLOG_BUILD_SHARED"] = not self.options.header_only and self.options.shared
-        cmake.definitions["SPDLOG_WCHAR_SUPPORT"] = self.options.wchar_support
-        cmake.definitions["SPDLOG_WCHAR_FILENAMES"] = self.options.wchar_filenames
-        cmake.definitions["SPDLOG_INSTALL"] = True
-        cmake.definitions["SPDLOG_NO_EXCEPTIONS"] = self.options.no_exceptions
-        cmake.configure()
-        return cmake
+        if self._cmake:
+            return self._cmake
+        self._cmake = CMake(self)
+        self._cmake.definitions["SPDLOG_BUILD_EXAMPLE"] = False
+        self._cmake.definitions["SPDLOG_BUILD_EXAMPLE_HO"] = False
+        self._cmake.definitions["SPDLOG_BUILD_TESTS"] = False
+        self._cmake.definitions["SPDLOG_BUILD_TESTS_HO"] = False
+        self._cmake.definitions["SPDLOG_BUILD_BENCH"] = False
+        self._cmake.definitions["SPDLOG_FMT_EXTERNAL"] = True
+        self._cmake.definitions["SPDLOG_BUILD_SHARED"] = not self.options.header_only and self.options.shared
+        self._cmake.definitions["SPDLOG_WCHAR_SUPPORT"] = self.options.wchar_support
+        self._cmake.definitions["SPDLOG_WCHAR_FILENAMES"] = self.options.wchar_filenames
+        self._cmake.definitions["SPDLOG_INSTALL"] = True
+        self._cmake.definitions["SPDLOG_NO_EXCEPTIONS"] = self.options.no_exceptions
+        self._cmake.configure()
+        return self._cmake
 
     def _disable_werror(self):
         tools.replace_in_file(os.path.join(self._source_subfolder, "cmake", "utils.cmake"), "/WX", "")
@@ -79,7 +83,7 @@ class SpdlogConan(ConanFile):
         cmake.build()
 
     def package(self):
-        self.copy("LICENSE", dst='licenses', src=self._source_subfolder)
+        self.copy("LICENSE", dst="licenses", src=self._source_subfolder)
         cmake = self._configure_cmake()
         cmake.install()
         tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
@@ -102,5 +106,5 @@ class SpdlogConan(ConanFile):
             self.cpp_info.defines.append("SPDLOG_WCHAR_FILENAMES")
         if self.options.no_exceptions:
             self.cpp_info.defines.append("SPDLOG_NO_EXCEPTIONS")
-        if tools.os_info.is_linux:
-            self.cpp_info.libs.append("pthread")
+        if self.settings.os == "Linux":
+            self.cpp_info.system_libs = ["pthread"]
