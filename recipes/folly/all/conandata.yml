@@ -1,0 +1,14 @@
+sources:
+  "2020.02.17.00":
+    url: "https://github.com/facebook/folly/archive/v2020.02.17.00.tar.gz"
+    sha256: "7fbcb94a89895628f85bc755ad4817ce985d5bc7fdf63f93eced5bbd3aae6ceb"
+  "2018.11.12.00":
+    url: "https://github.com/facebook/folly/archive/v2018.11.12.00.tar.gz"
+    sha256: "c05ff9ac9796cec9d02e00e14d593047b19de1e2a08d91c69cbf2fe53708662f"
+patches:
+  "2018.11.12.00":
+    - patch_file: "patches/0001-find-packages.patch"
+      base_path: "source_subfolder"
+  "2020.02.17.00":
+    - patch_file: "patches/0002-find-gflags.patch"
+      base_path: "source_subfolder"
