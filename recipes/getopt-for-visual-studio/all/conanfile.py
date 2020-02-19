@@ -10,6 +10,7 @@ class GetoptForVisualStudio(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/skandhurkat/Getopt-for-Visual-Studi"
     license = "MIT", "BSD-2-Clause"
+    exports_sources = "patches/**"
     settings = "compiler"
 
     def configure(self):
@@ -23,6 +24,10 @@ class GetoptForVisualStudio(ConanFile):
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
         os.rename("Getopt-for-Visual-Studio-{}".format(os.path.splitext(os.path.basename(self.conan_data["sources"][self.version]["url"]))[0]), self._source_subfolder)
+
+    def build(self):
+        for patch in self.conan_data["patches"][self.version]:
+            tools.patch(**patch)
 
     @property
     def _license_text(self):
