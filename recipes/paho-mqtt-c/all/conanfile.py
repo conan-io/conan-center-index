@@ -1,7 +1,5 @@
 import os
 from conans import CMake, ConanFile, tools
-from conans.errors import ConanInvalidConfiguration
-
 
 class PahoMqttcConan(ConanFile):
     name = "paho-mqtt-c"
@@ -13,16 +11,18 @@ class PahoMqttcConan(ConanFile):
     and MQTT-SN messaging protocols aimed at new, existing, and emerging applications for the Internet
     of Things (IoT)"""
     exports_sources = ["CMakeLists.txt", "patches/*"]
-    generators = "cmake", "cmake_find_package"
+    generators = "cmake"
     settings = "os", "arch", "compiler", "build_type"
     options = {"shared": [True, False],
                "fPIC": [True, False],
-               "SSL": [True, False],
+               "ssl": [True, False],
                "asynchronous": [True, False]}
     default_options = {"shared": False,
                        "fPIC": True,
-                       "SSL": False,
+                       "ssl": False,
                        "asynchronous": True}
+
+    _cmake = None
 
     @property
     def _source_subfolder(self):
@@ -37,8 +37,8 @@ class PahoMqttcConan(ConanFile):
         del self.settings.compiler.libcxx
 
     def requirements(self):
-        if self.options.SSL:
-            self.requires("OpenSSL/1.1.1d")
+        if self.options.ssl:
+            self.requires("openssl/1.1.1d")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
@@ -46,13 +46,17 @@ class PahoMqttcConan(ConanFile):
         os.rename(extracted_dir, self._source_subfolder)
 
     def _configure_cmake(self):
-        cmake = CMake(self)
+        if self._cmake:
+            return self._cmake
+        self._cmake = CMake(self)
         cmake.definitions["PAHO_ENABLE_TESTING"] = False
         cmake.definitions["PAHO_BUILD_DOCUMENTATION"] = False
         cmake.definitions["PAHO_BUILD_SAMPLES"] = False
         cmake.definitions["PAHO_BUILD_STATIC"] = not self.options.shared
-        cmake.definitions["PAHO_WITH_SSL"] = self.options.SSL
         cmake.definitions["PAHO_BUILD_ASYNC"] = self.options.asynchronous
+        cmake.definitions["PAHO_WITH_SSL"] = self.options.ssl
+        if self.options.ssl:
+            cmake.definitions["OPENSSL_SEARCH_PATH"] = self.deps_cpp_info["openssl"].rootpath
         cmake.configure()
         return cmake
 
