@@ -55,7 +55,7 @@ class TclConan(ConanFile):
             return {
                 "Macos": "macosx",
                 "Linux": "unix",
-                "Window": "win",
+                "Windows": "win",
             }[str(self.settings.os)]
 
     def _get_configure_dir(self, build_system_subdir=None):
