@@ -9,7 +9,7 @@ class LibdbConan(ConanFile):
     topics = ("conan", "gdbm", "dbm", "hash", "database")
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://www.oracle.com/database/berkeley-db"
-    license = ("BSD", "LGPLv2", "Sleepycat")
+    license = ("BSD-3-Clause")
     exports_sources = "patches/**"
     settings = "os", "compiler", "build_type", "arch"
     options = {
