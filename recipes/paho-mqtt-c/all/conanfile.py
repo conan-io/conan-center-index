@@ -49,16 +49,16 @@ class PahoMqttcConan(ConanFile):
         if self._cmake:
             return self._cmake
         self._cmake = CMake(self)
-        cmake.definitions["PAHO_ENABLE_TESTING"] = False
-        cmake.definitions["PAHO_BUILD_DOCUMENTATION"] = False
-        cmake.definitions["PAHO_BUILD_SAMPLES"] = False
-        cmake.definitions["PAHO_BUILD_STATIC"] = not self.options.shared
-        cmake.definitions["PAHO_BUILD_ASYNC"] = self.options.asynchronous
-        cmake.definitions["PAHO_WITH_SSL"] = self.options.ssl
+        self._cmake.definitions["PAHO_ENABLE_TESTING"] = False
+        self._cmake.definitions["PAHO_BUILD_DOCUMENTATION"] = False
+        self._cmake.definitions["PAHO_BUILD_SAMPLES"] = False
+        self._cmake.definitions["PAHO_BUILD_STATIC"] = not self.options.shared
+        self._cmake.definitions["PAHO_BUILD_ASYNC"] = self.options.asynchronous
+        self._cmake.definitions["PAHO_WITH_SSL"] = self.options.ssl
         if self.options.ssl:
-            cmake.definitions["OPENSSL_SEARCH_PATH"] = self.deps_cpp_info["openssl"].rootpath
-        cmake.configure()
-        return cmake
+            self._cmake.definitions["OPENSSL_SEARCH_PATH"] = self.deps_cpp_info["openssl"].rootpath
+        self._cmake.configure()
+        return self._cmake
 
     def build(self):
         for patch in self.conan_data["patches"][self.version]:
