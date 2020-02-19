@@ -1,4 +1,4 @@
-// This example does not work for library option 'paho-c:async=False'
+// This example does not work for library option 'paho-mqtt-c:async=False'
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>

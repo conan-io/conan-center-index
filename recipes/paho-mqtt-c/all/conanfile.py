@@ -3,8 +3,8 @@ from conans import CMake, ConanFile, tools
 from conans.errors import ConanInvalidConfiguration
 
 
-class PahocConan(ConanFile):
-    name = "paho-c"
+class PahoMqttcConan(ConanFile):
+    name = "paho-mqtt-c"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/eclipse/paho.mqtt.c"
     topics = ("MQTT", "IoT", "eclipse", "SSL", "paho", "C")
@@ -41,7 +41,7 @@ class PahocConan(ConanFile):
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
-        extracted_dir = self.name + "-" + self.version
+        extracted_dir = self.name.replace("-", ".") + "-" + self.version
         os.rename(extracted_dir, self._source_subfolder)
 
     def _configure_cmake(self):
@@ -54,10 +54,6 @@ class PahocConan(ConanFile):
         cmake.definitions["PAHO_BUILD_ASYNC"] = self.options.asynchronous
         cmake.configure()
         return cmake
-
-    def _disable_werror(self):
-        tools.replace_in_file(os.path.join(
-            self._source_subfolder, "cmake", "utils.cmake"), "/WX", "")
 
     def build(self):
         tools.patch(base_path=self._source_subfolder,
