@@ -57,10 +57,8 @@ class PahoMqttcConan(ConanFile):
         return cmake
 
     def build(self):
-        tools.patch(base_path=self._source_subfolder,
-                    patch_file="0001-fix-MinGW-and-OSX-builds.patch")
-        tools.patch(base_path=self._source_subfolder,
-                    patch_file="0002-fix-cmake-install.patch")
+        for patch in self.conan_data["patches"][self.version]:
+            tools.patch(**patch)
         cmake = self._configure_cmake()
         cmake.build()
 
