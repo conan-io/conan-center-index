@@ -20,6 +20,7 @@ class TclConan(ConanFile):
         "fPIC": True,
         "shared": False,
     }
+    exports_sources = ("patches/*")
     requires = ("zlib/1.2.11")
 
     _autotools = None
@@ -128,6 +129,8 @@ class TclConan(ConanFile):
         return self._autotools
 
     def build(self):
+        for patch in self.conan_data["patches"][self.version]:
+            tools.patch(**patch)
         self._patch_sources()
         if self.settings.compiler == "Visual Studio":
             self._build_nmake(["release"])
