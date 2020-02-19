@@ -33,6 +33,7 @@ class PahoMqttcConan(ConanFile):
             del self.options.fPIC
 
     def configure(self):
+        del self.settings.compiler.cppstd
         del self.settings.compiler.libcxx
 
     def requirements(self):
