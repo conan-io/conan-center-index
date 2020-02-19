@@ -78,14 +78,14 @@ class PahoMqttcConan(ConanFile):
         self.cpp_info.libs = tools.collect_libs(self)
         if self.settings.os == "Windows":
             if not self.options.shared:
-                self.cpp_info.libs.append("ws2_32")
+                self.cpp_info.system_libs.append("ws2_32")
                 if self.settings.compiler == "gcc":
-                    self.cpp_info.libs.extend(
+                    self.cpp_info.system_libs.extend(
                         ["wsock32", "uuid", "crypt32", "rpcrt4"])
         else:
             if self.settings.os == "Linux":
-                self.cpp_info.libs.extend(["c", "dl", "pthread"])
+                self.cpp_info.system_libs.extend(["c", "dl", "pthread"])
             elif self.settings.os == "FreeBSD":
-                self.cpp_info.libs.extend(["compat", "pthread"])
+                self.cpp_info.system_libs.extend(["compat", "pthread"])
             else:
-                self.cpp_info.libs.extend(["c", "pthread"])
+                self.cpp_info.system_libs.extend(["c", "pthread"])
