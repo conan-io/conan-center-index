@@ -1,0 +1,88 @@
+diff --git a/CMake/FindGFlags.cmake b/CMake/FindGFlags.cmake
+index b48157b..f31dc14 100644
+--- a/CMake/FindGFlags.cmake
++++ b/CMake/FindGFlags.cmake
+@@ -13,8 +13,13 @@ ENDIF ()
+ 
+ FIND_PATH(LIBGFLAGS_INCLUDE_DIR gflags/gflags.h)
+ 
+-FIND_LIBRARY(LIBGFLAGS_LIBRARY_DEBUG NAMES gflagsd gflags_staticd)
+-FIND_LIBRARY(LIBGFLAGS_LIBRARY_RELEASE NAMES gflags gflags_static)
++if(CMAKE_SYSTEM_NAME STREQUAL "Windows")
++  FIND_LIBRARY(LIBGFLAGS_LIBRARY_DEBUG NAMES gflagsd gflags_nothreads_staticd PATHS ${CONAN_GFLAGS_ROOT})
++  FIND_LIBRARY(LIBGFLAGS_LIBRARY_RELEASE NAMES gflags gflags_nothreads_static PATHS ${CONAN_GFLAGS_ROOT})
++else()
++  FIND_LIBRARY(LIBGFLAGS_LIBRARY_DEBUG NAMES gflags gflags_nothreads_debug PATHS ${CONAN_GFLAGS_ROOT})
++  FIND_LIBRARY(LIBGFLAGS_LIBRARY_RELEASE NAMES gflags_nothreads gflags PATHS ${CONAN_GFLAGS_ROOT})
++endif()
+ 
+ INCLUDE(SelectLibraryConfigurations)
+ SELECT_LIBRARY_CONFIGURATIONS(LIBGFLAGS)
+diff --git a/CMake/FindGLog.cmake b/CMake/FindGLog.cmake
+index 4338159..d84ef50 100644
+--- a/CMake/FindGLog.cmake
++++ b/CMake/FindGLog.cmake
+@@ -13,7 +13,7 @@ ENDIF ()
+ 
+ FIND_PATH(LIBGLOG_INCLUDE_DIR glog/logging.h)
+ 
+-FIND_LIBRARY(LIBGLOG_LIBRARY glog)
++FIND_LIBRARY(LIBGLOG_LIBRARY glog glogd PATHS ${CONAN_GLOG_ROOT})
+ 
+ # handle the QUIETLY and REQUIRED arguments and set LIBGLOG_FOUND to TRUE if
+ # all listed variables are TRUE
+diff --git a/CMake/FindLibEvent.cmake b/CMake/FindLibEvent.cmake
+index eca43a4..29836ff 100644
+--- a/CMake/FindLibEvent.cmake
++++ b/CMake/FindLibEvent.cmake
+@@ -11,7 +11,7 @@ foreach(prefix ${LibEvent_EXTRA_PREFIXES})
+ endforeach()
+ 
+ find_path(LIBEVENT_INCLUDE_DIR event.h PATHS ${LibEvent_INCLUDE_PATHS})
+-find_library(LIBEVENT_LIB NAMES event PATHS ${LibEvent_LIB_PATHS})
++find_library(LIBEVENT_LIB NAMES event libevent PATHS ${CONAN_LIBEVENT_ROOT})
+ 
+ if (LIBEVENT_LIB AND LIBEVENT_INCLUDE_DIR)
+   set(LibEvent_FOUND TRUE)
+diff --git a/CMake/FollyCompilerUnix.cmake b/CMake/FollyCompilerUnix.cmake
+index 245bbe9..d88cfd9 100644
+--- a/CMake/FollyCompilerUnix.cmake
++++ b/CMake/FollyCompilerUnix.cmake
+@@ -14,9 +14,9 @@ set(
+ )
+ mark_as_advanced(CXX_STD)
+ 
+-set(CMAKE_CXX_FLAGS_COMMON "-g -Wall -Wextra")
++set(CMAKE_CXX_FLAGS_COMMON "-Wall -Wextra")
+ set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_COMMON}")
+-set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_COMMON} -O3")
++set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_COMMON}")
+ 
+ set(CMAKE_REQUIRED_FLAGS "${CMAKE_REQUIRED_FLAGS} -std=${CXX_STD}")
+ function(apply_folly_compile_options_to_target THETARGET)
+@@ -28,11 +28,9 @@ function(apply_folly_compile_options_to_target THETARGET)
+   )
+   target_compile_options(${THETARGET}
+     PRIVATE
+-      -g
+       -std=${CXX_STD}
+       -finput-charset=UTF-8
+       -fsigned-char
+-      -Werror
+       -Wall
+       -Wno-deprecated
+       -Wno-deprecated-declarations
+diff --git a/folly/CachelinePadded.h b/folly/CachelinePadded.h
+index cd4b4a6..2226b86 100644
+--- a/folly/CachelinePadded.h
++++ b/folly/CachelinePadded.h
+@@ -35,9 +35,6 @@ namespace folly {
+  */
+ template <typename T>
+ class CachelinePadded {
+-  static_assert(
+-      alignof(T) <= max_align_v,
+-      "CachelinePadded does not support over-aligned types.");
+ 
+  public:
+   template <typename... Args>
