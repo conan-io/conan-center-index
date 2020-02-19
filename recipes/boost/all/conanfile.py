@@ -956,5 +956,6 @@ class BoostConan(ConanFile):
                 self.cpp_info.system_libs.extend(["pthread", "rt"])
 
         self.env_info.BOOST_ROOT = self.package_folder
+        self.cpp_info.bindirs.append("lib")
         self.cpp_info.names["cmake_find_package"] = "Boost"
         self.cpp_info.names["cmake_find_package_multi"] = "Boost"
