@@ -75,10 +75,6 @@ class PahocConan(ConanFile):
         cmake.install()
         tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
 
-    def package_id(self):
-        if self.options.header_only:
-            self.info.header_only()
-
     def package_info(self):
         self.cpp_info.libs = tools.collect_libs(self)
         if self.settings.os == "Windows":
