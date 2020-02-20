@@ -70,8 +70,8 @@ class LeptonicaConan(ConanFile):
 
     def _configure_cmake(self):
         cmake = CMake(self)
-        # was required in 1.78.0
-        # cmake.definitions['STATIC'] = not self.options.shared
+        if self.version == '1.78.0':
+            cmake.definitions['STATIC'] = not self.options.shared
         cmake.definitions['BUILD_PROG'] = False
         # avoid finding system libs
         cmake.definitions['CMAKE_DISABLE_FIND_PACKAGE_GIF'] = not self.options.with_gif
@@ -94,11 +94,11 @@ class LeptonicaConan(ConanFile):
 
         # upstream uses obsolete FOO_LIBRARY that is not generated
         # by cmake_find_package generator (upstream PR 456)
-        # was fixed in 1.79.0
-        #for dep in ('GIF', 'TIFF', 'PNG', 'JPEG', 'ZLIB'):
-        #   tools.replace_in_file(os.path.join(self._source_subfolder, "src", "CMakeLists.txt"),
-        #                         dep + "_LIBRARY",
-        #                         dep + "_LIBRARIES")
+        if self.version == '1.78.0':
+            for dep in ('GIF', 'TIFF', 'PNG', 'JPEG', 'ZLIB'):
+                tools.replace_in_file(os.path.join(self._source_subfolder, "src", "CMakeLists.txt"),
+                                      dep + "_LIBRARY",
+                                      dep + "_LIBRARIES")
 
         cmake = self._configure_cmake()
         cmake.build()
