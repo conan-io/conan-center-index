@@ -1,0 +1,8 @@
+sources:
+  "0.1.33":
+    url: "https://github.com/Dav1dde/glad/archive/v0.1.33.zip"
+    sha256: "3175b56aa5ff16c5bfb33df3f36d6a7eb680e7d9f1675035472015e007a88660"
+patches:
+  "0.1.33":
+    - patch_file: "patches/0001-CMake-handle-all-specs.patch"
+      base_path: "source_subfolder"

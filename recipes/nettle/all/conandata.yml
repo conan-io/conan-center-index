@@ -1,0 +1,4 @@
+sources:
+  "3.5":
+    url: "https://ftp.gnu.org/gnu/nettle/nettle-3.5.tar.gz"
+    sha256: "432d98dcd341cbd063a963025524122368c1f2ee9c721bb68d771d5e34674b4f"

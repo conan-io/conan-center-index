@@ -85,8 +85,8 @@ class LibtiffConan(ConanFile):
                                           "if (UNIX OR MINGW)")
 
         tools.replace_in_file(os.path.join(self._source_subfolder, "CMakeListsOriginal.txt"),
-            "add_subdirectory(tools)\nadd_subdirectory(test)\nadd_subdirectory(contrib)\nadd_subdirectory(build)\n"
-            "add_subdirectory(man)\nadd_subdirectory(html)", "")
+                              "add_subdirectory(tools)\nadd_subdirectory(test)\nadd_subdirectory(contrib)\nadd_subdirectory(build)\n"
+                              "add_subdirectory(man)\nadd_subdirectory(html)", "")
 
     def build(self):
         self._patch_sources()

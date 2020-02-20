@@ -1,0 +1,4 @@
+sources:
+  "1.30":
+    url: "https://github.com/greg7mdp/parallel-hashmap/archive/1.30.zip"
+    sha256: "388da5500842b42ea9f643220541aa13c6b1e0c810ecf603d65e174fe3eb1eee"

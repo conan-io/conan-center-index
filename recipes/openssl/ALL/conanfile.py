@@ -174,6 +174,51 @@ class OpenSSLConan(ConanFile):
         return target
 
     @property
+    def _perlasm_scheme(self):
+        # right now, we need to tweak this for iOS & Android only, as they inherit from generic targets
+        the_arch = str(self.settings.arch)
+        the_os = str(self.settings.os)
+        if the_os in ["iOS", "watchOS", "tvOS"]:
+            return "ios64" if the_arch in ["armv8", "armv8_32", "armv8.3", "x86_64"] else "ios32"
+        if str(self.settings.os) == "Android":
+            return {"armv7": "void",
+                    "armv8": "linux64",
+                    "mips": "o32",
+                    "mips64": "64",
+                    "x86": "android",
+                    "x86_64": "elf"}.get(the_arch, None)
+        return None
+
+    @property
+    def _asm_target(self):
+        if str(self.settings.os) in ["Android", "iOS", "watchOS", "tvOS"]:
+            return {
+                "x86": "x86_asm",
+                "x86_64": "x86_64_asm",
+                "armv5el": "armv4_asm",
+                "armv5hf": "armv4_asm",
+                "armv6": "armv4_asm",
+                "armv7": "armv4_asm",
+                "armv7hf": "armv4_asm",
+                "armv7s": "armv4_asm",
+                "armv7k": "armv4_asm",
+                "armv8": "aarch64_asm",
+                "armv8_32": "aarch64_asm",
+                "armv8.3": "aarch64_asm",
+                "mips": "mips32_asm",
+                "mips64": "mips64_asm",
+                "sparc": "sparcv8_asm",
+                "sparcv9": "sparcv9_asm",
+                "ia64": "ia64_asm",
+                "ppc32be": "ppc32_asm",
+                "ppc32": "ppc32_asm",
+                "ppc64le": "ppc64_asm",
+                "ppc64": "ppc64_asm",
+                "s390": "s390x_asm",
+                "s390x": "s390x_asm"
+            }.get(str(self.settings.arch), None)
+
+    @property
     def _targets(self):
         is_cygwin = self.settings.get_safe("os.subsystem") == "cygwin"
         is_1_0 = self._full_version < "1.1.0"
@@ -312,18 +357,18 @@ class OpenSSLConan(ConanFile):
         with tools.environment_append(env_build.vars):
             if not "CROSS_COMPILE" in os.environ:
                 cc = os.environ.get("CC", "cc")
-                tools.replace_in_file(makefile_org, "CC= cc", "CC= %s %s" % (cc, os.environ["CFLAGS"]))
+                tools.replace_in_file(makefile_org, "CC= cc", "CC= %s %s" % (adjust_path(cc), os.environ["CFLAGS"]))
                 if "AR" in os.environ:
-                    tools.replace_in_file(makefile_org, "AR=ar", "AR=%s" % os.environ["AR"])
+                    tools.replace_in_file(makefile_org, "AR=ar", "AR=%s" % adjust_path(os.environ["AR"]))
                 if "RANLIB" in os.environ:
-                    tools.replace_in_file(makefile_org, "RANLIB= ranlib", "RANLIB= %s" % os.environ["RANLIB"])
+                    tools.replace_in_file(makefile_org, "RANLIB= ranlib", "RANLIB= %s" % adjust_path(os.environ["RANLIB"]))
                 rc = os.environ.get("WINDRES", os.environ.get("RC"))
                 if rc:
-                    tools.replace_in_file(makefile_org, "RC= windres", "RC= %s" % rc)
+                    tools.replace_in_file(makefile_org, "RC= windres", "RC= %s" % adjust_path(rc))
                 if "NM" in os.environ:
-                    tools.replace_in_file(makefile_org, "NM= nm", "NM= %s" % os.environ["NM"])
+                    tools.replace_in_file(makefile_org, "NM= nm", "NM= %s" % adjust_path(os.environ["NM"]))
                 if "AS" in os.environ:
-                    tools.replace_in_file(makefile_org, "AS=$(CC) -c", "AS=%s" % os.environ["AS"])
+                    tools.replace_in_file(makefile_org, "AS=$(CC) -c", "AS=%s" % adjust_path(os.environ["AS"]))
 
     def _get_env_build(self):
         if not self._env_build:
@@ -393,7 +438,7 @@ class OpenSSLConan(ConanFile):
     def _create_targets(self):
         config_template = """{targets} = (
     "{target}" => {{
-        inherit_from => [ "{ancestor}" ],
+        inherit_from => {ancestor},
         cflags => add("{cflags}"),
         cxxflags => add("{cxxflags}"),
         {defines}
@@ -403,6 +448,7 @@ class OpenSSLConan(ConanFile):
         {cxx}
         {ar}
         {ranlib}
+        {perlasm_scheme}
     }},
 );
 """
@@ -418,6 +464,10 @@ class OpenSSLConan(ConanFile):
         ar = self._tool("AR", "ar")
         ranlib = self._tool("RANLIB", "ranlib")
 
+        perlasm_scheme = ""
+        if self._perlasm_scheme:
+            perlasm_scheme = 'perlasm_scheme => "%s",' % self._perlasm_scheme
+
         cc = 'cc => "%s",' % cc if cc else ""
         cxx = 'cxx => "%s",' % cxx if cxx else ""
         ar = 'ar => "%s",' % ar if ar else ""
@@ -429,9 +479,14 @@ class OpenSSLConan(ConanFile):
         if self.settings.os == "Windows":
             includes = includes.replace('\\', '/') # OpenSSL doesn't like backslashes
 
+        if self._asm_target:
+            ancestor = '[ "%s", asm("%s") ]' % (self._ancestor_target, self._asm_target)
+        else:
+            ancestor = '[ "%s" ]' % self._ancestor_target
+
         config = config_template.format(targets=targets,
                                         target=self._target,
-                                        ancestor=self._ancestor_target,
+                                        ancestor=ancestor,
                                         cc=cc,
                                         cxx=cxx,
                                         ar=ar,
@@ -440,6 +495,7 @@ class OpenSSLConan(ConanFile):
                                         cxxflags=" ".join(cxxflags),
                                         defines=defines,
                                         includes=includes,
+                                        perlasm_scheme=perlasm_scheme,
                                         lflags=" ".join(env_build.link_flags))
         self.output.info("using target: %s -> %s" % (self._target, self._ancestor_target))
         self.output.info(config)
@@ -597,7 +653,8 @@ class OpenSSLConan(ConanFile):
         tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
 
     def package_info(self):
-        self.cpp_info.name = "OpenSSL"
+        self.cpp_info.names["cmake_find_package"] = "OpenSSL"
+        self.cpp_info.names["cmake_find_package_multi"] = "OpenSSL"
         if self._use_nmake:
             if self._full_version < "1.1.0":
                 self.cpp_info.libs = ["ssleay32", "libeay32"]
@@ -609,6 +666,6 @@ class OpenSSLConan(ConanFile):
         else:
             self.cpp_info.libs = ["ssl", "crypto"]
         if self.settings.os == "Windows":
-            self.cpp_info.libs.extend(["crypt32", "msi", "ws2_32", "advapi32", "user32", "gdi32"])
+            self.cpp_info.system_libs.extend(["crypt32", "msi", "ws2_32", "advapi32", "user32", "gdi32"])
         elif self.settings.os == "Linux":
-            self.cpp_info.libs.extend(["dl", "pthread"])
+            self.cpp_info.system_libs.extend(["dl", "pthread"])

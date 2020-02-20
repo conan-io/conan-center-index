@@ -1,0 +1,16 @@
+--- a/cmake/AddEventLibrary.cmake
++++ b/cmake/AddEventLibrary.cmake
+@@ -141,12 +141,12 @@
+        APPEND
+     )
+
+     install(TARGETS ${ADD_EVENT_LIBRARY_TARGETS}
+         EXPORT LibeventTargets
+         LIBRARY DESTINATION "lib" COMPONENT lib
+         ARCHIVE DESTINATION "lib" COMPONENT lib
+-        RUNTIME DESTINATION "lib" COMPONENT lib
++        RUNTIME DESTINATION "bin" COMPONENT lib
+         PUBLIC_HEADER DESTINATION "include/event2"
+         COMPONENT dev
+     )
+     if (NOT WIN32 AND ${EVENT_LIBRARY_SHARED})

@@ -1,8 +1,6 @@
-# -*- coding: utf-8 -*-
-
-import os
-
 from conans import ConanFile, CMake
+from contextlib import contextmanager
+import os
 
 
 class TclTestConan(ConanFile):

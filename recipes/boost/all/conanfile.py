@@ -140,8 +140,9 @@ class BoostConan(ConanFile):
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
-        for patch in self.conan_data["patches"][self.version]:
-            tools.patch(**patch)
+        if self.version in self.conan_data["patches"]:
+            for patch in self.conan_data["patches"][self.version]:
+                tools.patch(**patch)
 
     ##################### BUILDING METHODS ###########################
 
@@ -786,11 +787,20 @@ class BoostConan(ConanFile):
             return compiler, compiler_version, ""
         elif self.settings.compiler == "sun-cc":
             return "sunpro", compiler_version, ""
+        elif self.settings.compiler == "intel":
+            toolset = {"Macos": "intel-darwin",
+                       "Windows": "intel-win",
+                       "Linux": "intel-linux"}.get(str(self.settings.os))
+            return toolset, compiler_version, ""
         else:
             return compiler, compiler_version, ""
 
     ##################### BOOSTRAP METHODS ###########################
     def _get_boostrap_toolset(self):
+        if self.settings.compiler == "intel":
+            return {"Macos": "intel-darwin",
+                    "Windows": "intel-win32",
+                    "Linux": "intel-linux"}.get(str(self.settings.os))
         if self._is_msvc:
             comp_ver = self.settings.compiler.version
             if Version(str(comp_ver)) >= "16":
@@ -934,12 +944,11 @@ class BoostConan(ConanFile):
                     self.output.info("Enabled magic autolinking (smart and magic decisions)")
 
                 # https://github.com/conan-community/conan-boost/issues/127#issuecomment-404750974
-                self.cpp_info.libs.append("bcrypt")
+                self.cpp_info.system_libs.append("bcrypt")
             elif self.settings.os == "Linux":
                 # https://github.com/conan-community/conan-boost/issues/135
-                self.cpp_info.libs.append("pthread")
+                self.cpp_info.system_libs.extend(["pthread", "rt"])
 
         self.env_info.BOOST_ROOT = self.package_folder
         self.cpp_info.names["cmake_find_package"] = "Boost"
         self.cpp_info.names["cmake_find_package_multi"] = "Boost"
-

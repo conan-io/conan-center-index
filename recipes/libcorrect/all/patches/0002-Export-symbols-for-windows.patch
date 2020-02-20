@@ -1,0 +1,296 @@
+From 30dc7af903b156f8b5abf5e139a7ca7e4eee2205 Mon Sep 17 00:00:00 2001
+From: Brennan Ashton <bashton@brennanashton.com>
+Date: Wed, 29 Jan 2020 00:03:04 -0800
+Subject: [PATCH 2/2] Export symbols for windows
+
+Signed-off-by: Brennan Ashton <bashton@brennanashton.com>
+---
+ CMakeLists.txt        | 10 ++++++++-
+ include/correct-sse.h | 20 ++++++++++-------
+ include/correct.h     | 49 +++++++++++++++++++++---------------------
+ include/fec_shim.h    | 50 +++++++++++++++++++++----------------------
+ 4 files changed, 71 insertions(+), 58 deletions(-)
+
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index f7f8a38..b251c65 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -5,6 +5,7 @@ include(CheckIncludeFiles)
+ include(CheckCSourceCompiles)
+ include(CMakePushCheckState)
+ include(CheckCCompilerFlag)
++include(GenerateExportHeader)
+ 
+ if(MSVC)
+ set(LIBM "")
+@@ -58,10 +59,11 @@ set(CMAKE_VISIBILITY_INLINES_HIDDEN 1)
+ set(LIBRARY_OUTPUT_PATH ${PROJECT_BINARY_DIR}/lib)
+ set(EXECUTABLE_OUTPUT_PATH ${PROJECT_BINARY_DIR}/bin)
+ 
++include_directories("${PROJECT_BINARY_DIR}")
+ include_directories(${PROJECT_SOURCE_DIR}/include)
+ add_subdirectory(src)
+ 
+-set(INSTALL_HEADERS "${PROJECT_BINARY_DIR}/include/correct.h")
++set(INSTALL_HEADERS "${PROJECT_BINARY_DIR}/include/correct.h" "${PROJECT_BINARY_DIR}/libcorrect_Export.h")
+ 
+ add_custom_target(correct-h ALL COMMAND ${CMAKE_COMMAND} -E copy ${PROJECT_SOURCE_DIR}/include/correct.h ${PROJECT_BINARY_DIR}/include/correct.h)
+ 
+@@ -81,6 +83,12 @@ else(BUILD_SHARED_LIBS)
+ endif(BUILD_SHARED_LIBS)
+ 
+ add_library(correct ${LIB_TYPE} ${correct_obj_files})
++generate_export_header(correct
++  BASE_NAME libcorrect
++  EXPORT_MACRO_NAME libcorrect_EXPORT
++  EXPORT_FILE_NAME libcorrect_Export.h
++  STATIC_DEFINE libcorrect_BUILT_AS_STATIC
++)
+ if(HAVE_SSE)
+   target_compile_definitions(correct PUBLIC HAVE_SSE=1)
+ endif()
+diff --git a/include/correct-sse.h b/include/correct-sse.h
+index 9372f19..c6dcfb9 100644
+--- a/include/correct-sse.h
++++ b/include/correct-sse.h
+@@ -10,20 +10,24 @@ typedef struct correct_convolutional_sse correct_convolutional_sse;
+  * and non-sse instances should not be used with the sse functions.
+  */
+ 
+-correct_convolutional_sse *correct_convolutional_sse_create(
++libcorrect_EXPORT correct_convolutional_sse *correct_convolutional_sse_create(
+     size_t rate, size_t order, const correct_convolutional_polynomial_t *poly);
+ 
+-void correct_convolutional_sse_destroy(correct_convolutional_sse *conv);
++libcorrect_EXPORT void correct_convolutional_sse_destroy(correct_convolutional_sse *conv);
+ 
+-size_t correct_convolutional_sse_encode_len(correct_convolutional_sse *conv, size_t msg_len);
++libcorrect_EXPORT size_t correct_convolutional_sse_encode_len(correct_convolutional_sse *conv,
++                                                              size_t msg_len);
+ 
+-size_t correct_convolutional_sse_encode(correct_convolutional_sse *conv, const uint8_t *msg,
+-                                        size_t msg_len, uint8_t *encoded);
++libcorrect_EXPORT size_t correct_convolutional_sse_encode(correct_convolutional_sse *conv,
++                                                          const uint8_t *msg, size_t msg_len,
++                                                          uint8_t *encoded);
+ 
+-ssize_t correct_convolutional_sse_decode(correct_convolutional_sse *conv, const uint8_t *encoded,
+-                                         size_t num_encoded_bits, uint8_t *msg);
++libcorrect_EXPORT ssize_t correct_convolutional_sse_decode(correct_convolutional_sse *conv,
++                                                           const uint8_t *encoded,
++                                                           size_t num_encoded_bits,
++                                                           uint8_t *msg);
+ 
+-ssize_t correct_convolutional_sse_decode_soft(correct_convolutional_sse *conv,
++libcorrect_EXPORT ssize_t correct_convolutional_sse_decode_soft(correct_convolutional_sse *conv,
+                                               const correct_convolutional_soft_t *encoded,
+                                               size_t num_encoded_bits, uint8_t *msg);
+ 
+diff --git a/include/correct.h b/include/correct.h
+index 12d817d..5d89fec 100644
+--- a/include/correct.h
++++ b/include/correct.h
+@@ -9,7 +9,7 @@
+ typedef ptrdiff_t ssize_t;
+ #endif
+ 
+-
++#include "libcorrect_Export.h"
+ 
+ // Convolutional Codes
+ 
+@@ -41,14 +41,14 @@ typedef struct correct_convolutional correct_convolutional;
+  *
+  * If this call is successful, it returns a non-NULL pointer.
+  */
+-correct_convolutional *correct_convolutional_create(size_t inv_rate, size_t order,
++libcorrect_EXPORT correct_convolutional *correct_convolutional_create(size_t inv_rate, size_t order,
+                                                     const correct_convolutional_polynomial_t *poly);
+ 
+ /* correct_convolutional_destroy releases all resources associated
+  * with conv. This pointer should not be used for further calls
+  * after calling destroy.
+  */
+-void correct_convolutional_destroy(correct_convolutional *conv);
++libcorrect_EXPORT void correct_convolutional_destroy(correct_convolutional *conv);
+ 
+ /* correct_convolutional_encode_len returns the number of *bits*
+  * in a msg_len of given size, in *bytes*. In order to convert
+@@ -57,7 +57,7 @@ void correct_convolutional_destroy(correct_convolutional *conv);
+  * length/8 + 1. If it is zero, then the length is just
+  * length/8.
+  */
+-size_t correct_convolutional_encode_len(correct_convolutional *conv, size_t msg_len);
++libcorrect_EXPORT size_t correct_convolutional_encode_len(correct_convolutional *conv, size_t msg_len);
+ 
+ /* correct_convolutional_encode uses the given conv instance to
+  * encode a block of data and write it to encoded. The length of
+@@ -70,8 +70,8 @@ size_t correct_convolutional_encode_len(correct_convolutional *conv, size_t msg_
+  * this is not an exact multiple of 8, then it occupies an additional
+  * byte.
+  */
+-size_t correct_convolutional_encode(correct_convolutional *conv, const uint8_t *msg, size_t msg_len,
+-                                    uint8_t *encoded);
++libcorrect_EXPORT size_t correct_convolutional_encode(correct_convolutional *conv, const uint8_t *msg,
++                                                      size_t msg_len, uint8_t *encoded);
+ 
+ /* correct_convolutional_decode uses the given conv instance to
+  * decode a block encoded by correct_convolutional_encode. This
+@@ -96,8 +96,8 @@ size_t correct_convolutional_encode(correct_convolutional *conv, const uint8_t *
+  * This function returns the number of bytes written to msg. If
+  * it fails, it returns -1.
+  */
+-ssize_t correct_convolutional_decode(correct_convolutional *conv, const uint8_t *encoded,
+-                                     size_t num_encoded_bits, uint8_t *msg);
++libcorrect_EXPORT ssize_t correct_convolutional_decode(correct_convolutional *conv, const uint8_t *encoded,
++                                                       size_t num_encoded_bits, uint8_t *msg);
+ 
+ /* correct_convolutional_decode_soft uses the given conv instance
+  * to decode a block encoded by correct_convolutional_encode and
+@@ -120,9 +120,9 @@ ssize_t correct_convolutional_decode(correct_convolutional *conv, const uint8_t
+  * This function returns the number of bytes written to msg. If
+  * it fails, it returns -1.
+  */
+-ssize_t correct_convolutional_decode_soft(correct_convolutional *conv,
+-                                          const correct_convolutional_soft_t *encoded,
+-                                          size_t num_encoded_bits, uint8_t *msg);
++libcorrect_EXPORT ssize_t correct_convolutional_decode_soft(correct_convolutional *conv,
++                                                            const correct_convolutional_soft_t *encoded,
++                                                            size_t num_encoded_bits, uint8_t *msg);
+ 
+ // Reed-Solomon
+ 
+@@ -195,10 +195,10 @@ static const uint16_t correct_rs_primitive_polynomial_ccsds =
+  * generator_root_gap are 1 and 1. Not all combinations of
+  * values produce valid codes.
+  */
+-correct_reed_solomon *correct_reed_solomon_create(uint16_t primitive_polynomial,
+-                                                  uint8_t first_consecutive_root,
+-                                                  uint8_t generator_root_gap,
+-                                                  size_t num_roots);
++libcorrect_EXPORT correct_reed_solomon *correct_reed_solomon_create(uint16_t primitive_polynomial,
++                                                                    uint8_t first_consecutive_root,
++                                                                    uint8_t generator_root_gap,
++                                                                    size_t num_roots);
+ 
+ /* correct_reed_solomon_encode uses the rs instance to encode
+  * parity information onto a block of data. msg_length should be
+@@ -214,8 +214,8 @@ correct_reed_solomon *correct_reed_solomon_create(uint16_t primitive_polynomial,
+  *
+  * This function returns the number of bytes written to encoded.
+  */
+-ssize_t correct_reed_solomon_encode(correct_reed_solomon *rs, const uint8_t *msg, size_t msg_length,
+-                                    uint8_t *encoded);
++libcorrect_EXPORT ssize_t correct_reed_solomon_encode(correct_reed_solomon *rs, const uint8_t *msg,
++                                                      size_t msg_length, uint8_t *encoded);
+ 
+ /* correct_reed_solomon_decode uses the rs instance to decode
+  * a payload from a block containing payload and parity bytes.
+@@ -232,8 +232,8 @@ ssize_t correct_reed_solomon_encode(correct_reed_solomon *rs, const uint8_t *msg
+  * This function returns a positive number of bytes written to msg
+  * if it has decoded or -1 if it has encountered an error.
+  */
+-ssize_t correct_reed_solomon_decode(correct_reed_solomon *rs, const uint8_t *encoded,
+-                                    size_t encoded_length, uint8_t *msg);
++libcorrect_EXPORT ssize_t correct_reed_solomon_decode(correct_reed_solomon *rs, const uint8_t *encoded,
++                                                      size_t encoded_length, uint8_t *msg);
+ 
+ /* correct_reed_solomon_decode_with_erasures uses the rs
+  * instance to decode a payload from a block containing payload
+@@ -262,16 +262,17 @@ ssize_t correct_reed_solomon_decode(correct_reed_solomon *rs, const uint8_t *enc
+  * This function returns a positive number of bytes written to msg
+  * if it has decoded or -1 if it has encountered an error.
+  */
+-ssize_t correct_reed_solomon_decode_with_erasures(correct_reed_solomon *rs, const uint8_t *encoded,
+-                                                  size_t encoded_length,
+-                                                  const uint8_t *erasure_locations,
+-                                                  size_t erasure_length, uint8_t *msg);
++libcorrect_EXPORT ssize_t correct_reed_solomon_decode_with_erasures(correct_reed_solomon *rs,
++                                                                    const uint8_t *encoded,
++                                                                    size_t encoded_length,
++                                                                    const uint8_t *erasure_locations,
++                                                                    size_t erasure_length, uint8_t *msg);
+ 
+ /* correct_reed_solomon_destroy releases the resources
+  * associated with rs. This pointer should not be
+  * used for any functions after this call.
+  */
+-void correct_reed_solomon_destroy(correct_reed_solomon *rs);
++libcorrect_EXPORT void correct_reed_solomon_destroy(correct_reed_solomon *rs);
+ 
+ #endif
+ 
+diff --git a/include/fec_shim.h b/include/fec_shim.h
+index b06e463..5f76ddd 100644
+--- a/include/fec_shim.h
++++ b/include/fec_shim.h
+@@ -6,11 +6,11 @@
+ #include <correct.h>
+ 
+ // Reed-Solomon
+-void *init_rs_char(int symbol_size, int primitive_polynomial, int first_consecutive_root,
+-                   int root_gap, int number_roots, unsigned int pad);
+-void free_rs_char(void *rs);
+-void encode_rs_char(void *rs, const unsigned char *msg, unsigned char *parity);
+-void decode_rs_char(void *rs, unsigned char *block, int *erasure_locations, int num_erasures);
++libcorrect_EXPORT void *init_rs_char(int symbol_size, int primitive_polynomial, int first_consecutive_root,
++                                     int root_gap, int number_roots, unsigned int pad);
++libcorrect_EXPORT void free_rs_char(void *rs);
++libcorrect_EXPORT void encode_rs_char(void *rs, const unsigned char *msg, unsigned char *parity);
++libcorrect_EXPORT void decode_rs_char(void *rs, unsigned char *block, int *erasure_locations, int num_erasures);
+ 
+ // Convolutional Codes
+ 
+@@ -37,29 +37,29 @@ void decode_rs_char(void *rs, unsigned char *block, int *erasure_locations, int
+ #define V615POLYF 064537
+ 
+ // Convolutional Methods
+-void *create_viterbi27(int num_decoded_bits);
+-int init_viterbi27(void *vit, int _mystery);
+-int update_viterbi27_blk(void *vit, unsigned char *encoded_soft, int n_encoded_groups);
+-int chainback_viterbi27(void *vit, unsigned char *decoded, unsigned int n_decoded_bits, unsigned int _mystery);
+-void delete_viterbi27(void *vit);
++libcorrect_EXPORT void *create_viterbi27(int num_decoded_bits);
++libcorrect_EXPORT int init_viterbi27(void *vit, int _mystery);
++libcorrect_EXPORT int update_viterbi27_blk(void *vit, unsigned char *encoded_soft, int n_encoded_groups);
++libcorrect_EXPORT int chainback_viterbi27(void *vit, unsigned char *decoded, unsigned int n_decoded_bits, unsigned int _mystery);
++libcorrect_EXPORT void delete_viterbi27(void *vit);
+ 
+-void *create_viterbi29(int num_decoded_bits);
+-int init_viterbi29(void *vit, int _mystery);
+-int update_viterbi29_blk(void *vit, unsigned char *encoded_soft, int n_encoded_groups);
+-int chainback_viterbi29(void *vit, unsigned char *decoded, unsigned int n_decoded_bits, unsigned int _mystery);
+-void delete_viterbi29(void *vit);
++libcorrect_EXPORT void *create_viterbi29(int num_decoded_bits);
++libcorrect_EXPORT int init_viterbi29(void *vit, int _mystery);
++libcorrect_EXPORT int update_viterbi29_blk(void *vit, unsigned char *encoded_soft, int n_encoded_groups);
++libcorrect_EXPORT int chainback_viterbi29(void *vit, unsigned char *decoded, unsigned int n_decoded_bits, unsigned int _mystery);
++libcorrect_EXPORT void delete_viterbi29(void *vit);
+ 
+-void *create_viterbi39(int num_decoded_bits);
+-int init_viterbi39(void *vit, int _mystery);
+-int update_viterbi39_blk(void *vit, unsigned char *encoded_soft, int n_encoded_groups);
+-int chainback_viterbi39(void *vit, unsigned char *decoded, unsigned int n_decoded_bits, unsigned int _mystery);
+-void delete_viterbi39(void *vit);
++libcorrect_EXPORT void *create_viterbi39(int num_decoded_bits);
++libcorrect_EXPORT int init_viterbi39(void *vit, int _mystery);
++libcorrect_EXPORT int update_viterbi39_blk(void *vit, unsigned char *encoded_soft, int n_encoded_groups);
++libcorrect_EXPORT int chainback_viterbi39(void *vit, unsigned char *decoded, unsigned int n_decoded_bits, unsigned int _mystery);
++libcorrect_EXPORT void delete_viterbi39(void *vit);
+ 
+-void *create_viterbi615(int num_decoded_bits);
+-int init_viterbi615(void *vit, int _mystery);
+-int update_viterbi615_blk(void *vit, unsigned char *encoded_soft, int n_encoded_groups);
+-int chainback_viterbi615(void *vit, unsigned char *decoded, unsigned int n_decoded_bits, unsigned int _mystery);
+-void delete_viterbi615(void *vit);
++libcorrect_EXPORT void *create_viterbi615(int num_decoded_bits);
++libcorrect_EXPORT int init_viterbi615(void *vit, int _mystery);
++libcorrect_EXPORT int update_viterbi615_blk(void *vit, unsigned char *encoded_soft, int n_encoded_groups);
++libcorrect_EXPORT int chainback_viterbi615(void *vit, unsigned char *decoded, unsigned int n_decoded_bits, unsigned int _mystery);
++libcorrect_EXPORT void delete_viterbi615(void *vit);
+ 
+ // Misc other
+ static inline int parity(unsigned int x) {
+-- 
+2.24.1
+
