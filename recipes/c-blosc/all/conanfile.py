@@ -75,6 +75,7 @@ class CbloscConan(ConanFile):
         if self._cmake:
             return self._cmake
         self._cmake = CMake(self)
+        self._cmake.definitions["BLOSC_INSTALL"] = True
         self._cmake.definitions["BUILD_STATIC"] = not self.options.shared
         self._cmake.definitions["BUILD_SHARED"] = self.options.shared
         self._cmake.definitions["BUILD_TESTS"] = False
@@ -99,10 +100,9 @@ class CbloscConan(ConanFile):
             self.copy(license_file, dst="licenses", src=os.path.join(self._source_subfolder, "LICENSES"))
         cmake = self._configure_cmake()
         cmake.install()
+        tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
 
     def package_info(self):
         self.cpp_info.libs = tools.collect_libs(self)
         if self.settings.os == "Linux":
-            self.cpp_info.libs.append("pthread")
-        self.cpp_info.names["cmake_find_package"] = "Blosc"
-        self.cpp_info.names["cmake_find_package_multi"] = "Blosc"
+            self.cpp_info.system_libs.append("pthread")
