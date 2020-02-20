@@ -1,6 +1,7 @@
 import os
 from conans import CMake, ConanFile, tools
 from conans.errors import ConanInvalidConfiguration
+from conans.tools import Version
 
 
 class SpdlogConan(ConanFile):
@@ -45,7 +46,10 @@ class SpdlogConan(ConanFile):
             raise ConanInvalidConfiguration("wchar is not yet supported under windows")
 
     def requirements(self):
-        self.requires("fmt/6.0.0")
+        if Version(self.version) >= "1.5.0":
+            self.requires("fmt/6.1.2")
+        else:
+            self.requires("fmt/6.0.0")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
