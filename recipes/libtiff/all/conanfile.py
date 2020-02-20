@@ -14,8 +14,22 @@ class LibtiffConan(ConanFile):
     exports_sources = ["CMakeLists.txt"]
     generators = "cmake", "cmake_find_package"
     settings = "os", "compiler", "build_type", "arch"
-    options = {"shared": [True, False], "fPIC": [True, False], "lzma": [True, False], "jpeg": [True, False], "zlib": [True, False], "zstd": [True, False]}
-    default_options = {'shared': False, 'fPIC': True, "lzma": True, "jpeg": True, "zlib": True, "zstd": True}
+    options = {"shared": [True, False],
+               "fPIC": [True, False],
+               "lzma": [True, False],
+               "jpeg": [True, False],
+               "zlib": [True, False],
+               "zstd": [True, False],
+               "jbig": [True, False],
+               "webp": [True, False]}
+    default_options = {"shared": False,
+                       "fPIC": True,
+                       "lzma": True,
+                       "jpeg": True,
+                       "zlib": True,
+                       "zstd": True,
+                       "jbig": True,
+                       "webp": True}
     _cmake = None
 
     @property
@@ -31,6 +45,9 @@ class LibtiffConan(ConanFile):
             del self.options.fPIC
         del self.settings.compiler.libcxx
         del self.settings.compiler.cppstd
+        if Version(self.version) < "4.1.0":
+            del self.options.webp
+            del self.options.zstd
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
@@ -43,13 +60,15 @@ class LibtiffConan(ConanFile):
     def requirements(self):
         if self.options.zlib:
             self.requires("zlib/1.2.11")
-        if self.options.zstd:
-            self.requires("zstd/1.4.3")
         if self.options.lzma:
             self.requires("xz_utils/5.2.4")
         if self.options.jpeg:
             self.requires("libjpeg/9d")
-        if Version(self.version) >= "4.1.0":
+        if self.options.jbig:
+            self.requires("jbig/20160605")
+        if self.options.get_safe("zstd"):
+            self.requires("zstd/1.4.3")
+        if self.options.get_safe("webp"):
             self.requires("libwebp/1.0.3")
 
     def _configure_cmake(self):
@@ -60,9 +79,10 @@ class LibtiffConan(ConanFile):
             self._cmake.definitions['CMAKE_INSTALL_INCLUDEDIR'] = 'include'
             self._cmake.definitions["lzma"] = self.options.lzma
             self._cmake.definitions["jpeg"] = self.options.jpeg
-            self._cmake.definitions["jbig"] = False
+            self._cmake.definitions["jbig"] = self.options.jbig
             self._cmake.definitions["zlib"] = self.options.zlib
-            self._cmake.definitions["zstd"] = self.options.zstd
+            self._cmake.definitions["zstd"] = self.options.get_safe("zstd")
+            self._cmake.definitions["webp"] = self.options.get_safe("webp")
             self._cmake.configure(source_folder=self._source_subfolder, build_folder=self._build_subfolder)
         return self._cmake
 
