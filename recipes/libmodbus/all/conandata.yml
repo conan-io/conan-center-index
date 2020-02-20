@@ -1,0 +1,4 @@
+sources:
+  "3.1.6":
+    sha256: fe0c141cd10d58bb848643f00f2d4b4005214f93312d7b66ac805fd369876651
+    url: https://github.com/stephane/libmodbus/archive/v3.1.6.tar.gz

@@ -1,0 +1,11 @@
+--- src/modbus.h	2018-01-16 15:43:00.511811500 +0100
++++ win_modbus.h	2018-01-16 16:31:15.457907400 +0100
+@@ -24,6 +24,8 @@
+ # if defined(DLLBUILD)
+ /* define DLLBUILD when building the DLL */
+ #  define MODBUS_API __declspec(dllexport)
++# elif defined(LIBMODBUS_STATICBUILD)
++#  define MODBUS_API 
+ # else
+ #  define MODBUS_API __declspec(dllimport)
+ # endif
