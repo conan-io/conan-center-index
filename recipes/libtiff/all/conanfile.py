@@ -28,7 +28,7 @@ class LibtiffConan(ConanFile):
 
     def config_options(self):
         if self.settings.os == "Windows":
-            del self.options.remove.fPIC
+            del self.options.fPIC
         del self.settings.compiler.libcxx
         del self.settings.compiler.cppstd
 
