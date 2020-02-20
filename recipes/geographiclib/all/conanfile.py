@@ -55,5 +55,5 @@ class GeographiclibConan(ConanFile):
 
     def package_info(self):
         self.cpp_info.libs = tools.collect_libs(self)
-        self.cpp_info.includedirs = ["include", os.path.join("include","GeographicLib")]
+        self.cpp_info.includedirs = ["include"]
         self.cpp_info.defines.append('GEOGRAPHICLIB_SHARED_LIB={}'.format("1" if self.options.shared else "0"))
