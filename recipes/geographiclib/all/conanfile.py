@@ -18,7 +18,7 @@ class GeographiclibConan(ConanFile):
 
     def config_options(self):
         if self.settings.os == 'Windows':
-            self.options.remove("fPIC")
+            del self.options.fPIC
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
