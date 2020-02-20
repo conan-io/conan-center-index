@@ -1,0 +1,4 @@
+sources:
+  "20200220":
+    sha256: ace3be84bfdf0e31e892bfaeaf442d5062d590a533fc39f64c2ef96549c614bc
+    url: https://github.com/gocarlos/libcoap/archive/21ea160d0f4aa832e2d545fce39ea9b60d0b8c12.zip
