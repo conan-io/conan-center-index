@@ -43,7 +43,7 @@ class LeptonicaConan(ConanFile):
         if self.options.with_png:
             self.requires.add("libpng/1.6.37")
         if self.options.with_tiff:
-            self.requires.add("libtiff/4.0.9")
+            self.requires.add("libtiff/4.1.0")
         if self.options.with_openjpeg:
             self.requires.add("openjpeg/2.3.1")
         if self.options.with_webp:
