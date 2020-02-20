@@ -8,7 +8,7 @@ class GetoptForVisualStudio(ConanFile):
     description = "GNU getopt for Visual Studio"
     topics = ("conan", "getopt", "cli", "command line", "options")
     url = "https://github.com/conan-io/conan-center-index"
-    homepage = "https://github.com/skandhurkat/Getopt-for-Visual-Studi"
+    homepage = "https://github.com/skandhurkat/Getopt-for-Visual-Studio"
     license = "MIT", "BSD-2-Clause"
     exports_sources = "patches/**"
     settings = "compiler"
