@@ -63,13 +63,16 @@ class LibtiffConan(ConanFile):
             self._cmake.definitions["jbig"] = False
             self._cmake.definitions["zlib"] = self.options.zlib
             self._cmake.definitions["zstd"] = self.options.zstd
+            self._cmake.configure(source_folder=self._source_subfolder, build_folder=self._build_subfolder)
+        return self._cmake
 
-            if self.options.shared and self.settings.compiler == "Visual Studio":
-                # https://github.com/Microsoft/vcpkg/blob/master/ports/tiff/fix-cxx-shared-libs.patch
-                tools.replace_in_file(os.path.join(self._source_subfolder, 'libtiff', 'CMakeLists.txt'),
-                                    r'set_target_properties(tiffxx PROPERTIES SOVERSION ${SO_COMPATVERSION})',
-                                    r'set_target_properties(tiffxx PROPERTIES SOVERSION ${SO_COMPATVERSION} '
-                                    r'WINDOWS_EXPORT_ALL_SYMBOLS ON)')
+    def _patch_sources(self):
+        if self.options.shared and self.settings.compiler == "Visual Studio":
+            # https://github.com/Microsoft/vcpkg/blob/master/ports/tiff/fix-cxx-shared-libs.patch
+            tools.replace_in_file(os.path.join(self._source_subfolder, 'libtiff', 'CMakeLists.txt'),
+                                r'set_target_properties(tiffxx PROPERTIES SOVERSION ${SO_COMPATVERSION})',
+                                r'set_target_properties(tiffxx PROPERTIES SOVERSION ${SO_COMPATVERSION} '
+                                r'WINDOWS_EXPORT_ALL_SYMBOLS ON)')
 
             if self.settings.os == "Windows" and self.settings.compiler != "Visual Studio":
                 tools.replace_in_file(os.path.join(self._source_subfolder, "CMakeListsOriginal.txt"),
@@ -81,15 +84,12 @@ class LibtiffConan(ConanFile):
                                         "if (UNIX)",
                                         "if (UNIX OR MINGW)")
 
-            tools.replace_in_file(os.path.join(self._source_subfolder, "CMakeListsOriginal.txt"),
-                "add_subdirectory(tools)\nadd_subdirectory(test)\nadd_subdirectory(contrib)\nadd_subdirectory(build)\n"
-                "add_subdirectory(man)\nadd_subdirectory(html)", "")
-
-            self._cmake.definitions["BUILD_SHARED_LIBS"] = self.options.shared
-            self._cmake.configure(source_folder=self._source_subfolder, build_folder=self._build_subfolder)
-        return self._cmake
+        tools.replace_in_file(os.path.join(self._source_subfolder, "CMakeListsOriginal.txt"),
+            "add_subdirectory(tools)\nadd_subdirectory(test)\nadd_subdirectory(contrib)\nadd_subdirectory(build)\n"
+            "add_subdirectory(man)\nadd_subdirectory(html)", "")
 
     def build(self):
+        self._patch_sources()
         cmake = self._configure_cmake()
         cmake.build()
 
