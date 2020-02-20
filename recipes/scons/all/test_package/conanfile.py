@@ -7,13 +7,6 @@ class TestPackageConan(ConanFile):
     settings = "os", "compiler", "build_type", "arch"
     generators = "scons"
 
-    _script_tool = {
-        "gcc": "gcc",
-        "clang": "clang",
-        "Visual Studio": "msvc",
-        "apple-clang": "clang",
-    }
-
     def build(self):
         scons_path = tools.which("scons")
         assert scons_path.replace("\\", "/").startswith(self.deps_cpp_info["scons"].rootpath.replace("\\", "/"))
@@ -26,7 +19,7 @@ class TestPackageConan(ConanFile):
 
         self.output.info("TMP={}".format(os.environ.get("TMP")))
 
-        self.run("scons -C \"{}\" --conan-compiler={}".format(self.source_folder, self._script_tool[str(self.settings.compiler)]))
+        self.run("scons -C \"{}\"".format(self.source_folder))
 
     def test(self):
         if not tools.cross_building(self.settings):
