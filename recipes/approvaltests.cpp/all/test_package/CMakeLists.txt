@@ -1,0 +1,22 @@
+cmake_minimum_required(VERSION 2.8)
+PROJECT(test_package)
+
+set(CMAKE_CXX_STANDARD 11)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_CXX_EXTENSIONS OFF)
+
+include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
+CONAN_BASIC_SETUP()
+
+if(WITH_CATCH)
+    ADD_EXECUTABLE(test_package_catch test_catch.cpp)
+    target_link_libraries(test_package_catch ${CONAN_LIBS})
+endif()
+if(WITH_GTEST)
+    ADD_EXECUTABLE(test_package_gtest test_gtest.cpp)
+    target_link_libraries(test_package_gtest ${CONAN_LIBS})
+endif()
+if(WITH_DOCTEST)
+    ADD_EXECUTABLE(test_package_doctest test_doctest.cpp)
+    target_link_libraries(test_package_doctest ${CONAN_LIBS})
+endif()

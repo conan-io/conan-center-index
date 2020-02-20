@@ -20,7 +20,8 @@ class Log4cplusConan(ConanFile):
                "with_iconv": [True, False],
                "working_locale": [True, False],
                "working_c_locale": [True, False],
-               "decorated_name": [True, False]}
+               "decorated_name": [True, False],
+               "unicode": [True, False]}
     default_options = {'shared': False,
                        'fPIC': True,
                        'single_threaded': False,
@@ -28,7 +29,8 @@ class Log4cplusConan(ConanFile):
                        'with_iconv': False,
                        'working_locale': False,
                        'working_c_locale': False,
-                       'decorated_name': False}
+                       'decorated_name': False,
+                       'unicode': True}
     short_paths = True
     _source_subfolder = "source_subfolder"
     _build_subfolder = "build_subfolder"
@@ -48,6 +50,7 @@ class Log4cplusConan(ConanFile):
 
     def _configure_cmake(self):
         cmake = CMake(self)
+        cmake.definitions['UNICODE'] = self.options.unicode
         cmake.definitions['LOG4CPLUS_BUILD_TESTING'] = False
         cmake.definitions['WITH_UNIT_TESTS'] = False
         cmake.definitions["LOG4CPLUS_ENABLE_DECORATED_LIBRARY_NAME"] = self.options.decorated_name

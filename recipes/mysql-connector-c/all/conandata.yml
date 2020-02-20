@@ -4,4 +4,5 @@ sources:
     url: "http://dev.mysql.com/get/Downloads/Connector-C/mysql-connector-c-6.1.11-src.tar.gz"
 patches:
   "6.1.11":
-    - "001-20028_all_mysql-5.6-gcc7.patch"
+    - patch_file: "patches/001-20028_all_mysql-5.6-gcc7.patch"
+      base_path: "source_subfolder"

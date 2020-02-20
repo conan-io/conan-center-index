@@ -7,7 +7,7 @@
  # Dependencies
  #-------------------------------------------------------------------------------------------
 -target_link_libraries(EASTL EABase)
-+target_link_libraries(EASTL CONAN_PKG::EABase)
++target_link_libraries(EASTL CONAN_PKG::eabase)
 
 +include(GNUInstallDirs)
 +install(TARGETS EASTL

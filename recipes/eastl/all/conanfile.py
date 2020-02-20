@@ -49,7 +49,7 @@ class Bzip2Conan(ConanFile):
 
     def _configure_cmake(self):
         cmake = CMake(self)
-        cmake.definitions["EASTSL_BUILD_BENCHMARK"] = False
+        cmake.definitions["EASTL_BUILD_BENCHMARK"] = False
         cmake.definitions["EASTL_BUILD_TESTS"] = False
         cmake.configure()
         return cmake

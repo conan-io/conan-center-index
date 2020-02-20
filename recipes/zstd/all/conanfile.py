@@ -1,6 +1,3 @@
-#!/usr/bin/env python
-# -*- coding: utf-8 -*-
-
 import os
 from conans import ConanFile, CMake, tools
 
@@ -10,10 +7,8 @@ class ZstdConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/facebook/zstd"
     description = "Zstandard - Fast real-time compression algorithm"
-    author = "Bincrafters <bincrafters@gmail.com>"
     topics = ("conan", "zstd", "compression", "algorithm", "decoder")
     license = "BSD-3-Clause"
-    exports = ["LICENSE.md"]
     exports_sources = ['CMakeLists.txt']
     generators = 'cmake'
     settings = "os", "arch", "compiler", "build_type"
@@ -35,7 +30,7 @@ class ZstdConan(ConanFile):
 
     def configure(self):
         del self.settings.compiler.libcxx
-        del self.settings.compiler.libstd
+        del self.settings.compiler.cppstd
 
     def _configure_cmake(self):
         cmake = CMake(self)
@@ -58,4 +53,4 @@ class ZstdConan(ConanFile):
     def package_info(self):
         self.cpp_info.libs = tools.collect_libs(self)
         if self.settings.os == "Linux":
-            self.cpp_info.libs.append("pthread")
+            self.cpp_info.system_libs.append("pthread")
