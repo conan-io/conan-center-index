@@ -1,5 +1,4 @@
 import os
-import time
 
 from conans import ConanFile, CMake, tools
 from conans.errors import ConanInvalidConfiguration
@@ -18,6 +17,8 @@ class CspiceConan(ConanFile):
     options = {"shared": [True, False], "fPIC": [True, False]}
     default_options = {"shared": False, "fPIC": True}
 
+    _cmake = None
+
     @property
     def _source_subfolder(self):
         return "source_subfolder"
@@ -27,81 +28,30 @@ class CspiceConan(ConanFile):
         return "build_subfolder"
 
     @property
-    def _patches_per_triplet(self):
-        """List of patches per triplet, in order to retrieve CSpice source code
-        of the triplet from CSpice source code of Cygwin GCC 32bit triplet.
-        """
-        # These patches were created by comparing the source code of each CSpice
-        # package (one per supported triplet) with CSpice's source code of
-        # Cygwin GCC 32bit package. All packages can be found at
-        # https://naif.jpl.nasa.gov/pub/naif/misc/toolkits_N${version}/C.
-        # By CSpice's source code, we mean .h and .c files under "include" and
-        # "src/cspice" directories. Others files are not relevant for this
-        # conan recipe.
+    def _sources_idx_per_triplet(self):
+        # Index of source code per triplet in conadata's "sources" field.
         return {
             "Macos": {
-                "x86": {
-                    "apple-clang": ["to-MacIntel-OSX-or-SunSPARC-Solaris.patch", "to-MacIntel-OSX-AppleC-32bit.patch"]
-                },
-                "x86_64": {
-                    "apple-clang": ["to-MacIntel-OSX-or-SunSPARC-Solaris.patch", "to-MacIntel-OSX-AppleC-64bit.patch"]
-                }
+                "x86": {"apple-clang": 0},
+                "x86_64": {"apple-clang": 1}
             },
             "Linux": {
-                "x86": {
-                    "gcc": ["to-PC-Linux-GCC-32bit.patch"]
-                },
-                "x86_64": {
-                    "gcc": ["to-PC-Linux-GCC-64bit.patch"]
-                }
+                "x86": {"gcc": 2},
+                "x86_64": {"gcc": 3}
             },
             "Windows": {
-                "x86": {
-                    "Visual Studio": ["to-PC-Windows.patch", "to-PC-Windows-VisualC-32bit.patch"]
-                },
-                "x86_64": {
-                    "Visual Studio": ["to-PC-Windows.patch", "to-PC-Windows-VisualC-64bit.patch"]
-                }
+                "x86": {"Visual Studio": 4},
+                "x86_64": {"Visual Studio": 5}
             },
             "cygwin": {
-                "x86": {
-                    "gcc": []
-                },
-                "x86_64": {
-                    "gcc": ["to-PC-Cygwin-GCC-64bit.patch"]
-                }
+                "x86": {"gcc": 6},
+                "x86_64": {"gcc": 7}
             },
             "SunOs": {
-                "x86": {
-                    "sun-cc": ["to-SunIntel-Solaris-SunC-32bit.patch"]
-                },
-                "x86_64": {
-                    "sun-cc": ["to-SunIntel-Solaris-SunC-64bit.patch"]
-                },
-                "sparc": {
-                    "gcc": [
-                        "to-MacIntel-OSX-or-SunSPARC-Solaris.patch",
-                        "to-SunSPARC-Solaris.patch",
-                        "to-SunSPARC-Solaris-GCC-32bit.patch"
-                    ],
-                    "sun-cc": [
-                        "to-MacIntel-OSX-or-SunSPARC-Solaris.patch",
-                        "to-SunSPARC-Solaris.patch",
-                        "to-SunSPARC-Solaris-SunC-32bit.patch"
-                    ]
-                },
-                "sparcv9": {
-                    "gcc": [
-                        "to-MacIntel-OSX-or-SunSPARC-Solaris.patch",
-                        "to-SunSPARC-Solaris.patch",
-                        "to-SunSPARC-Solaris-GCC-64bit.patch"
-                    ],
-                    "sun-cc": [
-                        "to-MacIntel-OSX-or-SunSPARC-Solaris.patch",
-                        "to-SunSPARC-Solaris.patch",
-                        "to-SunSPARC-Solaris-SunC-64bit.patch"
-                    ]
-                }
+                "x86": {"sun-cc": 8},
+                "x86_64": {"sun-cc": 9},
+                "sparc": {"gcc": 10, "sun-cc": 11},
+                "sparcv9": {"gcc": 12, "sun-cc": 13}
             }
         }
 
@@ -119,11 +69,11 @@ class CspiceConan(ConanFile):
         the_os = self._get_os_or_subsystem()
         arch = str(self.settings.arch)
         compiler = str(self.settings.compiler)
-        if the_os not in self._patches_per_triplet:
+        if the_os not in self._sources_idx_per_triplet:
             raise ConanInvalidConfiguration("cspice does not support {0}".format(the_os))
-        if arch not in self._patches_per_triplet[the_os]:
+        if arch not in self._sources_idx_per_triplet[the_os]:
             raise ConanInvalidConfiguration("cspice does not support {0} {1}".format(the_os, arch))
-        if compiler not in self._patches_per_triplet[the_os][arch]:
+        if compiler not in self._sources_idx_per_triplet[the_os][arch]:
             raise ConanInvalidConfiguration("cspice does not support {0} on {1} {2}".format(compiler, the_os, arch))
 
     def _get_os_or_subsystem(self):
@@ -134,37 +84,38 @@ class CspiceConan(ConanFile):
         return os_or_subsystem
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        try:
-            os.rename(self.name, self._source_subfolder)
-        except:
-            # workaround for permission denied on windows
-            time.sleep(10)
-            os.rename(self.name, self._source_subfolder)
+        pass
 
     def build(self):
-        self._apply_global_patches()
-        self._apply_triplet_patches()
+        self._get_sources()
+        os.rename(self.name, self._source_subfolder)
+        for patch in self.conan_data["patches"][self.version]:
+            tools.patch(**patch)
         cmake = self._configure_cmake()
         cmake.build()
 
-    def _apply_global_patches(self):
-        if "patches" in self.conan_data:
-            for patch in self.conan_data["patches"][self.version]:
-                tools.patch(**patch)
-
-    def _apply_triplet_patches(self):
+    def _get_sources(self):
         the_os = self._get_os_or_subsystem()
         arch = str(self.settings.arch)
         compiler = str(self.settings.compiler)
-        for patch_filename in self._patches_per_triplet[the_os][arch][compiler]:
-            tools.patch(patch_file=os.path.join("patches", self.version, "triplets", patch_filename),
-                        base_path=self._source_subfolder)
+        source_idx = self._sources_idx_per_triplet[the_os][arch][compiler]
+        source = self.conan_data["sources"][self.version][source_idx]
+        url = source["url"]
+        if url.endswith(".tar.Z"): # Python doesn't have any module to uncompress .Z files
+            filename = os.path.basename(url)
+            tools.download(url, filename, sha256=source["sha256"])
+            command = "zcat {} | tar -xf -".format(filename)
+            self.run(command=command)
+            os.remove(filename)
+        else:
+            tools.get(**source)
 
     def _configure_cmake(self):
-        cmake = CMake(self)
-        cmake.configure(build_folder=self._build_subfolder)
-        return cmake
+        if self._cmake:
+            return self._cmake
+        self._cmake = CMake(self)
+        self._cmake.configure(build_folder=self._build_subfolder)
+        return self._cmake
 
     def package(self):
         self.copy("TSPA.txt", dst="licenses")
