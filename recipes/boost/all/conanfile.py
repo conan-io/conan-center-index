@@ -870,6 +870,8 @@ class BoostConan(ConanFile):
         # copy to source with the good lib name
         self.copy("LICENSE_1_0.txt", dst="licenses", src=os.path.join(self.source_folder, self._folder_name))
         tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
+        if self.options.header_only:
+            self.copy(pattern="*", dst="include/boost", src="%s/boost" % self._boost_dir)
         return  # install should copy everything!
         out_lib_dir = os.path.join(self._boost_dir, "stage", "lib")
         self.copy(pattern="*", dst="include/boost", src="%s/boost" % self._boost_dir)
