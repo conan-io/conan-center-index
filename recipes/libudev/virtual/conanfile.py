@@ -35,7 +35,7 @@ class LibudevConan(ConanFile):
         elif tools.os_info.with_pacman:
             packages = "libsystemd systemd"
 
-        tools.SystemPackageTool().install(packages=packages)
+        tools.SystemPackageTool(conanfile=self).install(packages=packages)
 
     def package(self):
         pass
