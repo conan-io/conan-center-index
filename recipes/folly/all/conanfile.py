@@ -25,6 +25,7 @@ class FollyConan(ConanFile):
         "lz4/1.9.2",
         "openssl/1.1.1d",
         "zlib/1.2.11",
+        "bzip2/1.0.8",
         "zstd/1.3.5",
         "snappy/1.1.7"
     )
@@ -43,7 +44,7 @@ class FollyConan(ConanFile):
             del self.options.fPIC
 
     def configure(self):
-        compiler_version = Version(self.settings.compiler.version.value)
+        compiler_version = Version(self.settings.compiler.version)
         if self.settings.os == "Windows" and \
             self.settings.compiler == "Visual Studio" and \
             compiler_version < "15":
@@ -52,8 +53,8 @@ class FollyConan(ConanFile):
             self.settings.arch != "x86_64":
             raise ConanInvalidConfiguration("Folly requires a 64bit target architecture")
         elif self.settings.os == "Windows" and \
-             self.settings.compiler == "Visual Studio" and \
-             "MT" in self.settings.compiler.runtime:
+            self.settings.compiler == "Visual Studio" and \
+            "MT" in self.settings.compiler.runtime:
             raise ConanInvalidConfiguration("Folly could not be build with runtime MT")
         elif self.settings.os == "Linux" and \
             self.settings.compiler == "clang" and \
@@ -69,17 +70,13 @@ class FollyConan(ConanFile):
             raise ConanInvalidConfiguration("Folly could not be built by apple-clang < 8.0")
 
     def requirements(self):
-        if Version(self.version) >= "2020.02.17.00":
-            self.requires("fmt/6.1.2")
+        if Version(self.version) >= "2019.01.01.00":
             self.requires("xz_utils/5.2.4")
             self.requires("libdwarf/20191104")
             self.requires("libsodium/1.0.18")
             self.requires("libunwind/1.3.1")
             if self.settings.os == "Linux":
                 self.requires("libiberty/9.1.0")
-            # TODO - Update when available:
-            # * libaio
-            # * liburing
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])

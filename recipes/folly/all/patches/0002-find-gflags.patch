@@ -1,8 +1,8 @@
 diff --git a/CMake/FollyCompilerUnix.cmake b/CMake/FollyCompilerUnix.cmake
-index 7fba75f..fd9a1bc 100644
+index 9c76fdc..73829df 100644
 --- a/CMake/FollyCompilerUnix.cmake
 +++ b/CMake/FollyCompilerUnix.cmake
-@@ -44,7 +44,6 @@ function(apply_folly_compile_options_to_target THETARGET)
+@@ -30,7 +30,6 @@ function(apply_folly_compile_options_to_target THETARGET)
    )
    target_compile_options(${THETARGET}
      PRIVATE
@@ -11,20 +11,21 @@ index 7fba75f..fd9a1bc 100644
        -finput-charset=UTF-8
        -fsigned-char
 diff --git a/CMake/folly-deps.cmake b/CMake/folly-deps.cmake
-index c676b26..3f019ba 100644
+index 0fb8a90..d45c515 100644
 --- a/CMake/folly-deps.cmake
 +++ b/CMake/folly-deps.cmake
-@@ -36,12 +36,12 @@ find_package(DoubleConversion MODULE REQUIRED)
+@@ -23,12 +23,12 @@ find_package(DoubleConversion MODULE REQUIRED)
  list(APPEND FOLLY_LINK_LIBRARIES ${DOUBLE_CONVERSION_LIBRARY})
  list(APPEND FOLLY_INCLUDE_DIRECTORIES ${DOUBLE_CONVERSION_INCLUDE_DIR})
  
 -find_package(Gflags MODULE)
-+find_package(gflags MODULE)
- set(FOLLY_HAVE_LIBGFLAGS ${LIBGFLAGS_FOUND})
+-set(FOLLY_HAVE_LIBGFLAGS ${LIBGFLAGS_FOUND})
 -list(APPEND FOLLY_LINK_LIBRARIES ${LIBGFLAGS_LIBRARY})
 -list(APPEND FOLLY_INCLUDE_DIRECTORIES ${LIBGFLAGS_INCLUDE_DIR})
 -list(APPEND CMAKE_REQUIRED_LIBRARIES ${LIBGFLAGS_LIBRARY})
 -list(APPEND CMAKE_REQUIRED_INCLUDES ${LIBGFLAGS_INCLUDE_DIR})
++find_package(gflags MODULE)
++set(FOLLY_HAVE_LIBGFLAGS ${gflags_FOUND})
 +list(APPEND FOLLY_LINK_LIBRARIES ${gflags_LIBRARY})
 +list(APPEND FOLLY_INCLUDE_DIRECTORIES ${gflags_INCLUDE_DIR})
 +list(APPEND CMAKE_REQUIRED_LIBRARIES ${gflags_LIBRARY})
@@ -32,10 +33,3 @@ index c676b26..3f019ba 100644
  
  find_package(Glog MODULE)
  set(FOLLY_HAVE_LIBGLOG ${GLOG_FOUND})
-@@ -212,5 +212,5 @@ target_link_libraries(folly_deps INTERFACE
-   ${FOLLY_ASAN_FLAGS}
- )
- 
--find_package(fmt CONFIG REQUIRED)
-+find_package(fmt REQUIRED)
- target_link_libraries(folly_deps INTERFACE fmt::fmt)
