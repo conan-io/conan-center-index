@@ -158,7 +158,7 @@ class CspiceConan(ConanFile):
         arch = str(self.settings.arch)
         compiler = str(self.settings.compiler)
         for patch_filename in self._patches_per_triplet[os][arch][compiler]:
-            tools.patch(patch_file="patches/{0}/triplets/{1}".format(self.version, patch_filename),
+            tools.patch(patch_file=os.path.join("patches", self.version, "triplets", patch_filename),
                         base_path=self._source_subfolder)
 
     def _configure_cmake(self):
