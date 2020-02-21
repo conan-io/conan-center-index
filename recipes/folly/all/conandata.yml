@@ -10,5 +10,5 @@ patches:
     - patch_file: "patches/0001-find-packages.patch"
       base_path: "source_subfolder"
   "2019.09.16.00":
-    - patch_file: "patches/0002-gflags.patch"
+    - patch_file: "patches/0002-find-gflags.patch"
       base_path: "source_subfolder"
