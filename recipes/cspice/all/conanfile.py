@@ -116,15 +116,15 @@ class CspiceConan(ConanFile):
         self._raise_if_not_supported_triplet()
 
     def _raise_if_not_supported_triplet(self):
-        os = self._get_os_or_subsystem()
+        the_os = self._get_os_or_subsystem()
         arch = str(self.settings.arch)
         compiler = str(self.settings.compiler)
-        if os not in self._patches_per_triplet:
-            raise ConanInvalidConfiguration("cspice does not support {0}".format(os))
-        if arch not in self._patches_per_triplet[os]:
-            raise ConanInvalidConfiguration("cspice does not support {0} {1}".format(os, arch))
-        if compiler not in self._patches_per_triplet[os][arch]:
-            raise ConanInvalidConfiguration("cspice does not support {0} on {1} {2}".format(compiler, os, arch))
+        if the_os not in self._patches_per_triplet:
+            raise ConanInvalidConfiguration("cspice does not support {0}".format(the_os))
+        if arch not in self._patches_per_triplet[the_os]:
+            raise ConanInvalidConfiguration("cspice does not support {0} {1}".format(the_os, arch))
+        if compiler not in self._patches_per_triplet[the_os][arch]:
+            raise ConanInvalidConfiguration("cspice does not support {0} on {1} {2}".format(compiler, the_os, arch))
 
     def _get_os_or_subsystem(self):
         if self.settings.os == "Windows" and self.settings.os.subsystem != "None":
@@ -154,10 +154,10 @@ class CspiceConan(ConanFile):
                 tools.patch(**patch)
 
     def _apply_triplet_patches(self):
-        os = self._get_os_or_subsystem()
+        the_os = self._get_os_or_subsystem()
         arch = str(self.settings.arch)
         compiler = str(self.settings.compiler)
-        for patch_filename in self._patches_per_triplet[os][arch][compiler]:
+        for patch_filename in self._patches_per_triplet[the_os][arch][compiler]:
             tools.patch(patch_file=os.path.join("patches", self.version, "triplets", patch_filename),
                         base_path=self._source_subfolder)
 
