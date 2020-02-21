@@ -1,4 +1,5 @@
 import os
+import shutil
 import time
 
 from conans import ConanFile, CMake, tools
@@ -18,6 +19,7 @@ class PhysXConan(ConanFile):
     generators = "cmake"
     settings = "os", "compiler", "arch", "build_type"
     short_paths = True
+    no_copy_source = True
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
@@ -69,8 +71,7 @@ class PhysXConan(ConanFile):
                 raise ConanInvalidConfiguration("Visual Studio versions < 9 are not supported")
 
             allowed_runtimes = ["MDd", "MTd"] if build_type == "Debug" else ["MD", "MT"]
-            runtime = self.settings.compiler.runtime
-            if runtime not in allowed_runtimes:
+            if self.settings.compiler.runtime not in allowed_runtimes:
                 raise ConanInvalidConfiguration("Visual Studio Compiler runtime {0}" \
                                                 "is required for {1} build type".format(allowed_runtimes, build_type))
 
@@ -86,9 +87,36 @@ class PhysXConan(ConanFile):
             os.rename(extracted_dir, self._source_subfolder)
 
     def build(self):
+        self._copy_sources()
         self._patch_sources()
         cmake = self._configure_cmake()
         cmake.build()
+
+    def _copy_sources(self):
+        # Copy CMakeLists wrapper
+        shutil.copy(os.path.join(self.source_folder, "CMakeLists.txt"), "CMakeLists.txt")
+
+        # Copy patches
+        for patch in self.conan_data["patches"][self.version]:
+            if not os.path.exists("patches"):
+                os.mkdir("patches")
+            shutil.copy(os.path.join(self.source_folder, patch["patch_file"]),
+                        "patches")
+
+        # Copy PhysX source code
+        subfolders_to_copy = [
+           "pxshared",
+           os.path.join("externals", self._get_cmakemodules_subfolder()),
+           os.path.join("physx", "compiler"),
+           os.path.join("physx", "include"),
+           os.path.join("physx", "source")
+        ]
+        for subfolder in subfolders_to_copy:
+            shutil.copytree(os.path.join(self.source_folder, self._source_subfolder, subfolder),
+                            os.path.join(self._source_subfolder, subfolder))
+
+    def _get_cmakemodules_subfolder(self):
+        return "CMakeModules" if self.settings.os == "Windows" else "cmakemodules"
 
     def _patch_sources(self):
         for patch in self.conan_data["patches"][self.version]:
@@ -145,20 +173,21 @@ class PhysXConan(ConanFile):
         self._cmake.definitions["PX_BUILDSNIPPETS"] = False
         self._cmake.definitions["PX_BUILDPUBLICSAMPLES"] = False
         self._cmake.definitions["PX_CMAKE_SUPPRESS_REGENERATION"] = False
-        cmakemodules_path = os.path.join(
+        cmakemodules_abspath = os.path.join(
+            self.build_folder,
             self._source_subfolder,
             "externals",
-            "CMakeModules" if self.settings.os == "Windows" else "cmakemodules"
+            self._get_cmakemodules_subfolder()
         )
-        self._cmake.definitions["CMAKEMODULES_PATH"] = os.path.abspath(cmakemodules_path).replace("\\", "/")
-        self._cmake.definitions["PHYSX_ROOT_DIR"] = os.path.abspath(os.path.join(self._source_subfolder, "physx")).replace("\\", "/")
+        self._cmake.definitions["CMAKEMODULES_PATH"] = cmakemodules_abspath.replace("\\", "/")
+        self._cmake.definitions["PHYSX_ROOT_DIR"] = os.path.join(self.build_folder, self._source_subfolder, "physx").replace("\\", "/")
 
         # Options defined in physx/source/compiler/cmake/CMakeLists.txt
         if self.settings.os in ["Windows", "Android"]:
             self._cmake.definitions["PX_SCALAR_MATH"] = not self.options.enable_simd # this value doesn't matter on other os
         self._cmake.definitions["PX_GENERATE_STATIC_LIBRARIES"] = not self.options.shared
         self._cmake.definitions["PX_EXPORT_LOWLEVEL_PDB"] = False
-        self._cmake.definitions["PXSHARED_PATH"] = os.path.abspath(os.path.join(self._source_subfolder, "pxshared")).replace("\\", "/")
+        self._cmake.definitions["PXSHARED_PATH"] = os.path.join(self.build_folder, self._source_subfolder, "pxshared").replace("\\", "/")
         self._cmake.definitions["PXSHARED_INSTALL_PREFIX"] = self.package_folder.replace("\\", "/")
         self._cmake.definitions["PX_GENERATE_SOURCE_DISTRO"] = False
 
@@ -170,7 +199,7 @@ class PhysXConan(ConanFile):
             self._cmake.definitions["NV_USE_DEBUG_WINCRT"] = str(self.settings.compiler.runtime).endswith("d")
         self._cmake.definitions["NV_FORCE_64BIT_SUFFIX"] = False
         self._cmake.definitions["NV_FORCE_32BIT_SUFFIX"] = False
-        self._cmake.definitions["PX_ROOT_LIB_DIR"] = os.path.abspath(os.path.join(self.package_folder, "lib")).replace("\\", "/")
+        self._cmake.definitions["PX_ROOT_LIB_DIR"] = os.path.join(self.package_folder, "lib").replace("\\", "/")
 
         if self.settings.os == "Windows":
             # Options defined in physx/source/compiler/cmake/windows/CMakeLists.txt
@@ -182,7 +211,8 @@ class PhysXConan(ConanFile):
             # Options used in physx/source/compiler/cmake/windows/PhysX.cmake
             self._cmake.definitions["PX_GENERATE_GPU_PROJECTS"] = False
 
-        self._cmake.configure(build_folder=self._build_subfolder)
+        self._cmake.configure(build_folder=os.path.join(self.build_folder, self._build_subfolder),
+                              source_folder=os.path.join(self.build_folder))
         return self._cmake
 
     def _get_physx_build_type(self):
@@ -224,7 +254,7 @@ class PhysXConan(ConanFile):
         self._copy_external_bin()
 
     def _get_license(self):
-        readme = tools.load(os.path.join(self._source_subfolder, "README.md"))
+        readme = tools.load(os.path.join(self.source_folder, self._source_subfolder, "README.md"))
         begin = readme.find("Copyright")
         end = readme.find("\n## Introduction", begin)
         return readme[begin:end]
@@ -233,7 +263,7 @@ class PhysXConan(ConanFile):
         # For Windows and Linux 64 bits, PhysXGpu (and PhysXDevice on Windows)
         # precompiled shared libs must also be provided to end-user if
         # application uses GPU features.
-        external_bin_dir = os.path.join(self._source_subfolder, "physx", "bin")
+        external_bin_dir = os.path.join(self.source_folder, self._source_subfolder, "physx", "bin")
         physx_build_type = self._get_physx_build_type()
         compiler_version = tools.Version(self.settings.compiler.version)
 
