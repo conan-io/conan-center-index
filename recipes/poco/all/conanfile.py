@@ -150,6 +150,7 @@ class PocoConan(ConanFile):
         cmake = self._configure_cmake()
         cmake.install()
         tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
+        tools.rmdir(os.path.join(self.package_folder, "cmake"))
 
     def package_info(self):
         libs = [("enable_mongodb", "PocoMongoDB"),
