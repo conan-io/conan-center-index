@@ -53,7 +53,7 @@ class BoostConan(ConanFile):
         "lzma": [True, False],
         "zstd": [True, False],
         "segmented_stacks": [True, False],
-        "debug_level": range(1, 14),
+        "debug_level": [i for i in range(1, 14)],
         "extra_b2_flags": "ANY"  # custom b2 flags
     }
     options.update({"without_%s" % libname: [True, False] for libname in lib_list})
