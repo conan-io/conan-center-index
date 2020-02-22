@@ -53,6 +53,7 @@ class BoostConan(ConanFile):
         "lzma": [True, False],
         "zstd": [True, False],
         "segmented_stacks": [True, False],
+        "debug_level": range(1, 14),
         "extra_b2_flags": "ANY"  # custom b2 flags
     }
     options.update({"without_%s" % libname: [True, False] for libname in lib_list})
@@ -76,6 +77,7 @@ class BoostConan(ConanFile):
         'lzma': False,
         'zstd': False,
         'segmented_stacks': False,
+        "debug_level": 2,
         'extra_b2_flags': 'None',
     }
 
@@ -132,6 +134,7 @@ class BoostConan(ConanFile):
             self.info.header_only()
             self.info.options.header_only = True
         else:
+            del self.info.options.debug_level
             del self.info.options.python_executable  # PATH to the interpreter is not important, only version matters
             if self.options.without_python:
                 del self.info.options.python_version
@@ -394,15 +397,12 @@ class BoostConan(ConanFile):
             self._build_bcp()
             self._run_bcp()
 
-        flags = self._get_build_flags()
-        flags.append("install")
-        flags.append("--prefix=%s" % self.package_folder)
         # Help locating bzip2 and zlib
         self._create_user_config_jam(self._boost_build_dir)
 
         # JOIN ALL FLAGS
-        b2_flags = " ".join(flags)
-        full_command = "%s %s -j%s --abbreviate-paths -d2" % (self._b2_exe, b2_flags, tools.cpu_count())
+        b2_flags = " ".join(self._get_build_flags())
+        full_command = "%s %s" % (self._b2_exe, b2_flags)
         # -d2 is to print more debug info and avoid travis timing out without output
         sources = os.path.join(self.source_folder, self._boost_dir)
         full_command += ' --debug-configuration --build-dir="%s"' % self.build_folder
@@ -515,11 +515,7 @@ class BoostConan(ConanFile):
         return None
 
     def _get_build_flags(self):
-
-        if tools.cross_building(self.settings):
-            flags = self._get_build_cross_flags()
-        else:
-            flags = []
+        flags = self._get_build_cross_flags()
 
         # https://www.boost.org/doc/libs/1_70_0/libs/context/doc/html/context/architectures.html
         if self._b2_os:
@@ -631,11 +627,18 @@ class BoostConan(ConanFile):
         if self.options.extra_b2_flags:
             flags.append(str(self.options.extra_b2_flags))
 
+        flags.extend(["install",
+                      "--prefix=%s" % self.package_folder,
+                      "-j%s" % tools.cpu_count(),
+                      "--abbreviate-paths",
+                      "-d%s" % str(self.options.debug_level)])
         return flags
 
     def _get_build_cross_flags(self):
-        arch = self.settings.get_safe('arch')
         flags = []
+        if not tools.cross_building(self.settings):
+            return flags
+        arch = self.settings.get_safe('arch')
         self.output.info("Cross building, detecting compiler...")
 
         if arch.startswith('arm'):
@@ -868,20 +871,11 @@ class BoostConan(ConanFile):
     def package(self):
         # This stage/lib is in source_folder... Face palm, looks like it builds in build but then
         # copy to source with the good lib name
-        self.copy("LICENSE_1_0.txt", dst="licenses", src=os.path.join(self.source_folder, self._folder_name))
+        self.copy("LICENSE_1_0.txt", dst="licenses", src=os.path.join(self.source_folder,
+                                                                      self._folder_name))
         tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
         if self.options.header_only:
             self.copy(pattern="*", dst="include/boost", src="%s/boost" % self._boost_dir)
-        return  # install should copy everything!
-        out_lib_dir = os.path.join(self._boost_dir, "stage", "lib")
-        self.copy(pattern="*", dst="include/boost", src="%s/boost" % self._boost_dir)
-        if not self.options.shared:
-            self.copy(pattern="*.a", dst="lib", src=out_lib_dir, keep_path=False)
-        self.copy(pattern="*.so", dst="lib", src=out_lib_dir, keep_path=False, symlinks=True)
-        self.copy(pattern="*.so.*", dst="lib", src=out_lib_dir, keep_path=False, symlinks=True)
-        self.copy(pattern="*.dylib*", dst="lib", src=out_lib_dir, keep_path=False)
-        self.copy(pattern="*.lib", dst="lib", src=out_lib_dir, keep_path=False)
-        self.copy(pattern="*.dll", dst="bin", src=out_lib_dir, keep_path=False)
 
     def package_info(self):
         gen_libs = [] if self.options.header_only else tools.collect_libs(self)
