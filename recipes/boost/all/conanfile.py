@@ -775,7 +775,7 @@ class BoostConan(ConanFile):
             return "emscripten", compiler_version, self._cxx
         elif self.settings.compiler == "gcc" and tools.is_apple_os(self.settings.os):
             return "darwin", compiler_version, self._cxx
-        elif compiler == "gcc" and major >= "5":
+        elif compiler == "gcc" and Version(major) >= "5":
             # For GCC >= v5 we only need the major otherwise Boost doesn't find the compiler
             # The NOT windows check is necessary to exclude MinGW:
             if not tools.which("g++-%s" % major):
