@@ -64,12 +64,12 @@ class LibFlannConan(ConanFile):
         self._cmake = CMake(self)
 
         # Only build the C++ libraries
-        self._cmake.definitions["BUILD_DOC"] = "OFF"
-        self._cmake.definitions["BUILD_EXAMPLES"] = "OFF"
-        self._cmake.definitions["BUILD_TESTS"] = "OFF"
-        self._cmake.definitions["BUILD_C_BINDINGS"] = "OFF"
-        self._cmake.definitions["BUILD_MATLAB_BINDINGS"] = "OFF"
-        self._cmake.definitions["BUILD_PYTHON_BINDINGS"] = "OFF"
+        self._cmake.definitions["BUILD_DOC"] = False
+        self._cmake.definitions["BUILD_EXAMPLES"] = False
+        self._cmake.definitions["BUILD_TESTS"] = False
+        self._cmake.definitions["BUILD_C_BINDINGS"] = False
+        self._cmake.definitions["BUILD_MATLAB_BINDINGS"] = False
+        self._cmake.definitions["BUILD_PYTHON_BINDINGS"] = False
 
         # Workaround issue with flann_cpp
         if self.settings.os == "Windows" and self.options.shared:
