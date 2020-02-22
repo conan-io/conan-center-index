@@ -1,7 +1,8 @@
-#include <flann/flann.hpp>
+#include <iostream>
+#include <flann/flann.h>
 
 int main()
 {
-    flann::Matrix<float> dataset;
-    flann::Matrix<float> query;
+    // Simply make sure that it builds an runs
+    std::cout << flann_get_distance_type() << '\n';
 }

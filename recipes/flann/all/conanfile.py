@@ -63,11 +63,12 @@ class LibFlannConan(ConanFile):
             return self._cmake
         self._cmake = CMake(self)
 
+        self._cmake.definitions["BUILD_C_BINDINGS"] = True
+
         # Only build the C++ libraries
         self._cmake.definitions["BUILD_DOC"] = False
         self._cmake.definitions["BUILD_EXAMPLES"] = False
         self._cmake.definitions["BUILD_TESTS"] = False
-        self._cmake.definitions["BUILD_C_BINDINGS"] = False
         self._cmake.definitions["BUILD_MATLAB_BINDINGS"] = False
         self._cmake.definitions["BUILD_PYTHON_BINDINGS"] = False
 
@@ -112,6 +113,9 @@ class LibFlannConan(ConanFile):
         self.cpp_info.names["cmake_find_package_multi"] = "FLANN"
 
         if self.options.shared:
-            self.cpp_info.libs = ["flann_cpp"]
+            self.cpp_info.libs = ["flann", "flann_cpp"]
         else:
-            self.cpp_info.libs = ["flann_cpp_s"]
+            self.cpp_info.libs = ["flann_s", "flann_cpp_s"]
+
+        if not self.options.shared:
+            self.cpp_info.defines.append("FLANN_STATIC")
