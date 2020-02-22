@@ -1,0 +1,8 @@
+sources:
+  "1.0":
+    url: "https://github.com/dlbeer/quirc/archive/v1.0.tar.gz"
+    sha256: "91bba64ffca5b84aa953b88d5f5ccc9507275345c200fd581dca24fbf66b3706"
+patches:
+  "1.0":
+    - patch_file: "patches/fix_allocation_table_null_size.patch"
+      base_path: "source_subfolder"
