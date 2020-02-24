@@ -53,6 +53,7 @@ class BoostConan(ConanFile):
         "lzma": [True, False],
         "zstd": [True, False],
         "segmented_stacks": [True, False],
+        "pch": [True, False],
         "extra_b2_flags": "ANY"  # custom b2 flags
     }
     options.update({"without_%s" % libname: [True, False] for libname in lib_list})
@@ -76,6 +77,7 @@ class BoostConan(ConanFile):
         'lzma': False,
         'zstd': False,
         'segmented_stacks': False,
+        'pch': True,
         'extra_b2_flags': 'None',
     }
 
@@ -132,6 +134,7 @@ class BoostConan(ConanFile):
             self.info.header_only()
             self.info.options.header_only = True
         else:
+            del self.info.options.pch
             del self.info.options.python_executable  # PATH to the interpreter is not important, only version matters
             if self.options.without_python:
                 del self.info.options.python_version
@@ -610,6 +613,7 @@ class BoostConan(ConanFile):
             flags.extend(["segmented-stacks=on",
                           "define=BOOST_USE_SEGMENTED_STACKS=1",
                           "define=BOOST_USE_UCONTEXT=1"])
+        flags.append("pch=on" if self.options.pch else "pch=off")
 
         if tools.is_apple_os(self.settings.os):
             if self.settings.get_safe("os.version"):
