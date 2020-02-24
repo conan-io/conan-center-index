@@ -1,4 +1,4 @@
 sources:
-  "1.1.1":
-    sha256: 6dbf93969ec48d97ecb6c157014985846df8c01995a0011c21f4e2c146594922
-    url: https://github.com/arun11299/cpp-jwt/archive/v1.1.1.tar.gz
+  "1.2":
+    sha256: 5d0102d182c48ef520f3fb15412fbaa67e002e1bf90b3ba45d5a2c7f850371f7
+    url: https://github.com/arun11299/cpp-jwt/archive/v1.2.tar.gz
