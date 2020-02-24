@@ -35,6 +35,7 @@ class CppJwtConan(ConanFile):
         minimal_version = {
             "gcc": "6.4",
             "clang": "5",
+            "apple-clang", "10"
         }
 
         compiler = str(self.settings.compiler)
