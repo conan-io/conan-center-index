@@ -42,7 +42,7 @@ class OpenBLAS(ConanFile):
         tools.get(**self.conan_data["sources"][self.version])
         os.rename('OpenBLAS-{}'.format(self.version), self._source_subfolder)
 
-    def _configure_cmake(self):
+    def _create_cmake_helper(self):
         cmake = CMake(self)
         if self.options.build_lapack:
             self.output.warn(
@@ -65,11 +65,11 @@ class OpenBLAS(ConanFile):
             # which is required to successfully compile on older gcc versions.
             cmake.definitions["ANDROID"] = True
 
-        cmake.configure(build_folder=self._build_subfolder)
         return cmake
 
     def build(self):
-        cmake = self._configure_cmake()
+        cmake = self._create_cmake_helper()
+        cmake.configure(build_folder=self._build_subfolder)
         cmake.build()
 
     def package(self):
@@ -77,8 +77,8 @@ class OpenBLAS(ConanFile):
             pattern="LICENSE",
             dst="licenses",
             src=self._source_subfolder)
-        cmake = self._configure_cmake()
-        cmake.install()
+        cmake = self._create_cmake_helper()
+        cmake.install(build_dir=self._build_subfolder)
         tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
         tools.rmdir(os.path.join(self.package_folder, "share"))
 
