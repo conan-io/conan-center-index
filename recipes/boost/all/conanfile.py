@@ -358,7 +358,7 @@ class BoostConan(ConanFile):
         folder = os.path.join(self.source_folder, self._folder_name, 'tools', 'bcp')
         with tools.vcvars(self.settings) if self._is_msvc else tools.no_op():
             with tools.chdir(folder):
-                toolset, _, _ = self._get_toolset_version_and_exe()
+                toolset, _, _ = self._toolset_version_and_exe
                 command = "%s -j%s --abbreviate-paths -d2 toolset=%s" % (self._b2_exe, tools.cpu_count(), toolset)
                 self.output.warn(command)
                 self.run(command)
@@ -404,7 +404,7 @@ class BoostConan(ConanFile):
         self._create_user_config_jam(self._boost_build_dir)
 
         # JOIN ALL FLAGS
-        b2_flags = " ".join(self._get_build_flags())
+        b2_flags = " ".join(self._build_flags)
         full_command = "%s %s" % (self._b2_exe, b2_flags)
         # -d2 is to print more debug info and avoid travis timing out without output
         sources = os.path.join(self.source_folder, self._boost_dir)
@@ -517,8 +517,9 @@ class BoostConan(ConanFile):
             pass
         return None
 
-    def _get_build_flags(self):
-        flags = self._get_build_cross_flags()
+    @property
+    def _build_flags(self):
+        flags = self._build_cross_flags
 
         # https://www.boost.org/doc/libs/1_70_0/libs/context/doc/html/context/architectures.html
         if self._b2_os:
@@ -566,7 +567,7 @@ class BoostConan(ConanFile):
             if getattr(self.options, "without_%s" % libname):
                 flags.append("--without-%s" % libname)
 
-        toolset, _, _ = self._get_toolset_version_and_exe()
+        toolset, _, _ = self._toolset_version_and_exe
         flags.append("toolset=%s" % toolset)
 
         if self.settings.get_safe("compiler.cppstd"):
@@ -638,7 +639,8 @@ class BoostConan(ConanFile):
                       "-d%s" % str(self.options.debug_level)])
         return flags
 
-    def _get_build_cross_flags(self):
+    @property
+    def _build_cross_flags(self):
         flags = []
         if not tools.cross_building(self.settings):
             return flags
@@ -726,7 +728,7 @@ class BoostConan(ConanFile):
                         includes=self._python_includes,
                         libraries=self._python_libraries)
 
-        toolset, version, exe = self._get_toolset_version_and_exe()
+        toolset, version, exe = self._toolset_version_and_exe
         exe = compiler_command or exe  # Prioritize CXX
 
         # Specify here the toolset with the binary if present if don't empty parameter : :
@@ -759,7 +761,8 @@ class BoostConan(ConanFile):
         filename = "%s/user-config.jam" % folder
         tools.save(filename,  contents)
 
-    def _get_toolset_version_and_exe(self):
+    @property
+    def _toolset_version_and_exe(self):
         compiler_version = str(self.settings.compiler.version)
         major = compiler_version.split(".")[0]
         if "." not in compiler_version:
@@ -807,7 +810,8 @@ class BoostConan(ConanFile):
             return compiler, compiler_version, ""
 
     ##################### BOOSTRAP METHODS ###########################
-    def _get_boostrap_toolset(self):
+    @property
+    def _boostrap_toolset(self):
         if self.settings.compiler == "intel":
             return {"Macos": "intel-darwin",
                     "Windows": "intel-win32",
@@ -848,7 +852,7 @@ class BoostConan(ConanFile):
                         cmd = bootstrap
                     else:
                         option = "" if tools.os_info.is_windows else "-with-toolset="
-                        cmd = "%s %s%s" % (bootstrap, option, self._get_boostrap_toolset())
+                        cmd = "%s %s%s" % (bootstrap, option, self._boostrap_toolset)
                     self.output.info(cmd)
 
                     removed_environment_variables = [
