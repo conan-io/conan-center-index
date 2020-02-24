@@ -47,6 +47,11 @@ class PahoMqttCppConan(ConanFile):
         extracted_dir = self.name.replace("-", ".") + "-" + self.version
         os.rename(extracted_dir, self._source_subfolder)
 
+    def configure(self):
+        minimal_cpp_standard = "11"
+        if self.settings.compiler.cppstd:
+            tools.check_min_cppstd(self, minimal_cpp_standard)
+
     def _configure_cmake(self):
         if self._cmake:
             return self._cmake
