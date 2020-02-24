@@ -26,6 +26,29 @@ class CppJwtConan(ConanFile):
         extracted_dir = self.name + "-" + self.version
         os.rename(extracted_dir, self._source_subfolder)
 
+    def configure(self):
+        minimal_cpp_standard = "14"
+        if self.settings.compiler.cppstd:
+            tools.check_min_cppstd(self, minimal_cpp_standard)
+
+        minimal_version = {
+            "gcc": "6.4",
+            "clang": "5",
+        }
+
+        compiler = str(self.settings.compiler)
+        if compiler not in minimal_version:
+            self.output.warn(
+                "%s recipe lacks information about the %s compiler standard version support" % (self.name, compiler))
+            self.output.warn(
+                "%s requires a compiler that supports at least C++%s" % (self.name, minimal_cpp_standard))
+            return
+
+        version = tools.Version(self.settings.compiler.version)
+        if version < minimal_version[compiler]:
+            raise ConanInvalidConfiguration(
+                "%s requires a compiler that supports at least C++%s" % (self.name, minimal_cpp_standard))
+
     def _configure_cmake(self):
         cmake = CMake(self)
         cmake.definitions["CPP_JWT_BUILD_EXAMPLES"] = False
