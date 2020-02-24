@@ -12,7 +12,7 @@ class SConsConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index/"
     homepage = "https://scons.org"
     topics = ("conan", "scons", "build", "configuration", "development")
-    settings = "os_build"  # Added to test on let CI test on all os'es
+    settings = "os_build"  # Added to let the CI test this package on all os'es
 
     _autotools = None
 
@@ -31,7 +31,7 @@ class SConsConan(ConanFile):
     def package(self):
         self.copy("LICENSE*", src=self._source_subfolder, dst="licenses")
 
-        # Mislead CI and create an empty header in the includue directory
+        # Mislead CI and create an empty header in the include directory
         include_dir = os.path.join(self.package_folder, "include")
         os.mkdir(include_dir)
         tools.save(os.path.join(include_dir, "__nop.h"), "")
@@ -54,7 +54,9 @@ class SConsConan(ConanFile):
             for file in files:
                 for ext in (".pyc", ".pyo", "pyd"):
                     if ext in file:
-                        raise ConanException("Compiled python source in package: {}".format(os.path.join(root, file)))
+                        fullpath = os.path.join(root, file)
+                        os.unlink(fullpath)
+                        self.output.warn("Found compiled python code: {}".format(fullpath))
 
     def package_info(self):
         self.cpp_info.includedirs = []
