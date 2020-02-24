@@ -43,6 +43,8 @@ class LibtiffConan(ConanFile):
         cmake.definitions["lzma"] = False
         cmake.definitions["jpeg"] = False
         cmake.definitions["jbig"] = False
+        cmake.definitions["webp"] = False
+        cmake.definitions["zstd"] = False
         if self.options.shared and self.settings.compiler == "Visual Studio":
             # https://github.com/Microsoft/vcpkg/blob/master/ports/tiff/fix-cxx-shared-libs.patch
             tools.replace_in_file(os.path.join(self._source_subfolder, 'libtiff', 'CMakeLists.txt'),
@@ -52,8 +54,8 @@ class LibtiffConan(ConanFile):
 
         if self.settings.os == "Windows" and self.settings.compiler != "Visual Studio":
             tools.replace_in_file(os.path.join(self._source_subfolder, "CMakeListsOriginal.txt"),
-                                      "find_library(M_LIBRARY m)",
-                                      "if (NOT MINGW)\n  find_library(M_LIBRARY m)\nendif()")
+                                  "find_library(M_LIBRARY m)",
+                                  "if (NOT MINGW)\n  find_library(M_LIBRARY m)\nendif()")
             if self.version == '4.0.8':
                 # only one occurence must be patched. fixed in 4.0.9
                 tools.replace_in_file(os.path.join(self._source_subfolder, "CMakeListsOriginal.txt"),
@@ -61,8 +63,8 @@ class LibtiffConan(ConanFile):
                                       "if (UNIX OR MINGW)")
 
         tools.replace_in_file(os.path.join(self._source_subfolder, "CMakeListsOriginal.txt"),
-            "add_subdirectory(tools)\nadd_subdirectory(test)\nadd_subdirectory(contrib)\nadd_subdirectory(build)\n"
-            "add_subdirectory(man)\nadd_subdirectory(html)", "")
+                              "add_subdirectory(tools)\nadd_subdirectory(test)\nadd_subdirectory(contrib)\nadd_subdirectory(build)\n"
+                              "add_subdirectory(man)\nadd_subdirectory(html)", "")
 
         cmake.definitions["BUILD_SHARED_LIBS"] = self.options.shared
         cmake.configure(source_folder=self._source_subfolder)
