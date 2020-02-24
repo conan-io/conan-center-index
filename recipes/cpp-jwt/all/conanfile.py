@@ -9,7 +9,8 @@ class CppJwtConan(ConanFile):
     topics = ("jwt", "javascript", "auth", "header-only")
     url = "https://github.com/conan-io/conan-center-index"
     settings = "os", "compiler", "arch", "build_type"
-    no_copy_source = True
+    generators = "cmake", "cmake_find_package"
+    exports_sources = ["CMakeLists.txt"]
     license = "MIT"
 
     @property
