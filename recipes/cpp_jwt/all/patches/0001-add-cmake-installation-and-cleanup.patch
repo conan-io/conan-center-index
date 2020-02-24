@@ -1,0 +1,342 @@
+From de69fd2133400635cdc84231d065e806d18829be Mon Sep 17 00:00:00 2001
+From: Carlos Gomes Martinho <carlos.gomes_martinho@siemens.com>
+Date: Mon, 24 Feb 2020 09:21:52 +0100
+Subject: [PATCH 1/2] build: improve cmake scripts
+
+---
+ .gitignore              |  1 +
+ CMakeLists.txt          | 81 ++++++++++++++++++++++++++++++++---------
+ examples/CMakeLists.txt | 30 +++++++++------
+ tests/CMakeLists.txt    | 16 ++++----
+ 4 files changed, 90 insertions(+), 38 deletions(-)
+ create mode 100644 .gitignore
+
+diff --git a/.gitignore b/.gitignore
+new file mode 100644
+index 0000000..f3d6549
+--- /dev/null
++++ b/.gitignore
+@@ -0,0 +1 @@
++/build/
+\ No newline at end of file
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 07810da..9f1a58a 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -1,26 +1,73 @@
+-# CMakeLists files in this project can
+-# refer to the root source directory of the project as ${HELLO_SOURCE_DIR} and
+-# to the root binary directory of the project as ${HELLO_BINARY_DIR}.
++cmake_minimum_required(VERSION 3.5.0)
++project(cpp-jwt)
+ 
+-cmake_minimum_required (VERSION 2.8.11)
+-project (cpp-jwt)
++option(CPP_JWT_BUILD_EXAMPLES "build examples" ON)
++option(CPP_JWT_BUILD_TESTS "build examples" ON)
+ 
+-#SET (CMAKE_CXX_COMPILER /usr/local/bin/g++)
+-SET( CMAKE_CXX_FLAGS  "-std=c++14 -Wall -Wextra" )
++# only set compiler flags if we are the main project, otherwise let the main
++# project decide on the flags
++if(CMAKE_SOURCE_DIR STREQUAL CMAKE_CURRENT_SOURCE_DIR)
++  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++14 -Wall -Wextra")
++else()
+ 
+-include_directories (include)
++endif()
+ 
+ find_package(OpenSSL REQUIRED)
+-include_directories(${OPENSSL_INCLUDE_DIR})
+ 
+-find_package(GTest REQUIRED)
+-include_directories(${GTEST_INCLUDE_DIRS})
++# ##############################################################################
++# LIBRARY
++# ##############################################################################
+ 
+-enable_testing()
++add_library(${PROJECT_NAME} INTERFACE)
++target_include_directories(
++  ${PROJECT_NAME}
++  INTERFACE $<BUILD_INTERFACE:${${PROJECT_NAME}_SOURCE_DIR}/include>
++            $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>)
++target_link_libraries(${PROJECT_NAME} INTERFACE OpenSSL::SSL)
++target_compile_features(${PROJECT_NAME} INTERFACE cxx_std_14)
+ 
+-# Recurse into the "Hello" and "Demo" subdirectories. This does not actually
+-# cause another cmake executable to run. The same process will walk through
+-# the project's entire directory structure.
+-add_subdirectory (tests)
++# ##############################################################################
++# TESTS
++# ##############################################################################
+ 
+-add_subdirectory (examples)
++if(CPP_JWT_BUILD_TESTS)
++  find_package(GTest REQUIRED)
++  include_directories(${GTEST_INCLUDE_DIRS})
++  enable_testing()
++  # Recurse into the "Hello" and "Demo" subdirectories. This does not actually
++  # cause another cmake executable to run. The same process will walk through
++  # the project's entire directory structure.
++  add_subdirectory(tests)
++endif()
++
++# ##############################################################################
++# EXAMPLES
++# ##############################################################################
++
++if(CPP_JWT_BUILD_EXAMPLES)
++  add_subdirectory(examples)
++endif()
++
++# ##############################################################################
++# INSTALL
++# ##############################################################################
++
++include(GNUInstallDirs)
++install(
++  TARGETS ${PROJECT_NAME}
++  EXPORT ${PROJECT_NAME}_Targets
++  ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
++  LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
++  RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})
++
++install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/include/jwt/detail
++        DESTINATION include/jwt)
++install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/include/jwt/impl
++        DESTINATION include/jwt)
++install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/include/jwt/json
++        DESTINATION include/jwt)
++install(
++  DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/include/jwt/
++  DESTINATION include/jwt
++  FILES_MATCHING
++  PATTERN "*.hpp")
+diff --git a/examples/CMakeLists.txt b/examples/CMakeLists.txt
+index 9180a01..a1e4094 100644
+--- a/examples/CMakeLists.txt
++++ b/examples/CMakeLists.txt
+@@ -1,18 +1,24 @@
+-
+-include_directories(${OPENSSL_INCLUDE_DIR})
+-
+-SET(CERT_ROOT_DIR "${CMAKE_CURRENT_SOURCE_DIR}/rsa_256")
+-SET(CMAKE_CXX_FLAGS  "${CMAKE_CXX_FLAGS} -DCERT_ROOT_DIR=\"\\\"${CERT_ROOT_DIR}\\\"\"")
++set(CERT_ROOT_DIR "${CMAKE_CURRENT_SOURCE_DIR}/rsa_256")
++set(CMAKE_CXX_FLAGS
++    "${CMAKE_CXX_FLAGS} -DCERT_ROOT_DIR=\"\\\"${CERT_ROOT_DIR}\\\"\"")
+ 
+ add_executable(simple_ex1 simple_ex1.cc)
+-target_link_libraries(simple_ex1 ${OPENSSL_LIBRARIES} ${GTEST_LIBRARIES})
+-add_test(NAME simple_ex1 COMMAND ./simple_ex1 WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR})
++target_link_libraries(simple_ex1 OpenSSL::SSL ${PROJECT_NAME})
++add_test(
++  NAME simple_ex1
++  COMMAND ./simple_ex1
++  WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR})
+ 
+ add_executable(simple_ex2 simple_ex2.cc)
+-target_link_libraries(simple_ex2 ${OPENSSL_LIBRARIES} ${GTEST_LIBRARIES})
+-add_test(NAME simple_ex2 COMMAND ./simple_ex2 WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR})
++target_link_libraries(simple_ex2 OpenSSL::SSL ${PROJECT_NAME})
++add_test(
++  NAME simple_ex2
++  COMMAND ./simple_ex2
++  WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR})
+ 
+ add_executable(simple_ex3_rsa simple_ex3_rsa.cc)
+-target_link_libraries(simple_ex3_rsa ${OPENSSL_LIBRARIES} ${GTEST_LIBRARIES})
+-add_test(NAME simple_ex3_rsa COMMAND ./simple_ex3_rsa WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR})
+-
++target_link_libraries(simple_ex3_rsa OpenSSL::SSL ${PROJECT_NAME})
++add_test(
++  NAME simple_ex3_rsa
++  COMMAND ./simple_ex3_rsa
++  WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR})
+diff --git a/tests/CMakeLists.txt b/tests/CMakeLists.txt
+index 1ee5201..48cf4b8 100644
+--- a/tests/CMakeLists.txt
++++ b/tests/CMakeLists.txt
+@@ -1,33 +1,31 @@
+ 
+-include_directories(${OPENSSL_INCLUDE_DIR})
+-
+ SET(CERT_ROOT_DIR "${CMAKE_CURRENT_SOURCE_DIR}/certs")
+ SET(CMAKE_CXX_FLAGS  "${CMAKE_CXX_FLAGS} -DCERT_ROOT_DIR=\"\\\"${CERT_ROOT_DIR}\\\"\"")
+ 
+ add_executable(test_jwt_object test_jwt_object.cc)
+-target_link_libraries(test_jwt_object ${OPENSSL_LIBRARIES} ${GTEST_LIBRARIES})
++target_link_libraries(test_jwt_object OpenSSL::SSL GTest::GTest GTest::Main ${PROJECT_NAME})
+ add_test(NAME test_jwt_object COMMAND ./test_jwt_object WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR})
+ 
+ add_executable(test_jwt_encode test_jwt_encode.cc)
+-target_link_libraries(test_jwt_encode ${OPENSSL_LIBRARIES} ${GTEST_LIBRARIES})
++target_link_libraries(test_jwt_encode OpenSSL::SSL GTest::GTest GTest::Main ${PROJECT_NAME})
+ add_test(NAME test_jwt_encode COMMAND ./test_jwt_encode WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR})
+ 
+ add_executable(test_jwt_decode test_jwt_decode.cc)
+-target_link_libraries(test_jwt_decode ${OPENSSL_LIBRARIES} ${GTEST_LIBRARIES})
++target_link_libraries(test_jwt_decode OpenSSL::SSL GTest::GTest GTest::Main ${PROJECT_NAME})
+ add_test(NAME test_jwt_decode COMMAND ./test_jwt_decode WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR})
+ 
+ add_executable(test_jwt_decode_verifiy test_jwt_decode_verifiy.cc)
+-target_link_libraries(test_jwt_decode_verifiy ${OPENSSL_LIBRARIES} ${GTEST_LIBRARIES})
++target_link_libraries(test_jwt_decode_verifiy OpenSSL::SSL GTest::GTest GTest::Main ${PROJECT_NAME})
+ add_test(NAME test_jwt_decode_verifiy COMMAND ./test_jwt_decode_verifiy WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR})
+ 
+ add_executable(test_jwt_decode_verifiy_with_exception test_jwt_decode_verifiy_with_exception.cc)
+-target_link_libraries(test_jwt_decode_verifiy_with_exception ${OPENSSL_LIBRARIES} ${GTEST_LIBRARIES})
++target_link_libraries(test_jwt_decode_verifiy_with_exception OpenSSL::SSL GTest::GTest GTest::Main ${PROJECT_NAME})
+ add_test(NAME test_jwt_decode_verifiy_with_exception COMMAND ./test_jwt_decode_verifiy_with_exception WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR})
+ 
+ add_executable(test_jwt_rsa test_jwt_rsa.cc)
+-target_link_libraries(test_jwt_rsa ${OPENSSL_LIBRARIES} ${GTEST_LIBRARIES} )
++target_link_libraries(test_jwt_rsa OpenSSL::SSL GTest::GTest GTest::Main ${PROJECT_NAME})
+ add_test(NAME test_jwt_rsa COMMAND ./test_jwt_rsa WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR})
+ 
+ add_executable(test_jwt_es test_jwt_es.cc)
+-target_link_libraries(test_jwt_es ${OPENSSL_LIBRARIES} ${GTEST_LIBRARIES})
++target_link_libraries(test_jwt_es OpenSSL::SSL GTest::GTest GTest::Main ${PROJECT_NAME})
+ add_test(NAME test_jwt_es COMMAND ./test_jwt_es WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR})
+
+From 564e9f8d23f5bd9b422ca141a5edaab75574e293 Mon Sep 17 00:00:00 2001
+From: Carlos Gomes Martinho <carlos.gomes_martinho@siemens.com>
+Date: Mon, 24 Feb 2020 10:29:57 +0100
+Subject: [PATCH 2/2] build: add support for conan and make vendored json
+ optional
+
+---
+ CMakeLists.txt                | 14 +++++++++++++-
+ README.md                     | 23 +++++++++++++++++++----
+ conanfile.txt                 | 10 ++++++++++
+ include/jwt/json/test_json.cc |  5 ++++-
+ include/jwt/jwt.hpp           |  5 ++++-
+ 5 files changed, 50 insertions(+), 7 deletions(-)
+ create mode 100644 conanfile.txt
+
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 9f1a58a..bffe31d 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -2,7 +2,11 @@ cmake_minimum_required(VERSION 3.5.0)
+ project(cpp-jwt)
+ 
+ option(CPP_JWT_BUILD_EXAMPLES "build examples" ON)
+-option(CPP_JWT_BUILD_TESTS "build examples" ON)
++option(CPP_JWT_BUILD_TESTS "build tests" ON)
++option(CPP_JWT_USE_VENDORED_NLOHMANN_JSON "use vendored json header" ON)
++
++list(APPEND CMAKE_MODULE_PATH ${CMAKE_BINARY_DIR})
++list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_BINARY_DIR})
+ 
+ # only set compiler flags if we are the main project, otherwise let the main
+ # project decide on the flags
+@@ -14,6 +18,10 @@ endif()
+ 
+ find_package(OpenSSL REQUIRED)
+ 
++if(NOT CPP_JWT_USE_VENDORED_NLOHMANN_JSON)
++  find_package(nlohmann_json  REQUIRED)
++endif()
++
+ # ##############################################################################
+ # LIBRARY
+ # ##############################################################################
+@@ -24,6 +32,10 @@ target_include_directories(
+   INTERFACE $<BUILD_INTERFACE:${${PROJECT_NAME}_SOURCE_DIR}/include>
+             $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>)
+ target_link_libraries(${PROJECT_NAME} INTERFACE OpenSSL::SSL)
++if(NOT CPP_JWT_USE_VENDORED_NLOHMANN_JSON)
++  target_link_libraries(${PROJECT_NAME} INTERFACE nlohmann_json::nlohmann_json)
++  add_definitions(-DCPP_JWT_USE_VENDORED_NLOHMANN_JSON)
++endif()
+ target_compile_features(${PROJECT_NAME} INTERFACE cxx_std_14)
+ 
+ # ##############################################################################
+diff --git a/README.md b/README.md
+index 682789d..1cdff6e 100644
+--- a/README.md
++++ b/README.md
+@@ -209,12 +209,27 @@ Tested with <strong>clang-5.0</strong> and <strong>g++-6.4</strong>.
+ With issue#12, <strong>VS2017</strong> is also supported.
+ 
+ ## Installation
+-Use the C++ package manager..... just kidding :)
+-This is a header only library, so you can just add it to your include path and start using it. The only somewhat tricky part is to link it with openssl library. Check out the cmake file for building it properly.
+ 
+-For example one can run cmake like:
++### using conan
++
++```shell
++mkdir build
++cd build
++conan install .. --build missing
++cmake ..
++cmake --build . -j
+ ```
+-cmake -DOPENSSL_ROOT_DIR=/usr/local/Cellar/openssl/1.0.2j -DGTEST_ROOT=$HOME/googletest
++
++### using debian
++
++```shell
++sudo apt install nlohmann-json3-dev 
++sudo apt install libgtest-dev
++sudo apt install libssl-dev
++mkdir build
++cd build
++cmake ..
++cmake --build . -j
+ ```
+ 
+ ## Parameters
+diff --git a/conanfile.txt b/conanfile.txt
+new file mode 100644
+index 0000000..b7af822
+--- /dev/null
++++ b/conanfile.txt
+@@ -0,0 +1,10 @@
++[requires]
++gtest/1.10.0
++nlohmann_json/3.7.0
++openssl/1.1.1d
++
++[generators]
++cmake_find_package
++cmake_paths
++
++[options]
+diff --git a/include/jwt/json/test_json.cc b/include/jwt/json/test_json.cc
+index 869d24f..d1ea502 100644
+--- a/include/jwt/json/test_json.cc
++++ b/include/jwt/json/test_json.cc
+@@ -1,7 +1,10 @@
+ #include <iostream>
+ #include <string>
++#if defined( CPP_JWT_USE_VENDORED_NLOHMANN_JSON)
+ #include "./json.hpp"
+-
++#else
++#include "nlohmann/json.hpp"
++#endif
+ using json = nlohmann::json;
+ 
+ void basic_json_test()
+diff --git a/include/jwt/jwt.hpp b/include/jwt/jwt.hpp
+index 3c90549..3d00162 100644
+--- a/include/jwt/jwt.hpp
++++ b/include/jwt/jwt.hpp
+@@ -38,8 +38,11 @@ SOFTWARE.
+ #include "jwt/string_view.hpp"
+ #include "jwt/parameters.hpp"
+ #include "jwt/exceptions.hpp"
++#if defined(CPP_JWT_USE_VENDORED_NLOHMANN_JSON)
+ #include "jwt/json/json.hpp"
+-
++#else
++#include "nlohmann/json.hpp"
++#endif
+ // For convenience
+ using json_t = nlohmann::json;
+ using system_time_t = std::chrono::time_point<std::chrono::system_clock>;
