@@ -9,7 +9,7 @@ class Libsgp4Conan(ConanFile):
     topics = ("conan", "libsgp4", "sgp4", "orbit", "satellite", "perturbation")
     homepage = "https://github.com/dnwrnr/sgp4"
     url = "https://github.com/conan-io/conan-center-index"
-    exports_sources = "CMakeLists.txt"
+    exports_sources = ["CMakeLists.txt", "patches/**"]
     generators = "cmake"
     settings = "os", "arch", "compiler", "build_type"
     options = {"shared": [True, False], "fPIC": [True, False]}
@@ -36,8 +36,10 @@ class Libsgp4Conan(ConanFile):
         os.rename(extracted_dir, self._source_subfolder)
 
     def build(self):
+        for patch in self.conan_data["patches"][self.version]:
+            tools.patch(**patch)
         cmake = self._configure_cmake()
-        cmake.build()
+        cmake.build(target="sgp4")
 
     def _configure_cmake(self):
         if self._cmake:
@@ -53,4 +55,4 @@ class Libsgp4Conan(ConanFile):
 
     def package_info(self):
         self.cpp_info.libs = tools.collect_libs(self)
-        self.cpp_info.includedirs = ["include", os.path.join("include", "libsgp4")]
+        self.cpp_info.includedirs = ["include", os.path.join("include", "SGP4")]
