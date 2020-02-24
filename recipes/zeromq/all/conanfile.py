@@ -9,7 +9,7 @@ class ZeroMQConan(ConanFile):
     topics = ("conan", "zmq", "libzmq", "message-queue", "asynchronous")
     url = "https://github.com/conan-io/conan-center-index"
     license = "LGPL-3.0"
-    exports_sources = ["CMakeLists.txt"]
+    exports_sources = "CMakeLists.txt", "patches/**"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
@@ -24,8 +24,14 @@ class ZeroMQConan(ConanFile):
     generators = "cmake", "cmake_find_package"
 
     _cmake = None
-    _source_subfolder = "source_subfolder"
-    _build_subfolder = "build_subfolder"
+
+    @property
+    def _source_subfolder(self):
+        return "source_subfolder"
+
+    @property
+    def _build_subfolder(self):
+        return "build_subfolder"
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -58,6 +64,8 @@ class ZeroMQConan(ConanFile):
         return self._cmake
 
     def _patch_sources(self):
+        for patch in self.conan_data["patches"][self.version]:
+            tools.patch(**patch)
         os.unlink(os.path.join(self._source_subfolder, "builds", "cmake", "Modules", "FindSodium.cmake"))
         os.rename("Findlibsodium.cmake", "FindSodium.cmake")
         tools.replace_in_file(os.path.join(self._source_subfolder, "CMakeLists.txt"),
@@ -102,10 +110,11 @@ class ZeroMQConan(ConanFile):
                            "16": "v142"}.get(str(self.settings.compiler.version))
                 library_name = "libzmq-%s-mt%s-%s" % (toolset, runtime, version)
             self.cpp_info.libs = [library_name]
-            self.cpp_info.system_libs = ["iphlpapi", "ws2_32"]
         else:
             self.cpp_info.libs = ["zmq"]
-        if self.settings.os == "Linux":
-            self.cpp_info.system_libs.extend(["pthread", "rt", "m"])
+        if self.settings.os == "Windows":
+            self.cpp_info.system_libs = ["iphlpapi", "ws2_32"]
+        elif self.settings.os == "Linux":
+            self.cpp_info.system_libs = ["pthread", "rt", "m"]
         if not self.options.shared:
             self.cpp_info.defines.append("ZMQ_STATIC")
