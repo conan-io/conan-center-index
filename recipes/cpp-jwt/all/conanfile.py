@@ -11,7 +11,7 @@ class CppJwtConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     settings = "os", "compiler", "arch", "build_type"
     generators = "cmake", "cmake_find_package"
-    exports_sources = ["CMakeLists.txt"]
+    exports_sources = ["CMakeLists.txt", "patches/*"]
     license = "MIT"
 
     @property
@@ -60,6 +60,7 @@ class CppJwtConan(ConanFile):
         return cmake
 
     def build(self):
+        tools.patch(**self.conan_data["patches"][self.version])
         cmake = self._configure_cmake()
         cmake.build()
 
