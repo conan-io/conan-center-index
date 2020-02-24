@@ -29,7 +29,7 @@ class CppJwtConan(ConanFile):
     def _configure_cmake(self):
         cmake = CMake(self)
         cmake.definitions["CPP_JWT_BUILD_EXAMPLES"] = False
-        cmake.definitions["CPP_JWT_BUILD_EXAMPLES"] = False
+        cmake.definitions["CPP_JWT_BUILD_TESTS"] = False
         cmake.definitions["CPP_JWT_USE_VENDORED_NLOHMANN_JSON"] = False
         cmake.configure(source_folder=self._source_subfolder)
         return cmake
