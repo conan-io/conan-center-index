@@ -35,12 +35,16 @@ class ReplxxConan(ConanFile):
         extracted_dir = self.name + "-release-" + self.version
         os.rename(extracted_dir, self._source_subfolder)
 
+    def config_options(self):
+        if self.settings.os == "Windows":
+            del self.options.fPIC
+
     def _configure_cmake(self):
         if not self._cmake:
             self._cmake = CMake(self)
-        self._cmake.definitions["REPLXX_BUILD_EXAMPLES"] = False
-        self._cmake.definitions["REPLXX_BUILD_PACKAGE"] = False
-        self._cmake.configure()
+            self._cmake.definitions["REPLXX_BUILD_EXAMPLES"] = False
+            self._cmake.definitions["REPLXX_BUILD_PACKAGE"] = False
+            self._cmake.configure()
         return self._cmake
 
     def build(self):
@@ -53,5 +57,6 @@ class ReplxxConan(ConanFile):
         cmake.install()
 
     def package_info(self):
+        self.cpp_info.libs = tools.collect_libs(self)
         if tools.os_info.is_linux:
-            self.cpp_info.libs.append("pthread")
+            self.cpp_info.systemlibs = ["pthread"]
