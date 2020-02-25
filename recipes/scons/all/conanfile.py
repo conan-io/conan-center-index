@@ -42,8 +42,11 @@ class SConsConan(ConanFile):
         tools.rmdir(os.path.join(self.package_folder, "man"))
 
         if tools.os_info.is_windows:
+            # On Windows, scons installs the scripts in the folders `Scripts" and `Lib".
+            # Move these to the directories "bin" and "lib".
             shutil.move(os.path.join(self.package_folder, "Scripts"),
                         os.path.join(self.package_folder, "bin"))
+            # Windows has case-insensitive paths, so do Lib -> lib2 -> lib
             shutil.move(os.path.join(self.package_folder, "Lib"),
                         os.path.join(self.package_folder, "lib2"))
             shutil.move(os.path.join(self.package_folder, "lib2"),
