@@ -13,12 +13,14 @@ class ZyreConan(ConanFile):
     description = "Local Area Clustering for Peer-to-Peer Applications."
     topics = ("conan", "zyre", "czmq", "zmq", "zeromq",
               "message-queue", "asynchronous")
-    exports_sources = ['CMakeLists.txt']
+    exports_sources = ['CMakeLists.txt', 'Findzyre.cmake']
     settings = "os", "compiler", "build_type", "arch"
-    options = {"shared": [True, False],
-               "fPIC": [True, False], }
-    default_options = {"shared": False,
-                       "fPIC": True, }
+    options = {
+        "fPIC": [True, False],
+    }
+    default_options = {
+        "fPIC": True,
+    }
     generators = ["cmake"]
     _source_subfolder = "source_subfolder"
     _build_subfolder = "build_subfolder"
@@ -57,6 +59,7 @@ class ZyreConan(ConanFile):
         cmake.build()
 
     def package(self):
+        self.copy('Findzyre.cmake')
         self.copy(pattern="LICENSE", src=self._source_subfolder,
                   dst='licenses')
         cmake = self._configure_cmake()
