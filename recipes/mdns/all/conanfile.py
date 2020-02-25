@@ -4,7 +4,7 @@ from conans import CMake, ConanFile, tools
 
 class MdnsConan(ConanFile):
     name = "mdns"
-    license = "public domain"
+    license = "Public Domain or MIT"
     homepage = "https://github.com/mjansson/mdns"
     url = "https://github.com/conan-io/conan-center-index"
     description = """
@@ -67,3 +67,5 @@ class MdnsConan(ConanFile):
 
     def package_info(self):
         self.cpp_info.libs = ["mdns"]
+        if self.settings.os == "Windows":
+            self.cpp_info.system_libs = ["iphlpapi", "ws2_32"]
