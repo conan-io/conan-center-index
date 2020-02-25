@@ -79,12 +79,7 @@ class PhysXConan(ConanFile):
         tools.get(**self.conan_data["sources"][self.version])
         url = self.conan_data["sources"][self.version]["url"]
         extracted_dir = "PhysX-" + os.path.splitext(os.path.basename(url))[0]
-        try:
-            os.rename(extracted_dir, self._source_subfolder)
-        except OSError:
-            # workaround for permission denied on windows
-            time.sleep(10)
-            os.rename(extracted_dir, self._source_subfolder)
+        os.rename(extracted_dir, self._source_subfolder)
 
     def build(self):
         self._copy_sources()
