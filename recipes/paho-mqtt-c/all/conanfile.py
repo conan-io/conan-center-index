@@ -89,3 +89,6 @@ class PahoMqttcConan(ConanFile):
                 self.cpp_info.system_libs.extend(["compat", "pthread"])
             else:
                 self.cpp_info.system_libs.extend(["c", "pthread"])
+        self.cpp_info.names["cmake_find_package"] = "PahoMqttC"
+        self.cpp_info.names["cmake_find_package_multi"] = "PahoMqttC"
+
