@@ -19,7 +19,7 @@ class CppJwtConan(ConanFile):
         return "source_subfolder"
 
     def requirements(self):
-        self.requires("openssl/1.0.2t")
+        self.requires("openssl/1.1.1d")
         self.requires("nlohmann_json/3.7.3")
 
     def source(self):
