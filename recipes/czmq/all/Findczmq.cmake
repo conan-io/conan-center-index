@@ -1,12 +1,10 @@
 if(CONAN_INCLUDE_DIRS_CZMQ AND CONAN_LIBS_CZMQ)
-    message("Use conan headers")
 	find_path(
         CZMQ_INCLUDE_DIRS 
         NAMES czmq.h 
         PATHS ${CONAN_INCLUDE_DIRS_CZMQ} 
         NO_CMAKE_FIND_ROOT_PATH
     )
-    message("Use conan libs")
     find_library(
         CZMQ_LIBRARIES 
         NAMES ${CONAN_LIBS_CZMQ} 

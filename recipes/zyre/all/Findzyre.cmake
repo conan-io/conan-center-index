@@ -1,17 +1,15 @@
 if(CONAN_INCLUDE_DIRS_ZYRE AND CONAN_LIBS_ZYRE)
-    message("Use conan headers")
 	find_path(
         ZYRE_INCLUDE_DIRS 
         NAMES zyre.h zyre_library.h 
         PATHS ${CONAN_INCLUDE_DIRS_ZYRE} 
         NO_CMAKE_FIND_ROOT_PATH)
-    message("Use conan libs")
-	    find_library(
-            ZYRE_LIBRARIES 
-            NAMES ${CONAN_LIBS_ZYRE} 
-            PATHS ${CONAN_LIB_DIRS_ZYRE} 
-            NO_CMAKE_FIND_ROOT_PATH
-        )
+    find_library(
+        ZYRE_LIBRARIES 
+        NAMES ${CONAN_LIBS_ZYRE} 
+        PATHS ${CONAN_LIB_DIRS_ZYRE} 
+        NO_CMAKE_FIND_ROOT_PATH
+    )
 else()
     if (NOT MSVC)
         include(FindPkgConfig)
