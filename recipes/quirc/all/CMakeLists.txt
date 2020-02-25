@@ -4,6 +4,8 @@ project(quirc C)
 include(conanbuildinfo.cmake)
 conan_basic_setup()
 
+set(QUIRC_MAX_REGIONS 254 CACHE STRING "Maximum number of regions")
+
 set(QUIRC_SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/source_subfolder/lib)
 
 add_library(quirc
@@ -12,6 +14,8 @@ add_library(quirc
   ${QUIRC_SOURCE_DIR}/quirc.c
   ${QUIRC_SOURCE_DIR}/version_db.c
 )
+
+target_compile_definitions(quirc PRIVATE QUIRC_MAX_REGIONS=${QUIRC_MAX_REGIONS})
 
 if(WIN32 AND BUILD_SHARED_LIBS)
   set_target_properties(quirc PROPERTIES WINDOWS_EXPORT_ALL_SYMBOLS TRUE)

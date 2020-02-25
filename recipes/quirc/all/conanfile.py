@@ -12,8 +12,16 @@ class QuircConan(ConanFile):
     exports_sources = ["CMakeLists.txt", "patches/**"]
     generators = "cmake"
     settings = "os", "arch", "compiler", "build_type"
-    options = {"shared": [True, False], "fPIC": [True, False]}
-    default_options = {"shared": False, "fPIC": True}
+    options = {
+        "shared": [True, False],
+        "fPIC": [True, False],
+        "max_regions": "ANY" # integer in [1, 65534]
+    }
+    default_options = {
+        "shared": False,
+        "fPIC": True,
+        "max_regions": 254
+    }
 
     _cmake = None
 
@@ -48,6 +56,7 @@ class QuircConan(ConanFile):
             return self._cmake
         self._cmake = CMake(self)
         self._cmake.definitions["QUIRC_VERSION"] = self.version
+        self._cmake.definitions["QUIRC_MAX_REGIONS"] = self.options.max_regions
         self._cmake.configure(build_folder=self._build_subfolder)
         return self._cmake
 
