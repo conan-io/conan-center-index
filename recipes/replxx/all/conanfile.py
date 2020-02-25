@@ -1,7 +1,5 @@
 import os
 from conans import CMake, ConanFile, tools
-from conans.errors import ConanInvalidConfiguration
-from conans.tools import Version
 
 
 class ReplxxConan(ConanFile):
@@ -34,7 +32,7 @@ class ReplxxConan(ConanFile):
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
-        extracted_dir = self.name + "-" + self.version
+        extracted_dir = self.name + "-release-" + self.version
         os.rename(extracted_dir, self._source_subfolder)
 
     def _configure_cmake(self):
