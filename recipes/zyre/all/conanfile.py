@@ -47,8 +47,6 @@ class ZyreConan(ConanFile):
         generator = 'Ninja' if self.settings.compiler == "Visual Studio" \
             else None
         cmake = CMake(self, generator=generator)
-        cmake.definitions["ZYRE_BUILD_SHARED"] = self.options.shared
-        cmake.definitions["ZYRE_BUILD_STATIC"] = not self.options.shared
         cmake.configure(build_dir=self._build_subfolder)
         return cmake
 
