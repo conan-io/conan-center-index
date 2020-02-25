@@ -40,6 +40,11 @@ class LibUSBConan(ConanFile):
         if self.settings.os == "Windows":
             del self.options.fPIC
 
+    def build_requirements(self):
+        if tools.os_info.is_windows and "CONAN_BASH_PATH" not in os.environ and \
+                tools.os_info.detect_windows_subsystem() != "msys2":
+            self.build_requires("msys2/20190524")
+
     def system_requirements(self):
         if self.settings.os == "Linux":
             if self.options.enable_udev:
