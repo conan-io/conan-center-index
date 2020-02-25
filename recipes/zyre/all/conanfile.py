@@ -65,8 +65,6 @@ class ZyreConan(ConanFile):
 
     def package_info(self):
         if self.settings.compiler == 'Visual Studio':
-            self.cpp_info.libs = ['zyre' if self.options.shared else 'libzyre']
+            self.cpp_info.libs = ['zyre']
         else:
             self.cpp_info.libs = ['zyre']
-        if not self.options.shared:
-            self.cpp_info.defines.append('ZYRE_STATIC')
