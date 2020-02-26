@@ -3,8 +3,8 @@ import glob
 from conans import ConanFile, tools, CMake
 from conans.errors import ConanInvalidConfiguration
 
-class blake2Conan(ConanFile):
-    name = "blake2"
+class libb2Conan(ConanFile):
+    name = "libb2"
     version = "20190723"
     license = ["CC0-1.0", "OpenSSL", "APSL-2.0"]
     url = "https://github.com/conan-io/conan-center-index"
@@ -41,7 +41,7 @@ class blake2Conan(ConanFile):
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
-        extracted_dir = glob.glob(self.name.upper() + "-*")[0]
+        extracted_dir = glob.glob("BLAKE2-*")[0]
         os.rename(extracted_dir, self._source_subfolder)
 
     def _configure_cmake(self):
