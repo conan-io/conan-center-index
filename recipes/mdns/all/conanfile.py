@@ -7,15 +7,10 @@ class MdnsConan(ConanFile):
     license = "Public Domain or MIT"
     homepage = "https://github.com/mjansson/mdns"
     url = "https://github.com/conan-io/conan-center-index"
-    description = """
-        Public domain mDNS/DNS-SD library in C
-        """
+    description = """Public domain mDNS/DNS-SD library in C"""
     topics = ("mdns")
     settings = "os"
-    generators = "cmake"
     no_copy_source = True
-
-    _cmake = None
 
     @property
     def _source_subfolder(self):
@@ -37,9 +32,8 @@ class MdnsConan(ConanFile):
         self.copy(pattern="*.h", dst="include", src=self._source_subfolder)
 
     def package_info(self):
-        self.cpp_info.libs = ["mdns"]
         if self.settings.os == "Windows":
-            self.cpp_info.system_libs = ["iphlpapi", "ws2_32"]
+            self.cpp_info.libs = ["iphlpapi", "ws2_32"]
         if str(self.settings.os) in ["Linux", "Android"]:
             self.cpp_info.libs.append('pthread')
 
