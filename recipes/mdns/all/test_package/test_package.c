@@ -142,7 +142,7 @@ main() {
 	WSAStartup(versionWanted, &wsaData);
 #endif
 
-	int sock = mdns_socket_open_ipv4();
+	int sock = mdns_socket_open_ipv4(0);
 	if (sock < 0) {
 		printf("Failed to open socket: %s\n", strerror(errno));
 		return -1;
