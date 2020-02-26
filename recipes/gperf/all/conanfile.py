@@ -72,6 +72,7 @@ class GperfConan(ConanFile):
         tools.rmdir(os.path.join(self.package_folder, "share"))
 
     def package_id(self):
+        self.info.include_build_settings()
         del self.info.settings.compiler
 
     def package_info(self):
