@@ -58,7 +58,7 @@ class ReplxxConan(ConanFile):
 
     def package_info(self):
         self.cpp_info.libs = tools.collect_libs(self)
-        if tools.os_info.is_linux:
+        if self.settings.os == "Linux":
             self.cpp_info.systemlibs = ["pthread"]
-        if self.settings.os == "Windows":
+        if not self.options.shared:
             self.cpp_info.defines.append("REPLXX_STATIC")
