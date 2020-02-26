@@ -68,3 +68,6 @@ class MdnsConan(ConanFile):
         self.cpp_info.libs = ["mdns"]
         if self.settings.os == "Windows":
             self.cpp_info.system_libs = ["iphlpapi", "ws2_32"]
+
+    def package_id(self):
+        self.info.header_only()
