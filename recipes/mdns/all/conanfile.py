@@ -4,11 +4,11 @@ from conans import CMake, ConanFile, tools
 
 class MdnsConan(ConanFile):
     name = "mdns"
-    license = "Public Domain or MIT"
+    license = "Unlicense"
     homepage = "https://github.com/mjansson/mdns"
     url = "https://github.com/conan-io/conan-center-index"
-    description = """Public domain mDNS/DNS-SD library in C"""
-    topics = ("mdns")
+    description = "Public domain mDNS/DNS-SD library in C"
+    topics = ("conan", "mdns", "dns", "dns-sd")
     settings = "os"
     no_copy_source = True
 
@@ -33,9 +33,9 @@ class MdnsConan(ConanFile):
 
     def package_info(self):
         if self.settings.os == "Windows":
-            self.cpp_info.libs = ["iphlpapi", "ws2_32"]
+            self.cpp_info.system_libs = ["iphlpapi", "ws2_32"]
         if str(self.settings.os) in ["Linux", "Android"]:
-            self.cpp_info.libs.append('pthread')
+            self.cpp_info.system_libs.append('pthread')
 
     def package_id(self):
         self.info.header_only()
