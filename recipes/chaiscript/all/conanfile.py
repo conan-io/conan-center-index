@@ -12,10 +12,14 @@ class ChaiScriptConan(ConanFile):
     exports_sources = ["CMakeLists.txt"]
     generators = "cmake"
     settings = "os", "compiler", "build_type", "arch"
-    options = {"shared": [True, False], "fPIC": [True, False], "dyn_load": [True, False], "use_std_make_shared": [True, False],
-               "multithread_support": [True, False]}
-    default_options = {"shared": False, "fPIC": True, "dyn_load": True, "use_std_make_shared": True,
-                       "multithread_support": True}
+    options = {"shared": [True, False], "fPIC": [True, False],
+               "dyn_load": [True, False], "use_std_make_shared": [True, False],
+               "multithread_support": [True, False],
+               "header_only": [True, False]}
+    default_options = {"shared": False, "fPIC": True, "dyn_load": True,
+                       "use_std_make_shared": True,
+                       "multithread_support": True,
+                       "header_only": True}
 
     @property
     def _source_subfolder(self):
@@ -36,6 +40,9 @@ class ChaiScriptConan(ConanFile):
 
     def _configure_cmake(self):
         cmake = CMake(self)
+        cmake.definitions["BUILD_TESTING"] = False
+        cmake.definitions["BUILD_SAMPLES"] = False
+        cmake.definitions["BUILD_MODULES"] = True
         cmake.definitions["USE_STD_MAKE_SHARED"] = self.options.use_std_make_shared
         cmake.definitions["DYNLOAD_ENABLED"] = self.options.dyn_load
         cmake.definitions["MULTITHREAD_SUPPORT_ENABLED"] = self.options.multithread_support
@@ -43,19 +50,27 @@ class ChaiScriptConan(ConanFile):
         return cmake
 
     def build(self):
-        cmake = self._configure_cmake()
-        cmake.build()
+        if not self.options.header_only:
+            cmake = self._configure_cmake()
+            cmake.build()
 
     def package(self):
         self.copy("LICENSE", dst="licenses", src=self._source_subfolder)
-        cmake = self._configure_cmake()
-        cmake.install()
-        tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
-        tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
-        tools.rmdir(os.path.join(self.package_folder, "share"))
+        if self.options.header_only:
+            self.copy(pattern="*.hpp", dst="include",
+                      src=os.path.join(self._source_subfolder, 'include'))
+        else:
+            cmake = self._configure_cmake()
+            cmake.install()
+            tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
+            tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
+            tools.rmdir(os.path.join(self.package_folder, "share"))
 
     def package_info(self):
-        self.cpp_info.libs = tools.collect_libs(self)
+        if self.options.header_only:
+            self.info.header_only()
+        else:
+            self.cpp_info.libs = tools.collect_libs(self)
         if self.options.use_std_make_shared:
             self.cpp_info.defines.append("CHAISCRIPT_USE_STD_MAKE_SHARED")
         if self.settings.os == "Linux":
