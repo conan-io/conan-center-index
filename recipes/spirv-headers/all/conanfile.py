@@ -12,8 +12,6 @@ class SpirvheadersConan(ConanFile):
 
     license = "BSD"
 
-    def requirements(self):
-        pass
 
     @property
     def _source_subfolder(self):
