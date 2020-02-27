@@ -12,6 +12,7 @@ class SpirvheadersConan(ConanFile):
 
     license = "MIT-KhronosGroup"
 
+    _cmake = None
 
     @property
     def _source_subfolder(self):
@@ -23,10 +24,13 @@ class SpirvheadersConan(ConanFile):
         os.rename(extracted_dir, self._source_subfolder)
 
     def _configure_cmake(self):
-        cmake = CMake(self)
-        cmake.definitions["SPIRV_HEADERS_SKIP_EXAMPLES"] = True
-        cmake.configure(source_folder=self._source_subfolder)
-        return cmake
+        if self._cmake:
+            return self._cmake
+
+        self._cmake = CMake(self)
+        self._cmake.definitions["SPIRV_HEADERS_SKIP_EXAMPLES"] = True
+        self._cmake.configure(source_folder=self._source_subfolder)
+        return self._cmake
 
     def build(self):
         cmake = self._configure_cmake()
