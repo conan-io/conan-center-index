@@ -15,7 +15,7 @@ class QuircConan(ConanFile):
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
-        "max_regions": "ANY" # integer in [1, 65534]
+        "max_regions": [254, 65534]
     }
     default_options = {
         "shared": False,
