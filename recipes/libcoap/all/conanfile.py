@@ -15,22 +15,14 @@ class LibCoapConan(ConanFile):
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
-        "enable_dtls": [True, False],
-        "with_openssl": [True, False],
-        "with_gnutls": [True, False],
-        "with_tinydtls": [True, False],
-        "with_mbedtls": [True, False],
         "with_epoll": [True, False],
+        "tls_backend": [None, "with_openssl", "with_gnutls", "with_tinydtls", "with_mbedtls"],
     }
     default_options = {
         "shared": False,
         "fPIC": True,
-        "enable_dtls": True,
-        "with_openssl": True,
-        "with_gnutls": False,
-        "with_tinydtls": False,
-        "with_mbedtls": False,
         "with_epoll": False,
+        "tls_backend": "with_openssl",
     }
     generators = "cmake", "cmake_find_package"
 
@@ -45,13 +37,13 @@ class LibCoapConan(ConanFile):
         return "build_subfolder"
 
     def requirements(self):
-        if self.options.enable_dtls and self.options.with_openssl:
+        if self.options.tls_backend == "with_openssl":
             self.requires.add("openssl/1.1.1d")
-        if self.options.enable_dtls and self.options.with_mbedtls:
+        if self.options.tls_backend == "with_mbedtls":
             self.requires.add("mbedtls/2.16.3-apache")
-        if self.options.enable_dtls and self.options.with_gnutls:
+        if self.options.tls_backend == "with_gnutls":
             raise ConanInvalidConfiguration("gnu tls not available yet")
-        if self.options.enable_dtls and self.options.with_tinydtls:
+        if self.options.tls_backend == "with_tinydtls":
             raise ConanInvalidConfiguration("tinydtls not available yet")
 
     def config_options(self):
@@ -73,11 +65,12 @@ class LibCoapConan(ConanFile):
         if self._cmake:
             return self._cmake
         self._cmake = CMake(self)
-        self._cmake.definitions["ENABLE_DTLS"] = self.options.enable_dtls
-        self._cmake.definitions["WITH_OPENSSL"] = self.options.with_openssl
-        self._cmake.definitions["WITH_GNUTLS"] = self.options.with_gnutls
-        self._cmake.definitions["WITH_TINYDTLS"] = self.options.with_tinydtls
         self._cmake.definitions["WITH_EPOLL"] = self.options.with_epoll
+        self._cmake.definitions["ENABLE_DTLS"] = self.options.tls_backend != None
+        self._cmake.definitions["WITH_OPENSSL"] = self.options.tls_backend == "with_openssl"
+        self._cmake.definitions["WITH_MBEDTLS"] = self.options.tls_backend == "with_mbedtls"
+        self._cmake.definitions["WITH_GNUTLS"] = self.options.tls_backend == "with_gnutls"
+        self._cmake.definitions["WITH_TINYDTLS"] = self.options.tls_backend == "with_tinydtls"
         self._cmake.configure(build_folder=self._build_subfolder)
         return self._cmake
 
