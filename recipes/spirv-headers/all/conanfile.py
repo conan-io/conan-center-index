@@ -6,7 +6,7 @@ class SpirvheadersConan(ConanFile):
     name = "spirv-headers"
     homepage = "https://github.com/KhronosGroup/SPIRV-Headers"
     description = "SPIRV-Headers"
-    topics = ("conan", "sprv","vulkan")
+    topics = ("conan", "sprv", "vulkan")
     url = "https://github.com/conan-io/conan-center-index"
     settings = "os", "compiler", "arch", "build_type"
 
@@ -36,12 +36,12 @@ class SpirvheadersConan(ConanFile):
 
     def package(self):
         self.copy(pattern="LICENSE*", dst="licenses", src=self._source_subfolder)
+
         cmake = self._configure_cmake()
         cmake.install()
 
         # Error KB-H016, complaining that Cmake config files are found
         tools.rmdir(os.path.join(self.package_folder, "lib"))
-
 
     def package_id(self):
         self.info.header_only()
