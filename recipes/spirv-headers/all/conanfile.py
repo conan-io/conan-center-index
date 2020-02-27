@@ -10,7 +10,7 @@ class SpirvheadersConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     settings = "os", "compiler", "arch", "build_type"
 
-    license = "BSD"
+    license = "MIT-KhronosGroup"
 
 
     @property
