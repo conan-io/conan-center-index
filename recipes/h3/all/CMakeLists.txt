@@ -1,9 +1,8 @@
-cmake_minimum_required(VERSION 2.8.11)
+cmake_minimum_required(VERSION 3.1)
 project(cmake_wrapper)
 
 include(conanbuildinfo.cmake)
 conan_basic_setup()
 
-set(CMAKE_C_STANDARD 99)
-
 add_subdirectory("source_subfolder")
+set_target_properties(h3 PROPERTIES C_STANDARD 99)
