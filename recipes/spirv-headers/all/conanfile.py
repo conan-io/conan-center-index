@@ -6,7 +6,7 @@ class SpirvheadersConan(ConanFile):
     name = "spirv-headers"
     homepage = "https://github.com/KhronosGroup/SPIRV-Headers"
     description = "SPIRV-Headers"
-    topics = ("conan", "sprv", "vulkan")
+    topics = ("conan", "spirv", "spirv-v", "vulkan", "opengl", "opencl", "khronos")
     url = "https://github.com/conan-io/conan-center-index"
     settings = "os", "compiler", "arch", "build_type"
 
