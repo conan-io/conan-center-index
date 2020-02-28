@@ -6,11 +6,11 @@ import os
 class LibUSBCompatConan(ConanFile):
     name = "libusb-compat"
     description = "A compatibility layer allowing applications written for libusb-0.1 to work with libusb-1.0"
-    license = ("LGPL-2.1", "BSD")
+    license = ("LGPL-2.1", "BSD-3-Clause")
     homepage = "https://github.com/libusb/libusb-compat-0.1"
     url = "https://github.com/conan-io/conan-center-index"
     exports_sources = "patches/**"
-    topics = ("conan", "libusb", "compatibility", "0.1")
+    topics = ("conan", "libusb", "compatibility", "usb")
     settings = "os", "compiler", "build_type", "arch"
     options = {
         "shared": [True, False],
