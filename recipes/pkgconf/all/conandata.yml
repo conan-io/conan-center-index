@@ -1,0 +1,8 @@
+sources:
+  "1.6.3":
+    url: "https://git.sr.ht/~kaniini/pkgconf/archive/pkgconf-1.6.3.tar.gz"
+    sha256: "b95f331e652cab469c2956c4988aeeb688b6baf9acd1a5b89b782d082ea573cf"
+patches:
+  "1.6.3":
+    - patch_file: "patches/0001-meson-use-declare-dependencies.patch"
+      base_path: "source_subfolder"
