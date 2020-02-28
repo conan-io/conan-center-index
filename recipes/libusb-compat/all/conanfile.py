@@ -130,7 +130,6 @@ class LibUSBCompatConan(ConanFile):
     def build(self):
         self._patch_sources()
         with tools.chdir(self._source_subfolder):
-            # self.run("autoreconf -fiv".format())#os.environ["AUTORECONF"]), win_bash=tools.os_info.is_windows)
             self.run("{} -fiv".format(os.environ["AUTORECONF"]), win_bash=tools.os_info.is_windows)
         with self._build_context():
             autotools = self._configure_autotools()
