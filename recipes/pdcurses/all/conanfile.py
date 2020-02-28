@@ -17,11 +17,13 @@ class PDCursesConan(ConanFile):
         "shared": [True, False],
         "fPIC": [True, False],
         "enable_widec": [True, False],
+        "with_sdl": [None, "1", "2"],
     }
     default_options = {
         "shared": False,
         "fPIC": True,
         "enable_widec": False,
+        "with_sdl": None,
     }
 
     _autotools = None
@@ -43,6 +45,11 @@ class PDCursesConan(ConanFile):
     def configure(self):
         if self.settings.os == "Macos":
             raise ConanInvalidConfiguration("pdcurses does not support Macos")
+        if self.settings.os == "Linux":
+            if not tools.get_env("PDCURSES_OVERRIDE_X11", False):
+                raise ConanInvalidConfiguration("conan-center-index has no packages for X11 (yet)")
+        if self.options.with_sdl:
+            raise ConanInvalidConfiguration("conan-center-index has no packages for sdl2 (yet)")
         if self.options.shared:
             del self.options.fPIC
         del self.settings.compiler.cppstd
