@@ -305,7 +305,7 @@ class LibcurlConan(ConanFile):
         self._autotools = AutoToolsBuildEnvironment(self, win_bash=tools.os_info.is_windows)
 
         configure_args = self._get_configure_command_args()
-        if self._is_mingw:
+        if self._is_mingw and self.settings.arch == "x86_64":
             self._autotools.defines.append('_AMD64_')
         self._autotools.configure(vars=autotools_vars, args=configure_args, configure_dir=self._source_subfolder)
         return self._autotools, autotools_vars
