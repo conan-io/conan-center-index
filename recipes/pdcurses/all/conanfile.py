@@ -76,17 +76,25 @@ class PDCursesConan(ConanFile):
         return self._autotools
 
     def _build_windows(self):
-        with tools.chdir("wincon"):
+        with tools.chdir(os.path.join(self._source_subfolder, "wincon")):
             args = []
             if self.options.shared:
                 args.append("DLL=Y")
             args = " ".join(args)
             if self.settings.compiler == "Visual Studio":
-                self.run("nmake -f Makefile.vc {}".format(args))
+                with tools.vcvars(self.settings):
+                    self.run("nmake -f Makefile.vc {}".format(args))
             else:
                 self.run("{} libs {}".format(os.environ["CONAN_MAKE_PROGRAM"], args))
 
     def _patch_sources(self):
+        if self.settings.compiler == "Visual Studio":
+            tools.replace_in_file(os.path.join(self._source_subfolder, "wincon", "Makefile.vc"),
+                                  "$(CFLAGS)",
+                                  "$(CFLAGS) -{}".format(self.settings.compiler.runtime))
+            tools.replace_in_file(os.path.join(self._source_subfolder, "wincon", "Makefile.vc"),
+                                  "$(LDFLAGS)",
+                                  "$(LDFLAGS) -{}".format(self.settings.compiler.runtime))
         tools.replace_in_file(os.path.join(self._source_subfolder, "x11", "Makefile.in"),
                               "$(INSTALL) -c -m 644 $(osdir)/libXCurses.a $(libdir)/libXCurses.a",
                               "-$(INSTALL) -c -m 644 $(osdir)/libXCurses.a $(libdir)/libXCurses.a")
