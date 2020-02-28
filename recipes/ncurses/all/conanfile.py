@@ -44,7 +44,7 @@ class NCursesConan(ConanFile):
             if self.options.shared:
                 raise ConanInvalidConfiguration("shared ncurses builds on Windows are not supported")
             if self.options.with_widec:
-                raise ConanInvalidConfiguration("with_widec is (currently) not possible for Visual Studio")
+                raise ConanInvalidConfiguration("with_widec is unsupported for Visual Studio")
         if self.options.shared:
             del self.options.fPIC
 
@@ -161,33 +161,39 @@ class NCursesConan(ConanFile):
             autotools = AutoToolsBuildEnvironment(self, win_bash=tools.os_info.is_windows)
             autotools.make(target="install.libs" if self.settings.os == "Windows" else "install")
 
-            os.unlink(os.path.join(self.package_folder, "bin", "ncurses{}-config".format(self._major_version)))
+            os.unlink(os.path.join(self.package_folder, "bin", "ncurses{}{}-config".format(self._suffix, self._major_version)))
 
-            if self.options.shared:
-                tools.replace_in_file(os.path.join(self.package_folder, "include", "ncurses_dll.h"),
-                                      "#define NCURSES_DLL",
-                                      "#undef NCURSES_DLL")
+        if self.settings.compiler == "Visual Studio":
+            lib_infix = ".dll" if self.options.shared else ""
+            libs = self._libs
+            if self.settings.compiler != "Visual Studio":
+                libs += ["curses"]
+            for l in libs:
+                os.rename(os.path.join(self.package_folder, "lib", "lib{}{}.a".format(l, lib_infix)),
+                          os.path.join(self.package_folder, "lib", "{}.lib".format(l)))
 
-            if self.settings.compiler == "Visual Studio":
-                lib_infix = ".dll" if self.options.shared else ""
-                libs = self._libs
-                if self.settings.compiler != "Visual Studio":
-                    libs += ["curses"]
-                for l in libs:
-                    os.rename(os.path.join(self.package_folder, "lib", "lib{}{}.a".format(l, lib_infix)),
-                              os.path.join(self.package_folder, "lib", "{}.lib".format(l)))
+        if self.options.shared:
+            tools.replace_in_file(os.path.join(self.package_folder, "include", "ncurses{}".format(self._suffix), "ncurses_dll.h"),
+                                  "#define NCURSES_DLL",
+                                  "#undef NCURSES_DLL")
 
     @property
     def _libs(self):
         libs = ["ncurses++", "form", "menu", "panel", "ncurses"]
+        return list(l+self._suffix for l in libs)
+
+    @property
+    def _suffix(self):
+        res = ""
         if self.options.with_reentrant:
-            libs = [l + "t" for l in libs]
+            res += "t"
         if self.options.with_widec:
-            libs = [l + "w" for l in libs]
-        return libs
+            res += "w"
+        return res
+
 
     def package_info(self):
-        self.cpp_info.includedirs.append(os.path.join("include", "ncurses"))
+        self.cpp_info.includedirs.append(os.path.join("include", "ncurses" + self._suffix))
         self.cpp_info.libs = self._libs
         if not self.options.shared:
             self.cpp_info.defines = ["NCURSES_STATIC"]
