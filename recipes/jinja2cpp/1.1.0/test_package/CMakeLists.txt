@@ -3,6 +3,9 @@ project(Jinja2CppTestPackage)
 
 set(CMAKE_CXX_STANDARD 14)
 
+include (${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
+CONAN_BASIC_SETUP()
+
 find_package(jinja2cpp REQUIRED)
 
 if (CMAKE_CXX_COMPILER_ID MATCHES "MSVC")
