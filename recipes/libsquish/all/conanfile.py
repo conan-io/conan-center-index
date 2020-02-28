@@ -69,14 +69,8 @@ class LibsquishConan(ConanFile):
             return self._cmake
         self._cmake = CMake(self)
         self._cmake.definitions["BUILD_SQUISH_WITH_OPENMP"] = self.options.openmp
-        if self.settings.arch in self._sse2_compliant_archs:
-            self._cmake.definitions["BUILD_SQUISH_WITH_SSE2"] = self.options.sse2_intrinsics
-        else:
-            self._cmake.definitions["BUILD_SQUISH_WITH_SSE2"] = False
-        if self.settings.arch in self._altivec_compliant_archs:
-            self._cmake.definitions["BUILD_SQUISH_WITH_ALTIVEC"] = self.options.altivec_intrinsics
-        else:
-            self._cmake.definitions["BUILD_SQUISH_WITH_ALTIVEC"] = False
+        self._cmake.definitions["BUILD_SQUISH_WITH_SSE2"] = self.options.get_safe("sse2_intrinsics") or False
+        self._cmake.definitions["BUILD_SQUISH_WITH_ALTIVEC"] = self.options.get_safe("altivec_intrinsics") or False
         self._cmake.definitions["BUILD_SQUISH_EXTRA"] = False
         self._cmake.configure(build_folder=self._build_subfolder)
         return self._cmake
@@ -88,3 +82,5 @@ class LibsquishConan(ConanFile):
 
     def package_info(self):
         self.cpp_info.libs = tools.collect_libs(self)
+        if self.settings.os == "Linux":
+            self.cpp_info.system_libs.append("m")
