@@ -175,7 +175,7 @@ class NCursesConan(ConanFile):
         if self.options.shared:
             tools.replace_in_file(os.path.join(self.package_folder, "include", "ncurses{}".format(self._suffix), "ncurses_dll.h"),
                                   "#define NCURSES_DLL",
-                                  "#undef NCURSES_DLL")
+                                  "#undef NCURSES_DLL  //")
 
     @property
     def _libs(self):
