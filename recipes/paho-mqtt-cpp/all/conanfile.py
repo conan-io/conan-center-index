@@ -38,7 +38,8 @@ class PahoMqttCppConan(ConanFile):
             tools.check_min_cppstd(self, minimal_cpp_standard)
 
         if self.settings.os == "Windows" and self.options.shared:
-            raise ConanInvalidConfiguration("Paho cpp can not be built as shared on Windows.")
+            raise ConanInvalidConfiguration(
+                "Paho cpp can not be built as shared on Windows.")
 
         self.options["paho-mqtt-c"].shared = self.options.shared
         self.options["paho-mqtt-c"].ssl = self.options.ssl
@@ -79,4 +80,5 @@ class PahoMqttCppConan(ConanFile):
 
     def package_info(self):
         self.cpp_info.libs = tools.collect_libs(self)
-
+        self.cpp_info.names["cmake_find_package"] = "PahoMqttCpp"
+        self.cpp_info.names["cmake_find_package_multi"] = "PahoMqttCpp"
