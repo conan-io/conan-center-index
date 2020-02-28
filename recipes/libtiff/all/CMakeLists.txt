@@ -1,7 +1,7 @@
-cmake_minimum_required(VERSION 3.0)
+cmake_minimum_required(VERSION 3.1)
 project(cmake_wrapper)
 
-include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
+include("${CMAKE_SOURCE_DIR}/../conanbuildinfo.cmake")
 conan_basic_setup()
 
 include("CMakeListsOriginal.txt")
