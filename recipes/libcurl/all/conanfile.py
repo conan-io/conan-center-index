@@ -30,7 +30,9 @@ class LibcurlConan(ConanFile):
                "with_libpsl": [True, False],
                "with_largemaxwritesize": [True, False],
                "with_nghttp2": [True, False],
-               "with_brotli": [True, False]}
+               "with_brotli": [True, False],
+               "enable_bitcode": [True, False]
+               }
     default_options = {'shared': False,
                        'fPIC': True,
                        'with_openssl': True,
@@ -44,9 +46,11 @@ class LibcurlConan(ConanFile):
                        'with_libpsl': False,
                        'with_largemaxwritesize': False,
                        'with_nghttp2': False,
-                       'with_brotli': False
+                       'with_brotli': False, 
+                       'enable_bitcode': False
                        }
 
+    version = "7.68.0"  # TODO , remove for index center
     _source_subfolder = "source_subfolder"
     _build_subfolder = "build_subfolder"
     _autotools = False
@@ -68,8 +72,10 @@ class LibcurlConan(ConanFile):
             self.copy("*.dylib*", dst=self._source_subfolder, keep_path=False)
 
     def config_options(self):
-        if self.settings.os != "Macos":
+        if self.settings.os not in ["Macos", "iOS"]:
             self.options.remove("darwin_ssl")
+            self.options.remove("enable_bitcode")
+
         if self.settings.os != "Windows":
             self.options.remove("with_winssl")
 
@@ -92,7 +98,7 @@ class LibcurlConan(ConanFile):
 
         if self.options.with_openssl:
             # enforce shared linking due to openssl dependency
-            if self.settings.os != "Macos" or not self.options.darwin_ssl:
+            if self.settings.os not in ["Macos", "iOS"] or not self.options.darwin_ssl:
                 self.options["openssl"].shared = self.options.shared
         if self.options.with_libssh2:
             if self.settings.compiler != "Visual Studio":
@@ -106,7 +112,7 @@ class LibcurlConan(ConanFile):
 
     def requirements(self):
         if self.options.with_openssl:
-            if self.settings.os == "Macos" and self.options.darwin_ssl:
+            if self.settings.os in ["Macos", "iOS"] and self.options.darwin_ssl:
                 pass
             elif self.settings.os == "Windows" and self.options.with_winssl:
                 pass
@@ -121,11 +127,16 @@ class LibcurlConan(ConanFile):
         self.requires.add("zlib/1.2.11")
 
     def source(self):
+        self.output.info("++++++++++++++++++++++++++++++")
+        self.output.info("++++++++++++++++++++++++++++++")
+        self.output.info("++++++++++++++++++++++++++++++")
+        self.output.info("++++++++++++++++++++++++++++++")
         tools.get(**self.conan_data["sources"][self.version])
         os.rename("curl-%s" % self.version, self._source_subfolder)
         tools.download("https://curl.haxx.se/ca/cacert.pem", "cacert.pem", verify=True)
 
     def build(self):
+        os.chdir(self.source_folder) 
         self._patch_misc_files()
         if self.settings.compiler != "Visual Studio":
             self._build_with_autotools()
@@ -153,7 +164,7 @@ class LibcurlConan(ConanFile):
         params.append("--without-libpsl" if not self.options.with_libpsl else "--with-libpsl")
         params.append("--without-brotli" if not self.options.with_brotli else "--with-brotli")
 
-        if self.settings.os == "Macos" and self.options.darwin_ssl:
+        if self.settings.os in ["Macos", "iOS"] and self.options.darwin_ssl:
             params.append("--with-darwinssl")
             params.append("--without-ssl")
         elif self.settings.os == "Windows" and self.options.with_winssl:
@@ -191,8 +202,19 @@ class LibcurlConan(ConanFile):
         if tools.cross_building(self.settings):
             if self.settings.os == "Linux" and "arm" in self.settings.arch:
                 params.append('--host=%s' % self._get_linux_arm_host())
+            elif self.settings.os == "iOS": 
+                params.append("--enable-threaded-resolver") 
+                params.append("--disable-verbose")
+                # if there is anything special for arm or simulator, add it here
+                if "arm" in self.settings.arch:
+                    pass
+                else:
+                    pass
+            elif self.settings.os == "Android":
+                pass # this just works, conan is great! 
 
         return params
+
 
     def _get_linux_arm_host(self):
         arch = None
@@ -207,6 +229,8 @@ class LibcurlConan(ConanFile):
                 arch = 'arm-linux-gnueabi'
         return arch
 
+    # TODO, this should be a inner fuction of _get_linux_arm_host since it is only used from there
+    # it should not polute the class namespace, since there are iOS and Android arm aritectures also    
     def _arm_version(self, arch):
         version = None
         match = re.match(r"arm\w*(\d)", arch)
@@ -260,17 +284,19 @@ class LibcurlConan(ConanFile):
         with tools.environment_append(env_run.vars):
             with tools.chdir(self._source_subfolder):
                 use_win_bash = self._is_mingw and not tools.cross_building(self.settings)
-                autotools, autotools_vars = self._configure_autotools()
 
                 # autoreconf
                 self.run('./buildconf', win_bash=use_win_bash)
 
                 # fix generated autotools files
-                tools.replace_in_file("configure", "-install_name \\$rpath/", "-install_name ")
+                # tools.replace_in_file("configure", "-install_name \\$rpath/", "-install_name ")
+                # this needs a better comment, why, on all platforms? with all versions? 
+                # I do not seem to need this, 
+
                 self.run("chmod +x configure")
 
-                configure_args = self._get_configure_command_args()
-                autotools.configure(vars=autotools_vars, args=configure_args)
+
+                autotools, autotools_vars = self._configure_autotools()
                 autotools.make(vars=autotools_vars)
 
     def _configure_autotools_vars(self):
@@ -285,9 +311,53 @@ class LibcurlConan(ConanFile):
 
             del autotools_vars['LIBS']
             self.output.info("Autotools env vars: " + repr(autotools_vars))
+
+        if tools.cross_building(self.settings):
+            if self.settings.os == "iOS": 
+                ios_dev_target = str(self.settings.os.version).split(".")[0]
+                if self.settings.arch in ["x86", "x86_64"]:
+                    iphoneos = "iphonesimulator"
+                    autotools_vars['CPPFLAGS'] = "-D__IPHONE_OS_VERSION_MIN_REQUIRED={}0000".format(ios_dev_target)
+                elif self.settings.arch in ["armv7", "armv7s", "armv8"]:
+                    iphoneos = "iphoneos"
+                    autotools_vars['CPPFLAGS'] = ""
+                else:
+                    raise ConanInvalidConfiguration("Unsuported iOS arch {}".format(self.settings.arch)) 
+
+                cc = tools.XCRun(self.settings, iphoneos).cc
+                sysroot = "-isysroot {}".format(tools.XCRun(self.settings, iphoneos).sdk_path)
+
+                if self.settings.arch == "armv8":
+                    configure_arch = "arm64"    
+                    configure_host = "arm" #unused, autodetected
+                else:
+                    configure_arch = self.settings.arch
+                    configure_host = self.settings.arch #unused, autodetected
+    
+
+                arch_flag = "-arch {}".format(configure_arch)
+                ios_min_version = "-miphoneos-version-min={}".format(ios_dev_target)
+                bitcode =  "-fembed-bitcode" if self.options.enable_bitcode else ""
+                extra_flag = "-Werror=partial-availability"
+                extra_def = " -DHAVE_SOCKET -DHAVE_FCNTL_O_NONBLOCK"
+                # if we debug, maybe add a -gdwarf-2 , but why would we want that?  
+
+                autotools_vars['CC'] = cc 
+                autotools_vars['IPHONEOS_DEPLOYMENT_TARGET'] = ios_dev_target
+                autotools_vars['CFLAGS'] = "{} {} {} {} {}".format(
+                    sysroot, arch_flag, ios_min_version, bitcode, extra_flag
+                ) 
+                autotools_vars['LDFLAGS'] = "{} {}".format(arch_flag, sysroot)
+                autotools_vars['CPPFLAGS'] += extra_def
+
+            elif self.settings.os == "Android":
+                # nothing do to at the moment, this seems to just work
+                pass
+
         return autotools_vars
 
     def _configure_autotools(self):
+
         if not self._autotools:
             use_win_bash = self._is_mingw and not tools.cross_building(self.settings)
             self._autotools = AutoToolsBuildEnvironment(self, win_bash=use_win_bash)
@@ -305,7 +375,13 @@ class LibcurlConan(ConanFile):
                 self._autotools.defines.append('_AMD64_')
 
             configure_args = self._get_configure_command_args()
-            self._autotools.configure(vars=autotools_vars, args=configure_args)
+
+            if self.settings.os == "iOS" and self.settings.arch == "x86_64":
+                # please do not autodetect --build for the iOS simulator, thanks!
+                self._autotools.configure(vars=autotools_vars, args=configure_args, build=False)
+            else:
+                self._autotools.configure(vars=autotools_vars, args=configure_args)
+                
 
         return self._autotools, self._configure_autotools_vars()
 
@@ -337,6 +413,7 @@ class LibcurlConan(ConanFile):
         cmake.build()
 
     def package(self):
+        os.chdir(self.source_folder)
         self.copy(pattern="COPYING", dst="licenses", src=self._source_subfolder)
 
         # Execute install
