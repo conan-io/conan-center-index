@@ -16,14 +16,7 @@ class Jinja2CppTestPackage(ConanFile):
         cmake.build()
 
     def test(self):
-        if tools.os_info.is_windows:
-            bin_path = '.\\bin'
-            extension = ".exe"
-        elif tools.os_info.is_linux:
-            bin_path = "./bin"
-            extension = ""
-        else:
-            bin_path = "./bin"
-            extension = ""
-
-        self.run(os.path.join(bin_path, "jinja2cpp-test-package" + extension), run_environment=True)
+        if not tools.cross_building(self.settings):
+            ext = ".exe" if self.settings.os == "Windows" else ""
+            bin_path = os.path.join("bin", "jinja2cpp-test-package" + ext)
+            self.run(bin_path, run_environment=True)
