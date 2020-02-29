@@ -4,7 +4,7 @@ project(Jinja2CppTestPackage)
 set(CMAKE_CXX_STANDARD 14)
 
 include (${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
-CONAN_BASIC_SETUP()
+conan_basic_setup()
 
 find_package(jinja2cpp REQUIRED)
 
