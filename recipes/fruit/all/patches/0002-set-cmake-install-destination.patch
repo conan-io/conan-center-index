@@ -1,0 +1,57 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index d77de0c..04f5624 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -17,10 +17,6 @@ option(BUILD_SHARED_LIBS "Build shared library" ON)
+ # The Visual Studio CMake generators default to multiple configurations, but Fruit doesn't support multi-configuration build directories.
+ set(CMAKE_CONFIGURATION_TYPES "${CMAKE_BUILD_TYPE}")
+ 
+-if(NOT "${RUNTIME_OUTPUT_DIRECTORY}")
+-  set(RUNTIME_OUTPUT_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}")
+-endif()
+-
+ set(FRUIT_ADDITIONAL_CXX_FLAGS "" CACHE STRING "Additional CXX compiler flags." FORCE)
+ 
+ set(FRUIT_ADDITIONAL_COMPILE_FLAGS "${FRUIT_ADDITIONAL_CXX_FLAGS}")
+@@ -92,8 +88,7 @@ include_directories(${CMAKE_CURRENT_BINARY_DIR}/include)
+ # of the user-friendly default that hides Fruit internals).
+ #add_definitions(-DFRUIT_DEEP_TEMPLATE_INSTANTIATION_STACKTRACES_FOR_ERRORS=1)
+ 
+-set(INSTALL_INCLUDE_DIR include/fruit CACHE PATH "Installation directory for headers")
+-set(INSTALL_LIBRARY_DIR lib CACHE PATH "Installation directory for libraries")
++include(GNUInstallDirs)
+ 
+ set(FRUIT_VERSION "3.4.0")
+ 
+@@ -112,7 +107,7 @@ endif()
+ add_subdirectory(extras EXCLUDE_FROM_ALL)
+ 
+ install(DIRECTORY include/fruit/
+-  DESTINATION "${INSTALL_INCLUDE_DIR}"
++  DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/fruit
+   FILES_MATCHING PATTERN "*.h")
+ 
+ set(CPACK_PACKAGE_NAME "Fruit")
+diff --git a/configuration/CMakeLists.txt b/configuration/CMakeLists.txt
+index b18a463..11d8445 100644
+--- a/configuration/CMakeLists.txt
++++ b/configuration/CMakeLists.txt
+@@ -218,4 +218,4 @@ endif()
+ configure_file(${CMAKE_CURRENT_SOURCE_DIR}/fruit-config-base.h.in ${CMAKE_CURRENT_BINARY_DIR}/../include/fruit/impl/fruit-config-base.h)
+ 
+ install(FILES ${CMAKE_CURRENT_BINARY_DIR}/../include/fruit/impl/fruit-config-base.h
+-  DESTINATION ${INSTALL_INCLUDE_DIR}/impl)
++  DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/fruit/impl)
+diff --git a/src/CMakeLists.txt b/src/CMakeLists.txt
+index 66bf79f..0e328cf 100644
+--- a/src/CMakeLists.txt
++++ b/src/CMakeLists.txt
+@@ -22,5 +22,6 @@ else()
+ endif()
+ 
+ install(TARGETS fruit
+-        ARCHIVE DESTINATION "${INSTALL_LIBRARY_DIR}"
+-        LIBRARY DESTINATION "${INSTALL_LIBRARY_DIR}")
++        RUNTIME DESTINATION "${CMAKE_INSTALL_BINDIR}"
++        ARCHIVE DESTINATION "${CMAKE_INSTALL_LIBDIR}"
++        LIBRARY DESTINATION "${CMAKE_INSTALL_LIBDIR}")

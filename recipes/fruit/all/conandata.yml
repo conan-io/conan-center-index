@@ -1,0 +1,10 @@
+sources:
+  "3.4.0":
+    url: "https://github.com/google/fruit/archive/v3.4.0.tar.gz"
+    sha256: "0f3793ee5e437437c3d6360a037866429a7f1975451fd60d740f9d2023e92034"
+patches:
+  "3.4.0":
+    - patch_file: "patches/0001-remove-extra-cmake-target.patch"
+      base_path: "source_subfolder"
+    - patch_file: "patches/0002-set-cmake-install-destination.patch"
+      base_path: "source_subfolder"
