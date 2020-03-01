@@ -36,7 +36,7 @@ class Bzip2Conan(ConanFile):
 
         if (self.settings.compiler == "gcc" and Version(self.settings.compiler.version.value) < "5") or \
                 (self.settings.compiler == "clang" and Version(self.settings.compiler.version.value) < "3.4") or \
-                (self.settings.compiler == "Visual Studio" and Version(self.settings.compiler.version.value) < "2015"):
+                (self.settings.compiler == "Visual Studio" and Version(self.settings.compiler.version.value) < "14"):
             raise ConanInvalidConfiguration("Compiler is too old for c++ {}".format(self._minimum_cpp_standard))
 
     def requirements(self):
