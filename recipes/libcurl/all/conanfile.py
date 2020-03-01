@@ -49,8 +49,6 @@ class LibcurlConan(ConanFile):
                        'with_brotli': False, 
                        'enable_bitcode': False
                        }
-
-    version = "7.68.0"  # TODO , remove for index center
     _source_subfolder = "source_subfolder"
     _build_subfolder = "build_subfolder"
     _autotools = False
@@ -127,10 +125,6 @@ class LibcurlConan(ConanFile):
         self.requires.add("zlib/1.2.11")
 
     def source(self):
-        self.output.info("++++++++++++++++++++++++++++++")
-        self.output.info("++++++++++++++++++++++++++++++")
-        self.output.info("++++++++++++++++++++++++++++++")
-        self.output.info("++++++++++++++++++++++++++++++")
         tools.get(**self.conan_data["sources"][self.version])
         os.rename("curl-%s" % self.version, self._source_subfolder)
         tools.download("https://curl.haxx.se/ca/cacert.pem", "cacert.pem", verify=True)
@@ -149,7 +143,7 @@ class LibcurlConan(ConanFile):
                                   "define CURL_MAX_WRITE_SIZE 16384",
                                   "define CURL_MAX_WRITE_SIZE 10485760")
 
-        # https://github.com/curl/curl/issues/2835
+        # https://github.com/curl/curl/issues/2835  # TODO this ticket has been closed 2018, check if this is still required
         if self.settings.compiler == 'apple-clang' and self.settings.compiler.version == '9.1':
             if self.options.darwin_ssl:
                 tools.replace_in_file(os.path.join(self._source_subfolder, 'lib', 'vtls', 'sectransp.c'),
@@ -290,8 +284,8 @@ class LibcurlConan(ConanFile):
 
                 # fix generated autotools files
                 # tools.replace_in_file("configure", "-install_name \\$rpath/", "-install_name ")
-                # this needs a better comment, why, on all platforms? with all versions? 
-                # I do not seem to need this, 
+                # TODO, this needs a better comment, why, on all platforms? with all versions? 
+                # currently I do not seem to need this, (osx, ios, linux, android, all archs with version 7.68.0) 
 
                 self.run("chmod +x configure")
 
