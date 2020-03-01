@@ -8,7 +8,7 @@ class UriparserConan(ConanFile):
     topics = ("conan", "uriparser", "URI", "parser")
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://uriparser.github.io/"
-    exports_sources = "CMakeLists.txt"
+    exports_sources = ["CMakeLists.txt", "patches/**"]
     generators = "cmake"
     license = "BSD-3-Clause"
     settings = "os", "arch", "compiler", "build_type"
@@ -65,6 +65,8 @@ class UriparserConan(ConanFile):
         return self._cmake
 
     def _patch_sources(self):
+        for patch in self.conan_data["patches"][self.version]:
+            tools.patch(**patch)
         if not self.options.shared:
             tools.replace_in_file(os.path.join(self._source_subfolder, "include", "uriparser", "UriBase.h"),
                                   "__declspec(dllimport)",
@@ -84,12 +86,9 @@ class UriparserConan(ConanFile):
 
     def package_info(self):
         self.cpp_info.libs = ["uriparser"]
-        defines = []
         if not self.options.shared:
-            defines.append("URI_STATIC_BUILD")
+            self.cpp_info.defines.append("URI_STATIC_BUILD")
         if not self.options.with_char:
-            defines.append("URI_NO_ANSI")
+            self.cpp_info.defines.append("URI_NO_ANSI")
         if not self.options.with_wchar:
-            defines.append("URI_NO_UNICODE")
-        self.cpp_info.defines = defines
-
+            self.cpp_info.defines.append("URI_NO_UNICODE")
