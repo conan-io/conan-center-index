@@ -63,13 +63,8 @@ class FruitConan(ConanFile):
     def _configure_cmake(self):
         if not self._cmake:
             self._cmake = CMake(self)
-            # fruit doesn't support multi-configuration.
-            self._cmake.definitions["CMAKE_BUILD_TYPE"] = self.settings.build_type
             self._cmake.definitions["FRUIT_USES_BOOST"] = self.options.use_boost
             self._cmake.definitions["FRUIT_ENABLE_COVERAGE"] = False
-            if self.options.use_boost:
-                self._cmake.definitions["BOOST_DIR"] = os.path.join(
-                    self.deps_cpp_info["boost"].rootpath, "include")
 
             self._cmake.configure(build_folder=self._build_subfolder)
         return self._cmake
