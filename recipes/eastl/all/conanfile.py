@@ -1,12 +1,13 @@
 import os
 from conans import ConanFile, CMake, tools
 from conans.errors import ConanInvalidConfiguration
-from conans.model.version import Version
 
 
 class Bzip2Conan(ConanFile):
     name = "eastl"
-    description = "EASTL stands for Electronic Arts Standard Template Library. It is an extensive and robust implementation that has an emphasis on high performance."
+    description = "EASTL stands for Electronic Arts Standard Template Library. " \
+                  "It is an extensive and robust implementation that has an " \
+                  "emphasis on high performance."
     topics = ("conan", "eastl", "stl", "high-performance")
     license = "BSD-3-Clause"
     url = "https://github.com/conan-io/conan-center-index"
@@ -34,9 +35,9 @@ class Bzip2Conan(ConanFile):
             if cppstd in str(self.settings.compiler.cppstd):
                 raise ConanInvalidConfiguration("EASTL requires c++ {} or newer".format(self._minimum_cpp_standard))
 
-        if (self.settings.compiler == "gcc" and Version(self.settings.compiler.version.value) < "5") or \
-                (self.settings.compiler == "clang" and Version(self.settings.compiler.version.value) < "3.4") or \
-                (self.settings.compiler == "Visual Studio" and Version(self.settings.compiler.version.value) < "14"):
+        if (self.settings.compiler == "gcc" and tools.Version(self.settings.compiler.version) < "5") or \
+                (self.settings.compiler == "clang" and tools.Version(self.settings.compiler.version) < "3.4") or \
+                (self.settings.compiler == "Visual Studio" and tools.Version(self.settings.compiler.version) < "14"):
             raise ConanInvalidConfiguration("Compiler is too old for c++ {}".format(self._minimum_cpp_standard))
 
     def requirements(self):
@@ -78,3 +79,5 @@ class Bzip2Conan(ConanFile):
         self.cpp_info.libs = ["EASTL"]
         if self.settings.os in ("Android", "Linux", "Macos", "watchOS", "tvOS"):
             self.cpp_info.system_libs.append("pthread")
+        if self.options.shared:
+            self.cpp_info.defines.append("EASTL_DLL")
