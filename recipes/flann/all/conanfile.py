@@ -18,14 +18,12 @@ class LibFlannConan(ConanFile):
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
-        "with_hdf5": [True, False],
-        "with_openmp": [True, False]
+        "with_hdf5": [True, False]
     }
     default_options = {
         "shared": False,
         "fPIC": True,
-        "with_hdf5": False,
-        "with_openmp": True
+        "with_hdf5": False
     }
 
     _source_subfolder = "source_subfolder"
@@ -74,8 +72,8 @@ class LibFlannConan(ConanFile):
         self._cmake.definitions["BUILD_MATLAB_BINDINGS"] = False
         self._cmake.definitions["BUILD_PYTHON_BINDINGS"] = False
 
-        # Optional dependencies
-        self._cmake.definitions["USE_OPENMP"] = self.options.with_openmp
+        # OpenMP support can be added later if needed
+        self._cmake.definitions["USE_OPENMP"] = False
 
         # Workaround issue with flann_cpp
         if self.settings.os == "Windows" and self.options.shared:
@@ -124,7 +122,3 @@ class LibFlannConan(ConanFile):
 
         if not self.options.shared:
             self.cpp_info.defines.append("FLANN_STATIC")
-
-        if self.options.with_openmp:
-            self.cpp_info.cppflags = ["-fopenmp"]
-            self.cpp_info.sharedlinkflags = ["-fopenmp"]
