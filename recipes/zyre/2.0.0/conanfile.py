@@ -1,7 +1,5 @@
 from conans import ConanFile, CMake, tools
-from sys import platform
 from packaging import version
-import re
 import os
 
 
@@ -14,7 +12,7 @@ class ZyreConan(ConanFile):
     description = "Local Area Clustering for Peer-to-Peer Applications."
     topics = ("conan", "zyre", "czmq", "zmq", "zeromq",
               "message-queue", "asynchronous")
-    exports_sources = ['CMakeLists.txt', 'Findzyre.cmake']
+    exports_sources = ['CMakeLists.txt',  'patches/*']
     settings = "os", "compiler", "build_type", "arch"
     requires = "zeromq/4.3.2", "czmq/4.2.0"
     options = {
@@ -28,18 +26,14 @@ class ZyreConan(ConanFile):
         "fPIC": True,
         "drafts": False,
     }
-    generators = ["cmake"]
+    generators = "cmake_find_package"
+    _cmake = None
     _source_subfolder = "source_subfolder"
     _build_subfolder = "build_subfolder"
 
     def config_options(self):
-        if self.settings.compiler == 'Visual Studio':
+        if self.settings.os == "Windows":
             del self.options.fPIC
-
-    def build_requirements(self):
-        if not tools.which("ninja") and \
-                self.settings.compiler == 'Visual Studio':
-            self.build_requires.add('ninja/1.9.0')
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
@@ -47,28 +41,24 @@ class ZyreConan(ConanFile):
         os.rename(extracted_dir, self._source_subfolder)
 
     def _configure_cmake(self):
-        generator = 'Ninja' if self.settings.compiler == "Visual Studio" \
-            else None
-        cmake = CMake(self, generator=generator)
-        cmake.definitions["ENABLE_DRAFTS"] = self.options.drafts
-        cmake.configure(build_dir=self._build_subfolder)
-        return cmake
+        if self._cmake:
+            return self._cmake
+        self._cmake = CMake(self)
+        self._cmake.definitions["ENABLE_DRAFTS"] = self.options.drafts
+        self._cmake.configure(build_dir=self._build_subfolder)
+        return self._cmake
 
     def build(self):
-        tools.replace_in_file(os.path.join(
-            self._source_subfolder, "CMakeLists.txt"), "enable_testing()", '')
+        for patch in self.conan_data["patches"][self.version]:
+            tools.patch(**patch)
         cmake = self._configure_cmake()
         cmake.build()
 
     def package(self):
-        self.copy('Findzyre.cmake')
         self.copy(pattern="LICENSE", src=self._source_subfolder,
                   dst='licenses')
         cmake = self._configure_cmake()
         cmake.install()
 
     def package_info(self):
-        if self.settings.compiler == 'Visual Studio':
-            self.cpp_info.libs = ['zyre']
-        else:
-            self.cpp_info.libs = ['zyre']
+        self.cpp_info.libs = ['zyre']
