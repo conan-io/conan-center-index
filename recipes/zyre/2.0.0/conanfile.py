@@ -16,12 +16,10 @@ class ZyreConan(ConanFile):
     settings = "os", "compiler", "build_type", "arch"
     requires = "zeromq/4.3.2", "czmq/4.2.0"
     options = {
-        "shared": [True],
         "fPIC": [True, False],
         "drafts": [True, False],
     }
     default_options = {
-        "shared": True,
         "*:shared": True,
         "fPIC": True,
         "drafts": False,
