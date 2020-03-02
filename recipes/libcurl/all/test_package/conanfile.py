@@ -18,9 +18,6 @@ class TestPackageConan(ConanFile):
     def test(self):
         if tools.cross_building(self.settings) and self.settings.os in ["Android", "iOS"]:
             return 
-        else:
-            self.output.info("++++++++++++++++++++++++++++++")
-            self.output.info("NOT CROSS COMPILING?")
 
         if "arm" in self.settings.arch:
             self.test_arm()
