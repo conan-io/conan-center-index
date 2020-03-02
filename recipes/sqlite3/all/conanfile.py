@@ -107,3 +107,7 @@ class ConanSqlite3(ConanFile):
                 self.cpp_info.system_libs.append("pthread")
             if not self.options.omit_load_extension:
                 self.cpp_info.system_libs.append("dl")
+        if self.options.build_executable:
+            bin_path = os.path.join(self.package_folder, "bin")
+            self.output.info("Appending PATH env var with : {}".format(bin_path))
+            self.env_info.PATH.append(bin_path)
