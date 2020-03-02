@@ -1,7 +1,9 @@
 from conans import ConanFile, tools, CMake
 from conans.errors import ConanInvalidConfiguration
 from conans.tools import Version
+from fnmatch import fnmatch
 import os
+import tarfile
 
 
 class FruitConan(ConanFile):
@@ -55,8 +57,23 @@ class FruitConan(ConanFile):
 
         tools.check_min_cppstd(self, "11")
 
+    def _get_source(self):
+        filename = os.path.basename(self.conan_data["sources"][self.version]["url"])
+        tools.download(filename=filename, **self.conan_data["sources"][self.version])
+
+        with tarfile.TarFile.open(filename, 'r:*') as tarredgzippedFile:
+            # NOTE: The archive file contains the file names build and BULD
+            # in the extras/bazel_root/third_party/fruit directory.
+            # Extraction fails on a case-insensitive file system due to file
+            # name conflicts.
+            # Exclude build as a workaround.
+            exclude_pattern = "extras/bazel_root/third_party/fruit/build"
+            members = list(filter(lambda m: not fnmatch(m.name, exclude_pattern),
+                                  tarredgzippedFile.getmembers()))
+            tarredgzippedFile.extractall(".", members=members)
+
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
+        self._get_source()
         extracted_dir = self.name + "-" + self.version
         os.rename(extracted_dir, self._source_subfolder)
 
