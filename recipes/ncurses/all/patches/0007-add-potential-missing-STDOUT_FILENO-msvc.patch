@@ -9,7 +9,7 @@ MSVC misses STDIN_FILENO
  
  /* usually in <unistd.h> */
 +#ifndef STDIN_FILENO
-+#define STDIN_FILENO 1
++#define STDIN_FILENO 0
 +#endif
 +
  #ifndef STDOUT_FILENO
