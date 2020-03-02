@@ -70,7 +70,7 @@ class LibcurlConan(ConanFile):
             self.copy("*.dylib*", dst=self._source_subfolder, keep_path=False)
 
     def config_options(self):
-        if self.settings.os not in ["Macos", "iOS"]:
+        if not tools.is_apple_os(self.settings.os):
             self.options.remove("darwin_ssl")
             self.options.remove("enable_bitcode")
 
@@ -96,7 +96,7 @@ class LibcurlConan(ConanFile):
 
         if self.options.with_openssl:
             # enforce shared linking due to openssl dependency
-            if self.settings.os not in ["Macos", "iOS"] or not self.options.darwin_ssl:
+            if not tools.is_apple_os(self.settings.os) or not self.options.darwin_ssl:
                 self.options["openssl"].shared = self.options.shared
         if self.options.with_libssh2:
             if self.settings.compiler != "Visual Studio":
@@ -110,7 +110,7 @@ class LibcurlConan(ConanFile):
 
     def requirements(self):
         if self.options.with_openssl:
-            if self.settings.os in ["Macos", "iOS"] and self.options.darwin_ssl:
+            if tools.is_apple_os(self.settings.os) and self.options.darwin_ssl:
                 pass
             elif self.settings.os == "Windows" and self.options.with_winssl:
                 pass
@@ -143,7 +143,8 @@ class LibcurlConan(ConanFile):
                                   "define CURL_MAX_WRITE_SIZE 16384",
                                   "define CURL_MAX_WRITE_SIZE 10485760")
 
-        # https://github.com/curl/curl/issues/2835  # TODO this ticket has been closed 2018, check if this is still required
+        # https://github.com/curl/curl/issues/2835 
+        # for additional info, see this comment https://github.com/conan-io/conan-center-index/pull/1008#discussion_r386122685 
         if self.settings.compiler == 'apple-clang' and self.settings.compiler.version == '9.1':
             if self.options.darwin_ssl:
                 tools.replace_in_file(os.path.join(self._source_subfolder, 'lib', 'vtls', 'sectransp.c'),
@@ -158,7 +159,7 @@ class LibcurlConan(ConanFile):
         params.append("--without-libpsl" if not self.options.with_libpsl else "--with-libpsl")
         params.append("--without-brotli" if not self.options.with_brotli else "--with-brotli")
 
-        if self.settings.os in ["Macos", "iOS"] and self.options.darwin_ssl:
+        if tools.is_apple_os(self.settings.os) and self.options.darwin_ssl:
             params.append("--with-darwinssl")
             params.append("--without-ssl")
         elif self.settings.os == "Windows" and self.options.with_winssl:
@@ -282,13 +283,11 @@ class LibcurlConan(ConanFile):
                 # autoreconf
                 self.run('./buildconf', win_bash=use_win_bash)
 
-                # fix generated autotools files
-                # tools.replace_in_file("configure", "-install_name \\$rpath/", "-install_name ")
-                # TODO, this needs a better comment, why, on all platforms? with all versions? 
-                # currently I do not seem to need this, (osx, ios, linux, android, all archs with version 7.68.0) 
+                # fix generated autotools files on alle to have relocateable binaries
+                if tools.is_apple_os(self.settings.os):
+                    tools.replace_in_file("configure", "-install_name \\$rpath/", "-install_name ")
 
                 self.run("chmod +x configure")
-
 
                 autotools, autotools_vars = self._configure_autotools()
                 autotools.make(vars=autotools_vars)
