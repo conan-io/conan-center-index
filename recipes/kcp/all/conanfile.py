@@ -37,8 +37,6 @@ class KcpConan(ConanFile):
             del self.options.fPIC
 
     def configure(self):
-        if self.settings.os == "Windows" and self.options.shared:
-            raise ConanInvalidConfiguration("kcp does not support shared builds on Windows")
         if self.options.shared:
             del self.options.fPIC
 
