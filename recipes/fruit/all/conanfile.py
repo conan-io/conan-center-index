@@ -57,6 +57,10 @@ class FruitConan(ConanFile):
 
         tools.check_min_cppstd(self, "11")
 
+    @property
+    def _extracted_dir(self):
+        return self.name + "-" + self.version
+
     def _get_source(self):
         filename = os.path.basename(self.conan_data["sources"][self.version]["url"])
         tools.download(filename=filename, **self.conan_data["sources"][self.version])
@@ -67,15 +71,15 @@ class FruitConan(ConanFile):
             # Extraction fails on a case-insensitive file system due to file
             # name conflicts.
             # Exclude build as a workaround.
-            exclude_pattern = "extras/bazel_root/third_party/fruit/build"
+            exclude_pattern = "%s/extras/bazel_root/third_party/fruit/build" % (self._extracted_dir,)
             members = list(filter(lambda m: not fnmatch(m.name, exclude_pattern),
                                   tarredgzippedFile.getmembers()))
             tarredgzippedFile.extractall(".", members=members)
 
     def source(self):
         self._get_source()
-        extracted_dir = self.name + "-" + self.version
-        os.rename(extracted_dir, self._source_subfolder)
+
+        os.rename(self._extracted_dir, self._source_subfolder)
 
     def _configure_cmake(self):
         if not self._cmake:
