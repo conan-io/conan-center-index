@@ -120,6 +120,10 @@ class BoostConan(ConanFile):
         if self.settings.os == "Windows":
             del self.options.fPIC
 
+    def build_requirements(self):
+        if not tools.which("b2"):
+            self.build_requires("b2/4.1.0")
+
     def requirements(self):
         if self._zip_bzip2_requires_needed:
             if self.options.zlib:
@@ -334,8 +338,7 @@ class BoostConan(ConanFile):
 
     @property
     def _b2_exe(self):
-        folder = os.path.join(self.source_folder, self._folder_name, "tools", "build")
-        return os.path.join(folder, "b2.exe" if tools.os_info.is_windows else "b2")
+        return tools.which("b2")
 
     @property
     def _bcp_exe(self):
@@ -394,7 +397,6 @@ class BoostConan(ConanFile):
             return
 
         self._clean()
-        self._bootstrap()
 
         if self._use_bcp:
             self._build_bcp()
@@ -808,71 +810,6 @@ class BoostConan(ConanFile):
             return toolset, compiler_version, ""
         else:
             return compiler, compiler_version, ""
-
-    ##################### BOOSTRAP METHODS ###########################
-    @property
-    def _boostrap_toolset(self):
-        if self.settings.compiler == "intel":
-            return {"Macos": "intel-darwin",
-                    "Windows": "intel-win32",
-                    "Linux": "intel-linux"}.get(str(self.settings.os))
-        if self._is_msvc:
-            comp_ver = self.settings.compiler.version
-            if Version(str(comp_ver)) >= "16":
-                return "vc142"
-            elif Version(str(comp_ver)) >= "15":
-                return "vc141"
-            else:
-                return "vc%s" % comp_ver
-
-        if tools.os_info.is_windows:
-            return "gcc" if self.settings.compiler == "gcc" else ""
-
-        if tools.os_info.is_macos:
-            return "clang"
-
-        with_toolset = {"apple-clang": "clang"}.get(str(self.settings.compiler),
-                                                    str(self.settings.compiler))
-
-        # fallback for the case when no unversioned gcc/clang is available
-        if with_toolset in ["gcc", "clang"]:
-            # check for C++ compiler, as b2 uses only C++ one, which may not be installed alongside C compiler
-            compiler = "g++" if with_toolset == "gcc" else "clang++"
-            if not tools.which(compiler):
-                with_toolset = "cxx" if Version(str(self.version)) >= "1.71" else "cc"
-        return with_toolset
-
-    def _bootstrap(self):
-        folder = os.path.join(self.source_folder, self._folder_name, "tools", "build")
-        try:
-            bootstrap = "bootstrap.bat" if tools.os_info.is_windows else "./bootstrap.sh"
-            with tools.vcvars(self.settings) if self._is_msvc else tools.no_op():
-                with tools.chdir(folder):
-                    if tools.cross_building(self.settings):
-                        cmd = bootstrap
-                    else:
-                        option = "" if tools.os_info.is_windows else "-with-toolset="
-                        cmd = "%s %s%s" % (bootstrap, option, self._boostrap_toolset)
-                    self.output.info(cmd)
-
-                    removed_environment_variables = [
-                        "CC",
-                        "CXX",
-                        "CFLAGS",
-                        "CXXFLAGS",
-                        "SDKROOT",
-                        "IPHONEOS_DEPLOYMENT_TARGET"
-                    ]
-                    removed_environment_variables = dict((env_var, None) for env_var in removed_environment_variables)
-
-                    with tools.environment_append(removed_environment_variables):
-                        self.run(cmd)
-
-        except Exception as exc:
-            self.output.warn(str(exc))
-            if os.path.exists(os.path.join(folder, "bootstrap.log")):
-                self.output.warn(tools.load(os.path.join(folder, "bootstrap.log")))
-            raise
 
     ####################################################################
 
