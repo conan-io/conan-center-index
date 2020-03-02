@@ -1,0 +1,981 @@
+From da149e223c3777d69c6fa2b4a2f8c9f875af3644 Mon Sep 17 00:00:00 2001
+From: Carlos Gomes Martinho <kmartinho8@gmail.com>
+Date: Fri, 28 Feb 2020 10:03:08 +0100
+Subject: [PATCH 1/4] feat: remove openssl dependency functions and add missing
+ file to cmake
+
+---
+ .gitignore                     |   1 +
+ CMakeLists.txt                 |   1 +
+ build.sh                       |   7 +
+ ports/linux/bacsec_linux.c     | 303 ----------------------
+ src/bacnet/basic/sys/mstimer.c |   2 +-
+ src/bacnet/datalink/bacsec.c   | 446 ++++++++++++++++-----------------
+ src/bacnet/datalink/bacsec.h   |  22 +-
+ 7 files changed, 244 insertions(+), 538 deletions(-)
+ create mode 100755 build.sh
+ delete mode 100644 ports/linux/bacsec_linux.c
+
+diff --git a/.gitignore b/.gitignore
+index e9e58687..73105a10 100644
+--- a/.gitignore
++++ b/.gitignore
+@@ -61,5 +61,6 @@ Backup*
+ BACnet_BDT_table
+ address_cache
+ /build/*
++/_build/*
+ CMakeLists.txt.user
+ /out/*
+\ No newline at end of file
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index a5bf9c1a..58fc3ce5 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -442,6 +442,7 @@ if(${CMAKE_SYSTEM_NAME}
+            $<$<BOOL:${BACDL_MSTP}>:ports/linux/dlmstp.c>
+            $<$<BOOL:${BACDL_MSTP}>:ports/linux/dlmstp_linux.c>
+            $<$<BOOL:${BACDL_MSTP}>:ports/linux/dlmstp_linux.h>
++           ports/linux/mstimer-init.c
+            # ports/linux/rx_fsm.c
+            $<$<BOOL:${BACDL_ETHERNET}>:ports/linux/ethernet.c>)
+ 
+diff --git a/build.sh b/build.sh
+new file mode 100755
+index 00000000..56c874cb
+--- /dev/null
++++ b/build.sh
+@@ -0,0 +1,7 @@
++#!/bin/sh
++
++rm -rf _build
++mkdir _build
++cd _build
++cmake .. -DBUILD_SHARED_LIBS=ON
++make
+diff --git a/ports/linux/bacsec_linux.c b/ports/linux/bacsec_linux.c
+deleted file mode 100644
+index 8e6fc928..00000000
+--- a/ports/linux/bacsec_linux.c
++++ /dev/null
+@@ -1,303 +0,0 @@
+-/**************************************************************************
+-*
+-* Copyright (C) 2015 Nikola Jelic <nikola.jelic@euroicc.com>
+-*
+-* Permission is hereby granted, free of charge, to any person obtaining
+-* a copy of this software and associated documentation files (the
+-* "Software"), to deal in the Software without restriction, including
+-* without limitation the rights to use, copy, modify, merge, publish,
+-* distribute, sublicense, and/or sell copies of the Software, and to
+-* permit persons to whom the Software is furnished to do so, subject to
+-* the following conditions:
+-*
+-* The above copyright notice and this permission notice shall be included
+-* in all copies or substantial portions of the Software.
+-*
+-* THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+-* EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+-* MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
+-* IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY
+-* CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
+-* TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
+-* SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+-*
+-*********************************************************************/
+-#include "bacsec.h"
+-#include <string.h>
+-#include <time.h>
+-#include <openssl/evp.h>
+-#include <openssl/hmac.h>
+-
+-#define TMP_BUF_LEN 2048
+-
+-/* structures for keys - we use existing structures */
+-
+-BACNET_KEY_ENTRY master_key;
+-
+-BACNET_UPDATE_DISTRIBUTION_KEY distribution_key;
+-
+-BACNET_UPDATE_KEY_SET key_sets;
+-
+-static bool rand_set = false;
+-static HMAC_CTX hmac_ctx;
+-static EVP_CIPHER_CTX evp_ctx;
+-static uint8_t tmp_buf[TMP_BUF_LEN];
+-
+-static uint16_t next_mult_of_16(uint16_t arg)
+-{
+-    if ((arg & 0xF) == 0)
+-        return arg;
+-    else
+-        return ((arg >> 4) + 1) << 4;
+-}
+-
+-/* signing/verification and encryption/decryption - port specific */
+-int key_sign_msg(BACNET_KEY_ENTRY * key,
+-    uint8_t * msg,
+-    uint32_t msg_len,
+-    uint8_t * signature)
+-{
+-    uint8_t full_signature[32]; /* longest case */
+-    HMAC_CTX_init(&hmac_ctx);
+-    switch (key_algorithm(key->key_identifier)) {
+-        case KIA_AES_MD5:
+-            HMAC_Init_ex(&hmac_ctx, &key->key[16], 16, EVP_md5(), NULL);
+-            break;
+-        case KIA_AES_SHA256:
+-            HMAC_Init_ex(&hmac_ctx, &key->key[16], 32, EVP_sha256(), NULL);
+-            break;
+-        default:
+-            return -1;
+-    }
+-    HMAC_Update(&hmac_ctx, msg, msg_len);
+-    HMAC_Final(&hmac_ctx, full_signature, NULL);        /* we ignore the signature size */
+-    HMAC_CTX_cleanup(&hmac_ctx);
+-    memcpy(signature, full_signature, SIGNATURE_LEN);
+-    return 0;
+-}
+-
+-bool key_verify_sign_msg(BACNET_KEY_ENTRY * key,
+-    uint8_t * msg,
+-    uint32_t msg_len,
+-    uint8_t * signature)
+-{
+-    uint8_t full_signature[32]; /* longest case */
+-    HMAC_CTX_init(&hmac_ctx);
+-    switch (key_algorithm(key->key_identifier)) {
+-        case KIA_AES_MD5:
+-            HMAC_Init_ex(&hmac_ctx, &key->key[16], 16, EVP_md5(), NULL);
+-            break;
+-        case KIA_AES_SHA256:
+-            HMAC_Init_ex(&hmac_ctx, &key->key[16], 32, EVP_sha256(), NULL);
+-            break;
+-        default:
+-            return false;
+-    }
+-    HMAC_Update(&hmac_ctx, msg, msg_len);
+-    HMAC_Final(&hmac_ctx, full_signature, NULL);        /* we ignore the signature size */
+-    HMAC_CTX_cleanup(&hmac_ctx);
+-    return (memcmp(signature, full_signature,
+-            SIGNATURE_LEN) == 0 ? true : false);
+-}
+-
+-int key_encrypt_msg(BACNET_KEY_ENTRY * key,
+-    uint8_t * msg,
+-    uint32_t msg_len,
+-    uint8_t * signature)
+-{
+-    int outlen, outlen2;
+-    switch (key_algorithm(key->key_identifier)) {
+-        case KIA_AES_MD5:
+-        case KIA_AES_SHA256:
+-            EVP_EncryptInit_ex(&evp_ctx, EVP_aes_128_cbc(), NULL, key->key,
+-                signature);
+-            break;
+-        default:
+-            return -1;
+-    }
+-    EVP_EncryptUpdate(&evp_ctx, tmp_buf, &outlen, msg, msg_len);
+-    EVP_EncryptFinal(&evp_ctx, &msg[outlen], &outlen2);
+-    EVP_CIPHER_CTX_cleanup(&evp_ctx);
+-    if (outlen2 != 0)
+-        return -1;
+-    memcpy(msg, tmp_buf, msg_len);
+-    return 0;
+-}
+-
+-bool key_decrypt_msg(BACNET_KEY_ENTRY * key,
+-    uint8_t * msg,
+-    uint32_t msg_len,
+-    uint8_t * signature)
+-{
+-    int outlen, outlen2;
+-    switch (key_algorithm(key->key_identifier)) {
+-        case KIA_AES_MD5:
+-        case KIA_AES_SHA256:
+-            EVP_DecryptInit_ex(&evp_ctx, EVP_aes_128_cbc(), NULL, key->key,
+-                signature);
+-            break;
+-        default:
+-            return false;
+-    }
+-    if (EVP_DecryptUpdate(&evp_ctx, tmp_buf, &outlen, msg, msg_len) == 0)
+-        return false;
+-    if (EVP_DecryptFinal(&evp_ctx, &msg[outlen], &outlen2) == 0)
+-        return false;
+-    EVP_CIPHER_CTX_cleanup(&evp_ctx);
+-    if (outlen2 != 0)
+-        return false;
+-    memcpy(msg, tmp_buf, msg_len);
+-    return true;
+-}
+-
+-void key_set_padding(BACNET_KEY_ENTRY * key,
+-    int enc_len,
+-    uint16_t * padding_len,
+-    uint8_t * padding)
+-{
+-    /* in the future, we should check for the block size, but for now it is always 16 */
+-    int i;
+-    uint16_t padlen = next_mult_of_16(enc_len + 2);
+-    (void) key;
+-    (void) padding_len;
+-    if (!rand_set) {
+-        srand(time(NULL));
+-        rand_set = true;
+-    }
+-    if (padlen > 2)
+-        for (i = 0; i < padlen - 2; i++)
+-            padding[i] = rand();
+-}
+-
+-BACNET_SECURITY_RESPONSE_CODE bacnet_master_key_set(BACNET_SET_MASTER_KEY *
+-    key)
+-{
+-    memcpy(&master_key, &key->key, sizeof(BACNET_KEY_ENTRY));
+-
+-    return SEC_RESP_SUCCESS;
+-}
+-
+-BACNET_SECURITY_RESPONSE_CODE
+-bacnet_distribution_key_update(BACNET_UPDATE_DISTRIBUTION_KEY * key)
+-{
+-    memcpy(&distribution_key, key, sizeof(BACNET_KEY_ENTRY));
+-
+-    return SEC_RESP_SUCCESS;
+-}
+-
+-BACNET_SECURITY_RESPONSE_CODE bacnet_key_set_update(BACNET_UPDATE_KEY_SET *
+-    update_key_sets)
+-{
+-    int i, j, k, l;
+-    bool found;
+-    for (i = 0; i < 2; i++) {
+-        if (update_key_sets->set_rae[i]) {
+-            found = false;
+-            /* try with a valid set */
+-            for (j = 0; j < 2; j++)
+-                if ((key_sets.set_key_revision[j] ==
+-                        update_key_sets->set_key_revision[i]) &&
+-                    key_sets.set_rae[j]) {
+-                    found = true;
+-                    break;
+-                }
+-            /* try with an empty set */
+-            if (!found) {
+-                for (j = 0; j < 2; j++)
+-                    if (!key_sets.set_rae[j]) {
+-                        found = true;
+-                        break;
+-                    }
+-            }
+-            /* failure */
+-            if (!found)
+-                return -SEC_RESP_UNKNOWN_KEY_REVISION;
+-            /* just in case we're writing over an empty set */
+-            key_sets.set_key_revision[j] =
+-                update_key_sets->set_key_revision[i];
+-            /* update revision activation and expiration time */
+-            key_sets.set_activation_time[j] =
+-                update_key_sets->set_activation_time[i];
+-            key_sets.set_expiration_time[j] =
+-                update_key_sets->set_expiration_time[i];
+-            /* should we clear the key set? */
+-            if (update_key_sets->set_clr[i]) {
+-                key_sets.set_key_count[j] = 0;
+-            }
+-            for (k = 0; k < update_key_sets->set_key_count[i]; k++) {
+-                found = false;
+-                for (l = 0; l < key_sets.set_key_count[j]; l++)
+-                    if (update_key_sets->set_keys[i][k].key_identifier ==
+-                        key_sets.set_keys[j][l].key_identifier) {
+-                        found = true;
+-                        break;
+-                    }
+-
+-                if (!found) {
+-                    if (!update_key_sets->remove) {     /* add key */
+-                        /* check for available space */
+-                        if (key_sets.set_key_count[j] == MAX_UPDATE_KEY_COUNT)
+-                            return -SEC_RESP_TOO_MANY_KEYS;
+-                        memcpy(&key_sets.set_keys[j][key_sets.
+-                                set_key_count[j]],
+-                            &update_key_sets->set_keys[i][k],
+-                            sizeof(BACNET_KEY_ENTRY));
+-                        key_sets.set_key_count[j]++;
+-                    }   /* else do nothing, successfuly */
+-                } else {
+-                    if (!update_key_sets->remove) {     /* update key */
+-                        memcpy(&key_sets.set_keys[j][l],
+-                            &update_key_sets->set_keys[i][k],
+-                            sizeof(BACNET_KEY_ENTRY));
+-                    } else {    /* remove key */
+-                        memmove(&key_sets.set_keys[j][l],
+-                            &key_sets.set_keys[j][l + 1],
+-                            sizeof(BACNET_KEY_ENTRY) *
+-                            (key_sets.set_key_count[j] - l));
+-                        key_sets.set_key_count[j]--;
+-                    }
+-                }
+-            }
+-        }
+-
+-    }
+-    return SEC_RESP_SUCCESS;
+-}
+-
+-BACNET_SECURITY_RESPONSE_CODE bacnet_find_key(uint8_t revision,
+-    BACNET_KEY_ENTRY * key)
+-{
+-    int i, j;
+-    unsigned int current_time = time(NULL);
+-    switch (key_number(key->key_identifier)) {
+-        case KIKN_DEVICE_MASTER:
+-            if (revision != 0)
+-                return -SEC_RESP_UNKNOWN_KEY_REVISION;
+-            else
+-                memcpy(key, &master_key, sizeof(BACNET_KEY_ENTRY));
+-            break;
+-        case KIKN_DISTRIBUTION:
+-            if (revision != distribution_key.key_revision)
+-                return -SEC_RESP_UNKNOWN_KEY_REVISION;
+-            else
+-                memcpy(key, &distribution_key.key, sizeof(BACNET_KEY_ENTRY));
+-            break;
+-        default:       /* all other keys must be in a key set */
+-            for (i = 0; i < 2; i++) {
+-                if ((revision == key_sets.set_key_revision[i]) &&
+-                    (key_sets.set_activation_time[i] <= current_time) &&
+-                    (current_time <= key_sets.set_expiration_time[i])) {
+-                    for (j = 0; j < key_sets.set_key_count[i]; j++)
+-                        if (key->key_identifier ==
+-                            key_sets.set_keys[i][j].key_identifier) {
+-                            memcpy(key,
+-                                &key_sets.set_keys[i][j].key_identifier,
+-                                sizeof(BACNET_KEY_ENTRY));
+-                            return SEC_RESP_SUCCESS;
+-                        }
+-                }
+-            }
+-            return -SEC_RESP_UNKNOWN_KEY_REVISION;
+-    }
+-    return SEC_RESP_SUCCESS;
+-}
+diff --git a/src/bacnet/basic/sys/mstimer.c b/src/bacnet/basic/sys/mstimer.c
+index 206e287e..caee0af1 100644
+--- a/src/bacnet/basic/sys/mstimer.c
++++ b/src/bacnet/basic/sys/mstimer.c
+@@ -20,7 +20,7 @@
+ #include <stdio.h>
+ #include <stdbool.h>
+ #include <stdint.h>
+-#include "mstimer.h"
++#include "bacnet/basic/sys/mstimer.h"
+ 
+ /**
+  * @brief Set a timer for a time sometime in the future
+diff --git a/src/bacnet/datalink/bacsec.c b/src/bacnet/datalink/bacsec.c
+index ffa1b6f2..3f9ac108 100644
+--- a/src/bacnet/datalink/bacsec.c
++++ b/src/bacnet/datalink/bacsec.c
+@@ -38,122 +38,122 @@ BACNET_KEY_IDENTIFIER_KEY_NUMBER key_number(uint16_t id)
+     return (BACNET_KEY_IDENTIFIER_KEY_NUMBER)(id & 0xFF);
+ }
+ 
+-int encode_security_wrapper(
+-    int bytes_before, uint8_t *apdu, BACNET_SECURITY_WRAPPER *wrapper)
+-{
+-    int curr = 0;
+-    int enc_begin = 0;
+-    BACNET_KEY_ENTRY key;
+-    BACNET_SECURITY_RESPONSE_CODE res = SEC_RESP_SUCCESS;
+-
+-    apdu[curr] = 0;
+-    /* control byte */
+-    if (wrapper->payload_net_or_bvll_flag) {
+-        apdu[curr] |= 1 << 7;
+-    }
+-    /* encryption flag will be set after signature calculation */
+-    /* bit 5 is reserved and shall be 0 */
+-    if (wrapper->authentication_flag) {
+-        apdu[curr] |= 1 << 4;
+-    }
+-    if (wrapper->do_not_unwrap_flag) {
+-        apdu[curr] |= 1 << 3;
+-    }
+-    if (wrapper->do_not_decrypt_flag) {
+-        apdu[curr] |= 1 << 2;
+-    }
+-    if (wrapper->non_trusted_source_flag) {
+-        apdu[curr] |= 1 << 1;
+-    }
+-    if (wrapper->secured_by_router_flag) {
+-        apdu[curr] |= 1;
+-    }
+-    curr++;
+-    /* basic integrity checks */
+-    if (wrapper->do_not_decrypt_flag && !wrapper->do_not_unwrap_flag) {
+-        return -SEC_RESP_MALFORMED_MESSAGE;
+-    }
+-    if (!wrapper->encrypted_flag && wrapper->do_not_decrypt_flag) {
+-        return -SEC_RESP_MALFORMED_MESSAGE;
+-    }
+-    /* key */
+-    apdu[curr++] = wrapper->key_revision;
+-    curr += encode_unsigned16(&apdu[curr], wrapper->key_identifier);
+-    /* find appropriate key */
+-    key.key_identifier = wrapper->key_identifier;
+-    res = bacnet_find_key(wrapper->key_revision, &key);
+-    if (res != SEC_RESP_SUCCESS) {
+-        return -res;
+-    }
+-    /* source device instance */
+-    curr += encode_unsigned24(&apdu[curr], wrapper->source_device_instance);
+-    /* message id */
+-    curr += encode_unsigned32(&apdu[curr], wrapper->message_id);
+-    /* timestamp */
+-    curr += encode_unsigned32(&apdu[curr], wrapper->timestamp);
+-    /* begin encryption starting from destination device instance */
+-    enc_begin = curr;
+-    /* destination device instance */
+-    curr +=
+-        encode_unsigned24(&apdu[curr], wrapper->destination_device_instance);
+-    /* dst address */
+-    curr += encode_unsigned16(&apdu[curr], wrapper->dnet);
+-    apdu[curr++] = wrapper->dlen;
+-    memcpy(&apdu[curr], wrapper->dadr, wrapper->dlen);
+-    curr += wrapper->dlen;
+-    /* src address */
+-    curr += encode_unsigned16(&apdu[curr], wrapper->snet);
+-    apdu[curr++] = wrapper->slen;
+-    memcpy(&apdu[curr], wrapper->sadr, wrapper->slen);
+-    curr += wrapper->slen;
+-    /* authentication */
+-    if (wrapper->authentication_flag) {
+-        apdu[curr++] = wrapper->authentication_mechanism;
+-        /* authentication data */
+-        curr += encode_unsigned16(&apdu[curr], wrapper->user_id);
+-        apdu[curr++] = wrapper->user_role;
+-        if ((wrapper->authentication_mechanism >= 1) &&
+-            (wrapper->authentication_mechanism <= 199)) {
+-            curr += encode_unsigned16(
+-                &apdu[curr], wrapper->authentication_data_length + 5);
+-            memcpy(&apdu[curr], wrapper->authentication_data,
+-                wrapper->authentication_data_length);
+-            curr += wrapper->authentication_data_length;
+-        } else if (wrapper->authentication_mechanism >= 200) {
+-            curr += encode_unsigned16(
+-                &apdu[curr], wrapper->authentication_data_length + 7);
+-            curr += encode_unsigned16(&apdu[curr], wrapper->vendor_id);
+-            memcpy(&apdu[curr], wrapper->authentication_data,
+-                wrapper->authentication_data_length);
+-            curr += wrapper->authentication_data_length;
+-        }
+-    }
+-    memcpy(&apdu[curr], wrapper->service_data, wrapper->service_data_len);
+-    curr += wrapper->service_data_len;
+-    /* signature calculation */
+-    key_sign_msg(&key, &apdu[-bytes_before], (uint32_t)(bytes_before + curr),
+-        wrapper->signature);
+-    /* padding and encryption */
+-    if (wrapper->encrypted_flag) {
+-        /* set encryption flag, signing is done */
+-        apdu[0] |= 1 << 6;
+-        /* handle padding */
+-        key_set_padding(
+-            &key, curr - enc_begin, &wrapper->padding_len, wrapper->padding);
+-        if (wrapper->padding_len > 2) {
+-            memcpy(&apdu[curr], wrapper->padding, wrapper->padding_len - 2);
+-            curr += wrapper->padding_len - 2;
+-        }
+-        curr += encode_unsigned16(&apdu[curr], wrapper->padding_len);
+-        /* encryption */
+-        key_encrypt_msg(&key, &apdu[enc_begin], (uint32_t)(curr - enc_begin),
+-            wrapper->signature);
+-    }
+-    memcpy(&apdu[curr], wrapper->signature, SIGNATURE_LEN);
+-    curr += SIGNATURE_LEN;
+-
+-    return curr;
+-}
++// int encode_security_wrapper(
++//     int bytes_before, uint8_t *apdu, BACNET_SECURITY_WRAPPER *wrapper)
++// {
++//     int curr = 0;
++//     int enc_begin = 0;
++//     BACNET_KEY_ENTRY key;
++//     BACNET_SECURITY_RESPONSE_CODE res = SEC_RESP_SUCCESS;
++
++//     apdu[curr] = 0;
++//     /* control byte */
++//     if (wrapper->payload_net_or_bvll_flag) {
++//         apdu[curr] |= 1 << 7;
++//     }
++//     /* encryption flag will be set after signature calculation */
++//     /* bit 5 is reserved and shall be 0 */
++//     if (wrapper->authentication_flag) {
++//         apdu[curr] |= 1 << 4;
++//     }
++//     if (wrapper->do_not_unwrap_flag) {
++//         apdu[curr] |= 1 << 3;
++//     }
++//     if (wrapper->do_not_decrypt_flag) {
++//         apdu[curr] |= 1 << 2;
++//     }
++//     if (wrapper->non_trusted_source_flag) {
++//         apdu[curr] |= 1 << 1;
++//     }
++//     if (wrapper->secured_by_router_flag) {
++//         apdu[curr] |= 1;
++//     }
++//     curr++;
++//     /* basic integrity checks */
++//     if (wrapper->do_not_decrypt_flag && !wrapper->do_not_unwrap_flag) {
++//         return -SEC_RESP_MALFORMED_MESSAGE;
++//     }
++//     if (!wrapper->encrypted_flag && wrapper->do_not_decrypt_flag) {
++//         return -SEC_RESP_MALFORMED_MESSAGE;
++//     }
++//     /* key */
++//     apdu[curr++] = wrapper->key_revision;
++//     curr += encode_unsigned16(&apdu[curr], wrapper->key_identifier);
++//     /* find appropriate key */
++//     key.key_identifier = wrapper->key_identifier;
++//     res = bacnet_find_key(wrapper->key_revision, &key);
++//     if (res != SEC_RESP_SUCCESS) {
++//         return -res;
++//     }
++//     /* source device instance */
++//     curr += encode_unsigned24(&apdu[curr], wrapper->source_device_instance);
++//     /* message id */
++//     curr += encode_unsigned32(&apdu[curr], wrapper->message_id);
++//     /* timestamp */
++//     curr += encode_unsigned32(&apdu[curr], wrapper->timestamp);
++//     /* begin encryption starting from destination device instance */
++//     enc_begin = curr;
++//     /* destination device instance */
++//     curr +=
++//         encode_unsigned24(&apdu[curr], wrapper->destination_device_instance);
++//     /* dst address */
++//     curr += encode_unsigned16(&apdu[curr], wrapper->dnet);
++//     apdu[curr++] = wrapper->dlen;
++//     memcpy(&apdu[curr], wrapper->dadr, wrapper->dlen);
++//     curr += wrapper->dlen;
++//     /* src address */
++//     curr += encode_unsigned16(&apdu[curr], wrapper->snet);
++//     apdu[curr++] = wrapper->slen;
++//     memcpy(&apdu[curr], wrapper->sadr, wrapper->slen);
++//     curr += wrapper->slen;
++//     /* authentication */
++//     if (wrapper->authentication_flag) {
++//         apdu[curr++] = wrapper->authentication_mechanism;
++//         /* authentication data */
++//         curr += encode_unsigned16(&apdu[curr], wrapper->user_id);
++//         apdu[curr++] = wrapper->user_role;
++//         if ((wrapper->authentication_mechanism >= 1) &&
++//             (wrapper->authentication_mechanism <= 199)) {
++//             curr += encode_unsigned16(
++//                 &apdu[curr], wrapper->authentication_data_length + 5);
++//             memcpy(&apdu[curr], wrapper->authentication_data,
++//                 wrapper->authentication_data_length);
++//             curr += wrapper->authentication_data_length;
++//         } else if (wrapper->authentication_mechanism >= 200) {
++//             curr += encode_unsigned16(
++//                 &apdu[curr], wrapper->authentication_data_length + 7);
++//             curr += encode_unsigned16(&apdu[curr], wrapper->vendor_id);
++//             memcpy(&apdu[curr], wrapper->authentication_data,
++//                 wrapper->authentication_data_length);
++//             curr += wrapper->authentication_data_length;
++//         }
++//     }
++//     memcpy(&apdu[curr], wrapper->service_data, wrapper->service_data_len);
++//     curr += wrapper->service_data_len;
++//     /* signature calculation */
++//     key_sign_msg(&key, &apdu[-bytes_before], (uint32_t)(bytes_before + curr),
++//         wrapper->signature);
++//     /* padding and encryption */
++//     if (wrapper->encrypted_flag) {
++//         /* set encryption flag, signing is done */
++//         apdu[0] |= 1 << 6;
++//         /* handle padding */
++//         key_set_padding(
++//             &key, curr - enc_begin, &wrapper->padding_len, wrapper->padding);
++//         if (wrapper->padding_len > 2) {
++//             memcpy(&apdu[curr], wrapper->padding, wrapper->padding_len - 2);
++//             curr += wrapper->padding_len - 2;
++//         }
++//         curr += encode_unsigned16(&apdu[curr], wrapper->padding_len);
++//         /* encryption */
++//         key_encrypt_msg(&key, &apdu[enc_begin], (uint32_t)(curr - enc_begin),
++//             wrapper->signature);
++//     }
++//     memcpy(&apdu[curr], wrapper->signature, SIGNATURE_LEN);
++//     curr += SIGNATURE_LEN;
++
++//     return curr;
++// }
+ 
+ int encode_challenge_request(uint8_t *apdu, BACNET_CHALLENGE_REQUEST *bc_req)
+ {
+@@ -375,113 +375,113 @@ int encode_set_master_key(uint8_t *apdu, BACNET_SET_MASTER_KEY *set_master_key)
+     return encode_key_entry(apdu, &set_master_key->key);
+ }
+ 
+-int decode_security_wrapper_safe(int bytes_before,
+-    uint8_t *apdu,
+-    uint32_t apdu_len_remaining,
+-    BACNET_SECURITY_WRAPPER *wrapper)
+-{
+-    int curr = 0;
+-    int enc_begin = 0;
+-    int real_len = (int)(apdu_len_remaining - SIGNATURE_LEN);
+-    BACNET_KEY_ENTRY key;
+-    BACNET_SECURITY_RESPONSE_CODE res = SEC_RESP_SUCCESS;
+-
+-    if (apdu_len_remaining < 40) {
+-        return -SEC_RESP_MALFORMED_MESSAGE;
+-    }
+-    wrapper->payload_net_or_bvll_flag = ((apdu[curr] & (1 << 7)) != 0);
+-    wrapper->encrypted_flag = ((apdu[curr] & (1 << 6)) != 0);
+-    wrapper->authentication_flag = ((apdu[curr] & (1 << 4)) != 0);
+-    wrapper->do_not_unwrap_flag = ((apdu[curr] & (1 << 3)) != 0);
+-    wrapper->do_not_decrypt_flag = ((apdu[curr] & (1 << 2)) != 0);
+-    wrapper->non_trusted_source_flag = ((apdu[curr] & (1 << 1)) != 0);
+-    wrapper->secured_by_router_flag = ((apdu[curr] & 1) != 0);
+-    /* basic integrity checks */
+-    if (wrapper->do_not_decrypt_flag && !wrapper->do_not_unwrap_flag) {
+-        return -SEC_RESP_MALFORMED_MESSAGE;
+-    }
+-    if (!wrapper->encrypted_flag && wrapper->do_not_decrypt_flag) {
+-        return -SEC_RESP_MALFORMED_MESSAGE;
+-    }
+-    /* remove encryption flag for signature validation */
+-    apdu[curr] &= ~((uint8_t)(1 << 6));
+-    curr++;
+-    /* key */
+-    wrapper->key_revision = apdu[curr++];
+-    curr += decode_unsigned16(&apdu[curr], &wrapper->key_identifier);
+-    /* find appropriate key */
+-    key.key_identifier = wrapper->key_identifier;
+-    res = bacnet_find_key(wrapper->key_revision, &key);
+-    if (res != SEC_RESP_SUCCESS) {
+-        return -res;
+-    }
+-    /* source device instance */
+-    curr += decode_unsigned24(&apdu[curr], &wrapper->source_device_instance);
+-    /* message id */
+-    curr += decode_unsigned32(&apdu[curr], &wrapper->message_id);
+-    /* timestamp */
+-    curr += decode_unsigned32(&apdu[curr], &wrapper->timestamp);
+-    /* begin decryption starting from destination device instance */
+-    enc_begin = curr;
+-    /* read signature */
+-    memcpy(wrapper->signature, &apdu[real_len], SIGNATURE_LEN);
+-    if (wrapper->encrypted_flag) {
+-        if (!key_decrypt_msg(&key, &apdu[enc_begin],
+-                (uint32_t)(real_len - enc_begin), wrapper->signature)) {
+-            return -SEC_RESP_MALFORMED_MESSAGE;
+-        }
+-        curr += decode_unsigned16(&apdu[real_len - 2], &wrapper->padding_len);
+-        real_len -= wrapper->padding_len;
+-        memcpy(wrapper->padding, &apdu[wrapper->padding_len],
+-            wrapper->padding_len - 2);
+-    }
+-    /* destination device instance */
+-    curr +=
+-        decode_unsigned24(&apdu[curr], &wrapper->destination_device_instance);
+-    /* dst address */
+-    curr += decode_unsigned16(&apdu[curr], &wrapper->dnet);
+-    wrapper->dlen = apdu[curr++];
+-    memcpy(wrapper->dadr, &apdu[curr], wrapper->dlen);
+-    curr += wrapper->dlen;
+-    /* src address */
+-    curr += decode_unsigned16(&apdu[curr], &wrapper->snet);
+-    wrapper->slen = apdu[curr++];
+-    memcpy(wrapper->sadr, &apdu[curr], wrapper->slen);
+-    curr += wrapper->slen;
+-    /* authentication */
+-    if (wrapper->authentication_flag) {
+-        wrapper->authentication_mechanism = apdu[curr++];
+-        /* authentication data */
+-        curr += decode_unsigned16(&apdu[curr], &wrapper->user_id);
+-        wrapper->user_role = apdu[curr++];
+-        if ((wrapper->authentication_mechanism >= 1) &&
+-            (wrapper->authentication_mechanism <= 199)) {
+-            curr += decode_unsigned16(
+-                &apdu[curr], &wrapper->authentication_data_length);
+-            wrapper->authentication_data_length -= 5;
+-            memcpy(wrapper->authentication_data, &apdu[curr],
+-                wrapper->authentication_data_length);
+-            curr += wrapper->authentication_data_length;
+-        } else if (wrapper->authentication_mechanism >= 200) {
+-            curr += decode_unsigned16(
+-                &apdu[curr], &wrapper->authentication_data_length);
+-            wrapper->authentication_data_length -= 7;
+-            curr += decode_unsigned16(&apdu[curr], &wrapper->vendor_id);
+-            memcpy(wrapper->authentication_data, &apdu[curr],
+-                wrapper->authentication_data_length);
+-            curr += wrapper->authentication_data_length;
+-        }
+-    }
+-    wrapper->service_data_len = (uint16_t)(real_len - curr);
+-    memcpy(wrapper->service_data, &apdu[curr], wrapper->service_data_len);
+-    curr += wrapper->service_data_len;
+-    if (!key_verify_sign_msg(&key, &apdu[-bytes_before],
+-            (uint32_t)(bytes_before + real_len), wrapper->signature)) {
+-        return -SEC_RESP_BAD_SIGNATURE;
+-    }
+-
+-    return curr;
+-}
++// int decode_security_wrapper_safe(int bytes_before,
++//     uint8_t *apdu,
++//     uint32_t apdu_len_remaining,
++//     BACNET_SECURITY_WRAPPER *wrapper)
++// {
++//     int curr = 0;
++//     int enc_begin = 0;
++//     int real_len = (int)(apdu_len_remaining - SIGNATURE_LEN);
++//     BACNET_KEY_ENTRY key;
++//     BACNET_SECURITY_RESPONSE_CODE res = SEC_RESP_SUCCESS;
++
++//     if (apdu_len_remaining < 40) {
++//         return -SEC_RESP_MALFORMED_MESSAGE;
++//     }
++//     wrapper->payload_net_or_bvll_flag = ((apdu[curr] & (1 << 7)) != 0);
++//     wrapper->encrypted_flag = ((apdu[curr] & (1 << 6)) != 0);
++//     wrapper->authentication_flag = ((apdu[curr] & (1 << 4)) != 0);
++//     wrapper->do_not_unwrap_flag = ((apdu[curr] & (1 << 3)) != 0);
++//     wrapper->do_not_decrypt_flag = ((apdu[curr] & (1 << 2)) != 0);
++//     wrapper->non_trusted_source_flag = ((apdu[curr] & (1 << 1)) != 0);
++//     wrapper->secured_by_router_flag = ((apdu[curr] & 1) != 0);
++//     /* basic integrity checks */
++//     if (wrapper->do_not_decrypt_flag && !wrapper->do_not_unwrap_flag) {
++//         return -SEC_RESP_MALFORMED_MESSAGE;
++//     }
++//     if (!wrapper->encrypted_flag && wrapper->do_not_decrypt_flag) {
++//         return -SEC_RESP_MALFORMED_MESSAGE;
++//     }
++//     /* remove encryption flag for signature validation */
++//     apdu[curr] &= ~((uint8_t)(1 << 6));
++//     curr++;
++//     /* key */
++//     wrapper->key_revision = apdu[curr++];
++//     curr += decode_unsigned16(&apdu[curr], &wrapper->key_identifier);
++//     /* find appropriate key */
++//     key.key_identifier = wrapper->key_identifier;
++//     res = bacnet_find_key(wrapper->key_revision, &key);
++//     if (res != SEC_RESP_SUCCESS) {
++//         return -res;
++//     }
++//     /* source device instance */
++//     curr += decode_unsigned24(&apdu[curr], &wrapper->source_device_instance);
++//     /* message id */
++//     curr += decode_unsigned32(&apdu[curr], &wrapper->message_id);
++//     /* timestamp */
++//     curr += decode_unsigned32(&apdu[curr], &wrapper->timestamp);
++//     /* begin decryption starting from destination device instance */
++//     enc_begin = curr;
++//     /* read signature */
++//     memcpy(wrapper->signature, &apdu[real_len], SIGNATURE_LEN);
++//     if (wrapper->encrypted_flag) {
++//         if (!key_decrypt_msg(&key, &apdu[enc_begin],
++//                 (uint32_t)(real_len - enc_begin), wrapper->signature)) {
++//             return -SEC_RESP_MALFORMED_MESSAGE;
++//         }
++//         curr += decode_unsigned16(&apdu[real_len - 2], &wrapper->padding_len);
++//         real_len -= wrapper->padding_len;
++//         memcpy(wrapper->padding, &apdu[wrapper->padding_len],
++//             wrapper->padding_len - 2);
++//     }
++//     /* destination device instance */
++//     curr +=
++//         decode_unsigned24(&apdu[curr], &wrapper->destination_device_instance);
++//     /* dst address */
++//     curr += decode_unsigned16(&apdu[curr], &wrapper->dnet);
++//     wrapper->dlen = apdu[curr++];
++//     memcpy(wrapper->dadr, &apdu[curr], wrapper->dlen);
++//     curr += wrapper->dlen;
++//     /* src address */
++//     curr += decode_unsigned16(&apdu[curr], &wrapper->snet);
++//     wrapper->slen = apdu[curr++];
++//     memcpy(wrapper->sadr, &apdu[curr], wrapper->slen);
++//     curr += wrapper->slen;
++//     /* authentication */
++//     if (wrapper->authentication_flag) {
++//         wrapper->authentication_mechanism = apdu[curr++];
++//         /* authentication data */
++//         curr += decode_unsigned16(&apdu[curr], &wrapper->user_id);
++//         wrapper->user_role = apdu[curr++];
++//         if ((wrapper->authentication_mechanism >= 1) &&
++//             (wrapper->authentication_mechanism <= 199)) {
++//             curr += decode_unsigned16(
++//                 &apdu[curr], &wrapper->authentication_data_length);
++//             wrapper->authentication_data_length -= 5;
++//             memcpy(wrapper->authentication_data, &apdu[curr],
++//                 wrapper->authentication_data_length);
++//             curr += wrapper->authentication_data_length;
++//         } else if (wrapper->authentication_mechanism >= 200) {
++//             curr += decode_unsigned16(
++//                 &apdu[curr], &wrapper->authentication_data_length);
++//             wrapper->authentication_data_length -= 7;
++//             curr += decode_unsigned16(&apdu[curr], &wrapper->vendor_id);
++//             memcpy(wrapper->authentication_data, &apdu[curr],
++//                 wrapper->authentication_data_length);
++//             curr += wrapper->authentication_data_length;
++//         }
++//     }
++//     wrapper->service_data_len = (uint16_t)(real_len - curr);
++//     memcpy(wrapper->service_data, &apdu[curr], wrapper->service_data_len);
++//     curr += wrapper->service_data_len;
++//     if (!key_verify_sign_msg(&key, &apdu[-bytes_before],
++//             (uint32_t)(bytes_before + real_len), wrapper->signature)) {
++//         return -SEC_RESP_BAD_SIGNATURE;
++//     }
++
++//     return curr;
++// }
+ 
+ int decode_challenge_request_safe(uint8_t *apdu,
+     uint32_t apdu_len_remaining,
+diff --git a/src/bacnet/datalink/bacsec.h b/src/bacnet/datalink/bacsec.h
+index 93823dd7..9f5e9d78 100644
+--- a/src/bacnet/datalink/bacsec.h
++++ b/src/bacnet/datalink/bacsec.h
+@@ -211,10 +211,10 @@ extern "C" {
+         uint8_t * msg,
+         uint32_t msg_len,
+         uint8_t * signature);
+-    bool key_verify_sign_msg(BACNET_KEY_ENTRY * key,
+-        uint8_t * msg,
+-        uint32_t msg_len,
+-        uint8_t * signature);
++    // bool key_verify_sign_msg(BACNET_KEY_ENTRY * key,
++    //     uint8_t * msg,
++    //     uint32_t msg_len,
++    //     uint8_t * signature);
+     int key_encrypt_msg(BACNET_KEY_ENTRY * key,
+         uint8_t * msg,
+         uint32_t msg_len,
+@@ -229,9 +229,9 @@ extern "C" {
+         uint8_t * padding);
+ 
+ /* encoders */
+-    int encode_security_wrapper(int bytes_before,
+-        uint8_t * apdu,
+-        BACNET_SECURITY_WRAPPER * wrapper);
++    // int encode_security_wrapper(int bytes_before,
++    //     uint8_t * apdu,
++    //     BACNET_SECURITY_WRAPPER * wrapper);
+     int encode_challenge_request(uint8_t * apdu,
+         BACNET_CHALLENGE_REQUEST * bc_req);
+     int encode_security_payload(uint8_t * apdu,
+@@ -252,10 +252,10 @@ extern "C" {
+         BACNET_SET_MASTER_KEY * set_master_key);
+ 
+ /* safe decoders */
+-    int decode_security_wrapper_safe(int bytes_before,
+-        uint8_t * apdu,
+-        uint32_t apdu_len_remaining,
+-        BACNET_SECURITY_WRAPPER * wrapper);
++    // int decode_security_wrapper_safe(int bytes_before,
++    //     uint8_t * apdu,
++    //     uint32_t apdu_len_remaining,
++    //     BACNET_SECURITY_WRAPPER * wrapper);
+     int decode_challenge_request_safe(uint8_t * apdu,
+         uint32_t apdu_len_remaining,
+         BACNET_CHALLENGE_REQUEST * bc_req);
+
+From ef7908cfa1fb29280f8f3b893efa6149c2da8ef9 Mon Sep 17 00:00:00 2001
+From: Carlos Gomes Martinho <kmartinho8@gmail.com>
+Date: Fri, 28 Feb 2020 10:03:53 +0100
+Subject: [PATCH 2/4] chore: also build shared lib
+
+---
+ .appveyor.yml | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/.appveyor.yml b/.appveyor.yml
+index b15c0f9e..7a59b43c 100644
+--- a/.appveyor.yml
++++ b/.appveyor.yml
+@@ -6,5 +6,5 @@ image:
+   - macOS
+ 
+ build_script:
+-  - cmake .
++  - cmake . -DBUILD_SHARED_LIBS=ON
+   - cmake --build . --config %CONFIGURATION%
+\ No newline at end of file
+
+From 0dbcceebc88aa3931b97f8c6d5b247a862157547 Mon Sep 17 00:00:00 2001
+From: Carlos Gomes Martinho <kmartinho8@gmail.com>
+Date: Fri, 28 Feb 2020 10:14:58 +0100
+Subject: [PATCH 3/4] chore: also build shared for github ci
+
+---
+ .github/workflows/main.yml | 2 +-
+ build.sh                   | 2 +-
+ 2 files changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/.github/workflows/main.yml b/.github/workflows/main.yml
+index 079a1a45..c7e6f9ed 100644
+--- a/.github/workflows/main.yml
++++ b/.github/workflows/main.yml
+@@ -30,7 +30,7 @@ jobs:
+       # Note the current convention is to use the -S and -B options here to specify source 
+       # and build directories, but this is only available with CMake 3.13 and higher.  
+       # The CMake binaries on the Github Actions machines are (as of this writing) 3.12
+-      run: cmake $GITHUB_WORKSPACE -DCMAKE_BUILD_TYPE=$BUILD_TYPE
++      run: cmake $GITHUB_WORKSPACE -DBUILD_SHARED_LIBS=ON -DCMAKE_BUILD_TYPE=$BUILD_TYPE
+ 
+     - name: Build
+       working-directory: ${{runner.workspace}}/build
+diff --git a/build.sh b/build.sh
+index 56c874cb..a158ac4e 100755
+--- a/build.sh
++++ b/build.sh
+@@ -3,5 +3,5 @@
+ rm -rf _build
+ mkdir _build
+ cd _build
+-cmake .. -DBUILD_SHARED_LIBS=ON
++cmake ..
+ make
+
+From 2e8d89ba57c9e3f090df9b3c87f1a6dff357e781 Mon Sep 17 00:00:00 2001
+From: Carlos Gomes Martinho <kmartinho8@gmail.com>
+Date: Mon, 2 Mar 2020 22:27:12 +0100
+Subject: [PATCH 4/4] chore: do not test shared libs in ci for the moment
+
+---
+ .appveyor.yml              | 2 +-
+ .github/workflows/main.yml | 2 +-
+ 2 files changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/.appveyor.yml b/.appveyor.yml
+index 7a59b43c..b15c0f9e 100644
+--- a/.appveyor.yml
++++ b/.appveyor.yml
+@@ -6,5 +6,5 @@ image:
+   - macOS
+ 
+ build_script:
+-  - cmake . -DBUILD_SHARED_LIBS=ON
++  - cmake .
+   - cmake --build . --config %CONFIGURATION%
+\ No newline at end of file
+diff --git a/.github/workflows/main.yml b/.github/workflows/main.yml
+index c7e6f9ed..079a1a45 100644
+--- a/.github/workflows/main.yml
++++ b/.github/workflows/main.yml
+@@ -30,7 +30,7 @@ jobs:
+       # Note the current convention is to use the -S and -B options here to specify source 
+       # and build directories, but this is only available with CMake 3.13 and higher.  
+       # The CMake binaries on the Github Actions machines are (as of this writing) 3.12
+-      run: cmake $GITHUB_WORKSPACE -DBUILD_SHARED_LIBS=ON -DCMAKE_BUILD_TYPE=$BUILD_TYPE
++      run: cmake $GITHUB_WORKSPACE -DCMAKE_BUILD_TYPE=$BUILD_TYPE
+ 
+     - name: Build
+       working-directory: ${{runner.workspace}}/build
