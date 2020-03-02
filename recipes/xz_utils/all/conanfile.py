@@ -20,12 +20,11 @@ class XZUtils(ConanFile):
         return "source_subfolder"
 
     @property
-    def _is_mingw_windows(self):
-        # Linux MinGW doesn't require MSYS2 bash obviously
-        return self.settings.compiler == "gcc" and self.settings.os == "Windows" and os.name == "nt"
+    def _use_winbash(self):
+        return tools.os_info.is_windows
 
     def build_requirements(self):
-        if self._is_mingw_windows and "CONAN_BASH_PATH" not in os.environ and \
+        if self._use_winbash and "CONAN_BASH_PATH" not in os.environ and \
                 tools.os_info.detect_windows_subsystem() != "msys2":
             self.build_requires("msys2/20190524")
 
@@ -84,7 +83,7 @@ class XZUtils(ConanFile):
     def _build_configure(self):
         with tools.chdir(self._source_subfolder):
             args = []
-            env_build = AutoToolsBuildEnvironment(self, win_bash=self._is_mingw_windows)
+            env_build = AutoToolsBuildEnvironment(self, win_bash=self._use_winbash)
             args = ["--disable-doc"]
             if self.settings.os != "Windows" and self.options.fPIC:
                 args.append("--with-pic")

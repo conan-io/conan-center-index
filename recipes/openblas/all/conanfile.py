@@ -18,12 +18,16 @@ class OpenBLAS(ConanFile):
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
-        "build_lapack": [True, False]
+        "build_lapack": [True, False],
+        "use_thread": [True, False],
+        "dynamic_arch": [True, False],
     }
     default_options = {
         "shared": False,
         "fPIC": True,
-        "build_lapack": False
+        "build_lapack": False,
+        "use_thread": True,
+        "dynamic_arch": False
     }
     exports_sources = ["CMakeLists.txt"]
     generators = "cmake"
@@ -38,7 +42,7 @@ class OpenBLAS(ConanFile):
         tools.get(**self.conan_data["sources"][self.version])
         os.rename('OpenBLAS-{}'.format(self.version), self._source_subfolder)
 
-    def _configure_cmake(self):
+    def _create_cmake_helper(self):
         cmake = CMake(self)
         if self.options.build_lapack:
             self.output.warn(
@@ -46,6 +50,12 @@ class OpenBLAS(ConanFile):
 
         cmake.definitions["NOFORTRAN"] = not self.options.build_lapack
         cmake.definitions["BUILD_WITHOUT_LAPACK"] = not self.options.build_lapack
+        cmake.definitions["DYNAMIC_ARCH"] = self.options.dynamic_arch
+        cmake.definitions["USE_THREAD"] = self.options.use_thread
+
+        if not self.options.use_thread:
+            # Required for safe concurrent calls to OpenBLAS routines
+            cmake.definitions["USE_LOCKING"] = True
 
         if self.settings.compiler == "Visual Studio" and not self.options.shared:
             cmake.definitions["MSVC_STATIC_CRT"] = True
@@ -55,11 +65,11 @@ class OpenBLAS(ConanFile):
             # which is required to successfully compile on older gcc versions.
             cmake.definitions["ANDROID"] = True
 
-        cmake.configure(build_folder=self._build_subfolder)
         return cmake
 
     def build(self):
-        cmake = self._configure_cmake()
+        cmake = self._create_cmake_helper()
+        cmake.configure(build_folder=self._build_subfolder)
         cmake.build()
 
     def package(self):
@@ -67,8 +77,8 @@ class OpenBLAS(ConanFile):
             pattern="LICENSE",
             dst="licenses",
             src=self._source_subfolder)
-        cmake = self._configure_cmake()
-        cmake.install()
+        cmake = self._create_cmake_helper()
+        cmake.install(build_dir=self._build_subfolder)
         tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
         tools.rmdir(os.path.join(self.package_folder, "share"))
 
@@ -76,7 +86,9 @@ class OpenBLAS(ConanFile):
         self.env_info.OpenBLAS_HOME = self.package_folder
         self.cpp_info.libs = tools.collect_libs(self)
         if self.settings.os == "Linux":
-            self.cpp_info.system_libs = ["pthread"]
+            if self.options.use_thread:
+                self.cpp_info.system_libs = ["pthread"]
+
             if self.options.build_lapack:
                 self.cpp_info.system_libs.append("gfortran")
         self.cpp_info.names["cmake_find_package"] = "OpenBLAS"

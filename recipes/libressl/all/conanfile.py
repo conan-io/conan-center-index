@@ -45,7 +45,7 @@ class LibreSSLConan(ConanFile):
     def package(self):
         libressl_include_dir = os.path.join(self._source_subfolder, "include")
         self.copy("tls.h", dst="include", src=libressl_include_dir)
-        self.copy("openssl/*", dst="include", src=libressl_include_dir)
+        self.copy("openssl/*.h", dst="include", src=libressl_include_dir)
 
         self.copy("*COPYING", dst="licenses", keep_path=False)
         if self.options.shared:
