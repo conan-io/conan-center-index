@@ -10,7 +10,7 @@ class LibUSBConan(ConanFile):
     topics = ("conan", "libusb", "usb", "device")
     settings = "os", "compiler", "build_type", "arch"
     options = {"shared": [True, False], "enable_udev": [True, False], "fPIC": [True, False]}
-    default_options = {'shared': False, 'enable_udev': True, 'fPIC': True}
+    default_options = {"shared": False, "enable_udev": True, "fPIC": True}
     _autotools = None
 
     @property
@@ -76,16 +76,16 @@ class LibUSBConan(ConanFile):
     def _configure_autotools(self):
         if not self._autotools:
             self._autotools = AutoToolsBuildEnvironment(self, win_bash=tools.os_info.is_windows)
-            configure_args = ['--enable-shared' if self.options.shared else '--disable-shared']
-            configure_args.append('--enable-static' if not self.options.shared else '--disable-static')
+            configure_args = ["--enable-shared" if self.options.shared else "--disable-shared"]
+            configure_args.append("--enable-static" if not self.options.shared else "--disable-static")
             if self.settings.os == "Linux":
-                configure_args.append('--enable-udev' if self.options.enable_udev else '--disable-udev')
+                configure_args.append("--enable-udev" if self.options.enable_udev else "--disable-udev")
             elif self._is_mingw:
                 if self.settings.arch == "x86_64":
-                    configure_args.append('--host=x86_64-w64-mingw32')
+                    configure_args.append("--host=x86_64-w64-mingw32")
                 elif self.settings.arch == "x86":
-                    configure_args.append('--build=i686-w64-mingw32')
-                    configure_args.append('--host=i686-w64-mingw32')
+                    configure_args.append("--build=i686-w64-mingw32")
+                    configure_args.append("--host=i686-w64-mingw32")
             self._autotools.configure(args=configure_args, configure_dir=self._source_subfolder)
         return self._autotools
 
@@ -126,6 +126,7 @@ class LibUSBConan(ConanFile):
                 os.remove(la_file)
 
     def package_info(self):
+        self.cpp_info.names["pkg_config"] = "libusb-1.0"
         self.cpp_info.libs = tools.collect_libs(self)
         self.cpp_info.includedirs.append(os.path.join("include", "libusb-1.0"))
         if self.settings.os == "Linux":

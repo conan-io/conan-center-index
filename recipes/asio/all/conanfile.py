@@ -8,6 +8,7 @@ class Asio(ConanFile):
     homepage = "http://think-async.com/Asio"
     description = "Asio is a cross-platform C++ library for network and low-level I/O"
     topics = ("conan", "asio", "network", "io", "low-level")
+    settings = "os"
     license = "BSL-1.0"
 
     no_copy_source = True
@@ -28,7 +29,7 @@ class Asio(ConanFile):
 
     def package_info(self):
         self.cpp_info.defines.append('ASIO_STANDALONE')
-        if tools.os_info.is_linux:
+        if str(self.settings.os) in ["Linux", "Android"]:
             self.cpp_info.libs.append('pthread')
 
     def package_id(self):
