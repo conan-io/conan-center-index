@@ -1,5 +1,6 @@
 import os
 from conans import CMake, ConanFile, tools
+from conans.errors import ConanInvalidConfiguration
 
 
 class BacnetStackConan(ConanFile):
@@ -40,6 +41,9 @@ class BacnetStackConan(ConanFile):
     def configure(self):
         del self.settings.compiler.libcxx
         del self.settings.compiler.cppstd
+
+        if self.settings.os == "Windows" and self.options.shared:
+            raise ConanInvalidConfiguration("Windows shared builds are not supported right now, see issue https://github.com/bacnet-stack/bacnet-stack/issues/49")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
