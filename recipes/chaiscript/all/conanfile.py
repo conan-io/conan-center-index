@@ -12,11 +12,10 @@ class ChaiScriptConan(ConanFile):
     exports_sources = ["CMakeLists.txt"]
     generators = "cmake"
     settings = "os", "compiler", "build_type", "arch"
-    options = {"shared": [True, False], "fPIC": [True, False],
-               "dyn_load": [True, False], "use_std_make_shared": [True, False],
+    options = {"fPIC": [True, False], "dyn_load": [True, False], "use_std_make_shared": [True, False],
                "multithread_support": [True, False],
                "header_only": [True, False]}
-    default_options = {"shared": False, "fPIC": True, "dyn_load": True,
+    default_options = {"fPIC": True, "dyn_load": True,
                        "use_std_make_shared": True,
                        "multithread_support": True,
                        "header_only": True}
@@ -66,10 +65,12 @@ class ChaiScriptConan(ConanFile):
             tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
             tools.rmdir(os.path.join(self.package_folder, "share"))
 
-    def package_info(self):
+    def package_id(self):
         if self.options.header_only:
             self.info.header_only()
-        else:
+
+    def package_info(self):
+        if not self.options.header_only:
             self.cpp_info.libs = tools.collect_libs(self)
         if self.options.use_std_make_shared:
             self.cpp_info.defines.append("CHAISCRIPT_USE_STD_MAKE_SHARED")
