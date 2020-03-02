@@ -30,8 +30,7 @@ class LibcurlConan(ConanFile):
                "with_libpsl": [True, False],
                "with_largemaxwritesize": [True, False],
                "with_nghttp2": [True, False],
-               "with_brotli": [True, False],
-               "enable_bitcode": [True, False]
+               "with_brotli": [True, False]
                }
     default_options = {'shared': False,
                        'fPIC': True,
@@ -46,8 +45,7 @@ class LibcurlConan(ConanFile):
                        'with_libpsl': False,
                        'with_largemaxwritesize': False,
                        'with_nghttp2': False,
-                       'with_brotli': False, 
-                       'enable_bitcode': False
+                       'with_brotli': False
                        }
     _source_subfolder = "source_subfolder"
     _build_subfolder = "build_subfolder"
@@ -72,7 +70,6 @@ class LibcurlConan(ConanFile):
     def config_options(self):
         if not tools.is_apple_os(self.settings.os):
             self.options.remove("darwin_ssl")
-            self.options.remove("enable_bitcode")
 
         if self.settings.os != "Windows":
             self.options.remove("with_winssl")
@@ -324,15 +321,14 @@ class LibcurlConan(ConanFile):
 
                 arch_flag = "-arch {}".format(configure_arch)
                 ios_min_version = tools.apple_deployment_target_flag(self.settings.os, self.settings.os.version)
-                bitcode =  "-fembed-bitcode" if self.options.enable_bitcode else ""
                 extra_flag = "-Werror=partial-availability"
                 extra_def = " -DHAVE_SOCKET -DHAVE_FCNTL_O_NONBLOCK"
                 # if we debug, maybe add a -gdwarf-2 , but why would we want that?  
 
                 autotools_vars['CC'] = cc 
                 autotools_vars['IPHONEOS_DEPLOYMENT_TARGET'] = ios_dev_target
-                autotools_vars['CFLAGS'] = "{} {} {} {} {}".format(
-                    sysroot, arch_flag, ios_min_version, bitcode, extra_flag
+                autotools_vars['CFLAGS'] = "{} {} {} {}".format(
+                    sysroot, arch_flag, ios_min_version, extra_flag
                 ) 
                 autotools_vars['LDFLAGS'] = "{} {}".format(arch_flag, sysroot)
                 autotools_vars['CPPFLAGS'] += extra_def
