@@ -24,7 +24,7 @@ class ZyreConan(ConanFile):
         "fPIC": True,
         "drafts": False,
     }
-    generators = "cmake_find_package"
+    generators = ["cmake"]
     _cmake = None
     _source_subfolder = "source_subfolder"
     _build_subfolder = "build_subfolder"
@@ -47,8 +47,6 @@ class ZyreConan(ConanFile):
         return self._cmake
 
     def build(self):
-        for patch in self.conan_data["patches"][self.version]:
-            tools.patch(**patch)
         cmake = self._configure_cmake()
         cmake.build()
 
