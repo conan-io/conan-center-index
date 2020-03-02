@@ -1,0 +1,16 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 2bfab61..c86aef7 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -203,11 +203,6 @@ configure_file(
+     "${SOURCE_DIR}/src/libzyre.pc"
+ @ONLY)
+ 
+-install(
+-    FILES "${SOURCE_DIR}/src/libzyre.pc"
+-    DESTINATION "lib${LIB_SUFFIX}/pkgconfig"
+-)
+-
+ ########################################################################
+ # executables
+ ########################################################################
