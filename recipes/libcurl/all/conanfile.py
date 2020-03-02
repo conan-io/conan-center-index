@@ -200,11 +200,6 @@ class LibcurlConan(ConanFile):
             elif self.settings.os == "iOS": 
                 params.append("--enable-threaded-resolver") 
                 params.append("--disable-verbose")
-                # if there is anything special for arm or simulator, add it here
-                if "arm" in self.settings.arch:
-                    pass
-                else:
-                    pass
             elif self.settings.os == "Android":
                 pass # this just works, conan is great! 
 
@@ -307,12 +302,11 @@ class LibcurlConan(ConanFile):
 
         if tools.cross_building(self.settings):
             if self.settings.os == "iOS": 
+                iphoneos = tools.apple_sdk_name(self.settings)
                 ios_dev_target = str(self.settings.os.version).split(".")[0]
                 if self.settings.arch in ["x86", "x86_64"]:
-                    iphoneos = "iphonesimulator"
                     autotools_vars['CPPFLAGS'] = "-D__IPHONE_OS_VERSION_MIN_REQUIRED={}0000".format(ios_dev_target)
                 elif self.settings.arch in ["armv7", "armv7s", "armv8"]:
-                    iphoneos = "iphoneos"
                     autotools_vars['CPPFLAGS'] = ""
                 else:
                     raise ConanInvalidConfiguration("Unsuported iOS arch {}".format(self.settings.arch)) 
@@ -329,7 +323,7 @@ class LibcurlConan(ConanFile):
     
 
                 arch_flag = "-arch {}".format(configure_arch)
-                ios_min_version = "-miphoneos-version-min={}".format(ios_dev_target)
+                ios_min_version = tools.apple_deployment_target_flag(self.settings.os, self.settings.os.version)
                 bitcode =  "-fembed-bitcode" if self.options.enable_bitcode else ""
                 extra_flag = "-Werror=partial-availability"
                 extra_def = " -DHAVE_SOCKET -DHAVE_FCNTL_O_NONBLOCK"
