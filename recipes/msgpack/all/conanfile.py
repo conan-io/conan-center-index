@@ -32,7 +32,6 @@ class MsgpackConan(ConanFile):
         del self.settings.compiler.libcxx
         del self.settings.compiler.cppstd
         if self.options.header_only:
-            self.settings.clear()
             del self.options.shared
             del self.options.fPIC
             del self.options.with_boost
