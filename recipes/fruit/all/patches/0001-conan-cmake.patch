@@ -154,10 +154,10 @@ index b18a463..a78a5bb 100644
 -  DESTINATION ${INSTALL_INCLUDE_DIR}/impl)
 +  DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/fruit/impl)
 diff --git a/src/CMakeLists.txt b/src/CMakeLists.txt
-index 66bf79f..eedaf95 100644
+index 66bf79f..1322460 100644
 --- a/src/CMakeLists.txt
 +++ b/src/CMakeLists.txt
-@@ -11,16 +11,23 @@ normalized_component_storage_holder.cpp
+@@ -11,16 +11,28 @@ normalized_component_storage_holder.cpp
  semistatic_map.cpp
  semistatic_graph.cpp)
  
@@ -175,11 +175,16 @@ index 66bf79f..eedaf95 100644
  
 +target_include_directories(fruit
 +    PUBLIC
-+        ${FRUIT_INCLUDE_DIRS}
-+        ${CONAN_INCLUDE_DIRS})
++        ${FRUIT_INCLUDE_DIRS})
 +target_compile_definitions(fruit
 +    PUBLIC
 +        ${FRUIT_ADDITIONAL_COMPILE_FLAGS})
++
++if(FRUIT_USES_BOOST)
++    target_include_directories(fruit
++        PRIVATE
++            ${CONAN_INCLUDE_DIRS_BOOST})
++endif()
 +
  install(TARGETS fruit
 -        ARCHIVE DESTINATION "${INSTALL_LIBRARY_DIR}"
