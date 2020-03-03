@@ -35,7 +35,7 @@ class TaoCPPTaopqConan(ConanFile):
 
     def config_options(self):
         if self.settings.os == "Windows":
-            self.options.remove("fPIC")
+            del self.options.fPIC
 
     def configure(self):
         if self.settings.compiler.get_safe("cppstd"):
