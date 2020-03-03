@@ -1,6 +1,7 @@
 import os
 from conans import ConanFile, tools
 
+
 class NamedTypeConan(ConanFile):
     name = "namedtype"
     license = "MIT"
@@ -21,8 +22,5 @@ class NamedTypeConan(ConanFile):
         os.rename(extracted_dir, self._source_subfolder)
 
     def package(self):
-        self.copy("*.hpp", src=self._source_subfolder, dst='include')
-        self.copy(pattern="LICENSE", dst="licenses", src=self._source_subfolder)
-
-    def package_id(self):
-        self.info.header_only()
+        self.copy("*.hpp", dst="include", src=self._source_subfolder)
+        self.copy("LICENSE", dst="licenses", src=self._source_subfolder)
