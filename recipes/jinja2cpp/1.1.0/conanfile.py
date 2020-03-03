@@ -18,14 +18,13 @@ class Jinja2cppConan(ConanFile):
     }
     default_options = {'shared': False, "fPIC": True}
     requires = (
-        "variant-lite/[>=1.2.2]",
-        "expected-lite/[>=0.3.0]",
-        "optional-lite/[>=3.2.0]",
-        "string-view-lite/[>=1.3.0]",
-        "boost/[>=1.69.0 <1.72.0]",
-#        "boost/1.70.0",
-        "fmt/[>=5.3]",
-        "rapidjson/[>=1.1.0]"
+        "variant-lite/1.2.2",
+        "expected-lite/0.3.0",
+        "optional-lite/3.2.0",
+        "string-view-lite/1.3.0",
+        "boost/1.71.0",
+        "fmt/6.1.2",
+        "rapidjson/1.1.0"
     )
     
     _source_subfolder = "source_subfolder"
