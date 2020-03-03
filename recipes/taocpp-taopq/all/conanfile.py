@@ -72,3 +72,5 @@ class TaoCPPTaopqConan(ConanFile):
 
     def package_info(self):
         self.cpp_info.libs = ["taopq"]
+        if self.settings.os == "Windows":
+            self.cpp_info.system_libs = ["Ws2_32"]
