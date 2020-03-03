@@ -47,10 +47,9 @@ class ZyreConan(ConanFile):
         return self._cmake
 
     def build(self):
-        for patch in self.conan_data["patches"][self.version]:
-            tools.patch(**patch)
         cmake = self._configure_cmake()
         cmake.build()
+        tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
 
     def package(self):
         self.copy(pattern="LICENSE", src=self._source_subfolder,
