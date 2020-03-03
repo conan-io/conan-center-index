@@ -154,7 +154,7 @@ index b18a463..a78a5bb 100644
 -  DESTINATION ${INSTALL_INCLUDE_DIR}/impl)
 +  DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/fruit/impl)
 diff --git a/src/CMakeLists.txt b/src/CMakeLists.txt
-index 66bf79f..1322460 100644
+index 66bf79f..9c75ec6 100644
 --- a/src/CMakeLists.txt
 +++ b/src/CMakeLists.txt
 @@ -11,16 +11,28 @@ normalized_component_storage_holder.cpp
@@ -176,7 +176,7 @@ index 66bf79f..1322460 100644
 +target_include_directories(fruit
 +    PUBLIC
 +        ${FRUIT_INCLUDE_DIRS})
-+target_compile_definitions(fruit
++target_compile_options(fruit
 +    PUBLIC
 +        ${FRUIT_ADDITIONAL_COMPILE_FLAGS})
 +
