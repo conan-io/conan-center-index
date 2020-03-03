@@ -22,7 +22,7 @@ class Jinja2cppConan(ConanFile):
         "expected-lite/0.3.0",
         "optional-lite/3.2.0",
         "string-view-lite/1.3.0",
-        "boost/1.71.0",
+        "boost/1.72.0",
         "fmt/6.1.2",
         "rapidjson/1.1.0"
     )
