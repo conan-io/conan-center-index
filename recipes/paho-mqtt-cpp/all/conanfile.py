@@ -44,8 +44,14 @@ class PahoMqttCppConan(ConanFile):
         self.options["paho-mqtt-c"].shared = self.options.shared
         self.options["paho-mqtt-c"].ssl = self.options.ssl
 
+
     def requirements(self):
-        self.requires("paho-mqtt-c/1.3.0")
+        if self.version == "1.1":
+            self.requires("paho-mqtt-c/1.3.1")
+        elif self.version == "1.0.1":
+            self.requires("paho-mqtt-c/1.3.0")
+        else:
+            raise ConanInvalidConfiguration("{} requirements not implemented".format(self.version))
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
@@ -65,6 +71,13 @@ class PahoMqttCppConan(ConanFile):
         return self._cmake
 
     def build(self):
+        # TODO debug , remove
+        c_async = self.options["paho-mqtt-c"].asynchronous
+        use_ssl = self.options.ssl 
+        b_shared = self.options.shared
+        self.output.info("++++++++++++++++++++++++++++++")
+        self.output.info("Config: async = {}, ssl = {}, shared = {}".format(c_async, use_ssl, b_shared))
+
         for patch in self.conan_data["patches"][self.version]:
             tools.patch(**patch)
         cmake = self._configure_cmake()
