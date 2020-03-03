@@ -49,7 +49,6 @@ class ZyreConan(ConanFile):
     def build(self):
         cmake = self._configure_cmake()
         cmake.build()
-        tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
 
     def package(self):
         self.copy(pattern="LICENSE", src=self._source_subfolder,
