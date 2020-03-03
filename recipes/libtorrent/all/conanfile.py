@@ -1,5 +1,5 @@
 from conans import CMake, ConanFile, tools
-from conans.errors import ConanInvalidConfiguration
+from conans.tools import Version
 import os
 
 
@@ -57,8 +57,8 @@ class LibtorrentConan(ConanFile):
     def configure(self):
         if self.options.shared:
             del self.options.fPIC
-        if self.settings.compiler.cppstd and self.settings.compiler.cppstd in ("98", "gnu98"):
-            raise ConanInvalidConfiguration("libtorrent requires at least c++11")
+        if self.settings.compiler.cppstd:
+            tools.check_min_cppstd(self, 11)
 
     def requirements(self):
         self.requires("boost/1.71.0")
@@ -102,6 +102,11 @@ class LibtorrentConan(ConanFile):
         tools.replace_in_file(os.path.join(self._source_subfolder, "CMakeLists.txt"),
                               "find_public_dependency(Iconv)",
                               replace)
+        if self.settings.compiler == "clang" and self.settings.compiler.libcxx == "libstdc++":
+            # https://github.com/arvidn/libtorrent/issues/3557
+            tools.replace_in_file(os.path.join(self._source_subfolder, "include", "libtorrent", "file_storage.hpp"),
+                                  "file_entry& operator=(file_entry&&) & noexcept = default;",
+                                  "file_entry& operator=(file_entry&&) & = default;")
 
     def build(self):
         self._patch_sources()
