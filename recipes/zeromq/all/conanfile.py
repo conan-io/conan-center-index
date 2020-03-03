@@ -67,16 +67,18 @@ class ZeroMQConan(ConanFile):
         for patch in self.conan_data["patches"][self.version]:
             tools.patch(**patch)
         os.unlink(os.path.join(self._source_subfolder, "builds", "cmake", "Modules", "FindSodium.cmake"))
-        os.rename("Findlibsodium.cmake", "FindSodium.cmake")
-        tools.replace_in_file(os.path.join(self._source_subfolder, "CMakeLists.txt"),
-                                   "SODIUM_FOUND",
-                                   "libsodium_FOUND")
-        tools.replace_in_file(os.path.join(self._source_subfolder, "CMakeLists.txt"),
-                                   "SODIUM_INCLUDE_DIRS",
-                                   "libsodium_INCLUDE_DIRS")
-        tools.replace_in_file(os.path.join(self._source_subfolder, "CMakeLists.txt"),
-                                   "SODIUM_LIBRARIES",
-                                   "libsodium_LIBRARIES")
+
+        if self.options.encryption == "libsodium":
+            os.rename("Findlibsodium.cmake", "FindSodium.cmake")
+            tools.replace_in_file(os.path.join(self._source_subfolder, "CMakeLists.txt"),
+                                       "SODIUM_FOUND",
+                                       "libsodium_FOUND")
+            tools.replace_in_file(os.path.join(self._source_subfolder, "CMakeLists.txt"),
+                                       "SODIUM_INCLUDE_DIRS",
+                                       "libsodium_INCLUDE_DIRS")
+            tools.replace_in_file(os.path.join(self._source_subfolder, "CMakeLists.txt"),
+                                       "SODIUM_LIBRARIES",
+                                       "libsodium_LIBRARIES")
 
     def build(self):
         self._patch_sources()
