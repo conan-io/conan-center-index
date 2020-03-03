@@ -107,11 +107,11 @@ class FollyConan(ConanFile):
     def package_info(self):
         self.cpp_info.libs = tools.collect_libs(self)
         if self.settings.os == "Linux":
-            self.cpp_info.libs.extend(["pthread", "dl"])
+            self.cpp_info.system_libs.extend(["pthread", "dl"])
         elif self.settings.os == "Windows" and self.settings.compiler == "Visual Studio":
-            self.cpp_info.libs.extend(["ws2_32", "Iphlpapi", "Crypt32"])
+            self.cpp_info.system_libs.extend(["ws2_32", "Iphlpapi", "Crypt32"])
         if (self.settings.os == "Linux" and self.settings.compiler == "clang" and
             self.settings.compiler.libcxx == "libstdc++") or \
            (self.settings.os == "Macos" and self.settings.compiler == "apple-clang" and
            Version(self.settings.compiler.version.value) == "9.0" and self.settings.compiler.libcxx == "libc++"):
-            self.cpp_info.libs.append("atomic")
+            self.cpp_info.system_libs.append("atomic")
