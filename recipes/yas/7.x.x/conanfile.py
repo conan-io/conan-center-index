@@ -8,7 +8,6 @@ class LibnameConan(ConanFile):
     topics = ("conan", "yas", "serialization")
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/niXman/yas"
-    author = "Bincrafters <bincrafters@gmail.com>"
     license = "BSL-1.0"
     no_copy_source = True
     _source_subfolder = "source_subfolder"
