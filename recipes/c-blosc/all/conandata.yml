@@ -1,0 +1,8 @@
+sources:
+  "1.17.1":
+    url: "https://github.com/Blosc/c-blosc/archive/v1.17.1.tar.gz"
+    sha256: "19a6948b579c27e8ac440b4f077f99fc90e7292b1d9cb896bec0fd781d68fba2"
+patches:
+  "1.17.1":
+    - patch_file: "patches/cmake-dependencies_and_cxx_linker.patch"
+      base_path: "source_subfolder"

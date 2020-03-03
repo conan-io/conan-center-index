@@ -1,4 +1,7 @@
 sources:
+  "20200301":
+    url: "https://github.com/google/re2/archive/2020-03-01.tar.gz"
+    sha256: "192a2855e9853091ad3f4c40c03b56d6f5d1fd4cb98ba07101c92f313d0398dc"
   "20191101":
     url: "https://github.com/google/re2/archive/2019-11-01.tar.gz"
     sha256: "5229d7e801bdb3d62a1b9d82de7c74eda223cb5e264d5bd04bcf31a933245d27"
