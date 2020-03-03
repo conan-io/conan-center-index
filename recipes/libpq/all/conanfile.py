@@ -1,5 +1,4 @@
 from conans import ConanFile, AutoToolsBuildEnvironment, tools
-from conans.errors import ConanInvalidConfiguration
 from conans.tools import os_info
 import os
 
@@ -158,9 +157,11 @@ class LibpqConan(ConanFile):
         tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
 
     def package_info(self):
+        self.cpp_info.names["cmake_find_package"] = "PostgreSQL"
+        self.cpp_info.names["cmake_find_package_multi"] = "PostgreSQL"
         self.env_info.PostgreSQL_ROOT = self.package_folder
         self.cpp_info.libs = tools.collect_libs(self)
         if self.settings.os == "Linux":
-            self.cpp_info.libs.append("pthread")
+            self.cpp_info.system_libs = ["pthread"]
         elif self.settings.os == "Windows":
-            self.cpp_info.libs.extend(["ws2_32", "secur32", "advapi32", "shell32", "crypt32", "wldap32"])
+            self.cpp_info.system_libs = ["ws2_32", "secur32", "advapi32", "shell32", "crypt32", "wldap32"]

@@ -120,6 +120,7 @@ conan_staticlibs="{staticlibs}"
         freetype_config = os.path.join(self.package_folder, "bin", "freetype-config")
         self.env_info.PATH.append(os.path.join(self.package_folder, "bin"))
         self.env_info.FT2_CONFIG = freetype_config
+        self.user_info.LIBTOOL_VERSION = self._libtool_version
         self._chmod_plus_x(freetype_config)
         self.cpp_info.names['cmake_find_package'] = 'Freetype'
         self.cpp_info.names['cmake_find_package_multi'] = 'Freetype'

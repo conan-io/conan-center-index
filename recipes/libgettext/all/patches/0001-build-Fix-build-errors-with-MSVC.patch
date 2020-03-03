@@ -1,0 +1,362 @@
+From b33dca8eecdc1eb30bb3747df563faabf729f001 Mon Sep 17 00:00:00 2001
+From: Bruno Haible <bruno@clisp.org>
+Date: Thu, 4 Jul 2019 16:27:33 +0200
+Subject: [PATCH 1/2] build: Fix build errors with MSVC.
+
+* gettext-tools/libgettextpo/exported.sh.in: Remove one level of eval.
+* gettext-tools/libgettextpo/Makefile.am (config.h): Redirect compiler output to
+stderr. Remove symbols that contain an '@'.
+* libtextstyle/lib/Makefile.am (config.h): Likewise.
+
+build: Fix build error with MSVC.
+
+* gettext-runtime/intl/export.h (LIBINTL_DLL_EXPORTED): Define differently for
+MSVC.
+
+build: Fix build error with MSVC.
+
+* gettext-runtime/intl/Makefile.am (INTL_WINDOWS_LIBS): New variable.
+(OTHER_LDFLAGS): Add it.
+
+build: Fix build errors with MSVC.
+
+* gettext-tools/src/lang-table.h (language_table, language_variant_table):
+Declare with C linkage.
+* gettext-tools/src/read-po.h (input_format_po): Likewise.
+* gettext-tools/src/read-properties.h (input_format_properties): Likewise.
+* gettext-tools/src/read-stringtable.h (input_format_stringtable): Likewise.
+* gettext-tools/src/write-properties.h (output_format_properties): Likewise.
+* gettext-tools/src/write-stringtable.h (output_format_stringtable): Likewise.
+
+intl: Don't export the glwthread* symbols from libintl on native Windows.
+
+* gettext-runtime/intl/Makefile.am (OTHER_LDFLAGS): Add an -export-symbols-regex
+option.
+---
+ gettext-runtime/intl/Makefile.in          | 10 +++++++++-
+ gettext-runtime/intl/export.h             |  2 ++
+ gettext-tools/intl/Makefile.in            | 10 +++++++++-
+ gettext-tools/libgettextpo/Makefile.in    |  4 ++--
+ gettext-tools/libgettextpo/exported.sh.in |  5 ++---
+ gettext-tools/src/lang-table.h            | 14 +++++++++++++-
+ gettext-tools/src/read-po.h               | 14 +++++++++++++-
+ gettext-tools/src/read-properties.h       | 14 +++++++++++++-
+ gettext-tools/src/read-stringtable.h      | 14 +++++++++++++-
+ gettext-tools/src/write-properties.h      | 14 +++++++++++++-
+ gettext-tools/src/write-stringtable.h     | 14 +++++++++++++-
+ libtextstyle/lib/Makefile.in              |  4 ++--
+ 12 files changed, 104 insertions(+), 15 deletions(-)
+
+diff --git a/gettext-runtime/intl/Makefile.in b/gettext-runtime/intl/Makefile.in
+index fe59cd4aa..10aaa89fe 100644
+--- a/gettext-runtime/intl/Makefile.in
++++ b/gettext-runtime/intl/Makefile.in
+@@ -1416,6 +1416,11 @@ libintl_la_DEPENDENCIES = $(WOE32_LIBADD)
+ libgnuintl_la_LIBADD = $(WOE32_LIBADD)
+ libgnuintl_la_DEPENDENCIES = $(WOE32_LIBADD)
+ 
++# langprefs.c (_nl_language_preferences_win32_95) uses functions from
++# advapi32.dll.
++@WOE32_TRUE@INTL_WINDOWS_LIBS = -ladvapi32
++@WOE32_FALSE@INTL_WINDOWS_LIBS =
++
+ # Libtool's library version information for libintl.
+ # Before making a gettext release, you must change this according to the
+ # libtool documentation, section "Library interface versions".
+@@ -1424,8 +1429,11 @@ LTV_REVISION = 6
+ LTV_AGE = 1
+ 
+ # How to build libintl.la and libgnuintl.la.
++# Limit the exported symbols: Don't export glwthread* (from gnulib modules).
+ OTHER_LDFLAGS = \
+-  @LTLIBICONV@ @INTL_MACOSX_LIBS@ @LTLIBTHREAD@ -no-undefined \
++  @LTLIBICONV@ @INTL_MACOSX_LIBS@ $(INTL_WINDOWS_LIBS) @LTLIBTHREAD@ \
++  -no-undefined \
++  -export-symbols-regex '^([^g]|g[^l]|gl[^w]|glw[^t]|glwt[^h]|glwth[^r]|glwthr[^e]|glwthre[^a]|glwthrea[^d]).*' \
+   -version-info $(LTV_CURRENT):$(LTV_REVISION):$(LTV_AGE) \
+   -rpath $(libdir)
+ 
+diff --git a/gettext-runtime/intl/export.h b/gettext-runtime/intl/export.h
+index b5c47ad5b..10253e338 100644
+--- a/gettext-runtime/intl/export.h
++++ b/gettext-runtime/intl/export.h
+@@ -1,6 +1,8 @@
+ 
+ #if @HAVE_VISIBILITY@ && BUILDING_LIBINTL
+ #define LIBINTL_DLL_EXPORTED __attribute__((__visibility__("default")))
++#elif defined _MSC_VER && BUILDING_LIBINTL
++#define LIBINTL_DLL_EXPORTED __declspec(dllexport)
+ #else
+ #define LIBINTL_DLL_EXPORTED
+ #endif
+diff --git a/gettext-tools/intl/Makefile.in b/gettext-tools/intl/Makefile.in
+index 9bdfe2238..6eabf22af 100644
+--- a/gettext-tools/intl/Makefile.in
++++ b/gettext-tools/intl/Makefile.in
+@@ -2120,6 +2120,11 @@ libintl_la_DEPENDENCIES = $(WOE32_LIBADD)
+ libgnuintl_la_LIBADD = $(WOE32_LIBADD)
+ libgnuintl_la_DEPENDENCIES = $(WOE32_LIBADD)
+ 
++# langprefs.c (_nl_language_preferences_win32_95) uses functions from
++# advapi32.dll.
++@WOE32_TRUE@INTL_WINDOWS_LIBS = -ladvapi32
++@WOE32_FALSE@INTL_WINDOWS_LIBS =
++
+ # Libtool's library version information for libintl.
+ # Before making a gettext release, you must change this according to the
+ # libtool documentation, section "Library interface versions".
+@@ -2128,8 +2133,11 @@ LTV_REVISION = 6
+ LTV_AGE = 1
+ 
+ # How to build libintl.la and libgnuintl.la.
++# Limit the exported symbols: Don't export glwthread* (from gnulib modules).
+ OTHER_LDFLAGS = \
+-  @LTLIBICONV@ @INTL_MACOSX_LIBS@ @LTLIBTHREAD@ -no-undefined \
++  @LTLIBICONV@ @INTL_MACOSX_LIBS@ $(INTL_WINDOWS_LIBS) @LTLIBTHREAD@ \
++  -no-undefined \
++  -export-symbols-regex '^([^g]|g[^l]|gl[^w]|glw[^t]|glwt[^h]|glwth[^r]|glwthr[^e]|glwthre[^a]|glwthrea[^d]).*' \
+   -version-info $(LTV_CURRENT):$(LTV_REVISION):$(LTV_AGE) \
+   -rpath $(libdir)
+ 
+diff --git a/gettext-tools/libgettextpo/Makefile.in b/gettext-tools/libgettextpo/Makefile.in
+index 59356fa1d..444ef7807 100644
+--- a/gettext-tools/libgettextpo/Makefile.in
++++ b/gettext-tools/libgettextpo/Makefile.in
+@@ -2942,8 +2942,8 @@ config.h: $(BUILT_SOURCES)
+ 	          ;; \
+ 	      esac; \
+ 	    done; \
+-	  } 5>&1 \
+-	    | sed -e 's,.* ,,' | LC_ALL=C sort | LC_ALL=C uniq \
++	  } 5>&1 1>&2 \
++	    | sed -e 's,.* ,,' | grep -v '@' | LC_ALL=C sort | LC_ALL=C uniq \
+ 	    | sed -e 's,^obstack_free$$,__obstack_free,' \
+ 	    | sed -e 's,^\(.*\)$$,#define \1 libgettextpo_\1,' > config.h-t && \
+ 	  if test -f config.h; then \
+diff --git a/gettext-tools/libgettextpo/exported.sh.in b/gettext-tools/libgettextpo/exported.sh.in
+index 2e6b89ab6..be7fb38bd 100644
+--- a/gettext-tools/libgettextpo/exported.sh.in
++++ b/gettext-tools/libgettextpo/exported.sh.in
+@@ -1,6 +1,6 @@
+ #! /bin/sh
+ #
+-# Copyright (C) 2006 Free Software Foundation, Inc.
++# Copyright (C) 2006, 2009, 2019 Free Software Foundation, Inc.
+ #
+ # This program is free software: you can redistribute it and/or modify
+ # it under the terms of the GNU General Public License as published by
+@@ -20,5 +20,4 @@
+ # This is a separate script because $(GLOBAL_SYMBOL_PIPE) cannot be used in a
+ # Makefile, since it may contain dollar signs.
+ 
+-nm_cmd="@NM@ $1 | @GLOBAL_SYMBOL_PIPE@"
+-eval $nm_cmd
++@NM@ "$1" | @GLOBAL_SYMBOL_PIPE@
+diff --git a/gettext-tools/src/lang-table.h b/gettext-tools/src/lang-table.h
+index 7ac197669..ebf193b98 100644
+--- a/gettext-tools/src/lang-table.h
++++ b/gettext-tools/src/lang-table.h
+@@ -1,5 +1,5 @@
+ /* Table of languages.
+-   Copyright (C) 2001-2007 Free Software Foundation, Inc.
++   Copyright (C) 2001-2007, 2019 Free Software Foundation, Inc.
+    Written by Bruno Haible <haible@clisp.cons.org>, 2005.
+ 
+    This program is free software: you can redistribute it and/or modify
+@@ -20,6 +20,12 @@
+ 
+ #include <stddef.h>
+ 
++
++#ifdef __cplusplus
++extern "C" {
++#endif
++
++
+ struct language_table_entry
+ {
+   const char *code;
+@@ -32,4 +38,10 @@ extern const size_t language_table_size;
+ extern struct language_table_entry language_variant_table[];
+ extern const size_t language_variant_table_size;
+ 
++
++#ifdef __cplusplus
++}
++#endif
++
++
+ #endif /* _LANG_TABLE_H */
+diff --git a/gettext-tools/src/read-po.h b/gettext-tools/src/read-po.h
+index 6852a22a0..98fc893b2 100644
+--- a/gettext-tools/src/read-po.h
++++ b/gettext-tools/src/read-po.h
+@@ -1,5 +1,5 @@
+ /* Reading PO files.
+-   Copyright (C) 2006 Free Software Foundation, Inc.
++   Copyright (C) 2006, 2019 Free Software Foundation, Inc.
+    Written by Bruno Haible <bruno@clisp.org>, 2006.
+ 
+    This program is free software: you can redistribute it and/or modify
+@@ -20,7 +20,19 @@
+ 
+ #include "read-catalog-abstract.h"
+ 
++
++#ifdef __cplusplus
++extern "C" {
++#endif
++
++
+ /* Describes a .po / .pot file parser.  */
+ extern DLL_VARIABLE const struct catalog_input_format input_format_po;
+ 
++
++#ifdef __cplusplus
++}
++#endif
++
++
+ #endif /* _READ_PO_H */
+diff --git a/gettext-tools/src/read-properties.h b/gettext-tools/src/read-properties.h
+index e04abe524..9c299e6c2 100644
+--- a/gettext-tools/src/read-properties.h
++++ b/gettext-tools/src/read-properties.h
+@@ -1,5 +1,5 @@
+ /* Reading Java .properties files.
+-   Copyright (C) 2003, 2006 Free Software Foundation, Inc.
++   Copyright (C) 2003, 2006, 2019 Free Software Foundation, Inc.
+    Written by Bruno Haible <bruno@clisp.org>, 2003.
+ 
+    This program is free software: you can redistribute it and/or modify
+@@ -20,7 +20,19 @@
+ 
+ #include "read-catalog-abstract.h"
+ 
++
++#ifdef __cplusplus
++extern "C" {
++#endif
++
++
+ /* Describes a .properties file parser.  */
+ extern DLL_VARIABLE const struct catalog_input_format input_format_properties;
+ 
++
++#ifdef __cplusplus
++}
++#endif
++
++
+ #endif /* _READ_PROPERTIES_H */
+diff --git a/gettext-tools/src/read-stringtable.h b/gettext-tools/src/read-stringtable.h
+index 43d1ba505..4a107f2ff 100644
+--- a/gettext-tools/src/read-stringtable.h
++++ b/gettext-tools/src/read-stringtable.h
+@@ -1,5 +1,5 @@
+ /* Reading NeXTstep/GNUstep .strings files.
+-   Copyright (C) 2003, 2006 Free Software Foundation, Inc.
++   Copyright (C) 2003, 2006, 2019 Free Software Foundation, Inc.
+    Written by Bruno Haible <bruno@clisp.org>, 2003.
+ 
+    This program is free software: you can redistribute it and/or modify
+@@ -20,7 +20,19 @@
+ 
+ #include "read-catalog-abstract.h"
+ 
++
++#ifdef __cplusplus
++extern "C" {
++#endif
++
++
+ /* Describes a .strings file parser.  */
+ extern DLL_VARIABLE const struct catalog_input_format input_format_stringtable;
+ 
++
++#ifdef __cplusplus
++}
++#endif
++
++
+ #endif /* _READ_STRINGTABLE_H */
+diff --git a/gettext-tools/src/write-properties.h b/gettext-tools/src/write-properties.h
+index f0d18a7e4..7671afb30 100644
+--- a/gettext-tools/src/write-properties.h
++++ b/gettext-tools/src/write-properties.h
+@@ -1,5 +1,5 @@
+ /* Writing Java .properties files.
+-   Copyright (C) 2003, 2006 Free Software Foundation, Inc.
++   Copyright (C) 2003, 2006, 2019 Free Software Foundation, Inc.
+    Written by Bruno Haible <bruno@clisp.org>, 2003.
+ 
+    This program is free software: you can redistribute it and/or modify
+@@ -20,7 +20,19 @@
+ 
+ #include "write-catalog.h"
+ 
++
++#ifdef __cplusplus
++extern "C" {
++#endif
++
++
+ /* Describes a PO file in Java .properties syntax.  */
+ extern DLL_VARIABLE const struct catalog_output_format output_format_properties;
+ 
++
++#ifdef __cplusplus
++}
++#endif
++
++
+ #endif /* _WRITE_PROPERTIES_H */
+diff --git a/gettext-tools/src/write-stringtable.h b/gettext-tools/src/write-stringtable.h
+index 7d4981826..af0b081c8 100644
+--- a/gettext-tools/src/write-stringtable.h
++++ b/gettext-tools/src/write-stringtable.h
+@@ -1,5 +1,5 @@
+ /* Writing NeXTstep/GNUstep .strings files.
+-   Copyright (C) 2003, 2006 Free Software Foundation, Inc.
++   Copyright (C) 2003, 2006, 2019 Free Software Foundation, Inc.
+    Written by Bruno Haible <bruno@clisp.org>, 2003.
+ 
+    This program is free software: you can redistribute it and/or modify
+@@ -20,7 +20,19 @@
+ 
+ #include "write-catalog.h"
+ 
++
++#ifdef __cplusplus
++extern "C" {
++#endif
++
++
+ /* Describes a PO file in .strings syntax.  */
+ extern DLL_VARIABLE const struct catalog_output_format output_format_stringtable;
+ 
++
++#ifdef __cplusplus
++}
++#endif
++
++
+ #endif /* _WRITE_STRINGTABLE_H */
+diff --git a/libtextstyle/lib/Makefile.in b/libtextstyle/lib/Makefile.in
+index 4a11d73a1..ebee4845a 100644
+--- a/libtextstyle/lib/Makefile.in
++++ b/libtextstyle/lib/Makefile.in
+@@ -4536,8 +4536,8 @@ config.h: $(BUILT_SOURCES) libtextstyle.sym
+ 	            ;; \
+ 	        esac; \
+ 	      done; \
+-	    } 5>&1 \
+-	      | sed -e 's,.* ,,' | LC_ALL=C sort | LC_ALL=C uniq \
++	    } 5>&1 1>&2 \
++	      | sed -e 's,.* ,,' | grep -v '@' | LC_ALL=C sort | LC_ALL=C uniq \
+ 	      | LC_ALL=C join -v 1 - libtextstyle.sym \
+ 	      | sed -e 's,^\(.*\)$$,#define \1 libtextstyle_\1,' > config.h-t; \
+ 	  } 6>&1 && \
+-- 
+2.21.0.windows.1
+
