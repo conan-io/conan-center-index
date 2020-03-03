@@ -1,7 +1,5 @@
 from conans import ConanFile, CMake, tools
-from conans.errors import ConanInvalidConfiguration
 import os
-import shutil
 
 
 class AmqpcppConan(ConanFile):
@@ -12,58 +10,74 @@ class AmqpcppConan(ConanFile):
     license = "Apache-2.0"
     description = "C++ library for asynchronous non-blocking communication with RabbitMQ"
     settings = "os", "compiler", "build_type", "arch"
-    options = {"shared": [True, False], "fPIC": [True, False]}
-    default_options = {"shared": False, 'fPIC': True}
+    options = {
+        "shared": [True, False],
+        "fPIC": [True, False],
+        "linux_tcp_module": [True, False],
+    }
+    default_options = {
+        "shared": False,
+        "fPIC": True,
+        "linux_tcp_module": True,
+    }
     generators = "cmake"
 
-    exports_sources = ["CMakeLists.txt"]
+    exports_sources = "CMakeLists.txt", "patches/**"
 
-    _source_subfolder = "source_subfolder"
+    _cmake = None
+
+    @property
+    def _source_subfolder(self):
+        return "source_subfolder"
+
+    @property
+    def _build_subfolder(self):
+        return "build_subfolder"
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
         os.rename("AMQP-CPP-" + self.version, self._source_subfolder)
-        os.rename(os.path.join(self._source_subfolder, "CMakeLists.txt"),
-                  os.path.join(self._source_subfolder, "CMakeListsOriginal.txt"))
-        shutil.copy("CMakeLists.txt",
-                    os.path.join(self._source_subfolder, "CMakeLists.txt"))
 
     def config_options(self):
         if self.settings.os == "Windows":
-            self.options.remove("fPIC")
-
-    def configure(self):
-        if self.settings.os == "Windows":
-            raise ConanInvalidConfiguration("Windows is not supported by upstream")
+            del self.options.fPIC
+            del self.options.linux_tcp_module
 
     def requirements(self):
-        self.requires.add("openssl/1.0.2t")
+        if self.options.get_safe("linux_tcp_module"):
+            self.requires.add("openssl/1.1.1d")
 
     def _configure_cmake(self):
-        cmake = CMake(self)
+        if self._cmake:
+            return self._cmake
+        self._cmake = CMake(self)
+        self._cmake.definitions["AMQP-CPP_BUILD_SHARED"] = self.options.shared
+        self._cmake.definitions["AMQP-CPP_BUILD_EXAMPLES"] = False
+        self._cmake.definitions["AMQP-CPP_LINUX_TCP"] = self.options.get_safe("linux_tcp_module") or False
+        self._cmake.configure(build_folder=self._build_subfolder)
+        return self._cmake
 
-        cmake.definitions['AMQP-CPP_BUILD_SHARED'] = self.options.shared
-        cmake.definitions['AMQP-CPP_BUILD_EXAMPLES'] = False
-        cmake.definitions['AMQP-CPP_LINUX_TCP'] = True
-
-        cmake.configure(source_folder=self._source_subfolder)
-        return cmake
+    def _patch_sources(self):
+        for patch in self.conan_data["patches"][self.version]:
+            tools.patch(**patch)
 
     def build(self):
-        cmake = CMake(self)
+        self._patch_sources()
         cmake = self._configure_cmake()
         cmake.install()
 
     def package(self):
-        cmake = CMake(self)
         cmake = self._configure_cmake()
         cmake.install()
 
         self.copy("LICENSE", src=self._source_subfolder, dst="licenses", keep_path=False)
-        tools.rmdir(os.path.join(self.package_folder, 'cmake'))
-        tools.rmdir(os.path.join(self.package_folder, 'lib', 'pkgconfig'))
+        tools.rmdir(os.path.join(self.package_folder, "cmake"))
+        tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
 
     def package_info(self):
-        self.cpp_info.libs = tools.collect_libs(self)
+        self.cpp_info.names["pkg_config"] = "amqpcpp"
+        self.cpp_info.names["cmake_find_package"] = "amqpcpp"
+        self.cpp_info.names["cmake_find_package_multi"] = "amqpcpp"
+        self.cpp_info.libs = ["amqpcpp"]
         if self.settings.os == "Linux":
-            self.cpp_info.libs.extend(["pthread"])
+            self.cpp_info.system_libs = ["dl", "pthread"]
