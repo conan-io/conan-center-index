@@ -12,7 +12,7 @@ class ZyreConan(ConanFile):
     description = "Local Area Clustering for Peer-to-Peer Applications."
     topics = ("conan", "zyre", "czmq", "zmq", "zeromq",
               "message-queue", "asynchronous")
-    exports_sources = ['CMakeLists.txt',  'patches/*']
+    exports_sources = ['CMakeLists.txt']
     settings = "os", "compiler", "build_type", "arch"
     requires = "zeromq/4.3.2", "czmq/4.2.0"
     options = {
@@ -57,6 +57,7 @@ class ZyreConan(ConanFile):
                   dst='licenses')
         cmake = self._configure_cmake()
         cmake.install()
+        tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
 
     def package_info(self):
         self.cpp_info.libs = ['zyre']
