@@ -34,6 +34,10 @@ class FlacConan(ConanFile):
         tools.get(**self.conan_data["sources"][self.version])
         extracted_dir = "{}-{}".format(self.name, self.version)
         os.rename(extracted_dir, self._source_subfolder)
+        tools.replace_in_file(
+            os.path.join(self._source_subfolder, 'src', 'libFLAC', 'CMakeLists.txt'),
+            'target_link_libraries(FLAC PRIVATE $<$<BOOL:${HAVE_LROUND}>:m>)',
+            'target_link_libraries(FLAC PUBLIC $<$<BOOL:${HAVE_LROUND}>:m>)')
 
     def _configure_cmake(self):
         cmake = CMake(self)
