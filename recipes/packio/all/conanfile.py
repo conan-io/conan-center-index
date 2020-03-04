@@ -23,7 +23,7 @@ class PackioConan(ConanFile):
         return "source_subfolder"
 
     def _supports_cpp17(self):
-        supported_compilers = [("apple-clang", 10), ("clang", 6), ("gcc", 7), ("Visual Studio", 15.7)]
+        supported_compilers = [("apple-clang", 10), ("clang", 6), ("gcc", 7), ("Visual Studio", 16)]
         compiler, version = self.settings.compiler, Version(self.settings.compiler.version)
         return any(compiler == sc[0] and version >= sc[1] for sc in supported_compilers)
 
@@ -33,7 +33,9 @@ class PackioConan(ConanFile):
         os.rename(extracted_dir, self._source_subfolder)
 
     def configure(self):
-        if not self._supports_cpp17():
+        if self.settings.compiler.cppstd:
+            tools.check_min_cppstd(self, "17")
+        elif not self._supports_cpp17():
             raise ConanInvalidConfiguration("packio requires C++17 support")
 
     def package(self):
