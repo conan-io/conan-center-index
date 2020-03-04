@@ -21,4 +21,5 @@ class JsonCppTestConan(ConanFile):
             bin_path = "example"
             if self._is_multi_configuration:
                 bin_path = os.path.join(str(self.settings.build_type), bin_path)
+            self.output.info(bin_path)
             self.run(bin_path, run_environment=True)
