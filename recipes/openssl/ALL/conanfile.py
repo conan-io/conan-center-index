@@ -641,7 +641,8 @@ class OpenSSLConan(ConanFile):
 
     def package(self):
         self.copy(src=self._source_subfolder, pattern="*LICENSE", dst="licenses")
-        self._make_install()
+        with tools.vcvars(self.settings) if self._use_nmake else tools.no_op():
+            self._make_install()
         for root, _, files in os.walk(self.package_folder):
             for filename in files:
                 if fnmatch.fnmatch(filename, "*.pdb"):

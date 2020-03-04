@@ -8,7 +8,7 @@ option(OPENSSL_WITH_ZLIB "OpenSSL with zlib support" ON)
 
 add_executable(digest digest.cpp)
 if(OPENSSL_WITH_ZLIB)
-    target_compile_definitions(digest WITH_ZLIB)
+    target_compile_definitions(digest PRIVATE WITH_ZLIB)
 endif()
 
 
