@@ -98,7 +98,6 @@ class OpenSSLConan(ConanFile):
     _source_subfolder = "source_subfolder"
 
     def build_requirements(self):
-        # useful for example for conditional build_requires
         if tools.os_info.is_windows:
             if not self._win_bash:
                 self.build_requires("strawberryperl/5.30.0.1")
