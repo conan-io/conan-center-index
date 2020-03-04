@@ -4,7 +4,13 @@ project(OpenSSLTests)
 include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
 conan_basic_setup()
 
+option(OPENSSL_WITH_ZLIB "OpenSSL with zlib support" ON)
+
 add_executable(digest digest.cpp)
+if(OPENSSL_WITH_ZLIB)
+    target_compile_definitions(digest WITH_ZLIB)
+endif()
+
 
 if(USE_FIND_PACKAGE)
     set(OpenSSL_DEBUG 1)
