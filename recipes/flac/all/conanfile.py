@@ -21,6 +21,7 @@ class FlacConan(ConanFile):
         "shared": False,
         "fPIC": True,
     }
+    _cmake = None
     _source_subfolder = "source_subfolder"
 
     def config_options(self):
@@ -44,12 +45,14 @@ class FlacConan(ConanFile):
             '#set(CMAKE_EXE_LINKER_FLAGS -no-pie)')
 
     def _configure_cmake(self):
-        cmake = CMake(self)
-        cmake.definitions["BUILD_EXAMPLES"] = False
-        cmake.definitions["BUILD_DOCS"] = False
-        cmake.definitions["BUILD_TESTING"] = False
-        cmake.configure()
-        return cmake
+        if self._cmake:
+            return self._cmake
+        self._cmake = CMake(self)
+        self._cmake.definitions["BUILD_EXAMPLES"] = False
+        self._cmake.definitions["BUILD_DOCS"] = False
+        self._cmake.definitions["BUILD_TESTING"] = False
+        self._cmake.configure()
+        return self._cmake
 
     def build(self):
         cmake = self._configure_cmake()
