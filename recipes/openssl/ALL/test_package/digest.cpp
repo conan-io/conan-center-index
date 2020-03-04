@@ -14,7 +14,7 @@
 #define snprintf _snprintf
 #endif
 
-#if OPENSSL_VERSION_NUMBER > 0x101010L
+#if OPENSSL_VERSION_NUMBER > 0x10101000L
 #define OPENSSL_1_1_1_OR_LATER
 #endif
 
