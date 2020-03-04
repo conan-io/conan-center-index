@@ -6,7 +6,7 @@ from conans.tools import Version
 
 class PackioConan(ConanFile):
     name = "packio"
-    license = "MPL2"
+    license = "MPL-2.0"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/qchateau/packio"
     description = "An asynchronous msgpack-RPC library built on top of Boost.Asio."
