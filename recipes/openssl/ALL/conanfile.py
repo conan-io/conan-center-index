@@ -593,18 +593,10 @@ class OpenSSLConan(ConanFile):
                     self._patch_makefile_org()
                 self._make()
 
-    @staticmethod
-    def detected_os():
-        if tools.OSInfo().is_macos:
-            return "Macos"
-        if tools.OSInfo().is_windows:
-            return "Windows"
-        return platform.system()
-
     @property
     def _cross_building(self):
         if tools.cross_building(self.settings):
-            if self.settings.os == self.detected_os():
+            if self.settings.os == tools.detected_os():
                 if self.settings.arch == "x86" and tools.detected_architecture() == "x86_64":
                     return False
             return True
