@@ -658,6 +658,14 @@ class OpenSSLConan(ConanFile):
                 os.chmod("libssl.so.1.0.0", 0o755)
                 os.chmod("libcrypto.so.1.0.0", 0o755)
 
+        if self.options.shared:
+            libdir = os.path.join(self.package_folder, "lib")
+            for file in os.listdir(libdir):
+                if self._is_mingw and file.endswith(".dll.a"):
+                    continue
+                if file.endswith(".a"):
+                    os.unlink(os.path.join(libdir, file))
+
         tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
 
     def package_info(self):
