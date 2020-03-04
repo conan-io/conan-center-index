@@ -8,13 +8,15 @@ class MuparserxConan(ConanFile):
     license = "BSD"
     topics = ("conan", "muparserx", "math", "parser")
     homepage = "https://beltoforion.de/article.php?a=muparserx"
-    url = "https://github.com/beltoforion/muparserx"
+    url = "https://github.com/conan-io/conan-center-index"
     settings = "os", "compiler", "build_type", "arch"
     options = {"shared": [True, False],
                "fPIC": [True, False]}
     default_options = {"shared": False,
                        "fPIC": False}
+    exports_sources = "CMakeLists.txt"
     generators = "cmake"
+    _cmake = None
 
     @property
     def _source_subfolder(self):
@@ -30,9 +32,11 @@ class MuparserxConan(ConanFile):
         os.rename(extracted_dir, self._source_subfolder)
 
     def _configure_cmake(self):
-        cmake = CMake(self)
-        cmake.configure(source_folder=self._source_subfolder)
-        return cmake
+        if self._cmake:
+            return self._cmake
+        self._cmake = CMake(self)
+        self._cmake.configure()
+        return self._cmake
 
     def build(self):
         cmake = self._configure_cmake()
