@@ -528,11 +528,12 @@ class OpenSSLConan(ConanFile):
             return os.path.join(self.deps_cpp_info["strawberryperl"].rootpath, "bin", "perl.exe")
         return "perl"
 
+    @property
+    def _nmake_makefile(self):
+        return r"ms\ntdll.mak" if self.options.shared else r"ms\nt.mak"
+
     def _make(self):
         with tools.chdir(self._source_subfolder):
-            # workaround for MinGW (https://github.com/openssl/openssl/issues/7653)
-            if not os.path.isdir(os.path.join(self.package_folder, "bin")):
-                os.makedirs(os.path.join(self.package_folder, "bin"))
             # workaround for clang-cl not producing .pdb files
             if self._is_clangcl:
                 tools.save("ossl_static.pdb", "")
@@ -548,7 +549,6 @@ class OpenSSLConan(ConanFile):
                     self.run(r"ms\do_nasm")
                 else:
                     self.run(r"ms\do_ms" if self.settings.arch == "x86" else r"ms\do_win64a")
-                makefile = r"ms\ntdll.mak" if self.options.shared else r"ms\nt.mak"
 
                 self._replace_runtime_in_file(os.path.join("ms", "nt.mak"))
                 self._replace_runtime_in_file(os.path.join("ms", "ntdll.mak"))
@@ -556,10 +556,19 @@ class OpenSSLConan(ConanFile):
                     tools.replace_in_file(os.path.join("ms", "nt.mak"), "-WX", "")
                     tools.replace_in_file(os.path.join("ms", "ntdll.mak"), "-WX", "")
 
-                self._run_make(makefile=makefile)
-                self._run_make(makefile=makefile, targets=["install"], parallel=False)
+                self._run_make(makefile=self._nmake_makefile)
             else:
                 self._run_make()
+
+    def _make_install(self):
+        with tools.chdir(self._source_subfolder):
+            # workaround for MinGW (https://github.com/openssl/openssl/issues/7653)
+            if not os.path.isdir(os.path.join(self.package_folder, "bin")):
+                os.makedirs(os.path.join(self.package_folder, "bin"))
+
+            if self._use_nmake and self._full_version < "1.1.0":
+                self._run_make(makefile=self._nmake_makefile, targets=["install"], parallel=False)
+            else:
                 self._run_make(targets=["install_sw"], parallel=False)
 
     @property
@@ -632,6 +641,7 @@ class OpenSSLConan(ConanFile):
 
     def package(self):
         self.copy(src=self._source_subfolder, pattern="*LICENSE", dst="licenses")
+        self._make_install()
         for root, _, files in os.walk(self.package_folder):
             for filename in files:
                 if fnmatch.fnmatch(filename, "*.pdb"):
@@ -647,6 +657,7 @@ class OpenSSLConan(ConanFile):
             with tools.chdir(os.path.join(self.package_folder, "lib")):
                 os.chmod("libssl.so.1.0.0", 0o755)
                 os.chmod("libcrypto.so.1.0.0", 0o755)
+
         tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
 
     def package_info(self):
