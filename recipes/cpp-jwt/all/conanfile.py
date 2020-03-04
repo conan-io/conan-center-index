@@ -10,10 +10,9 @@ class CppJwtConan(ConanFile):
     topics = ("jwt", "auth", "header-only")
     url = "https://github.com/conan-io/conan-center-index"
     settings = "os", "compiler", "arch", "build_type"
-    generators = "cmake", "cmake_find_package"
-    exports_sources = ["CMakeLists.txt", "patches/*"]
+    generators = "cmake_find_package"
+    exports_sources = ["patches/*"]
     license = "MIT"
-
     _cmake = None
 
     @property
@@ -61,14 +60,10 @@ class CppJwtConan(ConanFile):
             self._cmake.definitions["CPP_JWT_BUILD_TESTS"] = False
             self._cmake.definitions["CPP_JWT_USE_VENDORED_NLOHMANN_JSON"] = False
             self._cmake.configure(source_folder=self._source_subfolder)
-        return self._cmake        
-
-    def build(self):
-        tools.patch(**self.conan_data["patches"][self.version])
-        cmake = self._configure_cmake()
-        cmake.build()
+        return self._cmake
 
     def package(self):
+        tools.patch(**self.conan_data["patches"][self.version])
         self.copy(pattern="LICENSE*", dst="licenses", src=self._source_subfolder)
         cmake = self._configure_cmake()
         cmake.install()
