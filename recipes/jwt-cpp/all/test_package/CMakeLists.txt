@@ -1,6 +1,8 @@
 cmake_minimum_required(VERSION 2.8.12)
 project(PackageTest CXX)
 
+set(CMAKE_VERBOSE_MAKEFILE TRUE)
+
 find_package(jwt-cpp REQUIRED)
 
 add_executable(example example.cpp)
