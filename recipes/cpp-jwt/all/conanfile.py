@@ -7,12 +7,14 @@ class CppJwtConan(ConanFile):
     name = "cpp-jwt"
     homepage = "https://github.com/arun11299/cpp-jwt"
     description = "A C++ library for handling JWT tokens"
-    topics = ("jwt", "javascript", "auth", "header-only")
+    topics = ("jwt", "auth", "header-only")
     url = "https://github.com/conan-io/conan-center-index"
     settings = "os", "compiler", "arch", "build_type"
     generators = "cmake", "cmake_find_package"
     exports_sources = ["CMakeLists.txt", "patches/*"]
     license = "MIT"
+
+    _cmake = None
 
     @property
     def _source_subfolder(self):
@@ -53,12 +55,13 @@ class CppJwtConan(ConanFile):
                 "%s requires a compiler that supports at least C++%s" % (self.name, minimal_cpp_standard))
 
     def _configure_cmake(self):
-        cmake = CMake(self)
-        cmake.definitions["CPP_JWT_BUILD_EXAMPLES"] = False
-        cmake.definitions["CPP_JWT_BUILD_TESTS"] = False
-        cmake.definitions["CPP_JWT_USE_VENDORED_NLOHMANN_JSON"] = False
-        cmake.configure(source_folder=self._source_subfolder)
-        return cmake
+        if not self._cmake:
+            self._cmake = CMake(self)
+            self._cmake.definitions["CPP_JWT_BUILD_EXAMPLES"] = False
+            self._cmake.definitions["CPP_JWT_BUILD_TESTS"] = False
+            self._cmake.definitions["CPP_JWT_USE_VENDORED_NLOHMANN_JSON"] = False
+            self._cmake.configure(source_folder=self._source_subfolder)
+        return self._cmake        
 
     def build(self):
         tools.patch(**self.conan_data["patches"][self.version])
