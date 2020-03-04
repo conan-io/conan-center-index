@@ -16,5 +16,5 @@ int main() {
 		.allow_algorithm(jwt::algorithm::hs256{"secret"})
 		.with_issuer("auth0");
 
-	verifier.verify(token);
+	verifier.verify(decoded);
 }
