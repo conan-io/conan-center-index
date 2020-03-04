@@ -38,6 +38,10 @@ class FlacConan(ConanFile):
             os.path.join(self._source_subfolder, 'src', 'libFLAC', 'CMakeLists.txt'),
             'target_link_libraries(FLAC PRIVATE $<$<BOOL:${HAVE_LROUND}>:m>)',
             'target_link_libraries(FLAC PUBLIC $<$<BOOL:${HAVE_LROUND}>:m>)')
+        tools.replace_in_file(
+            os.path.join(self._source_subfolder, 'CMakeLists.txt'),
+            'set(CMAKE_EXE_LINKER_FLAGS -no-pie)',
+            '#set(CMAKE_EXE_LINKER_FLAGS -no-pie)')
 
     def _configure_cmake(self):
         cmake = CMake(self)
