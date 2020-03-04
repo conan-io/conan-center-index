@@ -415,7 +415,7 @@ class OpenSSLConan(ConanFile):
             if self.options.capieng_dialog:
                 args.append("-DOPENSSL_CAPIENG_DIALOG=1")
         else:
-            args.append("-fPIC" if self.options.fPIC else "")
+            args.append("-fPIC" if self.options.fPIC else "no-pic")
         if self.settings.os == "Neutrino":
             args.append("-lsocket no-asm")
 
