@@ -35,7 +35,7 @@ jobs:
             docker_image: 'conanio/gcc48'
             build_types: 'Release,Debug'
             archs: 'x86,x86_64'
-            version: 1.8.3
+            CONAN_REFERENCE: "jsoncpp/1.8.3@/"
           - build: 'linux-gcc7'
             os: 'ubuntu-latest'
             compiler: 'gcc'
@@ -43,7 +43,7 @@ jobs:
             docker_image: 'conanio/gcc7'
             build_types: 'Release,Debug'
             archs: 'x86,x86_64'
-            version: 1.8.3
+            CONAN_REFERENCE: "jsoncpp/1.8.3@/"
           - build: 'linux-gcc9'
             os: 'ubuntu-latest'
             compiler: 'gcc'
@@ -51,7 +51,7 @@ jobs:
             docker_image: 'conanio/gcc9'
             build_types: 'Release,Debug'
             archs: 'x86,x86_64'
-            version: 1.8.3
+            CONAN_REFERENCE: "jsoncpp/1.8.3@/"
           - build: 'windows-2019-release'
             os: 'windows-2019'
             build_types: 'Release'
@@ -59,7 +59,7 @@ jobs:
             compiler_version: '16'
             vs_runtimes: 'MD,MT'
             archs: 'x86_64'
-            version: 1.8.3
+            CONAN_REFERENCE: "jsoncpp/1.8.3@/"
           - build: 'windows-2019-debug'
             os: 'windows-2019'
             build_types: 'Debug'
@@ -67,7 +67,7 @@ jobs:
             compiler_version: '16'
             vs_runtimes: 'MDd,MTd'
             archs: 'x86_64'
-            version: 1.8.3
+            CONAN_REFERENCE: "jsoncpp/1.8.3@/"
           - build: 'macos'
             os: 'macos-latest'
             build_types: 'Release,Debug'
@@ -75,7 +75,9 @@ jobs:
             compiler: 'apple_clang'
             compiler_version: '11.0'
             xcode_version: '11.3.1'
-            version: 1.8.3
+            CONAN_USERNAME: _
+            CONAN_CHANNEL: _
+            CONAN_REFERENCE: "jsoncpp/1.8.3"
     runs-on: ${{ matrix.os }}
     steps:
       - name: Configure git
@@ -99,7 +101,9 @@ jobs:
           docker-images: ${{ matrix.docker_image }}
         env:
           CONAN_OPTIONS: "jsoncpp:shared=True"
-          CONAN_REFERENCE: "jsoncpp/${{ matrix.version }}@/"
+          CONAN_REFERENCE: ${{ matrix.CONAN_REFERENCE }}
+          CONAN_USERNAME: ${{ matrix.CONAN_USERNAME }}
+          CONAN_CHANNEL: ${{ matrix.CONAN_CHANNEL }}
           CONAN_VISUAL_RUNTIMES: ${{ matrix.vs_runtimes }}
           CONAN_ARCHS: ${{ matrix.archs }}
           CONAN_BUILD_TYPES: ${{ matrix.build_types }}
