@@ -15,14 +15,7 @@ on:
       - '.github/workflows/zlib.yml'
 
 env:
-  CONAN_USERNAME: 'trassir'
-  CONAN_LOGIN_USERNAME: 'trassir-ci-bot'
   CONAN_PASSWORD: ${{ secrets.BintrayApiKey }}
-  CONAN_UPLOAD: 'https://api.bintray.com/conan/trassir/conan-public'
-  CONAN_UPLOAD_ONLY_WHEN_STABLE: 1
-  CONAN_STABLE_CHANNEL: 'stable'
-  CONAN_STABLE_BRANCH_PATTERN: 'trassir-ci'
-  CONAN_REMOTES: 'https://api.bintray.com/conan/trassir/conan-public'
   CONAN_REFERENCE: 'zlib/1.2.11'
 
 jobs:
