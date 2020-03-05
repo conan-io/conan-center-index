@@ -1,3 +1,8 @@
+# this patches is from https://git.busybox.net/buildroot/commit/?id=c48f8a64626c60bd1b46804b7cf1a699ff53cdf3
+# to fix compiler error on certain systems:
+# freadahead.c:92:3: error: #error "Please port gnulib freadahead.c to your platform! Look at the definition of fflush, fread, ungetc on your system, then report this to bug-gnulib."
+
+
 From 74d9d6a293d7462dea8f83e7fc5ac792e956a0ad Mon Sep 17 00:00:00 2001
 From: Paul Eggert <eggert@cs.ucla.edu>
 Date: Thu, 8 Mar 2018 16:42:45 -0800

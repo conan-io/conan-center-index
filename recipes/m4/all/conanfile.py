@@ -27,7 +27,8 @@ class M4Conan(ConanFile):
         return str(self.settings.compiler).endswith("clang")
 
     def build_requirements(self):
-        if tools.os_info.is_windows:
+        if tools.os_info.is_windows and "CONAN_BASH_PATH" not in os.environ and \
+                tools.os_info.detect_windows_subsystem() != "msys2":
             self.build_requires("msys2/20190524")
 
     def source(self):
@@ -37,43 +38,40 @@ class M4Conan(ConanFile):
     def _configure_autotools(self):
         if self._autotools:
             return self._autotools
-        args = []
-        if self._is_msvc:
-            args.extend(["CC={}/build-aux/compile cl -nologo".format(tools.unix_path(self._source_subfolder)),
-                         "CXX={}/build-aux/compile cl -nologo".format(tools.unix_path(self._source_subfolder)),
-                         "LD=link",
-                         "NM=dumpbin -symbols",
-                         "STRIP=:",
-                         "AR={}/build-aux/ar-lib lib".format(tools.unix_path(self._source_subfolder)),
-                         "RANLIB=:"])
-        elif self._is_clang:
-            args.extend(["CFLAGS=-rtlib=compiler-rt"])
-
+        conf_args = []
         self._autotools = AutoToolsBuildEnvironment(self, win_bash=tools.os_info.is_windows)
-        self._autotools.configure(args=args, configure_dir=self._source_subfolder)
+        self._autotools.configure(args=conf_args, configure_dir=self._source_subfolder)
         return self._autotools
 
     @contextmanager
     def _build_context(self):
-        if self._is_msvc:
+        env = {}
+        if self.settings.compiler == "Visual Studio":
             with tools.vcvars(self.settings):
-                yield
+                env.update({
+                    "CC": "{}/build-aux/compile cl -nologo".format(tools.unix_path(self._source_subfolder)),
+                    "CXX": "{}/build-aux/compile cl -nologo".format(tools.unix_path(self._source_subfolder)),
+                    "LD": "link",
+                    "NM": "dumpbin -symbols",
+                    "STRIP": ":",
+                    "AR": "{}/build-aux/ar-lib lib".format(tools.unix_path(self._source_subfolder)),
+                    "RANLIB": ":",
+                })
+                with tools.environment_append(env):
+                    yield
         else:
-            yield
+            if "clang" in str(self.settings.compiler):
+                env["CFLAGS"] = "-rtlib=compiler-rt"
+            with tools.environment_append(env):
+                yield
+
+    def _patch_sources(self):
+        for patch in self.conan_data["patches"][self.version]:
+            self.output.info("applying patch \"{}\"".format(patch["patch_file"]))
+            tools.patch(**patch)
 
     def build(self):
-        # 0001-fflush-adjust-to-glibc-2.28-libio.h-removal.patch
-        # 0002-fflush-be-more-paranoid-about-libio.h-change.patch
-        # these two patches are from https://git.busybox.net/buildroot/commit/?id=c48f8a64626c60bd1b46804b7cf1a699ff53cdf3
-        # to fix compiler error on certain systems:
-        # freadahead.c:92:3: error: #error "Please port gnulib freadahead.c to your platform! Look at the definition of fflush, fread, ungetc on your system, then report this to bug-gnulib."
-        # 0003-secure_snprintf.patch
-        # patch taken from https://github.com/macports/macports-ports/blob/master/devel/m4/files/secure_snprintf.patch
-        # to fix invalid instruction error on OSX when running m4
-        for patchargs in self.conan_data["patches"][self.version]:
-            self.output.info("applying patch \"{}\"".format(patchargs["patch_file"]))
-            tools.patch(**patchargs)
-
+        self._patch_sources()
         with self._build_context():
             autotools = self._configure_autotools()
             autotools.make()
@@ -83,10 +81,10 @@ class M4Conan(ConanFile):
                     autotools.make(target="check-local")
 
     def package(self):
+        self.copy(pattern="COPYING", dst="licenses", src=self._source_subfolder)
         with self._build_context():
             autotools = self._configure_autotools()
             autotools.install()
-        self.copy(pattern="COPYING", dst="licenses", src=self._source_subfolder)
         tools.rmdir(os.path.join(self.package_folder, "share"))
 
     def package_id(self):
@@ -94,6 +92,8 @@ class M4Conan(ConanFile):
         self.info.include_build_settings()
 
     def package_info(self):
-        self.env_info.PATH.append(os.path.join(self.package_folder, "bin"))
+        bin_path = os.path.join(self.package_folder, "bin")
+        self.output.info("Appending PATH environment var: {}".format(bin_path))
+        self.env_info.PATH.append(bin_path)
         m4 = "m4.exe" if self.settings.os_build == "Windows" else "m4"
         self.env_info.M4 = os.path.join(self.package_folder, "bin", m4).replace("\\", "/")
