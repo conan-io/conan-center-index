@@ -100,7 +100,6 @@ jobs:
           compiler-versions: ${{ matrix.compiler_version }}
           docker-images: ${{ matrix.docker_image }}
         env:
-          CONAN_OPTIONS: "jsoncpp:shared=True"
           CONAN_REFERENCE: ${{ matrix.conan_reference }}
           CONAN_USERNAME: ${{ matrix.conan_username }}
           CONAN_CHANNEL: ${{ matrix.conan_channel }}
