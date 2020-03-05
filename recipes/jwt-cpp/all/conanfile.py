@@ -30,6 +30,3 @@ class JwtCppConan(ConanFile):
         self.copy("jwt.h", dst="include", src=header_dir, keep_path=False)
         self.copy("base.h", dst="include", src=header_dir, keep_path=False)
         self.copy("LICENSE", dst="licenses", src=self._source_subfolder)
-
-    def package_info(self):
-        self.info.header_only()
