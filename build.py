@@ -4,11 +4,11 @@ from cpt.packager import ConanMultiPackager
 
 if __name__ == "__main__":
     builder = ConanMultiPackager(
-        login_username: 'trassir-ci-bot',
-        upload: 'https://api.bintray.com/conan/trassir/conan-public',
-        upload_only_when_stable: 1,
-        stable_branch_pattern: 'trassir-ci',
-        remotes: 'https://api.bintray.com/conan/trassir/conan-public'
+        login_username="trassir-ci-bot",
+        upload="https://api.bintray.com/conan/trassir/conan-public",
+        upload_only_when_stable=1,
+        stable_branch_pattern="trassir-ci",
+        remotes="https://api.bintray.com/conan/trassir/conan-public"
     )
     builder.add_common_builds(pure_c=False)
     builder.run()
