@@ -1,5 +1,5 @@
-cmake_minimum_required(VERSION 2.8.11)
 project(test_package)
+cmake_minimum_required(VERSION 2.8.11)
 
 set(CMAKE_VERBOSE_MAKEFILE TRUE)
 
