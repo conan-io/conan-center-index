@@ -21,6 +21,8 @@ env:
   CONAN_UPLOAD_ONLY_WHEN_STABLE: 1
   CONAN_STABLE_BRANCH_PATTERN: 'trassir-ci'
   CONAN_REMOTES: 'https://api.bintray.com/conan/trassir/conan-public'
+  CONAN_USERNAME: _
+  CONAN_CHANNEL: _
 
 jobs:
   jsoncpp:
@@ -99,7 +101,7 @@ jobs:
           docker-images: ${{ matrix.docker_image }}
         env:
           CONAN_OPTIONS: "jsoncpp:shared=True"
-          CONAN_REFERENCE: jsoncpp/${{ matrix.version }}@_/_
+          CONAN_REFERENCE: jsoncpp/${{ matrix.version }}
           CONAN_VISUAL_RUNTIMES: ${{ matrix.vs_runtimes }}
           CONAN_ARCHS: ${{ matrix.archs }}
           CONAN_BUILD_TYPES: ${{ matrix.build_types }}
