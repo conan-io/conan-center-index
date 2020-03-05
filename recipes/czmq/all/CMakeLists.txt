@@ -8,6 +8,10 @@ if(MSVC)
     add_definitions("-D_NOEXCEPT=noexcept")
 endif()
 
+if(NOT BUILD_SHARED_LIBS)
+    add_definitions("-DCZMQ_STATIC")
+endif()
+
 add_subdirectory(source_subfolder)
 
 foreach(TARGET zmakecert zsp test_randof czmq_selftest)
