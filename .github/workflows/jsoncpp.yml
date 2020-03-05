@@ -99,7 +99,7 @@ jobs:
           docker-images: ${{ matrix.docker_image }}
         env:
           CONAN_OPTIONS: "jsoncpp:shared=True"
-          CONAN_REFERENCE: jsoncpp/${{ matrix.version }}@/
+          CONAN_REFERENCE: jsoncpp/${{ matrix.version }}@_/_
           CONAN_VISUAL_RUNTIMES: ${{ matrix.vs_runtimes }}
           CONAN_ARCHS: ${{ matrix.archs }}
           CONAN_BUILD_TYPES: ${{ matrix.build_types }}
