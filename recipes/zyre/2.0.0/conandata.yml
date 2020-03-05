@@ -6,3 +6,7 @@ patches:
   "2.0.0":
       - patch_file: "patches/0001-cmake-use-conan-disable-executables.patch"
         base_path: "source_subfolder"
+      - patch_file: "patches/0002-zyre-disable-git-escape-CMAKE_BUILD_TYPE.patch"
+        base_path: "source_subfolder"
+      - patch_file: "patches/0003-fix-zyre-self-test.patch"
+        base_path: "source_subfolder"
