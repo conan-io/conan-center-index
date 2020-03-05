@@ -1,3 +1,6 @@
+patch taken from https://github.com/macports/macports-ports/blob/master/devel/m4/files/secure_snprintf.patch
+to fix invalid instruction error on OSX when running m4
+
 diff --git a/lib/vasnprintf.c b/lib/vasnprintf.c
 index 246831f..ae47ebf 100644
 --- a/lib/vasnprintf.c
