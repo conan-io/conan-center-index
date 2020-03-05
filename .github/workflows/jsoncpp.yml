@@ -98,6 +98,7 @@ jobs:
           compiler-versions: ${{ matrix.compiler_version }}
           docker-images: ${{ matrix.docker_image }}
         env:
+          CONAN_PACKAGE_VERSION: ${{ matrix.version }}
           CONAN_REFERENCE: jsoncpp/${{ matrix.version }}
           CONAN_VISUAL_RUNTIMES: ${{ matrix.vs_runtimes }}
           CONAN_ARCHS: ${{ matrix.archs }}

@@ -17,6 +17,9 @@ class JsoncppConan(ConanFile):
 
     _source_subfolder = "source_subfolder"
 
+    def set_version(self):
+        self.version = os.environ.get("CONAN_PACKAGE_VERSION")
+
     def configure(self):
         if self.settings.os == "Windows" or self.options.shared:
             del self.options.fPIC
