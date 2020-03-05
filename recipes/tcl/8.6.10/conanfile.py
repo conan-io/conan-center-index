@@ -153,13 +153,17 @@ class TclConan(ConanFile):
 
         tclConfigShPath = os.path.join(self.package_folder, "lib", "tclConfig.sh")
         package_path = self.package_folder
-        if self.settings.os == "Windows":
+        build_folder = self.build_folder
+        if self.settings.os == "Windows" and self.settings.compiler != "Visual Studio":
             package_path = package_path.replace("\\", "/")
+            drive, path = os.path.splitdrive(self.build_folder)
+            build_folder = "".join([drive, path.lower().replace("\\", "/")])
+
         tools.replace_in_file(tclConfigShPath,
                               package_path,
                               "${TCL_ROOT}")
         tools.replace_in_file(tclConfigShPath,
-                              self.build_folder,
+                              build_folder,
                               "${TCL_BUILD_ROOT}")
 
         tools.replace_in_file(tclConfigShPath,
