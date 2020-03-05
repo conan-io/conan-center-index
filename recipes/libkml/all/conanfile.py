@@ -62,33 +62,11 @@ class LibkmlConan(ConanFile):
         tools.rmdir(os.path.join(self.package_folder, "cmake"))
 
     def package_info(self):
-        self.cpp_info.libs = self._get_cpp_info_ordered_libs()
-        self.output.info("LIBRARIES: {}".format(self.cpp_info.libs))
-        if self.settings.os == "Windows" and self.options.shared:
-            self.cpp_info.defines.append("LIBKML_DLL")
-
-    def _get_cpp_info_ordered_libs(self):
-        gen_libs = tools.collect_libs(self)
-
         # Libs ordered following linkage order:
         # - kmlconvenience is a dependency of kmlregionator
         # - kmlengine is a dependency of kmlregionator and kmlconvenience
         # - kmldom is a dependency of kmlregionator, kmlconvenience and kmlengine
         # - kmlbase is a dependency of kmlregionator, kmlconvenience, kmlengine, kmldom and kmlxsd
-        lib_list = ["kmlregionator", "kmlconvenience", "kmlengine", "kmldom", "kmlxsd", "kmlbase"]
-
-        # List of lists, so if more than one matches the lib both will be added to the list
-        ordered_libs = [[] for _ in range(len(lib_list))]
-
-        # The order is important, reorder following the lib_list order
-        missing_order_info = []
-        for real_lib_name in gen_libs:
-            for pos, alib in enumerate(lib_list):
-                if os.path.splitext(real_lib_name)[0].split("-")[0].endswith(alib):
-                    ordered_libs[pos].append(real_lib_name)
-                    break
-            else:
-                missing_order_info.append(real_lib_name)
-
-        # Flat the list
-        return [item for sublist in ordered_libs for item in sublist if sublist] + missing_order_info
+        self.cpp_info.libs = ["kmlregionator", "kmlconvenience", "kmlengine", "kmldom", "kmlxsd", "kmlbase"]
+        if self.settings.os == "Windows" and self.options.shared:
+            self.cpp_info.defines.append("LIBKML_DLL")
