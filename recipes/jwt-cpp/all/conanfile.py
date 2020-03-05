@@ -26,7 +26,7 @@ class JwtCppConan(ConanFile):
         os.rename(extracted_dir, self._source_subfolder)
 
     def package(self):
-        header_dir = os.path.join(self._source_subfolder, "include", "jwt-cpp/")
+        header_dir = os.path.join(self._source_subfolder, "include", "jwt-cpp")
         self.copy("jwt.h", dst="include", src=header_dir, keep_path=False)
         self.copy("base.h", dst="include", src=header_dir, keep_path=False)
         self.copy("LICENSE", dst="licenses", src=self._source_subfolder)
