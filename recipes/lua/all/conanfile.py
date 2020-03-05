@@ -10,7 +10,7 @@ class LuaConan(ConanFile):
     license = "MIT"
     generators = "cmake"
     settings = "os", "compiler", "arch", "build_type"
-    exports_sources = ["CMakeLists.txt", "patches/lua_mobile.patch"]
+    exports_sources = ["CMakeLists.txt", "patches/**"]
     options = {"shared": [False, True], "fPIC": [True, False], "compile_as_cpp": [True, False]}
     default_options = {"shared": False, "fPIC": True, "compile_as_cpp": False}
 
@@ -22,9 +22,8 @@ class LuaConan(ConanFile):
         tools.get(**self.conan_data["sources"][self.version])
         extracted_dir = "lua-" + self.version
         os.rename(extracted_dir, self._source_subfolder)
-        if self.settings.os == 'Android' or self.settings.os == 'iOS':
-            base_path = self._source_subfolder
-            tools.patch(patch_file="patches/lua_mobile.patch", base_path="{}/src".format(base_path))
+        for patch in self.conan_data["patches"][self.version]:
+            tools.patch(**patch)
 
     def config_options(self):
         if self.settings.os == "Windows":
