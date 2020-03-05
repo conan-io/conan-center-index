@@ -23,7 +23,7 @@ env:
   CONAN_REMOTES: 'https://api.bintray.com/conan/trassir/conan-public'
 
 jobs:
-  jsoncpp_1_8_3:
+  jsoncpp:
     strategy:
       matrix:
         build: ['linux-gcc4.8', 'linux-gcc7', 'linux-gcc9', 'windows-2019-release', 'windows-2019-debug', 'macos']
