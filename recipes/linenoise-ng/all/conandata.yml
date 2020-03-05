@@ -1,0 +1,4 @@
+sources:
+  "1.0.1":
+    url: "https://github.com/arangodb/linenoise-ng/archive/v1.0.1.zip"
+    sha256: "af16575c73435601161d9e6bdfbc58983a78ec16fb3707c18df4171419379c54"
