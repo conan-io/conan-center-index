@@ -4,8 +4,8 @@ from conans import ConanFile, CMake, tools
 
 class MuparserxConan(ConanFile):
     name = "muparserx"
-    description = "Math Parser Library"
-    license = "BSD"
+    description = "A C++ Library for Parsing Expressions with Strings, Complex Numbers, Vectors, Matrices and more"
+    license = "BSD-2-Clause"
     topics = ("conan", "muparserx", "math", "parser")
     homepage = "https://beltoforion.de/article.php?a=muparserx"
     url = "https://github.com/conan-io/conan-center-index"
@@ -51,3 +51,5 @@ class MuparserxConan(ConanFile):
 
     def package_info(self):
         self.cpp_info.libs = tools.collect_libs(self)
+        if self.settings.os == "Linux":
+            self.cpp_info.system_libs = ["m"]
