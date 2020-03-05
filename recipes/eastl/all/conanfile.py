@@ -3,7 +3,7 @@ from conans import ConanFile, CMake, tools
 from conans.errors import ConanInvalidConfiguration
 
 
-class Bzip2Conan(ConanFile):
+class EastlConan(ConanFile):
     name = "eastl"
     description = "EASTL stands for Electronic Arts Standard Template Library. " \
                   "It is an extensive and robust implementation that has an " \
@@ -12,14 +12,25 @@ class Bzip2Conan(ConanFile):
     license = "BSD-3-Clause"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/electronicarts/EASTL"
-    exports_sources = "CMakeLists.txt", "patches/**"
+    exports_sources = ["CMakeLists.txt", "patches/**"]
     generators = "cmake"
     settings = "os", "compiler", "arch", "build_type"
     options = {"shared": [True, False], "fPIC": [True, False]}
     default_options = {"shared": False, "fPIC": True}
 
-    _source_subfolder = "source_subfolder"
-    _minimum_cpp_standard = 14
+    _cmake = None
+
+    @property
+    def _source_subfolder(self):
+        return "source_subfolder"
+
+    @property
+    def _build_subfolder(self):
+        return "build_subfolder"
+
+    @property
+    def _minimum_cpp_standard(self):
+        return 14
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -36,8 +47,8 @@ class Bzip2Conan(ConanFile):
                 raise ConanInvalidConfiguration("EASTL requires c++ {} or newer".format(self._minimum_cpp_standard))
 
         if (self.settings.compiler == "gcc" and tools.Version(self.settings.compiler.version) < "5") or \
-                (self.settings.compiler == "clang" and tools.Version(self.settings.compiler.version) < "3.4") or \
-                (self.settings.compiler == "Visual Studio" and tools.Version(self.settings.compiler.version) < "14"):
+           (self.settings.compiler == "clang" and tools.Version(self.settings.compiler.version) < "3.4") or \
+           (self.settings.compiler == "Visual Studio" and tools.Version(self.settings.compiler.version) < "14"):
             raise ConanInvalidConfiguration("Compiler is too old for c++ {}".format(self._minimum_cpp_standard))
 
     def requirements(self):
@@ -49,11 +60,13 @@ class Bzip2Conan(ConanFile):
         os.rename(folder_name, self._source_subfolder)
 
     def _configure_cmake(self):
-        cmake = CMake(self)
-        cmake.definitions["EASTL_BUILD_BENCHMARK"] = False
-        cmake.definitions["EASTL_BUILD_TESTS"] = False
-        cmake.configure()
-        return cmake
+        if self._cmake:
+            return self._cmake
+        self._cmake = CMake(self)
+        self._cmake.definitions["EASTL_BUILD_BENCHMARK"] = False
+        self._cmake.definitions["EASTL_BUILD_TESTS"] = False
+        self._cmake.configure(build_folder=self._build_subfolder)
+        return self._cmake
 
     def _patch_sources(self):
         for patch in self.conan_data["patches"][self.version]:
@@ -77,7 +90,7 @@ class Bzip2Conan(ConanFile):
         self.cpp_info.names["cmake_find_package"] = "EASTL"
         self.cpp_info.names["cmake_find_package_multi"] = "EASTL"
         self.cpp_info.libs = ["EASTL"]
-        if self.settings.os in ("Android", "Linux", "Macos", "watchOS", "tvOS"):
+        if self.settings.os == "Linux":
             self.cpp_info.system_libs.append("pthread")
         if self.options.shared:
             self.cpp_info.defines.append("EASTL_DLL")
