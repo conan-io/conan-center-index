@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.1)
-project(blake2 C)
+project(b2 C)
 
 include("conanbuildinfo.cmake")
 conan_basic_setup()
@@ -11,14 +11,12 @@ endif()
 option(USE_SSE "Optimized for speed on CPUs supporting SSE2, SSSE3, SSE4.1, AVX, or XOP" OFF)
 option(USE_NEON "Optimiced for arm CPUs" OFF)
 
-if (USE_NEON)    
+if (USE_NEON)
     message(STATUS "Using neon sources")
-    set(SOURCE_FILES source_subfolder/neon/blake2b.c
+    set(SOURCE_FILES source_subfolder/neon/blake2b-neon.c
                      source_subfolder/neon/blake2bp.c
                      source_subfolder/neon/blake2s-neon.c
                      source_subfolder/neon/blake2xb.c
-                     source_subfolder/neon/blake2b-neon.c
-                     source_subfolder/neon/blake2s.c
                      source_subfolder/neon/blake2sp.c
                      source_subfolder/neon/blake2xs.c)
 elseif (USE_SSE)
@@ -39,13 +37,13 @@ else ()
 	                 source_subfolder/ref/blake2xs-ref.c)
 endif()
 
-add_library(${CMAKE_PROJECT_NAME} ${SOURCE_FILES})
-set_target_properties(${CMAKE_PROJECT_NAME} PROPERTIES PUBLIC_HEADER source_subfolder/ref/blake2.h)
+add_library(${PROJECT_NAME} ${SOURCE_FILES})
+set_target_properties(${PROJECT_NAME} PROPERTIES PUBLIC_HEADER source_subfolder/ref/blake2.h)
 
-install(TARGETS ${CMAKE_PROJECT_NAME}
+install(TARGETS ${PROJECT_NAME}
         RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
         ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
         LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
-        PUBLIC_HEADER DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/${CMAKE_PROJECT_NAME}
+        PUBLIC_HEADER DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/libb2
         )
 
