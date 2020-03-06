@@ -32,23 +32,25 @@ class EastlConan(ConanFile):
     def _minimum_cpp_standard(self):
         return 14
 
+    @property
+    def _minimum_compilers_version(self):
+        return {
+            "Visual Studio": "14",
+            "gcc": "5",
+            "clang": "3.2",
+            "apple-clang": "4.3",
+        }
+
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
 
     def configure(self):
-        if not self.settings.compiler.cppstd:
-            self.output.info("Settings c++ standard to {}".format(self._minimum_cpp_standard))
-            self.settings.compiler.cppstd = self._minimum_cpp_standard
+        if self.settings.compiler.cppstd:
+            tools.check_min_cppstd(self, self._minimum_cpp_standard)
 
-        unsupported_cppstd = ("98", "11")
-        for cppstd in unsupported_cppstd:
-            if cppstd in str(self.settings.compiler.cppstd):
-                raise ConanInvalidConfiguration("EASTL requires c++ {} or newer".format(self._minimum_cpp_standard))
-
-        if (self.settings.compiler == "gcc" and tools.Version(self.settings.compiler.version) < "5") or \
-           (self.settings.compiler == "clang" and tools.Version(self.settings.compiler.version) < "3.4") or \
-           (self.settings.compiler == "Visual Studio" and tools.Version(self.settings.compiler.version) < "14"):
+        mininum_compiler_version = self._minimum_compilers_version.get(str(self.settings.compiler))
+        if mininum_compiler_version and tools.Version(self.settings.compiler.version) < mininum_compiler_version:
             raise ConanInvalidConfiguration("Compiler is too old for c++ {}".format(self._minimum_cpp_standard))
 
     def requirements(self):

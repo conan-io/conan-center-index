@@ -6,10 +6,6 @@ class TestPackageConan(ConanFile):
     settings = "os", "compiler", "build_type", "arch"
     generators = "cmake"
 
-    def configure(self):
-        if not self.settings.compiler.cppstd:
-            self.settings.compiler.cppstd = 14
-
     def build(self):
         cmake = CMake(self)
         cmake.configure()
