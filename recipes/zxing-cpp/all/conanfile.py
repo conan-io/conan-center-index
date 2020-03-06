@@ -41,14 +41,14 @@ class ZXingCppConan(ConanFile):
         if self.settings.os == "Windows":
             del self.options.fPIC
 
-        if str(self.settings.compiler.cppstd) in ("98", "gnu98", "11", "gnu11"):
-            raise ConanInvalidConfiguration("This library requires at least c++ 14. The requested c++ standard is too low.")
+        if self.settings.compiler.cppstd:
+            tools.check_min_cppstd(self, 14)
         try:
             minimum_required_version = self._compiler_cpp14_support[str(self.settings.compiler)]
             if self.settings.compiler.version < tools.Version(minimum_required_version):
                 raise ConanInvalidConfiguration("This compiler is too old. This library needs a compiler with c++14 support")
         except KeyError:
-            raise ConanInvalidConfiguration("This recipe does not support this compiler. Consider adding it.")
+            self.output.warn("This recipe might not support the compiler. Consider adding it.")
 
     def configure(self):
         if self.options.shared:
