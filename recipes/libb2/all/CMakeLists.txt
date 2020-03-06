@@ -37,10 +37,10 @@ else ()
 	                 source_subfolder/ref/blake2xs-ref.c)
 endif()
 
-add_library(${PROJECT_NAME} ${SOURCE_FILES})
-set_target_properties(${PROJECT_NAME} PROPERTIES PUBLIC_HEADER source_subfolder/ref/blake2.h)
+add_library(${CMAKE_PROJECT_NAME} ${SOURCE_FILES})
+set_target_properties(${CMAKE_PROJECT_NAME} PROPERTIES PUBLIC_HEADER source_subfolder/ref/blake2.h)
 
-install(TARGETS ${PROJECT_NAME}
+install(TARGETS ${CMAKE_PROJECT_NAME}
         RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
         ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
         LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
