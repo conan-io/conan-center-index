@@ -126,12 +126,11 @@ class LibcurlConan(ConanFile):
         tools.download("https://curl.haxx.se/ca/cacert.pem", "cacert.pem", verify=True)
 
     def build(self):
-        with tools.chdir(self.source_folder):
-            self._patch_misc_files()
-            if self.settings.compiler != "Visual Studio":
-                self._build_with_autotools()
-            else:
-                self._build_with_cmake()
+        self._patch_misc_files()
+        if self.settings.compiler != "Visual Studio":
+            self._build_with_autotools()
+        else:
+            self._build_with_cmake()
 
     def _patch_misc_files(self):
         if self.options.with_largemaxwritesize:
@@ -395,38 +394,37 @@ class LibcurlConan(ConanFile):
         cmake.build()
 
     def package(self):
-        with tools.chdir(self.source_folder):
-            self.copy(pattern="COPYING", dst="licenses", src=self._source_subfolder)
+        self.copy(pattern="COPYING", dst="licenses", src=self._source_subfolder)
 
-            # Execute install
-            if self.settings.compiler != "Visual Studio":
-                env_run = RunEnvironment(self)
-                with tools.environment_append(env_run.vars):
-                    with tools.chdir(self._source_subfolder):
-                        autotools, autotools_vars = self._configure_autotools()
-                        autotools.install(vars=autotools_vars)
-            else:
-                cmake = self._configure_cmake()
-                cmake.install()
+        # Execute install
+        if self.settings.compiler != "Visual Studio":
+            env_run = RunEnvironment(self)
+            with tools.environment_append(env_run.vars):
+                with tools.chdir(self._source_subfolder):
+                    autotools, autotools_vars = self._configure_autotools()
+                    autotools.install(vars=autotools_vars)
+        else:
+            cmake = self._configure_cmake()
+            cmake.install()
 
-            if self._is_mingw:
-                # Handle only mingw libs
-                self.copy(pattern="*.dll", dst="bin", keep_path=False)
-                self.copy(pattern="*dll.a", dst="lib", keep_path=False)
-                self.copy(pattern="*.def", dst="lib", keep_path=False)
-                self.copy(pattern="*.lib", dst="lib", keep_path=False)
+        if self._is_mingw:
+            # Handle only mingw libs
+            self.copy(pattern="*.dll", dst="bin", keep_path=False)
+            self.copy(pattern="*dll.a", dst="lib", keep_path=False)
+            self.copy(pattern="*.def", dst="lib", keep_path=False)
+            self.copy(pattern="*.lib", dst="lib", keep_path=False)
 
-            self.copy("cacert.pem", dst="res")
+        self.copy("cacert.pem", dst="res")
 
-            # no need to distribute share folder (docs/man pages)
-            tools.rmdir(os.path.join(self.package_folder, 'share'))
-            # no need for pc files
-            tools.rmdir(os.path.join(self.package_folder, 'lib', 'pkgconfig'))
-            # no need for cmake files
-            tools.rmdir(os.path.join(self.package_folder, 'lib', 'cmake'))
-            # Remove libtool files (*.la)
-            if os.path.isfile(os.path.join(self.package_folder, 'lib', 'libcurl.la')):
-                os.remove(os.path.join(self.package_folder, 'lib', 'libcurl.la'))
+        # no need to distribute share folder (docs/man pages)
+        tools.rmdir(os.path.join(self.package_folder, 'share'))
+        # no need for pc files
+        tools.rmdir(os.path.join(self.package_folder, 'lib', 'pkgconfig'))
+        # no need for cmake files
+        tools.rmdir(os.path.join(self.package_folder, 'lib', 'cmake'))
+        # Remove libtool files (*.la)
+        if os.path.isfile(os.path.join(self.package_folder, 'lib', 'libcurl.la')):
+            os.remove(os.path.join(self.package_folder, 'lib', 'libcurl.la'))
 
     def package_info(self):
         self.cpp_info.names['cmake_find_package'] = 'CURL'
