@@ -10,7 +10,7 @@ class GnuLibConanFile(ConanFile):
     homepage =  "https://www.gnu.org/software/gnulib/"
     url = "https://github.com/conan-io/conan-center-index"
     topics = ("conan", "gnulib", "library", "gnu")
-    license = ("GPL-3.0-or-later", "LGPL-3.0-or-later", "Public domain")
+    license = ("GPL-3.0-or-later", "LGPL-3.0-or-later", "Unlicense")
     no_copy_source = True
 
     # Added to test on CI
