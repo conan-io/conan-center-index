@@ -26,6 +26,9 @@ class M4Conan(ConanFile):
         return str(self.settings.compiler).endswith("clang")
 
     def build_requirements(self):
+        if self.settings.compiler == "Visual Studio":
+            self.build_requires("gnulib/20200224")
+            self.build_requires("automake/1.16.1")
         if tools.os_info.is_windows and "CONAN_BASH_PATH" not in os.environ and \
                 tools.os_info.detect_windows_subsystem() != "msys2":
             self.build_requires("msys2/20190524")
@@ -48,7 +51,7 @@ class M4Conan(ConanFile):
         if self.settings.compiler == "Visual Studio":
             with tools.vcvars(self.settings):
                 env.update({
-                    "AR": "lib",
+                    "AR": "{}/build-aux/ar-lib lib".format(tools.unix_path(self._source_subfolder)),
                     "CC": "cl -nologo",
                     "CXX": "cl -nologo",
                     "LD": "link",
@@ -73,6 +76,11 @@ class M4Conan(ConanFile):
     def build(self):
         self._patch_sources()
         with self._build_context():
+            if self.settings.compiler == "Visual Studio":
+                with tools.chdir(self._source_subfolder):
+                    tools.replace_in_file("configure.ac", "AC_PREREQ([2.62])", "AC_PREREQ([2.65])")
+                    self.run("gnulib-tool --update", win_bash=tools.os_info.is_windows)
+                    self.run("{} -ifv".format(os.environ["AUTORECONF"]), win_bash=tools.os_info.is_windows)
             autotools = self._configure_autotools()
             autotools.make()
             if bool(os.environ.get("CONAN_RUN_TESTS", "")):
