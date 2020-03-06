@@ -1,197 +1,154 @@
-diff --git a/cmake/CMakeLists.txt b/cmake/CMakeLists.txt
-index 71a0f37a..e834f410 100644
---- a/cmake/CMakeLists.txt
-+++ b/cmake/CMakeLists.txt
-@@ -180,7 +180,8 @@ if (MSVC)
+
+--- cmake/CMakeLists.txt
++++ cmake/CMakeLists.txt
+@@ -180,7 +180,7 @@
    configure_file(extract_includes.bat.in extract_includes.bat)
 
    # Suppress linker warnings about files with no symbols defined.
 -  set(CMAKE_STATIC_LINKER_FLAGS /ignore:4221)
+-
 +  # Bincrafters: https://github.com/protocolbuffers/protobuf/issues/6098
 +  set(CMAKE_STATIC_LINKER_FLAGS "${CMAKE_STATIC_LINKER_FLAGS} /ignore:4221")
-
    # Configure Resource Compiler
    enable_language(RC)
-@@ -213,10 +214,7 @@ if (protobuf_UNICODE)
+@@ -212,9 +212,10 @@
+ if (protobuf_UNICODE)
    add_definitions(-DUNICODE -D_UNICODE)
  endif (protobuf_UNICODE)
-
--include(libprotobuf-lite.cmake)
--include(libprotobuf.cmake)
+-
++if(0)
+ include(libprotobuf-lite.cmake)
+ include(libprotobuf.cmake)
++endif()
  if (protobuf_BUILD_PROTOC_BINARIES)
--  include(libprotoc.cmake)
+   include(libprotoc.cmake)
    include(protoc.cmake)
- endif (protobuf_BUILD_PROTOC_BINARIES)
-
-diff --git a/cmake/install.cmake b/cmake/install.cmake
-index be47c54a..9d4504cf 100644
---- a/cmake/install.cmake
-+++ b/cmake/install.cmake
-@@ -1,35 +1,9 @@
+--- cmake/install.cmake
++++ cmake/install.cmake
+@@ -1,5 +1,5 @@
  include(GNUInstallDirs)
-
--configure_file(${CMAKE_CURRENT_SOURCE_DIR}/protobuf.pc.cmake
--               ${CMAKE_CURRENT_BINARY_DIR}/protobuf.pc @ONLY)
--configure_file(${CMAKE_CURRENT_SOURCE_DIR}/protobuf-lite.pc.cmake
--               ${CMAKE_CURRENT_BINARY_DIR}/protobuf-lite.pc @ONLY)
-+unset(CMAKE_SIZEOF_VOID_P)
-
--set(_protobuf_libraries libprotobuf-lite libprotobuf)
+-
++if(0)
+ configure_file(${CMAKE_CURRENT_SOURCE_DIR}/protobuf.pc.cmake
+                ${CMAKE_CURRENT_BINARY_DIR}/protobuf.pc @ONLY)
+ configure_file(${CMAKE_CURRENT_SOURCE_DIR}/protobuf-lite.pc.cmake
+@@ -27,7 +27,7 @@
+     LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR} COMPONENT ${_library}
+     ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR} COMPONENT ${_library})
+ endforeach()
+-
++endif()
  if (protobuf_BUILD_PROTOC_BINARIES)
--    list(APPEND _protobuf_libraries libprotoc)
--endif (protobuf_BUILD_PROTOC_BINARIES)
--
--foreach(_library ${_protobuf_libraries})
--  set_property(TARGET ${_library}
--    PROPERTY INTERFACE_INCLUDE_DIRECTORIES
--    $<BUILD_INTERFACE:${protobuf_source_dir}/src>
--    $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>)
--  if (UNIX AND NOT APPLE)
--    set_property(TARGET ${_library}
--      PROPERTY INSTALL_RPATH "$ORIGIN")
--  elseif (APPLE)
--    set_property(TARGET ${_library}
--      PROPERTY INSTALL_RPATH "@loader_path")
--  endif()
--  install(TARGETS ${_library} EXPORT protobuf-targets
--    RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR} COMPONENT ${_library}
--    LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR} COMPONENT ${_library}
--    ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR} COMPONENT ${_library})
--endforeach()
--
--if (protobuf_BUILD_PROTOC_BINARIES)
--  install(TARGETS protoc EXPORT protobuf-targets
-+  install(TARGETS protoc EXPORT protoc-targets
+   install(TARGETS protoc EXPORT protobuf-targets
      RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR} COMPONENT protoc)
-   if (UNIX AND NOT APPLE)
-     set_property(TARGET protoc
-@@ -40,29 +14,6 @@ if (protobuf_BUILD_PROTOC_BINARIES)
+@@ -39,7 +39,7 @@
+       PROPERTY INSTALL_RPATH "@loader_path/../lib")
    endif()
  endif (protobuf_BUILD_PROTOC_BINARIES)
+-
++if(0)
+ install(FILES ${CMAKE_CURRENT_BINARY_DIR}/protobuf.pc ${CMAKE_CURRENT_BINARY_DIR}/protobuf-lite.pc DESTINATION "${CMAKE_INSTALL_LIBDIR}/pkgconfig")
 
--install(FILES ${CMAKE_CURRENT_BINARY_DIR}/protobuf.pc ${CMAKE_CURRENT_BINARY_DIR}/protobuf-lite.pc DESTINATION "${CMAKE_INSTALL_LIBDIR}/pkgconfig")
--
--file(STRINGS extract_includes.bat.in _extract_strings
--  REGEX "^copy")
--foreach(_extract_string ${_extract_strings})
--  string(REGEX REPLACE "^.* .+ include\\\\(.+)$" "\\1"
--    _header ${_extract_string})
--  string(REPLACE "\\" "/" _header ${_header})
--  get_filename_component(_extract_from "${protobuf_SOURCE_DIR}/../src/${_header}" ABSOLUTE)
--  get_filename_component(_extract_name ${_header} NAME)
--  get_filename_component(_extract_to "${CMAKE_INSTALL_INCLUDEDIR}/${_header}" PATH)
--  if(EXISTS "${_extract_from}")
--    install(FILES "${_extract_from}"
--      DESTINATION "${_extract_to}"
--      COMPONENT protobuf-headers
--      RENAME "${_extract_name}")
--  else()
--    message(AUTHOR_WARNING "The file \"${_extract_from}\" is listed in "
--      "\"${protobuf_SOURCE_DIR}/cmake/extract_includes.bat.in\" "
--      "but there not exists. The file will not be installed.")
--  endif()
--endforeach()
--
- # Internal function for parsing auto tools scripts
- function(_protobuf_auto_list FILE_NAME VARIABLE)
-   file(STRINGS ${FILE_NAME} _strings)
-@@ -103,48 +54,35 @@ endforeach()
- # Install configuration
- set(_cmakedir_desc "Directory relative to CMAKE_INSTALL to install the cmake configuration files")
- if(NOT MSVC)
--  set(CMAKE_INSTALL_CMAKEDIR "${CMAKE_INSTALL_LIBDIR}/cmake/protobuf" CACHE STRING "${_cmakedir_desc}")
-+  set(CMAKE_INSTALL_CMAKEDIR "${CMAKE_INSTALL_LIBDIR}/cmake/protoc" CACHE STRING "${_cmakedir_desc}")
- else()
+ file(STRINGS extract_includes.bat.in _extract_strings
+@@ -108,16 +108,16 @@
    set(CMAKE_INSTALL_CMAKEDIR "cmake" CACHE STRING "${_cmakedir_desc}")
  endif()
  mark_as_advanced(CMAKE_INSTALL_CMAKEDIR)
-
+-
++endif()
  configure_file(protobuf-config.cmake.in
 -  ${CMAKE_INSTALL_CMAKEDIR}/protobuf-config.cmake @ONLY)
-+  ${CMAKE_INSTALL_CMAKEDIR}/protoc-config.cmake @ONLY)
- configure_file(protobuf-config-version.cmake.in
+-configure_file(protobuf-config-version.cmake.in
 -  ${CMAKE_INSTALL_CMAKEDIR}/protobuf-config-version.cmake @ONLY)
-+  ${CMAKE_INSTALL_CMAKEDIR}/protoc-config-version.cmake @ONLY)
++  protoc-generate.cmake @ONLY)
++#configure_file(protobuf-config-version.cmake.in
++#  ${CMAKE_INSTALL_CMAKEDIR}/protobuf-config-version.cmake @ONLY)
  configure_file(protobuf-module.cmake.in
 -  ${CMAKE_INSTALL_CMAKEDIR}/protobuf-module.cmake @ONLY)
-+  ${CMAKE_INSTALL_CMAKEDIR}/protoc-module.cmake @ONLY)
++  protoc-module.cmake @ONLY)
  configure_file(protobuf-options.cmake
 -  ${CMAKE_INSTALL_CMAKEDIR}/protobuf-options.cmake @ONLY)
-+  ${CMAKE_INSTALL_CMAKEDIR}/protoc-options.cmake @ONLY)
-
- # Allows the build directory to be used as a find directory.
-
--if (protobuf_BUILD_PROTOC_BINARIES)
--  export(TARGETS libprotobuf-lite libprotobuf libprotoc protoc
--    NAMESPACE protobuf::
--    FILE ${CMAKE_INSTALL_CMAKEDIR}/protobuf-targets.cmake
--  )
--else (protobuf_BUILD_PROTOC_BINARIES)
--  export(TARGETS libprotobuf-lite libprotobuf
--    NAMESPACE protobuf::
--    FILE ${CMAKE_INSTALL_CMAKEDIR}/protobuf-targets.cmake
--  )
--endif (protobuf_BUILD_PROTOC_BINARIES)
-+export(TARGETS protoc
-+  NAMESPACE protobuf::
-+  FILE ${CMAKE_INSTALL_CMAKEDIR}/protoc-targets.cmake
-+)
-
--install(EXPORT protobuf-targets
-+install(EXPORT protoc-targets
-   DESTINATION "${CMAKE_INSTALL_CMAKEDIR}"
-   NAMESPACE protobuf::
--  COMPONENT protobuf-export)
-+  COMPONENT protoc-export)
-
- install(DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/${CMAKE_INSTALL_CMAKEDIR}/
-   DESTINATION "${CMAKE_INSTALL_CMAKEDIR}"
--  COMPONENT protobuf-export
--  PATTERN protobuf-targets.cmake EXCLUDE
-+  COMPONENT protoc-export
-+  PATTERN protoc-targets.cmake EXCLUDE
- )
++  protoc-options.cmake @ONLY)
++install(FILES "${CMAKE_CURRENT_BINARY_DIR}/protoc-generate.cmake" "${CMAKE_CURRENT_BINARY_DIR}/protoc-module.cmake" "${CMAKE_CURRENT_BINARY_DIR}/protoc-options.cmake" DESTINATION "${CMAKE_INSTALL_CMAKEDIR}")
 -
--option(protobuf_INSTALL_EXAMPLES "Install the examples folder" OFF)
--if(protobuf_INSTALL_EXAMPLES)
--  install(DIRECTORY ../examples/ DESTINATION examples
--    COMPONENT protobuf-examples)
--endif()
-diff --git a/cmake/protobuf-config.cmake.in b/cmake/protobuf-config.cmake.in
-index 29e39d88..7ef2f52d 100644
---- a/cmake/protobuf-config.cmake.in
-+++ b/cmake/protobuf-config.cmake.in
-@@ -1,11 +1,11 @@
+-# Allows the build directory to be used as a find directory.
++if(0)
+
+ if (protobuf_BUILD_PROTOC_BINARIES)
+@@ -148,3 +148,4 @@
+   install(DIRECTORY ../examples/ DESTINATION examples
+     COMPONENT protobuf-examples)
+ endif()
++endif()
+--- cmake/libprotoc.cmake
++++ cmake/libprotoc.cmake
+@@ -167,7 +167,7 @@
+
+ add_library(libprotoc ${protobuf_SHARED_OR_STATIC}
+   ${libprotoc_files} ${libprotoc_headers} ${libprotoc_rc_files})
+-target_link_libraries(libprotoc libprotobuf)
++target_link_libraries(libprotoc CONAN_PKG::protobuf)
+ if(MSVC AND protobuf_BUILD_SHARED_LIBS)
+   target_compile_definitions(libprotoc
+     PUBLIC  PROTOBUF_USE_DLLS
+--- cmake/protobuf-config.cmake.in
++++ cmake/protobuf-config.cmake.in
+@@ -1,11 +1,5 @@
  # User options
 -include("${CMAKE_CURRENT_LIST_DIR}/protobuf-options.cmake")
-+include("${CMAKE_CURRENT_LIST_DIR}/protoc-options.cmake")
-
- # Depend packages
- @_protobuf_FIND_ZLIB@
-
- # Imported targets
+-
+-# Depend packages
+-@_protobuf_FIND_ZLIB@
+-
+-# Imported targets
 -include("${CMAKE_CURRENT_LIST_DIR}/protobuf-targets.cmake")
-+include("${CMAKE_CURRENT_LIST_DIR}/protoc-targets.cmake")
++include("${CMAKE_CURRENT_LIST_DIR}/protoc-options.cmake")
 
  function(protobuf_generate)
    include(CMakeParseArguments)
-@@ -123,5 +123,5 @@ endfunction()
+@@ -104,9 +98,9 @@
+
+     add_custom_command(
+       OUTPUT ${_generated_srcs}
+-      COMMAND  protobuf::protoc
++      COMMAND  protoc
+       ARGS --${protobuf_generate_LANGUAGE}_out ${_dll_export_decl}${protobuf_generate_PROTOC_OUT_DIR} ${_protobuf_include_path} ${_abs_file}
+-      DEPENDS ${_abs_file} protobuf::protoc
++      DEPENDS ${_abs_file}
+       COMMENT "Running ${protobuf_generate_LANGUAGE} protocol buffer compiler on ${_proto}"
+       VERBATIM )
+   endforeach()
+@@ -123,5 +117,5 @@
 
  # CMake FindProtobuf module compatible file
  if(protobuf_MODULE_COMPATIBLE)
 -  include("${CMAKE_CURRENT_LIST_DIR}/protobuf-module.cmake")
 +  include("${CMAKE_CURRENT_LIST_DIR}/protoc-module.cmake")
  endif()
-diff --git a/cmake/protoc.cmake b/cmake/protoc.cmake
-index f90e525e..3ae9f334 100644
---- a/cmake/protoc.cmake
-+++ b/cmake/protoc.cmake
-@@ -9,7 +9,7 @@ set(protoc_rc_files
+--- cmake/protobuf-module.cmake.in
++++ cmake/protobuf-module.cmake.in
+@@ -119,7 +119,7 @@
+ #
+ # Main.
+ #
+-
++if(0)
+ # By default have PROTOBUF_GENERATE_CPP macro pass -I to protoc
+ # for each directory where a proto file is referenced.
+ if(NOT DEFINED PROTOBUF_GENERATE_CPP_APPEND_PATH)
+@@ -187,3 +187,4 @@
+     string(TOUPPER ${Camel} UPPER)
+     set(${UPPER} ${${Camel}})
+ endforeach()
++endif()
+--- cmake/protoc.cmake
++++ cmake/protoc.cmake
+@@ -9,7 +9,7 @@
  endif()
 
  add_executable(protoc ${protoc_files} ${protoc_rc_files})
 -target_link_libraries(protoc libprotoc libprotobuf)
-+target_link_libraries(protoc CONAN_PKG::Protobuf)
++target_link_libraries(protoc libprotoc)
  add_executable(protobuf::protoc ALIAS protoc)
 
  set_target_properties(protoc PROPERTIES
