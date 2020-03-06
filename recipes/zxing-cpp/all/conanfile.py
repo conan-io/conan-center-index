@@ -91,4 +91,3 @@ class ZXingCppConan(ConanFile):
         self.cpp_info.libs = ["ZXingCore"]
         if self.settings.os == "Linux":
             self.cpp_info.system_libs = ["pthread", "m"]
-        self.cpp_info.includedirs = ["include", os.path.join("include", "ZXing")]
