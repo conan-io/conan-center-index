@@ -1,6 +1,5 @@
 from conans import ConanFile, tools, AutoToolsBuildEnvironment
 from contextlib import contextmanager
-import glob
 import os
 
 
@@ -49,13 +48,14 @@ class M4Conan(ConanFile):
         if self.settings.compiler == "Visual Studio":
             with tools.vcvars(self.settings):
                 env.update({
-                    "CC": "{}/build-aux/compile cl -nologo".format(tools.unix_path(self._source_subfolder)),
-                    "CXX": "{}/build-aux/compile cl -nologo".format(tools.unix_path(self._source_subfolder)),
+                    "AR": "lib",
+                    "CC": "cl -nologo",
+                    "CXX": "cl -nologo",
                     "LD": "link",
                     "NM": "dumpbin -symbols",
-                    "STRIP": ":",
-                    "AR": "{}/build-aux/ar-lib lib".format(tools.unix_path(self._source_subfolder)),
+                    "OBJDUMP": ":",
                     "RANLIB": ":",
+                    "STRIP": ":",
                 })
                 with tools.environment_append(env):
                     yield
@@ -77,8 +77,8 @@ class M4Conan(ConanFile):
             autotools.make()
             if bool(os.environ.get("CONAN_RUN_TESTS", "")):
                 self.output.info("Running m4 checks...")
-                with tools.chdir("checks"):
-                    autotools.make(target="check-local")
+                with tools.chdir("tests"):
+                    autotools.make(target="check")
 
     def package(self):
         self.copy(pattern="COPYING", dst="licenses", src=self._source_subfolder)
