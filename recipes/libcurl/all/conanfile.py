@@ -1,6 +1,5 @@
 import os
 import re
-import shutil
 from conans import ConanFile, AutoToolsBuildEnvironment, RunEnvironment, CMake, tools
 from conans.errors import ConanInvalidConfiguration
 
@@ -402,7 +401,6 @@ class LibcurlConan(ConanFile):
             # Execute install
             if self.settings.compiler != "Visual Studio":
                 env_run = RunEnvironment(self)
-
                 with tools.environment_append(env_run.vars):
                     with tools.chdir(self._source_subfolder):
                         autotools, autotools_vars = self._configure_autotools()
@@ -421,11 +419,11 @@ class LibcurlConan(ConanFile):
             self.copy("cacert.pem", dst="res")
 
             # no need to distribute share folder (docs/man pages)
-            shutil.rmtree(os.path.join(self.package_folder, 'share'), ignore_errors=True)
+            tools.rmdir(os.path.join(self.package_folder, 'share'))
             # no need for pc files
-            shutil.rmtree(os.path.join(self.package_folder, 'lib', 'pkgconfig'), ignore_errors=True)
+            tools.rmdir(os.path.join(self.package_folder, 'lib', 'pkgconfig'))
             # no need for cmake files
-            shutil.rmtree(os.path.join(self.package_folder, 'lib', 'cmake'), ignore_errors=True)
+            tools.rmdir(os.path.join(self.package_folder, 'lib', 'cmake'))
             # Remove libtool files (*.la)
             if os.path.isfile(os.path.join(self.package_folder, 'lib', 'libcurl.la')):
                 os.remove(os.path.join(self.package_folder, 'lib', 'libcurl.la'))
