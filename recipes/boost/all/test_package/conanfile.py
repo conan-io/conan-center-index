@@ -26,6 +26,7 @@ class DefaultNameConan(ConanFile):
             cmake.definitions["WITH_COROUTINE"] = "TRUE"
         if not self.options["boost"].without_chrono:
             cmake.definitions["WITH_CHRONO"] = "TRUE"
+        cmake.definitions["Boost_NO_BOOST_CMAKE"] = "TRUE"
         cmake.configure()
         cmake.build()
 
