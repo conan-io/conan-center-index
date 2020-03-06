@@ -53,7 +53,7 @@ class ZeroMQConan(ConanFile):
         if self._cmake:
             return self._cmake
         self._cmake = CMake(self)
-        self._cmake.definitions["ENABLE_CURVE"] = self.options.encryption is not None
+        self._cmake.definitions["ENABLE_CURVE"] = bool(self.options.encryption)
         self._cmake.definitions["WITH_LIBSODIUM"] = self.options.encryption == "libsodium"
         self._cmake.definitions["ZMQ_BUILD_TESTS"] = False
         self._cmake.definitions["WITH_PERF_TOOL"] = False
