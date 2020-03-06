@@ -97,7 +97,7 @@ class LeptonicaConan(ConanFile):
 
         # upstream uses obsolete FOO_LIBRARY that is not generated
         # by cmake_find_package generator (upstream PR 456)
-        if self.version == '1.78.0':
+        if tools.Version(self.version) <= '1.78.0':
             for dep in ('GIF', 'TIFF', 'PNG', 'JPEG', 'ZLIB'):
                 tools.replace_in_file(os.path.join(self._source_subfolder, "src", "CMakeLists.txt"),
                                       dep + "_LIBRARY",
@@ -124,4 +124,3 @@ class LeptonicaConan(ConanFile):
         self.cpp_info.names["cmake_find_package_multi"] = "Leptonica"
         self.cpp_info.names['pkg_config'] = 'lept'
         self.cpp_info.includedirs.append(os.path.join("include", "leptonica"))
-
