@@ -62,5 +62,7 @@ class ZyreConan(ConanFile):
 
     def package_info(self):
         self.cpp_info.libs = ["zyre"]
+        if self.settings.os == "Linux":
+            self.cpp_info.system_libs = ["pthread", "dl", "rt", "m"]
         if not self.options.shared:
             self.cpp_info.defines = ["ZYRE_STATIC"]
