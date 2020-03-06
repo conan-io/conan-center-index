@@ -24,7 +24,7 @@ class ZyreConan(ConanFile):
         "fPIC": True,
         "drafts": False,
     }
-    generators = ["cmake"]
+    generators = ["cmake", "cmake_find_package"]
     _cmake = None
     _source_subfolder = "source_subfolder"
     _build_subfolder = "build_subfolder"
@@ -42,6 +42,7 @@ class ZyreConan(ConanFile):
         if self._cmake:
             return self._cmake
         self._cmake = CMake(self)
+        self._cmake.verbose = True
         self._cmake.definitions["ENABLE_DRAFTS"] = self.options.drafts
         self._cmake.configure(build_dir=self._build_subfolder)
         return self._cmake
@@ -61,3 +62,5 @@ class ZyreConan(ConanFile):
 
     def package_info(self):
         self.cpp_info.libs = ["zyre"]
+        if not self.options.shared:
+            self.cpp_info.defines = ["ZYRE_STATIC"]
