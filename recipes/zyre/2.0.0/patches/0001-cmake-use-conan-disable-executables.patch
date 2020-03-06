@@ -1,13 +1,17 @@
 --- CMakeLists.txt
 +++ CMakeLists.txt
-@@ -109,8 +109,8 @@ set(OPTIONAL_LIBRARIES)
+@@ -107,10 +107,10 @@ set(OPTIONAL_LIBRARIES)
  ########################################################################
- find_package(libzmq REQUIRED)
- IF (LIBZMQ_FOUND)
+ # LIBZMQ dependency
+ ########################################################################
+-find_package(libzmq REQUIRED)
++find_package(ZeroMQ REQUIRED)
+-IF (LIBZMQ_FOUND)
++IF (ZEROMQ_FOUND)
 -    include_directories(${LIBZMQ_INCLUDE_DIRS})
 -    list(APPEND MORE_LIBRARIES ${LIBZMQ_LIBRARIES})
 +    include_directories(${CONAN_INCLUDE_DIRS_LIBZMQ})
-+    list(APPEND MORE_LIBRARIES ${CONAN_LIBS_LIBZMQ})
++    list(APPEND MORE_LIBRARIES ZeroMQ::ZeroMQ)
      set(pkg_config_libs_private "${pkg_config_libs_private} -lzmq")
  ELSE (LIBZMQ_FOUND)
      message( FATAL_ERROR "libzmq not found." )
@@ -18,10 +22,19 @@
 -    include_directories(${CZMQ_INCLUDE_DIRS})
 -    list(APPEND MORE_LIBRARIES ${CZMQ_LIBRARIES})
 +    include_directories(${CONAN_INCLUDE_DIRS_CZMQ})
-+    list(APPEND MORE_LIBRARIES ${CONAN_LIBS_CZMQ})
++    list(APPEND MORE_LIBRARIES czmq::czmq)
      set(pkg_config_libs_private "${pkg_config_libs_private} -lczmq")
  ELSE (CZMQ_FOUND)
      message( FATAL_ERROR "czmq not found." )
+@@ -168,7 +168,7 @@
+ endif()
+ add_library(zyre ${zyre_sources})
+ set_target_properties(zyre
+-    PROPERTIES DEFINE_SYMBOL "ZYRE_EXPORTS"
++    PROPERTIES DEFINE_SYMBOL "ZYRE_EXPORTS" LINKER_LANGUAGE CXX
+ )
+ set_target_properties (zyre
+     PROPERTIES SOVERSION "2.0.0"
 @@ -182,9 +182,9 @@ install(TARGETS zyre
      ARCHIVE DESTINATION "lib${LIB_SUFFIX}" # .lib file
      RUNTIME DESTINATION bin              # .dll file
