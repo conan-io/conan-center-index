@@ -32,6 +32,7 @@ class LeptonicaConan(ConanFile):
                        'with_webp': True,
                        'fPIC': True}
 
+    _cmake = None
     _source_subfolder = "source_subfolder"
 
     def requirements(self):
@@ -69,7 +70,9 @@ class LeptonicaConan(ConanFile):
                     os.path.join(self._source_subfolder, "CMakeLists.txt"))
 
     def _configure_cmake(self):
-        cmake = CMake(self)
+        if self._cmake:
+            return self._cmake
+        cmake = self._cmake = CMake(self)
         if self.version == '1.78.0':
             cmake.definitions['STATIC'] = not self.options.shared
         cmake.definitions['BUILD_PROG'] = False
