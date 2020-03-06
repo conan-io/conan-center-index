@@ -9,7 +9,8 @@ class PahoMqttCppConan(ConanFile):
     homepage = "https://github.com/eclipse/paho.mqtt.cpp"
     topics = ("MQTT", "IoT", "eclipse", "SSL", "paho", "Cpp")
     license = "EPL-1.0"
-    description = """The open-source client implementations of MQTT and MQTT-SN"""
+    description = ("""The open-source client implementations of MQTT """
+                   """and MQTT-SN""")
     exports_sources = ["CMakeLists.txt", "patches/*"]
     generators = "cmake"
     settings = "os", "arch", "compiler", "build_type"
@@ -45,7 +46,7 @@ class PahoMqttCppConan(ConanFile):
         self.options["paho-mqtt-c"].ssl = self.options.ssl
 
     def requirements(self):
-        self.requires("paho-mqtt-c/1.3.0")
+        self.requires("paho-mqtt-c/1.3.1")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
@@ -65,8 +66,9 @@ class PahoMqttCppConan(ConanFile):
         return self._cmake
 
     def build(self):
-        for patch in self.conan_data["patches"][self.version]:
-            tools.patch(**patch)
+        if "patches" in self.conan_data.keys():
+            for patch in self.conan_data["patches"][self.version]:
+                tools.patch(**patch)
         cmake = self._configure_cmake()
         cmake.build()
 
