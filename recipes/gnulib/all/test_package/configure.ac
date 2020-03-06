@@ -9,6 +9,7 @@ AC_CONFIG_HEADERS([config.h])
 
 AC_PROG_CC
 gl_EARLY
+AM_PROG_AR
 
 gl_INIT
 
