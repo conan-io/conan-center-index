@@ -1,0 +1,95 @@
+name: libalsa CI
+
+on:
+  pull_request:
+    paths:
+      - 'recipes/libalsa/all/**'
+      - 'build.py'
+      - '.github/workflows/libalsa.yml'
+  push:
+    branches:
+      - trassir-ci
+    paths:
+      - 'recipes/libalsa/all/**'
+      - 'build.py'
+      - '.github/workflows/libalsa.yml'
+
+env:
+  CONAN_PASSWORD: ${{ secrets.BintrayApiKey }}
+
+jobs:
+  libalsa:
+    strategy:
+      matrix:
+        build: ['linux-gcc4.8', 'linux-gcc7', 'linux-gcc9', 'windows-2019-release', 'windows-2019-debug', 'macos']
+        libalsa_versions: ['1.1.9']
+        include:
+          - build: 'linux-gcc4.8'
+            os: 'ubuntu-latest'
+            compiler: 'gcc'
+            compiler_version: '4.8'
+            docker_image: 'conanio/gcc48'
+            build_types: 'Release,Debug'
+            archs: 'x86,x86_64'
+          - build: 'linux-gcc7'
+            os: 'ubuntu-latest'
+            compiler: 'gcc'
+            compiler_version: '7'
+            docker_image: 'conanio/gcc7'
+            build_types: 'Release,Debug'
+            archs: 'x86,x86_64'
+          - build: 'linux-gcc9'
+            os: 'ubuntu-latest'
+            compiler: 'gcc'
+            compiler_version: '9'
+            docker_image: 'conanio/gcc9'
+            build_types: 'Release,Debug'
+            archs: 'x86,x86_64'
+          - build: 'windows-2019-release'
+            os: 'windows-2019'
+            build_types: 'Release'
+            compiler: 'vs'
+            compiler_version: '16'
+            vs_runtimes: 'MD,MT'
+            archs: 'x86_64'
+          - build: 'windows-2019-debug'
+            os: 'windows-2019'
+            build_types: 'Debug'
+            compiler: 'vs'
+            compiler_version: '16'
+            vs_runtimes: 'MDd,MTd'
+            archs: 'x86_64'
+          - build: 'macos'
+            os: 'macos-latest'
+            build_types: 'Release,Debug'
+            archs: 'x86_64'
+            compiler: 'apple_clang'
+            compiler_version: '11.0'
+            xcode_version: '11.3.1'
+    runs-on: ${{ matrix.os }}
+    steps:
+      - name: Configure git
+        run: git config --global core.autocrlf input
+        shell: bash
+      - name: Checkout
+        uses: actions/checkout@v2
+        with:
+          path: sources
+      - name: Setup Python
+        uses: actions/setup-python@v1
+        with:
+          python-version: '3.x'
+      - name: Build and Optionally Upload
+        uses: trassir/run-cpt@v0.2.1-trassir
+        with:
+          work-dir: sources/recipes/libalsa/all
+          build-script: ../../../build.py
+          compiler: ${{ matrix.compiler }}
+          compiler-versions: ${{ matrix.compiler_version }}
+          docker-images: ${{ matrix.docker_image }}
+        env:
+          CONAN_REFERENCE: 'libalsa/${{ matrix.libalsa_versions }}'
+          CONAN_VISUAL_RUNTIMES: ${{ matrix.vs_runtimes }}
+          CONAN_ARCHS: ${{ matrix.archs }}
+          CONAN_BUILD_TYPES: ${{ matrix.build_types }}
+          DEVELOPER_DIR: /Applications/Xcode_${{ matrix.xcode_version }}.app/Contents/Developer
