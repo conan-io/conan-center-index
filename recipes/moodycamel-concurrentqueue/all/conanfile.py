@@ -9,7 +9,7 @@ class MoodycamelConcurrentqueueConan(ConanFile):
     homepage = "https://github.com/cameron314/concurrentqueue"
     description = "A fast multi-producer, multi-consumer lock-free concurrent queue for C++11"
     topics = ("cpp11", "cpp14", "cpp17", "queue", "lock-free")
-    license = "BSD-2-Clause, BSL-1.0"
+    license = ["BSD-2-Clause", "BSL-1.0"]
     no_copy_source = True
     _source_subfolder = "moodycamel-concurrentqueue"
 
