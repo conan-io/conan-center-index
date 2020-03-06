@@ -10,7 +10,7 @@ class GnuLibConanFile(ConanFile):
     homepage =  "https://www.gnu.org/software/gnulib/"
     url = "https://github.com/conan-io/conan-center-index"
     topics = ("conan", "gnulib", "library", "gnu")
-    license = "GPL-3.0-or-later", "LGPL-3.0-or-later", "Public domain"
+    license = ("GPL-3.0-or-later", "LGPL-3.0-or-later", "Public domain")
     no_copy_source = True
 
     # Added to test on CI
@@ -32,7 +32,7 @@ class GnuLibConanFile(ConanFile):
 
         gnulib_dir = os.path.join(self.source_folder, self._source_subfolder)
         for root, _, files in os.walk(gnulib_dir):
-            relpath = os.path.relpath(root, os.path.join(self.source_folder, self._source_subfolder))
+            relpath = os.path.relpath(root, gnulib_dir)
             dstdir = os.path.join(self.package_folder, "bin", relpath)
             try:
                 os.makedirs(dstdir)
