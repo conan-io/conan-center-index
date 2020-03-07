@@ -43,7 +43,6 @@ class ReplxxConan(ConanFile):
         if not self._cmake:
             self._cmake = CMake(self)
             self._cmake.definitions["REPLXX_BuildExamples"] = False
-            self._cmake.definitions["REPLXX_BUILD_PACKAGE"] = False
             self._cmake.definitions["BUILD_STATIC_LIBS"] = not self.options.shared
             self._cmake.configure()
         return self._cmake
