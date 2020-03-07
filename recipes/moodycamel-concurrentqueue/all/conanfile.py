@@ -4,7 +4,7 @@ import os
 
 
 class MoodycamelConcurrentqueueConan(ConanFile):
-    name = "moodycamel-concurrentqueue"
+    name = "concurrentqueue"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/cameron314/concurrentqueue"
     description = "A fast multi-producer, multi-consumer lock-free concurrent queue for C++11"
