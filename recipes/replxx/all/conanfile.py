@@ -11,7 +11,7 @@ class ReplxxConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/AmokHuginnsson/replxx"
     topics = ("conan", "readline", "libedit", "UTF-8")
-    license = "BSD"
+    license = "BSD-3-Clause"
     exports_sources = ["CMakeLists.txt"]
     generators = "cmake", "cmake_find_package"
     settings = "os", "arch", "compiler", "build_type"
@@ -42,8 +42,9 @@ class ReplxxConan(ConanFile):
     def _configure_cmake(self):
         if not self._cmake:
             self._cmake = CMake(self)
-            self._cmake.definitions["REPLXX_BUILD_EXAMPLES"] = False
+            self._cmake.definitions["REPLXX_BuildExamples"] = False
             self._cmake.definitions["REPLXX_BUILD_PACKAGE"] = False
+            self._cmake.definitions["BUILD_STATIC_LIBS"] = not self.options.shared
             self._cmake.configure()
         return self._cmake
 
@@ -59,6 +60,6 @@ class ReplxxConan(ConanFile):
     def package_info(self):
         self.cpp_info.libs = tools.collect_libs(self)
         if self.settings.os == "Linux":
-            self.cpp_info.systemlibs = ["pthread"]
+            self.cpp_info.system_libs = ["pthread", "m"]
         if not self.options.shared:
             self.cpp_info.defines.append("REPLXX_STATIC")
