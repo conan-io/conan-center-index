@@ -2,9 +2,11 @@
 #include <utility>
 #include <iostream>
 #include <vector>
+#include <list>
 
 #include "absl/strings/str_cat.h"
 #include "absl/strings/str_split.h"
+#include "absl/strings/string_view.h"
 #include "absl/container/flat_hash_map.h"
 #include "absl/container/flat_hash_set.h"
 #include "absl/numeric/int128.h"
@@ -46,4 +48,6 @@ int main()
     absl::Time t1 = absl::Now();
     absl::Time t2 = absl::Time();
     absl::Time t3 = absl::UnixEpoch();
+
+    std::list<absl::string_view> tokens = absl::StrSplit("1,2,3,4", absl::ByAnyChar("([,])"));
 }
