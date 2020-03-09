@@ -50,7 +50,6 @@ class LLVMOpenMpConan(ConanFile):
         tools.get(**self.conan_data["sources"][self.version])
         extracted_dir = "{}-{}.src".format(self.short_name, self.version)
         os.rename(extracted_dir, self._source_subfolder)
-        self._patch_sources()
 
     def _patch_sources(self):
         if self.version in self.conan_data["patches"]:
@@ -69,6 +68,7 @@ class LLVMOpenMpConan(ConanFile):
         return self._cmake
 
     def build(self):
+        self._patch_sources()
         cmake = self._configure_cmake()
         cmake.build()
 
