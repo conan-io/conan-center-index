@@ -57,3 +57,5 @@ class LaszipConan(ConanFile):
         self.cpp_info.libs = tools.collect_libs(self)
         if self.options.shared:
             self.cpp_info.defines.append("LASZIP_DYN_LINK")
+        if self.settings.os == "Linux":
+            self.cpp_info.system_libs = ["m"]
