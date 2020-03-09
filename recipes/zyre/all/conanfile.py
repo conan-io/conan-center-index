@@ -4,7 +4,6 @@ import os
 
 class ZyreConan(ConanFile):
     name = "zyre"
-    version = "2.0.0"
     license = "MPL-2.0"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/zeromq/zyre"
