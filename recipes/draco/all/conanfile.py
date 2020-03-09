@@ -11,7 +11,7 @@ class DracoConan(ConanFile):
     topics = ("conan", "draco", "3d", "graphics", "mesh", "compression", "decompression")
     homepage = "https://google.github.io/draco/"
     url = "https://github.com/conan-io/conan-center-index"
-    exports_sources = "CMakeLists.txt"
+    exports_sources = ["CMakeLists.txt", "patches/**"]
     generators = "cmake"
     settings = "os", "arch", "compiler", "build_type"
     short_paths = True
@@ -60,6 +60,9 @@ class DracoConan(ConanFile):
         os.rename(self.name + "-" + self.version, self._source_subfolder)
 
     def build(self):
+        if "patches" in self.conan_data and self.version in self.conan_data["patches"]:
+            for patch in self.conan_data["patches"][self.version]:
+                tools.patch(**patch)
         cmake = self._configure_cmake()
         cmake.build(target=self._get_target())
 
