@@ -83,14 +83,23 @@ class LibjpegTurboConan(ConanFile):
         self._cmake.definitions["WITH_TURBOJPEG"] = self.options.turbojpeg
         self._cmake.definitions["WITH_JAVA"] = self.options.java
         self._cmake.definitions["WITH_12BIT"] = self.options.enable12bit
+        if self.settings.compiler == "Visual Studio":
+            self._cmake.definitions["WITH_CRT_DLL"] = True # avoid replacing /MD by /MT in compiler flags
         self._cmake.configure(build_folder=self._build_subfolder)
         return self._cmake
 
-    def build(self):
+    def _patch_sources(self):
         # use standard GNUInstallDirs.cmake - custom one is broken
         tools.replace_in_file(os.path.join(self._source_subfolder, "CMakeLists.txt"),
                               "include(cmakescripts/GNUInstallDirs.cmake)",
                               "include(GNUInstallDirs)")
+        # do not override /MT by /MD if shared
+        tools.replace_in_file(os.path.join(self._source_subfolder, "sharedlib", "CMakeLists.txt"),
+                              """string(REGEX REPLACE "/MT" "/MD" ${var} "${${var}}")""",
+                              "")
+
+    def build(self):
+        self._patch_sources()
         cmake = self._configure_cmake()
         cmake.build()
 
