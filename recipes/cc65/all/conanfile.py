@@ -62,9 +62,11 @@ class Cc65Conan(ConanFile):
         mock_settings._data["os"] = mock_settings._data["os_build"].copy()
 
         original_settings = self.settings
-        self.settings = mock_settings
-        yield
-        self.settings = original_settings
+        try:
+            self.settings = mock_settings
+            yield
+        finally:
+            self.settings = original_settings
 
     def _build_msvc(self):
         msbuild = MSBuild(self)
