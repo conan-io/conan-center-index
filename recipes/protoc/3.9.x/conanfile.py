@@ -1,5 +1,6 @@
 import os
 from conans import ConanFile, CMake, tools
+from conans.errors import ConanInvalidConfiguration
 
 
 class ProtocConan(ConanFile):
@@ -11,7 +12,7 @@ class ProtocConan(ConanFile):
     license = "BSD-3-Clause"
     exports_sources = ["CMakeLists.txt", "patches/*"]
     generators = "cmake"
-    settings = "os_build", "arch_build", "compiler"
+    settings = "os_build", "arch_build", "os", "arch", "compiler"
 
     _cmake = None
 
@@ -27,6 +28,10 @@ class ProtocConan(ConanFile):
     def _cmake_base_path(self):
         return os.path.join("lib", "cmake", "protoc")
 
+    def configure(self):
+        if self.settings.os_build != self.settings.os and self.settings.arch_build != self.settings.arch:
+            raise ConanInvalidConfiguration("This recipe does not support cross building")
+
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
         extracted_folder = "protobuf-" + self.version
@@ -38,7 +43,6 @@ class ProtocConan(ConanFile):
     def _configure_cmake(self):
         if self._cmake:
             return self._cmake
-        self.settings._data["arch"] = self.settings._data["arch_build"].copy()
         self._cmake = CMake(self)
         self._cmake.definitions["CMAKE_INSTALL_CMAKEDIR"] = self._cmake_base_path.replace("\\", "/")
         self._cmake.definitions["protobuf_BUILD_TESTS"] = False
