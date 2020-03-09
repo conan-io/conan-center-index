@@ -17,14 +17,14 @@ class Hdf4Conan(ConanFile):
         "shared": [True, False],
         "fPIC": [True, False],
         "jpegturbo": [True, False],
-        "szip_support": ["None", "with_libaec", "with_szip"],
+        "szip_support": [None, "with_libaec", "with_szip"],
         "szip_encoding": [True, False]
     }
     default_options = {
         "shared": False,
         "fPIC": True,
         "jpegturbo": False,
-        "szip_support": "None",
+        "szip_support": None,
         "szip_encoding": False
     }
 
@@ -45,7 +45,7 @@ class Hdf4Conan(ConanFile):
     def configure(self):
         del self.settings.compiler.libcxx
         del self.settings.compiler.cppstd
-        if self.options.szip_support == "None":
+        if not bool(self.options.szip_support):
             del self.options.szip_encoding
         elif self.options.szip_support == "with_szip" and \
              self.options.szip_encoding and \
@@ -83,7 +83,7 @@ class Hdf4Conan(ConanFile):
         self._cmake.definitions["HDF4_ENABLE_DEPRECATED_SYMBOLS"] = True
         self._cmake.definitions["HDF4_ENABLE_JPEG_LIB_SUPPORT"] = True # HDF can't compile without libjpeg or libjpeg-turbo
         self._cmake.definitions["HDF4_ENABLE_Z_LIB_SUPPORT"] = True # HDF can't compile without zlib
-        self._cmake.definitions["HDF4_ENABLE_SZIP_SUPPORT"] = self.options.szip_support != "None"
+        self._cmake.definitions["HDF4_ENABLE_SZIP_SUPPORT"] = bool(self.options.szip_support)
         self._cmake.definitions["HDF4_ENABLE_SZIP_ENCODING"] = self.options.get_safe("szip_encoding") or False
         self._cmake.definitions["HDF4_PACKAGE_EXTLIBS"] = False
         self._cmake.definitions["HDF4_BUILD_XDR_LIB"] = True
@@ -109,6 +109,8 @@ class Hdf4Conan(ConanFile):
         self.cpp_info.includedirs.append(os.path.join(self.package_folder, "include", "hdf4"))
         if self.options.shared:
             self.cpp_info.defines.append("H4_BUILT_AS_DYNAMIC_LIB")
+        if self.settings.os == "Linux":
+            self.cpp_info.system_libs = ["m"]
 
     def _get_ordered_libs(self):
         libs = ["mfhdf", "xdr", "hdf"]
