@@ -22,6 +22,7 @@ class GeosConan(ConanFile):
         "fPIC": True,
         "inline": True
     }
+
     _cmake = None
 
     @property
@@ -41,7 +42,8 @@ class GeosConan(ConanFile):
         os.rename(self.name, self._source_subfolder)
 
     def build(self):
-        tools.patch(**self.conan_data["patches"][self.version])
+        for patch in self.conan_data["patches"][self.version]:
+            tools.patch(**patch)
         cmake = self._configure_cmake()
         cmake.build()
 
@@ -59,8 +61,6 @@ class GeosConan(ConanFile):
         cmake = self._configure_cmake()
         cmake.install()
         self.copy("geos.h", dst="include", src=os.path.join(self._source_subfolder, "include"))
-        if self.options.inline:
-            self.copy(pattern="*.inl", dst="include", src=os.path.join(self._source_subfolder, "include"))
         tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
 
     def package_info(self):
