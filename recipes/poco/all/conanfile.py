@@ -31,6 +31,8 @@ class PocoConan(ConanFile):
                "enable_data_sqlite": [True, False],
                "enable_data_mysql": [True, False],
                "enable_data_odbc": [True, False],
+               "enable_encodings": [True, False],
+               "enable_jwt": [True, False],
                "enable_sevenzip": [True, False],
                "enable_zip": [True, False],
                "enable_apacheconnector": [True, False],
@@ -60,6 +62,8 @@ class PocoConan(ConanFile):
                 "enable_data_sqlite": True,
                 "enable_data_mysql": False,
                 "enable_data_odbc": False,
+                "enable_encodings": True,
+                "enable_jwt": True,
                 "enable_sevenzip": False,
                 "enable_zip": True,
                 "enable_apacheconnector": False,
@@ -101,7 +105,8 @@ class PocoConan(ConanFile):
         if self.options.enable_netssl or \
            self.options.enable_netssl_win or \
            self.options.enable_crypto or \
-           self.options.force_openssl:
+           self.options.force_openssl or \
+           self.options.enable_jwt:
             self.requires.add("openssl/1.0.2t")
 
     def _patch(self):
