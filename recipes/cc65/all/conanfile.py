@@ -25,6 +25,8 @@ class Cc65Conan(ConanFile):
         if self.settings.compiler == "Visual Studio":
             if self.settings.arch_build not in ("x86", "x86_64"):
                 raise ConanInvalidConfiguration("Invalid arch_build")
+            if self.settings.arch_build == "x86_64":
+                self.output.info("This recipe will build x86 instead of x86_64 (the binaries are compatible)")
 
     def build_requirements(self):
         if self.settings.compiler == "Visual Studio" and not tools.which("make"):
@@ -56,6 +58,7 @@ class Cc65Conan(ConanFile):
                 self.output.info("x86_64 detected: building x86 instead")
                 mock_settings.arch_build = "x86"
 
+        self.output.warn("This recipe modifies private conan attributes. This can break at any time.")
         mock_settings._data["arch"] = mock_settings._data["arch_build"].copy()
         mock_settings._data["os"] = mock_settings._data["os_build"].copy()
 
