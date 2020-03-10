@@ -10,7 +10,7 @@ class LibHdf5Conan(ConanFile):
     topics = "conan", "hdf5"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://portal.hdfgroup.org/display/support"
-    license = "MIT"
+    license = "BSD-3-Clause"
     exports_sources = ["CMakeLists.txt"]
     generators = "cmake"
 
@@ -39,6 +39,10 @@ class LibHdf5Conan(ConanFile):
     def requirements(self):
         if self.options.with_zlib:
             self.requires("zlib/1.2.11")
+
+    def build_requirements(self):
+        if tools.Version(self.version) >= "1.12.0":
+            self.build_requires("cmake/3.16.2")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
