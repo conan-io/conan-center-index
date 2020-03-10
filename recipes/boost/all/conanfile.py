@@ -765,8 +765,6 @@ class BoostConan(ConanFile):
     def _toolset_version_and_exe(self):
         compiler_version = str(self.settings.compiler.version)
         major = compiler_version.split(".")[0]
-        if "." not in compiler_version:
-            compiler_version += ".0"
         compiler = str(self.settings.compiler)
         if self._is_msvc:
             if Version(compiler_version) >= "16":
