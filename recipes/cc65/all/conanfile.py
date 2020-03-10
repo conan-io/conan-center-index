@@ -27,10 +27,8 @@ class Cc65Conan(ConanFile):
                 raise ConanInvalidConfiguration("Invalid arch_build")
 
     def build_requirements(self):
-        if tools.os_info.is_windows and "CONAN_BASH_PATH" not in os.environ \
-                and tools.os_info.detect_windows_subsystem() != "msys2":
-            # msys2 provides make for MSVC and mingw + install for mingw
-            self.build_requires("msys2/20190524")
+        if self.settings.compiler == "Visual Studio" and not tools.which("make"):
+            self.build_requires("make/4.2.1")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
