@@ -12,7 +12,7 @@ class ProtocConan(ConanFile):
     license = "BSD-3-Clause"
     exports_sources = ["CMakeLists.txt", "patches/*"]
     generators = "cmake"
-    settings = "os_build", "arch_build", "os", "arch", "compiler"
+    settings = "os_build", "arch_build", "compiler"
 
     _cmake = None
 
@@ -59,8 +59,6 @@ class ProtocConan(ConanFile):
         cmake.install()
 
     def package_id(self):
-        del self.info.settings.arch
-        del self.info.settings.os
         del self.info.settings.compiler
         self.info.include_build_settings()
 
