@@ -5,3 +5,6 @@ sources:
   "2.3.6":
     url: "https://github.com/onqtam/doctest/archive/2.3.6.tar.gz"
     sha256: "f63c3c01021ba3fb35a0702127abfaa6fc44aaefd309e2c246e62a083deffa1f"
+  "2.3.7":
+    url: "https://github.com/onqtam/doctest/archive/2.3.7.tar.gz"
+    sha256: "a70cd25875029879e577b08cfaa57a76c7bea62c473ca94d85ec87ea53af7177"
