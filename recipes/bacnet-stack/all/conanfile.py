@@ -74,3 +74,7 @@ class BacnetStackConan(ConanFile):
         self.cpp_info.libs = ["bacnet-stack"]
         if self.settings.os == "Linux":
             self.cpp_info.system_libs = ["pthread"]
+        elif self.settings.os == "Windows":
+            self.cpp_info.system_libs = ["ws2_32"]
+        if not self.options.shared:
+            self.cpp_info.defines = ["BACNET_STACK_STATIC_DEFINE"]
