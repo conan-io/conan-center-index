@@ -28,17 +28,13 @@ class ProtocConan(ConanFile):
     def _cmake_base_path(self):
         return os.path.join("lib", "cmake", "protoc")
 
-    def configure(self):
-        if self.settings.os_build != self.settings.os and self.settings.arch_build != self.settings.arch:
-            raise ConanInvalidConfiguration("This recipe does not support cross building")
-
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
         extracted_folder = "protobuf-" + self.version
         os.rename(extracted_folder, self._source_subfolder)
 
     def requirements(self):
-        self.requires.add("protobuf/3.9.1", private=True)
+        self.requires("protobuf/3.9.1", private=True)
 
     def _configure_cmake(self):
         if self._cmake:
@@ -59,11 +55,12 @@ class ProtocConan(ConanFile):
 
     def package(self):
         self.copy("LICENSE", dst="licenses", src=self._source_subfolder)
-        # os.makedirs(os.path.join(self.package_folder, self._cmake_base_path))
         cmake = self._configure_cmake()
         cmake.install()
 
     def package_id(self):
+        del self.info.settings.arch
+        del self.info.settings.os
         del self.info.settings.compiler
         self.info.include_build_settings()
 
