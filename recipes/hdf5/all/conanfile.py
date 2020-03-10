@@ -42,7 +42,7 @@ class LibHdf5Conan(ConanFile):
 
     def build_requirements(self):
         if tools.Version(self.version) >= "1.12.0":
-            self.build_requires("cmake/3.16.2")
+            self.build_requires("cmake/3.16.4")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
