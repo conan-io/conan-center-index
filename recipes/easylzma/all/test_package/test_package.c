@@ -28,7 +28,7 @@ int main(){
         //std::cout << "Config failed with error code: " << rc << std::endl;
         printf("Config failed with error code: %d \n", rc);
     } else {
-        printf("Config OK \n", rc);
+        printf("Config OK \n");
     }
 
     elzma_compress_free(&hand);
