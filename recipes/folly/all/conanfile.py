@@ -88,6 +88,7 @@ class FollyConan(ConanFile):
     def _configure_cmake(self):
         if not self._cmake:
             self._cmake = CMake(self)
+            self._cmake.definitions["CXX_STD"] = self.settings.get_safe("compiler.cppstd") or "c++14"
             if self.settings.compiler == "Visual Studio":
                 self._cmake.definitions["MSVC_ENABLE_ALL_WARNINGS"] = False
                 self._cmake.definitions["MSVC_USE_STATIC_RUNTIME"] = "MT" in self.settings.compiler.runtime
