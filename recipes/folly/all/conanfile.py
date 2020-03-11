@@ -76,9 +76,9 @@ class FollyConan(ConanFile):
             self.requires("xz_utils/5.2.4")
             self.requires("libdwarf/20191104")
             self.requires("libsodium/1.0.18")
-            self.requires("libunwind/1.3.1")
             if self.settings.os == "Linux":
                 self.requires("libiberty/9.1.0")
+                self.requires("libunwind/1.3.1")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
@@ -88,6 +88,9 @@ class FollyConan(ConanFile):
     def _configure_cmake(self):
         if not self._cmake:
             self._cmake = CMake(self)
+            if self.settings.compiler == "Visual Studio":
+                self._cmake.definitions["MSVC_ENABLE_ALL_WARNINGS"] = False
+                self._cmake.definitions["MSVC_USE_STATIC_RUNTIME"] = "MT" in self.settings.compiler.runtime
             self._cmake.configure(build_folder=self._build_subfolder)
         return self._cmake
 
