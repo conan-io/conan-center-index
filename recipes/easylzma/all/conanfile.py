@@ -13,9 +13,8 @@ class eazylzmaConan(ConanFile):
     topics = ("conan", "eazylzma", "lzma")
     exports_sources = ["CMakeLists.txt", "patches/*"]
     exports = ["LICENSE"]
-    options = {"fPIC": [True, False]}
-    default_options = {"fPIC": True}
-
+    options = {"shared": [True, False], "fPIC": [True, False]}
+    default_options = {"shared": True, "fPIC": True}
 
     @property
     def _source_subfolder(self):
@@ -42,12 +41,18 @@ class eazylzmaConan(ConanFile):
         cmake.build()
 
     def package(self):
-        self.copy("LICENSE", dst="licenses", src=self.source_folder)
-        self.copy("*.so*", dst="lib", src=os.path.join(self._source_subfolder,self.name + "-" + self.version,"lib"))
-        self.copy("*.dll", dst="lib", src=os.path.join(self._source_subfolder,self.name + "-" + self.version,"lib", str(self.settings.build_type)))
-        self.copy("*.dylib", dst="lib", src=os.path.join(self._source_subfolder,self.name + "-" + self.version,"lib"))
-        self.copy("*.a", dst="lib", src=os.path.join(self._source_subfolder,self.name + "-" + self.version,"lib"))
-        self.copy("*.lib", dst="lib", src=os.path.join(self._source_subfolder,self.name + "-" + self.version,"lib", str(self.settings.build_type)))
+        # Copying static and dynamic libs
+        build_dir = os.path.join(self._source_subfolder,self.name + "-" + self.version)
+        if self.options.shared:
+            self.copy(pattern="*.dylib*", dst="lib", src=build_dir, keep_path=False, symlinks=True)
+            self.copy(pattern="*.so*", dst="lib", src=build_dir, keep_path=False, symlinks=True)
+            self.copy(pattern="*.dll", dst="bin", src=build_dir, keep_path=False)
+            self.copy(pattern="*.dll.a", dst="lib", src=build_dir, keep_path=False)
+        else:
+            self.copy(pattern="*.a", dst="lib", src=build_dir, keep_path=False)
+        self.copy(pattern="*.lib", dst="lib", src=build_dir, keep_path=False)
+
+        # Copy headers
         self.copy("*", dst="include", src=os.path.join(self._source_subfolder,self.name + "-" + self.version,"include"))
 
     def package_info(self):
