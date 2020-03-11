@@ -16,6 +16,7 @@ on:
 
 env:
   CONAN_PASSWORD: ${{ secrets.BintrayApiKey }}
+  IS_PURE_C: true
 
 jobs:
   openssl:
