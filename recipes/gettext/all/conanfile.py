@@ -14,7 +14,7 @@ class GetTextConan(ConanFile):
     settings = "os_build", "arch_build", "compiler"
     exports_sources = ["patches/*.patch"]
 
-    requires = [("libiconv/1.15", "private")]
+    requires = [("libiconv/1.16", "private")]
 
     _autotools = None
 
@@ -118,6 +118,5 @@ class GetTextConan(ConanFile):
         bindir = os.path.join(self.package_folder, "bin")
         self.output.info('Appending PATH environment variable: {}'.format(bindir))
         self.env_info.PATH.append(bindir)
-
 
 
