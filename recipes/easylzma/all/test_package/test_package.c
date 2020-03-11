@@ -1,11 +1,11 @@
-#include <iostream>
+#include <stdio.h>
 #include <assert.h>
 
 #include "easylzma/compress.h"
 
 int main(){
 
-    std::cout << "EasyLZMA test package" << std::endl;
+    printf("EasyLZMA test package \n");
 
     int rc;
     int inLen = 10;
@@ -14,7 +14,10 @@ int main(){
 
     /* allocate compression handle */
     hand = elzma_compress_alloc();
-    assert(hand != NULL);
+    if (hand == NULL){
+        printf("Allocation failed \n");
+        return 0;
+    }
 
     rc = elzma_compress_config(hand, ELZMA_LC_DEFAULT,
                                ELZMA_LP_DEFAULT, ELZMA_PB_DEFAULT,
@@ -22,9 +25,10 @@ int main(){
                                format, inLen);
 
     if (rc != ELZMA_E_OK) {
-        std::cout << "Config failed with error code: " << rc << std::endl;
+        //std::cout << "Config failed with error code: " << rc << std::endl;
+        printf("Config failed with error code: %d \n", rc);
     } else {
-        std::cout << "Config OK" << std::endl;
+        printf("Config OK \n", rc);
     }
 
     elzma_compress_free(&hand);
