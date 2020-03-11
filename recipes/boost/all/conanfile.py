@@ -687,9 +687,9 @@ class BoostConan(ConanFile):
         compiler_version = str(self.settings.compiler.version)
         major = compiler_version.split(".")[0]
         if self.settings.compiler == "gcc":
-            return tools.which("g++-%s" % compiler_version) or tools.which("g++-%s" % major) or tools.which("gcc")
+            return tools.which("g++-%s" % compiler_version) or tools.which("g++-%s" % major) or tools.which("g++") or ""
         if self.settings.compiler == "clang":
-            return tools.which("clang++-%s" % compiler_version) or tools.which("clang++-%s" % major) or tools.which("gcc")
+            return tools.which("clang++-%s" % compiler_version) or tools.which("clang++-%s" % major) or tools.which("clang++") or ""
         return ""
 
     def _create_user_config_jam(self, folder):
