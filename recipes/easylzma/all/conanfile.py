@@ -12,7 +12,6 @@ class eazylzmaConan(ConanFile):
     generators = "cmake"
     topics = ("conan", "eazylzma", "lzma")
     exports_sources = ["CMakeLists.txt", "patches/*"]
-    exports = ["LICENSE"]
     options = {"shared": [True, False], "fPIC": [True, False]}
     default_options = {"shared": True, "fPIC": True}
 
@@ -41,7 +40,15 @@ class eazylzmaConan(ConanFile):
         cmake.build()
 
     def package(self):
-        # Copying static and dynamic libs
+
+        # Extract the License/s from the README to a file
+        tmp = tools.load("source_subfolder/README")
+        license_contents = tmp[tmp.find("License",1):tmp.find("work.", 1)+5]
+        tools.save("LICENSE", license_contents)
+        # Package it
+        self.copy("LICENSE*", dst="licenses",  ignore_case=True, keep_path=False)
+
+        # Copy static and dynamic libs
         build_dir = os.path.join(self._source_subfolder,self.name + "-" + self.version)
         if self.options.shared:
             self.copy(pattern="*.dylib*", dst="lib", src=build_dir, keep_path=False, symlinks=True)
