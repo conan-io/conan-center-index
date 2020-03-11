@@ -32,6 +32,8 @@ class SentryNativeConan(ConanFile):
 
     def requirements(self):
         self.requires("libcurl/7.67.0")
+        if self.options.backend == "crashpad":
+            raise ConanInvalidConfiguration("crashpad not available yet in CCI")
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -47,6 +49,15 @@ class SentryNativeConan(ConanFile):
             return self._cmake
         self._cmake = CMake(self)
         self._cmake.definitions["BUILD_SHARED_LIBS"] = self.options.shared
+        if self.options.backend == "none":
+            self._cmake.definitions['SENTRY_BACKEND'] = 'none'
+        elif self.options.backend == "crashpad":
+            self._cmake.definitions['SENTRY_BACKEND'] = 'crashpad'
+        elif self.options.backend == "inproc":
+            self._cmake.definitions['SENTRY_BACKEND'] = "inproc"
+        else:
+            raise ConanInvalidConfiguration("backend must be specified")
+
         self._cmake.configure()
         return self._cmake
 
