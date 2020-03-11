@@ -1,20 +1,32 @@
-from conans import ConanFile
+from conans import ConanFile, tools
+from io import StringIO
 import os
 
 
+M4_CONTENTS = """\
+m4_define(NAME1, `Harry, Jr.')
+m4_define(NAME2, `Sally')
+m4_define(MET, `$1 met $2')
+MET(`NAME1', `NAME2')
+"""
+
+
 class TestPackageConan(ConanFile):
+    settings = "os", "arch", "compiler", "build_type"
+
+    @property
+    def _m4_input_path(self):
+        return os.path.join(self.build_folder, "input.m4")
 
     def build(self):
-        test_file = os.path.join(self.source_folder, "test_package.m4")
-        in_file = os.path.join(self.build_folder, "input.m4")
-        with open(in_file, "wb") as f_in_file, open(test_file, "rb") as f_test_file:
-            f_in_file.write(f_test_file.read().replace(b"\r\n", b"\n"))
-        assert "\r\n" not in open(in_file, "r")
-
-        self.run("{} --version".format(os.environ["M4"]))
-        self.run("{} -P {}".format(os.environ["M4"], in_file))
-        self.run("{} -P {} > out".format(os.environ["M4"], in_file))
+        tools.save(self._m4_input_path, M4_CONTENTS)
 
     def test(self):
-        if b"\r\n" in open("out", "rb"):
-            raise Exception("m4 output has DOS line-endings!")
+        if not tools.cross_building(self.settings):
+            self.run("{} --version".format(os.environ["M4"]))
+            self.run("{} -P {}".format(os.environ["M4"], self._m4_input_path))
+
+            output = StringIO()
+            self.run("{} -P {}".format(os.environ["M4"], self._m4_input_path), output=output)
+
+            assert "Harry, Jr. met Sally" in output.getvalue()
