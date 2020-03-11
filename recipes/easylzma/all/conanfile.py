@@ -4,6 +4,7 @@ from conans import ConanFile, tools, CMake
 class eazylzmaConan(ConanFile):
     name = "easylzma"
     license = "Public Domain"
+    url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/lloyd/easylzma"
     description = ("An easy to use, tiny, public domain, C wrapper library around \
                     Igor Pavlov's work that can be used to compress and extract lzma files")
