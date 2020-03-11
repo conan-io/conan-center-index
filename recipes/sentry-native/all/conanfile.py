@@ -48,7 +48,6 @@ class SentryNativeConan(ConanFile):
         if self._cmake:
             return self._cmake
         self._cmake = CMake(self)
-        self._cmake.definitions["BUILD_SHARED_LIBS"] = self.options.shared
         self._cmake.definitions['SENTRY_BACKEND'] = self.options.backend        
 
         self._cmake.configure()
@@ -65,6 +64,6 @@ class SentryNativeConan(ConanFile):
 
     def package_info(self):
         if self.settings.os == "Linux":
-            self.cpp_info.system_libs.append("pthread")
-        if self.settings.os == "Windows":
-            self.cpp_info.system_libs.extend(["winhttp"])
+            self.cpp_info.system_libs = ["pthread", "dl"]
+        elif self.settings.os == "Windows":
+            self.cpp_info.system_libs = ["winhttp"]
