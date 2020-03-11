@@ -49,14 +49,7 @@ class SentryNativeConan(ConanFile):
             return self._cmake
         self._cmake = CMake(self)
         self._cmake.definitions["BUILD_SHARED_LIBS"] = self.options.shared
-        if self.options.backend == "none":
-            self._cmake.definitions['SENTRY_BACKEND'] = 'none'
-        elif self.options.backend == "crashpad":
-            self._cmake.definitions['SENTRY_BACKEND'] = 'crashpad'
-        elif self.options.backend == "inproc":
-            self._cmake.definitions['SENTRY_BACKEND'] = "inproc"
-        else:
-            raise ConanInvalidConfiguration("backend must be specified")
+        self._cmake.definitions['SENTRY_BACKEND'] = self.options.backend        
 
         self._cmake.configure()
         return self._cmake
@@ -75,4 +68,3 @@ class SentryNativeConan(ConanFile):
             self.cpp_info.system_libs.append("pthread")
         if self.settings.os == "Windows":
             self.cpp_info.system_libs.extend(["winhttp"])
-
