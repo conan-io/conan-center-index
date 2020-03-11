@@ -5,6 +5,9 @@ from contextlib import contextmanager
 import os
 
 
+# FIXME: This recipe uses conan private attributes to force x86 builds (using MSVC) and can break at any time
+
+
 class Cc65Conan(ConanFile):
     name = "cc65"
     url = "https://github.com/conan-io/conan-center-index"
