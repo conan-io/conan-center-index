@@ -13,7 +13,7 @@ class eazylzmaConan(ConanFile):
     topics = ("conan", "eazylzma", "lzma")
     exports_sources = ["CMakeLists.txt", "patches/*"]
     options = {"shared": [True, False], "fPIC": [True, False]}
-    default_options = {"shared": True, "fPIC": True}
+    default_options = {"shared": False, "fPIC": True}
 
     @property
     def _source_subfolder(self):
@@ -37,33 +37,29 @@ class eazylzmaConan(ConanFile):
             tools.patch(**patch)
         cmake = CMake(self)
         cmake.configure()
-        cmake.build()
+        cmake.build(target="easylzma" if self.options.shared else "easylzma_s")
 
-    def package(self):
+    @property
+    def _license_text(self):
         # Extract the License/s from the README to a file
         tmp = tools.load("source_subfolder/README")
-        license_contents = tmp[tmp.find("License",1):tmp.find("work.", 1)+5]
-        tools.save("LICENSE", license_contents)
-        # Package it
-        self.copy("LICENSE*", dst="licenses",  ignore_case=True, keep_path=False)
+        return tmp[tmp.find("License",1):tmp.find("work.", 1)+5]
 
-        # Copy static and dynamic libs
-        build_dir = os.path.join(self._source_subfolder,self.name + "-" + self.version)
-        if self.options.shared:
-            self.copy(pattern="*.dylib*", dst="lib", src=build_dir, keep_path=False, symlinks=True)
-            self.copy(pattern="*.so*", dst="lib", src=build_dir, keep_path=False, symlinks=True)
-            self.copy(pattern="*.dll", dst="bin", src=build_dir, keep_path=False)
-            self.copy(pattern="*.dll.a", dst="lib", src=build_dir, keep_path=False)
-        else:
-            self.copy(pattern="*.a", dst="lib", src=build_dir, keep_path=False)
-        self.copy(pattern="*.lib", dst="lib", src=build_dir, keep_path=False)
+    def package(self):
+        tools.save(os.path.join(self.package_folder, "licenses", "LICENSE"), self._license_text)
 
-        # Copy headers
-        self.copy("*", dst="include", src=os.path.join(self._source_subfolder,self.name + "-" + self.version,"include"))
+        self.copy(pattern="*.dylib*", dst="lib", src="lib", keep_path=False, symlinks=True)
+        self.copy(pattern="*.so*", dst="lib", src="lib", keep_path=False, symlinks=True)
+        self.copy(pattern="*.dll", dst="bin", src="bin", keep_path=False)
+        self.copy(pattern="*.a", dst="lib", src="lib", keep_path=False)
+        self.copy(pattern="*.lib", dst="lib", src="lib", keep_path=False)
+
+        self.copy("easylzma/*", dst="include", src=os.path.join(self._source_subfolder, "src"))
 
     def package_info(self):
-        #self.cpp_info.libs = tools.collect_libs(self)
         if self.options.shared:
             self.cpp_info.libs = ["easylzma"]
         else:
             self.cpp_info.libs = ["easylzma_s"]
+        if self.options.shared:
+            self.cpp_info.defines = ["EASYLZMA_SHARED"]
