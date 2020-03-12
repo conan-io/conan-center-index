@@ -33,7 +33,7 @@ class libuvConan(ConanFile):
         del self.settings.compiler.cppstd
         del self.settings.compiler.libcxx
         if self.settings.compiler == "Visual Studio":
-            if int(str(self.settings.compiler.version)) < 14:
+            if tools.Version(self.settings.compiler.version) < "14":
                 raise ConanInvalidConfiguration("Visual Studio 2015 or higher required")
 
     def source(self):
