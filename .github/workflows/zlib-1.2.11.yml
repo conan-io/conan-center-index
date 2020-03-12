@@ -1,4 +1,4 @@
-name: zlib CI
+name: zlib-1.2.11 CI
 
 on:
   pull_request:
