@@ -1,7 +1,6 @@
 #include "easylzma/compress.h"
 
 #include <stdio.h>
-#include <assert.h>
 
 int main() {
     printf("EasyLZMA test package \n");
