@@ -1,23 +1,8 @@
 diff --git a/src/CMakeLists.txt b/src/CMakeLists.txt
-index 4e9b7c4..b98fdb2 100644
+index 4e9b7c4..5cc6327 100644
 --- a/src/CMakeLists.txt
 +++ b/src/CMakeLists.txt
-@@ -31,6 +31,14 @@ add_subdirectory(mqtt)
- 
- ## --- Library dependencies ---
- 
-+if (${CMAKE_SYSTEM_NAME} STREQUAL "iOS")
-+    set(CMAKE_TRY_COMPILE_TARGET_TYPE STATIC_LIBRARY)
-+    set(CMAKE_THREAD_LIBS_INIT "-lpthread")
-+    set(CMAKE_HAVE_THREADS_LIBRARY 1)
-+    set(CMAKE_USE_WIN32_THREADS_INIT 0)
-+    set(CMAKE_USE_PTHREADS_INIT 1)
-+endif()
-+
- set (THREADS_PREFER_PTHREAD_FLAG ON)
- find_package(Threads REQUIRED)
- 
-@@ -41,7 +49,7 @@ find_package(Threads REQUIRED)
+@@ -41,7 +41,7 @@ find_package(Threads REQUIRED)
  
  ## --- Use object library to optimize compilation ---
  
@@ -26,7 +11,7 @@ index 4e9b7c4..b98fdb2 100644
      async_client.cpp
      client.cpp
      disconnect_options.cpp
-@@ -51,56 +59,51 @@ add_library(paho-cpp-objs OBJECT
+@@ -51,56 +51,51 @@ add_library(paho-cpp-objs OBJECT
      response_options.cpp
      ssl_options.cpp
      string_collection.cpp
@@ -102,7 +87,7 @@ index 4e9b7c4..b98fdb2 100644
      )
  
      ## set the shared library soname
-@@ -119,16 +122,24 @@ endif()
+@@ -119,16 +114,24 @@ endif()
  
  if(PAHO_BUILD_STATIC)
      ## create the static library
@@ -131,9 +116,3 @@ index 4e9b7c4..b98fdb2 100644
      )
  
      ## install the static library
-@@ -141,5 +152,3 @@ if(PAHO_BUILD_STATIC)
-         set_target_properties(paho-mqttpp3-static PROPERTIES OUTPUT_NAME paho-mqttpp3)
-     endif()
- endif()
--
--
