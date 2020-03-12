@@ -19,6 +19,12 @@ class eazylzmaConan(ConanFile):
     def _source_subfolder(self):
         return "source_subfolder"
 
+    @property
+    def _license_text(self):
+        # Extract the License/s from the README to a file
+        tmp = tools.load("source_subfolder/README")
+        return tmp[tmp.find("License",1):tmp.find("work.", 1)+5]
+
     def config_options(self):
         if self.settings.os == "Windows":
            del self.options.fPIC
@@ -38,12 +44,6 @@ class eazylzmaConan(ConanFile):
         cmake = CMake(self)
         cmake.configure()
         cmake.build(target="easylzma" if self.options.shared else "easylzma_s")
-
-    @property
-    def _license_text(self):
-        # Extract the License/s from the README to a file
-        tmp = tools.load("source_subfolder/README")
-        return tmp[tmp.find("License",1):tmp.find("work.", 1)+5]
 
     def package(self):
         tools.save(os.path.join(self.package_folder, "licenses", "LICENSE"), self._license_text)
