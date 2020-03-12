@@ -56,10 +56,14 @@ class eazylzmaConan(ConanFile):
             self.copy(pattern="*.dll.a", dst="lib", src=build_dir, keep_path=False)
         else:
             self.copy(pattern="*.a", dst="lib", src=build_dir, keep_path=False)
-        self.copy(pattern="*_s.lib", dst="lib", src=build_dir, keep_path=False)
+        self.copy(pattern="*.lib", dst="lib", src=build_dir, keep_path=False)
 
         # Copy headers
         self.copy("*", dst="include", src=os.path.join(self._source_subfolder,self.name + "-" + self.version,"include"))
 
     def package_info(self):
-        self.cpp_info.libs = tools.collect_libs(self)
+        #self.cpp_info.libs = tools.collect_libs(self)
+        if self.options.shared:
+            self.cpp_info.libs = ["easylzma"]
+        else:
+            self.cpp_info.libs = ["easylzma_s"]
