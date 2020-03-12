@@ -1,5 +1,6 @@
 import os
 from conans import ConanFile, CMake, tools
+from conans.errors import ConanInvalidConfiguration
 
 
 class ProtocConan(ConanFile):
@@ -10,9 +11,10 @@ class ProtocConan(ConanFile):
     homepage = "https://github.com/protocolbuffers/protobuf"
     license = "BSD-3-Clause"
     exports_sources = ["CMakeLists.txt", "patches/*"]
-    generators = "cmake", "cmake_find_package"
-    short_paths = True
-    settings = "os_build", "arch_build", "compiler", "arch"
+    generators = "cmake"
+    settings = "os_build", "arch_build", "compiler"
+
+    _cmake = None
 
     @property
     def _source_subfolder(self):
@@ -32,16 +34,19 @@ class ProtocConan(ConanFile):
         os.rename(extracted_folder, self._source_subfolder)
 
     def requirements(self):
-        self.requires.add("protobuf/3.9.1", private=True)
+        self.requires("protobuf/3.9.1", private=True)
 
     def _configure_cmake(self):
-        cmake = CMake(self)
-        cmake.definitions["protobuf_BUILD_TESTS"] = False
-        cmake.definitions["protobuf_WITH_ZLIB"] = False
+        if self._cmake:
+            return self._cmake
+        self._cmake = CMake(self)
+        self._cmake.definitions["CMAKE_INSTALL_CMAKEDIR"] = self._cmake_base_path.replace("\\", "/")
+        self._cmake.definitions["protobuf_BUILD_TESTS"] = False
+        self._cmake.definitions["protobuf_WITH_ZLIB"] = False
         if self.settings.compiler == "Visual Studio":
-            cmake.definitions["protobuf_MSVC_STATIC_RUNTIME"] = "MT" in self.settings.compiler.runtime
-        cmake.configure(build_folder=self._build_subfolder)
-        return cmake
+            self._cmake.definitions["protobuf_MSVC_STATIC_RUNTIME"] = "MT" in self.settings.compiler.runtime
+        self._cmake.configure(build_folder=self._build_subfolder)
+        return self._cmake
 
     def build(self):
         tools.patch(**self.conan_data["patches"][self.version])
@@ -52,35 +57,22 @@ class ProtocConan(ConanFile):
         self.copy("LICENSE", dst="licenses", src=self._source_subfolder)
         cmake = self._configure_cmake()
         cmake.install()
-        cmake_folder = os.path.join(self.package_folder, self._cmake_base_path)
-        os.unlink(os.path.join(cmake_folder, "protoc-config-version.cmake"))
-        # FIXME: To find protoc the cmake generator is required
-        cmake_path = os.path.join(cmake_folder, "protoc-targets-noconfig.cmake")
-        tools.replace_in_file(cmake_path, "${_IMPORT_PREFIX}/bin/", "${CONAN_BIN_DIRS_PROTOC}/")
 
     def package_id(self):
         del self.info.settings.compiler
-        del self.info.settings.arch
         self.info.include_build_settings()
 
     def package_info(self):
         bindir = os.path.join(self.package_folder, "bin")
         self.output.info("Appending PATH environment variable: {}".format(bindir))
         self.env_info.PATH.append(bindir)
-        self.cpp_info.builddirs = [self._cmake_base_path]
-        # INFO: Google Protoc exports a bunch of functions/macro that can be consumed by CMake
-        # protoc-config.cmake: provides protobuf_generate function
-        # protoc-module.cmake: provides legacy functions, PROTOBUF_GENERATE_CPP PROTOBUF_GENERATE_PYTHON
-        # protoc-options.cmake: required by protoc-tools.cmake
-        # protoc-targets.cmake: required by protoc-tools.cmake
-        # protoc-targets-noconfig.cmake: declare protobuf:protoc as target
+
         self.cpp_info.build_modules = [
-            os.path.join(self._cmake_base_path, "protoc-config.cmake"),
             os.path.join(self._cmake_base_path, "protoc-module.cmake"),
             os.path.join(self._cmake_base_path, "protoc-options.cmake"),
-            os.path.join(self._cmake_base_path, "protoc-targets.cmake"),
-            os.path.join(self._cmake_base_path, "protoc-targets-noconfig.cmake")
+            os.path.join(self._cmake_base_path, "protoc-generate.cmake"),
         ]
+        self.cpp_info.builddirs = [self._cmake_base_path]
 
         protoc = "protoc.exe" if self.settings.os_build == "Windows" else "protoc"
         self.env_info.PROTOC_BIN = os.path.normpath(os.path.join(self.package_folder, "bin", protoc))
