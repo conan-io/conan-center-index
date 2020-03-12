@@ -23,7 +23,7 @@ jobs:
     strategy:
       matrix:
         build: ['linux-gcc4.8', 'linux-gcc7', 'linux-gcc9', 'windows-2019-release', 'windows-2019-debug', 'macos']
-        libalsa_versions: ['1.1.9']
+        libalsa_versions: ['1.1.0', '1.1.9']
         include:
           - build: 'linux-gcc4.8'
             os: 'ubuntu-latest'
