@@ -11,8 +11,14 @@ class libuvConan(ConanFile):
     topics = ("libuv", "asynchronous", "io", "networking", "multi-platform", "conan-recipe")
 
     settings = "os", "compiler", "build_type", "arch"
-    options = {"shared": [True, False]}
-    default_options = {"shared": False}
+    options = {
+        "shared": [True, False],
+        "fPIC": [True, False]
+    }
+    default_options = {
+        "shared": False,
+        "fPIC": True
+    }
 
     generators = "cmake"
     exports_sources = [
@@ -28,6 +34,10 @@ class libuvConan(ConanFile):
         cmake = CMake(self)
         cmake.configure()
         return cmake
+
+    def config_options(self):
+        if self.settings.os == "Windows":
+            self.options.remove("fPIC")
 
     def configure(self):
         del self.settings.compiler.cppstd
