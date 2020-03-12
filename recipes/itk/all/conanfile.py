@@ -199,7 +199,6 @@ class LibITKConan(ConanFile):
     def package(self):
         self.copy("LICENSE", dst="licenses", src=self._source_subfolder)
         cmake = self._configure_cmake()
-        cmake.configure(build_folder=self._build_subfolder)
         cmake.install()
         tools.rmdir(os.path.join(self.package_folder, "lib", "gdcmopenjpeg-2.1"))
         tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
