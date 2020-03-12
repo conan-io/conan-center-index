@@ -71,10 +71,11 @@ class LibHdf5Conan(ConanFile):
             self._cmake.definitions["ONLY_SHARED_LIBS"] = self.options.shared
 
         # Build only necessary modules
-        self._cmake.definitions["BUILD_TESTING"] = "OFF"
-        self._cmake.definitions["HDF5_BUILD_CPP_LIB"] = "ON"
-        self._cmake.definitions["HDF5_BUILD_EXAMPLES"] = "OFF"
-        self._cmake.definitions["HDF5_BUILD_TOOLS"] = "OFF"
+        self._cmake.definitions["BUILD_TESTING"] = False
+        self._cmake.definitions["HDF5_BUILD_CPP_LIB"] = True
+        self._cmake.definitions["HDF5_BUILD_EXAMPLES"] = False
+        self._cmake.definitions["HDF5_BUILD_TOOLS"] = False
+        self._cmake.definitions["HDF5_EXTERNALLY_CONFIGURED"] = True
         # Modules depending on options
         self._cmake.definitions["HDF5_BUILD_HL_LIB"] = self.options.hl
         self._cmake.definitions["HDF5_ENABLE_Z_LIB_SUPPORT"] = self.options.with_zlib
@@ -93,25 +94,13 @@ class LibHdf5Conan(ConanFile):
         # Copy license file
         self.copy("COPYING", src=self._source_subfolder, dst="licenses")
 
-        # Remove packaging files & MS runtime files
-        for dir_to_remove in [
-            "cmake",
-            os.path.join("lib", "pkgconfig"),
-            "share"
-        ]:
-            tools.rmdir(os.path.join(self.package_folder, dir_to_remove))
+        # Remove pkg-config files
+        tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
 
-        # Remove more useless files
+        # Remove general files (KB-H013)
         for file_to_remove in [
-            # General files (KB-H013)
             "COPYING",
             "RELEASE.txt",
-            "USING_HDF5_CMake.txt",
-            "USING_HDF5_VS.txt",
-            # MS runtime files (KB-H021)
-            os.path.join("bin", "concrt140.dll"),
-            os.path.join("bin", "msvcp140.dll"),
-            os.path.join("bin", "vcruntime140.dll")
         ]:
             path = os.path.join(self.package_folder, file_to_remove)
             if os.path.isfile(path):
