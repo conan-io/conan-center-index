@@ -14,7 +14,11 @@ class libuvConan(ConanFile):
     options = {"shared": [True, False]}
     default_options = {"shared": False}
 
-    exports_sources = ["patches/*"]
+    generators = "cmake"
+    exports_sources = [
+        "CMakeLists.txt",
+        "patches/*"
+    ]
 
     @property
     def _source_subfolder_name(self):
@@ -22,7 +26,7 @@ class libuvConan(ConanFile):
 
     def _configure_cmake(self):
         cmake = CMake(self)
-        cmake.configure(source_folder=self._source_subfolder_name)
+        cmake.configure()
         return cmake
 
     def configure(self):
