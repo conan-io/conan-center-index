@@ -57,6 +57,8 @@ class PahoMqttCppConan(ConanFile):
         tools.get(**self.conan_data["sources"][self.version])
         extracted_dir = self.name.replace("-", ".") + "-" + self.version
         os.rename(extracted_dir, self._source_subfolder)
+        for patch in self.conan_data["patches"][self.version]:
+            tools.patch(**patch)
 
     def _configure_cmake(self):
         if self._cmake:
@@ -71,15 +73,9 @@ class PahoMqttCppConan(ConanFile):
         return self._cmake
 
     def build(self):
-        # TODO debug , remove
         c_async = self.options["paho-mqtt-c"].asynchronous
         use_ssl = self.options.ssl 
         b_shared = self.options.shared
-        self.output.info("++++++++++++++++++++++++++++++")
-        self.output.info("Config: async = {}, ssl = {}, shared = {}".format(c_async, use_ssl, b_shared))
-
-        for patch in self.conan_data["patches"][self.version]:
-            tools.patch(**patch)
         cmake = self._configure_cmake()
         cmake.build()
 
