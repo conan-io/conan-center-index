@@ -730,8 +730,8 @@ class BoostConan(ConanFile):
                         includes=self._python_includes,
                         libraries=self._python_libraries)
 
-        # Specify here the toolset with the binary if present if don't empty parameter : :
-        contents += '\nusing "%s" : : ' % self._toolset
+        # Specify here the toolset with the binary if present if don't empty parameter :
+        contents += '\nusing "%s" : %s : ' % (self._toolset, self._toolset_version)
         contents += ' %s' % self._cxx.replace("\\", "/")
 
         if tools.is_apple_os(self.settings.os):
@@ -759,6 +759,18 @@ class BoostConan(ConanFile):
         self.output.warn(contents)
         filename = "%s/user-config.jam" % folder
         tools.save(filename,  contents)
+
+    @property
+    def _toolset_version(self):
+        if self._is_msvc:
+            compiler_version = str(self.settings.compiler.version)
+            if Version(compiler_version) >= "16":
+                return "14.2"
+            elif Version(compiler_version) >= "15":
+                return "14.1"
+            else:
+                return "%s.0" % compiler_version
+        return ""
 
     @property
     def _toolset(self):
