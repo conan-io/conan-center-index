@@ -132,3 +132,5 @@ class XZUtils(ConanFile):
             self.cpp_info.defines.append("LZMA_API_STATIC")
         self.cpp_info.libs = tools.collect_libs(self)
         self.cpp_info.names["pkg_config"] = "liblzma"
+        self.cpp_info.names["cmake_find_package"] = "LibLZMA"
+        self.cpp_info.names["cmake_find_package_multi"] = "LibLZMA"

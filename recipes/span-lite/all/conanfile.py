@@ -7,7 +7,6 @@ class SpanLite(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/martinmoene/span-lite"
     description = "span lite - A C++20-like span for C++98, C++11 and later in a single-file header-only library"
-    author = "Flex Ferrum"
     topics = ("conan", "cpp98", "cpp11", "cpp14", "cpp17", "span", "span-implementations")
     license = "BSL-1.0"
     no_copy_source = True
