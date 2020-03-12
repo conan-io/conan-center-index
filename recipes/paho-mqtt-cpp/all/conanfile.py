@@ -55,8 +55,6 @@ class PahoMqttCppConan(ConanFile):
         tools.get(**self.conan_data["sources"][self.version])
         extracted_dir = self.name.replace("-", ".") + "-" + self.version
         os.rename(extracted_dir, self._source_subfolder)
-        for patch in self.conan_data["patches"][self.version]:
-            tools.patch(**patch)
 
     def _configure_cmake(self):
         if self._cmake:
@@ -71,6 +69,8 @@ class PahoMqttCppConan(ConanFile):
         return self._cmake
 
     def build(self):
+        for patch in self.conan_data["patches"][self.version]:
+            tools.patch(**patch)        
         cmake = self._configure_cmake()
         cmake.build()
 
