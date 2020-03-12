@@ -71,9 +71,6 @@ class PahoMqttCppConan(ConanFile):
         return self._cmake
 
     def build(self):
-        c_async = self.options["paho-mqtt-c"].asynchronous
-        use_ssl = self.options.ssl 
-        b_shared = self.options.shared
         cmake = self._configure_cmake()
         cmake.build()
 
