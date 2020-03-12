@@ -40,7 +40,6 @@ class eazylzmaConan(ConanFile):
         cmake.build()
 
     def package(self):
-
         # Extract the License/s from the README to a file
         tmp = tools.load("source_subfolder/README")
         license_contents = tmp[tmp.find("License",1):tmp.find("work.", 1)+5]
@@ -57,7 +56,7 @@ class eazylzmaConan(ConanFile):
             self.copy(pattern="*.dll.a", dst="lib", src=build_dir, keep_path=False)
         else:
             self.copy(pattern="*.a", dst="lib", src=build_dir, keep_path=False)
-        self.copy(pattern="*.lib", dst="lib", src=build_dir, keep_path=False)
+        self.copy(pattern="*_s.lib", dst="lib", src=build_dir, keep_path=False)
 
         # Copy headers
         self.copy("*", dst="include", src=os.path.join(self._source_subfolder,self.name + "-" + self.version,"include"))
