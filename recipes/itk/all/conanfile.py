@@ -51,7 +51,7 @@ class LibITKConan(ConanFile):
         if(self.options["use_jpegturbo"]):
             self.requires("libjpeg-turbo/2.0.2")
         else:
-            self.requires("libjpeg/9c")
+            self.requires("libjpeg/9d")
 
         self.requires("expat/2.2.9")
         self.requires("libtiff/4.0.9")
