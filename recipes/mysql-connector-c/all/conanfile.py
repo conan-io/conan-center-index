@@ -20,7 +20,7 @@ class MysqlConnectorCConan(ConanFile):
 
     def requirements(self):
         if self.options.with_ssl:
-            self.requires.add("openssl/1.0.2t")
+            self.requires.add("openssl/1.0.2u")
 
         if self.options.with_zlib:
             self.requires.add("zlib/1.2.11")
@@ -37,8 +37,7 @@ class MysqlConnectorCConan(ConanFile):
         os.rename("CMakeLists.txt", sources_cmake)
         
         for patch in self.conan_data["patches"][self.version]:
-            tools.patch(patch_file=os.path.join("patches", patch),
-                        base_path=os.path.join(self.source_folder, self._source_subfolder))
+            tools.patch(**patch)
 
     def configure(self):
         del self.settings.compiler.libcxx

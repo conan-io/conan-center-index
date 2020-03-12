@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 from conans import CMake, tools, ConanFile
 import os
 

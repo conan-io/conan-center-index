@@ -1,0 +1,14 @@
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -152,7 +152,10 @@ if(NOT MSVC)
+     set_property(TARGET uriparser PROPERTY VERSION ${URIPARSER_SO_CURRENT_MINUS_AGE}.${URIPARSER_SO_AGE}.${URIPARSER_SO_REVISION})
+     set_property(TARGET uriparser PROPERTY SOVERSION ${URIPARSER_SO_CURRENT_MINUS_AGE})
+     if(WIN32)
+-        set_property(TARGET uriparser PROPERTY SUFFIX "-${URIPARSER_SO_CURRENT_MINUS_AGE}${CMAKE_SHARED_LIBRARY_SUFFIX}")
++        set_target_properties(uriparser PROPERTIES
++            OUTPUT_NAME uriparser
++            RUNTIME_OUTPUT_NAME uriparser-${URIPARSER_SO_CURRENT_MINUS_AGE}
++            ARCHIVE_OUTPUT_NAME uriparser)
+     endif()
+ endif()
+ 

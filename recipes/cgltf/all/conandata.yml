@@ -1,0 +1,4 @@
+sources:
+  "1.5":
+    url: "https://github.com/jkuhlmann/cgltf/archive/v1.5.tar.gz"
+    sha256: "66c09ed6539e64cc8b7a5130172e33605ae42ee57be26bd523e7d820b230bbd1"

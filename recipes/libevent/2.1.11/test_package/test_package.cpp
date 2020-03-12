@@ -20,8 +20,6 @@ int
 main(int argc, char **argv)
 {
 	struct event_base *base;
-	struct evconnlistener *listener;
-	struct event *signal_event;
 	const char* version = event_get_version();
 
 	base = event_base_new();
