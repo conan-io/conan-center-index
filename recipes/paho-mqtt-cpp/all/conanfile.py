@@ -46,12 +46,10 @@ class PahoMqttCppConan(ConanFile):
 
 
     def requirements(self):
-        if self.version == "1.1":
+        if Version(self.version) >= "1.1":
             self.requires("paho-mqtt-c/1.3.1")
-        elif self.version == "1.0.1":
-            self.requires("paho-mqtt-c/1.3.0")
         else:
-            raise ConanInvalidConfiguration("{} requirements not implemented".format(self.version))
+            self.requires("paho-mqtt-c/1.3.0")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
