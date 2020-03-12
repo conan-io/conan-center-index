@@ -14,7 +14,7 @@ class TestPackageConan(ConanFile):
         output = StringIO()
         self.run("{} --version".format(scons_path), run_environment=True, output=output)
         text = output.getvalue()
-        assert self.deps_cpp_info["scons"].version in text
+        assert self.requires["scons"].ref.version in text
 
         self.output.info("TMP={}".format(os.environ.get("TMP")))
 
