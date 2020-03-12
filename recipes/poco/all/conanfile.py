@@ -2,12 +2,13 @@ import os
 
 from conans import ConanFile, CMake, tools
 from conans.errors import ConanInvalidConfiguration
+from conans.tools import Version
 
 
 class PocoConan(ConanFile):
     name = "poco"
     url = "https://github.com/conan-io/conan-center-index"
-    homepage = "https://pocoproject.org"    
+    homepage = "https://pocoproject.org"
     topics = ("conan", "poco", "building", "networking", "server", "mobile", "embedded")
     exports_sources = "CMakeLists.txt"
     generators = "cmake"
@@ -30,6 +31,8 @@ class PocoConan(ConanFile):
                "enable_data_sqlite": [True, False],
                "enable_data_mysql": [True, False],
                "enable_data_odbc": [True, False],
+               "enable_encodings": [True, False],
+               "enable_jwt": [True, False],
                "enable_sevenzip": [True, False],
                "enable_zip": [True, False],
                "enable_apacheconnector": [True, False],
@@ -59,6 +62,8 @@ class PocoConan(ConanFile):
                 "enable_data_sqlite": True,
                 "enable_data_mysql": False,
                 "enable_data_odbc": False,
+                "enable_encodings": True,
+                "enable_jwt": True,
                 "enable_sevenzip": False,
                 "enable_zip": True,
                 "enable_apacheconnector": False,
@@ -100,7 +105,8 @@ class PocoConan(ConanFile):
         if self.options.enable_netssl or \
            self.options.enable_netssl_win or \
            self.options.enable_crypto or \
-           self.options.force_openssl:
+           self.options.force_openssl or \
+           self.options.enable_jwt:
             self.requires.add("openssl/1.0.2t")
 
     def _patch(self):
@@ -110,9 +116,13 @@ class PocoConan(ConanFile):
             if self.options.shared:
                 self.output.warn("Adding ws2_32 dependency...")
                 replace = 'Net Util Foundation Crypt32.lib'
+                if Version(self.version) >= "1.10.0":
+                    replace = 'Poco::Net Poco::Util Crypt32.lib'
                 tools.replace_in_file(os.path.join(self._source_subfolder, "NetSSL_Win", "CMakeLists.txt"), replace, replace + " ws2_32 ")
 
                 replace = 'Foundation ${OPENSSL_LIBRARIES}'
+                if Version(self.version) >= "1.10.0":
+                    replace = 'Poco::Foundation OpenSSL::SSL OpenSSL::Crypto'
                 tools.replace_in_file(os.path.join(self._source_subfolder, "Crypto", "CMakeLists.txt"), replace, replace + " ws2_32 Crypt32.lib")
 
         # Poco 1.9.x - CMAKE_SOURCE_DIR is required in many places
@@ -145,6 +155,7 @@ class PocoConan(ConanFile):
         cmake = self._configure_cmake()
         cmake.install()
         tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
+        tools.rmdir(os.path.join(self.package_folder, "cmake"))
 
     def package_info(self):
         libs = [("enable_mongodb", "PocoMongoDB"),
@@ -170,8 +181,12 @@ class PocoConan(ConanFile):
                  else ("d" if self.settings.build_type=="Debug" else "")
         for flag, lib in libs:
             if getattr(self.options, flag):
+                if self.settings.os == "Windows" and flag == "enable_netssl" and self.options.enable_netssl_win:
+                    continue
+
                 if self.settings.os != "Windows" and flag == "enable_netssl_win":
                     continue
+
                 self.cpp_info.libs.append("%s%s" % (lib, suffix))
 
         self.cpp_info.libs.append("PocoFoundation%s" % suffix)
