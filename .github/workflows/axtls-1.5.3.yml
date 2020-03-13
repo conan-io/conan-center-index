@@ -8,7 +8,7 @@ on:
       - '.github/workflows/axtls-1.5.3.yml'
   push:
     branches:
-      - trassir-ci
+      - master
     paths:
       - 'recipes/axtls/1.5.3/**'
       - 'build.py'

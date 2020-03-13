@@ -8,7 +8,7 @@ on:
       - '.github/workflows/openssl.yml'
   push:
     branches:
-      - trassir-ci
+      - master
     paths:
       - 'recipes/openssl/**'
       - 'build.py'

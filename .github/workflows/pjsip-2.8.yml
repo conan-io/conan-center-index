@@ -8,7 +8,7 @@ on:
       - '.github/workflows/pjsip-2.8.yml'
   push:
     branches:
-      - trassir-ci
+      - master
     paths:
       - 'recipes/pjsip/2.8/**'
       - 'build.py'

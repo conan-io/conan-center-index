@@ -8,7 +8,7 @@ on:
       - '.github/workflows/sip-4.19.3.yml'
   push:
     branches:
-      - trassir-ci
+      - master
     paths:
       - 'recipes/sip/4.19.3/**'
       - 'build.py'

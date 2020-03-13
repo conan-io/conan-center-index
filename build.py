@@ -13,7 +13,7 @@ if __name__ == "__main__":
         login_username="trassir-ci-bot",
         upload="https://api.bintray.com/conan/trassir/conan-public",
         upload_only_when_stable=1,
-        stable_branch_pattern="trassir-ci",
+        stable_branch_pattern="master",
         stable_channel="_",
         remotes="https://api.bintray.com/conan/trassir/conan-public"
     )

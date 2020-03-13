@@ -8,7 +8,7 @@ on:
       - '.github/workflows/jsoncpp.yml'
   push:
     branches:
-      - trassir-ci
+      - master
     paths:
       - 'recipes/jsoncpp/all/**'
       - 'build.py'

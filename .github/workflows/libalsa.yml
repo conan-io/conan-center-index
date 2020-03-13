@@ -8,7 +8,7 @@ on:
       - '.github/workflows/libalsa.yml'
   push:
     branches:
-      - trassir-ci
+      - master
     paths:
       - 'recipes/libalsa/all/**'
       - 'build.py'
