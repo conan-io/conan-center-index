@@ -1,7 +1,8 @@
 import os
 from conans import ConanFile, tools, CMake
 
-class eazylzmaConan(ConanFile):
+
+class EazylzmaConan(ConanFile):
     name = "easylzma"
     license = "Public Domain"
     url = "https://github.com/conan-io/conan-center-index"
@@ -38,12 +39,16 @@ class eazylzmaConan(ConanFile):
         extracted_dir = self.name + "-" + self.version
         os.rename(extracted_dir, self._source_subfolder)
 
+    @property
+    def _libname(self):
+        return "easylzma" if self.options.shared else "easylzma_s"
+
     def build(self):
         for patch in self.conan_data["patches"][self.version]:
             tools.patch(**patch)
         cmake = CMake(self)
         cmake.configure()
-        cmake.build(target="easylzma" if self.options.shared else "easylzma_s")
+        cmake.build(target=self._libname)
 
     def package(self):
         tools.save(os.path.join(self.package_folder, "licenses", "LICENSE"), self._license_text)
@@ -57,6 +62,9 @@ class eazylzmaConan(ConanFile):
         self.copy("easylzma/*", dst="include", src=os.path.join(self._source_subfolder, "src"))
 
     def package_info(self):
-        self.cpp_info.libs = tools.collect_libs(self)
+        self.cpp_info.libs = [self._libname]
         if self.options.shared:
             self.cpp_info.defines = ["EASYLZMA_SHARED"]
+        if self.settings.compiler == "Visual Studio":
+            if "d" in str(self.settings.compiler.runtime):
+                self.cpp_info.defines.append("DEBUG")
