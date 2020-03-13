@@ -1,7 +1,5 @@
-import glob
 import os
 from conans import ConanFile, CMake, tools
-from conans.model.version import Version
 from conans.errors import ConanInvalidConfiguration
 
 
@@ -26,12 +24,15 @@ class SentryNativeConan(ConanFile):
         "fPIC": True,
         "backend": "none"
     }
-    _source_subfolder = "source_subfolder"
+
+    @property
+    def _source_subfolder(self):
+        return "source_subfolder"
 
     _cmake = None
 
     def requirements(self):
-        self.requires("libcurl/7.67.0")
+        self.requires("libcurl/7.68.0")
         if self.options.backend == "crashpad":
             raise ConanInvalidConfiguration("crashpad not available yet in CCI")
 
@@ -48,7 +49,7 @@ class SentryNativeConan(ConanFile):
         if self._cmake:
             return self._cmake
         self._cmake = CMake(self)
-        self._cmake.definitions['SENTRY_BACKEND'] = self.options.backend        
+        self._cmake.definitions["SENTRY_BACKEND"] = self.options.backend        
 
         self._cmake.configure()
         return self._cmake
@@ -63,13 +64,14 @@ class SentryNativeConan(ConanFile):
         cmake.install()
 
     def package_info(self):
-        self.cpp_info.libs = tools.collect_libs(self)
+        self.cpp_info.libs = ["sentry"]
+        if self.settings.os in ("Android", "Windows"):
+            self.cpp_info.exelinkflags= ["--build-id=sha1"]
+            self.cpp_info.sharedlinkflags = ["--build-id=sha1"]
         if self.settings.os == "Linux":
             self.cpp_info.system_libs = ["pthread", "dl"]
         elif self.settings.os == "Windows":
             self.cpp_info.system_libs = ["winhttp"]
 
-        if self.options.shared:
-            self.cpp_info.defines = ["SENTRY_BUILD_SHARED"]
-        else:
+        if not self.options.shared:
             self.cpp_info.defines = ["SENTRY_BUILD_STATIC"]
