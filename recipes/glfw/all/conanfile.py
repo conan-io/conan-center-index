@@ -33,24 +33,23 @@ class GlfwConan(ConanFile):
                 .format(" ".join(missing_system_libs), install_command))
 
     def system_requirements(self):
-        if tools.os_info.is_linux:
-            apt_libs = ["libx11-dev", "libxrandr-dev", "libxinerama-dev", "libxkbcommon-dev", 
-                        "libxcursor-dev", "libxi-dev", "libglu1-mesa-dev"]
-            dnf_yum_libs = ["libX11-devel", "libXrandr-devel", "libXinerama-devel", "libxkbcommon-devel", 
-                            "libXcursor-devel", "libXi-devel", "mesa-libGL-devel"]
-            pacman_libs = ["libx11", "libxrandr", "libxinerama", "libxkbcommon-x11", 
-                           "libxcursor", "libxi", "libglvnd"]
-            if tools.os_info.with_apt:
-                self._check_system_libs(apt_libs, "apt install")
-            elif tools.os_info.with_dnf:
-                self._check_system_libs(dnf_yum_libs, "dnf install")
-            elif tools.os_info.with_yum:
-                self._check_system_libs(dnf_yum_libs, "yum install")
-            elif tools.os_info.with_pacman:
-                self._check_system_libs(pacman_libs, "pacman -S")
+        if self.settings.os == "Linux":
+            package_tool = tools.SystemPackageTool(conanfile=self, default_mode="verify")
+            libs_name = ""
+            os_info = tools.OSInfo()
+            if os_info.with_apt:
+                libs_name = "libx11-dev libxrandr-dev libxinerama-dev libxkbcommon-dev libxcursor-dev " \
+                            "libxi-dev libglu1-mesa-dev"
+            elif os_info.with_yum:
+                libs_name = "libX11-devel libXrandr-devel libXinerama-devel libxkbcommon-devel " \
+                            "libXcursor-devel libXi-devel mesa-libGL-devel"
+            elif os_info.with_pacman:
+                libs_name = "libx11 libxrandr libxinerama libxkbcommon-x11 libxcursor libxi libglvnd "
             else:
                 self.output.warn("Could not find any package manager, please install x11, xrandr, xinerama," \
                                  "xkb, xcursor, xi and mesa libraries if not already installed.")
+                return
+            package_tool.install(update=True, packages=libs_name)
 
     def config_options(self):
         if self.settings.os == "Windows":
