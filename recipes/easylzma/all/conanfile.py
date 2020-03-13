@@ -57,9 +57,6 @@ class eazylzmaConan(ConanFile):
         self.copy("easylzma/*", dst="include", src=os.path.join(self._source_subfolder, "src"))
 
     def package_info(self):
-        if self.options.shared:
-            self.cpp_info.libs = ["easylzma"]
-        else:
-            self.cpp_info.libs = ["easylzma_s"]
+        self.cpp_info.libs = tools.collect_libs(self)
         if self.options.shared:
             self.cpp_info.defines = ["EASYLZMA_SHARED"]
