@@ -23,7 +23,7 @@ class EazylzmaConan(ConanFile):
     @property
     def _license_text(self):
         # Extract the License/s from the README to a file
-        tmp = tools.load("source_subfolder/README")
+        tmp = tools.load(os.path.join("source_subfolder", "README"))
         return tmp[tmp.find("License",1):tmp.find("work.", 1)+5]
 
     @property
