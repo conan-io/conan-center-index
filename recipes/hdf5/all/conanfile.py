@@ -19,6 +19,7 @@ class Hdf5Conan(ConanFile):
         "fPIC": [True, False],
         "enable_cxx": [True, False],
         "hl": [True, False],
+        "threadsafe": [True, False],
         "with_zlib": [True, False],
         "szip_support": [None, "with_libaec", "with_szip"],
         "szip_encoding": [True, False]
@@ -28,6 +29,7 @@ class Hdf5Conan(ConanFile):
         "fPIC": True,
         "enable_cxx": True,
         "hl": True,
+        "threadsafe": False,
         "with_zlib": True,
         "szip_support": None,
         "szip_encoding": False
@@ -51,6 +53,8 @@ class Hdf5Conan(ConanFile):
         if not self.options.enable_cxx:
             del self.settings.compiler.libcxx
             del self.settings.compiler.cppstd
+        if self.options.enable_cxx or self.options.hl or (self.settings.os == "Windows" and not self.options.shared):
+            del self.options.threadsafe
         if not bool(self.options.szip_support):
             del self.options.szip_encoding
         elif self.options.szip_support == "with_szip" and \
@@ -113,7 +117,7 @@ class Hdf5Conan(ConanFile):
             self._cmake.definitions["CONAN_SZIP_LIBNAME"] = self._get_szip_lib() # this variable is added by conanize-link-szip*.patch
         self._cmake.definitions["HDF5_ENABLE_SZIP_ENCODING"] = self.options.get_safe("szip_encoding") or False
         self._cmake.definitions["HDF5_PACKAGE_EXTLIBS"] = False
-        self._cmake.definitions["HDF5_ENABLE_THREADSAFE"] = False # Option?
+        self._cmake.definitions["HDF5_ENABLE_THREADSAFE"] = self.options.get_safe("threadsafe") or False
         self._cmake.definitions["HDF5_ENABLE_DEBUG_APIS"] = False # Option?
         self._cmake.definitions["BUILD_TESTING"] = False
         self._cmake.definitions["HDF5_INSTALL_INCLUDE_DIR"] = os.path.join(self.package_folder, "include", "hdf5")
@@ -149,6 +153,8 @@ class Hdf5Conan(ConanFile):
             self.cpp_info.defines.append("H5_BUILT_AS_DYNAMIC_LIB")
         if self.settings.os == "Linux":
             self.cpp_info.system_libs.extend(["dl", "m"])
+            if self.options.get_safe("threadsafe"):
+                self.cpp_info.system_libs.append("pthread")
 
     def _get_ordered_libs(self):
         libs = ["hdf5"]
