@@ -6,3 +6,5 @@ patches:
   "2.4.6":
     - base_path: "source_subfolder"
       patch_file: "patches/0001-libtool-relocatable.patch"
+    - base_path: "source_subfolder"
+      patch_file: "patches/0002-libtool-fix-type-libtool.patch"
