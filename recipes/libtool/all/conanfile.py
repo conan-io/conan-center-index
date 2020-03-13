@@ -67,8 +67,11 @@ class LibtoolConan(ConanFile):
         return self._autotools
 
     def _patch_sources(self):
+        # FIXME: tools.patch cannot patch read-only files on Windows
+        os.chmod(os.path.join(self._source_subfolder, "build-aux", "ltmain.sh"), 0o777)
         for patch in self.conan_data["patches"][self.version]:
             tools.patch(**patch)
+        os.chmod(os.path.join(self._source_subfolder, "build-aux", "ltmain.sh"), 0o555)
 
     def build(self):
         self._patch_sources()
