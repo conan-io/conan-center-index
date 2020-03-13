@@ -17,6 +17,7 @@ class Hdf5Conan(ConanFile):
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
+        "enable_cxx": [True, False],
         "hl": [True, False],
         "with_zlib": [True, False],
         "szip_support": [None, "with_libaec", "with_szip"],
@@ -25,6 +26,7 @@ class Hdf5Conan(ConanFile):
     default_options = {
         "shared": False,
         "fPIC": True,
+        "enable_cxx": True,
         "hl": True,
         "with_zlib": True,
         "szip_support": None,
@@ -46,6 +48,9 @@ class Hdf5Conan(ConanFile):
             del self.options.fPIC
 
     def configure(self):
+        if not self.options.enable_cxx:
+            del self.settings.compiler.libcxx
+            del self.settings.compiler.cppstd
         if not bool(self.options.szip_support):
             del self.options.szip_encoding
         elif self.options.szip_support == "with_szip" and \
@@ -116,7 +121,7 @@ class Hdf5Conan(ConanFile):
         self._cmake.definitions["HDF5_BUILD_EXAMPLES"] = False
         self._cmake.definitions["HDF5_BUILD_HL_LIB"] = self.options.hl
         self._cmake.definitions["HDF5_BUILD_FORTRAN"] = False
-        self._cmake.definitions["HDF5_BUILD_CPP_LIB"] = True # Option?
+        self._cmake.definitions["HDF5_BUILD_CPP_LIB"] = self.options.enable_cxx
         if tools.Version(self.version) >= "1.10.0":
             self._cmake.definitions["HDF5_BUILD_JAVA"] = False
         self._cmake.configure(build_folder=self._build_subfolder)
@@ -146,9 +151,13 @@ class Hdf5Conan(ConanFile):
             self.cpp_info.system_libs.extend(["dl", "m"])
 
     def _get_ordered_libs(self):
-        libs = ["hdf5_cpp", "hdf5"]
+        libs = ["hdf5"]
+        if self.options.enable_cxx:
+            libs.insert(0, "hdf5_cpp")
         if self.options.hl:
-            libs[:0] = ["hdf5_hl_cpp", "hdf5_hl"]
+            libs.insert(0, "hdf5_hl")
+            if self.options.enable_cxx:
+                libs.insert(0, "hdf5_hl_cpp")
         # See config/cmake_ext_mod/HDFMacros.cmake
         if self.settings.os == "Windows" and self.settings.compiler != "gcc" and not self.options.shared:
             libs = ["lib" + lib for lib in libs]
