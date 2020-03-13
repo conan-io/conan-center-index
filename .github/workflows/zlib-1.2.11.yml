@@ -8,7 +8,7 @@ on:
       - '.github/workflows/zlib-1.2.11.yml'
   push:
     branches:
-      - trassir-ci
+      - master
     paths:
       - 'recipes/zlib/1.2.11/**'
       - 'build.py'
