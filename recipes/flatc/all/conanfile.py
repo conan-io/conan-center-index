@@ -31,7 +31,6 @@ class FlatcConan(ConanFile):
         tools.get(**self.conan_data["sources"][self.version])
         extracted_dir = "flatbuffers-" + self.version
         os.rename(extracted_dir, self._source_subfolder)
-        self._patch_sources()
 
     def _configure_cmake(self):
         cmake = CMake(self)
@@ -44,6 +43,7 @@ class FlatcConan(ConanFile):
         return cmake
 
     def build(self):
+        self._patch_sources()
         cmake = self._configure_cmake()
         cmake.build()
 
