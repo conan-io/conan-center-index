@@ -1,5 +1,5 @@
 diff --git a/CMakeLists.txt b/CMakeLists.txt
-index 2ab6d17e..5e180751 100644
+index 2ab6d17e..9292e6a2 100644
 --- a/CMakeLists.txt
 +++ b/CMakeLists.txt
 @@ -365,38 +365,24 @@ if(APPLE OR CMAKE_SYSTEM_NAME MATCHES "DragonFly|FreeBSD|Linux|NetBSD|OpenBSD")
@@ -54,7 +54,7 @@ index 2ab6d17e..5e180751 100644
  if(UNIX)
    # Now for some gibbering horrors from beyond the stars...
    foreach(x ${uv_libraries})
-@@ -411,20 +397,21 @@ if(UNIX)
+@@ -411,20 +397,18 @@ if(UNIX)
    set(includedir ${CMAKE_INSTALL_PREFIX}/${CMAKE_INSTALL_INCLUDEDIR})
    set(libdir ${CMAKE_INSTALL_PREFIX}/${CMAKE_INSTALL_LIBDIR})
    set(prefix ${CMAKE_INSTALL_PREFIX})
@@ -82,7 +82,4 @@ index 2ab6d17e..5e180751 100644
 +  install(TARGETS uv
 +    RUNTIME DESTINATION bin
 +    ARCHIVE DESTINATION lib)
-+  if (target_type STREQUAL "SHARED_LIBRARY")
-+    install(FILES $<TARGET_PDB_FILE:uv> DESTINATION bin OPTIONAL)
-+  endif()
  endif()
