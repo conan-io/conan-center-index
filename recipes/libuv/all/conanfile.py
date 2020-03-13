@@ -37,7 +37,7 @@ class libuvConan(ConanFile):
 
     def config_options(self):
         if self.settings.os == "Windows":
-            self.options.remove("fPIC")
+            del self.options.fPIC
 
     def configure(self):
         del self.settings.compiler.cppstd
