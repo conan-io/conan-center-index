@@ -26,6 +26,10 @@ class EazylzmaConan(ConanFile):
         tmp = tools.load("source_subfolder/README")
         return tmp[tmp.find("License",1):tmp.find("work.", 1)+5]
 
+    @property
+    def _libname(self):
+        return "easylzma" if self.options.shared else "easylzma_s"
+
     def config_options(self):
         if self.settings.os == "Windows":
            del self.options.fPIC
@@ -38,10 +42,6 @@ class EazylzmaConan(ConanFile):
         tools.get(**self.conan_data["sources"][self.version])
         extracted_dir = self.name + "-" + self.version
         os.rename(extracted_dir, self._source_subfolder)
-
-    @property
-    def _libname(self):
-        return "easylzma" if self.options.shared else "easylzma_s"
 
     def build(self):
         for patch in self.conan_data["patches"][self.version]:
