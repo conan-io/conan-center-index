@@ -27,3 +27,7 @@ class ConcurrentqueueConan(ConanFile):
 
     def package_id(self):
         self.info.header_only()
+
+    def package_info(self):
+        if self.settings.os == "Linux":
+            self.cpp_info.system_libs = ["pthread"]
