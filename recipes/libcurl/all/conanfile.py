@@ -328,7 +328,14 @@ class LibcurlConan(ConanFile):
                 autotools_vars['CFLAGS'] = "{} {} {} {}".format(
                     sysroot, arch_flag, ios_min_version, extra_flag
                 ) 
-                autotools_vars['LDFLAGS'] = "{} {}".format(arch_flag, sysroot)
+
+                if self.options.with_openssl:
+                    openssl_path = self.deps_cpp_info["openssl"].rootpath
+                    openssl_libdir = self.deps_cpp_info["openssl"].libdirs[0]
+                    autotools_vars['LDFLAGS'] = "{} {} -L{}/{}".format(arch_flag, sysroot, openssl_path, openssl_libdir)        
+                else:
+                    autotools_vars['LDFLAGS'] = "{} {}".format(arch_flag, sysroot)
+
                 autotools_vars['CPPFLAGS'] += extra_def
 
             elif self.settings.os == "Android":
