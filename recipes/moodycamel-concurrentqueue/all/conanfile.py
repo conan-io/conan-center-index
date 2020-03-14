@@ -11,6 +11,7 @@ class MoodycamelConcurrentqueueConan(ConanFile):
     topics = ("cpp11", "cpp14", "cpp17", "queue", "lock-free")
     license = ["BSD-2-Clause", "BSL-1.0"]
     no_copy_source = True
+    settings = "os"
     _source_subfolder = "moodycamel-concurrentqueue"
 
     def source(self):
