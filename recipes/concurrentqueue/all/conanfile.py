@@ -3,7 +3,7 @@ from fnmatch import fnmatch
 import os
 
 
-class MoodycamelConcurrentqueueConan(ConanFile):
+class ConcurrentqueueConan(ConanFile):
     name = "concurrentqueue"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/cameron314/concurrentqueue"
@@ -12,7 +12,7 @@ class MoodycamelConcurrentqueueConan(ConanFile):
     license = ["BSD-2-Clause", "BSL-1.0"]
     no_copy_source = True
     settings = "os"
-    _source_subfolder = "moodycamel-concurrentqueue"
+    _source_subfolder = "concurrentqueue"
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
