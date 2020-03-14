@@ -1,7 +1,7 @@
 from conans import ConanFile, CMake, tools
 import os
 
-class MoodycamelConcurrentqueueTestConan(ConanFile):
+class ConcurrentqueueTestConan(ConanFile):
     settings = "os", "compiler", "build_type", "arch"
     generators = "cmake"
 
