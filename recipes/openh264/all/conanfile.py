@@ -44,17 +44,17 @@ class OpenH264Conan(ConanFile):
                 if tools.os_info.is_windows:
                     prefix = tools.unix_path(prefix)
                 tools.replace_in_file('Makefile', 'PREFIX=/usr/local', 'PREFIX=%s' % prefix)
-                if self.settings.os == "Android":
-                    arch = str(self.settings.arch)
-                    arch = {"armv7": "arm",
-                            "armv8": "arm64"}.get(arch, arch)
+
+                if self.settings.arch == 'armv7':
+                    arch = 'arm'
+                if self.settings.arch == 'armv8':
+                    arch = 'arm64'
+                elif self.settings.arch == 'x86':
+                    arch = 'i386'
+                elif self.settings.arch == 'x86_64':
+                    arch = 'x86_64'
                 else:
-                    if self.settings.arch == 'x86':
-                        arch = 'i386'
-                    elif self.settings.arch == 'x86_64':
-                        arch = 'x86_64'
-                    else:
-                        arch = self.settings.arch
+                    arch = self.settings.arch
 
                 args = ['ARCH=%s' % arch]
 
