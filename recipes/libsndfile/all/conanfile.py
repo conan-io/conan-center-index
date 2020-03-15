@@ -1,4 +1,4 @@
-from conans import ConanFile, tools, AutoToolsBuildEnvironment
+from conans import ConanFile, tools, AutoToolsBuildEnvironment, RunEnvironment
 from conans.errors import ConanInvalidConfiguration
 import os
 import shutil
@@ -77,8 +77,9 @@ class LibnameConan(ConanFile):
     def build(self):
         if self.options.with_external_libs:
             shutil.copyfile('vorbis.pc', 'vorbisenc.pc')
-        autotools = self._configure_autotools()
-        autotools.make()
+        with tools.environment_append(RunEnvironment(self).vars):
+            autotools = self._configure_autotools()
+            autotools.make()
 
     def package(self):
         self.copy(pattern="COPYING", dst="licenses", src=self._source_subfolder)
