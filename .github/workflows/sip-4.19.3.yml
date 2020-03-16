@@ -72,7 +72,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     steps:
       - name: Configure git
-        run: git config --global core.autocrlf input
+        run: git config --global core.autocrlf false
         shell: bash
       - name: Checkout
         uses: actions/checkout@v2
