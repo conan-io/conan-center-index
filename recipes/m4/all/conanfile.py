@@ -60,7 +60,7 @@ class M4Conan(ConanFile):
                 with tools.environment_append(env):
                     yield
         else:
-            if "clang" in str(self.settings.compiler):
+            if self._is_clang:
                 env["CFLAGS"] = "-rtlib=compiler-rt"
             with tools.environment_append(env):
                 yield
