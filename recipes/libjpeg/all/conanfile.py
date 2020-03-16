@@ -1,8 +1,6 @@
 import os
 import shutil
 from conans import ConanFile, AutoToolsBuildEnvironment, tools
-from conans.errors import ConanInvalidConfiguration
-from conans.tools import os_info
 
 
 class LibjpegConan(ConanFile):
@@ -12,11 +10,16 @@ class LibjpegConan(ConanFile):
     topics = ("conan", "image", "format", "jpg", "jpeg", "picture", "multimedia", "graphics")
     license = "http://ijg.org/files/README"
     homepage = "http://ijg.org"
-    exports_sources = ["Win32.Mak"]
+    exports_sources = ["Win32.Mak", "patches/**"]
     settings = "os", "arch", "compiler", "build_type"
     options = {"shared": [True, False], "fPIC": [True, False]}
     default_options = {"shared": False, "fPIC": True}
-    source_subfolder = "source_subfolder"
+
+    _autotools = None
+
+    @property
+    def _source_subfolder(self):
+        return "source_subfolder"
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -25,84 +28,105 @@ class LibjpegConan(ConanFile):
     def configure(self):
         del self.settings.compiler.libcxx
         del self.settings.compiler.cppstd
-        if self.settings.compiler == 'Visual Studio' and self.options.shared:
-            raise ConanInvalidConfiguration("shared builds aren't supported for MSVC")
 
     def build_requirements(self):
         if tools.os_info.is_windows and self.settings.compiler != "Visual Studio":
-            if "CONAN_BASH_PATH" not in os.environ and os_info.detect_windows_subsystem() != 'msys2':
+            if "CONAN_BASH_PATH" not in os.environ and tools.os_info.detect_windows_subsystem() != "msys2":
                 self.build_requires("msys2/20190524")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
-        os.rename("jpeg-" + self.version, self.source_subfolder)
+        os.rename("jpeg-" + self.version, self._source_subfolder)
 
-    def build_nmake(self):
-        if self.settings.compiler == 'Visual Studio':
-            shutil.copy('Win32.Mak', os.path.join(self.source_subfolder, 'Win32.Mak'))
-        with tools.chdir(self.source_subfolder):
-            shutil.copy('jconfig.vc', 'jconfig.h')
-            vcvars_command = tools.vcvars_command(self.settings)
-            params = "nodebug=1" if self.settings.build_type == 'Release' else ""
+    def _build_nmake(self):
+        shutil.copy("Win32.Mak", os.path.join(self._source_subfolder, "Win32.Mak"))
+        tools.replace_in_file(os.path.join(self._source_subfolder, "Win32.Mak"),
+                              "\nccommon = -c ",
+                              "\nccommon = -c -DLIBJPEG_BUILDING {}".format("" if self.options.shared else "-DLIBJPEG_STATIC "))
+        with tools.chdir(self._source_subfolder):
+            shutil.copy("jconfig.vc", "jconfig.h")
+            make_args = [
+                "nodebug=1" if self.settings.build_type == "Release" else "",
+            ]
             # set flags directly in makefile.vc
             # cflags are critical for the library. ldflags and ldlibs are only for binaries
             if self.settings.compiler.runtime in ["MD", "MDd"]:
-                tools.replace_in_file('makefile.vc', '(cvars)', '(cvarsdll)')
-                tools.replace_in_file('makefile.vc', '(conlibs)', '(conlibsdll)')
+                tools.replace_in_file("makefile.vc", "(cvars)", "(cvarsdll)")
+                tools.replace_in_file("makefile.vc", "(conlibs)", "(conlibsdll)")
             else:
-                tools.replace_in_file('makefile.vc', '(cvars)', '(cvarsmt)')
-                tools.replace_in_file('makefile.vc', '(conlibs)', '(conlibsmt)')
-            self.run('%s && nmake -f makefile.vc %s libjpeg.lib' % (vcvars_command, params))
+                tools.replace_in_file("makefile.vc", "(cvars)", "(cvarsmt)")
+                tools.replace_in_file("makefile.vc", "(conlibs)", "(conlibsmt)")
+            target = "libjpeg.dll.lib" if self.options.shared else "libjpeg.lib"
+            with tools.vcvars(self.settings):
+                self.run("nmake -f makefile.vc {} {}".format(" ".join(make_args), target))
 
-    def build_configure(self):
-        # works for unix and mingw environments
-        env_build = AutoToolsBuildEnvironment(self, win_bash=tools.os_info.is_windows)
-        env_build.fpic = True
-        config_args = []
+    def _configure_autotools(self):
+        """For unix and mingw environments"""
+        if self._autotools:
+            return self._autotools
+        self._autotools = AutoToolsBuildEnvironment(self, win_bash=tools.os_info.is_windows)
+        self._autotools.defines.append("LIBJPEG_BUILDING")
+        config_args = [
+            "--prefix={}".format(tools.unix_path(self.package_folder)),
+        ]
         if self.options.shared:
             config_args.extend(["--enable-shared=yes", "--enable-static=no"])
         else:
             config_args.extend(["--enable-shared=no", "--enable-static=yes"])
-        prefix = os.path.abspath(self.package_folder)
-        if tools.os_info.is_windows:
-            prefix = tools.unix_path(prefix)
-        config_args.append("--prefix=%s" % prefix)
 
-        # mingw-specific
-        if self.settings.os == 'Windows':
-            if self.settings.arch == "x86_64":
-                config_args.append('--build=x86_64-w64-mingw32')
-                config_args.append('--host=x86_64-w64-mingw32')
-            if self.settings.arch == "x86":
-                config_args.append('--build=i686-w64-mingw32')
-                config_args.append('--host=i686-w64-mingw32')
+        if self.settings.os == "Windows":
+            mingw_arch = {
+                "x86_64": "x86_64",
+                "x86": "i686",
+            }
+            build_triplet = host_triplet = "{}-w64-mingw32".format(mingw_arch[str(self.settings.arch)])
+            config_args.extend([
+                "--build={}".format(build_triplet),
+                "--host={}".format(host_triplet),
+            ])
 
-        env_build.configure(configure_dir=self.source_subfolder, args=config_args)
-        env_build.make()
-        env_build.install()
+        self._autotools.configure(configure_dir=self._source_subfolder, args=config_args)
+        return self._autotools
+
+    def _patch_sources(self):
+        for patch in self.conan_data["patches"][self.version]:
+            tools.patch(**patch)
 
     def build(self):
+        self._patch_sources()
         if self.settings.compiler == "Visual Studio":
-            self.build_nmake()
+            self._build_nmake()
         else:
-            self.build_configure()
+            autotools = self._configure_autotools()
+            autotools.make()
 
     def package(self):
-        self.copy("README", src=self.source_subfolder, dst="licenses", ignore_case=True, keep_path=False)
+        self.copy("README", src=self._source_subfolder, dst="licenses", ignore_case=True, keep_path=False)
         if self.settings.compiler == "Visual Studio":
-            for filename in ['jpeglib.h', 'jerror.h', 'jconfig.h', 'jmorecfg.h']:
-                self.copy(pattern=filename, dst="include", src=self.source_subfolder, keep_path=False)
-            self.copy(pattern="*.lib", dst="lib", src=self.source_subfolder, keep_path=False)
-        tools.rmdir(os.path.join(self.package_folder, 'share'))
-        # can safely drop bin/ because there are no shared builds
-        tools.rmdir(os.path.join(self.package_folder, 'bin'))
-        tools.rmdir(os.path.join(self.package_folder, 'lib', 'pkgconfig'))
-        la = os.path.join(self.package_folder, 'lib', 'libjpeg.la')
-        if os.path.isfile(la):
-            os.unlink(la)
+            for filename in ["jpeglib.h", "jerror.h", "jconfig.h", "jmorecfg.h"]:
+                self.copy(pattern=filename, dst="include", src=self._source_subfolder, keep_path=False)
+            self.copy(pattern="*.lib", dst="lib", src=self._source_subfolder, keep_path=False)
+            self.copy(pattern="*.dll", dst="bin", src=self._source_subfolder, keep_path=False)
+        else:
+            autotools = self._configure_autotools()
+            autotools.install()
+            os.unlink(os.path.join(self.package_folder, "lib", "libjpeg.la"))
+
+            tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
+            tools.rmdir(os.path.join(self.package_folder, "share"))
+
+            bindir = os.path.join(self.package_folder, "bin")
+            for file in os.listdir(bindir):
+                if file.endswith(".exe"):
+                    os.unlink(os.path.join(bindir, file))
 
     def package_info(self):
         if self.settings.compiler == "Visual Studio":
-            self.cpp_info.libs = ['libjpeg']
+            lib = "libjpeg"
+            if self.options.shared:
+                lib += ".dll.lib"
+            self.cpp_info.libs = [lib]
         else:
-            self.cpp_info.libs = ['jpeg']
+            self.cpp_info.libs = ["jpeg"]
+        if not self.options.shared:
+            self.cpp_info.defines.append("LIBJPEG_STATIC")
