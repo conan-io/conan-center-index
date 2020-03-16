@@ -23,7 +23,7 @@ class TestPackageConan(ConanFile):
 
     def test(self):
         if not tools.cross_building(self.settings):
-            self.run("{} --version".format(os.environ["M4"]))
+            self.run("{} --version".format(os.environ["M4"]), run_environment=True)
             self.run("{} -P {}".format(os.environ["M4"], self._m4_input_path))
 
             output = StringIO()
