@@ -23,6 +23,9 @@ tmp/
 # C extensions
 *.so
 
+# vim tmp files
+*.swp
+
 # Distribution / packaging
 .Python
 build/

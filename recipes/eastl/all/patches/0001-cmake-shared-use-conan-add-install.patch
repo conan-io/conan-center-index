@@ -1,14 +1,19 @@
---- CMakeLists.txt	2019-11-05 19:33:25.980141260 +0100
-+++ CMakeLists.txt	2019-11-01 17:37:52.000000000 +0100
-@@ -44,7 +44,13 @@
- target_include_directories(EASTL PUBLIC include)
-
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -46,5 +46,18 @@ target_include_directories(EASTL PUBLIC include)
  #-------------------------------------------------------------------------------------------
  # Dependencies
  #-------------------------------------------------------------------------------------------
 -target_link_libraries(EASTL EABase)
 +target_link_libraries(EASTL CONAN_PKG::eabase)
-
+ 
++if(BUILD_SHARED_LIBS)
++  target_compile_definitions(EASTL PUBLIC EASTL_DLL)
++  if(MSVC OR CYGWIN)
++    target_compile_definitions(EASTL PRIVATE "EASTL_API=__declspec(dllexport)")
++  endif()
++endif()
++
 +include(GNUInstallDirs)
 +install(TARGETS EASTL
 +    RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
