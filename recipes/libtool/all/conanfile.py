@@ -77,7 +77,7 @@ class LibtoolConan(ConanFile):
         self._patch_sources()
         with self._build_context():
             autotools = self._configure_autotools()
-            autotools.make(args=["-j1"])
+            autotools.make()
 
     def package(self):
         self.copy("COPYING*", src=self._source_subfolder, dst="licenses")
