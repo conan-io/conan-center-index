@@ -121,7 +121,7 @@ class BoostConan(ConanFile):
             del self.options.fPIC
 
     def build_requirements(self):
-        self.build_requires("b2/4.1.0")
+        self.build_requires("b2/4.2.0")
 
     def requirements(self):
         if self._zip_bzip2_requires_needed:
