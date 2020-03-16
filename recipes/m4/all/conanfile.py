@@ -67,7 +67,6 @@ class M4Conan(ConanFile):
 
     def _patch_sources(self):
         for patch in self.conan_data["patches"][self.version]:
-            self.output.info("applying patch \"{}\"".format(patch["patch_file"]))
             tools.patch(**patch)
 
     def build(self):
