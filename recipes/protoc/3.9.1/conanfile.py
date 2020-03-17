@@ -2,9 +2,9 @@ from conans import ConanFile, CMake, tools
 import os
 
 
-class ProtocInstaller(ConanFile):
+class ProtocConanFile(ConanFile):
     _base_name = "protobuf"
-    name = "protoc_installer"
+    name = "protoc"
     version = "3.9.1"
     description = "Protocol Buffers - Google's data interchange format"
     topics = ("conan", "protobuf", "protocol-buffers", "protocol-compiler", "serialization", "rpc", "protocol-compiler")
