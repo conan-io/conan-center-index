@@ -59,14 +59,13 @@ class OpenALConan(ConanFile):
         tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
 
     def package_info(self):
-        if self.settings.os == "Windows":
-            self.cpp_info.libs = ["OpenAL32", 'winmm']
-        else:
-            self.cpp_info.libs = ["openal"]
+        self.cpp_info.libs = tools.collect_libs(self)
         if self.settings.os == 'Linux':
             self.cpp_info.system_libs.extend(['dl', 'm'])
         elif self.settings.os == 'Macos':
             self.cpp_info.frameworks.extend(['AudioToolbox', 'CoreAudio', 'CoreFoundation'])
+        elif self.settings.os == 'Windows':
+            self.cpp_info.system_libs.extend(['winmm', 'ole32', 'shell32'])
         self.cpp_info.includedirs = ["include", "include/AL"]
         if not self.options.shared:
             self.cpp_info.defines.append('AL_LIBTYPE_STATIC')
