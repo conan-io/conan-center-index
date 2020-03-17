@@ -14,7 +14,7 @@ class grpcConan(ConanFile):
     license = "Apache-2.0"
     exports = ["LICENSE.md"]
     exports_sources = ["CMakeLists.txt"]
-    generators = "cmake"
+    generators = "cmake", "cmake_find_package"
     short_paths = True  # Otherwise some folders go out of the 260 chars path length scope rapidly (on windows)
 
     settings = "os", "arch", "compiler", "build_type"
@@ -33,9 +33,8 @@ class grpcConan(ConanFile):
     _source_subfolder = "source_subfolder"
     _build_subfolder = "build_subfolder"
 
-   
     def requirements(self):
-        self.requires.add("zlib/1.2.11")
+        self.requires.add("zlib/1.2.11@conan/stable")
         self.requires.add("openssl/1.0.2r")
         self.requires.add("protobuf/3.9.1")
         self.requires.add("protoc/3.9.1")
@@ -58,6 +57,10 @@ class grpcConan(ConanFile):
 
         # See #5
         tools.replace_in_file(cmake_path, "_gRPC_PROTOBUF_LIBRARIES", "CONAN_LIBS_PROTOBUF")
+
+        # bring find_package in cares.cmake to work with cmake_find_package generator
+        cares_cmake_path = os.path.join(self._source_subfolder, "cmake", "cares.cmake")
+        tools.replace_in_file(cares_cmake_path, "find_package(c-ares REQUIRED CONFIG)", "find_package(c-ares REQUIRED)")
 
         # Parts which should be options:
         # grpc_cronet
