@@ -155,15 +155,6 @@ class NCursesConan(ConanFile):
 
             os.unlink(os.path.join(self.package_folder, "bin", "ncurses{}{}-config".format(self._suffix, self._major_version)))
 
-        if self.settings.compiler == "Visual Studio":
-            lib_infix = ".dll" if self.options.shared else ""
-            libs = self._libs
-            if self.settings.compiler != "Visual Studio":
-                libs += ["curses"]
-            for l in libs:
-                os.rename(os.path.join(self.package_folder, "lib", "lib{}{}.a".format(l, lib_infix)),
-                          os.path.join(self.package_folder, "lib", "{}.lib".format(l)))
-
     @property
     def _libs(self):
         libs = ["ncurses++", "form", "menu", "panel", "ncurses"]
