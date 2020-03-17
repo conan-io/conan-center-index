@@ -34,7 +34,7 @@ class grpcConan(ConanFile):
     _build_subfolder = "build_subfolder"
 
     def requirements(self):
-        self.requires.add("zlib/1.2.11@conan/stable")
+        self.requires.add("zlib/1.2.11")
         self.requires.add("openssl/1.0.2r")
         self.requires.add("protobuf/3.9.1")
         self.requires.add("protoc/3.9.1")
