@@ -1,0 +1,4 @@
+sources:
+  "20200130":
+    sha256: 5f327b56d932ed5c1a28b7b1b1f528ddfbf69cb45bc4a8d38301ab85116e4b0e
+    url: https://github.com/mjansson/mdns/archive/0f75def961433102dc4848564c1a865f473dfaed.zip
