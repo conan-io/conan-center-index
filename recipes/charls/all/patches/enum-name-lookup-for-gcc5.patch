@@ -1,0 +1,17 @@
+--- a/src/charls_jpegls_decoder.cpp
++++ b/src/charls_jpegls_decoder.cpp
+@@ -103,11 +103,11 @@ struct charls_jpegls_decoder final
+ 
+         switch (interleave_mode())
+         {
+-        case interleave_mode::none:
++        case charls::interleave_mode::none:
+             return static_cast<size_t>(stride) * info.height * info.component_count;
+ 
+-        case interleave_mode::line:
+-        case interleave_mode::sample:
++        case charls::interleave_mode::line:
++        case charls::interleave_mode::sample:
+             return static_cast<size_t>(stride) * info.height;
+         }
+ 

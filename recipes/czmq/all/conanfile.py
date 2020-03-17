@@ -91,5 +91,7 @@ class CzmqConan(ConanFile):
             self.cpp_info.libs = ["czmq"]
             if self.settings.os == "Linux":
                 self.cpp_info.system_libs.extend(["pthread", "m"])
+        if self.settings.os == "Windows":
+            self.cpp_info.system_libs.append("rpcrt4")
         if not self.options.shared:
             self.cpp_info.defines.append("CZMQ_STATIC")
