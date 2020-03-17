@@ -25,8 +25,7 @@ class LibnameConan(ConanFile):
         "fPIC": True,
         "with_alsa": True,
         "with_sqlite": True,
-        "with_external_libs": True,
-        "libalsa:shared": True}
+        "with_external_libs": True,}
     _autotools = None
 
     @property
