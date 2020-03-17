@@ -56,7 +56,6 @@ class NCursesConan(ConanFile):
         if self.settings.compiler == "Visual Studio":
             self.build_requires("getopt-for-visual-studio/20200201")
             self.build_requires("dirent/1.23.2")
-            self.build_requires("automake/1.16.1")
         if tools.os_info.is_windows and not "CONAN_BASH_PATH" in os.environ and \
                 tools.os_info.detect_windows_subsystem() != "msys2":
             self.build_requires("msys2/20190524")
@@ -75,13 +74,15 @@ class NCursesConan(ConanFile):
                 self._autotools.defines.append("_WIN64")
         build = None
         host = None
-        conf_args = [
-            "--with-shared" if self.options.shared else "--without-shared",
-            "--with-cxx-shared" if self.options.shared else "--without-cxx-shared",
+        conf_args = []
+        if self.options.shared:
+            conf_args.extend(["--with-shared", "--with-cxx-shared", "--without-normal"])
+        else:
+            conf_args.extend(["--without-shared", "--without-cxx-shared", "--with-normal"])
+        conf_args.extend([
             "--enable-reentrant" if self.options.with_reentrant else "--disable-reentrant",
-            "--with-pcre2" if self.options.with_pcre2 else "--without-pcre2",
             "--enable-widec" if self.options.with_widec else "--disable-widec",
-            "--without-normal",
+            "--with-pcre2" if self.options.with_pcre2 else "--without-pcre2",
             "--without-libtool",
             "--without-ada",
             "--without-manpages",
@@ -93,7 +94,7 @@ class NCursesConan(ConanFile):
             "--disable-rpath",
             "--datarootdir={}".format(tools.unix_path(os.path.join(self.package_folder, "bin", "share"))),
             "--disable-pc-files",
-        ]
+        ])
         if self.settings.os == "Windows":
             conf_args.extend([
                 "--disable-macros",
@@ -103,7 +104,6 @@ class NCursesConan(ConanFile):
                 "--enable-term-driver",
                 "--enable-interop",
             ])
-            self._autotools.flags.append("-D_WIN32_WINNT=0x0600")
         if self.settings.compiler == "Visual Studio":
             conf_args.extend([
                 "ac_cv_func_getopt=yes",
@@ -115,29 +115,21 @@ class NCursesConan(ConanFile):
         return self._autotools
 
     def _patch_sources(self):
-        if self.options.shared:
-            tools.replace_in_file(os.path.join(self._source_subfolder, "include", "ncurses_dll.h.in"),
-                                  "#undef NCURSES_DLL",
-                                  "#define NCURSES_DLL")
-            tools.replace_in_file(os.path.join(self._source_subfolder, "include", "ncurses_dll.h.in"),
-                                  "#define NCURSES_STATIC",
-                                  "#undef NCURSES_STATIC")
         for patch in self.conan_data["patches"][self.version]:
             tools.patch(**patch)
 
     @contextmanager
     def _build_context(self):
-        # FIXME: if cross compiling, set BUILD_CC. Does conan support multiple toolchains?
         if self.settings.compiler == "Visual Studio":
             with tools.vcvars(self.settings):
                 msvc_env = {
-                    "CC": "{} cl -nologo".format(tools.unix_path(self.deps_user_info["automake"].compile)),
-                    "CXX": "{} cl -nologo".format(tools.unix_path(self.deps_user_info["automake"].compile)),
-                    "LD": "link -nologo".format(tools.unix_path(self.deps_user_info["automake"].compile)),
+                    "CC": "cl -nologo",
+                    "CXX": "cl -nologo",
+                    "LD": "link -nologo",
                     "LDFLAGS": "user32.lib",
                     "NM": "dumpbin -symbols",
                     "STRIP": ":",
-                    "AR": "{} lib".format(tools.unix_path(self.deps_user_info["automake"].ar_lib)),
+                    "AR": "lib -nologo",
                     "RANLIB": ":",
                 }
                 with tools.environment_append(msvc_env):
@@ -172,11 +164,6 @@ class NCursesConan(ConanFile):
                 os.rename(os.path.join(self.package_folder, "lib", "lib{}{}.a".format(l, lib_infix)),
                           os.path.join(self.package_folder, "lib", "{}.lib".format(l)))
 
-        if self.options.shared:
-            tools.replace_in_file(os.path.join(self.package_folder, "include", "ncurses{}".format(self._suffix), "ncurses_dll.h"),
-                                  "#define NCURSES_DLL",
-                                  "#undef NCURSES_DLL  //")
-
     @property
     def _libs(self):
         libs = ["ncurses++", "form", "menu", "panel", "ncurses"]
@@ -195,7 +182,8 @@ class NCursesConan(ConanFile):
     def package_info(self):
         self.cpp_info.includedirs.append(os.path.join("include", "ncurses" + self._suffix))
         self.cpp_info.libs = self._libs
-        if not self.options.shared:
+        if self.options.shared:
+            if self.settings.os == "Linux":
+                self.cpp_info.system_libs = ["dl", "m"]
+        else:
             self.cpp_info.defines = ["NCURSES_STATIC"]
-        if self.settings.os == "Linux":
-            self.cpp_info.system_libs = ["dl", "m"]
