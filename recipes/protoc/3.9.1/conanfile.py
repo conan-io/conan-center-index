@@ -12,8 +12,8 @@ class ProtocInstaller(ConanFile):
     homepage = "https://github.com/protocolbuffers/protobuf"
     author = "Bincrafters <bincrafters@gmail.com>"
     license = "BSD-3-Clause"
-    exports = ["LICENSE.md", "protoc.patch"]
-    exports_sources = ["CMakeLists.txt"]
+    exports = ["LICENSE.md"]
+    exports_sources = ["CMakeLists.txt", "protoc.patch"]
     generators = "cmake"
     short_paths = True
 
@@ -36,6 +36,7 @@ class ProtocInstaller(ConanFile):
 
     def build(self):
         tools.patch(base_path=self._source_subfolder, patch_file="protoc.patch")
+        print("PWD: %s" % os.getcwd())
         cmake = self._configure_cmake()
         cmake.build()
 
