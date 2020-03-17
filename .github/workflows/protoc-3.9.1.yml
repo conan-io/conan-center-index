@@ -66,5 +66,5 @@ jobs:
           CONAN_VISUAL_RUNTIMES: ${{ matrix.vs_runtimes }}
           CONAN_ARCHS: ${{ matrix.archs }}
           CONAN_BUILD_TYPES: ${{ matrix.build_types }}
-          CONAN_REFERENCE: protoc_installer/${{ matrix.protobuf_versions }}
+          CONAN_REFERENCE: protoc/${{ matrix.protobuf_versions }}
           DEVELOPER_DIR: /Applications/Xcode_${{ matrix.xcode_version }}.app/Contents/Developer
