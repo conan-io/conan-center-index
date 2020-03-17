@@ -14,7 +14,7 @@ class grpcConan(ConanFile):
     license = "Apache-2.0"
     exports = ["LICENSE.md"]
     exports_sources = ["CMakeLists.txt"]
-    generators = "cmake"
+    generators = "cmake", "cmake_find_package"
     short_paths = True  # Otherwise some folders go out of the 260 chars path length scope rapidly (on windows)
 
     settings = "os", "arch", "compiler", "build_type"
