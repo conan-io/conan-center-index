@@ -10,7 +10,7 @@ on:
     branches:
       - master
     paths:
-      - 'recipes/protobuf/3.9.x/**'
+      - 'recipes/protoc/3.9.1/**'
       - 'build.py'
       - '.github/workflows/protoc-3.9.1.yml'
 
