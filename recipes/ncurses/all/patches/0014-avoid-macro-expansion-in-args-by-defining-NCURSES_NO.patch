@@ -1,4 +1,4 @@
-From 0f932f6f6ab4d817581cce13e8792d6ea3ea8bac Mon Sep 17 00:00:00 2001
+From 6ea68944cf091e3aaa03fef5bb5ec092224021cb Mon Sep 17 00:00:00 2001
 From: Anonymous Maarten <anonymous.maarten@gmail.com>
 Date: Mon, 16 Mar 2020 11:01:28 +0100
 Subject: [PATCH 14/15] avoid macro expansion in args by defining
