@@ -1,15 +1,15 @@
-From aae950e61d3caa2bc95b0d59d2af5adecb0179e1 Mon Sep 17 00:00:00 2001
+From 4a4d205735df2634a328c03629435f440cb5dd3c Mon Sep 17 00:00:00 2001
 From: Anonymous Maarten <anonymous.maarten@gmail.com>
 Date: Tue, 17 Mar 2020 15:38:08 +0100
 Subject: [PATCH 12/15] Learn configure about msvc
 
 ---
- aclocal.m4 | 142 ++++++++++++++++++++++++++++++++++++++++-------------
- mk-1st.awk |  25 ++++++----
- 2 files changed, 125 insertions(+), 42 deletions(-)
+ aclocal.m4 | 145 +++++++++++++++++++++++++++++++++++++++++------------
+ mk-1st.awk |  25 +++++----
+ 2 files changed, 128 insertions(+), 42 deletions(-)
 
 diff --git a/aclocal.m4 b/aclocal.m4
-index 55c65d1a..dad7ea47 100644
+index 55c65d1a..3a44d63b 100644
 --- a/aclocal.m4
 +++ b/aclocal.m4
 @@ -453,39 +453,55 @@ AC_DEFUN([CF_AR_FLAGS],[
@@ -96,7 +96,17 @@ index 55c65d1a..dad7ea47 100644
  ])
  
  if test -n "$ARFLAGS" ; then
-@@ -4036,7 +4052,7 @@ cf_prefix=$LIB_PREFIX
+@@ -4008,6 +4024,9 @@ define([CF_LIB_PREFIX],
+ 			LIB_PREFIX=''
+ 		fi
+ 		;;
++	(*-msvc*)
++		LIB_PREFIX=''
++		;;
+ 	(*)	LIB_PREFIX='lib'
+ 		;;
+ 	esac
+@@ -4036,7 +4055,7 @@ cf_prefix=$LIB_PREFIX
  AC_REQUIRE([CF_SUBST_NCURSES_VERSION])
  
  case $cf_cv_shlib_version in
@@ -105,7 +115,7 @@ index 55c65d1a..dad7ea47 100644
  	TINFO_NAME=$TINFO_ARG_SUFFIX
  	TINFO_SUFFIX=.dll
  	;;
-@@ -4159,6 +4175,10 @@ CF_EOF
+@@ -4159,6 +4178,10 @@ CF_EOF
  					cf_cygsuf=`echo "$cf_suffix" | sed -e 's/\.dll/\${ABI_VERSION}.dll/'`
  					cf_add_lib="../lib/lib${cf_libname}${cf_cygsuf}"
  					;;
@@ -116,7 +126,7 @@ index 55c65d1a..dad7ea47 100644
  				(*)
  					cf_add_lib=
  					;;
-@@ -4254,7 +4274,7 @@ CF_EOF
+@@ -4254,7 +4277,7 @@ CF_EOF
  			CXX_MODEL=$cf_ITEM
  			if test "$CXX_MODEL" = SHARED; then
  				case $cf_cv_shlib_version in
@@ -125,7 +135,7 @@ index 55c65d1a..dad7ea47 100644
  					test "x$with_shared_cxx" = xno && CF_VERBOSE(overriding CXX_MODEL to SHARED)
  					with_shared_cxx=yes
  					;;
-@@ -4649,11 +4669,25 @@ AC_DEFUN([CF_LIB_SUFFIX],
+@@ -4649,11 +4672,25 @@ AC_DEFUN([CF_LIB_SUFFIX],
  		$3=[$]$2
  		;;
  	(Xdebug)
@@ -153,7 +163,7 @@ index 55c65d1a..dad7ea47 100644
  		$3=[$]$2
  		;;
  	(Xshared)
-@@ -4662,6 +4696,10 @@ AC_DEFUN([CF_LIB_SUFFIX],
+@@ -4662,6 +4699,10 @@ AC_DEFUN([CF_LIB_SUFFIX],
  			$2='.so'
  			$3=[$]$2
  			;;
@@ -164,7 +174,7 @@ index 55c65d1a..dad7ea47 100644
  		(cygwin*|msys*|mingw*)
  			$2='.dll'
  			$3='.dll.a'
-@@ -4689,7 +4727,14 @@ AC_DEFUN([CF_LIB_SUFFIX],
+@@ -4689,7 +4730,14 @@ AC_DEFUN([CF_LIB_SUFFIX],
  		esac
  		;;
  	(*)
@@ -180,7 +190,7 @@ index 55c65d1a..dad7ea47 100644
  		$3=[$]$2
  		;;
  	esac
-@@ -6759,6 +6804,37 @@ CF_EOF
+@@ -6759,6 +6807,37 @@ CF_EOF
  		CF_SHARED_SONAME
  		MK_SHARED_LIB='${CC} ${LDFLAGS} ${CFLAGS} -shared -Wl,-soname,'$cf_cv_shared_soname',-stats,-lc -o $[@]'
  		;;
