@@ -27,7 +27,7 @@ set(_PROTOBUF_PROTOC $<TARGET_FILE:protobuf::protoc>)
 # Find gRPC installation
 # Looks for gRPCConfig.cmake file installed by gRPC's cmake installation.
 #find_package(protoc REQUIRED)
-set(_PROTOBUF_PROTOC $ENV{PROTOC_BIN}")
+set(_PROTOBUF_PROTOC $ENV{PROTOC_BIN})
 find_package(gRPC REQUIRED)
 message(STATUS "Using gRPC ${gRPC_VERSION}")
 
