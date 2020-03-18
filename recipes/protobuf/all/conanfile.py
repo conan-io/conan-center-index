@@ -11,7 +11,7 @@ class ProtobufConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/protocolbuffers/protobuf"
     license = "BSD-3-Clause"
-    exports_sources = ["CMakeLists.txt", "protobuf.patch"]
+    exports_sources = ["CMakeLists.txt", "*.patch"]
     generators = "cmake"
     short_paths = True
     settings = "os", "arch", "compiler", "build_type"
@@ -59,7 +59,7 @@ class ProtobufConan(ConanFile):
         return cmake
 
     def build(self):
-        tools.patch(base_path=self._source_subfolder, patch_file="protobuf.patch")
+        tools.patch(base_path=self._source_subfolder, patch_file="protobuf_" + self.version + ".patch")
         cmake = self._configure_cmake()
         cmake.build()
 
