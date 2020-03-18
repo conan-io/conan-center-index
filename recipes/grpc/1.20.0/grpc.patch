@@ -1,0 +1,72 @@
+diff -Naur a/cmake/cares.cmake b/cmake/cares.cmake
+--- a/cmake/cares.cmake
++++ b/cmake/cares.cmake
+@@ -35,9 +35,9 @@
+   endif()
+ elseif("${gRPC_CARES_PROVIDER}" STREQUAL "package")
+   # Use "CONFIG" as there is no built-in cmake module for c-ares.
+-  find_package(c-ares REQUIRED CONFIG)
+-  if(TARGET c-ares::cares)
+-    set(_gRPC_CARES_LIBRARIES c-ares::cares)
++  find_package(c-ares REQUIRED)
++  if(TARGET c-ares::c-ares)
++    set(_gRPC_CARES_LIBRARIES c-ares::c-ares)
+     set(_gRPC_CARES_INCLUDE_DIR ${c-ares_INCLUDE_DIR})
+   endif()
+   set(_gRPC_FIND_CARES "if(NOT c-ares_FOUND)\n  find_package(c-ares CONFIG)\nendif()")
+diff -Naur a/cmake/protobuf.cmake b/cmake/protobuf.cmake
+--- a/cmake/protobuf.cmake
++++ b/cmake/protobuf.cmake
+@@ -38,8 +38,8 @@
+       set(_gRPC_PROTOBUF_PROTOC_LIBRARIES libprotoc)
+     endif()
+     if(TARGET protoc)
+-      set(_gRPC_PROTOBUF_PROTOC protoc)
+-      set(_gRPC_PROTOBUF_PROTOC_EXECUTABLE $<TARGET_FILE:protoc>)
++      set(_gRPC_PROTOBUF_PROTOC $ENV{PROTOC_BIN})
++      set(_gRPC_PROTOBUF_PROTOC_EXECUTABLE $ENV{PROTOC_BIN})
+     endif()
+     set(_gRPC_PROTOBUF_INCLUDE_DIR "${PROTOBUF_ROOT_DIR}")
+     # For well-known .proto files distributed with protobuf
+@@ -73,11 +73,11 @@
+       set(_gRPC_PROTOBUF_WELLKNOWN_INCLUDE_DIR ${PROTOBUF_INCLUDE_DIRS})
+     endif()
+     if(TARGET protobuf::protoc)
+-      set(_gRPC_PROTOBUF_PROTOC protobuf::protoc)
+-      set(_gRPC_PROTOBUF_PROTOC_EXECUTABLE $<TARGET_FILE:protobuf::protoc>)
++      set(_gRPC_PROTOBUF_PROTOC $ENV{PROTOC_BIN})
++      set(_gRPC_PROTOBUF_PROTOC_EXECUTABLE $ENV{PROTOC_BIN})
+     else()
+-      set(_gRPC_PROTOBUF_PROTOC ${PROTOBUF_PROTOC_EXECUTABLE})
+-      set(_gRPC_PROTOBUF_PROTOC_EXECUTABLE ${PROTOBUF_PROTOC_EXECUTABLE})
++      set(_gRPC_PROTOBUF_PROTOC $ENV{PROTOC_BIN})
++      set(_gRPC_PROTOBUF_PROTOC_EXECUTABLE $ENV{PROTOC_BIN})
+     endif()
+     set(_gRPC_PROTOBUF_INCLUDE_DIR ${PROTOBUF_INCLUDE_DIRS})
+     set(_gRPC_FIND_PROTOBUF "if(NOT Protobuf_FOUND AND NOT PROTOBUF_FOUND)\n  find_package(Protobuf ${gRPC_PROTOBUF_PACKAGE_TYPE})\nendif()")
+diff -Naur a/cmake/ssl.cmake b/cmake/ssl.cmake
+--- a/cmake/ssl.cmake
++++ b/cmake/ssl.cmake
+@@ -44,8 +44,8 @@
+   # See https://cmake.org/cmake/help/v3.6/module/FindOpenSSL.html
+   find_package(OpenSSL REQUIRED)
+   
+-  if(TARGET OpenSSL::SSL)
+-    set(_gRPC_SSL_LIBRARIES OpenSSL::SSL OpenSSL::Crypto)
++  if(TARGET OpenSSL::OpenSSL)
++    set(_gRPC_SSL_LIBRARIES OpenSSL::OpenSSL)
+   else()
+     set(_gRPC_SSL_LIBRARIES ${OPENSSL_LIBRARIES})
+   endif()
+diff -Naur a/CMakeLists.txt b/CMakeLists.txt
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -182,7 +182,7 @@
+     return()
+   endif()
+ 
+-  set(_protobuf_include_path -I . -I ${_gRPC_PROTOBUF_WELLKNOWN_INCLUDE_DIR})
++  set(_protobuf_include_path -I . ${_gRPC_PROTOBUF_WELLKNOWN_INCLUDE_DIR})
+   foreach(FIL ${ARGN})
+     get_filename_component(ABS_FIL ${FIL} ABSOLUTE)
+     get_filename_component(FIL_WE ${FIL} NAME_WE)

@@ -13,7 +13,7 @@ class grpcConan(ConanFile):
     author = "Bincrafters <bincrafters@gmail.com>"
     license = "Apache-2.0"
     exports = ["LICENSE.md"]
-    exports_sources = ["CMakeLists.txt"]
+    exports_sources = ["CMakeLists.txt", "grpc.patch"]
     generators = "cmake", "cmake_find_package"
     short_paths = True  # Otherwise some folders go out of the 260 chars path length scope rapidly (on windows)
 
@@ -33,12 +33,13 @@ class grpcConan(ConanFile):
     _source_subfolder = "source_subfolder"
     _build_subfolder = "build_subfolder"
 
-    def requirements(self):
-        self.requires.add("zlib/1.2.11")
-        self.requires.add("openssl/1.0.2r")
-        self.requires.add("protobuf/3.9.1")
-        self.requires.add("protoc/3.9.1")
-        self.requires.add("c-ares/1.15.0")
+    requires = (
+        "zlib/1.2.11",
+        "openssl/1.0.2r",
+        "protobuf/3.9.1",
+        "protoc/3.9.1",
+        "c-ares/1.15.0" 
+    )
 
     def configure(self):
         if self.settings.os == "Windows" and self.settings.compiler == "Visual Studio":
@@ -56,11 +57,7 @@ class grpcConan(ConanFile):
         cmake_path = os.path.join(self._source_subfolder, "CMakeLists.txt")
 
         # See #5
-        tools.replace_in_file(cmake_path, "_gRPC_PROTOBUF_LIBRARIES", "CONAN_LIBS_PROTOBUF")
-
-        # bring find_package in cares.cmake to work with cmake_find_package generator
-        cares_cmake_path = os.path.join(self._source_subfolder, "cmake", "cares.cmake")
-        tools.replace_in_file(cares_cmake_path, "find_package(c-ares REQUIRED CONFIG)", "find_package(c-ares REQUIRED)")
+        tools.replace_in_file(cmake_path, "_gRPC_PROTOBUF_LIBRARIES", "CONAN_LIBS_PROTOBUF")        
 
         # Parts which should be options:
         # grpc_cronet
@@ -121,6 +118,7 @@ class grpcConan(ConanFile):
         return cmake
 
     def build(self):
+        tools.patch(base_path=self._source_subfolder, patch_file="grpc.patch")
         cmake = self._configure_cmake()
         cmake.build()
 
