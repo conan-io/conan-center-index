@@ -18,7 +18,7 @@ endif()
 # Find Protobuf installation
 # Looks for protobuf-config.cmake file installed by Protobuf's cmake installation.
 set(protobuf_MODULE_COMPATIBLE TRUE)
-find_package(Protobuf CONFIG REQUIRED)
+find_package(Protobuf REQUIRED)
 message(STATUS "Using protobuf ${protobuf_VERSION}")
 
 set(_PROTOBUF_LIBPROTOBUF protobuf::libprotobuf)
@@ -26,8 +26,9 @@ set(_PROTOBUF_PROTOC $<TARGET_FILE:protobuf::protoc>)
 
 # Find gRPC installation
 # Looks for gRPCConfig.cmake file installed by gRPC's cmake installation.
-find_package(protoc CONFIG REQUIRED)
-find_package(gRPC CONFIG REQUIRED)
+#find_package(protoc REQUIRED)
+set(_PROTOBUF_PROTOC $ENV{PROTOC_BIN}")
+find_package(gRPC REQUIRED)
 message(STATUS "Using gRPC ${gRPC_VERSION}")
 
 set(_GRPC_GRPCPP_UNSECURE gRPC::grpc++_unsecure)
