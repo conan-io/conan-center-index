@@ -1,0 +1,26 @@
+#!/usr/bin/env bash
+
+ALL_ARGS=$@
+
+BUILD=no
+for i in "$@":
+do
+  case $i in
+    --build)
+    BUILD=yes
+    ;;
+    *)
+    ;;
+  esac
+done
+
+if [ $BUILD == "yes" ]; then
+  cmake "$@"
+else
+  # TODO might want to make this output configurabel  
+  # echo "*************************!!!!!!"
+  fix_cmake_flags="-DCMAKE_FIND_ROOT_PATH_MODE_PROGRAM=BOTH -DCMAKE_FIND_ROOT_PATH_MODE_INCLUDE=BOTH -DCMAKE_FIND_ROOT_PATH_MODE_LIBRARY=BOTH -DCMAKE_FIND_ROOT_PATH_MODE_PACKAGE=NEVER"
+  cmake_call="cmake $@ ${CONAN_USER_CMAKE_FLAGS} ${fix_cmake_flags}"
+  # echo ${cmake_call}
+  ${cmake_call}
+fi
