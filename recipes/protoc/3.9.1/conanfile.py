@@ -52,8 +52,6 @@ class ProtocConanFile(ConanFile):
         cmake.install()
 
     def package_id(self):
-        del self.info.settings.compiler
-        del self.info.settings.arch
         self.info.include_build_settings()
 
     def package_info(self):
