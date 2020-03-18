@@ -7,7 +7,7 @@ import os
 class NCursesConan(ConanFile):
     name = "ncurses"
     description = "The ncurses (new curses) library is a free software emulation of curses in System V Release 4.0 (SVr4), and more"
-    topics = ("conan", "bitcoin", "blockchain", "cryptocurrency", "hash", "p2p")
+    topics = ("conan", "ncurses", "terminal", "screen", "tui")
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://www.gnu.org/software/ncurses"
     license = "X11"
