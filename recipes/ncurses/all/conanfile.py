@@ -17,6 +17,7 @@ class NCursesConan(ConanFile):
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
+        "with_cxx": [True, False],
         "with_pcre2": [True, False],
         "with_reentrant": [True, False],
         "with_widec": [True, False],
@@ -24,6 +25,7 @@ class NCursesConan(ConanFile):
     default_options = {
         "shared": False,
         "fPIC": True,
+        "with_cxx": True,
         "with_pcre2": False,
         "with_reentrant": False,
         "with_widec": False,
@@ -70,9 +72,17 @@ class NCursesConan(ConanFile):
         host = None
         conf_args = []
         if self.options.shared:
-            conf_args.extend(["--with-shared", "--with-cxx-shared", "--without-normal"])
+            conf_args.extend(["--with-shared", "--without-normal"])
         else:
-            conf_args.extend(["--without-shared", "--without-cxx-shared", "--with-normal"])
+            conf_args.extend(["--without-shared", "--with-normal"])
+        if self.options.with_cxx:
+            conf_args.append("--with-cxx-binding")
+            if self.options.shared:
+                conf_args.append("--with-cxx-shared")
+            else:
+                conf_args.append("--without-cxx-shared")
+        else:
+            conf_args.append("--without-cxx-binding")
         conf_args.extend([
             "--enable-reentrant" if self.options.with_reentrant else "--disable-reentrant",
             "--enable-widec" if self.options.with_widec else "--disable-widec",
@@ -174,7 +184,10 @@ class NCursesConan(ConanFile):
 
     @property
     def _libs(self):
-        libs = ["ncurses++", "form", "menu", "panel", "ncurses"]
+        libs = []
+        if self.options.with_cxx:
+            libs.append("ncurses++")
+        libs.extend(["form", "menu", "panel", "ncurses"])
         return list(l+self._lib_suffix for l in libs)
 
     def package_info(self):
