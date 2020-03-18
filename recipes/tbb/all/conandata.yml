@@ -1,7 +1,10 @@
 sources:
   "2019_u9":
-    url: "https://github.com/intel/tbb/archive/2019_U9.tar.gz"
+    url: "https://github.com/oneapi-src/oneTBB/archive/2019_U9.tar.gz"
     sha256: "3f5ea81b9caa195f1967a599036b473b2e7c347117330cda99b79cfcf5b77c84"
   "2020.0":
-    url: "https://github.com/intel/tbb/archive/v2020.0.tar.gz"
+    url: "https://github.com/oneapi-src/oneTBB/archive/2020.tar.gz"
     sha256: "57714f2d2cf33935db33cee93af57eb3ecd5a7bef40c1fb7ca4a41d79684b118"
+  "2020_u1":
+    url: "https://github.com/oneapi-src/oneTBB/archive/2020_U1.tar.gz"
+    sha256: "d80ca22c224ab7ef913dfae72c23fc1434b6aa46bfd472916d8c874c90881f5e" 
