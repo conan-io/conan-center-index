@@ -152,7 +152,7 @@ class NCursesConan(ConanFile):
 
     @property
     def _major_version(self):
-        return self.version.split(".")[0]
+        return tools.Version(self.version).major
 
     def package(self):
         self.copy("COPYING", src=self._source_subfolder, dst="licenses")
