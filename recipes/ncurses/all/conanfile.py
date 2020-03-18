@@ -41,8 +41,6 @@ class NCursesConan(ConanFile):
 
     def configure(self):
         if self.settings.compiler == "Visual Studio":
-            if self.options.shared:
-                raise ConanInvalidConfiguration("shared ncurses builds on Windows are not supported")
             if self.options.with_widec:
                 raise ConanInvalidConfiguration("with_widec is unsupported for Visual Studio")
         if self.options.shared:
@@ -68,10 +66,6 @@ class NCursesConan(ConanFile):
         if self._autotools:
             return self._autotools
         self._autotools = AutoToolsBuildEnvironment(self, win_bash=tools.os_info.is_windows)
-        if self.settings.os == "Windows":
-            self._autotools.defines.append("_WIN32")
-            if self.settings.arch == "x86_64":
-                self._autotools.defines.append("_WIN64")
         build = None
         host = None
         conf_args = []
@@ -105,6 +99,9 @@ class NCursesConan(ConanFile):
                 "--enable-interop",
             ])
         if self.settings.compiler == "Visual Studio":
+            self._autotools.defines.append("_WIN32")
+            if self.settings.arch == "x86_64":
+                self._autotools.defines.append("_WIN64")
             conf_args.extend([
                 "ac_cv_func_getopt=yes",
             ])
@@ -141,7 +138,7 @@ class NCursesConan(ConanFile):
         self._patch_sources()
         with self._build_context():
             autotools = self._configure_autotools()
-            autotools.make(target="libs" if self.settings.os == "Windows" else None)
+            autotools.make(target="libs" if self.settings.compiler == "Visual Studio" else None)
 
     @property
     def _major_version(self):
@@ -151,14 +148,9 @@ class NCursesConan(ConanFile):
         self.copy("COPYING", src=self._source_subfolder, dst="licenses")
         with self._build_context():
             autotools = AutoToolsBuildEnvironment(self, win_bash=tools.os_info.is_windows)
-            autotools.make(target="install.libs" if self.settings.os == "Windows" else "install")
+            autotools.make(target="install.libs" if self.settings.compiler == "Visual Studio" else "install")
 
             os.unlink(os.path.join(self.package_folder, "bin", "ncurses{}{}-config".format(self._suffix, self._major_version)))
-
-    @property
-    def _libs(self):
-        libs = ["ncurses++", "form", "menu", "panel", "ncurses"]
-        return list(l+self._suffix for l in libs)
 
     @property
     def _suffix(self):
@@ -169,12 +161,26 @@ class NCursesConan(ConanFile):
             res += "w"
         return res
 
+    @property
+    def _lib_suffix(self):
+        res = self._suffix
+        if self.options.shared:
+            if self.settings.os == "Windows":
+                if self.settings.compiler == "Visual Studio":
+                    res += ".dll.lib"
+                else:
+                    res += ".dll.a"
+        return res
+
+    @property
+    def _libs(self):
+        libs = ["ncurses++", "form", "menu", "panel", "ncurses"]
+        return list(l+self._lib_suffix for l in libs)
 
     def package_info(self):
         self.cpp_info.includedirs.append(os.path.join("include", "ncurses" + self._suffix))
         self.cpp_info.libs = self._libs
-        if self.options.shared:
+        if not self.options.shared:
+            self.cpp_info.defines = ["NCURSES_STATIC"]
             if self.settings.os == "Linux":
                 self.cpp_info.system_libs = ["dl", "m"]
-        else:
-            self.cpp_info.defines = ["NCURSES_STATIC"]
