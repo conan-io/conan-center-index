@@ -23,7 +23,7 @@ jobs:
     strategy:
       matrix:
         build: ['linux-gcc4.8', 'linux-gcc7']
-        c-ares_versions: ['1.15.0']
+        c-ares_versions: ['1.14.0', '1.15.0']
         include:
           - build: 'linux-gcc4.8'
             os: 'ubuntu-latest'
