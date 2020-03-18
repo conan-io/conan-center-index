@@ -53,7 +53,7 @@ that have future-proof scalability"""
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
-        os.rename("{}-{}".format(self.name.lower(), self.version.upper()), self._source_subfolder)
+        os.rename("one{}-{}".format(self.name.upper(), self.version.upper()), self._source_subfolder)
 
         # Get the version of the current compiler instead of gcc
         linux_include = os.path.join(self._source_subfolder, "build", "linux.inc")
@@ -75,7 +75,7 @@ that have future-proof scalability"""
             else:
                 os.environ[name] = value
 
-        if self.version == "2020.0" and self.settings.build_type == "Debug":
+        if self.version != "2019_u9" and self.settings.build_type == "Debug":
             tools.replace_in_file(os.path.join(self._source_subfolder, "Makefile"), "release", "debug")
 
         if self._is_msvc:
