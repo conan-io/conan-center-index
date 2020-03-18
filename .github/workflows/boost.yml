@@ -23,7 +23,7 @@ jobs:
     strategy:
       matrix:
         build: ['linux-gcc4.8', 'linux-gcc7', 'linux-gcc9', 'windows-2019-release', 'windows-2019-debug', 'macos']
-        boost_versions: ['1.64.0', '1.69.0']
+        boost_versions: ['1.69.0']
         include:
           - build: 'linux-gcc4.8'
             os: 'ubuntu-latest'
