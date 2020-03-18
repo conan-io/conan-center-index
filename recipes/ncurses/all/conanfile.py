@@ -47,6 +47,9 @@ class NCursesConan(ConanFile):
                 raise ConanInvalidConfiguration("with_widec is unsupported for Visual Studio")
         if self.options.shared:
             del self.options.fPIC
+        if not self.options.with_cxx:
+            del self.settings.compiler.libcxx
+            del self.settings.compiler.cppstd
 
     def requirements(self):
         if self.options.with_pcre2:
