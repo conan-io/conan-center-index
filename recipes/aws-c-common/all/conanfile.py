@@ -65,4 +65,7 @@ class AwsCCommon(ConanFile):
         self.cpp_info.libs = ["aws-c-common"]
         if self.settings.os == "Linux":
             self.cpp_info.system_libs = ["m", "pthread", "rt"]
+        if not self.options.shared:
+            if tools.is_apple_os(self.settings.os):
+                self.cpp_info.frameworks = ["CoreFoundation"]
         self.cpp_info.builddirs = [os.path.join("lib", "cmake")]
