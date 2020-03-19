@@ -49,12 +49,7 @@ class ProtocConanFile(ConanFile):
     def package(self):
         self.copy("LICENSE", dst="licenses", src=self._source_subfolder)
         cmake = self._configure_cmake()
-        cmake.install()
-
-    def package_id(self):
-        del self.info.settings.compiler
-        del self.info.settings.arch
-        self.info.include_build_settings()
+        cmake.install() 
 
     def package_info(self):
         bindir = os.path.join(self.package_folder, "bin")

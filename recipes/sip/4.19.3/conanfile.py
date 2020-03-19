@@ -24,8 +24,8 @@ class SipConan(ConanFile):
         if hasattr(pip, "main"):
             pip.main(["install", "mercurial"])
         else:
-            from pip._internal import main
-            main.main(['install', "mercurial"])
+            from pip._internal import main as sipmain
+            sipmain(['install', "mercurial"])
         if tools.os_info.is_windows:
             installer = tools.SystemPackageTool(tool=tools.ChocolateyTool())
             installer.install("winflexbison3")
@@ -37,7 +37,7 @@ class SipConan(ConanFile):
     def configure(self):
         del self.settings.compiler.libcxx
         del self.settings.compiler.cppstd
-        
+
     def source(self):
         self.run("hg clone {url} {folder}".format(url = self.url, folder = self._source_subfolder))
         with tools.chdir(self._source_subfolder):

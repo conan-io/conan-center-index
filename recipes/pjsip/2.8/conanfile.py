@@ -26,7 +26,7 @@ class PjsipConan(ConanFile):
                "disableSpeexAec": [True, False],
                "fPIC": [True, False]}
     # if no OpenSSL is found, pjsip might try to use GnuTLS
-    default_options = {"shared": False, "SSL": True, "armv7l": True, "disableSpeexAec":True, "fPIC": True}   
+    default_options = {"shared": False, "SSL": True, "armv7l": True, "disableSpeexAec":True, "fPIC": True}
     generators = "cmake"
     exports = "LICENSE"
     _autotools = None
@@ -98,13 +98,13 @@ class PjsipConan(ConanFile):
             self.output.info("autotools.vars: %s" % self._autotools.vars)
 
             #with tools.environment_append({"DYLD_LIBRARY_PATH": self._autotools.library_paths}):
-            #    self.run("DYLD_LIBRARY_PATH=%s ./configure --enable-shared" % os.environ['DYLD_LIBRARY_PATH'])  
+            #    self.run("DYLD_LIBRARY_PATH=%s ./configure --enable-shared" % os.environ['DYLD_LIBRARY_PATH'])
             #with tools.environment_append(self._autotools.vars):
             #    self.run("./configure --enable-shared")
             #    self.run("./configure '--enable-shared' '--prefix=/Users/jens/Develop/totemic/conan-pjsip/tmp/source/package' '--bindir=${prefix}/bin' '--sbindir=${prefix}/bin' '--libexecdir=${prefix}/bin' '--libdir=${prefix}/lib' '--includedir=${prefix}/include' '--oldincludedir=${prefix}/include' '--datarootdir=${prefix}/share' --build=x86_64-apple-darwin --host=x86_64-apple-darwin")
 
             copied_files = []
-            # HACK: on OSX, if we compile using shared ssl libraries, a test program 
+            # HACK: on OSX, if we compile using shared ssl libraries, a test program
             # compiled by autoconfig does not find the dlyb files in its path, even if
             # we set the DYLD_LIBRARY_PATH correctly, propbably because sub process don't
             # inherit it. To fix it, we simply copy the shared libraries into the build
@@ -167,22 +167,8 @@ class PjsipConan(ConanFile):
         self.output.info("package info file: " + pkgconfigpath)
         with tools.environment_append({'PKG_CONFIG_PATH': pkgconfigpath}):
             pkg_config = tools.PkgConfig("libpjproject")
-            self.output.info("PKG_libs: %s" % pkg_config.libs)
-            self.output.info("PKG_libs_only_L: %s" % pkg_config.libs_only_L)
-            self.output.info("PKG_libs_only_l: %s" % pkg_config.libs_only_l)
-            self.output.info("PKG_libs_only_other: %s" % pkg_config.libs_only_other)
-            self.output.info("PKG_cflags: %s" % pkg_config.cflags)
-            self.output.info("PKG_cflags_only_I: %s" % pkg_config.cflags_only_I)
-            self.output.info("PKG_variables: %s" % pkg_config.variables)
-
             self.copy_cleaned(pkg_config.libs_only_L, "-L", self.cpp_info.lib_paths, [])
-            self.output.info("lib_paths %s" % self.cpp_info.lib_paths)
-
             # exclude all libraries from dependencies here, they are separately included
             self.copy_cleaned(pkg_config.libs_only_l, "-l", self.cpp_info.libs, excluded_dep_libs) #["ssl", "crypto", "z"]
-            self.output.info("libs: %s" % self.cpp_info.libs)
-            self.output.info("libs excluded: %s" % excluded_dep_libs)
-
             self.copy_prefix_merged(pkg_config.libs_only_other, "-framework", self.cpp_info.exelinkflags)
-            self.output.info("exelinkflags: %s" % self.cpp_info.exelinkflags)
             self.cpp_info.sharedlinkflags = self.cpp_info.exelinkflags
