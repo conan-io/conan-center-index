@@ -50,7 +50,8 @@ class EtcdGrpcConan(ConanFile):
         return cmake
 
     def build(self):
-        protoc_path = self.env_info.PROTOC_BIN
+        protoc_module = self.deps_cpp_info["protoc"]
+        protoc_path = os.path.join(protoc_module.rootpath, protoc_module.bindirs[0], "protoc")
 
         grpc_module = self.deps_cpp_info["grpc"]
         grpc_cpp_plugin_path = os.path.join(grpc_module.rootpath, grpc_module.bindirs[0], "grpc_cpp_plugin")
