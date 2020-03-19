@@ -8,3 +8,6 @@ sources:
   2.11.1:
     url: https://github.com/catchorg/Catch2/archive/v2.11.1.tar.gz
     sha256: 9af06ca5b10362620c6c9c729821367e1aeb0f76adfc7bc3a468da83db3c50c6
+  2.11.2:
+    url: https://github.com/catchorg/Catch2/archive/v2.11.1.tar.gz
+    sha256: a96203fa531092375678ad2d81c43317ee58c684787f24b2a55748f6c6839799
