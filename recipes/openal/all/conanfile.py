@@ -60,7 +60,7 @@ class OpenALConan(ConanFile):
 
     def package_info(self):
         if self.settings.os == "Windows":
-            self.cpp_info.libs = ["OpenAL32", 'winmm']
+            self.cpp_info.libs = ["OpenAL32", 'winmm', 'OLE32', 'Shell32']
         else:
             self.cpp_info.libs = ["openal"]
         if self.settings.os == 'Linux':
