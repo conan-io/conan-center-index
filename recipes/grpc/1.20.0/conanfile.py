@@ -13,7 +13,7 @@ class grpcConan(ConanFile):
     author = "Bincrafters <bincrafters@gmail.com>"
     license = "Apache-2.0"
     exports = ["LICENSE.md"]
-    exports_sources = ["CMakeLists.txt", "grpc.patch"]
+    exports_sources = ["CMakeLists.txt", "grpc.patch", "gettid.patch"]
     generators = "cmake", "cmake_find_package"
     short_paths = True  # Otherwise some folders go out of the 260 chars path length scope rapidly (on windows)
 
@@ -34,7 +34,7 @@ class grpcConan(ConanFile):
     _build_subfolder = "build_subfolder"
 
     requires = (
-        "zlib/1.2.11",
+        "zlib/1.2.11@conan/stable",
         "openssl/1.0.2r",
         "protobuf/3.9.1",
         "protoc/3.9.1",
@@ -57,7 +57,13 @@ class grpcConan(ConanFile):
         cmake_path = os.path.join(self._source_subfolder, "CMakeLists.txt")
 
         # See #5
-        tools.replace_in_file(cmake_path, "_gRPC_PROTOBUF_LIBRARIES", "CONAN_LIBS_PROTOBUF")        
+        tools.replace_in_file(cmake_path, "_gRPC_PROTOBUF_LIBRARIES", "CONAN_LIBS_PROTOBUF")  
+
+        # rename gettid() function, see https://github.com/grpc/grpc/pull/18950/commits/57586a1ca7f17b1916aed3dea4ff8de872dbf853
+        tools.patch(base_path=self._source_subfolder, patch_file="gettid.patch")
+
+        # fix library names in cmake files for using cmake_find_package generator
+        tools.patch(base_path=self._source_subfolder, patch_file="grpc.patch")      
 
         # Parts which should be options:
         # grpc_cronet
@@ -117,8 +123,7 @@ class grpcConan(ConanFile):
         cmake.configure(build_folder=self._build_subfolder)
         return cmake
 
-    def build(self):
-        tools.patch(base_path=self._source_subfolder, patch_file="grpc.patch")
+    def build(self):        
         cmake = self._configure_cmake()
         cmake.build()
 
