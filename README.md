@@ -1,5 +1,7 @@
 
-# Conan-Center Index
+# ConanCenter Index
+
+![ConanCenter banner](https://conan.io/center/img/conan-logo.85680d1e.png)
 
 [This repository](https://github.com/conan-io/conan-center-index):
 
