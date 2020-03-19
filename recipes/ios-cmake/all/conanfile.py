@@ -34,6 +34,7 @@ class IosCMakeConan(ConanFile):
     url = "https://github.com/leetal/ios-cmake"
     exports_sources =  "cmake-wrapper"
 
+    @property
     def _source_subfolder(self):
         return os.path.join(self.source_folder, "source_subfolder")
 
@@ -44,17 +45,16 @@ class IosCMakeConan(ConanFile):
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
-        os.rename("ios-cmake-{}".format(self.version), self._source_subfolder())
+        os.rename("ios-cmake-{}".format(self.version), self._source_subfolder)
 
     def build(self):
         pass # there is nothign to build
 
     def package(self):
         self.copy("cmake-wrapper")
-        self.copy("ios.toolchain.cmake", src=self._source_subfolder(),  dst="ios-cmake", keep_path=False)
+        self.copy("ios.toolchain.cmake", src=self._source_subfolder,  dst="ios-cmake", keep_path=False)
 
     def package_info(self):
-
         arch_flag = self.settings.arch
         if arch_flag == "armv8":
             arch_flag = "arm64"
@@ -74,10 +74,10 @@ class IosCMakeConan(ConanFile):
         self.cpp_info.builddirs = ["ios-cmake"]
 
         self.env_info.CONAN_USER_CMAKE_FLAGS = cmake_flags
-        self.output.info('Setting toolchain options to: %s' % cmake_flags)
+        self.output.info("Setting toolchain options to: {}".format(cmake_flags))
         cmake_wrapper = os.path.join(self.package_folder, "cmake-wrapper")
         self._chmod_plus_x(cmake_wrapper)
-        self.output.info('Setting CONAN_CMAKE_PROGRAM to: %s' % cmake_wrapper)
+        self.output.info("Setting CONAN_CMAKE_PROGRAM to: {}".format(cmake_flags))
         self.env_info.CONAN_CMAKE_PROGRAM = cmake_wrapper
         tool_chain = os.path.join(self.package_folder,
                                   "ios-cmake",
