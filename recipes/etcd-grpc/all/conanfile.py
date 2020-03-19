@@ -11,14 +11,14 @@ class EtcdGrpcConan(ConanFile):
     homepage = "https://github.com/trassir/etcd-grpc"
     generators = "cmake"
 
-    settings = "os", "arch", "compiler"
+    settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
         "fPIC": [True, False]
     }
     default_options = {
-	"shared": True,
-        "fPIC": True
+        "shared": True,
+      "fPIC": True
     }
 
     _source_subfolder = "source_subfolder"
@@ -50,8 +50,7 @@ class EtcdGrpcConan(ConanFile):
         return cmake
 
     def build(self):
-        protoc_module = self.deps_cpp_info["protoc"]
-        protoc_path = os.path.join(protoc_module.rootpath, protoc_module.bindirs[0], "protoc")
+        protoc_path = self.env_info.PROTOC_BIN
 
         grpc_module = self.deps_cpp_info["grpc"]
         grpc_cpp_plugin_path = os.path.join(grpc_module.rootpath, grpc_module.bindirs[0], "grpc_cpp_plugin")
