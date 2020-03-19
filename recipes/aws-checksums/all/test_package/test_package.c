@@ -1,16 +1,15 @@
 #include <aws/checksums/crc.h>
 
-#include <algorithm>
-#include <cstdlib>
-#include <cstdio>
-#include <vector>
+#include <stdlib.h>
+#include <stdio.h>
 
 #define LOG_LEVEL AWS_LOG_LEVEL_TRACE
 
 
-static int f() {
-    static int i = 0;
-    return i++;
+static int fill(uint8_t *buffer, size_t size) {
+    for(size_t i = 0; i < size; ++i) {
+        buffer[i] = i;
+    }
 }
 
 /**
@@ -22,9 +21,9 @@ static int f() {
 #define CRC32_REF 0x24650d57
 
 int main() {
-    std::vector<uint8_t> buffer(128);
-    std::generate(buffer.begin(), buffer.end(), f);
-    auto crc32 = aws_checksums_crc32(buffer.data(), buffer.size(), 0x0);
+    uint8_t buffer[128];
+    fill(buffer, sizeof(buffer));
+    int crc32 = aws_checksums_crc32(buffer, sizeof(buffer), 0x0);
 
     printf("reference crc32:  0x%8x\n", CRC32_REF);
     printf("calculated crc32: 0x%8x\n", crc32);
