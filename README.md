@@ -1,10 +1,9 @@
 
 ![JFrogConanCenter](assets/JFrogConanCenter.png)
 
-[This repository](https://github.com/conan-io/conan-center-index) in the index of recipes of the
-[ConanCenter](https://conan.io/center) repository.
+This is the source index of recipes of the [ConanCenter](https://conan.io/center) package repository.
 
-The repository includes a Continuous Integration system that will build automatically the Conan packages for the recipes submitted via
+This repository includes a Continuous Integration system that will build automatically the Conan packages for the recipes submitted via
 [Pull Request](https://github.com/conan-io/conan-center-index/pulls).
 
 
