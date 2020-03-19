@@ -1,5 +1,5 @@
 
-![JFrogConanCenter](assets/JFrogConanCenter.png)
+![JFrogConanCenter](assets/JFrogConanCenter.png | width=50)
 
 This is the source index of recipes of the [ConanCenter](https://conan.io/center) package repository.
 
