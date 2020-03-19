@@ -7,7 +7,7 @@ This repository includes a Continuous Integration system that will build automat
 [Pull Request](https://github.com/conan-io/conan-center-index/pulls).
 
 
-### You can learn how to contribute new recipes and how this build service works in [the wiki of the project](https://github.com/conan-io/conan-center-index/wiki)
+### You can learn how to contribute new recipes and how this build service works in [the wiki of the project](https://github.com/conan-io/conan-center-index/wiki).
 
 
 ### Reporting Issues
