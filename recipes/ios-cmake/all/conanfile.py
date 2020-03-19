@@ -31,7 +31,7 @@ class IosCMakeConan(ConanFile):
         "ios_target": "OS64COMBINED", 
     }
     description = "ios Cmake toolchain to (cross) compile macOS/iOS/watchOS/tvOS"
-    url = "https://github.com/leetal/ios-cmake"
+    topics = "conan", "apple", "ios", "cmake", "toolchain", "ios", "tvos", "watchos"
     exports_sources =  "cmake-wrapper"
 
     @property
