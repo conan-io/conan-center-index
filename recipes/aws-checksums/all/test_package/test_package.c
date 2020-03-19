@@ -7,7 +7,8 @@
 
 
 static int fill(uint8_t *buffer, size_t size) {
-    for(size_t i = 0; i < size; ++i) {
+    size_t i;
+    for(i = 0; i < size; ++i) {
         buffer[i] = i;
     }
 }
@@ -21,9 +22,10 @@ static int fill(uint8_t *buffer, size_t size) {
 #define CRC32_REF 0x24650d57
 
 int main() {
+    int crc32;
     uint8_t buffer[128];
     fill(buffer, sizeof(buffer));
-    int crc32 = aws_checksums_crc32(buffer, sizeof(buffer), 0x0);
+    crc32 = aws_checksums_crc32(buffer, sizeof(buffer), 0x0);
 
     printf("reference crc32:  0x%8x\n", CRC32_REF);
     printf("calculated crc32: 0x%8x\n", crc32);
