@@ -27,4 +27,4 @@ You can open an issue to:
     - If you open a Pull Request and get an unexpected error you might comment in the failing PR.
     - If the service or repository is down or failing, use the `[service]` tag in the title of a new issue to help identifying them.
 
-* If your issue is not appropriate for a public discussion, please contact us via e-mail at ``info@conan.io`. Thanks!
+* If your issue is not appropriate for a public discussion, please contact us via e-mail at `info@conan.io`. Thanks!
