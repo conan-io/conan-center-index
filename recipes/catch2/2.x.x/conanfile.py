@@ -12,6 +12,7 @@ class ConanRecipe(ConanFile):
     license = "BSL-1.0"
     settings = "os", "compiler", "build_type", "arch"
     generators = "cmake"
+    no_copy_source=True
     
     _cmake = None
     
@@ -39,10 +40,6 @@ class ConanRecipe(ConanFile):
             build_folder=self._build_subfolder
         )
         return self._cmake
-
-    def build(self):
-        cmake = self._configure_cmake()
-        cmake.build()
 
     def package(self):
         self.copy(pattern="LICENSE.txt", dst="licenses", src=self._source_subfolder)
