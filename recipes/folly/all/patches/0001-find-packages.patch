@@ -55,7 +55,7 @@ index 246ceac..385605e 100644
 -  FIND_LIBRARY(LIBGFLAGS_LIBRARY_DEBUG NAMES gflagsd gflags_staticd)
 -  FIND_LIBRARY(LIBGFLAGS_LIBRARY_RELEASE NAMES gflags gflags_static)
 +  if(CMAKE_SYSTEM_NAME STREQUAL "Windows")
-+     FIND_LIBRARY(LIBGFLAGS_LIBRARY_DEBUG NAMES gflagsd gflags_nothreads_staticd PATHS ${CONAN_GFLAGS_ROOT})
++     FIND_LIBRARY(LIBGFLAGS_LIBRARY_DEBUG NAMES gflagsd gflags_nothreads_staticd gflags_nothreads_static_debug PATHS ${CONAN_GFLAGS_ROOT})
 +     FIND_LIBRARY(LIBGFLAGS_LIBRARY_RELEASE NAMES gflags gflags_nothreads_static PATHS ${CONAN_GFLAGS_ROOT})
 +  else()
 +    FIND_LIBRARY(LIBGFLAGS_LIBRARY_DEBUG NAMES gflags gflags_nothreads_debug PATHS ${CONAN_GFLAGS_ROOT})
