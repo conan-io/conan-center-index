@@ -1,29 +1,29 @@
-name: double-conversion CI
+name: openssl CI
 
 on:
   pull_request:
     paths:
-      - 'recipes/double-conversion/**'
+      - 'recipes/openssl/**'
       - 'build.py'
-      - '.github/workflows/double-conversion.yml'
+      - '.github/workflows/openssl.yml'
   push:
     branches:
       - master
     paths:
-      - 'recipes/double-conversion/**'
+      - 'recipes/openssl/**'
       - 'build.py'
-      - '.github/workflows/double-conversion.yml'
+      - '.github/workflows/openssl.yml'
 
 env:
   CONAN_PASSWORD: ${{ secrets.BintrayApiKey }}
   IS_PURE_C: true
 
 jobs:
-  double-conversion:
+  openssl:
     strategy:
       matrix:
         build: ['linux-gcc4.8', 'linux-gcc7', 'linux-gcc9', 'windows-2019-release', 'windows-2019-debug', 'macos']
-        double-conversion_versions: ['3.1.5']
+        openssl_versions: ['1.0.2r', '1.1.0l', '1.1.1c', '1.1.1d']
         include:
           - build: 'linux-gcc4.8'
             os: 'ubuntu-latest'
@@ -86,7 +86,7 @@ jobs:
           install: custom
           # TODO: replace when https://github.com/conan-io/conan-package-tools/issues/479 will be fixed upstream
           custom-package: git+https://github.com/trassir/conan-package-tools@fix-479-trassir
-          work-dir: sources/recipes/double-conversion/all
+          work-dir: sources/recipes/openssl/ALL
           build-script: ../../../build.py
           compiler: ${{ matrix.compiler }}
           compiler-versions: ${{ matrix.compiler_version }}
@@ -95,5 +95,5 @@ jobs:
           CONAN_VISUAL_RUNTIMES: ${{ matrix.vs_runtimes }}
           CONAN_ARCHS: ${{ matrix.archs }}
           CONAN_BUILD_TYPES: ${{ matrix.build_types }}
-          CONAN_REFERENCE: double-conversion/${{ matrix.double-conversion_versions }}
+          CONAN_REFERENCE: openssl/${{ matrix.openssl_versions }}
           DEVELOPER_DIR: /Applications/Xcode_${{ matrix.xcode_version }}.app/Contents/Developer
