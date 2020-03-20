@@ -16,6 +16,7 @@ class CMakeConan(ConanFile):
     settings = "os_build", "arch_build", "compiler", "arch"
 
     _source_subfolder = "source_subfolder"
+    _cmake = None
 
     @property
     def _arch(self):
@@ -38,13 +39,14 @@ class CMakeConan(ConanFile):
         os.rename(extracted_dir, self._source_subfolder)
 
     def _configure_cmake(self):
-        cmake = CMake(self)
-        cmake.definitions["CMAKE_BOOTSTRAP"] = False
-        if self.settings.os_build == "Linux":
-            cmake.definitions["OPENSSL_USE_STATIC_LIBS"] = True
-            cmake.definitions["CMAKE_EXE_LINKER_FLAGS"] = "-lz"
-        cmake.configure(source_dir=self._source_subfolder)
-        return cmake
+        if not self._cmake:
+            self._cmake = CMake(self)
+            self._cmake.definitions["CMAKE_BOOTSTRAP"] = False
+            if self.settings.os_build == "Linux":
+                self._cmake.definitions["OPENSSL_USE_STATIC_LIBS"] = True
+                self._cmake.definitions["CMAKE_EXE_LINKER_FLAGS"] = "-lz"
+            self._cmake.configure(source_dir=self._source_subfolder)
+        return self._cmake
 
     def build(self):
         if self.settings.os_build == "Linux":
