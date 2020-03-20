@@ -3,7 +3,7 @@ name: sqlite3 CI
 on:
   pull_request:
     paths:
-      - 'recipes/sqlite3/**'
+      - 'recipes/sqlite3/all/**'
       - 'build.py'
       - '.github/workflows/sqlite3.yml'
   push:
