@@ -3,14 +3,14 @@ name: libiconv CI
 on:
   pull_request:
     paths:
-      - 'recipes/libiconv/**'
+      - 'recipes/libiconv/all/**'
       - 'build.py'
       - '.github/workflows/libiconv.yml'
   push:
     branches:
       - master
     paths:
-      - 'recipes/libiconv/**'
+      - 'recipes/libiconv/all/**'
       - 'build.py'
       - '.github/workflows/libiconv.yml'
 
