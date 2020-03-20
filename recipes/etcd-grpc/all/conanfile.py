@@ -18,7 +18,7 @@ class EtcdGrpcConan(ConanFile):
     }
     default_options = {
         "shared": True,
-      "fPIC": True
+        "fPIC": True
     }
 
     _source_subfolder = "source_subfolder"
