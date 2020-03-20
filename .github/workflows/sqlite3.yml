@@ -10,7 +10,7 @@ on:
     branches:
       - master
     paths:
-      - 'recipes/sqlite3/**'
+      - 'recipes/sqlite3/all/**'
       - 'build.py'
       - '.github/workflows/sqlite3.yml'
 
