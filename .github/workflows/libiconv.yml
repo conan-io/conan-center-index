@@ -22,7 +22,7 @@ jobs:
   libiconv:
     strategy:
       matrix:
-        build: ['linux-gcc4.8', 'linux-gcc7', 'linux-gcc9', 'windows-2019-release', 'windows-2019-debug', 'macos']
+        build: ['linux-gcc4.8', 'linux-gcc7', 'linux-gcc9', 'macos']
         libiconv_versions: ['1.15']
         include:
           - build: 'linux-gcc4.8'
@@ -45,21 +45,7 @@ jobs:
             compiler_version: '9'
             docker_image: 'conanio/gcc9'
             build_types: 'Release,Debug'
-            archs: 'x86,x86_64'
-          - build: 'windows-2019-release'
-            os: 'windows-2019'
-            build_types: 'Release'
-            compiler: 'vs'
-            compiler_version: '16'
-            vs_runtimes: 'MD,MT'
-            archs: 'x86_64'
-          - build: 'windows-2019-debug'
-            os: 'windows-2019'
-            build_types: 'Debug'
-            compiler: 'vs'
-            compiler_version: '16'
-            vs_runtimes: 'MDd,MTd'
-            archs: 'x86_64'
+            archs: 'x86,x86_64'          
           - build: 'macos'
             os: 'macos-latest'
             build_types: 'Release,Debug'
