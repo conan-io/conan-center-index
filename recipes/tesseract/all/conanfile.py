@@ -1,6 +1,8 @@
 import os
 import shutil
 from conans import ConanFile, CMake, tools
+from conans.model.version import Version
+from conans.errors import ConanInvalidConfiguration
 
 
 class TesseractConan(ConanFile):
@@ -34,6 +36,13 @@ class TesseractConan(ConanFile):
         if self.options.with_training:
             # do not enforce failure and allow user to build with system cairo, pango, fontconfig
             self.output.warn("*** Build with training is not yet supported, continue on your own")
+
+    def configure(self):
+        # Exclude old compilers not supported by tesseract
+        compiler_version = Version(str(self.settings.compiler.version))
+        if (self.settings.compiler == "gcc" and compiler_version < "5") or \
+                (self.settings.compiler == "clang" and compiler_version < "5"):
+          raise ConanInvalidConfiguration("Compiler is not supported")
 
     def _configure_cmake(self):
         if self._cmake:
