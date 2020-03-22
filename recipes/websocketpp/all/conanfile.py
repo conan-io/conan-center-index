@@ -39,20 +39,11 @@ class WebsocketPPConan(ConanFile):
 
     def package(self):
         self._patch_sources()
-        cmake = CMake(self)
-        cmake.configure()
-        cmake.install()
         self.copy(pattern="COPYING", dst="licenses", src=self._source_subfolder)
         # We have to copy the headers manually, since the current install() step in the 0.8.1 release doesn't do so.
         self.copy(pattern="*.hpp", dst="include/websocketpp", src=self._source_subfolder + '/websocketpp')
 
-    def package_info(self):
-        # https://github.com/zaphoyd/websocketpp/blob/0.8.1/CMakeLists.txt#L42-L47
-        if self.settings.os == "Windows":
-            self.cpp_info.builddirs.append(os.path.join(self.package_folder, 'cmake'))
-        else:
-            self.cpp_info.builddirs.append(os.path.join(self.package_folder, 'lib', 'cmake', 'websocketpp'))
-    
+    def package_info(self):    
         if self.options.asio == 'standalone':
             self.cpp_info.defines.extend(['ASIO_STANDALONE', '_WEBSOCKETPP_CPP11_STL_'])
 
