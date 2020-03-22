@@ -8,7 +8,7 @@ class WebsocketPPConan(ConanFile):
     topics = ("conan", "websocketpp", "websocket", "network", "web", "rfc6455")
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/zaphoyd/websocketpp"
-    license = "	BSD-3-Clause"
+    license = "BSD-3-Clause"
     settings = "os", "arch", "compiler", "build_type"
     exports_sources = ["CMakeLists.txt", 'patches/*']
     generators = ["cmake"]
@@ -40,7 +40,7 @@ class WebsocketPPConan(ConanFile):
     def package(self):
         self._patch_sources()
         self.copy(pattern="COPYING", dst="licenses", src=self._source_subfolder)
-        # We have to copy the headers manually, since the current install() step in the 0.8.1 release doesn't do so.
+        # We have to copy the headers manually, since the current cmake.install() step in the 0.8.1 release doesn't do so.
         self.copy(pattern="*.hpp", dst="include/websocketpp", src=self._source_subfolder + '/websocketpp')
 
     def package_info(self):    
