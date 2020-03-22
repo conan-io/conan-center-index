@@ -14,7 +14,6 @@ class WebsocketPPConan(ConanFile):
     generators = ["cmake"]
     options = {'asio': ['boost', 'standalone']}
     default_options = {'asio': 'boost'}
-    version = "0.8.1"
 
     @property
     def _source_subfolder(self):
@@ -48,7 +47,12 @@ class WebsocketPPConan(ConanFile):
         self.copy(pattern="*.hpp", dst="include/websocketpp", src=self._source_subfolder + '/websocketpp')
 
     def package_info(self):
-        self.cpp_info.builddirs.append(os.path.join(self.package_folder, 'cmake'))
+        # https://github.com/zaphoyd/websocketpp/blob/0.8.1/CMakeLists.txt#L42-L47
+        if self.settings.os == "Windows":
+            self.cpp_info.builddirs.append(os.path.join(self.package_folder, 'cmake'))
+        else:
+            self.cpp_info.builddirs.append(os.path.join(self.package_folder, 'lib', 'cmake', 'websocketpp'))
+    
         if self.options.asio == 'standalone':
             self.cpp_info.defines.extend(['ASIO_STANDALONE', '_WEBSOCKETPP_CPP11_STL_'])
 
