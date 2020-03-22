@@ -14,6 +14,7 @@ class WebsocketPPConan(ConanFile):
     generators = ["cmake"]
     options = {'asio': ['boost', 'standalone']}
     default_options = {'asio': 'boost'}
+    version = "0.8.1"
 
     @property
     def _source_subfolder(self):
@@ -37,13 +38,11 @@ class WebsocketPPConan(ConanFile):
         for patch in self.conan_data["patches"][self.version]:
             tools.patch(**patch)
 
-    def build(self):
+    def package(self):
         self._patch_sources()
         cmake = CMake(self)
         cmake.configure()
         cmake.install()
-
-    def package(self):
         self.copy(pattern="COPYING", dst="licenses", src=self._source_subfolder)
         # We have to copy the headers manually, since the current install() step in the 0.8.1 release doesn't do so.
         self.copy(pattern="*.hpp", dst="include/websocketpp", src=self._source_subfolder + '/websocketpp')
