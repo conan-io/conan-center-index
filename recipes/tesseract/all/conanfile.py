@@ -78,9 +78,9 @@ class TesseractConan(ConanFile):
             "${Leptonica_LIBRARIES}",
             "Leptonica::Leptonica")
 
-	def build(self):
-		self._patch_sources()
-		cmake = self._configure_cmake()
+    def build(self):
+        self._patch_sources()
+        cmake = self._configure_cmake()
         cmake.build()
 
     def package(self):
