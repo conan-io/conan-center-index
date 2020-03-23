@@ -70,6 +70,9 @@ class FollyConan(ConanFile):
             raise ConanInvalidConfiguration("Folly could not be built by apple-clang < 8.0")
         elif self.settings.os == "Macos" and self.options.shared:
             raise ConanInvalidConfiguration("Folly could not be built by apple-clang as shared library")
+        elif self.settings.os == "Windows" and \
+             self.options.shared:
+            raise ConanInvalidConfiguration("Folly could not be built on Windows as shared library")
 
     def requirements(self):
         if Version(self.version) >= "2019.01.01.00":
