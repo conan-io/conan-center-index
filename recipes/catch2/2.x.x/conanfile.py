@@ -13,7 +13,7 @@ class ConanRecipe(ConanFile):
     settings = "os", "compiler", "build_type", "arch"
     generators = "cmake"
     _source_subfolder = "source_subfolder"  # This will be a conflict
-    _build_subfolder = "build_subfolder"
+    _build_subfolder = "build_subfolder" # and this one too
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
