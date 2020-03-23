@@ -12,7 +12,7 @@ class ConanRecipe(ConanFile):
     license = "BSL-1.0"
     settings = "os", "compiler", "build_type", "arch"
     generators = "cmake"
-    _source_subfolder = "source_subfolder"
+    _source_subfolder = "source_subfolder"  # This will be a conflict
     _build_subfolder = "build_subfolder"
 
     def source(self):
