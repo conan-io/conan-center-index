@@ -48,6 +48,5 @@ class NlohmannJsonConan(ConanFile):
         except FileNotFoundError:
             pass
 
-
     def package_id(self):
         self.info.header_only()
