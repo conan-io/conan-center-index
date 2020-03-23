@@ -68,5 +68,7 @@ class LibkmlConan(ConanFile):
         # - kmldom is a dependency of kmlregionator, kmlconvenience and kmlengine
         # - kmlbase is a dependency of kmlregionator, kmlconvenience, kmlengine, kmldom and kmlxsd
         self.cpp_info.libs = ["kmlregionator", "kmlconvenience", "kmlengine", "kmldom", "kmlxsd", "kmlbase"]
+        if self.settings.os == "Linux":
+            self.cpp_info.system_libs.append("m")
         if self.settings.os == "Windows" and self.options.shared:
             self.cpp_info.defines.append("LIBKML_DLL")
