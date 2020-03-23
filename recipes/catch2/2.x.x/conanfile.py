@@ -12,8 +12,16 @@ class ConanRecipe(ConanFile):
     license = "BSL-1.0"
     settings = "os", "compiler", "build_type", "arch"
     generators = "cmake"
-    _source_subfolder = "source_subfolder"
-    _build_subfolder = "build_subfolder"
+    no_copy_source=True
+    
+    _cmake = None
+    
+    @property
+    def _source_subfolder(self):
+        return "source_subfolder"
+    @property
+    def _build_subfolder(self):
+        return "build_subfolder"
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
@@ -21,19 +29,17 @@ class ConanRecipe(ConanFile):
         os.rename(extracted_dir, self._source_subfolder)
 
     def _configure_cmake(self):
-        cmake = CMake(self)
-        cmake.definitions["BUILD_TESTING"] = "OFF"
-        cmake.definitions["CATCH_INSTALL_DOCS"] = "OFF"
-        cmake.definitions["CATCH_INSTALL_HELPERS"] = "ON"
-        cmake.configure(
+        if self._cmake:
+            return self._cmake
+        self._cmake = CMake(self)
+        self._cmake.definitions["BUILD_TESTING"] = "OFF"
+        self._cmake.definitions["CATCH_INSTALL_DOCS"] = "OFF"
+        self._cmake.definitions["CATCH_INSTALL_HELPERS"] = "ON"
+        self._cmake.configure(
             source_folder=self._source_subfolder,
             build_folder=self._build_subfolder
         )
-        return cmake
-
-    def build(self):
-        cmake = self._configure_cmake()
-        cmake.build()
+        return self._cmake
 
     def package(self):
         self.copy(pattern="LICENSE.txt", dst="licenses", src=self._source_subfolder)
