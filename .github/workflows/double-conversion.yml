@@ -3,14 +3,14 @@ name: double-conversion CI
 on:
   pull_request:
     paths:
-      - 'recipes/double-conversion/**'
+      - 'recipes/double-conversion/all/**'
       - 'build.py'
       - '.github/workflows/double-conversion.yml'
   push:
     branches:
       - master
     paths:
-      - 'recipes/double-conversion/**'
+      - 'recipes/double-conversion/all/**'
       - 'build.py'
       - '.github/workflows/double-conversion.yml'
 
