@@ -9,7 +9,7 @@ tab_width = 4
 trim_trailing_whitespace = true
 
 [*.py]
-max_line_length = 101
+max_line_length = 200
 
 [*.yml]
 tab_width = 2
