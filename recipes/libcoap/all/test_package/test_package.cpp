@@ -1,6 +1,8 @@
 #include "coap2/coap.h"
+#include <iostream>
 
-int main(int argc, char *argv[]) {
+int main() {
+  std::cout << "starting" << std::endl;
   coap_startup();
 
   // create CoAP context and a client session
@@ -8,6 +10,6 @@ int main(int argc, char *argv[]) {
 
   coap_free_context(ctx);
   coap_cleanup();
-
+  std::cout << "stopping" << std::endl;
   return 0;
 }
