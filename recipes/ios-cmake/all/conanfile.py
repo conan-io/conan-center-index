@@ -51,9 +51,12 @@ class IosCMakeConan(ConanFile):
         pass # there is nothign to build
 
     def package(self):
-        self.copy("cmake-wrapper")
-        self.copy("ios.toolchain.cmake", src=self._source_subfolder,  dst="ios-cmake", keep_path=False)
-        # TODO , adopt location, do the wrapper in a bin folder, and the toolcahin into lib/cmake/ios-cmake
+        self.copy("cmake-wrapper", dst="bin")
+        self.copy("ios.toolchain.cmake", 
+                    src=self._source_subfolder,  
+                    dst=os.path.join("lib", "cmake", "ios-cmake"), 
+                    keep_path=False)
+        self._chmod_plus_x(os.path.join(self.package_folder, "bin", "cmake-wrapper"))
 
     def package_info(self):
         arch_flag = self.settings.arch
@@ -72,18 +75,16 @@ class IosCMakeConan(ConanFile):
             self.options.ios_target, self.settings.os.version, arch_flag, cmake_options
         ) 
 
-        self.cpp_info.builddirs = ["ios-cmake"]
-
         self.env_info.CONAN_USER_CMAKE_FLAGS = cmake_flags
         self.output.info("Setting toolchain options to: {}".format(cmake_flags))
-        cmake_wrapper = os.path.join(self.package_folder, "cmake-wrapper")
-        self._chmod_plus_x(cmake_wrapper)
+        cmake_wrapper = os.path.join(self.package_folder, "bin", "cmake-wrapper")
         self.output.info("Setting CONAN_CMAKE_PROGRAM to: {}".format(cmake_flags))
         self.env_info.CONAN_CMAKE_PROGRAM = cmake_wrapper
         tool_chain = os.path.join(self.package_folder,
-                                  "ios-cmake",
-                                  "ios.toolchain.cmake"
-                                  )
+                                    "lib", 
+                                    "cmake", 
+                                    "ios-cmake",
+                                    "ios.toolchain.cmake")
         self.env_info.CONAN_CMAKE_TOOLCHAIN_FILE = tool_chain
 
     def package_id(self):
