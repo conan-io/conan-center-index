@@ -87,8 +87,7 @@ class LibCoapConan(ConanFile):
         cmake.build()
 
     def package(self):
-        self.copy("LICENSE", dst='licenses', src=os.path.join(
-            self._source_subfolder, "license"))
+        self.copy("LICENSE", src=self._source_subfolder, dst="licenses")
         cmake = self._configure_cmake()
         cmake.install()
         tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
