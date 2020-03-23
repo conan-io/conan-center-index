@@ -39,7 +39,7 @@ class TesseractConan(ConanFile):
 
     def configure(self):
         # Exclude old compilers not supported by tesseract
-        compiler_version = Version(self.settings.compiler.version)
+        compiler_version = Version(self.settings.compiler.version.value)
         if (self.settings.compiler == "gcc" and compiler_version < "5") or \
                 (self.settings.compiler == "clang" and compiler_version < "5"):
           raise ConanInvalidConfiguration("tesseract/{} requires Clang >= 5".format(self.version))
