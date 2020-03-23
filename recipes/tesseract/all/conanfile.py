@@ -32,24 +32,23 @@ class TesseractConan(ConanFile):
 
     def config_options(self):
         if self.settings.os == "Windows":
-            self.options.remove("fPIC")
+            del self.options.fPIC
         if self.options.with_training:
             # do not enforce failure and allow user to build with system cairo, pango, fontconfig
             self.output.warn("*** Build with training is not yet supported, continue on your own")
 
     def configure(self):
         # Exclude old compilers not supported by tesseract
-        compiler_version = Version(str(self.settings.compiler.version))
+        compiler_version = Version(self.settings.compiler.version)
         if (self.settings.compiler == "gcc" and compiler_version < "5") or \
                 (self.settings.compiler == "clang" and compiler_version < "5"):
-          raise ConanInvalidConfiguration("Compiler is not supported")
+          raise ConanInvalidConfiguration("tesseract/{} requires Clang >= 5".format(self.version))
 
     def _configure_cmake(self):
         if self._cmake:
             return self._cmake
         cmake = self._cmake = CMake(self)
         cmake.definitions['BUILD_TRAINING_TOOLS'] = self.options.with_training
-        cmake.definitions["BUILD_SHARED_LIBS"] = self.options.shared
         cmake.definitions["STATIC"] = not self.options.shared
         # Use CMake-based package build and dependency detection, not the pkg-config, cppan or SW
         cmake.definitions['CPPAN_BUILD'] = False
@@ -86,9 +85,9 @@ class TesseractConan(ConanFile):
         cmake = self._configure_cmake()
         cmake.install()
 
-        self.copy("LICENSE", src=self._source_subfolder, dst="licenses", ignore_case=True, keep_path=False)
+        self.copy("LICENSE", src=self._source_subfolder, dst="licenses")
         # remove man pages
-        shutil.rmtree(os.path.join(self.package_folder, 'share', 'man'), ignore_errors=True)
+        tools.rmdir(os.path.join(self.package_folder, 'share', 'man'))
         # remove binaries
         for ext in ['', '.exe']:
             try:
@@ -103,9 +102,9 @@ class TesseractConan(ConanFile):
     def package_info(self):
         self.cpp_info.libs = tools.collect_libs(self)
         if self.settings.os == "Linux":
-            self.cpp_info.libs.extend(["pthread"])
-        if self.settings.compiler == "Visual Studio":
+            self.cpp_info.system_libs = ["pthread"]
+        elif self.settings.compiler == "Visual Studio":
             if not self.options.shared:
-                self.cpp_info.libs.append('ws2_32')
+                self.cpp_info.system_libs = ["ws2_32"]
         self.cpp_info.names["cmake_find_package"] = "Tesseract"
         self.cpp_info.names["cmake_find_package_multi"] = "Tesseract"
