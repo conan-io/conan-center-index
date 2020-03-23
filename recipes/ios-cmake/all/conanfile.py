@@ -2,8 +2,8 @@
 from conans import ConanFile, tools
 
 import os
-import platform
-import copy
+#import platform
+#import copy
 
 
 class IosCMakeConan(ConanFile):
@@ -24,8 +24,8 @@ class IosCMakeConan(ConanFile):
                        "WATCHOSCOMBINED", "SIMULATOR_WATCHOS"]
     }
     default_options = {
-        "enable_bitcode": False,
-        "enable_arc": False,
+        "enable_bitcode": True,
+        "enable_arc": True,
         "enable_visibility": False,
         "enable_strict_try_compile": False,
         "ios_target": "OS64COMBINED", 
@@ -53,6 +53,7 @@ class IosCMakeConan(ConanFile):
     def package(self):
         self.copy("cmake-wrapper")
         self.copy("ios.toolchain.cmake", src=self._source_subfolder,  dst="ios-cmake", keep_path=False)
+        # TODO , adopt location, do the wrapper in a bin folder, and the toolcahin into lib/cmake/ios-cmake
 
     def package_info(self):
         arch_flag = self.settings.arch
