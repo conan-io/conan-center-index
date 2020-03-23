@@ -5,7 +5,7 @@ import os
 
 class ExpatConan(ConanFile):
     name = "expat"
-    description = "Recipe for Expat library"
+    description = "Fast streaming XML parser written in C."
     topics = ("conan", "expat", "xml", "parsing")
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/libexpat/libexpat"
