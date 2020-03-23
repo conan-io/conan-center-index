@@ -1,5 +1,4 @@
 from conans import ConanFile, CMake, tools
-from conans.tools import Version
 import os
 
 
@@ -38,7 +37,7 @@ class ExpatConan(ConanFile):
         if self._cmake:
             return self._cmake
         self._cmake = CMake(self)
-        if Version(self.version) < "2.2.8":
+        if tools.Version(self.version) < "2.2.8":
             self._cmake.definitions["BUILD_doc"] = "Off"
             self._cmake.definitions["BUILD_examples"] =  "Off"
             self._cmake.definitions["BUILD_shared"] = self.options.shared
