@@ -63,7 +63,7 @@ class TesseractConan(ConanFile):
         cmake.configure(build_folder=self._build_subfolder)
         return cmake
 
-    def build(self):
+    def _patch_sources(self):
         # Use generated cmake module files
         tools.replace_in_file(
             os.path.join(self._source_subfolder, "CMakeLists.txt"),
@@ -78,7 +78,9 @@ class TesseractConan(ConanFile):
             "${Leptonica_LIBRARIES}",
             "Leptonica::Leptonica")
 
-        cmake = self._configure_cmake()
+	def build(self):
+		self._patch_sources()
+		cmake = self._configure_cmake()
         cmake.build()
 
     def package(self):
