@@ -5,6 +5,7 @@ include(conanbuildinfo.cmake)
 conan_basic_setup()
 
 # Add some options from https://sqlite.org/compile.html
+option(SQLITE3_BUILD_EXECUTABLE "Build sqlite command line utility for accessing SQLite databases")
 option(ENABLE_JSON1 "Enable JSON SQL functions")
 option(ENABLE_COLUMN_METADATA "Enable additional APIs that provide convenient access to meta-data about tables and queries")
 option(ENABLE_EXPLAIN_COMMENTS "Enable SQLite to insert comment text into the output of EXPLAIN")
@@ -21,9 +22,7 @@ option(HAVE_STRERROR_R "Use strerror_r()")
 option(HAVE_USLEEP "Use usleep() system call to implement the xSleep method")
 option(DISABLE_GETHOSTUUID "Disable function gethostuuid")
 
-add_library(${PROJECT_NAME} source_subfolder/sqlite3.c
-                            source_subfolder/sqlite3.h
-                            source_subfolder/sqlite3ext.h)
+add_library(${PROJECT_NAME} source_subfolder/sqlite3.c)
 if (WIN32 AND MSVC AND BUILD_SHARED_LIBS)
     set_target_properties(${PROJECT_NAME} PROPERTIES WINDOWS_EXPORT_ALL_SYMBOLS TRUE)
 endif(MSVC AND BUILD_SHARED_LIBS)
@@ -81,3 +80,11 @@ install(TARGETS ${PROJECT_NAME}
 
 install(DIRECTORY source_subfolder/ DESTINATION include
         FILES_MATCHING PATTERN "*.h")
+
+if(SQLITE3_BUILD_EXECUTABLE)
+    add_executable(sqlite3-bin source_subfolder/shell.c source_subfolder/sqlite3.c)
+    target_compile_definitions(sqlite3-bin PRIVATE "SQLITE_THREADSAFE=0")
+    target_link_libraries(sqlite3-bin PRIVATE ${CMAKE_DL_LIBS})
+    set_target_properties(sqlite3-bin PROPERTIES OUTPUT_NAME "sqlite3")
+    install(TARGETS sqlite3-bin RUNTIME DESTINATION bin)
+endif()

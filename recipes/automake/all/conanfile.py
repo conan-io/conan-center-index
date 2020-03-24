@@ -121,3 +121,6 @@ class AutomakeConan(ConanFile):
             automake = tools.unix_path(automake)
         self.output.info("Setting AUTOMAKE to {}".format(automake))
         self.env_info.AUTOMAKE = automake
+
+        self.user_info.compile = os.path.join(self._automake_libdir, "compile")
+        self.user_info.ar_lib = os.path.join(self._automake_libdir, "ar-lib")
