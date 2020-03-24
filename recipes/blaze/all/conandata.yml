@@ -1,0 +1,4 @@
+sources:
+  "3.7":
+    sha256: 4dfd6bf518c983e8785e217262813d44cdd2842955792417eb0b3736586168fa
+    url: https://bitbucket.org/blaze-lib/blaze/downloads/blaze-3.7.tar.gz

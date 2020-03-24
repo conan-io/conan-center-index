@@ -1,0 +1,8 @@
+sources:
+  "3.8.0":
+    url: "https://git.osgeo.org/gitea/geos/geos/archive/3.8.0.tar.gz"
+    sha256: "90e2ea9db689f5ca8c0bd61e671ac47c749e85998a867b777c3ded8a6399a695"
+patches:
+  "3.8.0":
+    - patch_file: "patches/fix-cmake-install-and-for-mingw.patch"
+      base_path: "source_subfolder"

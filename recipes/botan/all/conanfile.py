@@ -73,8 +73,9 @@ class BotanConan(ConanFile):
 
     def build(self):
         if "patches" in self.conan_data:
-            for patch in self.conan_data["patches"][self.version]:
-                tools.patch(**patch)
+            if self.version in self.conan_data["patches"]:
+                for patch in self.conan_data["patches"][self.version]:
+                    tools.patch(**patch)
         with tools.chdir('sources'):
             self.run(self._configure_cmd)
             self.run(self._make_cmd)
