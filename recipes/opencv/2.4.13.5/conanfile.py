@@ -36,17 +36,17 @@ class OpenCVConan(ConanFile):
             del self.options.fPIC
 
     def requirements(self):
-        self.requires.add('zlib/1.2.11@conan/stable')
+        self.requires.add('zlib/1.2.11')
         if self.options.jpeg:
-            self.requires.add('libjpeg/9c@bincrafters/stable')
+            self.requires.add('libjpeg/9d')
         if self.options.png:
-            self.requires.add('libpng/1.6.34@bincrafters/stable')
+            self.requires.add('libpng/1.6.37')
         if self.options.tiff:
-            self.requires.add('libtiff/4.0.8@bincrafters/stable')
+            self.requires.add('libtiff/4.0.8')
         if self.options.jasper:
-            self.requires.add('jasper/2.0.14@conan/stable')
+            self.requires.add('jasper/2.0.14')
         if self.options.openexr:
-            self.requires.add('openexr/2.3.0@conan/stable')
+            self.requires.add('openexr/2.3.0')
 
     def source(self):
         sha256 = "5fd00b20bb5eb9a9ddfca9318d173d74d0ebe06fefa30a29d9105299e4fd73ec"
