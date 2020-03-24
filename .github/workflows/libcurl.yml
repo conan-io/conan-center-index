@@ -67,6 +67,7 @@ jobs:
             compiler: 'apple_clang'
             compiler_version: '11.0'
             xcode_version: '11.3.1'
+            options: 'libcurl:darwin_ssl=False'
     runs-on: ${{ matrix.os }}
     steps:
       - name: Install automake
@@ -95,6 +96,7 @@ jobs:
           compiler-versions: ${{ matrix.compiler_version }}
           docker-images: ${{ matrix.docker_image }}
         env:
+          CONAN_OPTIONS: ${{ matrix.options }}
           CONAN_REFERENCE: 'libcurl/${{ matrix.libcurl_versions }}'
           CONAN_VISUAL_RUNTIMES: ${{ matrix.vs_runtimes }}
           CONAN_ARCHS: ${{ matrix.archs }}
