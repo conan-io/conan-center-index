@@ -45,17 +45,12 @@ class OpenH264Conan(ConanFile):
                     prefix = tools.unix_path(prefix)
                 tools.replace_in_file('Makefile', 'PREFIX=/usr/local', 'PREFIX=%s' % prefix)
 
-                if self.settings.arch == 'armv7':
-                    arch = 'arm'
-                if self.settings.arch == 'armv8':
-                    arch = 'arm64'
-                elif self.settings.arch == 'x86':
-                    arch = 'i386'
-                elif self.settings.arch == 'x86_64':
-                    arch = 'x86_64'
-                else:
-                    arch = self.settings.arch
-
+                arch_str = str(self.settings.arch)
+                arch = {
+                    'armv7': 'arm',
+                    'armv8': 'arm64',
+                    'x86': 'i386'
+                }.get(arch_str, arch_str)
                 args = ['ARCH=%s' % arch]
 
                 env_build = AutoToolsBuildEnvironment(self)
