@@ -9,7 +9,7 @@ class LibMbusConan(ConanFile):
     homepage = "https://github.com/gocarlos/libmbus/"
     url = "https://github.com/conan-io/conan-center-index"
     description = """Meter-bus library and utility programs"""
-    topics = ("mbus")
+    topics = "conan", "mbus", "metering", "iot", "meter", "bus", "protocol"
     exports_sources = "CMakeLists.txt"
     settings = "os", "compiler", "build_type", "arch"
     options = {
