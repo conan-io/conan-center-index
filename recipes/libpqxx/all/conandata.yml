@@ -8,6 +8,9 @@ sources:
   "7.0.3":
     url: "https://github.com/jtv/libpqxx/archive/7.0.3.tar.gz"
     sha256: "7e28ad68cf6563246d97ccdeba5996dd71316c589f39b253f2cb2fbac0c2f7ef"
+  "7.0.4":
+    url: "https://github.com/jtv/libpqxx/archive/7.0.4.tar.gz"
+    sha256: "b56b441eb49755b39f0ba194b81047f7596540ee23c1caa8aa1b963f1bded9f5"
 patches:
   "7.0.1":
     - patch_file: "patches/0001-cmake-fix-module.patch"
@@ -16,5 +19,8 @@ patches:
     - patch_file: "patches/0001-cmake-fix-module.patch"
       base_path: "source_subfolder"
   "7.0.3":
+    - patch_file: "patches/0001-cmake-fix-module.patch"
+      base_path: "source_subfolder"
+  "7.0.4":
     - patch_file: "patches/0001-cmake-fix-module.patch"
       base_path: "source_subfolder"
