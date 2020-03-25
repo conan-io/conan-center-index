@@ -1,0 +1,4 @@
+sources:
+  "20200306":
+    sha256: bf61bc7ffe556b30464ac0734e18d975fe6a8676d9c2fcb7c215981a46381847
+    url: https://github.com/bacnet-stack/bacnet-stack/archive/4a916468c63de478b84ef4d0c67d541cd84da27e.zip
