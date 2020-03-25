@@ -2,7 +2,7 @@ sources:
   "2019_u9":
     url: "https://github.com/oneapi-src/oneTBB/archive/2019_U9.tar.gz"
     sha256: "3f5ea81b9caa195f1967a599036b473b2e7c347117330cda99b79cfcf5b77c84"
-  "2020.0":
+  "2020":
     url: "https://github.com/oneapi-src/oneTBB/archive/2020.tar.gz"
     sha256: "a0cd0645113ccd3f05cc7fed2fc0a22d7b2fafea35023163ea2d71b36f1744e7"
   "2020_u1":
