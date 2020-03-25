@@ -1,0 +1,13 @@
+--- meson.build
++++ meson.build
+@@ -84,8 +84,8 @@
+ 
+ subdir('gen.tab')
+ subdir('lib')
+-subdir('bin')
+-subdir('test')
++
++
+ if get_option('docs')
+   subdir('doc')
+ endif

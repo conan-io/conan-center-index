@@ -1,7 +1,5 @@
 from conans import tools, ConanFile, Meson
-import glob
 import os
-import shutil
 
 
 class FriBiDiCOnan(ConanFile):
@@ -23,6 +21,7 @@ class FriBiDiCOnan(ConanFile):
         "fPIC": True,
         "with_deprecated": True,
     }
+    exports_sources = "patches/**"
 
     _meson = None
 
@@ -62,31 +61,23 @@ class FriBiDiCOnan(ConanFile):
         return self._meson
 
     def _patch_sources(self):
-        tools.replace_in_file(os.path.join(self._source_subfolder, "meson.build"),
-                              "subdir('bin')",
-                              "")
-        tools.replace_in_file(os.path.join(self._source_subfolder, "meson.build"),
-                              "subdir('test')",
-                              "")
+        for patch in self.conan_data["patches"][self.version]:
+            tools.patch(**patch)
 
     def build(self):
         self._patch_sources()
         meson = self._configure_meson()
         meson.build()
 
-    def _fix_library_names(self, path):
-        # regression in 1.16
-        if self.settings.compiler == "Visual Studio":
-            with tools.chdir(path):
-                for filename_old in glob.glob("*.a"):
-                    filename_new = filename_old[3:-2] + ".lib"
-                    self.output.info("rename %s into %s" % (filename_old, filename_new))
-                    shutil.move(filename_old, filename_new)
-
     def package(self):
         self.copy(pattern="COPYING", src=self._source_subfolder, dst="licenses")
         meson = self._configure_meson()
         meson.install()
+
+        if self.settings.compiler == "Visual Studio":
+            lib_a = os.path.join(self.package_folder, "lib", "libfribidi.a")
+            if os.path.isfile(lib_a):
+                os.rename(lib_a, os.path.join(self.package_folder, "lib", "fribidi.lib"))
 
         tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
 
