@@ -55,7 +55,7 @@ class ArrowConan(ConanFile):
         "with_flight_rpc": False,
         "with_gandiva": False,
         "with_glog": False,
-        "with_backtrace": True,
+        "with_backtrace": False,
         "with_json": False,
         "with_openssl": True,
         "with_parquet": False,
