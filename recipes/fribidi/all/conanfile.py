@@ -1,4 +1,5 @@
 from conans import tools, ConanFile, Meson
+import glob
 import os
 
 
@@ -78,6 +79,8 @@ class FriBiDiCOnan(ConanFile):
             lib_a = os.path.join(self.package_folder, "lib", "libfribidi.a")
             if os.path.isfile(lib_a):
                 os.rename(lib_a, os.path.join(self.package_folder, "lib", "fribidi.lib"))
+            for pdb in glob.glob(os.path.join(self.package_folder, "bin", "*.pdb")):
+                os.unlink(pdb)
 
         tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
 
