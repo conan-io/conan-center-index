@@ -6,17 +6,15 @@
 #include <openssl/sha.h>
 #include <openssl/crypto.h>
 #include <openssl/ssl.h>
+#if defined(WITH_ZLIB)
 #include <zlib.h>
+#endif
 
 #if defined(_MSC_VER) && _MSC_VER < 1900
 #define snprintf _snprintf
 #endif
 
-#if OPENSSL_VERSION_MAJOR > 1
-#define OPENSSL_1_1_1_OR_LATER
-#elif (OPENSSL_VERSION_MAJOR == 1) && (OPENSSL_VERSION_MINOR > 1)
-#define OPENSSL_1_1_1_OR_LATER
-#elif (OPENSSL_VERSION_MAJOR == 1) && (OPENSSL_VERSION_MINOR == 1) && (OPENSSL_VERSION_PATCH >= 1)
+#if OPENSSL_VERSION_NUMBER > 0x10101000L
 #define OPENSSL_1_1_1_OR_LATER
 #endif
 
@@ -90,7 +88,9 @@ int main()
 	printf("sha3 512 digest: %s\n", sha3_512_string);
 #endif
 	printf("SSL library version: %s\n", SSLeay_version(SSLEAY_VERSION));
+#if defined(WITH_ZLIB)
 	printf("ZLIB version: %s\n", ZLIB_VERSION);
+#endif
 
 	return 0;
 }
