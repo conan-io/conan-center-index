@@ -38,6 +38,30 @@ class OpenBLAS(ConanFile):
         if self.settings.os == "Windows":
             del self.options.fPIC
 
+    def system_requirements(self):
+        if self.options.build_lapack and tools.os_info.is_linux:
+            installer = tools.SystemPackageTool()
+            if tools.os_info.linux_distro == "arch":
+                # In Arch Linux the name of the package containing the Fortran
+                # compiler is gcc-fortran
+                installer.install("gcc-fortran")
+            else:
+                # In other dists try installing a package with name gfortran
+                # (this works in ubuntu and might or might not work in other
+                # distros)
+                installer.install("gfortran")
+
+                # It seems that just gfortan is not enough in ubuntu. We need
+                # to install a libgfortan-X-dev package, where X must match gcc
+                # version.
+                if self.settings.get_safe("compiler") == "gcc":
+                    if self.settings.get_safe("compiler.version") == "8":
+                        installer.install("libgfortran-8-dev")
+                    elif self.settings.get_safe("compiler.version") == "7":
+                        installer.install("libgfortran-7-dev")
+                    elif self.settings.get_safe("compiler.version") == "9":
+                        installer.install("libgfortran-9-dev")
+
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
         os.rename('OpenBLAS-{}'.format(self.version), self._source_subfolder)
