@@ -36,8 +36,7 @@ class LibibertyConan(ConanFile):
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
-        pkg_version = self.version.replace('.', '_')
-        extracted_dir = "gcc-gcc-{}-release".format(pkg_version)
+        extracted_dir = "gcc-" + self.version
         os.rename(extracted_dir, self._source_subfolder)
         tools.rmdir(os.path.join(self._source_subfolder, 'gcc'))
         tools.rmdir(os.path.join(self._source_subfolder, 'libstdc++-v3'))
@@ -68,4 +67,3 @@ class LibibertyConan(ConanFile):
 
     def package_info(self):
         self.cpp_info.libs = tools.collect_libs(self)
-
