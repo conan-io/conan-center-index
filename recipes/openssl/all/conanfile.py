@@ -4,7 +4,6 @@ import platform
 from functools import total_ordering
 from conans.errors import ConanInvalidConfiguration, ConanException
 from conans import ConanFile, AutoToolsBuildEnvironment, tools
-from conans.tools import os_info
 
 
 @total_ordering
@@ -96,17 +95,16 @@ class OpenSSLConan(ConanFile):
     default_options["fPIC"] = True
     default_options["openssldir"] = None
     _env_build = None
-    _source_subfolder = "sources"
+    _source_subfolder = "source_subfolder"
 
     def build_requirements(self):
-        # useful for example for conditional build_requires
         if tools.os_info.is_windows:
             if not self._win_bash:
                 self.build_requires("strawberryperl/5.30.0.1")
             if not self.options.no_asm and not tools.which("nasm"):
                 self.build_requires("nasm/2.14")
         if self._win_bash:
-            if "CONAN_BASH_PATH" not in os.environ and os_info.detect_windows_subsystem() != 'msys2':
+            if "CONAN_BASH_PATH" not in os.environ and tools.os_info.detect_windows_subsystem() != 'msys2':
                 self.build_requires("msys2/20190524")
 
     @property
@@ -417,11 +415,11 @@ class OpenSSLConan(ConanFile):
             if self.options.capieng_dialog:
                 args.append("-DOPENSSL_CAPIENG_DIALOG=1")
         else:
-            args.append("-fPIC" if self.options.fPIC else "")
+            args.append("-fPIC" if self.options.fPIC else "no-pic")
         if self.settings.os == "Neutrino":
             args.append("-lsocket no-asm")
 
-        if "zlib" in self.deps_cpp_info.deps:
+        if not self.options.no_zlib:
             zlib_info = self.deps_cpp_info["zlib"]
             include_path = zlib_info.include_paths[0]
             if self.settings.os == "Windows":
@@ -530,11 +528,12 @@ class OpenSSLConan(ConanFile):
             return os.path.join(self.deps_cpp_info["strawberryperl"].rootpath, "bin", "perl.exe")
         return "perl"
 
+    @property
+    def _nmake_makefile(self):
+        return r"ms\ntdll.mak" if self.options.shared else r"ms\nt.mak"
+
     def _make(self):
         with tools.chdir(self._source_subfolder):
-            # workaround for MinGW (https://github.com/openssl/openssl/issues/7653)
-            if not os.path.isdir(os.path.join(self.package_folder, "bin")):
-                os.makedirs(os.path.join(self.package_folder, "bin"))
             # workaround for clang-cl not producing .pdb files
             if self._is_clangcl:
                 tools.save("ossl_static.pdb", "")
@@ -550,7 +549,6 @@ class OpenSSLConan(ConanFile):
                     self.run(r"ms\do_nasm")
                 else:
                     self.run(r"ms\do_ms" if self.settings.arch == "x86" else r"ms\do_win64a")
-                makefile = r"ms\ntdll.mak" if self.options.shared else r"ms\nt.mak"
 
                 self._replace_runtime_in_file(os.path.join("ms", "nt.mak"))
                 self._replace_runtime_in_file(os.path.join("ms", "ntdll.mak"))
@@ -558,10 +556,19 @@ class OpenSSLConan(ConanFile):
                     tools.replace_in_file(os.path.join("ms", "nt.mak"), "-WX", "")
                     tools.replace_in_file(os.path.join("ms", "ntdll.mak"), "-WX", "")
 
-                self._run_make(makefile=makefile)
-                self._run_make(makefile=makefile, targets=["install"], parallel=False)
+                self._run_make(makefile=self._nmake_makefile)
             else:
                 self._run_make()
+
+    def _make_install(self):
+        with tools.chdir(self._source_subfolder):
+            # workaround for MinGW (https://github.com/openssl/openssl/issues/7653)
+            if not os.path.isdir(os.path.join(self.package_folder, "bin")):
+                os.makedirs(os.path.join(self.package_folder, "bin"))
+
+            if self._use_nmake and self._full_version < "1.1.0":
+                self._run_make(makefile=self._nmake_makefile, targets=["install"], parallel=False)
+            else:
                 self._run_make(targets=["install_sw"], parallel=False)
 
     @property
@@ -595,18 +602,10 @@ class OpenSSLConan(ConanFile):
                     self._patch_makefile_org()
                 self._make()
 
-    @staticmethod
-    def detected_os():
-        if tools.OSInfo().is_macos:
-            return "Macos"
-        if tools.OSInfo().is_windows:
-            return "Windows"
-        return platform.system()
-
     @property
     def _cross_building(self):
         if tools.cross_building(self.settings):
-            if self.settings.os == self.detected_os():
+            if self.settings.os == tools.detected_os():
                 if self.settings.arch == "x86" and tools.detected_architecture() == "x86_64":
                     return False
             return True
@@ -642,6 +641,8 @@ class OpenSSLConan(ConanFile):
 
     def package(self):
         self.copy(src=self._source_subfolder, pattern="*LICENSE", dst="licenses")
+        with tools.vcvars(self.settings) if self._use_nmake else tools.no_op():
+            self._make_install()
         for root, _, files in os.walk(self.package_folder):
             for filename in files:
                 if fnmatch.fnmatch(filename, "*.pdb"):
@@ -657,6 +658,15 @@ class OpenSSLConan(ConanFile):
             with tools.chdir(os.path.join(self.package_folder, "lib")):
                 os.chmod("libssl.so.1.0.0", 0o755)
                 os.chmod("libcrypto.so.1.0.0", 0o755)
+
+        if self.options.shared:
+            libdir = os.path.join(self.package_folder, "lib")
+            for file in os.listdir(libdir):
+                if self._is_mingw and file.endswith(".dll.a"):
+                    continue
+                if file.endswith(".a"):
+                    os.unlink(os.path.join(libdir, file))
+
         tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
 
     def package_info(self):

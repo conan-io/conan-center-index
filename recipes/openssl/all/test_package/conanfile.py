@@ -11,6 +11,7 @@ class DefaultNameConan(ConanFile):
 
         if self.settings.os == "Android":
             cmake.definitions["CONAN_LIBCXX"] = ""
+        cmake.definitions["OPENSSL_WITH_ZLIB"] = not self.options["openssl"].no_zlib
         cmake.definitions["USE_FIND_PACKAGE"] = use_find_package
         cmake.definitions["OPENSSL_ROOT_DIR"] = self.deps_cpp_info["openssl"].rootpath
         cmake.definitions["OPENSSL_USE_STATIC_LIBS"] = not self.options["openssl"].shared
