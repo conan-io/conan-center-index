@@ -1,5 +1,5 @@
-from conans import ConanFile, CMake, tools, RunEnvironment
 import os
+from conans import ConanFile, CMake
 
 
 class TestPackageConan(ConanFile):
@@ -10,7 +10,7 @@ class TestPackageConan(ConanFile):
         cmake = CMake(self)
         cmake.configure()
         cmake.build()
-        
+
     def test(self):
         bin_path = os.path.join("bin", "test_package")
         self.run(bin_path, run_environment=True)
