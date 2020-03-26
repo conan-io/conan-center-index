@@ -23,7 +23,6 @@ jobs:
     strategy:
       matrix:
         build: ['linux-gcc4.8', 'linux-gcc7', 'linux-gcc9', 'windows-2019-release', 'windows-2019-debug', 'macos']
-        boost_versions: ['1.69.0']
         include:
           - build: 'linux-gcc4.8'
             os: 'ubuntu-latest'
@@ -32,6 +31,7 @@ jobs:
             docker_image: 'conanio/gcc48'
             build_types: 'Release,Debug'
             archs: 'x86,x86_64'
+            boost_version: '1.69.0'
           - build: 'linux-gcc7'
             os: 'ubuntu-latest'
             compiler: 'gcc'
@@ -39,6 +39,7 @@ jobs:
             docker_image: 'conanio/gcc7'
             build_types: 'Release,Debug'
             archs: 'x86,x86_64'
+            boost_version: '1.69.0'
           - build: 'linux-gcc9'
             os: 'ubuntu-latest'
             compiler: 'gcc'
@@ -46,6 +47,7 @@ jobs:
             docker_image: 'conanio/gcc9'
             build_types: 'Release,Debug'
             archs: 'x86,x86_64'
+            boost_version: '1.69.0'
           - build: 'windows-2019-release'
             os: 'windows-2019'
             build_types: 'Release'
@@ -53,6 +55,7 @@ jobs:
             compiler_version: '16'
             vs_runtimes: 'MD,MT'
             archs: 'x86_64'
+            boost_version: '1.69.0'
           - build: 'windows-2019-debug'
             os: 'windows-2019'
             build_types: 'Debug'
@@ -60,6 +63,7 @@ jobs:
             compiler_version: '16'
             vs_runtimes: 'MDd,MTd'
             archs: 'x86_64'
+            boost_version: '1.69.0'
           - build: 'macos'
             os: 'macos-latest'
             build_types: 'Release,Debug'
@@ -67,6 +71,9 @@ jobs:
             compiler: 'apple_clang'
             compiler_version: '11.0'
             xcode_version: '11.3.1'
+            # Apple clang version 11.0.0 (clang-1100.0.33.8) complains about
+            # errors in boost::asio headers when trying to link with boost 1.69
+            boost_version: '1.64.0'
     runs-on: ${{ matrix.os }}
     steps:
       - name: Configure git
@@ -92,7 +99,7 @@ jobs:
           compiler-versions: ${{ matrix.compiler_version }}
           docker-images: ${{ matrix.docker_image }}
         env:
-          CONAN_REFERENCE: 'boost/${{ matrix.boost_versions }}'
+          CONAN_REFERENCE: 'boost/${{ matrix.boost_version }}'
           CONAN_VISUAL_RUNTIMES: ${{ matrix.vs_runtimes }}
           CONAN_ARCHS: ${{ matrix.archs }}
           CONAN_BUILD_TYPES: ${{ matrix.build_types }}
