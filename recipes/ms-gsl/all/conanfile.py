@@ -1,8 +1,5 @@
-#!/usr/bin/env python
-# -*- coding: utf-8 -*-
-
-from conans import ConanFile, tools
 import os
+from conans import ConanFile, tools
 
 
 class GslMicrosoftConan(ConanFile):
@@ -11,9 +8,8 @@ class GslMicrosoftConan(ConanFile):
     description = "Microsoft implementation of the Guidelines Support Library"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/microsoft/GSL"
-    topics = ("GSL")
+    topics = ("gsl")
     license = "MIT"
-    exports = ["LICENSE.md"]
     no_copy_source = True
     _source_subfolder = "source_subfolder"
 
@@ -28,17 +24,17 @@ class GslMicrosoftConan(ConanFile):
     # https://github.com/microsoft/GSL/releases/tag/v2.1.0 which states that
     # "Contract violation will always result in termination."
     options = {
-        'on_contract_violation': ['terminate', 'throw', 'unenforced']
+        "on_contract_violation": ["terminate", "throw", "unenforced"]
     }
 
     default_options = {
-        'on_contract_violation': 'terminate',
+        "on_contract_violation": "terminate",
     }
 
     _contract_map = {
-        'terminate': 'GSL_TERMINATE_ON_CONTRACT_VIOLATION',
-        'throw': 'GSL_THROW_ON_CONTRACT_VIOLATION',
-        'unenforced': 'GSL_UNENFORCED_ON_CONTRACT_VIOLATION'
+        "terminate": "GSL_TERMINATE_ON_CONTRACT_VIOLATION",
+        "throw": "GSL_THROW_ON_CONTRACT_VIOLATION",
+        "unenforced": "GSL_UNENFORCED_ON_CONTRACT_VIOLATION",
     }
 
     def source(self):
@@ -59,4 +55,6 @@ class GslMicrosoftConan(ConanFile):
         self.info.header_only()
 
     def package_info(self):
-        self.cpp_info.defines = [self._contract_map[str(self.options.on_contract_violation)]]
+        self.cpp_info.defines = [
+            self._contract_map[str(self.options.on_contract_violation)]
+        ]
