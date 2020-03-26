@@ -29,6 +29,18 @@ jobs:
             os: 'macos-latest'
             build_types: 'Release,Debug'
             archs: 'x86_64'
+            conan_options: 'qt:openssl=False,
+                            qt:qtsvg=True,
+                            qt:qtimageformats=True,
+                            qt:qtscript=True,
+
+                            qt:with_glib=False,
+                            qt:with_icu=False,
+                            qt:with_harfbuzz=False,
+                            qt:with_pcre2=False,
+                            qt:with_mysql=False,
+                            qt:with_sdl2=False,
+                            qt:with_zstd=False'
             compiler: 'apple_clang'
             compiler_version: '11.0'
             xcode_version: '11.3.1'
@@ -57,19 +69,7 @@ jobs:
           compiler-versions: ${{ matrix.compiler_version }}
           docker-images: ${{ matrix.docker_image }}
         env:
-          CONAN_OPTIONS: 'qt:openssl=False,
-                          qt:qtsvg=True,
-                          qt:qtx11extras=True,
-                          qt:qtimageformats=True,
-                          qt:qtscript=True,
-
-                          qt:with_glib=False,
-                          qt:with_icu=False,
-                          qt:with_harfbuzz=False,
-                          qt:with_pcre2=False,
-                          qt:with_mysql=False,
-                          qt:with_sdl2=False,
-                          qt:with_zstd=False'
+          CONAN_OPTIONS: ${{ matrix.conan_options }}
           CONAN_VISUAL_RUNTIMES: ${{ matrix.vs_runtimes }}
           CONAN_ARCHS: ${{ matrix.archs }}
           CONAN_BUILD_TYPES: ${{ matrix.build_types }}

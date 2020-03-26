@@ -6,7 +6,7 @@ import configparser
 from conans import ConanFile, tools, __version__ as conan_version
 from conans.errors import ConanInvalidConfiguration
 from conans.model import Generator
-from conans.tools import Version
+from conans.tools import Version, os_info
 
 
 class qt(Generator):
@@ -688,9 +688,10 @@ class QtConan(ConanFile):
           "Qt5Sql",
           "Qt5Svg",
           "Qt5Widgets",
-          "Qt5X11Extras",
           "Qt5Xml"
         ]
+        if os_info.is_linux:
+            libs.append("Qt5X11Extras")
         self.cpp_info.libdirs.append('lib')
         self.cpp_info.libs = [lib for lib in libs]
         self.env_info.CMAKE_PREFIX_PATH.append(self.package_folder)
