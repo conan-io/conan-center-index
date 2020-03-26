@@ -8,7 +8,7 @@ class TBBConan(ConanFile):
     name = "tbb"
     license = "Apache-2.0"
     url = "https://github.com/conan-io/conan-center-index"
-    homepage = "https://github.com/intel/tbb"
+    homepage = "https://github.com/oneapi-src/oneTBB"
     description = """Intel Threading Building Blocks (Intel TBB) lets you easily write parallel C++
 programs that take full advantage of multicore performance, that are portable and composable, and
 that have future-proof scalability"""
