@@ -1,0 +1,89 @@
+From fdf486d3a64b658809fce3059d3867656e9ef936 Mon Sep 17 00:00:00 2001
+From: SSE4 <tomskside@gmail.com>
+Date: Wed, 3 Apr 2019 19:42:03 +0700
+Subject: [PATCH 1/4] 0001
+
+---
+ lib/error.c      | 4 ++--
+ lib/error.h      | 4 ++--
+ lib/vasnprintf.h | 4 ++--
+ src/complain.h   | 4 ++--
+ 4 files changed, 8 insertions(+), 8 deletions(-)
+
+diff --git a/lib/error.c b/lib/error.c
+index 7e532f0..20906f7 100644
+--- a/lib/error.c
++++ b/lib/error.c
+@@ -73,11 +73,11 @@ unsigned int error_message_count;
+ /* In GNU libc we want do not want to use the common name 'error' directly.
+    Instead make it a weak alias.  */
+ extern void __error (int status, int errnum, const char *message, ...)
+-     __attribute__ ((__format__ (__printf__, 3, 4)));
++     __attribute__ ((__format__ (gnu_printf, 3, 4)));
+ extern void __error_at_line (int status, int errnum, const char *file_name,
+                              unsigned int line_number, const char *message,
+                              ...)
+-     __attribute__ ((__format__ (__printf__, 5, 6)));
++     __attribute__ ((__format__ (gnu_printf, 5, 6)));
+ # define error __error
+ # define error_at_line __error_at_line
+ 
+diff --git a/lib/error.h b/lib/error.h
+index 3759f8a..7adafcd 100644
+--- a/lib/error.h
++++ b/lib/error.h
+@@ -50,11 +50,11 @@ extern "C" {
+    If STATUS is nonzero, terminate the program with 'exit (STATUS)'.  */
+ 
+ extern void error (int __status, int __errnum, const char *__format, ...)
+-     _GL_ATTRIBUTE_FORMAT ((_GL_ATTRIBUTE_SPEC_PRINTF, 3, 4));
++     _GL_ATTRIBUTE_FORMAT ((gnu_printf, 3, 4));
+ 
+ extern void error_at_line (int __status, int __errnum, const char *__fname,
+                            unsigned int __lineno, const char *__format, ...)
+-     _GL_ATTRIBUTE_FORMAT ((_GL_ATTRIBUTE_SPEC_PRINTF, 5, 6));
++     _GL_ATTRIBUTE_FORMAT ((gnu_printf, 5, 6));
+ 
+ /* If NULL, error will flush stdout, then print on stderr the program
+    name, a colon and a space.  Otherwise, error will call this
+diff --git a/lib/vasnprintf.h b/lib/vasnprintf.h
+index 5b192b2..62e1716 100644
+--- a/lib/vasnprintf.h
++++ b/lib/vasnprintf.h
+@@ -68,9 +68,9 @@ extern "C" {
+ # define vasnprintf rpl_vasnprintf
+ #endif
+ extern char * asnprintf (char *resultbuf, size_t *lengthp, const char *format, ...)
+-       _GL_ATTRIBUTE_FORMAT ((__printf__, 3, 4));
++       _GL_ATTRIBUTE_FORMAT ((gnu_printf, 3, 4));
+ extern char * vasnprintf (char *resultbuf, size_t *lengthp, const char *format, va_list args)
+-       _GL_ATTRIBUTE_FORMAT ((__printf__, 3, 0));
++       _GL_ATTRIBUTE_FORMAT ((gnu_printf, 3, 0));
+ 
+ #ifdef __cplusplus
+ }
+diff --git a/src/complain.h b/src/complain.h
+index 266992f..09c7a54 100644
+--- a/src/complain.h
++++ b/src/complain.h
+@@ -107,7 +107,7 @@ bool warning_is_unset (warnings flags);
+ 
+ /** Make a complaint, with maybe a location.  */
+ void complain (location const *loc, warnings flags, char const *message, ...)
+-  __attribute__ ((__format__ (__printf__, 3, 4)));
++  __attribute__ ((__format__ (gnu_printf, 3, 4)));
+ 
+ /** Likewise, but with an \a argc/argv interface.  */
+ void complain_args (location const *loc, warnings w, unsigned *indent,
+@@ -116,7 +116,7 @@ void complain_args (location const *loc, warnings w, unsigned *indent,
+ /** Make a complaint with location and some indentation.  */
+ void complain_indent (location const *loc, warnings flags, unsigned *indent,
+                       char const *message, ...)
+-  __attribute__ ((__format__ (__printf__, 4, 5)));
++  __attribute__ ((__format__ (gnu_printf, 4, 5)));
+ 
+ 
+ /** GNU Bison extension not valid with POSIX Yacc.  */
+-- 
+2.7.4.windows.1
+

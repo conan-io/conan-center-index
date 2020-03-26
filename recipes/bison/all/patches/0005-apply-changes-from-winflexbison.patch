@@ -1,0 +1,216 @@
+From 6f3c72e1f54bb1383ad2ebad4b0e3fb4b762db15 Mon Sep 17 00:00:00 2001
+From: SSE4 <tomskside@gmail.com>
+Date: Tue, 11 Jun 2019 16:21:04 +0200
+Subject: [PATCH 5/5] 0005
+
+---
+ src/getargs.c |  4 +--
+ src/main.c    | 70 ++++++++++++++++++++++++++++++++++++++++++++++++---
+ src/output.c  | 28 +++++++++++++++------
+ src/output.h  |  5 +++-
+ 4 files changed, 93 insertions(+), 14 deletions(-)
+
+diff --git a/src/getargs.c b/src/getargs.c
+index 417e163c..552ab7f9 100644
+--- a/src/getargs.c
++++ b/src/getargs.c
+@@ -718,11 +718,11 @@ getargs (int argc, char *argv[])
+         break;
+ 
+       case PRINT_LOCALEDIR_OPTION:
+-        printf ("%s\n", LOCALEDIR);
++        printf ("%s\n", compute_localedir ());
+         exit (EXIT_SUCCESS);
+ 
+       case PRINT_DATADIR_OPTION:
+-        printf ("%s\n", pkgdatadir ());
++        printf ("%s\n", compute_pkgdatadir ());
+         exit (EXIT_SUCCESS);
+ 
+       case REPORT_FILE_OPTION:
+diff --git a/src/main.c b/src/main.c
+index 0fbbca05..c3eca555 100644
+--- a/src/main.c
++++ b/src/main.c
+@@ -55,20 +55,83 @@
+ #include "symtab.h"
+ #include "tables.h"
+ #include "uniqstr.h"
++#include "pathtools.h"
+ 
++/* extracts basename from path, optionally stripping the extension "\.*"
++ * (same concept as /bin/sh `basename`, but different handling of extension). */
++static char *basename2 (path, strip_ext)
++     char   *path;
++     int strip_ext;		/* boolean */
++{
++	char   *b, *e = 0;
++
++	b = path;
++	for (b = path; *path; path++)
++		if (*path == '/')
++			b = path + 1;
++		else if (*path == '\\')
++			b = path + 1;
++		else if (*path == '.')
++			e = path;
++
++	if (strip_ext && e && e > b)
++		*e = '\0';
++	return b;
++}
++
++#define LOCAL_PKGDATADIR "share/bison"
++
++char* get_local_pkgdatadir()
++{
++	const char* program_path = 0;
++	const char* dir = 0;
++	const char* last_divider = 0;
++	char* local_pkgdatadir = NULL;
++	size_t dir_len = 0;
++	size_t local_pkgdatadir_len = 0;
++	char exe_path[32768];
++	get_executable_path (NULL, &exe_path[0], sizeof (exe_path) / sizeof (exe_path[0]));
++
++	program_path = dir = exe_path;
++
++	while (*dir)
++	{
++		if (*dir == '\\' || *dir == '/')
++			last_divider = dir;
++		++dir;
++	}
++
++	if (!last_divider)
++		return LOCAL_PKGDATADIR;
++
++	++last_divider;
++
++	dir_len = last_divider - program_path - strlen("bin/");
++	local_pkgdatadir_len = dir_len+strlen(LOCAL_PKGDATADIR);
++	local_pkgdatadir = (char*)malloc((local_pkgdatadir_len+1)*sizeof(char));
++	strncpy(local_pkgdatadir, program_path, dir_len);
++	strcpy(&local_pkgdatadir[dir_len], LOCAL_PKGDATADIR);
++
++	return local_pkgdatadir;
++}
++
++char* local_pkgdatadir = 0;
+ 
+ int
+ main (int argc, char *argv[])
+ {
+ #define DEPENDS_ON_LIBINTL 1
++  char exe_path[32768];
+   set_program_name (argv[0]);
++  get_executable_path (argv[0], &exe_path[0], sizeof (exe_path) / sizeof (exe_path[0]));
++  program_name = basename2 (exe_path, 1);
++  local_pkgdatadir = get_local_pkgdatadir();
++
+   setlocale (LC_ALL, "");
+   {
+-    char *cp = NULL;
+-    char const *localedir = relocate2 (LOCALEDIR, &cp);
++    char const *localedir = compute_localedir();
+     (void) bindtextdomain (PACKAGE, localedir);
+     (void) bindtextdomain ("bison-runtime", localedir);
+-    free (cp);
+   }
+   (void) textdomain (PACKAGE);
+ 
+@@ -226,6 +289,7 @@ main (int argc, char *argv[])
+     bitset_stats_dump (stderr);
+ 
+  finish:
++  free(local_pkgdatadir);
+ 
+   /* Stop timing and print the times.  */
+   timevar_stop (tv_total);
+diff --git a/src/output.c b/src/output.c
+index 28a4d737..899e45c5 100644
+--- a/src/output.c
++++ b/src/output.c
+@@ -49,6 +49,7 @@ static struct obstack format_obstack;
+ 
+ /* Memory allocated by relocate2, to free.  */
+ static char *relocate_buffer = NULL;
++static char *relocate_buffer_locale = NULL;
+ 
+ 
+ /*-------------------------------------------------------------------.
+@@ -567,8 +568,8 @@ static void
+ output_skeleton (void)
+ {
+   /* Compute the names of the package data dir and skeleton files.  */
+-  char const *m4 = (m4 = getenv ("M4")) ? m4 : single_path_relocation(BINDIR, M4);
+-  char const *datadir = pkgdatadir ();
++  char const *m4 = (m4 = getenv ("M4")) ? m4 : "m4";
++  char const *datadir = compute_pkgdatadir ();
+   char *skeldir = xpath_join (datadir, "skeletons");
+   char *m4sugar = xpath_join (datadir, "m4sugar/m4sugar.m4");
+   char *m4bison = xpath_join (skeldir, "bison.m4");
+@@ -705,7 +706,7 @@ prepare (void)
+     /* b4_skeletonsdir is used inside m4_include in the skeletons, so digraphs
+        would never be expanded.  Hopefully no one has M4-special characters in
+        his Bison installation path.  */
+-    char *skeldir = xpath_join (pkgdatadir (), "skeletons");
++    char *skeldir = xpath_join (compute_pkgdatadir (), "skeletons");
+     MUSCLE_INSERT_STRING_RAW ("skeletonsdir", skeldir);
+     free (skeldir);
+   }
+@@ -739,20 +740,31 @@ output (void)
+ 
+   obstack_free (&format_obstack, NULL);
+   free (relocate_buffer);
++  free (relocate_buffer_locale);
+ }
+ 
++extern char* local_pkgdatadir;
++
+ char const *
+-pkgdatadir (void)
++compute_pkgdatadir (void)
+ {
+   if (relocate_buffer)
+     return relocate_buffer;
+   else
+     {
+       char const *cp = getenv ("BISON_PKGDATADIR");
+-      if (cp)
+-          return cp;
++      return cp ? cp : relocate2 (local_pkgdatadir, &relocate_buffer);
++    }
++}
+ 
+-      char * _dir = single_path_relocation(BINDIR, PKGDATADIR);
+-      return _dir;
++char const *
++compute_localedir (void)
++{
++  if (relocate_buffer_locale)
++    return relocate_buffer_locale;
++  else
++    {
++      char const *datadir = compute_pkgdatadir ();
++      char *localedir = xpath_join (datadir, "locale");
+     }
+ }
+diff --git a/src/output.h b/src/output.h
+index c308bf56..8d717bc0 100644
+--- a/src/output.h
++++ b/src/output.h
+@@ -25,6 +25,9 @@
+ void output (void);
+ 
+ /* Where our data files are installed.  */
+-char const *pkgdatadir (void);
++char const *compute_pkgdatadir (void);
++
++/* Where our locale files are installed.  */
++char const *compute_localedir (void);
+ 
+ #endif /* !OUTPUT_H_ */
+-- 
+2.21.0
+

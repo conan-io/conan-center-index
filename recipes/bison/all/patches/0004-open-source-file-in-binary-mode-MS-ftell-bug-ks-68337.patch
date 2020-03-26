@@ -1,0 +1,36 @@
+From ba7c1a218605a39a804a94ea2bb1adc1533c2d10 Mon Sep 17 00:00:00 2001
+From: SSE4 <tomskside@gmail.com>
+Date: Wed, 3 Apr 2019 19:49:50 +0700
+Subject: [PATCH 4/4] 0004
+
+---
+ src/location.c | 10 +++++++++-
+ 1 file changed, 9 insertions(+), 1 deletion(-)
+
+diff --git a/src/location.c b/src/location.c
+index 6876890..a21b031 100644
+--- a/src/location.c
++++ b/src/location.c
+@@ -162,10 +162,18 @@ cleanup_caret ()
+ void
+ location_caret (location loc, FILE *out)
+ {
++#if defined(_WIN32)
++    /* ftell() is unusable on Windows in the face of text files
++       that use just LF and not Windows-style CR-LF as newlines
++       http://support.microsoft.com/kb/68337 */
++    char fopen_mode[3] = "rb";
++#else
++    char fopen_mode[2] = "r";
++#endif
+   /* FIXME: find a way to support multifile locations, and only open once each
+      file. That would make the procedure future-proof.  */
+   if (! (caret_info.source
+-         || (caret_info.source = fopen (loc.start.file, "r")))
++         || (caret_info.source = fopen (loc.start.file, fopen_mode)))
+       || loc.start.column == -1 || loc.start.line == -1)
+     return;
+ 
+-- 
+2.7.4.windows.1
+
