@@ -1,0 +1,8 @@
+sources:
+  "6.3.0":
+    url: "https://github.com/OSGeo/PROJ/releases/download/6.3.0/proj-6.3.0.tar.gz"
+    sha256: "68ce9ba0005d442c2c1d238a3b9bc6654c358159b4af467b91e8d5b407c79c77"
+patches:
+  "6.3.0":
+    - patch_file: "patches/conanize-cmake.patch"
+      base_path: "source_subfolder"
