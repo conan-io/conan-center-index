@@ -1,5 +1,14 @@
 --- a/CMakeLists.txt
 +++ b/CMakeLists.txt
+@@ -4,7 +4,7 @@
+ SET(CMAKE_LEGACY_CYGWIN_WIN32 0)
+ 
+ PROJECT(CFITSIO)
+-CMAKE_MINIMUM_REQUIRED(VERSION 2.8.0)
++CMAKE_MINIMUM_REQUIRED(VERSION 3.1)
+ 
+ # Allow @rpath token in target install name on Macs.
+ # See "cmake --help-policy CMP0042" for more information.
 @@ -12,12 +12,14 @@ IF(POLICY CMP0042)
    CMAKE_POLICY(SET CMP0042 NEW)
  ENDIF()
@@ -17,7 +26,7 @@
  
  set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}")
  set (LIB_DESTINATION "${CMAKE_INSTALL_PREFIX}/lib${LIB_SUFFIX}")
-@@ -55,11 +57,18 @@ IF (BUILD_SHARED_LIBS)
+@@ -55,11 +57,19 @@ IF (BUILD_SHARED_LIBS)
  ENDIF (BUILD_SHARED_LIBS)
  
  
@@ -29,17 +38,18 @@
  IF (USE_PTHREADS)
 -    FIND_PACKAGE(pthreads REQUIRED)
 -    INCLUDE_DIRECTORIES(${PTHREADS_INCLUDE_DIR})
-+    IF(MSVC)
-+        LIST(APPEND LINK_LIBS "CONAN_PKG::pthreads4w")
-+    ELSE()
-+        SET(CMAKE_THREAD_PREFER_PTHREAD TRUE)
-+        FIND_PACKAGE(Threads REQUIRED)
++    SET(CMAKE_THREAD_PREFER_PTHREAD TRUE)
++    SET(THREADS_PREFER_PTHREAD_FLAG TRUE)
++    FIND_PACKAGE(Threads REQUIRED)
++    IF(CMAKE_USE_PTHREADS_INIT)
 +        LIST(APPEND LINK_LIBS "Threads::Threads")
++    ELSE()
++        LIST(APPEND LINK_LIBS "CONAN_PKG::pthreads4w")
 +    ENDIF()
      ADD_DEFINITIONS(-D_REENTRANT)
  ENDIF()
  
-@@ -71,35 +80,27 @@ ELSE()
+@@ -71,35 +81,27 @@ ELSE()
  ENDIF()
  
  # Support for remote file drivers is not implemented for native Windows:
@@ -90,7 +100,7 @@
      editcol.c edithdu.c eval_f.c eval_l.c eval_y.c
      f77_wrap1.c f77_wrap2.c f77_wrap3.c f77_wrap4.c
      fits_hcompress.c fits_hdecompress.c fitscore.c
-@@ -123,27 +124,100 @@ SET(SRC_FILES
+@@ -123,27 +125,100 @@ SET(SRC_FILES
  
  # Only include zlib source files if we are building a shared library.
  # Users will need to link their executable with zlib independently.
@@ -202,7 +212,7 @@
  
      ENABLE_TESTING()
  
-@@ -173,7 +247,7 @@ IF (BUILD_SHARED_LIBS)
+@@ -173,7 +248,7 @@ IF (BUILD_SHARED_LIBS)
        set_target_properties(FPack Funpack PROPERTIES LINK_FLAGS "setargv.obj")
      endif(MSVC)
  
