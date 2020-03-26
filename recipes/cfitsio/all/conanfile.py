@@ -57,11 +57,10 @@ class CfitsioConan(ConanFile):
         if self.options.threadsafe and self.settings.os == "Windows" and \
            (not self.settings.compiler == "gcc" or self.settings.compiler.threads == "win32"):
             self.requires.add("pthreads4w/3.0.0")
-        if self.settings.os != "Windows":
-            if self.options.with_bzip2:
-                self.requires.add("bzip2/1.0.8")
-            if self.options.with_curl:
-                self.requires.add("libcurl/7.68.0")
+        if self.options.get_safe("with_bzip2"):
+            self.requires.add("bzip2/1.0.8")
+        if self.options.get_safe("with_curl"):
+            self.requires.add("libcurl/7.68.0")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
