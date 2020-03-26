@@ -141,7 +141,7 @@ class OpenSSLConan(ConanFile):
     def configure(self):
         del self.settings.compiler.libcxx
         del self.settings.compiler.cppstd
-        if "1.0.2" not in self.version:
+        if self.version.startswith("1.1."):
             del self.options.no_zlib
             del self.options.no_md2
             del self.options.no_rc4
