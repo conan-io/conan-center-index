@@ -121,8 +121,7 @@ class BoostConan(ConanFile):
             del self.options.fPIC
 
     def build_requirements(self):
-        if not tools.which("b2"):
-            self.build_requires("b2/4.1.0")
+        self.build_requires("b2/4.2.0")
 
     def requirements(self):
         if self._zip_bzip2_requires_needed:
@@ -338,7 +337,8 @@ class BoostConan(ConanFile):
 
     @property
     def _b2_exe(self):
-        return tools.which("b2")
+        b2_exe = "b2.exe" if tools.os_info.is_windows else "b2"
+        return os.path.join(self.deps_cpp_info["b2"].rootpath, "bin", b2_exe)
 
     @property
     def _bcp_exe(self):
@@ -414,11 +414,9 @@ class BoostConan(ConanFile):
 
         with tools.vcvars(self.settings) if self._is_msvc else tools.no_op():
             with tools.chdir(sources):
-                # to locate user config jam (BOOST_BUILD_PATH)
-                with tools.environment_append({"BOOST_BUILD_PATH": self._boost_build_dir}):
-                    # To show the libraries *1
-                    # self.run("%s --show-libraries" % b2_exe)
-                    self.run(full_command)
+                # To show the libraries *1
+                # self.run("%s --show-libraries" % b2_exe)
+                self.run(full_command)
 
         arch = self.settings.get_safe('arch')
         if arch.startswith("asm.js"):
@@ -535,7 +533,6 @@ class BoostConan(ConanFile):
             flags.append("abi=%s" % self._b2_abi)
 
         flags.append("--layout=%s" % self.options.layout)
-        flags.append("-sBOOST_BUILD_PATH=%s" % self._boost_build_dir)
         flags.append("--user-config=%s" % os.path.join(self._boost_build_dir, 'user-config.jam'))
         flags.append("-sNO_ZLIB=%s" % ("0" if self.options.zlib else "1"))
         flags.append("-sNO_BZIP2=%s" % ("0" if self.options.bzip2 else "1"))
