@@ -6,7 +6,6 @@ conan_basic_setup()
 
 set(CMAKE_VERBOSE_MAKEFILE ON)
 
-message("Conan root: ${CONAN_PROTOBUF_ROOT}")
 # Download and build .proto
 file(READ ${CMAKE_BINARY_DIR}/conaninfo.txt CONAN_INFO)
 string(REGEX MATCH "([0-9]+\\.[0-9]+\\.[0-9]+)" PACKAGE_VERSION ${CONAN_INFO})
