@@ -14,7 +14,8 @@ class ConanFileDefault(ConanFile):
     topics = ("conan", "bison", "parser")
     license = "GPL-3.0-or-later"
     _source_subfolder = "source_subfolder"
-    requires = ("m4/1.4.18", "flex/2.6.4")
+    requires = ("m4/1.4.18")
+    build_requires = ("flex/2.6.4")
 
     settings = "os", "arch", "compiler", "build_type"
     options = {"fPIC": [True, False]}
