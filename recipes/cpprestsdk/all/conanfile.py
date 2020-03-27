@@ -89,7 +89,6 @@ class CppRestSDKConan(ConanFile):
         self._cmake.definitions["BOOST_INCLUDEDIR"] = self.deps_cpp_info["boost"].include_paths[0]
         self._cmake.definitions["BOOST_LIBRARYDIR"] = self.deps_cpp_info["boost"].lib_paths[0]
         self._cmake.definitions["Boost_NO_SYSTEM_PATHS"] = True
-        self._cmake.definitions["Boost_ADDITIONAL_VERSIONS"] = "1.69.0"
         self._cmake.definitions["Boost_USE_DEBUG_LIBS"] = self.settings.build_type == "Debug"
         self._cmake.definitions["Boost_USE_RELEASE_LIBS"] = self.settings.build_type != "Debug"
         self._cmake.definitions["Boost_USE_STATIC_LIBS"] = not self.options["boost"].shared
