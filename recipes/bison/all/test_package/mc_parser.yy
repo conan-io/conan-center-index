@@ -6,7 +6,7 @@
 using namespace std;
 
 int yylex();
-int yyerror(const char *p) { cerr << "Error!" << endl; }
+int yyerror(const char *p) { cerr << "Error!" << endl; return 42; }
 %}
 
 %union {
