@@ -7,7 +7,11 @@ conan_basic_setup()
 set(CMAKE_VERBOSE_MAKEFILE ON)
 
 # Download and build .proto
-string(REGEX MATCH "([0-9]+\\.[0-9]+\\.[0-9]+)" PACKAGE_VERSION ${CONAN_PROTOBUF_ROOT})
+file(READ ${CMAKE_BINARY_DIR}/conaninfo.txt CONAN_INFO)
+string(REGEX MATCH "([0-9]+\\.[0-9]+\\.[0-9]+)" PACKAGE_VERSION ${CONAN_INFO})
+if(NOT DEFINED PACKAGE_VERSION)
+  message(FATAL_ERROR "Protobuf version not found")
+endif()
 string(TOLOWER ${CONAN_SETTINGS_OS} OS)
 set(FILENAME "${CMAKE_CURRENT_SOURCE_DIR}/protoc.zip")
 set(EXT "")
