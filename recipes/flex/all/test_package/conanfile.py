@@ -6,6 +6,7 @@ class TestPackageConan(ConanFile):
     generators = "cmake"
 
     def build(self):
+        self.run("flex -+ --outfile basic_nr.cpp %s" % os.path.join(self.source_folder, "basic_nr.l"), run_environment=True)
         cmake = CMake(self)
         cmake.configure()
         cmake.build()
@@ -16,4 +17,3 @@ class TestPackageConan(ConanFile):
             self.run(bin_path, run_environment=True)
             
             self.run("flex --version", run_environment=True)
-            self.run("flex %s" % os.path.join(self.source_folder, "basic_nr.l"), run_environment=True)
