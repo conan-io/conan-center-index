@@ -141,4 +141,4 @@ class GcConan(ConanFile):
         self.cpp_info.defines = ["GC_DLL" if self.options.shared else "GC_NOT_DLL"]
         if not self.options.shared:
             if self.settings.os == "Linux":
-                self.cpp_info.system_libs = ["pthread"]
+                self.cpp_info.system_libs = ["pthread", "dl"]
