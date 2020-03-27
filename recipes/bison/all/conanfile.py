@@ -20,6 +20,8 @@ class ConanFileDefault(ConanFile):
     options = {"fPIC": [True, False]}
     default_options = {"fPIC": True}
 
+    _autotools = None
+
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
         extracted_dir = "bison-" + self.version
