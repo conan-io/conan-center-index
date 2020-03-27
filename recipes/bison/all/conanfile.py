@@ -27,6 +27,7 @@ class ConanFileDefault(ConanFile):
 
     def configure(self):
         del self.settings.compiler.libcxx
+        del self.settings.compiler.cppstd
         if self.settings.os == "Windows":
             raise ConanInvalidConfiguration("Bison package is not compatible with Windows. Consider using winflexbison instead.")
 
