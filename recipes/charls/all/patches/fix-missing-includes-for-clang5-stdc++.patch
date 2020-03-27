@@ -1,0 +1,12 @@
+--- a/src/jpegls_error.cpp
++++ b/src/jpegls_error.cpp
+@@ -3,6 +3,9 @@
+ 
+ #include <charls/jpegls_error.h>
+ 
++#include <string>
++#include <system_error>
++
+ using std::string;
+ using std::error_category;
+ 

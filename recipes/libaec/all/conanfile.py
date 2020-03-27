@@ -61,4 +61,7 @@ class LibaecConan(ConanFile):
         tools.rmdir(os.path.join(self.package_folder, 'share'))
 
     def package_info(self):
-        self.cpp_info.libs = tools.collect_libs(self)
+        if self.settings.os == "Windows" and self.options.shared:
+            self.cpp_info.libs = ["szip", "aec"]
+        else:
+            self.cpp_info.libs = ["sz", "aec"]

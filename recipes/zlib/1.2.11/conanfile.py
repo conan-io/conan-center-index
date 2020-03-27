@@ -14,7 +14,7 @@ class ZlibConan(ConanFile):
                    "(Also Free, Not to Mention Unencumbered by Patents)")
     settings = "os", "arch", "compiler", "build_type"
     options = {"shared": [True, False], "fPIC": [True, False], "minizip": [True, False]}
-    default_options = "shared=False", "fPIC=True", "minizip=False"
+    default_options = {"shared": False, "fPIC": True, "minizip": False}
     exports_sources = ["CMakeLists.txt", "CMakeLists_minizip.txt", "minizip.patch"]
     generators = "cmake"
     _source_subfolder = "source_subfolder"

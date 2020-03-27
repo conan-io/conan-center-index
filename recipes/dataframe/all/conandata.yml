@@ -1,0 +1,14 @@
+sources:
+  "1.8.0":
+    sha256: 43b057f6dedbdfc328667dc4dcdcd3384b4551cc2825ca546405ec955fb8cb35
+    url: https://github.com/hosseinmoein/DataFrame/archive/1.8.0.tar.gz
+  "1.7.0":
+    sha256: b5f25e331bcd25f2ddd222e65563df3c316d726d92134789f043338545faa4d4
+    url: https://github.com/hosseinmoein/DataFrame/archive/1.7.0.tar.gz
+patches:
+  "1.8.0":
+    - base_path: source_subfolder
+      patch_file: "patches/0001-remove-tests-bin-for-conan-package.patch"
+  "1.7.0":
+    - base_path: source_subfolder
+      patch_file: "patches/0001-remove-tests-bin-for-conan-package.patch"

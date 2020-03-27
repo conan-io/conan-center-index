@@ -53,13 +53,16 @@ class ZeroMQConan(ConanFile):
         if self._cmake:
             return self._cmake
         self._cmake = CMake(self)
-        self._cmake.definitions["ENABLE_CURVE"] = self.options.encryption is not None
+        self._cmake.definitions["ENABLE_CURVE"] = bool(self.options.encryption)
         self._cmake.definitions["WITH_LIBSODIUM"] = self.options.encryption == "libsodium"
         self._cmake.definitions["ZMQ_BUILD_TESTS"] = False
         self._cmake.definitions["WITH_PERF_TOOL"] = False
         self._cmake.definitions["BUILD_SHARED"] = self.options.shared
         self._cmake.definitions["BUILD_STATIC"] = not self.options.shared
+        self._cmake.definitions["BUILD_TESTS"] = False
         self._cmake.definitions["ENABLE_CPACK"] = False
+        self._cmake.definitions["WITH_DOCS"] = False
+        self._cmake.definitions["WITH_DOC"] = False
         self._cmake.configure(build_folder=self._build_subfolder)
         return self._cmake
 
