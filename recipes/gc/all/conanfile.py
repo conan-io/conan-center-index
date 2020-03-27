@@ -68,6 +68,9 @@ class GcConan(ConanFile):
             del self.options.fPIC
         if tools.Version(self.version) <= "8.0.4":
             del self.options.throw_bad_alloc_library
+        if not self.options.cplusplus:
+            del self.settings.compiler.libcxx
+            del self.settings.compiler.cppstd
 
     def requirements(self):
         if self.settings.os == "Windows":
