@@ -34,7 +34,7 @@ class ConanFileDefault(ConanFile):
     def build(self):
         env_build = AutoToolsBuildEnvironment(self)
         configure_args = ["--disable-nls", "HELP2MAN=/bin/true", "M4=m4"]
-        if "shared" in self.options and self.options.shared:
+        if self.options.shared:
             configure_args.extend(["--enable-shared", "--disable-static"])
         else:
             configure_args.extend(["--disable-shared", "--enable-static"])
