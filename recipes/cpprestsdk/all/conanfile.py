@@ -176,9 +176,6 @@ endfunction()
         elif self.settings.os == "Windows":
             self.cpp_info.system_libs.extend(["winhttp", "httpapi", "bcrypt"])
         elif self.settings.os == "Macos":
-            self.cpp_info.exelinkflags.append("-framework CoreFoundation")
-            self.cpp_info.exelinkflags.append("-framework Security")
-            self.cpp_info.sharedlinkflags.append("-framework CoreFoundation")
-            self.cpp_info.sharedlinkflags.append("-framework Security")
+            self.cpp_info.frameworks.extend(["CoreFoundation", "Security"])
         if not self.options.shared:
             self.cpp_info.defines.append("_NO_ASYNCRTIMP")
