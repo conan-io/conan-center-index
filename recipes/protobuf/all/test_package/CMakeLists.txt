@@ -10,12 +10,14 @@ set(CMAKE_VERBOSE_MAKEFILE ON)
 string(REGEX MATCH "([0-9]+\\.[0-9]+\\.[0-9]+)" PACKAGE_VERSION ${CONAN_PROTOBUF_ROOT})
 string(TOLOWER ${CONAN_SETTINGS_OS} OS)
 set(FILENAME "${CMAKE_CURRENT_SOURCE_DIR}/protoc.zip")
+set(EXT "")
 if(OS STREQUAL "windows")
   if(CONAN_SETTINGS_ARCH STREQUAL "x86_64")
     set(ARCH "64")
   elseif(CONAN_SETTINGS_ARCH STREQUAL "x86_32")
     set(ARCH "32")
   endif()  
+  set(EXT ".exe")
   set(OS_ARCH "win${ARCH}")
 elseif(OS STREQUAL "macos")
   set(OS_ARCH "osx-${CONAN_SETTINGS_ARCH}")
@@ -38,7 +40,7 @@ if(NOT res EQUAL 0)
   message(FATAL_ERROR "Unpack of protoc failed: ${res}")
 endif()
 
-execute_process(COMMAND "${CMAKE_CURRENT_SOURCE_DIR}/bin/protoc" "--proto_path=${CMAKE_CURRENT_SOURCE_DIR}" "--cpp_out=${CMAKE_CURRENT_SOURCE_DIR}" "${CMAKE_CURRENT_SOURCE_DIR}/addressbook.proto"
+execute_process(COMMAND "${CMAKE_CURRENT_SOURCE_DIR}/bin/protoc${EXT}" "--proto_path=${CMAKE_CURRENT_SOURCE_DIR}" "--cpp_out=${CMAKE_CURRENT_SOURCE_DIR}" "${CMAKE_CURRENT_SOURCE_DIR}/addressbook.proto"
                     WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}"
                     RESULT_VARIABLE res)
 if(NOT res EQUAL 0)
