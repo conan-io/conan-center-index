@@ -29,8 +29,6 @@ class CppRestSDKConan(ConanFile):
 
     _cmake = None
 
-    version = "2.10.15"
-
     @property
     def _source_subfolder(self):
         return "source_subfolder"
