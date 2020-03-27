@@ -32,7 +32,8 @@ class HttpParserConan(ConanFile):
             del self.options.fPIC
 
     def configure(self):
-        self.config_options()
+        if self.options.shared:
+            del self.options.fPIC
         del self.settings.compiler.cppstd
         del self.settings.compiler.libcxx
 
