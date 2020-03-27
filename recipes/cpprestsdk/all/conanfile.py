@@ -172,7 +172,7 @@ endfunction()
             lib_name = 'cpprest'
         self.cpp_info.libs.append(lib_name)
         if self.settings.os == "Linux":
-            self.cpp_info.libs.append("pthread")
+            self.cpp_info.system_libs.append("pthread")
         elif self.settings.os == "Windows":
             self.cpp_info.libs.extend(["winhttp", "httpapi", "bcrypt"])
         elif self.settings.os == "Macos":
