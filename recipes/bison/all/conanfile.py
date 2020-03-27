@@ -12,7 +12,6 @@ class ConanFileDefault(ConanFile):
     description = "Bison is a general-purpose parser generator"
     topics = ("conan", "bison", "parser")
     license = "GPL-3.0-or-later"
-    exports_sources = ["patches/*.patch"]
     _source_subfolder = "source_subfolder"
     requires = ("m4/1.4.18", "flex/2.6.4")
 
@@ -29,8 +28,6 @@ class ConanFileDefault(ConanFile):
         del self.settings.compiler.libcxx
 
     def build(self):
-        for patch in self.conan_data["patches"][self.version]:
-            tools.patch(**patch)
         self._build_configure()
 
     def _build_configure(self):
