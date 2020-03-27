@@ -5,13 +5,11 @@ import os
 class SpirvheadersConan(ConanFile):
     name = "spirv-headers"
     homepage = "https://github.com/KhronosGroup/SPIRV-Headers"
-    description = "SPIRV-Headers"
+    description = "Header files for the SPIRV instruction set."
     topics = ("conan", "spirv", "spirv-v", "vulkan", "opengl", "opencl", "khronos")
     url = "https://github.com/conan-io/conan-center-index"
     settings = "os", "compiler", "arch", "build_type"
-
     license = "MIT-KhronosGroup"
-
     _cmake = None
 
     @property
@@ -21,6 +19,8 @@ class SpirvheadersConan(ConanFile):
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
         extracted_dir = "SPIRV-Headers-" + self.version
+        if self.version == "1.5.1":
+            extracted_dir = extracted_dir + ".corrected"
         os.rename(extracted_dir, self._source_subfolder)
 
     def _configure_cmake(self):
@@ -38,7 +38,6 @@ class SpirvheadersConan(ConanFile):
 
     def package(self):
         self.copy(pattern="LICENSE*", dst="licenses", src=self._source_subfolder)
-
         cmake = self._configure_cmake()
         cmake.install()
 
