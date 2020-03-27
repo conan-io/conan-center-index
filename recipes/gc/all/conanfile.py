@@ -1,4 +1,5 @@
 from conans import CMake, ConanFile, tools
+from conans import ConanException
 import os
 
 
@@ -113,7 +114,8 @@ class GcConan(ConanFile):
         readme_md = open(os.path.join(self._source_subfolder, "README.md")).read()
         copyright_header = "## Copyright & Warranty\n"
         index = readme_md.find(copyright_header)
-        assert index > 0
+        if index == -1:
+            raise ConanException("Could not extract license from README file.")
         return readme_md[index+len(copyright_header):]
 
     def package(self):
