@@ -1,6 +1,6 @@
 --- CMakeLists.txt
 +++ CMakeLists.txt
-@@ -21,241 +21,594 @@
+@@ -21,241 +21,596 @@
  #  this will generate gc.sln
  #
  
@@ -329,11 +329,13 @@
 +message(STATUS "TARGET = ${HOST}")
 +
 +if (enable_threads)
-+  find_package(Threads REQUIRED)
-+  message(STATUS "Thread library: ${CMAKE_THREAD_LIBS_INIT}")
++  if(NOT APPLE)
++    find_package(Threads REQUIRED)
++    message(STATUS "Thread library: ${CMAKE_THREAD_LIBS_INIT}")
++    include_directories(${Threads_INCLUDE_DIR})
++    set(THREADDLLIBS ${CMAKE_THREAD_LIBS_INIT})
++  endif()
 +  include_directories(libatomic_ops/src)
-+  include_directories(${Threads_INCLUDE_DIR})
-+  set(THREADDLLIBS ${CMAKE_THREAD_LIBS_INIT})
 +  if (NOT (APPLE OR CYGWIN OR MSYS OR WIN32 OR HOST MATCHES mips-.*-irix6.*))
 +    set(THREADDLLIBS ${THREADDLLIBS} -ldl)
 +                                # The predefined CMAKE_DL_LIBS may be broken.
