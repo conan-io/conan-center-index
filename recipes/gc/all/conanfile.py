@@ -1,5 +1,5 @@
 from conans import CMake, ConanFile, tools
-from conans import ConanException
+from conans.errors import ConanException
 import os
 
 
