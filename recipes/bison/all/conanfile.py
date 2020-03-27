@@ -1,5 +1,6 @@
 
 from conans import ConanFile, AutoToolsBuildEnvironment, tools
+from conans.errors import ConanInvalidConfiguration
 import glob
 import os
 import shutil
@@ -7,7 +8,7 @@ import shutil
 
 class ConanFileDefault(ConanFile):
     name = "bison"
-    url = "https://github.com/conan-io/conan-center-index   "
+    url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://www.gnu.org/software/bison/"
     description = "Bison is a general-purpose parser generator"
     topics = ("conan", "bison", "parser")
@@ -26,17 +27,20 @@ class ConanFileDefault(ConanFile):
 
     def configure(self):
         del self.settings.compiler.libcxx
+        if self.settings.os == "Windows":
+            raise ConanInvalidConfiguration("Bison package is not compatible with Windows. Consider using winflexbison instead.")
 
-    def build(self):
-        self._build_configure()
+    def _configure_autotools(self):
+        if not self._autotools:
+            true = tools.which("true") or "/bin/true"
+            args = ["HELP2MAN=%s" % true, "MAKEINFO=%s" % true, "--disable-nls"]
 
-    def _build_configure(self):
-        true = tools.which("true") or "/bin/true"
-        args = ["HELP2MAN=%s" % true, "MAKEINFO=%s" % true, "--disable-nls"]
-        build = None
-        host = None
+            args.append("--datarootdir={}".format(os.path.join(self.package_folder, "bin", "share")))
+            self._autotools = AutoToolsBuildEnvironment(self)
+            self._autotools.configure(args=args)
+        return self._autotools
 
-        env_build = AutoToolsBuildEnvironment(self)
+    def build(self):        
         with tools.chdir(self._source_subfolder):
             tools.replace_in_file("Makefile.in",
                                   "dist_man_MANS = $(top_srcdir)/doc/bison.1",
@@ -48,15 +52,14 @@ class ConanFileDefault(ConanFile):
                                   "@bindir@",
                                   "${}_ROOT/bin".format(self.name.upper()))
 
-            env_build.configure(args=args, build=build, host=host)
+            env_build = self._configure_autotools()
             env_build.make()
-            env_build.install()
 
     def package(self):
+        with tools.chdir(self._source_subfolder):
+            env_build = self._configure_autotools()
+            env_build.install()
         self.copy(pattern="COPYING", dst="licenses", src=self._source_subfolder)
-        
-        #tools.rmdir(os.path.join(self.package_folder, "share"))
-        shutil.move(os.path.join(self.package_folder, "share"), os.path.join(self.package_folder, "bin", "share"))
 
 
     def package_info(self):
