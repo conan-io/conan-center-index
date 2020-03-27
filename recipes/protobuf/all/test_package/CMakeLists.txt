@@ -6,9 +6,8 @@ conan_basic_setup()
 
 set(CMAKE_VERBOSE_MAKEFILE ON)
 
-message("Conan package version: ${CONAN_PACKAGE_VERSION}")
-
 # Download and build .proto
+string(REGEX MATCH "([0-9]+\\.[0-9]+\\.[0-9]+)" PACKAGE_VERSION ${CONAN_PROTOBUF_ROOT})
 string(TOLOWER ${CONAN_SETTINGS_OS} OS)
 set(FILENAME "${CMAKE_CURRENT_SOURCE_DIR}/protoc.zip")
 if(${OS} EQUAL "windows")
@@ -24,8 +23,8 @@ else()
   set(OS_ARCH "${OS}-${CONAN_SETTINGS_ARCH}")
 endif(OS STREQ "Windows")
 
-set(URL "https://github.com/protocolbuffers/protobuf/releases/download/v${CONAN_PACKAGE_VERSION}/protoc-${CONAN_PACKAGE_VERSION}-${OS_ARCH}.zip")
-message("Download from ${URL}")
+set(URL "https://github.com/protocolbuffers/protobuf/releases/download/v${PACKAGE_VERSION}/protoc-${PACKAGE_VERSION}-${OS_ARCH}.zip")
+message("Download protoc binary from ${URL}")
 file(DOWNLOAD ${URL} ${FILENAME} 
         STATUS res)
 if(NOT res EQUAL 0)
@@ -39,12 +38,14 @@ if(NOT res EQUAL 0)
   message(FATAL_ERROR "Unpack of protoc failed: ${res}")
 endif()
 
-execute_process(COMMAND "${CMAKE_CURRENT_SOURCE_DIR}/protoc/bin/protoc" "--proto_path=${CMAKE_CURRENT_SOURCE_DIR}" "--cpp_out=${CMAKE_CURRENT_SOURCE_DIR}" "${CMAKE_CURRENT_SOURCE_DIR}/addressbook.proto"
+execute_process(COMMAND "${CMAKE_CURRENT_SOURCE_DIR}/bin/protoc" "--proto_path=${CMAKE_CURRENT_SOURCE_DIR}" "--cpp_out=${CMAKE_CURRENT_SOURCE_DIR}" "${CMAKE_CURRENT_SOURCE_DIR}/addressbook.proto"
                     WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}"
                     RESULT_VARIABLE res)
 if(NOT res EQUAL 0)
   message(FATAL_ERROR "Protoc compilation failed: ${res}")
 endif()
+
+file(REMOVE_RECURSE ${FILENAME} "${CMAKE_CURRENT_SOURCE_DIR}/bin" "${CMAKE_CURRENT_SOURCE_DIR}/include" "${CMAKE_CURRENT_SOURCE_DIR}/readme.txt")
 
 # http://www.cmake.org/Wiki/CMake_FAQ#How_can_I_build_my_MSVC_application_with_a_static_runtime.3F
 if(MSVC AND protobuf_MSVC_STATIC_RUNTIME)
