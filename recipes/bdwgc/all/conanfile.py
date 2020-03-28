@@ -3,8 +3,8 @@ from conans.errors import ConanException
 import os
 
 
-class GcConan(ConanFile):
-    name = "gc"
+class BdwGcConan(ConanFile):
+    name = "bdwgc"
     homepage = "https://www.hboehm.info/gc/"
     description = "The Boehm-Demers-Weiser conservative C/C++ Garbage Collector (libgc, bdwgc, boehm-gc)"
     topics = ("conan", "gc", "garbage", "collector")
