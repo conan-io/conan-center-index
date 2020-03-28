@@ -32,6 +32,7 @@ endif(OS STREQ "Windows")
 set(URL "https://github.com/protocolbuffers/protobuf/releases/download/v${PACKAGE_VERSION}/protoc-${PACKAGE_VERSION}-${OS_ARCH}.zip")
 message("Download protoc binary from ${URL}")
 file(DOWNLOAD ${URL} ${FILENAME} 
+	      TIMEOUT 10
         STATUS res)
 if(NOT res EQUAL 0)
   message(FATAL_ERROR "Download of protoc failed: ${res}")
