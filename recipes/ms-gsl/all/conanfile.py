@@ -4,11 +4,10 @@ from conans import ConanFile, tools
 
 class GslMicrosoftConan(ConanFile):
     name = "ms-gsl"
-    version = "2.1.0"
     description = "Microsoft implementation of the Guidelines Support Library"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/microsoft/GSL"
-    topics = ("gsl")
+    topics = ("gsl", "header-only")
     license = "MIT"
     no_copy_source = True
     _source_subfolder = "source_subfolder"
@@ -42,10 +41,6 @@ class GslMicrosoftConan(ConanFile):
         extracted_dir = "GSL-" + self.version
         os.rename(extracted_dir, self._source_subfolder)
 
-    def build(self):
-        # No build step for this header-only library
-        pass
-
     def package(self):
         include_folder = os.path.join(self._source_subfolder, "include")
         self.copy(pattern="LICENSE", dst="licenses", src=self._source_subfolder)
@@ -58,3 +53,5 @@ class GslMicrosoftConan(ConanFile):
         self.cpp_info.defines = [
             self._contract_map[str(self.options.on_contract_violation)]
         ]
+        self.cpp_info.names["cmake_find_package"] = "Microsoft.GSL"
+        self.cpp_info.names["cmake_find_package_multi"] = "Microsoft.GSL"
