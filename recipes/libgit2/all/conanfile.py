@@ -103,7 +103,7 @@ class LibGit2Conan(ConanFile):
         if tools.is_apple_os(self.settings.os):
             cmake.definitions["USE_ICONV"] = self.options.with_iconv
         else:
-            cmake.definitions["USE_ICONV"] = True
+            cmake.definitions["USE_ICONV"] = False
 
         cmake.definitions["USE_HTTPS"] = self._cmake_https[str(self.options.with_https)]
         cmake.definitions["SHA1_BACKEND"] = self._cmake_sha1[str(self.options.with_sha1)]
