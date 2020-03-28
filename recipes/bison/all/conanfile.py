@@ -15,11 +15,9 @@ class BisonConan(ConanFile):
 
     settings = "os", "arch", "compiler", "build_type"
     options = {
-        "shared": [True, False],
         "fPIC": [True, False],
     }
     default_options = {
-        "shared": False,
         "fPIC": True,
     }
 
@@ -49,10 +47,6 @@ class BisonConan(ConanFile):
             del self.options.fPIC
 
     def configure(self):
-        if self.options.shared:
-            del self.options.fPIC
-        if self.settings.compiler == "Visual Studio" and self.options.shared:
-            raise ConanInvalidConfiguration("MSVC cannot build a shared bison (yet)")
         del self.settings.compiler.libcxx
         del self.settings.compiler.cppstd
 
@@ -106,7 +100,6 @@ class BisonConan(ConanFile):
         self._patch_sources()
         with self._build_context():
             env_build = self._configure_autotools()
-            os.system("bash")
             env_build.make()
 
     def package(self):
