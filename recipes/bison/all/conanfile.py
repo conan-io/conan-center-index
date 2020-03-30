@@ -86,6 +86,7 @@ class BisonConan(ConanFile):
     def _configure_autotools(self):
         if self._autotools:
             return self._autotools
+        self._autotools = AutoToolsBuildEnvironment(self, win_bash=tools.os_info.is_windows)
         args = [
             "HELP2MAN={}".format(tools.unix_path(self._simple_output_script)),
             "MAKEINFO={}".format(tools.unix_path(self._simple_output_script)),
@@ -93,7 +94,10 @@ class BisonConan(ConanFile):
             "--disable-nls",
             "--datarootdir={}".format(os.path.join(self.package_folder, "bin", "share").replace("\\", "/")),
         ]
-        self._autotools = AutoToolsBuildEnvironment(self, win_bash=tools.os_info.is_windows)
+        if self.settings.os == "Windows":
+            self._autotools.defines.append("_WINDOWS")
+        if self.settings.compiler == "Visual Studio":
+            self._autotools.flags.append("-FS")
         self._autotools.configure(args=args, configure_dir=self._source_subfolder)
         return self._autotools
 
@@ -137,7 +141,7 @@ class BisonConan(ConanFile):
         self._patch_sources()
         with self._build_context():
             env_build = self._configure_autotools()
-            env_build.make(args=["V=1"])
+            env_build.make()
 
     def package(self):
         with self._build_context():

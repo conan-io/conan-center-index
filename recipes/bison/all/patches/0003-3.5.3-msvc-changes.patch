@@ -7,11 +7,11 @@ but aren't to avoid a dependency on a already-built flex and bison.
  #include <mbswidth.h>
  #include <quotearg.h>
  #include <stdio.h>    /* fileno */
-+#ifndef _MSC_VER
++#if !defined(_WINDOWS)
  #include <sys/ioctl.h>
 +#endif
  #include <sys/stat.h> /* fstat */
-+#ifndef _MSC_VER
++#if !defined(_WINDOWS)
  #include <termios.h>
 +#endif
  
@@ -248,4 +248,14 @@ but aren't to avoid a dependency on a already-built flex and bison.
  
  /** The user start symbol. */
  extern symbol *startsymbol;
-
+--- src/ielr.c
++++ src/ielr.c
+@@ -429,7 +429,7 @@
+              check all predecessors' goto follows for the LHS.  */
+           if (item_number_is_rule_number (ritem[s->items[item] - 2]))
+             {
+-              aver (lhs != accept->content->number);
++              aver (lhs != bison_accept->content->number);
+               for (state **predecessor = predecessors[s->number];
+                    *predecessor;
+                    ++predecessor)
