@@ -8,7 +8,6 @@ class Sol2Conan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/ThePhD/sol2"
     description = "C++17 Lua bindings"
-    topics = ("conan", "lua", "c++", "bindings")
     settings = "os", "compiler"
     license = "MIT"
     requires = ["lua/5.3.5"]    
@@ -35,7 +34,7 @@ class Sol2Conan(ConanFile):
 
 
     def configure(self):
-        minimal_cpp_standard = "17"
+        minimal_cpp_standard = "14"
         try:
             tools.check_min_cppstd(self, minimal_cpp_standard)
         except ConanInvalidConfiguration:
@@ -51,15 +50,8 @@ class Sol2Conan(ConanFile):
         cmake.build()
 
     def package(self):
-    # this is buggy in < 3.2.0, and it is less work to just copy the headers, 
-    # because this is what install does. However, for future releases, leave this here    
-#        cmake = self._configure_cmake()
-#        cmake.install()
-#        tools.rmdir(os.path.join(self.package_folder, "share")) # constains just # , "pkgconfig"))
-#        tools.rmdir(os.path.join(self.package_folder, "lib" )) # constains just # , "cmake"))
-
-        self.copy("*.h", src=os.path.join(self._source_subfolder, "include"), dst="include", keep_path=True)
-        self.copy("*.hpp", src=os.path.join(self._source_subfolder, "include"), dst="include", keep_path=True)
+        cmake = self._configure_cmake()
+        cmake.install()
 
     def package_id(self):
         self.info.header_only()
