@@ -35,7 +35,7 @@ jobs:
           - build: 'linux-gcc8'
             os: 'ubuntu-latest'
             compiler: 'gcc'
-            compiler_version: '8.3'
+            compiler_version: '8'
             docker_image: 'conanio/gcc8'
             build_types: 'Release,Debug'
             archs: 'x86,x86_64'
