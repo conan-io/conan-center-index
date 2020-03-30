@@ -91,7 +91,7 @@ class BisonConan(ConanFile):
             "MAKEINFO={}".format(tools.unix_path(self._simple_output_script)),
             "--enable-relocatable",
             "--disable-nls",
-            "--datarootdir={}".format(tools.unix_path(os.path.join(self.package_folder, "bin", "share"))),
+            "--datarootdir={}".format(os.path.join(self.package_folder, "bin", "share").replace("\\", "/")),
         ]
         self._autotools = AutoToolsBuildEnvironment(self, win_bash=tools.os_info.is_windows)
         self._autotools.configure(args=args, configure_dir=self._source_subfolder)
@@ -104,8 +104,24 @@ class BisonConan(ConanFile):
     def _patch_sources(self):
         for patch in self.conan_data["patches"][self.version]:
             tools.patch(**patch)
+
         tools.save(self._simple_output_script, SIMPLE_OUTPUT)
         os.chmod(self._simple_output_script, 0o555)
+
+        if self.settings.os == "Windows":
+            # replace embedded unix paths by windows paths
+            tools.replace_in_file(os.path.join(self._source_subfolder, "Makefile.in"),
+                                  "echo '#define BINDIR \"$(bindir)\"';",
+                                  "echo '#define BINDIR \"$(shell cygpath -m \"$(bindir)\")\"';")
+            tools.replace_in_file(os.path.join(self._source_subfolder, "Makefile.in"),
+                                  "echo '#define PKGDATADIR \"$(pkgdatadir)\"';",
+                                  "echo '#define PKGDATADIR \"$(shell cygpath -m \"$(pkgdatadir)\")\"';")
+            tools.replace_in_file(os.path.join(self._source_subfolder, "Makefile.in"),
+                                  "echo '#define DATADIR \"$(datadir)\"';",
+                                  "echo '#define DATADIR \"$(shell cygpath -m \"$(datadir)\")\"';")
+            tools.replace_in_file(os.path.join(self._source_subfolder, "Makefile.in"),
+                                  "echo '#define DATAROOTDIR \"$(datarootdir)\"';",
+                                  "echo '#define DATAROOTDIR \"$(shell cygpath -m \"$(datarootdir)\")\"';")
 
         tools.replace_in_file(os.path.join(self._source_subfolder, "Makefile.in"),
                               "dist_man_MANS = $(top_srcdir)/doc/bison.1",
@@ -143,6 +159,7 @@ class BisonConan(ConanFile):
         self.output.info('Appending PATH environment variable: {}'.format(bindir))
         self.env_info.PATH.append(bindir)
 
+        return
         bison_pkgdir = os.path.join(self.package_folder, "bin", "share", "bison")
         self.output.info('Setting BISON_INSTALLER_PKGDATADIR environment variable: {}'.format(bison_pkgdir))
         self.env_info.BISON_PKGDATADIR = bison_pkgdir

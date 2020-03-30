@@ -155,7 +155,7 @@
    char *m4sugar = xpath_join (datadir, "m4sugar/m4sugar.m4");
 --- /dev/null
 +++ src/pathtools.c
-@@ -0,0 +1,532 @@
+@@ -0,0 +1,536 @@
 +/*
 +      .Some useful path tools.
 +        .ASCII only for now.
@@ -181,12 +181,16 @@
 +#endif
 +#include <unistd.h>
 +
++#ifndef PATH_MAX
++#define PATH_MAX 4096
++#endif
++
 +/* If you don't define this, then get_executable_path()
 +   can only use argv[0] which will often not work well */
 +#define IMPLEMENT_SYS_GET_EXECUTABLE_PATH
 +
 +#if defined(IMPLEMENT_SYS_GET_EXECUTABLE_PATH)
-+#if defined(__linux__) || defined(__CYGWIN__) || defined(__MSYS__)
++#if defined(__linux__) || defined(__CYGWIN__) || defined(__MSYS__) || defined(_MSC_VER)
 +/* Nothing needed, unistd.h is enough. */
 +#elif defined(__APPLE__)
 +#include <mach-o/dyld.h>
@@ -347,7 +351,7 @@
 +  } while ((result_p = strchr (result_p, '/')) != NULL);
 +
 +  result_p = result;
-+  char const ** toks = (char const **) alloca (sizeof (char const*) * n_toks);
++  char ** toks = (char **) alloca (sizeof (char const*) * n_toks);
 +  n_toks = 0;
 +  do
 +  {

@@ -36,7 +36,7 @@ class TestPackageConan(ConanFile):
 
             # verify bison works without M4 environment variables
             with tools.environment_append({"M4": None}):
-                self.run("bison -d {}".format(self._mc_parser_source))
+                self.run("bison -d {}".format(self._mc_parser_source), run_environment=True)
 
             # verify bison works without BISON_PKGDATADIR and M4 environment variables
             with tools.environment_append({"BISON_PKGDATADIR": None, "M4": None}):
