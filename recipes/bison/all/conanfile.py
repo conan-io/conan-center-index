@@ -46,9 +46,10 @@ class BisonConan(ConanFile):
         extracted_dir = "bison-" + self.version
         os.rename(extracted_dir, self._source_subfolder)
 
+    def requirements(self):
+        self.requires("m4/1.4.18")
+
     def build_requirements(self):
-        # FIXME: the m4 build requirement should be PUBLIC
-        self.build_requires("m4/1.4.18")
         if tools.os_info.is_windows and not tools.get_env("CONAN_BASH_PATH") and \
                 tools.os_info.detect_windows_subsystem() != "msys2":
             self.build_requires("msys2/20190524")
