@@ -162,11 +162,3 @@ class BisonConan(ConanFile):
         bindir = os.path.join(self.package_folder, "bin")
         self.output.info('Appending PATH environment variable: {}'.format(bindir))
         self.env_info.PATH.append(bindir)
-
-        return
-        bison_pkgdir = os.path.join(self.package_folder, "bin", "share", "bison")
-        self.output.info('Setting BISON_INSTALLER_PKGDATADIR environment variable: {}'.format(bison_pkgdir))
-        self.env_info.BISON_PKGDATADIR = bison_pkgdir
-
-        self.output.info('Setting BISON_INSTALLER_ROOT environment variable: {}'.format(self.package_folder))
-        self.env_info.BISON_INSTALLER_ROOT = self.package_folder
