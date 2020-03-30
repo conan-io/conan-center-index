@@ -52,6 +52,9 @@ class Sol2Conan(ConanFile):
     def package(self):
         cmake = self._configure_cmake()
         cmake.install()
+        tools.rmdir(os.path.join(self.package_folder, "share")) # constains just # , "pkgconfig"))
+        tools.rmdir(os.path.join(self.package_folder, "lib" )) # constains just # , "cmake"))
+        self.copy("LICENSE.txt", src=self._source_subfolder, dst="licenses")
 
     def package_id(self):
         self.info.header_only()

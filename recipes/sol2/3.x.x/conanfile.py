@@ -60,6 +60,7 @@ class Sol2Conan(ConanFile):
 
         self.copy("*.h", src=os.path.join(self._source_subfolder, "include"), dst="include", keep_path=True)
         self.copy("*.hpp", src=os.path.join(self._source_subfolder, "include"), dst="include", keep_path=True)
+        self.copy("LICENSE.txt", src=self._source_subfolder, dst="licenses")
 
     def package_id(self):
         self.info.header_only()
