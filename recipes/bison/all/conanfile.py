@@ -87,8 +87,8 @@ class BisonConan(ConanFile):
             return self._autotools
         self._autotools = AutoToolsBuildEnvironment(self, win_bash=tools.os_info.is_windows)
         args = [
-            "HELP2MAN={}".format(tools.unix_path(self._simple_output_script)),
-            "MAKEINFO={}".format(tools.unix_path(self._simple_output_script)),
+            "HELP2MAN=python {}".format(tools.unix_path(self._simple_output_script)),
+            "MAKEINFO=python {}".format(tools.unix_path(self._simple_output_script)),
             "--enable-relocatable",
             "--disable-nls",
             "--datarootdir={}".format(os.path.join(self.package_folder, "bin", "share").replace("\\", "/")),
