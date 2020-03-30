@@ -4,9 +4,11 @@ sources:
     url: "https://ftp.gnu.org/gnu/bison/bison-3.5.3.tar.gz"
 patches:
   "3.5.3":
-    - patch_file: "patches/0003-create_pipe-uses-O_TEXT-not-O_BINARY-mode.patch"
+    - patch_file: "patches/0001-create_pipe-uses-O_TEXT-not-O_BINARY-mode.patch"
       base_path: "source_subfolder"
-    - patch_file: "patches/0004-open-source-file-in-binary-mode-MS-ftell-bug-ks-68337.patch"
+    - patch_file: "patches/0002-open-source-file-in-binary-mode-MS-ftell-bug-ks-68337.patch"
       base_path: "source_subfolder"
-    - patch_file: "patches/0010-3.5.3-msvc-changes.patch"
+    - patch_file: "patches/0003-3.5.3-msvc-changes.patch"
+      base_path: "source_subfolder"
+    - patch_file: "patches/0004-3.5.3-relocatable.patch"
       base_path: "source_subfolder"

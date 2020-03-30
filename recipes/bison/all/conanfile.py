@@ -1,7 +1,21 @@
 from conans import ConanFile, AutoToolsBuildEnvironment, tools
-from conans.errors import ConanInvalidConfiguration
 from contextlib import contextmanager
 import os
+
+
+SIMPLE_OUTPUT = """\
+#!/usr/bin/env python
+from argparse import ArgumentParser
+if __name__ == "__main__":
+    argparse = ArgumentParser()
+    argparse.add_argument("--output", "-o", help="output")
+    known, unknown = argparse.parse_known_args()
+    if known.output:
+        try:
+            open(known.output, "w").write("\\n")
+        except OSError:
+            pass
+"""
 
 
 class BisonConan(ConanFile):
@@ -32,10 +46,9 @@ class BisonConan(ConanFile):
         extracted_dir = "bison-" + self.version
         os.rename(extracted_dir, self._source_subfolder)
 
-    def requirements(self):
-        self.requires("m4/1.4.18")
-
     def build_requirements(self):
+        # FIXME: the m4 build requirement should be PUBLIC
+        self.build_requires("m4/1.4.18")
         if tools.os_info.is_windows and not tools.get_env("CONAN_BASH_PATH") and \
                 tools.os_info.detect_windows_subsystem() != "msys2":
             self.build_requires("msys2/20190524")
@@ -72,10 +85,10 @@ class BisonConan(ConanFile):
     def _configure_autotools(self):
         if self._autotools:
             return self._autotools
-        true = tools.unix_path(tools.which("true")) or "/bin/true"
         args = [
-            "HELP2MAN=%s" % true,
-            "MAKEINFO=%s" % true,
+            "HELP2MAN={}".format(tools.unix_path(self._simple_output_script)),
+            "MAKEINFO={}".format(tools.unix_path(self._simple_output_script)),
+            "--enable-relocatable",
             "--disable-nls",
             "--datarootdir={}".format(tools.unix_path(os.path.join(self.package_folder, "bin", "share"))),
         ]
@@ -83,9 +96,16 @@ class BisonConan(ConanFile):
         self._autotools.configure(args=args, configure_dir=self._source_subfolder)
         return self._autotools
 
+    @property
+    def _simple_output_script(self):
+        return os.path.join(self.build_folder, "simple_output.py")
+
     def _patch_sources(self):
         for patch in self.conan_data["patches"][self.version]:
             tools.patch(**patch)
+        tools.save(self._simple_output_script, SIMPLE_OUTPUT)
+        os.chmod(self._simple_output_script, 0o555)
+
         tools.replace_in_file(os.path.join(self._source_subfolder, "Makefile.in"),
                               "dist_man_MANS = $(top_srcdir)/doc/bison.1",
                               "dist_man_MANS =")
@@ -100,7 +120,7 @@ class BisonConan(ConanFile):
         self._patch_sources()
         with self._build_context():
             env_build = self._configure_autotools()
-            env_build.make()
+            env_build.make(args=["V=1"])
 
     def package(self):
         with self._build_context():
