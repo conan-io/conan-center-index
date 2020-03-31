@@ -12,7 +12,6 @@ class Sol2Conan(ConanFile):
     settings = "os", "compiler"
     license = "MIT"
     requires = ["lua/5.3.5"]    
-    default_options = {"lua:compile_as_cpp": True}
     
     _source_subfolder = "source_subfolder"
     _build_subfolder = "build_subfolder"
@@ -51,19 +50,20 @@ class Sol2Conan(ConanFile):
         cmake.build()
 
     def package(self):
-    # this is buggy in < 3.2.0, and it is less work to just copy the headers, 
-    # because this is what install does. However, for future releases, leave this here    
-#        cmake = self._configure_cmake()
-#        cmake.install()
-#        tools.rmdir(os.path.join(self.package_folder, "share")) # constains just # , "pkgconfig"))
-#        tools.rmdir(os.path.join(self.package_folder, "lib" )) # constains just # , "cmake"))
-
-        self.copy("*.h", src=os.path.join(self._source_subfolder, "include"), dst="include", keep_path=True)
-        self.copy("*.hpp", src=os.path.join(self._source_subfolder, "include"), dst="include", keep_path=True)
         self.copy("LICENSE.txt", src=self._source_subfolder, dst="licenses")
+        #there is a bug in cmake install in 3.0.3, so handel this
+        if tools.Version(self.version) == "3.0.3":
+            self.copy("*.h", src=os.path.join(self._source_subfolder, "include"), dst="include", keep_path=True)
+            self.copy("*.hpp", src=os.path.join(self._source_subfolder, "include"), dst="include", keep_path=True)
+        else:
+            cmake = self._configure_cmake()
+            cmake.install()
+            tools.rmdir(os.path.join(self.package_folder, "share")) # constains just # , "pkgconfig"))
+            tools.rmdir(os.path.join(self.package_folder, "lib" )) # constains just # , "cmake"))
 
     def package_id(self):
         self.info.header_only()
 
-    def package_info(self):        
-        self.cpp_info.defines.append("SOL_USING_CXX_LUA=1")
+    def package_info(self): 
+        if self.options["lua"].compile_as_cpp :        
+            self.cpp_info.defines.append("SOL_USING_CXX_LUA=1")
