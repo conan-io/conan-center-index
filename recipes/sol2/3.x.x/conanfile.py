@@ -67,5 +67,5 @@ class Sol2Conan(ConanFile):
         self.info.header_only()
 
     def package_info(self): 
-        if self.options["lua"].compile_as_cpp :        
+        if self.options["lua"].compile_as_cpp :
             self.cpp_info.defines.append("SOL_USING_CXX_LUA=1")
