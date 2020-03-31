@@ -86,4 +86,4 @@ class LLVMOpenMpConan(ConanFile):
             self.cpp_info.cxxflags = ["/Qopenmp"] if self.settings.os == 'Windows' else ["-Qopenmp"]
         self.cpp_info.libs = tools.collect_libs(self)
         if self.settings.os == "Linux":
-            self.cpp_info.system_libs = ["dl", "m"]
+            self.cpp_info.system_libs = ["dl", "m", "pthread"]
