@@ -24,5 +24,5 @@ class AnyLite(ConanFile):
         self.copy("*.hpp", dst="include", src=os.path.join(self._source_subfolder, "include"))
         self.copy("LICENSE.txt", dst="licenses", src=self._source_subfolder)
 
-    def package_info(self):
+    def package_id(self):
         self.info.header_only()
