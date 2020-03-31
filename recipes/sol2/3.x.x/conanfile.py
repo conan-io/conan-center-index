@@ -33,17 +33,19 @@ class Sol2Conan(ConanFile):
         return self._cmake
 
 
+    def _has_support_for_cpp17(self):
+        supported_compilers = [("apple-clang", 10), ("clang", 6), ("gcc", 7), ("Visual Studio", 15.7)]
+        compiler, version = self.settings.compiler, Version(self.settings.compiler.version)
+        return any(compiler == sc[0] and version >= sc[1] for sc in supported_compilers)
+
     def configure(self):
-        minimal_cpp_standard = "17"
-        try:
-            tools.check_min_cppstd(self, minimal_cpp_standard)
-        except ConanInvalidConfiguration:
-            raise
-        except ConanException:
-            # FIXME: We need to handle the case when Conan doesn't know
-            # about a user defined compiler's default standard version
-            self.output.warn(
-                "Unnable to determine the default standard version of the compiler")
+        if self.settings.compiler.get_safe("cppstd"):
+            tools.check_min_cppstd(self, "17")
+        if not self._has_support_for_cpp17():
+            raise ConanInvalidConfiguration("sol2 requires C++17 or higher support standard."
+                                            " {} {} is not supported."
+                                            .format(self.settings.compiler,
+                                                    self.settings.compiler.version))
 
     def build(self):
         cmake = self._configure_cmake()
