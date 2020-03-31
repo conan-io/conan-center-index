@@ -21,7 +21,7 @@ jobs:
   jsoncpp:
     strategy:
       matrix:
-        build: ['linux-gcc4.8', 'linux-gcc7', 'linux-gcc9', 'windows-2019-release', 'windows-2019-debug', 'macos']
+        build: ['linux-gcc4.8', 'linux-gcc8', 'linux-gcc9', 'windows-2019-release', 'windows-2019-debug', 'macos']
         include:
           - build: 'linux-gcc4.8'
             os: 'ubuntu-latest'
@@ -31,11 +31,11 @@ jobs:
             build_types: 'Release,Debug'
             archs: 'x86,x86_64'
             conan_reference: "jsoncpp/1.8.3"
-          - build: 'linux-gcc7'
+          - build: 'linux-gcc8'
             os: 'ubuntu-latest'
             compiler: 'gcc'
-            compiler_version: '7'
-            docker_image: 'conanio/gcc7'
+            compiler_version: '8'
+            docker_image: 'conanio/gcc8'
             build_types: 'Release,Debug'
             archs: 'x86,x86_64'
             conan_reference: "jsoncpp/1.8.3"
