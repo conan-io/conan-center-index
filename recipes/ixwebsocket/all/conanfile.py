@@ -59,7 +59,6 @@ class IXWebSocketConan(ConanFile):
             del self.options.use_openssl
 
     def requirements(self):
-        if not self.options.use_mbed_tls and self.options.use_tls
         if ((self._can_use_openssl() and not self.options.use_mbed_tls and self.options.use_tls
                 and (self.options.get_safe("use_openssl") or self.settings.os == "Linux" 
                      or self.settings.os == "Windows" and not self.options.get_safe("openssl")))): # OpenSSL jiggling with Windows necessary on newer versions. 
