@@ -47,10 +47,6 @@ class Sol2Conan(ConanFile):
                                             .format(self.settings.compiler,
                                                     self.settings.compiler.version))
 
-    def build(self):
-        cmake = self._configure_cmake()
-        cmake.build()
-
     def package(self):
         self.copy("LICENSE.txt", src=self._source_subfolder, dst="licenses")
         #there is a bug in cmake install in 3.0.3, so handel this
