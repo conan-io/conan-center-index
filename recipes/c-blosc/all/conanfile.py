@@ -55,7 +55,7 @@ class CbloscConan(ConanFile):
         if self.options.with_lz4:
             self.requires.add("lz4/1.9.2")
         if self.options.with_snappy:
-            self.requires.add("snappy/1.1.7")
+            self.requires.add("snappy/1.1.8")
         if self.options.with_zlib:
             self.requires.add("zlib/1.2.11")
         if self.options.with_zstd:
