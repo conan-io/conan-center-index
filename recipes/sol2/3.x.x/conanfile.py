@@ -11,7 +11,7 @@ class Sol2Conan(ConanFile):
     topics = ("conan", "lua", "c++", "bindings")
     settings = "os", "compiler"
     license = "MIT"
-    requires = ["lua/5.3.5"]    
+    requires = ["lua/5.3.5"]
     
     _source_subfolder = "source_subfolder"
     _build_subfolder = "build_subfolder"
