@@ -7,7 +7,7 @@ using namespace nonstd;
 
 int main()
 {
-    std::string hello = "hello, world";
+    const std::string hello = "hello, world";
 
     any var;
 
