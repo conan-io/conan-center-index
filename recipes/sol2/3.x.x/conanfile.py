@@ -35,7 +35,7 @@ class Sol2Conan(ConanFile):
 
     def _has_support_for_cpp17(self):
         supported_compilers = [("apple-clang", 10), ("clang", 6), ("gcc", 7), ("Visual Studio", 15.7)]
-        compiler, version = self.settings.compiler, Version(self.settings.compiler.version)
+        compiler, version = self.settings.compiler, tools.Version(self.settings.compiler.version)
         return any(compiler == sc[0] and version >= sc[1] for sc in supported_compilers)
 
     def configure(self):
