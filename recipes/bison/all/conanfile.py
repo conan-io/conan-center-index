@@ -4,6 +4,7 @@ import os
 
 
 SIMPLE_OUTPUT = """\
+#!/usr/bin/env python
 from argparse import ArgumentParser
 if __name__ == "__main__":
     argparse = ArgumentParser()
