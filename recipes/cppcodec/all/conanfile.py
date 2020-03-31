@@ -4,7 +4,6 @@ from conans import ConanFile, tools
 
 class CppcodecConan(ConanFile):
     name = "cppcodec"
-    version = "0.2"
     license = "MIT"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/tplgy/cppcodec"
