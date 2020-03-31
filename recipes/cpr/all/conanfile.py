@@ -44,9 +44,9 @@ class CprConan(ConanFile):
         os.rename("cpr-{}".format(self.version), self._source_subfolder)
 
     def requirements(self):
-        self.requires("libcurl/7.67.0")
+        self.requires("libcurl/7.69.1")
         if self.options.with_openssl:
-            self.requires("openssl/1.1.1d")
+            self.requires("openssl/1.1.1f")
 
     def _patch_sources(self):
         for patch in self.conan_data["patches"][self.version]:

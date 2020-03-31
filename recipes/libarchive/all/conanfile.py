@@ -74,7 +74,7 @@ class LibarchiveConan(ConanFile):
         if self.options.with_bzip2:
             self.requires.add("bzip2/1.0.8")
         if self.options.with_openssl:
-            self.requires.add("openssl/1.1.1d")
+            self.requires.add("openssl/1.1.1f")
         if self.options.with_lz4:
             self.requires.add("lz4/1.9.2")
         if self.options.with_zstd:

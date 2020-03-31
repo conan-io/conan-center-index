@@ -45,7 +45,7 @@ class Nghttp2Conan(ConanFile):
     def requirements(self):
         self.requires.add("zlib/1.2.11")
         if self.options.with_app:
-            self.requires.add("openssl/1.1.1d")
+            self.requires.add("openssl/1.1.1f")
             self.requires.add("c-ares/1.15.0")
             self.requires.add("libev/4.27")
             self.requires.add("libevent/2.1.11")

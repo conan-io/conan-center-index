@@ -69,7 +69,7 @@ class LibGit2Conan(ConanFile):
         if self.options.with_libssh2:
             self.requires("libssh2/1.8.2")
         if self._need_openssl:
-            self.requires("openssl/1.1.1d")
+            self.requires("openssl/1.1.1f")
         if self._need_mbedtls:
             self.requires("mbedtls/2.16.3-gpl")
 
@@ -115,7 +115,7 @@ class LibGit2Conan(ConanFile):
             cmake.definitions["STATIC_CRT"] = "MT" in str(self.settings.compiler.runtime)
 
         cmake.configure()
-        
+
         return cmake
 
     def _patch_sources(self):

@@ -18,7 +18,7 @@ class JwtCppConan(ConanFile):
 
     def requirements(self):
         self.requires("picojson/1.3.0")
-        self.requires("openssl/1.1.1d")
+        self.requires("openssl/1.1.1f")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])

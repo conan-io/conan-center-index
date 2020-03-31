@@ -19,8 +19,8 @@ class TgbotConan(ConanFile):
     exports_sources = ['CMakeLists.txt', 'patches/*']
     requires = (
         "boost/1.71.0",
-        "openssl/1.1.1d",
-        "libcurl/7.67.0"
+        "openssl/1.1.1f",
+        "libcurl/7.69.1"
     )
 
     _source_subfolder = "tgbot"
