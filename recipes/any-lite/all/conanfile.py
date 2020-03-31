@@ -10,8 +10,6 @@ class AnyLite(ConanFile):
     topics = ("conan", "cpp11", "cpp14", "cpp17", "any", "any-implementations")
     license = "BSL-1.0"
     no_copy_source = True
-    
-    version = "0.2.0"
 
     @property
     def _source_subfolder(self):
