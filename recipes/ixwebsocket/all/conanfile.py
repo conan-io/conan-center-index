@@ -59,7 +59,7 @@ class IXWebSocketConan(ConanFile):
 
         if(self._can_use_openssl() and not self.options.use_mbed_tls and self.options.use_tls
            and (self.options.get_safe("use_openssl") or self.settings.os == "Linux")):
-            self.requires.add("openssl/1.1.1c")
+            self.requires.add("openssl/1.1.1f")
 
         self.requires.add("zlib/1.2.11")
 

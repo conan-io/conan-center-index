@@ -13,7 +13,7 @@ class SimpleWebSocketServerConan(ConanFile):
     no_copy_source = True
     license = "MIT"
     requires = (
-        "openssl/1.1.1d",
+        "openssl/1.1.1f",
     )
     options = {
         "use_asio_standalone": [True, False],
