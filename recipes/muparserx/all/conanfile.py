@@ -26,6 +26,10 @@ class MuparserxConan(ConanFile):
         if self.settings.os == "Windows":
             del self.options.fPIC
 
+    def configure(self):
+        if self.settings.os == "Windows" and self.options.shared == True:
+            raise ConanInvalidConfiguration("Muparserx does not support windows dll library!")
+
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
         extracted_dir = self.name + "-" + self.version
@@ -35,6 +39,7 @@ class MuparserxConan(ConanFile):
         if self._cmake:
             return self._cmake
         self._cmake = CMake(self)
+        self._cmake.definitions["BUILD_EXAMPLES"] = False
         self._cmake.configure()
         return self._cmake
 
