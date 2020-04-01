@@ -12,7 +12,7 @@ class LLVMOpenMpConan(ConanFile):
                    "can be used to specify shared memory parallelism "
                    "in Fortran and C/C++ programs. This is the LLVM "
                    "implementation.")
-    license = "BSD-2-Clause"
+    license = "Apache-2.0 WITH LLVM-exception"
     topics = ("conan", "llvm", "openmp", "parallelism")
     homepage = "https://github.com/llvm/llvm-project/tree/master/openmp"
     url = "https://github.com/conan-io/conan-center-index"
