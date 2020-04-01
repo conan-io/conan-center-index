@@ -14,7 +14,6 @@ class GlfwConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/glfw/glfw"
     topics = ("conan", "gflw", "opengl", "vulkan", "opengl-es")
-    exports = "LICENSE"
     generators = "cmake"
     options = {"shared": [True, False], "fPIC": [True, False]}
     default_options = {"shared": False, "fPIC": True}
