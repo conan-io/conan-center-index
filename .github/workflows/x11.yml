@@ -1,0 +1,103 @@
+name: x11 CI
+
+on:
+  pull_request:
+    paths:
+      - 'recipes/x11/all/**'
+      - 'build.py'
+      - '.github/workflows/x11.yml'
+  push:
+    branches:
+      - master
+    paths:
+      - 'recipes/x11/all/**'
+      - 'build.py'
+      - '.github/workflows/x11.yml'
+
+env:
+  CONAN_PASSWORD: ${{ secrets.BintrayApiKey }}
+  IS_PURE_C: true
+  CONAN_DOCKER_RUN_OPTIONS: "-v $HOME/conan_cache:/home/conan/.conan/data"
+
+jobs:
+  x11:
+    strategy:
+      matrix:
+        build: ['linux-gcc4.8', 'linux-gcc8', 'linux-gcc9']
+        xproto_version: ['7.0.31']
+        libxdmcp_version: ['1.1.3']
+        include:
+          - build: 'linux-gcc4.8'
+            os: 'ubuntu-latest'
+            compiler: 'gcc'
+            compiler_version: '4.8'
+            docker_image: 'conanio/gcc48'
+            build_types: 'Release,Debug'
+            archs: 'x86,x86_64'
+          - build: 'linux-gcc8'
+            os: 'ubuntu-latest'
+            compiler: 'gcc'
+            compiler_version: '8'
+            docker_image: 'conanio/gcc8'
+            build_types: 'Release,Debug'
+            archs: 'x86,x86_64'
+          - build: 'linux-gcc9'
+            os: 'ubuntu-latest'
+            compiler: 'gcc'
+            compiler_version: '9'
+            docker_image: 'conanio/gcc9'
+            build_types: 'Release,Debug'
+            archs: 'x86,x86_64'          
+    runs-on: ${{ matrix.os }}
+    steps:
+      - name: Configure git
+        run: git config --global core.autocrlf false
+        shell: bash
+      - name: Checkout
+        uses: actions/checkout@v2
+        with:
+          path: sources
+      - name: Setup Python
+        uses: actions/setup-python@v1
+        with:
+          python-version: '3.x'
+      - name: Generating conanfiles
+        run: python /home/runner/work/conan-center-index/conan-center-index/sources/recipes/x11/all/manage.py gen
+        shell: bash
+      - name: Creating conan cache dir
+        run: mkdir $HOME/conan_cache && chmod 777 $HOME/conan_cache
+        shell: bash
+      - name: Building xproto
+        uses: trassir/run-cpt@v0.2.2-trassir
+        with:
+          install: custom
+          # TODO: replace when https://github.com/conan-io/conan-package-tools/issues/479 will be fixed upstream
+          custom-package: git+https://github.com/trassir/conan-package-tools@fix-479-trassir
+          work-dir: sources/recipes/x11/all/xproto
+          build-script: ../../../../build.py
+          compiler: ${{ matrix.compiler }}
+          compiler-versions: ${{ matrix.compiler_version }}
+          docker-images: ${{ matrix.docker_image }}
+        env:
+          CONAN_REFERENCE: 'xproto/${{ matrix.xproto_version }}'
+          CONAN_VISUAL_RUNTIMES: ${{ matrix.vs_runtimes }}
+          CONAN_ARCHS: ${{ matrix.archs }}
+          CONAN_BUILD_TYPES: ${{ matrix.build_types }}
+          DEVELOPER_DIR: /Applications/Xcode_${{ matrix.xcode_version }}.app/Contents/Developer          
+      - name: Building libxdmcp
+        uses: trassir/run-cpt@v0.2.2-trassir
+        with:
+          install: custom
+          # TODO: replace when https://github.com/conan-io/conan-package-tools/issues/479 will be fixed upstream
+          custom-package: git+https://github.com/trassir/conan-package-tools@fix-479-trassir
+          work-dir: sources/recipes/x11/all/libxdmcp
+          build-script: ../../../../build.py
+          compiler: ${{ matrix.compiler }}
+          compiler-versions: ${{ matrix.compiler_version }}
+          docker-images: ${{ matrix.docker_image }}
+        env:
+          CONAN_REFERENCE: 'libxdmcp/${{ matrix.libxdmcp_version }}'
+          CONAN_VISUAL_RUNTIMES: ${{ matrix.vs_runtimes }}
+          CONAN_ARCHS: ${{ matrix.archs }}
+          CONAN_BUILD_TYPES: ${{ matrix.build_types }}
+          DEVELOPER_DIR: /Applications/Xcode_${{ matrix.xcode_version }}.app/Contents/Developer

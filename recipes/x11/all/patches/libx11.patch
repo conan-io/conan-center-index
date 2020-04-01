@@ -1,0 +1,23 @@
+From 358cafbeb0ef23817811a570c0ad7d79d855d0cf Mon Sep 17 00:00:00 2001
+From: Eric Lemanissier <eric.lemanissier@gmail.com>
+Date: Wed, 22 Jan 2020 09:36:24 +0100
+Subject: [PATCH] add missing ldl to x11.pc libs
+
+---
+ x11.pc.in | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/x11.pc.in b/x11.pc.in
+index 25c7e7cd..e6505373 100644
+--- libX11-1.6.8.orig/x11.pc.in
++++ libX11-1.6.8/x11.pc.in
+@@ -11,5 +11,5 @@ Version: @PACKAGE_VERSION@
+ Requires: xproto @XKBPROTO_REQUIRES@
+ Requires.private: @X11_EXTRA_DEPS@
+ Cflags: -I${includedir} @XTHREAD_CFLAGS@
+-Libs: -L${libdir} -lX11
++Libs: -L${libdir} -lX11 -ldl
+ Libs.private: @XTHREADLIB@
+-- 
+2.23.0.windows.1
+
