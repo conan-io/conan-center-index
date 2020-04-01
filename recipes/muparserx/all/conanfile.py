@@ -27,7 +27,7 @@ class MuparserxConan(ConanFile):
             del self.options.fPIC
 
     def configure(self):
-        if self.settings.os == "Windows" and self.options.shared == True:
+        if self.settings.os == "Windows" and self.options.shared:
             raise ConanInvalidConfiguration("Muparserx does not support windows dll library!")
 
     def source(self):
@@ -44,6 +44,7 @@ class MuparserxConan(ConanFile):
         return self._cmake
 
     def build(self):
+        tools.replace_in_file(os.path.join(self._source_subfolder, "CMakeLists.txt"), "set_property(TARGET muparserx PROPERTY POSITION_INDEPENDENT_CODE TRUE)", "")
         cmake = self._configure_cmake()
         cmake.build()
 
@@ -52,10 +53,8 @@ class MuparserxConan(ConanFile):
         cmake = self._configure_cmake()
         cmake.install()
         tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
-        if self.settings.os == "Windows":
-            tools.rmdir(os.path.join(self.package_folder, "cmake"))
-        else:
-            tools.rmdir(os.path.join(self.package_folder, "share"))
+        tools.rmdir(os.path.join(self.package_folder, "cmake"))
+        tools.rmdir(os.path.join(self.package_folder, "share"))
 
     def package_info(self):
         self.cpp_info.libs = tools.collect_libs(self)
