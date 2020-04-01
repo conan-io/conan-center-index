@@ -16,7 +16,7 @@ class EnetConan(ConanFile):
 
     _source_subfolder = "source_subfolder"
 
-    def config(self):
+    def configure(self):
         del self.settings.compiler.libcxx
         del self.settings.compiler.cppstd
 
