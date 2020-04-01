@@ -131,9 +131,10 @@ class OpenSSLConan(ConanFile):
         try:
             tools.get(**self.conan_data["sources"][self.version])
         except ConanException:
+            self.output.warn("Downloading OpenSSL from the mirror.")
             url = self.conan_data["sources"][self.version]["url"]
             url = url.replace("https://www.openssl.org/source/",
-                              "https://www.openssl.org/source/old/%s" % self._full_version.base)
+                              "https://www.openssl.org/source/old/%s/" % self._full_version.base)
             tools.get(url, sha256=self.conan_data["sources"][self.version]["sha256"])
         extracted_folder = "openssl-" + self.version
         os.rename(extracted_folder, self._source_subfolder)
@@ -141,6 +142,11 @@ class OpenSSLConan(ConanFile):
     def configure(self):
         del self.settings.compiler.libcxx
         del self.settings.compiler.cppstd
+        if self._full_version >= "1.1.0":
+            del self.options.no_zlib
+            del self.options.no_md2
+            del self.options.no_rc4
+            del self.options.no_rc5
 
     def config_options(self):
         if self.settings.os != "Windows":
@@ -149,7 +155,7 @@ class OpenSSLConan(ConanFile):
             del self.options.fPIC
 
     def requirements(self):
-        if not self.options.no_zlib:
+        if not self.options.get_safe("no_zlib"):
             self.requires("zlib/1.2.11")
 
     @property
@@ -419,7 +425,7 @@ class OpenSSLConan(ConanFile):
         if self.settings.os == "Neutrino":
             args.append("-lsocket no-asm")
 
-        if not self.options.no_zlib:
+        if not self.options.get_safe("no_zlib"):
             zlib_info = self.deps_cpp_info["zlib"]
             include_path = zlib_info.include_paths[0]
             if self.settings.os == "Windows":
