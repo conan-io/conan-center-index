@@ -16,7 +16,7 @@ class LevelDBConan(ConanFile):
             "with_snappy": [True, False] }
     default_options = {
             "shared": False,
-            "fPIC": True,
+            "fPIC": False,
             "with_snappy": False }
     generators = "cmake"
 
@@ -27,8 +27,8 @@ class LevelDBConan(ConanFile):
             return self._cmake
         self._cmake = CMake(self)
         self._cmake.definitions["LEVELDB_BUILD_TESTS"] = False
-        # TODO: should use fPIC option?
-        self._cmake.definitions["CMAKE_POSITION_INDEPENDENT_CODE"] = True
+        if self.options.fPIC:
+            self._cmake.definitions["CMAKE_POSITION_INDEPENDENT_CODE"] = True
         return self._cmake
 
     # TODO: crc32, tcmalloc are also conditionally included in leveldb
@@ -79,6 +79,7 @@ class LevelDBConan(ConanFile):
 
     def package_info(self):
         self.cpp_info.libs = tools.collect_libs(self)
+        self.cpp_info.system_libs = ["pthread"]
         #self.cpp_info.libs = ["leveldb"]
         #if self.settings.os == "Linux":
         #    self.cpp_info.libs.append("pthread")
