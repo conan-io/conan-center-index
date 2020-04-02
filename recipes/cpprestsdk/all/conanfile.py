@@ -16,14 +16,14 @@ class CppRestSDKConan(ConanFile):
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
-        "websockets": [True, False],
-        "compression": [True, False]
+        "with_websockets": [True, False],
+        "with_compression": [True, False]
     }
     default_options = {
         "shared": False,
         "fPIC": True,
-        "websockets": True,
-        "compression": True
+        "with_websockets": True,
+        "with_compression": True
     }
     short_paths = True
 
@@ -47,9 +47,9 @@ class CppRestSDKConan(ConanFile):
 
     def requirements(self):
         self.requires.add("openssl/1.1.1e")
-        if self.options.compression:
+        if self.options.with_compression:
             self.requires.add("zlib/1.2.11")
-        if self.options.websockets:
+        if self.options.with_websockets:
             self.requires.add("websocketpp/0.8.1")
         self.requires.add("boost/1.72.0")
 
@@ -66,8 +66,8 @@ class CppRestSDKConan(ConanFile):
         self._cmake.definitions["BUILD_TESTS"] = False
         self._cmake.definitions["BUILD_SAMPLES"] = False
         self._cmake.definitions["WERROR"] = False
-        self._cmake.definitions["CPPREST_EXCLUDE_WEBSOCKETS"] = not self.options.websockets
-        self._cmake.definitions["CPPREST_EXCLUDE_COMPRESSION"] = not self.options.compression
+        self._cmake.definitions["CPPREST_EXCLUDE_WEBSOCKETS"] = not self.options.with_websockets
+        self._cmake.definitions["CPPREST_EXCLUDE_COMPRESSION"] = not self.options.with_compression
         self._cmake.configure(build_folder=self._build_subfolder)
         return self._cmake
 
