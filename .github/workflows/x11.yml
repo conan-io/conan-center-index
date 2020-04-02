@@ -62,7 +62,7 @@ jobs:
         with:
           python-version: '3.x'
       - name: Generating conanfiles
-        run: python /home/runner/work/conan-center-index/conan-center-index/sources/recipes/x11/all/manage.py gen
+        run: python sources/recipes/x11/all/manage.py gen
         shell: bash
       - name: Creating conan cache dir
         run: mkdir $HOME/conan_cache && chmod 777 $HOME/conan_cache
