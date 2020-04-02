@@ -53,10 +53,10 @@ def find(name):
 
 def gen(args):
     for info in libraries:
-        name = info["name"]
-        package_dir = os.path.join(current_dir, name.lower())
+        name = info["name"].lower()
+        package_dir = os.path.join(current_dir, name)
         os.makedirs(package_dir)
-        filename = os.path.join(current_dir, name.lower(), "conanfile.py")
+        filename = os.path.join(current_dir, name, "conanfile.py")
         print("generating %s..." % filename)
         classname = name.replace("-", "")
         with open(filename, "w") as f:
