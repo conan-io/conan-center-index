@@ -62,35 +62,12 @@ class CppRestSDKConan(ConanFile):
         if self._cmake:
             return self._cmake
 
-        if self.settings.os == "iOS":
-            with open('toolchain.cmake', 'w') as toolchain_cmake:
-                if self.settings.arch == "armv8":
-                    arch = "arm64"
-                    sdk = "iphoneos"
-                elif self.settings.arch == "x86_64":
-                    arch = "x86_64"
-                    sdk = "iphonesimulator"
-                sysroot = tools.XCRun(self.settings).sdk_path
-                toolchain_cmake.write('set(CMAKE_C_COMPILER /usr/bin/clang CACHE STRING "" FORCE)\n')
-                toolchain_cmake.write('set(CMAKE_CXX_COMPILER /usr/bin/clang++ CACHE STRING "" FORCE)\n')
-                toolchain_cmake.write('set(CMAKE_C_COMPILER_WORKS YES)\n')
-                toolchain_cmake.write('set(CMAKE_CXX_COMPILER_WORKS YES)\n')
-                toolchain_cmake.write('set(CMAKE_XCODE_EFFECTIVE_PLATFORMS "-%s" CACHE STRING "" FORCE)\n' % sdk)
-                toolchain_cmake.write('set(CMAKE_OSX_ARCHITECTURES "%s" CACHE STRING "" FORCE)\n' % arch)
-                toolchain_cmake.write('set(CMAKE_OSX_SYSROOT "%s" CACHE STRING "" FORCE)\n' % sysroot)
-            os.environ['CONAN_CMAKE_TOOLCHAIN_FILE'] = os.path.join(os.getcwd(), 'toolchain.cmake')
-
         self._cmake = CMake(self, set_cmake_flags=True)
         self._cmake.definitions["BUILD_TESTS"] = False
         self._cmake.definitions["BUILD_SAMPLES"] = False
         self._cmake.definitions["WERROR"] = False
         self._cmake.definitions["CPPREST_EXCLUDE_WEBSOCKETS"] = not self.options.websockets
         self._cmake.definitions["CPPREST_EXCLUDE_COMPRESSION"] = not self.options.compression
-        if self.settings.os == "iOS":
-            self._cmake.definitions["IOS"] = True
-        elif self.settings.os == "Android":
-            self._cmake.definitions["ANDROID"] = True
-            self._cmake.definitions["CONAN_LIBCXX"] = ''
         self._cmake.configure(build_folder=self._build_subfolder)
         return self._cmake
 
@@ -122,15 +99,6 @@ endfunction()
         if self.settings.compiler == 'clang' and str(self.settings.compiler.libcxx) in ['libstdc++', 'libstdc++11']:
             tools.replace_in_file(os.path.join(self._source_subfolder, 'Release', 'CMakeLists.txt'),
                                   'libc++', 'libstdc++')
-        if self.settings.os == 'Android':
-            tools.replace_in_file(os.path.join(self._source_subfolder, 'Release', 'src', 'pch', 'stdafx.h'),
-                                  '#include "boost/config/stdlib/libstdcpp3.hpp"',
-                                  '//#include "boost/config/stdlib/libstdcpp3.hpp"')
-            # https://github.com/Microsoft/cpprestsdk/issues/372#issuecomment-386798723
-            tools.replace_in_file(os.path.join(self._source_subfolder, 'Release', 'src', 'http', 'client',
-                                            'http_client_asio.cpp'),
-                                  'm_timer.expires_from_now(m_duration)',
-                                  'm_timer.expires_from_now(std::chrono::microseconds(m_duration.count()))')
 
     def build(self):
         self._patch()
