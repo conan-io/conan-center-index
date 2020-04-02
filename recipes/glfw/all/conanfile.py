@@ -1,7 +1,7 @@
 import os
 import glob
 from conans import ConanFile, CMake, tools
-from conans.errors import ConanInvalidConfiguration, ConanException
+from conans.errors import ConanException
 
 
 class GlfwConan(ConanFile):
@@ -19,20 +19,19 @@ class GlfwConan(ConanFile):
     default_options = {"shared": False, "fPIC": True}
     _source_subfolder = "source_subfolder"
     _build_subfolder = "build_subfolder"
+    _cmake = None
 
-    def _check_system_libs(self, libs, install_command):
-        installer = tools.SystemPackageTool()
-        missing_system_libs=[]
-        for package_name in libs:
-            if not installer.installed(package_name):
-                missing_system_libs.append(package_name)
-        if len(missing_system_libs) > 0:
-            raise ConanException(
-                'System libraries missing: {0} not found. You can install using: "sudo {1} {0}"'
-                .format(" ".join(missing_system_libs), install_command))
+    def _configure_cmake(self):
+        if not self._cmake:
+            self._cmake = CMake(self)
+            self._cmake.definitions["WITH_CGAL_Core"] = self.options.with_cgal_core
+            self._cmake.definitions["WITH_CGAL_Qt5"] = self.options.with_cgal_qt5
+            self._cmake.definitions["WITH_CGAL_ImageIO"] = self.options.with_cgal_imageio
+            self._cmake.configure(source_folder=self._source_subfolder)
+        return self._cmake
 
     def system_requirements(self):
-        if self.settings.os == "Linux":
+        if tools.os_info.is_linux:
             package_tool = tools.SystemPackageTool(conanfile=self, default_mode="verify")
             libs_name = ""
             os_info = tools.OSInfo()
@@ -80,7 +79,6 @@ class GlfwConan(ConanFile):
                     self.run('install_name_tool -id {filename} {filename}'.format(filename=filename))
 
     def package(self):
-        self.copy("LICENSE.md", dst="licenses", src=self._source_subfolder)
         self.copy(pattern="*.pdb", dst="bin", keep_path=False)
         cmake = self._configure_cmake()
         cmake.install()
@@ -91,8 +89,7 @@ class GlfwConan(ConanFile):
         self.cpp_info.libs = tools.collect_libs(self)
         if self.settings.os == "Linux":
             self.cpp_info.system_libs.extend(['X11', 'GL', 'm', 'dl', 'pthread'])
-            if self.options.shared:
+            if not self.options.shared:
                 self.cpp_info.exelinkflags.append("-lrt -lm -ldl")
         elif self.settings.os == "Macos":
-            self.cpp_info.frameworks.extend(
-                ["OpenGL", "Cocoa", "IOKit", "CoreVideo"])
+            self.cpp_info.frameworks.extend(["OpenGL", "Cocoa", "IOKit", "CoreVideo"])
