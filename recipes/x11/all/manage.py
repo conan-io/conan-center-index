@@ -9,7 +9,7 @@ import subprocess
 import json
 import os
 import re
-from shutil import copy2
+from shutil import copy
 
 conanfile_template = """from conans import tools
 import os
@@ -53,7 +53,7 @@ def find(name):
 
 def gen(args):
     for info in libraries:
-        name = info["name"].lower()
+        name = info["name"]
         package_dir = os.path.join(current_dir, name)
         os.makedirs(package_dir)
         filename = os.path.join(current_dir, name, "conanfile.py")
@@ -99,16 +99,14 @@ def gen(args):
                                                 patches=patches)
             f.write(content)
 
-            with open(os.path.join(current_dir, "conanfile_base.py")) as conanfile_base_src:
-                with open(os.path.join(package_dir, "conanfile_base.py"), "w+") as conanfile_base_dst:
-                    conanfile_base_dst.write(conanfile_base_src.read())
+            copy(os.path.join(current_dir, "conanfile_base.py"), package_dir)
 
             for patch in patches:
                 patch_file = os.path.join(current_dir, "patches", patch)
                 if os.path.exists(patch_file):
                     patches_dir = os.path.join(current_dir, name, "patches")
                     os.makedirs(patches_dir)
-                    copy2(patch_file, patches_dir)
+                    copy(patch_file, patches_dir)
 
 
 def create(args):
