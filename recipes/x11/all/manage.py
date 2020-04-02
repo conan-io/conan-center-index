@@ -54,9 +54,9 @@ def find(name):
 def gen(args):
     for info in libraries:
         name = info["name"]
-        package_dir = os.path.join(current_dir, name)
+        package_dir = os.path.join(current_dir, name.lower())
         os.makedirs(package_dir)
-        filename = os.path.join(current_dir, name, "conanfile.py")
+        filename = os.path.join(package_dir, "conanfile.py")
         print("generating %s..." % filename)
         classname = name.replace("-", "")
         with open(filename, "w") as f:
@@ -104,7 +104,7 @@ def gen(args):
             for patch in patches:
                 patch_file = os.path.join(current_dir, "patches", patch)
                 if os.path.exists(patch_file):
-                    patches_dir = os.path.join(current_dir, name, "patches")
+                    patches_dir = os.path.join(package_dir, "patches")
                     os.makedirs(patches_dir)
                     copy(patch_file, patches_dir)
 
