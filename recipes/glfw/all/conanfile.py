@@ -71,6 +71,7 @@ class GlfwConan(ConanFile):
                     self.run('install_name_tool -id {filename} {filename}'.format(filename=filename))
 
     def package(self):
+        self.copy("LICENSE*", dst="licenses", src=self._source_subfolder)
         self.copy(pattern="*.pdb", dst="bin", keep_path=False)
         cmake = self._configure_cmake()
         cmake.install()
