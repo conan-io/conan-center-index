@@ -24,9 +24,9 @@ class GlfwConan(ConanFile):
     def _configure_cmake(self):
         if not self._cmake:
             self._cmake = CMake(self)
-            self._cmake.definitions["WITH_CGAL_Core"] = self.options.with_cgal_core
-            self._cmake.definitions["WITH_CGAL_Qt5"] = self.options.with_cgal_qt5
-            self._cmake.definitions["WITH_CGAL_ImageIO"] = self.options.with_cgal_imageio
+            self._cmake.definitions["GLFW_BUILD_EXAMPLES"] = False
+            self._cmake.definitions["GLFW_BUILD_TESTS"] = False
+            self._cmake.definitions["GLFW_BUILD_DOCS"] = False
             self._cmake.configure(source_folder=self._source_subfolder)
         return self._cmake
 
