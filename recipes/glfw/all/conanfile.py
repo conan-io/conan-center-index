@@ -62,15 +62,6 @@ class GlfwConan(ConanFile):
         extracted_dir = "{}-{}".format(self.name, self.version)
         os.rename(extracted_dir, self._source_subfolder)
 
-    def _configure_cmake(self):
-        if not self._cmake:
-            cmake = CMake(self)
-            cmake.definitions["GLFW_BUILD_EXAMPLES"] = False
-            cmake.definitions["GLFW_BUILD_TESTS"] = False
-            cmake.definitions["GLFW_BUILD_DOCS"] = False
-            cmake.configure(source_folder=self._source_subfolder)
-        return self._cmake
-
     def build(self):
         cmake = self._configure_cmake()
         cmake.build()
