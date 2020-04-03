@@ -20,8 +20,7 @@ class VariantConan(ConanFile):
     _cmake = None
 
     def configure(self):
-        if self.settings.compiler == "Visual Studio" and int(self.settings.compiler.version.value) <= 12:
-            raise ConanInvalidConfiguration("Required MSVC 2015 Update 3 or superior")  # https://github.com/mpark/variant/blob/v1.3.0/include/mpark/config.hpp#L11
+        tools.check_min_cppstd(self, "11")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
