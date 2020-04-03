@@ -32,6 +32,7 @@ class LeptonicaConan(ConanFile):
                        'with_webp': True,
                        'fPIC': True}
 
+    _cmake = None
     _source_subfolder = "source_subfolder"
 
     def requirements(self):
@@ -39,11 +40,11 @@ class LeptonicaConan(ConanFile):
         if self.options.with_gif:
             self.requires.add("giflib/5.1.4")
         if self.options.with_jpeg:
-            self.requires.add("libjpeg/9c")
+            self.requires.add("libjpeg/9d")
         if self.options.with_png:
             self.requires.add("libpng/1.6.37")
         if self.options.with_tiff:
-            self.requires.add("libtiff/4.0.9")
+            self.requires.add("libtiff/4.1.0")
         if self.options.with_openjpeg:
             self.requires.add("openjpeg/2.3.1")
         if self.options.with_webp:
@@ -69,8 +70,11 @@ class LeptonicaConan(ConanFile):
                     os.path.join(self._source_subfolder, "CMakeLists.txt"))
 
     def _configure_cmake(self):
-        cmake = CMake(self)
-        cmake.definitions['STATIC'] = not self.options.shared
+        if self._cmake:
+            return self._cmake
+        cmake = self._cmake = CMake(self)
+        if self.version == '1.78.0':
+            cmake.definitions['STATIC'] = not self.options.shared
         cmake.definitions['BUILD_PROG'] = False
         # avoid finding system libs
         cmake.definitions['CMAKE_DISABLE_FIND_PACKAGE_GIF'] = not self.options.with_gif
@@ -79,6 +83,8 @@ class LeptonicaConan(ConanFile):
         cmake.definitions['CMAKE_DISABLE_FIND_PACKAGE_JPEG'] = not self.options.with_jpeg
         cmake.definitions['CMAKE_DISABLE_FIND_PACKAGE_webp'] = not self.options.with_webp
         cmake.definitions['CMAKE_DISABLE_FIND_PACKAGE_openjp2'] = not self.options.with_openjpeg
+
+        cmake.definitions['SW_BUILD'] = False
 
         cmake.configure(source_folder=self._source_subfolder)
         return cmake
@@ -91,10 +97,11 @@ class LeptonicaConan(ConanFile):
 
         # upstream uses obsolete FOO_LIBRARY that is not generated
         # by cmake_find_package generator (upstream PR 456)
-        for dep in ('GIF', 'TIFF', 'PNG', 'JPEG', 'ZLIB'):
-            tools.replace_in_file(os.path.join(self._source_subfolder, "src", "CMakeLists.txt"),
-                                  dep + "_LIBRARY",
-                                  dep + "_LIBRARIES")
+        if tools.Version(self.version) <= '1.78.0':
+            for dep in ('GIF', 'TIFF', 'PNG', 'JPEG', 'ZLIB'):
+                tools.replace_in_file(os.path.join(self._source_subfolder, "src", "CMakeLists.txt"),
+                                      dep + "_LIBRARY",
+                                      dep + "_LIBRARIES")
 
         cmake = self._configure_cmake()
         cmake.build()
@@ -116,3 +123,4 @@ class LeptonicaConan(ConanFile):
         self.cpp_info.names["cmake_find_package"] = "Leptonica"
         self.cpp_info.names["cmake_find_package_multi"] = "Leptonica"
         self.cpp_info.names['pkg_config'] = 'lept'
+        self.cpp_info.includedirs.append(os.path.join("include", "leptonica"))

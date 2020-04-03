@@ -1,0 +1,4 @@
+sources:
+  "20200224":
+    url: "http://git.savannah.gnu.org/gitweb/?p=gnulib.git;a=snapshot;h=d279bc6d9f9323e19ad8c32b6d12ff96dfb0f5ba;sf=tgz"
+    sha256: "171142863dd860b3a5babc0f6172048313cf9d98d00a289be9c154bf015ac68d"

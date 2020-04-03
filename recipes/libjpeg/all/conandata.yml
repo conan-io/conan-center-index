@@ -5,3 +5,10 @@ sources:
   "9d":
     url: "http://ijg.org/files/jpegsrc.v9d.tar.gz"
     sha256: "99cb50e48a4556bc571dadd27931955ff458aae32f68c4d9c39d624693f69c32"
+patches:
+  "9c":
+    - patch_file: "patches/0001-libjpeg-add-msvc-dll-support.patch"
+      base_path: "source_subfolder"
+  "9d":
+    - patch_file: "patches/0001-libjpeg-add-msvc-dll-support.patch"
+      base_path: "source_subfolder"

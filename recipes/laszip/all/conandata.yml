@@ -1,0 +1,4 @@
+sources:
+  "3.4.3":
+    url: "https://github.com/LASzip/LASzip/archive/3.4.3.tar.gz"
+    sha256: "862715affa00609b78b4f469ab5529fee659c597efd40b5006b4305dd56c22d3"

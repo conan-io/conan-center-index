@@ -8,3 +8,9 @@ sources:
   "3.16.4":
     sha256: 9bcc8c114d9da603af9512083ed7d4a39911d16105466beba165ba8fe939ac2c
     url: https://cmake.org/files/v3.16/cmake-3.16.4.tar.gz
+  "3.16.5":
+    sha256: 5f760b50b8ecc9c0c37135fae5fbf00a2fef617059aa9d61c1bb91653e5a8bfc
+    url: https://cmake.org/files/v3.16/cmake-3.16.5.tar.gz
+  "3.17.0":
+    sha256: b74c05b55115eacc4fa2b77a814981dbda05cdc95a53e279fe16b7b272f00847
+    url: https://cmake.org/files/v3.17/cmake-3.17.0.tar.gz
