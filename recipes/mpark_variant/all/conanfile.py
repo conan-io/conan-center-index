@@ -7,7 +7,7 @@ import shutil
 class VariantConan(ConanFile):
     name = "mpark_variant"
     url = "https://github.com/conan-io/conan-center-index"
-    homepage = "https://github.com/bincrafters/conan-variant"
+    homepage = "https://github.com/mpark/variant"
     description = "C++17 std::variant for C++11/14/17"
     license = "BSL-1.0"
     exports_sources = ["CMakeLists.txt"]
