@@ -9,7 +9,6 @@ class NinjaConan(ConanFile):
     license = "Apache-2.0"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/ninja-build/ninja"
-    author = "Bincrafters <bincrafters@gmail.com>"
     settings = "os_build", "arch_build", "compiler"
     _source_subfolder = "source_subfolder"
 
@@ -43,7 +42,8 @@ class NinjaConan(ConanFile):
             self._build_configure()
 
     def package(self):
-        self.copy(pattern="COPYING", dst="licenses", src=self._source_subfolder)
+        self.copy(pattern="COPYING", dst="licenses",
+                  src=self._source_subfolder)
         self.copy(pattern="ninja*", dst="bin", src=self._source_subfolder)
         pdb = os.path.join(self.package_folder, "bin", "ninja.pdb")
         if os.path.isfile(pdb):
@@ -51,7 +51,7 @@ class NinjaConan(ConanFile):
 
     def package_info(self):
         # ensure ninja is executable
-        if str(self.settings.os_build) in ["Linux", "Macosx"]:
+        if self.settings.os_build in ["Linux", "Macos"]:
             name = os.path.join(self.package_folder, "bin", "ninja")
             os.chmod(name, os.stat(name).st_mode | 0o111)
         self.env_info.PATH.append(os.path.join(self.package_folder, "bin"))
