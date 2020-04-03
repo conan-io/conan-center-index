@@ -1,6 +1,6 @@
 ---
-name: 'Conan-center: Web UI Bugs Or Requests'
-about: 'Bugs or feature requests for the Web UI of Conan-center at https://conan.io/center'
+name: 'ConanCenter: Web UI Bugs Or Requests'
+about: 'Bugs or feature requests for the Web UI of ConanCenter at https://conan.io/center'
 title: '[conan.io/center] SHORT DESCRIPTION'
 labels: conan.io/center
 ---
