@@ -1,0 +1,148 @@
+[
+    {
+        "name": "util-macros",
+        "version": "1.19.2",
+        "sha256": "9225c45c3de60faf971979a55a5536f3562baa4b6f02246c23e98ac0c09a75b7",
+        "description": "GNU autoconf macros shared across X.Org projects",
+        "namespace": "util",
+        "header-only": true
+    },
+    {
+        "name": "xorgproto",
+        "version": "2019.1",
+        "sha256": "38ad1d8316515785d53c5162b4b7022918e03c11d72a5bd9df0a176607f42bca",
+        "description": "X Window System unified protocol definitions",
+        "namespace": "proto",
+        "header-only": true
+    },    
+    {
+        "name": "xtrans",
+        "version": "1.4.0",
+        "sha256": "48ed850ce772fef1b44ca23639b0a57e38884045ed2cbb18ab137ef33ec713f9",
+        "description": "X Window System Protocols Transport layer shared code",
+        "header-only": true
+    },
+    {
+        "name": "xcb-proto",
+        "version": "1.13",
+        "sha256": "0698e8f596e4c0dbad71d3dc754d95eb0edbb42df5464e0f782621216fa33ba7",
+        "description": "XML-XCB protocol descriptions used by libxcb for the X11 protocol & extensions",
+        "namespace": "xcb",
+        "header-only": true
+    },
+    {
+        "name": "libXau",
+        "version": "1.0.9",
+        "sha256": "1f123d8304b082ad63a9e89376400a3b1d4c29e67e3ea07b3f659cccca690eea",
+        "description": "Functions for handling Xauthority files and entries.",
+        "requires": ["xorgproto"]
+    },
+    {
+        "name": "libpthread-stubs",
+        "version": "0.1",
+        "sha256": "f8f7ca635fa54bcaef372fd5fd9028f394992a743d73453088fcadc1dbf3a704",
+        "description": "Stub replacements for POSIX Threads functions",
+        "header-only": true
+    },
+    {
+        "name": "libxcb",
+        "version": "1.13.1",
+        "sha256": "f09a76971437780a602303170fd51b5f7474051722bc39d566a272d2c4bde1b5",
+        "description": "C interface to the X Window System protocol, which replaces the traditional Xlib interface",
+        "namespace": "xcb",
+        "requires": ["xcb-proto", "util-macros", "libXau", "libpthread-stubs", "libXdmcp"]
+    },
+    {
+        "name": "libX11",
+        "version": "1.6.8",
+        "sha256": "69d1a27cba722dca897198a23fa8d3cad3ec0c715e00205ea4398ec68a4258a5",
+        "description": "Core X11 protocol client library (aka \"Xlib\")",
+        "requires": ["xorgproto", "xtrans", "libxcb"],
+        "system_libs": ["dl"],
+        "patches": ["libx11.patch"]
+    },
+    {
+        "name": "libXfixes",
+        "version": "5.0.3",
+        "sha256": "9ab6c13590658501ce4bd965a8a5d32ba4d8b3bb39a5a5bc9901edffc5666570",
+        "description": "Xlib-based library for the XFIXES Extension",
+        "requires": ["libX11"]
+    },   
+    {
+        "name": "libXrender",
+        "version": "0.9.10",
+        "sha256": "770527cce42500790433df84ec3521e8bf095dfe5079454a92236494ab296adf",
+        "description": "Xlib library for the Render Extension to the X11 protocol",
+        "requires": ["libX11"]
+    },
+    {
+        "name": "libXcursor",
+        "version": "1.2.0",
+        "sha256": "ad5b2574fccaa4c3fa67b9874fbed863d29ad230c784e9a08b20692418f6a1f8",
+        "description": "Xlib-based Cursor management library",
+        "requires": ["libXfixes", "libXrender"]
+    },   
+    {
+        "name": "libXdmcp",
+        "version": "1.1.3",
+        "sha256": "2ef9653d32e09d1bf1b837d0e0311024979653fe755ad3aaada8db1aa6ea180c",
+        "description": "X Display Manager Control Protocol library",
+        "requires": ["xproto"]
+    },
+    {
+        "name": "xproto",
+        "version": "7.0.31",
+        "sha256": "6d755eaae27b45c5cc75529a12855fed5de5969b367ed05003944cf901ed43c7",
+        "description": "X Window System Core Protocol",
+        "namespace": "proto",
+        "requires": [],
+        "header-only": true
+    },
+    {
+        "name": "xcb-util",
+        "version": "0.4.0",
+        "sha256": "0ed0934e2ef4ddff53fcc70fc64fb16fe766cd41ee00330312e20a985fd927a7",
+        "description": "utility functions for other XCB utilities.",
+        "namespace": "xcb",
+        "requires": ["libxcb"],
+        "libs": ["xcb-util"]
+    },
+    {
+        "name": "xcb-util-wm",
+        "version": "0.4.0",
+        "sha256": "48c9b2a8c5697e0fde189706a6fa4b09b7b65762d88a495308e646eaf891f42a",
+        "description": " XCB ICCCM and EWMH bindings",
+        "namespace": "xcb",
+        "requires": ["libxcb"],
+        "libs": ["xcb-ewmh","xcb-icccm"]
+    },
+    {
+        "name": "xcb-util-image",
+        "version": "0.4.0",
+        "sha256": "cb2c86190cf6216260b7357a57d9100811bb6f78c24576a3a5bfef6ad3740a42",
+        "description": "XCB image convenience library",
+        "namespace": "xcb",
+        "requires": ["xcb-util"],
+        "libs": ["xcb-image"],
+        "patches": ["clang.patch"]
+    },
+    {
+        "name": "xcb-util-keysyms",
+        "version": "0.4.0",
+        "sha256": "0807cf078fbe38489a41d755095c58239e1b67299f14460dec2ec811e96caa96",
+        "description": "Library for handling standard X key constants and conversion to/from keycodes.",
+        "namespace": "xcb",
+        "requires": ["libxcb"],
+        "libs": ["xcb-keysyms"]
+    },
+    {
+        "name": "xcb-util-renderutil",
+        "version": "0.3.9",
+        "sha256": "55eee797e3214fe39d0f3f4d9448cc53cffe06706d108824ea37bb79fcedcad5",
+        "description": "convenience functions for the Render extension",
+        "namespace": "xcb",
+        "requires": ["libxcb"],
+        "libs": ["xcb-render-util"]
+    }   
+]
+
