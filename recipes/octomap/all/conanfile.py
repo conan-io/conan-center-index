@@ -40,13 +40,19 @@ class OctomapConan(ConanFile):
         os.rename(self.name + "-" + self.version, self._source_subfolder)
 
     def build(self):
-        tools.replace_in_file(os.path.join(self._source_subfolder, "octomap","CMakeLists.txt"),
-                              "SET( BASE_DIR ${CMAKE_SOURCE_DIR} )",
-                              "SET( BASE_DIR ${CMAKE_BINARY_DIR} )")
+        self._patch_sources()
         cmake = CMake(self)
         cmake.definitions["OCTOMAP_OMP"] = self.options.openmp
         cmake.configure(build_folder=self._build_subfolder)
         cmake.build(target="octomap" if self.options.shared else "octomap-static")
+
+    def _patch_sources(self):
+        tools.replace_in_file(os.path.join(self._source_subfolder, "octomap", "CMakeLists.txt"),
+                              "SET( BASE_DIR ${CMAKE_SOURCE_DIR} )",
+                              "SET( BASE_DIR ${CMAKE_BINARY_DIR} )")
+        # Do not force PIC
+        tools.replace_in_file(os.path.join(self._source_subfolder, "octomap", "CMakeModules", "CompilerSettings.cmake"),
+                              "ADD_DEFINITIONS(-fPIC)", "")
 
     def package(self):
         self.copy("LICENSE.txt", dst="licenses", src=os.path.join(self._source_subfolder, "octomap"))
