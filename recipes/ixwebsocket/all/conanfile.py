@@ -29,7 +29,6 @@ class IXWebSocketConan(ConanFile):
         "fPIC": [True, False]
     }
 
-
     default_options = {k: v[0] for k, v in options.items()}
 
     def _can_use_openssl(self):
@@ -45,9 +44,8 @@ class IXWebSocketConan(ConanFile):
         if self.options.use_mbed_tls and not self.options.use_tls or self.options.get_safe("use_openssl") and not self.options.use_tls:
             raise ConanInvalidConfiguration("TLS must be enabled to use mbedtls")
         elif self.options.use_mbed_tls and self.options.get_safe("use_openssl"):
-            raise ConanInvalidConfiguration("Cannot use both OpenSSL and MbedTLS") 
+            raise ConanInvalidConfiguration("Cannot use both OpenSSL and MbedTLS")
 
-        
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
@@ -59,11 +57,11 @@ class IXWebSocketConan(ConanFile):
             del self.options.use_openssl
 
     def requirements(self):
-        if ((self._can_use_openssl() and not self.options.use_mbed_tls and self.options.use_tls
+        if (self._can_use_openssl() and not self.options.use_mbed_tls and self.options.use_tls
                 and (self.options.get_safe("use_openssl") or self.settings.os == "Linux" 
-                     or self.settings.os == "Windows" and not self.options.get_safe("openssl")))): # OpenSSL jiggling with Windows necessary on newer versions. 
+                     or self.settings.os == "Windows" and not self.options.get_safe("openssl"))): # OpenSSL jiggling with Windows necessary on newer versions.
 
-            self.requires.add("openssl/1.1.1c")
+            self.requires.add("openssl/1.1.1e")
 
         self.requires.add("zlib/1.2.11")
 
@@ -71,7 +69,6 @@ class IXWebSocketConan(ConanFile):
         # Apple will fall back on its own SSL system of not using mbed or OpenSSL.
         if self.settings.os == "Windows" and self.options.use_tls and not self._can_use_openssl() or self.options.use_mbed_tls:
             self.requires.add("mbedtls/2.16.3-apache")
-
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
