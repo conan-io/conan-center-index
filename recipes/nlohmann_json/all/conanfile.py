@@ -50,4 +50,4 @@ class NlohmannJsonConan(ConanFile):
 
 
     def package_id(self):
-        self.info.header_only()
+        self.info.settings.clear()
