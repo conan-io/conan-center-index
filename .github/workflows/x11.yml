@@ -55,6 +55,8 @@ jobs:
 
         xcb-util-wm_version: ['0.4.0']
 
+        xkeyboard-config_version: ['2.28']
+
         include:
           - build: 'linux-gcc4.8'
             os: 'ubuntu-latest'
@@ -416,6 +418,24 @@ jobs:
           docker-images: ${{ matrix.docker_image }}
         env:
           CONAN_REFERENCE: 'xcb-util-wm/${{ matrix.xcb-util-wm_version }}'
+          CONAN_VISUAL_RUNTIMES: ${{ matrix.vs_runtimes }}
+          CONAN_ARCHS: ${{ matrix.archs }}
+          CONAN_BUILD_TYPES: ${{ matrix.build_types }}
+          DEVELOPER_DIR: /Applications/Xcode_${{ matrix.xcode_version }}.app/Contents/Developer
+
+      - name: Building xkeyboard-config
+        uses: trassir/run-cpt@v0.2.2-trassir
+        with:
+          install: custom
+          # TODO: replace when https://github.com/conan-io/conan-package-tools/issues/479 will be fixed upstream
+          custom-package: git+https://github.com/trassir/conan-package-tools@fix-479-trassir
+          work-dir: sources/recipes/x11/all/xkeyboard-config
+          build-script: ../../../../build.py
+          compiler: ${{ matrix.compiler }}
+          compiler-versions: ${{ matrix.compiler_version }}
+          docker-images: ${{ matrix.docker_image }}
+        env:
+          CONAN_REFERENCE: 'xkeyboard-config/${{ matrix.xkeyboard-config_version }}'
           CONAN_VISUAL_RUNTIMES: ${{ matrix.vs_runtimes }}
           CONAN_ARCHS: ${{ matrix.archs }}
           CONAN_BUILD_TYPES: ${{ matrix.build_types }}
