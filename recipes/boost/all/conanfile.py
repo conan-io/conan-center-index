@@ -548,7 +548,6 @@ class BoostConan(ConanFile):
             #flags.append("--library-path={}".format(";".join(self.deps_cpp_info["icu"].lib_paths)))
             flags.append("-sICU_PATH={}".format(self.deps_cpp_info["icu"].rootpath))
             #flags.append("-sICU_LINK=\"-L{} -l{}\"".format(self.deps_cpp_info["icu"].lib_paths[0], " -l".join(self.deps_cpp_info["icu"].libs)))
-            #-sICU_LINK="-L/opt/some/path/lib/x86_64-linux-gnu -licuuc -licudata -licui18n"
             flags.append("boost.locale.iconv=off boost.locale.icu=on")
         else:
             flags.append("--disable-icu")
