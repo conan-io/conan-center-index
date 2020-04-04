@@ -1,8 +1,6 @@
 versions:
   "64.2":
     folder: all
-  "65.1":
-    folder: all
   "66.1":
     folder: all
     
