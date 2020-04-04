@@ -548,10 +548,7 @@ class BoostConan(ConanFile):
         flags.append("-sNO_ZSTD=%s" % ("0" if self.options.zstd else "1"))
 
         if self.options.icu:
-            #flags.append("--include={}".format(";".join(self.deps_cpp_info["icu"].include_paths)))
-            #flags.append("--library-path={}".format(";".join(self.deps_cpp_info["icu"].lib_paths)))
             flags.append("-sICU_PATH={}".format(self.deps_cpp_info["icu"].rootpath))
-            #flags.append("-sICU_LINK=\"-L{} -l{}\"".format(self.deps_cpp_info["icu"].lib_paths[0], " -l".join(self.deps_cpp_info["icu"].libs)))
             flags.append("boost.locale.iconv=off boost.locale.icu=on")
         else:
             flags.append("--disable-icu")
