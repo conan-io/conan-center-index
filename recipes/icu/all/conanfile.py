@@ -242,7 +242,7 @@ class ICUBase(ConanFile):
         if not self.options.shared:
             self.cpp_info.defines.append("U_STATIC_IMPLEMENTATION")
         if self.settings.os == 'Linux':
-            self.cpp_info.libs.append('dl')
+            self.cpp_info.system_libs.extend(["dl", "pthread"])
 
         if self.settings.os == 'Windows':
             self.cpp_info.libs.append('advapi32')
