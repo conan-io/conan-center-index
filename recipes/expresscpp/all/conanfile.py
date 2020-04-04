@@ -27,6 +27,23 @@ class ExpressCppConan(ConanFile):
         if self.settings.os == "Windows":
             del self.options.fPIC
 
+    def configure(self):
+        compiler = str(self.settings.compiler)
+        compiler_version = Version(self.settings.compiler.version.value)
+
+        minimal_version = {
+            "gcc": "9",
+            "clang": "8",
+            "apple-clang": "10",
+            "Visual Studio": "16"
+        }
+
+        if compiler in minimal_version and \
+           compiler_version < minimal_version[compiler]:
+            raise ConanInvalidConfiguration("%s requires a compiler that supports"
+                                            " at least C++17. %s %s is not"
+                                            " supported." % (self.name, compiler, compiler_version))
+
     def requirements(self):
         self.requires.add("boost/1.72.0")
         self.requires.add("fmt/6.1.2")
