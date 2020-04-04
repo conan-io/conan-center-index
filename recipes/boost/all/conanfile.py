@@ -56,7 +56,7 @@ class BoostConan(ConanFile):
         "debug_level": [i for i in range(1, 14)],
         "pch": [True, False],
         "extra_b2_flags": "ANY",  # custom b2 flags
-        "disable_icu": [True, False],
+        "icu": [True, False],
     }
     options.update({"without_%s" % libname: [True, False] for libname in lib_list})
 
@@ -82,7 +82,7 @@ class BoostConan(ConanFile):
         "debug_level": 2,
         'pch': True,
         'extra_b2_flags': 'None',
-        "disable_icu": True,
+        "icu": False,
     }
 
     for libname in lib_list:
@@ -122,6 +122,10 @@ class BoostConan(ConanFile):
         if self.settings.os == "Windows":
             del self.options.fPIC
 
+    def configure(self):
+        if self.options.icu:
+            tools.check_min_cppstd(self, "11")
+
     def build_requirements(self):
         self.build_requires("b2/4.2.0")
 
@@ -135,8 +139,8 @@ class BoostConan(ConanFile):
                 self.requires("xz_utils/5.2.4")
             if self.options.zstd:
                 self.requires("zstd/1.4.3")
-        if not self.options.disable_icu:
-            self.requires("icu/64.2")
+        if self.options.icu:
+            self.requires("icu/66.1")
 
     def package_id(self):
         if self.options.header_only:
@@ -543,7 +547,7 @@ class BoostConan(ConanFile):
         flags.append("-sNO_LZMA=%s" % ("0" if self.options.lzma else "1"))
         flags.append("-sNO_ZSTD=%s" % ("0" if self.options.zstd else "1"))
 
-        if not self.options.disable_icu:
+        if self.options.icu:
             #flags.append("--include={}".format(";".join(self.deps_cpp_info["icu"].include_paths)))
             #flags.append("--library-path={}".format(";".join(self.deps_cpp_info["icu"].lib_paths)))
             flags.append("-sICU_PATH={}".format(self.deps_cpp_info["icu"].rootpath))
@@ -551,7 +555,6 @@ class BoostConan(ConanFile):
             flags.append("boost.locale.iconv=off boost.locale.icu=on")
         else:
             flags.append("--disable-icu")
-
 
         def add_defines(option, library):
             if option:
