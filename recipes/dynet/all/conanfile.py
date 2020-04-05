@@ -76,7 +76,9 @@ class DynetConan(ConanFile):
     def build(self):
         self._patch_sources()
         cmake = self._configure_cmake()
-        cmake.build()
+        append_has_c99 = self.options.backend == "eigen" and self.settings.compiler == "Visual Studio" and self.settings.compiler.version == tools.Version("14")
+        with tools.environment_append({"EIGEN_HAS_C99_MATH": "1"}) if append_has_c99 else tools.no_op():
+            cmake.build()
 
     def package(self):
         self.copy(pattern="LICENSE.txt", dst="licenses", src=self._source_subfolder)
