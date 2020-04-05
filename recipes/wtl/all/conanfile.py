@@ -1,4 +1,5 @@
 from conans import ConanFile, tools
+from conans.errors import ConanInvalidConfiguration
 import os
 
 
@@ -10,8 +11,12 @@ class WTLConan(ConanFile):
     description = "Windows Template Library (WTL) is a C++ library for developing Windows applications and UI components."
     topics = ("atl", "template library", "windows", "template", "ui", "gdi")
 
-    settings = {'os': ['Windows']}
+    settings = "os"
     no_copy_source = True
+
+    def configure(self):
+        if self.settings.os != "Windows":
+            raise ConanInvalidConfiguration("wtl supported only in Windows")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
