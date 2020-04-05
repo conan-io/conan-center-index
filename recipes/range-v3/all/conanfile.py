@@ -22,3 +22,6 @@ class Rangev3Conan(ConanFile):
     def package(self):
         self.copy(pattern="*", dst="include", src=os.path.join(self._source_subfolder, "include"))
         self.copy("LICENSE.txt", dst="licenses", src=self._source_subfolder)
+
+    def package_id(self):
+        self.info.header_only()
