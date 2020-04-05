@@ -1,0 +1,8 @@
+sources:
+    "2.1":
+      sha256: 72d5c2a0c7dece6b91426f02993f640297f6c5f7de1907d4eb587796e97022bc
+      url: https://github.com/clab/dynet/archive/2.1.tar.gz
+patches:
+    "2.1":
+        - patch_file: "patches/2.1-use-conan-targets.patch"
+          base_path: "source_subfolder"
