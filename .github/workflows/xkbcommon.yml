@@ -22,16 +22,9 @@ jobs:
   xkbcommon:
     strategy:
       matrix:
-        build: ['linux-gcc4.8', 'linux-gcc8', 'linux-gcc9']
+        build: ['linux-gcc8', 'linux-gcc9']
         xkbcommon_versions: ['0.10.0']
-        include:
-          - build: 'linux-gcc4.8'
-            os: 'ubuntu-latest'
-            compiler: 'gcc'
-            compiler_version: '4.8'
-            docker_image: 'conanio/gcc48'
-            build_types: 'Release,Debug'
-            archs: 'x86_64'
+        include:          
           - build: 'linux-gcc8'
             os: 'ubuntu-latest'
             compiler: 'gcc'
