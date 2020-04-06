@@ -17,6 +17,8 @@ class FmtConan(ConanFile):
     options = {"shared": [True, False], "header_only": [True, False], "fPIC": [True, False], "with_fmt_alias": [True, False]}
     default_options = {"shared": False, "header_only": False, "fPIC": True, "with_fmt_alias": False}
 
+    _cmake = None
+
     @property
     def _source_subfolder(self):
         return "source_subfolder"
@@ -48,13 +50,15 @@ class FmtConan(ConanFile):
         os.rename(extracted_dir, self._source_subfolder)
 
     def _configure_cmake(self):
-        cmake = CMake(self)
-        cmake.definitions["FMT_DOC"] = False
-        cmake.definitions["FMT_TEST"] = False
-        cmake.definitions["FMT_INSTALL"] = True
-        cmake.definitions["FMT_LIB_DIR"] = "lib"
-        cmake.configure(build_folder=self._build_subfolder)
-        return cmake
+        if self._cmake:
+            return self._cmake
+        self._cmake = CMake(self)
+        self._cmake.definitions["FMT_DOC"] = False
+        self._cmake.definitions["FMT_TEST"] = False
+        self._cmake.definitions["FMT_INSTALL"] = True
+        self._cmake.definitions["FMT_LIB_DIR"] = "lib"
+        self._cmake.configure(build_folder=self._build_subfolder)
+        return self._cmake
 
     def build(self):
         if not self.options.header_only:
