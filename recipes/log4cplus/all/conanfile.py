@@ -37,7 +37,7 @@ class Log4cplusConan(ConanFile):
 
     def requirements(self):
         if self.options.with_iconv:
-            self.requires.add('libiconv/1.15')
+            self.requires.add('libiconv/1.16')
 
     def config_options(self):
         if self.settings.os == 'Windows':
