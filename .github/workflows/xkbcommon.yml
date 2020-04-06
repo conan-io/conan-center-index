@@ -52,8 +52,6 @@ jobs:
         uses: actions/setup-python@v1
         with:
           python-version: '3.x'
-      - name: Installing build tools
-        run: sudo apt update && sudo apt install -y meson bison pkg-config
       - name: Build and Optionally Upload
         uses: trassir/run-cpt@v0.2.2-trassir
         with:
@@ -65,7 +63,8 @@ jobs:
           compiler: ${{ matrix.compiler }}
           compiler-versions: ${{ matrix.compiler_version }}
           docker-images: ${{ matrix.docker_image }}
-        env:          
+        env:
+          CONAN_DOCKER_ENTRY_SCRIPT: sudo apt update && sudo apt install -y meson bison pkg-config
           CONAN_VISUAL_RUNTIMES: ${{ matrix.vs_runtimes }}
           CONAN_ARCHS: ${{ matrix.archs }}
           CONAN_BUILD_TYPES: ${{ matrix.build_types }}
