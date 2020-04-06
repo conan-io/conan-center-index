@@ -78,5 +78,5 @@ class Log4cplusConan(ConanFile):
         self.cpp_info.libs = tools.collect_libs(self)
         if self.settings.os == "Linux":
             self.cpp_info.system_libs = ["dl", "pthread"]
-        elif self.settings.compiler == "Visual Studio":
+        elif self.settings.os == "Windows":
             self.cpp_info.system_libs = ['Ws2_32']
