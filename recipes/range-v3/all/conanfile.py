@@ -1,5 +1,7 @@
 import os
 from conans import ConanFile, CMake, tools
+from conans.errors import ConanInvalidConfiguration
+from conans.tools import Version, check_min_cppstd, cppstd_flag
 
 class Rangev3Conan(ConanFile):
     name = "range-v3"
@@ -8,11 +10,34 @@ class Rangev3Conan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     description = "Experimental range library for C++11/14/17"
     topics = ("range", "range-library", "proposal", "iterator")
+    settings = "os", "arch", "compiler", "build_type"
     no_copy_source = True
 
     @property
     def _source_subfolder(self):
         return os.path.join(self.source_folder, "source_subfolder")
+
+    def _validate_compiler_settings(self):
+        # As per https://github.com/ericniebler/range-v3#supported-compilers
+        compiler = self.settings.compiler
+        version = Version(self.settings.compiler.version.value)
+
+        if compiler == "Visual Studio":
+            check_min_cppstd(self, "17") # This requires latest but that is an invalid value
+
+            if version < "16":
+                raise ConanInvalidConfiguration("range-v3 doesn't support MSVC < 16")
+
+        elif compiler == "gcc" and version < "6.5":
+            raise ConanInvalidConfiguration("range-v3 doesn't support gcc < 6.5")
+
+        elif compiler == "clang" and version < "3.9":
+            raise ConanInvalidConfiguration("range-v3 doesn't support clang < 3.9")
+
+    def configure(self):
+        version = Version(self.version)
+        if(version >= "0.10"):
+            self._validate_compiler_settings()
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
