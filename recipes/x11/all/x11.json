@@ -143,6 +143,15 @@
         "namespace": "xcb",
         "requires": ["libxcb"],
         "libs": ["xcb-render-util"]
+    },
+    {
+        "name": "xkeyboard-config",
+        "version": "2.28",
+        "sha256": "4424ffaafdf9f09dea69a317709353c4e2b19f69b2405effadce0bac3bdebdff",
+        "description": "keyboard configuration database for the X Window System.",
+        "namespace": "data/xkeyboard-config",
+        "header-only": true,
+        "requires": ["xproto", "libX11"]
     }   
 ]
 
