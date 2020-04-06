@@ -36,11 +36,9 @@ class XkbcommonConan(ConanFile):
         del self.settings.compiler.libcxx
         del self.settings.compiler.cppstd
 
-    def build_requirements(self):
-        pass
-       # we don't want to install next build tools using conan        
-       # if not tools.which("meson"):
-       #     self.build_requires("meson/0.53.2")
+    def build_requirements(self):               
+        if not tools.which("meson"):
+            self.build_requires("meson/0.53.2")
        # if not tools.which("bison"):
        #     self.build_requires("bison_installer/3.4.1)
        # if not tools.which("pkg-config"):
@@ -92,4 +90,5 @@ class XkbcommonConan(ConanFile):
         meson.install()
 
     def package_info(self):
+        self.env_info.destdir.append("../install")
         self.cpp_info.libs = tools.collect_libs(self)
