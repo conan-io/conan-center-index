@@ -133,7 +133,7 @@ class OpenSSLConan(ConanFile):
         except ConanException:
             url = self.conan_data["sources"][self.version]["url"]
             url = url.replace("https://www.openssl.org/source/",
-                              "https://www.openssl.org/source/old/%s" % self._full_version.base)
+                              "https://www.openssl.org/source/old/%s/" % self._full_version.base)
             tools.get(url, sha256=self.conan_data["sources"][self.version]["sha256"])
         extracted_folder = "openssl-" + self.version
         os.rename(extracted_folder, self._source_subfolder)
