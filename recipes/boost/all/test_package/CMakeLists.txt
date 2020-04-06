@@ -1,5 +1,5 @@
-PROJECT(MyHello)
 cmake_minimum_required(VERSION 2.8)
+project(test_package)
 enable_testing()
 
 set(Boost_DEBUG 1)

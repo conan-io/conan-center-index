@@ -12,7 +12,7 @@ class GlogConan(ConanFile):
     generators = "cmake", "cmake_find_package"
     settings = "os", "arch", "compiler", "build_type"
     options = {"shared": [True, False], "fPIC": [True, False], "with_gflags": [True, False], "with_threads": [True, False]}
-    default_options = {'shared': False, 'fPIC': True, 'with_gflags': True, 'with_threads': True}
+    default_options = {"shared": False, "fPIC": True, "with_gflags": True, "with_threads": True}
 
     @property
     def _source_subfolder(self):
@@ -37,9 +37,9 @@ class GlogConan(ConanFile):
 
     def _configure_cmake(self):
         cmake = CMake(self)
-        cmake.definitions['WITH_GFLAGS'] = self.options.with_gflags
-        cmake.definitions['WITH_THREADS'] = self.options.with_threads
-        cmake.definitions['BUILD_TESTING'] = False
+        cmake.definitions["WITH_GFLAGS"] = self.options.with_gflags
+        cmake.definitions["WITH_THREADS"] = self.options.with_threads
+        cmake.definitions["BUILD_TESTING"] = False
         cmake.configure()
         return cmake
 
@@ -62,4 +62,6 @@ class GlogConan(ConanFile):
     def package_info(self):
         self.cpp_info.libs = tools.collect_libs(self)
         if self.settings.os == "Linux":
-            self.cpp_info.libs.append('pthread')
+            self.cpp_info.system_libs.append("pthread")
+        self.cpp_info.names["cmake_find_package"] = "GLOG"
+        self.cpp_info.names["cmake_find_package_multi"] = "GLOG"

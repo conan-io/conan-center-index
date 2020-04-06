@@ -39,7 +39,8 @@ class JsoncppConan(ConanFile):
             tools.replace_in_file(os.path.join(self._source_subfolder, "src", "lib_json", "CMakeLists.txt"),
                                   "set_target_properties( jsoncpp_lib PROPERTIES POSITION_INDEPENDENT_CODE ON)",
                                   "set_target_properties( jsoncpp_lib PROPERTIES POSITION_INDEPENDENT_CODE OFF)")
-        if tools.Version(self.version) > tools.Version("1.9.0"):
+
+        if tools.Version(self.version) > "1.9.0":
             tools.replace_in_file(os.path.join(self._source_subfolder, "src", "lib_json", "CMakeLists.txt"),
                                   "$<BUILD_INTERFACE:${PROJECT_BINARY_DIR}/include/json>",
                                   "")
