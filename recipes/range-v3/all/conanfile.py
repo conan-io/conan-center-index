@@ -24,7 +24,7 @@ class Rangev3Conan(ConanFile):
 
         if compiler == "Visual Studio":
             if self.settings.compiler.get_safe("cppstd"):
-            check_min_cppstd(self, "20")
+                check_min_cppstd(self, "20")
 
             if version < "16":
                 raise ConanInvalidConfiguration("range-v3 doesn't support MSVC < 16")
