@@ -13,9 +13,21 @@ class ZlibConan(ConanFile):
     description = ("A Massively Spiffy Yet Delicately Unobtrusive Compression Library "
                    "(Also Free, Not to Mention Unencumbered by Patents)")
     settings = "os", "arch", "compiler", "build_type"
-    options = {"shared": [True, False], "fPIC": [True, False], "minizip": [True, False]}
-    default_options = {"shared": False, "fPIC": True, "minizip": False}
-    exports_sources = ["CMakeLists.txt", "CMakeLists_minizip.txt", "minizip.patch"]
+    options = {
+        "shared": [True, False],
+        "fPIC": [True, False],
+        "minizip": [True, False]
+    }
+    default_options = {
+        "shared": False,
+        "fPIC": True,
+        "minizip": False
+    }
+    exports_sources = [
+        "CMakeLists.txt",
+        "CMakeLists_minizip.txt",
+        "minizip.patch"
+    ]
     generators = "cmake"
     _source_subfolder = "source_subfolder"
 
@@ -28,18 +40,20 @@ class ZlibConan(ConanFile):
         del self.settings.compiler.cppstd
 
     def source(self):
-
         try:
             tools.get(**self.conan_data["sources"][self.version])
         except ConanException:
-            tools.get(**self.conan_data["sources"]["{}_mirror".format(self.version)])
+            tools.get(**self.conan_data["sources"]
+                      ["{}_mirror".format(self.version)])
 
-        os.rename("{}-{}".format(self.name, self.version), self._source_subfolder)
+        os.rename("{}-{}".format(self.name, self.version),
+                  self._source_subfolder)
         if not tools.os_info.is_windows:
             configure_file = os.path.join(self._source_subfolder, "configure")
             st = os.stat(configure_file)
             os.chmod(configure_file, st.st_mode | stat.S_IEXEC)
-        tools.patch(patch_file="minizip.patch", base_path=self._source_subfolder)
+        tools.patch(patch_file="minizip.patch",
+                    base_path=self._source_subfolder)
 
     def build(self):
         self._build_zlib()
@@ -54,9 +68,11 @@ class ZlibConan(ConanFile):
         env_build = AutoToolsBuildEnvironment(self)
 
         # configure passes CFLAGS to linker, should be LDFLAGS
-        tools.replace_in_file("../configure", "$LDSHARED $SFLAGS", "$LDSHARED $LDFLAGS")
+        tools.replace_in_file(
+            "../configure", "$LDSHARED $SFLAGS", "$LDSHARED $LDFLAGS")
         # same thing in Makefile.in, when building tests/example executables
-        tools.replace_in_file("../Makefile.in", "$(CC) $(CFLAGS) -o", "$(CC) $(LDFLAGS) -o")
+        tools.replace_in_file(
+            "../Makefile.in", "$(CC) $(CFLAGS) -o", "$(CC) $(LDFLAGS) -o")
 
         # we need to build only libraries without test example and minigzip
         if self.options.shared:
@@ -78,7 +94,7 @@ class ZlibConan(ConanFile):
 
     def _build_zlib(self):
         with tools.chdir(self._source_subfolder):
-            # https://github.com/madler/zlib/issues/268 
+            # https://github.com/madler/zlib/issues/268
             tools.replace_in_file('gzguts.h',
                                   '#if defined(_WIN32) || defined(__CYGWIN__)',
                                   '#if defined(_WIN32) || defined(__MINGW32__)')
@@ -102,8 +118,10 @@ class ZlibConan(ConanFile):
                     self._build_zlib_cmake()
 
     def _build_minizip(self):
-        minizip_dir = os.path.join(self._source_subfolder, 'contrib', 'minizip')
-        os.rename("CMakeLists_minizip.txt", os.path.join(minizip_dir, 'CMakeLists.txt'))
+        minizip_dir = os.path.join(
+            self._source_subfolder, 'contrib', 'minizip')
+        os.rename("CMakeLists_minizip.txt", os.path.join(
+            minizip_dir, 'CMakeLists.txt'))
         with tools.chdir(minizip_dir):
             cmake = CMake(self)
             cmake.configure(source_folder=minizip_dir)
@@ -121,7 +139,8 @@ class ZlibConan(ConanFile):
                     os.rename(current_lib, os.path.join(lib_path, "zlib.lib"))
             else:
                 if self.settings.compiler == "Visual Studio":
-                    current_lib = os.path.join(lib_path, "zlibstatic%s.lib" % suffix)
+                    current_lib = os.path.join(
+                        lib_path, "zlibstatic%s.lib" % suffix)
                     os.rename(current_lib, os.path.join(lib_path, "zlib.lib"))
                 elif self.settings.compiler == "gcc":
                     current_lib = os.path.join(lib_path, "libzlibstatic.a")
@@ -139,16 +158,22 @@ class ZlibConan(ConanFile):
 
         # Copy headers
         for header in ["*zlib.h", "*zconf.h"]:
-            self.copy(pattern=header, dst="include", src=self._source_subfolder, keep_path=False)
-            self.copy(pattern=header, dst="include", src="_build", keep_path=False)
+            self.copy(pattern=header, dst="include",
+                      src=self._source_subfolder, keep_path=False)
+            self.copy(pattern=header, dst="include",
+                      src="_build", keep_path=False)
 
         # Copying static and dynamic libs
         build_dir = os.path.join(self._source_subfolder, "_build")
         if self.options.shared:
-            self.copy(pattern="*.dylib*", dst="lib", src=build_dir, keep_path=False, symlinks=True)
-            self.copy(pattern="*.so*", dst="lib", src=build_dir, keep_path=False, symlinks=True)
-            self.copy(pattern="*.dll", dst="bin", src=build_dir, keep_path=False)
-            self.copy(pattern="*.dll.a", dst="lib", src=build_dir, keep_path=False)
+            self.copy(pattern="*.dylib*", dst="lib", src=build_dir,
+                      keep_path=False, symlinks=True)
+            self.copy(pattern="*.so*", dst="lib", src=build_dir,
+                      keep_path=False, symlinks=True)
+            self.copy(pattern="*.dll", dst="bin",
+                      src=build_dir, keep_path=False)
+            self.copy(pattern="*.dll.a", dst="lib",
+                      src=build_dir, keep_path=False)
         else:
             self.copy(pattern="*.a", dst="lib", src=build_dir, keep_path=False)
         self.copy(pattern="*.lib", dst="lib", src=build_dir, keep_path=False)
@@ -160,6 +185,7 @@ class ZlibConan(ConanFile):
             self.cpp_info.libs.append('minizip')
             if self.options.shared:
                 self.cpp_info.defines.append('MINIZIP_DLL')
-        self.cpp_info.libs.append('zlib' if self.settings.os == "Windows" else "z")
+        self.cpp_info.libs.append(
+            'zlib' if self.settings.os == "Windows" else "z")
         self.cpp_info.names["cmake_find_package"] = "ZLIB"
         self.cpp_info.names["cmake_find_package_multi"] = "ZLIB"
