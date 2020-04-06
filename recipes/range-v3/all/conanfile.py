@@ -9,7 +9,7 @@ class Rangev3Conan(ConanFile):
     homepage = "https://github.com/ericniebler/range-v3"
     url = "https://github.com/conan-io/conan-center-index"
     description = "Experimental range library for C++11/14/17"
-    topics = ("range", "range-library", "proposal", "iterator")
+    topics = ("range", "range-library", "proposal", "iterator", "header-only")
     settings = "os", "arch", "compiler", "build_type"
     no_copy_source = True
 
@@ -23,7 +23,7 @@ class Rangev3Conan(ConanFile):
         version = Version(self.settings.compiler.version.value)
 
         if compiler == "Visual Studio":
-            check_min_cppstd(self, "17") # This requires latest but that is an invalid value
+            check_min_cppstd(self, "20")
 
             if version < "16":
                 raise ConanInvalidConfiguration("range-v3 doesn't support MSVC < 16")
