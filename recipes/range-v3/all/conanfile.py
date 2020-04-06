@@ -23,6 +23,7 @@ class Rangev3Conan(ConanFile):
         version = Version(self.settings.compiler.version.value)
 
         if compiler == "Visual Studio":
+            if self.settings.compiler.get_safe("cppstd"):
             check_min_cppstd(self, "20")
 
             if version < "16":
