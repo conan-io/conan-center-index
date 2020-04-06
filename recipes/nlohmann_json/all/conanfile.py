@@ -46,7 +46,3 @@ class NlohmannJsonConan(ConanFile):
             os.remove(os.path.join(self.package_folder, "nlohmann_json.natvis"))
         except FileNotFoundError:
             pass
-
-
-    def package_id(self):
-        self.info.settings.clear()
