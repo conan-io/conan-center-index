@@ -1,7 +1,6 @@
 from conans import ConanFile, CMake, tools
 from conans.errors import ConanInvalidConfiguration
 import os
-import shutil
 
 
 class VariantConan(ConanFile):
@@ -27,7 +26,7 @@ class VariantConan(ConanFile):
         extracted_dir = "variant-" + self.version
 
         # Work to remove 'deps' directory, just to be sure.
-        shutil.rmtree(os.path.join(extracted_dir, "3rdparty"))
+        tools.rmdir(os.path.join(extracted_dir, "3rdparty"))
 
         os.rename(extracted_dir, self._source_subfolder)
 
@@ -50,5 +49,3 @@ class VariantConan(ConanFile):
     def package_id(self):
         self.info.header_only()
     
-    def package_info(self):
-        pass
