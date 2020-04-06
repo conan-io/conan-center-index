@@ -11,8 +11,8 @@ class FmtConan(ConanFile):
     topics = ("conan", "fmt", "format", "iostream", "printf")
     url = "https://github.com/conan-io/conan-center-index"
     license = "MIT"
-    exports_sources = ['CMakeLists.txt']
-    generators = 'cmake'
+    exports_sources = ["CMakeLists.txt"]
+    generators = "cmake"
     settings = "os", "compiler", "build_type", "arch"
     options = {"shared": [True, False], "header_only": [True, False], "fPIC": [True, False], "with_fmt_alias": [True, False]}
     default_options = {"shared": False, "header_only": False, "fPIC": True, "with_fmt_alias": False}
@@ -88,5 +88,5 @@ class FmtConan(ConanFile):
         else:
             self.cpp_info.libs = tools.collect_libs(self)
             if self.options.shared:
-                self.cpp_info.defines.append('FMT_SHARED')
+                self.cpp_info.defines.append("FMT_SHARED")
                 self.cpp_info.bindirs.append("lib")
