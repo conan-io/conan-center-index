@@ -21,3 +21,6 @@ patches:
   "6.0.0":
     - patch_file: "patches/fix-install-6.0.0.patch"
       base_path: "source_subfolder"
+  "6.1.0":
+    - patch_file: "patches/fix-mingw-msvc2015-export-assert-fail-6.1.0.patch"
+      base_path: "source_subfolder"
