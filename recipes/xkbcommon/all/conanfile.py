@@ -36,7 +36,10 @@ class XkbcommonConan(ConanFile):
         del self.settings.compiler.libcxx
         del self.settings.compiler.cppstd
 
-    def build_requirements(self):               
+    def build_requirements(self):
+       # take meson from conan since we need version >= 0.47 for customizing installation 
+       # (i.e. set installation prefix) - https://mesonbuild.com/Installing.html
+       # meson from official ubuntu repos now has version 0.45.1
         if not tools.which("meson"):
             self.build_requires("meson/0.53.2")
        # take next dependencies from the system	
