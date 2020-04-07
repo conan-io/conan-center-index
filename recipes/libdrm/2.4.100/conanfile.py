@@ -62,7 +62,7 @@ class LibnameConan(ConanFile):
     
     def requirements(self):
         if self.options.intel:
-            self.requires("libpciaccess/0.16@bincrafters/stable")
+            self.requires("libpciaccess/0.16")
 
     def config_options(self):
         if self.settings.os == 'Windows':
