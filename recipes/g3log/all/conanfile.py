@@ -76,7 +76,7 @@ class G3logConan(ConanFile):
         else:
             if self.options.shared:
                 self.copy("libg3logger.so*", dst="lib", src="lib", keep_path=False, symlinks=True)
-                self.copy("libg3logger.dylib*", dst="lib", src="lib", keep_path=False)
+                self.copy("*.dylib*", dst="lib", src="lib", keep_path=False)
             else:
                 self.copy("libg3logger.a", dst="lib", src="lib", keep_path=False)
         self.copy("g3log/*.hpp", dst="include", src=path.join(self._source_subfolder, 'include'))  # generated_definitions.hpp
