@@ -33,7 +33,7 @@ class LibpqxxRecipe(ConanFile):
 
     def configure(self):
         compiler = str(self.settings.compiler)
-        compiler_version = Version(self.settings.compiler.version.value)
+        compiler_version = Version(self.settings.compiler.version)
 
         minimal_version = {
             "Visual Studio": "15",

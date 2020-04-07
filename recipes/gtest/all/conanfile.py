@@ -31,7 +31,7 @@ class GTestConan(ConanFile):
 
     def configure(self):
         if self.settings.os == "Windows":
-            if self.settings.compiler == "Visual Studio" and Version(self.settings.compiler.version.value) <= "12":
+            if self.settings.compiler == "Visual Studio" and Version(self.settings.compiler.version) <= "12":
                 raise ConanInvalidConfiguration("Google Test {} does not support Visual Studio <= 12".format(self.version))
 
     def source(self):
@@ -86,7 +86,7 @@ class GTestConan(ConanFile):
             self.cpp_info.defines.append("GTEST_LINKED_AS_SHARED_LIBRARY=1")
 
         if self.settings.compiler == "Visual Studio":
-            if Version(self.settings.compiler.version.value) >= "15":
+            if Version(self.settings.compiler.version) >= "15":
                 self.cpp_info.defines.append("GTEST_LANG_CXX11=1")
                 self.cpp_info.defines.append("GTEST_HAS_TR1_TUPLE=0")
         self.cpp_info.names["cmake_find_package"] = "GTest"
