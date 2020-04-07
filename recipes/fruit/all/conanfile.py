@@ -40,7 +40,7 @@ class FruitConan(ConanFile):
 
     def configure(self):
         compiler = str(self.settings.compiler)
-        compiler_version = Version(self.settings.compiler.version)
+        compiler_version = Version(self.settings.compiler.version.value)
 
         minimal_version = {
             "gcc": "5",

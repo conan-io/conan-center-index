@@ -61,7 +61,7 @@ class CorradeConan(ConanFile):
             del self.options.fPIC
 
     def configure(self):
-        if self.settings.compiler == "Visual Studio" and tools.Version(self.settings.compiler.version) < 14:
+        if self.settings.compiler == "Visual Studio" and tools.Version(self.settings.compiler.version.value) < 14:
             raise ConanInvalidConfiguration("Corrade requires Visual Studio version 14 or greater")
         if tools.cross_building(self.settings):
              raise ConanInvalidConfiguration("This Corrade recipe doesn't support cross building yet")
@@ -89,8 +89,8 @@ class CorradeConan(ConanFile):
         cmake.definitions["LIB_SUFFIX"] = ""
 
         if self.settings.compiler == "Visual Studio":
-            cmake.definitions["MSVC2015_COMPATIBILITY"] = "ON" if tools.Version(self.settings.compiler.version) == 14 else "OFF"
-            cmake.definitions["MSVC2017_COMPATIBILITY"] = "ON" if tools.Version(self.settings.compiler.version) == 14 else "OFF"
+            cmake.definitions["MSVC2015_COMPATIBILITY"] = "ON" if tools.Version(self.settings.compiler.version.value) == 14 else "OFF"
+            cmake.definitions["MSVC2017_COMPATIBILITY"] = "ON" if tools.Version(self.settings.compiler.version.value) == 14 else "OFF"
 
         cmake.configure(build_folder=self._build_subfolder)
 

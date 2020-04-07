@@ -30,7 +30,7 @@ that have future-proof scalability"""
     def configure(self):
         if self.settings.os == "Macos" and \
            self.settings.compiler == "apple-clang" and \
-           Version(self.settings.compiler.version) < "8.0":
+           Version(self.settings.compiler.version.value) < "8.0":
             raise ConanInvalidConfiguration("%s %s couldn't be built by apple-clang < 8.0" % (self.name, self.version))
         if not self.options.shared:
             self.output.warn("Intel-TBB strongly discourages usage of static linkage")

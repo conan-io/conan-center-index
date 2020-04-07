@@ -33,7 +33,7 @@ class BenchmarkConan(ConanFile):
 
     def config_options(self):
         if self.settings.os == "Windows":
-            if self.settings.compiler == "Visual Studio" and tools.Version(self.settings.compiler.version) <= 12:
+            if self.settings.compiler == "Visual Studio" and tools.Version(self.settings.compiler.version.value) <= 12:
                 raise ConanInvalidConfiguration("{} {} does not support Visual Studio <= 12".format(self.name, self.version))
             del self.options.fPIC
 
