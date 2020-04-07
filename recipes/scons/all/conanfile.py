@@ -1,5 +1,4 @@
 from conans import ConanFile, tools
-from conans.errors import ConanException
 import os
 import shutil
 import sys
@@ -12,7 +11,7 @@ class SConsConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index/"
     homepage = "https://scons.org"
     topics = ("conan", "scons", "build", "configuration", "development")
-    settings = "os_build"  # Added to let the CI test this package on all os'es
+    settings = "os"  # Added to let the CI test this package on all os'es
 
     _autotools = None
 
