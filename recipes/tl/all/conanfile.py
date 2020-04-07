@@ -9,6 +9,7 @@ class TlConan(ConanFile):
     homepage = "https://tl.tartanllama.xyz"
     description = "tl is a collection of generic C++ libraries"
     topics = ("conan", "c++", "utilities")
+    settings = "compiler"
     license = "CC0-1.0"
     no_copy_source = True
     _source_subfolder = "tl"
