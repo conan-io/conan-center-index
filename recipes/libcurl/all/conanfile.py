@@ -244,6 +244,12 @@ class LibcurlConan(ConanFile):
                                   '-lz ',
                                   '-lzlib ')
 
+        # patch for openssl extras in mingw
+        if self.options.with_openssl:
+            tools.replace_in_file("configure",
+                                  '-lcrypto ',
+                                  '-lcrypto -lcrypt32 ')
+
         if self.options.shared:
             # patch for shared mingw build
             tools.replace_in_file(os.path.join('lib', 'Makefile.am'),
