@@ -20,7 +20,7 @@ class Rangev3Conan(ConanFile):
     def _validate_compiler_settings(self):
         # As per https://github.com/ericniebler/range-v3#supported-compilers
         compiler = self.settings.compiler
-        version = Version(self.settings.compiler.version.value)
+        version = Version(self.settings.compiler.version)
 
         if compiler == "Visual Studio":
             if self.settings.compiler.get_safe("cppstd"):
