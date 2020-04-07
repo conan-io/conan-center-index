@@ -31,6 +31,9 @@ class G3logConan(ConanFile):
     exports_sources = ["CMakeLists.txt", "patches/*"]
     _source_subfolder = "source_subfolder"
 
+    def configure(self):
+        tools.check_min_cppstd(self, "14")
+
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
         dir_postfix = self.conan_data["sources"][self.version]["url"].split("/")[-1][:-7]
