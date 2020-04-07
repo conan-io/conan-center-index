@@ -14,3 +14,16 @@ index c692a4c..cd5c6d1 100644
     IF (${CMAKE_SYSTEM} MATCHES "FreeBSD-([0-9]*)\\.(.*)")
         IF (${CMAKE_MATCH_1} GREATER 9)
             set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pthread")
+diff --git a/CPackLists.txt b/CPackLists.txt
+index 7a89ad0..0fbec4a 100644
+--- a/CPackLists.txt
++++ b/CPackLists.txt
+@@ -23,7 +23,7 @@ IF(NOT MINGW)
+    ENDIF()
+ ENDIF()
+ 
+-SET(CMAKE_INSTALL_LIBDIR lib CACHE PATH "Output dir for libraries")
++SET(CMAKE_INSTALL_LIBDIR lib CACHE STRING "Output dir for libraries" FORCE)
+ SET(CMAKE_INSTALL_HEADERDIR include CACHE PATH "Output dir for headers")
+ 
+ SET(CPACK_PACKAGE_NAME g3log)
