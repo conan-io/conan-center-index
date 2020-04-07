@@ -1,7 +1,7 @@
 import os
 from conans import ConanFile, CMake, tools
 from conans.errors import ConanInvalidConfiguration
-from conans.tools import Version, check_min_cppstd, cppstd_flag
+from conans.tools import Version, check_min_cppstd
 
 class Rangev3Conan(ConanFile):
     name = "range-v3"
