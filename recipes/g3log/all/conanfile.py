@@ -13,6 +13,7 @@ class G3logConan(ConanFile):
     settings = "os", "compiler", "build_type", "arch"
     options = {
       "shared": [True, False],
+      "fPIC": [True, False],
       "use_dynamic_logging_levels": [True, False],
       "change_debug_to_dbug": [True, False],
       "use_dynamic_max_message_size": [True, False],
@@ -25,6 +26,7 @@ class G3logConan(ConanFile):
     default_options["use_dynamic_max_message_size"] = True
     default_options["enable_fatal_signal_handling"] = True
     default_options["enable_vectored_exception_handling"] = True
+    default_options["fPIC"] = True
     generators = "cmake"
     exports_sources = ["CMakeLists.txt", "patches/*"]
     _source_subfolder = "source_subfolder"
@@ -35,6 +37,8 @@ class G3logConan(ConanFile):
         os.rename("g3log-{}".format(dir_postfix), self._source_subfolder)
 
     def config_options(self):
+        if self.settings.os == "Windows":
+            del self.options.fPIC
         if self.settings.compiler != "Visual Studio":
             del self.options.enable_vectored_exception_handling
             del self.options.debug_break_at_fatal_signal
