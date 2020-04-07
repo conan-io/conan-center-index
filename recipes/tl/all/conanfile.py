@@ -13,6 +13,7 @@ class TlConan(ConanFile):
     license = "CC0-1.0"
     no_copy_source = True
     _source_subfolder = "tl"
+    
     def configure(self):
         minimal_cpp_standard = "14"
         if self.settings.compiler.cppstd:
@@ -37,6 +38,7 @@ class TlConan(ConanFile):
         if version < minimal_version[compiler]:
             raise ConanInvalidConfiguration(
                 "%s requires a compiler that supports at least C++%s" % (self.name, minimal_cpp_standard))
+
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
         os.rename("tl-%s" % self.version, self._source_subfolder)
