@@ -37,7 +37,7 @@ class Rangev3Conan(ConanFile):
 
     def configure(self):
         version = Version(self.version)
-        if(version >= "0.10"):
+        if version >= "0.10":
             self._validate_compiler_settings()
 
     def source(self):
