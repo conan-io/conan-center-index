@@ -9,7 +9,6 @@
 #include "tl/dependent_false.hpp"
 #include "tl/integer_sequence.hpp"
 #include "tl/make_array.hpp"
-#include "tl/overload.hpp"
 
 std::string append_int(std::string s, int i) {
     return s + std::to_string(i);
@@ -66,12 +65,4 @@ int main()
     assert(arr[0] == 1);
     assert(arr[1] == 12);
     assert(arr[2] == 42l);
-
-    auto dispatcher = tl::overload(
-        [](int i) { return 42; },
-        [](char const* f) { return 24; }
-    );
-
-    assert(dispatcher(0) == 42);
-    assert(dispatcher("hi") == 24);
 }
