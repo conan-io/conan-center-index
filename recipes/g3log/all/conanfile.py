@@ -1,6 +1,8 @@
 import os
 from os import path
 from conans import ConanFile, CMake, tools
+from conans.tools import Version
+from conans.errors import ConanInvalidConfiguration
 
 
 class G3logConan(ConanFile):
@@ -31,8 +33,19 @@ class G3logConan(ConanFile):
     exports_sources = ["CMakeLists.txt", "patches/*"]
     _source_subfolder = "source_subfolder"
 
+    def _has_support_for_cpp14(self):
+        supported_compilers = [("apple-clang", 5.1), ("clang", 3.4), ("gcc", 6.1), ("Visual Studio", 15.0)]
+        compiler, version = self.settings.compiler, Version(self.settings.compiler.version)
+        return any(compiler == sc[0] and version >= sc[1] for sc in supported_compilers)
+
     def configure(self):
-        tools.check_min_cppstd(self, "14")
+        if self.settings.compiler.get_safe("cppstd"):
+            tools.check_min_cppstd(self, "14")
+        if not self._has_support_for_cpp14():
+            raise ConanInvalidConfiguration("g3log requires C++14 or higher support standard."
+                                            " {} {} is not supported."
+                                            .format(self.settings.compiler,
+                                                    self.settings.compiler.version))
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
