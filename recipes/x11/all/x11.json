@@ -152,6 +152,12 @@
         "namespace": "data/xkeyboard-config",
         "header-only": true,
         "requires": ["xproto", "libX11"]
-    }   
+    },
+    {
+        "name": "libpciaccess",
+        "version": "0.16",
+        "sha256": "84413553994aef0070cf420050aa5c0a51b1956b404920e21b81e96db6a61a27",
+        "description": "Generic PCI access library"
+    }
 ]
 
