@@ -26,7 +26,7 @@ class DoubleConversionConan(ConanFile):
     def configure(self):
         if self.settings.os == "Windows" and \
             self.settings.compiler == "Visual Studio" and \
-            Version(self.settings.compiler.version) < "14":
+            Version(self.settings.compiler.version.value) < "14":
             raise ConanInvalidConfiguration("Double Convertion could not be built by MSVC <14")
 
     def source(self):

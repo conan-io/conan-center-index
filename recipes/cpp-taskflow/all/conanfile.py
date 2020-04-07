@@ -45,7 +45,7 @@ class CppTaskflowConan(ConanFile):
         if compiler_version < minimal_version[compiler]:
             raise ConanInvalidConfiguration("%s requires a compiler that supports"
                                             " at least C++17. %s %s is not" 
-                                            " supported." % (self.name, compiler, Version(self.settings.compiler.version)))
+                                            " supported." % (self.name, compiler, Version(self.settings.compiler.version.value)))
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
