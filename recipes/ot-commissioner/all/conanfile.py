@@ -29,19 +29,30 @@ class OtCommissionerConan(ConanFile):
         if self.settings.os == "Windows":
             del self.options.fPIC
 
-    # def requirements(self):
-        # self.requires("libevent/6.1.2")
-        # self.requires("mdns")
+    def requirements(self):
+        self.requires("libevent/2.1.11")
+        self.requires("mdns/20200331")
+        self.requires("nlohmann_json/3.7.3")
+        self.requires("mbedtls/2.16.3-gpl")
+        self.requires("fmt/6.1.2")
+        # TODO: port to CCI
+        self.requires("cose-c/20200225@gocarlos/testing")
+        self.requires("cn-cbor/20200227@gocarlos/testing")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
-        extracted_dir = self.name + "-" + self.version
+        # extracted_dir = self.name + "-" + self.version
+        extracted_dir = self.name + "-" + os.path.basename(self.conan_data["sources"][self.version]["url"]).split(".")[0]
         os.rename(extracted_dir, self._source_subfolder)
 
     def _configure_cmake(self):
         if self._cmake:
             return self._cmake
         self._cmake = CMake(self)
+        self._cmake.definitions["OT_COMM_USE_VENDORED_LIBS"] = False
+        self._cmake.definitions["OT_COMM_TEST"] = False
+        self._cmake.definitions["OT_COMM_APP"] = False
+        self._cmake.definitions["OT_COMM_COVERAGE"] = False
         self._cmake.configure()
         return self._cmake
 

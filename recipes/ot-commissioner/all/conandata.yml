@@ -1,4 +1,4 @@
 sources:
   "20200404":
-    sha256: 8fa3f311dd612e7843357766bd6d24638a84f3f4e40c724e64139c25b11322be
-    url: https://giþthub.com/openthread/ot-commissioner/archive/31c82656f30e14da7ebdfe12ae5f64ffd6cf96e4.zip
+    sha256: 04a8cd1b3e79ef8f42341d50c32916806e1313bbcc76292f7f57c36ade371b18
+    url: https://github.com/gocarlos/ot-commissioner/archive/643e7e8cf803f3fd8daa09673d49badc43b4b385.zip
