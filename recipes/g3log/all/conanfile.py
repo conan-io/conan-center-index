@@ -78,10 +78,7 @@ class G3logConan(ConanFile):
                 self.copy("libg3logger.so*", dst="lib", src="lib", symlinks=True)
             else:
                 self.copy("libg3logger.a", dst="lib", src="lib")
-        if self.version == "20170108":
-            self.copy("g3log/*.hpp", dst="include", src="include")  # generated_definitions.hpp
-        else:
-            self.copy("g3log/*.hpp", dst="include", src=path.join(self._source_subfolder, 'include'))  # generated_definitions.hpp
+        self.copy("g3log/*.hpp", dst="include", src=path.join(self._source_subfolder, 'include'))  # generated_definitions.hpp
         self.copy("g3log/*.hpp", dst="include", src=path.join(self._source_subfolder, 'src'))
 
     def package_info(self):
