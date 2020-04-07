@@ -41,16 +41,15 @@ class G3logConan(ConanFile):
 
     def _configure_cmake(self):
         cmake = CMake(self)
-        self.bind_cmake_bool_option(cmake, "shared", "G3_SHARED_LIB")
-        self.bind_cmake_bool_option(cmake, "use_dynamic_logging_levels", "USE_DYNAMIC_LOGGING_LEVELS")
-        self.bind_cmake_bool_option(cmake, "change_debug_to_dbug", "CHANGE_G3LOG_DEBUG_TO_DBUG")
-        self.bind_cmake_bool_option(cmake, "use_dynamic_max_message_size", "USE_G3_DYNAMIC_MAX_MESSAGE_SIZE")
-        self.bind_cmake_bool_option(cmake, "log_full_filename", "G3_LOG_FULL_FILENAME")
-        self.bind_cmake_bool_option(cmake, "enable_fatal_signal_handling", "ENABLE_FATAL_SIGNALHANDLING")
+        cmake.definitions["G3_SHARED_LIB"] = self.options.shared
+        cmake.definitions["USE_DYNAMIC_LOGGING_LEVELS"] = self.options.use_dynamic_logging_levels
+        cmake.definitions["CHANGE_G3LOG_DEBUG_TO_DBUG"] = self.options.change_debug_to_dbug
+        cmake.definitions["USE_G3_DYNAMIC_MAX_MESSAGE_SIZE"] = self.options.use_dynamic_max_message_size
+        cmake.definitions["G3_LOG_FULL_FILENAME"] = self.options.log_full_filename
+        cmake.definitions["ENABLE_FATAL_SIGNALHANDLING"] = self.options.enable_fatal_signal_handling
         if self.settings.compiler == "Visual Studio":
-            self.bind_cmake_bool_option(cmake, "enable_vectored_exception_handling", "ENABLE_VECTORED_EXCEPTIONHANDLING")
-            self.bind_cmake_bool_option(cmake, "debug_break_at_fatal_signal", "DEBUG_BREAK_AT_FATAL_SIGNAL")
-        cmake.definitions["BUILD_ROOT_DIR"] = os.getcwd()
+            cmake.definitions["ENABLE_VECTORED_EXCEPTIONHANDLING"] = self.options.enable_vectored_exception_handling
+            cmake.definitions["DEBUG_BREAK_AT_FATAL_SIGNAL"] = self.options.debug_break_at_fatal_signal
         cmake.definitions["ADD_FATAL_EXAMPLE"] = "OFF"
         cmake.definitions["ADD_G3LOG_PERFORMANCE"] = "OFF"
         cmake.definitions["ADD_G3LOG_UNIT_TEST"] = "OFF"
@@ -85,7 +84,3 @@ class G3logConan(ConanFile):
         self.cpp_info.libs = ["g3logger"]
         if str(self.settings.os) in ["Linux", "Android"]:
             self.cpp_info.libs.append('pthread')
-
-    def bind_cmake_bool_option(self, cmake, name, cmake_name):
-        cmake.definitions[cmake_name] = "ON" if getattr(self.options, name) else "OFF"
-        return "ON" if getattr(self.options, name) else "OFF"
