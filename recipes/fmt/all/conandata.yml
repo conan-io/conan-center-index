@@ -14,3 +14,6 @@ sources:
   "6.1.2":
     sha256: 1cafc80701b746085dddf41bd9193e6d35089e1c6ec1940e037fcb9c98f62365
     url: https://github.com/fmtlib/fmt/archive/6.1.2.tar.gz
+  "6.2.0":
+    sha256: a4468d528682143dcef2f16068104e03ef50467b0170b6125c9caf777d27bf10
+    url: https://github.com/fmtlib/fmt/archive/6.2.0.tar.gz
