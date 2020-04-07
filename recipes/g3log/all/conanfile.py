@@ -73,9 +73,10 @@ class G3logConan(ConanFile):
             self.copy("g3logger.lib", dst="lib", src="lib")
             self.copy("g3logger.dll", dst="bin", src="bin")
             self.copy("g3logrotate.lib", dst="lib", src="lib")
-        elif self.settings.os == "Linux":
+        else:
             if self.options.shared:
                 self.copy("libg3logger.so*", dst="lib", src="lib", symlinks=True)
+                self.copy("libg3logger.dylib*", dst="lib", src="lib", symlinks=True)
             else:
                 self.copy("libg3logger.a", dst="lib", src="lib")
         self.copy("g3log/*.hpp", dst="include", src=path.join(self._source_subfolder, 'include'))  # generated_definitions.hpp
