@@ -1,4 +1,5 @@
 from conans import ConanFile, tools
+from conans.errors import ConanException
 from io import StringIO
 import os
 
@@ -14,7 +15,8 @@ class TestPackageConan(ConanFile):
         output = StringIO()
         self.run("{} --version".format(scons_path), run_environment=True, output=output)
         text = output.getvalue()
-        assert self.deps_cpp_info["scons"].version in text
+        if self.deps_cpp_info["scons"].version not in text:
+            raise ConanException("scons --version does not return correct version")
 
         self.output.info("TMP={}".format(os.environ.get("TMP")))
 
