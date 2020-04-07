@@ -27,11 +27,16 @@ class ExpressCppConan(ConanFile):
         if self.settings.os == "Windows":
             del self.options.fPIC
 
+    def _has_support_for_cpp17(self):
+        supported_compilers = [("apple-clang", 10), ("clang", 8), ("gcc", 9), ("Visual Studio", 16)]
+        compiler, version = self.settings.compiler, Version(self.settings.compiler.version)
+        return any(compiler == sc[0] and version >= sc[1] for sc in supported_compilers)
+
     def configure(self):
         if self.settings.compiler.get_safe("cppstd"):
             tools.check_min_cppstd(self, "17")
         if not self._has_support_for_cpp17():
-            raise ConanInvalidConfiguration("Taocpp JSON requires C++17 or higher support standard."
+            raise ConanInvalidConfiguration("Expresscpp requires C++17 or higher support standard."
                                             " {} {} is not supported."
                                             .format(self.settings.compiler,
                                                     self.settings.compiler.version))
