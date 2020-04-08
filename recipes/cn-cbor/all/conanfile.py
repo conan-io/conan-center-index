@@ -60,9 +60,15 @@ class CnCborStackConan(ConanFile):
         cmake.build()
 
     def package(self):
-        self.copy("LICENSE", dst='licenses', src=os.path.join(self._source_subfolder, "license"))
+        self.copy("LICENSE", dst="licenses", src=self._source_subfolder)
         cmake = self._configure_cmake()
         cmake.install()
+        os.remove(os.path.join(self.package_folder, "README.md"))
+        os.remove(os.path.join(self.package_folder, "LICENSE"))
+        tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
+        tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
+        tools.rmdir(os.path.join(self.package_folder,
+                                 "lib", "cn-cbor", "cmake"))
 
     def package_info(self):
         self.cpp_info.libs = tools.collect_libs(self)
