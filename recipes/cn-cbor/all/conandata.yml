@@ -1,4 +1,4 @@
 sources:
-  "20200326":
-    sha256: 7cc228a7ac56494f95b74dcf94c254f920aada736793cdf647f9a644f6c67c66
-    url: https://github.com/jimsch/cn-cbor/archive/e2b410487ab76a1b9ee639716c01622290a46dcb.zip
+  "20200409":
+    sha256: 5a5c827177bf5f1bd3b667630eacd02f363e726dfcdd4c49094f594f3bcb82d8
+    url: https://github.com/jimsch/cn-cbor/archive/ff195453c9d62f0a30f2d64436c2d614a2278ba7.zip
