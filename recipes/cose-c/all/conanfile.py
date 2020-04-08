@@ -4,7 +4,7 @@ from conans.errors import ConanInvalidConfiguration
 
 
 class CoseCStackConan(ConanFile):
-    name = "COSE-C"
+    name = "cose-c"
     license = "BSD-3-Clause"
     homepage = "https://github.com/cose-wg/COSE-C"
     url = "https://github.com/conan-io/conan-center-index"
@@ -52,7 +52,7 @@ class CoseCStackConan(ConanFile):
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
-        extracted_dir = self.name + "-" + \
+        extracted_dir = self.name.upper() + "-" + \
             os.path.basename(
                 self.conan_data["sources"][self.version]["url"]).split(".")[0]
         os.rename(extracted_dir, self._source_subfolder)
