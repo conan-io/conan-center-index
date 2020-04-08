@@ -8,7 +8,7 @@ class LibiconvConan(ConanFile):
     description = "Convert text to and from Unicode"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://www.gnu.org/software/libiconv/"
-    topics = "libiconv", "iconv", "text", "encoding", "locale", "unicode", "conversion"
+    topics = ("libiconv", "iconv", "text", "encoding", "locale", "unicode", "conversion")
     license = "LGPL-2.1"
     exports_sources = "patches/**"
     settings = "os", "compiler", "build_type", "arch"
