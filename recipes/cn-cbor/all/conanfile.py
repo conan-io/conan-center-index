@@ -40,6 +40,9 @@ class CnCborStackConan(ConanFile):
         del self.settings.compiler.libcxx
         del self.settings.compiler.cppstd
 
+        if self.settings.os == "Windows" and self.options.shared:
+            raise ConanInvalidConfiguration("Windows shared builds are not supported right now")
+
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
         extracted_dir = self.name + "-" + os.path.basename(self.conan_data["sources"][self.version]["url"]).split(".")[0]
@@ -58,6 +61,8 @@ class CnCborStackConan(ConanFile):
     def build(self):
         cmake = self._configure_cmake()
         cmake.build()
+
+
 
     def package(self):
         self.copy("LICENSE", dst="licenses", src=self._source_subfolder)
