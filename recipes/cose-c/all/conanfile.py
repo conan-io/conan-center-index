@@ -5,7 +5,7 @@ from conans.errors import ConanInvalidConfiguration
 
 class CoseCStackConan(ConanFile):
     name = "COSE-C"
-    license = "MIT"
+    license = "BSD-3-Clause"
     homepage = "https://github.com/cose-wg/COSE-C"
     url = "https://github.com/conan-io/conan-center-index"
     description = """Implementation of COSE in C using cn-cbor and openssl"""
