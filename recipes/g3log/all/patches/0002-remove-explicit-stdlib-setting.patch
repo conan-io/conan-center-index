@@ -35,7 +35,7 @@ index 914a761..28976ee 100644
  IF(MINGW)
     # ==========================================================================
 diff --git a/CPackLists.txt b/CPackLists.txt
-index 7a89ad0..0fbec4a 100644
+index 7a89ad0..3262b6d 100644
 --- a/CPackLists.txt
 +++ b/CPackLists.txt
 @@ -23,7 +23,7 @@ IF(NOT MINGW)
@@ -47,3 +47,11 @@ index 7a89ad0..0fbec4a 100644
  SET(CMAKE_INSTALL_HEADERDIR include CACHE PATH "Output dir for headers")
  
  SET(CPACK_PACKAGE_NAME g3log)
+@@ -43,6 +43,7 @@ IF(NOT MINGW)
+    INSTALL( TARGETS g3logger
+                ARCHIVE DESTINATION ${CPACK_PACKAGING_INSTALL_PREFIX}/${CMAKE_INSTALL_LIBDIR}
+                LIBRARY DESTINATION ${CPACK_PACKAGING_INSTALL_PREFIX}/${CMAKE_INSTALL_LIBDIR}
++               RUNTIME DESTINATION ${CPACK_PACKAGING_INSTALL_PREFIX}/${CMAKE_INSTALL_BINDIR}
+                COMPONENT libraries)
+ 
+    INSTALL( FILES ${HEADER_FILES}
