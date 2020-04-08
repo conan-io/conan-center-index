@@ -1,0 +1,72 @@
+--- a/modules/ODE/CMakeLists.txt	2020-04-07 23:02:17.000000000 +0200
++++ b/modules/ODE/CMakeLists.txt	2020-04-07 12:08:04.000000000 +0200
+@@ -120,8 +120,8 @@
+ # Linux global build options
+ elseif (${CMAKE_SYSTEM_NAME} MATCHES Linux)
+   add_definitions (-DLINUX)
+-  set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fPIC -march=native -Wno-deprecated -std=c++0x")
+-  set (CMAKE_C_FLAGS   "${CMAKE_C_FLAGS}   -fPIC -march=native -Wno-deprecated")
++  set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -march=native -Wno-deprecated -std=c++0x")
++  set (CMAKE_C_FLAGS   "${CMAKE_C_FLAGS}   -march=native -Wno-deprecated")
+ 
+ # Mac OS X global build options
+ elseif (${CMAKE_SYSTEM_NAME} MATCHES Darwin)
+@@ -132,7 +132,7 @@
+ 
+ 
+ #
+-# static library
++# library
+ #
+ 
+ # header search path
+@@ -143,10 +143,10 @@
+ include_directories (${PROJECT_SOURCE_DIR}/external/ODE/OPCODE)
+ include_directories (${PROJECT_SOURCE_DIR}/external/ODE/OPCODE/Ice)
+ 
+-# static library source files
++# library source files
+ file (GLOB_RECURSE source RELATIVE ${PROJECT_SOURCE_DIR} ${PROJECT_SOURCE_DIR}/src/*.cpp ${PROJECT_SOURCE_DIR}/src/*.h)
+ 
+-# static library external dependencies source files
++# library external dependencies source files
+ file (GLOB_RECURSE source_ode    RELATIVE ${PROJECT_SOURCE_DIR} ${PROJECT_SOURCE_DIR}/external/ODE/ode/src/*.c ${PROJECT_SOURCE_DIR}/external/ODE/ode/src/*.cpp ${PROJECT_SOURCE_DIR}/external/ODE/ode/src/*.h ${PROJECT_SOURCE_DIR}/external/ODE/include/*.h)
+ file (GLOB_RECURSE source_opcode RELATIVE ${PROJECT_SOURCE_DIR} ${PROJECT_SOURCE_DIR}/external/ODE/OPCODE/*.cpp ${PROJECT_SOURCE_DIR}/external/ODE/OPCODE/*.h)
+ 
+@@ -173,8 +173,17 @@
+ endif ()
+ add_definitions (${PROJECT_DEFINITIONS})
+ 
+-# static library
+-add_library (chai3d-ODE STATIC ${source} ${source_ode} ${source_opcode})
++# library
++add_library (chai3d-ODE ${source} ${source_ode} ${source_opcode} $<TARGET_OBJECTS:chai3d-obj>)
++target_include_directories (chai3d-ODE
++  PUBLIC
++    $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/src>
++    $<INSTALL_INTERFACE:include>
++)
++if (BUILD_SHARED_LIBS)
++  set_target_properties (chai3d-ODE PROPERTIES VERSION ${PROJECT_VERSION})
++endif ()
++target_link_libraries (chai3d-ODE PUBLIC chai3d-lib)
+ 
+ # library exports
+ set (CHAI3D-ODE_INCLUDE_DIRS "${PROJECT_SOURCE_DIR}/src")
+@@ -183,16 +192,6 @@
+ 
+ 
+ #
+-# executables
+-#
+-
+-# examples
+-if (EXISTS ${PROJECT_SOURCE_DIR}/examples)
+-  add_subdirectory (${PROJECT_SOURCE_DIR}/examples)
+-endif ()
+-
+-
+-#
+ # export package
+ #
+ 

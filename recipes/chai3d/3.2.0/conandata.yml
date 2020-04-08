@@ -1,0 +1,18 @@
+sources:
+  "3.2.0":
+    url: "https://github.com/chai3d/chai3d/archive/3.2.0.zip"
+    sha256: "a1566c335b63972b1c5af3c5523c8bd130233ef9bc3ccb3cc55d40c838b7f382"
+patches:
+  "3.2.0":
+    - base_path: "source_subfolder"
+      patch_file: "patches/3.2.0/0001-fix_cmaths_croteulerdeg.patch"
+    - base_path: "source_subfolder"
+      patch_file: "patches/3.2.0/0002-fix_cfilexml_setname.patch"
+    - base_path: "source_subfolder"
+      patch_file: "patches/3.2.0/conanize_cmake-chai3d.patch"
+    - base_path: "source_subfolder"
+      patch_file: "patches/3.2.0/conanize_cmake-mod-bullet.patch"
+    - base_path: "source_subfolder"
+      patch_file: "patches/3.2.0/conanize_cmake-mod-gel.patch"
+    - base_path: "source_subfolder"
+      patch_file: "patches/3.2.0/conanize_cmake-mod-ode.patch"

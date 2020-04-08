@@ -1,0 +1,22 @@
+From 1a571bc17c6df8c9989ea590f45421c13f3bffec Mon Sep 17 00:00:00 2001
+From: Gonzalo Esteban <gonestco@gmail.com>
+Date: Tue, 21 Jan 2020 18:33:34 +0100
+Subject: [PATCH] CFileXML.cpp setName() fix
+
+---
+ src/files/CFileXML.cpp | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/src/files/CFileXML.cpp b/src/files/CFileXML.cpp
+index 0fde18e..7d12407 100644
+--- a/src/files/CFileXML.cpp
++++ b/src/files/CFileXML.cpp
+@@ -475,7 +475,7 @@ bool cFileXML::setName(const string& a_name)
+     // otherwise, assign name to current node
+     else 
+     {
+-      ((XML*)(m_xml))->m_currentNode.set_value(a_name.c_str());
++      ((XML*)(m_xml))->m_currentNode.set_name(a_name.c_str());
+ 
+       return true;
+     }

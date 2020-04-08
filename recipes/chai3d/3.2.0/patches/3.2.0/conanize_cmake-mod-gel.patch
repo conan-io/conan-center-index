@@ -1,0 +1,70 @@
+--- a/modules/GEL/CMakeLists.txt	2020-01-21 23:47:31.000000000 +0100
++++ b/modules/GEL/CMakeLists.txt	2020-04-07 12:08:43.000000000 +0200
+@@ -120,8 +120,8 @@
+ # Linux global build options
+ elseif (${CMAKE_SYSTEM_NAME} MATCHES Linux)
+   add_definitions (-DLINUX)
+-  set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fPIC -march=native -Wno-deprecated -std=c++0x")
+-  set (CMAKE_C_FLAGS   "${CMAKE_C_FLAGS}   -fPIC -march=native -Wno-deprecated")
++  set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -march=native -Wno-deprecated -std=c++0x")
++  set (CMAKE_C_FLAGS   "${CMAKE_C_FLAGS}   -march=native -Wno-deprecated")
+ 
+ # Mac OS X global build options
+ elseif (${CMAKE_SYSTEM_NAME} MATCHES Darwin)
+@@ -132,16 +132,16 @@
+ 
+ 
+ #
+-# static library
++# library
+ #
+ 
+ # header search path
+ include_directories (${PROJECT_SOURCE_DIR}/src)
+ 
+-# static library source files
++# library source files
+ file (GLOB_RECURSE source RELATIVE ${PROJECT_SOURCE_DIR} ${PROJECT_SOURCE_DIR}/src/*.cpp ${PROJECT_SOURCE_DIR}/src/*.h)
+ 
+-# static library external dependencies source files
++# library external dependencies source files
+ # -
+ 
+ # platform-specific source files adjustments
+@@ -153,8 +153,17 @@
+ # build flags
+ add_definitions (${PROJECT_DEFINITIONS})
+ 
+-# static library
+-add_library (chai3d-GEL STATIC ${source})
++# library
++add_library (chai3d-GEL ${source} $<TARGET_OBJECTS:chai3d-obj>)
++target_include_directories (chai3d-GEL
++  PUBLIC
++    $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/src>
++    $<INSTALL_INTERFACE:include>
++)
++if (BUILD_SHARED_LIBS)
++  set_target_properties (chai3d-GEL PROPERTIES VERSION ${PROJECT_VERSION})
++endif ()
++target_link_libraries (chai3d-GEL PUBLIC chai3d-lib)
+ 
+ # library exports
+ set (CHAI3D-GEL_INCLUDE_DIRS "${PROJECT_SOURCE_DIR}/src")
+@@ -162,16 +171,6 @@
+ 
+ 
+ #
+-# executables
+-#
+-
+-# examples
+-if (EXISTS ${PROJECT_SOURCE_DIR}/examples)
+-  add_subdirectory (${PROJECT_SOURCE_DIR}/examples)
+-endif ()
+-
+-
+-#
+ # export package
+ #
+ 

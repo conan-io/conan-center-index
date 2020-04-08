@@ -1,0 +1,22 @@
+From 516b3f979e1defb55986d43c5b2cfac668feb86e Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Fr=C3=A9d=C3=A9ric=20Bourgeois?= <bourgeoislab@gmail.com>
+Date: Thu, 14 Nov 2019 18:56:16 +0100
+Subject: [PATCH] CMaths.h cRotEulerDeg() fix intrinsic/extrinsic
+
+---
+ src/math/CMaths.h | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/src/math/CMaths.h b/src/math/CMaths.h
+index 6b2b069..ed29d3b 100644
+--- a/src/math/CMaths.h
++++ b/src/math/CMaths.h
+@@ -1190,7 +1190,7 @@ inline cMatrix3d cRotEulerDeg(const double& a_angleDeg1,
+     // create matrix
+     cMatrix3d rot;
+     if (a_useIntrinsicEulerModel)
+-        rot.setExtrinsicEulerRotationDeg(a_angleDeg1, a_angleDeg2, a_angleDeg3, a_eulerOrder);
++        rot.setIntrinsicEulerRotationDeg(a_angleDeg1, a_angleDeg2, a_angleDeg3, a_eulerOrder);
+     else
+         rot.setExtrinsicEulerRotationDeg(a_angleDeg1, a_angleDeg2, a_angleDeg3, a_eulerOrder);
+ 
