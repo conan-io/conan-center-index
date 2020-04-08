@@ -66,5 +66,5 @@ class CnCborStackConan(ConanFile):
 
     def package_info(self):
         self.cpp_info.libs = tools.collect_libs(self)
-        elif self.settings.os == "Windows":
+        if self.settings.os == "Windows":
             self.cpp_info.system_libs = ["ws2_32"]
