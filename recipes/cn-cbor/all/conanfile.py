@@ -9,7 +9,7 @@ class CnCborStackConan(ConanFile):
     homepage = "https://github.com/jimsch/cn-cbor/"
     url = "https://github.com/conan-io/conan-center-index"
     description = """A constrained node implementation of CBOR in C"""
-    topics = ("cbor")
+    topics = ("cbor", "nodes", "messaging")
     exports_sources = ['CMakeLists.txt']
     settings = "os", "compiler", "build_type", "arch"
     options = {
@@ -55,6 +55,8 @@ class CnCborStackConan(ConanFile):
         self._cmake.definitions["fatal_warnings"] = False
         self._cmake.definitions["coveralls"] = False
         self._cmake.definitions["build_tests"] = False
+        self._cmake.definitions["build_docs"] = False
+        
         self._cmake.configure(build_folder=self._build_subfolder)
         return self._cmake
 
