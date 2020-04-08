@@ -87,6 +87,7 @@ class LibtiffConan(ConanFile):
         return self._cmake
 
     def _patch_sources(self):
+        cmakefile = os.path.join(self._source_subfolder, "CMakeListsOriginal.txt")
         if self.options.shared and self.settings.compiler == "Visual Studio":
             # https://github.com/Microsoft/vcpkg/blob/master/ports/tiff/fix-cxx-shared-libs.patch
             tools.replace_in_file(os.path.join(self._source_subfolder, 'libtiff', 'CMakeLists.txt'),
@@ -95,18 +96,17 @@ class LibtiffConan(ConanFile):
                                   r'WINDOWS_EXPORT_ALL_SYMBOLS ON)')
 
             if self.settings.os == "Windows" and self.settings.compiler != "Visual Studio":
-                tools.replace_in_file(os.path.join(self._source_subfolder, "CMakeListsOriginal.txt"),
+                tools.replace_in_file(cmakefile,
                                       "find_library(M_LIBRARY m)",
                                       "if (NOT MINGW)\n  find_library(M_LIBRARY m)\nendif()")
                 if self.version == '4.0.8':
                     # only one occurence must be patched. fixed in 4.0.9
-                    tools.replace_in_file(os.path.join(self._source_subfolder, "CMakeListsOriginal.txt"),
-                                          "if (UNIX)",
-                                          "if (UNIX OR MINGW)")
+                    tools.replace_in_file(cmakefile, "if (UNIX)", "if (UNIX OR MINGW)")
 
         tools.replace_in_file(os.path.join(self._source_subfolder, "CMakeListsOriginal.txt"),
                               "add_subdirectory(tools)\nadd_subdirectory(test)\nadd_subdirectory(contrib)\nadd_subdirectory(build)\n"
                               "add_subdirectory(man)\nadd_subdirectory(html)", "")
+        tools.replace_in_file(cmakefile, "LIBLZMA_LIBRARIES", "LibLZMA_LIBRARIES")
 
     def build(self):
         self._patch_sources()
