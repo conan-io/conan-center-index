@@ -93,3 +93,5 @@ class SipConan(ConanFile):
     def package_info(self):
         self.cpp_info.bindirs = ["bin"]
         self.cpp_info.includedirs = ["include"]
+        if tools.os_info.is_macos:
+            self.cpp_info.libdirs = ["lib-dynload"]
