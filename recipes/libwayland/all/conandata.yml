@@ -1,0 +1,4 @@
+sources:
+  "1.18.0":
+    url: "https://wayland.freedesktop.org/releases/wayland-1.18.0.tar.xz"
+    sha256: "4675a79f091020817a98fd0484e7208c8762242266967f55a67776936c2e294d"
