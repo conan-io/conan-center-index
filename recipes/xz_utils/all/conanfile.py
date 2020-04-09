@@ -130,6 +130,8 @@ class XZUtils(ConanFile):
     def package_info(self):
         if not self.options.shared:
             self.cpp_info.defines.append("LZMA_API_STATIC")
+        if self.settings.os == "Linux":
+            self.cpp_info.system_libs.append("pthread")
         self.cpp_info.libs = tools.collect_libs(self)
         self.cpp_info.names["pkg_config"] = "liblzma"
         self.cpp_info.names["cmake_find_package"] = "LibLZMA"
