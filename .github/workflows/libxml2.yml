@@ -22,7 +22,7 @@ jobs:
     strategy:
       matrix:
         build: ['linux-gcc8', 'linux-gcc9', 'macos']
-        libxml2_versions: ['2.9.9]
+        libxml2_versions: ['2.9.9']
         include:          
           - build: 'linux-gcc8'
             os: 'ubuntu-latest'
