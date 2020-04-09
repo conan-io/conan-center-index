@@ -39,7 +39,7 @@ class CoseCStackConan(ConanFile):
             del self.options.fPIC
 
     def requirements(self):
-        self.requires("cn-cbor/20200227@gocarlos/testing")
+        self.requires("cn-cbor/1.0.0")
 
         if self.options.use_mbedtls:
             self.requires("mbedtls/2.16.3-gpl")
