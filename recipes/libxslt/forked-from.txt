@@ -1,0 +1,1 @@
+https://github.com/bincrafters/conan-libxslt/commit/347dbb332585feb5556bd7e767c56e983ca22841
