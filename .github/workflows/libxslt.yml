@@ -1,18 +1,18 @@
-name: libxslt CI
+name: libxslt_1.1.33 CI
 
 on:
   pull_request:
     paths:
-      - 'recipes/libxslt/all/**'
+      - 'recipes/libxslt/1.1.33 /**'
       - 'build.py'
-      - '.github/workflows/libxslt.yml'
+      - '.github/workflows/libxslt_1.1.33 .yml'
   push:
     branches:
       - master
     paths:
-      - 'recipes/libxslt/all/**'
+      - 'recipes/libxslt/1.1.33 /**'
       - 'build.py'
-      - '.github/workflows/libxslt.yml'
+      - '.github/workflows/libxslt_1.1.33 .yml'
 
 env:
   CONAN_PASSWORD: ${{ secrets.BintrayApiKey }}
@@ -64,7 +64,7 @@ jobs:
           install: custom
           # TODO: replace when https://github.com/conan-io/conan-package-tools/issues/479 will be fixed upstream
           custom-package: git+https://github.com/trassir/conan-package-tools@fix-479-trassir
-          work-dir: sources/recipes/libxslt/all
+          work-dir: sources/recipes/libxslt/1.1.33 
           build-script: ../../../build.py
           compiler: ${{ matrix.compiler }}
           compiler-versions: ${{ matrix.compiler_version }}
