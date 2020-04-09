@@ -32,11 +32,13 @@ class XZUtils(ConanFile):
         # treat "RelWithDebInfo" and "MinSizeRel" as "Release"
         return "Debug" if self.settings.build_type == "Debug" else "Release"
 
+    def config_options(self):
+        if self.settings.os == "Windows":
+            del self.options.fPIC
+
     def configure(self):
         del self.settings.compiler.cppstd
         del self.settings.compiler.libcxx
-        if self.settings.compiler == "Visual Studio":
-            del self.options.fPIC
 
     def _apply_patches(self):
         # Relax Windows SDK restriction
