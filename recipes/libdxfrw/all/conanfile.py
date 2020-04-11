@@ -50,5 +50,5 @@ class LibdxfrwConan(ConanFile):
                   src="install/lib",
                   dst="lib",
                   excludes=('cmake', 'pkgconfig'))
-        self.copy("*", src="install/includes", dst="includes")
+        self.copy("*", src="install/include", dst="include")
         self.copy("COPYING", src=self.libdxfrw_folder, dst="licenses")
