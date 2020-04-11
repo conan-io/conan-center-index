@@ -3,7 +3,7 @@ from conans.errors import ConanInvalidConfiguration
 import os
 
 
-def sort_libs(correct_order, libs, lib_suffix='', reverse_result=False):
+def sort_libs(correct_order, libs, lib_suffix="", reverse_result=False):
     # Add suffix for correct string matching
     correct_order[:] = [s.__add__(lib_suffix) for s in correct_order]
 
@@ -64,7 +64,7 @@ class CorradeConan(ConanFile):
         if self.settings.compiler == "Visual Studio" and tools.Version(self.settings.compiler.version.value) < 14:
             raise ConanInvalidConfiguration("Corrade requires Visual Studio version 14 or greater")
         if tools.cross_building(self.settings):
-             raise ConanInvalidConfiguration("This Corrade recipe doesn't support cross building yet")
+            raise ConanInvalidConfiguration("This Corrade recipe doesn"t support cross building yet")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
@@ -84,7 +84,7 @@ class CorradeConan(ConanFile):
         # TODO: To enable cross-building this executable should probably be outsourced to a separate package corrade-rc
         cmake.definitions["WITH_RC"] = "OFF"  
 
-        # Corrade uses suffix on the resulting 'lib'-folder when running cmake.install()
+        # Corrade uses suffix on the resulting "lib"-folder when running cmake.install()
         # Set it explicitly to empty, else Corrade might set it implicitly (eg. to "64")
         cmake.definitions["LIB_SUFFIX"] = ""
 
@@ -105,9 +105,9 @@ class CorradeConan(ConanFile):
         cmake = self._configure_cmake()
         cmake.install()
 
-        share_cmake = os.path.join(self.package_folder, 'share', 'cmake', 'Corrade')
-        self.copy('UseCorrade.cmake', src=share_cmake, dst=os.path.join(self.package_folder, 'lib', 'cmake', 'Corrade'))
-        tools.rmdir(os.path.join(self.package_folder, 'share'))
+        share_cmake = os.path.join(self.package_folder, "share", "cmake", "Corrade")
+        self.copy("UseCorrade.cmake", src=share_cmake, dst=os.path.join(self.package_folder, "lib", "cmake", "Corrade"))
+        tools.rmdir(os.path.join(self.package_folder, "share"))
 
     def package_info(self):
         self.cpp_info.names["cmake_find_package"] = "Corrade"
@@ -126,13 +126,13 @@ class CorradeConan(ConanFile):
         ]
 
         # Sort all built libs according to above, and reverse result for correct link order
-        suffix = '-d' if self.settings.build_type == "Debug" else ''
+        suffix = "-d" if self.settings.build_type == "Debug" else ""
         builtLibs = tools.collect_libs(self)
         self.cpp_info.libs = sort_libs(correct_order=allLibs, libs=builtLibs, lib_suffix=suffix, reverse_result=True)
         if self.settings.os == "Linux":
             self.cpp_info.system_libs = ["m", "dl"]
 
-        self.cpp_info.builddirs = [os.path.join(self.package_folder, 'lib', 'cmake', 'Corrade')]
+        self.cpp_info.builddirs = [os.path.join(self.package_folder, "lib", "cmake", "Corrade")]
 
         bindir = os.path.join(self.package_folder, "bin")
         self.output.info("Appending PATH environment variable: {}".format(bindir))
