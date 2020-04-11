@@ -82,9 +82,7 @@ class CorradeConan(ConanFile):
             self._cmake.definitions["WITH_PLUGINMANAGER"] = self.options["with_pluginmanager"] 
             self._cmake.definitions["WITH_TESTSUITE"] = self.options["with_testsuite"]
             self._cmake.definitions["WITH_UTILITY"] = self.options["with_utility"]
-
-            # TODO: To enable cross-building this executable should probably be outsourced to a separate package corrade-rc
-            self._cmake.definitions["WITH_RC"] = "OFF"  
+            self._cmake.definitions["WITH_RC"] = "ON"  
 
             # Corrade uses suffix on the resulting "lib"-folder when running cmake.install()
             # Set it explicitly to empty, else Corrade might set it implicitly (eg. to "64")
