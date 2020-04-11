@@ -44,6 +44,8 @@ class DateConan(ConanFile):
         else:
             cmake.definitions["USE_TZ_DB_IN_DOT"] = self.options.use_tz_db_in_dot
             cmake.definitions["USE_SYSTEM_TZ_DB"] = self.options.use_system_tz_db
+
+        cmake.definitions["BUILD_SHARED_LIBS"] = self.options.shared
         cmake.configure()
         return cmake
 
@@ -74,4 +76,6 @@ class DateConan(ConanFile):
             use_system_tz_db = 0 if self.options.use_system_tz_db else 1
         defines = ["USE_AUTOLOAD={}".format(use_system_tz_db),
                    "HAS_REMOTE_API={}".format(use_system_tz_db)]
+        if self.options.shared:
+            defines.append("DATE_USE_DLL=1")
         self.cpp_info.defines.extend(defines)
