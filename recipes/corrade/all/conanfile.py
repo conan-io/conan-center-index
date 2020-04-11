@@ -30,6 +30,7 @@ class CorradeConan(ConanFile):
     exports_sources = ["CMakeLists.txt"]
     generators = "cmake"
     short_paths = True
+    _cmake = None
 
     settings = "os", "arch", "compiler", "build_type"
     options = {
@@ -72,29 +73,31 @@ class CorradeConan(ConanFile):
         os.rename(extracted_dir, self._source_subfolder)
 
     def _configure_cmake(self):
-        cmake = CMake(self)
-        cmake.definitions["BUILD_STATIC"] = not self.options.shared
-        cmake.definitions["BUILD_DEPRECARED"] = self.options["build_deprecated"]
-        cmake.definitions["WITH_INTERCONNECT"] = self.options["with_interconnect"]
-        cmake.definitions["WITH_MAIN"] = self.options["with_main"]
-        cmake.definitions["WITH_PLUGINMANAGER"] = self.options["with_pluginmanager"] 
-        cmake.definitions["WITH_TESTSUITE"] = self.options["with_testsuite"]
-        cmake.definitions["WITH_UTILITY"] = self.options["with_utility"]
+        if not self._cmake:
+            self._cmake = CMake(self)
+            self._cmake.definitions["BUILD_STATIC"] = not self.options.shared
+            self._cmake.definitions["BUILD_DEPRECARED"] = self.options["build_deprecated"]
+            self._cmake.definitions["WITH_INTERCONNECT"] = self.options["with_interconnect"]
+            self._cmake.definitions["WITH_MAIN"] = self.options["with_main"]
+            self._cmake.definitions["WITH_PLUGINMANAGER"] = self.options["with_pluginmanager"] 
+            self._cmake.definitions["WITH_TESTSUITE"] = self.options["with_testsuite"]
+            self._cmake.definitions["WITH_UTILITY"] = self.options["with_utility"]
 
-        # TODO: To enable cross-building this executable should probably be outsourced to a separate package corrade-rc
-        cmake.definitions["WITH_RC"] = "OFF"  
+            # TODO: To enable cross-building this executable should probably be outsourced to a separate package corrade-rc
+            self._cmake.definitions["WITH_RC"] = "OFF"  
 
-        # Corrade uses suffix on the resulting "lib"-folder when running cmake.install()
-        # Set it explicitly to empty, else Corrade might set it implicitly (eg. to "64")
-        cmake.definitions["LIB_SUFFIX"] = ""
+            # Corrade uses suffix on the resulting "lib"-folder when running cmake.install()
+            # Set it explicitly to empty, else Corrade might set it implicitly (eg. to "64")
+            self._cmake.definitions["LIB_SUFFIX"] = ""
 
-        if self.settings.compiler == "Visual Studio":
-            cmake.definitions["MSVC2015_COMPATIBILITY"] = "ON" if tools.Version(self.settings.compiler.version.value) == 14 else "OFF"
-            cmake.definitions["MSVC2017_COMPATIBILITY"] = "ON" if tools.Version(self.settings.compiler.version.value) == 14 else "OFF"
+            if self.settings.compiler == "Visual Studio":
+                self._cmake.definitions["CORRADE_MSVC2015_COMPATIBILITY"] = "ON" if self.settings.compiler.version == "14" else "OFF"
+                self._cmake.definitions["CORRADE_MSVC2017_COMPATIBILITY"] = "ON" if self.settings.compiler.version == "15" else "OFF"
+                self._cmake.definitions["CORRADE_MSVC2019_COMPATIBILITY"] = "ON" if self.settings.compiler.version == "16" else "OFF"
 
-        cmake.configure(build_folder=self._build_subfolder)
+            self._cmake.configure(build_folder=self._build_subfolder)
 
-        return cmake
+        return self._cmake
 
     def build(self):
         cmake = self._configure_cmake()
