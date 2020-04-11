@@ -280,8 +280,12 @@ class LibcurlConan(ConanFile):
 
             self.run("chmod +x configure")
 
-            autotools, autotools_vars = self._configure_autotools()
-            autotools.make(vars=autotools_vars)
+            env_run = RunEnvironment(self)
+            # run configure with *LD_LIBRARY_PATH env vars it allows to pick up shared openssl
+            self.output.info("Run vars: " + repr(env_run.vars))
+            with tools.environment_append(env_run.vars):
+                autotools, autotools_vars = self._configure_autotools()
+                autotools.make(vars=autotools_vars)
 
     def _configure_autotools_vars(self):
         autotools_vars = self._autotools.vars
