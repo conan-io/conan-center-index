@@ -64,7 +64,7 @@ class CorradeConan(ConanFile):
         if self.settings.compiler == "Visual Studio" and tools.Version(self.settings.compiler.version.value) < 14:
             raise ConanInvalidConfiguration("Corrade requires Visual Studio version 14 or greater")
         if tools.cross_building(self.settings):
-            raise ConanInvalidConfiguration("This Corrade recipe doesn"t support cross building yet")
+            raise ConanInvalidConfiguration("This Corrade recipe doesn't support cross building yet")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
@@ -107,11 +107,16 @@ class CorradeConan(ConanFile):
 
         share_cmake = os.path.join(self.package_folder, "share", "cmake", "Corrade")
         self.copy("UseCorrade.cmake", src=share_cmake, dst=os.path.join(self.package_folder, "lib", "cmake", "Corrade"))
+        self.copy("CorradeLibSuffix.cmake", src=share_cmake, dst=os.path.join(self.package_folder, "lib", "cmake", "Corrade"))
         tools.rmdir(os.path.join(self.package_folder, "share"))
 
     def package_info(self):
         self.cpp_info.names["cmake_find_package"] = "Corrade"
         self.cpp_info.names["cmake_find_package_multi"] = "Corrade"
+
+        self.cpp_info.builddirs.append(os.path.join("lib", "cmake"))
+        self.cpp_info.build_modules.append(os.path.join("lib", "cmake", "Corrade", "UseCorrade.cmake"))
+        self.cpp_info.build_modules.append(os.path.join("lib", "cmake", "Corrade", "CorradeLibSuffix.cmake"))
 
         # See dependency order here: https://doc.magnum.graphics/magnum/custom-buildsystems.html
         allLibs = [
