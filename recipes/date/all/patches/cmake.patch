@@ -1,0 +1,16 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index f025a3a..0c84fbb 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -61,6 +61,11 @@ else( )
+ 	set( OPTIONAL_LIBRARIES ${CURL_LIBRARIES} )
+ endif( )
+ 
++if( BUILD_SHARED_LIBS )
++	target_compile_definitions( tz PRIVATE -DDATE_BUILD_DLL=1 )
++	target_compile_definitions( tz PUBLIC -DDATE_USE_DLL=1 )
++endif( )
++
+ if( USE_TZ_DB_IN_DOT )
+ 	target_compile_definitions( tz PRIVATE -DINSTALL=. )
+ endif( )
