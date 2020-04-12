@@ -9,7 +9,7 @@ class ExpressCppConan(ConanFile):
     description = "Fast, unopinionated, minimalist web framework for C++ Perfect for building REST APIs"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://gitlab.com/expresscpp/expresscpp"
-    topics = ("conan", "expresscpp", "logging", "header-only")
+    topics = ("conan", "expresscpp", "http", "router", "webserver")
     license = "MIT"
     exports_sources = ["CMakeLists.txt"]
     generators = "cmake", "cmake_find_package"
