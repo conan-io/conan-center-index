@@ -23,6 +23,10 @@ class LibdxfrwConan(ConanFile):
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
+        tools.replace_in_file(self.libdxfrw_folder + "/CMakeLists.txt", "set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS ON)",
+                              '''set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS ON)
+include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
+conan_basic_setup()''')
 
     def build(self):
         cmake = self._configure_cmake()
