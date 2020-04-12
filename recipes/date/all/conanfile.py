@@ -24,6 +24,10 @@ class DateConan(ConanFile):
     _source_subfolder = "source_subfolder"
     _build_subfolder = "build_subfolder"
 
+    def configure(self):
+        #requires at least c++11 to work.
+        tools.check_min_cppstd(self, "11")
+
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
         extracted_dir = self.name + "-" + self.version
