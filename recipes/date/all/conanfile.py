@@ -21,8 +21,15 @@ class DateConan(ConanFile):
                        "fPIC": True,
                        "use_system_tz_db": True,
                        "use_tz_db_in_dot": False}
-    _source_subfolder = "source_subfolder"
-    _build_subfolder = "build_subfolder"
+
+    _cmake = None
+
+    @property
+    def _source_subfolder(self):
+        return "source_subfolder"
+    @property
+    def _build_subfolder(self):
+        return "build_subfolder"
 
     def configure(self):
         #requires at least c++11 to work.
@@ -38,12 +45,16 @@ class DateConan(ConanFile):
             del self.options.fPIC
 
     def _configure_cmake(self):
+        if self._cmake:
+            return self._cmake
         cmake = CMake(self)
         cmake.definitions["ENABLE_DATE_TESTING"] = False
         cmake.definitions["USE_SYSTEM_TZ_DB"] = self.options.use_system_tz_db
         cmake.definitions["USE_TZ_DB_IN_DOT"] = self.options.use_tz_db_in_dot
         cmake.configure()
-        return cmake
+
+        self._cmake = cmake
+        return self._cmake
 
     def requirements(self):
         if not self.options.use_system_tz_db:
