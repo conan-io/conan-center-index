@@ -1,0 +1,4 @@
+sources:
+  4.0.0:
+    url: "https://github.com/SOCI/soci/archive/4.0.0.zip"
+    sha256: "d42fc224a424938ac61aa70861a95dfde00af6b4f8944f1bb36ba5b3a370afeb"
