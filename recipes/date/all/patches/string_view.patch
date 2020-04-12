@@ -1,16 +1,17 @@
 diff --git a/include/date/date.h b/include/date/date.h
-index cb115a9..fca9661 100644
+index cb115a9..74ee812 100644
 --- a/include/date/date.h
 +++ b/include/date/date.h
-@@ -62,7 +62,11 @@
+@@ -62,7 +62,12 @@
  #include <stdexcept>
  #include <string>
  #if HAS_STRING_VIEW
 -# include <string_view>
-+# if __has_include (<string_view>)
++# if __has_include (<string_viewx>)
 +#  include <string_view>
 +# else
 +#  include <experimental/string_view>
++namespace std { using string_view = experimental::string_view; }
 +# endif
  #endif
  #include <utility>
