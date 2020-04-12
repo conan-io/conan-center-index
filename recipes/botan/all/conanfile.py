@@ -41,6 +41,9 @@ class BotanConan(ConanFile):
     def configure(self):
         self._validate_compiler_settings()
 
+        if Version(self.version) >= "2.14.0":
+            self._validate_v2_14()
+
         if self.options.single_amalgamation:
             self.options.amalgamation = True
 
@@ -118,6 +121,26 @@ class BotanConan(ConanFile):
             raise ConanInvalidConfiguration(
                 'Using Botan with Clang on Linux requires either "compiler.libcxx=libstdc++11" ' \
                 'or "compiler.libcxx=libc++"')
+
+    def _validate_v2_14(self):
+        """disallow configurations that cause issues in Botan >= 2.14.0"""
+
+        compiler = self.settings.compiler
+        compiler_version = Version(compiler.version.value)
+
+        # --single-amalgamation option is no longer available
+        # See also https://github.com/randombit/botan/pull/2246
+        if self.options.single_amalgamation:
+            raise ConanInvalidConfiguration(
+                "single_amalgamation is not supported")
+
+        # Some older compilers cannot handle the amalgamated build anymore
+        # See also https://github.com/randombit/botan/issues/2328
+        if self.options.amalgamation:
+            if (compiler == "apple-clang" and compiler_version < "10") or \
+               (compiler == "gcc" and compiler_version < "7"):
+                raise ConanInvalidConfiguration(
+                    "amalgamation is not supported for this compiler version")
 
     @property
     def _is_mingw_windows(self):
