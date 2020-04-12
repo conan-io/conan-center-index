@@ -5,7 +5,7 @@ from conans import ConanFile, CMake, tools
 
 class LibdxfrwTestConan(ConanFile):
     settings = "os", "compiler", "build_type", "arch"
-    generators = "cmake_find_package"
+    generators = "cmake"
 
     def build(self):
         cmake = CMake(self)
@@ -16,4 +16,4 @@ class LibdxfrwTestConan(ConanFile):
 
     def test(self):
         if not tools.cross_building(self.settings):
-            self.run(".%sexample" % os.sep)
+            self.run(os.path.join("bin", "example"), run_environment=True)
