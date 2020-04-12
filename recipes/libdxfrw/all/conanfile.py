@@ -3,7 +3,6 @@ from conans import ConanFile, CMake, tools
 
 class LibdxfrwConan(ConanFile):
     name = "libdxfrw"
-    version = "1.0.0"
     license = "GPL2"
     url = "https://github.com/conan-io/conan-center-index"
     description = "C++ library to read/write DXF and read DWG files"
@@ -19,11 +18,13 @@ class LibdxfrwConan(ConanFile):
     }
     generators = "cmake"
     homepage = "https://github.com/LibreCAD/libdxfrw"
-    libdxfrw_folder = "libdxfrw-" + version
+
+    def _get_libdxfrw_folder(self):
+        return "libdxfrw-" + self.version
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
-        tools.replace_in_file(self.libdxfrw_folder + "/CMakeLists.txt", "set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS ON)",
+        tools.replace_in_file(self._get_libdxfrw_folder() + "/CMakeLists.txt", "set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS ON)",
                               '''set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS ON)
 include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
 conan_basic_setup()''')
@@ -36,7 +37,7 @@ conan_basic_setup()''')
         cmake = CMake(self)
         cmake.definitions["CMAKE_INSTALL_PREFIX"] = "install"
         print(self.source_folder)
-        cmake.configure(source_folder=self.libdxfrw_folder)
+        cmake.configure(source_folder=self._get_libdxfrw_folder())
         return cmake
 
     def package_info(self):
@@ -55,4 +56,4 @@ conan_basic_setup()''')
                   dst="lib",
                   excludes=('cmake', 'pkgconfig'))
         self.copy("*", src="install/include", dst="include")
-        self.copy("COPYING", src=self.libdxfrw_folder, dst="licenses")
+        self.copy("COPYING", src=self._get_libdxfrw_folder(), dst="licenses")
