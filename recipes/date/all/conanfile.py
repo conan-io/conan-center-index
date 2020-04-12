@@ -28,12 +28,14 @@ class DateConan(ConanFile):
         #requires at least c++11 to work.
         tools.check_min_cppstd(self, "11")
 
+        if self.settings.os == "Windows":
+            del self.options.use_system_tz_db
+            del self.options.use_tz_db_in_dot
+
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
         extracted_dir = self.name + "-" + self.version
         os.rename(extracted_dir, self._source_subfolder)
-        for patch in self.conan_data["patches"][self.version]:
-            tools.patch(**patch)
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -42,14 +44,10 @@ class DateConan(ConanFile):
     def _configure_cmake(self):
         cmake = CMake(self)
         cmake.definitions["ENABLE_DATE_TESTING"] = False
-        if self.settings.os == "Windows":
-            cmake.definitions["USE_TZ_DB_IN_DOT"] = False
-            cmake.definitions["USE_SYSTEM_TZ_DB"] = False
-        else:
+        if not self.settings.os == "Windows":
             cmake.definitions["USE_TZ_DB_IN_DOT"] = self.options.use_tz_db_in_dot
             cmake.definitions["USE_SYSTEM_TZ_DB"] = self.options.use_system_tz_db
 
-        cmake.definitions["BUILD_SHARED_LIBS"] = self.options.shared
         cmake.configure()
         return cmake
 
@@ -58,6 +56,8 @@ class DateConan(ConanFile):
             self.requires("libcurl/7.67.0")
 
     def build(self):
+        for patch in self.conan_data["patches"][self.version]:
+            tools.patch(**patch)
         cmake = self._configure_cmake()
         cmake.build()
 
