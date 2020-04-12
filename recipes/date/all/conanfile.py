@@ -72,9 +72,8 @@ class DateConan(ConanFile):
     def package_info(self):
         self.cpp_info.libs = tools.collect_libs(self)
         if self.settings.os == "Linux":
-            self.cpp_info.libs.append("pthread")
+            self.cpp_info.system_libs.append("pthread")
         if self.settings.os == "Windows":
-            self.cpp_info.libs.extend(["ws2_32", "Crypt32"])
             use_system_tz_db = 0
         else:
             use_system_tz_db = 0 if self.options.use_system_tz_db else 1
