@@ -28,10 +28,6 @@ class DateConan(ConanFile):
         #requires at least c++11 to work.
         tools.check_min_cppstd(self, "11")
 
-        if self.settings.os == "Windows":
-            del self.options.use_system_tz_db
-            del self.options.use_tz_db_in_dot
-
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
         extracted_dir = self.name + "-" + self.version
