@@ -44,15 +44,13 @@ class DateConan(ConanFile):
     def _configure_cmake(self):
         cmake = CMake(self)
         cmake.definitions["ENABLE_DATE_TESTING"] = False
-        if not self.settings.os == "Windows":
-            cmake.definitions["USE_TZ_DB_IN_DOT"] = self.options.use_tz_db_in_dot
-            cmake.definitions["USE_SYSTEM_TZ_DB"] = self.options.use_system_tz_db
-
+        cmake.definitions["USE_SYSTEM_TZ_DB"] = self.options.use_system_tz_db
+        cmake.definitions["USE_TZ_DB_IN_DOT"] = self.options.use_tz_db_in_dot
         cmake.configure()
         return cmake
 
     def requirements(self):
-        if self.settings.os == "Windows" or not self.options.use_system_tz_db:
+        if not self.options.use_system_tz_db:
             self.requires("libcurl/7.67.0")
 
     def build(self):
@@ -73,12 +71,14 @@ class DateConan(ConanFile):
         self.cpp_info.libs = tools.collect_libs(self)
         if self.settings.os == "Linux":
             self.cpp_info.system_libs.append("pthread")
-        if self.settings.os == "Windows":
-            use_system_tz_db = 0
+
+        if self.options.use_system_tz_db and not self.settings.os == "Windows":
+            use_os_tzdb = 1
         else:
-            use_system_tz_db = 0 if self.options.use_system_tz_db else 1
-        defines = ["USE_AUTOLOAD={}".format(use_system_tz_db),
-                   "HAS_REMOTE_API={}".format(use_system_tz_db)]
+            use_os_tzdb = 0
+
+        defines = ["USE_OS_TZDB={}".format(use_os_tzdb)]
         if self.options.shared:
             defines.append("DATE_USE_DLL=1")
+
         self.cpp_info.defines.extend(defines)
