@@ -5,3 +5,6 @@ sources:
   "1.75":
     url: "https://github.com/ocornut/imgui/archive/v1.75.tar.gz"
     sha256: "1023227fae4cf9c8032f56afcaea8902e9bfaad6d9094d6e48fb8f3903c7b866"
+  "1.76":
+    url: "https://github.com/ocornut/imgui/archive/v1.76.tar.gz"
+    sha256: "e482dda81330d38c87bd81597cacaa89f05e20ed2c4c4a93a64322e97565f6dc"
