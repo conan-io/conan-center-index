@@ -6,7 +6,7 @@ class Tabulate(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/p-ranav/tabulate"
     description = "Table Maker for Modern C++"
-    topics = ("conan", "cpp17", "any", "any-implementations")
+    topics = ("conan", "cpp17", "tabulate")
     license = "MIT License"
     no_copy_source = True
 
