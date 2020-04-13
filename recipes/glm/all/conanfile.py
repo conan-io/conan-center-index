@@ -68,27 +68,19 @@ class GlmConan(ConanFile):
     license = "MIT"
     no_copy_source = True
 
-    exports_sources = [
-        "CMakeLists.txt",
-        "patches/*.patch"
-    ]
+    @property
+    def _source_subfolder(self):
+        return "source_subfolder"
 
-    _source_subfolder = "source_subfolder"
-    _build_subfolder = "build_subfolder"
+    def package_id(self):
+        self.info.header_only()
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
-        extracted_dir = "glm-" + self.version
-        os.rename(extracted_dir, self._source_subfolder)
-        if "patches" in self.conan_data:
-            for patch in self.conan_data["patches"][self.version]:
-                tools.patch(**patch)
+        os.rename(self.name + "-" + self.version, self._source_subfolder)
 
     def package(self):
         os.makedirs(os.path.join(self.package_folder, "licenses"))
         tools.save(os.path.join(self.package_folder, "licenses", "COPYING.txt"), license)
         copy_tree(os.path.join(self.source_folder, self._source_subfolder, "glm"),
                   os.path.join(self.package_folder, "include", "glm"))
-
-    def package_id(self):
-        self.info.header_only()
