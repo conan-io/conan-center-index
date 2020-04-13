@@ -1,0 +1,4 @@
+sources:
+  "1.2.0":
+    sha256: b459c50a2ae7b90b45cd99a727dcd133e48602634571378491533148e642c511
+    url: https://github.com/qchateau/packio/archive/1.2.0.tar.gz
