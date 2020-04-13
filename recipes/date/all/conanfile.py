@@ -12,14 +12,14 @@ class DateConan(ConanFile):
     license = "MIT"
     exports_sources = ["patches/*", "CMakeLists.txt"]
     settings = "os", "arch", "compiler", "build_type"
-    generators = "cmake", "cmake_find_package"
+    generators = "cmake",
     options = {"shared": [True, False],
                "fPIC": [True, False],
                "use_system_tz_db": [True, False],
                "use_tz_db_in_dot": [True, False]}
     default_options = {"shared": False,
                        "fPIC": True,
-                       "use_system_tz_db": True,
+                       "use_system_tz_db": False,
                        "use_tz_db_in_dot": False}
 
     _cmake = None
