@@ -1,5 +1,6 @@
 import os
 from conans import ConanFile, tools
+from conans.tools import Version
 
 class Tabulate(ConanFile):
     name = "tabulate"
