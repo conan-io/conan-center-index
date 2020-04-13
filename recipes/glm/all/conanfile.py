@@ -1,6 +1,5 @@
 from conans import ConanFile, tools
 import os
-from distutils.dir_util import copy_tree
 
 
 class GlmConan(ConanFile):
@@ -29,8 +28,10 @@ class GlmConan(ConanFile):
             tools.save(os.path.join(self.package_folder, "licenses", "copying.txt"), self._get_license())
         else:
             self.copy("copying.txt", dst="licenses", src=self._source_subfolder)
-        copy_tree(os.path.join(self.source_folder, self._source_subfolder, "glm"),
-                  os.path.join(self.package_folder, "include", "glm"))
+        headers_src_dir = os.path.join(self.source_folder, self._source_subfolder, "glm")
+        self.copy("*.hpp", dst=os.path.join("include", "glm"), src=headers_src_dir)
+        self.copy("*.inl", dst=os.path.join("include", "glm"), src=headers_src_dir)
+        self.copy("*.h", dst=os.path.join("include", "glm"), src=headers_src_dir)
 
     def _get_semver(self):
         return self.version.rsplit(".", 1)[0]
