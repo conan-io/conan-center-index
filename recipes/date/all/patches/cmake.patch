@@ -1,18 +1,8 @@
 diff --git a/CMakeLists.txt b/CMakeLists.txt
-index f025a3a..ca5a497 100644
+index f025a3a..c316d4a 100644
 --- a/CMakeLists.txt
 +++ b/CMakeLists.txt
-@@ -6,9 +6,6 @@ include( GNUInstallDirs )
- 
- find_package( Threads REQUIRED )
- 
--# Override by setting on CMake command line.
--set( CMAKE_CXX_STANDARD 17 CACHE STRING "The C++ standard whose features are requested.")
--
- option( USE_SYSTEM_TZ_DB "Use the operating system's timezone database" OFF )
- option( USE_TZ_DB_IN_DOT "Save the timezone database in the current folder" OFF )
- option( BUILD_SHARED_LIBS  "Build a shared version of library" OFF )
-@@ -56,16 +53,18 @@ else( )
+@@ -56,16 +56,18 @@ else( )
  	target_compile_definitions( tz PRIVATE -DUSE_AUTOLOAD=1 )
  	target_compile_definitions( tz PRIVATE -DHAS_REMOTE_API=1 )
  	target_compile_definitions( tz PUBLIC -DUSE_OS_TZDB=0 )

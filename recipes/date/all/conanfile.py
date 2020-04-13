@@ -31,19 +31,6 @@ class DateConan(ConanFile):
     def _build_subfolder(self):
         return "build_subfolder"
 
-    def configure(self):
-        #requires at least c++11 to work.
-        tools.check_min_cppstd(self, "11")
-
-    def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        extracted_dir = self.name + "-" + self.version
-        os.rename(extracted_dir, self._source_subfolder)
-
-    def config_options(self):
-        if self.settings.os == "Windows":
-            del self.options.fPIC
-
     def _configure_cmake(self):
         if self._cmake:
             return self._cmake
@@ -56,9 +43,18 @@ class DateConan(ConanFile):
         self._cmake = cmake
         return self._cmake
 
+    def config_options(self):
+        if self.settings.os == "Windows":
+            del self.options.fPIC
+
     def requirements(self):
         if not self.options.use_system_tz_db:
-            self.requires("libcurl/7.67.0")
+            self.requires("libcurl/7.69.1")
+
+    def source(self):
+        tools.get(**self.conan_data["sources"][self.version])
+        extracted_dir = self.name + "-" + self.version
+        os.rename(extracted_dir, self._source_subfolder)
 
     def build(self):
         for patch in self.conan_data["patches"][self.version]:
@@ -85,7 +81,7 @@ class DateConan(ConanFile):
             use_os_tzdb = 0
 
         defines = ["USE_OS_TZDB={}".format(use_os_tzdb)]
-        if self.options.shared:
+        if self.settings.os == "Windows" and self.options.shared:
             defines.append("DATE_USE_DLL=1")
 
         self.cpp_info.defines.extend(defines)
