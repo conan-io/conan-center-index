@@ -7,7 +7,7 @@ class Tabulate(ConanFile):
     homepage = "https://github.com/p-ranav/tabulate"
     description = "Table Maker for Modern C++"
     topics = ("conan", "cpp17", "tabulate")
-    license = "MIT License"
+    license = "MIT"
     no_copy_source = True
 
     @property
