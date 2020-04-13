@@ -34,4 +34,3 @@ sources:
       sha256: ab2bee6487229e4f1f26d578b36ac6a73dfeb0fdab36b2ed774b4575ee544a33
     - url: "https://raw.githubusercontent.com/approvals/ApprovalTests.cpp/v.8.5.0/LICENSE"
       sha256: c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4
-    
