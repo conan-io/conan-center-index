@@ -141,7 +141,7 @@ class BotanConan(ConanFile):
                (compiler == "gcc" and compiler_version < "8") or \
                (compiler == "clang" and compiler_version < "7"):
                 raise ConanInvalidConfiguration(
-                    "amalgamation is not supported for this compiler version")
+                    "amalgamation is not supported for {} {}".format(compiler, compiler_version))
 
     @property
     def _is_mingw_windows(self):
