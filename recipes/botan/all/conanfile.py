@@ -44,7 +44,7 @@ class BotanConan(ConanFile):
         if Version(self.version) >= "2.14.0":
             self._validate_v2_14()
 
-        if self.options.single_amalgamation:
+        if self.options.get_safe("single_amalgamation"):
             self.options.amalgamation = True
 
         if self.options.with_boost:
@@ -68,6 +68,11 @@ class BotanConan(ConanFile):
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
+
+        # --single-amalgamation option is no longer available
+        # See also https://github.com/randombit/botan/pull/2246
+        if Version(self.version) >= "2.14.0":
+            del self.options.single_amalgamation
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
@@ -127,12 +132,6 @@ class BotanConan(ConanFile):
 
         compiler = self.settings.compiler
         compiler_version = Version(compiler.version.value)
-
-        # --single-amalgamation option is no longer available
-        # See also https://github.com/randombit/botan/pull/2246
-        if self.options.single_amalgamation:
-            raise ConanInvalidConfiguration(
-                "single_amalgamation is not supported")
 
         # Some older compilers cannot handle the amalgamated build anymore
         # See also https://github.com/randombit/botan/issues/2328
@@ -213,7 +212,7 @@ class BotanConan(ConanFile):
         if self.options.amalgamation:
             build_flags.append('--amalgamation')
 
-        if self.options.single_amalgamation:
+        if self.options.get_safe("single_amalgamation"):
             build_flags.append('--single-amalgamation-file')
 
         if self.options.system_cert_bundle:
