@@ -100,8 +100,13 @@ class DlibConan(ConanFile):
         self.copy("LICENSE.txt", "licenses", os.path.join(self._source_subfolder, "dlib"), keep_path=False)
 
         # Remove configuration files
-        tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
-        tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
+        for dir_to_remove in [
+            os.path.join("lib", "cmake"),
+            os.path.join("lib", "pkgconfig"),
+            os.path.join("include", "dlib", "cmake_utils"),
+            os.path.join("include", "dlib", "external", "pybind11", "tools")
+        ]:
+            tools.rmdir(os.path.join(self.package_folder, dir_to_remove))
 
     def package_info(self):
         # There is a single library whose name depends on settings
