@@ -1,0 +1,10 @@
+sources:
+  "3.470":
+    url: "https://heasarc.gsfc.nasa.gov/FTP/software/fitsio/c/cfitsio-3.47.tar.gz"
+    sha256: "985606e058403c073a68d95be74e9696f0ded9414520784457a1d4cba8cca7e2"
+patches:
+  "3.470":
+    - patch_file: "patches/windows-use-strtok_s.patch"
+      base_path: "source_subfolder"
+    - patch_file: "patches/fix-cmake.patch"
+      base_path: "source_subfolder"
