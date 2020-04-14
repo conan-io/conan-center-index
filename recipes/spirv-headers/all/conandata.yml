@@ -1,0 +1,4 @@
+sources:
+  "1.5.1":
+    sha256: 2b6a0ce1c02b9fe7b9ef727369168fe579e5256f1ea013993acdb8d8f06b7e89
+    url: https://github.com/KhronosGroup/SPIRV-Headers/archive/1.5.1.corrected.tar.gz
