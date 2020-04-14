@@ -212,6 +212,9 @@ class ICUBase(ConanFile):
             del self.options.fPIC
 
     def package_info(self):
+        self.cpp_info.names['cmake_find_package'] = 'ICU'
+        self.cpp_info.names['cmake_find_package_multi'] = 'ICU'
+
         def lib_name(lib):
             name = lib
             if self.settings.os == "Windows":
