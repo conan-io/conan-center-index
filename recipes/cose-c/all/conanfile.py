@@ -81,5 +81,4 @@ class CoseCStackConan(ConanFile):
         tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
 
     def package_info(self):
-        self.cpp_info.libs = ["cose-c"]
-        self.cpp_info.name = "cose-c"
+        self.cpp_info.libs = tools.collect_libs(self)
