@@ -47,6 +47,9 @@ class CoseCStackConan(ConanFile):
             self.requires("openssl/1.1.1d")
 
     def configure(self):
+        if self.settings.os == "Macos":
+            raise ConanInvalidConfiguration("cose-c does not support Macos at the moment")
+        
         del self.settings.compiler.libcxx
         del self.settings.compiler.cppstd
 
