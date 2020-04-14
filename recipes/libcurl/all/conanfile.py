@@ -268,23 +268,22 @@ class LibcurlConan(ConanFile):
                 tools.save(os.path.join('lib', 'Makefile.am'), added_content, append=True)
 
     def _build_with_autotools(self):
-        env_run = RunEnvironment(self)
-        # run configure with *LD_LIBRARY_PATH env vars
-        # it allows to pick up shared openssl
-        self.output.info("Run vars: " + repr(env_run.vars))
-        with tools.environment_append(env_run.vars):
-            with tools.chdir(self._source_subfolder):
-                use_win_bash = self._is_mingw and not tools.cross_building(self.settings)
+        with tools.chdir(self._source_subfolder):
+            use_win_bash = self._is_mingw and not tools.cross_building(self.settings)
 
-                # autoreconf
-                self.run('./buildconf', win_bash=use_win_bash)
+            # autoreconf
+            self.run('./buildconf', win_bash=use_win_bash, run_environment=True)
 
-                # fix generated autotools files on alle to have relocateable binaries
-                if tools.is_apple_os(self.settings.os):
-                    tools.replace_in_file("configure", "-install_name \\$rpath/", "-install_name ")
+            # fix generated autotools files on alle to have relocateable binaries
+            if tools.is_apple_os(self.settings.os):
+                tools.replace_in_file("configure", "-install_name \\$rpath/", "-install_name ")
 
-                self.run("chmod +x configure")
+            self.run("chmod +x configure")
 
+            env_run = RunEnvironment(self)
+            # run configure with *LD_LIBRARY_PATH env vars it allows to pick up shared openssl
+            self.output.info("Run vars: " + repr(env_run.vars))
+            with tools.environment_append(env_run.vars):
                 autotools, autotools_vars = self._configure_autotools()
                 autotools.make(vars=autotools_vars)
 
