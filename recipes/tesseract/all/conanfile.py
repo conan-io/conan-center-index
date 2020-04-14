@@ -88,12 +88,6 @@ class TesseractConan(ConanFile):
         self.copy("LICENSE", src=self._source_subfolder, dst="licenses")
         # remove man pages
         tools.rmdir(os.path.join(self.package_folder, 'share', 'man'))
-        # remove binaries
-        for ext in ['', '.exe']:
-            try:
-                os.remove(os.path.join(self.package_folder, 'bin', 'tesseract'+ext))
-            except:
-                pass
         # remove pkgconfig
         tools.rmdir(os.path.join(self.package_folder, 'lib', 'pkgconfig'))
         # remove cmake
