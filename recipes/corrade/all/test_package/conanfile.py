@@ -8,6 +8,10 @@ class TestPackageConan(ConanFile):
 
     def build(self):
         cmake = CMake(self)
+        if self.settings.compiler == "Visual Studio":
+            cmake.definitions["CORRADE_MSVC2015_COMPATIBILITY"] = "ON" if self.settings.compiler.version == "14" else "OFF"
+            cmake.definitions["CORRADE_MSVC2017_COMPATIBILITY"] = "ON" if self.settings.compiler.version == "15" else "OFF"
+            cmake.definitions["CORRADE_MSVC2019_COMPATIBILITY"] = "ON" if self.settings.compiler.version == "16" else "OFF"
         cmake.configure()
         cmake.build()
 
