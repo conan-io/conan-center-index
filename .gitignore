@@ -116,3 +116,6 @@ venv.bak/
 
 # mypy
 .mypy_cache/
+
+# scons build files
+*.dblite
