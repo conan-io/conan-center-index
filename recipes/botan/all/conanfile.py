@@ -138,7 +138,8 @@ class BotanConan(ConanFile):
         # See also https://github.com/randombit/botan/issues/2328
         if self.options.amalgamation:
             if (compiler == "apple-clang" and compiler_version < "10") or \
-               (compiler == "gcc" and compiler_version < "7"):
+               (compiler == "gcc" and compiler_version < "8") or \
+               (compiler == "clang" and compiler_version < "7"):
                 raise ConanInvalidConfiguration(
                     "amalgamation is not supported for this compiler version")
 
