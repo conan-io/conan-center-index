@@ -6,7 +6,7 @@ from conans import ConanFile, CMake, tools
 class DlibConan(ConanFile):
     name = "dlib"
     description = "A toolkit for making real world machine learning and data analysis applications"
-    topics = "conan", "dlib"
+    topics = ("machine-learning", "deep-learning", "computer-vision")
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "http://dlib.net"
     license = "BSL-1.0"
@@ -111,3 +111,5 @@ class DlibConan(ConanFile):
     def package_info(self):
         # There is a single library whose name depends on settings
         self.cpp_info.libs = tools.collect_libs(self)
+        if self.settings.os == "Linux":
+            self.system_info.libs = ["pthread"]
