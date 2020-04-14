@@ -63,19 +63,22 @@ class FruitConan(ConanFile):
         return self.name + "-" + self.version
 
     def _get_source(self):
-        filename = os.path.basename(self.conan_data["sources"][self.version]["url"])
-        tools.download(filename=filename, **self.conan_data["sources"][self.version])
+        if Version(self.version) == "3.4.0":
+            filename = os.path.basename(self.conan_data["sources"][self.version]["url"])
+            tools.download(filename=filename, **self.conan_data["sources"][self.version])
 
-        with tarfile.TarFile.open(filename, 'r:*') as tarredgzippedFile:
-            # NOTE: The archive file contains the file names build and BULD
-            # in the extras/bazel_root/third_party/fruit directory.
-            # Extraction fails on a case-insensitive file system due to file
-            # name conflicts.
-            # Exclude build as a workaround.
-            exclude_pattern = "%s/extras/bazel_root/third_party/fruit/build" % (self._extracted_dir,)
-            members = list(filter(lambda m: not fnmatch(m.name, exclude_pattern),
-                                  tarredgzippedFile.getmembers()))
-            tarredgzippedFile.extractall(".", members=members)
+            with tarfile.TarFile.open(filename, 'r:*') as tarredgzippedFile:
+                # NOTE: In fruit v3.4.0, The archive file contains the file names
+                # build and BUILD in the extras/bazel_root/third_party/fruit directory.
+                # Extraction fails on a case-insensitive file system due to file
+                # name conflicts.
+                # Exclude build as a workaround.
+                exclude_pattern = "%s/extras/bazel_root/third_party/fruit/build" % (self._extracted_dir,)
+                members = list(filter(lambda m: not fnmatch(m.name, exclude_pattern),
+                                    tarredgzippedFile.getmembers()))
+                tarredgzippedFile.extractall(".", members=members)
+        else:
+            tools.get(**self.conan_data["sources"][self.version])
 
     def source(self):
         self._get_source()
@@ -87,6 +90,8 @@ class FruitConan(ConanFile):
             self._cmake = CMake(self)
             self._cmake.definitions["FRUIT_USES_BOOST"] = self.options.use_boost
             self._cmake.definitions["FRUIT_ENABLE_COVERAGE"] = False
+            self._cmake.definitions["RUN_TESTS_UNDER_VALGRIND"] = False
+            self._cmake.definitions["FRUIT_ENABLE_CLANG_TIDY"] = False
 
             self._cmake.configure(build_folder=self._build_subfolder)
         return self._cmake
