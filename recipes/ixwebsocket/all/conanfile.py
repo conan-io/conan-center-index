@@ -23,8 +23,7 @@ class IXWebSocketConan(ConanFile):
     generators = "cmake"
 
     options = {
-        "use_tls": [True, False],
-        "tls": ["mbedtls", "openssl", "applessl", None],
+        "tls": ["mbedtls", "openssl", "applessl", False],
         "fPIC": [True, False]
     }
     default_options = {k: v[0] for k, v in options.items()}
@@ -41,10 +40,6 @@ class IXWebSocketConan(ConanFile):
     def configure(self):
         if self.options.tls == "applessl" and not tools.is_apple_os(self.settings.os):
             raise ConanInvalidConfiguration("Can only use Apple SSL on Apple.")
-        elif self.options.tls and not self.options.use_tls:
-            raise ConanInvalidConfiguration("You cannot use an SSL system when use_tls is false")
-        elif not self.options.tls and self.options.use_tls:
-            raise ConanInvalidConfiguration("You need to select an SSL system when use_tls is true")
         elif not self._can_use_openssl() and self.options.tls == "openssl":
             # Should maybe specify 7.9.3, even though it isn't packaged with conan?
             raise ConanInvalidConfiguration("This version doesn't support OpenSSL with Windows; use v9.1.9 or newer for this to be valid")
@@ -56,7 +51,7 @@ class IXWebSocketConan(ConanFile):
     def requirements(self):
         self.requires.add("zlib/1.2.11")
 
-        if not self.options.use_tls:
+        if not self.options.tls:
             # if we're not using TLS of some or another type, then no libraries after this
             # point are needed.
             return;
@@ -76,7 +71,7 @@ class IXWebSocketConan(ConanFile):
         cmake = CMake(self)
 
         # User-selectable options
-        cmake.definitions["USE_TLS"] = self.options.use_tls
+        cmake.definitions["USE_TLS"] = self.options.tls != False
         cmake.definitions["USE_MBED_TLS"] = self.options.tls == "mbedtls"
         cmake.definitions["USE_OPENSSL"] = self.options.tls == "openssl"
 
@@ -100,5 +95,5 @@ class IXWebSocketConan(ConanFile):
             self.cpp_info.system_libs.append("Ws2_32")
         elif self.settings.os == "Linux":
             self.cpp_info.system_libs.append("pthread")
-        elif self.options.use_tls and tools.is_apple_os(self.settings.os) and self.options.tls == "applessl":
+        elif tools.is_apple_os(self.settings.os) and self.options.tls == "applessl":
             self.cpp_info.frameworks = ['Security', 'CoreFoundation']
