@@ -112,4 +112,4 @@ class DlibConan(ConanFile):
         # There is a single library whose name depends on settings
         self.cpp_info.libs = tools.collect_libs(self)
         if self.settings.os == "Linux":
-            self.system_info.libs = ["pthread"]
+            self.cpp_info.system_libs = ["pthread"]
