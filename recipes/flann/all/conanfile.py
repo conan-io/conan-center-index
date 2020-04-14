@@ -112,9 +112,6 @@ class LibFlannConan(ConanFile):
                     os.remove(file_to_remove)
 
     def package_info(self):
-        self.cpp_info.names["cmake_find_package"] = "FLANN"
-        self.cpp_info.names["cmake_find_package_multi"] = "FLANN"
-
         if self.options.shared:
             self.cpp_info.libs = ["flann", "flann_cpp"]
         else:
