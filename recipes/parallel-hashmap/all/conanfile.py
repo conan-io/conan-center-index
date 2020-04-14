@@ -24,7 +24,7 @@ class ParallelHashmapConan(ConanFile):
         self.copy("*.h",
                   dst=os.path.join("include", "parallel_hashmap"),
                   src=os.path.join(self._source_subfolder, "parallel_hashmap"))
-        self.copy("phmap.natvis", dst="include", src=self._source_subfolder)
+        self.copy("phmap.natvis", dst="res", src=self._source_subfolder)
 
     def package_id(self):
         self.info.header_only()
