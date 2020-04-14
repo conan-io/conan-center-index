@@ -34,7 +34,9 @@ class LibgtaConan(ConanFile):
         del self.settings.compiler.cppstd
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
+        auth = (tools.get_env("AUTH_USERNAME"), tools.get_env("AUTH_PASSWORD"))
+        #tools.get(**self.conan_data["sources"][self.version], auth=auth)
+        tools.get("https://marlam.de/gta/releases/libgta-1.2.1.tar.xz", sha256="d445667e145f755f0bc34ac89b63a6bfdce1eea943f87ee7a3f23dc0dcede8b1", auth=auth)
         os.rename(self.name + "-" + self.version, self._source_subfolder)
 
     def build(self):
