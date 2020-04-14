@@ -41,7 +41,7 @@ class BoostConan(ConanFile):
         "asio_no_deprecated": [True, False],
         "filesystem_no_deprecated": [True, False],
         "fPIC": [True, False],
-        "layout": ["default", "system", "versioned", "tagged"],
+        "layout": ["system", "versioned", "tagged", "b2-default"],
         "magic_autolink": [True, False],  # enables BOOST_ALL_NO_LIB
         "python_executable": "ANY",  # system default python installation is used, if None
         "python_version": "ANY",  # major.minor; computed automatically, if None
@@ -66,7 +66,7 @@ class BoostConan(ConanFile):
         'asio_no_deprecated': False,
         'filesystem_no_deprecated': False,
         'fPIC': True,
-        'layout': 'default',
+        'layout': 'system',
         'magic_autolink': False,
         'python_executable': 'None',
         'python_version': 'None',
@@ -531,7 +531,7 @@ class BoostConan(ConanFile):
         if self._b2_abi:
             flags.append("abi=%s" % self._b2_abi)
 
-        if self.options.layout is not "default":
+        if self.options.layout is not "b2-default":
             flags.append("--layout=%s" % self.options.layout)
         flags.append("--user-config=%s" % os.path.join(self._boost_build_dir, 'user-config.jam'))
         flags.append("-sNO_ZLIB=%s" % ("0" if self.options.zlib else "1"))
