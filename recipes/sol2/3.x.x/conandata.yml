@@ -1,0 +1,10 @@
+sources:
+  "3.0.3":
+    url: "https://github.com/ThePhD/sol2/archive/v3.0.3.tar.gz"
+    sha256: "bf089e50387edfc70063e24fd7fbb693cceba4a50147d864fabedd1b33483582"
+
+  "2.20.6":
+    url: "https://github.com/ThePhD/sol2/archive/v2.20.6.tar.gz"
+    sha256: "90c72e120cdd67d516434b51fdcff2d63cc25afe06fb7866fcf7f5bc85366808"
+
+    
