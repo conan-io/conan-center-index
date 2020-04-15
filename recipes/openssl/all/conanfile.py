@@ -155,7 +155,7 @@ class OpenSSLConan(ConanFile):
             del self.options.fPIC
 
     def requirements(self):
-        if not self.options.get_safe("no_zlib"):
+        if self.options.get_safe("no_zlib") == False:
             self.requires("zlib/1.2.11")
 
     @property
@@ -425,7 +425,7 @@ class OpenSSLConan(ConanFile):
         if self.settings.os == "Neutrino":
             args.append("-lsocket no-asm")
 
-        if not self.options.get_safe("no_zlib"):
+        if self.options.get_safe("no_zlib") == False:
             zlib_info = self.deps_cpp_info["zlib"]
             include_path = zlib_info.include_paths[0]
             if self.settings.os == "Windows":
