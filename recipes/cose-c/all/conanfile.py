@@ -69,7 +69,7 @@ class CoseCStackConan(ConanFile):
         self._cmake.definitions["COSE_C_BUILD_DOCS"] = False
         self._cmake.definitions["COSE_C_BUILD_DUMPER"] = False
         self._cmake.definitions["COSE_C_USE_MBEDTLS"] = self.options.use_mbedtls
-        self._cmake.definitions["COSE_C_USE_PROJECT_ADD"] = False
+        self._cmake.definitions["COSE_C_USE_FIND_PACKAGE"] = True
         self._cmake.configure(build_folder=self._build_subfolder)
         return self._cmake
 
