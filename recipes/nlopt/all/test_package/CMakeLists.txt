@@ -6,4 +6,4 @@ conan_basic_setup()
 
 add_executable(${PROJECT_NAME} test_package.c)
 target_link_libraries(${PROJECT_NAME} ${CONAN_LIBS})
-set_target_properties(${PROJECT_NAME} PROPERTIES LINKER_LANGUAGE CXX)
+set_property(TARGET ${PROJECT_NAME} PROPERTY LINKER_LANGUAGE CXX)
