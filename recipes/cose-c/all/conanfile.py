@@ -34,10 +34,6 @@ class CoseCStackConan(ConanFile):
     def _build_subfolder(self):
         return "build_subfolder"
 
-    def config_options(self):
-        if self.settings.os == "Windows":
-            del self.options.fPIC
-
     def requirements(self):
         self.requires("cn-cbor/1.0.0")
 
@@ -47,8 +43,8 @@ class CoseCStackConan(ConanFile):
             self.requires("openssl/1.1.1d")
 
     def configure(self):
-        if self.settings.os == "Macos":
-            raise ConanInvalidConfiguration("cose-c does not support Macos at the moment")
+        if self.settings.os not in ["Windows", "Macos", "Android"]:
+            raise ConanInvalidConfiguration("cose-c does not support your OS at the moment")
         
         del self.settings.compiler.libcxx
         del self.settings.compiler.cppstd
