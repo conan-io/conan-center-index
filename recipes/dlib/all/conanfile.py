@@ -1,6 +1,7 @@
 import os
 
 from conans import ConanFile, CMake, tools
+from conans.errors import ConanInvalidConfiguration
 
 
 class DlibConan(ConanFile):
@@ -48,6 +49,10 @@ class DlibConan(ConanFile):
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
+
+    def configure(self):
+        if self.settings.compiler == "Visual Studio" and self.options.shared:
+            raise ConanInvalidConfiguration("dlib can not be built as a shared library with Visual Studio")
 
     def requirements(self):
         self.requires("zlib/1.2.11")
