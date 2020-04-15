@@ -97,6 +97,9 @@ class LibsodiumConan(ConanFile):
     def _build_autotools_linux(self, configure_args):
         self._build_autotools_impl(configure_args)
 
+    def _build_autotools_freebsd(self, configure_args):
+        self._build_autotools_impl(configure_args)
+
     def _build_autotools_emscripten(self, configure_args):
         self.run("./dist-build/emscripten.sh --standard", cwd=self._source_subfolder)
 
@@ -135,6 +138,8 @@ class LibsodiumConan(ConanFile):
 
         if self.settings.os == "Linux":
             self._build_autotools_linux(configure_args)
+        elif self.settings.os == "FreeBSD":
+            self._build_autotools_freebsd(configure_args)
         elif self.settings.os == "Emscripten":
             self._build_autotools_emscripten(configure_args)
         elif self.settings.os == "Android":
@@ -171,6 +176,8 @@ class LibsodiumConan(ConanFile):
                 self.cpp_info.defines = ["SODIUM_STATIC=1"]
         self.cpp_info.libs = tools.collect_libs(self)
         if self.settings.os == "Linux":
+            self.cpp_info.system_libs = ["pthread"]
+        elif self.settings.os == "FreeBSD":
             self.cpp_info.system_libs = ["pthread"]
 
     def _package_autotools(self):
