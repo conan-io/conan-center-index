@@ -1,4 +1,4 @@
-#include <cose.h>
+#include <cose/cose.h>
 #include <stdio.h>
 
 int main(int argc, char *argv[]) {
