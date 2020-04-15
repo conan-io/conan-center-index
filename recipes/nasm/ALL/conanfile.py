@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 import os
 import shutil
 from conans import ConanFile, AutoToolsBuildEnvironment, tools
@@ -10,7 +9,6 @@ class NASMConan(ConanFile):
     homepage = "http://www.nasm.us"
     description = "The Netwide Assembler, NASM, is an 80x86 and x86-64 assembler"
     license = "BSD-2-Clause"
-    author = "Bincrafters <bincrafters@gmail.com>"
     settings = "os_build", "arch_build", "compiler"
     topics = ("conan", "nasm", "installer", "assembler")
     _autotools = None
@@ -21,11 +19,11 @@ class NASMConan(ConanFile):
 
     def configure(self):
         del self.settings.compiler.libcxx
-        del self.settings.compiler.libstd
+        del self.settings.compiler.cppstd
 
     def build_requirements(self):
         if self.settings.os_build == "Windows" and not tools.which("perl"):
-            self.build_requires.add("strawberryperl/5.30.0.1")
+            self.build_requires("strawberryperl/5.30.0.1")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
