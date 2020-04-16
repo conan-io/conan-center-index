@@ -23,7 +23,7 @@ jobs:
   opencv:
     strategy:
       matrix:
-        build: [linux-gcc4.8', 'linux-gcc8', 'linux-gcc9', 'macos']
+        build: ['linux-gcc4.8', 'linux-gcc8', 'linux-gcc9', 'macos']
         include:
           - build: 'linux-gcc4.8'
             os: 'ubuntu-latest'
