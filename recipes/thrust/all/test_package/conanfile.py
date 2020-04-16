@@ -7,8 +7,7 @@ class ThrustTestConan(ConanFile):
     generators = "cmake"
 
     def requirements(self):
-        if self.settings.compiler == "apple-clang" or self.settings.compiler == "clang":
-            self.requires("llvm-openmp/9.0.1@")
+        self.requires("tbb/2019_u9@")
 
     def build(self):
         cmake = CMake(self)

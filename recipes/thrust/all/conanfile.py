@@ -5,7 +5,7 @@ class ThrustConan(ConanFile):
     name = "thrust"
     license = "Apache License 2.0"
     description = ("Thrust is a parallel algorithms library which resembles"
-                   "the C++ Standard Template Library (STL). Thrust’s high-level "
+                   "the C++ Standard Template Library (STL). Thrust's high-level "
                    "interface greatly enhances programmer productivity while "
                    "enabling performance portability between GPUs and multicore CPUs."
                    "Interoperability with established technologies "
