@@ -23,15 +23,8 @@ jobs:
   opencv:
     strategy:
       matrix:
-        build: ['linux-gcc4.8', 'linux-gcc8', 'linux-gcc9', 'macos']
+        build: ['linux-gcc8', 'linux-gcc9', 'macos']
         include:
-          - build: 'linux-gcc4.8'
-            os: 'ubuntu-latest'
-            compiler: 'gcc'
-            compiler_version: '4.8'
-            docker_image: 'conanio/gcc48'
-            build_types: 'Release,Debug'
-            archs: 'x86,x86_64'
           - build: 'linux-gcc8'
             os: 'ubuntu-latest'
             compiler: 'gcc'
