@@ -7,16 +7,19 @@ from conans.tools import Version
 class ProtobufConan(ConanFile):
     name = "protobuf"
     description = "Protocol Buffers - Google's data interchange format"
-    topics = ("conan", "protobuf", "protocol-buffers", "protocol-compiler", "serialization", "rpc", "protocol-compiler")
+    topics = ("conan", "protobuf", "protocol-buffers",
+              "protocol-compiler", "serialization", "rpc", "protocol-compiler")
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/protocolbuffers/protobuf"
     license = "BSD-3-Clause"
-    exports_sources = ["CMakeLists.txt", "protobuf.patch"]
+    exports_sources = ["CMakeLists.txt", "patches/*"]
     generators = "cmake"
     short_paths = True
     settings = "os", "arch", "compiler", "build_type"
-    options = {"shared": [True, False], "with_zlib": [True, False], "fPIC": [True, False], "lite": [True, False]}
-    default_options = {"with_zlib": False, "shared": False, "fPIC": True, "lite": False}
+    options = {"shared": [True, False], "with_zlib": [
+        True, False], "fPIC": [True, False], "lite": [True, False]}
+    default_options = {"with_zlib": False,
+                       "shared": False, "fPIC": True, "lite": False}
 
     @property
     def _source_subfolder(self):
@@ -41,7 +44,7 @@ class ProtobufConan(ConanFile):
             compiler_version = Version(self.settings.compiler.version.value)
             if compiler_version < "14":
                 raise ConanInvalidConfiguration("On Windows Protobuf can only be built with "
-                                           "Visual Studio 2015 or higher.")
+                                                "Visual Studio 2015 or higher.")
 
     def requirements(self):
         if self.options.with_zlib:
@@ -59,7 +62,8 @@ class ProtobufConan(ConanFile):
         return cmake
 
     def build(self):
-        tools.patch(base_path=self._source_subfolder, patch_file="protobuf.patch")
+        for patch in self.conan_data["patches"][self.version]:
+            tools.patch(**patch)
         cmake = self._configure_cmake()
         cmake.build()
 
@@ -70,7 +74,6 @@ class ProtobufConan(ConanFile):
         tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
         tools.rmdir(os.path.join(self.package_folder, "cmake"))
         tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
-
 
     def package_info(self):
         self.cpp_info.libs = tools.collect_libs(self)
