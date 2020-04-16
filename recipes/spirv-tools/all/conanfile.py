@@ -16,11 +16,13 @@ class SpirvtoolsConan(ConanFile):
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
+        "skip_executables": [True, False],
         "c_only": [True, False]
     }
     default_options = {
         "shared": True,
         "fPIC": True,
+        "skip_executables": False,
         "c_only": False
     }
 
@@ -46,6 +48,8 @@ class SpirvtoolsConan(ConanFile):
 
     def _configure_cmake(self):
         cmake = CMake(self)
+
+        cmake.definitions["SPIRV_SKIP_EXECUTABLES"] = self.options.skip_executables
 
         # Required by the project's CMakeLists.txt
         cmake.definitions["SPIRV-Headers_SOURCE_DIR"] = self.deps_cpp_info["spirv-headers"].rootpath
@@ -85,3 +89,8 @@ class SpirvtoolsConan(ConanFile):
             self.cpp_info.libs.append("SPIRV-Tools-link")
             self.cpp_info.libs.append("SPIRV-Tools-opt")
             self.cpp_info.libs.append("SPIRV-Tools")
+
+        if not self.options.skip_executables:
+            bin_path = os.path.join(self.package_folder, "bin")
+            self.output.info('Appending PATH environment variable: %s' % bin_path)
+            self.env_info.path.append(bin_path)
