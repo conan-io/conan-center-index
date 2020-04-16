@@ -7,6 +7,6 @@ diff --git a/include/jwt-cpp/jwt.h b/include/jwt-cpp/jwt.h
  			// TODO: Cannot find the exact version this change happended
 -#if OPENSSL_VERSION_NUMBER <= 0x1000114fL
 +#if OPENSSL_VERSION_NUMBER <= 0x10100003L
- 			std::unique_ptr<BIO, decltype(&BIO_free_all)> certbio(BIO_new_mem_buf(const_cast<char*>(certstr.data()), certstr.size()), BIO_free_all);
+ 			std::unique_ptr<BIO, decltype(&BIO_free_all)> certbio(BIO_new_mem_buf(const_cast<char*>(certstr.data()), (int)certstr.size()), BIO_free_all);
  #else
- 			std::unique_ptr<BIO, decltype(&BIO_free_all)> certbio(BIO_new_mem_buf(certstr.data(), certstr.size()), BIO_free_all);
+ 			std::unique_ptr<BIO, decltype(&BIO_free_all)> certbio(BIO_new_mem_buf(certstr.data(), (int)certstr.size()), BIO_free_all);
