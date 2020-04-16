@@ -15,3 +15,6 @@ patches:
       # https://github.com/bombela/backward-cpp/commit/b7ffd640ec48ada93045f8c46fc65f823490819b.patch
     - patch_file: "patches/backward-cpp-1.4-b7ffd640ec48ada93045f8c46fc65f823490819b.patch"
       base_path: "source_subfolder"
+  "1.5":
+    - patch_file: "patches/backward-cpp-1.5.patch"
+      base_path: "source_subfolder"
