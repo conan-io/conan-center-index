@@ -16,7 +16,7 @@ class BackwardCppConan(ConanFile):
     settings = "os", "arch", "compiler", "build_type"
     options = {
        "stack_walking" : ["unwind", "backtrace"],
-       "stack_details" : ["dw", "bfd", "dwarf", "backtrace_symbol"],
+       "stack_details" : ["dw", "bfd", "dwarf", "backtrace_symbol", "pdb"],
        "shared": [True, False],
        "fPIC": [True, False]
     }
@@ -36,16 +36,23 @@ class BackwardCppConan(ConanFile):
     def _has_stack_details(self, type):
         return self.options.stack_details == type
     
+    def _supported_os(self):
+        return ["Linux", "Macos", "Android", "Windows"] if tools.Version(self.version) < "1.5" \
+               else ["Linux", "Macos", "Android"]
+        
     def configure(self):
-        if self.settings.os not in ["Linux", "Macos", "Android"]:
+        if self.settings.os not in self._supported_os():
             raise ConanInvalidConfiguration("upstream backward-cpp v{0} is not \
                 supported in {1}.".format(self.version, self.settings.os))
-        # windows implementation only available in upstream master branch
 
         if self.settings.os == "Macos" and \
            not self._has_stack_details("backtrace_symbol"):
             raise ConanInvalidConfiguration("only stack_details=backtrace_symbol"
                                             " is supported on Macos")
+        if self.settings.os == "Windows" and \
+            not self._has_stack_details("pdb"):
+             raise ConanInvalidConfiguration("only stack_details=pdb"
+                                            " is supported on Windows")
         
     def requirements(self):
         if self.settings.os in ["Linux", "Android"] and \
@@ -95,12 +102,17 @@ class BackwardCppConan(ConanFile):
         cmake.definitions['STACK_DETAILS_BFD'] = self._has_stack_details("bfd")
         cmake.definitions['STACK_DETAILS_DWARF'] = self._has_stack_details("dwarf")
         cmake.definitions['BACKWARD_SHARED'] = self.options.shared
+        cmake.definitions['BACKWARD_TESTS'] = False
         cmake.configure(build_folder=self._build_subfolder)
         return cmake
 
+    def patch_sources(self):
+        if self.version in self.conan_data["patches"]:
+            for patch in self.conan_data["patches"][self.version]:
+                tools.patch(**patch)
+
     def build(self):
-        for patch in self.conan_data["patches"][self.version]:
-            tools.patch(**patch)
+        self.patch_sources()
         cmake = self._configure_cmake()
         cmake.build()
 
@@ -121,6 +133,7 @@ class BackwardCppConan(ConanFile):
         self.cpp_info.defines.append('BACKWARD_HAS_DW={}'.format(int(self._has_stack_details("dw"))))
         self.cpp_info.defines.append('BACKWARD_HAS_BFD={}'.format(int(self._has_stack_details("bfd"))))
         self.cpp_info.defines.append('BACKWARD_HAS_DWARF={}'.format(int(self._has_stack_details("dwarf"))))
+        self.cpp_info.defines.append('BACKWARD_HAS_PDB_SYMBOL={}'.format(int(self._has_stack_details("pdb"))))
 
         self.cpp_info.libs = tools.collect_libs(self)
         if self.settings.os == "Linux":
