@@ -60,7 +60,7 @@ jobs:
         run: brew install gtk+
       - name: Install gtk+
         if: matrix.os == 'ubuntu-latest'
-        run: sudo apt update && sudo apt install -y gtk2.0
+        run: sudo apt update && sudo apt install -y libgtk2.0-dev
       - name: Configure git
         run: git config --global core.autocrlf false
         shell: bash
