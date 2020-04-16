@@ -1,0 +1,4 @@
+sources:
+  "20200403":
+    url: "https://github.com/KhronosGroup/SPIRV-Cross/archive/2020-04-03.tar.gz"
+    sha256: "93f3a6dfad17c9ca0bf4d2d80809e90118e13b47502eb395baba8784025d7e97"
