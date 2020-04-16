@@ -25,7 +25,7 @@ jobs:
       matrix:
         # uncomment when conanfile.py ready
         # build: ['linux-gcc4.8', 'linux-gcc8', 'linux-gcc9', 'macos']
-        build: ['macos']
+        build: ['linux-gcc4.8', 'linux-gcc8', 'linux-gcc9', 'macos']
         include:
           - build: 'linux-gcc4.8'
             os: 'ubuntu-latest'
