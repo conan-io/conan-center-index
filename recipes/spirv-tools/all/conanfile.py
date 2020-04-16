@@ -82,5 +82,6 @@ class SpirvtoolsConan(ConanFile):
             self.cpp_info.libs.append("SPIRV-Tools-shared")
         else:
             self.cpp_info.libs.append("SPIRV-Tools-reduce")
+            self.cpp_info.libs.append("SPIRV-Tools-link")
             self.cpp_info.libs.append("SPIRV-Tools-opt")
             self.cpp_info.libs.append("SPIRV-Tools")
