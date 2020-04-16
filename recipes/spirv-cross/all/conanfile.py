@@ -89,10 +89,10 @@ class SpirvCrossConan(ConanFile):
         self._cmake.definitions["SPIRV_CROSS_ENABLE_MSL"] = self.options.msl
         self._cmake.definitions["SPIRV_CROSS_ENABLE_CPP"] = self.options.cpp
         self._cmake.definitions["SPIRV_CROSS_ENABLE_REFLECT"] = self.options.reflect
-        self._cmake.definitions["SPIRV_CROSS_ENABLE_C_API"] = self.options.get_safe("c_api") or False
-        self._cmake.definitions["SPIRV_CROSS_ENABLE_UTIL"] = self.options.get_safe("util") or False
+        self._cmake.definitions["SPIRV_CROSS_ENABLE_C_API"] = self.options.get_safe("c_api", False)
+        self._cmake.definitions["SPIRV_CROSS_ENABLE_UTIL"] = self.options.get_safe("util", False)
         self._cmake.definitions["SPIRV_CROSS_SKIP_INSTALL"] = False
-        self._cmake.definitions["SPIRV_CROSS_FORCE_PIC"] = self.options.get_safe("fPIC") or True
+        self._cmake.definitions["SPIRV_CROSS_FORCE_PIC"] = self.options.get_safe("fPIC", True)
         self._cmake.configure(build_folder=self._build_subfolder)
         return self._cmake
 
