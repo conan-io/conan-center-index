@@ -107,9 +107,10 @@ class BackwardCppConan(ConanFile):
         return cmake
 
     def patch_sources(self):
-        if self.version in self.conan_data["patches"]:
-            for patch in self.conan_data["patches"][self.version]:
-                tools.patch(**patch)
+        if "patches" in self.conan_data:
+            if self.version in self.conan_data["patches"]:
+                for patch in self.conan_data["patches"][self.version]:
+                    tools.patch(**patch)
 
     def build(self):
         self.patch_sources()
