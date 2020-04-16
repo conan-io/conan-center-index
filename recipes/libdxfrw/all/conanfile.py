@@ -3,10 +3,10 @@ from conans import ConanFile, CMake, tools
 
 class LibdxfrwConan(ConanFile):
     name = "libdxfrw"
-    license = "GPL2"
+    license = "GPL-2.0-or-later"
     url = "https://github.com/conan-io/conan-center-index"
     description = "C++ library to read/write DXF and read DWG files"
-    topics = ("dxf", "dwg")
+    topics = ("dxf", "dwg", "cad")
     settings = "os", "compiler", "build_type", "arch"
     options = {
         "shared": [True, False],
