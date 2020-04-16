@@ -12,8 +12,6 @@ class JwtCppConan(ConanFile):
     exports_sources = ["patches/**"]
     no_copy_source = True
 
-    version = "0.3.1"
-
     @property
     def _source_subfolder(self):
         return "source_subfolder"
