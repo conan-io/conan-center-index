@@ -22,7 +22,7 @@ jobs:
   xz_utils:
     strategy:
       matrix:
-        build: ['linux-gcc4.8', 'linux-gcc7', 'linux-gcc9', 'windows-2019-release', 'windows-2019-debug', 'macos']
+        build: ['linux-gcc4.8', 'linux-gcc8', 'linux-gcc9', 'macos']
         xz_utils_versions: ['5.2.4']
         include:
           - build: 'linux-gcc4.8'
@@ -32,11 +32,11 @@ jobs:
             docker_image: 'conanio/gcc48'
             build_types: 'Release,Debug'
             archs: 'x86,x86_64'
-          - build: 'linux-gcc7'
+          - build: 'linux-gcc8'
             os: 'ubuntu-latest'
             compiler: 'gcc'
-            compiler_version: '7'
-            docker_image: 'conanio/gcc7'
+            compiler_version: '8'
+            docker_image: 'conanio/gcc8'
             build_types: 'Release,Debug'
             archs: 'x86,x86_64'
           - build: 'linux-gcc9'
