@@ -147,6 +147,8 @@ class BackwardCppConan(ConanFile):
                 self.cpp_info.system_libs.extend(["dw"])           
             if self._has_stack_details("bfd"):
                 self.cpp_info.system_libs.extend(["bfd"])
+        if self.settings.os == "Windows":
+            self.cpp_info.system_libs.extend(["psapi", "dbghelp"])
 
 
         
