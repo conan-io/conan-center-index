@@ -71,7 +71,6 @@ class FmtConan(ConanFile):
         else:
             cmake = self._configure_cmake()
             cmake.install()
-        tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
         tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
         tools.rmdir(os.path.join(self.package_folder, "share"))
 
