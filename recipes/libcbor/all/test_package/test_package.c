@@ -1,27 +1,18 @@
 #include <cbor.h>
 #include <stdio.h>
 
-int main(int argc, char * argv[])
-{
-	/* Preallocate the map structure */
-	cbor_item_t * root = cbor_new_definite_map(2);
-	/* Add the content */
-	cbor_map_add(root, (struct cbor_pair) {
-		.key = cbor_move(cbor_build_string("Is CBOR awesome?")),
-		.value = cbor_move(cbor_build_bool(true))
-	});
-	cbor_map_add(root, (struct cbor_pair) {
-		.key = cbor_move(cbor_build_uint8(42)),
-		.value = cbor_move(cbor_build_string("Is the answer"))
-	});
-	/* Output: `length` bytes of data in the `buffer` */
-	unsigned char * buffer;
-	size_t buffer_size,
-		length = cbor_serialize_alloc(root, &buffer, &buffer_size);
+int main(int argc, char *argv[]) {
+  printf("Hello from libcbor %s\n", CBOR_VERSION);
+  printf("Custom allocation support: %s\n", CBOR_CUSTOM_ALLOC ? "yes" : "no");
+  printf("Pretty-printer support: %s\n", CBOR_PRETTY_PRINTER ? "yes" : "no");
+  printf("Buffer growth factor: %f\n", (float)CBOR_BUFFER_GROWTH);
+  cbor_item_t *array = cbor_new_definite_array(4);
+  cbor_array_push(array, cbor_move(cbor_build_uint8(4)));
+  cbor_array_push(array, cbor_move(cbor_build_uint8(3)));
+  cbor_array_push(array, cbor_move(cbor_build_uint8(1)));
+  cbor_array_push(array, cbor_move(cbor_build_uint8(2)));
 
-	fwrite(buffer, 1, length, stdout);
-	free(buffer);
-
-	fflush(stdout);
-	cbor_decref(&root);
+  cbor_describe(array, stdout);
+  fflush(stdout);
+  /* Preallocate the map structure */
 }
