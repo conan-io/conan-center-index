@@ -13,7 +13,7 @@ class WebsocketPPConan(ConanFile):
     exports_sources = ["CMakeLists.txt", "patches/*"]
     generators = ["cmake"]
     options = {"asio": ["boost", "standalone"]}
-    default_options = {"asio": "standalone"}
+    default_options = {"asio": "boost"}
     
     @property
     def _source_subfolder(self):
