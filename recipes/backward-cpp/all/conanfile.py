@@ -37,7 +37,7 @@ class BackwardCppConan(ConanFile):
         return self.options.stack_details == type
     
     def _supported_os(self):
-        return ["Linux", "Macos", "Android", "Windows"] if tools.Version(self.version) < "1.5" \
+        return ["Linux", "Macos", "Android", "Windows"] if tools.Version(self.version) >= "1.5" \
                else ["Linux", "Macos", "Android"]
         
     def configure(self):
