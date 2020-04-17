@@ -2,3 +2,6 @@ sources:
   "2.0.0":
     url: "https://github.com/microsoft/GSL/archive/v2.0.0.tar.gz"
     sha256: "6cce6fb16b651e62711a4f58e484931013c33979b795d1b1f7646f640cfa9c8e"
+  "3.0.0":
+    url: "https://github.com/microsoft/GSL/archive/v3.0.0.tar.gz"
+    sha256: "767b6246eecd0b2a915e2b5774ba6d4796579a5e15dc562d93ec80f1f2c9c889"

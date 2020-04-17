@@ -1,21 +1,24 @@
-#!/usr/bin/env python
-# -*- coding: utf-8 -*-
-
 from conans import ConanFile, tools
 import os
 
-
-class GslMicrosoftConan(ConanFile):
+class MicrosoftGslConan(ConanFile):
     name = "ms-gsl"
     version = "2.0.0"
     description = "Functions and types that are suggested for use by the C++ Core Guideline"
-    url = "https://github.com/bincrafters/conan-gsl_microsoft"
+    homepage = "https://github.com/microsoft/GSL"
+    url = "https://github.com/conan-io/conan-center-index"
     license = "MIT"
-    exports = ["LICENSE.md"]
+    topics = ("GSL", "guidelines", "core", "span")
     no_copy_source = True
-    _source_subfolder = "source_subfolder"
     
-    
+    @property
+    def _source_subfolder(self):
+        return "source_subfolder"
+
+    @property
+    def _build_subfolder(self):
+        return "build_subfolder"
+
     #  There are three configuration options for this GSL implementation's behavior
     #  when pre/post conditions on the GSL types are violated:
     # 
