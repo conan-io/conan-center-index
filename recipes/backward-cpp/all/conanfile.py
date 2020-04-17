@@ -39,7 +39,11 @@ class BackwardCppConan(ConanFile):
     def _supported_os(self):
         return ["Linux", "Macos", "Android", "Windows"] if tools.Version(self.version) >= "1.5" \
                else ["Linux", "Macos", "Android"]
-        
+    
+    def config_options(self):
+        if self.settings.os == "Windows":
+            del self.options.fPIC
+    
     def configure(self):
         if self.settings.os not in self._supported_os():
             raise ConanInvalidConfiguration("upstream backward-cpp v{0} is not \
