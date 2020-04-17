@@ -3,7 +3,6 @@ import os
 
 class MicrosoftGslConan(ConanFile):
     name = "ms-gsl"
-    version = "2.0.0"
     description = "Functions and types that are suggested for use by the C++ Core Guideline"
     homepage = "https://github.com/microsoft/GSL"
     url = "https://github.com/conan-io/conan-center-index"
