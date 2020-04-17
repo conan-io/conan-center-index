@@ -55,3 +55,5 @@ class MicrosoftGslConan(ConanFile):
         
     def package_info(self):
         self.cpp_info.defines = [self._contract_map[str(self.options.on_contract_violation)]]
+        self.cpp_info.names["cmake_find_package"] = "Microsoft.GSL"
+        self.cpp_info.names["cmake_find_package_multi"] = "Microsoft.GSL"
