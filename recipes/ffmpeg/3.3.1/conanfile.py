@@ -281,7 +281,8 @@ class FFMpegConan(ConanFile):
             args.append('--disable-nonfree')
 
             if self.settings.os == "Linux":
-                #args.append('--enable-alsa' if self.options.alsa else '--disable-alsa')
+                # there is no option associated with alsa in ffmpeg 3.3.1
+                # args.append('--enable-alsa' if self.options.alsa else '--disable-alsa') 
                 args.append('--enable-libpulse' if self.options.pulse else '--disable-libpulse')
                 args.append('--enable-vaapi' if self.options.vaapi else '--disable-vaapi')
                 args.append('--enable-vdpau' if self.options.vdpau else '--disable-vdpau')
