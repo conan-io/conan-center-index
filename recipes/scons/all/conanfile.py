@@ -1,4 +1,6 @@
 from conans import ConanFile, tools
+from conans.errors import ConanException
+import io
 import os
 import shutil
 import sys
@@ -19,12 +21,23 @@ class SConsConan(ConanFile):
     def _source_subfolder(self):
         return "source_subfolder"
 
+    def configure(self):
+        # Detect a frozen conan PyInstaller
+        if getattr(sys, "frozen", False):
+            raise ConanException("This recipe requires a python interpreter and does not support a frozen conan installation. This can be fixed with a cpython recipe.")
+
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
         os.rename("scons-{}".format(self.version), self._source_subfolder)
 
     def build(self):
         with tools.chdir(self._source_subfolder):
+            output = io.StringIO()
+            self.run("{} setup.py --requires".format(sys.executable), output=output)
+            # Workaround for log.print_run_commands = True/False
+            # This requires log.run_to_output = True
+            if not (output.getvalue().strip().splitlines() or ["-"])[-1].startswith("-"):
+                raise ConanException("scons has a requirement")
             self.run("{} setup.py build -j{}".format(sys.executable, tools.cpu_count()))
 
     def package(self):
@@ -59,6 +72,8 @@ class SConsConan(ConanFile):
                         fullpath = os.path.join(root, file)
                         os.unlink(fullpath)
                         self.output.warn("Found compiled python code: {}".format(fullpath))
+                if file.endswith(".egg-info"):
+                    os.unlink(os.path.join(root, file))
 
     def package_info(self):
         self.cpp_info.includedirs = []
