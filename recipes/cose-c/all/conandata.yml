@@ -1,4 +1,4 @@
 sources:
-  "20200415":
-    sha256: f68015441d65c5c0398ebbc5b38b51cdf54a8a756aa9353fa173300b1ced483d
-    url: https://github.com/cose-wg/COSE-C/archive/76a1f63b3ab735ff45f126b4e17f9dc7e39789a9.zip
+  "20200417":
+    sha256: 43d0762cc3b262050d8ef29de0e160f77513f1d0020f6626606008b35f64511e
+    url: https://github.com/cose-wg/COSE-C/archive/f8181759543dbf8fb00760ff5d7d31395c75710a.zip
