@@ -7,7 +7,7 @@ class PkgConfConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "http://pkgconf.org/"
     topics = ("conan", "pkgconf")
-    settings = "os_build", "arch_build", "compiler"
+    settings = "os", "arch", "compiler", "build_type"
     license = "ISC"
     description = "package compiler and linker metadata toolkit"
     exports_sources = "patches/**"
@@ -74,10 +74,6 @@ class PkgConfConan(ConanFile):
         os.rename(os.path.join(self.package_folder, "share", "aclocal"),
                   os.path.join(self.package_folder, "bin", "aclocal"))
         tools.rmdir(os.path.join(self.package_folder, "share"))
-
-    def package_id(self):
-        del self.info.settings.compiler
-        self.info.include_build_settings()
 
     def package_info(self):
         bindir = os.path.join(self.package_folder, "bin")
