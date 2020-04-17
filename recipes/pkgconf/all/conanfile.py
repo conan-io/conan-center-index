@@ -11,6 +11,14 @@ class PkgConfConan(ConanFile):
     license = "ISC"
     description = "package compiler and linker metadata toolkit"
     exports_sources = "patches/**"
+    options = {
+        "shared": [True, False],
+        "fPIC": [True, False],
+    }
+    default_options = {
+        "shared": False,
+        "fPIC": True,
+    }
 
     _meson = None
 
@@ -21,6 +29,14 @@ class PkgConfConan(ConanFile):
     @property
     def _build_subfolder(self):
         return "build_subfolder"
+
+    def config_options(self):
+        if self.settings.os == "Windows":
+            del self.options.fPIC
+
+    def configure(self):
+        if self.options.shared:
+            del self.options.fPIC
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
@@ -43,7 +59,6 @@ class PkgConfConan(ConanFile):
             return self._meson
         self._meson = Meson(self)
         self._meson.build_type = "Release"
-        self._meson.options["default_library"] = "static"
         self._meson.options["tests"] = False
         self._meson.options["sharedstatedir"] = self._sharedstatedir
         self._meson.configure(source_folder=self._source_subfolder, build_folder=self._build_subfolder)
