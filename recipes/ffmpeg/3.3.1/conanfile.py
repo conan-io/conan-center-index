@@ -346,13 +346,13 @@ class FFMpegConan(ConanFile):
 
     def package_info(self):
         libs = [
-            'avcodec',
             'avdevice',
             'avfilter',
             'avformat',
             'avutil',
             'swresample',
             'swscale',
+            'avcodec'
         ]
         if self.options.postproc:
             libs.append('postproc')
