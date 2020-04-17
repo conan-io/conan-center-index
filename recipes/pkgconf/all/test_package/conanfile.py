@@ -16,5 +16,5 @@ class TestPackageConan(ConanFile):
                 raise ConanException("pkgconf executable not found")
 
             with tools.environment_append({"PKG_CONFIG_PATH": self.source_folder}):
-                self.run("{} libexample1 --libs".format(os.environ["PKG_CONFIG"]))
-                self.run("{} libexample1 --cflags".format(os.environ["PKG_CONFIG"]))
+                self.run("{} libexample1 --libs".format(os.environ["PKG_CONFIG"]), run_environment=True)
+                self.run("{} libexample1 --cflags".format(os.environ["PKG_CONFIG"]), run_environment=True)
