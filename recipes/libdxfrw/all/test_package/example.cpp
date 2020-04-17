@@ -1,4 +1,3 @@
-#include <iostream>
 #include <libdxfrw/libdxfrw.h>
 
 int main() {
