@@ -11,7 +11,7 @@ BOOST_AUTO_TEST_SUITE(Suite)
 BOOST_AUTO_TEST_CASE(TestCase)
 {
     BOOST_CHECK(true);
-    ApprovalTests::Approvals::verify("Hello Approvals");
+    ApprovalTests::Approvals::verify("Hello Approvals", ApprovalTests::QuietReporter());
 }
 
 BOOST_AUTO_TEST_SUITE_END()
