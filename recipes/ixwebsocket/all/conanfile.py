@@ -23,9 +23,7 @@ class IXWebSocketConan(ConanFile):
     generators = "cmake"
 
     options = {
-        "use_mbed_tls": [False, True],
-        "use_tls": [True, False],
-        "use_openssl": [False, True],
+        "tls": ["mbedtls", "openssl", "applessl", False],
         "fPIC": [True, False]
     }
     default_options = {k: v[0] for k, v in options.items()}
@@ -40,30 +38,29 @@ class IXWebSocketConan(ConanFile):
         return True
 
     def configure(self):
-        if self.options.use_mbed_tls and not self.options.use_tls or self.options.get_safe("use_openssl") and not self.options.use_tls:
-            raise ConanInvalidConfiguration("TLS must be enabled to use mbedtls")
-        elif self.options.use_mbed_tls and self.options.get_safe("use_openssl"):
-            raise ConanInvalidConfiguration("Cannot use both OpenSSL and MbedTLS")
+        if self.options.tls == "applessl" and not tools.is_apple_os(self.settings.os):
+            raise ConanInvalidConfiguration("Can only use Apple SSL on Apple.")
+        elif not self._can_use_openssl() and self.options.tls == "openssl":
+            # Should maybe specify 7.9.3, even though it isn't packaged with conan?
+            raise ConanInvalidConfiguration("This version doesn't support OpenSSL with Windows; use v9.1.9 or newer for this to be valid")
 
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
-            self.default_options["use_mbed_tls"] = True
-            if not self._can_use_openssl():
-                del self.options.use_openssl
-        elif self.settings.os == "Linux":
-            # On Linux, if TLS is enabled and mbed is disabled, the only option is OpenSSL.
-            del self.options.use_openssl
 
     def requirements(self):
-
-        if(self._can_use_openssl() and not self.options.use_mbed_tls and self.options.use_tls
-           and (self.options.get_safe("use_openssl") or self.settings.os == "Linux")):
-            self.requires.add("openssl/1.1.1c")
-
         self.requires.add("zlib/1.2.11")
 
-        if self.settings.os == "Windows" and self.options.use_tls and not self._can_use_openssl() or self.options.use_mbed_tls:
+        if not self.options.tls:
+            # if we're not using TLS of some or another type, then no libraries after this
+            # point are needed.
+            return;
+
+        # Invalid configurations have been eliminated by this point, so it should be safe
+        # to add the dependencies without any further checks
+        if self.options.tls == "openssl":
+            self.requires.add("openssl/1.1.1e")
+        elif self.options.tls == "mbedtls":
             self.requires.add("mbedtls/2.16.3-apache")
 
     def source(self):
@@ -74,8 +71,9 @@ class IXWebSocketConan(ConanFile):
         cmake = CMake(self)
 
         # User-selectable options
-        cmake.definitions["USE_TLS"] = self.options.use_tls
-        cmake.definitions["USE_MBED_TLS"] = self.options.use_mbed_tls
+        cmake.definitions["USE_TLS"] = self.options.tls != False
+        cmake.definitions["USE_MBED_TLS"] = self.options.tls == "mbedtls"
+        cmake.definitions["USE_OPENSSL"] = self.options.tls == "openssl"
 
         cmake.configure()
         return cmake
@@ -92,13 +90,10 @@ class IXWebSocketConan(ConanFile):
 
     def package_info(self):
         self.cpp_info.libs = tools.collect_libs(self)
-        if self.options.use_tls and not self.options.use_mbed_tls and not self.options.get_safe("use_openssl") and self.settings.os == "Windows":
-            # Include linking with the websocket
+        if self.settings.os == "Windows":
+            # possibly required for all configurations. It's linked in by the IXWebSocket CMake, anyway.
             self.cpp_info.system_libs.append("Ws2_32")
-
-        if self.settings.os == "Linux":
+        elif self.settings.os == "Linux":
             self.cpp_info.system_libs.append("pthread")
-
-        if self.options.use_tls and self.settings.os == "Macos" and not self.options.use_openssl and not self.options.use_mbed_tls:
-            # Required
+        elif tools.is_apple_os(self.settings.os) and self.options.tls == "applessl":
             self.cpp_info.frameworks = ['Security', 'CoreFoundation']

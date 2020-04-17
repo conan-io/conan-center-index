@@ -120,7 +120,7 @@ class LibtiffConan(ConanFile):
         tools.rmdir(os.path.join(self.package_folder, 'lib', 'pkgconfig'))
 
     def package_info(self):
-        self.cpp_info.libs = ["tiff", "tiffxx"]
+        self.cpp_info.libs = ["tiffxx", "tiff"]
         if self.settings.os == "Windows" and self.settings.build_type == "Debug" and self.settings.compiler == 'Visual Studio':
             self.cpp_info.libs = [lib+'d' for lib in self.cpp_info.libs]
         if self.options.shared and self.settings.os == "Windows" and self.settings.compiler != 'Visual Studio':
