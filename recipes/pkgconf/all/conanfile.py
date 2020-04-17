@@ -37,14 +37,12 @@ class PkgConfConan(ConanFile):
     def configure(self):
         if self.options.shared:
             del self.options.fPIC
+        del self.settings.compiler.libcxx
+        del self.settings.compiler.cppstd
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
         os.rename("pkgconf-pkgconf-{}".format(self.version), self._source_subfolder)
-
-    def configure(self):
-        del self.settings.compiler.libcxx
-        del self.settings.compiler.cppstd
 
     def build_requirements(self):
         if not tools.which("meson"):
@@ -89,6 +87,7 @@ class PkgConfConan(ConanFile):
         tools.rmdir(os.path.join(self.package_folder, "share"))
 
     def package_info(self):
+        self.cpp_info.libs = ["pkgconf"]
         bindir = os.path.join(self.package_folder, "bin")
         self.output.info("Appending PATH env var: {}".format(bindir))
         self.env_info.PATH.append(bindir)
