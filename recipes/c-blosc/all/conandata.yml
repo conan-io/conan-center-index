@@ -5,10 +5,16 @@ sources:
   "1.17.1":
     url: "https://github.com/Blosc/c-blosc/archive/v1.17.1.tar.gz"
     sha256: "19a6948b579c27e8ac440b4f077f99fc90e7292b1d9cb896bec0fd781d68fba2"
+  "1.5.4":
+    url: "https://github.com/Blosc/c-blosc/archive/v1.5.4.tar.gz"
+    sha256: "1ffe7cb26f1c0a63f1a5e8b3da2d5c690f9d8ebd254330b038e77f7523da2551"
 patches:
   "1.18.1":
     - patch_file: "patches/cmake-dependencies_and_cxx_linker.patch"
       base_path: "source_subfolder"
   "1.17.1":
     - patch_file: "patches/cmake-dependencies_and_cxx_linker.patch"
+      base_path: "source_subfolder"
+  "1.5.4":
+    - patch_file: "patches/modify-1.5.4-CMakeLists-for-conan.patch"
       base_path: "source_subfolder"

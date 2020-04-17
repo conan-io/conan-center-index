@@ -42,6 +42,9 @@ class CbloscConan(ConanFile):
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
+        # support for zstd was added in v1.11.1
+        if tools.Version(self.version) < "1.11.1":
+            del self.options.with_zstd
 
     def configure(self):
         del self.settings.compiler.cppstd
@@ -58,7 +61,8 @@ class CbloscConan(ConanFile):
             self.requires.add("snappy/1.1.8")
         if self.options.with_zlib:
             self.requires.add("zlib/1.2.11")
-        if self.options.with_zstd:
+        # support for zstd was added in v1.11.1
+        if self.options.get_safe("with_zstd"):
             self.requires.add("zstd/1.4.4")
 
     def source(self):
@@ -85,7 +89,7 @@ class CbloscConan(ConanFile):
         self._cmake.definitions["DEACTIVATE_LZ4"] = not self.options.with_lz4
         self._cmake.definitions["DEACTIVATE_SNAPPY"] = not self.options.with_snappy
         self._cmake.definitions["DEACTIVATE_ZLIB"] = not self.options.with_zlib
-        self._cmake.definitions["DEACTIVATE_ZSTD"] = not self.options.with_zstd
+        self._cmake.definitions["DEACTIVATE_ZSTD"] = not self.options.get_safe("with_zstd")
         self._cmake.definitions["DEACTIVATE_SYMBOLS_CHECK"] = True
         self._cmake.definitions["PREFER_EXTERNAL_LZ4"] = True
         self._cmake.definitions["PREFER_EXTERNAL_SNAPPY"] = True
