@@ -8,7 +8,7 @@ class CppRestSDKConan(ConanFile):
                   "C++ API design"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/Microsoft/cpprestsdk"
-    topics = ("conan", "cpprestsdk", "rest", "client", "http")
+    topics = ("conan", "cpprestsdk", "rest", "client", "http", "https")
     license = "MIT"
     exports_sources = ["CMakeLists.txt", "patches/**"]
     generators = "cmake", "cmake_find_package"
@@ -46,12 +46,12 @@ class CppRestSDKConan(ConanFile):
             del self.options.fPIC
 
     def requirements(self):
-        self.requires.add("openssl/1.1.1e")
+        self.requires("openssl/1.1.1f")
         if self.options.with_compression:
-            self.requires.add("zlib/1.2.11")
+            self.requires("zlib/1.2.11")
         if self.options.with_websockets:
-            self.requires.add("websocketpp/0.8.1")
-        self.requires.add("boost/1.72.0")
+            self.requires("websocketpp/0.8.1")
+        self.requires("boost/1.72.0")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
