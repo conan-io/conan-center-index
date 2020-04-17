@@ -21,7 +21,7 @@ class WebsocketPPConan(ConanFile):
 
     def requirements(self):
         self.requires("openssl/1.1.1f")
-        self.requires.add("zlib/1.2.11")
+        self.requires("zlib/1.2.11")
         if self.options.asio == "standalone":
             self.requires.add("asio/1.16.0")
         else:
