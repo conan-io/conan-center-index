@@ -440,26 +440,6 @@ class BoostConan(ConanFile):
                 # self.run("%s --show-libraries" % b2_exe)
                 self.run(full_command)
 
-        arch = self.settings.get_safe('arch')
-        if arch.startswith("asm.js"):
-            self._create_emscripten_libs()
-
-    def _create_emscripten_libs(self):
-        # Boost Build doesn't create the libraries, but it gets close,
-        # leaving .bc files where the libraries would be.
-        staged_libs = os.path.join(
-            self.source_folder, self._boost_dir, "stage", "lib"
-        )
-        for bc_file in os.listdir(staged_libs):
-            if bc_file.startswith("lib") and bc_file.endswith(".bc"):
-                a_file = bc_file[:-3] + ".a"
-                cmd = "emar q {dst} {src}".format(
-                    dst=os.path.join(staged_libs, a_file),
-                    src=os.path.join(staged_libs, bc_file),
-                )
-                self.output.info(cmd)
-                self.run(cmd)
-
     @property
     def _b2_os(self):
         return {"Windows": "windows",
@@ -838,6 +818,26 @@ class BoostConan(ConanFile):
         tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
         if self.options.header_only:
             self.copy(pattern="*", dst="include/boost", src="%s/boost" % self._boost_dir)
+
+        arch = self.settings.get_safe('arch')
+        if arch.startswith("asm.js"):
+            self._create_emscripten_libs()
+
+    def _create_emscripten_libs(self):
+        # Boost Build doesn't create the libraries, but it gets close,
+        # leaving .bc files where the libraries would be.
+        staged_libs = os.path.join(
+            self.package_folder, "lib"
+        )
+        for bc_file in os.listdir(staged_libs):
+            if bc_file.startswith("lib") and bc_file.endswith(".bc"):
+                a_file = bc_file[:-3] + ".a"
+                cmd = "emar q {dst} {src}".format(
+                    dst=os.path.join(staged_libs, a_file),
+                    src=os.path.join(staged_libs, bc_file),
+                )
+                self.output.info(cmd)
+                self.run(cmd)
 
     def package_info(self):
         gen_libs = [] if self.options.header_only else tools.collect_libs(self)
