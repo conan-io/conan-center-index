@@ -35,5 +35,5 @@ class TestPackageConan(ConanFile):
             self.run(bin_path + "_catch", run_environment=True)
         if self.options["approvaltests.cpp"].with_gtest:
             self.run(bin_path + "_gtest", run_environment=True)
-        elif self.options["approvaltests.cpp"].with_doctest:
+        if self.options["approvaltests.cpp"].with_doctest:
             self.run(bin_path + "_doctest", run_environment=True)
