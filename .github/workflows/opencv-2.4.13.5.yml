@@ -23,8 +23,29 @@ jobs:
   opencv:
     strategy:
       matrix:
-        build: ['macos']
+        build: ['linux-gcc4.8', 'linux-gcc8', 'linux-gcc9', 'macos']
         include:
+          - build: 'linux-gcc4.8'
+            os: 'ubuntu-latest'
+            compiler: 'gcc'
+            compiler_version: '4.8'
+            docker_image: 'conanio/gcc48'
+            build_types: 'Release,Debug'
+            archs: 'x86_64'
+          - build: 'linux-gcc8'
+            os: 'ubuntu-latest'
+            compiler: 'gcc'
+            compiler_version: '8'
+            docker_image: 'conanio/gcc8'
+            build_types: 'Release,Debug'
+            archs: 'x86_64'
+          - build: 'linux-gcc9'
+            os: 'ubuntu-latest'
+            compiler: 'gcc'
+            compiler_version: '9'
+            docker_image: 'conanio/gcc9'
+            build_types: 'Release,Debug'
+            archs: 'x86_64'
           - build: 'macos'
             os: 'macos-latest'
             build_types: 'Release,Debug'
@@ -37,6 +58,9 @@ jobs:
       - name: Install gtk+
         if: matrix.os == 'macos-latest'
         run: brew install gtk+
+      - name: Install gtk+
+        if: matrix.os == 'ubuntu-latest'
+        run: sudo apt update && sudo apt install -y libgtk2.0-dev
       - name: Configure git
         run: git config --global core.autocrlf false
         shell: bash
