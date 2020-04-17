@@ -6,6 +6,7 @@ class TestPackageConan(ConanFile):
     settings = "os", "compiler", "arch", "build_type"
     generators = "cmake"
     default_options = {
+        "approvaltests.cpp:with_boosttest": True,
         "approvaltests.cpp:with_catch2": True,
         "approvaltests.cpp:with_gtest": True,
         "approvaltests.cpp:with_doctest": True
@@ -15,6 +16,8 @@ class TestPackageConan(ConanFile):
     def build(self):
         cmake = CMake(self)
 
+        if self.options["approvaltests.cpp"].with_boosttest:
+            cmake.definitions["WITH_BOOSTTEST"] = True
         if self.options["approvaltests.cpp"].with_catch2:
             cmake.definitions["WITH_CATCH"] = True
         if self.options["approvaltests.cpp"].with_gtest:
@@ -31,6 +34,9 @@ class TestPackageConan(ConanFile):
             return
 
         bin_path = os.path.join("bin", "test_package")
+        if self.options["approvaltests.cpp"].with_boosttest:
+            print("Running Boost")
+            self.run(bin_path + "_boosttest", run_environment=True)
         if self.options["approvaltests.cpp"].with_catch2:
             print("Running Catch2")
             self.run(bin_path + "_catch", run_environment=True)

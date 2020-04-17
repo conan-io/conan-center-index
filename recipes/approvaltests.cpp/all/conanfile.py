@@ -12,11 +12,13 @@ class ApprovalTestsCppConan(ConanFile):
                   "test assertions for each element."
     topics = ("conan", "testing", "unit-testing", "header-only")
     options = {
+        "with_boosttest": [True, False], # Should this be: with_boost_unit_test_framework?
         "with_catch2": [True, False],
         "with_gtest": [True, False],
         "with_doctest": [True, False]
     }
     default_options = {
+        "with_boosttest": False,
         "with_catch2": False,
         "with_gtest": False,
         "with_doctest": False
@@ -28,6 +30,8 @@ class ApprovalTestsCppConan(ConanFile):
         return "ApprovalTests.hpp"
 
     def requirements(self):
+        if self.options.with_boosttest:
+            self.requires("boost/1.72.0")
         if self.options.with_catch2:
             self.requires("catch2/2.11.0")
         if self.options.with_gtest:
