@@ -32,8 +32,11 @@ class TestPackageConan(ConanFile):
 
         bin_path = os.path.join("bin", "test_package")
         if self.options["approvaltests.cpp"].with_catch2:
+            print("Running Catch2")
             self.run(bin_path + "_catch", run_environment=True)
         if self.options["approvaltests.cpp"].with_gtest:
+            print("Running GTest")
             self.run(bin_path + "_gtest", run_environment=True)
         if self.options["approvaltests.cpp"].with_doctest:
+            print("Running DocTest")
             self.run(bin_path + "_doctest", run_environment=True)
