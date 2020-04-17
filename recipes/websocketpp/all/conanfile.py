@@ -25,7 +25,7 @@ class WebsocketPPConan(ConanFile):
         if self.options.asio == "standalone":
             self.requires("asio/1.16.0")
         else:
-            self.requires.add("boost/1.72.0")
+            self.requires("boost/1.72.0")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
