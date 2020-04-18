@@ -32,11 +32,13 @@ class XZUtils(ConanFile):
         # treat "RelWithDebInfo" and "MinSizeRel" as "Release"
         return "Debug" if self.settings.build_type == "Debug" else "Release"
 
+    def config_options(self):
+        if self.settings.os == "Windows":
+            del self.options.fPIC
+
     def configure(self):
         del self.settings.compiler.cppstd
         del self.settings.compiler.libcxx
-        if self.settings.compiler == "Visual Studio":
-            del self.options.fPIC
 
     def _apply_patches(self):
         # Relax Windows SDK restriction
@@ -130,6 +132,8 @@ class XZUtils(ConanFile):
     def package_info(self):
         if not self.options.shared:
             self.cpp_info.defines.append("LZMA_API_STATIC")
+        if self.settings.os == "Linux":
+            self.cpp_info.system_libs.append("pthread")
         self.cpp_info.libs = tools.collect_libs(self)
         self.cpp_info.names["pkg_config"] = "liblzma"
         self.cpp_info.names["cmake_find_package"] = "LibLZMA"
