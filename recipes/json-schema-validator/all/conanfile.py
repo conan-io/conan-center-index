@@ -33,7 +33,7 @@ class JsonSchemaValidatorConan(ConanFile):
             del self.options.fPIC
 
     def requirements(self):
-        self.requires("nlohmann_json/3.7.3")  # 3.6.0 is used by CI
+        self.requires("nlohmann_json/3.7.3")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
