@@ -122,10 +122,6 @@ class BoostConan(ConanFile):
         if self.settings.os == "Windows":
             del self.options.fPIC
 
-    def configure(self):
-        if self.options.icu:
-            tools.check_min_cppstd(self, "11")
-
     def build_requirements(self):
         self.build_requires("b2/4.2.0")
 
@@ -140,7 +136,7 @@ class BoostConan(ConanFile):
             if self.options.zstd:
                 self.requires("zstd/1.4.3")
         if self.options.icu:
-            self.requires("icu/66.1")
+            self.requires("icu/64.2")
 
     def package_id(self):
         if self.options.header_only:
