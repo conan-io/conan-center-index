@@ -12,7 +12,8 @@ class JsonSchemaValidatorConan(ConanFile):
     topics = ("json-schema-validator", "modern-json",
               "nlohmann_json", "conan-recipe")
     settings = "os", "arch", "compiler", "build_type"
-    generators = "cmake_find_package"
+    generators = "cmake"
+    exports_sources = ["CMakeLists.txt"]
     options = {"shared": [True, False],
                "fPIC": [True, False]}
     default_options = {"shared": False,
@@ -46,7 +47,7 @@ class JsonSchemaValidatorConan(ConanFile):
         self._cmake.definitions["BUILD_TESTS"] = False
         self._cmake.definitions["BUILD_EXAMPLES"] = False
         self._cmake.definitions["BUILD_SHARED_LIBS"] = self.options.shared
-        self._cmake.configure(build_folder=self._build_subfolder, source_folder=self._source_subfolder)
+        self._cmake.configure(build_folder=self._build_subfolder)
         return self._cmake
 
     def build(self):
