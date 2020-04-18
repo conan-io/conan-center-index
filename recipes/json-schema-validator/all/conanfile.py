@@ -1,5 +1,6 @@
-from conans import ConanFile, CMake, tools
 import os
+import glob
+from conans import ConanFile, CMake, tools
 
 
 class JsonSchemaValidatorConan(ConanFile):
@@ -11,15 +12,12 @@ class JsonSchemaValidatorConan(ConanFile):
     topics = ("json-schema-validator", "modern-json",
               "nlohmann_json", "conan-recipe")
     settings = "os", "arch", "compiler", "build_type"
-    exports_sources = ["patches/**"]
     generators = "cmake_find_package"
     options = {"shared": [True, False],
                "fPIC": [True, False]}
     default_options = {"shared": False,
                        "fPIC": True}
     _cmake = None
-
-    version = "2.0.0"
 
     @property
     def _source_subfolder(self):
@@ -38,10 +36,8 @@ class JsonSchemaValidatorConan(ConanFile):
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
-        extracted_dir = self.name + "-" + self.version
+        extracted_dir = glob.glob(self.name + "-*/")[0]
         os.rename(extracted_dir, self._source_subfolder)
-        for patch in self.conan_data["patches"][self.version]:
-            tools.patch(**patch)
 
     def _configure_cmake(self):
         if self._cmake:
@@ -61,3 +57,8 @@ class JsonSchemaValidatorConan(ConanFile):
         self.copy("LICENSE", dst="licenses", src=self._source_subfolder)
         cmake = self._configure_cmake()
         cmake.install()
+        tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
+
+    def package_info(self):
+        self.cpp_info.names["cmake_find_package"] = "nlohmann_json_schema_validator"
+        self.cpp_info.names["cmake_find_package_multi"] = "nlohmann_json_schema_validator"

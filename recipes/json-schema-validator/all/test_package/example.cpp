@@ -1,7 +1,7 @@
 #include <iostream>
 #include <iomanip>
 
-#include "json-schema.hpp"
+#include "nlohmann/json-schema.hpp"
 
 using nlohmann::json;
 using nlohmann::json_schema::json_validator;
@@ -59,30 +59,6 @@ int main()
 		} catch (const std::exception &e) {
 			std::cerr << "Validation failed, here is why: " << e.what() << "\n";
 		}
-	}
-
-	/* json-parse the people - with custom error handler */
-	class custom_error_handler : public nlohmann::json_schema::basic_error_handler
-	{
-		void error(const nlohmann::json::json_pointer &ptr, const json &instance, const std::string &message) override
-		{
-			nlohmann::json_schema::basic_error_handler::error(ptr, instance, message);
-			std::cerr << "ERROR: '" << ptr << "' - '" << instance << "': " << message << "\n";
-		}
-	};
-
-
-	for (auto &person : {bad_person, good_person}) {
-		std::cout << "About to validate this person:\n"
-		          << std::setw(2) << person << std::endl;
-
-		custom_error_handler err;
-		validator.validate(person, err); // validate the document
-
-		if (err)
-			std::cerr << "Validation failed\n";
-		else
-			std::cout << "Validation succeeded\n";
 	}
 
 	return EXIT_SUCCESS;
