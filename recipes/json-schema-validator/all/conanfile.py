@@ -36,6 +36,10 @@ class JsonSchemaValidatorConan(ConanFile):
         compiler_version = Version(self.settings.compiler.version)
         if self.settings.os == "Windows"and self.settings.compiler == "Visual Studio" and compiler_version < "16":
             tools.check_min_cppstd(self, "17")
+        elif self.settings.os == "Linux" and self.settings.compiler == "clang" and compiler_version < "4":
+            tools.check_min_cppstd(self, "11")
+        elif self.settings.compiler.get_safe("cppstd"):
+            tools.check_min_cppstd(self, "11")
 
     def requirements(self):
         self.requires("nlohmann_json/3.7.3")
