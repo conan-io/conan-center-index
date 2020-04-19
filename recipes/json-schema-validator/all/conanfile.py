@@ -33,6 +33,10 @@ class JsonSchemaValidatorConan(ConanFile):
         if self.settings.os == "Windows":
             del self.options.fPIC
 
+    def configure(self):
+        if self.settings.os == "Windows" and self.settings.get_safe("compiler.cppstd"):
+            tools.check_min_cppstd(self, "17")
+
     def requirements(self):
         self.requires("nlohmann_json/3.7.3")
 
