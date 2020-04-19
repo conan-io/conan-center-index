@@ -18,6 +18,7 @@ class JsonSchemaValidatorConan(ConanFile):
                "fPIC": [True, False]}
     default_options = {"shared": False,
                        "fPIC": True}
+    short_paths = True
     _cmake = None
 
     @property
