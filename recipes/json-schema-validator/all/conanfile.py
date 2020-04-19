@@ -1,6 +1,7 @@
 import os
 import glob
 from conans import ConanFile, CMake, tools
+from conans.tools import Version
 
 
 class JsonSchemaValidatorConan(ConanFile):
@@ -14,10 +15,8 @@ class JsonSchemaValidatorConan(ConanFile):
     settings = "os", "arch", "compiler", "build_type"
     generators = "cmake"
     exports_sources = ["CMakeLists.txt"]
-    options = {"shared": [True, False],
-               "fPIC": [True, False]}
-    default_options = {"shared": False,
-                       "fPIC": True}
+    options = {"shared": [True, False], "fPIC": [True, False]}
+    default_options = {"shared": False, "fPIC": True}
     short_paths = True
     _cmake = None
 
@@ -34,7 +33,8 @@ class JsonSchemaValidatorConan(ConanFile):
             del self.options.fPIC
 
     def configure(self):
-        if self.settings.os == "Windows" and self.settings.get_safe("compiler.cppstd"):
+        compiler_version = Version(self.settings.compiler.version)
+        if self.settings.os == "Windows"and self.settings.compiler == "Visual Studio" and compiler_version < "16":
             tools.check_min_cppstd(self, "17")
 
     def requirements(self):
