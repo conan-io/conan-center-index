@@ -3,18 +3,15 @@ import os
 
 class ThrustConan(ConanFile):
     name = "thrust"
-    license = "Apache License 2.0"
+    license = "Apache-2.0"
     description = ("Thrust is a parallel algorithms library which resembles"
-                   "the C++ Standard Template Library (STL). Thrust's high-level "
-                   "interface greatly enhances programmer productivity while "
-                   "enabling performance portability between GPUs and multicore CPUs."
-                   "Interoperability with established technologies "
-                   "(such as CUDA, TBB, and OpenMP) facilitates "
-                   "integration with existing software.")
-    topics = ("conan", "thrust", "parallel", "header_only")
+                   "the C++ Standard Template Library (STL).")
+    topics = ("parallel", "stl", "header-only")
     homepage = "https://thrust.github.io/"
     url = "https://github.com/conan-io/conan-center-index"
     no_copy_source = True
+    options = {"thrust_device_system": ["cuda", "cpp", "omp", "tbb"]
+    default_options = {"thrust_device_system": "cuda"}
 
     @property
     def _source_subfolder(self):
@@ -27,7 +24,7 @@ class ThrustConan(ConanFile):
 
     def package(self):
         self.copy(pattern="LICENSE", src=self._source_subfolder, dst="licenses")
-        self.copy("*", src=self._source_subfolder+"/thrust", dst="include/thrust")
+        self.copy("*.h", src=os.path.join(self._source_subfolder, "thrust"), dst=os.path.join("include", "thrust"))
 
     def package_id(self):
         self.info.header_only()
