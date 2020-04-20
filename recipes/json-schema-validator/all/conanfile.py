@@ -11,7 +11,7 @@ class JsonSchemaValidatorConan(ConanFile):
     homepage = "https://github.com/pboettch/json-schema-validator"
     description = "JSON schema validator for JSON for Modern C++ "
     topics = ("json-schema-validator", "modern-json",
-              "nlohmann_json", "conan-recipe")
+              "schema-validation", "json")
     settings = "os", "arch", "compiler", "build_type"
     generators = "cmake"
     exports_sources = ["CMakeLists.txt"]
