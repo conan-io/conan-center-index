@@ -8,7 +8,7 @@ class TestPackageConan(ConanFile):
     generators = "cmake"
 
     def build(self):
-        packio_version = self.requires['packio'].ref.version
+        packio_version = self.deps_cpp_info["packio"].version
         cmake = CMake(self)
         cmake.configure(defs={"PACKIO_VERSION": packio_version})
         cmake.build()
