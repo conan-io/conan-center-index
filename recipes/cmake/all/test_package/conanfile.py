@@ -5,13 +5,13 @@ from conans import ConanFile, tools
 
 class TestPackageConan(ConanFile):
     settings = "os", "os_build"
-    
+
     def test(self):
         if not tools.cross_building(self.settings):
             output = StringIO()
             self.run("cmake --version", output=output, run_environment=True)
             self.output.info("Installed: %s" % str(output.getvalue()))
-            ver = str(self.requires["cmake"].ref.version)
+            ver = str(self.deps_cpp_info["cmake"].version)
             value = str(output.getvalue())
             cmake_version = value.split('\n')[0]
             self.output.info("Expected value: {}".format(ver))
