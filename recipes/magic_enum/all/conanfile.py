@@ -45,7 +45,7 @@ class MagicEnumConan(ConanFile):
     def configure(self):
         if self.settings.compiler.get_safe("cppstd"):
             tools.check_min_cppstd(self, "17")
-        if not _self.supported_compiler:
+        if not self._supported_compiler:
             raise ConanInvalidConfiguration("magic_enum: Unsupported compiler: {}-{} "
                                             "(https://github.com/Neargye/magic_enum#compiler-compatibility).".format(self.settings.compiler, self.settings.compiler.version))
 
