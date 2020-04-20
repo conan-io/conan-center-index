@@ -591,7 +591,7 @@ class BoostConan(ConanFile):
                 cxx_flags.append("-fPIC")
 
         # Standalone toolchain fails when declare the std lib
-        if self.settings.os != "Android":
+        if self.settings.os != "Android" and self.settings.os != "Emscripten":
             try:
                 if self._gnu_cxx11_abi:
                     flags.append("define=_GLIBCXX_USE_CXX11_ABI=%s" % self._gnu_cxx11_abi)
@@ -657,13 +657,13 @@ class BoostConan(ConanFile):
         if arch.startswith('arm'):
             if 'hf' in arch:
                 flags.append('-mfloat-abi=hard')
+        elif self.settings.os == "Emscripten":
+            pass
         elif arch in ["x86", "x86_64"]:
             pass
         elif arch.startswith("ppc"):
             pass
         elif arch.startswith("mips"):
-            pass
-        elif arch.startswith("asm.js"):
             pass
         else:
             self.output.warn("Unable to detect the appropriate ABI for %s architecture." % arch)
@@ -819,8 +819,7 @@ class BoostConan(ConanFile):
         if self.options.header_only:
             self.copy(pattern="*", dst="include/boost", src="%s/boost" % self._boost_dir)
 
-        arch = self.settings.get_safe('arch')
-        if arch.startswith("asm.js"):
+        if self.settings.os == "Emscripten":
             self._create_emscripten_libs()
 
     def _create_emscripten_libs(self):
@@ -914,6 +913,18 @@ class BoostConan(ConanFile):
                 self.cpp_info.system_libs.append("rt")
                 if self.options.multithreading:
                     self.cpp_info.system_libs.append("pthread")
+            elif self.settings.os == "Emscripten":
+                if self.options.multithreading:
+                    arch = self.settings.get_safe('arch')
+                    # https://emscripten.org/docs/porting/pthreads.html
+                    # The documentation mentions that we should be using the "-s USE_PTHREADS=1"
+                    # but it was causing problems with the target based configurations in conan
+                    # So instead we are using the raw compiler flags (that are being activated
+                    # from the aformentioned flag)
+                    if arch.startswith("x86") or arch.startswith("wasm"):
+                        self.cpp_info.cxxflags.append("-pthread")
+                        self.cpp_info.sharedlinkflags.extend(["-pthread","--shared-memory"])
+                        self.cpp_info.exelinkflags.extend(["-pthread","--shared-memory"])
 
         self.env_info.BOOST_ROOT = self.package_folder
         self.cpp_info.bindirs.append("lib")
