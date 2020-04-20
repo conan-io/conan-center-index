@@ -55,7 +55,6 @@ class JsonSchemaValidatorConan(ConanFile):
         self._cmake = CMake(self)
         self._cmake.definitions["BUILD_TESTS"] = False
         self._cmake.definitions["BUILD_EXAMPLES"] = False
-        self._cmake.definitions["BUILD_SHARED_LIBS"] = self.options.shared
         self._cmake.configure(build_folder=self._build_subfolder)
         return self._cmake
 
