@@ -29,7 +29,7 @@ class MagicEnumConan(ConanFile):
         os.rename(extracted_dir, self._source_subfolder)
 
     @property
-    def supported_compiler(self):
+    def _supported_compiler(self):
         compiler = str(self.settings.compiler)
         version = tools.Version(self.settings.compiler.version)
         if compiler == "Visual Studio" and version >= "15":
