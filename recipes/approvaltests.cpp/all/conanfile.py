@@ -29,7 +29,6 @@ class ApprovalTestsCppConan(ConanFile):
     def configure(self):
         if not self._boost_test_supported():
             del self.options.with_boosttest
-            self.default_options.__delitem__("with_boosttest")
 
     @property
     def _header_file(self):
