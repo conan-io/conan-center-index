@@ -7,7 +7,7 @@ import os
 class RocksDB(ConanFile):
     name = "rocksdb"
     homepage = "https://github.com/facebook/rocksdb"
-    license = "GPL-2.0"
+    license = ("GPL-2.0-only", "Apache-2.0")
     url = "https://github.com/conan-io/conan-center-index"
     description = "A library that provides an embeddable, persistent key-value store for fast storage"
     topics = ("conan", "rocksdb", "database",
