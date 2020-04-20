@@ -95,3 +95,5 @@ class zbarConan(ConanFile):
         self.cpp_info.libs = tools.collect_libs(self)
         if self.settings.os == "Linux" and self.options.enable_pthread:
             self.cpp_info.system_libs = ["pthread"]
+        if tools.is_apple_os(self.settings.os):
+            self.cpp_info.system_libs = ["iconv"]
