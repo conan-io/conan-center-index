@@ -28,6 +28,10 @@ class CMakeConan(ConanFile):
     def _minor_version(self):
         return ".".join(str(self.version).split(".")[:2])
 
+    def build_requirements(self):
+        if self.settings.os_build in ["Linux", "FreeBSD"]:
+            self.build_requires("openssl/1.1.1f")
+
     def configure(self):
         if self._os == "Macos" and self._arch == "x86":
             raise ConanInvalidConfiguration("CMake does not support x86 for macOS")
