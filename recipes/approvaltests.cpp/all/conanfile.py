@@ -35,7 +35,7 @@ class ApprovalTestsCppConan(ConanFile):
         return "ApprovalTests.hpp"
 
     def requirements(self):
-        if self._boost_test_supported() and self.options.with_boosttest:
+        if self.options.get_safe("with_boosttest"):
             self.requires("boost/1.72.0")
         if self.options.with_catch2:
             self.requires("catch2/2.11.0")
