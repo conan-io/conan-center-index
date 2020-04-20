@@ -14,28 +14,28 @@ class zbarConan(ConanFile):
     settings = "os", "compiler", "build_type", "arch"
     options = {"shared": [True, False],
                "fPIC": [True, False],
-               "without_video": [True, False],
-               "without_imagemagick": [True, False],
-               "without_gtk": [True, False],
-               "without_qt": [True, False],
-               "without_python_bindings": [True, False],
+               "with_video": [True, False],
+               "with_imagemagick": [True, False],
+               "with_gtk": [True, False],
+               "with_qt": [True, False],
+               "with_python_bindings": [True, False],
                "with_x": [True, False],
-               "without_xshm": [True, False],
-               "without_xv": [True, False],
-               "without_jpeg": [True, False],
-               "disable_pthread": [True, False],}
+               "with_xshm": [True, False],
+               "with_xv": [True, False],
+               "with_jpeg": [True, False],
+               "enable_pthread": [True, False],}
     default_options = {'shared': False,
                        'fPIC': True,
-                       'without_video': True,
-                       'without_imagemagick': True,
-                       'without_gtk': True,
-                       'without_qt': True,
-                       'without_python_bindings': True,
+                       'with_video': False,
+                       'with_imagemagick': False,
+                       'with_gtk': False,
+                       'with_qt': False,
+                       'with_python_bindings': False,
                        'with_x': False,
-                       'without_xshm': False,
-                       'without_xv': False,
-                       'without_jpeg': False,
-                       'disable_pthread': False,
+                       'with_xshm': False,
+                       'with_xv': False,
+                       'with_jpeg': False,
+                       'enable_pthread': True,
                        }
 
     _env_build = None
@@ -48,30 +48,20 @@ class zbarConan(ConanFile):
         if not self._env_build:
             self._env_build = AutoToolsBuildEnvironment(self)
             env_args = []
-            if self.options.without_video:
-                env_args.extend(["--disable-video"])
-            if self.options.without_imagemagick:
-                env_args.extend(["--without-imagemagick"])
-            if self.options.with_gtk:
-                env_args.extend(["--with-gtk"])
-            if self.options.without_qt:
-                env_args.extend(["--without-qt"])
-            if self.options.without_python_bindings:
-                env_args.extend(["--without-python"])
-            if self.options.without_x:
-                env_args.extend(["--without-x"])
-            if self.options.without_xshm:
-                env_args.extend(["--without-xshm"])
-            if self.options.without_xv:
-                env_args.extend(["--without-xv"])
-            if self.options.disable_pthread:
-                env_args.extend(["--disable-pthread"])
-            if self.options.without_jpeg:
-                env_args.extend(["--without-jpeg"])
-            if self.options.shared:
-                env_args.extend(["--enable-shared", "--disable-static"])
-            else:
-                env_args.extend(["--enable-static", "--disable-shared"])
+            env_args.extend([
+                "--enable-video" if self.options.with_video else "--disable-video",
+                "--with-imagemagick" if self.options.with_imagemagick else "--without-imagemagick",
+                "--with-gtk" if self.options.with_gtk else "--without-gtk",
+                "--with-qt" if self.options.with_qt else "--without-qt",
+                "--with-python" if self.options.with_python_bindings else "--without-python",
+                "--with-x" if self.options.with_x else "--without-x",
+                "--with-xshm" if self.options.with_xshm else "--without-xshm",
+                "--with-xv" if self.options.with_xv else "--without-xv",
+                "--with-jpeg" if self.options.with_jpeg else "--without-jpeg",
+                "--enable-pthread" if self.options.enable_pthread else "--disable-pthread",
+                "--enable-shared" if self.options.shared else "--disable-shared",
+                "--enable-static" if not self.options.shared else "--disable-static",
+            ])
             self._env_build.configure(args=env_args, configure_dir=self._source_subfolder)
         return self._env_build
 
@@ -99,5 +89,5 @@ class zbarConan(ConanFile):
 
     def package_info(self):
         self.cpp_info.libs = tools.collect_libs(self)
-        if self.settings.os == "Linux" and not self.options.disable_pthread:
+        if self.settings.os == "Linux" and self.options.enable_pthread:
             self.cpp_info.system_libs = ["pthread"]
