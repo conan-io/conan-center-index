@@ -15,7 +15,7 @@ class MagicEnumConan(ConanFile):
         "header-only",
         "compile-time"
     )
-    url = "https://github.com/Neargye/magic_enum"
+    url = "https://github.com/conan-io/conan-center-index "
     homepage = "https://github.com/Neargye/magic_enum"
     license = "MIT"
     settings = "compiler"
