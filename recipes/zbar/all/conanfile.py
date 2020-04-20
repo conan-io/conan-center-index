@@ -39,7 +39,6 @@ class zbarConan(ConanFile):
                        }
 
     _env_build = None
-    _env_args = []
 
     @property
     def _source_subfolder(self):
@@ -48,31 +47,33 @@ class zbarConan(ConanFile):
     def _configure_autotools(self):
         if not self._env_build:
             self._env_build = AutoToolsBuildEnvironment(self)
+            env_args = []
             if self.options.without_video:
-                self._env_args.extend(["--disable-video"])
+                env_args.extend(["--disable-video"])
             if self.options.without_imagemagick:
-                self._env_args.extend(["--without-imagemagick"])
-            if self.options.without_gtk:
-                self._env_args.extend(["--without-gtk"])
+                env_args.extend(["--without-imagemagick"])
+            if self.options.with_gtk:
+                env_args.extend(["--with-gtk"])
             if self.options.without_qt:
-                self._env_args.extend(["--without-qt"])
+                env_args.extend(["--without-qt"])
             if self.options.without_python_bindings:
-                self._env_args.extend(["--without-python"])
-            if self.options.with_x:
-                self._env_args.extend(["--with-x"])
+                env_args.extend(["--without-python"])
+            if self.options.without_x:
+                env_args.extend(["--without-x"])
             if self.options.without_xshm:
-                self._env_args.extend(["--without-xshm"])
+                env_args.extend(["--without-xshm"])
             if self.options.without_xv:
-                self._env_args.extend(["--without-xv"])
+                env_args.extend(["--without-xv"])
             if self.options.disable_pthread:
-                self._env_args.extend(["--disable-pthread"])
+                env_args.extend(["--disable-pthread"])
             if self.options.without_jpeg:
-                self._env_args.extend(["--without-jpeg"])
+                env_args.extend(["--without-jpeg"])
             if self.options.shared:
-                self._env_args.extend(["--enable-shared", "--disable-static"])
+                env_args.extend(["--enable-shared", "--disable-static"])
             else:
-                self._env_args.extend(["--enable-static", "--disable-shared"])
-        return self._env_build, self._env_args
+                env_args.extend(["--enable-static", "--disable-shared"])
+            self._env_build.configure(args=env_args, configure_dir=self._source_subfolder)
+        return self._env_build
 
     def configure(self):
         if self.settings.os == "Windows":
@@ -84,16 +85,13 @@ class zbarConan(ConanFile):
         os.rename(extracted_dir, self._source_subfolder)
 
     def build(self):
-        with tools.chdir(self._source_subfolder):
-            env_build, env_args = self._configure_autotools()
-            env_build.configure(args=env_args)
-            env_build.make()
+        env_build = self._configure_autotools()
+        env_build.make()
 
     def package(self):
         self.copy("LICENSE", src=self._source_subfolder, dst="licenses")
-        with tools.chdir(self._source_subfolder):
-            env_build, env_args = self._configure_autotools()
-            env_build.install()
+        env_build = self._configure_autotools()
+        env_build.install()
         tools.rmdir(os.path.join(self.package_folder, "share"))
         tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
         for dot_la_files in glob.iglob(os.path.join(self.package_folder, "lib", '*.la')):
