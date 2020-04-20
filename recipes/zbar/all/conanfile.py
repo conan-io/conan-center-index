@@ -65,6 +65,10 @@ class zbarConan(ConanFile):
             self._env_build.configure(args=env_args, configure_dir=self._source_subfolder)
         return self._env_build
 
+    def requirements(self):
+        if self.options.with_jpeg:
+            self.requires.add("libjpeg/9d")
+
     def configure(self):
         if self.settings.os == "Windows":
             raise ConanInvalidConfiguration("Zbar can't be built on Windows")
