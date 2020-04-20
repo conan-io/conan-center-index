@@ -1,0 +1,4 @@
+sources:
+  "0.1":
+    url: "https://gitlab.com/dvd0101/svgwrite/-/archive/master/svgwrite-master.tar.gz"
+    sha256: "da208ae2b4e76a3422305504e021d8de4dba713fe5b0f4fdc9d5f4128b440685"
