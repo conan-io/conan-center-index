@@ -4,7 +4,7 @@ from conans import ConanFile, CMake, tools
 
 class SvgwriteConan(ConanFile):
     name = "svgwrite"
-    version = "0.1"
+    version = "0.1.0"
 
     license = "Boost Software License"
     url = "https://github.com/conan-io/conan-center-index"
