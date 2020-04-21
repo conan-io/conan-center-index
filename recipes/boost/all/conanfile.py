@@ -56,7 +56,7 @@ class BoostConan(ConanFile):
         "debug_level": [i for i in range(1, 14)],
         "pch": [True, False],
         "extra_b2_flags": "ANY",  # custom b2 flags
-        "icu": [True, False],
+        "i18n_backend": ["iconv", "icu", None],
     }
     options.update({"without_%s" % libname: [True, False] for libname in lib_list})
 
@@ -82,7 +82,7 @@ class BoostConan(ConanFile):
         "debug_level": 2,
         'pch': True,
         'extra_b2_flags': 'None',
-        "icu": False,
+        "i18n_backend": 'iconv',
     }
 
     for libname in lib_list:
@@ -122,6 +122,10 @@ class BoostConan(ConanFile):
         if self.settings.os == "Windows":
             del self.options.fPIC
 
+    def configure(self):
+        if not self.options.i18n_backend and not self.options.without_locale:
+            raise ConanInvalidConfiguration("Boost 'locale' library requires a i18n_backend, either 'icu' or 'iconv'")
+
     def build_requirements(self):
         self.build_requires("b2/4.2.0")
 
@@ -135,7 +139,7 @@ class BoostConan(ConanFile):
                 self.requires("xz_utils/5.2.4")
             if self.options.zstd:
                 self.requires("zstd/1.4.3")
-        if self.options.icu:
+        if self.options.i18n_backend == 'icu':
             self.requires("icu/64.2")
 
     def package_id(self):
@@ -543,11 +547,14 @@ class BoostConan(ConanFile):
         flags.append("-sNO_LZMA=%s" % ("0" if self.options.lzma else "1"))
         flags.append("-sNO_ZSTD=%s" % ("0" if self.options.zstd else "1"))
 
-        if self.options.icu:
+        if self.options.i18n_backend == 'icu':
             flags.append("-sICU_PATH={}".format(self.deps_cpp_info["icu"].rootpath))
             flags.append("boost.locale.iconv=off boost.locale.icu=on")
+        elif self.options.i18n_backend == 'iconv':
+            flags.append("boost.locale.iconv=on boost.locale.icu=off")
         else:
-            flags.append("--disable-icu")
+            flags.append("boost.locale.iconv=off boost.locale.icu=off")
+            flags.append("--disable-icu --disable-iconvv")
 
         def add_defines(option, library):
             if option:
