@@ -1,29 +1,30 @@
 from conans import ConanFile, tools, CMake
 import os
+import glob
 
 
 class SpirvtoolsConan(ConanFile):
     name = "spirv-tools"
     homepage = "https://github.com/KhronosGroup/SPIRV-Tools/"
-    description = "SPIRV-Tools "
+    description = "Create and optimize SPIRV shaders"
     topics = ("conan", "spirv", "spirv-v", "vulkan", "opengl", "opencl", "hlsl", "khronos")
     url = "https://github.com/conan-io/conan-center-index"
+    short_paths = True
     settings = "os", "compiler", "arch", "build_type"
     exports_sources = ["CMakeLists.txt"]
     license = "Apache-2.0"
     generators = "cmake"
+    _cmake = None
 
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
-        "skip_executables": [True, False],
-        "c_only": [True, False]
+        "skip_executables": [True, False]
     }
     default_options = {
         "shared": True,
         "fPIC": True,
-        "skip_executables": False,
-        "c_only": False
+        "skip_executables": False
     }
 
     def requirements(self):
@@ -47,9 +48,13 @@ class SpirvtoolsConan(ConanFile):
             del self.options.fPIC
 
     def _configure_cmake(self):
+        if self._cmake:
+            return self._cmake
+
         cmake = CMake(self)
 
-        cmake.definitions["SPIRV_SKIP_EXECUTABLES"] = self.options.skip_executables
+        if self.options.shared and self.settings.compiler == "Visual Studio":
+            cmake.definitions["CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS"] = True
 
         # Required by the project's CMakeLists.txt
         cmake.definitions["SPIRV-Headers_SOURCE_DIR"] = self.deps_cpp_info["spirv-headers"].rootpath
@@ -58,12 +63,27 @@ class SpirvtoolsConan(ConanFile):
         # need to turn this off
         cmake.definitions["SPIRV_WERROR"] = False
 
+        cmake.definitions["SPIRV_SKIP_EXECUTABLES"] = self.options.skip_executables
+        cmake.definitions["SKIP_SPIRV_TOOLS_INSTALL"] = False
+        cmake.definitions["SPIRV_LOG_DEBUG"] = False
+        cmake.definitions["SPIRV_SKIP_TESTS"] = True
+        cmake.definitions["SPIRV_CHECK_CONTEXT"] = False
+        cmake.definitions["SPIRV_BUILD_FUZZER"] = False
+
         cmake.configure(build_folder=self._build_subfolder)
-        return cmake
+        self._cmake = cmake
+        return self._cmake
 
     def build(self):
+        self._patch_sources()
         cmake = self._configure_cmake()
         cmake.build()
+
+    def _patch_sources(self):
+        # CMAKE_POSITION_INDEPENDENT_CODE was set ON for the entire
+        # project in the lists file.
+        tools.replace_in_file(os.path.join(self._source_subfolder, "CMakeLists.txt"),
+                              "set(CMAKE_POSITION_INDEPENDENT_CODE ON)", "")
 
     def package(self):
         self.copy(pattern="LICENSE*", dst="licenses", src=self._source_subfolder)
@@ -76,19 +96,29 @@ class SpirvtoolsConan(ConanFile):
         # Error KB-H019, complaining that .pc files are found
         tools.rmdir(os.path.join(self.package_folder, "lib/cmake"))
 
+        # SPIRV-Tools-shared is meant to be a shared-only c-only API for the library .
+        # it is built by the original CMakeLists.txt file. It is the same
+        # as the other libraries except only the C interface is exposed
+        # This library is being removed because it is only causing confusion.
+        # As a result, you are restricted to to using the C++ api only.
+        for bin_file in glob.glob(os.path.join(self.package_folder, "bin", "*SPIRV-Tools-shared.dll")):
+            os.remove(bin_file)
+        for lib_file in glob.glob(os.path.join(self.package_folder, "lib", "*SPIRV-Tools-shared*")):
+            os.remove(lib_file)
+
     def package_info(self):
         # The spirv-tools CMAKE builds a SPIRV-Tools-shared.so which is
         # apparantly only exports the C-interface of the library.
         # The test_package.c is used when testing the c_only option
         # The C-interface is ALWAYS built as a shared-object as per the original
         # CMakeLists.txt file
-        if self.options.c_only:
-            self.cpp_info.libs.append("SPIRV-Tools-shared")
-        else:
-            self.cpp_info.libs.append("SPIRV-Tools-reduce")
-            self.cpp_info.libs.append("SPIRV-Tools-link")
-            self.cpp_info.libs.append("SPIRV-Tools-opt")
-            self.cpp_info.libs.append("SPIRV-Tools")
+        self.cpp_info.libs.append("SPIRV-Tools-reduce")
+        self.cpp_info.libs.append("SPIRV-Tools-link")
+        self.cpp_info.libs.append("SPIRV-Tools-opt")
+        self.cpp_info.libs.append("SPIRV-Tools")
+
+        if self.settings.os == "Linux":
+            self.cpp_info.system_libs.append("rt") # for SPIRV-Tools
 
         if not self.options.skip_executables:
             bin_path = os.path.join(self.package_folder, "bin")
