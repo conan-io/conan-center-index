@@ -47,11 +47,11 @@ class Libssh2Conan(ConanFile):
 
     def requirements(self):
         if self.options.with_zlib:
-            self.requires.add("zlib/1.2.11")
+            self.requires("zlib/1.2.11")
         if self.options.crypto_backend == "openssl":
-            self.requires.add("openssl/1.1.1d")
+            self.requires("openssl/1.1.1f")
         elif self.options.crypto_backend == "mbedtls":
-            self.requires.add("mbedtls/2.16.3-gpl")
+            self.requires("mbedtls/2.16.3-gpl")
 
     def _configure_cmake(self):
         cmake = CMake(self)
