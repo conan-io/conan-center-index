@@ -87,11 +87,8 @@ class SpirvtoolsConan(ConanFile):
         cmake = self._configure_cmake()
         cmake.install()
 
-        # Error KB-H020, complaining that .pc files are found
-        tools.rmdir(os.path.join(self.package_folder, "lib/pkgconfig"))
-
-        # Error KB-H019, complaining that .pc files are found
-        tools.rmdir(os.path.join(self.package_folder, "lib/cmake"))
+        tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
+        tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
 
         # SPIRV-Tools-shared is meant to be a shared-only c-only API for the library .
         # it is built by the original CMakeLists.txt file. It is the same
@@ -104,6 +101,10 @@ class SpirvtoolsConan(ConanFile):
             os.remove(lib_file)
 
     def package_info(self):
+        # TODO: set targets names when components available in conan
+        self.cpp_info.names["cmake_find_package"] = "SPIRV-Tools"
+        self.cpp_info.names["cmake_find_package_multi"] = "SPIRV-Tools"
+
         # The spirv-tools CMAKE builds a SPIRV-Tools-shared.so which is
         # apparantly only exports the C-interface of the library.
         # The test_package.c is used when testing the c_only option
