@@ -4,7 +4,6 @@ from conans import ConanFile, tools
 
 class SpyConan(ConanFile):
     name = "spy"
-    settings = "os", "compiler", "build_type", "arch"
     version = "0.0.3"
     license = "MIT"
     url = "https://github.com/conan-io/conan-center-index"
