@@ -18,13 +18,11 @@ class SpirvtoolsConan(ConanFile):
 
     options = {
         "shared": [True, False],
-        "fPIC": [True, False],
-        "skip_executables": [True, False]
+        "fPIC": [True, False]
     }
     default_options = {
         "shared": True,
-        "fPIC": True,
-        "skip_executables": False
+        "fPIC": True
     }
 
     def requirements(self):
@@ -63,7 +61,6 @@ class SpirvtoolsConan(ConanFile):
         # need to turn this off
         cmake.definitions["SPIRV_WERROR"] = False
 
-        cmake.definitions["SPIRV_SKIP_EXECUTABLES"] = self.options.skip_executables
         cmake.definitions["SKIP_SPIRV_TOOLS_INSTALL"] = False
         cmake.definitions["SPIRV_LOG_DEBUG"] = False
         cmake.definitions["SPIRV_SKIP_TESTS"] = True
@@ -120,7 +117,6 @@ class SpirvtoolsConan(ConanFile):
         if self.settings.os == "Linux":
             self.cpp_info.system_libs.append("rt") # for SPIRV-Tools
 
-        if not self.options.skip_executables:
-            bin_path = os.path.join(self.package_folder, "bin")
-            self.output.info('Appending PATH environment variable: %s' % bin_path)
-            self.env_info.path.append(bin_path)
+        bin_path = os.path.join(self.package_folder, "bin")
+        self.output.info('Appending PATH environment variable: %s' % bin_path)
+        self.env_info.path.append(bin_path)
