@@ -3,7 +3,7 @@ from conans.errors import ConanInvalidConfiguration
 import os
 
 
-def sort_libs(correct_order, libs, lib_suffix='', reverse_result=False):
+def sort_libs(correct_order, libs, lib_suffix="", reverse_result=False):
     # Add suffix for correct string matching
     correct_order[:] = [s.__add__(lib_suffix) for s in correct_order]
 
@@ -30,6 +30,7 @@ class CorradeConan(ConanFile):
     exports_sources = ["CMakeLists.txt"]
     generators = "cmake"
     short_paths = True
+    _cmake = None
 
     settings = "os", "arch", "compiler", "build_type"
     options = {
@@ -64,7 +65,7 @@ class CorradeConan(ConanFile):
         if self.settings.compiler == "Visual Studio" and tools.Version(self.settings.compiler.version.value) < 14:
             raise ConanInvalidConfiguration("Corrade requires Visual Studio version 14 or greater")
         if tools.cross_building(self.settings):
-             raise ConanInvalidConfiguration("This Corrade recipe doesn't support cross building yet")
+            raise ConanInvalidConfiguration("This Corrade recipe doesn't support cross building yet")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
@@ -72,29 +73,29 @@ class CorradeConan(ConanFile):
         os.rename(extracted_dir, self._source_subfolder)
 
     def _configure_cmake(self):
-        cmake = CMake(self)
-        cmake.definitions["BUILD_STATIC"] = not self.options.shared
-        cmake.definitions["BUILD_DEPRECARED"] = self.options["build_deprecated"]
-        cmake.definitions["WITH_INTERCONNECT"] = self.options["with_interconnect"]
-        cmake.definitions["WITH_MAIN"] = self.options["with_main"]
-        cmake.definitions["WITH_PLUGINMANAGER"] = self.options["with_pluginmanager"] 
-        cmake.definitions["WITH_TESTSUITE"] = self.options["with_testsuite"]
-        cmake.definitions["WITH_UTILITY"] = self.options["with_utility"]
+        if not self._cmake:
+            self._cmake = CMake(self)
+            self._cmake.definitions["BUILD_STATIC"] = not self.options.shared
+            self._cmake.definitions["BUILD_DEPRECARED"] = self.options["build_deprecated"]
+            self._cmake.definitions["WITH_INTERCONNECT"] = self.options["with_interconnect"]
+            self._cmake.definitions["WITH_MAIN"] = self.options["with_main"]
+            self._cmake.definitions["WITH_PLUGINMANAGER"] = self.options["with_pluginmanager"] 
+            self._cmake.definitions["WITH_TESTSUITE"] = self.options["with_testsuite"]
+            self._cmake.definitions["WITH_UTILITY"] = self.options["with_utility"]
+            self._cmake.definitions["WITH_RC"] = "ON"  
 
-        # TODO: To enable cross-building this executable should probably be outsourced to a separate package corrade-rc
-        cmake.definitions["WITH_RC"] = "OFF"  
+            # Corrade uses suffix on the resulting "lib"-folder when running cmake.install()
+            # Set it explicitly to empty, else Corrade might set it implicitly (eg. to "64")
+            self._cmake.definitions["LIB_SUFFIX"] = ""
 
-        # Corrade uses suffix on the resulting 'lib'-folder when running cmake.install()
-        # Set it explicitly to empty, else Corrade might set it implicitly (eg. to "64")
-        cmake.definitions["LIB_SUFFIX"] = ""
+            if self.settings.compiler == "Visual Studio":
+                self._cmake.definitions["CORRADE_MSVC2015_COMPATIBILITY"] = "ON" if self.settings.compiler.version == "14" else "OFF"
+                self._cmake.definitions["CORRADE_MSVC2017_COMPATIBILITY"] = "ON" if self.settings.compiler.version == "15" else "OFF"
+                self._cmake.definitions["CORRADE_MSVC2019_COMPATIBILITY"] = "ON" if self.settings.compiler.version == "16" else "OFF"
 
-        if self.settings.compiler == "Visual Studio":
-            cmake.definitions["MSVC2015_COMPATIBILITY"] = "ON" if tools.Version(self.settings.compiler.version.value) == 14 else "OFF"
-            cmake.definitions["MSVC2017_COMPATIBILITY"] = "ON" if tools.Version(self.settings.compiler.version.value) == 14 else "OFF"
+            self._cmake.configure(build_folder=self._build_subfolder)
 
-        cmake.configure(build_folder=self._build_subfolder)
-
-        return cmake
+        return self._cmake
 
     def build(self):
         cmake = self._configure_cmake()
@@ -105,13 +106,18 @@ class CorradeConan(ConanFile):
         cmake = self._configure_cmake()
         cmake.install()
 
-        share_cmake = os.path.join(self.package_folder, 'share', 'cmake', 'Corrade')
-        self.copy('UseCorrade.cmake', src=share_cmake, dst=os.path.join(self.package_folder, 'lib', 'cmake', 'Corrade'))
-        tools.rmdir(os.path.join(self.package_folder, 'share'))
+        share_cmake = os.path.join(self.package_folder, "share", "cmake", "Corrade")
+        self.copy("UseCorrade.cmake", src=share_cmake, dst=os.path.join(self.package_folder, "lib", "cmake", "Corrade"))
+        self.copy("CorradeLibSuffix.cmake", src=share_cmake, dst=os.path.join(self.package_folder, "lib", "cmake", "Corrade"))
+        tools.rmdir(os.path.join(self.package_folder, "share"))
 
     def package_info(self):
         self.cpp_info.names["cmake_find_package"] = "Corrade"
         self.cpp_info.names["cmake_find_package_multi"] = "Corrade"
+
+        self.cpp_info.builddirs.append(os.path.join("lib", "cmake"))
+        self.cpp_info.build_modules.append(os.path.join("lib", "cmake", "Corrade", "UseCorrade.cmake"))
+        self.cpp_info.build_modules.append(os.path.join("lib", "cmake", "Corrade", "CorradeLibSuffix.cmake"))
 
         # See dependency order here: https://doc.magnum.graphics/magnum/custom-buildsystems.html
         allLibs = [
@@ -126,13 +132,13 @@ class CorradeConan(ConanFile):
         ]
 
         # Sort all built libs according to above, and reverse result for correct link order
-        suffix = '-d' if self.settings.build_type == "Debug" else ''
+        suffix = "-d" if self.settings.build_type == "Debug" else ""
         builtLibs = tools.collect_libs(self)
         self.cpp_info.libs = sort_libs(correct_order=allLibs, libs=builtLibs, lib_suffix=suffix, reverse_result=True)
         if self.settings.os == "Linux":
             self.cpp_info.system_libs = ["m", "dl"]
 
-        self.cpp_info.builddirs = [os.path.join(self.package_folder, 'lib', 'cmake', 'Corrade')]
+        self.cpp_info.builddirs = [os.path.join(self.package_folder, "lib", "cmake", "Corrade")]
 
         bindir = os.path.join(self.package_folder, "bin")
         self.output.info("Appending PATH environment variable: {}".format(bindir))

@@ -1,0 +1,26 @@
+--- a/include/spatialindex/capi/sidx_api.h
++++ b/include/spatialindex/capi/sidx_api.h
+@@ -33,6 +33,8 @@
+ 
+ #include "sidx_config.h"
+ 
++#include <stddef.h>
++
+ IDX_C_START
+ 
+ SIDX_DLL IndexH Index_Create(IndexPropertyH properties);
+--- a/include/spatialindex/capi/sidx_config.h
++++ b/include/spatialindex/capi/sidx_config.h
+@@ -42,10 +42,8 @@
+   typedef unsigned __int16 uint16_t;
+   typedef unsigned __int32 uint32_t;
+   typedef unsigned __int64 uint64_t;
+-#endif
+-
+-#if _MSC_VER >= 1900
+-   #include <cinttypes>
++#else
++  #include <stdint.h>
+ #endif
+ 
+    #include <windows.h>

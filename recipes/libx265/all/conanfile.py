@@ -71,14 +71,10 @@ class Libx265Conan(ConanFile):
 
     def _patch_sources(self):
         cmakelists = os.path.join(self._source_subfolder, "source", "CMakeLists.txt")
-        if self.settings.os == "Windows":
-            tools.replace_in_file(cmakelists,
-                                  "${PROJECT_BINARY_DIR}/Debug/x265.pdb",
-                                  "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/x265.pdb")
-            tools.replace_in_file(cmakelists,
-                                  "${PROJECT_BINARY_DIR}/x265.pdb",
-                                  "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/x265.pdb")
-        elif self.settings.os == "Android":
+        tools.replace_in_file(cmakelists,
+                                "if((WIN32 AND ENABLE_CLI) OR (WIN32 AND ENABLE_SHARED))",
+                                "if(FALSE)")
+        if self.settings.os == "Android":
             tools.replace_in_file(cmakelists,
                 "list(APPEND PLATFORM_LIBS pthread)", "")
             tools.replace_in_file(cmakelists,

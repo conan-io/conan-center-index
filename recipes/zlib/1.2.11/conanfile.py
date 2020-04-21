@@ -65,7 +65,9 @@ class ZlibConan(ConanFile):
         else:
             make_target = "libz.a"
 
-        env = {"CC": "clang", "CXX": "clang++"} if "clang" in str(self.settings.compiler) else {}
+        env = {}
+        if "clang" in str(self.settings.compiler) and tools.get_env("CC") is None and tools.get_env("CXX") is None:
+            env = {"CC": "clang", "CXX": "clang++"}
         with tools.environment_append(env):
             env_build.configure("../", build=False, host=False, target=False)
             env_build.make(target=make_target)
@@ -80,7 +82,7 @@ class ZlibConan(ConanFile):
 
     def _build_zlib(self):
         with tools.chdir(self._source_subfolder):
-            # https://github.com/madler/zlib/issues/268 
+            # https://github.com/madler/zlib/issues/268
             tools.replace_in_file('gzguts.h',
                                   '#if defined(_WIN32) || defined(__CYGWIN__)',
                                   '#if defined(_WIN32) || defined(__MINGW32__)')

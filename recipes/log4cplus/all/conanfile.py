@@ -37,7 +37,7 @@ class Log4cplusConan(ConanFile):
 
     def requirements(self):
         if self.options.with_iconv:
-            self.requires.add('libiconv/1.15')
+            self.requires.add('libiconv/1.16')
 
     def config_options(self):
         if self.settings.os == 'Windows':
@@ -78,5 +78,5 @@ class Log4cplusConan(ConanFile):
         self.cpp_info.libs = tools.collect_libs(self)
         if self.settings.os == "Linux":
             self.cpp_info.system_libs = ["dl", "pthread"]
-        elif self.settings.compiler == "Visual Studio":
+        elif self.settings.os == "Windows":
             self.cpp_info.system_libs = ['Ws2_32']

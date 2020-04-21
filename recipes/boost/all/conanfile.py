@@ -1,7 +1,6 @@
 from conans import ConanFile
 from conans import tools
-from conans.client.build.cppstd_flags import cppstd_flag
-from conans.tools import Version
+from conans.tools import Version, cppstd_flag
 from conans.errors import ConanException
 
 from conans.errors import ConanInvalidConfiguration
@@ -42,7 +41,7 @@ class BoostConan(ConanFile):
         "asio_no_deprecated": [True, False],
         "filesystem_no_deprecated": [True, False],
         "fPIC": [True, False],
-        "layout": ["system", "versioned", "tagged"],
+        "layout": ["system", "versioned", "tagged", "b2-default"],
         "magic_autolink": [True, False],  # enables BOOST_ALL_NO_LIB
         "python_executable": "ANY",  # system default python installation is used, if None
         "python_version": "ANY",  # major.minor; computed automatically, if None
@@ -532,7 +531,8 @@ class BoostConan(ConanFile):
         if self._b2_abi:
             flags.append("abi=%s" % self._b2_abi)
 
-        flags.append("--layout=%s" % self.options.layout)
+        if self.options.layout is not "b2-default":
+            flags.append("--layout=%s" % self.options.layout)
         flags.append("--user-config=%s" % os.path.join(self._boost_build_dir, 'user-config.jam'))
         flags.append("-sNO_ZLIB=%s" % ("0" if self.options.zlib else "1"))
         flags.append("-sNO_BZIP2=%s" % ("0" if self.options.bzip2 else "1"))
@@ -568,12 +568,7 @@ class BoostConan(ConanFile):
         flags.append("toolset=%s" % self._toolset)
 
         if self.settings.get_safe("compiler.cppstd"):
-            flags.append("cxxflags=%s" % cppstd_flag(
-                    self.settings.get_safe("compiler"),
-                    self.settings.get_safe("compiler.version"),
-                    self.settings.get_safe("compiler.cppstd")
-                )
-            )
+            flags.append("cxxflags=%s" % cppstd_flag(self.settings))
 
         # CXX FLAGS
         cxx_flags = []
