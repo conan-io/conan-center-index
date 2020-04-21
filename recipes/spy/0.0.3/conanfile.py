@@ -20,7 +20,7 @@ class SpyConan(ConanFile):
         os.rename(extracted_dir, self._source_subfolder)
 
     def package(self):
-        self.copy("LICENSE", dst="licenses", src=self._source_subfolder)
+        self.copy("LICENSE.md", dst="licenses", src=self._source_subfolder)
         self.copy("*.hpp", src=self._source_subfolder)
 
     def package_id(self):
