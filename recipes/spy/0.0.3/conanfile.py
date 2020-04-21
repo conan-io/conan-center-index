@@ -1,6 +1,7 @@
 import os
-
 from conans import ConanFile, tools
+
+
 class SpyConan(ConanFile):
     name = "spy"
     settings = "os", "compiler", "build_type", "arch"
@@ -16,7 +17,7 @@ class SpyConan(ConanFile):
         "url": "auto",
         "revision": "auto"
     }
-    
+
     _source_subfolder = "source_subfolder"
 
     def source(self):
