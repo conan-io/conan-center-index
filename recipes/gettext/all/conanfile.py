@@ -11,10 +11,11 @@ class GetTextConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://www.gnu.org/software/gettext"
     license = "GPL-3.0-or-later"
-    settings = "os_build", "arch_build", "compiler"
+    settings = "os", "arch", "compiler", "build_type"
     exports_sources = ["patches/*.patch"]
-
-    requires = [("libiconv/1.16", "private")]
+    options = {"shared": [True, False], "fPIC": [True, False]}
+    default_options = {"shared": False, "fPIC": True}
+    requires = ("libiconv/1.16")
 
     _autotools = None
 
@@ -28,7 +29,11 @@ class GetTextConan(ConanFile):
 
     @property
     def _make_args(self):
-        return None
+        return ["-C", "intl"]
+
+    def config_options(self):
+        if self.settings.os == 'Windows':
+            del self.options.fPIC
 
     def configure(self):
         del self.settings.compiler.libcxx
@@ -45,7 +50,7 @@ class GetTextConan(ConanFile):
         tools.get(**self.conan_data["sources"][self.version])
         extracted_dir = "gettext-" + self.version
         os.rename(extracted_dir, self._source_subfolder)
- 
+
     def _configure_autotools(self):
         if self._autotools:
             return self._autotools
@@ -69,10 +74,10 @@ class GetTextConan(ConanFile):
         if self._is_msvc:
             # INSTALL.windows: Native binaries, built using the MS Visual C/C++ tool chain.
             build = False
-            if self.settings.arch_build == "x86":
+            if self.settings.arch == "x86":
                 host = "i686-w64-mingw32"
                 rc = "windres --target=pe-i386"
-            elif self.settings.arch_build == "x86_64":
+            elif self.settings.arch == "x86_64":
                 host = "x86_64-w64-mingw32"
                 rc = "windres --target=pe-x86-64"
             automake_perldir = tools.unix_path(os.path.join(self.deps_cpp_info['automake'].rootpath, "bin", "share", "automake-1.16"))
@@ -92,7 +97,7 @@ class GetTextConan(ConanFile):
 
     def build(self):
         for patch in self.conan_data["patches"][self.version]:
-            tools.patch(**patch)   
+            tools.patch(**patch)
         with tools.vcvars(self.settings) if self._is_msvc else tools.no_op():
             with tools.environment_append(VisualStudioBuildEnvironment(self).vars) if self._is_msvc else tools.no_op():
                 with tools.chdir(os.path.join(self._source_subfolder)):
@@ -107,12 +112,8 @@ class GetTextConan(ConanFile):
                     env_build = self._configure_autotools()
                     env_build.install()
         tools.rmdir(os.path.join(self.package_folder, 'share'))
-        tools.rmdir(os.path.join(self.package_folder, 'lib'))
-        tools.rmdir(os.path.join(self.package_folder, 'include'))
-
-    def package_id(self):
-        self.info.include_build_settings()
-        del self.info.settings.compiler
+        os.rename(os.path.join(self.package_folder, "include", "libgnuintl.h"),
+                  os.path.join(self.package_folder, "include", "libintl.h"))
 
     def package_info(self):
         bindir = os.path.join(self.package_folder, "bin")
