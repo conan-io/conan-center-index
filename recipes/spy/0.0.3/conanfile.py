@@ -12,11 +12,6 @@ class SpyConan(ConanFile):
     description = "C++ 17 for constexpr-proof detection and classification of informations about OS, compiler, etc..."
     topics = ("c++17", "config", "metaprogramming")
     no_copy_source = True
-    scm = {
-        "type": "git",
-        "url": "auto",
-        "revision": "auto"
-    }
 
     _source_subfolder = "source_subfolder"
 
