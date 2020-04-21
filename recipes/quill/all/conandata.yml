@@ -1,0 +1,4 @@
+sources:
+  "1.2.3":
+    sha256: f318fa87a39aea76c66cfe09c686f5ce2cacaf2980678ada310acac8cf42ffd0
+    url: https://github.com/odygrd/quill/archive/v1.2.3.tar.gz
