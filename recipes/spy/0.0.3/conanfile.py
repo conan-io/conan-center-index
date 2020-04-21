@@ -1,9 +1,11 @@
 import os
-from conans import ConanFile, tools
-
+from conans import ConanFile, tools, errors
+from conans.errors import ConanInvalidConfiguration
+from conans.tools import Version
 
 class SpyConan(ConanFile):
     name = "spy"
+    settings = "compiler"
     version = "0.0.3"
     license = "MIT"
     url = "https://github.com/conan-io/conan-center-index"
@@ -13,6 +15,16 @@ class SpyConan(ConanFile):
     no_copy_source = True
 
     _source_subfolder = "source_subfolder"
+
+    def _supports_cpp17(self):
+        supported_compilers = [("gcc", "7"), ("clang", "5"), ("apple-clang", "10"), ("Visual Studio", "15.7")]
+        compiler = self.settings.compiler
+        version = Version(self.settings.compiler.version)
+        return any(compiler == e[0] and version >= e[1] for e in supported_compilers)
+
+    def configure(self):
+        if not self._supports_cpp17():
+            raise ConanInvalidConfiguration("Absent requires C++17 support")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
