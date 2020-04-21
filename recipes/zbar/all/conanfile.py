@@ -65,10 +65,6 @@ class zbarConan(ConanFile):
             self._env_build.configure(args=env_args, configure_dir=self._source_subfolder)
         return self._env_build
 
-    def _patch_souces(self):
-        tools.replace_in_file(os.path.join(self._source_subfolder, "zbar", "refcnt.c"), "_zbar_reflock", "zbar_reflock")
-        tools.replace_in_file(os.path.join(self._source_subfolder, "zbar", "refcnt.h"), "_zbar_reflock", "zbar_reflock")
-
     def requirements(self):
         if self.options.with_jpeg:
             self.requires.add("libjpeg/9d")
@@ -83,7 +79,6 @@ class zbarConan(ConanFile):
         os.rename(extracted_dir, self._source_subfolder)
 
     def build(self):
-        self._patch_souces()
         env_build = self._configure_autotools()
         env_build.make()
 
