@@ -47,8 +47,7 @@ class zbarConan(ConanFile):
     def _configure_autotools(self):
         if not self._env_build:
             self._env_build = AutoToolsBuildEnvironment(self)
-            env_args = []
-            env_args.extend([
+            env_args = [
                 "--enable-video" if self.options.with_video else "--disable-video",
                 "--with-imagemagick" if self.options.with_imagemagick else "--without-imagemagick",
                 "--with-gtk" if self.options.with_gtk else "--without-gtk",
@@ -61,7 +60,7 @@ class zbarConan(ConanFile):
                 "--enable-pthread" if self.options.enable_pthread else "--disable-pthread",
                 "--enable-shared" if self.options.shared else "--disable-shared",
                 "--enable-static" if not self.options.shared else "--disable-static",
-            ])
+            ]
             self._env_build.configure(args=env_args, configure_dir=self._source_subfolder)
         return self._env_build
 
