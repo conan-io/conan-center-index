@@ -12,12 +12,10 @@ set(CMAKE_VERBOSE_MAKEFILE TRUE)
 include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
 conan_basic_setup()
 
-if( ${BUILD_C_TEST_PACKAGE} )
+add_executable(${PROJECT_NAME}_c test_package.c)
+target_link_libraries(${PROJECT_NAME}_c ${CONAN_LIBS})
+set_property(TARGET ${PROJECT_NAME}_c PROPERTY LINKER_LANGUAGE CXX)
 
-    add_executable(${PROJECT_NAME} test_package.c)
-
-else()
-    add_executable(${PROJECT_NAME} test_package.cpp)
-endif()
-
+add_executable(${PROJECT_NAME} test_package.cpp)
 target_link_libraries(${PROJECT_NAME} ${CONAN_LIBS})
+set_property(TARGET ${PROJECT_NAME} PROPERTY CXX_STANDARD 11)
