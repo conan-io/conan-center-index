@@ -71,6 +71,8 @@ class zbarConan(ConanFile):
     def configure(self):
         if self.settings.os == "Windows":
             raise ConanInvalidConfiguration("Zbar can't be built on Windows")
+        if tools.is_apple_os(self.settings.os) and not self.options.shared:
+            raise ConanInvalidConfiguration("Zbar can't be built static on macOS")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
