@@ -17,8 +17,8 @@ int main (int argc, char **argv)
     /* clean up */
     zbar_image_scanner_destroy(scanner);
 
-	int VersionMajor;
-	int VersionMinor;
+	unsigned VersionMajor;
+	unsigned VersionMinor;
 	zbar_version(&VersionMajor, &VersionMinor);
 
 	printf("Compiled ZBar version %d.%d \n", VersionMajor, VersionMinor);
