@@ -11,13 +11,17 @@ class LibgdConan(ConanFile):
     settings = "os", "compiler", "build_type", "arch"
     homepage = "https://libgd.github.io"
     options = {"shared": [True, False], "fPIC": [True, False]}
-    default_options = {"shared": False}
+    default_options = {"shared": False, "fPIC": True}
     generators = "cmake"
     requires = "zlib/1.2.11"
 
     def config_options(self):
         if self.settings.os == "Windows":
-            self.options.remove("fPIC")
+            del self.options.fPIC
+
+    def configure(self):
+        if self.options.shared:
+            del self.options.fPIC
 
     @property
     def _source_subfolder(self):
