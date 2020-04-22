@@ -1,4 +1,4 @@
 sources:
   "2.12":
-    url: "http://www.digip.org/jansson/releases/jansson-2.12.tar.gz"
-    sha256: "5f8dec765048efac5d919aded51b26a32a05397ea207aa769ff6b53c7027d2c9"
+    url: "https://github.com/akheron/jansson/archive/v2.12.tar.gz"
+    sha256: "76260d30e9bbd0ef392798525e8cd7fe59a6450c54ca6135672e3cd6a1642941"
