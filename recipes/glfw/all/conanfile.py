@@ -84,4 +84,4 @@ class GlfwConan(ConanFile):
         if self.settings.os == "Linux":
             self.cpp_info.system_libs.extend(["X11", "GL", "m", "pthread", "dl", "rt"])
         elif self.settings.os == "Macos":
-            self.cpp_info.frameworks.extend(["OpenGL", "Cocoa", "IOKit", "CoreVideo"])
+            self.cpp_info.frameworks.extend(["OpenGL", "Cocoa", "IOKit", "CoreFoundation"])
