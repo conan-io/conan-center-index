@@ -60,6 +60,8 @@ jobs:
         libpciaccess_version: ['0.16']
 
         libxext_version: ['1.3.4']
+    
+        libxdamage_version: ['1.1.5']
 
         include:
           - build: 'linux-gcc8'
@@ -462,6 +464,24 @@ jobs:
           docker-images: ${{ matrix.docker_image }}
         env:
           CONAN_REFERENCE: 'libxext/${{ matrix.libxext_version }}'
+          CONAN_VISUAL_RUNTIMES: ${{ matrix.vs_runtimes }}
+          CONAN_ARCHS: ${{ matrix.archs }}
+          CONAN_BUILD_TYPES: ${{ matrix.build_types }}
+          DEVELOPER_DIR: /Applications/Xcode_${{ matrix.xcode_version }}.app/Contents/Developer
+
+      - name: Building libxdamage
+        uses: trassir/run-cpt@v0.2.2-trassir
+        with:
+          install: custom
+          # TODO: replace when https://github.com/conan-io/conan-package-tools/issues/479 will be fixed upstream
+          custom-package: git+https://github.com/trassir/conan-package-tools@fix-479-trassir
+          work-dir: sources/recipes/x11/all/libxdamage
+          build-script: ../../../../build.py
+          compiler: ${{ matrix.compiler }}
+          compiler-versions: ${{ matrix.compiler_version }}
+          docker-images: ${{ matrix.docker_image }}
+        env:
+          CONAN_REFERENCE: 'libxdamage/${{ matrix.libxdamage_version }}'
           CONAN_VISUAL_RUNTIMES: ${{ matrix.vs_runtimes }}
           CONAN_ARCHS: ${{ matrix.archs }}
           CONAN_BUILD_TYPES: ${{ matrix.build_types }}
