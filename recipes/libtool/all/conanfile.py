@@ -105,7 +105,7 @@ class LibtoolConan(ConanFile):
         datadir = os.path.join(self.package_folder, "bin", "share")
         return {
             "LIBTOOL_PREFIX": tools.unix_path(self.package_folder),
-            "LIVTOOL_DATADIR": tools.unix_path(datadir),
+            "LIBTOOL_DATADIR": tools.unix_path(datadir),
             "LIBTOOL_PKGAUXDIR": tools.unix_path(os.path.join(datadir, "libtool", "build-aux")),
             "LIBTOOL_PKGLTDLDIR": tools.unix_path(os.path.join(datadir, "libtool")),
             "LIBTOOL_ACLOCALDIR": tools.unix_path(os.path.join(datadir, "aclocal")),
