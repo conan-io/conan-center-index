@@ -46,7 +46,7 @@ jobs:
         run: brew install pkg-config
       - name: Install pkg-config (Linux)
         if: matrix.os == 'ubuntu-latest'
-        run: sudo apt-get update && sudo apt-get installpkg-config
+        run: sudo apt-get update && sudo apt-get install pkg-config
       - name: Install bison (MacOS)
         if: matrix.os == 'macos-latest'
         run: brew install bison
