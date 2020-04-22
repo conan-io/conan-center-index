@@ -21,10 +21,10 @@ class libMysqlClientCConan(ConanFile):
 
     def requirements(self):
         if self.options.with_ssl:
-            self.requires.add("openssl/1.1.1d")
+            self.requires("openssl/1.1.1f")
 
         if self.options.with_zlib:
-            self.requires.add("zlib/1.2.11")
+            self.requires("zlib/1.2.11")
 
     def config_options(self):
         if self.settings.os == "Windows":
