@@ -2,7 +2,7 @@ import os
 import glob
 from conans import ConanFile, CMake, tools
 from conans.tools import Version
-
+from conans.errors import ConanInvalidConfiguration, ConanException
 
 class JsonSchemaValidatorConan(ConanFile):
     name = "json-schema-validator"
@@ -35,9 +35,21 @@ class JsonSchemaValidatorConan(ConanFile):
     def configure(self):
         compiler_version = Version(self.settings.compiler.version)
         if self.settings.os == "Windows"and self.settings.compiler == "Visual Studio" and compiler_version < "16":
-            tools.check_min_cppstd(self, "17")
-        elif self.settings.os == "Linux" and self.settings.compiler == "clang" and compiler_version < "4":
-            tools.check_min_cppstd(self, "11")
+            try:
+                # Force check to ensure compatability
+                tools.check_min_cppstd(self, "17") # There's an issue in upstream forcing a higher cppstd version. See https://github.com/pboettch/json-schema-validator/issues/106
+            except ConanInvalidConfiguration:
+                raise
+            except ConanException:
+                self.output.warn("Unnable to determine the default standard version of the compiler")
+        elif self.settings.compiler == "clang" and compiler_version < "4":
+            try:
+                # Force check to ensure compatability
+                tools.check_min_cppstd(self, "11") # Clang 3.9 requires this to be set to ignore the issue above https://releases.llvm.org/3.9.1/tools/clang/docs/ReleaseNotes.html#c-1z-feature-support
+            except ConanInvalidConfiguration:
+                raise
+            except ConanException:
+                self.output.warn("Unnable to determine the default standard version of the compiler")
         elif self.settings.compiler.get_safe("cppstd"):
             tools.check_min_cppstd(self, "11")
 
