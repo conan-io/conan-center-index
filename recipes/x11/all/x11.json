@@ -166,6 +166,13 @@
         "description": "Xlib-based library for common extensions to the X11 protocol",
         "requires": ["libX11"],
         "system_libs": ["dl"]
+    },
+    {
+        "name": "libXdamage",
+        "version": "1.1.5",
+        "sha256": "630ec53abb8c2d6dac5cd9f06c1f73ffb4a3167f8118fdebd77afd639dbc2019",
+        "description": "X Damage Extension library",
+        "requires": ["libXfixes"]
     }
 ]
 
