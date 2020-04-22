@@ -67,7 +67,7 @@ jobs:
 
         libxxf86vm_version: ['1.1.4']
 
-        libxranrd_version: ['1.5.2']
+        libxrandr_version: ['1.5.2']
 
         include:
           - build: 'linux-gcc8'
