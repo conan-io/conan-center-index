@@ -55,7 +55,9 @@ class Stlab(ConanFile):
         os.rename(extracted_dir, self._source_subfolder)
 
     def configure(self):
-        tools.check_min_cppstd(self, '17')
+        # TODO: Enable transitive required C++17
+        # tools.check_min_cppstd(self, '17')
+        pass
 
     def package(self):
         self.copy("*LICENSE", dst="licenses", keep_path=False)
