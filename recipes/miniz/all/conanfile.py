@@ -10,7 +10,7 @@ class MinizConan(ConanFile):
     topics = ("conan", "miniz", "compression", "lossless")
     homepage = "https://github.com/richgel999/miniz"
     url = "https://github.com/conan-io/conan-center-index"
-    exports_sources = "CMakeLists.txt"
+    exports_sources = "CMakeLists.txt", "patches/*"
     generators = "cmake"
     settings = "os", "arch", "compiler", "build_type"
     options = {"shared": [True, False], "fPIC": [True, False]}
@@ -46,6 +46,8 @@ class MinizConan(ConanFile):
         return self._cmake
 
     def build(self):
+        for patch in self.conan_data["patches"][self.version]:
+            tools.patch(**patch)
         cmake = self._configure_cmake()
         cmake.build(target=self.name)
 
