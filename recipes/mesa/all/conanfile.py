@@ -252,7 +252,7 @@ class LibnameConan(ConanFile):
             if self._with_any_vk or self.options.egl or (self._with_glx == 'dri' and self._with_dri_platform == 'drm'):
                 self.requires("libxcb/1.13.1")
                 if self._with_dri3:
-                    self.requires("libxshmfence/1.3@bincrafters/stable")
+                    self.requires("libxshmfence/1.3")
             if self._with_glx == 'dri' or self._with_glx == 'gallium-xlib':
                 pass#self.requires('glproto/1.4.17@bincrafters/stable') TODO: create package in conan-x11
 
