@@ -119,5 +119,9 @@ class GetTextConan(ConanFile):
         bindir = os.path.join(self.package_folder, "bin")
         self.output.info('Appending PATH environment variable: {}'.format(bindir))
         self.env_info.PATH.append(bindir)
-
-
+        if self._is_msvc and self.options.shared:
+            self.cpp_info.libs = ["gnuintl.dll.lib"]
+        else:
+            self.cpp_info.libs = ["gnuintl"]
+        if self.settings.os == "Macos":
+            self.cpp_info.frameworks.extend(['CoreFoundation'])
