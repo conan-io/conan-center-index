@@ -73,6 +73,8 @@ class SpdlogConan(ConanFile):
         self._cmake.definitions["SPDLOG_WCHAR_FILENAMES"] = self.options.wchar_filenames
         self._cmake.definitions["SPDLOG_INSTALL"] = True
         self._cmake.definitions["SPDLOG_NO_EXCEPTIONS"] = self.options.no_exceptions
+        if self.settings.os in ("iOS", "tvOS", "watchOS"):
+            self._cmake.definitions["SPDLOG_NO_TLS"] = True
         self._cmake.configure()
         return self._cmake
 
