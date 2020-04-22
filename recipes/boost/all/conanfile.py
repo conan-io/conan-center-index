@@ -547,7 +547,7 @@ class BoostConan(ConanFile):
         if self._zip_bzip2_requires_needed:
             add_defines(self.options.zlib, "zlib")
             add_defines(self.options.bzip2, "bzip2")
-            add_defines(self.options.lzma, "lzma")
+            add_defines(self.options.lzma, "xz_utils")
             add_defines(self.options.zstd, "zstd")
 
         if self._is_msvc and self.settings.compiler.runtime:
@@ -692,11 +692,11 @@ class BoostConan(ConanFile):
 
         contents = ""
         if self._zip_bzip2_requires_needed:
-            def create_library_config(name):
-                includedir = self.deps_cpp_info[name].include_paths[0].replace('\\', '/')
-                libdir = self.deps_cpp_info[name].lib_paths[0].replace('\\', '/')
-                lib = self.deps_cpp_info[name].libs[0]
-                version = self.deps_cpp_info[name].version
+            def create_library_config(deps_name, name):
+                includedir = self.deps_cpp_info[deps_name].include_paths[0].replace('\\', '/')
+                libdir = self.deps_cpp_info[deps_name].lib_paths[0].replace('\\', '/')
+                lib = self.deps_cpp_info[deps_name].libs[0]
+                version = self.deps_cpp_info[deps_name].version
                 return "\nusing {name} : {version} : " \
                        "<include>{includedir} " \
                        "<search>{libdir} " \
@@ -708,13 +708,13 @@ class BoostConan(ConanFile):
 
             contents = ""
             if self.options.zlib:
-                contents += create_library_config("zlib")
+                contents += create_library_config("zlib", "zlib")
             if self.options.bzip2:
-                contents += create_library_config("bzip2")
+                contents += create_library_config("bzip2", "bzip2")
             if self.options.lzma:
-                contents += create_library_config("lzma")
+                contents += create_library_config("xz_utils", "lzma")
             if self.options.zstd:
-                contents += create_library_config("zstd")
+                contents += create_library_config("zstd", "zstd")
 
         if not self.options.without_python:
             # https://www.boost.org/doc/libs/1_70_0/libs/python/doc/html/building/configuring_boost_build.html
