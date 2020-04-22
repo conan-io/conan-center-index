@@ -173,6 +173,27 @@
         "sha256": "630ec53abb8c2d6dac5cd9f06c1f73ffb4a3167f8118fdebd77afd639dbc2019",
         "description": "X Damage Extension library",
         "requires": ["libXfixes"]
+    },
+    {
+        "name": "libxshmfence",
+        "version": "1.3",
+        "sha256": "7eb3d46ad91bab444f121d475b11b39273142d090f7e9ac43e6a87f4ff5f902c",
+        "description": "Shared memory SyncFence synchronization primitive",
+        "requires": ["xorgproto", "util-macros"]
+    },
+    {
+        "name": "libXxf86vm",
+        "version": "1.1.4",
+        "sha256": "5108553c378a25688dcb57dca383664c36e293d60b1505815f67980ba9318a99",
+        "description": "Xlib-based library for the XFree86-VidMode X extension",
+        "requires": ["libX11", "libXext"]
+    },
+    {
+        "name": "libXrandr",
+        "version": "1.5.2",
+        "sha256": "3f10813ab355e7a09f17e147d61b0ce090d898a5ea5b5519acd0ef68675dcf8e",
+        "description": "Xlib Resize, Rotate and Reflection (RandR) extension library",
+        "requires": ["libXrender", "libXext"]
     }
 ]
 
