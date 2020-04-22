@@ -2,3 +2,7 @@ sources:
   "0.1.0":
     url: "https://gitlab.com/dvd0101/svgwrite/-/archive/v0.1.0/svgwrite-v0.1.0.tar.gz"
     sha256: "32c77e8dde050233c067b7ae83ffbfff89b6da724683d3153c32670813c0ba76"
+patches:
+  "0.1.0":
+    - patch_file: "patches/0001-remove-gcc-flags.patch"
+      base_path: "source_subfolder"
