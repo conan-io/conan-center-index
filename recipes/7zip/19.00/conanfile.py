@@ -30,8 +30,7 @@ class Package7Zip(ConanFile):
         os.unlink(filename)
 
     def build_requirements(self):
-        if not tools.which("7zr"):
-            self.build_requires("lzma_sdk/9.20")
+        self.build_requires("lzma_sdk/9.20")
 
         if tools.os_info.is_windows and "make" not in os.environ.get("CONAN_MAKE_PROGRAM", ""):
             self.build_requires("make/4.2.1")
