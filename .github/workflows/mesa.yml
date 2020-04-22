@@ -22,9 +22,16 @@ jobs:
   mesa:
     strategy:
       matrix:
-        build: ['macos']
+        build: ['linux-gcc8', 'macos']
         mesa_versions: ['19.3.1']
         include:
+          - build: 'linux-gcc8'
+            os: 'ubuntu-latest'
+            compiler: 'gcc'
+            compiler_version: '8'
+            docker_image: 'trassiross/conan-gcc8'
+            build_types: 'Release,Debug'
+            archs: 'x86_64' 
           - build: 'macos'
             os: 'macos-latest'
             build_types: 'Release,Debug'
@@ -34,15 +41,24 @@ jobs:
             xcode_version: '11.3.1'
     runs-on: ${{ matrix.os }}
     steps:
-      - name: Install pkg-config
-        if: matrix.os == 'macos-latest'
+      - name: Install pkg-config (MacOS)
+        if: matrix.os == 'ubuntu-latest'
         run: brew install pkg-config
-      - name: Install bison
+      - name: Install pkg-config (Linux)
+        if: matrix.os == 'macos-latest'
+        run: sudo apt-get update && sudo apt-get installpkg-config
+      - name: Install bison (MacOS)
         if: matrix.os == 'macos-latest'
         run: brew install bison
-      - name: Install flex
+      - name: Install bison (Linux)
+        if: matrix.os == 'ubuntu-latest'
+        run: sudo apt-get install bison
+      - name: Install flex (MacOS)
         if: matrix.os == 'macos-latest'
         run: brew install flex
+      - name: Install flex (Linux)
+        if: matrix.os == 'ubuntu-latest'
+        run: sudo apt-get install flex
       - name: Configure git
         run: git config --global core.autocrlf false
         shell: bash
