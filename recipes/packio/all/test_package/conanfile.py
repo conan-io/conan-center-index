@@ -8,10 +8,11 @@ class TestPackageConan(ConanFile):
     generators = "cmake"
 
     def build(self):
+        packio_version = self.deps_cpp_info["packio"].version
         cmake = CMake(self)
-        cmake.configure()
+        cmake.configure(defs={"PACKIO_VERSION": packio_version})
         cmake.build()
 
     def test(self):
         if not tools.cross_building(self.settings):
-            self.run(os.path.join("bin", "basic"), run_environment=True)
+            self.run(os.path.join("bin", "main"), run_environment=True)
