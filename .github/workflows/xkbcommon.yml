@@ -16,7 +16,7 @@ on:
 
 env:
   CONAN_PASSWORD: ${{ secrets.BintrayApiKey }}
-  CONAN_DOCKER_ENTRY_SCRIPT: sudo apt update && sudo apt install -y bison pkg-config
+  CONAN_DOCKER_ENTRY_SCRIPT: sudo apt-get update && sudo apt-get install -y bison pkg-config
   IS_PURE_C: true
 
 jobs:
