@@ -1,4 +1,4 @@
 sources:
   "3.2.2":
-    url: "http://apache.rediris.es//xerces/c/3/sources/xerces-c-3.2.2.tar.bz2"
+    url: "https://archive.apache.org/dist/xerces/c/3/sources/xerces-c-3.2.2.tar.bz2"
     sha256: "1f2a4d1dbd0086ce0f52b718ac0fa4af3dc1ce7a7ff73a581a05fbe78a82bce0"
