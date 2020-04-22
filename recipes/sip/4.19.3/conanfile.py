@@ -14,8 +14,12 @@ class SipConan(ConanFile):
     description = "SIP comprises a code generator and a Python module"
     url = "https://www.riverbankcomputing.com/hg/sip"
     settings = "os", "compiler", "build_type", "arch"
-    options = {}
-    default_options = {}
+    options = {
+        "python": ['python2', 'python3'],
+    }
+    default_options = {
+        "python": "python2",
+    }
     exports = ""
     _source_subfolder = "source_subfolder"
 
@@ -52,26 +56,28 @@ class SipConan(ConanFile):
 
     def build(self):
         with tools.chdir(self._source_subfolder):
-            self.run("python build.py prepare")
+            self.run("{python} build.py prepare".format(python = self.options.python))
             if tools.os_info.is_macos:
-                self.run(("python configure.py"
+                self.run(("{python} configure.py"
                       + " --deployment-target=10.12"
                       + " -b {prefix}/bin"
                       + " -d {prefix}/lib-dynload"
                       + " -e {prefix}/include"
                       + " -v {prefix}/share/sip"
                 ).format(
-                    prefix = tools.unix_path(self.package_folder)
+                    prefix = tools.unix_path(self.package_folder),
+                    python = self.options.python
                 ))
                 self.run("make -j%d" % tools.cpu_count())
             if tools.os_info.is_windows:
-                self.run(("python configure.py"
+                self.run(("{python} configure.py"
                       + " -b {prefix}/bin"
                       + " -d {prefix}/site-packages"
                       + " -e {prefix}/include"
                       + " -v {prefix}/share/sip"
                 ).format(
-                    prefix = self.package_folder
+                    prefix = self.package_folder,
+                    python = self.options.python
                 ))
                 # cannot be bothered to fix build of siplib which we don't use anyway
                 with tools.chdir("sipgen"):
