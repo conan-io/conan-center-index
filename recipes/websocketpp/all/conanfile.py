@@ -47,3 +47,7 @@ class WebsocketPPConan(ConanFile):
     def package_info(self):
         if self.options.asio == "standalone":
             self.cpp_info.defines.extend(["ASIO_STANDALONE", "_WEBSOCKETPP_CPP11_STL_"])
+
+    def package_id(self):	
+        self.info.header_only()
+        
