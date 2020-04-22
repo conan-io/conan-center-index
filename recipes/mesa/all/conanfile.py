@@ -227,7 +227,7 @@ class LibnameConan(ConanFile):
             self.requires('libxvmc/1.0.11@bincrafters/stable')
             self.requires('libxv/1.0.11@bincrafters/stable')
         if self._with_dri2 or self._with_dri3:
-            self.requires("libdrm/2.4.100@bincrafters/stable")
+            self.requires("libdrm/2.4.100")
         if self.options.vk_amd or self.options.gallium_radeonsi or self.options.gallium_opencl:
             self.requires("libelf/0.8.13")
         if self.options.libunwind:
@@ -236,21 +236,21 @@ class LibnameConan(ConanFile):
             self.requires('selinux/2.9@bincrafters/stable')
         if 'x11' in self._platforms:
             if self._with_glx == 'xlib' or self._with_glx == 'gallium-xlib':
-                self.requires("libx11/1.6.8@bincrafters/stable")
-                self.requires("libxext/1.3.4@bincrafters/stable")
-                self.requires("libxcb/1.13.1@bincrafters/stable")
+                self.requires("libx11/1.6.8")
+                self.requires("libxext/1.3.4")
+                self.requires("libxcb/1.13.1")
             elif self._with_glx == 'dri':
-                self.requires("libx11/1.6.8@bincrafters/stable")
-                self.requires("libxext/1.3.4@bincrafters/stable")
-                self.requires("libxdamage/1.1.5@bincrafters/stable")
-                self.requires("libxfixes/5.0.3@bincrafters/stable")
-                self.requires("libxcb/1.13.1@bincrafters/stable")
+                self.requires("libx11/1.6.8")
+                self.requires("libxext/1.3.4")
+                self.requires("libxdamage/1.1.5")
+                self.requires("libxfixes/5.0.3")
+                self.requires("libxcb/1.13.1")
             if self._with_any_vk or self._with_glx == 'dri' or self.options.egl or \
                     self.options.gallium_vdpau or self.options.gallium_xvmc or self.options.gallium_va or \
                     self.options.gallium_omx != 'disabled':
-                self.requires("libxcb/1.13.1@bincrafters/stable")
+                self.requires("libxcb/1.13.1")
             if self._with_any_vk or self.options.egl or (self._with_glx == 'dri' and self._with_dri_platform == 'drm'):
-                self.requires("libxcb/1.13.1@bincrafters/stable")
+                self.requires("libxcb/1.13.1")
                 if self._with_dri3:
                     self.requires("libxshmfence/1.3@bincrafters/stable")
             if self._with_glx == 'dri' or self._with_glx == 'gallium-xlib':
@@ -259,14 +259,14 @@ class LibnameConan(ConanFile):
             if self._with_glx == 'dri':
                 if self._with_dri_platform == 'drm':
                     #self.requires('dri2proto/2.8@bincrafters/stable') TODO: create package in conan-x11
-                    self.requires("libxxf86vm/1.1.4@bincrafters/stable")
+                    self.requires("libxxf86vm/1.1.4")
 
             if self.options.egl or \
                 self.options.gallium_vdpau or self.options.gallium_xvmc or self.options.gallium_xa or\
                 self.options.gallium_omx != 'disabled':
-                self.requires("libxcb/1.13.1@bincrafters/stable")
+                self.requires("libxcb/1.13.1")
             if self._with_xlib_lease:
-                self.requires('libxrandr/1.5.2@bincrafters/stable')
+                self.requires('libxrandr/1.5.2')
 
     def config_options(self):
         if self.settings.os == 'Windows':
