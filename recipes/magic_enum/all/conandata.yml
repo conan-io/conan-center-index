@@ -1,0 +1,5 @@
+sources:
+  "0.6.5":
+    sha256: "37A69482517C8976CB48CD271DA8C6BA92E07EE2AB2BDD7CAEF4C8158AF77359"
+    url: "https://github.com/Neargye/magic_enum/archive/v0.6.5.tar.gz"
+
