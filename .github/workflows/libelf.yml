@@ -24,7 +24,7 @@ jobs:
       matrix:
         build: ['linux-gcc8', 'macos']
         libelf_versions: ['0.8.13']
-        include:          
+        include:
           - build: 'linux-gcc8'
             os: 'ubuntu-latest'
             compiler: 'gcc'
