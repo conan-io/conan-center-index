@@ -42,7 +42,7 @@ class CzmqConan(ConanFile):
             del self.options.fPIC
 
     def requirements(self):
-        self.requires("openssl/1.1.1f")  # zdigest depends on openssl
+        self.requires("openssl/1.1.1g")  # zdigest depends on openssl
         self.requires("zeromq/4.3.2")
         if self.options.with_libcurl:
             self.requires("libcurl/7.69.1")
