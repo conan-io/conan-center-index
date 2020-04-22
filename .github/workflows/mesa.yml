@@ -42,10 +42,10 @@ jobs:
     runs-on: ${{ matrix.os }}
     steps:
       - name: Install pkg-config (MacOS)
-        if: matrix.os == 'ubuntu-latest'
+        if: matrix.os == 'macos-latest'
         run: brew install pkg-config
       - name: Install pkg-config (Linux)
-        if: matrix.os == 'macos-latest'
+        if: matrix.os == 'ubuntu-latest'
         run: sudo apt-get update && sudo apt-get installpkg-config
       - name: Install bison (MacOS)
         if: matrix.os == 'macos-latest'
