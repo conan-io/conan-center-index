@@ -8,7 +8,7 @@ class SvgwriteConan(ConanFile):
     license = "BSL-1.0"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://gitlab.com/dvd0101/svgwrite"
-    description = "SVGWrite - a streamign svg library"
+    description = "SVGWrite - a streaming svg library"
     topics = ("svg", "stream", "vector", "image")
     settings = "os", "compiler", "build_type", "arch"
     options = {"shared": [True, False], "fPIC": [True, False]}
