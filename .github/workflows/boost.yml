@@ -74,9 +74,6 @@ jobs:
             # Apple clang version 11.0.0 (clang-1100.0.33.8) complains about
             # errors in boost::asio headers when trying to link with boost 1.69
             boost_version: '1.64.0'
-            # codesign requires a lot of space in libraries to write LD_* commands
-            # we provide it by padding library headers to maximum size
-            ldflags: -headerpad_max_install_names
     runs-on: ${{ matrix.os }}
     steps:
       - name: Configure git
@@ -102,7 +99,6 @@ jobs:
           compiler-versions: ${{ matrix.compiler_version }}
           docker-images: ${{ matrix.docker_image }}
         env:
-          LDFLAGS: ${{ matrix.ldflags }}
           CONAN_REFERENCE: 'boost/${{ matrix.boost_version }}'
           CONAN_VISUAL_RUNTIMES: ${{ matrix.vs_runtimes }}
           CONAN_ARCHS: ${{ matrix.archs }}

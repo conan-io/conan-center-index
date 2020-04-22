@@ -748,6 +748,11 @@ class BoostConan(ConanFile):
             contents += '<cxxflags>"%s" ' % os.environ["CXXFLAGS"]
         if "CFLAGS" in os.environ:
             contents += '<cflags>"%s" ' % os.environ["CFLAGS"]
+        if tools.os_info.is_macos:
+            if "LDFLAGS" in os.environ:
+                os.environ["LDFLAGS"] += " -headerpad_max_install_names"
+            else:
+                os.environ["LDFLAGS"] = "-headerpad_max_install_names"
         if "LDFLAGS" in os.environ:
             contents += '<linkflags>"%s" ' % os.environ["LDFLAGS"]
         if "ASFLAGS" in os.environ:
