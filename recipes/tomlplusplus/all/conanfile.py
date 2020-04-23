@@ -4,13 +4,14 @@ import os
 
 
 class TomlPlusPlusConan(ConanFile):
-    name = "toml++"
+    name = "tomlplusplus"
     homepage = "https://github.com/marzer/tomlplusplus"
     description = "Header-only TOML config file parser and serializer for modern C++."
     topics = ("conan", "tomlformoderncpp", "toml++", "tomlplusplus",
               "toml", "json", "header-only", "single-header")
     url = "https://github.com/conan-io/conan-center-index"
     license = "MIT"
+    settings = { "compiler" }
     options = {
         "multiple_headers": [True, False]
     }
