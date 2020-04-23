@@ -20,7 +20,7 @@ class WebsocketPPConan(ConanFile):
         return "source_subfolder"
 
     def requirements(self):
-        self.requires("openssl/1.1.1f")
+        self.requires("openssl/1.1.1g")
         self.requires("zlib/1.2.11")
         if self.options.asio == "standalone":
             self.requires("asio/1.16.0")
@@ -34,13 +34,14 @@ class WebsocketPPConan(ConanFile):
         self._patch_sources()
 
     def _patch_sources(self):
-        for patch in self.conan_data["patches"][self.version]:
-            tools.patch(**patch)
+        if "patches" in self.conan_data and self.version in self.conan_data["patches"]:
+            for patch in self.conan_data["patches"][self.version]:
+                tools.patch(**patch)
 
     def package(self):
         self._patch_sources()
         self.copy(pattern="COPYING", dst="licenses", src=self._source_subfolder)
-        # We have to copy the headers manually, since the current cmake.install() step in the 0.8.1 release doesn't do so.
+        # We have to copy the headers manually, since the upstream cmake.install() step doesn't do so.
         self.copy(pattern="*.hpp", dst="include/websocketpp", src=self._source_subfolder + "/websocketpp")
 
     def package_info(self):
@@ -49,3 +50,4 @@ class WebsocketPPConan(ConanFile):
 
     def package_id(self):
         self.info.header_only()
+        
