@@ -123,5 +123,13 @@ class LibjpegTurboConan(ConanFile):
 
         self.copy("license*", src=self._source_subfolder, dst="licenses", ignore_case=True, keep_path=False)
 
+    def _collect_libs(self):
+        libs = ["jpeg"]
+        if self.options.turbojpeg:
+            libs.append("turbojpeg")
+        if self.settings.compiler == "Visual Studio" and not self.options.shared:
+            libs = [lib + "-static" for lib in libs]
+        return libs
+
     def package_info(self):
-        self.cpp_info.libs = tools.collect_libs(self)
+        self.cpp_info.libs = self._collect_libs()
