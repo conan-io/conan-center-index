@@ -88,7 +88,10 @@ class PahoMqttcConan(ConanFile):
             elif self.settings.os == "FreeBSD":
                 self.cpp_info.system_libs.extend(["compat", "pthread"])
             else:
-                self.cpp_info.system_libs.extend(["c", "pthread"])
+                if self.settings.os == "Android":
+                    self.cpp_info.system_libs.extend(["c"])
+                else:
+                    self.cpp_info.system_libs.extend(["c", "pthread"])
         self.cpp_info.names["cmake_find_package"] = "PahoMqttC"
         self.cpp_info.names["cmake_find_package_multi"] = "PahoMqttC"
 
