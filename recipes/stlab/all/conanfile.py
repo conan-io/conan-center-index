@@ -1,4 +1,6 @@
 from conans import ConanFile, tools
+from conans.tools import Version
+from conans.errors import ConanInvalidConfiguration
 import os
 
 class Stlab(ConanFile):
@@ -11,6 +13,13 @@ class Stlab(ConanFile):
 
     settings = 'compiler'
 
+    options = {
+        'coroutines': [True, False]
+    }
+    default_options = {
+        'coroutines': False
+    }
+
     no_copy_source = True
     _source_subfolder = 'source_subfolder'
 
@@ -22,9 +31,17 @@ class Stlab(ConanFile):
         os.rename(extracted_dir, self._source_subfolder)
 
     def configure(self):
-        # TODO: Enable transitive required C++17
-        # tools.check_min_cppstd(self, '17')
-        pass
+        if self.settings.compiler.get_safe("cppstd"):
+            tools.check_min_cppstd(self, '17')
+
+        if self.settings.compiler == "gcc" and Version(self.settings.compiler.version) < "9":
+            raise ConanInvalidConfiguration("Need gcc >= 9")
+
+        if self.settings.compiler == "clang" and Version(self.settings.compiler.version) < "8":
+            raise ConanInvalidConfiguration("Need clang >= 8")
+
+        if self.settings.compiler == "Visual Studio" and Version(self.settings.compiler.version) < "19.15":
+            raise ConanInvalidConfiguration("Need MSVC >= 19.15")
 
     def package(self):
         self.copy("*LICENSE", dst="licenses", keep_path=False)
@@ -32,3 +49,10 @@ class Stlab(ConanFile):
 
     def package_id(self):
         self.info.header_only()
+
+    def package_info(self):
+        coroutines_value = 1 if self.options.coroutines else 0
+
+        self.cpp_info.defines = [
+            'STLAB_FUTURE_COROUTINES={}'.format(coroutines_value)
+        ]
