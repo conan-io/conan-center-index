@@ -24,7 +24,7 @@ class SpyConan(ConanFile):
 
     def configure(self):
         if not self._supports_cpp17():
-            raise ConanInvalidConfiguration("Absent requires C++17 support")
+            raise ConanInvalidConfiguration("Spy requires C++17 support")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
