@@ -37,7 +37,7 @@ class OtCommissionerConan(ConanFile):
         self.requires("fmt/6.1.2")
         # TODO: port to CCI
         self.requires("cose-c/20200225@gocarlos/testing")
-        self.requires("cn-cbor/20200227@gocarlos/testing")
+        self.requires("cn-cbor/1.0.0")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
