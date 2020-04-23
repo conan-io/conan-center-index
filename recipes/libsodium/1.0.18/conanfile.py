@@ -133,7 +133,7 @@ class LibsodiumConan(ConanFile):
         absolute_install_dir = absolute_install_dir.replace("\\", "/")
         configure_args = self._get_configure_args(absolute_install_dir)
 
-        if self.settings.os == "Linux":
+        if self.settings.os in ["Linux", "FreeBSD"]:
             self._build_autotools_linux(configure_args)
         elif self.settings.os == "Emscripten":
             self._build_autotools_emscripten(configure_args)
@@ -170,7 +170,7 @@ class LibsodiumConan(ConanFile):
             if not self.options.shared:
                 self.cpp_info.defines = ["SODIUM_STATIC=1"]
         self.cpp_info.libs = tools.collect_libs(self)
-        if self.settings.os == "Linux":
+        if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.system_libs = ["pthread"]
 
     def _package_autotools(self):
