@@ -49,7 +49,7 @@ class MinizConan(ConanFile):
         for patch in self.conan_data["patches"][self.version]:
             tools.patch(**patch)
         cmake = self._configure_cmake()
-        cmake.build(target=self.name)
+        cmake.build()
 
     def package(self):
         self.copy("LICENSE", dst="licenses", src=self._source_subfolder)
