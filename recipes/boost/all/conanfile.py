@@ -54,7 +54,8 @@ class BoostConan(ConanFile):
         "segmented_stacks": [True, False],
         "debug_level": [i for i in range(1, 14)],
         "pch": [True, False],
-        "extra_b2_flags": "ANY"  # custom b2 flags
+        "extra_b2_flags": "ANY",  # custom b2 flags
+        "i18n_backend": ["iconv", "icu", None],
     }
     options.update({"without_%s" % libname: [True, False] for libname in lib_list})
 
@@ -80,6 +81,7 @@ class BoostConan(ConanFile):
         "debug_level": 2,
         'pch': True,
         'extra_b2_flags': 'None',
+        "i18n_backend": 'iconv',
     }
 
     for libname in lib_list:
@@ -119,6 +121,10 @@ class BoostConan(ConanFile):
         if self.settings.os == "Windows":
             del self.options.fPIC
 
+    def configure(self):
+        if not self.options.i18n_backend and not self.options.without_locale:
+            raise ConanInvalidConfiguration("Boost 'locale' library requires a i18n_backend, either 'icu' or 'iconv'")
+
     def build_requirements(self):
         self.build_requires("b2/4.2.0")
 
@@ -132,6 +138,8 @@ class BoostConan(ConanFile):
                 self.requires("xz_utils/5.2.4")
             if self.options.zstd:
                 self.requires("zstd/1.4.3")
+        if self.options.i18n_backend == 'icu':
+            self.requires("icu/64.2")
 
     def package_id(self):
         if self.options.header_only:
@@ -539,6 +547,15 @@ class BoostConan(ConanFile):
         flags.append("-sNO_LZMA=%s" % ("0" if self.options.lzma else "1"))
         flags.append("-sNO_ZSTD=%s" % ("0" if self.options.zstd else "1"))
 
+        if self.options.i18n_backend == 'icu':
+            flags.append("-sICU_PATH={}".format(self.deps_cpp_info["icu"].rootpath))
+            flags.append("boost.locale.iconv=off boost.locale.icu=on")
+        elif self.options.i18n_backend == 'iconv':
+            flags.append("boost.locale.iconv=on boost.locale.icu=off")
+        else:
+            flags.append("boost.locale.iconv=off boost.locale.icu=off")
+            flags.append("--disable-icu --disable-iconvv")
+
         def add_defines(option, library):
             if option:
                 for define in self.deps_cpp_info[library].defines:
@@ -547,7 +564,7 @@ class BoostConan(ConanFile):
         if self._zip_bzip2_requires_needed:
             add_defines(self.options.zlib, "zlib")
             add_defines(self.options.bzip2, "bzip2")
-            add_defines(self.options.lzma, "lzma")
+            add_defines(self.options.lzma, "xz_utils")
             add_defines(self.options.zstd, "zstd")
 
         if self._is_msvc and self.settings.compiler.runtime:
@@ -692,11 +709,11 @@ class BoostConan(ConanFile):
 
         contents = ""
         if self._zip_bzip2_requires_needed:
-            def create_library_config(name):
-                includedir = self.deps_cpp_info[name].include_paths[0].replace('\\', '/')
-                libdir = self.deps_cpp_info[name].lib_paths[0].replace('\\', '/')
-                lib = self.deps_cpp_info[name].libs[0]
-                version = self.deps_cpp_info[name].version
+            def create_library_config(deps_name, name):
+                includedir = self.deps_cpp_info[deps_name].include_paths[0].replace('\\', '/')
+                libdir = self.deps_cpp_info[deps_name].lib_paths[0].replace('\\', '/')
+                lib = self.deps_cpp_info[deps_name].libs[0]
+                version = self.deps_cpp_info[deps_name].version
                 return "\nusing {name} : {version} : " \
                        "<include>{includedir} " \
                        "<search>{libdir} " \
@@ -708,13 +725,13 @@ class BoostConan(ConanFile):
 
             contents = ""
             if self.options.zlib:
-                contents += create_library_config("zlib")
+                contents += create_library_config("zlib", "zlib")
             if self.options.bzip2:
-                contents += create_library_config("bzip2")
+                contents += create_library_config("bzip2", "bzip2")
             if self.options.lzma:
-                contents += create_library_config("lzma")
+                contents += create_library_config("xz_utils", "lzma")
             if self.options.zstd:
-                contents += create_library_config("zstd")
+                contents += create_library_config("zstd", "zstd")
 
         if not self.options.without_python:
             # https://www.boost.org/doc/libs/1_70_0/libs/python/doc/html/building/configuring_boost_build.html

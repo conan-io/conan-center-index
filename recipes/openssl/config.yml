@@ -1,19 +1,21 @@
 versions:
   1.0.2s:
-    folder: all
+    folder: "1.x.x"
   1.0.2t:
-    folder: all
+    folder: "1.x.x"
   1.0.2u:
-    folder: all
+    folder: "1.x.x"
   1.1.0k:
-    folder: all
+    folder: "1.x.x"
   1.1.0l:
-    folder: all
+    folder: "1.x.x"
   1.1.1c:
-    folder: all
+    folder: "1.x.x"
   1.1.1d:
-    folder: all
+    folder: "1.x.x"
   1.1.1e:
-    folder: all
+    folder: "1.x.x"
   1.1.1f:
-    folder: all
+    folder: "1.x.x"
+  1.1.1g:
+    folder: "1.x.x"

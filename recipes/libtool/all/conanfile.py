@@ -10,6 +10,7 @@ class LibtoolConan(ConanFile):
     description = "GNU libtool is a generic library support script. "
     topics = ("conan", "libtool", "configure", "library", "shared", "static")
     license = ("GPL-2.0-or-later", "GPL-3.0-or-later")
+    exports_sources = "patches/**"
 
     settings = "os_build", "arch_build", "compiler"
     _autotools = None
@@ -38,12 +39,13 @@ class LibtoolConan(ConanFile):
 
     @contextmanager
     def _build_context(self):
-        if self.settings.compiler == "Visual Studio":
-            with tools.vcvars(self.settings):
-                with tools.environment_append({"CC": "cl -nologo", "CXX": "cl -nologo",}):
-                    yield
-        else:
-            yield
+        with tools.environment_append(self._libtool_relocatable_env):
+            if self.settings.compiler == "Visual Studio":
+                with tools.vcvars(self.settings):
+                    with tools.environment_append({"CC": "cl -nologo", "CXX": "cl -nologo",}):
+                        yield
+            else:
+                yield
 
     def _configure_autotools(self):
         if self._autotools:
@@ -57,14 +59,19 @@ class LibtoolConan(ConanFile):
         conf_args = [
             "--datarootdir={}".format(datarootdir),
             "--prefix={}".format(prefix),
-            "--disable-shared",
-            "--disable-static",
+            "--enable-shared",
+            "--enable-static",
             "--disable-ltdl-install",
         ]
         self._autotools.configure(args=conf_args, configure_dir=self._source_subfolder)
         return self._autotools
 
+    def _patch_sources(self):
+        for patch in self.conan_data["patches"][self.version]:
+            tools.patch(**patch)
+
     def build(self):
+        self._patch_sources()
         with self._build_context():
             autotools = self._configure_autotools()
             autotools.make()
@@ -90,27 +97,36 @@ class LibtoolConan(ConanFile):
     def package_id(self):
         del self.info.settings.compiler
 
+    @property
+    def _libtool_relocatable_env(self):
+        datadir = os.path.join(self.package_folder, "bin", "share")
+        return {
+            "LIBTOOL_PREFIX": tools.unix_path(self.package_folder),
+            "LIBTOOL_DATADIR": tools.unix_path(datadir),
+            "LIBTOOL_PKGAUXDIR": tools.unix_path(os.path.join(datadir, "libtool", "build-aux")),
+            "LIBTOOL_PKGLTDLDIR": tools.unix_path(os.path.join(datadir, "libtool")),
+            "LIBTOOL_ACLOCALDIR": tools.unix_path(os.path.join(datadir, "aclocal")),
+        }
+
     def package_info(self):
         bin_path = os.path.join(self.package_folder, "bin")
-        self.output.info("Appending PATH env var with : {}".format(bin_path))
+        self.output.info("Appending PATH env: {}".format(bin_path))
         self.env_info.PATH.append(bin_path)
 
         bin_ext = ".exe" if self.settings.os_build == "Windows" else ""
 
-        libtool = os.path.join(self.package_folder, "bin", "libtool" + bin_ext)
-        if self.settings.os_build == "Windows":
-            libtool = tools.unix_path(libtool)
-        self.output.info("Setting LIBTOOL to {}".format(libtool))
+        libtool = tools.unix_path(os.path.join(self.package_folder, "bin", "libtool" + bin_ext))
+        self.output.info("Setting LIBTOOL env to {}".format(libtool))
         self.env_info.LIBTOOL = libtool
 
-        libtoolize = os.path.join(self.package_folder, "bin", "libtoolize" + bin_ext)
-        if self.settings.os_build == "Windows":
-            libtoolize = tools.unix_path(libtoolize)
-        self.output.info("Setting LIBTOOLIZE to {}".format(libtoolize))
+        libtoolize = tools.unix_path(os.path.join(self.package_folder, "bin", "libtoolize" + bin_ext))
+        self.output.info("Setting LIBTOOLIZE env to {}".format(libtoolize))
         self.env_info.LIBTOOLIZE = libtoolize
 
-        libtool_aclocal = os.path.join(self.package_folder, "bin", "share", "aclocal" + bin_ext)
-        if self.settings.os_build == "Windows":
-            libtool_aclocal = tools.unix_path(libtool_aclocal)
-        self.output.info("Appending var to ACLOCAL_PATH: {}".format(libtool_aclocal))
+        libtool_aclocal = tools.unix_path(os.path.join(self.package_folder, "bin", "share", "aclocal" + bin_ext))
+        self.output.info("Appending ACLOCAL_PATH env: {}".format(libtool_aclocal))
         self.env_info.ACLOCAL_PATH.append(libtool_aclocal)
+
+        # These are private environment variables so don't output anything
+        for key, value in self._libtool_relocatable_env.items():
+            setattr(self.env_info, key, value)
