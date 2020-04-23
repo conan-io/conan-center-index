@@ -26,6 +26,10 @@ class SvgwriteConan(ConanFile):
     def _build_subfolder(self):
         return "build_subfolder"
 
+    def config_options(self):
+        if self.settings.os == "Windows":
+            del self.options.fPIC
+
     def configure(self):
         compiler = str(self.settings.compiler)
         compiler_version = tools.Version(self.settings.compiler.version)
