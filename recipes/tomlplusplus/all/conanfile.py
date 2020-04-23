@@ -11,7 +11,7 @@ class TomlPlusPlusConan(ConanFile):
               "toml", "json", "header-only", "single-header")
     url = "https://github.com/conan-io/conan-center-index"
     license = "MIT"
-    settings = { "compiler" }
+    settings = {"compiler"}
     options = {
         "multiple_headers": [True, False]
     }
@@ -24,12 +24,24 @@ class TomlPlusPlusConan(ConanFile):
     def _source_subfolder(self):
         return "source_subfolder"
 
+    @property
+    def _minimum_cpp_standard(self):
+        return 17
+
+    @property
+    def _minimum_compilers_version(self):
+        return {
+            "Visual Studio": "16",
+            "gcc": "7",
+            "clang": "5",
+            "apple-clang": "10",
+        }
+
     def configure(self):
         if self.settings.get_safe("compiler.cppstd"):
-            tools.check_min_cppstd(self, "17")
-        compilers = {"gcc": "7", "clang": "5",
-                     "Visual Studio": "15", "apple-clang": "10"}
-        min_version = compilers.get(str(self.settings.compiler))
+            tools.check_min_cppstd(self, self._minimum_cpp_standard)
+        min_version = self._minimum_compilers_version.get(
+            str(self.settings.compiler))
         if not min_version:
             self.output.warn("{} recipe lacks information about the {} compiler support.".format(
                 self.name, self.settings.compiler))
@@ -52,3 +64,6 @@ class TomlPlusPlusConan(ConanFile):
         else:
             self.copy(pattern="toml.hpp", dst="include",
                       src=self._source_subfolder)
+
+    def package_id(self):
+        self.info.header_only()
