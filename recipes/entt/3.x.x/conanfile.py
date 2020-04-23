@@ -4,19 +4,17 @@ from conans import ConanFile, CMake, tools
 from conans.errors import ConanInvalidConfiguration
 
 
-class ConanRecipe(ConanFile):
+class EnttConan(ConanFile):
     name = "entt"
-
     description = "Gaming meets modern C++ - a fast and reliable entity-component system (ECS) and much more"
     topics = ("conan," "entt", "gaming", "entity", "ecs")
-
     homepage = "https://github.com/skypjack/entt"
     url = "https://github.com/conan-io/conan-center-index"
-
     license = "MIT"
-
+    no_copy_source = True
     settings = "os", "compiler", "build_type", "arch"
-    generators = "cmake", "cmake_find_package_multi"
+
+    _cmake = None
 
     @property
     def _source_subfolder(self):
@@ -53,18 +51,21 @@ class ConanRecipe(ConanFile):
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
-        extracted_dir = "entt-" + self.version
-        os.rename(extracted_dir, self._source_subfolder)
+        os.rename(self.name + "-" + self.version, self._source_subfolder)
 
     def _configure_cmake(self):
-        cmake = CMake(self)
-        cmake.definitions["BUILD_TESTING"] = "OFF"
-        cmake.definitions["USE_LIBCPP"] = "OFF"
-        cmake.configure(
+        if self._cmake:
+            return self._cmake
+        self._cmake = CMake(self)
+        self._cmake.definitions["USE_LIBCPP"] = False
+        self._cmake.definitions["USE_ASAN"] = False
+        self._cmake.definitions["BUILD_TESTING"] = False
+        self._cmake.definitions["BUILD_DOCS"] = False
+        self._cmake.configure(
             source_folder=self._source_subfolder,
             build_folder=self._build_subfolder
         )
-        return cmake
+        return self._cmake
 
     def build(self):
         cmake = self._configure_cmake()

@@ -37,7 +37,7 @@ class LibeventConan(ConanFile):
 
     def requirements(self):
         if self.options.with_openssl:
-            self.requires.add("openssl/1.1.1d")
+            self.requires("openssl/1.1.1d")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
@@ -92,6 +92,9 @@ class LibeventConan(ConanFile):
 
     def package_info(self):
         self.cpp_info.libs = tools.collect_libs(self)
+        self.cpp_info.names["cmake_find_package"] = "Libevent"
+        self.cpp_info.names["cmake_find_package_multi"] = "Libevent"
+
         if self.settings.os == "Linux":
             self.cpp_info.system_libs.extend(["rt"])
 

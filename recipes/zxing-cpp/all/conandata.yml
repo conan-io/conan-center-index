@@ -1,0 +1,8 @@
+sources:
+  "1.0.8":
+    url: "https://github.com/nu-book/zxing-cpp/archive/v1.0.8.tar.gz"
+    sha256: "9154b5456904e47bd4c38462d57e4b7897bfb20cb2bc2e8c958453e40e73c8b2"
+patches:
+  "1.0.8":
+    - patch_file: "patches/0001-Fix-C2327-for-MSVC-2015.patch"
+      base_path: "source_subfolder"
