@@ -41,7 +41,10 @@ class BotanConan(ConanFile):
     def configure(self):
         self._validate_compiler_settings()
 
-        if self.options.single_amalgamation:
+        if Version(self.version) >= "2.14.0":
+            self._validate_v2_14()
+
+        if self.options.get_safe("single_amalgamation"):
             self.options.amalgamation = True
 
         if self.options.with_boost:
@@ -65,6 +68,11 @@ class BotanConan(ConanFile):
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
+
+        # --single-amalgamation option is no longer available
+        # See also https://github.com/randombit/botan/pull/2246
+        if Version(self.version) >= "2.14.0":
+            del self.options.single_amalgamation
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
@@ -118,6 +126,21 @@ class BotanConan(ConanFile):
             raise ConanInvalidConfiguration(
                 'Using Botan with Clang on Linux requires either "compiler.libcxx=libstdc++11" ' \
                 'or "compiler.libcxx=libc++"')
+
+    def _validate_v2_14(self):
+        """disallow configurations that cause issues in Botan >= 2.14.0"""
+
+        compiler = self.settings.compiler
+        compiler_version = Version(compiler.version.value)
+
+        # Some older compilers cannot handle the amalgamated build anymore
+        # See also https://github.com/randombit/botan/issues/2328
+        if self.options.amalgamation:
+            if (compiler == "apple-clang" and compiler_version < "10") or \
+               (compiler == "gcc" and compiler_version < "8") or \
+               (compiler == "clang" and compiler_version < "7"):
+                raise ConanInvalidConfiguration(
+                    "amalgamation is not supported for {} {}".format(compiler, compiler_version))
 
     @property
     def _is_mingw_windows(self):
@@ -189,7 +212,7 @@ class BotanConan(ConanFile):
         if self.options.amalgamation:
             build_flags.append('--amalgamation')
 
-        if self.options.single_amalgamation:
+        if self.options.get_safe("single_amalgamation"):
             build_flags.append('--single-amalgamation-file')
 
         if self.options.system_cert_bundle:
