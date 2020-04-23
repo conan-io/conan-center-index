@@ -2,3 +2,7 @@ sources:
     "0.3.1":
         url: "https://github.com/Thalhammer/jwt-cpp/archive/v0.3.1.zip"
         sha256: "c19677c2bbfc51c9a0b3825bc5787a7cdea14e5d4c578283e5d9e94025865420"
+patches:
+    "0.3.1":
+        - patch_file: "patches/0002-fix-openssl-change-version.patch"
+          base_path: "source_subfolder"

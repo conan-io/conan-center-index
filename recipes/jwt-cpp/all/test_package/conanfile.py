@@ -1,16 +1,10 @@
 from conans import ConanFile, CMake, tools
-
 import os
 
 
 class JsonCppTestConan(ConanFile):
     settings = "os", "compiler", "build_type", "arch"
     generators = "cmake", "cmake_find_package"
-
-    @property
-    def _is_multi_configuration(self):
-        cmake = CMake(self)
-        return cmake.is_multi_configuration
 
     def build(self):
         cmake = CMake(self)
