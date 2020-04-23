@@ -5,6 +5,9 @@ sources:
   "2.13.0":
     url: "https://github.com/randombit/botan/archive/2.13.0.tar.gz"
     sha256: "29a57d8efd6ab297eab67cbf489a5a423b06e120e0520aff2583074e8aea151c"
+  "2.14.0":
+    url: "https://github.com/randombit/botan/archive/2.14.0.tar.gz"
+    sha256: "38e34b8ef7652e811382744425b82da1b1a7fb5f14cc281a7d3a18543eaf72f7"
 patches:
   "2.12.1":
      - patch_file: "dll-dir.patch"

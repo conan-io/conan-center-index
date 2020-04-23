@@ -1,6 +1,5 @@
 import os
 from conans import tools, ConanFile, CMake
-from conans import __version__ as conan_version
 from conans.tools import Version
 from conans.errors import ConanInvalidConfiguration, NotFoundException, ConanException
 
@@ -50,8 +49,8 @@ class CMakeConan(ConanFile):
     def build(self):
         if self.settings.os_build == "Linux":
             tools.replace_in_file(os.path.join(self._source_subfolder, "Utilities", "cmcurl", "CMakeLists.txt"),
-                                "list(APPEND CURL_LIBS ${OPENSSL_LIBRARIES})",
-                                "list(APPEND CURL_LIBS ${OPENSSL_LIBRARIES} -ldl -lpthread)")
+                                  "list(APPEND CURL_LIBS ${OPENSSL_LIBRARIES})",
+                                  "list(APPEND CURL_LIBS ${OPENSSL_LIBRARIES} -ldl -lpthread)")
         self.settings.arch = self.settings.arch_build  # workaround for cross-building to get the correct arch during the build
         cmake = self._configure_cmake()
         cmake.build()

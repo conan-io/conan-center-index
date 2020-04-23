@@ -11,16 +11,22 @@ class sqlpp11Conan(ConanFile):
     license = "BSD-2-Clause"
     exports_sources = ["CMakeLists.txt"]
     generators = "cmake"
-    options = {"shared": [True, False], "fPIC": [True, False]}
-    default_options = {"shared": False, "fPIC": True}
+    options = {"shared": [True, False], "fPIC": [True, False], "with_sqlcipher": [True, False]}
+    default_options = {"shared": False, "fPIC": True, "with_sqlcipher": False}
     _source_subfolder = "source_subfolder"
     _build_subfolder = "build_subfolder"
-    requires = "sqlpp11/0.58", "sqlite3/3.30.1"
     short_paths = True
 
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
+
+    def requirements(self):
+        self.requires("sqlpp11/0.58")
+        if self.options.with_sqlcipher:
+            self.requires("sqlcipher/4.3.0")
+        else:
+            self.requires("sqlite3/3.30.1")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
@@ -30,8 +36,8 @@ class sqlpp11Conan(ConanFile):
     def _configure_cmake(self):
         cmake = CMake(self)
         cmake.definitions["ENABLE_TESTS"] = False
-        cmake.definitions['HinnantDate_ROOT_DIR'] = self.deps_cpp_info['date'].include_paths[0]
-        cmake.definitions['SQLPP11_INCLUDE_DIR'] = self.deps_cpp_info['sqlpp11'].include_paths[0]
+        cmake.definitions["SQLCIPHER"] = self.options.with_sqlcipher
+        cmake.definitions["SQLPP11_INCLUDE_DIR"] = self.deps_cpp_info["sqlpp11"].include_paths[0]
         cmake.configure(build_folder=self._build_subfolder)
         return cmake
 

@@ -26,7 +26,7 @@ class PackageLzmaSdk(ConanFile):
 
     def build_requirements(self):
         if tools.os_info.is_windows and os.environ.get("CONAN_BASH_PATH", None) is None:
-            self.build_requires("msys2/20161025")
+            self.build_requires("msys2/20190524")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])

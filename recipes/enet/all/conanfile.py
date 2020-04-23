@@ -16,7 +16,7 @@ class EnetConan(ConanFile):
 
     _source_subfolder = "source_subfolder"
 
-    def config(self):
+    def configure(self):
         del self.settings.compiler.libcxx
         del self.settings.compiler.cppstd
 
@@ -41,5 +41,4 @@ class EnetConan(ConanFile):
     def package_info(self):
         self.cpp_info.libs = tools.collect_libs(self)
         if self.settings.compiler == "Visual Studio":
-            self.cpp_info.libs.append("ws2_32")
-            self.cpp_info.libs.append("winmm")
+            self.cpp_info.system_libs.extend(["ws2_32", "winmm"])

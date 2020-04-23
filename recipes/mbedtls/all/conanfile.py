@@ -80,4 +80,6 @@ class MBedTLSConan(ConanFile):
         tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
 
     def package_info(self):
+        self.cpp_info.names["cmake_find_package"] = "MbedTLS"
+        self.cpp_info.names["cmake_find_package_multi"] = "MbedTLS"
         self.cpp_info.libs = ["mbedtls", "mbedx509", "mbedcrypto", ]

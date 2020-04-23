@@ -1,6 +1,5 @@
 from conans import ConanFile, CMake, tools
 from conans.errors import ConanInvalidConfiguration
-from conans.tools import Version
 import os
 
 
@@ -11,11 +10,13 @@ class FmtConan(ConanFile):
     topics = ("conan", "fmt", "format", "iostream", "printf")
     url = "https://github.com/conan-io/conan-center-index"
     license = "MIT"
-    exports_sources = ['CMakeLists.txt']
-    generators = 'cmake'
+    exports_sources = ["CMakeLists.txt", "patches/**"]
+    generators = "cmake"
     settings = "os", "compiler", "build_type", "arch"
     options = {"shared": [True, False], "header_only": [True, False], "fPIC": [True, False], "with_fmt_alias": [True, False]}
     default_options = {"shared": False, "header_only": False, "fPIC": True, "with_fmt_alias": False}
+
+    _cmake = None
 
     @property
     def _source_subfolder(self):
@@ -34,13 +35,6 @@ class FmtConan(ConanFile):
             self.settings.clear()
             del self.options.fPIC
             del self.options.shared
-        elif self.version == "6.1.0" and \
-             self.settings.os == "Windows" and \
-             self.settings.compiler == "Visual Studio" and \
-             Version(self.settings.compiler.version) < "16" and \
-             self.options.shared:
-            raise ConanInvalidConfiguration("Could not support this specific configuration. "
-                                            "Try static or header-only instead.")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
@@ -48,15 +42,20 @@ class FmtConan(ConanFile):
         os.rename(extracted_dir, self._source_subfolder)
 
     def _configure_cmake(self):
-        cmake = CMake(self)
-        cmake.definitions["FMT_DOC"] = False
-        cmake.definitions["FMT_TEST"] = False
-        cmake.definitions["FMT_INSTALL"] = True
-        cmake.definitions["FMT_LIB_DIR"] = "lib"
-        cmake.configure(build_folder=self._build_subfolder)
-        return cmake
+        if self._cmake:
+            return self._cmake
+        self._cmake = CMake(self)
+        self._cmake.definitions["FMT_DOC"] = False
+        self._cmake.definitions["FMT_TEST"] = False
+        self._cmake.definitions["FMT_INSTALL"] = True
+        self._cmake.definitions["FMT_LIB_DIR"] = "lib"
+        self._cmake.configure(build_folder=self._build_subfolder)
+        return self._cmake
 
     def build(self):
+        if "patches" in self.conan_data and self.version in self.conan_data["patches"]:
+            for patch in self.conan_data["patches"][self.version]:
+                tools.patch(**patch)
         if not self.options.header_only:
             cmake = self._configure_cmake()
             cmake.build()
@@ -79,14 +78,15 @@ class FmtConan(ConanFile):
     def package_id(self):
         if self.options.header_only:
             self.info.header_only()
+        else:
+            del self.info.options.with_fmt_alias
 
     def package_info(self):
         if self.options.with_fmt_alias:
             self.cpp_info.defines.append("FMT_STRING_ALIAS=1")
         if self.options.header_only:
-            self.cpp_info.defines = ["FMT_HEADER_ONLY"]
+            self.cpp_info.defines.append("FMT_HEADER_ONLY")
         else:
             self.cpp_info.libs = tools.collect_libs(self)
             if self.options.shared:
-                self.cpp_info.defines.append('FMT_SHARED')
-                self.cpp_info.bindirs.append("lib")
+                self.cpp_info.defines.append("FMT_SHARED")

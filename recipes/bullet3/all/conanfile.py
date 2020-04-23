@@ -22,6 +22,7 @@ class Bullet3Conan(ConanFile):
         "bt2_thread_locks": [True, False],
         "soft_body_multi_body_dynamics_world": [True, False],
         "network_support": [True, False],
+        "extras": [True, False]
     }
     default_options = {
         "shared": False,
@@ -32,6 +33,7 @@ class Bullet3Conan(ConanFile):
         "bt2_thread_locks": False,
         "soft_body_multi_body_dynamics_world": False,
         "network_support": False,
+        "extras": False
     }
 
     _source_subfolder = "source_subfolder"
@@ -66,7 +68,7 @@ class Bullet3Conan(ConanFile):
         self._cmake.definitions["BUILD_CPU_DEMOS"] = False
         self._cmake.definitions["BUILD_OPENGL3_DEMOS"] = False
         self._cmake.definitions["BUILD_BULLET2_DEMOS"] = False
-        self._cmake.definitions["BUILD_EXTRAS"] = False
+        self._cmake.definitions["BUILD_EXTRAS"] = self.options.extras
         self._cmake.definitions["BUILD_UNIT_TESTS"] = False
         if self.settings.compiler == "Visual Studio":
             self._cmake.definitions["USE_MSVC_RUNTIME_LIBRARY_DLL"] = "MD" in self.settings.compiler.runtime
@@ -102,6 +104,16 @@ class Bullet3Conan(ConanFile):
             "Bullet3Common",
             "BulletInverseDynamics",
         ]
+        if self.options.extras:
+            libs += [   "BulletInverseDynamicsUtils",
+                        "BulletRobotics",
+                        "BulletFileLoader",
+                        "BulletXmlWorldImporter",
+                        "BulletWorldImporter",
+                        "ConvexDecomposition",
+                        "HACD",
+                        "GIMPACTUtils"
+                    ]
         if self.settings.os == "Windows" and self.settings.build_type in ("Debug", "MinSizeRel", "RelWithDebInfo"):
             libs = [lib + "_{}".format(self.settings.build_type) for lib in libs]
 
@@ -109,3 +121,5 @@ class Bullet3Conan(ConanFile):
         self.cpp_info.names["cmake_find_package_multi"] = "Bullet"
         self.cpp_info.libs = libs
         self.cpp_info.includedirs = ["include", os.path.join("include", "bullet")]
+        if self.options.extras:
+            self.cpp_info.includedirs.append(os.path.join("include", "bullet_robotics"))

@@ -1,4 +1,5 @@
 from conans import ConanFile, tools
+from conans.errors import ConanInvalidConfiguration
 import os
 
 
@@ -8,8 +9,12 @@ class MozillaBuildConan(ConanFile):
     description = "Mozilla build requirements on Windows"
     topics = ("conan", "mozilla", "build")
     url = "https://github.com/conan-io/conan-center-index"
-    settings = {"os_build": "Windows", "arch_build": ["x86", "x86_64"]}
+    settings = "os_build", "arch_build"
     license = "MPL-2.0"
+
+    def configure(self):
+        if self.settings.os_build != "Windows":
+            raise ConanInvalidConfiguration("Only Windows supported")
 
     def build_requirements(self):
         self.build_requires("7zip/19.00")

@@ -1,0 +1,61 @@
+--- a/src/kml/base/CMakeLists.txt
++++ b/src/kml/base/CMakeLists.txt
+@@ -49,3 +49,7 @@ build_target(
+   INCS ${INCS}
+   DEPENDS ${KMLBASE_DEPENDS}
+   LINKS ${KMLBASE_LINK_LIBS} )
++
++if(BUILD_SHARED_LIBS)
++  target_compile_definitions(kmlbase PUBLIC "LIBKML_DLL")
++endif()
+--- a/src/kml/base/mimetypes.cc
++++ b/src/kml/base/mimetypes.cc
+@@ -25,14 +25,15 @@
+ 
+ // This defines some common KML-related mimetype strings.
+ 
++#define KML_BASE_MIMETYPE_EXPORTS
+ #include "kml/base/mimetypes.h"
+ 
+ namespace kmlbase {
+ 
+-const char* kAtomMimeType = "application/atom+xml";
+-const char* kCsvMimeType = "text/csv";
+-const char* kKmlMimeType = "application/vnd.google-earth.kml+xml";
+-const char* kKmzMimeType = "application/vnd.google-earth.kmz";
++KML_BASE_MIMETYPE_API const char* kAtomMimeType = "application/atom+xml";
++KML_BASE_MIMETYPE_API const char* kCsvMimeType = "text/csv";
++KML_BASE_MIMETYPE_API const char* kKmlMimeType = "application/vnd.google-earth.kml+xml";
++KML_BASE_MIMETYPE_API const char* kKmzMimeType = "application/vnd.google-earth.kmz";
+ 
+ }
+ 
+--- a/src/kml/base/mimetypes.h
++++ b/src/kml/base/mimetypes.h
+@@ -28,12 +28,22 @@
+ #ifndef KML_BASE_MIMETYPES_H__
+ #define KML_BASE_MIMETYPES_H__
+ 
++#if defined(_MSC_VER) && defined(LIBKML_DLL)
++  #ifdef KML_BASE_MIMETYPE_EXPORTS
++    #define KML_BASE_MIMETYPE_API __declspec(dllexport)
++  #else
++    #define KML_BASE_MIMETYPE_API __declspec(dllimport)
++  #endif
++#else
++  #define KML_BASE_MIMETYPE_API
++#endif
++
+ namespace kmlbase {
+ 
+-extern const char* kAtomMimeType;
+-extern const char* kCsvMimeType;
+-extern const char* kKmlMimeType;
+-extern const char* kKmzMimeType;
++KML_BASE_MIMETYPE_API extern const char* kAtomMimeType;
++KML_BASE_MIMETYPE_API extern const char* kCsvMimeType;
++KML_BASE_MIMETYPE_API extern const char* kKmlMimeType;
++KML_BASE_MIMETYPE_API extern const char* kKmzMimeType;
+ 
+ }  // end namespace kmlbase
+ 
