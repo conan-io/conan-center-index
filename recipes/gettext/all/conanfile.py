@@ -31,6 +31,10 @@ class GetTextConan(ConanFile):
     def _make_args(self):
         return ["-C", "intl"]
 
+    @property
+    def _gettext_folder(self):
+        return "gettext-tools"
+
     def config_options(self):
         if self.settings.os == 'Windows':
             del self.options.fPIC
@@ -102,6 +106,8 @@ class GetTextConan(ConanFile):
             with tools.environment_append(VisualStudioBuildEnvironment(self).vars) if self._is_msvc else tools.no_op():
                 with tools.chdir(os.path.join(self._source_subfolder)):
                     env_build = self._configure_autotools()
+                    env_build.make()
+                with tools.chdir(os.path.join(self._source_subfolder, self._gettext_folder)):
                     env_build.make(self._make_args)
 
     def package(self):
@@ -112,6 +118,7 @@ class GetTextConan(ConanFile):
                     env_build = self._configure_autotools()
                     env_build.install()
         tools.rmdir(os.path.join(self.package_folder, 'share'))
+        self.copy(pattern="*libgnuintl.h", dst="include", src=self._source_subfolder, keep_path=False, symlinks=True)
         os.rename(os.path.join(self.package_folder, "include", "libgnuintl.h"),
                   os.path.join(self.package_folder, "include", "libintl.h"))
 
