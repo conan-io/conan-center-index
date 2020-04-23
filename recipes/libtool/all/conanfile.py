@@ -1,4 +1,5 @@
 import os
+import re
 from conans import AutoToolsBuildEnvironment, ConanFile, tools
 from contextlib import contextmanager
 
@@ -12,7 +13,15 @@ class LibtoolConan(ConanFile):
     license = ("GPL-2.0-or-later", "GPL-3.0-or-later")
     exports_sources = "patches/**"
 
-    settings = "os_build", "arch_build", "compiler"
+    settings = "os", "arch", "compiler", "build_type"
+    options = {
+        "shared": [True, False],
+        "fPIC": [True, False],
+    }
+    default_options = {
+        "shared": False,
+        "fPIC": True,
+    }
     _autotools = None
 
     @property
@@ -53,7 +62,7 @@ class LibtoolConan(ConanFile):
         self._autotools = AutoToolsBuildEnvironment(self, win_bash=tools.os_info.is_windows)
         datarootdir = os.path.join(self.package_folder, "bin", "share")
         prefix = self.package_folder
-        if self.settings.os_build == "Windows":
+        if self.settings.os == "Windows":
             datarootdir = tools.unix_path(datarootdir)
             prefix = tools.unix_path(prefix)
         conf_args = [
@@ -61,7 +70,7 @@ class LibtoolConan(ConanFile):
             "--prefix={}".format(prefix),
             "--enable-shared",
             "--enable-static",
-            "--disable-ltdl-install",
+            "--enable-ltdl-install",
         ]
         self._autotools.configure(args=conf_args, configure_dir=self._source_subfolder)
         return self._autotools
@@ -76,23 +85,60 @@ class LibtoolConan(ConanFile):
             autotools = self._configure_autotools()
             autotools.make()
 
+    @property
+    def _shared_ext(self):
+        if self.settings.os == "Windows":
+            return "dll"
+        elif tools.is_apple_os(self.settings.os):
+            return "dylib"
+        else:
+            return "so"
+
+    @property
+    def _static_ext(self):
+        if self.settings.compiler == "Visual Studio":
+            return "lib"
+        else:
+            return "a"
+
+    def _rm_binlib_files_containing(self, ext_inclusive, ext_exclusive=None):
+        regex_in = re.compile(r".*\.({})($|\..*)".format(ext_inclusive))
+        if ext_exclusive:
+            regex_out = re.compile(r".*\.({})($|\..*)".format(ext_exclusive))
+        else:
+            regex_out = re.compile("^$")
+        for dir in (
+                os.path.join(self.package_folder, "bin"),
+                os.path.join(self.package_folder, "lib"),
+        ):
+            for file in os.listdir(dir):
+                if regex_in.match(file) and not regex_out.match(file):
+                    os.unlink(os.path.join(dir, file))
+
     def package(self):
         self.copy("COPYING*", src=self._source_subfolder, dst="licenses")
         with self._build_context():
             autotools = self._configure_autotools()
             autotools.install()
 
-        tools.rmdir(os.path.join(self.package_folder, "lib"))
         tools.rmdir(os.path.join(self.package_folder, "bin", "share", "info"))
         tools.rmdir(os.path.join(self.package_folder, "bin", "share", "man"))
 
-        if self.settings.os_build == "Windows":
+        os.unlink(os.path.join(self.package_folder, "lib", "libltdl.la"))
+        if self.options.shared:
+            self._rm_binlib_files_containing(self._static_ext, self._shared_ext)
+        else:
+            self._rm_binlib_files_containing(self._shared_ext)
+
+        if self.settings.os == "Windows":
             binpath = os.path.join(self.package_folder, "bin")
             for filename in os.listdir(binpath):
-                fullpath = os.path.join(binpath, filename)
-                if not os.path.isfile(fullpath):
-                    continue
-                os.rename(fullpath, fullpath + ".exe")
+                _, ext = os.path.splitext(filename)
+                if not ext:
+                    fullpath = os.path.join(binpath, filename)
+                    if not os.path.isfile(fullpath):
+                        continue
+                    os.rename(fullpath, fullpath + ".exe")
 
     def package_id(self):
         del self.info.settings.compiler
@@ -109,11 +155,23 @@ class LibtoolConan(ConanFile):
         }
 
     def package_info(self):
+        lib = "ltdl"
+        if self.settings.os == "Windows" and self.options.shared:
+            lib += ".dll" + ".lib" if self.settings.compiler == "Visual Studio" else ".a"
+        self.cpp_info.libs = [lib]
+
+        if self.options.shared:
+            if self.settings.os == "Windows":
+                self.cpp_info.defines = ["LIBLTDL_DLL_IMPORT"]
+        else:
+            if self.settings.os == "Linux":
+                self.cpp_info.system_libs = ["dl"]
+
         bin_path = os.path.join(self.package_folder, "bin")
         self.output.info("Appending PATH env: {}".format(bin_path))
         self.env_info.PATH.append(bin_path)
 
-        bin_ext = ".exe" if self.settings.os_build == "Windows" else ""
+        bin_ext = ".exe" if self.settings.os == "Windows" else ""
 
         libtool = tools.unix_path(os.path.join(self.package_folder, "bin", "libtool" + bin_ext))
         self.output.info("Setting LIBTOOL env to {}".format(libtool))
