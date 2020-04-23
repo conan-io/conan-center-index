@@ -403,8 +403,8 @@ class OpenSSLConan(ConanFile):
         openssldir = tools.unix_path(openssldir) if self._win_bash else openssldir
         args = ['"%s"' % (self._target if self._full_version >= "1.1.0" else self._ancestor_target),
                 "shared" if self.options.shared else "no-shared",
-                "--prefix=%s" % prefix,
-                "--openssldir=%s" % openssldir,
+                "--prefix=\"%s\"" % prefix,
+                "--openssldir=\"%s\"" % openssldir,
                 "no-unit-test"]
         if self._full_version >= "1.1.1":
             args.append("PERL=%s" % self._perl)
