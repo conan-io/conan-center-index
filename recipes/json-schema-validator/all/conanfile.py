@@ -1,8 +1,7 @@
 import os
 import glob
 from conans import ConanFile, CMake, tools
-from conans.tools import Version
-from conans.errors import ConanInvalidConfiguration, ConanException
+from conans.errors import ConanInvalidConfiguration
 
 
 class JsonSchemaValidatorConan(ConanFile):
