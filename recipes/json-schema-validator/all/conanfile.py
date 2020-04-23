@@ -33,25 +33,17 @@ class JsonSchemaValidatorConan(ConanFile):
             del self.options.fPIC
 
     def configure(self):
-        compiler_version = Version(self.settings.compiler.version)
-        if self.settings.os == "Windows"and self.settings.compiler == "Visual Studio" and compiler_version < "16":
-            try:
-                # Force check to ensure compatability
-                tools.check_min_cppstd(self, "17") # There's an issue in upstream forcing a higher cppstd version. See https://github.com/pboettch/json-schema-validator/issues/106
-            except ConanInvalidConfiguration:
-                raise
-            except ConanException:
-                self.output.warn("Unnable to determine the default standard version of the compiler")
-        elif self.settings.compiler == "clang" and compiler_version < "4":
-            try:
-                # Force check to ensure compatability
-                tools.check_min_cppstd(self, "11") # Clang 3.9 requires this to be set to ignore the issue above https://releases.llvm.org/3.9.1/tools/clang/docs/ReleaseNotes.html#c-1z-feature-support
-            except ConanInvalidConfiguration:
-                raise
-            except ConanException:
-                self.output.warn("Unnable to determine the default standard version of the compiler")
-        elif self.settings.compiler.get_safe("cppstd"):
-            tools.check_min_cppstd(self, "11")
+        min_cppstd = "17" if self.settings.compiler == "Visual Studio" else "11"
+        if self.settings.get_safe("compiler.cppstd"):
+            tools.check_min_cppstd(self, min_cppstd)
+
+        compilers = {"gcc": "5", "clang": "4", "Visual Studio": "15", "apple-clang": "9"}
+        min_version = compilers.get(str(self.settings.compiler))
+        if not min_version:
+        	self.output.warn("{} recipe lacks information about the {} compiler support.".format(self.name, self.settings.compiler))
+        else:
+            if tools.Version(self.settings.compiler.version) < min_version:
+                raise ConanInvalidConfiguration("{} requires c++{} support. The current compiler {} {} does not support it.".format(self.name, min_cppstd, self.settings.compiler, self.settings.compiler.version))
 
     def requirements(self):
         self.requires("nlohmann_json/3.7.3")
