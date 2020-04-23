@@ -1,0 +1,4 @@
+sources:
+  "1.2.3":
+    sha256: ead2900cc1123e3c6eb61267396aa6358597366598d199ff62cae4fe22f1cca7
+    url: https://github.com/marzer/tomlplusplus/archive/v1.2.3.tar.gz
