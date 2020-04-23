@@ -1,8 +1,11 @@
 #include <toml.hpp>
 #include <fstream> //required for toml::parse_file()
+#include <iostream>
+
+using namespace std::string_view_literals;
 
 int main() {
-    auto config = toml::parse_file( "configuration.toml" );
+    auto config = toml::parse_file( "../../configuration.toml" );
 
     // get key-value pairs
     std::string_view library_name = config["library"]["name"].value_or(""sv);
@@ -21,9 +24,7 @@ int main() {
     {
         v.visit([](auto& node) noexcept
         {
-            std::cout << node << std:endl;
-            if constexpr (toml::is_string<decltype(node)>)
-                do_something_with_string_values(node);
+            std::cout << node << std::endl;
         });
     }
 
