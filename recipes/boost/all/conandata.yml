@@ -67,3 +67,5 @@ patches:
       base_path: "boost_1_72_0"
     - patch_file: "patches/0001-revert-cease-dependence-on-range.patch"
       base_path: "boost_1_72_0"
+    - patch_file: "patches/boost_log_filesystem_no_deprecated_1_72.patch"
+      base_path: "boost_1_72_0"
