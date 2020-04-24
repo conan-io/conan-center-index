@@ -30,15 +30,6 @@ class MysqlConnectorCConan(ConanFile):
         tools.get(**self.conan_data["sources"][self.version])
         os.rename(archive_name, self._source_subfolder)
 
-        sources_cmake = os.path.join(self._source_subfolder, "CMakeLists.txt")
-        sources_cmake_orig = os.path.join(self._source_subfolder, "CMakeListsOriginal.txt")
-
-        os.rename(sources_cmake, sources_cmake_orig)
-        os.rename("CMakeLists.txt", sources_cmake)
-        
-        for patch in self.conan_data["patches"][self.version]:
-            tools.patch(**patch)
-
     def configure(self):
         del self.settings.compiler.libcxx
         del self.settings.compiler.cppstd
@@ -49,6 +40,7 @@ class MysqlConnectorCConan(ConanFile):
         cmake.definitions["DISABLE_SHARED"] = not self.options.shared
         cmake.definitions["DISABLE_STATIC"] = self.options.shared
         cmake.definitions["STACK_DIRECTION"] = "-1"  # stack grows downwards, on very few platforms stack grows upwards
+        cmake.definitions["REQUIRE_STDCPP"] = self._require_stdcpp_library
 
         if self.settings.compiler == "Visual Studio":
             if self.settings.compiler.runtime == "MD" or self.settings.compiler.runtime == "MDd":
@@ -62,8 +54,19 @@ class MysqlConnectorCConan(ConanFile):
 
         cmake.configure(source_dir=self._source_subfolder)
         return cmake
+
+    def _patch_sources(self):
+        sources_cmake = os.path.join(self._source_subfolder, "CMakeLists.txt")
+        sources_cmake_orig = os.path.join(self._source_subfolder, "CMakeListsOriginal.txt")
+
+        os.rename(sources_cmake, sources_cmake_orig)
+        os.rename("CMakeLists.txt", sources_cmake)
+
+        for patch in self.conan_data["patches"][self.version]:
+            tools.patch(**patch)
     
     def build(self):
+        self._patch_sources()
         cmake = self._configure_cmake()
         cmake.build()
         
@@ -81,6 +84,13 @@ class MysqlConnectorCConan(ConanFile):
             os.remove(f)
         tools.rmdir(os.path.join(self.package_folder, "docs"))
 
+    @property
+    def _require_stdcpp_library(self):
+        return self.settings.compiler in ("gcc",) and not self.options.shared
+
     def package_info(self):
         self.cpp_info.libs = tools.collect_libs(self)
         self.cpp_info.bindirs = ['lib']
+        if not self.options.shared:
+            if self._require_stdcpp_library:
+                self.cpp_info.system_libs.append("stdc++")
