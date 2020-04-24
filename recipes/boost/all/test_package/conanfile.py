@@ -33,8 +33,19 @@ class DefaultNameConan(ConanFile):
     def test(self):
         if tools.cross_building(self.settings):
             return
-        bt = self.settings.build_type
-        self.run('ctest --output-on-error -C %s' % bt, run_environment=True)
+        self.run(os.path.join("bin", "lambda_exe"), run_environment=True)
+        if self.options["boost"].header_only:
+            return
+        if not self.options["boost"].without_random:
+            self.run(os.path.join("bin", "random_exe"), run_environment=True)
+        if not self.options["boost"].without_regex:
+            self.run(os.path.join("bin", "regex_exe"), run_environment=True)
+        if not self.options["boost"].without_test:
+            self.run(os.path.join("bin", "test_exe"), run_environment=True)
+        if not self.options["boost"].without_coroutine:
+            self.run(os.path.join("bin", "coroutine_exe"), run_environment=True)
+        if not self.options["boost"].without_chrono:
+            self.run(os.path.join("bin", "chrono_exe"), run_environment=True)
         if not self.options["boost"].without_python:
             os.chdir("bin")
             sys.path.append(".")
