@@ -57,7 +57,7 @@ class Utf8ProcConan(ConanFile):
         cmake.build()
 
     def package(self):
-        self.copy("LICENSE.md", dst="licenses")
+        self.copy("LICENSE.md", src=self._source_subfolder, dst="licenses")
         cmake = self._configure_cmake()
         cmake.install()
 
