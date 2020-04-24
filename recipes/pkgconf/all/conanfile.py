@@ -67,9 +67,10 @@ class PkgConfConan(ConanFile):
             tools.patch(**patch)
         tools.replace_in_file(os.path.join(self._source_subfolder, "meson.build"),
                               "shared_library(", "library(")
-        tools.replace_in_file(os.path.join(self._source_subfolder, "meson.build"),
-                              "'-DLIBPKGCONF_EXPORT'",
-                              "['-DLIBPKGCONF_EXPORT', '-DPKGCONFIG_IS_STATIC']")
+        if not self.options.shared:
+            tools.replace_in_file(os.path.join(self._source_subfolder, "meson.build"),
+                                  "'-DLIBPKGCONF_EXPORT'",
+                                  "'-DPKGCONFIG_IS_STATIC'")
 
     def build(self):
         self._patch_sources()
@@ -81,13 +82,22 @@ class PkgConfConan(ConanFile):
         meson = self._meson
         meson.install()
 
+        if self.settings.compiler == "Visual Studio":
+            if not self.options.shared:
+                os.rename(os.path.join(self.package_folder, "lib", "libpkgconf.a"),
+                          os.path.join(self.package_folder, "lib", "pkgconf.lib"),)
+
         tools.rmdir(os.path.join(self.package_folder, "share", "man"))
         os.rename(os.path.join(self.package_folder, "share", "aclocal"),
                   os.path.join(self.package_folder, "bin", "aclocal"))
         tools.rmdir(os.path.join(self.package_folder, "share"))
 
     def package_info(self):
+        self.cpp_info.includedirs.append(os.path.join("include", "libpkgconf"))
         self.cpp_info.libs = ["pkgconf"]
+        if not self.options.shared:
+            self.cpp_info.defines = ["PKGCONFIG_IS_STATIC"]
+
         bindir = os.path.join(self.package_folder, "bin")
         self.output.info("Appending PATH env var: {}".format(bindir))
         self.env_info.PATH.append(bindir)
