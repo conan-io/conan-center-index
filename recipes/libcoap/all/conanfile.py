@@ -16,13 +16,13 @@ class LibCoapConan(ConanFile):
         "shared": [True, False],
         "fPIC": [True, False],
         "with_epoll": [True, False],
-        "tls_backend": [None, "with_openssl", "with_gnutls", "with_tinydtls", "with_mbedtls"],
+        "tls_backend": [None, "openssl", "gnutls", "tinydtls", "mbedtls"],
     }
     default_options = {
         "shared": False,
         "fPIC": True,
         "with_epoll": False,
-        "tls_backend": "with_openssl",
+        "tls_backend": "openssl",
     }
     generators = "cmake", "cmake_find_package"
 
@@ -37,17 +37,17 @@ class LibCoapConan(ConanFile):
         return "build_subfolder"
 
     def requirements(self):
-        if self.options.tls_backend == "with_openssl":
+        if self.options.tls_backend == "openssl":
             self.requires.add("openssl/1.1.1d")
-        if self.options.tls_backend == "with_mbedtls":
+        if self.options.tls_backend == "mbedtls":
             self.requires.add("mbedtls/2.16.3-apache")
-        if self.options.tls_backend == "with_gnutls":
+        if self.options.tls_backend == "gnutls":
             raise ConanInvalidConfiguration("gnu tls not available yet")
-        if self.options.tls_backend == "with_tinydtls":
+        if self.options.tls_backend == "tinydtls":
             raise ConanInvalidConfiguration("tinydtls not available yet")
 
     def _patch_files(self):
-        if self.options.tls_backend == "with_openssl":
+        if self.options.tls_backend == "openssl":
             replace_ssl = 'OpenSSL::SSL'
             tools.replace_in_file(os.path.join(self._source_subfolder, "CMakeLists.txt"), replace_ssl, "OpenSSL::OpenSSL")
             replace_crypto = 'OpenSSL::Crypto'
@@ -58,6 +58,9 @@ class LibCoapConan(ConanFile):
             del self.options.fPIC
 
     def configure(self):
+        if self.settings.os_build != "Windows":
+            raise ConanInvalidConfiguration("Only Windows supported")
+
         del self.settings.compiler.libcxx
         del self.settings.compiler.cppstd
 
@@ -74,10 +77,7 @@ class LibCoapConan(ConanFile):
         self._cmake = CMake(self)
         self._cmake.definitions["WITH_EPOLL"] = self.options.with_epoll
         self._cmake.definitions["ENABLE_DTLS"] = self.options.tls_backend != None
-        self._cmake.definitions["WITH_OPENSSL"] = self.options.tls_backend == "with_openssl"
-        self._cmake.definitions["WITH_MBEDTLS"] = self.options.tls_backend == "with_mbedtls"
-        self._cmake.definitions["WITH_GNUTLS"] = self.options.tls_backend == "with_gnutls"
-        self._cmake.definitions["WITH_TINYDTLS"] = self.options.tls_backend == "with_tinydtls"
+        self._cmake.definitions["DTLS_BACKEND"] = self.options.tls_backend
         self._cmake.configure(build_folder=self._build_subfolder)
         return self._cmake
 
