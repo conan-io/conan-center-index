@@ -4,8 +4,6 @@ project(PackageTest CXX)
 include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
 conan_basic_setup()
 
-add_library(spy_config INTERFACE)
-target_compile_features ( spy_config INTERFACE  cxx_std_17 )
-
 add_executable(example example.cpp)
-target_link_libraries(example ${CONAN_LIBS} PUBLIC spy_config)
+target_link_libraries(example ${CONAN_LIBS})
+set_property(TARGET example PROPERTY CXX_STANDARD 17)
