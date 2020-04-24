@@ -74,7 +74,10 @@ class GetTextConan(ConanFile):
         build = None
         host = None
         rc = None
-        args.extend(["--disable-shared", "--disable-static"])
+        if self.options.shared:
+            args.extend(["--disable-static", "--enable-shared"])
+        else:
+            args.extend(["--disable-shared", "--enable-static"])
         if self._is_msvc:
             # INSTALL.windows: Native binaries, built using the MS Visual C/C++ tool chain.
             build = False
@@ -121,6 +124,8 @@ class GetTextConan(ConanFile):
         self.copy(pattern="*libgnuintl.h", dst="include", src=self._source_subfolder, keep_path=False, symlinks=True)
         os.rename(os.path.join(self.package_folder, "include", "libgnuintl.h"),
                   os.path.join(self.package_folder, "include", "libintl.h"))
+        for f in glob.glob(os.path.join(self.package_folder, "lib", "*.la")):
+            os.remove(f)
 
     def package_info(self):
         bindir = os.path.join(self.package_folder, "bin")
