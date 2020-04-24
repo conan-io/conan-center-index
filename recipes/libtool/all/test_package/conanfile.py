@@ -17,7 +17,12 @@ class TestPackageConan(ConanFile):
     def _build_context(self):
         if self.settings.compiler == "Visual Studio":
             with tools.vcvars(self.settings):
-                with tools.environment_append({"CC": "cl -nologo", "CXX": "cl -nologo",}):
+                with tools.environment_append({
+                    "CC": "{} cl -nologo".format(tools.unix_path(self.deps_user_info["automake"].compile)),
+                    "CXX": "{} cl -nologo".format(tools.unix_path(self.deps_user_info["automake"].compile)),
+                    "AR": "{} lib".format(tools.unix_path(self.deps_user_info["automake"].ar_lib)),
+                    "LD": "link",
+                }):
                     yield
         else:
             yield
@@ -43,6 +48,7 @@ class TestPackageConan(ConanFile):
         with tools.chdir("bin_autotools"):
             with self._build_context():
                 autotools = AutoToolsBuildEnvironment(self, win_bash=tools.os_info.is_windows)
+                autotools.libs = []
                 autotools.configure(args=conf_args, configure_dir=os.path.join(self.build_folder, "autotools"))
                 autotools.make(args=["V=1", "-j1"])
                 autotools.install()
