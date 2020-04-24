@@ -16,6 +16,11 @@ ErrorInfo to_int( char const * const text )
     return pos == text ? nonstd::make_unexpected(std::string("Failed to convert '") + text + std::string("' to int")) : ErrorInfo(value);
 }
 
+struct my_type
+{
+    const int i;
+};
+
 int main( int argc, char * argv[] )
 {
     const char * text = argc > 1 ? argv[1] : "42";
@@ -24,6 +29,8 @@ int main( int argc, char * argv[] )
 
     if ( val ) std::cout << "'" << text << "' is " << val.value() << std::endl;
     else      std::cout << "'" << text << "' isn't a number. Error: " << val.error() << std::endl;
+
+    expected<my_type, std::string> type(my_type{ 13 });
 }
 
 // cl -nologo -W3 -EHsc -I../include to_int.cpp && to_int x1
