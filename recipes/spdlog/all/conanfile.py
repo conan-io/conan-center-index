@@ -73,6 +73,8 @@ class SpdlogConan(ConanFile):
         self._cmake.definitions["SPDLOG_WCHAR_FILENAMES"] = self.options.wchar_filenames
         self._cmake.definitions["SPDLOG_INSTALL"] = True
         self._cmake.definitions["SPDLOG_NO_EXCEPTIONS"] = self.options.no_exceptions
+        if self.settings.os in ("iOS", "tvOS", "watchOS"):
+            self._cmake.definitions["SPDLOG_NO_TLS"] = True
         self._cmake.configure()
         return self._cmake
 
@@ -100,7 +102,7 @@ class SpdlogConan(ConanFile):
 
     def package_info(self):
         if self.options.header_only:
-            self.cpp_info.defines = ["SPDLOG_HEADER_ONLY", "SPDLOG_FMT_EXTERNAL"]
+            self.cpp_info.defines = ["SPDLOG_FMT_EXTERNAL"]
         else:
             self.cpp_info.libs = tools.collect_libs(self)
             self.cpp_info.defines = ["SPDLOG_COMPILED_LIB", "SPDLOG_FMT_EXTERNAL"]
