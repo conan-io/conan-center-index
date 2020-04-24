@@ -1,0 +1,71 @@
+from conans import ConanFile, tools, CMake
+import os
+
+projects = [
+    'clang',
+    'clang-tools-extra',
+    'compiler-rt',
+    'debuginfo-tests',
+    'libc',
+    'libclc',
+    'libcxx',
+    'libcxxabi',
+    'libunwind',
+    'lld',
+    'lldb',
+    'mlir',
+    'openmp',
+    'parallel-libs',
+    'polly',
+    'pstl'
+]
+
+default_projects = [
+    'clang',
+    'compiler-rt'
+]
+
+class Llvm(ConanFile):
+    name = 'llvm'
+    description = 'The LLVM Project is a collection of modular and reusable compiler and toolchain technologies'
+    url = 'https://github.com/conan-io/conan-center-index'
+    homepage = 'https://github.com/llvm/llvm-project'
+    license = 'Apache 2.0'
+    topics = 'conan', 'c++', 'compiler', 'tooling'
+
+    settings = 'os', 'arch', 'compiler', 'build_type'
+
+    no_copy_source = True
+    _source_subfolder = 'source_subfolder'
+
+    options = { 'with_' + project : [True, False] for project in projects }
+    default_options = { 'with_' + project : project in default_projects for project in projects }
+    generators = 'cmake_find_package'
+
+    def source(self):
+        tools.get(**self.conan_data["sources"][self.version])
+        extracted_dir = 'llvm-project-llvmorg-' + self.version
+        os.rename(extracted_dir, self._source_subfolder)
+
+    def configure(self):
+        tools.check_min_cppstd(self, '14')
+
+    def build(self):
+        enabled_projects = [project for project in projects if self.options['with_' + project]]
+
+        cmake = CMake(self);
+        cmake.configure(
+            defs = {
+                'LLVM_ENABLE_PROJECTS': ';'.join(enabled_projects)
+            },
+            source_folder = os.path.join(self._source_subfolder, 'llvm')
+        )
+        cmake.build()
+
+    def package(self):
+        cmake = CMake(self)
+        cmake.install()
+
+    def package_info(self):
+        self.cpp_info.libs = tools.collect_libs(self)
+        self.cpp_info.builddirs = ['lib/cmake']
