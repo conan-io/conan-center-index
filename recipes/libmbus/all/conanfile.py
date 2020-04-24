@@ -6,7 +6,7 @@ from conans.errors import ConanInvalidConfiguration
 class LibMbusConan(ConanFile):
     name = "libmbus"
     license = "BSD-3-Clause"
-    homepage = "https://github.com/gocarlos/libmbus/"
+    homepage = "https://github.com/rscada/libmbus"
     url = "https://github.com/conan-io/conan-center-index"
     description = """Meter-bus library and utility programs"""
     topics = "conan", "mbus", "metering", "iot", "meter", "bus", "protocol"
@@ -37,6 +37,8 @@ class LibMbusConan(ConanFile):
             del self.options.fPIC
 
     def configure(self):
+        if self.options.shared:
+            del self.options.fPIC
         if self.settings.os not in ["Linux"]:
             raise ConanInvalidConfiguration("Only Linux supported")
         del self.settings.compiler.libcxx
