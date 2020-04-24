@@ -16,13 +16,13 @@ class LibCoapConan(ConanFile):
         "shared": [True, False],
         "fPIC": [True, False],
         "with_epoll": [True, False],
-        "tls_backend": [None, "openssl", "gnutls", "tinydtls", "mbedtls"],
+        "dtls_backend": [None, "openssl", "gnutls", "tinydtls", "mbedtls"],
     }
     default_options = {
         "shared": False,
         "fPIC": True,
         "with_epoll": False,
-        "tls_backend": "openssl",
+        "dtls_backend": "openssl",
     }
     generators = "cmake", "cmake_find_package"
 
@@ -37,17 +37,17 @@ class LibCoapConan(ConanFile):
         return "build_subfolder"
 
     def requirements(self):
-        if self.options.tls_backend == "openssl":
+        if self.options.dtls_backend == "openssl":
             self.requires.add("openssl/1.1.1d")
-        if self.options.tls_backend == "mbedtls":
+        if self.options.dtls_backend == "mbedtls":
             self.requires.add("mbedtls/2.16.3-apache")
-        if self.options.tls_backend == "gnutls":
+        if self.options.dtls_backend == "gnutls":
             raise ConanInvalidConfiguration("gnu tls not available yet")
-        if self.options.tls_backend == "tinydtls":
+        if self.options.dtls_backend == "tinydtls":
             raise ConanInvalidConfiguration("tinydtls not available yet")
 
     def _patch_files(self):
-        if self.options.tls_backend == "openssl":
+        if self.options.dtls_backend == "openssl":
             replace_ssl = 'OpenSSL::SSL'
             tools.replace_in_file(os.path.join(self._source_subfolder, "CMakeLists.txt"), replace_ssl, "OpenSSL::OpenSSL")
             replace_crypto = 'OpenSSL::Crypto'
@@ -76,8 +76,8 @@ class LibCoapConan(ConanFile):
             return self._cmake
         self._cmake = CMake(self)
         self._cmake.definitions["WITH_EPOLL"] = self.options.with_epoll
-        self._cmake.definitions["ENABLE_DTLS"] = self.options.tls_backend != None
-        self._cmake.definitions["DTLS_BACKEND"] = self.options.tls_backend
+        self._cmake.definitions["ENABLE_DTLS"] = self.options.dtls_backend != None
+        self._cmake.definitions["DTLS_BACKEND"] = self.options.dtls_backend
         self._cmake.configure(build_folder=self._build_subfolder)
         return self._cmake
 
