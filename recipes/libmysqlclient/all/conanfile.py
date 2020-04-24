@@ -5,7 +5,7 @@ import os
 import glob
 
 
-class libMysqlClientCConan(ConanFile):
+class LibMysqlClientCConan(ConanFile):
     name = "libmysqlclient"
     url = "https://github.com/conan-io/conan-center-index"
     description = "A MySQL client library for C development."
@@ -16,7 +16,7 @@ class libMysqlClientCConan(ConanFile):
     generators = "cmake"
     settings = "os", "arch", "compiler", "build_type"
     options = {"shared": [True, False], "fPIC": [True, False], "with_ssl": [True, False], "with_zlib": [True, False]}
-    default_options = {"shared": True, "fPIC": True, "with_ssl": True, "with_zlib": True}
+    default_options = {"shared": False, "fPIC": True, "with_ssl": True, "with_zlib": True}
     _source_subfolder = "source_subfolder"
 
     def requirements(self):
@@ -25,10 +25,6 @@ class libMysqlClientCConan(ConanFile):
 
         if self.options.with_zlib:
             self.requires("zlib/1.2.11")
-
-    def config_options(self):
-        if self.settings.os == "Windows":
-            del self.options.fPIC
 
     def source(self):
         archive_name = "mysql-" + self.version
@@ -40,8 +36,9 @@ class libMysqlClientCConan(ConanFile):
             tools.rmdir(os.path.join(self._source_subfolder, folder))
         tools.rmdir(os.path.join(self._source_subfolder, "storage", "ndb"))
 
-    def _patch(self):
-        tools.patch(**self.conan_data["patches"][self.version])
+    def _patch_files(self):
+        for patch in self.conan_data["patches"][self.version]:
+            tools.patch(**patch)
         sources_cmake = os.path.join(self._source_subfolder, "CMakeLists.txt")
         sources_cmake_orig = os.path.join(self._source_subfolder, "CMakeListsOriginal.txt")
         os.rename(sources_cmake, sources_cmake_orig)
@@ -49,11 +46,15 @@ class libMysqlClientCConan(ConanFile):
         if self.settings.os == "Macos":
             tools.replace_in_file(os.path.join(self._source_subfolder, "libmysql", "CMakeLists.txt"), "COMMAND $<TARGET_FILE:libmysql_api_test>", "COMMAND DYLD_LIBRARY_PATH=%s $<TARGET_FILE:libmysql_api_test>" % os.path.join(self.build_folder, "library_output_directory"))
 
+    def config_options(self):
+        if self.settings.os == "Windows":
+            del self.options.fPIC
+
     def configure(self):
+        if self.options.shared:
+            del self.options.fPIC
         del self.settings.compiler.libcxx
         del self.settings.compiler.cppstd
-        if not self.options.shared:
-            raise ConanInvalidConfiguration("libmysqlclient cannot be built as static library")
         if self.settings.compiler == "Visual Studio":
             raise ConanInvalidConfiguration("Visual Studio is not supported yet")
         if self.settings.compiler == "gcc" and Version(self.settings.compiler.version.value) < "5.3":
@@ -82,7 +83,7 @@ class libMysqlClientCConan(ConanFile):
         return cmake
 
     def build(self):
-        self._patch()
+        self._patch_files()
         cmake = self._configure_cmake()
         cmake.build()
 
@@ -101,4 +102,4 @@ class libMysqlClientCConan(ConanFile):
         tools.rmdir(os.path.join(self.package_folder, "share"))
 
     def package_info(self):
-        self.cpp_info.libs = tools.collect_libs(self)
+        self.cpp_info.libs = ["mysqlclient"]
