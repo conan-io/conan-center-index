@@ -1,0 +1,438 @@
+diff --git a/include/nonstd/expected.hpp b/include/nonstd/expected.hpp
+index e30e9a2..522122f 100644
+--- a/include/nonstd/expected.hpp
++++ b/include/nonstd/expected.hpp
+@@ -203,0 +204 @@ namespace nonstd {
++#include <memory>
+@@ -424 +425 @@ template< typename T, typename E >
+-union storage_t
++class storage_t_impl
+@@ -428 +429 @@ union storage_t
+-private:
++public:
+@@ -433,2 +434,6 @@ private:
+-    storage_t() {}
+-    ~storage_t() {}
++    storage_t_impl() {}
++    ~storage_t_impl() {}
++
++    explicit storage_t_impl( bool has_value ) 
++        : m_has_value( has_value )
++    {}
+@@ -539,0 +545,10 @@ private:
++    bool has_value() const
++    {
++        return m_has_value;
++    }
++
++    void set_has_value( bool v )
++    {
++        m_has_value = v;
++    }
++
+@@ -541,2 +556,7 @@ private:
+-    value_type m_value;
+-    error_type m_error;
++    union
++    {
++        value_type m_value;
++        error_type m_error;
++    };
++
++    bool m_has_value = false;
+@@ -548 +568 @@ template< typename E >
+-union storage_t<void, E>
++struct storage_t_impl<void, E>
+@@ -552 +572 @@ union storage_t<void, E>
+-private:
++public:
+@@ -557,2 +577,6 @@ private:
+-    storage_t() {}
+-    ~storage_t() {}
++    storage_t_impl() {}
++    ~storage_t_impl() {}
++
++    explicit storage_t_impl( bool has_value )
++        : m_has_value( has_value )
++    {}
+@@ -606,0 +631,10 @@ private:
++    bool has_value() const 
++    {
++        return m_has_value;
++    }
++
++    void set_has_value( bool v )
++    {
++        m_has_value = v;
++    }
++
+@@ -608 +642,158 @@ private:
+-    error_type m_error;
++    union
++    {
++        char m_dummy;
++        error_type m_error;
++    };
++
++    bool m_has_value = false;
++};
++
++template< typename T, typename E, bool isConstructable, bool isMoveable >
++class storage_t
++{
++public:
++    storage_t() = default;
++    ~storage_t() = default;
++
++    explicit storage_t( bool has_value )
++        : storage_t_impl<T, E>( has_value )
++    {}
++
++    storage_t( storage_t const & other ) = delete;
++    storage_t( storage_t &&      other ) = delete;
++};
++
++template< typename T, typename E >
++class storage_t<T, E, true, true> : public storage_t_impl<T, E>
++{
++public:
++    storage_t() = default;
++    ~storage_t() = default;
++
++    explicit storage_t( bool has_value )
++        : storage_t_impl<T, E>( has_value )
++    {}
++
++    storage_t( storage_t const & other )
++        : storage_t_impl<T, E>( other.has_value() )
++    {
++        if ( this->has_value() ) this->construct_value( other.value() );
++        else                     this->construct_error( other.error() );
++    }
++
++    storage_t(storage_t && other )
++        : storage_t_impl<T, E>( other.has_value() )
++    {
++        if ( this->has_value() ) this->construct_value( std::move( other.value() ) );
++        else                     this->construct_error( std::move( other.error() ) );
++    }
++};
++
++template< typename E >
++class storage_t<void, E, true, true> : public storage_t_impl<void, E>
++{
++public:
++    storage_t() = default;
++    ~storage_t() = default;
++
++    explicit storage_t( bool has_value )
++        : storage_t_impl<void, E>( has_value )
++    {}
++
++    storage_t( storage_t const & other )
++        : storage_t_impl<void, E>( other.has_value() )
++    {
++        if ( this->has_value() ) ;
++        else                     this->construct_error( other.error() );
++    }
++
++    storage_t(storage_t && other )
++        : storage_t_impl<void, E>( other.has_value() )
++    {
++        if ( this->has_value() ) ;
++        else                     this->construct_error( std::move( other.error() ) );
++    }
++};
++
++template< typename T, typename E >
++class storage_t<T, E, true, false> : public storage_t_impl<T, E>
++{
++public:
++    storage_t() = default;
++    ~storage_t() = default;
++
++    explicit storage_t( bool has_value )
++        : storage_t_impl<T, E>( has_value )
++    {}
++
++    storage_t( storage_t const & other )
++        : storage_t_impl<T, E>(other.has_value())
++    {
++        if ( this->has_value() ) this->construct_value( other.value() );
++        else                     this->construct_error( other.error() );
++    }
++
++    storage_t( storage_t && other ) = delete;
++};
++
++template< typename E >
++class storage_t<void, E, true, false> : public storage_t_impl<void, E>
++{
++public:
++    storage_t() = default;
++    ~storage_t() = default;
++
++    explicit storage_t( bool has_value )
++        : storage_t_impl<void, E>( has_value )
++    {}
++
++    storage_t( storage_t const & other )
++        : storage_t_impl<void, E>(other.has_value())
++    {
++        if ( this->has_value() ) ;
++        else                     this->construct_error( other.error() );
++    }
++
++    storage_t( storage_t && other ) = delete;
++};
++
++template< typename T, typename E >
++class storage_t<T, E, false, true> : public storage_t_impl<T, E>
++{
++public:
++    storage_t() = default;
++    ~storage_t() = default;
++
++    explicit storage_t( bool has_value )
++        : storage_t_impl<T, E>( has_value )
++    {}
++
++    storage_t( storage_t const & other ) = delete;
++
++    storage_t( storage_t && other )
++        : storage_t_impl<T, E>( other.has_value() )
++    {
++        if ( this->has_value() ) this->construct_value( std::move( other.value() ) );
++        else                     this->construct_error( std::move( other.error() ) );
++    }
++};
++
++template< typename E >
++class storage_t<void, E, false, true> : public storage_t_impl<void, E>
++{
++public:
++    storage_t() = default;
++    ~storage_t() = default;
++
++    explicit storage_t( bool has_value )
++        : storage_t_impl<void, E>( has_value )
++    {}
++
++    storage_t( storage_t const & other ) = delete;
++
++    storage_t( storage_t && other )
++        : storage_t_impl<void, E>( other.has_value() )
++    {
++        if ( this->has_value() ) ;
++        else                     this->construct_error( std::move( other.error() ) );
++    }
+@@ -1080 +1270,0 @@ private:
+-
+@@ -1098 +1288 @@ public:
+-    : has_value_( true )
++    : contained( true )
+@@ -1103,26 +1293,2 @@ public:
+-    nsel_constexpr14 expected( expected const & other
+-        nsel_REQUIRES_A(
+-            std::is_copy_constructible<T>::value
+-            && std::is_copy_constructible<E>::value
+-        )
+-    )
+-    : has_value_( other.has_value_ )
+-    {
+-        if ( has_value() ) contained.construct_value( other.contained.value() );
+-        else               contained.construct_error( other.contained.error() );
+-    }
+-
+-    nsel_constexpr14 expected( expected && other
+-        nsel_REQUIRES_A(
+-            std::is_move_constructible<T>::value
+-            && std::is_move_constructible<E>::value
+-        )
+-    ) noexcept (
+-        std::is_nothrow_move_constructible<T>::value
+-        && std::is_nothrow_move_constructible<E>::value
+-    )
+-    : has_value_( other.has_value_ )
+-    {
+-        if ( has_value() ) contained.construct_value( std::move( other.contained.value() ) );
+-        else               contained.construct_error( std::move( other.contained.error() ) );
+-    }
++    nsel_constexpr14 expected( expected const & ) = default;
++    nsel_constexpr14 expected( expected &&      ) = default;
+@@ -1145 +1311 @@ public:
+-    : has_value_( other.has_value_ )
++    : contained( other.has_value() )
+@@ -1166 +1332 @@ public:
+-    : has_value_( other.has_value_ )
++    : contained( other.has_value() )
+@@ -1187 +1353 @@ public:
+-    : has_value_( other.has_value_ )
++    : contained( other.has_value() )
+@@ -1208 +1374 @@ public:
+-    : has_value_( other.has_value_ )
++    : contained( other.has_value() )
+@@ -1218 +1384 @@ public:
+-    : has_value_( true )
++    : contained( true )
+@@ -1237 +1403 @@ public:
+-    : has_value_( true )
++    : contained( true )
+@@ -1256 +1422 @@ public:
+-    : has_value_( true )
++    : contained( true )
+@@ -1269 +1435 @@ public:
+-    : has_value_( false )
++    : contained( false )
+@@ -1280 +1446 @@ public:
+-    : has_value_( false )
++    : contained( false )
+@@ -1291 +1457 @@ public:
+-    : has_value_( false )
++    : contained( false )
+@@ -1302 +1468 @@ public:
+-    : has_value_( false )
++    : contained( false )
+@@ -1315 +1481 @@ public:
+-    : has_value_( true )
++    : contained( true )
+@@ -1326 +1492 @@ public:
+-    : has_value_( true )
++    : contained( true )
+@@ -1339 +1505 @@ public:
+-    : has_value_( false )
++    : contained( false )
+@@ -1350 +1516 @@ public:
+-    : has_value_( false )
++    : contained( false )
+@@ -1369,10 +1535 @@ public:
+-    nsel_REQUIRES_R(
+-        expected &,
+-        std::is_copy_constructible<   T>::value
+-        && std::is_copy_assignable<   T>::value
+-        && std::is_copy_constructible<E>::value
+-        && std::is_copy_assignable<   E>::value
+-        && (   std::is_nothrow_move_constructible<T>::value
+-            || std::is_nothrow_move_constructible<E>::value )
+-    )
+-    operator=( expected const & other )
++    expected & operator=( expected const & other )
+@@ -1384,8 +1541 @@ public:
+-    nsel_REQUIRES_R(
+-        expected &,
+-        std::is_move_constructible<   T>::value
+-        && std::is_move_assignable<   T>::value
+-        && std::is_move_constructible<E>::value // TODO: std::is_nothrow_move_constructible<E>
+-        && std::is_move_assignable<   E>::value // TODO: std::is_nothrow_move_assignable<E>
+-    )
+-    operator=( expected && other ) noexcept
++    expected & operator=( expected && other ) noexcept
+@@ -1484 +1634,5 @@ public:
+-                                                     swap( has_value_, other.has_value_ ); }
++                                                     bool has_value = contained.has_value();
++                                                     bool other_has_value = other.has_value();
++                                                     other.contained.set_has_value(has_value);
++                                                     contained.set_has_value(other_has_value);
++                                                   }
+@@ -1531 +1685 @@ public:
+-        return has_value_;
++        return contained.has_value();
+@@ -1660,2 +1814,8 @@ private:
+-    bool has_value_;
+-    detail::storage_t<T,E> contained;
++    detail::storage_t
++    <
++        T
++        ,E
++        , std::is_copy_constructible<T>::value && std::is_copy_constructible<E>::value
++        , std::is_move_constructible<T>::value && std::is_move_constructible<E>::value
++    >
++    contained;
+@@ -1680 +1840 @@ public:
+-    : has_value_( true )
++        : contained( true )
+@@ -1683,24 +1843,2 @@ public:
+-    nsel_constexpr14 expected( expected const & other )
+-    : has_value_( other.has_value_ )
+-    {
+-        if ( ! has_value() )
+-        {
+-            contained.construct_error( other.contained.error() );
+-        }
+-    }
+-
+-    nsel_REQUIRES_0(
+-        std::is_move_constructible<E>::value
+-    )
+-    nsel_constexpr14 expected( expected && other ) noexcept
+-    (
+-        std::is_nothrow_move_constructible<E>::value
+-    )
+-    : has_value_( other.has_value_ )
+-    {
+-        if ( ! has_value() )
+-        {
+-            contained.construct_error( std::move( other.contained.error() ) );
+-        }
+-
+-    }
++    nsel_constexpr14 expected( expected const & other ) = default;
++    nsel_constexpr14 expected( expected &&      other ) = default;
+@@ -1709 +1847 @@ public:
+-    : has_value_( true )
++        : contained( true )
+@@ -1718 +1856 @@ public:
+-    : has_value_( false )
++        : contained( false )
+@@ -1729 +1867 @@ public:
+-    : has_value_( false )
++        : contained( false )
+@@ -1740 +1878 @@ public:
+-    : has_value_( false )
++        : contained( false )
+@@ -1751 +1889 @@ public:
+-    : has_value_( false )
++        : contained( false )
+@@ -1762 +1900 @@ public:
+-    : has_value_( false )
++        : contained( false )
+@@ -1773 +1911 @@ public:
+-    : has_value_( false )
++        : contained( false )
+@@ -1790,6 +1928 @@ public:
+-    nsel_REQUIRES_R(
+-        expected &,
+-        std::is_copy_constructible<E>::value
+-        && std::is_copy_assignable<E>::value
+-    )
+-    operator=( expected const & other )
++    expected & operator=( expected const & other )
+@@ -1801,6 +1934 @@ public:
+-    nsel_REQUIRES_R(
+-        expected &,
+-        std::is_move_constructible<E>::value
+-        && std::is_move_assignable<E>::value
+-    )
+-    operator=( expected && other ) noexcept
++    expected & operator=( expected && other ) noexcept
+@@ -1835 +1963,5 @@ public:
+-                                                     swap( has_value_, other.has_value_ ); }
++                                                     bool has_value = contained.has_value();
++                                                     bool other_has_value = other.has_value();
++                                                     other.contained.set_has_value(has_value);
++                                                     contained.set_has_value(other_has_value);
++                                                     }
+@@ -1848 +1980 @@ public:
+-        return has_value_;
++        return contained.has_value();
+@@ -1917,2 +2049,8 @@ private:
+-    bool has_value_;
+-    detail::storage_t<void,E> contained;
++    detail::storage_t
++    <
++        void
++        , E
++        , std::is_copy_constructible<E>::value
++        , std::is_move_constructible<E>::value
++    >
++    contained;
