@@ -71,8 +71,13 @@ class Z3Conan(ConanFile):
         cmake = self._configure_cmake()
         cmake.install()
 
+        tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
+
     def package_info(self):
-        self.cpp_info.libs = ["libz3"]
+        self.cpp_info.libs = ["libz3" if self.settings.os == "Windows" else "z3"]
+        if self.settings.os in ("Linux",):
+            self.cpp_info.system_libs.append("pthread")
+
         # FIXME: name of imported CMake target is z3::libz3 (no capitals)
         self.cpp_info.names["cmake_find_package"] = "Z3"
         self.cpp_info.names["cmake_find_package_multi"] = "Z3"
