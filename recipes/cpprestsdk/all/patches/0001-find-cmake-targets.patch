@@ -1,8 +1,8 @@
 diff --git a/Release/cmake/cpprest_find_openssl.cmake b/Release/cmake/cpprest_find_openssl.cmake
-index 0b49a7e..ed5c24b 100644
+index 93336636..a4ce046a 100644
 --- a/Release/cmake/cpprest_find_openssl.cmake
 +++ b/Release/cmake/cpprest_find_openssl.cmake
-@@ -1,70 +1,7 @@
+@@ -1,80 +1,7 @@
  function(cpprest_find_openssl)
 -  if(TARGET cpprestsdk_openssl_internal)
 -    return()
@@ -33,24 +33,30 @@ index 0b49a7e..ed5c24b 100644
 -        "${CMAKE_BINARY_DIR}/../openssl/x86/lib/libcrypto.a"
 -        CACHE INTERNAL ""
 -        )
-+    if(NOT TARGET cpprestsdk_openssl_internal)
-+        add_library(cpprestsdk_openssl_internal INTERFACE)
-+        target_include_directories(cpprestsdk_openssl_internal INTERFACE "${CONAN_INCLUDE_DIRS_OPENSSL}")
-+        target_link_libraries(cpprestsdk_openssl_internal INTERFACE "${CONAN_LIBS_OPENSSL}")
-     endif()
+-    endif()
 -    set(_SSL_LEAK_SUPPRESS_AVAILABLE ON CACHE INTERNAL "")
 -  else()
 -    if(APPLE)
 -      if(NOT DEFINED OPENSSL_ROOT_DIR)
 -        # Prefer a homebrew version of OpenSSL over the one in /usr/lib
--        file(GLOB OPENSSL_ROOT_DIR /usr/local/Cellar/openssl/*)
+-        file(GLOB OPENSSL_ROOT_DIR /usr/local/Cellar/openssl*/*)
 -        # Prefer the latest (make the latest one first)
 -        list(REVERSE OPENSSL_ROOT_DIR)
+-        list(GET OPENSSL_ROOT_DIR 0 OPENSSL_ROOT_DIR)
 -      endif()
 -      # This should prevent linking against the system provided 0.9.8y
+-      message(STATUS "OPENSSL_ROOT_DIR = ${OPENSSL_ROOT_DIR}")
 -      set(_OPENSSL_VERSION "")
 -    endif()
--    find_package(OpenSSL 1.0.0 REQUIRED)
+-    if(UNIX)
+-      find_package(PkgConfig)
+-      pkg_search_module(OPENSSL openssl)
+-    endif()
+-    if(OPENSSL_FOUND)
+-      target_link_libraries(cpprest PRIVATE ${OPENSSL_LDFLAGS})
+-    else()
+-      find_package(OpenSSL 1.0.0 REQUIRED)
+-    endif()
 -
 -    INCLUDE(CheckCXXSourceCompiles)
 -    set(CMAKE_REQUIRED_INCLUDES "${OPENSSL_INCLUDE_DIR}")
@@ -75,18 +81,25 @@ index 0b49a7e..ed5c24b 100644
 -  if (NOT _SSL_LEAK_SUPPRESS_AVAILABLE)
 -    # libressl doesn't ship with the cleanup method being used in ws_client_wspp
 -    target_compile_definitions(cpprestsdk_openssl_internal INTERFACE -DCPPREST_NO_SSL_LEAK_SUPPRESS)
--  endif()
++  if(NOT TARGET cpprestsdk_openssl_internal)
++    add_library(cpprestsdk_openssl_internal INTERFACE)
++    target_include_directories(cpprestsdk_openssl_internal INTERFACE "${CONAN_INCLUDE_DIRS_OPENSSL}")
++    target_link_libraries(cpprestsdk_openssl_internal INTERFACE "${CONAN_LIBS_OPENSSL}")
+   endif()
  endfunction()
-\ No newline at end of file
 diff --git a/Release/cmake/cpprest_find_websocketpp.cmake b/Release/cmake/cpprest_find_websocketpp.cmake
-index 94ea81a..f83a777 100644
+index 94ea81a4..e35a8f7c 100644
 --- a/Release/cmake/cpprest_find_websocketpp.cmake
 +++ b/Release/cmake/cpprest_find_websocketpp.cmake
 @@ -1,27 +1,7 @@
  function(cpprest_find_websocketpp)
 -  if(TARGET cpprestsdk_websocketpp_internal)
 -    return()
--  endif()
++  if(NOT TARGET cpprestsdk_websocketpp_internal)
++    add_library(cpprestsdk_websocketpp_internal INTERFACE)
++    target_include_directories(cpprestsdk_websocketpp_internal INTERFACE "${CONAN_INCLUDE_DIRS_WEBSOCKETPP}")
++    target_link_libraries(cpprestsdk_websocketpp_internal INTERFACE "${CONAN_LIBS_WEBSOCKETPP}")
+   endif()
 -
 -  find_package(WEBSOCKETPP CONFIG QUIET)
 -  if(WEBSOCKETPP_FOUND)
@@ -109,11 +122,4 @@ index 94ea81a..f83a777 100644
 -      cpprestsdk_boost_internal
 -      cpprestsdk_openssl_internal
 -  )
--endfunction()
-+    if(NOT TARGET cpprestsdk_websocketpp_internal)
-+        add_library(cpprestsdk_websocketpp_internal INTERFACE)
-+        target_include_directories(cpprestsdk_websocketpp_internal INTERFACE "${CONAN_INCLUDE_DIRS_WEBSOCKETPP}")
-+        target_link_libraries(cpprestsdk_websocketpp_internal INTERFACE "${CONAN_LIBS_WEBSOCKETPP}")
-+    endif()
-+endfunction()
-\ No newline at end of file
+ endfunction()
