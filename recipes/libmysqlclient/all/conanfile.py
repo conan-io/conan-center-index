@@ -17,7 +17,12 @@ class LibMysqlClientCConan(ConanFile):
     settings = "os", "arch", "compiler", "build_type"
     options = {"shared": [True, False], "fPIC": [True, False], "with_ssl": [True, False], "with_zlib": [True, False]}
     default_options = {"shared": False, "fPIC": True, "with_ssl": True, "with_zlib": True}
-    _source_subfolder = "source_subfolder"
+
+    _cmake = None
+
+    @property
+    def _source_subfolder(self):
+        return "source_subfolder"
 
     def requirements(self):
         if self.options.with_ssl:
@@ -55,32 +60,32 @@ class LibMysqlClientCConan(ConanFile):
             del self.options.fPIC
         del self.settings.compiler.libcxx
         del self.settings.compiler.cppstd
-        if self.settings.compiler == "Visual Studio":
-            raise ConanInvalidConfiguration("Visual Studio is not supported yet")
         if self.settings.compiler == "gcc" and Version(self.settings.compiler.version.value) < "5.3":
             raise ConanInvalidConfiguration("GCC 5.3 or newer is required")
 
     def _configure_cmake(self):
-        cmake = CMake(self)
-        cmake.definitions["DISABLE_SHARED"] = not self.options.shared
-        cmake.definitions["STACK_DIRECTION"] = "-1"  # stack grows downwards, on very few platforms stack grows upwards
-        cmake.definitions["WITHOUT_SERVER"] = True
-        cmake.definitions["WITH_UNIT_TESTS"] = False
-        cmake.definitions["ENABLED_PROFILING"] = False
-        cmake.definitions["WIX_DIR"] = False
+        if self._cmake:
+            return self._cmake
+        self._cmake = CMake(self)
+        self._cmake.definitions["DISABLE_SHARED"] = not self.options.shared
+        self._cmake.definitions["STACK_DIRECTION"] = "-1"  # stack grows downwards, on very few platforms stack grows upwards
+        self._cmake.definitions["WITHOUT_SERVER"] = True
+        self._cmake.definitions["WITH_UNIT_TESTS"] = False
+        self._cmake.definitions["ENABLED_PROFILING"] = False
+        self._cmake.definitions["WIX_DIR"] = False
 
         if self.settings.compiler == "Visual Studio":
             if self.settings.compiler.runtime == "MD" or self.settings.compiler.runtime == "MDd":
-                cmake.definitions["WINDOWS_RUNTIME_MD"] = True
+                self._cmake.definitions["WINDOWS_RUNTIME_MD"] = True
 
         if self.options.with_ssl:
-            cmake.definitions["WITH_SSL"] = self.deps_cpp_info["openssl"].rootpath
+            self._cmake.definitions["WITH_SSL"] = self.deps_cpp_info["openssl"].rootpath
 
         if self.options.with_zlib:
-            cmake.definitions["WITH_ZLIB"] = "system"
+            self._cmake.definitions["WITH_ZLIB"] = "system"
 
-        cmake.configure(source_dir=self._source_subfolder)
-        return cmake
+        self._cmake.configure(source_dir=self._source_subfolder)
+        return self._cmake
 
     def build(self):
         self._patch_files()
@@ -102,4 +107,4 @@ class LibMysqlClientCConan(ConanFile):
         tools.rmdir(os.path.join(self.package_folder, "share"))
 
     def package_info(self):
-        self.cpp_info.libs = ["mysqlclient"]
+        self.cpp_info.libs = ["libmysql" if self.settings.os == "Windows" and self.options.shared else "mysqlclient"]

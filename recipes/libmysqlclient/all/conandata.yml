@@ -8,3 +8,5 @@ patches:
       patch_file: "patches/0001-find-cmake.patch"
     - base_path: "source_subfolder"
       patch_file: "patches/0002-dont-install-static-libraries+fix-mysql-config.patch"
+    - base_path: "source_subfolder"
+      patch_file: "patches/0003-msvc-install-no-pdb.patch"
