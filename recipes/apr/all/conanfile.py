@@ -103,7 +103,7 @@ class AprConan(ConanFile):
         if not self.options.shared:
             self.cpp_info.defines = ["APR_DECLARE_STATIC"]
             if self.settings.os == "Linux":
-                self.cpp_info.system_libs = ["dl", "pthread", "uuid"]
+                self.cpp_info.system_libs = ["dl", "pthread"]
 
         apr_root = tools.unix_path(self.package_folder)
         self.output.info("Settings APR_ROOT environment var: {}".format(apr_root))
