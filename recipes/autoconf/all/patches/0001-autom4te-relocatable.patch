@@ -4,7 +4,12 @@
  	if /^\s*(\#.*)?$/;
  
        my @words = shellwords ($_);
-+      @words = map(s#AUTOCONF_M4DIR#$pkgdatadir#r, @words);
++      my @words_clone = @words;
++      @words = ();
++      foreach ( @words_clone ) {
++          push(@words, do { (my $tmp = $_) =~ s#AUTOCONF_M4DIR#$pkgdatadir#; $tmp });
++      }
++
        my $type = shift @words;
        if ($type eq 'begin-language:')
  	{
