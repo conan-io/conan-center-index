@@ -109,5 +109,7 @@ class WolfSSLConan(ConanFile):
         if self.options.shared:
             self.cpp_info.defines.append("WOLFSSL_DLL")
         if not self.options.shared:
-            if self.settings.os == "Windows":
+            if self.settings.os == "Linux":
+                self.cpp_info.system_libs.append("m")
+            elif self.settings.os == "Windows":
                 self.cpp_info.system_libs.extend(["advapi32", "ws2_32"])
