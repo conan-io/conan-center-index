@@ -134,15 +134,12 @@ class LibtoolConan(ConanFile):
         else:
             self._rm_binlib_files_containing(self._shared_ext)
 
+        binpath = os.path.join(self.package_folder, "bin")
+        os.unlink(os.path.join(binpath, "libtool"))
+
         if self.settings.os == "Windows":
-            binpath = os.path.join(self.package_folder, "bin")
-            for filename in os.listdir(binpath):
-                _, ext = os.path.splitext(filename)
-                if not ext:
-                    fullpath = os.path.join(binpath, filename)
-                    if not os.path.isfile(fullpath):
-                        continue
-                    os.rename(fullpath, fullpath + ".exe")
+            os.rename(os.path.join(binpath, "libtoolize"),
+                      os.path.join(binpath, "libtoolize.exe"))
 
     def package_id(self):
         del self.info.settings.compiler
@@ -176,10 +173,6 @@ class LibtoolConan(ConanFile):
         self.env_info.PATH.append(bin_path)
 
         bin_ext = ".exe" if self.settings.os == "Windows" else ""
-
-        libtool = tools.unix_path(os.path.join(self.package_folder, "bin", "libtool" + bin_ext))
-        self.output.info("Setting LIBTOOL env to {}".format(libtool))
-        self.env_info.LIBTOOL = libtool
 
         libtoolize = tools.unix_path(os.path.join(self.package_folder, "bin", "libtoolize" + bin_ext))
         self.output.info("Setting LIBTOOLIZE env to {}".format(libtoolize))
