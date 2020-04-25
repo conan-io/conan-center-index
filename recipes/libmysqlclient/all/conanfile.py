@@ -60,6 +60,9 @@ class LibMysqlClientCConan(ConanFile):
             del self.options.fPIC
         del self.settings.compiler.libcxx
         del self.settings.compiler.cppstd
+        if self.settings.compiler == "Visual Studio":
+            if Version(self.settings.compiler.version) < "15":
+                raise ConanInvalidConfiguration("Visual Studio 15 2017 or newer is required")
         if self.settings.compiler == "gcc" and Version(self.settings.compiler.version.value) < "5.3":
             raise ConanInvalidConfiguration("GCC 5.3 or newer is required")
 
