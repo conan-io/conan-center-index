@@ -1,0 +1,4 @@
+sources:
+  "4.8.7":
+    url: "https://github.com/Z3Prover/z3/archive/z3-4.8.7.tar.gz"
+    sha256: "8c1c49a1eccf5d8b952dadadba3552b0eac67482b8a29eaad62aa7343a0732c3"
