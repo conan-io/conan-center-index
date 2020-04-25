@@ -26,7 +26,7 @@ class LibMysqlClientCConan(ConanFile):
 
     def requirements(self):
         if self.options.with_ssl:
-            self.requires("openssl/1.1.1f")
+            self.requires("openssl/1.1.1g")
 
         if self.options.with_zlib:
             self.requires("zlib/1.2.11")
@@ -78,8 +78,7 @@ class LibMysqlClientCConan(ConanFile):
         self._cmake.definitions["WIX_DIR"] = False
 
         if self.settings.compiler == "Visual Studio":
-            if self.settings.compiler.runtime == "MD" or self.settings.compiler.runtime == "MDd":
-                self._cmake.definitions["WINDOWS_RUNTIME_MD"] = True
+            self._cmake.definitions["WINDOWS_RUNTIME_MD"] = "MD" in str(self.settings.compiler.runtime)
 
         if self.options.with_ssl:
             self._cmake.definitions["WITH_SSL"] = self.deps_cpp_info["openssl"].rootpath
