@@ -40,8 +40,12 @@ class Llvm(ConanFile):
     no_copy_source = True
     _source_subfolder = 'source_subfolder'
 
-    options = { 'with_' + project : [True, False] for project in projects }
-    default_options = { 'with_' + project : project in default_projects for project in projects }
+    options = {**{ 'with_' + project : [True, False] for project in projects }, **{
+        'fPIC': [True, False]
+    }}
+    default_options = {**{ 'with_' + project : project in default_projects for project in projects }, **{
+        'fPIC': True
+    }}
     generators = 'cmake_find_package'
 
     def source(self):
