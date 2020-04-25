@@ -4,7 +4,7 @@
    CMAKE_POLICY(SET CMP0007 OLD)
  ENDIF()
  
-+OPTION(REQUIRE_STDCPP "Add stdc++ as extra lib")
++set(REQUIRE_STDCPP "" CACHE STRING "c++ library")
 +
  # Extract dependencies using CMake's internal ${target}_LIB_DEPENDS variable
  # returned string in ${var} is can be passed to linker's command line
@@ -14,7 +14,7 @@
        ENDIF()
      ENDFOREACH()
 +    IF(REQUIRE_STDCPP)
-+        SET(${var} "${${var}}-lstdc++")
++        SET(${var} "${${var}}-l${REQUIRE_STDCPP}")
 +    ENDIF()
    ENDIF()
    IF(MSVC)
