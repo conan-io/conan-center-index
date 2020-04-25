@@ -1,7 +1,7 @@
 from conans import ConanFile, tools, CMake
 from conans.tools import Version
 from conans.errors import ConanInvalidConfiguration
-import os
+import os, shutil
 
 projects = [
     'clang',
@@ -75,6 +75,13 @@ class Llvm(ConanFile):
     def package(self):
         cmake = CMake(self)
         cmake.install()
+
+        directories_to_ignore = [
+            'share'
+        ]
+
+        for ignore_dir in directories_to_ignore:
+            shutil.rmtree(os.path.join(self.package_folder, ignore_dir))
 
     def package_info(self):
         self.cpp_info.libs = tools.collect_libs(self)
