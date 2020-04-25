@@ -1,0 +1,13 @@
+diff --git a/src/cci_cfg/cci_param_untyped_handle.h b/src/cci_cfg/cci_param_untyped_handle.h
+index 2d3f1da..2e4de88 100644
+--- a/src/cci_cfg/cci_param_untyped_handle.h
++++ b/src/cci_cfg/cci_param_untyped_handle.h
+@@ -69,7 +69,7 @@ public:
+ #endif // CCI_HAS_CXX_RVALUE_REFS
+ 
+     /// Destructor.
+-    ~cci_param_untyped_handle();
++    virtual ~cci_param_untyped_handle();
+ 
+     //@}
+ 
