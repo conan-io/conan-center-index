@@ -12,12 +12,12 @@
 -: ${EGREP="@EGREP@"}
 -: ${FGREP="@FGREP@"}
 -: ${GREP="@GREP@"}
-+: ${GREP="/usr/bin/grep"}
++: ${GREP="/usr/bin/env grep"}
 +: ${EGREP="$GREP -E"}
 +: ${FGREP="$GREP -F"}
  : ${LN_S="@LN_S@"}
 -: ${SED="@SED@"}
-+: ${SED="/usr/bin/sed"}
++: ${SED="/usr/bin/env sed"}
  
  
  ## -------------------------- ##
