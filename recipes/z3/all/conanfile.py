@@ -21,6 +21,7 @@ class Z3Conan(ConanFile):
         "shared": False,
         "fPIC": True,
         "multithreaded": True,
+        "mpir:shared": True,  # https://github.com/wbhart/mpir/issues/286
     }
 
     _cmake = None
