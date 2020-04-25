@@ -65,7 +65,8 @@ class WolfSSLConan(ConanFile):
         if self._autotools:
             return self._autotools
         self._autotools = AutoToolsBuildEnvironment(self, win_bash=tools.os_info.is_windows)
-        self._autotools.link_flags.append("-ladvapi32")
+        if self.settings.compiler == "Visual Studio":
+            self._autotools.link_flags.append("-ladvapi32")
         self._autotools.libs = []
         enable_disable = lambda name, b: ("--enable-" if b else "--disable-") + name
         conf_args = [
