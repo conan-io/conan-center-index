@@ -1,6 +1,7 @@
 #include "z3.h"
 
-#include <stdio.h>
+#include <cstdio>
+#include <cstdlib>
 
 /* Adapted from z3/examples/c/test_capi.c */
 
