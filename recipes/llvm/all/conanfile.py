@@ -1,4 +1,6 @@
 from conans import ConanFile, tools, CMake
+from conans.tools import Version
+from conans.errors import ConanInvalidConfiguration
 import os
 
 projects = [
@@ -48,7 +50,11 @@ class Llvm(ConanFile):
         os.rename(extracted_dir, self._source_subfolder)
 
     def configure(self):
-        tools.check_min_cppstd(self, '14')
+        if self.settings.compiler.get_safe("cppstd"):
+            tools.check_min_cppstd(self, '14')
+
+        if self.settings.compiler == "Visual Studio" and Version(self.settings.compiler.version) < "19.1":
+            raise ConanInvalidConfiguration("Need MSVC >= 19.1")
 
     def build(self):
         enabled_projects = [project for project in projects if self.options['with_' + project]]
