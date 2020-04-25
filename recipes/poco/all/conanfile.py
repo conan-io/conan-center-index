@@ -190,6 +190,7 @@ class PocoConan(ConanFile):
                 self.cpp_info.libs.append("%s%s" % (lib, suffix))
 
         self.cpp_info.libs.append("PocoFoundation%s" % suffix)
+        self.cpp_info.libs.append("PocoEncodings%s" % suffix)
 
         # in linux we need to link also with these libs
         if self.settings.os == "Linux":
