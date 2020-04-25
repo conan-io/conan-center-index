@@ -5,7 +5,7 @@ import os
 
 class WolfSSLConan(ConanFile):
     name = "wolfssl"
-    license = "GPL-2.0"
+    license = "GPL-2.0-or-later"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://www.wolfssl.com/"
     description = "wolfSSL (formerly CyaSSL) is a small, fast, portable implementation of TLS/SSL for embedded devices to the cloud."
