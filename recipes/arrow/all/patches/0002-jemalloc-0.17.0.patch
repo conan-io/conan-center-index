@@ -1,14 +1,14 @@
 --- cpp/cmake_modules/ThirdpartyToolchain.cmake
 +++ cpp/cmake_modules/ThirdpartyToolchain.cmake
-@@ -1298,6 +1298,7 @@ endif()
+@@ -1296,6 +1296,6 @@ endif()
  # jemalloc - Unix-only high-performance allocator
- 
+-
  if(ARROW_JEMALLOC)
 +if(0)
    message(STATUS "Building (vendored) jemalloc from source")
    # We only use a vendored jemalloc as we want to control its version.
    # Also our build of jemalloc is specially prefixed so that it will not
-@@ -1354,6 +1355,8 @@ if(ARROW_JEMALLOC)
+@@ -1352,6 +1352,8 @@ if(ARROW_JEMALLOC)
                                     "${CMAKE_CURRENT_BINARY_DIR}/jemalloc_ep-prefix/src")
    add_dependencies(jemalloc::jemalloc jemalloc_ep)
  endif()
@@ -19,7 +19,7 @@
  # mimalloc - Cross-platform high-performance allocator, from Microsoft
 --- cpp/src/arrow/CMakeLists.txt
 +++ cpp/src/arrow/CMakeLists.txt
-@@ -217,7 +217,7 @@ set(ARROW_TESTING_SRCS
+@@ -270,7 +270,7 @@ set(ARROW_TESTING_SRCS
  
  set(_allocator_dependencies "") # Empty list
  if(ARROW_JEMALLOC)
