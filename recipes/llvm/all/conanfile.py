@@ -61,7 +61,8 @@ class Llvm(ConanFile):
             raise ConanInvalidConfiguration("Need MSVC >= 19.1")
 
     def build(self):
-        enabled_projects = [project for project in projects if self.options['with_' + project]]
+        enabled_projects = [project for project in projects if getattr(self.options, 'with_' + project)]
+        self.output.info('Enabled LLVM subprojects: {}'.format(', '.join(enabled_projects)))
 
         cmake = CMake(self);
         cmake.configure(
