@@ -1,7 +1,7 @@
 from conans import ConanFile, tools, CMake
 from conans.tools import Version
 from conans.errors import ConanInvalidConfiguration
-import os, shutil
+import os, shutil, glob
 
 projects = [
     'clang',
@@ -48,6 +48,13 @@ class Llvm(ConanFile):
     }}
     generators = 'cmake_find_package'
 
+    @property
+    def repo_folder(self):
+        return os.path.join(self.source_folder, self._source_subfolder)
+
+    def project_folder(self, project):
+        return os.path.join(self.repo_folder, project)
+
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
         extracted_dir = 'llvm-project-llvmorg-' + self.version
@@ -77,14 +84,29 @@ class Llvm(ConanFile):
         cmake = CMake(self)
         cmake.install()
 
-        self.copy('LICENSE.TXT', src='clang', dst='licenses', keep_path=False)
+        self.copy(
+            'LICENSE.TXT',
+            src=self.project_folder('clang'),
+            dst='licenses',
+            keep_path=False)
 
-        directories_to_ignore = [
-            'share'
+        ignore = [
+            'share',
+            'libexec',
+            '**/Find*.cmake',
+            '**/*Config.cmake'
         ]
 
-        for ignore_dir in directories_to_ignore:
-            shutil.rmtree(os.path.join(self.package_folder, ignore_dir))
+        for ignore_entry in ignore:
+            ignore_glob = os.path.join(self.package_folder, ignore_entry)
+
+            for ignore_path in glob.glob(ignore_glob, recursive=True):
+                self.output.info('Remove ignored file/directory "{}" from package'.format(ignore_path))
+
+                if os.path.isfile(ignore_path):
+                    os.remove(ignore_path)
+                else:
+                    shutil.rmtree(ignore_path)
 
     def package_info(self):
         self.cpp_info.libs = tools.collect_libs(self)
