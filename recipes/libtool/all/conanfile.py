@@ -141,9 +141,6 @@ class LibtoolConan(ConanFile):
             os.rename(os.path.join(binpath, "libtoolize"),
                       os.path.join(binpath, "libtoolize.exe"))
 
-    def package_id(self):
-        del self.info.settings.compiler
-
     @property
     def _libtool_relocatable_env(self):
         datadir = os.path.join(self.package_folder, "bin", "share")
