@@ -4,7 +4,7 @@ import os
 
 
 class VariantConan(ConanFile):
-    name = "mpark_variant"
+    name = "mpark-variant"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/mpark/variant"
     description = "C++17 std::variant for C++11/14/17"
@@ -46,7 +46,7 @@ class VariantConan(ConanFile):
         cmake.install()
         self.copy(pattern="LICENSE.md", dst="licenses", src=self._source_subfolder)
         tools.rmdir(os.path.join(self.package_folder, "lib"))
-    
+
     def package_id(self):
         self.info.header_only()
-    
+
