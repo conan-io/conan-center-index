@@ -85,8 +85,6 @@ class ArrowConan(ConanFile):
     def configure(self):
         if self.options.shared:
             del self.options.fPIC
-        if not self.settings.build_type:
-            self.settings.build_type = "Release"
         if self.options.with_dataset_modules and not self.options.with_compute:
             raise ConanInvalidConfiguration("'with_dataset_modules' options requires 'with_compute'")
 
