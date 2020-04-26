@@ -3,24 +3,6 @@
 
 --- libtoolize.in
 +++ libtoolize.in
-@@ -38,12 +38,12 @@
- # with bootstrap, so set those here where they can still be over-
- # ridden by the user, but otherwise take precedence.
- 
- : ${AUTOCONF="autoconf"}
- : ${AUTOMAKE="automake"}
--: ${EGREP="@EGREP@"}
--: ${FGREP="@FGREP@"}
--: ${GREP="@GREP@"}
-+: ${GREP="/usr/bin/env grep"}
-+: ${EGREP="$GREP -E"}
-+: ${FGREP="$GREP -F"}
- : ${LN_S="@LN_S@"}
--: ${SED="@SED@"}
-+: ${SED="/usr/bin/env sed"}
- 
- 
- ## -------------------------- ##
 @@ -1901,11 +1901,11 @@
    pkgmacro_files="@pkgmacro_files@"
 

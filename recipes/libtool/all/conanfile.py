@@ -1,7 +1,8 @@
+from contextlib import contextmanager
 import os
 import re
 from conans import AutoToolsBuildEnvironment, ConanFile, tools
-from contextlib import contextmanager
+from conans.errors import ConanException
 
 
 class LibtoolConan(ConanFile):
@@ -64,8 +65,8 @@ class LibtoolConan(ConanFile):
         if self._autotools:
             return self._autotools
         self._autotools = AutoToolsBuildEnvironment(self, win_bash=tools.os_info.is_windows)
-        datarootdir = os.path.join(self.package_folder, "bin", "share")
         prefix = self.package_folder
+        datarootdir = os.path.join(prefix, "bin", "share")
         if self.settings.os == "Windows":
             datarootdir = tools.unix_path(datarootdir)
             prefix = tools.unix_path(prefix)
@@ -134,12 +135,32 @@ class LibtoolConan(ConanFile):
         else:
             self._rm_binlib_files_containing(self._shared_ext)
 
-        binpath = os.path.join(self.package_folder, "bin")
-        os.unlink(os.path.join(binpath, "libtool"))
+        import re
+        files = (
+            os.path.join(self.package_folder, "bin", "libtool"),
+            os.path.join(self.package_folder, "bin", "libtoolize"),
+        )
+        replaces = {
+            "GREP": "/usr/bin/env grep",
+            "EGREP": "/usr/bin/env grep -E",
+            "FGREP": "/usr/bin/env grep -F",
+            "SED": "/usr/bin/env sed",
+        }
+        for file in files:
+            contents = open(file).read()
+            for key, repl in replaces.items():
+                contents, nb1 = re.subn("^{}=\"[^\"]*\"".format(key), "{}=\"{}\"".format(key, repl), contents, flags=re.MULTILINE)
+                contents, nb2 = re.subn("^: \\$\\{{{}=\"[^$\"]*\"\\}}".format(key), ": ${{{}=\"{}\"}}".format(key, repl), contents, flags=re.MULTILINE)
+                if nb1 + nb2 == 0:
+                    raise ConanException("Failed to find {} in {}".format(key, repl))
+            open(file, "w").write(contents)
 
+        binpath = os.path.join(self.package_folder, "bin")
         if self.settings.os == "Windows":
             os.rename(os.path.join(binpath, "libtoolize"),
                       os.path.join(binpath, "libtoolize.exe"))
+            os.rename(os.path.join(binpath, "libtool"),
+                      os.path.join(binpath, "libtool.exe"))
 
     @property
     def _libtool_relocatable_env(self):
