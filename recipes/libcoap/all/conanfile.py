@@ -58,6 +58,9 @@ class LibCoapConan(ConanFile):
             del self.options.fPIC
 
     def configure(self):
+        if self.settings.os in ("Windows", "Macos"):
+            raise ConanInvalidConfiguration("Platform is currently not supported")
+
         del self.settings.compiler.libcxx
         del self.settings.compiler.cppstd
 
