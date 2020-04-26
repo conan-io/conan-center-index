@@ -8,7 +8,7 @@ class LevelDBCppConan(ConanFile):
     name = "leveldb"
     description = "LevelDB is a fast key-value storage library written at Google that provides an ordered mapping from string keys to string values."
     url = "https://github.com/conan-io/conan-center-index"
-    homepage = "https://gitlab.com/google/leveldb"
+    homepage = "https://github.com/google/leveldb"
     topics = ("conan", "leveldb", "db")
     license = "MIT"
     exports_sources = ["CMakeLists.txt"]
@@ -35,11 +35,9 @@ class LevelDBCppConan(ConanFile):
         if self.settings.os == "Windows":
             del self.options.fPIC
 
-    # def configure(self):
-
     def requirements(self):
         if self.options.with_snappy:
-            self.requires.add("snappy/1.1.8")
+            self.requires("snappy/1.1.8")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
