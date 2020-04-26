@@ -100,7 +100,7 @@ class ArrowConan(ConanFile):
             self.requires("thrift/x.y.z")
 
     def requirements(self):
-        self.requires("protobuf/3.9.1.0")
+        self.requires("protobuf/3.9.1")
         self.requires("jemalloc/5.2.1")
         if self._boost_required:
             self.requires("boost/1.72.0")
@@ -120,7 +120,7 @@ class ArrowConan(ConanFile):
         if self.options.with_json:
             self.requires("rapidjson/1.1.0")
         if self.options.with_openssl:
-            self.requires("openssl/1.1.1d")
+            self.requires("openssl/1.1.1g")
         if self.options.with_s3:
             self.requires("aws-sdk-cpp/1.7.299")
         if self.options.with_brotli:
@@ -228,7 +228,10 @@ class ArrowConan(ConanFile):
         libs = []
         if self.options.with_dataset_modules:
             libs.append("arrow_dataset")
-        libs.append("arrow")
+        if self.settings.compiler == "Visual Studio" and not self.options.shared:
+            libs.append("arrow_static")
+        else:
+            libs.append("arrow")
         return libs
 
     def package_info(self):
