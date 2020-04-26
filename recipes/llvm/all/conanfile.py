@@ -77,6 +77,8 @@ class Llvm(ConanFile):
         cmake = CMake(self)
         cmake.install()
 
+        self.copy('LICENSE.TXT', src='clang', dst='licenses', keep_path=False)
+
         directories_to_ignore = [
             'share'
         ]
