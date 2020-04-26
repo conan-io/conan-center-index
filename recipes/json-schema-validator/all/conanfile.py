@@ -33,12 +33,14 @@ class JsonSchemaValidatorConan(ConanFile):
             del self.options.fPIC
 
     def configure(self):
+        min_vs_version = "16"
         min_cppstd = "17" if self.settings.compiler == "Visual Studio" else "11"
         if self.settings.get_safe("compiler.cppstd"):
             tools.check_min_cppstd(self, min_cppstd)
+            min_vs_version = "15"
 
         compilers = {"gcc": "5", "clang": "4",
-                     "Visual Studio": "16", "apple-clang": "9"}
+                     "Visual Studio": min_vs_version, "apple-clang": "9"}
         min_version = compilers.get(str(self.settings.compiler))
         if not min_version:
             self.output.warn("{} recipe lacks information about the {} compiler support.".format(
