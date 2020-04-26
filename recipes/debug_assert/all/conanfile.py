@@ -1,6 +1,4 @@
 from conans import ConanFile, tools
-from conans.tools import Version
-from conans.errors import ConanInvalidConfiguration
 import os
 
 class DebugAssert(ConanFile):
