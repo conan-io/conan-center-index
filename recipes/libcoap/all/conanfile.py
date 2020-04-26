@@ -58,9 +58,6 @@ class LibCoapConan(ConanFile):
             del self.options.fPIC
 
     def configure(self):
-        if self.settings.os_build != "Windows":
-            raise ConanInvalidConfiguration("Only Windows supported")
-
         del self.settings.compiler.libcxx
         del self.settings.compiler.cppstd
 
