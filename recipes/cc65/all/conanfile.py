@@ -5,9 +5,6 @@ from contextlib import contextmanager
 import os
 
 
-# FIXME: This recipe uses conan private attributes to force x86 builds (using MSVC) and can break at any time
-
-
 class Cc65Conan(ConanFile):
     name = "cc65"
     url = "https://github.com/conan-io/conan-center-index"
@@ -17,7 +14,7 @@ class Cc65Conan(ConanFile):
     topics = ("conan", "cc65", "compiler", "cmos", "6502", "8bit")
     exports_sources = "patches/**"
 
-    settings = "os_build", "arch_build", "compiler"
+    settings = "os", "arch", "compiler", "build_type"
 
     _autotools = None
     _source_subfolder = "source_subfolder"
@@ -26,9 +23,9 @@ class Cc65Conan(ConanFile):
         del self.settings.compiler.libcxx
         del self.settings.compiler.cppstd
         if self.settings.compiler == "Visual Studio":
-            if self.settings.arch_build not in ("x86", "x86_64"):
-                raise ConanInvalidConfiguration("Invalid arch_build")
-            if self.settings.arch_build == "x86_64":
+            if self.settings.arch not in ("x86", "x86_64"):
+                raise ConanInvalidConfiguration("Invalid arch")
+            if self.settings.arch == "x86_64":
                 self.output.info("This recipe will build x86 instead of x86_64 (the binaries are compatible)")
 
     def build_requirements(self):
@@ -51,19 +48,15 @@ class Cc65Conan(ConanFile):
     @contextmanager
     def _mock_settings(self):
         """
-        This will temporarily copy the attributes arch_build and os_build of settings to arch and os.
+        If the current compiler is Visual Studio, this will temporarily set the arch attribute of settings to x86.
         Because cc65 does not provide x86_64 support for visual studio, x86 is built instead.
         """
         mock_settings = self.settings.copy()
 
         if self.settings.compiler == "Visual Studio":
-            if self.settings.arch_build == "x86_64":
-                self.output.info("x86_64 detected: building x86 instead")
-                mock_settings.arch_build = "x86"
-
-        self.output.warn("This recipe modifies private conan attributes. This can break at any time.")
-        mock_settings._data["arch"] = mock_settings._data["arch_build"].copy()
-        mock_settings._data["os"] = mock_settings._data["os_build"].copy()
+            if self.settings.arch != "x86":
+                self.output.info("{} detected: building x86 instead".format(self.settings.arch))
+                mock_settings.arch = "x86"
 
         original_settings = self.settings
         try:
@@ -77,8 +70,9 @@ class Cc65Conan(ConanFile):
         msvc_platforms = {
             "x86": "Win32",
         }
+
         msbuild.build(os.path.join(self._source_subfolder, "src", "cc65.sln"),
-                      build_type="Release", platforms=msvc_platforms, arch=self.settings.arch_build)
+                      build_type="Release", platforms=msvc_platforms)
         autotools = self._configure_autotools()
         with tools.chdir(os.path.join(self._source_subfolder, "libsrc")):
             autotools.make()
@@ -103,7 +97,7 @@ class Cc65Conan(ConanFile):
             "datadir={}".format(datadir),
             "samplesdir={}".format(samplesdir),
         ]
-        if self.settings.os_build == "Windows":
+        if self.settings.os == "Windows":
             args.append("EXE_SUFFIX=.exe")
         return args
 
@@ -122,7 +116,7 @@ class Cc65Conan(ConanFile):
                         continue
                     tools.replace_in_file(fn, "v141", msvs_toolset(self.settings))
                     tools.replace_in_file(fn, "<WindowsTargetPlatformVersion>10.0.16299.0</WindowsTargetPlatformVersion>", "")
-        if self.settings.os_build == "Windows":
+        if self.settings.os == "Windows":
             # Add ".exe" suffix to calls from cl65 to other utilities
             for fn, var in (("cc65", "CC65"), ("ca65", "CA65"), ("co65", "CO65"), ("ld65", "LD65"), ("grc65", "GRC")):
                 v = "{},".format(var).ljust(5)
@@ -159,10 +153,9 @@ class Cc65Conan(ConanFile):
             self._package_autotools()
 
     def package_id(self):
-        self.info.include_build_settings()
         if self.settings.compiler == "Visual Studio":
-            if self.settings.arch_build == "x86_64":
-                self.info.settings.arch_build = "x86"
+            if self.settings.arch == "x86_64":
+                self.info.settings.arch = "x86"
         del self.info.settings.compiler
 
     def package_info(self):
@@ -173,16 +166,16 @@ class Cc65Conan(ConanFile):
         self.output.info("Seting CC65_HOME environment variable: %s" % self._datadir)
         self.env_info.CC65_HOME = self._datadir
 
-        bin_ext = ".exe" if self.settings.os_build == "Windows" else ""
+        bin_ext = ".exe" if self.settings.os == "Windows" else ""
 
         cc65_cc = os.path.join(bindir, "cc65" + bin_ext)
-        self.output.info("Seting CC65 environment variable: %s" % cc65_cc)
+        self.output.info("Seting CC65 environment variable: {}".format(cc65_cc))
         self.env_info.CC65 = cc65_cc
 
         cc65_as = os.path.join(bindir, "ca65" + bin_ext)
-        self.output.info("Seting AS65 environment variable: %s" % cc65_as)
+        self.output.info("Seting AS65 environment variable: {}".format(cc65_as))
         self.env_info.AS65 = cc65_as
 
         cc65_ld = os.path.join(bindir, "cl65" + bin_ext)
-        self.output.info("Seting LD65 environment variable: %s" % cc65_ld)
+        self.output.info("Seting LD65 environment variable: {}".format(cc65_ld))
         self.env_info.LD65 = cc65_ld
