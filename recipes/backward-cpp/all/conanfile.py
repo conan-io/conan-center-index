@@ -110,14 +110,14 @@ class BackwardCppConan(ConanFile):
         cmake.configure(build_folder=self._build_subfolder)
         return cmake
 
-    def patch_sources(self):
+    def _patch_sources(self):
         if "patches" in self.conan_data:
             if self.version in self.conan_data["patches"]:
                 for patch in self.conan_data["patches"][self.version]:
                     tools.patch(**patch)
 
     def build(self):
-        self.patch_sources()
+        self._patch_sources()
         cmake = self._configure_cmake()
         cmake.build()
 
