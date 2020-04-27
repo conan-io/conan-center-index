@@ -5,7 +5,6 @@ from conans.errors import ConanInvalidConfiguration
 
 class LLVMOpenMpConan(ConanFile):
     name = "llvm-openmp"
-    short_name = "openmp"
     description = ("The OpenMP (Open Multi-Processing) specification "
                    "is a standard for a set of compiler directives, "
                    "library routines, and environment variables that "
@@ -48,7 +47,7 @@ class LLVMOpenMpConan(ConanFile):
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
-        extracted_dir = "{}-{}.src".format(self.short_name, self.version)
+        extracted_dir = "openmp-{}.src".format(self.version)
         os.rename(extracted_dir, self._source_subfolder)
 
     def _patch_sources(self):
