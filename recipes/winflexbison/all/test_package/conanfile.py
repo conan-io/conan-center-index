@@ -15,7 +15,5 @@ class TestPackageConan(ConanFile):
         self.run("win_bison --version", run_environment=True)
 
         if not tools.cross_building(self.settings):
-            with tools.environment_append(RunEnvironment(self).vars):
-                cmake = CMake(self)
-                cmake.test()
-                
+            cmake = CMake(self)
+            cmake.test()
