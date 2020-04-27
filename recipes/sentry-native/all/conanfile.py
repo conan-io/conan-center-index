@@ -5,7 +5,9 @@ from conans.errors import ConanInvalidConfiguration
 
 class SentryNativeConan(ConanFile):
     name = "sentry-native"
-    description = "Sentry SDK for C, C++ and native applications."
+    description = "The Sentry Native SDK is an error and crash reporting client for native applications,\n" \
+                  "optimized for C and C++. Sentry allows to add tags,\n" \
+                  "breadcrumbs and arbitrary custom context to enrich error reports."
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/getsentry/sentry-native"
     license = "MIT"
@@ -61,7 +63,7 @@ class SentryNativeConan(ConanFile):
         self._cmake = CMake(self)
         self._cmake.definitions["SENTRY_BACKEND"] = self.options.backend
         self._cmake.definitions["SENTRY_ENABLE_INSTALL"] = True
-        self._cmake.definitions["SENTRY_TRANSPORT "] = self.options.transport
+        self._cmake.definitions["SENTRY_TRANSPORT"] = self.options.transport
         self._cmake.configure()
         return self._cmake
 
