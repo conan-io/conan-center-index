@@ -168,6 +168,7 @@ class PocoConan(ConanFile):
                 ("enable_data_mysql", "PocoDataMySQL"),
                 ("enable_data_odbc", "PocoDataODBC"),
                 ("enable_data", "PocoData"),
+                ("enable_encodings", "PocoEncodings"),
                 ("enable_sevenzip", "PocoSevenZip"),
                 ("enable_zip", "PocoZip"),
                 ("enable_apacheconnector", "PocoApacheConnector"),
@@ -190,7 +191,6 @@ class PocoConan(ConanFile):
                 self.cpp_info.libs.append("%s%s" % (lib, suffix))
 
         self.cpp_info.libs.append("PocoFoundation%s" % suffix)
-        self.cpp_info.libs.append("PocoEncodings%s" % suffix)
 
         # in linux we need to link also with these libs
         if self.settings.os == "Linux":
