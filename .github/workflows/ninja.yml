@@ -50,7 +50,7 @@ jobs:
           install: custom
           # TODO: replace when https://github.com/conan-io/conan-package-tools/issues/479 will be fixed upstream
           custom-package: git+https://github.com/trassir/conan-package-tools@fix-479-trassir
-          work-dir: sources/recipes/libdrm/2.4.100
+          work-dir: sources/recipes/ninja/all
           build-script: ../../../build.py
           compiler: ${{ matrix.compiler }}
           compiler-versions: ${{ matrix.compiler_version }}
