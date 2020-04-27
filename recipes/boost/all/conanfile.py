@@ -105,6 +105,10 @@ class BoostConan(ConanFile):
         return self.settings.compiler == "Visual Studio"
 
     @property
+    def _is_clang_cl(self):
+        return self.settings.os == "Windows" and self.settings.compiler == "clang"
+
+    @property
     def _zip_bzip2_requires_needed(self):
         return not self.options.without_iostreams and not self.options.header_only
 
@@ -373,7 +377,7 @@ class BoostConan(ConanFile):
                 self.run(command)
 
     def _run_bcp(self):
-        with tools.vcvars(self.settings) if self._is_msvc or (self.settings.os == "Windows" and self.settings.compiler == "clang") else tools.no_op():
+        with tools.vcvars(self.settings) if self._is_msvc or self._is_clang_cl else tools.no_op():
             with tools.chdir(self.source_folder):
                 os.mkdir(self._bcp_dir)
                 namespace = "--namespace=%s" % self.options.namespace
@@ -877,7 +881,7 @@ class BoostConan(ConanFile):
                 if not self.options.shared:
                     self.cpp_info.defines.append("BOOST_PYTHON_STATIC_LIB")
 
-            if self._is_msvc or (self.settings.os == "Windows" and self.settings.compiler == "clang"):
+            if self._is_msvc or self._is_clang_cl:
                 if not self.options.magic_autolink:
                     # DISABLES AUTO LINKING! NO SMART AND MAGIC DECISIONS THANKS!
                     self.cpp_info.defines.append("BOOST_ALL_NO_LIB")
