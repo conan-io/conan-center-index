@@ -87,8 +87,6 @@ class ArrowConan(ConanFile):
     def configure(self):
         if self.options.shared:
             del self.options.fPIC
-            if self.options["jemalloc"].enable_cxx:
-                raise ConanInvalidConfiguration("jemmalloc.enable_cxx must be disabled")
         if self.options.with_dataset_modules and not self.options.with_compute:
             raise ConanInvalidConfiguration("'with_dataset_modules' options requires 'with_compute'")
 
@@ -214,7 +212,7 @@ class ArrowConan(ConanFile):
 
     def build(self):
         if self.options.shared:
-            if not self.options["jemalloc"] and self.options["jemalloc"].enable_cxx:
+            if not self.options["jemalloc"].shared and self.options["jemalloc"].enable_cxx:
                 raise ConanInvalidConfiguration("jemmalloc.enable_cxx of a static jemalloc must be disabled")
 
         self._patch_sources()
