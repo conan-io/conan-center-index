@@ -5,4 +5,4 @@ message(STATUS "Conan CMake Wrapper")
 include("conanbuildinfo.cmake")
 conan_basic_setup(TARGETS)
 
-add_subdirectory("source_subfolder/cmake")
+add_subdirectory(source_subfolder/cmake)
