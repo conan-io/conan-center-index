@@ -3,9 +3,8 @@ from conans import ConanFile, tools
 
 class CtreConan(ConanFile):
     name = "ctre"
-    url = "https://github.com/hanickadot/compile-time-regular-expressions"
     homepage = "https://github.com/hanickadot/compile-time-regular-expressions"
-    author = "Hana Dusíková (ctre@hanicka.net)"
+    url = "https://github.com/conan-io/conan-center-index"
     description = "Compile Time Regular Expression for C++17/20"
     topics = ("cpp17", "regex", "compile-time-regular-expressions")
     license = "Apache 2.0 with LLVM Exception"
