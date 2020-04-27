@@ -214,8 +214,8 @@ class ArrowConan(ConanFile):
 
     def build(self):
         if self.options.shared:
-            if self.options["jemalloc"].enable_cxx:
-                raise ConanInvalidConfiguration("jemmalloc.enable_cxx must be disabled")
+            if not self.options["jemalloc"] and self.options["jemalloc"].enable_cxx:
+                raise ConanInvalidConfiguration("jemmalloc.enable_cxx of a static jemalloc must be disabled")
 
         self._patch_sources()
         cmake = self._configure_cmake()
