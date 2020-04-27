@@ -21,6 +21,8 @@ class ProtobufConan(ConanFile):
     default_options = {"with_zlib": False,
                        "shared": False, "fPIC": True, "lite": False}
 
+    _cmake = None
+
     @property
     def _source_subfolder(self):
         return "source_subfolder"
@@ -51,15 +53,17 @@ class ProtobufConan(ConanFile):
             self.requires("zlib/1.2.11")
 
     def _configure_cmake(self):
-        cmake = CMake(self)
-        cmake.definitions["protobuf_BUILD_TESTS"] = False
-        cmake.definitions["protobuf_WITH_ZLIB"] = self.options.with_zlib
-        cmake.definitions["protobuf_BUILD_PROTOC_BINARIES"] = not self.options.lite
-        cmake.definitions["protobuf_BUILD_PROTOBUF_LITE"] = self.options.lite
+        if self._cmake:
+            return self._cmake
+        self._cmake = CMake(self)
+        self._cmake.definitions["protobuf_BUILD_TESTS"] = False
+        self._cmake.definitions["protobuf_WITH_ZLIB"] = self.options.with_zlib
+        self._cmake.definitions["protobuf_BUILD_PROTOC_BINARIES"] = not self.options.lite
+        self._cmake.definitions["protobuf_BUILD_PROTOBUF_LITE"] = self.options.lite
         if self.settings.compiler == "Visual Studio":
-            cmake.definitions["protobuf_MSVC_STATIC_RUNTIME"] = "MT" in self.settings.compiler.runtime
-        cmake.configure(build_folder=self._build_subfolder)
-        return cmake
+            self._cmake.definitions["protobuf_MSVC_STATIC_RUNTIME"] = "MT" in self.settings.compiler.runtime
+        self._cmake.configure(build_folder=self._build_subfolder)
+        return self._cmake
 
     def build(self):
         for patch in self.conan_data["patches"][self.version]:
