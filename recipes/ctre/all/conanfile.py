@@ -1,5 +1,6 @@
 import os
 from conans import ConanFile, tools
+from conans.errors import ConanInvalidConfiguration
 
 class CtreConan(ConanFile):
     name = "ctre"
@@ -9,9 +10,29 @@ class CtreConan(ConanFile):
     topics = ("cpp17", "regex", "compile-time-regular-expressions")
     license = "Apache 2.0 with LLVM Exception"
     no_copy_source = True
+    settings = "compiler"
 
     _source_name = "compile-time-regular-expressions"
     _source_subfolder = "source_subfolder"
+
+    def _validate_compiler_settings(self):
+        compiler = self.settings.compiler
+        version = tools.Version(self.settings.compiler.version)
+
+        if compiler == "Visual Studio":
+            if self.settings.compiler.get_safe("cppstd"):
+                tools.check_min_cppstd(self, "17")
+            if version < "15":
+                raise ConanInvalidConfiguration("ctre doesn't support MSVC < 15")
+        elif compiler == "gcc" and version < "7.4":
+            raise ConanInvalidConfiguration("ctre doesn't support gcc < 7.4")
+        elif compiler == "clang" and version < "6.0":
+            raise ConanInvalidConfiguration("ctre doesn't support clang < 6.0")
+        elif compiler == "apple-clang" and version < "10.0":
+            raise ConanInvalidConfiguration("ctre doesn't support Apple clang < 10.0")
+
+    def configure(self):
+         self._validate_compiler_settings()
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
