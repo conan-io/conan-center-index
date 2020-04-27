@@ -46,7 +46,7 @@ class CppRestSDKConan(ConanFile):
             del self.options.fPIC
 
     def requirements(self):
-        self.requires("openssl/1.1.1f")
+        self.requires("openssl/1.1.1g")
         if self.options.with_compression:
             self.requires("zlib/1.2.11")
         if self.options.with_websockets:
