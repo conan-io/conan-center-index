@@ -18,7 +18,11 @@ class RapidjsonConan(ConanFile):
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
-        extracted_dir = glob.glob(self.name + "-*/")[0]
+        version = tools.Version(self.version)
+        if "cci" in version.prerelease: # Assuming it's a commit url
+            extracted_dir = glob.glob(self.name + "-*/")[0]
+        else:
+            extracted_dir = self.name + "-" + self.version
         os.rename(extracted_dir, self._source_subfolder)
 
     def package(self):
