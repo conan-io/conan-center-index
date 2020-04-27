@@ -57,14 +57,14 @@ class MicrosoftGslConan(ConanFile):
         self.info.header_only()
 
     def package_info(self):
-        if int(self.version.split(".")[0]) > 2:
+        if tools.Version(self.version) >= "3.0.0":
             if self.options.on_contract_violation != 'terminate':
                 raise ConanInvalidConfiguration("Microsoft GSL only supports terminate on contract violation since version 3.0.0")
 
         self.cpp_info.defines = [
             self._contract_map[str(self.options.on_contract_violation)]
         ]
-          
-        if int(self.version.split(".")[0]) > 2:
+
+        if tools.Version(self.version) >= "3.0.0":
             self.cpp_info.names["cmake_find_package"] = "Microsoft.GSL"
             self.cpp_info.names["cmake_find_package_multi"] = "Microsoft.GSL"
