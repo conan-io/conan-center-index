@@ -17,7 +17,7 @@ class SentryNativeConan(ConanFile):
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
-        "backend": ["none", "crashpad", "inproc"],
+        "backend": ["none", "crashpad", "breakpad", "inproc"],
     }
     default_options = {
         "shared": False,
@@ -35,6 +35,8 @@ class SentryNativeConan(ConanFile):
         self.requires("libcurl/7.68.0")
         if self.options.backend == "crashpad":
             raise ConanInvalidConfiguration("crashpad not available yet in CCI")
+        if self.options.backend == "breakpad":
+            raise ConanInvalidConfiguration("breakpad not available yet in CCI")
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -45,12 +47,16 @@ class SentryNativeConan(ConanFile):
         extracted_dir = self.name + "-" + self.version
         os.rename(extracted_dir, self._source_subfolder)
 
+    def configure(self):
+        if self.options.backend == "inproc" and self.settings.os == "Windows":
+            raise ConanInvalidConfiguration("The in-process backend is not supported on Windows")
+
     def _configure_cmake(self):
         if self._cmake:
             return self._cmake
         self._cmake = CMake(self)
         self._cmake.definitions["SENTRY_BACKEND"] = self.options.backend        
-
+        self._cmake.definitions["SENTRY_ENABLE_INSTALL"] = True      
         self._cmake.configure()
         return self._cmake
 

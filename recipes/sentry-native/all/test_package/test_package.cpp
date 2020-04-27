@@ -1,9 +1,10 @@
-#include "sentry.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include "sentry.h"
 
-int main(int argc, char **argv) {
+int main(int argc, char **argv)
+{
   sentry_options_t *options = sentry_options_new();
 
   sentry_options_set_environment(options, "Production");
