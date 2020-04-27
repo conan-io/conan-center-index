@@ -40,7 +40,7 @@ class CoseCStackConan(ConanFile):
         if self.options.use_mbedtls:
             self.requires("mbedtls/2.16.3-gpl")
         else:
-            self.requires("openssl/1.1.1d")
+            self.requires("openssl/1.1.1f")
 
     def configure(self):
         if self.settings.os in ["Windows", "Macos", "Android"]:
