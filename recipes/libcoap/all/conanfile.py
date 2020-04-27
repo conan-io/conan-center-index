@@ -38,7 +38,7 @@ class LibCoapConan(ConanFile):
 
     def requirements(self):
         if self.options.dtls_backend == "openssl":
-            self.requires.add("openssl/1.1.1d")
+            self.requires.add("openssl/1.1.1g")
         if self.options.dtls_backend == "mbedtls":
             self.requires.add("mbedtls/2.16.3-apache")
         if self.options.dtls_backend == "gnutls":
