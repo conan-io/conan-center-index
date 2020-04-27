@@ -16,6 +16,7 @@ class ArrowConan(ConanFile):
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
+        "with_jemalloc": [True, False],
         "with_deprecated": [True, False],
         "with_cli": [True, False],
         "with_compute": [True, False],
@@ -44,6 +45,7 @@ class ArrowConan(ConanFile):
     default_options = {
         "shared": False,
         "fPIC": True,
+        "with_jemalloc": True,
         "with_deprecated": True,
         "with_cli": False,
         "with_compute": False,
@@ -85,6 +87,8 @@ class ArrowConan(ConanFile):
     def configure(self):
         if self.options.shared:
             del self.options.fPIC
+            if self.options["jemalloc"].enable_cxx:
+                raise ConanInvalidConfiguration("jemmalloc.enable_cxx must be disabled")
         if self.options.with_dataset_modules and not self.options.with_compute:
             raise ConanInvalidConfiguration("'with_dataset_modules' options requires 'with_compute'")
 
@@ -98,8 +102,9 @@ class ArrowConan(ConanFile):
             self.requires("thrift/x.y.z")
 
     def requirements(self):
-        self.requires("protobuf/3.9.1")
-        self.requires("jemalloc/5.2.1")
+        self.requires("protobuf/3.11.4")
+        if self.options.with_jemalloc:
+            self.requires("jemalloc/5.2.1")
         if self._boost_required:
             self.requires("boost/1.72.0")
         if self.options.with_cuda:
@@ -156,6 +161,7 @@ class ArrowConan(ConanFile):
         self._cmake.definitions["ARROW_COMPUTE"] = self.options.with_compute
         self._cmake.definitions["ARROW_CSV"] = self.options.with_csv
         self._cmake.definitions["ARROW_CUDA"] = self.options.with_cuda
+        self._cmake.definitions["ARROW_JEMALLOC"] = self.options.with_jemalloc
         self._cmake.definitions["ARROW_JSON"] = self.options.with_json
         self._cmake.definitions["ARROW_PARQUET"] = self.options.with_parquet
 
@@ -207,6 +213,10 @@ class ArrowConan(ConanFile):
             tools.patch(**patch)
 
     def build(self):
+        if self.options.shared:
+            if self.options["jemalloc"].enable_cxx:
+                raise ConanInvalidConfiguration("jemmalloc.enable_cxx must be disabled")
+
         self._patch_sources()
         cmake = self._configure_cmake()
         cmake.build()
