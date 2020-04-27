@@ -23,7 +23,7 @@ class SentryNativeConan(ConanFile):
     default_options = {
         "shared": False,
         "fPIC": True,
-        "backend": "inproc"
+        "backend": "inproc",
         "transport": "curl"
     }
 
