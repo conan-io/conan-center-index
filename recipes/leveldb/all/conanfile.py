@@ -13,11 +13,17 @@ class LevelDBConan(ConanFile):
     options = {
             "shared": [True, False],
             "fPIC": [True, False],
-            "with_snappy": [True, False] }
+            "with_crc32": [True, False],
+            "with_snappy": [True, False],
+            "with_tcmalloc": [True, False],
+    }
     default_options = {
             "shared": False,
             "fPIC": False,
-            "with_snappy": False }
+            "with_crc32": False,
+            "with_snappy": False,
+            "with_tcmalloc": False
+    }
     generators = "cmake"
 
     _cmake = None
@@ -31,7 +37,9 @@ class LevelDBConan(ConanFile):
             self._cmake.definitions["CMAKE_POSITION_INDEPENDENT_CODE"] = True
         return self._cmake
 
-    # TODO: crc32, tcmalloc are also conditionally included in leveldb
+    # TODO: crc32, tcmalloc are also conditionally included in leveldb, but
+    # there are no official packages yet
+
     optional_snappy_requirement = "snappy/1.1.7"
 
     def requirements(self):
@@ -67,19 +75,9 @@ class LevelDBConan(ConanFile):
         self.copy("LICENSE", src=self._source_subfolder, dst="", keep_path=False)
         cmake.install()
         tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
-        #self.copy("*", dst="include", src=self._source_subfolder + "/include", keep_path=True)
-        #self.copy("*.lib", dst="lib", keep_path=False)
-        #   
-        #if self.options.shared:
-        #    self.copy("*.dll", dst="bin", keep_path=False)
-        #    self.copy("*.so*", dst="lib", keep_path=False)
-        #else:
-        #    self.copy("*.a", dst="lib", keep_path=False)
 
 
     def package_info(self):
         self.cpp_info.libs = tools.collect_libs(self)
-        self.cpp_info.system_libs = ["pthread"]
-        #self.cpp_info.libs = ["leveldb"]
-        #if self.settings.os == "Linux":
-        #    self.cpp_info.libs.append("pthread")
+        if self.settings.os == "Linux":
+            self.cpp_info.system_libs = ["pthread"]
