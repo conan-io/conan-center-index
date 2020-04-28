@@ -1,6 +1,6 @@
+import os
 from conans import ConanFile, CMake, tools
-import os.path
-
+from conans.errors import ConanInvalidConfiguration
 
 class FrozenConan(ConanFile):
     name = "frozen"
@@ -8,12 +8,30 @@ class FrozenConan(ConanFile):
     homepage = "https://github.com/serge-sans-paille/frozen"
     url = "https://github.com/conan-io/conan-center-index"
     license = "Apache-2.0"
-    topics = ("gperf")
-    exports_sources = ["CMakeLists.txt"]
-    settings = "compiler"
-    generators = "cmake"
+    topics = ("gperf", "constexpr", "header-only")
+    no_copy_source = True
     _source_subfolder = "source_subfolder"
-    _build_subfolder = "build_subfolder"
+
+    def configure(self):
+        minimal_cpp_standard = "14"
+        if self.settings.compiler.cppstd:
+            tools.check_min_cppstd(self, minimal_cpp_standard)
+        minimal_version = {
+            "gcc": "5",
+            "clang": "3.4",
+            "apple-clang": "10",
+            "Visual Studio": "14"
+        }
+        compiler = str(self.settings.compiler)
+        if compiler not in minimal_version:
+            self.output.warn(
+                "%s recipe lacks information about the %s compiler standard version support" % (self.name, compiler))
+            self.output.warn(
+                "%s requires a compiler that supports at least C++%s" % (self.name, minimal_cpp_standard))
+            return
+        version = tools.Version(self.settings.compiler.version)
+        if version < minimal_version[compiler]:
+            raise ConanInvalidConfiguration("%s requires a compiler that supports at least C++%s" % (self.name, minimal_cpp_standard))
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
