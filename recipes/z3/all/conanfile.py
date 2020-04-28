@@ -1,4 +1,5 @@
 from conans import CMake, ConanFile, tools
+from conans.errors import ConanInvalidConfiguration
 import os
 
 
@@ -64,6 +65,9 @@ class Z3Conan(ConanFile):
         return self._cmake
 
     def build(self):
+        if self.settings.compiler == "Visual Studio":
+            if self.options["mpir"].shared and "MT" in str(self.settings.compiler.runtime):
+                raise ConanInvalidConfiguration("Cannot link to a shared mpir library and a static {} runtime at the same time".format(self.settings.compiler.runtime))
         cmake = self._configure_cmake()
         cmake.build()
 
