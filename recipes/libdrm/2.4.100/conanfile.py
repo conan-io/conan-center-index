@@ -1,5 +1,6 @@
 from conans import ConanFile, Meson, tools
 import os
+from os.path import join
 import shutil
 
 
@@ -76,6 +77,10 @@ class LibnameConan(ConanFile):
         tools.get(**self.conan_data["sources"][self.version])
         extracted_dir = self.name + "-" + self.version
         os.rename(extracted_dir, self._source_subfolder)
+
+        tools.replace_in_file(join(self._source_subfolder, "amdgpu", "meson.build"),\
+            "dependencies : [dep_pthread_stubs, dep_atomic_ops]",\
+            "dependencies : [dep_pthread_stubs, dep_atomic_ops, dep_rt]")
 
     def _configure_meson(self):
         meson = Meson(self)
