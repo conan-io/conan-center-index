@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 2.8.12)
 project(test_package)
 
-include("${CMAKE_BINARY_DIR}/conanbuildinfo.cmake")
+include("${CMAKE_BINARY_DIR}/../conanbuildinfo.cmake")
 conan_basic_setup()
 
 option(PROTOC_AVAILABLE "protobuf is available")
