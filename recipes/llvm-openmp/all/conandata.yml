@@ -1,0 +1,9 @@
+sources:
+  "9.0.1":
+    url: https://github.com/llvm/llvm-project/releases/download/llvmorg-9.0.1/openmp-9.0.1.src.tar.xz
+    sha256: 5c94060f846f965698574d9ce22975c0e9f04c9b14088c3af5f03870af75cace
+
+patches:
+  "9.0.1":
+    - base_path: "source_subfolder"
+      patch_file: "patches/0001-disable-build-testing.patch"
