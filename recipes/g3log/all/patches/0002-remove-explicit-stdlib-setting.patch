@@ -1,0 +1,57 @@
+diff --git a/Build.cmake b/Build.cmake
+index c692a4c..cd5c6d1 100644
+--- a/Build.cmake
++++ b/Build.cmake
+@@ -25,11 +25,6 @@ IF (${CMAKE_CXX_COMPILER_ID} MATCHES ".*Clang")
+    message( STATUS "" )
+    message( STATUS "cmake for Clang " )
+    SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -std=c++14 -Wunused -D_GLIBCXX_USE_NANOSLEEP")
+-   IF (${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
+-       SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -stdlib=libstdc++ -pthread")
+-   ELSE()
+-       SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -stdlib=libc++")
+-   ENDIF()
+    IF (${CMAKE_SYSTEM} MATCHES "FreeBSD-([0-9]*)\\.(.*)")
+        IF (${CMAKE_MATCH_1} GREATER 9)
+            set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pthread")
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 914a761..28976ee 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -160,7 +160,6 @@ message( STATUS "Software Version: ${VERSION}" )
+ 
+ 
+ 
+-IF(${CMAKE_SYSTEM_NAME} MATCHES "Linux" OR ${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
+    # ==========================================================================
+    #        Only tested on Ubuntu, CentOS and OSX.
+    #        For OSX you can also install an older version using 'brew install'
+@@ -177,7 +176,6 @@ IF(${CMAKE_SYSTEM_NAME} MATCHES "Linux" OR ${CMAKE_SYSTEM_NAME} MATCHES "Darwin"
+    #
+    # ==========================================================================
+    INCLUDE (${g3log_SOURCE_DIR}/CPackLists.txt)
+-ENDIF()
+ 
+ IF(MINGW)
+    # ==========================================================================
+diff --git a/CPackLists.txt b/CPackLists.txt
+index 7a89ad0..3262b6d 100644
+--- a/CPackLists.txt
++++ b/CPackLists.txt
+@@ -23,7 +23,7 @@ IF(NOT MINGW)
+    ENDIF()
+ ENDIF()
+ 
+-SET(CMAKE_INSTALL_LIBDIR lib CACHE PATH "Output dir for libraries")
++SET(CMAKE_INSTALL_LIBDIR lib CACHE STRING "Output dir for libraries" FORCE)
+ SET(CMAKE_INSTALL_HEADERDIR include CACHE PATH "Output dir for headers")
+ 
+ SET(CPACK_PACKAGE_NAME g3log)
+@@ -43,6 +43,7 @@ IF(NOT MINGW)
+    INSTALL( TARGETS g3logger
+                ARCHIVE DESTINATION ${CPACK_PACKAGING_INSTALL_PREFIX}/${CMAKE_INSTALL_LIBDIR}
+                LIBRARY DESTINATION ${CPACK_PACKAGING_INSTALL_PREFIX}/${CMAKE_INSTALL_LIBDIR}
++               RUNTIME DESTINATION ${CPACK_PACKAGING_INSTALL_PREFIX}/${CMAKE_INSTALL_BINDIR}
+                COMPONENT libraries)
+ 
+    INSTALL( FILES ${HEADER_FILES}
