@@ -146,6 +146,7 @@ class ArrowConan(ConanFile):
         if self._cmake:
             return self._cmake
         self._cmake = CMake(self)
+        self._cmake.definitions["ARROW_USE_STATIC_CRT"] = "MT" in str(self.settings.compiler.runtime)
         self._cmake.definitions["ARROW_DEPENDENCY_SOURCE"] = "SYSTEM"
         self._cmake.definitions["ARROW_VERBOSE_THIRDPARTY_BUILD"] = True
         self._cmake.definitions["ARROW_BUILD_SHARED"] = self.options.shared
@@ -187,8 +188,7 @@ class ArrowConan(ConanFile):
         self._cmake.definitions["ARROW_USE_OPENSSL"] = self.options.with_openssl
         if self.options.with_openssl:
             self._cmake.definitions["OPENSSL_ROOT_DIR"] = self.deps_cpp_info["openssl"].rootpath.replace("\\", "/")
-        if self._boost_required:
-            self._cmake.definitions["ARROW_BOOST_USE_SHARED"] = self.options["boost"].shared
+        self._cmake.definitions["ARROW_BOOST_USE_SHARED"] = self._boost_required and self.options["boost"].shared
         self._cmake.definitions["ARROW_S3"] = self.options.with_s3
         self._cmake.definitions["AWSSDK_SOURCE"] = "SYSTEM"
 
