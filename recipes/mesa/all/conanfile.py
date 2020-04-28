@@ -194,11 +194,11 @@ class LibnameConan(ConanFile):
             self.build_requires("meson/0.53.2")
         if not tools.which('pkg-config'):
             self.build_requires('pkg-config_installer/0.29.2@bincrafters/stable')
-        if self._with_any_opengl:
-            if not tools.which("bison"):
-                self.build_requires("bison_installer/3.3.2@bincrafters/stable")
-            if not tools.which("flex"):
-                self.build_requires("flex_installer/2.6.4@bincrafters/stable")
+        #if self._with_any_opengl:
+        #    if not tools.which("bison"):
+        #        self.build_requires("bison_installer/3.3.2@bincrafters/stable")
+        #    if not tools.which("flex"):
+        #        self.build_requires("flex_installer/2.6.4@bincrafters/stable")
 
     def configure(self):
         if self.settings.os not in ["Linux", "FreeBSD"]:
