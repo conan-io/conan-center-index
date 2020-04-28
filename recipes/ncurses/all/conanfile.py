@@ -45,6 +45,7 @@ class NCursesConan(ConanFile):
         if self.settings.compiler == "Visual Studio":
             if self.options.with_widec:
                 raise ConanInvalidConfiguration("with_widec is unsupported for Visual Studio")
+            raise ConanInvalidConfiguration("Unsupported on Visual Studio")
         if self.options.shared:
             del self.options.fPIC
         if not self.options.with_cxx:
