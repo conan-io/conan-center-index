@@ -1,0 +1,4 @@
+sources:
+  "0.8.0":
+    url: "https://github.com/capnproto/capnproto/archive/v0.8.0.tar.gz"
+    sha256: "6d8b43a7ec2a764b4dfe4139a7cdd070ad9057f106898050d9f4db3754b98820"
