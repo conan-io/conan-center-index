@@ -138,6 +138,7 @@ class SpirvCrossConan(ConanFile):
     def package_info(self):
         # TODO: set targets names when components available in conan
         self.cpp_info.libs = self._get_ordered_libs()
+        self.cpp_info.includedirs.append(os.path.join("include", "spirv_cross"))
         if self.settings.os == "Linux" and self.options.glsl:
             self.cpp_info.defines.append("m")
         if self.options.build_executable:
