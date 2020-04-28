@@ -1,5 +1,5 @@
 import os
-from conans import ConanFile, CMake, RunEnvironment, tools
+from conans import ConanFile, CMake, tools
 import shutil
 
 
@@ -26,17 +26,16 @@ class TestPackageConan(ConanFile):
         cmake.configure(build_folder="without_protoc")
         cmake.build()
 
-        with tools.environment_append(RunEnvironment(self).vars):
-            if self._protoc_available:
-                # Build with protoc
-                os.mkdir("with_protoc")
-                shutil.copy("conanbuildinfo.cmake", os.path.join("with_protoc", "conanbuildinfo.cmake"))
-                cmake = CMake(self)
-                cmake.definitions["protobuf_VERBOSE"] = True
-                cmake.definitions["protobuf_MODULE_COMPATIBLE"] = True
-                cmake.definitions["PROTOC_AVAILABLE"] = True
-                cmake.configure(build_folder="with_protoc")
-                cmake.build()
+        if self._protoc_available:
+            # Build with protoc
+            os.mkdir("with_protoc")
+            shutil.copy("conanbuildinfo.cmake", os.path.join("with_protoc", "conanbuildinfo.cmake"))
+            cmake = CMake(self)
+            cmake.definitions["protobuf_VERBOSE"] = True
+            cmake.definitions["protobuf_MODULE_COMPATIBLE"] = True
+            cmake.definitions["PROTOC_AVAILABLE"] = True
+            cmake.configure(build_folder="with_protoc")
+            cmake.build()
 
     def test(self):
         if not tools.cross_building(self.settings):

@@ -71,6 +71,15 @@ index be47c54a..bb1e9e25 100644
  if (protobuf_BUILD_PROTOC_BINARIES)
      list(APPEND _protobuf_libraries libprotoc)
  endif (protobuf_BUILD_PROTOC_BINARIES)
+@@ -36,7 +45,7 @@
+       PROPERTY INSTALL_RPATH "$ORIGIN/../${CMAKE_INSTALL_LIBDIR}")
+   elseif (APPLE)
+     set_property(TARGET protoc
+-      PROPERTY INSTALL_RPATH "@loader_path/../lib")
++      PROPERTY INSTALL_RPATH "@executable_path/../${CMAKE_INSTALL_LIBDIR}")
+   endif()
+ endif (protobuf_BUILD_PROTOC_BINARIES)
+ 
 @@ -110,33 +119,33 @@ endif()
  mark_as_advanced(CMAKE_INSTALL_CMAKEDIR)
  
