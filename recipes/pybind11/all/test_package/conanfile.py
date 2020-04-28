@@ -16,7 +16,7 @@ class TestPackageConan(ConanFile):
     @property
     def _python_available(self):
         # FIXME: this can be removed once a python interpreter is available in CCI
-        return getattr(sys, "frozen", False)
+        return not getattr(sys, "frozen", False)
 
     def test(self):
         if self._python_available and not tools.cross_building(self.settings):
