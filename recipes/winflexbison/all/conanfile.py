@@ -13,12 +13,14 @@ class WinflexbisonConan(ConanFile):
     license = "GPL-3.0-or-later"
     exports_sources = ["CMakeLists.txt"]
 
-    settings = "os_build", "build_type", "arch", "compiler"
+    settings = "os", "build_type", "arch", "compiler"
 
     _source_subfolder = "source_subfolder"
+    
+    _cmake = None
 
     def config_options(self):
-        if self.settings.os_build != "Windows":
+        if self.settings.os != "Windows":
             raise ConanInvalidConfiguration("winflexbison is only supported on Windows.")
 
     def source(self):
@@ -27,9 +29,11 @@ class WinflexbisonConan(ConanFile):
         os.rename(extracted_dir, self._source_subfolder)
 
     def _configure_cmake(self):
-        cmake = CMake(self)
-        cmake.configure()
-        return cmake
+        if self._cmake:
+            return self._cmake
+        self._cmake = CMake(self)
+        self._cmake.configure()
+        return self._cmake
 
     def build(self):
         cmake = self._configure_cmake()
@@ -56,12 +60,6 @@ class WinflexbisonConan(ConanFile):
         os.rename(os.path.join(self.package_folder, "licenses", "COPYING"), os.path.join(self.package_folder, "licenses", "bison-license"))
         self.copy(pattern="COPYING", dst="licenses", src=os.path.join(self._source_subfolder, "bison", "src"), keep_path=False)
         os.rename(os.path.join(self.package_folder, "licenses", "COPYING"), os.path.join(self.package_folder, "licenses", "flex-license"))
-
-    def package_id(self):
-        self.info.include_build_settings()
-        del self.info.settings.arch
-        del self.info.settings.compiler
-        del self.info.settings.build_type
 
     def package_info(self):
         bindir = os.path.join(self.package_folder, "bin")
