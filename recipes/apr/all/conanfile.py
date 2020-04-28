@@ -1,6 +1,7 @@
 import os
-
+import re
 from conans import AutoToolsBuildEnvironment, ConanFile, CMake, tools
+from conans.errors import ConanException
 
 
 class AprConan(ConanFile):
@@ -97,6 +98,14 @@ class AprConan(ConanFile):
             tools.rmdir(os.path.join(self.package_folder, "build-1"))
             tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
 
+            apr_rules_mk = os.path.join(self.package_folder, "bin", "build-1", "apr_rules.mk")
+            apr_rules_cnt = open(apr_rules_mk).read()
+            for key in ("apr_builddir", "apr_builders", "top_builddir"):
+                apr_rules_cnt, nb = re.subn("^{}=[^\n]*\n".format(key), "{}=$(_APR_BUILDDIR)\n".format(key), apr_rules_cnt, flags=re.MULTILINE)
+                if nb == 0:
+                    raise ConanException("Could not find/replace {} in {}".format(key, apr_rules_mk))
+            open(apr_rules_mk, "w").write(apr_rules_cnt)
+
     def package_info(self):
         self.cpp_info.names["pkg_config"] = "apr-1"
         self.cpp_info.libs = ["apr-1"]
@@ -105,6 +114,13 @@ class AprConan(ConanFile):
             if self.settings.os == "Linux":
                 self.cpp_info.system_libs = ["dl", "pthread"]
 
-        apr_root = tools.unix_path(self.package_folder)
+        apr_root = self.package_folder
+        if tools.os_info.is_windows:
+            apr_root = tools.unix_path(apr_root)
         self.output.info("Settings APR_ROOT environment var: {}".format(apr_root))
         self.env_info.APR_ROOT = apr_root
+
+        apr_mk_dir = os.path.join(self.package_folder, "bin", "build-1")
+        if tools.os_info.is_windows:
+            apr_mk_dir = tools.unix_path(apr_mk_dir)
+        self.env_info._APR_BUILDDIR = apr_mk_dir
