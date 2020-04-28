@@ -27,6 +27,8 @@ class TestPackageConan(ConanFile):
 
         with tools.environment_append(RunEnvironment(self).vars):
             if self._protoc_available:
+                if not tools.cross_building(self.settings):
+                    self.run("protoc --version", run_environment=True)
                 # Build with protoc
                 cmake = CMake(self)
                 cmake.definitions["protobuf_VERBOSE"] = True
