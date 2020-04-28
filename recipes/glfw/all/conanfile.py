@@ -39,7 +39,7 @@ class GlfwConan(ConanFile):
             os_info = tools.OSInfo()
             if os_info.with_apt:
                 libs_name = "libx11-dev libxrandr-dev libxinerama-dev libxkbcommon-dev libxcursor-dev " \
-                            "libxi-dev libglu1-mesa-dev"
+                            "libxi-dev libglu1-mesa-dev libgl1-mesa-dev"
             elif os_info.with_yum:
                 libs_name = "libX11-devel libXrandr-devel libXinerama-devel libxkbcommon-devel " \
                             "libXcursor-devel libXi-devel mesa-libGL-devel"
