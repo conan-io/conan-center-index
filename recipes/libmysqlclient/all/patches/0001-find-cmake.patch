@@ -79,7 +79,7 @@ index 0b0cc090..04a3b32b 100644
 diff --git a/cmake/zlib.cmake b/cmake/zlib.cmake
 --- a/cmake/zlib.cmake
 +++ b/cmake/zlib.cmake
-@@ -51,28 +51,7 @@ MACRO (MYSQL_CHECK_ZLIB_WITH_COMPRESS)
+@@ -51,28 +51,6 @@ MACRO (MYSQL_CHECK_ZLIB_WITH_COMPRESS)
    IF(WITH_ZLIB STREQUAL "bundled")
      MYSQL_USE_BUNDLED_ZLIB()
    ELSE()
@@ -106,7 +106,6 @@ diff --git a/cmake/zlib.cmake b/cmake/zlib.cmake
 -    IF(NOT ZLIB_FOUND)
 -      MYSQL_USE_BUNDLED_ZLIB()
 -    ENDIF()
-+    find_package(ZLIB REQUIRED)
-+    SET(ZLIB_LIBRARY ZLIB::ZLIB CACHE INTERNAL "System zlib library")
++    SET(ZLIB_LIBRARY "${CONAN_LIBS_ZLIB}" CACHE INTERNAL "System zlib library")
    ENDIF()
  ENDMACRO()

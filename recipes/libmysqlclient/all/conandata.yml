@@ -4,5 +4,11 @@ sources:
     url: "https://dev.mysql.com/get/Downloads/MySQL-8.0/mysql-8.0.17.tar.gz"
 patches:
   "8.0.17":
-    base_path: "source_subfolder"
-    patch_file: "patches/0001-find-cmake.patch"
+    - base_path: "source_subfolder"
+      patch_file: "patches/0001-find-cmake.patch"
+    - base_path: "source_subfolder"
+      patch_file: "patches/0002-dont-install-static-libraries+fix-mysql-config.patch"
+    - base_path: "source_subfolder"
+      patch_file: "patches/0003-msvc-install-no-pdb.patch"
+    - base_path: "source_subfolder"
+      patch_file: "patches/0004-find-openssl-debug.patch"
