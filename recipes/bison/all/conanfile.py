@@ -3,21 +3,6 @@ from contextlib import contextmanager
 import os
 
 
-SIMPLE_OUTPUT = """\
-#!/usr/bin/env python
-from argparse import ArgumentParser
-if __name__ == "__main__":
-    argparse = ArgumentParser()
-    argparse.add_argument("--output", "-o", help="output")
-    known, unknown = argparse.parse_known_args()
-    if known.output:
-        try:
-            open(known.output, "w").write("\\n")
-        except OSError:
-            pass
-"""
-
-
 class BisonConan(ConanFile):
     name = "bison"
     url = "https://github.com/conan-io/conan-center-index"
@@ -88,8 +73,6 @@ class BisonConan(ConanFile):
             return self._autotools
         self._autotools = AutoToolsBuildEnvironment(self, win_bash=tools.os_info.is_windows)
         args = [
-            "HELP2MAN={}".format(tools.unix_path(self._simple_output_script)),
-            "MAKEINFO={}".format(tools.unix_path(self._simple_output_script)),
             "--enable-relocatable",
             "--disable-nls",
             "--datarootdir={}".format(os.path.join(self.package_folder, "bin", "share").replace("\\", "/")),
@@ -101,16 +84,9 @@ class BisonConan(ConanFile):
         self._autotools.configure(args=args, configure_dir=self._source_subfolder)
         return self._autotools
 
-    @property
-    def _simple_output_script(self):
-        return os.path.join(self.build_folder, "simple_output.py")
-
     def _patch_sources(self):
         for patch in self.conan_data["patches"][self.version]:
             tools.patch(**patch)
-
-        tools.save(self._simple_output_script, SIMPLE_OUTPUT)
-        os.chmod(self._simple_output_script, 0o555)
 
         if self.settings.os == "Windows":
             # replace embedded unix paths by windows paths
