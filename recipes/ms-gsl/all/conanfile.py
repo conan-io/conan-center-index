@@ -8,7 +8,7 @@ class MicrosoftGslConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/microsoft/GSL"
     license = "MIT"
-    topics = ("GSL", "guidelines", "core", "span")
+    topics = ("gsl", "guidelines", "core", "span")
     no_copy_source = True
     
     @property
