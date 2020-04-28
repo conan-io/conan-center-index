@@ -117,22 +117,19 @@ class AprUtilConan(ConanFile):
         if self._autotools:
             return self._autotools
         self._autotools = AutoToolsBuildEnvironment(self)
+        my_unix_path = tools.unix_path if tools.os_info.is_windows else lambda x: x
         conf_args = [
-            "--with-apr={}".format(self.deps_cpp_info["apr"].rootpath),
+            "--with-apr={}".format(my_unix_path(self.deps_cpp_info["apr"].rootpath)),
             "--with-crypto" if self.options.crypto else "--without-crypto",
-            "--with-expat={}".format(tools.unix_path(self.deps_cpp_info["expat"].rootpath)) if self.options.with_expat else "--without-expat",
-            "--with-mysql={}".format(tools.unix_path(self.deps_cpp_info["libmysqlclient"].rootpath)) if self.options.with_mysql else "--without-mysql",
-            "--with-pgsql={}".format(tools.unix_path(self.deps_cpp_info["libpq"].rootpath)) if self.options.with_sqlite3 else "--without-postgresql",
-            "--with-sqlite3={}".format(tools.unix_path(self.deps_cpp_info["sqlite3"].rootpath)) if self.options.with_sqlite3 else "--without-sqlite3",
+            "--with-expat={}".format(my_unix_path(self.deps_cpp_info["expat"].rootpath)) if self.options.with_expat else "--without-expat",
+            "--with-mysql={}".format(my_unix_path(self.deps_cpp_info["libmysqlclient"].rootpath)) if self.options.with_mysql else "--without-mysql",
+            "--with-pgsql={}".format(my_unix_path(self.deps_cpp_info["libpq"].rootpath)) if self.options.with_sqlite3 else "--without-postgresql",
+            "--with-sqlite3={}".format(my_unix_path(self.deps_cpp_info["sqlite3"].rootpath)) if self.options.with_sqlite3 else "--without-sqlite3",
         ]
         if self.options.dbm:
             conf_args.append("--with-dbm={}".format(self.options.dbm))
         if self.options.crypto == "openssl":
             conf_args.append("--with-openssl={}".format(tools.unix_path(self.deps_cpp_info["openssl"].rootpath)))
-        # if self.options.shared:
-        #     conf_args.extend(["--enable-shared", "--disable-static"])
-        # else:
-        #     conf_args.extend(["--disable-shared", "--enable-static"])
         self._autotools.configure(args=conf_args, configure_dir=self._source_subfolder)
         return self._autotools
 
@@ -141,6 +138,9 @@ class AprUtilConan(ConanFile):
             tools.patch(**patch)
 
     def build(self):
+        if self.options.shared != self.options["apr"].shared:
+            raise ConanInvalidConfiguration("apr-util must be built with same shared option as apr")
+
         self._patch_sources()
         if self.settings.os == "Windows":
             cmake = self._configure_cmake()
