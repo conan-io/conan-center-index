@@ -17,6 +17,7 @@ on:
 env:
   CONAN_PASSWORD: ${{ secrets.BintrayApiKey }}
   IS_PURE_C: true
+  CONAN_DOCKER_ENTRY_SCRIPT: 'sudo apt-get update && sudo apt-get install -y bison flex'
 
 jobs:
   mesa:
@@ -41,24 +42,15 @@ jobs:
             xcode_version: '11.3.1'
     runs-on: ${{ matrix.os }}
     steps:
-      - name: Install pkg-config (MacOS)
+      - name: Install pkg-config
         if: matrix.os == 'macos-latest'
         run: brew install pkg-config
-      - name: Install pkg-config (Linux)
-        if: matrix.os == 'ubuntu-latest'
-        run: sudo apt-get update && sudo apt-get install pkg-config
-      - name: Install bison (MacOS)
+      - name: Install biso
         if: matrix.os == 'macos-latest'
         run: brew install bison
-      - name: Install bison (Linux)
-        if: matrix.os == 'ubuntu-latest'
-        run: sudo apt-get install bison
-      - name: Install flex (MacOS)
+      - name: Install flex
         if: matrix.os == 'macos-latest'
         run: brew install flex
-      - name: Install flex (Linux)
-        if: matrix.os == 'ubuntu-latest'
-        run: sudo apt-get install flex
       - name: Configure git
         run: git config --global core.autocrlf false
         shell: bash
