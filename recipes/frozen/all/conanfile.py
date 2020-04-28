@@ -10,6 +10,7 @@ class FrozenConan(ConanFile):
     license = "Apache-2.0"
     topics = ("gperf", "constexpr", "header-only")
     no_copy_source = True
+    settings = "compiler"
     _source_subfolder = "source_subfolder"
 
     def configure(self):
