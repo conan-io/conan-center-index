@@ -26,7 +26,7 @@ class OdbcConan(ConanFile):
 
     def requirements(self):
         if self.options.with_libiconv:
-            self.requires("libiconv/1.15")
+            self.requires("libiconv/1.16")
         
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
