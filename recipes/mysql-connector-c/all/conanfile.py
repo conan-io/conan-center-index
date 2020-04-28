@@ -101,3 +101,5 @@ class MysqlConnectorCConan(ConanFile):
         if not self.options.shared:
             if self._stdcpp_library:
                 self.cpp_info.system_libs.append(self._stdcpp_library)
+            if self.settings.os == "Linux":
+                self.cpp_info.system_libs.append('m')
