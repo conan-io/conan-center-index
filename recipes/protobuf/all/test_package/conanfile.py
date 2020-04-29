@@ -26,9 +26,6 @@ class TestPackageConan(ConanFile):
         cmake.build()
 
         with tools.environment_append(RunEnvironment(self).vars):
-            import pprint
-            print("environment for running with_protoc")
-            pprint.pprint(os.environ)
             if self._protoc_available:
                 if not tools.cross_building(self.settings):
                     self.run("protoc --version", run_environment=True)
