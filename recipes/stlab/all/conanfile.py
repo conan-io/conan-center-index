@@ -40,8 +40,8 @@ class Stlab(ConanFile):
         if self.settings.compiler == "clang" and Version(self.settings.compiler.version) < "8":
             raise ConanInvalidConfiguration("Need clang >= 8")
 
-        if self.settings.compiler == "Visual Studio" and Version(self.settings.compiler.version) < "19.15":
-            raise ConanInvalidConfiguration("Need MSVC >= 19.15")
+        if self.settings.compiler == "Visual Studio" and Version(self.settings.compiler.version) < "15.8":
+            raise ConanInvalidConfiguration("Need Visual Studio >= 2017 15.8 (MSVC 19.15)")
 
     def package(self):
         self.copy("*LICENSE", dst="licenses", keep_path=False)
