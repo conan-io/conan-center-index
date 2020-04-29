@@ -12,6 +12,7 @@ find_package(PythonInterp REQUIRED)
 find_package(PythonLibs REQUIRED)
 
 find_package(pybind11 REQUIRED)
+include(pybind11Tools)
 
 pybind11_add_module(test_package MODULE
     test_package.cpp
