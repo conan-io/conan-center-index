@@ -18,8 +18,6 @@ class TestPackageConan(ConanFile):
         if self.deps_cpp_info["scons"].version not in text:
             raise ConanException("scons --version does not return correct version")
 
-        self.output.info("TMP={}".format(os.environ.get("TMP")))
-
         self.run("scons -C \"{}\"".format(self.source_folder))
 
     def test(self):
