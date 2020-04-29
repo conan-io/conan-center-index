@@ -1,9 +1,5 @@
 sources:
-  "0.2.5":
-    url: "https://github.com/getsentry/sentry-native/archive/0.2.5.tar.gz"
-    sha256: "51c83d4e0c952d80c8d47f2e419a30ecb80d3d7f5bc923b3c854f928d61a4c22"
+  "0.2.6":
+    url: "https://github.com/getsentry/sentry-native/archive/0.2.6.tar.gz"
+    sha256: "e96ed2dee226b978a2d2de552a8d4b8a578bd5990de1c41bf23add455eef597a"
 
-patches:
-  "0.2.5":
-    - base_path: "source_subfolder"
-      patch_file: "patches/0001_add_c_standard.patch"

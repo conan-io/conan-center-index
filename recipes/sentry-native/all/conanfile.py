@@ -13,7 +13,7 @@ class SentryNativeConan(ConanFile):
     license = "MIT"
     topics = ("conan", "breakpad", "crashpad",
               "error-reporting", "crash-reporting")
-    exports_sources = ["CMakeLists.txt", "patches/*"]
+    exports_sources = ["CMakeLists.txt"]
     generators = "cmake", "cmake_find_package"
     settings = "os", "arch", "compiler", "build_type"
     options = {
@@ -69,8 +69,6 @@ class SentryNativeConan(ConanFile):
         return self._cmake
 
     def build(self):
-        for patch in self.conan_data["patches"][self.version]:
-            tools.patch(**patch)        
         cmake = self._configure_cmake()
         cmake.build()
 
