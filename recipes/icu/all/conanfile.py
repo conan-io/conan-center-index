@@ -197,11 +197,16 @@ class ICUBase(ConanFile):
 
     def _install_name_tool(self):
         if tools.is_apple_os(self.settings.os):
+            vtag = self.version.split('.')[0]
             with tools.chdir(os.path.join(self.package_folder, 'lib')):
                 for dylib in glob.glob('*icu*.{0}.dylib'.format(self.version)):
                     command = 'install_name_tool -id {0} {1}'.format(os.path.basename(dylib), dylib)
                     self.output.info(command)
                     self.run(command)
+                    for replace_dylib in glob.glob('*icu*.{0}.dylib'.format(vtag)):
+                        command = 'install_name_tool -change {0} @loader_path/{0} {1}'.format(os.path.basename(replace_dylib), dylib)
+                        self.output.info(command)
+                        self.run(command)
 
     def package_id(self):
         del self.info.options.with_unit_tests  # ICU unit testing shouldn't affect the package's ID
