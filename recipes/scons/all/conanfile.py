@@ -34,7 +34,7 @@ class SConsConan(ConanFile):
     def build(self):
         with tools.chdir(self._source_subfolder):
             output = io.StringIO()
-            self.run("{} setup.py --requires".format(sys.executable), output=output)
+            self.run("python setup.py --requires", output=output)
             # Workaround for log.print_run_commands = True/False
             # This requires log.run_to_output = True
             if not (output.getvalue().strip().splitlines() or ["-"])[-1].startswith("-"):
