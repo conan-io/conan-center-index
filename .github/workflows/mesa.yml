@@ -45,7 +45,7 @@ jobs:
       - name: Install pkg-config
         if: matrix.os == 'macos-latest'
         run: brew install pkg-config
-      - name: Install biso
+      - name: Install bison
         if: matrix.os == 'macos-latest'
         run: brew install bison
       - name: Install flex
