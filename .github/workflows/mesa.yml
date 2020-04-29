@@ -17,14 +17,22 @@ on:
 env:
   CONAN_PASSWORD: ${{ secrets.BintrayApiKey }}
   IS_PURE_C: true
+  CONAN_DOCKER_ENTRY_SCRIPT: 'sudo apt-get update && sudo apt-get install -y bison flex'
 
 jobs:
   mesa:
     strategy:
       matrix:
-        build: ['macos']
+        build: ['linux-gcc8', 'macos']
         mesa_versions: ['19.3.1']
         include:
+          - build: 'linux-gcc8'
+            os: 'ubuntu-latest'
+            compiler: 'gcc'
+            compiler_version: '8'
+            docker_image: 'trassiross/conan-gcc8'
+            build_types: 'Release,Debug'
+            archs: 'x86_64' 
           - build: 'macos'
             os: 'macos-latest'
             build_types: 'Release,Debug'
