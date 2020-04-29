@@ -15,7 +15,7 @@ class DebugAssert(ConanFile):
     _source_subfolder = 'source_subfolder'
 
     @property
-    def repo_folder(self):
+    def _repo_folder(self):
         return os.path.join(self.source_folder, self._source_subfolder)
 
     def source(self):
@@ -29,7 +29,7 @@ class DebugAssert(ConanFile):
 
     def package(self):
         self.copy("*LICENSE", dst="licenses", keep_path=False)
-        self.copy("debug_assert.hpp", src=self.repo_folder, dst='include/')
+        self.copy("debug_assert.hpp", src=self._repo_folder, dst='include/')
 
     def package_id(self):
         self.info.header_only()
