@@ -17,7 +17,7 @@ class TypeSafe(ConanFile):
     requires = 'debug_assert/1.3.3'
 
     @property
-    def repo_folder(self):
+    def _repo_folder(self):
         return os.path.join(self.source_folder, self._source_subfolder)
 
     def source(self):
@@ -31,7 +31,7 @@ class TypeSafe(ConanFile):
 
     def package(self):
         self.copy("*LICENSE", dst="licenses", keep_path=False)
-        self.copy("*", src=os.path.join(self.repo_folder, 'include'), dst='include/')
+        self.copy("*", src=os.path.join(self._repo_folder, 'include'), dst='include/')
 
     def package_id(self):
         self.info.header_only()
