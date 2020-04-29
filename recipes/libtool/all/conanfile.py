@@ -61,18 +61,23 @@ class LibtoolConan(ConanFile):
             else:
                 yield
 
+    @property
+    def _datarootdir(self):
+        return os.path.join(self.package_folder, "bin", "share")
+
+    def _my_unix_path(self, path):
+        if tools.os_info.is_windows:
+            return tools.unix_path(path)
+        else:
+            return path
+
     def _configure_autotools(self):
         if self._autotools:
             return self._autotools
         self._autotools = AutoToolsBuildEnvironment(self, win_bash=tools.os_info.is_windows)
-        prefix = self.package_folder
-        datarootdir = os.path.join(prefix, "bin", "share")
-        if self.settings.os == "Windows":
-            datarootdir = tools.unix_path(datarootdir)
-            prefix = tools.unix_path(prefix)
         conf_args = [
-            "--datarootdir={}".format(datarootdir),
-            "--prefix={}".format(prefix),
+            "--datarootdir={}".format(self._my_unix_path(self._datarootdir)),
+            "--prefix={}".format(self._my_unix_path(self.package_folder)),
             "--enable-shared",
             "--enable-static",
             "--enable-ltdl-install",
@@ -126,8 +131,8 @@ class LibtoolConan(ConanFile):
             autotools = self._configure_autotools()
             autotools.install()
 
-        tools.rmdir(os.path.join(self.package_folder, "bin", "share", "info"))
-        tools.rmdir(os.path.join(self.package_folder, "bin", "share", "man"))
+        tools.rmdir(os.path.join(self._datarootdir, "info"))
+        tools.rmdir(os.path.join(self._datarootdir, "man"))
 
         os.unlink(os.path.join(self.package_folder, "lib", "libltdl.la"))
         if self.options.shared:
@@ -164,13 +169,12 @@ class LibtoolConan(ConanFile):
 
     @property
     def _libtool_relocatable_env(self):
-        datadir = os.path.join(self.package_folder, "bin", "share")
         return {
-            "LIBTOOL_PREFIX": tools.unix_path(self.package_folder),
-            "LIBTOOL_DATADIR": tools.unix_path(datadir),
-            "LIBTOOL_PKGAUXDIR": tools.unix_path(os.path.join(datadir, "libtool", "build-aux")),
-            "LIBTOOL_PKGLTDLDIR": tools.unix_path(os.path.join(datadir, "libtool")),
-            "LIBTOOL_ACLOCALDIR": tools.unix_path(os.path.join(datadir, "aclocal")),
+            "LIBTOOL_PREFIX": self._my_unix_path(self.package_folder),
+            "LIBTOOL_DATADIR": self._my_unix_path(self._datarootdir),
+            "LIBTOOL_PKGAUXDIR": self._my_unix_path(os.path.join(self._datarootdir, "libtool", "build-aux")),
+            "LIBTOOL_PKGLTDLDIR": self._my_unix_path(os.path.join(self._datarootdir, "libtool")),
+            "LIBTOOL_ACLOCALDIR": self._my_unix_path(os.path.join(self._datarootdir, "aclocal")),
         }
 
     def package_info(self):
@@ -192,11 +196,11 @@ class LibtoolConan(ConanFile):
 
         bin_ext = ".exe" if self.settings.os == "Windows" else ""
 
-        libtoolize = tools.unix_path(os.path.join(self.package_folder, "bin", "libtoolize" + bin_ext))
+        libtoolize = self._my_unix_path(os.path.join(self.package_folder, "bin", "libtoolize" + bin_ext))
         self.output.info("Setting LIBTOOLIZE env to {}".format(libtoolize))
         self.env_info.LIBTOOLIZE = libtoolize
 
-        libtool_aclocal = tools.unix_path(os.path.join(self.package_folder, "bin", "share", "aclocal" + bin_ext))
+        libtool_aclocal = self._my_unix_path(os.path.join(self.package_folder, "bin", "share", "aclocal" + bin_ext))
         self.output.info("Appending ACLOCAL_PATH env: {}".format(libtool_aclocal))
         self.env_info.ACLOCAL_PATH.append(libtool_aclocal)
 
