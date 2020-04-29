@@ -3,7 +3,9 @@ import os
 
 class LevelDBConan(ConanFile):
     name = "leveldb"
-    description = "TODO"
+    description = ("LevelDB is a fast key-value storage library written at \
+                    Google that provides an ordered mapping from string keys \
+                    to string values"
     license = "https://github.com/google/leveldb/blob/master/LICENSE"
     topics = ("conan", "leveldb", "google", "db")
     url = "https://github.com/conan-io/conan-center-index "
