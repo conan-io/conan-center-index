@@ -2,7 +2,7 @@ import os
 from conans import ConanFile, tools
 
 
-class CtestConan(ConanFile):
+class BvdbergCtestConan(ConanFile):
     name = "ctest"
     license = "Apache-2.0"
     homepage = "https://github.com/bvdberg/ctest"
