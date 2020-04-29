@@ -92,6 +92,8 @@ class PocoConan(ConanFile):
         os.rename(extracted_folder, self._source_subfolder)
 
     def config_options(self):
+        if tools.Version(self.version) < "1.9.0":
+            del self.options.enable_encodings
         if self.settings.os == "Windows":
             del self.options.fPIC
 
