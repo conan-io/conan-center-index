@@ -690,6 +690,11 @@ class QtConan(ConanFile):
           "Qt5Widgets",
           "Qt5Xml"
         ]
+        if self.options.qtmultimedia:
+            libs.extend([
+                "Qt5Multimedia",
+                "Qt5MultimediaWidgets"
+                ])
         if os_info.is_linux:
             libs.append("Qt5X11Extras")
         self.cpp_info.libdirs.append('lib')
