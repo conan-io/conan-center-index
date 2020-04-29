@@ -14,6 +14,10 @@ find_package(PythonLibs REQUIRED)
 find_package(pybind11 REQUIRED)
 include(pybind11Tools)
 
+include("${CMAKE_BINARY_DIR}/conanbuildinfo.cmake")
+conan_set_find_paths()
+conan_include_build_modules()
+
 pybind11_add_module(test_package MODULE
     test_package.cpp
 )
