@@ -8,7 +8,7 @@ class CtreConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     description = "Compile Time Regular Expression for C++17/20"
     topics = ("cpp17", "regex", "compile-time-regular-expressions")
-    license = "Apache 2.0 with LLVM Exception"
+    license = ("Apache-2.0", "LLVM-exception")
     no_copy_source = True
     settings = "compiler"
 
@@ -16,14 +16,14 @@ class CtreConan(ConanFile):
     _source_subfolder = "source_subfolder"
 
     def _validate_compiler_settings(self):
+        # See: https://github.com/hanickadot/compile-time-regular-expressions#supported-compilers
         compiler = self.settings.compiler
         version = tools.Version(self.settings.compiler.version)
 
-        if compiler == "Visual Studio":
-            if self.settings.compiler.get_safe("cppstd"):
-                tools.check_min_cppstd(self, "17")
-            if version < "15":
-                raise ConanInvalidConfiguration("ctre doesn't support MSVC < 15")
+        if self.settings.compiler.get_safe("cppstd"):
+            tools.check_min_cppstd(self, "17")
+        if compiler == "Visual Studio" and version < "15":
+            raise ConanInvalidConfiguration("ctre doesn't support MSVC < 15")
         elif compiler == "gcc" and version < "7.4":
             raise ConanInvalidConfiguration("ctre doesn't support gcc < 7.4")
         elif compiler == "clang" and version < "6.0":
