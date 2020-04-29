@@ -3,9 +3,9 @@ import os
 
 class LevelDBConan(ConanFile):
     name = "leveldb"
-    description = ("LevelDB is a fast key-value storage library written at \
-                    Google that provides an ordered mapping from string keys \
-                    to string values"
+    description = ("LevelDB is a fast key-value storage library written at "
+                   "Google that provides an ordered mapping from string keys "
+                   "to string values")
     license = "https://github.com/google/leveldb/blob/master/LICENSE"
     topics = ("conan", "leveldb", "google", "db")
     url = "https://github.com/conan-io/conan-center-index "
@@ -14,16 +14,12 @@ class LevelDBConan(ConanFile):
     options = {
             "shared": [True, False],
             "fPIC": [True, False],
-            "with_crc32": [True, False],
             "with_snappy": [True, False],
-            "with_tcmalloc": [True, False],
     }
     default_options = {
             "shared": False,
             "fPIC": False,
-            "with_crc32": False,
             "with_snappy": False,
-            "with_tcmalloc": False
     }
     generators = "cmake"
 
@@ -39,8 +35,8 @@ class LevelDBConan(ConanFile):
         return self._cmake
 
     # note: crc32, tcmalloc are also conditionally included in leveldb, but
-    # there are no "official" conan packages yet
-
+    # there are no "official" conan packages yet; when those are available, we
+    # can add similar with- options for those
     optional_snappy_requirement = "snappy/1.1.7"
 
     def requirements(self):
