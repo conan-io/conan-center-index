@@ -1,7 +1,6 @@
 from conans import ConanFile, CMake, tools
 import os
 
-
 class LevelDBConan(ConanFile):
     name = "leveldb"
     description = "TODO"
@@ -37,8 +36,8 @@ class LevelDBConan(ConanFile):
             self._cmake.definitions["CMAKE_POSITION_INDEPENDENT_CODE"] = True
         return self._cmake
 
-    # TODO: crc32, tcmalloc are also conditionally included in leveldb, but
-    # there are no official packages yet
+    # note: crc32, tcmalloc are also conditionally included in leveldb, but
+    # there are no "official" conan packages yet
 
     optional_snappy_requirement = "snappy/1.1.7"
 
@@ -72,7 +71,7 @@ class LevelDBConan(ConanFile):
 
     def package(self):
         cmake = self._get_cmake()
-        self.copy("LICENSE", src=self._source_subfolder, dst="", keep_path=False)
+        self.copy("LICENSE", src=self._source_subfolder, dst="licenses", keep_path=False)
         cmake.install()
         tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
 
