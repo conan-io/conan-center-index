@@ -1,5 +1,5 @@
 from conans import ConanFile, tools
-from conans.errors import ConanInvalidConfiguration
+from conans.errors import ConanException, ConanInvalidConfiguration
 import io
 import os
 import shutil
@@ -22,9 +22,10 @@ class SConsConan(ConanFile):
         return "source_subfolder"
 
     def configure(self):
-        # Detect a frozen conan PyInstaller
-        if getattr(sys, "frozen", False):
-            raise ConanInvalidConfiguration("This recipe requires a python interpreter and does not support a frozen conan installation. This can be fixed with a cpython recipe.")
+        # Detect availability of a python interpreter
+        # FIXME: add a python build requirement
+        if not tools.which("python"):
+            raise ConanInvalidConfiguration("This recipe requires a python interpreter.")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
