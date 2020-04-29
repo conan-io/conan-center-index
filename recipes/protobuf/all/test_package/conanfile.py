@@ -35,6 +35,7 @@ class TestPackageConan(ConanFile):
                 cmake.definitions["protobuf_MODULE_COMPATIBLE"] = True
                 cmake.definitions["PROTOC_AVAILABLE"] = True
                 cmake.configure(build_folder="with_protoc")
+                cmake.build(target="main")
                 cmake.build()
 
     def test(self):
