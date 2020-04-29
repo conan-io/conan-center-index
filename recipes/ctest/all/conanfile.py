@@ -1,5 +1,5 @@
 import os
-from conans import CMake, ConanFile, tools
+from conans import ConanFile, tools
 
 
 class CtestConan(ConanFile):
@@ -9,7 +9,6 @@ class CtestConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     description = "ctest is a unit test framework for software written in C."
     topics = ("conan", "testing", "testing-framework", "unit-testing")
-    settings = "os"
     no_copy_source = True
 
     @property
