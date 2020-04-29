@@ -57,9 +57,6 @@ class CppRestSDKConan(ConanFile):
         tools.get(**self.conan_data["sources"][self.version])
         extracted_dir = self.name + "-" + self.version
         os.rename(extracted_dir, self._source_subfolder)
-        if "patches" in self.conan_data and self.version in self.conan_data["patches"]:
-            for patch in self.conan_data["patches"][self.version]:
-                tools.patch(**patch)
 
     def _configure_cmake(self):
         if self._cmake:
@@ -80,6 +77,9 @@ class CppRestSDKConan(ConanFile):
                                   'libc++', 'libstdc++')
 
     def build(self):
+        if "patches" in self.conan_data and self.version in self.conan_data["patches"]:
+            for patch in self.conan_data["patches"][self.version]:
+                tools.patch(**patch)
         self._patch_clang_libcxx()
         cmake = self._configure_cmake()
         cmake.build()
