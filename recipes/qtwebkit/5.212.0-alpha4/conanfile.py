@@ -109,8 +109,6 @@ class QtWebKitConan(ConanFile):
         cmake.definitions["PORT"] = "Qt"
         cmake.definitions["ENABLE_DEVICE_ORIENTATION"] = "OFF"
         cmake.definitions["ENABLE_TEST_SUPPORT"] = "OFF"
-        if tools.is_apple_os(self.settings.os):
-            cmake.definitions["USE_QT_MULTIMEDIA"] = "OFF"
 
         # TODO on linux we should check kernel version. On kernels < 3.4 bmalloc cannot be compiled
         if not self.options["with_bmalloc"]:
@@ -148,10 +146,18 @@ class QtWebKitConan(ConanFile):
         pass
 
     def package_info(self):
-        libs = [
-            "Qt5WebKit",
-            "Qt5WebKitWidgets"
-        ]
-        self.cpp_info.libdirs.append('lib')
-        self.cpp_info.libs = [lib for lib in libs]
+        if tools.is_apple_os(self.settings.os):
+            libs = [
+                "QtWebKit",
+                "QtWebKitWidgets"
+            ]
+            self.cpp_info.frameworkdirs = ['lib']
+            self.cpp_info.frameworks = [lib for lib in libs]
+        else:
+            libs = [
+                "Qt5WebKit",
+                "Qt5WebKitWidgets"
+            ]
+            self.cpp_info.libdirs.append('lib')
+            self.cpp_info.libs = [lib for lib in libs]
         self.env_info.CMAKE_PREFIX_PATH.append(self.package_folder)
