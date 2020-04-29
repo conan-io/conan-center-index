@@ -38,6 +38,8 @@ class PyBind11Conan(ConanFile):
         cmake.install()
         os.unlink(os.path.join(self.package_folder, "lib", "cmake", "pybind11", "pybind11Config.cmake"))
         os.unlink(os.path.join(self.package_folder, "lib", "cmake", "pybind11", "pybind11ConfigVersion.cmake"))
+        pybind11tools_path = os.path.join(self.package_folder, "lib", "cmake", "pybind11", "pybind11Tools.cmake")
+        tools.replace_in_file(pybind11tools_path, "PYBIND11_INCLUDE_DIR", "pybind11_INCLUDE_DIRS")
 
     def package_id(self):
         self.info.header_only()
