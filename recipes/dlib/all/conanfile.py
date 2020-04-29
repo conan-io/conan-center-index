@@ -49,6 +49,10 @@ class DlibConan(ConanFile):
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
+        if self.settings.arch not in ["x86", "x86_64"]:
+            del self.options.with_sse2
+            del self.options.with_sse4
+            del self.options.with_avx
 
     def configure(self):
         if self.settings.compiler == "Visual Studio" and self.options.shared:
