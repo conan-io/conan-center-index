@@ -31,15 +31,19 @@ class SConsConan(ConanFile):
         tools.get(**self.conan_data["sources"][self.version])
         os.rename("scons-{}".format(self.version), self._source_subfolder)
 
+    @property
+    def _python_executable(self):
+        return "python"
+
     def build(self):
         with tools.chdir(self._source_subfolder):
             output = io.StringIO()
-            self.run("python setup.py --requires", output=output)
+            self.run("{} setup.py --requires".format(self._python_executable), output=output)
             # Workaround for log.print_run_commands = True/False
             # This requires log.run_to_output = True
             if not (output.getvalue().strip().splitlines() or ["-"])[-1].startswith("-"):
                 raise ConanException("scons has a requirement")
-            self.run("{} setup.py build -j{}".format(sys.executable, tools.cpu_count()))
+            self.run("{} setup.py build -j{}".format(self._python_executable, tools.cpu_count()))
 
     def package(self):
         self.copy("LICENSE*", src=self._source_subfolder, dst="licenses")
@@ -50,7 +54,7 @@ class SConsConan(ConanFile):
         tools.save(os.path.join(include_dir, "__nop.h"), "")
 
         with tools.chdir(self._source_subfolder):
-            self.run("{} setup.py install --no-compile --prefix={}".format(sys.executable, self.package_folder))
+            self.run("{} setup.py install --no-compile --prefix={}".format(self._python_executable, self.package_folder))
 
         tools.rmdir(os.path.join(self.package_folder, "man"))
 
