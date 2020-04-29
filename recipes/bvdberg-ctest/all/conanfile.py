@@ -3,7 +3,7 @@ from conans import ConanFile, tools
 
 
 class BvdbergCtestConan(ConanFile):
-    name = "ctest"
+    name = "bvdberg-ctest"
     license = "Apache-2.0"
     homepage = "https://github.com/bvdberg/ctest"
     url = "https://github.com/conan-io/conan-center-index"
@@ -17,7 +17,7 @@ class BvdbergCtestConan(ConanFile):
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
-        extracted_dir = self.name + "-" + self.version
+        extracted_dir = "ctest" + "-" + self.version
         os.rename(extracted_dir, self._source_subfolder)
 
     def package(self):
