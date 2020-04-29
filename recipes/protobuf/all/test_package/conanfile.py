@@ -27,15 +27,12 @@ class TestPackageConan(ConanFile):
 
         with tools.environment_append(RunEnvironment(self).vars):
             if self._protoc_available:
-                if not tools.cross_building(self.settings):
-                    self.run("protoc --version", run_environment=True)
                 # Build with protoc
                 cmake = CMake(self)
                 cmake.definitions["protobuf_VERBOSE"] = True
                 cmake.definitions["protobuf_MODULE_COMPATIBLE"] = True
                 cmake.definitions["PROTOC_AVAILABLE"] = True
                 cmake.configure(build_folder="with_protoc")
-                cmake.build(target="main")
                 cmake.build()
 
     def test(self):
