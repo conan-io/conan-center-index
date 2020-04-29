@@ -43,7 +43,7 @@ class SConsConan(ConanFile):
             # This requires log.run_to_output = True
             if not (output.getvalue().strip().splitlines() or ["-"])[-1].startswith("-"):
                 raise ConanException("scons has a requirement")
-            self.run("{} setup.py build -j{}".format(self._python_executable, tools.cpu_count()))
+            self.run("{} setup.py build".format(self._python_executable))
 
     def package(self):
         self.copy("LICENSE*", src=self._source_subfolder, dst="licenses")
