@@ -87,13 +87,14 @@ class DlibConan(ConanFile):
         self._cmake.definitions["DLIB_JPEG_SUPPORT"] = self.options.with_jpeg
         self._cmake.definitions["DLIB_PNG_SUPPORT"] = self.options.with_png
 
-        # Configure SIMD options
-        if self.options.with_sse2 != "auto":
-            self._cmake.definitions["USE_SSE2_INSTRUCTIONS"] = self.options.with_sse2
-        if self.options.with_sse4 != "auto":
-            self._cmake.definitions["USE_SSE4_INSTRUCTIONS"] = self.options.with_sse4
-        if self.options.with_avx != "auto":
-            self._cmake.definitions["USE_AVX_INSTRUCTIONS"] = self.options.with_avx
+        # Configure SIMD options if possible
+        if self.settings.arch in ["x86", "x86_64"]:
+            if self.options.with_sse2 != "auto":
+                self._cmake.definitions["USE_SSE2_INSTRUCTIONS"] = self.options.with_sse2
+            if self.options.with_sse4 != "auto":
+                self._cmake.definitions["USE_SSE4_INSTRUCTIONS"] = self.options.with_sse4
+            if self.options.with_avx != "auto":
+                self._cmake.definitions["USE_AVX_INSTRUCTIONS"] = self.options.with_avx
 
         self._cmake.configure(build_folder=self._build_subfolder)
         return self._cmake
