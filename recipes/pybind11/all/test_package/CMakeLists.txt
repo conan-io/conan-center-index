@@ -29,7 +29,6 @@ include("${CMAKE_BINARY_DIR}/conanbuildinfo.cmake")
 conan_global_flags()
 conan_set_find_paths()
 conan_set_find_library_paths()
-conan_include_build_modules()
 
 pybind11_add_module(test_package MODULE
     test_package.cpp
