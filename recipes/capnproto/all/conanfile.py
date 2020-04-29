@@ -93,7 +93,9 @@ class CapnprotoConan(ConanFile):
             self.cpp_info.system_libs.append("pthread")
         elif self.settings.os == "Windows":
             self.cpp_info.system_libs.append("ws2_32")
-        self.env_info.PATH.append(os.path.join(self.package_folder, "bin"))
+        bin_path = os.path.join(self.package_folder, "bin")
+        self.output.info("Appending PATH env var with : {}".format(bin_path))
+        self.env_info.PATH.append(bin_path)
 
     def _get_ordered_libs(self):
         libs = []
