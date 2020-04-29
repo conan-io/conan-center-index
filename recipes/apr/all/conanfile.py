@@ -54,7 +54,6 @@ class AprConan(ConanFile):
         self._cmake = CMake(self)
         self._cmake.definitions["INSTALL_PDB"] = False
         self._cmake.definitions["APR_BUILD_TESTAPR"] = False
-        # self._cmake.definitions["APR_INSTALL_PRIVATE_H"] = True
         self._cmake.configure(build_folder=self._build_subfolder)
         return self._cmake
 
