@@ -204,6 +204,6 @@ class LibtoolConan(ConanFile):
         self.output.info("Appending ACLOCAL_PATH env: {}".format(libtool_aclocal))
         self.env_info.ACLOCAL_PATH.append(libtool_aclocal)
 
-        # These are private environment variables so don't output anything
         for key, value in self._libtool_relocatable_env.items():
+            self.output.info("Setting {} environment variable to {}".format(key, value))
             setattr(self.env_info, key, value)
