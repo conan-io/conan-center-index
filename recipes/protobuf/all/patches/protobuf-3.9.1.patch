@@ -223,7 +223,7 @@ index f90e525e..fd0c1f68 100644
 +      COMMAND protoc  #FIXME: use conan binary component
        ARGS --${protobuf_generate_LANGUAGE}_out ${_dll_export_decl}${protobuf_generate_PROTOC_OUT_DIR} ${_protobuf_include_path} ${_abs_file}
 -      DEPENDS ${_abs_file} protobuf::protoc
-+      DEPENDS ${_abs_file}
++      DEPENDS ${_abs_file} USES_TERMINAL
        COMMENT "Running ${protobuf_generate_LANGUAGE} protocol buffer compiler on ${_proto}"
        VERBATIM )
    endforeach()
