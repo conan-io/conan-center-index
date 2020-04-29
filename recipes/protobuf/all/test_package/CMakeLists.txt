@@ -11,14 +11,6 @@ target_link_libraries(${PROJECT_NAME} ${CONAN_LIBS})
 set_property(TARGET ${PROJECT_NAME} PROPERTY CXX_STANDARD 11)
 target_include_directories(${PROJECT_NAME} PRIVATE "${CMAKE_BINARY_DIR}")
 
-message("CMakeLists.txt: DYLD_LIBRARY_PATH: $ENV{DYLD_LIBRARY_PATH}")
-
-file(WRITE "${CMAKE_BINARY_DIR}/test.c" "int main() {}")
-add_executable(main test.c)
-add_custom_command(TARGET main PRE_LINK
-    COMMAND "${CMAKE_COMMAND}" ARGS -E environment
-)
-
 if(PROTOC_AVAILABLE)
     find_package(Protobuf REQUIRED)
     protobuf_generate_cpp(PROTO_SRCS PROTO_HDRS TARGET ${PROJECT_NAME})
