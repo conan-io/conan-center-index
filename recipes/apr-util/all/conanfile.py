@@ -123,13 +123,13 @@ class AprUtilConan(ConanFile):
             "--with-crypto" if self.options.crypto else "--without-crypto",
             "--with-expat={}".format(my_unix_path(self.deps_cpp_info["expat"].rootpath)) if self.options.with_expat else "--without-expat",
             "--with-mysql={}".format(my_unix_path(self.deps_cpp_info["libmysqlclient"].rootpath)) if self.options.with_mysql else "--without-mysql",
-            "--with-pgsql={}".format(my_unix_path(self.deps_cpp_info["libpq"].rootpath)) if self.options.with_sqlite3 else "--without-postgresql",
+            "--with-pgsql={}".format(my_unix_path(self.deps_cpp_info["libpq"].rootpath)) if self.options.with_postgresql else "--without-pgsql",
             "--with-sqlite3={}".format(my_unix_path(self.deps_cpp_info["sqlite3"].rootpath)) if self.options.with_sqlite3 else "--without-sqlite3",
         ]
         if self.options.dbm:
             conf_args.append("--with-dbm={}".format(self.options.dbm))
         if self.options.crypto == "openssl":
-            conf_args.append("--with-openssl={}".format(tools.unix_path(self.deps_cpp_info["openssl"].rootpath)))
+            conf_args.append("--with-openssl={}".format(my_unix_path(self.deps_cpp_info["openssl"].rootpath)))
         self._autotools.configure(args=conf_args, configure_dir=self._source_subfolder)
         return self._autotools
 
@@ -174,6 +174,8 @@ class AprUtilConan(ConanFile):
             elif self.settings.os == "Windows":
                 self.cpp_info.system_libs = ["mswsock", "rpcrt4", "ws2_32"]
 
-        apr_util_root = tools.unix_path(self.package_folder)
+        apr_util_root = self.package_folder
+        if tools.os_info.is_windows:
+            apr_util_root = tools.unix_path(apr_util_root)
         self.output.info("Settings APR_UTIL_ROOT environment var: {}".format(apr_util_root))
         self.env_info.APR_UTIL_ROOT = apr_util_root
