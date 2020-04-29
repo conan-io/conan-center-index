@@ -170,7 +170,7 @@ class AprUtilConan(ConanFile):
         if not self.options.shared:
             self.cpp_info.defines = ["APU_DECLARE_STATIC"]
             if self.settings.os == "Linux":
-                self.cpp_info.system_libs = ["dl", "pthread", "uuid"]
+                self.cpp_info.system_libs = ["dl", "pthread", "uuid", "rt"]
             elif self.settings.os == "Windows":
                 self.cpp_info.system_libs = ["mswsock", "rpcrt4", "ws2_32"]
 
