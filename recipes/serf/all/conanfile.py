@@ -68,7 +68,7 @@ class SerfConan(ConanFile):
                 "ZLIB": self.deps_cpp_info["zlib"].rootpath,
                 "DEBUG": self.settings.build_type == "Debug",
                 "APR_STATIC": not self.options["apr"].shared,
-                "CFLAGS": " ".join(self.deps_cpp_info.cflags),
+                "CFLAGS": " ".join(self.deps_cpp_info.cflags + ["-fPIC"] if self.options.get_safe("fPIC") else []),
                 "LINKFLAGS": " ".join(self.deps_cpp_info.sharedlinkflags) + " " + " ".join("-L'{}'".format(l) for l in self.deps_cpp_info.lib_paths),
                 "CPPFLAGS": " ".join("-D{}".format(d) for d in self.deps_cpp_info.defines) + " " + " ".join("-I'{}'".format(inc) for inc in self.deps_cpp_info.include_paths),
             }
