@@ -163,9 +163,9 @@ class MpdecimalConan(ConanFile):
 
             shutil.copy("mpdecimal.h", dist_folder)
             if self.options.shared:
-                shutil.copy("libmpdec-{}.dll".format(self._version_major), os.path.join(dist_folder, "libmpdec-{}.dll".format(main_version)))
-                shutil.copy("libmpdec-{}.dll.exp".format(self._version_major), os.path.join(dist_folder, "libmpdec-{}.exp".format(main_version)))
-                shutil.copy("libmpdec-{}.dll.lib".format(self._version_major), os.path.join(dist_folder, "libmpdec-{}.lib".format(main_version)))
+                shutil.copy("libmpdec-{}.dll".format(self._version_major), os.path.join(dist_folder, "libmpdec-{}.dll".format(self._version_major)))
+                shutil.copy("libmpdec-{}.dll.exp".format(self._version_major), os.path.join(dist_folder, "libmpdec-{}.exp".format(self._version_major)))
+                shutil.copy("libmpdec-{}.dll.lib".format(self._version_major), os.path.join(dist_folder, "libmpdec-{}.lib".format(self._version_major)))
             else:
                 shutil.copy("libmpdec-{}.lib".format(self._version_major), dist_folder)
 
