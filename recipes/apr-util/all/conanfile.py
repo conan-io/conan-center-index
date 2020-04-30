@@ -17,7 +17,9 @@ class AprUtilConan(ConanFile):
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
-        "crypto": [False, "openssl", "nss", "commoncrypto"],
+        "with_openssl": [True, False],
+        "with_nss": [True, False],
+        "with_commoncrypto": [True, False],
         "dbm": [False, "gdbm", "ndbm", "db"],
         "with_expat": [True, False],
         "with_mysql": [True, False],
@@ -29,7 +31,9 @@ class AprUtilConan(ConanFile):
     default_options = {
         "shared": False,
         "fPIC": True,
-        "crypto": "openssl",
+        "with_openssl": True,
+        "with_nss": False,
+        "with_commoncrypto": False,
         "dbm": False,
         "with_expat": True,
         "with_mysql": True,
@@ -66,12 +70,12 @@ class AprUtilConan(ConanFile):
 
     def requirements(self):
         self.requires("apr/1.7.0")
-        if self.options.crypto == "openssl":
+        if self.options.with_openssl:
             self.requires("openssl/1.1.1g")  # FIXME: 1.1 is not supported by mysql-connector-c
-        elif self.options.crypto == "nss":
+        if self.options.with_nss:
             # self.requires("nss/x.y.z")
             raise ConanInvalidConfiguration("CCI has no nss recipe (yet)")
-        elif self.options.crypto == "commoncrypto":
+        if self.options.with_commoncrypto:
             # self.requires("commoncrypto/x.y.z")
             raise ConanInvalidConfiguration("CCI has no commoncrypto recipe (yet)")
         if self.options.dbm == "gdbm":
@@ -108,28 +112,41 @@ class AprUtilConan(ConanFile):
         self._cmake = CMake(self)
         self._cmake.definitions["APR_INCLUDE_DIR"] = ";".join(self.deps_cpp_info["apr"].include_paths)
         self._cmake.definitions["INSTALL_PDB"] = False
-        self._cmake.definitions["APU_HAVE_CRYPTO"] = bool(self.options.crypto)
+        self._cmake.definitions["APU_HAVE_CRYPTO"] = self._with_crypto
         self._cmake.definitions["APR_HAS_LDAP"] = self.options.with_ldap
         self._cmake.configure(build_folder=self._build_subfolder)
         return self._cmake
+
+    @property
+    def _with_crypto(self):
+        return self.options.with_openssl or self.options.with_nss or self.options.with_commoncrypto
 
     def _configure_autotools(self):
         if self._autotools:
             return self._autotools
         self._autotools = AutoToolsBuildEnvironment(self)
+        self._autotools.libs = []
+        self._autotools.include_paths = []
+        if self._with_crypto:
+            if self.settings.os == "Linux":
+                self._autotools.libs.append("dl")
         my_unix_path = tools.unix_path if tools.os_info.is_windows else lambda x: x
         conf_args = [
             "--with-apr={}".format(my_unix_path(self.deps_cpp_info["apr"].rootpath)),
-            "--with-crypto" if self.options.crypto else "--without-crypto",
+            "--with-crypto" if self._with_crypto else "--without-crypto",
+            "--with-openssl={}".format(my_unix_path(self.deps_cpp_info["openssl"].rootpath)) if self.options.with_openssl else "--without-openssl",
             "--with-expat={}".format(my_unix_path(self.deps_cpp_info["expat"].rootpath)) if self.options.with_expat else "--without-expat",
             "--with-mysql={}".format(my_unix_path(self.deps_cpp_info["libmysqlclient"].rootpath)) if self.options.with_mysql else "--without-mysql",
             "--with-pgsql={}".format(my_unix_path(self.deps_cpp_info["libpq"].rootpath)) if self.options.with_postgresql else "--without-pgsql",
             "--with-sqlite3={}".format(my_unix_path(self.deps_cpp_info["sqlite3"].rootpath)) if self.options.with_sqlite3 else "--without-sqlite3",
+            "--with-ldap={}".format(my_unix_path(self.deps_cpp_info["ldap"].rootpath)) if self.options.with_ldap else "--without-ldap",
+            "--with-berkeley-db={}".format(my_unix_path(self.deps_cpp_info["libdb"].rootpath)) if self.options.dbm == "db" else "--without-berkeley-db",
+            "--with-gdbm={}".format(my_unix_path(self.deps_cpp_info["gdbm"].rootpath)) if self.options.dbm == "gdbm" else "--without-gdbm",
+            "--with-ndbm={}".format(my_unix_path(self.deps_cpp_info["ndbm"].rootpath)) if self.options.dbm == "ndbm" else "--without-ndbm",
+
         ]
         if self.options.dbm:
             conf_args.append("--with-dbm={}".format(self.options.dbm))
-        if self.options.crypto == "openssl":
-            conf_args.append("--with-openssl={}".format(my_unix_path(self.deps_cpp_info["openssl"].rootpath)))
         self._autotools.configure(args=conf_args, configure_dir=self._source_subfolder)
         return self._autotools
 
@@ -174,8 +191,14 @@ class AprUtilConan(ConanFile):
             elif self.settings.os == "Windows":
                 self.cpp_info.system_libs = ["mswsock", "rpcrt4", "ws2_32"]
 
-        apr_util_root = self.package_folder
-        if tools.os_info.is_windows:
-            apr_util_root = tools.unix_path(apr_util_root)
+        my_unix_path = tools.unix_path if tools.os_info.is_windows else lambda x : x
+
+        binpath = os.path.join(self.package_folder, "bin")
+        self.output.info("Appending PATH env var : {}".format(binpath))
+        self.env_info.PATH.append(binpath)
+
+        apr_util_root = my_unix_path(self.package_folder)
         self.output.info("Settings APR_UTIL_ROOT environment var: {}".format(apr_util_root))
         self.env_info.APR_UTIL_ROOT = apr_util_root
+
+        self.env_info.APRUTIL_LDFLAGS = " ".join(my_unix_path("-L{}".format(l) for l in self.deps_cpp_info.lib_paths))
