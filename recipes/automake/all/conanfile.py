@@ -11,7 +11,7 @@ class AutomakeConan(ConanFile):
     exports_sources = ["patches/**"]
     license = ("GPL-2.0-or-later", "GPL-3.0-or-later")
 
-    settings = "os_build", "arch_build"
+    settings = "os"
     _autotools = None
 
     @property
@@ -32,7 +32,7 @@ class AutomakeConan(ConanFile):
         # automake requires perl-Thread-Queue package
 
     def build_requirements(self):
-        if self.settings.os_build == "Windows" and "CONAN_BASH_PATH" not in os.environ \
+        if tools.os_info.is_windows and "CONAN_BASH_PATH" not in os.environ \
                 and tools.os_info.detect_windows_subsystem() != "msys2":
             self.build_requires("msys2/20190524")
 
@@ -77,7 +77,7 @@ class AutomakeConan(ConanFile):
         tools.rmdir(os.path.join(self.package_folder, "bin", "share", "man"))
         tools.rmdir(os.path.join(self.package_folder, "bin", "share", "doc"))
 
-        if self.settings.os_build == "Windows":
+        if self.settings.os == "Windows":
             binpath = os.path.join(self.package_folder, "bin")
             for filename in os.listdir(binpath):
                 fullpath = os.path.join(binpath, filename)
@@ -90,34 +90,34 @@ class AutomakeConan(ConanFile):
         self.output.info("Appending PATH env var with : {}".format(bin_path))
         self.env_info.PATH.append(bin_path)
 
-        bin_ext = ".exe" if self.settings.os_build == "Windows" else ""
+        bin_ext = ".exe" if self.settings.os == "Windows" else ""
 
         aclocal = os.path.join(self.package_folder, "bin", "aclocal" + bin_ext)
-        if self.settings.os_build == "Windows":
+        if tools.os_info.is_windows:
             aclocal = tools.unix_path(aclocal)
         self.output.info("Setting ACLOCAL to {}".format(aclocal))
         self.env_info.ACLOCAL = aclocal
 
         automake_datadir = self._datarootdir
-        if self.settings.os_build == "Windows":
+        if tools.os_info.is_windows:
             automake_datadir = tools.unix_path(automake_datadir)
         self.output.info("Setting AUTOMAKE_DATADIR to {}".format(automake_datadir))
         self.env_info.AUTOMAKE_DATADIR = automake_datadir
 
         automake_libdir = self._automake_libdir
-        if self.settings.os_build == "Windows":
+        if tools.os_info.is_windows:
             automake_libdir = tools.unix_path(automake_libdir)
         self.output.info("Setting AUTOMAKE_LIBDIR to {}".format(automake_libdir))
         self.env_info.AUTOMAKE_LIBDIR = automake_libdir
 
         automake_perllibdir = self._automake_libdir
-        if self.settings.os_build == "Windows":
+        if tools.os_info.is_windows:
             automake_perllibdir = tools.unix_path(automake_perllibdir)
         self.output.info("Setting AUTOMAKE_PERLLIBDIR to {}".format(automake_perllibdir))
         self.env_info.AUTOMAKE_PERLLIBDIR = automake_perllibdir
 
         automake = os.path.join(self.package_folder, "bin", "automake" + bin_ext)
-        if self.settings.os_build == "Windows":
+        if tools.os_info.is_windows:
             automake = tools.unix_path(automake)
         self.output.info("Setting AUTOMAKE to {}".format(automake))
         self.env_info.AUTOMAKE = automake
