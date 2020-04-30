@@ -1,6 +1,7 @@
 from conans import ConanFile, CMake, tools
 import os
 
+
 class LevelDBConan(ConanFile):
     name = "leveldb"
     description = ("LevelDB is a fast key-value storage library written at "
@@ -42,7 +43,7 @@ class LevelDBConan(ConanFile):
     def requirements(self):
         if self.options.with_snappy:
             self.requires(self.optional_snappy_requirement)
-    
+
     @property
     def _source_subfolder(self):
         return "source_subfolder"
@@ -52,15 +53,17 @@ class LevelDBConan(ConanFile):
         return "build_subfolder"
 
     def source(self):
-       tools.get(**self.conan_data["sources"][self.version])
-       downloaded_name = "%s-%s" % (self.name, self.version)
-       os.rename(downloaded_name, self._source_subfolder)
-       with tools.chdir(self._source_subfolder):
-           if not self.options.with_snappy:
-               tools.replace_in_file("CMakeLists.txt",
-                       '''check_library_exists(snappy snappy_compress "" HAVE_SNAPPY)''',
-                       '''check_library_exists(snappy snappy_compress "" IGNORE_HAVE_SNAPPY)''')
-
+        tools.get(**self.conan_data["sources"][self.version])
+        downloaded_name = "%s-%s" % (self.name, self.version)
+        os.rename(downloaded_name, self._source_subfolder)
+        with tools.chdir(self._source_subfolder):
+            if not self.options.with_snappy:
+                tools.replace_in_file(
+                    "CMakeLists.txt",
+                    ('''check_library_exists(snappy snappy_compress '''
+                     '''"" HAVE_SNAPPY)'''),
+                    ('''check_library_exists(snappy snappy_compress '''
+                        '''"" IGNORE_HAVE_SNAPPY)'''))
 
     def build(self):
         cmake = self._get_cmake()
@@ -69,12 +72,13 @@ class LevelDBConan(ConanFile):
 
     def package(self):
         cmake = self._get_cmake()
-        self.copy("LICENSE", src=self._source_subfolder, dst="licenses", keep_path=False)
+        self.copy("LICENSE", src=self._source_subfolder,
+                  dst="licenses", keep_path=False)
         cmake.install()
         tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
-
 
     def package_info(self):
         self.cpp_info.libs = tools.collect_libs(self)
         if self.settings.os == "Linux":
             self.cpp_info.system_libs = ["pthread"]
+
