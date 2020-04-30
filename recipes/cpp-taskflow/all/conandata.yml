@@ -2,3 +2,7 @@ sources:
   2.2.0:
     url: https://github.com/cpp-taskflow/cpp-taskflow/archive/v2.2.0.tar.gz
     sha256: 60b2340ff029a241a3371d88c26b778ba7fccdf1a95995a716d9220575771689
+
+  2.4.0:
+    url: https://github.com/cpp-taskflow/cpp-taskflow/archive/v2.4.0.tar.gz
+    sha256: c59ec561675cc387bf30cc41065a85099cb14a731267d7156462441c230d8145
