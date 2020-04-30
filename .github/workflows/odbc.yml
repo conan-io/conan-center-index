@@ -31,7 +31,7 @@ jobs:
             compiler_version: '8'
             docker_image: 'trassiross/conan-gcc8'
             build_types: 'Release,Debug'
-            archs: 'x86,x86_64'        
+            archs: 'x86,x86_64'
           - build: 'macos'
             os: 'macos-latest'
             build_types: 'Release,Debug'
