@@ -1,0 +1,4 @@
+sources:
+  "20200424":
+    sha256: 0357e8795b1685a493399414a676827f4084fcee7806648af65e753ef5734b34
+    url: https://github.com/rscada/libmbus/archive/baf03e2a47500e088161471829a05a3f42f45a0b.zip
