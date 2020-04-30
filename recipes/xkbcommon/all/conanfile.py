@@ -96,3 +96,5 @@ class XkbcommonConan(ConanFile):
     def package_info(self):
         self.env_info.destdir.append("../install")
         self.cpp_info.libs = tools.collect_libs(self)
+        if self.options.with_x11:
+            self.cpp_info.libs.extend(self.deps_cpp_info['libxcb'].libs)
