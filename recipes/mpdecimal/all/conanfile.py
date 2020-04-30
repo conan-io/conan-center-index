@@ -142,11 +142,14 @@ class MpdecimalConan(ConanFile):
                                       "libmpdec.so",
                                       "libmpdec{}".format(shared_ext))
 
+    @property
+    def _version_major(self):
+        return self.version.split(".", 1)[0]
+
     def _build_msvc(self):
         libmpdec_folder = os.path.join(self.build_folder, self._source_subfolder, "libmpdec")
         vcbuild_folder = os.path.join(self.build_folder, self._source_subfolder, "vcbuild")
         arch_ext = "{}".format(32 if self.settings.arch == "x86" else 64)
-        main_version, _ = self.version.split(".", 1)
         dist_folder = os.path.join(vcbuild_folder, "dist{}".format(arch_ext))
         os.mkdir(dist_folder)
 
@@ -160,11 +163,11 @@ class MpdecimalConan(ConanFile):
 
             shutil.copy("mpdecimal.h", dist_folder)
             if self.options.shared:
-                shutil.copy("libmpdec-{}.dll".format(main_version), os.path.join(dist_folder, "libmpdec-{}.dll".format(main_version)))
-                shutil.copy("libmpdec-{}.dll.exp".format(main_version), os.path.join(dist_folder, "libmpdec-{}.exp".format(main_version)))
-                shutil.copy("libmpdec-{}.dll.lib".format(main_version), os.path.join(dist_folder, "libmpdec-{}.lib".format(main_version)))
+                shutil.copy("libmpdec-{}.dll".format(self._version_major), os.path.join(dist_folder, "libmpdec-{}.dll".format(main_version)))
+                shutil.copy("libmpdec-{}.dll.exp".format(self._version_major), os.path.join(dist_folder, "libmpdec-{}.exp".format(main_version)))
+                shutil.copy("libmpdec-{}.dll.lib".format(self._version_major), os.path.join(dist_folder, "libmpdec-{}.lib".format(main_version)))
             else:
-                shutil.copy("libmpdec-{}.lib".format(main_version), dist_folder)
+                shutil.copy("libmpdec-{}.lib".format(self._version_major), dist_folder)
 
     def _configure_autotools(self):
         if self._autotools:
@@ -197,7 +200,11 @@ class MpdecimalConan(ConanFile):
             tools.rmdir(os.path.join(self.package_folder, "share"))
 
     def package_info(self):
-        self.cpp_info.libs = ["mpdec"]
+        if self.settings.compiler == "Visual Studio":
+            ext = ".dll.lib" if self.options.shared else ".lib"
+            self.cpp_info.libs = ["libmpdec-{}{}".format(self._version_major, ext)]
+        else:
+            self.cpp_info.libs = ["mpdec"]
         if self.options.shared:
             if self.settings.compiler == "Visual Studio":
                 self.cpp_info.defines = ["USE_DLL"]
