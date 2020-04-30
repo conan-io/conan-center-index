@@ -13,6 +13,8 @@ class TestPackageConan(ConanFile):
         cmake.build()
 
     def test(self):
+        self.run("apu-1-config --ldflags", win_bash=tools.os_info.is_windows)
+
         if not tools.cross_building(self.settings):
             bin_path = os.path.join("bin", "test_package")
             self.run(bin_path, run_environment=True)
