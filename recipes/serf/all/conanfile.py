@@ -1,7 +1,7 @@
 from conans import AutoToolsBuildEnvironment, ConanFile, CMake, tools
-from conans.errors import ConanInvalidConfiguration
-import glob
+from conans.errors import ConanException
 import os
+import re
 
 
 class SerfConan(ConanFile):
@@ -82,12 +82,31 @@ class SerfConan(ConanFile):
             escape_str = lambda x : "\"{}\"".format(x)
             self.run("scons {} {}".format(" ".join(escape_str(s) for s in args), " ".join("{}={}".format(k, escape_str(v)) for k, v in kwargs.items())), run_environment=True)
 
+    @property
+    def _static_ext(self):
+        return "a"
+
+    @property
+    def _shared_ext(self):
+        if tools.is_apple_os(self.settings.os):
+            return "dylib"
+        return {
+            "Windows": "dll",
+        }.get(str(self.settings.os), "so")
+
     def package(self):
         self.copy("LICENSE", src=self._source_subfolder, dst="licenses")
         with tools.chdir(self._build_subfolder):
             self.run("scons install -Y \"{}\"".format(os.path.join(self.source_folder, self._source_subfolder)), run_environment=True)
 
         tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
+        if self.settings.os == "Windows":
+            raise ConanException("FIXME: don't know how to handle static/shared libraries on Windows yet")
+        else:
+            ext_to_remove = self._static_ext if self.options.shared else self._shared_ext
+            for fn in os.listdir(os.path.join(self.package_folder, "lib")):
+                if any(re.finditer("\\.{}(\.?|$)".format(ext_to_remove), fn)):
+                    os.unlink(os.path.join(self.package_folder, "lib", fn))
 
     def package_info(self):
         libname = "serf-{}".format(self.version.split(".", 1)[0])
