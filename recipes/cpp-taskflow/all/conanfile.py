@@ -44,7 +44,7 @@ class CppTaskflowConan(ConanFile):
             }            
         }
 
-        if compiler not in minimal_version:
+        if compiler not in minimal_version[min_req_cppstd]:
             self.output.info("%s requires a compiler that supports at least C++%s" % (self.name, min_req_cppstd))
             return
         
