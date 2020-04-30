@@ -163,6 +163,7 @@ class PocoConan(ConanFile):
                 ("enable_netssl", "PocoNetSSL"),
                 ("enable_netssl_win", "PocoNetSSLWin"),
                 ("enable_net", "PocoNet"),
+                ("enable_jwt", "PocoJWT"),
                 ("enable_crypto", "PocoCrypto"),
                 ("enable_data_sqlite", "PocoDataSQLite"),
                 ("enable_data_mysql", "PocoDataMySQL"),
