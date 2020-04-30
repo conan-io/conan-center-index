@@ -1,0 +1,4 @@
+sources:
+  "0.10.1":
+    url: "https://github.com/lief-project/LIEF/archive/0.10.1.tar.gz"
+    sha256: "6f30c98a559f137e08b25bcbb376c0259914b33c307b8b901e01ca952241d00a"

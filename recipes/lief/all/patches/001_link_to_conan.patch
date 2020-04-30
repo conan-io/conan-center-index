@@ -1,0 +1,124 @@
+--- CMakeLists.txt	2019-11-29 15:51:38.000000000 -0500
++++ CMakeLists.txt	2020-04-30 14:25:52.747398200 -0400
+@@ -5,7 +5,7 @@
+ # Modules
+ list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake/")
+ if (WIN32)
+-  include(ChooseMSVCCRT)
++
+ endif()
+ include(CheckCXXCompilerFlag)
+ include(CheckCCompilerFlag)
+@@ -50,13 +50,9 @@
+ # Dependencies
+ # ============
+ set(THIRD_PARTY_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/third-party/")
+-include(LIEFDependencies)
+
+ # LIEF Source definition
+ # ======================
+-set_source_files_properties(${mbedtls_src_crypto} PROPERTIES GENERATED TRUE)
+-set_source_files_properties(${mbedtls_src_x509} PROPERTIES GENERATED TRUE)
+-set_source_files_properties(${mbedtls_src_tls} PROPERTIES GENERATED TRUE)
+
+ if (LIEF_LOGGING)
+   set_source_files_properties(${ELG_SOURCE_DIR}/easylogging++.cc PROPERTIES GENERATED TRUE)
+@@ -73,9 +69,6 @@
+
+ set(LIBLIEF_SOURCE_FILES
+   "${ELG_CC_PATH}"
+-  "${mbedtls_src_crypto}"
+-  "${mbedtls_src_x509}"
+-  "${mbedtls_src_tls}"
+   "${LIBFUZZER_SRC_FILES}"
+   "${CMAKE_CURRENT_SOURCE_DIR}/src/logging.cpp"
+   "${CMAKE_CURRENT_SOURCE_DIR}/src/exception.cpp"
+@@ -123,18 +116,6 @@
+   ${LIEF_VISITOR_INCLUDE_FILES}
+ )
+
+-set(LIEF_JSON_SRC "${CMAKE_CURRENT_SOURCE_DIR}/src/visitors/json.cpp")
+-set(LIEF_JSON_HDR
+-  "${CMAKE_CURRENT_SOURCE_DIR}/include/LIEF/json.hpp"
+-  "${LIBJSON_SOURCE_DIR}/json.hpp"
+-)
+-
+-if (LIEF_ENABLE_JSON)
+-  list(APPEND LIBLIEF_SOURCE_FILES     "${LIEF_JSON_SRC}")
+-  list(APPEND LIEF_INC_FILES           "${LIEF_JSON_HDR}")
+-  list(APPEND LIEF_PUBLIC_INCLUDE_DIR  "${LIBJSON_SOURCE_DIR}/")
+-endif()
+-
+ source_group("Header Files" FILES ${LIEF_INC_FILES})
+ source_group("Source Files" FILES ${LIBLIEF_SOURCE_FILES})
+
+@@ -224,9 +205,7 @@
+
+ # Frozen Configuration
+ # ====================
+-if (LIEF_FROZEN_ENABLED)
+-  list(APPEND LIEF_PRIVATE_INCLUDE_DIR "${FROZEN_INCLUDE_DIR}")
+-endif()
++
+
+ # OAT part
+ # ========
+@@ -292,9 +271,9 @@
+ list(APPEND LIEF_PRIVATE_INCLUDE_DIR
+   "${LIEF_PUBLIC_INCLUDE_DIR}"
+   "${LIEF_PUBLIC_INCLUDE_DIR}"
+-  "${LIBRANG_SOURCE_DIR}/include"
+   "${CMAKE_CURRENT_SOURCE_DIR}/src"
+   "${CMAKE_BINARY_DIR}"
++  "${CMAKE_CURRENT_BINARY_DIR}"
+   "${ELG_SOURCE_DIR}"
+   "${MBEDTLS_INCLUDE_DIRS}"
+ )
+@@ -302,9 +281,6 @@
+
+ # Grouping external projects
+ # ==========================
+-source_group("mbedtls\\crypto" FILES ${mbedtls_src_crypto})
+-source_group("mbedtls\\x509"   FILES ${mbedtls_src_x509})
+-source_group("mbedtls\\tls"    FILES ${mbedtls_src_tls})
+ if (LIEF_LOGGING)
+   source_group("easylogging"     FILES ${ELG_SOURCE_DIR}/easylogging++.cc)
+ endif()
+@@ -316,7 +292,7 @@
+   PRIVATE "${LIEF_PRIVATE_INCLUDE_DIR}")
+
+ if (LIEF_ENABLE_JSON)
+-  add_dependencies(LIB_LIEF lief_libjson)
++  target_link_libraries(LIB_LIEF CONAN_PKG::nlohmann_json)
+ endif()
+
+ if (LIEF_LOGGING)
+@@ -324,12 +300,12 @@
+ endif()
+
+ if (LIEF_FROZEN_ENABLED)
+-  add_dependencies(LIB_LIEF lief_frozen)
++  target_link_libraries(LIB_LIEF CONAN_PKG::frozen)
+ endif()
+
+-add_dependencies(LIB_LIEF lief_rang_cpp_color)
++target_link_libraries(LIB_LIEF CONAN_PKG::rang)
+
+-add_dependencies(LIB_LIEF lief_mbed_tls)
++target_link_libraries(LIB_LIEF CONAN_PKG::mbedtls)
+
+ # Flags definition
+ # ----------------
+@@ -345,11 +321,7 @@
+ # with the SpcSpAgencyInfo Critical Extension, which mbed TLS doesn't
+ # support, so set MBEDTLS_X509_ALLOW_UNSUPPORTED_CRITICAL_EXTENSION to
+ # have it skip this extension.
+-add_definitions(
+-  -DMBEDTLS_MD2_C
+-  -DMBEDTLS_MD4_C
+-  -DMBEDTLS_X509_ALLOW_UNSUPPORTED_CRITICAL_EXTENSION
+-)
++
+
+
+ # ASAN - LSAN - TSAN - USAN
