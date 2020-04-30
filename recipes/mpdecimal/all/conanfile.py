@@ -201,8 +201,7 @@ class MpdecimalConan(ConanFile):
 
     def package_info(self):
         if self.settings.compiler == "Visual Studio":
-            ext = ".dll.lib" if self.options.shared else ".lib"
-            self.cpp_info.libs = ["libmpdec-{}{}".format(self._version_major, ext)]
+            self.cpp_info.libs = ["libmpdec-{}".format(self._version_major)]
         else:
             self.cpp_info.libs = ["mpdec"]
         if self.options.shared:
