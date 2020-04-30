@@ -73,9 +73,8 @@ class LibxcryptConan(ConanFile):
 
     def package(self):
         self.copy("COPYING.LIB", src=self._source_subfolder, dst="licenses")
-        with self._build_context():
-            autotools = self._configure_autotools()
-            autotools.install()
+        autotools = self._configure_autotools()
+        autotools.install()
 
         os.unlink(os.path.join(self.package_folder, "lib", "libcrypt.la"))
         tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
