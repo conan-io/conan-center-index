@@ -5,7 +5,7 @@ import os
 class RangConan(ConanFile):
     name = "rang"
     description = "A Minimal, Header only Modern c++ library for colors in your terminal"
-    homepage = "https://github.com/rvarago/absent"
+    homepage = "https://github.com/agauniyal/rang"
     url = "https://github.com/conan-io/conan-center-index"
     license = "MIT"
     topics = ("conan", "cli", "colors", "terminal", "console")
