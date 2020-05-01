@@ -1,4 +1,3 @@
-#include <cstdlib>
 #include <filesystem>
 #include <iostream>
 #include <random>
@@ -32,20 +31,6 @@ ScopedTempDir::ScopedTempDir() {
 
 }
 
-namespace {
-
-void exit_if_failed(leveldb::Status status, const leveldb::DB *db) {
-  if (!status.ok()) {
-    std::cerr << "Error due to leveldb status " << status.ToString() << std::endl;
-    if (db) {
-      delete db;
-    }
-    std::exit(EXIT_FAILURE);
-  }
-}
-
-}
-
 int main() {
   ScopedTempDir tmpdir;
 
@@ -53,19 +38,24 @@ int main() {
   leveldb::Options options;
   options.create_if_missing = true;
   options.error_if_exists = true;
-  leveldb::Status status = leveldb::DB::Open(options, tmpdir.GetPath(), &db);
+  auto status = leveldb::DB::Open(options, tmpdir.GetPath(), &db);
+  if (!status.ok()) {
+    std::cerr << "Failed to open tempdb at " << tmpdir.GetPath() << std::endl;
+    return EXIT_FAILURE;
+  }
 
-  exit_if_failed(status, db); status = db->Put(leveldb::WriteOptions(), "key1", "value1");
+  db->Put(leveldb::WriteOptions(), "key1", "value1");
   std::string value;
-  exit_if_failed(status, db); status = db->Get(leveldb::ReadOptions(), "key1", &value);
-  exit_if_failed(status, db); status = db->Put(leveldb::WriteOptions(), "key2", "value1");
+  db->Get(leveldb::ReadOptions(), "key1", &value);
+  db->Put(leveldb::WriteOptions(), "key2", "value1");
 
   leveldb::WriteBatch batch;
   batch.Delete("key1");
   batch.Delete("key2");
 
-  exit_if_failed(status, db); status = db->Write(leveldb::WriteOptions(), &batch);
-  exit_if_failed(status, db); delete db;
+  db->Write(leveldb::WriteOptions(), &batch);
+
+  delete db;
 
   return 0;
 }
