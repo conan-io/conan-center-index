@@ -11,9 +11,7 @@ class LevelDBTestConan(ConanFile):
 
     def build(self):
         cmake = CMake(self)
-        cmake.configure(
-          defs = {'CMAKE_CXX_FLAGS': "-std=c++17"}
-        )
+        cmake.configure()
         cmake.build()
 
     def test(self):
