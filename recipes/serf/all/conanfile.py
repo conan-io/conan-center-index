@@ -1,5 +1,6 @@
-from conans import AutoToolsBuildEnvironment, ConanFile, CMake, tools
+from conans import ConanFile, tools
 from conans.errors import ConanException
+import glob
 import os
 import re
 
@@ -49,7 +50,7 @@ class SerfConan(ConanFile):
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
-        os.rename("{}-{}".format(self.name, self.version), self._source_subfolder)
+        os.rename(glob.glob("serf-*")[0], self._source_subfolder)
 
     def _patch_sources(self):
         for patch in self.conan_data["patches"][self.version]:
