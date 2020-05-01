@@ -97,5 +97,6 @@ class LibCoapConan(ConanFile):
 
     def package_info(self):
         self.cpp_info.libs = ["coap"]
+        self.cpp_info.names['pkg_config'] = "libcoap-2{}".format("-" + self.options.dtls_backend if self.options.dtls_backend else "")
         if self.settings.os == "Linux":
             self.cpp_info.system_libs = ["pthread"]
