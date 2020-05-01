@@ -1,8 +1,8 @@
 #include <cose/cose.h>
 #include <stdio.h>
 
-int main(int argc, char *argv[]) {
-
+int main(int argc, char *argv[])
+{
   const int aCoseInitFlags = COSE_INIT_FLAGS_NONE;
 
   const auto mSign =

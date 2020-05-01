@@ -43,9 +43,6 @@ class CoseCStackConan(ConanFile):
             self.requires("openssl/1.1.1f")
 
     def configure(self):
-        if self.settings.os in ["Windows", "Macos", "Android"]:
-            raise ConanInvalidConfiguration("cose-c does not support your OS at the moment")
-        
         del self.settings.compiler.libcxx
         del self.settings.compiler.cppstd
 
