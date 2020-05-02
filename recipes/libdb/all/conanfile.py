@@ -1,4 +1,5 @@
 from conans import AutoToolsBuildEnvironment, ConanFile, MSBuild, tools
+from conans.errors import ConanInvalidConfiguration
 import os
 import shutil
 
@@ -42,6 +43,9 @@ class LibdbConan(ConanFile):
     def configure(self):
         if self.options.shared:
             del self.options.fPIC
+        if self.settings.compiler == "apple-clang":
+            if self.settings.compiler.version < tools.Version("10"):
+                raise ConanInvalidConfiguration("This compiler version is unsupported")
 
     def requirements(self):
         if self.options.with_tcl:
