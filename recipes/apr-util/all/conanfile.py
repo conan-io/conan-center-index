@@ -104,6 +104,8 @@ class AprUtilConan(ConanFile):
             self.requires("expat/2.2.9")
         if self.options.with_postgresql:
             self.requires("libpq/11.5")
+        if self.settings.os != "Windows":
+            self.requires("libuuid/1.0.3")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
@@ -190,7 +192,7 @@ class AprUtilConan(ConanFile):
         if not self.options.shared:
             self.cpp_info.defines = ["APU_DECLARE_STATIC"]
             if self.settings.os == "Linux":
-                self.cpp_info.system_libs = ["dl", "pthread", "uuid", "rt"]
+                self.cpp_info.system_libs = ["dl", "pthread", "rt"]
             elif self.settings.os == "Windows":
                 self.cpp_info.system_libs = ["mswsock", "rpcrt4", "ws2_32"]
 
