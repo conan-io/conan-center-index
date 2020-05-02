@@ -61,6 +61,7 @@ class AprConan(ConanFile):
         if self._autotools:
             return self._autotools
         self._autotools = AutoToolsBuildEnvironment(self)
+        self._autotools.libs = []
         conf_args = [
             "--with-installbuilddir=${prefix}/bin/build-1",
         ]
@@ -77,7 +78,7 @@ class AprConan(ConanFile):
 
     def build(self):
         self._patch_sources()
-        if self.settings.os == "Windows":
+        if self.settings.compiler == "Visual Studio":
             cmake = self._configure_cmake()
             cmake.build(target="libapr-1" if self.options.shared else "apr-1")
         else:
@@ -86,7 +87,7 @@ class AprConan(ConanFile):
 
     def package(self):
         self.copy("LICENSE", dst="licenses", src=self._source_subfolder)
-        if self.settings.os == "Windows":
+        if self.settings.compiler == "Visual Studio":
             cmake = self._configure_cmake()
             cmake.install()
         else:
