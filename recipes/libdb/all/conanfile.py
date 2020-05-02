@@ -17,11 +17,13 @@ class LibdbConan(ConanFile):
         "shared": [True, False],
         "fPIC": [True, False],
         "with_tcl": [True, False],
+        "with_cxx": [True, False],
     }
     default_options = {
         "shared": False,
         "fPIC": True,
         "with_tcl": True,
+        "with_cxx": False,
     }
 
     generators = "visual_studio"
@@ -39,13 +41,19 @@ class LibdbConan(ConanFile):
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
+        if self.settings.compiler == "Visual Studio":
+            del self.options.with_cxx
 
     def configure(self):
         if self.options.shared:
             del self.options.fPIC
-        if self.settings.compiler == "apple-clang":
-            if self.settings.compiler.version < tools.Version("10"):
-                raise ConanInvalidConfiguration("This compiler version is unsupported")
+        if self.options.get_safe("with_cxx"):
+            if self.settings.compiler == "clang":
+                if self.settings.compiler.version <= tools.Version("5"):
+                    raise ConanInvalidConfiguration("This compiler version is unsupported")
+            if self.settings.compiler == "apple-clang":
+                if self.settings.compiler.version < tools.Version("10"):
+                    raise ConanInvalidConfiguration("This compiler version is unsupported")
 
     def requirements(self):
         if self.options.with_tcl:
@@ -86,7 +94,7 @@ class LibdbConan(ConanFile):
         conf_args = [
             "--enable-debug" if self.settings.build_type == "Debug" else "--disable-debug",
             "--enable-mingw" if self._mingw_build else "--disable-mingw",
-            "--enable-cxx",
+            "--enable-cxx" if self.options.with_cxx else "--disable-cxx",
             "--enable-compat185",
             "--enable-stl",
             "--enable-sql",
@@ -121,7 +129,7 @@ class LibdbConan(ConanFile):
         return self._msvc_platforms[str(self.settings.arch)]
 
     def _build_msvc(self):
-        projects = ["db", "db_stl", "db_sql", ]
+        projects = ["db", "db_sql", "db_stl"]
         if self.options.with_tcl:
             projects.append("db_tcl")
         msbuild = MSBuild(self)
@@ -157,11 +165,6 @@ class LibdbConan(ConanFile):
                 debug_suffix = "d" if self.settings.build_type == "Debug" else ""
                 version_suffix = "".join(self._major_minor_version)
                 return "{}{}{}{}".format(lib, version_suffix, shared_suffix, debug_suffix)
-
-            # MSVC does not build libdb_cxx but some dependencies depend on its existence
-            # ==> copy libdb to libdb_cxx
-            shutil.copy(os.path.join(libdir, _lib_to_msvc_lib("libdb")+".lib"),
-                        os.path.join(libdir, _lib_to_msvc_lib("libdb_cxx")+".lib"))
 
             msvc_libs = [_lib_to_msvc_lib(lib) for lib in self._libs]
             for lib, msvc_lib in zip(self._libs, msvc_libs):
@@ -213,7 +216,9 @@ class LibdbConan(ConanFile):
         libs = []
         if self.options.with_tcl:
             libs.append("db_tcl")
-        libs.extend(["db_cxx", "db_stl", "db_sql", "db"])
+        if self.options.get_safe("with_cxx"):
+            libs.append("db_cxx")
+        libs.extend(["db_stl", "db_sql", "db"])
         if self.settings.compiler == "Visual Studio":
             libs = ["lib{}".format(lib) for lib in libs]
         return libs
