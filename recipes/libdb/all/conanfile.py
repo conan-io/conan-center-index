@@ -22,7 +22,7 @@ class LibdbConan(ConanFile):
     default_options = {
         "shared": False,
         "fPIC": True,
-        "with_tcl": True,
+        "with_tcl": False,
         "with_cxx": False,
     }
 
@@ -94,11 +94,14 @@ class LibdbConan(ConanFile):
         conf_args = [
             "--enable-debug" if self.settings.build_type == "Debug" else "--disable-debug",
             "--enable-mingw" if self._mingw_build else "--disable-mingw",
-            "--enable-cxx" if self.options.with_cxx else "--disable-cxx",
             "--enable-compat185",
-            "--enable-stl",
             "--enable-sql",
         ]
+        if self.options.with_cxx:
+            conf_args.extend(["--enable-cxx", "--enable-stl"])
+        else:
+            conf_args.extend(["--disable-cxx", "--disable-stl"])
+
         if self.options.shared:
             conf_args.extend(["--enable-shared", "--disable-static"])
         else:
@@ -217,8 +220,8 @@ class LibdbConan(ConanFile):
         if self.options.with_tcl:
             libs.append("db_tcl")
         if self.options.get_safe("with_cxx"):
-            libs.append("db_cxx")
-        libs.extend(["db_stl", "db_sql", "db"])
+            libs.extend(["db_cxx", "db_stl"])
+        libs.extend(["db_sql", "db"])
         if self.settings.compiler == "Visual Studio":
             libs = ["lib{}".format(lib) for lib in libs]
         return libs
@@ -227,5 +230,8 @@ class LibdbConan(ConanFile):
         self.cpp_info.libs = self._libs
         if self.settings.compiler == "Visual Studio"and self.options.shared:
             self.cpp_info.defines = ["DB_USE_DLL"]
-        if self.settings.os == "Windows" and not self.options.shared:
-            self.cpp_info.system_libs = ["ws2_32"]
+        if self.settings.os == "Linux":
+            self.cpp_info.system_libs.extend(["dl", "pthread"])
+        elif self.settings.os == "Windows" :
+            self.cpp_info.system_libs.append("ws2_32")
+
