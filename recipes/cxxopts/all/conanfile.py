@@ -9,6 +9,7 @@ class CxxOptsConan(ConanFile):
     description = "Lightweight C++ option parser library, supporting the standard GNU style syntax for options."
     license = "MIT"
     topics = ("conan", "option-parser", "positional-arguments ", "header-only")
+    settings = "compiler"
     options = { "unicode": [True, False] }
     default_options = { "unicode": False }
     no_copy_source = True
@@ -16,6 +17,9 @@ class CxxOptsConan(ConanFile):
     @property
     def _source_subfolder(self):
         return "source_subfolder"
+
+    def configure(self):
+        tools.check_min_cppstd(self, "11")
 
     def requirements(self):
         if self.options.unicode:
