@@ -296,6 +296,15 @@ class CPythonConan(ConanFile):
         return os.path.join(self.package_folder, "bin", self._cpython_interpreter_name)
 
     @property
+    def _abi_suffix(self):
+        res = ""
+        if self.settings.build_type == "Debug":
+            res += "d"
+        if self.options.get_safe("pymalloc"):
+            res += "m"
+        return res
+
+    @property
     def _cpython_symlink(self):
         symlink = os.path.join(self.package_folder, "bin", "python")
         if self.settings.os == "Windows":
@@ -315,7 +324,7 @@ class CPythonConan(ConanFile):
                 lib_ext = ""
         else:
             self.cpp_info.includedirs.append(os.path.join("include", "python{}m".format(self._version_major_minor)))
-            lib_ext = "m" + ".dll.a" if self.options.shared and self.settings.os == "Windows" else ""
+            lib_ext = self._abi_suffix + ".dll.a" if self.options.shared and self.settings.os == "Windows" else ""
         self.cpp_info.libs = ["python{}{}".format(self._version_major_minor, lib_ext)]
         if not self.options.shared:
             self.cpp_info.defines.append("Py_NO_ENABLE_SHARED")

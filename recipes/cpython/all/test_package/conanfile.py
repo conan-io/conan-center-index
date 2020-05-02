@@ -4,12 +4,22 @@ import os
 
 class TestPackageConan(ConanFile):
     settings = "os", "compiler", "build_type", "arch"
-    generators = "cmake"
+    generators = "cmake"\
+
+    @property
+    def _cpython3_find_abi(self):
+        return [
+            "ON" if self.settings.build_type == "Debug" else "OFF",
+            "ON" if self.options["cpython"].pymalloc else "OFF",
+            "ANY",
+        ]
 
     def build(self):
         cmake = CMake(self)
         cmake.definitions["PYTHON_EXECUTABLE"] = tools.get_env("PYTHON")
         cmake.definitions["Python_ADDITIONAL_VERSIONS"] = ".".join(self.deps_cpp_info["cpython"].version.split(".")[:2])
+        if self.settings.compiler != "Visual Studio":
+            cmake.definitions["Python3_FIND_ABI"] = ";".join(self._cpython3_find_abi)
         cmake.configure()
         cmake.build()
 

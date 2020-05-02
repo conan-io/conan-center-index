@@ -19,19 +19,32 @@ if(NOT PYTHON_VERSION_STRING MATCHES "${Python_ADDITIONAL_VERSIONS}.*")
     message(FATAL_ERROR "CMake detected wrong cpython version")
 endif()
 
-add_library(spam MODULE test_module.c)
-target_include_directories(spam
-    PRIVATE
-        ${PYTHON_INCLUDE_DIR}
-)
-set_property(TARGET spam PROPERTY PREFIX "")
-if(MSVC)
-    if(CONAN_SETTINGS_BUILD_TYPE STREQUAL "Debug")
-        set(SUFFIX "_d.pyd")
-    else()
-        set(SUFFIX ".pyd")
+if(CMAKE_VERSION VERSION_LESS "3.12" OR (MSVC AND CONAN_SETTINGS_BUILD_TYPE STREQUAL "Debug"))
+    add_library(spam MODULE test_module.c)
+    target_include_directories(spam
+        PRIVATE
+            ${PYTHON_INCLUDE_DIR}
+    )
+    set_property(TARGET spam PROPERTY PREFIX "")
+    if(MSVC)
+        if(CONAN_SETTINGS_BUILD_TYPE STREQUAL "Debug")
+            set(SUFFIX "_d.pyd")
+        else()
+            set(SUFFIX ".pyd")
+        endif()
+        set_property(TARGET spam PROPERTY SUFFIX "${SUFFIX}")
     endif()
-    set_property(TARGET spam PROPERTY SUFFIX "${SUFFIX}")
+else()
+    find_package(Python3 REQUIRED COMPONENTS Interpreter Development)
+    message("Python3_EXECUTABLE: ${Python3_EXECUTABLE}")
+    message("Python3_INTERPRETER_ID: ${Python3_INTERPRETER_ID}")
+    message("Python3_VERSION: ${Python3_VERSION}")
+    if(NOT Python3_VERSION MATCHES "${Python_ADDITIONAL_VERSIONS}.*")
+        message("Python_ADDITIONAL_VERSIONS does not match PYTHON_VERSION_STRING")
+        message(FATAL_ERROR "CMake detected wrong cpython version")
+    endif()
+
+    python3_add_library(spam test_module.c)
 endif()
 
 add_executable(${PROJECT_NAME} test_package.c)
