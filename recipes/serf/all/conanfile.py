@@ -1,4 +1,4 @@
-from conans import ConanFile, tools
+from conans import AutoToolsBuildEnvironment, ConanFile, tools
 from conans.errors import ConanException
 import glob
 import os
@@ -60,6 +60,7 @@ class SerfConan(ConanFile):
     def build(self):
         self._patch_sources()
         os.mkdir(self._build_subfolder)
+        autotools = AutoToolsBuildEnvironment(self)
         with tools.chdir(self._build_subfolder):
             args = ["-Y", os.path.join(self.source_folder, self._source_subfolder)]
             kwargs = {
@@ -71,9 +72,10 @@ class SerfConan(ConanFile):
                 "ZLIB": self.deps_cpp_info["zlib"].rootpath,
                 "DEBUG": self.settings.build_type == "Debug",
                 "APR_STATIC": not self.options["apr"].shared,
-                "CFLAGS": " ".join(self.deps_cpp_info.cflags + ["-fPIC"] if self.options.get_safe("fPIC") else []),
+                "CFLAGS": " ".join(self.deps_cpp_info.cflags + (["-fPIC"] if self.options.get_safe("fPIC") else []) + autotools.flags),
                 "LINKFLAGS": " ".join(self.deps_cpp_info.sharedlinkflags) + " " + " ".join("-L'{}'".format(l) for l in self.deps_cpp_info.lib_paths),
-                "CPPFLAGS": " ".join("-D{}".format(d) for d in self.deps_cpp_info.defines) + " " + " ".join("-I'{}'".format(inc) for inc in self.deps_cpp_info.include_paths),
+                "CPPFLAGS": " ".join("-D{}".format(d) for d in autotools.defines) + " " + " ".join("-I'{}'".format(inc) for inc in self.deps_cpp_info.include_paths),
+                "CC": tools.get_env("CC") if tools.get_env("CC") else str(self.settings.compiler),
             }
 
             if self.settings.compiler == "Visual Studio":
