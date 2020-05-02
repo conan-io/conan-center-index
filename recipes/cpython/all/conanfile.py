@@ -8,8 +8,8 @@ class CPythonConan(ConanFile):
     name = "cpython"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://www.python.org"
-    description = "GNU libtool is a generic library support script. "
-    topics = ("conan", "libtool", "configure", "library", "shared", "static")
+    description = "Python is a programming language that lets you work quickly and integrate systems more effectively."
+    topics = ("conan", "python", "cpython", "language", "script")
     license = ("Python-2.0",)
     exports_sources = "patches/**"
     generators = "visual_studio"
