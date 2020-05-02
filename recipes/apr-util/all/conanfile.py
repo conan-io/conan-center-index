@@ -31,14 +31,14 @@ class AprUtilConan(ConanFile):
     default_options = {
         "shared": False,
         "fPIC": True,
-        "with_openssl": True,
+        "with_openssl": False,
         "with_nss": False,
         "with_commoncrypto": False,
         "dbm": False,
         "with_expat": True,
-        "with_mysql": True,
-        "with_postgresql": True,
-        "with_sqlite3": True,
+        "with_mysql": False,
+        "with_postgresql": False,
+        "with_sqlite3": False,
         "with_lber": False,
         "with_ldap": False,
     }
@@ -59,6 +59,9 @@ class AprUtilConan(ConanFile):
         if self.settings.compiler == "Visual Studio":
             if self.options.crypto and self.options.crypto != "openssl":
                 raise ConanInvalidConfiguration("Visual Studio only supports openssl crypto")
+
+        if not self.options.with_expat:
+            raise ConanInvalidConfiguration("expat cannot be disabled (at this time) (check back later)")
 
     @property
     def _source_subfolder(self):
