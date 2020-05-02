@@ -40,7 +40,7 @@ class CppTaskflowConan(ConanFile):
                 "Visual Studio": "15",
                 "gcc": "5",
                 "clang": "4.0",
-                "apple-clang": "10.0"
+                "apple-clang": "8.0"
             }            
         }
 
