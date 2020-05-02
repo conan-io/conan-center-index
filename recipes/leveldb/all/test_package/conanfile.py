@@ -1,12 +1,9 @@
 from conans import ConanFile, CMake
 import os
 
-username = os.getenv("CONAN_USERNAME", "jjkoshy")
-channel = os.getenv("CONAN_CHANNEL", "stable")
 
 class LevelDBTestConan(ConanFile):
     settings = "os", "compiler", "build_type", "arch"
-    requires = "leveldb/1.22@%s/%s" % (username, channel)
     generators = "cmake"
 
     def build(self):
@@ -15,5 +12,6 @@ class LevelDBTestConan(ConanFile):
         cmake.build()
 
     def test(self):
-        os.chdir("bin")
-        self.run("LD_LIBRARY_PATH=$(pwd) && .%sexample" % os.sep)
+        bin_path = os.path.join("bin", "example")
+        self.run(bin_path, run_environment=True)
+
