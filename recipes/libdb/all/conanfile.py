@@ -117,14 +117,16 @@ class LibdbConan(ConanFile):
         return self._msvc_platforms[str(self.settings.arch)]
 
     def _build_msvc(self):
-        targets = ["db", "db_stl", "db_sql", ]
+        projects = ["db", "db_stl", "db_sql", ]
         if self.options.with_tcl:
-            targets.append("db_tcl")
+            projects.append("db_tcl")
         msbuild = MSBuild(self)
-        prop_file = os.path.join(self.install_folder, "conanbuildinfo.props")
-        msbuild.build(os.path.join(self._source_subfolder, "build_windows", "Berkeley_DB_vs2010.sln"),
-                      targets=targets, build_type=self._msvc_build_type, platforms=self._msvc_platforms,
-                      user_property_file_name=prop_file)
+        upgraded = False
+        for project in projects:
+            msbuild.build(os.path.join(self._source_subfolder, "build_windows", "VS10", "{}.vcxproj".format(project)),
+                          build_type=self._msvc_build_type, platforms=self._msvc_platforms,
+                          upgrade_project=not upgraded)
+            upgraded = True
 
     def build(self):
         self._patch_sources()
