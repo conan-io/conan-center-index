@@ -12,6 +12,7 @@ class SerfConan(ConanFile):
     topics = ("conan", "serf", "apache", "http", "library")
     homepage = "https://serf.apache.org/"
     url = "https://github.com/conan-io/conan-center-index"
+    exports_sources = "patches/**"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
@@ -53,10 +54,11 @@ class SerfConan(ConanFile):
         os.rename(glob.glob("serf-*")[0], self._source_subfolder)
 
     def _patch_sources(self):
-        for patch in self.conan_data["patches"][self.version]:
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
             tools.patch(**patch)
 
     def build(self):
+        self._patch_sources()
         os.mkdir(self._build_subfolder)
         with tools.chdir(self._build_subfolder):
             args = ["-Y", os.path.join(self.source_folder, self._source_subfolder)]
