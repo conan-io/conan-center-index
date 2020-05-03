@@ -44,6 +44,10 @@ class AprConan(ConanFile):
     def _build_subfolder(self):
         return "build_subfolder"
 
+
+    # apr will not have uuid support if no uuid library is found.
+    # Add a `libuuid` requirement here or to your profile if this feature is really required.
+
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
         os.rename("{}-{}".format(self.name, self.version), self._source_subfolder)
