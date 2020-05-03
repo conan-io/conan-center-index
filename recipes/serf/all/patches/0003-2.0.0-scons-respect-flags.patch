@@ -1,11 +1,13 @@
 --- SConstruct
 +++ SConstruct
-@@ -172,10 +172,16 @@
+@@ -172,10 +172,18 @@
                   "Assume a source layout instead of install layout",
                   True),
      )
 -
-+extra_environment = {}
++extra_environment = {
++  'ENV': {'PATH': os.environ['PATH'], },
++}
 +if os.environ.get('LD'):
 +  extra_environment['LINK'] = os.environ['LD']
 +if os.environ.get('LDFLAGS'):
