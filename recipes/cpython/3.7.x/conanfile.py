@@ -23,12 +23,11 @@ class CPythonConan(ConanFile):
         "pymalloc": [True, False],
         "with_bz2": [True, False],
         "with_gdbm": [True, False],
-        "with_bdb": [True, False],
         "with_lzma": [True, False],
         "with_nis": [True, False],
         "with_sqlite3": [True, False],
         "with_tkinter": [True, False],
-        "with_curses": [True, False],  # FIXME/CHECK: add curses readline
+        "with_curses": [True, False],
     }
     default_options = {
         "shared": True,
@@ -39,7 +38,6 @@ class CPythonConan(ConanFile):
         "pymalloc": True,
         "with_bz2": True,
         "with_gdbm": False,
-        "with_bdb": False,
         "with_lzma": True,
         "with_nis": True,
         "with_sqlite3": True,
@@ -69,7 +67,6 @@ class CPythonConan(ConanFile):
             del self.options.docstrings
             del self.options.pymalloc
             del self.options.with_gdbm
-            del self.options.with_bdb
             del self.options.with_nis
             del self.options.with_curses
         del self.settings.compiler.libcxx
@@ -98,12 +95,8 @@ class CPythonConan(ConanFile):
             self.requires("libxcrypt/4.4.16")
         if self.options.with_bz2:
             self.requires("bzip2/1.0.8")
-        if self.options.get_safe("with_bdb"):
-            raise ConanInvalidConfiguration("libdb is not available on CCI (yet)")
-            self.requires("libdb/x.y.z")
         if self.options.get_safe("with_gdbm"):
-            raise ConanInvalidConfiguration("gdbm is not available on CCI (yet)")
-            self.requires("gdbm/1.18.1@bincrafters/stable", private=self._is_installer)
+            self.requires("gdbm/1.18.1")
         if self.options.with_lzma:
             self.requires("xz_utils/5.2.4")
         if self.options.with_sqlite3:
@@ -111,7 +104,7 @@ class CPythonConan(ConanFile):
         if self.options.with_tkinter:
             raise ConanInvalidConfiguration("tk is not available on CCI (yet)")
             self.requires("tk/8.6.9.1@bincrafters/stable", private=self._is_installer)
-        elif self.options.get_safe("with_curses"):
+        if self.options.get_safe("with_curses"):
             self.requires("ncurses/6.2")
 
     def _configure_autotools(self):
@@ -142,7 +135,7 @@ class CPythonConan(ConanFile):
             tcltk_includes = []
             tcltk_libs = []
             for dep in ("tcl", "tk", "zlib"):
-                tcltk_includes += ["-I{}".format(d) for d in self.deps_cpp_info[dep].includedirs]
+                tcltk_includes += ["-I{}".format(d) for d in self.deps_cpp_info[dep].include_paths]
                 tcltk_libs += ["-l{}".format(lib) for lib in self.deps_cpp_info[dep].libs]
             conf_args.extend([
                 "--with-tcltk-includes={}".format(" ".join(tcltk_includes)),
@@ -157,7 +150,7 @@ class CPythonConan(ConanFile):
         return self._autotools
 
     def _patch_sources(self):
-        for patch in self.conan_data["patches"][self.version]:
+        for patch in self.conan_data.get("patches",{}).get(self.version, []):
             tools.patch(**patch)
         tools.replace_in_file(os.path.join(self._source_subfolder, "setup.py"),
                               ":libmpdec.so.2", "libmpdec")
@@ -323,10 +316,12 @@ class CPythonConan(ConanFile):
             else:
                 lib_ext = ""
         else:
-            self.cpp_info.includedirs.append(os.path.join("include", "python{}m".format(self._version_major_minor)))
-            lib_ext = self._abi_suffix + ".dll.a" if self.options.shared and self.settings.os == "Windows" else ""
+            self.cpp_info.includedirs.append(os.path.join("include", "python{}{}".format(self._version_major_minor, self._abi_suffix)))
+            lib_ext = self._abi_suffix + (".dll.a" if self.options.shared and self.settings.os == "Windows" else "")
         self.cpp_info.libs = ["python{}{}".format(self._version_major_minor, lib_ext)]
-        if not self.options.shared:
+        if self.options.shared:
+            self.cpp_info.defines.append("Py_ENABLE_SHARED")
+        else:
             self.cpp_info.defines.append("Py_NO_ENABLE_SHARED")
             if self.settings.os == "Linux":
                 self.cpp_info.system_libs.extend(["dl", "m", "pthread", "util"])
@@ -342,11 +337,6 @@ class CPythonConan(ConanFile):
             python_root = tools.unix_path(python_root)
         self.output.info("Setting PYTHON_ROOT environment variable: {}".format(python_root))
         self.env_info.PYTHON_ROOT = python_root
-
-        pythonhome = os.path.join(self.package_folder, "bin")
-        self.output.info("Setting PYTHONHOME environment variable: {}".format(pythonhome))
-        self.env_info.PYTHONHOME = pythonhome
-
         bindir = os.path.join(self.package_folder, "bin")
         self.output.info("Appending PATH environment variable: {}".format(bindir))
         self.env_info.PATH.append(bindir)
