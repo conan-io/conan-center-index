@@ -1,5 +1,5 @@
 import os
-from conans import ConanFile, tools, CMake
+from conans import ConanFile, tools
 
 
 class CxxOptsConan(ConanFile):
@@ -13,10 +13,7 @@ class CxxOptsConan(ConanFile):
     options = { "unicode": [True, False] }
     default_options = { "unicode": False }
     no_copy_source = True
-
-    @property
-    def _source_subfolder(self):
-        return "source_subfolder"
+    _source_subfolder = "source_subfolder"
 
     def configure(self):
         tools.check_min_cppstd(self, "11")

@@ -1,4 +1,4 @@
-#include <iostream>
+﻿#include <iostream>
 #include <cxxopts.hpp>
 
 int main(int argc, char* argv[])
@@ -11,7 +11,7 @@ int main(int argc, char* argv[])
 		("b,bar", "Option bar", cxxopts::value<std::string>())
 		("z,baz", "Option baz", cxxopts::value<bool>()->implicit_value("true"))
 	#ifdef CXXOPTS_USE_UNICODE
-		("q,qux", u8"Optino qux with non-ascii description: 你好", cxxopts::value<std::string>())
+		("q,qux", u8"Option qux with non-ascii description: 你好", cxxopts::value<std::string>())
 	#endif
 	;
 
@@ -27,7 +27,7 @@ int main(int argc, char* argv[])
 	#endif
 
 		if (result.count("help")) {
-			std::cout << options.help({"", "Group"}) << std::endl;
+			std::cout << options.help({ "", "Group" }) << std::endl;
 			return 0;
 		}
 
