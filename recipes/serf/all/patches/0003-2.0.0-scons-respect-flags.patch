@@ -9,7 +9,7 @@
 +if os.environ.get('LD'):
 +  extra_environment['LINK'] = os.environ['LD']
 +if os.environ.get('LDFLAGS'):
-+  extra_environment['LDFLAGS'] = os.environ['LDFLAGS']
++  extra_environment['LINKFLAGS'] = os.environ['LDFLAGS']
 +if os.environ.get('CFLAGS'):
 +  extra_environment['CFLAGS'] = os.environ['CFLAGS']
  env = Environment(variables=opts,
