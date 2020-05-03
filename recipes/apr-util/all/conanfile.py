@@ -104,8 +104,6 @@ class AprUtilConan(ConanFile):
             self.requires("expat/2.2.9")
         if self.options.with_postgresql:
             self.requires("libpq/11.5")
-        if self.settings.os != "Windows":
-            self.requires("libuuid/1.0.3")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
