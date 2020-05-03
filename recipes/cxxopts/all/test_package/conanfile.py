@@ -19,8 +19,8 @@ class TestPackageConan(ConanFile):
             if self.options["cxxopts"].unicode:
                 option_string += " -q quxis";
             self.run("{} {}".format(bin_path, option_string), run_environment=True, output=output)
-            output_lines = output.getvalue().splitlines()
-            expected_lines = ["foo:41", "bar:baria", "baz:1"]
+            output_lines = set(output.getvalue().splitlines())
+            expected_lines = {"foo:41", "bar:baria", "baz:1"}
             if self.options["cxxopts"].unicode:
-                expected_lines.append("qux:quxis")
-            assert(output_lines == expected_lines)
+                expected_lines.add("qux:quxis")
+            assert(expected_lines.issubset(output_lines))
