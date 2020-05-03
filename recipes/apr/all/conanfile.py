@@ -17,10 +17,12 @@ class AprConan(ConanFile):
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
+        "force_apr_uuid": [True, False],
     }
     default_options = {
         "shared": False,
         "fPIC": True,
+        "force_apr_uuid": True,
     }
 
     _autotools = None
@@ -43,10 +45,6 @@ class AprConan(ConanFile):
     @property
     def _build_subfolder(self):
         return "build_subfolder"
-
-
-    # apr will not have uuid support if no uuid library is found.
-    # Add a `libuuid` requirement here or to your profile if this feature is really required.
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
@@ -79,6 +77,9 @@ class AprConan(ConanFile):
     def _patch_sources(self):
         for patch in self.conan_data["patches"][self.version]:
             tools.patch(**patch)
+        if self.options.force_apr_uuid:
+            tools.replace_in_file(os.path.join(self._source_subfolder, "include", "apr.h.in"),
+                                  "@osuuid@", "0")
 
     def build(self):
         self._patch_sources()
