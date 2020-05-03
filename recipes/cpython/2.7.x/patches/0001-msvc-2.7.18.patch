@@ -1,0 +1,182 @@
+--- PCbuild/_bsddb.vcxproj
++++ PCbuild/_bsddb.vcxproj
+@@ -75,7 +75,7 @@
+   </ItemGroup>
+   <ItemGroup>
+     <ClCompile Include="..\Modules\_bsddb.c" />
+-    <ClCompile Include="$(bsddbDir)\crypto\aes_method.c" />
++    <!--<ClCompile Include="$(bsddbDir)\crypto\aes_method.c" />
+     <ClCompile Include="$(bsddbDir)\btree\bt_compact.c" />
+     <ClCompile Include="$(bsddbDir)\btree\bt_compare.c" />
+     <ClCompile Include="$(bsddbDir)\btree\bt_conv.c" />
+@@ -300,7 +300,7 @@
+     <ClCompile Include="$(bsddbDir)\xa\xa.c" />
+     <ClCompile Include="$(bsddbDir)\xa\xa_db.c" />
+     <ClCompile Include="$(bsddbDir)\xa\xa_map.c" />
+-    <ClCompile Include="$(bsddbDir)\common\zerofill.c" />
++    <ClCompile Include="$(bsddbDir)\common\zerofill.c" />-->
+   </ItemGroup>
+   <ItemGroup>
+     <ProjectReference Include="pythoncore.vcxproj">
+--- PCbuild/_hashlib.vcxproj
++++ PCbuild/_hashlib.vcxproj
+@@ -64,7 +64,7 @@
+       <AdditionalIncludeDirectories>$(opensslIncludeDir);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+     </ClCompile>
+     <Link>
+-      <AdditionalDependencies>ws2_32.lib;$(OutDir)libeay$(PyDebugExt).lib;$(OutDir)ssleay$(PyDebugExt).lib;%(AdditionalDependencies)</AdditionalDependencies>
++      <AdditionalDependencies>ws2_32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+     </Link>
+   </ItemDefinitionGroup>
+   <ItemGroup>
+@@ -75,14 +75,14 @@
+       <Project>{cf7ac3d1-e2df-41d2-bea6-1e2556cdea26}</Project>
+       <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
+     </ProjectReference>
+-    <ProjectReference Include="ssleay.vcxproj">
++    <!--<ProjectReference Include="ssleay.vcxproj">
+       <Project>{10615b24-73bf-4efa-93aa-236916321317}</Project>
+       <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
+     </ProjectReference>
+     <ProjectReference Include="libeay.vcxproj">
+       <Project>{e5b04cc0-eb4c-42ab-b4dc-18ef95f864b0}</Project>
+       <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
+-    </ProjectReference>
++    </ProjectReference>-->
+   </ItemGroup>
+   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+   <ImportGroup Label="ExtensionTargets">
+--- PCbuild/_sqlite3.vcxproj
++++ PCbuild/_sqlite3.vcxproj
+@@ -96,10 +96,10 @@
+       <Project>{cf7ac3d1-e2df-41d2-bea6-1e2556cdea26}</Project>
+       <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
+     </ProjectReference>
+-    <ProjectReference Include="sqlite3.vcxproj">
++    <!--<ProjectReference Include="sqlite3.vcxproj">
+       <Project>{a1a295e5-463c-437f-81ca-1f32367685da}</Project>
+       <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
+-    </ProjectReference>
++    </ProjectReference>-->
+   </ItemGroup>
+   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+   <ImportGroup Label="ExtensionTargets">
+--- PCbuild/_ssl.vcxproj
++++ PCbuild/_ssl.vcxproj
+@@ -64,7 +64,7 @@
+       <AdditionalIncludeDirectories>$(opensslIncludeDir);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+     </ClCompile>
+     <Link>
+-      <AdditionalDependencies>ws2_32.lib;crypt32.lib;$(OutDir)libeay$(PyDebugExt).lib;$(OutDir)ssleay$(PyDebugExt).lib;%(AdditionalDependencies)</AdditionalDependencies>
++      <AdditionalDependencies>ws2_32.lib;crypt32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+     </Link>
+   </ItemDefinitionGroup>
+   <ItemGroup>
+@@ -75,14 +75,14 @@
+       <Project>{cf7ac3d1-e2df-41d2-bea6-1e2556cdea26}</Project>
+       <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
+     </ProjectReference>
+-    <ProjectReference Include="libeay.vcxproj">
++    <!--<ProjectReference Include="libeay.vcxproj">
+       <Project>{e5b04cc0-eb4c-42ab-b4dc-18ef95f864b0}</Project>
+       <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
+     </ProjectReference>
+     <ProjectReference Include="ssleay.vcxproj">
+       <Project>{10615b24-73bf-4efa-93aa-236916321317}</Project>
+       <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
+-    </ProjectReference>
++    </ProjectReference>-->
+     <ProjectReference Include="_socket.vcxproj">
+       <Project>{86937f53-c189-40ef-8ce8-8759d8e7d480}</Project>
+       <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
+--- PCbuild/_tkinter.vcxproj
++++ PCbuild/_tkinter.vcxproj
+@@ -53,7 +53,7 @@
+   </ImportGroup>
+   <ImportGroup Label="PropertySheets">
+     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+-    <Import Project="tcltk.props" />
++    <!--<Import Project="tcltk.props" />-->
+   </ImportGroup>
+   <PropertyGroup Label="UserMacros" />
+   <PropertyGroup>
+@@ -65,7 +65,7 @@
+       <PreprocessorDefinitions>WITH_APPINIT;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+     </ClCompile>
+     <Link>
+-      <AdditionalDependencies>$(tcltkLib);%(AdditionalDependencies)</AdditionalDependencies>
++      <AdditionalDependencies>%(AdditionalDependencies)</AdditionalDependencies>
+     </Link>
+   </ItemDefinitionGroup>
+   <ItemGroup>
+@@ -77,12 +77,12 @@
+       <Project>{cf7ac3d1-e2df-41d2-bea6-1e2556cdea26}</Project>
+       <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
+     </ProjectReference>
+-    <ProjectReference Include="tcl.vcxproj">
++    <!--<ProjectReference Include="tcl.vcxproj">
+       <Project>{b5fd6f1d-129e-4bff-9340-03606fac7283}</Project>
+     </ProjectReference>
+     <ProjectReference Include="tk.vcxproj">
+       <Project>{7e85eccf-a72c-4da4-9e52-884508e80ba1}</Project>
+-    </ProjectReference>
++    </ProjectReference>-->
+   </ItemGroup>
+   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+   <ImportGroup Label="ExtensionTargets">
+--- PCbuild/bz2.vcxproj
++++ PCbuild/bz2.vcxproj
+@@ -72,13 +72,13 @@
+   </ItemDefinitionGroup>
+   <ItemGroup>
+     <ClCompile Include="..\Modules\bz2module.c" />
+-    <ClCompile Include="$(bz2Dir)\blocksort.c" />
++    <!--<ClCompile Include="$(bz2Dir)\blocksort.c" />
+     <ClCompile Include="$(bz2Dir)\bzlib.c" />
+     <ClCompile Include="$(bz2Dir)\compress.c" />
+     <ClCompile Include="$(bz2Dir)\crctable.c" />
+     <ClCompile Include="$(bz2Dir)\decompress.c" />
+     <ClCompile Include="$(bz2Dir)\huffman.c" />
+-    <ClCompile Include="$(bz2Dir)\randtable.c" />
++    <ClCompile Include="$(bz2Dir)\randtable.c" />-->
+   </ItemGroup>
+   <ItemGroup>
+     <ClInclude Include="$(bz2Dir)\bzlib.h" />
+--- PCbuild/pyexpat.vcxproj
++++ PCbuild/pyexpat.vcxproj
+@@ -58,19 +59,19 @@
+   <PropertyGroup Label="UserMacros" />
+   <ItemDefinitionGroup>
+     <ClCompile>
+-      <AdditionalIncludeDirectories>$(PySourcePath)Modules\expat;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+-      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;PYEXPAT_EXPORTS;XML_STATIC;%(PreprocessorDefinitions)</PreprocessorDefinitions>
++      <AdditionalIncludeDirectories>%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
++      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS%(PreprocessorDefinitions)</PreprocessorDefinitions>
+     </ClCompile>
+   </ItemDefinitionGroup>
+   <ItemGroup>
+-    <ClInclude Include="..\Modules\expat\xmlrole.h" />
+-    <ClInclude Include="..\Modules\expat\xmltok.h" />
++    <!--<ClInclude Include="..\Modules\expat\xmlrole.h" />
++    <ClInclude Include="..\Modules\expat\xmltok.h" />-->
+   </ItemGroup>
+   <ItemGroup>
+     <ClCompile Include="..\Modules\pyexpat.c" />
+-    <ClCompile Include="..\Modules\expat\xmlparse.c" />
++    <!--<ClCompile Include="..\Modules\expat\xmlparse.c" />
+     <ClCompile Include="..\Modules\expat\xmlrole.c" />
+-    <ClCompile Include="..\Modules\expat\xmltok.c" />
++    <ClCompile Include="..\Modules\expat\xmltok.c" />-->
+   </ItemGroup>
+   <ItemGroup>
+     <ProjectReference Include="pythoncore.vcxproj">
+--- PCbuild/python.props
++++ PCbuild/python.props
+@@ -1,5 +1,6 @@
+ ﻿<?xml version="1.0" encoding="utf-8"?>
+ <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
++  <Import Project="..\..\conanbuildinfo.props" />
+   <PropertyGroup>
+     <Platform Condition="'$(Platform)' == ''">Win32</Platform>
+     <Configuration Condition="'$(Configuration)' == ''">Release</Configuration>
+
