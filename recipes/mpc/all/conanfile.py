@@ -45,7 +45,7 @@ class MpcConan(ConanFile):
         if self.options.shared:
             args.extend(["--disable-static", "--enable-shared"])
         else:
-            args.extend(["--disable-shared", "--disable-static"])
+            args.extend(["--disable-shared", "--enable-static"])
         self._autotools.configure(args=args)
         return self._autotools
 
