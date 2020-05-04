@@ -31,8 +31,6 @@ class LevelDBConan(ConanFile):
             return self._cmake
         self._cmake = CMake(self)
         self._cmake.definitions["LEVELDB_BUILD_TESTS"] = False
-        if self.options.fPIC:
-            self._cmake.definitions["CMAKE_POSITION_INDEPENDENT_CODE"] = True
         return self._cmake
 
     # note: crc32, tcmalloc are also conditionally included in leveldb, but
