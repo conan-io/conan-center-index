@@ -7,3 +7,5 @@ versions:
       folder: all
     1.72.0:
       folder: all
+    1.73.0:
+      folder: all
