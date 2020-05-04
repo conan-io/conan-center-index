@@ -97,7 +97,19 @@ class ProjConan(ConanFile):
             self.cpp_info.system_libs.append("m")
             if self.options.threadsafe:
                 self.cpp_info.system_libs.append("pthread")
+        if not self.options.shared and self._stdcpp_library:
+            self.cpp_info.system_libs.append(self._stdcpp_library)
         if self.options.shared and self.settings.compiler == "Visual Studio":
             self.cpp_info.defines.append("PROJ_MSVC_DLL_IMPORT")
         self.env_info.PROJ_LIB.append(os.path.join(self.package_folder, "res"))
         self.env_info.PATH.append(os.path.join(self.package_folder, "bin"))
+
+    @property
+    def _stdcpp_library(self):
+        libcxx = self.settings.get_safe("compiler.libcxx")
+        if libcxx in ("libstdc++", "libstdc++11"):
+            return "stdc++"
+        elif libcxx in ("libc++",):
+            return "c++"
+        else:
+            return False
