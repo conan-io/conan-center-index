@@ -28,19 +28,26 @@ class TestPackageConan(ConanFile):
 
     @property
     def _cmake_abi(self):
-        return CmakePython3Abi(
-            debug=self.settings.build_type == "Debug",
-            pymalloc=bool(self.options["cpython"].pymalloc),
-            unicode=None,
-        )
+        if self._py_version < tools.Version("3.8"):
+            return CmakePython3Abi(
+                debug=self.settings.build_type == "Debug",
+                pymalloc=bool(self.options["cpython"].pymalloc),
+                unicode=False,
+            )
+        else:
+            return CmakePython3Abi(
+                debug=self.settings.build_type == "Debug",
+                pymalloc=False,
+                unicode=False,
+            )
 
     def build(self):
         cmake = CMake(self)
         py_major = self.deps_cpp_info["cpython"].version.split(".")[0]
-        cmake.definitions["PY_MAJOR"] = py_major
-        cmake.definitions["PY_VERSION"] = self.deps_cpp_info["cpython"].version
+        cmake.definitions["PY_VERSION_MAJOR"] = py_major
+        cmake.definitions["PY_VERSION_MAJOR_MINOR"] = ".".join(self._py_version.split(".")[:2])
+        cmake.definitions["PY_VERSION"] = self._py_version
         cmake.definitions["PYTHON_EXECUTABLE"] = tools.get_env("PYTHON")
-        cmake.definitions["PYTHON_EXACT_VERSION"] = self.deps_cpp_info["cpython"].version
         cmake.definitions["Python{}_ROOT_DIR".format(py_major)] = self.deps_cpp_info["cpython"].rootpath
         cmake.definitions["Python{}_USE_STATIC_LIBS".format(py_major)] = not self.options["cpython"].shared
         cmake.definitions["Python{}_FIND_REGISTRY".format(py_major)] = "NEVER"
@@ -48,7 +55,7 @@ class TestPackageConan(ConanFile):
         cmake.definitions["Python{}_FIND_STRATEGY".format(py_major)] = "LOCATION"
 
         if self.settings.compiler != "Visual Studio":
-            if tools.Version(self._py_version) >= tools.Version(3):
+            if tools.Version(self._py_version) < tools.Version("3.8"):
                 cmake.definitions["Python{}_FIND_ABI".format(py_major)] = self._cmake_abi.cmake_arg()
 
         with tools.environment_append(RunEnvironment(self).vars):

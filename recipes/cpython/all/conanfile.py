@@ -190,15 +190,6 @@ class CPythonConan(ConanFile):
     def _patch_sources(self):
         for patch in self.conan_data.get("patches",{}).get(self.version, []):
             tools.patch(**patch)
-        # tools.replace_in_file(os.path.join(self._source_subfolder, "setup.py"),
-        #                       ":libmpdec.so.2", "libmpdec")
-        # tools.replace_in_file(os.path.join(self._source_subfolder, "setup.py"),
-        #                       "libraries = ['libmpdec']", "libraries = ['mpdec']")
-        #
-        # makefile = os.path.join(self._source_subfolder, "Makefile.pre.in")
-        # tools.replace_in_file(makefile,
-        #                       "@OPT@",
-        #                       "@OPT@ @CFLAGS@")
 
     @property
     def _solution_projects(self):
@@ -338,11 +329,13 @@ class CPythonConan(ConanFile):
             if self._is_py2:
                 scripts = ("2to3", "idle", "pydoc", "python{}-config".format(self._version_major_minor), "smtpd.py")
             else:
-                script_prefixes = ("2to3-", "easy_install-", "idle", "pydoc", "pyvenv-")
+                script_prefixes = ("2to3-", "easy_install-", "idle", "pydoc", "pyvenv-", "pip")
                 scripts = tuple(os.path.join(self.package_folder, "bin", sp + self._version_major_minor) for sp in script_prefixes)
 
             for script_name in scripts:
                 script = os.path.join(self.package_folder, "bin", script_name)
+                if not os.path.isfile(script):
+                    continue
                 with open(script, "r") as fn:
                     fn.readline()
                     text = fn.read()
@@ -384,8 +377,9 @@ class CPythonConan(ConanFile):
         if self._is_py3:
             if self.settings.build_type == "Debug":
                 res += "d"
-            if self.options.get_safe("pymalloc"):
-                res += "m"
+            if tools.Version(self.version) < tools.Version("3.8"):
+                if self.options.get_safe("pymalloc"):
+                    res += "m"
         return res
 
     def package_info(self):
@@ -419,11 +413,16 @@ class CPythonConan(ConanFile):
         self.output.info("Setting PYTHON environment variable: {}".format(python))
         self.env_info.PYTHON = python
 
+        if self.settings.compiler == "Visual Studio":
+            pythonhome = os.path.join(self.package_folder, "bin")
+        else:
+            pythonhome = os.path.join(self.package_folder)
+        self.output.info("Setting PYTHONHOME environment variable: {}".format(pythonhome))
+        self.env_info.PYTHONHOME = pythonhome
+
         if self._is_py2:
             if self.settings.compiler == "Visual Studio":
-                pythonhome = os.path.join(self.package_folder, "bin")
-                self.output.info("Setting PYTHONHOME environment variable: {}".format(pythonhome))
-                self.env_info.PYTHONHOME = pythonhome
+                pass
         else:
             python_root = tools.unix_path(self.package_folder)
             self.output.info("Setting PYTHON_ROOT environment variable: {}".format(python_root))
