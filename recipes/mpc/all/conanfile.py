@@ -56,9 +56,7 @@ class MpcConan(ConanFile):
             autotools = self._configure_autotools()
             autotools.install()
         tools.rmdir(os.path.join(self.package_folder, "share"))
-        la = os.path.join(self.package_folder, "lib", "libmpc.la")
-        if os.path.isfile(la):
-            os.unlink(la)
+        os.unlink(os.path.join(self.package_folder, "lib", "libmpc.la"))
 
     def package_info(self):
         self.cpp_info.libs = ["mpc"]
