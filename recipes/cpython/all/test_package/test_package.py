@@ -2,25 +2,19 @@ import argparse
 import os
 import sys
 
-parser = argparse.ArgumentParser()
-parser.add_argument("-b", dest="build_folder", help="build_folder", required=True)
-parser.add_argument("-t", dest="test_module", help="test python module")
-ns = parser.parse_args()
 
-os.chdir(ns.build_folder)
-
-
-all_tests = dict()
+ALL_TESTS = dict()
 
 
 def add_test(fn):
-    global all_tests
+    global ALL_TESTS
     name = fn.__name__[fn.__name__.find("_")+1:]
+
     def inner_fn():
         print("testing {}".format(name))
         sys.stdout.flush()
         fn()
-    all_tests[name] = inner_fn
+    ALL_TESTS[name] = inner_fn
     return fn
 
 
@@ -38,7 +32,6 @@ def test_expat():
     def char_data(data):
         print('Character data:', repr(data))
 
-
     p = xml.parsers.expat.ParserCreate()
 
     p.StartElementHandler = start_element
@@ -53,9 +46,12 @@ def test_expat():
 
 @add_test
 def test_gdbm():
-    import gdbm
+    if sys.version_info < (3, 0):
+        import gdbm
+    else:
+        import dbm.gnu as gdbm
 
-    dbfile = "data.db"
+    dbfile = "gdbm.db"
 
     db = gdbm.open(dbfile, "c")
     db["key1"] = "data1"
@@ -66,9 +62,9 @@ def test_gdbm():
     print("keys read from", dbfile, "are", db.keys())
     if len(db.keys()) != 2:
         raise Exception("Wrong length")
-    if "key1" not in db.keys():
+    if b"key1" not in db.keys():
         raise Exception("key1 not present")
-    if "key2" not in db.keys():
+    if b"key2" not in db.keys():
         raise Exception("key2 not present")
 
 
@@ -109,4 +105,19 @@ def test_bsddb():
         raise Exception("value2 incorrect {}".format(db["key2"]))
 
 
-all_tests[ns.test_module]()
+@add_test
+def test_lzma():
+    import lzma
+
+    data = lzma.compress(b"hello world")
+    if data is None:
+        raise Exception("lzma.compress returned no data")
+
+
+parser = argparse.ArgumentParser()
+parser.add_argument("-b", dest="build_folder", help="build_folder", required=True)
+parser.add_argument("-t", dest="test_module", help="test python module")
+ns = parser.parse_args()
+
+os.chdir(ns.build_folder)
+ALL_TESTS[ns.test_module]()

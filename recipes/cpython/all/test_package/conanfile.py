@@ -1,4 +1,4 @@
-from conans import ConanFile, CMake, tools
+from conans import ConanFile, CMake, tools, RunEnvironment
 from conans.errors import ConanException
 from io import StringIO
 import os
@@ -23,6 +23,10 @@ class TestPackageConan(ConanFile):
     generators = "cmake"
 
     @property
+    def _py_version(self):
+        return self.deps_cpp_info["cpython"].version
+
+    @property
     def _cmake_abi(self):
         return CmakePython3Abi(
             debug=self.settings.build_type == "Debug",
@@ -32,25 +36,27 @@ class TestPackageConan(ConanFile):
 
     def build(self):
         cmake = CMake(self)
+        py_major = self.deps_cpp_info["cpython"].version.split(".")[0]
+        cmake.definitions["PY_MAJOR"] = py_major
+        cmake.definitions["PY_VERSION"] = self.deps_cpp_info["cpython"].version
         cmake.definitions["PYTHON_EXECUTABLE"] = tools.get_env("PYTHON")
-        cmake.definitions["Python_ADDITIONAL_VERSIONS"] = ".".join(self.deps_cpp_info["cpython"].version.split(".")[:2])
-        cmake.definitions["Python3_ROOT_DIR"] = self.deps_cpp_info["cpython"].rootpath
-        cmake.definitions["Python3_USE_STATIC_LIBS"] = not self.options["cpython"].shared
-        cmake.definitions["Python3_FIND_REGISTRY"] = "NEVER"
-        cmake.definitions["Python3_FIND_IMPLEMENTATIONS"] = "CPython"
-        cmake.definitions["Python3_FIND_STRATEGY"] = "LOCATION"
+        cmake.definitions["PYTHON_EXACT_VERSION"] = self.deps_cpp_info["cpython"].version
+        cmake.definitions["Python{}_ROOT_DIR".format(py_major)] = self.deps_cpp_info["cpython"].rootpath
+        cmake.definitions["Python{}_USE_STATIC_LIBS".format(py_major)] = not self.options["cpython"].shared
+        cmake.definitions["Python{}_FIND_REGISTRY".format(py_major)] = "NEVER"
+        cmake.definitions["Python{}_FIND_IMPLEMENTATIONS".format(py_major)] = "CPython"
+        cmake.definitions["Python{}_FIND_STRATEGY".format(py_major)] = "LOCATION"
+
         if self.settings.compiler != "Visual Studio":
-            cmake.definitions["Python3_FIND_ABI"] = self._cmake_abi.cmake_arg()
-        # cmake.configure()
-        cmake.parallel = False
-        from conans import RunEnvironment
+            if tools.Version(self._py_version) >= tools.Version(3):
+                cmake.definitions["Python{}_FIND_ABI".format(py_major)] = self._cmake_abi.cmake_arg()
+
         with tools.environment_append(RunEnvironment(self).vars):
             cmake.configure()
-            # cmake.configure(args=["--trace", "--trace-expand"])
         cmake.build()
 
     def _test_module(self, module):
-        self.run("{} '{}/test_package.py' -b '{}' -t {}".format(tools.get_env("PYTHON"), self.source_folder, self.build_folder, module), run_environment=True)
+        self.run("{} {}/test_package.py -b {} -t {}".format(tools.get_env("PYTHON"), self.source_folder, self.build_folder, module), run_environment=True)
 
     def test(self):
         if not tools.cross_building(self.settings, skip_x64_x86=True):
@@ -60,12 +66,14 @@ class TestPackageConan(ConanFile):
             self.run("{} -c \"import sys; print('.'.join(str(s) for s in sys.version_info[:3]))\"".format(tools.get_env("PYTHON")), run_environment=True, output=buffer)
             version_detected = buffer.getvalue().splitlines()[-1].strip()
             if version_detected != self.deps_cpp_info["cpython"].version:
-                raise ConanException("python reported wrong version. Expected {exp}. Got {res}.".format(exp=self.deps_cpp_info["cpython"].version, res=version_detected))
+                raise ConanException("python reported wrong version. Expected {exp}. Got {res}.".format(exp=self._py_version, res=version_detected))
 
             if self.options["cpython"].with_gdbm:
                 self._test_module("gdbm")
             if self.options["cpython"].with_bz2:
                 self._test_module("bz2")
+            if self.options["cpython"].with_bsddb:
+                self._test_module("bsddb")
             if self.options["cpython"].with_lzma:
                 self._test_module("lzma")
 
