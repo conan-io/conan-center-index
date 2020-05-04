@@ -1,3 +1,5 @@
 versions:
   2.8.1:
     folder: all
+  2.8.2:
+    folder: all
