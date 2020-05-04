@@ -33,20 +33,28 @@ class MpcConan(ConanFile):
         extracted_dir = self.name + "-" + self.version
         os.rename(extracted_dir, self._source_subfolder)
 
+    def _configure_autotools(self):
+        if self._autotools:
+            return self._autotools
+        self._autotools = AutoToolsBuildEnvironment(self)
+        args = []
+        if self.options.shared:
+            args.extend(["--disable-static", "--enable-shared"])
+        else:
+            args.extend(["--disable-shared", "--disable-static"])
+        self._autotools.configure(args=args)
+        return self._autotools
+
     def build(self):
         with tools.chdir(self._source_subfolder):
-            args = []
-            if self.options.shared:
-                args.extend(["--disable-static", "--enable-shared"])
-            else:
-                args.extend(["--disable-shared", "--disable-static"])
-            env_build = AutoToolsBuildEnvironment(self)
-            env_build.configure(args=args)
-            env_build.make(args=["V=0"])
-            env_build.install()
+            autotools = self._configure_autotools()
+            autotools.make()
 
     def package(self):
         self.copy(pattern="COPYING.LESSER", dst="licenses", src=self._source_subfolder)
+        with tools.chdir(self._source_subfolder):
+            autotools = self._configure_autotools()
+            autotools.install()
         tools.rmdir(os.path.join(self.package_folder, "share"))
         la = os.path.join(self.package_folder, "lib", "libmpc.la")
         if os.path.isfile(la):
