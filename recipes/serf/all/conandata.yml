@@ -2,15 +2,9 @@ sources:
   "1.3.9":
     url: "https://www.apache.org/dist/serf/serf-1.3.9.tar.bz2"
     sha256: "549c2d21c577a8a9c0450facb5cca809f26591f048e466552240947bdf7a87cc"
-  "2.0.0.beta.20190905":
-    url: "https://github.com/apache/serf/archive/1cb2ab783fb7182a7d5db64d428be30b6d779a90.zip"
-    sha256: "948239cedad8a2b269a3894a43875c2bc9b40240ac7d88d9a74714eb5080c677"
 patches:
   "1.3.9":
     - patch_file: "patches/0001-1.3.9-scons-python3.patch"
       base_path: "source_subfolder"
     - patch_file: "patches/0002-1.3.9-scons-respect-flags.patch"
-      base_path: "source_subfolder"
-  "2.0.0.beta.20190905":
-    - patch_file: "patches/0003-2.0.0-scons-respect-flags.patch"
       base_path: "source_subfolder"
