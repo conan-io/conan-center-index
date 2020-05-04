@@ -1,6 +1,6 @@
 import os
-
 from conans import ConanFile, tools
+
 
 class ParallelHashmapConan(ConanFile):
     name = "parallel-hashmap"
