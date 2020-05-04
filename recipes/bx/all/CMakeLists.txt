@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.0)
-project(cmake_wrapper)
+project(bx)
 
 include(conanbuildinfo.cmake)
 conan_basic_setup(TARGETS)
@@ -13,6 +13,7 @@ list(REMOVE_ITEM BX_SOURCES ${BX_SOURCE_SUBFOLDER}/src/amalgamated.cpp)
 add_library(bx STATIC ${BX_SOURCES})
 target_include_directories(bx PUBLIC ${BX_SOURCE_SUBFOLDER}/include ${BX_SOURCE_SUBFOLDER}/3rdparty)
 install(TARGETS bx PUBLIC_HEADER ARCHIVE LIBRARY RUNTIME)
+set_property(TARGET bx PROPERTY CXX_STANDARD 11)
 install(DIRECTORY ${BX_SOURCE_SUBFOLDER}/include/bx DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
 
 if(MSVC)
