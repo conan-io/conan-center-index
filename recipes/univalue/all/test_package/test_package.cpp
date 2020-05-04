@@ -1,5 +1,6 @@
 #include "univalue.h"
 
+#include <stdlib>
 #include <iostream>
 
 int main(int argc, char *argv[])
