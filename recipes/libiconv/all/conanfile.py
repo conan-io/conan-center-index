@@ -85,6 +85,8 @@ class LibiconvConan(ConanFile):
                     yield
 
     def _configure_autotools(self):
+        if self.settings.build_type == "RelWithDebInfo":
+           self.settings.build_type = "Release"
         if self._autotools:
             return self._autotools
         host = None
