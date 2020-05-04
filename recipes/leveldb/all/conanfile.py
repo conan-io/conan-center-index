@@ -7,7 +7,7 @@ class LevelDBConan(ConanFile):
     description = ("LevelDB is a fast key-value storage library written at "
                    "Google that provides an ordered mapping from string keys "
                    "to string values")
-    license = "https://github.com/google/leveldb/blob/master/LICENSE"
+    license = ("BSD-3-Clause",)
     topics = ("conan", "leveldb", "google", "db")
     url = "https://github.com/conan-io/conan-center-index "
     homepage = "https://github.com/google/leveldb"
@@ -81,4 +81,3 @@ class LevelDBConan(ConanFile):
         self.cpp_info.libs = tools.collect_libs(self)
         if self.settings.os == "Linux":
             self.cpp_info.system_libs = ["pthread"]
-
