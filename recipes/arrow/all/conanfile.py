@@ -146,7 +146,8 @@ class ArrowConan(ConanFile):
         if self._cmake:
             return self._cmake
         self._cmake = CMake(self)
-        self._cmake.definitions["ARROW_USE_STATIC_CRT"] = "MT" in str(self.settings.compiler.runtime)
+        if self.settings.compiler == "Visual Studio":
+            self._cmake.definitions["ARROW_USE_STATIC_CRT"] = "MT" in str(self.settings.compiler.runtime)
         self._cmake.definitions["ARROW_DEPENDENCY_SOURCE"] = "SYSTEM"
         self._cmake.definitions["ARROW_VERBOSE_THIRDPARTY_BUILD"] = True
         self._cmake.definitions["ARROW_BUILD_SHARED"] = self.options.shared
