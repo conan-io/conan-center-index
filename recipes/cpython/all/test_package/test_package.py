@@ -114,6 +114,51 @@ def test_lzma():
         raise Exception("lzma.compress returned no data")
 
 
+@add_test
+def test_sqlite3():
+    import sqlite3
+    conn = sqlite3.connect("sqlite3.db")
+
+    c = conn.cursor()
+    c.execute("""CREATE TABLE stocks
+                 (date text, trans text, symbol text, qty real, price real)""")
+    c.execute("INSERT INTO stocks VALUES ('2006-01-05','BUY','RHAT',100,35.14)")
+    conn.commit()
+
+    t = ('RHAT',)
+    c.execute('SELECT * FROM stocks WHERE symbol=?', t)
+
+    # Larger example that inserts many records at a time
+    purchases = [('2006-03-28', 'BUY', 'IBM', 1000, 45.00),
+                 ('2006-04-05', 'BUY', 'MSFT', 1000, 72.00),
+                 ('2006-04-06', 'SELL', 'IBM', 500, 53.00),
+                 ]
+    c.executemany('INSERT INTO stocks VALUES (?,?,?,?,?)', purchases)
+    conn.commit()
+    conn.close()
+    conn = sqlite3.connect("sqlite3.db")
+    c = conn.cursor()
+    c.execute("SELECT * from stocks")
+    data = c.fetchall()
+    if len(data) != 4:
+        raise Exception("Need 4 stocks")
+    print(data)
+    conn.close()
+
+
+@add_test
+def test_decimal():
+    if sys.version_info >= (3, ):
+        # Check whether the _decimal package was built successfully
+        import _decimal as decimal
+    else:
+        import decimal
+    decimal.getcontext().prec = 6
+    print("1/7 =", decimal.Decimal(1) / decimal.Decimal(7))
+    decimal.getcontext().prec = 40
+    print("1/7 =", decimal.Decimal(1) / decimal.Decimal(7))
+
+
 parser = argparse.ArgumentParser()
 parser.add_argument("-b", dest="build_folder", help="build_folder", required=True)
 parser.add_argument("-t", dest="test_module", help="test python module")

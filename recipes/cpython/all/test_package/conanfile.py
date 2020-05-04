@@ -85,6 +85,8 @@ class TestPackageConan(ConanFile):
                 self._test_module("lzma")
 
             self._test_module("expat")
+            self._test_module("sqlite3")
+            self._test_module("decimal")
 
             with tools.environment_append({"PYTHONPATH": [os.path.join(self.build_folder, "lib")]}):
                 self._test_module("spam")

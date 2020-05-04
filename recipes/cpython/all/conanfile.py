@@ -44,7 +44,7 @@ class CPythonConan(ConanFile):
         "pymalloc": True,
         "with_bz2": True,
         "with_gdbm": True,
-        "with_nis": True,
+        "with_nis": False,
         "with_sqlite3": True,
         "with_tkinter": False,
         # "with_curses": False,
@@ -127,6 +127,9 @@ class CPythonConan(ConanFile):
             self.requires("bzip2/1.0.8")
         if self.options.get_safe("with_gdbm"):
             self.requires("gdbm/1.18.1")
+        if self.options.with_nis:
+            raise ConanInvalidConfiguration("nis is not available on CCI (yet)")
+            self.requires("nis/x.y.z")
         if self.options.with_sqlite3:
             self.requires("sqlite3/3.31.1")
         if self.options.with_tkinter:
@@ -164,6 +167,7 @@ class CPythonConan(ConanFile):
             conf_args.extend([
                 "--with-system-libmpdec",
                 "--with-openssl={}".format(self.deps_cpp_info["openssl"].rootpath),
+                "--disable-loadable-sqlite-extensions" if self.options["sqlite3"].omit_load_extension else "--enable-loadable-sqlite-extensions",
             ])
         if self.settings.compiler == "intel":
             conf_args.extend(["--with-icc", "--without-gcc"])
@@ -190,6 +194,9 @@ class CPythonConan(ConanFile):
     def _patch_sources(self):
         for patch in self.conan_data.get("patches",{}).get(self.version, []):
             tools.patch(**patch)
+        if self._is_py3:
+            tools.replace_in_file(os.path.join(self._source_subfolder, "setup.py"),
+                                  ":libmpdec.so.2", "mpdec")
 
     @property
     def _solution_projects(self):
