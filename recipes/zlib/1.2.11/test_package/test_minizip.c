@@ -8,8 +8,7 @@
     #include <iowin32.h>
 #endif
 
-/* TODO: create test for this headers */
-// #include <crypt.h> // THIS IS INTERNAL ONLY, NOT INSTALLED
+/* TODO: create test for this header */
 #include <mztools.h>
 
 const char text[] = ""
