@@ -89,7 +89,7 @@ class SpirvCrossConan(ConanFile):
         self._cmake.definitions["SPIRV_CROSS_ENABLE_MSL"] = self.options.msl
         self._cmake.definitions["SPIRV_CROSS_ENABLE_CPP"] = self.options.cpp
         self._cmake.definitions["SPIRV_CROSS_ENABLE_REFLECT"] = self.options.reflect
-        self._cmake.definitions["SPIRV_CROSS_ENABLE_C_API"] = self.options.get_safe("c_api", False)
+        self._cmake.definitions["SPIRV_CROSS_ENABLE_C_API"] = self.options.get_safe("c_api", True)
         self._cmake.definitions["SPIRV_CROSS_ENABLE_UTIL"] = self.options.get_safe("util", False)
         self._cmake.definitions["SPIRV_CROSS_SKIP_INSTALL"] = False
         self._cmake.definitions["SPIRV_CROSS_FORCE_PIC"] = self.options.get_safe("fPIC", True)
@@ -141,6 +141,8 @@ class SpirvCrossConan(ConanFile):
         self.cpp_info.includedirs.append(os.path.join("include", "spirv_cross"))
         if self.settings.os == "Linux" and self.options.glsl:
             self.cpp_info.system_libs.append("m")
+        if not self.options.shared and self.options.c_api and self._stdcpp_library:
+            self.cpp_info.system_libs.append(self._stdcpp_library)
         if self.options.build_executable:
             self.env_info.PATH.append(os.path.join(self.package_folder, "bin"))
 
@@ -173,3 +175,13 @@ class SpirvCrossConan(ConanFile):
         if self.settings.os == "Windows" and self.settings.build_type == "Debug":
             libs = [lib + "d" for lib in libs]
         return libs
+
+    @property
+    def _stdcpp_library(self):
+        libcxx = self.settings.get_safe("compiler.libcxx")
+        if libcxx in ("libstdc++", "libstdc++11"):
+            return "stdc++"
+        elif libcxx in ("libc++",):
+            return "c++"
+        else:
+            return False
