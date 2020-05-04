@@ -50,8 +50,16 @@ class NloptConan(ConanFile):
         os.rename(self.name + "-" + self.version, self._source_subfolder)
 
     def build(self):
+        self._patch_sources()
         cmake = self._configure_cmake()
         cmake.build()
+
+    def _patch_sources(self):
+        # don't force PIC
+        tools.replace_in_file(os.path.join(self._source_subfolder, "CMakeLists.txt"),
+                                          "set (CMAKE_C_FLAGS \"-fPIC ${CMAKE_C_FLAGS}\")", "")
+        tools.replace_in_file(os.path.join(self._source_subfolder, "CMakeLists.txt"),
+                                          "set (CMAKE_CXX_FLAGS \"-fPIC ${CMAKE_CXX_FLAGS}\")", "")
 
     def _configure_cmake(self):
         if self._cmake:
@@ -102,3 +110,5 @@ class NloptConan(ConanFile):
         self.cpp_info.libs = tools.collect_libs(self)
         if self.settings.os == "Linux":
             self.cpp_info.system_libs.append("m")
+        if self.settings.os == "Windows" and self.options.shared:
+            self.cpp_info.defines.append("NLOPT_DLL")
