@@ -7,7 +7,7 @@ class RangConan(ConanFile):
     description = "A Minimal, Header only Modern c++ library for colors in your terminal"
     homepage = "https://github.com/agauniyal/rang"
     url = "https://github.com/conan-io/conan-center-index"
-    license = "MIT"
+    license = "Unlicense"
     topics = ("conan", "cli", "colors", "terminal", "console")
     no_copy_source = True
     _source_subfolder = "source_subfolder"
