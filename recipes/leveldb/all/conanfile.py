@@ -33,14 +33,13 @@ class LevelDBConan(ConanFile):
         self._cmake.definitions["LEVELDB_BUILD_TESTS"] = False
         return self._cmake
 
-    # note: crc32, tcmalloc are also conditionally included in leveldb, but
+    # FIXME: crc32, tcmalloc are also conditionally included in leveldb, but
     # there are no "official" conan packages yet; when those are available, we
-    # can add similar with- options for those
-    optional_snappy_requirement = "snappy/1.1.7"
+    # can add similar with options for those
 
     def requirements(self):
         if self.options.with_snappy:
-            self.requires(self.optional_snappy_requirement)
+            self.requires("snappy/1.1.7")
 
     @property
     def _source_subfolder(self):
@@ -54,16 +53,18 @@ class LevelDBConan(ConanFile):
         tools.get(**self.conan_data["sources"][self.version])
         downloaded_name = "%s-%s" % (self.name, self.version)
         os.rename(downloaded_name, self._source_subfolder)
-        with tools.chdir(self._source_subfolder):
-            if not self.options.with_snappy:
-                tools.replace_in_file(
-                    "CMakeLists.txt",
-                    ('''check_library_exists(snappy snappy_compress '''
-                     '''"" HAVE_SNAPPY)'''),
-                    ('''check_library_exists(snappy snappy_compress '''
-                        '''"" IGNORE_HAVE_SNAPPY)'''))
+        
+    def _patch_sources(self):
+        if not self.options.with_snappy:
+            tools.replace_in_file(
+                os.path.join(self._source_subfolder, "CMakeLists.txt"),
+                ('''check_library_exists(snappy snappy_compress '''
+                 '''"" HAVE_SNAPPY)'''),
+                ('''check_library_exists(snappy snappy_compress '''
+                    '''"" IGNORE_HAVE_SNAPPY)'''))
 
     def build(self):
+        self._patch_sources()
         cmake = self._get_cmake()
         cmake.configure(source_folder=self._source_subfolder)
         cmake.build()
