@@ -11,7 +11,7 @@ class TomlPlusPlusConan(ConanFile):
               "toml", "json", "header-only", "single-header")
     url = "https://github.com/conan-io/conan-center-index"
     license = "MIT"
-    settings = ("compiler")
+    settings = ("compiler",)
     options = {
         "multiple_headers": [True, False]
     }
