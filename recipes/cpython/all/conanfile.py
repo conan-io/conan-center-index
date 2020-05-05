@@ -85,6 +85,7 @@ class CPythonConan(ConanFile):
             del self.options.lto
             del self.options.docstrings
             del self.options.pymalloc
+            del self.options.with_curses
             del self.options.with_gdbm
             del self.options.with_nis
         if self._is_py2:
@@ -137,7 +138,7 @@ class CPythonConan(ConanFile):
         if self.options.with_tkinter:
             raise ConanInvalidConfiguration("tk is not available on CCI (yet)")
             self.requires("tk/8.6.9.1@bincrafters/stable", private=self._is_installer)
-        if self.options.with_curses:
+        if self.options.get_safe("with_curses", False):
             raise ConanInvalidConfiguration("ncurses is not available on CCI (yet)")
             self.requires("ncurses/6.2")
         if self._is_py2:
