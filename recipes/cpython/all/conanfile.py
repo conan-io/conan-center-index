@@ -108,6 +108,8 @@ class CPythonConan(ConanFile):
             if self._is_py2:
                 if self.settings.compiler.version >= tools.Version("14"):
                     self.output.warn("Visual Studio versions 14 and higher are not supported")
+            if str(self.settings.arch) not in self._msvc_archs:
+                raise ConanInvalidConfiguration("Visual Studio does not support this architecure")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
@@ -115,10 +117,11 @@ class CPythonConan(ConanFile):
 
     def requirements(self):
         self.requires("openssl/1.1.1g")
-        self.requires("expat/2.2.9")
+        if not (self.settings.compiler == "Visual Studio" and tools.Version(self.version) >= tools.Version("3.8")):
+            self.requires("expat/2.2.9")
         self.requires("mpdecimal/2.4.2")
         self.requires("zlib/1.2.11")
-        if self.settings.compiler != "Visual Studio":
+        if self.settings.compiler != "Visual Studio" or tools.Version(self.version) >= "3.8":
             self.requires("libffi/3.3")
         if self.settings.os != "Windows":
             self.requires("libuuid/1.0.3")
@@ -127,7 +130,7 @@ class CPythonConan(ConanFile):
             self.requires("bzip2/1.0.8")
         if self.options.get_safe("with_gdbm"):
             self.requires("gdbm/1.18.1")
-        if self.options.with_nis:
+        if self.options.get_safe("with_nis"):
             raise ConanInvalidConfiguration("nis is not available on CCI (yet)")
             self.requires("nis/x.y.z")
         if self.options.with_sqlite3:
@@ -202,13 +205,13 @@ class CPythonConan(ConanFile):
     def _solution_projects(self):
         solution_path = os.path.join(self._source_subfolder, "PCBuild", "pcbuild.sln")
         project_set = set(m.group(1) for m in re.finditer("\"([^\"]+)\\.vcxproj\"", open(solution_path).read()))
-        discarded = self._discarded_projects
+        discarded = self._msvc_discarded_projects
         projects = set(filter(lambda p: os.path.basename(p) not in discarded, project_set))
         return projects
 
     @property
-    def _discarded_projects(self):
-        discarded = {}
+    def _msvc_discarded_projects(self):
+        discarded = set()
         if not self.options.with_bz2:
             discarded.add("bz2")
         if not self.options.with_sqlite3:
@@ -217,21 +220,30 @@ class CPythonConan(ConanFile):
             discarded.add("_tkinter")
         if self._is_py2:
             # Python 2 Visual Studio projects NOT to build
-            discarded += {"bdist_wininst", "libeay", "ssleay", "sqlite3", "tcl", "tk", "tix"}
+            discarded = discarded.union({"bdist_wininst", "libeay", "ssleay", "sqlite3", "tcl", "tk", "tix"})
             if not self.options.with_bsddb:
                 discarded.add("_bsddb")
         elif self._is_py3:
-            discarded.add("xxlimited")
+            discarded = discarded.union({"bdist_wininst", "liblzma", "openssl", "sqlite3", "xxlimited"})
             if not self.options.with_lzma:
                 discarded.add("_lzma")
         return discarded
 
-    def _build_msvc(self):
-        msbuild = MSBuild(self)
-        msbuild_arch = {
+    @property
+    def _msvc_archs(self):
+        archs = {
             "x86": "Win32",
             "x86_64": "x64",
         }
+        if tools.Version(self.version) >= "3.8":
+            archs.update({
+                "armv7": "ARM",
+                "armv8": "ARM64",
+            })
+        return archs
+
+    def _msvc_build(self):
+        msbuild = MSBuild(self)
         msbuild_properties = {
             "IncludeExternals": "true",
         }
@@ -239,34 +251,27 @@ class CPythonConan(ConanFile):
         self.output.info("Building Visual Studio projects: {}".format(projects))
 
         upgraded = False
-        for project in projects.values():
+        for project in projects:
             project_file = os.path.join(self._source_subfolder, "PCBuild", project + ".vcxproj")
             msbuild.build(project_file, upgrade_project=not upgraded, build_type="Debug" if self.settings.build_type == "Debug" else "Release",
-                          arch=msbuild_arch, properties=msbuild_properties)
+                          arch=self._msvc_archs, properties=msbuild_properties)
             upgraded = True
 
     def build(self):
         self._patch_sources()
         if self.settings.compiler == "Visual Studio":
-            self._build_msvc()
+            self._msvc_build()
         else:
             autotools = self._configure_autotools()
             autotools.make()
 
     @property
     def _msvc_artifacts_path(self):
-        build_subdir = {
-            "x86_64": "amd64",
-            "x86": "Win32",
-        }[str(self.settings.arch)]
+        build_subdir = self._msvc_archs[str(self.settings.arch)]
         return os.path.join(self._source_subfolder, "PCBuild", build_subdir)
 
     def _msvc_package_layout(self):
-        build_subdir = {
-            "x86_64": "amd64",
-            "x86": "Win32",
-        }[str(self.settings.arch)]
-        build_path = os.path.join(self._source_subfolder, "PCBuild", build_subdir)
+        build_path = self._msvc_artifacts_path
         infix = "_d" if self.settings.build_type == "Debug" else ""
         python_built = os.path.join(build_path, "python{}.exe".format(infix))
         layout_args = [
@@ -305,11 +310,7 @@ class CPythonConan(ConanFile):
                 os.unlink(os.path.join(self.package_folder, "lib", file))
 
     def _msvc_package_copy(self):
-        build_subdir = {
-            "x86_64": "amd64",
-            "x86": "Win32",
-        }[str(self.settings.arch)]
-        build_path = os.path.join(self._source_subfolder, "PCBuild", build_subdir)
+        build_path = self._msvc_artifacts_path
         infix = "_d" if self.settings.build_type == "Debug" else ""
         self.copy("*.exe", src=build_path, dst=os.path.join(self.package_folder, "bin"))
         self.copy("*.dll", src=build_path, dst=os.path.join(self.package_folder, "bin"))
@@ -319,6 +320,9 @@ class CPythonConan(ConanFile):
         self.copy("pyconfig.h", src=os.path.join(self._source_subfolder, "PC"), dst=os.path.join(self.package_folder, "include", "python{}".format(self._version_major_minor)))
         self.copy("*.py", src=os.path.join(self._source_subfolder, "lib"), dst=os.path.join(self.package_folder, "bin", "Lib"))
         tools.rmdir(os.path.join(self.package_folder, "bin", "lib", "test"))
+
+        self.run("{} -c \"import compileall; compileall.compile_dir('{}')\"".format(os.path.join(build_path, "python.exe"), os.path.join(self.package_folder, "bin", "Lib").replace("\\", "/")),
+                 run_environment=True)
 
     def package(self):
         self.copy("LICENSE", src=self._source_subfolder, dst="licenses")
