@@ -14,11 +14,9 @@ class BxConan(ConanFile):
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "fPIC": [True, False],
-        "shared": [True, False],
     }
     default_options = {
         "fPIC": True,
-        "shared": False,
     }
     _source_subfolder = "source_subfolder"
     _build_subfolder = "build_subfolder"
