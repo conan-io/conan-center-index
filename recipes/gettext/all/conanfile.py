@@ -1,4 +1,5 @@
 from conans import ConanFile, AutoToolsBuildEnvironment, VisualStudioBuildEnvironment, tools
+from conans.errors import ConanInvalidConfiguration
 import os
 import shutil
 import glob
@@ -42,6 +43,10 @@ class GetTextConan(ConanFile):
     def configure(self):
         del self.settings.compiler.libcxx
         del self.settings.compiler.cppstd
+
+        if self.setting.compiler == "Visual Studio" and \
+           tools.Version(self.settings.compiler.version) == "15":
+            raise ConanInvalidConfiguration("Gettext does not support Visual Studio 15.")
 
     def build_requirements(self):
         if tools.os_info.is_windows:
