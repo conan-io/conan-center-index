@@ -38,8 +38,8 @@ class FlatbuffersConan(ConanFile):
     def _configure_cmake(self):
         cmake = CMake(self)
         cmake.definitions["FLATBUFFERS_BUILD_TESTS"] = False
-        cmake.definitions["FLATBUFFERS_BUILD_SHAREDLIB"] = self.options.shared and not self.options.header_only
-        cmake.definitions["FLATBUFFERS_BUILD_FLATLIB"] = not self.options.shared and not self.options.header_only
+        cmake.definitions["FLATBUFFERS_BUILD_SHAREDLIB"] = self.options.shared
+        cmake.definitions["FLATBUFFERS_BUILD_FLATLIB"] = not self.options.shared
         cmake.definitions["FLATBUFFERS_BUILD_FLATC"] = False
         cmake.definitions["FLATBUFFERS_BUILD_FLATHASH"] = False
         cmake.configure(build_folder=self._build_subfolder)
