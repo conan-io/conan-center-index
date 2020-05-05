@@ -6,7 +6,7 @@ class DebugAssert(ConanFile):
     description = 'Simple, flexible and modular assertion macro'
     url = 'https://github.com/conan-io/conan-center-index'
     homepage = 'http://foonathan.net/blog/2016/09/16/assertions.html'
-    license = 'zlib'
+    license = 'Zlib'
     topics = 'conan', 'assert', 'debugging', 'utilities'
 
     settings = 'compiler'
