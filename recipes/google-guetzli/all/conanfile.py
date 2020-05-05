@@ -58,7 +58,7 @@ class GoogleGuetzliConan(ConanFile):
     def package(self):
         subdir = "Debug" if self.settings.build_type == "Debug" else "Release"
         if self._is_msvc:
-            self.copy("{}/bin/{}/Release/{}.exe".format(self._source_subfolder, self.settings.arch, subdir),
+            self.copy("{}/bin/{}/{}/guetzli.exe".format(self._source_subfolder, self.settings.arch, subdir),
                       dst="bin", keep_path=False)
         else:
             self.copy("{}/bin/{}/guetzli".format(self._source_subfolder, subdir), dst="bin", keep_path=False)
@@ -68,4 +68,3 @@ class GoogleGuetzliConan(ConanFile):
         bindir = os.path.join(self.package_folder, "bin")
         self.output.info("Appending PATH environment variable: {}".format(bindir))
         self.env_info.PATH.append(bindir)
-
