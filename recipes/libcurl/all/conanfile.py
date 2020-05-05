@@ -15,7 +15,7 @@ class LibcurlConan(ConanFile):
     exports_sources = ["lib_Makefile_add.am", "CMakeLists.txt"]
     generators = "cmake", "pkg_config"
 
-    settings = "os", "arch", "compiler", "build_type"
+    settings = "os", "arch", "compiler", "build_type", "os_build"
     options = {"shared": [True, False],
                "fPIC": [True, False],
                "with_openssl": [True, False],
@@ -53,6 +53,11 @@ class LibcurlConan(ConanFile):
     @property
     def _is_mingw(self):
         return self.settings.os == "Windows" and self.settings.compiler != "Visual Studio"
+
+    @property
+    def _is_win_x_android(self):
+        return self.settings.os == "Android" and self.settings.os_build == "Windows"
+
 
     def imports(self):
         # Copy shared libraries for dependencies to fix DYLD_LIBRARY_PATH problems
@@ -127,10 +132,11 @@ class LibcurlConan(ConanFile):
 
     def build(self):
         self._patch_misc_files()
-        if self.settings.compiler != "Visual Studio":
-            self._build_with_autotools()
-        else:
+        if self.settings.compiler == "Visual Studio" or self._is_win_x_android: 
             self._build_with_cmake()
+        else:
+            self._build_with_autotools()
+        
 
     def _patch_misc_files(self):
         if self.options.with_largemaxwritesize:
@@ -379,7 +385,10 @@ class LibcurlConan(ConanFile):
         return self._autotools, self._configure_autotools_vars()
 
     def _configure_cmake(self):
-        cmake = CMake(self)
+        if self._is_win_x_android:
+            cmake = CMake(self, generator="Ninja")
+        else:
+            cmake = CMake(self)
         cmake.definitions['BUILD_TESTING'] = False
         cmake.definitions['BUILD_CURL_EXE'] = False
         cmake.definitions['CURL_DISABLE_LDAP'] = not self.options.with_ldap
@@ -409,16 +418,15 @@ class LibcurlConan(ConanFile):
         self.copy(pattern="COPYING", dst="licenses", src=self._source_subfolder)
 
         # Execute install
-        if self.settings.compiler != "Visual Studio":
+        if self.settings.compiler == "Visual Studio" or self._is_win_x_android:
+            cmake = self._configure_cmake()
+            cmake.install()
+        else:
             env_run = RunEnvironment(self)
             with tools.environment_append(env_run.vars):
                 with tools.chdir(self._source_subfolder):
                     autotools, autotools_vars = self._configure_autotools()
                     autotools.install(vars=autotools_vars)
-        else:
-            cmake = self._configure_cmake()
-            cmake.install()
-
         if self._is_mingw:
             # Handle only mingw libs
             self.copy(pattern="*.dll", dst="bin", keep_path=False)
