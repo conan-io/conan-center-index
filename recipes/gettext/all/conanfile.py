@@ -44,7 +44,7 @@ class GetTextConan(ConanFile):
         del self.settings.compiler.libcxx
         del self.settings.compiler.cppstd
 
-        if self.setting.compiler == "Visual Studio" and \
+        if self.settings.compiler == "Visual Studio" and \
            tools.Version(self.settings.compiler.version) == "15":
             raise ConanInvalidConfiguration("Gettext does not support Visual Studio 15.")
 
