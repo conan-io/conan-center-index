@@ -75,6 +75,8 @@ class LibtoolConan(ConanFile):
         if self._autotools:
             return self._autotools
         self._autotools = AutoToolsBuildEnvironment(self, win_bash=tools.os_info.is_windows)
+        if self.settings.compiler == "Visual Studio":
+            self._autotools.flags.append("-FS")
         conf_args = [
             "--datarootdir={}".format(self._my_unix_path(self._datarootdir)),
             "--prefix={}".format(self._my_unix_path(self.package_folder)),
