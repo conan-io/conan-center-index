@@ -17,6 +17,7 @@ class LibxsltConan(ConanFile):
                        'fPIC': True}
     exports_sources = ["FindLibXml2.cmake"]
     _source_subfolder = "source_subfolder"
+    exports_sources = "patches/**"
 
     def requirements(self):
         self.requires("libxml2/2.9.10")
@@ -41,7 +42,12 @@ class LibxsltConan(ConanFile):
         del self.settings.compiler.libcxx
         del self.settings.compiler.cppstd
 
+    def _patch_sources(self):
+        for patch in self.conan_data["patches"][self.version]:
+            tools.patch(**patch)
+
     def build(self):
+        self._patch_sources()
         if self._is_msvc:
             self._build_windows()
         else:
