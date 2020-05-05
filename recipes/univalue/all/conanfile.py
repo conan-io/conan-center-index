@@ -51,6 +51,7 @@ class UnivalueConan(ConanFile):
         self._autotools =  AutoToolsBuildEnvironment(self, win_bash=tools.os_info.is_windows)
         self._autotools.libs = []
         if self.settings.compiler == "Visual Studio":
+            self._autotools.flags.append("-FS")
             self._autotools.cxx_flags.append("-EHsc")
         conf_args = []
         if self.options.shared:
