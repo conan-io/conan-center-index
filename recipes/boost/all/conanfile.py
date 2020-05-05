@@ -47,6 +47,7 @@ class BoostConan(ConanFile):
         "python_version": "ANY",  # major.minor; computed automatically, if None
         "namespace": "ANY",  # custom boost namespace for bcp, e.g. myboost
         "namespace_alias": [True, False],  # enable namespace alias for bcp, boost=myboost
+        "multithreading": [True, False],  # enables multithreading support
         "zlib": [True, False],
         "bzip2": [True, False],
         "lzma": [True, False],
@@ -73,6 +74,7 @@ class BoostConan(ConanFile):
         'python_version': 'None',
         'namespace': 'boost',
         'namespace_alias': False,
+        'multithreading': True,
         'zlib': True,
         'bzip2': True,
         'lzma': False,
@@ -128,6 +130,15 @@ class BoostConan(ConanFile):
     def configure(self):
         if not self.options.i18n_backend and not self.options.without_locale:
             raise ConanInvalidConfiguration("Boost 'locale' library requires a i18n_backend, either 'icu' or 'iconv'")
+
+        if not self.options.multithreading:
+            # * For the reason 'thread' is deactivate look at https://stackoverflow.com/a/20991533
+            #   Look also on the comments of the answer for more details
+            # * Although the 'context' and 'atomic' library does not mention anything about threading,
+            #   when being build the compiler uses the -pthread flag, which makes it quite dangerous
+            for lib in ['locale', 'coroutine', 'wave', 'type_erasure', 'fiber', 'thread', 'context', 'atomic']:
+                if not self.options.get_safe('without_%s' % lib):
+                    raise ConanInvalidConfiguration("Boost '%s' library requires multi threading" % lib)
 
     def build_requirements(self):
         self.build_requires("b2/4.2.0")
@@ -574,7 +585,8 @@ class BoostConan(ConanFile):
         if self._is_msvc and self.settings.compiler.runtime:
             flags.append("runtime-link=%s" % ("static" if "MT" in str(self.settings.compiler.runtime) else "shared"))
 
-        flags.append("threading=multi")
+        # For details https://boostorg.github.io/build/manual/master/index.html
+        flags.append("threading=%s" % ("single" if not self.options.multithreading else "multi" ))
 
         flags.append("link=%s" % ("static" if not self.options.shared else "shared"))
         if self.settings.build_type == "Debug":
@@ -633,8 +645,10 @@ class BoostConan(ConanFile):
                                                                     self.settings.os.version))
 
         if self.settings.os == "iOS":
-            cxx_flags.append("-DBOOST_AC_USE_PTHREADS")
-            cxx_flags.append("-DBOOST_SP_USE_PTHREADS")
+            if self.options.multithreading:
+                cxx_flags.append("-DBOOST_AC_USE_PTHREADS")
+                cxx_flags.append("-DBOOST_SP_USE_PTHREADS")
+
             cxx_flags.append("-fvisibility=hidden")
             cxx_flags.append("-fvisibility-inlines-hidden")
             cxx_flags.append("-fembed-bitcode")
@@ -896,8 +910,10 @@ class BoostConan(ConanFile):
                 # https://github.com/conan-community/conan-boost/issues/127#issuecomment-404750974
                 self.cpp_info.system_libs.append("bcrypt")
             elif self.settings.os == "Linux":
-                # https://github.com/conan-community/conan-boost/issues/135
-                self.cpp_info.system_libs.extend(["pthread", "rt"])
+                # https://github.com/conan-community/community/issues/135
+                self.cpp_info.system_libs.append("rt")
+                if self.options.multithreading:
+                    self.cpp_info.system_libs.append("pthread")
 
         self.env_info.BOOST_ROOT = self.package_folder
         self.cpp_info.bindirs.append("lib")
