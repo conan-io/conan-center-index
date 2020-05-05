@@ -39,7 +39,7 @@ class EasyhttpcppConan(ConanFile):
         if self._cmake:
             return self._cmake
         self._cmake = CMake(self)
-        self._cmake.definitions["FORCE_SHARED"] = self.options.shared
+        self._cmake.definitions["FORCE_SHAREDLIB"] = self.options.shared
         self._cmake.configure()
         return self._cmake
 
@@ -59,5 +59,11 @@ class EasyhttpcppConan(ConanFile):
         tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
 
     def package_info(self):
-        self.cpp_info.libs = ["easyhttp"]
+        libsuffix = ""
+        if self.settings.os == "Windows":
+            if not self.options.shared:
+                libsuffix += "md"
+        if self.settings.build_type == "Debug":
+            libsuffix += "d"
+        self.cpp_info.libs = ["easyhttp{}".format(libsuffix)]
 
