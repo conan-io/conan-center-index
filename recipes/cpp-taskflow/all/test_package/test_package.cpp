@@ -5,12 +5,16 @@ int main()
     tf::Executor executor;
     tf::Taskflow taskflow;
 
-    auto [A, B, C, D] = taskflow.emplace( 
-        [] () { std::cout << "TaskA\n"; },     //                                 
-        [] () { std::cout << "TaskB\n"; },     //          +---+                  
-        [] () { std::cout << "TaskC\n"; },     //    +---->| B |-----+            
-        [] () { std::cout << "TaskD\n"; }      //    |     +---+     |            
-    );                                         //  +---+           +-v-+          
+    auto A = taskflow.emplace([](){ std::cout << "Task A\n"; });
+    auto B = taskflow.emplace([](){ std::cout << "Task B\n"; });
+    auto C = taskflow.emplace([](){ std::cout << "Task C\n"; });
+    auto D = taskflow.emplace([](){ std::cout << "Task D\n"; });
+                                            
+                                               //                                 
+                                               //          +---+                  
+                                               //    +---->| B |-----+            
+                                               //    |     +---+     |            
+                                               //  +---+           +-v-+          
                                                //  | A |           | D |          
     A.precede(B);    // B runs after A         //  +---+           +-^-+          
     A.precede(C);    // C runs after A         //    |     +---+     |            
