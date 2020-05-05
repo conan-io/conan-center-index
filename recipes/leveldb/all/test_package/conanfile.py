@@ -14,4 +14,6 @@ class LevelDBTestConan(ConanFile):
     def test(self):
         if not tools.cross_building(self.settings):
             bin_path = os.path.join("bin", "example")
+            tools.mkdir("temp_db")
             self.run(bin_path, run_environment=True)
+            tools.rmdir("temp_db")
