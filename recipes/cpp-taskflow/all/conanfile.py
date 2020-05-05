@@ -21,7 +21,7 @@ class CppTaskflowConan(ConanFile):
     def configure(self):
         compiler = str(self.settings.compiler)
         compiler_version = tools.Version(self.settings.compiler.version)
-        min_req_cppstd = "17" if self.version <= "2.2.0" else "14"
+        min_req_cppstd = "17" if tools.Version(self.version) <= "2.2.0" else "14"
 
         if self.settings.compiler.cppstd:
             tools.check_min_cppstd(self, min_req_cppstd)
