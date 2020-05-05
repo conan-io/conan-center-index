@@ -55,9 +55,8 @@ class MpcConan(ConanFile):
 
     def package(self):
         self.copy(pattern="COPYING.LESSER", dst="licenses", src=self._source_subfolder)
-        with tools.chdir(self._source_subfolder):
-            autotools = self._configure_autotools()
-            autotools.install()
+        autotools = self._configure_autotools()
+        autotools.install()
         tools.rmdir(os.path.join(self.package_folder, "share"))
         os.unlink(os.path.join(self.package_folder, "lib", "libmpc.la"))
 
