@@ -72,6 +72,8 @@ class LibGit2Conan(ConanFile):
             self.requires("openssl/1.1.1g")
         if self._need_mbedtls:
             self.requires("mbedtls/2.16.3-gpl")
+        if tools.is_apple_os(self.settings.os) and self.options.with_iconv:
+            self.requires("libiconv/1.16")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
