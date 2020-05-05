@@ -26,7 +26,7 @@ class CPythonConan(ConanFile):
         "with_nis": [True, False],
         "with_sqlite3": [True, False],
         "with_tkinter": [True, False],
-        # "with_curses": [True, False],
+        "with_curses": [True, False],
 
         # Python 2 options
         "unicode": ["ucs2", "ucs4"],
@@ -46,8 +46,8 @@ class CPythonConan(ConanFile):
         "with_gdbm": True,
         "with_nis": False,
         "with_sqlite3": True,
-        "with_tkinter": False,
-        # "with_curses": False,
+        "with_tkinter": False,  # FIXME: enable by default
+        "with_curses": False,   # FIXME: enable by default
 
         # Python 2 options
         "unicode": "ucs2",
@@ -87,7 +87,6 @@ class CPythonConan(ConanFile):
             del self.options.pymalloc
             del self.options.with_gdbm
             del self.options.with_nis
-            del self.options.with_curses
         if self._is_py2:
             # Python 2.xx does not support following options
             del self.options.with_lzma
@@ -128,9 +127,9 @@ class CPythonConan(ConanFile):
             self.requires("libxcrypt/4.4.16")
         if self.options.with_bz2:
             self.requires("bzip2/1.0.8")
-        if self.options.get_safe("with_gdbm"):
+        if self.options.get_safe("with_gdbm", False):
             self.requires("gdbm/1.18.1")
-        if self.options.get_safe("with_nis"):
+        if self.options.get_safe("with_nis", False):
             raise ConanInvalidConfiguration("nis is not available on CCI (yet)")
             self.requires("nis/x.y.z")
         if self.options.with_sqlite3:
@@ -138,8 +137,9 @@ class CPythonConan(ConanFile):
         if self.options.with_tkinter:
             raise ConanInvalidConfiguration("tk is not available on CCI (yet)")
             self.requires("tk/8.6.9.1@bincrafters/stable", private=self._is_installer)
-        # if self.options.get_safe("with_curses"):
-        #     self.requires("ncurses/6.2")
+        if self.options.with_curses:
+            raise ConanInvalidConfiguration("ncurses is not available on CCI (yet)")
+            self.requires("ncurses/6.2")
         if self._is_py2:
             if self.options.with_bsddb:
                 self.requires("libdb/5.3.28")
@@ -389,7 +389,7 @@ class CPythonConan(ConanFile):
             if self.settings.build_type == "Debug":
                 res += "d"
             if tools.Version(self.version) < tools.Version("3.8"):
-                if self.options.get_safe("pymalloc"):
+                if self.options.get_safe("pymalloc", False):
                     res += "m"
         return res
 
