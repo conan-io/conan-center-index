@@ -321,7 +321,7 @@ class CPythonConan(ConanFile):
         self.copy("*.py", src=os.path.join(self._source_subfolder, "lib"), dst=os.path.join(self.package_folder, "bin", "Lib"))
         tools.rmdir(os.path.join(self.package_folder, "bin", "lib", "test"))
 
-        self.run("{} -c \"import compileall; compileall.compile_dir('{}')\"".format(os.path.join(build_path, "python.exe"), os.path.join(self.package_folder, "bin", "Lib").replace("\\", "/")),
+        self.run("{} -c \"import compileall; compileall.compile_dir('{}')\"".format(os.path.join(build_path, self._cpython_interpreter_name), os.path.join(self.package_folder, "bin", "Lib").replace("\\", "/")),
                  run_environment=True)
 
     def package(self):
