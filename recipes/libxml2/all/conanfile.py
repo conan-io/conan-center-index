@@ -36,7 +36,7 @@ class Libxml2Conan(ConanFile):
         if self.options.lzma:
             self.requires("xz_utils/5.2.4")
         if self.options.iconv:
-            self.requires("libiconv/1.15")
+            self.requires("libiconv/1.16")
         if self.options.icu:
             self.requires("icu/64.2")
 
