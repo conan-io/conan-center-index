@@ -16,7 +16,7 @@ class BackwardCppConan(ConanFile):
     settings = "os", "arch", "compiler", "build_type"
     options = {
        "stack_walking" : ["unwind", "backtrace"],
-       "stack_details" : ["dw", "bfd", "dwarf", "backtrace_symbol", "pdb"],
+       "stack_details" : ["dw", "bfd", "dwarf", "backtrace_symbol"],
        "shared": [True, False],
        "fPIC": [True, False]
     }
@@ -33,8 +33,8 @@ class BackwardCppConan(ConanFile):
     def _has_stack_walking(self, type):
         return self.options.stack_walking == type
 
-    def _has_stack_details(self, type):
-        return self.options.stack_details == type
+    def _has_stack_details(self, type):            
+        return False if self.settings.os == "Windows" else self.options.stack_details == type
     
     def _supported_os(self):
         return ["Linux", "Macos", "Android", "Windows"] if tools.Version(self.version) >= "1.5" \
@@ -43,6 +43,7 @@ class BackwardCppConan(ConanFile):
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
+            del self.options.stack_details
     
     def configure(self):
         if self.settings.os not in self._supported_os():
@@ -53,10 +54,6 @@ class BackwardCppConan(ConanFile):
            not self._has_stack_details("backtrace_symbol"):
             raise ConanInvalidConfiguration("only stack_details=backtrace_symbol"
                                             " is supported on Macos")
-        if self.settings.os == "Windows" and \
-            not self._has_stack_details("pdb"):
-             raise ConanInvalidConfiguration("only stack_details=pdb"
-                                            " is supported on Windows")
         
     def requirements(self):
         if self.settings.os in ["Linux", "Android"] and \
@@ -138,7 +135,7 @@ class BackwardCppConan(ConanFile):
         self.cpp_info.defines.append('BACKWARD_HAS_DW={}'.format(int(self._has_stack_details("dw"))))
         self.cpp_info.defines.append('BACKWARD_HAS_BFD={}'.format(int(self._has_stack_details("bfd"))))
         self.cpp_info.defines.append('BACKWARD_HAS_DWARF={}'.format(int(self._has_stack_details("dwarf"))))
-        self.cpp_info.defines.append('BACKWARD_HAS_PDB_SYMBOL={}'.format(int(self._has_stack_details("pdb"))))
+        self.cpp_info.defines.append('BACKWARD_HAS_PDB_SYMBOL={}'.format(int(self.settings.os == "Windows")))
 
         self.cpp_info.libs = tools.collect_libs(self)
         if self.settings.os == "Linux":
