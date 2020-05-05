@@ -12,7 +12,7 @@ int main(int argc, char *argv[])
     UniValue package2(UniValue::VOBJ);
     package2.pushKV("name", "boost");
     package2.pushKV("bool", true);
-    package2.pushKV("huge number", 0x123456789abcdef);
+    package2.pushKV("huge number", 0x123456789abcdefUL);
     UniValue parents(UniValue::VOBJ);
     parents.pushKV("p1", package1);
     parents.pushKV("p2", package2);
