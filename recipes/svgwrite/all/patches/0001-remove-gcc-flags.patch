@@ -1,0 +1,12 @@
+diff --git a/src/CMakeLists.txt b/src/CMakeLists.txt
+index d173312..20f62bd 100644
+--- a/src/CMakeLists.txt
++++ b/src/CMakeLists.txt
+@@ -14,7 +14,6 @@ set_target_properties(svgwrite
+ )
+ 
+ target_compile_features(svgwrite PUBLIC cxx_std_17)
+-target_compile_options(svgwrite PRIVATE -Wall -Wextra -Wpedantic)
+ target_include_directories(svgwrite
+     PUBLIC
+ 	    $<BUILD_INTERFACE:${svgwrite_SOURCE_DIR}/include>
