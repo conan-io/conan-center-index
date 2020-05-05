@@ -78,6 +78,8 @@ class PocoConan(ConanFile):
                 "cxx_14": False
             }
 
+    _cmake = None
+
     @property
     def _source_subfolder(self):
         return "source_subfolder"
@@ -107,7 +109,7 @@ class PocoConan(ConanFile):
            self.options.enable_crypto or \
            self.options.force_openssl or \
            self.options.enable_jwt:
-            self.requires.add("openssl/1.0.2t")
+            self.requires("openssl/1.1.1g")
 
     def _patch(self):
         if self.settings.compiler == "Visual Studio":
@@ -130,20 +132,22 @@ class PocoConan(ConanFile):
         os.rename("CMakeLists.txt", os.path.join(self._source_subfolder, "CMakeLists.txt"))
 
     def _configure_cmake(self):
-        cmake = CMake(self, parallel=None)
+        if self._cmake:
+            return self._cmake
+        self._cmake = CMake(self, parallel=None)
         for option_name in self.options.values.fields:
             activated = getattr(self.options, option_name)
             if option_name == "shared":
-                cmake.definitions["POCO_STATIC"] = "OFF" if activated else "ON"
+                self._cmake.definitions["POCO_STATIC"] = "OFF" if activated else "ON"
             elif not option_name == "fPIC":
-                cmake.definitions[option_name.upper()] = "ON" if activated else "OFF"
+                self._cmake.definitions[option_name.upper()] = "ON" if activated else "OFF"
 
-        cmake.definitions["CMAKE_INSTALL_SYSTEM_RUNTIME_LIBS_SKIP"] = True
+        self._cmake.definitions["CMAKE_INSTALL_SYSTEM_RUNTIME_LIBS_SKIP"] = True
         if self.settings.os == "Windows" and self.settings.compiler == "Visual Studio":  # MT or MTd
-            cmake.definitions["POCO_MT"] = "ON" if "MT" in str(self.settings.compiler.runtime) else "OFF"
-        self.output.info(cmake.definitions)
-        cmake.configure(build_dir=self._build_subfolder, source_dir=os.path.join("..", self._source_subfolder))
-        return cmake
+            self._cmake.definitions["POCO_MT"] = "ON" if "MT" in str(self.settings.compiler.runtime) else "OFF"
+        self.output.info(self._cmake.definitions)
+        self._cmake.configure(build_dir=self._build_subfolder, source_dir=os.path.join("..", self._source_subfolder))
+        return self._cmake
 
     def build(self):
         self._patch()
