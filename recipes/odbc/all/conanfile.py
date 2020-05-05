@@ -8,7 +8,6 @@ class OdbcConan(ConanFile):
     description = 'Package providing unixODBC'
     url = 'https://github.com/conan-io/conan-center-index'
     homepage = "http://www.unixodbc.org"
-    author = "Bincrafters <bincrafters@gmail>"
     license = ('LGPL-2.1', 'GPL-2.1')
 
     settings = 'os', 'compiler', 'build_type', 'arch'
@@ -26,7 +25,7 @@ class OdbcConan(ConanFile):
 
     def requirements(self):
         if self.options.with_libiconv:
-            self.requires("libiconv/1.15")
+            self.requires("libiconv/1.16")
         
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
