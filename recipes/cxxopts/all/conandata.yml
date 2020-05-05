@@ -1,0 +1,7 @@
+sources:
+  "1.4.4":
+    url: https://github.com/jarro2783/cxxopts/archive/v1.4.4.zip
+    sha256: 7c8ec885fcc58e10a8268b57ae04d5cbeac895d150d3a09c15605ff7ef05cf87
+  "2.2.0":
+    url: https://github.com/jarro2783/cxxopts/archive/v2.2.0.zip
+    sha256: f9640c00d9938bedb291a21f9287902a3a8cee38db6910b905f8eba4a6416204
