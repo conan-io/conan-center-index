@@ -20,7 +20,7 @@ class LibCborStackConan(ConanFile):
         "shared": False,
         "fPIC": True
     }
-    generators = "cmake", "cmake_find_package"
+    generators = "cmake"
 
     _cmake = None
 
