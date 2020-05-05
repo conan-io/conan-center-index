@@ -46,11 +46,11 @@ class CppRestSDKConan(ConanFile):
             del self.options.fPIC
 
     def requirements(self):
-        self.requires("openssl/1.1.1f")
+        self.requires("openssl/1.1.1g")
         if self.options.with_compression:
             self.requires("zlib/1.2.11")
         if self.options.with_websockets:
-            self.requires("websocketpp/0.8.1")
+            self.requires("websocketpp/0.8.2")
         self.requires("boost/1.72.0")
 
     def source(self):
@@ -77,8 +77,9 @@ class CppRestSDKConan(ConanFile):
                                   'libc++', 'libstdc++')
 
     def build(self):
-        for patch in self.conan_data["patches"][self.version]:
-            tools.patch(**patch)
+        if "patches" in self.conan_data and self.version in self.conan_data["patches"]:
+            for patch in self.conan_data["patches"][self.version]:
+                tools.patch(**patch)
         self._patch_clang_libcxx()
         cmake = self._configure_cmake()
         cmake.build()
@@ -105,6 +106,7 @@ class CppRestSDKConan(ConanFile):
             lib_name = versioned_name
         else:
             lib_name = 'cpprest'
+
         self.cpp_info.libs.append(lib_name)
         if self.settings.os == "Linux":
             self.cpp_info.system_libs.append("pthread")
