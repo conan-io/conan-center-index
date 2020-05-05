@@ -15,7 +15,6 @@ class LibxsltConan(ConanFile):
                "fPIC": [True, False]}
     default_options = {'shared': False,
                        'fPIC': True}
-    exports_sources = ["FindLibXml2.cmake"]
     _source_subfolder = "source_subfolder"
     exports_sources = "patches/**"
 
@@ -102,8 +101,7 @@ class LibxsltConan(ConanFile):
                     self.run("nmake /f Makefile.msvc install")
 
     def _build_with_configure(self):
-        in_win = self.settings.os == "Windows"
-        env_build = AutoToolsBuildEnvironment(self, win_bash=in_win)
+        env_build = AutoToolsBuildEnvironment(self, win_bash=tools.os_info.is_windows)
         if not in_win:
             env_build.fpic = self.options.fPIC
         full_install_subfolder = tools.unix_path(self.package_folder) if in_win else self.package_folder
@@ -137,7 +135,6 @@ class LibxsltConan(ConanFile):
         env_build.make(args=["install", "V=1"])
 
     def package(self):
-        # copy package license
         self.copy("COPYING", src=self._full_source_subfolder, dst="licenses", ignore_case=True, keep_path=False)
         tools.rmdir(os.path.join(self.package_folder, "share"))
         tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
@@ -174,4 +171,3 @@ class LibxsltConan(ConanFile):
             self.cpp_info.system_libs.append('m')
         if self.settings.os == "Windows":
             self.cpp_info.system_libs.append('ws2_32')
-
