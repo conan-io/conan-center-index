@@ -50,9 +50,8 @@ class MpcConan(ConanFile):
         return self._autotools
 
     def build(self):
-        with tools.chdir(self._source_subfolder):
-            autotools = self._configure_autotools()
-            autotools.make()
+        autotools = self._configure_autotools()
+        autotools.make()
 
     def package(self):
         self.copy(pattern="COPYING.LESSER", dst="licenses", src=self._source_subfolder)
