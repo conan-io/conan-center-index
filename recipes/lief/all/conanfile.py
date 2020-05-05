@@ -45,7 +45,7 @@ class LiefConan(ConanFile):
     _build_subfolder = "build_subfolder"
 
     requires = (
-        "rang/3.1.0@rang/stable",
+        "rang/3.1.0",
         "mbedtls/2.16.3-apache",
     )
 
