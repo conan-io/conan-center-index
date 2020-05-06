@@ -1,4 +1,5 @@
 from conans import ConanFile, CMake, tools
+from conans.errors import ConanInvalidConfiguration
 import os
 
 
@@ -20,10 +21,6 @@ class EasyhttpcppConan(ConanFile):
         "shared": False,
         "fPIC": True,
     }
-    requires = (
-        "openssl/1.1.1g",
-        "poco/1.10.1",
-    )
 
     _cmake = None
 
@@ -34,6 +31,20 @@ class EasyhttpcppConan(ConanFile):
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
         os.rename("{}-{}".format(self.name, self.version), self._source_subfolder)
+
+    def requirements(self):
+        self.requires("poco/1.10.1")
+        if self.settings.os != "Windows":
+            self.requires("openssl/1.1.1g")
+
+    @property
+    def _required_poco_components(self):
+        comps = ["enable_data", "enable_data_sqlite", "enable_net"]
+        if self.settings.os == "Windows":
+            comps.append("enable_netssl_win")
+        else:
+            comps.append("enable_netssl")
+        return comps
 
     def _configure_cmake(self):
         if self._cmake:
@@ -48,6 +59,10 @@ class EasyhttpcppConan(ConanFile):
             tools.patch(**patch)
 
     def build(self):
+        for comp in self._required_poco_components:
+            if not getattr(self.options["poco"], comp):
+                raise ConanInvalidConfiguration("{} requires the following poco option enabled: '{}'".format(self.name, comp))
+
         self._patch_sources()
         cmake = self._configure_cmake()
         cmake.build()
