@@ -62,4 +62,3 @@
 +		if (file_handle < (void*)0) {
  			return r;
  		}
- 
