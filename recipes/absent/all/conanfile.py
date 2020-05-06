@@ -19,10 +19,6 @@ class AbsentConan(ConanFile):
     def _source_subfolder(self):
         return "source_subfolder"
 
-    @property
-    def _build_subfolder(self):
-        return "build_subfolder"
-    
     def _supports_cpp17(self):
         supported_compilers = [("gcc", "7"), ("clang", "5"), ("apple-clang", "10"), ("Visual Studio", "15.7")]
         compiler = self.settings.compiler
@@ -32,8 +28,7 @@ class AbsentConan(ConanFile):
     def _configure_cmake(self):
         cmake = CMake(self)
         cmake.definitions["BUILD_TESTS"] = "OFF"
-        cmake.configure(source_folder=self._source_subfolder,
-                        build_folder=self._build_subfolder)
+        cmake.configure(source_folder=self._source_subfolder)
         return cmake
 
     def configure(self):
@@ -44,10 +39,6 @@ class AbsentConan(ConanFile):
         tools.get(**self.conan_data["sources"][self.version])
         extracted_dir = self.name + "-" + self.version
         os.rename(extracted_dir, self._source_subfolder)
-
-    def build(self):
-        cmake = self._configure_cmake()
-        cmake.build()
 
     def package(self):
         self.copy(pattern="LICENSE", dst="licenses", src=self._source_subfolder)
