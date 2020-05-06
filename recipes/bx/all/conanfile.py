@@ -6,7 +6,7 @@ from conans.errors import ConanInvalidConfiguration
 class BxConan(ConanFile):
     name = "bx"
     description = "Base library used across multiple projects."
-    license = "MIT"
+    license = "BSD-2-Clause"
     topics = ("conan", "bx")
     homepage = "https://github.com/bkaradzic/bx"
     url = "https://github.com/conan-io/conan-center-index"
