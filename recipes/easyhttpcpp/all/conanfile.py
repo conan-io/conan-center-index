@@ -75,10 +75,10 @@ class EasyhttpcppConan(ConanFile):
 
     def package_info(self):
         libsuffix = ""
-        if self.settings.os == "Windows":
-            if not self.options.shared:
-                libsuffix += "md"
         if self.settings.build_type == "Debug":
+            if self.settings.os == "Windows":
+                if not self.options.shared:
+                    libsuffix += "md"
             libsuffix += "d"
         self.cpp_info.libs = ["easyhttp{}".format(libsuffix)]
 
