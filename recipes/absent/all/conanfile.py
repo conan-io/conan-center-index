@@ -22,8 +22,8 @@ class AbsentConan(ConanFile):
     def _supports_cpp17(self):
         supported_compilers = [("gcc", "7"), ("clang", "5"), ("apple-clang", "10"), ("Visual Studio", "15.7")]
         compiler = self.settings.compiler
-        version = Version(self.settings.compiler.version)
-        return any(compiler == e[0] and version >= e[1] for e in supported_compilers)
+        version = Version(compiler.version)
+        return any(compiler == sc[0] and version >= sc[1] for sc in supported_compilers)
             
     def _configure_cmake(self):
         cmake = CMake(self)
@@ -32,7 +32,9 @@ class AbsentConan(ConanFile):
         return cmake
 
     def configure(self):
-        if not self._supports_cpp17():
+        if self.settings.compiler.get_safe("cppstd"):
+            tools.check_min_cppstd(self, "17")
+        elif not self._supports_cpp17():
             raise ConanInvalidConfiguration("Absent requires C++17 support")
 
     def source(self):
