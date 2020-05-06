@@ -97,9 +97,6 @@ class Chai3dConan(ConanFile):
             del self.options.fPIC
         # glew doesn't have an fPIC option, so its type must match with chai3d
         self.options["glew"].shared = self.options.shared
-        # bullet module uses double precision
-        if self.options.with_bullet:
-            self.options["bullet3"].double_precision = True
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
