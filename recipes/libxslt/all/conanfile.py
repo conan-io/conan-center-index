@@ -102,8 +102,6 @@ class LibxsltConan(ConanFile):
 
     def _build_with_configure(self):
         env_build = AutoToolsBuildEnvironment(self, win_bash=tools.os_info.is_windows)
-        if not in_win:
-            env_build.fpic = self.options.fPIC
         full_install_subfolder = tools.unix_path(self.package_folder)
         # fix rpath
         if self.settings.os == "Macos":
