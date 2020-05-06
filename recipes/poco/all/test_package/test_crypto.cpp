@@ -18,7 +18,6 @@
 #include "Poco/StreamCopier.h"
 #include <fstream>
 #include <iostream>
-#include "openssl/crypto.h"
 
 
 using Poco::DigestEngine;
@@ -50,7 +49,6 @@ int main(int argc, char** argv)
 	dos.close();
 
 	std::cout << DigestEngine::digestToHex(md5.digest()) << std::endl;
-	std::cout << "SSL library version: " << SSLeay_version(SSLEAY_VERSION) << std::endl;
 
 	return 0;
 }

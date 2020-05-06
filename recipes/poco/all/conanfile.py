@@ -162,33 +162,43 @@ class PocoConan(ConanFile):
         tools.rmdir(os.path.join(self.package_folder, "cmake"))
 
     def package_info(self):
-        libs = [("enable_mongodb", "PocoMongoDB"),
-                ("enable_pdf", "PocoPDF"),
-                ("enable_netssl", "PocoNetSSL"),
-                ("enable_netssl_win", "PocoNetSSLWin"),
-                ("enable_net", "PocoNet"),
-                ("enable_crypto", "PocoCrypto"),
-                ("enable_data_sqlite", "PocoDataSQLite"),
-                ("enable_data_mysql", "PocoDataMySQL"),
-                ("enable_data_odbc", "PocoDataODBC"),
-                ("enable_data", "PocoData"),
-                ("enable_sevenzip", "PocoSevenZip"),
-                ("enable_zip", "PocoZip"),
-                ("enable_apacheconnector", "PocoApacheConnector"),
-                ("enable_util", "PocoUtil"),
-                ("enable_xml", "PocoXML"),
-                ("enable_json", "PocoJSON"),
-                ("enable_redis", "PocoRedis")]
+        option_libs = [
+            ("enable_zip", "PocoZip"),
+            ("enable_pdf", "PocoPDF"),
+            ("enable_sevenzip", "PocoSevenZip"),
+            ("enable_netssl_win", "PocoNetSSLWin"),
+            ("enable_netssl", "PocoNetSSL"),
+        ]
+        if tools.Version(self.version) >= "1.10":
+            option_libs.append(("enable_jwt", "PocoJWT"))
+        option_libs += [
+            ("enable_util", "PocoUtil"),
+            ("enable_apacheconnector", "PocoApacheConnector"),
+            ("enable_data_sqlite", "PocoDataSQLite"),
+            ("enable_data_odbc", "PocoDataODBC"),
+            ("enable_data_mysql", "PocoDataMySQL"),
+            ("enable_redis", "PocoRedis"),
+            ("enable_mongodb", "PocoMongoDB"),
+            ("enable_net", "PocoNet"),
+        ]
+        if tools.Version(self.version) >= "1.9":
+            option_libs.append(("enable_encodings", "PocoEncodings"))
+        option_libs += [
+            ("enable_xml", "PocoXML"),
+            ("enable_data", "PocoData"),
+            ("enable_crypto", "PocoCrypto"),
+            ("enable_json", "PocoJSON"),
+        ]
 
         suffix = str(self.settings.compiler.runtime).lower()  \
                  if self.settings.compiler == "Visual Studio" and not self.options.shared \
-                 else ("d" if self.settings.build_type=="Debug" else "")
-        for flag, lib in libs:
-            if getattr(self.options, flag):
-                if self.settings.os == "Windows" and flag == "enable_netssl" and self.options.enable_netssl_win:
+                 else ("d" if self.settings.build_type == "Debug" else "")
+        for option, lib in option_libs:
+            if getattr(self.options, option):
+                if self.settings.os == "Windows" and option == "enable_netssl" and self.options.enable_netssl_win:
                     continue
 
-                if self.settings.os != "Windows" and flag == "enable_netssl_win":
+                if self.settings.os != "Windows" and option == "enable_netssl_win":
                     continue
 
                 self.cpp_info.libs.append("%s%s" % (lib, suffix))
@@ -197,11 +207,13 @@ class PocoConan(ConanFile):
 
         # in linux we need to link also with these libs
         if self.settings.os == "Linux":
-            self.cpp_info.libs.extend(["pthread", "dl", "rt"])
+            self.cpp_info.system_libs.extend(["pthread", "dl", "rt"])
 
+        if self.settings.compiler == "Visual Studio":
+            self.cpp_info.defines.append("POCO_NO_AUTOMATIC_LIBS")
         if not self.options.shared:
-            self.cpp_info.defines.extend(["POCO_STATIC=ON", "POCO_NO_AUTOMATIC_LIBS"])
+            self.cpp_info.defines.append("POCO_STATIC=ON")
             if self.settings.compiler == "Visual Studio":
-                self.cpp_info.libs.extend(["ws2_32", "Iphlpapi", "Crypt32"])
+                self.cpp_info.system_libs.extend(["ws2_32", "iphlpapi", "crypt32"])
         self.cpp_info.names["cmake_find_package"] = "Poco"
         self.cpp_info.names["cmake_find_package_multi"] = "Poco"
