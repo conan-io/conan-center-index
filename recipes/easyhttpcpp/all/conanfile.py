@@ -21,6 +21,7 @@ class EasyhttpcppConan(ConanFile):
         "shared": False,
         "fPIC": True,
     }
+    short_paths = True
 
     _cmake = None
 
