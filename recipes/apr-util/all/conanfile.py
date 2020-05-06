@@ -56,10 +56,6 @@ class AprUtilConan(ConanFile):
         del self.settings.compiler.cppstd
         del self.settings.compiler.libcxx
 
-        if self.settings.compiler == "Visual Studio":
-            if self.options.crypto and self.options.crypto != "openssl":
-                raise ConanInvalidConfiguration("Visual Studio only supports openssl crypto")
-
         if not self.options.with_expat:
             raise ConanInvalidConfiguration("expat cannot be disabled (at this time) (check back later)")
 
@@ -74,7 +70,7 @@ class AprUtilConan(ConanFile):
     def requirements(self):
         self.requires("apr/1.7.0")
         if self.options.with_openssl:
-            self.requires("openssl/1.1.1g")  # FIXME: 1.1 is not supported by mysql-connector-c
+            self.requires("openssl/1.1.1g")
         if self.options.with_nss:
             # self.requires("nss/x.y.z")
             raise ConanInvalidConfiguration("CCI has no nss recipe (yet)")
@@ -204,4 +200,5 @@ class AprUtilConan(ConanFile):
         self.output.info("Settings APR_UTIL_ROOT environment var: {}".format(apr_util_root))
         self.env_info.APR_UTIL_ROOT = apr_util_root
 
-        self.env_info.APRUTIL_LDFLAGS = " ".join(my_unix_path("-L{}".format(l) for l in self.deps_cpp_info.lib_paths))
+        if self.settings.compiler != "Visual Studio":
+            self.env_info.APRUTIL_LDFLAGS = " ".join(my_unix_path("-L{}".format(l)) for l in self.deps_cpp_info.lib_paths)
