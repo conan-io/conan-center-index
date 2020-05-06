@@ -33,7 +33,7 @@ class BackwardCppConan(ConanFile):
     def _has_stack_walking(self, type):
         return self.options.stack_walking == type
 
-    def _has_stack_details(self, type):            
+    def _has_stack_details(self, type):
         return False if self.settings.os == "Windows" else self.options.stack_details == type
     
     def _supported_os(self):
