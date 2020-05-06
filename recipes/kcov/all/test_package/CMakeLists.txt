@@ -1,6 +1,8 @@
 cmake_minimum_required(VERSION 2.8.12)
-project(PackageTest CXX)
+project(test_package)
 
+include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
+conan_basic_setup()
 
-add_executable(example example.cpp)
-target_compile_definitions(example PRIVATE BUILD_DIR="${CMAKE_CURRENT_BINARY_DIR}")
+add_executable(${PROJECT_NAME} test_package.cpp)
+target_compile_definitions(${PROJECT_NAME} PRIVATE BUILD_DIR="${CMAKE_CURRENT_BINARY_DIR}")
