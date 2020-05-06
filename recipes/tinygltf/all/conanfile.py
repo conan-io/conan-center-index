@@ -52,6 +52,8 @@ class TinygltfConan(ConanFile):
         self.copy("tiny_gltf.h", dst="include", src=os.path.join(self.source_folder, self._source_subfolder))
 
     def package_info(self):
+        self.cpp_info.names["cmake_find_package"] = "TinyGLTF"
+        self.cpp_info.names["cmake_find_package_multi"] = "TinyGLTF"
         if self.options.draco:
             self.cpp_info.defines.append("TINYGLTF_ENABLE_DRACO")
         if not self.options.stb_image:
