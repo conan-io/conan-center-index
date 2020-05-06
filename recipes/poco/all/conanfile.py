@@ -112,8 +112,18 @@ class PocoConan(ConanFile):
             raise ConanInvalidConfiguration("PostgreSQL not supported yet, open an issue here please: %s" % self.url)
 
     def requirements(self):
+        self.requires("pcre/8.41")
+        self.requires("zlib/1.2.11")
+        if self.options.enable_xml:
+            self.requires("expat/2.2.9")
+        if self.options.enable_data_sqlite:
+            self.requires("sqlite3/3.31.1")
+        if self.options.enable_apacheconnector:
+            self.requires("apr/1.7.0")
+            self.requires("apr-util/1.6.1")
+            raise ConanInvalidConfiguration("apache2 is not (yet) available on CCI")
+            self.requires("apache2/x.y.z")
         if self.options.enable_netssl or \
-           self.options.enable_netssl_win or \
            self.options.enable_crypto or \
            self.options.force_openssl or \
            self.options.get_safe("enable_jwt", False):
@@ -150,6 +160,7 @@ class PocoConan(ConanFile):
             elif not option_name == "fPIC":
                 self._cmake.definitions[option_name.upper()] = "ON" if activated else "OFF"
 
+        self._cmake.definitions["POCO_UNBUNDLED"] = True
         self._cmake.definitions["CMAKE_INSTALL_SYSTEM_RUNTIME_LIBS_SKIP"] = True
         if self.settings.os == "Windows" and self.settings.compiler == "Visual Studio":  # MT or MTd
             self._cmake.definitions["POCO_MT"] = "ON" if "MT" in str(self.settings.compiler.runtime) else "OFF"
@@ -158,6 +169,9 @@ class PocoConan(ConanFile):
         return self._cmake
 
     def build(self):
+        if self.options.enable_data_sqlite:
+            if self.options["sqlite3"].threadsafe == 0:
+                raise ConanInvalidConfiguration("sqlite3 must be built with threadsafe enabled")
         self._patch()
         cmake = self._configure_cmake()
         cmake.build()
