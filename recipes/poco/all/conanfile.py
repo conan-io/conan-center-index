@@ -1,3 +1,4 @@
+from collections import OrderedDict
 import os
 
 from conans import ConanFile, CMake, tools
@@ -31,6 +32,7 @@ class PocoConan(ConanFile):
                "enable_data_sqlite": [True, False],
                "enable_data_mysql": [True, False],
                "enable_data_odbc": [True, False],
+               "enable_data_postgresql": [True, False],
                "enable_encodings": [True, False],
                "enable_jwt": [True, False],
                "enable_sevenzip": [True, False],
@@ -62,6 +64,7 @@ class PocoConan(ConanFile):
                 "enable_data_sqlite": True,
                 "enable_data_mysql": False,
                 "enable_data_odbc": False,
+                "enable_data_postgresql": False,
                 "enable_encodings": True,
                 "enable_jwt": True,
                 "enable_sevenzip": False,
@@ -96,19 +99,24 @@ class PocoConan(ConanFile):
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
+        if tools.Version(self.version) < "1.10":
+            del self.options.enable_data_postgresql
+            del self.options.enable_jwt
 
     def configure(self):
         if self.options.enable_apacheconnector:
             raise ConanInvalidConfiguration("Apache connector not supported: https://github.com/pocoproject/poco/issues/1764")
         if self.options.enable_data_mysql:
             raise ConanInvalidConfiguration("MySQL not supported yet, open an issue here please: %s" % self.url)
+        if self.options.get_safe("enable_data_postgresql"):
+            raise ConanInvalidConfiguration("PostgreSQL not supported yet, open an issue here please: %s" % self.url)
 
     def requirements(self):
         if self.options.enable_netssl or \
            self.options.enable_netssl_win or \
            self.options.enable_crypto or \
            self.options.force_openssl or \
-           self.options.enable_jwt:
+           self.options.get_safe("enable_jwt", False):
             self.requires("openssl/1.1.1g")
 
     def _patch(self):
@@ -134,7 +142,7 @@ class PocoConan(ConanFile):
     def _configure_cmake(self):
         if self._cmake:
             return self._cmake
-        self._cmake = CMake(self, parallel=None)
+        self._cmake = CMake(self)
         for option_name in self.options.values.fields:
             activated = getattr(self.options, option_name)
             if option_name == "shared":
@@ -162,39 +170,40 @@ class PocoConan(ConanFile):
         tools.rmdir(os.path.join(self.package_folder, "cmake"))
 
     def package_info(self):
-        option_libs = [
+        option_libs = OrderedDict((
             ("enable_zip", "PocoZip"),
             ("enable_pdf", "PocoPDF"),
             ("enable_sevenzip", "PocoSevenZip"),
             ("enable_netssl_win", "PocoNetSSLWin"),
             ("enable_netssl", "PocoNetSSL"),
-        ]
-        if tools.Version(self.version) >= "1.10":
-            option_libs.append(("enable_jwt", "PocoJWT"))
-        option_libs += [
+            ("enable_jwt", "PocoJWT"),
             ("enable_util", "PocoUtil"),
             ("enable_apacheconnector", "PocoApacheConnector"),
             ("enable_data_sqlite", "PocoDataSQLite"),
             ("enable_data_odbc", "PocoDataODBC"),
+            ("enable_data_postgresql", "DataPostgreSQL"),
             ("enable_data_mysql", "PocoDataMySQL"),
             ("enable_redis", "PocoRedis"),
             ("enable_mongodb", "PocoMongoDB"),
             ("enable_net", "PocoNet"),
-        ]
-        if tools.Version(self.version) >= "1.9":
-            option_libs.append(("enable_encodings", "PocoEncodings"))
-        option_libs += [
+            ("enable_encodings", "PocoEncodings"),
             ("enable_xml", "PocoXML"),
             ("enable_data", "PocoData"),
             ("enable_crypto", "PocoCrypto"),
             ("enable_json", "PocoJSON"),
-        ]
+        ))
+
+        if tools.Version(self.version) < "1.9":
+            option_libs.pop("enable_encodings")
+        if tools.Version(self.version) < "1.10":
+            option_libs.pop("enable_jwt")
+            option_libs.pop("enable_data_postgresql")
 
         suffix = str(self.settings.compiler.runtime).lower()  \
                  if self.settings.compiler == "Visual Studio" and not self.options.shared \
                  else ("d" if self.settings.build_type == "Debug" else "")
-        for option, lib in option_libs:
-            if getattr(self.options, option):
+        for option, lib in option_libs.items():
+            if self.options.get_safe(option, False):
                 if self.settings.os == "Windows" and option == "enable_netssl" and self.options.enable_netssl_win:
                     continue
 
