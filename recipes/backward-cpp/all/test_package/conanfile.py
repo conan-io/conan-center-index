@@ -10,7 +10,7 @@ class TestPackageConan(ConanFile):
         cmake = CMake(self)
         compiler = self.settings.compiler
         if compiler == 'Visual Studio':
-            runtime = self.settings.compiler.runtime
+            runtime = str(self.settings.compiler.runtime)
             cmake.definitions["MSVC_RUNTIME_TYPE"] = '/' + runtime
         cmake.configure()
         cmake.build()
