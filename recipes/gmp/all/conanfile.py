@@ -80,7 +80,8 @@ class GmpConan(ConanFile):
         del self.info.options.run_checks  # run_checks doesn't affect package's ID
 
     def package_info(self):
-        self.cpp_info.components["gmp"].libs = ["gmp"]
+        self.cpp_info.components["libgmp"].libs = ["gmp"]
+        self.cpp_info.components["libgmp"].names["pkg_config"] = ["gmp"]
         if self.options.enable_cxx:
             self.cpp_info.components["gmpxx"].libs = ["gmpxx"]
-            self.cpp_info.components["gmpxx"].requires = ["gmp"]
+            self.cpp_info.components["gmpxx"].requires = ["libgmp"]
