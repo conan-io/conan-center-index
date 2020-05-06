@@ -21,11 +21,13 @@ class Assimp(ConanFile):
         "shared": [True, False],
         "double_precision": [True, False],
         "fPIC": [True, False],
+        "no_export": [True, False],
     }
     default_options = {
         "shared": False,
         "double_precision": False,
         "fPIC": True,
+        "no_export": False,
     }
 
     _format_option_map = {
@@ -110,7 +112,7 @@ class Assimp(ConanFile):
         cmake = CMake(self)
         cmake.definitions["SYSTEM_IRRXML"] = True
         cmake.definitions["ASSIMP_DOUBLE_PRECISION"] = self.options.double_precision
-        cmake.definitions["ASSIMP_NO_EXPORT"] = False
+        cmake.definitions["ASSIMP_NO_EXPORT"] = self.options.no_export
         cmake.definitions["ASSIMP_BUILD_ASSIMP_TOOLS"] = False
         cmake.definitions["ASSIMP_BUILD_TESTS"] = False
         cmake.definitions["ASSIMP_BUILD_SAMPLES"] = False
