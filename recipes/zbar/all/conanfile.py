@@ -73,6 +73,15 @@ class zbarConan(ConanFile):
             raise ConanInvalidConfiguration("Zbar can't be built on Windows")
         if tools.is_apple_os(self.settings.os) and not self.options.shared:
             raise ConanInvalidConfiguration("Zbar can't be built static on macOS")
+        if self.options.with_imagemagick:   #TODO add when available
+            self.output.warn("There is no imagemagick package available on Conan (yet). This recipe will use the one present on the system (if available).")
+        if self.options.with_gtk:           #TODO add when available
+            self.output.warn("There is no gtk package available on Conan (yet). This recipe will use the one present on the system (if available).")
+        if self.options.with_qt:            #TODO add when available
+            self.output.warn("There is no qt package available on Conan (yet). This recipe will use the one present on the system (if available).")
+        if self.options.with_xv:            #TODO add when available
+            self.output.warn("There is no Xvideo package available on Conan (yet). This recipe will use the one present on the system (if available).")
+
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
