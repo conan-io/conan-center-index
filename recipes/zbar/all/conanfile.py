@@ -66,7 +66,7 @@ class zbarConan(ConanFile):
 
     def requirements(self):
         if self.options.with_jpeg:
-            self.requires.add("libjpeg/9d")
+            self.requires("libjpeg/9d")
 
     def configure(self):
         if self.settings.os == "Windows":
