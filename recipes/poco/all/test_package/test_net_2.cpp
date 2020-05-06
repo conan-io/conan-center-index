@@ -232,7 +232,10 @@ protected:
 			Thread thread;
 			thread.start(reactor);
 			// wait for CTRL-C or kill
-			waitForTerminationRequest();
+
+			// Don't wait for TerminationRequest and stop immediately (This is a bad server)
+			//waitForTerminationRequest();
+
 			// Stop the SocketReactor
 			reactor.stop();
 			thread.join();
