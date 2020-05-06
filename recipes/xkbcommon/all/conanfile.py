@@ -98,4 +98,4 @@ class XkbcommonConan(ConanFile):
         self.cpp_info.libs = tools.collect_libs(self)
         if self.options.with_x11:
             # linking with libxcb-xkb is required by qt configure system for passing tests
-            self.cpp_info.libs.extend('xcb-xkb')
+            self.cpp_info.libs.append('xcb-xkb')
