@@ -7,4 +7,7 @@ include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
 conan_basic_setup()
 
 add_executable(${PROJECT_NAME} libxslt_tutorial.c)
-target_link_libraries(${PROJECT_NAME} ${CONAN_LIBS} rt)
+target_link_libraries(${PROJECT_NAME} ${CONAN_LIBS})
+if (NOT APPLE)
+    target_link_libraries(${PROJECT_NAME} rt)
+endif()
