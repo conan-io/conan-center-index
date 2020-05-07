@@ -1,6 +1,6 @@
-#include <iostream>
-#define VOLK_IMPLEMENTATION
-#include <volk/volk.h>
+#include "volk.h"
+
+#include <stdio.h>
 
 int main() {
     /* Try to initialize volk. This might not work on CI builds,
@@ -13,4 +13,3 @@ int main() {
             VK_VERSION_PATCH(version)
             );
 }
-
