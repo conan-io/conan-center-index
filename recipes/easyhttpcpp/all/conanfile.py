@@ -92,4 +92,5 @@ class EasyhttpcppConan(ConanFile):
         self.cpp_info.libs = ["easyhttp{}".format(libsuffix)]
         if self.settings.os == "Windows" and self.options.shared:
             self.cpp_info.defines.append("EASYHTTPCPP_DLL")
-
+        self.cpp_info.name["cmake_find_package"] = "easyhttpcppeasyhttp"
+        self.cpp_info.name["cmake_find_package_multi"] = "easyhttpcppeasyhttp"
