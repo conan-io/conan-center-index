@@ -29,7 +29,7 @@ class ConanSqlite3(ConanFile):
                }
     default_options = {"shared": False,
                        "fPIC": True,
-                       "threadsafe": 0,
+                       "threadsafe": 1,
                        "enable_column_metadata": True,
                        "enable_explain_comments": False,
                        "enable_fts3": False,
