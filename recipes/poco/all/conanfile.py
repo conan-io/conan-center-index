@@ -12,7 +12,7 @@ class PocoConan(ConanFile):
     homepage = "https://pocoproject.org"
     topics = ("conan", "poco", "building", "networking", "server", "mobile", "embedded")
     exports_sources = "CMakeLists.txt", "patches/**"
-    generators = "cmake"
+    generators = "cmake", "cmake_find_package"
     settings = "os", "arch", "compiler", "build_type"
     license = "BSL-1.0"
     description = "Modern, powerful open source C++ class libraries for building network- and internet-based " \
@@ -133,6 +133,31 @@ class PocoConan(ConanFile):
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
             tools.patch(**patch)
 
+        if Version(self.version) < "1.10":
+            sqlite3_replace = "${SQLITE3_LIBRARIES}"
+            tools.replace_in_file(os.path.join(self._source_subfolder, "data", "SQLite", "CMakeLists.txt"),
+                                               "SQLITE3_INCLUDE_DIRS", "sqlite3_INCLUDE_DIRS")
+        else:
+            sqlite3_replace = "SQLite::SQLite3"
+        tools.replace_in_file(os.path.join(self._source_subfolder, "Data", "SQLite", "CMakeLists.txt"),
+                              sqlite3_replace, "sqlite3::sqlite3")
+
+        pcre_replace = "${PCRE_LIBRARIES}"
+        if Version(self.version) >= "1.10":
+            pcre_replace = "Pcre::Pcre"
+        tools.replace_in_file(os.path.join(self._source_subfolder, "Foundation", "CMakeLists.txt"),
+                              pcre_replace, "pcre::pcre")
+
+        if Version(self.version) < "1.10":
+            openssl_replace = "${OPENSSL_LIBRARIES}"
+            tools.replace_in_file(os.path.join(self._source_subfolder, "CMakeLists.txt"),
+                                               "OPENSSL_INCLUDE_DIR", "OpenSSL_INCLUDE_DIR")
+        else:
+            # FIXME: conan components should make the following line unnecessary (Only older versions of poco should be patched in the future)
+            openssl_replace = "OpenSSL::SSL OpenSSL::Crypto"
+        tools.replace_in_file(os.path.join(self._source_subfolder, "Crypto", "CMakeLists.txt"),
+                              openssl_replace, "OpenSSL::OpenSSL")
+
         if self.settings.compiler == "Visual Studio":
             replace = "POCO_INSTALL_PDB(${target_name})"
             tools.replace_in_file(os.path.join(self._source_subfolder, "cmake", "PocoMacros.cmake"), replace, "# " + replace)
@@ -142,11 +167,6 @@ class PocoConan(ConanFile):
                 if Version(self.version) >= "1.10.0":
                     replace = 'Poco::Net Poco::Util Crypt32.lib'
                 tools.replace_in_file(os.path.join(self._source_subfolder, "NetSSL_Win", "CMakeLists.txt"), replace, replace + " ws2_32 ")
-
-                replace = 'Foundation ${OPENSSL_LIBRARIES}'
-                if Version(self.version) >= "1.10.0":
-                    replace = 'Poco::Foundation OpenSSL::SSL OpenSSL::Crypto'
-                tools.replace_in_file(os.path.join(self._source_subfolder, "Crypto", "CMakeLists.txt"), replace, replace + " ws2_32 Crypt32.lib")
 
         # Poco 1.9.x - CMAKE_SOURCE_DIR is required in many places
         os.rename(os.path.join(self._source_subfolder, "CMakeLists.txt"), os.path.join(self._source_subfolder, "CMakeListsOriginal.cmake"))
@@ -168,7 +188,9 @@ class PocoConan(ConanFile):
         if self.settings.os == "Windows" and self.settings.compiler == "Visual Studio":  # MT or MTd
             self._cmake.definitions["POCO_MT"] = "ON" if "MT" in str(self.settings.compiler.runtime) else "OFF"
         self.output.info(self._cmake.definitions)
-        self._cmake.configure(build_dir=self._build_subfolder, source_dir=os.path.join("..", self._source_subfolder))
+        # On Windows, Poco needs a message (MC) compiler.
+        with tools.vcvars(self.settings) if self.settings.compiler == "Visual Studio" else tools.no_op():
+            self._cmake.configure(build_dir=self._build_subfolder, source_dir=os.path.join("..", self._source_subfolder))
         return self._cmake
 
     def build(self):
