@@ -22,7 +22,7 @@ jobs:
   libjpeg-turbo:
     strategy:
       matrix:
-        build: ['linux-gcc8', 'linux-gcc9', 'macos']
+        build: ['linux-gcc8', 'macos']
         libjpeg-turbo_versions: ['2.0.4']
         include:
           - build: 'linux-gcc8'
@@ -30,13 +30,6 @@ jobs:
             compiler: 'gcc'
             compiler_version: '8'
             docker_image: 'conanio/gcc8'
-            build_types: 'Release,Debug'
-            archs: 'x86_64'
-          - build: 'linux-gcc9'
-            os: 'ubuntu-latest'
-            compiler: 'gcc'
-            compiler_version: '9'
-            docker_image: 'conanio/gcc9'
             build_types: 'Release,Debug'
             archs: 'x86_64'
           - build: 'macos'
@@ -47,7 +40,7 @@ jobs:
             compiler_version: '11.0'
             xcode_version: '11.3.1'
     runs-on: ${{ matrix.os }}
-    steps:     
+    steps:
       - name: Configure git
         run: git config --global core.autocrlf false
         shell: bash

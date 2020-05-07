@@ -23,17 +23,8 @@ jobs:
   axtls:
     strategy:
       matrix:
-        # uncomment when conanfile.py ready
-        # build: ['linux-gcc4.8', 'linux-gcc8', 'linux-gcc9', 'macos']
-        build: ['linux-gcc4.8', 'linux-gcc8', 'linux-gcc9', 'macos']
+        build: ['linux-gcc8', 'macos']
         include:
-          - build: 'linux-gcc4.8'
-            os: 'ubuntu-latest'
-            compiler: 'gcc'
-            compiler_version: '4.8'
-            docker_image: 'conanio/gcc48'
-            build_types: 'Release,Debug'
-            archs: 'x86,x86_64'
           - build: 'linux-gcc8'
             os: 'ubuntu-latest'
             compiler: 'gcc'
@@ -41,13 +32,6 @@ jobs:
             docker_image: 'conanio/gcc8'
             build_types: 'Release,Debug'
             archs: 'x86,x86_64'
-          - build: 'linux-gcc9'
-            os: 'ubuntu-latest'
-            compiler: 'gcc'
-            compiler_version: '9'
-            docker_image: 'conanio/gcc9'
-            build_types: 'Release,Debug'
-            archs: 'x86,x86_64'          
           - build: 'macos'
             os: 'macos-latest'
             build_types: 'Release,Debug'
