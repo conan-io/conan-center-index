@@ -15,5 +15,5 @@ class VolkTestConan(ConanFile):
 
     def test(self):
         if not tools.cross_building(self.settings):
-            self.run(os.path.join("bin", "test_package"))
-            self.run(os.path.join("bin", "test_package_nolibs"))
+            self.run(os.path.join("bin", "test_package"), run_environment=True)
+            self.run(os.path.join("bin", "test_package_nolibs"), run_environment=True)
