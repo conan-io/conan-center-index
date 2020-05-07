@@ -26,7 +26,7 @@ class KcovConan(ConanFile):
     def configure(self):
         if self.settings.compiler == "Visual Studio":
             raise ConanInvalidConfiguration(
-                  "kcov can not be built by Visual Studio.")
+                "kcov can not be built by Visual Studio.")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
@@ -56,8 +56,11 @@ class KcovConan(ConanFile):
             elif tools.os_info.is_freebsd:
                 required_package.append("libbfd")
 
-        installer = tools.SystemPackageTool()
-        installer.install(required_package)
+        if required_package is not None:
+            installer = tools.SystemPackageTool()
+            for pack in required_package:
+                if not installer.installed(pack):
+                    raise ConanInvalidConfiguration("kcov requires {}.".format(pack))
 
     def _patch_sources(self):
         for patch in self.conan_data["patches"][self.version]:
