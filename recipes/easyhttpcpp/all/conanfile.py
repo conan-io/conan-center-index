@@ -90,4 +90,6 @@ class EasyhttpcppConan(ConanFile):
                     libsuffix += "md"
             libsuffix += "d"
         self.cpp_info.libs = ["easyhttp{}".format(libsuffix)]
+        if self.settings.os == "Windows" and self.options.shared:
+            self.cpp_info.defines.append("EASYHTTPCPP_DLL")
 

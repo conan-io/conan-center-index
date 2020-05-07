@@ -6,3 +6,5 @@ patches:
   "2.1.0":
     - patch_file: "patches/0001-allow-inclusion-as-subproject.patch"
       base_path: "source_subfolder"
+    - patch_file: "patches/0002-use-poco-target.cmake"
+      base_path: "source_subfolder"
