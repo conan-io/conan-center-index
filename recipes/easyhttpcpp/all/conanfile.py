@@ -11,7 +11,7 @@ class EasyhttpcppConan(ConanFile):
     homepage = "https://github.com/sony/easyhttpcpp"
     url = "https://github.com/conan-io/conan-center-index"
     exports_sources = "CMakeLists.txt", "patches/**"
-    generators = "cmake", "cmake_find_package_multi"
+    generators = "cmake", "cmake_find_package", "cmake_find_package_multi"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
