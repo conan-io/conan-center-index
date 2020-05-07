@@ -1,4 +1,10 @@
 sources:
-  "4.13.2":
-    url: "https://github.com/InsightSoftwareConsortium/ITK/archive/v4.13.2.tar.gz"
-    sha256: "98c2fd826e1987d797521d83031fcaa328135daf6524f7823363d66ab288c545"
+  "5.1rc03":
+    url: "https://github.com/InsightSoftwareConsortium/ITK/archive/v5.1rc03.tar.gz"
+    sha256: "40a3f999b156efd5dfb6594999f536e66a8375b562f4b44f7aa64bfa25943c98"
+patches:
+  "5.1rc03":
+    - patch_file: "patches/0001-find-conan-packages.patch"
+      base_path: "source_subfolder"
+    - patch_file: "patches/0002-gdcm-dependencies.patch"  #FIXME: should be removed when gdcm becomes a dependency
+      base_path: "source_subfolder"

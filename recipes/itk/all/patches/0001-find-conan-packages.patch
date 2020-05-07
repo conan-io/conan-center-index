@@ -1,0 +1,126 @@
+--- Modules/ThirdParty/Eigen3/itk-module-init.cmake
++++ Modules/ThirdParty/Eigen3/itk-module-init.cmake
+@@ -1,3 +1,3 @@
+ if(ITK_USE_SYSTEM_EIGEN)
+-  find_package(Eigen3 REQUIRED CONFIG)
++  find_package(Eigen3 REQUIRED)
+ endif()
+--- Modules/ThirdParty/DCMTK/itk-module-init.cmake
++++ Modules/ThirdParty/DCMTK/itk-module-init.cmake
+@@ -24,7 +24,7 @@
+ if(ITK_USE_SYSTEM_DCMTK)
+   # Use local FindDCMTK.cmake.
+   list(INSERT CMAKE_MODULE_PATH 0 "${CMAKE_CURRENT_LIST_DIR}/CMake")
+-  find_package(DCMTK REQUIRED NO_MODULE)
++  find_package(DCMTK REQUIRED)
+ else(ITK_USE_SYSTEM_DCMTK)
+   # Copied and mofified from DCMTK/CMake/3rdparty.cmake
+   if(NOT DEFINED DCMTK_USE_ICU)
+--- Modules/ThirdParty/Eigen3/CMakeLists.txt
++++ Modules/ThirdParty/Eigen3/CMakeLists.txt
+@@ -5,7 +5,7 @@
+ mark_as_advanced(ITK_USE_SYSTEM_EIGEN)
+ 
+ if(ITK_USE_SYSTEM_EIGEN)
+-  set(_eigen_itk_target Eigen3::Eigen)
++  set(_eigen_itk_target Eigen3::Eigen3)
+ else()
+   set(_eigen_itk_target ITKInternalEigen3::Eigen)
+ endif()
+@@ -52,9 +52,9 @@
+ 
+ if(ITK_USE_SYSTEM_EIGEN)
+   set(_Eigen3_SYSTEM_OR_INTERNAL "Eigen3")
+-  find_package(${_Eigen3_SYSTEM_OR_INTERNAL} ${_Eigen3_min_version} REQUIRED CONFIG)
+-  set(Eigen3_DIR_INSTALL ${Eigen3_DIR})
+-  set(Eigen3_DIR_BUILD ${Eigen3_DIR})
++  find_package(${_Eigen3_SYSTEM_OR_INTERNAL} ${_Eigen3_min_version} REQUIRED)
++  set(Eigen3_DIR_INSTALL ${Eigen3_INCLUDE_DIR})
++  set(Eigen3_DIR_BUILD ${Eigen3_INCLUDE_DIR})
+ else()
+   set(_Eigen3_SYSTEM_OR_INTERNAL "ITKInternalEigen3")
+   find_package(${_Eigen3_SYSTEM_OR_INTERNAL} ${_Eigen3_min_version} REQUIRED CONFIG)
+@@ -66,7 +66,7 @@
+ # Eigen3 is header only, but there are compile definitions that we want to provide
+ # to enforce use of MPL only code, and to disable warnings.
+ # We only need to add the location of the header itk_eigen.h used internally.
+-get_target_property(Eigen_INCLUDE_DIRS ${_eigen_itk_target} INTERFACE_INCLUDE_DIRECTORIES)
++set(Eigen_INCLUDE_DIRS ${Eigen3_INCLUDE_DIRS})
+ set(ITKEigen3_INCLUDE_DIRS
+   ${Eigen_INCLUDE_DIRS}
+   ${ITKEigen3_BINARY_DIR}/src # For the generated itk_eigen.h
+@@ -75,14 +75,10 @@
+ # When this module is loaded by an app, load Eigen too.
+ # Load ITKInternalEigen3 or Eigen3 depending on ITK_USE_SYSTEM_EIGEN
+ set(ITKEigen3_EXPORT_CODE_INSTALL "
+-set(ITK_USE_SYSTEM_EIGEN \"${ITK_USE_SYSTEM_EIGEN}\")
+-set(${_Eigen3_SYSTEM_OR_INTERNAL}_DIR \"${Eigen3_DIR_INSTALL}\")
+-find_package(${_Eigen3_SYSTEM_OR_INTERNAL} ${_Eigen3_min_version} REQUIRED CONFIG)
++find_package(${_Eigen3_SYSTEM_OR_INTERNAL} ${_Eigen3_min_version} REQUIRED)
+ ")
+ set(ITKEigen3_EXPORT_CODE_BUILD "
+-set(ITK_USE_SYSTEM_EIGEN \"${ITK_USE_SYSTEM_EIGEN}\")
+-set(${_Eigen3_SYSTEM_OR_INTERNAL}_DIR \"${Eigen3_DIR_BUILD}\")
+-find_package(${_Eigen3_SYSTEM_OR_INTERNAL} ${_Eigen3_min_version} REQUIRED CONFIG)
++find_package(${_Eigen3_SYSTEM_OR_INTERNAL} ${_Eigen3_min_version} REQUIRED)
+ ")
+ 
+ # Eigen3 targets are not installed if ITK_USE_SYSTEM_EIGEN==True
+--- Modules/ThirdParty/Eigen3/src/itk_eigen.h.in
++++ Modules/ThirdParty/Eigen3/src/itk_eigen.h.in
+@@ -43,10 +43,10 @@
+   set(Eigen3_DIR ${ITKInternalEigen3_DIR})
+ endif()
+ message(STATUS "From ITK: Eigen3_DIR: ${Eigen3_DIR}")
+-find_package(Eigen3 REQUIRED CONFIG)
++find_package(Eigen3 REQUIRED)
+ add_executable(main main.cpp)
+ target_link_libraries(main PUBLIC ${ITK_LIBRARIES})
+-target_link_libraries(main PUBLIC Eigen3::Eigen)
++target_link_libraries(main PUBLIC Eigen3::Eigen3)
+ \endcode
+  *
+  * Then, the user can use Eigen3 as usual:
+--- Modules/ThirdParty/JPEG/CMakeLists.txt
++++ Modules/ThirdParty/JPEG/CMakeLists.txt
+@@ -6,13 +6,13 @@
+ 
+ if(ITK_USE_SYSTEM_JPEG)
+-  find_package(JPEG REQUIRED)
++  find_package(libjpeg REQUIRED)
+   set(ITKJPEG_INCLUDE_DIRS
+     ${ITKJPEG_BINARY_DIR}/src
+     )
+   set(ITKJPEG_SYSTEM_INCLUDE_DIRS
+-    ${JPEG_INCLUDE_DIR}
++    #(libjpeg_INCLUDE_DIRS}
+     )
+-  set(ITKJPEG_LIBRARIES "${JPEG_LIBRARIES}")
++  set(ITKJPEG_LIBRARIES ${JPEG_LIBRARIES})
+   set(ITKJPEG_NO_SRC 1)
+ else()
+   set(ITKJPEG_INCLUDE_DIRS
+--- Modules/ThirdParty/DoubleConversion/CMakeLists.txt
++++ Modules/ThirdParty/DoubleConversion/CMakeLists.txt
+@@ -8,8 +8,8 @@
+ 
+ if(ITK_USE_SYSTEM_DOUBLECONVERSION)
+   find_package(double-conversion REQUIRED)
+-  get_target_property(ITKDoubleConversion_INCLUDE_DIRS double-conversion::double-conversion INTERFACE_INCLUDE_DIRECTORIES)
+-  get_target_property(ITKDoubleConversion_LIBRARIES double-conversion::double-conversion LOCATION)
++  set(ITKDoubleConversion_INCLUDE_DIRS ${double-conversion_INCLUDE_DIRS})
++  set(ITKDoubleConversion_LIBRARIES ${double-conversion_LIBRARIES})
+ else()
+   set(ITKDoubleConversion_INCLUDE_DIRS
+     ${ITKDoubleConversion_SOURCE_DIR}/src
+--- Modules/ThirdParty/OpenJPEG/src/CMakeLists.txt
++++ Modules/ThirdParty/OpenJPEG/src/CMakeLists.txt
+@@ -4,5 +4,6 @@
+ set(ITK3P_INSTALL_RUNTIME_DIR "${ITKOpenJPEG_INSTALL_RUNTIME_DIR}")
+ set(ITK3P_INSTALL_LIBRARY_DIR "${ITKOpenJPEG_INSTALL_LIBRARY_DIR}")
+ set(ITK3P_INSTALL_ARCHIVE_DIR "${ITKOpenJPEG_INSTALL_ARCHIVE_DIR}")
+-add_subdirectory(openjpeg)
+-itk_module_target(itkopenjpeg NO_INSTALL)
++find_package(OpenJPEG REQUIRED)
++add_library(itkopenjpeg UNKNOWN IMPORTED)
++set_property(TARGET itkopenjpeg PROPERTY INTERFACE_LINK_LIBRARIES OpenJPEG::OpenJPEG)

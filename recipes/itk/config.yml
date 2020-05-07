@@ -1,3 +1,3 @@
 versions:
-    4.13.2:
-      folder: all
+  "5.1rc03":
+    folder: "all"
