@@ -1,13 +1,13 @@
 --- CMakeLists.txt
 +++ CMakeLists.txt
-@@ -14,7 +14,8 @@ option(EASYHTTPCPP_VERBOSE_MESSAGES "Enable informational messages during config
+@@ -14,7 +14,7 @@ option(EASYHTTPCPP_VERBOSE_MESSAGES "Enable informational messages during config
  set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
  set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
  set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 -set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
+-
 +set(PROJECT_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake)
 +set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${PROJECT_MODULE_PATH})
- 
  if (WIN32)
      if (NOT FORCE_SHAREDLIB)
 @@ -52,12 +53,12 @@ if (FORCE_SHAREDLIB)
@@ -25,7 +25,7 @@
      endif ()
  endif ()
  
-@@ -170,19 +171,19 @@ endif ()
+@@ -170,19 +170,19 @@ endif ()
  
  include(CMakePackageConfigHelpers)
  write_basic_package_version_file(
