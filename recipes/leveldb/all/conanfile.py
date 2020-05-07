@@ -57,7 +57,15 @@ class LevelDBCppConan(ConanFile):
         self._cmake.configure()
         return self._cmake
 
+    def _patch_sources(self):
+        if not self.options.with_snappy:
+            tools.replace_in_file(
+                    os.path.join(self._source_subfolder, "CMakeLists.txt"),
+                    ('''check_library_exists(snappy snappy_compress '''
+                        '''"" HAVE_SNAPPY)'''), "")
+
     def build(self):
+        self._patch_sources()
         cmake = self._configure_cmake()
         cmake.build()
 
