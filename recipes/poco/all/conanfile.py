@@ -11,7 +11,7 @@ class PocoConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://pocoproject.org"
     topics = ("conan", "poco", "building", "networking", "server", "mobile", "embedded")
-    exports_sources = "CMakeLists.txt"
+    exports_sources = "CMakeLists.txt", "patches/**"
     generators = "cmake"
     settings = "os", "arch", "compiler", "build_type"
     license = "BSL-1.0"
@@ -129,7 +129,10 @@ class PocoConan(ConanFile):
            self.options.get_safe("enable_jwt", False):
             self.requires("openssl/1.1.1g")
 
-    def _patch(self):
+    def _patch_sources(self):
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            tools.patch(**patch)
+
         if self.settings.compiler == "Visual Studio":
             replace = "POCO_INSTALL_PDB(${target_name})"
             tools.replace_in_file(os.path.join(self._source_subfolder, "cmake", "PocoMacros.cmake"), replace, "# " + replace)
@@ -172,7 +175,7 @@ class PocoConan(ConanFile):
         if self.options.enable_data_sqlite:
             if self.options["sqlite3"].threadsafe == 0:
                 raise ConanInvalidConfiguration("sqlite3 must be built with threadsafe enabled")
-        self._patch()
+        self._patch_sources()
         cmake = self._configure_cmake()
         cmake.build()
 
