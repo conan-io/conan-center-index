@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 2.8.12)
+cmake_minimum_required(VERSION 3.0.2)
 project(libxslt_tutorial)
 
 set(CMAKE_VERBOSE_MAKEFILE TRUE)
@@ -8,6 +8,9 @@ conan_basic_setup()
 
 add_executable(${PROJECT_NAME} libxslt_tutorial.c)
 target_link_libraries(${PROJECT_NAME} ${CONAN_LIBS})
-if (NOT APPLE)
+
+CHECK_LIBRARY_EXISTS(rt clock_gettime "" HAVE_CLOCK_GETTIME)
+
+if (HAVE_CLOCK_GETTIME)
     target_link_libraries(${PROJECT_NAME} rt)
 endif()
