@@ -1,4 +1,5 @@
 from conans import ConanFile, CMake, tools
+import os
 
 
 class VolkConan(ConanFile):
@@ -14,24 +15,60 @@ class VolkConan(ConanFile):
         loading Vulkan entrypoints directly from the driver which \
         can increase performance by skipping loader dispatch \
         overhead."
-    topics = ("Vulkan", "graphics")
+    topics = ("Vulkan", "loader", "extension", "entrypoint", "graphics")
     settings = "os", "compiler", "build_type", "arch"
+    options = {
+        "fPIC": [True, False],
+    }
+    default_options = {
+        "fPIC": True,
+    }
+    exports_sources = "CMakeLists.txt"
     generators = "cmake"
-    no_copy_source = True
+
+    _cmake = None
+
+    @property
+    def _source_subfolder(self):
+        return "source_subfolder"
+
+    def config_options(self):
+        if self.settings.os == "Windows":
+            del self.options.fPIC
+
+    def requirements(self):
+        self.requires("vulkan-headers/1.2.135.0")
 
     def source(self):
-        self.run("git clone https://github.com/zeux/volk.git")
-        self.run("cd volk/ && git checkout %s" % self.version)
+        tools.get(**self.conan_data["sources"][self.version])
+        commithash, _ = os.path.splitext(os.path.basename(self.conan_data["sources"][self.version]["url"]))
+        os.rename("volk-{}".format(commithash), self._source_subfolder)
+
+    def _configure_cmake(self):
+        if self._cmake:
+            return self._cmake
+        self._cmake = CMake(self)
+        self._cmake.definitions["VOLK_INSTALL"] = True
+        self._cmake.configure()
+        return self._cmake
+
+    def build(self):
+        cmake = self._configure_cmake()
+        cmake.build()
 
     def package(self):
-        self.copy("*volk.h", dst="include")
-        self.copy("*volk.c", dst="include")
-        self.copy("*LICENSE.md", dst="licenses")
+        self.copy("LICENSE.md", src=self._source_subfolder, dst="licenses")
+        cmake = self._configure_cmake()
+        cmake.install()
+        tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
 
     def package_info(self):
+        self.cpp_info.components["volk_headers"].requires = ["vulkan-headers::vulkan-headers"]
         if self.settings.os == "Linux":
-            self.cpp_info.libs.extend(["dl"])
+            self.cpp_info.components["volk_headers"].system_libs = ["dl"]
 
-    def package_id(self):
-        self.info.header_only()
-
+        self.cpp_info.components["libvolk"].libs = ["volk"]
+        self.cpp_info.components["libvolk"].system_libs = ["dl"]
+        self.cpp_info.components["libvolk"].requires = ["volk_headers"]
+        self.cpp_info.components["libvolk"].names["cmake_find_package"] = ["volk"]
+        self.cpp_info.components["libvolk"].names["cmake_find_package_multi"] = ["volk"]
