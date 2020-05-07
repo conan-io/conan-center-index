@@ -26,7 +26,7 @@ class SpirvtoolsConan(ConanFile):
     }
 
     def requirements(self):
-        self.requires.add("spirv-headers/1.5.1")
+        self.requires("spirv-headers/1.5.1")
 
     @property
     def _source_subfolder(self):
