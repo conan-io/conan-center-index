@@ -29,7 +29,7 @@ jobs:
             compiler: 'gcc'
             compiler_version: '7'
             docker_image: 'conanio/gcc7'
-            build_types: 'Release'
+            build_types: 'Release,Debug'
             archs: 'x86,x86_64'
     runs-on: ${{ matrix.os }}
     steps:

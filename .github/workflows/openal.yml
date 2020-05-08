@@ -26,8 +26,8 @@ jobs:
         openal_versions: ['1.20.1']
         include:
           - build: 'macos'
-            os: 'macos-10.15'
-            build_types: 'Release'
+            os: 'macos-latest'
+            build_types: 'Release,Debug'
             archs: 'x86_64'
             compiler: 'apple_clang'
             compiler_version: '11.0'

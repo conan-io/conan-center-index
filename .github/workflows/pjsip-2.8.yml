@@ -26,8 +26,8 @@ jobs:
         build: ['macos']
         include:
           - build: 'macos'
-            os: 'macos-10.15'
-            build_types: 'Release'
+            os: 'macos-latest'
+            build_types: 'Release,Debug'
             archs: 'x86_64'
             compiler: 'apple_clang'
             compiler_version: '11.0'
@@ -35,7 +35,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     steps:
       - name: Install pkg-config
-        if: matrix.os == 'macos-10.15'
+        if: matrix.os == 'macos-latest'
         run: brew install pkg-config
       - name: Configure git
         run: git config --global core.autocrlf false
