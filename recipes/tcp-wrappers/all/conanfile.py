@@ -39,6 +39,8 @@ class TcpWrappersConan(ConanFile):
             raise ConanInvalidConfiguration("Visual Studio is not supported")
         if self.options.shared:
             del self.options.fPIC
+        del self.settings.compiler.libcxx
+        del self.settings.compiler.cppstd
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
