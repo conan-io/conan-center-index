@@ -75,8 +75,6 @@ jobs:
           compiler-versions: ${{ matrix.compiler_version }}
           docker-images: ${{ matrix.docker_image }}
         env:
-          CONAN_OPTIONS: "libcurl:shared=True"
-          CONAN_SHARED_OPTION_NAME: False
           CONAN_OPTIONS: ${{ matrix.options }}
           CONAN_REFERENCE: 'libcurl/${{ matrix.libcurl_versions }}'
           CONAN_VISUAL_RUNTIMES: ${{ matrix.vs_runtimes }}

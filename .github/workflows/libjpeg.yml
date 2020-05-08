@@ -24,7 +24,7 @@ jobs:
       matrix:
         build: ['linux-gcc8', 'macos']
         libjpeg_versions: ['9d']
-        include:
+        include:       
           - build: 'linux-gcc8'
             os: 'ubuntu-latest'
             compiler: 'gcc'
@@ -64,8 +64,6 @@ jobs:
           compiler-versions: ${{ matrix.compiler_version }}
           docker-images: ${{ matrix.docker_image }}
         env:
-          CONAN_OPTIONS: "libjpeg:shared=True"
-          CONAN_SHARED_OPTION_NAME: False
           CONAN_REFERENCE: 'libjpeg/${{ matrix.libjpeg_versions }}'
           CONAN_VISUAL_RUNTIMES: ${{ matrix.vs_runtimes }}
           CONAN_ARCHS: ${{ matrix.archs }}

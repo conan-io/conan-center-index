@@ -72,8 +72,6 @@ jobs:
           docker-images: ${{ matrix.docker_image }}
         env:
           CONAN_REFERENCE: 'yasm/${{ matrix.yasm_versions }}'
-          CONAN_OPTIONS: "yasm:shared=True"
-          CONAN_SHARED_OPTION_NAME: False
           CONAN_VISUAL_RUNTIMES: ${{ matrix.vs_runtimes }}
           CONAN_ARCHS: ${{ matrix.archs }}
           CONAN_BUILD_TYPES: ${{ matrix.build_types }}

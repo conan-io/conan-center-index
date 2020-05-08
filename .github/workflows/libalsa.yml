@@ -71,8 +71,6 @@ jobs:
           compiler-versions: ${{ matrix.compiler_version }}
           docker-images: ${{ matrix.docker_image }}
         env:
-          CONAN_OPTIONS: "libalsa:shared=True"
-          CONAN_SHARED_OPTION_NAME: False
           CONAN_REFERENCE: 'libalsa/${{ matrix.libalsa_versions }}'
           CONAN_VISUAL_RUNTIMES: ${{ matrix.vs_runtimes }}
           CONAN_ARCHS: ${{ matrix.archs }}
