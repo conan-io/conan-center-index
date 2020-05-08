@@ -50,6 +50,8 @@ class LibcurlConan(ConanFile):
     _build_subfolder = "build_subfolder"
     _autotools = False
 
+    _cmake = None
+
     @property
     def _is_mingw(self):
         return self.settings.os == "Windows" and self.settings.compiler != "Visual Studio"
@@ -385,24 +387,26 @@ class LibcurlConan(ConanFile):
         return self._autotools, self._configure_autotools_vars()
 
     def _configure_cmake(self):
+        if self._cmake:
+            return self._cmake
         if self._is_win_x_android:
-            cmake = CMake(self, generator="Ninja")
+            self._cmake = CMake(self, generator="Ninja")
         else:
-            cmake = CMake(self)
-        cmake.definitions['BUILD_TESTING'] = False
-        cmake.definitions['BUILD_CURL_EXE'] = False
-        cmake.definitions['CURL_DISABLE_LDAP'] = not self.options.with_ldap
-        cmake.definitions['BUILD_SHARED_LIBS'] = self.options.shared
-        cmake.definitions['CURL_STATICLIB'] = not self.options.shared
-        cmake.definitions['CMAKE_DEBUG_POSTFIX'] = ''
-        cmake.definitions['CMAKE_USE_LIBSSH2'] = self.options.with_libssh2
+            self._cmake = CMake(self)
+        self._cmake.definitions['BUILD_TESTING'] = False
+        self._cmake.definitions['BUILD_CURL_EXE'] = False
+        self._cmake.definitions['CURL_DISABLE_LDAP'] = not self.options.with_ldap
+        self._cmake.definitions['BUILD_SHARED_LIBS'] = self.options.shared
+        self._cmake.definitions['CURL_STATICLIB'] = not self.options.shared
+        self._cmake.definitions['CMAKE_DEBUG_POSTFIX'] = ''
+        self._cmake.definitions['CMAKE_USE_LIBSSH2'] = self.options.with_libssh2
 
         # all these options are exclusive. set just one of them
         # mac builds do not use cmake so don't even bother about darwin_ssl
-        cmake.definitions['CMAKE_USE_WINSSL'] = 'with_winssl' in self.options and self.options.with_winssl
-        cmake.definitions['CMAKE_USE_OPENSSL'] = 'with_openssl' in self.options and self.options.with_openssl
-        cmake.configure(build_folder=self._build_subfolder)
-        return cmake
+        self._cmake.definitions['CMAKE_USE_WINSSL'] = 'with_winssl' in self.options and self.options.with_winssl
+        self._cmake.definitions['CMAKE_USE_OPENSSL'] = 'with_openssl' in self.options and self.options.with_openssl
+        self._cmake.configure(build_folder=self._build_subfolder)
+        return self._cmake
 
     def _build_with_cmake(self):
         # patch cmake files
