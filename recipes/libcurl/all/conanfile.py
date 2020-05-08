@@ -132,11 +132,11 @@ class LibcurlConan(ConanFile):
 
     def build(self):
         self._patch_misc_files()
-        if self.settings.compiler == "Visual Studio" or self._is_win_x_android: 
+        if self.settings.compiler == "Visual Studio" or self._is_win_x_android:
             self._build_with_cmake()
         else:
             self._build_with_autotools()
-        
+
 
     def _patch_misc_files(self):
         if self.options.with_largemaxwritesize:
