@@ -30,7 +30,7 @@ jobs:
             compiler: 'gcc'
             compiler_version: '8'
             docker_image: 'trassiross/conan-gcc8'
-            build_types: 'Release,Debug'
+            build_types: 'Release'
             archs: 'x86_64'
     runs-on: ${{ matrix.os }}
     steps:
