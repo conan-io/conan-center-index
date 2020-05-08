@@ -51,6 +51,7 @@ class TcpWrappersConan(ConanFile):
             tools.patch(**patch)
 
     def build(self):
+        self._patch_sources()
         with tools.chdir(self._source_subfolder):
             autotools = AutoToolsBuildEnvironment(self)
             make_args = [
