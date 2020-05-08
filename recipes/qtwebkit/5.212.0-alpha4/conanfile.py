@@ -53,6 +53,8 @@ class QtWebKitConan(ConanFile):
         "qt:qtx11extras": platform.system() == "Linux",
         "qt:qtimageformats": True,
         "qt:qtscript": True,
+        "qt:qttools": True,
+        "qt:qtmultimedia" : True,
 
         "qt:with_glib": False,
         "qt:with_harfbuzz": False,

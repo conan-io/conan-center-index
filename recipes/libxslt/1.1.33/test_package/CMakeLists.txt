@@ -8,3 +8,10 @@ conan_basic_setup()
 
 add_executable(${PROJECT_NAME} libxslt_tutorial.c)
 target_link_libraries(${PROJECT_NAME} ${CONAN_LIBS})
+
+include(CheckLibraryExists)
+CHECK_LIBRARY_EXISTS(rt clock_gettime "" HAVE_CLOCK_GETTIME)
+
+if (HAVE_CLOCK_GETTIME)
+    target_link_libraries(${PROJECT_NAME} rt)
+endif()
