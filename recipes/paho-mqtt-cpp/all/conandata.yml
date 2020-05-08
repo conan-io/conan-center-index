@@ -21,4 +21,3 @@ patches:
     - patch_file: "patches/1.0.1/0003-fix-paho-mqtt-cpp-config-cmake.patch"
       base_path: "source_subfolder"
         
-      

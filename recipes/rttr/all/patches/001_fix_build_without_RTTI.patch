@@ -20,4 +20,3 @@
 +    replace_compiler_option("${enable_rtti_opt}" "${disable_rtti_opt}")
    endif()
  endmacro()
- 
