@@ -21,21 +21,14 @@ jobs:
   libxml2:
     strategy:
       matrix:
-        build: ['linux-gcc8', 'linux-gcc9', 'macos']
+        build: ['linux-gcc8', 'macos']
         libxml2_versions: ['2.9.9']
-        include:          
+        include:
           - build: 'linux-gcc8'
             os: 'ubuntu-latest'
             compiler: 'gcc'
             compiler_version: '8'
             docker_image: 'conanio/gcc8'
-            build_types: 'Release,Debug'
-            archs: 'x86_64'
-          - build: 'linux-gcc9'
-            os: 'ubuntu-latest'
-            compiler: 'gcc'
-            compiler_version: '9'
-            docker_image: 'conanio/gcc9'
             build_types: 'Release,Debug'
             archs: 'x86_64'
           - build: 'macos'
