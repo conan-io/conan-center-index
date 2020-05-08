@@ -135,13 +135,15 @@ class PocoConan(ConanFile):
 
         if Version(self.version) < "1.10":
             sqlite3_replace = "${SQLITE3_LIBRARIES}"
-            tools.replace_in_file(os.path.join(self._source_subfolder, "data", "SQLite", "CMakeLists.txt"),
-                                               "SQLITE3_INCLUDE_DIRS", "sqlite3_INCLUDE_DIRS")
+            tools.replace_in_file(os.path.join(self._source_subfolder, "Data", "SQLite", "CMakeLists.txt"),
+                                  "SQLITE3_INCLUDE_DIRS", "sqlite3_INCLUDE_DIRS")
         else:
             sqlite3_replace = "SQLite::SQLite3"
         tools.replace_in_file(os.path.join(self._source_subfolder, "Data", "SQLite", "CMakeLists.txt"),
                               sqlite3_replace, "sqlite3::sqlite3")
 
+        tools.replace_in_file(os.path.join(self._source_subfolder, "Foundation", "CMakeLists.txt"),
+                              "find_package(PCRE REQUIRED)", "find_package(pcre REQUIRED)")
         pcre_replace = "${PCRE_LIBRARIES}"
         if Version(self.version) >= "1.10":
             pcre_replace = "Pcre::Pcre"
@@ -151,7 +153,7 @@ class PocoConan(ConanFile):
         if Version(self.version) < "1.10":
             openssl_replace = "${OPENSSL_LIBRARIES}"
             tools.replace_in_file(os.path.join(self._source_subfolder, "CMakeLists.txt"),
-                                               "OPENSSL_INCLUDE_DIR", "OpenSSL_INCLUDE_DIR")
+                                  "OPENSSL_INCLUDE_DIR", "OpenSSL_INCLUDE_DIR")
         else:
             # FIXME: conan components should make the following line unnecessary (Only older versions of poco should be patched in the future)
             openssl_replace = "OpenSSL::SSL OpenSSL::Crypto"
