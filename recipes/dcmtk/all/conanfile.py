@@ -112,7 +112,7 @@ class DCMTKConan(ConanFile):
         if self.options.with_libpng:
             self._cmake.definitions["WITH_LIBPNGINC"] = self.deps_cpp_info["libpng"].rootpath
         self._cmake.definitions["DCMTK_WITH_SNDFILE"] = self.options.with_libsndfile
-        if self.options.with_libpng:
+        if self.options.with_libsndfile:
             self._cmake.definitions["WITH_SNDFILEINC"] = self.deps_cpp_info["libsndfile"].rootpath
         self._cmake.definitions["DCMTK_WITH_THREADS"] = self.options.with_multithreading
         self._cmake.definitions["DCMTK_WITH_TIFF"] = self.options.with_libtiff
