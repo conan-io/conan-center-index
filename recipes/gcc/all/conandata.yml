@@ -1,0 +1,4 @@
+sources:
+  "10.1.0":
+    sha256: 0fd6876c022daa1fc84db88396ecf114ab3598c4408d2ffd28ca3cd9be7d3b16
+    url: https://github.com/gcc-mirror/gcc/archive/releases/gcc-10.1.0.tar.gz
