@@ -5,9 +5,9 @@ from conans.errors import ConanInvalidConfiguration
 
 class TcpWrappersConan(ConanFile):
     name = "tcp-wrappers"
-    homepage = "https://github.com/zeromq/czmq"
+    homepage = "ftp://ftp.porcupine.org/pub/security/index.html"
     description = "A security tool which acts as a wrapper for TCP daemons"
-    topics = ("conan", "zmq", "libzmq", "message-queue", "asynchronous")
+    topics = ("conan", "tcp", "ip", "daemon", "wrapper")
     url = "https://github.com/conan-io/conan-center-index"
     license = "BSD"
     exports_sources = "patches/**"
