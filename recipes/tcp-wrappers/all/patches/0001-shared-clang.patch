@@ -17,7 +17,7 @@
  
 -LIB	= libwrap.a
 +ALIB	= libwrap.a
-+SHLIB	= libwrap.so
++SHLIB	= libwrap${SHEXT}
 +
 +ifdef shared
 +LIB	= $(SHLIB)

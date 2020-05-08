@@ -57,6 +57,7 @@ class TcpWrappersConan(ConanFile):
             make_args = [
                 "REAL_DAEMON_DIR={}".format(tools.unix_path(os.path.join(self.package_folder, "bin"))),
                 "-j1",
+                "SHEXT={}".format(self._shext),
             ]
             if self.options.shared:
                 make_args.append("shared=1")
@@ -64,9 +65,16 @@ class TcpWrappersConan(ConanFile):
             if self.options.get_safe("fPIC", True):
                 env_vars["CFLAGS"] += " -fPIC"
             env_vars["ENV_CFLAGS"] = env_vars["CFLAGS"]
+            # env_vars["SHEXT"] = self._shext
             print(env_vars)
             with tools.environment_append(env_vars):
                 autotools.make(target="linux", args=make_args)
+
+    @property
+    def _shext(self):
+        if tools.is_apple_os(self.settings.os):
+            return ".dylib"
+        return ".so"
 
     def package(self):
         self.copy(pattern="DISCLAIMER", src=self._source_subfolder, dst="licenses")
@@ -75,7 +83,7 @@ class TcpWrappersConan(ConanFile):
             self.copy(exe, src=self._source_subfolder, dst="bin", keep_path=False)
         self.copy("tcpd.h", src=self._source_subfolder, dst="include", keep_path=False)
         if self.options.shared:
-            self.copy("libwrap.so", src=self._source_subfolder, dst="lib", keep_path=False)
+            self.copy("libwrap{}".format(self._shext), src=self._source_subfolder, dst="lib", keep_path=False)
         else:
             self.copy("libwrap.a", src=self._source_subfolder, dst="lib", keep_path=False)
 
