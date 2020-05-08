@@ -153,6 +153,7 @@ class DCMTKConan(ConanFile):
 
         tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
         tools.rmdir(os.path.join(self.package_folder, "etc"))
+        tools.rmdir(os.path.join(self.package_folder, "share"))
 
     @property
     def _dcm_datadictionary_path(self):
