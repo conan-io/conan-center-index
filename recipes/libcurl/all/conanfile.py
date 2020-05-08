@@ -15,7 +15,7 @@ class LibcurlConan(ConanFile):
     exports_sources = ["lib_Makefile_add.am", "CMakeLists.txt"]
     generators = "cmake", "pkg_config"
 
-    settings = "os", "arch", "compiler", "build_type", "os_build"
+    settings = "os", "arch", "compiler", "build_type"
     options = {"shared": [True, False],
                "fPIC": [True, False],
                "with_openssl": [True, False],
