@@ -61,7 +61,7 @@ class PocoConan(ConanFile):
                 "enable_netssl_win": True,
                 "enable_crypto": True,
                 "enable_data": True,
-                "enable_data_sqlite": False,
+                "enable_data_sqlite": True,
                 "enable_data_mysql": False,
                 "enable_data_odbc": False,
                 "enable_data_postgresql": False,
