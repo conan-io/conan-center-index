@@ -40,6 +40,10 @@ class VolkConan(ConanFile):
             del self.settings.compiler.cppstd
             del self.settings.compiler.libcxx
 
+        def configure(self):
+            del self.settings.compiler.cppstd
+            del self.settings.compiler.libcxx
+
     def requirements(self):
         if self.version <= 20200318:
             self.requires("vulkan-headers/1.2.135.0")
