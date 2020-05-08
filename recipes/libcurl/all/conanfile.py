@@ -15,7 +15,7 @@ class LibcurlConan(ConanFile):
     exports_sources = ["lib_Makefile_add.am", "CMakeLists.txt"]
     generators = "cmake", "pkg_config"
 
-    settings = "os", "arch", "compiler", "build_type"
+    settings = "os", "arch", "compiler", "build_type", "os_build"
     options = {"shared": [True, False],
                "fPIC": [True, False],
                "with_openssl": [True, False],
@@ -56,7 +56,11 @@ class LibcurlConan(ConanFile):
 
     @property
     def _is_win_x_android(self):
+<<<<<<< HEAD
         return self.settings.os == "Android" and platform.system() == "Windows"
+=======
+        return self.settings.os == "Android" and self.settings.os_build == "Windows"
+>>>>>>> 16aba97d04ab500751aa86d05cc6dba1e1b454e3
 
 
     def imports(self):
