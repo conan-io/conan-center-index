@@ -1,4 +1,4 @@
-import os, platform
+import os
 import re
 from conans import ConanFile, AutoToolsBuildEnvironment, RunEnvironment, CMake, tools
 from conans.errors import ConanInvalidConfiguration
@@ -56,7 +56,7 @@ class LibcurlConan(ConanFile):
 
     @property
     def _is_win_x_android(self):
-        return self.settings.os == "Android" and platform.system() == "Windows"
+        return self.settings.os == "Android" and tools.os_info.is_windows
 
 
     def imports(self):
