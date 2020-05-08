@@ -40,21 +40,6 @@
  
  tcpd:	tcpd.o $(LIB)
  	$(CC) $(CFLAGS) -o $@ tcpd.o $(LIB) $(LIBS)
-diff --git a/source/source_subfolder/fix_options.c b/source/source_subfolder/fix_options.c
-index b5e81b8..373171e 100644
---- fix_options.c
-+++ fix_options.c
-@@ -82,7 +82,7 @@ struct request_info *request;
- 		   "refused connect from %s with IP source routing options",
- 		       eval_client(request));
- 		shutdown(fd, 2);
--		return;
-+		return 0;
- 	    }
- 	    if (opt == IPOPT_EOL)
- 		break;
-diff --git a/source/source_subfolder/tcpd.h b/source/source_subfolder/tcpd.h
-index 8384ed4..5a881f7 100644
 --- tcpd.h
 +++ tcpd.h
 @@ -157,8 +157,8 @@ extern char *skip_ipv6_addrs();		/* skip over colons in IPv6 addrs */
