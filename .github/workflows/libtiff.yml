@@ -71,6 +71,8 @@ jobs:
           compiler-versions: ${{ matrix.compiler_version }}
           docker-images: ${{ matrix.docker_image }}
         env:
+          CONAN_OPTIONS: "libtiff:shared=True"
+          CONAN_SHARED_OPTION_NAME: False
           CONAN_REFERENCE: 'libtiff/${{ matrix.libtiff_versions }}'
           CONAN_OPTIONS: 'libtiff:lzma=False'
           CONAN_VISUAL_RUNTIMES: ${{ matrix.vs_runtimes }}

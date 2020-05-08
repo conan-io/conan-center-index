@@ -23,7 +23,7 @@ jobs:
       matrix:
         build: ['linux-gcc8', 'macos']
         ninja_versions: ['1.9.0']
-        include:          
+        include:
           - build: 'linux-gcc8'
             os: 'ubuntu-latest'
             compiler: 'gcc'
