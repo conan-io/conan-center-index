@@ -11,7 +11,7 @@ class Jinja2cppConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     description = "Jinja2 C++ (and for C++) almost full-conformance template engine implementation"
     topics = ("conan", "cpp14", "cpp17", "jinja2", "string templates", "templates engine")
-    exports_sources = ["CMakeLists.txt"]
+    exports_sources = "CMakeLists.txt", "patches/**"
     generators = "cmake", "cmake_find_package"
     settings = "os", "compiler", "build_type", "arch"
     options = {
@@ -55,7 +55,12 @@ class Jinja2cppConan(ConanFile):
         extracted_dir = "Jinja2Cpp-" + self.version
         os.rename(extracted_dir, self._source_subfolder)
 
+    def _patch_sources(self):
+        for patch in self.conan_data["patches"][self.version]:
+            tools.patch(**patch)
+
     def build(self):
+        self._patch_sources()
         cmake = CMake(self)
         cmake.definitions["JINJA2CPP_BUILD_TESTS"] = False
         cmake.definitions["JINJA2CPP_STRICT_WARNINGS"] = False
