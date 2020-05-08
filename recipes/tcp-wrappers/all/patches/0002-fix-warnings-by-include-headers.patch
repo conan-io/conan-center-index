@@ -295,9 +295,7 @@
  #endif
 --- try-from.c
 +++ try-from.c
-@@ -37,7 +37,7 @@
- int     allow_severity = SEVERITY;	/* run-time adjustable */
- int     deny_severity = LOG_WARNING;	/* ditto */
+@@ -39,5 +39,5 @@
  
 -main(argc, argv)
 +int main(argc, argv)
