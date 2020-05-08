@@ -116,7 +116,7 @@ class LibcurlConan(ConanFile):
             elif self.settings.os == "Windows" and self.options.with_winssl:
                 pass
             else:
-                self.requires("openssl/1.1.1f")
+                self.requires("openssl/1.1.1g")
         if self.options.with_libssh2:
             if self.settings.compiler != "Visual Studio":
                 self.requires("libssh2/1.9.0")
