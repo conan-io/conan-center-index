@@ -130,48 +130,6 @@ class PocoConan(ConanFile):
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
             tools.patch(**patch)
 
-        if Version(self.version) < "1.10":
-            tools.replace_in_file(os.path.join(self._source_subfolder, "Data", "SQLite", "CMakeLists.txt"),
-                                  "find_package(SQLite3)", "find_package(sqlite3 REQUIRED)") #1.8.1
-            sqlite3_replace = "${SQLITE3_LIBRARIES}"
-            tools.replace_in_file(os.path.join(self._source_subfolder, "Data", "SQLite", "CMakeLists.txt"),
-                                  "SQLITE3_INCLUDE_DIRS", "sqlite3_INCLUDE_DIRS")
-        else:
-            tools.replace_in_file(os.path.join(self._source_subfolder, "Data", "SQLite", "CMakeLists.txt"),
-                                  "find_package(SQLite3 REQUIRED)", "find_package(sqlite3 REQUIRED)") #1.8.1
-            sqlite3_replace = "SQLite::SQLite3"
-        tools.replace_in_file(os.path.join(self._source_subfolder, "Data", "SQLite", "CMakeLists.txt"),
-                              sqlite3_replace, "sqlite3::sqlite3")
-
-        tools.replace_in_file(os.path.join(self._source_subfolder, "Foundation", "CMakeLists.txt"),
-                              "find_package(PCRE REQUIRED)", "find_package(pcre REQUIRED)")
-        pcre_replace = "${PCRE_LIBRARIES}"
-        if Version(self.version) >= "1.10":
-            pcre_replace = "Pcre::Pcre"
-        tools.replace_in_file(os.path.join(self._source_subfolder, "Foundation", "CMakeLists.txt"),
-                              pcre_replace, "pcre::pcre")
-
-        if Version(self.version) < "1.10":
-            openssl_replace = "${OPENSSL_LIBRARIES}"
-            tools.replace_in_file(os.path.join(self._source_subfolder, "CMakeLists.txt"),
-                                  "OPENSSL_INCLUDE_DIR", "OpenSSL_INCLUDE_DIR")
-        else:
-            # FIXME: conan components should make the following line unnecessary
-            openssl_replace = "OpenSSL::SSL OpenSSL::Crypto"
-        tools.replace_in_file(os.path.join(self._source_subfolder, "Crypto", "CMakeLists.txt"),
-                              openssl_replace, "OpenSSL::OpenSSL")
-
-        replace = "POCO_INSTALL_PDB(${target_name})"
-        tools.replace_in_file(os.path.join(self._source_subfolder, "cmake", "PocoMacros.cmake"), replace, "# " + replace)
-        replace = 'Net Util Foundation Crypt32.lib'
-        if Version(self.version) >= "1.10.0":
-            replace = 'Poco::Net Poco::Util Crypt32.lib'
-        tools.replace_in_file(os.path.join(self._source_subfolder, "NetSSL_Win", "CMakeLists.txt"), replace, replace + " ws2_32 ")
-
-        # Poco 1.9.x - CMAKE_SOURCE_DIR is required in many places
-        os.rename(os.path.join(self._source_subfolder, "CMakeLists.txt"), os.path.join(self._source_subfolder, "CMakeListsOriginal.cmake"))
-        os.rename("CMakeLists.txt", os.path.join(self._source_subfolder, "CMakeLists.txt"))
-
     def _configure_cmake(self):
         if self._cmake:
             return self._cmake
