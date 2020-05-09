@@ -14,7 +14,7 @@ class JsonSchemaValidatorConan(ConanFile):
               "schema-validation", "json")
     settings = "os", "arch", "compiler", "build_type"
     generators = "cmake"
-    exports_sources = ["CMakeLists.txt"]
+    exports_sources = ["CMakeLists.txt", "patches/**"]
     options = {"shared": [True, False], "fPIC": [True, False]}
     default_options = {"shared": False, "fPIC": True}
     short_paths = True
@@ -55,13 +55,14 @@ class JsonSchemaValidatorConan(ConanFile):
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
-        extracted_dir = glob.glob(self.name + "-*/")[0]
+        extracted_dir = self.name + "-" + self.version
         os.rename(extracted_dir, self._source_subfolder)
 
     def _configure_cmake(self):
         if self._cmake:
             return self._cmake
         self._cmake = CMake(self)
+
         self._cmake.definitions["BUILD_TESTS"] = False
         self._cmake.definitions["BUILD_EXAMPLES"] = False
         self._cmake.configure(build_folder=self._build_subfolder)
@@ -73,6 +74,7 @@ class JsonSchemaValidatorConan(ConanFile):
 
     def package(self):
         self.copy("LICENSE", dst="licenses", src=self._source_subfolder)
+        self.copy("src/json-schema.hpp", dst="include/nlohmann", src=self._source_subfolder, keep_path=False)
         cmake = self._configure_cmake()
         cmake.install()
         tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))

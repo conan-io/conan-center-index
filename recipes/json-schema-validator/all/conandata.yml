@@ -1,4 +1,8 @@
 sources:
-    "20200415":
-        url: "https://github.com/pboettch/json-schema-validator/archive/b28c15adea57bc9556cb00a7611536b5899dc67c.zip"
-        sha256: "d98a9a163d42294becb0137b046446995c74dfe6720446d0fcf598694aa040c0"
+    "2.0.0":
+        url: "https://github.com/pboettch/json-schema-validator/archive/2.0.0.zip"
+        sha256: "8fddec7248581e2899b3543ae2cd1a0ae682f54e6866db999577627f230a6f1f"
+patches:
+    "2.0.0":
+        - patch_file: "patches/0001-cmake-find.patch"
+          base_path: "source_subfolder"
