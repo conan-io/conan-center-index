@@ -134,10 +134,14 @@ class PocoConan(ConanFile):
             tools.patch(**patch)
 
         if Version(self.version) < "1.10":
+            tools.replace_in_file(os.path.join(self._source_subfolder, "Data", "SQLite", "CMakeLists.txt"),
+                                  "find_package(SQLite3)", "find_package(sqlite3 REQUIRED)") #1.8.1
             sqlite3_replace = "${SQLITE3_LIBRARIES}"
             tools.replace_in_file(os.path.join(self._source_subfolder, "Data", "SQLite", "CMakeLists.txt"),
                                   "SQLITE3_INCLUDE_DIRS", "sqlite3_INCLUDE_DIRS")
         else:
+            tools.replace_in_file(os.path.join(self._source_subfolder, "Data", "SQLite", "CMakeLists.txt"),
+                                  "find_package(SQLite3 REQUIRED)", "find_package(sqlite3 REQUIRED)") #1.8.1
             sqlite3_replace = "SQLite::SQLite3"
         tools.replace_in_file(os.path.join(self._source_subfolder, "Data", "SQLite", "CMakeLists.txt"),
                               sqlite3_replace, "sqlite3::sqlite3")
