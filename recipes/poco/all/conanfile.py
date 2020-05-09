@@ -43,7 +43,6 @@ class PocoConan(ConanFile):
                "enable_pagecompiler": [True, False],
                "enable_pagecompiler_file2page": [True, False],
                "enable_redis": [True, False],
-               "force_openssl": [True, False],
                "enable_tests": [True, False],
                "poco_unbundled": [True, False],
                "cxx_14": [True, False]
@@ -75,7 +74,6 @@ class PocoConan(ConanFile):
                 "enable_pagecompiler": False,
                 "enable_pagecompiler_file2page": False,
                 "enable_redis": True,
-                "force_openssl": True,
                 "enable_tests": False,
                 "poco_unbundled": False,
                 "cxx_14": False
@@ -108,7 +106,7 @@ class PocoConan(ConanFile):
             raise ConanInvalidConfiguration("Apache connector not supported: https://github.com/pocoproject/poco/issues/1764")
         if self.options.enable_data_mysql:
             raise ConanInvalidConfiguration("MySQL not supported yet, open an issue here please: %s" % self.url)
-        if self.options.get_safe("enable_data_postgresql"):
+        if self.options.get_safe("enable_data_postgresql", False):
             raise ConanInvalidConfiguration("PostgreSQL not supported yet, open an issue here please: %s" % self.url)
 
     def requirements(self):
@@ -125,7 +123,6 @@ class PocoConan(ConanFile):
             self.requires("apache2/x.y.z")
         if self.options.enable_netssl or \
            self.options.enable_crypto or \
-           self.options.force_openssl or \
            self.options.get_safe("enable_jwt", False):
             self.requires("openssl/1.1.1g")
 
