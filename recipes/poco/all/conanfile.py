@@ -159,7 +159,7 @@ class PocoConan(ConanFile):
             tools.replace_in_file(os.path.join(self._source_subfolder, "CMakeLists.txt"),
                                   "OPENSSL_INCLUDE_DIR", "OpenSSL_INCLUDE_DIR")
         else:
-            # FIXME: conan components should make the following line unnecessary (Only older versions of poco should be patched in the future)
+            # FIXME: conan components should make the following line unnecessary
             openssl_replace = "OpenSSL::SSL OpenSSL::Crypto"
         tools.replace_in_file(os.path.join(self._source_subfolder, "Crypto", "CMakeLists.txt"),
                               openssl_replace, "OpenSSL::OpenSSL")
