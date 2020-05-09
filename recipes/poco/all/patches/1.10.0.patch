@@ -1,0 +1,73 @@
+--- cmake/PocoMacros.cmake
++++ cmake/PocoMacros.cmake
+@@ -278,7 +278,7 @@
+ 
+ if (MSVC)
+ # install the targets pdb
+-  POCO_INSTALL_PDB(${target_name})
++  # POCO_INSTALL_PDB(${target_name})
+ endif()
+ 
+ endmacro()
+--- Crypto/CMakeLists.txt
++++ Crypto/CMakeLists.txt
+@@ -21,7 +21,7 @@
+     DEFINE_SYMBOL Crypto_EXPORTS
+     )
+ 
+-target_link_libraries(Crypto PUBLIC Poco::Foundation OpenSSL::SSL OpenSSL::Crypto)
++target_link_libraries(Crypto PUBLIC Poco::Foundation OpenSSL::OpenSSL)
+ target_include_directories(Crypto
+     PUBLIC
+         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+--- Data/SQLite/CMakeLists.txt
++++ Data/SQLite/CMakeLists.txt
+@@ -7,7 +7,7 @@
+ POCO_HEADERS_AUTO( SQLITE_SRCS ${HDRS_G})
+ 
+ if (POCO_UNBUNDLED)
+-	find_package(SQLite3 REQUIRED)
++	find_package(sqlite3 REQUIRED)
+ else()
+     # sqlite3
+     POCO_SOURCES( SQLITE_SRCS sqlite3
+@@ -43,7 +43,7 @@
+     )
+ 
+ if(POCO_UNBUNDLED)
+-        target_link_libraries(DataSQLite PUBLIC SQLite::SQLite3)
++        target_link_libraries(DataSQLite PUBLIC sqlite3::sqlite3)
+ 	target_compile_definitions(DataSQLite PUBLIC POCO_UNBUNDLED)
+ else()
+ 	if(WINCE)
+--- Foundation/CMakeLists.txt
++++ Foundation/CMakeLists.txt
+@@ -35,7 +35,7 @@
+ # If POCO_UNBUNDLED is enabled we try to find the required packages
+ # The configuration will fail if the packages are not found
+ if (POCO_UNBUNDLED)
+-	find_package(PCRE REQUIRED)
++	find_package(pcre REQUIRED)
+ 	find_package(ZLIB REQUIRED)
+ 
+ 	#HACK: Unicode.cpp requires functions from these files. The can't be taken from the library
+@@ -101,7 +101,7 @@
+ 	)
+ 
+ if (POCO_UNBUNDLED)
+-    target_link_libraries(Foundation PUBLIC Pcre::Pcre ZLIB::ZLIB)
++    target_link_libraries(Foundation PUBLIC pcre::pcre ZLIB::ZLIB)
+     target_compile_definitions(Foundation PUBLIC POCO_UNBUNDLED)
+ endif (POCO_UNBUNDLED)
+ 
+--- NetSSL_Win/CMakeLists.txt
++++ NetSSL_Win/CMakeLists.txt
+@@ -21,7 +21,7 @@
+     DEFINE_SYMBOL NetSSL_Win_EXPORTS
+     )
+ 
+-target_link_libraries(NetSSLWin PUBLIC Poco::Net Poco::Util Crypt32.lib)
++target_link_libraries(NetSSLWin PUBLIC Poco::Net Poco::Util Crypt32.lib ws2_32 )
+ target_include_directories(NetSSLWin
+     PUBLIC
+         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
