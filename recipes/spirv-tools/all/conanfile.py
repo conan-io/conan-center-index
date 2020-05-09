@@ -116,7 +116,7 @@ class SpirvtoolsConan(ConanFile):
         self.cpp_info.libs.append("SPIRV-Tools")
 
         if self.settings.os == "Linux":
-            self.cpp_info.system_libs.append("rt") # for SPIRV-Tools
+            self.cpp_info.system_libs.extend(["m", "rt"]) # m for SPIRV-Tools-opt, rt for SPIRV-Tools
 
         bin_path = os.path.join(self.package_folder, "bin")
         self.output.info('Appending PATH environment variable: %s' % bin_path)
