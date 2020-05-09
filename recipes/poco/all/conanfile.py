@@ -122,8 +122,8 @@ class PocoConan(ConanFile):
             raise ConanInvalidConfiguration("apache2 is not (yet) available on CCI")
             self.requires("apache2/x.y.z")
         if self.options.enable_netssl or \
-           self.options.enable_crypto or \
-           self.options.get_safe("enable_jwt", False):
+                self.options.enable_crypto or \
+                self.options.get_safe("enable_jwt", False):
             self.requires("openssl/1.1.1g")
 
     def _patch_sources(self):
@@ -161,15 +161,12 @@ class PocoConan(ConanFile):
         tools.replace_in_file(os.path.join(self._source_subfolder, "Crypto", "CMakeLists.txt"),
                               openssl_replace, "OpenSSL::OpenSSL")
 
-        if self.settings.compiler == "Visual Studio":
-            replace = "POCO_INSTALL_PDB(${target_name})"
-            tools.replace_in_file(os.path.join(self._source_subfolder, "cmake", "PocoMacros.cmake"), replace, "# " + replace)
-            if self.options.shared:
-                self.output.warn("Adding ws2_32 dependency...")
-                replace = 'Net Util Foundation Crypt32.lib'
-                if Version(self.version) >= "1.10.0":
-                    replace = 'Poco::Net Poco::Util Crypt32.lib'
-                tools.replace_in_file(os.path.join(self._source_subfolder, "NetSSL_Win", "CMakeLists.txt"), replace, replace + " ws2_32 ")
+        replace = "POCO_INSTALL_PDB(${target_name})"
+        tools.replace_in_file(os.path.join(self._source_subfolder, "cmake", "PocoMacros.cmake"), replace, "# " + replace)
+        replace = 'Net Util Foundation Crypt32.lib'
+        if Version(self.version) >= "1.10.0":
+            replace = 'Poco::Net Poco::Util Crypt32.lib'
+        tools.replace_in_file(os.path.join(self._source_subfolder, "NetSSL_Win", "CMakeLists.txt"), replace, replace + " ws2_32 ")
 
         # Poco 1.9.x - CMAKE_SOURCE_DIR is required in many places
         os.rename(os.path.join(self._source_subfolder, "CMakeLists.txt"), os.path.join(self._source_subfolder, "CMakeListsOriginal.cmake"))
