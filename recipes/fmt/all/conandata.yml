@@ -17,6 +17,9 @@ sources:
   "6.2.0":
     sha256: fe6e4ff397e01c379fc4532519339c93da47404b9f6674184a458a9967a76575
     url: https://github.com/fmtlib/fmt/archive/6.2.0.tar.gz
+  "6.2.1":
+    sha256: 5edf8b0f32135ad5fafb3064de26d063571e95e8ae46829c2f4f4b52696bbff0
+    url: https://github.com/fmtlib/fmt/archive/6.2.1.tar.gz
 patches:
   "5.3.0":
     - patch_file: "patches/fix-install-5.3.0.patch"
