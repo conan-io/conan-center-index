@@ -28,7 +28,7 @@ class PCREConan(ConanFile):
 
     def config_options(self):
         if self.settings.os == "Windows":
-            self.options.remove("fPIC")
+            del self.options.fPIC
 
     def configure(self):
         if not self.options.build_pcrecpp:
@@ -53,9 +53,9 @@ class PCREConan(ConanFile):
 
     def requirements(self):
         if self.options.with_bzip2:
-            self.requires.add("bzip2/1.0.8")
+            self.requires("bzip2/1.0.8")
         if self.options.with_zlib:
-            self.requires.add("zlib/1.2.11")
+            self.requires("zlib/1.2.11")
 
     def _configure_cmake(self):
         cmake = CMake(self)
