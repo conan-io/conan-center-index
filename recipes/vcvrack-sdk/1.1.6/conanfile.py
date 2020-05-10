@@ -69,7 +69,7 @@ class VCVRackSDKConan(ConanFile):
 
     def package_info(self):
         if self.settings.os == "Windows":
-            self.cpp_info.cxxflags.append("-DARCH_WIN")
+            self.cpp_info.cxxflags.append("-DARCH_WIN -D_USE_MATH_DEFINES")
             self.cpp_info.libs.append("Rack")
             self.env_info.path.append(os.path.join(self.deps_env_info["msys2"].MSYS_ROOT, "mingw64", "bin"))
             self.cpp_info.libdirs.append(os.path.join(self.package_folder))
@@ -83,7 +83,7 @@ class VCVRackSDKConan(ConanFile):
         else:
             self.cpp_info.cxxflags.append("-Wsuggest-override")
 
-        self.cpp_info.cxxflags.append("-D_USE_MATH_DEFINES -march=nocona -funsafe-math-optimizations -fPIC")
+        self.cpp_info.cxxflags.append("-march=nocona -funsafe-math-optimizations -fPIC")
         self.cpp_info.cxxflags.append("-Wall -Wextra -Wno-unused-parameter")
 
         self.cpp_info.includedirs = ["include", "dep/include"]
