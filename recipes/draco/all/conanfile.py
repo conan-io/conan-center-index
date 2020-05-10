@@ -129,3 +129,5 @@ class DracoConan(ConanFile):
         self.cpp_info.names["cmake_find_package_multi"] = "Draco"
         self.cpp_info.names["pkg_config"] = "Draco"
         self.cpp_info.libs = tools.collect_libs(self)
+        if self.settings.os == "Linux":
+            self.cpp_info.system_libs.append("m")
