@@ -126,4 +126,7 @@ class DracoConan(ConanFile):
         self.copy(pattern="*.dll", dst="bin", src=build_bin_dir, keep_path=False)
 
     def package_info(self):
+        self.cpp_info.names["cmake_find_package"] = "Draco"
+        self.cpp_info.names["cmake_find_package_multi"] = "Draco"
+        self.cpp_info.names["pkg_config"] = "Draco"
         self.cpp_info.libs = tools.collect_libs(self)
