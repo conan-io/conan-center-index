@@ -53,13 +53,13 @@ class CbloscConan(ConanFile):
 
     def requirements(self):
         if self.options.with_lz4:
-            self.requires.add("lz4/1.9.2")
+            self.requires("lz4/1.9.2")
         if self.options.with_snappy:
-            self.requires.add("snappy/1.1.8")
+            self.requires("snappy/1.1.8")
         if self.options.with_zlib:
-            self.requires.add("zlib/1.2.11")
+            self.requires("zlib/1.2.11")
         if self.options.with_zstd:
-            self.requires.add("zstd/1.4.4")
+            self.requires("zstd/1.4.4")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
