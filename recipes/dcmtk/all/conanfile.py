@@ -154,10 +154,7 @@ class DCMTKConan(ConanFile):
     def package(self):
         self.copy(pattern="COPYRIGHT", dst="licenses", src=self._source_subfolder)
 
-        # cmake = self._configure_cmake()
-        cmake = CMake(self)
-        cmake.build_folder = self._build_subfolder
-        cmake.build_folder = self._build_subfolder
+        cmake = self._configure_cmake()
         cmake.install()
 
         tools.rmdir(os.path.join(self.package_folder, "cmake"))
