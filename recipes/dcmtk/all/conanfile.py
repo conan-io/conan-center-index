@@ -132,6 +132,13 @@ class DCMTKConan(ConanFile):
         self._cmake.definitions["DCMTK_ENABLE_MANPAGE"] = False
         self._cmake.definitions["DCMTK_WITH_DOXYGEN"] = False
 
+        if self.settings.os == "Windows":
+            self._cmake.definitions["DCMTK_OVERWRITE_WIN32_COMPILER_FLAGS"] = False
+
+        if self.settings.compiler == "Visual Studio":
+            self._cmake.definitions["DCMTK_ICONV_FLAGS_ANALYZED"] = True
+            self._cmake.definitions["DCMTK_COMPILE_WIN32_MULTITHREADED_DLL"] = "MD" in str(self.settings.compiler.runtime)
+
         self._cmake.configure(build_folder=self._build_subfolder)
         return self._cmake
 
@@ -147,10 +154,13 @@ class DCMTKConan(ConanFile):
     def package(self):
         self.copy(pattern="COPYRIGHT", dst="licenses", src=self._source_subfolder)
 
-        cmake = self._configure_cmake()
+        # cmake = self._configure_cmake()
+        cmake = CMake(self)
+        cmake.build_folder = self._build_subfolder
         cmake.build_folder = self._build_subfolder
         cmake.install()
 
+        tools.rmdir(os.path.join(self.package_folder, "cmake"))
         tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
         tools.rmdir(os.path.join(self.package_folder, "etc"))
         tools.rmdir(os.path.join(self.package_folder, "share"))
@@ -164,6 +174,9 @@ class DCMTKConan(ConanFile):
         self.cpp_info.includedirs.append(os.path.join("include", "dcmtk"))
         self.cpp_info.names["cmake_find_package"] = "DCMTK"
         self.cpp_info.names["cmake_find_package_multi"] = "DCMTK"
+
+        if self.settings.os == "Windows":
+            self.cpp_info.system_libs.extend(["iphlpapi", "ws2_32", "netapi32", "wsock32"])
 
         dcmdictpath = os.path.join(self._dcm_datadictionary_path, "dcmtk", "dicom.dic")
         self.output.info("Settings DCMDICTPATH environment variable: {}".format(dcmdictpath))

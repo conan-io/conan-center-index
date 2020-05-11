@@ -2,10 +2,11 @@
 +++ CMake/3rdparty.cmake
 @@ -42,7 +42,7 @@
      if(WITH_LIBXMLINC)
-       set(LIBXML_INCDIR "${WITH_LIBXMLINC}/include")
+-      set(LIBXML_INCDIR "${WITH_LIBXMLINC}/include")
++      set(LIBXML_INCDIR ${CONAN_INCLUDE_DIRS_LIBXML2} ${CONAN_INCLUDE_DIRS_ICONV})
        set(LIBXML_LIBDIR "${WITH_LIBXMLINC}/lib")
 -      set(LIBXML_LIBS debug "${LIBXML_LIBDIR}/libxml2_d.lib" optimized "${LIBXML_LIBDIR}/libxml2_o.lib" debug "${LIBXML_LIBDIR}/iconv_d.lib" optimized "${LIBXML_LIBDIR}/iconv_o.lib")
-+      set(LIBXML_LIBS CONAN_PNG::libxml2)
++      set(LIBXML_LIBS ${CONAN_LIBS_LIBXML2})
        message(STATUS "Info: DCMTK XML support will be enabled")
        set(WITH_LIBXML 1)
        # this hides some warnings that are emitted when linking against libxmlXXX.lib instead of linking the DLL directly
@@ -32,7 +33,7 @@
        set(OPENSSL_LIBDIR "${WITH_OPENSSLINC}/lib")
        # starting with OpenSSL 1.1.0, the Windows crypt32 library is needed for a static link of OpenSSL.
 -      set(OPENSSL_LIBS "crypt32" debug "${OPENSSL_LIBDIR}/dcmtkssl_d.lib" optimized "${OPENSSL_LIBDIR}/dcmtkssl_o.lib" debug "${OPENSSL_LIBDIR}/dcmtkcrypto_d.lib" optimized "${OPENSSL_LIBDIR}/dcmtkcrypto_o.lib")
-+      set(OPENSSL_LIBS CONAN_PKG::openssl)
++      set(OPENSSL_LIBS ${CONAN_LIBS_OPENSSL})
        set(TEMP_INCLUDES "${CMAKE_REQUIRED_INCLUDES}")
        list(APPEND CMAKE_REQUIRED_INCLUDES "${OPENSSL_INCDIR}")
        CHECK_CXX_SOURCE_COMPILES("extern \"C\" {\n#include <openssl/ssl.h>\n}\nint main(){\n#if OPENSSL_VERSION_NUMBER < 0x10001000L\n#error OpenSSL too old\n#endif\n}\n" OPENSSL_VERSION_CHECK)
