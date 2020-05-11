@@ -36,9 +36,9 @@ class VolkConan(ConanFile):
         if self.settings.os == "Windows":
             del self.options.fPIC
 
-        def configure(self):
-            del self.settings.compiler.cppstd
-            del self.settings.compiler.libcxx
+    def configure(self):
+        del self.settings.compiler.cppstd
+        del self.settings.compiler.libcxx
 
     def requirements(self):      
         self.requires("vulkan-headers/1.2.135.0")
