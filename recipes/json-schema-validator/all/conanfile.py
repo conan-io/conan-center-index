@@ -74,7 +74,7 @@ class JsonSchemaValidatorConan(ConanFile):
 
     def package(self):
         self.copy("LICENSE", dst="licenses", src=self._source_subfolder)
-        self.copy(os.path("src", "json-schema.hpp"), dst=os.path.join("include", "nlohmann"), src=self._source_subfolder, keep_path=False)
+        self.copy(os.path.join("src", "json-schema.hpp"), dst=os.path.join("include", "nlohmann"), src=self._source_subfolder, keep_path=False)
         cmake = self._configure_cmake()
         cmake.install()
         tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
