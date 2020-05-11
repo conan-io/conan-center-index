@@ -546,6 +546,9 @@ class OpenSSLConan(ConanFile):
             args = " ".join(self._configure_args)
             self.output.info(self._configure_args)
 
+            if self._use_nmake and self._full_version >= "1.1.0":
+                self._replace_runtime_in_file(os.path.join("Configurations", "10-main.conf"))
+
             self.run('{perl} ./Configure {args}'.format(perl=self._perl, args=args), win_bash=self._win_bash)
 
             self._patch_install_name()
