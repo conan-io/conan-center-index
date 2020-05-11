@@ -3,9 +3,10 @@
 @@ -42,7 +42,7 @@
      if(WITH_LIBXMLINC)
 -      set(LIBXML_INCDIR "${WITH_LIBXMLINC}/include")
-+      set(LIBXML_INCDIR ${CONAN_INCLUDE_DIRS_LIBXML2} ${CONAN_INCLUDE_DIRS_ICONV})
-       set(LIBXML_LIBDIR "${WITH_LIBXMLINC}/lib")
+-      set(LIBXML_LIBDIR "${WITH_LIBXMLINC}/lib")
 -      set(LIBXML_LIBS debug "${LIBXML_LIBDIR}/libxml2_d.lib" optimized "${LIBXML_LIBDIR}/libxml2_o.lib" debug "${LIBXML_LIBDIR}/iconv_d.lib" optimized "${LIBXML_LIBDIR}/iconv_o.lib")
++      set(LIBXML_INCDIR ${CONAN_INCLUDE_DIRS_LIBXML2} ${CONAN_INCLUDE_DIRS_ICONV})
++      link_directories(${WITH_LIBXMLINC}/lib)
 +      set(LIBXML_LIBS ${CONAN_LIBS_LIBXML2})
        message(STATUS "Info: DCMTK XML support will be enabled")
        set(WITH_LIBXML 1)
@@ -13,8 +14,9 @@
 @@ -59,7 +59,7 @@
      if(WITH_LIBPNGINC)
        set(LIBPNG_INCDIR "${WITH_LIBPNGINC}/include")
-       set(LIBPNG_LIBDIR "${WITH_LIBPNGINC}/lib")
+-      set(LIBPNG_LIBDIR "${WITH_LIBPNGINC}/lib")
 -      set(LIBPNG_LIBS debug "${LIBPNG_LIBDIR}/libpng_d.lib" optimized "${LIBPNG_LIBDIR}/libpng_o.lib")
++      link_directories(${WITH_LIBPNGINC}/lib)
 +      set(LIBPNG_LIBS CONAN_PKG::libpng)
        message(STATUS "Info: DCMTK PNG support will be enabled")
        set(WITH_LIBPNG 1)
@@ -22,15 +24,17 @@
 @@ -74,7 +74,7 @@
      if(WITH_LIBTIFFINC)
        set(LIBTIFF_INCDIR "${WITH_LIBTIFFINC}/include")
-       set(LIBTIFF_LIBDIR "${WITH_LIBTIFFINC}/lib")
+-      set(LIBTIFF_LIBDIR "${WITH_LIBTIFFINC}/lib")
 -      set(LIBTIFF_LIBS debug "${LIBTIFF_LIBDIR}/libtiff_d.lib" optimized "${LIBTIFF_LIBDIR}/libtiff_o.lib")
++      link_directories(${WITH_LIBTIFFINC}/lib)
 +      set(LIBTIFF_LIBS CONAN_PKG::libtiff)
        message(STATUS "Info: DCMTK TIFF support will be enabled")
        set(WITH_LIBTIFF 1)
      else() # turn off library if library path not set
 @@ -92,7 +92,7 @@
        set(OPENSSL_INCDIR "${WITH_OPENSSLINC}/include")
-       set(OPENSSL_LIBDIR "${WITH_OPENSSLINC}/lib")
+-      set(OPENSSL_LIBDIR "${WITH_OPENSSLINC}/lib")
++      link_directories(${WITH_OPENSSLINC}/lib)
        # starting with OpenSSL 1.1.0, the Windows crypt32 library is needed for a static link of OpenSSL.
 -      set(OPENSSL_LIBS "crypt32" debug "${OPENSSL_LIBDIR}/dcmtkssl_d.lib" optimized "${OPENSSL_LIBDIR}/dcmtkssl_o.lib" debug "${OPENSSL_LIBDIR}/dcmtkcrypto_d.lib" optimized "${OPENSSL_LIBDIR}/dcmtkcrypto_o.lib")
 +      set(OPENSSL_LIBS ${CONAN_LIBS_OPENSSL})
@@ -40,8 +44,9 @@
 @@ -117,7 +117,7 @@
      if(WITH_ZLIBINC)
        set(ZLIB_INCDIR "${WITH_ZLIBINC}/include")
-       set(ZLIB_LIBDIR "${WITH_ZLIBINC}/lib")
+-      set(ZLIB_LIBDIR "${WITH_ZLIBINC}/lib")
 -      set(ZLIB_LIBS debug "${ZLIB_LIBDIR}/zlib_d.lib" optimized "${ZLIB_LIBDIR}/zlib_o.lib")
++      link_directories(${WITH_ZLIBINC}/lib)
 +      set(ZLIB_LIBS CONAN_PKG::zlib)
        message(STATUS "Info: DCMTK ZLIB support will be enabled")
        set(WITH_ZLIB 1)
@@ -49,8 +54,9 @@
 @@ -132,7 +132,7 @@
      if(WITH_SNDFILEINC)
        set(SNDFILE_INCDIR "${WITH_SNDFILEINC}/include")
-       set(SNDFILE_LIBDIR "${WITH_SNDFILEINC}/lib")
+-      set(SNDFILE_LIBDIR "${WITH_SNDFILEINC}/lib")
 -      set(SNDFILE_LIBS debug "${SNDFILE_LIBDIR}/libsndfile_d.lib" optimized "${SNDFILE_LIBDIR}/libsndfile_o.lib")
++      link_directories(${WITH_SNDFILEINC}/lib)
 +      set(SNDFILE_LIBS CONAN_PKG::libsndfile)
        message(STATUS "Info: DCMTK SNDFILE support will be enabled")
        set(WITH_SNDFILE 1)
@@ -58,8 +64,9 @@
 @@ -147,7 +147,7 @@
      if(WITH_LIBICONVINC)
        set(LIBICONV_INCDIR "${WITH_LIBICONVINC}/include")
-       set(LIBICONV_LIBDIR "${WITH_LIBICONVINC}/lib")
+-      set(LIBICONV_LIBDIR "${WITH_LIBICONVINC}/lib")
 -      set(LIBICONV_LIBS debug "${LIBICONV_LIBDIR}/libiconv_d.lib" optimized "${LIBICONV_LIBDIR}/libiconv_o.lib")
++      link_directories(${WITH_LIBICONVINC}/lib)
 +      set(LIBICONV_LIBS CONAN_PKG::libiconv)
        message(STATUS "Info: DCMTK ICONV support will be enabled")
        set(WITH_LIBICONV 1)
