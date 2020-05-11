@@ -1,7 +1,6 @@
 from conans import AutoToolsBuildEnvironment, ConanFile, MSBuild, tools
 from conans.client.tools.win import msvs_toolset
 from conans.errors import ConanInvalidConfiguration
-from contextlib import contextmanager
 import os
 
 
@@ -45,34 +44,19 @@ class Cc65Conan(ConanFile):
     def _samplesdir(self):
         return os.path.join(self.package_folder, "samples")
 
-    @contextmanager
-    def _mock_settings(self):
-        """
-        If the current compiler is Visual Studio, this will temporarily set the arch attribute of settings to x86.
-        Because cc65 does not provide x86_64 support for visual studio, x86 is built instead.
-        """
-        mock_settings = self.settings.copy()
-
-        if self.settings.compiler == "Visual Studio":
-            if self.settings.arch != "x86":
-                self.output.info("{} detected: building x86 instead".format(self.settings.arch))
-                mock_settings.arch = "x86"
-
-        original_settings = self.settings
-        try:
-            self.settings = mock_settings
-            yield
-        finally:
-            self.settings = original_settings
-
     def _build_msvc(self):
         msbuild = MSBuild(self)
         msvc_platforms = {
             "x86": "Win32",
         }
+        arch = str(self.settings.arch)
+        if arch != "x86":
+            self.output.warn("{} detected: building x86 instead".format(self.settings.arch))
+            arch = "x86"
 
         msbuild.build(os.path.join(self._source_subfolder, "src", "cc65.sln"),
-                      build_type="Release", platforms=msvc_platforms)
+                      build_type="Debug" if self.settings.build_type == "Debug" else "Release",
+                      arch=arch, platforms=msvc_platforms)
         autotools = self._configure_autotools()
         with tools.chdir(os.path.join(self._source_subfolder, "libsrc")):
             autotools.make()
@@ -126,11 +110,10 @@ class Cc65Conan(ConanFile):
 
     def build(self):
         self._patch_sources()
-        with self._mock_settings():
-            if self.settings.compiler == "Visual Studio":
-                self._build_msvc()
-            else:
-                self._build_autotools()
+        if self.settings.compiler == "Visual Studio":
+            self._build_msvc()
+        else:
+            self._build_autotools()
 
     def _package_msvc(self):
         self.copy("*.exe", src=os.path.join(self._source_subfolder, "bin"), dst=os.path.join(self.package_folder, "bin"), keep_path=False)
