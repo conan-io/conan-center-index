@@ -37,28 +37,14 @@
  POCO_HEADERS_AUTO( SQLITE_SRCS ${HDRS_G})
  
  if (POCO_UNBUNDLED)
--    find_package(SQLite3)
+     find_package(SQLite3)
 -    set(DATASQLITELIBS ${SQLITE3_LIBRARIES})
 -    include_directories("${SQLITE3_INCLUDE_DIRS}")
-+    find_package(sqlite3 REQUIRED)
-+    set(DATASQLITELIBS sqlite3::sqlite3)
-+    include_directories("${sqlite3_INCLUDE_DIRS}")
++    set(DATASQLITELIBS ${SQLite3_LIBRARIES})
++    include_directories("${SQLite3_INCLUDE_DIRS}")
  else()
      # sqlite3
      POCO_SOURCES( SQLITE_SRCS sqlite3
---- Foundation/CMakeLists.txt
-+++ Foundation/CMakeLists.txt
-@@ -32,8 +32,8 @@
- # If POCO_UNBUNDLED is enabled we try to find the required packages
- # The configuration will fail if the packages are not found
- if (POCO_UNBUNDLED)
--	find_package(PCRE REQUIRED)
--	set(SYSLIBS ${SYSLIBS} ${PCRE_LIBRARIES})
-+	find_package(pcre REQUIRED)
-+	set(SYSLIBS ${SYSLIBS} pcre::pcre)
- 	include_directories(${PCRE_INCLUDE_DIRS})
- 
- 	#HACK: Unicode.cpp requires functions from these files. The can't be taken from the library
 --- NetSSL_Win/CMakeLists.txt
 +++ NetSSL_Win/CMakeLists.txt
 @@ -18,7 +18,7 @@
