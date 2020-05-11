@@ -7,8 +7,8 @@ sources:
     sha256: "19a6948b579c27e8ac440b4f077f99fc90e7292b1d9cb896bec0fd781d68fba2"
 patches:
   "1.18.1":
-    - patch_file: "patches/cmake-dependencies_and_cxx_linker.patch"
+    - patch_file: "patches/cmake-dependencies.patch"
       base_path: "source_subfolder"
   "1.17.1":
-    - patch_file: "patches/cmake-dependencies_and_cxx_linker.patch"
+    - patch_file: "patches/cmake-dependencies.patch"
       base_path: "source_subfolder"
