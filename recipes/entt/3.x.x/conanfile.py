@@ -78,6 +78,7 @@ class EnttConan(ConanFile):
         cmake.install()
         tools.rmdir(os.path.join(self.package_folder, "cmake"))
         tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
+        tools.rmdir(os.path.join(self.package_folder, "lib", "EnTT", "cmake"))
 
     def package_id(self):
         self.info.header_only()

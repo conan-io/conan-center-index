@@ -11,3 +11,6 @@ sources:
   3.3.2:
     url: https://github.com/skypjack/entt/archive/v3.3.2.tar.gz
     sha256: 150cd89b45bffbcd7643d39bbce282e8fa38307bb5ed25567b79e337376ba1c7
+  3.4.0:
+    url: https://github.com/skypjack/entt/archive/v3.4.0.tar.gz
+    sha256: 07086b8c5b1d84a1b76b39b0ce257c36c4f1521b77e664368b3d5ca7c00264e2
