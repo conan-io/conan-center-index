@@ -22,7 +22,7 @@ class CpphttplibConan(ConanFile):
 
     def requirements(self):
         if self.options.with_openssl:
-            self.requires.add("openssl/1.1.1d")
+            self.requires.add("openssl/1.1.1g")
         if self.options.with_zlib:
             self.requires.add("zlib/1.2.11")
 
