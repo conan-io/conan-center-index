@@ -21,7 +21,7 @@ class Re2Conan(ConanFile):
         "fPIC": [True, False]
     }
     default_options = {
-        "shared": False, 
+        "shared": False,
         "fPIC": True
     }
 
@@ -30,7 +30,7 @@ class Re2Conan(ConanFile):
 
     def config_options(self):
         if self.settings.os == "Windows":
-            self.options.remove("fPIC")
+            del self.options.fPIC
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
