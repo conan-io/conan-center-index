@@ -143,13 +143,3 @@
  endif (NOT DEACTIVATE_ZSTD)
  
  
-@@ -193,6 +135,9 @@ endif()
- 
- if (BUILD_SHARED)
-     target_link_libraries(blosc_shared ${LIBS})
-+    if(NOT DEACTIVATE_SNAPPY)
-+        set_target_properties(blosc_shared PROPERTIES LINKER_LANGUAGE CXX)
-+    endif()
-     target_include_directories(blosc_shared PUBLIC ${BLOSC_INCLUDE_DIRS})
- endif()
- 

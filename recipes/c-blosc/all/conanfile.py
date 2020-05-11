@@ -45,11 +45,7 @@ class CbloscConan(ConanFile):
 
     def configure(self):
         del self.settings.compiler.cppstd
-        # Snappy is a C++ library with C API. C-Blosc only uses the C API of
-        # Snappy, but if C-Blosc is shared (and snappy static), we have to use
-        # C++ linker.
-        if not (self.options.with_snappy and self.options.shared):
-            del self.settings.compiler.libcxx
+        del self.settings.compiler.libcxx
 
     def requirements(self):
         if self.options.with_lz4:
