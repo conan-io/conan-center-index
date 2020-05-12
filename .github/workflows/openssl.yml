@@ -23,13 +23,13 @@ jobs:
     strategy:
       matrix:
         build: ['linux-gcc8', 'macos']
-        openssl_versions: ['1.1.1d']
+        openssl_versions: ['1.0.2r', '1.1.1d']
         include:
           - build: 'linux-gcc8'
             os: 'ubuntu-latest'
             compiler: 'gcc'
             compiler_version: '8'
-            docker_image: 'trassiross/conan-gcc8'
+            docker_image: 'trassiross/conan-gcc8:frombase'
             build_types: 'Release'
             archs: 'x86,x86_64'
           - build: 'macos'
