@@ -1,5 +1,6 @@
 from conans import ConanFile, tools
 import os
+import glob
 
 
 class RapidjsonConan(ConanFile):
@@ -10,12 +11,15 @@ class RapidjsonConan(ConanFile):
     homepage = "http://rapidjson.org"
     license = "MIT"
     no_copy_source = True
-    _source_subfolder = "source_subfolder"
+
+    @property
+    def _source_subfolder(self):
+        return "source_subfolder"
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
-        extracted_folder = self.name + "-" + self.version
-        os.rename(extracted_folder, self._source_subfolder)
+        extracted_dir = glob.glob(self.name + "-*/")[0]
+        os.rename(extracted_dir, self._source_subfolder)
 
     def package(self):
         include_folder = os.path.join(self._source_subfolder, "include")
