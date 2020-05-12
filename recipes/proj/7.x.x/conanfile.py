@@ -74,7 +74,7 @@ class ProjConan(ConanFile):
         self._cmake.definitions["BUILD_GIE"] = True
         self._cmake.definitions["BUILD_PROJ"] = True
         self._cmake.definitions["BUILD_PROJINFO"] = True
-        self._cmake.definitions["BUILD_PROJSYNC"] = True
+        self._cmake.definitions["BUILD_PROJSYNC"] = self.options.with_curl
         self._cmake.definitions["PROJ_DATA_SUBDIR"] = "res"
         self._cmake.configure(build_folder=self._build_subfolder)
         return self._cmake
