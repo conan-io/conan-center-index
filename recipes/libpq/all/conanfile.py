@@ -48,9 +48,9 @@ class LibpqConan(ConanFile):
 
     def requirements(self):
         if self.options.with_zlib:
-            self.requires.add("zlib/1.2.11")
+            self.requires("zlib/1.2.11")
         if self.options.with_openssl:
-            self.requires.add("openssl/1.0.2s")
+            self.requires("openssl/1.1.1g")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
