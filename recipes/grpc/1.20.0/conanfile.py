@@ -27,9 +27,7 @@ class grpcConan(ConanFile):
     default_options = {
         "fPIC": True,
         "build_codegen": True,
-        "build_csharp_ext": False,
-
-        "openssl:shared": True
+        "build_csharp_ext": False
     }
 
     _source_subfolder = "source_subfolder"

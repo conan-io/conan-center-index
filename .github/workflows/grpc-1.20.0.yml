@@ -32,6 +32,7 @@ jobs:
             docker_image: 'trassiross/conan-gcc8'
             build_types: 'Release'
             archs: 'x86_64'
+            conan_options: 'openssl:shared=True'
     runs-on: ${{ matrix.os }}
     steps:
       - name: Configure git
