@@ -151,7 +151,7 @@ class MpdecimalConan(ConanFile):
 
         shutil.copy(os.path.join(libmpdec_folder, "Makefile.vc"), os.path.join(libmpdec_folder, "Makefile"))
         with tools.chdir(libmpdec_folder):
-            with tools.environment_append(tools.vcvars_dict(self.settings)):
+            with tools.vcvars(self.settings):
                 # self.run("nmake /nologo clean")
                 self.run("nmake /nologo MACHINE={machine} DLL={dll}".format(
                     machine="ppro" if self.settings.arch == "x86" else "x64",
