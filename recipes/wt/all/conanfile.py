@@ -1,5 +1,6 @@
 from conans import ConanFile, CMake, tools
 import os
+import shutil
 
 
 class WtConan(ConanFile):
@@ -67,6 +68,7 @@ class WtConan(ConanFile):
         if self._cmake:
             return self._cmake
         self._cmake = CMake(self)
+        self._cmake.definitions['CONFIGDIR'] = os.path.join(self.package_folder, 'bin')
         self._cmake.definitions['SHARED_LIBS'] = self.options.shared
         self._cmake.definitions['BUILD_EXAMPLES'] = False
         self._cmake.definitions['BUILD_TESTS'] = False
@@ -114,7 +116,7 @@ class WtConan(ConanFile):
         self.copy(pattern="LICENSE", dst="licenses", src=self._source_subfolder)
         cmake = self._configure_cmake()
         cmake.install()
-        tools.rmdir(os.path.join(self.package_folder, "etc"))
+        shutil.move(os.path.join(self.package_folder, "share", "Wt"), os.path.join(self.package_folder, "bin")) 
         tools.rmdir(os.path.join(self.package_folder, "share"))
         tools.rmdir(os.path.join(self.package_folder, "var"))
         tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
