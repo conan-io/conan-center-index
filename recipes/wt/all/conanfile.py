@@ -103,7 +103,6 @@ class WtConan(ConanFile):
         else:
             self._cmake.definitions['CONNECTOR_FCGI'] = self.options.connector_fcgi
             self._cmake.definitions['CONNECTOR_ISAPI'] = False
-            self._cmake.definitions['CMAKE_POSITION_INDEPENDENT_CODE'] = self.options.fPIC
         self._cmake.configure(build_folder=self._build_subfolder)
         return self._cmake
 
@@ -152,4 +151,3 @@ class WtConan(ConanFile):
             self.cpp_info.system_libs.append('dl')
         elif self.settings.os == 'Windows':
             self.cpp_info.system_libs.extend(['ws2_32', 'mswsock', 'wsock32'])
-
