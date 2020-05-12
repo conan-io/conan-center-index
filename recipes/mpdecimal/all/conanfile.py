@@ -37,10 +37,6 @@ class MpdecimalConan(ConanFile):
         if self.options.shared or self.settings.compiler == "Visual Studio":
             del self.options.fPIC
 
-    def build_requirements(self):
-        if self.settings.os == "Windows" and self.settings.compiler != "Visual Studio":
-            self.build_requires("msys2/20190524")
-
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
         os.rename("mpdecimal-{}".format(self.version), self._source_subfolder)
