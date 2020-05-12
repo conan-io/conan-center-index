@@ -13,7 +13,7 @@ class grpcConan(ConanFile):
     author = "Bincrafters <bincrafters@gmail.com>"
     license = "Apache-2.0"
     exports = ["LICENSE.md"]
-    exports_sources = ["CMakeLists.txt", "patches"]
+    exports_sources = ["CMakeLists.txt", "patches/*"]
     generators = "cmake", "cmake_find_package"
     short_paths = True  # Otherwise some folders go out of the 260 chars path length scope rapidly (on windows)
 
