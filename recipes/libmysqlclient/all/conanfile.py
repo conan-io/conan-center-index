@@ -58,8 +58,6 @@ class LibMysqlClientCConan(ConanFile):
     def configure(self):
         if self.options.shared:
             del self.options.fPIC
-        del self.settings.compiler.libcxx
-        del self.settings.compiler.cppstd
         if self.settings.compiler == "Visual Studio":
             if Version(self.settings.compiler.version) < "15":
                 raise ConanInvalidConfiguration("Visual Studio 15 2017 or newer is required")
@@ -108,5 +106,20 @@ class LibMysqlClientCConan(ConanFile):
         tools.rmdir(os.path.join(self.package_folder, "docs"))
         tools.rmdir(os.path.join(self.package_folder, "share"))
 
+    @property
+    def _stdcpp_library(self):
+        libcxx = self.settings.get_safe("compiler.libcxx")
+        if libcxx in ("libstdc++", "libstdc++11"):
+            return "stdc++"
+        elif libcxx in ("libc++",):
+            return "c++"
+        else:
+            return False
+
     def package_info(self):
         self.cpp_info.libs = ["libmysql" if self.settings.os == "Windows" and self.options.shared else "mysqlclient"]
+        if not self.options.shared:
+            if self._stdcpp_library:
+                self.cpp_info.system_libs.append(self._stdcpp_library)
+            if self.settings.os == "Linux":
+                self.cpp_info.system_libs.append('m')
