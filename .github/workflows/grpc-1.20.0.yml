@@ -22,13 +22,13 @@ jobs:
   grpc:
     strategy:
       matrix:
-        build: ['linux-gcc7']
+        build: ['linux-gcc8']
         include:
-          - build: 'linux-gcc7'
+          - build: 'linux-gcc8'
             os: 'ubuntu-latest'
             compiler: 'gcc'
-            compiler_version: '7'
-            docker_image: 'conanio/gcc7'
+            compiler_version: '8'
+            docker_image: 'trassiross/conan-gcc8'
             build_types: 'Release'
             archs: 'x86,x86_64'
     runs-on: ${{ matrix.os }}
