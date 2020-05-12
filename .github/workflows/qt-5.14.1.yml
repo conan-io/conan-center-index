@@ -29,20 +29,23 @@ jobs:
             os: 'macos-10.15'
             build_types: 'Release'
             archs: 'x86_64'
-            conan_options: 'qt:openssl=False,
-                            qt:qtsvg=True,
+            conan_options: 'qt:openssl=True,
                             qt:qtimageformats=True,
+                            qt:qtmultimedia=True,
                             qt:qtscript=True,
+                            qt:qtsvg=True,
                             qt:qttools=True,
                             qt:shared=True,
 
                             qt:with_glib=False,
-                            qt:with_icu=False,
                             qt:with_harfbuzz=False,
-                            qt:with_pcre2=False,
+                            qt:with_icu=False,
                             qt:with_mysql=False,
+                            qt:with_openal=True,
+                            qt:with_pcre2=False,
                             qt:with_sdl2=False,
-                            qt:with_zstd=False'
+                            qt:with_zstd=False
+                            '
             compiler: 'apple_clang'
             compiler_version: '11.0'
             xcode_version: '11.4'
