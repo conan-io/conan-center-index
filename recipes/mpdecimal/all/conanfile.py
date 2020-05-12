@@ -34,7 +34,7 @@ class MpdecimalConan(ConanFile):
         del self.settings.compiler.cppstd
 
     def config_options(self):
-        if self.options.shared or self.settings.compiler == "Visual Studio":
+        if self.settings.os == "Windows":
             del self.options.fPIC
 
     def source(self):
