@@ -22,23 +22,16 @@ jobs:
   c-ares:
     strategy:
       matrix:
-        build: ['linux-gcc8', 'windows-2019-release', 'macos']
-        c-ares_versions: ['1.14.0', '1.15.0']
+        build: ['linux-gcc8', 'macos']
+        c-ares_versions: ['1.15.0']
         include:
           - build: 'linux-gcc8'
             os: 'ubuntu-latest'
             compiler: 'gcc'
             compiler_version: '8'
-            docker_image: 'conanio/gcc8'
+            docker_image: 'trassiross/conan-gcc8'
             build_types: 'Release'
             archs: 'x86,x86_64'
-          - build: 'windows-2019-release'
-            os: 'windows-2019'
-            build_types: 'Release'
-            compiler: 'vs'
-            compiler_version: '16'
-            vs_runtimes: 'MD,MT'
-            archs: 'x86_64'
           - build: 'macos'
             os: 'macos-10.15'
             build_types: 'Release'
