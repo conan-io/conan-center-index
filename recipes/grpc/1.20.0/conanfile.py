@@ -13,7 +13,7 @@ class grpcConan(ConanFile):
     author = "Bincrafters <bincrafters@gmail.com>"
     license = "Apache-2.0"
     exports = ["LICENSE.md"]
-    exports_sources = ["CMakeLists.txt", "grpc.patch", "gettid.patch"]
+    exports_sources = ["CMakeLists.txt", "patches"]
     generators = "cmake", "cmake_find_package"
     short_paths = True  # Otherwise some folders go out of the 260 chars path length scope rapidly (on windows)
 
@@ -27,7 +27,9 @@ class grpcConan(ConanFile):
     default_options = {
         "fPIC": True,
         "build_codegen": True,
-        "build_csharp_ext": False
+        "build_csharp_ext": False,
+
+        "openssl:shared": True
     }
 
     _source_subfolder = "source_subfolder"
@@ -59,11 +61,9 @@ class grpcConan(ConanFile):
         # See #5
         tools.replace_in_file(cmake_path, "_gRPC_PROTOBUF_LIBRARIES", "CONAN_LIBS_PROTOBUF")  
 
-        # rename gettid() function, see https://github.com/grpc/grpc/pull/18950/commits/57586a1ca7f17b1916aed3dea4ff8de872dbf853
-        tools.patch(base_path=self._source_subfolder, patch_file="gettid.patch")
-
-        # fix library names in cmake files for using cmake_find_package generator
-        tools.patch(base_path=self._source_subfolder, patch_file="grpc.patch")      
+        for _, _, patches in os.walk('patches'):
+            for patch in patches:
+                tools.patch(base_path=self._source_subfolder, patch_file=os.path.join("patches", patch))
 
         # Parts which should be options:
         # grpc_cronet

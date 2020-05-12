@@ -1,3 +1,5 @@
+rename gettid() function, see https://github.com/grpc/grpc/pull/18950/commits/57586a1ca7f17b1916aed3dea4ff8de872dbf853
+
 diff -Nuar a/src/core/lib/gpr/log_linux.cc b/src/core/lib/gpr/log_linux.cc
 --- a/src/core/lib/gpr/log_linux.cc
 +++ b/src/core/lib/gpr/log_linux.cc

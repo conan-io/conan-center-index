@@ -1,3 +1,4 @@
+fix library names in cmake files for using cmake_find_package generator
 diff -Naur a/cmake/cares.cmake b/cmake/cares.cmake
 --- a/cmake/cares.cmake
 +++ b/cmake/cares.cmake
