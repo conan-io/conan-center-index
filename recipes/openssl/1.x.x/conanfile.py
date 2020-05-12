@@ -647,6 +647,7 @@ class OpenSSLConan(ConanFile):
     def _replace_runtime_in_file(self, filename):
         for e in ["MDd", "MTd", "MD", "MT"]:
             tools.replace_in_file(filename, "/%s " % e, "/%s " % self.settings.compiler.runtime, strict=False)
+            tools.replace_in_file(filename, "/%s\"" % e, "/%s\"" % self.settings.compiler.runtime, strict=False)
 
     def package(self):
         self.copy(src=self._source_subfolder, pattern="*LICENSE", dst="licenses")
