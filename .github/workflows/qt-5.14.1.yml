@@ -27,7 +27,7 @@ jobs:
         include:
           - build: 'macos'
             os: 'macos-10.15'
-            build_types: 'Release,Debug'
+            build_types: 'Release'
             archs: 'x86_64'
             conan_options: 'qt:openssl=False,
                             qt:qtsvg=True,
