@@ -81,3 +81,6 @@ class LevelDBCppConan(ConanFile):
         if not self.options.shared:
             if self.settings.os == "Linux":
                 self.cpp_info.system_libs = ["pthread"]
+
+        self.cpp_info.names["cmake_find_package"] = "LevelDB"
+        self.cpp_info.names["cmake_find_package_multi"] = "LevelDB"
