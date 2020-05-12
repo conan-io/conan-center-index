@@ -119,6 +119,7 @@ class Bullet3Conan(ConanFile):
 
         self.cpp_info.names["cmake_find_package"] = "Bullet"
         self.cpp_info.names["cmake_find_package_multi"] = "Bullet"
+        self.cpp_info.names["pkg_config"] = "bullet"
         self.cpp_info.libs = libs
         self.cpp_info.includedirs = ["include", os.path.join("include", "bullet")]
         if self.options.extras:
