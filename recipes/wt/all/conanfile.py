@@ -37,7 +37,29 @@ class WtConan(ConanFile):
         "connector_isapi": [True, False],
         "connector_fcgi": [True, False]
     }
-    default_options = {'shared': False, 'fPIC': True, 'with_ssl': True, 'with_haru': False, 'with_pango': False, 'with_sqlite': True, 'with_postgres': False, 'with_firebird': False, 'with_mysql': False, 'with_mssql': False, 'with_qt4': False, 'with_test': True, 'with_dbo': True, 'with_opengl': False, 'with_unwind': False, 'no_std_locale': False, 'no_std_wstring': False, 'multi_threaded': True, 'connector_http': True, 'connector_isapi': True, 'connector_fcgi': False}
+    default_options = {
+        'shared': False,
+        'fPIC': True,
+        'with_ssl': True,
+        'with_haru': False,
+        'with_pango': False,
+        'with_sqlite': True,
+        'with_postgres': True,
+        'with_firebird': False,
+        'with_mysql': True,
+        'with_mssql': False,
+        'with_qt4': False,
+        'with_test': True,
+        'with_dbo': True,
+        'with_opengl': False,
+        'with_unwind': True,
+        'no_std_locale': False,
+        'no_std_wstring': False,
+        'multi_threaded': True,
+        'connector_http': True,
+        'connector_isapi': True,
+        'connector_fcgi': False
+        }
 
     _source_subfolder = "source_subfolder"
     _build_subfolder = "build_subfolder"
@@ -51,6 +73,12 @@ class WtConan(ConanFile):
             self.requires('openssl/1.1.1g')
         if self.options.with_sqlite:
             self.requires('sqlite3/3.31.1')
+        if self.options.with_mysql:
+            self.requires('libmysqlclient/8.0.17')
+        if self.options.with_postgres:
+            self.requires('libpq/11.5')
+        if self.options.with_unwind:
+            self.requires('libunwind/1.3.1')
 
     def config_options(self):
         if self.settings.os == 'Windows':
@@ -58,6 +86,8 @@ class WtConan(ConanFile):
             del self.options.connector_fcgi
         else:
             del self.options.connector_isapi
+        if self.settings.os not in ["Linux", "FreeBSD"]:
+            self.options.with_unwind = False
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
