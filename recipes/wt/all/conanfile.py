@@ -122,11 +122,23 @@ class WtConan(ConanFile):
         self._cmake.definitions['DEBUG'] = self.settings.build_type == 'Debug'
         self._cmake.definitions['CONNECTOR_HTTP'] = self.options.connector_http
         self._cmake.definitions['BOOST_DYNAMIC'] = self.options['boost'].shared
+
+        def _gather_libs(p):
+            libs = self.deps_cpp_info[p].libs + self.deps_cpp_info[p].system_libs
+            for dep in self.deps_cpp_info[p].public_deps:
+                libs += _gather_libs(dep)
+            return libs
+
         if self.options.with_ssl:
             self._cmake.definitions['OPENSSL_PREFIX'] = self.deps_cpp_info['openssl'].rootpath
-            self._cmake.definitions['OPENSSL_LIBRARIES'] = ';'.join(self.deps_cpp_info['openssl'].libs + self.deps_cpp_info['openssl'].system_libs)
+            self._cmake.definitions['OPENSSL_LIBRARIES'] = ';'.join(_gather_libs('openssl'))
             self._cmake.definitions['OPENSSL_INCLUDE_DIR'] = ';'.join(self.deps_cpp_info['openssl'].include_paths)
             self._cmake.definitions['OPENSSL_FOUND'] = True
+        if self.options.with_mysql:
+            self._cmake.definitions['MYSQL_LIBRARIES'] = ';'.join(_gather_libs('libmysqlclient'))
+            self._cmake.definitions['MYSQL_INCLUDE'] = ';'.join(self.deps_cpp_info['libmysqlclient'].include_paths)
+            self._cmake.definitions['MYSQL_DEFINITIONS'] = ';'.join('-D%s' % d for d in self.deps_cpp_info['libmysqlclient'].defines)
+            self._cmake.definitions['MYSQL_FOUND'] = True
         if self.settings.os == 'Windows':
             self._cmake.definitions['CONNECTOR_FCGI'] = False
             self._cmake.definitions['CONNECTOR_ISAPI'] = self.options.connector_isapi
@@ -138,6 +150,7 @@ class WtConan(ConanFile):
 
     def build(self):
         tools.replace_in_file(os.path.join(self._source_subfolder, 'CMakeLists.txt'), 'find_package(OpenSSL)', '#find_package(OpenSSL)')
+        tools.replace_in_file(os.path.join(self._source_subfolder, 'CMakeLists.txt'), 'INCLUDE(cmake/WtFindMysql.txt)', '#INCLUDE(cmake/WtFindMysql.txt)')
         cmake = self._configure_cmake()
         cmake.build()
 
