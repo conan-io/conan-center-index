@@ -61,5 +61,5 @@ jobs:
           CONAN_SHARED_OPTION_NAME: False
           CONAN_VISUAL_RUNTIMES: ${{ matrix.vs_runtimes }}
           CONAN_ARCHS: ${{ matrix.archs }}
-          CONAN_BUILD_TYPES: ${{ matrix.build_types }}  
+          CONAN_BUILD_TYPES: ${{ matrix.build_types }}
           DEVELOPER_DIR: /Applications/Xcode_${{ matrix.xcode_version }}.app/Contents/Developer
