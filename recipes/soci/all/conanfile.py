@@ -30,7 +30,7 @@ class SociConan(ConanFile):
         "with_boost": [True, False],
         "with_all_backends": [True, False]
     }
-    options.update({"with_backend_%s" % backend: [True, False, None] for backend in backends})
+    options.update({"with_backend_%s" % backend: [True, False] for backend in backends})
 
     default_options = {
         "shared": True,
@@ -67,7 +67,7 @@ class SociConan(ConanFile):
             self.requires("libpq/12.2")
 
         if self.options.with_boost:
-            self.requires("boost/1.72.0")
+            self.requires("boost/1.73.0")
 
     _source_subfolder = "source_subfolder"
 
@@ -120,30 +120,27 @@ class SociConan(ConanFile):
             cmake.definitions["WITH_SQLITE3"] = "ON"
             cmake.definitions["SQLITE_ROOT_DIR"] = sqlite3.root
 
-        if self._with_backend(self.options.with_backend_mysql):
+        cmake.definitions["WITH_MYSQL"] = self.options.with_backend_mysql
+        if self.options.with_backend_mysql:
             mysql = self._dependency('libmysqlclient')
-            cmake.definitions["WITH_MYSQL"] = "ON"
-            os.environ["MYSQL_DIR"] = mysql.root
-            cmake.definitions["MYSQL_LIBRARIES"] = ';'.join(mysql.libs)
+            os.environ["MYSQL_DIR"] = mysql.root  # move this to a `tools.environment_append` context (or a cmake variable)
+            cmake.definitions["MYSQL_LIBRARIES"] = ";".join(self.deps_cpp_info["libmysqlclient"].libs)
 
         if self._with_backend(self.options.with_backend_odbc):
             odbc = self._dependency('odbc')
             cmake.definitions["WITH_ODBC"] = "ON"
-            cmake.definitions["ODBC_INCLUDE_DIR"] = os.path.join(odbc.root, 'include')
+            cmake.definitions["ODBC_INCLUDE_DIR"] = ";".join(self.deps_cpp_info["odbc"].include_paths)
             if self.settings.os == 'Windows':
-              cmake.definitions["ODBC_LIBRARY"] = os.path.join(odbc.root, 'lib', 'libodbc.lib')
+              cmake.definitions["ODBC_LIBRARY"] = ";".join(seld.deps_cpp_info["odb"].libs)
             else:
               cmake.definitions["SOCI_ODBC_DO_NOT_TEST"] = True
-              if self.options['odbc'].shared == False:
-                cmake.definitions["ODBC_LIBRARY"] = os.path.join(odbc.root, 'lib', 'libodbc.a')
-              else:
-                cmake.definitions["ODBC_LIBRARY"] = os.path.join(odbc.root, 'lib', 'libodbc.so')
+              cmake.definitions["ODBC_LIBRARY"] = ";".join(seld.deps_cpp_info["odb"].libs)
 
 
         if self._with_backend(self.options.with_backend_postgresql):
             postgresql = self._dependency('libpq')
-            cmake.definitions["WITH_POSTGRESQL"] = "ON"
-            os.environ["POSTGRESQL_ROOT"] = postgresql.root
+            cmake.definitions["WITH_POSTGRESQL"] = True
+            os.environ["POSTGRESQL_ROOT"] = self.deps_cpp_info["libpq"].rootpath
 
         #cmake.configure(source_folder=self._source_subfolder)
         cmake.configure()
@@ -167,4 +164,3 @@ class SociConan(ConanFile):
         cmake.install()
         self.copy('LICENSE_1_0.txt', dst='licenses', src=self._source_subfolder)
         self.copy('cmake/SOCI-override.cmake')
-
