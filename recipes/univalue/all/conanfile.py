@@ -102,6 +102,7 @@ class UnivalueConan(ConanFile):
             os.unlink(os.path.join(self.package_folder, "lib",  "libunivalue.la"))
 
     def package_info(self):
-        self.cpp_info.libs = ["univalue"]
+        suffix = ".dll" if self.options.shared and self.settings.os == "Windows" else ""
+        self.cpp_info.libs = ["univalue{}".format(suffix)]
         if self.options.shared:
             self.cpp_info.defines = ["UNIVALUE_SHARED"]
