@@ -72,7 +72,6 @@ class VolkConan(ConanFile):
             self.cpp_info.components["volk_headers"].system_libs = ["dl"]
 
         self.cpp_info.components["libvolk"].libs = ["volk"]
-        self.cpp_info.components["libvolk"].system_libs = ["dl"]
         self.cpp_info.components["libvolk"].requires = ["volk_headers"]
         self.cpp_info.components["libvolk"].names["cmake_find_package"] = ["volk"]
         self.cpp_info.components["libvolk"].names["cmake_find_package_multi"] = ["volk"]
