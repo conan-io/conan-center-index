@@ -103,6 +103,8 @@ class UnivalueConan(ConanFile):
 
     def package_info(self):
         suffix = ".dll" if self.options.shared and self.settings.os == "Windows" else ""
+        if self.settings.compiler == "Visual Studio":
+            suffix += ".lib"
         self.cpp_info.libs = ["univalue{}".format(suffix)]
         if self.options.shared:
             self.cpp_info.defines = ["UNIVALUE_SHARED"]
