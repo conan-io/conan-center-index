@@ -364,6 +364,11 @@ class QtConan(ConanFile):
         for p in self.conan_data["patches"][self.version]:
             tools.patch(**p)
 
+        if self.settings.os == "Linux":
+            tools.replace_in_file(os.path.join(self.source_folder, "qt5", "qtbase", "mkspecs", "common", "linux.conf"),\
+                                  "QMAKE_LIBS_OPENGL       = -lGL",\
+                                  "QMAKE_LIBS_OPENGL       = -lGL -ldrm -lxcb-dri3")
+
     def _xplatform(self):
         if self.settings.os == "Linux":
             if self.settings.compiler == "gcc":
@@ -440,7 +445,7 @@ class QtConan(ConanFile):
         return None
 
     def build(self):
-        args = ["-confirm-license", "-silent", "-nomake examples", "-nomake tests",
+        args = ["-confirm-license", "-silent", "-nomake examples", "-nomake tests", "-no-feature-accessibility",
                 "-prefix %s" % self.package_folder]
         if self.options.commercial:
             args.append("-commercial")
