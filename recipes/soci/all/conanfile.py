@@ -64,7 +64,7 @@ class SociConan(ConanFile):
                 self.requires("libiconv/1.15")
 
         if self.options.with_backend_postgresql:
-            self.requires("libpq/12.2")
+            self.requires("libpq/11.5")
 
         if self.options.with_backend_db2:
             # FIXME: add db2 support
@@ -145,33 +145,43 @@ class SociConan(ConanFile):
 
         tools.rmdir(os.path.join(self.package_folder, "cmake"))
 
+    def _construct_library_name(self, name):
+        if self.settings.os == "Windows":
+            abi_version = tools.Version(self.version)
+            name = "lib{name}_{major}_{minor}".format(
+                name = name,
+                major = abi_version.major,
+                minor = abi_version.minor
+            )
+        return name
+
     def package_info(self):
         self.cpp_info.names["cmake_find_package"] = "SOCI"
         self.cpp_info.names["cmake_find_package_multi"] = "SOCI"
 
-        self.cpp_info.components["core"].libs = ["soci_core"]
+        self.cpp_info.components["core"].libs = [self._construct_library_name("soci_core")]
         if self.options.with_boost:
-          self.cpp_info.components["core"].defines.append("SOCI_USE_BOOST")
-          self.cpp_info.components["core"].requires.append("boost::boost")
+            self.cpp_info.components["core"].defines.append("SOCI_USE_BOOST")
+            self.cpp_info.components["core"].requires.append("boost::boost")
         if self.settings.os == "Linux":
             self.cpp_info.components["core"].system_libs.extend(["dl", "m", "pthread"])
 
         if self.options.with_backend_empty:
-            self.cpp_info.components["empty"].libs = ["soci_empty"]
+            self.cpp_info.components["empty"].libs = [self._construct_library_name("soci_empty")]
             self.cpp_info.components["empty"].requires = ["core"]
 
         if self.options.with_backend_sqlite3:
-            self.cpp_info.components["sqlite3"].libs = ["soci_sqlite3"]
+            self.cpp_info.components["sqlite3"].libs = [self._construct_library_name("soci_sqlite3")]
             self.cpp_info.components["sqlite3"].requires = ["core", "sqlite3::sqlite3"]
 
         if self.options.with_backend_mysql:
-            self.cpp_info.components["mysql"].libs = ["soci_mysql"]
+            self.cpp_info.components["mysql"].libs = [self._construct_library_name("soci_mysql")]
             self.cpp_info.components["mysql"].requires = ["core", "libmysqlclient::libmysqlclient"]
 
         if self.options.with_backend_odbc:
-            self.cpp_info.components["odbc"].libs = ["soci_odbc"]
+            self.cpp_info.components["odbc"].libs = [self._construct_library_name("soci_odbc")]
             self.cpp_info.components["odbc"].requires = ["core", "odbc::odbc"]
 
         if self.options.with_backend_postgresql:
-            self.cpp_info.components["postgresql"].libs = ["soci_postgresql"]
+            self.cpp_info.components["postgresql"].libs = [self._construct_library_name("soci_postgresql")]
             self.cpp_info.components["postgresql"].requires = ["core", "libpq::libpq"]
