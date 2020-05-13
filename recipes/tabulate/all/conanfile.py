@@ -20,7 +20,8 @@ class Tabulate(ConanFile):
     _source_subfolder = "source_subfolder"
 
     def configure(self):
-        tools.check_min_cppstd(self, "17")
+        if self.settings.compiler.cppstd:
+            tools.check_min_cppstd(self, 17)
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
