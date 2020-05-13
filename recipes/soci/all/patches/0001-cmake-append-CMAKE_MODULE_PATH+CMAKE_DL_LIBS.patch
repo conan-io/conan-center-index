@@ -1,0 +1,28 @@
+--- CMakeLists.txt
++++ CMakeLists.txt
+@@ -29,8 +29,8 @@
+ ###############################################################################
+ 
+ # Path to additional CMake modules
+-set(CMAKE_MODULE_PATH ${SOCI_SOURCE_DIR}/cmake ${CMAKE_MODULE_PATH})
+-set(CMAKE_MODULE_PATH ${SOCI_SOURCE_DIR}/cmake/modules ${CMAKE_MODULE_PATH})
++list(APPEND CMAKE_MODULE_PATH ${SOCI_SOURCE_DIR}/cmake)
++#set(CMAKE_MODULE_PATH ${SOCI_SOURCE_DIR}/cmake/modules ${CMAKE_MODULE_PATH})
+ 
+ include(SociUtilities)
+ include(SociConfig)
+@@ -86,10 +86,10 @@ endif()
+ 
+ if(NOT MSVC)
+   set(DL_FIND_QUIETLY TRUE)
+-  find_package(DL)
+-  if(DL_FOUND)
+-    list(APPEND SOCI_CORE_DEPS_LIBS ${DL_LIBRARY})
+-    set_directory_properties(PROPERTIES INCLUDE_DIRECTORIES ${DL_INCLUDE_DIR})
++  #find_package(DL)
++  if(CMAKE_DL_LIBS)
++    list(APPEND SOCI_CORE_DEPS_LIBS ${CMAKE_DL_LIBS})
++    #set_directory_properties(PROPERTIES INCLUDE_DIRECTORIES ${DL_INCLUDE_DIR})
+     add_definitions(-DHAVE_DL=1)
+   endif()
+ endif()

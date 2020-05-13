@@ -7,7 +7,7 @@ int main()
   auto backend = soci::factory_mysql();
 
   try {
-    soci::session sql(*soci::factory_mysql(), "db=test.db");
+    soci::session sql(*soci::factory_mysql(), "db=db_mysql.db");
   }
   catch(const soci::soci_error& )
   {

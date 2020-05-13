@@ -9,14 +9,15 @@
 int main()
 {
 #if defined BACKEND_EMPTY
-  soci::session sql(*soci::factory_empty(), "database.db");
+  soci::session sql(*soci::factory_empty(), "db_empty.db");
 #elif defined BACKEND_SQLITE3
-  soci::session sql(*soci::factory_sqlite3(), "database.db");
+  soci::session sql(*soci::factory_sqlite3(), "db_sqlite3.db");
 #endif
 
   try
   {
     sql << "drop table sqlite3_test";
+    sql.commit();
   }
   catch (const soci::soci_error& )
   {

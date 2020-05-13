@@ -5,7 +5,7 @@
 int main()
 {
   try {
-    soci::session sql(*soci::factory_postgresql(), "db=test.db");
+    soci::session sql(*soci::factory_postgresql(), "db=db_postgresql.db");
   }
   catch(const soci::soci_error& )
   {

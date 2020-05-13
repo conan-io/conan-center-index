@@ -1,7 +1,7 @@
-import os
-import copy
-from collections import namedtuple
 from conans import ConanFile, CMake, tools
+from conans.errors import ConanInvalidConfiguration
+import os
+
 
 class SociConan(ConanFile):
     name = "soci"
@@ -10,157 +10,168 @@ class SociConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "http://soci.sourceforge.net/"
     license = "BSL-1.0"
-    generators = "cmake"
+    generators = "cmake", "cmake_find_package"
     topics = ("conan", "soci", "database")
-    exports_sources=["CMakeLists.txt", "cmake/SOCI-override.cmake"]
+    exports_sources = "CMakeLists.txt", "patches/**"
 
-    backends = [
-#     "db2",
-      "empty",
-#     "firebird",
-      "mysql",
-      "odbc",
-#     "oracle",
-      "postgresql",
-      "sqlite3"
-    ]
+    short_paths = True
+
+    @property
+    def _source_subfolder(self):
+        return "source_subfolder"
+
+    _cmake = None
+
+    _backend_default_option = {
+        "empty": True,
+        "mysql": True,
+        "odbc": True,
+        "postgresql": True,
+        "sqlite3": True,
+        "db2": False,
+        "firebird": False,
+        "oracle": False,
+    }
 
     options = {
         "shared": [True, False],
+        "fPIC": [True, False],
         "with_boost": [True, False],
-        "with_all_backends": [True, False]
     }
-    options.update({"with_backend_%s" % backend: [True, False] for backend in backends})
+    options.update({"with_backend_{}".format(backend): [True, False] for backend in _backend_default_option.keys()})
 
     default_options = {
-        "shared": True,
+        "shared": False,
+        "fPIC": True,
         "with_boost": False,
-        "with_all_backends": True
     }
+    default_options.update({"with_backend_{}".format(backend): default for backend, default in _backend_default_option.items()})
 
-    default_options.update({"with_backend_%s" % backend: None for backend in backends})
-
-
-    short_paths = True
-    no_copy_source = True
-      
-    def _with_backend(self, with_backend):
-      return with_backend == True or with_backend == 'None' and self.options.with_all_backends
+    def config_options(self):
+        if self.settings.os == "Windows":
+            del self.options.fPIC
 
     def requirements(self):
-        if self.settings.os == "Windows" and self.options.with_backend_odbc == 'None':
-            self.options.with_backend_odbc = False
-       
-        if self._with_backend(self.options.with_backend_sqlite3):
+        if self.options.with_backend_sqlite3:
             self.requires("sqlite3/3.31.1")
 
-        if self._with_backend(self.options.with_backend_mysql):
+        if self.options.with_backend_mysql:
             self.requires("libmysqlclient/8.0.17")
-            self.requires("openssl/1.1.1d")
 
-        if self._with_backend(self.options.with_backend_odbc):
+        if self.options.with_backend_odbc:
             self.requires("odbc/2.3.7")
             if self.options["odbc"].with_libiconv:
                 self.requires("libiconv/1.15")
 
-        if self._with_backend(self.options.with_backend_postgresql):
+        if self.options.with_backend_postgresql:
             self.requires("libpq/12.2")
+
+        if self.options.with_backend_db2:
+            # FIXME: add db2 support
+            raise ConanInvalidConfiguration("db2 is not (yet) available on CCI")
+            self.requires("db2/x.y.z")
+
+        if self.options.with_backend_firebird:
+            # FIXME: add firebird support
+            raise ConanInvalidConfiguration("firebird is not (yet) available on CCI")
+            self.requires("firebird/x.y.z")
+
+        if self.options.with_backend_oracle:
+            # FIXME: add oracle support
+            raise ConanInvalidConfiguration("oracle is not (yet) available on CCI")
+            self.requires("oracle/x.y.z")
 
         if self.options.with_boost:
             self.requires("boost/1.73.0")
 
-    _source_subfolder = "source_subfolder"
-
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
-        url = self.conan_data["sources"][self.version]["url"]
-        archive_name = os.path.basename(url)
-        archive_name = os.path.splitext(archive_name)[0]
-        os.rename("soci-%s" % archive_name, self._source_subfolder)
-        
-    def _dependency(self, name):
-        def find_lib_path(name, lib):
-            lib_filename = (
-              '' if self.settings.os == "Windows" else 'lib'
-            ) + lib + (
-              '.lib' if self.settings.os == "Windows" else '.so' if self.options[name].shared else '.a'
-            )
-
-            for path in self.deps_cpp_info[name].lib_paths:
-                full_path = os.path.join(
-                  path,
-                  lib_filename
-                )
-                if os.path.isfile(full_path):
-                    return full_path
-            print('{} not found in {}'.format(lib_filename, self.deps_cpp_info[name].lib_paths))
-            return None
-
-        libs = [find_lib_path(name, lib) for lib in self.deps_cpp_info[name].libs]
-
-        return namedtuple('Dependency', ['root', 'libs'])(
-          root          = self.deps_cpp_info[name].rootpath,
-          libs          = libs
-        )
+        os.rename("soci-{}".format(self.version), self._source_subfolder)
 
     def _configure_cmake(self):
-        cmake = CMake(self)
-        cmake.definitions["SOCI_SHARED"] = self.options.shared
-        cmake.definitions["SOCI_STATIC"] = not self.options.shared
-        cmake.definitions["SOCI_TESTS"] = False
+        if self._cmake:
+            return self._cmake
+        self._cmake = CMake(self)
 
-        print("self.settings.compiler.cppstd = {}".format(self.settings.compiler.cppstd))
-        if self.settings.compiler.cppstd != 'None':
-            cmake.definitions["CMAKE_CXX_STANDARD"] = self.settings.compiler.cppstd
+        self._cmake.definitions["BINDIR"] = os.path.join(self.package_folder, "bin")
+        self._cmake.definitions["LIBDIR"] = os.path.join(self.package_folder, "lib")
+        self._cmake.definitions["LIB_SUFFIX"] = ""
 
-        cmake.definitions["WITH_EMPTY"] = self._with_backend(self.options.with_backend_empty)
+        self._cmake.definitions["SOCI_SHARED"] = self.options.shared
+        self._cmake.definitions["SOCI_STATIC"] = not self.options.shared
+        self._cmake.definitions["SOCI_TESTS"] = False
 
-        if self._with_backend(self.options.with_backend_sqlite3):
-            sqlite3 = self._dependency('sqlite3')
-            cmake.definitions["WITH_SQLITE3"] = "ON"
-            cmake.definitions["SQLITE_ROOT_DIR"] = sqlite3.root
+        self._cmake.definitions["WITH_BOOST"] = self.options.with_boost
+        self._cmake.definitions["SOCI_EMPTY"] = self.options.with_backend_empty
+        self._cmake.definitions["WITH_SQLITE3"] = self.options.with_backend_sqlite3
+        self._cmake.definitions["WITH_MYSQL"] = self.options.with_backend_mysql
+        self._cmake.definitions["WITH_ODBC"] = self.options.with_backend_odbc
+        self._cmake.definitions["WITH_POSTGRESQL"] = self.options.with_backend_postgresql
 
-        cmake.definitions["WITH_MYSQL"] = self.options.with_backend_mysql
+        self._cmake.definitions["WITH_DB2"] = self.options.with_backend_db2
+        self._cmake.definitions["WITH_FIREBIRD"] = self.options.with_backend_firebird
+        self._cmake.definitions["WITH_ORACLE"] = self.options.with_backend_oracle
+
+        self._cmake.configure()
+        return self._cmake
+
+    def _patch_sources(self):
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            tools.patch(**patch)
+
+        if self.options.with_backend_sqlite3:
+            tools.replace_in_file("FindSQLite3.cmake", "SQLite3_FOUND", "SQLITE3_FOUND")
+            tools.replace_in_file("FindSQLite3.cmake", "SQLite3_INCLUDE_DIRS", "SQLITE3_INCLUDE_DIRS")
+            tools.replace_in_file("FindSQLite3.cmake", "SQLite3_LIBRARIES", "SQLITE3_LIBRARIES")
         if self.options.with_backend_mysql:
-            mysql = self._dependency('libmysqlclient')
-            os.environ["MYSQL_DIR"] = mysql.root  # move this to a `tools.environment_append` context (or a cmake variable)
-            cmake.definitions["MYSQL_LIBRARIES"] = ";".join(self.deps_cpp_info["libmysqlclient"].libs)
-
-        if self._with_backend(self.options.with_backend_odbc):
-            odbc = self._dependency('odbc')
-            cmake.definitions["WITH_ODBC"] = "ON"
-            cmake.definitions["ODBC_INCLUDE_DIR"] = ";".join(self.deps_cpp_info["odbc"].include_paths)
-            if self.settings.os == 'Windows':
-              cmake.definitions["ODBC_LIBRARY"] = ";".join(seld.deps_cpp_info["odb"].libs)
-            else:
-              cmake.definitions["SOCI_ODBC_DO_NOT_TEST"] = True
-              cmake.definitions["ODBC_LIBRARY"] = ";".join(seld.deps_cpp_info["odb"].libs)
-
-
-        if self._with_backend(self.options.with_backend_postgresql):
-            postgresql = self._dependency('libpq')
-            cmake.definitions["WITH_POSTGRESQL"] = True
-            os.environ["POSTGRESQL_ROOT"] = self.deps_cpp_info["libpq"].rootpath
-
-        #cmake.configure(source_folder=self._source_subfolder)
-        cmake.configure()
-        cmake.verbose = True
-        return cmake
+            os.rename("Findlibmysqlclient.cmake", "FindMySQL.cmake")
+            tools.replace_in_file("FindMySQL.cmake", "libmysqlclient_FOUND", "MYSQL_FOUND")
+            tools.replace_in_file("FindMySQL.cmake", "libmysqlclient_INCLUDE_DIRS", "MYSQL_INCLUDE_DIRS")
+            tools.replace_in_file("FindMySQL.cmake", "libmysqlclient_LIBRARIES", "MYSQL_LIBRARIES")
+        if self.options.with_backend_postgresql:
+            tools.replace_in_file("FindPostgreSQL.cmake", "PostgreSQL_FOUND", "POSTGRESQL_FOUND")
+            tools.replace_in_file("FindPostgreSQL.cmake", "PostgreSQL_INCLUDE_DIRS", "POSTGRESQL_INCLUDE_DIRS")
+            tools.replace_in_file("FindPostgreSQL.cmake", "PostgreSQL_LIBRARIES", "POSTGRESQL_LIBRARIES")
 
     def build(self):
+        self._patch_sources()
         cmake = self._configure_cmake()
         cmake.build()
 
-    def package_info(self):
-        self.cpp_info.build_modules.append('cmake/SOCI-override.cmake')
-        self.cpp_info.builddirs.append('cmake')
-        
-        if self.options.with_boost:
-          self.cpp_info.defines.append('-DSOCI_USE_BOOST')
-
-
     def package(self):
+        self.copy("LICENSE_1_0.txt", dst="licenses", src=self._source_subfolder)
         cmake = self._configure_cmake()
         cmake.install()
-        self.copy('LICENSE_1_0.txt', dst='licenses', src=self._source_subfolder)
-        self.copy('cmake/SOCI-override.cmake')
+
+        tools.rmdir(os.path.join(self.package_folder, "cmake"))
+
+    def package_info(self):
+        self.cpp_info.names["cmake_find_package"] = "SOCI"
+        self.cpp_info.names["cmake_find_package_multi"] = "SOCI"
+
+        self.cpp_info.components["core"].libs = ["soci_core"]
+        if self.options.with_boost:
+          self.cpp_info.components["core"].defines.append("SOCI_USE_BOOST")
+          self.cpp_info.components["core"].requires.append("boost::boost")
+        if self.settings.os == "Linux":
+            self.cpp_info.components["core"].system_libs.extend(["dl", "m", "pthread"])
+
+        if self.options.with_backend_empty:
+            self.cpp_info.components["empty"].libs = ["soci_empty"]
+            self.cpp_info.components["empty"].requires = ["core"]
+
+        if self.options.with_backend_sqlite3:
+            self.cpp_info.components["sqlite3"].libs = ["soci_sqlite3"]
+            self.cpp_info.components["sqlite3"].requires = ["core", "sqlite3::sqlite3"]
+
+        if self.options.with_backend_mysql:
+            self.cpp_info.components["mysql"].libs = ["soci_mysql"]
+            self.cpp_info.components["mysql"].requires = ["core", "libmysqlclient::libmysqlclient"]
+
+        if self.options.with_backend_odbc:
+            self.cpp_info.components["odbc"].libs = ["soci_odbc"]
+            self.cpp_info.components["odbc"].requires = ["core", "odbc::odbc"]
+
+        if self.options.with_backend_postgresql:
+            self.cpp_info.components["postgresql"].libs = ["soci_postgresql"]
+            self.cpp_info.components["postgresql"].requires = ["core", "libpq::libpq"]
