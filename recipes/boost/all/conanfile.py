@@ -589,6 +589,11 @@ class BoostConan(ConanFile):
         if self.settings.os != "Windows":
             if self.options.fPIC:
                 cxx_flags.append("-fPIC")
+        if self.settings.build_type == "RelWithDebInfo":
+            if self.settings.compiler == "gcc" or "clang" in str(self.settings.compiler):
+                cxx_flags.append("-g")
+            elif self.settings.compiler == "Visual Studio":
+                cxx_flags.append("/Z7")
 
         # Standalone toolchain fails when declare the std lib
         if self.settings.os != "Android" and self.settings.os != "Emscripten":
