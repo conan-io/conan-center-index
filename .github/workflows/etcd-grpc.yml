@@ -17,21 +17,24 @@ on:
 env:
   CONAN_PASSWORD: ${{ secrets.BintrayApiKey }}
   IS_PURE_C: true
+  CONAN_OPTIONS: 'c-ares:shared=True,
+                  grpc:shared=True,
+                  protobuf:shared=True'
 
 jobs:
   etcd-grpc:
     strategy:
       matrix:
-        build: ['linux-gcc7']
+        build: ['linux-gcc8']
         etcd-grpc_versions: ['4.0.0']
         include:
-          - build: 'linux-gcc7'
+          - build: 'linux-gcc8'
             os: 'ubuntu-latest'
             compiler: 'gcc'
-            compiler_version: '7'
-            docker_image: 'conanio/gcc7'
+            compiler_version: '8'
+            docker_image: 'trassiross/conan-gcc8'
             build_types: 'Release'
-            archs: 'x86,x86_64'
+            archs: 'x86_64'
     runs-on: ${{ matrix.os }}
     steps:
       - name: Configure git
