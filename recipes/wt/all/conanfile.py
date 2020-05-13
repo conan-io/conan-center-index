@@ -125,8 +125,11 @@ class WtConan(ConanFile):
 
         def _gather_libs(p):
             libs = self.deps_cpp_info[p].libs + self.deps_cpp_info[p].system_libs
-            for dep in self.deps_cpp_info[p].public_deps:
-                libs += _gather_libs(dep)
+            if not getattr(self.options[p],'shared', False):
+                for dep in self.deps_cpp_info[p].public_deps:
+                    for l in _gather_libs(dep):
+                        if not l in libs:
+                            libs.append(l)
             return libs
 
         if self.options.with_ssl:
@@ -139,6 +142,10 @@ class WtConan(ConanFile):
             self._cmake.definitions['MYSQL_INCLUDE'] = ';'.join(self.deps_cpp_info['libmysqlclient'].include_paths)
             self._cmake.definitions['MYSQL_DEFINITIONS'] = ';'.join('-D%s' % d for d in self.deps_cpp_info['libmysqlclient'].defines)
             self._cmake.definitions['MYSQL_FOUND'] = True
+        if self.options.with_postgres:
+            self._cmake.definitions['POSTGRES_LIBRARIES'] = ';'.join(_gather_libs('libpq'))
+            self._cmake.definitions['POSTGRES_INCLUDE'] = ';'.join(self.deps_cpp_info['libpq'].include_paths)
+            self._cmake.definitions['POSTGRES_FOUND'] = True
         if self.settings.os == 'Windows':
             self._cmake.definitions['CONNECTOR_FCGI'] = False
             self._cmake.definitions['CONNECTOR_ISAPI'] = self.options.connector_isapi
@@ -151,6 +158,7 @@ class WtConan(ConanFile):
     def build(self):
         tools.replace_in_file(os.path.join(self._source_subfolder, 'CMakeLists.txt'), 'find_package(OpenSSL)', '#find_package(OpenSSL)')
         tools.replace_in_file(os.path.join(self._source_subfolder, 'CMakeLists.txt'), 'INCLUDE(cmake/WtFindMysql.txt)', '#INCLUDE(cmake/WtFindMysql.txt)')
+        tools.replace_in_file(os.path.join(self._source_subfolder, 'CMakeLists.txt'), 'INCLUDE(cmake/WtFindPostgresql.txt)', '#INCLUDE(cmake/WtFindPostgresql.txt)')
         cmake = self._configure_cmake()
         cmake.build()
 
