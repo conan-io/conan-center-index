@@ -120,9 +120,9 @@ class LibpqConan(ConanFile):
                 autotools.make(target="generated-headers")
             with tools.chdir(os.path.join(self._source_subfolder, "src", "common")):
                 autotools.make()
-            if self.version >= '12':
-              with tools.chdir(os.path.join(self._source_subfolder, "src", "port")):
-                  autotools.make()
+            if tools.Version(self.version) >= '12':
+                with tools.chdir(os.path.join(self._source_subfolder, "src", "port")):
+                    autotools.make()
             with tools.chdir(os.path.join(self._source_subfolder, "src", "include")):
                 autotools.make()
             with tools.chdir(os.path.join(self._source_subfolder, "src", "interfaces", "libpq")):
