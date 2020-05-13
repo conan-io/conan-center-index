@@ -18,13 +18,39 @@ env:
   CONAN_PASSWORD: ${{ secrets.BintrayApiKey }}
   IS_PURE_C: false
   CONAN_REFERENCE: qt/5.14.1
+  CONAN_DOCKER_ENTRY_SCRIPT: "sudo ln -s /usr/bin/g++-8 /usr/bin/g++"
 
 jobs:
   qt_5_14_1:
     strategy:
       matrix:
-        build: ['macos']
+        build: ['linux-gcc8', 'macos']
         include:
+          - build: 'linux-gcc8'
+            os: 'ubuntu-latest'
+            compiler: 'gcc'
+            compiler_version: '8'
+            docker_image: 'trassiross/conan-gcc8'
+            build_types: 'Release'
+            archs: 'x86_64'
+            conan_options: 'qt:openssl=False,
+                            qt:qtimageformats=True,
+                            qt:qtmultimedia=True,
+                            qt:qtscript=True,
+                            qt:qtsvg=True,
+                            qt:qttools=True,
+                            qt:qtx11extras=True,
+                            qt:shared=True,                            
+
+                            qt:with_glib=False,
+                            qt:with_harfbuzz=False,
+                            qt:with_icu=False,
+                            qt:with_mysql=False,
+                            qt:with_openal=True,
+                            qt:with_pcre2=False,                            
+                            qt:with_sdl2=False,
+                            qt:with_zstd=False
+                            '
           - build: 'macos'
             os: 'macos-10.15'
             build_types: 'Release'
