@@ -18,6 +18,7 @@ env:
   CONAN_PASSWORD: ${{ secrets.BintrayApiKey }}
   IS_PURE_C: false
   CONAN_REFERENCE: qt/5.14.1
+  CONAN_DOCKER_ENTRY_SCRIPT: "sudo ln -s /usr/bin/g++-8 /usr/bin/g++"
 
 jobs:
   qt_5_14_1:
