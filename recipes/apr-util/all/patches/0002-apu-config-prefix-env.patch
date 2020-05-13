@@ -1,0 +1,22 @@
+--- apu-config.in
++++ apu-config.in
+@@ -21,7 +21,7 @@
+ APRUTIL_MAJOR_VERSION="@APRUTIL_MAJOR_VERSION@"
+ APRUTIL_DOTTED_VERSION="@APRUTIL_DOTTED_VERSION@"
+ 
+-prefix="@prefix@"
++prefix="$APR_UTIL_ROOT"
+ exec_prefix="@exec_prefix@"
+ bindir="@bindir@"
+ libdir="@libdir@"
+@@ -28,8 +28,8 @@
+ includedir="@includedir@"
+ 
+ LIBS="@APRUTIL_EXPORT_LIBS@"
+-INCLUDES="@APRUTIL_INCLUDES@"
+-LDFLAGS="@APRUTIL_LDFLAGS@"
++INCLUDES=""
++LDFLAGS="$APRUTIL_LDFLAGS"
+ LDAP_LIBS="@LDADD_ldap@"
+ DBM_LIBS="@LDADD_dbm_db@ @LDADD_dbm_gdbm@ @LDADD_dbm_ndbm@"
+ 

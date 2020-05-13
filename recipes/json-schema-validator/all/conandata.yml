@@ -1,0 +1,8 @@
+sources:
+    "2.0.0":
+        url: "https://github.com/pboettch/json-schema-validator/archive/2.0.0.zip"
+        sha256: "8fddec7248581e2899b3543ae2cd1a0ae682f54e6866db999577627f230a6f1f"
+patches:
+    "2.0.0":
+        - patch_file: "patches/0001-cmake-find.patch"
+          base_path: "source_subfolder"
