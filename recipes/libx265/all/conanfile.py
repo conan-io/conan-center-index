@@ -49,9 +49,6 @@ class Libx265Conan(ConanFile):
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
         os.rename("x265_{}".format(self.version), self._source_subfolder)
-        if self.version in self.conan_data["patches"]:
-            for patch in self.conan_data["patches"][self.version]:
-                tools.patch(**patch)
 
     def _configure_cmake(self):
         if self._cmake:
@@ -82,6 +79,8 @@ class Libx265Conan(ConanFile):
                 "list(APPEND PLATFORM_LIBS pthread)", "")
             tools.replace_in_file(cmakelists,
                 "list(APPEND PLATFORM_LIBS rt)", "")
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            tools.patch(**patch)
 
     def build(self):
         self._patch_sources()
