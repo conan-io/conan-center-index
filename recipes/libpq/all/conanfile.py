@@ -113,12 +113,16 @@ class LibpqConan(ConanFile):
                 with tools.environment_append({"CONFIG": config}):
                     with tools.chdir(os.path.join(self._source_subfolder, "src", "tools", "msvc")):
                         self.run("perl build.pl libpq")
+                        self.run("perl build.pl libpgport")
         else:
             autotools = self._configure_autotools()
             with tools.chdir(os.path.join(self._source_subfolder, "src", "backend")):
                 autotools.make(target="generated-headers")
             with tools.chdir(os.path.join(self._source_subfolder, "src", "common")):
                 autotools.make()
+            if self.version >= '12':
+              with tools.chdir(os.path.join(self._source_subfolder, "src", "port")):
+                  autotools.make()
             with tools.chdir(os.path.join(self._source_subfolder, "src", "include")):
                 autotools.make()
             with tools.chdir(os.path.join(self._source_subfolder, "src", "interfaces", "libpq")):
