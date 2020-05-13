@@ -5,17 +5,15 @@ import os
 
 class grpcConan(ConanFile):
     name = "grpc"
-    version = "1.20.0"
+    version = "1.26.0"
     description = "Google's RPC library and framework."
     topics = ("conan", "grpc", "rpc")
     url = "https://github.com/inexorgame/conan-grpc"
     homepage = "https://github.com/grpc/grpc"
-    author = "Bincrafters <bincrafters@gmail.com>"
     license = "Apache-2.0"
-    exports = ["LICENSE.md"]
-    exports_sources = ["CMakeLists.txt", "patches/grpc.patch", "patches/gettid.patch", "patches/18729.patch"]
-    generators = "cmake", "cmake_find_package"
-    short_paths = True  # Otherwise some folders go out of the 260 chars path length scope rapidly (on windows)
+    exports_sources = ["CMakeLists.txt"]
+    generators = "cmake", "cmake_find_package_multi"
+    short_paths = True
 
     settings = "os", "arch", "compiler", "build_type"
     options = {
@@ -35,33 +33,36 @@ class grpcConan(ConanFile):
 
     requires = (
         "zlib/1.2.11",
-        "openssl/1.0.2r",
+        "openssl/1.1.1d",
         "protobuf/3.9.1",
         "protoc/3.9.1",
-        "c-ares/1.15.0" 
+        "c-ares/1.15.0"
     )
 
     def configure(self):
         if self.settings.os == "Windows" and self.settings.compiler == "Visual Studio":
             del self.options.fPIC
-            compiler_version = int(str(self.settings.compiler.version))
+            compiler_version = tools.Version(self.settings.compiler.version)
             if compiler_version < 14:
                 raise ConanInvalidConfiguration("gRPC can only be built with Visual Studio 2015 or higher.")
 
     def source(self):
-        sha256 = "5c00f09f7b0517a9ccbd6f0de356b1be915bc7baad2d2189adf8ce803e00af12"
-        tools.get("{}/archive/v{}.zip".format(self.homepage, self.version), sha256=sha256)
+        tools.get(**self.conan_data["sources"][self.version])
         extracted_dir = self.name + "-" + self.version
         os.rename(extracted_dir, self._source_subfolder)
 
         cmake_path = os.path.join(self._source_subfolder, "CMakeLists.txt")
 
         # See #5
-        tools.replace_in_file(cmake_path, "_gRPC_PROTOBUF_LIBRARIES", "CONAN_LIBS_PROTOBUF")  
+        tools.replace_in_file(cmake_path, "_gRPC_PROTOBUF_LIBRARIES", "CONAN_LIBS_PROTOBUF")
 
-        for _, _, patches in os.walk('patches'):
-            for patch in patches:
-                tools.patch(base_path=self._source_subfolder, patch_file=os.path.join("patches", patch))
+        # See https://github.com/grpc/grpc/issues/21293 - OpenSSL 1.1.1+ doesn't work without
+        tools.replace_in_file(
+            cmake_path, "set(_gRPC_BASELIB_LIBRARIES wsock32 ws2_32)", "set(_gRPC_BASELIB_LIBRARIES wsock32 ws2_32 crypt32)")
+
+        # cmake_find_package_multi is producing a c-ares::c-ares target, grpc is looking for c-ares::cares
+        tools.replace_in_file(
+            os.path.join(self._source_subfolder, "cmake", "cares.cmake"), "c-ares::cares", "c-ares::c-ares")
 
         # Parts which should be options:
         # grpc_cronet
@@ -108,10 +109,6 @@ class grpcConan(ConanFile):
         cmake.definitions['gRPC_SSL_PROVIDER'] = "package"
         cmake.definitions['gRPC_PROTOBUF_PROVIDER'] = "package"
 
-        # Workaround for https://github.com/grpc/grpc/issues/11068
-        cmake.definitions['gRPC_GFLAGS_PROVIDER'] = "none"
-        cmake.definitions['gRPC_BENCHMARK_PROVIDER'] = "none"
-
         # Compilation on minGW GCC requires to set _WIN32_WINNTT to at least 0x600
         # https://github.com/grpc/grpc/blob/109c570727c3089fef655edcdd0dd02cc5958010/include/grpc/impl/codegen/port_platform.h#L44
         if self.settings.os == "Windows" and self.settings.compiler == "gcc":
@@ -121,7 +118,7 @@ class grpcConan(ConanFile):
         cmake.configure(build_folder=self._build_subfolder)
         return cmake
 
-    def build(self):        
+    def build(self):
         cmake = self._configure_cmake()
         cmake.build()
 
@@ -141,12 +138,18 @@ class grpcConan(ConanFile):
     def package_info(self):
         self.env_info.PATH.append(os.path.join(self.package_folder, "bin"))
         self.cpp_info.libs = [
-            "grpc++",
-            "grpc",
             "grpc++_unsecure",
+            "grpc++_reflection",
+            "grpc++_error_details",
+            "grpc++",
             "grpc_unsecure",
+            "grpc_plugin_support",
+            "grpc_cronet",
+            "grpcpp_channelz",
+            "grpc",
             "gpr",
-            "address_sorting"
+            "address_sorting",
+            "upb",
         ]
         if self.settings.compiler == "Visual Studio":
-            self.cpp_info.libs += ["wsock32", "ws2_32"]
+            self.cpp_info.system_libs += ["wsock32", "ws2_32"]

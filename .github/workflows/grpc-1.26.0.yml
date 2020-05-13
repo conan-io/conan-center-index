@@ -1,23 +1,22 @@
-name: grpc-1.20.0 CI
+name: grpc-1.26.0 CI
 
 on:
   pull_request:
     paths:
-      - 'recipes/grpc/1.20.0/**'
+      - 'recipes/grpc/1.26.0/**'
       - 'build.py'
-      - '.github/workflows/grpc-1.20.0.yml'
+      - '.github/workflows/grpc-1.26.0.yml'
   push:
     branches:
       - master
     paths:
-      - 'recipes/grpc/1.20.0/**'
+      - 'recipes/grpc/1.26.0/**'
       - 'build.py'
-      - '.github/workflows/grpc-1.20.0.yml'
+      - '.github/workflows/grpc-1.26.0.yml'
 
 env:
   CONAN_PASSWORD: ${{ secrets.BintrayApiKey }}
-  CONAN_REFERENCE: 'grpc/1.20.0'
-  IS_PURE_C: true
+  CONAN_REFERENCE: 'grpc/1.26.0'
   CONAN_OPTIONS: 'openssl:shared=True'
 
 jobs:
@@ -52,7 +51,7 @@ jobs:
           install: custom
           # TODO: replace when https://github.com/conan-io/conan-package-tools/issues/479 will be fixed upstream
           custom-package: git+https://github.com/trassir/conan-package-tools@fix-479-trassir
-          work-dir: sources/recipes/grpc/1.20.0
+          work-dir: sources/recipes/grpc/1.26.0
           build-script: ../../../build.py
           compiler: ${{ matrix.compiler }}
           compiler-versions: ${{ matrix.compiler_version }}
