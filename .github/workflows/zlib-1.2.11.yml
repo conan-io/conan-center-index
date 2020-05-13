@@ -30,7 +30,7 @@ jobs:
             compiler_version: '8'
             docker_image: 'trassiross/conan-gcc8'
             build_types: 'Release'
-            archs: 'x86,x86_64'
+            archs: 'x86_64'
             conan_reference: 'zlib/1.2.11'
           - build: 'macos'
             os: 'macos-10.15'

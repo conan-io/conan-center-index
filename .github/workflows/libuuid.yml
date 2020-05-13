@@ -31,7 +31,7 @@ jobs:
             compiler_version: '8'
             docker_image: 'conanio/gcc8'
             build_types: 'Release'
-            archs: 'x86,x86_64'
+            archs: 'x86_64'
     runs-on: ${{ matrix.os }}
     steps:
       - name: Configure git
