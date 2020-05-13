@@ -3,7 +3,6 @@ from conans.model.version import Version
 from conans.errors import ConanInvalidConfiguration
 import os
 
-
 class QuillConan(ConanFile):
     name = "quill"
     description = "C++14 Asynchronous Low Latency Logging Library"
