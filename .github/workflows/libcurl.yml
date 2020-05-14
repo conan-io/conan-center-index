@@ -73,7 +73,6 @@ jobs:
         env:
           CONAN_SHARED_OPTION_NAME: False
           CONAN_OPTIONS: ${{ matrix.conan_options }}
-          CONAN_SHARED_OPTION_NAME: False
           CONAN_REFERENCE: 'libcurl/${{ matrix.libcurl_versions }}'
           CONAN_VISUAL_RUNTIMES: ${{ matrix.vs_runtimes }}
           CONAN_ARCHS: ${{ matrix.archs }}
