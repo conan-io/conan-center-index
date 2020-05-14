@@ -69,6 +69,8 @@ jobs:
 
         libxrandr_version: ['1.5.2']
 
+        libxcomposite_version: ['0.4.5']
+
         include:
           - build: 'linux-gcc8'
             os: 'ubuntu-latest'
@@ -544,6 +546,26 @@ jobs:
           CONAN_OPTIONS: "libxrandr:shared=True"
           CONAN_SHARED_OPTION_NAME: False
           CONAN_REFERENCE: 'libxrandr/${{ matrix.libxrandr_version }}'
+          CONAN_VISUAL_RUNTIMES: ${{ matrix.vs_runtimes }}
+          CONAN_ARCHS: ${{ matrix.archs }}
+          CONAN_BUILD_TYPES: ${{ matrix.build_types }}
+          DEVELOPER_DIR: /Applications/Xcode_${{ matrix.xcode_version }}.app/Contents/Developer
+
+      - name: Building libxcomposite
+        uses: trassir/run-cpt@v0.2.2-trassir
+        with:
+          install: custom
+          # TODO: replace when https://github.com/conan-io/conan-package-tools/issues/479 will be fixed upstream
+          custom-package: git+https://github.com/trassir/conan-package-tools@fix-479-trassir
+          work-dir: sources/recipes/x11/all/libxcomposite
+          build-script: ../../../../build.py
+          compiler: ${{ matrix.compiler }}
+          compiler-versions: ${{ matrix.compiler_version }}
+          docker-images: ${{ matrix.docker_image }}
+        env:
+          CONAN_OPTIONS: "libxcomposite:shared=True"
+          CONAN_SHARED_OPTION_NAME: False
+          CONAN_REFERENCE: 'libxcomposite/${{ matrix.libxcomposite_version }}'
           CONAN_VISUAL_RUNTIMES: ${{ matrix.vs_runtimes }}
           CONAN_ARCHS: ${{ matrix.archs }}
           CONAN_BUILD_TYPES: ${{ matrix.build_types }}

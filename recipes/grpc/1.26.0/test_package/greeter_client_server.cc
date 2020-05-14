@@ -18,7 +18,9 @@
 
 #include <iostream>
 #include <memory>
+#include <sstream>
 #include <string>
+#include <thread>
 
 #include <grpcpp/grpcpp.h>
 
@@ -30,6 +32,9 @@
 
 using grpc::Channel;
 using grpc::ClientContext;
+using grpc::Server;
+using grpc::ServerBuilder;
+using grpc::ServerContext;
 using grpc::Status;
 using helloworld::HelloRequest;
 using helloworld::HelloReply;
@@ -71,16 +76,46 @@ class GreeterClient {
   std::unique_ptr<Greeter::Stub> stub_;
 };
 
+// Logic and data behind the server's behavior.
+class GreeterServiceImpl final : public Greeter::Service {
+  Status SayHello(ServerContext* context, const HelloRequest* request,
+                  HelloReply* reply) override {
+    std::string prefix("Hello ");
+    reply->set_message(prefix + request->name());
+    return Status::OK;
+  }
+};
+
 int main(int argc, char** argv) {
+  std::string server_address("0.0.0.0:0");
+  GreeterServiceImpl service;
+
+  ServerBuilder builder;
+  int selected_port = 0;
+  // Listen on the given address without any authentication mechanism.
+  builder.AddListeningPort(server_address, grpc::InsecureServerCredentials(),
+                           &selected_port);
+  // Register "service" as the instance through which we'll communicate with
+  // clients. In this case it corresponds to an *synchronous* service.
+  builder.RegisterService(&service);
+  // Finally assemble the server.
+  std::unique_ptr<Server> server(builder.BuildAndStart());
+  std::cout << "Server listening on 0.0.0.0:" << selected_port << std::endl;
+
   // Instantiate the client. It requires a channel, out of which the actual RPCs
   // are created. This channel models a connection to an endpoint (in this case,
-  // localhost at port 50051). We indicate that the channel isn't authenticated
-  // (use of InsecureChannelCredentials()).
+  // localhost at the selected port). We indicate that the channel isn't
+  // authenticated (use of InsecureChannelCredentials()).
+  std::ostringstream addr;
+  addr << "localhost:" << selected_port;
   GreeterClient greeter(grpc::CreateChannel(
-      "localhost:50051", grpc::InsecureChannelCredentials()));
+      addr.str(), grpc::InsecureChannelCredentials()));
   std::string user("world");
   std::string reply = greeter.SayHello(user);
   std::cout << "Greeter received: " << reply << std::endl;
+
+  server->Shutdown();
+  server->Wait();
 
   return 0;
 }
