@@ -33,7 +33,7 @@ jobs:
             docker_image: 'trassiross/conan-gcc8'
             build_types: 'Release'
             archs: 'x86_64'
-            conan_options: 'qt:openssl=False,
+            conan_options: 'qt:openssl=True,
                             qt:qtimageformats=True,
                             qt:qtmultimedia=True,
                             qt:qtscript=True,
@@ -46,7 +46,6 @@ jobs:
                             qt:with_harfbuzz=False,
                             qt:with_icu=False,
                             qt:with_mysql=False,
-                            qt:with_openal=True,
                             qt:with_pcre2=False,                            
                             qt:with_sdl2=False,
                             qt:with_zstd=False
@@ -67,7 +66,6 @@ jobs:
                             qt:with_harfbuzz=False,
                             qt:with_icu=False,
                             qt:with_mysql=False,
-                            qt:with_openal=True,
                             qt:with_pcre2=False,
                             qt:with_sdl2=False,
                             qt:with_zstd=False
