@@ -20,6 +20,7 @@ class JerryScriptStackConan(ConanFile):
         "fPIC": True
     }
     generators = "cmake"
+    short_paths = True
 
     _cmake = None
 
