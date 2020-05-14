@@ -14,6 +14,7 @@ class QtWebKitConan(ConanFile):
     generators = 'cmake'
     exports_sources = [
         "clang-11-jsc.patch",
+        "OptionsQt.patch"
     ]
     _source_subfolder = "source_subfolder"
     _build_subfolder = "build_subfolder"
@@ -76,10 +77,14 @@ class QtWebKitConan(ConanFile):
 
         # check recipe conistency
         tools.check_with_algorithm_sum("sha1", "clang-11-jsc.patch", "03358658f12a895d00f5a7544618dc7019fb2882")
+        tools.check_with_algorithm_sum("sha1", "OptionsQt.patch", "ccbf3abeae84d9540aa2425e1d40fe3f8d9210b1")
 
         # apply patches
         if tools.is_apple_os(self.settings.os):
-            tools.patch(base_path = self._source_subfolder, patch_file = "clang-11-jsc.patch", strip = 1)
+            tools.patch(base_path=self._source_subfolder, patch_file="clang-11-jsc.patch", strip=1)
+
+        if platform.system() == "Linux":
+            tools.patch(base_path=self._source_subfolder, patch_file="OptionsQt.patch", strip=1)
 
     def _configure_cmake(self):
         cmake = CMake(self)
