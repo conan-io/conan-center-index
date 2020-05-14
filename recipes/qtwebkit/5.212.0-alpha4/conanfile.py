@@ -26,42 +26,13 @@ class QtWebKitConan(ConanFile):
         }
 
     default_options = {
-        "icu:shared": True,
-
-        "libxml2:shared": True,
-        "libxslt:shared": True,
-
-        "libjpeg-turbo:shared": True,
-        "zlib:shared": True,
-        "libpng:shared": True,
-        "sqlite3:shared": True,
-        "libwebp:shared": True,
-
         "with_bmalloc": False,
-
         "with_geolocation": False,
         "with_gstreamer": False,
         "with_libhyphen": False,
         "with_webcrypto": False,
         "with_webkit2": False,
-        "with_woff2": False,
-
-        "qt:openssl": True,
-        "qt:qtimageformats": True,
-        "qt:qtmultimedia": True,
-        "qt:qtscript": True,
-        "qt:qtsvg": True,
-        "qt:qttools": True,
-        "qt:qtx11extras": platform.system() == "Linux",
-        "qt:shared": True,
-
-        "qt:with_glib": False,
-        "qt:with_harfbuzz": False,
-        "qt:with_icu": False,
-        "qt:with_mysql": False,
-        "qt:with_pcre2": False,
-        "qt:with_sdl2": False,
-        "qt:with_zstd": False
+        "with_woff2": False
     }
 
     requires = (
