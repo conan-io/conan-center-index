@@ -9,7 +9,7 @@ class JerryScriptStackConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     description = "Ultra-lightweight JavaScript engine for the Internet of Things"
     topics = ["javascript", "iot", "jerryscript", "javascript-engine"]
-    exports_sources = ['CMakeLists.txt']
+    exports_sources = "CMakeLists.txt", "patches/**"
     settings = "os", "compiler", "build_type", "arch"
     options = {
         "shared": [True, False],
@@ -44,6 +44,10 @@ class JerryScriptStackConan(ConanFile):
         extracted_dir = self.name + "-" + self.version
         os.rename(extracted_dir, self._source_subfolder)
 
+    def _patch_sources(self):
+        for patch in self.conan_data["patches"][self.version]:
+            tools.patch(**patch)
+
     def _configure_cmake(self):
         if self._cmake:
             return self._cmake
@@ -52,6 +56,7 @@ class JerryScriptStackConan(ConanFile):
         return self._cmake
 
     def build(self):
+        self._patch_sources()
         cmake = self._configure_cmake()
         cmake.build()
 
