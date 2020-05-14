@@ -147,5 +147,7 @@ conan_basic_setup()""")
         ]
         if self.settings.os == "Linux":
             self.cpp_info.system_libs.append("pthread")
+        if self.settings.os == "Macos":
+            self.cpp_info.frameworks.append("CoreFoundation")
         self.cpp_info.names["cmake_find_package"] = "absl"
         self.cpp_info.names["cmake_find_package_multi"] = "absl"
