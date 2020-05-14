@@ -56,20 +56,10 @@ class RestinioConan(ConanFile):
         self._cmake = CMake(self)
         self._cmake.definitions["RESTINIO_INSTALL"] = True
         self._cmake.definitions["RESTINIO_FIND_DEPS"] = False
-        self._cmake.definitions["RESTINIO_FMT_HEADER_ONLY"] = self.options["fmt"].header_only
         self._cmake.definitions["RESTINIO_USE_EXTERNAL_EXPECTED_LITE"] = True
         self._cmake.definitions["RESTINIO_USE_EXTERNAL_OPTIONAL_LITE"] = True
         self._cmake.definitions["RESTINIO_USE_EXTERNAL_STRING_VIEW_LITE"] = True
         self._cmake.definitions["RESTINIO_USE_EXTERNAL_VARIANT_LITE"] = True
-
-        boost_libs = "none"
-        if self.options.use_boost:
-            if self.options["boost"].shared:
-                boost_libs = "shared"
-            else:
-                boost_libs = "static"
-        self._cmake.definitions["RESTINIO_USE_BOOST_ASIO"] = boost_libs
-
         self._cmake.configure(build_folder=self._build_subfolder)
         return self._cmake
 
