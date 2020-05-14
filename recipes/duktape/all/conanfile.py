@@ -12,7 +12,7 @@ class DuktapeConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://duktape.org"
     exports_sources = ["CMakeLists.txt"]
-    generators = "cmake", "cmake_find_package"
+    generators = "cmake"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
@@ -42,14 +42,8 @@ class DuktapeConan(ConanFile):
         if self._cmake:
             return self._cmake
         self._cmake = CMake(self)
-        self._cmake.definitions["LEVELDB_BUILD_TESTS"] = False
-        self._cmake.definitions["LEVELDB_BUILD_BENCHMARKS"] = False
         self._cmake.configure()
         return self._cmake
-
-    def package_info(self):
-        self.cpp_info.includedirs = ['include']
-        self.cpp_info.srcdirs = ['src']
 
     def build(self):
         cmake = self._configure_cmake()
@@ -59,8 +53,6 @@ class DuktapeConan(ConanFile):
         self.copy("LICENSE", dst="licenses", src=self._source_subfolder)
         cmake = self._configure_cmake()
         cmake.install()
-        tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
-        tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
 
     def package_info(self):
         self.cpp_info.libs = tools.collect_libs(self)
