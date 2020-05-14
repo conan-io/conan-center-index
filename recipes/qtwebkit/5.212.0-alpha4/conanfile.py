@@ -77,7 +77,7 @@ class QtWebKitConan(ConanFile):
 
         # check recipe conistency
         tools.check_with_algorithm_sum("sha1", "clang-11-jsc.patch", "03358658f12a895d00f5a7544618dc7019fb2882")
-        tools.check_with_algorithm_sum("sha1", "OptionsQt.patch", "ccbf3abeae84d9540aa2425e1d40fe3f8d9210b1")
+        tools.check_with_algorithm_sum("sha1", "OptionsQt.patch", "895a71929cdeb18a1d67152fbb7f4c722c681397")
 
         # apply patches
         if tools.is_apple_os(self.settings.os):
