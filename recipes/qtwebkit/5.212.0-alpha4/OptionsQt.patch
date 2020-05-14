@@ -1,6 +1,6 @@
 --- a/Source/cmake/OptionsQt.cmake
 +++ b/Source/cmake/OptionsQt.cmake
-@@ -777,6 +777,7 @@
+@@ -776,6 +776,7 @@
      elseif (NOT X11_Xrender_FOUND)
          message(FATAL_ERROR "libXrender is required for ENABLE_X11_TARGET")
      endif ()
