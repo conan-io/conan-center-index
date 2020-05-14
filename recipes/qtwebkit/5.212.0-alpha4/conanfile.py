@@ -32,10 +32,10 @@ class QtWebKitConan(ConanFile):
         "with_libhyphen": False,
         "with_webcrypto": False,
         "with_webkit2": False,
-        "with_woff2": False
+        "with_woff2": False        
     }
 
-    requires = (
+    requires = [
         "qt/5.14.1",
         "libjpeg-turbo/2.0.4",
         "libpng/1.6.37",
@@ -45,7 +45,10 @@ class QtWebKitConan(ConanFile):
         "libxml2/2.9.9",
         "libxslt/1.1.33",
         "zlib/1.2.11"
-    )
+    ]
+
+    if platform.system() == "Linux":
+        requires.append("libxcomposite/0.4.5")
 
     def build_requirements(self):
         pass
