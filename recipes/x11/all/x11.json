@@ -194,6 +194,13 @@
         "sha256": "3f10813ab355e7a09f17e147d61b0ce090d898a5ea5b5519acd0ef68675dcf8e",
         "description": "Xlib Resize, Rotate and Reflection (RandR) extension library",
         "requires": ["libXrender", "libXext"]
+    },
+    {
+        "name": "libXcomposite",
+        "version": "0.4.5",
+        "sha256": "581c7fc0f41a99af38b1c36b9be64bc13ef3f60091cd3f01105bbc7c01617d6c",
+        "description": "Xlib-based client library for the Composite extension to the X11 protocol",
+        "requires": ["libXfixes"]
     }
 ]
 
