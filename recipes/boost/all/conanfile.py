@@ -385,7 +385,7 @@ class BoostConan(ConanFile):
             with tools.chdir(folder):
                 command = "%s -j%s --abbreviate-paths toolset=%s" % (self._b2_exe, tools.cpu_count(), self._toolset)
                 if self.options.debug_level:
-                    command.append(" -d%d" % self.options.debug_level)
+                    command += " -d%d" % self.options.debug_level
                 self.output.warn(command)
                 self.run(command)
 
