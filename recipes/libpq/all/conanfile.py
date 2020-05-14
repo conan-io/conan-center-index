@@ -122,7 +122,7 @@ class LibpqConan(ConanFile):
                 autotools.make(target="generated-headers")
             with tools.chdir(os.path.join(self._source_subfolder, "src", "common")):
                 autotools.make()
-            if tools.Version(self.version) >= '12':
+            if tools.Version(self.version) >= "12":
                 with tools.chdir(os.path.join(self._source_subfolder, "src", "port")):
                     autotools.make()
             with tools.chdir(os.path.join(self._source_subfolder, "src", "include")):
@@ -165,7 +165,7 @@ class LibpqConan(ConanFile):
                 autotools.install()
             with tools.chdir(os.path.join(self._source_subfolder, "src", "interfaces", "libpq")):
                 autotools.install()
-            if tools.Version(self.version) >= '12':
+            if tools.Version(self.version) >= "12":
                 with tools.chdir(os.path.join(self._source_subfolder, "src", "port")):
                     autotools.install()
 
@@ -220,4 +220,3 @@ class LibpqConan(ConanFile):
             self.cpp_info.components["pq"].system_libs = ["pthread"]
         elif self.settings.os == "Windows":
             self.cpp_info.components["pq"].system_libs = ["ws2_32", "secur32", "advapi32", "shell32", "crypt32", "wldap32"]
-
