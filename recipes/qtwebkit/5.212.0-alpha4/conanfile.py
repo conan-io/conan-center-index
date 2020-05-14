@@ -31,11 +31,11 @@ class QtWebKitConan(ConanFile):
         "libxml2:shared": True,
         "libxslt:shared": True,
 
-        "libjpeg-turbo:shared": False,
-        "zlib:shared": False,
-        "libpng:shared": False,
-        "sqlite3:shared": False,
-        "libwebp:shared": False,
+        "libjpeg-turbo:shared": True,
+        "zlib:shared": True,
+        "libpng:shared": True,
+        "sqlite3:shared": True,
+        "libwebp:shared": True,
 
         "with_bmalloc": False,
 
@@ -46,19 +46,20 @@ class QtWebKitConan(ConanFile):
         "with_webkit2": False,
         "with_woff2": False,
 
-        "qt:qtsvg": True,
-        "qt:qtx11extras": platform.system() == "Linux",
-        "qt:qtimageformats": True,
-        "qt:qtscript": True,
         "qt:openssl": True,
+        "qt:qtimageformats": True,
+        "qt:qtmultimedia": True,
+        "qt:qtscript": True,
+        "qt:qtsvg": True,
         "qt:qttools": True,
-        "qt:qtmultimedia" : True,
+        "qt:qtx11extras": platform.system() == "Linux",
+        "qt:shared": True,
 
         "qt:with_glib": False,
         "qt:with_harfbuzz": False,
         "qt:with_icu": False,
-        "qt:with_pcre2": False,
         "qt:with_mysql": False,
+        "qt:with_pcre2": False,
         "qt:with_sdl2": False,
         "qt:with_zstd": False
     }
@@ -139,18 +140,13 @@ class QtWebKitConan(ConanFile):
         pass
 
     def package_info(self):
-        if tools.is_apple_os(self.settings.os):
-            libs = [
-                "QtWebKit",
-                "QtWebKitWidgets"
-            ]
+        libs = ("QtWebKit", "QtWebKitWidgets")
+
+        if tools.is_apple_os(self.settings.os):           
             self.cpp_info.frameworkdirs = ['lib']
             self.cpp_info.frameworks = [lib for lib in libs]
         else:
-            libs = [
-                "Qt5WebKit",
-                "Qt5WebKitWidgets"
-            ]
             self.cpp_info.libdirs.append('lib')
             self.cpp_info.libs = [lib for lib in libs]
+
         self.env_info.CMAKE_PREFIX_PATH.append(self.package_folder)
