@@ -26,7 +26,7 @@ class EtcdGrpcConan(ConanFile):
 
     requires = (
         "c-ares/1.15.0",
-        "grpc/1.20.0",
+        "grpc/1.26.0",
         "protobuf/3.9.1",
         "protoc/3.9.1"	
     )
