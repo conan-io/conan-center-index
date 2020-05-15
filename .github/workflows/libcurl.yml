@@ -22,23 +22,17 @@ jobs:
   libcurl:
     strategy:
       matrix:
-        build: ['linux-gcc7', 'windows-2019-release', 'macos']
+        build: ['linux-gcc8', 'macos']
         libcurl_versions: ['7.64.1']
         include:
-          - build: 'linux-gcc7'
+          - build: 'linux-gcc8'
             os: 'ubuntu-latest'
             compiler: 'gcc'
-            compiler_version: '7'
-            docker_image: 'conanio/gcc7'
+            compiler_version: '8'
+            docker_image: 'trassiross/conan-gcc8'
             build_types: 'Release'
             archs: 'x86_64'
-          - build: 'windows-2019-release'
-            os: 'windows-2019'
-            build_types: 'Release'
-            compiler: 'vs'
-            compiler_version: '16'
-            vs_runtimes: 'MD,MT'
-            archs: 'x86_64'
+            conan_options: 'libcurl:shared=True'
           - build: 'macos'
             os: 'macos-10.15'
             build_types: 'Release'
@@ -46,7 +40,9 @@ jobs:
             compiler: 'apple_clang'
             compiler_version: '11.0'
             xcode_version: '11.3.1'
-            options: 'libcurl:darwin_ssl=False'
+            conan_options: 'libcurl:shared=True,
+                            libcurl:darwin_ssl=False
+                           '
     runs-on: ${{ matrix.os }}
     steps:
       - name: Install automake
@@ -75,9 +71,8 @@ jobs:
           compiler-versions: ${{ matrix.compiler_version }}
           docker-images: ${{ matrix.docker_image }}
         env:
-          CONAN_OPTIONS: "libcurl:shared=True"
           CONAN_SHARED_OPTION_NAME: False
-          CONAN_OPTIONS: ${{ matrix.options }}
+          CONAN_OPTIONS: ${{ matrix.conan_options }}
           CONAN_REFERENCE: 'libcurl/${{ matrix.libcurl_versions }}'
           CONAN_VISUAL_RUNTIMES: ${{ matrix.vs_runtimes }}
           CONAN_ARCHS: ${{ matrix.archs }}
