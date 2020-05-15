@@ -14,6 +14,7 @@ class QtWebKitConan(ConanFile):
     generators = 'cmake'
     exports_sources = [
         "clang-11-jsc.patch",
+        "OptionsQt.patch"
     ]
     _source_subfolder = "source_subfolder"
     _build_subfolder = "build_subfolder"
@@ -29,44 +30,16 @@ class QtWebKitConan(ConanFile):
         }
 
     default_options = {
-        "icu:shared": True,
-
-        "libxml2:shared": True,
-        "libxslt:shared": True,
-
-        "libjpeg-turbo:shared": False,
-        "zlib:shared": False,
-        "libpng:shared": False,
-        "sqlite3:shared": False,
-        "libwebp:shared": False,
-
         "with_bmalloc": False,
-
         "with_geolocation": False,
         "with_gstreamer": False,
         "with_libhyphen": False,
         "with_webcrypto": False,
         "with_webkit2": False,
-        "with_woff2": False,
-
-        "qt:qtsvg": True,
-        "qt:qtx11extras": platform.system() == "Linux",
-        "qt:qtimageformats": True,
-        "qt:qtscript": True,
-        "qt:openssl": True,
-        "qt:qttools": True,
-        "qt:qtmultimedia" : True,
-
-        "qt:with_glib": False,
-        "qt:with_harfbuzz": False,
-        "qt:with_icu": False,
-        "qt:with_pcre2": False,
-        "qt:with_mysql": False,
-        "qt:with_sdl2": False,
-        "qt:with_zstd": False
+        "with_woff2": False        
     }
 
-    requires = (
+    requires = [
         "qt/5.14.1",
         "libjpeg-turbo/2.0.4",
         "libpng/1.6.37",
@@ -76,7 +49,10 @@ class QtWebKitConan(ConanFile):
         "libxml2/2.9.9",
         "libxslt/1.1.33",
         "zlib/1.2.11"
-    )
+    ]
+
+    if platform.system() == "Linux":
+        requires.append("libxcomposite/0.4.5")
 
     def build_requirements(self):
         pass
@@ -101,10 +77,14 @@ class QtWebKitConan(ConanFile):
 
         # check recipe conistency
         tools.check_with_algorithm_sum("sha1", "clang-11-jsc.patch", "03358658f12a895d00f5a7544618dc7019fb2882")
+        tools.check_with_algorithm_sum("sha1", "OptionsQt.patch", "1ba5e8c5e5e22b5a0bb6e04632fee76a70d8d8ec")
 
         # apply patches
         if tools.is_apple_os(self.settings.os):
-            tools.patch(base_path = self._source_subfolder, patch_file = "clang-11-jsc.patch", strip = 1)
+            tools.patch(base_path=self._source_subfolder, patch_file="clang-11-jsc.patch", strip=1)
+
+        if platform.system() == "Linux":
+            tools.patch(base_path=self._source_subfolder, patch_file="OptionsQt.patch", strip=1)
 
     def _configure_cmake(self):
         cmake = CMake(self)
@@ -149,18 +129,13 @@ class QtWebKitConan(ConanFile):
         pass
 
     def package_info(self):
-        if tools.is_apple_os(self.settings.os):
-            libs = [
-                "QtWebKit",
-                "QtWebKitWidgets"
-            ]
+        libs = ["QtWebKit", "QtWebKitWidgets"]
+
+        if tools.is_apple_os(self.settings.os):           
             self.cpp_info.frameworkdirs = ['lib']
-            self.cpp_info.frameworks = [lib for lib in libs]
+            self.cpp_info.frameworks = libs[:]
         else:
-            libs = [
-                "Qt5WebKit",
-                "Qt5WebKitWidgets"
-            ]
             self.cpp_info.libdirs.append('lib')
-            self.cpp_info.libs = [lib for lib in libs]
+            self.cpp_info.libs = libs[:]
+
         self.env_info.CMAKE_PREFIX_PATH.append(self.package_folder)

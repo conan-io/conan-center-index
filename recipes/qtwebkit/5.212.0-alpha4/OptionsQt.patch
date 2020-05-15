@@ -1,0 +1,11 @@
+Standard CMake X11 finder doesn't update INCLUDE_DIRECTORIES variable, so we have to do it by yourselves
+--- a/Source/cmake/OptionsQt.cmake
++++ b/Source/cmake/OptionsQt.cmake
+@@ -776,6 +776,7 @@
+     elseif (NOT X11_Xrender_FOUND)
+         message(FATAL_ERROR "libXrender is required for ENABLE_X11_TARGET")
+     endif ()
++    include_directories(${X11_INCLUDE_DIR})
+ endif ()
+ 
+ if (NOT ENABLE_VIDEO)
