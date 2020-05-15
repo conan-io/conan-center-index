@@ -45,7 +45,7 @@ jobs:
                              qt:with_mysql=False,
                              qt:with_pcre2=False,
                              qt:with_sdl2=False,
-                             qt:with_zstd=False,
+                             qt:with_zstd=False
                              '
     strategy:
       matrix:
@@ -59,7 +59,8 @@ jobs:
             docker_image: 'trassiross/conan-gcc8'
             build_types: 'Release'
             archs: 'x86_64'
-            conan_options: 'qt:qtx11extras=True,
+            conan_options: ',
+                            qt:qtx11extras=True,
                             libxcomposite:shared=True
                            '        
           - build: 'macos'
