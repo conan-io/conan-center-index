@@ -64,6 +64,7 @@ jobs:
             os: 'macos-10.15'
             build_types: 'Release'
             archs: 'x86_64'
+            conan_options: ''
             compiler: 'apple_clang'
             compiler_version: '11.0'
             xcode_version: '11.3.1'
