@@ -1,0 +1,10 @@
+sources:
+   "4.8":
+      url: "https://www.antlr.org/download/antlr4-cpp-runtime-4.8-source.zip"
+      sha256: "58c9c8f83ed2b2224a047a2ca8af8c7ca2f45bc13ff30bd8777ce65ba81d6d11"
+patches:
+   "4.8":
+    - patch_file: "patches/conanize.patch"
+      base_path: "source_subfolder"
+    - patch_file: "patches/conanize_runtime.patch"
+      base_path: "source_subfolder"
