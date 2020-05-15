@@ -22,7 +22,7 @@ class TestPackageConan(ConanFile):
         if self.deps_cpp_info["scons"].version not in text:
             raise ConanException("scons --version does not return correct version")
 
-        self.run("scons -U \"{}\"".format(self.source_folder))
+        self.run("scons -j {} -U \"{}\" test_package".format(tools.cpu_count(), os.path.join(self.source_folder, "SConstruct")))
 
     def test(self):
         if not tools.cross_building(self.settings):
