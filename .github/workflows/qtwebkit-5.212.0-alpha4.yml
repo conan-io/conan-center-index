@@ -59,7 +59,9 @@ jobs:
             docker_image: 'trassiross/conan-gcc8'
             build_types: 'Release'
             archs: 'x86_64'
-            conan_options: 'qt:qtx11extras=True'        
+            conan_options: 'qt:qtx11extras=True,
+                            libxcomposite:shared=True
+                           '        
           - build: 'macos'
             os: 'macos-10.15'
             build_types: 'Release'
