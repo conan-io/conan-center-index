@@ -414,11 +414,11 @@ class OpenSSLConan(ConanFile):
         if self._full_version >= "1.1.0":
             args.append("--debug" if self.settings.build_type == "Debug" else "--release")
 
-        if str(self.settings.os) == "tvOS":
+        if self.settings.os == "tvOS":
             args.append(" -DNO_FORK") # fork is not available on tvOS
-        if str(self.settings.os) == "Android":
+        if self.settings.os == "Android":
             args.append(" -D__ANDROID_API__=%s" % str(self.settings.os.api_level))  # see NOTES.ANDROID
-        if str(self.settings.os) == "Emscripten":
+        if self.settings.os == "Emscripten":
             args.append("-D__STDC_NO_ATOMICS__=1")
         if self.settings.os == "Windows":
             if self.options.capieng_dialog:
