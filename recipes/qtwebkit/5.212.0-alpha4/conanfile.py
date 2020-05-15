@@ -129,13 +129,13 @@ class QtWebKitConan(ConanFile):
         pass
 
     def package_info(self):
-        libs = ("QtWebKit", "QtWebKitWidgets")
+        libs = ["QtWebKit", "QtWebKitWidgets"]
 
         if tools.is_apple_os(self.settings.os):           
             self.cpp_info.frameworkdirs = ['lib']
-            self.cpp_info.frameworks = [lib for lib in libs]
+            self.cpp_info.frameworks = libs[:]
         else:
             self.cpp_info.libdirs.append('lib')
-            self.cpp_info.libs = [lib for lib in libs]
+            self.cpp_info.libs = libs[:]
 
         self.env_info.CMAKE_PREFIX_PATH.append(self.package_folder)

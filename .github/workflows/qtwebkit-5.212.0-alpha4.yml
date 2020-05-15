@@ -17,10 +17,36 @@ on:
 env:
   CONAN_PASSWORD: ${{ secrets.BintrayApiKey }}
   CONAN_DOCKER_ENTRY_SCRIPT: 'sudo apt-add-repository -y ppa:brightbox/ruby-ng && sudo apt-get update && sudo apt-get install -y bison gperf ruby2.3'
-  IS_PURE_C: true
+  IS_PURE_C: true # used for decrease building time, we don't want to build qtwebkit with stdc++11
 
 jobs:
   qtwebkit:
+    env: 
+      COMMON_CONAN_OPTIONS: 'icu:shared=True,
+                             libjpeg-turbo:shared=True,
+                             libpng:shared=True,
+                             libwebp:shared=True,
+                             libxml2:shared=True,
+                             libxslt:shared=True,
+                             sqlite3:shared=True,
+                             zlib:shared=True,
+
+                             qt:openssl=True,
+                             qt:qtimageformats=True,
+                             qt:qtmultimedia=True,
+                             qt:qtscript=True,
+                             qt:qtsvg=True,
+                             qt:qttools=True,
+                             qt:shared=True,
+
+                             qt:with_glib=False,
+                             qt:with_harfbuzz=False,
+                             qt:with_icu=False,
+                             qt:with_mysql=False,
+                             qt:with_pcre2=False,
+                             qt:with_sdl2=False,
+                             qt:with_zstd=False
+                             '
     strategy:
       matrix:
         build: ['linux-gcc8', 'macos']
@@ -33,62 +59,11 @@ jobs:
             docker_image: 'trassiross/conan-gcc8'
             build_types: 'Release'
             archs: 'x86_64'
-            conan_options: 'icu:shared=True,
-                            libjpeg-turbo:shared=True,
-                            libpng:shared=True,
-                            libwebp:shared=True,
-                            libxcomposite:shared=True,
-                            libxml2:shared=True,
-                            libxslt:shared=True,
-                            sqlite3:shared=True,
-                            zlib:shared=True,
-                            
-                            qt:openssl=True,
-                            qt:qtimageformats=True,
-                            qt:qtmultimedia=True,
-                            qt:qtscript=True,
-                            qt:qtsvg=True,
-                            qt:qttools=True,
-                            qt:qtx11extras=True,
-                            qt:shared=True,
-
-                            qt:with_glib=False,
-                            qt:with_harfbuzz=False,
-                            qt:with_icu=False,
-                            qt:with_mysql=False,
-                            qt:with_pcre2=False,
-                            qt:with_sdl2=False,
-                            qt:with_zstd=False
-                            '        
+            conan_options: 'qt:qtx11extras=True'        
           - build: 'macos'
             os: 'macos-10.15'
             build_types: 'Release'
             archs: 'x86_64'
-            conan_options: 'icu:shared=True,
-                            libjpeg-turbo:shared=True,
-                            libpng:shared=True,
-                            libwebp:shared=True,
-                            libxml2:shared=True,
-                            libxslt:shared=True,
-                            sqlite3:shared=True,
-                            zlib:shared=True,
-                            
-                            qt:openssl=True,
-                            qt:qtimageformats=True,
-                            qt:qtmultimedia=True,
-                            qt:qtscript=True,
-                            qt:qtsvg=True,
-                            qt:qttools=True,
-                            qt:shared=True,
-
-                            qt:with_glib=False,
-                            qt:with_harfbuzz=False,
-                            qt:with_icu=False,
-                            qt:with_mysql=False,
-                            qt:with_pcre2=False,
-                            qt:with_sdl2=False,
-                            qt:with_zstd=False
-                            ' 
             compiler: 'apple_clang'
             compiler_version: '11.0'
             xcode_version: '11.3.1'
@@ -117,7 +92,7 @@ jobs:
           compiler-versions: ${{ matrix.compiler_version }}
           docker-images: ${{ matrix.docker_image }}
         env:
-          CONAN_OPTIONS: ${{ matrix.conan_options }}
+          CONAN_OPTIONS: ${{ env.COMMON_CONAN_OPTIONS }} ${{ matrix.conan_options }}
           CONAN_REFERENCE: 'qtwebkit/${{ matrix.qtwebkit_versions }}'
           CONAN_VISUAL_RUNTIMES: ${{ matrix.vs_runtimes }}
           CONAN_ARCHS: ${{ matrix.archs }}
