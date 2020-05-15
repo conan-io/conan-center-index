@@ -18,14 +18,10 @@ class WtConan(ConanFile):
         "shared": [True, False],
         "fPIC": [True, False],
         "with_ssl": [True, False],
-        "with_haru": [True, False],
-        "with_pango": [True, False],
         "with_sqlite": [True, False],
         "with_postgres": [True, False],
-        "with_firebird": [True, False],
         "with_mysql": [True, False],
         "with_mssql": [True, False],
-        "with_qt4": [True, False],
         "with_test": [True, False],
         "with_dbo": [True, False],
         "with_opengl": [True, False],
@@ -41,14 +37,10 @@ class WtConan(ConanFile):
         'shared': False,
         'fPIC': True,
         'with_ssl': True,
-        'with_haru': False,
-        'with_pango': False,
         'with_sqlite': True,
         'with_postgres': True,
-        'with_firebird': False,
         'with_mysql': True,
         'with_mssql': False,
-        'with_qt4': False,
         'with_test': True,
         'with_dbo': True,
         'with_opengl': False,
@@ -103,14 +95,15 @@ class WtConan(ConanFile):
         self._cmake.definitions['BUILD_EXAMPLES'] = False
         self._cmake.definitions['BUILD_TESTS'] = False
         self._cmake.definitions['ENABLE_SSL'] = self.options.with_ssl
-        self._cmake.definitions['ENABLE_HARU'] = self.options.with_haru
-        self._cmake.definitions['ENABLE_PANGO'] = self.options.with_pango
+        self._cmake.definitions['ENABLE_HARU'] = False
+        self._cmake.definitions['ENABLE_PANGO'] = False
         self._cmake.definitions['ENABLE_SQLITE'] = self.options.with_sqlite
         self._cmake.definitions['ENABLE_POSTGRES'] = self.options.with_postgres
-        self._cmake.definitions['ENABLE_FIREBIRD'] = self.options.with_firebird
+        self._cmake.definitions['ENABLE_FIREBIRD'] = False
         self._cmake.definitions['ENABLE_MYSQL'] = self.options.with_mysql
         self._cmake.definitions['ENABLE_MSSQLSERVER'] = self.options.with_mssql
-        self._cmake.definitions['ENABLE_QT4'] = self.options.with_qt4
+        self._cmake.definitions['ENABLE_QT4'] = False
+        self._cmake.definitions['ENABLE_QT5'] = False
         self._cmake.definitions['ENABLE_LIBWTTEST'] = self.options.with_test
         self._cmake.definitions['ENABLE_LIBWTDBO'] = self.options.with_dbo
         self._cmake.definitions['ENABLE_OPENGL'] = self.options.with_opengl
@@ -183,8 +176,6 @@ class WtConan(ConanFile):
             self.cpp_info.libs.append('wtdbomysql')
         if self.options.with_mssql:
             self.cpp_info.libs.append('wtdbomssqlserver')
-        if self.options.with_firebird:
-            self.cpp_info.libs.append('wtdbofirebird')
         if self.options.with_dbo:
             self.cpp_info.libs.append('wtdbo')
         if self.options.connector_http:
