@@ -5,10 +5,16 @@ sources:
   "1.5.0":
     sha256: b38e0bbef7faac2b82fed550a0c19b0d4e7f6737d5321d4fd8f216b80f8aee8a
     url: https://github.com/gabime/spdlog/archive/v1.5.0.tar.gz
+  "1.6.0":
+    sha256: 0421667c9f2fc78e6548d44f7bc5921be0f03e612df384294c16cedb93d967f8
+    url: https://github.com/gabime/spdlog/archive/v1.6.0.tar.gz
 patches:
   "1.4.2":
     patch_file: "patches/0001-header-only.patch"
     base_path: "source_subfolder"
   "1.5.0":
     patch_file: "patches/0002-header-only.patch"
+    base_path: "source_subfolder"
+  "1.6.0":
+    patch_file: "patches/0003-header-only.patch"
     base_path: "source_subfolder"
