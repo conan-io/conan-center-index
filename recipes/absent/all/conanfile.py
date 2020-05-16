@@ -6,7 +6,7 @@ import os.path
 
 class AbsentConan(ConanFile):
     name = "absent"
-    description = "A simple library to compose nullable types in a generic, type-safe, and declarative style for C++"
+    description = "A small library meant to simplify the composition of nullable types in a generic, type-safe, and declarative style for some C++ type-constructors"
     homepage = "https://github.com/rvarago/absent"
     url = "https://github.com/conan-io/conan-center-index"
     license = "MIT"
