@@ -19,5 +19,5 @@ class TestPackageConan(ConanFile):
                 bin_path = os.path.join("bin", "test_package_cpp")
                 self.run(bin_path, run_environment=True)
 
-            bin_path = os.path.join("bin", "test_package_c")
+            bin_path = os.path.join("bin", "test_package_stable_abi")
             self.run(bin_path, run_environment=True)
