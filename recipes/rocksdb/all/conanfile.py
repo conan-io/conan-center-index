@@ -1,8 +1,7 @@
 from conans import ConanFile, CMake, tools
-from conans.tools import Version
 from conans.errors import ConanInvalidConfiguration
 import os
-
+import glob
 
 class RocksDB(ConanFile):
     name = "rocksdb"
@@ -35,7 +34,7 @@ class RocksDB(ConanFile):
         "with_gflags": False,
         "with_tbb": False
     }
-    exports_sources = ["CMakeLists.txt", "patches/*"]
+    exports_sources = ["CMakeLists.txt"]
     generators = "cmake", "cmake_find_package"
 
     _cmake = None
@@ -52,15 +51,21 @@ class RocksDB(ConanFile):
         if self.settings.os == "Windows":
             del self.options.fPIC
 
+        # Force compilation with C++14
+        self.settings.compiler.cppstd = 14
+
     def configure(self):
         if self.settings.os == "Windows" and \
            self.settings.compiler == "Visual Studio" and \
-           Version(self.settings.compiler.version) < "15":
+           tools.Version(self.settings.compiler.version) < "15":
             raise ConanInvalidConfiguration("Rocksdb requires Visual Studio 15 or later.")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
-        extracted_dir = self.name + "-" + os.path.basename(self.conan_data["sources"][self.version]["url"]).split(".")[0]
+        extracted_dir = "{name}-{version}".format(
+          name = self.name,
+          version = self.version
+        )
         os.rename(extracted_dir, self._source_subfolder)
 
     def _configure_cmake(self):
@@ -83,6 +88,9 @@ class RocksDB(ConanFile):
         self._cmake.definitions["WITH_ZSTD"] = self.options.with_zstd
         self._cmake.definitions["WITH_TBB"] = self.options.with_tbb
         self._cmake.definitions["ROCKSDB_BUILD_SHARED"] = self.options.shared
+        self._cmake.definitions["ROCKSDB_LIBRARY_EXPORTS"] = self.settings.os == "Windows" and self.options.shared
+        self._cmake.definitions["ROCKSDB_DLL" ] = self.settings.os == "Windows" and self.options.shared
+
         # not available yet in CCI
         self._cmake.definitions["WITH_JEMALLOC"] = False
         self._cmake.definitions["WITH_NUMA"] = False
@@ -91,8 +99,6 @@ class RocksDB(ConanFile):
         return self._cmake
 
     def build(self):
-        for patch in self.conan_data["patches"][self.version]:
-            tools.patch(**patch)
         cmake = self._configure_cmake()
         cmake.build()
 
@@ -110,11 +116,26 @@ class RocksDB(ConanFile):
         if self.options.with_tbb:
             self.requires("tbb/2019_u9")
 
+    def _remove_static_libraries(self):
+        for static_lib_name in ["lib*.a", "{}.lib".format(self.name)]:
+            for file in glob.glob(os.path.join(self.package_folder, "lib", static_lib_name)):
+                os.remove(file)
+
+
+    def _remove_cpp_headers(self):
+        for file in glob.glob(os.path.join(self.package_folder, "include", "rocksdb", "*")):
+            if file != os.path.join(self.package_folder, "include", "rocksdb", "c.h"):
+                os.remove(file)
+
     def package(self):
         self.copy("COPYING", dst="licenses", src=self._source_subfolder)
         self.copy("LICENSE*", dst="licenses", src=self._source_subfolder)
         cmake = self._configure_cmake()
         cmake.install()
+        if self.options.shared:
+            self._remove_static_libraries()
+            self._remove_cpp_headers() # Force stable ABI for shared libraries
+
         tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
 
     def package_info(self):
@@ -124,7 +145,7 @@ class RocksDB(ConanFile):
         if self.settings.os == "Windows":
             self.cpp_info.system_libs = ["Shlwapi.lib", "Rpcrt4.lib"]
             if self.options.shared:
-                self.cpp_info.defines = ["ROCKSDB_DLL", "ROCKSDB_LIBRARY_EXPORTS"]
+                self.cpp_info.defines = ["ROCKSDB_DLL"]
         elif self.settings.os == "Linux":
             self.cpp_info.system_libs = ["pthread", "m"]
         if self.options.lite:
