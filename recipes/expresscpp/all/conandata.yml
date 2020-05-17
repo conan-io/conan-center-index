@@ -1,6 +1,6 @@
 sources:
-  "0.17.0":
-    sha256: 79f759a671a9d6dd595e8f75e89a44ad41d5ae09408e0ef4a29d18d88fb4b74c
-    url: https://gitlab.com/expresscpp/expresscpp/-/archive/v0.17.0/expresscpp-v0.17.0.tar.gz
+  "0.19.0":
+    sha256: 8c360269275cf6034b566ff14bbe1067869614610fd68381fba971eab00b10ae
+    url: https://gitlab.com/expresscpp/expresscpp/-/archive/v0.18.0/expresscpp-v0.18.0.tar.gz
 
 
