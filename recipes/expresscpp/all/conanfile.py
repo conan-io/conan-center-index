@@ -42,9 +42,9 @@ class ExpressCppConan(ConanFile):
                                                     self.settings.compiler.version))
 
     def requirements(self):
-        self.requires.add("boost/1.73.0")
-        self.requires.add("fmt/6.2.0")
-        self.requires.add("nlohmann_json/3.7.3")
+        self.requires("boost/1.73.0")
+        self.requires("fmt/6.2.0")
+        self.requires("nlohmann_json/3.7.3")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
