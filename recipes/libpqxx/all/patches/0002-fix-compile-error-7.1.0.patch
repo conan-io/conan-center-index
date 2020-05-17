@@ -1,0 +1,12 @@
+diff --git a/include/pqxx/internal/encoding_group.hxx b/include/pqxx/internal/encoding_group.hxx
+index 1cc81a02..aa2d214d 100644
+--- a/include/pqxx/internal/encoding_group.hxx
++++ b/include/pqxx/internal/encoding_group.hxx
+@@ -9,6 +9,7 @@
+ #ifndef PQXX_H_ENCODING_GROUP
+ #define PQXX_H_ENCODING_GROUP
+ 
++#include <cstddef>
+ 
+ namespace pqxx::internal
+ {
