@@ -11,8 +11,8 @@ class RestinioConan(ConanFile):
     topics = ("http-server", "websockets", "rest", "tls-support")
     exports_sources = ["CMakeLists.txt"]
     settings = "os", "compiler", "build_type", "arch"
-    options = {"use_boost": [True, False], "use_openssl": [True, False]}
-    default_options = {"use_boost": False, "use_openssl": False}
+    options = {"asio": ["boost", "standalone"], "with_openssl": [True, False], "with_zlib": [True, False]}
+    default_options = {"asio": "standalone", "with_openssl": False, "with_zlib": False}
     generators = "cmake"
 
     _cmake = None
@@ -36,13 +36,16 @@ class RestinioConan(ConanFile):
         self.requires("string-view-lite/1.3.0")
         self.requires("variant-lite/1.2.2")
 
-        if self.options.use_boost:
-            self.requires("boost/1.73.0")
-        else:
+        if self.options.asio == "standalone":
             self.requires("asio/1.14.1")
+        else:
+            self.requires("boost/1.73.0")
 
-        if self.options.use_openssl:
+        if self.options.with_openssl:
             self.requires("openssl/1.1.1g")
+
+        if self.options.with_zlib:
+            self.requires("zlib/1.12.1")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
@@ -75,5 +78,5 @@ class RestinioConan(ConanFile):
     def package_info(self):
         self.cpp_info.defines.extend(["RESTINIO_EXTERNAL_EXPECTED_LITE", "RESTINIO_EXTERNAL_OPTIONAL_LITE",
                                       "RESTINIO_EXTERNAL_STRING_VIEW_LITE", "RESTINIO_EXTERNAL_VARIANT_LITE"])
-        if self.options.use_boost:
+        if self.options.asio == "boost":
             self.cpp_info.defines.append("RESTINIO_USE_BOOST_ASIO")
