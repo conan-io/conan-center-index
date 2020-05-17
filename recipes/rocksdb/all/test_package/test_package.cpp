@@ -9,7 +9,7 @@ int main() {
   rocksdb::Status status = rocksdb::DB::Open(options, "testdb", &db);
   
   if (!status.ok()) {
-    std::cerr << "DB error: " << status.ToString();
+    std::cerr << "DB error: " << status.ToString() << std::endl;
   }
 
   return EXIT_SUCCESS;

@@ -1,8 +1,5 @@
 sources:
-  "20200417":
-    sha256: b3d3ee146e8453e74124243bb7b06d7da8db9f00458aeb6dcbccb37346ab147d
-    url: https://github.com/facebook/rocksdb/archive/9e6f3efcd2fd956d01d56f598838f0917e238a2d.zip
-patches:
-  "20200417":
-    - patch_file: "patches/6724.patch"
-      base_path: "source_subfolder"
+  "6.8.1":
+    url: https://github.com/facebook/rocksdb/archive/v6.8.1.tar.gz
+    sha256: ca192a06ed3bcb9f09060add7e9d0daee1ae7a8705a3d5ecbe41867c5e2796a2
+
