@@ -1,4 +1,6 @@
 ---
 versions:
+  "6.8.1":
+    folder: all
   "20200417":
     folder: all
