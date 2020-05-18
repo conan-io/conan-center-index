@@ -53,7 +53,7 @@ class BoostConan(ConanFile):
         "lzma": [True, False],
         "zstd": [True, False],
         "segmented_stacks": [True, False],
-        "debug_level": [i for i in range(1, 14)],
+        "debug_level": [i for i in range(0, 14)],
         "pch": [True, False],
         "extra_b2_flags": "ANY"  # custom b2 flags
     }
@@ -78,7 +78,7 @@ class BoostConan(ConanFile):
         'lzma': False,
         'zstd': False,
         'segmented_stacks': False,
-        "debug_level": 2,
+        "debug_level": 0,
         'pch': True,
         'extra_b2_flags': 'None',
     }
@@ -361,7 +361,9 @@ class BoostConan(ConanFile):
         folder = os.path.join(self.source_folder, self._folder_name, 'tools', 'bcp')
         with tools.vcvars(self.settings) if self._is_msvc else tools.no_op():
             with tools.chdir(folder):
-                command = "%s -j%s --abbreviate-paths -d2 toolset=%s" % (self._b2_exe, tools.cpu_count(), self._toolset)
+                command = "%s -j%s --abbreviate-paths toolset=%s" % (self._b2_exe, tools.cpu_count(), self._toolset)
+                if self.options.debug_level:
+                    command.append(" -d%d" % self.options.debug_level)
                 self.output.warn(command)
                 self.run(command)
 
@@ -632,8 +634,9 @@ class BoostConan(ConanFile):
         flags.extend(["install",
                       "--prefix=%s" % self.package_folder,
                       "-j%s" % tools.cpu_count(),
-                      "--abbreviate-paths",
-                      "-d%s" % str(self.options.debug_level)])
+                      "--abbreviate-paths"])
+        if self.options.debug_level:
+            flags.append("-d%d" % self.options.debug_level)
         return flags
 
     @property
