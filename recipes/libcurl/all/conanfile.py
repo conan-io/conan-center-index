@@ -113,7 +113,7 @@ class LibcurlConan(ConanFile):
 
     def build_requirements(self):
         if tools.os_info.is_windows:
-            self.build_requires("ninja/[>=1.9.0]")
+            self.build_requires("ninja/1.9.0")
            
 
     def requirements(self):
