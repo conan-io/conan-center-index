@@ -74,9 +74,9 @@ jobs:
           CONAN_OPTIONS: '
             opencv:jasper=False,
             opencv:openexr=False,
-            opencv:tiff=False
+            opencv:tiff=False,
+            opencv:shared=True
             '
-          CONAN_OPTIONS: "opencv:shared=True"
           CONAN_SHARED_OPTION_NAME: False
           CONAN_VISUAL_RUNTIMES: ${{ matrix.vs_runtimes }}
           CONAN_ARCHS: ${{ matrix.archs }}
