@@ -11,8 +11,8 @@ class RestinioConan(ConanFile):
     topics = ("http-server", "websockets", "rest", "tls-support")
     exports_sources = ["CMakeLists.txt"]
     settings = "os", "compiler", "build_type", "arch"
-    options = {"asio": ["boost", "standalone"], "with_openssl": [True, False], "with_zlib": [True, False]}
-    default_options = {"asio": "standalone", "with_openssl": False, "with_zlib": False}
+    options = {"asio": ["boost", "standalone"], "with_openssl": [True, False], "with_zlib": [True, False], "with_pcre": [1, 2, None]}
+    default_options = {"asio": "standalone", "with_openssl": False, "with_zlib": False, "with_pcre": None}
     generators = "cmake"
 
     _cmake = None
@@ -37,7 +37,7 @@ class RestinioConan(ConanFile):
         self.requires("variant-lite/1.2.2")
 
         if self.options.asio == "standalone":
-            self.requires("asio/1.14.1")
+            self.requires("asio/1.16.1")
         else:
             self.requires("boost/1.73.0")
 
@@ -46,6 +46,11 @@ class RestinioConan(ConanFile):
 
         if self.options.with_zlib:
             self.requires("zlib/1.12.1")
+
+        if self.options.with_pcre == 1:
+            self.requires("pcre/8.41")
+        elif self.options.with_pcre == 2:
+            self.requires("pcre2/10.33")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
