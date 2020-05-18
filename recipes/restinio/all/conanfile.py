@@ -10,7 +10,7 @@ class RestinioConan(ConanFile):
     description = "RESTinio is a header-only C++14 library that gives you an embedded HTTP/Websocket server."
     topics = ("http-server", "websockets", "rest", "tls-support")
     exports_sources = ["CMakeLists.txt"]
-    settings = ("compiler",)
+    settings = "os", "compiler", "build_type", "arch"
     options = {"asio": ["boost", "standalone"], "with_openssl": [True, False], "with_zlib": [True, False], "with_pcre": [1, 2, None]}
     default_options = {"asio": "standalone", "with_openssl": False, "with_zlib": False, "with_pcre": None}
     generators = "cmake"
