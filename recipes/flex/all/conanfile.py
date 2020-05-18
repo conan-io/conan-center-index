@@ -1,10 +1,10 @@
 from conans import ConanFile, AutoToolsBuildEnvironment, tools
+from conans.client.conan_api import Conan
 from conans.errors import ConanInvalidConfiguration
 import os
-import glob
 
 
-class ConanFileDefault(ConanFile):
+class FlexConan(ConanFile):
     name = "flex"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/westes/flex"
@@ -18,7 +18,11 @@ class ConanFileDefault(ConanFile):
 
     requires = ("m4/1.4.18",)
 
-    _source_subfolder = "source_subfolder"
+    _autotools = None
+
+    @property
+    def _source_subfolder(self):
+        return "source_subfolder"
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
@@ -30,47 +34,46 @@ class ConanFileDefault(ConanFile):
         del self.settings.compiler.cppstd
         if self.settings.os == "Windows":
             raise ConanInvalidConfiguration("Flex package is not compatible with Windows. Consider using winflexbison instead.")
+        if tools.cross_building(self.settings, skip_x64_x86=True):
+            raise ConanInvalidConfiguration("This recipe does not support cross building atm (missing conan support)")
 
-    def build(self):
-        env_build = AutoToolsBuildEnvironment(self)
+    def _configure_autotools(self):
+        if self._autotools:
+            return self._autotools
+        self._autotools = AutoToolsBuildEnvironment(self)
         configure_args = ["--disable-nls", "HELP2MAN=/bin/true", "M4=m4"]
         if self.options.shared:
             configure_args.extend(["--enable-shared", "--disable-static"])
         else:
             configure_args.extend(["--disable-shared", "--enable-static"])
 
-        with tools.chdir(self._source_subfolder):
-            if self.settings.os == "Linux":
-                # https://github.com/westes/flex/issues/247
-                configure_args.extend(["ac_cv_func_malloc_0_nonnull=yes", "ac_cv_func_realloc_0_nonnull=yes"])
-                # https://github.com/easybuilders/easybuild-easyconfigs/pull/5792
-                configure_args.append("ac_cv_func_reallocarray=no")
-            if tools.cross_building(self.settings, skip_x64_x86=True):
-                # stage1flex must be built on native arch: https://github.com/westes/flex/issues/78
-                self.run("./configure %s" % " ".join(configure_args))
-                env_build.make(args=["-C", "src", "stage1flex"])
-                self.run("mv src/stage1flex src/stage1flex.build")
-                env_build.make(args=["distclean"])
-                with tools.environment_append(env_build.vars):
-                    env_build.configure(args=configure_args)
-                    cpu_count_option = "-j%s" % tools.cpu_count()
-                    self.run("make -C src %s || true" % cpu_count_option)
-                    self.run("mv src/stage1flex.build src/stage1flex")
-                    self.run("touch src/stage1flex")
-                    env_build.make(args=["-C", "src"])
-            else:
-                with tools.environment_append(env_build.vars):
-                    env_build.configure(args=configure_args)
-                    env_build.make()
-            env_build.make(args=["install"])
+        if self.settings.os == "Linux":
+            # https://github.com/westes/flex/issues/247
+            configure_args.extend(["ac_cv_func_malloc_0_nonnull=yes", "ac_cv_func_realloc_0_nonnull=yes"])
+            # https://github.com/easybuilders/easybuild-easyconfigs/pull/5792
+            configure_args.append("ac_cv_func_reallocarray=no")
 
-    def package_info(self):
-        self.cpp_info.libs = tools.collect_libs(self)
-        self.env_info.PATH.append(os.path.join(self.package_folder, "bin"))
+        # stage1flex must be built on native arch: https://github.com/westes/flex/issues/78
+        # This requires flex to depend on itself.
+        # conan does not support this (currently), so cross build of flex is not possible atm
+
+        self._autotools.configure(args=configure_args)
+        return self._autotools
+
+
+    def build(self):
+        with tools.chdir(self._source_subfolder):
+            autotools = self._configure_autotools()
+            autotools.make()
 
     def package(self):
         self.copy(pattern="COPYING", dst="licenses", src=self._source_subfolder)
+        with tools.chdir(self._source_subfolder):
+            autotools = self._configure_autotools()
+            autotools.install()
         tools.rmdir(os.path.join(self.package_folder, "share"))
-        with tools.chdir(os.path.join(self.package_folder, "lib")):
-            for filename in glob.glob("*.la"):
-                os.unlink(filename)
+        os.unlink(os.path.join(self.package_folder, "lib", "libfl.la"))
+
+    def package_info(self):
+        self.cpp_info.libs = ["fl"]
+        self.env_info.PATH.append(os.path.join(self.package_folder, "bin"))

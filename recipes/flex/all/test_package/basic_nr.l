@@ -31,7 +31,7 @@
        integer = 43
 */
 %{
-/* #include "config.h" */
+  #include <stdio.h>
 %}
 
 %option prefix="test"
@@ -46,19 +46,19 @@ WS    [[:blank:]]
 ^{IDENT}+{WS}*={WS}*[[:digit:]]+{WS}*\r?\n    { return 102;}
 ^{WS}*#.*\r?\n     { }
 ^{WS}*\r?\n        { }
-.|\n  { fprintf(stderr,"Invalid line.\n"); exit(-1);}
+.|\n  { fprintf(stderr, "Invalid line.\n"); exit(-1);}
 
 %%
 
-int main(void);
-
-int main ()
-{
-    yyin = stdin;
-    yyout = stdout;
-    while( yylex() )
-    {
+int main(int argc, const char *argv[]) {
+    if (argc < 2) {
+        fprintf(stderr, "Need an argument\n");
+        return 1;
+    }
+    yyin = fopen(argv[1], "r");
+    while (yylex()) {
     }
     printf("TEST RETURNING OK.\n");
+    fclose(yyin);
     return 0;
 }
