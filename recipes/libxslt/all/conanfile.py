@@ -158,10 +158,12 @@ class LibxsltConan(ConanFile):
                 os.unlink(la)
 
     def package_info(self):
+        self.cpp_info.libs = ['exslt', 'xslt']
         if self._is_msvc:
-            self.cpp_info.libs = ['libxslt' if self.options.shared else 'libxslt_a']
-        else:
-            self.cpp_info.libs = ['xslt']
+            if self.options.shared:
+                self.cpp_info.libs = ['lib%s' % l for l in self.cpp_info.libs]
+            else:
+                self.cpp_info.libs = ['lib%s_a' % l for l in self.cpp_info.libs]
         self.cpp_info.includedirs.append(os.path.join("include", "libxslt"))
         if self.settings.os == "Linux" or self.settings.os == "Macos":
             self.cpp_info.system_libs.append('m')
