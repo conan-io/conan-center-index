@@ -56,7 +56,6 @@ class JerryScriptStackConan(ConanFile):
         if self._cmake:
             return self._cmake
         self._cmake = CMake(self)
-        self._cmake.definitions["BUILD_SHARED_LIBS"] = self.options.shared
         self._cmake.definitions["JERRY_CMDLINE"] = False
         self._cmake.definitions["ENABLE_LTO"] = False
         self._cmake.configure(build_folder=self._build_subfolder)
