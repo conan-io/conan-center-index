@@ -4,13 +4,13 @@ import os
 
 class RestinioConan(ConanFile):
     name = "restinio"
-    license = "BSD-3-CLAUSE"
+    license = "BSD-3-Clause"
     homepage = "https://github.com/Stiffstream/restinio"
     url = "https://github.com/conan-io/conan-center-index"
     description = "RESTinio is a header-only C++14 library that gives you an embedded HTTP/Websocket server."
     topics = ("http-server", "websockets", "rest", "tls-support")
     exports_sources = ["CMakeLists.txt"]
-    settings = "os", "compiler", "build_type", "arch"
+    settings = ("compiler",)
     options = {"asio": ["boost", "standalone"], "with_openssl": [True, False], "with_zlib": [True, False], "with_pcre": [1, 2, None]}
     default_options = {"asio": "standalone", "with_openssl": False, "with_zlib": False, "with_pcre": None}
     generators = "cmake"
