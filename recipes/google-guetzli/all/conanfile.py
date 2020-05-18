@@ -9,7 +9,7 @@ class GoogleGuetzliConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://opensource.google/projects/guetzli"
     description = "Perceptual JPEG encoder"
-    topics = "jpeg","compression"
+    topics = "jpeg", "compression"
     exports_sources = "patches/**"
     settings = "os", "compiler", "build_type", "arch"
     generators = "pkg_config"
@@ -54,13 +54,13 @@ class GoogleGuetzliConan(ConanFile):
                         "verbose=1',"
                     ]
                     autotools.make(args=make_args)
-            
+
     def package(self):
         subdir = "Debug" if self.settings.build_type == "Debug" else "Release"
         if self._is_msvc:
-            self.copy(os.path.join(self._source_subfolder, "bin", str(self.settings.arch), subdir, "guetzli.exe"), dst="bin", keep_path=False )
+            self.copy(os.path.join(self._source_subfolder, "bin", str(self.settings.arch), subdir, "guetzli.exe"), dst="bin", keep_path=False)
         else:
-            self.copy("{}/bin/{}/guetzli".format(self._source_subfolder, subdir), dst="bin", keep_path=False)
+            self.copy(os.path.join(self._source_subfolder, "bin", subdir, "guetzli"), dst="bin", keep_path=False)
         self.copy("LICENSE", src=self._source_subfolder, dst="licenses")
 
     def package_info(self):
