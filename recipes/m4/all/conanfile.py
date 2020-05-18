@@ -11,7 +11,7 @@ class M4Conan(ConanFile):
     homepage = "https://www.gnu.org/software/m4/"
     license = "GPL-3.0-only"
     exports_sources = ["patches/*.patch"]
-    settings = "os_build", "arch_build", "compiler"
+    settings = "os", "arch", "compiler"
 
     _autotools = None
     _source_subfolder = "source_subfolder"
@@ -87,12 +87,11 @@ class M4Conan(ConanFile):
         tools.rmdir(os.path.join(self.package_folder, "share"))
 
     def package_id(self):
-        del self.info.settings.compiler
         self.info.include_build_settings()
 
     def package_info(self):
         bin_path = os.path.join(self.package_folder, "bin")
         self.output.info("Appending PATH environment var: {}".format(bin_path))
         self.env_info.PATH.append(bin_path)
-        m4 = "m4.exe" if self.settings.os_build == "Windows" else "m4"
+        m4 = "m4.exe" if self.settings.os == "Windows" else "m4"
         self.env_info.M4 = os.path.join(self.package_folder, "bin", m4).replace("\\", "/")
