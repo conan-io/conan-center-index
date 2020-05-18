@@ -112,7 +112,7 @@ class LibcurlConan(ConanFile):
         pass
 
     def build_requirements(self):
-        if tools.os_info.is_windows:
+        if self._is_win_x_android:
             self.build_requires("ninja/1.9.0")
            
 
