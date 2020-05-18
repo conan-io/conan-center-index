@@ -28,9 +28,5 @@ patches:
       base_path: "source_subfolder"
     - patch_file: "patches/0012-Learn-configure-about-msvc.patch"
       base_path: "source_subfolder"
-#    - patch_file: "patches/0013-Fix-lib_gen.c.patch" # Part of 0014-...
-#      base_path: "source_subfolder"
-#    - patch_file: "patches/0014-avoid-macro-expansion-in-args-by-defining-NCURSES_NO.patch"  # Required for Visual Studio, but makes the library non-functional according to the author
-#      base_path: "source_subfolder"
     - patch_file: "patches/0015-Run-autoreconf.patch"
       base_path: "source_subfolder"
