@@ -15,7 +15,6 @@ class TestPackageConan(ConanFile):
             if not flex_bin.startswith(self.deps_cpp_info["flex"].rootpath):
                 raise ConanException("Wrong flex executable captured")
             cmake = CMake(self)
-            cmake.verbose = True
             cmake.definitions["FLEX_ROOT"] = self.deps_cpp_info["flex"].rootpath
             cmake.configure()
             cmake.build()
