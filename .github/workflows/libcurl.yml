@@ -39,7 +39,7 @@ jobs:
             archs: 'x86_64'
             compiler: 'apple_clang'
             compiler_version: '11.0'
-            xcode_version: '11.3.1'
+            xcode_version: '11.4'
             conan_options: 'libcurl:shared=True,
                             libcurl:darwin_ssl=False
                            '
