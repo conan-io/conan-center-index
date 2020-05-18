@@ -14,7 +14,7 @@ class JsonSchemaValidatorConan(ConanFile):
               "schema-validation", "json")
     settings = "os", "arch", "compiler", "build_type"
     generators = "cmake"
-    exports_sources = ["CMakeLists.txt", "patches/**"]
+    exports_sources = ["CMakeLists.txt"]
     options = {"shared": [True, False], "fPIC": [True, False]}
     default_options = {"shared": False, "fPIC": True}
     short_paths = True
@@ -33,11 +33,11 @@ class JsonSchemaValidatorConan(ConanFile):
             del self.options.fPIC
 
     def configure(self):
-        min_vs_version = "16"
-        min_cppstd = "17" if self.settings.compiler == "Visual Studio" else "11"
+        min_vs_version = "16" if tools.Version(self.version) <= "2.0.0" else "14"
+        min_cppstd = "17" if self.settings.compiler == "Visual Studio" and tools.Version(self.version) < "2.1.0" else "11"
         if self.settings.get_safe("compiler.cppstd"):
             tools.check_min_cppstd(self, min_cppstd)
-            min_vs_version = "15"
+            min_vs_version = "15" if tools.Version(self.version) <= "2.0.0" else "14"
 
         compilers = {"gcc": "5", "clang": "4",
                      "Visual Studio": min_vs_version, "apple-clang": "9"}
