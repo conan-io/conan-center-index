@@ -21,43 +21,69 @@
  * PURPOSE.
  */
 
-/* TEST scanner.
-   Basic non-reentrant scanner.
+%option C++ noyywrap
 
-   Sample Input:
-       # this is a comment
-       foo = true
-       bar = "string value"
-       integer = 43
-*/
 %{
-  #include <stdio.h>
+int mylineno = 0;
 %}
 
-%option nounput noyywrap noyylineno warn nodefault noinput
+string	\"[^\n"]+\"
 
-IDENT [[:alnum:]_-]
-WS    [[:blank:]]
-%%
+ws	[ \t]+
 
-^{IDENT}+{WS}*={WS}*(true|false){WS}*\r?\n    { return 100;}
-^{IDENT}+{WS}*={WS}*\"[^\"\n\r]*\"{WS}*\r?\n  { return 101;}
-^{IDENT}+{WS}*={WS}*[[:digit:]]+{WS}*\r?\n    { return 102;}
-^{WS}*#.*\r?\n     { }
-^{WS}*\r?\n        { }
-.|\n  { fprintf(stderr, "Invalid line.\n"); exit(-1);}
+alpha	[A-Za-z]
+dig	[0-9]
+name	({alpha}|{dig}|\$)({alpha}|{dig}|\_|\.|\-|\/|\$)*
+num1	[-+]?{dig}+\.?([eE][-+]?{dig}+)?
+num2	[-+]?{dig}*\.{dig}+([eE][-+]?{dig}+)?
+number	{num1}|{num2}
 
 %%
 
-int main(int argc, const char *argv[]) {
+{ws}	/* skip blanks and tabs */
+
+"/*"		{
+		int c;
+
+		while((c = yyinput()) != 0)
+			{
+			if(c == '\n')
+				++mylineno;
+
+			else if(c == '*')
+				{
+				if((c = yyinput()) == '/')
+					break;
+				else
+					unput(c);
+				}
+			}
+		}
+
+{number}	std::cout << "number " << YYText() << '\n';
+
+\n		mylineno++;
+
+{name}		std::cout << "name " << YYText() << '\n';
+
+{string}	std::cout << "string " << YYText() << '\n';
+
+%%
+
+extern "C" {
+    int yylex() {return 0;}
+}
+
+#include <fstream>
+
+int main( int argc, const char *argv[]) {
     if (argc < 2) {
         fprintf(stderr, "Need an argument\n");
         return 1;
     }
-    yyin = fopen(argv[1], "r");
-    while (yylex()) {
-    }
-    printf("TEST RETURNING OK.\n");
-    fclose(yyin);
-    return 0;
-}
+    std::ifstream ifs(argv[1]);
+	FlexLexer *lexer = new yyFlexLexer(ifs, std::cout);
+	while(lexer->yylex() != 0)
+		;
+	return 0;
+	}
