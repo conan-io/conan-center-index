@@ -22,11 +22,13 @@ class TestPackageConan(ConanFile):
         tools.save(self._m4_input_path, M4_CONTENTS)
 
     def test(self):
+        m4_bin = self.deps_user_info["m4"].M4
+
         if not tools.cross_building(self.settings):
-            self.run("{} --version".format(os.environ["M4"]), run_environment=True)
-            self.run("{} -P {}".format(os.environ["M4"], self._m4_input_path))
+            self.run("{} --version".format(m4_bin), run_environment=True)
+            self.run("{} -P {}".format(m4_bin, self._m4_input_path))
 
             output = StringIO()
-            self.run("{} -P {}".format(os.environ["M4"], self._m4_input_path), output=output)
+            self.run("{} -P {}".format(m4_bin, self._m4_input_path), output=output)
 
             assert "Harry, Jr. met Sally" in output.getvalue()
