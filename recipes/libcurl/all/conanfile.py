@@ -111,6 +111,11 @@ class LibcurlConan(ConanFile):
         #   would be much better than installed them (sudo required).
         pass
 
+    def build_requirements(self):
+        if tools.os_info.is_windows:
+            self.build_requires("ninja/[>=1.9.0]")
+           
+
     def requirements(self):
         if self.options.with_openssl:
             if tools.is_apple_os(self.settings.os) and self.options.darwin_ssl:
