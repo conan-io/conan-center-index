@@ -60,8 +60,6 @@ class SociConan(ConanFile):
 
         if self.options.with_backend_odbc:
             self.requires("odbc/2.3.7")
-            if self.options["odbc"].with_libiconv:
-                self.requires("libiconv/1.15")
 
         if self.options.with_backend_postgresql:
             self.requires("libpq/11.5")
@@ -119,20 +117,6 @@ class SociConan(ConanFile):
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
             tools.patch(**patch)
 
-        if self.options.with_backend_sqlite3:
-            tools.replace_in_file("FindSQLite3.cmake", "SQLite3_FOUND", "SQLITE3_FOUND")
-            tools.replace_in_file("FindSQLite3.cmake", "SQLite3_INCLUDE_DIRS", "SQLITE3_INCLUDE_DIRS")
-            tools.replace_in_file("FindSQLite3.cmake", "SQLite3_LIBRARIES", "SQLITE3_LIBRARIES")
-        if self.options.with_backend_mysql:
-            os.rename("Findlibmysqlclient.cmake", "FindMySQL.cmake")
-            tools.replace_in_file("FindMySQL.cmake", "libmysqlclient_FOUND", "MYSQL_FOUND")
-            tools.replace_in_file("FindMySQL.cmake", "libmysqlclient_INCLUDE_DIRS", "MYSQL_INCLUDE_DIRS")
-            tools.replace_in_file("FindMySQL.cmake", "libmysqlclient_LIBRARIES", "MYSQL_LIBRARIES")
-        if self.options.with_backend_postgresql:
-            tools.replace_in_file("FindPostgreSQL.cmake", "PostgreSQL_FOUND", "POSTGRESQL_FOUND")
-            tools.replace_in_file("FindPostgreSQL.cmake", "PostgreSQL_INCLUDE_DIRS", "POSTGRESQL_INCLUDE_DIRS")
-            tools.replace_in_file("FindPostgreSQL.cmake", "PostgreSQL_LIBRARIES", "POSTGRESQL_LIBRARIES")
-
     def build(self):
         self._patch_sources()
         cmake = self._configure_cmake()
@@ -156,13 +140,13 @@ class SociConan(ConanFile):
         return name
 
     def package_info(self):
-        self.cpp_info.names["cmake_find_package"] = "SOCI"
-        self.cpp_info.names["cmake_find_package_multi"] = "SOCI"
+        self.cpp_info.names["cmake_find_package"] = "Soci"
+        self.cpp_info.names["cmake_find_package_multi"] = "Soci"
 
         self.cpp_info.components["core"].libs = [self._construct_library_name("soci_core")]
         if self.options.with_boost:
             self.cpp_info.components["core"].defines.append("SOCI_USE_BOOST")
-            self.cpp_info.components["core"].requires.append("boost::boost")
+            self.cpp_info.components["core"].requires.append("boost::date_time")
         if self.settings.os == "Linux":
             self.cpp_info.components["core"].system_libs.extend(["dl", "m", "pthread"])
 
