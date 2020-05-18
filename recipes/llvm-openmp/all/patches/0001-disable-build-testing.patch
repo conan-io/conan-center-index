@@ -36,13 +36,3 @@ index 597eedcec0b..4395761dac4 100644
 
 -# Now that we have seen all testuites, create the check-openmp target.
 -construct_check_openmp_target()
-
-diff --git a/openmp/runtime/CMakeLists.txt b/openmp/runtime/CMakeLists.txt
-index 8087b23a07d..1842bd087ff 100644
---- runtime/CMakeLists.txt
-+++ runtime/CMakeLists.txt
-@@ -376,4 +376,3 @@ if(${OPENMP_STANDALONE_BUILD})
- endif()
-
- add_subdirectory(src)
--add_subdirectory(test)
