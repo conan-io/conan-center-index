@@ -97,7 +97,6 @@ class M4Conan(ConanFile):
         bin_ext = ".exe" if self.settings.os == "Windows" else ""
         m4_bin = os.path.join(self.package_folder, "bin", "m4{}".format(bin_ext)).replace("\\", "/")
 
+        # M4 environment variable is used by a lot of scripts as a way to override a hard-coded embedded m4 path
         self.output.info("Setting M4 environment variable: {}".format(m4_bin))
         self.env_info.M4 = m4_bin
-
-        self.user_info.M4 = m4_bin
