@@ -58,10 +58,6 @@ class ICUBase(ConanFile):
                                   "pathBuf.append('/', localError); pathBuf.append(arg, localError);")
 
     def build(self):
-        for filename in glob.glob("patches/*.patch"):
-            self.output.info('applying patch "%s"' % filename)
-            tools.patch(base_path=self._source_subfolder, patch_file=filename)
-
         if self._is_msvc:
             run_configure_icu_file = os.path.join(self._source_subfolder, 'source', 'runConfigureICU')
 
@@ -119,23 +115,6 @@ class ICUBase(ConanFile):
         tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
         tools.rmdir(os.path.join(self.package_folder, "share"))
 
-    @staticmethod
-    def detected_os():
-        if tools.OSInfo().is_macos:
-            return "Macos"
-        if tools.OSInfo().is_windows:
-            return "Windows"
-        return platform.system()
-
-    @property
-    def cross_building(self):
-        if tools.cross_building(self.settings):
-            if self.settings.os == self.detected_os():
-                if self.settings.arch == "x86" and tools.detected_architecture() == "x86_64":
-                    return False
-            return True
-        return False
-
     @property
     def build_config_args(self):
         prefix = self.package_folder.replace('\\', '/')
@@ -162,7 +141,7 @@ class ICUBase(ConanFile):
         if not self.options.with_dyload:
             args += ["--disable-dyload"]
 
-        if self.cross_building:
+        if tools.cross_building(self.settings, skip_x64_x86=True):
             if self._env_build.build:
                 args.append("--build=%s" % self._env_build.build)
             if self._env_build.host:
@@ -247,8 +226,10 @@ class ICUBase(ConanFile):
 
         if not self.options.shared:
             self.cpp_info.defines.append("U_STATIC_IMPLEMENTATION")
-        if self.settings.os == 'Linux' and self.options.with_dyload:
-            self.cpp_info.libs.append('dl')
+        if self.settings.os == 'Linux':
+            if self.options.with_dyload:
+                self.cpp_info.system_libs.append('dl')
+            self.cpp_info.system_libs.append('pthread')
 
         if self.settings.os == 'Windows':
-            self.cpp_info.libs.append('advapi32')
+            self.cpp_info.system_libs.append('advapi32')
