@@ -9,7 +9,7 @@ class OatppConan(ConanFile):
     license = "Apache-2.0"
     topics = ("conan", "oat++", "oatpp", "web-framework")
     url = "https://github.com/conan-io/conan-center-index"
-    generators = "cmake", "cmake_find_package"
+    generators = "cmake"
     settings = "os", "compiler", "build_type", "arch"
     options = {"shared": [True, False], "fPIC": [True, False]}
     default_options = {"shared": False, "fPIC": True}
