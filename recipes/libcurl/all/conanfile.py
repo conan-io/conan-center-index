@@ -100,9 +100,13 @@ class LibcurlConan(ConanFile):
 
     def system_requirements(self):
         # TODO: Declare tools needed to compile. The idea is Conan checking that they are
-        #   installed and providing a meaninful message before starting the compilation. It
+        #   installed and providing a meaningful message before starting the compilation. It
         #   would be much better than installed them (sudo required).
         pass
+
+    def build_requirements(self):
+        if self.settings.os == "Linux":
+            self.build_requires("libtool/2.4.6")
 
     def requirements(self):
         if self.options.with_openssl:
@@ -111,7 +115,7 @@ class LibcurlConan(ConanFile):
             elif self.settings.os == "Windows" and self.options.with_winssl:
                 pass
             else:
-                self.requires("openssl/1.1.1f")
+                self.requires("openssl/1.1.1g")
         if self.options.with_libssh2:
             if self.settings.compiler != "Visual Studio":
                 self.requires("libssh2/1.9.0")
