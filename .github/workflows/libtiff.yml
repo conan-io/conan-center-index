@@ -29,7 +29,7 @@ jobs:
             os: 'ubuntu-latest'
             compiler: 'gcc'
             compiler_version: '7'
-            docker_image: 'conanio/gcc7'
+            docker_image: 'trassiross/conan-gcc8'
             build_types: 'Release'
             archs: 'x86_64'
           - build: 'windows-2019-release'
