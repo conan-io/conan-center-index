@@ -2,6 +2,7 @@ from conans import ConanFile, CMake, tools
 from conans.errors import ConanInvalidConfiguration
 import os
 import glob
+import shutil
 
 class RocksDB(ConanFile):
     name = "rocksdb"
@@ -123,9 +124,12 @@ class RocksDB(ConanFile):
 
 
     def _remove_cpp_headers(self):
-        for file in glob.glob(os.path.join(self.package_folder, "include", "rocksdb", "*")):
-            if file != os.path.join(self.package_folder, "include", "rocksdb", "c.h"):
-                os.remove(file)
+        for path in glob.glob(os.path.join(self.package_folder, "include", "rocksdb", "*")):
+            if path != os.path.join(self.package_folder, "include", "rocksdb", "c.h"):
+                if os.path.isfile(path): 
+                    os.remove(path)
+                else:
+                    shutil.rmtree(path)
 
     def package(self):
         self.copy("COPYING", dst="licenses", src=self._source_subfolder)
