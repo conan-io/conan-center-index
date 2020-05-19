@@ -357,6 +357,12 @@ class OpenSSLConan(ConanFile):
             return getattr(tools.XCRun(self.settings), apple_name)
         return None
 
+    def _patch_configure(self):
+        # since _patch_makefile_org will replace binutils variables
+        # use a more restricted regular expresion to prevent that Configure script trying to do it again
+        configure = os.path.join(self._source_subfolder, "Configure")
+        tools.replace_in_file(configure, r"s/^AR=\s*ar/AR= $ar/;", r"s/^AR=\s*ar\b/AR= $ar/;")
+
     def _patch_makefile_org(self):
         # https://wiki.openssl.org/index.php/Compilation_and_Installation#Modifying_Build_Settings
         # its often easier to modify Configure and Makefile.org rather than trying to add targets to the configure scripts
@@ -403,8 +409,8 @@ class OpenSSLConan(ConanFile):
         openssldir = tools.unix_path(openssldir) if self._win_bash else openssldir
         args = ['"%s"' % (self._target if self._full_version >= "1.1.0" else self._ancestor_target),
                 "shared" if self.options.shared else "no-shared",
-                "--prefix=%s" % prefix,
-                "--openssldir=%s" % openssldir,
+                "--prefix=\"%s\"" % prefix,
+                "--openssldir=\"%s\"" % openssldir,
                 "no-unit-test"]
         if self._full_version >= "1.1.1":
             args.append("PERL=%s" % self._perl)
@@ -546,6 +552,9 @@ class OpenSSLConan(ConanFile):
             args = " ".join(self._configure_args)
             self.output.info(self._configure_args)
 
+            if self._use_nmake and self._full_version >= "1.1.0":
+                self._replace_runtime_in_file(os.path.join("Configurations", "10-main.conf"))
+
             self.run('{perl} ./Configure {args}'.format(perl=self._perl, args=args), win_bash=self._win_bash)
 
             self._patch_install_name()
@@ -605,6 +614,7 @@ class OpenSSLConan(ConanFile):
                 if self._full_version >= "1.1.0":
                     self._create_targets()
                 else:
+                    self._patch_configure()
                     self._patch_makefile_org()
                 self._make()
 
@@ -644,6 +654,7 @@ class OpenSSLConan(ConanFile):
     def _replace_runtime_in_file(self, filename):
         for e in ["MDd", "MTd", "MD", "MT"]:
             tools.replace_in_file(filename, "/%s " % e, "/%s " % self.settings.compiler.runtime, strict=False)
+            tools.replace_in_file(filename, "/%s\"" % e, "/%s\"" % self.settings.compiler.runtime, strict=False)
 
     def package(self):
         self.copy(src=self._source_subfolder, pattern="*LICENSE", dst="licenses")

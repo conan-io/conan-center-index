@@ -3,7 +3,6 @@ from conans.model.version import Version
 from conans.errors import ConanInvalidConfiguration
 import os
 
-
 class QuillConan(ConanFile):
     name = "quill"
     description = "C++14 Asynchronous Low Latency Logging Library"
@@ -14,8 +13,14 @@ class QuillConan(ConanFile):
     exports_sources = ["CMakeLists.txt"]
     generators = "cmake", "cmake_find_package"
     settings = "os", "compiler", "build_type", "arch"
-    options = {"fPIC": [True, False]}
-    default_options = {"fPIC": True}
+
+    options = {"fPIC": [True, False],
+               "with_bounded_queue": [True, False],
+               "with_no_exceptions": [True, False]}
+
+    default_options = {"fPIC": True,
+                       "with_bounded_queue": False,
+                       "with_no_exceptions": False}
 
     _cmake = None
 
@@ -73,7 +78,8 @@ class QuillConan(ConanFile):
         self._cmake = CMake(self)
         self._cmake.definitions["QUILL_FMT_EXTERNAL"] = True
         self._cmake.definitions["QUILL_ENABLE_INSTALL"] = True
-
+        self._cmake.definitions["QUILL_USE_BOUNDED_QUEUE"] = self.options.with_bounded_queue
+        self._cmake.definitions["QUILL_NO_EXCEPTIONS"] = self.options.with_no_exceptions
         self._cmake.configure(build_folder=self._build_subfolder)
 
         return self._cmake
