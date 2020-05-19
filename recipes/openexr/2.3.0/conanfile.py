@@ -93,6 +93,9 @@ class OpenEXRConan(ConanFile):
                 os.unlink(filename)
 
     def package_info(self):
+        self.cpp_info.names["cmake_find_package"] = "OpenEXR"
+        self.cpp_info.names["cmake_find_package_multi"] = "OpenEXR"
+        self.cpp_info.names["pkg_config"] = "OpenEXR"
         parsed_version = self.version.split(".")
         version_suffix = "-%s_%s" % (parsed_version[0], parsed_version[1]) if self.options.namespace_versioning else ""
         if not self.options.shared:
