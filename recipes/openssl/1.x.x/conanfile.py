@@ -357,6 +357,12 @@ class OpenSSLConan(ConanFile):
             return getattr(tools.XCRun(self.settings), apple_name)
         return None
 
+    def _patch_configure(self):
+        # since _patch_makefile_org will replace binutils variables
+        # use a more restricted regular expresion to prevent that Configure script trying to do it again
+        configure = os.path.join(self._source_subfolder, "Configure")
+        tools.replace_in_file(configure, r"s/^AR=\s*ar/AR= $ar/;", r"s/^AR=\s*ar\b/AR= $ar/;")
+
     def _patch_makefile_org(self):
         # https://wiki.openssl.org/index.php/Compilation_and_Installation#Modifying_Build_Settings
         # its often easier to modify Configure and Makefile.org rather than trying to add targets to the configure scripts
@@ -608,6 +614,7 @@ class OpenSSLConan(ConanFile):
                 if self._full_version >= "1.1.0":
                     self._create_targets()
                 else:
+                    self._patch_configure()
                     self._patch_makefile_org()
                 self._make()
 
