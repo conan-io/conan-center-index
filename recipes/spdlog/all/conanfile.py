@@ -41,7 +41,7 @@ class SpdlogConan(ConanFile):
         if self.options.header_only:
             del self.options.shared
             del self.options.fPIC
-        elif self.settings.os == "Windows" and self.options.shared:
+        elif self.settings.os == "Windows" and self.options.shared and Version(self.version) < "1.6.0":
             raise ConanInvalidConfiguration("spdlog shared lib is not yet supported under windows")
         if self.settings.os != "Windows" and \
            (self.options.wchar_support or self.options.wchar_filenames):
@@ -49,7 +49,7 @@ class SpdlogConan(ConanFile):
 
     def requirements(self):
         if Version(self.version) >= "1.5.0":
-            self.requires("fmt/6.1.2")
+            self.requires("fmt/6.2.0")
         else:
             self.requires("fmt/6.0.0")
 

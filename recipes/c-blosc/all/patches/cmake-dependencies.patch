@@ -1,0 +1,145 @@
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -126,51 +126,18 @@ set(CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/cmake")
+ 
+ 
+ if(NOT DEACTIVATE_LZ4)
+-    if(PREFER_EXTERNAL_LZ4)
+-        find_package(LZ4)
+-    else()
+-        message(STATUS "Using LZ4 internal sources.")
+-    endif(PREFER_EXTERNAL_LZ4)
+-    # HAVE_LZ4 will be set to true because even if the library is
+-    # not found, we will use the included sources for it
+     set(HAVE_LZ4 TRUE)
+ endif(NOT DEACTIVATE_LZ4)
+ 
+ if(NOT DEACTIVATE_SNAPPY)
+-    if(PREFER_EXTERNAL_SNAPPY)
+-        find_package(Snappy)
+-    else()
+-        message(STATUS "Using Snappy internal sources.")
+-    endif(PREFER_EXTERNAL_SNAPPY)
+-    # HAVE_SNAPPY will be set to true because even if the library is not found,
+-    # we will use the included sources for it
+     set(HAVE_SNAPPY TRUE)
+ endif(NOT DEACTIVATE_SNAPPY)
+ 
+ if(NOT DEACTIVATE_ZLIB)
+-    # import the ZLIB_ROOT environment variable to help finding the zlib library
+-    if(PREFER_EXTERNAL_ZLIB)
+-        set(ZLIB_ROOT $ENV{ZLIB_ROOT})
+-        find_package(ZLIB)
+-        if (NOT ZLIB_FOUND )
+-            message(STATUS "No zlib found.  Using internal sources.")
+-        endif (NOT ZLIB_FOUND )
+-    else()
+-        message(STATUS "Using zlib internal sources.")
+-    endif(PREFER_EXTERNAL_ZLIB)
+-    # HAVE_ZLIB will be set to true because even if the library is not found,
+-    # we will use the included sources for it
+     set(HAVE_ZLIB TRUE)
+ endif(NOT DEACTIVATE_ZLIB)
+ 
+ if (NOT DEACTIVATE_ZSTD)
+-    if (PREFER_EXTERNAL_ZSTD)
+-        find_package(Zstd)
+-    else ()
+-        message(STATUS "Using ZSTD internal sources.")
+-    endif (PREFER_EXTERNAL_ZSTD)
+-    # HAVE_ZSTD will be set to true because even if the library is
+-    # not found, we will use the included sources for it
+     set(HAVE_ZSTD TRUE)
+ endif (NOT DEACTIVATE_ZSTD)
+ 
+--- a/blosc/CMakeLists.txt
++++ b/blosc/CMakeLists.txt
+@@ -10,41 +10,6 @@ set(CMAKE_C_VISIBILITY_PRESET hidden)
+ 
+ # includes
+ set(BLOSC_INCLUDE_DIRS ${BLOSC_INCLUDE_DIRS} ${CMAKE_CURRENT_SOURCE_DIR})
+-if(NOT DEACTIVATE_LZ4)
+-    if (LZ4_FOUND)
+-        set(BLOSC_INCLUDE_DIRS ${BLOSC_INCLUDE_DIRS} ${LZ4_INCLUDE_DIR})
+-    else(LZ4_FOUND)
+-        set(LZ4_LOCAL_DIR ${INTERNAL_LIBS}/lz4-1.9.2)
+-        set(BLOSC_INCLUDE_DIRS ${BLOSC_INCLUDE_DIRS} ${LZ4_LOCAL_DIR})
+-    endif(LZ4_FOUND)
+-endif(NOT DEACTIVATE_LZ4)
+-
+-if(NOT DEACTIVATE_SNAPPY)
+-    if (SNAPPY_FOUND)
+-        set(BLOSC_INCLUDE_DIRS ${BLOSC_INCLUDE_DIRS} ${SNAPPY_INCLUDE_DIR})
+-    else(SNAPPY_FOUND)
+-        set(SNAPPY_LOCAL_DIR ${INTERNAL_LIBS}/snappy-1.1.1)
+-        set(BLOSC_INCLUDE_DIRS ${BLOSC_INCLUDE_DIRS} ${SNAPPY_LOCAL_DIR})
+-    endif(SNAPPY_FOUND)
+-endif(NOT DEACTIVATE_SNAPPY)
+-
+-if(NOT DEACTIVATE_ZLIB)
+-    if (ZLIB_FOUND)
+-        set(BLOSC_INCLUDE_DIRS ${BLOSC_INCLUDE_DIRS} ${ZLIB_INCLUDE_DIR})
+-    else(ZLIB_FOUND)
+-        set(ZLIB_LOCAL_DIR ${INTERNAL_LIBS}/zlib-1.2.8)
+-        set(BLOSC_INCLUDE_DIRS ${BLOSC_INCLUDE_DIRS} ${ZLIB_LOCAL_DIR})
+-    endif(ZLIB_FOUND)
+-endif(NOT DEACTIVATE_ZLIB)
+-
+-if (NOT DEACTIVATE_ZSTD)
+-    if (ZSTD_FOUND)
+-        set(BLOSC_INCLUDE_DIRS ${BLOSC_INCLUDE_DIRS} ${ZSTD_INCLUDE_DIR})
+-    else (ZSTD_FOUND)
+-        set(ZSTD_LOCAL_DIR ${INTERNAL_LIBS}/zstd-1.4.4)
+-        set(BLOSC_INCLUDE_DIRS ${BLOSC_INCLUDE_DIRS} ${ZSTD_LOCAL_DIR} ${ZSTD_LOCAL_DIR}/common)
+-    endif (ZSTD_FOUND)
+-endif (NOT DEACTIVATE_ZSTD)
+ 
+ include_directories(${BLOSC_INCLUDE_DIRS})
+ 
+@@ -81,42 +46,19 @@ else(WIN32)
+ endif(WIN32)
+ 
+ if(NOT DEACTIVATE_LZ4)
+-    if(LZ4_FOUND)
+-        set(LIBS ${LIBS} ${LZ4_LIBRARY})
+-    else(LZ4_FOUND)
+-        file(GLOB LZ4_FILES ${LZ4_LOCAL_DIR}/*.c)
+-        set(SOURCES ${SOURCES} ${LZ4_FILES})
+-    endif(LZ4_FOUND)
++    set(LIBS ${LIBS} "CONAN_PKG::lz4")
+ endif(NOT DEACTIVATE_LZ4)
+ 
+ if(NOT DEACTIVATE_SNAPPY)
+-    if(SNAPPY_FOUND)
+-        set(LIBS ${LIBS} ${SNAPPY_LIBRARY})
+-    else(SNAPPY_FOUND)
+-        file(GLOB SNAPPY_FILES ${SNAPPY_LOCAL_DIR}/*.cc)
+-        set(SOURCES ${SOURCES} ${SNAPPY_FILES})
+-    endif(SNAPPY_FOUND)
++    set(LIBS ${LIBS} "CONAN_PKG::snappy")
+ endif(NOT DEACTIVATE_SNAPPY)
+ 
+ if(NOT DEACTIVATE_ZLIB)
+-    if(ZLIB_FOUND)
+-        set(LIBS ${LIBS} ${ZLIB_LIBRARY})
+-    else(ZLIB_FOUND)
+-        file(GLOB ZLIB_FILES ${ZLIB_LOCAL_DIR}/*.c)
+-        set(SOURCES ${SOURCES} ${ZLIB_FILES})
+-    endif(ZLIB_FOUND)
++    set(LIBS ${LIBS} "CONAN_PKG::zlib")
+ endif(NOT DEACTIVATE_ZLIB)
+ 
+ if (NOT DEACTIVATE_ZSTD)
+-    if (ZSTD_FOUND)
+-        set(LIBS ${LIBS} ${ZSTD_LIBRARY})
+-    else (ZSTD_FOUND)
+-      file(GLOB ZSTD_FILES
+-        ${ZSTD_LOCAL_DIR}/common/*.c
+-        ${ZSTD_LOCAL_DIR}/compress/*.c
+-        ${ZSTD_LOCAL_DIR}/decompress/*.c)
+-        set(SOURCES ${SOURCES} ${ZSTD_FILES})
+-    endif (ZSTD_FOUND)
++    set(LIBS ${LIBS} "CONAN_PKG::zstd")
+ endif (NOT DEACTIVATE_ZSTD)
+ 
+ 

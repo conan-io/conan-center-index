@@ -1,6 +1,4 @@
-import glob
 import os
-import shutil
 
 from conans import ConanFile, CMake, tools
 
@@ -11,7 +9,7 @@ class CjsonConan(ConanFile):
     topics = ("conan", "cjson", "json", "parser")
     homepage = "https://github.com/DaveGamble/cJSON"
     url = "https://github.com/conan-io/conan-center-index"
-    exports_sources = "CMakeLists.txt"
+    exports_sources = ["CMakeLists.txt", "patches/**"]
     generators = "cmake"
     settings = "os", "arch", "compiler", "build_type"
     options = {
@@ -48,6 +46,8 @@ class CjsonConan(ConanFile):
         os.rename("cJSON-" + self.version, self._source_subfolder)
 
     def build(self):
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            tools.patch(**patch)
         cmake = self._configure_cmake()
         cmake.build()
 
@@ -66,8 +66,7 @@ class CjsonConan(ConanFile):
         self._cmake.definitions["ENABLE_CJSON_TEST"] = False
         self._cmake.definitions["ENABLE_LOCALES"] = self.options.use_locales
         self._cmake.definitions["ENABLE_FUZZING"] = False
-        # Disable Custom Compiler Flags for MingW on Windows, because it uses -fstack-protector-strong
-        self._cmake.definitions["ENABLE_CUSTOM_COMPILER_FLAGS"] = not (self.settings.os == "Windows" and self.settings.compiler == "gcc")
+        self._cmake.definitions["ENABLE_CUSTOM_COMPILER_FLAGS"] = False
 
         self._cmake.configure(build_folder=self._build_subfolder)
         return self._cmake
@@ -78,17 +77,11 @@ class CjsonConan(ConanFile):
         cmake.install()
         tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
         tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
-        self._move_dll_to_bin_folder()
-
-    def _move_dll_to_bin_folder(self):
-        if self.settings.os == "Windows" and self.options.shared:
-            bin_dir = os.path.join(self.package_folder, "bin")
-            if not os.path.exists(bin_dir):
-                os.mkdir(bin_dir)
-            for dll_file in glob.glob(os.path.join(self.package_folder, "lib", "*.dll")):
-                shutil.move(dll_file, bin_dir)
 
     def package_info(self):
+        self.cpp_info.names["cmake_find_package"] = "cjson"
+        self.cpp_info.names["cmake_find_package_multi"] = "cjson"
+        self.cpp_info.names["pkg_config"] = "libcjson"
         self.cpp_info.libs = tools.collect_libs(self)
         if self.settings.os == "Linux":
             self.cpp_info.system_libs.append("m")

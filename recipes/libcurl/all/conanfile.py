@@ -107,14 +107,15 @@ class LibcurlConan(ConanFile):
 
     def system_requirements(self):
         # TODO: Declare tools needed to compile. The idea is Conan checking that they are
-        #   installed and providing a meaninful message before starting the compilation. It
+        #   installed and providing a meaningful message before starting the compilation. It
         #   would be much better than installed them (sudo required).
         pass
 
     def build_requirements(self):
         if self._is_win_x_android:
             self.build_requires("ninja/1.9.0")
-           
+        elif self.settings.os == "Linux":
+            self.build_requires("libtool/2.4.6")
 
     def requirements(self):
         if self.options.with_openssl:
