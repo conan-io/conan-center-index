@@ -543,7 +543,6 @@ jobs:
           compiler-versions: ${{ matrix.compiler_version }}
           docker-images: ${{ matrix.docker_image }}
         env:
-          CONAN_OPTIONS: "libxrandr:shared=True"
           CONAN_SHARED_OPTION_NAME: False
           CONAN_REFERENCE: 'libxrandr/${{ matrix.libxrandr_version }}'
           CONAN_VISUAL_RUNTIMES: ${{ matrix.vs_runtimes }}
@@ -563,7 +562,6 @@ jobs:
           compiler-versions: ${{ matrix.compiler_version }}
           docker-images: ${{ matrix.docker_image }}
         env:
-          CONAN_OPTIONS: "libxcomposite:shared=True"
           CONAN_SHARED_OPTION_NAME: False
           CONAN_REFERENCE: 'libxcomposite/${{ matrix.libxcomposite_version }}'
           CONAN_VISUAL_RUNTIMES: ${{ matrix.vs_runtimes }}

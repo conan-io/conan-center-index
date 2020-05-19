@@ -32,7 +32,7 @@ jobs:
             docker_image: 'trassiross/conan-gcc8'
             build_types: 'Release'
             archs: 'x86_64'
-            conan_options: 'libcurl:shared=True'
+            conan_options: ''
           - build: 'macos'
             os: 'macos-10.15'
             build_types: 'Release'
@@ -40,9 +40,7 @@ jobs:
             compiler: 'apple_clang'
             compiler_version: '11.0'
             xcode_version: '11.4'
-            conan_options: 'libcurl:shared=True,
-                            libcurl:darwin_ssl=False
-                           '
+            conan_options: 'libcurl:darwin_ssl=False'
     runs-on: ${{ matrix.os }}
     steps:
       - name: Install automake

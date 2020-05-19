@@ -21,23 +21,13 @@ env:
 
 jobs:
   qtwebkit:
-    env: 
-      COMMON_CONAN_OPTIONS: 'icu:shared=True,
-                             libjpeg-turbo:shared=True,
-                             libpng:shared=True,
-                             libwebp:shared=True,
-                             libxml2:shared=True,
-                             libxslt:shared=True,
-                             sqlite3:shared=True,
-                             zlib:shared=True,
-
-                             qt:openssl=True,
+    env:
+      COMMON_CONAN_OPTIONS: 'qt:openssl=True,
                              qt:qtimageformats=True,
                              qt:qtmultimedia=True,
                              qt:qtscript=True,
                              qt:qtsvg=True,
                              qt:qttools=True,
-                             qt:shared=True,
 
                              qt:with_glib=False,
                              qt:with_harfbuzz=False,
@@ -60,9 +50,8 @@ jobs:
             build_types: 'Release'
             archs: 'x86_64'
             conan_options: ',
-                            qt:qtx11extras=True,
-                            libxcomposite:shared=True
-                           '        
+                            qt:qtx11extras=True
+                           '
           - build: 'macos'
             os: 'macos-10.15'
             build_types: 'Release'

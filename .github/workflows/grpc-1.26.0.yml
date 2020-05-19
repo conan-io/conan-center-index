@@ -18,7 +18,6 @@ env:
   CONAN_PASSWORD: ${{ secrets.BintrayApiKey }}
   CONAN_REFERENCE: 'grpc/1.26.0'
   IS_PURE_C: true
-  CONAN_OPTIONS: 'openssl:shared=True'
 
 jobs:
   grpc:

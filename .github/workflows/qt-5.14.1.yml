@@ -40,13 +40,12 @@ jobs:
                             qt:qtsvg=True,
                             qt:qttools=True,
                             qt:qtx11extras=True,
-                            qt:shared=True,                            
 
                             qt:with_glib=False,
                             qt:with_harfbuzz=False,
                             qt:with_icu=False,
                             qt:with_mysql=False,
-                            qt:with_pcre2=False,                            
+                            qt:with_pcre2=False,
                             qt:with_sdl2=False,
                             qt:with_zstd=False
                             '
@@ -60,7 +59,6 @@ jobs:
                             qt:qtscript=True,
                             qt:qtsvg=True,
                             qt:qttools=True,
-                            qt:shared=True,
 
                             qt:with_glib=False,
                             qt:with_harfbuzz=False,
