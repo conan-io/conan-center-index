@@ -30,9 +30,9 @@ class JasperConan(ConanFile):
 
     def requirements(self):
         if self.options.jpegturbo:
-            self.requires.add("libjpeg-turbo/2.0.4")
+            self.requires("libjpeg-turbo/2.0.4")
         else:
-            self.requires.add("libjpeg/9d")
+            self.requires("libjpeg/9d")
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -77,4 +77,4 @@ class JasperConan(ConanFile):
     def package_info(self):
         self.cpp_info.libs = ["jasper"]
         if self.settings.os == "Linux":
-            self.cpp_info.libs.append("m")
+            self.cpp_info.system_libs.append("m")
