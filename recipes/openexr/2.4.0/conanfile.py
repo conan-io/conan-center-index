@@ -17,7 +17,15 @@ class OpenEXRConan(ConanFile):
     generators = "cmake", "cmake_find_package"
     exports_sources = "CMakeLists.txt"
 
-    _source_subfolder = "source_subfolder"
+    _cmake = None
+
+    @property
+    def _source_subfolder(self):
+        return "source_subfolder"
+
+    @property
+    def _build_subfolder(self):
+        return "build_subfolder"
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -31,14 +39,16 @@ class OpenEXRConan(ConanFile):
         os.rename("openexr-{}".format(self.version), self._source_subfolder)
 
     def _configure_cmake(self):
-        cmake = CMake(self)
-        cmake.definitions["PYILMBASE_ENABLE"] = False
-        cmake.definitions["OPENEXR_VIEWERS_ENABLE"] = False
-        cmake.definitions["OPENEXR_BUILD_BOTH_STATIC_SHARED"] = False
-        cmake.definitions["OPENEXR_BUILD_UTILS"] = False
-        cmake.definitions["BUILD_TESTING"] = False
-        cmake.configure()
-        return cmake
+        if self._cmake:
+            return self._cmake
+        self._cmake = CMake(self)
+        self._cmake.definitions["PYILMBASE_ENABLE"] = False
+        self._cmake.definitions["OPENEXR_VIEWERS_ENABLE"] = False
+        self._cmake.definitions["OPENEXR_BUILD_BOTH_STATIC_SHARED"] = False
+        self._cmake.definitions["OPENEXR_BUILD_UTILS"] = False
+        self._cmake.definitions["BUILD_TESTING"] = False
+        self._cmake.configure(build_folder=self._build_subfolder)
+        return self._cmake
 
     def _patch_files(self):
         for lib in ("OpenEXR", "IlmBase"):
