@@ -21,7 +21,7 @@ class OpenEXRConan(ConanFile):
 
     def config_options(self):
         if self.settings.os == "Windows":
-            self.options.remove("fPIC")
+            del self.options.fPIC
 
     def requirements(self):
         self.requires("zlib/1.2.11")
