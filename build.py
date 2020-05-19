@@ -19,6 +19,7 @@ if __name__ == "__main__":
         upload_only_when_stable=1,
         stable_branch_pattern="master",
         stable_channel="_",
+        config_url="https://github.com/trassir/conan-config.git",
         remotes="https://api.bintray.com/conan/trassir/conan-public"
     )
     builder.add_common_builds(pure_c=is_pure_c)
