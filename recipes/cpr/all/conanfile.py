@@ -45,6 +45,8 @@ class CprConan(ConanFile):
 
     def requirements(self):
         self.requires("libcurl/7.67.0")
+        if self.options.with_openssl:
+            self.output.warn("OpenSSL support is not stable yet. whoshuu/cpr#31")
 
     def _patch_sources(self):
         for patch in self.conan_data["patches"][self.version]:
