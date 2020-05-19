@@ -33,8 +33,6 @@ class FlexConan(ConanFile):
         del self.settings.compiler.cppstd
         if self.settings.os == "Windows":
             raise ConanInvalidConfiguration("Flex package is not compatible with Windows. Consider using winflexbison instead.")
-        if tools.cross_building(self.settings, skip_x64_x86=True):
-            raise ConanInvalidConfiguration("This recipe does not support cross building atm (missing conan support)")
 
     def _configure_autotools(self):
         if self._autotools:
@@ -61,6 +59,8 @@ class FlexConan(ConanFile):
 
 
     def build(self):
+        if tools.cross_building(self.settings, skip_x64_x86=True):
+            raise ConanInvalidConfiguration("This recipe does not support cross building atm (missing conan support)")
         with tools.chdir(self._source_subfolder):
             autotools = self._configure_autotools()
             autotools.make()
