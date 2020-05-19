@@ -70,6 +70,7 @@ class OpenEXRConan(ConanFile):
     def package_info(self):
         self.cpp_info.names["cmake_find_package"] = "OpenEXR"
         self.cpp_info.names["cmake_find_package_multi"] = "OpenEXR"
+        self.cpp_info.names["pkg_config"] = "OpenEXR"
         parsed_version = self.version.split(".")
         lib_suffix = "-{}_{}".format(parsed_version[0], parsed_version[1])
         if self.settings.build_type == "Debug":
@@ -82,7 +83,7 @@ class OpenEXRConan(ConanFile):
                               "IexMath{}".format(lib_suffix),
                               "Imath{}".format(lib_suffix),
                               "Half{}".format(lib_suffix)]
-        
+
         self.cpp_info.includedirs = [os.path.join("include", "OpenEXR"), "include"]
         if self.options.shared and self.settings.os == "Windows":
             self.cpp_info.defines.append("OPENEXR_DLL")
