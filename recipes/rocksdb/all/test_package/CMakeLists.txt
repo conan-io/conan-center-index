@@ -11,6 +11,5 @@ if(NOT ROCKSDB_DLL)
     target_link_libraries(test_package_cpp ${CONAN_LIBS})
 endif()
 
-add_executable(test_package_c test_package.c)
-target_link_libraries(test_package_c ${CONAN_LIBS})
-
+add_executable(test_package_stable_abi test_package_stable_abi.cpp)
+target_link_libraries(test_package_stable_abi ${CONAN_LIBS})
