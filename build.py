@@ -15,7 +15,7 @@ if __name__ == "__main__":
     is_pure_c = get_bool_from_env('IS_PURE_C')
     builder = ConanMultiPackager(
         login_username="trassir-ci-bot",
-        upload="https://api.bintray.com/conan/trassir/conan-public",
+        upload=("https://api.bintray.com/conan/trassir/conan-public", True, "bintray-trassir"),
         upload_only_when_stable=1,
         stable_branch_pattern="master",
         stable_channel="_",
