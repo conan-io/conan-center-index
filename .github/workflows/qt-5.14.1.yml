@@ -16,12 +16,28 @@ on:
 
 env:
   CONAN_PASSWORD: ${{ secrets.BintrayApiKey }}
-  IS_PURE_C: false
+  IS_PURE_C: true # qt builds too long to wait for both libstdc++ and libstdc++11
   CONAN_REFERENCE: qt/5.14.1
-  CONAN_DOCKER_ENTRY_SCRIPT: "sudo ln -s /usr/bin/g++-8 /usr/bin/g++"
 
 jobs:
   qt_5_14_1:
+    env:
+      COMMON_CONAN_OPTIONS: '
+      qt:openssl=True,
+      qt:qtimageformats=True,
+      qt:qtmultimedia=True,
+      qt:qtscript=True,
+      qt:qtsvg=True,
+      qt:qttools=True,
+
+      qt:with_glib=False,
+      qt:with_harfbuzz=False,
+      qt:with_icu=False,
+      qt:with_mysql=False,
+      qt:with_pcre2=False,
+      qt:with_sdl2=False,
+      qt:with_zstd=False
+      '
     strategy:
       matrix:
         build: ['linux-gcc8', 'macos']
@@ -33,41 +49,11 @@ jobs:
             docker_image: 'trassiross/conan-gcc8'
             build_types: 'Release'
             archs: 'x86_64'
-            conan_options: 'qt:openssl=True,
-                            qt:qtimageformats=True,
-                            qt:qtmultimedia=True,
-                            qt:qtscript=True,
-                            qt:qtsvg=True,
-                            qt:qttools=True,
-                            qt:qtx11extras=True,
-
-                            qt:with_glib=False,
-                            qt:with_harfbuzz=False,
-                            qt:with_icu=False,
-                            qt:with_mysql=False,
-                            qt:with_pcre2=False,
-                            qt:with_sdl2=False,
-                            qt:with_zstd=False
-                            '
+            conan_options: ', qt:qtx11extras=True'
           - build: 'macos'
             os: 'macos-10.15'
             build_types: 'Release'
             archs: 'x86_64'
-            conan_options: 'qt:openssl=True,
-                            qt:qtimageformats=True,
-                            qt:qtmultimedia=True,
-                            qt:qtscript=True,
-                            qt:qtsvg=True,
-                            qt:qttools=True,
-
-                            qt:with_glib=False,
-                            qt:with_harfbuzz=False,
-                            qt:with_icu=False,
-                            qt:with_mysql=False,
-                            qt:with_pcre2=False,
-                            qt:with_sdl2=False,
-                            qt:with_zstd=False
-                            '
             compiler: 'apple_clang'
             compiler_version: '11.0'
             xcode_version: '11.4'
@@ -97,7 +83,7 @@ jobs:
           docker-images: ${{ matrix.docker_image }}
         env:
           CONAN_SHARED_OPTION_NAME: False
-          CONAN_OPTIONS: ${{ matrix.conan_options }}
+          CONAN_OPTIONS: ${{ env.COMMON_CONAN_OPTIONS }} ${{ matrix.conan_options }}
           CONAN_VISUAL_RUNTIMES: ${{ matrix.vs_runtimes }}
           CONAN_ARCHS: ${{ matrix.archs }}
           CONAN_BUILD_TYPES: ${{ matrix.build_types }}
