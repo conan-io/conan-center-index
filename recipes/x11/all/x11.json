@@ -124,7 +124,7 @@
         "namespace": "xcb",
         "requires": ["xcb-util"],
         "libs": ["xcb-image"],
-        "patches": ["clang.patch"]
+        "patches": ["clang.patch", "xcb-util-image.patch"]
     },
     {
         "name": "xcb-util-keysyms",

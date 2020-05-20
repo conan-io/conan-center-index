@@ -1,0 +1,53 @@
+--- xcb-util-image-0.4.0-origin/test/Makefile.am	2014-06-11 10:49:48.000000000 +0200
++++ xcb-util-image-0.4.0/test/Makefile.am	2020-04-13 18:30:07.304634059 +0200
+@@ -10,11 +10,11 @@
+ 
+ test_swap_SOURCES = test_swap.c
+ test_swap_CPPFLAGS = $(XCB_CFLAGS) $(XCB_SHM_CFLAGS) $(XCB_UTIL_CFLAGS) -I$(top_srcdir)/image
+-test_swap_LDADD = $(XCB_LIBS) $(XCB_UTIL_LIBS) $(top_builddir)/image/libxcb-image.la
++test_swap_LDADD = $(XCB_LIBS) $(XCB_UTIL_LIBS) $(XCB_SHM_LIBS) $(top_builddir)/image/libxcb-image.la
+ 
+ test_xcb_image_SOURCES = test_xcb_image.c
+ test_xcb_image_CPPFLAGS = $(XCB_CFLAGS) $(XCB_SHM_CFLAGS) $(XCB_UTIL_CFLAGS) -I$(top_srcdir)/image
+-test_xcb_image_LDADD = $(XCB_LIBS) $(XCB_UTIL_LIBS) $(top_builddir)/image/libxcb-image.la
++test_xcb_image_LDADD = $(XCB_LIBS) $(XCB_UTIL_LIBS) $(XCB_SHM_LIBS) $(top_builddir)/image/libxcb-image.la
+ 
+ test_xcb_image_shm_SOURCES = test_xcb_image_shm.c
+ test_xcb_image_shm_CPPFLAGS = $(XCB_CFLAGS) $(XCB_SHM_CFLAGS) $(XCB_UTIL_CFLAGS) -I$(top_srcdir)/image
+@@ -22,8 +22,8 @@
+ 
+ test_formats_SOURCES = test_formats.c
+ test_formats_CPPFLAGS = $(XCB_CFLAGS) $(XCB_SHM_CFLAGS) $(XCB_UTIL_CFLAGS) $(XPROTO_CFLAGS) -I$(top_srcdir)/image
+-test_formats_LDADD = $(XCB_LIBS) $(XCB_UTIL_LIBS) $(top_builddir)/image/libxcb-image.la
++test_formats_LDADD = $(XCB_LIBS) $(XCB_UTIL_LIBS) $(XCB_SHM_LIBS) $(top_builddir)/image/libxcb-image.la
+ 
+ test_bitmap_SOURCES = test_bitmap.c test.xbm
+ test_bitmap_CPPFLAGS = $(XCB_CFLAGS) $(XCB_SHM_CFLAGS) $(XCB_UTIL_CFLAGS)  -I$(top_srcdir)/image
+-test_bitmap_LDADD = $(XCB_LIBS) $(XCB_UTIL_LIBS) $(top_builddir)/image/libxcb-image.la
++test_bitmap_LDADD = $(XCB_LIBS) $(XCB_UTIL_LIBS) $(XCB_SHM_LIBS) $(top_builddir)/image/libxcb-image.la
+--- xcb-util-image-0.4.0-origin/test/Makefile.in	2014-10-15 04:01:17.000000000 +0200
++++ xcb-util-image-0.4.0/test/Makefile.in	2020-04-13 18:27:34.116156995 +0200
+@@ -548,19 +548,19 @@
+ xcbincludedir = @xcbincludedir@
+ test_swap_SOURCES = test_swap.c
+ test_swap_CPPFLAGS = $(XCB_CFLAGS) $(XCB_SHM_CFLAGS) $(XCB_UTIL_CFLAGS) -I$(top_srcdir)/image
+-test_swap_LDADD = $(XCB_LIBS) $(XCB_UTIL_LIBS) $(top_builddir)/image/libxcb-image.la
++test_swap_LDADD = $(XCB_LIBS) $(XCB_UTIL_LIBS) $(XCB_SHM_LIBS) $(top_builddir)/image/libxcb-image.la
+ test_xcb_image_SOURCES = test_xcb_image.c
+ test_xcb_image_CPPFLAGS = $(XCB_CFLAGS) $(XCB_SHM_CFLAGS) $(XCB_UTIL_CFLAGS) -I$(top_srcdir)/image
+-test_xcb_image_LDADD = $(XCB_LIBS) $(XCB_UTIL_LIBS) $(top_builddir)/image/libxcb-image.la
++test_xcb_image_LDADD = $(XCB_LIBS) $(XCB_UTIL_LIBS) $(XCB_SHM_LIBS) $(top_builddir)/image/libxcb-image.la
+ test_xcb_image_shm_SOURCES = test_xcb_image_shm.c
+ test_xcb_image_shm_CPPFLAGS = $(XCB_CFLAGS) $(XCB_SHM_CFLAGS) $(XCB_UTIL_CFLAGS) -I$(top_srcdir)/image
+ test_xcb_image_shm_LDADD = $(XCB_LIBS) $(XCB_UTIL_LIBS) $(XCB_SHM_LIBS) $(top_builddir)/image/libxcb-image.la
+ test_formats_SOURCES = test_formats.c
+ test_formats_CPPFLAGS = $(XCB_CFLAGS) $(XCB_SHM_CFLAGS) $(XCB_UTIL_CFLAGS) $(XPROTO_CFLAGS) -I$(top_srcdir)/image
+-test_formats_LDADD = $(XCB_LIBS) $(XCB_UTIL_LIBS) $(top_builddir)/image/libxcb-image.la
++test_formats_LDADD = $(XCB_LIBS) $(XCB_UTIL_LIBS) $(XCB_SHM_LIBS) $(top_builddir)/image/libxcb-image.la
+ test_bitmap_SOURCES = test_bitmap.c test.xbm
+ test_bitmap_CPPFLAGS = $(XCB_CFLAGS) $(XCB_SHM_CFLAGS) $(XCB_UTIL_CFLAGS)  -I$(top_srcdir)/image
+-test_bitmap_LDADD = $(XCB_LIBS) $(XCB_UTIL_LIBS) $(top_builddir)/image/libxcb-image.la
++test_bitmap_LDADD = $(XCB_LIBS) $(XCB_UTIL_LIBS) $(XCB_SHM_LIBS) $(top_builddir)/image/libxcb-image.la
+ all: all-am
+ 
+ .SUFFIXES:
