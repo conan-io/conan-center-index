@@ -34,6 +34,7 @@ jobs:
             archs: 'x86_64'
           - build: 'macos'
             os: 'macos-10.15'
+            deployment-target: '10.14'
             build_types: 'Release'
             archs: 'x86_64'
             compiler: 'apple_clang'
@@ -70,6 +71,7 @@ jobs:
           compiler-versions: ${{ matrix.compiler_version }}
           docker-images: ${{ matrix.docker_image }}
         env:
+          MACOSX_DEPLOYMENT_TARGET: ${{ matrix.deployment-target }}
           # these are taken for macOS config, linux one may be different!
           CONAN_OPTIONS: '
             opencv:jasper=False,

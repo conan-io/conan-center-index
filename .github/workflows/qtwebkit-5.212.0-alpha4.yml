@@ -54,6 +54,7 @@ jobs:
                            '
           - build: 'macos'
             os: 'macos-10.15'
+            deployment-target: '10.14'
             build_types: 'Release'
             archs: 'x86_64'
             conan_options: ''
@@ -85,6 +86,7 @@ jobs:
           compiler-versions: ${{ matrix.compiler_version }}
           docker-images: ${{ matrix.docker_image }}
         env:
+          MACOSX_DEPLOYMENT_TARGET: ${{ matrix.deployment-target }}
           CONAN_OPTIONS: ${{ env.COMMON_CONAN_OPTIONS }} ${{ matrix.conan_options }}
           CONAN_REFERENCE: 'qtwebkit/${{ matrix.qtwebkit_versions }}'
           CONAN_VISUAL_RUNTIMES: ${{ matrix.vs_runtimes }}

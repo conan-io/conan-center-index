@@ -27,6 +27,7 @@ jobs:
         include:
           - build: 'macos'
             os: 'macos-10.15'
+            deployment-target: '10.14'
             build_types: 'Release'
             archs: 'x86_64'
             compiler: 'apple_clang'
@@ -60,6 +61,7 @@ jobs:
           compiler-versions: ${{ matrix.compiler_version }}
           docker-images: ${{ matrix.docker_image }}
         env:
+          MACOSX_DEPLOYMENT_TARGET: ${{ matrix.deployment-target }}
           CONAN_SHARED_OPTION_NAME: False
           CONAN_VISUAL_RUNTIMES: ${{ matrix.vs_runtimes }}
           CONAN_ARCHS: ${{ matrix.archs }}
