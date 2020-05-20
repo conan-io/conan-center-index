@@ -10,7 +10,7 @@ class BitserializerConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://bitbucket.org/Pavel_Kisliak/bitserializer"
     license = "MIT"
-    settings = ("compiler",)
+    settings = ("os", "compiler",)
     no_copy_source = True
 
     @property
@@ -52,3 +52,8 @@ class BitserializerConan(ConanFile):
 
     def package_id(self):
         self.info.header_only()
+
+    def package_info(self):
+        if self.settings.compiler == "gcc" or (self.settings.os == "Linux" and self.settings.compiler == "clang"):
+            if tools.Version(self.settings.compiler.version) < 9:
+                self.cpp_info.libs = ["stdc++fs"]
