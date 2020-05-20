@@ -89,7 +89,7 @@ class SerfConan(ConanFile):
             if self.settings.compiler == "Visual Studio":
                 kwargs.update({
                     "TARGET_ARCH": str(self.settings.arch),
-                    "MSVC_VERSION": "{:.1f}".format(int(self.settings.compiler.version)),
+                    "MSVC_VERSION": "{:.1f}".format(int(str(self.settings.compiler.version))),
                 })
 
             escape_str = lambda x : "\"{}\"".format(x)
