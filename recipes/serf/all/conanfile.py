@@ -130,3 +130,5 @@ class SerfConan(ConanFile):
         self.cpp_info.libs = [libname]
         self.cpp_info.includedirs.append(os.path.join("include", libname))
         self.cpp_info.names["pkg_config"] = libname
+        if self.settings.os == "Windows":
+            self.cpp_info.system_libs = ["user32", "advapi32", "gdi32", "ws2_32", "crypt32", "mswsock", "rpcrt4", "secur32"]
