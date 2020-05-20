@@ -1,0 +1,4 @@
+sources:
+  "1.0.0":
+    url: "https://github.com/oatpp/oatpp-websocket/archive/1.0.0.tar.gz"
+    sha256: "2e4ed596d1e8c15f0b9c6d5ba994b8fde623a6dfd256a17c8f99d86427115981"
