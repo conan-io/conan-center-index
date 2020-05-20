@@ -57,6 +57,14 @@ class SerfConan(ConanFile):
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
             tools.patch(**patch)
 
+    @property
+    def _cc(self):
+        if tools.get_env("CC"):
+            return tools.get_env("CC")
+        if tools.is_apple_os(self.settings.os):
+            return "clang"
+        return str(self.settings.compiler)
+
     def build(self):
         self._patch_sources()
         os.mkdir(self._build_subfolder)
@@ -75,13 +83,13 @@ class SerfConan(ConanFile):
                 "CFLAGS": " ".join(self.deps_cpp_info.cflags + (["-fPIC"] if self.options.get_safe("fPIC") else []) + autotools.flags),
                 "LINKFLAGS": " ".join(self.deps_cpp_info.sharedlinkflags) + " " + " ".join("-L'{}'".format(l) for l in self.deps_cpp_info.lib_paths),
                 "CPPFLAGS": " ".join("-D{}".format(d) for d in autotools.defines) + " " + " ".join("-I'{}'".format(inc) for inc in self.deps_cpp_info.include_paths),
-                "CC": tools.get_env("CC") if tools.get_env("CC") else str(self.settings.compiler),
+                "CC": self._cc,
             }
 
             if self.settings.compiler == "Visual Studio":
                 kwargs.update({
                     "TARGET_ARCH": str(self.settings.arch),
-                    "MSVC_VERSION": str(self.settings.compiler.version),
+                    "MSVC_VERSION": "{:.1f}".format(int(self.settings.compiler.version)),
                 })
 
             escape_str = lambda x : "\"{}\"".format(x)
