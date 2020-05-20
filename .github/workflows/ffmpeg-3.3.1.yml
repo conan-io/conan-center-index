@@ -68,6 +68,7 @@ jobs:
           compiler-versions: ${{ matrix.compiler_version }}
           docker-images: ${{ matrix.docker_image }}
         env:
+          CONAN_OPTIONS: 'ffmpeg:pulse=False, ffmpeg:vdpau=False'
           MACOSX_DEPLOYMENT_TARGET: ${{ matrix.deployment-target }}
           CONAN_SHARED_OPTION_NAME: False
           CONAN_VISUAL_RUNTIMES: ${{ matrix.vs_runtimes }}
