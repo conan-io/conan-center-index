@@ -1,0 +1,11 @@
+sources:
+  "0.0.7":
+    url: "https://github.com/lloyd/easylzma/archive/0.0.7.tar.gz"
+    sha256: "c32565643598ba5147332d094d0392ec5b15b494e237c39a712db3fab9d9939a"
+patches:
+  "0.0.7":
+    - patch_file: "patches/memleaksfix.patch"
+      base_path: "source_subfolder"
+    - patch_file: "patches/cmake-no-cflags.patch"
+      base_path: "source_subfolder"
+

@@ -1,8 +1,8 @@
 ---
 versions:
   "2.13.01":
-    folder: ALL
+    folder: all
   "2.13.02":
-    folder: ALL
+    folder: all
   "2.14":
-    folder: ALL
+    folder: all

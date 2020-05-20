@@ -1,7 +1,6 @@
 from conans import ConanFile
 from conans import tools
-from conans.client.build.cppstd_flags import cppstd_flag
-from conans.tools import Version
+from conans.tools import Version, cppstd_flag
 from conans.errors import ConanException
 
 from conans.errors import ConanInvalidConfiguration
@@ -42,12 +41,13 @@ class BoostConan(ConanFile):
         "asio_no_deprecated": [True, False],
         "filesystem_no_deprecated": [True, False],
         "fPIC": [True, False],
-        "layout": ["system", "versioned", "tagged"],
+        "layout": ["system", "versioned", "tagged", "b2-default"],
         "magic_autolink": [True, False],  # enables BOOST_ALL_NO_LIB
         "python_executable": "ANY",  # system default python installation is used, if None
         "python_version": "ANY",  # major.minor; computed automatically, if None
         "namespace": "ANY",  # custom boost namespace for bcp, e.g. myboost
         "namespace_alias": [True, False],  # enable namespace alias for bcp, boost=myboost
+        "multithreading": [True, False],  # enables multithreading support
         "zlib": [True, False],
         "bzip2": [True, False],
         "lzma": [True, False],
@@ -55,7 +55,8 @@ class BoostConan(ConanFile):
         "segmented_stacks": [True, False],
         "debug_level": [i for i in range(1, 14)],
         "pch": [True, False],
-        "extra_b2_flags": "ANY"  # custom b2 flags
+        "extra_b2_flags": "ANY",  # custom b2 flags
+        "i18n_backend": ["iconv", "icu", None],
     }
     options.update({"without_%s" % libname: [True, False] for libname in lib_list})
 
@@ -73,6 +74,7 @@ class BoostConan(ConanFile):
         'python_version': 'None',
         'namespace': 'boost',
         'namespace_alias': False,
+        'multithreading': True,
         'zlib': True,
         'bzip2': True,
         'lzma': False,
@@ -81,6 +83,7 @@ class BoostConan(ConanFile):
         "debug_level": 2,
         'pch': True,
         'extra_b2_flags': 'None',
+        "i18n_backend": 'iconv',
     }
 
     for libname in lib_list:
@@ -104,6 +107,10 @@ class BoostConan(ConanFile):
         return self.settings.compiler == "Visual Studio"
 
     @property
+    def _is_clang_cl(self):
+        return self.settings.os == "Windows" and self.settings.compiler == "clang"
+
+    @property
     def _zip_bzip2_requires_needed(self):
         return not self.options.without_iostreams and not self.options.header_only
 
@@ -120,6 +127,19 @@ class BoostConan(ConanFile):
         if self.settings.os == "Windows":
             del self.options.fPIC
 
+    def configure(self):
+        if not self.options.i18n_backend and not self.options.without_locale:
+            raise ConanInvalidConfiguration("Boost 'locale' library requires a i18n_backend, either 'icu' or 'iconv'")
+
+        if not self.options.multithreading:
+            # * For the reason 'thread' is deactivate look at https://stackoverflow.com/a/20991533
+            #   Look also on the comments of the answer for more details
+            # * Although the 'context' and 'atomic' library does not mention anything about threading,
+            #   when being build the compiler uses the -pthread flag, which makes it quite dangerous
+            for lib in ['locale', 'coroutine', 'wave', 'type_erasure', 'fiber', 'thread', 'context', 'atomic']:
+                if not self.options.get_safe('without_%s' % lib):
+                    raise ConanInvalidConfiguration("Boost '%s' library requires multi threading" % lib)
+
     def build_requirements(self):
         self.build_requires("b2/4.2.0")
 
@@ -133,6 +153,8 @@ class BoostConan(ConanFile):
                 self.requires("xz_utils/5.2.4")
             if self.options.zstd:
                 self.requires("zstd/1.4.3")
+        if self.options.i18n_backend == 'icu':
+            self.requires("icu/64.2")
 
     def package_id(self):
         if self.options.header_only:
@@ -366,7 +388,7 @@ class BoostConan(ConanFile):
                 self.run(command)
 
     def _run_bcp(self):
-        with tools.vcvars(self.settings) if self._is_msvc else tools.no_op():
+        with tools.vcvars(self.settings) if self._is_msvc or self._is_clang_cl else tools.no_op():
             with tools.chdir(self.source_folder):
                 os.mkdir(self._bcp_dir)
                 namespace = "--namespace=%s" % self.options.namespace
@@ -417,26 +439,6 @@ class BoostConan(ConanFile):
                 # To show the libraries *1
                 # self.run("%s --show-libraries" % b2_exe)
                 self.run(full_command)
-
-        arch = self.settings.get_safe('arch')
-        if arch.startswith("asm.js"):
-            self._create_emscripten_libs()
-
-    def _create_emscripten_libs(self):
-        # Boost Build doesn't create the libraries, but it gets close,
-        # leaving .bc files where the libraries would be.
-        staged_libs = os.path.join(
-            self.source_folder, self._boost_dir, "stage", "lib"
-        )
-        for bc_file in os.listdir(staged_libs):
-            if bc_file.startswith("lib") and bc_file.endswith(".bc"):
-                a_file = bc_file[:-3] + ".a"
-                cmd = "emar q {dst} {src}".format(
-                    dst=os.path.join(staged_libs, a_file),
-                    src=os.path.join(staged_libs, bc_file),
-                )
-                self.output.info(cmd)
-                self.run(cmd)
 
     @property
     def _b2_os(self):
@@ -532,12 +534,22 @@ class BoostConan(ConanFile):
         if self._b2_abi:
             flags.append("abi=%s" % self._b2_abi)
 
-        flags.append("--layout=%s" % self.options.layout)
+        if self.options.layout is not "b2-default":
+            flags.append("--layout=%s" % self.options.layout)
         flags.append("--user-config=%s" % os.path.join(self._boost_build_dir, 'user-config.jam'))
         flags.append("-sNO_ZLIB=%s" % ("0" if self.options.zlib else "1"))
         flags.append("-sNO_BZIP2=%s" % ("0" if self.options.bzip2 else "1"))
         flags.append("-sNO_LZMA=%s" % ("0" if self.options.lzma else "1"))
         flags.append("-sNO_ZSTD=%s" % ("0" if self.options.zstd else "1"))
+
+        if self.options.i18n_backend == 'icu':
+            flags.append("-sICU_PATH={}".format(self.deps_cpp_info["icu"].rootpath))
+            flags.append("boost.locale.iconv=off boost.locale.icu=on")
+        elif self.options.i18n_backend == 'iconv':
+            flags.append("boost.locale.iconv=on boost.locale.icu=off")
+        else:
+            flags.append("boost.locale.iconv=off boost.locale.icu=off")
+            flags.append("--disable-icu --disable-iconvv")
 
         def add_defines(option, library):
             if option:
@@ -547,13 +559,14 @@ class BoostConan(ConanFile):
         if self._zip_bzip2_requires_needed:
             add_defines(self.options.zlib, "zlib")
             add_defines(self.options.bzip2, "bzip2")
-            add_defines(self.options.lzma, "lzma")
+            add_defines(self.options.lzma, "xz_utils")
             add_defines(self.options.zstd, "zstd")
 
         if self._is_msvc and self.settings.compiler.runtime:
             flags.append("runtime-link=%s" % ("static" if "MT" in str(self.settings.compiler.runtime) else "shared"))
 
-        flags.append("threading=multi")
+        # For details https://boostorg.github.io/build/manual/master/index.html
+        flags.append("threading=%s" % ("single" if not self.options.multithreading else "multi" ))
 
         flags.append("link=%s" % ("static" if not self.options.shared else "shared"))
         if self.settings.build_type == "Debug":
@@ -568,12 +581,7 @@ class BoostConan(ConanFile):
         flags.append("toolset=%s" % self._toolset)
 
         if self.settings.get_safe("compiler.cppstd"):
-            flags.append("cxxflags=%s" % cppstd_flag(
-                    self.settings.get_safe("compiler"),
-                    self.settings.get_safe("compiler.version"),
-                    self.settings.get_safe("compiler.cppstd")
-                )
-            )
+            flags.append("cxxflags=%s" % cppstd_flag(self.settings))
 
         # CXX FLAGS
         cxx_flags = []
@@ -581,9 +589,14 @@ class BoostConan(ConanFile):
         if self.settings.os != "Windows":
             if self.options.fPIC:
                 cxx_flags.append("-fPIC")
+        if self.settings.build_type == "RelWithDebInfo":
+            if self.settings.compiler == "gcc" or "clang" in str(self.settings.compiler):
+                cxx_flags.append("-g")
+            elif self.settings.compiler == "Visual Studio":
+                cxx_flags.append("/Z7")
 
         # Standalone toolchain fails when declare the std lib
-        if self.settings.os != "Android":
+        if self.settings.os != "Android" and self.settings.os != "Emscripten":
             try:
                 if self._gnu_cxx11_abi:
                     flags.append("define=_GLIBCXX_USE_CXX11_ABI=%s" % self._gnu_cxx11_abi)
@@ -617,8 +630,10 @@ class BoostConan(ConanFile):
                                                                     self.settings.os.version))
 
         if self.settings.os == "iOS":
-            cxx_flags.append("-DBOOST_AC_USE_PTHREADS")
-            cxx_flags.append("-DBOOST_SP_USE_PTHREADS")
+            if self.options.multithreading:
+                cxx_flags.append("-DBOOST_AC_USE_PTHREADS")
+                cxx_flags.append("-DBOOST_SP_USE_PTHREADS")
+
             cxx_flags.append("-fvisibility=hidden")
             cxx_flags.append("-fvisibility-inlines-hidden")
             cxx_flags.append("-fembed-bitcode")
@@ -647,13 +662,13 @@ class BoostConan(ConanFile):
         if arch.startswith('arm'):
             if 'hf' in arch:
                 flags.append('-mfloat-abi=hard')
+        elif self.settings.os == "Emscripten":
+            pass
         elif arch in ["x86", "x86_64"]:
             pass
         elif arch.startswith("ppc"):
             pass
         elif arch.startswith("mips"):
-            pass
-        elif arch.startswith("asm.js"):
             pass
         else:
             self.output.warn("Unable to detect the appropriate ABI for %s architecture." % arch)
@@ -697,11 +712,11 @@ class BoostConan(ConanFile):
 
         contents = ""
         if self._zip_bzip2_requires_needed:
-            def create_library_config(name):
-                includedir = self.deps_cpp_info[name].include_paths[0].replace('\\', '/')
-                libdir = self.deps_cpp_info[name].lib_paths[0].replace('\\', '/')
-                lib = self.deps_cpp_info[name].libs[0]
-                version = self.deps_cpp_info[name].version
+            def create_library_config(deps_name, name):
+                includedir = '"%s"' % self.deps_cpp_info[deps_name].include_paths[0].replace('\\', '/')
+                libdir = '"%s"' % self.deps_cpp_info[deps_name].lib_paths[0].replace('\\', '/')
+                lib = self.deps_cpp_info[deps_name].libs[0]
+                version = self.deps_cpp_info[deps_name].version
                 return "\nusing {name} : {version} : " \
                        "<include>{includedir} " \
                        "<search>{libdir} " \
@@ -713,13 +728,13 @@ class BoostConan(ConanFile):
 
             contents = ""
             if self.options.zlib:
-                contents += create_library_config("zlib")
+                contents += create_library_config("zlib", "zlib")
             if self.options.bzip2:
-                contents += create_library_config("bzip2")
+                contents += create_library_config("bzip2", "bzip2")
             if self.options.lzma:
-                contents += create_library_config("lzma")
+                contents += create_library_config("xz_utils", "lzma")
             if self.options.zstd:
-                contents += create_library_config("zstd")
+                contents += create_library_config("zstd", "zstd")
 
         if not self.options.without_python:
             # https://www.boost.org/doc/libs/1_70_0/libs/python/doc/html/building/configuring_boost_build.html
@@ -731,7 +746,7 @@ class BoostConan(ConanFile):
 
         # Specify here the toolset with the binary if present if don't empty parameter :
         contents += '\nusing "%s" : %s : ' % (self._toolset, self._toolset_version)
-        contents += ' %s' % self._cxx.replace("\\", "/")
+        contents += ' "%s"' % self._cxx.replace("\\", "/")
 
         if tools.is_apple_os(self.settings.os):
             if self.settings.compiler == "apple-clang":
@@ -809,6 +824,25 @@ class BoostConan(ConanFile):
         if self.options.header_only:
             self.copy(pattern="*", dst="include/boost", src="%s/boost" % self._boost_dir)
 
+        if self.settings.os == "Emscripten":
+            self._create_emscripten_libs()
+
+    def _create_emscripten_libs(self):
+        # Boost Build doesn't create the libraries, but it gets close,
+        # leaving .bc files where the libraries would be.
+        staged_libs = os.path.join(
+            self.package_folder, "lib"
+        )
+        for bc_file in os.listdir(staged_libs):
+            if bc_file.startswith("lib") and bc_file.endswith(".bc"):
+                a_file = bc_file[:-3] + ".a"
+                cmd = "emar q {dst} {src}".format(
+                    dst=os.path.join(staged_libs, a_file),
+                    src=os.path.join(staged_libs, bc_file),
+                )
+                self.output.info(cmd)
+                self.run(cmd)
+
     def package_info(self):
         gen_libs = [] if self.options.header_only else tools.collect_libs(self)
 
@@ -865,7 +899,7 @@ class BoostConan(ConanFile):
                 if not self.options.shared:
                     self.cpp_info.defines.append("BOOST_PYTHON_STATIC_LIB")
 
-            if self._is_msvc:
+            if self._is_msvc or self._is_clang_cl:
                 if not self.options.magic_autolink:
                     # DISABLES AUTO LINKING! NO SMART AND MAGIC DECISIONS THANKS!
                     self.cpp_info.defines.append("BOOST_ALL_NO_LIB")
@@ -880,8 +914,22 @@ class BoostConan(ConanFile):
                 # https://github.com/conan-community/conan-boost/issues/127#issuecomment-404750974
                 self.cpp_info.system_libs.append("bcrypt")
             elif self.settings.os == "Linux":
-                # https://github.com/conan-community/conan-boost/issues/135
-                self.cpp_info.system_libs.extend(["pthread", "rt"])
+                # https://github.com/conan-community/community/issues/135
+                self.cpp_info.system_libs.append("rt")
+                if self.options.multithreading:
+                    self.cpp_info.system_libs.append("pthread")
+            elif self.settings.os == "Emscripten":
+                if self.options.multithreading:
+                    arch = self.settings.get_safe('arch')
+                    # https://emscripten.org/docs/porting/pthreads.html
+                    # The documentation mentions that we should be using the "-s USE_PTHREADS=1"
+                    # but it was causing problems with the target based configurations in conan
+                    # So instead we are using the raw compiler flags (that are being activated
+                    # from the aformentioned flag)
+                    if arch.startswith("x86") or arch.startswith("wasm"):
+                        self.cpp_info.cxxflags.append("-pthread")
+                        self.cpp_info.sharedlinkflags.extend(["-pthread","--shared-memory"])
+                        self.cpp_info.exelinkflags.extend(["-pthread","--shared-memory"])
 
         self.env_info.BOOST_ROOT = self.package_folder
         self.cpp_info.bindirs.append("lib")

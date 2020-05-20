@@ -9,7 +9,7 @@ class Libx265Conan(ConanFile):
     topics = ("conan", "libx265", "codec", "video", "H.265")
     url = "https://github.com/conan-io/conan-center-index"
     homepage = " https://bitbucket.org/multicoreware/x265"
-    exports_sources = "CMakeLists.txt"
+    exports_sources = ["CMakeLists.txt", "patches/*"]
     generators = "cmake"
     license = ("GPL-2.0-only", "commercial")  # https://bitbucket.org/multicoreware/x265/src/default/COPYING
     settings = "os", "arch", "compiler", "build_type"
@@ -71,18 +71,16 @@ class Libx265Conan(ConanFile):
 
     def _patch_sources(self):
         cmakelists = os.path.join(self._source_subfolder, "source", "CMakeLists.txt")
-        if self.settings.os == "Windows":
-            tools.replace_in_file(cmakelists,
-                                  "${PROJECT_BINARY_DIR}/Debug/x265.pdb",
-                                  "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/x265.pdb")
-            tools.replace_in_file(cmakelists,
-                                  "${PROJECT_BINARY_DIR}/x265.pdb",
-                                  "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/x265.pdb")
-        elif self.settings.os == "Android":
+        tools.replace_in_file(cmakelists,
+                                "if((WIN32 AND ENABLE_CLI) OR (WIN32 AND ENABLE_SHARED))",
+                                "if(FALSE)")
+        if self.settings.os == "Android":
             tools.replace_in_file(cmakelists,
                 "list(APPEND PLATFORM_LIBS pthread)", "")
             tools.replace_in_file(cmakelists,
                 "list(APPEND PLATFORM_LIBS rt)", "")
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            tools.patch(**patch)
 
     def build(self):
         self._patch_sources()

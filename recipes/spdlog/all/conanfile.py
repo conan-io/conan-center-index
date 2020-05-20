@@ -41,7 +41,7 @@ class SpdlogConan(ConanFile):
         if self.options.header_only:
             del self.options.shared
             del self.options.fPIC
-        elif self.settings.os == "Windows" and self.options.shared:
+        elif self.settings.os == "Windows" and self.options.shared and Version(self.version) < "1.6.0":
             raise ConanInvalidConfiguration("spdlog shared lib is not yet supported under windows")
         if self.settings.os != "Windows" and \
            (self.options.wchar_support or self.options.wchar_filenames):
@@ -49,7 +49,7 @@ class SpdlogConan(ConanFile):
 
     def requirements(self):
         if Version(self.version) >= "1.5.0":
-            self.requires("fmt/6.1.2")
+            self.requires("fmt/6.2.0")
         else:
             self.requires("fmt/6.0.0")
 
@@ -73,6 +73,8 @@ class SpdlogConan(ConanFile):
         self._cmake.definitions["SPDLOG_WCHAR_FILENAMES"] = self.options.wchar_filenames
         self._cmake.definitions["SPDLOG_INSTALL"] = True
         self._cmake.definitions["SPDLOG_NO_EXCEPTIONS"] = self.options.no_exceptions
+        if self.settings.os in ("iOS", "tvOS", "watchOS"):
+            self._cmake.definitions["SPDLOG_NO_TLS"] = True
         self._cmake.configure()
         return self._cmake
 
@@ -100,7 +102,7 @@ class SpdlogConan(ConanFile):
 
     def package_info(self):
         if self.options.header_only:
-            self.cpp_info.defines = ["SPDLOG_HEADER_ONLY", "SPDLOG_FMT_EXTERNAL"]
+            self.cpp_info.defines = ["SPDLOG_FMT_EXTERNAL"]
         else:
             self.cpp_info.libs = tools.collect_libs(self)
             self.cpp_info.defines = ["SPDLOG_COMPILED_LIB", "SPDLOG_FMT_EXTERNAL"]

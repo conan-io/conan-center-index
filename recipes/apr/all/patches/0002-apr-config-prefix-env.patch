@@ -1,0 +1,11 @@
+--- apr-config.in
++++ apr-config.in
+@@ -21,7 +21,7 @@
+ APR_MAJOR_VERSION="@APR_MAJOR_VERSION@"
+ APR_DOTTED_VERSION="@APR_DOTTED_VERSION@"
+ 
+-prefix="@prefix@"
++prefix="$APR_ROOT"
+ exec_prefix="@exec_prefix@"
+ bindir="@bindir@"
+ libdir="@libdir@"

@@ -89,4 +89,4 @@ class LibpqxxRecipe(ConanFile):
         self.cpp_info.libs = ["pqxx"]
 
         if self.settings.os == "Windows":
-            self.cpp_info.system_libs = ["wsock32 ", "ws2_32"]
+            self.cpp_info.system_libs = ["wsock32", "ws2_32"]

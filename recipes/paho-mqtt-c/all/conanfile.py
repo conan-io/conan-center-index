@@ -38,7 +38,7 @@ class PahoMqttcConan(ConanFile):
 
     def requirements(self):
         if self.options.ssl:
-            self.requires("openssl/1.1.1d")
+            self.requires("openssl/1.1.1f")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
@@ -87,6 +87,8 @@ class PahoMqttcConan(ConanFile):
                 self.cpp_info.system_libs.extend(["c", "dl", "pthread"])
             elif self.settings.os == "FreeBSD":
                 self.cpp_info.system_libs.extend(["compat", "pthread"])
+            elif self.settings.os == "Android":
+                self.cpp_info.system_libs.extend(["c"])
             else:
                 self.cpp_info.system_libs.extend(["c", "pthread"])
         self.cpp_info.names["cmake_find_package"] = "PahoMqttC"

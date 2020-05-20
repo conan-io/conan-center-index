@@ -22,12 +22,14 @@ class ICUBase(ConanFile):
                "fPIC": [True, False],
                "data_packaging": ["files", "archive", "library", "static"],
                "with_unit_tests": [True, False],
-               "silent": [True, False]}
+               "silent": [True, False],
+               "with_dyload": [True, False]}
     default_options = {"shared": False,
                        "fPIC": True,
                        "data_packaging": "archive",
                        "with_unit_tests": False,
-                       "silent": True}
+                       "silent": True,
+                       "with_dyload": True}
 
     @property
     def _is_msvc(self):
@@ -158,6 +160,9 @@ class ICUBase(ConanFile):
                 "--disable-samples",
                 "--disable-layout",
                 "--disable-layoutex"]
+        
+        if not self.options.with_dyload:
+            args += ["--disable-dyload"]
 
         if self.cross_building:
             if self._env_build.build:
@@ -214,6 +219,9 @@ class ICUBase(ConanFile):
             del self.options.fPIC
 
     def package_info(self):
+        self.cpp_info.names['cmake_find_package'] = 'ICU'
+        self.cpp_info.names['cmake_find_package_multi'] = 'ICU'
+
         def lib_name(lib):
             name = lib
             if self.settings.os == "Windows":
@@ -241,7 +249,7 @@ class ICUBase(ConanFile):
 
         if not self.options.shared:
             self.cpp_info.defines.append("U_STATIC_IMPLEMENTATION")
-        if self.settings.os == 'Linux':
+        if self.settings.os == 'Linux' and self.options.with_dyload:
             self.cpp_info.system_libs.extend(["dl", "pthread"])
 
         if self.settings.os == 'Windows':

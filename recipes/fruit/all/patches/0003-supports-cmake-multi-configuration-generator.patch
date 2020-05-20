@@ -1,0 +1,87 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 11342ce..c85be1b 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -14,15 +14,8 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
+ # CMake on OSX likes to see this set explicitly, otherwise it outputs a warning.
+ set(CMAKE_MACOSX_RPATH 1)
+ 
+-if(NOT "${CMAKE_BUILD_TYPE}" MATCHES "^(Debug|Release|RelWithDebInfo|MinSizeRel)$")
+-  message(FATAL_ERROR "Please re-run CMake, specifying -DCMAKE_BUILD_TYPE=Debug , -DCMAKE_BUILD_TYPE=Release , -DCMAKE_BUILD_TYPE=RelWithDebInfo or -DCMAKE_BUILD_TYPE=MinSizeRel .")
+-endif()
+-
+ option(BUILD_SHARED_LIBS "Build shared library" ON)
+ 
+-# The Visual Studio CMake generators default to multiple configurations, but Fruit doesn't support multi-configuration build directories.
+-set(CMAKE_CONFIGURATION_TYPES "${CMAKE_BUILD_TYPE}")
+-
+ set(FRUIT_ADDITIONAL_CXX_FLAGS "" CACHE STRING "Additional CXX compiler flags." FORCE)
+ 
+ set(FRUIT_ADDITIONAL_COMPILE_FLAGS "${FRUIT_ADDITIONAL_CXX_FLAGS}")
+@@ -36,18 +29,18 @@ if(NOT "${CMAKE_CXX_COMPILER_ID}" MATCHES "^(GNU|Clang|AppleClang|MSVC)$")
+   #   - https://software.intel.com/en-us/forums/intel-c-compiler/topic/606049
+ endif()
+ 
+-if("${CMAKE_CXX_COMPILER_ID}" MATCHES "^(GNU|Clang|Intel|AppleClang)$")
+-  set(FRUIT_ADDITIONAL_COMPILE_FLAGS "${FRUIT_ADDITIONAL_COMPILE_FLAGS} -std=c++11 -W -Wall -Wno-unknown-warning-option -Wno-missing-braces")
+-elseif("${CMAKE_CXX_COMPILER_ID}" MATCHES "^(MSVC)$")
+-  # TODO: we currently disable the warning C4709 because MSVC emits it even when there is no reason to. Re-enable it when possible.
+-  # TODO: the warning C4141 is disabled, because MSVC emits it ("'inline': used more than once") when a function/method is marked with both __forceinline and inline.
+-  # TODO: the warning C4714 is disabled, MSVC emits it when it decides not to inline a __forceinline function/method.
+-  # The warning C4577 is disabled because we don't need a termination guarantee on exceptions for functions marked with
+-  # 'noexcept'.
+-  # The warning C4530 is disabled because it's triggered by MSVC's STL.
+-  # The warning C5205 is disabled, MSVC emits it for abstract classes in example code with non-virtual destructors, but we never call delete on those (even though std::default_delete<Scaler> is instantiated for those types).
+-  set(FRUIT_ADDITIONAL_COMPILE_FLAGS "${FRUIT_ADDITIONAL_COMPILE_FLAGS} /nologo /FS /W4 /wd4324 /wd4709 /wd4459 /wd4141 /wd4714 /wd4577 /wd4530 /wd5205 /D_SCL_SECURE_NO_WARNINGS")
+-endif()
++set(FRUIT_ADDITIONAL_COMPILE_FLAGS_GNU ${FRUIT_ADDITIONAL_COMPILE_FLAGS} -W -Wall -Wno-unknown-warning-option -Wno-missing-braces)
++set(FRUIT_ADDITIONAL_COMPILE_FLAGS_Clang ${FRUIT_ADDITIONAL_COMPILE_FLAGS} -W -Wall -Wno-unknown-warning-option -Wno-missing-braces)
++set(FRUIT_ADDITIONAL_COMPILE_FLAGS_Intel ${FRUIT_ADDITIONAL_COMPILE_FLAGS} -W -Wall -Wno-unknown-warning-option -Wno-missing-braces)
++set(FRUIT_ADDITIONAL_COMPILE_FLAGS_AppleClang ${FRUIT_ADDITIONAL_COMPILE_FLAGS} -W -Wall -Wno-unknown-warning-option -Wno-missing-braces)
++set(FRUIT_ADDITIONAL_COMPILE_FLAGS_MSVC ${FRUIT_ADDITIONAL_COMPILE_FLAGS} /nologo /FS /W4 /wd4324 /wd4709 /wd4459 /wd4141 /wd4714 /wd4577 /wd4530 /wd5205 /D_SCL_SECURE_NO_WARNINGS)
++
++list(APPEND FRUIT_ADDITIONAL_COMPILE_FLAGS
++  $<$<CXX_COMPILER_ID:GNU>:${FRUIT_ADDITIONAL_COMPILE_FLAGS_GNU}>
++  $<$<CXX_COMPILER_ID:Clang>:${FRUIT_ADDITIONAL_COMPILE_FLAGS_Clang}>
++  $<$<CXX_COMPILER_ID:Intel>:${FRUIT_ADDITIONAL_COMPILE_FLAGS_Intel}>
++  $<$<CXX_COMPILER_ID:AppleClang>:${FRUIT_ADDITIONAL_COMPILE_FLAGS_AppleClang}>
++  $<$<CXX_COMPILER_ID:MSVC>:${FRUIT_ADDITIONAL_COMPILE_FLAGS_MSVC}>)
+ 
+ option(FRUIT_ENABLE_COVERAGE "Enable collection of test coverage. This is meant to be used by Fruit developers. It's only supported when using GCC on Linux." OFF)
+ if("${FRUIT_ENABLE_COVERAGE}")
+@@ -89,12 +82,6 @@ set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} ${FRUIT_ADDITIONAL_LINKER_
+ set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} ${FRUIT_ADDITIONAL_LINKER_FLAGS}")
+ set(CMAKE_MODULE_LINKER_FLAGS "${CMAKE_MODULE_LINKER_FLAGS} ${FRUIT_ADDITIONAL_LINKER_FLAGS}")
+ 
+-if ("${CMAKE_BUILD_TYPE}" STREQUAL "Release")
+-    set(FRUIT_COMPILE_FLAGS "${CMAKE_CXX_FLAGS} ${CMAKE_CXX_FLAGS_RELEASE} ${FRUIT_ADDITIONAL_COMPILE_FLAGS}")
+-else()
+-    set(FRUIT_COMPILE_FLAGS "${CMAKE_CXX_FLAGS} ${CMAKE_CXX_FLAGS_DEBUG} ${FRUIT_ADDITIONAL_COMPILE_FLAGS}")
+-endif()
+-
+ set(FRUIT_CLANG_TIDY_CHECKS
+     bugprone*,-bugprone-reserved-identifier,-bugprone-exception-escape,clang-analyzer*,performance*,google*,-google-readability*,-google-runtime-references,clang-diagnostic-unused-command-line-argument,misc-macro-parentheses,-clang-diagnostic-dtor-name)
+ 
+diff --git a/configuration/CMakeLists.txt b/configuration/CMakeLists.txt
+index 11d8445..a78a5bb 100644
+--- a/configuration/CMakeLists.txt
++++ b/configuration/CMakeLists.txt
+@@ -1,7 +1,17 @@
+ 
+ include(CheckCXXSourceCompiles)
+ 
+-set(CMAKE_REQUIRED_FLAGS "${FRUIT_COMPILE_FLAGS}")
++if("${CMAKE_CXX_COMPILER_ID}" MATCHES "GNU")
++    set(CMAKE_REQUIRED_FLAGS ${FRUIT_ADDITIONAL_COMPILE_FLAGS_GNU})
++elseif("${CMAKE_CXX_COMPILER_ID}" MATCHES "^Clang$")
++    set(CMAKE_REQUIRED_FLAGS ${FRUIT_ADDITIONAL_COMPILE_FLAGS_Clang})
++elseif("${CMAKE_CXX_COMPILER_ID}" MATCHES "Intel")
++    set(CMAKE_REQUIRED_FLAGS ${FRUIT_ADDITIONAL_COMPILE_FLAGS_Intel})
++elseif("${CMAKE_CXX_COMPILER_ID}" MATCHES "AppleClang")
++    set(CMAKE_REQUIRED_FLAGS ${FRUIT_ADDITIONAL_COMPILE_FLAGS_AppleClang})
++elseif("${CMAKE_CXX_COMPILER_ID}" MATCHES "MSVC")
++    set(CMAKE_REQUIRED_FLAGS ${FRUIT_ADDITIONAL_COMPILE_FLAGS_MSVC})
++endif()
+ 
+ CHECK_CXX_SOURCE_COMPILES("
+ int main() {}

@@ -8,7 +8,6 @@ class NlohmannJsonConan(ConanFile):
     description = "JSON for Modern C++ parser and generator."
     topics = ("conan", "jsonformoderncpp", "nlohmann_json", "json", "header-only")
     url = "https://github.com/conan-io/conan-center-index"
-    settings = "os", "compiler", "arch", "build_type"
     no_copy_source = True
     license = "MIT"
     options = {
@@ -47,7 +46,3 @@ class NlohmannJsonConan(ConanFile):
             os.remove(os.path.join(self.package_folder, "nlohmann_json.natvis"))
         except FileNotFoundError:
             pass
-
-
-    def package_id(self):
-        self.info.header_only()

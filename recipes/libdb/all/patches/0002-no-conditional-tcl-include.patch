@@ -1,0 +1,197 @@
+This is required on Windows mingw.
+--- lang/tcl/tcl_compat.c
++++ lang/tcl/tcl_compat.c
+@@ -10,9 +10,9 @@
+ #ifdef CONFIG_TEST
+ 
+ #include "db_int.h"
+-#ifdef HAVE_SYSTEM_INCLUDE_FILES
++//#ifdef HAVE_SYSTEM_INCLUDE_FILES
+ #include <tcl.h>
+-#endif
++//#endif
+ #include "dbinc/tcl_db.h"
+ 
+ /*
+--- lang/tcl/tcl_db.c
++++ lang/tcl/tcl_db.c
+@@ -9,9 +9,9 @@
+ #include "db_config.h"
+ 
+ #include "db_int.h"
+-#ifdef HAVE_SYSTEM_INCLUDE_FILES
++//#ifdef HAVE_SYSTEM_INCLUDE_FILES
+ #include <tcl.h>
+-#endif
++//#endif
+ #include "dbinc/db_page.h"
+ #include "dbinc/db_am.h"
+ #include "dbinc/tcl_db.h"
+--- lang/tcl/tcl_db_pkg.c
++++ lang/tcl/tcl_db_pkg.c
+@@ -9,9 +9,9 @@
+ #include "db_config.h"
+ 
+ #include "db_int.h"
+-#ifdef HAVE_SYSTEM_INCLUDE_FILES
++//#ifdef HAVE_SYSTEM_INCLUDE_FILES
+ #include <tcl.h>
+-#endif
++//#endif
+ #include "dbinc/db_page.h"
+ #include "dbinc/hash.h"
+ #include "dbinc/tcl_db.h"
+--- lang/tcl/tcl_dbcursor.c
++++ lang/tcl/tcl_dbcursor.c
+@@ -9,9 +9,9 @@
+ #include "db_config.h"
+ 
+ #include "db_int.h"
+-#ifdef HAVE_SYSTEM_INCLUDE_FILES
++//#ifdef HAVE_SYSTEM_INCLUDE_FILES
+ #include <tcl.h>
+-#endif
++//#endif
+ #include "dbinc/tcl_db.h"
+ 
+ /*
+--- lang/tcl/tcl_env.c
++++ lang/tcl/tcl_env.c
+@@ -9,9 +9,9 @@
+ #include "db_config.h"
+ 
+ #include "db_int.h"
+-#ifdef HAVE_SYSTEM_INCLUDE_FILES
++//#ifdef HAVE_SYSTEM_INCLUDE_FILES
+ #include <tcl.h>
+-#endif
++//#endif
+ #include "dbinc/lock.h"
+ #include "dbinc/txn.h"
+ #include "dbinc/tcl_db.h"
+--- lang/tcl/tcl_internal.c
++++ lang/tcl/tcl_internal.c
+@@ -9,9 +9,9 @@
+ #include "db_config.h"
+ 
+ #include "db_int.h"
+-#ifdef HAVE_SYSTEM_INCLUDE_FILES
++//#ifdef HAVE_SYSTEM_INCLUDE_FILES
+ #include <tcl.h>
+-#endif
++//#endif
+ #include "dbinc/tcl_db.h"
+ #include "dbinc/db_page.h"
+ #include "dbinc/db_am.h"
+--- lang/tcl/tcl_lock.c
++++ lang/tcl/tcl_lock.c
+@@ -9,9 +9,9 @@
+ #include "db_config.h"
+ 
+ #include "db_int.h"
+-#ifdef HAVE_SYSTEM_INCLUDE_FILES
++//#ifdef HAVE_SYSTEM_INCLUDE_FILES
+ #include <tcl.h>
+-#endif
++//#endif
+ #include "dbinc/tcl_db.h"
+ 
+ /*
+--- lang/tcl/tcl_log.c
++++ lang/tcl/tcl_log.c
+@@ -9,9 +9,9 @@
+ #include "db_config.h"
+ 
+ #include "db_int.h"
+-#ifdef HAVE_SYSTEM_INCLUDE_FILES
++//#ifdef HAVE_SYSTEM_INCLUDE_FILES
+ #include <tcl.h>
+-#endif
++//#endif
+ #include "dbinc/log.h"
+ #include "dbinc/tcl_db.h"
+ 
+--- lang/tcl/tcl_mp.c
++++ lang/tcl/tcl_mp.c
+@@ -9,9 +9,9 @@
+ #include "db_config.h"
+ 
+ #include "db_int.h"
+-#ifdef HAVE_SYSTEM_INCLUDE_FILES
++//#ifdef HAVE_SYSTEM_INCLUDE_FILES
+ #include <tcl.h>
+-#endif
++//#endif
+ #include "dbinc/tcl_db.h"
+ 
+ /*
+--- lang/tcl/tcl_mutex.c
++++ lang/tcl/tcl_mutex.c
+@@ -9,9 +9,9 @@
+ #include "db_config.h"
+ 
+ #include "db_int.h"
+-#ifdef HAVE_SYSTEM_INCLUDE_FILES
++//#ifdef HAVE_SYSTEM_INCLUDE_FILES
+ #include <tcl.h>
+-#endif
++//#endif
+ #include "dbinc/tcl_db.h"
+ 
+ #ifdef CONFIG_TEST
+--- lang/tcl/tcl_rep.c
++++ lang/tcl/tcl_rep.c
+@@ -9,9 +9,9 @@
+ #include "db_config.h"
+ 
+ #include "db_int.h"
+-#ifdef HAVE_SYSTEM_INCLUDE_FILES
++//#ifdef HAVE_SYSTEM_INCLUDE_FILES
+ #include <tcl.h>
+-#endif
++//#endif
+ #include "dbinc/tcl_db.h"
+ 
+ #ifdef CONFIG_TEST
+--- lang/tcl/tcl_seq.c
++++ lang/tcl/tcl_seq.c
+@@ -10,9 +10,9 @@
+ #ifdef HAVE_64BIT_TYPES
+ 
+ #include "db_int.h"
+-#ifdef HAVE_SYSTEM_INCLUDE_FILES
++//#ifdef HAVE_SYSTEM_INCLUDE_FILES
+ #include <tcl.h>
+-#endif
++//#endif
+ #include "dbinc/tcl_db.h"
+ #include "dbinc_auto/sequence_ext.h"
+ 
+--- lang/tcl/tcl_txn.c
++++ lang/tcl/tcl_txn.c
+@@ -9,9 +9,9 @@
+ #include "db_config.h"
+ 
+ #include "db_int.h"
+-#ifdef HAVE_SYSTEM_INCLUDE_FILES
++//#ifdef HAVE_SYSTEM_INCLUDE_FILES
+ #include <tcl.h>
+-#endif
++//#endif
+ #include "dbinc/tcl_db.h"
+ 
+ static int tcl_TxnCommit __P((Tcl_Interp *,
+--- lang/tcl/tcl_util.c
++++ lang/tcl/tcl_util.c
+@@ -9,9 +9,9 @@
+ #include "db_config.h"
+ 
+ #include "db_int.h"
+-#ifdef HAVE_SYSTEM_INCLUDE_FILES
++//#ifdef HAVE_SYSTEM_INCLUDE_FILES
+ #include <tcl.h>
+-#endif
++//#endif
+ #include "dbinc/tcl_db.h"
+ 
+ /*

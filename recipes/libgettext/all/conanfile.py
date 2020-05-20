@@ -14,11 +14,11 @@ class GetTextConan(ConanFile):
     settings = "os", "arch", "compiler", "build_type"
     exports_sources = ["patches/*.patch"]
 
-    
+
     options = {"shared": [True, False], "fPIC": [True, False]}
     default_options = {"shared": False, "fPIC": True}
 
-    requires = ("libiconv/1.15")
+    requires = ("libiconv/1.16")
 
     def config_options(self):
         if self.settings.os == 'Windows':
@@ -41,6 +41,7 @@ class GetTextConan(ConanFile):
         return ["-C", "intl"]
 
     def configure(self):
+        self.output.warn("[DEPRECATED] Use 'gettext/{}@' instead.".format(self.version))
         del self.settings.compiler.libcxx
         del self.settings.compiler.cppstd
 
@@ -59,7 +60,7 @@ class GetTextConan(ConanFile):
 
     def build(self):
         for patch in self.conan_data["patches"][self.version]:
-            tools.patch(**patch)    
+            tools.patch(**patch)
         libiconv_prefix = self.deps_cpp_info["libiconv"].rootpath
         libiconv_prefix = tools.unix_path(libiconv_prefix) if tools.os_info.is_windows else libiconv_prefix
         args = ["HELP2MAN=/bin/true",

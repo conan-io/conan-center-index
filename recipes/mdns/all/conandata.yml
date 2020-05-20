@@ -5,3 +5,7 @@ sources:
   "20200331":
     sha256: 98861150179942cd6975b207048939a491ab4bb6c7291a3a34dedc80082b3ba9
     url: https://github.com/mjansson/mdns/archive/4f7f7942bd10eb3d67af48b5233cb84283d9639c.zip
+  "20200424":
+    sha256: 505aac658feb45bea65b2ab00a6abf1b14c2aaaa971456d6e3ba58b75a543d47
+    url: https://github.com/mjansson/mdns/archive/0b9a4de6c5132679364e47c0f9a7a37af9d2ce47.zip
+

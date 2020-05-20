@@ -2,7 +2,13 @@ sources:
   "2.9.9":
     sha256: 94fb70890143e3c6549f265cee93ec064c80a84c42ad0f23e85ee1fd6540a871
     url: http://xmlsoft.org/sources/libxml2-2.9.9.tar.gz
+  "2.9.10":
+    sha256: aafee193ffb8fe0c82d4afef6ef91972cbaf5feea100edc2f262750611b4be1f
+    url: http://xmlsoft.org/sources/libxml2-2.9.10.tar.gz
 patches:
   "2.9.9":
     - patch_file: "patches/0001-fix-install-mingw.patch"
+      base_path: "source_subfolder"
+  "2.9.10":
+    - patch_file: "patches/0002-fix-install-mingw.patch"
       base_path: "source_subfolder"
