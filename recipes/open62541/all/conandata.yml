@@ -9,10 +9,10 @@ patches:
   "1.0.0":
     - patch_file: "patches/add_conan_center_index_compliance_v_1_0.patch"
       base_path: "source_subfolder"
-    - patch_file: "patches/set_static_version_v_1_0.patch"
+    - patch_file: "patches/set_static_version.patch"
       base_path: "source_subfolder"
   "1.0.1":
     - patch_file: "patches/add_conan_center_index_compliance_v_1_0_1.patch"
       base_path: "source_subfolder"
-    - patch_file: "patches/set_static_version_v_1_0_1.patch"
+    - patch_file: "patches/set_static_version.patch"
       base_path: "source_subfolder"
