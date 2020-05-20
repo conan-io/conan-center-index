@@ -44,7 +44,7 @@ class FontconfigConan(ConanFile):
         os.rename(extrated_dir, self._source_subfolder)
 
     def build_requirements(self):
-        self.build_requires("gperf_installer/3.1@conan/stable")
+        self.build_requires("gperf/3.1")
         if not tools.which("pkg-config"):
             self.build_requires("pkg-config_installer/0.29.2@bincrafters/stable")
 
@@ -86,4 +86,3 @@ class FontconfigConan(ConanFile):
         if self.settings.os == "Linux":
             self.cpp_info.libs.extend(["m", "pthread"])
         self.env_info.PATH.append(os.path.join(self.package_folder, 'bin'))
-
