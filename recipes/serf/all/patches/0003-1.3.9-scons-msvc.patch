@@ -10,3 +10,17 @@
                  ),
  
      # We always documented that we handle an install layout, but in fact we
+@@ -273,11 +273,11 @@
+   # Choose runtime and optimization
+   if debug:
+     # Disable optimizations for debugging, use debug DLL runtime
+-    env.Append(CCFLAGS=['/Od', '/MDd'])
++    env.Append(CCFLAGS=['/Od'])
+     env.Append(CPPDEFINES=['DEBUG', '_DEBUG'])
+   else:
+     # Optimize for speed, use DLL runtime
+-    env.Append(CCFLAGS=['/O2', '/MD'])
++    env.Append(CCFLAGS=['/O2'])
+     env.Append(CPPDEFINES=['NDEBUG'])
+     env.Append(LINKFLAGS=['/RELEASE'])
+ 
