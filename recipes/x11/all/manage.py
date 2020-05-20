@@ -105,7 +105,8 @@ def gen(args):
                 patch_file = os.path.join(current_dir, "patches", patch)
                 if os.path.exists(patch_file):
                     patches_dir = os.path.join(package_dir, "patches")
-                    os.makedirs(patches_dir)
+                    if not os.path.exists(pathces_dir):
+                        os.makedirs(patches_dir)
                     copy(patch_file, patches_dir)
 
 
