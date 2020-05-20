@@ -73,7 +73,8 @@ class IXWebSocketConan(ConanFile):
         # User-selectable options
         cmake.definitions["USE_TLS"] = self.options.tls != False
         cmake.definitions["USE_MBED_TLS"] = self.options.tls == "mbedtls"
-        cmake.definitions["USE_OPENSSL"] = self.options.tls == "openssl"
+        cmake.definitions["USE_OPEN_SSL"] = self.options.tls == "openssl"
+        # Apple configures itself
 
         cmake.configure()
         return cmake
