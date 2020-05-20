@@ -8,7 +8,7 @@ if __name__ == "__main__":
     environ["CONAN_USERNAME"] = "_"
     environ["CONAN_CHANNEL"] = "ci"
     if "CONAN_OPTIONS" in environ and environ["CONAN_OPTIONS"] != "":
-        environ = "*:shared=True," + environ["CONAN_OPTIONS"]
+        environ["CONAN_OPTIONS"] = "*:shared=True," + environ["CONAN_OPTIONS"]
     else:
         environ["CONAN_OPTIONS"] = "*:shared=True"
 
