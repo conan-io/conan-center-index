@@ -22,13 +22,13 @@ jobs:
   yasm:
     strategy:
       matrix:
-        build: ['linux-gcc7', 'windows-2019-release', 'macos']
+        build: ['linux-gcc8', 'windows-2019-release', 'macos']
         yasm_versions: ['1.3.0']
         include:
-          - build: 'linux-gcc7'
+          - build: 'linux-gcc8'
             os: 'ubuntu-latest'
             compiler: 'gcc'
-            compiler_version: '7'
+            compiler_version: '8'
             docker_image: 'trassiross/conan-gcc8'
             build_types: 'Release'
             archs: 'x86_64'
