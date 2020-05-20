@@ -18,6 +18,7 @@ class ICUBase(ConanFile):
     _build_subfolder = "build_subfolder"
     _env_build = None
     settings = "os", "arch", "compiler", "build_type"
+    exports = ["patches/*.patch"]
     options = {"shared": [True, False],
                "fPIC": [True, False],
                "data_packaging": ["files", "archive", "library", "static"],
@@ -58,6 +59,8 @@ class ICUBase(ConanFile):
                                   "pathBuf.append('/', localError); pathBuf.append(arg, localError);")
 
     def build(self):
+        for p in self.conan_data["patches"][self.version]:
+            tools.patch(**p)
         if self._is_msvc:
             run_configure_icu_file = os.path.join(self._source_subfolder, 'source', 'runConfigureICU')
 
