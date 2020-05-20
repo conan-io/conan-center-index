@@ -111,6 +111,7 @@ jobs:
           compiler-versions: ${{ matrix.compiler_version }}
           docker-images: ${{ matrix.docker_image }}
         env:
+          CONAN_SHARED_OPTION_NAME: False
           CONAN_REFERENCE: 'xproto/${{ matrix.xproto_version }}'
           CONAN_VISUAL_RUNTIMES: ${{ matrix.vs_runtimes }}
           CONAN_ARCHS: ${{ matrix.archs }}
@@ -129,6 +130,7 @@ jobs:
           compiler-versions: ${{ matrix.compiler_version }}
           docker-images: ${{ matrix.docker_image }}
         env:
+          CONAN_SHARED_OPTION_NAME: False
           CONAN_REFERENCE: 'libxdmcp/${{ matrix.libxdmcp_version }}'
           CONAN_VISUAL_RUNTIMES: ${{ matrix.vs_runtimes }}
           CONAN_ARCHS: ${{ matrix.archs }}
@@ -147,6 +149,7 @@ jobs:
           compiler-versions: ${{ matrix.compiler_version }}
           docker-images: ${{ matrix.docker_image }}
         env:
+          CONAN_SHARED_OPTION_NAME: False
           CONAN_REFERENCE: 'xorgproto/${{ matrix.xorgproto_version }}'
           CONAN_VISUAL_RUNTIMES: ${{ matrix.vs_runtimes }}
           CONAN_ARCHS: ${{ matrix.archs }}
@@ -165,6 +168,7 @@ jobs:
           compiler-versions: ${{ matrix.compiler_version }}
           docker-images: ${{ matrix.docker_image }}
         env:
+          CONAN_SHARED_OPTION_NAME: False
           CONAN_REFERENCE: 'libxau/${{ matrix.libxau_version }}'
           CONAN_VISUAL_RUNTIMES: ${{ matrix.vs_runtimes }}
           CONAN_ARCHS: ${{ matrix.archs }}
@@ -183,6 +187,7 @@ jobs:
           compiler-versions: ${{ matrix.compiler_version }}
           docker-images: ${{ matrix.docker_image }}
         env:
+          CONAN_SHARED_OPTION_NAME: False
           CONAN_REFERENCE: 'libpthread-stubs/${{ matrix.libpthread-stubs_version }}'
           CONAN_VISUAL_RUNTIMES: ${{ matrix.vs_runtimes }}
           CONAN_ARCHS: ${{ matrix.archs }}
@@ -201,6 +206,7 @@ jobs:
           compiler-versions: ${{ matrix.compiler_version }}
           docker-images: ${{ matrix.docker_image }}
         env:
+          CONAN_SHARED_OPTION_NAME: False
           CONAN_REFERENCE: 'util-macros/${{ matrix.util-macros_version }}'
           CONAN_VISUAL_RUNTIMES: ${{ matrix.vs_runtimes }}
           CONAN_ARCHS: ${{ matrix.archs }}
@@ -219,6 +225,7 @@ jobs:
           compiler-versions: ${{ matrix.compiler_version }}
           docker-images: ${{ matrix.docker_image }}
         env:
+          CONAN_SHARED_OPTION_NAME: False
           CONAN_REFERENCE: 'xcb-proto/${{ matrix.xcb-proto_version }}'
           CONAN_VISUAL_RUNTIMES: ${{ matrix.vs_runtimes }}
           CONAN_ARCHS: ${{ matrix.archs }}
@@ -237,6 +244,7 @@ jobs:
           compiler-versions: ${{ matrix.compiler_version }}
           docker-images: ${{ matrix.docker_image }}
         env:
+          CONAN_SHARED_OPTION_NAME: False
           CONAN_REFERENCE: 'libxcb/${{ matrix.libxcb_version }}'
           CONAN_VISUAL_RUNTIMES: ${{ matrix.vs_runtimes }}
           CONAN_ARCHS: ${{ matrix.archs }}
@@ -255,6 +263,7 @@ jobs:
           compiler-versions: ${{ matrix.compiler_version }}
           docker-images: ${{ matrix.docker_image }}
         env:
+          CONAN_SHARED_OPTION_NAME: False
           CONAN_REFERENCE: 'xtrans/${{ matrix.xtrans_version }}'
           CONAN_VISUAL_RUNTIMES: ${{ matrix.vs_runtimes }}
           CONAN_ARCHS: ${{ matrix.archs }}
@@ -273,6 +282,7 @@ jobs:
           compiler-versions: ${{ matrix.compiler_version }}
           docker-images: ${{ matrix.docker_image }}
         env:
+          CONAN_SHARED_OPTION_NAME: False
           CONAN_REFERENCE: 'libx11/${{ matrix.libx11_version }}'
           CONAN_VISUAL_RUNTIMES: ${{ matrix.vs_runtimes }}
           CONAN_ARCHS: ${{ matrix.archs }}
@@ -291,6 +301,7 @@ jobs:
           compiler-versions: ${{ matrix.compiler_version }}
           docker-images: ${{ matrix.docker_image }}
         env:
+          CONAN_SHARED_OPTION_NAME: False
           CONAN_REFERENCE: 'libxrender/${{ matrix.libxrender_version }}'
           CONAN_VISUAL_RUNTIMES: ${{ matrix.vs_runtimes }}
           CONAN_ARCHS: ${{ matrix.archs }}
@@ -309,6 +320,7 @@ jobs:
           compiler-versions: ${{ matrix.compiler_version }}
           docker-images: ${{ matrix.docker_image }}
         env:
+          CONAN_SHARED_OPTION_NAME: False
           CONAN_REFERENCE: 'libxfixes/${{ matrix.libxfixes_version }}'
           CONAN_VISUAL_RUNTIMES: ${{ matrix.vs_runtimes }}
           CONAN_ARCHS: ${{ matrix.archs }}
@@ -327,6 +339,7 @@ jobs:
           compiler-versions: ${{ matrix.compiler_version }}
           docker-images: ${{ matrix.docker_image }}
         env:
+          CONAN_SHARED_OPTION_NAME: False
           CONAN_REFERENCE: 'libxcursor/${{ matrix.libxcursor_version }}'
           CONAN_VISUAL_RUNTIMES: ${{ matrix.vs_runtimes }}
           CONAN_ARCHS: ${{ matrix.archs }}
@@ -345,6 +358,7 @@ jobs:
           compiler-versions: ${{ matrix.compiler_version }}
           docker-images: ${{ matrix.docker_image }}
         env:
+          CONAN_SHARED_OPTION_NAME: False
           CONAN_REFERENCE: 'xcb-util/${{ matrix.xcb-util_version }}'
           CONAN_VISUAL_RUNTIMES: ${{ matrix.vs_runtimes }}
           CONAN_ARCHS: ${{ matrix.archs }}
@@ -363,6 +377,7 @@ jobs:
           compiler-versions: ${{ matrix.compiler_version }}
           docker-images: ${{ matrix.docker_image }}
         env:
+          CONAN_SHARED_OPTION_NAME: False
           CONAN_REFERENCE: 'xcb-util-image/${{ matrix.xcb-util-image_version }}'
           CONAN_VISUAL_RUNTIMES: ${{ matrix.vs_runtimes }}
           CONAN_ARCHS: ${{ matrix.archs }}
@@ -381,6 +396,7 @@ jobs:
           compiler-versions: ${{ matrix.compiler_version }}
           docker-images: ${{ matrix.docker_image }}
         env:
+          CONAN_SHARED_OPTION_NAME: False
           CONAN_REFERENCE: 'xcb-util-renderutil/${{ matrix.xcb-util-renderutil_version }}'
           CONAN_VISUAL_RUNTIMES: ${{ matrix.vs_runtimes }}
           CONAN_ARCHS: ${{ matrix.archs }}
@@ -399,6 +415,7 @@ jobs:
           compiler-versions: ${{ matrix.compiler_version }}
           docker-images: ${{ matrix.docker_image }}
         env:
+          CONAN_SHARED_OPTION_NAME: False
           CONAN_REFERENCE: 'xcb-util-keysyms/${{ matrix.xcb-util-keysyms_version }}'
           CONAN_VISUAL_RUNTIMES: ${{ matrix.vs_runtimes }}
           CONAN_ARCHS: ${{ matrix.archs }}
@@ -417,6 +434,7 @@ jobs:
           compiler-versions: ${{ matrix.compiler_version }}
           docker-images: ${{ matrix.docker_image }}
         env:
+          CONAN_SHARED_OPTION_NAME: False
           CONAN_REFERENCE: 'xcb-util-wm/${{ matrix.xcb-util-wm_version }}'
           CONAN_VISUAL_RUNTIMES: ${{ matrix.vs_runtimes }}
           CONAN_ARCHS: ${{ matrix.archs }}
@@ -435,6 +453,7 @@ jobs:
           compiler-versions: ${{ matrix.compiler_version }}
           docker-images: ${{ matrix.docker_image }}
         env:
+          CONAN_SHARED_OPTION_NAME: False
           CONAN_REFERENCE: 'xkeyboard-config/${{ matrix.xkeyboard-config_version }}'
           CONAN_VISUAL_RUNTIMES: ${{ matrix.vs_runtimes }}
           CONAN_ARCHS: ${{ matrix.archs }}
@@ -453,6 +472,7 @@ jobs:
           compiler-versions: ${{ matrix.compiler_version }}
           docker-images: ${{ matrix.docker_image }}
         env:
+          CONAN_SHARED_OPTION_NAME: False
           CONAN_REFERENCE: 'libpciaccess/${{ matrix.libpciaccess_version }}'
           CONAN_VISUAL_RUNTIMES: ${{ matrix.vs_runtimes }}
           CONAN_ARCHS: ${{ matrix.archs }}
@@ -471,6 +491,7 @@ jobs:
           compiler-versions: ${{ matrix.compiler_version }}
           docker-images: ${{ matrix.docker_image }}
         env:
+          CONAN_SHARED_OPTION_NAME: False
           CONAN_REFERENCE: 'libxext/${{ matrix.libxext_version }}'
           CONAN_VISUAL_RUNTIMES: ${{ matrix.vs_runtimes }}
           CONAN_ARCHS: ${{ matrix.archs }}
@@ -489,6 +510,7 @@ jobs:
           compiler-versions: ${{ matrix.compiler_version }}
           docker-images: ${{ matrix.docker_image }}
         env:
+          CONAN_SHARED_OPTION_NAME: False
           CONAN_REFERENCE: 'libxdamage/${{ matrix.libxdamage_version }}'
           CONAN_VISUAL_RUNTIMES: ${{ matrix.vs_runtimes }}
           CONAN_ARCHS: ${{ matrix.archs }}
@@ -507,6 +529,7 @@ jobs:
           compiler-versions: ${{ matrix.compiler_version }}
           docker-images: ${{ matrix.docker_image }}
         env:
+          CONAN_SHARED_OPTION_NAME: False
           CONAN_REFERENCE: 'libxshmfence/${{ matrix.libxshmfence_version }}'
           CONAN_VISUAL_RUNTIMES: ${{ matrix.vs_runtimes }}
           CONAN_ARCHS: ${{ matrix.archs }}
@@ -525,6 +548,7 @@ jobs:
           compiler-versions: ${{ matrix.compiler_version }}
           docker-images: ${{ matrix.docker_image }}
         env:
+          CONAN_SHARED_OPTION_NAME: False
           CONAN_REFERENCE: 'libxxf86vm/${{ matrix.libxxf86vm_version }}'
           CONAN_VISUAL_RUNTIMES: ${{ matrix.vs_runtimes }}
           CONAN_ARCHS: ${{ matrix.archs }}
