@@ -35,3 +35,12 @@
    elif aprstatic:
      env.Append(LIBPATH=['$APR/LibR','$APU/LibR'],
                 CPPPATH=['$APR/include', '$APU/include'])
+@@ -337,7 +337,7 @@
+   # openssl
+   env.Append(LIBS=['libeay32.lib', 'ssleay32.lib'])
+   if not env.get('SOURCE_LAYOUT', None):
+-    env.Append(CPPPATH=['$OPENSSL/include/openssl'],
++    env.Append(CPPPATH=['$OPENSSL/include', '$OPENSSL/include/openssl'],
+                LIBPATH=['$OPENSSL/lib'])
+   elif 0: # opensslstatic:
+     env.Append(CPPPATH=['$OPENSSL/inc32'],
