@@ -63,7 +63,10 @@ class SerfConan(ConanFile):
             return tools.get_env("CC")
         if tools.is_apple_os(self.settings.os):
             return "clang"
-        return str(self.settings.compiler)
+        return {
+            "Visual Studio": "cl",
+        }.get(str(self.settings.compiler), str(self.settings.compiler))
+
 
     def build(self):
         self._patch_sources()
@@ -93,7 +96,8 @@ class SerfConan(ConanFile):
                 })
 
             escape_str = lambda x : "\"{}\"".format(x)
-            self.run("scons {} {}".format(" ".join(escape_str(s) for s in args), " ".join("{}={}".format(k, escape_str(v)) for k, v in kwargs.items())), run_environment=True)
+            with tools.vcvars(self.settings) if self.settings.compiler == "Visual Studio" else tools.no_op():
+                self.run("scons {} {}".format(" ".join(escape_str(s) for s in args), " ".join("{}={}".format(k, escape_str(v)) for k, v in kwargs.items())), run_environment=True)
 
     @property
     def _static_ext(self):
