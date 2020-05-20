@@ -87,6 +87,7 @@ class SerfConan(ConanFile):
                 "LINKFLAGS": " ".join(self.deps_cpp_info.sharedlinkflags) + " " + " ".join("-L'{}'".format(l) for l in self.deps_cpp_info.lib_paths),
                 "CPPFLAGS": " ".join("-D{}".format(d) for d in autotools.defines) + " " + " ".join("-I'{}'".format(inc) for inc in self.deps_cpp_info.include_paths),
                 "CC": self._cc,
+                "SOURCE_LAYOUT": "False",
             }
 
             if self.settings.compiler == "Visual Studio":
