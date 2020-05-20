@@ -58,7 +58,7 @@ class PjsipConan(ConanFile):
         if self.settings.os == "Linux":
             self.requires("libalsa/1.1.0")
         if self.options.SSL:
-            self.requires(_openSSL+"/1.0.2r")
+            self.requires(_openSSL+"/1.1.1d")
 
     def _configure_autotools(self):
         if not self._autotools:

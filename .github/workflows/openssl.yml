@@ -23,7 +23,7 @@ jobs:
     strategy:
       matrix:
         build: ['linux-gcc8', 'macos']
-        openssl_versions: ['1.0.2r', '1.1.1d']
+        openssl_versions: ['1.1.1d']
         include:
           - build: 'linux-gcc8'
             os: 'ubuntu-latest'
