@@ -123,7 +123,10 @@ class Open62541Conan(ConanFile):
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
-        folder_name = "%s-%s" % (self.name, self.version)
+        if Version(self.version) <= "1.0.0":
+            folder_name = "%s-%s" % (self.name, "1.0")
+        else:
+            folder_name = "%s-%s" % (self.name, self.version)
         os.rename(folder_name, self._source_subfolder)
         if Version(self.version) <= "1.0.1":
             self._download_ua_nodes()
