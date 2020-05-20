@@ -37,10 +37,6 @@ class SerfConan(ConanFile):
     def _source_subfolder(self):
         return "source_subfolder"
 
-    @property
-    def _build_subfolder(self):
-        return "build_subfolder"
-
     def requirements(self):
         self.requires("apr-util/1.6.1")
         self.requires("zlib/1.2.11")
@@ -67,12 +63,10 @@ class SerfConan(ConanFile):
             "Visual Studio": "cl",
         }.get(str(self.settings.compiler), str(self.settings.compiler))
 
-
     def build(self):
         self._patch_sources()
-        os.mkdir(self._build_subfolder)
         autotools = AutoToolsBuildEnvironment(self)
-        with tools.chdir(self._build_subfolder):
+        with tools.chdir(self._source_subfolder):
             args = ["-Y", os.path.join(self.source_folder, self._source_subfolder)]
             kwargs = {
                 "APR": self.deps_cpp_info["apr"].rootpath,
@@ -114,7 +108,7 @@ class SerfConan(ConanFile):
 
     def package(self):
         self.copy("LICENSE", src=self._source_subfolder, dst="licenses")
-        with tools.chdir(self._build_subfolder):
+        with tools.chdir(self._source_subfolder):
             self.run("scons install -Y \"{}\"".format(os.path.join(self.source_folder, self._source_subfolder)), run_environment=True)
 
         tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
