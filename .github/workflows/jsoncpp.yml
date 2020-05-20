@@ -21,7 +21,7 @@ jobs:
   jsoncpp:
     strategy:
       matrix:
-        build: ['linux-gcc8', 'windows-2019-release', 'macos']
+        build: ['linux-gcc8', 'macos']
         include:
           - build: 'linux-gcc8'
             os: 'ubuntu-latest'
@@ -29,14 +29,6 @@ jobs:
             compiler_version: '8'
             docker_image: 'trassiross/conan-gcc8'
             build_types: 'Release'
-            archs: 'x86_64'
-            conan_reference: "jsoncpp/1.8.3"
-          - build: 'windows-2019-release'
-            os: 'windows-2019'
-            build_types: 'Release'
-            compiler: 'vs'
-            compiler_version: '16'
-            vs_runtimes: 'MD,MT'
             archs: 'x86_64'
             conan_reference: "jsoncpp/1.8.3"
           - build: 'macos'
