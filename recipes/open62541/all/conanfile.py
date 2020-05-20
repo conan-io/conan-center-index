@@ -207,12 +207,3 @@ class Open62541Conan(ConanFile):
             os.path.join("lib", "cmake"),
             os.path.join("lib", "cmake", "open62541")
         ]
-        if Version(self.version) > "1.0.1" and self.settings.build_type == "Debug" and self.settings.compiler == "clang":
-            self.cpp_info.cflags = ["-fsanitize=address"]
-            self.cpp_info.cflags.append('-fsanitize-address-use-after-scope')
-            self.cpp_info.cflags.append(
-                '-fsanitize-coverage=trace-pc-guard,trace-cmp')
-            self.cpp_info.cflags.append('-fsanitize=leak')
-            self.cpp_info.cflags.append('-fsanitize=undefined')
-            self.cpp_info.cxxflags = self.cpp_info.cflags
-            self.cpp_info.sharedlinkflags = ["-fsanitize=address"]

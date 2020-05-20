@@ -1,5 +1,5 @@
 diff --git a/CMakeLists.txt b/CMakeLists.txt
-index d426e1da..b8e0374c 100644
+index d426e1da..1f7ca494 100644
 --- a/CMakeLists.txt
 +++ b/CMakeLists.txt
 @@ -9,7 +9,6 @@ string(TOLOWER "${CMAKE_BUILD_TYPE}" BUILD_TYPE_LOWER_CASE)
@@ -28,7 +28,26 @@ index d426e1da..b8e0374c 100644
  #################
  # Build Options #
  #################
-@@ -514,7 +502,6 @@ endif()
+@@ -440,18 +428,6 @@ if(NOT UA_COMPILE_AS_CXX AND (CMAKE_COMPILER_IS_GNUCC OR "x${CMAKE_C_COMPILER_ID
+     # Linker
+     set(CMAKE_SHARED_LIBRARY_LINK_C_FLAGS "") # cmake sets -rdynamic by default
+ 
+-    # Debug
+-    if(BUILD_TYPE_LOWER_CASE STREQUAL "debug" AND UNIX)
+-        if("x${CMAKE_C_COMPILER_ID}" STREQUAL "xClang" AND NOT UA_ENABLE_UNIT_TESTS_MEMCHECK)
+-            # Add default sanitizer settings when using clang and Debug build.
+-            # This allows e.g. CLion to find memory locations for SegFaults
+-            message(STATUS "Sanitizer enabled")
+-            set(SANITIZER_FLAGS "-g -fno-omit-frame-pointer -gline-tables-only -fsanitize=address -fsanitize-address-use-after-scope -fsanitize-coverage=trace-pc-guard,trace-cmp -fsanitize=leak -fsanitize=undefined")
+-            set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${SANITIZER_FLAGS}")
+-            set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${SANITIZER_FLAGS}")
+-        endif()
+-    endif()
+-
+     if(UA_ENABLE_HARDENING AND ((CMAKE_BUILD_TYPE STREQUAL "Release") OR (CMAKE_BUILD_TYPE STREQUAL "RelWithDebInfo")))
+         check_cc_flag("-D_FORTIFY_SOURCE=2") # run-time buffer overflow detection (needs at least -O1)
+     endif()
+@@ -514,7 +490,6 @@ endif()
  
  file(MAKE_DIRECTORY "${PROJECT_BINARY_DIR}/src_generated")
  configure_file(include/open62541/config.h.in ${PROJECT_BINARY_DIR}/src_generated/open62541/config.h)
@@ -36,7 +55,7 @@ index d426e1da..b8e0374c 100644
  
  if(UA_ENABLE_DISCOVERY_MULTICAST)
      set(MDNSD_LOGLEVEL 300 CACHE STRING "Level at which logs shall be reported" FORCE)
-@@ -1102,8 +1089,6 @@ include(linting_target)
+@@ -1102,8 +1077,6 @@ include(linting_target)
  # Enable shared library with `-DBUILD_SHARED_LIBS=ON`
  
  set(cmake_configfile_install ${CMAKE_INSTALL_LIBDIR}/cmake/open62541)
@@ -45,7 +64,7 @@ index d426e1da..b8e0374c 100644
  
  # This list of components allows to define a find_package requirement.
  # E.g.:
-@@ -1160,22 +1145,6 @@ if(UA_ENABLE_AMALGAMATION)
+@@ -1160,22 +1133,6 @@ if(UA_ENABLE_AMALGAMATION)
  install(CODE "MESSAGE(WARNING \"Installation with UA_ENABLE_AMALGAMATION=ON is not recommended.\")")
  endif()
  
@@ -68,7 +87,7 @@ index d426e1da..b8e0374c 100644
  install(EXPORT open62541Targets
          FILE open62541Targets.cmake
          DESTINATION "${cmake_configfile_install}"
-@@ -1189,35 +1158,9 @@ export(
+@@ -1189,35 +1146,9 @@ export(
  
  configure_file("${CMAKE_CURRENT_SOURCE_DIR}/tools/cmake/macros_public.cmake" "${CMAKE_CURRENT_BINARY_DIR}/open62541Macros.cmake" COPYONLY)
  
@@ -105,7 +124,7 @@ index d426e1da..b8e0374c 100644
  if(NOT UA_ENABLE_AMALGAMATION)
      # Recreate the include folder structure from the source also in /usr/lib/include/open62541
  
-@@ -1251,8 +1194,6 @@ else()
+@@ -1251,8 +1182,6 @@ else()
      install(FILES ${PROJECT_BINARY_DIR}/open62541.h DESTINATION include)
  endif()
  
