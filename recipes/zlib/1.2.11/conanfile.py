@@ -15,7 +15,7 @@ class ZlibConan(ConanFile):
     settings = "os", "arch", "compiler", "build_type"
     options = {"shared": [True, False], "fPIC": [True, False], "minizip": [True, False]}
     default_options = {"shared": False, "fPIC": True, "minizip": False}
-    exports_sources = ["CMakeLists.txt", "CMakeLists_minizip.txt", "minizip.patch"]
+    exports_sources = ["CMakeLists.txt", "CMakeLists_minizip.txt", "minizip.patch", "patches/**"]
     generators = "cmake"
     _source_subfolder = "source_subfolder"
 
@@ -28,11 +28,7 @@ class ZlibConan(ConanFile):
         del self.settings.compiler.cppstd
 
     def source(self):
-
-        try:
-            tools.get(**self.conan_data["sources"][self.version])
-        except ConanException:
-            tools.get(**self.conan_data["sources"]["{}_mirror".format(self.version)])
+        tools.get(**self.conan_data["sources"][self.version])
 
         os.rename("{}-{}".format(self.name, self.version), self._source_subfolder)
         if not tools.os_info.is_windows:
@@ -48,7 +44,11 @@ class ZlibConan(ConanFile):
 
     @property
     def _use_autotools(self):
+        if self.settings.os == "iOS":
+            return False # use a cmake toolchain .... or, find out the special CHOST settings zlib requires, but ...
         return self.settings.os == "Linux" or tools.is_apple_os(self.settings.os)
+        # ... the  question is, why not always go with cmake and forget about the automake distaster? 
+        # this woulds simplify this recipe enorm
 
     def _build_zlib_autotools(self):
         env_build = AutoToolsBuildEnvironment(self)
@@ -69,7 +69,8 @@ class ZlibConan(ConanFile):
         if "clang" in str(self.settings.compiler) and tools.get_env("CC") is None and tools.get_env("CXX") is None:
             env = {"CC": "clang", "CXX": "clang++"}
         with tools.environment_append(env):
-            env_build.configure("../", build=False, host=False, target=False)
+            #env_build.configure("../", build=False, host=False, target=False)
+            env_build.configure("../")
             env_build.make(target=make_target)
 
     def _build_zlib_cmake(self):
@@ -81,14 +82,17 @@ class ZlibConan(ConanFile):
         cmake.build(build_dir=".", target=make_target)
 
     def _build_zlib(self):
+        for patch in self.conan_data["patches"][self.version]:
+            tools.patch(**patch)
+
         with tools.chdir(self._source_subfolder):
             # https://github.com/madler/zlib/issues/268
             tools.replace_in_file('gzguts.h',
                                   '#if defined(_WIN32) || defined(__CYGWIN__)',
                                   '#if defined(_WIN32) || defined(__MINGW32__)')
-            if self.settings.os == "iOS":
-                tools.replace_in_file("gzguts.h", '#ifdef _LARGEFILE64_SOURCE',
-                                      '#include <unistd.h>\n\n#ifdef _LARGEFILE64_SOURCE')
+            # if self.settings.os == "iOS":
+            #     tools.replace_in_file("gzguts.h", '#ifdef _LARGEFILE64_SOURCE',
+            #                           '#include <unistd.h>\n\n#ifdef _LARGEFILE64_SOURCE')
             for filename in ['zconf.h', 'zconf.h.cmakein', 'zconf.h.in']:
                 tools.replace_in_file(filename,
                                       '#ifdef HAVE_UNISTD_H    '
