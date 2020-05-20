@@ -8,7 +8,6 @@ if __name__ == "__main__":
     environ["CONAN_USERNAME"] = "_"
     environ["CONAN_CHANNEL"] = "ci"
 
-    environ["CONAN_SHARED_OPTION_NAME"] = "False"
     if "CONAN_OPTIONS" in environ and environ["CONAN_OPTIONS"] != "":
         environ["CONAN_OPTIONS"] = "*:shared=True," + environ["CONAN_OPTIONS"]
     else:
@@ -28,7 +27,7 @@ if __name__ == "__main__":
         config_url=conan_config_url,
         remotes="https://api.bintray.com/conan/trassir/conan-public"
     )
-    builder.add_common_builds(pure_c=is_pure_c)
+    builder.add_common_builds(shared_option_name=False, pure_c=is_pure_c)
     builder.run()
 
 # rebuild everything 5
