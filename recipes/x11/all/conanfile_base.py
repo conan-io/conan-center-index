@@ -67,7 +67,7 @@ class BaseHeaderOnly(ConanFile):
 
 class BaseLib(BaseHeaderOnly):
     options = {"shared": [True, False], "fPIC": [True, False]}
-    default_options = {"shared": False, "fPIC": True}
+    default_options = {"shared": True, "fPIC": True}
 
     def configure(self):
         super(BaseLib, self).configure()
