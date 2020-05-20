@@ -8,4 +8,3 @@ sources:
   "66.1":
     url: "https://github.com/unicode-org/icu/releases/download/release-66-1/icu4c-66_1-src.tgz"
     sha256: "52a3f2209ab95559c1cf0a14f24338001f389615bf00e2585ef3dbc43ecf0a2e"
-        
