@@ -38,7 +38,7 @@ class SpirvtoolsConan(ConanFile):
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
-        extracted_dir = "SPIRV-Tools-" + self.version
+        extracted_dir = "SPIRV-Tools-" + self.version[1:]
         os.rename(extracted_dir, self._source_subfolder)
 
     def configure(self):
