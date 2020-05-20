@@ -2,7 +2,7 @@ from conans import ConanFile, CMake, tools
 import os
 
 
-class OatppConan(ConanFile):
+class OatppWebSocketConan(ConanFile):
     name = "oatpp-websocket"
     description = "WebSocket functionality for oatpp applications"
     homepage = "https://github.com/oatpp/oatpp-websocket"
