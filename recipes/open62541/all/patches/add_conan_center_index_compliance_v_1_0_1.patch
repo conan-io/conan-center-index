@@ -1,0 +1,477 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 6156c9b7..6590b4f2 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -9,7 +9,6 @@ string(TOLOWER "${CMAKE_BUILD_TYPE}" BUILD_TYPE_LOWER_CASE)
+ 
+ set(CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/tools/cmake")
+ find_package(PythonInterp REQUIRED)
+-find_package(Git)
+ include(AssignSourceGroup)
+ include(GNUInstallDirs)
+ 
+@@ -28,17 +27,6 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
+ set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
+ set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
+ 
+-###########
+-# Version #
+-###########
+-
+-include(SetGitBasedVersion)
+-
+-# The version string will be automatically set based on the git describe output.
+-# This will automate the version strings. Just create a new tag, and the version will be set correctly.
+-set_open62541_version()
+-MESSAGE(STATUS "open62541 Version: ${OPEN62541_VER_MAJOR}.${OPEN62541_VER_MINOR}.${OPEN62541_VER_PATCH}${OPEN62541_VER_LABEL}")
+-
+ #################
+ # Build Options #
+ #################
+@@ -514,7 +502,6 @@ endif()
+ 
+ file(MAKE_DIRECTORY "${PROJECT_BINARY_DIR}/src_generated")
+ configure_file(include/open62541/config.h.in ${PROJECT_BINARY_DIR}/src_generated/open62541/config.h)
+-configure_file(open62541.pc.in ${PROJECT_BINARY_DIR}/src_generated/open62541.pc @ONLY)
+ 
+ if(UA_ENABLE_DISCOVERY_MULTICAST)
+     set(MDNSD_LOGLEVEL 300 CACHE STRING "Level at which logs shall be reported" FORCE)
+@@ -1106,8 +1093,6 @@ include(linting_target)
+ # Enable shared library with `-DBUILD_SHARED_LIBS=ON`
+ 
+ set(cmake_configfile_install ${CMAKE_INSTALL_LIBDIR}/cmake/open62541)
+-set(open62541_install_tools_dir share/open62541/tools)
+-set(open62541_install_nodeset_dir share/open62541/tools/ua-nodeset)
+ 
+ # This list of components allows to define a find_package requirement.
+ # E.g.:
+@@ -1169,22 +1154,6 @@ if(UA_ENABLE_AMALGAMATION)
+ install(CODE "MESSAGE(WARNING \"Installation with UA_ENABLE_AMALGAMATION=ON is not recommended.\")")
+ endif()
+ 
+-include(CMakePackageConfigHelpers)
+-configure_package_config_file("${CMAKE_CURRENT_SOURCE_DIR}/tools/cmake/open62541Config.cmake.in"
+-                              "${CMAKE_CURRENT_BINARY_DIR}/open62541Config.cmake"
+-                              INSTALL_DESTINATION "${cmake_configfile_install}"
+-                              PATH_VARS open62541_install_tools_dir
+-                                        open62541_install_nodeset_dir
+-                                        open62541_enabled_components
+-                              )
+-
+-set(open62541_VERSION)
+-get_target_property(open62541_VERSION open62541 VERSION)
+-
+-write_basic_package_version_file("${CMAKE_CURRENT_BINARY_DIR}/open62541ConfigVersion.cmake"
+-                                 VERSION ${open62541_VERSION}
+-                                 COMPATIBILITY AnyNewerVersion)
+-
+ install(EXPORT open62541Targets
+         FILE open62541Targets.cmake
+         DESTINATION "${cmake_configfile_install}"
+@@ -1198,35 +1167,9 @@ export(
+ 
+ configure_file("${CMAKE_CURRENT_SOURCE_DIR}/tools/cmake/macros_public.cmake" "${CMAKE_CURRENT_BINARY_DIR}/open62541Macros.cmake" COPYONLY)
+ 
+-install(FILES "${CMAKE_CURRENT_BINARY_DIR}/open62541Config.cmake"
+-              "${CMAKE_CURRENT_BINARY_DIR}/open62541ConfigVersion.cmake"
+-              "${CMAKE_CURRENT_BINARY_DIR}/open62541Macros.cmake"
++install(FILES "${CMAKE_CURRENT_BINARY_DIR}/open62541Macros.cmake"
+         DESTINATION "${cmake_configfile_install}")
+ 
+-if(${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
+-    install(FILES "${PROJECT_BINARY_DIR}/src_generated/open62541.pc"
+-            DESTINATION ${CMAKE_INSTALL_LIBDIR}/pkgconfig)
+-endif()
+-
+-set(UA_install_tools_dirs "tools/certs"
+-    "tools/nodeset_compiler"
+-    "tools/schema"
+-    "deps/ua-nodeset")
+-
+-set(UA_install_tools_files "tools/generate_datatypes.py"
+-    "tools/generate_nodeid_header.py"
+-    "tools/generate_statuscode_descriptions.py")
+-
+-install(DIRECTORY ${UA_install_tools_dirs} 
+-    DESTINATION ${open62541_install_tools_dir} 
+-    USE_SOURCE_PERMISSIONS
+-    FILES_MATCHING
+-    PATTERN "*"
+-    PATTERN "*.pyc" EXCLUDE
+-    )
+-
+-install(FILES ${UA_install_tools_files} DESTINATION ${open62541_install_tools_dir})
+-
+ if (UA_PACK_DEBIAN)    
+     set(UA_install_examples_dirs "examples/"
+         "examples/access_control"
+@@ -1235,9 +1178,6 @@ if (UA_PACK_DEBIAN)
+         "examples/encryption"
+         "examples/nodeset"
+         "examples/pubsub")
+-
+-    set(open62541_install_examples_dir share/open62541/examples)
+-    install(DIRECTORY ${UA_install_examples_dirs} COMPONENT examples DESTINATION ${open62541_install_examples_dir} USE_SOURCE_PERMISSIONS)
+ endif()
+ 
+ if(NOT UA_ENABLE_AMALGAMATION)
+@@ -1273,8 +1213,6 @@ else()
+     install(FILES ${PROJECT_BINARY_DIR}/open62541.h DESTINATION include)
+ endif()
+ 
+-add_subdirectory(tools/packaging)
+-
+ ##################################
+ # Visual studio solution folders #
+ ##################################
+diff --git a/debian/libopen62541-dev.install-template b/debian/libopen62541-dev.install-template
+deleted file mode 100644
+index ff354feb..00000000
+--- a/debian/libopen62541-dev.install-template
++++ /dev/null
+@@ -1,5 +0,0 @@
+-usr/include
+-usr/lib/*/*.so
+-usr/lib/*/*.a
+-usr/lib/*/cmake/open62541/*
+-usr/lib/*/pkgconfig/open62541.pc
+diff --git a/open62541.pc.in b/open62541.pc.in
+deleted file mode 100644
+index 53d8e8ed..00000000
+--- a/open62541.pc.in
++++ /dev/null
+@@ -1,15 +0,0 @@
+-/* This Source Code Form is subject to the terms of the Mozilla Public
+- * License, v. 2.0. If a copy of the MPL was not distributed with this
+- * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+-
+-prefix=@CMAKE_INSTALL_PREFIX@
+-exec_prefix=${prefix}
+-libdir=${prefix}/@CMAKE_INSTALL_LIBDIR@
+-sharedlibdir=${libdir}
+-includedir=${prefix}/@CMAKE_INSTALL_INCLUDEDIR@
+-
+-Name: open62541
+-Description: open62541 is an open source C (C99) implementation of OPC UA
+-Version: @OPEN62541_VER_MAJOR@.@OPEN62541_VER_MINOR@.@OPEN62541_VER_PATCH@
+-Libs: -L${libdir} -lopen62541
+-Cflags: -I${includedir}/open62541
+diff --git a/open62541.spec b/open62541.spec
+deleted file mode 100644
+index 771e35a3..00000000
+--- a/open62541.spec
++++ /dev/null
+@@ -1,65 +0,0 @@
+-Name:     open62541
+-Version:  1.0.1
+-Release:  1%{?dist}
+-Summary:  OPC UA implementation
+-License:  MPLv2.0
+-URL:      http://open62541.org
+-Source0:  https://github.com/open62541/open62541/archive/%{name}-%{version}.tar.gz
+-
+-BuildRequires: cmake3, python
+-
+-%description
+-open62541 is a C-based library (linking with C++ projects is possible)
+-with all necessary tools to implement dedicated OPC UA clients and servers,
+-or to integrate OPC UA-based communication into existing applications.
+-
+-%package  devel
+-Summary:  Development files for %{name}
+-Requires: %{name}%{?_isa} = %{version}-%{release}
+-
+-%description devel
+-The %{name}-devel package contains libraries and header files for
+-developing applications that use %{name}.
+-
+-%prep
+-%setup -q -n %{name}-%{name}-%{version} # double-name prefix by GitHub
+-
+-%build
+-%cmake3 -DUA_ENABLE_AMALGAMATION=ON .
+-make
+-
+-%install
+-%make_install
+-
+-# Remove this from the examples installation
+-rm examples/CMakeLists.txt
+-
+-%post -p /sbin/ldconfig
+-
+-%postun -p /sbin/ldconfig
+-
+-%files
+-%license LICENSE
+-%doc AUTHORS CHANGELOG README.md
+-%{_libdir}/libopen62541.so.*
+-
+-%files devel
+-%license LICENSE LICENSE-CC0
+-%{_libdir}/libopen62541.so
+-%{_libdir}/pkgconfig/open62541.pc
+-%dir %{_includedir}/open62541
+-%{_includedir}/open62541/*
+-%{_libdir}/cmake/open62541*
+-%dir %{_exec_prefix}/share/open62541
+-%{_exec_prefix}/share/open62541/*
+-
+-%doc FEATURES.md
+-%doc examples/
+-
+-%changelog
+-* Tue Sep 05 2017 Jens Reimann <jreimann@redhat.com> - 0.3-1
+-- New version of open62541
+-- Adapt for cmake3
+-* Thu Aug 31 2017 Jens Reimann <jreimann@redhat.com> - 0.2-1
+-- Initial version of the package
+-
+diff --git a/tools/cmake/SetGitBasedVersion.cmake b/tools/cmake/SetGitBasedVersion.cmake
+deleted file mode 100644
+index 1816568e..00000000
+--- a/tools/cmake/SetGitBasedVersion.cmake
++++ /dev/null
+@@ -1,85 +0,0 @@
+-get_filename_component(VERSION_SRC_DIR ${CMAKE_CURRENT_LIST_DIR} DIRECTORY)
+-set(VERSION_SRC_DIR "${VERSION_SRC_DIR}/..")
+-
+-find_package(Git)
+-
+-function(set_open62541_version)
+-
+-    # Generate a git-describe version string from Git repository tags
+-    if(GIT_EXECUTABLE AND NOT DEFINED OPEN62541_VERSION)
+-        execute_process(
+-            COMMAND ${GIT_EXECUTABLE} describe --tags --dirty --match "v*"
+-            WORKING_DIRECTORY "${VERSION_SRC_DIR}"
+-            OUTPUT_VARIABLE GIT_DESCRIBE_VERSION
+-            RESULT_VARIABLE GIT_DESCRIBE_ERROR_CODE
+-            OUTPUT_STRIP_TRAILING_WHITESPACE
+-        )
+-        if(NOT GIT_DESCRIBE_ERROR_CODE)
+-
+-            # Example values can be:
+-            # v1.2
+-            # v1.2.3
+-            # v1.2.3-rc1
+-            # v1.2.3-rc1-dirty
+-            # v1.2.3-5-g4538abcd
+-            # v1.2.3-5-g4538abcd-dirty
+-
+-            set(OPEN62541_VERSION ${GIT_DESCRIBE_VERSION})
+-        endif()
+-    endif()
+-
+-    if(OPEN62541_VERSION)
+-        STRING(REGEX REPLACE "^(v[0-9\\.]+)(.*)$"
+-               "\\1"
+-               GIT_VERSION_NUMBERS
+-               "${OPEN62541_VERSION}" )
+-        STRING(REGEX REPLACE "^v([0-9\\.]+)(.*)$"
+-               "\\2"
+-               GIT_VERSION_LABEL
+-               "${OPEN62541_VERSION}" )
+-
+-        if("${GIT_VERSION_NUMBERS}" MATCHES "^v([0-9]+)(.*)$")
+-            STRING(REGEX REPLACE "^v([0-9]+)\\.?(.*)$"
+-                   "\\1"
+-                   GIT_VER_MAJOR
+-                   "${GIT_VERSION_NUMBERS}" )
+-            if("${GIT_VERSION_NUMBERS}" MATCHES "^v([0-9]+)\\.([0-9]+)(.*)$")
+-                STRING(REGEX REPLACE "^v([0-9]+)\\.([0-9]+)(.*)$"
+-                       "\\2"
+-                       GIT_VER_MINOR
+-                       "${GIT_VERSION_NUMBERS}" )
+-                if("${GIT_VERSION_NUMBERS}" MATCHES "^v([0-9]+)\\.([0-9]+)\\.([0-9]+)(.*)$")
+-                    STRING(REGEX REPLACE "^v([0-9]+)\\.([0-9]+)\\.([0-9]+)(.*)$"
+-                           "\\3"
+-                           GIT_VER_PATCH
+-                           "${GIT_VERSION_NUMBERS}" )
+-                else()
+-                    set(GIT_VER_PATCH 0)
+-                endif()
+-            else()
+-                set(GIT_VER_MINOR 0)
+-                set(GIT_VER_PATCH 0)
+-            endif()
+-
+-        else()
+-            set(GIT_VER_MAJOR 0)
+-            set(GIT_VER_MINOR 0)
+-            set(GIT_VER_PATCH 0)
+-        endif()
+-        set(OPEN62541_VER_MAJOR ${GIT_VER_MAJOR} PARENT_SCOPE)
+-        set(OPEN62541_VER_MINOR ${GIT_VER_MINOR} PARENT_SCOPE)
+-        set(OPEN62541_VER_PATCH ${GIT_VER_PATCH} PARENT_SCOPE)
+-        set(OPEN62541_VER_LABEL "${GIT_VERSION_LABEL}" PARENT_SCOPE)
+-        set(OPEN62541_VER_COMMIT ${OPEN62541_VERSION} PARENT_SCOPE)
+-    else()
+-        # Final fallback: Just use a bogus version string that is semantically older
+-        # than anything else and spit out a warning to the developer.
+-        set(OPEN62541_VERSION "v0.0.0-unknown" PARENT_SCOPE)
+-        set(OPEN62541_VER_MAJOR 0 PARENT_SCOPE)
+-        set(OPEN62541_VER_MINOR 0 PARENT_SCOPE)
+-        set(OPEN62541_VER_PATCH 0 PARENT_SCOPE)
+-        set(OPEN62541_VER_LABEL "-unknown" PARENT_SCOPE)
+-        set(OPEN62541_VER_COMMIT "undefined" PARENT_SCOPE)
+-        message(WARNING "Failed to determine OPEN62541_VERSION from repository tags. Using default version \"${OPEN62541_VERSION}\".")
+-    endif()
+-endfunction()
+diff --git a/tools/packaging/CMakeLists.txt b/tools/packaging/CMakeLists.txt
+deleted file mode 100644
+index 87fd02f5..00000000
+--- a/tools/packaging/CMakeLists.txt
++++ /dev/null
+@@ -1,17 +0,0 @@
+-##########################
+-# Packaging (DEB/RPM)    #
+-##########################
+-# invoke via `make package`
+-
+-set(CPACK_GENERATOR "TGZ;DEB;RPM")
+-set(CPACK_PACKAGE_VENDOR "open62541 team")
+-set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "OPC UA implementation")
+-set(CPACK_PACKAGE_DESCRIPTION "open62541 is a C-based library (linking with C++ projects is possible) with all necessary tools to implement dedicated OPC UA clients and servers, or to integrate OPC UA-based communication into existing applications.")
+-set(CPACK_PACKAGE_DESCRIPTION_FILE "${PROJECT_SOURCE_DIR}/README.md")
+-set(CPACK_RESOURCE_FILE_LICENSE "${PROJECT_SOURCE_DIR}/LICENSE")
+-set(CPACK_PACKAGE_VERSION_MAJOR "${OPEN62541_VER_MAJOR}")
+-set(CPACK_PACKAGE_VERSION_MINOR "${OPEN62541_VER_MINOR}")
+-set(CPACK_PACKAGE_VERSION_PATCH "${OPEN62541_VER_PATCH}${OPEN62541_VER_LABEL}")
+-set(CPACK_DEBIAN_PACKAGE_MAINTAINER "open62541 team") #required
+-
+-include(CPack)
+diff --git a/tools/packaging/tito/tito.props b/tools/packaging/tito/tito.props
+deleted file mode 100644
+index eab3f190..00000000
+--- a/tools/packaging/tito/tito.props
++++ /dev/null
+@@ -1,5 +0,0 @@
+-[buildconfig]
+-builder = tito.builder.Builder
+-tagger = tito.tagger.VersionTagger
+-changelog_do_not_remove_cherrypick = 0
+-changelog_format = %s (%ae)
+diff --git a/tools/prepare_packaging.py b/tools/prepare_packaging.py
+deleted file mode 100644
+index 6bcc033f..00000000
+--- a/tools/prepare_packaging.py
++++ /dev/null
+@@ -1,117 +0,0 @@
+-#!/usr/bin/env python
+-
+-# This Source Code Form is subject to the terms of the Mozilla Public
+-# License, v. 2.0. If a copy of the MPL was not distributed with this
+-# file, You can obtain one at http://mozilla.org/MPL/2.0/.
+-
+-import subprocess
+-import os
+-import re
+-from email.utils import formatdate
+-import datetime
+-
+-
+-dirpath = os.path.join(os.path.dirname(os.path.realpath(__file__)),"..")
+-
+-git_describe_version = subprocess.check_output(["git", "describe", "--tags", "--dirty", "--match", "v*"]).decode('utf-8').strip()
+-
+-# v1.2
+-# v1.2.3
+-# v1.2.3-rc1
+-# v1.2.3-rc1-dirty
+-# v1.2.3-5-g4538abcd
+-# v1.2.3-5-g4538abcd-dirty
+-# git_describe_version = "v1.2.3"
+-
+-m = re.match(r"^v([0-9]+)(\.[0-9]+)?(\.[0-9]+)?(-(.*)+)?$", git_describe_version)
+-version_major = m.group(1) if m.group(1) is not None else "0"
+-version_minor = m.group(2).replace(".", "") if m.group(2) is not None else "0"
+-version_patch = m.group(3).replace(".", "") if m.group(3) is not None else "0"
+-version_label = m.group(4) if m.group(4) is not None else ""
+-#print("major {} minor {} patch {} label {}".format(version_major, version_minor, version_patch, version_label))
+-
+-# We can not use unstable for now, because dpkg-buildpackage wants to sign them
+-# It will fail with gpg: skipped "open62541 Team <open62541-core@googlegroups.com>": No secret key
+-#debian_distribution = "unstable"
+-#if version_label is not "":
+-debian_distribution = "UNRELEASED"
+-
+-debian_path = os.path.join(dirpath, "debian")
+-changelog_file = os.path.join(debian_path, "changelog")
+-
+-# remove leading 'v'
+-changelog_version = git_describe_version[1:] if git_describe_version[0] == 'v' else git_describe_version
+-# replace all '-' with '~' in version
+-changelog_version = changelog_version.replace('-', '~')
+-
+-# prefix the version string with the current ISO datetime to ensure correct version ordering.
+-# See https://github.com/open62541/open62541/issues/3140
+-changelog_version = datetime.datetime.utcnow().replace(microsecond=0).isoformat().replace('-', '').replace(':', '') + '~' + changelog_version
+-
+-with open(changelog_file, 'r') as original: data = original.read()
+-with open(changelog_file, 'w') as modified:
+-    new_entry = """open62541 ({version}) {distribution}; urgency=medium
+-
+-  * Full changelog is available here:
+-    https://github.com/open62541/open62541/blob/master/CHANGELOG
+-
+- -- open62541 Team <open62541-core@googlegroups.com>  {time}
+-""".format(version=changelog_version, time=formatdate(), distribution = debian_distribution)
+-
+-    modified.write(new_entry + "\n" + data)
+-
+-# Create control file and replace template variables
+-control_file_template = os.path.join(debian_path, "control-template")
+-control_file = os.path.join(debian_path, "control")
+-os.rename(control_file_template, control_file)
+-
+-with open(control_file, 'r+') as f:
+-    content = f.read()
+-    f.seek(0)
+-    f.truncate()
+-    f.write(content.replace('<soname>', "{}".format(version_major)))
+-
+-
+-# rename the install template to match the soname
+-install_file_template = os.path.join(debian_path, "libopen62541.install-template")
+-install_file = os.path.join(debian_path, "libopen62541-{}.install".format(version_major))
+-os.rename(install_file_template, install_file)
+-
+-install_file_template = os.path.join(debian_path, "libopen62541-dev.install-template")
+-install_file = os.path.join(debian_path, "libopen62541-{}-dev.install".format(version_major))
+-os.rename(install_file_template, install_file)
+-
+-install_file_template = os.path.join(debian_path, "libopen62541-tools.install-template")
+-install_file = os.path.join(debian_path, "libopen62541-{}-tools.install".format(version_major))
+-os.rename(install_file_template, install_file)
+-
+-install_file_template = os.path.join(debian_path, "open62541-doc.doc-base-template")
+-install_file = os.path.join(debian_path, "open62541-doc.doc-base")
+-os.rename(install_file_template, install_file)
+-
+-install_file_template = os.path.join(debian_path, "open62541-doc.install-template")
+-install_file = os.path.join(debian_path, "open62541-doc.install")
+-os.rename(install_file_template, install_file)
+-
+-# Create rule file and replace template variables
+-rule_file_template = os.path.join(debian_path, "rules-template")
+-rule_file = os.path.join(debian_path, "rules")
+-os.rename(rule_file_template, rule_file)
+-
+-with open(rule_file, 'r+') as f:
+-    content = f.read()
+-    f.seek(0)
+-    f.truncate()
+-    content = content.replace('<soname>', "{}".format(version_major))
+-    f.write(content)
+-
+-# Update CMakeLists.txt to include full version string
+-
+-with open(os.path.join(dirpath,"CMakeLists.txt"), 'r+') as f:
+-    lines = f.readlines()
+-    f.seek(0)
+-    f.truncate()
+-    for idx, line in enumerate(lines):
+-        if idx == 2:
+-            f.write('set(OPEN62541_VERSION "{}")\n'.format(git_describe_version))
+-        f.write(line)
