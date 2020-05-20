@@ -71,7 +71,6 @@ jobs:
           docker-images: ${{ matrix.docker_image }}
         env:
           MACOSX_DEPLOYMENT_TARGET: ${{ matrix.deployment-target }}
-          CONAN_SHARED_OPTION_NAME: False
           CONAN_OPTIONS: ${{ matrix.conan_options }}
           CONAN_REFERENCE: 'libcurl/${{ matrix.libcurl_versions }}'
           CONAN_VISUAL_RUNTIMES: ${{ matrix.vs_runtimes }}

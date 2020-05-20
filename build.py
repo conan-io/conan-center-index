@@ -7,6 +7,8 @@ from cpt.tools import get_bool_from_env
 if __name__ == "__main__":
     environ["CONAN_USERNAME"] = "_"
     environ["CONAN_CHANNEL"] = "ci"
+
+    environ["CONAN_SHARED_OPTION_NAME"] = "False"
     if "CONAN_OPTIONS" in environ and environ["CONAN_OPTIONS"] != "":
         environ["CONAN_OPTIONS"] = "*:shared=True," + environ["CONAN_OPTIONS"]
     else:
