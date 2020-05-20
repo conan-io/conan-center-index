@@ -6,5 +6,4 @@ sources:
 patches:
   "1.2.11":
     - patch_file: "patches/0001-no-exampels-cmake.patch"
-      base_path: "source_subfolder" 
- 
+      base_path: "source_subfolder"

@@ -47,7 +47,7 @@ class ZlibConan(ConanFile):
         if self.settings.os == "iOS":
             return False # use a cmake toolchain .... or, find out the special CHOST settings zlib requires, but ...
         return self.settings.os == "Linux" or tools.is_apple_os(self.settings.os)
-        # ... the  question is, why not always go with cmake and forget about the automake distaster? 
+        # ... the  question is, why not always go with cmake and forget about the automake distaster?
         # this woulds simplify this recipe enorm
 
     def _build_zlib_autotools(self):
