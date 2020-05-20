@@ -1,4 +1,6 @@
 #include "UrlTest.hpp"
+#include "DeserializerTest.hpp"
+#include "TypeTest.hpp"
 
 #include "oatpp/core/concurrency/SpinLock.hpp"
 #include "oatpp/core/base/Environment.hpp"
@@ -9,6 +11,8 @@
 
 void runTests() {
     OATPP_RUN_TEST(oatpp::test::network::UrlTest);
+    OATPP_RUN_TEST(oatpp::test::parser::json::mapping::DeserializerTest);
+    OATPP_RUN_TEST(oatpp::test::core::data::mapping::type::TypeTest);
 }
 
 int main() {
