@@ -1,23 +1,18 @@
 --- SConstruct
 +++ SConstruct
-@@ -151,10 +151,18 @@
+@@ -151,10 +151,10 @@
                   "Assume a source layout instead of install layout",
                   True),
      )
 -
-+extra_environment = {
-+  'ENV': {'PATH': os.environ['PATH'], },
-+}
-+if os.environ.get('LD'):
-+  extra_environment['LINK'] = os.environ['LD']
-+if os.environ.get('LDFLAGS'):
-+  extra_environment['LINKFLAGS'] = os.environ['LDFLAGS']
-+if os.environ.get('CFLAGS'):
-+  extra_environment['CFLAGS'] = os.environ['CFLAGS']
- env = Environment(variables=opts,
-                   tools=('default', 'textfile',),
+-env = Environment(variables=opts,
+-                  tools=('default', 'textfile',),
 -                  CPPPATH=['.', ],
-+                  CPPPATH=['.', ], **extra_environment
-                   )
+-                  )
++extra_environment = { 'ENV': {'PATH': os.environ['PATH'], },}
++if os.environ.get('LD'): extra_environment['LINK'] = os.environ['LD']
++if os.environ.get('LDFLAGS'): extra_environment['LINKFLAGS'] = os.environ['LDFLAGS']
++if os.environ.get('CFLAGS'): extra_environment['CFLAGS'] = os.environ['CFLAGS']
++env = Environment(variables=opts, tools=('default', 'textfile',), CPPPATH=['.', ], **extra_environment)
  
  env.Append(BUILDERS = {
