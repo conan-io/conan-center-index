@@ -60,6 +60,10 @@ jobs:
             xcode_version: '11.4'
     runs-on: ${{ matrix.os }}
     steps:
+      - name: Install meson on macos-10.15
+        # not required by qt, but by its test package
+        if: matrix.os == 'macos-10.15'
+        run: brew install meson
       - name: Configure git
         run: git config --global core.autocrlf false
         shell: bash
