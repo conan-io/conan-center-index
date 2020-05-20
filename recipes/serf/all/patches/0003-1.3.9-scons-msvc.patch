@@ -24,7 +24,7 @@
      env.Append(CPPDEFINES=['NDEBUG'])
      env.Append(LINKFLAGS=['/RELEASE'])
  
-@@ -316,8 +316,8
+@@ -316,8 +316,8 @@
  
    env.Append(LIBS=[apr_libs, apu_libs])
    if not env.get('SOURCE_LAYOUT', None):
