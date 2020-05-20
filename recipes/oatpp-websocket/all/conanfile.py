@@ -41,8 +41,11 @@ class OatppConan(ConanFile):
         self._cmake.definitions["OATPP_BUILD_TESTS"] = False
         self._cmake.definitions["OATPP_MODULES_LOCATION"] = "CUSTOM"
         self._cmake.definitions["OATPP_DIR_LIB"] = os.path.join(
-            self.deps_cpp_info["oatpp"].rootpath, self.deps_cpp_info["oatpp"].libdirs[0])
-        self._cmake.definitions["OATPP_DIR_SRC"] = self.deps_cpp_info["oatpp"].include_paths[0]
+            self.deps_cpp_info["oatpp"].rootpath, self.deps_cpp_info["oatpp"].libdirs[0]
+        )
+        self._cmake.definitions["OATPP_DIR_SRC"] = self.deps_cpp_info[
+            "oatpp"
+        ].include_paths[0]
         self._cmake.configure(build_folder=self._build_subfolder)
         return self._cmake
 
@@ -57,8 +60,10 @@ class OatppConan(ConanFile):
         tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
 
     def package_info(self):
-        self.cpp_info.includedirs = [os.path.join("include", "oatpp-{}".format(self.version), "oatpp-websocket")]
-        self.cpp_info.libdirs = [os.path.join("lib",  "oatpp-{}".format(self.version))]
+        self.cpp_info.includedirs = [
+            os.path.join("include", "oatpp-{}".format(self.version), "oatpp-websocket")
+        ]
+        self.cpp_info.libdirs = [os.path.join("lib", "oatpp-{}".format(self.version))]
         self.cpp_info.libs = tools.collect_libs(self)
         if self.settings.os == "Linux":
             self.cpp_info.system_libs = ["pthread"]
