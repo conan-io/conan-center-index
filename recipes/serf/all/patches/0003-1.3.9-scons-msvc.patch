@@ -24,6 +24,15 @@
      env.Append(CPPDEFINES=['NDEBUG'])
      env.Append(LINKFLAGS=['/RELEASE'])
  
+@@ -309,7 +309,7 @@
+   if aprstatic:
+     apr_libs='apr-1.lib'
+     apu_libs='aprutil-1.lib'
+-    env.Append(LIBS=['shell32.lib', 'xml.lib'])
++    env.Append(LIBS=['shell32.lib'])
+   else:
+     apr_libs='libapr-1.lib'
+     apu_libs='libaprutil-1.lib'
 @@ -316,8 +316,8 @@
  
    env.Append(LIBS=[apr_libs, apu_libs])
