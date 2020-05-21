@@ -1,6 +1,5 @@
 from conans import ConanFile, tools, AutoToolsBuildEnvironment
 from conans.errors import ConanInvalidConfiguration
-from contextlib import contextmanager
 import glob
 import os
 
@@ -39,11 +38,6 @@ class LibeditConan(ConanFile):
             raise ConanInvalidConfiguration("tinfo is not (yet) available on CCI")
             self.requires("libtinfo/x.y.z")
 
-    def build_requirements(self):
-        if tools.os_info.is_windows and "CONAN_BASH_PATH" not in os.environ \
-                and tools.os_info.detect_windows_subsystem() != "msys2":
-            self.build_requires("msys2/20190524")
-
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
@@ -53,37 +47,18 @@ class LibeditConan(ConanFile):
             del self.options.fPIC
         del self.settings.compiler.libcxx
         del self.settings.compiler.cppstd
+        if self.settings.os == "Windows":
+            raise ConanInvalidConfiguration("Windows is not supported by libedit (missing termios.h)")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
         archive_name = glob.glob("{}-*-{}".format(self.name, self.version))[0]
         os.rename(archive_name, self._source_subfolder)
 
-    @contextmanager
-    def _build_context(self):
-        env_vars = {}
-        if self.settings.compiler == "Visual Studio":
-            build_aux_path = os.path.join(self.build_folder, self._source_subfolder, "build-aux")
-            lt_compile = tools.unix_path(os.path.join(build_aux_path, "compile"))
-            lt_ar = tools.unix_path(os.path.join(build_aux_path, "ar-lib"))
-            env_vars.update({
-                "CC": "{} cl -nologo".format(lt_compile),
-                "CXX": "{} cl -nologo".format(lt_compile),
-                "LD": "link",
-                "STRIP": ":",
-                "AR": "{} lib".format(lt_ar),
-                "RANLIB": ":",
-                "NM": "dumpbin -symbols"
-            })
-            with tools.vcvars(self.settings):
-                with tools.environment_append(env_vars):
-                    yield
-        else:
-            yield
-
     def _configure_autotools(self):
         if self._autotools:
             return self._autotools
+
         self._autotools = AutoToolsBuildEnvironment(self, win_bash=tools.os_info.is_windows)
         self._autotools.libs = []
 
@@ -102,15 +77,13 @@ class LibeditConan(ConanFile):
 
     def build(self):
         self._patch_sources()
-        with self._build_context():
-            autotools = self._configure_autotools()
-            autotools.make()
+        autotools = self._configure_autotools()
+        autotools.make()
 
     def package(self):
         self.copy("COPYING", src=self._source_subfolder, dst="licenses")
-        with self._build_context():
-            autotools = self._configure_autotools()
-            autotools.install()
+        autotools = self._configure_autotools()
+        autotools.install()
 
         tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
         tools.rmdir(os.path.join(self.package_folder, "share"))
