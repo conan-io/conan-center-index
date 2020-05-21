@@ -28,8 +28,7 @@ class LibSELinuxConan(ConanFile):
             raise ConanInvalidConfiguration("Only Linux is supported")
 
     def build_requirements(self):
-        if not tools.which("flex"):
-            self.build_requires("flex/2.6.4")
+        self.build_requires("flex/2.6.4")
 
     def source(self):
         for download in self.conan_data["sources"][self.version]:
