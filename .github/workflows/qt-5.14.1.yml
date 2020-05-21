@@ -60,10 +60,6 @@ jobs:
             xcode_version: '11.4'
     runs-on: ${{ matrix.os }}
     steps:
-      - name: Install meson on macos-10.15
-        # not required by qt, but by its test package
-        if: matrix.os == 'macos-10.15'
-        run: brew install meson
       - name: Configure git
         run: git config --global core.autocrlf false
         shell: bash
@@ -88,6 +84,7 @@ jobs:
           docker-images: ${{ matrix.docker_image }}
         env:
           MACOSX_DEPLOYMENT_TARGET: ${{ matrix.deployment-target }}
+          CONAN_SHARED_OPTION_NAME: False
           CONAN_OPTIONS: ${{ env.COMMON_CONAN_OPTIONS }} ${{ matrix.conan_options }}
           CONAN_VISUAL_RUNTIMES: ${{ matrix.vs_runtimes }}
           CONAN_ARCHS: ${{ matrix.archs }}
