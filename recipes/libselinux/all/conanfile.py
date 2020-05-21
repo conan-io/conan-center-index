@@ -33,7 +33,6 @@ class LibSELinuxConan(ConanFile):
     def source(self):
         for download in self.conan_data["sources"][self.version]:
             tools.get(**download)
-            extracted_dir = glob.glob("lib*")[0]
 
     def build(self):
         _sepol_subfolder, _selinux_subfolder = self._get_subfolders()
@@ -62,4 +61,3 @@ class LibSELinuxConan(ConanFile):
 
     def package_info(self):
         self.cpp_info.libs = ["selinux", "sepol"]
-
