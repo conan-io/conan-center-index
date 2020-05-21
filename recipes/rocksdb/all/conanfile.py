@@ -52,8 +52,9 @@ class RocksDB(ConanFile):
         if self.settings.os == "Windows":
             del self.options.fPIC
 
-        # Force compilation with C++14
-        self.settings.compiler.cppstd = 14
+        minimal_cpp_standard = "11"
+        if self.settings.compiler.cppstd:
+            tools.check_min_cppstd(self, minimal_cpp_standard)
 
     def configure(self):
         if self.settings.os == "Windows" and \
