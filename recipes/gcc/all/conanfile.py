@@ -84,7 +84,7 @@ class GccConan(ConanFile):
         return []
 
     def build(self):
-        # If building on x86_64, change the default directory name for 64-bit libraries to “lib”:
+        # If building on x86_64, change the default directory name for 64-bit libraries to "lib":
         tools.replace_in_file(os.path.join(self.source_folder,
                                            self._source_subfolder, "gcc", "config", "i386", "t-linux64"),
                               "m64=../lib64", "m64=../lib", strict=False)
