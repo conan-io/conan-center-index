@@ -1,5 +1,7 @@
 from conans import AutoToolsBuildEnvironment, ConanFile, tools
+from conans.client.tools.win import msvs_toolset
 from conans.errors import ConanException
+from contextlib import contextmanager
 import glob
 import os
 import re
@@ -52,6 +54,8 @@ class SerfConan(ConanFile):
     def _patch_sources(self):
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
             tools.patch(**patch)
+        pc_in = os.path.join(self._source_subfolder, "build", "serf.pc.in")
+        tools.save(pc_in, tools.load(pc_in))
 
     @property
     def _cc(self):
@@ -65,38 +69,47 @@ class SerfConan(ConanFile):
 
     def _lib_path_arg(self, path):
         argname = "LIBPATH:" if self.settings.compiler == "Visual Studio" else "L"
-        return "-{}'{}'".format(argname, path)
+        return "-{}'{}'".format(argname, path.replace("\\", "/"))
+
+    @contextmanager
+    def _build_context(self):
+        extra_env = {}
+        if self.settings.compiler == "Visual Studio":
+            extra_env["OPENSSL_LIBS"] = ";".join("{}.lib".format(lib) for lib in self.deps_cpp_info["openssl"].libs)
+        with tools.environment_append(extra_env):
+            with tools.vcvars(self.settings) if self.settings.compiler == "Visual Studio" else tools.no_op():
+                yield
 
     def build(self):
         self._patch_sources()
         autotools = AutoToolsBuildEnvironment(self)
+        args = ["-Y", os.path.join(self.source_folder, self._source_subfolder)]
+        kwargs = {
+            "APR": self.deps_cpp_info["apr"].rootpath.replace("\\", "/"),
+            "APU": self.deps_cpp_info["apr-util"].rootpath.replace("\\", "/"),
+            "OPENSSL": self.deps_cpp_info["openssl"].rootpath.replace("\\", "/"),
+            "PREFIX": self.package_folder.replace("\\", "/"),
+            "LIBDIR": os.path.join(self.package_folder, "lib").replace("\\", "/"),
+            "ZLIB": self.deps_cpp_info["zlib"].rootpath.replace("\\", "/"),
+            "DEBUG": self.settings.build_type == "Debug",
+            "APR_STATIC": not self.options["apr"].shared,
+            "CFLAGS": " ".join(self.deps_cpp_info.cflags + (["-fPIC"] if self.options.get_safe("fPIC") else []) + autotools.flags),
+            "LINKFLAGS": " ".join(self.deps_cpp_info.sharedlinkflags) + " " + " ".join(self._lib_path_arg(l) for l in self.deps_cpp_info.lib_paths),
+            "CPPFLAGS": " ".join("-D{}".format(d) for d in autotools.defines) + " " + " ".join("-I'{}'".format(inc.replace("\\", "/")) for inc in self.deps_cpp_info.include_paths),
+            "CC": self._cc,
+            "SOURCE_LAYOUT": "False",
+        }
+
+        if self.settings.compiler == "Visual Studio":
+            kwargs.update({
+                "TARGET_ARCH": str(self.settings.arch),
+                "MSVC_VERSION": "{:.1f}".format(float(msvs_toolset(self.settings).lstrip("v")) / 10),
+            })
+
+        escape_str = lambda x : "\"{}\"".format(x)
         with tools.chdir(self._source_subfolder):
-            args = ["-Y", os.path.join(self.source_folder, self._source_subfolder)]
-            kwargs = {
-                "APR": self.deps_cpp_info["apr"].rootpath,
-                "APU": self.deps_cpp_info["apr-util"].rootpath,
-                "OPENSSL": self.deps_cpp_info["openssl"].rootpath,
-                "PREFIX": self.package_folder,
-                "LIBDIR": os.path.join(self.package_folder, "lib"),
-                "ZLIB": self.deps_cpp_info["zlib"].rootpath,
-                "DEBUG": self.settings.build_type == "Debug",
-                "APR_STATIC": not self.options["apr"].shared,
-                "CFLAGS": " ".join(self.deps_cpp_info.cflags + (["-fPIC"] if self.options.get_safe("fPIC") else []) + autotools.flags),
-                "LINKFLAGS": " ".join(self.deps_cpp_info.sharedlinkflags) + " " + " ".join(self._lib_path_arg(l) for l in self.deps_cpp_info.lib_paths),
-                "CPPFLAGS": " ".join("-D{}".format(d) for d in autotools.defines) + " " + " ".join("-I'{}'".format(inc) for inc in self.deps_cpp_info.include_paths),
-                "CC": self._cc,
-                "SOURCE_LAYOUT": "False",
-            }
-
-            if self.settings.compiler == "Visual Studio":
-                kwargs.update({
-                    "TARGET_ARCH": str(self.settings.arch),
-                    "MSVC_VERSION": "{:.1f}".format(int(str(self.settings.compiler.version))),
-                })
-
-            escape_str = lambda x : "\"{}\"".format(x)
-            with tools.vcvars(self.settings) if self.settings.compiler == "Visual Studio" else tools.no_op():
-                self.run("scons {} {}".format(" ".join(escape_str(s) for s in args), " ".join("{}={}".format(k, escape_str(v)) for k, v in kwargs.items())), run_environment=True)
+            with self._build_context():
+                    self.run("scons {} {}".format(" ".join(escape_str(s) for s in args), " ".join("{}={}".format(k, escape_str(v)) for k, v in kwargs.items())), run_environment=True)
 
     @property
     def _static_ext(self):
@@ -113,21 +126,41 @@ class SerfConan(ConanFile):
     def package(self):
         self.copy("LICENSE", src=self._source_subfolder, dst="licenses")
         with tools.chdir(self._source_subfolder):
-            self.run("scons install -Y \"{}\"".format(os.path.join(self.source_folder, self._source_subfolder)), run_environment=True)
+            with self._build_context():
+                self.run("scons install -Y \"{}\"".format(os.path.join(self.source_folder, self._source_subfolder)), run_environment=True)
 
         tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
         if self.settings.os == "Windows":
-            raise ConanException("FIXME: don't know how to handle static/shared libraries on Windows yet")
+            for file in glob.glob(os.path.join(self.package_folder, "lib", "*.exp")):
+                os.unlink(file)
+            for file in glob.glob(os.path.join(self.package_folder, "lib", "*.pdb")):
+                os.unlink(file)
+            if self.options.shared:
+                for file in glob.glob(os.path.join(self.package_folder, "lib", "serf-{}.*".format(self._version_major))):
+                    os.unlink(file)
+                tools.mkdir(os.path.join(self.package_folder, "bin"))
+                os.rename(os.path.join(self.package_folder, "lib", "libserf-{}.dll".format(self._version_major)),
+                          os.path.join(self.package_folder, "bin", "libserf-{}.dll".format(self._version_major)))
+            else:
+                for file in glob.glob(os.path.join(self.package_folder, "lib", "libserf-{}.*".format(self._version_major))):
+                    os.unlink(file)
         else:
             ext_to_remove = self._static_ext if self.options.shared else self._shared_ext
             for fn in os.listdir(os.path.join(self.package_folder, "lib")):
                 if any(re.finditer("\\.{}(\.?|$)".format(ext_to_remove), fn)):
                     os.unlink(os.path.join(self.package_folder, "lib", fn))
 
+    @property
+    def _version_major(self):
+        return self.version.split(".", 1)[0]
+
     def package_info(self):
-        libname = "serf-{}".format(self.version.split(".", 1)[0])
+        libprefix = ""
+        if self.settings.os == "Windows" and self.options.shared:
+            libprefix = "lib"
+        libname = "{}serf-{}".format(libprefix, self._version_major)
         self.cpp_info.libs = [libname]
-        self.cpp_info.includedirs.append(os.path.join("include", libname))
+        self.cpp_info.includedirs.append(os.path.join("include", "serf-{}".format(self._version_major)))
         self.cpp_info.names["pkg_config"] = libname
         if self.settings.os == "Windows":
             self.cpp_info.system_libs = ["user32", "advapi32", "gdi32", "ws2_32", "crypt32", "mswsock", "rpcrt4", "secur32"]

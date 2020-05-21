@@ -5,11 +5,20 @@
                   "Visual C++ to use for building (E.g. 11.0, 9.0)",
                   None,
 -                 allowed_values=('14.0', '12.0',
-+                 allowed_values=('16.0', '15.0', '14.0', '12.0',
++                 allowed_values=('14.2', "14.1", '14.0', '12.0',
                                   '11.0', '10.0', '9.0', '8.0', '6.0')
                  ),
  
      # We always documented that we handle an install layout, but in fact we
+@@ -208,7 +208,7 @@
+ thisdir = os.getcwd()
+ libdir = '$LIBDIR'
+ incdir = '$PREFIX/include/serf-$MAJOR'
+-
++if os.environ.get("TMP"): env["ENV"]["TMP"] = os.environ["TMP"]
+ # This version string is used in the dynamic library name, and for Mac OS X also
+ # for the current_version and compatibility_version options in the .dylib
+ #
 @@ -273,11 +273,11 @@
    # Choose runtime and optimization
    if debug:
@@ -44,9 +53,12 @@
    elif aprstatic:
      env.Append(LIBPATH=['$APR/LibR','$APU/LibR'],
                 CPPPATH=['$APR/include', '$APU/include'])
-@@ -337,7 +337,7 @@
+@@ -335,9 +335,9 @@
+                LIBPATH=['$ZLIB'])
+ 
    # openssl
-   env.Append(LIBS=['libeay32.lib', 'ssleay32.lib'])
+-  env.Append(LIBS=['libeay32.lib', 'ssleay32.lib'])
++  env.Append(LIBS=os.environ["OPENSSL_LIBS"].split(";"))
    if not env.get('SOURCE_LAYOUT', None):
 -    env.Append(CPPPATH=['$OPENSSL/include/openssl'],
 +    env.Append(CPPPATH=['$OPENSSL/include', '$OPENSSL/include/openssl'],
