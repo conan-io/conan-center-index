@@ -63,6 +63,10 @@ class SerfConan(ConanFile):
             "Visual Studio": "cl",
         }.get(str(self.settings.compiler), str(self.settings.compiler))
 
+    def _lib_path_arg(self, path):
+        argname = "LIBPATH:" if self.settings.compiler == "Visual Studio" else "L"
+        return "-{}'{}'".format(argname, path)
+
     def build(self):
         self._patch_sources()
         autotools = AutoToolsBuildEnvironment(self)
@@ -78,7 +82,7 @@ class SerfConan(ConanFile):
                 "DEBUG": self.settings.build_type == "Debug",
                 "APR_STATIC": not self.options["apr"].shared,
                 "CFLAGS": " ".join(self.deps_cpp_info.cflags + (["-fPIC"] if self.options.get_safe("fPIC") else []) + autotools.flags),
-                "LINKFLAGS": " ".join(self.deps_cpp_info.sharedlinkflags) + " " + " ".join("-L'{}'".format(l) for l in self.deps_cpp_info.lib_paths),
+                "LINKFLAGS": " ".join(self.deps_cpp_info.sharedlinkflags) + " " + " ".join(self._lib_path_arg(l) for l in self.deps_cpp_info.lib_paths),
                 "CPPFLAGS": " ".join("-D{}".format(d) for d in autotools.defines) + " " + " ".join("-I'{}'".format(inc) for inc in self.deps_cpp_info.include_paths),
                 "CC": self._cc,
                 "SOURCE_LAYOUT": "False",
