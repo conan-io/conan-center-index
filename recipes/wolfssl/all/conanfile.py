@@ -68,11 +68,13 @@ class WolfSSLConan(ConanFile):
         if self.settings.compiler == "Visual Studio":
             self._autotools.link_flags.append("-ladvapi32")
         self._autotools.libs = []
-        enable_disable = lambda name, b: ("--enable-" if b else "--disable-") + name
+        if self.settings.compiler == "Visual Studio":
+            self._autotools.flags.append("-FS")
         conf_args = [
             "--disable-examples",
             "--disable-crypttests",
-            enable_disable("debug", self.settings.build_type == "Debug"),
+            "--enable-harden",
+            "--enable-debug" if self.settings.build_type == "Debug" else "--disable-debug",
         ]
         if self.options.shared:
             conf_args.extend(["--enable-shared", "--disable-static"])
