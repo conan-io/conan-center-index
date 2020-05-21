@@ -24,6 +24,7 @@ class GccConan(ConanFile):
         self._autotools = AutoToolsBuildEnvironment(self)
         pkgversion = 'conan GCC %s' % self.version
         bugurl = self.url + '/issues'
+        libdir = "%s/lib/gcc/%s" % (self.package_folder, self.version)
         args = [
             "--enable-languages=c,c++",
             "--disable-nls",
@@ -34,6 +35,7 @@ class GccConan(ConanFile):
             '--with-mpc=%s' % self.deps_cpp_info["mpc"].rootpath,
             "--with-mpfr=%s" % self.deps_cpp_info["mpfr"].rootpath,
             "--without-isl",
+            "--libdir=%s" % libdir,
             '--with-pkgversion=%s' % pkgversion,
             "--program-suffix=-%s" % self.version,
             "--with-bugurl=%s" % bugurl
@@ -82,6 +84,15 @@ class GccConan(ConanFile):
         return []
 
     def build(self):
+        # If building on x86_64, change the default directory name for 64-bit libraries to “lib”:
+        tools.replace_in_file(os.path.join(self.source_folder,
+                                           self._source_subfolder, "gcc", "config", "i386", "t-linux64"),
+                              "m64=../lib64", "m64=../lib", strict=False)
+        # Ensure correct install names when linking against libgcc_s;
+        # see discussion in https://github.com/Homebrew/legacy-homebrew/pull/34303
+        tools.replace_in_file(os.path.join(self.source_folder,
+                                           self._source_subfolder, "libgcc", "config", "t-slibgcc-darwin"),
+                              "@shlib_slibdir@", libdir, strict=False)
         autotools = self._configure_autotools()
         autotools.make(args=self._make_args)
 
