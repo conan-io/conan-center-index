@@ -11,7 +11,6 @@ class DoxygenInstallerConan(ConanFile):
     topics = ("conan", "doxygen", "installer", "devtool", "documentation")
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/doxygen/doxygen"
-    author = "Inexor <info@inexor.org>"
     license = "GPL-2.0-only"
 
     settings = {
