@@ -1,6 +1,5 @@
 import os
 from conans import tools, CMake, ConanFile
-from conans.errors import ConanInvalidConfiguration
 
 
 class ConanFileDefault(ConanFile):
@@ -11,7 +10,7 @@ class ConanFileDefault(ConanFile):
     homepage = "https://github.com/apache/thrift"
     license = "Apache-2.0"
     exports_sources = ["CMakeLists.txt"]
-    generators = "cmake"
+    generators = "cmake", "cmake_find_package"
 
     settings = "os", "arch", "compiler", "build_type"
     options = {
@@ -59,17 +58,18 @@ class ConanFileDefault(ConanFile):
         if self.settings.os == 'Windows':
             del self.options.fPIC
 
-    def configure(self):
-        # See: https://github.com/apache/thrift/blob/v0.12.0/build/cmake/DefinePlatformSpecifc.cmake
-        if self.settings.os == "Windows" and self.options.shared:
-            raise ConanInvalidConfiguration("Thrift does not currently support shared libs on Windows. Use -o thrift:shared=False instead")
-
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
         extracted_dir = "thrift-" + self.version
         os.rename(extracted_dir, self._source_subfolder)
 
     def build(self):
+        if self.options.with_openssl:
+            tools.replace_in_file("FindOpenSSL.cmake", "OpenSSL_INCLUDE_DIR", "OPENSSL_INCLUDE_DIR")
+            tools.replace_in_file("FindOpenSSL.cmake", "OpenSSL_LIBRARIES", "OPENSSL_LIBRARIES")
+        if self.options.with_libevent:
+            tools.replace_in_file("FindLibevent.cmake", "Libevent_INCLUDE_DIR", "LIBEVENT_INCLUDE_DIR")
+            tools.replace_in_file("FindLibevent.cmake", "Libevent_LIBRARIES", "LIBEVENT_LIBRARIES")
         cmake = self._configure_cmake()
         cmake.build()
 
@@ -95,13 +95,10 @@ class ConanFileDefault(ConanFile):
         for option, value in self.options.items():
             self._cmake.definitions[option.upper()] = value
 
-        self._cmake.definitions["WITH_SHARED_LIB"] = self.options.shared
-
         # Make thrift use correct thread lib (see repo/build/cmake/config.h.in)
         self._cmake.definitions["USE_STD_THREAD"] = self.options.with_stdthreads
         self._cmake.definitions["USE_BOOST_THREAD"] = self.options.with_boostthreads
-        self._cmake.definitions["WITH_SHARED_LIB"] = self.options.shared
-        self._cmake.definitions["WITH_STATIC_LIB"] = not self.options.shared
+        self._cmake.definitions["BUILD_SHARED_LIBS"] = self.options.shared
         self._cmake.definitions["BOOST_ROOT"] = self.deps_cpp_info['boost'].rootpath
         self._cmake.definitions["BUILD_TESTING"] = False
         self._cmake.definitions["BUILD_COMPILER"] = True
