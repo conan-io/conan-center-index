@@ -134,13 +134,6 @@ class GiflibConan(ConanFile):
         tools.rmdir(os.path.join(self.package_folder, "share"))
 
     def package_info(self):
+        self.cpp_info.libs = tools.collect_libs(self)
         if self.settings.compiler == "Visual Studio":
-            if self.options.shared:
-                self.cpp_info.libs = ['gif.dll.lib']
-                # defined only for consuming package to use dllimport
-                self.cpp_info.defines.append('USE_GIF_DLL')
-            else:
-                self.cpp_info.libs = ['gif']
-                self.cpp_info.defines.append('USE_GIF_LIB')
-        else:
-            self.cpp_info.libs = ['gif']
+            self.cpp_info.defines.append("USE_GIF_DLL" if self.options.shared else "USE_GIF_LIB")
