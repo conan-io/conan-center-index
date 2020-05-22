@@ -52,8 +52,8 @@ class TermcapConan(ConanFile):
         self._cmake.definitions["TERMCAP_SOURCES"] = ";".join(sources)
         self._cmake.definitions["TERMCAP_HEADERS"] = ";".join(headers)
         self._cmake.definitions["TERMCAP_INC_OPTS"] = ";".join(optional_headers)
-        self._cmake.definitions["TERMCAP_CAP_FILE"] = tools.unix_path(os.path.join(self._source_subfolder, "termcap.src"))
-        self._cmake.definitions["CMAKE_INSTALL_SYSCONFDIR"] = tools.unix_path(os.path.join(self.package_folder, "bin", "etc"))
+        self._cmake.definitions["TERMCAP_CAP_FILE"] = os.path.join(self._source_subfolder, "termcap.src").replace("\\", "/")
+        self._cmake.definitions["CMAKE_INSTALL_SYSCONFDIR"] = os.path.join(self.package_folder, "bin", "etc").replace("\\", "/")
         self._cmake.verbose = True
         self._cmake.configure()
         return self._cmake
