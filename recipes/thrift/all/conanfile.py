@@ -70,6 +70,9 @@ class ConanFileDefault(ConanFile):
         if self.options.with_libevent:
             tools.replace_in_file("FindLibevent.cmake", "Libevent_INCLUDE_DIR", "LIBEVENT_INCLUDE_DIR")
             tools.replace_in_file("FindLibevent.cmake", "Libevent_LIBRARIES", "LIBEVENT_LIBRARIES")
+        for f in ["Findflex.cmake", "Findbison.cmake"]:
+            if os.path.isfile(f):
+                os.unlink(f)
         cmake = self._configure_cmake()
         cmake.build()
 
