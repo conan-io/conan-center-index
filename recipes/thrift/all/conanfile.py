@@ -5,7 +5,6 @@ from conans.errors import ConanInvalidConfiguration
 
 class ConanFileDefault(ConanFile):
     name = "thrift"
-
     description = "Thrift is an associated code generation mechanism for RPC"
     topics = ("conan", "thrift", "serialization", "rpc")
     url = "https://github.com/conan-io/conan-center-index"
@@ -142,5 +141,4 @@ class ConanFileDefault(ConanFile):
             # To avoid error C2589: '(' : illegal token on right side of '::'
             self.cpp_info.defines.append("NOMINMAX")
         elif self.settings.os == "Linux":
-            self.cpp_info.libs.extend(["m", "pthread"])
-
+            self.cpp_info.system_libs.extend(["m", "pthread"])
