@@ -3,6 +3,7 @@
 
 #include "Calculator.h"
 
+#include <thrift/config.h>
 #include <thrift/server/TSimpleServer.h>
 #include <thrift/server/TThreadPoolServer.h>
 #include <thrift/server/TThreadedServer.h>
@@ -58,6 +59,6 @@ int main(int argc, char **argv) {
     std::shared_ptr<ThreadManager> threadManager = ThreadManager::newSimpleThreadManager(workerCount);
     threadManager->threadFactory(std::make_shared<ThreadFactory>());
 
-    std::cout << "Bincrafters\n";
+    std::cout << "Thrift " << PACKAGE_VERSION << '\n';
     return EXIT_SUCCESS;
 }
