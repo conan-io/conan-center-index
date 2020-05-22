@@ -27,6 +27,11 @@ class GoogleGuetzliConan(ConanFile):
         if self.settings.os not in ["Linux", "Windows"]:
             raise ConanInvalidConfiguration("conan recipe for guetzli v{0} is not \
                 available in {1}.".format(self.version, self.settings.os))
+       
+        if str(self.settings.compiler.libcxx) == "libc++":
+            raise ConanInvalidConfiguration("conan recipe for guetzli v{0} cannot be\
+                built with libc++".format(self.version))
+
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
