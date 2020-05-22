@@ -12,7 +12,7 @@ class ZyreConan(ConanFile):
               "message-queue", "asynchronous")
     exports_sources = "CMakeLists.txt", "patches/**"
     settings = "os", "compiler", "build_type", "arch"
-    requires = "zeromq/4.3.2", "czmq/4.2.0"
+    requires = "czmq/4.2.0"
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
