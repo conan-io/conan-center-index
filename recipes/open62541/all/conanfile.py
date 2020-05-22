@@ -196,8 +196,6 @@ class Open62541Conan(ConanFile):
         self.copy("LICENSE-CC0", dst="licenses", src=self._source_subfolder)
         cmake = self._configure_cmake()
         cmake.install()
-        if self.settings.os == "Windows":
-            self.copy("*.dll", dst="lib", src="", keep_path=False)
 
     def package_info(self):
         self.cpp_info.names["cmake_find_package"] = "open62541"

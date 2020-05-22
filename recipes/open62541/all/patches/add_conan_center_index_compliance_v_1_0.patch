@@ -1,5 +1,5 @@
 diff --git a/CMakeLists.txt b/CMakeLists.txt
-index d426e1da..1f7ca494 100644
+index d426e1da..54e7713d 100644
 --- a/CMakeLists.txt
 +++ b/CMakeLists.txt
 @@ -9,7 +9,6 @@ string(TOLOWER "${CMAKE_BUILD_TYPE}" BUILD_TYPE_LOWER_CASE)
@@ -64,7 +64,18 @@ index d426e1da..1f7ca494 100644
  
  # This list of components allows to define a find_package requirement.
  # E.g.:
-@@ -1160,22 +1133,6 @@ if(UA_ENABLE_AMALGAMATION)
+@@ -1151,31 +1124,15 @@ install(TARGETS open62541
+         EXPORT open62541Targets
+         LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+         ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
+-        RUNTIME DESTINATION ${CMAKE_INSTALL_PREFIX}
++        RUNTIME DESTINATION ${CMAKE_INSTALL_LIBDIR}
+         INCLUDES DESTINATION include)
+-
++       
+ if(UA_ENABLE_AMALGAMATION)
+ # Our default way of installation is the non-amalgamated version.
+ # See also https://github.com/open62541/open62541/pull/2292#discussion_r241106424
  install(CODE "MESSAGE(WARNING \"Installation with UA_ENABLE_AMALGAMATION=ON is not recommended.\")")
  endif()
  
