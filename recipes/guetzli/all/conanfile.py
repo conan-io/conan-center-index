@@ -4,7 +4,7 @@ import os
 
 
 class GoogleGuetzliConan(ConanFile):
-    name = "google-guetzli"
+    name = "guetzli"
     license = "Apache-2.0"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://opensource.google/projects/guetzli"
@@ -25,7 +25,7 @@ class GoogleGuetzliConan(ConanFile):
 
     def configure(self):
         if self.settings.os not in ["Linux", "Windows"]:
-            raise ConanInvalidConfiguration("conan recipe for google-guetzli v{0} is not \
+            raise ConanInvalidConfiguration("conan recipe for guetzli v{0} is not \
                 available in {1}.".format(self.version, self.settings.os))
 
     def source(self):
