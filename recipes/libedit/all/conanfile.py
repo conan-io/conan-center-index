@@ -35,8 +35,8 @@ class LibeditConan(ConanFile):
         elif self.options.terminal_db == "ncurses":
             self.requires("ncurses/6.2")
         elif self.options.terminal_db == "tinfo":
+            # TODO - Add tinfo when available
             raise ConanInvalidConfiguration("tinfo is not (yet) available on CCI")
-            self.requires("libtinfo/x.y.z")
 
     def config_options(self):
         if self.settings.os == "Windows":
