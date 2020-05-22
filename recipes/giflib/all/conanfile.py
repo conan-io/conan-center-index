@@ -21,13 +21,18 @@ class GiflibConan(ConanFile):
 
     _source_subfolder = "source_subfolder"
 
+    def config_options(self):
+        if self.settings.os == "Windows":
+            del self.options.fPIC
+
     def configure(self):
         del self.settings.compiler.libcxx
         del self.settings.compiler.cppstd
 
-    def config_options(self):
-        if self.settings.os == "Windows":
-            del self.options.fPIC
+    def build_requirements(self):
+        if tools.os_info.is_windows and "CONAN_BASH_PATH" not in os.environ and \
+           tools.os_info.detect_windows_subsystem() not in ("cygwin", "msys2"):
+            self.build_requires("msys2/20190524")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
@@ -39,14 +44,6 @@ class GiflibConan(ConanFile):
         tools.replace_in_file(os.path.join(self._source_subfolder, "Makefile.in"),
                               'SUBDIRS = lib util pic $(am__append_1)',
                               'SUBDIRS = lib pic $(am__append_1)')
-
-        if tools.os_info.is_windows:
-            if tools.os_info.detect_windows_subsystem() not in ("cygwin", "msys2"):
-                raise ConanInvalidConfiguration("This recipe needs a Windows Subsystem to be compiled. "
-                                                "You can specify a build_require to:"
-                                                " 'msys2_installer/latest@bincrafters/stable' or"
-                                                " 'cygwin_installer/2.9.0@bincrafters/stable' or"
-                                                " put in the PATH your own installation")
 
         if self.settings.compiler == "Visual Studio":
             self.build_visual()
