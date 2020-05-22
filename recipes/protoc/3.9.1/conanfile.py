@@ -16,14 +16,15 @@ class ProtocConanFile(ConanFile):
     exports_sources = ["CMakeLists.txt", "protoc.patch"]
     generators = "cmake"
     short_paths = True
+    keep_imports = True
 
     _source_subfolder = "source_subfolder"
-    _build_subfolder = "build_subfolder"    
+    _build_subfolder = "build_subfolder"
 
     settings = "os_build", "arch_build", "compiler", "arch"
 
-    def requirements(self):
-        self.requires.add("protobuf/{}".format(self.version), private=True)
+    def build_requirements(self):
+        self.build_requires("protobuf/{}".format(self.version))
 
     def _configure_cmake(self):
         cmake = CMake(self)
@@ -36,7 +37,6 @@ class ProtocConanFile(ConanFile):
 
     def build(self):
         tools.patch(base_path=self._source_subfolder, patch_file="protoc.patch")
-        print("PWD: %s" % os.getcwd())
         cmake = self._configure_cmake()
         cmake.build()
 
@@ -46,14 +46,25 @@ class ProtocConanFile(ConanFile):
         extracted_dir = self._base_name + "-" + self.version
         os.rename(extracted_dir, self._source_subfolder)
 
+    def imports(self):
+        # when built with protobuf:shared=True, protoc will require its libraries to run
+        # so we copy those from protobuf package
+        if tools.os_info.is_linux:
+            # `ldd` shows dependencies named like libprotoc.so.3.9.1.0
+            self.protobuf_dylib_mask = "*.so.*"
+        else:
+            assert False, "protoc package was not checked on your system"
+        self.copy(self.protobuf_dylib_mask, dst="lib", src="lib", root_package="protobuf")
+
     def package(self):
         self.copy("LICENSE", dst="licenses", src=self._source_subfolder)
         cmake = self._configure_cmake()
-        cmake.install() 
+        cmake.install()
+        self.copy(self.protobuf_dylib_mask, dst="lib", src="lib")
 
     def package_info(self):
         bindir = os.path.join(self.package_folder, "bin")
-        self.output.info("Appending PATH environment variable: {}".format(bindir))
+        self.output.info("env_info.PATH: {}".format(bindir))
         self.env_info.PATH.append(bindir)
 
         protoc = "protoc.exe" if self.settings.os_build == "Windows" else "protoc"
