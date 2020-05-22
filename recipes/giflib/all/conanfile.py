@@ -131,6 +131,7 @@ class GiflibConan(ConanFile):
         la_file = os.path.join(self.package_folder, 'lib', 'libgif.la')
         if os.path.isfile(la_file):
             os.unlink(la_file)
+        tools.rmdir(os.path.join(self.package_folder, "share"))
 
     def package_info(self):
         if self.settings.compiler == "Visual Studio":
