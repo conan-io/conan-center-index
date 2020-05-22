@@ -14,6 +14,8 @@ class DefaultNameConan(ConanFile):
                 cmake.definitions["HEADER_ONLY"] = "TRUE"
             else:
                 cmake.definitions["Boost_USE_STATIC_LIBS"] = not self.options["boost"].shared
+            if not self.options["boost"].without_locale:
+                cmake.definitions["WITH_LOCALE"] = "TRUE"
             if not self.options["boost"].without_python:
                 cmake.definitions["WITH_PYTHON"] = "TRUE"
             if not self.options["boost"].without_random:
@@ -26,6 +28,10 @@ class DefaultNameConan(ConanFile):
                 cmake.definitions["WITH_COROUTINE"] = "TRUE"
             if not self.options["boost"].without_chrono:
                 cmake.definitions["WITH_CHRONO"] = "TRUE"
+            if self.options["boost"].i18n_backend == "icu":
+                cmake.definitions["USE_ICU"] = "TRUE"
+                cmake.definitions["ICU_USE_STATIC_LIBS"] = "FALSE" if self.options["icu"].shared else "TRUE"
+
             cmake.definitions["Boost_NO_BOOST_CMAKE"] = "TRUE"
             cmake.configure()
             cmake.build()
@@ -46,6 +52,8 @@ class DefaultNameConan(ConanFile):
             self.run(os.path.join("bin", "coroutine_exe"), run_environment=True)
         if not self.options["boost"].without_chrono:
             self.run(os.path.join("bin", "chrono_exe"), run_environment=True)
+        if not self.options["boost"].without_locale:
+            self.run(os.path.join("bin", "locale_exe"), run_environment=True)
         if not self.options["boost"].without_python:
             os.chdir("bin")
             sys.path.append(".")

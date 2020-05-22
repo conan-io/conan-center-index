@@ -544,12 +544,14 @@ class BoostConan(ConanFile):
 
         if self.options.i18n_backend == 'icu':
             flags.append("-sICU_PATH={}".format(self.deps_cpp_info["icu"].rootpath))
+            if not self.options["icu"].shared:
+                flags.append( "-sICU_LINK_TYPE=static" )
             flags.append("boost.locale.iconv=off boost.locale.icu=on")
         elif self.options.i18n_backend == 'iconv':
             flags.append("boost.locale.iconv=on boost.locale.icu=off")
         else:
             flags.append("boost.locale.iconv=off boost.locale.icu=off")
-            flags.append("--disable-icu --disable-iconvv")
+            flags.append("--disable-icu --disable-iconv")
 
         def add_defines(option, library):
             if option:

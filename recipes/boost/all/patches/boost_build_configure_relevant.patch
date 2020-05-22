@@ -1,0 +1,11 @@
+--- a/tools/build/src/build/configure.jam	2019-08-14 14:03:50.000000000 +0200
++++ b/tools/build/src/build/configure.jam	2019-09-10 14:27:54.377625059 +0200
+@@ -41,4 +41,4 @@
+ # relevant features are also considered relevant.
+ #
+ feature.compose <configure> :
+-    <target-os> <toolset> <address-model> <architecture> <cxxstd> ;
++    <target-os> <toolset> <address-model> <architecture> <cxxstd> <variant> <link> <runtime-link> ;
+
+
+ rule log-summary ( )
