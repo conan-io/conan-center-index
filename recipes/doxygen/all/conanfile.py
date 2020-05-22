@@ -58,6 +58,8 @@ class DoxygenInstallerConan(ConanFile):
         if not dest_file:
             raise ConanInvalidConfiguration("could not find source file fo the configuration")
 
+        tools.unzip("doxygen-{}.linux.bin.tar.gz".format(self.version), pattern="*LICENSE")
+
         if self.settings.os_build == "Macos":
             self.unpack_dmg(dest_file)
             # Redirect the path of libclang.dylib to be adjacent to the doxygen executable, instead of in Frameworks
@@ -76,6 +78,7 @@ class DoxygenInstallerConan(ConanFile):
         self.copy("*.exe", dst="bin")
         self.copy("*.dylib", dst="bin")
         self.copy("*.dll", dst="bin")
+        self.copy("*LICENSE", dst="licenses", keep_path=False)
 
     def package_info(self):
         bindir = os.path.join(self.package_folder, "bin")
