@@ -12,6 +12,7 @@ class BitserializerConan(ConanFile):
     license = "MIT"
     settings = ("os", "compiler",)
     no_copy_source = True
+    requires = ("rapidjson/1.1.0")
 
     @property
     def _supported_compilers(self):
@@ -46,9 +47,18 @@ class BitserializerConan(ConanFile):
                 break
 
     def package(self):
-        include_folder = os.path.join(self._source_subfolder, "core")
         self.copy(pattern="license.txt", dst="licenses", src=self._source_subfolder)
-        self.copy(pattern="*.h", dst="include", src=include_folder)
+        # Install Core
+        self.copy(pattern="*.h", dst="include", src=os.path.join(self._source_subfolder, "core"))
+        # Install JSON component based on RapidJson
+        archives_include_folder = os.path.join(self._source_subfolder, "archives")
+        self.copy(pattern=os.path.join("bitserializer_rapidjson", "*.h"), dst="include", src=archives_include_folder)
+        # ToDo: Install JSON component based on CppRestSdk (when Conan will support components)
+        # self.copy(pattern=os.path.join("bitserializer_cpprest_json", "*.h"), dst="include", src=archives_include_folder)
+        # ToDo: Install XML component based on PugiXml (when Conan will support components and PugiXml will be available in the Conan-center)
+        # self.copy(pattern="bitserializer_pugixml\\*.h", dst="include", src=archives_include_folder)
+        # ToDo: Install YAML component based on RapidYaml (when Conan will support components and RapidYaml will be available in the Conan-center)
+        # self.copy(pattern="bitserializer_rapidyaml\\*.h", dst="include", src=archives_include_folder)
 
     def package_id(self):
         self.info.header_only()
