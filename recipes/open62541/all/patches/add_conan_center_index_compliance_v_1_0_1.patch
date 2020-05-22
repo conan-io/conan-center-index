@@ -1,5 +1,5 @@
 diff --git a/CMakeLists.txt b/CMakeLists.txt
-index 6156c9b7..299aaf89 100644
+index 6156c9b7..20976e0e 100644
 --- a/CMakeLists.txt
 +++ b/CMakeLists.txt
 @@ -9,7 +9,6 @@ string(TOLOWER "${CMAKE_BUILD_TYPE}" BUILD_TYPE_LOWER_CASE)
@@ -64,6 +64,15 @@ index 6156c9b7..299aaf89 100644
  
  # This list of components allows to define a find_package requirement.
  # E.g.:
+@@ -1160,7 +1133,7 @@ install(TARGETS open62541 ${EXTRATARGETS}
+         EXPORT open62541Targets
+         LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+         ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
+-        RUNTIME DESTINATION ${CMAKE_INSTALL_PREFIX}
++        RUNTIME DESTINATION ${CMAKE_INSTALL_LIBDIR}
+         INCLUDES DESTINATION include)
+ 
+ if(UA_ENABLE_AMALGAMATION)
 @@ -1169,22 +1142,6 @@ if(UA_ENABLE_AMALGAMATION)
  install(CODE "MESSAGE(WARNING \"Installation with UA_ENABLE_AMALGAMATION=ON is not recommended.\")")
  endif()
