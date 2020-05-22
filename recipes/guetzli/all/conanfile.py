@@ -28,7 +28,7 @@ class GoogleGuetzliConan(ConanFile):
             raise ConanInvalidConfiguration("conan recipe for guetzli v{0} is not \
                 available in {1}.".format(self.version, self.settings.os))
        
-        if str(self.settings.compiler.libcxx) == "libc++":
+        if "libcxx" in self.settings.compiler and str(self.settings.compiler.libcxx) == "libc++":
             raise ConanInvalidConfiguration("conan recipe for guetzli v{0} cannot be\
                 built with libc++".format(self.version))
 
