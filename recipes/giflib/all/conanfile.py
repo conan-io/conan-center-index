@@ -7,14 +7,12 @@ import platform
 
 class GiflibConan(ConanFile):
     name = "giflib"
-    version = "5.1.4"
     description = 'A library and utilities for reading and writing GIF images.'
     url = "https://github.com/conan-io/conan-center-index"
     license = "MIT"
     homepage = "http://giflib.sourceforge.net"
     topics = ("conan", "giflib", "image", "multimedia", "format", "graphics")
     exports_sources = ["unistd.h", "gif_lib.h"]
-    generators = "cmake"
     settings = "os", "arch", "compiler", "build_type"
     options = {"shared": [True, False], "fPIC": [True, False]}
     default_options = {'shared': False, 'fPIC': True}
