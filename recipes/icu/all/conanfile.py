@@ -57,6 +57,13 @@ class ICUBase(ConanFile):
                                   "pathBuf.appendPathPart(arg, localError);",
                                   "pathBuf.append('/', localError); pathBuf.append(arg, localError);")
 
+    def _remove_scrptrun(self):
+        if self.settings.compiler == "Visual Studio" and Version(self.version) >= "65.1":
+            makefile_in = os.path.join(self.build_folder, self._source_subfolder, "source", "extra", "Makefile.in")
+            tools.replace_in_file(makefile_in,
+                                  "SUBDIRS = scrptrun uconv",
+                                  "SUBDIRS = uconv")
+
     def build(self):
         for filename in glob.glob("patches/*.patch"):
             self.output.info('applying patch "%s"' % filename)
@@ -72,6 +79,7 @@ class ICUBase(ConanFile):
             tools.replace_in_file(run_configure_icu_file, "-MD", flags)
 
         self._workaround_icu_20545()
+        self._remove_scrptrun()
 
         self._env_build = AutoToolsBuildEnvironment(self)
         if not self.options.get_safe("shared"):
