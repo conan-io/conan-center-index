@@ -85,7 +85,7 @@ class WolfSSLConan(ConanFile):
 
     def build(self):
         with tools.chdir(self._source_subfolder):
-            self.run("{} -fiv".format(os.environ["AUTORECONF"]), win_bash=tools.os_info.is_windows)
+            self.run("{} -fiv".format(tools.get_env("AUTORECONF")), win_bash=tools.os_info.is_windows)
         with self._build_context():
             autotools = self._configure_autotools()
             if self.settings.compiler == "Visual Studio":
