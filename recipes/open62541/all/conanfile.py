@@ -203,9 +203,13 @@ class Open62541Conan(ConanFile):
         self.cpp_info.libs = tools.collect_libs(self)
         self.cpp_info.includedirs = [
             "include",
-            os.path.join("include", "plugin"),
-            os.path.join("include", "posix")
+            os.path.join("include", "plugin")
         ]
+        if self.settings.os == "Windows":
+            self.cpp_info.libs.append("ws2_32")
+            self.cpp_info.includedirs.append(os.path.join("include", "win32"))
+        else:
+            self.cpp_info.includedirs.append(os.path.join("include", "posix"))
         self.cpp_info.builddirs = [
             "lib",
             os.path.join("lib", "cmake"),
