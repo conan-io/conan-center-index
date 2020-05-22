@@ -140,6 +140,10 @@ class Open62541Conan(ConanFile):
     def _configure_cmake(self):
         cmake = CMake(self)
         cmake.verbose = True
+        version = Version(self.version)
+        cmake.definitions["OPEN62541_VER_MAJOR"] = version.major(fill=False)
+        cmake.definitions["OPEN62541_VER_MINOR"] = version.minor(fill=False)
+        cmake.definitions["OPEN62541_VER_PATCH"] = version.patch()
         if self.settings.os != "Windows":
             cmake.definitions["POSITION_INDEPENDENT_CODE"] = self.options.fPIC
         cmake.definitions["BUILD_SHARED_LIBS"] = self.options.shared
@@ -178,7 +182,7 @@ class Open62541Conan(ConanFile):
         cmake.definitions["UA_ENABLE_HARDENING"] = self.options.hardening
         if self.settings.compiler == "Visual Studio" and self.options.shared == True:
             cmake.definitions["UA_MSVC_FORCE_STATIC_CRT"] = True
-        if Version(self.version) > "1.0.1":
+        if version > "1.0.1":
             cmake.definitions["UA_COMPILE_AS_CXX"] = self.options.cpp_compatible
         cmake.configure()
         return cmake
