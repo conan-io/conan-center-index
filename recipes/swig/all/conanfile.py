@@ -25,7 +25,7 @@ class SwigConan(ConanFile):
 
     def build_requirements(self):
         if tools.os_info.is_windows and not tools.get_env("CONAN_BASH_PATH") \
-                and not tools.os_info.detect_windows_subsystem() != "msys2":
+                and tools.os_info.detect_windows_subsystem() != "msys2":
             self.build_requires("msys2/20190524")
         if self.settings.compiler == "Visual Studio":
             self.build_requires("cccl/1.1")
