@@ -97,6 +97,8 @@ class ProjConan(ConanFile):
             self.cpp_info.system_libs.append("m")
             if self.options.threadsafe:
                 self.cpp_info.system_libs.append("pthread")
+        if self.settings.os == "Windows":
+            self.cpp_info.system_libs.append("shell32")
         if not self.options.shared and self._stdcpp_library:
             self.cpp_info.system_libs.append(self._stdcpp_library)
         if self.options.shared and self.settings.compiler == "Visual Studio":
