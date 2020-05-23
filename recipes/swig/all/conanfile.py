@@ -30,7 +30,7 @@ class SwigConan(ConanFile):
         if self.settings.compiler == "Visual Studio":
             self.build_requires("cccl/1.1")
         if tools.os_info.is_windows:
-            self.build_requires("winflexbison/2.5.18@bincrafters/stable")
+            self.build_requires("winflexbison/2.5.22")
         else:
             self.build_requires("bison/3.5.3")
         self.build_requires("automake/1.16.2")
