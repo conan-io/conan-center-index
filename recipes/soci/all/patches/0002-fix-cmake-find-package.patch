@@ -1,0 +1,23 @@
+--- cmake/SociBackend.cmake
++++ cmake/SociBackend.cmake
+@@ -31,14 +31,13 @@
+     if(NOT DEPEND_FOUND)
+       list(APPEND DEPS_NOT_FOUND ${dep})
+     else()
+-      string(TOUPPER "${dep}" DEPU)
+-      if( ${DEPU}_INCLUDE_DIR )
+-        list(APPEND DEPS_INCLUDE_DIRS ${${DEPU}_INCLUDE_DIR})
++      if( ${dep}_INCLUDE_DIR )
++        list(APPEND DEPS_INCLUDE_DIRS ${${dep}_INCLUDE_DIR})
+       endif()
+-      if( ${DEPU}_INCLUDE_DIRS )
+-        list(APPEND DEPS_INCLUDE_DIRS ${${DEPU}_INCLUDE_DIRS})
++      if( ${dep}_INCLUDE_DIRS )
++        list(APPEND DEPS_INCLUDE_DIRS ${${dep}_INCLUDE_DIRS})
+       endif()
+-      list(APPEND DEPS_LIBRARIES ${${DEPU}_LIBRARIES})
++      list(APPEND DEPS_LIBRARIES ${${dep}_LIBRARIES})
+     endif()
+   endforeach()
+ 
+
