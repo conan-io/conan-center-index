@@ -28,6 +28,10 @@ class OatppConan(ConanFile):
         tools.get(**self.conan_data["sources"][self.version])
         os.rename("oatpp-{0}".format(self.version), self._source_subfolder)
 
+    def configure(self):
+        if self.settings.os == "Windows" and self.options.shared:
+            raise ConanInvalidConfiguration("oatpp can not be built as shared library on Windows")
+
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
