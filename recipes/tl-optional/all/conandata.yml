@@ -2,6 +2,3 @@ sources:
   "1.0.0":
     url: https://github.com/TartanLlama/optional/archive/v1.0.0.zip
     sha256: 8bb68defc61da3de2b4cd73ef9792eba44570ec5cb52c4da731286f24aecbb95
-  "20191111":
-    url: https://github.com/TartanLlama/optional/archive/0dfc7b4e41b1245e47936d6c99bf8e3d80e42b9f.zip
-    sha256: dfc915d41a91095e0449161822a454bce96b5c3f68cd9cca13f1bb8cc2ea281b
