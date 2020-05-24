@@ -1,5 +1,6 @@
 from conans import ConanFile, CMake, tools
-from conans.errors import ConanInvalidConfiguration
+from conans.client.build.cppstd_flags import cppstd_default
+from conans.errors import ConanInvalidConfiguration, ConanException
 import os
 
 
@@ -25,7 +26,7 @@ class SociConan(ConanFile):
     _backend_default_option = {
         "empty": True,
         "mysql": True,
-        "odbc": True,
+        "odbc": False,
         "postgresql": True,
         "sqlite3": True,
         "db2": False,
@@ -50,6 +51,11 @@ class SociConan(ConanFile):
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
+
+    def configure(self):
+        compiler = str(self.settings.compiler)
+        if compiler == "apple-clang" and tools.Version(self.settings.compiler.version) <= "9.1":
+            raise ConanInvalidConfiguration( "{} requires at least {} 9.1".format(self.name, compiler))
 
     def requirements(self):
         if self.options.with_backend_sqlite3:
@@ -86,6 +92,22 @@ class SociConan(ConanFile):
         tools.get(**self.conan_data["sources"][self.version])
         os.rename("soci-{}".format(self.version), self._source_subfolder)
 
+    def _get_cppstd(self):
+        cppstd = self.settings.get_safe("compiler.cppstd")
+        if cppstd is None:
+            cppstd = cppstd_default(self.settings)
+
+        compiler = self.settings.get_safe("compiler")
+        compiler_version = self.settings.get_safe("compiler.version")
+        if not compiler or not compiler_version:
+            raise ConanException("Could not obtain cppstd because there is no declared "
+                                 "compiler in the 'settings' field of the recipe.")
+
+        if cppstd is None:
+            raise ConanInvalidConfiguration("Could not detect the current default cppstd for "
+                                            "the compiler {}-{}.".format(compiler,
+                                                                         compiler_version))
+
     def _configure_cmake(self):
         if self._cmake:
             return self._cmake
@@ -109,6 +131,14 @@ class SociConan(ConanFile):
         self._cmake.definitions["WITH_DB2"] = self.options.with_backend_db2
         self._cmake.definitions["WITH_FIREBIRD"] = self.options.with_backend_firebird
         self._cmake.definitions["WITH_ORACLE"] = self.options.with_backend_oracle
+
+        self._cmake.definitions["SOCI_CXX11"] = True
+
+        cppstd = self._get_cppstd()
+        if cppstd == "98" or cppstd == "gnu98":
+            self._cmake.definitions["SOCI_CXX11"] = False
+
+
 
         self._cmake.configure()
         return self._cmake
@@ -144,6 +174,10 @@ class SociConan(ConanFile):
         self.cpp_info.names["cmake_find_package_multi"] = "Soci"
 
         self.cpp_info.components["core"].libs = [self._construct_library_name("soci_core")]
+
+        cppstd = self._get_cppstd()
+        self.cpp_info.components["core"].defines = ["CMAKE_CXX_STANDARD={}".format("98" if cppstd == "98" or cppstd == "gnu98" else "11")]
+
         if self.options.with_boost:
             self.cpp_info.components["core"].defines.append("SOCI_USE_BOOST")
             self.cpp_info.components["core"].requires.append("boost::date_time")
