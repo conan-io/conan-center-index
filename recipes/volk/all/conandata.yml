@@ -1,7 +1,4 @@
 sources:
-  "20200318":
-    url: "https://github.com/zeux/volk/archive/ed4c168595bc7c5d36925f0036ea14d36b20c87c.zip"
-    sha256: "7c7179db256e54cbb2b1e21dfa8ed7f050d0129723f0a2be3d607feb5b53ba1a"
   "20200514":
     url: "https://github.com/zeux/volk/archive/5d2e2cf91f8a1fe4156d4c6b5c814d45d733684a.zip"
     sha256: "0d1507ad21eb90fb1d3dd426b86c73cc36a8618fb2a9467a39e9155ce37dc305"
