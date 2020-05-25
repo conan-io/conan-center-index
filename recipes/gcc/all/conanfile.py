@@ -109,7 +109,10 @@ class GccConan(ConanFile):
 
     def package(self):
         autotools = self._configure_autotools()
-        autotools.install(args=self._make_args)
+        if self.settings.build_type == "Debug":
+            autotools.install(args=self._make_args)
+        else:
+            autotools.make(args=["install-strip"] + self._make_args)
         tools.rmdir(os.path.join(self.package_folder, "share"))
         self._remove_by_mask("*.la")
         self.copy(pattern="COPYING*", dst="licenses", src=self._source_subfolder)
