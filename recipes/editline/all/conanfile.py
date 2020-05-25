@@ -4,12 +4,12 @@ import glob
 import os
 
 
-class LibeditConan(ConanFile):
-    name = "libedit"
+class EditlineConan(ConanFile):
+    name = "editline"
     description = "Autotool- and libtoolized port of the NetBSD Editline library (libedit)."
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "http://thrysoee.dk/editline/"
-    topics = ("conan", "libedit", "line", "editing", "history", "tokenization")
+    topics = ("conan", "editline", "libedit", "line", "editing", "history", "tokenization")
     license = "BSD-3-Clause"
     settings = "os", "compiler", "build_type", "arch"
     options = {
@@ -52,7 +52,7 @@ class LibeditConan(ConanFile):
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
-        archive_name = glob.glob("{}-*-{}".format(self.name, self.version))[0]
+        archive_name = glob.glob("{}-*-{}".format("libedit", self.version))[0]
         os.rename(archive_name, self._source_subfolder)
 
     def _configure_autotools(self):
