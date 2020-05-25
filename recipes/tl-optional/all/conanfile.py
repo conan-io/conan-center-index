@@ -11,7 +11,10 @@ class TlOptionalConan(ConanFile):
     topics = ("cpp11", "cpp14", "cpp17", "optional")
     license = "CC0-1.0"
     no_copy_source = True
-    _source_subfolder = "tl-expected"
+
+    @property
+    def _source_subfolder(self):
+        return "source_subfolder"
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
