@@ -32,6 +32,7 @@ class libuvConan(ConanFile):
 
     def _configure_cmake(self):
         cmake = CMake(self)
+        cmake.definitions["LIBUV_BUILD_TESTS"] = False
         cmake.configure()
         return cmake
 
