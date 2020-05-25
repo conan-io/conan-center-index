@@ -128,8 +128,9 @@ class BoostConan(ConanFile):
             del self.options.fPIC
 
     def configure(self):
-        if not self.options.i18n_backend and not self.options.without_locale:
-            raise ConanInvalidConfiguration("Boost 'locale' library requires a i18n_backend, either 'icu' or 'iconv'")
+        if not self.options.i18n_backend and not self.options.without_locale and \
+        (self.settings.os != "Windows" or self.settings.os.subsystem not in [None, "cygwin"]):
+            raise ConanInvalidConfiguration("Boost 'locale' library requires a i18n_backend on posix platform, either 'icu' or 'iconv'")
 
         if not self.options.multithreading:
             # * For the reason 'thread' is deactivate look at https://stackoverflow.com/a/20991533
