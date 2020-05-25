@@ -18,17 +18,8 @@ class TlOptionalConan(ConanFile):
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
-        os.rename(self._archive_dir, self._source_subfolder)
-
-    @property
-    def _archive_dir(self):
-        # the archive expands to a directory named expected-[COMMIT SHA1];
-        # we'd like to put this under a stable name
-        expected_dirs = [
-            de for de in os.scandir(self.source_folder)
-            if de.is_dir() and fnmatch(de.name, "optional-*")
-        ]
-        return expected_dirs[0].name
+        extracted_folder = "optional-" + self.version
+        os.rename(extracted_folder, self._source_subfolder)
 
     def package(self):
         self.copy("*",
