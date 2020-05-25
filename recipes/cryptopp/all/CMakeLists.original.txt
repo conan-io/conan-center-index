@@ -12,6 +12,8 @@
 # SET(CMAKE_C_COMPILER ${CMAKE_CXX_COMPILER})
 # # error "The CMAKE_C_COMPILER is set to a C++ compiler"
 
+cmake_minimum_required(VERSION 2.8.6)
+
 if(NOT DEFINED cryptocpp_DISPLAY_CMAKE_SUPPORT_WARNING)
   set(cryptocpp_DISPLAY_CMAKE_SUPPORT_WARNING 1)
 endif()
@@ -29,7 +31,6 @@ endif()
 # Print useful information
 message( STATUS "CMake version ${CMAKE_VERSION}" )
 
-cmake_minimum_required(VERSION 2.8.6)
 if (${CMAKE_VERSION} VERSION_LESS "3.0.0")
   project(cryptopp)
   set(cryptopp_VERSION_MAJOR 8)
