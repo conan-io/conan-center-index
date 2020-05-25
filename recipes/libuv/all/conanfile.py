@@ -64,6 +64,8 @@ class libuvConan(ConanFile):
 
     def package_info(self):
         self.cpp_info.libs = tools.collect_libs(self)
+        if self.options.shared:
+            self.cpp_info.defines = ["USING_UV_SHARED=1"]
         if self.settings.os == "Linux":
             self.cpp_info.system_libs = ["dl", "pthread", "rt"]
         if self.settings.os == "Windows":
