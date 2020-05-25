@@ -1,0 +1,8 @@
+sources:
+  "7.3.2":
+    url: "https://github.com/qhull/qhull/archive/v7.3.2.tar.gz"
+    sha256: "619c8a954880d545194bc03359404ef36a1abd2dde03678089459757fd790cb0"
+patches:
+  "7.3.2":
+    - patch_file: "patches/fix-cmake.patch"
+      base_path: "source_subfolder"
