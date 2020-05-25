@@ -5,7 +5,7 @@
 
 int main()
 {
-    char buf[1024] = {0};
+    char buf[2048] = {0};
     char *cl_string, *cm_string;
     int auto_wrap, height, width;
 
@@ -19,7 +19,7 @@ int main()
         case -1: fprintf(stderr, "tgetent: database not found\n"); break;
         case 0: fprintf(stderr, "tgetent: no such entry\n"); break;
         case 1: fprintf(stderr, "tgetent: success\n"); break;
-        default: fprintf(stderr, "Unknown tgetent return variable\n");
+        default: fprintf(stderr, "Unknown tgetent return variable\n"); break;
         }
     }
 
