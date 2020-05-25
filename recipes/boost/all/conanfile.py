@@ -123,13 +123,18 @@ class BoostConan(ConanFile):
         exe = self.options.python_executable if self.options.python_executable else sys.executable
         return str(exe).replace('\\', '/')
 
+    @property
+    def _is_posix_platform(self):
+        return (self.settings.os != "Windows") or (self.settings.os.subsystem not in [None, "cygwin"])
+            
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
+        if not self._is_posix_platform:
+            self.options.i18n_backend = None
 
     def configure(self):
-        if not self.options.i18n_backend and not self.options.without_locale and \
-        (self.settings.os != "Windows" or self.settings.os.subsystem not in [None, "cygwin"]):
+        if not self.options.i18n_backend and not self.options.without_locale and self._is_posix_platform:
             raise ConanInvalidConfiguration("Boost 'locale' library requires a i18n_backend on posix platform, either 'icu' or 'iconv'")
 
         if not self.options.multithreading:
