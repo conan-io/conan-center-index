@@ -1,0 +1,4 @@
+sources:
+  "8.2.0":
+    sha256: e3bcd48a62739ad179ad8064b523346abb53767bcbefc01fe37303412292343e
+    url: https://github.com/weidai11/cryptopp/archive/CRYPTOPP_8_2_0.tar.gz
