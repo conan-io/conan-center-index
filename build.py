@@ -29,3 +29,5 @@ if __name__ == "__main__":
     )
     builder.add_common_builds(shared_option_name=False, pure_c=is_pure_c)
     builder.run()
+
+# rebuild everything 7
