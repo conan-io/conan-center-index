@@ -11,7 +11,7 @@ class grpcConan(ConanFile):
     url = "https://github.com/inexorgame/conan-grpc"
     homepage = "https://github.com/grpc/grpc"
     license = "Apache-2.0"
-    exports_sources = ["CMakeLists.txt", "add_rpath.patch"]
+    exports_sources = ["CMakeLists.txt", "add_rpath.patch", "21661.patch"]
     generators = "cmake", "cmake_find_package_multi"
     short_paths = True
     keep_imports = True
@@ -42,7 +42,7 @@ class grpcConan(ConanFile):
     )
 
     def imports(self):
-        # when built with protobuf:shared=True, protoc will require its libraries to run
+        # when built with protobuf:shared=True, grpc plugins will require its libraries to run
         # so we copy those from protobuf package
         if tools.os_info.is_linux:
             # `ldd` shows dependencies named like libprotoc.so.3.9.1.0
@@ -65,6 +65,9 @@ class grpcConan(ConanFile):
 
         tools.check_with_algorithm_sum("sha1", "add_rpath.patch", "a6467f92d93a9550e9876ea487c49a24bd34ad97")
         tools.patch(base_path=self._source_subfolder, patch_file="add_rpath.patch", strip=1)
+
+        tools.check_with_algorithm_sum("sha1", "21661.patch", "32828f2f50293bb45b98464905355a6622099c58")
+        tools.patch(base_path=self._source_subfolder, patch_file="21661.patch", strip=1)
 
         cmake_path = os.path.join(self._source_subfolder, "CMakeLists.txt")
 
@@ -112,7 +115,7 @@ class grpcConan(ConanFile):
 
         cmake.definitions['gRPC_BUILD_CODEGEN'] = "ON" if self.options.build_codegen else "OFF"
         cmake.definitions['gRPC_BUILD_CSHARP_EXT'] = "ON" if self.options.build_csharp_ext else "OFF"
-        cmake.definitions['gRPC_BUILD_TESTS'] = "OFF"
+        #cmake.definitions['gRPC_BUILD_TESTS'] = "OFF"
 
         # We need the generated cmake/ files (bc they depend on the list of targets, which is dynamic)
         cmake.definitions['gRPC_INSTALL'] = "ON"
