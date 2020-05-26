@@ -261,4 +261,4 @@ class ICUBase(ConanFile):
             self.cpp_info.system_libs.extend(["dl", "pthread"])
 
         if self.settings.os == 'Windows':
-            self.cpp_info.libs.append('advapi32')
+            self.cpp_info.system_libs.append('advapi32')
