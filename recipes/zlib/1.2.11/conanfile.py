@@ -90,9 +90,6 @@ class ZlibConan(ConanFile):
             tools.replace_in_file('gzguts.h',
                                   '#if defined(_WIN32) || defined(__CYGWIN__)',
                                   '#if defined(_WIN32) || defined(__MINGW32__)')
-            # if self.settings.os == "iOS":
-            #     tools.replace_in_file("gzguts.h", '#ifdef _LARGEFILE64_SOURCE',
-            #                           '#include <unistd.h>\n\n#ifdef _LARGEFILE64_SOURCE')
             for filename in ['zconf.h', 'zconf.h.cmakein', 'zconf.h.in']:
                 tools.replace_in_file(filename,
                                       '#ifdef HAVE_UNISTD_H    '
