@@ -11,7 +11,7 @@ class PprintConan(ConanFile):
     license = "MIT"
     settings = "os", "compiler"
     topics = ("conan", "pprint", "pretty", "printer")
-    no_copy_sources = True
+    no_copy_source = True
 
     @property
     def _source_subfolder(self):
