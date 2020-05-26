@@ -10,7 +10,7 @@ class DoxygenInstallerConan(ConanFile):
     topics = ("conan", "doxygen", "installer", "devtool", "documentation")
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/doxygen/doxygen"
-    license = "GPL-2.0-only"
+    license = "GPL-2.0-or-later"
 
     settings = {"os", "arch"}
 
