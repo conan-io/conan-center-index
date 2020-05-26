@@ -77,7 +77,7 @@ class ConanFileDefault(ConanFile):
         cmake.build()
 
     def requirements(self):
-        self.requires("boost/1.71.0")
+        self.requires("boost/1.73.0")
         if self.settings.os == 'Windows':
             self.requires("winflexbison/2.5.22")
         else:
