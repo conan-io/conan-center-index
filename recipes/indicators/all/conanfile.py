@@ -6,7 +6,7 @@ class IndicatorsConan(ConanFile):
     name = "indicators"
     homepage = "https://github.com/p-ranav/indicators"
     url = "https://github.com/conan-io/conan-center-index"
-    description = "Termcolor is a header-only C++ library for printing colored messages to the terminal."
+    description = "Activity Indicators for Modern C++"
     license = "MIT"
     settings = "os"
     topics = ("conan", "indicators", "activity", "indicator", "loading", "spinner", "animation", "progress")
