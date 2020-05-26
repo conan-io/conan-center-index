@@ -89,9 +89,6 @@ class ICUBase(ConanFile):
             if self.settings.get_safe("os.version"):
                 self._env_build.flags.append(tools.apple_deployment_target_flag(self.settings.os, self.settings.os.version))
 
-        if self._is_msvc:
-            self._env_build.cxx_flags.append("-EHsc")
-
         if "msys2" in self.deps_user_info:
             self._env_build.vars["PYTHON"] = tools.unix_path(os.path.join(self.deps_env_info["msys2"].MSYS_BIN, "python"), tools.MSYS2)
 
