@@ -8,13 +8,17 @@ class IndicatorsConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     description = "Activity Indicators for Modern C++"
     license = "MIT"
-    settings = "os"
+    settings = "compiler", "os"
     topics = ("conan", "indicators", "activity", "indicator", "loading", "spinner", "animation", "progress")
     no_copy_sources = True
 
     @property
     def _source_subfolder(self):
         return "source_subfolder"
+
+    def configure(self):
+        if self.settings.compiler.cppstd:
+            tools.check_min_cppstd(self, 11)
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
