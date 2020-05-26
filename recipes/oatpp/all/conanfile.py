@@ -33,8 +33,8 @@ class OatppConan(ConanFile):
         if self.settings.os == "Windows" and self.options.shared:
             raise ConanInvalidConfiguration("oatpp can not be built as shared library on Windows")
 
-        if self.settings.compiler == "gcc" and self.settings.compiler.version in ["4.8", "4.9"]:
-            raise ConanInvalidConfiguration("oatpp can not be built with gcc 4.8 or 4.9")
+        if self.settings.compiler == "gcc" and tools.Version(self.settings.compiler.version) < "5":
+            raise ConanInvalidConfiguration("oatpp requires GCC >=5")
 
     def config_options(self):
         if self.settings.os == "Windows":
