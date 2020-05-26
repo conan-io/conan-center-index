@@ -11,7 +11,7 @@ class grpcConan(ConanFile):
     url = "https://github.com/inexorgame/conan-grpc"
     homepage = "https://github.com/grpc/grpc"
     license = "Apache-2.0"
-    exports_sources = ["CMakeLists.txt", "add_rpath.patch", "21661.patch"]
+    exports_sources = ["CMakeLists.txt", "add_rpath.patch", "b54a5b338637f92bfcf4b0bc05e0f57a5fd8fadd.patch"]
     generators = "cmake", "cmake_find_package_multi"
     short_paths = True
     keep_imports = True
@@ -48,7 +48,7 @@ class grpcConan(ConanFile):
             # `ldd` shows dependencies named like libprotoc.so.3.9.1.0
             self.protobuf_dylib_mask = "*.so.*"
         else:
-            assert False, "protoc package was not checked on your system"
+            assert False, "grpc package was not checked on your system"
         self.copy(self.protobuf_dylib_mask, dst="lib", src="lib", root_package="protobuf")
 
     def configure(self):
@@ -63,11 +63,13 @@ class grpcConan(ConanFile):
         extracted_dir = self.name + "-" + self.version
         os.rename(extracted_dir, self._source_subfolder)
 
+        # This patch adds RPATH to grpc plugins binaries for correct work with dynamically built protobuf
         tools.check_with_algorithm_sum("sha1", "add_rpath.patch", "a6467f92d93a9550e9876ea487c49a24bd34ad97")
         tools.patch(base_path=self._source_subfolder, patch_file="add_rpath.patch", strip=1)
 
-        tools.check_with_algorithm_sum("sha1", "21661.patch", "32828f2f50293bb45b98464905355a6622099c58")
-        tools.patch(base_path=self._source_subfolder, patch_file="21661.patch", strip=1)
+        # This patch refers to https://github.com/grpc/grpc/commit/b54a5b338637f92bfcf4b0bc05e0f57a5fd8fadd and helps to avoid hungs during test
+        tools.check_with_algorithm_sum("sha1", "b54a5b338637f92bfcf4b0bc05e0f57a5fd8fadd.patch", "56818a07d0a9b47a32ed65577be777eb224f5c78")
+        tools.patch(base_path=self._source_subfolder, patch_file="b54a5b338637f92bfcf4b0bc05e0f57a5fd8fadd.patch", strip=1)
 
         cmake_path = os.path.join(self._source_subfolder, "CMakeLists.txt")
 
