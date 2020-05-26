@@ -1,5 +1,6 @@
-import os
 from conans import ConanFile, tools
+from conans.errors import ConanInvalidConfiguration
+import os
 
 
 class PprintConan(ConanFile):
@@ -19,6 +20,20 @@ class PprintConan(ConanFile):
     def configure(self):
         if self.settings.compiler.cppstd:
             tools.check_min_cppstd(self, 17)
+
+        min_compiler_version = {
+            "gcc": 7,
+            "clang": 7,
+            "apple-clang": 7,
+            "Visual Studio": 15,
+        }.get(str(self.settings.compiler), None)
+
+        if min_compiler_version:
+            if tools.Version(self.settings.compiler.version) < min_compiler_version:
+                raise ConanInvalidConfiguration("The compiler does not support c++17")
+        else:
+            self.output.warn("pprint needs a c++17 capable compiler")
+
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
