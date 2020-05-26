@@ -1,0 +1,26 @@
+From b54a5b338637f92bfcf4b0bc05e0f57a5fd8fadd Mon Sep 17 00:00:00 2001
+From: Yash Tibrewal <yashkt@google.com>
+Date: Tue, 14 Jan 2020 15:15:57 -0800
+Subject: [PATCH] Sidestep multiple initialization issue of Tracers
+
+---
+ src/core/lib/debug/trace.cc | 6 ++++++
+ 1 file changed, 6 insertions(+)
+
+diff --git a/src/core/lib/debug/trace.cc b/src/core/lib/debug/trace.cc
+index 84c0a3805d3..4c1b88ad149 100644
+--- a/src/core/lib/debug/trace.cc
++++ b/src/core/lib/debug/trace.cc
+@@ -70,6 +70,12 @@ bool TraceFlagList::Set(const char* name, bool enabled) {
+ }
+ 
+ void TraceFlagList::Add(TraceFlag* flag) {
++  // TODO(yashykt): This loop is present to sidestep https://github.com/grpc/grpc/issues/21213. Remove it when either Makefile is fixed, or it's deprecated.
++  for (TraceFlag* t = root_tracer_; t != nullptr; t = t->next_tracer_) {
++    if (t == flag) {
++      return;
++    }
++  }
+   flag->next_tracer_ = root_tracer_;
+   root_tracer_ = flag;
+ }

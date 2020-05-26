@@ -1,0 +1,13 @@
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -13273,6 +13273,10 @@
+   )
+ endif()
+ 
++foreach(plugin grpc_cpp_plugin  grpc_csharp_plugin  grpc_node_plugin  grpc_objective_c_plugin  grpc_php_plugin  grpc_python_plugin  grpc_ruby_plugin)
++  set_property(TARGET ${plugin} PROPERTY INSTALL_RPATH "$ORIGIN/../${CMAKE_INSTALL_LIBDIR}")
++endforeach()
++
+ endif()
+ if(gRPC_BUILD_TESTS)
+ 

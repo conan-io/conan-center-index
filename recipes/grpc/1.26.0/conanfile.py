@@ -11,18 +11,20 @@ class grpcConan(ConanFile):
     url = "https://github.com/inexorgame/conan-grpc"
     homepage = "https://github.com/grpc/grpc"
     license = "Apache-2.0"
-    exports_sources = ["CMakeLists.txt"]
+    exports_sources = ["CMakeLists.txt", "add_rpath.patch", "b54a5b338637f92bfcf4b0bc05e0f57a5fd8fadd.patch"]
     generators = "cmake", "cmake_find_package_multi"
     short_paths = True
+    keep_imports = True
 
     settings = "os", "arch", "compiler", "build_type"
     options = {
-        # "shared": [True, False],
+        "shared": [True, False],
         "fPIC": [True, False],
         "build_codegen": [True, False],
         "build_csharp_ext": [True, False]
     }
     default_options = {
+        "shared": False,
         "fPIC": True,
         "build_codegen": True,
         "build_csharp_ext": False
@@ -39,6 +41,16 @@ class grpcConan(ConanFile):
         "c-ares/1.15.0"
     )
 
+    def imports(self):
+        # when built with protobuf:shared=True, grpc plugins will require its libraries to run
+        # so we copy those from protobuf package
+        if tools.os_info.is_linux:
+            # `ldd` shows dependencies named like libprotoc.so.3.9.1.0
+            self.protobuf_dylib_mask = "*.so.*"
+        else:
+            assert False, "grpc package was not checked on your system"
+        self.copy(self.protobuf_dylib_mask, dst="lib", src="lib", root_package="protobuf")
+
     def configure(self):
         if self.settings.os == "Windows" and self.settings.compiler == "Visual Studio":
             del self.options.fPIC
@@ -50,6 +62,14 @@ class grpcConan(ConanFile):
         tools.get(**self.conan_data["sources"][self.version])
         extracted_dir = self.name + "-" + self.version
         os.rename(extracted_dir, self._source_subfolder)
+
+        # This patch adds RPATH to grpc plugins binaries for correct work with dynamically built protobuf
+        tools.check_with_algorithm_sum("sha1", "add_rpath.patch", "a6467f92d93a9550e9876ea487c49a24bd34ad97")
+        tools.patch(base_path=self._source_subfolder, patch_file="add_rpath.patch", strip=1)
+
+        # This patch refers to https://github.com/grpc/grpc/commit/b54a5b338637f92bfcf4b0bc05e0f57a5fd8fadd and helps to avoid hungs during test
+        tools.check_with_algorithm_sum("sha1", "b54a5b338637f92bfcf4b0bc05e0f57a5fd8fadd.patch", "56818a07d0a9b47a32ed65577be777eb224f5c78")
+        tools.patch(base_path=self._source_subfolder, patch_file="b54a5b338637f92bfcf4b0bc05e0f57a5fd8fadd.patch", strip=1)
 
         cmake_path = os.path.join(self._source_subfolder, "CMakeLists.txt")
 
@@ -97,7 +117,7 @@ class grpcConan(ConanFile):
 
         cmake.definitions['gRPC_BUILD_CODEGEN'] = "ON" if self.options.build_codegen else "OFF"
         cmake.definitions['gRPC_BUILD_CSHARP_EXT'] = "ON" if self.options.build_csharp_ext else "OFF"
-        cmake.definitions['gRPC_BUILD_TESTS'] = "OFF"
+        #cmake.definitions['gRPC_BUILD_TESTS'] = "OFF"
 
         # We need the generated cmake/ files (bc they depend on the list of targets, which is dynamic)
         cmake.definitions['gRPC_INSTALL'] = "ON"
@@ -114,6 +134,8 @@ class grpcConan(ConanFile):
         if self.settings.os == "Windows" and self.settings.compiler == "gcc":
             cmake.definitions["CMAKE_CXX_FLAGS"] = "-D_WIN32_WINNT=0x600"
             cmake.definitions["CMAKE_C_FLAGS"] = "-D_WIN32_WINNT=0x600"
+
+        cmake.definitions["BUILD_SHARED_LIBS"] = "ON" if self.options.shared else "OFF"
 
         cmake.configure(build_folder=self._build_subfolder)
         return cmake
@@ -134,6 +156,7 @@ class grpcConan(ConanFile):
         self.copy("*", dst="bin", src="bin")
         self.copy("*.dll", dst="bin", keep_path=False)
         self.copy("*.so", dst="lib", keep_path=False)
+        self.copy(self.protobuf_dylib_mask, dst="lib", src="lib")
 
     def package_info(self):
         self.env_info.PATH.append(os.path.join(self.package_folder, "bin"))
