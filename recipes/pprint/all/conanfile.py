@@ -24,7 +24,7 @@ class PprintConan(ConanFile):
         min_compiler_version = {
             "gcc": 7,
             "clang": 7,
-            "apple-clang": "9.1",
+            "apple-clang": 10,
             "Visual Studio": 15,
         }.get(str(self.settings.compiler), None)
 
