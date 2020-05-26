@@ -5,7 +5,6 @@ import os
 
 class GdbmConan(ConanFile):
     name = "gdbm"
-    version = "1.18.1"
     description = ("gdbm is a library of database functions that uses "
                    "extensible hashing and work similar to "
                    "the standard UNIX dbm. "
@@ -52,7 +51,7 @@ class GdbmConan(ConanFile):
             self.requires("libiconv/1.16")
         if self.options.with_readline:
             raise ConanInvalidConfiguration("readline is not (yet) available on CCI")
-            self.requires("readline/x.y")
+            # TODO - Add readline package when available
 
     def build_requirements(self):
         self.build_requires("bison/3.5.3")
