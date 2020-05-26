@@ -10,7 +10,7 @@ class IndicatorsConan(ConanFile):
     license = "MIT"
     settings = "compiler", "os"
     topics = ("conan", "indicators", "activity", "indicator", "loading", "spinner", "animation", "progress")
-    no_copy_sources = True
+    no_copy_source = True
 
     @property
     def _source_subfolder(self):
