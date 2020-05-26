@@ -25,6 +25,9 @@ class B2Conan(ConanFile):
         engine_dir = os.path.join(build_dir, "src", "engine")
         os.chdir(engine_dir)
         with tools.environment_append({"VSCMD_START_DIR": os.curdir}):
+            if tools.get_env("CXXFLAGS") is not None:
+                # Tell the b2 build to use the environment variable CXX for the compiler to use
+                command += ' cxx'
             self.run(command)
         os.chdir(build_dir)
         command = os.path.join(

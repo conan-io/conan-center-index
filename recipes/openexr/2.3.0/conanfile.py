@@ -18,11 +18,19 @@ class OpenEXRConan(ConanFile):
     generators = "cmake"
     exports_sources = ["CMakeLists.txt", "patches/*.patch"]
 
-    _source_subfolder = "source_subfolder"
+    _cmake = None
+
+    @property
+    def _source_subfolder(self):
+        return "source_subfolder"
+
+    @property
+    def _build_subfolder(self):
+        return "build_subfolder"
 
     def config_options(self):
         if self.settings.os == "Windows":
-            self.options.remove("fPIC")
+            del self.options.fPIC
 
     def requirements(self):
         self.requires("zlib/1.2.11")
@@ -34,19 +42,21 @@ class OpenEXRConan(ConanFile):
             tools.patch(**p)
 
     def _configure_cmake(self):
-        cmake = CMake(self)
-        cmake.definitions["OPENEXR_BUILD_PYTHON_LIBS"] = False
-        cmake.definitions["BUILD_ILMBASE_STATIC"] = not self.options.shared
-        cmake.definitions["OPENEXR_BUILD_SHARED"] = self.options.shared
-        cmake.definitions["OPENEXR_BUILD_STATIC"] = not self.options.shared
-        cmake.definitions["OPENEXR_NAMESPACE_VERSIONING"] = self.options.namespace_versioning
-        cmake.definitions["OPENEXR_ENABLE_TESTS"] = False
-        cmake.definitions["OPENEXR_FORCE_CXX03"] = False
-        cmake.definitions["OPENEXR_BUILD_UTILS"] = False
-        cmake.definitions["ENABLE_TESTS"] = False
-        cmake.definitions["OPENEXR_BUILD_TESTS"] = False
-        cmake.configure()
-        return cmake
+        if self._cmake:
+            return self._cmake
+        self._cmake = CMake(self)
+        self._cmake.definitions["OPENEXR_BUILD_PYTHON_LIBS"] = False
+        self._cmake.definitions["BUILD_ILMBASE_STATIC"] = not self.options.shared
+        self._cmake.definitions["OPENEXR_BUILD_SHARED"] = self.options.shared
+        self._cmake.definitions["OPENEXR_BUILD_STATIC"] = not self.options.shared
+        self._cmake.definitions["OPENEXR_NAMESPACE_VERSIONING"] = self.options.namespace_versioning
+        self._cmake.definitions["OPENEXR_ENABLE_TESTS"] = False
+        self._cmake.definitions["OPENEXR_FORCE_CXX03"] = False
+        self._cmake.definitions["OPENEXR_BUILD_UTILS"] = False
+        self._cmake.definitions["ENABLE_TESTS"] = False
+        self._cmake.definitions["OPENEXR_BUILD_TESTS"] = False
+        self._cmake.configure(build_folder=self._build_subfolder)
+        return self._cmake
 
     def _patch_sources(self):
         # Fix dependency of IlmBase
@@ -93,6 +103,9 @@ class OpenEXRConan(ConanFile):
                 os.unlink(filename)
 
     def package_info(self):
+        self.cpp_info.names["cmake_find_package"] = "OpenEXR"
+        self.cpp_info.names["cmake_find_package_multi"] = "OpenEXR"
+        self.cpp_info.names["pkg_config"] = "OpenEXR"
         parsed_version = self.version.split(".")
         version_suffix = "-%s_%s" % (parsed_version[0], parsed_version[1]) if self.options.namespace_versioning else ""
         if not self.options.shared:

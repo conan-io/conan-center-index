@@ -34,11 +34,11 @@ class FreetypeConan(ConanFile):
 
     def requirements(self):
         if self.options.with_png:
-            self.requires.add("libpng/1.6.37")
+            self.requires("libpng/1.6.37")
         if self.options.with_zlib:
-            self.requires.add("zlib/1.2.11")
+            self.requires("zlib/1.2.11")
         if self.options.with_bzip2:
-            self.requires.add("bzip2/1.0.8")
+            self.requires("bzip2/1.0.8")
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -115,7 +115,7 @@ conan_staticlibs="{staticlibs}"
     def package_info(self):
         self.cpp_info.libs = tools.collect_libs(self)
         if self.settings.os == "Linux":
-            self.cpp_info.libs.append("m")
+            self.cpp_info.system_libs.append("m")
         self.cpp_info.includedirs.append(os.path.join("include", "freetype2"))
         freetype_config = os.path.join(self.package_folder, "bin", "freetype-config")
         self.env_info.PATH.append(os.path.join(self.package_folder, "bin"))

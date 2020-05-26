@@ -3,7 +3,6 @@ import os
 import glob
 
 
-
 class MysqlConnectorCConan(ConanFile):
     name = "mysql-connector-c"
     url = "https://github.com/conan-io/conan-center-index"
@@ -16,7 +15,12 @@ class MysqlConnectorCConan(ConanFile):
     settings = "os", "arch", "compiler", "build_type"
     options = {"shared": [True, False], "with_ssl": [True, False], "with_zlib": [True, False]}
     default_options = {'shared': False, 'with_ssl': True, 'with_zlib': True}
-    _source_subfolder = "source_subfolder"
+
+    _cmake = None
+
+    @property
+    def _source_subfolder(self):
+        return "source_subfolder"
 
     def requirements(self):
         if self.options.with_ssl:
@@ -30,43 +34,44 @@ class MysqlConnectorCConan(ConanFile):
         tools.get(**self.conan_data["sources"][self.version])
         os.rename(archive_name, self._source_subfolder)
 
+    def _configure_cmake(self):
+        if self._cmake:
+            return self._cmake
+        self._cmake = CMake(self)
+
+        self._cmake.definitions["DISABLE_SHARED"] = not self.options.shared
+        self._cmake.definitions["DISABLE_STATIC"] = self.options.shared
+        self._cmake.definitions["STACK_DIRECTION"] = "-1"  # stack grows downwards, on very few platforms stack grows upwards
+        self._cmake.definitions["REQUIRE_STDCPP"] = self._stdcpp_library
+
+        if self.settings.compiler == "Visual Studio":
+            if self.settings.compiler.runtime == "MD" or self.settings.compiler.runtime == "MDd":
+                self._cmake.definitions["WINDOWS_RUNTIME_MD"] = True
+
+        if self.options.with_ssl:
+            self._cmake.definitions["WITH_SSL"] = "system"
+
+        if self.options.with_zlib:
+            self._cmake.definitions["WITH_ZLIB"] = "system"
+
+        self._cmake.configure(source_dir=self._source_subfolder)
+        return self._cmake
+
+    def _patch_sources(self):
         sources_cmake = os.path.join(self._source_subfolder, "CMakeLists.txt")
         sources_cmake_orig = os.path.join(self._source_subfolder, "CMakeListsOriginal.txt")
 
         os.rename(sources_cmake, sources_cmake_orig)
         os.rename("CMakeLists.txt", sources_cmake)
-        
+
         for patch in self.conan_data["patches"][self.version]:
             tools.patch(**patch)
 
-    def configure(self):
-        del self.settings.compiler.libcxx
-        del self.settings.compiler.cppstd
-
-    def _configure_cmake(self):
-        cmake = CMake(self)
-
-        cmake.definitions["DISABLE_SHARED"] = not self.options.shared
-        cmake.definitions["DISABLE_STATIC"] = self.options.shared
-        cmake.definitions["STACK_DIRECTION"] = "-1"  # stack grows downwards, on very few platforms stack grows upwards
-
-        if self.settings.compiler == "Visual Studio":
-            if self.settings.compiler.runtime == "MD" or self.settings.compiler.runtime == "MDd":
-                cmake.definitions["WINDOWS_RUNTIME_MD"] = True
-
-        if self.options.with_ssl:
-            cmake.definitions["WITH_SSL"] = "system"
-
-        if self.options.with_zlib:
-            cmake.definitions["WITH_ZLIB"] = "system"
-
-        cmake.configure(source_dir=self._source_subfolder)
-        return cmake
-    
     def build(self):
+        self._patch_sources()
         cmake = self._configure_cmake()
         cmake.build()
-        
+
     def package(self):
         cmake = self._configure_cmake()
         cmake.install()
@@ -81,6 +86,20 @@ class MysqlConnectorCConan(ConanFile):
             os.remove(f)
         tools.rmdir(os.path.join(self.package_folder, "docs"))
 
+    @property
+    def _stdcpp_library(self):
+        libcxx = self.settings.get_safe("compiler.libcxx")
+        if libcxx in ("libstdc++", "libstdc++11"):
+            return "stdc++"
+        elif libcxx in ("libc++",):
+            return "c++"
+        else:
+            return False
+
     def package_info(self):
-        self.cpp_info.libs = tools.collect_libs(self)
-        self.cpp_info.bindirs = ['lib']
+        self.cpp_info.libs = ["libmysql" if self.options.shared and self.settings.os == "Windows" else "mysqlclient"]
+        if not self.options.shared:
+            if self._stdcpp_library:
+                self.cpp_info.system_libs.append(self._stdcpp_library)
+            if self.settings.os == "Linux":
+                self.cpp_info.system_libs.append('m')

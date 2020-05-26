@@ -1,6 +1,7 @@
 #include <boost/lambda/lambda.hpp>
 #include <iostream>
 #include <vector>
+#include <algorithm>
 
 int main(int argc, const char * const argv[])
 {

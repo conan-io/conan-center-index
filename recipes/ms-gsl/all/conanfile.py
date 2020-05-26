@@ -1,16 +1,23 @@
 import os
 from conans import ConanFile, tools
+from conans.errors import ConanInvalidConfiguration
 
-
-class GslMicrosoftConan(ConanFile):
+class MicrosoftGslConan(ConanFile):
     name = "ms-gsl"
     description = "Microsoft implementation of the Guidelines Support Library"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/microsoft/GSL"
-    topics = ("gsl", "header-only")
     license = "MIT"
+    topics = ("gsl", "guidelines", "core", "span")
     no_copy_source = True
-    _source_subfolder = "source_subfolder"
+    
+    @property
+    def _source_subfolder(self):
+        return "source_subfolder"
+
+    @property
+    def _build_subfolder(self):
+        return "build_subfolder"
 
     #  There are three configuration options for this GSL implementation's behavior
     #  when pre/post conditions on the GSL types are violated:
@@ -50,8 +57,14 @@ class GslMicrosoftConan(ConanFile):
         self.info.header_only()
 
     def package_info(self):
+        if tools.Version(self.version) >= "3.0.0":
+            if self.options.on_contract_violation != 'terminate':
+                raise ConanInvalidConfiguration("Microsoft GSL only supports terminate on contract violation since version 3.0.0")
+
         self.cpp_info.defines = [
             self._contract_map[str(self.options.on_contract_violation)]
         ]
-        self.cpp_info.names["cmake_find_package"] = "Microsoft.GSL"
-        self.cpp_info.names["cmake_find_package_multi"] = "Microsoft.GSL"
+
+        if tools.Version(self.version) >= "3.0.0":
+            self.cpp_info.names["cmake_find_package"] = "Microsoft.GSL"
+            self.cpp_info.names["cmake_find_package_multi"] = "Microsoft.GSL"

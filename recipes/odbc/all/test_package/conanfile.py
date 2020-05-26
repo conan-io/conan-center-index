@@ -11,9 +11,6 @@ class FalconTestConan(ConanFile):
         cmake.configure()
         cmake.build()
 
-    def imports(self):
-        self.copy("*.dll", "bin", "bin")
-
     def test(self):
         self.run(os.path.join('bin', 'example'))
         if self.settings.os != "Windows":

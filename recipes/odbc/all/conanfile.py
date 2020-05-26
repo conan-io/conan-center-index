@@ -8,7 +8,6 @@ class OdbcConan(ConanFile):
     description = 'Package providing unixODBC'
     url = 'https://github.com/conan-io/conan-center-index'
     homepage = "http://www.unixodbc.org"
-    author = "Bincrafters <bincrafters@gmail>"
     license = ('LGPL-2.1', 'GPL-2.1')
 
     settings = 'os', 'compiler', 'build_type', 'arch'
@@ -26,7 +25,7 @@ class OdbcConan(ConanFile):
 
     def requirements(self):
         if self.options.with_libiconv:
-            self.requires("libiconv/1.15")
+            self.requires("libiconv/1.16")
         
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
@@ -61,6 +60,9 @@ class OdbcConan(ConanFile):
         self.copy('COPYING', src=self._source_subfolder, dst="licenses")
 
     def package_info(self):
+        self.cpp_info.names["cmake_find_package"] = "ODBC"
+        self.cpp_info.names["cmake_find_package_multi"] = "ODBC"
+
         self.env_info.path.append(os.path.join(self.package_folder, 'bin'))
 
         self.cpp_info.libs = ['odbc', 'odbccr', 'odbcinst', 'ltdl']

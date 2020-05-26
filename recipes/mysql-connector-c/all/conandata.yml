@@ -6,3 +6,7 @@ patches:
   "6.1.11":
     - patch_file: "patches/001-20028_all_mysql-5.6-gcc7.patch"
       base_path: "source_subfolder"
+    - patch_file: "patches/002-mysql_config.patch"
+      base_path: "source_subfolder"
+    - patch_file: "patches/003-cmake-install-standard-locations.patch"
+      base_path: "source_subfolder"

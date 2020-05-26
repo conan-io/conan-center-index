@@ -135,6 +135,8 @@ class LibiconvConan(ConanFile):
         tools.rmdir(os.path.join(self.package_folder, "share"))
 
     def package_info(self):
+        self.cpp_info.names["cmake_find_package"] = "Iconv"
+        self.cpp_info.names["cmake_find_package_multi"] = "Iconv"
         lib = "iconv"
         if self.settings.os == "Windows" and self.options.shared:
             lib += ".dll" + ".lib" if self.settings.compiler == "Visual Studio" else ".a"

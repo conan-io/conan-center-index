@@ -1,0 +1,32 @@
+diff --git a/win32/Makefile.mingw b/win32/Makefile.mingw
+index 9dfa4abe..e6da5176 100644
+--- a/win32/Makefile.mingw
++++ b/win32/Makefile.mingw
+@@ -246,18 +246,17 @@ distclean : clean
+ rebuild : clean all
+ 
+ install-libs : all
+-	cmd.exe /C "if not exist $(INCPREFIX)\libxml2 mkdir $(INCPREFIX)\libxml2"
+-	cmd.exe /C "if not exist $(INCPREFIX)\libxml2\libxml mkdir $(INCPREFIX)\libxml2\libxml"
+-	cmd.exe /C "if not exist $(BINPREFIX) mkdir $(BINPREFIX)"
+-	cmd.exe /C "if not exist $(LIBPREFIX) mkdir $(LIBPREFIX)"
+-	cmd.exe /C "copy $(XML_SRCDIR)\include\libxml\*.h $(INCPREFIX)\libxml2\libxml"
+-	cmd.exe /C "copy $(BINDIR)\$(XML_SO) $(SOPREFIX)"
+-	cmd.exe /C "copy $(BINDIR)\$(XML_A) $(LIBPREFIX)"
+-	cmd.exe /C "copy $(BINDIR)\$(XML_IMP) $(LIBPREFIX)"
+-	cmd.exe /C "copy $(BINDIR)\xml*.exe $(BINPREFIX)"
++	cmd.exe /C if not exist $(INCPREFIX)\libxml2 mkdir $(INCPREFIX)\libxml2
++	cmd.exe /C if not exist $(INCPREFIX)\libxml2\libxml mkdir $(INCPREFIX)\libxml2\libxml
++	cmd.exe /C if not exist $(BINPREFIX) mkdir $(BINPREFIX)
++	cmd.exe /C if not exist $(LIBPREFIX) mkdir $(LIBPREFIX)
++	cmd.exe /C copy $(XML_SRCDIR)\include\libxml $(INCPREFIX)\libxml2\libxml
++	cmd.exe /C copy $(BINDIR)\$(XML_SO) $(SOPREFIX)
++	cmd.exe /C copy $(BINDIR)\$(XML_A) $(LIBPREFIX)
++	cmd.exe /C copy $(BINDIR)\$(XML_IMP) $(LIBPREFIX)
++	cmd.exe /C copy $(BINDIR)\xml*.exe $(BINPREFIX)
+ 
+ install : install-libs
+-	cmd.exe /C "copy $(BINDIR)\*.exe $(BINPREFIX)"
+ 
+ install-dist : install-libs
+ 	cmd.exe /C "copy $(BINDIR)\xml*.exe $(BINPREFIX)"

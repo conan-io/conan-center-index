@@ -1,0 +1,14 @@
+--- cpr/CMakeLists.txt
++++ cpr/CMakeLists.txt
+@@ -46,3 +46,11 @@
+ message(STATUS "Using CURL_LIBRARIES: ${CURL_LIBRARIES}.")
+ target_link_libraries(${CPR_LIBRARIES}
+     ${CURL_LIBRARIES})
++
++include(GNUInstallDirs)
++install(TARGETS cpr
++    RUNTIME DESTINATION "${CMAKE_INSTALL_BINDIR}"
++    ARCHIVE DESTINATION "${CMAKE_INSTALL_LIBDIR}"
++    LIBRARY DESTINATION "${CMAKE_INSTALL_LIBDIR}"
++)
++install(DIRECTORY "${PROJECT_SOURCE_DIR}/include/cpr" DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}")
