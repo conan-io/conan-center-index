@@ -174,8 +174,8 @@ class CPythonConan(ConanFile):
                 "--disable-loadable-sqlite-extensions" if self.options["sqlite3"].omit_load_extension else "--enable-loadable-sqlite-extensions",
             ])
         if self.settings.compiler == "intel":
-            conf_args.extend(["--with-icc", "--without-gcc"])
-        if tools.get_env("CC"):
+            conf_args.extend(["--with-icc"])
+        if tools.get_env("CC") or self.settings.compiler != "gcc":
             conf_args.append("--without-gcc")
         if self.options.with_tkinter:
             tcltk_includes = []
