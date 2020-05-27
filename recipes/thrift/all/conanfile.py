@@ -9,7 +9,7 @@ class ConanFileDefault(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/apache/thrift"
     license = "Apache-2.0"
-    exports_sources = ["CMakeLists.txt"]
+    exports_sources = ["CMakeLists.txt", "patches/*.diff"]
     generators = "cmake", "cmake_find_package"
 
     settings = "os", "arch", "compiler", "build_type"
@@ -64,12 +64,8 @@ class ConanFileDefault(ConanFile):
         os.rename(extracted_dir, self._source_subfolder)
 
     def build(self):
-        if self.options.with_openssl:
-            tools.replace_in_file("FindOpenSSL.cmake", "OpenSSL_INCLUDE_DIR", "OPENSSL_INCLUDE_DIR")
-            tools.replace_in_file("FindOpenSSL.cmake", "OpenSSL_LIBRARIES", "OPENSSL_LIBRARIES")
-        if self.options.with_libevent:
-            tools.replace_in_file("FindLibevent.cmake", "Libevent_INCLUDE_DIR", "LIBEVENT_INCLUDE_DIR")
-            tools.replace_in_file("FindLibevent.cmake", "Libevent_LIBRARIES", "LIBEVENT_LIBRARIES")
+        for p in self.conan_data["patches"][self.version]:
+            tools.patch(**p)
         for f in ["Findflex.cmake", "Findbison.cmake"]:
             if os.path.isfile(f):
                 os.unlink(f)
