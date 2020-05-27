@@ -60,6 +60,9 @@ class OdbcConan(ConanFile):
         self.copy('COPYING', src=self._source_subfolder, dst="licenses")
 
     def package_info(self):
+        self.cpp_info.names["cmake_find_package"] = "ODBC"
+        self.cpp_info.names["cmake_find_package_multi"] = "ODBC"
+
         self.env_info.path.append(os.path.join(self.package_folder, 'bin'))
 
         self.cpp_info.libs = ['odbc', 'odbccr', 'odbcinst', 'ltdl']

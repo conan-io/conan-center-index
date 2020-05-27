@@ -1,4 +1,5 @@
 from conans import ConanFile, tools
+from conans.errors import ConanException
 from io import StringIO
 import os
 
@@ -22,11 +23,15 @@ class TestPackageConan(ConanFile):
         tools.save(self._m4_input_path, M4_CONTENTS)
 
     def test(self):
+        m4_bin = tools.get_env("M4")
+        if m4_bin is None or not m4_bin.startswith(self.deps_cpp_info["m4"].rootpath):
+            raise ConanException("M4 environment variable not set")
+
         if not tools.cross_building(self.settings):
-            self.run("{} --version".format(os.environ["M4"]), run_environment=True)
-            self.run("{} -P {}".format(os.environ["M4"], self._m4_input_path))
+            self.run("{} --version".format(m4_bin), run_environment=True)
+            self.run("{} -P {}".format(m4_bin, self._m4_input_path))
 
             output = StringIO()
-            self.run("{} -P {}".format(os.environ["M4"], self._m4_input_path), output=output)
+            self.run("{} -P {}".format(m4_bin, self._m4_input_path), output=output)
 
             assert "Harry, Jr. met Sally" in output.getvalue()

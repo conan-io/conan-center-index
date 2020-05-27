@@ -1,0 +1,9 @@
+sources:
+  "2.2.0":
+    sha256: ce76f716972d111587d36451c438b65dd2b8f7e9853c5f5a2b59229b05df6b0b
+    url: https://github.com/jerryscript-project/jerryscript/archive/v2.2.0.zip
+
+patches:
+  "2.2.0":
+    - base_path: "source_subfolder"
+      patch_file: "patches/001-2.5.0-remove-werror.patch"
