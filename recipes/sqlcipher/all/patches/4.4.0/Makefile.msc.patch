@@ -1,0 +1,289 @@
+diff --git a/Makefile.msc b/tmp/Makefile.msc
+index d59ca46..d5a972b 100644
+--- a/Makefile.msc
++++ b/tmp/Makefile.msc
+@@ -276,9 +276,9 @@ SQLITE3H = sqlite3.h
+ #
+ !IFNDEF SQLITE3DLL
+ !IF $(FOR_WIN10)!=0
+-SQLITE3DLL = winsqlite3.dll
++SQLITE3DLL = sqlcipher.dll
+ !ELSE
+-SQLITE3DLL = sqlite3.dll
++SQLITE3DLL = sqlcipher.dll
+ !ENDIF
+ !ENDIF
+ 
+@@ -296,9 +296,9 @@ SQLITE3LIB = sqlite3.lib
+ #
+ !IFNDEF SQLITE3EXE
+ !IF $(FOR_WIN10)!=0
+-SQLITE3EXE = winsqlite3shell.exe
++SQLITE3EXE = sqlcipher.exe
+ !ELSE
+-SQLITE3EXE = sqlite3.exe
++SQLITE3EXE = sqlcipher.exe
+ !ENDIF
+ !ENDIF
+ 
+@@ -330,7 +330,7 @@ SQLITETCLDECLSH = sqlite_tclDecls.h
+ # Tcl bindings for SQLite.
+ #
+ !IFNDEF SQLITE3TCLDLL
+-SQLITE3TCLDLL = tclsqlite3.dll
++SQLITE3TCLDLL = tclsqlcipher.dll
+ !ENDIF
+ 
+ # These are the additional targets that the targets that integrate with the
+@@ -458,14 +458,14 @@ CRTLIBPATH = $(CRTLIBPATH:\\=\)
+ # For example, to use the x86 compiler when cross-compiling for x64, a command
+ # line similar to the following could be used (all on one line):
+ #
+-#     nmake /f Makefile.msc sqlite3.dll
++#     nmake /f Makefile.msc sqlcipher.dll
+ #           XCOMPILE=1 USE_NATIVE_LIBPATHS=1
+ #
+ # Alternatively, the full path and file name to the compiler binary for the
+ # platform the compilation process is taking place may be specified (all on
+ # one line):
+ #
+-#     nmake /f Makefile.msc sqlite3.dll
++#     nmake /f Makefile.msc sqlcipher.dll
+ #           "NCC=""%VCINSTALLDIR%\bin\cl.exe"""
+ #           USE_NATIVE_LIBPATHS=1
+ #
+@@ -566,32 +566,12 @@ RCC = $(RC) -DSQLITE_OS_WIN=1 -I. -I$(TOP) -I$(TOP)\src $(RCOPTS) $(RCCOPTS)
+ # an explicit calling convention, which results in "cdecl").
+ #
+ !IF $(USE_STDCALL)!=0 || $(FOR_WIN10)!=0
++# ALWAYS USE cdecl
+ !IF "$(PLATFORM)"=="x86"
+-CORE_CCONV_OPTS = -Gz -DSQLITE_CDECL=__cdecl -DSQLITE_APICALL=__stdcall -DSQLITE_CALLBACK=__stdcall -DSQLITE_SYSAPI=__stdcall
+-SHELL_CCONV_OPTS = -Gz -DSQLITE_CDECL=__cdecl -DSQLITE_APICALL=__stdcall -DSQLITE_CALLBACK=__stdcall -DSQLITE_SYSAPI=__stdcall
++CORE_CCONV_OPTS = -Gd -DSQLITE_CDECL=__cdecl -DSQLITE_APICALL=__cdecl -DSQLITE_CALLBACK=__cdecl -DSQLITE_SYSAPI=__cdecl
++SHELL_CCONV_OPTS = -Gd -DSQLITE_CDECL=__cdecl -DSQLITE_APICALL=__cdecl -DSQLITE_CALLBACK=__cdecl -DSQLITE_SYSAPI=__cdecl
+ # <<mark>>
+-TEST_CCONV_OPTS = -Gz -DSQLITE_CDECL=__cdecl -DSQLITE_APICALL=__stdcall -DSQLITE_CALLBACK=__stdcall -DSQLITE_SYSAPI=__stdcall -DINCLUDE_SQLITE_TCL_H=1 -DSQLITE_TCLAPI=__cdecl
+-# <</mark>>
+-!ELSE
+-!IFNDEF PLATFORM
+-CORE_CCONV_OPTS = -Gz -DSQLITE_CDECL=__cdecl -DSQLITE_APICALL=__stdcall -DSQLITE_CALLBACK=__stdcall -DSQLITE_SYSAPI=__stdcall
+-SHELL_CCONV_OPTS = -Gz -DSQLITE_CDECL=__cdecl -DSQLITE_APICALL=__stdcall -DSQLITE_CALLBACK=__stdcall -DSQLITE_SYSAPI=__stdcall
+-# <<mark>>
+-TEST_CCONV_OPTS = -Gz -DSQLITE_CDECL=__cdecl -DSQLITE_APICALL=__stdcall -DSQLITE_CALLBACK=__stdcall -DSQLITE_SYSAPI=__stdcall -DINCLUDE_SQLITE_TCL_H=1 -DSQLITE_TCLAPI=__cdecl
+-# <</mark>>
+-!ELSE
+-CORE_CCONV_OPTS =
+-SHELL_CCONV_OPTS =
+-# <<mark>>
+-TEST_CCONV_OPTS =
+-# <</mark>>
+-!ENDIF
+-!ENDIF
+-!ELSE
+-CORE_CCONV_OPTS =
+-SHELL_CCONV_OPTS =
+-# <<mark>>
+-TEST_CCONV_OPTS =
++TEST_CCONV_OPTS = -Gd -DSQLITE_CDECL=__cdecl -DSQLITE_APICALL=__cdecl -DSQLITE_CALLBACK=__cdecl -DSQLITE_SYSAPI=__cdecl -DINCLUDE_SQLITE_TCL_H=1 -DSQLITE_TCLAPI=__cdecl
+ # <</mark>>
+ !ENDIF
+ 
+@@ -612,7 +592,7 @@ CORE_COMPILE_OPTS = $(CORE_CCONV_OPTS)
+ !IF $(DYNAMIC_SHELL)!=0
+ CORE_LINK_DEP =
+ !ELSEIF $(FOR_WIN10)==0 || "$(PLATFORM)"=="x86"
+-CORE_LINK_DEP = sqlite3.def
++CORE_LINK_DEP = sqlcipher.def
+ !ELSE
+ CORE_LINK_DEP =
+ !ENDIF
+@@ -624,7 +604,7 @@ CORE_LINK_DEP =
+ !IF $(DYNAMIC_SHELL)!=0
+ CORE_LINK_OPTS =
+ !ELSEIF $(FOR_WIN10)==0 || "$(PLATFORM)"=="x86"
+-CORE_LINK_OPTS = /DEF:sqlite3.def
++CORE_LINK_OPTS = /DEF:sqlcipher.def
+ !ELSE
+ CORE_LINK_OPTS =
+ !ENDIF
+@@ -662,7 +642,7 @@ SHELL_CORE_SRC = $(SQLITE3C)
+ SHELL_CORE_DEP = $(SQLITE3DLL)
+ # <<mark>>
+ !ELSEIF $(USE_AMALGAMATION)==0
+-SHELL_CORE_DEP = libsqlite3.lib
++SHELL_CORE_DEP = sqlcipher.lib
+ # <</mark>>
+ !ELSE
+ SHELL_CORE_DEP =
+@@ -685,7 +665,7 @@ TESTFIXTURE_DEP = zlib $(TESTFIXTURE_DEP)
+ SHELL_CORE_LIB = $(SQLITE3LIB)
+ # <<mark>>
+ !ELSEIF $(USE_AMALGAMATION)==0
+-SHELL_CORE_LIB = libsqlite3.lib
++SHELL_CORE_LIB = sqlcipher.lib
+ # <</mark>>
+ !ELSE
+ SHELL_CORE_LIB =
+@@ -720,8 +700,8 @@ RCC = $(RCC) -DWINAPI_FAMILY=WINAPI_FAMILY_APP
+ # C compiler options for the Windows 10 platform (needs MSVC 2015).
+ #
+ !IF $(FOR_WIN10)!=0
+-TCC = $(TCC) /d2guard4 -D_ARM_WINAPI_PARTITION_DESKTOP_SDK_AVAILABLE
+-BCC = $(BCC) /d2guard4 -D_ARM_WINAPI_PARTITION_DESKTOP_SDK_AVAILABLE
++TCC = $(TCC) -D_ARM_WINAPI_PARTITION_DESKTOP_SDK_AVAILABLE
++BCC = $(BCC) -D_ARM_WINAPI_PARTITION_DESKTOP_SDK_AVAILABLE
+ !ENDIF
+ 
+ # Also, we need to dynamically link to the correct MSVC runtime
+@@ -998,8 +978,8 @@ TLIBS =
+ # default to file, 2 to default to memory, and 3 to force temporary
+ # tables to always be in memory.
+ #
+-TCC = $(TCC) -DSQLITE_TEMP_STORE=1
+-RCC = $(RCC) -DSQLITE_TEMP_STORE=1
++TCC = $(TCC) -DSQLITE_TEMP_STORE=2
++RCC = $(RCC) -DSQLITE_TEMP_STORE=2
+ 
+ # Enable/disable loadable extensions, and other optional features
+ # based on configuration. (-DSQLITE_OMIT*, -DSQLITE_ENABLE*).
+@@ -1165,14 +1145,13 @@ LTLINKOPTS = $(LTLINKOPTS) "/LIBPATH:$(WP81LIBPATH)"
+ !ENDIF
+ LTLINKOPTS = $(LTLINKOPTS) /DYNAMICBASE
+ LTLINKOPTS = $(LTLINKOPTS) WindowsPhoneCore.lib RuntimeObject.lib PhoneAppModelHost.lib
+-LTLINKOPTS = $(LTLINKOPTS) /NODEFAULTLIB:kernel32.lib /NODEFAULTLIB:ole32.lib
+ !ENDIF
+ 
+ # When compiling for UWP or the Windows 10 platform, some extra linker
+ # options are also required.
+ #
+ !IF $(FOR_UWP)!=0 || $(FOR_WIN10)!=0
+-LTLINKOPTS = $(LTLINKOPTS) /DYNAMICBASE /NODEFAULTLIB:kernel32.lib
++LTLINKOPTS = $(LTLINKOPTS) /DYNAMICBASE
+ LTLINKOPTS = $(LTLINKOPTS) mincore.lib
+ !IFDEF PSDKLIBPATH
+ LTLINKOPTS = $(LTLINKOPTS) "/LIBPATH:$(PSDKLIBPATH)"
+@@ -1182,9 +1161,9 @@ LTLINKOPTS = $(LTLINKOPTS) "/LIBPATH:$(PSDKLIBPATH)"
+ !IF $(FOR_WIN10)!=0
+ LTLINKOPTS = $(LTLINKOPTS) /guard:cf "/LIBPATH:$(UCRTLIBPATH)"
+ !IF $(DEBUG)>1
+-LTLINKOPTS = $(LTLINKOPTS) /NODEFAULTLIB:libucrtd.lib /DEFAULTLIB:ucrtd.lib
+-!ELSE
+ LTLINKOPTS = $(LTLINKOPTS) /NODEFAULTLIB:libucrt.lib /DEFAULTLIB:ucrt.lib
++!ELSE
++LTLINKOPTS = $(LTLINKOPTS) /NODEFAULTLIB:libucrtd.lib /DEFAULTLIB:ucrtd.lib
+ !ENDIF
+ !ENDIF
+ 
+@@ -1225,7 +1204,7 @@ LTLIBS = $(LTLIBS) $(LIBICU)
+ # <<mark>>
+ # Object files for the SQLite library (non-amalgamation).
+ #
+-LIBOBJS0 = vdbe.lo parse.lo alter.lo analyze.lo attach.lo auth.lo \
++LIBOBJS0 = crypto.lo crypto_impl.lo crypto_openssl.lo vdbe.lo parse.lo alter.lo analyze.lo attach.lo auth.lo \
+          backup.lo bitvec.lo btmutex.lo btree.lo build.lo \
+          callback.lo complete.lo ctime.lo \
+          date.lo dbpage.lo dbstat.lo delete.lo \
+@@ -1715,7 +1694,7 @@ ALL_TCL_TARGETS =
+ # This is the default Makefile target.  The objects listed here
+ # are what get build when you type just "make" with no arguments.
+ #
+-core:	dll libsqlite3.lib shell
++core:	dll sqlcipher.lib
+ 
+ # Targets that require the Tcl library.
+ #
+@@ -1734,17 +1713,17 @@ dll:	$(SQLITE3DLL)
+ shell:	$(SQLITE3EXE)
+ 
+ # <<mark>>
+-libsqlite3.lib:	$(LIBOBJ)
+-	$(LTLIB) $(LTLIBOPTS) /OUT:$@ $(LIBOBJ) $(TLIBS)
++sqlcipher.lib:	$(LIBOBJ)
++	$(LTLIB) $(LTLIBPATHS) $(LTLIBOPTS) /OUT:$@ $(LIBOBJ) $(TLIBS)
+ 
+-libtclsqlite3.lib:	tclsqlite.lo libsqlite3.lib
+-	$(LTLIB) $(LTLIBOPTS) $(TCLLIBPATHS) $(LTLIBPATHS) /OUT:$@ tclsqlite.lo libsqlite3.lib $(LIBTCLSTUB) $(TLIBS)
++libtclsqlite3.lib:	tclsqlite.lo sqlcipher.lib
++	$(LTLIB) $(LTLIBOPTS) $(TCLLIBPATHS) $(LTLIBPATHS) /OUT:$@ tclsqlite.lo sqlcipher.lib $(LIBTCLSTUB) $(TLIBS)
+ 
+-tclsqlite3.def:	tclsqlite.lo
+-	echo EXPORTS > tclsqlite3.def
++tclsqlcipher.def:	tclsqlite.lo
++	echo EXPORTS > tclsqlcipher.def
+ 	dumpbin /all tclsqlite.lo \
+ 		| $(TCLSH_CMD) $(TOP)\tool\replace.tcl include "^\s+/EXPORT:_?((?:Sqlite3|Tclsqlite3)_[^@]*)(?:@\d+)?$$" \1 \
+-		| sort >> tclsqlite3.def
++		| sort >> tclsqlcipher.def
+ 
+ pkgIndex.tcl:	$(TOP)\VERSION
+ 	for /F %%V in ('type "$(TOP)\VERSION"') do ( \
+@@ -1752,19 +1731,19 @@ pkgIndex.tcl:	$(TOP)\VERSION
+ 			| $(TCLSH_CMD) $(TOP)\tool\replace.tcl exact @version@ %%V > pkgIndex.tcl \
+ 	)
+ 
+-$(SQLITE3TCLDLL):	libtclsqlite3.lib $(LIBRESOBJS) tclsqlite3.def pkgIndex.tcl
+-	$(LD) $(LDFLAGS) $(LTLINKOPTS) $(LTLIBPATHS) /DLL /DEF:tclsqlite3.def /OUT:$@ libtclsqlite3.lib $(LIBRESOBJS) $(LTLIBS) $(TLIBS)
++$(SQLITE3TCLDLL):	libtclsqlite3.lib $(LIBRESOBJS) tclsqlcipher.def pkgIndex.tcl
++	$(LD) $(LDFLAGS) $(LTLINKOPTS) $(LTLIBPATHS) /DLL /DEF:tclsqlcipher.def /OUT:$@ libtclsqlite3.lib $(LIBRESOBJS) $(LTLIBS) $(TLIBS)
+ # <</mark>>
+ 
+ $(SQLITE3DLL):	$(LIBOBJ) $(LIBRESOBJS) $(CORE_LINK_DEP)
+ 	$(LD) $(LDFLAGS) $(LTLINKOPTS) $(LTLIBPATHS) /DLL $(CORE_LINK_OPTS) /OUT:$@ $(LIBOBJ) $(LIBRESOBJS) $(LTLIBS) $(TLIBS)
+ 
+ # <<block2>>
+-sqlite3.def:	libsqlite3.lib
+-	echo EXPORTS > sqlite3.def
+-	dumpbin /all libsqlite3.lib \
++sqlcipher.def:	sqlcipher.lib
++	echo EXPORTS > sqlcipher.def
++	dumpbin /all sqlcipher.lib \
+ 		| $(TCLSH_CMD) $(TOP)\tool\replace.tcl include "^\s+1 _?(sqlite3(?:session|changeset|changegroup|rebaser|rbu)?_[^@]*)(?:@\d+)?$$" \1 \
+-		| sort >> sqlite3.def
++		| sort >> sqlcipher.def
+ # <</block2>>
+ 
+ $(SQLITE3EXE):	shell.c $(SHELL_CORE_DEP) $(LIBRESOBJS) $(SHELL_CORE_SRC) $(SQLITE3H)
+@@ -1940,6 +1919,15 @@ callback.lo:	$(TOP)\src\callback.c $(HDR)
+ complete.lo:	$(TOP)\src\complete.c $(HDR)
+ 	$(LTCOMPILE) $(CORE_COMPILE_OPTS) -c $(TOP)\src\complete.c
+ 
++crypto.lo:	$(TOP)\src\crypto.c $(HDR)
++	$(LTCOMPILE) $(CORE_COMPILE_OPTS) -c $(TOP)\src\crypto.c
++
++crypto_impl.lo:	$(TOP)\src\crypto_impl.c $(HDR)
++	$(LTCOMPILE) $(CORE_COMPILE_OPTS) -c $(TOP)\src\crypto_impl.c
++
++crypto_openssl.lo:	$(TOP)\src\crypto_openssl.c $(HDR)
++	$(LTCOMPILE) $(CORE_COMPILE_OPTS) -c $(TOP)\src\crypto_openssl.c
++
+ ctime.lo:	$(TOP)\src\ctime.c $(HDR)
+ 	$(LTCOMPILE) $(CORE_COMPILE_OPTS) -c $(TOP)\src\ctime.c
+ 
+@@ -2144,7 +2132,7 @@ tclsqlite.lo:	$(TOP)\src\tclsqlite.c $(HDR) $(SQLITE_TCL_DEP)
+ tclsqlite-shell.lo:	$(TOP)\src\tclsqlite.c $(HDR) $(SQLITE_TCL_DEP)
+ 	$(LTCOMPILE) $(NO_WARN) -DTCLSH -DBUILD_sqlite -I$(TCLINCDIR) -c $(TOP)\src\tclsqlite.c
+ 
+-tclsqlite3.exe:	tclsqlite-shell.lo $(SQLITE3C) $(SQLITE3H) $(LIBRESOBJS)
++tclsqlcipher.exe:	tclsqlite-shell.lo $(SQLITE3C) $(SQLITE3H) $(LIBRESOBJS)
+ 	$(LTLINK) $(SQLITE3C) /link $(LDFLAGS) $(LTLINKOPTS) $(TCLLIBPATHS) $(LTLIBPATHS) /OUT:$@ tclsqlite-shell.lo $(LIBRESOBJS) $(TCLLIBS) $(LTLIBS) $(TLIBS)
+ 
+ # Rules to build opcodes.c and opcodes.h
+@@ -2349,7 +2337,7 @@ sqlite3rbu.lo:	$(TOP)\ext\rbu\sqlite3rbu.c $(HDR) $(EXTHDR)
+ # Rules to build the 'testfixture' application.
+ #
+ # If using the amalgamation, use sqlite3.c directly to build the test
+-# fixture.  Otherwise link against libsqlite3.lib.  (This distinction is
++# fixture.  Otherwise link against sqlcipher.lib.  (This distinction is
+ # necessary because the test fixture requires non-API symbols which are
+ # hidden when the library is built via the amalgamation).
+ #
+@@ -2574,7 +2562,7 @@ clean:
+ 	-rmdir /Q/S .libs 2>NUL
+ 	-rmdir /Q/S tsrc 2>NUL
+ 	del /Q .target_source 2>NUL
+-	del /Q tclsqlite3.exe $(SQLITETCLH) $(SQLITETCLDECLSH) 2>NUL
++	del /Q tclsqlcipher.exe $(SQLITETCLH) $(SQLITETCLDECLSH) 2>NUL
+ 	del /Q lsm.dll lsmtest.exe 2>NUL
+ 	del /Q atrc.exe changesetfuzz.exe dbtotxt.exe index_usage.exe 2>NUL
+ 	del /Q testloadext.dll 2>NUL

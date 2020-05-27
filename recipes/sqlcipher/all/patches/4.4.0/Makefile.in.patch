@@ -1,0 +1,22 @@
+diff --git a/Makefile.in b/tmp/Makefile.in
+index d8f5a62..18fb56c 100644
+--- a/Makefile.in
++++ b/tmp/Makefile.in
+@@ -1445,15 +1445,12 @@ lib_install:	libsqlcipher.la
+ 	$(INSTALL) -d $(DESTDIR)$(libdir)
+ 	$(LTINSTALL) libsqlcipher.la $(DESTDIR)$(libdir)
+ 
+-install:	sqlcipher$(TEXE) lib_install sqlite3.h sqlcipher.pc ${HAVE_TCL:1=tcl_install}
++install:	lib_install sqlite3.h
+ 	$(INSTALL) -d $(DESTDIR)$(bindir)
+-	$(LTINSTALL) sqlcipher$(TEXE) $(DESTDIR)$(bindir)
+ 	$(INSTALL) -d $(DESTDIR)$(includedir)
+ 	$(INSTALL) -m 0644 sqlite3.h $(DESTDIR)$(includedir)
+ 	$(INSTALL) -m 0644 $(TOP)/src/sqlite3ext.h $(DESTDIR)$(includedir)
+-	$(INSTALL) -d $(DESTDIR)$(pkgconfigdir)
+-	$(INSTALL) -m 0644 sqlcipher.pc $(DESTDIR)$(pkgconfigdir)
+-
++	
+ pkgIndex.tcl:
+ 	echo 'package ifneeded sqlite3 $(RELEASE) [list load [file join $$dir libtclsqlite3[info sharedlibextension]] sqlite3]' > $@
+ tcl_install:	lib_install libtclsqlite3.la pkgIndex.tcl

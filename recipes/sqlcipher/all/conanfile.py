@@ -30,9 +30,9 @@ class SqlcipherConan(ConanFile):
 
     def requirements(self):
         if self.options.crypto_library == "openssl":
-            self.requires("openssl/1.1.1d")
+            self.requires("openssl/1.1.1g")
         else:
-            self.requires("libressl/2.9.2")
+            self.requires("libressl/3.0.2")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
