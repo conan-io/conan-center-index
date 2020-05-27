@@ -11,8 +11,12 @@ add_executable(blinky
 )
 verilate(blinky SOURCES blinky.v TRACE)
 
-add_executable(blinky_sc
-    blinky_sc.cpp
-)
-verilate(blinky_sc SOURCES blinky.v SYSTEMC)
-target_link_libraries(blinky_sc PRIVATE CONAN_PKG::systemc)
+option(BUILD_SYSTEMC "Build SystemC example" ON)
+
+if(BUILD_SYSTEMC)
+    add_executable(blinky_sc
+        blinky_sc.cpp
+    )
+    verilate(blinky_sc SOURCES blinky.v SYSTEMC)
+    target_link_libraries(blinky_sc PRIVATE CONAN_PKG::systemc)
+endif()
