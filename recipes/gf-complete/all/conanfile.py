@@ -39,6 +39,17 @@ class GfCompleteConan(ConanFile):
             del self.options.fPIC
 
     def configure(self):
+        if tools.os_info.is_windows and not self.settings.compiler == "gcc":
+            # Building on Windows is currently only supported using the MSYS2
+            # subsystem. In theory, the gf-complete library can be build using
+            # MSVC. However, some adjustments to the build-system are needed
+            # and the CLI tools cannot be build.
+            #
+            # A suitable profile for MSYS2 can be found in the documentation:
+            # https://github.com/conan-io/docs/blob/b712aa7c0dc99607c46c57585787ced2ae66ac33/systems_cross_building/windows_subsystems.rst
+            raise ConanInvalidConfiguration(
+                "Windows is only supported using the MSYS2 subsystem")
+
         del self.settings.compiler.libcxx
         del self.settings.compiler.cppstd
 
