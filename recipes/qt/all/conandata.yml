@@ -1,0 +1,14 @@
+sources:
+  "5.15.0":
+    url: "https://download.qt.io/archive/qt/5.15/5.15.0/single/qt-everywhere-src-5.15.0.tar.xz"
+    sha256: "22b63d7a7a45183865cc4141124f12b673e7a17b1fe2b91e433f6547c5d548c3"
+patches:
+  "5.15.0":
+    - patch_file: "patches/aa2a39dea5.diff"
+      base_path: "qt5/qtbase"
+    - patch_file: "patches/c72097e.diff"
+      base_path: "qt5/qtwebengine"
+    - patch_file: "patches/e2eb6e9.diff"
+      base_path: "qt5/qtbase"
+    - patch_file: "patches/c994a33.diff"
+      base_path: "qt5/qtbase"
