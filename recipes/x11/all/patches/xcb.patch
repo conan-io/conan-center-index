@@ -1,0 +1,10 @@
+--- libxcb-1.13.1-orig/xcb.pc.in
++++ libxcb-1.13.1/xcb.pc.in
+@@ -8,6 +8,5 @@
+ Description: X-protocol C Binding
+ Version: @PACKAGE_VERSION@
+ Requires.private: @NEEDED@
+-Libs: -L${libdir} -lxcb
+-Libs.private: @LIBS@
++Libs: -L${libdir} -lxcb @LIBS@
+ Cflags: -I${includedir}
