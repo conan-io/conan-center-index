@@ -80,8 +80,14 @@ class GmpConan(ConanFile):
         del self.info.options.run_checks  # run_checks doesn't affect package's ID
 
     def package_info(self):
+        super_component = "libgmp"
         self.cpp_info.components["libgmp"].libs = ["gmp"]
         self.cpp_info.components["libgmp"].names["pkg_config"] = ["gmp"]
         if self.options.enable_cxx:
+            super_component = "gmpxx"
             self.cpp_info.components["gmpxx"].libs = ["gmpxx"]
             self.cpp_info.components["gmpxx"].requires = ["libgmp"]
+
+        # Make sure the GMP cmake_find_package generator knows about both libgmp and gmpxx
+        self.cpp_info.components[super_component].names["cmake_find_package"] = "GMP"
+        self.cpp_info.components[super_component].names["cmake_find_package_multi"] = "GMP"
