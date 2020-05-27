@@ -8,10 +8,9 @@ class ElfutilsConan(ConanFile):
     homepage = "https://sourceware.org/elfutils"
     url = "https://github.com/conan-io/conan-center-index"
     topics = ("conan", "elfutils", "libelf", "libdw", "libasm")
-    license = "MIT"
     exports = ["LICENSE.md", "patches/elfutils-*.patch"]
-    autotools = None
-
+    license = ["GPL-1.0-or-later", "LGPL-3.0-or-later", "GPL-3.0-or-later"]
+    
     settings = "os", "arch", "compiler", "build_type"
     options = {"fPIC": [True, False]}
     default_options = {'fPIC': True}
