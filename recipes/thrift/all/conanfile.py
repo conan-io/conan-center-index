@@ -101,7 +101,8 @@ class ConanFileDefault(ConanFile):
         # Make thrift use correct thread lib (see repo/build/cmake/config.h.in)
         self._cmake.definitions["USE_STD_THREAD"] = self.options.with_stdthreads
         self._cmake.definitions["USE_BOOST_THREAD"] = self.options.with_boostthreads
-        self._cmake.definitions["BUILD_SHARED_LIBS"] = self.options.shared
+        self._cmake.definitions["WITH_SHARED_LIB"] = self.options.shared
+        self._cmake.definitions["WITH_STATIC_LIB"] = not self.options.shared
         self._cmake.definitions["BOOST_ROOT"] = self.deps_cpp_info['boost'].rootpath
         self._cmake.definitions["BUILD_TESTING"] = False
         self._cmake.definitions["BUILD_COMPILER"] = True
