@@ -1,0 +1,8 @@
+sources:
+  "2.6.4":
+    sha256: "8745f0a6e3f233e961fdfec6882a9b03171603eb60ec9169fe8ba58f288fc5fd"
+    url: "https://github.com/harfbuzz/harfbuzz/archive/2.6.4.tar.gz"
+patches:
+  "2.6.4":
+    - patch_file: "patches/source_subfolder.patch"
+      base_path: "."
