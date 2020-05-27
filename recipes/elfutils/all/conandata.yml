@@ -5,4 +5,4 @@ sources:
 patches:
   "0.173":
     base_path: "source_subfolder"
-    patch_file: "patches/elfutils-0.173.patch"
+    patch_file: "patches/elfutils-0.173-remove-Werror.patch"
