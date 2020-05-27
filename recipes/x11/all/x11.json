@@ -50,7 +50,8 @@
         "sha256": "f09a76971437780a602303170fd51b5f7474051722bc39d566a272d2c4bde1b5",
         "description": "C interface to the X Window System protocol, which replaces the traditional Xlib interface",
         "namespace": "xcb",
-        "requires": ["xcb-proto", "util-macros", "libXau", "libpthread-stubs", "libXdmcp"]
+        "requires": ["xcb-proto", "util-macros", "libXau", "libpthread-stubs", "libXdmcp"],
+        "patches": ["xcb.patch"]
     },
     {
         "name": "libX11",
