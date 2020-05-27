@@ -53,7 +53,6 @@ class ElfutilsConan(ConanFile):
         autotools = self._configure_autotools()
         autotools.install()
         tools.rmdir(os.path.join(self.package_folder, "share"))
-        #tools.rmdir(os.path.join(self.package_folder, "bin"))
         tools.rmdir(os.path.join(self.package_folder, 'lib', 'pkgconfig'))
 
     def package_info(self):
