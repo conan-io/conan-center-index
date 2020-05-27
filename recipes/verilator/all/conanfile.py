@@ -85,7 +85,7 @@ class VerilatorConan(ConanFile):
         if self.settings.build_type == "Debug":
             args.append("DEBUG=1")
         if self.settings.compiler == "Visual Studio":
-            args.append("PROGLINK={}".format(tools.unix_path(os.path.join(self.build_folder, "msvc_link.sh"))))
+            args.append("PROGLINK={}".format(tools.unix_path(os.path.join(self.build_folder, self._source_subfolder, "msvc_link.sh"))))
         return args
 
     def _patch_sources(self):
@@ -100,71 +100,6 @@ class VerilatorConan(ConanFile):
         if self.settings.compiler == "Visual Studio":
             tools.replace_in_file(os.path.join(self._source_subfolder, "src", "Makefile_obj.in"),
                                   "${LINK}", "${PROGLINK}")
-
-        tools.save("msvc_link.sh", textwrap.dedent("""\
-            #!/bin/sh
-            clopts=()
-            ldopts=()
-            libs=()
-            while test $# -gt 0; do
-                case "$1" in
-                    -lm | -pthread | -lpthread)
-                        # ignore
-                        ;;
-                    -Xlinker)
-                        shift
-                        ;;
-                    -W* | -w*)
-                        # ignore warnings
-                        ;;
-                    -D*)
-                        clopts+=("$1")
-                        ;;
-                    -I*)
-                        clopts+=("$1")
-                        ;;
-                    -l*)
-                        ldopts+=("`echo \"$1.lib\" | sed \"s/^-l//\"`")
-                        ;;
-                    -LIBPATH*)
-                        ldopts+=("$1")
-                        ;;
-                    -L*)
-                        ldopts+=("`echo \"$1\" | sed \"s/^-L/-LIBPATH:/\"`")
-                        ;;
-                    *.obj | *.o)
-                        ldopts+=("$1")
-                        ;;
-                    -Wl,*)
-                        for linkarg in `echo '$1' | sed -e 's/-Wl,//' -e 's/,/ /'`; do
-                            ldopts+=("${linkarg}")
-                        done
-                        ;;
-                    *.lib)
-                        ldopts+=("$1")
-                        ;;
-                    -o)
-                        shift
-                        ldopts+=("-out:$1")
-                        ;;
-                    *)
-                        clopts+=("$1")
-                        ldopts+=("$1")
-                        ;;
-                esac
-                shift
-            done
-
-            args="${ldopts[@]}"
-
-            cat <<-EOF
-                Creating program
-                ** ld options:   "$args"
-            EOF
-
-            LINK= exec link -nologo -debug:full $args
-        """))
-        os.chmod("msvc_link.sh", 0o755)
 
     def build(self):
         self._patch_sources()
