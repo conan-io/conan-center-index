@@ -20,6 +20,7 @@ class ElfutilsConan(ConanFile):
         "xz_utils/5.2.4"
     )
 
+    _autotools = None
     _source_subfolder = "source_subfolder"
 
     def config_options(self):
@@ -36,11 +37,11 @@ class ElfutilsConan(ConanFile):
         os.rename(extracted_dir, self._source_subfolder)
 
     def _configure_autotools(self):
-        if not self.autotools:
+        if not self._autotools:
             args = ['--enable-silent-rules', '--with-zlib', '--with-bzlib', '--with-lzma']
-            self.autotools = AutoToolsBuildEnvironment(self, win_bash=tools.os_info.is_windows)
-            self.autotools.configure(configure_dir=self._source_subfolder, args=args)
-        return self.autotools
+            self._autotools = AutoToolsBuildEnvironment(self, win_bash=tools.os_info.is_windows)
+            self._autotools.configure(configure_dir=self._source_subfolder, args=args)
+        return self._autotools
 
     def build(self):
         tools.patch(**self.conan_data["patches"][self.version])
