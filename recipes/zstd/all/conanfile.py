@@ -41,9 +41,8 @@ class ZstdConan(ConanFile):
         return cmake
 
     def _patch_sources(self):
-        if self.version in self.conan_data["patches"]:
-            for patch in self.conan_data["patches"][self.version]:
-                tools.patch(**patch)
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            tools.patch(**patch)
 
     def build(self):
         self._patch_sources()
