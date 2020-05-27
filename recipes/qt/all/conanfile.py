@@ -97,13 +97,13 @@ class QtConan(ConanFile):
         "with_vulkan": False,
         "openssl": True,
         "with_pcre2": True,
-        "with_glib": True,
+        "with_glib": False,
         # "with_libiconv": True,
         "with_doubleconversion": True,
         "with_freetype": True,
         "with_fontconfig": True,
         "with_icu": True,
-        "with_harfbuzz": True,
+        "with_harfbuzz": False,
         "with_libjpeg": True,
         "with_libpng": True,
         "with_sqlite3": True,
@@ -178,6 +178,9 @@ class QtConan(ConanFile):
     def config_options(self):
         if self.settings.os != "Linux":
             self.options.with_icu = False
+        if self.settings.os == "Linux":
+            self.options.GUI = False
+            self.options.widgets = False
 
     def configure(self):
         if conan_version < Version("1.20.0"):
