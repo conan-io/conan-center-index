@@ -1,5 +1,5 @@
 diff --git a/Makefile.msc b/tmp/Makefile.msc
-index d59ca46..d5a972b 100644
+index d59ca46..04cc720 100644
 --- a/Makefile.msc
 +++ b/tmp/Makefile.msc
 @@ -276,9 +276,9 @@ SQLITE3H = sqlite3.h
@@ -35,24 +35,7 @@ index d59ca46..d5a972b 100644
  !ENDIF
  
  # These are the additional targets that the targets that integrate with the
-@@ -458,14 +458,14 @@ CRTLIBPATH = $(CRTLIBPATH:\\=\)
- # For example, to use the x86 compiler when cross-compiling for x64, a command
- # line similar to the following could be used (all on one line):
- #
--#     nmake /f Makefile.msc sqlite3.dll
-+#     nmake /f Makefile.msc sqlcipher.dll
- #           XCOMPILE=1 USE_NATIVE_LIBPATHS=1
- #
- # Alternatively, the full path and file name to the compiler binary for the
- # platform the compilation process is taking place may be specified (all on
- # one line):
- #
--#     nmake /f Makefile.msc sqlite3.dll
-+#     nmake /f Makefile.msc sqlcipher.dll
- #           "NCC=""%VCINSTALLDIR%\bin\cl.exe"""
- #           USE_NATIVE_LIBPATHS=1
- #
-@@ -566,32 +566,12 @@ RCC = $(RC) -DSQLITE_OS_WIN=1 -I. -I$(TOP) -I$(TOP)\src $(RCOPTS) $(RCCOPTS)
+@@ -566,34 +566,15 @@ RCC = $(RC) -DSQLITE_OS_WIN=1 -I. -I$(TOP) -I$(TOP)\src $(RCOPTS) $(RCCOPTS)
  # an explicit calling convention, which results in "cdecl").
  #
  !IF $(USE_STDCALL)!=0 || $(FOR_WIN10)!=0
@@ -77,19 +60,21 @@ index d59ca46..d5a972b 100644
 -SHELL_CCONV_OPTS =
 -# <<mark>>
 -TEST_CCONV_OPTS =
--# <</mark>>
--!ENDIF
--!ENDIF
++TEST_CCONV_OPTS = -Gd -DSQLITE_CDECL=__cdecl -DSQLITE_APICALL=__cdecl -DSQLITE_CALLBACK=__cdecl -DSQLITE_SYSAPI=__cdecl -DINCLUDE_SQLITE_TCL_H=1 -DSQLITE_TCLAPI=__cdecl
+ # <</mark>>
+ !ENDIF
+ !ENDIF
 -!ELSE
 -CORE_CCONV_OPTS =
 -SHELL_CCONV_OPTS =
 -# <<mark>>
 -TEST_CCONV_OPTS =
-+TEST_CCONV_OPTS = -Gd -DSQLITE_CDECL=__cdecl -DSQLITE_APICALL=__cdecl -DSQLITE_CALLBACK=__cdecl -DSQLITE_SYSAPI=__cdecl -DINCLUDE_SQLITE_TCL_H=1 -DSQLITE_TCLAPI=__cdecl
- # <</mark>>
- !ENDIF
+-# <</mark>>
+-!ENDIF
  
-@@ -612,7 +592,7 @@ CORE_COMPILE_OPTS = $(CORE_CCONV_OPTS)
+ # These are additional compiler options used for the core library.
+ #
+@@ -612,7 +593,7 @@ CORE_COMPILE_OPTS = $(CORE_CCONV_OPTS)
  !IF $(DYNAMIC_SHELL)!=0
  CORE_LINK_DEP =
  !ELSEIF $(FOR_WIN10)==0 || "$(PLATFORM)"=="x86"
@@ -98,7 +83,7 @@ index d59ca46..d5a972b 100644
  !ELSE
  CORE_LINK_DEP =
  !ENDIF
-@@ -624,7 +604,7 @@ CORE_LINK_DEP =
+@@ -624,7 +605,7 @@ CORE_LINK_DEP =
  !IF $(DYNAMIC_SHELL)!=0
  CORE_LINK_OPTS =
  !ELSEIF $(FOR_WIN10)==0 || "$(PLATFORM)"=="x86"
@@ -107,7 +92,7 @@ index d59ca46..d5a972b 100644
  !ELSE
  CORE_LINK_OPTS =
  !ENDIF
-@@ -662,7 +642,7 @@ SHELL_CORE_SRC = $(SQLITE3C)
+@@ -662,7 +643,7 @@ SHELL_CORE_SRC = $(SQLITE3C)
  SHELL_CORE_DEP = $(SQLITE3DLL)
  # <<mark>>
  !ELSEIF $(USE_AMALGAMATION)==0
@@ -116,7 +101,7 @@ index d59ca46..d5a972b 100644
  # <</mark>>
  !ELSE
  SHELL_CORE_DEP =
-@@ -685,7 +665,7 @@ TESTFIXTURE_DEP = zlib $(TESTFIXTURE_DEP)
+@@ -685,7 +666,7 @@ TESTFIXTURE_DEP = zlib $(TESTFIXTURE_DEP)
  SHELL_CORE_LIB = $(SQLITE3LIB)
  # <<mark>>
  !ELSEIF $(USE_AMALGAMATION)==0
@@ -125,7 +110,7 @@ index d59ca46..d5a972b 100644
  # <</mark>>
  !ELSE
  SHELL_CORE_LIB =
-@@ -720,8 +700,8 @@ RCC = $(RCC) -DWINAPI_FAMILY=WINAPI_FAMILY_APP
+@@ -720,8 +701,8 @@ RCC = $(RCC) -DWINAPI_FAMILY=WINAPI_FAMILY_APP
  # C compiler options for the Windows 10 platform (needs MSVC 2015).
  #
  !IF $(FOR_WIN10)!=0
@@ -136,7 +121,7 @@ index d59ca46..d5a972b 100644
  !ENDIF
  
  # Also, we need to dynamically link to the correct MSVC runtime
-@@ -998,8 +978,8 @@ TLIBS =
+@@ -998,8 +979,8 @@ TLIBS =
  # default to file, 2 to default to memory, and 3 to force temporary
  # tables to always be in memory.
  #
@@ -147,7 +132,7 @@ index d59ca46..d5a972b 100644
  
  # Enable/disable loadable extensions, and other optional features
  # based on configuration. (-DSQLITE_OMIT*, -DSQLITE_ENABLE*).
-@@ -1165,14 +1145,13 @@ LTLINKOPTS = $(LTLINKOPTS) "/LIBPATH:$(WP81LIBPATH)"
+@@ -1165,14 +1146,13 @@ LTLINKOPTS = $(LTLINKOPTS) "/LIBPATH:$(WP81LIBPATH)"
  !ENDIF
  LTLINKOPTS = $(LTLINKOPTS) /DYNAMICBASE
  LTLINKOPTS = $(LTLINKOPTS) WindowsPhoneCore.lib RuntimeObject.lib PhoneAppModelHost.lib
@@ -163,7 +148,7 @@ index d59ca46..d5a972b 100644
  LTLINKOPTS = $(LTLINKOPTS) mincore.lib
  !IFDEF PSDKLIBPATH
  LTLINKOPTS = $(LTLINKOPTS) "/LIBPATH:$(PSDKLIBPATH)"
-@@ -1182,9 +1161,9 @@ LTLINKOPTS = $(LTLINKOPTS) "/LIBPATH:$(PSDKLIBPATH)"
+@@ -1182,9 +1162,9 @@ LTLINKOPTS = $(LTLINKOPTS) "/LIBPATH:$(PSDKLIBPATH)"
  !IF $(FOR_WIN10)!=0
  LTLINKOPTS = $(LTLINKOPTS) /guard:cf "/LIBPATH:$(UCRTLIBPATH)"
  !IF $(DEBUG)>1
@@ -175,7 +160,7 @@ index d59ca46..d5a972b 100644
  !ENDIF
  !ENDIF
  
-@@ -1225,7 +1204,7 @@ LTLIBS = $(LTLIBS) $(LIBICU)
+@@ -1225,7 +1205,7 @@ LTLIBS = $(LTLIBS) $(LIBICU)
  # <<mark>>
  # Object files for the SQLite library (non-amalgamation).
  #
@@ -184,7 +169,7 @@ index d59ca46..d5a972b 100644
           backup.lo bitvec.lo btmutex.lo btree.lo build.lo \
           callback.lo complete.lo ctime.lo \
           date.lo dbpage.lo dbstat.lo delete.lo \
-@@ -1715,7 +1694,7 @@ ALL_TCL_TARGETS =
+@@ -1715,7 +1695,7 @@ ALL_TCL_TARGETS =
  # This is the default Makefile target.  The objects listed here
  # are what get build when you type just "make" with no arguments.
  #
@@ -193,7 +178,7 @@ index d59ca46..d5a972b 100644
  
  # Targets that require the Tcl library.
  #
-@@ -1734,17 +1713,17 @@ dll:	$(SQLITE3DLL)
+@@ -1734,17 +1714,17 @@ dll:	$(SQLITE3DLL)
  shell:	$(SQLITE3EXE)
  
  # <<mark>>
@@ -218,7 +203,7 @@ index d59ca46..d5a972b 100644
  
  pkgIndex.tcl:	$(TOP)\VERSION
  	for /F %%V in ('type "$(TOP)\VERSION"') do ( \
-@@ -1752,19 +1731,19 @@ pkgIndex.tcl:	$(TOP)\VERSION
+@@ -1752,19 +1732,19 @@ pkgIndex.tcl:	$(TOP)\VERSION
  			| $(TCLSH_CMD) $(TOP)\tool\replace.tcl exact @version@ %%V > pkgIndex.tcl \
  	)
  
@@ -244,7 +229,16 @@ index d59ca46..d5a972b 100644
  # <</block2>>
  
  $(SQLITE3EXE):	shell.c $(SHELL_CORE_DEP) $(LIBRESOBJS) $(SHELL_CORE_SRC) $(SQLITE3H)
-@@ -1940,6 +1919,15 @@ callback.lo:	$(TOP)\src\callback.c $(HDR)
+@@ -1844,7 +1824,7 @@ mptest:	mptester.exe
+ 	copy /Y fts5.h tsrc
+ 	del /Q tsrc\sqlite.h.in tsrc\parse.y 2>NUL
+ 	$(TCLSH_CMD) $(TOP)\tool\vdbe-compress.tcl $(OPTS) < tsrc\vdbe.c > vdbe.new
+-	move vdbe.new tsrc\vdbe.c
++	Echo y|move vdbe.new tsrc\vdbe.c
+ 	echo > .target_source
+ 
+ sqlite3.c:	.target_source sqlite3ext.h $(MKSQLITE3C_TOOL)
+@@ -1940,6 +1920,15 @@ callback.lo:	$(TOP)\src\callback.c $(HDR)
  complete.lo:	$(TOP)\src\complete.c $(HDR)
  	$(LTCOMPILE) $(CORE_COMPILE_OPTS) -c $(TOP)\src\complete.c
  
@@ -260,7 +254,7 @@ index d59ca46..d5a972b 100644
  ctime.lo:	$(TOP)\src\ctime.c $(HDR)
  	$(LTCOMPILE) $(CORE_COMPILE_OPTS) -c $(TOP)\src\ctime.c
  
-@@ -2144,7 +2132,7 @@ tclsqlite.lo:	$(TOP)\src\tclsqlite.c $(HDR) $(SQLITE_TCL_DEP)
+@@ -2144,7 +2133,7 @@ tclsqlite.lo:	$(TOP)\src\tclsqlite.c $(HDR) $(SQLITE_TCL_DEP)
  tclsqlite-shell.lo:	$(TOP)\src\tclsqlite.c $(HDR) $(SQLITE_TCL_DEP)
  	$(LTCOMPILE) $(NO_WARN) -DTCLSH -DBUILD_sqlite -I$(TCLINCDIR) -c $(TOP)\src\tclsqlite.c
  
@@ -269,7 +263,7 @@ index d59ca46..d5a972b 100644
  	$(LTLINK) $(SQLITE3C) /link $(LDFLAGS) $(LTLINKOPTS) $(TCLLIBPATHS) $(LTLIBPATHS) /OUT:$@ tclsqlite-shell.lo $(LIBRESOBJS) $(TCLLIBS) $(LTLIBS) $(TLIBS)
  
  # Rules to build opcodes.c and opcodes.h
-@@ -2349,7 +2337,7 @@ sqlite3rbu.lo:	$(TOP)\ext\rbu\sqlite3rbu.c $(HDR) $(EXTHDR)
+@@ -2349,7 +2338,7 @@ sqlite3rbu.lo:	$(TOP)\ext\rbu\sqlite3rbu.c $(HDR) $(EXTHDR)
  # Rules to build the 'testfixture' application.
  #
  # If using the amalgamation, use sqlite3.c directly to build the test
@@ -278,7 +272,7 @@ index d59ca46..d5a972b 100644
  # necessary because the test fixture requires non-API symbols which are
  # hidden when the library is built via the amalgamation).
  #
-@@ -2574,7 +2562,7 @@ clean:
+@@ -2574,7 +2563,7 @@ clean:
  	-rmdir /Q/S .libs 2>NUL
  	-rmdir /Q/S tsrc 2>NUL
  	del /Q .target_source 2>NUL
