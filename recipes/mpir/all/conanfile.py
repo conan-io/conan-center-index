@@ -62,6 +62,8 @@ class MpirConan(ConanFile):
                 args.extend(['--disable-static', '--enable-shared'])
             else:
                 args.extend(['--disable-shared', '--enable-static'])
+            if self.options.fPIC:
+                args.extend(['--with-pic'])
 
             args.extend(['--disable-silent-rules', '--enable-gmpcompat', '--enable-cxx'])
             self._autotools.configure(args=args)
