@@ -43,7 +43,7 @@ if(PYTHONLIBS_VERSION_STRING)
 endif()
 
 if(CMAKE_VERSION VERSION_LESS "3.12" OR (MSVC AND CONAN_SETTINGS_BUILD_TYPE STREQUAL "Debug"))
-    add_library(spam MODULE test_module.c)
+    add_library(spam MODULE "py${PY_VERSION_MAJOR}/test_module.c")
     target_include_directories(spam
         PRIVATE
             ${PYTHON_INCLUDE_DIR}
