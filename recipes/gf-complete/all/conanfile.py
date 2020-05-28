@@ -15,16 +15,16 @@ class GfCompleteConan(ConanFile):
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
-        "neon": [True, False],
-        "sse": [True, False],
-        "avx": [True, False]
+        "neon": [True, False, "auto"],
+        "sse": [True, False, "auto"],
+        "avx": [True, False, "auto"]
     }
     default_options = {
         "shared": False,
         "fPIC": True,
-        "neon": True,
-        "sse": True,
-        "avx": False
+        "neon": "auto",
+        "sse": "auto",
+        "avx": "auto"
     }
 
     _source_subfolder = "source_subfolder"
@@ -37,6 +37,11 @@ class GfCompleteConan(ConanFile):
     def config_options(self):
         if self.settings.os == 'Windows':
             del self.options.fPIC
+        if self.settings.arch not in ["x86", "x86_64"]:
+            del self.options.sse
+            del self.options.avx
+        if "arm" not in self.settings.arch:
+            del self.options.neon
 
     def configure(self):
         if tools.os_info.is_windows and not self.settings.compiler == "gcc":
@@ -61,44 +66,43 @@ class GfCompleteConan(ConanFile):
             self, win_bash=tools.os_info.is_windows)
 
         with tools.environment_append(self._autotools.vars):
-            # run autoreconf
-            self.run("./autogen.sh", win_bash=tools.os_info.is_windows)
+            with tools.chdir(self._source_subfolder):
+                self.run("./autogen.sh", win_bash=tools.os_info.is_windows)
 
         if "x86" in self.settings.arch:
             self._autotools.flags.append('-mstackrealign')
-
-        if "fPIC" in self.options:
-            self._autotools.fpic = self.options.fPIC
 
         configure_args = [
             "--enable-shared=%s" % ("yes" if self.options.shared else "no"),
             "--enable-static=%s" % ("no" if self.options.shared else "yes")
         ]
 
-        # enabled by default
-        if not self.options.neon:
-            configure_args.append("--disable-neon")
-        if not self.options.sse:
-            configure_args.append("--disable-sse")
+        if "arm" in self.settings.arch:
+            # neon is enabled by default
+            if self.options.neon != "auto" and not self.options.neon:
+                configure_args.append("--disable-neon")
 
-        # disabled by default
-        if self.options.avx:
-            configure_args.append("--enable-avx")
+        if self.settings.arch in ["x86", "x86_64"]:
+            # sse is enabled by default
+            if self.options.sse != "auto" and not self.options.sse:
+                configure_args.append("--disable-sse")
+            # avx is disabled by default
+            if self.options.avx != "auto" and self.options.avx:
+                configure_args.append("--enable-avx")
 
-        self._autotools.configure(args=configure_args)
+        self._autotools.configure(args=configure_args,
+                                  configure_dir=self._source_subfolder)
 
         return self._autotools
 
     def build(self):
-        with tools.chdir(self._source_subfolder):
-            autotools = self._configure_autotools()
-            autotools.make()
+        autotools = self._configure_autotools()
+        autotools.make()
 
     def package(self):
         self.copy("COPYING", dst="licenses", src=self._source_subfolder)
-        with tools.chdir(self._source_subfolder):
-            autotools = self._configure_autotools()
-            autotools.install()
+        autotools = self._configure_autotools()
+        autotools.install()
 
         # don't package la file
         la_file = os.path.join(self.package_folder, "lib", "libgf_complete.la")
@@ -107,4 +111,3 @@ class GfCompleteConan(ConanFile):
 
     def package_info(self):
         self.cpp_info.libs = tools.collect_libs(self)
-        self.cpp_info.includedirs.append(os.path.join("include"))
