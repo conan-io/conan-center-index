@@ -38,7 +38,7 @@ class ElfutilsConan(ConanFile):
 
     def _configure_autotools(self):
         if not self._autotools:
-            args = ['--enable-silent-rules', '--with-zlib', '--with-bzlib', '--with-lzma']
+            args = ['--enable-deterministic-archives', '--enable-silent-rules', '--with-zlib', '--with-bzlib', '--with-lzma']
             self._autotools = AutoToolsBuildEnvironment(self, win_bash=tools.os_info.is_windows)
             self._autotools.configure(configure_dir=self._source_subfolder, args=args)
         return self._autotools
