@@ -1,4 +1,5 @@
 from conans import ConanFile, CMake, tools
+from conans.errors import ConanInvalidConfiguration
 import os
 
 
@@ -29,6 +30,13 @@ class OatppWebSocketConan(ConanFile):
         tools.get(**self.conan_data["sources"][self.version])
         os.rename("oatpp-websocket-{0}".format(self.version), self._source_subfolder)
 
+    def configure(self):
+        if self.settings.os == "Windows" and self.options.shared:
+            raise ConanInvalidConfiguration("oatpp-websocket can not be built as shared library on Windows")
+
+        if self.settings.compiler == "gcc" and tools.Version(self.settings.compiler.version) < "5":
+            raise ConanInvalidConfiguration("oatpp-websocket requires GCC >=5")
+
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
@@ -43,9 +51,7 @@ class OatppWebSocketConan(ConanFile):
         self._cmake.definitions["OATPP_DIR_LIB"] = os.path.join(
             self.deps_cpp_info["oatpp"].rootpath, self.deps_cpp_info["oatpp"].libdirs[0]
         )
-        self._cmake.definitions["OATPP_DIR_SRC"] = self.deps_cpp_info[
-            "oatpp"
-        ].include_paths[0]
+        self._cmake.definitions["OATPP_DIR_SRC"] = self.deps_cpp_info["oatpp"].include_paths[0]
         self._cmake.configure(build_folder=self._build_subfolder)
         return self._cmake
 
