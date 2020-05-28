@@ -102,9 +102,11 @@ class CPythonConan(ConanFile):
     def configure(self):
         if self.options.shared:
             del self.options.fPIC
-        if self._is_py2 and tools.is_apple_os(self.settings.os):
-            # FIXME: python2 does not build on Macos due to a missing uuid_string_t type: https://github.com/conan-io/conan-center-index/pull/1510#issuecomment-634832899
-            raise ConanInvalidConfiguration("python2 cannot be built for apple products")
+        if tools.is_apple_os(self.settings.os):
+            # FIXME: python2 does not build on Macos due to a missing uuid_string_t type
+            #        see https://github.com/conan-io/conan-center-index/pull/1510#issuecomment-634832899
+            # FIXME: python3 test_package does not work. It does not find the python libraries.
+            raise ConanInvalidConfiguration("This recipe (currently) does not support python for apple products.")
         if self.settings.compiler == "Visual Studio":
             if not self.options.shared:
                 raise ConanInvalidConfiguration("MSVC does not support a static build")
