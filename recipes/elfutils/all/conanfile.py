@@ -1,5 +1,6 @@
 from conans import ConanFile, AutoToolsBuildEnvironment, tools
 import os
+import glob
 
 
 class ElfutilsConan(ConanFile):
@@ -12,8 +13,14 @@ class ElfutilsConan(ConanFile):
     license = ["GPL-1.0-or-later", "LGPL-3.0-or-later", "GPL-3.0-or-later"]
     
     settings = "os", "arch", "compiler", "build_type"
-    options = {"fPIC": [True, False]}
-    default_options = {'fPIC': True}
+    options = {
+        "shared": [True, False],
+        "fPIC": [True, False]
+    }
+    default_options = {
+        "shared": True,
+        "fPIC": True
+    }
     requires = (
         "bzip2/1.0.6",
         "zlib/1.2.11",
@@ -43,18 +50,29 @@ class ElfutilsConan(ConanFile):
             self._autotools.configure(configure_dir=self._source_subfolder, args=args)
         return self._autotools
 
+    def build_id(self):
+        self.info_build.options.shared = "Any"
+    
     def build(self):
         tools.patch(**self.conan_data["patches"][self.version])
         autotools = self._configure_autotools()
         autotools.make()
-
+    
     def package(self):
         self.copy(pattern="COPYING*", dst="licenses", src=self._source_subfolder)
         autotools = self._configure_autotools()
         autotools.install()
         tools.rmdir(os.path.join(self.package_folder, "share"))
-        tools.rmdir(os.path.join(self.package_folder, 'lib', 'pkgconfig'))
-
+        tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
+        if self.options.shared:
+            for f in glob.glob(os.path.join(self.package_folder, "lib", "*.a")):
+                os.remove(f)
+        else:
+            for f in glob.glob(os.path.join(self.package_folder, "lib", "*.so")):
+                os.remove(f)            
+            for f in glob.glob(os.path.join(self.package_folder, "lib", "*.so.1")):
+                os.remove(f)
+        
     def package_info(self):
         # library components
         self.cpp_info.components["elf"].name = "elf"
