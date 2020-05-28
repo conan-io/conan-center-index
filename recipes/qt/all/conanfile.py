@@ -594,36 +594,39 @@ class QtConan(ConanFile):
         if self.options.config:
             args.append(str(self.options.config))
 
-        with tools.vcvars(self.settings) if self.settings.compiler == "Visual Studio" else tools.no_op():
-            build_env = {"MAKEFLAGS": "j%d" % tools.cpu_count(), "PKG_CONFIG_PATH": [os.getcwd()]}
-            if self.options.qtwebengine:
-                if self.settings.compiler in ['gcc', 'clang']:
-                    i_path = []
-                    l_path = []
-                    for p in ['fontconfig', 'zlib']:
-                        if p in self.deps_cpp_info.deps:
-                            i_path.extend(self._gather_include_paths(p))
-                            l_path.extend(self._gather_lib_paths(p))
-                    build_env['C_INCLUDE_PATH'] = os.pathsep.join(i_path)
-                    build_env['CPLUS_INCLUDE_PATH'] = os.pathsep.join(i_path)
-                    build_env['LIBRARY_PATH'] = os.pathsep.join(l_path)
-            if self.settings.os == "Windows":
-                build_env["PATH"] = [os.path.join(self.source_folder, "qt5", "gnuwin32", "bin")]
-            with tools.environment_append(build_env):
-                self.run("%s/qt5/configure %s" % (self.source_folder, " ".join(args)), run_environment=True)
-                if tools.os_info.is_macos:
-                    with open("bash_env", "w") as f:
-                        f.write('export DYLD_LIBRARY_PATH="%s"' % ":".join(RunEnvironment(self).vars["DYLD_LIBRARY_PATH"]))
-                with tools.environment_append({
-                    "BASH_ENV": os.path.abspath("bash_env")
-                    }) if tools.os_info.is_macos else tools.no_op():
-                    self.run(self._make_program(), run_environment=True)
+        os.mkdir('build_folder')
+        with tools.chdir('build_folder'):
+            with tools.vcvars(self.settings) if self.settings.compiler == "Visual Studio" else tools.no_op():
+                build_env = {"MAKEFLAGS": "j%d" % tools.cpu_count(), "PKG_CONFIG_PATH": [os.getcwd()]}
+                if self.options.qtwebengine:
+                    if self.settings.compiler in ['gcc', 'clang']:
+                        i_path = []
+                        l_path = []
+                        for p in ['fontconfig', 'zlib']:
+                            if p in self.deps_cpp_info.deps:
+                                i_path.extend(self._gather_include_paths(p))
+                                l_path.extend(self._gather_lib_paths(p))
+                        build_env['C_INCLUDE_PATH'] = os.pathsep.join(i_path)
+                        build_env['CPLUS_INCLUDE_PATH'] = os.pathsep.join(i_path)
+                        build_env['LIBRARY_PATH'] = os.pathsep.join(l_path)
+                if self.settings.os == "Windows":
+                    build_env["PATH"] = [os.path.join(self.source_folder, "qt5", "gnuwin32", "bin")]
+                with tools.environment_append(build_env):
+                    self.run("%s/qt5/configure %s" % (self.source_folder, " ".join(args)), run_environment=True)
+                    if tools.os_info.is_macos:
+                        with open("bash_env", "w") as f:
+                            f.write('export DYLD_LIBRARY_PATH="%s"' % ":".join(RunEnvironment(self).vars["DYLD_LIBRARY_PATH"]))
+                    with tools.environment_append({
+                        "BASH_ENV": os.path.abspath("bash_env")
+                        }) if tools.os_info.is_macos else tools.no_op():
+                        self.run(self._make_program(), run_environment=True)
 
-        with open('qtbase/bin/qt.conf', 'w') as f:
-            f.write('[Paths]\nPrefix = ..')
+            with open('qtbase/bin/qt.conf', 'w') as f:
+                f.write('[Paths]\nPrefix = ..')
 
     def package(self):
-        self.run("%s install" % self._make_program())
+        with tools.chdir('build_folder'):
+            self.run("%s install" % self._make_program())
         self.copy("bin/qt.conf", src="qtbase")
         self.copy("*LICENSE*", src="qt5/", dst="licenses")
         tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
@@ -634,9 +637,6 @@ class QtConan(ConanFile):
     def package_id(self):
         del self.info.options.cross_compile
         del self.info.options.sysroot
-
-    def package_info(self):
-        self.env_info.CMAKE_PREFIX_PATH.append(self.package_folder)
 
     @staticmethod
     def _remove_duplicate(l):
