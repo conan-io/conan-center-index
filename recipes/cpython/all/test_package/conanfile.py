@@ -14,6 +14,15 @@ class CmakePython3Abi(object):
         False: "OFF",
     }
 
+    @property
+    def suffix(self):
+        return "{}{}{}".format(
+            "d" if self.debug else "",
+            "m" if self.pymalloc else "",
+            "u" if self.unicode else "",
+        )
+
+    @property
     def cmake_arg(self):
         return ";".join(self._cmake_lut[a] for a in (self.debug, self.pymalloc, self.unicode))
 
@@ -47,6 +56,7 @@ class TestPackageConan(ConanFile):
         cmake.definitions["PY_VERSION_MAJOR"] = py_major
         cmake.definitions["PY_VERSION_MAJOR_MINOR"] = ".".join(self._py_version.split(".")[:2])
         cmake.definitions["PY_VERSION"] = self._py_version
+        cmake.definitions["PY_VERSION_SUFFIX"] = self._cmake_abi.suffix
         cmake.definitions["PYTHON_EXECUTABLE"] = tools.get_env("PYTHON")
         cmake.definitions["Python{}_ROOT_DIR".format(py_major)] = self.deps_cpp_info["cpython"].rootpath
         cmake.definitions["Python{}_USE_STATIC_LIBS".format(py_major)] = not self.options["cpython"].shared
@@ -56,7 +66,7 @@ class TestPackageConan(ConanFile):
 
         if self.settings.compiler != "Visual Studio":
             if tools.Version(self._py_version) < tools.Version("3.8"):
-                cmake.definitions["Python{}_FIND_ABI".format(py_major)] = self._cmake_abi.cmake_arg()
+                cmake.definitions["Python{}_FIND_ABI".format(py_major)] = self._cmake_abi.cmake_arg
 
         with tools.environment_append(RunEnvironment(self).vars):
             cmake.configure()
