@@ -1,0 +1,13 @@
+--- bin/aclocal.in
++++ bin/aclocal.in
+@@ -62,8 +62,8 @@
+ # ACLOCAL_PATH environment variable, and reset with the '--system-acdir'
+ # option.
+ my @user_includes = ();
+-my @automake_includes = ('@datadir@/aclocal-' . $APIVERSION);
+-my @system_includes = ('@datadir@/aclocal');
++my @automake_includes = ($ENV{"AUTOMAKE_DATADIR"} . '/aclocal-' . $APIVERSION);
++my @system_includes = ($ENV{"AUTOMAKE_DATADIR"} . '/aclocal');
+ 
+ # Whether we should copy M4 file in $user_includes[0].
+ my $install = 0;

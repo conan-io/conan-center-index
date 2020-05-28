@@ -14,8 +14,8 @@ index b19fb0a..1116b3f 100644
 +#  define TERMCAP_STATIC_IMPORT_API extern
 +#  define TERMCAP_STATIC_EXPORT_API extern
 +#else
-+#  define TERMCAP_SHARED_EXPORT_API __attribute__((visibility(\"default\")))
-+#  define TERMCAP_SHARED_IMPORT_API __attribute__((visibility(\"default\")))
++#  define TERMCAP_SHARED_EXPORT_API __attribute__((visibility("default")))
++#  define TERMCAP_SHARED_IMPORT_API __attribute__((visibility("default")))
 +#  define TERMCAP_STATIC_IMPORT_API extern
 +#  define TERMCAP_STATIC_EXPORT_API extern
 +#endif

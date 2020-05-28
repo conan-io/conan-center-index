@@ -12,7 +12,7 @@ class CgalConan(ConanFile):
                   "in computational geometry."
     topics = ("geometry", "algorithms")
     settings = "os", "compiler", "build_type", "arch"
-    requires = "mpir/3.0.0", "mpfr/4.0.2", "boost/1.72.0", "eigen/3.3.7"
+    requires = "mpfr/4.0.2", "boost/1.72.0", "eigen/3.3.7"
     generators = "cmake"
     exports_sources = "CMakeLists.txt"
 

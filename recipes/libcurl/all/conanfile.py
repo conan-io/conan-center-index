@@ -50,9 +50,16 @@ class LibcurlConan(ConanFile):
     _build_subfolder = "build_subfolder"
     _autotools = False
 
+    _cmake = None
+
     @property
     def _is_mingw(self):
         return self.settings.os == "Windows" and self.settings.compiler != "Visual Studio"
+
+    @property
+    def _is_win_x_android(self):
+        return self.settings.os == "Android" and tools.os_info.is_windows
+
 
     def imports(self):
         # Copy shared libraries for dependencies to fix DYLD_LIBRARY_PATH problems
@@ -100,9 +107,15 @@ class LibcurlConan(ConanFile):
 
     def system_requirements(self):
         # TODO: Declare tools needed to compile. The idea is Conan checking that they are
-        #   installed and providing a meaninful message before starting the compilation. It
+        #   installed and providing a meaningful message before starting the compilation. It
         #   would be much better than installed them (sudo required).
         pass
+
+    def build_requirements(self):
+        if self._is_win_x_android:
+            self.build_requires("ninja/1.9.0")
+        elif self.settings.os == "Linux":
+            self.build_requires("libtool/2.4.6")
 
     def requirements(self):
         if self.options.with_openssl:
@@ -111,7 +124,7 @@ class LibcurlConan(ConanFile):
             elif self.settings.os == "Windows" and self.options.with_winssl:
                 pass
             else:
-                self.requires("openssl/1.1.1f")
+                self.requires("openssl/1.1.1g")
         if self.options.with_libssh2:
             if self.settings.compiler != "Visual Studio":
                 self.requires("libssh2/1.9.0")
@@ -127,10 +140,11 @@ class LibcurlConan(ConanFile):
 
     def build(self):
         self._patch_misc_files()
-        if self.settings.compiler != "Visual Studio":
-            self._build_with_autotools()
-        else:
+        if self.settings.compiler == "Visual Studio" or self._is_win_x_android:
             self._build_with_cmake()
+        else:
+            self._build_with_autotools()
+
 
     def _patch_misc_files(self):
         if self.options.with_largemaxwritesize:
@@ -379,21 +393,26 @@ class LibcurlConan(ConanFile):
         return self._autotools, self._configure_autotools_vars()
 
     def _configure_cmake(self):
-        cmake = CMake(self)
-        cmake.definitions['BUILD_TESTING'] = False
-        cmake.definitions['BUILD_CURL_EXE'] = False
-        cmake.definitions['CURL_DISABLE_LDAP'] = not self.options.with_ldap
-        cmake.definitions['BUILD_SHARED_LIBS'] = self.options.shared
-        cmake.definitions['CURL_STATICLIB'] = not self.options.shared
-        cmake.definitions['CMAKE_DEBUG_POSTFIX'] = ''
-        cmake.definitions['CMAKE_USE_LIBSSH2'] = self.options.with_libssh2
+        if self._cmake:
+            return self._cmake
+        if self._is_win_x_android:
+            self._cmake = CMake(self, generator="Ninja")
+        else:
+            self._cmake = CMake(self)
+        self._cmake.definitions['BUILD_TESTING'] = False
+        self._cmake.definitions['BUILD_CURL_EXE'] = False
+        self._cmake.definitions['CURL_DISABLE_LDAP'] = not self.options.with_ldap
+        self._cmake.definitions['BUILD_SHARED_LIBS'] = self.options.shared
+        self._cmake.definitions['CURL_STATICLIB'] = not self.options.shared
+        self._cmake.definitions['CMAKE_DEBUG_POSTFIX'] = ''
+        self._cmake.definitions['CMAKE_USE_LIBSSH2'] = self.options.with_libssh2
 
         # all these options are exclusive. set just one of them
         # mac builds do not use cmake so don't even bother about darwin_ssl
-        cmake.definitions['CMAKE_USE_WINSSL'] = 'with_winssl' in self.options and self.options.with_winssl
-        cmake.definitions['CMAKE_USE_OPENSSL'] = 'with_openssl' in self.options and self.options.with_openssl
-        cmake.configure(build_folder=self._build_subfolder)
-        return cmake
+        self._cmake.definitions['CMAKE_USE_WINSSL'] = 'with_winssl' in self.options and self.options.with_winssl
+        self._cmake.definitions['CMAKE_USE_OPENSSL'] = 'with_openssl' in self.options and self.options.with_openssl
+        self._cmake.configure(build_folder=self._build_subfolder)
+        return self._cmake
 
     def _build_with_cmake(self):
         # patch cmake files
@@ -409,16 +428,15 @@ class LibcurlConan(ConanFile):
         self.copy(pattern="COPYING", dst="licenses", src=self._source_subfolder)
 
         # Execute install
-        if self.settings.compiler != "Visual Studio":
+        if self.settings.compiler == "Visual Studio" or self._is_win_x_android:
+            cmake = self._configure_cmake()
+            cmake.install()
+        else:
             env_run = RunEnvironment(self)
             with tools.environment_append(env_run.vars):
                 with tools.chdir(self._source_subfolder):
                     autotools, autotools_vars = self._configure_autotools()
                     autotools.install(vars=autotools_vars)
-        else:
-            cmake = self._configure_cmake()
-            cmake.install()
-
         if self._is_mingw:
             # Handle only mingw libs
             self.copy(pattern="*.dll", dst="bin", keep_path=False)
