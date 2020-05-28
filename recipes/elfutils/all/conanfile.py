@@ -59,12 +59,14 @@ class ElfutilsConan(ConanFile):
         # library components
         self.cpp_info.components["elf"].name = "elf"
         self.cpp_info.components["elf"].libs = ["elf"]
+        self.cpp_info.components["elf"].requires = ["zlib::zlib"]
 
         self.cpp_info.components["dw"].name = "dw"
         self.cpp_info.components["dw"].libs = ["dw"]
-        self.cpp_info.components["dw"].requires = ["elf"]
+        self.cpp_info.components["dw"].requires = ["elf", "zlib::zlib", "bzlib::bzlib", "lzma::lzma"]
 
         self.cpp_info.components["asm"].name = "asm"
+        self.cpp_info.components["asm"].includedirs = ["include/elfutils"]
         self.cpp_info.components["asm"].libs = ["asm"]
         self.cpp_info.components["asm"].requires = ["elf", "dw"]
 
