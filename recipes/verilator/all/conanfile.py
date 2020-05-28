@@ -104,17 +104,14 @@ class VerilatorConan(ConanFile):
     def build(self):
         self._patch_sources()
         with self._build_context():
-            # with tools.chdir(self._source_subfolder):
-                autotools = self._configure_autotools()
-                # os.system("bash")
-                autotools.make(args=self._make_args)
+            autotools = self._configure_autotools()
+            autotools.make(args=self._make_args)
 
     def package(self):
         self.copy("LICENSE", src=self._source_subfolder, dst="licenses")
         with self._build_context():
-            # with tools.chdir(self._source_subfolder):
-                autotools = self._configure_autotools()
-                autotools.install(args=self._make_args)
+            autotools = self._configure_autotools()
+            autotools.install(args=self._make_args)
 
         tools.rmdir(os.path.join(self.package_folder, "bin", "share", "man"))
         tools.rmdir(os.path.join(self.package_folder, "bin", "share", "pkgconfig"))
