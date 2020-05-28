@@ -60,6 +60,7 @@ class HiredisConan(ConanFile):
         if self.options.shared:
             self.copy("*.dylib", dst="lib", keep_path=False)
             self.copy("*.so", dst="lib", keep_path=False)
+            self.copy("*.so.*", dst="lib", keep_path=False)
         else:
             self.copy("*.a", dst="lib", keep_path=False)
 
