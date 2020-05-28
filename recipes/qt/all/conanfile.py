@@ -264,7 +264,7 @@ class QtConan(ConanFile):
             self.requires("pcre2/10.33")
 
         if self.options.with_glib:
-            self.requires("glib/2.64.0@bincrafters/stable")
+            self.requires("glib/2.64.0")
         # if self.options.with_libiconv:
         #     self.requires("libiconv/1.16")
         if self.options.with_doubleconversion and not self.options.multiconfiguration:
@@ -272,11 +272,11 @@ class QtConan(ConanFile):
         if self.options.with_freetype and not self.options.multiconfiguration:
             self.requires("freetype/2.10.1")
         if self.options.with_fontconfig:
-            self.requires("fontconfig/2.13.91@conan/stable")
+            self.requires("fontconfig/2.13.91")
         if self.options.with_icu:
             self.requires("icu/64.2")
         if self.options.with_harfbuzz and not self.options.multiconfiguration:
-            self.requires("harfbuzz/2.6.4@bincrafters/stable")
+            self.requires("harfbuzz/2.6.4")
         if self.options.with_libjpeg and not self.options.multiconfiguration:
             self.requires("libjpeg/9d")
         if self.options.with_libpng and not self.options.multiconfiguration:
@@ -597,7 +597,7 @@ class QtConan(ConanFile):
                 if self.settings.compiler in ['gcc', 'clang']:
                     i_path = []
                     l_path = []
-                    for p in ['fontconfig', 'libxcursor', 'libxi', 'libxtst', 'libxrandr', 'libxscrnsaver', 'libxcomposite', 'zlib', 'libxdamage']:
+                    for p in ['fontconfig', 'zlib']:
                         if p in self.deps_cpp_info.deps:
                             i_path.extend(self._gather_include_paths(p))
                             l_path.extend(self._gather_lib_paths(p))
