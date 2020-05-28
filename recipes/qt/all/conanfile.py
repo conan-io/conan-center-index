@@ -404,6 +404,9 @@ class QtConan(ConanFile):
         args = ["-confirm-license", "-silent", "-nomake examples", "-nomake tests",
                 "-prefix %s" % self.package_folder]
         args.append("-v")
+        args.append("-archdatadir  %s" % os.path.join(self.package_folder, "bin", "archdatadir"))
+        args.append("-datadir  %s" % os.path.join(self.package_folder, "bin", "datadir"))
+        args.append("-sysconfdir  %s" % os.path.join(self.package_folder, "bin", "sysconfdir"))
         if self.options.commercial:
             args.append("-commercial")
         else:
