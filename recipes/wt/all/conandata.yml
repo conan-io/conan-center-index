@@ -1,0 +1,4 @@
+sources:
+  "4.3.1":
+    url: "https://github.com/emweb/wt/archive/4.3.1.tar.gz"
+    sha256: "6c0130f36c829ed67119679770c2f62d7768a62eaa281bb10070c4cf1b145139"

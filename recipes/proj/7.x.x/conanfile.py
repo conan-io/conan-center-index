@@ -43,11 +43,11 @@ class ProjConan(ConanFile):
             del self.options.fPIC
 
     def requirements(self):
-        self.requires.add("sqlite3/3.31.1")
+        self.requires("sqlite3/3.31.1")
         if self.options.with_tiff:
-            self.requires.add("libtiff/4.1.0")
+            self.requires("libtiff/4.1.0")
         if self.options.with_curl:
-            self.requires.add("libcurl/7.69.1")
+            self.requires("libcurl/7.69.1")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
@@ -74,7 +74,7 @@ class ProjConan(ConanFile):
         self._cmake.definitions["BUILD_GIE"] = True
         self._cmake.definitions["BUILD_PROJ"] = True
         self._cmake.definitions["BUILD_PROJINFO"] = True
-        self._cmake.definitions["BUILD_PROJSYNC"] = True
+        self._cmake.definitions["BUILD_PROJSYNC"] = self.options.with_curl
         self._cmake.definitions["PROJ_DATA_SUBDIR"] = "res"
         self._cmake.configure(build_folder=self._build_subfolder)
         return self._cmake
@@ -97,6 +97,8 @@ class ProjConan(ConanFile):
             self.cpp_info.system_libs.append("m")
             if self.options.threadsafe:
                 self.cpp_info.system_libs.append("pthread")
+        if self.settings.os == "Windows":
+            self.cpp_info.system_libs.append("shell32")
         if not self.options.shared and self._stdcpp_library:
             self.cpp_info.system_libs.append(self._stdcpp_library)
         if self.options.shared and self.settings.compiler == "Visual Studio":

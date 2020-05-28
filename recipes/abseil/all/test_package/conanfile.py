@@ -1,7 +1,5 @@
-# -*- coding: utf-8 -*-
 from conans import ConanFile, CMake
 import os
-
 
 class TestPackageConan(ConanFile):
     settings = "os", "compiler", "build_type", "arch"
