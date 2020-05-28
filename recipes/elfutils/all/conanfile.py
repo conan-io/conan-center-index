@@ -8,7 +8,7 @@ class ElfutilsConan(ConanFile):
     homepage = "https://sourceware.org/elfutils"
     url = "https://github.com/conan-io/conan-center-index"
     topics = ("conan", "elfutils", "libelf", "libdw", "libasm")
-    exports = ["LICENSE.md", "patches/elfutils-*.patch"]
+    exports = ["patches/elfutils-*.patch"]
     license = ["GPL-1.0-or-later", "LGPL-3.0-or-later", "GPL-3.0-or-later"]
     
     settings = "os", "arch", "compiler", "build_type"
