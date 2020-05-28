@@ -1,8 +1,5 @@
-#!/usr/bin/env python
-# -*- coding: utf-8 -*-
 import os
 from conans import ConanFile, CMake, tools, RunEnvironment
-
 
 class FontconfigTestConan(ConanFile):
     settings = "os", "compiler", "build_type", "arch"
