@@ -25,6 +25,9 @@ class HiredisConan(ConanFile):
         "shared": True
     }
 
+    def configure(self):
+        del self.settings.compiler.libcxx
+
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
