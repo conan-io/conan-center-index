@@ -1,6 +1,7 @@
-import os
-
 from conans import AutoToolsBuildEnvironment, ConanFile, tools
+from conans.errors import ConanInvalidConfiguration
+
+import os
 
 
 class HiredisConan(ConanFile):
@@ -36,9 +37,8 @@ class HiredisConan(ConanFile):
         del self.settings.compiler.cppstd
         del self.settings.compiler.libcxx
 
-    def config_options(self):
         if self.settings.os == "Windows":
-            del self.options.fPIC
+            raise ConanInvalidConfiguration("hiredis %s is not supported on Windows." % self.version)
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
