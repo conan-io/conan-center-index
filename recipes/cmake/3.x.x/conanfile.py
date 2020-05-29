@@ -13,7 +13,7 @@ class CMakeConan(ConanFile):
     license = "BSD-3-Clause"
     exports_sources = ["CMakeLists.txt"]
     generators = "cmake"
-    settings = "os", "arch", "build_type"
+    settings = "os", "arch", "compiler", "build_type"
 
     _source_subfolder = "source_subfolder"
     _cmake = None
@@ -53,6 +53,10 @@ class CMakeConan(ConanFile):
         cmake = self._configure_cmake()
         cmake.install()
         tools.rmdir(os.path.join(self.package_folder, "doc"))
+
+    def package_id(self):
+        # CMake is a executable-only package, so the compiler version does not matter
+        del self.info.settings.compiler.version
 
     def package_info(self):
         minor = self._minor_version()
