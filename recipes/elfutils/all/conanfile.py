@@ -87,18 +87,15 @@ class ElfutilsConan(ConanFile):
         
     def package_info(self):
         # library components
-        self.cpp_info.components["elf"].name = "elf"
-        self.cpp_info.components["elf"].libs = ["elf"]
-        self.cpp_info.components["elf"].requires = ["zlib::zlib"]
+        self.cpp_info.components["libelf"].libs = ["elf"]
+        self.cpp_info.components["libelf"].requires = ["zlib::zlib"]
 
-        self.cpp_info.components["dw"].name = "dw"
-        self.cpp_info.components["dw"].libs = ["dw"]
-        self.cpp_info.components["dw"].requires = ["elf", "zlib::zlib", "bzip2::bzip2", "xz_utils::xz_utils"]
+        self.cpp_info.components["libdw"].libs = ["dw"]
+        self.cpp_info.components["libdw"].requires = ["libelf", "zlib::zlib", "bzip2::bzip2", "xz_utils::xz_utils"]
 
-        self.cpp_info.components["asm"].name = "asm"
-        self.cpp_info.components["asm"].includedirs = ["include/elfutils"]
-        self.cpp_info.components["asm"].libs = ["asm"]
-        self.cpp_info.components["asm"].requires = ["elf", "dw"]
+        self.cpp_info.components["libasm"].includedirs = ["include/elfutils"]
+        self.cpp_info.components["libasm"].libs = ["asm"]
+        self.cpp_info.components["libasm"].requires = ["libelf", "libdw"]
 
         # utilities
         bin_path = os.path.join(self.package_folder, "bin")
