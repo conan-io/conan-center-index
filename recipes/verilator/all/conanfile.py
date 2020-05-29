@@ -64,7 +64,7 @@ class VerilatorConan(ConanFile):
         self._autotools = AutoToolsBuildEnvironment(self, win_bash=tools.os_info.is_windows)
         self._autotools.libs = []
         self._autotools.library_paths = []
-        if self.settings.compiler.libcxx == "libc++":
+        if self.settings.get_safe("compiler.libcxx") == "libc++":
             self._autotools.libs.append("c++")
         if self.settings.compiler == "Visual Studio":
             self._autotools.cxx_flags.append("-EHsc")
