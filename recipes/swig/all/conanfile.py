@@ -11,7 +11,7 @@ class SwigConan(ConanFile):
     license = "GPL-3.0-or-later"
     topics = ("conan", "swig", "python", "java", "wrapper")
     exports_sources = "patches/**"
-    settings = "os", "arch", "compiler"
+    settings = "os", "arch", "compiler", "build_type"
 
     _autotools = None
 
