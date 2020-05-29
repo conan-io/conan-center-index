@@ -217,7 +217,7 @@ class CPythonConan(ConanFile):
 
     @property
     def _msvc_discarded_projects(self):
-        discarded = set()
+        discarded = {"python_uwp", "pythonw_uwp"}
         if not self.options.with_bz2:
             discarded.add("bz2")
         if not self.options.with_sqlite3:
