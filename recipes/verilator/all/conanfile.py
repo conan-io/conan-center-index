@@ -133,9 +133,6 @@ class VerilatorConan(ConanFile):
             os.rename(fn, os.path.join(self.package_folder, "bin", os.path.basename(fn)))
         tools.rmdir(os.path.join(self.package_folder, "bin", "share", "verilator", "bin"))
 
-    def package_id(self):
-        del self.info.settings.compiler
-
     def package_info(self):
         verilator_include_root = os.path.join(self.package_folder, "share", "verilator", "include")
 
