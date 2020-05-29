@@ -17,10 +17,8 @@ class TestPackageConan(ConanFile):
         bin_path = os.path.join("bin", "test_package")
         archive_path = "archive.a"
 
-        self.run("eu-ar r {0} {1}".format(archive_path, bin_path))
+        self.run("eu-ar r {0} {1}".format(archive_path, bin_path), run_environment=True)
         if not tools.cross_building(self.settings):            
-            elf_test = bin_path + " " + bin_path
-            self.run(elf_test, run_environment=True)
+            self.run("{} {}".format(bin_path, bin_path), run_environment=True)
 
-            arch_test = bin_path + " " + archive_path
-            self.run(arch_test, run_environment=True)
+            self.run("{} {}".format(bin_path, archive_path), run_environment=True)
