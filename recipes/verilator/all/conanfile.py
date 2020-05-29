@@ -1,10 +1,8 @@
 from conans import ConanFile, AutoToolsBuildEnvironment, tools
-from conans.errors import ConanInvalidConfiguration
 from contextlib import contextmanager
 import glob
 import os
 import shutil
-import textwrap
 
 
 class VerilatorConan(ConanFile):
@@ -66,6 +64,8 @@ class VerilatorConan(ConanFile):
         self._autotools = AutoToolsBuildEnvironment(self, win_bash=tools.os_info.is_windows)
         self._autotools.libs = []
         self._autotools.library_paths = []
+        if self.settings.compiler.libcxx == "libc++":
+            self._autotools.libs.append("c++")
         if self.settings.compiler == "Visual Studio":
             self._autotools.cxx_flags.append("-EHsc")
             self._autotools.defines.append("YY_NO_UNISTD_H")
