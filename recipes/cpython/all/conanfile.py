@@ -244,6 +244,7 @@ class CPythonConan(ConanFile):
         if tools.Version(self.version) >= "3.8":
             archs.update({
                 "armv7": "ARM",
+                "armv8_32": "ARM",
                 "armv8": "ARM64",
             })
         return archs
