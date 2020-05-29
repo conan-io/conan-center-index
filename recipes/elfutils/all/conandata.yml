@@ -4,5 +4,7 @@ sources:
     sha256: "b76d8c133f68dad46250f5c223482c8299d454a69430d9aa5c19123345a000ff"
 patches:
   "0.173":
-    base_path: "source_subfolder"
-    patch_file: "patches/elfutils-0.173-remove-Werror.patch"
+    - base_path: "source_subfolder"
+      patch_file: "patches/0001-add-STATIC-support-for-binaries.patch"
+    - base_path: "source_subfolder"
+      patch_file: "patches/0002-remove-Werror.patch"
