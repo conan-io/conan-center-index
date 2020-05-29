@@ -25,9 +25,9 @@ class OdbcConan(ConanFile):
             raise ConanInvalidConfiguration("Windows not supported yet. Please, open an issue if you need such support")
 
     def requirements(self):
-        if self.options.with_libiconv:
+        if self.options.with_libiconv and not tools.is_apple_os(self.settings.os):
             self.requires("libiconv/1.15")
-        
+
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
         extracted_dir = 'unixODBC-%s' % self.version
@@ -43,7 +43,10 @@ class OdbcConan(ConanFile):
                 '--enable-ltdl-install',
                 '--enable-iconv=%s' % libiconv_flag]
         if self.options.with_libiconv:
-            libiconv_prefix = self.deps_cpp_info["libiconv"].rootpath
+            if tools.is_apple_os(self.settings.os):
+                libiconv_prefix = "/usr"
+            else:
+                libiconv_prefix = self.deps_cpp_info["libiconv"].rootpath
             args.append('--with-libiconv-prefix=%s' % libiconv_prefix)
 
         env_build.configure(configure_dir=self._source_subfolder, args=args)
