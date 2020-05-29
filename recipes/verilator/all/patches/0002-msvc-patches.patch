@@ -125,8 +125,9 @@
  #include <algorithm>
  #include <cctype>
  #include <cerrno>
+-#include <tgmath.h>
++#include <cmath>
 +#include <sstream>
- #include <tgmath.h>
  #include <sys/stat.h>  // mkdir
  
 @@ -678,7 +679,7 @@
