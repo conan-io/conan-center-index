@@ -41,7 +41,7 @@ class VolkConan(ConanFile):
         del self.settings.compiler.libcxx
 
     def requirements(self):      
-        self.requires("vulkan-headers/1.2.135.0")
+        self.requires("vulkan-headers/" + self.version)
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
@@ -67,11 +67,6 @@ class VolkConan(ConanFile):
         tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
 
     def package_info(self):
-        self.cpp_info.components["volk_headers"].requires = ["vulkan-headers::vulkan-headers"]
+        self.cpp_info.libs = ["volk"]
         if self.settings.os == "Linux":
-            self.cpp_info.components["volk_headers"].system_libs = ["dl"]
-
-        self.cpp_info.components["libvolk"].libs = ["volk"]
-        self.cpp_info.components["libvolk"].requires = ["volk_headers"]
-        self.cpp_info.components["libvolk"].names["cmake_find_package"] = ["volk"]
-        self.cpp_info.components["libvolk"].names["cmake_find_package_multi"] = ["volk"]
+            self.cpp_info.system_libs = ["dl"]
