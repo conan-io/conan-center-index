@@ -1,6 +1,6 @@
 import os
 import shutil
-import re
+import glob
 
 from conans import ConanFile, tools, AutoToolsBuildEnvironment
 from conans.errors import ConanInvalidConfiguration
@@ -51,12 +51,8 @@ class FontconfigConan(ConanFile):
         return self._autotools
 
     def _patch_files(self):
-        def rename_if_exists(old, new):
-            if os.path.exists(old):
-                os.rename(old, new)
         #  - fontconfig requires libtool version number, change it for the corresponding freetype one
         tools.replace_in_file(os.path.join(self._source_subfolder, 'configure'), '21.0.15', '2.8.1')
-        rename_if_exists('freetype.pc', 'freetype2.pc')
 
     def build(self):
         # Patch files from dependencies
@@ -68,17 +64,20 @@ class FontconfigConan(ConanFile):
         self.copy("COPYING", dst="licenses", src=self._source_subfolder)
         autotools = self._configure_autotools()
         autotools.install()
-        la = os.path.join(self.package_folder, "lib", "libfontconfig.la")
-        if os.path.isfile(la):
-            os.unlink(la)
+        os.unlink(os.path.join(self.package_folder, "lib", "libfontconfig.la"))
         tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
-        tools.rmdir(os.path.join(self.package_folder, "etc"))
-        tools.rmdir(os.path.join(self.package_folder, "share"))
-        tools.rmdir(os.path.join(self.package_folder, "var"))
+        for f in glob.glob(os.path.join(self.package_folder, "etc", "fonts", "conf.d", "*.conf")):
+            os.remove(f)
+        shutil.move(os.path.join(self.package_folder, "etc"), os.path.join(self.package_folder, "bin", "etc"))
+        shutil.move(os.path.join(self.package_folder, "share"), os.path.join(self.package_folder, "bin", "share"))
+        shutil.move(os.path.join(self.package_folder, "var"), os.path.join(self.package_folder, "bin", "var"))
 
     def package_info(self):
-        self.cpp_info.libs = tools.collect_libs(self)
+        self.cpp_info.libs = ["fontconfig"]
         if self.settings.os == "Linux":
             self.cpp_info.system_libs.extend(["m", "pthread"])
         self.cpp_info.names["cmake_find_package"] = "Fontconfig"
         self.cpp_info.names["cmake_find_package_multi"] = "Fontconfig"
+
+        self.env_info.FONTCONFIG_FILE = os.path.join(self.package_folder, "bin", "etc", "fonts", "fonts.conf")
+        self.env_info.FONTCONFIG_PATH = os.path.join(self.package_folder, "bin", "etc", "fonts")

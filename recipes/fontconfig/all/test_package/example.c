@@ -17,7 +17,7 @@ int main() {
 			printf("%s\n",fontFile);
 		}
 	} else {
-        printf("Ops! I can't find any font!");
+        printf("Ops! I can't find any font!\n");
     }
 	FcPatternDestroy(pat);
     return EXIT_SUCCESS;
