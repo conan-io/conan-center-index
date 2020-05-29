@@ -1,6 +1,4 @@
 import os
-import shutil
-import glob
 
 from conans import ConanFile, tools, AutoToolsBuildEnvironment
 from conans.errors import ConanInvalidConfiguration
@@ -45,6 +43,10 @@ class FontconfigConan(ConanFile):
             args = ["--enable-static=%s" % ("no" if self.options.shared else "yes"),
                     "--enable-shared=%s" % ("yes" if self.options.shared else "no"),
                     "--disable-docs"]
+            args.append("--sysconfdir=%s" % os.path.join(self.package_folder, "bin", "etc"))
+            args.append("--datadir=%s" % os.path.join(self.package_folder, "bin", "share"))
+            args.append("--datarootdir=%s" % os.path.join(self.package_folder, "bin", "share"))
+            args.append("--localstatedir=%s" % os.path.join(self.package_folder, "bin", "var"))
             self._autotools = AutoToolsBuildEnvironment(self)
             self._autotools.configure(configure_dir=self._source_subfolder, args=args)
             tools.replace_in_file("Makefile", "po-conf test", "po-conf")
@@ -66,11 +68,6 @@ class FontconfigConan(ConanFile):
         autotools.install()
         os.unlink(os.path.join(self.package_folder, "lib", "libfontconfig.la"))
         tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
-        for f in glob.glob(os.path.join(self.package_folder, "etc", "fonts", "conf.d", "*.conf")):
-            os.remove(f)
-        shutil.move(os.path.join(self.package_folder, "etc"), os.path.join(self.package_folder, "bin", "etc"))
-        shutil.move(os.path.join(self.package_folder, "share"), os.path.join(self.package_folder, "bin", "share"))
-        shutil.move(os.path.join(self.package_folder, "var"), os.path.join(self.package_folder, "bin", "var"))
 
     def package_info(self):
         self.cpp_info.libs = ["fontconfig"]
