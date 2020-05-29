@@ -167,6 +167,9 @@ class FFMpegConan(ConanFile):
             self.requires.add("libwebp/1.0.0")
         if self.options.openssl:
             self.requires.add("OpenSSL/1.1.1b")
+        if self.settings.os == "Linux":
+            if self.options.vaapi:
+                self.requires.add("libva/1.5.1")
         if self.settings.os == "Windows":
             if self.options.qsv:
                 self.requires.add("intel_media_sdk/2018R2")
@@ -186,8 +189,6 @@ class FFMpegConan(ConanFile):
                     packages.append('libasound2-dev%s' % arch_suffix)
                 if self.options.pulse:
                     packages.append('libpulse-dev%s' % arch_suffix)
-                if self.options.vaapi:
-                    packages.append('libva-dev%s' % arch_suffix)
                 if self.options.vdpau:
                     packages.append('libvdpau-dev%s' % arch_suffix)
                 if self.options.xcb:
@@ -282,7 +283,7 @@ class FFMpegConan(ConanFile):
 
             if self.settings.os == "Linux":
                 # there is no option associated with alsa in ffmpeg 3.3.1
-                # args.append('--enable-alsa' if self.options.alsa else '--disable-alsa') 
+                # args.append('--enable-alsa' if self.options.alsa else '--disable-alsa')
                 args.append('--enable-libpulse' if self.options.pulse else '--disable-libpulse')
                 args.append('--enable-vaapi' if self.options.vaapi else '--disable-vaapi')
                 args.append('--enable-vdpau' if self.options.vdpau else '--disable-vdpau')
@@ -348,7 +349,7 @@ class FFMpegConan(ConanFile):
         libs = [
             'avdevice',
             'avfilter',
-            'avformat',            
+            'avformat',
             'swresample',
             'swscale',
             'avcodec',
@@ -382,21 +383,21 @@ class FFMpegConan(ConanFile):
                 self.cpp_info.exelinkflags.append("-framework %s" % framework)
             self.cpp_info.sharedlinkflags = self.cpp_info.exelinkflags
         elif self.settings.os == "Linux":
-            self.cpp_info.libs.extend(['dl', 'pthread'])
+            self.cpp_info.system_libs.extend(['dl', 'pthread'])
             if self.options.alsa:
-                self.cpp_info.libs.append('asound')
+                self.cpp_info.system_libs.append('asound')
             if self.options.pulse:
-                self.cpp_info.libs.append('pulse')
-            if self.options.vaapi:
-                self.cpp_info.libs.extend(['va', 'va-drm', 'va-x11'])
+                self.cpp_info.system_libs.append('pulse')
             if self.options.vdpau:
-                self.cpp_info.libs.extend(['vdpau', 'X11'])
+                self.cpp_info.system_libs.extend(['vdpau', 'X11'])
             if self.options.xcb:
-                self.cpp_info.libs.extend(['xcb', 'xcb-shm', 'xcb-shape', 'xcb-xfixes'])
+                # FIXME: should instead rely on the same xcb as libva from Conan
+                # self.cpp_info.system_libs.extend(['xcb', 'xcb-shm', 'xcb-shape', 'xcb-xfixes'])
+                raise NotImplementedError()
             if self.settings.os != "Windows" and self.options.fPIC:
                 # https://trac.ffmpeg.org/ticket/1713
                 # https://ffmpeg.org/platform.html#Advanced-linking-configuration
                 # https://ffmpeg.org/pipermail/libav-user/2014-December/007719.html
                 self.cpp_info.sharedlinkflags.append("-Wl,-Bsymbolic")
         elif self.settings.os == "Windows":
-            self.cpp_info.libs.extend(['ws2_32', 'secur32', 'shlwapi', 'strmiids', 'vfw32', 'bcrypt'])
+            self.cpp_info.system_libs.extend(['ws2_32', 'secur32', 'shlwapi', 'strmiids', 'vfw32', 'bcrypt'])

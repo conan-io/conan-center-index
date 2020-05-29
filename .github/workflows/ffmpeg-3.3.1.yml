@@ -32,7 +32,7 @@ jobs:
             docker_image: 'trassiross/conan-gcc8'
             build_types: 'Release'
             archs: 'x86_64'
-            conan-options: 'ffmpeg:pulse=False, ffmpeg:vdpau=False'
+            conan-options: 'ffmpeg:pulse=False, ffmpeg:vdpau=False, ffmpeg:xcb=False'
           - build: 'macos'
             os: 'macos-10.15'
             deployment-target: '10.14'
