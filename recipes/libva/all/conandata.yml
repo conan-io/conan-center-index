@@ -1,0 +1,4 @@
+sources:
+  "1.5.1":
+    url: "https://github.com/intel/libva/archive/libva-1.5.1.tar.gz"
+    sha256: "815efaefcc0838c859ae9437bf7352aa409205a1617a192f9ee2115d23cf055d"
