@@ -43,22 +43,23 @@ if(PYTHONLIBS_VERSION_STRING)
     endif()
 endif()
 
-if(CMAKE_VERSION VERSION_LESS "3.12" OR (MSVC AND CONAN_SETTINGS_BUILD_TYPE STREQUAL "Debug"))
-    add_library(spam MODULE "py${PY_VERSION_MAJOR}/test_module.c")
-    target_include_directories(spam
-        PRIVATE
-            ${PYTHON_INCLUDE_DIR}
-    )
-    set_property(TARGET spam PROPERTY PREFIX "")
-    if(MSVC)
-        if(CONAN_SETTINGS_BUILD_TYPE STREQUAL "Debug")
-            set(SUFFIX "_d.pyd")
-        else()
-            set(SUFFIX ".pyd")
-        endif()
-        set_property(TARGET spam PROPERTY SUFFIX "${SUFFIX}")
+add_library(spam MODULE "py${PY_VERSION_MAJOR}/test_module.c")
+target_include_directories(spam
+    PRIVATE
+        ${PYTHON_INCLUDE_DIR}
+)
+set_property(TARGET spam PROPERTY PREFIX "")
+if(MSVC)
+    if(CONAN_SETTINGS_BUILD_TYPE STREQUAL "Debug")
+        set(SUFFIX "_d.pyd")
+    else()
+        set(SUFFIX ".pyd")
     endif()
-else()
+    set_property(TARGET spam PROPERTY SUFFIX "${SUFFIX}")
+endif()
+
+if(NOT (CMAKE_VERSION VERSION_LESS "3.16"))
+    # Require CMake 3.16 because this version introduces Python${PY_VERSION_MAJOR}_FIND_ABI
     find_package(Python${PY_VERSION_MAJOR} REQUIRED COMPONENTS Interpreter Development)
     message("Python${PY_VERSION_MAJOR}_EXECUTABLE: ${Python${PY_VERSION_MAJOR}_EXECUTABLE}")
     message("Python${PY_VERSION_MAJOR}_INTERPRETER_ID: ${Python${PY_VERSION_MAJOR}_INTERPRETER_ID}")
@@ -71,9 +72,9 @@ else()
     endif()
 
     if(PY_VERSION_MAJOR STREQUAL "2")
-        python2_add_library(spam "py${PY_VERSION_MAJOR}/test_module.c")
+        python2_add_library(spam2 "py${PY_VERSION_MAJOR}/test_module.c")
     elseif(PY_VERSION_MAJOR STREQUAL "3")
-        python3_add_library(spam "py${PY_VERSION_MAJOR}/test_module.c")
+        python3_add_library(spam2 "py${PY_VERSION_MAJOR}/test_module.c")
     else()
         message(FATAL_ERROR "Unknown PY_VERSION_MAJOR")
     endif()
