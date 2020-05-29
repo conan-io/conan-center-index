@@ -1,7 +1,6 @@
-from conans import AutoToolsBuildEnvironment, ConanFile, tools
+import os
 
-from os import rename
-from os.path import join
+from conans import AutoToolsBuildEnvironment, ConanFile, tools
 
 
 class HiredisConan(ConanFile):
@@ -10,7 +9,7 @@ class HiredisConan(ConanFile):
     description = "Minimalistic C client for Redis >= 1.2"
     topics = "conan", "c", "redis"
 
-    license = "BSD 3-Clause \"New\" or \"Revised\" License"
+    license = "BSD-3-Clause"
     settings = "os", "arch", "compiler", "build_type"
 
     homepage = "https://github.com/redis/hiredis"
@@ -22,10 +21,19 @@ class HiredisConan(ConanFile):
     }
     default_options = {
         "fPIC": True,
-        "shared": True
+        "shared": False
     }
 
+    def _configure_autotools(self):
+        autoTools = AutoToolsBuildEnvironment(self, win_bash=tools.os_info.is_windows)
+        return autoTools
+
+    @property
+    def _source_subfolder(self):
+        return "source_subfolder"
+
     def configure(self):
+        del self.settings.compiler.cppstd
         del self.settings.compiler.libcxx
 
     def config_options(self):
@@ -35,28 +43,22 @@ class HiredisConan(ConanFile):
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
         extracted_folder = self.name + "-" + self.version
-        rename(extracted_folder, "src")
+        os.rename(extracted_folder, self._source_subfolder)
 
     def build(self):
-        # settings
-        isWindows = self.settings.os == "Windows"
-
         # update makefile
-        makefile = join(self.source_folder, "src", "Makefile")
+        makefile = os.path.join(self.source_folder, self._source_subfolder, "Makefile")
         tools.replace_in_file(makefile, "-fPIC ", "", strict=False)
 
-        with tools.chdir(join(self.source_folder, "src")):
-            autoTools = AutoToolsBuildEnvironment(self, win_bash=isWindows)
+        with tools.chdir(os.path.join(self.source_folder, self._source_subfolder)):
+            autoTools = self._configure_autotools()
             autoTools.make()
 
     def package(self):
-        # settings
-        isWindows = self.settings.os == "Windows"
-
-        with tools.chdir(join(self.source_folder, "src")):
-            autoTools = AutoToolsBuildEnvironment(self, win_bash=isWindows)
+        with tools.chdir(os.path.join(self.source_folder, self._source_subfolder)):
+            autoTools = self._configure_autotools()
             autoTools.install(vars={
-                "DESTDIR": join(self.build_folder),
+                "DESTDIR": os.path.join(self.build_folder),
                 "PREFIX": ""
             })
 
@@ -72,7 +74,7 @@ class HiredisConan(ConanFile):
             self.copy("*.a", dst="lib", keep_path=False)
 
         # licenses
-        self.copy("COPYING", dst="licenses", src="src")
+        self.copy("COPYING", dst="licenses", src=self._source_subfolder)
 
     def package_info(self):
         self.cpp_info.libs = tools.collect_libs(self)
