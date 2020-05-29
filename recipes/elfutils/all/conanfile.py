@@ -1,6 +1,5 @@
 from conans import ConanFile, AutoToolsBuildEnvironment, tools
 from conans.errors import ConanInvalidConfiguration
-from contextlib import contextmanager
 import os
 import glob
 
@@ -11,17 +10,17 @@ class ElfutilsConan(ConanFile):
     homepage = "https://sourceware.org/elfutils"
     url = "https://github.com/conan-io/conan-center-index"
     topics = ("conan", "elfutils", "libelf", "libdw", "libasm")
-    exports = ["patches/elfutils-*.patch"]
+    exports = "patches/**"
     license = ["GPL-1.0-or-later", "LGPL-3.0-or-later", "GPL-3.0-or-later"]
     
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
-        "fPIC": [True, False]
+        "fPIC": [True, False],
     }
     default_options = {
-        "shared": True,
-        "fPIC": True
+        "shared": False,
+        "fPIC": True,
     }
     requires = (
         "bzip2/1.0.6",
@@ -46,6 +45,7 @@ class ElfutilsConan(ConanFile):
             self.output.warn("Compiler %s is not gcc." % self.settings.compiler)
 
     def build_requirements(self):
+        self.build_requires("automake/1.16.2")
         if tools.os_info.is_windows and not tools.get_env("CONAN_BASH_PATH") and \
                 tools.os_info.detect_windows_subsystem() != "msys2":
             self.build_requires("msys2/20190524")
@@ -57,23 +57,36 @@ class ElfutilsConan(ConanFile):
 
     def _configure_autotools(self):
         if not self._autotools:
-            args = ['--enable-deterministic-archives', '--enable-silent-rules', '--with-zlib', '--with-bzlib', '--with-lzma']
+            args = [
+                "--enable-deterministic-archives",
+                "--enable-silent-rules",
+                "--with-zlib",
+                "--with-bzlib",
+                "--with-lzma",
+                'BUILD_STATIC={}'.format("1" if self.options.shared else "0"),
+            ]
             self._autotools = AutoToolsBuildEnvironment(self, win_bash=tools.os_info.is_windows)
             self._autotools.configure(configure_dir=self._source_subfolder, args=args)
         return self._autotools
 
-    def build_id(self):
-        self.info_build.options.shared = "Any"
-    
+    @property
+    def _make_args(self):
+        return [
+            "BUILD_STATIC={}".format("1" if self.options.shared else "0"),
+        ]
+
     def build(self):
-        tools.patch(**self.conan_data["patches"][self.version])
+        for patch in self.conan_data["patches"][self.version]:
+            tools.patch(**patch)
+        with tools.chdir(self._source_subfolder):
+            self.run("autoreconf -fiv")
         autotools = self._configure_autotools()
-        autotools.make()
+        autotools.make(args=self._make_args)
     
     def package(self):
         self.copy(pattern="COPYING*", dst="licenses", src=self._source_subfolder)
         autotools = self._configure_autotools()
-        autotools.install()
+        autotools.install(args=self._make_args)
         tools.rmdir(os.path.join(self.package_folder, "share"))
         tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
         if self.options.shared:
