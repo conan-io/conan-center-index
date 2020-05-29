@@ -15,7 +15,7 @@ class ZlibConan(ConanFile):
     settings = "os", "arch", "compiler", "build_type"
     options = {"shared": [True, False], "fPIC": [True, False], "minizip": [True, False]}
     default_options = {"shared": False, "fPIC": True, "minizip": False}
-    exports_sources = ["CMakeLists.txt", "CMakeLists_minizip.txt", "minizip.patch", "patches/**"]
+    exports_sources = ["CMakeLists.txt", "CMakeLists_minizip.txt", "patches/**"]
     generators = "cmake"
     _source_subfolder = "source_subfolder"
 
@@ -35,7 +35,6 @@ class ZlibConan(ConanFile):
             configure_file = os.path.join(self._source_subfolder, "configure")
             st = os.stat(configure_file)
             os.chmod(configure_file, st.st_mode | stat.S_IEXEC)
-        tools.patch(patch_file="minizip.patch", base_path=self._source_subfolder)
 
     def build(self):
         self._build_zlib()
@@ -69,7 +68,6 @@ class ZlibConan(ConanFile):
         if "clang" in str(self.settings.compiler) and tools.get_env("CC") is None and tools.get_env("CXX") is None:
             env = {"CC": "clang", "CXX": "clang++"}
         with tools.environment_append(env):
-            #env_build.configure("../", build=False, host=False, target=False)
             env_build.configure("../")
             env_build.make(target=make_target)
 
