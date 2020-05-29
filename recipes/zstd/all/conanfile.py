@@ -9,7 +9,7 @@ class ZstdConan(ConanFile):
     description = "Zstandard - Fast real-time compression algorithm"
     topics = ("conan", "zstd", "compression", "algorithm", "decoder")
     license = "BSD-3-Clause"
-    exports_sources = ['CMakeLists.txt']
+    exports_sources = ['CMakeLists.txt', "patches/**"]
     generators = 'cmake'
     settings = "os", "arch", "compiler", "build_type"
     options = {"shared": [True, False], "fPIC": [True, False]}
@@ -40,7 +40,12 @@ class ZstdConan(ConanFile):
         cmake.configure()
         return cmake
 
+    def _patch_sources(self):
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            tools.patch(**patch)
+
     def build(self):
+        self._patch_sources()
         cmake = self._configure_cmake()
         cmake.build()
 
@@ -48,6 +53,7 @@ class ZstdConan(ConanFile):
         self.copy(pattern="LICENSE", dst="licenses", src=self._source_subfolder)
         cmake = self._configure_cmake()
         cmake.install()
+        tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
         tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
 
     def package_info(self):
