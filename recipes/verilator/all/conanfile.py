@@ -133,6 +133,10 @@ class VerilatorConan(ConanFile):
             os.rename(fn, os.path.join(self.package_folder, "bin", os.path.basename(fn)))
         tools.rmdir(os.path.join(self.package_folder, "bin", "share", "verilator", "bin"))
 
+    def package_id(self):
+        # Verilator is a executable-only package, so the compiler version does not matter
+        del self.info.settings.compiler.version
+
     def package_info(self):
         verilator_include_root = os.path.join(self.package_folder, "share", "verilator", "include")
 
