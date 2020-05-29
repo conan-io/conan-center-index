@@ -1,4 +1,5 @@
 from conans import ConanFile, AutoToolsBuildEnvironment, tools
+from contextlib import contextmanager
 import os
 import glob
 
@@ -38,11 +39,33 @@ class ElfutilsConan(ConanFile):
         del self.settings.compiler.libcxx
         del self.settings.compiler.cppstd
 
+    def build_requirements(self):
+        if tools.os_info.is_windows and not tools.get_env("CONAN_BASH_PATH") and \
+                tools.os_info.detect_windows_subsystem() != "msys2":
+            self.build_requires("msys2/20190524")
+        if self.settings.compiler == "Visual Studio":
+            self.build_requires("automake/1.16.1")
+    
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
         extracted_dir = "elfutils" + "-" + self.version
         os.rename(extracted_dir, self._source_subfolder)
 
+    @contextmanager
+    def _build_context(self):
+        if self.settings.compiler == "Visual Studio":
+            with tools.vcvars(self.settings):
+                env = {
+                    "CC": "{} cl -nolink".format(tools.unix_path(self.deps_user_info["automake"].compile)),
+                    "CXX": "{} cl -nolink".format(tools.unix_path(self.deps_user_info["automake"].compile)),
+                    "AR": "{} lib".format(tools.unix_path(self.deps_user_info["automake"].ar_lib)),
+                    "LD": "{} cl -nolink".format(tools.unix_path(self.deps_user_info["automake"].compile)),
+                }
+                with tools.environment_append(env):
+                    yield
+        else:
+            yield
+    
     def _configure_autotools(self):
         if not self._autotools:
             args = ['--enable-deterministic-archives', '--enable-silent-rules', '--with-zlib', '--with-bzlib', '--with-lzma']
@@ -55,8 +78,12 @@ class ElfutilsConan(ConanFile):
     
     def build(self):
         tools.patch(**self.conan_data["patches"][self.version])
-        autotools = self._configure_autotools()
-        autotools.make()
+        if self.settings.compiler == "Visual Studio":
+            with tools.chdir(self._source_subfolder):
+                self.run("{} -fiv".format(tools.get_env("AUTORECONF")), win_bash=tools.os_info.is_windows)
+        with self._build_context():
+            autotools = self._configure_autotools()
+            autotools.make()
     
     def package(self):
         self.copy(pattern="COPYING*", dst="licenses", src=self._source_subfolder)
