@@ -19,7 +19,8 @@ class LibtiffConan(ConanFile):
                "zlib": [True, False],
                "zstd": [True, False],
                "jbig": [True, False],
-               "webp": [True, False]}
+               "webp": [True, False],
+               "cxx":  [True, False]}
     default_options = {"shared": False,
                        "fPIC": True,
                        "lzma": True,
@@ -27,7 +28,8 @@ class LibtiffConan(ConanFile):
                        "zlib": True,
                        "zstd": True,
                        "jbig": True,
-                       "webp": True}
+                       "webp": True,
+                       "cxx":  True}
     _cmake = None
 
     @property
@@ -43,8 +45,9 @@ class LibtiffConan(ConanFile):
             del self.options.fPIC
 
     def configure(self):
-        del self.settings.compiler.libcxx
-        del self.settings.compiler.cppstd
+        if not self.options.cxx:
+            del self.settings.compiler.libcxx
+            del self.settings.compiler.cppstd
         if tools.Version(self.version) < "4.1.0":
             del self.options.webp
             del self.options.zstd
@@ -98,6 +101,7 @@ class LibtiffConan(ConanFile):
             self._cmake.definitions["zlib"] = self.options.zlib
             self._cmake.definitions["zstd"] = self.options.get_safe("zstd", False)
             self._cmake.definitions["webp"] = self.options.get_safe("webp", False)
+            self._cmake.definitions["cxx"] = self.options.cxx
             self._cmake.configure(build_folder=self._build_subfolder)
         return self._cmake
 
@@ -113,7 +117,9 @@ class LibtiffConan(ConanFile):
         tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
 
     def package_info(self):
-        self.cpp_info.libs = ["tiffxx", "tiff"]
+        if self.options.cxx:
+            self.cpp_info.libs.append("tiffxx")
+        self.cpp_info.libs.append("tiff")
         if self.settings.os == "Windows" and self.settings.build_type == "Debug" and self.settings.compiler == "Visual Studio":
             self.cpp_info.libs = [lib + "d" for lib in self.cpp_info.libs]
         if self.options.shared and self.settings.os == "Windows" and self.settings.compiler != "Visual Studio":
