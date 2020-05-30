@@ -115,8 +115,8 @@ class CPythonConan(ConanFile):
                 #        see https://github.com/conan-io/conan-center-index/pull/1510#issuecomment-634832899
                 # raise ConanInvalidConfiguration("This recipe (currently) does not support building python3 for apple products.")
                 pass
-            if self._version_major_minor == "3.7" and not self.options.shared:
-                raise ConanInvalidConfiguration("python 3.7 on apple does not support static libraries (cannot create python modules)")
+            if not self.options.shared:
+                raise ConanInvalidConfiguration("python on apple does not support static libraries (cannot create python modules)")
         else:
             raise ConanInvalidConfiguration("ONLY BUILD APPLE FOR NOW!")
         if self.settings.compiler == "Visual Studio":
