@@ -11,6 +11,6 @@ int main() {
   if (!status.ok()) {
     std::cerr << "DB error: " << status.ToString() << std::endl;
   }
-
+  delete db;
   return EXIT_SUCCESS;
 }

@@ -11,7 +11,7 @@ int main() {
   if (!db) {
     printf("DB error: %s\n", err);
   } else {
-    rocksdb_free(db);
+    rocksdb_close(db);
   }
 
   if(err) {
