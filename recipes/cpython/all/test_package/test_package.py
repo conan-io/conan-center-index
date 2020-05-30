@@ -70,12 +70,18 @@ def test_gdbm():
 
 @add_test
 def test_spam():
+    import platform
     import spam
 
     if "This is an example spam doc." not in spam.__doc__:
         raise Exception("spam.__doc__ does not contain the expected text")
 
-    spam.system("dir")
+    cmd = {
+        "Windows": "dir",
+    }.get(platform.system(), "ls")
+    print("About to run spam.system(\"{}\")".format(cmd))
+
+    spam.system(cmd)
 
 
 @add_test
