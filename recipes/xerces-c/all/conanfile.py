@@ -20,7 +20,7 @@ class XercesCConan(ConanFile):
     _build_subfolder = "build_subfolder"
 
     def config_options(self):
-        if self.settings.os == 'Windows':
+        if self.settings.os == "Windows":
             del self.options.fPIC
 
     def source(self):
@@ -43,13 +43,13 @@ class XercesCConan(ConanFile):
                                               "Macos": "posix",
                                               "Linux": "posix"}.get(str(self.settings.os))
         # avoid picking up system dependency
-        cmake.definitions['CMAKE_DISABLE_FIND_PACKAGE_CURL'] = True
-        cmake.definitions['CMAKE_DISABLE_FIND_PACKAGE_ICU'] = True
+        cmake.definitions["CMAKE_DISABLE_FIND_PACKAGE_CURL"] = True
+        cmake.definitions["CMAKE_DISABLE_FIND_PACKAGE_ICU"] = True
         cmake.configure(build_folder=self._build_subfolder)
         return cmake
 
     def configure(self):
-        if self.settings.os not in ('Windows', 'Macos', 'Linux'):
+        if self.settings.os not in ("Windows", "Macos", "Linux"):
             raise ConanInvalidConfiguration("OS is not supported")
 
     def build(self):
@@ -61,15 +61,15 @@ class XercesCConan(ConanFile):
         cmake = self._configure_cmake()
         cmake.install()
         # remove unneeded directories
-        tools.rmdir(os.path.join(self.package_folder, 'share'))
-        tools.rmdir(os.path.join(self.package_folder, 'lib', 'pkgconfig'))
-        tools.rmdir(os.path.join(self.package_folder, 'lib', 'cmake'))
-        tools.rmdir(os.path.join(self.package_folder, 'cmake'))
+        tools.rmdir(os.path.join(self.package_folder, "share"))
+        tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
+        tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
+        tools.rmdir(os.path.join(self.package_folder, "cmake"))
 
     def package_info(self):
         self.cpp_info.libs = tools.collect_libs(self)
         if self.settings.os == "Macos":
-            self.cpp_info.frameworks = ['CoreFoundation', 'CoreServices']
+            self.cpp_info.frameworks = ["CoreFoundation", "CoreServices"]
         elif self.settings.os == "Linux":
             self.cpp_info.libs.append("pthread")
         self.cpp_info.names["cmake_find_package"] = "XercesC"
