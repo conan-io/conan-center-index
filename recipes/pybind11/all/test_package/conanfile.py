@@ -13,6 +13,4 @@ class TestPackageConan(ConanFile):
         cmake.build()
 
     def test(self):
-        self.run("{} {} {}".format(sys.executable,
-                                   os.path.join(self.source_folder, "test.py"),
-                                   os.path.join(self.build_folder, "lib")), run_environment=True)
+        CMake(self).test()
