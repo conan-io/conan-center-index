@@ -107,18 +107,12 @@ class CPythonConan(ConanFile):
         if self.options.shared:
             del self.options.fPIC
         if tools.is_apple_os(self.settings.os):
+            if not self.options.shared:
+                # FIXME: find out why cpython on apple does not allow to use modules linked against a static python
+                raise ConanInvalidConfiguration("python on apple does not support static libraries (cannot create python modules)")
             if self._is_py2:
                 # FIXME: python2 does not build on Macos due to a missing uuid_string_t type
                 raise ConanInvalidConfiguration("This recipe (currently) does not support building python2 for apple products.")
-            else:
-                # FIXME: python3 test_package does not work. It does not find the python libraries.
-                #        see https://github.com/conan-io/conan-center-index/pull/1510#issuecomment-634832899
-                # raise ConanInvalidConfiguration("This recipe (currently) does not support building python3 for apple products.")
-                pass
-            if not self.options.shared:
-                raise ConanInvalidConfiguration("python on apple does not support static libraries (cannot create python modules)")
-        else:
-            raise ConanInvalidConfiguration("ONLY BUILD APPLE FOR NOW!")
         if self.settings.compiler == "Visual Studio":
             if not self.options.shared:
                 raise ConanInvalidConfiguration("MSVC does not support a static build")
