@@ -67,15 +67,7 @@ class XercesCConan(ConanFile):
         tools.rmdir(os.path.join(self.package_folder, 'cmake'))
 
     def package_info(self):
-        version_tokens = self.version.split(".")
-        if self.settings.os == "Windows":
-            lib = "xerces-c_%s" % version_tokens[0]
-            if self.settings.build_type == "Debug":
-                lib += "d"
-            self.cpp_info.libs = [lib]
-        else:
-            self.cpp_info.libs = ["xerces-c" if self.options.shared else
-                                  ("xerces-c-%s.%s" % (version_tokens[0], version_tokens[1]))]
+        self.cpp_info.libs = tools.collect_libs(self)
         if self.settings.os == "Macos":
             self.cpp_info.frameworks = ['CoreFoundation', 'CoreServices']
         elif self.settings.os == "Linux":
