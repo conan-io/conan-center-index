@@ -36,7 +36,7 @@ class CMakeConan(ConanFile):
             if self.settings.os == "Linux":
                 self._cmake.definitions["OPENSSL_USE_STATIC_LIBS"] = True
                 self._cmake.definitions["CMAKE_EXE_LINKER_FLAGS"] = "-lz"
-            self._cmake.configure(source_dir=self._source_subfolder)
+            self._cmake.configure()
         return self._cmake
 
     def build(self):
