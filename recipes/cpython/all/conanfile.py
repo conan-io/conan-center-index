@@ -63,12 +63,16 @@ class CPythonConan(ConanFile):
         return "source_subfolder"
 
     @property
+    def _version_tuple(self):
+        return tuple(self.version.split("."))
+
+    @property
     def _version_major_minor(self):
         if self.settings.compiler == "Visual Studio":
             joiner = ""
         else:
             joiner = "."
-        return joiner.join(self.version.split(".")[:2])
+        return joiner.join(self._version_tuple[:2])
 
     @property
     def _is_py3(self):
@@ -111,6 +115,8 @@ class CPythonConan(ConanFile):
                 #        see https://github.com/conan-io/conan-center-index/pull/1510#issuecomment-634832899
                 # raise ConanInvalidConfiguration("This recipe (currently) does not support building python3 for apple products.")
                 pass
+            if self._version_major_minor == "3.7" and not self.options.shared:
+                raise ConanInvalidConfiguration("python 3.7 on apple does not support static libraries (cannot create python modules)")
         else:
             raise ConanInvalidConfiguration("ONLY BUILD APPLE FOR NOW!")
         if self.settings.compiler == "Visual Studio":
