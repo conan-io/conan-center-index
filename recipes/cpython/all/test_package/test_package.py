@@ -71,6 +71,9 @@ def test_gdbm():
 @add_test
 def test_spam():
     import platform
+
+    print("About to import spam")
+    sys.stdout.flush()
     import spam
 
     if "This is an example spam doc." not in spam.__doc__:
@@ -80,6 +83,7 @@ def test_spam():
         "Windows": "dir",
     }.get(platform.system(), "ls")
     print("About to run spam.system(\"{}\")".format(cmd))
+    sys.stdout.flush()
 
     spam.system(cmd)
 
