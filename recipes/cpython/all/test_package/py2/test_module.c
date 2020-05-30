@@ -1,5 +1,7 @@
 #include <Python.h>
 
+#include <stdlib.h>
+
 static PyObject *SpamError;
 
 static PyObject *
