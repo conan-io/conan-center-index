@@ -15,3 +15,8 @@ conan_basic_setup()
 pybind11_add_module(test_package MODULE
     test_package.cpp
 )
+
+enable_testing()
+
+add_test(run_example
+  ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/test.py ${CMAKE_CURRENT_BINARY_DIR}/lib)
