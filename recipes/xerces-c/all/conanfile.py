@@ -16,12 +16,23 @@ class XercesCConan(ConanFile):
     options = {"shared": [True, False], "fPIC": [True, False]}
     default_options = {"shared": False, "fPIC": True}
 
-    _source_subfolder = "source_subfolder"
-    _build_subfolder = "build_subfolder"
+    _cmake = None
+
+    @property
+    def _source_subfolder(self):
+        return "source_subfolder"
+
+    @property
+    def _build_subfolder(self):
+        return "build_subfolder"
 
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
+
+    def configure(self):
+        if self.settings.os not in ("Windows", "Macos", "Linux"):
+            raise ConanInvalidConfiguration("OS is not supported")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
@@ -29,28 +40,26 @@ class XercesCConan(ConanFile):
         os.rename(extracted_dir, self._source_subfolder)
 
     def _configure_cmake(self):
-        cmake = CMake(self)
+        if self._cmake:
+            return self._cmake
+        self._cmake = CMake(self)
         # https://xerces.apache.org/xerces-c/build-3.html
-        cmake.definitions["network-accessor"] = {"Windows": "winsock",
-                                                 "Macos": "cfurl",
-                                                 "Linux": "socket"}.get(str(self.settings.os))
-        cmake.definitions["transcoder"] = {"Windows": "windows",
-                                           "Macos": "macosunicodeconverter",
-                                           "Linux": "gnuiconv"}.get(str(self.settings.os))
-        cmake.definitions["message-loader"] = "inmemory"
-        cmake.definitions["xmlch-type"] = "uint16_t"
-        cmake.definitions["mutex-manager"] = {"Windows": "windows",
-                                              "Macos": "posix",
-                                              "Linux": "posix"}.get(str(self.settings.os))
+        self._cmake.definitions["network-accessor"] = {"Windows": "winsock",
+                                                       "Macos": "cfurl",
+                                                       "Linux": "socket"}.get(str(self.settings.os))
+        self._cmake.definitions["transcoder"] = {"Windows": "windows",
+                                                 "Macos": "macosunicodeconverter",
+                                                 "Linux": "gnuiconv"}.get(str(self.settings.os))
+        self._cmake.definitions["message-loader"] = "inmemory"
+        self._cmake.definitions["xmlch-type"] = "uint16_t"
+        self._cmake.definitions["mutex-manager"] = {"Windows": "windows",
+                                                    "Macos": "posix",
+                                                    "Linux": "posix"}.get(str(self.settings.os))
         # avoid picking up system dependency
-        cmake.definitions["CMAKE_DISABLE_FIND_PACKAGE_CURL"] = True
-        cmake.definitions["CMAKE_DISABLE_FIND_PACKAGE_ICU"] = True
-        cmake.configure(build_folder=self._build_subfolder)
-        return cmake
-
-    def configure(self):
-        if self.settings.os not in ("Windows", "Macos", "Linux"):
-            raise ConanInvalidConfiguration("OS is not supported")
+        self._cmake.definitions["CMAKE_DISABLE_FIND_PACKAGE_CURL"] = True
+        self._cmake.definitions["CMAKE_DISABLE_FIND_PACKAGE_ICU"] = True
+        self._cmake.configure(build_folder=self._build_subfolder)
+        return self._cmake
 
     def build(self):
         cmake = self._configure_cmake()
