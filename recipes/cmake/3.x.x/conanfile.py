@@ -14,7 +14,12 @@ class CMakeConan(ConanFile):
     generators = "cmake"
     settings = "os", "arch", "compiler", "build_type"
 
-    requires = "openssl/1.1.1g"
+    options = {
+        "with_openssl": [True, False, "auto"],
+    }
+    default_options = {
+        "with_openssl": "auto",
+    }
 
     _source_subfolder = "source_subfolder"
     _cmake = None
@@ -22,9 +27,19 @@ class CMakeConan(ConanFile):
     def _minor_version(self):
         return ".".join(str(self.version).split(".")[:2])
 
+    @property
+    def _with_openssl(self):
+        if self.options.with_openssl == "auto":
+            return self.settings.os != "Windows"
+        return self.options.with_openssl
+
     def configure(self):
         if self.settings.os == "Macos" and self.settings.arch == "x86":
             raise ConanInvalidConfiguration("CMake does not support x86 for macOS")
+
+    def requirements(self):
+        if self._with_openssl:
+            self.requires("openssl/1.1.1g")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
@@ -36,7 +51,9 @@ class CMakeConan(ConanFile):
             self._cmake = CMake(self)
             self._cmake.definitions["CMAKE_BOOTSTRAP"] = False
             if self.settings.os == "Linux":
-                self._cmake.definitions["OPENSSL_USE_STATIC_LIBS"] = not self.options["openssl"].shared
+                self._cmake.definitions["CMAKE_USE_OPENSSL"] = self._with_openssl
+                if self._with_openssl:
+                    self._cmake.definitions["OPENSSL_USE_STATIC_LIBS"] = not self.options["openssl"].shared
                 self._cmake.definitions["CMAKE_EXE_LINKER_FLAGS"] = "-lz"
             self._cmake.configure()
         return self._cmake
@@ -56,6 +73,8 @@ class CMakeConan(ConanFile):
         tools.rmdir(os.path.join(self.package_folder, "doc"))
 
     def package_id(self):
+        self.info.options.with_openssl = self._with_openssl
+
         # CMake is a executable-only package, so the compiler version does not matter
         del self.info.settings.compiler.version
 
