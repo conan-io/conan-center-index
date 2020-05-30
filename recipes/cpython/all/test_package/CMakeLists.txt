@@ -20,10 +20,18 @@ if(ROOT_SUBPOS EQUAL -1)
     message(FATAL_ERROR "found wrong python interpreter: ${PYTHON_EXECUTABLE}")
 endif()
 
+message(STATUS "FindPythonInterp:")
 message(STATUS "PYTHON_VERSION_STRING: ${PYTHON_VERSION_STRING}")
-message(STATUS "PYTHONLIBS_VERSION_STRING: ${PYTHONLIBS_VERSION_STRING}")
+message(STATUS "PYTHON_VERSION_MAJOR: ${PYTHON_VERSION_MAJOR}")
+message(STATUS "PYTHON_VERSION_MINOR: ${PYTHON_VERSION_MINOR}")
+message(STATUS "PYTHON_VERSION_PATCH: ${PYTHON_VERSION_PATCH}")
+message(STATUS "=============================================")
+message(STATUS "FindPythonLibs:")
 message(STATUS "PYTHON_LIBRARIES: ${PYTHON_LIBRARIES}")
-message(STATUS "PYTHON_INCLUDE_PATH: ${PYTHON_INCLUDE_PATH}")
+message(STATUS "PYTHON_INCLUDE_PATH: ${PYTHON_INCLUDE_PATH} (deprecated)")
+message(STATUS "PYTHON_INCLUDE_DIRS: ${PYTHON_INCLUDE_DIRS}")
+message(STATUS "PYTHON_DEBUG_LIBRARIES: ${PYTHON_DEBUG_LIBRARIES} (deprecated)")
+message(STATUS "PYTHONLIBS_VERSION_STRING: ${PYTHONLIBS_VERSION_STRING}")
 
 if(NOT PYTHON_VERSION_STRING AND NOT PYTHONLIBS_VERSION_STRING)
     message(FATAL_ERROR "Version of python interpreter and libraries not found")
@@ -46,7 +54,10 @@ endif()
 add_library(spam MODULE "py${PY_VERSION_MAJOR}/test_module.c")
 target_include_directories(spam
     PRIVATE
-        ${PYTHON_INCLUDE_DIR}
+        ${PYTHON_INCLUDE_DIRS}
+)
+target_link_libraries(spam PRIVATE
+    ${PYTHON_LIBRARIES}
 )
 set_property(TARGET spam PROPERTY PREFIX "")
 if(MSVC)
