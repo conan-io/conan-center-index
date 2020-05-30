@@ -10,7 +10,6 @@ class CMakeConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/Kitware/CMake"
     license = "BSD-3-Clause"
-    exports_sources = ["CMakeLists.txt"]
     generators = "cmake"
     settings = "os", "arch", "compiler", "build_type"
 
@@ -55,10 +54,14 @@ class CMakeConan(ConanFile):
                 if self._with_openssl:
                     self._cmake.definitions["OPENSSL_USE_STATIC_LIBS"] = not self.options["openssl"].shared
                 self._cmake.definitions["CMAKE_EXE_LINKER_FLAGS"] = "-lz"
-            self._cmake.configure()
+            self._cmake.configure(source_folder=self._source_subfolder)
         return self._cmake
 
     def build(self):
+        tools.replace_in_file(os.path.join(self._source_subfolder, "CMakeLists.txt"),
+                              "project(CMake)",
+                              "project(CMake)\ninclude(\"{}/conanbuildinfo.cmake\")\nconan_basic_setup()".format(
+                                  self.build_folder.replace("\\", "/")))
         if self.settings.os == "Linux":
             tools.replace_in_file(os.path.join(self._source_subfolder, "Utilities", "cmcurl", "CMakeLists.txt"),
                                   "list(APPEND CURL_LIBS ${OPENSSL_LIBRARIES})",
