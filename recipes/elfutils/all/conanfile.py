@@ -99,6 +99,8 @@ class ElfutilsConan(ConanFile):
                 os.remove(f)
         
     def package_info(self):
+        self.env_info.CONAN_ELFUTILS_MODULES = os.path.join(self.package_folder, "lib", "elfutils")
+
         # library components
         self.cpp_info.components["libelf"].libs = ["elf"]
         self.cpp_info.components["libelf"].requires = ["zlib::zlib"]

@@ -1,0 +1,44 @@
+--- libebl/eblopenbackend.c
++++ libebl/eblopenbackend.c
+@@ -321,20 +321,34 @@
+ 
+ 	/* Give it a try.  At least the machine type matches.  First
+            try to load the module.  */
+-	char dsoname[100];
+-	strcpy (stpcpy (stpcpy (dsoname, ORIGINDIR "libebl_"),
+-			machines[cnt].dsoname),
+-		".so");
++	char dsoname[256];
++	void *h = NULL;
++	
++	const char *elfutils_modules_env = getenv("CONAN_ELFUTILS_MODULES");
++	if (elfutils_modules_env != NULL)
++	{
++	  strcpy (stpcpy (stpcpy (stpcpy (stpcpy (dsoname, elfutils_modules_env), "/"),
++	       "libebl_"),
++	     machines[cnt].dsoname),
++	   ".so");
++	  h = dlopen (dsoname, RTLD_LAZY);
++	}
++	if (h == NULL)
++	{
++	  strcpy (stpcpy (stpcpy (dsoname, ORIGINDIR "libebl_"),
++	     machines[cnt].dsoname),
++	   ".so");
+ 
+-	void *h = dlopen (dsoname, RTLD_LAZY);
+-	if (h == NULL)
++	  h = dlopen (dsoname, RTLD_LAZY);
++  
++	  if (h == NULL)
+ 	  {
+ 	    strcpy (stpcpy (stpcpy (dsoname, "libebl_"),
+ 			    machines[cnt].dsoname),
+ 		    ".so");
+ 	    h = dlopen (dsoname, RTLD_LAZY);
+ 	  }
+-
++  }
+ 	  /* Try without an explicit path.  */
+ 	if (h != NULL)
+ 	  {
