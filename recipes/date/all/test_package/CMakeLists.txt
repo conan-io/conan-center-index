@@ -8,9 +8,5 @@ add_executable(${PROJECT_NAME} test_package.cpp)
 target_link_libraries(${PROJECT_NAME} ${CONAN_LIBS})
 set_property(TARGET ${PROJECT_NAME} PROPERTY CXX_STANDARD 11)
 if(DATE_HEADER_ONLY)
-  set_target_properties(
-	  ${PROJECT_NAME}
-	  PROPERTIES
-	  COMPILE_DEFINITIONS "DATE_HEADER_ONLY"
-	  )
+  target_compile_definitions(${PROJECT_NAME} PRIVATE DATE_HEADER_ONLY)
 endif()
