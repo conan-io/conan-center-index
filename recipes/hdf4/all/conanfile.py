@@ -107,6 +107,7 @@ class Hdf4Conan(ConanFile):
         os.remove(os.path.join(self.package_folder, "lib", "libhdf4.settings"))
 
     def package_info(self):
+        self.cpp_info.names["pkg_config"] = "hdf"
         self.cpp_info.libs = self._get_ordered_libs()
         self.cpp_info.includedirs.append(os.path.join(self.package_folder, "include", "hdf4"))
         if self.options.shared:
