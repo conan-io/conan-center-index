@@ -107,9 +107,9 @@ class CPythonConan(ConanFile):
         if self.options.shared:
             del self.options.fPIC
         if tools.is_apple_os(self.settings.os):
-            if not self.options.shared:
-                # FIXME: find out why cpython on apple does not allow to use modules linked against a static python
-                raise ConanInvalidConfiguration("python on apple does not support static libraries (cannot create python modules)")
+            # if not self.options.shared:
+            #     # FIXME: find out why cpython on apple does not allow to use modules linked against a static python
+            #     raise ConanInvalidConfiguration("python on apple does not support static libraries (cannot create python modules)")
             if self._is_py2:
                 # FIXME: python2 does not build on Macos due to a missing uuid_string_t type
                 raise ConanInvalidConfiguration("This recipe (currently) does not support building python2 for apple products.")
