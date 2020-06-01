@@ -53,15 +53,15 @@ class Hdf4Conan(ConanFile):
             raise ConanInvalidConfiguration("encoding must be enabled in the dependency (szip:enable_encoding=True)")
 
     def requirements(self):
-        self.requires.add("zlib/1.2.11")
+        self.requires("zlib/1.2.11")
         if self.options.jpegturbo:
-            self.requires.add("libjpeg-turbo/2.0.4")
+            self.requires("libjpeg-turbo/2.0.4")
         else:
-            self.requires.add("libjpeg/9d")
+            self.requires("libjpeg/9d")
         if self.options.szip_support == "with_libaec":
-            self.requires.add("libaec/1.0.4")
+            self.requires("libaec/1.0.4")
         elif self.options.szip_support == "with_szip":
-            self.requires.add("szip/2.1.1")
+            self.requires("szip/2.1.1")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
