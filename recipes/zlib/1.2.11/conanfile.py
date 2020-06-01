@@ -43,7 +43,7 @@ class ZlibConan(ConanFile):
 
     @property
     def _use_autotools(self):
-        if self.settings.os == "iOS":
+        if str(self.settings.os) in ["iOS", "watchOS", "tvOS"]:
             return False # use a cmake toolchain .... or, find out the special CHOST settings zlib requires, but ...
         return self.settings.os == "Linux" or tools.is_apple_os(self.settings.os)
         # ... the  question is, why not always go with cmake and forget about the automake distaster?
