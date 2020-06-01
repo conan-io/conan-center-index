@@ -75,10 +75,13 @@ class TestPackageConan(ConanFile):
         with tools.environment_append({"DISTUTILS_USE_SDK": "1"}):
             setup_args = [
                 "{}/setup.py".format(self.source_folder),
+                "conan_build", "--install-folder", self.build_folder,
                 "build",
                 "--build-base", self.build_folder,
                 "--build-platlib", os.path.join(self.build_folder, "lib_setuptools"),
             ]
+            if self.settings.build_type == "Debug":
+                setup_args.append("--debug")
             self.run("{} {}".format(tools.get_env("PYTHON"), " ".join("\"{}\"".format(a) for a in setup_args)), run_environment=True)
 
     def _test_module(self, module):
