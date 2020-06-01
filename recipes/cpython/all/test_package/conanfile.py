@@ -112,7 +112,7 @@ class TestPackageConan(ConanFile):
             #     self._test_module("spam")
 
             with tools.environment_append({"PYTHONPATH": [os.path.join(self.build_folder, "lib_setuptools")]}):
-                self.output.info("Testing module (spam) using setuptools built module")
+                self.output.info("Testing module (spam) using setup.py built module")
                 self._test_module("spam")
 
             self.run(os.path.join("bin", "test_package"), run_environment=True)

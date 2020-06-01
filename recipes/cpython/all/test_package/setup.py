@@ -1,4 +1,3 @@
-from setuptools import setup, Extension
 import os
 import sys
 
@@ -8,8 +7,10 @@ PY3 = (3, 0) <= sys.version_info < (4, 0)
 
 if PY2:
     subdir = "py2"
+    from distutils.core import setup, Extension
 elif PY3:
     subdir = "py3"
+    from setuptools import setup, Extension
 else:
     raise Exception
 
