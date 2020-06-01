@@ -1,7 +1,7 @@
 import os
 from conans import tools, ConanFile, CMake
 from conans.tools import Version
-from conans.errors import ConanInvalidConfiguration, NotFoundException, ConanException
+from conans.errors import ConanInvalidConfiguration, ConanException
 
 
 class CMakeConan(ConanFile):
@@ -13,23 +13,16 @@ class CMakeConan(ConanFile):
     license = "BSD-3-Clause"
     exports_sources = ["CMakeLists.txt"]
     generators = "cmake"
-    settings = "os_build", "arch_build", "compiler", "arch"
+    settings = "os", "arch", "build_type"
 
     _source_subfolder = "source_subfolder"
-
-    @property
-    def _arch(self):
-        return self.settings.get_safe("arch_build") or self.settings.get_safe("arch")
-
-    @property
-    def _os(self):
-        return self.settings.get_safe("os_build") or self.settings.get_safe("os")
+    _cmake = None
 
     def _minor_version(self):
         return ".".join(str(self.version).split(".")[:2])
 
     def configure(self):
-        if self._os == "Macos" and self._arch == "x86":
+        if self.settings.os == "Macos" and self.settings.arch == "x86":
             raise ConanInvalidConfiguration("CMake does not support x86 for macOS")
 
     def source(self):
@@ -38,27 +31,22 @@ class CMakeConan(ConanFile):
         os.rename(extracted_dir, self._source_subfolder)
 
     def _configure_cmake(self):
-        cmake = CMake(self)
-        cmake.definitions["CMAKE_BOOTSTRAP"] = False
-        if self.settings.os_build == "Linux":
-            cmake.definitions["OPENSSL_USE_STATIC_LIBS"] = True
-            cmake.definitions["CMAKE_EXE_LINKER_FLAGS"] = "-lz"
-        cmake.configure(source_dir=self._source_subfolder)
-        return cmake
+        if not self._cmake:
+            self._cmake = CMake(self)
+            self._cmake.definitions["CMAKE_BOOTSTRAP"] = False
+            if self.settings.os == "Linux":
+                self._cmake.definitions["OPENSSL_USE_STATIC_LIBS"] = True
+                self._cmake.definitions["CMAKE_EXE_LINKER_FLAGS"] = "-lz"
+            self._cmake.configure(source_dir=self._source_subfolder)
+        return self._cmake
 
     def build(self):
-        if self.settings.os_build == "Linux":
+        if self.settings.os == "Linux":
             tools.replace_in_file(os.path.join(self._source_subfolder, "Utilities", "cmcurl", "CMakeLists.txt"),
                                   "list(APPEND CURL_LIBS ${OPENSSL_LIBRARIES})",
                                   "list(APPEND CURL_LIBS ${OPENSSL_LIBRARIES} -ldl -lpthread)")
-        self.settings.arch = self.settings.arch_build  # workaround for cross-building to get the correct arch during the build
         cmake = self._configure_cmake()
         cmake.build()
-
-    def package_id(self):
-        self.info.include_build_settings()
-        del self.info.settings.arch
-        del self.info.settings.compiler
 
     def package(self):
         self.copy("Copyright.txt", dst="licenses", src=self._source_subfolder)

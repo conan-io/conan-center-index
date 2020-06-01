@@ -17,7 +17,7 @@ class SpectraConan(ConanFile):
         return "source_subfolder"
 
     def requirements(self):
-        self.requires.add("eigen/3.3.7")
+        self.requires("eigen/3.3.7")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])

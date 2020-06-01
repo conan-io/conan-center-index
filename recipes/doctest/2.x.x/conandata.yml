@@ -8,3 +8,6 @@ sources:
   "2.3.7":
     url: "https://github.com/onqtam/doctest/archive/2.3.7.tar.gz"
     sha256: "a70cd25875029879e577b08cfaa57a76c7bea62c473ca94d85ec87ea53af7177"
+  "2.3.8":
+    url: "https://github.com/onqtam/doctest/archive/2.3.8.tar.gz"
+    sha256: "d7232437eceb46ad5de03cacdee770c80f2e53e7b8efc1c8a8ed29539f64efa5"
