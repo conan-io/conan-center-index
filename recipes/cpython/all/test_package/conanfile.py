@@ -72,8 +72,17 @@ class TestPackageConan(ConanFile):
             cmake.configure()
         cmake.build()
 
+        with tools.environment_append({"DISTUTILS_USE_SDK": "1"}):
+            setup_args = [
+                "{}/setup.py".format(self.source_folder),
+                "build",
+                "--build-base", self.build_folder,
+                "--build-platlib", os.path.join(self.build_folder, "lib_setuptools"),
+            ]
+            self.run("{} {}".format(tools.get_env("PYTHON"), " ".join("\"{}\"".format(a) for a in setup_args)), run_environment=True)
+
     def _test_module(self, module):
-        self.run("{} {}/test_package.py -b {} -t {}".format(tools.get_env("PYTHON"), self.source_folder, self.build_folder, module), run_environment=True)
+        self.run("{} {}/test_package.py -b {} -t {} ".format(tools.get_env("PYTHON"), self.source_folder, self.build_folder, module), run_environment=True)
 
     def test(self):
         if not tools.cross_building(self.settings, skip_x64_x86=True):
@@ -99,6 +108,11 @@ class TestPackageConan(ConanFile):
             self._test_module("decimal")
 
             with tools.environment_append({"PYTHONPATH": [os.path.join(self.build_folder, "lib")]}):
+                self.output.info("Testing module (spam) using cmake built module")
+                self._test_module("spam")
+
+            with tools.environment_append({"PYTHONPATH": [os.path.join(self.build_folder, "lib_setuptools")]}):
+                self.output.info("Testing module (spam) using setuptools built module")
                 self._test_module("spam")
 
             self.run(os.path.join("bin", "test_package"), run_environment=True)
