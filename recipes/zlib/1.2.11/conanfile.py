@@ -68,7 +68,7 @@ class ZlibConan(ConanFile):
         if "clang" in str(self.settings.compiler) and tools.get_env("CC") is None and tools.get_env("CXX") is None:
             env = {"CC": "clang", "CXX": "clang++"}
         with tools.environment_append(env):
-            env_build.configure("../")
+            env_build.configure("../", build=False, host=False, target=False)
             env_build.make(target=make_target)
 
     def _build_zlib_cmake(self):
