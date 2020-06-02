@@ -70,8 +70,6 @@ class MSYS2Conan(ConanFile):
 
     def build(self):
         arch = 0 if self.settings.arch_build == "x86" else 1  # index in the sources list
-        url = self.conan_data["sources"][self.version][arch]["url"]
-        sha256 = self.conan_data["sources"][self.version][arch]["sha256"]
         filename = self._download(**self.conan_data["sources"][self.version][arch])
         tar_name = filename.replace(".xz", "")
         self.run("7z.exe x {0}".format(filename))
