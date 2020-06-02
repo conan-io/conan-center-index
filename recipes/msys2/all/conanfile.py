@@ -1,5 +1,7 @@
 from conans import ConanFile, tools
 from conans.errors import ConanInvalidConfiguration
+import csv
+from io import StringIO
 import os
 import shutil
 
@@ -29,6 +31,32 @@ class MSYS2Conan(ConanFile):
         # build tools have to download files in build method when the
         # source files downloaded will be different based on architecture or OS
         pass
+
+    def _kill_processes_in_build_folder(self):
+        output = StringIO()
+        orig, self._conan_runner._print_commands_to_output = self._conan_runner._print_commands_to_output, False
+        self.run("wmic process get /format:csv", output=output)
+        self._conan_runner._print_commands_to_output = orig
+        output.seek(0, os.SEEK_SET)
+
+        while True:
+            line = output.readline()
+            if line.strip():
+                output.tell()
+                output.seek(output.tell()-len(line), os.SEEK_SET)
+                break
+
+        reader = csv.DictReader(output, delimiter=",")
+        for row in reader:
+            print("trying", row["ExecutablePath"])
+            if self.build_folder in row["ExecutablePath"] or \
+                    self.build_folder.replace("\\", "/") in row["ExecutablePath"] or \
+                    tools.unix_path(self.build_folder) in row["ExecutablePath"]:
+                self.output.info("Name: " + row["Name"])
+                self.output.info("ExecutablePath: " +  row["ExecutablePath"])
+                self.output.info("ProcessId: " +  row["ProcessId"])
+                self.output.info("Attempting to kill " + row["ProcessId"])
+                self.run("wmic process where ProcessId={} delete".format(row["ProcessId"]))
 
     def _download(self, url, sha256):
         from six.moves.urllib.parse import urlparse
@@ -74,6 +102,8 @@ class MSYS2Conan(ConanFile):
         # Prepend the PKG_CONFIG_PATH environment variable with an eventual PKG_CONFIG_PATH environment variable
         tools.replace_in_file(os.path.join(self._msys_dir, "etc", "profile"),
                               'PKG_CONFIG_PATH="', 'PKG_CONFIG_PATH="$PKG_CONFIG_PATH:')
+
+        self._kill_processes_in_build_folder()
 
     def package(self):
         excludes = None
