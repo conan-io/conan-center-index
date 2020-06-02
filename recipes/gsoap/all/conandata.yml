@@ -1,0 +1,4 @@
+sources:
+  "2.8.103":
+    sha256: "afe2ba08d2fa56adc3c774b6741587203a72140a255346e9947b8d2ee6c7d4b6"
+    url: "https://sourceforge.net/projects/gsoap2/files/gsoap-2.8/gsoap_2.8.103.zip/download"

@@ -25,6 +25,8 @@ class JemallocConan(ConanFile):
         "enable_syscall": [True, False],
         "enable_lazy_lock": [True, False],
         "enable_debug_logging": [True, False],
+        "enable_initial_exec_tls": [True, False],
+        "enable_libdl": [True, False],
     }
     default_options = {
         "shared": False,
@@ -37,7 +39,11 @@ class JemallocConan(ConanFile):
         "enable_syscall": True,
         "enable_lazy_lock": False,
         "enable_debug_logging": False,
+        "enable_initial_exec_tls": True,
+        "enable_libdl": True,
     }
+
+    _autotools = None
 
     _source_subfolder = "source_subfolder"
 
@@ -81,6 +87,8 @@ class JemallocConan(ConanFile):
             "--enable-syscall" if self.options.enable_syscall else "--disable-syscall",
             "--enable-lazy-lock" if self.options.enable_lazy_lock else "--disable-lazy-lock",
             "--enable-log" if self.options.enable_debug_logging else "--disable-log",
+            "--enable-initial-exec-tld" if self.options.enable_initial_exec_tls else "--disable-initial-exec-tls",
+            "--enable-libdl" if self.options.enable_libdl else "--disable-libdl",
         ]
         if self.options.shared:
             conf_args.extend(["--enable-shared", "--disable-static"])
@@ -89,9 +97,11 @@ class JemallocConan(ConanFile):
         return conf_args
 
     def _configure_autotools(self):
-            autotools = AutoToolsBuildEnvironment(self, win_bash=tools.os_info.is_windows)
-            autotools.configure(args=self._autotools_args, configure_dir=self._source_subfolder)
-            return autotools
+        if self._autotools:
+            return self._autotools
+        self._autotools = AutoToolsBuildEnvironment(self, win_bash=tools.os_info.is_windows)
+        self._autotools.configure(args=self._autotools_args, configure_dir=self._source_subfolder)
+        return self._autotools
 
     @property
     def _msvc_build_type(self):

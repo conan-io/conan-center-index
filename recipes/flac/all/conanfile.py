@@ -71,3 +71,5 @@ class FlacConan(ConanFile):
         self.cpp_info.libs = ['FLAC++', 'FLAC']
         if not self.options.shared:
             self.cpp_info.defines = ["FLAC__NO_DLL"]
+            if self.settings.os == "Linux":
+                self.cpp_info.system_libs += ["m"]

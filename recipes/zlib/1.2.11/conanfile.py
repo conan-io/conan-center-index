@@ -130,6 +130,9 @@ class ZlibConan(ConanFile):
                 elif self.settings.compiler == "gcc":
                     current_lib = os.path.join(lib_path, "libzlibstatic.a")
                     os.rename(current_lib, os.path.join(lib_path, "libzlib.a"))
+                elif self.settings.compiler == "clang":
+                    current_lib = os.path.join(lib_path, "zlibstatic.lib")
+                    os.rename(current_lib, os.path.join(lib_path, "zlib.lib"))
 
     def package(self):
         # Extract the License/s from the header to a file

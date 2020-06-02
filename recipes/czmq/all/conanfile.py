@@ -42,15 +42,15 @@ class CzmqConan(ConanFile):
             del self.options.fPIC
 
     def requirements(self):
-        self.requires("openssl/1.1.1d")  # zdigest depends on openssl
-        self.requires.add("zeromq/4.3.2")
+        self.requires("openssl/1.1.1g")  # zdigest depends on openssl
+        self.requires("zeromq/4.3.2")
         if self.options.with_libcurl:
-            self.requires("libcurl/7.67.0")
+            self.requires("libcurl/7.69.1")
         if self.options.with_lz4:
-            self.requires.add("lz4/1.9.2")
+            self.requires("lz4/1.9.2")
         if self.settings.os != "Windows":
             if self.options.with_libuuid:
-                self.requires.add("libuuid/1.0.3")
+                self.requires("libuuid/1.0.3")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])

@@ -1,6 +1,6 @@
 import os
 
-from conans import ConanFile, CMake, tools
+from conans import ConanFile, tools
 
 class CpphttplibConan(ConanFile):
     name = "cpp-httplib"
@@ -9,8 +9,6 @@ class CpphttplibConan(ConanFile):
     topics = ("conan", "cpp-httplib", "http", "https", "header-only")
     homepage = "https://github.com/yhirose/cpp-httplib"
     url = "https://github.com/conan-io/conan-center-index"
-    exports_sources = "CMakeLists.txt"
-    generators = "cmake"
     settings = "os"
     options = {"with_openssl": [True, False], "with_zlib": [True, False]}
     default_options = {"with_openssl": False, "with_zlib": False}
@@ -22,9 +20,9 @@ class CpphttplibConan(ConanFile):
 
     def requirements(self):
         if self.options.with_openssl:
-            self.requires.add("openssl/1.1.1d")
+            self.requires("openssl/1.1.1g")
         if self.options.with_zlib:
-            self.requires.add("zlib/1.2.11")
+            self.requires("zlib/1.2.11")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
@@ -32,10 +30,7 @@ class CpphttplibConan(ConanFile):
 
     def package(self):
         self.copy("LICENSE", dst="licenses", src=self._source_subfolder)
-        cmake = CMake(self)
-        cmake.configure()
-        cmake.install()
-        tools.rmdir(os.path.join(self.package_folder, "share"))
+        self.copy("httplib.h", dst=os.path.join("include", "httplib"), src=self._source_subfolder)
 
     def package_id(self):
         self.info.header_only()

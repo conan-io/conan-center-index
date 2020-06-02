@@ -29,7 +29,7 @@ class ConanSqlite3(ConanFile):
                }
     default_options = {"shared": False,
                        "fPIC": True,
-                       "threadsafe": 0,
+                       "threadsafe": 1,
                        "enable_column_metadata": True,
                        "enable_explain_comments": False,
                        "enable_fts3": False,
@@ -111,3 +111,6 @@ class ConanSqlite3(ConanFile):
             bin_path = os.path.join(self.package_folder, "bin")
             self.output.info("Appending PATH env var with : {}".format(bin_path))
             self.env_info.PATH.append(bin_path)
+
+        self.cpp_info.names["cmake_find_package"] = "SQLite3"
+        self.cpp_info.names["cmake_find_package_multi"] = "SQLite3"

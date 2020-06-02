@@ -1,0 +1,4 @@
+sources:
+  "1.0.0":
+    url: "https://github.com/oatpp/oatpp/archive/1.0.0.tar.gz"
+    sha256: "9ba7c75e3ada8ec894ec10beae712e775774a835fd3de89d8c34e17740202619"

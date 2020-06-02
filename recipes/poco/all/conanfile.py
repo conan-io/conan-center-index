@@ -1,3 +1,4 @@
+from collections import OrderedDict
 import os
 
 from conans import ConanFile, CMake, tools
@@ -31,6 +32,7 @@ class PocoConan(ConanFile):
                "enable_data_sqlite": [True, False],
                "enable_data_mysql": [True, False],
                "enable_data_odbc": [True, False],
+               "enable_data_postgresql": [True, False],
                "enable_encodings": [True, False],
                "enable_jwt": [True, False],
                "enable_sevenzip": [True, False],
@@ -62,6 +64,7 @@ class PocoConan(ConanFile):
                 "enable_data_sqlite": True,
                 "enable_data_mysql": False,
                 "enable_data_odbc": False,
+                "enable_data_postgresql": False,
                 "enable_encodings": True,
                 "enable_jwt": True,
                 "enable_sevenzip": False,
@@ -77,6 +80,8 @@ class PocoConan(ConanFile):
                 "poco_unbundled": False,
                 "cxx_14": False
             }
+
+    _cmake = None
 
     @property
     def _source_subfolder(self):
@@ -94,20 +99,25 @@ class PocoConan(ConanFile):
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
+        if tools.Version(self.version) < "1.10":
+            del self.options.enable_data_postgresql
+            del self.options.enable_jwt
 
     def configure(self):
         if self.options.enable_apacheconnector:
             raise ConanInvalidConfiguration("Apache connector not supported: https://github.com/pocoproject/poco/issues/1764")
         if self.options.enable_data_mysql:
             raise ConanInvalidConfiguration("MySQL not supported yet, open an issue here please: %s" % self.url)
+        if self.options.get_safe("enable_data_postgresql"):
+            raise ConanInvalidConfiguration("PostgreSQL not supported yet, open an issue here please: %s" % self.url)
 
     def requirements(self):
         if self.options.enable_netssl or \
            self.options.enable_netssl_win or \
            self.options.enable_crypto or \
            self.options.force_openssl or \
-           self.options.enable_jwt:
-            self.requires.add("openssl/1.0.2t")
+           self.options.get_safe("enable_jwt", False):
+            self.requires("openssl/1.1.1g")
 
     def _patch(self):
         if self.settings.compiler == "Visual Studio":
@@ -130,20 +140,22 @@ class PocoConan(ConanFile):
         os.rename("CMakeLists.txt", os.path.join(self._source_subfolder, "CMakeLists.txt"))
 
     def _configure_cmake(self):
-        cmake = CMake(self, parallel=None)
+        if self._cmake:
+            return self._cmake
+        self._cmake = CMake(self)
         for option_name in self.options.values.fields:
             activated = getattr(self.options, option_name)
             if option_name == "shared":
-                cmake.definitions["POCO_STATIC"] = "OFF" if activated else "ON"
+                self._cmake.definitions["POCO_STATIC"] = "OFF" if activated else "ON"
             elif not option_name == "fPIC":
-                cmake.definitions[option_name.upper()] = "ON" if activated else "OFF"
+                self._cmake.definitions[option_name.upper()] = "ON" if activated else "OFF"
 
-        cmake.definitions["CMAKE_INSTALL_SYSTEM_RUNTIME_LIBS_SKIP"] = True
+        self._cmake.definitions["CMAKE_INSTALL_SYSTEM_RUNTIME_LIBS_SKIP"] = True
         if self.settings.os == "Windows" and self.settings.compiler == "Visual Studio":  # MT or MTd
-            cmake.definitions["POCO_MT"] = "ON" if "MT" in str(self.settings.compiler.runtime) else "OFF"
-        self.output.info(cmake.definitions)
-        cmake.configure(build_dir=self._build_subfolder, source_dir=os.path.join("..", self._source_subfolder))
-        return cmake
+            self._cmake.definitions["POCO_MT"] = "ON" if "MT" in str(self.settings.compiler.runtime) else "OFF"
+        self.output.info(self._cmake.definitions)
+        self._cmake.configure(build_dir=self._build_subfolder, source_dir=os.path.join("..", self._source_subfolder))
+        return self._cmake
 
     def build(self):
         self._patch()
@@ -158,33 +170,44 @@ class PocoConan(ConanFile):
         tools.rmdir(os.path.join(self.package_folder, "cmake"))
 
     def package_info(self):
-        libs = [("enable_mongodb", "PocoMongoDB"),
-                ("enable_pdf", "PocoPDF"),
-                ("enable_netssl", "PocoNetSSL"),
-                ("enable_netssl_win", "PocoNetSSLWin"),
-                ("enable_net", "PocoNet"),
-                ("enable_crypto", "PocoCrypto"),
-                ("enable_data_sqlite", "PocoDataSQLite"),
-                ("enable_data_mysql", "PocoDataMySQL"),
-                ("enable_data_odbc", "PocoDataODBC"),
-                ("enable_data", "PocoData"),
-                ("enable_sevenzip", "PocoSevenZip"),
-                ("enable_zip", "PocoZip"),
-                ("enable_apacheconnector", "PocoApacheConnector"),
-                ("enable_util", "PocoUtil"),
-                ("enable_xml", "PocoXML"),
-                ("enable_json", "PocoJSON"),
-                ("enable_redis", "PocoRedis")]
+        option_libs = OrderedDict((
+            ("enable_zip", "PocoZip"),
+            ("enable_pdf", "PocoPDF"),
+            ("enable_sevenzip", "PocoSevenZip"),
+            ("enable_netssl_win", "PocoNetSSLWin"),
+            ("enable_netssl", "PocoNetSSL"),
+            ("enable_jwt", "PocoJWT"),
+            ("enable_util", "PocoUtil"),
+            ("enable_apacheconnector", "PocoApacheConnector"),
+            ("enable_data_sqlite", "PocoDataSQLite"),
+            ("enable_data_odbc", "PocoDataODBC"),
+            ("enable_data_postgresql", "DataPostgreSQL"),
+            ("enable_data_mysql", "PocoDataMySQL"),
+            ("enable_redis", "PocoRedis"),
+            ("enable_mongodb", "PocoMongoDB"),
+            ("enable_net", "PocoNet"),
+            ("enable_encodings", "PocoEncodings"),
+            ("enable_xml", "PocoXML"),
+            ("enable_data", "PocoData"),
+            ("enable_crypto", "PocoCrypto"),
+            ("enable_json", "PocoJSON"),
+        ))
+
+        if tools.Version(self.version) < "1.9":
+            option_libs.pop("enable_encodings")
+        if tools.Version(self.version) < "1.10":
+            option_libs.pop("enable_jwt")
+            option_libs.pop("enable_data_postgresql")
 
         suffix = str(self.settings.compiler.runtime).lower()  \
                  if self.settings.compiler == "Visual Studio" and not self.options.shared \
-                 else ("d" if self.settings.build_type=="Debug" else "")
-        for flag, lib in libs:
-            if getattr(self.options, flag):
-                if self.settings.os == "Windows" and flag == "enable_netssl" and self.options.enable_netssl_win:
+                 else ("d" if self.settings.build_type == "Debug" else "")
+        for option, lib in option_libs.items():
+            if self.options.get_safe(option, False):
+                if self.settings.os == "Windows" and option == "enable_netssl" and self.options.enable_netssl_win:
                     continue
 
-                if self.settings.os != "Windows" and flag == "enable_netssl_win":
+                if self.settings.os != "Windows" and option == "enable_netssl_win":
                     continue
 
                 self.cpp_info.libs.append("%s%s" % (lib, suffix))
@@ -193,11 +216,13 @@ class PocoConan(ConanFile):
 
         # in linux we need to link also with these libs
         if self.settings.os == "Linux":
-            self.cpp_info.libs.extend(["pthread", "dl", "rt"])
+            self.cpp_info.system_libs.extend(["pthread", "dl", "rt"])
 
+        if self.settings.compiler == "Visual Studio":
+            self.cpp_info.defines.append("POCO_NO_AUTOMATIC_LIBS")
         if not self.options.shared:
-            self.cpp_info.defines.extend(["POCO_STATIC=ON", "POCO_NO_AUTOMATIC_LIBS"])
+            self.cpp_info.defines.append("POCO_STATIC=ON")
             if self.settings.compiler == "Visual Studio":
-                self.cpp_info.libs.extend(["ws2_32", "Iphlpapi", "Crypt32"])
+                self.cpp_info.system_libs.extend(["ws2_32", "iphlpapi", "crypt32"])
         self.cpp_info.names["cmake_find_package"] = "Poco"
         self.cpp_info.names["cmake_find_package_multi"] = "Poco"
