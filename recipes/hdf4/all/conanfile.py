@@ -10,7 +10,7 @@ class Hdf4Conan(ConanFile):
     topics = ("conan", "hdf4", "hdf", "data")
     homepage = "https://portal.hdfgroup.org/display/HDF4/HDF4"
     url = "https://github.com/conan-io/conan-center-index"
-    exports_sources = "CMakeLists.txt"
+    exports_sources = ["CMakeLists.txt", "patches/**"]
     generators = "cmake"
     settings = "os", "arch", "compiler", "build_type"
     options = {
@@ -53,21 +53,23 @@ class Hdf4Conan(ConanFile):
             raise ConanInvalidConfiguration("encoding must be enabled in the dependency (szip:enable_encoding=True)")
 
     def requirements(self):
-        self.requires.add("zlib/1.2.11")
+        self.requires("zlib/1.2.11")
         if self.options.jpegturbo:
-            self.requires.add("libjpeg-turbo/2.0.4")
+            self.requires("libjpeg-turbo/2.0.4")
         else:
-            self.requires.add("libjpeg/9d")
+            self.requires("libjpeg/9d")
         if self.options.szip_support == "with_libaec":
-            self.requires.add("libaec/1.0.4")
+            self.requires("libaec/1.0.4")
         elif self.options.szip_support == "with_szip":
-            self.requires.add("szip/2.1.1")
+            self.requires("szip/2.1.1")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
         os.rename("hdf-" + self.version, self._source_subfolder)
 
     def build(self):
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            tools.patch(**patch)
         cmake = self._configure_cmake()
         cmake.build()
 
@@ -105,6 +107,7 @@ class Hdf4Conan(ConanFile):
         os.remove(os.path.join(self.package_folder, "lib", "libhdf4.settings"))
 
     def package_info(self):
+        self.cpp_info.names["pkg_config"] = "hdf"
         self.cpp_info.libs = self._get_ordered_libs()
         self.cpp_info.includedirs.append(os.path.join(self.package_folder, "include", "hdf4"))
         if self.options.shared:
