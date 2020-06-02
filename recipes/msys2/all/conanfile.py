@@ -49,9 +49,9 @@ class MSYS2Conan(ConanFile):
         reader = csv.DictReader(output, delimiter=",")
         for row in reader:
             print("trying", row["ExecutablePath"])
-            if self.build_folder in row["ExecutablePath"] or \
-                    self.build_folder.replace("\\", "/") in row["ExecutablePath"] or \
-                    tools.unix_path(self.build_folder) in row["ExecutablePath"]:
+            if self.build_folder.lower() in row["ExecutablePath"].lower() or \
+                    self.build_folder.replace("\\", "/").lower() in row["ExecutablePath"].lower() or \
+                    tools.unix_path(self.build_folder).lower() in row["ExecutablePath"].lower():
                 self.output.info("Name: " + row["Name"])
                 self.output.info("ExecutablePath: " +  row["ExecutablePath"])
                 self.output.info("ProcessId: " +  row["ProcessId"])
@@ -111,7 +111,6 @@ class MSYS2Conan(ConanFile):
         self.copy("*", dst="bin", src=self._msys_dir, excludes=excludes)
         shutil.copytree(os.path.join(self.package_folder, "bin", "usr", "share", "licenses"),
                         os.path.join(self.package_folder, "licenses"))
-
 
     def package_info(self):
         msys_root = os.path.join(self.package_folder, "bin")
