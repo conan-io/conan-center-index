@@ -23,25 +23,23 @@ relpath = os.path.relpath(srcpath, os.getcwd())
 spam_sources = [os.path.join(relpath, "test_module.c")]
 
 
-class ConanBuild2Command(BuildCmd):
+class ConanCommand(Command):
     description = "build everything with includes and libs from conan"
 
     user_options = [
         ("install-folder=", None, "Install folder of conan"),
         ("nolink", None, "Don't link to installed conan dependency libraries"),
-    ] + BuildCmd.user_options
+    ]
 
-    boolean_options = ["nolink"] + BuildCmd.boolean_options
+    boolean_options = ["nolink"]
 
     def initialize_options(self):
-        BuildCmd.initialize_options(self)
         self.install_folder = None
         self.nolink = False
 
     def finalize_options(self):
         if self.install_folder is None:
             self.install_folder = os.getcwd()
-        BuildCmd.finalize_options(self)
 
     def read_conanbuildinfo(self):
         data = {}
@@ -65,7 +63,6 @@ class ConanBuild2Command(BuildCmd):
             extmod.library_dirs.extend(conanbuildinfo["libdirs"])
             if not self.nolink:
                 extmod.libraries.extend(conanbuildinfo["libs"])
-        BuildCmd.run(self)
 
 
 setup(
@@ -76,6 +73,6 @@ setup(
         Extension("spam", spam_sources),
     ],
     cmdclass={
-        "conan_build": ConanBuild2Command,
+        "conan": ConanCommand,
     },
 )

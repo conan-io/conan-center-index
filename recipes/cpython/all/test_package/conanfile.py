@@ -73,10 +73,11 @@ class TestPackageConan(ConanFile):
         cmake.build()
 
         with tools.vcvars(self.settings) if self.settings.compiler == "Visual Studio" else tools.no_op():
-            with tools.environment_append({"DISTUTILS_USE_SDK": "1"}):
+            with tools.environment_append({"DISTUTILS_USE_SDK": "1", "MSSdk": "1"}):
                 setup_args = [
                     "{}/setup.py".format(self.source_folder),
-                    "conan_build", "--install-folder", self.build_folder,
+                    "conan",
+                    "--install-folder", self.build_folder,
                     "build",
                     "--build-base", self.build_folder,
                     "--build-platlib", os.path.join(self.build_folder, "lib_setuptools"),
