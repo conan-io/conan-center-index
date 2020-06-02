@@ -55,7 +55,7 @@ class GoogleGuetzliConan(ConanFile):
                 env_vars.update(autotools.vars)
                 with tools.environment_append(env_vars):
                     make_args = [
-                        "config={}".format("debug" if self.settings.build_type == "Debug" else "release"),
+                        "config=release",
                         "verbose=1',"
                     ]
                     autotools.make(args=make_args)
