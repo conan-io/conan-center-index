@@ -83,8 +83,8 @@ class CMakeConan(ConanFile):
     def package_id(self):
         self.info.options.with_openssl = self._with_openssl
 
-        # CMake is a executable-only package, so the compiler version does not matter
-        del self.info.settings.compiler.version
+        del self.info.settings.compiler
+        del self.info.settings.build_type
 
     def package_info(self):
         minor = self._minor_version()
