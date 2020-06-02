@@ -70,7 +70,7 @@ class Open62541Conan(ConanFile):
         "discovery_multicast": False,
         "query": False,
         "encription": False,
-        "json_support": True,
+        "json_support": False,
         "pub_sub": "None",
         "data_access": False,
         "compiled_nodeset_descriptions": True,
