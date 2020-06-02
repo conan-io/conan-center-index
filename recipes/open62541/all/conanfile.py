@@ -56,7 +56,7 @@ class Open62541Conan(ConanFile):
         "fPIC": True,
         "shared": True,
         "historize": False,
-        "logging_level": "Trace",
+        "logging_level": "Info",
         "subscription": True,
         "subscription_events": False,
         "methods": True,
@@ -137,6 +137,17 @@ class Open62541Conan(ConanFile):
             self._download_mdnsd()
         self._patch_sources()
 
+    def _get_log_level(self):
+        return {
+            "Fatal": "600",
+            "Error": "500",
+            "Warrning": "400",
+            "Info": "300",
+            "Debug": "200",
+            "Trace": "100",
+            "PackageOption": "300"
+        }.get(str(self.options.logging_level), "300")
+
     def _configure_cmake(self):
         cmake = CMake(self)
         cmake.verbose = True
@@ -147,6 +158,7 @@ class Open62541Conan(ConanFile):
         if self.settings.os != "Windows":
             cmake.definitions["POSITION_INDEPENDENT_CODE"] = self.options.fPIC
         cmake.definitions["BUILD_SHARED_LIBS"] = self.options.shared
+        cmake.definitions["UA_LOGLEVEL"] = self._get_log_level()
         cmake.definitions["UA_ENABLE_SUBSCRIPTIONS"] = self.options.subscription
         cmake.definitions["UA_ENABLE_SUBSCRIPTIONS_EVENTS"] = self.options.subscription_events
         cmake.definitions["UA_ENABLE_METHODCALLS"] = self.options.methods
