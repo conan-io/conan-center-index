@@ -16,7 +16,11 @@ elif PY3:
 else:
     raise Exception
 
-spam_sources = [os.path.join(os.path.dirname(os.path.realpath(__file__)), subdir, "test_module.c")]
+srcpath = os.path.join(os.path.dirname(os.path.realpath(__file__)), subdir)
+relpath = os.path.relpath(srcpath, os.getcwd())
+
+# Using a relative path to avoid long paths
+spam_sources = [os.path.join(relpath, "test_module.c")]
 
 
 class ConanBuild2Command(BuildCmd):
