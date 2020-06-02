@@ -68,6 +68,9 @@ class GoogleGuetzliConan(ConanFile):
             self.copy(os.path.join(self._source_subfolder, "bin", subdir, "guetzli"), dst="bin", keep_path=False)
         self.copy("LICENSE", src=self._source_subfolder, dst="licenses")
 
+    def package_id(self):
+        del self.info.settings.compiler
+
     def package_info(self):
         bindir = os.path.join(self.package_folder, "bin")
         self.output.info("Appending PATH environment variable: {}".format(bindir))
