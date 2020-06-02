@@ -61,8 +61,7 @@ class MSYS2Conan(ConanFile):
     def _download(self, url, sha256):
         from six.moves.urllib.parse import urlparse
         filename = os.path.basename(urlparse(url[0]).path)
-        tools.download(url, filename)
-        tools.check_sha256(filename, sha256)
+        tools.download(url=url, filename=filename, sha256=sha256)
         return filename
 
     @property
