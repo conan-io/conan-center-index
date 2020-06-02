@@ -11,7 +11,7 @@ class GoogleGuetzliConan(ConanFile):
     description = "Perceptual JPEG encoder"
     topics = "jpeg", "compression"
     exports_sources = "patches/**"
-    settings = "os", "compiler", "build_type", "arch"
+    settings = "os", "compiler", "arch"
     generators = "pkg_config"
     requires = ["libpng/1.6.37"]
 
