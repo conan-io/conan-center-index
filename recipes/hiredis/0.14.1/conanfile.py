@@ -6,6 +6,7 @@ import os
 
 class HiredisConan(ConanFile):
     name = "hiredis"
+    version = "0.14.1"
 
     description = "Minimalistic C client for Redis >= 1.2"
     topics = "conan", "c", "redis"
