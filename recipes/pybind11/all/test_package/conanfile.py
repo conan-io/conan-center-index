@@ -9,17 +9,17 @@ class TestPackageConan(ConanFile):
 
     def build(self):
         cmake = CMake(self)
-        cmake.definitions["Python_ADDITIONAL_VERSIONS"] = "{}.{}".format(sys.version_info.major,sys.version_info.minor)
+        cmake.definitions["PYTHON_EXECUTABLE"] = self._python_interpreter
         cmake.configure()
         cmake.build()
 
     @property
-    def _python_available(self):
-        # FIXME: this can be removed once a python interpreter is available in CCI
-        return not getattr(sys, "frozen", False)
+    def _python_interpreter(self):
+        if getattr(sys, "frozen", False):
+            return "python"
+        return sys.executable
 
     def test(self):
-        if self._python_available and not tools.cross_building(self.settings):
-            self.run("{} {} {}".format(sys.executable,
-                                       os.path.join(self.source_folder, "test.py"),
-                                       os.path.join(self.build_folder, "lib")), run_environment=True)
+        if not tools.cross_building(self.settings):
+            with tools.environment_append({"PYTHONPATH": "lib"}):
+                self.run("{} {}".format(self._python_interpreter, os.path.join(self.source_folder, "test.py")), run_environment=True)

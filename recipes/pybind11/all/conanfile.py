@@ -22,10 +22,6 @@ class PyBind11Conan(ConanFile):
         tools.get(**self.conan_data["sources"][self.version])
         os.rename("{}-{}".format(self.name, self.version), self._source_subfolder)
 
-    def requirements(self):
-        # TODO: self.requires("cpython/x.y/z") or self.requires("pypy/x.y/z")
-        self.output.info("This recipe requires a python SDK which is not available (yet) on CCI")
-
     def _configure_cmake(self):
         if self._cmake:
             return self._cmake
