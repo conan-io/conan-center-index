@@ -47,7 +47,7 @@ class GoogleGuetzliConan(ConanFile):
         if self._is_msvc:
             msbuild = MSBuild(self)
             with tools.chdir(self._source_subfolder):
-                msbuild.build("guetzli.sln")
+                msbuild.build("guetzli.sln", build_type="Release")
         else:
             autotools = AutoToolsBuildEnvironment(self)
             with tools.chdir(self._source_subfolder):
