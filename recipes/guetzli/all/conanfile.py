@@ -61,11 +61,10 @@ class GoogleGuetzliConan(ConanFile):
                     autotools.make(args=make_args)
 
     def package(self):
-        subdir = "Debug" if self.settings.build_type == "Debug" else "Release"
         if self._is_msvc:
-            self.copy(os.path.join(self._source_subfolder, "bin", str(self.settings.arch), subdir, "guetzli.exe"), dst="bin", keep_path=False)
+            self.copy(os.path.join(self._source_subfolder, "bin", str(self.settings.arch), "Release", "guetzli.exe"), dst="bin", keep_path=False)
         else:
-            self.copy(os.path.join(self._source_subfolder, "bin", subdir, "guetzli"), dst="bin", keep_path=False)
+            self.copy(os.path.join(self._source_subfolder, "bin", "Release", "guetzli"), dst="bin", keep_path=False)
         self.copy("LICENSE", src=self._source_subfolder, dst="licenses")
 
     def package_id(self):
