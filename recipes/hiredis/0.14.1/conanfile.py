@@ -64,7 +64,7 @@ class HiredisConan(ConanFile):
             })
 
         # headers
-        self.copy("*.h", dst="include/hiredis", src="include/hiredis")
+        self.copy("*.h", dst=os.path.join("include", "hiredis"), src=os.path.join("include", "hiredis"))
 
         # libs
         if self.options.shared:
