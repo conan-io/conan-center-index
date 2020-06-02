@@ -55,6 +55,7 @@ jobs:
             deployment-target: '10.14'
             build_types: 'Release'
             archs: 'x86_64'
+            conan_options: ', qt:with_builtin_libs=True'
             compiler: 'apple_clang'
             compiler_version: '11.0'
             xcode_version: '11.4'

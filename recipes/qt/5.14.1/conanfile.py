@@ -86,6 +86,7 @@ class QtConan(ConanFile):
         "sysroot": "ANY",
         "config": "ANY",
         "multiconfiguration": [True, False],
+        "with_builtin_libs": [True, False],
     }, **{module: [True, False] for module in _submodules if module != 'qtbase'}
     )
     no_copy_source = True
@@ -122,6 +123,7 @@ class QtConan(ConanFile):
         "sysroot": None,
         "config": None,
         "multiconfiguration": False,
+        "with_builtin_libs": False,
         "libxcb:shared": True,
     }, **{module: False for module in _submodules if module != 'qtbase'}
     )
@@ -290,21 +292,21 @@ class QtConan(ConanFile):
             self.requires("glib/2.64.0")
         # if self.options.with_libiconv:
         #     self.requires("libiconv/1.16")
-        if self.options.with_doubleconversion and not self.options.multiconfiguration:
+        if self.options.with_doubleconversion and not (self.options.multiconfiguration or self.options.with_builtin_libs):
             self.requires("double-conversion/3.1.5")
-        if self.options.with_freetype and not self.options.multiconfiguration:
+        if self.options.with_freetype and not (self.options.multiconfiguration or self.options.with_builtin_libs):
             self.requires("freetype/2.10.1")
         if self.options.with_fontconfig:
             self.requires("fontconfig/2.13.91")
         if self.options.with_icu:
             self.requires("icu/64.2")
-        if self.options.with_harfbuzz and not self.options.multiconfiguration:
+        if self.options.with_harfbuzz and not (self.options.multiconfiguration or self.options.with_builtin_libs):
             self.requires("harfbuzz/2.6.4")
-        if self.options.with_libjpeg and not self.options.multiconfiguration:
+        if self.options.with_libjpeg and not (self.options.multiconfiguration or self.options.with_builtin_libs):
             self.requires("libjpeg/9d")
-        if self.options.with_libpng and not self.options.multiconfiguration:
+        if self.options.with_libpng and not (self.options.multiconfiguration or self.options.with_builtin_libs):
             self.requires("libpng/1.6.37")
-        if self.options.with_sqlite3 and not self.options.multiconfiguration:
+        if self.options.with_sqlite3 and not (self.options.multiconfiguration or self.options.with_builtin_libs):
             self.requires("sqlite3/3.31.0")
             self.options["sqlite3"].enable_column_metadata = True
         if self.options.with_mysql:
@@ -523,7 +525,7 @@ class QtConan(ConanFile):
                               ("with_libpng", "libpng"),
                               ("with_sqlite3", "sqlite")]:
             if getattr(self.options, opt):
-                if self.options.multiconfiguration:
+                if self.options.multiconfiguration or self.options.with_builtin_libs:
                     args += ["-qt-" + conf_arg]
                 else:
                     args += ["-system-" + conf_arg]
