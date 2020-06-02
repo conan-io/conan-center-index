@@ -21,9 +21,12 @@ class UtfCppConan(ConanFile):
 
     def package(self):
         self.copy("*.h",
-                  dst="include",
+                  dst=os.path.join("include", "utf8cpp"),
                   src=os.path.join(self._source_subfolder, "source"))
         self.copy("LICENSE", dst="licenses", src=self._source_subfolder)
 
     def package_id(self):
         self.info.header_only()
+
+    def package_info(self):
+        self.cpp_info.includedirs.append(os.path.join("include", "utf8cpp"))

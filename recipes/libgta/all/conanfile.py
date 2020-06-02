@@ -61,6 +61,9 @@ class LibgtaConan(ConanFile):
         tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
 
     def package_info(self):
+        self.cpp_info.names["cmake_find_package"] = "GTA"
+        self.cpp_info.names["cmake_find_package_multi"] = "GTA"
+        self.cpp_info.names["pkg_config"] = "gta"
         self.cpp_info.libs = tools.collect_libs(self)
         if self.settings.compiler == "Visual Studio" and not self.options.shared:
             self.cpp_info.defines.append("GTA_STATIC")

@@ -1,0 +1,31 @@
+sources:
+  "3.16.2":
+    sha256: 8c09786ec60ca2be354c29829072c38113de9184f29928eb9da8446a5f2ce6a9
+    url: https://cmake.org/files/v3.16/cmake-3.16.2.tar.gz
+  "3.16.3":
+    sha256: e54f16df9b53dac30fd626415833a6e75b0e47915393843da1825b096ee60668
+    url: https://cmake.org/files/v3.16/cmake-3.16.3.tar.gz
+  "3.16.4":
+    sha256: 9bcc8c114d9da603af9512083ed7d4a39911d16105466beba165ba8fe939ac2c
+    url: https://cmake.org/files/v3.16/cmake-3.16.4.tar.gz
+  "3.16.5":
+    sha256: 5f760b50b8ecc9c0c37135fae5fbf00a2fef617059aa9d61c1bb91653e5a8bfc
+    url: https://cmake.org/files/v3.16/cmake-3.16.5.tar.gz
+  "3.16.6":
+    sha256: 6f6ff1a197851b0fa8412ff5de602e6717a4eb9509b2c385b08589c4e7a16b62
+    url: https://cmake.org/files/v3.16/cmake-3.16.6.tar.gz
+  "3.16.7":
+    sha256: 5f49c95a2933b1800f14840f3a389f4cef0b19093985a35053b43f38ec21358f
+    url: https://cmake.org/files/v3.16/cmake-3.16.7.tar.gz
+  "3.17.0":
+    sha256: b74c05b55115eacc4fa2b77a814981dbda05cdc95a53e279fe16b7b272f00847
+    url: https://cmake.org/files/v3.17/cmake-3.17.0.tar.gz
+  "3.17.1":
+    sha256: 3aa9114485da39cbd9665a0bfe986894a282d5f0882b1dea960a739496620727
+    url: https://cmake.org/files/v3.17/cmake-3.17.1.tar.gz
+  "3.17.2":
+    sha256: fc77324c4f820a09052a7785549b8035ff8d3461ded5bbd80d252ae7d1cd3aa5
+    url: https://cmake.org/files/v3.17/cmake-3.17.2.tar.gz
+  "3.17.3":
+    sha256: 0bd60d512275dc9f6ef2a2865426a184642ceb3761794e6b65bff233b91d8c40
+    url: https://cmake.org/files/v3.17/cmake-3.17.3.tar.gz

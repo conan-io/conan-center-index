@@ -1,0 +1,4 @@
+sources:
+  "2.8.2":
+    url: https://github.com/hanickadot/compile-time-regular-expressions/archive/v2.8.2.tar.gz
+    sha256: f89494f52ec31e5854fff3d2c5825474201476636c5d82a9365dad5188396314 

@@ -39,7 +39,6 @@ class WebsocketPPConan(ConanFile):
                 tools.patch(**patch)
 
     def package(self):
-        self._patch_sources()
         self.copy(pattern="COPYING", dst="licenses", src=self._source_subfolder)
         # We have to copy the headers manually, since the upstream cmake.install() step doesn't do so.
         self.copy(pattern="*.hpp", dst="include/websocketpp", src=self._source_subfolder + "/websocketpp")

@@ -8,8 +8,7 @@
     #include <iowin32.h>
 #endif
 
-/* TODO: create test for this headers */
-#include <crypt.h>
+/* TODO: create test for this header */
 #include <mztools.h>
 
 const char text[] = ""
@@ -238,7 +237,7 @@ void Display64BitsSize(ZPOS64_T n, int size_char) {
     int offset = 19;
     int pos_string = 19;
     number[20] = 0;
-    
+
     for (;;) {
         number[offset] = (char) ((n % 10) + '0');
       if (number[offset] != '0') {
