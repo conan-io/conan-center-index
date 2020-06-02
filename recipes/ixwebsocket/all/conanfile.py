@@ -49,7 +49,7 @@ class IXWebSocketConan(ConanFile):
             del self.options.fPIC
 
     def requirements(self):
-        self.requires.add("zlib/1.2.11")
+        self.requires("zlib/1.2.11")
 
         if not self.options.tls:
             # if we're not using TLS of some or another type, then no libraries after this
@@ -59,9 +59,9 @@ class IXWebSocketConan(ConanFile):
         # Invalid configurations have been eliminated by this point, so it should be safe
         # to add the dependencies without any further checks
         if self.options.tls == "openssl":
-            self.requires.add("openssl/1.1.1e")
+            self.requires("openssl/1.1.1e")
         elif self.options.tls == "mbedtls":
-            self.requires.add("mbedtls/2.16.3-apache")
+            self.requires("mbedtls/2.16.3-apache")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
@@ -73,7 +73,8 @@ class IXWebSocketConan(ConanFile):
         # User-selectable options
         cmake.definitions["USE_TLS"] = self.options.tls != False
         cmake.definitions["USE_MBED_TLS"] = self.options.tls == "mbedtls"
-        cmake.definitions["USE_OPENSSL"] = self.options.tls == "openssl"
+        cmake.definitions["USE_OPEN_SSL"] = self.options.tls == "openssl"
+        # Apple configures itself
 
         cmake.configure()
         return cmake
