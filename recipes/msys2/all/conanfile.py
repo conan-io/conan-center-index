@@ -11,7 +11,6 @@ class MSYS2Conan(ConanFile):
     homepage = "http://www.msys2.org"
     license = "MSYS license"
     topics = ("conan", "msys", "unix", "subsystem")
-    build_requires = "7zip/19.00"
     short_paths = True
     options = {"exclude_files": "ANY",  # Comma separated list of file patterns to exclude from the package
                "packages": "ANY",  # Comma separated
@@ -30,12 +29,6 @@ class MSYS2Conan(ConanFile):
         # source files downloaded will be different based on architecture or OS
         pass
 
-    def _download(self, url, sha256):
-        from six.moves.urllib.parse import urlparse
-        filename = os.path.basename(urlparse(url).path)
-        tools.download(url, filename)
-        tools.check_sha256(filename, sha256)
-        return filename
 
     @property
     def _msys_dir(self):
@@ -43,14 +36,7 @@ class MSYS2Conan(ConanFile):
 
     def build(self):
         arch = 0 if self.settings.arch_build == "x86" else 1  # index in the sources list
-        url = self.conan_data["sources"][self.version][arch]["url"]
-        sha256 = self.conan_data["sources"][self.version][arch]["sha256"]
-        filename = self._download(**self.conan_data["sources"][self.version][arch])
-        tar_name = filename.replace(".xz", "")
-        self.run("7z.exe x {0}".format(filename))
-        self.run("7z.exe x {0}".format(tar_name))
-        os.unlink(filename)
-        os.unlink(tar_name)
+        tools.get(**self.conan_data["sources"][self.version][arch])
 
         packages = []
         if self.options.packages:
