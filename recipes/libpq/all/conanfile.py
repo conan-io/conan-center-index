@@ -1,4 +1,5 @@
 from conans import ConanFile, AutoToolsBuildEnvironment, tools
+from conans.errors import ConanInvalidConfiguration
 from conans.tools import os_info
 import os
 import glob
@@ -46,6 +47,9 @@ class LibpqConan(ConanFile):
     def configure(self):
         del self.settings.compiler.libcxx
         del self.settings.compiler.cppstd
+        if self.settings.compiler != "Visual Studio" and self.settings.os == "Windows":
+            if self.options.shared:
+                raise ConanInvalidConfiguration("static mingw build is not possible")
 
     def requirements(self):
         if self.options.with_zlib:
@@ -73,6 +77,13 @@ class LibpqConan(ConanFile):
             with tools.chdir(self._source_subfolder):
                 self._autotools.configure(args=args)
         return self._autotools
+
+    @property
+    def _make_args(self):
+        args = []
+        if self.settings.os == "Windows":
+            args.append("MAKE_DLL={}".format(str(self.options.shared).lower()))
+        return args
 
     def build(self):
         if self.settings.compiler == "Visual Studio":
@@ -119,27 +130,32 @@ class LibpqConan(ConanFile):
         else:
             autotools = self._configure_autotools()
             with tools.chdir(os.path.join(self._source_subfolder, "src", "backend")):
-                autotools.make(target="generated-headers")
+                autotools.make(args=self._make_args, target="generated-headers")
             with tools.chdir(os.path.join(self._source_subfolder, "src", "common")):
-                autotools.make()
+                autotools.make(args=self._make_args)
             if tools.Version(self.version) >= "12":
                 with tools.chdir(os.path.join(self._source_subfolder, "src", "port")):
-                    autotools.make()
+                    autotools.make(args=self._make_args)
             with tools.chdir(os.path.join(self._source_subfolder, "src", "include")):
-                autotools.make()
+                autotools.make(args=self._make_args)
             with tools.chdir(os.path.join(self._source_subfolder, "src", "interfaces", "libpq")):
-                autotools.make()
+                autotools.make(args=self._make_args)
             with tools.chdir(os.path.join(self._source_subfolder, "src", "bin", "pg_config")):
-                autotools.make()
+                autotools.make(args=self._make_args)
 
-    def _remove_unused_libraries_from_package(self, is_shared):
-        path = None
-        if is_shared:
-            path = os.path.join(self.package_folder, "lib", "*.a")
+    def _remove_unused_libraries_from_package(self):
+        if self.options.shared:
+            if self.settings.os == "Windows":
+                globs = []
+            else:
+                globs = [os.path.join(self.package_folder, "lib", "*.a")]
         else:
-            path = os.path.join(self.package_folder, "lib", "libpq.so*")
-        for file in glob.glob(path):
-            os.remove(file)
+            globs = [os.path.join(self.package_folder, "lib", "libpq.so*"), os.path.join(self.package_folder, "bin", "*.dll")]
+        if self.settings.os == "Windows":
+            os.unlink(os.path.join(self.package_folder, "lib", "libpq.dll"))
+        for globi in globs:
+            for file in glob.glob(globi):
+                os.remove(file)
 
     def package(self):
         self.copy(pattern="COPYRIGHT", dst="licenses", src=self._source_subfolder)
@@ -158,21 +174,22 @@ class LibpqConan(ConanFile):
             else:
                 self.copy("*.lib", src=self._source_subfolder, dst="lib", keep_path=False)
         else:
-            autotools = self._configure_autotools()
+            autotools = AutoToolsBuildEnvironment(self, win_bash=tools.os_info.is_windows)#self._configure_autotools()
             with tools.chdir(os.path.join(self._source_subfolder, "src", "common")):
-                autotools.install()
+                autotools.install(args=self._make_args)
             with tools.chdir(os.path.join(self._source_subfolder, "src", "include")):
-                autotools.install()
+                autotools.install(args=self._make_args)
             with tools.chdir(os.path.join(self._source_subfolder, "src", "interfaces", "libpq")):
-                autotools.install()
+                autotools.install(args=self._make_args)
             if tools.Version(self.version) >= "12":
                 with tools.chdir(os.path.join(self._source_subfolder, "src", "port")):
-                    autotools.install()
-
-            self._remove_unused_libraries_from_package(self.options.shared)
+                    autotools.install(args=self._make_args)
 
             with tools.chdir(os.path.join(self._source_subfolder, "src", "bin", "pg_config")):
-                autotools.install()
+                autotools.install(args=self._make_args)
+
+            self._remove_unused_libraries_from_package()
+
             tools.rmdir(os.path.join(self.package_folder, "include", "postgresql", "server"))
             self.copy(pattern="*.h", dst=os.path.join("include", "catalog"), src=os.path.join(self._source_subfolder, "src", "include", "catalog"))
         self.copy(pattern="*.h", dst=os.path.join("include", "catalog"), src=os.path.join(self._source_subfolder, "src", "backend", "catalog"))
@@ -188,7 +205,7 @@ class LibpqConan(ConanFile):
         self.cpp_info.names["cmake_find_package"] = "PostgreSQL"
         self.cpp_info.names["cmake_find_package_multi"] = "PostgreSQL"
         self.env_info.PostgreSQL_ROOT = self.package_folder
-        
+
         self.cpp_info.components["pq"].libs = [self._construct_library_name("pq")]
 
         if self.options.with_zlib:
@@ -214,7 +231,6 @@ class LibpqConan(ConanFile):
                     self.cpp_info.components["pgcommon"].libs = ["pgcommon", "pgcommon_shlib"]
                     self.cpp_info.components["pgport"].libs = ["pgport", "pgport_shlib"]
                     self.cpp_info.components["pq"].requires.extend(["pgport", "pgcommon"])
-
 
         if self.settings.os == "Linux":
             self.cpp_info.components["pq"].system_libs = ["pthread"]
