@@ -8,19 +8,13 @@ PY3 = (3, 0) <= sys.version_info < (4, 0)
 if PY2:
     subdir = "py2"
     from distutils.core import setup, Command, Extension
-    from distutils.command.build import build as BuildCmd
 elif PY3:
     subdir = "py3"
     from setuptools import setup, Command, Extension
-    from setuptools.command.build_ext import build_ext as BuildCmd
 else:
     raise Exception
 
-srcpath = os.path.join(os.path.dirname(os.path.realpath(__file__)), subdir)
-relpath = os.path.relpath(srcpath, os.getcwd())
-
-# Using a relative path to avoid long paths
-spam_sources = [os.path.join(relpath, "test_module.c")]
+spam_sources = [os.path.join(subdir, "test_module.c")]
 
 
 class ConanCommand(Command):
