@@ -25,3 +25,5 @@ versions:
     folder: all
   8.9.0:
     folder: all
+  8.9.1:
+    folder: all
