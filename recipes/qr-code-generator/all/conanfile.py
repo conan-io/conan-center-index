@@ -2,8 +2,8 @@ from conans import ConanFile, CMake, tools
 import os
 
 
-class qrcodegenConan(ConanFile):
-    name = "qrcodegen"
+class QrCodeGeneratorConan(ConanFile):
+    name = "qr-code-generator"
     url = "https://github.com/nayuki/QR-Code-generator"
     description = "High-quality QR Code generator library in Java, JavaScript, Python, C++, C, Rust, TypeScript."
     license = "MIT"
