@@ -7,10 +7,13 @@ class QrCodeGeneratorConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/nayuki/QR-Code-generator"
     description = "High-quality QR Code generator library in Java, JavaScript, Python, C++, C, Rust, TypeScript."
+    topics = ["qr-code", "qr-generator", "c-plus-plus"]
     license = "MIT"
     settings = "os", "compiler", "arch", "build_type"
-    options = {"shared": [True, False]}
-    default_options = "shared=False"
+    options = {"shared": [True, False],
+               "fPIC": [True, False]}
+    default_options = {'shared': False,
+                       'fPIC': True}
     exports_sources = "*"
     generators = "cmake"
 
@@ -19,6 +22,10 @@ class QrCodeGeneratorConan(ConanFile):
     @property
     def _source_subfolder(self):
         return "source_subfolder"
+
+    def configure(self):
+        if self.settings.compiler == "Visual Studio":
+            self.options.remove("fPIC")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
