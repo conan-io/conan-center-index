@@ -21,6 +21,7 @@ class BaseHeaderOnly(ConanFile):
                                         os.path.join("lib", "pkgconfig")])
         self.cpp_info.includedirs = [path for path in self.cpp_info.includedirs if os.path.isdir(path)]
         self.cpp_info.libdirs = [path for path in self.cpp_info.libdirs if os.path.isdir(path)]
+        self.cpp_info.libs = tools.collect_libs(self)
 
     def package_id(self):
         self.info.header_only()
