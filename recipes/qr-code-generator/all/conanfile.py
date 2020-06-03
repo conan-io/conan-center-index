@@ -25,7 +25,7 @@ class QrCodeGeneratorConan(ConanFile):
 
     def configure(self):
         if self.settings.compiler == "Visual Studio":
-            self.options.remove("fPIC")
+            del self.options.fPIC
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
@@ -52,6 +52,8 @@ class QrCodeGeneratorConan(ConanFile):
         cmake.build()
 
     def package(self):
+        self.copy("Readme.markdown", dst="licenses",
+                  src=self._source_subfolder)
         cmake = self._configure_cmake()
         cmake.install()
 
