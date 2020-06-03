@@ -12,6 +12,7 @@ class KangaruConan(ConanFile):
                 "no_exception": [True, False]}
     default_options = {"reverse_destruction": True,
                         "no_exception": False}
+    no_copy_source = True
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
@@ -35,7 +36,3 @@ class KangaruConan(ConanFile):
 
     def package_id(self):
         self.info.header_only()
-    
-    def package_info(self):
-        self.cpp_info.libs = []
-        self.cpp_info.builddirs
