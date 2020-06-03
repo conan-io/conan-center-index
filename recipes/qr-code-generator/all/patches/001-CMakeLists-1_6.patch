@@ -1,0 +1,12 @@
+--- CMakeLists.txt
++++ CMakeLists.txt
+@@ -36,8 +36,6 @@
+     LIBRARY DESTINATION lib
+     ARCHIVE DESTINATION lib)
+ 
+-set(HEADERS source_subfolder/cpp/QrCode.hpp
+-            source_subfolder/cpp/QrSegment.hpp
+-            source_subfolder/cpp/BitBuffer.hpp)
++set(HEADERS source_subfolder/cpp/QrCode.hpp)
+ 
+ INSTALL(FILES ${HEADERS} DESTINATION include/qrcodegen)
