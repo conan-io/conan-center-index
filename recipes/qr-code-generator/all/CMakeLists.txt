@@ -9,8 +9,6 @@ set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
-set(CMAKE_POSITION_INDEPENDENT_CODE ON)
-
 if(MSVC)
     add_definitions (-D_WIN32_WINNT=0x0601)
     add_definitions (-D_SCL_SECURE_NO_WARNINGS=1)
@@ -27,7 +25,10 @@ if(WIN32 AND BUILD_SHARED_LIBS)
     set(CMAKE_VS_INCLUDE_INSTALL_TO_DEFAULT_BUILD TRUE)
 endif()
 
-aux_source_directory(source_subfolder/cpp SRC)
+set(SRC source_subfolder/cpp/QrCode.cpp
+        source_subfolder/cpp/QrSegment.cpp
+        source_subfolder/cpp/BitBuffer.cpp
+        source_subfolder/cpp/QrCodeGeneratorWorker.cpp)
 
 add_library(qrcodegen ${SRC})
 
