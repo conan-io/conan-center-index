@@ -105,8 +105,7 @@
         "sha256": "0ed0934e2ef4ddff53fcc70fc64fb16fe766cd41ee00330312e20a985fd927a7",
         "description": "utility functions for other XCB utilities.",
         "namespace": "xcb",
-        "requires": ["libxcb"],
-        "libs": ["xcb-util"]
+        "requires": ["libxcb"]
     },
     {
         "name": "xcb-util-wm",
@@ -114,8 +113,7 @@
         "sha256": "48c9b2a8c5697e0fde189706a6fa4b09b7b65762d88a495308e646eaf891f42a",
         "description": " XCB ICCCM and EWMH bindings",
         "namespace": "xcb",
-        "requires": ["libxcb"],
-        "libs": ["xcb-ewmh","xcb-icccm"]
+        "requires": ["libxcb"]
     },
     {
         "name": "xcb-util-image",
@@ -124,7 +122,6 @@
         "description": "XCB image convenience library",
         "namespace": "xcb",
         "requires": ["xcb-util"],
-        "libs": ["xcb-image"],
         "patches": ["clang.patch", "xcb-util-image.patch"]
     },
     {
@@ -133,8 +130,7 @@
         "sha256": "0807cf078fbe38489a41d755095c58239e1b67299f14460dec2ec811e96caa96",
         "description": "Library for handling standard X key constants and conversion to/from keycodes.",
         "namespace": "xcb",
-        "requires": ["libxcb"],
-        "libs": ["xcb-keysyms"]
+        "requires": ["libxcb"]
     },
     {
         "name": "xcb-util-renderutil",
@@ -142,8 +138,7 @@
         "sha256": "55eee797e3214fe39d0f3f4d9448cc53cffe06706d108824ea37bb79fcedcad5",
         "description": "convenience functions for the Render extension",
         "namespace": "xcb",
-        "requires": ["libxcb"],
-        "libs": ["xcb-render-util"]
+        "requires": ["libxcb"]
     },
     {
         "name": "xkeyboard-config",

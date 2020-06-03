@@ -36,7 +36,6 @@ class {classname}Conan({baseclass}):
 
     def package_info(self):
         super({classname}Conan, self).package_info()
-        {libs}
         {system_libs}
 """
 
@@ -72,13 +71,6 @@ def gen(args):
             else:
                 requires = ""
             header_only = "header-only" in info and info["header-only"]
-            libs = ""
-            if "libs" in info:
-                libs = ['"%s"' % lib for lib in info["libs"]]
-                libs = "self.cpp_info.libs.extend([%s])" % ", ".join(libs)
-            elif not header_only:
-                libs = ['"%s"' % name[3:]]
-                libs = "self.cpp_info.libs.extend([%s])" % ", ".join(libs)
             system_libs = ""
             if "system_libs" in info:
                 system_libs = ['"%s"' % lib for lib in info["system_libs"]]
@@ -93,7 +85,6 @@ def gen(args):
                                                 requires=requires,
                                                 name=name,
                                                 baseclass=baseclass,
-                                                libs=libs,
                                                 system_libs=system_libs,
                                                 classname=classname,
                                                 patches=patches)
