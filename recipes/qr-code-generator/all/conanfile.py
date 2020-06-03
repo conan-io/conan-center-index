@@ -4,7 +4,8 @@ import os
 
 class QrCodeGeneratorConan(ConanFile):
     name = "qr-code-generator"
-    url = "https://github.com/nayuki/QR-Code-generator"
+    url = "https://github.com/conan-io/conan-center-index"
+    homepage = "https://github.com/nayuki/QR-Code-generator"
     description = "High-quality QR Code generator library in Java, JavaScript, Python, C++, C, Rust, TypeScript."
     license = "MIT"
     settings = "os", "compiler", "arch", "build_type"
