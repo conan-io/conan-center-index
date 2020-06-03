@@ -212,6 +212,18 @@ class CPythonConan(ConanFile):
         if self._is_py3:
             tools.replace_in_file(os.path.join(self._source_subfolder, "setup.py"),
                                   ":libmpdec.so.2", "mpdec")
+        if self.settings.compiler == "Visual Studio":
+            runtime_library = {
+                "MT": "MultiThreaded",
+                "MTd": "MultiThreadedDebug",
+                "MD": "MultiThreadedDLL",
+                "MDd": "MultiThreadedDebugDLL",
+            }[str(self.settings.compiler.runtime)]
+            self.output.info("Patching runtime")
+            tools.replace_in_file(os.path.join(self._source_subfolder, "PCbuild", "pyproject.props"),
+                                  "MultiThreadedDLL", runtime_library)
+            tools.replace_in_file(os.path.join(self._source_subfolder, "PCbuild", "pyproject.props"),
+                                  "MultiThreadedDebugDLL", runtime_library)
 
     @property
     def _solution_projects(self):
