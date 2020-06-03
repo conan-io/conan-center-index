@@ -51,6 +51,12 @@ class TestPackageConan(ConanFile):
                 unicode=False,
             )
 
+    @property
+    def _cmake_try_FindPythonX(self):
+        if self.settings.compiler == "Visual Studio" and self.settings.build_type == "Debug":
+            return False
+        return True
+
     def build(self):
         cmake = CMake(self)
         py_major = self.deps_cpp_info["cpython"].version.split(".")[0]
@@ -59,8 +65,11 @@ class TestPackageConan(ConanFile):
         cmake.definitions["PY_VERSION"] = self._py_version
         cmake.definitions["PY_VERSION_SUFFIX"] = self._cmake_abi.suffix
         cmake.definitions["PYTHON_EXECUTABLE"] = tools.get_env("PYTHON")
+        cmake.definitions["USE_FINDPYTHON_X".format(py_major)] = self._cmake_try_FindPythonX
+        cmake.definitions["Python{}_EXECUTABLE".format(py_major)] = tools.get_env("PYTHON")
         cmake.definitions["Python{}_ROOT_DIR".format(py_major)] = self.deps_cpp_info["cpython"].rootpath
         cmake.definitions["Python{}_USE_STATIC_LIBS".format(py_major)] = not self.options["cpython"].shared
+        cmake.definitions["Python{}_FIND_FRAMEWORK".format(py_major)] = "NEVER"
         cmake.definitions["Python{}_FIND_REGISTRY".format(py_major)] = "NEVER"
         cmake.definitions["Python{}_FIND_IMPLEMENTATIONS".format(py_major)] = "CPython"
         cmake.definitions["Python{}_FIND_STRATEGY".format(py_major)] = "LOCATION"

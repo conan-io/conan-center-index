@@ -69,7 +69,8 @@ if(MSVC)
     set_property(TARGET spam PROPERTY SUFFIX "${SUFFIX}")
 endif()
 
-if(NOT (CMAKE_VERSION VERSION_LESS "3.16"))
+option(USE_FINDPYTHON_X "Use new-style FindPythonX module")
+if(USE_FINDPYTHON_X AND NOT (CMAKE_VERSION VERSION_LESS "3.16"))
     # Require CMake 3.16 because this version introduces Python${PY_VERSION_MAJOR}_FIND_ABI
     find_package(Python${PY_VERSION_MAJOR} REQUIRED COMPONENTS Interpreter Development)
     message("Python${PY_VERSION_MAJOR}_EXECUTABLE: ${Python${PY_VERSION_MAJOR}_EXECUTABLE}")
