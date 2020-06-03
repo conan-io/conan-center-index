@@ -1,5 +1,5 @@
 from conans import ConanFile, tools, CMake
-import os, shutil
+import os
 
 class KangaruConan(ConanFile):
     name = "kangaru"
@@ -14,14 +14,19 @@ class KangaruConan(ConanFile):
                         "no_exception": False}
     no_copy_source = True
 
+    @property
+    def _source_subfolder(self):
+        return "source_subfolder"
+
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
+        os.rename(self.name + "-" + self.version, self._source_subfolder)
 
     def _configure_cmake(self):
         cmake = CMake(self)
         cmake.definitions["KANGARU_REVERSE_DESTRUCTION"] = self.options.reverse_destruction
         cmake.definitions["KANGARU_NO_EXCEPTION"] = self.options.no_exception
-        cmake.configure(source_folder="kangaru-4.2.4")
+        cmake.configure(source_folder=self._source_subfolder)
         return cmake
 
     def build(self):
@@ -31,8 +36,5 @@ class KangaruConan(ConanFile):
     def package(self):
         cmake = self._configure_cmake()
         cmake.install()
-        shutil.rmtree(os.path.join(self.package_folder, "lib"))
-        self.copy("*LICENSE*", "licenses")
-
-    def package_id(self):
-        self.info.header_only()
+        tools.rmdir(os.path.join(self.package_folder, "lib"))
+        self.copy(os.path.join(self._source_subfolder, "LICENSE"), "licenses")
