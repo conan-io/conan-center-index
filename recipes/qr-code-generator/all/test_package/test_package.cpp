@@ -1,5 +1,3 @@
-#include <stdexcept>
-
 #include "qrcodegen/QrCode.hpp"
 
 int main() {

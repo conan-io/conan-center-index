@@ -43,7 +43,7 @@ class QrCodeGeneratorConan(ConanFile):
         try:
             for patch in self.conan_data["patches"][self.version]:
                 tools.patch(**patch)
-        except Exception:
+        except KeyError:
             pass
 
     def build(self):

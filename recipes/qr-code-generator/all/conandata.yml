@@ -10,6 +10,9 @@ sources:
     sha256: "8acee5a77325e075b910747ad4b1fdb1491b7e22d0b8f1b5a6ea15ea08ba33a8"
 
 patches:
+  "1.4.0":
+    - base_path: "."
+      patch_file: "patches/002-qrcode-1_4.patch"
   "1.6.0":
     - base_path: "."
       patch_file: "patches/001-CMakeLists-1_6.patch"
