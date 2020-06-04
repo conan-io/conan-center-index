@@ -179,8 +179,7 @@ class QtConan(ConanFile):
         if self.settings.os != "Linux":
             self.options.with_icu = False
         if self.settings.os == "Linux":
-            self.options.GUI = False
-            self.options.widgets = False
+            raise ConanInvalidConfiguration('Linux is not yet supported')
 
     def configure(self):
         if conan_version < Version("1.20.0"):
