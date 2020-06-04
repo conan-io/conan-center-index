@@ -78,17 +78,18 @@ class GfCompleteConan(ConanFile):
         ]
 
         if "arm" in self.settings.arch:
-            # neon is enabled by default
-            if self.options.neon != "auto" and not self.options.neon:
-                configure_args.append("--disable-neon")
+            if self.options.neon != "auto":
+                configure_args.append("--{}-neon".format(
+                    "enable" if self.options.neon else "disable"))
 
         if self.settings.arch in ["x86", "x86_64"]:
-            # sse is enabled by default
-            if self.options.sse != "auto" and not self.options.sse:
-                configure_args.append("--disable-sse")
-            # avx is disabled by default
-            if self.options.avx != "auto" and self.options.avx:
-                configure_args.append("--enable-avx")
+            if self.options.sse != "auto":
+                configure_args.append("--{}-sse".format(
+                    "enable" if self.options.sse else "disable"))
+
+            if self.options.avx != "auto":
+                configure_args.append("--{}-avx".format(
+                    "enable" if self.options.avx else "disable"))
 
         self._autotools.configure(args=configure_args,
                                   configure_dir=self._source_subfolder)
