@@ -103,8 +103,13 @@ class ProjConan(ConanFile):
             self.cpp_info.system_libs.append(self._stdcpp_library)
         if self.options.shared and self.settings.compiler == "Visual Studio":
             self.cpp_info.defines.append("PROJ_MSVC_DLL_IMPORT")
-        self.env_info.PROJ_LIB.append(os.path.join(self.package_folder, "res"))
-        self.env_info.PATH.append(os.path.join(self.package_folder, "bin"))
+
+        res_path = os.path.join(self.package_folder, "res")
+        self.output.info("Appending PROJ_LIB environment variable: {}".format(res_path))
+        self.env_info.PROJ_LIB.append(res_path)
+        bin_path = os.path.join(self.package_folder, "bin")
+        self.output.info("Appending PATH environment variable: {}".format(bin_path))
+        self.env_info.PATH.append(bin_path)
 
     @property
     def _stdcpp_library(self):
