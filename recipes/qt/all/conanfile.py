@@ -632,6 +632,13 @@ class QtConan(ConanFile):
         tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
         for file_to_remove in glob.glob(os.path.join(self.package_folder, "lib", "*.la*")):
             os.remove(file_to_remove)
+        for file_to_remove in glob.glob(os.path.join(self.package_folder, "lib", "*.pdb*")):
+            os.remove(file_to_remove)
+        for root, dirs, files in os.walk(os.path.join(self.package_folder, "bin")):
+            for name in files:
+                if name.endswith('.pdb'):
+                    os.remove(os.path.join(root, name))
+            
 
     def package_id(self):
         del self.info.options.cross_compile
