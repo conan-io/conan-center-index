@@ -52,6 +52,14 @@ class QtConan(ConanFile):
     exports = ["qtmodules.conf", "patches/*.diff"]
     settings = "os", "arch", "compiler", "build_type"
 
+    library_source = {
+        "not_used": "-no-",
+        "qt": "-qt-",
+        "system": "-system-"
+    }  
+
+    library_sources = list(library_source.keys())
+
     options = dict({
         "shared": [True, False],
         "commercial": [True, False],
@@ -61,14 +69,14 @@ class QtConan(ConanFile):
         "with_pcre2": [True, False],
         "with_glib": [True, False],
         # "with_libiconv": [True, False],  # Qt tests failure "invalid conversion from const char** to char**"
-        "with_doubleconversion": [True, False],
-        "with_freetype": [True, False],
+        "with_doubleconversion": library_sources,
+        "with_freetype": library_sources,
         "with_fontconfig": [True, False],
         "with_icu": [True, False],
-        "with_harfbuzz": [True, False],
-        "with_libjpeg": [True, False],
-        "with_libpng": [True, False],
-        "with_sqlite3": [True, False],
+        "with_harfbuzz": library_sources,
+        "with_libjpeg": library_sources,
+        "with_libpng": library_sources,
+        "with_sqlite3": library_sources,
         "with_mysql": [True, False],
         "with_pq": [True, False],
         "with_odbc": [True, False],
@@ -98,14 +106,14 @@ class QtConan(ConanFile):
         "with_pcre2": True,
         "with_glib": True,
         # "with_libiconv": True,
-        "with_doubleconversion": True,
-        "with_freetype": True,
+        "with_doubleconversion": "system",
+        "with_freetype": "system",
         "with_fontconfig": True,
         "with_icu": True,
-        "with_harfbuzz": True,
-        "with_libjpeg": True,
-        "with_libpng": True,
-        "with_sqlite3": True,
+        "with_harfbuzz": "system",
+        "with_libjpeg": "system",
+        "with_libpng": "system",
+        "with_sqlite3": "system",
         "with_mysql": True,
         "with_pq": True,
         "with_odbc": True,
@@ -221,11 +229,11 @@ class QtConan(ConanFile):
                                             "You can either disable qt:widgets or enable qt:GUI")
         if not self.options.GUI:
             self.options.opengl = "no"
-            self.options.with_freetype = False
+            self.options.with_freetype = "not_used"
             self.options.with_fontconfig = False
-            self.options.with_harfbuzz = False
-            self.options.with_libjpeg = False
-            self.options.with_libpng = False
+            self.options.with_harfbuzz = "not_used"
+            self.options.with_libjpeg = "not_used"
+            self.options.with_libpng = "not_used"
 
         if not self.options.qtgamepad:
             self.options.with_sdl2 = False
@@ -262,7 +270,7 @@ class QtConan(ConanFile):
         if self.options.multiconfiguration:
             del self.settings.build_type
 
-        if not self.options.with_doubleconversion and str(self.settings.compiler.libcxx) != "libc++":
+        if self.options.with_doubleconversion == "not_used" and str(self.settings.compiler.libcxx) != "libc++":
             raise ConanInvalidConfiguration('Qt without libc++ needs qt:with_doubleconversion. '
                                             'Either enable qt:with_doubleconversion or switch to libc++')
 
@@ -288,25 +296,33 @@ class QtConan(ConanFile):
         if self.options.with_pcre2:
             self.requires("pcre2/10.33")
 
+        if self.options.multiconfiguration or self.options.with_builtin_libs:
+            self.options.with_doubleconversion = "qt"
+            self.options.with_freetype = "qt"
+            self.options.with_harfbuzz = "qt"
+            self.options.with_libjpeg = "qt"
+            self.options.with_libpng= "qt"
+            self.options.with_sqlite3 = "qt"
+
         if self.options.with_glib:
             self.requires("glib/2.64.0")
         # if self.options.with_libiconv:
         #     self.requires("libiconv/1.16")
-        if self.options.with_doubleconversion and not (self.options.multiconfiguration or self.options.with_builtin_libs):
+        if self.options.with_doubleconversion == "system":
             self.requires("double-conversion/3.1.5")
-        if self.options.with_freetype and not (self.options.multiconfiguration or self.options.with_builtin_libs):
+        if self.options.with_freetype == "system":
             self.requires("freetype/2.10.1")
         if self.options.with_fontconfig:
             self.requires("fontconfig/2.13.91")
         if self.options.with_icu:
             self.requires("icu/64.2")
-        if self.options.with_harfbuzz and not (self.options.multiconfiguration or self.options.with_builtin_libs):
+        if self.options.with_harfbuzz == "system":
             self.requires("harfbuzz/2.6.4")
-        if self.options.with_libjpeg and not (self.options.multiconfiguration or self.options.with_builtin_libs):
+        if self.options.with_libjpeg == "system":
             self.requires("libjpeg/9d")
-        if self.options.with_libpng and not (self.options.multiconfiguration or self.options.with_builtin_libs):
+        if self.options.with_libpng == "system":
             self.requires("libpng/1.6.37")
-        if self.options.with_sqlite3 and not (self.options.multiconfiguration or self.options.with_builtin_libs):
+        if self.options.with_sqlite3 == "system":
             self.requires("sqlite3/3.31.0")
             self.options["sqlite3"].enable_column_metadata = True
         if self.options.with_mysql:
@@ -524,13 +540,7 @@ class QtConan(ConanFile):
                               ("with_libjpeg", "libjpeg"),
                               ("with_libpng", "libpng"),
                               ("with_sqlite3", "sqlite")]:
-            if getattr(self.options, opt):
-                if self.options.multiconfiguration or self.options.with_builtin_libs:
-                    args += ["-qt-" + conf_arg]
-                else:
-                    args += ["-system-" + conf_arg]
-            else:
-                args += ["-no-" + conf_arg]
+            args += [self.library_source[str(getattr(self.options, opt))] + conf_arg]
 
         libmap = [("zlib", "ZLIB"),
                   ("openssl", "OPENSSL"),
