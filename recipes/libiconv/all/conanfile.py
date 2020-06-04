@@ -115,8 +115,8 @@ class LibiconvConan(ConanFile):
         return self._autotools
 
     def _patch_sources(self):
-        for patchdata in self.conan_data["patches"][self.version]:
-            tools.patch(**patchdata)
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            tools.patch(**patch)
 
     def build(self):
         self._patch_sources()
@@ -137,10 +137,9 @@ class LibiconvConan(ConanFile):
     def package_info(self):
         self.cpp_info.names["cmake_find_package"] = "Iconv"
         self.cpp_info.names["cmake_find_package_multi"] = "Iconv"
-        lib = "iconv"
-        if self.settings.os == "Windows" and self.options.shared:
-            lib += ".dll" + ".lib" if self.settings.compiler == "Visual Studio" else ".a"
-        self.cpp_info.libs = [lib]
+        self.cpp_info.libs = ["iconv", "charset"]
+        if self._is_msvc and self.options.shared:
+            self.cpp_info.libs = [lib + ".dll.lib" for lib in self.cpp_info.libs]
 
         binpath = os.path.join(self.package_folder, "bin")
         self.output.info("Appending PATH environment var: {}".format(binpath))
