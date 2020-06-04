@@ -13,7 +13,7 @@ BOOST_AUTO_TEST_CASE(TestCase)
     BOOST_CHECK(true);
 
     auto defaultReporterDisposer =
-        ApprovalTests::Approvals::useAsDefaultReporter(
+        ApprovalTests::Approvals::useAsFrontLoadedReporter(
             std::make_shared<ApprovalTests::QuietReporter>());
 
     ApprovalTests::Approvals::verify("Hello Approvals");
