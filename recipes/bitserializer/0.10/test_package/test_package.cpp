@@ -6,11 +6,7 @@
 #include <sstream>
 #include <filesystem>
 #include "bitserializer/bit_serializer.h"
-#include "bitserializer_rapidjson/rapidjson_archive.h"
-// ToDo: Will need to check that components are available (via #ifdef)
-// #include "bitserializer_cpprest_json/cpprest_json_archive.h"
-// #include "bitserializer_pugixml/pugixml_archive.h"
-// #include "bitserializer_rapidyaml/rapidyaml_archive.h"
+#include "bitserializer/rapidjson_archive.h"
 
 class CTest
 {
@@ -29,9 +25,9 @@ public:
 };
 
 template <typename TArchive>
-void TestArchive(const std::string& archiveType, const std::string& message)
+void TestArchive(const std::string& message)
 {
-	std::cout << "Testing " << archiveType << " archive: ";
+	std::cout << "Testing " << BitSerializer::Convert::ToString(TArchive::archive_type) << " archive: ";
 
 	BitSerializer::SerializationOptions serializationOptions;
 	serializationOptions.streamOptions.writeBom = false;
@@ -52,14 +48,5 @@ int main() {
 	// Some compilers does not link filesystem automatically
 	std::cout << "Testing the link of C++17 filesystem: " << std::filesystem::temp_directory_path() << std::endl;
 
-	TestArchive<BitSerializer::Json::RapidJson::JsonArchive>("JSON", "Implementation based on RapidJson");
-
-	// ToDo: Uncomment when Conan will support components (will need to check that component is available, like via #ifdef)
-	// TestArchive<BitSerializer::Json::CppRest::JsonArchive>("JSON", "Implementation based on CppRestSdk");
-
-	// ToDo: Uncomment when Conan will support components and PugiXml will be available in the Conan-center
-	// TestArchive<BitSerializer::Xml::PugiXml::XmlArchive>("XML", "Implementation based on PugiXml");
-
-	// ToDo: Uncomment when Conan will support components and RapidYaml will be available in the Conan-center
-	// TestArchive<BitSerializer::Yaml::RapidYaml::YamlArchive>("YAML", "Implementation based on RapidYaml");
+	TestArchive<BitSerializer::Json::RapidJson::JsonArchive>("Implementation based on RapidJson");
 }
