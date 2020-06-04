@@ -11,7 +11,7 @@ class ProjConan(ConanFile):
     homepage = "https://proj.org"
     url = "https://github.com/conan-io/conan-center-index"
     exports_sources = ["CMakeLists.txt", "patches/**"]
-    generators = "cmake"
+    generators = "cmake", "cmake_find_package"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
@@ -54,7 +54,7 @@ class ProjConan(ConanFile):
         os.rename(self.name + "-" + self.version, self._source_subfolder)
 
     def build(self):
-        for patch in self.conan_data["patches"][self.version]:
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
             tools.patch(**patch)
         cmake = self._configure_cmake()
         cmake.build()
