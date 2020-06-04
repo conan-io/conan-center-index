@@ -1,0 +1,10 @@
+sources:
+  "1.8.17":
+    - url: "http://downloads.sourceforge.net/project/doxygen/rel-1.8.17/doxygen-1.8.17.windows.bin.zip"
+      sha256: "5adf183f2591fc6590e57e11c929758bda6229486fce17aee248329da85e34fa"
+    - url: "http://downloads.sourceforge.net/project/doxygen/rel-1.8.17/doxygen-1.8.17.windows.x64.bin.zip"
+      sha256: "49051ae149715b765d94d51eb8c4c6043636464cb27ba5f75c14f71ab81d8740"
+    - url: "http://downloads.sourceforge.net/project/doxygen/rel-1.8.17/Doxygen-1.8.17.dmg"
+      sha256: "bf051b2c26ad5569efe9ca09396199340d03c6c96d61b730d50d5cd8f547425b"
+    - url: "http://downloads.sourceforge.net/project/doxygen/rel-1.8.17/doxygen-1.8.17.linux.bin.tar.gz"
+      sha256: "2ca403e7b9c37c6ca7d9a44c717ba5388500b99ee707d474d159ced11c53242c"
