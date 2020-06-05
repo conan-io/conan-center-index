@@ -139,3 +139,7 @@ class ConanFileDefault(ConanFile):
             self.cpp_info.defines.append("NOMINMAX")
         elif self.settings.os == "Linux":
             self.cpp_info.system_libs.extend(["m", "pthread"])
+
+        bin_path = os.path.join(self.package_folder, "bin")
+        self.output.info("Appending PATH env var with : {}".format(bin_path))
+        self.env_info.PATH.append(bin_path)
