@@ -120,15 +120,22 @@ class GetTextConan(ConanFile):
 
     def package(self):
         self.copy(pattern="COPYING", dst="licenses", src=self._source_subfolder)
+        self.copy(pattern="*.dll", dst="bin", src=self._source_subfolder, keep_path=False, symlinks=True)
+        self.copy(pattern="*.lib", dst="lib", src=self._source_subfolder, keep_path=False, symlinks=True)
+        self.copy(pattern="*.a", dst="lib", src=self._source_subfolder, keep_path=False, symlinks=True)
+        self.copy(pattern="*.so*", dst="lib", src=self._source_subfolder, keep_path=False, symlinks=True)
+        self.copy(pattern="*.dylib*", dst="lib", src=self._source_subfolder, keep_path=False, symlinks=True)
+
         with tools.vcvars(self.settings) if self._is_msvc else tools.no_op():
             with tools.environment_append(VisualStudioBuildEnvironment(self).vars) if self._is_msvc else tools.no_op():
                 with tools.chdir(os.path.join(self._source_subfolder)):
                     env_build = self._configure_autotools()
                     env_build.install()
-        tools.rmdir(os.path.join(self.package_folder, 'share'))
         self.copy(pattern="*libgnuintl.h", dst="include", src=self._source_subfolder, keep_path=False, symlinks=True)
         os.rename(os.path.join(self.package_folder, "include", "libgnuintl.h"),
                   os.path.join(self.package_folder, "include", "libintl.h"))
+        
+        tools.rmdir(os.path.join(self.package_folder, 'share'))
         for f in glob.glob(os.path.join(self.package_folder, "lib", "*.la")):
             os.remove(f)
 
