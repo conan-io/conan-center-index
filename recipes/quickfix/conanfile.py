@@ -1,4 +1,6 @@
 from conans import ConanFile, CMake, tools
+import shutil
+import os
 
 
 class QuickfixConan(ConanFile):
@@ -22,6 +24,8 @@ class QuickfixConan(ConanFile):
                               '''project(${quickfix_PROJECT_NAME} VERSION 0.1 LANGUAGES CXX C)
 include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
 conan_basic_setup()''')
+        os.makedirs("quickfix/include")
+        shutil.copyfile("quickfix/src/C++/Except.h", "quickfix/include/Except.h")
 
     def build(self):
         cmake = self._configure_cmake()
@@ -31,9 +35,14 @@ conan_basic_setup()''')
         cmake = self._configure_cmake()
         cmake.install()
         self.copy("config.h", dst="include", src="quickfix")
+        self.copy("Except.h", dst="include", src="quickfix/src/C++")
 
     def package_info(self):
-        self.cpp_info.libs = ["quickfix"]
+        self.cpp_info.libs = tools.collect_libs(self)
+
+        if self.settings.os == "Windows":
+            self.cpp_info.libs.append("ws2_32")
+            self.cpp_info.libs.append("wsock32")
 
     def _configure_cmake(self):
         cmake = CMake(self)
