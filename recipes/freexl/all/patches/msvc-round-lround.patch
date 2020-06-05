@@ -1,0 +1,27 @@
+--- a/src/freexl.c
++++ b/src/freexl.c
+@@ -89,24 +89,6 @@ freexl_version (void)
+     return freexlversion;
+ }
+ 
+-#if defined(_WIN32) && !defined(__MINGW32__)
+-/* MSVC compiler doesn't support lround() at all */
+-static double
+-round (double num)
+-{
+-    double integer = ceil (num);
+-    if (num > 0)
+-	return integer - num > 0.5 ? integer - 1.0 : integer;
+-    return integer - num >= 0.5 ? integer - 1.0 : integer;
+-}
+-
+-static long
+-lround (double num)
+-{
+-    long integer = (long) round (num);
+-    return integer;
+-}
+-#endif
+ 
+ static void
+ swap16 (biff_word16 * word)
