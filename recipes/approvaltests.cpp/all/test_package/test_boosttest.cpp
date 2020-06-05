@@ -11,7 +11,12 @@ BOOST_AUTO_TEST_SUITE(Suite)
 BOOST_AUTO_TEST_CASE(TestCase)
 {
     BOOST_CHECK(true);
-    ApprovalTests::Approvals::verify("Hello Approvals", ApprovalTests::QuietReporter());
+
+    auto defaultReporterDisposer =
+        ApprovalTests::Approvals::useAsFrontLoadedReporter(
+            std::make_shared<ApprovalTests::QuietReporter>());
+
+    ApprovalTests::Approvals::verify("Hello Approvals");
 }
 
 BOOST_AUTO_TEST_SUITE_END()
