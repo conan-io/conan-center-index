@@ -6,6 +6,8 @@ from conans import ConanFile, CMake, tools
 
 class QuickfixTestConan(ConanFile):
     settings = "os", "compiler", "build_type", "arch"
+    options = {"ssl": [True, False]}
+    default_options = "ssl=False"
     generators = "cmake"
 
     def source(self):
@@ -17,6 +19,9 @@ class QuickfixTestConan(ConanFile):
         self.run("git config core.sparseCheckout true")
         self.run("echo examples/ >> .git/info/sparse-checkout")
         self.run("git pull origin master")
+
+    def configure(self):
+        self.options["quickfix"].ssl = self.options.ssl
 
     def build(self):
         cmake = CMake(self)
