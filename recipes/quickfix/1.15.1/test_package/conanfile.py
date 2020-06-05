@@ -1,50 +1,41 @@
 import os
 import shutil
+import re
 
 from conans import ConanFile, CMake, tools
 
 
 class QuickfixTestConan(ConanFile):
+    version = "1.15.1"
     settings = "os", "compiler", "build_type", "arch"
-    options = {"ssl": [True, False]}
-    default_options = "ssl=False"
+    options = {"ssl": [True, False], "fPIC": [True, False]}
+    default_options = "ssl=False", "fPIC=True"
     generators = "cmake"
+    file_pattern = re.compile(r'quickfix-(.*)')
 
     def source(self):
+        tools.get(**self.conan_data["sources"][self.version])
+        files = os.listdir()
+        quickfix_dir = list(filter(self.file_pattern.search, files))
         shutil.rmtree("source", ignore_errors=True)
-        os.makedirs("source")
-        os.chdir("source")
-        self.run("git init")
-        self.run("git remote add origin https://github.com/quickfix/quickfix.git")
-        self.run("git config core.sparseCheckout true")
-        self.run("echo examples/ >> .git/info/sparse-checkout")
-        self.run("git pull origin master")
+        shutil.move(f"{quickfix_dir[0]}{os.sep}examples", f".{os.sep}source{os.sep}examples")
 
     def configure(self):
         self.options["quickfix"].ssl = self.options.ssl
+        self.options["quickfix"].fPIC = self.options.fPIC
 
     def build(self):
         self.source()
         cmake = CMake(self)
-        # Current dir is "test_package/build/<build_id>" and CMakeLists.txt is
-        # in "test_package"
         cmake.configure()
         cmake.build()
 
-    def imports(self):
-        self.copy("*.dll", dst="bin", src="bin")
-        self.copy("*.dylib*", dst="bin", src="lib")
-        self.copy('*.so*', dst='bin', src='lib')
-        self.copy('*.lib*', dst='lib', src='lib')
-        self.copy('*.a*', dst='lib', src='lib')
-
     def test(self):
         if not tools.cross_building(self):
-            os.chdir("../bin")
-
             if self.settings.os == "Windows":
                 program = "executor_cpp"
             else:
                 program = "executor"
 
-            self.run(f".{os.sep}{program}")
+            self.run(f".{os.sep}{program}", run_environment=True,
+                     cwd=f"{self.build_folder}{os.sep}bin")

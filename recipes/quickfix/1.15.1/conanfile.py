@@ -1,6 +1,7 @@
 from conans import ConanFile, CMake, tools
 import shutil
 import os
+import re
 
 
 class QuickfixConan(ConanFile):
@@ -12,15 +13,19 @@ class QuickfixConan(ConanFile):
     description = "QuickFIX is a free and open source implementation of the FIX protocol"
     topics = ("conan", "QuickFIX", "FIX", "Financial Information Exchange", "libraries", "cpp")
     settings = "os", "compiler", "build_type", "arch"
-    options = {"ssl": [True, False]}
-    default_options = "ssl=False"
+    options = {"ssl": [True, False], "fPIC": [True, False]}
+    default_options = "ssl=False", "fPIC=True"
     generators = "cmake"
+    file_pattern = re.compile(r'quickfix-(.*)')
 
     def source(self):
-        self.run("git clone https://github.com/quickfix/quickfix.git")
-        # This small hack might be useful to guarantee proper /MT /MD linkage
-        # in MSVC if the packaged project doesn't have variables to set it
-        # properly
+        tools.get(**self.conan_data["sources"][self.version])
+
+        files = os.listdir()
+        quickfix_dir = list(filter(self.file_pattern.search, files))
+
+        shutil.move(quickfix_dir[0], "quickfix")
+
         tools.replace_in_file("quickfix/CMakeLists.txt",
                               "project(${quickfix_PROJECT_NAME} VERSION 0.1 LANGUAGES CXX C)",
                               '''project(${quickfix_PROJECT_NAME} VERSION 0.1 LANGUAGES CXX C)
@@ -46,6 +51,10 @@ conan_basic_setup()''')
         if self.options.ssl:
             self.requires("openssl/[>=1.0.2a]")
 
+    def configure(self):
+        if self.settings.compiler == 'Visual Studio':
+            del self.options.fPIC
+
     def build(self):
         cmake = self._configure_cmake()
         cmake.build(target="quickfix")
@@ -55,6 +64,8 @@ conan_basic_setup()''')
         cmake.install()
         self.copy("config.h", dst="include", src="quickfix")
         self.copy("Except.h", dst="include", src="quickfix/src/C++")
+        self.copy("LICENSE", dst="licenses", src="quickfix")
+        shutil.rmtree(f"{self.package_folder}{os.sep}share")
 
     def package_info(self):
         self.cpp_info.libs = tools.collect_libs(self)
