@@ -10,7 +10,8 @@ class FlacConan(ConanFile):
     homepage = "https://github.com/xiph/flac"
     license = ("BSD-3-Clause", "GPL-2.0-or-later", "LPGL-2.1-or-later", "GFDL-1.2")
     requires = "ogg/1.3.4"
-    exports_sources = "CMakeLists.txt",
+    exports_sources = ['CMakeLists.txt', 'patches/*']
+
     generators = "cmake",
     settings = "os", "compiler", "build_type", "arch"
     options = {
@@ -33,6 +34,9 @@ class FlacConan(ConanFile):
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
+        if self.version in self.conan_data["patches"]:
+            for patch in self.conan_data["patches"][self.version]:
+                tools.patch(**patch)
         extracted_dir = "{}-{}".format(self.name, self.version)
         os.rename(extracted_dir, self._source_subfolder)
         tools.replace_in_file(
