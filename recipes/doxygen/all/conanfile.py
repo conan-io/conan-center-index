@@ -12,7 +12,7 @@ class DoxygenInstallerConan(ConanFile):
     homepage = "https://github.com/doxygen/doxygen"
     license = "GPL-2.0-or-later"
 
-    settings = {"os", "arch"}
+    settings = "os", "arch",
 
     def config(self):
         if self.settings.os in ["Linux", "Macos"] and self.settings.arch == "x86":
