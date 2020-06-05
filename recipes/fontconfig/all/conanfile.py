@@ -1,4 +1,5 @@
 import os
+import glob
 
 from conans import ConanFile, tools, AutoToolsBuildEnvironment
 from conans.errors import ConanInvalidConfiguration
@@ -68,6 +69,9 @@ class FontconfigConan(ConanFile):
         autotools.install()
         os.unlink(os.path.join(self.package_folder, "lib", "libfontconfig.la"))
         tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
+        for f in glob.glob(os.path.join(self.package_folder, "bin", "etc", "fonts", "conf.d", "*.conf")):
+            if os.path.islink(f):
+                os.unlink(f)
 
     def package_info(self):
         self.cpp_info.libs = ["fontconfig"]
