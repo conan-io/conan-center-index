@@ -24,6 +24,7 @@ class QuickfixTestConan(ConanFile):
         self.options["quickfix"].ssl = self.options.ssl
 
     def build(self):
+        self.source()
         cmake = CMake(self)
         # Current dir is "test_package/build/<build_id>" and CMakeLists.txt is
         # in "test_package"
@@ -39,7 +40,7 @@ class QuickfixTestConan(ConanFile):
 
     def test(self):
         if not tools.cross_building(self):
-            os.chdir("bin")
+            os.chdir("../bin")
 
             if self.settings.os == "Windows":
                 program = "executor_cpp"
