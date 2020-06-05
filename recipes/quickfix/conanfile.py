@@ -30,6 +30,7 @@ conan_basic_setup()''')
     def package(self):
         cmake = self._configure_cmake()
         cmake.install()
+        self.copy("config.h", dst="include", src="quickfix")
 
     def package_info(self):
         self.cpp_info.libs = ["quickfix"]
