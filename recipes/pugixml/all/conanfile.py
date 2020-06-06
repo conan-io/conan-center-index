@@ -27,6 +27,8 @@ class PugiXmlConan(ConanFile):
         'no_exceptions': False
     }
 
+    _cmake = None
+
     @property
     def _source_subfolder(self):
         return "source_subfolder"
@@ -44,22 +46,23 @@ class PugiXmlConan(ConanFile):
             if self.settings.os != 'Windows':
                 del self.options.fPIC
             del self.options.shared
-            self.settings.clear()
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
         os.rename(self.name + "-" + self.version, self._source_subfolder)
 
     def _configure_cmake(self):
-        cmake = CMake(self)
-        cmake.definitions["BUILD_TESTS"] = False
+        if self._cmake:
+            return self._cmake
+        self._cmake = CMake(self)
+        self._cmake.definitions["BUILD_TESTS"] = False
         if self.settings.os == 'Windows' and self.settings.compiler == 'Visual Studio':
-            cmake.definitions['CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS'] = self.options.shared
-        cmake.configure(
+            self._cmake.definitions['CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS'] = self.options.shared
+        self._cmake.configure(
             source_folder=self._source_subfolder,
             build_folder=self._build_subfolder
         )
-        return cmake
+        return self._cmake
 
     def build(self):
         header_file = os.path.join(self._source_subfolder, "src", "pugiconfig.hpp")
@@ -87,9 +90,10 @@ class PugiXmlConan(ConanFile):
             tools.rmdir(os.path.join(self.package_folder, 'lib', 'cmake'))
             tools.rmdir(os.path.join(self.package_folder, 'lib', 'pkgconfig'))
 
-    def package_info(self):
-        self.output.info(os.path.join(self.package_folder, "lib", "cmake", self.name))
+    def package_id(self):
         if self.options.header_only:
             self.info.header_only()
-        else:
+
+    def package_info(self):
+        if not self.options.header_only:
             self.cpp_info.libs = tools.collect_libs(self)
