@@ -110,6 +110,9 @@ class Open62541Conan(ConanFile):
             del self.options.fPIC
 
     def configure(self):
+        if self.settings.compiler == "clang" and tools.Version(self.settings.compiler.version) <= "5":
+            raise ConanInvalidConfiguration("clang compiler <= 5.0 not (yet) supported" )
+
         if self._ua_multithreaded() is None:
             raise ConanInvalidConfiguration("multithread configuration may be False, thread-safe, internal-threads or an integer" )
 
