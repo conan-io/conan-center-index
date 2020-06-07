@@ -10,6 +10,7 @@ class PugiXmlConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://pugixml.org/"
     license = "MIT"
+    exports_sources = ["CMakeLists.txt"]
     generators = "cmake"
     settings = ("os", "arch", "compiler", "build_type")
     options = {
@@ -58,10 +59,7 @@ class PugiXmlConan(ConanFile):
         self._cmake.definitions["BUILD_TESTS"] = False
         if self.settings.os == 'Windows' and self.settings.compiler == 'Visual Studio':
             self._cmake.definitions['CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS'] = self.options.shared
-        self._cmake.configure(
-            source_folder=self._source_subfolder,
-            build_folder=self._build_subfolder
-        )
+        self._cmake.configure(build_folder=self._build_subfolder)
         return self._cmake
 
     def build(self):
