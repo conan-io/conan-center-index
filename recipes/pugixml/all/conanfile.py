@@ -90,7 +90,8 @@ class PugiXmlConan(ConanFile):
 
     def package_id(self):
         if self.options.header_only:
-            self.info.header_only()
+            self.info.settings.clear()
+            self.info.requires.clear()
 
     def package_info(self):
         if not self.options.header_only:
