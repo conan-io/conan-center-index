@@ -10,7 +10,7 @@ class BoostDiConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     description = "[Boost].DI: C++14 Dependency Injection Library."
     topics = ("dependency-injection", "metaprogramming", "design-patterns")
-    exports_sources = ["LICENSE_1_0.txt"]
+    exports_sources = ["patches/**"]
     settings = ("compiler",)
     options = {"with_extensions": [True, False], "diagnostics_level": [0, 1, 2]}
     default_options = {"with_extensions": False, "diagnostics_level": 1}
@@ -46,8 +46,12 @@ class BoostDiConan(ConanFile):
         extracted_dir = "di-" + self.version
         os.rename(extracted_dir, self._source_subfolder)
 
+        if "patches" in self.conan_data and self.version in self.conan_data["patches"]:
+            for patch in self.conan_data["patches"][self.version]:
+                tools.patch(**patch)
+
     def package(self):
-        self.copy("LICENSE_1_0.txt", src="", dst="licenses")
+        self.copy("LICENSE_1_0.txt", src=self._source_subfolder, dst="licenses")
         if self.options.with_extensions:
             self.copy("*.hpp", src=os.path.join(self._source_subfolder, "extension", "include", "boost", "di", "extension"), dst=os.path.join("include", "boost", "di", "extension"), keep_path=True)
         self.copy("di.hpp", src=os.path.join(self._source_subfolder, "include", "boost"), dst=os.path.join("include", "boost"))
