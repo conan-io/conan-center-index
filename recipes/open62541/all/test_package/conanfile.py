@@ -13,5 +13,8 @@ class TestPackageConan(ConanFile):
 
     def test(self):
         if not tools.cross_building(self.settings):
-            bin_path = os.path.join("bin", "test_package")
-            self.run(bin_path, run_environment=True)
+            client_bin_path = os.path.join("bin", "test_package_client")
+            self.run(client_bin_path, run_environment=True)
+
+            server_bin_path = os.path.join("bin", "test_package_server")
+            self.run(server_bin_path, run_environment=True)

@@ -9,7 +9,7 @@ class Open62541Conan(ConanFile):
     name = "open62541"
     url = "https://github.com/conan-io/conan-center-index"
     description = "Open source implementation of OPC UA (OPC Unified Architecture) aka IEC 62541 licensed under Mozilla Public License v2.0"
-    topics = ("conan", "opcua", "iec 62541")
+    topics = ("conan", "opcua", "iec62541")
     homepage = "http://open62541.org"
     license = "MPL-2.0"
     exports_sources = ["CMakeLists.txt"]
@@ -18,8 +18,8 @@ class Open62541Conan(ConanFile):
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
-        "multithread": ["no", "thread-safe", "internal-threads"],
-        "tls": ["openssl", "mbedtls", False],
+        "multithread": "ANY",
+        "tls": ["openssl", "mbedtls-apache", "mbedtls-gpl", False],
         "enable_amalgamation": [True, False],
         "enable_historizing": [True, False],
         "enable_methodcalls": [True, False],
@@ -60,9 +60,9 @@ class Open62541Conan(ConanFile):
     default_options = {
         "shared": False,
         "fPIC": True,
-        "multithread": "no",
-        "tls": "mbedtls",
-        "enable_amalgamation": True,
+        "multithread": False,
+        "tls": "mbedtls-apache",
+        "enable_amalgamation": False,
         "enable_historizing": False,
         "enable_methodcalls": True,
         "enable_nodemanagement": True,
@@ -109,22 +109,46 @@ class Open62541Conan(ConanFile):
         if self.settings.os == "Windows":
             del self.options.fPIC
 
+    def configure(self):
+        if self._ua_multithreaded() is None:
+            raise ConanInvalidConfiguration("multithread configuration may be False, thread-safe, internal-threads or an integer" )
+
     def requirements(self):
         if self.options.tls == "openssl":
             self.requires("openssl/1.1.1g")
 
-        if self.options.tls == "mbedtls":
+        if self.options.tls == "mbedtls-apache":
             self.requires("mbedtls/2.16.3-apache")
+
+        if self.options.tls == "mbedtls-gpl":
+            self.requires("mbedtls/2.16.3-gpl")
 
         if self.options.enable_websocket_server:
             raise ConanInvalidConfiguration("libwebsocket is not (yet) available on CCI")
             self.requires("libwebsockets/x.y.z")
 
+    def build_requirements(self):
+        if not tools.which("python") and not tools.which("python3"):
+            raise ConanInvalidConfiguration("Python is required for building Open62541")
+            self.build_requires("cpython/3.8.3")
 
     def source(self):
         archive_name = self.name + "-" + self.version
         tools.get(**self.conan_data["sources"][self.version])
         os.rename(archive_name, self._source_subfolder)
+
+    def _ua_multithreaded(self):
+        if self.options.multithread in ("False", "thread-safe", "internal-threads"):
+            return {
+                "False": "0",
+                "thread-safe": "100",
+                "internal-threads": "200"
+            }[str(self.options.multithread)]
+        else:
+            try:
+                return str(int(self.options.multithread))
+            except ValueError:
+                return None
 
     def _configure_cmake(self):
         if self._cmake:
@@ -137,17 +161,10 @@ class Open62541Conan(ConanFile):
         if self.options.tls == "openssl":
             self._cmake.definitions["UA_ENABLE_ENCRYPTION_OPENSSL"] = True
 
-        if self.options.tls == "mbedtls":
+        if self.options.tls == "mbedtls-apache" or self.options.tls == "mbedtls-gpl":
             self._cmake.definitions["UA_ENABLE_ENCRYPTION_MBEDTLS"] = True
 
-        if self.options.multithread == "no":
-            self._cmake.definitions["UA_MULTITHREADING"] = "0"
-
-        if self.options.multithread == "thread-safe":
-            self._cmake.definitions["UA_MULTITHREADING"] = "100"
-
-        if self.options.multithread == "internal-threads":
-            self._cmake.definitions["UA_MULTITHREADING"] = "200"
+        self._cmake.definitions["UA_MULTITHREADING"] = self._ua_multithreaded()
 
         self._cmake.definitions["UA_ENABLE_AMALGAMATION"] = self.options.enable_amalgamation
         self._cmake.definitions["UA_ENABLE_HISTORIZING"] = self.options.enable_historizing
@@ -187,10 +204,18 @@ class Open62541Conan(ConanFile):
         self._cmake.definitions["UA_ENABLE_HARDENING"] = self.options.enable_hardening
         self._cmake.definitions["OPEN62541_VERSION"] = self.version
 
+
+        self._cmake.definitions["UA_BUILD_EXAMPLES"] = False
+        self._cmake.definitions["UA_BUILD_UNIT_TESTS"] = False
         self._cmake.configure(source_dir=self._source_subfolder)
         return self._cmake
 
+    def _patch_sources(self):
+        if self.settings.compiler == "clang" and tools.Version(self.settings.compiler.version) <= "5":
+            tools.replace_in_file(os.path.join(self._source_subfolder, "CMakeLists.txt"), "trace-pc-guard,", "")
+
     def build(self):
+        self._patch_sources()
         cmake = self._configure_cmake()
         cmake.build()
 
@@ -202,11 +227,29 @@ class Open62541Conan(ConanFile):
             os.remove(f)
         for f in glob.glob(os.path.join(self.package_folder, "lib", "*.pdb")):
             os.remove(f)
-        shutil.move(os.path.join(self.package_folder, "share", "open62541", "tools"), os.path.join(self.package_folder, "bin", "tools"))
+
+        self.copy(
+          pattern = "*",
+          src = os.path.join(self.package_folder, "share", "open62541", "tools"),
+          dst = os.path.join(self.package_folder, "bin", "tools")
+        )
+
+        if self.settings.os == "Windows" and self.options.shared:
+            shutil.move(os.path.join(self.package_folder, "open62541.dll"), os.path.join(self.package_folder, "bin"))
+
+
         tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
         tools.rmdir(os.path.join(self.package_folder, "share"))
         tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
 
 
     def package_info(self):
+        self.info.options.multithreaded = self._ua_multithreaded()
+
+    def package_info(self):
         self.cpp_info.libs = tools.collect_libs(self)
+        if self.options.enable_amalgamation:
+            self.cpp_info.defines.append("UA_ENABLE_AMALGAMATION")
+
+        if self.settings.os == "Windows":
+            self.cpp_info.libs.append("ws2_32")
