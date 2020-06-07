@@ -44,6 +44,10 @@ conan_basic_setup()''')
                               "add_executable(ordermatch Application.cpp Market.cpp ordermatch.cpp ${applink_SOURCE})",
                               "add_executable(ordermatch Application.cpp Market.cpp ordermatch.cpp)")
 
+        tools.replace_in_file("quickfix/src/C++/Utility.h",
+                              "#elif defined(HAVE_STD_TR1_SHARED_PTR)",
+                              "#elif defined(HAVE_STD_TR1_SHARED_PTR_FROM_TR1_MEMORY_HEADER)")
+
         os.makedirs("quickfix/include")
         shutil.copyfile("quickfix/src/C++/Except.h", "quickfix/include/Except.h")
 
