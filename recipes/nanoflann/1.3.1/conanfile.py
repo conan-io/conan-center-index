@@ -19,6 +19,11 @@ class NanoflannConan(ConanFile):
     def _source_subfolder(self):
         return "source_subfolder"
 
+    @property
+    def _license_text(self):
+        license = open(os.path.join(self.source_folder, self._source_subfolder, "COPYING"), "rb").read()
+        return license.lstrip()
+
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
         extracted_dir = glob.glob(self.name + "-*/")[0]
@@ -27,6 +32,8 @@ class NanoflannConan(ConanFile):
     def package(self):
         include_folder = os.path.join(self._source_subfolder, "include")
         self.copy(pattern="*", dst="include", src=include_folder)
+        tools.save(os.path.join(self.package_folder, "licenses", "LICENSE"), self._license_text)
+
 
     def package_id(self):
         self.info.header_only()
