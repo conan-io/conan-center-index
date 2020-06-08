@@ -12,7 +12,7 @@ class Open62541Conan(ConanFile):
     topics = ("conan", "opcua", "iec62541")
     homepage = "http://open62541.org"
     license = "MPL-2.0"
-    exports_sources = ["CMakeLists.txt"]
+    exports_sources = ["CMakeLists.txt", "patches/**"]
     generators = "cmake", "cmake_find_package"
     settings = "os", "arch", "compiler", "build_type"
     options = {
@@ -110,8 +110,8 @@ class Open62541Conan(ConanFile):
             del self.options.fPIC
 
     def configure(self):
-        if self.settings.compiler == "clang" and tools.Version(self.settings.compiler.version) <= "5":
-            raise ConanInvalidConfiguration("clang compiler <= 5.0 not (yet) supported" )
+        if self.settings.compiler == "clang" and tools.Version(self.settings.compiler.version) <= "4":
+            raise ConanInvalidConfiguration("clang compiler <= 4.0 not (yet) supported" )
 
         if self._ua_multithreaded() is None:
             raise ConanInvalidConfiguration("multithread configuration may be False, thread-safe, internal-threads or an integer" )
@@ -214,8 +214,8 @@ class Open62541Conan(ConanFile):
         return self._cmake
 
     def _patch_sources(self):
-        if self.settings.compiler == "clang" and tools.Version(self.settings.compiler.version) <= "5":
-            tools.replace_in_file(os.path.join(self._source_subfolder, "CMakeLists.txt"), "trace-pc-guard,", "")
+        for patch in self.conan_data["patches"][self.version]:
+            tools.patch(**patch)
 
     def build(self):
         self._patch_sources()
@@ -256,3 +256,4 @@ class Open62541Conan(ConanFile):
 
         if self.settings.os == "Windows":
             self.cpp_info.system_libs.append("ws2_32")
+
