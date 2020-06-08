@@ -6,10 +6,8 @@ class PahoMqttcConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/eclipse/paho.mqtt.c"
     topics = ("MQTT", "IoT", "eclipse", "SSL", "paho", "C")
-    license = "EPL-1.0"
-    description = """The Eclipse Paho project provides open-source client implementations of MQTT
-    and MQTT-SN messaging protocols aimed at new, existing, and emerging applications for the Internet
-    of Things (IoT)"""
+    license = "EPL-2.0"
+    description = """Eclipse Paho MQTT C client library for Linux, Windows and MacOS"""
     exports_sources = ["CMakeLists.txt", "patches/*"]
     generators = "cmake"
     settings = "os", "arch", "compiler", "build_type"
