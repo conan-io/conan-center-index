@@ -6,7 +6,6 @@ import re
 
 class QuickfixConan(ConanFile):
     name = "quickfix"
-    version = "1.15.1"
     license = "The QuickFIX Software License, Version 1.0"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "http://www.quickfixengine.org"
