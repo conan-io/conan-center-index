@@ -13,7 +13,7 @@ class QuickfixConan(ConanFile):
     topics = ("conan", "QuickFIX", "FIX", "Financial Information Exchange", "libraries", "cpp")
     settings = "os", "compiler", "build_type", "arch"
     options = {"ssl": [True, False], "fPIC": [True, False]}
-    default_options = "ssl=False", "fPIC=True"
+    default_options = {"ssl": False, "fPIC": True}
     generators = "cmake"
     file_pattern = re.compile(r'quickfix-(.*)')
 
@@ -200,6 +200,15 @@ add_executable(pt pt.cpp getopt.c)
         os.makedirs("quickfix/include")
         shutil.copyfile("quickfix/src/C++/Except.h", "quickfix/include/Except.h")
 
+        if self.options.ssl and not self.options["openssl"].shared:
+            tools.replace_in_file("quickfix/src/C++/CMakeLists.txt",
+                                  "  target_link_libraries(${PROJECT_NAME} ${OPENSSL_LIBRARIES} ${MYSQL_CLIENT_LIBS} "
+                                  "${PostgreSQL_LIBRARIES} ws2_32)",
+                                  "  target_link_libraries(${PROJECT_NAME} ${OPENSSL_LIBRARIES} ${MYSQL_CLIENT_LIBS} "
+                                  "${PostgreSQL_LIBRARIES} ws2_32 crypt32)")
+
+
+
     def requirements(self):
         if self.options.ssl:
             self.requires("openssl/1.1.1g")
@@ -224,7 +233,6 @@ add_executable(pt pt.cpp getopt.c)
         self.cpp_info.libs = tools.collect_libs(self)
 
         if self.settings.os == "Windows":
-            self.cpp_info.libs.append("ws2_32")
             self.cpp_info.libs.append("wsock32")
 
     def _configure_cmake(self):
