@@ -63,15 +63,12 @@ class PugiXmlConan(ConanFile):
         return self._cmake
 
     def build(self):
-        header_file = os.path.join(self._source_subfolder, "src", "pugiconfig.hpp")
-        if self.options.wchar_mode:
-            tools.replace_in_file(header_file, "// #define PUGIXML_WCHAR_MODE", '''#define PUGIXML_WCHAR_MODE''')
-        if self.options.no_exceptions:
-            tools.replace_in_file(header_file, "// #define PUGIXML_NO_EXCEPTIONS", '''#define PUGIXML_NO_EXCEPTIONS''')
-
-        if self.options.header_only:
-            tools.replace_in_file(header_file, "// #define PUGIXML_HEADER_ONLY", '''#define PUGIXML_HEADER_ONLY''')
-        else:
+        if not self.options.header_only:
+            header_file = os.path.join(self._source_subfolder, "src", "pugiconfig.hpp")
+            if self.options.wchar_mode:
+                tools.replace_in_file(header_file, "// #define PUGIXML_WCHAR_MODE", '''#define PUGIXML_WCHAR_MODE''')
+            if self.options.no_exceptions:
+                tools.replace_in_file(header_file, "// #define PUGIXML_NO_EXCEPTIONS", '''#define PUGIXML_NO_EXCEPTIONS''')
             cmake = self._configure_cmake()
             cmake.build()
 
@@ -90,9 +87,15 @@ class PugiXmlConan(ConanFile):
 
     def package_id(self):
         if self.options.header_only:
-            self.info.settings.clear()
-            self.info.requires.clear()
+            self.info.header_only()
 
     def package_info(self):
-        if not self.options.header_only:
+        if self.options.header_only:
+            self.cpp_info.defines.append("PUGIXML_HEADER_ONLY")
+            if self.options.wchar_mode:
+                self.cpp_info.defines.append("PUGIXML_WCHAR_MODE")
+            if self.options.no_exceptions:
+                self.cpp_info.defines.append("PUGIXML_NO_EXCEPTIONS")
+        else:
             self.cpp_info.libs = tools.collect_libs(self)
+
