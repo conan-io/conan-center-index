@@ -202,7 +202,7 @@ add_executable(pt pt.cpp getopt.c)
 
     def requirements(self):
         if self.options.ssl:
-            self.requires("openssl/[>=1.0.2u]")
+            self.requires("openssl/1.1.1g")
 
     def configure(self):
         if self.settings.os == 'Windows':
