@@ -171,9 +171,9 @@ class BoostConan(ConanFile):
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
+        os.rename("boost_%s" % self.version.replace(".", "_"), self._source_subfolder)
         for patch in self.conan_data["patches"].get(self.version, []):
             tools.patch(**patch)
-        os.rename("boost_%s" % self.version.replace(".", "_"), self._source_subfolder)
 
     ##################### BUILDING METHODS ###########################
 
