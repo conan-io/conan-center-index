@@ -61,9 +61,10 @@ class LibalsaConan(ConanFile):
             autotools.install()
         tools.rmdir(os.path.join(self.package_folder, "share"))
         tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))        
-        la_file = os.path.join(self.package_folder, "lib", "libasound.la")
-        if os.path.isfile(la_file):
-            os.unlink(la_file)
+        for l in ["asound", "atopology"]:
+            la_file = os.path.join(self.package_folder, "lib", "lib%s.la" % l)
+            if os.path.isfile(la_file):
+                os.unlink(la_file)
 
     def package_info(self):
         self.cpp_info.libs = ["asound"]

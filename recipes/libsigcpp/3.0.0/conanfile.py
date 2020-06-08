@@ -81,6 +81,6 @@ class LibSigCppConan(ConanFile):
     def package_info(self):
         self.cpp_info.libs = tools.collect_libs(self)
         if self.settings.os == "Linux":
-            self.cpp_info.libs.append("m")
+            self.cpp_info.system_libs.append("m")
         self.cpp_info.includedirs.extend([os.path.join('include', "sigc++-3.0"),
                                           os.path.join('lib', "sigc++-3.0", "include")])

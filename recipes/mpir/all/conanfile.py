@@ -37,7 +37,7 @@ class MpirConan(ConanFile):
                                                    "{}_mpir_gc.vcxproj".format(self._dll_or_lib))
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version], keep_permissions=True)
+        tools.get(keep_permissions=True, **self.conan_data["sources"][self.version])
         extracted_dir = self.name + "-" + self.version
         os.rename(extracted_dir, self._source_subfolder)
 

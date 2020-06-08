@@ -8,9 +8,6 @@ tl::expected<int, const char*> maybe_do_something(int i) {
   }
 }
 
-int main(int argc, char** argv) {
-  (void)argc;
-  (void)argv;
-
+int main() {
   return maybe_do_something(0).value_or(-1);
 }

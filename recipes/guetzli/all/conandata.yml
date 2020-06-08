@@ -1,0 +1,8 @@
+sources:
+  "1.0.1":
+    url: "https://github.com/google/guetzli/archive/v1.0.1.tar.gz"
+    sha256: "e52eb417a5c0fb5a3b08a858c8d10fa797627ada5373e203c196162d6a313697"
+patches:
+  "1.0.1":
+    - base_path: "source_subfolder"
+      patch_file: "patches/0001-no-debug.patch"
