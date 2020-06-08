@@ -35,8 +35,12 @@ class QuickfixTestConan(ConanFile):
 ''')
 
     def configure(self):
+        if self.settings.os == 'Windows':
+            del self.options.fPIC
+        else:
+            self.options["quickfix"].fPIC = self.options.fPIC
+
         self.options["quickfix"].ssl = self.options.ssl
-        self.options["quickfix"].fPIC = self.options.fPIC
 
     def build(self):
         self.source()
