@@ -28,7 +28,7 @@ class QuickfixConan(ConanFile):
 
         tools.replace_in_file("quickfix/CMakeLists.txt",
                               "cmake_minimum_required(VERSION 3.0 FATAL_ERROR)",
-                              "cmake_minimum_required(VERSION 3.17 FATAL_ERROR)")
+                              "cmake_minimum_required(VERSION 3.16 FATAL_ERROR)")
 
         tools.replace_in_file("quickfix/CMakeLists.txt",
                               "project(${quickfix_PROJECT_NAME} VERSION 0.1 LANGUAGES CXX C)",
