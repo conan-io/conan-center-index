@@ -140,6 +140,46 @@ endif (HAVE_IN_CLASS_NON_STATIC)
 include(FindSharedPtr)
 ''')
 
+        tools.replace_in_file("quickfix/CMakeLists.txt",
+                              'add_definitions("-DHAVE_STD_SHARED_PTR=1")',
+                              '''
+add_definitions("-DHAVE_STD_SHARED_PTR=1")
+file(APPEND ${CMAKE_SOURCE_DIR}/config.h
+ "#ifndef HAVE_STD_SHARED_PTR\n"
+ "#define HAVE_STD_SHARED_PTR\n"
+ "#endif\n" )
+''')
+
+        tools.replace_in_file("quickfix/CMakeLists.txt",
+                              'add_definitions("-DHAVE_STD_TR1_SHARED_PTR=1")',
+                              '''
+add_definitions("-DHAVE_STD_TR1_SHARED_PTR=1")
+file(APPEND ${CMAKE_SOURCE_DIR}/config.h
+ "#ifndef HAVE_STD_TR1_SHARED_PTR\n"
+ "#define HAVE_STD_TR1_SHARED_PTR\n"
+ "#endif\n" )
+''')
+
+        tools.replace_in_file("quickfix/CMakeLists.txt",
+                              'add_definitions("-DHAVE_STD_TR1_SHARED_PTR_FROM_TR1_MEMORY_HEADER=1")',
+                              '''
+add_definitions("-DHAVE_STD_TR1_SHARED_PTR_FROM_TR1_MEMORY_HEADER=1")
+file(APPEND ${CMAKE_SOURCE_DIR}/config.h
+ "#ifndef HAVE_STD_TR1_SHARED_PTR_FROM_TR1_MEMORY_HEADER\n"
+ "#define HAVE_STD_TR1_SHARED_PTR_FROM_TR1_MEMORY_HEADER\n"
+ "#endif\n" )
+''')
+
+        tools.replace_in_file("quickfix/CMakeLists.txt",
+                              'add_definitions("-DHAVE_STD_UNIQUE_PTR=1")',
+                              '''
+add_definitions("-DHAVE_STD_UNIQUE_PTR=1")
+file(APPEND ${CMAKE_SOURCE_DIR}/config.h
+ "#ifndef HAVE_STD_UNIQUE_PTR\n"
+ "#define HAVE_STD_UNIQUE_PTR\n"
+ "#endif\n" )
+''')
+
         tools.replace_in_file("quickfix/src/CMakeLists.txt",
                               "add_executable(ut ut.cpp getopt.c ${ut_SOURCES})",
                               '''
