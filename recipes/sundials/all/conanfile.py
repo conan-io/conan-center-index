@@ -4,7 +4,7 @@ import os
 
 class SundialsConan(ConanFile):
     name = "sundials"
-    license = "BSD 3-Clause"
+    license = "BSD-3-Clause"
     description = ("SUNDIALS is a family of software packages implemented"
                    " with the goal of providing robust time integrators "
                    "and nonlinear solvers that can easily be incorporated"
@@ -22,7 +22,7 @@ class SundialsConan(ConanFile):
                "build_idas": [True, False],
                "build_kinsol": [True, False]}
     default_options = {"shared": False,
-                       "fPIC": False,
+                       "fPIC": True,
                        "build_arkode": True,
                        "build_cvode": True,
                        "build_cvodes": True,
@@ -56,7 +56,6 @@ class SundialsConan(ConanFile):
         if self._cmake:
             return self._cmake
         self._cmake = CMake(self)
-        self._cmake.definitions["BUILD_SHARED_LIBS"] = self.options.shared
         self._cmake.definitions["BUILD_STATIC_LIBS"] = not self.options.shared
         self._cmake.definitions["BUILD_ARKODE"] = self.options.build_arkode
         self._cmake.definitions["BUILD_CVODE"] = self.options.build_cvode
