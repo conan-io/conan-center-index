@@ -33,6 +33,8 @@ class QuickfixConan(ConanFile):
         shutil.copyfile(f"{self._source_subfolder}/src/C++/Except.h",
                         f"{self._source_subfolder}/include/Except.h")
 
+        self._patch_sources()
+
     def requirements(self):
         if self.options.ssl:
             self.requires("openssl/1.1.1g")
@@ -42,7 +44,6 @@ class QuickfixConan(ConanFile):
             del self.options.fPIC
 
     def build(self):
-        self._patch_sources()
         cmake = self._configure_cmake()
         cmake.build(target="quickfix")
 
@@ -60,6 +61,9 @@ class QuickfixConan(ConanFile):
         if self.settings.os == "Windows":
             self.cpp_info.libs.append("wsock32")
 
+            if self.options.ssl and not self.options["openssl"].shared:
+                self.cpp_info.libs.append("crypt32")
+
     def _configure_cmake(self):
         cmake = CMake(self)
 
@@ -72,3 +76,10 @@ class QuickfixConan(ConanFile):
     def _patch_sources(self):
         for patch in self.conan_data["patches"][self.version]:
             tools.patch(**patch)
+
+        if self.options.ssl and not self.options["openssl"].shared:
+            tools.replace_in_file(f"{self._source_subfolder}/src/C++/CMakeLists.txt",
+                                  "  target_link_libraries(${PROJECT_NAME} ${OPENSSL_LIBRARIES} ${MYSQL_CLIENT_LIBS} "
+                                  "${PostgreSQL_LIBRARIES} ws2_32)",
+                                  "  target_link_libraries(${PROJECT_NAME} ${OPENSSL_LIBRARIES} ${MYSQL_CLIENT_LIBS} "
+                                  "${PostgreSQL_LIBRARIES} ws2_32 crypt32)")
