@@ -1,6 +1,6 @@
-from conans import ConanFile, tools
 import os
 import glob
+from conans import ConanFile, tools
 
 
 class NanoflannConan(ConanFile):
@@ -12,7 +12,7 @@ class NanoflannConan(ConanFile):
     topics = ("conan", "nanoflann", "nearest-neighbor", "kd-trees")
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/jlblancoc/nanoflann"
-    license = "BSD"
+    license = "BSD-2-Clause"
     no_copy_source = True
 
     @property
@@ -31,7 +31,3 @@ class NanoflannConan(ConanFile):
 
     def package_id(self):
         self.info.header_only()
-
-    def package_info(self):
-        self.cpp_info.names["cmake_find_package"] = "nanoflann"
-        self.cpp_info.names["cmake_find_package_multi"] = "nanoflann"
