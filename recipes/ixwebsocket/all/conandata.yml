@@ -5,3 +5,6 @@ sources:
   "9.1.9":
     url: "https://github.com/machinezone/IXWebSocket/archive/v9.1.9.zip"
     sha256: "dd83b4855882b538ca9782b42e80be4ebf96f978974e2615def673fb9d58c33b"
+  "9.6.4":
+    url: "https://github.com/machinezone/IXWebSocket/archive/v9.6.4.zip"
+    sha256: "b249b3bd0323f5b9aa4808852266f17073afd9f1f3a89815205a39604230f0ea"

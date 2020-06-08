@@ -1,5 +1,6 @@
 """Conan recipe package for Google FlatBuffers
 """
+import glob
 import os
 import shutil
 from conans import ConanFile, CMake, tools
@@ -13,8 +14,8 @@ class FlatbuffersConan(ConanFile):
     topics = ("conan", "flatbuffers", "serialization", "rpc", "json-parser")
     description = "Memory Efficient Serialization Library"
     settings = "os", "compiler", "build_type", "arch"
-    options = {"shared": [True, False], "fPIC": [True, False]}
-    default_options = {"shared": False, "fPIC": True}
+    options = {"shared": [True, False], "fPIC": [True, False], "header_only": [True, False]}
+    default_options = {"shared": False, "fPIC": True, "header_only": False}
     exports_sources = "CMakeLists.txt"
     generators = "cmake"
 
@@ -46,24 +47,31 @@ class FlatbuffersConan(ConanFile):
         return cmake
 
     def build(self):
-        cmake = self._configure_cmake()
-        cmake.build()
+        if not self.options.header_only:
+            cmake = self._configure_cmake()
+            cmake.build()
 
     def package(self):
         self.copy(pattern="LICENSE.txt", dst="licenses", src=self._source_subfolder)
-        cmake = self._configure_cmake()
-        cmake.install()
-        tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
-        if self.settings.os == "Windows" and self.options.shared:
-            if self.settings.compiler == "Visual Studio":
+        if self.options.header_only:
+            header_dir = os.path.join(self._source_subfolder, "include", "flatbuffers")
+            dst_dir = os.path.join("include", "flatbuffers")
+            self.copy("*.h", dst=dst_dir, src=header_dir)
+        else:
+            cmake = self._configure_cmake()
+            cmake.install()
+            tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
+            if self.settings.os == "Windows" and self.options.shared:
                 tools.mkdir(os.path.join(self.package_folder, "bin"))
-                shutil.move(os.path.join(self.package_folder, "lib", "%s.dll" % self.name),
-                            os.path.join(self.package_folder, "bin", "%s.dll" % self.name))
-            elif self.settings.compiler == "gcc":
-                shutil.move(os.path.join(self.package_folder, "lib", "lib%s.dll" % self.name),
-                            os.path.join(self.package_folder, "bin", "lib%s.dll" % self.name))
+                for dll_path in glob.glob(os.path.join(self.package_folder, "lib", "*.dll")):
+                    shutil.move(dll_path, os.path.join(self.package_folder, "bin", os.path.basename(dll_path)))
+
+    def package_id(self):
+        if self.options.header_only:
+            self.info.header_only()
 
     def package_info(self):
-        self.cpp_info.libs = tools.collect_libs(self)
-        if self.settings.os == "Linux":
-            self.cpp_info.libs.append("m")
+        if not self.options.header_only:
+            self.cpp_info.libs = tools.collect_libs(self)
+            if self.settings.os == "Linux":
+                self.cpp_info.system_libs.append("m")

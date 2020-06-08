@@ -1,15 +1,21 @@
 versions:
   "3.16.2":
-    folder: all
+    folder: "3.x.x"
   "3.16.3":
-    folder: all
+    folder: "3.x.x"
   "3.16.4":
-    folder: all
+    folder: "3.x.x"
   "3.16.5":
-    folder: all
+    folder: "3.x.x"
   "3.16.6":
-    folder: all
+    folder: "3.x.x"
+  "3.16.7":
+    folder: "3.x.x"
   "3.17.0":
-    folder: all
+    folder: "3.x.x"
   "3.17.1":
-    folder: all
+    folder: "3.x.x"
+  "3.17.2":
+    folder: "3.x.x"
+  "3.17.3":
+    folder: "3.x.x"
