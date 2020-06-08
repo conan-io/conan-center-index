@@ -20,6 +20,20 @@ class QuickfixTestConan(ConanFile):
         shutil.rmtree("source", ignore_errors=True)
         shutil.move(f"{quickfix_dir[0]}{os.sep}examples", f".{os.sep}source{os.sep}examples")
 
+        tools.replace_in_file("source/examples/executor/C++/Application.cpp",
+                              "#pragma warning( disable : 4503 4355 4786 )",
+                              '''
+#pragma warning( disable : 4503 4355 4786 )
+#include "config.h"
+''')
+
+        tools.replace_in_file("source/examples/executor/C++/executor.cpp",
+                              "#pragma warning( disable : 4503 4355 4786 )",
+                              '''
+#pragma warning( disable : 4503 4355 4786 )
+#include "config.h"
+''')
+
     def configure(self):
         self.options["quickfix"].ssl = self.options.ssl
         self.options["quickfix"].fPIC = self.options.fPIC
