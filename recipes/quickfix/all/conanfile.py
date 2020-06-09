@@ -53,7 +53,7 @@ class QuickfixConan(ConanFile):
         self.copy("config.h", dst="include", src=self._source_subfolder)
         self.copy("Except.h", dst="include", src=f"{self._source_subfolder}/src/C++")
         self.copy("LICENSE", dst="licenses", src=self._source_subfolder)
-        shutil.rmtree(f"{self.package_folder}{os.sep}share")
+        tools.rmdir(os.path.join(self.package_folder, "share"))
 
     def package_info(self):
         self.cpp_info.libs = tools.collect_libs(self)
