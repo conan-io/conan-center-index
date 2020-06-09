@@ -30,7 +30,7 @@ jobs:
                              qt:qttools=True,
 
                              qt:with_glib=False,
-                             qt:with_harfbuzz=False,
+                             qt:with_harfbuzz=not_used,
                              qt:with_icu=False,
                              qt:with_mysql=False,
                              qt:with_pcre2=False,
@@ -50,14 +50,17 @@ jobs:
             build_types: 'Release'
             archs: 'x86_64'
             conan_options: ',
-                            qt:qtx11extras=True
+                            qt:qtx11extras=True,
+                            qt:with_doubleconversion=qt
                            '
           - build: 'macos'
             os: 'macos-10.15'
             deployment-target: '10.14'
             build_types: 'Release'
             archs: 'x86_64'
-            conan_options: ''
+            conan_options: ',
+                             qt:with_builtin_libs=True
+                            '
             compiler: 'apple_clang'
             compiler_version: '11.0'
             xcode_version: '11.4'

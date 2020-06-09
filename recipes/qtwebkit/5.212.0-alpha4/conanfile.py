@@ -13,8 +13,9 @@ class QtWebKitConan(ConanFile):
     settings = "os", "compiler", "build_type", "arch"
     generators = 'cmake'
     exports_sources = [
-        "clang-11-jsc.patch",
-        "OptionsQt.patch"
+        "patches/clang-11-jsc.patch",
+        "patches/OptionsQt.patch",
+        "patches/cmake_version.patch"
     ]
     _source_subfolder = "source_subfolder"
     _build_subfolder = "build_subfolder"
@@ -76,15 +77,16 @@ class QtWebKitConan(ConanFile):
         os.rename(f'{self.name}-{self.version}', self._source_subfolder)
 
         # check recipe conistency
-        tools.check_with_algorithm_sum("sha1", "clang-11-jsc.patch", "03358658f12a895d00f5a7544618dc7019fb2882")
-        tools.check_with_algorithm_sum("sha1", "OptionsQt.patch", "1ba5e8c5e5e22b5a0bb6e04632fee76a70d8d8ec")
+        tools.check_with_algorithm_sum("sha1", "patches/clang-11-jsc.patch", "03358658f12a895d00f5a7544618dc7019fb2882")
+        tools.check_with_algorithm_sum("sha1", "patches/OptionsQt.patch", "1ba5e8c5e5e22b5a0bb6e04632fee76a70d8d8ec")
+        tools.check_with_algorithm_sum("sha1", "patches/cmake_version.patch", "030c7f2d1d6daceee54497eac6c734af457f10bf")
 
         # apply patches
-        if tools.is_apple_os(self.settings.os):
-            tools.patch(base_path=self._source_subfolder, patch_file="clang-11-jsc.patch", strip=1)
+        tools.patch(base_path=self._source_subfolder, patch_file="patches/clang-11-jsc.patch", strip=1)
 
         if platform.system() == "Linux":
-            tools.patch(base_path=self._source_subfolder, patch_file="OptionsQt.patch", strip=1)
+            tools.patch(base_path=self._source_subfolder, patch_file="patches/OptionsQt.patch", strip=1)
+            tools.patch(base_path=self._source_subfolder, patch_file="patches/cmake_version.patch", strip=1)
 
     def _configure_cmake(self):
         cmake = CMake(self)
@@ -129,9 +131,9 @@ class QtWebKitConan(ConanFile):
         pass
 
     def package_info(self):
-        libs = ["QtWebKit", "QtWebKitWidgets"]
+        libs = ["Qt5WebKit", "Qt5WebKitWidgets"]
 
-        if tools.is_apple_os(self.settings.os):           
+        if tools.is_apple_os(self.settings.os):
             self.cpp_info.frameworkdirs = ['lib']
             self.cpp_info.frameworks = libs[:]
         else:
