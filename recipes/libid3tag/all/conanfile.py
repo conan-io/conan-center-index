@@ -14,8 +14,15 @@ class LibId3TagConan(ConanFile):
     options = {"shared": [True, False], "fPIC": [True, False]}
     default_options = {"shared": False, "fPIC": True}
     requires = "zlib/1.2.11"
-    _source_subfolder = "source_subfolder"
-    _build_subfolder = "build_subfolder"
+    _autotools = None
+
+    @property
+    def _source_subfolder(self):
+        return "source_subfolder"
+
+    @property
+    def _build_subfolder(self):
+        return "build_subfolder"
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -44,7 +51,7 @@ class LibId3TagConan(ConanFile):
         if self._is_msvc:
             self._build_msvc()
         else:
-            self._build_configure()
+            self._build_autotools()
 
     def _build_msvc(self):
         kwargs = {}
@@ -62,19 +69,27 @@ class LibId3TagConan(ConanFile):
             msbuild = MSBuild(self)
             msbuild.build(project_file="libid3tag.vcxproj", **kwargs)
 
-    def _build_configure(self):
-        with tools.chdir(self._source_subfolder):
-            if self.options.shared:
-                args = ["--disable-static", "--enable-shared"]
-            else:
-                args = ["--disable-shared", "--enable-static"]
-            env_build = AutoToolsBuildEnvironment(self)
-            env_build.configure(args=args)
-            env_build.make()
-            env_build.install()
-            la = os.path.join(self.package_folder, "lib", "libid3tag.la")
-            if os.path.isfile(la):
-                os.unlink(la)
+    def _configure_autotools(self):
+        if self._autotools:
+            return self._autotools
+        if self.options.shared:
+            args = ["--disable-static", "--enable-shared"]
+        else:
+            args = ["--disable-shared", "--enable-static"]
+        self._autotools = AutoToolsBuildEnvironment(self)
+        self._autotools.configure(args=args, configure_dir=self._source_subfolder)
+        return self._autotools
+
+    def _build_autotools(self):
+        autotools = self._configure_autotools()
+        autotools.make()
+
+    def _install_autotools(self):
+        autotools = self._configure_autotools()
+        autotools.install()
+        la = os.path.join(self.package_folder, "lib", "libid3tag.la")
+        if os.path.isfile(la):
+            os.unlink(la)
 
     def package(self):
         self.copy("COPYRIGHT", dst="licenses", src=self._source_subfolder)
@@ -85,6 +100,8 @@ class LibId3TagConan(ConanFile):
                 pattern="*.lib", dst="lib", src=self._source_subfolder, keep_path=False
             )
             self.copy(pattern="id3tag.h", dst="include", src=self._source_subfolder)
+        else:
+            self._install_autotools()
 
     def package_info(self):
         self.cpp_info.libs = ["libid3tag" if self._is_msvc else "id3tag"]
