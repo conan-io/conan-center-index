@@ -2,7 +2,7 @@ diff --git a/source_subfolder/CMakeLists.txt b/source_subfolder_patched/CMakeLis
 index 2a8fd8b..2b7056c 100644
 --- a/source_subfolder/CMakeLists.txt
 +++ b/source_subfolder_patched/CMakeLists.txt
-@@ -258,19 +258,19 @@ if (HB_HAVE_ICU)
+@@ -234,19 +234,19 @@ if (HB_HAVE_ICU)
    add_definitions(-DHAVE_ICU)
  
    # https://github.com/WebKit/webkit/blob/master/Source/cmake/FindICU.cmake
