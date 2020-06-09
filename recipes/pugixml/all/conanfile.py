@@ -1,4 +1,5 @@
 from conans import ConanFile, CMake, tools
+from conans.errors import ConanInvalidConfiguration
 import os
 
 
@@ -43,6 +44,9 @@ class PugiXmlConan(ConanFile):
             del self.options.fPIC
 
     def configure(self):
+        if self.options.shared and self.options.wchar_mode:
+            # The app crashes with error "The procedure entry point ... could not be located in the dynamic link library"
+            raise ConanInvalidConfiguration("Combination of 'shared' and 'wchar_mode' options is not supported")
         if self.options.header_only:
             if self.settings.os != 'Windows':
                 del self.options.fPIC
@@ -65,6 +69,7 @@ class PugiXmlConan(ConanFile):
     def build(self):
         if not self.options.header_only:
             header_file = os.path.join(self._source_subfolder, "src", "pugiconfig.hpp")
+            # For the library build mode, options applied via change the configuration file
             if self.options.wchar_mode:
                 tools.replace_in_file(header_file, "// #define PUGIXML_WCHAR_MODE", '''#define PUGIXML_WCHAR_MODE''')
             if self.options.no_exceptions:
@@ -91,6 +96,7 @@ class PugiXmlConan(ConanFile):
 
     def package_info(self):
         if self.options.header_only:
+            # For the "header_only" mode, options applied via global definitions
             self.cpp_info.defines.append("PUGIXML_HEADER_ONLY")
             if self.options.wchar_mode:
                 self.cpp_info.defines.append("PUGIXML_WCHAR_MODE")
