@@ -236,7 +236,7 @@ class LibwebsocketsConan(ConanFile):
 
         if self.options.with_hubbub:
             raise ConanInvalidConfiguration("Library hubbub not implemented (yet) in CCI")
-            self.requires("hubbub/x.y.z")
+            # TODO - Add hubbub package when available.
           
 
     def source(self):
@@ -460,4 +460,3 @@ class LibwebsocketsConan(ConanFile):
             self.cpp_info.names["pkg_config"] = "libwebsockets"
         else:
             self.cpp_info.names["pkg_config"] = "libwebsockets_static"
-
