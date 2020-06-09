@@ -25,10 +25,7 @@ class QuickfixTestConan(ConanFile):
 
     def test(self):
         if not tools.cross_building(self):
-            if self.settings.os == "Windows":
-                program = "executor_cpp"
-            else:
-                program = "executor"
+            program = "executor"
 
             self.run(f".{os.sep}{program}", run_environment=True,
                      cwd=f"{self.build_folder}{os.sep}bin")
