@@ -180,17 +180,9 @@ file(APPEND ${CMAKE_SOURCE_DIR}/config.h
 ''')
 
         tools.replace_in_file("quickfix/src/CMakeLists.txt",
-                              "add_executable(ut ut.cpp getopt.c ${ut_SOURCES})",
+                              'if( WIN32 OR ${CMAKE_SYSTEM_NAME} STREQUAL "Linux" )',
                               '''
-if ( NULLPTR_FOUND AND ENUM_NESTED_FOUND AND IN_CLASS_NON_STATIC_FOUND )
-add_executable(ut ut.cpp getopt.c ${ut_SOURCES})
-''')
-
-        tools.replace_in_file("quickfix/src/CMakeLists.txt",
-                              "add_executable(pt pt.cpp getopt.c)",
-                              '''
-endif ( NULLPTR_FOUND AND ENUM_NESTED_FOUND AND IN_CLASS_NON_STATIC_FOUND )
-add_executable(pt pt.cpp getopt.c)
+if ( FALSE )
 ''')
 
         tools.replace_in_file("quickfix/src/C++/Utility.h",
