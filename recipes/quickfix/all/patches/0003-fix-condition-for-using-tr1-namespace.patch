@@ -1,4 +1,4 @@
-From 83c3aacf7cfb1396f55653382e331166391e1830 Mon Sep 17 00:00:00 2001
+From 72e4ddd46fcc1d563076a6a2c1a7225ca712a355 Mon Sep 17 00:00:00 2001
 From: Tarcisio Rodrigues <tarcisio.genaro@gmail.com>
 Date: Tue, 9 Jun 2020 08:39:03 -0300
 Subject: [PATCH 3/4] fix condition for using tr1 namespace
@@ -8,10 +8,10 @@ Subject: [PATCH 3/4] fix condition for using tr1 namespace
  1 file changed, 1 insertion(+), 1 deletion(-)
 
 diff --git a/src/C++/Utility.h b/src/C++/Utility.h
-index 5f8c02d5..a8a473bb 100644
+index 0aa2cd3e..e4846f1a 100644
 --- a/src/C++/Utility.h
 +++ b/src/C++/Utility.h
-@@ -122,7 +122,7 @@ typedef int socket_handle;
+@@ -110,7 +110,7 @@ typedef int ssize_t;
  
  #if defined(HAVE_STD_SHARED_PTR)
    namespace ptr = std;

@@ -1,7 +1,7 @@
 sources:
   "1.15.1":
-    url: "https://github.com/quickfix/quickfix/archive/76a7b41a40b744fbdcd7a707012f0308b8d4c5ee.tar.gz"
-    sha256: "f820888caa6173aecbf77b9f02326fb6a746e78d1f018371d42cfe0212858cfe"
+    url: "https://github.com/quickfix/quickfix/archive/v1.15.1.tar.gz"
+    sha256: "1c4322a68704526ca3d1f213e7b0dcd30e067a8815be2a79b2ab1197ef70dcf7"
 patches:
   "1.15.1":
     - patch_file: "patches/0001-inc.-required-CMake-version-add-conan-basic-setup-an.patch"
