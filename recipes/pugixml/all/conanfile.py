@@ -5,7 +5,6 @@ import os
 
 class PugiXmlConan(ConanFile):
     name = "pugixml"
-    version = "1.10"
     description = "Light-weight, simple and fast XML parser for C++ with XPath support"
     topics = ("xml-parser", "xpath", "xml", "dom")
     url = "https://github.com/conan-io/conan-center-index"
@@ -104,4 +103,3 @@ class PugiXmlConan(ConanFile):
                 self.cpp_info.defines.append("PUGIXML_NO_EXCEPTIONS")
         else:
             self.cpp_info.libs = tools.collect_libs(self)
-
