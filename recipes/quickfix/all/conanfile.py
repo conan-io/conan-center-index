@@ -29,10 +29,6 @@ class QuickfixConan(ConanFile):
         extracted_dir = match_dirs[0]
         os.rename(extracted_dir, self._source_subfolder)
 
-        os.makedirs(f"{self._source_subfolder}/include")
-        shutil.copyfile(f"{self._source_subfolder}/src/C++/Except.h",
-                        f"{self._source_subfolder}/include/Except.h")
-
         self._patch_sources()
 
     def requirements(self):
@@ -51,7 +47,6 @@ class QuickfixConan(ConanFile):
         cmake = self._configure_cmake()
         cmake.install()
         self.copy("config.h", dst="include", src=self._source_subfolder)
-        self.copy("Except.h", dst="include", src=f"{self._source_subfolder}/src/C++")
         self.copy("LICENSE", dst="licenses", src=self._source_subfolder)
         tools.rmdir(os.path.join(self.package_folder, "share"))
 

@@ -1,8 +1,5 @@
 #include "config.h"
 
-#include "quickfix/Session.h"
-#include "quickfix/Application.h"
-#include "quickfix/MessageCracker.h"
 #include "quickfix/FileStore.h"
 #include "quickfix/SocketAcceptor.h"
 #ifdef HAVE_SSL
@@ -11,6 +8,12 @@
 #endif
 #include "quickfix/Log.h"
 #include "quickfix/SessionSettings.h"
+#include "quickfix/Application.h"
+#include "quickfix/MessageCracker.h"
+#include "quickfix/Values.h"
+#include "quickfix/Utility.h"
+#include "quickfix/Mutex.h"
+#include "quickfix/Session.h"
 
 #include "quickfix/fix40/ExecutionReport.h"
 #include "quickfix/fix41/ExecutionReport.h"
@@ -26,6 +29,8 @@
 #include "quickfix/fix44/NewOrderSingle.h"
 #include "quickfix/fix50/NewOrderSingle.h"
 
+
+
 class Application
     : public FIX::Application, public FIX::MessageCracker
 {
@@ -38,11 +43,11 @@ public:
   void onLogout( const FIX::SessionID& sessionID );
   void toAdmin( FIX::Message&, const FIX::SessionID& );
   void toApp( FIX::Message&, const FIX::SessionID& )
-  EXCEPT( FIX::DoNotSend );
+  throw( FIX::DoNotSend );
   void fromAdmin( const FIX::Message&, const FIX::SessionID& )
-  EXCEPT( FIX::FieldNotFound, FIX::IncorrectDataFormat, FIX::IncorrectTagValue, FIX::RejectLogon );
+  throw( FIX::FieldNotFound, FIX::IncorrectDataFormat, FIX::IncorrectTagValue, FIX::RejectLogon );
   void fromApp( const FIX::Message& message, const FIX::SessionID& sessionID )
-  EXCEPT( FIX::FieldNotFound, FIX::IncorrectDataFormat, FIX::IncorrectTagValue, FIX::UnsupportedMessageType );
+  throw( FIX::FieldNotFound, FIX::IncorrectDataFormat, FIX::IncorrectTagValue, FIX::UnsupportedMessageType );
 
   // MessageCracker overloads
   void onMessage( const FIX40::NewOrderSingle&, const FIX::SessionID& );
@@ -73,15 +78,15 @@ void Application::toAdmin( FIX::Message& message,
                            const FIX::SessionID& sessionID ) {}
 void Application::toApp( FIX::Message& message,
                          const FIX::SessionID& sessionID )
-EXCEPT( FIX::DoNotSend ) {}
+throw( FIX::DoNotSend ) {}
 
 void Application::fromAdmin( const FIX::Message& message,
                              const FIX::SessionID& sessionID )
-EXCEPT( FIX::FieldNotFound, FIX::IncorrectDataFormat, FIX::IncorrectTagValue, FIX::RejectLogon ) {}
+throw( FIX::FieldNotFound, FIX::IncorrectDataFormat, FIX::IncorrectTagValue, FIX::RejectLogon ) {}
 
 void Application::fromApp( const FIX::Message& message,
                            const FIX::SessionID& sessionID )
-EXCEPT( FIX::FieldNotFound, FIX::IncorrectDataFormat, FIX::IncorrectTagValue, FIX::UnsupportedMessageType )
+throw( FIX::FieldNotFound, FIX::IncorrectDataFormat, FIX::IncorrectTagValue, FIX::UnsupportedMessageType )
 { crack( message, sessionID ); }
 
 void Application::onMessage( const FIX40::NewOrderSingle& message,
