@@ -12,3 +12,5 @@ patches:
       base_path: "quickfix"
     - patch_file: "patches/0004-remove-tests-from-compilatin-unit-performance-and-ac.patch"
       base_path: "quickfix"
+    - patch_file: "patches/0005-Fix-build-for-C-17-replace-throw-.-with-EXCEPT.patch"
+      base_path: "quickfix"

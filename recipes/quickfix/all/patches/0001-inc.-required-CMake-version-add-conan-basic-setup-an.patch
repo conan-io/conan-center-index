@@ -1,7 +1,7 @@
 From 9c04ad42622a99c4068c2e4f2594486b7f954611 Mon Sep 17 00:00:00 2001
 From: Tarcisio Rodrigues <tarcisio.genaro@gmail.com>
 Date: Tue, 9 Jun 2020 02:14:57 -0300
-Subject: [PATCH 1/4] inc. required CMake version, add conan basic setup and
+Subject: [PATCH 1/5] inc. required CMake version, add conan basic setup and
  check compiler features
 
 ---
