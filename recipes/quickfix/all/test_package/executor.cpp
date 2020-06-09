@@ -1,30 +1,16 @@
-/****************************************************************************
-** Copyright (c) 2001-2014
-**
-** This file is part of the QuickFIX FIX Engine
-**
-** This file may be distributed under the terms of the quickfixengine.org
-** license as defined by quickfixengine.org and appearing in the file
-** LICENSE included in the packaging of this file.
-**
-** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
-** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
-**
-** See http://www.quickfixengine.org/LICENSE for licensing information.
-**
-** Contact ask@quickfixengine.org if any conditions of this licensing are
-** not clear to you.
-**
-****************************************************************************/
-
-#ifdef _MSC_VER
-#pragma warning( disable : 4503 4355 4786 )
-#endif
-
 #include "config.h"
 
-#include "Application.h"
 #include "quickfix/Session.h"
+#include "quickfix/Application.h"
+#include "quickfix/MessageCracker.h"
+#include "quickfix/FileStore.h"
+#include "quickfix/SocketAcceptor.h"
+#ifdef HAVE_SSL
+  #include "quickfix/ThreadedSSLSocketAcceptor.h"
+  #include "quickfix/SSLSocketAcceptor.h"
+#endif
+#include "quickfix/Log.h"
+#include "quickfix/SessionSettings.h"
 
 #include "quickfix/fix40/ExecutionReport.h"
 #include "quickfix/fix41/ExecutionReport.h"
@@ -32,6 +18,53 @@
 #include "quickfix/fix43/ExecutionReport.h"
 #include "quickfix/fix44/ExecutionReport.h"
 #include "quickfix/fix50/ExecutionReport.h"
+
+#include "quickfix/fix40/NewOrderSingle.h"
+#include "quickfix/fix41/NewOrderSingle.h"
+#include "quickfix/fix42/NewOrderSingle.h"
+#include "quickfix/fix43/NewOrderSingle.h"
+#include "quickfix/fix44/NewOrderSingle.h"
+#include "quickfix/fix50/NewOrderSingle.h"
+
+class Application
+    : public FIX::Application, public FIX::MessageCracker
+{
+public:
+  Application() : m_orderID(0), m_execID(0) {}
+
+  // Application overloads
+  void onCreate( const FIX::SessionID& );
+  void onLogon( const FIX::SessionID& sessionID );
+  void onLogout( const FIX::SessionID& sessionID );
+  void toAdmin( FIX::Message&, const FIX::SessionID& );
+  void toApp( FIX::Message&, const FIX::SessionID& )
+  EXCEPT( FIX::DoNotSend );
+  void fromAdmin( const FIX::Message&, const FIX::SessionID& )
+  EXCEPT( FIX::FieldNotFound, FIX::IncorrectDataFormat, FIX::IncorrectTagValue, FIX::RejectLogon );
+  void fromApp( const FIX::Message& message, const FIX::SessionID& sessionID )
+  EXCEPT( FIX::FieldNotFound, FIX::IncorrectDataFormat, FIX::IncorrectTagValue, FIX::UnsupportedMessageType );
+
+  // MessageCracker overloads
+  void onMessage( const FIX40::NewOrderSingle&, const FIX::SessionID& );
+  void onMessage( const FIX41::NewOrderSingle&, const FIX::SessionID& );
+  void onMessage( const FIX42::NewOrderSingle&, const FIX::SessionID& );
+  void onMessage( const FIX43::NewOrderSingle&, const FIX::SessionID& );
+  void onMessage( const FIX44::NewOrderSingle&, const FIX::SessionID& );
+  void onMessage( const FIX50::NewOrderSingle&, const FIX::SessionID& );
+
+  std::string genOrderID() {
+    std::stringstream stream;
+    stream << ++m_orderID;
+    return stream.str();
+  }
+  std::string genExecID() {
+    std::stringstream stream;
+    stream << ++m_execID;
+    return stream.str();
+  }
+private:
+  int m_orderID, m_execID;
+};
 
 void Application::onCreate( const FIX::SessionID& sessionID ) {}
 void Application::onLogon( const FIX::SessionID& sessionID ) {}
@@ -322,7 +355,7 @@ void Application::onMessage( const FIX50::NewOrderSingle& message,
         side,
         FIX::LeavesQty( 0 ),
         FIX::CumQty( orderQty ) );
-  
+
   executionReport.set( clOrdID );
   executionReport.set( symbol );
   executionReport.set( orderQty );
@@ -338,4 +371,52 @@ void Application::onMessage( const FIX50::NewOrderSingle& message,
     FIX::Session::sendToTarget( executionReport, sessionID );
   }
   catch ( FIX::SessionNotFound& ) {}
+}
+
+int main( int argc, char** argv )
+{
+  if ( argc < 2 )
+  {
+    std::cout << "usage: " << argv[ 0 ]
+              << " FILE." << std::endl;
+    return 0;
+  }
+  std::string file = argv[ 1 ];
+#ifdef HAVE_SSL
+  std::string isSSL;
+  if (argc > 2)
+  {
+    isSSL.assign(argv[2]);
+  }
+#endif
+
+  FIX::Acceptor * acceptor = 0;
+  try
+  {
+    FIX::SessionSettings settings( file );
+
+    Application application;
+    FIX::FileStoreFactory storeFactory( settings );
+    FIX::ScreenLogFactory logFactory( settings );
+
+#ifdef HAVE_SSL
+    if (isSSL.compare("SSL") == 0)
+      acceptor = new FIX::ThreadedSSLSocketAcceptor ( application, storeFactory, settings, logFactory );
+    else if (isSSL.compare("SSL-ST") == 0)
+      acceptor = new FIX::SSLSocketAcceptor ( application, storeFactory, settings, logFactory );
+    else
+#endif
+    acceptor = new FIX::SocketAcceptor ( application, storeFactory, settings, logFactory );
+
+    acceptor->start();
+    acceptor->stop();
+    delete acceptor;
+    return 0;
+  }
+  catch ( std::exception & e )
+  {
+    std::cout << e.what() << std::endl;
+    delete acceptor;
+    return 1;
+  }
 }
