@@ -31,6 +31,10 @@ class QuickfixConan(ConanFile):
 
         self._patch_sources()
 
+        os.makedirs(f"{self._source_subfolder}/include")
+        shutil.copyfile(f"{self._source_subfolder}/src/C++/Except.h",
+                        f"{self._source_subfolder}/include/Except.h")
+
     def requirements(self):
         if self.options.ssl:
             self.requires("openssl/1.1.1g")
@@ -47,6 +51,7 @@ class QuickfixConan(ConanFile):
         cmake = self._configure_cmake()
         cmake.install()
         self.copy("config.h", dst="include", src=self._source_subfolder)
+        self.copy("Except.h", dst="include", src=f"{self._source_subfolder}/src/C++")
         self.copy("LICENSE", dst="licenses", src=self._source_subfolder)
         tools.rmdir(os.path.join(self.package_folder, "share"))
 
