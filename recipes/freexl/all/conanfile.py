@@ -27,6 +27,8 @@ class FreexlConan(ConanFile):
             del self.options.fPIC
 
     def configure(self):
+        if self.options.shared:
+            del self.options.fPIC
         del self.settings.compiler.cppstd
         del self.settings.compiler.libcxx
 
@@ -81,7 +83,6 @@ class FreexlConan(ConanFile):
                 os.remove(la_file)
 
     def package_info(self):
-        self.cpp_info.names["pkg_config"] = "freexl"
         self.cpp_info.libs = tools.collect_libs(self)
         if self.settings.os == "Linux":
             self.cpp_info.system_libs.append("m")
