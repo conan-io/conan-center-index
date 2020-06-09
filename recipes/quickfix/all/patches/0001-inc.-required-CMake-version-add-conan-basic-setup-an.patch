@@ -1,15 +1,15 @@
-From 194326cd87fae3f50e38486186358340c1f6dabb Mon Sep 17 00:00:00 2001
+From b284031db87dcf503c5ed9f36d3529b94597215d Mon Sep 17 00:00:00 2001
 From: Tarcisio Rodrigues <tarcisio.genaro@gmail.com>
 Date: Tue, 9 Jun 2020 02:14:57 -0300
-Subject: [PATCH 1/4] inc. rquired CMake version, add conan basic setup and
+Subject: [PATCH 1/4] inc. required CMake version, add conan basic setup and
  check compiler features
 
 ---
- CMakeLists.txt | 129 ++++++++++++++++++++++++++++++++++++++++++++++++-
- 1 file changed, 128 insertions(+), 1 deletion(-)
+ CMakeLists.txt | 113 ++++++++++++++++++++++++++++++++++++++++++++++++-
+ 1 file changed, 112 insertions(+), 1 deletion(-)
 
 diff --git a/CMakeLists.txt b/CMakeLists.txt
-index 48908ead..36854b65 100644
+index 48908ead..fd63bf7c 100644
 --- a/CMakeLists.txt
 +++ b/CMakeLists.txt
 @@ -1,4 +1,4 @@
@@ -27,7 +27,19 @@ index 48908ead..36854b65 100644
  message("-- Project name ${CMAKE_PROJECT_NAME}")
  
  set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/")
-@@ -58,17 +60,133 @@ message("-- Building with POSTGRESQL")
+@@ -40,6 +42,11 @@ message("-- OPENSSL_ROOT_DIR: ${OPENSSL_ROOT_DIR}")
+ 
+ message("-- Building with SSL")
+ add_definitions("-DHAVE_SSL=1")
++
++file(APPEND ${CMAKE_SOURCE_DIR}/config.h
++        "#ifndef HAVE_SSL\n"
++        "#define HAVE_SSL 1\n"
++        "#endif\n")
+ endif()
+ 
+ if(HAVE_MYSQL)
+@@ -58,17 +65,115 @@ message("-- Building with POSTGRESQL")
  add_definitions("-DHAVE_POSTGRESQL=1")
  endif()
  
@@ -53,12 +65,9 @@ index 48908ead..36854b65 100644
 +    message(STATUS "set HAVE_NULLPTR")
 +    add_definitions("-DHAVE_NULLPTR=1")
 +    file(APPEND ${CMAKE_SOURCE_DIR}/config.h
-+     "#ifndef HAVE_NULLPTR
-+"
-+     "#define HAVE_NULLPTR
-+"
-+     "#endif
-+" )
++     "#ifndef HAVE_NULLPTR\n"
++     "#define HAVE_NULLPTR\n"
++     "#endif\n" )
 +endif (HAVE_NULLPTR)
 +
 +message(STATUS "Checking for use of enumeration in nested specifier.")
@@ -81,12 +90,9 @@ index 48908ead..36854b65 100644
 +    add_definitions("-DHAVE_ENUM_NESTED=1")
 +
 +    file(APPEND ${CMAKE_SOURCE_DIR}/config.h
-+     "#ifndef HAVE_ENUM_NESTED
-+"
-+     "#define HAVE_ENUM_NESTED
-+"
-+     "#endif
-+" )
++     "#ifndef HAVE_ENUM_NESTED\n"
++     "#define HAVE_ENUM_NESTED\n"
++     "#endif\n" )
 +endif (HAVE_ENUM_NESTED)
 +
 +message(STATUS "Checking support in-class initialization of non-static data member.")
@@ -109,12 +115,9 @@ index 48908ead..36854b65 100644
 +    add_definitions("-DHAVE_IN_CLASS_NON_STATIC=1")
 +
 +    file(APPEND ${CMAKE_SOURCE_DIR}/config.h
-+     "#ifndef HAVE_IN_CLASS_NON_STATIC
-+"
-+     "#define HAVE_IN_CLASS_NON_STATIC
-+"
-+     "#endif
-+" )
++     "#ifndef HAVE_IN_CLASS_NON_STATIC\n"
++     "#define HAVE_IN_CLASS_NON_STATIC\n"
++     "#endif\n" )
 +endif (HAVE_IN_CLASS_NON_STATIC)
 +
  include(FindSharedPtr)
@@ -127,53 +130,41 @@ index 48908ead..36854b65 100644
 +
  add_definitions("-DHAVE_STD_SHARED_PTR=1")
 +file(APPEND ${CMAKE_SOURCE_DIR}/config.h
-+ "#ifndef HAVE_STD_SHARED_PTR
-+"
-+ "#define HAVE_STD_SHARED_PTR
-+"
-+ "#endif
-+" )
++ "#ifndef HAVE_STD_SHARED_PTR\n"
++ "#define HAVE_STD_SHARED_PTR\n"
++ "#endif\n" )
 +
  elseif(HAVE_SHARED_PTR_IN_TR1_NAMESPACE)
  message("-- set HAVE_STD_TR1_SHARED_PTR")
 +
  add_definitions("-DHAVE_STD_TR1_SHARED_PTR=1")
 +file(APPEND ${CMAKE_SOURCE_DIR}/config.h
-+ "#ifndef HAVE_STD_TR1_SHARED_PTR
-+"
-+ "#define HAVE_STD_TR1_SHARED_PTR
-+"
-+ "#endif
-+" )
++ "#ifndef HAVE_STD_TR1_SHARED_PTR\n"
++ "#define HAVE_STD_TR1_SHARED_PTR\n"
++ "#endif\n" )
 +
  elseif(HAVE_SHARED_PTR_IN_TR1_NAMESPACE_FROM_TR1_MEMORY_HEADER)
  message("-- set HAVE_STD_TR1_SHARED_PTR_FROM_TR1_MEMORY_HEADER")
 +
  add_definitions("-DHAVE_STD_TR1_SHARED_PTR_FROM_TR1_MEMORY_HEADER=1")
 +file(APPEND ${CMAKE_SOURCE_DIR}/config.h
-+ "#ifndef HAVE_STD_TR1_SHARED_PTR_FROM_TR1_MEMORY_HEADER
-+"
-+ "#define HAVE_STD_TR1_SHARED_PTR_FROM_TR1_MEMORY_HEADER
-+"
-+ "#endif
-+" )
++ "#ifndef HAVE_STD_TR1_SHARED_PTR_FROM_TR1_MEMORY_HEADER\n"
++ "#define HAVE_STD_TR1_SHARED_PTR_FROM_TR1_MEMORY_HEADER\n"
++ "#endif\n" )
 +
  else()
  message("-- shared_ptr not found.")
  endif()
-@@ -77,7 +195,16 @@ include(FindUniquePtr)
+@@ -77,7 +182,13 @@ include(FindUniquePtr)
  FIND_UNIQUE_PTR()
  if (HAVE_UNIQUE_PTR_IN_STD_NAMESPACE)
  message("-- set HAVE_STD_UNIQUE_PTR")
 +
  add_definitions("-DHAVE_STD_UNIQUE_PTR=1")
 +file(APPEND ${CMAKE_SOURCE_DIR}/config.h
-+ "#ifndef HAVE_STD_UNIQUE_PTR
-+"
-+ "#define HAVE_STD_UNIQUE_PTR
-+"
-+ "#endif
-+" )
++ "#ifndef HAVE_STD_UNIQUE_PTR\n"
++ "#define HAVE_STD_UNIQUE_PTR\n"
++ "#endif\n" )
 +
  endif()
  

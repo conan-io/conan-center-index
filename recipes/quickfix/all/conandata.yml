@@ -4,7 +4,7 @@ sources:
     sha256: "f820888caa6173aecbf77b9f02326fb6a746e78d1f018371d42cfe0212858cfe"
 patches:
   "1.15.1":
-    - patch_file: "patches/0001-inc.-rquired-CMake-version-add-conan-basic-setup-and.patch"
+    - patch_file: "patches/0001-inc.-required-CMake-version-add-conan-basic-setup-an.patch"
       base_path: "quickfix"
     - patch_file: "patches/0002-remove-from-examples-dependency-on-openssl-source.patch"
       base_path: "quickfix"
