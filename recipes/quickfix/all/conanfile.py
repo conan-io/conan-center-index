@@ -199,14 +199,12 @@ if ( FALSE )
                                   "  target_link_libraries(${PROJECT_NAME} ${OPENSSL_LIBRARIES} ${MYSQL_CLIENT_LIBS} "
                                   "${PostgreSQL_LIBRARIES} ws2_32 crypt32)")
 
-
-
     def requirements(self):
         if self.options.ssl:
             self.requires("openssl/1.1.1g")
 
-    def configure(self):
-        if self.settings.os == 'Windows':
+    def config_options(self):
+        if self.settings.os == "Windows":
             del self.options.fPIC
 
     def build(self):
