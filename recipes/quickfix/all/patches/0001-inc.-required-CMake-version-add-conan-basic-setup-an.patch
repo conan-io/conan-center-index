@@ -1,15 +1,15 @@
-From 9c04ad42622a99c4068c2e4f2594486b7f954611 Mon Sep 17 00:00:00 2001
+From 5ca92fc2fc9f41e2a9344f43e482a2fd3aff1647 Mon Sep 17 00:00:00 2001
 From: Tarcisio Rodrigues <tarcisio.genaro@gmail.com>
 Date: Tue, 9 Jun 2020 02:14:57 -0300
 Subject: [PATCH 1/5] inc. required CMake version, add conan basic setup and
  check compiler features
 
 ---
- CMakeLists.txt | 113 ++++++++++++++++++++++++++++++++++++++++++++++++-
- 1 file changed, 112 insertions(+), 1 deletion(-)
+ CMakeLists.txt | 130 +++++++++++++++++++++++++++++++++++++++++++------
+ 1 file changed, 114 insertions(+), 16 deletions(-)
 
 diff --git a/CMakeLists.txt b/CMakeLists.txt
-index 48908ead..e8bdcaee 100644
+index 48908ead..8f8a3fbf 100644
 --- a/CMakeLists.txt
 +++ b/CMakeLists.txt
 @@ -1,4 +1,4 @@
@@ -27,8 +27,17 @@ index 48908ead..e8bdcaee 100644
  message("-- Project name ${CMAKE_PROJECT_NAME}")
  
  set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/")
-@@ -40,6 +42,11 @@ message("-- OPENSSL_ROOT_DIR: ${OPENSSL_ROOT_DIR}")
+@@ -31,15 +33,13 @@ option(HAVE_PYTHON3 "Build with default Python3 version")
+ if(HAVE_SSL)
+ # Can set location explicitly, example, cmake -DOPENSSL_ROOT_DIR=/usr/local/ssl -DOPENSSL_LIBRARIES=/usr/local/ssl/lib
  
+-find_package(OpenSSL REQUIRED)
+-include_directories(${OPENSSL_INCLUDE_DIR})
+-
+-message("-- OPENSSL_INCLUDE_DIR: ${OPENSSL_INCLUDE_DIR}")
+-message("-- OPENSSL_LIBRARIES: ${OPENSSL_LIBRARIES}")
+-message("-- OPENSSL_ROOT_DIR: ${OPENSSL_ROOT_DIR}")
+-
  message("-- Building with SSL")
  add_definitions("-DHAVE_SSL=1")
 +
@@ -39,7 +48,7 @@ index 48908ead..e8bdcaee 100644
  endif()
  
  if(HAVE_MYSQL)
-@@ -58,17 +65,115 @@ message("-- Building with POSTGRESQL")
+@@ -58,17 +58,115 @@ message("-- Building with POSTGRESQL")
  add_definitions("-DHAVE_POSTGRESQL=1")
  endif()
  
@@ -155,7 +164,7 @@ index 48908ead..e8bdcaee 100644
  else()
  message("-- shared_ptr not found.")
  endif()
-@@ -77,7 +182,13 @@ include(FindUniquePtr)
+@@ -77,7 +175,13 @@ include(FindUniquePtr)
  FIND_UNIQUE_PTR()
  if (HAVE_UNIQUE_PTR_IN_STD_NAMESPACE)
  message("-- set HAVE_STD_UNIQUE_PTR")
@@ -169,6 +178,24 @@ index 48908ead..e8bdcaee 100644
  endif()
  
  if (HAVE_PYTHON)
+@@ -91,15 +195,9 @@ find_package(PythonLibs 3 REQUIRED)
+ include_directories(${PYTHON_INCLUDE_DIRS})
+ endif ()
+ 
+-if( WIN32 OR ${CMAKE_SYSTEM_NAME} STREQUAL "Linux" )
+-add_subdirectory(UnitTest++)
+-endif()
+-
+ add_subdirectory(src)
+-add_subdirectory(examples)
+-if( WIN32)
+-add_subdirectory(test)
+-endif()
++
++target_link_libraries(${PROJECT_NAME} ${CONAN_LIBS})
+ 
+ install(DIRECTORY ${CMAKE_SOURCE_DIR}/spec/ DESTINATION share/quickfix
+   FILES_MATCHING PATTERN "FIX*.xml")
 -- 
-2.25.0
+2.17.0.windows.1
 

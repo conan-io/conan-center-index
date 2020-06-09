@@ -1,4 +1,4 @@
-From 72e4ddd46fcc1d563076a6a2c1a7225ca712a355 Mon Sep 17 00:00:00 2001
+From e01df2fb5c04f89b7bd3af9df489ecfa2fc50d14 Mon Sep 17 00:00:00 2001
 From: Tarcisio Rodrigues <tarcisio.genaro@gmail.com>
 Date: Tue, 9 Jun 2020 08:39:03 -0300
 Subject: [PATCH 3/5] fix condition for using tr1 namespace
@@ -21,5 +21,5 @@ index 0aa2cd3e..e4846f1a 100644
    namespace ptr = std::tr1;
  #elif defined(HAVE_BOOST_SHARED_PTR)
 -- 
-2.25.0
+2.17.0.windows.1
 

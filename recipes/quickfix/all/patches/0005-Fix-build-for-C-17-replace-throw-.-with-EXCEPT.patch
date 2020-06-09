@@ -1,4 +1,4 @@
-From a146076582a7a9001fa516142330aa05be4be38f Mon Sep 17 00:00:00 2001
+From ece2abf94db61d60addc6becff7d08fee5f34071 Mon Sep 17 00:00:00 2001
 From: Dmitry Shatilov <shatilov.diman@gmail.com>
 Date: Fri, 16 Nov 2018 18:58:01 +0200
 Subject: [PATCH 5/5] Fix build for C++17: replace throw(...) with EXCEPT(...)
@@ -3481,5 +3481,5 @@ index 9be0667a..c24f1bf6 100644
      m_count++; 
    }
 -- 
-2.25.0
+2.17.0.windows.1
 

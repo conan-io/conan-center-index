@@ -1,4 +1,4 @@
-From d55092b3a41802d5a24539e07f7428eeb8d07048 Mon Sep 17 00:00:00 2001
+From 39c0b69d63d3cfbabcdfed6b3769cc49978c06e1 Mon Sep 17 00:00:00 2001
 From: Tarcisio Rodrigues <tarcisio.genaro@gmail.com>
 Date: Tue, 9 Jun 2020 08:45:53 -0300
 Subject: [PATCH 4/5] remove tests from compilatin (unit, performance and
@@ -21,5 +21,5 @@ index cb4a60c6..df3c245a 100644
  add_executable(at at.cpp getopt.c)
  
 -- 
-2.25.0
+2.17.0.windows.1
 

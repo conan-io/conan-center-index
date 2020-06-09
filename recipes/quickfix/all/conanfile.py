@@ -59,10 +59,7 @@ class QuickfixConan(ConanFile):
         self.cpp_info.libs = tools.collect_libs(self)
 
         if self.settings.os == "Windows":
-            self.cpp_info.libs.append("wsock32")
-
-            if self.options.ssl and not self.options["openssl"].shared:
-                self.cpp_info.libs.append("crypt32")
+            self.cpp_info.system_libs.extend(["ws2_32"])
 
     def _configure_cmake(self):
         cmake = CMake(self)
@@ -76,10 +73,3 @@ class QuickfixConan(ConanFile):
     def _patch_sources(self):
         for patch in self.conan_data["patches"][self.version]:
             tools.patch(**patch)
-
-        if self.options.ssl and not self.options["openssl"].shared:
-            tools.replace_in_file(f"{self._source_subfolder}/src/C++/CMakeLists.txt",
-                                  "  target_link_libraries(${PROJECT_NAME} ${OPENSSL_LIBRARIES} ${MYSQL_CLIENT_LIBS} "
-                                  "${PostgreSQL_LIBRARIES} ws2_32)",
-                                  "  target_link_libraries(${PROJECT_NAME} ${OPENSSL_LIBRARIES} ${MYSQL_CLIENT_LIBS} "
-                                  "${PostgreSQL_LIBRARIES} ws2_32 crypt32)")
