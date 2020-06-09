@@ -624,13 +624,23 @@ class QtConan(ConanFile):
                         }) if tools.os_info.is_macos else tools.no_op():
                         self.run(self._make_program(), run_environment=True)
 
-            with open('qtbase/bin/qt.conf', 'w') as f:
-                f.write('[Paths]\nPrefix = ..')
-
     def package(self):
         with tools.chdir('build_folder'):
             self.run("%s install" % self._make_program())
-        self.copy("bin/qt.conf", src="qtbase")
+        with open(os.path.join(self.package_folder, "bin", "qt.conf"), 'w') as f:
+            f.write("""[Paths]
+Prefix = ..
+ArchData = bin/archdatadir
+HostData = bin/archdatadir
+Data = bin/datadir
+Sysconf = bin/sysconfdir
+LibraryExecutables = bin/archdatadir/bin
+Plugins = bin/archdatadir/plugins
+Imports = bin/archdatadir/imports
+Qml2Imports = bin/archdatadir/qml
+Translations = bin/datadir/translations
+Documentation = bin/datadir/doc
+Examples = bin/datadir/examples""")
         self.copy("*LICENSE*", src="qt5/", dst="licenses")
         tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
         tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
