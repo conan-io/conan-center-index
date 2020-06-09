@@ -8,6 +8,8 @@ class TestPackageConan(ConanFile):
 
     def build(self):
         cmake = CMake(self)
+        cmake.definitions["TEST_ENABLE_PUBSUB_CUSTOM_PUBLISH_HANDLING"] = self.options["open62541"].enable_pubsub_custom_publish_handling
+        cmake.verbose= True
         cmake.configure()
         cmake.build()
 

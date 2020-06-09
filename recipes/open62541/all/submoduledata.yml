@@ -1,0 +1,6 @@
+submodules:
+  "1.1":
+    deps/mdnsd:
+      sha256: b1847047c0c4a20ab6a132fed6d6b6e50db6b07f0068a95213306603279a3b9a
+      url: https://github.com/Pro/mdnsd/archive/5af316c4b79460c0c1b6c2a674a37e28a85441a3.zip
+      archive_pattern: "mdnsd-{version}"

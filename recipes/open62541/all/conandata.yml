@@ -1,8 +1,8 @@
 sources:
-  "1.0.1":
-    sha256: ae9fac217267bccdf360fe0f1788f4d65875b06028404cf2440600927d2b3ad3
-    url: "https://github.com/open62541/open62541/archive/v1.0.1.tar.gz"
+  "1.1":
+    sha256: 86acf02f441866cc5176b1086d8028ca8e604f5a04db7314fa44b9ac661cd990
+    url: https://github.com/open62541/open62541/archive/v1.1.tar.gz
 patches:
-  "1.0.1":
-    - patch_file: "patches/0001-remove-sanitizer.patch"
+  "1.1":
+    - patch_file: "patches/0001-Remove-sanitizer-and-rename-find-packages.patch"
       base_path: "source_subfolder"
