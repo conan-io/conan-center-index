@@ -17,7 +17,6 @@ class Open62541Conan(ConanFile):
     homepage = "https://open62541.org/"
     url = "https://github.com/conan-io/conan-center-index"
     description = "open62541 is an open source and free implementation of OPC UA (OPC Unified Architecture) written in the common subset of the C99 and C++98 languages. The library is usable with all major compilers and provides the necessary tools to implement dedicated OPC UA clients and servers, or to integrate OPC UA-based communication into existing applications. open62541 library is platform independent. All platform-specific functionality is implemented via exchangeable plugins. Plugin implementations are provided for the major operating systems."
-    requires = ("mbedtls/2.16.3-gpl")
     topics = (
         "OPC UA", "open62541", "sdk", "server/client", "c", "iec-62541",
         "industrial automation", "tsn", "time sensetive networks", "publish-subscirbe", "pubsub"
@@ -82,6 +81,10 @@ class Open62541Conan(ConanFile):
         "readable_statuscodes": True
     }
     generators = "cmake", "cmake_find_package"
+
+    def requirements(self):
+        if self.options.encription:
+            self.requires("mbedtls/2.16.3-gpl")
 
     @property
     def _source_subfolder(self):
