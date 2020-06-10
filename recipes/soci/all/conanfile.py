@@ -161,8 +161,13 @@ class SociConan(ConanFile):
 
     def _construct_library_name(self, name):
         if self.settings.os == "Windows":
+            prefix = ""
+            if not self.options.shared:
+                prefix = "lib"
+
             abi_version = tools.Version(self.version)
-            name = "lib{name}_{major}_{minor}".format(
+            name = "{prefix}{name}_{major}_{minor}".format(
+                prefix = prefix,
                 name = name,
                 major = abi_version.major,
                 minor = abi_version.minor
