@@ -3,6 +3,7 @@ import sys
 from conans import ConanFile, CMake, tools
 from conans.tools import download, unzip
 from conans.model.version import Version
+from conans.errors import ConanInvalidConfiguration
 from urllib.parse import urlparse
 import shutil
 
@@ -152,6 +153,10 @@ class Open62541Conan(ConanFile):
         }.get(str(self.options.logging_level), "300")
 
     def _configure_cmake(self):
+        if self.settings.compiler == "clang" and not self.options.shared:
+            raise ConanInvalidConfiguration(
+                "Clang compiler can not be used to build a static library")
+
         cmake = CMake(self)
         cmake.verbose = True
         version = Version(self.version)
