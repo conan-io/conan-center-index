@@ -163,10 +163,6 @@ class Open62541Conan(ConanFile):
         cmake.definitions["OPEN62541_VER_MAJOR"] = version.major(fill=False)
         cmake.definitions["OPEN62541_VER_MINOR"] = version.minor(fill=False)
         cmake.definitions["OPEN62541_VER_PATCH"] = version.patch()
-        cmake.definitions["BUILD_SHARED_LIBS"] = self.options.shared
-        if self.settings.os != "Windows" and self.options.shared:
-            cmake.definitions["POSITION_INDEPENDENT_CODE"] = self.options.fPIC
-        cmake.definitions["BUILD_SHARED_LIBS"] = self.options.shared
         cmake.definitions["UA_LOGLEVEL"] = self._get_log_level()
         cmake.definitions["UA_ENABLE_SUBSCRIPTIONS"] = self.options.subscription
         cmake.definitions["UA_ENABLE_SUBSCRIPTIONS_EVENTS"] = self.options.subscription_events
