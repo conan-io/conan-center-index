@@ -11,8 +11,9 @@ class QuickfixConan(ConanFile):
     topics = ("conan", "QuickFIX", "FIX", "Financial Information Exchange", "libraries", "cpp")
     settings = "os", "compiler", "build_type", "arch"
     options = {"fPIC": [True, False],
-               "ssl":  [True, False]}
-    default_options = {"ssl": False, "fPIC": True}
+               "ssl":  [True, False],
+               "shared_ptr": ["std", "tr1"]}
+    default_options = {"fPIC": True, "ssl": False, "shared_ptr": "std"}
     generators = "cmake"
     exports_sources = "patches/**"
     _cmake = None
@@ -41,7 +42,8 @@ class QuickfixConan(ConanFile):
         if not self._cmake:
             self._cmake = CMake(self)
             self._cmake.definitions["HAVE_SSL"] = self.options.ssl
-            self._cmake.configure(source_folder=self._source_subfolder)
+            self._cmake.definitions["SHARED_PTR"] = str(self.options.shared_ptr).upper()
+            self._cmake.configure(source_folder=self._source_subfolder, build_folder=self._build_subfolder)
         return self._cmake
 
     def build(self):
@@ -64,6 +66,11 @@ class QuickfixConan(ConanFile):
 
         if self.options.ssl:
             self.cpp_info.defines.append("HAVE_SSL=1")
+
+        if self.options.shared_ptr == "std":
+            self.cpp_info.defines.append("HAVE_STD_SHARED_PTR=1")
+        else:
+            self.cpp_info.defines.append("HAVE_STD_TR1_SHARED_PTR_FROM_TR1_MEMORY_HEADER=1")
 
         if self.settings.os == "Windows":
             self.cpp_info.system_libs.extend(["ws2_32"])
