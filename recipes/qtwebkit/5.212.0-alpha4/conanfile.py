@@ -37,7 +37,7 @@ class QtWebKitConan(ConanFile):
         "with_libhyphen": False,
         "with_webcrypto": False,
         "with_webkit2": False,
-        "with_woff2": False        
+        "with_woff2": False
     }
 
     requires = [
@@ -131,7 +131,10 @@ class QtWebKitConan(ConanFile):
         pass
 
     def package_info(self):
-        libs = ["Qt5WebKit", "Qt5WebKitWidgets"]
+        if tools.is_apple_os(self.settings.os):
+           libs = ["QtWebKit", "QtWebKitWidgets"]
+       else:
+           libs = ["Qt5WebKit", "Qt5WebKitWidgets"]
 
         if tools.is_apple_os(self.settings.os):
             self.cpp_info.frameworkdirs = ['lib']
