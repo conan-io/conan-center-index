@@ -133,7 +133,7 @@ class QtWebKitConan(ConanFile):
     def package_info(self):
         if tools.is_apple_os(self.settings.os):
            libs = ["QtWebKit", "QtWebKitWidgets"]
-       else:
+        else:
            libs = ["Qt5WebKit", "Qt5WebKitWidgets"]
 
         if tools.is_apple_os(self.settings.os):
