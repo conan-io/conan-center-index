@@ -63,7 +63,7 @@ class GdalConan(ConanFile):
         # "with_sfcgal": [True, False],
         "with_qhull": [True, False],
         # "with_opencl": [True, False],
-        # "with_freexl": [True, False],
+        "with_freexl": [True, False],
         "without_pam": [True, False],
         # "with_poppler": [True, False],
         # "with_podofo": [True, False],
@@ -125,7 +125,7 @@ class GdalConan(ConanFile):
         # "with_sfcgal": False,
         "with_qhull": True,
         # "with_opencl": False,
-        # "with_freexl": False,
+        "with_freexl": False,
         "without_pam": False,
         # "with_poppler": False,
         # "with_podofo": False,
@@ -283,8 +283,8 @@ class GdalConan(ConanFile):
             self.requires("qhull/7.3.2")
         # if self.options.with_opencl:
         #     self.requires("opencl-headers/x.x.x")
-        # if self.options.with_freexl:
-        #     self.requires("freexl/1.0.5")
+        if self.options.with_freexl:
+            self.requires("freexl/1.0.5")
         # if self.options.with_poppler:
         #     self.requires("poppler/0.83.0")
         # if self.options.with_podofo:
@@ -424,6 +424,8 @@ class GdalConan(ConanFile):
             args.append("WEBP_CFLAGS=\"-I{}\"".format(" -I".join(self.deps_cpp_info["libwebp"].include_paths)))
         if self.options.with_xml2:
             args.append("LIBXML2_INC=\"-I{}\"".format(" -I".join(self.deps_cpp_info["libxml2"].include_paths)))
+        if self.options.with_freexl:
+            self._replace_in_nmake("#FREEXL_LIBS = e:/freexl-1.0.0a/freexl_i.lib", "FREEXL_LIBS=")
         if self.options.with_gta:
             args.append("GTA_CFLAGS=\"-I{}\"".format(" -I".join(self.deps_cpp_info["libgta"].include_paths)))
         args.append("QHULL_SETTING={}".format("EXTERNAL" if self.options.with_qhull else "NO"))
@@ -559,7 +561,7 @@ class GdalConan(ConanFile):
         args.append("--without-sfcgal") # TODO: to implement when sfcgal lib available
         args.append("--with-qhull={}".format("yes" if self.options.with_qhull else "no"))
         args.append("--without-opencl") # TODO: to implement when opencl-headers available (and also OpenCL lib?)
-        args.append("--without-freexl") # TODO: to implement when freexl lib available
+        args.append("--with-freexl={}".format("yes" if self.options.with_freexl else "no"))
         args.append("--with-libjson-c={}".format(self._unix_path(self.deps_cpp_info["json-c"].rootpath))) # always required !
         if self.options.without_pam:
             args.append("--without-pam")
