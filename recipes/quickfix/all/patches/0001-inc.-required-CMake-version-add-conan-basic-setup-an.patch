@@ -1,15 +1,15 @@
-From 5ca92fc2fc9f41e2a9344f43e482a2fd3aff1647 Mon Sep 17 00:00:00 2001
+From 9e042be5cb00a674be143a986f29dc720121ccbf Mon Sep 17 00:00:00 2001
 From: Tarcisio Rodrigues <tarcisio.genaro@gmail.com>
 Date: Tue, 9 Jun 2020 02:14:57 -0300
-Subject: [PATCH 1/5] inc. required CMake version, add conan basic setup and
+Subject: [PATCH 1/4] inc. required CMake version, add conan basic setup and
  check compiler features
 
 ---
- CMakeLists.txt | 130 +++++++++++++++++++++++++++++++++++++++++++------
- 1 file changed, 114 insertions(+), 16 deletions(-)
+ CMakeLists.txt | 53 +++++++++++++++++++++++++++++++++++---------------
+ 1 file changed, 37 insertions(+), 16 deletions(-)
 
 diff --git a/CMakeLists.txt b/CMakeLists.txt
-index 48908ead..8f8a3fbf 100644
+index 48908ead..cfa3742e 100644
 --- a/CMakeLists.txt
 +++ b/CMakeLists.txt
 @@ -1,4 +1,4 @@
@@ -48,87 +48,9 @@ index 48908ead..8f8a3fbf 100644
  endif()
  
  if(HAVE_MYSQL)
-@@ -58,17 +58,115 @@ message("-- Building with POSTGRESQL")
- add_definitions("-DHAVE_POSTGRESQL=1")
+@@ -59,16 +59,37 @@ add_definitions("-DHAVE_POSTGRESQL=1")
  endif()
  
-+message(STATUS "Checking for nullptr.")
-+unset(HAVE_NULLPTR CACHE)
-+set(NULLPTR_FOUND FALSE)
-+check_include_file_cxx(cstddef HAVE_STD_CSTDDEF_HEADER)
-+if (HAVE_STD_CSTDDEF_HEADER)
-+    include(CheckCXXSourceCompiles)
-+    check_cxx_source_compiles("#include <cstddef>
-+                               int main() {
-+                                 std::nullptr_t null = nullptr;
-+                                 return 0;
-+                               }"
-+            HAVE_NULLPTR)
-+    if (HAVE_NULLPTR)
-+        message(STATUS "Found support to nullptr.")
-+        set(NULLPTR_FOUND TRUE)
-+    endif(HAVE_NULLPTR)
-+endif(HAVE_STD_CSTDDEF_HEADER)
-+
-+if (HAVE_NULLPTR)
-+    message(STATUS "set HAVE_NULLPTR")
-+    add_definitions("-DHAVE_NULLPTR=1")
-+    file(APPEND ${CMAKE_SOURCE_DIR}/config.h
-+     "#ifndef HAVE_NULLPTR\n"
-+     "#define HAVE_NULLPTR\n"
-+     "#endif\n" )
-+endif (HAVE_NULLPTR)
-+
-+message(STATUS "Checking for use of enumeration in nested specifier.")
-+unset(HAVE_ENUM_NESTED CACHE)
-+set(ENUM_NESTED_FOUND FALSE)
-+check_cxx_source_compiles("namespace NS {
-+                           enum E {
-+                           Item
-+                           };
-+                           }
-+                           int main() {
-+                             NS::E e = NS::E::Item;
-+                           }"
-+                          HAVE_ENUM_NESTED)
-+if (HAVE_ENUM_NESTED)
-+    message(STATUS "Found support to use of enumeration in nested specifier.")
-+    set(ENUM_NESTED_FOUND TRUE)
-+
-+    message(STATUS "set HAVE_ENUM_NESTED")
-+    add_definitions("-DHAVE_ENUM_NESTED=1")
-+
-+    file(APPEND ${CMAKE_SOURCE_DIR}/config.h
-+     "#ifndef HAVE_ENUM_NESTED\n"
-+     "#define HAVE_ENUM_NESTED\n"
-+     "#endif\n" )
-+endif (HAVE_ENUM_NESTED)
-+
-+message(STATUS "Checking support in-class initialization of non-static data member.")
-+unset(HAVE_IN_CLASS_NON_STATIC CACHE)
-+set(IN_CLASS_NON_STATIC_FOUND FALSE)
-+check_cxx_source_compiles("namespace NS {
-+                           class C {
-+                           int f = 0;
-+                           };
-+                           }
-+                           int main() {
-+                             NS::C c;
-+                           }"
-+                          HAVE_IN_CLASS_NON_STATIC)
-+if (HAVE_IN_CLASS_NON_STATIC)
-+    message(STATUS "Found support to in-class initialization of non-static data member.")
-+    set(IN_CLASS_NON_STATIC_FOUND TRUE)
-+
-+    message(STATUS "set HAVE_IN_CLASS_NON_STATIC")
-+    add_definitions("-DHAVE_IN_CLASS_NON_STATIC=1")
-+
-+    file(APPEND ${CMAKE_SOURCE_DIR}/config.h
-+     "#ifndef HAVE_IN_CLASS_NON_STATIC\n"
-+     "#define HAVE_IN_CLASS_NON_STATIC\n"
-+     "#endif\n" )
-+endif (HAVE_IN_CLASS_NON_STATIC)
-+
  include(FindSharedPtr)
 +
 +
@@ -164,7 +86,7 @@ index 48908ead..8f8a3fbf 100644
  else()
  message("-- shared_ptr not found.")
  endif()
-@@ -77,7 +175,13 @@ include(FindUniquePtr)
+@@ -77,7 +98,13 @@ include(FindUniquePtr)
  FIND_UNIQUE_PTR()
  if (HAVE_UNIQUE_PTR_IN_STD_NAMESPACE)
  message("-- set HAVE_STD_UNIQUE_PTR")
@@ -178,7 +100,7 @@ index 48908ead..8f8a3fbf 100644
  endif()
  
  if (HAVE_PYTHON)
-@@ -91,15 +195,9 @@ find_package(PythonLibs 3 REQUIRED)
+@@ -91,15 +118,9 @@ find_package(PythonLibs 3 REQUIRED)
  include_directories(${PYTHON_INCLUDE_DIRS})
  endif ()
  
