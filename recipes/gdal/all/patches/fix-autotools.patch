@@ -214,7 +214,18 @@
      fi
    fi
  
-@@ -4846,8 +4838,7 @@ if test "$with_libjson_c" = "external" -o "$with_libjson_c" = "" -o "$with_libjs
+@@ -4740,7 +4732,9 @@ AC_MSG_CHECKING([for FreeXL support])
+ HAVE_FREEXL=no
+ FREEXL_INCLUDE=
+ 
+-if test "$with_freexl" = "" -o "$with_freexl" = "yes" ; then
++if test "$with_freexl" = "yes"; then
++  PKG_CHECK_MODULES([FREEXL], [freexl >= 1.0.0], [HAVE_FREEXL=yes], [HAVE_FREEXL=no])
++elif test "$with_freexl" = ""; then
+   AC_CHECK_HEADERS(freexl.h)
+   AC_CHECK_LIB(freexl,freexl_open,FREEXL_LIBS="-lfreexl",FREEXL_LIBS=missing)
+ 
+@@ -4846,8 +4840,7 @@ if test "$with_libjson_c" = "external" -o "$with_libjson_c" = "" -o "$with_libjs
  elif test "$with_libjson_c" = "internal" ; then
    LIBJSONC_SETTING=internal
  elif test "$with_libjson_c" != "no"; then
@@ -224,7 +235,7 @@
  else
    AC_MSG_ERROR([libjson-c (internal or external) is required])
  fi
-@@ -5951,7 +5942,6 @@ else
+@@ -5951,7 +5944,6 @@ else
      # Test that the package found is for the right architecture
      saved_LIBS="$LIBS"
      LIBS="$EXR_LIBS"
