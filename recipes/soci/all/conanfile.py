@@ -56,6 +56,8 @@ class SociConan(ConanFile):
         compiler = str(self.settings.compiler)
         if compiler == "apple-clang" and tools.Version(self.settings.compiler.version) <= "9.1":
             raise ConanInvalidConfiguration( "{} requires at least {} 9.1".format(self.name, compiler))
+        if compiler == "clang" and tools.Version(self.settings.compiler.version) <= "5.0":
+            raise ConanInvalidConfiguration( "{} requires at least {} 5.0".format(self.name, compiler))
 
     def requirements(self):
         if self.options.with_backend_sqlite3:
