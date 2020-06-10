@@ -42,6 +42,10 @@ class IosCMakeConan(ConanFile):
         if os.name == 'posix':
             os.chmod(filename, os.stat(filename).st_mode | 0o111)
 
+    def configure(self):
+        if not tools.is_apple_os(self.settings.os):
+            raise ConanInvalidConfiguration("This package only supports Apple operating systems")
+
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
         os.rename("ios-cmake-{}".format(self.version), self._source_subfolder)
