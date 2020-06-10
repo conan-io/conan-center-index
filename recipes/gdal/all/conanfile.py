@@ -648,8 +648,6 @@ class GdalConan(ConanFile):
             self.cpp_info.system_libs.extend(["psapi", "ws2_32"])
         if not self.options.shared and self._stdcpp_library:
             self.cpp_info.system_libs.append(self._stdcpp_library)
-        if self.settings.compiler == "Visual Studio" and self.options.shared:
-            self.cpp_info.defines.append("CPL_DISABLE_DLL") # yes, it's weird, but otherwise consumers would have lot of dllexport
         bin_path = os.path.join(self.package_folder, "bin")
         self.output.info("Appending PATH environment variable: {}".format(bin_path))
         self.env_info.PATH.append(bin_path)

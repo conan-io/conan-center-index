@@ -359,6 +359,14 @@
  !ENDIF
  !ENDIF  # OPTFLAGS
  
+@@ -951,6 +951,7 @@ LINKER_FLAGS = $(EXTRA_LINKER_FLAGS) $(MSVC_VLD_LIB) $(LDEBUG)
+ 
+ 
+ CFLAGS	=	$(OPTFLAGS) $(WARNFLAGS) $(USER_DEFS) $(SSEFLAGS) $(SSSE3FLAGS) $(INC) $(AVXFLAGS) $(EXTRAFLAGS) $(OGR_FLAG) $(GNM_FLAG) $(MSVC_VLD_FLAGS) -DGDAL_COMPILATION
++CFLAGS	=	$(CFLAGS) -DGDAL_EXPORTS
+ CPPFLAGS = $(CFLAGS) -DNOMINMAX
+ MAKE	=	nmake /nologo
+ 
 --- a/ogr/ogrsf_frmts/geojson/makefile.vc
 +++ b/ogr/ogrsf_frmts/geojson/makefile.vc
 @@ -28,13 +28,7 @@ EXTRAFLAGS = -I. -I.. -I..\.. -Ilibjson
@@ -375,3 +383,18 @@
 -	cd ..
  	-del *.lib
  	-del *.obj *.pdb
+--- a/port/cpl_port.h
++++ b/port/cpl_port.h
+@@ -344,7 +344,11 @@ typedef unsigned int  GUIntptr_t;
+ 
+ #ifndef CPL_DLL
+ #if defined(_MSC_VER) && !defined(CPL_DISABLE_DLL)
+-#  define CPL_DLL     __declspec(dllexport)
++#  ifdef GDAL_EXPORTS
++#    define CPL_DLL     __declspec(dllexport)
++#  else
++#    define CPL_DLL
++#  endif
+ #  define CPL_INTERNAL
+ #else
+ #  if defined(USE_GCC_VISIBILITY_FLAG)
