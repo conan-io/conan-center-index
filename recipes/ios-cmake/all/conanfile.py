@@ -59,7 +59,8 @@ class IosCMakeConan(ConanFile):
         self._chmod_plus_x(os.path.join(self.package_folder, "bin", "cmake-wrapper"))
 
         self.copy("LICENSE.md", dst="licenses", src=self._source_subfolder, keep_path=False)
-
+        # satisfy KB-H014 (header_only recipes require headers
+        tools.save(os.path.join(self.package_folder, "include", "dummy_header.h"), "\n")
 
     def package_info(self):
         arch_flag = self.settings.arch
