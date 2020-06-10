@@ -51,7 +51,7 @@ class IosCMakeConan(ConanFile):
         os.rename("ios-cmake-{}".format(self.version), self._source_subfolder)
 
     def build(self):
-        pass # there is nothign to build
+        pass # there is nothing to build
 
     def package(self):
         self.copy("cmake-wrapper", dst="bin")
