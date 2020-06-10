@@ -1,4 +1,4 @@
-From 2c63d56cb3b16ddfd6f90ced68ff65274acb5eb2 Mon Sep 17 00:00:00 2001
+From 09df13bafe149dd1a9e4b1cc17d3cbe860a7852a Mon Sep 17 00:00:00 2001
 From: Dmitry Shatilov <shatilov.diman@gmail.com>
 Date: Fri, 16 Nov 2018 18:58:01 +0200
 Subject: [PATCH 4/4] Fix build for C++17: replace throw(...) with EXCEPT(...)
