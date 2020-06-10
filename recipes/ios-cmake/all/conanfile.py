@@ -2,8 +2,6 @@
 from conans import ConanFile, tools
 
 import os
-#import platform
-#import copy
 
 
 class IosCMakeConan(ConanFile):
