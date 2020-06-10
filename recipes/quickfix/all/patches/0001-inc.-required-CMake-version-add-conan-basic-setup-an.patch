@@ -1,15 +1,15 @@
-From 9e042be5cb00a674be143a986f29dc720121ccbf Mon Sep 17 00:00:00 2001
+From 9c9d16c449839ad7ebf50b857deb4708fca28305 Mon Sep 17 00:00:00 2001
 From: Tarcisio Rodrigues <tarcisio.genaro@gmail.com>
 Date: Tue, 9 Jun 2020 02:14:57 -0300
 Subject: [PATCH 1/4] inc. required CMake version, add conan basic setup and
  check compiler features
 
 ---
- CMakeLists.txt | 53 +++++++++++++++++++++++++++++++++++---------------
- 1 file changed, 37 insertions(+), 16 deletions(-)
+ CMakeLists.txt | 38 ++++++++++++++++++++++----------------
+ 1 file changed, 22 insertions(+), 16 deletions(-)
 
 diff --git a/CMakeLists.txt b/CMakeLists.txt
-index 48908ead..cfa3742e 100644
+index 48908ead..bf455479 100644
 --- a/CMakeLists.txt
 +++ b/CMakeLists.txt
 @@ -1,4 +1,4 @@
@@ -27,7 +27,7 @@ index 48908ead..cfa3742e 100644
  message("-- Project name ${CMAKE_PROJECT_NAME}")
  
  set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/")
-@@ -31,15 +33,13 @@ option(HAVE_PYTHON3 "Build with default Python3 version")
+@@ -31,13 +33,6 @@ option(HAVE_PYTHON3 "Build with default Python3 version")
  if(HAVE_SSL)
  # Can set location explicitly, example, cmake -DOPENSSL_ROOT_DIR=/usr/local/ssl -DOPENSSL_LIBRARIES=/usr/local/ssl/lib
  
@@ -40,40 +40,22 @@ index 48908ead..cfa3742e 100644
 -
  message("-- Building with SSL")
  add_definitions("-DHAVE_SSL=1")
-+
-+file(APPEND ${CMAKE_SOURCE_DIR}/config.h
-+        "#ifndef HAVE_SSL\n"
-+        "#define HAVE_SSL 1\n"
-+        "#endif\n")
  endif()
- 
- if(HAVE_MYSQL)
-@@ -59,16 +59,37 @@ add_definitions("-DHAVE_POSTGRESQL=1")
- endif()
- 
- include(FindSharedPtr)
-+
-+
-+
- FIND_SHARED_PTR()
+@@ -63,12 +58,25 @@ FIND_SHARED_PTR()
  if (HAVE_SHARED_PTR_IN_STD_NAMESPACE)
  message("-- set HAVE_STD_SHARED_PTR")
-+
  add_definitions("-DHAVE_STD_SHARED_PTR=1")
 +file(APPEND ${CMAKE_SOURCE_DIR}/config.h
 + "#ifndef HAVE_STD_SHARED_PTR\n"
 + "#define HAVE_STD_SHARED_PTR\n"
 + "#endif\n" )
-+
  elseif(HAVE_SHARED_PTR_IN_TR1_NAMESPACE)
  message("-- set HAVE_STD_TR1_SHARED_PTR")
-+
  add_definitions("-DHAVE_STD_TR1_SHARED_PTR=1")
 +file(APPEND ${CMAKE_SOURCE_DIR}/config.h
 + "#ifndef HAVE_STD_TR1_SHARED_PTR\n"
 + "#define HAVE_STD_TR1_SHARED_PTR\n"
 + "#endif\n" )
-+
  elseif(HAVE_SHARED_PTR_IN_TR1_NAMESPACE_FROM_TR1_MEMORY_HEADER)
  message("-- set HAVE_STD_TR1_SHARED_PTR_FROM_TR1_MEMORY_HEADER")
 +
@@ -82,11 +64,10 @@ index 48908ead..cfa3742e 100644
 + "#ifndef HAVE_STD_TR1_SHARED_PTR_FROM_TR1_MEMORY_HEADER\n"
 + "#define HAVE_STD_TR1_SHARED_PTR_FROM_TR1_MEMORY_HEADER\n"
 + "#endif\n" )
-+
  else()
  message("-- shared_ptr not found.")
  endif()
-@@ -77,7 +98,13 @@ include(FindUniquePtr)
+@@ -77,7 +85,12 @@ include(FindUniquePtr)
  FIND_UNIQUE_PTR()
  if (HAVE_UNIQUE_PTR_IN_STD_NAMESPACE)
  message("-- set HAVE_STD_UNIQUE_PTR")
@@ -96,11 +77,10 @@ index 48908ead..cfa3742e 100644
 + "#ifndef HAVE_STD_UNIQUE_PTR\n"
 + "#define HAVE_STD_UNIQUE_PTR\n"
 + "#endif\n" )
-+
  endif()
  
  if (HAVE_PYTHON)
-@@ -91,15 +118,9 @@ find_package(PythonLibs 3 REQUIRED)
+@@ -91,15 +104,8 @@ find_package(PythonLibs 3 REQUIRED)
  include_directories(${PYTHON_INCLUDE_DIRS})
  endif ()
  
@@ -113,7 +93,6 @@ index 48908ead..cfa3742e 100644
 -if( WIN32)
 -add_subdirectory(test)
 -endif()
-+
 +target_link_libraries(${PROJECT_NAME} ${CONAN_LIBS})
  
  install(DIRECTORY ${CMAKE_SOURCE_DIR}/spec/ DESTINATION share/quickfix

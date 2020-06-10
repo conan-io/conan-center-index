@@ -12,7 +12,8 @@ class QuickfixConan(ConanFile):
     description = "QuickFIX is a free and open source implementation of the FIX protocol"
     topics = ("conan", "QuickFIX", "FIX", "Financial Information Exchange", "libraries", "cpp")
     settings = "os", "compiler", "build_type", "arch"
-    options = {"ssl": [True, False], "fPIC": [True, False]}
+    options = {"fPIC": [True, False],
+               "ssl":  [True, False]}
     default_options = {"ssl": False, "fPIC": True}
     generators = "cmake"
     file_pattern = re.compile(r'quickfix-(.*)')
@@ -57,6 +58,9 @@ class QuickfixConan(ConanFile):
 
     def package_info(self):
         self.cpp_info.libs = tools.collect_libs(self)
+
+        if self.options.ssl:
+            self.cpp_info.defines.append("HAVE_SSL=1")
 
         if self.settings.os == "Windows":
             self.cpp_info.system_libs.extend(["ws2_32"])
