@@ -389,7 +389,8 @@ class GdalConan(ConanFile):
         if self.options.with_hdf4:
             args.append("HDF4_DIR=\"{}\"".format(self.deps_cpp_info["hdf4"].rootpath))
             args.append("HDF4_INCLUDE=\"{}\"".format(" -I".join(self.deps_cpp_info["hdf4"].include_paths)))
-            args.append("HDF4_HAS_MAXOPENFILES=YES")
+            if tools.Version(self.deps_cpp_info["hdf4"].version) >= "4.2.5":
+                args.append("HDF4_HAS_MAXOPENFILES=YES")
         if self.options.with_hdf5:
             args.append("HDF5_DIR=\"{}\"".format(self.deps_cpp_info["hdf5"].rootpath))
         if not self.options.with_pcidsk:
