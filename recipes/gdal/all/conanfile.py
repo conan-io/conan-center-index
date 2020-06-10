@@ -190,11 +190,11 @@ class GdalConan(ConanFile):
             self.build_requires("libtool/2.4.6")
 
     def requirements(self):
-        self.requires("json-c/0.13.1")
+        self.requires("json-c/0.14")
         self.requires("libgeotiff/1.6.0")
         # self.requires("libopencad/0.0.2") # TODO: use conan recipe when available instead of internal one
         self.requires("libtiff/4.1.0")
-        self.requires("proj/7.0.0")
+        self.requires("proj/7.0.1")
         if tools.Version(self.version) >= "3.1.0":
             self.requires("flatbuffers/1.12.0")
         if self.options.get_safe("with_zlib", True):
