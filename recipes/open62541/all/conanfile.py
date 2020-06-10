@@ -27,7 +27,7 @@ class Open62541Conan(ConanFile):
         "fPIC": [True, False],
         "shared": [True, False],
         "historize": [True, False],
-        "logging_level": ["Fatal", "Error", "Warrning", "Info", "Debug", "Trace"],
+        "logging_level": ["Fatal", "Error", "Warning", "Info", "Debug", "Trace"],
         "subscription": [True, False],
         "subscription_events": [True, False],
         "methods": [True, False],
@@ -141,7 +141,7 @@ class Open62541Conan(ConanFile):
         return {
             "Fatal": "600",
             "Error": "500",
-            "Warrning": "400",
+            "Warning": "400",
             "Info": "300",
             "Debug": "200",
             "Trace": "100",
