@@ -16,7 +16,7 @@ class Box2dConan(ConanFile):
     exports_sources = "CMakeLists.txt"
 
     @property
-    def source_subfolder(self):
+    def _source_subfolder(self):
         return "sources"
 
     def config_options(self):
