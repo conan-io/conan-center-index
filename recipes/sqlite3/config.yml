@@ -1,9 +1,11 @@
-versions:
-  "3.31.1":
-    folder: all
-  "3.31.0":
-    folder: all
-  "3.30.1":
-    folder: all
+"versions":
   "3.29.0":
-    folder: all
+    "folder": "all"
+  "3.30.1":
+    "folder": "all"
+  "3.31.0":
+    "folder": "all"
+  "3.31.1":
+    "folder": "all"
+  "3.32.1":
+    "folder": "all"

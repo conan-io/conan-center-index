@@ -59,8 +59,6 @@ class DlibConan(ConanFile):
             raise ConanInvalidConfiguration("dlib can not be built as a shared library with Visual Studio")
 
     def requirements(self):
-        self.requires("zlib/1.2.11")
-
         if self.options.with_gif:
             self.requires("giflib/5.1.4")
         if self.options.with_jpeg:

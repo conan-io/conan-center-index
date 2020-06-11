@@ -1,0 +1,14 @@
+sources:
+  "3.1.0":
+    url: "https://github.com/OSGeo/gdal/releases/download/v3.1.0/gdal-3.1.0.tar.gz"
+    sha256: "6793ddb2b1ca042494d938ac82c71d06b9125bbb00c9bb9414a7c5e3a707c639"
+patches:
+  "3.1.0":
+    - patch_file: "patches/fix-autotools.patch"
+      base_path: "source_subfolder"
+    - patch_file: "patches/fix-nmake.patch"
+      base_path: "source_subfolder"
+    - patch_file: "patches/fix-include-jsonc.patch"
+      base_path: "source_subfolder"
+    - patch_file: "patches/fix-include-xerces.patch"
+      base_path: "source_subfolder"

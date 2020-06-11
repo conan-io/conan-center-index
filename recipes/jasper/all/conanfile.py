@@ -10,8 +10,8 @@ class JasperConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     topics = ("conan", "jasper", "tool-kit", "coding")
     description = "JasPer Image Processing/Coding Tool Kit"
-    exports_sources = "CMakeLists.txt"
-    generators = "cmake"
+    exports_sources = ["CMakeLists.txt", "patches/**"]
+    generators = "cmake", "cmake_find_package"
     settings = "os", "compiler", "build_type", "arch"
     options = {"shared": [True, False],
                "fPIC": [True, False],
@@ -28,12 +28,6 @@ class JasperConan(ConanFile):
     def _build_subfolder(self):
         return "build_subfolder"
 
-    def requirements(self):
-        if self.options.jpegturbo:
-            self.requires("libjpeg-turbo/2.0.4")
-        else:
-            self.requires("libjpeg/9d")
-
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
@@ -41,6 +35,12 @@ class JasperConan(ConanFile):
     def configure(self):
         del self.settings.compiler.cppstd
         del self.settings.compiler.libcxx
+
+    def requirements(self):
+        if self.options.jpegturbo:
+            self.requires("libjpeg-turbo/2.0.4")
+        else:
+            self.requires("libjpeg/9d")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
@@ -60,6 +60,8 @@ class JasperConan(ConanFile):
         return self._cmake
 
     def build(self):
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            tools.patch(**patch)
         cmake = self._configure_cmake()
         cmake.build()
 

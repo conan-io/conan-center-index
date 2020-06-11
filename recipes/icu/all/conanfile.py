@@ -18,6 +18,7 @@ class ICUBase(ConanFile):
     _build_subfolder = "build_subfolder"
     _env_build = None
     settings = "os", "arch", "compiler", "build_type"
+    exports = ["patches/*.patch"]
     options = {"shared": [True, False],
                "fPIC": [True, False],
                "data_packaging": ["files", "archive", "library", "static"],
@@ -58,10 +59,8 @@ class ICUBase(ConanFile):
                                   "pathBuf.append('/', localError); pathBuf.append(arg, localError);")
 
     def build(self):
-        for filename in glob.glob("patches/*.patch"):
-            self.output.info('applying patch "%s"' % filename)
-            tools.patch(base_path=self._source_subfolder, patch_file=filename)
-
+        for p in self.conan_data["patches"][self.version]:
+            tools.patch(**p)
         if self._is_msvc:
             run_configure_icu_file = os.path.join(self._source_subfolder, 'source', 'runConfigureICU')
 
@@ -111,30 +110,12 @@ class ICUBase(ConanFile):
         self._install_name_tool()
 
     def package(self):
-        if self._is_msvc:
-            for dll in glob.glob(os.path.join(self.package_folder, 'lib', '*.dll')):
-                shutil.move(dll, os.path.join(self.package_folder, 'bin'))
+        for dll in glob.glob(os.path.join(self.package_folder, 'lib', '*.dll')):
+            shutil.move(dll, os.path.join(self.package_folder, 'bin'))
 
         self.copy("LICENSE", dst="licenses", src=os.path.join(self.source_folder, self._source_subfolder))
         tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
         tools.rmdir(os.path.join(self.package_folder, "share"))
-
-    @staticmethod
-    def detected_os():
-        if tools.OSInfo().is_macos:
-            return "Macos"
-        if tools.OSInfo().is_windows:
-            return "Windows"
-        return platform.system()
-
-    @property
-    def cross_building(self):
-        if tools.cross_building(self.settings):
-            if self.settings.os == self.detected_os():
-                if self.settings.arch == "x86" and tools.detected_architecture() == "x86_64":
-                    return False
-            return True
-        return False
 
     @property
     def build_config_args(self):
@@ -157,12 +138,13 @@ class ICUBase(ConanFile):
                 "--with-library-bits={0}".format(bits),
                 "--disable-samples",
                 "--disable-layout",
-                "--disable-layoutex"]
+                "--disable-layoutex",
+                "--disable-extras"]
         
         if not self.options.with_dyload:
             args += ["--disable-dyload"]
 
-        if self.cross_building:
+        if tools.cross_building(self.settings, skip_x64_x86=True):
             if self._env_build.build:
                 args.append("--build=%s" % self._env_build.build)
             if self._env_build.host:
@@ -247,8 +229,10 @@ class ICUBase(ConanFile):
 
         if not self.options.shared:
             self.cpp_info.defines.append("U_STATIC_IMPLEMENTATION")
-        if self.settings.os == 'Linux' and self.options.with_dyload:
-            self.cpp_info.libs.append('dl')
+        if self.settings.os == 'Linux':
+            if self.options.with_dyload:
+                self.cpp_info.system_libs.append('dl')
+            self.cpp_info.system_libs.append('pthread')
 
         if self.settings.os == 'Windows':
-            self.cpp_info.libs.append('advapi32')
+            self.cpp_info.system_libs.append('advapi32')
