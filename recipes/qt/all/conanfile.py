@@ -404,6 +404,9 @@ class QtConan(ConanFile):
         return None
 
     def build(self):
+        if self.settings.compiler in ["gcc", "clang"]:
+            if tools.Version(self.settings.compiler.version) < "5.0":
+                raise ConanInvalidConfiguration("qt 5.15.0 is not support on GCC or clang before 5.0")
         args = ["-confirm-license", "-silent", "-nomake examples", "-nomake tests",
                 "-prefix %s" % self.package_folder]
         args.append("-v")
