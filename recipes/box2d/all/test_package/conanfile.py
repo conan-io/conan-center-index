@@ -3,7 +3,7 @@ from conans import ConanFile, CMake, tools
 
 
 class Box2DTestConan(ConanFile):
-    settings = "os", "compiler", "build_type", "arch", "cppstd"
+    settings = "os", "compiler", "build_type", "arch"
     generators = "cmake"
 
     def build(self):
