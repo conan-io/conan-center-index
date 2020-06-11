@@ -611,7 +611,7 @@ class GdalConan(ConanFile):
             with tools.chdir(self._source_subfolder):
                 with tools.vcvars(self.settings):
                     with tools.environment_append(VisualStudioBuildEnvironment(self).vars):
-                        self.run("nmake -f makefile.vc {}".format(" ".join(self._get_nmake_args())))
+                        self.run("nmake -f makefile.vc devinstall {}".format(" ".join(self._get_nmake_args())))
         else:
             autotools = self._configure_autotools()
             with tools.chdir(self._source_subfolder):
@@ -620,10 +620,6 @@ class GdalConan(ConanFile):
     def package(self):
         self.copy("LICENSE.TXT", dst="licenses", src=self._source_subfolder)
         if self.settings.compiler == "Visual Studio":
-            with tools.chdir(self._source_subfolder):
-                with tools.vcvars(self.settings):
-                    with tools.environment_append(VisualStudioBuildEnvironment(self).vars):
-                        self.run("nmake -f makefile.vc devinstall {}".format(" ".join(self._get_nmake_args())))
             for pdb_file in glob.glob(os.path.join(self.package_folder, "lib", "*.pdb")):
                 os.remove(pdb_file)
         else:
