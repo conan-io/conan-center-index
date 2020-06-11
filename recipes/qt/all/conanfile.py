@@ -178,8 +178,6 @@ class QtConan(ConanFile):
     def config_options(self):
         if self.settings.os != "Linux":
             self.options.with_icu = False
-        if self.settings.os == "Linux":
-            raise ConanInvalidConfiguration('Linux is not yet supported')
         if self.settings.compiler == "apple-clang":
             if tools.Version(self.settings.compiler.version) < "10.0":
                 raise ConanInvalidConfiguration("Old versions of apple sdk are not supported by Qt (QTBUG-76777)")
@@ -298,8 +296,8 @@ class QtConan(ConanFile):
             self.requires("openal/1.19.1")
         if self.options.with_libalsa:
             self.requires("libalsa/1.1.9")
-        if self.options.GUI and self.settings.os == "Linux":
-            self.requires("xorg/system")
+        #if self.options.GUI and self.settings.os == "Linux":
+        #    self.requires("xorg/system")
         if self.options.opengl != "no":
             self.requires("opengl/system")
         if self.options.with_zstd:
