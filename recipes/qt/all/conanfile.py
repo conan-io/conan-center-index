@@ -300,6 +300,8 @@ class QtConan(ConanFile):
             self.requires("libalsa/1.1.9")
         if self.options.GUI and self.settings.os == "Linux":
             self.requires("xorg/system")
+        if self.options.opengl != "no":
+            self.requires("opengl/system")
         if self.options.with_zstd:
             self.requires("zstd/1.4.4")
         if self.options.qtwebengine and self.settings.os == "Linux":
