@@ -4,7 +4,6 @@ from conans import ConanFile, CMake, tools
 
 class Box2dConan(ConanFile):
     name = "box2d"
-    version = "2.3.1"
     license = "Zlib"
     description = "Box2D is a 2D physics engine for games"
     homepage = "http://box2d.org/"
