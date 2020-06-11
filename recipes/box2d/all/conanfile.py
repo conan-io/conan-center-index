@@ -25,7 +25,7 @@ class Box2dConan(ConanFile):
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
-        os.rename("Box2D-%s" % self.version, self.source_subfolder)
+        os.rename("box2d-%s" % self.version, self.source_subfolder)
 
     def build(self):
         cmake = CMake(self)
