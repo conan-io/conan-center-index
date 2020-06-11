@@ -38,8 +38,8 @@ class Box2dConan(ConanFile):
         cmake.build()
 
     def package(self):
-        self.copy("License.txt", dst="licenses", src="%s/Box2D" % self.source_subfolder)
-        self.copy("*.h", dst="include/Box2D", src="%s/Box2D/Box2D" % self.source_subfolder)
+        self.copy("License.txt", dst="licenses", src=os.path.join(self._source_subfolder, "Box2D"))
+        self.copy("*.h", dst=os.path.join("include", "Box2D"), src=os.path.join(self._source_subfolder, "Box2D", "Box2D"))
         self.copy("*.lib", dst="lib", keep_path=False)
         self.copy("*.dll", dst="bin", keep_path=False)
         self.copy("*.so*", dst="lib", keep_path=False, symlinks=True)
