@@ -87,6 +87,6 @@ class GmpConan(ConanFile):
         if self.options.enable_cxx:
             self.cpp_info.components["gmpxx"].libs = ["gmpxx"]
             self.cpp_info.components["gmpxx"].requires = ["libgmp"]
-            self.cpp_info.components["gmpxx"].names["cmake_find_package"] = "GMP"
-            self.cpp_info.components["gmpxx"].names["cmake_find_package_multi"] = "GMP"
+            self.cpp_info.components["gmpxx"].names["cmake_find_package"] = "GMPXX"
+            self.cpp_info.components["gmpxx"].names["cmake_find_package_multi"] = "GMPXX"
             self.cpp_info.components["gmpxx"].names["pkg_config"] = "gmpxx"
