@@ -8,6 +8,7 @@ class ArduinojsonConan(ConanFile):
     description = "C++ JSON library for IoT. Simple and efficient."
     homepage = "https://github.com/bblanchon/ArduinoJson"
     url = "https://github.com/conan-io/conan-center-index"
+    topics = ("json", "arduino", "iot", "embedded", "esp8266")
     no_copy_source = True
 
     def source(self):
