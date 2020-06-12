@@ -169,7 +169,9 @@ class Open62541Conan(ConanFile):
         cmake.definitions["UA_ENABLE_METHODCALLS"] = self.options.methods
         cmake.definitions["UA_ENABLE_NODEMANAGEMENT"] = self.options.dynamic_nodes
         cmake.definitions["UA_ENABLE_AMALGAMATION"] = self.options.single_header
-        cmake.definitions["UA_ENABLE_MULTITHREADING"] = self.options.multithreading
+        if self.options.multithreading and Version(self.version) >= "1.0.1":
+            print("Multithreading is an expermental feature that can cause segmentation faults. Use it at your own risk!")
+            cmake.definitions["UA_ENABLE_MULTITHREADING"] = self.options.multithreading
         cmake.definitions["UA_ENABLE_IMMUTABLE_NODES"] = self.options.imutable_nodes
         cmake.definitions["UA_ENABLE_WEBSOCKET_SERVER"] = self.options.web_socket
         cmake.definitions["UA_ENABLE_HISTORIZING"] = self.options.historize
@@ -224,6 +226,8 @@ class Open62541Conan(ConanFile):
         ]
         if self.options.single_header:
             self.cpp_info.defines.append("UA_ENABLE_AMALGAMATION")
+        if self.options.multithreading:
+            self.cpp_info.defines.append("UA_ENABLE_MULTITHREADING")
         if self.settings.os == "Windows":
             self.cpp_info.libs.append("ws2_32")
             self.cpp_info.includedirs.append(os.path.join("include", "win32"))
