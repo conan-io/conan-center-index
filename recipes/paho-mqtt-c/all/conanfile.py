@@ -12,12 +12,10 @@ class PahoMqttcConan(ConanFile):
     generators = "cmake"
     settings = "os", "arch", "compiler", "build_type"
     options = {"shared": [True, False],
-               "static": [True, False],
                "fPIC": [True, False],
                "ssl": [True, False],
                "samples": [True, False]}
     default_options = {"shared": False,
-                       "static": True,
                        "fPIC": True,
                        "ssl": True,
                        "samples": False}
@@ -51,7 +49,7 @@ class PahoMqttcConan(ConanFile):
         self._cmake = CMake(self)
         self._cmake.definitions["PAHO_ENABLE_TESTING"] = False
         self._cmake.definitions["PAHO_BUILD_DOCUMENTATION"] = False
-        self._cmake.definitions["PAHO_BUILD_STATIC"] = self.options.static
+        self._cmake.definitions["PAHO_BUILD_STATIC"] = not self.options.shared
         self._cmake.definitions["PAHO_BUILD_SHARED"] = self.options.shared
         self._cmake.definitions["PAHO_BUILD_SAMPLES"] = self.options.samples
         self._cmake.definitions["PAHO_WITH_SSL"] = self.options.ssl
