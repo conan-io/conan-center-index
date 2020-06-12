@@ -20,9 +20,9 @@ class ArduinojsonConan(ConanFile):
         os.rename("ArduinoJson", self._source_subfolder)
 
     def package(self):
-        self.copy("*LICENSE*", dst="licenses", src="sources")
-        self.copy("*.h", dst="include", src="sources")
-        self.copy("*.hpp", dst="include", src="sources")
+        self.copy("*LICENSE*", dst="licenses", src=self._source_subfolder)
+        self.copy("*.h", dst="include", src=self._source_subfolder)
+        self.copy("*.hpp", dst="include", src=self._source_subfolder)
 
     def package_info(self):
         self.cpp_info.includedirs.append(os.path.join("include", "src"))
