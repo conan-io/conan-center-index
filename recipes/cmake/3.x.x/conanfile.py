@@ -58,7 +58,6 @@ class CMakeConan(ConanFile):
                 self._cmake.definitions["CMAKE_USE_OPENSSL"] = self._with_openssl
                 if self._with_openssl:
                     self._cmake.definitions["OPENSSL_USE_STATIC_LIBS"] = not self.options["openssl"].shared
-                self._cmake.definitions["CMAKE_EXE_LINKER_FLAGS"] = "-lz"
             self._cmake.configure(source_folder=self._source_subfolder)
         return self._cmake
 
