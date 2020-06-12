@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.1)
+cmake_minimum_required(VERSION 2.8.12)
 
 project(duktape C)
 
@@ -7,7 +7,6 @@ conan_basic_setup()
 
 file(GLOB SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/source_subfolder/src/*.c)
 file(GLOB HEADERS ${CMAKE_CURRENT_SOURCE_DIR}/source_subfolder/src/*.h)
-message(STATUS "SOURCES= ${SOURCES} HEADERS=${HEADERS}")
 add_library(duktape ${SOURCES} ${HEADERS})
 set_target_properties(duktape PROPERTIES PUBLIC_HEADER "${HEADERS}")
 
