@@ -3,8 +3,8 @@ from conans.errors import ConanInvalidConfiguration
 import os
 
 
-class BoostDiConan(ConanFile):
-    name = "boost-di"
+class DiConan(ConanFile):
+    name = "di"
     license = "BSL-1.0"
     homepage = "https://github.com/boost-experimental/di"
     url = "https://github.com/conan-io/conan-center-index"

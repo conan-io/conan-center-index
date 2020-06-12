@@ -2,7 +2,7 @@ from conans import ConanFile, CMake, tools
 import os
 
 
-class BoostDiConan(ConanFile):
+class DiConan(ConanFile):
     settings = "os", "compiler", "build_type", "arch"
     generators = "cmake"
 
