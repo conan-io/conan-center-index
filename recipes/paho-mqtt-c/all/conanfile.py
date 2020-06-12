@@ -15,7 +15,8 @@ class PahoMqttcConan(ConanFile):
                "fPIC": [True, False],
                "ssl": [True, False],
                "samples": [True, False]}
-    default_options = {"shared": False,
+    # static builds didn't really work until 1.3.4
+    default_options = {"shared": True,
                        "fPIC": True,
                        "ssl": True,
                        "samples": False}
@@ -49,6 +50,7 @@ class PahoMqttcConan(ConanFile):
         self._cmake = CMake(self)
         self._cmake.definitions["PAHO_ENABLE_TESTING"] = False
         self._cmake.definitions["PAHO_BUILD_DOCUMENTATION"] = False
+        self._cmake.definitions["PAHO_BUILD_ASYNC"] = True # Not used in recent versions but needed for <= 1.3.1
         self._cmake.definitions["PAHO_BUILD_STATIC"] = not self.options.shared
         self._cmake.definitions["PAHO_BUILD_SHARED"] = self.options.shared
         self._cmake.definitions["PAHO_BUILD_SAMPLES"] = self.options.samples
@@ -66,7 +68,11 @@ class PahoMqttcConan(ConanFile):
 
     def package(self):
         self.copy("edl-v10", src=self._source_subfolder, dst="licenses")
-        self.copy("epl-v20", src=self._source_subfolder, dst="licenses")
+        if self.version in ['1.3.0', '1.3.1']:
+            eplfile = "epl-v10"
+        else:
+            eplfile = "epl-v20" # EPL changed to V2
+        self.copy(eplfile, src=self._source_subfolder, dst="licenses")
         self.copy("notice.html", src=self._source_subfolder, dst="licenses")
         cmake = self._configure_cmake()
         cmake.install()
