@@ -10,6 +10,10 @@ class ArduinojsonConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     topics = ("json", "arduino", "iot", "embedded", "esp8266")
     no_copy_source = True
+    
+    @property
+    def _source_subfolder(self):
+        return "source_subfolder"
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
