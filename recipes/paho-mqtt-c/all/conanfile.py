@@ -16,8 +16,8 @@ class PahoMqttcConan(ConanFile):
                "fPIC": [True, False],
                "ssl": [True, False],
                "samples": [True, False]}
-    default_options = {"shared": True,
-                       "static": False,
+    default_options = {"shared": False,
+                       "static": True,
                        "fPIC": True,
                        "ssl": True,
                        "samples": False}
