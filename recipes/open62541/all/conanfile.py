@@ -72,7 +72,7 @@ class Open62541Conan(ConanFile):
         "encription": False,
         "json_support": False,
         "pub_sub": "None",
-        "data_access": False,
+        "data_access": True,
         "compiled_nodeset_descriptions": True,
         "namescpae_zero": "FULL",
         "embedded_profile": False,
