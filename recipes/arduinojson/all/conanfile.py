@@ -17,7 +17,7 @@ class ArduinojsonConan(ConanFile):
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
-        os.rename("ArduinoJson", "sources")
+        os.rename("ArduinoJson", self._source_subfolder)
 
     def package(self):
         self.copy("*LICENSE*", dst="licenses", src="sources")
