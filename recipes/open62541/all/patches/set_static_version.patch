@@ -1,8 +1,8 @@
 diff --git a/CMakeLists.txt b/CMakeLists.txt
-index d426e1da..0fcf8177 100644
+index d426e1da..93031735 100644
 --- a/CMakeLists.txt
 +++ b/CMakeLists.txt
-@@ -5,6 +5,11 @@ if(${CMAKE_VERSION} VERSION_LESS 3.12)
+@@ -5,6 +5,12 @@ if(${CMAKE_VERSION} VERSION_LESS 3.12)
      cmake_policy(VERSION ${CMAKE_MAJOR_VERSION}.${CMAKE_MINOR_VERSION})
  endif()
  
@@ -10,6 +10,7 @@ index d426e1da..0fcf8177 100644
 +set(OPEN62541_VER_MAJOR "0" CACHE STRING "Set the minor version. Used by conan")
 +set(OPEN62541_VER_PATCH "0" CACHE STRING "Set the patch version. Used by conan")
 +set(OPEN62541_VER_LABEL "")
++set(OPEN62541_VER_COMMIT "${OPEN62541_VER_MAJOR}.${OPEN62541_VER_MINOR}.${OPEN62541_VER_PATCH}")
 +
  string(TOLOWER "${CMAKE_BUILD_TYPE}" BUILD_TYPE_LOWER_CASE)
  
