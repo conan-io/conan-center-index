@@ -9,25 +9,25 @@ class PclConanRecipe(ConanFile):
     description = "Point Cloud Library"
     license = "BSD-3-Clause"
     homepage = "https://pointclouds.org/"
-    url = "https://github.com/conan-module_io/conan-center-index"
+    url = "https://github.com/conan-io/conan-center-index"
     settings = "os", "compiler", "build_type", "arch"
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
-        "tools": [True, False],
-        "usb": [True, False],
-        "png": [True, False],
-        "qhull": [True, False],
-        "cuda": [True, False],
-        "vtk": [True, False],
-        "pcap": [True, False],
-        "opengl": [True, False],
-        "openni": [True, False],
-        "openni2": [True, False],
-        "ensenso": [True, False],
-        "davidsdk": [True, False],
-        "dssdk": [True, False],
-        "rssdk": [True, False],
+        "with_cuda": [True, False],
+        "with_davidsdk": [True, False],
+        "with_dssdk": [True, False],
+        "with_ensenso": [True, False],
+        "with_opengl": [True, False],
+        "with_openni": [True, False],
+        "with_openni2": [True, False],
+        "with_pcap": [True, False],
+        "with_png": [True, False],
+        "with_qhull": [True, False],
+        "with_rssdk": [True, False],
+        "with_tools": [True, False],
+        "with_usb": [True, False],
+        "with_vtk": [True, False],
         "module_2d": [True, False],
         "module_features": [True, False],
         "module_filters": [True, False],
@@ -49,21 +49,21 @@ class PclConanRecipe(ConanFile):
     default_options = {
         "shared": True,
         "fPIC": True,
-        "tools": False,
         "boost:shared": True,
-        "usb": False,
-        "png": True,
-        "qhull": True,
-        "cuda": False,
-        "vtk": False,
-        "pcap": False,
-        "opengl": True,
-        "openni": False,
-        "openni2": False,
-        "ensenso": False,
-        "davidsdk": False,
-        "dssdk": False,
-        "rssdk": False,
+        "with_cuda": False,
+        "with_davidsdk": False,
+        "with_dssdk": False,
+        "with_ensenso": False,
+        "with_opengl": True,
+        "with_openni": False,
+        "with_openni2": False,
+        "with_qhull": True,
+        "with_pcap": False,
+        "with_png": True,
+        "with_rssdk": False,
+        "with_tools": False,
+        "with_usb": False,
+        "with_vtk": False,
         "module_2d": False,
         "module_features": False,
         "module_filters": False,
@@ -102,11 +102,13 @@ class PclConanRecipe(ConanFile):
         tools.replace_in_file("CMakeLists.txt", "add_subdirectory(pcl)", f"add_subdirectory({self._source_subfolder})")
 
     def requirements(self):
-        if self.options.png:
+        if self.options.with_png:
             self.requires("libpng/[>1.6.36]")
-        if self.options.qhull:
+        if self.options.with_qhull:
             self.requires("qhull/[>7.3.0]")
-            self.options["qhull"].shared=False
+            self.options["qhull"].shared = False
+        if self.options.with_opengl:
+            self.requires("opengl/system")
 
     def configure(self):
         if self.options.module_registration:
@@ -125,30 +127,29 @@ class PclConanRecipe(ConanFile):
         if self.options.module_features:
             self.options.module_2d = True
 
-
     def _configure_cmake(self):
         cmake_definitions = {
-            "PCL_BUILD_WITH_BOOST_DYNAMIC_LINKING_WIN32": self.options["boost"].shared,
+            "PCL_BUILD_WITH_BOOST_DYNAMIC_LINKING_WIN32": self.options["boost"].shared
         }
 
         pcl_config = {
             "EIGEN_ROOT": self.deps_cpp_info["eigen"].rootpath,
             "FLANN_ROOT": self.deps_cpp_info["flann"].rootpath,
             "BOOST_ROOT": self.deps_cpp_info["boost"].rootpath,
-            "BUILD_tools": self.options.tools,
-            "WITH_LIBUSB": self.options.usb,
-            "WITH_PNG": self.options.png,
-            "WITH_QHULL": self.options.qhull,
-            "WITH_CUDA": self.options.cuda,
-            "WITH_VTK": self.options.vtk,
-            "WITH_PCAP": self.options.pcap,
-            "WITH_OPENGL": self.options.opengl,
-            "WITH_OPENNI": self.options.openni2,
-            "WITH_OPENNI2": self.options.openni2,
-            "WITH_ENSENSO": self.options.ensenso,
-            "WITH_DAVIDSDK": self.options.davidsdk,
-            "WITH_DSSDK": self.options.dssdk,
-            "WITH_RSSDK": self.options.rssdk,
+            "BUILD_tools": self.options.with_tools,
+            "WITH_LIBUSB": self.options.with_usb,
+            "WITH_PNG": self.options.with_png,
+            "WITH_QHULL": self.options.with_qhull,
+            "WITH_CUDA": self.options.with_cuda,
+            "WITH_VTK": self.options.with_vtk,
+            "WITH_PCAP": self.options.with_pcap,
+            "WITH_OPENGL": self.options.with_opengl,
+            "WITH_OPENNI": self.options.with_openni,
+            "WITH_OPENNI2": self.options.with_openni2,
+            "WITH_ENSENSO": self.options.with_ensenso,
+            "WITH_DAVIDSDK": self.options.with_davidsdk,
+            "WITH_DSSDK": self.options.with_dssdk,
+            "WITH_RSSDK": self.options.with_rssdk,
             "PCL_SHARED_LIBS": self.options.shared,
             "FLANN_USE_STATIC": not self.options["flann"].shared
         }
@@ -172,9 +173,9 @@ class PclConanRecipe(ConanFile):
             "BUILD_stereo": self.options.module_stereo
         }
 
-        if self.options.png:
+        if self.options.with_png:
             pcl_config["LIBPNG_ROOT"] = self.deps_cpp_info["libpng"].rootpath
-        if self.options.qhull:
+        if self.options.with_qhull:
             pcl_config["QHULL_ROOT"] = self.deps_cpp_info["qhull"].rootpath
             pcl_config["QHULL_USE_STATIC"] = True
 
