@@ -10,7 +10,7 @@ file(GLOB HEADERS ${CMAKE_CURRENT_SOURCE_DIR}/source_subfolder/src/*.h)
 add_library(duktape ${SOURCES} ${HEADERS})
 set_target_properties(duktape PROPERTIES PUBLIC_HEADER "${HEADERS}")
 
-if (NOT WIN32)
+if (UNIX AND NOT APPLE AND NOT ANDROID)
     target_link_libraries(duktape m)
 endif()
 

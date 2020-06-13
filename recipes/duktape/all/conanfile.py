@@ -66,5 +66,9 @@ class DuktapeConan(ConanFile):
 
     def package_info(self):
         self.cpp_info.libs = ["duktape"]
-        if self.settings.os != "Windows" and not self.options.shared:
+        if not self.options.shared and str(self.settings.os) in (
+            "Linux",
+            "FreeBSD",
+            "SunOS",
+        ):
             self.cpp_info.system_libs = ["m"]
