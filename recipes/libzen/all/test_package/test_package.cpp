@@ -17,4 +17,12 @@ int main() {
         std::cerr << "LittleEndian incorrect! Got 0x" << std::hex << le64 << "\n";
         return 1;
     }
+
+    std::cout << "path separator on this platform is '";
+#ifdef UNICODE
+    std::wcout << ZenLib::PathSeparator;
+#else
+    std::cout << ZenLib::PathSeparator;
+#endif
+    std::cout << "'\n";
 }
