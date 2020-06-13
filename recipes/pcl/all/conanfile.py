@@ -148,7 +148,8 @@ class ConanRecipe(ConanFile):
             "WITH_DAVIDSDK": self.options.davidsdk,
             "WITH_DSSDK": self.options.dssdk,
             "WITH_RSSDK": self.options.rssdk,
-            "PCL_SHARED_LIBS": self.options.shared
+            "PCL_SHARED_LIBS": self.options.shared,
+            "FLANN_USE_STATIC": not self.options["flann"].shared
         }
         pcl_features = {
             "BUILD_kdtree": self.options.kdtree,
