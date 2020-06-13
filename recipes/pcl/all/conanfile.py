@@ -9,7 +9,7 @@ class PclConanRecipe(ConanFile):
     description = "Point Cloud Library"
     license = "BSD-3-Clause"
     homepage = "https://pointclouds.org/"
-    url = "https://github.com/conan-io/conan-center-index"
+    url = "https://github.com/conan-module_io/conan-center-index"
     settings = "os", "compiler", "build_type", "arch"
     options = {
         "shared": [True, False],
@@ -28,23 +28,23 @@ class PclConanRecipe(ConanFile):
         "davidsdk": [True, False],
         "dssdk": [True, False],
         "rssdk": [True, False],
-        "kdtree": [True, False],
-        "octree": [True, False],
-        "search": [True, False],
-        "sample_consensus": [True, False],
-        "filters": [True, False],
-        "twod": [True, False],
-        "geometry": [True, False],
-        "io": [True, False],
-        "features": [True, False],
-        "ml": [True, False],
-        "segmentation": [True, False],
-        "surface": [True, False],
-        "registration": [True, False],
-        "keypoints": [True, False],
-        "tracking": [True, False],
-        "recognition": [True, False],
-        "stereo": [True, False]
+        "module_2d": [True, False],
+        "module_features": [True, False],
+        "module_filters": [True, False],
+        "module_geometry": [True, False],
+        "module_io": [True, False],
+        "module_kdtree": [True, False],
+        "module_keypoints": [True, False],
+        "module_ml": [True, False],
+        "module_octree": [True, False],
+        "module_registration": [True, False],
+        "module_sample_consensus": [True, False],
+        "module_search": [True, False],
+        "module_segmentation": [True, False],
+        "module_stereo": [True, False],
+        "module_surface": [True, False],
+        "module_tracking": [True, False],
+        "module_recognition": [True, False]
     }
     default_options = {
         "shared": True,
@@ -64,23 +64,23 @@ class PclConanRecipe(ConanFile):
         "davidsdk": False,
         "dssdk": False,
         "rssdk": False,
-        "kdtree": True,
-        "octree": True,
-        "search": False,
-        "sample_consensus": False,
-        "filters": False,
-        "twod": False,
-        "geometry": True,
-        "io": True,
-        "features": False,
-        "ml": True,
-        "segmentation": True,
-        "surface": True,
-        "registration": True,
-        "keypoints": False,
-        "tracking": False,
-        "recognition": False,
-        "stereo": False
+        "module_2d": False,
+        "module_features": False,
+        "module_filters": False,
+        "module_geometry": True,
+        "module_io": True,
+        "module_kdtree": True,
+        "module_keypoints": False,
+        "module_ml": True,
+        "module_octree": True,
+        "module_recognition": False,
+        "module_registration": True,
+        "module_sample_consensus": False,
+        "module_search": False,
+        "module_segmentation": True,
+        "module_stereo": False,
+        "module_surface": True,
+        "module_tracking": False
     }
     requires = ("boost/[>1.69.0]",
                 "eigen/[>3.3.5]",
@@ -109,20 +109,21 @@ class PclConanRecipe(ConanFile):
             self.options["qhull"].shared=False
 
     def configure(self):
-        if self.options.registration:
-            self.options.octree = True
-            self.options.filters = True
-            self.options.features = True
-        if self.options.io:
-            self.options.octree = True
-        if self.options.filters:
-            self.options.kdtree = True
-            self.options.search = True
-            self.options.sample_consensus = True
-        if self.options.segmentation:
-            self.options.ml = True
-        if self.options.features:
-            self.options.twod = True
+        if self.options.module_registration:
+            self.options.module_octree = True
+            self.options.module_filters = True
+            self.options.module_features = True
+            self.options.module_2d = True
+        if self.options.module_io:
+            self.options.module_octree = True
+        if self.options.module_filters:
+            self.options.module_kdtree = True
+            self.options.module_search = True
+            self.options.module_sample_consensus = True
+        if self.options.module_segmentation:
+            self.options.module_ml = True
+        if self.options.module_features:
+            self.options.module_2d = True
 
 
     def _configure_cmake(self):
@@ -152,23 +153,23 @@ class PclConanRecipe(ConanFile):
             "FLANN_USE_STATIC": not self.options["flann"].shared
         }
         pcl_features = {
-            "BUILD_kdtree": self.options.kdtree,
-            "BUILD_octree": self.options.octree,
-            "BUILD_search": self.options.search,
-            "BUILD_sample_consensus": self.options.sample_consensus,
-            "BUILD_filters": self.options.filters,
-            "BUILD_2d": self.options.twod,
-            "BUILD_geometry": self.options.geometry,
-            "BUILD_io": self.options.io,
-            "BUILD_features": self.options.features,
-            "BUILD_ml": self.options.ml,
-            "BUILD_segmentation": self.options.segmentation,
-            "BUILD_surface": self.options.surface,
-            "BUILD_registration": self.options.registration,
-            "BUILD_keypoints": self.options.keypoints,
-            "BUILD_tracking": self.options.tracking,
-            "BUILD_recognition": self.options.recognition,
-            "BUILD_stereo": self.options.stereo
+            "BUILD_kdtree": self.options.module_kdtree,
+            "BUILD_octree": self.options.module_octree,
+            "BUILD_search": self.options.module_search,
+            "BUILD_sample_consensus": self.options.module_sample_consensus,
+            "BUILD_filters": self.options.module_filters,
+            "BUILD_2d": self.options.module_2d,
+            "BUILD_geometry": self.options.module_geometry,
+            "BUILD_io": self.options.module_io,
+            "BUILD_features": self.options.module_features,
+            "BUILD_ml": self.options.module_ml,
+            "BUILD_segmentation": self.options.module_segmentation,
+            "BUILD_surface": self.options.module_surface,
+            "BUILD_module_registration": self.options.module_registration,
+            "BUILD_module_keypoints": self.options.module_keypoints,
+            "BUILD_module_tracking": self.options.module_tracking,
+            "BUILD_recognition": self.options.module_recognition,
+            "BUILD_stereo": self.options.module_stereo
         }
 
         if self.options.png:
