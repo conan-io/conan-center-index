@@ -9,6 +9,7 @@ class ConanRecipe(ConanFile):
     description = "Point Cloud Library"
     license = "BSD-3-Clause"
     homepage = "https://pointclouds.org/"
+    url = "https://github.com/conan-io/conan-center-index"
     settings = "os", "compiler", "build_type", "arch"
     options = {
         "shared": [True, False],

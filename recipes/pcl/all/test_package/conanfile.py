@@ -12,10 +12,6 @@ class PclTestConan(ConanFile):
         cmake.configure()
         cmake.build()
 
-    def imports(self):
-        self.copy("*.dll", "bin", "bin")
-
     def test(self):
         os.chdir('bin')
         self.run('.{}pcl_test_package'.format(os.sep))
-
