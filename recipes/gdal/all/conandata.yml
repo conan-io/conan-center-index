@@ -10,6 +10,8 @@ patches:
       base_path: "source_subfolder"
     - patch_file: "patches/fix-import-dll-msvc.patch"
       base_path: "source_subfolder"
+    - patch_file: "patches/ogrflatgeobuflayer-stdexcept.patch"
+      base_path: "source_subfolder"
     - patch_file: "patches/fix-include-jsonc.patch"
       base_path: "source_subfolder"
     - patch_file: "patches/fix-include-xerces.patch"
