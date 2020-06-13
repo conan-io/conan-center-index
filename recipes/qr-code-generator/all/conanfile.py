@@ -39,21 +39,21 @@ class QrCodeGeneratorConan(ConanFile):
         self._cmake.configure()
         return self._cmake
 
-    def _patch_sources(self):
-        try:
-            for patch in self.conan_data["patches"][self.version]:
-                tools.patch(**patch)
-        except KeyError:
-            pass
-
     def build(self):
-        self._patch_sources()
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            tools.patch(**patch)
         cmake = self._configure_cmake()
         cmake.build()
 
+    def _extract_license(self):
+        header = tools.load(os.path.join(
+            self._source_subfolder, "cpp", "QrCode.hpp"))
+        license_contents = header[2:header.find("*/", 1)]
+        tools.save("LICENSE", license_contents)
+
     def package(self):
-        self.copy("Readme.markdown", dst="licenses",
-                  src=self._source_subfolder)
+        self._extract_license()
+        self.copy("LICENSE", dst="licenses")
         cmake = self._configure_cmake()
         cmake.install()
 
