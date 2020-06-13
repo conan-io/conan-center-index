@@ -14,7 +14,7 @@ class QrCodeGeneratorConan(ConanFile):
                "fPIC": [True, False]}
     default_options = {'shared': False,
                        'fPIC': True}
-    exports_sources = "*"
+    exports_sources = ["CMakeLists.txt", "patches/**"]
     generators = "cmake"
 
     _cmake = None
