@@ -1,5 +1,14 @@
 --- PCbuild/_bsddb.vcxproj
 +++ PCbuild/_bsddb.vcxproj
+@@ -46,7 +46,7 @@
+     <CharacterSet>NotSet</CharacterSet>
+   </PropertyGroup>
+   <PropertyGroup Label="Configuration" />
+-  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
++  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" /><Import Project="../../conan_libdb.props" />
+   <PropertyGroup>
+     <TargetExt>.pyd</TargetExt>
+   </PropertyGroup>
 @@ -75,7 +75,7 @@
    </ItemGroup>
    <ItemGroup>
@@ -20,6 +29,15 @@
      <ProjectReference Include="pythoncore.vcxproj">
 --- PCbuild/_hashlib.vcxproj
 +++ PCbuild/_hashlib.vcxproj
+@@ -45,7 +45,7 @@
+     <ConfigurationType>DynamicLibrary</ConfigurationType>
+     <CharacterSet>NotSet</CharacterSet>
+   </PropertyGroup>
+-  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
++  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" /><Import Project="../../conan_openssl.props" />
+   <PropertyGroup>
+     <TargetExt>.pyd</TargetExt>
+   </PropertyGroup>
 @@ -64,7 +64,7 @@
        <AdditionalIncludeDirectories>$(opensslIncludeDir);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
      </ClCompile>
@@ -48,6 +66,15 @@
    <ImportGroup Label="ExtensionTargets">
 --- PCbuild/_sqlite3.vcxproj
 +++ PCbuild/_sqlite3.vcxproj
+@@ -45,7 +45,7 @@
+     <ConfigurationType>DynamicLibrary</ConfigurationType>
+     <CharacterSet>NotSet</CharacterSet>
+   </PropertyGroup>
+-  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
++  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" /><Import Project="../../conan_sqlite3.props" />
+   <PropertyGroup>
+     <TargetExt>.pyd</TargetExt>
+   </PropertyGroup>
 @@ -96,10 +96,10 @@
        <Project>{cf7ac3d1-e2df-41d2-bea6-1e2556cdea26}</Project>
        <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
@@ -63,6 +90,15 @@
    <ImportGroup Label="ExtensionTargets">
 --- PCbuild/_ssl.vcxproj
 +++ PCbuild/_ssl.vcxproj
+@@ -45,7 +45,7 @@
+     <ConfigurationType>DynamicLibrary</ConfigurationType>
+     <CharacterSet>NotSet</CharacterSet>
+   </PropertyGroup>
+-  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
++  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" /><Import Project="../../conan_openssl.props" />
+   <PropertyGroup>
+     <TargetExt>.pyd</TargetExt>
+   </PropertyGroup>
 @@ -64,7 +64,7 @@
        <AdditionalIncludeDirectories>$(opensslIncludeDir);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
      </ClCompile>
@@ -91,6 +127,15 @@
        <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
 --- PCbuild/_tkinter.vcxproj
 +++ PCbuild/_tkinter.vcxproj
+@@ -45,7 +45,7 @@
+     <ConfigurationType>DynamicLibrary</ConfigurationType>
+     <CharacterSet>NotSet</CharacterSet>
+   </PropertyGroup>
+-  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
++  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" /><!-- TODO <Import Project="../../conan_tk.props" />-->
+   <PropertyGroup>
+     <TargetExt>.pyd</TargetExt>
+   </PropertyGroup>
 @@ -53,7 +53,7 @@
    </ImportGroup>
    <ImportGroup Label="PropertySheets">
@@ -126,6 +171,15 @@
    <ImportGroup Label="ExtensionTargets">
 --- PCbuild/bz2.vcxproj
 +++ PCbuild/bz2.vcxproj
+@@ -47,7 +47,7 @@
+     <CharacterSet>NotSet</CharacterSet>
+   </PropertyGroup>
+   <PropertyGroup Label="Configuration" />
+-  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
++  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" /><Import Project="../../conan_bzip2.props" />
+   <PropertyGroup>
+     <TargetExt>.pyd</TargetExt>
+   </PropertyGroup>
 @@ -72,13 +72,13 @@
    </ItemDefinitionGroup>
    <ItemGroup>
@@ -144,6 +198,15 @@
      <ClInclude Include="$(bz2Dir)\bzlib.h" />
 --- PCbuild/pyexpat.vcxproj
 +++ PCbuild/pyexpat.vcxproj
+@@ -45,7 +45,7 @@
+     <ConfigurationType>DynamicLibrary</ConfigurationType>
+     <CharacterSet>NotSet</CharacterSet>
+   </PropertyGroup>
+-  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
++  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" /><Import Project="../../conan_expat.props" />
+   <PropertyGroup>
+     <TargetExt>.pyd</TargetExt>
+   </PropertyGroup>
 @@ -58,19 +59,19 @@
    <PropertyGroup Label="UserMacros" />
    <ItemDefinitionGroup>
@@ -170,13 +233,3 @@
    </ItemGroup>
    <ItemGroup>
      <ProjectReference Include="pythoncore.vcxproj">
---- PCbuild/python.props
-+++ PCbuild/python.props
-@@ -1,5 +1,6 @@
- ﻿<?xml version="1.0" encoding="utf-8"?>
- <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-+  <Import Project="..\..\conanbuildinfo.props" />
-   <PropertyGroup>
-     <Platform Condition="'$(Platform)' == ''">Win32</Platform>
-     <Configuration Condition="'$(Configuration)' == ''">Release</Configuration>
-

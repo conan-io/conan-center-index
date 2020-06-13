@@ -11,6 +11,15 @@
  Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "python3dll", "python3dll.vcxproj", "{885D4898-D08D-4091-9C40-C700CFE3FC5A}"
 --- PCbuild/_bz2.vcxproj
 +++ PCbuild/_bz2.vcxproj
+@@ -39,7 +39,7 @@
+     <RootNamespace>bz2</RootNamespace>
+     <Keyword>Win32Proj</Keyword>
+   </PropertyGroup>
+-  <Import Project="python.props" />
++  <Import Project="python.props" /><Import Project="../../conan_bzip2.props" />
+   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+   <PropertyGroup Label="Configuration">
+     <ConfigurationType>DynamicLibrary</ConfigurationType>
 @@ -69,17 +69,17 @@
    </ItemDefinitionGroup>
    <ItemGroup>
@@ -35,6 +44,15 @@
      <ResourceCompile Include="..\PC\python_nt.rc" />
 --- PCbuild/_decimal.vcxproj
 +++ PCbuild/_decimal.vcxproj
+@@ -39,7 +39,7 @@
+     <RootNamespace>_decimal</RootNamespace>
+     <Keyword>Win32Proj</Keyword>
+   </PropertyGroup>
+-  <Import Project="python.props" />
++  <Import Project="python.props" /><Import Project="../../conan_mpdecimal.props" />
+   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+   <PropertyGroup Label="Configuration">
+     <ConfigurationType>DynamicLibrary</ConfigurationType>
 @@ -68,7 +68,7 @@
      </ClCompile>
    </ItemDefinitionGroup>
@@ -67,6 +85,15 @@
      <CustomBuild Include="..\Modules\_decimal\libmpdec\vcdiv64.asm">
 --- PCbuild/_elementtree.vcxproj
 +++ PCbuild/_elementtree.vcxproj
+@@ -39,7 +39,7 @@
+     <RootNamespace>_elementtree</RootNamespace>
+     <Keyword>Win32Proj</Keyword>
+   </PropertyGroup>
+-  <Import Project="python.props" />
++  <Import Project="python.props" /><Import Project="../../conan_expat.props" />
+   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+   <PropertyGroup Label="Configuration">
+     <ConfigurationType>DynamicLibrary</ConfigurationType>
 @@ -66,7 +66,7 @@
      </ClCompile>
    </ItemDefinitionGroup>
@@ -95,6 +122,15 @@
      <ResourceCompile Include="..\PC\python_nt.rc" />
 --- PCbuild/_lzma.vcxproj
 +++ PCbuild/_lzma.vcxproj
+@@ -39,7 +39,7 @@
+     <RootNamespace>lzma</RootNamespace>
+     <Keyword>Win32Proj</Keyword>
+   </PropertyGroup>
+-  <Import Project="python.props" />
++  <Import Project="python.props" /><Import Project="../../conan_xz_utils.props" />
+   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+   <PropertyGroup Label="Configuration">
+     <ConfigurationType>DynamicLibrary</ConfigurationType>
 @@ -62,10 +62,10 @@
    <ItemDefinitionGroup>
      <ClCompile>
@@ -123,6 +159,15 @@
    <ImportGroup Label="ExtensionTargets">
 --- PCbuild/_sqlite3.vcxproj
 +++ PCbuild/_sqlite3.vcxproj
+@@ -39,7 +39,7 @@
+     <RootNamespace>_sqlite3</RootNamespace>
+     <Keyword>Win32Proj</Keyword>
+   </PropertyGroup>
+-  <Import Project="python.props" />
++  <Import Project="python.props" /><Import Project="../../conan_sqlite3.props" />
+   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+   <PropertyGroup Label="Configuration">
+     <ConfigurationType>DynamicLibrary</ConfigurationType>
 @@ -95,10 +95,10 @@
        <Project>{cf7ac3d1-e2df-41d2-bea6-1e2556cdea26}</Project>
        <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
@@ -157,6 +202,15 @@
        <FilesToSign Include="$(opensslOutDir)\lib*.dll" />
 --- PCbuild/pyexpat.vcxproj
 +++ PCbuild/pyexpat.vcxproj
+@@ -39,7 +39,7 @@
+     <ProjectGuid>{D06B6426-4762-44CC-8BAD-D79052507F2F}</ProjectGuid>
+     <RootNamespace>pyexpat</RootNamespace>
+   </PropertyGroup>
+-  <Import Project="python.props" />
++  <Import Project="python.props" /><Import Project="../../conan_expat.props" />
+   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+   <PropertyGroup Label="Configuration">
+     <ConfigurationType>DynamicLibrary</ConfigurationType>
 @@ -58,19 +58,19 @@
    <PropertyGroup Label="UserMacros" />
    <ItemDefinitionGroup>
@@ -183,40 +237,17 @@
    </ItemGroup>
    <ItemGroup>
      <ResourceCompile Include="..\PC\python_nt.rc" />
---- PCbuild/python.props
-+++ PCbuild/python.props
-@@ -1,5 +1,6 @@
- <?xml version="1.0" encoding="utf-8"?>
- <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-+  <Import Project="..\..\conanbuildinfo.props" />
-   <PropertyGroup>
-     <Platform Condition="'$(Platform)' == ''">Win32</Platform>
-     <Configuration Condition="'$(Configuration)' == ''">Release</Configuration>
-@@ -46,14 +47,14 @@
-     <ExternalsDir>$(EXTERNALS_DIR)</ExternalsDir>
-     <ExternalsDir Condition="$(ExternalsDir) == ''">$([System.IO.Path]::GetFullPath(`$(PySourcePath)externals`))</ExternalsDir>
-     <ExternalsDir Condition="!HasTrailingSlash($(ExternalsDir))">$(ExternalsDir)\</ExternalsDir>
--    <sqlite3Dir>$(ExternalsDir)sqlite-3.31.1.0\</sqlite3Dir>
--    <bz2Dir>$(ExternalsDir)bzip2-1.0.6\</bz2Dir>
--    <lzmaDir>$(ExternalsDir)xz-5.2.2\</lzmaDir>
--    <opensslDir>$(ExternalsDir)openssl-1.1.1d\</opensslDir>
--    <opensslOutDir>$(ExternalsDir)openssl-bin-1.1.1d\$(ArchName)\</opensslOutDir>
--    <opensslIncludeDir>$(opensslOutDir)include</opensslIncludeDir>
--    <nasmDir>$(ExternalsDir)\nasm-2.11.06\</nasmDir>
--    <zlibDir>$(ExternalsDir)\zlib-1.2.11\</zlibDir>
-+    <sqlite3Dir>$(Conan-sqlite3-Root)</sqlite3Dir>
-+    <bz2Dir>$(Conan-bzip2-Root)</bz2Dir>
-+    <lzmaDir>$(Conan-xz_utils-Root)</lzmaDir>
-+    <opensslDir>$(Conan-openssl-Root)</opensslDir>
-+    <opensslOutDir>$(Conan-openssl-Root)\lib</opensslOutDir>
-+    <opensslIncludeDir>$(Conan-openssl-Root)\include</opensslIncludeDir>
-+    <nasmDir>$(Conan-nasm-Root)</nasmDir>
-+    <zlibDir>$(Conan-zlib-Root)</zlibDir>
-     
-     <!-- Suffix for all binaries when building for debug -->
-     <PyDebugExt Condition="'$(PyDebugExt)' == '' and $(Configuration) == 'Debug'">_d</PyDebugExt>
 --- PCbuild/pythoncore.vcxproj
 +++ PCbuild/pythoncore.vcxproj
+@@ -38,7 +38,7 @@
+     <ProjectGuid>{CF7AC3D1-E2DF-41D2-BEA6-1E2556CDEA26}</ProjectGuid>
+     <RootNamespace>pythoncore</RootNamespace>
+   </PropertyGroup>
+-  <Import Project="python.props" />
++  <Import Project="python.props" /><Import Project="../../conan_zlib.props" />
+   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+   <PropertyGroup Label="Configuration">
+     <ConfigurationType>DynamicLibrary</ConfigurationType>
 @@ -215,7 +215,7 @@
      <ClInclude Include="..\Python\wordcode_helpers.h" />
    </ItemGroup>
@@ -255,6 +286,15 @@
      <ClCompile Include="..\PC\dl_nt.c" />
 --- PCbuild/_hashlib.vcxproj
 +++ PCbuild/_hashlib.vcxproj
+@@ -39,7 +39,7 @@
+     <RootNamespace>_hashlib</RootNamespace>
+     <Keyword>Win32Proj</Keyword>
+   </PropertyGroup>
+-  <Import Project="python.props" />
++  <Import Project="python.props" /><Import Project="../../conan_openssl.props" />
+   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+   <PropertyGroup Label="Configuration">
+     <ConfigurationType>DynamicLibrary</ConfigurationType>
 @@ -54,7 +54,7 @@
    <ImportGroup Label="PropertySheets">
      <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
@@ -266,6 +306,15 @@
    <PropertyGroup>
 --- PCbuild/_ssl.vcxproj
 +++ PCbuild/_ssl.vcxproj
+@@ -39,7 +39,7 @@
+     <RootNamespace>_ssl</RootNamespace>
+     <Keyword>Win32Proj</Keyword>
+   </PropertyGroup>
+-  <Import Project="python.props" />
++  <Import Project="python.props" /><Import Project="../../conan_openssl.props" />
+   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+   <PropertyGroup Label="Configuration">
+     <ConfigurationType>DynamicLibrary</ConfigurationType>
 @@ -54,7 +54,7 @@
    <ImportGroup Label="PropertySheets">
      <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
@@ -287,3 +336,14 @@
    </ItemGroup>
    <ItemGroup>
      <ResourceCompile Include="..\PC\python_nt.rc" />
+--- PCbuild/_tkinter.vcxproj
++++ PCbuild/_tkinter.vcxproj
+@@ -39,7 +39,7 @@
+     <RootNamespace>_tkinter</RootNamespace>
+     <Keyword>Win32Proj</Keyword>
+   </PropertyGroup>
+-  <Import Project="python.props" />
++  <Import Project="python.props" /><!-- TODO <Import Project="../../conan_tk.props" />-->
+   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+   <PropertyGroup Label="Configuration">
+     <ConfigurationType>DynamicLibrary</ConfigurationType>

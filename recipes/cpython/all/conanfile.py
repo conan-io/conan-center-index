@@ -12,7 +12,7 @@ class CPythonConan(ConanFile):
     topics = ("conan", "python", "cpython", "language", "script")
     license = ("Python-2.0",)
     exports_sources = "patches/**"
-    generators = "visual_studio"
+    generators = "msbuild"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
