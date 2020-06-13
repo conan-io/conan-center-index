@@ -4,7 +4,7 @@ import os.path
 from conans import ConanFile, CMake, tools
 
 
-class ConanRecipe(ConanFile):
+class PclConanRecipe(ConanFile):
     name = "pcl"
     description = "Point Cloud Library"
     license = "BSD-3-Clause"
