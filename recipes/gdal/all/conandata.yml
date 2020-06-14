@@ -12,6 +12,8 @@ patches:
       base_path: "source_subfolder"
     - patch_file: "patches/ogrflatgeobuflayer-stdexcept.patch"
       base_path: "source_subfolder"
+    - patch_file: "patches/makefile-mitigate-long-line.patch"
+      base_path: "source_subfolder"
     - patch_file: "patches/fix-include-jsonc.patch"
       base_path: "source_subfolder"
     - patch_file: "patches/fix-include-xerces.patch"
