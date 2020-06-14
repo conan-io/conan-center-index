@@ -9,14 +9,14 @@ class DbgMacroConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/sharkdp/dbg-macro"
     license = "MIT"
-    description = "A dbg(…) macro for C++"
+    description = "A dbg(...) macro for C++"
     topics = ("conan", "debugging", "macro", "pretty-printing", "header-only")
     no_copy_source = True
 
     @property
     def _source_subfolder(self):
         return "source_subfolder"
-        
+
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
         extracted_dir = self.name + "-" + self.version
