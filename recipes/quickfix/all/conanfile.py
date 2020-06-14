@@ -1,4 +1,5 @@
 from conans import ConanFile, CMake, tools
+from conans.model.version import Version
 import os
 
 
@@ -37,6 +38,10 @@ class QuickfixConan(ConanFile):
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
+
+        version = Version(str(self.settings.compiler.version))
+        if self.settings.compiler == "Visual Studio" and (version <= "10" or self.settings.compiler.cppstd is None):
+            self.options.shared_ptr = "tr1"
 
     def _configure_cmake(self):
         if not self._cmake:
