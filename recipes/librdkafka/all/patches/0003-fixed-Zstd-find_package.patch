@@ -1,0 +1,42 @@
+--- a/packaging/cmake/Modules/FindZstd.cmake
++++ b/packaging/cmake/Modules/FindZstd.cmake
+@@ -6,22 +6,26 @@
+ # ZSTD_LIBRARY
+ #
+ 
+-find_path(ZSTD_INCLUDE_DIR NAMES zstd.h)
+ 
+-find_library(ZSTD_LIBRARY_DEBUG NAMES zstdd zstd_staticd)
+-find_library(ZSTD_LIBRARY_RELEASE NAMES zstd zstd_static)
+-
+-include(SelectLibraryConfigurations)
+-SELECT_LIBRARY_CONFIGURATIONS(ZSTD)
++set(ZSTD_INCLUDE_DIR ${CONAN_INCLUDE_DIRS_ZSTD})
++set(ZSTD_LIBRARY ${CONAN_LIBS_ZSTD})
++if (ZSTD_INCLUDE_DIR)
++  file(STRINGS "${ZSTD_INCLUDE_DIR}/zstd.h" _zstd_version_lines
++    REGEX "#define[ \t]+ZSTD_VERSION_(MAJOR|MINOR|RELEASE)")
++  string(REGEX REPLACE ".*ZSTD_VERSION_MAJOR *\([0-9]*\).*" "\\1" _zstd_version_major "${_zstd_version_lines}")
++  string(REGEX REPLACE ".*ZSTD_VERSION_MINOR *\([0-9]*\).*" "\\1" _zstd_version_minor "${_zstd_version_lines}")
++  string(REGEX REPLACE ".*ZSTD_VERSION_RELEASE *\([0-9]*\).*" "\\1" _zstd_version_release "${_zstd_version_lines}")
++  set(ZSTD_VERSION "${_zstd_version_major}.${_zstd_version_minor}.${_zstd_version_release}")
++  unset(_zstd_version_major)
++  unset(_zstd_version_minor)
++  unset(_zstd_version_release)
++  unset(_zstd_version_lines)
++endif ()
+ 
+ include(FindPackageHandleStandardArgs)
+-FIND_PACKAGE_HANDLE_STANDARD_ARGS(
+-    ZSTD DEFAULT_MSG
+-    ZSTD_LIBRARY ZSTD_INCLUDE_DIR
++FIND_PACKAGE_HANDLE_STANDARD_ARGS(ZSTD
++    REQUIRED_VARS ZSTD_LIBRARY ZSTD_INCLUDE_DIR
++    VERSION_VAR ZSTD_VERSION
+ )
+ 
+-if (ZSTD_FOUND)
+-    message(STATUS "Found Zstd: ${ZSTD_LIBRARY}")
+-endif()
+-
+ mark_as_advanced(ZSTD_INCLUDE_DIR ZSTD_LIBRARY)
