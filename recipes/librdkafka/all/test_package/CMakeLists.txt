@@ -1,0 +1,30 @@
+cmake_minimum_required(VERSION 3.8)
+project(PackageTest CXX)
+
+include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
+conan_basic_setup()
+
+add_executable(${PROJECT_NAME} test.cpp)
+target_link_libraries(${PROJECT_NAME} ${CONAN_LIBS})
+
+if(WITH_ZLIB)
+  list(APPEND test_compile_definitions WITH_ZLIB)
+endif()
+if(WITH_ZSTD)
+  list(APPEND test_compile_definitions WITH_ZSTD)
+endif()
+if(WITH_PLUGINS)
+  list(APPEND test_compile_definitions WITH_PLUGIN)
+endif()
+if(WITH_SSL)
+  list(APPEND test_compile_definitions WITH_SSL)
+endif()
+if(WITH_SASL)
+  list(APPEND test_compile_definitions WITH_SASL)
+endif()
+if(WITH_LZ4)
+  list(APPEND test_compile_definitions WITH_LZ4)
+endif()
+
+
+target_compile_definitions(${PROJECT_NAME} PRIVATE ${test_compile_definitions})

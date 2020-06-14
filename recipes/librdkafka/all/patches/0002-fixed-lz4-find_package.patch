@@ -1,0 +1,32 @@
+--- a/packaging/cmake/Modules/FindLZ4.cmake
++++ b/packaging/cmake/Modules/FindLZ4.cmake
+@@ -1,11 +1,5 @@
+-find_path(LZ4_INCLUDE_DIR
+-  NAMES lz4.h
+-  DOC "lz4 include directory")
+-mark_as_advanced(LZ4_INCLUDE_DIR)
+-find_library(LZ4_LIBRARY
+-  NAMES lz4
+-  DOC "lz4 library")
+-mark_as_advanced(LZ4_LIBRARY)
++set(LZ4_INCLUDE_DIR ${CONAN_INCLUDE_DIRS_LZ4})
++set(LZ4_LIBRARY ${CONAN_LIBS_LZ4})
+ 
+ if (LZ4_INCLUDE_DIR)
+   file(STRINGS "${LZ4_INCLUDE_DIR}/lz4.h" _lz4_version_lines
+@@ -25,14 +19,8 @@ find_package_handle_standard_args(LZ4
+   REQUIRED_VARS LZ4_LIBRARY LZ4_INCLUDE_DIR
+   VERSION_VAR LZ4_VERSION)
+ 
++mark_as_advanced(LZ4_INCLUDE_DIR LZ4_LIBRARY)
+ if (LZ4_FOUND)
+   set(LZ4_INCLUDE_DIRS "${LZ4_INCLUDE_DIR}")
+   set(LZ4_LIBRARIES "${LZ4_LIBRARY}")
+-
+-  if (NOT TARGET LZ4::LZ4)
+-    add_library(LZ4::LZ4 UNKNOWN IMPORTED)
+-    set_target_properties(LZ4::LZ4 PROPERTIES
+-      IMPORTED_LOCATION "${LZ4_LIBRARY}"
+-      INTERFACE_INCLUDE_DIRECTORIES "${LZ4_INCLUDE_DIR}")
+-  endif ()
+ endif ()

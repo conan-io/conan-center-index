@@ -1,0 +1,39 @@
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -5,7 +5,7 @@ parseversion("src/rdkafka.h")
+ 
+ project(RdKafka VERSION ${RDKAFKA_VERSION})
+ 
+-set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/packaging/cmake/Modules/")
++set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${PROJECT_SOURCE_DIR}/packaging/cmake/Modules/")
+ 
+ # Options. No 'RDKAFKA_' prefix to match old C++ code. {
+ 
+diff --git a/src/CMakeLists.txt b/src/CMakeLists.txt
+index 5f7dc11..ec4cdcb 100644
+--- a/src/CMakeLists.txt
++++ b/src/CMakeLists.txt
+@@ -172,13 +172,11 @@ endif()
+ 
+ if(WITH_ZLIB)
+   find_package(ZLIB REQUIRED)
+-  target_link_libraries(rdkafka PUBLIC ZLIB::ZLIB)
++  target_link_libraries(rdkafka PUBLIC ${ZLIB_LIBRARIES})
+ endif()
+ 
+ if(WITH_ZSTD)
+   target_link_libraries(rdkafka PUBLIC ${ZSTD_LIBRARY})
+-  target_include_directories(rdkafka PUBLIC ${ZSTD_INCLUDE_DIR})
+-  message(STATUS "Found ZSTD: ${ZSTD_LIBRARY}")
+ endif()
+ 
+ if(WITH_SSL)
+@@ -211,7 +209,7 @@ if(WITH_LIBDL)
+ endif()
+ 
+ if(WITH_LZ4_EXT)
+-  target_link_libraries(rdkafka PUBLIC LZ4::LZ4)
++  target_link_libraries(rdkafka PUBLIC ${LZ4_LIBRARIES})
+ endif()
+ 
+ # Set up path to these sources for other sub-projects (tests, examples)
