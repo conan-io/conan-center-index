@@ -1,0 +1,37 @@
+From dd6ffd220768c51d8ec0103832c4ce6c85512abc Mon Sep 17 00:00:00 2001
+From: Tarcisio Rodrigues <tarcisio.genaro@gmail.com>
+Date: Sun, 14 Jun 2020 19:24:26 -0300
+Subject: [PATCH 6/6] opt for unique_ptr vs auto_ptr through CMake option
+
+---
+ CMakeLists.txt | 11 ++++-------
+ 1 file changed, 4 insertions(+), 7 deletions(-)
+
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index a9cea790..f6be2611 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -66,16 +66,13 @@ else()
+ message(FATAL_ERROR "Must set SHARED_PTR")
+ endif()
+ 
+-include(FindUniquePtr)
+-FIND_UNIQUE_PTR()
+-if (HAVE_UNIQUE_PTR_IN_STD_NAMESPACE)
++set(UNIQUE_PTR AUTO CACHE STRING "Define unique pointer implementation")
++set_property(CACHE UNIQUE_PTR PROPERTY STRINGS UNIQUE AUTO)
++
++if ("${UNIQUE_PTR}" STREQUAL "UNIQUE")
+ message("-- set HAVE_STD_UNIQUE_PTR")
+ 
+ add_definitions("-DHAVE_STD_UNIQUE_PTR=1")
+-file(APPEND ${CMAKE_SOURCE_DIR}/config.h
+- "#ifndef HAVE_STD_UNIQUE_PTR\n"
+- "#define HAVE_STD_UNIQUE_PTR\n"
+- "#endif\n" )
+ endif()
+ 
+ if (HAVE_PYTHON)
+-- 
+2.25.0
+
