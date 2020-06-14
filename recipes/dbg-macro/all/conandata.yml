@@ -1,0 +1,4 @@
+sources:
+  "0.4.0":
+    sha256: e44a1206fbfd1d3dc8ad649f387df479d288b08c80cf2f1239ccb4e26148d781
+    url: https://github.com/sharkdp/dbg-macro/archive/v0.4.0.tar.gz
