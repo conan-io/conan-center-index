@@ -51,9 +51,9 @@ class LibrdkafkaConan(ConanFile):
         if self.options.zlib:
             self.requires("zlib/1.2.11")
         if self.options.zstd:
-            self.requires("zstd/1.4.4")
+            self.requires("zstd/1.4.5")
         if self.options.ssl:
-            self.requires("openssl/1.1.1d")
+            self.requires("openssl/1.1.1g")
         if self.options.lz4:
             self.requires("lz4/1.9.2")
 
@@ -101,12 +101,7 @@ class LibrdkafkaConan(ConanFile):
         self.copy(pattern="LICENSES.txt", src=self.sources_folder, dst="licenses")
         cmake = self._configure_cmake()
         cmake.install()
-        # self.copy("*.h", dst="include", src=self.name)
-        # self.copy("*.lib", dst="lib", keep_path=False)
-        # self.copy("*.dll", dst="bin", keep_path=False)
-        # self.copy("*.so", dst="lib", keep_path=False)
-        # self.copy("*.dylib*", dst="lib", keep_path=False)
-        # self.copy("*.a", dst="lib", keep_path=False)
+
         tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
         tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
         tools.rmdir(os.path.join(self.package_folder, "share"))
