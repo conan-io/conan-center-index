@@ -1,16 +1,5 @@
---- a/CMakeLists.txt
-+++ b/CMakeLists.txt
-@@ -5,7 +5,7 @@ parseversion("src/rdkafka.h")
- 
- project(RdKafka VERSION ${RDKAFKA_VERSION})
- 
--set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/packaging/cmake/Modules/")
-+set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${PROJECT_SOURCE_DIR}/packaging/cmake/Modules/")
- 
- # Options. No 'RDKAFKA_' prefix to match old C++ code. {
- 
 diff --git a/src/CMakeLists.txt b/src/CMakeLists.txt
-index 5f7dc11..ec4cdcb 100644
+index 5f7dc119..ec4cdcbb 100644
 --- a/src/CMakeLists.txt
 +++ b/src/CMakeLists.txt
 @@ -172,13 +172,11 @@ endif()

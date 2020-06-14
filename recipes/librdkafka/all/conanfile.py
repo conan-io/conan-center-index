@@ -5,16 +5,16 @@ from conans import CMake, ConanFile, tools
 
 class LibrdkafkaConan(ConanFile):
     name = "librdkafka"
-    license = "MIT"
+    license = "BSD-2-Clause"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/edenhill/librdkafka"
-    description = """This is a Kafka C client package.
-    A fully featured, portable librdkafka library."""
+    description = "Librdkafka is an Apache Kafka C/C++ library designed with message delivery reliability and high performance in mind."
 
     topics = ("kafka", "librdkafka")
     settings = "os", "compiler", "build_type", "arch"
     options = {
         "shared": [True, False],
+        "fPIC": [True, False],
         "zlib": [True, False],
         "zstd": [True, False],
         "plugins": [True, False],
@@ -24,6 +24,7 @@ class LibrdkafkaConan(ConanFile):
     }
     default_options = {
         "shared": False,
+        "fPIC": True,
         "zlib": False,
         "zstd": False,
         "plugins": False,
@@ -36,19 +37,25 @@ class LibrdkafkaConan(ConanFile):
     sources_folder = "sources"
     _cmake = None
 
+    def config_options(self):
+        if self.settings.os == "Windows":
+            del self.options.fPIC
+
     def configure(self):
+        if self.options.shared:
+            del self.options.fPIC
         if self.options.ssl:
             self.options["openssl"].shared = self.options.shared
 
     def requirements(self):
         if self.options.zlib:
-            self.requires.add("zlib/1.2.11")
+            self.requires("zlib/1.2.11")
         if self.options.zstd:
-            self.requires.add("zstd/1.4.4")
+            self.requires("zstd/1.4.4")
         if self.options.ssl:
-            self.requires.add("openssl/1.1.1d")
+            self.requires("openssl/1.1.1d")
         if self.options.lz4:
-            self.requires.add("lz4/1.9.2")
+            self.requires("lz4/1.9.2")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
@@ -64,6 +71,10 @@ class LibrdkafkaConan(ConanFile):
             return self._cmake
         self._cmake = CMake(self)
         self._cmake.definitions["WITHOUT_OPTIMIZATION"] = (
+            self.settings.build_type == "Debug"
+        )
+        self._cmake.definitions["ENABLE_DEVEL"] = self.settings.build_type == "Debug"
+        self._cmake.definitions["ENABLE_REFCNT_DEBUG"] = (
             self.settings.build_type == "Debug"
         )
         self._cmake.definitions["RDKAFKA_BUILD_STATIC"] = not self.options.shared
@@ -87,14 +98,18 @@ class LibrdkafkaConan(ConanFile):
         cmake.build()
 
     def package(self):
+        self.copy(pattern="LICENSES.txt", src=self.sources_folder, dst="licenses")
         cmake = self._configure_cmake()
         cmake.install()
-        self.copy("*.h", dst="include", src=self.name)
-        self.copy("*.lib", dst="lib", keep_path=False)
-        self.copy("*.dll", dst="bin", keep_path=False)
-        self.copy("*.so", dst="lib", keep_path=False)
-        self.copy("*.dylib*", dst="lib", keep_path=False)
-        self.copy("*.a", dst="lib", keep_path=False)
+        # self.copy("*.h", dst="include", src=self.name)
+        # self.copy("*.lib", dst="lib", keep_path=False)
+        # self.copy("*.dll", dst="bin", keep_path=False)
+        # self.copy("*.so", dst="lib", keep_path=False)
+        # self.copy("*.dylib*", dst="lib", keep_path=False)
+        # self.copy("*.a", dst="lib", keep_path=False)
+        tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
+        tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
+        tools.rmdir(os.path.join(self.package_folder, "share"))
 
     def package_info(self):
         self.cpp_info.libs = ["rdkafka", "rdkafka++"]
