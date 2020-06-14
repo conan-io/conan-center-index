@@ -27,6 +27,14 @@ class QuickfixConan(ConanFile):
     def _build_subfolder(self):
         return "build_subfolder"
 
+    def _configure_cmake(self):
+        if not self._cmake:
+            self._cmake = CMake(self)
+            self._cmake.definitions["HAVE_SSL"] = self.options.ssl
+            self._cmake.definitions["SHARED_PTR"] = str(self.options.shared_ptr).upper()
+            self._cmake.configure(source_folder=self._source_subfolder, build_folder=self._build_subfolder)
+        return self._cmake
+
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
         os.rename(self.name + "-" + self.version, self._source_subfolder)
@@ -43,13 +51,8 @@ class QuickfixConan(ConanFile):
         if self.settings.compiler == "Visual Studio" and (version <= "10" or self.settings.compiler.cppstd is None):
             self.options.shared_ptr = "tr1"
 
-    def _configure_cmake(self):
-        if not self._cmake:
-            self._cmake = CMake(self)
-            self._cmake.definitions["HAVE_SSL"] = self.options.ssl
-            self._cmake.definitions["SHARED_PTR"] = str(self.options.shared_ptr).upper()
-            self._cmake.configure(source_folder=self._source_subfolder, build_folder=self._build_subfolder)
-        return self._cmake
+        if self.settings.compiler == "gcc" and str(self.settings.compiler.cppstd).find("98") != -1:
+            self.options.shared_ptr = "tr1"
 
     def build(self):
         for patch in self.conan_data["patches"][self.version]:
