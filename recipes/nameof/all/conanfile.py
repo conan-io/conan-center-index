@@ -21,6 +21,7 @@ class NameofConan(ConanFile):
         "compile-time"
     )
     no_copy_source = True
+    settings = "compiler"
 
     @property
     def _source_subfolder(self):
@@ -50,7 +51,7 @@ class NameofConan(ConanFile):
             raise ConanInvalidConfiguration("nameof: Unsupported compiler (https://github.com/Neargye/nameof#compiler-compatibility).")
 
     def package(self):
-        self.copy("include/*")
+        self.copy("include/nameof.hpp", dst=".", src=self._source_subfolder)
         self.copy("LICENSE", dst="licenses")
 
     def package_id(self):
