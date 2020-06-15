@@ -28,7 +28,7 @@ class NameofConan(ConanFile):
         return "source_subfolder"
 
     @property
-    def supported_compiler(self):
+    def _supported_compiler(self):
         compiler = str(self.settings.compiler)
         version = tools.Version(self.settings.compiler.version)
         if compiler == "Visual Studio" and version >= "15":
@@ -47,7 +47,7 @@ class NameofConan(ConanFile):
         os.rename(extracted_dir, self._source_subfolder)
 
     def configure(self):
-        if not self.supported_compiler:
+        if not self._supported_compiler:
             raise ConanInvalidConfiguration("nameof: Unsupported compiler (https://github.com/Neargye/nameof#compiler-compatibility).")
 
     def package(self):
