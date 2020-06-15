@@ -3,6 +3,22 @@
 #include "quickfix/SocketAcceptor.h"
 #include "quickfix/Log.h"
 #include "quickfix/SessionSettings.h"
+#include "quickfix/DOMDocument.h"
+#include "quickfix/DataDictionaryProvider.h"
+
+class Node : public FIX::DOMNode
+{
+  virtual SmartPtr<DOMNode> getFirstChildNode()
+  { SmartPtr<DOMNode> ptr; return ptr; }
+  virtual SmartPtr<DOMNode> getNextSiblingNode()
+  { SmartPtr<DOMNode> ptr; return ptr; }
+  virtual SmartPtr<FIX::DOMAttributes> getAttributes()
+  { SmartPtr<FIX::DOMAttributes> ptr; return ptr; }
+  virtual std::string getName()
+  { return ""; }
+  virtual std::string getText()
+  { return ""; }
+};
 
 class Application
     : public FIX::Application
@@ -27,6 +43,9 @@ int main( int argc, char** argv )
 {
   try
   {
+    Node node;
+    FIX::DataDictionaryProvider provider;
+    provider.addTransportDataDictionary( FIX::BeginString("FIX.4.2"), ptr::shared_ptr<FIX::DataDictionary>(new FIX::DataDictionary()) );
     Application application;
     FIX::SessionSettings settings( "" );
     FIX::FileStoreFactory storeFactory( settings );
