@@ -39,6 +39,8 @@ class NngConan(ConanFile):
             del self.options.fPIC
 
     def configure(self):
+        if self.options.shared:
+            del self.options.fPIC
         del self.settings.compiler.libcxx
         del self.settings.compiler.cppstd
 
@@ -67,15 +69,14 @@ class NngConan(ConanFile):
                   src=self._source_subfolder)
         cmake = self._configure_cmake()
         cmake.install()
+        tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
 
     def package_info(self):
         self.cpp_info.libs = tools.collect_libs(self)
         if self.settings.os == "Windows" and not self.options.shared:
-            self.cpp_info.libs.extend(['mswsock', 'ws2_32'])
+            self.cpp_info.system_libs.extend(['mswsock', 'ws2_32'])
         elif self.settings.os == "Linux":
-            self.cpp_info.libs.extend(['pthread'])
+            self.cpp_info.system_libs.extend(['pthread'])
 
         if not self.options.shared:
             self.cpp_info.defines.append("NN_STATIC_LIB=ON")
-
-        self.cpp_info.builddirs = [os.path.join("lib", "cmake", "nng")]
