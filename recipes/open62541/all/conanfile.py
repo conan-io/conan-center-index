@@ -124,12 +124,12 @@ class Open62541Conan(ConanFile):
     def configure(self):
         self.options["libwebsockets"].with_ssl = self.options.tls
 
-        if self.options.enable_pubsub_mqtt                                      \
+        if not self.options.enable_pubsub and (self.options.enable_pubsub_mqtt                                      
           or self.options.enable_pubsub_informationmodel                        \
           or self.options.enable_pubsub_informationmodel_methods                \
           or self.options.enable_pubsub_custom_publish_handling                 \
-          or self.options.enable_pubsub_eth_uadp_etf:
-            self.options.enable_pubsub = True
+          or self.options.enable_pubsub_eth_uadp_etf):
+            raise ConanInvalidConfiguration("The option 'enable_pubsub' must be True, if pubsub is required." )
 
         if self.options.enable_discovery_multicast:
             self.options.enable_discovery = True
@@ -297,4 +297,3 @@ class Open62541Conan(ConanFile):
 
         if self.settings.os == "Windows":
             self.cpp_info.system_libs.append("ws2_32")
-
