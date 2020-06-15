@@ -16,7 +16,7 @@ class PahoMqttcConan(ConanFile):
                "ssl": [True, False],
                "samples": [True, False]}
     # static builds didn't really work until 1.3.4
-    default_options = {"shared": True,
+    default_options = {"shared": self.version in ['1.3.0', '1.3.1'],
                        "fPIC": True,
                        "ssl": True,
                        "samples": False}
