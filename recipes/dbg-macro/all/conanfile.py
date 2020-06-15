@@ -24,7 +24,7 @@ class DbgMacroConan(ConanFile):
 
     def package(self):
         self.copy("dbg.h", dst="include", src=self._source_subfolder)
-        self.copy("LICENSE", dst="licenses")
+        self.copy("LICENSE", dst="licenses", src=self._source_subfolder)
 
     def package_id(self):
         self.info.header_only()
