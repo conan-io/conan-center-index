@@ -1,6 +1,7 @@
 from conans import ConanFile, Meson, tools
 import os
 import shutil
+import glob
 
 
 class EpoxyConan(ConanFile):
@@ -92,6 +93,8 @@ class EpoxyConan(ConanFile):
         meson = self._configure_meson()
         meson.install()
         tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
+        for pdb_file in glob.glob(os.path.join(self.package_folder, "bin", "*.pdb")):
+            os.unlink(pdb_file)
 
     def package_info(self):
         self.cpp_info.libs = ["epoxy"]
