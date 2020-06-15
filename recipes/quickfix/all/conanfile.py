@@ -70,11 +70,14 @@ class QuickfixConan(ConanFile):
                 self.options.unique_ptr = "auto"
 
         version = Version(str(self.settings.compiler.version))
-        if self.settings.compiler == "Visual Studio" and (version <= "10" or self.settings.compiler.cppstd is None):
+        if self.settings.compiler == "Visual Studio" and version <= "10":
             self.options.shared_ptr = "tr1"
 
-        if self.settings.compiler == "gcc" and str(self.settings.compiler.cppstd).find("98") != -1:
+        if self.settings.compiler == "gcc" and (
+                str(self.settings.compiler.cppstd).find("98") != -1 or
+                (version < "6.0" and self.settings.compiler.cppstd == "None")):
             self.options.shared_ptr = "tr1"
+            self.options.unique_ptr = "auto"
 
     def configure(self):
         if self.settings.os == "Windows" and self.options.shared:
