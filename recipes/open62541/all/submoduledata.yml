@@ -4,3 +4,7 @@ submodules:
       sha256: b1847047c0c4a20ab6a132fed6d6b6e50db6b07f0068a95213306603279a3b9a
       url: https://github.com/Pro/mdnsd/archive/5af316c4b79460c0c1b6c2a674a37e28a85441a3.zip
       archive_pattern: "mdnsd-{version}"
+    deps/ua-nodeset:
+      sha256: 4a611b2986037ca1280f1ae9fd0d77fb1a9b2cd052df16f5246337e09fdb0abb
+      url: https://github.com/OPCFoundation/UA-Nodeset/archive/805cb46ad326d8375ea2449082f264b7d0175f24.zip
+      archive_pattern: "UA-Nodeset-{version}"

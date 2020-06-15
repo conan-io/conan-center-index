@@ -124,18 +124,19 @@ class Open62541Conan(ConanFile):
     def configure(self):
         self.options["libwebsockets"].with_ssl = self.options.tls
 
-        if not self.options.enable_pubsub and (self.options.enable_pubsub_mqtt                                      
-          or self.options.enable_pubsub_informationmodel                        \
-          or self.options.enable_pubsub_informationmodel_methods                \
-          or self.options.enable_pubsub_custom_publish_handling                 \
-          or self.options.enable_pubsub_eth_uadp_etf):
-            raise ConanInvalidConfiguration("The option 'enable_pubsub' must be True, if pubsub is required." )
+        if self.options.enable_pubsub:
+            if self.options.enable_pubsub_mqtt                                      \
+              or self.options.enable_pubsub_informationmodel                        \
+              or self.options.enable_pubsub_informationmodel_methods                \
+              or self.options.enable_pubsub_custom_publish_handling                 \
+              or self.options.enable_pubsub_eth_uadp_etf:
+                raise ConanInvalidConfiguration("The option 'enable_pubsub' must be True, if pubsub is required." )
 
-        if self.options.enable_discovery_multicast:
-            self.options.enable_discovery = True
+        if self.options.enable_discovery_multicast and not self.options.enable_discovery:
+            raise ConanInvalidConfiguration("The option 'enable_discovery' must be True, if discovery_multicast is required." )
 
-        if self.options.enable_experimental_historizing:
-            self.options.enable_historizing = True
+        if self.options.enable_experimental_historizing and not self.options.enable_historizing:
+            raise ConanInvalidConfiguration("The option 'enable_historizing' must be True, if experimental_historizing is required." )
 
         if self.settings.compiler == "clang" and tools.Version(self.settings.compiler.version) <= "4":
             raise ConanInvalidConfiguration("clang compiler <= 4.0 not (yet) supported" )
