@@ -8,6 +8,9 @@
 
 class Node : public FIX::DOMNode
 {
+public:
+  virtual ~Node(){ };
+private:
   virtual SmartPtr<DOMNode> getFirstChildNode()
   { SmartPtr<DOMNode> ptr; return ptr; }
   virtual SmartPtr<DOMNode> getNextSiblingNode()
