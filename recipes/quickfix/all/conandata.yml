@@ -16,3 +16,5 @@ patches:
       base_path: "source_subfolder"
     - patch_file: "patches/0006-opt-for-unique_ptr-vs-auto_ptr-through-CMake-option.patch"
       base_path: "source_subfolder"
+    - patch_file: "patches/0007-manage-postgres-through-conan.patch"
+      base_path: "source_subfolder"

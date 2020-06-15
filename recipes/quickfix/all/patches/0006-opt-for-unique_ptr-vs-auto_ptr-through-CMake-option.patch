@@ -1,7 +1,7 @@
 From dd6ffd220768c51d8ec0103832c4ce6c85512abc Mon Sep 17 00:00:00 2001
 From: Tarcisio Rodrigues <tarcisio.genaro@gmail.com>
 Date: Sun, 14 Jun 2020 19:24:26 -0300
-Subject: [PATCH 6/6] opt for unique_ptr vs auto_ptr through CMake option
+Subject: [PATCH 6/7] opt for unique_ptr vs auto_ptr through CMake option
 
 ---
  CMakeLists.txt | 11 ++++-------
