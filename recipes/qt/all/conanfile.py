@@ -296,8 +296,8 @@ class QtConan(ConanFile):
             self.requires("openal/1.19.1")
         if self.options.with_libalsa:
             self.requires("libalsa/1.1.9")
-        #if self.options.GUI and self.settings.os == "Linux":
-        #    self.requires("xorg/system")
+        if self.options.GUI and self.settings.os == "Linux":
+            self.requires("xorg/system")
         if self.options.opengl != "no":
             self.requires("opengl/system")
         if self.options.with_zstd:
