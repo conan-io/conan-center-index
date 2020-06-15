@@ -25,3 +25,13 @@ versions:
     folder: all
   8.9.0:
     folder: all
+  8.9.1:
+    folder: all
+  8.9.2:
+    folder: all
+  9.0.0:
+    folder: all
+  10.0.0:
+    folder: all
+  10.0.1:
+    folder: all
