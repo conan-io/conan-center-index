@@ -1,5 +1,6 @@
 from conans import ConanFile
 from conans import tools
+from conans import CMake
 from conans.tools import Version, cppstd_flag
 from conans.errors import ConanException
 
@@ -7,6 +8,7 @@ from conans.errors import ConanInvalidConfiguration
 import os
 import sys
 import shutil
+import yaml
 
 try:
     from cStringIO import StringIO
@@ -92,7 +94,9 @@ class BoostConan(ConanFile):
     default_options.update({"without_python": True})
     short_paths = True
     no_copy_source = True
-    exports_sources = ['patches/*']
+    exports_sources = ['patches/*', 'find_components/*']
+
+    _components_filename = None
 
     @property
     def _source_subfolder(self):
@@ -415,6 +419,8 @@ class BoostConan(ConanFile):
                 self.run(command)
 
     def build(self):
+        self._components_filename = os.path.join(self.build_folder, "find_components", "BoostComponents.yml")
+
         if self.options.header_only:
             self.output.warn("Header only package, skipping build")
             return
@@ -441,6 +447,8 @@ class BoostConan(ConanFile):
                 # To show the libraries *1
                 # self.run("%s --show-libraries" % b2_exe)
                 self.run(full_command)
+
+        self._configure_dependency_cmake()
 
     @property
     def _b2_os(self):
@@ -818,12 +826,22 @@ class BoostConan(ConanFile):
 
     ####################################################################
 
+    def _configure_dependency_cmake(self):
+        self._dep_cmake = CMake(self)
+        self._dep_cmake.definitions["BOOST_ROOT"] = self.package_folder.replace("\\", "/")
+        self._dep_cmake.definitions["BOOST_VERSION"] = self.version
+        self._dep_cmake.definitions["CMAKE_BUILD_TYPE"] = self.settings.build_type
+        self._dep_cmake.definitions["Boost_USE_STATIC_LIBS"] = not self.options.shared
+        
+        self._dep_cmake.configure(source_folder="find_components", build_folder="find_components")
+        
+
     def package(self):
         # This stage/lib is in source_folder... Face palm, looks like it builds in build but then
         # copy to source with the good lib name
         self.copy("LICENSE_1_0.txt", dst="licenses", src=os.path.join(self.source_folder,
                                                                       self._source_subfolder))
-        tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
+        # tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
         if self.options.header_only:
             self.copy(pattern="*", dst="include/boost", src="%s/boost" % self._boost_dir)
 
@@ -851,103 +869,213 @@ class BoostConan(ConanFile):
         layout = self.options.get_safe("layout")
         return layout == "versioned" or (layout == "b2-default" and os.name == 'nt')
 
+    def _create_library_name(self, lib_path):
+        lib_name = os.path.splitext(os.path.basename(lib_path))[0]
+        if self.settings.os != "Windows":
+            libprefix = "lib"
+            if lib_name.startswith(libprefix):
+                lib_name = lib_name[len(libprefix):]
+        return lib_name
+
     def package_info(self):
-        gen_libs = [] if self.options.header_only else tools.collect_libs(self)
+        if True:
+            self._dep_cmake.build()
+            with open(self._components_filename, "r") as components_file:
+                dependencies = yaml.load(components_file)
 
-        if self._is_versioned_layout:
-            version_tokens = str(self.version).split(".")
-            if len(version_tokens) >= 2:
-                major = version_tokens[0]
-                minor = version_tokens[1]
-                boost_version_tag = "boost-%s_%s" % (major, minor)
-                self.cpp_info.includedirs = [os.path.join(self.package_folder, "include", boost_version_tag)]
+                for comp_name, component in dependencies["Boost"].items():
+                    if component is not None:
+                        if "libs" in component:
+                            self.cpp_info.components[comp_name].libs = [ self._create_library_name(lib) for lib in component["libs"] ]
 
-        # List of lists, so if more than one matches the lib like serialization and wserialization
-        # both will be added to the list
-        ordered_libs = [[] for _ in range(len(lib_list))]
+                        if "requires" in component:
+                            self.cpp_info.components[comp_name].requires = component["requires"]
 
-        # The order is important, reorder following the lib_list order
-        missing_order_info = []
-        for real_lib_name in gen_libs:
-            for pos, alib in enumerate(lib_list):
-                if os.path.splitext(real_lib_name)[0].split("-")[0].endswith(alib):
-                    ordered_libs[pos].append(real_lib_name)
-                    break
-            else:
-                # self.output.info("Missing in order: %s" % real_lib_name)
-                if "_exec_monitor" not in real_lib_name:  # https://github.com/bincrafters/community/issues/94
-                    missing_order_info.append(real_lib_name)  # Assume they do not depend on other
+                        if "definitions" in component:
+                            self.cpp_info.components[comp_name].definitions = component["definitions"]
 
-        # Flat the list and append the missing order
-        self.cpp_info.libs = [item for sublist in ordered_libs
-                                      for item in sublist if sublist] + missing_order_info
+                if not self.options.header_only and self.options.shared:
+                    self.cpp_info.components[comp_name].defines.append("BOOST_ALL_DYN_LINK")
 
-        if self.options.without_test:  # remove boost_unit_test_framework
-            self.cpp_info.libs = [lib for lib in self.cpp_info.libs if "unit_test" not in lib]
+                    if self.settings.os != "Android":
+                        if self._gnu_cxx11_abi:
+                            self.cpp_info.components[comp_name].defines.append("_GLIBCXX_USE_CXX11_ABI=%s" % self._gnu_cxx11_abi)
 
-        self.output.info("LIBRARIES: %s" % self.cpp_info.libs)
-        self.output.info("Package folder: %s" % self.package_folder)
+            for comp_name, component in self.cpp_info.components.items():
+                if not self.options.header_only:
+                    if self.options.error_code_header_only:
+                        component.defines.append("BOOST_ERROR_CODE_HEADER_ONLY")
 
-        if not self.options.header_only and self.options.shared:
-            self.cpp_info.defines.append("BOOST_ALL_DYN_LINK")
+                    if not self.options.without_python:
+                        if not self.options.shared:
+                            component.defines.append("BOOST_PYTHON_STATIC_LIB")
 
-        if self.options.system_no_deprecated:
-            self.cpp_info.defines.append("BOOST_SYSTEM_NO_DEPRECATED")
+                    if self._is_msvc or self._is_clang_cl:
+                        if not self.options.magic_autolink:
+                            # DISABLES AUTO LINKING! NO SMART AND MAGIC DECISIONS THANKS!
+                            component.defines.append("BOOST_ALL_NO_LIB")
+                            self.output.info("Disabled magic autolinking (smart and magic decisions)")
+                        else:
+                            if self.options.layout == "system":
+                                component.defines.append("BOOST_AUTO_LINK_SYSTEM")
+                            elif self.options.layout == "tagged":
+                                component.defines.append("BOOST_AUTO_LINK_TAGGED")
+                            self.output.info("Enabled magic autolinking (smart and magic decisions)")
 
-        if self.options.asio_no_deprecated:
-            self.cpp_info.defines.append("BOOST_ASIO_NO_DEPRECATED")
+                        # https://github.com/conan-community/conan-boost/issues/127#issuecomment-404750974
+                        component.system_libs.append("bcrypt")
+                    elif self.settings.os == "Linux":
+                        # https://github.com/conan-community/community/issues/135
+                        component.system_libs.append("rt")
 
-        if self.options.filesystem_no_deprecated:
-            self.cpp_info.defines.append("BOOST_FILESYSTEM_NO_DEPRECATED")
+                    if "Threads::Threads" in self.cpp_info.components[comp_name].requires:
+                        self.cpp_info.components[comp_name].requires.remove("Threads::Threads")
+                        if self.settings.os == "Linux":
+                            component.system_libs.append("pthread")
+                        elif self.settings.os == "Emscripten":
+                            arch = self.settings.get_safe('arch')
+                            # https://emscripten.org/docs/porting/pthreads.html
+                            # The documentation mentions that we should be using the "-s USE_PTHREADS=1"
+                            # but it was causing problems with the target based configurations in conan
+                            # So instead we are using the raw compiler flags (that are being activated
+                            # from the aformentioned flag)
+                            if arch.startswith("x86") or arch.startswith("wasm"):
+                                component.cxxflags.append("-pthread")
+                                component.sharedlinkflags.extend(["-pthread","--shared-memory"])
+                                component.exelinkflags.extend(["-pthread","--shared-memory"])
 
-        if self.options.segmented_stacks:
-            self.cpp_info.defines.extend(["BOOST_USE_SEGMENTED_STACKS", "BOOST_USE_UCONTEXT"])
 
-        if self.settings.os != "Android":
-            if self._gnu_cxx11_abi:
-                self.cpp_info.defines.append("_GLIBCXX_USE_CXX11_ABI=%s" % self._gnu_cxx11_abi)
+            self.cpp_info.components["headers"].names["cmake_find_package"] = "headers"
+            self.cpp_info.components["headers"].names["cmake_find_package_multi"] = "headers"
 
-        if not self.options.header_only:
-            if self.options.error_code_header_only:
-                self.cpp_info.defines.append("BOOST_ERROR_CODE_HEADER_ONLY")
 
-            if not self.options.without_python:
-                if not self.options.shared:
-                    self.cpp_info.defines.append("BOOST_PYTHON_STATIC_LIB")
+            if self.options.zlib:
+                self.cpp_info.components["headers"].requires.append("zlib::zlib")
+            if self.options.bzip2:
+                self.cpp_info.components["headers"].requires.append("bzip2::bzip2")
+            if self.options.lzma:
+                self.cpp_info.components["headers"].requires.append("xz_utils::xz_utils")
+            if self.options.zstd:
+                self.cpp_info.components["headers"].requires.append("zstd::zstd")
 
-            if self._is_msvc or self._is_clang_cl:
-                if not self.options.magic_autolink:
-                    # DISABLES AUTO LINKING! NO SMART AND MAGIC DECISIONS THANKS!
-                    self.cpp_info.defines.append("BOOST_ALL_NO_LIB")
-                    self.output.info("Disabled magic autolinking (smart and magic decisions)")
+            if self.options.i18n_backend == 'icu':
+                for comp_name in ["regex", "locale"]:
+                    self.cpp_info.components[comp_name].requires.append("icu::icu")
+
+            if self.options.system_no_deprecated:
+                self.cpp_info.components["system"].defines.append("BOOST_SYSTEM_NO_DEPRECATED")
+
+            if self.options.asio_no_deprecated:
+                self.cpp_info.components["asio"].defines.append("BOOST_ASIO_NO_DEPRECATED")
+
+            if self.options.filesystem_no_deprecated:
+                self.cpp_info.components["filesystem"].defines.append("BOOST_FILESYSTEM_NO_DEPRECATED")
+
+            if self.options.segmented_stacks:
+                for comp_name in ["context", "coroutine", "coroutine2", "fiber"]:
+                    self.cpp_info.components[comp_name].defines.extend(["BOOST_USE_SEGMENTED_STACKS", "BOOST_USE_UCONTEXT"])
+
+
+            self.cpp_info.names["cmake_find_package"] = "Boost"
+            self.cpp_info.names["cmake_find_package_multi"] = "Boost"
+
+        else:
+            gen_libs = [] if self.options.header_only else tools.collect_libs(self)
+
+            if self._is_versioned_layout:
+                version_tokens = str(self.version).split(".")
+                if len(version_tokens) >= 2:
+                    major = version_tokens[0]
+                    minor = version_tokens[1]
+                    boost_version_tag = "boost-%s_%s" % (major, minor)
+                    self.cpp_info.includedirs = [os.path.join(self.package_folder, "include", boost_version_tag)]
+
+            # List of lists, so if more than one matches the lib like serialization and wserialization
+            # both will be added to the list
+            ordered_libs = [[] for _ in range(len(lib_list))]
+
+            # The order is important, reorder following the lib_list order
+            missing_order_info = []
+            for real_lib_name in gen_libs:
+                for pos, alib in enumerate(lib_list):
+                    if os.path.splitext(real_lib_name)[0].split("-")[0].endswith(alib):
+                        ordered_libs[pos].append(real_lib_name)
+                        break
                 else:
-                    if self.options.layout == "system":
-                        self.cpp_info.defines.append("BOOST_AUTO_LINK_SYSTEM")
-                    elif self.options.layout == "tagged":
-                        self.cpp_info.defines.append("BOOST_AUTO_LINK_TAGGED")
-                    self.output.info("Enabled magic autolinking (smart and magic decisions)")
+                    # self.output.info("Missing in order: %s" % real_lib_name)
+                    if "_exec_monitor" not in real_lib_name:  # https://github.com/bincrafters/community/issues/94
+                        missing_order_info.append(real_lib_name)  # Assume they do not depend on other
 
-                # https://github.com/conan-community/conan-boost/issues/127#issuecomment-404750974
-                self.cpp_info.system_libs.append("bcrypt")
-            elif self.settings.os == "Linux":
-                # https://github.com/conan-community/community/issues/135
-                self.cpp_info.system_libs.append("rt")
-                if self.options.multithreading:
-                    self.cpp_info.system_libs.append("pthread")
-            elif self.settings.os == "Emscripten":
-                if self.options.multithreading:
-                    arch = self.settings.get_safe('arch')
-                    # https://emscripten.org/docs/porting/pthreads.html
-                    # The documentation mentions that we should be using the "-s USE_PTHREADS=1"
-                    # but it was causing problems with the target based configurations in conan
-                    # So instead we are using the raw compiler flags (that are being activated
-                    # from the aformentioned flag)
-                    if arch.startswith("x86") or arch.startswith("wasm"):
-                        self.cpp_info.cxxflags.append("-pthread")
-                        self.cpp_info.sharedlinkflags.extend(["-pthread","--shared-memory"])
-                        self.cpp_info.exelinkflags.extend(["-pthread","--shared-memory"])
+            # Flat the list and append the missing order
+            self.cpp_info.libs = [item for sublist in ordered_libs
+                                          for item in sublist if sublist] + missing_order_info
 
-        self.env_info.BOOST_ROOT = self.package_folder
-        self.cpp_info.bindirs.append("lib")
-        self.cpp_info.names["cmake_find_package"] = "Boost"
-        self.cpp_info.names["cmake_find_package_multi"] = "Boost"
+            if self.options.without_test:  # remove boost_unit_test_framework
+                self.cpp_info.libs = [lib for lib in self.cpp_info.libs if "unit_test" not in lib]
+
+            self.output.info("LIBRARIES: %s" % self.cpp_info.libs)
+            self.output.info("Package folder: %s" % self.package_folder)
+
+            if not self.options.header_only and self.options.shared:
+                self.cpp_info.defines.append("BOOST_ALL_DYN_LINK")
+
+            if self.options.system_no_deprecated:
+                self.cpp_info.defines.append("BOOST_SYSTEM_NO_DEPRECATED")
+
+            if self.options.asio_no_deprecated:
+                self.cpp_info.defines.append("BOOST_ASIO_NO_DEPRECATED")
+
+            if self.options.filesystem_no_deprecated:
+                self.cpp_info.defines.append("BOOST_FILESYSTEM_NO_DEPRECATED")
+
+            if self.options.segmented_stacks:
+                self.cpp_info.defines.extend(["BOOST_USE_SEGMENTED_STACKS", "BOOST_USE_UCONTEXT"])
+
+            if self.settings.os != "Android":
+                if self._gnu_cxx11_abi:
+                    self.cpp_info.defines.append("_GLIBCXX_USE_CXX11_ABI=%s" % self._gnu_cxx11_abi)
+
+            if not self.options.header_only:
+                if self.options.error_code_header_only:
+                    self.cpp_info.defines.append("BOOST_ERROR_CODE_HEADER_ONLY")
+
+                if not self.options.without_python:
+                    if not self.options.shared:
+                        self.cpp_info.defines.append("BOOST_PYTHON_STATIC_LIB")
+
+                if self._is_msvc or self._is_clang_cl:
+                    if not self.options.magic_autolink:
+                        # DISABLES AUTO LINKING! NO SMART AND MAGIC DECISIONS THANKS!
+                        self.cpp_info.defines.append("BOOST_ALL_NO_LIB")
+                        self.output.info("Disabled magic autolinking (smart and magic decisions)")
+                    else:
+                        if self.options.layout == "system":
+                            self.cpp_info.defines.append("BOOST_AUTO_LINK_SYSTEM")
+                        elif self.options.layout == "tagged":
+                            self.cpp_info.defines.append("BOOST_AUTO_LINK_TAGGED")
+                        self.output.info("Enabled magic autolinking (smart and magic decisions)")
+
+                    # https://github.com/conan-community/conan-boost/issues/127#issuecomment-404750974
+                    self.cpp_info.system_libs.append("bcrypt")
+                elif self.settings.os == "Linux":
+                    # https://github.com/conan-community/community/issues/135
+                    self.cpp_info.system_libs.append("rt")
+                    if self.options.multithreading:
+                        self.cpp_info.system_libs.append("pthread")
+                elif self.settings.os == "Emscripten":
+                    if self.options.multithreading:
+                        arch = self.settings.get_safe('arch')
+                        # https://emscripten.org/docs/porting/pthreads.html
+                        # The documentation mentions that we should be using the "-s USE_PTHREADS=1"
+                        # but it was causing problems with the target based configurations in conan
+                        # So instead we are using the raw compiler flags (that are being activated
+                        # from the aformentioned flag)
+                        if arch.startswith("x86") or arch.startswith("wasm"):
+                            self.cpp_info.cxxflags.append("-pthread")
+                            self.cpp_info.sharedlinkflags.extend(["-pthread","--shared-memory"])
+                            self.cpp_info.exelinkflags.extend(["-pthread","--shared-memory"])
+
+            self.env_info.BOOST_ROOT = self.package_folder
+            self.cpp_info.bindirs.append("lib")
+            self.cpp_info.names["cmake_find_package"] = "Boost"
+            self.cpp_info.names["cmake_find_package_multi"] = "Boost"

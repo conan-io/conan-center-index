@@ -5,7 +5,7 @@ import sys
 
 class DefaultNameConan(ConanFile):
     settings = "os", "compiler", "arch", "build_type"
-    generators = "cmake"
+    generators = "cmake", "cmake_find_package"
 
     def build(self):
         with tools.vcvars(self.settings) if (self.settings.os == "Windows" and self.settings.compiler == "clang") else tools.no_op():
