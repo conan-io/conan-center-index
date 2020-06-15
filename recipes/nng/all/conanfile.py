@@ -12,6 +12,7 @@ class NngConan(ConanFile):
     homepage = "https://github.com/nanomsg/nng"
     license = "MIT"
     topics = ("nanomsg", "communication", "messaging", "protocols")
+    generators = "cmake"
 
     settings = "os", "arch", "compiler", "build_type"
     options = {
