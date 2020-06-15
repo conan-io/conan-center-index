@@ -12,10 +12,10 @@ class QuickfixConan(ConanFile):
     topics = ("conan", "QuickFIX", "FIX", "Financial Information Exchange", "libraries", "cpp")
     settings = "os", "compiler", "build_type", "arch"
     options = {"fPIC": [True, False],
-               "ssl":  [True, False],
+               "with_ssl":  [True, False],
                "shared_ptr": ["std", "tr1"],
                "unique_ptr": ["unique", "auto"]}
-    default_options = {"fPIC": True, "ssl": False, "shared_ptr": "std", "unique_ptr": "unique"}
+    default_options = {"fPIC": True, "with_ssl": False, "shared_ptr": "std", "unique_ptr": "unique"}
     generators = "cmake"
     exports_sources = "patches/**"
     _cmake = None
@@ -31,7 +31,7 @@ class QuickfixConan(ConanFile):
     def _configure_cmake(self):
         if not self._cmake:
             self._cmake = CMake(self)
-            self._cmake.definitions["HAVE_SSL"] = self.options.ssl
+            self._cmake.definitions["HAVE_SSL"] = self.options.with_ssl
             self._cmake.definitions["SHARED_PTR"] = str(self.options.shared_ptr).upper()
             self._cmake.definitions["UNIQUE_PTR"] = str(self.options.unique_ptr).upper()
             self._cmake.configure(source_folder=self._source_subfolder, build_folder=self._build_subfolder)
@@ -42,7 +42,7 @@ class QuickfixConan(ConanFile):
         os.rename(self.name + "-" + self.version, self._source_subfolder)
 
     def requirements(self):
-        if self.options.ssl:
+        if self.options.with_ssl:
             self.requires("openssl/1.1.1g")
 
     def config_options(self):
@@ -81,7 +81,7 @@ class QuickfixConan(ConanFile):
     def package_info(self):
         self.cpp_info.libs = tools.collect_libs(self)
 
-        if self.options.ssl:
+        if self.options.with_ssl:
             self.cpp_info.defines.append("HAVE_SSL=1")
 
         if self.options.shared_ptr == "std":
