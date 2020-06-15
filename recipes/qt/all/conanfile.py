@@ -603,7 +603,7 @@ class QtConan(ConanFile):
         os.mkdir('build_folder')
         with tools.chdir('build_folder'):
             with tools.vcvars(self.settings) if self.settings.compiler == "Visual Studio" else tools.no_op():
-                build_env = {"MAKEFLAGS": "j%d" % tools.cpu_count(), "PKG_CONFIG_PATH": [os.getcwd()]}
+                build_env = {"MAKEFLAGS": "j%d" % tools.cpu_count(), "PKG_CONFIG_PATH": [self.build_folder]}
                 if self.options.qtwebengine:
                     if self.settings.compiler in ['gcc', 'clang']:
                         i_path = []
