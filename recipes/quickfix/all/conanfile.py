@@ -1,5 +1,6 @@
 from conans import ConanFile, CMake, tools
-from conans.model.version import Version
+from conans.tools import Version
+from conans.errors import ConanInvalidConfiguration
 import os
 
 
@@ -38,7 +39,7 @@ class QuickfixConan(ConanFile):
     def _configure_cmake(self):
         if not self._cmake:
             self._cmake = CMake(self)
-            self._cmake.definitions["BUILD_SHARED_LIBS"] = self.settings.os != "Windows" and self.options.shared
+            self._cmake.definitions["BUILD_SHARED_LIBS"] = self.options.shared
             self._cmake.definitions["HAVE_SSL"] = self.options.with_ssl
             self._cmake.definitions["HAVE_POSTGRESQL"] = self.options.with_postgres
             self._cmake.definitions["SHARED_PTR"] = str(self.options.shared_ptr).upper()
@@ -60,7 +61,6 @@ class QuickfixConan(ConanFile):
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
-            del self.options.shared
 
         if hasattr(self.settings.compiler, "cppstd"):
             cppstd = str(self.settings.compiler.cppstd)
@@ -75,6 +75,10 @@ class QuickfixConan(ConanFile):
 
         if self.settings.compiler == "gcc" and str(self.settings.compiler.cppstd).find("98") != -1:
             self.options.shared_ptr = "tr1"
+
+    def configure(self):
+        if self.settings.os == "Windows" and self.options.shared:
+            raise ConanInvalidConfiguration("QuickFIX cannot be built as shared lib on Windows")
 
     def build(self):
         for patch in self.conan_data["patches"][self.version]:
