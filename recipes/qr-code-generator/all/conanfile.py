@@ -24,7 +24,7 @@ class QrCodeGeneratorConan(ConanFile):
         return "source_subfolder"
 
     def configure(self):
-        if self.settings.compiler == "Visual Studio":
+        if self.settings.os == "Windows":
             del self.options.fPIC
 
     def source(self):
