@@ -35,11 +35,6 @@ class CMakeConan(ConanFile):
     def configure(self):
         if self.settings.os == "Macos" and self.settings.arch == "x86":
             raise ConanInvalidConfiguration("CMake does not support x86 for macOS")
-        if self.settings.build_type != "Release":
-            raise ConanInvalidConfiguration("only Release build_type is supported")
-        if self.settings.compiler == "Visual Studio":
-            if self.settings.compiler.runtime != "MT":
-                raise ConanInvalidConfiguration("Only MT MSVC runtime is supported")
 
     def requirements(self):
         if self._with_openssl:
@@ -81,9 +76,6 @@ class CMakeConan(ConanFile):
 
     def package_id(self):
         self.info.options.with_openssl = self._with_openssl
-
-        del self.info.settings.compiler
-        del self.info.settings.build_type
 
     def package_info(self):
         minor = self._minor_version()
