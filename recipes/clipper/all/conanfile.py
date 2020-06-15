@@ -1,8 +1,5 @@
 import os
-from os import path
 from conans import ConanFile, CMake, tools
-from conans.tools import Version
-from conans.errors import ConanInvalidConfiguration
 
 
 class ClipperConan(ConanFile):
@@ -23,6 +20,7 @@ class ClipperConan(ConanFile):
         }
     default_options = {"shared": False, "fPIC": True}
 
+    _cmake = None
     _source_subfolder = "source_subfolder"
     _build_subfolder = "build_subfolder"
 
@@ -37,9 +35,12 @@ class ClipperConan(ConanFile):
             del self.options.fPIC
 
     def _configure_cmake(self):
-        cmake = CMake(self)
-        cmake.configure(build_folder=self._build_subfolder, source_folder=os.path.join(self._source_subfolder, "cpp"))
-        return cmake
+        if self._cmake:
+            return self._cmake
+
+        self._cmake = CMake(self)
+        self._cmake.configure(build_folder=self._build_subfolder)
+        return self._cmake
 
     def build(self):
         cmake = self._configure_cmake()
@@ -54,6 +55,10 @@ class ClipperConan(ConanFile):
         tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
 
     def package_info(self):
+        self.cpp_info.names["cmake_find_package"] = "polyclipping"
+        self.cpp_info.names["cmake_find_package_multi"] = "polyclipping"
+        self.cpp_info.names["pkg_config"] = "polyclipping"
         self.cpp_info.libs = ["polyclipping"]
+
         if self.settings.os == "Linux":
-            self.cpp_info.libs.append('pthread')
+            self.cpp_info.system_libs.append("pthread")
