@@ -1,4 +1,5 @@
 from conans import ConanFile, Meson, tools
+from conans.errors import ConanInvalidConfiguration
 import os
 import shutil
 import glob
@@ -29,6 +30,7 @@ class EpoxyConan(ConanFile):
         "x11": True
     }
 
+    _meson = None
     _source_subfolder = "source_subfolder"
     _build_subfolder = "build_subfolder"
 
@@ -36,7 +38,8 @@ class EpoxyConan(ConanFile):
         del self.settings.compiler.libcxx
         del self.settings.compiler.cppstd
         if self.settings.os == "Windows":
-            self.options.shared = True
+            if not self.options.shared:
+                raise ConanInvalidConfiguration("Static builds on Windows are not supported")
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -61,7 +64,9 @@ class EpoxyConan(ConanFile):
         os.rename(extracted_dir, self._source_subfolder)
 
     def _configure_meson(self):
-        meson = Meson(self)
+        if self._meson:
+            return self._meson
+        self._meson = Meson(self)
         defs = {}
         defs["docs"] = "false"
         defs["tests"] = "false"
@@ -71,8 +76,8 @@ class EpoxyConan(ConanFile):
             defs[opt] = "true" if self.settings.os == "Linux" and getattr(self.options, opt) else "false"
         args=[]
         args.append("--wrap-mode=nofallback")
-        meson.configure(defs=defs, build_folder=self._build_subfolder, source_folder=self._source_subfolder, pkg_config_paths=[self.install_folder], args=args)
-        return meson
+        self._meson.configure(defs=defs, build_folder=self._build_subfolder, source_folder=self._source_subfolder, pkg_config_paths=[self.install_folder], args=args)
+        return self._meson
 
     def build(self):
         for package in self.deps_cpp_info.deps:
@@ -101,4 +106,3 @@ class EpoxyConan(ConanFile):
         if self.settings.os == "Linux":
             self.cpp_info.system_libs = ["dl"]
         self.cpp_info.names["pkg_config"] = "epoxy"
-
