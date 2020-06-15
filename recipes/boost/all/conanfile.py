@@ -53,7 +53,7 @@ class BoostConan(ConanFile):
         "lzma": [True, False],
         "zstd": [True, False],
         "segmented_stacks": [True, False],
-        "debug_level": [i for i in range(1, 14)],
+        "debug_level": [i for i in range(0, 14)],
         "pch": [True, False],
         "extra_b2_flags": "ANY",  # custom b2 flags
         "i18n_backend": ["iconv", "icu", None],
@@ -80,7 +80,7 @@ class BoostConan(ConanFile):
         'lzma': False,
         'zstd': False,
         'segmented_stacks': False,
-        "debug_level": 2,
+        "debug_level": 0,
         'pch': True,
         'extra_b2_flags': 'None',
         "i18n_backend": 'iconv',
@@ -95,12 +95,12 @@ class BoostConan(ConanFile):
     exports_sources = ['patches/*']
 
     @property
-    def _bcp_dir(self):
-        return "custom-boost"
+    def _source_subfolder(self):
+        return "source_subfolder"
 
     @property
-    def _folder_name(self):
-        return "boost_%s" % self.version.replace(".", "_")
+    def _bcp_dir(self):
+        return "custom-boost"
 
     @property
     def _is_msvc(self):
@@ -171,9 +171,9 @@ class BoostConan(ConanFile):
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
-        if self.version in self.conan_data["patches"]:
-            for patch in self.conan_data["patches"][self.version]:
-                tools.patch(**patch)
+        os.rename("boost_%s" % self.version.replace(".", "_"), self._source_subfolder)
+        for patch in self.conan_data["patches"].get(self.version, []):
+            tools.patch(**patch)
 
     ##################### BUILDING METHODS ###########################
 
@@ -343,7 +343,7 @@ class BoostConan(ConanFile):
         raise ConanInvalidConfiguration("couldn't locate python libraries - make sure you have installed python development files")
 
     def _clean(self):
-        src = os.path.join(self.source_folder, self._folder_name)
+        src = os.path.join(self.source_folder, self._source_subfolder)
         clean_dirs = [os.path.join(self.build_folder, "bin.v2"),
                       os.path.join(self.build_folder, "architecture"),
                       os.path.join(self.source_folder, self._bcp_dir),
@@ -364,7 +364,7 @@ class BoostConan(ConanFile):
 
     @property
     def _bcp_exe(self):
-        folder = os.path.join(self.source_folder, self._folder_name, "dist", "bin")
+        folder = os.path.join(self.source_folder, self._source_subfolder, "dist", "bin")
         return os.path.join(folder, "bcp.exe" if tools.os_info.is_windows else "bcp")
 
     @property
@@ -373,17 +373,19 @@ class BoostConan(ConanFile):
 
     @property
     def _boost_dir(self):
-        return self._bcp_dir if self._use_bcp else self._folder_name
+        return self._bcp_dir if self._use_bcp else self._source_subfolder
 
     @property
     def _boost_build_dir(self):
-        return os.path.join(self.source_folder, self._folder_name, "tools", "build")
+        return os.path.join(self.source_folder, self._source_subfolder, "tools", "build")
 
     def _build_bcp(self):
-        folder = os.path.join(self.source_folder, self._folder_name, 'tools', 'bcp')
+        folder = os.path.join(self.source_folder, self._source_subfolder, 'tools', 'bcp')
         with tools.vcvars(self.settings) if self._is_msvc else tools.no_op():
             with tools.chdir(folder):
-                command = "%s -j%s --abbreviate-paths -d2 toolset=%s" % (self._b2_exe, tools.cpu_count(), self._toolset)
+                command = "%s -j%s --abbreviate-paths toolset=%s" % (self._b2_exe, tools.cpu_count(), self._toolset)
+                if self.options.debug_level:
+                    command += " -d%d" % self.options.debug_level
                 self.output.warn(command)
                 self.run(command)
 
@@ -393,13 +395,13 @@ class BoostConan(ConanFile):
                 os.mkdir(self._bcp_dir)
                 namespace = "--namespace=%s" % self.options.namespace
                 alias = "--namespace-alias" if self.options.namespace_alias else ""
-                boostdir = "--boost=%s" % self._folder_name
+                boostdir = "--boost=%s" % self._source_subfolder
                 libraries = {"build", "boost-build.jam", "boostcpp.jam", "boost_install", "headers"}
-                for d in os.listdir(os.path.join(self._folder_name, "boost")):
-                    if os.path.isdir(os.path.join(self._folder_name, "boost", d)):
+                for d in os.listdir(os.path.join(self._source_subfolder, "boost")):
+                    if os.path.isdir(os.path.join(self._source_subfolder, "boost", d)):
                         libraries.add(d)
-                for d in os.listdir(os.path.join(self._folder_name, "libs")):
-                    if os.path.isdir(os.path.join(self._folder_name, "libs", d)):
+                for d in os.listdir(os.path.join(self._source_subfolder, "libs")):
+                    if os.path.isdir(os.path.join(self._source_subfolder, "libs", d)):
                         libraries.add(d)
                 libraries = ' '.join(libraries)
                 command = "{bcp} {namespace} {alias} " \
@@ -647,8 +649,9 @@ class BoostConan(ConanFile):
         flags.extend(["install",
                       "--prefix=%s" % self.package_folder,
                       "-j%s" % tools.cpu_count(),
-                      "--abbreviate-paths",
-                      "-d%s" % str(self.options.debug_level)])
+                      "--abbreviate-paths"])
+        if self.options.debug_level:
+            flags.append("-d%d" % self.options.debug_level)
         return flags
 
     @property
@@ -819,7 +822,7 @@ class BoostConan(ConanFile):
         # This stage/lib is in source_folder... Face palm, looks like it builds in build but then
         # copy to source with the good lib name
         self.copy("LICENSE_1_0.txt", dst="licenses", src=os.path.join(self.source_folder,
-                                                                      self._folder_name))
+                                                                      self._source_subfolder))
         tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
         if self.options.header_only:
             self.copy(pattern="*", dst="include/boost", src="%s/boost" % self._boost_dir)

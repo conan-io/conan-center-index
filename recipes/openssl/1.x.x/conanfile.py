@@ -90,12 +90,14 @@ class OpenSSLConan(ConanFile):
                "no_async": [True, False],
                "no_dso": [True, False],
                "capieng_dialog": [True, False],
+               "enable_capieng": [True, False],
                "openssldir": "ANY"}
     default_options = {key: False for key in options.keys()}
     default_options["fPIC"] = True
     default_options["openssldir"] = None
     _env_build = None
     _source_subfolder = "source_subfolder"
+    exports_sources = ['patches/*']
 
     def build_requirements(self):
         if tools.os_info.is_windows:
@@ -151,6 +153,7 @@ class OpenSSLConan(ConanFile):
     def config_options(self):
         if self.settings.os != "Windows":
             del self.options.capieng_dialog
+            del self.options.enable_capieng
         else:
             del self.options.fPIC
 
@@ -419,11 +422,15 @@ class OpenSSLConan(ConanFile):
         if self._full_version >= "1.1.0":
             args.append("--debug" if self.settings.build_type == "Debug" else "--release")
 
-        if str(self.settings.os) == "Android":
+        if self.settings.os == "tvOS":
+            args.append(" -DNO_FORK") # fork is not available on tvOS
+        if self.settings.os == "Android":
             args.append(" -D__ANDROID_API__=%s" % str(self.settings.os.api_level))  # see NOTES.ANDROID
-        if str(self.settings.os) == "Emscripten":
+        if self.settings.os == "Emscripten":
             args.append("-D__STDC_NO_ATOMICS__=1")
         if self.settings.os == "Windows":
+            if self.options.enable_capieng:
+                args.append("enable-capieng")
             if self.options.capieng_dialog:
                 args.append("-DOPENSSL_CAPIENG_DIALOG=1")
         else:
@@ -447,7 +454,7 @@ class OpenSSLConan(ConanFile):
 
         for option_name in self.options.values.fields:
             activated = getattr(self.options, option_name)
-            if activated and option_name not in ["fPIC", "openssldir", "capieng_dialog"]:
+            if activated and option_name not in ["fPIC", "openssldir", "capieng_dialog", "enable_capieng"]:
                 self.output.info("activated option: %s" % option_name)
                 args.append(option_name.replace("_", "-"))
         return args
@@ -612,6 +619,9 @@ class OpenSSLConan(ConanFile):
                 env_vars["CROSS_TOP"] = os.path.dirname(os.path.dirname(xcrun.sdk_path))
             with tools.environment_append(env_vars):
                 if self._full_version >= "1.1.0":
+                    if self.settings.os == "tvOS":
+                        tools.patch(patch_file=os.path.join("patches", "1.1.1-tvos.patch"),
+                                    base_path=self._source_subfolder)
                     self._create_targets()
                 else:
                     self._patch_configure()

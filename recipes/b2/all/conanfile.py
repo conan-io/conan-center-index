@@ -33,7 +33,7 @@ class B2Conan(ConanFile):
         command = os.path.join(
             engine_dir, "b2.exe" if use_windows_commands else "b2")
         full_command = \
-            "{0} --prefix=../output --abbreviate-paths install".format(
+            "{0} --ignore-site-config --prefix=../output --abbreviate-paths install".format(
                 command)
         self.run(full_command)
 

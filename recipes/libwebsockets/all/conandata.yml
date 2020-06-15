@@ -1,0 +1,4 @@
+sources:
+  "4.0.15":
+    sha256: adce8152c3e802b8fe71b26d7252944944c49954ba6b5ba9fbb7fa5c4aad93dc
+    url: https://github.com/warmcat/libwebsockets/archive/v4.0.15.tar.gz

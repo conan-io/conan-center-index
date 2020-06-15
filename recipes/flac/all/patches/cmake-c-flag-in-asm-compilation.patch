@@ -1,0 +1,15 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index c2d2dfc7..18d5b9cf 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -76,7 +76,9 @@ add_compile_options(
+     $<$<AND:$<COMPILE_LANGUAGE:C>,$<BOOL:${HAVE_DECL_AFTER_STMT_FLAG}>>:-Wdeclaration-after-statement>)
+ 
+ if(CMAKE_SYSTEM_PROCESSOR STREQUAL "i686" AND HAVE_STACKREALIGN_FLAG)
+-    add_compile_options(-mstackrealign)
++    add_compile_options(
++    $<$<OR:$<COMPILE_LANGUAGE:C>,$<COMPILE_LANGUAGE:CXX>>:-mstackrealign>
++    )
+ endif()
+ 
+ include_directories("include")
