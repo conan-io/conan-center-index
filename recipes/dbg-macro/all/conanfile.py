@@ -1,7 +1,6 @@
 import os
-from conans import CMake, ConanFile, tools
+from conans import ConanFile, tools
 from conans.errors import ConanInvalidConfiguration
-from conans.tools import Version
 
 
 class DbgMacroConan(ConanFile):
