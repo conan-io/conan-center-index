@@ -79,6 +79,11 @@ class QuickfixConan(ConanFile):
             self.options.shared_ptr = "tr1"
             self.options.unique_ptr = "auto"
 
+        if self.settings.compiler == "clang" and (
+                (version <= "5.0" and self.settings.compiler.cppstd == "None")):
+            self.options.shared_ptr = "tr1"
+            self.options.unique_ptr = "auto"
+
     def configure(self):
         if self.settings.os == "Windows" and self.options.shared:
             raise ConanInvalidConfiguration("QuickFIX cannot be built as shared lib on Windows")
