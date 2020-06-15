@@ -52,7 +52,7 @@ class NameofConan(ConanFile):
 
     def package(self):
         self.copy("include/nameof.hpp", dst=".", src=self._source_subfolder)
-        self.copy("LICENSE", dst="licenses")
+        self.copy("LICENSE", dst="licenses", src=self._source_subfolder)
 
     def package_id(self):
         self.info.header_only()
