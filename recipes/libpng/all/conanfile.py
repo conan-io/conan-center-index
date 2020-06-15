@@ -85,6 +85,7 @@ class LibpngConan(ConanFile):
     def package_info(self):
         self.cpp_info.names["cmake_find_package"] = "PNG"
         self.cpp_info.names["cmake_find_package_multi"] = "PNG"
+        self.cpp_info.names["pkg_config"] = "libpng"
 
         if self.settings.os == "Windows":
             if self.settings.compiler == "gcc":
