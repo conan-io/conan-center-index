@@ -6,17 +6,21 @@
 #include "quickfix/DOMDocument.h"
 #include "quickfix/DataDictionaryProvider.h"
 
+
+class Attributes : public FIX::DOMAttributes
+{ };
+
 class Node : public FIX::DOMNode
 {
 public:
   virtual ~Node(){ };
 private:
   virtual SmartPtr<DOMNode> getFirstChildNode()
-  { SmartPtr<DOMNode> ptr; return ptr; }
+  { Node * ptr; return SmartPtr<DOMNode>(ptr); }
   virtual SmartPtr<DOMNode> getNextSiblingNode()
-  { SmartPtr<DOMNode> ptr; return ptr; }
+  { Node * ptr; return SmartPtr<DOMNode>(ptr); }
   virtual SmartPtr<FIX::DOMAttributes> getAttributes()
-  { SmartPtr<FIX::DOMAttributes> ptr; return ptr; }
+  { Attributes * ptr; return SmartPtr<FIX::DOMAttributes>(ptr); }
   virtual std::string getName()
   { return ""; }
   virtual std::string getText()
