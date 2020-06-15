@@ -13,9 +13,14 @@ class QuickfixConan(ConanFile):
     settings = "os", "compiler", "build_type", "arch"
     options = {"fPIC": [True, False],
                "with_ssl":  [True, False],
+               "with_postgres": [True, False],
                "shared_ptr": ["std", "tr1"],
                "unique_ptr": ["unique", "auto"]}
-    default_options = {"fPIC": True, "with_ssl": False, "shared_ptr": "std", "unique_ptr": "unique"}
+    default_options = {"fPIC": True,
+                       "with_ssl": False,
+                       "with_postgres": False,
+                       "shared_ptr": "std",
+                       "unique_ptr": "unique"}
     generators = "cmake"
     exports_sources = "patches/**"
     _cmake = None
@@ -32,6 +37,7 @@ class QuickfixConan(ConanFile):
         if not self._cmake:
             self._cmake = CMake(self)
             self._cmake.definitions["HAVE_SSL"] = self.options.with_ssl
+            self._cmake.definitions["HAVE_POSTGRESQL"] = self.options.with_postgres
             self._cmake.definitions["SHARED_PTR"] = str(self.options.shared_ptr).upper()
             self._cmake.definitions["UNIQUE_PTR"] = str(self.options.unique_ptr).upper()
             self._cmake.configure(source_folder=self._source_subfolder, build_folder=self._build_subfolder)
@@ -44,6 +50,9 @@ class QuickfixConan(ConanFile):
     def requirements(self):
         if self.options.with_ssl:
             self.requires("openssl/1.1.1g")
+
+        if self.options.with_postgres:
+            self.requires("libpq/11.5")
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -83,6 +92,9 @@ class QuickfixConan(ConanFile):
 
         if self.options.with_ssl:
             self.cpp_info.defines.append("HAVE_SSL=1")
+
+        if self.options.with_postgres:
+            self.cpp_info.defines.append("HAVE_POSTGRESQL=1")
 
         if self.options.shared_ptr == "std":
             self.cpp_info.defines.append("HAVE_STD_SHARED_PTR=1")
