@@ -102,7 +102,7 @@ class LibrdkafkaConan(ConanFile):
         cmake.build()
 
     def package(self):
-        self.copy(pattern="LICENSES.txt", src=self.sources_folder, dst="licenses")
+        self.copy(pattern="LICENSES.txt", src=self._source_subfolder, dst="licenses")
         cmake = self._configure_cmake()
         cmake.install()
 
@@ -114,8 +114,7 @@ class LibrdkafkaConan(ConanFile):
         self.cpp_info.libs = ["rdkafka", "rdkafka++"]
         if self.settings.compiler == "Visual Studio":
             self.cpp_info.system_libs.extend(["crypt32", "ws2_32"])
-        else:
-            if self.settings.os == "Linux":
-                self.cpp_info.system_libs.extend(["pthread", "m"])
+        elif self.settings.os == "Linux":
+            self.cpp_info.system_libs.extend(["pthread", "m"])
         if not self.options.shared:
             self.cpp_info.defines.append("LIBRDKAFKA_STATICLIB")
