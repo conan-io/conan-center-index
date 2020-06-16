@@ -18,7 +18,7 @@ class JsoncppConan(ConanFile):
     _source_subfolder = "source_subfolder"
 
     def configure(self):
-        if self.settings.os == "Windows" or self.options.shared:
+        if self.settings.os == "Windows":
             del self.options.fPIC
 
     def source(self):
@@ -55,6 +55,8 @@ class JsoncppConan(ConanFile):
         cmake.definitions["JSONCPP_WITH_CMAKE_PACKAGE"] = False
         cmake.definitions["JSONCPP_WITH_STRICT_ISO"] = False
         cmake.definitions["JSONCPP_WITH_PKGCONFIG_SUPPORT"] = False
+        cmake.definitions["BUILD_SHARED_LIBS"] = "ON" if self.options.shared else "OFF"
+        cmake.definitions["BUILD_STATIC_LIBS"] = "OFF" if self.options.shared else "ON"
         cmake.configure()
         return cmake
 
