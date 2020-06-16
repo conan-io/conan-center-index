@@ -56,7 +56,7 @@ class PackioConan(ConanFile):
         self.info.header_only()
 
     def package_info(self):
-        if self.options.standalone_asio:
+        if self.options.get_safe("standalone_asio"):
             self.cpp_info.defines.append("PACKIO_STANDALONE_ASIO")
 
     @staticmethod
