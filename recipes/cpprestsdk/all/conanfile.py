@@ -17,13 +17,19 @@ class CppRestSDKConan(ConanFile):
         "shared": [True, False],
         "fPIC": [True, False],
         "with_websockets": [True, False],
-        "with_compression": [True, False]
+        "with_compression": [True, False],
+        "pplx_impl": ["win", "winpplx"],
+        "http_client_impl": ["winhttp", "asio"],
+        "http_listener_impl": ["httpsys", "asio"]
     }
     default_options = {
         "shared": False,
         "fPIC": True,
         "with_websockets": True,
-        "with_compression": True
+        "with_compression": True,
+        "pplx_impl": "win",
+        "http_client_impl": "winhttp",
+        "http_listener_impl": "httpsys"
     }
     short_paths = True
 
@@ -40,6 +46,10 @@ class CppRestSDKConan(ConanFile):
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
+        else:
+            del self.options.pplx_impl
+            del self.options.http_client_impl
+            del self.options.http_listener_impl
 
     def configure(self):
         if self.options.shared:
@@ -68,6 +78,13 @@ class CppRestSDKConan(ConanFile):
         self._cmake.definitions["WERROR"] = False
         self._cmake.definitions["CPPREST_EXCLUDE_WEBSOCKETS"] = not self.options.with_websockets
         self._cmake.definitions["CPPREST_EXCLUDE_COMPRESSION"] = not self.options.with_compression
+        if self.options.get_safe("pplx_impl"):
+            self._cmake.definitions["CPPREST_PPLX_IMPL"] = self.options.pplx_impl
+        if self.options.get_safe("http_client_impl"):
+            self._cmake.definitions["CPPREST_HTTP_CLIENT_IMPL"] = self.options.http_client_impl
+        if self.options.get_safe("http_listener_impl"):
+            self._cmake.definitions["CPPREST_HTTP_LISTENER_IMPL"] = self.options.http_listener_impl
+
         self._cmake.configure(build_folder=self._build_subfolder)
         return self._cmake
 
@@ -111,7 +128,17 @@ class CppRestSDKConan(ConanFile):
         if self.settings.os == "Linux":
             self.cpp_info.system_libs.append("pthread")
         elif self.settings.os == "Windows":
-            self.cpp_info.system_libs.extend(["winhttp", "httpapi", "bcrypt"])
+            if self.options.get_safe("http_client_impl") == "winhttp":
+                self.cpp_info.system_libs.append("winhttp")
+            if self.options.get_safe("http_listener_impl") == "httpsys":
+                self.cpp_info.system_libs.append("httpapi")
+            self.cpp_info.system_libs.append("bcrypt")
+            if self.options.get_safe("pplx_impl") == "winpplx":
+                self.cpp_info.defines.append("CPPREST_FORCE_PPLX=1")
+            if self.options.get_safe("http_client_impl") == "asio":
+                self.cpp_info.defines.append("CPPREST_FORCE_HTTP_CLIENT_ASIO")
+            if self.options.get_safe("http_listener_impl") == "asio":
+                self.cpp_info.defines.append("CPPREST_FORCE_HTTP_LISTENER_ASIO")
         elif self.settings.os == "Macos":
             self.cpp_info.frameworks.extend(["CoreFoundation", "Security"])
         if not self.options.shared:
