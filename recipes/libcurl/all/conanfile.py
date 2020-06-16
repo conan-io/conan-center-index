@@ -113,7 +113,8 @@ class LibcurlConan(ConanFile):
 
     def build_requirements(self):
         if self._is_mingw and "CONAN_BASH_PATH" not in os.environ and \
-           tools.os_info.detect_windows_subsystem() != "msys2":
+           tools.os_info.detect_windows_subsystem() != "msys2" and \
+           self.settings.os_build == "Windows":
             self.build_requires("msys2/20190524")
         elif self._is_win_x_android:
             self.build_requires("ninja/1.9.0")
