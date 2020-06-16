@@ -47,9 +47,6 @@ class LibrdkafkaConan(ConanFile):
     def configure(self):
         if self.options.shared:
             del self.options.fPIC
-        if self.options.ssl:
-            self.output.warn(f"Forcing openssl:shared={self.options.shared}")
-            self.options["openssl"].shared = self.options.shared
 
     def requirements(self):
         if self.options.zlib:
