@@ -47,6 +47,8 @@ class NameofConan(ConanFile):
         os.rename(extracted_dir, self._source_subfolder)
 
     def configure(self):
+        if self.settings.compiler.get_safe("cppstd"):
+            tools.check_min_cppstd(self, "17")
         if not self._supported_compiler:
             raise ConanInvalidConfiguration("nameof: Unsupported compiler (https://github.com/Neargye/nameof#compiler-compatibility).")
 
