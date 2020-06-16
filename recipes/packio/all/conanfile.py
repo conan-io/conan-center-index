@@ -32,7 +32,7 @@ class PackioConan(ConanFile):
     def requirements(self):
         self.requires("msgpack/3.2.1")
 
-        if self.options.standalone_asio:
+        if self.options.get_safe("standalone_asio"):
             self.requires("asio/1.16.1")
         else:
             self.requires("boost/1.73.0")
