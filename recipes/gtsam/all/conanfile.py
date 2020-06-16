@@ -69,7 +69,6 @@ class gtsamConan(ConanFile):
     def _configure_cmake(self):
         if not self._cmake:
             self._cmake = CMake(self)
-            self._cmake.verbose = True
             self._cmake.definitions["BUILD_SHARED_LIBS"] = self.options.shared
             self._cmake.definitions["GTSAM_USE_QUATERNIONS"] = self.options.use_quaternions
             self._cmake.definitions["GTSAM_POSE3_EXPMAP"] = self.options.pose3_expmap
