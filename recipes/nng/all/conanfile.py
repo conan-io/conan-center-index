@@ -80,4 +80,4 @@ class NngConan(ConanFile):
             self.cpp_info.system_libs.extend(['pthread'])
 
         if not self.options.shared:
-            self.cpp_info.defines.append("NN_STATIC_LIB=ON")
+            self.cpp_info.defines.append("NNG_STATIC_LIB=ON")
