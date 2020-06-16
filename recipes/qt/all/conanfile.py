@@ -645,6 +645,9 @@ Translations = bin/datadir/translations
 Documentation = bin/datadir/doc
 Examples = bin/datadir/examples""")
         self.copy("*LICENSE*", src="qt5/", dst="licenses")
+        for module in self._submodules:
+            if module != 'qtbase' and not getattr(self.options, module):
+                tools.rmdir(os.path.join(self.package_folder, "licenses", module))
         tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
         tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
         for file_to_remove in glob.glob(os.path.join(self.package_folder, "lib", "*.la*")):
