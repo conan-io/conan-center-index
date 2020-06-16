@@ -337,6 +337,7 @@ class GdalConan(ConanFile):
 
         args = []
         args.append("GDAL_HOME=\"{}\"".format(self.package_folder))
+        args.append("DATADIR=\"{}\"".format(os.path.join(self.package_folder, "res", "gdal")))
         if self.settings.arch == "x86_64":
             args.append("WIN64=1")
         args.append("DEBUG={}".format("1" if self.settings.build_type == "Debug" else "0"))
@@ -461,6 +462,7 @@ class GdalConan(ConanFile):
         self._autotools = AutoToolsBuildEnvironment(self, win_bash=tools.os_info.is_windows)
 
         args = []
+        args.append("--datarootdir={}".format(self._unix_path(os.path.join(self.package_folder, "res"))))
         # Shared/Static
         if self.options.shared:
             args.extend(["--disable-static", "--enable-shared"])
@@ -609,7 +611,7 @@ class GdalConan(ConanFile):
             with tools.chdir(self._source_subfolder):
                 with tools.vcvars(self.settings):
                     with tools.environment_append(VisualStudioBuildEnvironment(self).vars):
-                        self.run("nmake -f makefile.vc {}".format(" ".join(self._get_nmake_args())))
+                        self.run("nmake -f makefile.vc devinstall {}".format(" ".join(self._get_nmake_args())))
         else:
             autotools = self._configure_autotools()
             with tools.chdir(self._source_subfolder):
@@ -618,18 +620,12 @@ class GdalConan(ConanFile):
     def package(self):
         self.copy("LICENSE.TXT", dst="licenses", src=self._source_subfolder)
         if self.settings.compiler == "Visual Studio":
-            with tools.chdir(self._source_subfolder):
-                with tools.vcvars(self.settings):
-                    with tools.environment_append(VisualStudioBuildEnvironment(self).vars):
-                        self.run("nmake -f makefile.vc devinstall {}".format(" ".join(self._get_nmake_args())))
-            tools.rmdir(os.path.join(self.package_folder, "data"))
             for pdb_file in glob.glob(os.path.join(self.package_folder, "lib", "*.pdb")):
                 os.remove(pdb_file)
         else:
             autotools = self._configure_autotools()
             with tools.chdir(self._source_subfolder):
                 autotools.install()
-            tools.rmdir(os.path.join(self.package_folder, "share"))
             tools.rmdir(os.path.join(self.package_folder, "lib", "gdalplugins"))
             tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
             for la_file in glob.glob(os.path.join(self.package_folder, "lib", "*.la")):
@@ -648,6 +644,10 @@ class GdalConan(ConanFile):
             self.cpp_info.system_libs.extend(["psapi", "ws2_32"])
         if not self.options.shared and self._stdcpp_library:
             self.cpp_info.system_libs.append(self._stdcpp_library)
+
+        gdal_data_path = os.path.join(self.package_folder, "res", "gdal")
+        self.output.info("Appending GDAL_DATA environment variable: {}".format(gdal_data_path))
+        self.env_info.GDAL_DATA.append(gdal_data_path)
         bin_path = os.path.join(self.package_folder, "bin")
         self.output.info("Appending PATH environment variable: {}".format(bin_path))
         self.env_info.PATH.append(bin_path)

@@ -35,6 +35,10 @@ class LibzenConan(ConanFile):
         if self.settings.os == "Windows":
             del self.options.fPIC
 
+    def configure(self):
+        if self.options.shared:
+            del self.options.fPIC
+
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
         os.rename("ZenLib", self._source_subfolder)
@@ -76,6 +80,8 @@ class LibzenConan(ConanFile):
         if self.settings.os == "Linux":
             self.cpp_info.system_libs.extend(["m", "pthread"])
         if self.options.enable_unicode:
-            self.cpp_info.defines.append("UNICODE")
+            self.cpp_info.defines.extend(["UNICODE", "_UNICODE"])
+        if self.options.shared:
+            self.cpp_info.defines.append("LIBZEN_SHARED")
         self.cpp_info.names["cmake_find_package"] = "ZenLib"
         self.cpp_info.names["cmake_find_package_multi"] = "ZenLib"
