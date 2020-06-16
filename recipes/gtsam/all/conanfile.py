@@ -97,7 +97,7 @@ class gtsamConan(ConanFile):
             self._cmake.definitions["GTSAM_INSTALL_MATLAB_TOOLBOX"] = self.options.install_matlab_toolbox
             self._cmake.definitions["GTSAM_INSTALL_CYTHON_TOOLBOX"] = self.options.install_cython_toolbox
             self._cmake.definitions["GTSAM_INSTALL_CPPUNITLITE"] = self.options.install_cppunitlite
-            self._cmake.definitions["GTSAM_INSTALL_GEOGRAPHICLIB"] = self.options.install_geographiclib
+            self._cmake.definitions["GTSAM_INSTALL_GEOGRAPHICLIB"] = False #Use conan-provided geographiclib
             self._cmake.definitions["GTSAM_USE_SYSTEM_EIGEN"] = True #Set to false to use eigen sources contained in GTSAM
             self._cmake.configure(build_folder=self._build_subfolder)
         return self._cmake
@@ -142,6 +142,8 @@ class gtsamConan(ConanFile):
         if self.options.with_TBB:
             self.requires("tbb/2020.0")
             self.options["tbb"].tbbmalloc = True
+        if self.options.install_geographiclib:
+            self.requires("geographiclib/1.50.1")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
