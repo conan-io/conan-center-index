@@ -58,8 +58,3 @@ class PackioConan(ConanFile):
     def package_info(self):
         if self.options.get_safe("standalone_asio"):
             self.cpp_info.defines.append("PACKIO_STANDALONE_ASIO")
-
-    @staticmethod
-    def _as_number(version):
-        major, minor, patch = version.split('.')
-        return int(major) * 1e6 + int(minor) * 1e3 + int(patch)
