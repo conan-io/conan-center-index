@@ -45,10 +45,10 @@ class QuickfixConan(ConanFile):
 
         # gcc default standard for version 5.5 is gnu++98. In the 6 series, it
         # changed to gnu++14.
-        version = Version(str(self.settings.compiler.version))
+        version = Version(self.settings.compiler.version)
         if self.settings.compiler == "gcc" and (
-                str(self.settings.compiler.cppstd).find("98") != -1 or
-                (version <= "5.5" and self.settings.compiler.cppstd == "None")):
+                "98" in cppstd or
+                (version <= "5.5" and not cppstd)):
             return "auto"
 
         if self.settings.compiler == "clang" and (
