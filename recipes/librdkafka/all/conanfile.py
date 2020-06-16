@@ -34,8 +34,11 @@ class LibrdkafkaConan(ConanFile):
     }
     generators = "cmake"
     exports_sources = "CMakeLists.txt", "patches/**"
-    sources_folder = "sources"
     _cmake = None
+
+    @property
+    def _source_subfolder(self):
+        return "source_subfolder"
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -61,11 +64,11 @@ class LibrdkafkaConan(ConanFile):
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
         downloaded_folder_name = "{}-{}".format(self.name, self.version)
-        os.rename(downloaded_folder_name, self.sources_folder)
+        os.rename(downloaded_folder_name, self._source_subfolder)
 
     def _patch_sources(self):
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            tools.patch(base_path=self.sources_folder, **patch)
+            tools.patch(**patch)
 
     def _configure_cmake(self):
         if self._cmake is not None:
