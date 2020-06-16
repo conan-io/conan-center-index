@@ -16,17 +16,21 @@ class PyBind11Conan(ConanFile):
 
     _source_subfolder = "source_subfolder"
 
+    _cmake = None
+
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
         os.rename("{}-{}".format(self.name, self.version), self._source_subfolder)
 
     def _configure_cmake(self):
-        cmake = CMake(self)
-        cmake.definitions["PYBIND11_INSTALL"] = True
-        cmake.definitions["PYBIND11_TEST"] = False
-        cmake.definitions["PYBIND11_CMAKECONFIG_INSTALL_DIR"] = "lib/cmake/pybind11"
-        cmake.configure()
-        return cmake
+        if self._cmake:
+            return self._cmake
+        self._cmake = CMake(self)
+        self._cmake.definitions["PYBIND11_INSTALL"] = True
+        self._cmake.definitions["PYBIND11_TEST"] = False
+        self._cmake.definitions["PYBIND11_CMAKECONFIG_INSTALL_DIR"] = "lib/cmake/pybind11"
+        self._cmake.configure()
+        return self._cmake
 
     def build(self):
         cmake = self._configure_cmake()

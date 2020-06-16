@@ -14,11 +14,12 @@ class PahoMqttcConan(ConanFile):
     options = {"shared": [True, False],
                "fPIC": [True, False],
                "ssl": [True, False],
-               "asynchronous": [True, False]}
+               "samples": [True, False]}
+    # static builds didn't really work until 1.3.4
     default_options = {"shared": False,
                        "fPIC": True,
-                       "ssl": False,
-                       "asynchronous": True}
+                       "ssl": True,
+                       "samples": False}
 
     _cmake = None
 
@@ -49,9 +50,9 @@ class PahoMqttcConan(ConanFile):
         self._cmake = CMake(self)
         self._cmake.definitions["PAHO_ENABLE_TESTING"] = False
         self._cmake.definitions["PAHO_BUILD_DOCUMENTATION"] = False
-        self._cmake.definitions["PAHO_BUILD_SAMPLES"] = False
         self._cmake.definitions["PAHO_BUILD_STATIC"] = not self.options.shared
-        self._cmake.definitions["PAHO_BUILD_ASYNC"] = self.options.asynchronous
+        self._cmake.definitions["PAHO_BUILD_SHARED"] = self.options.shared
+        self._cmake.definitions["PAHO_BUILD_SAMPLES"] = self.options.samples
         self._cmake.definitions["PAHO_WITH_SSL"] = self.options.ssl
         if self.options.ssl:
             self._cmake.definitions["OPENSSL_SEARCH_PATH"] = self.deps_cpp_info["openssl"].rootpath
@@ -66,7 +67,7 @@ class PahoMqttcConan(ConanFile):
 
     def package(self):
         self.copy("edl-v10", src=self._source_subfolder, dst="licenses")
-        self.copy("epl-v10", src=self._source_subfolder, dst="licenses")
+        self.copy("epl-v20", src=self._source_subfolder, dst="licenses")
         self.copy("notice.html", src=self._source_subfolder, dst="licenses")
         cmake = self._configure_cmake()
         cmake.install()
