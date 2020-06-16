@@ -26,7 +26,7 @@ class PackioConan(ConanFile):
         return any(compiler == sc[0] and version >= sc[1] for sc in supported_compilers)
 
     def config_options(self):
-        if self.version < tools.Version("1.2.0"):
+        if tools.Version(self.version) < "1.2.0":
             del self.options.standalone_asio
 
     def requirements(self):
