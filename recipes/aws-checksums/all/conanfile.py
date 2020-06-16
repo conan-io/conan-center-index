@@ -47,7 +47,6 @@ class AwsChecksums(ConanFile):
             return self._cmake
         self._cmake = CMake(self)
         self._cmake.definitions["BUILD_TESTING"] = False
-        self._cmake.definitions["CMAKE_MODULE_PATH"] = self.build_folder.replace("\\", "/")
         self._cmake.configure()
         return self._cmake
 
