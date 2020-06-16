@@ -321,10 +321,14 @@ class LibcurlConan(ConanFile):
             if self.settings.os == "iOS":
                 iphoneos = tools.apple_sdk_name(self.settings)
                 ios_dev_target = str(self.settings.os.version).split(".")[0]
+                
+                env_cppflags = tools.get_env("CPPFLAGS", "")
+                socket_flags = " -DHAVE_SOCKET -DHAVE_FCNTL_O_NONBLOCK"
                 if self.settings.arch in ["x86", "x86_64"]:
-                    autotools_vars['CPPFLAGS'] = "-D__IPHONE_OS_VERSION_MIN_REQUIRED={}0000".format(ios_dev_target)
+                    autotools_vars['CPPFLAGS'] = "-D__IPHONE_OS_VERSION_MIN_REQUIRED={}0000 {} {}".format(
+                        ios_dev_target, socket_flags , env_cppflags)
                 elif self.settings.arch in ["armv7", "armv7s", "armv8"]:
-                    autotools_vars['CPPFLAGS'] = ""
+                    autotools_vars['CPPFLAGS'] = "{} {}".format(socket_flags, env_cppflags)
                 else:
                     raise ConanInvalidConfiguration("Unsuported iOS arch {}".format(self.settings.arch))
 
@@ -342,13 +346,14 @@ class LibcurlConan(ConanFile):
                 arch_flag = "-arch {}".format(configure_arch)
                 ios_min_version = tools.apple_deployment_target_flag(self.settings.os, self.settings.os.version)
                 extra_flag = "-Werror=partial-availability"
-                extra_def = " -DHAVE_SOCKET -DHAVE_FCNTL_O_NONBLOCK"
+                
                 # if we debug, maybe add a -gdwarf-2 , but why would we want that?
 
                 autotools_vars['CC'] = cc
                 autotools_vars['IPHONEOS_DEPLOYMENT_TARGET'] = ios_dev_target
+                env_cflags = tools.get_env("CFLAGS", "")
                 autotools_vars['CFLAGS'] = "{} {} {} {}".format(
-                    sysroot, arch_flag, ios_min_version, extra_flag
+                    sysroot, arch_flag, ios_min_version, env_cflags
                 )
 
                 if self.options.with_openssl:
@@ -357,8 +362,6 @@ class LibcurlConan(ConanFile):
                     autotools_vars['LDFLAGS'] = "{} {} -L{}/{}".format(arch_flag, sysroot, openssl_path, openssl_libdir)
                 else:
                     autotools_vars['LDFLAGS'] = "{} {}".format(arch_flag, sysroot)
-
-                autotools_vars['CPPFLAGS'] += extra_def
 
             elif self.settings.os == "Android":
                 # nothing do to at the moment, this seems to just work
