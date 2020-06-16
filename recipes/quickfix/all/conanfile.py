@@ -74,11 +74,12 @@ class QuickfixConan(ConanFile):
             return "tr1"
 
         if self.settings.compiler == "clang" and (
-                (version <= "5.0" and self.settings.compiler.libcxx == "libstdc++" and
-                 self.settings.compiler.cppstd == "None")):
+           (version <= "5.0" and \
+            self.settings.compiler.libcxx == "libstdc++" and \
+            not self.settings.compiler.cppstd)):
             return "tr1"
 
-        return self.default_options["shared_ptr"]
+        return self.options.shared_ptr
 
     def _configure_cmake(self):
         if not self._cmake:
