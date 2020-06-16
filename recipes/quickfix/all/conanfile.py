@@ -61,8 +61,8 @@ class QuickfixConan(ConanFile):
     @property
     def _shared_ptr(self):
         # libc++ doesn't know of tr1.
-        if "clang" in str(self.settings.compiler) and \
-           self.settings.compiler.libcxx == "libc++":
+        libcxx = self.settings.get_safe("compiler.libcxx", "")
+        if libcxx == "libc++":
             return "std"
 
         # gcc default standard for version 5.5 is gnu++98. In the 6 series, it
