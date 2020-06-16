@@ -64,6 +64,9 @@ class NngConan(ConanFile):
         cmake = self._configure_cmake()
         cmake.build()
 
+    def package_id(self):
+        del self.info.options.tests
+
     def package(self):
         self.copy(pattern="LICENSE.txt",
                   dst="licenses",
@@ -79,5 +82,7 @@ class NngConan(ConanFile):
         elif self.settings.os == "Linux":
             self.cpp_info.system_libs.extend(['pthread'])
 
-        if not self.options.shared:
-            self.cpp_info.defines.append("NNG_STATIC_LIB=ON")
+        if self.options.shared:
+            self.cpp_info.defines.append("NNG_SHARED_LIB")
+        else:
+            self.cpp_info.defines.append("NNG_STATIC_LIB")
