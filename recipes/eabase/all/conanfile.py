@@ -11,6 +11,7 @@ class EABaseConan(ConanFile):
     homepage = "https://github.com/electronicarts/EABase"
     exports_sources = "CMakeLists.txt", "patches/**"
     generators = "cmake"
+    settings = "os", "compiler", "build_type", "arch"
 
     _source_subfolder = "source_subfolder"
 
