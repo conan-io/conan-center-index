@@ -53,10 +53,10 @@ class QuickfixConan(ConanFile):
 
         if self.settings.compiler == "clang" and (
                 (version <= "5.0" and self.settings.compiler.libcxx == "libstdc++" and
-                 self.settings.compiler.cppstd == "None")):
+                 not self.settings.compiler.cppstd)):
             return "auto"
 
-        return self.default_options["unique_ptr"]
+        return self.options.unique_ptr
 
     @property
     def _shared_ptr(self):
