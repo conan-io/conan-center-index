@@ -9,12 +9,6 @@ class LibrdkafkaTestConan(ConanFile):
 
     def build(self):
         cmake = CMake(self)
-        cmake.definitions["WITH_ZLIB"] = self.options["librdkafka"].zlib
-        cmake.definitions["WITH_ZSTD"] = self.options["librdkafka"].zstd
-        cmake.definitions["WITH_PLUGINS"] = self.options["librdkafka"].plugins
-        cmake.definitions["WITH_SSL"] = self.options["librdkafka"].ssl
-        cmake.definitions["WITH_SASL"] = self.options["librdkafka"].sasl
-        cmake.definitions["WITH_LZ4"] = self.options["librdkafka"].lz4
         cmake.configure()
         cmake.build()
 
