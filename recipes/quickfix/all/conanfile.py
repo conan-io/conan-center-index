@@ -39,10 +39,9 @@ class QuickfixConan(ConanFile):
     @property
     def _unique_ptr(self):
         # auto_ptr is fully removed in C++17.
-        if hasattr(self.settings.compiler, "cppstd"):
-            cppstd = str(self.settings.compiler.cppstd)
-            if cppstd.find("17") != -1 or cppstd.find("20") != -1:
-                return "unique"
+        cppstd = self.settings.get_safe("compiler.cppstd", "")
+        if "17" in cppstd or "20" in cppstd:
+            return "unique"
 
         # gcc default standard for version 5.5 is gnu++98. In the 6 series, it
         # changed to gnu++14.
