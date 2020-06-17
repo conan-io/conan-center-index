@@ -1,0 +1,44 @@
+diff --git a/oiio-Release-2.1.16.0/CMakeLists.txt b/source_subfolder/CMakeLists.txt
+index 8174fdd..d3ac750 100644
+--- a/oiio-Release-2.1.16.0/CMakeLists.txt
++++ b/source_subfolder/CMakeLists.txt
+@@ -171,7 +171,7 @@ if (OIIO_BUILD_TOOLS AND NOT BUILD_OIIOUTIL_ONLY)
+     add_subdirectory (src/iinfo)
+     add_subdirectory (src/maketx)
+     add_subdirectory (src/oiiotool)
+-    add_subdirectory (src/testtex)
++    # add_subdirectory (src/testtex)
+     add_subdirectory (src/iv)
+ endif ()
+ 
+@@ -477,7 +477,7 @@ if (WIN32)
+     set(CPACK_PACKAGE_EXECUTABLES "iv" "iv - Image Viewer")
+ #    set(CPACK_CREATE_DESCTOP_LINKS "iv" "iv - Image Viewer")
+     set(CPACK_NSIS_MODIFY_PATH ON)
+-    include (InstallRequiredSystemLibraries)
++    #include (InstallRequiredSystemLibraries)
+ endif ()
+ set (CPACK_SOURCE_PACKAGE_FILE_NAME ${PROJECT_NAME}-${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR}.${PROJECT_VERSION_PATCH}-source)
+ #set (CPACK_SOURCE_STRIP_FILES Do we need this?)
+diff --git a/oiio-Release-2.1.16.0/src/cmake/externalpackages.cmake b/source_subfolder/src/cmake/externalpackages.cmake
+index 58dfc42..77f2279 100644
+--- a/oiio-Release-2.1.16.0/src/cmake/externalpackages.cmake
++++ b/source_subfolder/src/cmake/externalpackages.cmake
+@@ -144,7 +144,7 @@ if (LINKSTATIC)
+     endif ()
+ else ()
+     if (MSVC)
+-        add_definitions (-DBOOST_ALL_DYN_LINK=1)
++        # add_definitions (-DBOOST_ALL_DYN_LINK=1)
+     endif ()
+ endif ()
+ if (BOOST_CUSTOM)
+@@ -197,7 +197,7 @@ if (CMAKE_COMPILER_IS_CLANG AND OPENEXR_VERSION VERSION_LESS 2.3)
+     add_compile_options (-Wno-deprecated-register)
+ endif ()
+ if (MSVC AND NOT LINKSTATIC)
+-    add_definitions (-DOPENEXR_DLL) # Is this needed for new versions?
++    # add_definitions (-DOPENEXR_DLL) # Is this needed for new versions?
+ endif ()
+ 
+ 
