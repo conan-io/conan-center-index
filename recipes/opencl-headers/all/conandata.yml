@@ -1,0 +1,4 @@
+sources:
+  "2020.03.13":
+    url: "https://github.com/KhronosGroup/OpenCL-Headers/archive/v2020.03.13.tar.gz"
+    sha256: "664bbe587e5a0a00aac267f645b7c413586e7bc56dca9ff3b00037050d06f476"
