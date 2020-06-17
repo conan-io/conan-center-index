@@ -1,4 +1,4 @@
-From a083a1ba9c870ac1565727b6bd5cae7f7011113a Mon Sep 17 00:00:00 2001
+From 5ca88b3e944fe351821be9240b32a4c2e2a64685 Mon Sep 17 00:00:00 2001
 From: Tarcisio Rodrigues <tarcisio.genaro@gmail.com>
 Date: Sun, 14 Jun 2020 22:44:09 -0300
 Subject: [PATCH 7/8] manage postgres through conan
@@ -8,7 +8,7 @@ Subject: [PATCH 7/8] manage postgres through conan
  1 file changed, 2 deletions(-)
 
 diff --git a/CMakeLists.txt b/CMakeLists.txt
-index f6be2611..c199c5d8 100644
+index 5690742a..dbb1099d 100644
 --- a/CMakeLists.txt
 +++ b/CMakeLists.txt
 @@ -46,8 +46,6 @@ add_definitions("-DHAVE_MYSQL=1")

@@ -1,4 +1,4 @@
-From 77faa30f53d65f0ca9d14ee076821e371b8a71d6 Mon Sep 17 00:00:00 2001
+From aad62352323638bafc6fe1d8f0010935a9cc66c2 Mon Sep 17 00:00:00 2001
 From: Tarcisio Rodrigues <tarcisio.genaro@gmail.com>
 Date: Tue, 9 Jun 2020 08:39:03 -0300
 Subject: [PATCH 2/8] fix condition for using tr1 namespace

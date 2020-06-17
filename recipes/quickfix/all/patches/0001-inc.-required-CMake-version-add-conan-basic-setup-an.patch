@@ -1,15 +1,15 @@
-From 761b3791e30bd07a0a57ca295327b63da71e117e Mon Sep 17 00:00:00 2001
+From e3885793d855f9d475bb1c20cdba40c72ff24097 Mon Sep 17 00:00:00 2001
 From: Tarcisio Rodrigues <tarcisio.genaro@gmail.com>
 Date: Tue, 9 Jun 2020 02:14:57 -0300
 Subject: [PATCH 1/8] inc. required CMake version, add conan basic setup and
  check compiler features
 
 ---
- CMakeLists.txt | 39 +++++++++++++++------------------------
- 1 file changed, 15 insertions(+), 24 deletions(-)
+ CMakeLists.txt | 34 ++++++++++------------------------
+ 1 file changed, 10 insertions(+), 24 deletions(-)
 
 diff --git a/CMakeLists.txt b/CMakeLists.txt
-index 48908ead..a9cea790 100644
+index 48908ead..bc0a0ef8 100644
 --- a/CMakeLists.txt
 +++ b/CMakeLists.txt
 @@ -1,4 +1,4 @@
@@ -41,7 +41,7 @@ index 48908ead..a9cea790 100644
  message("-- Building with SSL")
  add_definitions("-DHAVE_SSL=1")
  endif()
-@@ -58,26 +53,29 @@ message("-- Building with POSTGRESQL")
+@@ -58,19 +53,17 @@ message("-- Building with POSTGRESQL")
  add_definitions("-DHAVE_POSTGRESQL=1")
  endif()
  
@@ -67,19 +67,7 @@ index 48908ead..a9cea790 100644
  endif()
  
  include(FindUniquePtr)
- FIND_UNIQUE_PTR()
- if (HAVE_UNIQUE_PTR_IN_STD_NAMESPACE)
- message("-- set HAVE_STD_UNIQUE_PTR")
-+
- add_definitions("-DHAVE_STD_UNIQUE_PTR=1")
-+file(APPEND ${CMAKE_SOURCE_DIR}/config.h
-+ "#ifndef HAVE_STD_UNIQUE_PTR\n"
-+ "#define HAVE_STD_UNIQUE_PTR\n"
-+ "#endif\n" )
- endif()
- 
- if (HAVE_PYTHON)
-@@ -91,15 +89,8 @@ find_package(PythonLibs 3 REQUIRED)
+@@ -91,15 +84,8 @@ find_package(PythonLibs 3 REQUIRED)
  include_directories(${PYTHON_INCLUDE_DIRS})
  endif ()
  
