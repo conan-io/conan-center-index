@@ -11,7 +11,7 @@ class SwigConan(ConanFile):
     license = "GPL-3.0-or-later"
     topics = ("conan", "swig", "python", "java", "wrapper")
     exports_sources = "patches/**"
-    settings = "os", "arch", "compiler"
+    settings = "os", "arch", "compiler", "build_type"
 
     _autotools = None
 
@@ -114,10 +114,6 @@ class SwigConan(ConanFile):
     @property
     def _swiglibdir(self):
         return os.path.join(self.package_folder, "bin", "swiglib").replace("\\", "/")
-
-    def package_id(self):
-        # Verilator is a executable-only package, so the compiler version does not matter
-        del self.info.settings.compiler.version
 
     def package_info(self):
         # FIXME: Don't set cmake_find_package name because conan cmake generators do not define SWIG_EXECUTABLE
