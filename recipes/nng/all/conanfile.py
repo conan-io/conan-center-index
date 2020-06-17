@@ -17,15 +17,9 @@ class NngConan(ConanFile):
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
-        "tests": [True, False],
         "nngcat": [True, False],
     }
-    default_options = {
-        "shared": False,
-        "fPIC": True,
-        "tests": False,
-        "nngcat": False
-    }
+    default_options = {"shared": False, "fPIC": True, "nngcat": False}
 
     _source_subfolder = "source_subfolder"
     _cmake = None
@@ -53,7 +47,7 @@ class NngConan(ConanFile):
             return self._cmake
 
         self._cmake = CMake(self)
-        self._cmake.definitions["NNG_TESTS"] = self.options.tests
+        self._cmake.definitions["NNG_TESTS"] = False
         self._cmake.definitions["NNG_NNGCAT"] = self.options.nngcat
         self._cmake.configure()
 
@@ -62,9 +56,6 @@ class NngConan(ConanFile):
     def build(self):
         cmake = self._configure_cmake()
         cmake.build()
-
-    def package_id(self):
-        del self.info.options.tests
 
     def package(self):
         self.copy(pattern="LICENSE.txt",
