@@ -50,8 +50,8 @@ class ConanXOrg(ConanFile):
             package_tool.install(update=True, packages=" ".join(packages))
 
     def package_info(self):
-        for name in ["x11", "dmx", "fontenc", "libfs", "ice", "sm", "xau", "xaw7", "xcomposite",
-                     "xcursor", "xdamage", "xdmcp", "xext", "xfixes", "xft", "xi",
+        for name in ["x11", "x11-xcb", "dmx", "fontenc", "libfs", "ice", "sm", "xau", "xaw7",
+                     "xcomposite","xcursor", "xdamage", "xdmcp", "xext", "xfixes", "xft", "xi",
                      "xinerama", "xkbfile", "xmu", "xmuu", "xpm", "xrandr", "xrender", "xres",
                      "xscrnsaver", "xt", "xtst", "xv", "xvmc", "xxf86dga", "xxf86vm", "xtrans"]:
             self._fill_cppinfo_from_pkgconfig(name)
