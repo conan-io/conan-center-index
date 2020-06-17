@@ -68,8 +68,10 @@ class CAresConan(ConanFile):
             self.cpp_info.defines.append("CARES_STATICLIB")
         if self.settings.os == "Linux":
             self.cpp_info.system_libs.append("rt")
-        if self.settings.os == "Windows":
+        elif self.settings.os == "Windows":
             self.cpp_info.system_libs.extend(["ws2_32", "Advapi32"])
+        elif self.settings.os == "Macos":
+            self.cpp_info.system_libs.append("resolv")
         self.cpp_info.names["pkg_config"] = "libcares"
 
         bin_path = os.path.join(self.package_folder, "bin")
