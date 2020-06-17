@@ -53,7 +53,6 @@ class AwsCEventStream(ConanFile):
         self._cmake = CMake(self)
         self._cmake.definitions["BUILD_BINARIES"] = False
         self._cmake.definitions["BUILD_TESTING"] = False
-        self._cmake.definitions["CMAKE_MODULE_PATH"] = self.build_folder
         self._cmake.configure()
         return self._cmake
 
