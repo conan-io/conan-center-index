@@ -15,6 +15,7 @@ class CbloscConan(ConanFile):
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
+        "simd_intrinsics": [None, "sse2", "avx2"],
         "with_lz4": [True, False],
         "with_snappy": [True, False],
         "with_zlib": [True, False],
@@ -23,6 +24,7 @@ class CbloscConan(ConanFile):
     default_options = {
         "shared": False,
         "fPIC": True,
+        "simd_intrinsics": "sse2",
         "with_lz4": True,
         "with_snappy": True,
         "with_zlib": True,
@@ -48,6 +50,8 @@ class CbloscConan(ConanFile):
             del self.options.fPIC
         del self.settings.compiler.cppstd
         del self.settings.compiler.libcxx
+        if self.settings.arch not in ["x86", "x86_64"]:
+            del self.options.simd_intrinsics
 
     def requirements(self):
         if self.options.with_lz4:
@@ -83,8 +87,9 @@ class CbloscConan(ConanFile):
         self._cmake.definitions["BUILD_SHARED"] = self.options.shared
         self._cmake.definitions["BUILD_TESTS"] = False
         self._cmake.definitions["BUILD_BENCHMARKS"] = False
-        self._cmake.definitions["DEACTIVATE_SSE2"] = False
-        self._cmake.definitions["DEACTIVATE_AVX2"] = False
+        simd_intrinsics = self.options.get_safe("simd_intrinsics", False)
+        self._cmake.definitions["DEACTIVATE_SSE2"] = simd_intrinsics not in ["sse2", "avx2"]
+        self._cmake.definitions["DEACTIVATE_AVX2"] = simd_intrinsics != "avx2"
         self._cmake.definitions["DEACTIVATE_LZ4"] = not self.options.with_lz4
         self._cmake.definitions["DEACTIVATE_SNAPPY"] = not self.options.with_snappy
         self._cmake.definitions["DEACTIVATE_ZLIB"] = not self.options.with_zlib
