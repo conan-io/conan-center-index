@@ -1,6 +1,5 @@
 from conans import ConanFile, CMake, tools
 from conans.errors import ConanInvalidConfiguration
-from glob import glob
 import os
 
 
@@ -8,7 +7,7 @@ class NngConan(ConanFile):
     name = "nng"
     description = "nanomsg-next-generation: light-weight brokerless messaging"
     url = "https://github.com/conan-io/conan-center-index"
-    exports_sources = ["CMakeLists.txt", "src/*.cmake", "src/*.txt"]
+    exports_sources = ["CMakeLists.txt"]
     homepage = "https://github.com/nanomsg/nng"
     license = "MIT"
     topics = ("nanomsg", "communication", "messaging", "protocols")
@@ -56,7 +55,7 @@ class NngConan(ConanFile):
         self._cmake = CMake(self)
         self._cmake.definitions["NNG_TESTS"] = self.options.tests
         self._cmake.definitions["NNG_NNGCAT"] = self.options.nngcat
-        self._cmake.configure(source_folder=self._source_subfolder)
+        self._cmake.configure()
 
         return self._cmake
 
