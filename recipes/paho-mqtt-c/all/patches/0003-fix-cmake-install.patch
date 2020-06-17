@@ -1,8 +1,8 @@
 diff --git a/src/CMakeLists.txt b/src/CMakeLists.txt
-index b46eaca..df2c268 100644
+index b46eaca..d8df5ba 100644
 --- a/src/CMakeLists.txt
 +++ b/src/CMakeLists.txt
-@@ -68,74 +68,19 @@ ENDIF()
+@@ -68,69 +68,18 @@ ENDIF()
  
  ## common compilation for libpaho-mqtt3c and libpaho-mqtt3a
  ADD_LIBRARY(common_obj OBJECT ${common_src})
@@ -70,18 +70,15 @@ index b46eaca..df2c268 100644
 -    FIND_LIBRARY(OPENSSLCRYPTO_LIB NAMES crypto libcrypto libeay32
 -      	HINTS ${OPENSSL_SEARCH_PATH}/lib ${OPENSSL_SEARCH_LIB_PATH})
 +    SET(OPENSSL_ROOT_DIR "" CACHE PATH "Directory containing OpenSSL libraries and includes")
++        
 +    find_package(OpenSSL REQUIRED)
++    
++    SET(OPENSSL_LIB ${OPENSSL_SSL_LIBRARY})
++    SET(OPENSSLCRYPTO_LIB ${OPENSSL_CRYPTO_LIBRARY})
  
      MESSAGE(STATUS "OpenSSL hints: ${OPENSSL_SEARCH_PATH}")
      MESSAGE(STATUS "OpenSSL headers found at ${OPENSSL_INCLUDE_DIR}")
--    MESSAGE(STATUS "OpenSSL library found at ${OPENSSL_LIB}")
--    MESSAGE(STATUS "OpenSSL Crypto library found at ${OPENSSLCRYPTO_LIB}")
-+    MESSAGE(STATUS "OpenSSL library found at ${OPENSSL_SSL_LIBRARY}")
-+    MESSAGE(STATUS "OpenSSL Crypto library found at ${OPENSSL_CRYPTO_LIBRARY}")
- 
-     INCLUDE_DIRECTORIES(
-         ${OPENSSL_INCLUDE_DIR}
-@@ -144,54 +89,94 @@ IF (PAHO_WITH_SSL)
+@@ -144,54 +93,94 @@ IF (PAHO_WITH_SSL)
      ## common compilation for libpaho-mqtt3cs and libpaho-mqtt3as
      ## Note: SSL libraries must be recompiled due ifdefs
      ADD_LIBRARY(common_ssl_obj OBJECT ${common_src})
