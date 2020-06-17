@@ -1,4 +1,4 @@
 sources:
-  "20200514":
-    sha256: 7668377988cf336276a8b9b41a38230519818f6a1270b6ce86ca6fad9462c9c6
-    url: https://github.com/mattiasgustavsson/libs/archive/3da65d818fd4214d608d62666df32a0fc0428c80.tar.gz
+  "20200417":
+    sha256: 1235919eaa9895dbdf060c3252aaf6917b42c3d0a11ee7aabfef4ef7b231e78d
+    url: https://github.com/mattiasgustavsson/libs/archive/bc03ac2268db88d1fadfbe4cee5ec1d55f715edc.tar.gz
