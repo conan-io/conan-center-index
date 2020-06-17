@@ -38,7 +38,7 @@ class ConanXOrg(ConanFile):
         if tools.os_info.is_linux and self.settings.os == "Linux":
             package_tool = tools.SystemPackageTool(conanfile=self, default_mode="verify")
             if tools.os_info.with_apt:
-                packages = ["xorg-dev"]
+                packages = ["xorg-dev", "libx11-xcb-dev"]
             elif tools.os_info.with_yum:
                 packages = ["xorg-x11-server-devel"]
             elif tools.os_info.with_pacman:
@@ -47,11 +47,11 @@ class ConanXOrg(ConanFile):
                 packages = ["Xorg-x11-devel"]
             else:
                 self.warn("Do not know how to install 'xorg' for {}.".format(tools.os_info.linux_distro))
-            package_tool.install(update=True, packages=packages)
+            package_tool.install(update=True, packages=" ".join(packages))
 
     def package_info(self):
-        for name in ["x11", "dmx", "fontenc", "libfs", "ice", "sm", "xau", "xaw7", "xcomposite",
-                     "xcursor", "xdamage", "xdmcp", "xext", "xfixes", "xft", "xi",
+        for name in ["x11", "x11-xcb", "dmx", "fontenc", "libfs", "ice", "sm", "xau", "xaw7",
+                     "xcomposite","xcursor", "xdamage", "xdmcp", "xext", "xfixes", "xft", "xi",
                      "xinerama", "xkbfile", "xmu", "xmuu", "xpm", "xrandr", "xrender", "xres",
                      "xscrnsaver", "xt", "xtst", "xv", "xvmc", "xxf86dga", "xxf86vm", "xtrans"]:
             self._fill_cppinfo_from_pkgconfig(name)
