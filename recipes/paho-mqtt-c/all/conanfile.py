@@ -6,7 +6,7 @@ class PahoMqttcConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/eclipse/paho.mqtt.c"
     topics = ("MQTT", "IoT", "eclipse", "SSL", "paho", "C")
-    license = "EPL-1.0"
+    license = "EPL-2.0"
     description = """Eclipse Paho MQTT C client library for Linux, Windows and MacOS"""
     exports_sources = ["CMakeLists.txt", "patches/*"]
     generators = "cmake"
@@ -18,7 +18,7 @@ class PahoMqttcConan(ConanFile):
     # static builds didn't really work until 1.3.4
     default_options = {"shared": True,
                        "fPIC": True,
-                       "ssl": False,
+                       "ssl": True,
                        "samples": False}
 
     _cmake = None
@@ -68,7 +68,11 @@ class PahoMqttcConan(ConanFile):
 
     def package(self):
         self.copy("edl-v10", src=self._source_subfolder, dst="licenses")
-        self.copy("epl-v10", src=self._source_subfolder, dst="licenses")
+        if self.version in ['1.3.0', '1.3.1']:
+            eplfile = "epl-v10"
+        else:
+            eplfile = "epl-v20" # EPL changed to V2
+        self.copy(eplfile, src=self._source_subfolder, dst="licenses")
         self.copy("notice.html", src=self._source_subfolder, dst="licenses")
         cmake = self._configure_cmake()
         cmake.install()
