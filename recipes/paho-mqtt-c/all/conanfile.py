@@ -6,7 +6,7 @@ class PahoMqttcConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/eclipse/paho.mqtt.c"
     topics = ("MQTT", "IoT", "eclipse", "SSL", "paho", "C")
-    license = "EPL-2.0"
+    license = "EPL-1.0"
     description = """Eclipse Paho MQTT C client library for Linux, Windows and MacOS"""
     exports_sources = ["CMakeLists.txt", "patches/*"]
     generators = "cmake"
@@ -14,11 +14,12 @@ class PahoMqttcConan(ConanFile):
     options = {"shared": [True, False],
                "fPIC": [True, False],
                "ssl": [True, False],
-               "asynchronous": [True, False]}
-    default_options = {"shared": False,
+               "samples": [True, False]}
+    # static builds didn't really work until 1.3.4
+    default_options = {"shared": True,
                        "fPIC": True,
                        "ssl": False,
-                       "asynchronous": True}
+                       "samples": False}
 
     _cmake = None
 
@@ -49,9 +50,10 @@ class PahoMqttcConan(ConanFile):
         self._cmake = CMake(self)
         self._cmake.definitions["PAHO_ENABLE_TESTING"] = False
         self._cmake.definitions["PAHO_BUILD_DOCUMENTATION"] = False
-        self._cmake.definitions["PAHO_BUILD_SAMPLES"] = False
+        self._cmake.definitions["PAHO_BUILD_ASYNC"] = True # Not used in recent versions but needed for <= 1.3.1 because of patch
         self._cmake.definitions["PAHO_BUILD_STATIC"] = not self.options.shared
-        self._cmake.definitions["PAHO_BUILD_ASYNC"] = self.options.asynchronous
+        self._cmake.definitions["PAHO_BUILD_SHARED"] = self.options.shared
+        self._cmake.definitions["PAHO_BUILD_SAMPLES"] = self.options.samples
         self._cmake.definitions["PAHO_WITH_SSL"] = self.options.ssl
         if self.options.ssl:
             self._cmake.definitions["OPENSSL_SEARCH_PATH"] = self.deps_cpp_info["openssl"].rootpath
