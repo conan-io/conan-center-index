@@ -51,4 +51,4 @@ class NlohmannJsonConan(ConanFile):
             pass
 
     def package_id(self):
-        self.info.header_only()
+        self.info.settings.clear()
