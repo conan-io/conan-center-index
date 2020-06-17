@@ -10,7 +10,7 @@ class CbloscConan(ConanFile):
     homepage = "https://github.com/Blosc/c-blosc"
     url = "https://github.com/conan-io/conan-center-index"
     exports_sources = ["CMakeLists.txt", "patches/**"]
-    generators = "cmake"
+    generators = "cmake", "cmake_find_package"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
@@ -62,10 +62,15 @@ class CbloscConan(ConanFile):
         os.rename(self.name + "-" + self.version, self._source_subfolder)
 
     def build(self):
-        for patch in self.conan_data["patches"][self.version]:
-            tools.patch(**patch)
+        self._patch_sources()
         cmake = self._configure_cmake()
         cmake.build()
+
+    def _patch_sources(self):
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            tools.patch(**patch)
+        # Remove folder containing custom FindLib.cmake files
+        tools.rmdir(os.path.join(self._source_subfolder, "cmake"))
 
     def _configure_cmake(self):
         if self._cmake:
