@@ -69,7 +69,7 @@ class LibtiffConan(ConanFile):
         if self.options.get_safe("zstd"):
             self.requires("zstd/1.4.3")
         if self.options.get_safe("webp"):
-            self.requires("libwebp/1.0.3")
+            self.requires("libwebp/1.1.0")
 
     def _configure_cmake(self):
         if not self._cmake:
