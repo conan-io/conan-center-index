@@ -55,7 +55,7 @@ class CbloscConan(ConanFile):
         if self.options.with_zlib:
             self.requires("zlib/1.2.11")
         if self.options.with_zstd:
-            self.requires("zstd/1.4.4")
+            self.requires("zstd/1.4.5")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
