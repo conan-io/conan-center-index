@@ -96,7 +96,8 @@ class CbloscConan(ConanFile):
         self._cmake.definitions["DEACTIVATE_ZSTD"] = not self.options.with_zstd
         self._cmake.definitions["DEACTIVATE_SYMBOLS_CHECK"] = True
         self._cmake.definitions["PREFER_EXTERNAL_LZ4"] = True
-        self._cmake.definitions["PREFER_EXTERNAL_SNAPPY"] = True
+        if tools.Version(self.version) < "1.19.0":
+            self._cmake.definitions["PREFER_EXTERNAL_SNAPPY"] = True
         self._cmake.definitions["PREFER_EXTERNAL_ZLIB"] = True
         self._cmake.definitions["PREFER_EXTERNAL_ZSTD"] = True
         self._cmake.configure(build_folder=self._build_subfolder)
