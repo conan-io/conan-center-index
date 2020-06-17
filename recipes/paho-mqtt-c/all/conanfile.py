@@ -54,8 +54,7 @@ class PahoMqttcConan(ConanFile):
         self._cmake.definitions["PAHO_BUILD_STATIC"] = not self.options.shared
         self._cmake.definitions["PAHO_BUILD_SHARED"] = self.options.shared
         self._cmake.definitions["PAHO_BUILD_SAMPLES"] = self.options.samples
-        # SSL build not working in 1.3.0
-        self._cmake.definitions["PAHO_WITH_SSL"] = False if self.version == '1.3.0' else self.options.ssl
+        self._cmake.definitions["PAHO_WITH_SSL"] = self.options.ssl
         if self.options.ssl:
             self._cmake.definitions["OPENSSL_SEARCH_PATH"] = self.deps_cpp_info["openssl"].rootpath
             self._cmake.definitions["OPENSSL_ROOT_DIR"] = self.deps_cpp_info["openssl"].rootpath

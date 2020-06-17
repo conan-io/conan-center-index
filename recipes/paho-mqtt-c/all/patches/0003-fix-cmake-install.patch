@@ -42,7 +42,9 @@ index b46eaca..34bb590 100644
  
  INSTALL(FILES MQTTAsync.h MQTTClient.h MQTTClientPersistence.h MQTTProperties.h MQTTReasonCodes.h MQTTSubscribeOpts.h
      DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
-@@ -144,54 +111,94 @@ IF (PAHO_WITH_SSL)
+@@ -144,54 +111,96 @@ IF (PAHO_WITH_SSL)
++    SET(OPENSSL_ROOT_DIR "" CACHE PATH "Directory containing OpenSSL libraries and includes")
++    find_package(OpenSSL REQUIRED)
      ## common compilation for libpaho-mqtt3cs and libpaho-mqtt3as
      ## Note: SSL libraries must be recompiled due ifdefs
      ADD_LIBRARY(common_ssl_obj OBJECT ${common_src})
