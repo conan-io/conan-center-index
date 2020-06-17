@@ -4,7 +4,6 @@ import os
 
 class OpenEXRConan(ConanFile):
     name = "openexr"
-    version = "2.4.0"
     description = "OpenEXR is a high dynamic-range (HDR) image file format developed by Industrial Light & " \
                   "Magic for use in computer imaging applications."
     topics = ("conan", "openexr", "hdr", "image", "picture")
@@ -51,11 +50,19 @@ class OpenEXRConan(ConanFile):
         return self._cmake
 
     def _patch_files(self):
-        for lib in ("OpenEXR", "IlmBase"):
-            if self.settings.os == "Windows":
+
+        pkg_version = tools.Version(self.version)
+        if pkg_version < "2.5.2" and self.settings.os == "Windows":
+            # This fixes symlink creation on Windows.
+            # OpenEXR's build system no longer creates symlinks on windows, starting with commit
+            # 7f9e1b410de92de244329b614cf551b30bc30421 (included in 2.5.2).
+            for lib in ("OpenEXR", "IlmBase"):
                 tools.replace_in_file(os.path.join(self._source_subfolder,  lib, "config", "LibraryDefine.cmake"),
                                       "${CMAKE_COMMAND} -E chdir ${CMAKE_INSTALL_FULL_LIBDIR}",
                                       "${CMAKE_COMMAND} -E chdir ${CMAKE_INSTALL_FULL_BINDIR}")
+
+        # Add  "_d" suffix to lib file names.
+        for lib in ("OpenEXR", "IlmBase"):
             if self.settings.build_type == "Debug":
                 tools.replace_in_file(os.path.join(self._source_subfolder,  lib, "config", "LibraryDefine.cmake"),
                                       "set(verlibname ${CMAKE_SHARED_LIBRARY_PREFIX}${libname}${@LIB@_LIB_SUFFIX}${CMAKE_SHARED_LIBRARY_SUFFIX})".replace("@LIB@", lib.upper()),
