@@ -57,6 +57,7 @@ class PahoMqttcConan(ConanFile):
         self._cmake.definitions["PAHO_WITH_SSL"] = self.options.ssl
         if self.options.ssl:
             self._cmake.definitions["OPENSSL_SEARCH_PATH"] = self.deps_cpp_info["openssl"].rootpath
+            self._cmake.definitions["OPENSSL_ROOT_DIR"] = self.deps_cpp_info["openssl"].rootpath
         self._cmake.configure()
         return self._cmake
 
