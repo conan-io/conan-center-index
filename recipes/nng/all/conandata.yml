@@ -1,0 +1,4 @@
+sources:
+  "1.3.0":
+    url: https://github.com/nanomsg/nng/archive/v1.3.0.zip
+    sha256: "2c81bff28cd949bfb497e6b351e37aa92297d18764fed403338c79fe021f20e8"
