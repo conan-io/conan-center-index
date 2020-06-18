@@ -65,7 +65,7 @@ class OpenALConan(ConanFile):
         elif self.settings.os == 'Macos':
             self.cpp_info.frameworks.extend(['AudioToolbox', 'CoreAudio', 'CoreFoundation'])
         elif self.settings.os == 'Windows':
-            self.cpp_info.system_libs.extend(['winmm', 'ole32', 'shell32'])
+            self.cpp_info.system_libs.extend(['winmm', 'ole32', 'shell32', "User32"])
         self.cpp_info.includedirs = ["include", "include/AL"]
         if not self.options.shared:
             self.cpp_info.defines.append('AL_LIBTYPE_STATIC')
