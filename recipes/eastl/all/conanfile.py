@@ -95,4 +95,4 @@ class EastlConan(ConanFile):
         if self.settings.os == "Linux":
             self.cpp_info.system_libs.append("pthread")
         if self.options.shared:
-            self.cpp_info.defines.append("EASTL_DLL")
+            self.cpp_info.defines.append("EA_DLL")
