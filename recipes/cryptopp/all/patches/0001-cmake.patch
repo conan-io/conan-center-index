@@ -1,0 +1,30 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 5be7b06..9367adb 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -372,7 +372,7 @@ if (MSVC)
+   if (CMAKE_SYSTEM_VERSION MATCHES "10\\.0.*")
+     list(APPEND CRYPTOPP_COMPILE_DEFINITIONS "_WIN32_WINNT=0x0A00")
+   endif ()
+-  list(APPEND CRYPTOPP_COMPILE_OPTIONS /FI winapifamily.h)
++  list(APPEND CRYPTOPP_COMPILE_OPTIONS /FIwinapifamily.h)
+ endif ()
+ 
+ # Enable PIC for all target machines except 32-bit i386 due to register pressures.
+@@ -546,8 +546,6 @@ if (CMAKE_CXX_COMPILER_ID MATCHES "Clang" OR CMAKE_CXX_COMPILER_ID STREQUAL "GNU
+                            "${TEST_PROG_DIR}/test_x86_avx2.cxx")
+     CheckCompileLinkOption("-msse4.2 -msha" CRYPTOPP_IA32_SHA
+                            "${TEST_PROG_DIR}/test_x86_sha.cxx")
+-    CheckCompileLinkOption("" CRYPTOPP_MIXED_ASM
+-                           "${TEST_PROG_DIR}/test_asm_mixed.cxx")
+ 
+     # https://github.com/weidai11/cryptopp/issues/756
+     if (NOT CRYPTOPP_MIXED_ASM)
+@@ -1123,7 +1121,6 @@ install(FILES ${cryptopp_HEADERS} DESTINATION include/cryptopp)
+ if (NOT CMAKE_VERSION VERSION_LESS 2.8.8)
+   include(CMakePackageConfigHelpers)
+   write_basic_package_version_file("${PROJECT_BINARY_DIR}/cryptopp-config-version.cmake" VERSION ${cryptopp_VERSION_MAJOR}.${cryptopp_VERSION_MINOR}.${cryptopp_VERSION_PATCH} COMPATIBILITY SameMajorVersion)
+-  install(FILES cryptopp-config.cmake ${PROJECT_BINARY_DIR}/cryptopp-config-version.cmake DESTINATION "lib/cmake/cryptopp")
+   install(EXPORT ${export_name} DESTINATION "lib/cmake/cryptopp")
+ endif ()
+ 
