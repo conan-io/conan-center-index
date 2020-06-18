@@ -43,14 +43,14 @@ class LibtiffConan(ConanFile):
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
+        if tools.Version(self.version) < "4.1.0":
+            del self.options.webp
+            del self.options.zstd
 
     def configure(self):
         if not self.options.cxx:
             del self.settings.compiler.libcxx
             del self.settings.compiler.cppstd
-        if tools.Version(self.version) < "4.1.0":
-            del self.options.webp
-            del self.options.zstd
 
     def requirements(self):
         if self.options.zlib:
