@@ -16,6 +16,8 @@ class OpenALConan(ConanFile):
     options = {"shared": [True, False], "fPIC": [True, False]}
     default_options = {"shared": False, "fPIC": True}
 
+    _cmake = None
+
     @property
     def _source_subfolder(self):
         return "source_subfolder"
@@ -44,14 +46,16 @@ class OpenALConan(ConanFile):
         os.rename(extracted_dir, self._source_subfolder)
 
     def _configure_cmake(self):
-        cmake = CMake(self)
-        cmake.definitions["LIBTYPE"] = "SHARED" if self.options.shared else "STATIC"
-        cmake.definitions["ALSOFT_UTILS"] = False
-        cmake.definitions["ALSOFT_EXAMPLES"] = False
-        cmake.definitions["ALSOFT_TESTS"] = False
-        cmake.definitions["CMAKE_DISABLE_FIND_PACKAGE_SoundIO"] = True
-        cmake.configure(build_folder=self._build_subfolder)
-        return cmake
+        if self._cmake:
+            return self._cmake
+        self._cmake = CMake(self)
+        self._cmake.definitions["LIBTYPE"] = "SHARED" if self.options.shared else "STATIC"
+        self._cmake.definitions["ALSOFT_UTILS"] = False
+        self._cmake.definitions["ALSOFT_EXAMPLES"] = False
+        self._cmake.definitions["ALSOFT_TESTS"] = False
+        self._cmake.definitions["CMAKE_DISABLE_FIND_PACKAGE_SoundIO"] = True
+        self._cmake.configure(build_folder=self._build_subfolder)
+        return self._cmake
 
     def build(self):
         for patch in self.conan_data["patches"][self.version]:
