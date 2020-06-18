@@ -1,5 +1,5 @@
 diff --git a/Makefile.msc b/Makefile.msc
-index d59ca46..6a3f56c 100644
+index d59ca46..3e71b15 100644
 --- a/Makefile.msc
 +++ b/Makefile.msc
 @@ -276,9 +276,9 @@ SQLITE3H = sqlite3.h
@@ -69,6 +69,15 @@ index d59ca46..6a3f56c 100644
  
  # Enable/disable loadable extensions, and other optional features
  # based on configuration. (-DSQLITE_OMIT*, -DSQLITE_ENABLE*).
+@@ -1227,7 +1230,7 @@ LTLIBS = $(LTLIBS) $(LIBICU)
+ #
+ LIBOBJS0 = vdbe.lo parse.lo alter.lo analyze.lo attach.lo auth.lo \
+          backup.lo bitvec.lo btmutex.lo btree.lo build.lo \
+-         callback.lo complete.lo ctime.lo \
++         callback.lo complete.lo crypto.lo crypto_impl.lo crypto_openssl.lo ctime.lo \
+          date.lo dbpage.lo dbstat.lo delete.lo \
+          expr.lo fault.lo fkey.lo \
+          fts3.lo fts3_aux.lo fts3_expr.lo fts3_hash.lo fts3_icu.lo \
 @@ -1715,7 +1718,7 @@ ALL_TCL_TARGETS =
  # This is the default Makefile target.  The objects listed here
  # are what get build when you type just "make" with no arguments.
@@ -107,7 +116,23 @@ index d59ca46..6a3f56c 100644
  		| $(TCLSH_CMD) $(TOP)\tool\replace.tcl include "^\s+1 _?(sqlite3(?:session|changeset|changegroup|rebaser|rbu)?_[^@]*)(?:@\d+)?$$" \1 \
  		| sort >> sqlite3.def
  # <</block2>>
-@@ -2349,7 +2353,7 @@ sqlite3rbu.lo:	$(TOP)\ext\rbu\sqlite3rbu.c $(HDR) $(EXTHDR)
+@@ -1940,6 +1944,15 @@ callback.lo:	$(TOP)\src\callback.c $(HDR)
+ complete.lo:	$(TOP)\src\complete.c $(HDR)
+ 	$(LTCOMPILE) $(CORE_COMPILE_OPTS) -c $(TOP)\src\complete.c
+ 
++crypto.lo:	$(TOP)\src\crypto.c $(HDR)
++	$(LTCOMPILE) $(CORE_COMPILE_OPTS) -c $(TOP)\src\crypto.c
++
++crypto_impl.lo:	$(TOP)\src\crypto_impl.c $(HDR)
++	$(LTCOMPILE) $(CORE_COMPILE_OPTS) -c $(TOP)\src\crypto_impl.c
++
++crypto_openssl.lo:	$(TOP)\src\crypto_openssl.c $(HDR)
++	$(LTCOMPILE) $(CORE_COMPILE_OPTS) -c $(TOP)\src\crypto_openssl.c
++
+ ctime.lo:	$(TOP)\src\ctime.c $(HDR)
+ 	$(LTCOMPILE) $(CORE_COMPILE_OPTS) -c $(TOP)\src\ctime.c
+ 
+@@ -2349,7 +2362,7 @@ sqlite3rbu.lo:	$(TOP)\ext\rbu\sqlite3rbu.c $(HDR) $(EXTHDR)
  # Rules to build the 'testfixture' application.
  #
  # If using the amalgamation, use sqlite3.c directly to build the test
