@@ -32,7 +32,7 @@ class LibrdkafkaConan(ConanFile):
         "sasl": False,
         "lz4": False,
     }
-    generators = "cmake"
+    generators = "cmake", "cmake_find_package"
     exports_sources = "CMakeLists.txt", "patches/**"
     _cmake = None
 
