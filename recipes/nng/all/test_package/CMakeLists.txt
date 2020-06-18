@@ -6,4 +6,3 @@ conan_basic_setup(TARGETS)
 
 add_executable(${PROJECT_NAME} test_package.c)
 target_link_libraries(${PROJECT_NAME} CONAN_PKG::nng)
-set_property(TARGET ${PROJECT_NAME} PROPERTY C_STANDARD 99)
