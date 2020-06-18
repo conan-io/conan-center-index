@@ -53,7 +53,7 @@ class NameofConan(ConanFile):
             raise ConanInvalidConfiguration("nameof: Unsupported compiler (https://github.com/Neargye/nameof#compiler-compatibility).")
 
     def package(self):
-        self.copy("include/nameof.hpp", dst=".", src=self._source_subfolder)
+        self.copy("nameof.hpp", dst="include", src=os.path.join(self._source_subfolder, "include"))
         self.copy("LICENSE", dst="licenses", src=self._source_subfolder)
 
     def package_id(self):
