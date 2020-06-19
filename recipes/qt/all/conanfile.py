@@ -283,7 +283,7 @@ class QtConan(ConanFile):
         if self.options.with_libpng and not self.options.multiconfiguration:
             self.requires("libpng/1.6.37")
         if self.options.with_sqlite3 and not self.options.multiconfiguration:
-            self.requires("sqlite3/3.31.0")
+            self.requires("sqlite3/3.32.2")
             self.options["sqlite3"].enable_column_metadata = True
         if self.options.with_mysql:
             self.requires("libmysqlclient/8.0.17")
@@ -301,7 +301,7 @@ class QtConan(ConanFile):
         if self.options.opengl != "no":
             self.requires("opengl/system")
         if self.options.with_zstd:
-            self.requires("zstd/1.4.4")
+            self.requires("zstd/1.4.5")
         if self.options.qtwebengine and self.settings.os == "Linux":
             self.requires("expat/2.2.9")
             self.requires("opus/1.3.1")
