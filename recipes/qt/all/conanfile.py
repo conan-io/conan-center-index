@@ -288,7 +288,7 @@ class QtConan(ConanFile):
         if self.options.with_mysql:
             self.requires("libmysqlclient/8.0.17")
         if self.options.with_pq:
-            self.requires("libpq/11.5")
+            self.requires("libpq/12.2")
         if self.options.with_odbc:
             if self.settings.os != "Windows":
                 self.requires("odbc/2.3.7")
