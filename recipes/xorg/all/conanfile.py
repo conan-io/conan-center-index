@@ -38,7 +38,7 @@ class ConanXOrg(ConanFile):
         if tools.os_info.is_linux and self.settings.os == "Linux":
             package_tool = tools.SystemPackageTool(conanfile=self, default_mode="verify")
             if tools.os_info.with_apt:
-                packages = ["xorg-dev", "libx11-xcb-dev", "libxcb-render0-dev"]
+                packages = ["xorg-dev", "libx11-xcb-dev", "libxcb-render0-dev", "libxcb-render-util0-dev"]
             elif tools.os_info.with_yum:
                 packages = ["xorg-x11-server-devel"]
             elif tools.os_info.with_pacman:
