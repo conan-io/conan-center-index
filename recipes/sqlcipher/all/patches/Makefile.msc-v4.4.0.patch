@@ -1,5 +1,5 @@
 diff --git a/Makefile.msc b/Makefile.msc
-index d59ca46..3e71b15 100644
+index d59ca46..925061e 100644
 --- a/Makefile.msc
 +++ b/Makefile.msc
 @@ -276,9 +276,9 @@ SQLITE3H = sqlite3.h
@@ -69,7 +69,25 @@ index d59ca46..3e71b15 100644
  
  # Enable/disable loadable extensions, and other optional features
  # based on configuration. (-DSQLITE_OMIT*, -DSQLITE_ENABLE*).
-@@ -1227,7 +1230,7 @@ LTLIBS = $(LTLIBS) $(LIBICU)
+@@ -1165,14 +1168,15 @@ LTLINKOPTS = $(LTLINKOPTS) "/LIBPATH:$(WP81LIBPATH)"
+ !ENDIF
+ LTLINKOPTS = $(LTLINKOPTS) /DYNAMICBASE
+ LTLINKOPTS = $(LTLINKOPTS) WindowsPhoneCore.lib RuntimeObject.lib PhoneAppModelHost.lib
+-LTLINKOPTS = $(LTLINKOPTS) /NODEFAULTLIB:kernel32.lib /NODEFAULTLIB:ole32.lib
++# Remove /NODEFAULTLIB:kernel32.lib, required by OpenSSL
+ !ENDIF
+ 
+ # When compiling for UWP or the Windows 10 platform, some extra linker
+ # options are also required.
+ #
+ !IF $(FOR_UWP)!=0 || $(FOR_WIN10)!=0
+-LTLINKOPTS = $(LTLINKOPTS) /DYNAMICBASE /NODEFAULTLIB:kernel32.lib
++# Remove /NODEFAULTLIB:kernel32.lib, required by OpenSSL
++LTLINKOPTS = $(LTLINKOPTS) /DYNAMICBASE
+ LTLINKOPTS = $(LTLINKOPTS) mincore.lib
+ !IFDEF PSDKLIBPATH
+ LTLINKOPTS = $(LTLINKOPTS) "/LIBPATH:$(PSDKLIBPATH)"
+@@ -1227,7 +1231,7 @@ LTLIBS = $(LTLIBS) $(LIBICU)
  #
  LIBOBJS0 = vdbe.lo parse.lo alter.lo analyze.lo attach.lo auth.lo \
           backup.lo bitvec.lo btmutex.lo btree.lo build.lo \
@@ -78,7 +96,7 @@ index d59ca46..3e71b15 100644
           date.lo dbpage.lo dbstat.lo delete.lo \
           expr.lo fault.lo fkey.lo \
           fts3.lo fts3_aux.lo fts3_expr.lo fts3_hash.lo fts3_icu.lo \
-@@ -1715,7 +1718,7 @@ ALL_TCL_TARGETS =
+@@ -1715,7 +1719,7 @@ ALL_TCL_TARGETS =
  # This is the default Makefile target.  The objects listed here
  # are what get build when you type just "make" with no arguments.
  #
@@ -87,7 +105,7 @@ index d59ca46..3e71b15 100644
  
  # Targets that require the Tcl library.
  #
-@@ -1734,11 +1737,12 @@ dll:	$(SQLITE3DLL)
+@@ -1734,11 +1738,12 @@ dll:	$(SQLITE3DLL)
  shell:	$(SQLITE3EXE)
  
  # <<mark>>
@@ -104,7 +122,7 @@ index d59ca46..3e71b15 100644
  
  tclsqlite3.def:	tclsqlite.lo
  	echo EXPORTS > tclsqlite3.def
-@@ -1760,9 +1764,9 @@ $(SQLITE3DLL):	$(LIBOBJ) $(LIBRESOBJS) $(CORE_LINK_DEP)
+@@ -1760,9 +1765,9 @@ $(SQLITE3DLL):	$(LIBOBJ) $(LIBRESOBJS) $(CORE_LINK_DEP)
  	$(LD) $(LDFLAGS) $(LTLINKOPTS) $(LTLIBPATHS) /DLL $(CORE_LINK_OPTS) /OUT:$@ $(LIBOBJ) $(LIBRESOBJS) $(LTLIBS) $(TLIBS)
  
  # <<block2>>
@@ -116,7 +134,7 @@ index d59ca46..3e71b15 100644
  		| $(TCLSH_CMD) $(TOP)\tool\replace.tcl include "^\s+1 _?(sqlite3(?:session|changeset|changegroup|rebaser|rbu)?_[^@]*)(?:@\d+)?$$" \1 \
  		| sort >> sqlite3.def
  # <</block2>>
-@@ -1940,6 +1944,15 @@ callback.lo:	$(TOP)\src\callback.c $(HDR)
+@@ -1940,6 +1945,15 @@ callback.lo:	$(TOP)\src\callback.c $(HDR)
  complete.lo:	$(TOP)\src\complete.c $(HDR)
  	$(LTCOMPILE) $(CORE_COMPILE_OPTS) -c $(TOP)\src\complete.c
  
@@ -132,7 +150,7 @@ index d59ca46..3e71b15 100644
  ctime.lo:	$(TOP)\src\ctime.c $(HDR)
  	$(LTCOMPILE) $(CORE_COMPILE_OPTS) -c $(TOP)\src\ctime.c
  
-@@ -2349,7 +2362,7 @@ sqlite3rbu.lo:	$(TOP)\ext\rbu\sqlite3rbu.c $(HDR) $(EXTHDR)
+@@ -2349,7 +2363,7 @@ sqlite3rbu.lo:	$(TOP)\ext\rbu\sqlite3rbu.c $(HDR) $(EXTHDR)
  # Rules to build the 'testfixture' application.
  #
  # If using the amalgamation, use sqlite3.c directly to build the test
