@@ -22,7 +22,7 @@ jobs:
     strategy:
       matrix:
         build: ['linux-gcc8', 'macos']
-        icu_versions: ['64.2']
+        icu_versions: ['63.2']
         include:
           - build: 'linux-gcc8'
             os: 'ubuntu-latest'
