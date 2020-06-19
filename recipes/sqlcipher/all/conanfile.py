@@ -76,9 +76,10 @@ class SqlcipherConan(ConanFile):
         crypto_incdir = crypto_dep.include_paths[0]
         crypto_libdir = crypto_dep.lib_paths[0]
         libs = map(lambda lib : lib + ".lib", crypto_dep.libs)
+        system_libs = map(lambda lib : lib + ".lib", crypto_dep.system_libs)
 
         nmake_flags = [
-                "TLIBS=\"%s\"" % " ".join(libs),
+                "TLIBS=\"%s %s\"" % (" ".join(libs), " ".join(system_libs)),
                 "LTLIBPATHS=/LIBPATH:%s" % crypto_libdir,
                 "OPTS=\"-I%s -DSQLITE_HAS_CODEC\"" % (crypto_incdir),
                 "NO_TCL=1",
