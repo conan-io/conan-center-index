@@ -46,7 +46,7 @@ class QtWebKitConan(ConanFile):
         "libpng/1.6.37",
         "libwebp/1.1.0",
         "sqlite3/3.31.0",
-        "icu/64.2",
+        "icu/63.2",
         "libxml2/2.9.9",
         "libxslt/1.1.33",
         "zlib/1.2.11"
@@ -63,7 +63,7 @@ class QtWebKitConan(ConanFile):
             self.requires("libgcrypt/1.8.4@bincrafters/stable")
 
         if self.options["with_gstreamer"]:
-            self.requires["gstreamer/1.16.0@bincrafters/stable"]
+            self.requires("gstreamer/1.16.0@bincrafters/stable")
 
         if self.options["with_libhyphen"]:
             pass # TODO add dependency when somebody will write receipt for libhyphen
