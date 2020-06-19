@@ -108,6 +108,8 @@ class SqlcipherConan(ConanFile):
         autotools_env = AutoToolsBuildEnvironment(self, win_bash=tools.os_info.is_windows)
         if self.settings.os == "Linux":
             autotools_env.libs.append("dl")
+            if not self.options.with_largefile:
+                autotools_env.defines.append("SQLITE_DISABLE_LFS=1")
         autotools_env.defines.extend(["SQLITE_HAS_CODEC", "SQLCIPHER_CRYPTO_OPENSSL"])
 
         # sqlcipher config.sub does not contain android configurations...
@@ -136,8 +138,6 @@ class SqlcipherConan(ConanFile):
                 env_vars["config_TARGET_EXEEXT"] = ".exe"
             else:
                 build = None
-            if self.settings.os == "Linux":
-                env_vars["_FILE_OFFSET_BITS"] = ("64" if self.options.with_largefile else "32")
             tclsh_cmd = self.deps_env_info.TCLSH
             env_vars["TCLSH_CMD"] = tclsh_cmd.replace("\\", "/")
             autotools_env.configure(args=configure_args, host=host, build=build, vars=env_vars)
