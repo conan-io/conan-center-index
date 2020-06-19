@@ -20,10 +20,11 @@ class OpenALConan(ConanFile):
     _build_subfolder = "build_subfolder"
 
     def configure(self):
+        if tools.Version("1.20.1") <= self.version and self.settings.compiler.get_safe("cppstd"):
+            tools.check_min_cppstd(self, "11")
+
         if self.settings.os == 'Windows':
             del self.options.fPIC
-        del self.settings.compiler.libcxx
-        del self.settings.compiler.cppstd
 
     def requirements(self):
         if self.settings.os == "Linux":
@@ -33,8 +34,11 @@ class OpenALConan(ConanFile):
         tools.get(**self.conan_data["sources"][self.version])
         extracted_dir = "openal-soft-openal-soft-" + self.version
         os.rename(extracted_dir, self._source_subfolder)
-        for patch in self.conan_data["patches"][self.version]:
-            tools.patch(**patch)
+
+        # Not all versions need patching
+        if "patches" in self.conan_data and self.version in self.conan_data["patches"]:
+            for patch in self.conan_data["patches"][self.version]:
+                tools.patch(**patch)
 
     def _configure_cmake(self):
         cmake = CMake(self)
