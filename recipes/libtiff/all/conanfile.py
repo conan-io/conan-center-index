@@ -71,22 +71,19 @@ class LibtiffConan(ConanFile):
         os.rename("tiff-" + self.version, self._source_subfolder)
 
     def _patch_sources(self):
-        cmakefile = os.path.join(self._source_subfolder, "CMakeLists.txt")
         if self.options.shared and self.settings.compiler == "Visual Studio":
             # https://github.com/Microsoft/vcpkg/blob/master/ports/tiff/fix-cxx-shared-libs.patch
             tools.replace_in_file(os.path.join(self._source_subfolder, "libtiff", "CMakeLists.txt"),
                                   r"set_target_properties(tiffxx PROPERTIES SOVERSION ${SO_COMPATVERSION})",
                                   r"set_target_properties(tiffxx PROPERTIES SOVERSION ${SO_COMPATVERSION} "
                                   r"WINDOWS_EXPORT_ALL_SYMBOLS ON)")
-
-            if self.settings.os == "Windows" and self.settings.compiler != "Visual Studio":
-                tools.replace_in_file(cmakefile,
-                                      "find_library(M_LIBRARY m)",
-                                      "if (NOT MINGW)\n  find_library(M_LIBRARY m)\nendif()")
-                if tools.Version(self.version) == "4.0.8":
-                    # only one occurence must be patched. fixed in 4.0.9
-                    tools.replace_in_file(cmakefile, "if (UNIX)", "if (UNIX OR MINGW)")
-
+        cmakefile = os.path.join(self._source_subfolder, "CMakeLists.txt")
+        if self.settings.os == "Windows" and self.settings.compiler != "Visual Studio":
+            tools.replace_in_file(cmakefile,
+                                  "find_library(M_LIBRARY m)",
+                                  "if (NOT MINGW)\n  find_library(M_LIBRARY m)\nendif()")
+            if tools.Version(self.version) < "4.0.9":
+                tools.replace_in_file(cmakefile, "if (UNIX)", "if (UNIX OR MINGW)")
         tools.replace_in_file(cmakefile,
                               "add_subdirectory(tools)\nadd_subdirectory(test)\nadd_subdirectory(contrib)\nadd_subdirectory(build)\n"
                               "add_subdirectory(man)\nadd_subdirectory(html)", "")
