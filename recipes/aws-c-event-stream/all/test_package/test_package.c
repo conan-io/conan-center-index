@@ -23,8 +23,9 @@ int main() {
         return EXIT_FAILURE;
     }
 
-    uint8_t *buffer = aws_event_stream_message_buffer(&message);
-    for (size_t i=0; i<sizeof(expected_data); ++i) {
+    const uint8_t *buffer = aws_event_stream_message_buffer(&message);
+    size_t i;
+    for (i=0; i<sizeof(expected_data); ++i) {
         if (expected_data[i] != buffer[i]) {
             fprintf(stderr, "Error at index %u!\n", i);
         }
