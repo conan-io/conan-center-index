@@ -51,7 +51,7 @@ class AwsSdkCppConan(ConanFile):
 
     def requirements(self):
         self.requires("aws-c-common/0.4.25")
-        self.requires("aws-c-event-stream/0.1.4")
+        self.requires("aws-c-event-stream/0.1.5")
         self.requires("openssl/1.1.1d")
         self.requires("zlib/1.2.11")
         if self.options.with_curl:
