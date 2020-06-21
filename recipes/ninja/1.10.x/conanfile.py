@@ -15,11 +15,6 @@ class NinjaConan(ConanFile):
     _source_subfolder = "source_subfolder"
     _cmake = None
 
-    def configure(self):
-        if self.settings.compiler == "Visual Studio":
-            if self.settings.compiler.runtime != "MT":
-                raise ConanInvalidConfiguration("Only MT MSVC runtime is supported")
-
     def _configure_cmake(self):
         if self._cmake:
             return self._cmake
@@ -34,6 +29,9 @@ class NinjaConan(ConanFile):
         os.rename("ninja-%s" % self.version, self._source_subfolder)
 
     def build(self):
+        if self.settings.compiler == "Visual Studio":
+            if self.settings.compiler.runtime != "MT":
+                raise ConanInvalidConfiguration("Only MT MSVC runtime is supported")
         for patch in self.conan_data["patches"][self.version]:
             tools.patch(**patch)
 
