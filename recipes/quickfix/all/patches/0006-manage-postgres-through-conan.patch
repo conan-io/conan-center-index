@@ -1,7 +1,7 @@
 From 96e595483cc068530d306b851080499931770562 Mon Sep 17 00:00:00 2001
 From: Tarcisio Rodrigues <tarcisio.genaro@gmail.com>
 Date: Sun, 14 Jun 2020 22:44:09 -0300
-Subject: [PATCH 6/7] manage postgres through conan
+Subject: [PATCH 6/8] manage postgres through conan
 
 ---
  CMakeLists.txt | 2 --
