@@ -1,15 +1,18 @@
-From e3885793d855f9d475bb1c20cdba40c72ff24097 Mon Sep 17 00:00:00 2001
+From ea4342aa1cd7ddf68857d1923ac1dceab90586a5 Mon Sep 17 00:00:00 2001
 From: Tarcisio Rodrigues <tarcisio.genaro@gmail.com>
 Date: Tue, 9 Jun 2020 02:14:57 -0300
-Subject: [PATCH 1/8] inc. required CMake version, add conan basic setup and
+Subject: [PATCH 5/7] inc. required CMake version, add conan basic setup and
  check compiler features
 
+opt for unique_ptr vs auto_ptr through CMake option
 ---
- CMakeLists.txt | 34 ++++++++++------------------------
- 1 file changed, 10 insertions(+), 24 deletions(-)
+ CMakeLists.txt | 27 +++++++++++----------------
+ config.h.in    | 15 +++++++++++++++
+ 2 files changed, 26 insertions(+), 16 deletions(-)
+ create mode 100644 config.h.in
 
 diff --git a/CMakeLists.txt b/CMakeLists.txt
-index 48908ead..bc0a0ef8 100644
+index 48908ead..8789432c 100644
 --- a/CMakeLists.txt
 +++ b/CMakeLists.txt
 @@ -1,4 +1,4 @@
@@ -22,7 +25,7 @@ index 48908ead..bc0a0ef8 100644
  endif()
  
  project(${quickfix_PROJECT_NAME} VERSION 0.1 LANGUAGES CXX C)
-+include(${PROJECT_SOURCE_DIR}/../conanbuildinfo.cmake)
++include(${PROJECT_BINARY_DIR}/../conanbuildinfo.cmake)
 +conan_basic_setup()
  message("-- Project name ${CMAKE_PROJECT_NAME}")
  
@@ -41,33 +44,31 @@ index 48908ead..bc0a0ef8 100644
  message("-- Building with SSL")
  add_definitions("-DHAVE_SSL=1")
  endif()
-@@ -58,19 +53,17 @@ message("-- Building with POSTGRESQL")
- add_definitions("-DHAVE_POSTGRESQL=1")
- endif()
- 
--include(FindSharedPtr)
--FIND_SHARED_PTR()
--if (HAVE_SHARED_PTR_IN_STD_NAMESPACE)
-+set(SHARED_PTR AUTO CACHE STRING "Define shared pointer implementation")
-+set_property(CACHE SHARED_PTR PROPERTY STRINGS STD TR1)
-+
-+if ("${SHARED_PTR}" STREQUAL "STD")
+@@ -63,12 +58,15 @@ FIND_SHARED_PTR()
+ if (HAVE_SHARED_PTR_IN_STD_NAMESPACE)
  message("-- set HAVE_STD_SHARED_PTR")
  add_definitions("-DHAVE_STD_SHARED_PTR=1")
--elseif(HAVE_SHARED_PTR_IN_TR1_NAMESPACE)
--message("-- set HAVE_STD_TR1_SHARED_PTR")
--add_definitions("-DHAVE_STD_TR1_SHARED_PTR=1")
--elseif(HAVE_SHARED_PTR_IN_TR1_NAMESPACE_FROM_TR1_MEMORY_HEADER)
-+elseif("${SHARED_PTR}" STREQUAL "TR1")
++set(HAVE_STD_SHARED_PTR 1)
+ elseif(HAVE_SHARED_PTR_IN_TR1_NAMESPACE)
+ message("-- set HAVE_STD_TR1_SHARED_PTR")
+ add_definitions("-DHAVE_STD_TR1_SHARED_PTR=1")
++set(HAVE_STD_TR1_SHARED_PTR 1)
+ elseif(HAVE_SHARED_PTR_IN_TR1_NAMESPACE_FROM_TR1_MEMORY_HEADER)
  message("-- set HAVE_STD_TR1_SHARED_PTR_FROM_TR1_MEMORY_HEADER")
  add_definitions("-DHAVE_STD_TR1_SHARED_PTR_FROM_TR1_MEMORY_HEADER=1")
++set(HAVE_STD_TR1_SHARED_PTR_FROM_TR1_MEMORY_HEADER 1)
  else()
--message("-- shared_ptr not found.")
-+message(FATAL_ERROR "Must set SHARED_PTR")
+ message("-- shared_ptr not found.")
+ endif()
+@@ -78,6 +76,7 @@ FIND_UNIQUE_PTR()
+ if (HAVE_UNIQUE_PTR_IN_STD_NAMESPACE)
+ message("-- set HAVE_STD_UNIQUE_PTR")
+ add_definitions("-DHAVE_STD_UNIQUE_PTR=1")
++set(HAVE_STD_UNIQUE_PTR 1)
  endif()
  
- include(FindUniquePtr)
-@@ -91,15 +84,8 @@ find_package(PythonLibs 3 REQUIRED)
+ if (HAVE_PYTHON)
+@@ -91,15 +90,11 @@ find_package(PythonLibs 3 REQUIRED)
  include_directories(${PYTHON_INCLUDE_DIRS})
  endif ()
  
@@ -81,9 +82,33 @@ index 48908ead..bc0a0ef8 100644
 -add_subdirectory(test)
 -endif()
 +target_link_libraries(${PROJECT_NAME} ${CONAN_LIBS})
++target_include_directories(${PROJECT_NAME} PRIVATE ${PROJECT_BINARY_DIR})
++
++configure_file(config.h.in config.h)
  
  install(DIRECTORY ${CMAKE_SOURCE_DIR}/spec/ DESTINATION share/quickfix
    FILES_MATCHING PATTERN "FIX*.xml")
+diff --git a/config.h.in b/config.h.in
+new file mode 100644
+index 00000000..ffaffb5f
+--- /dev/null
++++ b/config.h.in
+@@ -0,0 +1,15 @@
++#ifndef HAVE_STD_SHARED_PTR
++#cmakedefine HAVE_STD_SHARED_PTR
++#endif
++
++#ifndef HAVE_STD_TR1_SHARED_PTR
++#cmakedefine HAVE_STD_TR1_SHARED_PTR
++#endif
++
++#ifndef HAVE_STD_TR1_SHARED_PTR_FROM_TR1_MEMORY_HEADER
++#cmakedefine HAVE_STD_TR1_SHARED_PTR_FROM_TR1_MEMORY_HEADER
++#endif
++
++#ifndef HAVE_STD_UNIQUE_PTR
++#cmakedefine HAVE_STD_UNIQUE_PTR
++#endif
 -- 
 2.25.0
 
