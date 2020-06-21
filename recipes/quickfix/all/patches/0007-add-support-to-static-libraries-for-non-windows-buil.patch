@@ -1,7 +1,7 @@
-From 46236c739d26bb8d21fa220f215fa6ea2dc593ec Mon Sep 17 00:00:00 2001
+From ede1a5d292edb46253ffc6996fab8679e7f87a43 Mon Sep 17 00:00:00 2001
 From: Tarcisio Rodrigues <tarcisio.genaro@gmail.com>
 Date: Mon, 15 Jun 2020 00:01:26 -0300
-Subject: [PATCH 8/8] add support to static libraries for non windows builds
+Subject: [PATCH 7/7] add support to static libraries for non windows builds
 
 ---
  CMakeLists.txt         | 1 +
@@ -9,7 +9,7 @@ Subject: [PATCH 8/8] add support to static libraries for non windows builds
  2 files changed, 6 insertions(+), 1 deletion(-)
 
 diff --git a/CMakeLists.txt b/CMakeLists.txt
-index dbb1099d..158bd324 100644
+index 4392bd55..44b8349e 100644
 --- a/CMakeLists.txt
 +++ b/CMakeLists.txt
 @@ -21,6 +21,7 @@ include(QuickfixPlatformSettings)

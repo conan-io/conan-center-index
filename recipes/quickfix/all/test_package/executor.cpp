@@ -1,3 +1,5 @@
+#include "quickfix/config.h"
+
 #include "quickfix/FileStore.h"
 #include "quickfix/Application.h"
 #include "quickfix/SocketAcceptor.h"
