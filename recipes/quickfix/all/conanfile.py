@@ -15,11 +15,13 @@ class QuickfixConan(ConanFile):
     options = {"fPIC": [True, False],
                "shared": [True, False],
                "with_ssl":  [True, False],
-               "with_postgres": [True, False]}
+               "with_postgres": [True, False],
+               "with_mysql": [None, "libmysqlclient"]}
     default_options = {"fPIC": True,
                        "shared": False,
                        "with_ssl": False,
-                       "with_postgres": False}
+                       "with_postgres": False,
+                       "with_mysql": None}
     generators = "cmake"
     exports_sources = "patches/**"
     _cmake = None
@@ -37,6 +39,7 @@ class QuickfixConan(ConanFile):
             self._cmake = CMake(self)
             self._cmake.definitions["HAVE_SSL"] = self.options.with_ssl
             self._cmake.definitions["HAVE_POSTGRESQL"] = self.options.with_postgres
+            self._cmake.definitions["HAVE_MYSQL"] = bool(self.options.with_mysql)
             self._cmake.configure(source_folder=self._source_subfolder, build_folder=self._build_subfolder)
         return self._cmake
 
@@ -50,6 +53,9 @@ class QuickfixConan(ConanFile):
 
         if self.options.with_postgres:
             self.requires("libpq/11.5")
+
+        if self.options.with_mysql == "libmysqlclient":
+            self.requires("libmysqlclient/8.0.17")
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -82,6 +88,9 @@ class QuickfixConan(ConanFile):
 
         if self.options.with_postgres:
             self.cpp_info.defines.append("HAVE_POSTGRESQL=1")
+
+        if self.options.with_mysql:
+            self.cpp_info.defines.append("HAVE_MYSQL=1")
 
         if self.settings.os == "Windows":
             self.cpp_info.system_libs.extend(["ws2_32"])

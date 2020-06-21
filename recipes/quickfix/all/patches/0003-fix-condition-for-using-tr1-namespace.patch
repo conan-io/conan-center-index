@@ -1,7 +1,7 @@
 From 0dc1082e71b21a84124d56181c1ab7daa6b52352 Mon Sep 17 00:00:00 2001
 From: Tarcisio Rodrigues <tarcisio.genaro@gmail.com>
 Date: Tue, 9 Jun 2020 08:39:03 -0300
-Subject: [PATCH 3/7] fix condition for using tr1 namespace
+Subject: [PATCH 3/8] fix condition for using tr1 namespace
 
 ---
  src/C++/Utility.h | 2 +-
