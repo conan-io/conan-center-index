@@ -1,0 +1,4 @@
+sources:
+  "13.0":
+    url: "https://www.freedesktop.org/software/pulseaudio/releases/pulseaudio-13.0.tar.xz"
+    sha256: "961b23ca1acfd28f2bc87414c27bb40e12436efcf2158d29721b1e89f3f28057"
