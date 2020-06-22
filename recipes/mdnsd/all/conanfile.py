@@ -44,6 +44,9 @@ class mdnsdConan(ConanFile):
         os.rename(folder_name, self._source_subfolder)
 
     def config_options(self):
+        if not self.options.cpp_compatible:
+            del self.settings.compiler.libcxx
+            del self.settings.compiler.cppstd
         if self.settings.os == "Windows":
             del self.options.fPIC
 
