@@ -74,6 +74,10 @@ static void socket_set_nonblocking(int sockfd) {
 }
 
 int msock(void) {
+#ifdef _WIN32
+  WSADATA Data;
+  WSAStartup(MAKEWORD(2, 2), &Data);
+#endif
   int s, flag = 1, ittl = 255;
   struct sockaddr_in in;
   struct ip_mreq mc;
