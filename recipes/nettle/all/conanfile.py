@@ -58,15 +58,12 @@ class NettleTLS(ConanFile):
         self._autotools = AutoToolsBuildEnvironment(self, win_bash=tools.os_info.is_windows)
         conf_args = [
             "--enable-public-key" if self.options.public_key else "--disable-public-key",
+            "--enable-fat",  # Detect processor features at runtime
         ]
         if self.options.shared:
             conf_args.extend(["--enable-shared", "--disable-static"])
         else:
             conf_args.extend(["--disable-shared", "--enable-static"])
-        if self.settings.arch == "x86_64":
-            conf_args.append("--enable-x86-aesni")
-            if self.version >= "3.5":
-                conf_args.append("--enable-x86-sha-ni")
         self._autotools.configure(args=conf_args, configure_dir=self._source_subfolder)
         return self._autotools
 
