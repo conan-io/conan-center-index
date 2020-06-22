@@ -87,7 +87,7 @@ class Open62541Conan(ConanFile):
 
     def requirements(self):
         if self.options.encryption:
-            self.requires("mbedtls/2.16.3-gpl")
+            self.requires("mbedtls/2.16.3-apache")
 
     @property
     def _source_subfolder(self):
