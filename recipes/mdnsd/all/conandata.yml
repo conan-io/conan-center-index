@@ -1,0 +1,10 @@
+sources:
+  "0.8.0":
+    url: "https://github.com/Pro/mdnsd/archive/v0.8.tar.gz"
+    sha256: "b7975dda33a93ad31e8862b6c03d33ca72c0ec3a7992f720d2e588d0ee5d7f18"
+patches:
+  "0.8.0":
+    - patch_file: "patches/remove_addsan.patch"
+      base_path: "source_subfolder"
+    - patch_file: "patches/add_install.patch"
+      base_path: "source_subfolder"
