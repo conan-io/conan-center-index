@@ -40,12 +40,12 @@ class Open62541Conan(ConanFile):
         "discovery_semaphore": [True, False],
         "discovery_multicast": [True, False],
         "query": [True, False],
-        "encription": [True, False],
+        "encryption": [True, False],
         "json_support": [True, False],
         "pub_sub": ["None", "Simple", "Ethernet", "Ethernet_XDP"],
         "data_access": [True, False],
         "compiled_nodeset_descriptions": [True, False],
-        "namescpae_zero": ["MINIMAL", "REDUCED", "FULL"],
+        "namespace_zero ": ["MINIMAL", "REDUCED", "FULL"],
         "embedded_profile": [True, False],
         "typenames": [True, False],
         "hardening": [True, False],
@@ -69,12 +69,12 @@ class Open62541Conan(ConanFile):
         "discovery_semaphore": True,
         "discovery_multicast": False,
         "query": False,
-        "encription": False,
+        "encryption": False,
         "json_support": False,
         "pub_sub": "None",
         "data_access": True,
         "compiled_nodeset_descriptions": True,
-        "namescpae_zero": "FULL",
+        "namespace_zero ": "FULL",
         "embedded_profile": False,
         "typenames": True,
         "hardening": False,
@@ -84,7 +84,7 @@ class Open62541Conan(ConanFile):
     generators = "cmake", "cmake_find_package"
 
     def requirements(self):
-        if self.options.encription:
+        if self.options.encryption:
             self.requires("mbedtls/2.16.3-gpl")
 
     @property
@@ -179,7 +179,7 @@ class Open62541Conan(ConanFile):
         cmake.definitions["UA_ENABLE_DISCOVERY_MULTICAST"] = self.options.discovery_multicast
         cmake.definitions["UA_ENABLE_DISCOVERY_SEMAPHORE"] = self.options.discovery_semaphore
         cmake.definitions["UA_ENABLE_QUERY"] = self.options.query
-        cmake.definitions["UA_ENABLE_ENCRYPTION"] = self.options.encription
+        cmake.definitions["UA_ENABLE_ENCRYPTION"] = self.options.encryption
         cmake.definitions["UA_ENABLE_JSON_ENCODING"] = self.options.json_support
         if self.options.pub_sub != "None":
             cmake.definitions["UA_ENABLE_PUBSUB"] = True
@@ -194,7 +194,7 @@ class Open62541Conan(ConanFile):
             cmake.definitions["UA_ENABLE_NODESET_COMPILER_DESCRIPTIONS"] = self.options.compiled_nodeset_descriptions
             cmake.definitions["UA_NAMESPACE_ZERO"] = "FULL"
         else:
-            cmake.definitions["UA_NAMESPACE_ZERO"] = self.options.namescpae_zero
+            cmake.definitions["UA_NAMESPACE_ZERO"] = self.options.namespace_zero
         cmake.definitions["UA_ENABLE_MICRO_EMB_DEV_PROFILE"] = self.options.embedded_profile
         cmake.definitions["UA_ENABLE_TYPENAMES"] = self.options.typenames
         cmake.definitions["UA_ENABLE_STATUSCODE_DESCRIPTIONS"] = self.options.readable_statuscodes
