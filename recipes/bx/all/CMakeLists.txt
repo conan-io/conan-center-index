@@ -1,3 +1,6 @@
+# Custom cmake config because the maintainer doesn't want maintain CMake configs.
+# https://github.com/conan-io/conan-center-index/pull/1544/files#r420852884
+
 cmake_minimum_required(VERSION 3.0)
 project(bx)
 
