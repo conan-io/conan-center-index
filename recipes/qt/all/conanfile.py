@@ -520,8 +520,7 @@ class QtConan(ConanFile):
                   ("sdl2", "SDL2"),
                   ("openal", "OPENAL"),
                   ("zstd", "ZSTD"),
-                  ("libalsa", "ALSA"),
-                  ("xkbcommon", "XKBCOMMON")]
+                  ("libalsa", "ALSA")]
         for package, var in libmap:
             if package in self.deps_cpp_info.deps:
                 if package == 'freetype':
@@ -604,17 +603,6 @@ class QtConan(ConanFile):
         with tools.chdir('build_folder'):
             with tools.vcvars(self.settings) if self.settings.compiler == "Visual Studio" else tools.no_op():
                 build_env = {"MAKEFLAGS": "j%d" % tools.cpu_count(), "PKG_CONFIG_PATH": [self.build_folder]}
-                if self.options.qtwebengine:
-                    if self.settings.compiler in ['gcc', 'clang']:
-                        i_path = []
-                        l_path = []
-                        for p in ['fontconfig', 'zlib']:
-                            if p in self.deps_cpp_info.deps:
-                                i_path.extend(self._gather_include_paths(p))
-                                l_path.extend(self._gather_lib_paths(p))
-                        build_env['C_INCLUDE_PATH'] = os.pathsep.join(i_path)
-                        build_env['CPLUS_INCLUDE_PATH'] = os.pathsep.join(i_path)
-                        build_env['LIBRARY_PATH'] = os.pathsep.join(l_path)
                 if self.settings.os == "Windows":
                     build_env["PATH"] = [os.path.join(self.source_folder, "qt5", "gnuwin32", "bin")]
                 with tools.environment_append(build_env):
