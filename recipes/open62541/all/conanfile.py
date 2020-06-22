@@ -45,7 +45,7 @@ class Open62541Conan(ConanFile):
         "pub_sub": ["None", "Simple", "Ethernet", "Ethernet_XDP"],
         "data_access": [True, False],
         "compiled_nodeset_descriptions": [True, False],
-        "namespace_zero ": ["MINIMAL", "REDUCED", "FULL"],
+        "namespace_zero": ["MINIMAL", "REDUCED", "FULL"],
         "embedded_profile": [True, False],
         "typenames": [True, False],
         "hardening": [True, False],
@@ -74,7 +74,7 @@ class Open62541Conan(ConanFile):
         "pub_sub": "None",
         "data_access": True,
         "compiled_nodeset_descriptions": True,
-        "namespace_zero ": "FULL",
+        "namespace_zero": "FULL",
         "embedded_profile": False,
         "typenames": True,
         "hardening": False,
@@ -82,6 +82,8 @@ class Open62541Conan(ConanFile):
         "readable_statuscodes": True
     }
     generators = "cmake", "cmake_find_package"
+
+    _cmake = None
 
     def requirements(self):
         if self.options.encryption:
@@ -152,58 +154,63 @@ class Open62541Conan(ConanFile):
         }.get(str(self.options.logging_level), "300")
 
     def _configure_cmake(self):
+        if self._cmake:
+            return self._cmake
+
         if self.settings.compiler == "clang" and not self.options.shared:
             raise ConanInvalidConfiguration(
                 "Clang compiler can not be used to build a static library")
 
-        cmake = CMake(self)
-        cmake.verbose = True
+        self._cmake = CMake(self)
+        self._cmake.verbose = True
         version = Version(self.version)
-        cmake.definitions["OPEN62541_VER_MAJOR"] = version.major(fill=False)
-        cmake.definitions["OPEN62541_VER_MINOR"] = version.minor(fill=False)
-        cmake.definitions["OPEN62541_VER_PATCH"] = version.patch()
-        cmake.definitions["UA_LOGLEVEL"] = self._get_log_level()
-        cmake.definitions["UA_ENABLE_SUBSCRIPTIONS"] = self.options.subscription
-        cmake.definitions["UA_ENABLE_SUBSCRIPTIONS_EVENTS"] = self.options.subscription_events
-        cmake.definitions["UA_ENABLE_METHODCALLS"] = self.options.methods
-        cmake.definitions["UA_ENABLE_NODEMANAGEMENT"] = self.options.dynamic_nodes
-        cmake.definitions["UA_ENABLE_AMALGAMATION"] = self.options.single_header
+        self._cmake.definitions["OPEN62541_VER_MAJOR"] = version.major(
+            fill=False)
+        self._cmake.definitions["OPEN62541_VER_MINOR"] = version.minor(
+            fill=False)
+        self._cmake.definitions["OPEN62541_VER_PATCH"] = version.patch()
+        self._cmake.definitions["UA_LOGLEVEL"] = self._get_log_level()
+        self._cmake.definitions["UA_ENABLE_SUBSCRIPTIONS"] = self.options.subscription
+        self._cmake.definitions["UA_ENABLE_SUBSCRIPTIONS_EVENTS"] = self.options.subscription_events
+        self._cmake.definitions["UA_ENABLE_METHODCALLS"] = self.options.methods
+        self._cmake.definitions["UA_ENABLE_NODEMANAGEMENT"] = self.options.dynamic_nodes
+        self._cmake.definitions["UA_ENABLE_AMALGAMATION"] = self.options.single_header
         if self.options.multithreading and Version(self.version) >= "1.0.1":
             print("Multithreading is an expermental feature that can cause segmentation faults. Use it at your own risk!")
-            cmake.definitions["UA_ENABLE_MULTITHREADING"] = self.options.multithreading
-        cmake.definitions["UA_ENABLE_IMMUTABLE_NODES"] = self.options.imutable_nodes
-        cmake.definitions["UA_ENABLE_WEBSOCKET_SERVER"] = self.options.web_socket
-        cmake.definitions["UA_ENABLE_HISTORIZING"] = self.options.historize
-        cmake.definitions["UA_ENABLE_DISCOVERY"] = self.options.discovery
-        cmake.definitions["UA_ENABLE_DISCOVERY_MULTICAST"] = self.options.discovery_multicast
-        cmake.definitions["UA_ENABLE_DISCOVERY_SEMAPHORE"] = self.options.discovery_semaphore
-        cmake.definitions["UA_ENABLE_QUERY"] = self.options.query
-        cmake.definitions["UA_ENABLE_ENCRYPTION"] = self.options.encryption
-        cmake.definitions["UA_ENABLE_JSON_ENCODING"] = self.options.json_support
+            self._cmake.definitions["UA_ENABLE_MULTITHREADING"] = self.options.multithreading
+        self._cmake.definitions["UA_ENABLE_IMMUTABLE_NODES"] = self.options.imutable_nodes
+        self._cmake.definitions["UA_ENABLE_WEBSOCKET_SERVER"] = self.options.web_socket
+        self._cmake.definitions["UA_ENABLE_HISTORIZING"] = self.options.historize
+        self._cmake.definitions["UA_ENABLE_DISCOVERY"] = self.options.discovery
+        self._cmake.definitions["UA_ENABLE_DISCOVERY_MULTICAST"] = self.options.discovery_multicast
+        self._cmake.definitions["UA_ENABLE_DISCOVERY_SEMAPHORE"] = self.options.discovery_semaphore
+        self._cmake.definitions["UA_ENABLE_QUERY"] = self.options.query
+        self._cmake.definitions["UA_ENABLE_ENCRYPTION"] = self.options.encryption
+        self._cmake.definitions["UA_ENABLE_JSON_ENCODING"] = self.options.json_support
         if self.options.pub_sub != "None":
-            cmake.definitions["UA_ENABLE_PUBSUB"] = True
+            self._cmake.definitions["UA_ENABLE_PUBSUB"] = True
             if self.settings.os == "Linux" and self.options.pub_sub == "Ethernet":
-                cmake.definitions["UA_ENABLE_PUBSUB_ETH_UADP"] = True
+                self._cmake.definitions["UA_ENABLE_PUBSUB_ETH_UADP"] = True
             elif self.settings.os == "Linux" and self.options.pub_sub == "Ethernet_XDP":
-                cmake.definitions["UA_ENABLE_PUBSUB_ETH_UADP_XDP"] = True
+                self._cmake.definitions["UA_ENABLE_PUBSUB_ETH_UADP_XDP"] = True
             else:
                 print("PubSub over Ethernet is not supported for your OS!")
-        cmake.definitions["UA_ENABLE_DA"] = self.options.data_access
+        self._cmake.definitions["UA_ENABLE_DA"] = self.options.data_access
         if self.options.compiled_nodeset_descriptions == True:
-            cmake.definitions["UA_ENABLE_NODESET_COMPILER_DESCRIPTIONS"] = self.options.compiled_nodeset_descriptions
-            cmake.definitions["UA_NAMESPACE_ZERO"] = "FULL"
+            self._cmake.definitions["UA_ENABLE_NODESET_COMPILER_DESCRIPTIONS"] = self.options.compiled_nodeset_descriptions
+            self._cmake.definitions["UA_NAMESPACE_ZERO"] = "FULL"
         else:
-            cmake.definitions["UA_NAMESPACE_ZERO"] = self.options.namespace_zero
-        cmake.definitions["UA_ENABLE_MICRO_EMB_DEV_PROFILE"] = self.options.embedded_profile
-        cmake.definitions["UA_ENABLE_TYPENAMES"] = self.options.typenames
-        cmake.definitions["UA_ENABLE_STATUSCODE_DESCRIPTIONS"] = self.options.readable_statuscodes
-        cmake.definitions["UA_ENABLE_HARDENING"] = self.options.hardening
+            self._cmake.definitions["UA_NAMESPACE_ZERO"] = self.options.namespace_zero
+        self._cmake.definitions["UA_ENABLE_MICRO_EMB_DEV_PROFILE"] = self.options.embedded_profile
+        self._cmake.definitions["UA_ENABLE_TYPENAMES"] = self.options.typenames
+        self._cmake.definitions["UA_ENABLE_STATUSCODE_DESCRIPTIONS"] = self.options.readable_statuscodes
+        self._cmake.definitions["UA_ENABLE_HARDENING"] = self.options.hardening
         if self.settings.compiler == "Visual Studio" and self.options.shared == True:
-            cmake.definitions["UA_MSVC_FORCE_STATIC_CRT"] = True
+            self._cmake.definitions["UA_MSVC_FORCE_STATIC_CRT"] = True
         if version > "1.0.1":
-            cmake.definitions["UA_COMPILE_AS_CXX"] = self.options.cpp_compatible
-        cmake.configure()
-        return cmake
+            self._cmake.definitions["UA_COMPILE_AS_CXX"] = self.options.cpp_compatible
+        self._cmake.configure()
+        return self._cmake
 
     def build(self):
         self._patch_sources()
