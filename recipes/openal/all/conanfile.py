@@ -44,6 +44,10 @@ class OpenALConan(ConanFile):
         tools.get(**self.conan_data["sources"][self.version])
         extracted_dir = "openal-soft-openal-soft-" + self.version
         os.rename(extracted_dir, self._source_subfolder)
+        if "patches" in self.conan_data:
+            if self.version in self.conan_data["patches"]:
+                for patch in self.conan_data["patches"][self.version]:
+                    tools.patch(**patch)
 
     def _configure_cmake(self):
         if self._cmake:
