@@ -139,7 +139,6 @@ class Open62541Conan(ConanFile):
         if Version(self.version) <= "1.0.1":
             self._download_ua_nodes()
             self._download_mdnsd()
-        self._patch_sources()
 
     def _get_log_level(self):
         return {
@@ -207,6 +206,7 @@ class Open62541Conan(ConanFile):
         return cmake
 
     def build(self):
+        self._patch_sources()
         cmake = self._configure_cmake()
         cmake.build()
 
