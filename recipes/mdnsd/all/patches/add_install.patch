@@ -1,5 +1,5 @@
 diff --git a/libmdnsd/CMakeLists.txt b/libmdnsd/CMakeLists.txt
-index 3c29b08..73b3b1d 100644
+index 3c29b08..bb55338 100644
 --- a/libmdnsd/CMakeLists.txt
 +++ b/libmdnsd/CMakeLists.txt
 @@ -46,8 +46,12 @@ endif()
@@ -8,7 +8,7 @@ index 3c29b08..73b3b1d 100644
  
 -set(LIBRARY_FILES mdnsd.c mdnsd.h 1035.c 1035.h sdtxt.c sdtxt.h xht.c xht.h)
 +set(PUBLIC_INCLUDES mdnsd.h 1035.h sdtxt.h xht.h)
-+  if(WIN32 AND CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
++if(WIN32)
 +  list(APPEND PUBLIC_INCLUDES ms_stdint.h)
 +endif()
  
