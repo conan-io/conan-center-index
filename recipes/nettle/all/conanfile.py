@@ -23,7 +23,10 @@ class NettleTLS(ConanFile):
     }
 
     _autotools = None
-    _source_subfolder = "source_subfolder"
+
+    @property
+    def _source_subfolder(self):
+        return "source_subfolder"
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -86,5 +89,10 @@ class NettleTLS(ConanFile):
         tools.rmdir(os.path.join(self.package_folder, "share"))
 
     def package_info(self):
-        self.cpp_info.libs = ["hogweed", "nettle"]
-        self.cpp_info.includedirs.append(os.path.join("include", "nettle"))
+        self.cpp_info.components["hogweed"].libs = ["hogweed"]
+        if self.options.public_key:
+            self.cpp_info.components["hogweed"].requires.append("gmp::gmp")  # FIXME: gmp::libgmp
+
+        self.cpp_info.components["libnettle"].libs = ["nettle"]
+        self.cpp_info.components["libnettle"].requires = ["hogweed"]
+        self.cpp_info.components["libnettle"].names["pkgconfig"] = ["nettle"]
