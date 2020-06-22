@@ -11,6 +11,7 @@ class LibTasn1Conan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     settings = "os", "compiler", "arch", "build_type"
     license = "LGPL-2.1-or-later"
+    exports_sources = "patches/**"
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
@@ -63,6 +64,8 @@ class LibTasn1Conan(ConanFile):
         return self._autotools
 
     def build(self):
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            tools.patch(**patch)
         autotools = self._configure_autotools()
         autotools.make()
 
