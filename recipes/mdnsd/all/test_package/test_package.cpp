@@ -7,16 +7,60 @@
 #include <stdlib.h>
 #include <string.h>
 
+#ifdef _MSC_VER
+#define _CRT_SECURE_NO_WARNINGS
+#endif
+
 #ifdef _WIN32
-#include "Windows.h"
+#define _WINSOCK_DEPRECATED_NO_WARNINGS
+#include "windows.h"
 #include <winsock2.h>
 #include <ws2tcpip.h>
+
+static int my_inet_pton(int af, const char *src, void *dst) {
+  struct sockaddr_storage ss;
+  int size = sizeof(ss);
+  char src_copy[INET6_ADDRSTRLEN + 1];
+
+  ZeroMemory(&ss, sizeof(ss));
+  /* stupid non-const API */
+  strncpy(src_copy, src, INET6_ADDRSTRLEN + 1);
+  src_copy[INET6_ADDRSTRLEN] = 0;
+
+  if (WSAStringToAddress(src_copy, af, NULL, (struct sockaddr *)&ss, &size) ==
+      0) {
+    switch (af) {
+    case AF_INET:
+      *(struct in_addr *)dst = ((struct sockaddr_in *)&ss)->sin_addr;
+      return 1;
+    case AF_INET6:
+      *(struct in6_addr *)dst = ((struct sockaddr_in6 *)&ss)->sin6_addr;
+      return 1;
+    }
+  }
+  return 0;
+}
+
+#define INET_PTON my_inet_pton
 #define CLOSESOCKET(S) closesocket((SOCKET)S)
 #define ssize_t int
 #else
+#include <arpa/inet.h>
+#include <netinet/in.h>
+#include <sys/ioctl.h>
+#include <sys/select.h>
 #include <unistd.h>
+#define INET_PTON inet_pton
 #define CLOSESOCKET(S) close(S)
 #endif
+
+void cross_sleep(int seconds) {
+#ifdef _WIN32
+  Sleep(seconds);
+#else
+  sleep(seconds);
+#endif
+}
 
 static void socket_set_nonblocking(int sockfd) {
 #ifdef _WIN32
@@ -70,7 +114,7 @@ int main() {
     return 1;
   }
 
-  sleep(1);
+  cross_sleep(1);
   mdnsd_shutdown(daemon);
   if (write(0, "\0", 1) == -1) {
     printf("Could not write zero byte to socket\n");
