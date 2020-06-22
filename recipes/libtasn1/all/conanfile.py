@@ -60,8 +60,6 @@ class LibTasn1Conan(ConanFile):
             conf_args.extend(["--enable-shared", "--disable-static"])
         else:
             conf_args.extend(["--disable-shared", "--enable-static"])
-        if "fPIC" in self.options.fields:
-            conf_args.append("--with-pic" if self.options.fPIC else "--without-pic")
         self._autotools.configure(configure_dir=self._source_subfolder, args=conf_args)
         return self._autotools
 
