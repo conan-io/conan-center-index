@@ -11,3 +11,6 @@ sources:
   "0.3.0":
     sha256: ac6d1b9cc2e57318eab1252bf5aa13c7bac25e316285a687c61dfdfa71e71e8d
     url: https://github.com/rvarago/absent/archive/0.3.0.tar.gz
+  "0.3.1":
+    sha256: fe0a96303c6438f1095273b093e56c8f10a3b79dea86676b59aec94e6ed89224
+    url: https://github.com/rvarago/absent/archive/0.3.1.tar.gz
