@@ -69,7 +69,7 @@ class QuickfixConan(ConanFile):
     def package(self):
         cmake = self._configure_cmake()
         cmake.install()
-        self.copy("config.h", dst="include/quickfix", src=self._build_subfolder)
+        self.copy("config.h", dst=os.path.join("include", "quickfix"), src=self._build_subfolder)
         self.copy("Except.h", dst="include", src=os.path.join(self._source_subfolder, "src", "C++"))
         self.copy("LICENSE", dst="licenses", src=self._source_subfolder)
         tools.rmdir(os.path.join(self.package_folder, "share"))
