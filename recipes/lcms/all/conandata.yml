@@ -5,3 +5,6 @@ sources:
   "2.10":
     url: "https://github.com/mm2/Little-CMS/archive/lcms2.10.tar.gz"
     sha256: "f7529f90f0a9c7529c561a2c681043c10f2d30b78e6728fb44132828f89b666a"
+  "2.11":
+    url: "https://github.com/mm2/Little-CMS/archive/2.11.tar.gz"
+    sha256: "478c9c3938d7a91b1171de4616f8b04308a8676d73eadc19505b7ace41327f28"
