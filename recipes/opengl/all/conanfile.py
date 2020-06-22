@@ -60,6 +60,8 @@ class SysConfigOpenGLConan(ConanFile):
             package_tool.install(update=True, packages=packages)
 
     def package_info(self):
+        self.cpp_info.includedirs = []
+        self.cpp_info.libdirs = []
         if self.settings.os == "Macos":
             self.cpp_info.defines.append("GL_SILENCE_DEPRECATION=1")
             self.cpp_info.frameworks.append("OpenGL")
