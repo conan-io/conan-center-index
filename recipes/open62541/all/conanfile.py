@@ -227,7 +227,7 @@ class Open62541Conan(ConanFile):
         if self.options.single_header:
             self.cpp_info.defines.append("UA_ENABLE_AMALGAMATION")
         if self.settings.os == "Windows":
-            self.cpp_info.libs.append("ws2_32")
+            self.cpp_info.system_libs.append("ws2_32")
             self.cpp_info.includedirs.append(os.path.join("include", "win32"))
         else:
             self.cpp_info.includedirs.append(os.path.join("include", "posix"))
