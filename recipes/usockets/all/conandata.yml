@@ -1,0 +1,4 @@
+sources:
+  "0.4.0":
+    url: "https://github.com/uNetworking/uSockets/archive/v0.4.0.tar.gz"
+    sha256: "f9f15b395def578cc79a5b32abc64fa9cff5dac873062911f515b984b90f7cc2"
