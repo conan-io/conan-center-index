@@ -1,19 +1,22 @@
 diff --git a/libmdnsd/CMakeLists.txt b/libmdnsd/CMakeLists.txt
-index 3c29b08..f32b00e 100644
+index 3c29b08..73b3b1d 100644
 --- a/libmdnsd/CMakeLists.txt
 +++ b/libmdnsd/CMakeLists.txt
-@@ -46,8 +46,9 @@ endif()
+@@ -46,8 +46,12 @@ endif()
  configure_file("mdnsd_config.h.in" "${PROJECT_BINARY_DIR}/mdnsd_config.h")
  include_directories(${PROJECT_BINARY_DIR})
  
 -set(LIBRARY_FILES mdnsd.c mdnsd.h 1035.c 1035.h sdtxt.c sdtxt.h xht.c xht.h)
 +set(PUBLIC_INCLUDES mdnsd.h 1035.h sdtxt.h xht.h)
++  if(WIN32 AND CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
++  list(APPEND PUBLIC_INCLUDES ms_stdint.h)
++endif()
  
 +set(LIBRARY_FILES mdnsd.c 1035.c xht.c sdtxt.c)
  
  if (MDNSD_BUILD_FUZZING_CORPUS)
      set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
-@@ -63,9 +64,9 @@ if(MDNSD_COMPILE_AS_CXX)
+@@ -63,9 +67,9 @@ if(MDNSD_COMPILE_AS_CXX)
  endif()
  
  if(MDNSD_BUILD_OSS_FUZZ)
@@ -25,7 +28,7 @@ index 3c29b08..f32b00e 100644
  endif()
  
  if(WIN32 OR MINGW)
-@@ -73,3 +74,23 @@ if(WIN32 OR MINGW)
+@@ -73,3 +77,23 @@ if(WIN32 OR MINGW)
  endif()
  
  target_compile_definitions(libmdnsd PRIVATE -DMDNSD_DYNAMIC_LINKING_EXPORT)
