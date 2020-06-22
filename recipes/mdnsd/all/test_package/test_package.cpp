@@ -98,9 +98,11 @@ int msock(void) {
 
   mc.imr_multiaddr.s_addr = inet_addr("224.0.0.251");
   mc.imr_interface.s_addr = htonl(INADDR_ANY);
+#ifndef _WIN32
   setsockopt(s, IPPROTO_IP, IP_ADD_MEMBERSHIP, (void *)&mc, sizeof(mc));
   setsockopt(s, IPPROTO_IP, IP_MULTICAST_TTL, (void *)&ttl, sizeof(ttl));
   setsockopt(s, IPPROTO_IP, IP_MULTICAST_TTL, (void *)&ittl, sizeof(ittl));
+#endif
 
   socket_set_nonblocking(s);
 
