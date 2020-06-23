@@ -27,7 +27,7 @@ class mdnsdConan(ConanFile):
         "shared": False,
         "compile_as_cpp": False
     }
-    generators = "cmake", "cmake_find_package"
+    generators = "cmake"
 
     _cmake = None
 
