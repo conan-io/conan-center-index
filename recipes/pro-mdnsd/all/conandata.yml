@@ -8,5 +8,7 @@ patches:
       base_path: "source_subfolder"
     - patch_file: "patches/add_install.patch"
       base_path: "source_subfolder"
+    - patch_file: "patches/remove_pic.patch"
+      base_path: "source_subfolder"
     - patch_file: "patches/fix_signed_overfload_optimization.patch"
       base_path: "source_subfolder"
