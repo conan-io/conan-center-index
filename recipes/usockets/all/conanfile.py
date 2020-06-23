@@ -60,11 +60,13 @@ class UsocketsConan(ConanFile):
                 additional_ldflags.extend(['-L'+os.path.join(self.deps_cpp_info['libuv'].rootpath, s)
                                            for s in self.deps_cpp_info['libuv'].libdirs])
 
+            # set options for Makefile
             args = []
             if self.options.with_ssl == "openssl":
                 args.append("WITH_OPENSSL=1")
             if self.options.with_libuv:
                 args.append("WITH_LIBUV=1")
+            # set paths for dependencies
             tools.replace_in_file("Makefile",
                                   ".PHONY: examples",
                                   "override CFLAGS += " + ' '.join(additional_cflags) +
@@ -75,6 +77,10 @@ class UsocketsConan(ConanFile):
                                   "override LDFLAGS += " + ' '.join(additional_ldflags) +
                                   "\n.PHONY: examples\n"
                                  )
+            # disable lto
+            tools.replace_in_file("Makefile",
+                                  " -flto",
+                                  "")
             self.run("%s %s" % (' '.join(args), make_program))
 
     def build(self):
