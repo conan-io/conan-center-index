@@ -1,8 +1,10 @@
 ---
 versions:
-  "20200306":
+  "cci.20200306":
     folder: "all"
-  "20200515":
+  "cci.20200515":
     folder: "all"
-  "20200601":
+  "cci.20200601":
+    folder: "all"
+  "1.0.0":
     folder: "all"
