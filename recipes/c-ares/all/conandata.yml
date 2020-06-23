@@ -1,4 +1,7 @@
 sources:
+  "1.16.1":
+    sha256: 870962cc8f6b352303c404ce848e2ea1f1072f3c0a940042209a72179511c08c
+    url: https://github.com/c-ares/c-ares/archive/cares-1_16_1.tar.gz
   "1.15.0":
     sha256: 7deb7872cbd876c29036d5f37e30c4cbc3cc068d59d8b749ef85bb0736649f04
     url: https://github.com/c-ares/c-ares/archive/cares-1_15_0.tar.gz

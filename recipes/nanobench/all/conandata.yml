@@ -1,0 +1,4 @@
+sources:
+  "4.0.0":
+    url: "https://github.com/martinus/nanobench/archive/v4.0.0.tar.gz"
+    sha256: 34b9bbfc7bf3bc30599f3b7cb398455539edb8ea67930aaef22b707f1ad3824f
