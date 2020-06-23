@@ -75,7 +75,6 @@ class mdnsdConan(ConanFile):
 
     def package_info(self):
         self.cpp_info.names["cmake_find_package"] = "mdnsd"
-        self.cpp_info.names["cmake_find_package_multi"] = "mdnsd"
         self.cpp_info.libs = tools.collect_libs(self)
         if self.settings.os == "Windows":
             self.cpp_info.system_libs.append("ws2_32")
