@@ -35,6 +35,11 @@ class mdnsdConan(ConanFile):
     def _source_subfolder(self):
         return "source_subfolder"
 
+    def configure(self):
+        if not self.options.cpp_compatible:
+            del self.settings.compiler.libcxx
+            del self.settings.compiler.cppstd
+
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
         if Version(self.version) <= "0.8.0":
@@ -44,9 +49,6 @@ class mdnsdConan(ConanFile):
         os.rename(folder_name, self._source_subfolder)
 
     def config_options(self):
-        if not self.options.cpp_compatible:
-            del self.settings.compiler.libcxx
-            del self.settings.compiler.cppstd
         if self.settings.os == "Windows":
             del self.options.fPIC
 
