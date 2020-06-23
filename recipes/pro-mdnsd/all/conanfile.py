@@ -20,12 +20,12 @@ class mdnsdConan(ConanFile):
     options = {
         "fPIC": [True, False],
         "shared": [True, False],
-        "cpp_compatible": [True, False]
+        "compile_as_cpp": [True, False]
     }
     default_options = {
         "fPIC": True,
         "shared": False,
-        "cpp_compatible": False
+        "compile_as_cpp": False
     }
     generators = "cmake", "cmake_find_package"
 
@@ -36,7 +36,7 @@ class mdnsdConan(ConanFile):
         return "source_subfolder"
 
     def configure(self):
-        if not self.options.cpp_compatible:
+        if not self.options.compile_as_cpp:
             del self.settings.compiler.libcxx
             del self.settings.compiler.cppstd
 
@@ -54,7 +54,7 @@ class mdnsdConan(ConanFile):
             return self._cmake
         self._cmake = CMake(self)
         self._cmake.verbose = True
-        self._cmake.definitions["MDNSD_COMPILE_AS_CXX"] = self.options.cpp_compatible
+        self._cmake.definitions["MDNSD_COMPILE_AS_CXX"] = self.options.compile_as_cpp
         self._cmake.configure()
         return self._cmake
 
