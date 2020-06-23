@@ -1,5 +1,6 @@
 import os
 from conans import CMake, ConanFile, tools
+from conans.errors import ConanInvalidConfiguration
 
 class PahoMqttcConan(ConanFile):
     name = "paho-mqtt-c"
@@ -14,11 +15,12 @@ class PahoMqttcConan(ConanFile):
     options = {"shared": [True, False],
                "fPIC": [True, False],
                "ssl": [True, False],
-               "samples": [True, False]}
-    # static builds didn't really work until 1.3.4
+               "samples": [True, False],
+               "asynchronous": [True, False]}
     default_options = {"shared": True,
                        "fPIC": True,
                        "ssl": True,
+                       "asynchronous" : True, 
                        "samples": False}
 
     _cmake = None
@@ -34,6 +36,8 @@ class PahoMqttcConan(ConanFile):
     def configure(self):
         del self.settings.compiler.cppstd
         del self.settings.compiler.libcxx
+        if self.options.shared == False and self.settings.os == "Windows" and self.version in ['1.3.0', '1.3.1']:
+            raise ConanInvalidConfiguration("Static linking in Windows did not work before version 1.3.4")
 
     def requirements(self):
         if self.options.ssl:
@@ -50,7 +54,7 @@ class PahoMqttcConan(ConanFile):
         self._cmake = CMake(self)
         self._cmake.definitions["PAHO_ENABLE_TESTING"] = False
         self._cmake.definitions["PAHO_BUILD_DOCUMENTATION"] = False
-        self._cmake.definitions["PAHO_BUILD_ASYNC"] = True # Not used in recent versions but needed for <= 1.3.1 because of patch
+        self._cmake.definitions["PAHO_BUILD_ASYNC"] = self.options.asynchronous
         self._cmake.definitions["PAHO_BUILD_STATIC"] = not self.options.shared
         self._cmake.definitions["PAHO_BUILD_SHARED"] = self.options.shared
         self._cmake.definitions["PAHO_BUILD_SAMPLES"] = self.options.samples
