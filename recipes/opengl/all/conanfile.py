@@ -56,7 +56,7 @@ class SysConfigOpenGLConan(ConanFile):
             elif tools.os_info.with_zypper:
                 packages = ["Mesa-libGL-devel"]
             else:
-                self.warn("don't know how to install OpenGL for your distro")
+                self.output.warn("Don't know how to install OpenGL for your distro.")
             package_tool.install(update=True, packages=packages)
 
     def package_info(self):
