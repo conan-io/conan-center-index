@@ -37,7 +37,7 @@ class UsocketsConan(ConanFile):
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
-        os.rename("usockets-%s" % self.version, self._source_subfolder)
+        os.rename("uSockets-%s" % self.version, self._source_subfolder)
 
     def _build_msvc(self):
         with tools.chdir(os.path.join(self._source_subfolder)):
