@@ -13,8 +13,9 @@ class UsocketsConan(ConanFile):
     topics = ("conan", "socket", "network", "web")
     settings = "os", "arch", "compiler", "build_type"
     options = {"fPIC": [True, False],
-               "with_openssl": [True, False]}
-    default_options = {"fPIC": True, 'with_openssl': False}
+               "with_ssl": [False, "openssl"],
+               "with_libuv": [True, False]}
+    default_options = {"fPIC": True, 'with_ssl': False, 'with_libuv': True}
     generators = "cmake"
     _source_subfolder = "source_subfolder"
 
@@ -29,35 +30,51 @@ class UsocketsConan(ConanFile):
         del self.settings.compiler.libcxx
 
     def requirements(self):
-        if self.options.with_openssl:
+        if self.options.with_ssl == "openssl":
             self.requires("openssl/1.1.1g")
+        if self.options.with_libuv:
+            self.requires("libuv/1.38.0")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
         os.rename("usockets-%s" % self.version, self._source_subfolder)
 
-
     def _build_msvc(self):
         with tools.chdir(os.path.join(self._source_subfolder)):
+            tools.replace_in_file("uSockets.vcxproj",
+                                  "<WindowsTargetPlatformVersion>10.0.17134.0</WindowsTargetPlatformVersion>", "")
             msbuild = MSBuild(self)
             msbuild.build(project_file="uSockets.vcxproj")
 
     def _build_configure(self):
         make_program = tools.get_env("CONAN_MAKE_PROGRAM", tools.which("make"))
         with tools.chdir(self._source_subfolder):
+            additional_cflags = []
+            additional_ldflags = []
+            if self.options.with_ssl == "openssl":
+                additional_cflags.extend(['-I'+s for s in self.deps_cpp_info['openssl'].include_paths])
+                additional_ldflags.extend(['-L'+os.path.join(self.deps_cpp_info['openssl'].rootpath, s)
+                                           for s in self.deps_cpp_info['openssl'].libdirs])
+            if self.options.with_libuv:
+                additional_cflags.extend(['-I'+s for s in self.deps_cpp_info['libuv'].include_paths])
+                additional_ldflags.extend(['-L'+os.path.join(self.deps_cpp_info['libuv'].rootpath, s)
+                                           for s in self.deps_cpp_info['libuv'].libdirs])
+
             args = []
-            if self.options.with_openssl:
+            if self.options.with_ssl == "openssl":
                 args.append("WITH_OPENSSL=1")
-                tools.replace_in_file("Makefile",
-                                      "override CFLAGS += -DLIBUS_USE_OPENSSL",
-                                      "override CFLAGS += -DLIBUS_USE_OPENSSL " +
-                                      ' '.join(['-I'+s for s in self.deps_cpp_info['openssl'].include_paths])
-                                     )
-                tools.replace_in_file("Makefile",
-                                      "override LDFLAGS += -lssl -lcrypto",
-                                      "override LDFLAGS += " +
-                                      ' '.join(['-L'+s for s in self.deps_cpp_info['openssl'].libdirs]) + " -lssl -lcrypto"
-                                     )
+            if self.options.with_libuv:
+                args.append("WITH_LIBUV=1")
+            tools.replace_in_file("Makefile",
+                                  ".PHONY: examples",
+                                  "override CFLAGS += " + ' '.join(additional_cflags) +
+                                  "\n.PHONY: examples"
+                                 )
+            tools.replace_in_file("Makefile",
+                                  ".PHONY: examples",
+                                  "override LDFLAGS += " + ' '.join(additional_ldflags) +
+                                  "\n.PHONY: examples\n"
+                                 )
             self.run("%s %s" % (' '.join(args), make_program))
 
     def build(self):
@@ -78,7 +95,9 @@ class UsocketsConan(ConanFile):
 
     def package_info(self):
         self.cpp_info.libs = ["uSockets"]
-        if self.options.with_openssl:
+        if self.options.with_ssl == "openssl":
             self.cpp_info.defines.append("LIBUS_USE_OPENSSL")
         else:
             self.cpp_info.defines.append("LIBUS_NO_SSL")
+        if self.options.with_libuv:
+            self.cpp_info.defines.append("LIBUS_USE_LIBUV")
