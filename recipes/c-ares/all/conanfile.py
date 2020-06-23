@@ -8,7 +8,7 @@ class CAresConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     description = "A C library for asynchronous DNS requests"
     topics = ("conan", "c-ares", "dns")
-    homepage = "https://c-ares.haxx.se/"
+    homepage = "https://c-ares.haxx.se"
     settings = "os", "compiler", "build_type", "arch"
     options = {"shared": [True, False], "fPIC": [True, False]}
     default_options = {"shared": False, "fPIC": True}
@@ -72,6 +72,9 @@ class CAresConan(ConanFile):
             self.cpp_info.system_libs.extend(["ws2_32", "Advapi32"])
         elif self.settings.os == "Macos":
             self.cpp_info.system_libs.append("resolv")
+
+        self.cpp_info.names["cmake_find_package"] = "cares"
+        self.cpp_info.names["cmake_find_package_multi"] = "cares"
         self.cpp_info.names["pkg_config"] = "libcares"
 
         bin_path = os.path.join(self.package_folder, "bin")
