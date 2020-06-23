@@ -1,13 +1,23 @@
 diff --git a/libmdnsd/sdtxt.c b/libmdnsd/sdtxt.c
-index c18c852..67e59bc 100644
+index c18c852..5e17e05 100644
 --- a/libmdnsd/sdtxt.c
 +++ b/libmdnsd/sdtxt.c
-@@ -61,7 +61,7 @@ unsigned char *sd2txt(xht_t *h, int *len)
- 	return raw;
- }
- 
--xht_t *txt2sd(const unsigned char *txt, int len)
-+xht_t *txt2sd(const unsigned char *txt, volatile int len)
+@@ -64,15 +64,15 @@ unsigned char *sd2txt(xht_t *h, int *len)
+ xht_t *txt2sd(const unsigned char *txt, int len)
  {
  	char key[256];
- 	xht_t *h = 0;
+-	xht_t *h = 0;
++	xht_t *h = NULL;
+ 
+ 	if (txt == 0 || len == 0 || *txt == 0)
+-		return 0;
++		return NULL;
+ 
+ 	h = xht_new(23);
+ 
+ 	/* Loop through data breaking out each block, storing into hashtable */
+-	for (; *txt <= len && len > 0; len -= *txt, txt += *txt + 1) {
++	for (; len > 0 && *txt <= len; len -= *txt, txt += *txt + 1) {
+ 		char* val;
+ 		if (*txt == 0)
+ 			break;
