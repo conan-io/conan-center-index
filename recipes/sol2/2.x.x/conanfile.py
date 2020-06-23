@@ -9,7 +9,7 @@ class Sol2Conan(ConanFile):
     homepage = "https://github.com/ThePhD/sol2"
     description = "C++17 Lua bindings"
     topics = ("conan", "lua", "c++", "bindings")
-    settings = "os", "compiler"
+    settings = "os", "compiler", "build_type", "arch"
     license = "MIT"
     requires = ["lua/5.3.5"]
 
@@ -37,10 +37,12 @@ class Sol2Conan(ConanFile):
             tools.check_min_cppstd(self, "14")
         compiler = str(self.settings.compiler)
         comp_version = tools.Version(self.settings.compiler.version)
-        compilers = {"Visual Studio": "14", "gcc": "5", "clang": "3.2", "apple-clang": "4.3"}
+        compilers = {"Visual Studio": "14", "gcc": "5",
+                     "clang": "3.2", "apple-clang": "4.3"}
         min_version = compilers.get(compiler)
-        if not min_version :
-            self.output.warn("sol2 recipe lacks information about the %s compiler support".format( compiler))
+        if not min_version:
+            self.output.warn(
+                "sol2 recipe lacks information about the %s compiler support".format(compiler))
         elif comp_version < min_version:
             raise ConanInvalidConfiguration("sol2 requires C++14 or higher support standard."
                                             " {} {} is not supported."
@@ -54,12 +56,14 @@ class Sol2Conan(ConanFile):
         self.copy("LICENSE.txt", src=self._source_subfolder, dst="licenses")
         cmake = self._configure_cmake()
         cmake.install()
-        tools.rmdir(os.path.join(self.package_folder, "share")) # constains just # , "pkgconfig"))
-        tools.rmdir(os.path.join(self.package_folder, "lib" )) # constains just # , "cmake"))
+        # constains just # , "pkgconfig"))
+        tools.rmdir(os.path.join(self.package_folder, "share"))
+        # constains just # , "cmake"))
+        tools.rmdir(os.path.join(self.package_folder, "lib"))
 
     def package_id(self):
         self.info.header_only()
 
     def package_info(self):
-        if self.options["lua"].compile_as_cpp :
+        if self.options["lua"].compile_as_cpp:
             self.cpp_info.defines.append("SOL_USING_CXX_LUA=1")
