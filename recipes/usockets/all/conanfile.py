@@ -24,8 +24,8 @@ class UsocketsConan(ConanFile):
             del self.options.fPIC
 
     def configure(self):
-        if self.settings.compiler == "Visual Studio" and self.options.with_openssl:
-            raise ConanInvalidConfiguration("Windows SSL build is not supported")
+        if self.settings.compiler == "Visual Studio":
+            raise ConanInvalidConfiguration("Windows build is not supported by upstream")
         del self.settings.compiler.cppstd
         del self.settings.compiler.libcxx
 
