@@ -19,8 +19,8 @@ class UsocketsConan(ConanFile):
     _source_subfolder = "source_subfolder"
 
     def config_options(self):
-        # no shared, no fPIC at all
-        del self.options.fPIC
+        if self.settings.os == "Windows":
+            del self.options.fPIC
 
     def configure(self):
         if self.settings.compiler == "Visual Studio" and self.options.with_openssl:
