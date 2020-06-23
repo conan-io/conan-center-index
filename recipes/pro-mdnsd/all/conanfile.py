@@ -43,7 +43,7 @@ class mdnsdConan(ConanFile):
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
         if Version(self.version) <= "0.8.0":
-            folder_name = "%s-%s" % (self.name, "0.8")
+            folder_name = "%s-%s" % ("mdnsd", "0.8")
         else:
             folder_name = "%s-%s" % (self.name, self.version)
         os.rename(folder_name, self._source_subfolder)
