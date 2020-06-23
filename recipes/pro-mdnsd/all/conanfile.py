@@ -7,7 +7,7 @@ from conans.model.version import Version
 
 class mdnsdConan(ConanFile):
     name = "pro-mdnsd"
-    license = "BSD 3-Clause"
+    license = "BSD-3-Clause"
     exports_sources = [
         "CMakeLists.txt",
         "patches/**"
