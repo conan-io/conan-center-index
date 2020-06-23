@@ -1,14 +1,10 @@
 sources:
-  "0.8":
-    url: "https://github.com/Pro/mdnsd/archive/v0.8.tar.gz"
-    sha256: "b7975dda33a93ad31e8862b6c03d33ca72c0ec3a7992f720d2e588d0ee5d7f18"
+  "0.8.1":
+    url: "https://github.com/Pro/mdnsd/archive/v0.8.1.tar.gz"
+    sha256: "2686e3c9c8b45b188b65b93937df05a11117497956ca06ba491365d9e1034c8a"
 patches:
-  "0.8":
+  "0.8.1":
     - patch_file: "patches/remove_addsan.patch"
       base_path: "source_subfolder"
-    - patch_file: "patches/add_install.patch"
-      base_path: "source_subfolder"
     - patch_file: "patches/remove_pic.patch"
-      base_path: "source_subfolder"
-    - patch_file: "patches/fix_signed_overfload_optimization.patch"
       base_path: "source_subfolder"
