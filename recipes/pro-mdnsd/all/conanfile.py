@@ -24,7 +24,7 @@ class mdnsdConan(ConanFile):
     }
     default_options = {
         "fPIC": True,
-        "shared": False,
+        "shared": True,
         "compile_as_cpp": False
     }
     generators = "cmake"
