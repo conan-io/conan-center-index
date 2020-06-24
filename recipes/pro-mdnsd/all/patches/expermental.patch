@@ -84,3 +84,51 @@ index b7d2a4d..23c3473 100644
 -    DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}/${PROJECT_NAME}"
 +    DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}/lib${PROJECT_NAME}"
  )
+diff --git a/libmdnsd/mdnsd_config.h.in b/libmdnsd/mdnsd_config.h.in
+index e110e46..be9e229 100644
+--- a/libmdnsd/mdnsd_config.h.in
++++ b/libmdnsd/mdnsd_config.h.in
+@@ -30,27 +30,27 @@
+ /* On Win32: Define MDNSD_DYNAMIC_LINKING and MDNSD_DYNAMIC_LINKING_EXPORT in order to
+    export symbols for a DLL. Define MDNSD_DYNAMIC_LINKING only to import symbols
+ 	from a DLL.*/
+-#cmakedefine MDNSD_DYNAMIC_LINKING
+-#ifdef _WIN32
+-# ifdef MDNSD_DYNAMIC_LINKING_EXPORT
+-#  ifdef __GNUC__
+-#   define MDNSD_EXPORT __attribute__ ((dllexport))
++#ifdef MDNSD_DYNAMIC_LINKING
++# ifdef _WIN32
++#  ifdef MDNSD_DYNAMIC_LINKING_EXPORT
++#   ifdef __GNUC__
++#    define MDNSD_EXPORT __attribute__ ((dllexport))
++#   else
++#    define MDNSD_EXPORT __declspec(dllexport)
++#   endif
+ #  else
+-#   define MDNSD_EXPORT __declspec(dllexport)
++#   ifdef __GNUC__
++#    define MDNSD_EXPORT __attribute__ ((dllexport))
++#   else
++#    define MDNSD_EXPORT __declspec(dllimport)
++#   endif
+ #  endif
+-# else
+-#  ifdef __GNUC__
+-#   define MDNSD_EXPORT __attribute__ ((dllexport))
+-#  else
+-#   define MDNSD_EXPORT __declspec(dllimport)
++#  if __GNUC__ || __clang__
++#   define MDNSD_EXPORT __attribute__ ((visibility ("default")))
+ #  endif
+ # endif
+ #else
+-# if __GNUC__ || __clang__
+-#  define MDNSD_EXPORT __attribute__ ((visibility ("default")))
+-# else
+-#  define MDNSD_EXPORT
+-# endif
++# define MDNSD_EXPORT
+ #endif
+ 
+ /**
