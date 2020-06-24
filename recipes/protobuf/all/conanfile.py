@@ -81,28 +81,45 @@ class ProtobufConan(ConanFile):
         tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
 
     def package_info(self):
-        self.cpp_info.libs = tools.collect_libs(self)
-        self.cpp_info.libs.sort(reverse=True)
-
-        if self.settings.os == "Linux":
-            self.cpp_info.system_libs.append("pthread")
-            if self._is_clang_x86 or "arm" in str(self.settings.arch):
-                self.cpp_info.system_libs.append("atomic")
-
-        if self.settings.os == "Windows":
-            if self.options.shared:
-                self.cpp_info.defines = ["PROTOBUF_USE_DLLS"]
         self.cpp_info.names["cmake_find_package"] = "Protobuf"
         self.cpp_info.names["cmake_find_package_multi"] = "Protobuf"
-        self.cpp_info.builddirs = [
+
+        if not self.options.lite:
+            self.cpp_info.components["libprotobuf"].name = "libprotobuf"
+            self.cpp_info.components["libprotobuf"].libs = ["protobuf"]
+            if self.settings.os == "Linux":
+                self.cpp_info.components["libprotobuf"].system_libs.append("pthread")
+                if self._is_clang_x86 or "arm" in str(self.settings.arch):
+                    self.cpp_info.components["libprotobuf"].system_libs.append("atomic")
+            if self.settings.os == "Windows":
+                if self.options.shared:
+                    self.cpp_info.components["libprotobuf"].defines = ["PROTOBUF_USE_DLLS"]
+            self.cpp_info.components["protoc"].requires = ["zlib::zlib"]
+
+            self.cpp_info.components["protoc"].name = "protoc"
+            self.cpp_info.components["protoc"].libs = ["protoc"]
+            self.cpp_info.components["protoc"].requires = ["libprotobuf"]
+        else:
+            self.cpp_info.components["libprotobuf-lite"].name = "libprotobuf-lite"
+            self.cpp_info.components["libprotobuf-lite"].libs = ["protobuf-lite"]
+            if self.settings.os == "Linux":
+                self.cpp_info.components["libprotobuf-lite"].system_libs.append("pthread")
+                if self._is_clang_x86 or "arm" in str(self.settings.arch):
+                    self.cpp_info.components["libprotobuf-lite"].system_libs.append("atomic")
+            if self.settings.os == "Windows":
+                if self.options.shared:
+                    self.cpp_info.components["libprotobuf-lite"].defines = ["PROTOBUF_USE_DLLS"]
+
+        self.cpp_info.components["libprotobuf"].builddirs = [
             self._cmake_install_base_path,
         ]
-        self.cpp_info.build_modules = [
+        self.cpp_info.components["libprotobuf"].build_modules = [
             os.path.join(self._cmake_install_base_path, "protobuf-generate.cmake"),
             os.path.join(self._cmake_install_base_path, "protobuf-module.cmake"),
             os.path.join(self._cmake_install_base_path, "protobuf-options.cmake"),
         ]
-        bindir = os.path.join(self.package_folder, "bin")
-        self.output.info("Appending PATH environment variable: {}".format(bindir))
-        self.env_info.PATH.append(bindir)
 
+        if not self.options.lite:
+            bindir = os.path.join(self.package_folder, "bin")
+            self.output.info("Appending PATH environment variable: {}".format(bindir))
+            self.env_info.PATH.append(bindir)

@@ -1,0 +1,242 @@
+diff --git a/cmake/CMakeLists.txt b/cmake/CMakeLists.txt
+index 9ca31ac..9f8be6c 100644
+--- a/cmake/CMakeLists.txt
++++ b/cmake/CMakeLists.txt
+@@ -44,6 +44,7 @@ option(protobuf_BUILD_TESTS "Build tests" ON)
+ option(protobuf_BUILD_CONFORMANCE "Build conformance tests" OFF)
+ option(protobuf_BUILD_EXAMPLES "Build examples" OFF)
+ option(protobuf_BUILD_PROTOC_BINARIES "Build libprotoc and protoc compiler" ON)
++option(protobuf_BUILD_PROTOBUF_LITE "Build libprotobuf-lite" ON)
+ if (BUILD_SHARED_LIBS)
+   set(protobuf_BUILD_SHARED_LIBS_DEFAULT ON)
+ else (BUILD_SHARED_LIBS)
+@@ -125,7 +126,7 @@ endif (CMAKE_USE_PTHREADS_INIT)
+ 
+ set(_protobuf_FIND_ZLIB)
+ if (protobuf_WITH_ZLIB)
+-  find_package(ZLIB)
++  find_package(ZLIB REQUIRED)
+   if (ZLIB_FOUND)
+     set(HAVE_ZLIB 1)
+     # FindZLIB module define ZLIB_INCLUDE_DIRS variable
+@@ -249,8 +250,13 @@ if (protobuf_UNICODE)
+   add_definitions(-DUNICODE -D_UNICODE)
+ endif (protobuf_UNICODE)
+ 
+-include(libprotobuf-lite.cmake)
+-include(libprotobuf.cmake)
++if (protobuf_BUILD_PROTOBUF_LITE)
++  include(libprotobuf-lite.cmake)
++endif()
++
++if (protobuf_BUILD_PROTOC_BINARIES OR NOT protobuf_BUILD_PROTOBUF_LITE)
++  include(libprotobuf.cmake)
++endif()
+ if (protobuf_BUILD_LIBPROTOC)
+   include(libprotoc.cmake)
+ endif (protobuf_BUILD_LIBPROTOC)
+diff --git a/cmake/install.cmake b/cmake/install.cmake
+index be47c54..613f13b 100644
+--- a/cmake/install.cmake
++++ b/cmake/install.cmake
+@@ -5,7 +5,15 @@ configure_file(${CMAKE_CURRENT_SOURCE_DIR}/protobuf.pc.cmake
+ configure_file(${CMAKE_CURRENT_SOURCE_DIR}/protobuf-lite.pc.cmake
+                ${CMAKE_CURRENT_BINARY_DIR}/protobuf-lite.pc @ONLY)
+ 
+-set(_protobuf_libraries libprotobuf-lite libprotobuf)
++set(_protobuf_libraries)
++
++if (protobuf_BUILD_PROTOBUF_LITE)
++  list(APPEND _protobuf_libraries libprotobuf-lite)
++endif (protobuf_BUILD_PROTOBUF_LITE)
++
++if (NOT protobuf_BUILD_PROTOBUF_LITE)
++  list(APPEND _protobuf_libraries libprotobuf)
++endif ()
+ if (protobuf_BUILD_PROTOC_BINARIES)
+     list(APPEND _protobuf_libraries libprotoc)
+ endif (protobuf_BUILD_PROTOC_BINARIES)
+@@ -36,7 +44,7 @@ if (protobuf_BUILD_PROTOC_BINARIES)
+       PROPERTY INSTALL_RPATH "$ORIGIN/../${CMAKE_INSTALL_LIBDIR}")
+   elseif (APPLE)
+     set_property(TARGET protoc
+-      PROPERTY INSTALL_RPATH "@loader_path/../lib")
++      PROPERTY INSTALL_RPATH "@executable_path/../${CMAKE_INSTALL_LIBDIR}")
+   endif()
+ endif (protobuf_BUILD_PROTOC_BINARIES)
+ 
+@@ -110,33 +118,33 @@ endif()
+ mark_as_advanced(CMAKE_INSTALL_CMAKEDIR)
+ 
+ configure_file(protobuf-config.cmake.in
+-  ${CMAKE_INSTALL_CMAKEDIR}/protobuf-config.cmake @ONLY)
+-configure_file(protobuf-config-version.cmake.in
+-  ${CMAKE_INSTALL_CMAKEDIR}/protobuf-config-version.cmake @ONLY)
++  protobuf-generate.cmake @ONLY)
+ configure_file(protobuf-module.cmake.in
+-  ${CMAKE_INSTALL_CMAKEDIR}/protobuf-module.cmake @ONLY)
++  protobuf-module.cmake @ONLY)
+ configure_file(protobuf-options.cmake
+-  ${CMAKE_INSTALL_CMAKEDIR}/protobuf-options.cmake @ONLY)
++  protobuf-options.cmake @ONLY)
++install(FILES "${CMAKE_CURRENT_BINARY_DIR}/protobuf-generate.cmake" "${CMAKE_CURRENT_BINARY_DIR}/protobuf-module.cmake" "${CMAKE_CURRENT_BINARY_DIR}/protobuf-options.cmake" DESTINATION "${CMAKE_INSTALL_CMAKEDIR}")
+ 
+ # Allows the build directory to be used as a find directory.
+ 
+-if (protobuf_BUILD_PROTOC_BINARIES)
++if(0) # Don't export targets + examples
++if (0) # Don't export targets
+   export(TARGETS libprotobuf-lite libprotobuf libprotoc protoc
+     NAMESPACE protobuf::
+     FILE ${CMAKE_INSTALL_CMAKEDIR}/protobuf-targets.cmake
+   )
+-else (protobuf_BUILD_PROTOC_BINARIES)
++elseif (0) # Don't export targets
+   export(TARGETS libprotobuf-lite libprotobuf
+     NAMESPACE protobuf::
+     FILE ${CMAKE_INSTALL_CMAKEDIR}/protobuf-targets.cmake
+   )
+ endif (protobuf_BUILD_PROTOC_BINARIES)
+-
++if(0) # Don't export targets
+ install(EXPORT protobuf-targets
+   DESTINATION "${CMAKE_INSTALL_CMAKEDIR}"
+   NAMESPACE protobuf::
+   COMPONENT protobuf-export)
+-
++endif()
+ install(DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/${CMAKE_INSTALL_CMAKEDIR}/
+   DESTINATION "${CMAKE_INSTALL_CMAKEDIR}"
+   COMPONENT protobuf-export
+@@ -148,3 +156,4 @@ if(protobuf_INSTALL_EXAMPLES)
+   install(DIRECTORY ../examples/ DESTINATION examples
+     COMPONENT protobuf-examples)
+ endif()
++endif()
+diff --git a/cmake/libprotobuf.cmake b/cmake/libprotobuf.cmake
+index 0c12596..327f6fd 100644
+--- a/cmake/libprotobuf.cmake
++++ b/cmake/libprotobuf.cmake
+@@ -1,3 +1,33 @@
++set(libprotobuf_lite_files
++  ${protobuf_source_dir}/src/google/protobuf/any_lite.cc
++  ${protobuf_source_dir}/src/google/protobuf/arena.cc
++  ${protobuf_source_dir}/src/google/protobuf/extension_set.cc
++  ${protobuf_source_dir}/src/google/protobuf/generated_enum_util.cc
++  ${protobuf_source_dir}/src/google/protobuf/generated_message_table_driven_lite.cc
++  ${protobuf_source_dir}/src/google/protobuf/generated_message_util.cc
++  ${protobuf_source_dir}/src/google/protobuf/implicit_weak_message.cc
++  ${protobuf_source_dir}/src/google/protobuf/io/coded_stream.cc
++  ${protobuf_source_dir}/src/google/protobuf/io/io_win32.cc
++  ${protobuf_source_dir}/src/google/protobuf/io/strtod.cc
++  ${protobuf_source_dir}/src/google/protobuf/io/zero_copy_stream.cc
++  ${protobuf_source_dir}/src/google/protobuf/io/zero_copy_stream_impl.cc
++  ${protobuf_source_dir}/src/google/protobuf/io/zero_copy_stream_impl_lite.cc
++  ${protobuf_source_dir}/src/google/protobuf/message_lite.cc
++  ${protobuf_source_dir}/src/google/protobuf/parse_context.cc
++  ${protobuf_source_dir}/src/google/protobuf/repeated_field.cc
++  ${protobuf_source_dir}/src/google/protobuf/stubs/bytestream.cc
++  ${protobuf_source_dir}/src/google/protobuf/stubs/common.cc
++  ${protobuf_source_dir}/src/google/protobuf/stubs/int128.cc
++  ${protobuf_source_dir}/src/google/protobuf/stubs/status.cc
++  ${protobuf_source_dir}/src/google/protobuf/stubs/statusor.cc
++  ${protobuf_source_dir}/src/google/protobuf/stubs/stringpiece.cc
++  ${protobuf_source_dir}/src/google/protobuf/stubs/stringprintf.cc
++  ${protobuf_source_dir}/src/google/protobuf/stubs/structurally_valid.cc
++  ${protobuf_source_dir}/src/google/protobuf/stubs/strutil.cc
++  ${protobuf_source_dir}/src/google/protobuf/stubs/time.cc
++  ${protobuf_source_dir}/src/google/protobuf/wire_format_lite.cc
++)
++
+ set(libprotobuf_files
+   ${protobuf_source_dir}/src/google/protobuf/any.cc
+   ${protobuf_source_dir}/src/google/protobuf/any.pb.cc
+diff --git a/cmake/protobuf-config.cmake.in b/cmake/protobuf-config.cmake.in
+index 11b85d3..218fc58 100644
+--- a/cmake/protobuf-config.cmake.in
++++ b/cmake/protobuf-config.cmake.in
+@@ -1,12 +1,6 @@
+ # User options
+ include("${CMAKE_CURRENT_LIST_DIR}/protobuf-options.cmake")
+ 
+-# Depend packages
+-@_protobuf_FIND_ZLIB@
+-
+-# Imported targets
+-include("${CMAKE_CURRENT_LIST_DIR}/protobuf-targets.cmake")
+-
+ function(protobuf_generate)
+   include(CMakeParseArguments)
+ 
+@@ -41,7 +35,7 @@ function(protobuf_generate)
+   if(protobuf_generate_EXPORT_MACRO AND protobuf_generate_LANGUAGE STREQUAL cpp)
+     set(_dll_export_decl "dllexport_decl=${protobuf_generate_EXPORT_MACRO}:")
+   endif()
+-  
++
+   if(protobuf_generate_PLUGIN)
+       set(_plugin "--plugin=${protobuf_generate_PLUGIN}")
+   endif()
+@@ -125,9 +119,9 @@ function(protobuf_generate)
+ 
+     add_custom_command(
+       OUTPUT ${_generated_srcs}
+-      COMMAND  protobuf::protoc
+-      ARGS --${protobuf_generate_LANGUAGE}_out ${_dll_export_decl}${protobuf_generate_PROTOC_OUT_DIR} ${_plugin} ${_protobuf_include_path} ${_abs_file}
+-      DEPENDS ${_abs_file} protobuf::protoc
++      COMMAND "${CMAKE_COMMAND}"  #FIXME: use conan binary component
++      ARGS -E env "DYLD_LIBRARY_PATH=${Protobuf_LIB_DIRS}:${CONAN_LIB_DIRS}:${Protobuf_LIB_DIRS_RELEASE}:${Protobuf_LIB_DIRS_DEBUG}:${Protobuf_LIB_DIRS_RELWITHDEBINFO}:${Protobuf_LIB_DIRS_MINSIZEREL}" protoc --${protobuf_generate_LANGUAGE}_out ${_dll_export_decl}${protobuf_generate_PROTOC_OUT_DIR} ${_protobuf_include_path} ${_abs_file}
++      DEPENDS ${_abs_file} USES_TERMINAL
+       COMMENT "Running ${protobuf_generate_LANGUAGE} protocol buffer compiler on ${_proto}"
+       VERBATIM )
+   endforeach()
+diff --git a/cmake/protobuf-module.cmake.in b/cmake/protobuf-module.cmake.in
+index 74c5488..4b1b2e2 100644
+--- a/cmake/protobuf-module.cmake.in
++++ b/cmake/protobuf-module.cmake.in
+@@ -163,27 +163,3 @@ FIND_PACKAGE_HANDLE_STANDARD_ARGS(Protobuf
+     REQUIRED_VARS Protobuf_PROTOC_EXECUTABLE Protobuf_LIBRARIES Protobuf_INCLUDE_DIRS
+     VERSION_VAR Protobuf_VERSION
+ )
+-
+-# Backwards compatibility
+-# Define upper case versions of output variables
+-foreach(Camel
+-    Protobuf_VERSION
+-    Protobuf_SRC_ROOT_FOLDER
+-    Protobuf_IMPORT_DIRS
+-    Protobuf_DEBUG
+-    Protobuf_INCLUDE_DIRS
+-    Protobuf_LIBRARIES
+-    Protobuf_PROTOC_LIBRARIES
+-    Protobuf_LITE_LIBRARIES
+-    Protobuf_LIBRARY
+-    Protobuf_PROTOC_LIBRARY
+-    Protobuf_INCLUDE_DIR
+-    Protobuf_PROTOC_EXECUTABLE
+-    Protobuf_LIBRARY_DEBUG
+-    Protobuf_PROTOC_LIBRARY_DEBUG
+-    Protobuf_LITE_LIBRARY
+-    Protobuf_LITE_LIBRARY_DEBUG
+-    )
+-    string(TOUPPER ${Camel} UPPER)
+-    set(${UPPER} ${${Camel}})
+-endforeach()
+diff --git a/cmake/protoc.cmake b/cmake/protoc.cmake
+index f90e525..94e0d40 100644
+--- a/cmake/protoc.cmake
++++ b/cmake/protoc.cmake
+@@ -9,7 +9,12 @@ set(protoc_rc_files
+ endif()
+ 
+ add_executable(protoc ${protoc_files} ${protoc_rc_files})
+-target_link_libraries(protoc libprotoc libprotobuf)
++# Clang x86 requires atomic lib
++if (${CMAKE_SIZEOF_VOID_P} EQUAL 4 AND "${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang" AND NOT ${CMAKE_LIBRARY_ARCHITECTURE})
++    target_link_libraries(protoc libprotobuf libprotoc atomic)
++else ()
++    target_link_libraries(protoc libprotobuf libprotoc)
++endif ()
+ add_executable(protobuf::protoc ALIAS protoc)
+ 
+ set_target_properties(protoc PROPERTIES
