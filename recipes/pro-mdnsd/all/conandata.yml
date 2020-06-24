@@ -2,7 +2,3 @@ sources:
   "0.8.3":
     url: "https://github.com/Pro/mdnsd/archive/v0.8.3.tar.gz"
     sha256: "2d7d45044014b29f40f0e37d4baa784a1d425f6ef8b3eac15592ae50b5ccb057"
-patches:
-  "0.8.3":
-    - patch_file: "patches/expermental.patch"
-      base_path: "source_subfolder"
