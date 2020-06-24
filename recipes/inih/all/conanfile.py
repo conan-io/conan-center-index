@@ -1,4 +1,5 @@
 from conans import ConanFile, Meson, tools
+from conans.errors import ConanInvalidConfiguration
 import os
 
 
@@ -20,7 +21,6 @@ class InihConan(ConanFile):
         "shared": False,
         "fPIC": True,
     }
-    no_copy_source = True
 
     _meson = None
 
@@ -42,6 +42,8 @@ class InihConan(ConanFile):
     def configure(self):
         if self.options.shared:
             del self.options.fPIC
+            if self.settings.os == "Windows":
+                raise ConanInvalidConfiguration("Shared inih is not supported")
         del self.settings.compiler.cppstd
         del self.settings.compiler.libcxx
 
@@ -65,8 +67,12 @@ class InihConan(ConanFile):
         self.copy("LICENSE.txt", dst="licenses", src=self._source_subfolder)
         meson = self._configure_meson()
         meson.install()
-
         tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
+
+        if self.settings.compiler == "Visual Studio":
+            # https://github.com/mesonbuild/meson/issues/7378
+            os.rename(os.path.join(self.package_folder, "lib", "libinih.a"),
+                      os.path.join(self.package_folder, "lib", "inih.lib"))
 
     def package_info(self):
         self.cpp_info.libs = ["inih"]
