@@ -42,7 +42,7 @@ index b7d5036..0a5c022 100644
  )
  
 diff --git a/libmdnsd/CMakeLists.txt b/libmdnsd/CMakeLists.txt
-index b7d2a4d..23c3473 100644
+index b7d2a4d..a9e83d6 100644
 --- a/libmdnsd/CMakeLists.txt
 +++ b/libmdnsd/CMakeLists.txt
 @@ -1,6 +1,6 @@
@@ -53,7 +53,15 @@ index b7d2a4d..23c3473 100644
  
  set(MDNSD_LOGLEVEL 300 CACHE STRING "Level at which logs shall be reported")
  
-@@ -71,12 +71,13 @@ if(MDNSD_COMPILE_AS_CXX)
+@@ -46,6 +46,7 @@ endif()
+ set(MDNSD_DYNAMIC_LINKING OFF)
+ if(BUILD_SHARED_LIBS)
+   set(MDNSD_DYNAMIC_LINKING ON)
++  message(INFO "Generating shared library! MDNSD_DYNAMIC_LINKING is set to ${MDNSD_DYNAMIC_LINKING}")
+ endif()
+ 
+ configure_file("mdnsd_config.h.in" "${PROJECT_BINARY_DIR}/mdnsd_config.h")
+@@ -71,12 +72,13 @@ if(MDNSD_COMPILE_AS_CXX)
      set_source_files_properties(${LIBRARY_FILES} PROPERTIES LANGUAGE CXX)
  endif()
  
@@ -71,7 +79,7 @@ index b7d2a4d..23c3473 100644
  endif()
  
  install(
-@@ -88,10 +89,10 @@ install(
+@@ -88,10 +90,10 @@ install(
  
  install(
      FILES ${PUBLIC_INCLUDES}
