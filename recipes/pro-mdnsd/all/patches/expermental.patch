@@ -1,7 +1,15 @@
 diff --git a/CMakeLists.txt b/CMakeLists.txt
-index b7d5036..9966afc 100644
+index b7d5036..0a5c022 100644
 --- a/CMakeLists.txt
 +++ b/CMakeLists.txt
+@@ -1,6 +1,6 @@
+ cmake_minimum_required(VERSION 2.8)
+ 
+-project(mdnsd)
++project(mdnsd_example)
+ list(APPEND CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/tools/cmake")
+ 
+ include(GNUInstallDirs)
 @@ -15,11 +15,9 @@ if(MDNSD_BUILD_FUZZING)
      add_definitions(-DFUZZING_BUILD_MODE_UNSAFE_FOR_PRODUCTION)
  endif()
@@ -22,10 +30,11 @@ index b7d5036..9966afc 100644
 -add_executable(mdnsd mdnsd.c)
 -target_link_libraries(mdnsd PRIVATE libmdnsd)
 +add_executable(mdns_daemon mdnsd.c)
-+target_link_libraries(mdns_daemon PRIVATE libmdnsd)
++target_link_libraries(mdns_daemon PRIVATE mdnsd)
  
  add_executable(mquery mquery.c)
- target_link_libraries(mquery PRIVATE libmdnsd)
+-target_link_libraries(mquery PRIVATE libmdnsd)
++target_link_libraries(mquery PRIVATE mdnsd)
  
 -install(TARGETS mdnsd mquery
 +install(TARGETS mdns_daemon mquery
@@ -33,17 +42,43 @@ index b7d5036..9966afc 100644
  )
  
 diff --git a/libmdnsd/CMakeLists.txt b/libmdnsd/CMakeLists.txt
-index b7d2a4d..dcb3a1c 100644
+index b7d2a4d..acc28f6 100644
 --- a/libmdnsd/CMakeLists.txt
 +++ b/libmdnsd/CMakeLists.txt
-@@ -72,8 +72,8 @@ if(MDNSD_COMPILE_AS_CXX)
+@@ -1,6 +1,6 @@
+ cmake_minimum_required(VERSION 2.8)
+ 
+-project(libmdnsd)
++project(mdnsd)
+ 
+ set(MDNSD_LOGLEVEL 300 CACHE STRING "Level at which logs shall be reported")
+ 
+@@ -71,12 +71,11 @@ if(MDNSD_COMPILE_AS_CXX)
+     set_source_files_properties(${LIBRARY_FILES} PROPERTIES LANGUAGE CXX)
  endif()
  
- add_library(libmdnsd ${LIBRARY_FILES} ${PUBLIC_INCLUDES})
+-add_library(libmdnsd ${LIBRARY_FILES} ${PUBLIC_INCLUDES})
 -set_property(TARGET libmdnsd PROPERTY OUTPUT_NAME "mdnsd")
 -set_property(TARGET libmdnsd PROPERTY DEFINE_SYMBOL "MDNSD_DYNAMIC_LINKING_EXPORT")
-+set_target_properties(libmdnsd PROPERTIES OUTPUT_NAME "mdnsd")
-+target_compile_definitions(libmdnsd PUBLIC MDNSD_DYNAMIC_LINKING_EXPORT)
++add_library(${PROJECT_NAME} ${LIBRARY_FILES} ${PUBLIC_INCLUDES})
++target_compile_definitions(${PROJECT_NAME} PUBLIC MDNSD_DYNAMIC_LINKING_EXPORT)
  
  if(WIN32)
-   target_link_libraries(libmdnsd PUBLIC wsock32 ws2_32)
+-  target_link_libraries(libmdnsd PUBLIC wsock32 ws2_32)
++  target_link_libraries(${PROJECT_NAME} PUBLIC wsock32 ws2_32)
+ endif()
+ 
+ install(
+@@ -88,10 +87,10 @@ install(
+ 
+ install(
+     FILES ${PUBLIC_INCLUDES}
+-    DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}/${PROJECT_NAME}"
++    DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}/lib${PROJECT_NAME}"
+ )
+ 
+ install(
+     FILES ${PROJECT_BINARY_DIR}/mdnsd_config.h
+-    DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}/${PROJECT_NAME}"
++    DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}/lib${PROJECT_NAME}"
+ )
