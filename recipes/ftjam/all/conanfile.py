@@ -88,7 +88,6 @@ class FtjamConan(ConanFile):
         license_txt = txt[:txt.find("*/")+3]
         tools.save(os.path.join(self.package_folder, "licenses", "LICENSE"), license_txt)
         if self.settings.compiler == "Visual Studio":
-            # self.copy("")
             pass
         else:
             if self.settings.os == "Windows":
