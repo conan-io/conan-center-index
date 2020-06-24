@@ -56,10 +56,12 @@ class SysConfigOpenGLConan(ConanFile):
             elif tools.os_info.with_zypper:
                 packages = ["Mesa-libGL-devel"]
             else:
-                self.warn("don't know how to install OpenGL for your distro")
+                self.output.warn("Don't know how to install OpenGL for your distro.")
             package_tool.install(update=True, packages=packages)
 
     def package_info(self):
+        self.cpp_info.includedirs = []
+        self.cpp_info.libdirs = []
         if self.settings.os == "Macos":
             self.cpp_info.defines.append("GL_SILENCE_DEPRECATION=1")
             self.cpp_info.frameworks.append("OpenGL")

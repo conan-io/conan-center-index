@@ -13,6 +13,7 @@ class RocksDB(ConanFile):
     topics = ("conan", "rocksdb", "database",
               "leveldb", "facebook", "key-value")
     settings = "os", "compiler", "build_type", "arch"
+
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
@@ -22,7 +23,10 @@ class RocksDB(ConanFile):
         "with_lz4": [True, False],
         "with_zlib": [True, False],
         "with_zstd": [True, False],
-        "with_tbb": [True, False]
+        "with_tbb": [True, False],
+        "with_jemalloc": [True, False],
+        "enable_sse": [False, "sse42", "avx2"],
+        "use_rtti": [True, False]
     }
     default_options = {
         "shared": False,
@@ -33,9 +37,12 @@ class RocksDB(ConanFile):
         "with_zlib": False,
         "with_zstd": False,
         "with_gflags": False,
-        "with_tbb": False
+        "with_tbb": False,
+        "with_jemalloc": False,
+        "enable_sse": False,
+        "use_rtti": False
     }
-    exports_sources = ["CMakeLists.txt"]
+    exports_sources = ["CMakeLists.txt", "patches/**"]
     generators = "cmake", "cmake_find_package"
 
     _cmake = None
@@ -52,15 +59,24 @@ class RocksDB(ConanFile):
         if self.settings.os == "Windows":
             del self.options.fPIC
 
+        if self.settings.arch != "x86_64":
+            del self.options.with_tbb
+
         minimal_cpp_standard = "11"
         if self.settings.compiler.cppstd:
             tools.check_min_cppstd(self, minimal_cpp_standard)
 
     def configure(self):
+        if self.settings.arch not in ["x86_64", "ppc64le", "ppc64", "mips64", "armv8"]:
+            raise ConanInvalidConfiguration("Rocksdb requires 64 bits")
+
         if self.settings.os == "Windows" and \
            self.settings.compiler == "Visual Studio" and \
            tools.Version(self.settings.compiler.version) < "15":
             raise ConanInvalidConfiguration("Rocksdb requires Visual Studio 15 or later.")
+
+        if self.settings.build_type == "Debug":
+            self.options.use_rtti = True  # Rtti are used in asserts for debug mode...
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
@@ -89,18 +105,35 @@ class RocksDB(ConanFile):
         self._cmake.definitions["WITH_ZLIB"] = self.options.with_zlib
         self._cmake.definitions["WITH_ZSTD"] = self.options.with_zstd
         self._cmake.definitions["WITH_TBB"] = self.options.with_tbb
+        self._cmake.definitions["WITH_JEMALLOC"] = self.options.with_jemalloc
         self._cmake.definitions["ROCKSDB_BUILD_SHARED"] = self.options.shared
         self._cmake.definitions["ROCKSDB_LIBRARY_EXPORTS"] = self.settings.os == "Windows" and self.options.shared
         self._cmake.definitions["ROCKSDB_DLL" ] = self.settings.os == "Windows" and self.options.shared
 
+        self._cmake.definitions["USE_RTTI"] = self.options.use_rtti
+        if self.options.enable_sse == "False":
+          self._cmake.definitions["PORTABLE"] = True
+          self._cmake.definitions["FORCE_SSE42"] = False
+        elif self.options.enable_sse == "sse42":
+          self._cmake.definitions["PORTABLE"] = True
+          self._cmake.definitions["FORCE_SSE42"] = True
+        elif self.options.enable_sse == "avx2":
+          self._cmake.definitions["PORTABLE"] = False
+          self._cmake.definitions["FORCE_SSE42"] = False
+
         # not available yet in CCI
-        self._cmake.definitions["WITH_JEMALLOC"] = False
+
         self._cmake.definitions["WITH_NUMA"] = False
 
         self._cmake.configure(build_folder=self._build_subfolder)
         return self._cmake
 
+    def _patch_sources(self):
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            tools.patch(**patch)
+
     def build(self):
+        self._patch_sources()
         cmake = self._configure_cmake()
         cmake.build()
 
@@ -117,6 +150,8 @@ class RocksDB(ConanFile):
             self.requires("zstd/1.3.8")
         if self.options.with_tbb:
             self.requires("tbb/2019_u9")
+        if self.options.with_jemalloc:
+            self.requires("jemalloc/5.2.1")
 
     def _remove_static_libraries(self):
         for static_lib_name in ["lib*.a", "{}.lib".format(self.name)]:
