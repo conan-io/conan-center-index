@@ -88,7 +88,7 @@ class NettleTLS(ConanFile):
     def package_info(self):
         self.cpp_info.components["hogweed"].libs = ["hogweed"]
         if self.options.public_key:
-            self.cpp_info.components["hogweed"].requires.append("gmp::gmp")  # FIXME: gmp::libgmp
+            self.cpp_info.components["hogweed"].requires.append("gmp::libgmp")
 
         self.cpp_info.components["libnettle"].libs = ["nettle"]
         self.cpp_info.components["libnettle"].requires = ["hogweed"]
