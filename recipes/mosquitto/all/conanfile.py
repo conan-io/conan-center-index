@@ -63,7 +63,7 @@ class MosquittoConan(ConanFile):
             self._cmake.definitions["WITH_MOSQUITTOPP"] = self.options.with_mosquittopp
             self._cmake.definitions["WITH_TLS"] = self.options.with_tls
             self._cmake.definitions["DOCUMENTATION"] = False
-            self._cmake.definitions["CMAKE_INSTALL_SYSCONFDIR"] = "res"
+            self._cmake.definitions["CMAKE_INSTALL_SYSCONFDIR"] = "share"
             self._cmake.configure(build_folder=self._build_subfolder)
         return self._cmake
 
@@ -77,11 +77,13 @@ class MosquittoConan(ConanFile):
         self.copy(pattern="LICENSE.txt", dst="licenses", src=self._source_subfolder)
         self.copy(pattern="edl-v10", dst="licenses", src=self._source_subfolder)
         self.copy(pattern="epl-v10", dst="licenses", src=self._source_subfolder)
-        self.copy(pattern="mosquitto.conf", src=self._source_subfolder, dst="bin")
+        if self.options.with_binaries:
+            self.copy(pattern="mosquitto.conf", src=self._source_subfolder, dst="bin")
         cmake = self._configure_cmake()
         cmake.install()
         tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
         tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
+        tools.rmdir(os.path.join(self.package_folder, "share"))
 
     def package_info(self):
         self.cpp_info.libs = tools.collect_libs(self)
