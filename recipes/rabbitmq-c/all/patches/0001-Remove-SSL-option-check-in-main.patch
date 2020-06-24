@@ -1,0 +1,18 @@
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -118,15 +118,6 @@ endif()
+ 
+ option(ENABLE_SSL_SUPPORT "Enable SSL support" ON)
+ 
+-if (ENABLE_SSL_SUPPORT)
+-  find_package(OpenSSL 0.9.8 REQUIRED)
+-
+-  cmake_push_check_state()
+-  set(THREADS_PREFER_PTHREAD_FLAG ON)
+-  find_package(Threads REQUIRED)
+-  cmake_pop_check_state()
+-endif()
+-
+ if (MSVC)
+   set(CMAKE_C_FLAGS "/W4 /nologo ${CMAKE_C_FLAGS}")
+ elseif (CMAKE_C_COMPILER_ID MATCHES ".*Clang")
