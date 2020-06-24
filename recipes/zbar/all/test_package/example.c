@@ -1,5 +1,4 @@
 #include <stdio.h>
-#include <stdlib.h>
 #include <zbar.h>
 
 zbar_image_scanner_t *scanner = NULL;
@@ -23,7 +22,7 @@ int main (int argc, char **argv)
 
 	printf("Compiled ZBar version %d.%d \n", VersionMajor, VersionMinor);
 
-	printf("Zbar Test Completed \n");
+	printf("ZBar Test Completed \n");
 
     return(0);
 }
