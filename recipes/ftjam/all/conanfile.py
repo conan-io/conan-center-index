@@ -55,7 +55,7 @@ class FtjamConan(ConanFile):
         return self._autotools
 
     def build(self):
-        if self.settings.compiler.build_type != "Release":
+        if self.settings.build_type != "Release":
             raise ConanInvalidConfiguration("This build_type is disabled in order to diminish the number of builds")
         if self.settings.compiler == "Visual Studio":
             if self.settings.compiler.runtime != "MT":
