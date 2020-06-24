@@ -30,8 +30,6 @@ class UsocketsConan(ConanFile):
             raise ConanInvalidConfiguration("Windows build is not supported by upstream")
         del self.settings.compiler.cppstd
         del self.settings.compiler.libcxx
-        if self.options.with_ssl == "wolfssl":
-            self.options["wolfssl"].opensslextra = True
 
     def requirements(self):
         if self.options.with_ssl == "openssl":
@@ -61,6 +59,10 @@ class UsocketsConan(ConanFile):
                 additional_cflags.extend(['-I'+s for s in self.deps_cpp_info['openssl'].include_paths])
                 additional_ldflags.extend(['-L'+os.path.join(self.deps_cpp_info['openssl'].rootpath, s)
                                            for s in self.deps_cpp_info['openssl'].libdirs])
+            if self.options.with_ssl == "wolfssl":
+                additional_cflags.extend(['-I'+s for s in self.deps_cpp_info['wolfssl'].include_paths])
+                additional_ldflags.extend(['-L'+os.path.join(self.deps_cpp_info['wolfssl'].rootpath, s)
+                                           for s in self.deps_cpp_info['wolfssl'].libdirs])
             if self.options.with_libuv:
                 additional_cflags.extend(['-I'+s for s in self.deps_cpp_info['libuv'].include_paths])
                 additional_ldflags.extend(['-L'+os.path.join(self.deps_cpp_info['libuv'].rootpath, s)
@@ -93,6 +95,9 @@ class UsocketsConan(ConanFile):
             self.run("%s %s" % (' '.join(args), make_program))
 
     def build(self):
+        if self.options.with_ssl == "wolfssl":
+            if not self.options["wolfssl"].opensslextra:
+                raise ConanInvalidConfiguration("wolfssl needs opensslextra option enabled for usockets")
         if self.settings.compiler == "Visual Studio":
             self._build_msvc()
         else:
