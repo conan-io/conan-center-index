@@ -47,7 +47,7 @@ class BacnetStackConan(ConanFile):
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
-        if self.version.startswith("cci"):
+        if self.version.startswith("2020"):
             extracted_dir = self.name + "-" + os.path.basename(self.conan_data["sources"][self.version]["url"]).split(".")[0]
         else:
             extracted_dir = self.name + "-" + self.name + "-" + self.version
