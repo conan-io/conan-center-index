@@ -11,6 +11,7 @@ class zbarConan(ConanFile):
     topics = ("conan", "zbar", "bar codes")
     description = "ZBar is an open source software suite for reading bar codes\
                    from various sources, such as video streams, image files and raw intensity sensors"
+    exports_sources = ["patches/*"]
     settings = "os", "compiler", "build_type", "arch"
     options = {"shared": [True, False],
                "fPIC": [True, False],
@@ -82,13 +83,14 @@ class zbarConan(ConanFile):
         if self.options.with_xv:            #TODO add when available
             self.output.warn("There is no Xvideo package available on Conan (yet). This recipe will use the one present on the system (if available).")
 
-
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
         extracted_dir = self.name + "-" + self.version
         os.rename(extracted_dir, self._source_subfolder)
 
     def build(self):
+        for patch in self.conan_data["patches"][self.version]:
+            tools.patch(**patch)
         env_build = self._configure_autotools()
         env_build.make()
 
@@ -107,4 +109,5 @@ class zbarConan(ConanFile):
             self.cpp_info.system_libs = ["pthread"]
         if tools.is_apple_os(self.settings.os):
             self.cpp_info.system_libs = ["iconv"]
-
+        self.cpp_info.names["cmake_find_package"] = "ZBar"
+        self.cpp_info.names["cmake_find_package_multi"] = "ZBar"
