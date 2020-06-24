@@ -26,8 +26,6 @@ class UsocketsConan(ConanFile):
             del self.options.fPIC
 
     def configure(self):
-        if self.settings.compiler == "Visual Studio":
-            raise ConanInvalidConfiguration("Windows build is not supported by upstream")
         del self.settings.compiler.cppstd
         del self.settings.compiler.libcxx
 
@@ -47,8 +45,11 @@ class UsocketsConan(ConanFile):
         with tools.chdir(os.path.join(self._source_subfolder)):
             tools.replace_in_file("uSockets.vcxproj",
                                   "<WindowsTargetPlatformVersion>10.0.17134.0</WindowsTargetPlatformVersion>", "")
+            tools.replace_in_file("uSockets.vcxproj",
+                                  "<ConfigurationType>DynamicLibrary</ConfigurationType>",
+                                  "<ConfigurationType>StaticLibrary</ConfigurationType>")
             msbuild = MSBuild(self)
-            msbuild.build(project_file="uSockets.vcxproj")
+            msbuild.build(project_file="uSockets.vcxproj", platforms={"x86": "Win32"})
 
     def _build_configure(self):
         make_program = tools.get_env("CONAN_MAKE_PROGRAM", tools.which("make"))
@@ -110,7 +111,8 @@ class UsocketsConan(ConanFile):
     def package(self):
         self.copy(pattern="LICENSE", dst="licenses", src=self._source_subfolder)
         self.copy(pattern="*.h", src=os.path.join(self._source_subfolder, "src"), dst="include", keep_path=True)
-        self.copy(pattern="*.a", src=os.path.join(self._source_subfolder), dst="lib", keep_path=False)
+        self.copy(pattern="*.a", src=self._source_subfolder, dst="lib", keep_path=False)
+        self.copy(pattern="*.lib", src=self._source_subfolder, dst="lib", keep_path=False)
         # drop internal headers
         tools.rmdir(os.path.join(self.package_folder, "include", "internal"))
 
