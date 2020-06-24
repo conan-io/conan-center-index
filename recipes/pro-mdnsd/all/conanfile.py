@@ -78,4 +78,3 @@ class mdnsdConan(ConanFile):
         self.cpp_info.libs = tools.collect_libs(self)
         if self.settings.os == "Windows":
             self.cpp_info.system_libs.append("ws2_32")
-            self.cpp_info.defines.append("MDNSD_DYNAMIC_LINKING")
