@@ -1,0 +1,8 @@
+sources:
+  "1.6.10":
+    sha256: ffcfca01342ca8b82303bd1a9ccb0ff9b715e5711280a2fedba14e739f54f595
+    url: https://github.com/eclipse/mosquitto/archive/v1.6.10.tar.gz
+patches:
+  "1.6.10":
+    - patch_file: "patches/0001-optional-binaries.patch"
+      base_path: "source_subfolder"
