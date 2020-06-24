@@ -6,10 +6,12 @@ class NlohmannJsonConan(ConanFile):
     name = "nlohmann_json"
     homepage = "https://github.com/nlohmann/json"
     description = "JSON for Modern C++ parser and generator."
-    topics = ("conan", "jsonformoderncpp", "nlohmann_json", "json", "header-only")
+    topics = ("conan", "jsonformoderncpp",
+              "nlohmann_json", "json", "header-only")
     url = "https://github.com/conan-io/conan-center-index"
     no_copy_source = True
     license = "MIT"
+    settings = "os", "compiler", "build_type", "arch"
     options = {
         "multiple_headers": [True, False]
     }
@@ -38,7 +40,8 @@ class NlohmannJsonConan(ConanFile):
         cmake.build()
 
     def package(self):
-        self.copy(pattern="LICENSE*", dst="licenses", src=self._source_subfolder)
+        self.copy(pattern="LICENSE*", dst="licenses",
+                  src=self._source_subfolder)
         cmake = self._configure_cmake()
         cmake.install()
         tools.rmdir(os.path.join(self.package_folder, "lib"))
@@ -46,3 +49,6 @@ class NlohmannJsonConan(ConanFile):
             os.remove(os.path.join(self.package_folder, "nlohmann_json.natvis"))
         except FileNotFoundError:
             pass
+
+    def package_id(self):
+        self.info.settings.clear()

@@ -38,16 +38,17 @@ class ConanXOrg(ConanFile):
         if tools.os_info.is_linux and self.settings.os == "Linux":
             package_tool = tools.SystemPackageTool(conanfile=self, default_mode="verify")
             if tools.os_info.with_apt:
-                packages = ["xorg-dev", "libx11-xcb-dev"]
-            elif tools.os_info.with_yum:
+                packages = ["xorg-dev", "libx11-xcb-dev", "libxcb-render0-dev", "libxcb-render-util0-dev"]
+            elif tools.os_info.with_yum or tools.os_info.with_dnf:
                 packages = ["xorg-x11-server-devel"]
             elif tools.os_info.with_pacman:
                 packages = ["xorg-server-devel"]
             elif tools.os_info.with_zypper:
                 packages = ["Xorg-x11-devel"]
             else:
-                self.warn("Do not know how to install 'xorg' for {}.".format(tools.os_info.linux_distro))
-            package_tool.install(update=True, packages=" ".join(packages))
+                self.output.warn("Do not know how to install 'xorg' for {}.".format(tools.os_info.linux_distro))
+            for p in packages:
+                package_tool.install(update=True, packages=p)
 
     def package_info(self):
         for name in ["x11", "x11-xcb", "dmx", "fontenc", "libfs", "ice", "sm", "xau", "xaw7",
