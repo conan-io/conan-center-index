@@ -69,19 +69,24 @@ class GmpConan(ConanFile):
         with tools.chdir(self._source_subfolder):
             autotools = self._configure_autotools()
             autotools.install()
+
+        tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
         tools.rmdir(os.path.join(self.package_folder, "share"))
-        # remove la files
-        for la_name in ['libgmp.la', 'libgmpxx.la']:
-            la = os.path.join(self.package_folder, "lib", la_name)
-            if os.path.isfile(la):
-                os.unlink(la)
+        os.unlink(os.path.join(self.package_folder, "lib", "libgmp.la"))
+        if self.options.enable_cxx:
+            os.unlink(os.path.join(self.package_folder, "lib", "libgmpxx.la"))
 
     def package_id(self):
         del self.info.options.run_checks  # run_checks doesn't affect package's ID
 
     def package_info(self):
+        self.cpp_info.components["libgmp"].libs = ["gmp"]
+        self.cpp_info.components["libgmp"].names["cmake_find_package"] = "GMP"
+        self.cpp_info.components["libgmp"].names["cmake_find_package_multi"] = "GMP"
+        self.cpp_info.components["libgmp"].names["pkg_config"] = "gmp"
         if self.options.enable_cxx:
-            self.cpp_info.libs = ["gmpxx"]
-        self.cpp_info.libs.append("gmp")
-        self.cpp_info.names["cmake_find_package"] = "GMP"
-        self.cpp_info.names["cmake_find_package_multi"] = "GMP"
+            self.cpp_info.components["gmpxx"].libs = ["gmpxx"]
+            self.cpp_info.components["gmpxx"].requires = ["libgmp"]
+            self.cpp_info.components["gmpxx"].names["cmake_find_package"] = "GMPXX"
+            self.cpp_info.components["gmpxx"].names["cmake_find_package_multi"] = "GMPXX"
+            self.cpp_info.components["gmpxx"].names["pkg_config"] = "gmpxx"
