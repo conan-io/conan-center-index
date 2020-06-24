@@ -1,4 +1,4 @@
-from conans import ConanFile, tools
+from conans import AutoToolsBuildEnvironment, ConanFile, tools
 import os
 import shutil
 
@@ -13,7 +13,13 @@ class TestPackage(ConanFile):
         if not tools.cross_building(self.settings):
             assert os.path.isfile(os.environ["JAM"])
 
-            self.run(os.environ["JAM"])
+            vars = AutoToolsBuildEnvironment(self).vars
+            vars["CCFLAGS"] = vars["CFLAGS"]
+            vars["C++FLAGS"] = vars["CXXFLAGS"]
+            vars["LINKFLAGS"] = vars["LDFLAGS"]
+            vars["LINKLIBS"] = vars["LIBS"]
+            with tools.environment_append(vars):
+                self.run("{} -d7".format(os.environ["JAM"]), run_environment=True)
 
     def test(self):
         if not tools.cross_building(self.settings):
