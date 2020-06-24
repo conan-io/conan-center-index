@@ -1,5 +1,5 @@
 diff --git a/CMakeLists.txt b/CMakeLists.txt
-index b7d5036..49a02b4 100644
+index b7d5036..2032d2b 100644
 --- a/CMakeLists.txt
 +++ b/CMakeLists.txt
 @@ -15,11 +15,9 @@ if(MDNSD_BUILD_FUZZING)
@@ -15,27 +15,7 @@ index b7d5036..49a02b4 100644
  
  if(MDNSD_BUILD_FUZZING_CORPUS)
      add_definitions(-DMDNSD_DEBUG_DUMP_PKGS_FILE)
-@@ -27,19 +25,6 @@ endif()
- 
- option(MDNSD_ENABLE_SANITIZERS "enable sanitizers for mdnsd ON)" ON)
- 
--# Debug
--string(TOLOWER "${CMAKE_BUILD_TYPE}" BUILD_TYPE_LOWER_CASE)
--if(MDNSD_ENABLE_SANITIZERS AND BUILD_TYPE_LOWER_CASE STREQUAL "debug" AND UNIX)
--    if("x${CMAKE_C_COMPILER_ID}" STREQUAL "xClang")
--        # Add default sanitizer settings when using clang and Debug build.
--        # This allows e.g. CLion to find memory locations for SegFaults
--        message(STATUS "Sanitizer enabled")
--        set(SANITIZER_FLAGS "-g -fno-omit-frame-pointer -gline-tables-only -fsanitize=address -fsanitize-address-use-after-scope -fsanitize-coverage=trace-pc-guard,trace-cmp -fsanitize=leak -fsanitize=undefined")
--        set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${SANITIZER_FLAGS}")
--        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${SANITIZER_FLAGS}")
--    endif()
--endif()
--
- add_subdirectory(libmdnsd)
- 
- #option(MDNSD_BUILD_UNIT_TESTS "Build the unit tests" OFF)
-@@ -51,13 +36,13 @@ if(MDNSD_BUILD_FUZZING OR MDNSD_BUILD_OSS_FUZZ)
+@@ -51,8 +49,8 @@ if(MDNSD_BUILD_FUZZING OR MDNSD_BUILD_OSS_FUZZ)
      add_subdirectory(tests/fuzz)
  endif()
  
@@ -46,12 +26,6 @@ index b7d5036..49a02b4 100644
  
  add_executable(mquery mquery.c)
  target_link_libraries(mquery PRIVATE libmdnsd)
- 
--install(TARGETS mdnsd mquery
-+install(TARGETS mdns_daemon mquery
-     RUNTIME DESTINATION "${CMAKE_INSTALL_BINDIR}"
- )
- 
 diff --git a/libmdnsd/CMakeLists.txt b/libmdnsd/CMakeLists.txt
 index b7d2a4d..b3f5e16 100644
 --- a/libmdnsd/CMakeLists.txt
@@ -62,7 +36,7 @@ index b7d2a4d..b3f5e16 100644
  add_library(libmdnsd ${LIBRARY_FILES} ${PUBLIC_INCLUDES})
 -set_property(TARGET libmdnsd PROPERTY OUTPUT_NAME "mdnsd")
 -set_property(TARGET libmdnsd PROPERTY DEFINE_SYMBOL "MDNSD_DYNAMIC_LINKING_EXPORT")
-+set_target_properties(libmdnsd PROPERTIES OUTPUT_NAME "mdnsd")
++set_target_properties(libmdnsd PROPERTY OUTPUT_NAME "mdnsd")
 +target_compile_definitions(libmdnsd PUBLIC MDNSD_DYNAMIC_LINKING_EXPORT)
  
  if(WIN32)
