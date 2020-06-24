@@ -8,8 +8,10 @@ class TaoCPPPEGTLConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/taocpp/pegtl"
     description = "Parsing Expression Grammar Template Library"
-    topics = ("peg", "header-only", "cpp", "parsing", "cpp17", "cpp11", "grammar")
+    topics = ("peg", "header-only", "cpp",
+              "parsing", "cpp17", "cpp11", "grammar")
     no_copy_source = True
+    settings = "os", "compiler", "build_type", "arch"
 
     @property
     def _source_subfolder(self):
