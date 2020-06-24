@@ -36,7 +36,7 @@ index b7d2a4d..b3f5e16 100644
  add_library(libmdnsd ${LIBRARY_FILES} ${PUBLIC_INCLUDES})
 -set_property(TARGET libmdnsd PROPERTY OUTPUT_NAME "mdnsd")
 -set_property(TARGET libmdnsd PROPERTY DEFINE_SYMBOL "MDNSD_DYNAMIC_LINKING_EXPORT")
-+set_target_properties(libmdnsd PROPERTY OUTPUT_NAME "mdnsd")
++set_target_properties(libmdnsd PROPERTIES OUTPUT_NAME "mdnsd")
 +target_compile_definitions(libmdnsd PUBLIC MDNSD_DYNAMIC_LINKING_EXPORT)
  
  if(WIN32)
