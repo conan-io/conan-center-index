@@ -1,6 +1,6 @@
 import os
 
-from conans import ConanFile, tools, MSBuild
+from conans import ConanFile, tools, MSBuild, AutoToolsBuildEnvironment
 from conans.errors import ConanInvalidConfiguration
 
 
@@ -16,6 +16,7 @@ class UsocketsConan(ConanFile):
                "with_ssl": [False, "openssl", "wolfssl"],
                "with_libuv": [True, False]}
     default_options = {"fPIC": True, "with_ssl": False, "with_libuv": True}
+    exports_sources = "patches/**"
 
     @property
     def _source_subfolder(self):
@@ -41,35 +42,19 @@ class UsocketsConan(ConanFile):
         tools.get(**self.conan_data["sources"][self.version])
         os.rename("uSockets-%s" % self.version, self._source_subfolder)
 
+    def _patch_sources(self):
+        for patch in self.conan_data["patches"][self.version]:
+            tools.patch(**patch)
+
     def _build_msvc(self):
         with tools.chdir(os.path.join(self._source_subfolder)):
-            tools.replace_in_file("uSockets.vcxproj",
-                                  "<WindowsTargetPlatformVersion>10.0.17134.0</WindowsTargetPlatformVersion>", "")
-            tools.replace_in_file("uSockets.vcxproj",
-                                  "<ConfigurationType>DynamicLibrary</ConfigurationType>",
-                                  "<ConfigurationType>StaticLibrary</ConfigurationType>")
             msbuild = MSBuild(self)
             msbuild.build(project_file="uSockets.vcxproj", platforms={"x86": "Win32"})
 
     def _build_configure(self):
-        make_program = tools.get_env("CONAN_MAKE_PROGRAM", tools.which("make"))
+        autotools = AutoToolsBuildEnvironment(self)
+        autotools.fpic = self.options.get_safe("fPIC", False)
         with tools.chdir(self._source_subfolder):
-            additional_cflags = []
-            additional_ldflags = []
-            if self.options.with_ssl == "openssl":
-                additional_cflags.extend(['-I'+s for s in self.deps_cpp_info['openssl'].include_paths])
-                additional_ldflags.extend(['-L'+os.path.join(self.deps_cpp_info['openssl'].rootpath, s)
-                                           for s in self.deps_cpp_info['openssl'].libdirs])
-            if self.options.with_ssl == "wolfssl":
-                additional_cflags.extend(['-I'+s for s in self.deps_cpp_info['wolfssl'].include_paths])
-                additional_ldflags.extend(['-L'+os.path.join(self.deps_cpp_info['wolfssl'].rootpath, s)
-                                           for s in self.deps_cpp_info['wolfssl'].libdirs])
-            if self.options.with_libuv:
-                additional_cflags.extend(['-I'+s for s in self.deps_cpp_info['libuv'].include_paths])
-                additional_ldflags.extend(['-L'+os.path.join(self.deps_cpp_info['libuv'].rootpath, s)
-                                           for s in self.deps_cpp_info['libuv'].libdirs])
-
-            # set options for Makefile
             args = []
             if self.options.with_ssl == "openssl":
                 args.append("WITH_OPENSSL=1")
@@ -77,32 +62,15 @@ class UsocketsConan(ConanFile):
                 args.append("WITH_WOLFSSL=1")
             if self.options.with_libuv:
                 args.append("WITH_LIBUV=1")
-
-            # set paths for dependencies
-            tools.replace_in_file("Makefile",
-                                  ".PHONY: examples",
-                                  "override CFLAGS += " + ' '.join(additional_cflags) +
-                                  "\n.PHONY: examples"
-                                 )
-            tools.replace_in_file("Makefile",
-                                  ".PHONY: examples",
-                                  "override LDFLAGS += " + ' '.join(additional_ldflags) +
-                                  "\n.PHONY: examples\n"
-                                 )
-            # disable lto
-            tools.replace_in_file("Makefile",
-                                  " -flto",
-                                  "")
-            # fix output name
-            tools.replace_in_file("Makefile",
-                                  "rvs uSockets.a",
-                                  "rvs libuSockets.a")
-            self.run("%s %s" % (' '.join(args), make_program))
+            # set CPPFLAGS, CFLAGS and LDFLAGS
+            args.extend("{}={}".format(key, value) for key, value in autotools.vars.items())
+            autotools.make(target="default", args=args)
 
     def build(self):
         if self.options.with_ssl == "wolfssl":
             if not self.options["wolfssl"].opensslextra:
                 raise ConanInvalidConfiguration("wolfssl needs opensslextra option enabled for usockets")
+        self._patch_sources()
         if self.settings.compiler == "Visual Studio":
             self._build_msvc()
         else:
