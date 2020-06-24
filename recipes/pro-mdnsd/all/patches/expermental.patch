@@ -1,12 +1,29 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index b7d5036..2e75251 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -51,8 +51,8 @@ if(MDNSD_BUILD_FUZZING OR MDNSD_BUILD_OSS_FUZZ)
+     add_subdirectory(tests/fuzz)
+ endif()
+ 
+-add_executable(mdnsd mdnsd.c)
+-target_link_libraries(mdnsd PRIVATE libmdnsd)
++add_executable(mdns_daemon mdnsd.c)
++target_link_libraries(mdns_daemon PRIVATE libmdnsd)
+ 
+ add_executable(mquery mquery.c)
+ target_link_libraries(mquery PRIVATE libmdnsd)
 diff --git a/libmdnsd/CMakeLists.txt b/libmdnsd/CMakeLists.txt
-index b7d2a4d..a302987 100644
+index b7d2a4d..b3f5e16 100644
 --- a/libmdnsd/CMakeLists.txt
 +++ b/libmdnsd/CMakeLists.txt
-@@ -73,7 +73,7 @@ endif()
+@@ -72,8 +72,8 @@ if(MDNSD_COMPILE_AS_CXX)
+ endif()
  
  add_library(libmdnsd ${LIBRARY_FILES} ${PUBLIC_INCLUDES})
- set_property(TARGET libmdnsd PROPERTY OUTPUT_NAME "mdnsd")
+-set_property(TARGET libmdnsd PROPERTY OUTPUT_NAME "mdnsd")
 -set_property(TARGET libmdnsd PROPERTY DEFINE_SYMBOL "MDNSD_DYNAMIC_LINKING_EXPORT")
++set_target_properties(libmdnsd PROPERTY OUTPUT_NAME "mdnsd")
 +target_compile_definitions(libmdnsd PUBLIC MDNSD_DYNAMIC_LINKING_EXPORT)
  
  if(WIN32)
