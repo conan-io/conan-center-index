@@ -37,7 +37,7 @@ class TlExpectedConan(ConanFile):
         self.info.header_only()
 
     def package_info(self):
-        self.cpp_info.name = "tl-expected"
-        self.cpp_info.names["cmake_find_package"] = "tl"
-        self.cpp_info.names["cmake_find_package_multi"] = "tl"
+        self.cpp_info.name = "tl"
+        self.cpp_info.names["cmake_find_package"] = "tl-expected"
+        self.cpp_info.names["cmake_find_package_multi"] = "tl-expected"
         self.cpp_info.components["expected"].name = "expected"
