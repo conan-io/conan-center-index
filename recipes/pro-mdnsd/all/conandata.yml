@@ -6,3 +6,5 @@ patches:
   "0.8.3":
     - patch_file: "patches/remove_addsan.patch"
       base_path: "source_subfolder"
+    - patch_file: "patches/expermental.patch"
+      base_path: "source_subfolder"
