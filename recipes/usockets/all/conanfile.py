@@ -92,6 +92,10 @@ class UsocketsConan(ConanFile):
             tools.replace_in_file("Makefile",
                                   " -flto",
                                   "")
+            # fix output name
+            tools.replace_in_file("Makefile",
+                                  "rvs uSockets.a",
+                                  "rvs libuSockets.a")
             self.run("%s %s" % (' '.join(args), make_program))
 
     def build(self):
@@ -109,9 +113,6 @@ class UsocketsConan(ConanFile):
         self.copy(pattern="*.a", src=os.path.join(self._source_subfolder), dst="lib", keep_path=False)
         # drop internal headers
         tools.rmdir(os.path.join(self.package_folder, "include", "internal"))
-        # fix library name
-        if self.settings.compiler != "Visual Studio":
-            os.rename(os.path.join(self.package_folder, "lib", "uSockets.a"), os.path.join(self.package_folder, "lib", "libuSockets.a"))
 
     def package_info(self):
         self.cpp_info.libs = ["uSockets"]
