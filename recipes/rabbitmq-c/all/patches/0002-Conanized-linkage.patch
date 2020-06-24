@@ -1,0 +1,60 @@
+--- a/librabbitmq/CMakeLists.txt
++++ b/librabbitmq/CMakeLists.txt
+@@ -76,7 +76,6 @@ set(LIBRABBITMQ_INCLUDE_DIRS
+ add_definitions(-DHAVE_CONFIG_H)
+ 
+ if (ENABLE_SSL_SUPPORT)
+-  add_definitions(-DWITH_SSL=1)
+   set(AMQP_SSL_SOCKET_H_PATH amqp_ssl_socket.h)
+ 
+   set(AMQP_SSL_SRCS ${AMQP_SSL_SOCKET_H_PATH}
+@@ -88,8 +87,6 @@ if (ENABLE_SSL_SUPPORT)
+       amqp_openssl_bio.c
+       amqp_openssl_bio.h
+   )
+-  include_directories(${OPENSSL_INCLUDE_DIR})
+-  set(AMQP_SSL_LIBS ${OPENSSL_LIBRARIES})
+   if (APPLE)
+     # Apple has deprecated OpenSSL in 10.7+. This disables that warning.
+     set_source_files_properties(${AMQP_SSL_SRCS}
+@@ -115,15 +112,18 @@ set(RABBITMQ_SOURCES
+ 
+ add_definitions(-DAMQP_BUILD)
+ 
+-set(RMQ_LIBRARIES ${AMQP_SSL_LIBS} ${SOCKET_LIBRARIES} ${LIBRT} ${CMAKE_THREAD_LIBS_INIT})
++set(RMQ_LIBRARIES ${SOCKET_LIBRARIES} ${LIBRT})
+ 
+ if (BUILD_SHARED_LIBS)
+     add_library(rabbitmq SHARED ${RABBITMQ_SOURCES})
+-    if (THREADS_HAVE_PTHREAD_ARG)
+-      target_compile_options(rabbitmq PUBLIC "-pthread")
++    if (ENABLE_SSL_SUPPORT)
++      find_package(Threads REQUIRED)
++      target_link_libraries(rabbitmq PUBLIC Threads::Threads)
++      target_compile_definitions(rabbitmq PUBLIC WITH_SSL=1)
++      target_link_libraries(rabbitmq PUBLIC CONAN_PKG::openssl)
+     endif()
+ 
+-    target_link_libraries(rabbitmq ${RMQ_LIBRARIES})
++    target_link_libraries(rabbitmq PRIVATE ${RMQ_LIBRARIES})
+ 
+     if (WIN32)
+         set_target_properties(rabbitmq PROPERTIES VERSION ${RMQ_VERSION} OUTPUT_NAME rabbitmq.${RMQ_SOVERSION})
+@@ -142,11 +142,14 @@ endif (BUILD_SHARED_LIBS)
+ 
+ if (BUILD_STATIC_LIBS)
+     add_library(rabbitmq-static STATIC ${RABBITMQ_SOURCES})
+-    if (THREADS_HAVE_PTHREAD_ARG)
+-      target_compile_options(rabbitmq-static PUBLIC "-pthread")
++    if (ENABLE_SSL_SUPPORT)
++      find_package(Threads REQUIRED)
++      target_link_libraries(rabbitmq-static PUBLIC Threads::Threads)
++      target_compile_definitions(rabbitmq-static PUBLIC WITH_SSL=1)
++      target_link_libraries(rabbitmq-static PUBLIC CONAN_PKG::openssl)
+     endif()
+ 
+-    target_link_libraries(rabbitmq-static ${RMQ_LIBRARIES})
++    target_link_libraries(rabbitmq-static PRIVATE ${RMQ_LIBRARIES})
+ 
+     set_target_properties(rabbitmq-static PROPERTIES COMPILE_DEFINITIONS AMQP_STATIC)
+     if (WIN32)
