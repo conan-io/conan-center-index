@@ -1,12 +1,14 @@
-#include <cstdlib>
-#include <gmp.h>
+#include <gmpxx.h>
 
+#include <cstdlib>
+#include <iostream>
 
 int main (void) {
+    mpz_class a("1234");
+    mpz_class b("4321");
 
-  mpz_t a,b,c;
-  mpz_inits(a,b,c,NULL);
+    mpz_class c = a + b;
+    std::cout << a << " + " << b << " = " << c << "\n";
 
-  mpz_set_str(a, "1234", 10);
-  return EXIT_SUCCESS;
+    return EXIT_SUCCESS;
 }
