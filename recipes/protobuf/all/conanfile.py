@@ -96,9 +96,9 @@ class ProtobufConan(ConanFile):
                     self.cpp_info.components["libprotobuf"].defines = ["PROTOBUF_USE_DLLS"]
             self.cpp_info.components["protoc"].requires = ["zlib::zlib"]
 
-            self.cpp_info.components["protoc"].name = "protoc"
-            self.cpp_info.components["protoc"].libs = ["protoc"]
-            self.cpp_info.components["protoc"].requires = ["libprotobuf"]
+            self.cpp_info.components["libprotoc"].name = "libprotoc"
+            self.cpp_info.components["libprotoc"].libs = ["protoc"]
+            self.cpp_info.components["libprotoc"].requires = ["libprotobuf"]
         else:
             self.cpp_info.components["libprotobuf-lite"].name = "libprotobuf-lite"
             self.cpp_info.components["libprotobuf-lite"].libs = ["protobuf-lite"]
