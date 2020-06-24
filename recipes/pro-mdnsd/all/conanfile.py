@@ -55,6 +55,8 @@ class mdnsdConan(ConanFile):
         self._cmake = CMake(self)
         self._cmake.verbose = True
         self._cmake.definitions["MDNSD_ENABLE_SANITIZERS"] = False
+        if self.settings.os == "Windows":
+            self._cmake.definitions["MDNSD_DYNAMIC_LINKING"] = True
         self._cmake.definitions["MDNSD_COMPILE_AS_CXX"] = self.options.compile_as_cpp
         self._cmake.configure()
         return self._cmake
