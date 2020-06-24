@@ -1,10 +1,8 @@
 sources:
-  "0.8.1":
-    url: "https://github.com/Pro/mdnsd/archive/v0.8.1.tar.gz"
-    sha256: "2686e3c9c8b45b188b65b93937df05a11117497956ca06ba491365d9e1034c8a"
+  "0.8.3":
+    url: "https://github.com/Pro/mdnsd/archive/v0.8.3.tar.gz"
+    sha256: "2d7d45044014b29f40f0e37d4baa784a1d425f6ef8b3eac15592ae50b5ccb057"
 patches:
-  "0.8.1":
+  "0.8.3":
     - patch_file: "patches/remove_addsan.patch"
-      base_path: "source_subfolder"
-    - patch_file: "patches/remove_pic.patch"
       base_path: "source_subfolder"

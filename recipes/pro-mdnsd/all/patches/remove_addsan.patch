@@ -1,14 +1,14 @@
 diff --git a/CMakeLists.txt b/CMakeLists.txt
-index cd232be..0ca1eee 100644
+index c48f798..ff622b7 100644
 --- a/CMakeLists.txt
 +++ b/CMakeLists.txt
-@@ -17,19 +17,6 @@ if(MDNSD_BUILD_FUZZING_CORPUS)
-     add_definitions(-DMDNSD_DEBUG_DUMP_PKGS_FILE)
- endif()
+@@ -27,19 +27,6 @@ endif()
+ 
+ option(MDNSD_ENABLE_SANITIZERS "enable sanitizers for mdnsd ON)" ON)
  
 -# Debug
 -string(TOLOWER "${CMAKE_BUILD_TYPE}" BUILD_TYPE_LOWER_CASE)
--if(BUILD_TYPE_LOWER_CASE STREQUAL "debug" AND UNIX)
+-if(MDNSD_ENABLE_SANITIZERS AND BUILD_TYPE_LOWER_CASE STREQUAL "debug" AND UNIX)
 -    if("x${CMAKE_C_COMPILER_ID}" STREQUAL "xClang")
 -        # Add default sanitizer settings when using clang and Debug build.
 -        # This allows e.g. CLion to find memory locations for SegFaults
