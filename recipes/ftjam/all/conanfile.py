@@ -3,9 +3,9 @@ from contextlib import contextmanager
 import os
 
 
-class JamConan(ConanFile):
-    name = "jam"
-    description = "Jam is a small open-source build tool that can be used as a replacement for Make."
+class FtjamConan(ConanFile):
+    name = "ftjam"
+    description = "Jam (ftjam) is a small open-source build tool that can be used as a replacement for Make."
     topics = ("conan", "jam", "build", "make")
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://www.freetype.org/jam/"
