@@ -13,11 +13,13 @@ class UsocketsConan(ConanFile):
     topics = ("conan", "socket", "network", "web")
     settings = "os", "arch", "compiler", "build_type"
     options = {"fPIC": [True, False],
-               "with_ssl": [False, "openssl"],
+               "with_ssl": [False, "openssl", "wolfssl"],
                "with_libuv": [True, False]}
-    default_options = {"fPIC": True, 'with_ssl': False, 'with_libuv': True}
-    generators = "cmake"
-    _source_subfolder = "source_subfolder"
+    default_options = {"fPIC": True, "with_ssl": False, "with_libuv": True}
+
+    @property
+    def _source_subfolder(self):
+        return "source_subfolder"
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -28,10 +30,14 @@ class UsocketsConan(ConanFile):
             raise ConanInvalidConfiguration("Windows build is not supported by upstream")
         del self.settings.compiler.cppstd
         del self.settings.compiler.libcxx
+        if self.options.with_ssl == "wolfssl":
+            self.options["wolfssl"].opensslextra = True
 
     def requirements(self):
         if self.options.with_ssl == "openssl":
             self.requires("openssl/1.1.1g")
+        elif self.options.with_ssl == "wolfssl":
+            self.requires("wolfssl/4.4.0")
         if self.options.with_libuv:
             self.requires("libuv/1.38.0")
 
@@ -64,8 +70,11 @@ class UsocketsConan(ConanFile):
             args = []
             if self.options.with_ssl == "openssl":
                 args.append("WITH_OPENSSL=1")
+            elif self.options.with_ssl == "wolfssl":
+                args.append("WITH_WOLFSSL=1")
             if self.options.with_libuv:
                 args.append("WITH_LIBUV=1")
+
             # set paths for dependencies
             tools.replace_in_file("Makefile",
                                   ".PHONY: examples",
@@ -103,6 +112,8 @@ class UsocketsConan(ConanFile):
         self.cpp_info.libs = ["uSockets"]
         if self.options.with_ssl == "openssl":
             self.cpp_info.defines.append("LIBUS_USE_OPENSSL")
+        elif self.options.with_ssl == "wolfssl":
+            self.cpp_info.defines.append("LIBUS_USE_WOLFSSL")
         else:
             self.cpp_info.defines.append("LIBUS_NO_SSL")
         if self.options.with_libuv:
