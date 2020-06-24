@@ -383,7 +383,7 @@ class BoostConan(ConanFile):
         folder = os.path.join(self.source_folder, self._source_subfolder, 'tools', 'bcp')
         with tools.vcvars(self.settings) if self._is_msvc else tools.no_op():
             with tools.chdir(folder):
-                command = "%s -j%s --abbreviate-paths toolset=%s" % (self._b2_exe, tools.cpu_count(), self._toolset)
+                command = '"%s" -j%s --abbreviate-paths toolset=%s' % (self._b2_exe, tools.cpu_count(), self._toolset)
                 if self.options.debug_level:
                     command += " -d%d" % self.options.debug_level
                 self.output.warn(command)
@@ -430,7 +430,7 @@ class BoostConan(ConanFile):
 
         # JOIN ALL FLAGS
         b2_flags = " ".join(self._build_flags)
-        full_command = "%s %s" % (self._b2_exe, b2_flags)
+        full_command = '"%s" %s' % (self._b2_exe, b2_flags)
         # -d2 is to print more debug info and avoid travis timing out without output
         sources = os.path.join(self.source_folder, self._boost_dir)
         full_command += ' --debug-configuration --build-dir="%s"' % self.build_folder
@@ -538,14 +538,14 @@ class BoostConan(ConanFile):
 
         if self.options.layout is not "b2-default":
             flags.append("--layout=%s" % self.options.layout)
-        flags.append("--user-config=%s" % os.path.join(self._boost_build_dir, 'user-config.jam'))
+        flags.append('"--user-config=%s"' % os.path.join(self._boost_build_dir, 'user-config.jam'))
         flags.append("-sNO_ZLIB=%s" % ("0" if self.options.zlib else "1"))
         flags.append("-sNO_BZIP2=%s" % ("0" if self.options.bzip2 else "1"))
         flags.append("-sNO_LZMA=%s" % ("0" if self.options.lzma else "1"))
         flags.append("-sNO_ZSTD=%s" % ("0" if self.options.zstd else "1"))
 
         if self.options.i18n_backend == 'icu':
-            flags.append("-sICU_PATH={}".format(self.deps_cpp_info["icu"].rootpath))
+            flags.append('-sICU_PATH="{}"'.format(self.deps_cpp_info["icu"].rootpath))
             flags.append("boost.locale.iconv=off boost.locale.icu=on")
         elif self.options.i18n_backend == 'iconv':
             flags.append("boost.locale.iconv=on boost.locale.icu=off")
@@ -647,7 +647,7 @@ class BoostConan(ConanFile):
             flags.append(str(self.options.extra_b2_flags))
 
         flags.extend(["install",
-                      "--prefix=%s" % self.package_folder,
+                      '"--prefix=%s"' % self.package_folder,
                       "-j%s" % tools.cpu_count(),
                       "--abbreviate-paths"])
         if self.options.debug_level:
@@ -839,7 +839,7 @@ class BoostConan(ConanFile):
         for bc_file in os.listdir(staged_libs):
             if bc_file.startswith("lib") and bc_file.endswith(".bc"):
                 a_file = bc_file[:-3] + ".a"
-                cmd = "emar q {dst} {src}".format(
+                cmd = 'emar q "{dst}" "{src}"'.format(
                     dst=os.path.join(staged_libs, a_file),
                     src=os.path.join(staged_libs, bc_file),
                 )
