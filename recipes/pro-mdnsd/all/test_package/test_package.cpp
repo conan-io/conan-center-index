@@ -7,12 +7,9 @@
 #include <stdlib.h>
 #include <string.h>
 
-#ifdef _MSC_VER
-#define _CRT_SECURE_NO_WARNINGS
-#endif
-
 #ifdef _WIN32
 #define _WINSOCK_DEPRECATED_NO_WARNINGS
+#define _CRT_SECURE_NO_WARNINGS
 #include <io.h>
 #include <windows.h>
 #include <winsock.h>
