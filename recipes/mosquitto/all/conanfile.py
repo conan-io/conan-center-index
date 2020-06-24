@@ -46,9 +46,9 @@ class MosquittoConan(ConanFile):
 
     def requirements(self):
         if self.options.with_tls:
-            self.requires.add("openssl/1.1.1g")
+            self.requires("openssl/1.1.1g")
         if self.options.with_srv:
-            self.requires.add("c-ares/1.16.1")
+            self.requires("c-ares/1.16.1")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
