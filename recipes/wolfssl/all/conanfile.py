@@ -14,10 +14,12 @@ class WolfSSLConan(ConanFile):
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
+        "opensslextra": [True, False]
     }
     default_options = {
         "shared": False,
         "fPIC": True,
+        "opensslextra": False
     }
 
     _autotools = None
@@ -80,6 +82,8 @@ class WolfSSLConan(ConanFile):
             conf_args.extend(["--enable-shared", "--disable-static"])
         else:
             conf_args.extend(["--disable-shared", "--enable-static"])
+        if self.options.opensslextra:
+            conf_args.append("--enable-opensslextra")
         self._autotools.configure(args=conf_args, configure_dir=self._source_subfolder)
         return self._autotools
 
