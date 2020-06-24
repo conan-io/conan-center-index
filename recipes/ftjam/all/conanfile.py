@@ -35,7 +35,8 @@ class FtjamConan(ConanFile):
             self.build_requires("msys2/20190524")
         if self.settings.compiler == "Visual Studio":
             self.build_requires("automake/1.16.2")
-        self.build_requires("bison/3.5.3")
+        if self.settings.os != "Windows":
+            self.build_requires("bison/3.5.3")
 
     def _patch_sources(self):
         tools.replace_in_file(os.path.join(self._source_subfolder, "jamgram.c"),
@@ -54,6 +55,12 @@ class FtjamConan(ConanFile):
         return self._autotools
 
     def build(self):
+        if self.settings.compiler.build_type != "Release":
+            raise ConanInvalidConfiguration("This build_type is disabled in order to diminish the number of builds")
+        if self.settings.compiler == "Visual Studio":
+            if self.settings.compiler.runtime != "MT":
+                raise ConanInvalidConfiguration("This runtime is disabled in order to diminish the number of builds")
+
         # toolset name of the system building ftjam
         jam_toolset = self._jam_toolset(self.settings.os, self.settings.compiler)
         autotools = AutoToolsBuildEnvironment(self, win_bash=tools.os_info.is_windows)
@@ -99,6 +106,10 @@ class FtjamConan(ConanFile):
         if os == "Windows":
             return "MINGW"
         return None
+
+    def package_id(self):
+        del self.info.settings.build_type
+        del self.info.settings.compiler
 
     def package_info(self):
         jam_path = os.path.join(self.package_folder, "bin")
