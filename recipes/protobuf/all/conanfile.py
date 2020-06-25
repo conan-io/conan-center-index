@@ -85,9 +85,9 @@ class ProtobufConan(ConanFile):
         self.cpp_info.libs.sort(reverse=True)
 
         if self.settings.os == "Linux":
-            self.cpp_info.libs.append("pthread")
+            self.cpp_info.system_libs.append("pthread")
             if self._is_clang_x86 or "arm" in str(self.settings.arch):
-                self.cpp_info.libs.append("atomic")
+                self.cpp_info.system_libs.append("atomic")
 
         if self.settings.os == "Windows":
             if self.options.shared:
