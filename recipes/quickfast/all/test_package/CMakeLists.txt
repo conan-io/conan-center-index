@@ -4,5 +4,6 @@ project(PackageTest CXX)
 include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
 conan_basic_setup()
 
-add_executable(executor ${PROJECT_SOURCE_DIR}/executor.cpp)
-target_link_libraries(executor ${CONAN_LIBS})
+add_executable(test ${PROJECT_SOURCE_DIR}/main.cpp)
+
+target_link_libraries(test ${CONAN_LIBS})

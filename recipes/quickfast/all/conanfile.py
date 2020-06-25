@@ -45,7 +45,7 @@ class QuickfastConan(ConanFile):
 
     def build(self):
         patches = self.conan_data["patches"][self.version]
-        for patch in patches or []:
+        for patch in patches:
             tools.patch(**patch)
 
         cmake = self._configure_cmake()

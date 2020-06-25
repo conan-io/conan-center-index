@@ -5,6 +5,7 @@ from conans import ConanFile, CMake, tools
 
 class QuickfastTestConan(ConanFile):
     settings = "os", "compiler", "build_type", "arch"
+    requires = ["boost/1.73.0"]
     generators = "cmake"
 
     def build(self):
@@ -14,5 +15,5 @@ class QuickfastTestConan(ConanFile):
 
     def test(self):
         if not tools.cross_building(self):
-            bin_path = os.path.join("bin", "executor")
+            bin_path = os.path.join("bin", "test")
             self.run(bin_path, run_environment=True)
