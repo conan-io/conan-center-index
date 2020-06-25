@@ -1,5 +1,4 @@
 import os
-import sys
 from conans import ConanFile, CMake, tools
 from conans.tools import download, unzip
 from conans.model.version import Version
@@ -66,6 +65,9 @@ class mdnsdConan(ConanFile):
     def package(self):
         cmake = self._configure_cmake()
         cmake.install()
+        tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
+        tools.rmdir(os.path.join(self.package_folder, "share"))
+        self.copy("LICENSE", dst="licenses", src=self._source_subfolder)
 
     def package_info(self):
         self.cpp_info.names["cmake_find_package"] = "mdnsd"
