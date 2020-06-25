@@ -1,7 +1,7 @@
 From b91089d531a945cdff2cd50389c03343c91c7b14 Mon Sep 17 00:00:00 2001
 From: Tarcisio Rodrigues <tarcisio.genaro@gmail.com>
 Date: Sun, 14 Jun 2020 16:57:19 -0300
-Subject: [PATCH 2/7] except copy
+Subject: [PATCH 2/8] except copy
 
 ---
  include/Except.h | 33 +++++++++++++++++++++++++++++++++

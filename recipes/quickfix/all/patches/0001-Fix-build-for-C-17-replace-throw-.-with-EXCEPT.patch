@@ -1,7 +1,7 @@
 From 87dd08e223d1b32ee18166cfacbc35ec0f44ccf3 Mon Sep 17 00:00:00 2001
 From: Dmitry Shatilov <shatilov.diman@gmail.com>
 Date: Fri, 16 Nov 2018 18:58:01 +0200
-Subject: [PATCH 1/7] Fix build for C++17: replace throw(...) with EXCEPT(...)
+Subject: [PATCH 1/8] Fix build for C++17: replace throw(...) with EXCEPT(...)
 
 ---
  examples/executor/C++/Application.cpp   |  6 ++--

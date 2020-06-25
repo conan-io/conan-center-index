@@ -1,7 +1,7 @@
 From 08dc23e525c4659be9271012c25f43fb193db025 Mon Sep 17 00:00:00 2001
 From: Tarcisio Rodrigues <tarcisio.genaro@gmail.com>
 Date: Tue, 9 Jun 2020 08:45:53 -0300
-Subject: [PATCH 4/7] remove tests from compilatin (unit, performance and
+Subject: [PATCH 4/8] remove tests from compilatin (unit, performance and
  acceptance tests)
 
 ---
