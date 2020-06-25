@@ -1,5 +1,3 @@
-diff --git a/librabbitmq/CMakeLists.txt b/librabbitmq/CMakeLists.txt
-index bd5369a..a47121c 100644
 --- a/librabbitmq/CMakeLists.txt
 +++ b/librabbitmq/CMakeLists.txt
 @@ -88,8 +88,8 @@ if (ENABLE_SSL_SUPPORT)
