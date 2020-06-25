@@ -10,7 +10,7 @@ class OpenImageIOConan(ConanFile):
     homepage = "http://www.openimageio.org/"
     url = "https://github.com/conan-io/conan-center-index"
     settings = "os", "compiler", "build_type", "arch"
-    generators = "cmake"
+    generators = "cmake", "cmake_find_package"
     exports_sources = ["CMakeLists.txt", "patches/*"]
 
     options = {
@@ -54,9 +54,29 @@ class OpenImageIOConan(ConanFile):
         self._cmake.definitions["USE_PYTHON"] = False
         self._cmake.definitions["USE_EXTERNAL_PUGIXML"] = True
 
-        # Pass version variables used by OIIO's build system
-        self._cmake.definitions["Boost_VERSION"] = self.deps_cpp_info["boost"].version
-        self._cmake.definitions["OPENJPEG_VERSION"] = self.deps_cpp_info["openjpeg"].version
+        # Set "USE_<PKG>" variables for disabled plugins to False.
+        # If these variables are not set, the package will be built
+        # when required library is found, even if it is not provided
+        # by Conan.
+        self._cmake.definitions["USE_JPEGTURBO"] = False
+        self._cmake.definitions["USE_JPEG"] = True
+        self._cmake.definitions["USE_HDF5"] = False
+        self._cmake.definitions["USE_OPENCOLORIO"] = False
+        self._cmake.definitions["USE_OPENCV"] = False
+        self._cmake.definitions["USE_TBB"] = False
+        self._cmake.definitions["USE_DCMTK"] = self.options.with_dcmtk
+        self._cmake.definitions["USE_FFMPEG"] = False
+        self._cmake.definitions["USE_FIELD3D"] = False
+        self._cmake.definitions["USE_GIF"] = False
+        self._cmake.definitions["USE_LIBHEIF"] = False
+        self._cmake.definitions["USE_LIBRAW"] = self.options.with_raw
+        self._cmake.definitions["USE_OPENVDB"] = False
+        self._cmake.definitions["USE_PTEX"] = False
+        self._cmake.definitions["USE_R3DSDK"] = False
+        self._cmake.definitions["USE_NUKE"] = False
+        self._cmake.definitions["USE_OPENGL"] = False
+        self._cmake.definitions["USE_QT"] = False
+        self._cmake.definitions["USE_QT5"] = False
         
         self._cmake.configure()
         return self._cmake
@@ -74,7 +94,8 @@ class OpenImageIOConan(ConanFile):
         self.requires("pugixml/1.10")
         self.requires("libsquish/1.15")
         self.requires("libpng/1.6.37")
-        self.requires("libjpeg-turbo/2.0.4")
+        # self.requires("libjpeg-turbo/2.0.4")
+        self.requires("libjpeg/9d")
         self.requires("libwebp/1.1.0")
         self.requires("openjpeg/2.3.1")
         # TODO code using GifLib 5.1.4 does not compile with Clang
