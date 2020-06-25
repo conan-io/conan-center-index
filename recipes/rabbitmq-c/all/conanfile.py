@@ -14,7 +14,7 @@ class RabbitmqcConan(ConanFile):
     settings = "os", "compiler", "build_type", "arch"
     options = {"shared": [True, False], "fPIC": [True, False], "ssl": [True, False]}
     default_options = {"shared": False, "fPIC": True, "ssl": False}
-    generators = "cmake"
+    generators = "cmake", "cmake_find_package"
     exports_sources = "CMakeLists.txt", "patches/**"
     _cmake = None
 
