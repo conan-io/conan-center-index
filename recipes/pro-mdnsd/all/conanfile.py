@@ -52,7 +52,6 @@ class mdnsdConan(ConanFile):
         if self._cmake:
             return self._cmake
         self._cmake = CMake(self)
-        self._cmake.verbose = True
         self._cmake.definitions["MDNSD_ENABLE_SANITIZERS"] = False
         self._cmake.definitions["MDNSD_COMPILE_AS_CXX"] = self.options.compile_as_cpp
         self._cmake.configure()
