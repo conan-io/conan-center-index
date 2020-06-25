@@ -77,6 +77,7 @@ class ElfutilsConan(ConanFile):
         ]
 
     def build(self):
+        if "patches" in self.conan_data and self.version in self.conan_data["patches"]:
         for patch in self.conan_data["patches"][self.version]:
             tools.patch(**patch)
         with tools.chdir(self._source_subfolder):
