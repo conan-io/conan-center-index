@@ -1,7 +1,7 @@
 From ea4342aa1cd7ddf68857d1923ac1dceab90586a5 Mon Sep 17 00:00:00 2001
 From: Tarcisio Rodrigues <tarcisio.genaro@gmail.com>
 Date: Tue, 9 Jun 2020 02:14:57 -0300
-Subject: [PATCH 5/7] inc. required CMake version, add conan basic setup and
+Subject: [PATCH 5/8] inc. required CMake version, add conan basic setup and
  check compiler features
 
 opt for unique_ptr vs auto_ptr through CMake option
