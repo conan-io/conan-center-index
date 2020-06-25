@@ -344,7 +344,7 @@ class OpenSSLConan(ConanFile):
         if not ancestor:
             raise ConanInvalidConfiguration("unsupported configuration: %s %s %s, "
                                             "please open an issue: "
-                                            "https://github.com/conan-community/community/issues. "
+                                            "https://github.com/conan-io/conan-center-index/issues. "
                                             "alternatively, set the CONAN_OPENSSL_CONFIGURATION environment variable "
                                             "into your conan profile "
                                             "(list of configurations can be found by running './Configure --help')." %
