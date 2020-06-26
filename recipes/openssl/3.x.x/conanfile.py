@@ -146,8 +146,6 @@ class OpenSSLConan(ConanFile):
     def configure(self):
         del self.settings.compiler.libcxx
         del self.settings.compiler.cppstd
-        if self._full_version >= "1.1.0":
-            del self.options.no_rc4
 
     def config_options(self):
         if self.settings.os != "Windows":
