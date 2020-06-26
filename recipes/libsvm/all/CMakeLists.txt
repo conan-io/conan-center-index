@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 2.8)
 project(svm C CXX)
 
-include(../conanbuildinfo.cmake)
+include(${CMAKE_SOURCE_DIR}/conanbuildinfo.cmake)
 conan_basic_setup()
 
 add_library(svm svm.cpp)
