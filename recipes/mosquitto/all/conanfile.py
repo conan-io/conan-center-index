@@ -51,6 +51,7 @@ class MosquittoConan(ConanFile):
             self._cmake.definitions["WITH_STATIC_LIBRARIES"] = not self.options.shared
             self._cmake.definitions["WITH_TLS"] = self.options.with_tls
             self._cmake.definitions["DOCUMENTATION"] = False
+            self._cmake.definitions["WITH_THREADING"] = self.settings.compiler != "Visual Studio"
             self._cmake.configure(build_folder=self._build_subfolder)
         return self._cmake
 
@@ -75,6 +76,8 @@ class MosquittoConan(ConanFile):
         tools.rmdir(os.path.join(self.package_folder, "etc"))
         if not self.options.shared:
             for f in glob.glob(os.path.join(self.package_folder, "lib", "*.so*")):
+                os.remove(f)
+            for f in glob.glob(os.path.join(self.package_folder, "lib", "*.dll")):
                 os.remove(f)
 
     def package_info(self):
