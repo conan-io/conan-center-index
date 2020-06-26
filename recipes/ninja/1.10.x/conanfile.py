@@ -8,7 +8,7 @@ class NinjaConan(ConanFile):
     license = "Apache-2.0"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/ninja-build/ninja"
-    settings = "os", "arch", "compiler"
+    settings = "os", "arch", "compiler", "build_type"
     exports_sources = ["CMakeLists.txt", "*.patch"]
     generators = "cmake"
 
