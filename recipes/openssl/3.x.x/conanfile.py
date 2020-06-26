@@ -501,10 +501,6 @@ class OpenSSLConan(ConanFile):
 
     def _make_install(self):
         with tools.chdir(self._source_subfolder):
-            # workaround for MinGW (https://github.com/openssl/openssl/issues/7653)
-            if not os.path.isdir(os.path.join(self.package_folder, "bin")):
-                os.makedirs(os.path.join(self.package_folder, "bin"))
-
             self._run_make(targets=["install_sw"], parallel=False)
 
     @property
