@@ -1,5 +1,5 @@
 diff --git a/src/mfast/xml_parser/CMakeLists.txt b/src/mfast/xml_parser/CMakeLists.txt
-index cdf7a45..1d84163 100644
+index cdf7a45..0d8cb5d 100644
 --- a/src/mfast/xml_parser/CMakeLists.txt
 +++ b/src/mfast/xml_parser/CMakeLists.txt
 @@ -6,12 +6,12 @@ file (GLOB_RECURSE sources "*.cpp")     ## retrieve all source files in current
@@ -13,7 +13,7 @@ index cdf7a45..1d84163 100644
  
  add_library(mfast_xml_parser_static STATIC ${mfast_xml_parser_SRCS})
  
-+target_link_libraries(mfast_xml_parser_static CONAN_PKG::boost CONAN_PKG::tinyxml2)
++target_link_libraries(mfast_xml_parser_static ${CONAN_LIBS} )
 +
  if (UNIX)
  	set_target_properties(mfast_xml_parser_static PROPERTIES OUTPUT_NAME mfast_xml_parser)
@@ -22,7 +22,7 @@ index cdf7a45..1d84163 100644
    # is no such problem.
    add_dependencies(mfast_xml_parser mfast_xml_parser_static)
  
-+  target_link_libraries(mfast_xml_parser CONAN_PKG::boost CONAN_PKG::tinyxml2)
++  target_link_libraries(mfast_xml_parser ${CONAN_LIBS} )
 +
    if (CMAKE_COMPILER_IS_GNUCXX OR ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang"))
  	set_target_properties(mfast_xml_parser PROPERTIES COMPILE_FLAGS -fvisibility=hidden)
