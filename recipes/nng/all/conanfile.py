@@ -18,8 +18,14 @@ class NngConan(ConanFile):
         "shared": [True, False],
         "fPIC": [True, False],
         "nngcat": [True, False],
+        "http": [True, False],
     }
-    default_options = {"shared": False, "fPIC": True, "nngcat": False}
+    default_options = {
+        "shared": False,
+        "fPIC": True,
+        "nngcat": False,
+        "http": True,
+    }
 
     _source_subfolder = "source_subfolder"
     _cmake = None
@@ -48,7 +54,9 @@ class NngConan(ConanFile):
 
         self._cmake = CMake(self)
         self._cmake.definitions["NNG_TESTS"] = False
-        self._cmake.definitions["NNG_NNGCAT"] = self.options.nngcat
+        self._cmake.definitions["NNG_ENABLE_TLS"] = False
+        self._cmake.definitions["NNG_ENABLE_NNGCAT"] = self.options.nngcat
+        self._cmake.definitions["NNG_ENABLE_HTTP"] = self.options.http
         self._cmake.configure()
 
         return self._cmake
