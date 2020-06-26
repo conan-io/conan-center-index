@@ -280,7 +280,7 @@ class OpenSSLConan(ConanFile):
         query = "%s-%s-%s" % (self.settings.os, self.settings.arch, self.settings.compiler)
         ancestor = next((self._targets[i] for i in self._targets if fnmatch.fnmatch(query, i)), None)
         if not ancestor:
-            raise ConanInvalidConfiguration("unsupported configuration: %s %s %s, "
+            raise ConanInvalidConfiguration("Unsupported configuration: %s %s %s, "
                                             "please open an issue: "
                                             "https://github.com/conan-io/conan-center-index/issues. "
                                             "alternatively, set the CONAN_OPENSSL_CONFIGURATION environment variable "
@@ -531,19 +531,10 @@ class OpenSSLConan(ConanFile):
                 self._make()
 
     @property
-    def _cross_building(self):
-        if tools.cross_building(self.settings):
-            if self.settings.os == tools.detected_os():
-                if self.settings.arch == "x86" and tools.detected_architecture() == "x86_64":
-                    return False
-            return True
-        return False
-
-    @property
     def _win_bash(self):
         return tools.os_info.is_windows and \
                not self._use_nmake and \
-               (self._is_mingw or self._cross_building)
+            (self._is_mingw or tools.cross_building(self.settings, skip_x64_x86=True))
 
     @property
     def _make_program(self):
