@@ -4,7 +4,7 @@ import os
 
 class QuickfastConan(ConanFile):
     name = "quickfast"
-    license = "QuickFAST License"
+    license = "BSD-3-Clause"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://objectcomputing.com/"
     description = "QuickFAST is an Open Source native C++ implementation of the FAST Protocol"
