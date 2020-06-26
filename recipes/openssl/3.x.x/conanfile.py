@@ -29,6 +29,7 @@ class OpenSSLConan(ConanFile):
         "no_dh": [True, False],
         "no_dsa": [True, False],
         "no_dso": [True, False],
+        "no_engine": [True, False],
         "no_fips": [True, False],
         "no_hmac": [True, False],
         "no_legacy": [True, False],
