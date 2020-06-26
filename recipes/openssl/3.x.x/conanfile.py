@@ -89,6 +89,9 @@ class OpenSSLConan(ConanFile):
                "no_sha": [True, False],
                "no_async": [True, False],
                "no_dso": [True, False],
+               "no_deprected": [True, False],
+               "no_legacy": [True, False],
+               "no_fips": [True, False],
                "capieng_dialog": [True, False],
                "enable_capieng": [True, False],
                "openssldir": "ANY"}
