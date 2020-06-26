@@ -4,6 +4,7 @@ import os
 
 class mFASTConan(ConanFile):
     name = "mfast"
+    Name = "mFAST"
     license = "LGPL-3.0"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://objectcomputing.com/"
@@ -37,7 +38,7 @@ class mFASTConan(ConanFile):
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
-        os.rename(self.name + "-" + self.version, self._source_subfolder)
+        os.rename(self.Name + "-" + self.version, self._source_subfolder)
 
     def config_options(self):
         if self.settings.os == "Windows":
