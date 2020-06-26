@@ -14,10 +14,6 @@
 #define snprintf _snprintf
 #endif
 
-#if OPENSSL_VERSION_NUMBER > 0x10101000L
-#define OPENSSL_1_1_1_OR_LATER
-#endif
-
 void SHA3_hash(const EVP_MD *type, const unsigned char *message, size_t message_len, unsigned char *digest, unsigned int *digest_len) {
 	EVP_MD_CTX *mdctx;
 
@@ -59,10 +55,9 @@ int main()
 	SHA1((unsigned char*)&string, strlen(string), (unsigned char*)&sha1_digest);
 	SHA256((unsigned char*)&string, strlen(string), (unsigned char*)&sha256_digest);
 	SHA512((unsigned char*)&string, strlen(string), (unsigned char*)&sha512_digest);
-#ifdef OPENSSL_1_1_1_OR_LATER
 	SHA3_hash(EVP_sha3_256(), (unsigned char*)&string, strlen(string), (unsigned char*)&sha3_256_digest, &digest_len);
 	SHA3_hash(EVP_sha3_512(), (unsigned char*)&string, strlen(string), (unsigned char*)&sha3_512_digest, &digest_len);
-#endif
+
 	for(int i = 0; i < MD5_DIGEST_LENGTH; i++)
 		 snprintf(&md5_string[i*2], sizeof(md5_string)-i*2, "%02x", (unsigned int)md5_digest[i]);
 
@@ -83,10 +78,8 @@ int main()
 	printf("sha1 digest: %s\n", sha1_string);
 	printf("sha256 digest: %s\n", sha256_string);
 	printf("sha512 digest: %s\n", sha512_string);
-#ifdef OPENSSL_1_1_1_OR_LATER
 	printf("sha3 256 digest: %s\n", sha3_256_string);
 	printf("sha3 512 digest: %s\n", sha3_512_string);
-#endif
 	printf("SSL library version: %s\n", SSLeay_version(SSLEAY_VERSION));
 #if defined(WITH_ZLIB)
 	printf("ZLIB version: %s\n", ZLIB_VERSION);
