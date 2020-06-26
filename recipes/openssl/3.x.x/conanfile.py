@@ -67,7 +67,7 @@ class OpenSSLConan(ConanFile):
     topics = ("conan", "openssl", "ssl", "tls", "encryption", "security")
     description = "A toolkit for the Transport Layer Security (TLS) and Secure Sockets Layer (SSL) protocols"
     options = {"no_threads": [True, False],
-               "no_zlib": [True, False],
+               "zlib": [True, False],
                "shared": [True, False],
                "fPIC": [True, False],
                "no_asm": [True, False],
@@ -97,6 +97,7 @@ class OpenSSLConan(ConanFile):
                "openssldir": "ANY"}
     default_options = {key: False for key in options.keys()}
     default_options["fPIC"] = True
+    default_options["zlib"] = True
     default_options["openssldir"] = None
     _env_build = None
     _source_subfolder = "source_subfolder"
@@ -148,7 +149,6 @@ class OpenSSLConan(ConanFile):
         del self.settings.compiler.libcxx
         del self.settings.compiler.cppstd
         if self._full_version >= "1.1.0":
-            del self.options.no_zlib
             del self.options.no_md2
             del self.options.no_rc4
             del self.options.no_rc5
@@ -161,7 +161,7 @@ class OpenSSLConan(ConanFile):
             del self.options.fPIC
 
     def requirements(self):
-        if self.options.get_safe("no_zlib") == False:
+        if self.options.get_safe("zlib") == True:
             self.requires("zlib/1.2.11")
 
     @property
