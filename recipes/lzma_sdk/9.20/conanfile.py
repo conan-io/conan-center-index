@@ -25,7 +25,7 @@ class PackageLzmaSdk(ConanFile):
     settings = "os_build", "arch_build", "compiler"
 
     def build_requirements(self):
-        if tools.os_info.is_windows and os.environ.get("CONAN_BASH_PATH", None) is None:
+        if self.settings.compiler != "Visual Studio" and tools.os_info.is_windows and os.environ.get("CONAN_BASH_PATH", None) is None:
             self.build_requires("msys2/20190524")
 
     def source(self):
