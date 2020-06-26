@@ -4,7 +4,6 @@ import os
 
 class mFASTConan(ConanFile):
     name = "mfast"
-    Name = "mFAST"
     license = "LGPL-3.0"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://objectcomputing.com/"
