@@ -1,61 +1,9 @@
 import os
 import fnmatch
 import platform
-from functools import total_ordering
 from conans.errors import ConanInvalidConfiguration, ConanException
 from conans import ConanFile, AutoToolsBuildEnvironment, tools
-
-
-@total_ordering
-class OpenSSLVersion(object):
-    def __init__(self, version_str):
-        self._pre = ""
-
-        tokens = version_str.split("-")
-        if len(tokens) > 1:
-            self._pre = tokens[1]
-        version_str = tokens[0]
-
-        tokens = version_str.split(".")
-        self._major = int(tokens[0])
-        self._minor = 0
-        self._patch = 0
-        self._build = ""
-        if len(tokens) > 1:
-            self._minor = int(tokens[1])
-            if len(tokens) > 2:
-                self._patch = tokens[2]
-                if self._patch[-1].isalpha():
-                    self._build = self._patch[-1]
-                    self._patch = self._patch[:1]
-                self._patch = int(self._patch)
-
-    @property
-    def base(self):
-        return "%s.%s.%s" % (self._major, self._minor, self._patch)
-
-    @property
-    def as_list(self):
-        return [self._major, self._minor, self._patch, self._build, self._pre]
-
-    def __eq__(self, other):
-        return self.compare(other) == 0
-
-    def __lt__(self, other):
-        return self.compare(other) == -1
-
-    def __hash__(self):
-        return hash(self.as_list)
-
-    def compare(self, other):
-        if not isinstance(other, OpenSSLVersion):
-            other = OpenSSLVersion(other)
-        if self.as_list == other.as_list:
-            return 0
-        elif self.as_list < other.as_list:
-            return -1
-        else:
-            return 1
+from conans.tools import Version
 
 
 class OpenSSLConan(ConanFile):
@@ -127,18 +75,18 @@ class OpenSSLConan(ConanFile):
     def _use_nmake(self):
         return self._is_clangcl or self._is_msvc
 
-    @property
-    def _full_version(self):
-        return OpenSSLVersion(self.version)
-
     def source(self):
         try:
             tools.get(**self.conan_data["sources"][self.version])
         except ConanException:
             self.output.warn("Downloading OpenSSL from the mirror.")
             url = self.conan_data["sources"][self.version]["url"]
+            # FIXME: For < 3.0.0 the old url contained major.minor.patch, e.g. 1.1.0, but without the letter (e.g. "a")
+            # FIXME: So what will be the old url for >= 3.0.0?
+            openssl_version = Version(self.version)
+            old_directory = "{}.{}".format(openssl_version.major, openssl_version.minor)
             url = url.replace("https://www.openssl.org/source/",
-                              "https://www.openssl.org/source/old/%s/" % self._full_version.base)
+                              "https://www.openssl.org/source/old/{}/".format(old_directory))
             tools.get(url, sha256=self.conan_data["sources"][self.version]["sha256"])
         extracted_folder = "openssl-" + self.version
         os.rename(extracted_folder, self._source_subfolder)
