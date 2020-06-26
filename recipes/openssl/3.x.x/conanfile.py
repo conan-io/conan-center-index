@@ -14,33 +14,35 @@ class OpenSSLConan(ConanFile):
     license = "Apache-2.0"
     topics = ("conan", "openssl", "ssl", "tls", "encryption", "security")
     description = "A toolkit for the Transport Layer Security (TLS) and Secure Sockets Layer (SSL) protocols"
-    options = {"no_threads": [True, False],
-               "zlib": [True, False],
-               "shared": [True, False],
-               "fPIC": [True, False],
-               "no_asm": [True, False],
-               "386": [True, False],
-               "no_sse2": [True, False],
-               "no_bf": [True, False],
-               "no_cast": [True, False],
-               "no_des": [True, False],
-               "no_dh": [True, False],
-               "no_dsa": [True, False],
-               "no_hmac": [True, False],
-               "no_md5": [True, False],
-               "no_mdc2": [True, False],
-               "no_rc2": [True, False],
-               "no_rc4": [True, False],
-               "no_rsa": [True, False],
-               "no_sha": [True, False],
-               "no_async": [True, False],
-               "no_dso": [True, False],
-               "no_deprected": [True, False],
-               "no_legacy": [True, False],
-               "no_fips": [True, False],
-               "capieng_dialog": [True, False],
-               "enable_capieng": [True, False],
-               "openssldir": "ANY"}
+    options = {
+        "shared": [True, False],
+        "fPIC": [True, False],
+        "386": [True, False],
+        "capieng_dialog": [True, False],
+        "enable_capieng": [True, False],
+        "no_asm": [True, False],
+        "no_async": [True, False],
+        "no_bf": [True, False],
+        "no_cast": [True, False],
+        "no_deprected": [True, False],
+        "no_des": [True, False],
+        "no_dh": [True, False],
+        "no_dsa": [True, False],
+        "no_dso": [True, False],
+        "no_fips": [True, False],
+        "no_hmac": [True, False],
+        "no_legacy": [True, False],
+        "no_md5": [True, False],
+        "no_mdc2": [True, False],
+        "no_rc2": [True, False],
+        "no_rc4": [True, False],
+        "no_rsa": [True, False],
+        "no_sha": [True, False],
+        "no_sse2": [True, False],
+        "no_threads": [True, False],
+        "openssldir": "ANY",
+        "zlib": [True, False]
+        }
     default_options = {key: False for key in options.keys()}
     default_options["fPIC"] = True
     default_options["zlib"] = True
@@ -540,7 +542,7 @@ class OpenSSLConan(ConanFile):
     def _make_program(self):
         if self._use_nmake:
             return "nmake"
-        make_program = tools.get_env("CONAN_MAKE_PROGRAM", tools.which("make") or tools.which('mingw32-make'))
+        make_program = tools.get_env("CONAN_MAKE_PROGRAM", tools.which("make") or tools.which("mingw32-make"))
         make_program = tools.unix_path(make_program) if tools.os_info.is_windows else make_program
         if not make_program:
             raise Exception('could not find "make" executable. please set "CONAN_MAKE_PROGRAM" environment variable')
@@ -567,10 +569,10 @@ class OpenSSLConan(ConanFile):
                 if fnmatch.fnmatch(filename, "*.pdb"):
                     os.unlink(os.path.join(self.package_folder, root, filename))
         if self._use_nmake:
-            if self.settings.build_type == 'Debug':
-                with tools.chdir(os.path.join(self.package_folder, 'lib')):
-                    os.rename('libssl.lib', 'libssld.lib')
-                    os.rename('libcrypto.lib', 'libcryptod.lib')
+            if self.settings.build_type == "Debug":
+                with tools.chdir(os.path.join(self.package_folder, "lib")):
+                    os.rename("libssl.lib", "libssld.lib")
+                    os.rename("libcrypto.lib", "libcryptod.lib")
 
         if self.options.shared:
             libdir = os.path.join(self.package_folder, "lib")
@@ -587,9 +589,9 @@ class OpenSSLConan(ConanFile):
         self.cpp_info.names["cmake_find_package_multi"] = "OpenSSL"
         if self._use_nmake:
             if self.settings.build_type == "Debug":
-                self.cpp_info.libs = ['libssld', 'libcryptod']
+                self.cpp_info.libs = ["libssld", "libcryptod"]
             else:
-                self.cpp_info.libs = ['libssl', 'libcrypto']
+                self.cpp_info.libs = ["libssl", "libcrypto"]
         else:
             self.cpp_info.libs = ["ssl", "crypto"]
         if self.settings.os == "Windows":
