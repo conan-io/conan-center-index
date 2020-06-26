@@ -431,7 +431,7 @@ class OpenSSLConan(ConanFile):
         if self.settings.os == "Neutrino":
             args.append("-lsocket no-asm")
 
-        if self.options.get_safe("no_zlib") == False:
+        if self.options.get_safe("zlib") == True:
             zlib_info = self.deps_cpp_info["zlib"]
             include_path = zlib_info.include_paths[0]
             if self.settings.os == "Windows":
