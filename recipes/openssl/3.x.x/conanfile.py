@@ -231,11 +231,10 @@ class OpenSSLConan(ConanFile):
     @property
     def _targets(self):
         is_cygwin = self.settings.get_safe("os.subsystem") == "cygwin"
-        is_1_0 = self._full_version < "1.1.0"
         return {
-            "Linux-x86-clang": ("%slinux-generic32" % self._target_prefix) if is_1_0 else "linux-x86-clang",
-            "Linux-x86_64-clang": ("%slinux-x86_64" % self._target_prefix) if is_1_0 else "linux-x86_64-clang",
-            "Linux-x86-*": ("%slinux-generic32" % self._target_prefix) if is_1_0 else "linux-x86",
+            "Linux-x86-clang": "linux-x86-clang",
+            "Linux-x86_64-clang": "linux-x86_64-clang",
+            "Linux-x86-*": "linux-x86",
             "Linux-x86_64-*": "%slinux-x86_64" % self._target_prefix,
             "Linux-armv4-*": "linux-armv4",
             "Linux-armv4i-*": "linux-armv4",
