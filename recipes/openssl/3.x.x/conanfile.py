@@ -47,7 +47,7 @@ class OpenSSLConan(ConanFile):
     default_options["openssldir"] = None
     _env_build = None
     _source_subfolder = "source_subfolder"
-    exports_sources = ['patches/*']
+    exports_sources = ["patches/*"]
 
     def build_requirements(self):
         if tools.os_info.is_windows:
@@ -56,7 +56,7 @@ class OpenSSLConan(ConanFile):
             if not self.options.no_asm and not tools.which("nasm"):
                 self.build_requires("nasm/2.14")
         if self._win_bash:
-            if "CONAN_BASH_PATH" not in os.environ and tools.os_info.detect_windows_subsystem() != 'msys2':
+            if "CONAN_BASH_PATH" not in os.environ and tools.os_info.detect_windows_subsystem() != "msys2":
                 self.build_requires("msys2/20190524")
 
     @property
@@ -105,10 +105,6 @@ class OpenSSLConan(ConanFile):
     def requirements(self):
         if self.options.get_safe("zlib") == True:
             self.requires("zlib/1.2.11")
-
-    @property
-    def _target_prefix(self):
-        return ""
 
     @property
     def _target(self):
@@ -181,7 +177,7 @@ class OpenSSLConan(ConanFile):
             "Linux-x86-clang": "linux-x86-clang",
             "Linux-x86_64-clang": "linux-x86_64-clang",
             "Linux-x86-*": "linux-x86",
-            "Linux-x86_64-*": "%slinux-x86_64" % self._target_prefix,
+            "Linux-x86_64-*": "linux-x86_64",
             "Linux-armv4-*": "linux-armv4",
             "Linux-armv4i-*": "linux-armv4",
             "Linux-armv5el-*": "linux-armv4",
@@ -207,10 +203,10 @@ class OpenSSLConan(ConanFile):
             "Linux-sparc-*": "linux-sparcv8",
             "Linux-sparcv9-*": "linux64-sparcv9",
             "Linux-*-*": "linux-generic32",
-            "Macos-x86-*": "%sdarwin-i386-cc" % self._target_prefix,
-            "Macos-x86_64-*": "%sdarwin64-x86_64-cc" % self._target_prefix,
-            "Macos-ppc32-*": "%sdarwin-ppc-cc" % self._target_prefix,
-            "Macos-ppc32be-*": "%sdarwin-ppc-cc" % self._target_prefix,
+            "Macos-x86-*": "darwin-i386-cc",
+            "Macos-x86_64-*": "darwin64-x86_64-cc",
+            "Macos-ppc32-*": "darwin-ppc-cc",
+            "Macos-ppc32be-*": "darwin-ppc-cc",
             "Macos-ppc64-*": "darwin64-ppc-cc",
             "Macos-ppc64be-*": "darwin64-ppc-cc",
             "Macos-*-*": "darwin-common",
@@ -230,15 +226,15 @@ class OpenSSLConan(ConanFile):
             "Windows-x86-gcc": "Cygwin-x86" if is_cygwin else "mingw",
             "Windows-x86_64-gcc": "Cygwin-x86_64" if is_cygwin else "mingw64",
             "Windows-*-gcc": "Cygwin-common" if is_cygwin else "mingw-common",
-            "Windows-ia64-Visual Studio": "%sVC-WIN64I" % self._target_prefix,  # Itanium
-            "Windows-x86-Visual Studio": "%sVC-WIN32" % self._target_prefix,
-            "Windows-x86_64-Visual Studio": "%sVC-WIN64A" % self._target_prefix,
+            "Windows-ia64-Visual Studio": "VC-WIN64I",  # Itanium
+            "Windows-x86-Visual Studio": "VC-WIN32",
+            "Windows-x86_64-Visual Studio": "VC-WIN64A",
             "Windows-armv7-Visual Studio": "VC-WIN32-ARM",
             "Windows-armv8-Visual Studio": "VC-WIN64-ARM",
             "Windows-*-Visual Studio": "VC-noCE-common",
-            "Windows-ia64-clang": "%sVC-WIN64I" % self._target_prefix,  # Itanium
-            "Windows-x86-clang": "%sVC-WIN32" % self._target_prefix,
-            "Windows-x86_64-clang": "%sVC-WIN64A" % self._target_prefix,
+            "Windows-ia64-clang": "VC-WIN64I",  # Itanium
+            "Windows-x86-clang": "VC-WIN32",
+            "Windows-x86_64-clang": "VC-WIN64A",
             "Windows-armv7-clang": "VC-WIN32-ARM",
             "Windows-armv8-clang": "VC-WIN64-ARM",
             "Windows-*-clang": "VC-noCE-common",
@@ -248,13 +244,13 @@ class OpenSSLConan(ConanFile):
             "WindowsStore-armv8-*": "VC-WIN64-ARM-UWP",
             "WindowsStore-*-*": "VC-WIN32-ONECORE",
             "WindowsCE-*-*": "VC-CE",
-            "SunOS-x86-gcc": "%ssolaris-x86-gcc" % self._target_prefix,
-            "SunOS-x86_64-gcc": "%ssolaris64-x86_64-gcc" % self._target_prefix,
-            "SunOS-sparc-gcc": "%ssolaris-sparcv8-gcc" % self._target_prefix,
+            "SunOS-x86-gcc": "solaris-x86-gcc",
+            "SunOS-x86_64-gcc": "solaris64-x86_64-gcc",
+            "SunOS-sparc-gcc": "solaris-sparcv8-gcc",
             "SunOS-sparcv9-gcc": "solaris64-sparcv9-gcc",
-            "SunOS-x86-suncc": "%ssolaris-x86-cc" % self._target_prefix,
-            "SunOS-x86_64-suncc": "%ssolaris64-x86_64-cc" % self._target_prefix,
-            "SunOS-sparc-suncc": "%ssolaris-sparcv8-cc" % self._target_prefix,
+            "SunOS-x86-suncc": "solaris-x86-cc",
+            "SunOS-x86_64-suncc": "solaris64-x86_64-cc",
+            "SunOS-sparc-suncc": "solaris-sparcv8-cc",
             "SunOS-sparcv9-suncc": "solaris64-sparcv9-cc",
             "SunOS-*-*": "solaris-common",
             "*BSD-x86-*": "BSD-x86",
