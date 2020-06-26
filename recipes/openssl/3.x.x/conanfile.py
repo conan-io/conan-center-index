@@ -406,17 +406,14 @@ class OpenSSLConan(ConanFile):
         openssldir = self.options.openssldir if self.options.openssldir else os.path.join(self.package_folder, "res")
         prefix = tools.unix_path(self.package_folder) if self._win_bash else self.package_folder
         openssldir = tools.unix_path(openssldir) if self._win_bash else openssldir
-        args = ['"%s"' % (self._target if self._full_version >= "1.1.0" else self._ancestor_target),
+        args = ['"%s"' % (self._target),
                 "shared" if self.options.shared else "no-shared",
                 "--prefix=\"%s\"" % prefix,
                 "--openssldir=\"%s\"" % openssldir,
                 "no-unit-test"]
-        if self._full_version >= "1.1.1":
-            args.append("PERL=%s" % self._perl)
-        if self._full_version < "1.1.0" or self._full_version >= "1.1.1":
-            args.append("no-tests")
-        if self._full_version >= "1.1.0":
-            args.append("--debug" if self.settings.build_type == "Debug" else "--release")
+        args.append("PERL=%s" % self._perl)
+        args.append("no-tests")
+        args.append("--debug" if self.settings.build_type == "Debug" else "--release")
 
         if self.settings.os == "tvOS":
             args.append(" -DNO_FORK") # fork is not available on tvOS
