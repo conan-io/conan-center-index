@@ -79,12 +79,10 @@ class OpenSSLConan(ConanFile):
                "no_dh": [True, False],
                "no_dsa": [True, False],
                "no_hmac": [True, False],
-               "no_md2": [True, False],
                "no_md5": [True, False],
                "no_mdc2": [True, False],
                "no_rc2": [True, False],
                "no_rc4": [True, False],
-               "no_rc5": [True, False],
                "no_rsa": [True, False],
                "no_sha": [True, False],
                "no_async": [True, False],
@@ -149,9 +147,7 @@ class OpenSSLConan(ConanFile):
         del self.settings.compiler.libcxx
         del self.settings.compiler.cppstd
         if self._full_version >= "1.1.0":
-            del self.options.no_md2
             del self.options.no_rc4
-            del self.options.no_rc5
 
     def config_options(self):
         if self.settings.os != "Windows":
