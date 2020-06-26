@@ -1,4 +1,5 @@
 import os
+import glob
 from conans import CMake, ConanFile, tools
 
 class MosquittoConan(ConanFile):
@@ -13,16 +14,10 @@ class MosquittoConan(ConanFile):
     settings = "os", "arch", "compiler", "build_type"
     options = {"shared": [True, False],
                "fPIC": [True, False],
-               "with_tls": [True, False],
-               "with_mosquittopp": [True, False],
-               "with_srv": [True, False],
-               "with_binaries": [True, False]}
+               "with_tls": [True, False]}
     default_options = {"shared": False,
                        "fPIC": True,
-                       "with_tls": True,
-                       "with_mosquittopp": True,
-                       "with_srv": True,
-                       "with_binaries": True}
+                       "with_tls": True}
     _cmake = None
 
     @property
@@ -40,15 +35,10 @@ class MosquittoConan(ConanFile):
     def configure(self):
         if self.options.shared:
             del self.options.fPIC
-        if not self.options.with_mosquittopp:
-            del self.settings.compiler.libcxx
-            del self.settings.compiler.cppstd
 
     def requirements(self):
         if self.options.with_tls:
             self.requires("openssl/1.1.1g")
-        if self.options.with_srv:
-            self.requires("c-ares/1.16.1")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
@@ -58,18 +48,19 @@ class MosquittoConan(ConanFile):
     def _configure_cmake(self):
         if not self._cmake:
             self._cmake = CMake(self)
-            self._cmake.definitions["WITH_SRV"] = self.options.with_srv
-            self._cmake.definitions["WITH_BINARIES"] = self.options.with_binaries
-            self._cmake.definitions["WITH_MOSQUITTOPP"] = self.options.with_mosquittopp
+            self._cmake.definitions["WITH_STATIC_LIBRARIES"] = not self.options.shared
             self._cmake.definitions["WITH_TLS"] = self.options.with_tls
             self._cmake.definitions["DOCUMENTATION"] = False
-            self._cmake.definitions["CMAKE_INSTALL_SYSCONFDIR"] = "share"
             self._cmake.configure(build_folder=self._build_subfolder)
         return self._cmake
 
+    def _patch(self):
+        if not self.options.shared and self.options.fPIC:
+            tools.replace_in_file(os.path.join(self._source_subfolder, "lib", "CMakeLists.txt"),
+                                  "POSITION_INDEPENDENT_CODE 1",
+                                  "POSITION_INDEPENDENT_CODE 0")
+
     def build(self):
-        for patch in self.conan_data["patches"][self.version]:
-            tools.patch(**patch)
         cmake = self._configure_cmake()
         cmake.build()
 
@@ -77,22 +68,32 @@ class MosquittoConan(ConanFile):
         self.copy(pattern="LICENSE.txt", dst="licenses", src=self._source_subfolder)
         self.copy(pattern="edl-v10", dst="licenses", src=self._source_subfolder)
         self.copy(pattern="epl-v10", dst="licenses", src=self._source_subfolder)
-        if self.options.with_binaries:
-            self.copy(pattern="mosquitto.conf", src=self._source_subfolder, dst="bin")
+        self.copy(pattern="mosquitto.conf", src=self._source_subfolder, dst="bin")
         cmake = self._configure_cmake()
         cmake.install()
-        tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
         tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
-        tools.rmdir(os.path.join(self.package_folder, "share"))
+        tools.rmdir(os.path.join(self.package_folder, "etc"))
+        if not self.options.shared:
+            for f in glob.glob(os.path.join(self.package_folder, "lib", "*.so*")):
+                os.remove(f)
 
     def package_info(self):
-        self.cpp_info.libs = tools.collect_libs(self)
+        lib_suffix = "_static" if not self.options.shared else ""
+        self.cpp_info.components["libmosquitto"].name = "mosquitto"
+        self.cpp_info.components["libmosquitto"].libs = ["mosquitto" + lib_suffix]
+        self.cpp_info.components["libmosquitto"].names["pkgconfig"] = "libmosquitto"
+        if self.options.with_tls:
+            self.cpp_info.components["libmosquitto"].requires.append("openssl::openssl")
         if self.settings.os == "Windows":
-            self.cpp_info.libs.append("ws2_32")
+            self.cpp_info.components["libmosquitto"].system_libs.append("ws2_32")
         elif self.settings.os == "Linux":
-            self.cpp_info.libs.extend(["rt", "pthread", "dl"])
+            self.cpp_info.components["libmosquitto"].system_libs.extend(["rt", "pthread", "dl"])
 
-        if self.options.with_binaries:
-            bin_path = os.path.join(self.package_folder, "bin")
-            self.output.info("Appending PATH env var with : {}".format(bin_path))
-            self.env_info.PATH.append(bin_path)
+        self.cpp_info.components["libmosquittopp"].name = "mosquittopp"
+        self.cpp_info.components["libmosquittopp"].libs = ["mosquittopp" + lib_suffix]
+        self.cpp_info.components["libmosquittopp"].requires = ["libmosquitto"]
+        self.cpp_info.components["libmosquittopp"].names["pkgconfig"] = "libmosquittopp"
+
+        bin_path = os.path.join(self.package_folder, "bin")
+        self.output.info("Appending PATH env var with : {}".format(bin_path))
+        self.env_info.PATH.append(bin_path)
