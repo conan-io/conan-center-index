@@ -1,0 +1,49 @@
+<?xml version="1.0"?>
+<templates xmlns="http://www.fixprotocol.org/ns/fast/td/1.1" templateNs="http://www.fixprotocol.org/ns/templates/sample" ns="http://www.fixprotocol.org/ns/fix">
+    <template name="MDRefreshSample">
+        <typeRef name="MarketDataIncrementalRefresh"/>
+        <string name="BeginString" id="8">
+            <constant value="FIX4.4"/>
+        </string>
+        <string name="MessageType" id="35">
+            <constant value="X"/>
+        </string>
+        <string name="SenderCompID" id="49">
+            <copy/>
+        </string>
+        <uInt32 name="MsgSeqNum" id="34">
+            <increment/>
+        </uInt32>
+        <sequence name="MDEntries">
+            <length name="NoMDEntries" id="268"/>
+            <uInt32 name="MDUpdateAction" id="279">
+                <copy/>
+            </uInt32>
+            <string name="MDEntryType" id="269">
+                <copy/>
+            </string>
+            <string name="Symbol" id="55">
+                <copy/>
+            </string>
+            <string name="SecurityType" id="167">
+                <copy/>
+            </string>
+            <decimal name="MDEntryPx" id="270">
+                <delta/>
+            </decimal>
+            <decimal name="MDEntrySize" id="271">
+                <exponent> <delta/> </exponent>
+                <mantissa> <delta/> </mantissa>
+            </decimal>
+            <uInt32 name="NumberOfOrders" id="346">
+                <delta/>
+            </uInt32>
+            <string name="QuoteCondition" id="276">
+                <copy/>
+            </string>
+            <string name="TradeCondition" id="277">
+                <copy/>
+            </string>
+        </sequence>
+    </template>
+</templates>
