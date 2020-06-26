@@ -80,7 +80,7 @@ int main()
 	printf("sha512 digest: %s\n", sha512_string);
 	printf("sha3 256 digest: %s\n", sha3_256_string);
 	printf("sha3 512 digest: %s\n", sha3_512_string);
-	printf("SSL library version: %s\n", SSLeay_version(SSLEAY_VERSION));
+    printf("OpenSSL version: %s\n", OpenSSL_version(OPENSSL_VERSION));
 #if defined(WITH_ZLIB)
 	printf("ZLIB version: %s\n", ZLIB_VERSION);
 #endif
