@@ -1,6 +1,5 @@
 from conans import ConanFile, tools, CMake
 import os
-import shutil
 
 class libsvmConan(ConanFile):
     name = "libsvm"
@@ -23,7 +22,7 @@ class libsvmConan(ConanFile):
     def _configure_cmake(self):
         if not self._cmake:
             self._cmake = CMake(self)
-            self._cmake.configure(source_folder=self._source_subfolder)
+            self._cmake.configure()
         return self._cmake
 
     def config_options(self):
@@ -36,8 +35,6 @@ class libsvmConan(ConanFile):
         os.rename(extracted_dir, self._source_subfolder)
 
     def build(self):
-        #Use custom CMakeLists.txt
-        shutil.copy(src=os.path.join(self.source_folder, "CMakeLists.txt"), dst=os.path.join(self.source_folder,self._source_subfolder))
         cmake = self._configure_cmake()
         cmake.build()
 
