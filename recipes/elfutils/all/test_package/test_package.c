@@ -1,9 +1,10 @@
-#include <dwarf.h>
+#include <gelf.h>
 #include <elfutils/libasm.h>
 #include <elfutils/libdwelf.h>
 #include <elfutils/libdwfl.h>
 #include <elfutils/libdw.h>
-#include <elfutils/libebl.h>
+//#include <elfutils/libebl.h>
+#include <dwarf.h>
 #include <libelf.h>
 
 #include <stdio.h>
