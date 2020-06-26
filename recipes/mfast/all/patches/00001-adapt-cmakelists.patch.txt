@@ -1,5 +1,5 @@
 diff --git a/CMakeLists.txt b/CMakeLists.txt
-index 3721f76..dde9ddb 100644
+index 3721f76..847f587 100644
 --- a/CMakeLists.txt
 +++ b/CMakeLists.txt
 @@ -10,6 +10,9 @@ endif()
@@ -7,7 +7,7 @@ index 3721f76..dde9ddb 100644
  project (mFAST)
  
 +include(${PROJECT_BINARY_DIR}/../conanbuildinfo.cmake)
-+conan_basic_setup(TARGETS)
++conan_basic_setup()
 +
  if (CMAKE_BUILD_TYPE STREQUAL "Coverage")
  	list(APPEND CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake")
@@ -22,7 +22,7 @@ index 3721f76..dde9ddb 100644
  
  ################################################################################
  
-@@ -174,19 +174,14 @@ endmacro()
+@@ -174,9 +174,6 @@ endmacro()
  # Recurse into the "src" and "unit-tests" subdirectories. This does not actually
  # cause another cmake executable to run. The same process will walk through
  # the project's entire directory structure.
@@ -31,12 +31,9 @@ index 3721f76..dde9ddb 100644
 -add_subdirectory (tests)
  
  if (BUILD_SHARED_LIBS)
--  set(MFAST_LIBRARIES mfast_coder mfast_xml_parser mfast)
-+  set(MFAST_LIBRARIES mfast_coder mfast)
-   add_definitions( -DMFAST_DYN_LINK )
- else()
--  set(MFAST_LIBRARIES mfast_coder_static mfast_xml_parser_static mfast_static)
-+  set(MFAST_LIBRARIES mfast_coder_static mfast_static)
+   set(MFAST_LIBRARIES mfast_coder mfast_xml_parser mfast)
+@@ -185,8 +182,6 @@ else()
+   set(MFAST_LIBRARIES mfast_coder_static mfast_xml_parser_static mfast_static)
  endif()
  
 -add_subdirectory (examples)
