@@ -1,5 +1,6 @@
 from conans import ConanFile, CMake, tools
 import os
+import shutil
 
 
 class QuickfastConan(ConanFile):
@@ -44,9 +45,14 @@ class QuickfastConan(ConanFile):
             del self.options.fPIC
 
     def build(self):
+        # Patch taken from:
+        # https://raw.githubusercontent.com/microsoft/vcpkg/master/ports/quickfast/00001-fix-boost-asio.patch
         patches = self.conan_data["patches"][self.version]
         for patch in patches:
             tools.patch(**patch)
+
+        shutil.copy("CMakeLists.txt",
+                    os.path.join(self._source_subfolder, "CMakeLists.txt"))
 
         cmake = self._configure_cmake()
         cmake.build(target="quickfast")

@@ -4,7 +4,5 @@ sources:
     sha256: "7ae22d28cc13967a2815c09bec027ce01f2f3e30b6ed752bea00649581e728df"
 patches:
   "1.5":
-    - patch_file: "patches/00001-fix-boost-asio.patch.txt"
-      base_path: "source_subfolder"
-    - patch_file: "patches/00002-add-cmakelists.patch.txt"
+    - patch_file: "patches/00001-fix-boost-asio.patch"
       base_path: "source_subfolder"
