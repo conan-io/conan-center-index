@@ -5,3 +5,6 @@ sources:
   "2.10.1":
     url: "https://download.savannah.gnu.org/releases//freetype/freetype-2.10.1.tar.gz"
     sha256: "3a60d391fd579440561bf0e7f31af2222bc610ad6ce4d9d7bd2165bca8669110"
+  "2.10.2":
+    url: "https://download.savannah.gnu.org/releases//freetype/freetype-2.10.2.tar.gz"
+    sha256: "e09aa914e4f7a5d723ac381420949c55c0b90b15744adce5d1406046022186ab"
