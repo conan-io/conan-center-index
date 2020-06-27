@@ -81,7 +81,7 @@ class NetcdfConan(ConanFile):
             if self.options.with_dap:
                 args.append("--enable-dap")
             else:
-                args.append("--disable-netcdf4")
+                args.append("--disable-dap")
 
             if self.options.with_utilities:
                 args.append("--enable-utilities")
