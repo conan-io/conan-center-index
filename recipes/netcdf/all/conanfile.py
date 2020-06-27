@@ -29,6 +29,7 @@ class NetcdfConan(ConanFile):
         "with_dap": True,
         "with_utilities": True,
     }
+    _autotools = None
 
     @property
     def _source_subfolder(self):
@@ -59,44 +60,51 @@ class NetcdfConan(ConanFile):
         extracted_dir = "netcdf-c-{}".format(self.version)
         os.rename(extracted_dir, self._source_subfolder)
 
+    def _configure_autotools(self):
+        if not self._autotools:
+            args = [
+                "--prefix={}".format(self.package_folder),
+            ]
+
+            if self.options.shared:
+                args.append("--enable-shared")
+                args.append("--disable-static")
+            else:
+                args.append("--disable-shared")
+                args.append("--enable-static")
+
+            if self.options.with_netcdf4:
+                args.append("--enable-netcdf4")
+            else:
+                args.append("--disable-netcdf4")
+
+            if self.options.with_dap:
+                args.append("--enable-dap")
+            else:
+                args.append("--disable-netcdf4")
+
+            if self.options.with_utilities:
+                args.append("--enable-utilities")
+            else:
+                args.append("--disable-utilities")
+
+            if self.options.get_safe("fPIC"):
+                args.append('--with-pic')
+
+            self._autotools = AutoToolsBuildEnvironment(self)
+            self._autotools.configure(self._source_subfolder, args=args)
+        return self._autotools
+
     def build(self):
-        args = [
-            "--prefix={}".format(self.package_folder),
-        ]
-
-        if self.options.shared:
-            args.append("--enable-shared")
-            args.append("--disable-static")
-        else:
-            args.append("--disable-shared")
-            args.append("--enable-static")
-
-        if self.options.with_netcdf4:
-            args.append("--enable-netcdf4")
-        else:
-            args.append("--disable-netcdf4")
-
-        if self.options.with_dap:
-            args.append("--enable-dap")
-        else:
-            args.append("--disable-netcdf4")
-
-        if self.options.with_utilities:
-            args.append("--enable-utilities")
-        else:
-            args.append("--disable-utilities")
-
-        if self.options.get_safe("fPIC"):
-            args.append('--with-pic')
-
-        env_build = AutoToolsBuildEnvironment(self)
-        env_build.configure(self._source_subfolder, args=args)
-        env_build.make()
+        autotools = self._configure_autotools()
+        autotools.make()
 
     def package(self):
         self.copy("COPYRIGHT", dst="licenses", src=self._source_subfolder)
-        env_build = AutoToolsBuildEnvironment(self)
-        env_build.make(["install"])
+
+        autotools = self._configure_autotools()
+        autotools.install()
+
         tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
         for filename in glob.glob(
                 os.path.join(self.package_folder, "lib", "*.la")):
