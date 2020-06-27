@@ -106,5 +106,6 @@ class NetcdfConan(ConanFile):
 
     def package_info(self):
         self.cpp_info.libs = ["netcdf"]
-
-        self.env_info.PATH.append(os.path.join(self.package_folder, "bin"))
+        bin_path = os.path.join(self.package_folder, "bin")
+        self.output.info("Appending PATH env var with : {}".format(bin_path))
+        self.env_info.PATH.append(bin_path)
