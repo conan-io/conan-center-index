@@ -27,6 +27,8 @@ class DoxygenInstallerConan(ConanFile):
             for program in ["doxygen", "doxyindexer", "doxysearch.cgi"]:
                 shutil.copy(os.path.join(mount_point, "Doxygen.app", "Contents",
                                          "Resources", program), self.build_folder)
+            shutil.copy(os.path.join(mount_point, "Doxygen.app", "Contents",
+                                    "Frameworks", "libclang.dylib"), self.build_folder)
         finally:
             self.run("diskutil eject %s" % (mount_point))
             tools.rmdir(mount_point)
@@ -55,6 +57,8 @@ class DoxygenInstallerConan(ConanFile):
 
         if self.settings.os == "Macos":
             self._unpack_dmg(dest_file)
+            # Redirect the path of libclang.dylib to be adjacent to the doxygen executable, instead of in Frameworks
+            self.run('install_name_tool -change "@executable_path/../Frameworks/libclang.dylib" "@executable_path/libclang.dylib" doxygen')
         else:
             tools.unzip(dest_file)
 
