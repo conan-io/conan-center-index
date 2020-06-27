@@ -11,7 +11,7 @@ class DoxygenInstallerConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/doxygen/doxygen"
     license = "GPL-2.0-or-later"
-    settings = "os", "arch",
+    settings = "os", "arch", "compiler"
 
     def configure(self):
         if self.settings.os in ["Linux", "Macos"] and self.settings.arch == "x86":
@@ -78,3 +78,6 @@ class DoxygenInstallerConan(ConanFile):
     def package_info(self):
         bindir = os.path.join(self.package_folder, "bin")
         self.env_info.PATH.append(bindir)
+
+    def package_id(self):
+        del self.info.settings.compiler
