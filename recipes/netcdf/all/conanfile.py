@@ -84,7 +84,7 @@ class NetcdfConan(ConanFile):
         else:
             args.append("--disable-utilities")
 
-        if self.settings.compiler != 'Visual Studio' and self.options.fPIC:
+        if self.options.get_safe("fPIC"):
             args.append('--with-pic')
 
         env_build = AutoToolsBuildEnvironment(self)
