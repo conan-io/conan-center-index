@@ -6,7 +6,6 @@ conan_basic_setup()
 
 add_library(svm source_subfolder/svm.cpp)
 set_target_properties(svm PROPERTIES PUBLIC_HEADER source_subfolder/svm.h)
-target_include_directories(svm PRIVATE source_subfolder)
 
 add_executable(svm-predict source_subfolder/svm-predict.c)
 target_link_libraries(svm-predict svm)
