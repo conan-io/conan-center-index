@@ -107,5 +107,5 @@ class PkgConfConan(ConanFile):
         self.env_info.PKG_CONFIG = pkg_config
 
         automake_extra_includes = os.path.join(self.package_folder , "bin", "aclocal").replace("\\", "/")
-        self.output.info("Appending AUTOMAKE_EXTRA_INCLUDES env var: {}".format(automake_extra_includes))
-        self.env_info.AUTOMAKE_EXTRA_INCLUDES.append(automake_extra_includes)
+        self.output.info("Appending AUTOMAKE_CONAN_INCLUDES env var: {}".format(automake_extra_includes))
+        self.env_info.AUTOMAKE_CONAN_INCLUDES.append(automake_extra_includes)
