@@ -29,6 +29,9 @@ class ParallelSTLConan(ConanFile):
         if self.options.backend == "tbb":
             self.requires("tbb/2020.1")
 
+    def configure(self):
+        tools.check_min_cppstd(self, "11")
+
     def _configure_cmake(self):
         cmake = CMake(self)
         cmake.definitions["PARALLELSTL_BACKEND"] = self.options.backend
