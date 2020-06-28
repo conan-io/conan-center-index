@@ -23,11 +23,11 @@ class PclConanRecipe(ConanFile):
         "with_cuda": False,
         "with_tools": False
     }
-    requires = ("boost/1.70.0]",
+    requires = ("boost/1.70.0",
                 "eigen/3.3.7",
                 "flann/1.9.1",
                 "libpng/1.6.37",
-                "qhull/[>7.3.0]"
+                "qhull/7.3.2"
 
                 )
     generators = "cmake"
@@ -44,10 +44,10 @@ class PclConanRecipe(ConanFile):
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
-        tools.replace_in_file("CMakeLists.txt", "add_subdirectory(pcl)", f"add_subdirectory({self._source_subfolder})")
 
     def _configure_cmake(self):
         cmake_definitions = {
+            "CONAN_PCL_VERSION": self.version,
             "PCL_BUILD_WITH_BOOST_DYNAMIC_LINKING_WIN32": self.options["boost"].shared
         }
 
