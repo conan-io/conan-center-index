@@ -13,6 +13,6 @@ class ParallelSTLTestConan(ConanFile):
         cmake.build()
 
     def test(self):
-        if not tools.cross_building(self):
-            os.chdir("bin")
-            self.run(".%sexample" % os.sep)
+        if not tools.cross_building(self.settings):
+            bin_path = os.path.join("bin", "pstl_test_package")
+            self.run(bin_path, run_environment=True)
