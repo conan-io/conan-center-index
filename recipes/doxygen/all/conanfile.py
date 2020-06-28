@@ -16,8 +16,8 @@ class DoxygenInstallerConan(ConanFile):
     def configure(self):
         if self.settings.os in ["Linux", "Macos"] and self.settings.arch == "x86":
             raise ConanInvalidConfiguration("Doxygen is not supported on {}-{}".format(self.os, self.arch))
-        if tools.Version(self.version) >= "1.8.18" and self.settings.compiler == "gcc" and tools.Version(self.settings.compiler.version) < "6":
-            raise ConanInvalidConfiguration("Doxygen requires GLIBCXX_3.4.22")
+        if tools.Version(self.version) >= "1.8.18" and self.settings.compiler == "gcc" and tools.Version(self.settings.compiler.version) < "8":
+            raise ConanInvalidConfiguration("Doxygen requires GLIBCXX_3.4.22 and GLIBC_2.27") # https://abi-laboratory.pro/index.php?view=changelog&l=glibc&v=2.27
 
     def _unpack_dmg(self, dest_file):
         mount_point = os.path.join(self.build_folder, "mnt")
