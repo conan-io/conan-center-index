@@ -1,7 +1,6 @@
 import os.path
 
 from conans import ConanFile, CMake, tools
-from conans.errors import ConanInvalidConfiguration
 
 
 class PclConanRecipe(ConanFile):
@@ -41,8 +40,6 @@ class PclConanRecipe(ConanFile):
 
     def configure(self):
         tools.check_min_cppstd(self, "14")
-        if self.options["qhull"].shared:
-            raise ConanInvalidConfiguration("PCL Requires a static build of QHull")
 
     def _configure_cmake(self):
         cmake_definitions = {
@@ -66,7 +63,8 @@ class PclConanRecipe(ConanFile):
             "WITH_DSSDK": False,
             "WITH_RSSDK": False,
             "PCL_SHARED_LIBS": self.options.shared,
-            "FLANN_USE_STATIC": not self.options["flann"].shared
+            "FLANN_USE_STATIC": not self.options["flann"].shared,
+            "QHULL_USE_STATIC": not self.options["qhull"].shared
         }
         pcl_features = {
             "BUILD_kdtree": True,
@@ -87,8 +85,6 @@ class PclConanRecipe(ConanFile):
             "BUILD_recognition": True,
             "BUILD_stereo": True,
         }
-
-        pcl_config["QHULL_USE_STATIC"] = True
 
         cmake = CMake(self)
         cmake.definitions.update(cmake_definitions)
