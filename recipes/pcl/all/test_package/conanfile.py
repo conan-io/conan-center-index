@@ -1,7 +1,6 @@
 from conans import ConanFile, CMake, tools
 import os
 
-
 class PclTestConan(ConanFile):
     settings = "os", "compiler", "build_type", "arch"
     generators = "cmake"
