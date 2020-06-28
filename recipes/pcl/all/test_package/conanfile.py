@@ -1,4 +1,4 @@
-from conans import ConanFile, CMake
+from conans import ConanFile, CMake, tools
 import os
 
 
@@ -13,5 +13,6 @@ class PclTestConan(ConanFile):
         cmake.build()
 
     def test(self):
-        os.chdir('bin')
-        self.run('.{}pcl_test_package'.format(os.sep))
+        if not tools.cross_building(self.settings):
+            bin_path = os.path.join("bin", "pcl_test_package")
+            self.run(bin_path, run_environment=True)

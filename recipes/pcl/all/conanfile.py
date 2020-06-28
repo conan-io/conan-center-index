@@ -2,6 +2,7 @@ import shutil
 import os.path
 
 from conans import ConanFile, CMake, tools
+from conans.errors import ConanInvalidConfiguration
 
 
 class PclConanRecipe(ConanFile):
@@ -21,7 +22,8 @@ class PclConanRecipe(ConanFile):
         "shared": True,
         "fPIC": True,
         "with_cuda": False,
-        "with_tools": False
+        "with_tools": False,
+        "qhull:shared": False
     }
     requires = ("boost/1.70.0",
                 "eigen/3.3.7",
@@ -34,16 +36,16 @@ class PclConanRecipe(ConanFile):
     exports = ["CMakeLists.txt"]
 
     @property
-    def _major_minor_version(self):
-        major, minor, patch = self.version.split(".")
-        return ".".join([major, minor])
-
-    @property
     def _source_subfolder(self):
-        return f"pcl-pcl-{self.version}"
+        return "pcl-pcl-{}".format(self.version)
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
+
+    def configure(self):
+        tools.check_min_cppstd(self, "14")
+        if self.options["qhull"].shared:
+            raise ConanInvalidConfiguration("PCL Requires a static build of QHull")
 
     def _configure_cmake(self):
         cmake_definitions = {
@@ -111,9 +113,10 @@ class PclConanRecipe(ConanFile):
         cmake = self._configure_cmake()
         cmake.install()
         self.copy(pattern="LICENSE.txt", dst="licenses", src=self._source_subfolder)
-        shutil.rmtree(os.path.join(self.package_folder, "share"))
-        shutil.rmtree(os.path.join(self.package_folder, "lib", "pkgconfig"))
+        tools.rmdir(os.path.join(self.package_folder, "share"))
+        tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
 
     def package_info(self):
-        self.cpp_info.includedirs = [f"include/pcl-{self._major_minor_version}"]
+        semver = tools.Version(self.version)
+        self.cpp_info.includedirs = ["include/pcl-{}-{}".format(semver.major, semver.minor)]
         self.cpp_info.libs = tools.collect_libs(self)
