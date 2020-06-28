@@ -12,11 +12,11 @@ class ParallelSTLConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/oneapi-src/oneDPL"
     topics = ("stl", "parallelism")
-    settings = "os", "compiler", "build_type", "arch"
     options = {"backend": ["tbb", "serial"]}
     default_options = {"backend": "tbb"}
     generators = ["cmake", "cmake_find_package"]
     exports = ["CMakeLists.txt"]
+    no_copy_source = True
 
     @property
     def _source_subfolder(self):
