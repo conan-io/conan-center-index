@@ -1,4 +1,3 @@
-import shutil
 import os.path
 
 from conans import ConanFile, CMake, tools
@@ -29,10 +28,8 @@ class PclConanRecipe(ConanFile):
                 "eigen/3.3.7",
                 "flann/1.9.1",
                 "libpng/1.6.37",
-                "qhull/7.3.2"
-
-                )
-    generators = "cmake"
+                "qhull/7.3.2")
+    generators = ["cmake", "cmake_find_package"]
     exports = ["CMakeLists.txt"]
 
     @property
@@ -54,9 +51,6 @@ class PclConanRecipe(ConanFile):
         }
 
         pcl_config = {
-            "EIGEN_ROOT": self.deps_cpp_info["eigen"].rootpath,
-            "FLANN_ROOT": self.deps_cpp_info["flann"].rootpath,
-            "BOOST_ROOT": self.deps_cpp_info["boost"].rootpath,
             "BUILD_tools": self.options.with_tools,
             "WITH_LIBUSB": False,
             "WITH_PNG": True,
@@ -94,8 +88,6 @@ class PclConanRecipe(ConanFile):
             "BUILD_stereo": True,
         }
 
-        pcl_config["LIBPNG_ROOT"] = self.deps_cpp_info["libpng"].rootpath
-        pcl_config["QHULL_ROOT"] = self.deps_cpp_info["qhull"].rootpath
         pcl_config["QHULL_USE_STATIC"] = True
 
         cmake = CMake(self)
@@ -118,5 +110,5 @@ class PclConanRecipe(ConanFile):
 
     def package_info(self):
         semver = tools.Version(self.version)
-        self.cpp_info.includedirs = ["include/pcl-{}-{}".format(semver.major, semver.minor)]
+        self.cpp_info.includedirs = ["include/pcl-{}.{}".format(semver.major, semver.minor)]
         self.cpp_info.libs = tools.collect_libs(self)
