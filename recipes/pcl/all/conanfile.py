@@ -1,6 +1,7 @@
 import os.path
 
 from conans import ConanFile, CMake, tools
+from conans.errors import ConanInvalidConfiguration
 
 
 class PclConanRecipe(ConanFile):
@@ -43,6 +44,9 @@ class PclConanRecipe(ConanFile):
             del self.options.fPIC
 
     def configure(self):
+        if self.settings.compiler == "Visual Studio":
+            if self.settings.compiler.version == 14 or self.settings.compiler.toolset == "v140":
+                raise ConanInvalidConfiguration("Unsupported Visual Studio Compiler or Toolset")
         tools.check_min_cppstd(self, "14")
 
     def _configure_cmake(self):
