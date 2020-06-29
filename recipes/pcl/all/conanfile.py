@@ -1,4 +1,7 @@
-import os.path
+import os
+from os.path import join
+from glob import glob
+from itertools import chain
 
 from conans import ConanFile, CMake, tools
 from conans.errors import ConanInvalidConfiguration
@@ -45,9 +48,8 @@ class PclConanRecipe(ConanFile):
             del self.options.fPIC
 
     def configure(self):
-        if self.settings.compiler == "Visual Studio":
-            if self.settings.compiler.version == 14 or self.settings.compiler.toolset == "v140":
-                raise ConanInvalidConfiguration("Unsupported Visual Studio Compiler or Toolset")
+        if tools.msvs_toolset(self) == "v140":
+            raise ConanInvalidConfiguration("Unsupported Visual Studio Compiler or Toolset")
         tools.check_min_cppstd(self, "14")
 
     def _configure_cmake(self):
@@ -106,12 +108,25 @@ class PclConanRecipe(ConanFile):
         cmake = self._configure_cmake()
         cmake.build()
 
+    def _remove_vs_runtime_files(self):
+        patterns = [join(self.package_folder, pattern) for pattern in ["msvcp*.dll", "vcruntime*.dll", "concrt*.dll"]]
+        runtime_files = chain.from_iterable(glob(pattern) for pattern in patterns)
+        for runtime_file in runtime_files:
+            try:
+                os.remove(runtime_file)
+            except Exception as ex:
+                self.output.warn("Could not remove vs runtime file {}, {}".format(runtime_file, ex))
+
     def package(self):
         cmake = self._configure_cmake()
         cmake.install()
         self.copy(pattern="LICENSE.txt", dst="licenses", src=self._source_subfolder)
-        tools.rmdir(os.path.join(self.package_folder, "share"))
-        tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
+        if self.settings.os == "Windows":
+            self._remove_vs_runtime_files()
+
+        tools.rmdir(join(self.package_folder, "cmake"))
+        tools.rmdir(join(self.package_folder, "share"))
+        tools.rmdir(join(self.package_folder, "lib", "pkgconfig"))
 
     def package_info(self):
         semver = tools.Version(self.version)
