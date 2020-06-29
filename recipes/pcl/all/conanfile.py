@@ -109,7 +109,7 @@ class PclConanRecipe(ConanFile):
         cmake.build()
 
     def _remove_vs_runtime_files(self):
-        patterns = [join(self.package_folder, pattern) for pattern in ["msvcp*.dll", "vcruntime*.dll", "concrt*.dll"]]
+        patterns = [join(self.package_folder, "bin", pattern) for pattern in ["msvcp*.dll", "vcruntime*.dll", "concrt*.dll"]]
         runtime_files = chain.from_iterable(glob(pattern) for pattern in patterns)
         for runtime_file in runtime_files:
             try:
