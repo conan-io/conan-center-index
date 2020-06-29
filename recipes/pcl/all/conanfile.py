@@ -34,6 +34,7 @@ class PclConanRecipe(ConanFile):
                 "qhull/7.3.2")
     generators = ["cmake", "cmake_find_package"]
     exports = ["CMakeLists.txt"]
+    _cmake = None
 
     @property
     def _source_subfolder(self):
