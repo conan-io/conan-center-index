@@ -51,7 +51,6 @@ class TestPackageConan(ConanFile):
     def _build_autotools(self):
         """Test autoreconf + configure + make"""
         with tools.environment_append({"AUTOMAKE_CONAN_INCLUDES": [tools.unix_path(self.source_folder)]}):
-            print(os.environ["AUTOMAKE_CONAN_INCLUDES"])
             self.run("{} --verbose --install".format(os.environ["AUTORECONF"]), win_bash=tools.os_info.is_windows)
         self.run("{} --help".format(os.path.join(self.build_folder, "configure").replace("\\", "/")), win_bash=tools.os_info.is_windows)
         autotools = AutoToolsBuildEnvironment(self, win_bash=tools.os_info.is_windows)
