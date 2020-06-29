@@ -3,10 +3,12 @@
 #include <pcl/surface/convex_hull.h>
 
 #include <iostream>
+    
+using PointCloud = pcl::PointCloud<pcl::PointXYZ>;
 
 int main() {
 
-    auto cloud = std::make_shared<pcl::PointCloud<pcl::PointXYZ>>();
+    auto cloud = PointCloud::Ptr(new PointCloud);
     cloud->emplace_back(-1, -1, 0);
     cloud->emplace_back(1, -1, 0);
     cloud->emplace_back(0, 1, 0);
@@ -14,7 +16,7 @@ int main() {
 
     std::cout << "Calculating convex hull\n";
 
-    pcl::PointCloud<pcl::PointXYZ> hull_geometry;
+    PointCloud hull_geometry;
 
     pcl::ConvexHull<pcl::PointXYZ> hull;
     hull.setInputCloud(cloud);
