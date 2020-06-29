@@ -1,7 +1,8 @@
+import os
+
 from conans import ConanFile, tools
 from conans.errors import ConanInvalidConfiguration
 from conans.model.version import Version
-import os
 
 
 class TaskflowConan(ConanFile):
@@ -30,13 +31,13 @@ class TaskflowConan(ConanFile):
                              " standard version support" % (self.name, compiler))
 
         minimal_version = {
-            "17" : {
+            "17": {
                 "Visual Studio": "16",
                 "gcc": "7.3",
                 "clang": "6.0",
                 "apple-clang": "10.0"
             },
-            "14" : {
+            "14": {
                 "Visual Studio": "15",
                 "gcc": "5",
                 "clang": "4.0",
@@ -48,7 +49,7 @@ class TaskflowConan(ConanFile):
             self.output.info("%s requires a compiler that supports at least C++%s" % (self.name, min_req_cppstd))
             return
 
-        # Exclude compilers not supported by taskflow
+        # Exclude compilers not supported by cpp-taskflow
         if compiler_version < minimal_version[min_req_cppstd][compiler]:
             raise ConanInvalidConfiguration("%s requires a compiler that supports"
                                             " at least C++%s. %s %s is not"
@@ -71,4 +72,3 @@ class TaskflowConan(ConanFile):
             self.cpp_info.system_libs.append("pthread")
         if self.settings.compiler == "Visual Studio":
             self.cpp_info.defines.append("_ENABLE_EXTENDED_ALIGNED_STORAGE")
-
