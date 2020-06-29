@@ -28,6 +28,7 @@ class PclConanRecipe(ConanFile):
                 "eigen/3.3.7",
                 "flann/1.9.1",
                 "libpng/1.6.37",
+                "opengl/system",
                 "qhull/7.3.2")
     generators = ["cmake", "cmake_find_package"]
     exports = ["CMakeLists.txt"]
