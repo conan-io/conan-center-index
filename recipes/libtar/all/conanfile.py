@@ -1,5 +1,5 @@
 from conans import AutoToolsBuildEnvironment, ConanFile, tools
-from contextlib import contextmanager
+from conans.errors import ConanInvalidConfiguration
 import glob
 import os
 
@@ -38,45 +38,25 @@ class LibTarConan(ConanFile):
             del self.options.fPIC
 
     def configure(self):
+        if self.settings.compiler == "Visual Studio":
+            raise ConanInvalidConfiguration("libtar does not support Visual Studio")
         if self.options.shared:
             del self.options.fPIC
         del self.settings.compiler.libcxx
         del self.settings.compiler.cppstd
 
     def build_requirements(self):
-        if tools.os_info.is_windows and not tools.get_env("CONAN_BASH_PATH") and \
-                tools.os_info.detect_windows_subsystem() != "msys2":
-            self.build_requires("msys2/20190524")
         self.build_requires("libtool/2.4.6")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
         os.rename(glob.glob("libtar-*")[0], self._source_subfolder)
 
-    @contextmanager
-    def _build_context(self):
-        env = {}
-        if self.settings.compiler == "Visual Studio":
-            with tools.vcvars(self.settings):
-                env.update({
-                    "AR": "{} lib".format(tools.unix_path(self.deps_user_info["automake"].ar_lib)),
-                    "CC": "{} cl -nologo".format(tools.unix_path(self.deps_user_info["automake"].compile)),
-                    "CXX": "{} cl -nologo".format(tools.unix_path(self.deps_user_info["automake"].compile)),
-                    "NM": "dumpbin -symbols",
-                    "OBJDUMP": ":",
-                    "RANLIB": ":",
-                    "STRIP": ":",
-                })
-                with tools.environment_append(env):
-                    yield
-        else:
-            with tools.environment_append(env):
-                yield
-
     def _configure_autotools(self):
         if self._autotools:
             return self._autotools
         self._autotools = AutoToolsBuildEnvironment(self, win_bash=tools.os_info.is_windows)
+        self._autotools.libs = []
         conf_args = [
             "--with-zlib" if self.options.with_zlib else "--without-zlib",
         ]
@@ -87,7 +67,14 @@ class LibTarConan(ConanFile):
         self._autotools.configure(args=conf_args, configure_dir=self._source_subfolder)
         return self._autotools
 
+    def _patch_sources(self):
+        if self.options.with_zlib:
+            tools.replace_in_file(os.path.join(self._source_subfolder, "configure.ac"),
+                                  "AC_CHECK_LIB([z], [gzread])",
+                                  "AC_CHECK_LIB([{}], [gzread])".format(self.deps_cpp_info["zlib"].libs[0]))
+
     def build(self):
+        self._patch_sources()
         with tools.chdir(self._source_subfolder):
             self.run("autoreconf -fiv", run_environment=True, win_bash=tools.os_info.is_windows)
         with self._build_context():
