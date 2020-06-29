@@ -24,8 +24,7 @@ class PclConanRecipe(ConanFile):
         "shared": True,
         "fPIC": True,
         "with_cuda": False,
-        "with_tools": False,
-        "qhull:shared": False
+        "with_tools": False
     }
     requires = ("boost/1.70.0",
                 "eigen/3.3.7",
