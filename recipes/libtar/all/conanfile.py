@@ -89,14 +89,13 @@ class LibTarConan(ConanFile):
 
     def build(self):
         with tools.chdir(self._source_subfolder):
-            self.run("autoreconf -fiv", run_environment=True)
+            self.run("autoreconf -fiv", run_environment=True, win_bash=tools.os_info.is_windows)
         with self._build_context():
             autotools = self._configure_autotools()
             autotools.make()
 
     def package(self):
         self.copy("COPYING", src=self._source_subfolder, dst="licenses")
-        self.copy("COPYRIGHT", src=self._source_subfolder, dst="licenses")
         with self._build_context():
             autotools = self._configure_autotools()
             autotools.install()
