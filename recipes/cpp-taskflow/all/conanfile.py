@@ -7,7 +7,7 @@ import os
 class CppTaskflowConan(ConanFile):
     name = "cpp-taskflow"
     description = "A fast C++ header-only library to help you quickly write parallel programs with complex task dependencies."
-    topics = ("conan", "cpp-taskflow", "tasking", "parallelism")
+    topics = ("conan", "cpp-taskflow", "taskflow", "tasking", "parallelism")
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/cpp-taskflow/cpp-taskflow"
     license = "MIT"
@@ -19,6 +19,8 @@ class CppTaskflowConan(ConanFile):
     _source_subfolder = "source_subfolder"
     
     def configure(self):
+        self.output.warn("[DEPRECATED] Package cpp-taskflow is being deprecated. Change yours to require taskflow instead")
+
         compiler = str(self.settings.compiler)
         compiler_version = tools.Version(self.settings.compiler.version)
         min_req_cppstd = "17" if tools.Version(self.version) <= "2.2.0" else "14"
@@ -56,8 +58,7 @@ class CppTaskflowConan(ConanFile):
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
-        extracted_dir = self.name + "-" + self.version
-        os.rename(extracted_dir, self._source_subfolder)
+        os.rename("taskflow-" + self.version, self._source_subfolder)
 
     def package(self):
         self.copy(pattern="LICENSE", dst="licenses", src=self._source_subfolder)
