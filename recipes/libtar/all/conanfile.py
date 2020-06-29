@@ -77,15 +77,13 @@ class LibTarConan(ConanFile):
         self._patch_sources()
         with tools.chdir(self._source_subfolder):
             self.run("autoreconf -fiv", run_environment=True, win_bash=tools.os_info.is_windows)
-        with self._build_context():
-            autotools = self._configure_autotools()
-            autotools.make()
+        autotools = self._configure_autotools()
+        autotools.make()
 
     def package(self):
         self.copy("COPYING", src=self._source_subfolder, dst="licenses")
-        with self._build_context():
-            autotools = self._configure_autotools()
-            autotools.install()
+        autotools = self._configure_autotools()
+        autotools.install()
 
         os.unlink(os.path.join(os.path.join(self.package_folder, "lib", "libtar.la")))
         tools.rmdir(os.path.join(self.package_folder, "share"))
