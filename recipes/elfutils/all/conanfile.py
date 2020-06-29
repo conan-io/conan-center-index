@@ -11,22 +11,29 @@ class ElfutilsConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     topics = ("conan", "elfutils", "libelf", "libdw", "libasm")
     exports = "patches/**"
-    license = ["GPL-1.0-or-later", "LGPL-3.0-or-later", "GPL-3.0-or-later"]
+    license = ["GPL-1.0-or-later", "LGPL-3.0-or-later", "GPL-2.0-or-later"]
     
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
+        "debuginfod": [True, False],
+        "with_bzlib": [True, False],
+        "with_lzma": [True, False],
+        "with_sqlite3": [True, False],
+        "with_zlib": [True, False],
     }
     default_options = {
         "shared": False,
         "fPIC": True,
+        "debuginfod": False,
+        "with_bzlib": True,
+        "with_lzma": True,
+        "with_sqlite3": False,
+        "with_zlib": True,
     }
-    requires = (
-        "bzip2/1.0.6",
-        "zlib/1.2.11",
-        "xz_utils/5.2.4"
-    )
+
+    generators = "pkg_config"
 
     _autotools = None
     _source_subfolder = "source_subfolder"
@@ -36,6 +43,8 @@ class ElfutilsConan(ConanFile):
             del self.options.fPIC
 
     def configure(self):
+        if self.options.shared:
+            del self.options.fPIC
         del self.settings.compiler.libcxx
         del self.settings.compiler.cppstd
         if self.settings.compiler in ["Visual Studio", "clang", "apple-clang"]:
@@ -44,9 +53,24 @@ class ElfutilsConan(ConanFile):
         if self.settings.compiler != "gcc":
             self.output.warn("Compiler %s is not gcc." % self.settings.compiler)
 
+    def requirements(self):
+        if self.options.with_sqlite3:
+            self.requires("sqlite3/3.31.1")
+        if self.options.with_bzlib:
+            self.requires("bzip2/1.0.6")
+        if self.options.with_zlib:
+            self.requires("zlib/1.2.11")
+        if self.options.with_lzma:
+            self.requires("xz_utils/5.2.4")
+        if self.options.debuginfod:
+            # FIXME: missing recipe for libmicrohttpd
+            raise ConanInvalidConfiguration("libmicrohttpd is not available (yet) on CCI")
+
     def build_requirements(self):
         self.build_requires("automake/1.16.2")
         self.build_requires("m4/1.4.18")
+        self.build_requires("flex/2.6.4")
+        self.build_requires("bison/3.5.3")
         if tools.os_info.is_windows and not tools.get_env("CONAN_BASH_PATH") and \
                 tools.os_info.detect_windows_subsystem() != "msys2":
             self.build_requires("msys2/20190524")
@@ -61,10 +85,11 @@ class ElfutilsConan(ConanFile):
             args = [
                 "--enable-deterministic-archives",
                 "--enable-silent-rules",
-                "--with-zlib",
-                "--with-bzlib",
-                "--with-lzma",
-                'BUILD_STATIC={}'.format("1" if self.options.shared else "0"),
+                "--with-zlib" if self.options.with_zlib else "--without-zlib",
+                "--with-bzlib" if self.options.with_bzlib else "--without-bzlib",
+                "--with-lzma" if self.options.with_lzma else "--without-lzma",
+                "--enable-debuginfod" if self.options.debuginfod else "--disable-debuginfod",
+                'BUILD_STATIC={}'.format("0" if self.options.shared else "1"),
             ]
             self._autotools = AutoToolsBuildEnvironment(self, win_bash=tools.os_info.is_windows)
             self._autotools.configure(configure_dir=self._source_subfolder, args=args)
@@ -74,14 +99,34 @@ class ElfutilsConan(ConanFile):
     def _make_args(self):
         return [
             "BUILD_STATIC={}".format("1" if self.options.shared else "0"),
+            "V=1",
         ]
 
     def build(self):
-        if "patches" in self.conan_data and self.version in self.conan_data["patches"]:
-            for patch in self.conan_data["patches"][self.version]:
-                tools.patch(**patch)
-        with tools.chdir(self._source_subfolder):
-            self.run("autoreconf -fiv")
+        # FIXME: autoreconf using conan fails because conan needs pkgconf (#1013) + multiple m4 directories for automake (#2038)
+
+        for root, _, files in os.walk(self._source_subfolder):
+            for file in files:
+                if file.endswith(".in"):
+                    tools.replace_in_file(os.path.join(root, file), "-Werror", "", strict=False)
+        tools.replace_in_file(os.path.join(self._source_subfolder, "configure"), "-Werror", "")
+        tools.replace_in_file(os.path.join(self._source_subfolder, "configure"),""" if test "$use_gprof" = yes -o "$use_gcov" = yes; then
+  BUILD_STATIC_TRUE=
+  BUILD_STATIC_FALSE='#'
+else
+  BUILD_STATIC_TRUE='#'
+  BUILD_STATIC_FALSE=
+fi""",
+                              """BUILD_STATIC_TRUE={}
+BUILD_STATIC_FALSE={}""".format("#" if self.options.shared else "", "" if self.options.shared else "#"))
+        tools.replace_in_file(os.path.join(self._source_subfolder, "config", "eu.am"), "-Werror", "")
+
+
+        # if "patches" in self.conan_data and self.version in self.conan_data["patches"]:
+        #     for patch in self.conan_data["patches"][self.version]:
+        #         tools.patch(**patch)
+        # with tools.chdir(self._source_subfolder):
+        #     self.run("autoreconf -fiv")
         autotools = self._configure_autotools()
         autotools.make(args=self._make_args)
     
@@ -96,7 +141,7 @@ class ElfutilsConan(ConanFile):
                 os.remove(f)
         else:
             for f in glob.glob(os.path.join(self.package_folder, "lib", "*.so")):
-                os.remove(f)            
+                os.remove(f)
             for f in glob.glob(os.path.join(self.package_folder, "lib", "*.so.1")):
                 os.remove(f)
         
