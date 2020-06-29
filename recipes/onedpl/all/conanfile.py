@@ -3,9 +3,10 @@ import os
 from conans import ConanFile, CMake, tools
 
 
-class ParallelSTLConan(ConanFile):
-    name = "parallelstl"
-    description = ("Parallel STL is an implementation of the C++ standard library algorithms"
+class OneDplConan(ConanFile):
+    name = "onedpl"
+    description = ("OneDPL (Formerly Parallel STL) is an implementation of "
+                   "the C++ standard library algorithms"
                    "with support for execution policies, as specified in "
                    "ISO/IEC 14882:2017 standard, commonly called C++17")
     license = "Apache-2.0 WITH LLVM-exception"
