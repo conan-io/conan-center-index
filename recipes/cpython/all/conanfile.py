@@ -12,7 +12,6 @@ class CPythonConan(ConanFile):
     topics = ("conan", "python", "cpython", "language", "script")
     license = ("Python-2.0",)
     exports_sources = "patches/**"
-    generators = "msbuild"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
@@ -111,6 +110,8 @@ class CPythonConan(ConanFile):
                 # FIXME: python2 does not build on Macos due to a missing uuid_string_t type
                 raise ConanInvalidConfiguration("This recipe (currently) does not support building python2 for apple products.")
         if self.settings.compiler == "Visual Studio":
+            # The msbuild generator only works with Visual Studio
+            self.generators.append("msbuild")
             if not self.options.shared:
                 raise ConanInvalidConfiguration("MSVC does not support a static build")
             if self._is_py2:
