@@ -1,7 +1,7 @@
 --- configure.ac
 +++ configure.ac
-@@ -324,7 +324,7 @@
- AM_CONDITIONAL(USE_VALGRIND, test "$use_valgrind" = yes)
+@@ -382,7 +382,7 @@
+ AM_CONDITIONAL(INSTALL_ELFH, test "$install_elfh" = yes)
  
  AM_CONDITIONAL(BUILD_STATIC, [dnl
 -test "$use_gprof" = yes -o "$use_gcov" = yes])
