@@ -70,8 +70,10 @@ class PclConanRecipe(ConanFile):
         if version < minimal_version[compiler]:
             raise ConanInvalidConfiguration("%s requires a compiler that supports at least C++%s" % (self.name, minimal_cpp_standard))
 
-
     def _configure_cmake(self):
+        if self._cmake:
+            return self._cmake
+
         cmake_definitions = {
             "CONAN_PCL_VERSION": self.version,
             "PCL_BUILD_WITH_BOOST_DYNAMIC_LINKING_WIN32": self.options["boost"].shared
@@ -116,12 +118,12 @@ class PclConanRecipe(ConanFile):
             "BUILD_stereo": True,
         }
 
-        cmake = CMake(self)
-        cmake.definitions.update(cmake_definitions)
-        cmake.definitions.update(pcl_config)
-        cmake.definitions.update(pcl_features)
-        cmake.configure()
-        return cmake
+        self._cmake = CMake(self)
+        self._cmake.definitions.update(cmake_definitions)
+        self._cmake.definitions.update(pcl_config)
+        self._cmake.definitions.update(pcl_features)
+        self._cmake.configure()
+        return self._cmake
 
     def build(self):
         cmake = self._configure_cmake()
