@@ -30,7 +30,7 @@ class CyrusSaslConan(ConanFile):
         "with_mysql": [True, False],
     }
     default_options = {
-        "shared": False,
+        "shared": True,
         "fPIC": True,
         "with_openssl": True,
         "with_cram": True,
@@ -62,6 +62,10 @@ class CyrusSaslConan(ConanFile):
             raise ConanInvalidConfiguration(
                 "Cyrus SASL package is not compatible with Windows yet."
             )
+        if not self.options.shared:
+            raise ConanInvalidConfiguration(
+                "Cyrus SASL package cant be built using static linkage"
+            )
 
     def requirements(self):
         if self.options.with_openssl:
@@ -90,8 +94,10 @@ class CyrusSaslConan(ConanFile):
                 configure_args.extend(["--enable-shared", "--disable-static"])
             else:
                 configure_args.extend(["--disable-shared", "--enable-static"])
+
             if not self.options.with_openssl:
                 configure_args.append("--without-openssl")
+
             if not self.options.with_digest:
                 configure_args.append("--disable-digest")
 
@@ -129,6 +135,7 @@ class CyrusSaslConan(ConanFile):
                     configure_args.append("-with-mysql=no")
             else:
                 configure_args.append("--disable-sql")
+            configure_args.append("--with-dblib=none")
 
             configure_file_path = os.path.join(self._source_subfolder)
             self._autotools.configure(
