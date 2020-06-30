@@ -1,6 +1,7 @@
 import os
 
 from conans import ConanFile, tools
+from conans.errors import ConanInvalidConfiguration
 
 
 class UwebsocketsConan(ConanFile):
@@ -21,8 +22,29 @@ class UwebsocketsConan(ConanFile):
         return "source_subfolder"
 
     def configure(self):
-        if self.settings.get_safe("compiler.cppstd"):
-            tools.check_min_cppstd(self, "17")
+        minimal_cpp_standard = "17"
+        if self.settings.compiler.cppstd:
+            tools.check_min_cppstd(self, minimal_cpp_standard)
+
+        minimal_version = {
+            "Visual Studio": "15.9",
+            "gcc": "7",
+            "clang": "5",
+            "apple-clang": "10"
+        }
+
+        compiler = str(self.settings.compiler)
+        if compiler not in minimal_version:
+            self.output.warn(
+                "%s recipe lacks information about the %s compiler standard version support" % (self.name, compiler))
+            self.output.warn(
+                "%s requires a compiler that supports at least C++%s" % (self.name, minimal_cpp_standard))
+            return
+
+        version = tools.Version(self.settings.compiler.version)
+        if version < minimal_version[compiler]:
+            raise ConanInvalidConfiguration(
+                "%s requires a compiler that supports at least C++%s" % (self.name, minimal_cpp_standard))
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
