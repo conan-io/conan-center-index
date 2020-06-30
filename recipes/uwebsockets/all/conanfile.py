@@ -10,6 +10,7 @@ class UwebsocketsConan(ConanFile):
     license = "Apache-2.0"
     homepage = "https://github.com/uNetworking/uWebSockets"
     topics = ("conan", "websocket", "network")
+    settings = "compiler"
     no_copy_source = True
 
     requires = ("usockets/0.4.0",
@@ -20,7 +21,7 @@ class UwebsocketsConan(ConanFile):
         return "source_subfolder"
 
     def configure(self):
-        if self.settings.get_safe("cppstd"):
+        if self.settings.get_safe("compiler.cppstd"):
             tools.check_min_cppstd(self, "17")
 
     def source(self):
