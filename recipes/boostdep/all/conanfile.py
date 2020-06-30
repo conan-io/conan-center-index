@@ -55,7 +55,7 @@ class BoostDepConan(ConanFile):
         cmake.install()
 
     def package_id(self):
-        del self.info.settings
+        del self.info.settings.compiler
 
     def package_info(self):
         bin_path = os.path.join(self.package_folder, "bin")
