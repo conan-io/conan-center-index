@@ -1,7 +1,5 @@
 from conans import ConanFile, tools
 from conans.errors import ConanInvalidConfiguration
-import csv
-from io import StringIO
 import os
 import shutil
 
