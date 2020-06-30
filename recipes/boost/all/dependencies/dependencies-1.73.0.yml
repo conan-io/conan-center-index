@@ -1,0 +1,608 @@
+buildables:
+- atomic
+- chrono
+- container
+- context
+- contract
+- coroutine
+- date_time
+- exception
+- fiber
+- filesystem
+- graph
+- graph_parallel
+- iostreams
+- locale
+- log
+- math
+- mpi
+- nowide
+- program_options
+- python
+- random
+- regex
+- serialization
+- signals
+- stacktrace
+- system
+- test
+- thread
+- timer
+- type_erasure
+- wave
+dependencies:
+  atomic:
+  - assert
+  - config
+  - static_assert
+  - type_traits
+  chrono:
+  - assert
+  - config
+  - core
+  - integer
+  - move
+  - mpl
+  - predef
+  - ratio
+  - static_assert
+  - system
+  - throw_exception
+  - type_traits
+  - typeof
+  - utility
+  - winapi
+  container:
+  - assert
+  - config
+  - container_hash
+  - core
+  - intrusive
+  - move
+  - static_assert
+  - type_traits
+  context:
+  - assert
+  - config
+  - pool
+  - predef
+  - smart_ptr
+  - thread
+  contract:
+  - any
+  - assert
+  - config
+  - core
+  - exception
+  - function
+  - function_types
+  - mpl
+  - optional
+  - preprocessor
+  - smart_ptr
+  - static_assert
+  - thread
+  - type_traits
+  - typeof
+  - utility
+  coroutine:
+  - assert
+  - config
+  - context
+  - core
+  - exception
+  - move
+  - range
+  - system
+  - thread
+  - throw_exception
+  - type_traits
+  - utility
+  date_time:
+  - algorithm
+  - assert
+  - config
+  - core
+  - io
+  - lexical_cast
+  - range
+  - serialization
+  - smart_ptr
+  - static_assert
+  - throw_exception
+  - tokenizer
+  - type_traits
+  - utility
+  - winapi
+  exception:
+  - assert
+  - config
+  - core
+  - smart_ptr
+  - throw_exception
+  - tuple
+  - type_traits
+  fiber:
+  - algorithm
+  - assert
+  - config
+  - context
+  - core
+  - filesystem
+  - format
+  - intrusive
+  - predef
+  - smart_ptr
+  filesystem:
+  - assert
+  - config
+  - container_hash
+  - core
+  - detail
+  - io
+  - iterator
+  - predef
+  - smart_ptr
+  - system
+  - type_traits
+  - winapi
+  graph:
+  - algorithm
+  - any
+  - array
+  - assert
+  - bimap
+  - bind
+  - concept_check
+  - config
+  - container_hash
+  - conversion
+  - core
+  - detail
+  - foreach
+  - function
+  - integer
+  - iterator
+  - lexical_cast
+  - math
+  - move
+  - mpl
+  - multi_index
+  - optional
+  - parameter
+  - preprocessor
+  - property_map
+  - property_tree
+  - random
+  - range
+  - regex
+  - serialization
+  - smart_ptr
+  - spirit
+  - static_assert
+  - throw_exception
+  - tti
+  - tuple
+  - type_traits
+  - typeof
+  - unordered
+  - utility
+  - xpressive
+  graph_parallel:
+  - assert
+  - concept_check
+  - config
+  - container_hash
+  - core
+  - detail
+  - dynamic_bitset
+  - filesystem
+  - foreach
+  - function
+  - graph
+  - iterator
+  - lexical_cast
+  - mpi
+  - mpl
+  - optional
+  - property_map
+  - random
+  - serialization
+  - smart_ptr
+  - static_assert
+  - tuple
+  - type_traits
+  - variant
+  iostreams:
+  - assert
+  - bind
+  - config
+  - core
+  - detail
+  - function
+  - integer
+  - iterator
+  - mpl
+  - preprocessor
+  - random
+  - range
+  - regex
+  - smart_ptr
+  - static_assert
+  - throw_exception
+  - type_traits
+  - utility
+  locale:
+  - assert
+  - config
+  - function
+  - iterator
+  - smart_ptr
+  - static_assert
+  - thread
+  - type_traits
+  - unordered
+  log:
+  - align
+  - array
+  - asio
+  - assert
+  - atomic
+  - bind
+  - config
+  - container
+  - core
+  - date_time
+  - exception
+  - filesystem
+  - function_types
+  - fusion
+  - interprocess
+  - intrusive
+  - io
+  - iterator
+  - lexical_cast
+  - locale
+  - move
+  - mpl
+  - optional
+  - parameter
+  - phoenix
+  - predef
+  - preprocessor
+  - property_tree
+  - proto
+  - random
+  - range
+  - regex
+  - smart_ptr
+  - spirit
+  - static_assert
+  - system
+  - thread
+  - throw_exception
+  - type_index
+  - type_traits
+  - utility
+  - winapi
+  - xpressive
+  math:
+  - array
+  - assert
+  - atomic
+  - concept_check
+  - config
+  - core
+  - detail
+  - fusion
+  - integer
+  - lambda
+  - lexical_cast
+  - mpl
+  - predef
+  - range
+  - smart_ptr
+  - static_assert
+  - throw_exception
+  - tuple
+  - type_traits
+  mpi:
+  - assert
+  - config
+  - core
+  - foreach
+  - function
+  - graph
+  - integer
+  - iterator
+  - lexical_cast
+  - mpl
+  - optional
+  - python
+  - serialization
+  - smart_ptr
+  - static_assert
+  - throw_exception
+  - type_traits
+  - utility
+  nowide:
+  - config
+  - filesystem
+  - smart_ptr
+  - static_assert
+  program_options:
+  - any
+  - bind
+  - config
+  - core
+  - detail
+  - function
+  - iterator
+  - lexical_cast
+  - smart_ptr
+  - static_assert
+  - throw_exception
+  - tokenizer
+  - type_traits
+  python:
+  - bind
+  - config
+  - conversion
+  - core
+  - detail
+  - foreach
+  - function
+  - graph
+  - integer
+  - iterator
+  - lexical_cast
+  - mpl
+  - preprocessor
+  - property_map
+  - smart_ptr
+  - static_assert
+  - tuple
+  - type_traits
+  - utility
+  random:
+  - assert
+  - config
+  - core
+  - dynamic_bitset
+  - integer
+  - io
+  - math
+  - mpl
+  - multiprecision
+  - range
+  - static_assert
+  - system
+  - throw_exception
+  - type_traits
+  - utility
+  regex:
+  - assert
+  - concept_check
+  - config
+  - container_hash
+  - core
+  - integer
+  - iterator
+  - mpl
+  - predef
+  - smart_ptr
+  - static_assert
+  - throw_exception
+  - type_traits
+  serialization:
+  - array
+  - assert
+  - config
+  - core
+  - detail
+  - function
+  - integer
+  - io
+  - iterator
+  - move
+  - mpl
+  - optional
+  - predef
+  - preprocessor
+  - smart_ptr
+  - spirit
+  - static_assert
+  - type_traits
+  - unordered
+  - utility
+  - variant
+  signals:
+  - any
+  - config
+  - core
+  - function
+  - iterator
+  - mpl
+  - optional
+  - smart_ptr
+  - type_traits
+  - utility
+  stacktrace:
+  - array
+  - config
+  - container_hash
+  - core
+  - predef
+  - static_assert
+  - type_traits
+  - winapi
+  system:
+  - config
+  - winapi
+  test:
+  - algorithm
+  - assert
+  - bind
+  - config
+  - core
+  - detail
+  - exception
+  - function
+  - io
+  - iterator
+  - mpl
+  - optional
+  - preprocessor
+  - smart_ptr
+  - static_assert
+  - type_traits
+  - utility
+  thread:
+  - algorithm
+  - assert
+  - atomic
+  - bind
+  - chrono
+  - concept_check
+  - config
+  - container
+  - container_hash
+  - core
+  - date_time
+  - exception
+  - function
+  - intrusive
+  - io
+  - iterator
+  - lexical_cast
+  - move
+  - optional
+  - predef
+  - preprocessor
+  - smart_ptr
+  - static_assert
+  - system
+  - throw_exception
+  - tuple
+  - type_traits
+  - utility
+  - winapi
+  timer:
+  - chrono
+  - config
+  - core
+  - io
+  - predef
+  - system
+  - throw_exception
+  type_erasure:
+  - assert
+  - config
+  - core
+  - fusion
+  - iterator
+  - mpl
+  - preprocessor
+  - smart_ptr
+  - thread
+  - throw_exception
+  - type_traits
+  - typeof
+  - vmd
+  wave:
+  - assert
+  - concept_check
+  - config
+  - core
+  - filesystem
+  - iterator
+  - lexical_cast
+  - mpl
+  - multi_index
+  - pool
+  - preprocessor
+  - serialization
+  - smart_ptr
+  - spirit
+  - static_assert
+  - throw_exception
+  - type_traits
+libs:
+  atomic:
+  - boost_atomic
+  chrono:
+  - boost_chrono
+  container:
+  - boost_container
+  context:
+  - boost_context
+  contract:
+  - boost_contract
+  coroutine:
+  - boost_coroutine
+  date_time:
+  - boost_date_time
+  exception:
+  - boost_exception
+  fiber:
+  - boost_fiber
+  filesystem:
+  - boost_filesystem
+  graph:
+  - boost_graph
+  graph_parallel:
+  - boost_graph_parallel
+  iostreams:
+  - boost_iostreams
+  locale:
+  - boost_locale
+  log:
+  - boost_log
+  - boost_log_setup
+  math:
+  - boost_math_c99f
+  - boost_math_c99l
+  - boost_math_c99
+  - boost_math_tr1f
+  - boost_math_tr1l
+  - boost_math_tr1
+  mpi:
+  - boost_mpi
+  nowide:
+  - boost_nowide
+  program_options:
+  - boost_program_options
+  python:
+  - boost_python
+  random:
+  - boost_random
+  regex:
+  - boost_regex
+  serialization:
+  - boost_serialization
+  - boost_wserialization
+  signals:
+  - boost_signals
+  stacktrace:
+  - boost_stacktrace
+  - boost_stacktrace_noop
+  - boost_stacktrace_backtrace
+  - boost_stacktrace_addr2line
+  - boost_stacktrace_basic
+  - boost_stacktrace_windbg
+  - boost_stacktrace_windbg_cached
+  system:
+  - boost_system
+  test:
+  - boost_unit_test_framework
+  - boost_prg_exec_monitor
+  - boost_test_exec_monitor
+  thread:
+  - boost_thread
+  timer:
+  - boost_timer
+  type_erasure:
+  - boost_type_erasure
+  wave:
+  - boost_wave
+version: 1.73.0
