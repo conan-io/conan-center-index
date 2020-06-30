@@ -1,0 +1,13 @@
+--- Makefile	2020-06-22 23:15:29.000000000 +0300
++++ Makefile.new	2020-06-24 23:57:29.000000000 +0300
+@@ -38,8 +38,8 @@
+ # By default we build the uSockets.a static library
+ default:
+ 	rm -f *.o
+-	$(CC) $(CFLAGS) -flto -O3 -c src/*.c src/eventing/*.c src/crypto/*.c
+-	$(AR) rvs uSockets.a *.o
++	$(CC) $(CFLAGS) $(CPPFLAGS) -c src/*.c src/eventing/*.c src/crypto/*.c
++	$(AR) rvs libuSockets.a *.o
+ 
+ # Builds all examples
+ .PHONY: examples
