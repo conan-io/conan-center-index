@@ -9,7 +9,7 @@ class eigenConan(ConanFile):
                    numerical solvers, and related algorithms."
     license = "MPL-2.0"
     topics = ("eigen", "algebra", "linear-algebra", "vector", "numerical")
-    settings = "os"
+    settings = "os", "compiler"
     no_copy_source = True
 
     @property
