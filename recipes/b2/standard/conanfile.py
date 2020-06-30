@@ -92,3 +92,7 @@ class B2Conan(ConanFile):
             self.package_folder, "bin")] + self.env_info.path
         self.env_info.BOOST_BUILD_PATH = os.path.join(
             self.package_folder, "bin", "b2_src", "src", "kernel")
+
+    def package_id(self):
+        del self.info.options.use_cxx_env
+        del self.info.options.toolset
