@@ -12,7 +12,7 @@ class SysConfigGLUConan(ConanFile):
     homepage = "https://cgit.freedesktop.org/mesa/glu/"
     license = "SGI-B-2.0"
     settings = "os"
-    requirements = "opengl/system"
+    requires = "opengl/system"
 
     def system_requirements(self):
         if tools.os_info.is_linux and self.settings.os == "Linux":
