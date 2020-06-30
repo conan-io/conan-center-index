@@ -27,8 +27,10 @@ class BoostDepConan(ConanFile):
         self.build_requires("boost/{}".format(self.version))
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
+        tools.get(**self.conan_data["sources"][self.version][0])
         os.rename("boostdep-boost-{}".format(self.version), self._source_subfolder)
+        license_info = self.conan_data["sources"][self.version][1]
+        tools.download(filename=os.path.basename(license_info["url"]), **license_info)
 
     def _configure_cmake(self):
         if self._cmake:
@@ -42,6 +44,7 @@ class BoostDepConan(ConanFile):
         cmake.build()
 
     def package(self):
+        self.copy("LICENSE*", dst="licenses")
         cmake = self._configure_cmake()
         cmake.install()
 
