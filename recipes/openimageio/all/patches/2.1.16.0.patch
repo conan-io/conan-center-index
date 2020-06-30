@@ -1,7 +1,7 @@
-diff --git a/oiio-Release-2.1.16.0/CMakeLists.txt b/source_subfolder/CMakeLists.txt
+diff --git a/CMakeLists.txt b/CMakeLists.txt
 index 8174fdd..d3ac750 100644
---- a/oiio-Release-2.1.16.0/CMakeLists.txt
-+++ b/source_subfolder/CMakeLists.txt
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
 @@ -171,7 +171,7 @@ if (OIIO_BUILD_TOOLS AND NOT BUILD_OIIOUTIL_ONLY)
      add_subdirectory (src/iinfo)
      add_subdirectory (src/maketx)
@@ -20,10 +20,10 @@ index 8174fdd..d3ac750 100644
  endif ()
  set (CPACK_SOURCE_PACKAGE_FILE_NAME ${PROJECT_NAME}-${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR}.${PROJECT_VERSION_PATCH}-source)
  #set (CPACK_SOURCE_STRIP_FILES Do we need this?)
-diff --git a/oiio-Release-2.1.16.0/src/cmake/externalpackages.cmake b/source_subfolder/src/cmake/externalpackages.cmake
+diff --git a/src/cmake/externalpackages.cmake b/src/cmake/externalpackages.cmake
 index 58dfc42..8af7e5d 100644
---- a/oiio-Release-2.1.16.0/src/cmake/externalpackages.cmake
-+++ b/source_subfolder/src/cmake/externalpackages.cmake
+--- a/src/cmake/externalpackages.cmake
++++ b/src/cmake/externalpackages.cmake
 @@ -144,7 +144,7 @@ if (LINKSTATIC)
      endif ()
  else ()
@@ -79,10 +79,10 @@ index 58dfc42..8af7e5d 100644
  endif ()
  
  
-diff --git a/oiio-Release-2.1.16.0/src/cmake/oiio_macros.cmake b/source_subfolder/src/cmake/oiio_macros.cmake
+diff --git a/src/cmake/oiio_macros.cmake b/src/cmake/oiio_macros.cmake
 index 1c8e783..a7155c2 100644
---- a/oiio-Release-2.1.16.0/src/cmake/oiio_macros.cmake
-+++ b/source_subfolder/src/cmake/oiio_macros.cmake
+--- a/src/cmake/oiio_macros.cmake
++++ b/src/cmake/oiio_macros.cmake
 @@ -169,6 +169,8 @@ endmacro ()
  # the user where to find such tests.
  #
@@ -92,10 +92,10 @@ index 1c8e783..a7155c2 100644
      cmake_parse_arguments (_ats "" "" "URL;IMAGEDIR;LABEL;FOUNDVAR;TESTNAME" ${ARGN})
         # Arguments: <prefix> <options> <one_value_keywords> <multi_value_keywords> args...
      set (_ats_testdir "${OIIO_TESTSUITE_IMAGEDIR}/${_ats_IMAGEDIR}")
-diff --git a/oiio-Release-2.1.16.0/src/dds.imageio/CMakeLists.txt b/source_subfolder/src/dds.imageio/CMakeLists.txt
+diff --git a/src/dds.imageio/CMakeLists.txt b/src/dds.imageio/CMakeLists.txt
 index 546f683..5ccdd8e 100644
---- a/oiio-Release-2.1.16.0/src/dds.imageio/CMakeLists.txt
-+++ b/source_subfolder/src/dds.imageio/CMakeLists.txt
+--- a/src/dds.imageio/CMakeLists.txt
++++ b/src/dds.imageio/CMakeLists.txt
 @@ -5,7 +5,7 @@
  if (LIBSQUISH_FOUND)
      # External libsquish was found -- use it
@@ -105,10 +105,10 @@ index 546f683..5ccdd8e 100644
                       )
  else ()
      # No external libsquish was found -- use the embedded version.
-diff --git a/oiio-Release-2.1.16.0/src/include/CMakeLists.txt b/source_subfolder/src/include/CMakeLists.txt
+diff --git a/src/include/CMakeLists.txt b/src/include/CMakeLists.txt
 index faed9f6..46e1640 100644
---- a/oiio-Release-2.1.16.0/src/include/CMakeLists.txt
-+++ b/source_subfolder/src/include/CMakeLists.txt
+--- a/src/include/CMakeLists.txt
++++ b/src/include/CMakeLists.txt
 @@ -52,12 +52,12 @@ install (FILES ${public_headers}
           DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/${PROJECT_NAME}
           COMPONENT developer)
@@ -131,10 +131,10 @@ index faed9f6..46e1640 100644
 +# install (FILES ${fmt_headers}
 +#          DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/${PROJECT_NAME}/fmt
 +#          COMPONENT developer)
-diff --git a/oiio-Release-2.1.16.0/src/jpeg2000.imageio/CMakeLists.txt b/source_subfolder/src/jpeg2000.imageio/CMakeLists.txt
+diff --git a/src/jpeg2000.imageio/CMakeLists.txt b/src/jpeg2000.imageio/CMakeLists.txt
 index 7bc6adb..2b7866e 100644
---- a/oiio-Release-2.1.16.0/src/jpeg2000.imageio/CMakeLists.txt
-+++ b/source_subfolder/src/jpeg2000.imageio/CMakeLists.txt
+--- a/src/jpeg2000.imageio/CMakeLists.txt
++++ b/src/jpeg2000.imageio/CMakeLists.txt
 @@ -2,8 +2,8 @@
  # SPDX-License-Identifier: BSD-3-Clause
  # https://github.com/OpenImageIO/oiio/blob/master/LICENSE.md
@@ -166,10 +166,10 @@ index 7bc6adb..2b7866e 100644
                           DEFINITIONS "-DUSE_OPENJPEG")
      endif ()
  else()
-diff --git a/oiio-Release-2.1.16.0/src/libOpenImageIO/CMakeLists.txt b/source_subfolder/src/libOpenImageIO/CMakeLists.txt
+diff --git a/src/libOpenImageIO/CMakeLists.txt b/src/libOpenImageIO/CMakeLists.txt
 index 7cabd9b..9ceee9c 100644
---- a/oiio-Release-2.1.16.0/src/libOpenImageIO/CMakeLists.txt
-+++ b/source_subfolder/src/libOpenImageIO/CMakeLists.txt
+--- a/src/libOpenImageIO/CMakeLists.txt
++++ b/src/libOpenImageIO/CMakeLists.txt
 @@ -135,8 +135,7 @@ endif ()
  
  target_link_libraries (OpenImageIO
@@ -196,10 +196,10 @@ index 7cabd9b..9ceee9c 100644
  endif()
  
  if (WIN32)
-diff --git a/oiio-Release-2.1.16.0/src/libutil/CMakeLists.txt b/source_subfolder/src/libutil/CMakeLists.txt
+diff --git a/src/libutil/CMakeLists.txt b/src/libutil/CMakeLists.txt
 index 49ec779..8911c83 100644
---- a/oiio-Release-2.1.16.0/src/libutil/CMakeLists.txt
-+++ b/source_subfolder/src/libutil/CMakeLists.txt
+--- a/src/libutil/CMakeLists.txt
++++ b/src/libutil/CMakeLists.txt
 @@ -13,7 +13,7 @@ target_include_directories (OpenImageIO_Util
          )
  target_link_libraries (OpenImageIO_Util
@@ -209,10 +209,10 @@ index 49ec779..8911c83 100644
              ${GCC_ATOMIC_LIBRARIES}
          PRIVATE
              ${SANITIZE_LIBRARIES}
-diff --git a/oiio-Release-2.1.16.0/src/raw.imageio/CMakeLists.txt b/source_subfolder/src/raw.imageio/CMakeLists.txt
+diff --git a/src/raw.imageio/CMakeLists.txt b/src/raw.imageio/CMakeLists.txt
 index 81a0ff5..70ebc84 100644
---- a/oiio-Release-2.1.16.0/src/raw.imageio/CMakeLists.txt
-+++ b/source_subfolder/src/raw.imageio/CMakeLists.txt
+--- a/src/raw.imageio/CMakeLists.txt
++++ b/src/raw.imageio/CMakeLists.txt
 @@ -4,8 +4,7 @@
  
  if (LIBRAW_FOUND)
@@ -223,10 +223,10 @@ index 81a0ff5..70ebc84 100644
                       DEFINITIONS "-DUSE_LIBRAW=1")
  else ()
      message (WARNING "Raw plugin will not be built")
-diff --git a/oiio-Release-2.1.16.0/src/tiff.imageio/CMakeLists.txt b/source_subfolder/src/tiff.imageio/CMakeLists.txt
+diff --git a/src/tiff.imageio/CMakeLists.txt b/src/tiff.imageio/CMakeLists.txt
 index f6d648c..ef345c9 100644
---- a/oiio-Release-2.1.16.0/src/tiff.imageio/CMakeLists.txt
-+++ b/source_subfolder/src/tiff.imageio/CMakeLists.txt
+--- a/src/tiff.imageio/CMakeLists.txt
++++ b/src/tiff.imageio/CMakeLists.txt
 @@ -3,6 +3,4 @@
  # https://github.com/OpenImageIO/oiio/blob/master/LICENSE.md
  

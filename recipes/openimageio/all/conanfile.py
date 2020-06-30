@@ -16,14 +16,14 @@ class OpenImageIOConan(ConanFile):
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
-        "with_dcmtk": [True, False],
+        "with_dicom": [True, False],
         "with_raw": [True, False]
     }
 
     default_options = {
         "shared": False,
         "fPIC": True,
-        "with_dcmtk": False, # Heavy dependency, disabled by default
+        "with_dicom": False, # Heavy dependency, disabled by default
         "with_raw": False # libraw is available under CDDL-1.0 or LGPL-2.1, for this reason it is disabled by default
     }
 
@@ -64,7 +64,7 @@ class OpenImageIOConan(ConanFile):
         self._cmake.definitions["USE_OPENCOLORIO"] = False
         self._cmake.definitions["USE_OPENCV"] = False
         self._cmake.definitions["USE_TBB"] = False
-        self._cmake.definitions["USE_DCMTK"] = self.options.with_dcmtk
+        self._cmake.definitions["USE_DCMTK"] = self.options.with_dicom
         self._cmake.definitions["USE_FFMPEG"] = False
         self._cmake.definitions["USE_FIELD3D"] = False
         self._cmake.definitions["USE_GIF"] = False
@@ -102,7 +102,7 @@ class OpenImageIOConan(ConanFile):
         # self.requires("giflib/5.1.4")
         self.requires("freetype/2.10.2")
     
-        if self.options.with_dcmtk:
+        if self.options.with_dicom:
             self.requires("dcmtk/3.6.5")
 
         if self.options.with_raw:
@@ -112,10 +112,13 @@ class OpenImageIOConan(ConanFile):
         tools.get(**self.conan_data["sources"][self.version])
         os.rename("oiio-Release-{}".format(self.version), self._source_subfolder)
 
-        patch_file = os.path.join(self.source_folder, "patches", "{}.patch".format(self.version))
-        tools.patch(base_path=self._source_subfolder, patch_file=patch_file, strip=1)
+    def _patch_sources(self):
+         for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            tools.patch(**patch)
 
     def build(self):
+        self._patch_sources()
+
         cmake = self._configure_cmake()
         cmake.build()
 
