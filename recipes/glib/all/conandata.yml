@@ -1,0 +1,10 @@
+sources:
+  "2.63.3":
+    url: "https://download.gnome.org/sources/glib/2.63/glib-2.63.3.tar.xz"
+    sha256: "8a09a2a059eb617d52b6fcd6f25e0243f0849c598612c9aa5074ce3a6ee1c11c"
+  "2.63.6":
+    url: "https://download.gnome.org/sources/glib/2.63/glib-2.63.6.tar.xz"
+    sha256: "f78e5d77b5a5dd6ffd24b18a611b4daf1b312c2a81151e56f2c54377ed4f3f64"
+  "2.64.0":
+    url: "https://download.gnome.org/sources/glib/2.64/glib-2.64.0.tar.xz"
+    sha256: "e5e514e47d169cdb4111c3ea4af0300e1b1a5f428a474d2d7ddadf38dd061280"

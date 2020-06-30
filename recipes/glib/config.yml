@@ -1,0 +1,8 @@
+versions:
+  "2.63.3":
+    folder: all
+  "2.63.6":
+    folder: all
+  "2.64.0":
+    folder: all
+

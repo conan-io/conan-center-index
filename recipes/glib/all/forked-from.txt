@@ -1,0 +1,1 @@
+https://github.com/bincrafters/conan-glib/commit/459ce38aab7695797566c001b73eb26a6044ef09
