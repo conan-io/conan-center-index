@@ -9,7 +9,7 @@ class UwebsocketsConan(ConanFile):
     description = "Simple, secure & standards compliant web server for the most demanding of applications"
     license = "Apache-2.0"
     homepage = "https://github.com/uNetworking/uWebSockets"
-    topics = ("conan", "websockets", "net")
+    topics = ("conan", "websocket", "network")
     no_copy_source = True
 
     requires = ("usockets/0.4.0",
