@@ -25,7 +25,7 @@ class ICUBase(ConanFile):
                "silent": [True, False]}
     default_options = {"shared": False,
                        "fPIC": True,
-                       "data_packaging": "archive",
+                       "data_packaging": "library",
                        "with_unit_tests": False,
                        "silent": True}
 
