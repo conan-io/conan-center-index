@@ -62,9 +62,9 @@ class CyrusSaslConan(ConanFile):
             raise ConanInvalidConfiguration(
                 "Cyrus SASL package is not compatible with Windows yet."
             )
-        if not self.options.shared:
+        if self.options.with_gssapi and not self.options.shared:
             raise ConanInvalidConfiguration(
-                "Cyrus SASL package cant be built using static linkage"
+                "Cyrus SASL package cannot link statically to libkrb5"
             )
 
     def requirements(self):
@@ -89,7 +89,11 @@ class CyrusSaslConan(ConanFile):
             self._autotools = AutoToolsBuildEnvironment(
                 self, win_bash=tools.os_info.is_windows
             )
-            configure_args = ["--with-dblib=none", "--disable-macos-framework"]
+            configure_args = [
+                "--disable-sample",
+                "--disable-macos-framework",
+                "--with-dblib=none",
+            ]
             if self.options.shared:
                 configure_args.extend(["--enable-shared", "--disable-static"])
             else:
@@ -110,7 +114,9 @@ class CyrusSaslConan(ConanFile):
             if not self.options.with_krb4:
                 configure_args.append("--disable-krb4")
 
-            if not self.options.with_gssapi:
+            if self.options.with_gssapi:
+                configure_args.append("--with-gss_impl=mit")
+            else:
                 configure_args.append("--disable-gssapi")
 
             if not self.options.with_plain:
