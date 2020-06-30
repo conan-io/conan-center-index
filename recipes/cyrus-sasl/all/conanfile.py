@@ -89,7 +89,7 @@ class CyrusSaslConan(ConanFile):
             self._autotools = AutoToolsBuildEnvironment(
                 self, win_bash=tools.os_info.is_windows
             )
-            configure_args = []
+            configure_args = ["--with-dblib=none", "--disable-macos-framework"]
             if self.options.shared:
                 configure_args.extend(["--enable-shared", "--disable-static"])
             else:
@@ -135,7 +135,6 @@ class CyrusSaslConan(ConanFile):
                     configure_args.append("-with-mysql=no")
             else:
                 configure_args.append("--disable-sql")
-            configure_args.append("--with-dblib=none")
 
             configure_file_path = os.path.join(self._source_subfolder)
             self._autotools.configure(
