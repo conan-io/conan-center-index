@@ -1,5 +1,4 @@
 import os
-from os.path import join
 from glob import glob
 from itertools import chain
 
@@ -13,6 +12,7 @@ class PclConanRecipe(ConanFile):
     license = "BSD-3-Clause"
     homepage = "https://pointclouds.org/"
     url = "https://github.com/conan-io/conan-center-index"
+    topics = ("pointcloud", "computer-vision", "point-cloud")
     settings = "os", "compiler", "build_type", "arch"
     options = {
         "shared": [True, False],
@@ -49,7 +49,8 @@ class PclConanRecipe(ConanFile):
             del self.options.fPIC
 
     def configure(self):
-        if tools.msvs_toolset(self) == "v140":
+        if (tools.msvs_toolset(self) == "v140" or
+                self.settings.compiler == "Visual Studio" and self.settings.compiler.version < "15"):
             raise ConanInvalidConfiguration("Unsupported Visual Studio Compiler or Toolset")
         minimal_cpp_standard = "14"
         if self.settings.compiler.cppstd:
@@ -131,7 +132,7 @@ class PclConanRecipe(ConanFile):
         cmake.build()
 
     def _remove_vs_runtime_files(self):
-        patterns = [join(self.package_folder, "bin", pattern) for pattern in ["msvcp*.dll", "vcruntime*.dll", "concrt*.dll"]]
+        patterns = [os.path.join(self.package_folder, "bin", pattern) for pattern in ["msvcp*.dll", "vcruntime*.dll", "concrt*.dll"]]
         runtime_files = chain.from_iterable(glob(pattern) for pattern in patterns)
         for runtime_file in runtime_files:
             try:
@@ -146,9 +147,9 @@ class PclConanRecipe(ConanFile):
         if self.settings.os == "Windows":
             self._remove_vs_runtime_files()
 
-        tools.rmdir(join(self.package_folder, "cmake"))
-        tools.rmdir(join(self.package_folder, "share"))
-        tools.rmdir(join(self.package_folder, "lib", "pkgconfig"))
+        tools.rmdir(os.path.join(self.package_folder, "cmake"))
+        tools.rmdir(os.path.join(self.package_folder, "share"))
+        tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
 
     def package_info(self):
         semver = tools.Version(self.version)
