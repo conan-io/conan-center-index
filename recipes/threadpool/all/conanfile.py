@@ -23,7 +23,7 @@ class threadpoolConan(ConanFile):
 
     def package(self):
         self.copy(pattern="COPYING", src=self._source_subfolder, dst="licenses", )
-        self.copy(pattern="*.h", src=self._source_subfolder,  dst=os.path.join("include", "threadpool"))
+        self.copy(pattern="*.h", src=self._source_subfolder,  dst=os.path.join("include", "ThreadPool"))
 
     def package_id(self):
         self.info.header_only()
