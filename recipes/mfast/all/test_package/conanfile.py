@@ -5,7 +5,6 @@ from conans import ConanFile, CMake, tools
 
 class mFASTTestConan(ConanFile):
     settings = "os", "compiler", "build_type", "arch"
-    requires = "boost/1.73.0"
     generators = "cmake"
 
     def build(self):
