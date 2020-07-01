@@ -25,7 +25,7 @@ class BoostDepConan(ConanFile):
         return "build_subfolder"
 
     def requirements(self):
-        self.requires("boost/{}".format(self.version))
+        self.requires("boost/1.72.0")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version][0])
