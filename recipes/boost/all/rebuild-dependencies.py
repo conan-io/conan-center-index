@@ -93,27 +93,37 @@ class BoostDependencyBuilder(object):
                     mod_deps = re.findall("\n([A-Za-z_-]+):\n", module_ts_output.decode())
                     dependency_tree[module] = mod_deps
 
-        # filtered_dependency_tree = {k: [d for d in v if d in buildables] for k, v in dependency_tree.items() if k in buildables}
-        boost_dependencies = BoostDependencies(dependencies=dependency_tree, buildables=buildables, version=self.boost_version)
+        filtered_dependency_tree = {k: [d for d in v if d in buildables] for k, v in dependency_tree.items() if k in buildables}
+        boost_dependencies = BoostDependencies(dependencies=filtered_dependency_tree, buildables=buildables, version=self.boost_version)
 
         return boost_dependencies
 
     @staticmethod
-    def _boostify_libraries(libs: List[str]) -> List[str]:
-        return ["boost_{}".format(l) for l in libs]
+    def _boostify_library(lib: str) -> str:
+        return "boost_{}".format(lib)
 
     def do_create_libraries(self, boost_dependencies: BoostDependencies):
-        libraries = {b: self._boostify_libraries([b]) for b in boost_dependencies.buildables}
+        libraries = {b: [self._boostify_library(b)] for b in boost_dependencies.buildables}
+
+        def insert_modules(parent_module, modules):
+            for module in modules:
+                boost_dependencies.dependencies[module] = [parent_module]
+                libraries[module] = [self._boostify_library(module)]
+
         if "log" in libraries:
-            libraries["log"] += self._boostify_libraries(["log_setup"])
+            insert_modules("log", ["log_setup"])
         if "math" in libraries:
-            libraries["math"] = self._boostify_libraries(["math_c99f", "math_c99l", "math_c99", "math_tr1f", "math_tr1l", "math_tr1"])
+            insert_modules("math", ["math_c99f", "math_c99l", "math_c99", "math_tr1f", "math_tr1l", "math_tr1"])
+            libraries["math"] = []
         if "serialization" in libraries:
-            libraries["serialization"] = self._boostify_libraries(["serialization", "wserialization"])
+            insert_modules("serialization", ["wserialization"])
         if "stacktrace" in libraries:
-            libraries["stacktrace"] = self._boostify_libraries(["stacktrace", "stacktrace_noop", "stacktrace_backtrace", "stacktrace_addr2line", "stacktrace_basic", "stacktrace_windbg", "stacktrace_windbg_cached"])
+            libraries["stacktrace"] = []
+            insert_modules("stacktrace", ["stacktrace_noop", "stacktrace_backtrace", "stacktrace_addr2line", "stacktrace_basic", "stacktrace_windbg", "stacktrace_windbg_cached"])
         if "test" in libraries:
-            libraries["test"] = self._boostify_libraries(["unit_test_framework", "prg_exec_monitor", "test_exec_monitor"])
+            insert_modules("test", ["unit_test_framework", "prg_exec_monitor", "test_exec_monitor"])
+            libraries["test"] = []
+            boost_dependencies.dependencies["unit_test_framework"].extend(["prg_exec_monitor", "test_exec_monitor"])
 
         boost_dependencies.libs = libraries
 

@@ -122,16 +122,15 @@ class BoostConan(ConanFile):
             self._dependencies_cache = yaml.safe_load(open(dep_path))
         return self._dependencies_cache
 
-    def _all_dependencies_of(self, module):
-        all_deps = set()
-        todo = self._dependencies["dependencies"][module]
-        while todo:
-            l = todo.pop()
-            if l in all_deps:
-                continue
-            all_deps.add(l)
-            todo.extend(self._dependencies["dependencies"][l])
-        return all_deps
+    def _iter_modules(self):
+        tree = {k: v[:] for k, v in self._dependencies["dependencies"].items()}
+        while tree:
+            nodeps = set(k for k, v in tree.items() if not v)
+            if not nodeps:
+                raise ConanException("cyclic dependency tree detected")
+            for nodep in nodeps:
+                yield nodep
+            tree = {k: [d for d in v if d not in nodeps] for k, v in tree.items() if k not in nodeps}
 
     @property
     def _source_subfolder(self):
@@ -914,36 +913,38 @@ class BoostConan(ConanFile):
 
         self.cpp_info.components["headers"].libs = []
 
-        self.cpp_info.components["coroutine"].requires = ["headers"]
-
+        modules_seen = set()
         detected_libraries = set(tools.collect_libs(self))
         used_libraries = set()
-        for mod_name, mod_deps in self._dependencies["dependencies"].items():
-            if not self.options.get_safe("without_{}".format(mod_name), False):
-                dep_libs_all_sorted = self._dependencies["libs"].get(mod_name, [])
-                dep_libs_avail = set(dep_libs_all_sorted).intersection(detected_libraries)
-                used_libraries = used_libraries.union(dep_libs_avail)
-                self.cpp_info.components[mod_name].libs = [l for l in dep_libs_all_sorted if l in dep_libs_avail]
+        for module in self._iter_modules():
+            module_added = not self.options.get_safe("without_{}".format(module), False) and all(d in modules_seen for d in self._dependencies["dependencies"][module]) and \
+                           all(l in detected_libraries for l in self._dependencies["libs"][module])
+            if module_added:
+                modules_seen.add(module)
 
-                # requires = set(self._dependencies["dependencies"][mod_name]).difference({"mpi", "python"})
-                requires = set(self._dependencies["dependencies"][mod_name]).intersection(set(self._dependencies["dependencies"].keys()))
+                used_libraries = used_libraries.union(set(self._dependencies["libs"][module]))
+                self.cpp_info.components[module].libs = self._dependencies["libs"][module]
 
-                self.cpp_info.components[mod_name].requires = list(requires) + ["headers"]
-                self.cpp_info.components[mod_name].names["cmake_find_package"] = mod_name
-                self.cpp_info.components[mod_name].names["cmake_find_package_multi"] = mod_name
-                self.output.info("deps {}: {}".format(mod_name, self.cpp_info.components[mod_name].requires))
+                self.cpp_info.components[module].requires = self._dependencies["dependencies"][module] + ["headers"]
+                self.cpp_info.components[module].names["cmake_find_package"] = module
+                self.cpp_info.components[module].names["cmake_find_package_multi"] = module
 
         if used_libraries != detected_libraries:
             non_used = detected_libraries.difference(used_libraries)
             raise ConanInvalidConfiguration("These libraries were not used in conan components: {}".format(non_used))
 
-        if self.options.bzip2:
-            self.cpp_info.components["headers"].requires.append("bzip2::bzip2")  # iostreams
-        if self.options.zlib:
-            self.cpp_info.components["headers"].requires.append("zlib::zlib")  # boost, iostreams
+        if self._zip_bzip2_requires_needed:
+            if self.options.bzip2:
+                self.cpp_info.components["headers"].requires.append("bzip2::bzip2")
+            if self.options.zlib:
+                self.cpp_info.components["headers"].requires.append("zlib::zlib")
+            if self.options.lzma:
+                self.cpp_info.components["headers"].requires.append("xz_utils::xz_utils")
+            if self.options.zstd:
+                self.cpp_info.components["headers"].requires.append("zstd::zstd")
+            if self.options.i18n_backend == 'icu':
+                self.cpp_info.components["headers"].requires.append("icu::icu")
 
-
-        # self.cpp_info.components["dynamic_linking"].defines.append("BOOST_ALL_DYN_LINK")
         if not self.options.header_only and self.options.shared:
             self.cpp_info.components["headers"].defines.append("BOOST_ALL_DYN_LINK")
 
@@ -957,7 +958,7 @@ class BoostConan(ConanFile):
             self.cpp_info.components["filesystem"].append("BOOST_FILESYSTEM_NO_DEPRECATED")
 
         if self.options.segmented_stacks:
-            self.cpp_info.comonents["headers"].extend(["BOOST_USE_SEGMENTED_STACKS", "BOOST_USE_UCONTEXT"])
+            self.cpp_info.components["headers"].extend(["BOOST_USE_SEGMENTED_STACKS", "BOOST_USE_UCONTEXT"])
 
         if self.settings.os != "Android":
             if self._gnu_cxx11_abi:
@@ -997,7 +998,7 @@ class BoostConan(ConanFile):
                     # The documentation mentions that we should be using the "-s USE_PTHREADS=1"
                     # but it was causing problems with the target based configurations in conan
                     # So instead we are using the raw compiler flags (that are being activated
-                    # from the aformentioned flag)
+                    # from the aforementioned flag)
                     if arch.startswith("x86") or arch.startswith("wasm"):
                         self.cpp_info.components["headers"].cxxflags.append("-pthread")
                         self.cpp_info.components["headers"].sharedlinkflags.extend(["-pthread","--shared-memory"])
