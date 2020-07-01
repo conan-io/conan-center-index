@@ -29,12 +29,13 @@ class BoostDependencies(object):
 
 
 class BoostDependencyBuilder(object):
-    def __init__(self, boost_version: str, boostdep_version: str, tmppath: Path, git_url: str, outputdir: Path):
+    def __init__(self, boost_version: str, boostdep_version: str, tmppath: Path, git_url: str, outputdir: Path, unsafe: bool):
         self.boost_version = boost_version
         self.boostdep_version = boostdep_version
         self.git_url = git_url
         self.tmppath = tmppath
         self.outputdir = outputdir
+        self.unsafe = unsafe
 
     @property
     def boost_path(self) -> Path:
@@ -61,21 +62,19 @@ class BoostDependencyBuilder(object):
 
     def do_git_submodule_update(self):
         with tools.chdir(str(self.boost_path)):
-            try:
+            if not self.unsafe:
                 # De-init + init to make sure that boostdep won't detect a new or removed boost library
                 print("De-init git submodules")
                 subprocess.check_call(["git", "submodule", "deinit", "--all", "-f"])
 
+            try:
                 print("Checking out version {}".format(self.boost_version))
                 subprocess.check_call(["git", "checkout", "boost-{}".format(self.boost_version)])
-
-                print("Re-init git submodules")
-                subprocess.check_call(["git", "submodule", "update", "--init"])
             except subprocess.CalledProcessError:
                 print("version {} does not exist".format(self.boost_version))
                 raise
 
-            print("Initializing git submodules")
+            print("Re-init git submodules")
             subprocess.check_call(["git", "submodule", "update", "--init"])
 
     def do_install_boostdep(self):
@@ -147,27 +146,43 @@ class BoostDependencyBuilder(object):
         return "boost_{}".format(lib)
 
     def do_create_libraries(self, boost_dependencies: BoostDependencies):
-        libraries = {b: [self._boostify_library(b)] for b in boost_dependencies.buildables}
+        libraries = {}
+        module_provides_extra = {}
 
-        def insert_modules(parent_module, modules):
-            for module in modules:
-                boost_dependencies.export.dependencies[module] = [parent_module]
-                libraries[module] = [self._boostify_library(module)]
+        #  Look for the names of libraries in Jam build files
+        for buildable in boost_dependencies.buildables:
+            construct_jam = lambda jam_ext : self.boost_path / "libs" / buildable / "build" / "Jamfile{}".format(jam_ext)
+            try:
+                buildable_jam = next(construct_jam(jam_ext) for jam_ext in ("", ".v2") if construct_jam(jam_ext).is_file())
+            except StopIteration:
+                raise Exception("Cannot find jam build file for {}".format(buildable))
+            jam_text = buildable_jam.read_text()
+            buildable_libs = re.findall("[ \n](boost-)?lib ([a-zA-Z0-9_]+)[ \n]", jam_text)
+            buildable_libs = set("boost_{}".format(lib) if lib_prefix else lib for lib_prefix, lib in buildable_libs)
+            buildable_libs = set(l[len("boost_"):] for l in buildable_libs if l.startswith("boost_"))  # list(filter(lambda l: l.startswith("boost"), buildable_libs))
+            if not buildable_libs:
+                # Some boost releases support multpile python versions
+                if buildable == "python":
+                    for pysuffix in ("", "2", "3"):
+                        boost_py_lib = "python{}".format(pysuffix)
+                        if " boost_{} ".format(boost_py_lib) in jam_text:
+                            buildable_libs.add(boost_py_lib)
+            if not buildable_libs:
+                raise Exception("Cannot find any library for buildable {}".format(buildable))
 
-        if "log" in libraries:
-            insert_modules("log", ["log_setup"])
-        if "math" in libraries:
-            insert_modules("math", ["math_c99f", "math_c99l", "math_c99", "math_tr1f", "math_tr1l", "math_tr1"])
-            libraries["math"] = []
-        if "serialization" in libraries:
-            insert_modules("serialization", ["wserialization"])
-        if "stacktrace" in libraries:
-            libraries["stacktrace"] = []
-            insert_modules("stacktrace", ["stacktrace_noop", "stacktrace_backtrace", "stacktrace_addr2line", "stacktrace_basic", "stacktrace_windbg", "stacktrace_windbg_cached"])
-        if "test" in libraries:
-            insert_modules("test", ["unit_test_framework", "prg_exec_monitor", "test_exec_monitor"])
-            libraries["test"] = []
-            boost_dependencies.export.dependencies["unit_test_framework"].extend(["prg_exec_monitor", "test_exec_monitor"])
+            if buildable in buildable_libs:
+                libraries[buildable] = ["boost_{}".format(buildable)]
+                buildable_libs.remove(buildable)
+            else:
+                libraries[buildable] = []
+            module_provides_extra[buildable] = buildable_libs
+            for buildable_dep in buildable_libs:
+                boost_dependencies.export.dependencies[buildable_dep] = [buildable]
+                libraries[buildable_dep] = ["boost_{}".format(buildable_dep)]
+
+        # Boost.Test: unit_test_framework depends on all libraries of Boost.Test
+        if "unit_test_framework" in boost_dependencies.export.dependencies and "test" in module_provides_extra:
+            boost_dependencies.export.dependencies["unit_test_framework"].extend(module_provides_extra["test"].difference({"unit_test_framework"}))
 
         boost_dependencies.export.libs = libraries
 
@@ -182,6 +197,8 @@ class BoostDependencyBuilder(object):
         tree = self.do_create_libraries(tree)
 
         data = dataclasses.asdict(tree.export)
+        if self.unsafe:
+            data["UNSAFE"] = "!DO NOT COMMIT! !THIS FILE IS GENERATED WITH THE UNSAFE OPTION ENABLED!"
 
         print("Creating {}".format(self.outputdir))
         with self._outputpath.open("w") as fout:
@@ -195,6 +212,7 @@ def main(args=None) -> int:
     parser.add_argument("-u", dest="git_url", default=BOOST_GIT_URL, help="boost git url")
     parser.add_argument("-U", dest="git_update", action="store_true", help="update the git repo")
     parser.add_argument("-o", dest="outputdir", default=None, type=Path, help="output dependency dir")
+    parser.add_argument("-x", dest="unsafe", action="store_true", help="unsafe fast(er) operation")
 
     version_group = parser.add_mutually_exclusive_group(required=True)
     version_group.add_argument("-v", dest="boost_version", help="boost version")
@@ -225,6 +243,7 @@ def main(args=None) -> int:
             git_url=ns.git_url,
             outputdir=ns.outputdir,
             tmppath=ns.tmppath,
+            unsafe=ns.unsafe,
         )
 
         if not ns.git_update and not boost_collector.boost_path.exists():

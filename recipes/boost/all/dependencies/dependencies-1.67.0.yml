@@ -69,6 +69,8 @@ dependencies:
   - graph
   - python
   - serialization
+  numpy:
+  - python
   prg_exec_monitor:
   - test
   program_options: []
@@ -112,8 +114,8 @@ dependencies:
   - thread
   unit_test_framework:
   - test
-  - prg_exec_monitor
   - test_exec_monitor
+  - prg_exec_monitor
   wave:
   - filesystem
   - serialization
@@ -167,6 +169,8 @@ libs:
   - boost_math_tr1l
   mpi:
   - boost_mpi
+  numpy:
+  - boost_numpy
   prg_exec_monitor:
   - boost_prg_exec_monitor
   program_options:

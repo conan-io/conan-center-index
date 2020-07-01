@@ -180,10 +180,13 @@ class BoostConan(ConanFile):
 
     def _check_options(self):
         for mod_name, mod_deps in self._dependencies["dependencies"].items():
-            if not self.options.get_safe("without_{}".format(mod_name), False):
-                for mod_dep in mod_deps:
-                    if self.options.get_safe("without_{}".format(mod_dep), False):
-                        raise ConanInvalidConfiguration("{} requires {}: {} is disabled".format(mod_name, mod_deps, mod_dep))
+            without_option = "without_{}".format(mod_name)
+            known_option = without_option in self.options
+            if known_option:
+                if not self.options.get_safe(without_option):
+                    for mod_dep in mod_deps:
+                        if self.options.get_safe("without_{}".format(mod_dep), False):
+                            raise ConanInvalidConfiguration("{} requires {}: {} is disabled".format(mod_name, mod_deps, mod_dep))
 
     def build_requirements(self):
         self.build_requires("b2/4.2.0")

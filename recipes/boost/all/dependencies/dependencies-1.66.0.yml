@@ -69,6 +69,8 @@ dependencies:
   - test
   program_options: []
   python: []
+  python3:
+  - python
   random:
   - math
   - system
@@ -108,8 +110,8 @@ dependencies:
   - thread
   unit_test_framework:
   - test
-  - prg_exec_monitor
   - test_exec_monitor
+  - prg_exec_monitor
   wave:
   - filesystem
   - serialization
@@ -167,6 +169,8 @@ libs:
   - boost_program_options
   python:
   - boost_python
+  python3:
+  - boost_python3
   random:
   - boost_random
   regex:
