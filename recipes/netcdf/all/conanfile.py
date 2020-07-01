@@ -106,6 +106,11 @@ class NetcdfConan(ConanFile):
             os.remove(filename)
         tools.rmdir(os.path.join(self.package_folder, "share"))
 
+        if self.settings.os == "Windows":
+            for dll_file in glob.glob(os.path.join(self.package_folder, "bin", "*.dll")):
+                if os.path.basename(dll_file).startswith(("concrt", "msvcp", "vcruntime")):
+                    os.unlink(dll_file)
+
     def package_info(self):
         self.cpp_info.names["cmake_find_package"] = "netCDF"
         self.cpp_info.names["cmake_find_package_multi"] = "netCDF"
