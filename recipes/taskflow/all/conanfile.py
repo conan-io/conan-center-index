@@ -2,8 +2,6 @@ import os
 
 from conans import ConanFile, tools
 from conans.errors import ConanInvalidConfiguration
-from conans.model.version import Version
-
 
 class TaskflowConan(ConanFile):
     name = "taskflow"
@@ -17,18 +15,15 @@ class TaskflowConan(ConanFile):
 
     settings = "os", "compiler"
 
-    _source_subfolder = "source_subfolder"
+    @property
+    def _source_subfolder(self):
+        return "source_subfolder"
 
     def configure(self):
-        compiler = str(self.settings.compiler)
-        compiler_version = tools.Version(self.settings.compiler.version)
-        min_req_cppstd = "17" if tools.Version(self.version) <= "2.2.0" else "14"
+        minimal_cpp_standard = "17" if tools.Version(self.version) <= "2.2.0" else "14"
 
         if self.settings.compiler.cppstd:
-            tools.check_min_cppstd(self, min_req_cppstd)
-        else:
-            self.output.warn("%s recipe lacks information about the %s compiler"
-                             " standard version support" % (self.name, compiler))
+            tools.check_min_cppstd(self, minimal_cpp_standard)
 
         minimal_version = {
             "17": {
@@ -43,17 +38,18 @@ class TaskflowConan(ConanFile):
                 "clang": "4.0",
                 "apple-clang": "8.0"
             }
-        }
+        }[minimal_cpp_standard]
 
-        if compiler not in minimal_version[min_req_cppstd]:
-            self.output.info("%s requires a compiler that supports at least C++%s" % (self.name, min_req_cppstd))
+        compiler = str(self.settings.compiler)
+        if compiler not in minimal_version:
+            self.output.warn(
+                "%s recipe lacks information about the %s compiler standard version support" % (self.name, compiler))
+            self.output.warn(
+                "%s requires a compiler that supports at least C++%s" % (self.name, minimal_cpp_standard))
             return
-
-        # Exclude compilers not supported by cpp-taskflow
-        if compiler_version < minimal_version[min_req_cppstd][compiler]:
-            raise ConanInvalidConfiguration("%s requires a compiler that supports"
-                                            " at least C++%s. %s %s is not"
-                                            " supported." % (self.name, min_req_cppstd, compiler, Version(self.settings.compiler.version.value)))
+        version = tools.Version(self.settings.compiler.version)
+        if version < minimal_version[compiler]:
+            raise ConanInvalidConfiguration("%s requires a compiler that supports at least C++%s" % (self.name, minimal_cpp_standard))
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
@@ -62,7 +58,7 @@ class TaskflowConan(ConanFile):
 
     def package(self):
         self.copy(pattern="LICENSE", dst="licenses", src=self._source_subfolder)
-        self.copy(pattern="*", dst="include/taskflow", src=os.path.join(self._source_subfolder, "taskflow"))
+        self.copy(pattern="*", dst=os.path.join("include", "taskflow"), src=os.path.join(self._source_subfolder, "taskflow"))
 
     def package_id(self):
         self.info.header_only()
@@ -72,3 +68,5 @@ class TaskflowConan(ConanFile):
             self.cpp_info.system_libs.append("pthread")
         if self.settings.compiler == "Visual Studio":
             self.cpp_info.defines.append("_ENABLE_EXTENDED_ALIGNED_STORAGE")
+        self.cpp_info.names["cmake_find_package"] = "Taskflow"
+        self.cpp_info.names["cmake_find_package_multi"] = "Taskflow"
