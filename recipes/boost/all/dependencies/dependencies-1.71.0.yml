@@ -78,7 +78,6 @@ dependencies:
   - system
   regex: []
   serialization: []
-  signals: []
   stacktrace: []
   stacktrace_addr2line:
   - stacktrace
@@ -178,8 +177,6 @@ libs:
   - boost_regex
   serialization:
   - boost_serialization
-  signals:
-  - boost_signals
   stacktrace: []
   stacktrace_addr2line:
   - boost_stacktrace_addr2line

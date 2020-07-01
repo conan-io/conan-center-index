@@ -62,8 +62,15 @@ class BoostDependencyBuilder(object):
     def do_git_submodule_update(self):
         with tools.chdir(str(self.boost_path)):
             try:
+                # De-init + init to make sure that boostdep won't detect a new or removed boost library
+                print("De-init git submodules")
+                subprocess.check_call(["git", "submodule", "deinit", "--all"])
+
                 print("Checking out version {}".format(self.boost_version))
                 subprocess.check_call(["git", "checkout", "boost-{}".format(self.boost_version)])
+
+                print("Re-init git submodules")
+                subprocess.check_call(["git", "submodule", "update", "--init"])
             except subprocess.CalledProcessError:
                 print("version {} does not exist".format(self.boost_version))
                 raise

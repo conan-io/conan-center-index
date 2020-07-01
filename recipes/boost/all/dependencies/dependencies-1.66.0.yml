@@ -5,9 +5,6 @@ dependencies:
   container: []
   context:
   - thread
-  contract:
-  - exception
-  - thread
   coroutine:
   - context
   - exception
@@ -129,8 +126,6 @@ libs:
   - boost_container
   context:
   - boost_context
-  contract:
-  - boost_contract
   coroutine:
   - boost_coroutine
   date_time:
