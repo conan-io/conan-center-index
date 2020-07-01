@@ -140,11 +140,13 @@ class CPythonConan(ConanFile):
         if self.options.get_safe("with_gdbm", False):
             self.requires("gdbm/1.18.1")
         if self.options.get_safe("with_nis", False):
+            # TODO: Add nis when available.
             raise ConanInvalidConfiguration("nis is not available on CCI (yet)")
             self.requires("nis/x.y.z")
         if self.options.with_sqlite3:
             self.requires("sqlite3/3.31.1")
         if self.options.with_tkinter:
+          # TODO: Add tk when available
             raise ConanInvalidConfiguration("tk is not available on CCI (yet)")
             self.requires("tk/8.6.9.1@bincrafters/stable", private=self._is_installer)
         if self.options.get_safe("with_curses", False):
