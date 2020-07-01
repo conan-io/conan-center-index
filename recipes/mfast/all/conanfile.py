@@ -20,6 +20,7 @@ class mFASTConan(ConanFile):
     requires = ["boost/1.73.0", "tinyxml2/8.0.0"]
     generators = "cmake"
     exports_sources = "patches/**"
+    short_paths = True
     _cmake = None
 
     @property
