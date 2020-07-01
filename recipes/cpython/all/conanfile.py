@@ -75,11 +75,11 @@ class CPythonConan(ConanFile):
 
     @property
     def _is_py3(self):
-        return self.version.split(".")[0] == "3"
+        return tools.Version(self.version).major == "3"
 
     @property
     def _is_py2(self):
-        return self.version.split(".")[0] == "2"
+        return tools.Version(self.version).major == "2"
 
     def config_options(self):
         if self.settings.os == "Windows":
