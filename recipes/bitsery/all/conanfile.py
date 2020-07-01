@@ -10,7 +10,7 @@ class BitseryConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/fraillt/bitsery"
     license = "MIT"
-    settings = "compiler"
+    settings = "compiler", "os"
     no_copy_source = True
 
     @property
@@ -18,7 +18,8 @@ class BitseryConan(ConanFile):
         return "source_subfolder"
 
     def configure(self):
-        tools.check_min_cppstd(self, "11")
+        if self.settings.compiler.cppstd:
+            tools.check_min_cppstd(self, "11")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
@@ -27,7 +28,7 @@ class BitseryConan(ConanFile):
 
     def package(self):
         self.copy(pattern="LICENSE", dst="licenses", src=self._source_subfolder)
-        self.copy(pattern="*", dst="include/bitsery", src=self._source_subfolder + "/include/bitsery")
+        self.copy(pattern="*.h", dst=os.path.join("include", "bitsery"), src=os.path.join(self._source_subfolder, "include", "bitsery"))
 
     def package_id(self):
         self.info.header_only()
