@@ -1,0 +1,22 @@
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -854,7 +854,7 @@ ENDIF()
+ # Option to support byte-range reading of remote datasets
+ OPTION(ENABLE_BYTERANGE "Enable byte-range access to remote datasets.." OFF)
+ 
+-IF(NOT CURL_LIBRARY)
++IF(NOT CURL_LIBRARIES)
+   IF(ENABLE_BYTERANGE)
+     MESSAGE(FATAL_ERROR "Byte-range support specified, CURL libraries are not found.")
+   ENDIF()
+--- a/liblib/CMakeLists.txt
++++ b/liblib/CMakeLists.txt
+@@ -88,7 +88,7 @@ IF(USE_HDF5 OR USE_NETCDF4)
+ ENDIF()
+ 
+ IF(USE_DAP)
+-  SET(TLL_LIBS ${TLL_LIBS} ${CURL_LIBRARY})
++  SET(TLL_LIBS ${TLL_LIBS} ${CURL_LIBRARIES})
+ ENDIF()
+ 
+ IF(USE_HDF4)

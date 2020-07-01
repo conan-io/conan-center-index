@@ -1,0 +1,25 @@
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -117,11 +117,6 @@ MACRO(CHECK_C_LINKER_FLAG M_FLAG M_RESULT)
+   SET(CMAKE_REQUIRED_FLAGS "${T_REQ_FLAG}")
+ ENDMACRO()
+ 
+-# Enable 'dist and distcheck'.
+-# File adapted from http://ensc.de/cmake/FindMakeDist.cmake
+-FIND_PACKAGE(MakeDist)
+-# End 'enable dist and distcheck'
+-
+ # Set the build type.
+ IF(NOT CMAKE_BUILD_TYPE)
+   SET(CMAKE_BUILD_TYPE DEBUG CACHE STRING "Choose the type of build, options are: None, Debug, Release."
+@@ -1932,10 +1927,6 @@ INSTALL(PROGRAMS ${netCDF_BINARY_DIR}/nc-config
+ ##
+ print_conf_summary()
+ 
+-# Enable Makedist files.
+-ADD_MAKEDIST()
+-ENABLE_MAKEDIST(README.md COPYRIGHT RELEASE_NOTES.md INSTALL INSTALL.cmake test_prog.c lib_flags.am cmake CMakeLists.txt COMPILE.cmake.txt config.h.cmake.in cmake_uninstall.cmake.in netcdf-config-version.cmake.in netcdf-config.cmake.in FixBundle.cmake.in nc-config.cmake.in configure configure.ac install-sh config.h.in config.sub CTestConfig.cmake.in)
+-
+ #####
+ # Configure and print the libnetcdf.settings file.
+ #####

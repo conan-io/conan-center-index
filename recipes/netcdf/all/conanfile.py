@@ -14,7 +14,8 @@ class NetcdfConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     topics = ("array", "dataset", "scientific")
 
-    generators = "cmake"
+    exports_sources = ["CMakeLists.txt", "patches/**"]
+    generators = "cmake_find_package"
     settings = "os", "compiler", "build_type", "arch"
     options = {
         "shared": [True, False],
@@ -65,10 +66,12 @@ class NetcdfConan(ConanFile):
         if not self._cmake:
             cmake = CMake(self)
             cmake.definitions["CMAKE_INSTALL_PREFIX"] = self.package_folder
-            cmake.definitions["ENABLE_NETCDF4"] = self.options.with_netcdf4
+            cmake.definitions["ENABLE_NETCDF_4"] = self.options.with_netcdf4
             cmake.definitions["ENABLE_DAP"] = self.options.with_dap
             cmake.definitions["BUILD_UTILITIES"] = self.options.with_utilities
             cmake.definitions["BUILD_SHARED_LIBS"] = self.options.shared
+            cmake.definitions["ENABLE_TESTS"] = False
+            cmake.definitions["NC_FIND_SHARED_LIBS"] = self.options["hdf5"].shared
 
             cmake.configure(
                 source_folder=self._source_subfolder,
@@ -78,7 +81,12 @@ class NetcdfConan(ConanFile):
 
         return self._cmake
 
+    def _patch_sources(self):
+        for patch in self.conan_data["patches"][self.version]:
+            tools.patch(**patch)
+
     def build(self):
+        self._patch_sources()
         cmake = self._configure_cmake()
         cmake.build()
 
