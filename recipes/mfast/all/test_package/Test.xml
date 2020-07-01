@@ -1,0 +1,8 @@
+<?xml version="1.0"?>
+<templates>
+    <template name="Test">
+        <string name="String" id="1">
+            <constant value="Value"/>
+        </string>
+    </template>
+</templates>
