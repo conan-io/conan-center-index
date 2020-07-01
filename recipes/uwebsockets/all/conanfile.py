@@ -53,7 +53,7 @@ class UwebsocketsConan(ConanFile):
     def package(self):
         self.copy(pattern="LICENSE", dst="licenses", src=self._source_subfolder)
         self.copy(pattern="*.h", src=os.path.join(self._source_subfolder, "src"), dst=os.path.join("include", "uWebSockets"), keep_path=False)
-        self.copy(pattern="*.hpp", src=os.path.join(self._source_subfolder, "src", "f2"), dst="include/uWebSockets/f2", keep_path=False)
+        self.copy(pattern="*.hpp", src=os.path.join(self._source_subfolder, "src", "f2"), dst=os.path.join("include", "uWebSockets", "f2"), keep_path=False)
 
     def package_id(self):
         self.info.header_only()
