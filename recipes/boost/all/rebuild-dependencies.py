@@ -64,7 +64,7 @@ class BoostDependencyBuilder(object):
             try:
                 # De-init + init to make sure that boostdep won't detect a new or removed boost library
                 print("De-init git submodules")
-                subprocess.check_call(["git", "submodule", "deinit", "--all"])
+                subprocess.check_call(["git", "submodule", "deinit", "--all", "-f"])
 
                 print("Checking out version {}".format(self.boost_version))
                 subprocess.check_call(["git", "checkout", "boost-{}".format(self.boost_version)])
@@ -95,8 +95,8 @@ class BoostDependencyBuilder(object):
                 buildables = subprocess.check_output(["boostdep", "--list-buildable"])
                 buildables = buildables.decode().splitlines()
 
-                modules = subprocess.check_output(["boostdep", "--list-modules"])
-                modules = modules.decode().splitlines()
+                # modules = subprocess.check_output(["boostdep", "--list-modules"])
+                # modules = modules.decode().splitlines()
 
                 dep_modules = buildables
 
@@ -107,9 +107,40 @@ class BoostDependencyBuilder(object):
                     dependency_tree[module] = mod_deps
 
         filtered_dependency_tree = {k: [d for d in v if d in buildables] for k, v in dependency_tree.items() if k in buildables}
+
+        filtered_dependency_tree = self._fix_dependencies(filtered_dependency_tree)
+
         boost_dependencies = BoostDependencies(export=BoostDependenciesExport(dependencies=filtered_dependency_tree, version=self.boost_version), buildables=buildables)
 
         return boost_dependencies
+
+    @staticmethod
+    def detect_cycles(tree: Dict[str, List[str]]) -> Dict[str, List[str]]:
+        tree = {k: v[:] for k, v in tree.items()}
+        while tree:
+            nodeps = set(k for k, v in tree.items() if not v)
+            if not nodeps:
+                return tree
+            tree = {k: [d for d in v if d not in nodeps] for k, v in tree.items() if k not in nodeps}
+        return {}
+
+    def _fix_dependencies(self, deptree: Dict[str, List[str]]) -> Dict[str, List[str]]:
+        try:
+            # python does not depend on graph
+            deptree["python"].remove("graph")
+        except (KeyError, ValueError):
+            pass
+
+        try:
+            # graph does not depend on graph_parallel
+            deptree["graph"].remove("graph_parallel")
+        except (KeyError, ValueError):
+            pass
+
+        remaining_tree = self.detect_cycles(deptree)
+        if remaining_tree:
+            raise Exception("Dependency cycle detected. Remaining tree: {}".format(remaining_tree))
+        return deptree
 
     @staticmethod
     def _boostify_library(lib: str) -> str:

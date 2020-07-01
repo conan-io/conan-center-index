@@ -72,8 +72,7 @@ dependencies:
   prg_exec_monitor:
   - test
   program_options: []
-  python:
-  - graph
+  python: []
   random:
   - math
   - system

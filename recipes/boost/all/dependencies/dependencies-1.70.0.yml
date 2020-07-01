@@ -22,7 +22,6 @@ dependencies:
   filesystem:
   - system
   graph:
-  - graph_parallel
   - math
   - random
   - regex
@@ -73,8 +72,7 @@ dependencies:
   prg_exec_monitor:
   - test
   program_options: []
-  python:
-  - graph
+  python: []
   random:
   - math
   - system
