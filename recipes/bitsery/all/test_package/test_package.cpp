@@ -1,4 +1,4 @@
-// directly taken from https://github.com/fraillt/bitsery/blob/master/examples/basic_usage.cpp
+// directly taken from https://github.com/fraillt/bitsery/blob/master/examples/basic_usage.cpp and removed the asserts at the end
 //include bitsery.h to get serialization and deserialization classes
 #include <bitsery/bitsery.h>
 //in ordered to serialize/deserialize data to buffer, include buffer adapter
@@ -43,7 +43,4 @@ int main() {
   //same as serialization, but returns deserialization state as a pair
   //first = error code, second = is buffer was successfully read from begin to the end.
   auto state = bitsery::quickDeserialization<InputAdapter>({buffer.begin(), writtenSize}, res);
-
-  assert(state.first == bitsery::ReaderError::NoError && state.second);
-  assert(data.fs == res.fs && data.i == res.i && data.e == res.e);
 }
