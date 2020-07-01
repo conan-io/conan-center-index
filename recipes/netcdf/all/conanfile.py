@@ -1,6 +1,6 @@
 import os
 import glob
-from conans import ConanFile, AutoToolsBuildEnvironment, tools
+from conans import ConanFile, CMake, tools
 
 
 class NetcdfConan(ConanFile):
@@ -14,6 +14,7 @@ class NetcdfConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     topics = ("array", "dataset", "scientific")
 
+    generators = "cmake"
     settings = "os", "compiler", "build_type", "arch"
     options = {
         "shared": [True, False],
@@ -29,11 +30,15 @@ class NetcdfConan(ConanFile):
         "with_dap": True,
         "with_utilities": True,
     }
-    _autotools = None
+    _cmake = None
 
     @property
     def _source_subfolder(self):
         return "source_subfolder"
+
+    @property
+    def _build_subfolder(self):
+        return "build_subfolder"
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -56,52 +61,35 @@ class NetcdfConan(ConanFile):
         extracted_dir = "netcdf-c-{}".format(self.version)
         os.rename(extracted_dir, self._source_subfolder)
 
-    def _configure_autotools(self):
-        if not self._autotools:
-            args = [
-                "--prefix={}".format(self.package_folder),
-            ]
+    def _configure_cmake(self):
+        if not self._cmake:
+            cmake = CMake(self)
+            cmake.definitions["CMAKE_INSTALL_PREFIX"] = self.package_folder
+            cmake.definitions["ENABLE_NETCDF4"] = self.options.with_netcdf4
+            cmake.definitions["ENABLE_DAP"] = self.options.with_dap
+            cmake.definitions["BUILD_UTILITIES"] = self.options.with_utilities
+            cmake.definitions["BUILD_SHARED_LIBS"] = self.options.shared
 
-            if self.options.shared:
-                args.append("--enable-shared")
-                args.append("--disable-static")
-            else:
-                args.append("--disable-shared")
-                args.append("--enable-static")
+            cmake.configure(
+                source_folder=self._source_subfolder,
+                build_folder=self._build_subfolder
+            )
+            self._cmake = cmake
 
-            if self.options.with_netcdf4:
-                args.append("--enable-netcdf4")
-            else:
-                args.append("--disable-netcdf4")
-
-            if self.options.with_dap:
-                args.append("--enable-dap")
-            else:
-                args.append("--disable-dap")
-
-            if self.options.with_utilities:
-                args.append("--enable-utilities")
-            else:
-                args.append("--disable-utilities")
-
-            if self.options.get_safe("fPIC"):
-                args.append('--with-pic')
-
-            self._autotools = AutoToolsBuildEnvironment(self)
-            self._autotools.configure(self._source_subfolder, args=args)
-        return self._autotools
+        return self._cmake
 
     def build(self):
-        autotools = self._configure_autotools()
-        autotools.make()
+        cmake = self._configure_cmake()
+        cmake.build()
 
     def package(self):
         self.copy("COPYRIGHT", dst="licenses", src=self._source_subfolder)
 
-        autotools = self._configure_autotools()
-        autotools.install()
+        cmake = self._configure_cmake()
+        cmake.install()
 
         tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
+        tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
         for filename in glob.glob(
                 os.path.join(self.package_folder, "lib", "*.la")):
             os.remove(filename)
@@ -111,6 +99,8 @@ class NetcdfConan(ConanFile):
         tools.rmdir(os.path.join(self.package_folder, "share"))
 
     def package_info(self):
+        self.cpp_info.names["cmake_find_package"] = "netCDF"
+        self.cpp_info.names["cmake_find_package_multi"] = "netCDF"
         self.cpp_info.libs = ["netcdf"]
         bin_path = os.path.join(self.package_folder, "bin")
         self.output.info("Appending PATH env var with : {}".format(bin_path))
