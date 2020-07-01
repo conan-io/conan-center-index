@@ -1,35 +1,3 @@
-buildables:
-- atomic
-- chrono
-- container
-- context
-- contract
-- coroutine
-- date_time
-- exception
-- fiber
-- filesystem
-- graph
-- graph_parallel
-- iostreams
-- locale
-- log
-- math
-- mpi
-- nowide
-- program_options
-- python
-- random
-- regex
-- serialization
-- signals
-- stacktrace
-- system
-- test
-- thread
-- timer
-- type_erasure
-- wave
 dependencies:
   atomic: []
   chrono:

@@ -1,35 +1,3 @@
-buildables:
-- atomic
-- chrono
-- container
-- context
-- contract
-- coroutine
-- date_time
-- exception
-- fiber
-- filesystem
-- graph
-- graph_parallel
-- iostreams
-- locale
-- log
-- math
-- mpi
-- nowide
-- program_options
-- python
-- random
-- regex
-- serialization
-- signals
-- stacktrace
-- system
-- test
-- thread
-- timer
-- type_erasure
-- wave
 dependencies:
   atomic: []
   chrono:
@@ -100,8 +68,6 @@ dependencies:
   - graph
   - python
   - serialization
-  nowide:
-  - filesystem
   prg_exec_monitor:
   - test
   program_options: []
@@ -200,8 +166,6 @@ libs:
   - boost_math_tr1l
   mpi:
   - boost_mpi
-  nowide:
-  - boost_nowide
   prg_exec_monitor:
   - boost_prg_exec_monitor
   program_options:

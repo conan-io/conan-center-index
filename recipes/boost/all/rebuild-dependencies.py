@@ -3,6 +3,7 @@ import dataclasses
 from pathlib import Path
 import re
 import subprocess
+import sys
 import tempfile
 from typing import Dict, List
 
@@ -15,11 +16,16 @@ BOOST_GIT_URL = "https://github.com/boostorg/boost.git"
 
 
 @dataclasses.dataclass
-class BoostDependencies(object):
+class BoostDependenciesExport(object):
     version: str
-    buildables: List[str]
     dependencies: Dict[str, List[str]] = dataclasses.field(default_factory=dict)
     libs: Dict[str, List[str]] = dataclasses.field(default_factory=dict)
+
+
+@dataclasses.dataclass
+class BoostDependencies(object):
+    buildables: List[str]
+    export: BoostDependenciesExport
 
 
 class BoostDependencyBuilder(object):
@@ -41,7 +47,7 @@ class BoostDependencyBuilder(object):
                 subprocess.check_call(["git", "clone", "--", self.git_url, "boost"])
             with tools.chdir(str(self.boost_path)):
                 print("Checking out current master")
-                subprocess.check_call(["git checkout", "origin/master"])
+                subprocess.check_call(["git", "checkout", "origin/master"])
                 print("Removing master branch")
                 subprocess.check_call(["git", "branch", "-D", "master"])
         else:
@@ -94,7 +100,7 @@ class BoostDependencyBuilder(object):
                     dependency_tree[module] = mod_deps
 
         filtered_dependency_tree = {k: [d for d in v if d in buildables] for k, v in dependency_tree.items() if k in buildables}
-        boost_dependencies = BoostDependencies(dependencies=filtered_dependency_tree, buildables=buildables, version=self.boost_version)
+        boost_dependencies = BoostDependencies(export=BoostDependenciesExport(dependencies=filtered_dependency_tree, version=self.boost_version), buildables=buildables)
 
         return boost_dependencies
 
@@ -107,7 +113,7 @@ class BoostDependencyBuilder(object):
 
         def insert_modules(parent_module, modules):
             for module in modules:
-                boost_dependencies.dependencies[module] = [parent_module]
+                boost_dependencies.export.dependencies[module] = [parent_module]
                 libraries[module] = [self._boostify_library(module)]
 
         if "log" in libraries:
@@ -123,9 +129,9 @@ class BoostDependencyBuilder(object):
         if "test" in libraries:
             insert_modules("test", ["unit_test_framework", "prg_exec_monitor", "test_exec_monitor"])
             libraries["test"] = []
-            boost_dependencies.dependencies["unit_test_framework"].extend(["prg_exec_monitor", "test_exec_monitor"])
+            boost_dependencies.export.dependencies["unit_test_framework"].extend(["prg_exec_monitor", "test_exec_monitor"])
 
-        boost_dependencies.libs = libraries
+        boost_dependencies.export.libs = libraries
 
         return boost_dependencies
 
@@ -137,14 +143,14 @@ class BoostDependencyBuilder(object):
         tree = self.do_boostdep_collect()
         tree = self.do_create_libraries(tree)
 
-        data = dataclasses.asdict(tree)
+        data = dataclasses.asdict(tree.export)
 
         print("Creating {}".format(self.outputdir))
         with self._outputpath.open("w") as fout:
             yaml.dump(data, fout)
 
 
-def main(args=None):
+def main(args=None) -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("-t", dest="tmppath", help="temporary folder where to clone boost")
     parser.add_argument("-d", dest="boostdep_version", default="1.73.0", type=str, help="boostdep version")
@@ -182,8 +188,14 @@ def main(args=None):
             outputdir=ns.outputdir,
             tmppath=ns.tmppath,
         )
+
+        if not ns.git_update and not boost_collector.boost_path.exists():
+            print("boost directory does not exist. Re-execute this script with the -U to run git update", file=sys.stderr)
+            return 1
+
         if ns.git_update and not git_update_done:
             boost_collector.do_git_update()
+            git_update_done = True
 
         boost_collector.do_git_submodule_update()
 
@@ -192,7 +204,8 @@ def main(args=None):
             boostdep_installed = True
 
         boost_collector.do_create_dependency_file()
+    return 0
 
 
 if __name__ == "__main__":
-    main()
+    sys.exit(main())
