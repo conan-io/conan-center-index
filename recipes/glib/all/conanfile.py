@@ -27,7 +27,6 @@ class GLibConan(ConanFile):
                        "with_selinux": True}
     _source_subfolder = "source_subfolder"
     _build_subfolder = 'build_subfolder'
-    autotools = None
     short_paths = True
     generators = "pkg_config"
     requires = "zlib/1.2.11", "libffi/3.3"
@@ -37,10 +36,12 @@ class GLibConan(ConanFile):
         return self.settings.compiler == "Visual Studio"
 
     def configure(self):
+        if self.options.shared:
+            del self.options.fPIC
         del self.settings.compiler.libcxx
         del self.settings.compiler.cppstd
-        if self.settings.os == "Windows":
-            self.options.shared = True
+        if self.settings.os == "Windows" and not self.options.shared:
+            raise ConanInvalidConfiguration("glib can not be built as static on Windows.")
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -147,4 +148,3 @@ class GLibConan(ConanFile):
             self.cpp_info.system_libs.append("iconv")
             self.cpp_info.system_libs.append("resolv")
             self.cpp_info.frameworks.extend(['Foundation', 'CoreServices', 'CoreFoundation'])
-
