@@ -47,6 +47,7 @@ class OneDplConan(ConanFile):
     def package_info(self):
         self.cpp_info.includedirs = ["include", os.path.join("lib", "stdlib")]
         self.cpp_info.names["cmake_find_package"] = "ParallelSTL"
+        self.cpp_info.names["cmake_find_package_multi"] = "ParallelSTL"
 
     def package_id(self):
         self.info.header_only()
