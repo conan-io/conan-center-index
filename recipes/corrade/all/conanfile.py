@@ -94,7 +94,7 @@ class CorradeConan(ConanFile):
         self.copy("CorradeLibSuffix.cmake", src=share_cmake, dst=os.path.join(self.package_folder, "lib", "cmake", "Corrade"))
         tools.rmdir(os.path.join(self.package_folder, "share"))
 
-    def _sort_libs(correct_order, libs, lib_suffix="", reverse_result=False):
+    def _sort_libs(self, correct_order, libs, lib_suffix="", reverse_result=False):
         # Add suffix for correct string matching
         correct_order[:] = [s.__add__(lib_suffix) for s in correct_order]
 
