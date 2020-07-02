@@ -38,7 +38,7 @@ class B2Conan(ConanFile):
             'acc', 'borland', 'clang', 'como', 'gcc-nocygwin', 'gcc',
             'intel-darwin', 'intel-linux', 'intel-win32', 'kcc', 'kylix',
             'mingw', 'mipspro', 'pathscale', 'pgi', 'qcc', 'sun', 'sunpro',
-            'tru64cxx', 'vacpp', 'vc12', 'vc14', 'vc141', 'vc142' ]
+            'tru64cxx', 'vacpp', 'vc12', 'vc14', 'vc141', 'vc142']
     }
     default_options = {
         'use_cxx_env': False,
@@ -46,9 +46,9 @@ class B2Conan(ConanFile):
     }
 
     def configure(self):
-        if self.options.toolset == 'cxx' or self.options.toolset == 'cross-cxx' and \
-           not self.options.use_cxx_env:
-            raise ConanInvalidConfiguration("Option toolset 'cxx' and 'cross-cxx' requires 'use_cxx_env=True'")
+        if (self.options.toolset == 'cxx' or self.options.toolset == 'cross-cxx') and not self.options.use_cxx_env:
+            raise ConanInvalidConfiguration(
+                "Option toolset 'cxx' and 'cross-cxx' requires 'use_cxx_env=True'")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
@@ -85,7 +85,8 @@ class B2Conan(ConanFile):
         self.copy("LICENSE.txt", dst="licenses", src="source")
         self.copy(pattern="*b2", dst="bin", src="output/bin")
         self.copy(pattern="*b2.exe", dst="bin", src="output/bin")
-        self.copy(pattern="*.jam", dst="bin/b2_src", src="output/share/boost-build")
+        self.copy(pattern="*.jam", dst="bin/b2_src",
+                  src="output/share/boost-build")
 
     def package_info(self):
         self.cpp_info.bindirs = ["bin"]
