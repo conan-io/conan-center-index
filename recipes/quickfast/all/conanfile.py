@@ -1,4 +1,4 @@
-from conans import ConanFile, CMake, tools
+from conans import ConanFile, CMake, tools, AutoToolsBuildEnvironment
 import os
 import shutil
 
@@ -17,9 +17,8 @@ class QuickfastConan(ConanFile):
     default_options = {"fPIC": True,
                        "shared": False}
     requires = ["boost/1.73.0", "xerces-c/3.2.3"]
-    generators = "cmake"
-    exports_sources = "CMakeLists.txt", "patches/**"
-    _cmake = None
+    build_requires = "makefile-project-workspace-creator/4.1.46"
+    exports_sources = "patches/**"
 
     @property
     def _source_subfolder(self):
@@ -29,13 +28,6 @@ class QuickfastConan(ConanFile):
     def _build_subfolder(self):
         return "build_subfolder"
 
-    def _configure_cmake(self):
-        if not self._cmake:
-            self._cmake = CMake(self)
-            self._cmake.definitions["BOOST_BIND_NO_PLACEHOLDERS"] = True
-            self._cmake.configure(source_folder=self._source_subfolder, build_folder=self._build_subfolder)
-        return self._cmake
-
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
         os.rename(self.name + "-" + self.version.replace(".", "_"), self._source_subfolder)
@@ -44,6 +36,17 @@ class QuickfastConan(ConanFile):
         if self.settings.os == "Windows":
             del self.options.fPIC
 
+    def configure(self):
+        if self.options.shared:
+            del self.options.fPIC
+
+        if self.settings.compiler == "Visual Studio":
+            self.generators = "visual_studio",
+        else:
+            self.generators = "make",
+
+        self.options['boost'].shared = True
+
     def build(self):
         # Patch taken from:
         # https://raw.githubusercontent.com/microsoft/vcpkg/master/ports/quickfast/00001-fix-boost-asio.patch
@@ -51,18 +54,37 @@ class QuickfastConan(ConanFile):
         for patch in patches:
             tools.patch(**patch)
 
-        shutil.copy("CMakeLists.txt",
-                    os.path.join(self._source_subfolder, "CMakeLists.txt"))
+        with tools.chdir(self._source_subfolder):
+            if self.settings.os == "Windows":
+                pass
+            else:
+                env_build = AutoToolsBuildEnvironment(self)
+                args = ['CONAN_MAKE_FILE=' + os.path.join(self.build_folder, "conanbuildinfo.mak")]
 
-        cmake = self._configure_cmake()
-        cmake.build(target="quickfast")
+                with tools.environment_append(
+                        {**env_build.vars,
+                         **{"QUICKFAST_ROOT": os.path.join(self.build_folder, self._source_subfolder),
+                            "XERCESCROOT": self.deps_cpp_info["xerces-c"].rootpath,
+                            }}):
+                    fpic = '-fPIC' if self.options.get_safe("fPIC", default=True) else ''
+                    self.run('mwc.pl -type make -exclude src/Examples' + (' ' if self.options.shared else ' -static') +
+                             ' -value_template "pic={}"'.format(fpic) +
+                             ' -value_template platforms=macosx'
+                             ' -value_template "linkflags+=-framework CoreServices -framework CoreFoundation"'
+                             ' -value_template extracppflags+=-DBOOST_BIND_GLOBAL_PLACEHOLDERS'
+                             ' QuickFAST.mwc')
+                    env_build.make(args=args, target="QuickFAST")
 
     def package(self):
-        cmake = self._configure_cmake()
-        cmake.install()
+        self.copy("*.dylib", dst="lib", src=os.path.join(self._source_subfolder, "lib"))
+        self.copy("*.a", dst="lib", src=os.path.join(self._source_subfolder, "lib"))
+        self.copy("*.h", dst="include/quickfast", src=os.path.join(self._source_subfolder, "src"))
         self.copy("license.txt", dst="licenses", src=self._source_subfolder)
 
     def package_info(self):
         self.cpp_info.libs = tools.collect_libs(self)
         self.cpp_info.includedirs.append(os.path.join("include", "quickfast"))
         self.cpp_info.defines.append("BOOST_BIND_NO_PLACEHOLDERS")
+        self.cpp_info.defines.append("XML_USE_PTHREADS")
+        if self.options.shared:
+            self.cpp_info.defines.append("QUICKFAST_BUILD_DLL")

@@ -1,16 +1,3 @@
-diff --git a/src/Common/QuickFASTPch.h b/src/Common/QuickFASTPch.h
-index 3574df8..c4ef4e1 100644
---- a/src/Common/QuickFASTPch.h
-+++ b/src/Common/QuickFASTPch.h
-@@ -32,7 +32,7 @@
- #include <string.h>
- 
- // If building for .NET, must link boost threads dynamically
--#define BOOST_THREAD_USE_DLL
-+// #define BOOST_THREAD_USE_DLL
- // This reports at compile time which boost libraries will be used
- // #define BOOST_LIB_DIAGNOSTIC
- 
 diff --git a/src/Communication/AsioService.h b/src/Communication/AsioService.h
 index 4f61915..96f2198 100644
 --- a/src/Communication/AsioService.h
