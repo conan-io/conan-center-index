@@ -8,4 +8,4 @@ class DefaultNameConan(ConanFile):
         pass
 
     def test(self):
-        self.run("mpc.pl --version", run_environment=True)
+        self.run("perl -S mpc.pl --version", run_environment=True)
