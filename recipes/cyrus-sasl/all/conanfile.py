@@ -64,6 +64,8 @@ class CyrusSaslConan(ConanFile):
         del self.settings.compiler.cppstd
 
     def configure(self):
+        if self.options.shared:
+            del self.options.fPIC
         if self.settings.os == "Windows":
             raise ConanInvalidConfiguration(
                 "Cyrus SASL package is not compatible with Windows yet."
