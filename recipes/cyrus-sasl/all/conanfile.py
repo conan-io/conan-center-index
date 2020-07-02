@@ -10,7 +10,11 @@ class CyrusSaslConan(ConanFile):
     license = "BSD-4-Clause"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://www.cyrusimap.org/sasl/"
-    description = "This is the Cyrus SASL API implementation. It can be used on the client or server side to provide authentication and authorization services."
+    description = (
+        "This is the Cyrus SASL API implementation. "
+        "It can be used on the client or server side "
+        "to provide authentication and authorization services."
+    )
 
     topics = ("SASL", "authentication", "authorization")
     settings = "os", "compiler", "build_type", "arch"
@@ -77,7 +81,7 @@ class CyrusSaslConan(ConanFile):
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
-        downloaded_folder_name = f"{self.name}-{self.version}"
+        downloaded_folder_name = "{}-{}".format(self.name, self.version)
         os.rename(downloaded_folder_name, self._source_subfolder)
 
     def _patch_sources(self):
@@ -129,13 +133,15 @@ class CyrusSaslConan(ConanFile):
                 configure_args.append("--enable-sql")
                 if self.options.with_postgresql:
                     configure_args.append(
-                        f"--with-pgsql={self.deps_cpp_info['libpq'].rootpath}"
+                        "--with-pgsql={}".format(self.deps_cpp_info["libpq"].rootpath)
                     )
                 else:
                     configure_args.append("-with-pgsql=no")
                 if self.options.with_mysql:
                     configure_args.append(
-                        f"--with-mysql={self.deps_cpp_info['libmysqlclient'].rootpath}"
+                        "--with-mysql={}".format(
+                            self.deps_cpp_info["libmysqlclient"].rootpath
+                        )
                     )
                 else:
                     configure_args.append("-with-mysql=no")
@@ -170,5 +176,5 @@ class CyrusSaslConan(ConanFile):
     def package_info(self):
         self.cpp_info.libs = tools.collect_libs(self)
         bindir = os.path.join(self.package_folder, "bin")
-        self.output.info(f"Appending PATH environment variable: {bindir}")
+        self.output.info("Appending PATH environment variable: {}".format(bindir))
         self.env_info.PATH.append(bindir)
