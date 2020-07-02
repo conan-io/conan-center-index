@@ -9,7 +9,7 @@ class OneDplConan(ConanFile):
                    "the C++ standard library algorithms"
                    "with support for execution policies, as specified in "
                    "ISO/IEC 14882:2017 standard, commonly called C++17")
-    license = "Apache-2.0 WITH LLVM-exception"
+    license = ("Apache-2.0", "LLVM-exception")
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/oneapi-src/oneDPL"
     topics = ("stl", "parallelism")
