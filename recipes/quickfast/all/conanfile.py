@@ -1,6 +1,6 @@
 from conans import ConanFile, CMake, tools, AutoToolsBuildEnvironment
+from conans.errors import ConanInvalidConfiguration
 import os
-import shutil
 
 
 class QuickfastConan(ConanFile):
@@ -28,6 +28,36 @@ class QuickfastConan(ConanFile):
     def _build_subfolder(self):
         return "build_subfolder"
 
+    @property
+    def _windows_platforms(self):
+        pass
+
+    @property
+    def _windows_type(self):
+        pass
+
+    @property
+    def _mwc_command_line(self):
+        link_flag = ' ' if self.options.shared else ' -static'
+        fpic_flag = '-fPIC' if self.options.get_safe("fPIC", default=True) else ''
+        if self.settings.os == 'Macos':
+            platforms = 'macosx'
+            build_type = 'make'
+        elif self.settings.os == 'Linux':
+            platforms = 'linux'
+            build_type = 'make'
+        elif self.settings.os == 'Windows':
+            platforms = self._windows_platforms
+            build_type = self._windows_type
+
+        return 'mwc.pl -type {} -exclude src/Examples'.format(build_type) + \
+               link_flag + \
+               ' -value_template "pic={}"'.format(fpic_flag) + \
+               ' -value_template platforms={}'.format(platforms) + \
+               ' -value_template "linkflags+=-framework CoreServices -framework CoreFoundation"' + \
+               ' -value_template extracppflags+=-DBOOST_BIND_GLOBAL_PLACEHOLDERS' + \
+               ' QuickFAST.mwc'
+
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
         os.rename(self.name + "-" + self.version.replace(".", "_"), self._source_subfolder)
@@ -37,6 +67,9 @@ class QuickfastConan(ConanFile):
             del self.options.fPIC
 
     def configure(self):
+        if self.settings.os != "Macos":  # and self.settings.os != "Windows" and self.settings.os != "Linux":
+            raise ConanInvalidConfiguration("QuickFAST cannot be built on {}".format(self.settings.os))
+
         if self.options.shared:
             del self.options.fPIC
 
@@ -66,13 +99,7 @@ class QuickfastConan(ConanFile):
                          **{"QUICKFAST_ROOT": os.path.join(self.build_folder, self._source_subfolder),
                             "XERCESCROOT": self.deps_cpp_info["xerces-c"].rootpath,
                             }}):
-                    fpic = '-fPIC' if self.options.get_safe("fPIC", default=True) else ''
-                    self.run('mwc.pl -type make -exclude src/Examples' + (' ' if self.options.shared else ' -static') +
-                             ' -value_template "pic={}"'.format(fpic) +
-                             ' -value_template platforms=macosx'
-                             ' -value_template "linkflags+=-framework CoreServices -framework CoreFoundation"'
-                             ' -value_template extracppflags+=-DBOOST_BIND_GLOBAL_PLACEHOLDERS'
-                             ' QuickFAST.mwc')
+                    self.run(self._mwc_command_line)
                     env_build.make(args=args, target="QuickFAST")
 
     def package(self):
