@@ -11,14 +11,15 @@ class DoxygenInstallerConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/doxygen/doxygen"
     license = "GPL-2.0-or-later"
+    settings = "os", "arch", "compiler"
 
-    settings = "os", "arch",
-
-    def config(self):
+    def configure(self):
         if self.settings.os in ["Linux", "Macos"] and self.settings.arch == "x86":
             raise ConanInvalidConfiguration("Doxygen is not supported on {}-{}".format(self.os, self.arch))
+        if tools.Version(self.version) >= "1.8.18" and self.settings.compiler == "gcc" and tools.Version(self.settings.compiler.version) < "8":
+            raise ConanInvalidConfiguration("Doxygen requires GLIBCXX_3.4.22 and GLIBC_2.27") # https://abi-laboratory.pro/index.php?view=changelog&l=glibc&v=2.27
 
-    def unpack_dmg(self, dest_file):
+    def _unpack_dmg(self, dest_file):
         mount_point = os.path.join(self.build_folder, "mnt")
         tools.mkdir(mount_point)
         self.run("hdiutil attach -mountpoint %s %s" % (mount_point, dest_file))
@@ -26,7 +27,8 @@ class DoxygenInstallerConan(ConanFile):
             for program in ["doxygen", "doxyindexer", "doxysearch.cgi"]:
                 shutil.copy(os.path.join(mount_point, "Doxygen.app", "Contents",
                                          "Resources", program), self.build_folder)
-            shutil.copy(os.path.join(mount_point, "Doxygen.app", "Contents",
+            if tools.Version(self.version) < "1.8.18":
+                shutil.copy(os.path.join(mount_point, "Doxygen.app", "Contents",
                                     "Frameworks", "libclang.dylib"), self.build_folder)
         finally:
             self.run("diskutil eject %s" % (mount_point))
@@ -55,9 +57,10 @@ class DoxygenInstallerConan(ConanFile):
         tools.unzip("doxygen-{}.linux.bin.tar.gz".format(self.version), pattern="*LICENSE")
 
         if self.settings.os == "Macos":
-            self.unpack_dmg(dest_file)
-            # Redirect the path of libclang.dylib to be adjacent to the doxygen executable, instead of in Frameworks
-            self.run('install_name_tool -change "@executable_path/../Frameworks/libclang.dylib" "@executable_path/libclang.dylib" doxygen')
+            self._unpack_dmg(dest_file)
+            if tools.Version(self.version) < "1.8.18":
+                # Redirect the path of libclang.dylib to be adjacent to the doxygen executable, instead of in Frameworks
+                self.run('install_name_tool -change "@executable_path/../Frameworks/libclang.dylib" "@executable_path/libclang.dylib" doxygen')
         else:
             tools.unzip(dest_file)
 
@@ -77,3 +80,6 @@ class DoxygenInstallerConan(ConanFile):
     def package_info(self):
         bindir = os.path.join(self.package_folder, "bin")
         self.env_info.PATH.append(bindir)
+
+    def package_id(self):
+        del self.info.settings.compiler
