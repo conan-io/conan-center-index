@@ -25,7 +25,7 @@ class SimdjsonConan(ConanFile):
 
     @property
     def _supported_cppstd(self):
-        return ["11", "gnu11", "17", "gnu17", "20", "gnu20"]
+        return ["11", "gnu11","14", "gnu14", "17", "gnu17", "20", "gnu20"]
 
     def _has_support_for_cpp11(self):
         supported_compilers = [("apple-clang", 10), ("clang", 6), ("gcc", 7), ("Visual Studio", 15.7)]
