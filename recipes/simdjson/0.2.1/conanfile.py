@@ -36,7 +36,7 @@ class SimdjsonConan(ConanFile):
 
     def configure(self):
         if self.settings.compiler == "Visual Studio":
-            self.options.remove("fPIC")
+            del self.options.fPIC
         if self.settings.compiler.cppstd and \
            not self.settings.compiler.cppstd in self._supported_cppstd:
           raise ConanInvalidConfiguration("This library requires c++17 standard or higher."
