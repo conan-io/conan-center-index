@@ -1,4 +1,5 @@
 import os
+import glob
 from conans import ConanFile, CMake, tools
 
 class GlewConan(ConanFile):
@@ -53,6 +54,8 @@ class GlewConan(ConanFile):
 
         tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
         tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
+        for pdb_file in glob.glob(os.path.join(self.package_folder, "lib", "*.pdb")):
+            os.remove(pdb_file)
 
         self.copy("include/*", ".", "%s" % self._source_subfolder, keep_path=True)
         self.copy("%s/license*" % self._source_subfolder, dst="licenses",  ignore_case=True, keep_path=False)
