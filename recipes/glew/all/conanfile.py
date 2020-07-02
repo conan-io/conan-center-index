@@ -50,43 +50,7 @@ class GlewConan(ConanFile):
         for pdb_file in glob.glob(os.path.join(self.package_folder, "lib", "*.pdb")):
             os.remove(pdb_file)
 
-        self.copy("include/*", ".", "%s" % self._source_subfolder, keep_path=True)
-        self.copy("%s/license*" % self._source_subfolder, dst="licenses",  ignore_case=True, keep_path=False)
-        self.copy(pattern="LICENSE", dst="licenses", src=self._source_subfolder)
-
-        if self.settings.os == "Windows":
-            if self.settings.compiler == "Visual Studio":
-                if self.options.shared:
-                    if self.settings.build_type == "Release":
-                        self.copy("glew32.lib", "lib", "lib", keep_path=False)
-                        self.copy("glew32.dll", "bin", "bin", keep_path=False)
-                    else:
-                        self.copy("glew32d.lib", "lib", "lib", keep_path=False)
-                        self.copy("glew32d.dll", "bin", "bin", keep_path=False)
-                else:
-                    if self.settings.build_type == "Release":
-                        self.copy("libglew32.lib", "lib", "lib", keep_path=False)
-                    else:
-                        self.copy("libglew32d.lib", "lib", "lib", keep_path=False)
-            else:
-                if self.options.shared:
-                    self.copy(pattern="*32.dll.a", dst="lib", keep_path=False)
-                    self.copy(pattern="*32d.dll.a", dst="lib", keep_path=False)
-                    self.copy(pattern="*.dll", dst="bin", keep_path=False)
-                else:
-                    self.copy(pattern="*32.a", dst="lib", keep_path=False)
-                    self.copy(pattern="*32d.a", dst="lib", keep_path=False)
-        elif self.settings.os == "Macos":
-            if self.options.shared:
-                self.copy(pattern="*.dylib", dst="lib", keep_path=False)
-            else:
-                self.copy(pattern="*.a", dst="lib", keep_path=False)
-        else:
-            if self.options.shared:
-                self.copy(pattern="*.so", dst="lib", keep_path=False)
-                self.copy(pattern="*.so.*", dst="lib", keep_path=False)
-            else:
-                self.copy(pattern="*.a", dst="lib", keep_path=False)
+        self.copy(pattern="LICENSE.txt", dst="licenses", src=self._source_subfolder)
 
     def package_info(self):
         if self.settings.os == "Windows" and not self.options.shared:
