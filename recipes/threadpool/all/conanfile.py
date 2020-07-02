@@ -8,7 +8,7 @@ class threadpoolConan(ConanFile):
     description = "A simple C++11 Thread Pool implementation."
     license = "Zlib"
     topics = ("C++11", "Thread", "Pool", "threadpool", "conan")
-    settings = "os"
+    settings = "os", "compiler"
     no_copy_source = True
 
     @property
