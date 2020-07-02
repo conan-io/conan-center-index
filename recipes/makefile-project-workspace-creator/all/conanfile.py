@@ -16,7 +16,7 @@ class MPCGeneratorConan(ConanFile):
         return "source_subfolder"
 
     def requirements(self):
-        if tools.os_info.is_windows:
+        if self.settings.os == "Windows":
             self.requires("strawberryperl/5.30.0.1")
 
     def build(self):
