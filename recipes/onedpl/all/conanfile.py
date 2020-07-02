@@ -13,6 +13,7 @@ class OneDplConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/oneapi-src/oneDPL"
     topics = ("stl", "parallelism")
+    settings = "os", "arch", "build_type", "compiler"
     options = {"backend": ["tbb", "serial"]}
     default_options = {"backend": "tbb"}
     generators = ["cmake", "cmake_find_package"]
