@@ -32,6 +32,7 @@ class CyrusSaslConan(ConanFile):
         "with_anon": [True, False],
         "with_postgresql": [True, False],
         "with_mysql": [True, False],
+        "with_sqlite3": [True, False],
     }
     default_options = {
         "shared": True,
@@ -47,6 +48,7 @@ class CyrusSaslConan(ConanFile):
         "with_anon": True,
         "with_postgresql": False,
         "with_mysql": False,
+        "with_sqlite3": False,
     }
     exports_sources = ("patches/**",)
     _autotools = None
@@ -78,6 +80,8 @@ class CyrusSaslConan(ConanFile):
             self.requires("libpq/12.2")
         if self.options.with_mysql:
             self.requires("libmysqlclient/8.0.17")
+        if self.options.with_sqlite3:
+            self.requires("sqlite3/3.32.3")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
@@ -129,14 +133,18 @@ class CyrusSaslConan(ConanFile):
             if not self.options.with_anon:
                 configure_args.append("--disable-anon")
 
-            if self.options.with_postgresql or self.options.with_mysql:
+            if (
+                self.options.with_postgresql
+                or self.options.with_mysql
+                or self.options.with_sqlite3
+            ):
                 configure_args.append("--enable-sql")
                 if self.options.with_postgresql:
                     configure_args.append(
                         "--with-pgsql={}".format(self.deps_cpp_info["libpq"].rootpath)
                     )
                 else:
-                    configure_args.append("-with-pgsql=no")
+                    configure_args.append("--with-pgsql=no")
                 if self.options.with_mysql:
                     configure_args.append(
                         "--with-mysql={}".format(
@@ -144,7 +152,16 @@ class CyrusSaslConan(ConanFile):
                         )
                     )
                 else:
-                    configure_args.append("-with-mysql=no")
+                    configure_args.append("--with-mysql=no")
+                configure_args.append("--with-sqlite=no")
+                if self.options.with_mysql:
+                    configure_args.append(
+                        "--with-sqlite3={}".format(
+                            self.deps_cpp_info["libmysqlclient"].rootpath
+                        )
+                    )
+                else:
+                    configure_args.append("--with-sqlite3=no")
             else:
                 configure_args.append("--disable-sql")
 
