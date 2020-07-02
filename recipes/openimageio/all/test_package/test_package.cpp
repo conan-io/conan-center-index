@@ -1,7 +1,8 @@
 #include <OpenImageIO/imagecache.h>
+#include <algorithm>
 
 int main()
 {
-    OIIO::ImageCache* cache = OIIO::ImageCache::create();
-    OIIO::ImageCache::destroy(cache);
+    std::string formats = OIIO::get_string_attribute("format_list");
+    std::cout << "Supported formats:\n" << formats;
 }
