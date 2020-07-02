@@ -8,3 +8,6 @@ sources:
   "1.76":
     url: "https://github.com/ocornut/imgui/archive/v1.76.tar.gz"
     sha256: "e482dda81330d38c87bd81597cacaa89f05e20ed2c4c4a93a64322e97565f6dc"
+  "1.77":
+    url: "https://github.com/ocornut/imgui/archive/v1.77.tar.gz"
+    sha256: "c0dae830025d4a1a169df97409709f40d9dfa19f8fc96b550052224cbb238fa8"
