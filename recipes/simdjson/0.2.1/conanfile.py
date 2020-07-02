@@ -6,6 +6,7 @@ from conans.tools import Version
 
 class SimdjsonConan(ConanFile):
     name = "simdjson"
+    version = '0.2.1'
     description = "Parsing gigabytes of JSON per second"
     topics = ("conan", "json", "parser", "simd", "format")
     url = "https://github.com/conan-io/conan-center-index"
@@ -73,7 +74,7 @@ class SimdjsonConan(ConanFile):
         cmake.definitions['SIMDJSON_DISABLE_AVX'] = not self.options.avx
         cmake.definitions['SIMDJSON_SANITIZE'] = False
         cmake.definitions['ENABLE_FUZZING'] = False
-        cmake.configure()
+        cmake.configure(source_folder=self._source_subfolder)
         return cmake
 
     def build(self):
