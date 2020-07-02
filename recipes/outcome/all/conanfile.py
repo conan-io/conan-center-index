@@ -16,6 +16,20 @@ class OutcomeConan(ConanFile):
     def configure(self):
         if self.settings.compiler.get_safe("cppstd"):
             tools.check_min_cppstd(self, "14")
+        minimum_version = {
+            "clang": "3.9",
+            "gcc": "6",
+            "Visual Studio": "15.0",
+        }.get(str(self.settings.compiler))
+
+        if not minimum_version:
+            self.output.warn(
+                "Unknown compiler {} {}. Assuming compiler supports C++14.".format(self.settings.compiler, self.settings.compiler.version))
+        else:
+            version = tools.Version(self.settings.compiler.version)
+            if version < minimum_version:
+                raise ConanInvalidConfiguration(
+                    "The compiler {} {} does not support C++14.".format(self.settings.compiler, self.settings.compiler.version))
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
