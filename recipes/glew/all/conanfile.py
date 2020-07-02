@@ -55,16 +55,4 @@ class GlewConan(ConanFile):
     def package_info(self):
         if self.settings.os == "Windows" and not self.options.shared:
             self.cpp_info.defines.append("GLEW_STATIC")
-        if self.settings.os == "Windows":
-            self.cpp_info.libs = ['glew32']
-
-            if self.settings.compiler == "Visual Studio":
-                if not self.options.shared:
-                    self.cpp_info.libs[0] = "lib" + self.cpp_info.libs[0]
-
-        else:
-            self.cpp_info.libs = ['GLEW']
-
-        if self.settings.build_type == "Debug":
-            self.cpp_info.libs[0] += "d"
-
+        self.cpp_info.libs = tools.collect_libs(self)
