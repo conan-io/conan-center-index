@@ -132,8 +132,7 @@ class CorradeConan(ConanFile):
         # Sort all built libs according to above, and reverse result for correct link order
         suffix = "-d" if self.settings.build_type == "Debug" else ""
         builtLibs = tools.collect_libs(self)
-        self.cpp_info.libs = self._sort_libs(correct_order=allLibs, libs=builtLibs, lib_suffix=suffix,
-                                             reverse_result=True)
+        self.cpp_info.libs = self._sort_libs(allLibs, builtLibs, suffix, reverse_result=True)
         if self.settings.os == "Linux":
             self.cpp_info.system_libs = ["m", "dl"]
 
