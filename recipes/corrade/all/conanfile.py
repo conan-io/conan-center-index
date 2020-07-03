@@ -1,5 +1,5 @@
 from conans import ConanFile, CMake, tools
-from conans.errors import ConanInvalidConfiguration
+from conans.errors import ConanInvalidConfiguration, ConanException
 import os
 
 
@@ -45,12 +45,12 @@ class CorradeConan(ConanFile):
             del self.options.fPIC
 
     def configure(self):
-        if self.settings.compiler == "Visual Studio" and tools.Version(self.settings.compiler.version.value) < 14:
+        if self.settings.compiler == "Visual Studio" and tools.Version(self.settings.compiler.version) < 14:
             raise ConanInvalidConfiguration("Corrade requires Visual Studio version 14 or greater")
-        if tools.cross_building(self.settings):
+        if tools.cross_building(self):
             print("THIS IS CROSS-BUILDING!")
             self.output.warn("THIS IS CROSS-BUILDING!")
-            raise ConanInvalidConfiguration("This Corrade recipe doesn't support cross building yet")
+            raise ConanException("This Corrade recipe doesn't support cross building yet")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
