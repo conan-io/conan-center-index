@@ -140,6 +140,8 @@ class QuickfastConan(ConanFile):
             del self.options.fPIC
 
     def configure(self):
+        tools.check_min_cppstd(self, "11")
+
         if self.options.shared:
             del self.options.fPIC
 
