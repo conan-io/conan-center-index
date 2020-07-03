@@ -1,4 +1,4 @@
-/* Libnl example taken from stackoverflow: 
+/* Libnl example taken from stackoverflow:
  * https://stackoverflow.com/questions/42307658/how-to-get-ipv4-address-of-an-interface-using-libnl3-netlink-version-3-on-linu
 */
 
@@ -33,7 +33,7 @@ void addr_cb(struct nl_object *p_nl_object, void *data) {
         return;
     }
 
-    // This routine is not mentioned in the doxygen help.  
+    // This routine is not mentioned in the doxygen help.
     // It is listed under Attributes, but no descriptive text.
     // this routine just returns p_rtnl_addr->a_ifindex
     int cur_ifindex = rtnl_addr_get_ifindex(p_rtnl_addr);
@@ -59,7 +59,7 @@ void addr_cb(struct nl_object *p_nl_object, void *data) {
     }
 
     // This routine just returns p_rtnl_addr->a_local
-    const struct nl_addr *p_nl_addr_local = rtnl_addr_get_local(p_rtnl_addr);
+    struct nl_addr *p_nl_addr_local = rtnl_addr_get_local(p_rtnl_addr);
     if (NULL == p_nl_addr_local) {
         /* error */
         printf("rtnl_addr_get failed\n");
@@ -79,7 +79,7 @@ void addr_cb(struct nl_object *p_nl_object, void *data) {
 
 int main(int argc, char **argv, char **envp) {
 
-    int err;
+    int err, i;
 
     struct nl_sock *p_nl_sock;
     struct nl_cache *link_cache;
@@ -88,21 +88,19 @@ int main(int argc, char **argv, char **envp) {
     struct rtnl_addr *p_rtnl_addr;
     struct nl_addr *p_nl_addr;
     struct nl_link *p_nl_link;
-
     struct rtnl_link *p_rtnl_link;
-
 
     char addr_str[ADDR_STR_BUF_SIZE];
 
     p_nl_sock = nl_socket_alloc();
-    if (!p_nl_sock) 
+    if (!p_nl_sock)
     {
         fprintf(stderr, "Could not allocate netlink socket.\n");
         exit(ENOMEM);
     }
 
     // Connect to socket
-    if(err = nl_connect(p_nl_sock, NETLINK_ROUTE)) 
+    if(err = nl_connect(p_nl_sock, NETLINK_ROUTE))
     {
         fprintf(stderr, "netlink error: %s\n", nl_geterror(err));
         p_nl_sock = NULL;
@@ -113,7 +111,7 @@ int main(int argc, char **argv, char **envp) {
     err = rtnl_link_alloc_cache(p_nl_sock, AF_UNSPEC, &link_cache);
     //err = rtnl_link_alloc_cache(p_nl_sock, AF_INET, &link_cache);
     //err = rtnl_link_alloc_cache(p_nl_sock, IFA_LOCAL, &link_cache);
-    if (0 != err) 
+    if (0 != err)
     {
         /* error */
         printf("rtnl_link_alloc_cache failed: %s\n", nl_geterror(err));
@@ -121,7 +119,7 @@ int main(int argc, char **argv, char **envp) {
     }
 
     err = rtnl_addr_alloc_cache(p_nl_sock, &addr_cache);
-    if (0 != err) 
+    if (0 != err)
     {
         /* error */
         printf("rtnl_addr_alloc_cache failed: %s\n", nl_geterror(err));
@@ -133,12 +131,12 @@ int main(int argc, char **argv, char **envp) {
     int count = nl_cache_nitems(addr_cache);
     printf("addr_cache has %d items\n",count);
     struct nl_object *p_nl_object;
-    p_nl_object = nl_cache_get_first(addr_cache); 
+    p_nl_object = nl_cache_get_first(addr_cache);
     p_rtnl_addr = (struct rtnl_addr *) p_nl_object;
-    for (int i=0; i<count; i++) 
+    for (i=0; i<count; i++)
     {
         // This routine just returns p_rtnl_addr->a_local
-        const struct nl_addr *p_nl_addr_local = rtnl_addr_get_local(p_rtnl_addr);
+        struct nl_addr *p_nl_addr_local = rtnl_addr_get_local(p_rtnl_addr);
         if (NULL == p_nl_addr_local) {
             /* error */
             printf("rtnl_addr_get failed\n");
@@ -149,16 +147,16 @@ int main(int argc, char **argv, char **envp) {
         printf("This is index %d\n",cur_ifindex);
 
         const char *addr_s = nl_addr2str(p_nl_addr_local, addr_str, sizeof(addr_str));
-        if (NULL == addr_s) 
+        if (NULL == addr_s)
         {
             /* error */
             printf("nl_addr2str failed\n");
             return(EXIT_FAILURE);
         }
         fprintf(stdout, "\naddr is: %s\n", addr_s);
- 
+
         printf("%d\n",i);
-        p_nl_object = nl_cache_get_next(p_nl_object); 
+        p_nl_object = nl_cache_get_next(p_nl_object);
         p_rtnl_addr = (struct rtnl_addr *) p_nl_object;
     }
 

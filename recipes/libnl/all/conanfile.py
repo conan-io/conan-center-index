@@ -25,7 +25,7 @@ class LibNlConan(ConanFile):
         os.rename(extracted_dir, self._source_subfolder)
 
     def configure(self):
-        if not tools.os_info.is_linux:
+        if self.settings.os != "Linux":
             raise ConanInvalidConfiguration("Libnl is only supported on Linux")
         del self.settings.compiler.libcxx
         del self.settings.compiler.cppstd
@@ -67,4 +67,5 @@ class LibNlConan(ConanFile):
     def package_info(self):
         self.cpp_info.includedirs = [os.path.join('include', 'libnl3')]
         self.cpp_info.libs = ["nl-3", "nl-cli-3", "nl-genl-3", "nl-idiag-3", "nl-nf-3", "nl-route-3"]
+        self.cpp_info.system_libs = ["m"]
 
