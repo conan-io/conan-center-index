@@ -45,8 +45,7 @@ class FriBiDiCOnan(ConanFile):
             del self.options.fPIC
 
     def build_requirements(self):
-        if not tools.which("meson"):
-            self.build_requires("meson/0.53.0")
+        self.build_requires("meson/0.53.0")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
