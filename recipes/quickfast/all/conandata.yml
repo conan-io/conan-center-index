@@ -4,5 +4,7 @@ sources:
     sha256: "7ae22d28cc13967a2815c09bec027ce01f2f3e30b6ed752bea00649581e728df"
 patches:
   "1.5":
+    # Patch taken from:
+    # https://raw.githubusercontent.com/microsoft/vcpkg/master/ports/quickfast/00001-fix-boost-asio.patch
     - patch_file: "patches/00001-fix-boost-asio.patch"
       base_path: "source_subfolder"

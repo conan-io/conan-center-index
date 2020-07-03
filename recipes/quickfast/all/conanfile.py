@@ -126,8 +126,6 @@ class QuickfastConan(ConanFile):
         return self._env_build, self._args
 
     def _patch_sources(self):
-        # Patch taken from:
-        # https://raw.githubusercontent.com/microsoft/vcpkg/master/ports/quickfast/00001-fix-boost-asio.patch
         patches = self.conan_data["patches"][self.version]
         for patch in patches:
             tools.patch(**patch)
