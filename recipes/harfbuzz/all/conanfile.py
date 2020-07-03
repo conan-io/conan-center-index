@@ -74,7 +74,7 @@ class HarfbuzzConan(ConanFile):
         return cmake
 
     def _configure_cmake_macos(self, cmake):
-        if str(self.settings.os) in ["Macos", "iOS", "watchOS", "tvOS"]:
+        if tools.is_apple_os(self.settings.os):
             cmake.definitions["CMAKE_MACOSX_RPATH"] = True
         return cmake
 
