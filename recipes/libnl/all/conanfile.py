@@ -11,6 +11,7 @@ class LibNlConan(ConanFile):
     settings = "os", "arch", "compiler", "build_type"
     options = {"shared": [True, False]}
     default_options = {"shared": False}
+    build_requires = ( "flex/2.6.4", "bison/3.5.3" )
 
     _autotools = None
 
