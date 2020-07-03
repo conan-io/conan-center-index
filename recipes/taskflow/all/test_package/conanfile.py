@@ -1,16 +1,14 @@
-# -*- coding: utf-8 -*-
-
-from conans import ConanFile, CMake, tools
 import os
+
+from conans import ConanFile, tools, CMake
 
 
 class TestPackageConan(ConanFile):
     settings = "os", "compiler", "build_type", "arch"
-    generators = "cmake"
+    generators = "cmake", "cmake_find_package"
 
     def build(self):
         cmake = CMake(self)
-        cmake.definitions["TASKFLOW_VERSION"] = self.deps_cpp_info["taskflow"].version
         cmake.configure()
         cmake.build()
 
