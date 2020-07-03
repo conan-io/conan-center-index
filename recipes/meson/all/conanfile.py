@@ -9,6 +9,7 @@ class MesonInstallerConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/mesonbuild/meson"
     license = "Apache-2.0"
+    settings = "os"
     no_copy_source = True
     requires = "ninja/1.10.0"
     _source_subfolder = "source_subfolder"
@@ -48,6 +49,3 @@ exec "$meson_dir/meson.py" "$@"
 
         self._chmod_plus_x(os.path.join(meson_root, "meson"))
         self._chmod_plus_x(os.path.join(meson_root, "meson.py"))
-
-    def package_id(self):
-        self.info.header_only()
