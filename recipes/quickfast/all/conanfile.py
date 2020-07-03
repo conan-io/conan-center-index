@@ -20,6 +20,7 @@ class QuickfastConan(ConanFile):
     requires = ["boost/1.73.0", "xerces-c/3.2.3"]
     build_requires = "makefile-project-workspace-creator/4.1.46"
     exports_sources = "patches/**"
+    generators = "visual_studio", "make"
     _msbuild = None
     _env_build = None
     _args = None
@@ -44,7 +45,7 @@ class QuickfastConan(ConanFile):
 
     @property
     def _wss_platform(self):
-        subsystem = self.settings.get_safe("os.subsystem")
+        subsystem = tools.os_info.detect_windows_subsystem()
         if subsystem:
             raise ConanInvalidConfiguration("QuickFAST cannot be built for Windows subsytems ({})"
                                             .format(subsystem))
@@ -147,12 +148,6 @@ class QuickfastConan(ConanFile):
 
         if self.options.shared:
             del self.options.fPIC
-
-        if self.settings.compiler == "Visual Studio":
-            self.generators = "visual_studio",
-        else:
-            self.generators = "make",
-
 
     def build_requirements(self):
         if self.settings.compiler != "Visual Studio" and \
