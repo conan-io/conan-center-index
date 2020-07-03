@@ -47,6 +47,7 @@ class ConanXOrg(ConanFile):
                 packages = ["Xorg-x11-devel"]
             else:
                 self.output.warn("Do not know how to install 'xorg' for {}.".format(tools.os_info.linux_distro))
+                packages = []
             for p in packages:
                 package_tool.install(update=True, packages=p)
 
