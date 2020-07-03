@@ -154,7 +154,6 @@ class QuickfastConan(ConanFile):
         else:
             self.generators = "make",
 
-        self.options['boost'].shared = True
 
     def build_requirements(self):
         if self.settings.compiler != "Visual Studio" and \
