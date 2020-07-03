@@ -16,7 +16,7 @@ int main() {
 
     pkgconf_client_init(&client, error_callback, NULL, pkgconf_cross_personality_default());
 
-    pkgconf_error(&client, __FILE__, __LINE__, __FUNCTION__, "test error");
+    pkgconf_error(&client, "%s:%d %s: %s", __FILE__, __LINE__, __FUNCTION__, "test error");
 
     pkgconf_client_deinit(&client);
 
