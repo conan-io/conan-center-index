@@ -55,7 +55,6 @@ class PkgConfConan(ConanFile):
         if self._meson:
             return self._meson
         self._meson = Meson(self)
-        self._meson.build_type = "Release"
         self._meson.options["tests"] = False
         self._meson.options["sharedstatedir"] = self._sharedstatedir
         self._meson.configure(source_folder=self._source_subfolder, build_folder=self._build_subfolder)
