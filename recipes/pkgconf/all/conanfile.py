@@ -104,7 +104,7 @@ class PkgConfConan(ConanFile):
         self.output.info("Appending PATH env var: {}".format(bindir))
         self.env_info.PATH.append(bindir)
 
-        pkg_config = os.path.join(bindir, "pkgconf").replace("\\", "/")
+        pkg_config = tools.unix_path(os.path.join(bindir, "pkgconf"))
         self.output.info("Setting PKG_CONFIG env var: {}".format(pkg_config))
         self.env_info.PKG_CONFIG = pkg_config
 
