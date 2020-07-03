@@ -47,6 +47,8 @@ class HarfbuzzConan(ConanFile):
             self.requires("glib/2.65.0")
 
     def configure(self):
+        if self.options.shared:
+            del self.options.fPIC
         del self.settings.compiler.libcxx
         del self.settings.compiler.cppstd
 
@@ -118,4 +120,3 @@ class HarfbuzzConan(ConanFile):
             self.cpp_info.system_libs.extend(["dwrite", "rpcrt4", "usp10", "gdi32"])
         if self.settings.os == "Macos":
             self.cpp_info.frameworks.extend(["CoreFoundation", "CoreGraphics", "CoreText"])
-
