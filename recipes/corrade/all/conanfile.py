@@ -48,6 +48,7 @@ class CorradeConan(ConanFile):
         if self.settings.compiler == "Visual Studio" and tools.Version(self.settings.compiler.version.value) < 14:
             raise ConanInvalidConfiguration("Corrade requires Visual Studio version 14 or greater")
         if tools.cross_building(self.settings):
+            print("THIS IS CROSS-BUILDING!")
             self.output.warn("THIS IS CROSS-BUILDING!")
             raise ConanInvalidConfiguration("This Corrade recipe doesn't support cross building yet")
 
