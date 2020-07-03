@@ -1,4 +1,4 @@
-from conans import ConanFile, tools, AutoToolsBuildEnvironment
+from conans import ConanFile, tools, AutoToolsBuildEnvironment, MSBuild
 from conans.errors import ConanInvalidConfiguration
 from conans.model.version import Version
 import os
@@ -20,6 +20,7 @@ class QuickfastConan(ConanFile):
     requires = ["boost/1.73.0", "xerces-c/3.2.3"]
     build_requires = "makefile-project-workspace-creator/4.1.46"
     exports_sources = "patches/**"
+    _msbuild = None
     _env_build = None
     _args = None
 
@@ -114,6 +115,13 @@ class QuickfastConan(ConanFile):
         for patch in patches:
             tools.patch(**patch)
 
+    def _configure_msbuild(self):
+        if self._msbuild:
+            return self._msbuild
+
+        self._msbuild = MSBuild(self)
+        return self._msbuild
+
     def _configure_autotools(self):
         if self._env_build:
             return self._env_build, self._args
@@ -155,8 +163,13 @@ class QuickfastConan(ConanFile):
                  {"QUICKFAST_ROOT": os.path.join(self.build_folder, self._source_subfolder),
                   "XERCESCROOT": self.deps_cpp_info["xerces-c"].rootpath,
                   }):
-            env_build, args = self._configure_autotools()
-            env_build.make(args=args, target="QuickFAST")
+
+            if self.settings.compiler == "Visual Studio":
+                msbuild = self._configure_msbuild()
+                msbuild.build("QuickFAST.sln")
+            else:
+                env_build, args = self._configure_autotools()
+                env_build.make(args=args, target="QuickFAST")
 
     def package(self):
         with tools.chdir(self._source_subfolder), \
@@ -164,14 +177,19 @@ class QuickfastConan(ConanFile):
                  {"QUICKFAST_ROOT": os.path.join(self.build_folder, self._source_subfolder),
                   "XERCESCROOT": self.deps_cpp_info["xerces-c"].rootpath,
                   }):
-            env_build, args = self._configure_autotools()
-            env_build.make(args=args, target="QuickFAST")
 
-            self.copy("*.dylib", dst="lib", keep_path=False)
-            self.copy("*.dll", dst="bin", keep_path=False)
-            self.copy("*.a", dst="lib", keep_path=False)
-            self.copy("*.h", dst="include/quickfast", src=os.path.join(self._source_subfolder, "src"))
-            self.copy("license.txt", dst="licenses", src=self._source_subfolder)
+            if self.settings.compiler == "Visual Studio":
+                msbuild = self._configure_msbuild()
+                msbuild.build("QuickFAST")
+            else:
+                env_build, args = self._configure_autotools()
+                env_build.make(args=args, target="QuickFAST")
+
+        self.copy("*.dylib", dst="lib", keep_path=False)
+        self.copy("*.dll", dst="bin", keep_path=False)
+        self.copy("*.a", dst="lib", keep_path=False)
+        self.copy("*.h", dst="include/quickfast", src=os.path.join(self._source_subfolder, "src"))
+        self.copy("license.txt", dst="licenses", src=self._source_subfolder)
 
     def package_info(self):
         self.cpp_info.libs = tools.collect_libs(self)
