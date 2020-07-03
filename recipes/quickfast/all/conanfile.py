@@ -69,11 +69,11 @@ class QuickfastConan(ConanFile):
         compiler = self.settings.compiler
         version = Version(compiler.version.value)
 
-        if "8" <= version.major() <= "14":
-            return "v" + version.major()
-        elif version.major() == "14":
+        if "8" <= version <= "14":
+            return "v" + version
+        elif version == "14":
             return "vs2017"
-        elif version.major() == "16":
+        elif version == "16":
             return "vs2019"
         else:
             raise ConanInvalidConfiguration("QuickFAST cannot be built with Visual Studio version {}"
