@@ -29,7 +29,6 @@ class AutomakeConan(ConanFile):
 
     def requirements(self):
         self.requires("autoconf/2.69")
-        self.requires("m4/1.4.18")
         # automake requires perl-Thread-Queue package
 
     def build_requirements(self):
