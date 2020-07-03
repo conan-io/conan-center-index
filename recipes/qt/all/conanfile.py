@@ -265,7 +265,7 @@ class QtConan(ConanFile):
             self.requires("pcre2/10.33")
 
         if self.options.with_glib:
-            self.requires("glib/2.64.0")
+            self.requires("glib/2.65.0")
         # if self.options.with_libiconv:
         #     self.requires("libiconv/1.16")
         if self.options.with_doubleconversion and not self.options.multiconfiguration:
@@ -277,7 +277,7 @@ class QtConan(ConanFile):
         if self.options.with_icu:
             self.requires("icu/64.2")
         if self.options.with_harfbuzz and not self.options.multiconfiguration:
-            self.requires("harfbuzz/2.6.7")
+            self.requires("harfbuzz/2.6.8")
         if self.options.with_libjpeg and not self.options.multiconfiguration:
             self.requires("libjpeg/9d")
         if self.options.with_libpng and not self.options.multiconfiguration:
