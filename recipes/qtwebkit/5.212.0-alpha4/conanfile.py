@@ -123,6 +123,12 @@ class QtWebKitConan(ConanFile):
         return cmake
 
     def build(self):
+        # Github Actions uses predefined images of OS
+        # Mono framework goes pre-installed in macos image, causing path
+        # errors in some (png, jpeg, sqlite) CMake finders during header search
+        if os.getenv('GITHUB_ACTIONS'):
+            if tools.is_apple_os(self.settings.os):
+                self.run("sudo rm -rf /Library/Frameworks/Mono.framework")
         cmake = self._configure_cmake()
         cmake.build()
         cmake.install()
