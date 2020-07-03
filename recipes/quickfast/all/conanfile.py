@@ -141,6 +141,9 @@ class QuickfastConan(ConanFile):
             del self.options.fPIC
 
     def configure(self):
+        if self.settings.os == "Windows":
+            raise ConanInvalidConfiguration("Windows builds still not working...")
+
         tools.check_min_cppstd(self, "11")
 
         if self.options.shared:
