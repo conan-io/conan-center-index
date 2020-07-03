@@ -14,7 +14,16 @@ class GlewConan(ConanFile):
     settings = "os", "arch", "build_type", "compiler"
     options = {"shared": [True, False]}
     default_options = {"shared": False}
-    _source_subfolder = "source_subfolder"
+    
+    _cmake = None
+
+    @property
+    def _source_subfolder(self):
+        return "source_subfolder"
+
+    @property
+    def _build_subfolder(self):
+        return "build_subfolder"
 
     def requirements(self):
         self.requires("opengl/system")
@@ -27,17 +36,18 @@ class GlewConan(ConanFile):
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
         os.rename("%s-%s" % (self.name, self.version), self._source_subfolder)
-        if "patches" in self.conan_data:
-            for patch in self.conan_data["patches"][self.version]:
-                tools.patch(**patch)
 
     def _configure_cmake(self):
-        cmake = CMake(self)
-        cmake.definitions["BUILD_UTILS"] = "OFF"
-        cmake.configure()
-        return cmake
+        if self._cmake:
+            return self._cmake
+        self._cmake = CMake(self)
+        self._cmake.definitions["BUILD_UTILS"] = "OFF"
+        self._cmake.configure(build_folder=self._build_subfolder)
+        return self._cmake
 
     def build(self):
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            tools.patch(**patch)
         cmake = self._configure_cmake()
         cmake.build()
 
