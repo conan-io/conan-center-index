@@ -126,7 +126,7 @@ class QuickfastConan(ConanFile):
         if self._env_build:
             return self._env_build, self._args
 
-        self._env_build = AutoToolsBuildEnvironment(self, win_bash=tools.os_info.is_windows)
+        self._env_build = AutoToolsBuildEnvironment(self, win_bash=self.settings.os is "Windows")
         self._args = ['CONAN_MAKE_FILE=' + os.path.join(self.build_folder, "conanbuildinfo.mak")]
         self.run(self._mwc_command_line)
         return self._env_build, self._args
@@ -153,7 +153,9 @@ class QuickfastConan(ConanFile):
         self.options['boost'].shared = True
 
     def build_requirements(self):
-        if tools.os_info.is_windows and not tools.get_env("CONAN_BASH_PATH") and \
+        if self.settings.compiler != "Visual Studio" and \
+                tools.os_info.is_windows and \
+                "CONAN_BASH_PATH" not in os.environ and \
                 tools.os_info.detect_windows_subsystem() != "msys2":
             self.build_requires("msys2/20190524")
 
