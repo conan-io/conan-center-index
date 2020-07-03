@@ -108,17 +108,11 @@ class QuickfastConan(ConanFile):
                ' -value_template extracppflags+=-DBOOST_BIND_GLOBAL_PLACEHOLDERS' + \
                ' QuickFAST.mwc'
 
-    def _patch_sources(self):
-        # Patch taken from:
-        # https://raw.githubusercontent.com/microsoft/vcpkg/master/ports/quickfast/00001-fix-boost-asio.patch
-        patches = self.conan_data["patches"][self.version]
-        for patch in patches:
-            tools.patch(**patch)
-
     def _configure_msbuild(self):
         if self._msbuild:
             return self._msbuild
 
+        self.run(self._mwc_command_line)
         self._msbuild = MSBuild(self)
         return self._msbuild
 
@@ -128,8 +122,15 @@ class QuickfastConan(ConanFile):
 
         self._env_build = AutoToolsBuildEnvironment(self, win_bash=self.settings.os is "Windows")
         self._args = ['CONAN_MAKE_FILE=' + os.path.join(self.build_folder, "conanbuildinfo.mak")]
-        self.run(self._mwc_command_line)
+        self.run(self._mwc_command_line, win_bash=self.settings.os is "Windows")
         return self._env_build, self._args
+
+    def _patch_sources(self):
+        # Patch taken from:
+        # https://raw.githubusercontent.com/microsoft/vcpkg/master/ports/quickfast/00001-fix-boost-asio.patch
+        patches = self.conan_data["patches"][self.version]
+        for patch in patches:
+            tools.patch(**patch)
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
