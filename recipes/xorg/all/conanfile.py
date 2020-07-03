@@ -46,7 +46,7 @@ class ConanXOrg(ConanFile):
             elif tools.os_info.with_pacman:
                 packages = ["xorg-server-devel"]
             elif tools.os_info.with_zypper:
-                packages = ["Xorg-x11-devel"]
+                packages = ["xorg-x11-devel"]
             else:
                 self.output.warn("Do not know how to install 'xorg' for {}.".format(tools.os_info.linux_distro))
                 packages = []
@@ -54,7 +54,7 @@ class ConanXOrg(ConanFile):
                 package_tool.install(update=True, packages=p)
 
     def package_info(self):
-        for name in ["x11", "x11-xcb", "dmx", "fontenc", "libfs", "ice", "sm", "xau", "xaw7",
+        for name in ["x11", "x11-xcb", "fontenc", "ice", "sm", "xau", "xaw7",
                      "xcomposite","xcursor", "xdamage", "xdmcp", "xext", "xfixes", "xft", "xi",
                      "xinerama", "xkbfile", "xmu", "xmuu", "xpm", "xrandr", "xrender", "xres",
                      "xscrnsaver", "xt", "xtst", "xv", "xvmc", "xxf86dga", "xxf86vm", "xtrans",
