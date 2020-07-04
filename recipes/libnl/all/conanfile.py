@@ -10,8 +10,8 @@ class LibNlConan(ConanFile):
     homepage = "https://www.infradead.org/~tgr/libnl/"
     license = "LGPL-2.1-only"
     settings = "os", "arch", "compiler", "build_type"
-    options = {"shared": [True, False]}
-    default_options = {"shared": False}
+    options = {"fPIC": [True, False], "shared": [True, False]}
+    default_options = {"fPIC": True, "shared": False}
     build_requires = ( "flex/2.6.4", "bison/3.5.3" )
 
     _autotools = None
