@@ -71,6 +71,7 @@ class ElfutilsConan(ConanFile):
         self.build_requires("m4/1.4.18")
         self.build_requires("flex/2.6.4")
         self.build_requires("bison/3.5.3")
+        self.build_requires("pkgconf/1.7.3")
         if tools.os_info.is_windows and not tools.get_env("CONAN_BASH_PATH") and \
                 tools.os_info.detect_windows_subsystem() != "msys2":
             self.build_requires("msys2/20190524")
@@ -83,6 +84,8 @@ class ElfutilsConan(ConanFile):
     def _configure_autotools(self):
         if not self._autotools:
             args = [
+                "--disable-werror",
+                "--enable-static={}".format("no" if self.options.shared else "yes"),
                 "--enable-deterministic-archives",
                 "--enable-silent-rules",
                 "--with-zlib" if self.options.with_zlib else "--without-zlib",
@@ -95,45 +98,18 @@ class ElfutilsConan(ConanFile):
             self._autotools.configure(configure_dir=self._source_subfolder, args=args)
         return self._autotools
 
-    @property
-    def _make_args(self):
-        return [
-            "BUILD_STATIC={}".format("1" if self.options.shared else "0"),
-            "V=1",
-        ]
-
     def build(self):
-        # FIXME: autoreconf using conan fails because conan needs pkgconf (#1013) + multiple m4 directories for automake (#2038)
-
-        for root, _, files in os.walk(self._source_subfolder):
-            for file in files:
-                if file.endswith(".in"):
-                    tools.replace_in_file(os.path.join(root, file), "-Werror", "", strict=False)
-        tools.replace_in_file(os.path.join(self._source_subfolder, "configure"), "-Werror", "")
-        tools.replace_in_file(os.path.join(self._source_subfolder, "configure"),""" if test "$use_gprof" = yes -o "$use_gcov" = yes; then
-  BUILD_STATIC_TRUE=
-  BUILD_STATIC_FALSE='#'
-else
-  BUILD_STATIC_TRUE='#'
-  BUILD_STATIC_FALSE=
-fi""",
-                              """BUILD_STATIC_TRUE={}
-BUILD_STATIC_FALSE={}""".format("#" if self.options.shared else "", "" if self.options.shared else "#"))
-        tools.replace_in_file(os.path.join(self._source_subfolder, "config", "eu.am"), "-Werror", "")
-
-
-        # if "patches" in self.conan_data and self.version in self.conan_data["patches"]:
-        #     for patch in self.conan_data["patches"][self.version]:
-        #         tools.patch(**patch)
-        # with tools.chdir(self._source_subfolder):
-        #     self.run("autoreconf -fiv")
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            tools.patch(**patch)
+        with tools.chdir(self._source_subfolder):
+            self.run("autoreconf -fiv")
         autotools = self._configure_autotools()
-        autotools.make(args=self._make_args)
+        autotools.make()
     
     def package(self):
         self.copy(pattern="COPYING*", dst="licenses", src=self._source_subfolder)
         autotools = self._configure_autotools()
-        autotools.install(args=self._make_args)
+        autotools.install()
         tools.rmdir(os.path.join(self.package_folder, "share"))
         tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
         if self.options.shared:
