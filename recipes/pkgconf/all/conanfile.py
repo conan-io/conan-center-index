@@ -58,7 +58,8 @@ class PkgConfConan(ConanFile):
         self._meson = Meson(self)
         self._meson.options["tests"] = False
         self._meson.options["sharedstatedir"] = self._sharedstatedir
-        self._meson.configure(source_folder=self._source_subfolder, build_folder=self._build_subfolder)
+        with tools.environment_append({"CFLAGS": tools.get_env("CFLAGS", "") + " -std=c99",}):
+            self._meson.configure(source_folder=self._source_subfolder, build_folder=self._build_subfolder)
         return self._meson
 
     def _patch_sources(self):
