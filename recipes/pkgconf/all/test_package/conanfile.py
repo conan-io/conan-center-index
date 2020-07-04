@@ -30,11 +30,14 @@ class TestPackageConan(ConanFile):
         if not tools.cross_building(self.settings):
             self.run(os.path.join("bin", "test_package"), run_environment=True)
 
-            if not os.environ["PKG_CONFIG"].startswith(self.deps_cpp_info["pkgconf"].rootpath):
+            pkg_config = tools.get_env("PKG_CONFIG")
+            self.output.info("Read environment variable PKG_CONFIG='{}'".format(pkg_config))
+            if not pkg_config or not pkg_config.startswith(self.deps_cpp_info["pkgconf"].rootpath.replace("\\", "/")):
                 raise ConanException("PKG_CONFIG variable incorrect")
 
             pkgconf_path = tools.which("pkgconf").replace("\\", "/")
-            if not pkgconf_path.startswith(self.deps_cpp_info["pkgconf"].rootpath):
+            self.output.info("Found pkgconf at '{}'".format(pkgconf_path))
+            if not pkgconf_path or not pkgconf_path.startswith(self.deps_cpp_info["pkgconf"].rootpath.replace("\\", "/")):
                 raise ConanException("pkgconf executable not found")
 
             with tools.environment_append({"PKG_CONFIG_PATH": self.source_folder}):
