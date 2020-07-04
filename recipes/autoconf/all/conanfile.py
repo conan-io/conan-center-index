@@ -22,7 +22,7 @@ class AutoconfConan(ConanFile):
         os.rename("{}-{}".format(self.name, self.version), self._source_subfolder)
 
     def requirements(self):
-        if not tools.os_info.is_windows:
+        if self.settings.os_build != "Windows":
             #the Conan m4 package currently doesn't work correctly with autoconf
             self.requires("m4/1.4.18")
 
