@@ -1,4 +1,4 @@
-from conans import AutoToolsBuildEnvironment, CMake, ConanFile, tools
+from conans import AutoToolsBuildEnvironment, CMake, ConanFile, tools, RunEnvironment
 from conans.errors import ConanException
 import os
 import shutil
@@ -20,7 +20,8 @@ class TestPackageConan(ConanFile):
                     os.path.join(self.build_folder, "configure.ac"))
         self.run("autoreconf -fiv", run_environment=True, win_bash=tools.os_info.is_windows)
         autotools = AutoToolsBuildEnvironment(self, win_bash=tools.os_info.is_windows)
-        autotools.configure()
+        with tools.environment_append(RunEnvironment(self).vars):
+            autotools.configure()
 
         cmake = CMake(self)
         cmake.configure()
