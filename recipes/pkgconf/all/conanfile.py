@@ -104,10 +104,10 @@ class PkgConfConan(ConanFile):
         self.output.info("Appending PATH env var: {}".format(bindir))
         self.env_info.PATH.append(bindir)
 
-        pkg_config = tools.unix_path(os.path.join(bindir, "pkgconf"))
+        pkg_config = os.path.join(bindir, "pkgconf")
         self.output.info("Setting PKG_CONFIG env var: {}".format(pkg_config))
         self.env_info.PKG_CONFIG = pkg_config
 
-        automake_extra_includes = os.path.join(self.package_folder , "bin", "aclocal").replace("\\", "/")
+        automake_extra_includes = tools.unix_path(os.path.join(self.package_folder , "bin", "aclocal").replace("\\", "/"))
         self.output.info("Appending AUTOMAKE_CONAN_INCLUDES env var: {}".format(automake_extra_includes))
         self.env_info.AUTOMAKE_CONAN_INCLUDES.append(automake_extra_includes)
