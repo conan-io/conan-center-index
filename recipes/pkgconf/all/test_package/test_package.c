@@ -7,7 +7,7 @@
 bool error_callback(const char *msg, const pkgconf_client_t *client, const void *data) {
     printf("error callback: %s\n", msg);
     fflush(stdout);
-    return 1;
+    return 1; // 1/true means message handled
 }
 
 int main() {
