@@ -20,6 +20,25 @@ index 5b6957b..389e714 100644
  endif ()
  set (CPACK_SOURCE_PACKAGE_FILE_NAME ${PROJECT_NAME}-${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR}.${PROJECT_VERSION_PATCH}-source)
  #set (CPACK_SOURCE_STRIP_FILES Do we need this?)
+diff --git a/src/cineon.imageio/CMakeLists.txt b/src/cineon.imageio/CMakeLists.txt
+index 1158487..f2612e5 100644
+--- a/src/cineon.imageio/CMakeLists.txt
++++ b/src/cineon.imageio/CMakeLists.txt
+@@ -3,6 +3,11 @@
+ # https://github.com/OpenImageIO/oiio/blob/master/LICENSE.md
+ 
+ add_oiio_plugin (cineoninput.cpp
+-                 libcineon/Cineon.cpp libcineon/OutStream.cpp libcineon/Codec.cpp
+-                 libcineon/Reader.cpp libcineon/Writer.cpp libcineon/CineonHeader.cpp
+-                 libcineon/ElementReadStream.cpp libcineon/InStream.cpp)
++                 ../../../libcineon/Cineon.cpp
++                 ../../../libcineon/OutStream.cpp
++                 ../../../libcineon/Codec.cpp
++                 ../../../libcineon/Reader.cpp
++                 ../../../libcineon/Writer.cpp
++                 ../../../libcineon/CineonHeader.cpp
++                 ../../../libcineon/ElementReadStream.cpp
++                 ../../../libcineon/InStream.cpp)
 diff --git a/src/cmake/externalpackages.cmake b/src/cmake/externalpackages.cmake
 index 7109cb9..106d8bc 100644
 --- a/src/cmake/externalpackages.cmake

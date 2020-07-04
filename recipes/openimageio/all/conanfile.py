@@ -1,5 +1,5 @@
 from conans import ConanFile, CMake, tools
-import os
+import os, shutil
 
 class OpenImageIOConan(ConanFile):
     name = "openimageio"
@@ -32,10 +32,6 @@ class OpenImageIOConan(ConanFile):
     @property
     def _source_subfolder(self):
         return "source_subfolder"
-
-    @property
-    def _install_folder(self):
-        return os.path.join(self.build_folder, "install")
 
     def _configure_cmake(self):
         if self._cmake:
@@ -117,6 +113,13 @@ class OpenImageIOConan(ConanFile):
 
     def build(self):
         self._patch_sources()
+
+        # Workaround for error MSB4198 when building on CI with Visual Studio 14.
+        # Object file paths for Cineon sources was too long. Putting them in the root
+        # directory makes it short enough.
+        shutil.copytree(
+            src=os.path.join(self._source_subfolder, "src", "cineon.imageio", "libcineon"),
+            dst="libcineon")
 
         cmake = self._configure_cmake()
         cmake.build()

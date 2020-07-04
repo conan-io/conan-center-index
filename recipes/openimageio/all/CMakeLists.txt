@@ -19,4 +19,6 @@ include_directories(
     "${CMAKE_BINARY_DIR}/source_subfolder/include"
 )
 
+set(CMAKE_OBJECT_PATH_MAX 200)
+
 add_subdirectory(source_subfolder)
