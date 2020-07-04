@@ -1,5 +1,5 @@
 diff --git a/CMakeLists.txt b/CMakeLists.txt
-index 8174fdd..d3ac750 100644
+index 5b6957b..389e714 100644
 --- a/CMakeLists.txt
 +++ b/CMakeLists.txt
 @@ -171,7 +171,7 @@ if (OIIO_BUILD_TOOLS AND NOT BUILD_OIIOUTIL_ONLY)
@@ -16,12 +16,12 @@ index 8174fdd..d3ac750 100644
  #    set(CPACK_CREATE_DESCTOP_LINKS "iv" "iv - Image Viewer")
      set(CPACK_NSIS_MODIFY_PATH ON)
 -    include (InstallRequiredSystemLibraries)
-+    #include (InstallRequiredSystemLibraries)
++    # include (InstallRequiredSystemLibraries)
  endif ()
  set (CPACK_SOURCE_PACKAGE_FILE_NAME ${PROJECT_NAME}-${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR}.${PROJECT_VERSION_PATCH}-source)
  #set (CPACK_SOURCE_STRIP_FILES Do we need this?)
 diff --git a/src/cmake/externalpackages.cmake b/src/cmake/externalpackages.cmake
-index 58dfc42..8af7e5d 100644
+index 7109cb9..106d8bc 100644
 --- a/src/cmake/externalpackages.cmake
 +++ b/src/cmake/externalpackages.cmake
 @@ -144,7 +144,7 @@ if (LINKSTATIC)
@@ -46,7 +46,7 @@ index 58dfc42..8af7e5d 100644
  endif ()
  if (MSVC AND NOT LINKSTATIC)
 -    add_definitions (-DOPENEXR_DLL) # Is this needed for new versions?
-+    # add_definitions (-DOPENEXR_DLL) # Is this needed for new versions?
++    #add_definitions (-DOPENEXR_DLL) # Is this needed for new versions?
  endif ()
  
  
@@ -59,7 +59,7 @@ index 58dfc42..8af7e5d 100644
                         DEFINITIONS -DUSE_EXTERNAL_PUGIXML=1)
  endif()
  
-@@ -253,8 +252,8 @@ checked_find_package (Field3D
+@@ -254,8 +253,8 @@ checked_find_package (Field3D
                     DEFINITIONS  -DUSE_FIELD3D=1)
  checked_find_package (GIF 4)
  checked_find_package (Libheif 1.3)  # For HEIF/HEIC format
@@ -70,7 +70,7 @@ index 58dfc42..8af7e5d 100644
  checked_find_package (OpenVDB 5.0
                     DEPS         TBB
                     DEFINITIONS  -DUSE_OPENVDB=1)
-@@ -330,7 +329,7 @@ endmacro()
+@@ -331,7 +330,7 @@ endmacro()
  option (USE_EMBEDDED_LIBSQUISH
          "Force use of embedded Libsquish, even if external is found" OFF)
  if (NOT USE_EMBEDDED_LIBSQUISH)
@@ -80,7 +80,7 @@ index 58dfc42..8af7e5d 100644
  
  
 diff --git a/src/cmake/oiio_macros.cmake b/src/cmake/oiio_macros.cmake
-index 1c8e783..a7155c2 100644
+index c642ac7..ac469fb 100644
 --- a/src/cmake/oiio_macros.cmake
 +++ b/src/cmake/oiio_macros.cmake
 @@ -169,6 +169,8 @@ endmacro ()
@@ -106,33 +106,21 @@ index 546f683..5ccdd8e 100644
  else ()
      # No external libsquish was found -- use the embedded version.
 diff --git a/src/include/CMakeLists.txt b/src/include/CMakeLists.txt
-index faed9f6..46e1640 100644
+index faed9f6..80b564e 100644
 --- a/src/include/CMakeLists.txt
 +++ b/src/include/CMakeLists.txt
-@@ -52,12 +52,12 @@ install (FILES ${public_headers}
-          DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/${PROJECT_NAME}
-          COMPONENT developer)
- 
--set (fmt_headers
--        ${FMT_INCLUDES}/fmt/core.h
--        ${FMT_INCLUDES}/fmt/format-inl.h
--        ${FMT_INCLUDES}/fmt/format.h
--        ${FMT_INCLUDES}/fmt/ostream.h
--        ${FMT_INCLUDES}/fmt/printf.h )
+@@ -58,6 +58,6 @@ set (fmt_headers
+         ${FMT_INCLUDES}/fmt/format.h
+         ${FMT_INCLUDES}/fmt/ostream.h
+         ${FMT_INCLUDES}/fmt/printf.h )
 -install (FILES ${fmt_headers}
 -         DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/${PROJECT_NAME}/fmt
 -         COMPONENT developer)
-+# set (fmt_headers
-+#         ${FMT_INCLUDES}/fmt/core.h
-+#         ${FMT_INCLUDES}/fmt/format-inl.h
-+#         ${FMT_INCLUDES}/fmt/format.h
-+#         ${FMT_INCLUDES}/fmt/ostream.h
-+#         ${FMT_INCLUDES}/fmt/printf.h )
 +# install (FILES ${fmt_headers}
 +#          DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/${PROJECT_NAME}/fmt
 +#          COMPONENT developer)
 diff --git a/src/jpeg2000.imageio/CMakeLists.txt b/src/jpeg2000.imageio/CMakeLists.txt
-index 7bc6adb..2b7866e 100644
+index 7bc6adb..7bf937a 100644
 --- a/src/jpeg2000.imageio/CMakeLists.txt
 +++ b/src/jpeg2000.imageio/CMakeLists.txt
 @@ -2,8 +2,8 @@
@@ -146,14 +134,13 @@ index 7bc6adb..2b7866e 100644
          # Old OpenJpeg 1.5. Remove this eventually.
          #
          # For reasons I don't understand, OpenJPEG 1.5 fails imageinout_test
-@@ -13,15 +13,15 @@ if (OPENJPEG_FOUND)
+@@ -13,15 +13,13 @@ if (OPENJPEG_FOUND)
          # for now, I'm just disabling jpeg2000 support for that combination.
          if (EMBEDPLUGINS)
              add_oiio_plugin (jpeg2000input-v1.cpp jpeg2000output-v1.cpp
 -                             INCLUDE_DIRS ${OPENJPEG_INCLUDES}
 -                             LINK_LIBRARIES ${OPENJPEG_LIBRARIES}
-+                             INCLUDE_DIRS ${OpenJPEG_INCLUDES}
-+                             LINK_LIBRARIES ${OpenJPEG_LIBRARIES}
++                             LINK_LIBRARIES OpenJPEG::OpenJPEG
                               DEFINITIONS "-DUSE_OPENJPEG")
          endif()
      else ()
@@ -161,13 +148,12 @@ index 7bc6adb..2b7866e 100644
          add_oiio_plugin (jpeg2000input.cpp jpeg2000output.cpp
 -                         INCLUDE_DIRS ${OPENJPEG_INCLUDES}
 -                         LINK_LIBRARIES ${OPENJPEG_LIBRARIES}
-+                         INCLUDE_DIRS ${OpenJPEG_INCLUDES}
-+                         LINK_LIBRARIES ${OpenJPEG_LIBRARIES}
++                         LINK_LIBRARIES OpenJPEG::OpenJPEG
                           DEFINITIONS "-DUSE_OPENJPEG")
      endif ()
  else()
 diff --git a/src/libOpenImageIO/CMakeLists.txt b/src/libOpenImageIO/CMakeLists.txt
-index 7cabd9b..9ceee9c 100644
+index 7cabd9b..9e6b791 100644
 --- a/src/libOpenImageIO/CMakeLists.txt
 +++ b/src/libOpenImageIO/CMakeLists.txt
 @@ -135,8 +135,7 @@ endif ()
@@ -180,13 +166,12 @@ index 7cabd9b..9ceee9c 100644
              ${OpenCV_LIBRARIES}
              ${GCC_ATOMIC_LIBRARIES}
          PRIVATE
-@@ -152,12 +151,12 @@ target_link_libraries (OpenImageIO
+@@ -152,12 +151,11 @@ target_link_libraries (OpenImageIO
  if (USE_EXTERNAL_PUGIXML)
      # insert include path to pugixml first, to ensure that the external
      # pugixml is found, and not the one in OIIO's include directory.
 -    target_include_directories (OpenImageIO PRIVATE BEFORE ${PUGIXML_INCLUDES})
 -    target_link_libraries (OpenImageIO PRIVATE ${PUGIXML_LIBRARIES})
-+    # target_include_directories (OpenImageIO PRIVATE BEFORE ${PUGIXML_INCLUDES})
 +    target_link_libraries (OpenImageIO PRIVATE pugixml::pugixml)
  endif()
  

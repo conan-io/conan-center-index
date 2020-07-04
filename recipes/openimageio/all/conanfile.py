@@ -67,7 +67,7 @@ class OpenImageIOConan(ConanFile):
         self._cmake.definitions["USE_DCMTK"] = self.options.with_dicom
         self._cmake.definitions["USE_FFMPEG"] = False
         self._cmake.definitions["USE_FIELD3D"] = False
-        self._cmake.definitions["USE_GIF"] = False
+        self._cmake.definitions["USE_GIF"] = True
         self._cmake.definitions["USE_LIBHEIF"] = False
         self._cmake.definitions["USE_LIBRAW"] = self.options.with_raw
         self._cmake.definitions["USE_OPENVDB"] = False
@@ -98,8 +98,7 @@ class OpenImageIOConan(ConanFile):
         self.requires("libjpeg/9d")
         self.requires("libwebp/1.1.0")
         self.requires("openjpeg/2.3.1")
-        # TODO code using GifLib 5.1.4 does not compile with Clang
-        # self.requires("giflib/5.1.4")
+        self.requires("giflib/5.2.1")
         self.requires("freetype/2.10.2")
     
         if self.options.with_dicom:
