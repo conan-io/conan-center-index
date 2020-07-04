@@ -72,7 +72,8 @@ class FlatccConan(ConanFile):
         cmake.definitions["FLATCC_REFLECTION"] = self.options.reflection
         cmake.definitions["FLATCC_NATIVE_OPTIM"] = self.options.native_optim
         cmake.definitions["FLATCC_FAST_DOUBLE"] = self.options.fast_double
-        cmake.definitions["FLATCC_IGNORE_CONST_COND"]= self.options.ignore_const_condition
+        cmake.definitions["FLATCC_IGNORE_CONST_COND"] = self.options.ignore_const_condition
+        cmake.definitions["FLATCC_TEST"] = False
         cmake.configure(source_folder=os.path.join(self.source_folder, self._source_subfolder))
         cmake.build()
         cmake.install()
@@ -88,4 +89,7 @@ class FlatccConan(ConanFile):
         if not self.options.runtime_lib_only:
             self.cpp_info.libs.append("flatcc")
         self.cpp_info.libs.append("flatccrt")
-        self.env_info.LD_LIBRARY_PATH.append(os.path.join(self.package_folder, "lib"))
+        if tools.os_info.is_linux:
+            self.env_info.LD_LIBRARY_PATH.append(os.path.join(self.package_folder, "lib"))
+        if tools.os_info.is_macos:
+            self.env_info.DYLD_FALLBACK_LIBRARY_PATH.append(os.path.join(self.package_folder, "lib"))
