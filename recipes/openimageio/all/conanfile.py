@@ -12,6 +12,7 @@ class OpenImageIOConan(ConanFile):
     settings = "os", "compiler", "build_type", "arch"
     generators = "cmake", "cmake_find_package"
     exports_sources = ["CMakeLists.txt", "patches/*"]
+    short_paths = True
 
     options = {
         "shared": [True, False],
@@ -113,14 +114,7 @@ class OpenImageIOConan(ConanFile):
 
     def build(self):
         self._patch_sources()
-
-        # Workaround for error MSB4198 when building on CI with Visual Studio 14.
-        # Object file paths for Cineon sources was too long. Putting them in the root
-        # directory makes it short enough.
-        shutil.copytree(
-            src=os.path.join(self._source_subfolder, "src", "cineon.imageio", "libcineon"),
-            dst="libcineon")
-
+        
         cmake = self._configure_cmake()
         cmake.build()
 
