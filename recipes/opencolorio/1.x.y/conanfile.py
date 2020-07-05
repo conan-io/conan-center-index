@@ -11,7 +11,7 @@ class OpenEXRConan(ConanFile):
     options = {"shared": [True, False], "fPIC": [True, False]}
     default_options = {"shared": False, "fPIC": True}
     generators = "cmake", "cmake_find_package"
-    exports_sources = ["CMakeLists.txt", "patches/*"]
+    exports_sources = ["patches/*"]
 
     _cmake = None
 
@@ -78,6 +78,10 @@ class OpenEXRConan(ConanFile):
         self.copy("LICENSE", src=self._source_subfolder, dst="licenses")
 
     def package_info(self):
+        self.cpp_info.names["cmake_find_package"] = "OpenColorIO"
+        self.cpp_info.names["cmake_find_package_multi"] = "OpenColorIO"
+        self.cpp_info.names["pkg_config"] = "OpenColorIO"
+
         self.cpp_info.libs = tools.collect_libs(self)
 
         if not self.options.shared:
