@@ -36,6 +36,8 @@ class FlatccConan(ConanFile):
     settings = "os", "arch", "compiler", "build_type"
     no_copy_source = True
 
+    _cmake = None
+
 
     @property
     def _source_subfolder(self):
@@ -44,41 +46,41 @@ class FlatccConan(ConanFile):
     def configure(self):
         if self.settings.os == "Windows" and self.settings.compiler == "gcc":
             raise ConanInvalidConfiguration("Building flatcc with MinGW is not supported")
-
-    def config_options(self):
-        if self.settings.compiler == "Visual Studio":
+        if self.settings.compiler == "Visual Studio" and self.options.shared:
             #Building flatcc shared libs with Visual Studio is broken
-            del self.options.shared
-            del self.options.fPIC
+            raise ConanInvalidConfiguration("Building flatcc libraries shared is not supported")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
         extracted_dir = self.name + "-" + self.version
         os.rename(extracted_dir, self._source_subfolder)
 
+    def _configure_cmake(self):
+        if not self._cmake:
+            self._cmake = CMake(self)
+            self._cmake.definitions["FLATCC_PORTABLE"] = self.options.portable
+            self._cmake.definitions["FLATCC_GNU_POSIX_MEMALIGN"] = self.options.gnu_posix_memalign
+            self._cmake.definitions["FLATCC_RTONLY"] = self.options.runtime_lib_only
+            self._cmake.definitions["FLATCC_INSTALL"] = True
+            self._cmake.definitions["FLATCC_COVERAGE"] = False
+            self._cmake.definitions["FLATCC_DEBUG_VERIFY"] = self.options.verify_assert
+            self._cmake.definitions["FLATCC_TRACE_VERIFY"] = self.options.verify_trace
+            self._cmake.definitions["FLATCC_REFLECTION"] = self.options.reflection
+            self._cmake.definitions["FLATCC_NATIVE_OPTIM"] = self.options.native_optim
+            self._cmake.definitions["FLATCC_FAST_DOUBLE"] = self.options.fast_double
+            self._cmake.definitions["FLATCC_IGNORE_CONST_COND"] = self.options.ignore_const_condition
+            self._cmake.definitions["FLATCC_TEST"] = False
+            self._cmake.configure(source_folder=os.path.join(self.source_folder, self._source_subfolder))
+        return self._cmake
+
     def build(self):
-        cmake = CMake(self)
-        if self.settings.compiler == "Visual Studio":
-            cmake.definitions["BUILD_SHARED_LIBS"] = False
-        else:
-            cmake.definitions["BUILD_SHARED_LIBS"] = self.options.shared
-        cmake.definitions["FLATCC_PORTABLE"] = self.options.portable
-        cmake.definitions["FLATCC_GNU_POSIX_MEMALIGN"] = self.options.gnu_posix_memalign
-        cmake.definitions["FLATCC_RTONLY"] = self.options.runtime_lib_only
-        cmake.definitions["FLATCC_INSTALL"] = True
-        cmake.definitions["FLATCC_COVERAGE"] = False
-        cmake.definitions["FLATCC_DEBUG_VERIFY"] = self.options.verify_assert
-        cmake.definitions["FLATCC_TRACE_VERIFY"] = self.options.verify_trace
-        cmake.definitions["FLATCC_REFLECTION"] = self.options.reflection
-        cmake.definitions["FLATCC_NATIVE_OPTIM"] = self.options.native_optim
-        cmake.definitions["FLATCC_FAST_DOUBLE"] = self.options.fast_double
-        cmake.definitions["FLATCC_IGNORE_CONST_COND"] = self.options.ignore_const_condition
-        cmake.definitions["FLATCC_TEST"] = False
-        cmake.configure(source_folder=os.path.join(self.source_folder, self._source_subfolder))
+        cmake = self._configure_cmake()
         cmake.build()
-        cmake.install()
+
 
     def package(self):
+        cmake = self._configure_cmake()
+        cmake.install()
         # Copy license file
         self.copy("LICENSE", dst="licenses", src=self._source_subfolder)
 
