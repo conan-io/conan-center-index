@@ -22,6 +22,9 @@ class OpenEXRConan(ConanFile):
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
+
+    def configure(self):
+        tools.check_min_cppstd(self, "11")
     
     def requirements(self):
         self.requires("lcms/2.11")
