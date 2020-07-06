@@ -23,7 +23,7 @@ class AutoconfConan(ConanFile):
 
     def requirements(self):
         if self.settings.os_build != "Windows":
-            #the Conan m4 package currently doesn't work correctly with autoconf
+            #the Conan m4 package currently doesn't work correctly with autoconf on Windows
             self.requires("m4/1.4.18")
 
     def build_requirements(self):
