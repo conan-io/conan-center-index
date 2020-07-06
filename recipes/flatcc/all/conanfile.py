@@ -51,8 +51,8 @@ class FlatccConan(ConanFile):
             raise ConanInvalidConfiguration("Building flatcc libraries shared is not supported")
         if self.settings.os == "Windows" and self.settings.compiler == "gcc":
             raise ConanInvalidConfiguration("Building flatcc with MinGW is not supported")
-        if self.settings.os == "MacOS" and self.options.shared:
-            raise ConanInvalidConfiguration("Building flatcc shared on MacOS is currently not supported due to Systems Integrity Protection problems"
+        if self.settings.os == "Macos" and self.options.shared:
+            raise ConanInvalidConfiguration("Building flatcc shared on Macos is currently not supported due to Systems Integrity Protection problems")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
