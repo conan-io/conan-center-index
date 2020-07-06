@@ -35,6 +35,8 @@ class FmtConan(ConanFile):
             self.settings.clear()
             del self.options.fPIC
             del self.options.shared
+        elif self.options.shared:
+            del self.options.fPIC
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
