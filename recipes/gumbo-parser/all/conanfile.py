@@ -28,7 +28,7 @@ class GumboParserConan(ConanFile):
         del self.settings.compiler.libcxx
         del self.settings.compiler.cppstd
         if self.settings.compiler == "Visual Studio":
-            raise ConanInvalidConfiguration("%s is not supported by Visual Studio" % self.name)
+            raise ConanInvalidConfiguration("This recipe does not support Visual Studio")
 
     def build_requirements(self):
         self.build_requires("automake/1.16.1")
