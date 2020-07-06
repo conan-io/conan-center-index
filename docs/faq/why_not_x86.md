@@ -2,7 +2,7 @@
 
 As described in the [Supported platforms and configurations](https://github.com/conan-io/conan-center-index/wiki/Supported-Platforms-And-Configurations), only the x86_64 architecture is available for download, the rest must be built from sources. The reasons behind this decision are:
 
-* Few users need different pre-built packages that are either x86_64, this number is less than 10% of total users (data obtained through the download counter from Bintray), and tends to decrease over the years;
+* Few users need different pre-built packages that are not x86_64 packages, this number is less than 10% of total users (data obtained through the download counter from Bintray), and tends to decrease over the years;
 * Some OS are putting the x86 as obsolete, examples [macOS](https://developer.apple.com/documentation/macos-release-notes/macos-catalina-10_15-release-notes) and Ubuntu 20.04;
 * For security reasons, most companies build their own packages from sources, even if they already have a pre-built version available, which further reduces the need for extra configurations;
 * Each recipe results around 130 packages, and this is only for x86_64, but not all packages are used, some settings remain with zero downloads throughout their life. So, imagine adding more settings that will be rarely used, but that will consume more resources as time and storage, this leaves us in an impractical situation.
