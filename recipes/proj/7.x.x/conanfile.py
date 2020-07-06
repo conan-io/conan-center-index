@@ -42,6 +42,10 @@ class ProjConan(ConanFile):
         if self.settings.os == "Windows":
             del self.options.fPIC
 
+    def configure(self):
+        if self.options.shared:
+            del self.options.fPIC
+
     def requirements(self):
         self.requires("sqlite3/3.31.1")
         if self.options.with_tiff:
