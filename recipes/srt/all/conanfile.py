@@ -4,7 +4,7 @@ import os
 
 class SttConan(ConanFile):
     name = "srt"
-    homepage = "https://github.com/Haivision/srt/tree/v1.4.1"
+    homepage = "https://github.com/Haivision"
     description = "Secure Reliable Transport (SRT) is an open source transport technology that optimizes streaming performance across unpredictable networks, such as the Internet."
     topics = ("conan", "srt", "ip", "transport")
     url = "https://github.com/conan-io/conan-center-index"
@@ -28,6 +28,10 @@ class SttConan(ConanFile):
 
     def config_options(self):
         if self.settings.os == "Windows":
+            del self.options.fPIC
+
+    def configure(self):
+        if self.options.shared:
             del self.options.fPIC
 
     def requirements(self):
