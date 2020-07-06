@@ -79,11 +79,13 @@ class FmtConan(ConanFile):
             del self.info.options.with_fmt_alias
 
     def package_info(self):
-        if self.options.with_fmt_alias:
-            self.cpp_info.defines.append("FMT_STRING_ALIAS=1")
         if self.options.header_only:
-            self.cpp_info.defines.append("FMT_HEADER_ONLY")
+            self.cpp_info.components["fmt-header-only"].defines.append("FMT_HEADER_ONLY=1")
+            if self.options.with_fmt_alias:
+                self.cpp_info.components["fmt-header-only"].defines.append("FMT_STRING_ALIAS=1")
         else:
             self.cpp_info.libs = tools.collect_libs(self)
+            if self.options.with_fmt_alias:
+                self.cpp_info.defines.append("FMT_STRING_ALIAS=1")
             if self.options.shared:
                 self.cpp_info.defines.append("FMT_SHARED")
