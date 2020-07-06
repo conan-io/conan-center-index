@@ -31,7 +31,6 @@ class GumboParserConan(ConanFile):
             raise ConanInvalidConfiguration("This recipe does not support Visual Studio")
 
     def build_requirements(self):
-        self.build_requires("automake/1.16.1")
         self.build_requires("libtool/2.4.6")
 
     def source(self):
