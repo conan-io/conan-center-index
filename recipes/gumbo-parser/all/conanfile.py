@@ -65,6 +65,7 @@ class GumboParserConan(ConanFile):
             os.unlink(la_file)
 
     def package_info(self):
-        self.cpp_info.libs = tools.collect_libs(self)
+        self.cpp_info.names["pkg_config"] = "gumbo"
+        self.cpp_info.libs = ["gumbo"]
         if self.settings.os == "Linux":
             self.cpp_info.system_libs.append("m")
