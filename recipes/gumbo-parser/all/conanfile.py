@@ -30,6 +30,10 @@ class GumboParserConan(ConanFile):
         if self.settings.compiler == "Visual Studio":
             raise ConanInvalidConfiguration("%s is not supported by Visual Studio" % self.name)
 
+    def build_requirements(self):
+        self.build_requires("automake/1.16.1")
+        self.build_requires("libtool/2.4.6")
+
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
         extracted_folder = "gumbo-parser-{0}".format(self.version)
