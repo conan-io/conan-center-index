@@ -18,9 +18,10 @@ int main (int argc, char **argv)
 
 	unsigned VersionMajor;
 	unsigned VersionMinor;
-	zbar_version(&VersionMajor, &VersionMinor);
+	unsigned VersionPatch;
+	zbar_version(&VersionMajor, &VersionMinor, &VersionPatch);
 
-	printf("Compiled ZBar version %d.%d \n", VersionMajor, VersionMinor);
+	printf("Compiled ZBar version %d.%d.%d \n", VersionMajor, VersionMinor, VersionPatch);
 
 	printf("ZBar Test Completed \n");
 

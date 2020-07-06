@@ -11,7 +11,6 @@ class zbarConan(ConanFile):
     topics = ("conan", "zbar", "bar codes")
     description = "ZBar is an open source software suite for reading bar codes\
                    from various sources, such as video streams, image files and raw intensity sensors"
-    exports_sources = ["patches/*"]
     settings = "os", "compiler", "build_type", "arch"
     options = {"shared": [True, False],
                "fPIC": [True, False],
@@ -65,6 +64,10 @@ class zbarConan(ConanFile):
             self._env_build.configure(args=env_args, configure_dir=self._source_subfolder)
         return self._env_build
 
+    def build_requirements(self):
+        self.build_requires("gettext/0.20.1")
+        self.build_requires("libtool/2.4.6")
+
     def requirements(self):
         if self.options.with_jpeg:
             self.requires("libjpeg/9d")
@@ -89,8 +92,8 @@ class zbarConan(ConanFile):
         os.rename(extracted_dir, self._source_subfolder)
 
     def build(self):
-        for patch in self.conan_data["patches"][self.version]:
-            tools.patch(**patch)
+        with tools.chdir(self._source_subfolder):
+            self.run("autoreconf -fiv", run_environment=tools.os_info.is_windows)
         env_build = self._configure_autotools()
         env_build.make()
 
