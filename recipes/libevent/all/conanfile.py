@@ -100,6 +100,6 @@ class LibeventConan(ConanFile):
             self.cpp_info.system_libs.extend(["rt"])
 
         if self.settings.os == "Windows":
-            self.cpp_info.system_libs.append("ws2_32")
+            self.cpp_info.system_libs.extend(["ws2_32", "Iphlpapi"])
             if self.options.with_openssl:
                 self.cpp_info.defines.append("EVENT__HAVE_OPENSSL=1")
