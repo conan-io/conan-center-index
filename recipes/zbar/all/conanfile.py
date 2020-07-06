@@ -98,7 +98,7 @@ class zbarConan(ConanFile):
         env_build.make()
 
     def package(self):
-        self.copy("LICENSE", src=self._source_subfolder, dst="licenses")
+        self.copy("COPYING", src=self._source_subfolder, dst="licenses")
         env_build = self._configure_autotools()
         env_build.install()
         tools.rmdir(os.path.join(self.package_folder, "share"))
