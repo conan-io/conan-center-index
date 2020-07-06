@@ -83,6 +83,11 @@ class FlatccConan(ConanFile):
     def package(self):
         cmake = self._configure_cmake()
         cmake.install()
+        if self.settings.build_type == "Debug" and not tools.os_info.is_windows:
+            debug_suffix = "_d" if self.settings.build_type == "Debug" else ""
+            exe_suffix = ".exe" if self.settings.os == "Windows" else ""
+            os.rename(os.path.join(self.package_folder, "bin", "flatcc%s%s" % (debug_suffix, exe_suffix)),
+                      os.path.join(self.package_folder, "bin", "flatcc%s" % exe_suffix))
         # Copy license file
         self.copy("LICENSE", dst="licenses", src=self._source_subfolder)
 
@@ -90,9 +95,10 @@ class FlatccConan(ConanFile):
         bin_path = os.path.join(self.package_folder, "bin")
         self.output.info('Appending PATH environment variable: %s' % bin_path)
         self.env_info.PATH.append(bin_path)
+        debug_suffix = "_d" if self.settings.build_type == "Debug" else ""
         if not self.options.runtime_lib_only:
-            self.cpp_info.libs.append("flatcc")
-        self.cpp_info.libs.append("flatccrt")
+            self.cpp_info.libs.append("flatcc%s" % debug_suffix)
+        self.cpp_info.libs.append("flatccrt%s" % debug_suffix)
         if tools.os_info.is_linux:
             self.env_info.LD_LIBRARY_PATH.append(os.path.join(self.package_folder, "lib"))
         if tools.os_info.is_macos:
