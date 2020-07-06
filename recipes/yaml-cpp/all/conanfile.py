@@ -32,7 +32,8 @@ class YamlCppConan(ConanFile):
             del self.options.fPIC
 
     def configure(self):
-        tools.check_min_cppstd(self, "11")
+        if self.settings.compiler.cppstd:
+            tools.check_min_cppstd(self, "11")
 
     def _configure_cmake(self):
         if self._cmake:
