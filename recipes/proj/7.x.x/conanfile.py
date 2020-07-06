@@ -89,9 +89,6 @@ class ProjConan(ConanFile):
         cmake.install()
         tools.rmdir(os.path.join(self.package_folder, "share"))
         tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
-        for data_file in glob.glob(os.path.join(self.package_folder, "res", "*")):
-            if not data_file.endswith("proj.db"):
-                os.remove(data_file)
 
     def package_info(self):
         self.cpp_info.names["cmake_find_package"] = "PROJ"
