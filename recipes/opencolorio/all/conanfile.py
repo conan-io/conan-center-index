@@ -46,9 +46,11 @@ class OpenEXRConan(ConanFile):
         self._cmake.definitions["OCIO_BUILD_DOCS"] = False
         self._cmake.definitions["OCIO_BUILD_TESTS"] = False
         self._cmake.definitions["OCIO_BUILD_PYGLUE"] = False
-        self._cmake.definitions["USE_EXTERNAL_TINYXML"] = False
         self._cmake.definitions["USE_EXTERNAL_YAML"] = True
         self._cmake.definitions["USE_EXTERNAL_LCMS"] = True
+
+        # OpenColorIO uses old TinyXML, not TinyXML 2 available in CCI.
+        self._cmake.definitions["USE_EXTERNAL_TINYXML"] = False
         self._cmake.definitions["TINYXML_OBJECT_LIB_EMBEDDED"] = True
         self._cmake.definitions["YAML_CPP_VERSION"] = self.deps_cpp_info["yaml-cpp"].version
         
