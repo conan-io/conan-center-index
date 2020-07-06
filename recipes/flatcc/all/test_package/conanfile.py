@@ -12,6 +12,10 @@ class FlatccTestConan(ConanFile):
         cmake.configure()
         cmake.build()
 
+    def imports(self):
+        self.copy("*.dll", "", "bin")
+        self.copy("*.dylib", "", "lib")
+
     def test(self):
         if not tools.cross_building(self):
             bin_path = os.path.join(self.build_folder, "bin", "monster")
