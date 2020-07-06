@@ -91,19 +91,27 @@ class ProjConan(ConanFile):
         tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
 
     def package_info(self):
+        # TODO: also define deprecated PROJ4::proj alias?
         self.cpp_info.names["cmake_find_package"] = "PROJ"
         self.cpp_info.names["cmake_find_package_multi"] = "PROJ"
-        self.cpp_info.libs = tools.collect_libs(self)
+        self.cpp_info.components["projlib"].names["cmake_find_package"] = "proj"
+        self.cpp_info.components["projlib"].names["cmake_find_package_multi"] = "proj"
+        self.cpp_info.components["projlib"].libs = tools.collect_libs(self)
         if self.settings.os == "Linux":
-            self.cpp_info.system_libs.append("m")
+            self.cpp_info.components["projlib"].system_libs.append("m")
             if self.options.threadsafe:
-                self.cpp_info.system_libs.append("pthread")
+                self.cpp_info.components["projlib"].system_libs.append("pthread")
         if self.settings.os == "Windows":
-            self.cpp_info.system_libs.append("shell32")
+            self.cpp_info.components["projlib"].system_libs.append("shell32")
         if not self.options.shared and self._stdcpp_library:
-            self.cpp_info.system_libs.append(self._stdcpp_library)
+            self.cpp_info.components["projlib"].system_libs.append(self._stdcpp_library)
+        self.cpp_info.components["projlib"].requires.append("sqlite3::sqlite3")
+        if self.options.with_tiff:
+            self.cpp_info.components["projlib"].requires.append("libtiff::libtiff")
+        if self.options.with_curl:
+            self.cpp_info.components["projlib"].requires.append("libcurl::libcurl")
         if self.options.shared and self.settings.compiler == "Visual Studio":
-            self.cpp_info.defines.append("PROJ_MSVC_DLL_IMPORT")
+            self.cpp_info.components["projlib"].defines.append("PROJ_MSVC_DLL_IMPORT")
 
         res_path = os.path.join(self.package_folder, "res")
         self.output.info("Appending PROJ_LIB environment variable: {}".format(res_path))
