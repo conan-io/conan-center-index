@@ -63,17 +63,13 @@ class FmtConan(ConanFile):
     def package(self):
         self.copy("LICENSE.rst", dst="licenses", src=self._source_subfolder)
         if self.options.header_only:
-            src_dir = os.path.join(self._source_subfolder, "src")
-            header_dir = os.path.join(self._source_subfolder, "include")
-            dst_dir = os.path.join("include", "fmt")
-            self.copy("*.h", dst="include", src=header_dir)
-            self.copy("*.cc", dst=dst_dir, src=src_dir)
+            self.copy("*.h", dst="include", src=os.path.join(self._source_subfolder, "include"))
         else:
             cmake = self._configure_cmake()
             cmake.install()
-        tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
-        tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
-        tools.rmdir(os.path.join(self.package_folder, "share"))
+            tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
+            tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
+            tools.rmdir(os.path.join(self.package_folder, "share"))
 
     def package_id(self):
         if self.options.header_only:
