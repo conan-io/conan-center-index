@@ -20,6 +20,7 @@ class LibeventConan(ConanFile):
                        "with_openssl": True,
                        "disable_threads": False}
     generators = "cmake", "cmake_find_package"
+    short_paths = True
 
     _cmake = None
     _source_subfolder = "source_subfolder"
