@@ -10,15 +10,10 @@ class GreatestConan(ConanFile):
     homepage = "https://github.com/silentbicycle/greatest"
     topics = ("conan", "testing", "testing-framework", "unit-testing", "header-only")
     no_copy_source = True
-    settings = "compiler"
 
     @property
     def _source_subfolder(self):
         return "source_subfolder"
-
-    def configure(self):
-        del self.settings.compiler.libcxx
-        del self.settings.compiler.cppstd
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
