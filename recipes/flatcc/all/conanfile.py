@@ -102,4 +102,4 @@ class FlatccConan(ConanFile):
         if tools.os_info.is_linux:
             self.env_info.LD_LIBRARY_PATH.append(os.path.join(self.package_folder, "lib"))
         if tools.os_info.is_macos:
-            self.env_info.DYLD_FALLBACK_LIBRARY_PATH.append(os.path.join(self.package_folder, "lib"))
+            self.env_info.DYLD_LIBRARY_PATH.append(os.path.join(self.package_folder, "lib"))
