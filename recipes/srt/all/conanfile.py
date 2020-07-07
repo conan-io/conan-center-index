@@ -10,7 +10,7 @@ class SttConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     license = "MPL-2.0"
     exports_sources = ["CMakeLists.txt", "patches/*"]
-    generators = "cmake", "cmake_find_package"
+    generators = "cmake"
     settings = "os", "compiler", "build_type", "arch"
     options = {"shared": [True, False], "fPIC": [True, False]}
     default_options = {"shared": False, "fPIC": True}
