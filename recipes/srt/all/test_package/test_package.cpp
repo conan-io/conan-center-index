@@ -27,6 +27,7 @@ int main()
    std::string service("9000");
    if (0 != getaddrinfo(NULL, service.c_str(), &hints, &res))
    {
+      srt_cleanup();
       return 1;
    }
 
