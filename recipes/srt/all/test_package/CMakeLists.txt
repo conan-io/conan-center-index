@@ -7,4 +7,4 @@ conan_basic_setup(TARGETS)
 find_package(srt REQUIRED)
 
 add_executable(${CMAKE_PROJECT_NAME} test_package.cpp)
-target_link_libraries(${CMAKE_PROJECT_NAME} CONAN_PKG::srt)
+target_link_libraries(${CMAKE_PROJECT_NAME} srt::srt)
