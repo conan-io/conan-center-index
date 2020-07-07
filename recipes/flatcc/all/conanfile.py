@@ -21,7 +21,7 @@ class FlatccConan(ConanFile):
                 "fast_double": [True, False],
                 "ignore_const_condition": [True, False],
     }
-    default_options = { "shared": True,
+    default_options = { "shared": False,
                         "fPIC": True,
                         "portable": False,
                         "gnu_posix_memalign": True,
