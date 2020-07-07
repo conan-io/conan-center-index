@@ -243,9 +243,9 @@ class Libxml2Conan(ConanFile):
         if not self.options.shared:
             self.cpp_info.defines = ["LIBXML_STATIC"]
         if self.settings.os == "Linux" or self.settings.os == "Macos":
-            self.cpp_info.libs.append('m')
+            self.cpp_info.system_libs.append('m')
         if self.settings.os == "Windows":
-            self.cpp_info.libs.append('ws2_32')
+            self.cpp_info.system_libs.append('ws2_32')
         self.cpp_info.names["cmake_find_package"] = "LibXml2"
         self.cpp_info.names["cmake_find_package_multi"] = "LibXml2"
         self.cpp_info.names["pkg_config"] = "libxml-2.0"
