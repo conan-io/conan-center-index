@@ -103,6 +103,8 @@ class ProjConan(ConanFile):
                 self.cpp_info.components["projlib"].system_libs.append("pthread")
         if self.settings.os == "Windows":
             self.cpp_info.components["projlib"].system_libs.append("shell32")
+            if tools.Version(self.version) >= "7.1.0":
+                self.cpp_info.components["projlib"].system_libs.append("Ole32")
         if not self.options.shared and tools.stdcpp_library(self):
             self.cpp_info.components["projlib"].system_libs.append(tools.stdcpp_library(self))
         self.cpp_info.components["projlib"].requires.append("sqlite3::sqlite3")
