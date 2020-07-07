@@ -2,9 +2,9 @@ from conans import ConanFile, CMake, tools
 import os
 
 
-class SttConan(ConanFile):
+class SrtConan(ConanFile):
     name = "srt"
-    homepage = "https://github.com/Haivision"
+    homepage = "https://github.com/Haivision/srt"
     description = "Secure Reliable Transport (SRT) is an open source transport technology that optimizes streaming performance across unpredictable networks, such as the Internet."
     topics = ("conan", "srt", "ip", "transport")
     url = "https://github.com/conan-io/conan-center-index"
