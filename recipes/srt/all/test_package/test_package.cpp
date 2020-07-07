@@ -34,6 +34,7 @@ int main()
    srt_close(serv);
 
    // use this function to release the UDT library
+   freeaddrinfo(res);
    srt_cleanup();
    return 0;
 }
