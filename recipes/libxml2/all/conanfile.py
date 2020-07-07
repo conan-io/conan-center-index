@@ -108,11 +108,11 @@ class Libxml2Conan(ConanFile):
             fix_library(self.options.icu, 'icu', 'advapi32.lib sicuuc.lib sicuin.lib sicudt.lib')
             fix_library(self.options.icu, 'icu', 'icuuc.lib icuin.lib icudt.lib')
 
-            self.run("nmake /f Makefile.msvc")
+            self.run("nmake /f Makefile.msvc libxml libxmla libxmladll")
 
     def _package_msvc(self):
         with self._msvc_build_environment():
-            self.run("nmake /f Makefile.msvc install")
+            self.run("nmake /f Makefile.msvc install-libs")
 
     def _build_mingw(self):
         with tools.chdir(os.path.join(self._source_subfolder, 'win32')):
