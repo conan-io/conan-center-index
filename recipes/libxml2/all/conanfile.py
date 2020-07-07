@@ -111,7 +111,7 @@ class Libxml2Conan(ConanFile):
                     'include="%s"' % ";".join(self.deps_cpp_info.include_paths),
                     'lib="%s"' % ";".join(self.deps_cpp_info.lib_paths)]
 
-            for name in self.option_names:
+            for name in self._option_names:
                 cname = {"mem-debug": "mem_debug",
                          "run-debug": "run_debug",
                          "docbook": "docb"}.get(name, name)
