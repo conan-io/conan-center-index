@@ -3,23 +3,6 @@ from conans.errors import ConanInvalidConfiguration
 import os
 
 
-def sort_libs(correct_order, libs, lib_suffix="", reverse_result=False):
-    # Add suffix for correct string matching
-    correct_order[:] = [s.__add__(lib_suffix) for s in correct_order]
-
-    result = []
-    for expectedLib in correct_order:
-        for lib in libs:
-            if expectedLib == lib:
-                result.append(lib)
-
-    if reverse_result:
-        # Linking happens in reversed order
-        result.reverse()
-
-    return result
-
-
 class CorradeConan(ConanFile):
     name = "corrade"
     description = "Corrade is a multiplatform utility library written in C++11/C++14."
@@ -62,10 +45,10 @@ class CorradeConan(ConanFile):
             del self.options.fPIC
 
     def configure(self):
-        if self.settings.compiler == "Visual Studio" and tools.Version(self.settings.compiler.version.value) < 14:
+        if self.settings.compiler == "Visual Studio" and tools.Version(self.settings.compiler.version) < 14:
             raise ConanInvalidConfiguration("Corrade requires Visual Studio version 14 or greater")
-        if tools.cross_building(self.settings):
-            raise ConanInvalidConfiguration("This Corrade recipe doesn't support cross building yet")
+        if tools.cross_building(self):
+            self.output.warn("This Corrade recipe could not be prepared for cross building")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
@@ -79,10 +62,10 @@ class CorradeConan(ConanFile):
             self._cmake.definitions["BUILD_DEPRECARED"] = self.options["build_deprecated"]
             self._cmake.definitions["WITH_INTERCONNECT"] = self.options["with_interconnect"]
             self._cmake.definitions["WITH_MAIN"] = self.options["with_main"]
-            self._cmake.definitions["WITH_PLUGINMANAGER"] = self.options["with_pluginmanager"] 
+            self._cmake.definitions["WITH_PLUGINMANAGER"] = self.options["with_pluginmanager"]
             self._cmake.definitions["WITH_TESTSUITE"] = self.options["with_testsuite"]
             self._cmake.definitions["WITH_UTILITY"] = self.options["with_utility"]
-            self._cmake.definitions["WITH_RC"] = "ON"  
+            self._cmake.definitions["WITH_RC"] = "ON"
 
             # Corrade uses suffix on the resulting "lib"-folder when running cmake.install()
             # Set it explicitly to empty, else Corrade might set it implicitly (eg. to "64")
@@ -111,6 +94,21 @@ class CorradeConan(ConanFile):
         self.copy("CorradeLibSuffix.cmake", src=share_cmake, dst=os.path.join(self.package_folder, "lib", "cmake", "Corrade"))
         tools.rmdir(os.path.join(self.package_folder, "share"))
 
+    def _sort_libs(self, correct_order, libs, lib_suffix="", reverse_result=False):
+        # Add suffix for correct string matching
+        correct_order[:] = [s.__add__(lib_suffix) for s in correct_order]
+
+        result = []
+        for expectedLib in correct_order:
+            for lib in libs:
+                if expectedLib == lib:
+                    result.append(lib)
+
+        if reverse_result:
+            # Linking happens in reversed order
+            result.reverse()
+        return result
+
     def package_info(self):
         self.cpp_info.names["cmake_find_package"] = "Corrade"
         self.cpp_info.names["cmake_find_package_multi"] = "Corrade"
@@ -134,7 +132,7 @@ class CorradeConan(ConanFile):
         # Sort all built libs according to above, and reverse result for correct link order
         suffix = "-d" if self.settings.build_type == "Debug" else ""
         builtLibs = tools.collect_libs(self)
-        self.cpp_info.libs = sort_libs(correct_order=allLibs, libs=builtLibs, lib_suffix=suffix, reverse_result=True)
+        self.cpp_info.libs = self._sort_libs(allLibs, builtLibs, suffix, True)
         if self.settings.os == "Linux":
             self.cpp_info.system_libs = ["m", "dl"]
 
