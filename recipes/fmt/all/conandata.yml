@@ -33,3 +33,6 @@ patches:
   "6.1.0":
     - patch_file: "patches/fix-mingw-msvc2015-export-assert-fail-6.1.0.patch"
       base_path: "source_subfolder"
+  "7.0.0":
+    - patch_file: "patches/fix-export-vformat-7.0.0.patch"
+      base_path: "source_subfolder"
