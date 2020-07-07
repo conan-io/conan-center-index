@@ -12,7 +12,6 @@ class Libxml2Conan(ConanFile):
     homepage = "https://xmlsoft.org"
     license = "MIT"
     settings = "os", "arch", "compiler", "build_type"
-    exports_sources = "patches/**"
     generators = "pkg_config"
     options = {"shared": [True, False],
                "fPIC": [True, False],
@@ -39,6 +38,10 @@ class Libxml2Conan(ConanFile):
             self.requires("libiconv/1.16")
         if self.options.icu:
             self.requires("icu/64.2")
+
+    def build_requirements(self):
+        if self.settings.compiler != "Visual Studio" and tools.os_info.is_windows and os.environ.get("CONAN_BASH_PATH", None) is None:
+            self.build_requires("msys2/20190524")
 
     @property
     def _is_msvc(self):
@@ -114,34 +117,6 @@ class Libxml2Conan(ConanFile):
         with self._msvc_build_environment():
             self.run("nmake /f Makefile.msvc install-libs")
 
-    def _build_mingw(self):
-        with tools.chdir(os.path.join(self._source_subfolder, 'win32')):
-            debug = "yes" if self.settings.build_type == "Debug" else "no"
-            static = "no" if self.options.shared else "yes"
-
-            args = ["cscript",
-                    "configure.js",
-                    "zlib=%d" % (1 if self.options.zlib else 0),
-                    "lzma=%d" % (1 if self.options.lzma else 0),
-                    "iconv=%d" % (1 if self.options.iconv else 0),
-                    "icu=%d" % (1 if self.options.icu else 0),
-                    "compiler=mingw",
-                    "prefix=%s" % self.package_folder,
-                    "debug=%s" % debug,
-                    "static=%s" % static,
-                    'include="%s"' % " -I".join(self.deps_cpp_info.include_paths),
-                    'lib="%s"' % " -L".join(self.deps_cpp_info.lib_paths)]
-            configure_command = ' '.join(args)
-            self.output.info(configure_command)
-            self.run(configure_command)
-
-            self.run("mingw32-make -f Makefile.mingw")
-
-    def _package_mingw(self):
-        tools.mkdir(os.path.join(self.package_folder, "include", "libxml2"))
-        with tools.chdir(os.path.join(self._source_subfolder, 'win32')):
-            self.run("mingw32-make -f Makefile.mingw install")
-
     def _configure_autotools(self):
         if self._autotools:
             return self._autotools
@@ -174,9 +149,6 @@ class Libxml2Conan(ConanFile):
         return self._autotools
 
     def _patch_sources(self):
-        for patch in self.conan_data["patches"][self.version]:
-            tools.patch(**patch)
-
         # Break dependency of install on build
         for makefile in ("Makefile.mingw", "Makefile.msvc"):
             tools.replace_in_file(os.path.join(self._source_subfolder, "win32", makefile),
@@ -187,8 +159,6 @@ class Libxml2Conan(ConanFile):
         self._patch_sources()
         if self._is_msvc:
             self._build_msvc()
-        elif self._is_mingw:
-            self._build_mingw()
         else:
             autotools = self._configure_autotools()
             autotools.make(["libxml2.la"])
@@ -198,8 +168,6 @@ class Libxml2Conan(ConanFile):
         self.copy("COPYING", src=self._source_subfolder, dst="licenses", ignore_case=True, keep_path=False)
         if self._is_msvc:
             self._package_msvc()
-        elif self._is_mingw:
-            self._package_mingw()
         else:
             autotools = self._configure_autotools()
             autotools.make(["install-libLTLIBRARIES", "install-data"])
@@ -221,14 +189,6 @@ class Libxml2Conan(ConanFile):
             pdb_files = glob.glob(os.path.join(self.package_folder, 'bin', '*.pdb'), recursive=True)
             for pdb in pdb_files:
                 os.unlink(pdb)
-        elif self._is_mingw:
-            if self.options.shared:
-                os.unlink(os.path.join(self.package_folder, "lib", "libxml2.a"))
-                os.rename(os.path.join(self.package_folder, "lib", "libxml2.lib"),
-                          os.path.join(self.package_folder, "lib", "libxml2.a"))
-            else:
-                os.unlink(os.path.join(self.package_folder, "bin", "libxml2.dll"))
-                os.unlink(os.path.join(self.package_folder, "lib", "libxml2.lib"))
 
         tools.rmdir(os.path.join(self.package_folder, 'share'))
         tools.rmdir(os.path.join(self.package_folder, 'lib', 'cmake'))
