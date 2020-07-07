@@ -34,26 +34,23 @@ class FlatccConan(ConanFile):
                         "ignore_const_condition": False
     }
     settings = "os", "arch", "compiler", "build_type"
-    no_copy_source = True
     generators = "cmake"
     exports_sources = ["CMakeLists.txt"]
-    
+
     _cmake = None
 
 
     @property
     def _source_subfolder(self):
         return "source_subfolder"
-        
+
     @property
     def _build_subfolder(self):
-        return "build_subfolder"    
+        return "build_subfolder"
 
     def configure(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
-            #Visual Studio links with wrong runtime if we run cmake directly on the source folder
-            self.no_copy_source = False
             if self.settings.compiler == "Visual Studio" and self.options.shared:
                 #Building flatcc shared libs with Visual Studio is broken
                 raise ConanInvalidConfiguration("Building flatcc libraries shared is not supported")
