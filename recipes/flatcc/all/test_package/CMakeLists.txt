@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.12)
+cmake_minimum_required(VERSION 2.8)
 project(flatcc_example)
 
 include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
@@ -20,4 +20,3 @@ add_custom_command (
 add_executable(monster monster.c)
 add_dependencies(monster gen_monster_fbs)
 target_link_libraries(monster ${CONAN_LIBS})
-
