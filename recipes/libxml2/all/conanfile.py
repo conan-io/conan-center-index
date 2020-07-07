@@ -166,7 +166,7 @@ class Libxml2Conan(ConanFile):
         else:
             configure_args.extend(['--enable-static', '--disable-shared'])
 
-        for name in self.option_names:
+        for name in self._option_names:
             value = getattr(self.options, name)
             value = ("--with-%s" % name) if value else ("--without-%s" % name)
             configure_args.append(value)
