@@ -6,7 +6,7 @@ from conans.errors import ConanInvalidConfiguration
 class LibCoapConan(ConanFile):
     name = "libcoap"
     license = "BSD-2-Clause"
-    homepage = "https://github.com/gocarlos/libcoap/"
+    homepage = "https://github.com/obgm/libcoap"
     url = "https://github.com/conan-io/conan-center-index"
     description = """A CoAP (RFC 7252) implementation in C"""
     topics = ("coap")
