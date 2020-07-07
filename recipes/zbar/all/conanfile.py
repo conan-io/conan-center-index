@@ -65,7 +65,6 @@ class zbarConan(ConanFile):
         return self._env_build
 
     def build_requirements(self):
-        self.build_requires("gettext/0.20.1")
         self.build_requires("libtool/2.4.6")
 
     def requirements(self):
@@ -93,7 +92,8 @@ class zbarConan(ConanFile):
 
     def build(self):
         with tools.chdir(self._source_subfolder):
-            self.run("autoreconf -fiv", run_environment=tools.os_info.is_windows)
+            with tools.environment_append({"AUTOMAKE_CONAN_INCLUDES": ["/usr/share/aclocal"]}):
+                self.run("autoreconf -fiv")
         env_build = self._configure_autotools()
         env_build.make()
 
