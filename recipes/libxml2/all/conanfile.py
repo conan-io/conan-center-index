@@ -13,18 +13,44 @@ class Libxml2Conan(ConanFile):
     license = "MIT"
     settings = "os", "arch", "compiler", "build_type"
     generators = "pkg_config"
-    options = {"shared": [True, False],
-               "fPIC": [True, False],
-               "zlib": [True, False],
-               "lzma": [True, False],
-               "iconv": [True, False],
-               "icu": [True, False]}
+
+    # from ./configure and ./win32/configure.js
     default_options = {'shared': False,
                        'fPIC': True,
+                       "c14n": True,
+                       "catalog": True,
+                       "docbook": True,
+                       "ftp": True,
+                       "http": True,
+                       "html": True,
                        "iconv": True,
+                       "icu": False,
+                       "iso8859x": True,
+                       "legacy": True,
+                       "mem-debug": False,
+                       "output": True,
+                       "pattern": True,
+                       "push": True,
+                       "python": False,
+                       "reader": True,
+                       "regexps": True,
+                       "run-debug": False,
+                       "sax1": True,
+                       "schemas": True,
+                       "schematron": True,
+                       "threads": True,
+                       "tree": True,
+                       "valid": True,
+                       "writer": True,
+                       "xinclude": True,
+                       "xpath": True,
+                       "xptr": True,
                        "zlib": True,
                        "lzma": False,
-                       "icu": False}
+                       }
+
+    options = {name: [True, False] for name in default_options.keys()}
+    option_names = [name for name in default_options.keys() if name not in ["shared", "fPIC"]]
 
     _autotools = None
     _source_subfolder = "source_subfolder"
@@ -77,10 +103,6 @@ class Libxml2Conan(ConanFile):
 
             args = ["cscript",
                     "configure.js",
-                    "zlib=%d" % (1 if self.options.zlib else 0),
-                    "lzma=%d" % (1 if self.options.lzma else 0),
-                    "iconv=%d" % (1 if self.options.iconv else 0),
-                    "icu=%d" % (1 if self.options.icu else 0),
                     "compiler=msvc",
                     "prefix=%s" % self.package_folder,
                     "cruntime=/%s" % self.settings.compiler.runtime,
@@ -88,6 +110,15 @@ class Libxml2Conan(ConanFile):
                     "static=%s" % static,
                     'include="%s"' % ";".join(self.deps_cpp_info.include_paths),
                     'lib="%s"' % ";".join(self.deps_cpp_info.lib_paths)]
+
+            for name in self.option_names:
+                cname = {"mem-debug": "mem_debug",
+                         "run-debug": "run_debug",
+                         "docbook": "docb"}.get(name, name)
+                value = getattr(self.options, name)
+                value = "yes" if value else "no"
+                args.append("%s=%s" % (cname, value))
+
             configure_command = ' '.join(args)
             self.output.info(configure_command)
             self.run(configure_command)
@@ -127,17 +158,18 @@ class Libxml2Conan(ConanFile):
         # fix rpath
         if self.settings.os == "Macos":
             tools.replace_in_file(os.path.join(self._source_subfolder, "configure"), r"-install_name \$rpath/", "-install_name ")
-        configure_args = ['--with-python=no', '--prefix=%s' % full_install_subfolder]
+        configure_args = ['--prefix=%s' % full_install_subfolder]
         if self._autotools.fpic:
             configure_args.extend(['--with-pic'])
         if self.options.shared:
             configure_args.extend(['--enable-shared', '--disable-static'])
         else:
             configure_args.extend(['--enable-static', '--disable-shared'])
-        configure_args.extend(['--with-zlib' if self.options.zlib else '--without-zlib'])
-        configure_args.extend(['--with-lzma' if self.options.lzma else '--without-lzma'])
-        configure_args.extend(['--with-iconv' if self.options.iconv else '--without-iconv'])
-        configure_args.extend(['--with-icu' if self.options.icu else '--without-icu'])
+
+        for name in self.option_names:
+            value = getattr(self.options, name)
+            value = ("--with-%s" % name) if value else ("--without-%s" % name)
+            configure_args.append(value)
 
         # Disable --build when building for iPhoneSimulator. The configure script halts on
         # not knowing if it should cross-compile.
