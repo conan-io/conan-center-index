@@ -8,7 +8,7 @@ class Libxml2Conan(ConanFile):
     name = "libxml2"
     url = "https://github.com/conan-io/conan-center-index"
     description = "libxml2 is a software library for parsing XML documents"
-    topics = "XML", "parser", "validation"
+    topics = ("XML", "parser", "validation")
     homepage = "https://xmlsoft.org"
     license = "MIT"
     settings = "os", "arch", "compiler", "build_type"
