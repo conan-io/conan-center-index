@@ -35,8 +35,11 @@ class FlatccConan(ConanFile):
     }
     settings = "os", "arch", "compiler", "build_type"
     no_copy_source = True
-
+    generators = "cmake"
+    exports_sources = ["CMakeLists.txt"]
+    
     _cmake = None
+    _build_subfolder = "build_subfolder"
 
 
     @property
@@ -78,7 +81,8 @@ class FlatccConan(ConanFile):
             self._cmake.definitions["FLATCC_FAST_DOUBLE"] = self.options.fast_double
             self._cmake.definitions["FLATCC_IGNORE_CONST_COND"] = self.options.ignore_const_condition
             self._cmake.definitions["FLATCC_TEST"] = False
-            self._cmake.configure(source_folder=os.path.join(self.source_folder, self._source_subfolder))
+            #self._cmake.configure(source_folder=os.path.join(self.source_folder, self._source_subfolder))
+            self._cmake.configure(build_folder=self._build_subfolder)
         return self._cmake
 
     def build(self):
