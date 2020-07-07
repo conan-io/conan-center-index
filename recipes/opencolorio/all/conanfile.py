@@ -24,7 +24,8 @@ class OpenEXRConan(ConanFile):
             del self.options.fPIC
 
     def configure(self):
-        tools.check_min_cppstd(self, "11")
+        if self.settings.compiler.cppstd:
+            tools.check_min_cppstd(self, "11")
     
     def requirements(self):
         self.requires("lcms/2.11")
@@ -42,7 +43,7 @@ class OpenEXRConan(ConanFile):
 
         self._cmake.definitions["OCIO_BUILD_SHARED"] = self.options.shared
         self._cmake.definitions["OCIO_BUILD_STATIC"] = not self.options.shared
-        self._cmake.definitions["OCIO_BUILD_APPS"] = False
+        self._cmake.definitions["OCIO_BUILD_APPS"] = True
         self._cmake.definitions["OCIO_BUILD_DOCS"] = False
         self._cmake.definitions["OCIO_BUILD_TESTS"] = False
         self._cmake.definitions["OCIO_BUILD_PYGLUE"] = False
@@ -73,11 +74,11 @@ class OpenEXRConan(ConanFile):
 
         if not self.options.shared:
             self.copy("*", src=os.path.join(self.package_folder, "lib", "static"), dst="lib")
-            shutil.rmtree(path=os.path.join(self.package_folder, "lib", "static"))
+            tools.rmdir(os.path.join(self.package_folder, "lib", "static"))
 
-        shutil.rmtree(path=os.path.join(self.package_folder, "cmake"))
-        shutil.rmtree(path=os.path.join(self.package_folder, "lib", "pkgconfig"))
-        shutil.rmtree(path=os.path.join(self.package_folder, "share"))
+        tools.rmdir(os.path.join(self.package_folder, "cmake"))
+        tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
+        tools.rmdir(os.path.join(self.package_folder, "share"))
         os.remove(os.path.join(self.package_folder, "OpenColorIOConfig.cmake"))
 
         self.copy("LICENSE", src=self._source_subfolder, dst="licenses")
