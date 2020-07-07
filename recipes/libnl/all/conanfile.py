@@ -61,7 +61,6 @@ class LibNlConan(ConanFile):
         la_pattern = os.path.join(self.package_folder, "lib", "**", "*.la")
         la_files = glob.glob(la_pattern, recursive=True)
         for next_file in la_files:
-            self.output.info("removing %s" % next_file)
             os.remove(next_file)
         tools.rmdir(os.path.join(self.package_folder, "share"))
         tools.rmdir(os.path.join(self.package_folder, "etc"))
