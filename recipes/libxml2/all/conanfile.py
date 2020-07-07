@@ -191,7 +191,7 @@ class Libxml2Conan(ConanFile):
             self._build_mingw()
         else:
             autotools = self._configure_autotools()
-            autotools.make()
+            autotools.make(["libxml2.la"])
 
     def package(self):
         # copy package license
@@ -202,7 +202,7 @@ class Libxml2Conan(ConanFile):
             self._package_mingw()
         else:
             autotools = self._configure_autotools()
-            autotools.install()
+            autotools.make(["install-libLTLIBRARIES", "install-data"])
             os.unlink(os.path.join(self.package_folder, 'lib', 'libxml2.la'))
 
         for prefix in ["run", "test"]:
