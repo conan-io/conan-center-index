@@ -70,4 +70,4 @@ class LibNlConan(ConanFile):
     def package_info(self):
         self.cpp_info.includedirs = [os.path.join('include', 'libnl3')]
         self.cpp_info.libs = ["nl-3", "nl-cli-3", "nl-genl-3", "nl-idiag-3", "nl-nf-3", "nl-route-3"]
-        self.cpp_info.system_libs = ["m"]
+        self.cpp_info.system_libs = ["pthread", "m"]
