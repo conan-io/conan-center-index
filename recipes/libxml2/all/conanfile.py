@@ -50,7 +50,7 @@ class Libxml2Conan(ConanFile):
                        }
 
     options = {name: [True, False] for name in default_options.keys()}
-    option_names = [name for name in default_options.keys() if name not in ["shared", "fPIC"]]
+    _option_names = [name for name in default_options.keys() if name not in ["shared", "fPIC"]]
 
     _autotools = None
     _source_subfolder = "source_subfolder"
