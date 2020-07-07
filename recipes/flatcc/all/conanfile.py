@@ -46,13 +46,17 @@ class FlatccConan(ConanFile):
     def configure(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
-        if self.settings.compiler == "Visual Studio" and self.options.shared:
-            #Building flatcc shared libs with Visual Studio is broken
-            raise ConanInvalidConfiguration("Building flatcc libraries shared is not supported")
-        if self.settings.os == "Windows" and self.settings.compiler == "gcc":
-            raise ConanInvalidConfiguration("Building flatcc with MinGW is not supported")
+            #Visual Studio links with wrong runtime if we run cmake directly on the source folder
+            self.no_copy_source = False
+            if self.settings.compiler == "Visual Studio" and self.options.shared:
+                #Building flatcc shared libs with Visual Studio is broken
+                raise ConanInvalidConfiguration("Building flatcc libraries shared is not supported")
+            if self.settings.compiler == "gcc":
+                raise ConanInvalidConfiguration("Building flatcc with MinGW is not supported")
         if self.settings.os == "Macos" and self.options.shared:
             raise ConanInvalidConfiguration("Building flatcc shared on Macos is currently not supported due to Systems Integrity Protection problems")
+        if self.options.shared:
+            del self.options.fPIC
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
