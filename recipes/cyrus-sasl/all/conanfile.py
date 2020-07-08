@@ -60,10 +60,10 @@ class CyrusSaslConan(ConanFile):
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
-        del self.settings.compiler.libcxx
-        del self.settings.compiler.cppstd
 
     def configure(self):
+        del self.settings.compiler.libcxx
+        del self.settings.compiler.cppstd
         if self.options.shared:
             del self.options.fPIC
         if self.settings.os == "Windows":
