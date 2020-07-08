@@ -4,7 +4,7 @@ import os
 
 
 class WaylandConan(ConanFile):
-    name = "libwayland"
+    name = "wayland"
     description = "Wayland is a project to define a protocol for a compositor to talk to its clients as well as a library implementation of the protocol"
     topics = ("conan", "wayland")
     url = "https://github.com/conan-io/conan-center-index"
@@ -29,14 +29,14 @@ class WaylandConan(ConanFile):
     _source_subfolder = "source_subfolder"
     _build_subfolder = "build_subfolder"
     _meson = None
-    
+
     def requirements(self):
         if self.options.enable_libraries:
             self.requires("libffi/3.3")
         if self.options.enable_dtd_validation:
             self.requires("libxml2/2.9.10")
         self.requires("expat/2.2.9")
-    
+
     def build_requirements(self):
         self.build_requires('meson/0.54.2')
 
