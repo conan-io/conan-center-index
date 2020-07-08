@@ -121,20 +121,23 @@ class LibcurlConan(ConanFile):
             self.build_requires("libtool/2.4.6")
 
     def requirements(self):
-        if self.options.with_openssl:
-            if tools.is_apple_os(self.settings.os) and self.options.darwin_ssl:
-                pass
-            elif self.settings.os == "Windows" and self.options.with_winssl:
-                pass
-            else:
-                self.requires("openssl/1.1.1g")
-        if self.options.with_libssh2:
-            if self.settings.compiler != "Visual Studio":
-                self.requires("libssh2/1.9.0")
+        if self._depends_on_openssl:
+            self.requires("openssl/1.1.1g")
+        if self._depends_on_libssh2:
+            self.requires("libssh2/1.9.0")
         if self.options.with_nghttp2:
             self.requires("libnghttp2/1.40.0")
-
         self.requires("zlib/1.2.11")
+
+    @property
+    def _depends_on_openssl(self):
+        return self.options.with_openssl and \
+               not ((tools.is_apple_os(self.settings.os) and self.options.darwin_ssl) or \
+                    (self.settings.os == "Windows" and self.options.with_winssl))
+
+    @property
+    def _depends_on_libssh2(self):
+        return self.options.with_libssh2 and self.settings.compiler != "Visual Studio"
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
@@ -465,40 +468,50 @@ class LibcurlConan(ConanFile):
     def package_info(self):
         self.cpp_info.names["cmake_find_package"] = "CURL"
         self.cpp_info.names["cmake_find_package_multi"] = "CURL"
+        self.cpp_info.components["curl"].names["cmake_find_package"] = "libcurl"
+        self.cpp_info.components["curl"].names["cmake_find_package_multi"] = "libcurl"
 
         if self.settings.compiler != "Visual Studio":
-            self.cpp_info.libs = ["curl"]
+            self.cpp_info.components["curl"].libs = ["curl"]
             if self.settings.os == "Linux":
-                self.cpp_info.system_libs.extend(["rt", "pthread"])
+                self.cpp_info.components["curl"].system_libs.extend(["rt", "pthread"])
                 if self.options.with_libssh2:
-                    self.cpp_info.libs.extend(["ssh2"])
+                    self.cpp_info.components["curl"].libs.extend(["ssh2"])
                 if self.options.with_libidn:
-                    self.cpp_info.libs.extend(["idn"])
+                    self.cpp_info.components["curl"].libs.extend(["idn"])
                 if self.options.with_librtmp:
-                    self.cpp_info.libs.extend(["rtmp"])
+                    self.cpp_info.components["curl"].libs.extend(["rtmp"])
                 if self.options.with_brotli:
-                    self.cpp_info.libs.extend(["brotlidec"])
+                    self.cpp_info.components["curl"].libs.extend(["brotlidec"])
             if self.settings.os == "Macos":
                 if self.options.with_ldap:
-                    self.cpp_info.system_libs.extend(["ldap"])
+                    self.cpp_info.components["curl"].system_libs.extend(["ldap"])
                 if self.options.darwin_ssl:
-                    self.cpp_info.frameworks.extend(["Cocoa", "Security"])
+                    self.cpp_info.components["curl"].frameworks.extend(["Cocoa", "Security"])
         else:
-            self.cpp_info.libs = ["libcurl_imp"] if self.options.shared else ["libcurl"]
+            self.cpp_info.components["curl"].libs = ["libcurl_imp"] if self.options.shared else ["libcurl"]
 
         if self.settings.os == "Windows":
             # used on Windows for VS build, native and cross mingw build
-            self.cpp_info.system_libs.append("ws2_32")
+            self.cpp_info.components["curl"].system_libs.append("ws2_32")
             if self.options.with_ldap:
-                self.cpp_info.system_libs.append("wldap32")
+                self.cpp_info.components["curl"].system_libs.append("wldap32")
             if self.options.with_winssl:
-                self.cpp_info.system_libs.append("Crypt32")
+                self.cpp_info.components["curl"].system_libs.append("Crypt32")
 
         if self._is_mingw:
             # provide pthread for dependent packages
-            self.cpp_info.cflags.append("-pthread")
-            self.cpp_info.exelinkflags.append("-pthread")
-            self.cpp_info.sharedlinkflags.append("-pthread")
+            self.cpp_info.components["curl"].cflags.append("-pthread")
+            self.cpp_info.components["curl"].exelinkflags.append("-pthread")
+            self.cpp_info.components["curl"].sharedlinkflags.append("-pthread")
 
         if not self.options.shared:
-            self.cpp_info.defines.append("CURL_STATICLIB=1")
+            self.cpp_info.components["curl"].defines.append("CURL_STATICLIB=1")
+
+        self.cpp_info.components["curl"].requires.append("zlib::zlib")
+        if self._depends_on_openssl:
+            self.cpp_info.components["curl"].requires.append("openssl::openssl")
+        if self._depends_on_libssh2:
+            self.cpp_info.components["curl"].requires.append("libssh2::libssh2")
+        if self.options.with_nghttp2:
+            self.cpp_info.components["curl"].requires.append("libnghttp2::libnghttp2")
