@@ -40,11 +40,11 @@ class ConanXOrg(ConanFile):
             if tools.os_info.with_apt:
                 packages = ["xorg-dev", "libx11-xcb-dev", "libxcb-render0-dev", "libxcb-render-util0-dev"]
             elif tools.os_info.with_yum or tools.os_info.with_dnf:
-                packages = ["xorg-x11-server-devel", "libdmx-devel", "libfontenc-devel", "libXaw-devel",
+                packages = ["xorg-x11-server-devel", "libfontenc-devel", "libXaw-devel",
                             "libXcomposite-devel", "libXcursor-devel", "libXdmcp-devel", "libXft-devel",
                             "libXtst-devel", "libXinerama-devel", "xorg-x11-xkb-utils-devel", "libXrandr-devel",
                             "libXres-devel", "libXScrnSaver-devel", "libXvMC-devel", "libXxf86dga-devel",
-                            "xorg-x11-xtrans-devel", "libFS-devel"]
+                            "xorg-x11-xtrans-devel"]
             elif tools.os_info.with_pacman:
                 packages = ["xorg-server-devel"]
             elif tools.os_info.with_zypper:
