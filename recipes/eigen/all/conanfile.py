@@ -35,8 +35,11 @@ class eigenConan(ConanFile):
         self.info.header_only()
 
     def package_info(self):
-        self.cpp_info.includedirs = [os.path.join("include","eigen3")]
-        if self.settings.os == "Linux":
-            self.cpp_info.system_libs = ["m"]
         self.cpp_info.names["cmake_find_package"] = "Eigen3"
         self.cpp_info.names["cmake_find_package_multi"] = "Eigen3"
+        self.cpp_info.names["pkg_config"] = "eigen3"
+        self.cpp_info.components["eigen3"].names["cmake_find_package"] = "Eigen"
+        self.cpp_info.components["eigen3"].names["cmake_find_package_multi"] = "Eigen"
+        self.cpp_info.components["eigen3"].includedirs = [os.path.join("include", "eigen3")]
+        if self.settings.os == "Linux":
+            self.cpp_info.components["eigen3"].system_libs = ["m"]
