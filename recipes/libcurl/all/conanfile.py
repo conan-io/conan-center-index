@@ -105,12 +105,6 @@ class LibcurlConan(ConanFile):
             if self.settings.compiler != "Visual Studio":
                 self.options["libssh2"].shared = self.options.shared
 
-    def system_requirements(self):
-        # TODO: Declare tools needed to compile. The idea is Conan checking that they are
-        #   installed and providing a meaningful message before starting the compilation. It
-        #   would be much better than installed them (sudo required).
-        pass
-
     def build_requirements(self):
         if self._is_mingw and tools.os_info.is_windows and not tools.get_env("CONAN_BASH_PATH") and \
            tools.os_info.detect_windows_subsystem() != "msys2":
