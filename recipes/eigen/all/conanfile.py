@@ -1,7 +1,7 @@
 import os
 from conans import ConanFile, tools, CMake
 
-class eigenConan(ConanFile):
+class EigenConan(ConanFile):
     name = "eigen"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "http://eigen.tuxfamily.org"
@@ -9,12 +9,12 @@ class eigenConan(ConanFile):
                    numerical solvers, and related algorithms."
     license = "MPL-2.0"
     topics = ("eigen", "algebra", "linear-algebra", "vector", "numerical")
-    settings = "os", "compiler"
+    settings = "os", "compiler", "build_type", "arch"
     no_copy_source = True
 
     @property
     def _source_subfolder(self):
-        return "_source_subfolder"
+        return "source_subfolder"
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
@@ -25,6 +25,8 @@ class eigenConan(ConanFile):
 
     def package(self):
         cmake = CMake(self)
+        cmake.definitions["BUILD_TESTING"] = False
+        cmake.definitions["EIGEN_TEST_NOQT"] = True
         cmake.configure(source_folder=self._source_subfolder)
         cmake.install()
 
