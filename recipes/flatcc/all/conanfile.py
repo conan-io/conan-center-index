@@ -59,8 +59,6 @@ class FlatccConan(ConanFile):
                 raise ConanInvalidConfiguration("Building flatcc libraries shared is not supported")
             if self.settings.compiler == "gcc":
                 raise ConanInvalidConfiguration("Building flatcc with MinGW is not supported")
-        if self.settings.os == "Macos" and self.options.shared:
-            raise ConanInvalidConfiguration("Building flatcc shared on Macos is currently not supported due to Systems Integrity Protection problems")
         if self.options.shared:
             del self.options.fPIC
 
