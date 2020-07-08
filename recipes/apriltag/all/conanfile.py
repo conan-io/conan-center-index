@@ -16,8 +16,11 @@ class apriltagConan(ConanFile):
     generators = "cmake"
     topics = ("conan", "apriltag", "robotics")
     exports_sources = ["CMakeLists.txt", "patches/*"]
-    _source_subfolder = "source_subfolder"
     _cmake = None
+
+    @property
+    def _source_subfolder(self):
+        return "source_subfolder"
 
     def _configure_cmake(self):
         if not self._cmake:
