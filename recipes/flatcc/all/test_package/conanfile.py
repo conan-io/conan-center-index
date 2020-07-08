@@ -1,6 +1,6 @@
 import os.path
 
-from conans import ConanFile, CMake, tools
+from conans import ConanFile, CMake, tools, RunEnvironment
 
 
 class FlatccTestConan(ConanFile):
@@ -8,9 +8,11 @@ class FlatccTestConan(ConanFile):
     generators = "cmake"
 
     def build(self):
-        cmake = CMake(self)
-        cmake.configure()
-        cmake.build()
+        env_build = RunEnvironment(self)
+        with tools.environment_append(env_build.vars):
+            cmake = CMake(self)
+            cmake.configure()
+            cmake.build()
 
     def test(self):
         if not tools.cross_building(self):
