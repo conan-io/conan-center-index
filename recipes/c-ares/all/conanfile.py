@@ -63,16 +63,18 @@ class CAresConan(ConanFile):
         tools.rmdir(os.path.join(self.package_folder, "share"))
 
     def package_info(self):
-        self.cpp_info.libs = tools.collect_libs(self)
-        if not self.options.shared:
-            self.cpp_info.defines.append("CARES_STATICLIB")
-        if self.settings.os == "Linux":
-            self.cpp_info.system_libs.append("rt")
-        elif self.settings.os == "Windows":
-            self.cpp_info.system_libs.extend(["ws2_32", "Advapi32"])
-        elif self.settings.os == "Macos":
-            self.cpp_info.system_libs.append("resolv")
         self.cpp_info.names["pkg_config"] = "libcares"
+        self.cpp_info.components["cares"].names["cmake_find_package"] = "cares"
+        self.cpp_info.components["cares"].names["cmake_find_package_multi"] = "cares"
+        self.cpp_info.components["cares"].libs = tools.collect_libs(self)
+        if not self.options.shared:
+            self.cpp_info.components["cares"].defines.append("CARES_STATICLIB")
+        if self.settings.os == "Linux":
+            self.cpp_info.components["cares"].system_libs.append("rt")
+        elif self.settings.os == "Windows":
+            self.cpp_info.components["cares"].system_libs.extend(["ws2_32", "Advapi32"])
+        elif self.settings.os == "Macos":
+            self.cpp_info.components["cares"].system_libs.append("resolv")
 
         bin_path = os.path.join(self.package_folder, "bin")
         self.output.info("Appending PATH environment variable: {}".format(bin_path))
