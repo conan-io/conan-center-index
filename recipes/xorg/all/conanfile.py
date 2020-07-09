@@ -38,7 +38,9 @@ class ConanXOrg(ConanFile):
         if tools.os_info.is_linux and self.settings.os == "Linux":
             package_tool = tools.SystemPackageTool(conanfile=self, default_mode="verify")
             if tools.os_info.with_apt:
-                packages = ["xorg-dev", "libx11-xcb-dev", "libxcb-render0-dev", "libxcb-render-util0-dev", "libxcb-xkb-dev"]
+                packages = ["xorg-dev", "libx11-xcb-dev", "libxcb-render0-dev", "libxcb-render-util0-dev", "libxcb-xkb-dev",
+                    "libxcb-icccm4-dev", "libxcb-image0-dev", "libxcb-keysyms1-dev", "libxcb-randr0-dev", "libxcb-shape0-dev",
+                    "libxcb-sync-dev", "libxcb-xfixes0-dev", "libxcb-xinerama0-dev"]
             elif tools.os_info.with_yum or tools.os_info.with_dnf:
                 packages = ["xorg-x11-server-devel"]
             elif tools.os_info.with_pacman:
@@ -55,5 +57,7 @@ class ConanXOrg(ConanFile):
                      "xcomposite","xcursor", "xdamage", "xdmcp", "xext", "xfixes", "xft", "xi",
                      "xinerama", "xkbfile", "xmu", "xmuu", "xpm", "xrandr", "xrender", "xres",
                      "xscrnsaver", "xt", "xtst", "xv", "xvmc", "xxf86dga", "xxf86vm", "xtrans",
-                     "xcb-xkb"]:
+                     "xcb-xkb", "xcb-icccm", "xcb-image", "xcb-keysyms", "xcb-randr", "xcb-render",
+                     "xcb-renderutil", "xcb-shape", "xcb-shm", "xcb-sync", "xcb-xfixes",
+                     "xcb-xinerama", "xcb"]:
             self._fill_cppinfo_from_pkgconfig(name)
