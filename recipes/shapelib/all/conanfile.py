@@ -9,8 +9,8 @@ class ShapelibConan(ConanFile):
     topics = ("conan", "shapelib", "osgeo", "shapefile", "esri", "geospatial")
     homepage = "https://github.com/OSGeo/shapelib"
     url = "https://github.com/conan-io/conan-center-index"
-    exports_sources = 'CMakeLists.txt'
-    generators = 'cmake'
+    exports_sources = "CMakeLists.txt"
+    generators = "cmake"
     settings = "os", "arch", "compiler", "build_type"
     options = {"shared": [True, False], "fPIC": [True, False]}
     default_options = {"shared": False, "fPIC": True}
