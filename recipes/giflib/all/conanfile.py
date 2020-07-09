@@ -26,6 +26,8 @@ class GiflibConan(ConanFile):
             del self.options.fPIC
 
     def configure(self):
+        if self.options.shared:
+            del self.options.fPIC
         del self.settings.compiler.libcxx
         del self.settings.compiler.cppstd
 
@@ -102,7 +104,7 @@ class GiflibConan(ConanFile):
         env_build = AutoToolsBuildEnvironment(self, win_bash=self.settings.os == "Windows" and
                                               platform.system() == "Windows")
         if self.settings.os != "Windows":
-            env_build.fpic = self.options.fPIC
+            env_build.fpic = self.options.get_safe("fPIC", True)
 
         prefix = os.path.abspath(self.package_folder)
         if self.settings.os == "Windows":
