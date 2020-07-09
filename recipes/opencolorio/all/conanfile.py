@@ -28,6 +28,7 @@ class OpenEXRConan(ConanFile):
             tools.check_min_cppstd(self, "11")
     
     def requirements(self):
+        # TODO: add GLUT (needed for ociodisplay tool)
         self.requires("lcms/2.11")
         self.requires("yaml-cpp/0.6.3")
 
@@ -49,11 +50,11 @@ class OpenEXRConan(ConanFile):
         self._cmake.definitions["OCIO_BUILD_PYGLUE"] = False
         self._cmake.definitions["USE_EXTERNAL_YAML"] = True
         self._cmake.definitions["USE_EXTERNAL_LCMS"] = True
+        self._cmake.definitions["YAML_CPP_VERSION"] = self.deps_cpp_info["yaml-cpp"].version
 
-        # OpenColorIO uses old TinyXML, not TinyXML 2 available in CCI.
+        # FIXME: OpenColorIO uses old TinyXML which doesn't have Conan package.
         self._cmake.definitions["USE_EXTERNAL_TINYXML"] = False
         self._cmake.definitions["TINYXML_OBJECT_LIB_EMBEDDED"] = True
-        self._cmake.definitions["YAML_CPP_VERSION"] = self.deps_cpp_info["yaml-cpp"].version
         
         self._cmake.configure(source_folder=self._source_subfolder)
         return self._cmake
