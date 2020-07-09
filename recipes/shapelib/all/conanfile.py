@@ -57,8 +57,10 @@ class ShapelibConan(ConanFile):
         self.copy(pattern="*.dll", dst="bin", src=build_bin_dir, keep_path=False)
 
     def package_info(self):
-        self.cpp_info.names["cmake_find_package"] = "shp"
-        self.cpp_info.names["cmake_find_package_multi"] = "shp"
-        self.cpp_info.libs = tools.collect_libs(self)
+        self.cpp_info.names["cmake_find_package"] = "shapelib"
+        self.cpp_info.names["cmake_find_package_multi"] = "shapelib"
+        self.cpp_info.components["shp"].names["cmake_find_package"] = "shp"
+        self.cpp_info.components["shp"].names["cmake_find_package_multi"] = "shp"
+        self.cpp_info.components["shp"].libs = tools.collect_libs(self)
         if self.settings.os == "Linux":
-            self.cpp_info.system_libs.append("m")
+            self.cpp_info.components["shp"].system_libs.append("m")
