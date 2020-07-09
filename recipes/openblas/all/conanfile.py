@@ -26,7 +26,7 @@ class OpenblasConan(ConanFile):
         "fPIC": True,
         "build_lapack": False,
         "use_thread": True,
-        "dynamic_arch": False
+        "dynamic_arch": True
     }
     exports_sources = ["CMakeLists.txt"]
     generators = "cmake"
