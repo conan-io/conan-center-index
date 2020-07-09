@@ -48,7 +48,9 @@ class SpdlogConan(ConanFile):
             raise ConanInvalidConfiguration("wchar is not yet supported under windows")
 
     def requirements(self):
-        if Version(self.version) >= "1.5.0":
+        if Version(self.version) >= "1.7.0":
+            self.requires("fmt/7.0.1")
+        elif Version(self.version) >= "1.5.0":
             self.requires("fmt/6.2.0")
         else:
             self.requires("fmt/6.0.0")
@@ -102,7 +104,7 @@ class SpdlogConan(ConanFile):
 
     def package_info(self):
         if self.options.header_only:
-            self.cpp_info.defines = ["SPDLOG_FMT_EXTERNAL"]
+            self.cpp_info.components["spdlog_header_only"].defines.append("SPDLOG_FMT_EXTERNAL")
         else:
             self.cpp_info.libs = tools.collect_libs(self)
             self.cpp_info.defines = ["SPDLOG_COMPILED_LIB", "SPDLOG_FMT_EXTERNAL"]
