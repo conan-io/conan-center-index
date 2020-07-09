@@ -131,6 +131,8 @@ class GiflibConan(ConanFile):
         tools.rmdir(os.path.join(self.package_folder, "share"))
 
     def package_info(self):
+        self.cpp_info.names["cmake_find_package"] = "GIF"
+        self.cpp_info.names["cmake_find_package_multi"] = "GIF"
         self.cpp_info.libs = ["gif"]
         if self.settings.compiler == "Visual Studio":
             if self.options.shared:
