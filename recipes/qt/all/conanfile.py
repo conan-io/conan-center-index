@@ -184,12 +184,10 @@ class QtConan(ConanFile):
 
 
     def configure(self):
-        if conan_version < Version("1.20.0"):
-            raise ConanInvalidConfiguration("This recipe needs at least conan 1.20.0, please upgrade.")
         if self.settings.os != 'Linux':
         #     self.options.with_libiconv = False
             self.options.with_fontconfig = False
-        if self.settings.compiler == "gcc" and Version(self.settings.compiler.version.value) < "5.3":
+        if self.settings.compiler == "gcc" and Version(self.settings.compiler.version) < "5.3":
             self.options.with_mysql = False
         if self.settings.os == "Windows":
             self.options.with_mysql = False
