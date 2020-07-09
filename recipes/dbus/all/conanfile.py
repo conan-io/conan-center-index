@@ -38,17 +38,10 @@ class DbusConan(ConanFile):
     )
 
     def source(self):
-
         tools.get(**self.conan_data["sources"][self.version])
         extracted_dir = self.name + "-" + self.version
         os.rename(extracted_dir, self._source_subfolder)
 
-        dbus_cmake = tools.os.path.join(
-            self._source_subfolder, "cmake", "CMakeLists.txt")
-
-        if self.options.with_glib:
-            tools.replace_in_file(dbus_cmake, "GLib2", "glib")
-            tools.replace_in_file(dbus_cmake, "GLIB2", "GLIB")
 
     def requirements(self):
         if self.options.with_glib:
@@ -79,6 +72,13 @@ class DbusConan(ConanFile):
         return self._cmake
 
     def build(self):
+        dbus_cmake = tools.os.path.join(
+            self._source_subfolder, "cmake", "CMakeLists.txt")
+
+        if self.options.with_glib:
+            tools.replace_in_file(dbus_cmake, "GLib2", "glib")
+            tools.replace_in_file(dbus_cmake, "GLIB2", "GLIB")
+
         cmake = self._configure_cmake()
         cmake.build()
 
