@@ -104,15 +104,21 @@ class SpdlogConan(ConanFile):
 
     def package_info(self):
         if self.options.header_only:
+            component_name = "spdlog_header_only"
+            self.cpp_info.components[component_name].requires = ["fmt::fmt-header-only"]
             self.cpp_info.components["spdlog_header_only"].defines.append("SPDLOG_FMT_EXTERNAL")
         else:
-            self.cpp_info.libs = tools.collect_libs(self)
-            self.cpp_info.defines = ["SPDLOG_COMPILED_LIB", "SPDLOG_FMT_EXTERNAL"]
+            component_name = "libspdlog"
+            self.cpp_info.components["libspdlog"].libs = tools.collect_libs(self)
+            self.cpp_info.components[component_name].requires = ["fmt::fmt"]
+            self.cpp_info.components["libspdlog"].defines.append("SPDLOG_COMPILED_LIB")
+            
+        self.cpp_info.components[component_name].defines.append("SPDLOG_FMT_EXTERNAL")
         if self.options.wchar_support:
-            self.cpp_info.defines.append("SPDLOG_WCHAR_TO_UTF8_SUPPORT")
+            self.cpp_info.components[component_name].defines.append("SPDLOG_WCHAR_TO_UTF8_SUPPORT")
         if self.options.wchar_filenames:
-            self.cpp_info.defines.append("SPDLOG_WCHAR_FILENAMES")
+            self.cpp_info.components[component_name].defines.append("SPDLOG_WCHAR_FILENAMES")
         if self.options.no_exceptions:
-            self.cpp_info.defines.append("SPDLOG_NO_EXCEPTIONS")
+            self.cpp_info.components[component_name].defines.append("SPDLOG_NO_EXCEPTIONS")
         if self.settings.os == "Linux":
-            self.cpp_info.system_libs = ["pthread"]
+            self.cpp_info.components[component_name].system_libs = ["pthread"]
