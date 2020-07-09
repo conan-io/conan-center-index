@@ -45,7 +45,7 @@ class GiflibConan(ConanFile):
     def _patch_sources(self):
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
             tools.patch(**patch)
-    
+
     def build(self):
         self._patch_sources()
 
@@ -57,8 +57,10 @@ class GiflibConan(ConanFile):
         cmake.install()
 
         self.copy("COPYING", src=self._source_subfolder, dst="licenses")
-    
+
     def package_info(self):
+        self.cpp_info.names["cmake_find_package"] = "GIF"
+        self.cpp_info.names["cmake_find_package_multi"] = "GIF"
         self.cpp_info.libs = tools.collect_libs(self)
 
         if self.options.shared:
