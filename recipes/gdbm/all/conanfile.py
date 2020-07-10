@@ -50,8 +50,7 @@ class GdbmConan(ConanFile):
         if self.options.with_libiconv:
             self.requires("libiconv/1.16")
         if self.options.with_readline:
-            raise ConanInvalidConfiguration("readline is not (yet) available on CCI")
-            # TODO - Add readline package when available
+            self.requires("readline/8.0")
 
     def build_requirements(self):
         self.build_requires("bison/3.5.3")
