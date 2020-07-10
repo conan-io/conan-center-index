@@ -44,7 +44,8 @@ class ConanXOrg(ConanFile):
                             "libXcomposite-devel", "libXcursor-devel", "libXdmcp-devel", "libXft-devel",
                             "libXtst-devel", "libXinerama-devel", "xorg-x11-xkb-utils-devel", "libXrandr-devel",
                             "libXres-devel", "libXScrnSaver-devel", "libXvMC-devel", "libXxf86dga-devel",
-                            "xorg-x11-xtrans-devel"]
+                            "xorg-x11-xtrans-devel", "xcb-util-wm-devel", "xcb-util-image-devel",
+                            "xcb-util-keysyms-devel", "xcb-util-renderutil-devel"]
             elif tools.os_info.with_pacman:
                 packages = ["xorg-server-devel"]
             elif tools.os_info.with_zypper:
