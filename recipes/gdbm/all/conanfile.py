@@ -77,7 +77,9 @@ class GdbmConan(ConanFile):
         if self.options.shared:
             conf_args.extend(["--enable-shared", "--disable-static"])
         else:
-            conf_args.extend(["--disable-shared", "--enable-static"])
+            conf_args.extend(["--disable-shared", "--enable-static",
+                             "--with-pic" if self.options.fPIC
+                                else "--without-pic"])
 
         self._autotools.configure(args=conf_args)
         return self._autotools
