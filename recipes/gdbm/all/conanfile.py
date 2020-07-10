@@ -104,4 +104,4 @@ class GdbmConan(ConanFile):
         tools.rmdir(os.path.join(self.package_folder, "share"))
 
     def package_info(self):
-        self.cpp_info.libs = ["gdbm"]
+        self.cpp_info.libs = tools.collect_libs(self)
