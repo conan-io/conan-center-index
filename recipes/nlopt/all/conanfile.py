@@ -41,6 +41,8 @@ class NloptConan(ConanFile):
             del self.options.fPIC
 
     def configure(self):
+        if self.options.shared:
+            del self.options.fPIC
         if not self.options.enable_cxx_routines:
             del self.settings.compiler.libcxx
             del self.settings.compiler.cppstd
