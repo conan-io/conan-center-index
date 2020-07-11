@@ -46,8 +46,9 @@ class B2Conan(ConanFile):
     }
 
     def configure(self):
-        if self.options.toolset == 'cxx' or self.options.toolset == 'cross-cxx':
-            self.options.use_cxx_env = True
+        if (self.options.toolset == 'cxx' or self.options.toolset == 'cross-cxx') and not self.options.use_cxx_env:
+            raise ConanInvalidConfiguration(
+                "Option toolset 'cxx' and 'cross-cxx' requires 'use_cxx_env=True'")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
@@ -90,3 +91,7 @@ class B2Conan(ConanFile):
         self.cpp_info.bindirs = ["bin"]
         self.env_info.path = [os.path.join(
             self.package_folder, "bin")] + self.env_info.path
+
+    def package_id(self):
+        del self.info.options.use_cxx_env
+        del self.info.options.toolset
