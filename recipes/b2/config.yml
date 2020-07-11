@@ -7,3 +7,5 @@ versions:
     folder: standard
   "4.2.0":
     folder: standard
+  "4.3.0":
+    folder: portable
