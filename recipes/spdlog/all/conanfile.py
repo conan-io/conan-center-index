@@ -11,7 +11,7 @@ class SpdlogConan(ConanFile):
     homepage = "https://github.com/gabime/spdlog"
     topics = ("conan", "spdlog", "logging", "header-only")
     license = "MIT"
-    exports_sources = ["CMakeLists.txt", "patches/*"]
+    exports = ["CMakeLists.txt"]
     generators = "cmake", "cmake_find_package"
     settings = "os", "arch", "compiler", "build_type"
     options = {"shared": [True, False],
@@ -70,6 +70,7 @@ class SpdlogConan(ConanFile):
         self._cmake.definitions["SPDLOG_BUILD_TESTS_HO"] = False
         self._cmake.definitions["SPDLOG_BUILD_BENCH"] = False
         self._cmake.definitions["SPDLOG_FMT_EXTERNAL"] = True
+        self._cmake.definitions["SPDLOG_FMT_EXTERNAL_HO"] = self.options["fmt"].header_only
         self._cmake.definitions["SPDLOG_BUILD_SHARED"] = not self.options.header_only and self.options.shared
         self._cmake.definitions["SPDLOG_WCHAR_SUPPORT"] = self.options.wchar_support
         self._cmake.definitions["SPDLOG_WCHAR_FILENAMES"] = self.options.wchar_filenames
@@ -85,18 +86,20 @@ class SpdlogConan(ConanFile):
 
     def build(self):
         self._disable_werror()
-        if self.options.header_only:
-            tools.patch(**self.conan_data["patches"][self.version])
-        cmake = self._configure_cmake()
-        cmake.build()
+        if not self.options.header_only:
+            cmake = self._configure_cmake()
+            cmake.build()
 
     def package(self):
         self.copy("LICENSE", dst="licenses", src=self._source_subfolder)
-        cmake = self._configure_cmake()
-        cmake.install()
-        tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
-        tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
-        tools.rmdir(os.path.join(self.package_folder, "lib", "spdlog", "cmake"))
+        if self.options.header_only:
+            self.copy(pattern="*.h", dst="include", src=os.path.join(self._source_subfolder, "include"))
+        else:
+            cmake = self._configure_cmake()
+            cmake.install()
+            tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
+            tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
+            tools.rmdir(os.path.join(self.package_folder, "lib", "spdlog", "cmake"))
 
     def package_id(self):
         if self.options.header_only:
@@ -105,15 +108,16 @@ class SpdlogConan(ConanFile):
     def package_info(self):
         if self.options.header_only:
             component_name = "spdlog_header_only"
-            self.cpp_info.components[component_name].requires = ["fmt::fmt-header-only"]
-            self.cpp_info.components["spdlog_header_only"].defines.append("SPDLOG_FMT_EXTERNAL")
         else:
             component_name = "libspdlog"
             self.cpp_info.components["libspdlog"].libs = tools.collect_libs(self)
-            self.cpp_info.components[component_name].requires = ["fmt::fmt"]
             self.cpp_info.components["libspdlog"].defines.append("SPDLOG_COMPILED_LIB")
             
         self.cpp_info.components[component_name].defines.append("SPDLOG_FMT_EXTERNAL")
+        if self.options["fmt"].header_only:
+            self.cpp_info.components[component_name].requires = ["fmt::fmt"]
+        else:
+            self.cpp_info.components[component_name].requires = ["fmt::fmt-header-only"]
         if self.options.wchar_support:
             self.cpp_info.components[component_name].defines.append("SPDLOG_WCHAR_TO_UTF8_SUPPORT")
         if self.options.wchar_filenames:
