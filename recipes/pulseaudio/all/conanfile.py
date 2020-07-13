@@ -34,7 +34,7 @@ class LibnameConan(ConanFile):
         "with_openssl": True,
     }
 
-    build_requires = "gettext/0.20.1"
+    build_requires = "gettext/0.20.1", "libtool/2.4.6"
 
     @property
     def _source_subfolder(self):
@@ -65,7 +65,6 @@ class LibnameConan(ConanFile):
     def system_requirements(self):
         installer = tools.SystemPackageTool()
         if tools.os_info.with_apt:
-            installer.install('libltdl-dev')
             installer.install('libcap-dev')
 
     def config_options(self):
