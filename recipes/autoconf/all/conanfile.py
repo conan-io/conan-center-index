@@ -78,6 +78,10 @@ class AutoconfConan(ConanFile):
                     continue
                 os.rename(fullpath, fullpath + ".exe")
 
+    def package_id(self):
+        # The m4 requirement does not change the contents of this package
+        self.info.requires.clear()
+
     def package_info(self):
         bin_path = os.path.join(self.package_folder, "bin")
         self.output.info("Appending PATH env var with : {}".format(bin_path))
