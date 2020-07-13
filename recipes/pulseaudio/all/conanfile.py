@@ -80,8 +80,10 @@ class LibnameConan(ConanFile):
         if not self._autotools:
             self._autotools = AutoToolsBuildEnvironment(self)
             args=[]
-            for lib in ['alsa', 'glib', 'fftw', 'x11', 'openssl']:
+            for lib in ['alsa', 'x11', 'openssl']:
                 args.append("--%s-%s" % ('enable' if getattr(self.options, 'with_' + lib) else 'disable', lib))
+            args.append("--%s-glib2" % 'enable' if self.options.with_glib else 'disable')
+            args.append("--%s-fftw" % 'with' if self.options.with_fftw else 'without')
             if self.options.shared:
                 args.extend(['--enable-shared=yes', '--enable-static=no'])
             else:
