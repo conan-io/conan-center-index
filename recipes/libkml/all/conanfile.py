@@ -66,13 +66,35 @@ class LibkmlConan(ConanFile):
         tools.rmdir(os.path.join(self.package_folder, "cmake"))
 
     def package_info(self):
-        # Libs ordered following linkage order:
-        # - kmlconvenience is a dependency of kmlregionator
-        # - kmlengine is a dependency of kmlregionator and kmlconvenience
-        # - kmldom is a dependency of kmlregionator, kmlconvenience and kmlengine
-        # - kmlbase is a dependency of kmlregionator, kmlconvenience, kmlengine, kmldom and kmlxsd
-        self.cpp_info.libs = ["kmlregionator", "kmlconvenience", "kmlengine", "kmldom", "kmlxsd", "kmlbase"]
+        # TODO:
+        # - do not export LibKML:: namespace
+        # - libkml depends on boost header only
+        self.cpp_info.names["cmake_find_package"] = "LibKML"
+        self.cpp_info.names["cmake_find_package_multi"] = "LibKML"
+        # kmlbase
+        self.cpp_info.components["kmlbase"].libs = ["kmlbase"]
         if self.settings.os == "Linux":
-            self.cpp_info.system_libs.append("m")
+            self.cpp_info.components["kmlbase"].system_libs.append("m")
+        self.cpp_info.components["kmlbase"].requires = [
+            "boost::boost", "expat::expat", "minizip::minizip",
+            "uriparser::uriparser", "zlib::zlib"
+        ]
         if self.settings.os == "Windows" and self.options.shared:
-            self.cpp_info.defines.append("LIBKML_DLL")
+            self.cpp_info.components["kmlbase"].defines.append("LIBKML_DLL")
+        # kmlxsd
+        self.cpp_info.components["kmlxsd"].libs = ["kmlxsd"]
+        self.cpp_info.components["kmlxsd"].requires = ["boost::boost", "kmlbase"]
+        # kmldom
+        self.cpp_info.components["kmldom"].libs = ["kmldom"]
+        self.cpp_info.components["kmldom"].requires = ["boost::boost", "kmlbase"]
+        # kmlengine
+        self.cpp_info.components["kmlengine"].libs = ["kmlengine"]
+        self.cpp_info.components["kmlengine"].requires = ["boost::boost", "kmldom", "kmlbase"]
+        if self.settings.os == "Linux":
+            self.cpp_info.components["kmlengine"].system_libs.append("m")
+        # kmlconvenience
+        self.cpp_info.components["kmlconvenience"].libs = ["kmlconvenience"]
+        self.cpp_info.components["kmlconvenience"].requires = ["boost::boost", "kmlengine", "kmldom", "kmlbase"]
+        # kmlregionator
+        self.cpp_info.components["kmlregionator"].libs = ["kmlregionator"]
+        self.cpp_info.components["kmlregionator"].requires = ["kmlconvenience", "kmlengine", "kmldom", "kmlbase"]
