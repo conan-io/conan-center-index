@@ -24,19 +24,21 @@ class PremakeConan(ConanFile):
 
     @property
     def _platform(self):
-        return {"Windows": "vs2017",
-                "Linux": "gmake.unix",
-                "Macos": "gmake.macosx"}.get(str(self.settings.os))
+        if self.version == "5.0.0-alpha14":
+            return {"Windows": "vs2017",
+                    "Linux": "gmake.unix",
+                    "Macos": "gmake.macosx"}.get(str(self.settings.os))
+        else:
+            return {"Windows": "vs2017",
+                    "Linux": "gmake2.unix",
+                    "Macos": "gmake2.macosx"}.get(str(self.settings.os))
 
     def build(self):
         with tools.chdir(os.path.join(self._source_subfolder, "build", self._platform)):
             if self.settings.os == "Windows":
                 msbuild = MSBuild(self)
                 msbuild.build("Premake5.sln", platforms={"x86": "Win32", "x86_64": "x64"}, build_type="Release", arch=self.settings.arch)
-            elif self.settings.os == "Linux":
-                env_build = AutoToolsBuildEnvironment(self)
-                env_build.make(args=["config=release"])
-            elif self.settings.os == "Macos":
+            elif self.settings.os == "Linux" or self.settings.os == "Macos":
                 env_build = AutoToolsBuildEnvironment(self)
                 env_build.make(args=["config=release"])
 
