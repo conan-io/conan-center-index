@@ -5,9 +5,9 @@ sources:
   "3.7.8":
     url: "https://www.python.org/ftp/python/3.7.8/Python-3.7.8.tgz"
     sha256: "0e25835614dc221e3ecea5831b38fa90788b5389b99b675a751414c858789ab0"
-  "3.8.3":
-    url: "https://www.python.org/ftp/python/3.8.3/Python-3.8.3.tgz"
-    sha256: "6af6d4d2e010f9655518d0fc6738c7ff7069f10a4d2fbd55509e467f092a8b90"
+  "3.8.4":
+    url: "https://www.python.org/ftp/python/3.8.4/Python-3.8.4.tgz"
+    sha256: "32c4d9817ef11793da4d0d95b3191c4db81d2e45544614e8449255ca9ae3cc18"
 patches:
   "2.7.18":
     - patch_file: "patches/0001-2.7.18-msvc.patch"
@@ -19,8 +19,8 @@ patches:
       base_path: "source_subfolder"
     - patch_file: "patches/0002-3.7.8-relocatable-python-config.patch"
       base_path: "source_subfolder"
-  "3.8.3":
-    - patch_file: "patches/0001-3.8.3-msvc.patch"
+  "3.8.4":
+    - patch_file: "patches/0001-3.8.4-msvc.patch"
       base_path: "source_subfolder"
     - patch_file: "patches/0002-3.7.8-relocatable-python-config.patch"
       base_path: "source_subfolder"
