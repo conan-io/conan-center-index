@@ -51,7 +51,7 @@ static input_item_t test_input[] = {
 #include <stdio.h>
 #include <stdlib.h>
 
-int main(int argc, char *argv) {
+int main(int argc, const char *argv[]) {
     void *pParser = ParseAlloc(malloc);
     double result = -123456.;
     double val;
