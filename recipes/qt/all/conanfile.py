@@ -40,7 +40,6 @@ def _getsubmodules():
 
 
 class QtConan(ConanFile):
-
     _submodules = _getsubmodules()
 
     generators = "pkg_config"
@@ -62,7 +61,7 @@ class QtConan(ConanFile):
         "openssl": [True, False],
         "with_pcre2": [True, False],
         "with_glib": [True, False],
-        # "with_libiconv": [True, False],  # Qt tests failure "invalid conversion from const char** to char**"
+        # "with_libiconv": [True, False],  # QTBUG-84708 Qt tests failure "invalid conversion from const char** to char**"
         "with_doubleconversion": [True, False],
         "with_freetype": [True, False],
         "with_fontconfig": [True, False],
@@ -98,7 +97,7 @@ class QtConan(ConanFile):
         "openssl": True,
         "with_pcre2": True,
         "with_glib": False,
-        # "with_libiconv": True,
+        # "with_libiconv": True, # QTBUG-84708
         "with_doubleconversion": True,
         "with_freetype": True,
         "with_fontconfig": True,
@@ -151,7 +150,7 @@ class QtConan(ConanFile):
 
             if not python_exe:
                 msg = ("Python2 must be available in PATH "
-                        "in order to build Qt WebEngine")
+                       "in order to build Qt WebEngine")
                 raise ConanInvalidConfiguration(msg)
             # In any case, check its actual version for compatibility
             from six import StringIO  # Python 2 and 3 compatible
@@ -167,12 +166,12 @@ class QtConan(ConanFile):
             v_max = "3.0.0"
             if (version >= v_min) and (version < v_max):
                 msg = ("Found valid Python 2 required for QtWebengine:"
-                        " version={}, path={}".format(mybuf.getvalue(), python_exe))
+                       " version={}, path={}".format(mybuf.getvalue(), python_exe))
                 self.output.success(msg)
             else:
                 msg = ("Found Python 2 in path, but with invalid version {}"
-                        " (QtWebEngine requires >= {} & < "
-                        "{})".format(verstr, v_min, v_max))
+                       " (QtWebEngine requires >= {} & < "
+                       "{})".format(verstr, v_min, v_max))
                 raise ConanInvalidConfiguration(msg)
 
     def config_options(self):
@@ -182,10 +181,9 @@ class QtConan(ConanFile):
             if tools.Version(self.settings.compiler.version) < "10.0":
                 raise ConanInvalidConfiguration("Old versions of apple sdk are not supported by Qt (QTBUG-76777)")
 
-
     def configure(self):
         if self.settings.os != 'Linux':
-        #     self.options.with_libiconv = False
+            #     self.options.with_libiconv = False # QTBUG-84708
             self.options.with_fontconfig = False
         if self.settings.compiler == "gcc" and Version(self.settings.compiler.version) < "5.3":
             self.options.with_mysql = False
@@ -264,8 +262,8 @@ class QtConan(ConanFile):
 
         if self.options.with_glib:
             self.requires("glib/2.65.0")
-        # if self.options.with_libiconv:
-        #     self.requires("libiconv/1.16")
+        # if self.options.with_libiconv: # QTBUG-84708
+        #     self.requires("libiconv/1.16")# QTBUG-84708
         if self.options.with_doubleconversion and not self.options.multiconfiguration:
             self.requires("double-conversion/3.1.5")
         if self.options.with_freetype and not self.options.multiconfiguration:
@@ -312,9 +310,9 @@ class QtConan(ConanFile):
             tools.patch(**p)
         for f in ["renderer", os.path.join("renderer", "core"), os.path.join("renderer", "platform")]:
             tools.replace_in_file(os.path.join(self.source_folder, "qt5", "qtwebengine", "src", "3rdparty", "chromium", "third_party", "blink", f, "BUILD.gn"),
-            "  if (enable_precompiled_headers) {\n    if (is_win) {",
-            "  if (enable_precompiled_headers) {\n    if (false) {"
-            )
+                                  "  if (enable_precompiled_headers) {\n    if (is_win) {",
+                                  "  if (enable_precompiled_headers) {\n    if (false) {"
+                                  )
 
     def _make_program(self):
         if self.settings.compiler == "Visual Studio":
@@ -455,7 +453,7 @@ class QtConan(ConanFile):
             args += ["-opengl desktop"]
         elif self.options.opengl == "dynamic":
             args += ["-opengl dynamic"]
-        
+
         if self.options.with_vulkan:
             args.append("-vulkan")
         else:
@@ -470,7 +468,7 @@ class QtConan(ConanFile):
             else:
                 args += ["-openssl-linked"]
 
-        # args.append("--iconv=" + ("gnu" if self.options.with_libiconv else "no"))
+        # args.append("--iconv=" + ("gnu" if self.options.with_libiconv else "no"))# QTBUG-84708
 
         args.append("--glib=" + ("yes" if self.options.with_glib else "no"))
         args.append("--pcre=" + ("system" if self.options.with_pcre2 else "qt"))
@@ -503,7 +501,7 @@ class QtConan(ConanFile):
                   ("openssl", "OPENSSL"),
                   ("pcre2", "PCRE2"),
                   ("glib", "GLIB"),
-                  # ("libiconv", "ICONV"),
+                  # ("libiconv", "ICONV"),# QTBUG-84708
                   ("double-conversion", "DOUBLECONVERSION"),
                   ("freetype", "FREETYPE"),
                   ("fontconfig", "FONTCONFIG"),
@@ -610,7 +608,7 @@ class QtConan(ConanFile):
                             f.write('export DYLD_LIBRARY_PATH="%s"' % ":".join(RunEnvironment(self).vars["DYLD_LIBRARY_PATH"]))
                     with tools.environment_append({
                         "BASH_ENV": os.path.abspath("bash_env")
-                        }) if tools.os_info.is_macos else tools.no_op():
+                    }) if tools.os_info.is_macos else tools.no_op():
                         self.run(self._make_program(), run_environment=True)
 
     def package(self):
@@ -644,7 +642,6 @@ Examples = bin/datadir/examples""")
             for name in files:
                 if name.endswith('.pdb'):
                     os.remove(os.path.join(root, name))
-            
 
     def package_id(self):
         del self.info.options.cross_compile

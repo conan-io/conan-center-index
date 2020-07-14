@@ -2,6 +2,6 @@ SOURCES += test_package.cpp
 
 HEADERS += greeter.h
 
-QT -= GUI
+QT -= gui
 
 CONFIG += console
