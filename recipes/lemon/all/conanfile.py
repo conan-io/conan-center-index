@@ -37,10 +37,6 @@ class LemonConan(ConanFile):
         self._cmake.configure()
         return self._cmake
 
-    @property
-    def _lemon_exe(self):
-        return "lemon{}".format(".exe" if self.settings.os == "Windows" else "")
-
     def build(self):
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
             tools.patch(**patch)
