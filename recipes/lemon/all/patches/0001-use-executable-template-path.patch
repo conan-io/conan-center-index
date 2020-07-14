@@ -1,6 +1,6 @@
 --- tool/lemon.c
 +++ tool/lemon.c
-@@ -3502,11 +3502,49 @@
+@@ -3502,11 +3502,53 @@
    }
  }
 
@@ -18,13 +18,17 @@
 +static char *get_default_template_path(const char *filename) {
 +    static char static_path[8192];
 +#ifdef _WIN32
-+    char joiner = '\\';
++# define JOINER "\\"
 +    int result = GetModuleFileNameA(NULL, static_path, sizeof(static_path));
 +    if (result != ERROR_SUCCESS) {
 +        memcpy(static_path, DEFAULT_PATH, strlen(DEFAULT_PATH));
 +    }
++    char *pos = strrchr(static_path, '\\');
++    if (pos) {
++        *pos = '\0';
++    }
 +#else
-+    char joiner = '/';
++# define JOINER "/"
 +    ssize_t nb = readlink("/proc/self/exe", static_path, sizeof(static_path));
 +    if (nb != -1) {
 +        static_path[nb] = '\0';
@@ -37,7 +41,7 @@
 +        memcpy(static_path, DEFAULT_PATH, strlen(DEFAULT_PATH));
 +        return static_path;
 +    }
-+    strncat(static_path, &joiner, 1);
++    strncat(static_path, JOINER, sizeof(JOINER));
 +    strncat(static_path, filename, sizeof(filename));
 +    return static_path;
 +}
@@ -51,7 +55,7 @@
    char buf[1000];
    FILE *in;
    char *tpltname;
-@@ -3530,6 +3568,7 @@
+@@ -3530,6 +3572,7 @@
      return in;
    }
 
