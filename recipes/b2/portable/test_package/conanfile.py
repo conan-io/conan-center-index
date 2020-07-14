@@ -9,4 +9,4 @@ class TestPackgeConan(ConanFile):
         tools.save(
             "jamroot.jam",
             'ECHO "info:" Success loading project jamroot.jam file. ;')
-        self.run("b2 --debug-configuration")
+        self.run("b2 --debug-configuration", run_environment=True)
