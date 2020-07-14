@@ -37,7 +37,7 @@ class LibkmlConan(ConanFile):
         self.requires("boost/1.73.0")
         self.requires("expat/2.2.9")
         self.requires("minizip/1.2.11")
-        self.requires("uriparser/0.9.3")
+        self.requires("uriparser/0.9.4")
         self.requires("zlib/1.2.11")
 
     def source(self):
