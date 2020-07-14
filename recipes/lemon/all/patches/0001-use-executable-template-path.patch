@@ -16,7 +16,7 @@
 +#define DEFAULT_PATH "."
 +
 +static char *get_default_template_path(const char *filename) {
-+    static char static_path[MAX_PATH+1];
++    static char static_path[8192];
 +#ifdef _WIN32
 +# define JOINER "\\"
 +    SetLastError(ERROR_SUCCESS);
