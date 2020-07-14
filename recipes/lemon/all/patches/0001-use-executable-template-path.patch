@@ -16,11 +16,12 @@
 +#define DEFAULT_PATH "."
 +
 +static char *get_default_template_path(const char *filename) {
-+    static char static_path[8192];
++    static char static_path[MAX_PATH+1];
 +#ifdef _WIN32
 +# define JOINER "\\"
++    SetLastError(ERROR_SUCCESS);
 +    int result = GetModuleFileNameA(NULL, static_path, sizeof(static_path));
-+    if (result != ERROR_SUCCESS) {
++    if (GetLastError() != ERROR_SUCCESS) {
 +        memcpy(static_path, DEFAULT_PATH, strlen(DEFAULT_PATH));
 +    }
 +    char *pos = strrchr(static_path, '\\');
@@ -37,9 +38,8 @@
 +        memcpy(static_path, DEFAULT_PATH, strlen(DEFAULT_PATH));
 +    }
 +#endif
-+    if (sizeof(static_path) < (strlen(static_path) + 1 + sizeof(filename) + 1)) {
-+        memcpy(static_path, DEFAULT_PATH, strlen(DEFAULT_PATH));
-+        return static_path;
++    if (sizeof(static_path) < (strlen(static_path) + sizeof(JOINER) + strlen(filename) + 1)) {
++        strcpy(static_path, DEFAULT_PATH);
 +    }
 +    strncat(static_path, JOINER, sizeof(JOINER));
 +    strncat(static_path, filename, sizeof(filename));
