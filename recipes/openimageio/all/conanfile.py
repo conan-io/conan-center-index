@@ -64,7 +64,7 @@ class OpenImageIOConan(ConanFile):
         self._cmake.definitions["USE_JPEGTURBO"] = self._use_jpeg_turbo
         self._cmake.definitions["USE_JPEG"] = True
         self._cmake.definitions["USE_HDF5"] = False
-        self._cmake.definitions["USE_OPENCOLORIO"] = False
+        self._cmake.definitions["USE_OPENCOLORIO"] = True
         self._cmake.definitions["USE_OPENCV"] = False
         self._cmake.definitions["USE_TBB"] = False
         self._cmake.definitions["USE_DCMTK"] = self.options.with_dicom
@@ -91,7 +91,7 @@ class OpenImageIOConan(ConanFile):
     def requirements(self):
         self.requires("openexr/2.5.2")
         self.requires("libtiff/4.1.0")
-        self.requires("fmt/6.2.1")
+        self.requires("fmt/7.0.1")
         self.requires("boost/1.73.0")
         self.requires("tsl-robin-map/0.6.3")
         self.requires("pugixml/1.10")
@@ -101,6 +101,7 @@ class OpenImageIOConan(ConanFile):
         self.requires("openjpeg/2.3.1")
         self.requires("giflib/5.2.1")
         self.requires("freetype/2.10.2")
+        self.requires("opencolorio/1.1.1")
 
         if self._use_jpeg_turbo:
             self.requires("libjpeg-turbo/2.0.4")
