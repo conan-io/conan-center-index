@@ -68,6 +68,8 @@ class HarfbuzzConan(ConanFile):
         compiler = str(self.settings.compiler)
         if compiler in ("clang", "apple-clang"):
             flags.append("-Wno-deprecated-declarations")
+        if self.settings.compiler == "gcc" and self.settings.os == "Windows":
+            flags.append("-Wa,-mbig-obj")
         cmake.definitions["CMAKE_C_FLAGS"] = " ".join(flags)
         cmake.definitions["CMAKE_CXX_FLAGS"] = cmake.definitions["CMAKE_C_FLAGS"]
 
@@ -114,6 +116,6 @@ class HarfbuzzConan(ConanFile):
         if self.settings.os == "Linux":
             self.cpp_info.system_libs.append("m")
         if self.settings.os == "Windows" and not self.options.shared:
-            self.cpp_info.system_libs.extend(["dwrite", "rpcrt4", "usp10", "gdi32"])
+            self.cpp_info.system_libs.extend(["dwrite", "rpcrt4", "usp10", "gdi32", "user32"])
         if self.settings.os == "Macos":
             self.cpp_info.frameworks.extend(["CoreFoundation", "CoreGraphics", "CoreText"])
