@@ -30,7 +30,7 @@ class OpenblasConan(ConanFile):
         "dynamic_arch": False,
         "target": None
     }
-    exports_sources = ["CMakeLists.txt"]
+    exports_sources = ["CMakeLists.txt", "patches/**"]
     generators = "cmake"
 
     _cmake = None
@@ -64,6 +64,11 @@ class OpenblasConan(ConanFile):
             if "CONAN_BASH_PATH" not in os.environ and tools.os_info.detect_windows_subsystem() != 'msys2':
                 self.build_requires("msys2/20190524")
 
+    def _patch_sources(self):
+        if self.version in self.conan_data["patches"]:
+            for patch in self.conan_data["patches"][self.version]:
+                tools.patch(**patch)
+
     def _configure_cmake(self):
         if self._cmake:
             return self._cmake
@@ -93,6 +98,7 @@ class OpenblasConan(ConanFile):
         cmake.build()
 
     def _build_make(self, args=None):
+        self._patch_sources()
         make_options = ["DEBUG={}".format(self._get_make_build_type_debug()),
                         "NO_SHARED={}".format(self._get_make_option_value(not self.options.shared)),
                         "BINARY={}".format(self._get_make_arch()),
@@ -131,7 +137,7 @@ class OpenblasConan(ConanFile):
 
         if args:
             make_options.extend(args)
-            
+
         self.run("cd {} && make {}".format(self._source_subfolder, ' '.join(make_options)), cwd=self.source_folder)
 
     def build(self):

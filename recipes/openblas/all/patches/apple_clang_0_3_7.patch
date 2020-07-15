@@ -1,0 +1,31 @@
+diff --git a/dsymv_L_microk_skylakex-2.c b/dsymv_L_microk_skylakex-2.c
+index 5245d9e..299a7b2 100644
+--- dsymv_L_microk_skylakex-2.c
++++ dsymv_L_microk_skylakex-2.c
+@@ -33,6 +33,12 @@ USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ 
+ #define HAVE_KERNEL_4x4 1
+ 
++#if defined(__clang_patchlevel__) && __clang_major__ == 9 && __clang_minor__ == 0 && __clang_patchlevel__ == 0
++#pragma clang optimize off
++#endif
++#if defined(__apple_build_version__) && __clang_major__ == 11 && __clang_minor__ == 0 && __clang_patchlevel__ == 3
++#pragma clang optimize off
++#endif
+ static void dsymv_kernel_4x4(BLASLONG from, BLASLONG to, FLOAT **a, FLOAT *x, FLOAT *y, FLOAT *temp1, FLOAT *temp2)
+ {
+
+
+@@ -156,6 +162,12 @@ static void dsymv_kernel_4x4(BLASLONG from, BLASLONG to, FLOAT **a, FLOAT *x, FL
+        temp2[2] += half_accum2[0];
+        temp2[3] += half_accum3[0];
+ }
++#if defined(__clang_patchlevel__) && __clang_major__ == 9 && __clang_minor__ == 0 && __clang_patchlevel__ == 0
++#pragma clang optimize on
++#endif
++#if defined(__apple_build_version__) && __clang_major__ == 11 && __clang_minor__ == 0 && __clang_patchlevel__ == 3
++#pragma clang optimize on
++#endif
+  
+ #else
+ #include "dsymv_L_microk_haswell-2.c"

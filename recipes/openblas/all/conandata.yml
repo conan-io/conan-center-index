@@ -8,3 +8,11 @@ sources:
   "0.3.7":
     sha256: bde136122cef3dd6efe2de1c6f65c10955bbb0cc01a520c2342f5287c28f9379
     url: https://github.com/xianyi/OpenBLAS/archive/v0.3.7.tar.gz
+
+patches:
+  "0.3.9":
+    - base_path: "source_subfolder/kernel/x86_64/"
+      patch_file: "patches/apple_clang_0_3_9.patch"
+  "0.3.7":
+    - base_path: "source_subfolder/kernel/x86_64/"
+      patch_file: "patches/apple_clang_0_3_7.patch"
