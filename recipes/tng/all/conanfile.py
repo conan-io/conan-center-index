@@ -88,5 +88,7 @@ class tngConan(ConanFile):
 
     def package_info(self):
         self.cpp_info.libs = ["tng_io"]
+        if self.settings.os == "Linux":
+            self.cpp_info.system_libs = ["m"]
         self.cpp_info.names["cmake_find_package"] = "tng_io"
         self.cpp_info.names["cmake_find_package_multi"] = "tng_io"
