@@ -67,6 +67,7 @@ class ZstdConan(ConanFile):
         tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
 
     def package_info(self):
-        self.cpp_info.libs = tools.collect_libs(self)
+        zstd_component = "libzstd_shared" if self.options.shared else "libzstd_static"
+        self.cpp_info.components[zstd_component].libs = tools.collect_libs(self)
         if self.settings.os == "Linux":
-            self.cpp_info.system_libs.append("pthread")
+            self.cpp_info.components[zstd_component].system_libs.append("pthread")
