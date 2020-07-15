@@ -38,7 +38,7 @@ class B2Conan(ConanFile):
             'acc', 'borland', 'clang', 'como', 'gcc-nocygwin', 'gcc',
             'intel-darwin', 'intel-linux', 'intel-win32', 'kcc', 'kylix',
             'mingw', 'mipspro', 'pathscale', 'pgi', 'qcc', 'sun', 'sunpro',
-            'tru64cxx', 'vacpp', 'vc12', 'vc14', 'vc141', 'vc142' ]
+            'tru64cxx', 'vacpp', 'vc12', 'vc14', 'vc141', 'vc142']
     }
     default_options = {
         'use_cxx_env': False,
@@ -90,7 +90,7 @@ class B2Conan(ConanFile):
     def package_info(self):
         self.cpp_info.bindirs = ["bin"]
         self.env_info.path = [os.path.join(
-            self.package_folder, "bin")] + self.env_info.path
+            self.package_folder, "bin")]
 
     def package_id(self):
         del self.info.options.use_cxx_env
