@@ -9,8 +9,8 @@ class ZstdConan(ConanFile):
     description = "Zstandard - Fast real-time compression algorithm"
     topics = ("conan", "zstd", "compression", "algorithm", "decoder")
     license = "BSD-3-Clause"
-    exports_sources = ['CMakeLists.txt', "patches/**"]
-    generators = 'cmake'
+    exports_sources = ["CMakeLists.txt", "patches/**"]
+    generators = "cmake"
     settings = "os", "arch", "compiler", "build_type"
     options = {"shared": [True, False], "fPIC": [True, False]}
     default_options = {"shared": False, "fPIC": True}
