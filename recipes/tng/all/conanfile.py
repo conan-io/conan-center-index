@@ -1,6 +1,5 @@
 from conans import ConanFile, tools, CMake
 import os
-import shutil
 import glob
 
 
@@ -11,7 +10,7 @@ class tngConan(ConanFile):
     topics = ("conan", "tng", "gromacs")
     homepage = "https://github.com/gromacs/tng/"
     url = "https://github.com/conan-io/conan-center-index"
-    exports_sources = "CMakeLists.txt"
+    exports_sources = ["CMakeLists.txt", "patches/*"]
     generators = "cmake"
     settings = "os", "arch", "compiler", "build_type"
     options = {
@@ -54,6 +53,8 @@ class tngConan(ConanFile):
         os.rename(extracted_dir, self._source_subfolder)
 
     def build(self):
+        for patch in self.conan_data["patches"][self.version]:
+            tools.patch(**patch)
         cmake = self._configure_cmake()
         cmake.build()
 
@@ -61,23 +62,8 @@ class tngConan(ConanFile):
         if self._cmake:
             return self._cmake
         self._cmake = CMake(self)
-
         self._cmake.definitions["TNG_BUILD_OWN_ZLIB"] = False
-
         self._cmake.configure(build_folder=self._build_subfolder)
-
-        # the version.h file ends up being in a different location due to
-        # having the source_subfolder, this just copies the header to the
-        # the location that cmake is expecting it to be in
-        # so that the install process doesn't fail
-        version_header = os.path.join(os.getcwd(), self._build_subfolder,
-                                      "tng", "include", "tng", "version.h")
-        dst_header_folder = os.path.join(os.getcwd(), self._build_subfolder,
-                                         self._source_subfolder, "include",
-                                         "tng")
-        os.makedirs(dst_header_folder)
-        shutil.copy(version_header, dst_header_folder)
-
         return self._cmake
 
     def package(self):
