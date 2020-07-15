@@ -42,6 +42,8 @@ class tngConan(ConanFile):
             del self.options.fPIC
 
     def configure(self):
+        if self.options.shared:
+            del self.options.fPIC
         del self.settings.compiler.libcxx
         del self.settings.compiler.cppstd
 
@@ -86,3 +88,5 @@ class tngConan(ConanFile):
 
     def package_info(self):
         self.cpp_info.libs = ["tng_io"]
+        self.cpp_info.names["cmake_find_package"] = "tng_io"
+        self.cpp_info.names["cmake_find_package_multi"] = "tng_io"
