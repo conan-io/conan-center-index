@@ -1,7 +1,7 @@
 import os
 
 from conans import ConanFile, CMake, tools
-
+import pathlib
 
 class TestPackageConan(ConanFile):
     settings = "os", "compiler", "build_type", "arch"
@@ -15,4 +15,5 @@ class TestPackageConan(ConanFile):
     def test(self):
         if not tools.cross_building(self.settings):
             os.chdir("bin")
-            self.run(".%stest_package" % os.sep)
+            file = os.path.join( pathlib.Path(__file__).parent.absolute(), "tng_example.tng")
+            self.run(".%stest_package %s" % (os.sep, file) )
