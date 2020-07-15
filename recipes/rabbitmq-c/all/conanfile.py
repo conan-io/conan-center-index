@@ -71,6 +71,10 @@ class RabbitmqcConan(ConanFile):
         tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
 
     def package_info(self):
+        # TODO: add cmake import information
+        # - for config file: rabbitmq-c
+        # - imported target: rabbitmq::rabbitmq if shared else rabbitmq::rabbitmq-static)
+        self.cpp_info.names["pkg_config"] = "librabbitmq"
         if self.settings.os == "Windows":
             self.cpp_info.libs = [
                 "rabbitmq.4" if self.options.shared else "librabbitmq.4"
