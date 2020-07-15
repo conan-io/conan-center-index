@@ -51,6 +51,10 @@ class OpenblasConan(ConanFile):
     def _is_msvc(self):
         return self.settings.compiler == "Visual Studio"
 
+    @property
+    def _is_apple_clang(self):
+        return self.settings.compiler == "apple-clang"
+
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
@@ -67,6 +71,8 @@ class OpenblasConan(ConanFile):
     def _patch_sources(self):
         if self.version in self.conan_data["patches"]:
             for patch in self.conan_data["patches"][self.version]:
+                if "apple_clang" in patch["patch_file"] and not self._is_apple_clang:
+                    continue
                 tools.patch(**patch)
 
     def _configure_cmake(self):
