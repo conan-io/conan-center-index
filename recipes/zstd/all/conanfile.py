@@ -15,9 +15,15 @@ class ZstdConan(ConanFile):
     options = {"shared": [True, False], "fPIC": [True, False]}
     default_options = {"shared": False, "fPIC": True}
 
+    _cmake = None
+
     @property
     def _source_subfolder(self):
         return "source_subfolder"
+
+    @property
+    def _build_subfolder(self):
+        return "build_subfolder"
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
@@ -33,12 +39,14 @@ class ZstdConan(ConanFile):
         del self.settings.compiler.cppstd
 
     def _configure_cmake(self):
-        cmake = CMake(self)
-        cmake.definitions["ZSTD_BUILD_PROGRAMS"] = False
-        cmake.definitions["ZSTD_BUILD_STATIC"] = not self.options.shared
-        cmake.definitions["ZSTD_BUILD_SHARED"] = self.options.shared
-        cmake.configure()
-        return cmake
+        if self._cmake:
+            return self._cmake
+        self._cmake = CMake(self)
+        self._cmake.definitions["ZSTD_BUILD_PROGRAMS"] = False
+        self._cmake.definitions["ZSTD_BUILD_STATIC"] = not self.options.shared
+        self._cmake.definitions["ZSTD_BUILD_SHARED"] = self.options.shared
+        self._cmake.configure(build_folder=self._build_subfolder)
+        return self._cmake
 
     def _patch_sources(self):
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
