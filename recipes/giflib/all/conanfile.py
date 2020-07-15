@@ -103,8 +103,6 @@ class GiflibConan(ConanFile):
     def build_configure(self):
         env_build = AutoToolsBuildEnvironment(self, win_bash=self.settings.os == "Windows" and
                                               platform.system() == "Windows")
-        if self.settings.os != "Windows":
-            env_build.fpic = self.options.get_safe("fPIC", True)
 
         prefix = os.path.abspath(self.package_folder)
         if self.settings.os == "Windows":
