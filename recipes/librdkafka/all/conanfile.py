@@ -112,6 +112,6 @@ class LibrdkafkaConan(ConanFile):
         if self.settings.compiler == "Visual Studio":
             self.cpp_info.system_libs.extend(["crypt32", "ws2_32"])
         elif self.settings.os == "Linux":
-            self.cpp_info.system_libs.extend(["pthread", "m"])
+            self.cpp_info.system_libs.extend(["pthread", "rt", "dl", "m"])
         if not self.options.shared:
             self.cpp_info.defines.append("LIBRDKAFKA_STATICLIB")
