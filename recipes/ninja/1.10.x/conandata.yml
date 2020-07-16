@@ -11,6 +11,8 @@ patches:
      patch_file: patches/add_install_target_to_cmake_build.patch
    - base_path: source_subfolder
      patch_file: patches/build_testing_option.patch
+   - base_path: source_subfolder
+     patch_file: patches/add_subproject_support.patch
   "1.10.1":
    - base_path: source_subfolder
      patch_file: patches/build_testing_option_1.10.1.patch
