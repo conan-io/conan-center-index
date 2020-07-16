@@ -10,7 +10,7 @@ class PremakeConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://premake.github.io"
     license = "BSD-3-Clause"
-    settings = "os", "arch", "compiler"
+    settings = "os", "arch", "compiler", "build_type"
     _source_subfolder = "source_subfolder"
 
     def configure(self):
@@ -37,7 +37,7 @@ class PremakeConan(ConanFile):
         with tools.chdir(os.path.join(self._source_subfolder, "build", self._platform)):
             if self.settings.os == "Windows":
                 msbuild = MSBuild(self)
-                msbuild.build("Premake5.sln", platforms={"x86": "Win32", "x86_64": "x64"}, build_type="Release", arch="{}".format(self.settings.arch))
+                msbuild.build("Premake5.sln", platforms={"x86": "Win32", "x86_64": "x64"})
             elif self.settings.os == "Linux" or self.settings.os == "Macos":
                 env_build = AutoToolsBuildEnvironment(self)
                 env_build.make(args=["config=release"])
