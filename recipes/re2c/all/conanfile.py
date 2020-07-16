@@ -78,10 +78,6 @@ class Re2CConan(ConanFile):
 
         tools.rmdir(os.path.join(self.package_folder, "share"))
 
-    def package_id(self):
-        del self.info.settings.build_type
-        del self.info.settings.compiler
-
     def package_info(self):
         bin_path = os.path.join(self.package_folder, "bin")
         self.output.info("Appending PATH environment variable: {}".format(bin_path))
