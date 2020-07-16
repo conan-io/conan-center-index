@@ -20,6 +20,7 @@ class CMakeConan(ConanFile):
         "with_openssl": "auto",
     }
 
+    short_paths = True
     _source_subfolder = "source_subfolder"
     _cmake = None
 
