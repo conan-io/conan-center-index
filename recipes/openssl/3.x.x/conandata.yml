@@ -2,3 +2,6 @@ sources:
   3.0.0-alpha4:
     sha256: d930b650e0899f5baca8b80c50e7401620c129fef6c50198400999776a39bd37
     url: https://www.openssl.org/source/openssl-3.0.0-alpha4.tar.gz
+  3.0.0-alpha5:
+    sha256: 09ad89af04cbf36dbbce1fc7063e18fcc333fcaaf3eccecf22c4a99bac83e139
+    url: https://www.openssl.org/source/openssl-3.0.0-alpha5.tar.gz
