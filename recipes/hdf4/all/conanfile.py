@@ -1,7 +1,6 @@
 import os
 
 from conans import ConanFile, CMake, tools
-from conans.errors import ConanInvalidConfiguration
 
 class Hdf4Conan(ConanFile):
     name = "hdf4"
@@ -49,10 +48,6 @@ class Hdf4Conan(ConanFile):
         del self.settings.compiler.cppstd
         if not bool(self.options.szip_support):
             del self.options.szip_encoding
-        elif self.options.szip_support == "with_szip" and \
-             self.options.szip_encoding and \
-             not self.options["szip"].enable_encoding:
-            raise ConanInvalidConfiguration("encoding must be enabled in the dependency (szip:enable_encoding=True)")
 
     def requirements(self):
         self.requires("zlib/1.2.11")
