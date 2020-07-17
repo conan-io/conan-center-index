@@ -107,33 +107,39 @@ class Hdf4Conan(ConanFile):
         self.cpp_info.names["pkg_config"] = "hdf"
         unofficial_includedir = os.path.join(self.package_folder, "include", "hdf4")
         # xdr
-        xdr_component = "xdr-shared" if self.options.shared else "xdr-static"
-        self.cpp_info.components[xdr_component].includedirs.append(unofficial_includedir)
-        self.cpp_info.components[xdr_component].libs = [self._get_decorated_lib("xdr")]
+        xdr_cmake = "xdr-shared" if self.options.shared else "xdr-static"
+        self.cpp_info.components["xdr"].names["cmake_find_package"] = xdr_cmake
+        self.cpp_info.components["xdr"].names["cmake_find_package_multi"] = xdr_cmake
+        self.cpp_info.components["xdr"].includedirs.append(unofficial_includedir)
+        self.cpp_info.components["xdr"].libs = [self._get_decorated_lib("xdr")]
         if self.settings.os == "Windows":
-            self.cpp_info.components[xdr_component].system_libs.append("ws2_32")
+            self.cpp_info.components["xdr"].system_libs.append("ws2_32")
         # hdf
-        hdf_component = "hdf-shared" if self.options.shared else "hdf-static"
-        self.cpp_info.components[hdf_component].includedirs.append(unofficial_includedir)
-        self.cpp_info.components[hdf_component].libs = [self._get_decorated_lib("hdf")]
-        self.cpp_info.components[hdf_component].requires = [
+        hdf_cmake = "hdf-shared" if self.options.shared else "hdf-static"
+        self.cpp_info.components["hdf"].names["cmake_find_package"] = hdf_cmake
+        self.cpp_info.components["hdf"].names["cmake_find_package_multi"] = hdf_cmake
+        self.cpp_info.components["hdf"].includedirs.append(unofficial_includedir)
+        self.cpp_info.components["hdf"].libs = [self._get_decorated_lib("hdf")]
+        self.cpp_info.components["hdf"].requires = [
             "zlib::zlib",
             "libjpeg-turbo::libjpeg-turbo" if self.options.jpegturbo else "libjpeg::libjpeg"
         ]
         if self.options.szip_support == "with_libaec":
-            self.cpp_info.components[hdf_component].requires.append("libaec::libaec")
+            self.cpp_info.components["hdf"].requires.append("libaec::libaec")
         elif self.options.szip_support == "with_szip":
-            self.cpp_info.components[hdf_component].requires.append("szip::szip")
+            self.cpp_info.components["hdf"].requires.append("szip::szip")
         # mfhdf
-        mfhdf_component = "mfhdf-shared" if self.options.shared else "mfhdf-static"
-        self.cpp_info.components[mfhdf_component].includedirs.append(unofficial_includedir)
-        self.cpp_info.components[mfhdf_component].libs = [self._get_decorated_lib("mfhdf")]
-        self.cpp_info.components[mfhdf_component].requires = [xdr_component, hdf_component]
+        mfhdf_cmake = "mfhdf-shared" if self.options.shared else "mfhdf-static"
+        self.cpp_info.components["mfhdf"].names["cmake_find_package"] = mfhdf_cmake
+        self.cpp_info.components["mfhdf"].names["cmake_find_package_multi"] = mfhdf_cmake
+        self.cpp_info.components["mfhdf"].includedirs.append(unofficial_includedir)
+        self.cpp_info.components["mfhdf"].libs = [self._get_decorated_lib("mfhdf")]
+        self.cpp_info.components["mfhdf"].requires = ["xdr", "hdf"]
 
         if self.options.shared:
-            self.cpp_info.components[xdr_component].defines.append("H4_BUILT_AS_DYNAMIC_LIB=1")
-            self.cpp_info.components[hdf_component].defines.append("H4_BUILT_AS_DYNAMIC_LIB=1")
-            self.cpp_info.components[mfhdf_component].defines.append("H4_BUILT_AS_DYNAMIC_LIB=1")
+            self.cpp_info.components["xdr"].defines.append("H4_BUILT_AS_DYNAMIC_LIB=1")
+            self.cpp_info.components["hdf"].defines.append("H4_BUILT_AS_DYNAMIC_LIB=1")
+            self.cpp_info.components["mfhdf"].defines.append("H4_BUILT_AS_DYNAMIC_LIB=1")
 
     def _get_decorated_lib(self, name):
         libname = name
