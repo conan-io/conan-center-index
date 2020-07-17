@@ -108,19 +108,40 @@ class Hdf4Conan(ConanFile):
 
     def package_info(self):
         self.cpp_info.names["pkg_config"] = "hdf"
-        self.cpp_info.libs = self._get_ordered_libs()
-        self.cpp_info.includedirs.append(os.path.join(self.package_folder, "include", "hdf4"))
-        if self.options.shared:
-            self.cpp_info.defines.append("H4_BUILT_AS_DYNAMIC_LIB")
-        if self.settings.os == "Linux":
-            self.cpp_info.system_libs = ["m"]
+        unofficial_includedir = os.path.join(self.package_folder, "include", "hdf4")
+        # xdr
+        xdr_component = "xdr-shared" if self.options.shared else "xdr-static"
+        self.cpp_info.components[xdr_component].includedirs.append(unofficial_includedir)
+        self.cpp_info.components[xdr_component].libs = [self._get_decorated_lib("xdr")]
+        if self.settings.os == "Windows":
+            self.cpp_info.components[xdr_component].system_libs.append("ws2_32")
+        # hdf
+        hdf_component = "hdf-shared" if self.options.shared else "hdf-static"
+        self.cpp_info.components[hdf_component].includedirs.append(unofficial_includedir)
+        self.cpp_info.components[hdf_component].libs = [self._get_decorated_lib("hdf")]
+        self.cpp_info.components[hdf_component].requires = [
+            "zlib::zlib",
+            "libjpeg-turbo::libjpeg-turbo" if self.options.jpegturbo else "libjpeg::libjpeg"
+        ]
+        if self.options.szip_support == "with_libaec":
+            self.cpp_info.components[hdf_component].requires.append("libaec::libaec")
+        elif self.options.szip_support == "with_szip":
+            self.cpp_info.components[hdf_component].requires.append("szip::szip")
+        # mfhdf
+        mfhdf_component = "mfhdf-shared" if self.options.shared else "mfhdf-static"
+        self.cpp_info.components[mfhdf_component].includedirs.append(unofficial_includedir)
+        self.cpp_info.components[mfhdf_component].libs = [self._get_decorated_lib("mfhdf")]
+        self.cpp_info.components[mfhdf_component].requires = [xdr_component, hdf_component]
 
-    def _get_ordered_libs(self):
-        libs = ["mfhdf", "xdr", "hdf"]
-        # See config/cmake_ext_mod/HDFMacros.cmake
+        if self.options.shared:
+            self.cpp_info.components[xdr_component].defines.append("H4_BUILT_AS_DYNAMIC_LIB=1")
+            self.cpp_info.components[hdf_component].defines.append("H4_BUILT_AS_DYNAMIC_LIB=1")
+            self.cpp_info.components[mfhdf_component].defines.append("H4_BUILT_AS_DYNAMIC_LIB=1")
+
+    def _get_decorated_lib(self, name):
+        libname = name
         if self.settings.os == "Windows" and self.settings.compiler != "gcc" and not self.options.shared:
-            libs = ["lib" + lib for lib in libs]
+            libname = "lib" + libname
         if self.settings.build_type == "Debug":
-            debug_postfix = "_D" if self.settings.os == "Windows" else "_debug"
-            libs = [lib + debug_postfix for lib in libs]
-        return libs
+            libname += "_D" if self.settings.os == "Windows" else "_debug"
+        return libname
