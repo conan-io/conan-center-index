@@ -1,5 +1,3 @@
-diff --git a/src/CMakeLists.txt b/src/CMakeLists.txt
-index 5550bb2c..a7f5f78e 100644
 --- a/src/CMakeLists.txt
 +++ b/src/CMakeLists.txt
 @@ -132,7 +132,9 @@ if(WITHOUT_WIN32_CONFIG)
