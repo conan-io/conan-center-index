@@ -570,7 +570,7 @@ class OpenSSLConan(ConanFile):
             tools.replace_in_file(filename, "/%s\"" % e, "/%s\"" % self.settings.compiler.runtime, strict=False)
 
     def package(self):
-        self.copy(src=self._source_subfolder, pattern="*LICENSE", dst="licenses")
+        self.copy(pattern="*LICENSE*", dst="licenses", src=self._source_subfolder)
         with tools.vcvars(self.settings) if self._use_nmake else tools.no_op():
             self._make_install()
         for root, _, files in os.walk(self.package_folder):

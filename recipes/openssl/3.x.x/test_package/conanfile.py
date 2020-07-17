@@ -26,4 +26,4 @@ class TestPackageConan(ConanFile):
         if not tools.cross_building(self.settings):
             bin_path = os.path.join("bin", "digest")
             self.run(bin_path, run_environment=True)
-        assert os.path.exists(os.path.join(self.deps_cpp_info["openssl"].rootpath, "licenses", "LICENSE"))
+        assert os.path.exists(os.path.join(self.deps_cpp_info["openssl"].rootpath, "licenses", "LICENSE.txt"))
