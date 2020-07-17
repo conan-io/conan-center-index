@@ -48,7 +48,9 @@ class SpdlogConan(ConanFile):
             raise ConanInvalidConfiguration("wchar is not yet supported under windows")
 
     def requirements(self):
-        if Version(self.version) >= "1.5.0":
+        if Version(self.version) >= "1.7.0":
+            self.requires("fmt/7.0.1")
+        elif Version(self.version) >= "1.5.0":
             self.requires("fmt/6.2.0")
         else:
             self.requires("fmt/6.0.0")
@@ -82,6 +84,9 @@ class SpdlogConan(ConanFile):
         tools.replace_in_file(os.path.join(self._source_subfolder, "cmake", "utils.cmake"), "/WX", "")
 
     def build(self):
+        if tools.Version(self.version) < "1.7" and \
+           tools.Version(self.deps_cpp_info["fmt"].version) >= 7:
+            raise ConanInvalidConfiguration("The project spdlog {} requires fmt <7.x".format(self.version))
         self._disable_werror()
         if self.options.header_only:
             tools.patch(**self.conan_data["patches"][self.version])
