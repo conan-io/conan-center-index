@@ -79,18 +79,9 @@ class OpenSSLConan(ConanFile):
         return self._is_clangcl or self._is_msvc
 
     def source(self):
-        try:
-            tools.get(**self.conan_data["sources"][self.version])
-        except ConanException:
-            self.output.warn("Downloading OpenSSL from the mirror.")
-            url = self.conan_data["sources"][self.version]["url"]
-            # FIXME: For < 3.0.0 the old url contained major.minor.patch, e.g. 1.1.0, but without the letter (e.g. "a")
-            # FIXME: So what will be the old url for >= 3.0.0?
-            openssl_version = Version(self.version)
-            old_directory = "{}.{}".format(openssl_version.major, openssl_version.minor)
-            url = url.replace("https://www.openssl.org/source/",
-                              "https://www.openssl.org/source/old/{}/".format(old_directory))
-            tools.get(url, sha256=self.conan_data["sources"][self.version]["sha256"])
+        # FIXME: For < 3.0.0 the old url contained major.minor.patch, e.g. 1.1.0, but without the letter (e.g. "a")
+        # FIXME: So what will be the old url for >= 3.0.0?
+        tools.get(**self.conan_data["sources"][self.version])
         extracted_folder = "openssl-" + self.version
         os.rename(extracted_folder, self._source_subfolder)
 
