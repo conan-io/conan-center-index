@@ -14,4 +14,4 @@ class TestPackgeConan(ConanFile):
             "boost-build \"" +
             os.environ['BOOST_BUILD_PATH'].replace("\\", "/")+"\" ;"
         )
-        self.run("b2 --debug-configuration")
+        self.run("b2 --debug-configuration", run_environment=True)
