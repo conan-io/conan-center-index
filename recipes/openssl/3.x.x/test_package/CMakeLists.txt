@@ -11,6 +11,8 @@ if(OPENSSL_WITH_ZLIB)
     target_compile_definitions(digest PRIVATE WITH_ZLIB)
 endif()
 
-message("LINK WITH ${CONAN_LIBS}")
-target_include_directories(digest PRIVATE ${CONAN_INCLUDE_DIRS})
-target_link_libraries(digest PRIVATE ${CONAN_LIBS})
+set(OpenSSL_DEBUG 1)
+find_package(OpenSSL REQUIRED)
+message("LINK WITH ${OpenSSL_LIBRARIES}")
+
+target_link_libraries(digest OpenSSL::SSL)
