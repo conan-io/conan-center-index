@@ -139,7 +139,6 @@ class Cc65Conan(ConanFile):
         if self.settings.compiler == "Visual Studio":
             if self.settings.arch == "x86_64":
                 self.info.settings.arch = "x86"
-        del self.info.settings.compiler
 
     def package_info(self):
         bindir = os.path.join(self.package_folder, "bin")
