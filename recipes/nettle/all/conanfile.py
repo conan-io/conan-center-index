@@ -49,6 +49,7 @@ class NettleTLS(ConanFile):
         os.rename("nettle-{}".format(self.version), self._source_subfolder)
 
     def build_requirements(self):
+        self.build_requires("m4/1.4.18")
         if tools.os_info.is_windows and not "CONAN_BASH_PATH" in os.environ:
             self.build_requires("msys2/20190524")
 
