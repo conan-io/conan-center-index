@@ -26,6 +26,7 @@ class SysConfigGLUConan(ConanFile):
             elif tools.os_info.with_zypper:
                 packages = ["Mesa-libGLU-devel"]
             else:
+                packages = []
                 self.output.warn("Don't know how to install GLU for your distro")
 
             for p in packages:
