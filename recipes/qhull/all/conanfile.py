@@ -34,6 +34,8 @@ class QhullConan(ConanFile):
             del self.options.fPIC
 
     def configure(self):
+        if self.options.shared:
+            del self.options.fPIC
         del self.settings.compiler.libcxx
         del self.settings.compiler.cppstd
 
@@ -61,6 +63,7 @@ class QhullConan(ConanFile):
         tools.rmdir(os.path.join(self.package_folder, "doc"))
         tools.rmdir(os.path.join(self.package_folder, "man"))
         tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
+        tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
         tools.rmdir(os.path.join(self.package_folder, "share"))
 
     def package_info(self):
@@ -71,3 +74,7 @@ class QhullConan(ConanFile):
             self.cpp_info.system_libs.append("m")
         if self.settings.compiler == "Visual Studio" and self.options.shared:
             self.cpp_info.defines.extend(["qh_dllimport"])
+
+        bin_path = os.path.join(self.package_folder, "bin")
+        self.output.info("Appending PATH environment variable: {}".format(bin_path))
+        self.env_info.PATH.append(bin_path)
