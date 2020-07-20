@@ -1,14 +1,3 @@
---- configure
-+++ configure
-@@ -12592,7 +12592,7 @@
- 
- $as_echo "#define API_EXPORTED __attribute__((visibility(\"default\")))" >>confdefs.h
- 
--AM_CFLAGS="-std=gnu99 $inline_cflags -Wall -Wundef -Wunused -Wstrict-prototypes -Werror-implicit-function-declaration -Wno-pointer-sign -Wshadow"
-+AM_CFLAGS="-std=gnu99 $inline_cflags -Wall"
- 
- 
- ac_config_files="$ac_config_files libusb.pc libusb-config Makefile libusb/Makefile examples/Makefile"
 --- configure.ac
 +++ configure.ac
 @@ -9,7 +9,7 @@
