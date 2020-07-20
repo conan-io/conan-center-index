@@ -11,7 +11,7 @@ class SpdlogConan(ConanFile):
     homepage = "https://github.com/gabime/spdlog"
     topics = ("conan", "spdlog", "logging", "header-only")
     license = "MIT"
-    exports = ["CMakeLists.txt"]
+    exports_sources = ["CMakeLists.txt"]
     generators = "cmake", "cmake_find_package"
     settings = "os", "arch", "compiler", "build_type"
     options = {"shared": [True, False],
