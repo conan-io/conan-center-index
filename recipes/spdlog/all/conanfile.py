@@ -85,6 +85,9 @@ class SpdlogConan(ConanFile):
         tools.replace_in_file(os.path.join(self._source_subfolder, "cmake", "utils.cmake"), "/WX", "")
 
     def build(self):
+        if tools.Version(self.version) < "1.7" and tools.Version(self.deps_cpp_info["fmt"].version) >= 7:
+            raise ConanInvalidConfiguration("The project spdlog/{} requires fmt <7.x".format(self.version))
+
         self._disable_werror()
         if not self.options.header_only:
             cmake = self._configure_cmake()
