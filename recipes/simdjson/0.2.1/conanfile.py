@@ -74,7 +74,7 @@ class SimdjsonConan(ConanFile):
         cmake.definitions['SIMDJSON_DISABLE_AVX'] = not self.options.avx
         cmake.definitions['SIMDJSON_SANITIZE'] = False
         cmake.definitions['ENABLE_FUZZING'] = False
-        cmake.configure(source_folder=self._source_subfolder)
+        cmake.configure()
         return cmake
 
     def build(self):
