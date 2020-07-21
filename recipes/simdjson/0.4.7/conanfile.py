@@ -63,6 +63,7 @@ class SimdjsonConan(ConanFile):
         self._cmake.definitions['SIMDJSON_BUILD_STATIC'] = not self.options.shared
         self._cmake.definitions['SIMDJSON_ENABLE_THREADS'] = self.options.threads
         self._cmake.definitions['SIMDJSON_SANITIZE'] = False
+        self._cmake.definitions['SIMDJSON_JUST_LIBRARY'] = True
         self._cmake.configure(source_folder=self._source_subfolder)
         return self._cmake
 
