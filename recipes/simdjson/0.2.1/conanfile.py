@@ -6,6 +6,7 @@ from conans.tools import Version
 
 class SimdjsonConan(ConanFile):
     name = "simdjson"
+    version = '0.2.1'
     description = "Parsing gigabytes of JSON per second"
     topics = ("conan", "json", "parser", "simd", "format")
     url = "https://github.com/conan-io/conan-center-index"
@@ -35,7 +36,7 @@ class SimdjsonConan(ConanFile):
 
     def configure(self):
         if self.settings.compiler == "Visual Studio":
-            self.options.remove("fPIC")
+            del self.options.fPIC
         if self.settings.compiler.cppstd and \
            not self.settings.compiler.cppstd in self._supported_cppstd:
           raise ConanInvalidConfiguration("This library requires c++17 standard or higher."
@@ -93,3 +94,5 @@ class SimdjsonConan(ConanFile):
         self.cpp_info.libs = ['simdjson']
         if self.settings.os == "Linux":
             self.cpp_info.system_libs = ["m"]
+
+
