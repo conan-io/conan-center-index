@@ -21,11 +21,9 @@ class SimdjsonConan(ConanFile):
     default_options = {'shared': False,
                        'fPIC': True,
                        'threads': True}
-    _cmake = None
-
-    @property
-    def _source_subfolder(self):
-          return "source_subfolder"
+    # It was proposed that the next line was replaced by _cmake = None and the
+    # addition of a function _source_subfolder, but it breaks the build.
+    _source_subfolder = "source_subfolder"
 
     @property
     def _supported_cppstd(self):
@@ -72,15 +70,14 @@ class SimdjsonConan(ConanFile):
                                   'set(CMAKE_INTERPROCEDURAL_OPTIMIZATION FALSE)')
 
     def _configure_cmake(self):
-        if(self._cmake):
-          return self._cmake
-        self._cmake = CMake(self)
-        self._cmake.definitions['SIMDJSON_BUILD_STATIC'] = not self.options.shared
-        self._cmake.definitions['SIMDJSON_ENABLE_THREADS'] = self.options.threads
-        self._cmake.definitions['SIMDJSON_SANITIZE'] = False
-        self._cmake.definitions['ENABLE_FUZZING'] = False
-        self._cmake.configure(source_folder=self._source_subfolder)
-        return self._cmake
+        # Changes to this function were proposed, but they break the build.
+        cmake = CMake(self)
+        cmake.definitions['SIMDJSON_BUILD_STATIC'] = not self.options.shared
+        cmake.definitions['SIMDJSON_ENABLE_THREADS'] = self.options.threads
+        cmake.definitions['SIMDJSON_SANITIZE'] = False
+        cmake.definitions['ENABLE_FUZZING'] = False
+        cmake.configure()
+        return cmake
 
     def build(self):
         cmake = self._configure_cmake()
