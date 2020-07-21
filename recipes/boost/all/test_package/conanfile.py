@@ -40,8 +40,9 @@ class DefaultNameConan(ConanFile):
                 cmake.definitions["Boost_USE_STATIC_LIBS"] = not self.options["boost"].shared
             if not self.options["boost"].without_python:
                 cmake.definitions["WITH_PYTHON"] = "TRUE"
-                cmake.definitions["Python_ADDITIONAL_VERSIONS"] = "{}.{}".format(sys.version_info.major, sys.version_info.minor)
-                cmake.definitions["PYTHON_COMPONENT_SUFFIX"] = "{}{}".format(sys.version_info.major, sys.version_info.minor)
+                pyversion = tools.Version(self.options["boost"].python_version)
+                cmake.definitions["Python_ADDITIONAL_VERSIONS"] = "{}.{}".format(pyversion.major, pyversion.minor)
+                cmake.definitions["PYTHON_COMPONENT_SUFFIX"] = "{}{}".format(pyversion.major, pyversion.minor)
             if not self.options["boost"].without_random:
                 cmake.definitions["WITH_RANDOM"] = "TRUE"
             if not self.options["boost"].without_regex:
