@@ -1,0 +1,32 @@
+diff --git a/docopt.h b/docopt.h
+index c5ce97e..a59b5ed 100644
+--- a/docopt.h
++++ b/docopt.h
+@@ -9,13 +9,6 @@
+ #ifndef docopt__docopt_h_
+ #define docopt__docopt_h_
+ 
+-#include "docopt_value.h"
+-
+-#include <map>
+-#include <vector>
+-#include <string>
+-#include <stdexcept>
+-
+ #ifdef DOCOPT_HEADER_ONLY
+     #define DOCOPT_INLINE inline
+     #define DOCOPT_API
+@@ -41,6 +34,13 @@
+     #endif
+ #endif
+ 
++#include "docopt_value.h"
++
++#include <map>
++#include <vector>
++#include <string>
++#include <stdexcept>
++
+ namespace docopt {
+ 	
+ 	// Usage string could not be parsed (ie, the developer did something wrong)

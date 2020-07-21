@@ -2,6 +2,9 @@ sources:
   "0.6.2":
     url: "https://github.com/docopt/docopt.cpp/archive/v0.6.2.zip"
     sha256: "217d2171c67b99e245701bbd9a97f5b87318812711e40beb3865c2e8e38c1f59"
+  "0.6.3":
+    url: "https://github.com/docopt/docopt.cpp/archive/v0.6.3.zip"
+    sha256: "35c00cb72e0289835ae7f22f986fc6a3be0fe8e97605edbb0746cba3498d277d"
 patches:
   "0.6.2":
     - patch_file: "patches/include-stdexcept.patch"
@@ -9,4 +12,9 @@ patches:
     - patch_file: "patches/0002-cmake-library.patch"
       base_path: "source_subfolder"
     - patch_file: "patches/docopt-value-dll.patch"
+      base_path: "source_subfolder"
+  "0.6.3":
+    - patch_file: "patches/cmake-library-v0.6.3.patch"
+      base_path: "source_subfolder"
+    - patch_file: "patches/docopt-value-dll-v0.6.3.patch"
       base_path: "source_subfolder"

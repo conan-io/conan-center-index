@@ -1,10 +1,10 @@
-from conans import ConanFile, CMake, tools
 import os
+
+from conans import CMake, ConanFile, tools
 
 
 class DocoptCppConan(ConanFile):
     name = "docopt.cpp"
-    version = "0.6.2"
     license = "MIT"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/docopt/docopt.cpp"
@@ -47,6 +47,7 @@ class DocoptCppConan(ConanFile):
         cmake = self._configure_cmake()
         cmake.install()
         tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
+        tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
 
     def package_info(self):
         self.cpp_info.libs = ["docopt"]
