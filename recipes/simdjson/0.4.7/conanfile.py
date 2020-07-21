@@ -94,3 +94,5 @@ class SimdjsonConan(ConanFile):
             self.cpp_info.defines = ["SIMDJSON_THREADS_ENABLED=1"]
             if self.settings.os == "Linux":
                 self.cpp_info.system_libs.append("pthread")
+            if self.options.shared:
+                self.cpp_info.defines.append("SIMDJSON_USING_LIBRARY=1")
