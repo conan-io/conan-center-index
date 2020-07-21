@@ -1,4 +1,7 @@
 sources:
+  "0.10.7":
+    url: https://github.com/open-source-parsers/jsoncpp/archive/0.10.7.tar.gz
+    sha256: 73e235c230708a8ac78ec11b886434a018f89691bd9e7fcf9c3128c8e677b435
   "1.9.1":
     url: https://github.com/open-source-parsers/jsoncpp/archive/1.9.1.tar.gz
     sha256: c7b40f5605dd972108f503f031b20186f5e5bca2b65cd4b8bd6c3e4ba8126697
