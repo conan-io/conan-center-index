@@ -21,7 +21,7 @@ class SpirvtoolsConan(ConanFile):
         "fPIC": [True, False]
     }
     default_options = {
-        "shared": True,
+        "shared": False,
         "fPIC": True
     }
 
@@ -34,7 +34,7 @@ class SpirvtoolsConan(ConanFile):
         return "build_subfolder"
 
     def config_options(self):
-        if self.settings.os == 'Windows':
+        if self.settings.os == "Windows":
             del self.options.fPIC
 
     def configure(self):
@@ -141,5 +141,5 @@ class SpirvtoolsConan(ConanFile):
         self.cpp_info.components["spirv-tools-reduce"].requires = ["spirv-tools-core", "spirv-tools-opt"]
 
         bin_path = os.path.join(self.package_folder, "bin")
-        self.output.info('Appending PATH environment variable: %s' % bin_path)
+        self.output.info("Appending PATH environment variable: %s" % bin_path)
         self.env_info.path.append(bin_path)
