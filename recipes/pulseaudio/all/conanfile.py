@@ -33,7 +33,7 @@ class LibnameConan(ConanFile):
         "with_fftw": True,
         "with_x11": True,
         "with_openssl": True,
-        "with_dbus": True,
+        "with_dbus": False,
     }
 
     build_requires = "gettext/0.20.1", "libtool/2.4.6"
