@@ -107,3 +107,7 @@ class GdbmConan(ConanFile):
         if self.options.libgdbm_compat:
             self.cpp_info.libs.append("gdbm_compat")
         self.cpp_info.libs.append("gdbm")
+
+        bin_path = os.path.join(self.package_folder, "bin"))
+        self.output.info("Appending PATH environment variable: {}".format(bin_path))
+        self.env_info.PATH.append(bin_path)
