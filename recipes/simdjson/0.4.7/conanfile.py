@@ -63,6 +63,13 @@ class SimdjsonConan(ConanFile):
         tools.get(**self.conan_data["sources"][self.version])
         extracted_dir = self.name + "-" + self.version
         os.rename(extracted_dir, self._source_subfolder)
+        # Generating export files by CMake via __export_def (enabled by property WINDOWS_EXPORT_ALL_SYMBOLS)
+        # does not work with whole program optimization.
+        # So disable INTERPROCEDURAL_OPTIMIZATION
+        if self.settings.compiler == "Visual Studio" and self.options.shared:
+            tools.replace_in_file(os.path.join(self._source_subfolder, 'CMakeLists.txt'),
+                                  'set(CMAKE_INTERPROCEDURAL_OPTIMIZATION TRUE)',
+                                  'set(CMAKE_INTERPROCEDURAL_OPTIMIZATION FALSE)')
 
     def _configure_cmake(self):
         if self._cmake:
