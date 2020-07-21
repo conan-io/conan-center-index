@@ -20,7 +20,7 @@ except ImportError:
 lib_list = ['math', 'wave', 'container', 'contract', 'exception', 'graph', 'iostreams', 'locale', 'log',
             'program_options', 'random', 'regex', 'mpi', 'serialization',
             'coroutine', 'fiber', 'context', 'timer', 'thread', 'chrono', 'date_time',
-            'atomic', 'filesystem', 'system', 'graph_parallel', 'python',
+            'atomic', 'filesystem', 'system', 'graph_parallel', 'python', 'numpy',
             'stacktrace', 'test', 'type_erasure']
 
 
@@ -178,6 +178,13 @@ class BoostConan(ConanFile):
                 if not self.options.get_safe('without_%s' % lib):
                     raise ConanInvalidConfiguration("Boost '%s' library requires multi threading" % lib)
 
+        if not self.options.without_python and not self.options.python_version:
+            # The python version (currently) really needs to be stored in the package (and not only in the package_id)
+            # Dependencies of boost need to be able to query the value of options["boost"].python_version
+            # Adding it to package_info is not enough
+            # FIXME: A conan python package will fix this by obviating the need fot a python_version option
+            self.options.python_version = self._detect_python_version()
+
     def _check_options(self):
         for mod_name, mod_deps in self._dependencies["dependencies"].items():
             without_option = "without_{}".format(mod_name)
@@ -214,8 +221,6 @@ class BoostConan(ConanFile):
             del self.info.options.python_executable  # PATH to the interpreter is not important, only version matters
             if self.options.without_python:
                 del self.info.options.python_version
-            else:
-                self.info.options.python_version = self._python_version
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
@@ -286,8 +291,7 @@ class BoostConan(ConanFile):
         """
         return self._get_python_sc_var(name) or self._get_python_du_var(name)
 
-    @property
-    def _python_version(self):
+    def _detect_python_version(self):
         """
         obtain version of python interpreter
         :return: python interpreter version, in format major.minor
@@ -295,10 +299,11 @@ class BoostConan(ConanFile):
         version = self._run_python_script("from __future__ import print_function; "
                                           "import sys; "
                                           "print('%s.%s' % (sys.version_info[0], sys.version_info[1]))")
-        if self.options.python_version and version != self.options.python_version:
-            raise ConanInvalidConfiguration("detected python version %s doesn't match conan option %s" % (version,
-                                                                                          self.options.python_version))
         return version
+
+    @property
+    def _python_version(self):
+        return str(self.options.python_version)
 
     @property
     def _python_inc(self):
@@ -914,6 +919,7 @@ class BoostConan(ConanFile):
                 boost_version_tag = "boost-%s_%s" % (major, minor)
                 self.cpp_info.components["headers"].includedirs = [os.path.join(self.package_folder, "include", boost_version_tag)]
 
+        # FIXME: the boost component cannot be made!! But is required to make!! Name it "headers" for now.
         self.cpp_info.components["headers"].libs = []
 
         libformatdata = {}
@@ -929,7 +935,7 @@ class BoostConan(ConanFile):
             if self.options.get_safe("without_{}".format(module), False) or not all(d in modules_seen for d in self._dependencies["dependencies"][module]):
                 continue
             module_libraries = [lib.format(**libformatdata) for lib in self._dependencies["libs"][module]]
-            if all(d in modules_seen for d in self._dependencies["dependencies"][module]):
+            if all(l in detected_libraries for l in module_libraries):
                 modules_seen.add(module)
 
                 used_libraries = used_libraries.union(module_libraries)
@@ -986,9 +992,12 @@ class BoostConan(ConanFile):
             if not self.options.without_python:
                 pyversion = tools.Version(self._python_version)
                 self.cpp_info.components["python{}{}".format(pyversion.major, pyversion.minor)].requires = ["python"]
-                self.cpp_info.components["numpy{}{}".format(pyversion.major, pyversion.minor)].requires = ["numpy"]
                 if not self.options.shared:
                     self.cpp_info.components["python"].defines.append("BOOST_PYTHON_STATIC_LIB")
+
+            if not self.options.without_numpy:
+                pyversion = tools.Version(self._python_version)
+                self.cpp_info.components["numpy{}{}".format(pyversion.major, pyversion.minor)].requires = ["numpy"]
 
             if self._is_msvc or self._is_clang_cl:
                 if not self.options.magic_autolink:

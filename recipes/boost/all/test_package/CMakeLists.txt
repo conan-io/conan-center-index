@@ -42,57 +42,47 @@ IF(NOT HEADER_ONLY)
 
     if (WITH_RANDOM)
         ADD_EXECUTABLE(random_exe random.cpp)
-        TARGET_LINK_LIBRARIES(random_exe ${Boost_LIBRARIES})
+        TARGET_LINK_LIBRARIES(random_exe Boost::random)
     endif()
     if (WITH_REGEX)
         ADD_EXECUTABLE(regex_exe regex.cpp)
-        TARGET_LINK_LIBRARIES(regex_exe ${Boost_LIBRARIES})
+        TARGET_LINK_LIBRARIES(regex_exe Boost::regex)
     endif()
 
     if (WITH_TEST)
         ADD_EXECUTABLE(test_exe test.cpp)
-        TARGET_LINK_LIBRARIES(test_exe ${CONAN_LIBS})
+        TARGET_LINK_LIBRARIES(test_exe Boost::unit_test_framework)
     endif()
 
     if (WITH_COROUTINE)
         ADD_EXECUTABLE(coroutine_exe coroutine.cpp)
-        TARGET_LINK_LIBRARIES(coroutine_exe ${Boost_LIBRARIES})
+        TARGET_LINK_LIBRARIES(coroutine_exe Boost::coroutine)
     endif()
 
     if (WITH_CHRONO)
         ADD_EXECUTABLE(chrono_exe chrono.cpp)
-        TARGET_LINK_LIBRARIES(chrono_exe ${CONAN_LIBS})
+        TARGET_LINK_LIBRARIES(chrono_exe Boost::chrono)
     endif()
 
     if(WITH_PYTHON)
         add_library(hello_ext MODULE python.cpp)
         set_property(TARGET hello_ext PROPERTY PREFIX "")
         target_include_directories(hello_ext PRIVATE ${PYTHON_INCLUDE_DIRS})
-        target_link_libraries(hello_ext ${CONAN_LIBS} ${PYTHON_LIBRARIES})
+        target_link_libraries(hello_ext Boost::python${PYTHON_COMPONENT_SUFFIX} ${PYTHON_LIBRARIES})
         if(WIN32)
             set_target_properties(hello_ext PROPERTIES SUFFIX ".pyd")
         endif()
 
         add_executable(numpy_exe numpy.cpp)
         target_include_directories(numpy_exe PRIVATE ${PYTHON_INCLUDE_DIRS})
-        target_link_libraries(numpy_exe ${CONAN_LIBS} ${PYTHON_LIBRARIES})
-    endif()
-
-    if (WITH_REGEX)
-        ADD_TEST(NAME TestRegex
-                 COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} "$<TARGET_FILE:regex_exe>")
+        target_link_libraries(numpy_exe Boost::numpy${PYTHON_COMPONENT_SUFFIX} ${PYTHON_LIBRARIES})
     endif()
 ENDIF()
 
 ADD_EXECUTABLE(lambda_exe lambda.cpp)
-
-ADD_TEST(NAME TestLambda
-         COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} "$<TARGET_FILE:lambda_exe>" ${TEST_ARGS})
-
-IF(NOT HEADER_ONLY AND WITH_REGEX)
-    # Test a different exe linking with the CONAN_LIBS to actually test the package_info
-    ADD_EXECUTABLE(newregex regex.cpp)
-    TARGET_LINK_LIBRARIES(newregex ${CONAN_LIBS})
-    ADD_TEST(NAME TestRegexNew
-             COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} "$<TARGET_FILE:newregex>" ${TEST_ARGS})
-ENDIF()
+# FIXME: The target Boost::boost cannot be created using current conan...
+if (CONAN_BOOST_FINDPACKAGE)
+    target_link_libraries(lambda_exe Boost::headers)
+else()
+    target_link_libraries(lambda_exe Boost::boost)
+endif()

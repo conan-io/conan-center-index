@@ -22,14 +22,16 @@ class DefaultNameConan(ConanFile):
         os.rename(src=os.path.join("FindBoost.cmake"), dst=os.path.join("backup", "FindBoost.cmake"))
 
         # Build using CMake's find_package
-        self._build_cmake(self._conan_build_folder)
+        # FIXME: disabled because recent boost versions require a recent cmake versions.
+        # When a cmake version does not support a boost version, imported boost targets are disabled.
+        # self._build_cmake(self._cmake_build_dir, False)
 
         # Copy the generated FindBoost.cmake back
         shutil.copy(src=os.path.join("backup", "FindBoost.cmake"), dst=os.path.join("FindBoost.cmake"))
         # Build using conan's find_package (generated with cmake_find_package)
-        self._build_cmake(self._cmake_build_dir)
+        self._build_cmake(self._conan_build_folder, True)
 
-    def _build_cmake(self, build_folder):
+    def _build_cmake(self, build_folder, conan_boost_findpackage):
         with tools.vcvars(self.settings) if (self.settings.os == "Windows" and self.settings.compiler == "clang") else tools.no_op():
             cmake = CMake(self)
             cmake.definitions["CONAN_INSTALL_FOLDER"] = self.build_folder
@@ -54,13 +56,14 @@ class DefaultNameConan(ConanFile):
             if not self.options["boost"].without_chrono:
                 cmake.definitions["WITH_CHRONO"] = "TRUE"
             cmake.definitions["Boost_NO_BOOST_CMAKE"] = "TRUE"
+            cmake.definitions["CONAN_BOOST_FINDPACKAGE"] = conan_boost_findpackage
             cmake.configure(build_folder=build_folder)
             cmake.build()
 
     def test(self):
         if tools.cross_building(self.settings):
             return
-        for subdir in (self._conan_build_folder, self._cmake_build_dir):
+        for subdir in (self._conan_build_folder, ): #(self._conan_build_folder, self._cmake_build_dir):
             bindir = os.path.join(subdir, "bin")
             libdir = os.path.join(subdir, "lib")
             self.run(os.path.join(bindir, "lambda_exe"), run_environment=True)
