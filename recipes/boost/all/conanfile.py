@@ -926,12 +926,10 @@ class BoostConan(ConanFile):
         detected_libraries = set(tools.collect_libs(self))
         used_libraries = set()
         for module in self._iter_modules():
-            if self.options.get_safe("without_{}".format(module), False):
+            if self.options.get_safe("without_{}".format(module), False) or not all(d in modules_seen for d in self._dependencies["dependencies"][module]):
                 continue
             module_libraries = [lib.format(**libformatdata) for lib in self._dependencies["libs"][module]]
-            module_added = all(d in modules_seen for d in self._dependencies["dependencies"][module]) and \
-                           all(l in detected_libraries for l in module_libraries)
-            if module_added:
+            if all(d in modules_seen for d in self._dependencies["dependencies"][module]):
                 modules_seen.add(module)
 
                 used_libraries = used_libraries.union(module_libraries)
