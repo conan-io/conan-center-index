@@ -22,9 +22,7 @@ class AutoconfConan(ConanFile):
         os.rename("{}-{}".format(self.name, self.version), self._source_subfolder)
 
     def requirements(self):
-        if self.settings.os_build != "Windows":
-            #the Conan m4 package currently doesn't work correctly with autoconf on Windows
-            self.requires("m4/1.4.18")
+        self.requires("m4/1.4.18")
 
     def build_requirements(self):
         if tools.os_info.is_windows and "CONAN_BASH_PATH" not in os.environ:
@@ -77,6 +75,10 @@ class AutoconfConan(ConanFile):
                 if not os.path.isfile(fullpath):
                     continue
                 os.rename(fullpath, fullpath + ".exe")
+
+    def package_id(self):
+        # The m4 requirement does not change the contents of this package
+        self.info.requires.clear()
 
     def package_info(self):
         bin_path = os.path.join(self.package_folder, "bin")
