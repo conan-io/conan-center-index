@@ -84,8 +84,8 @@ class LibnameConan(ConanFile):
             args=[]
             for lib in ['alsa', 'x11', 'openssl', 'dbus']:
                 args.append("--%s-%s" % ('enable' if getattr(self.options, 'with_' + lib) else 'disable', lib))
-            args.append("--%s-glib2" % 'enable' if self.options.with_glib else 'disable')
-            args.append("--%s-fftw" % 'with' if self.options.with_fftw else 'without')
+            args.append("--%s-glib2" % ('enable' if self.options.with_glib else 'disable'))
+            args.append("--%s-fftw" % ('with' if self.options.with_fftw else 'without'))
             if self.options.shared:
                 args.extend(['--enable-shared=yes', '--enable-static=no'])
             else:
