@@ -21,10 +21,11 @@ class SimdjsonConan(ConanFile):
     default_options = {'shared': False,
                        'fPIC': True,
                        'threads': True}
-    # It was proposed that the next line was replaced by _cmake = None and the
-    # addition of a function _source_subfolder, but it breaks the build.
-    _source_subfolder = "source_subfolder"
-
+    _cmake = None
+     
+    @property
+    def _source_subfolder(self):
+          return "source_subfolder"
     @property
     def _supported_cppstd(self):
         return ["11", "gnu11","14", "gnu14", "17", "gnu17", "20", "gnu20"]
@@ -49,35 +50,21 @@ class SimdjsonConan(ConanFile):
             raise ConanInvalidConfiguration("This library is tested with a family of recent compilers."
                                             " {} {} is not supported."
                                             .format(self.settings.compiler, self.settings.compiler.version))
-
+   
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
         extracted_dir = self.name + "-" + self.version
         os.rename(extracted_dir, self._source_subfolder)
 
-        # In version 0.2.1 CMAKE_CXX_FLAGS are ignored
-        tools.replace_in_file(os.path.join(self._source_subfolder, 'tools', 'cmake', 'FindOptions.cmake'),
-                              'set(CMAKE_CXX_FLAGS "${CXXSTD_FLAGS}',
-                              'set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${CXXSTD_FLAGS}',
-                              strict=False)
-
-        # Generating export files by CMake via __export_def (enabled by property WINDOWS_EXPORT_ALL_SYMBOLS)
-        # does not work with whole program optimization.
-        # So disable INTERPROCEDURAL_OPTIMIZATION
-        if self.settings.compiler == "Visual Studio" and self.options.shared:
-            tools.replace_in_file(os.path.join(self._source_subfolder, 'CMakeLists.txt'),
-                                  'set(CMAKE_INTERPROCEDURAL_OPTIMIZATION TRUE)',
-                                  'set(CMAKE_INTERPROCEDURAL_OPTIMIZATION FALSE)')
-
     def _configure_cmake(self):
-        # Changes to this function were proposed, but they break the build.
-        cmake = CMake(self)
-        cmake.definitions['SIMDJSON_BUILD_STATIC'] = not self.options.shared
-        cmake.definitions['SIMDJSON_ENABLE_THREADS'] = self.options.threads
-        cmake.definitions['SIMDJSON_SANITIZE'] = False
-        cmake.definitions['ENABLE_FUZZING'] = False
-        cmake.configure()
-        return cmake
+        if(self._cmake):
+                return self._cmake
+        self._cmake = CMake(self)
+        self._cmake.definitions['SIMDJSON_BUILD_STATIC'] = not self.options.shared
+        self._cmake.definitions['SIMDJSON_ENABLE_THREADS'] = self.options.threads
+        self._cmake.definitions['SIMDJSON_SANITIZE'] = False
+        self._cmake.configure(source_folder=self._source_subfolder)
+        return self._cmake
 
     def build(self):
         cmake = self._configure_cmake()
