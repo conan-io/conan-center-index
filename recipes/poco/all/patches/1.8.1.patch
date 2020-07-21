@@ -42,7 +42,7 @@
 -    include_directories("${SQLITE3_INCLUDE_DIRS}")
 +    find_package(SQLite3 REQUIRED)
 +    set(DATASQLITELIBS ${SQLite3_LIBRARIES})
-+    include_directories(${SQLite3_INCLUDE_DIRSS})
++    include_directories(${SQLite3_INCLUDE_DIRS})
  else()
      # sqlite3
      POCO_SOURCES( SQLITE_SRCS sqlite3
