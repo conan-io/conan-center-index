@@ -240,7 +240,9 @@ class BoostConan(ConanFile):
             self.output.info("(failed)")
             return None
         output = output.getvalue().strip()
-        self.output.info(output)
+        # Conan is broken when run_to_output = True
+        if "\n-----------------\n" in output:
+            output = output.split("\n-----------------\n", 1)[1]
         return output if output != "None" else None
 
     def _get_python_path(self, name):
@@ -904,8 +906,6 @@ class BoostConan(ConanFile):
         return layout == "versioned" or (layout == "b2-default" and os.name == 'nt')
 
     def package_info(self):
-        gen_libs = [] if self.options.header_only else tools.collect_libs(self)
-
         if self._is_versioned_layout:
             version_tokens = str(self.version).split(".")
             if len(version_tokens) >= 2:
@@ -916,17 +916,24 @@ class BoostConan(ConanFile):
 
         self.cpp_info.components["headers"].libs = []
 
+        libformatdata = {}
+        if not self.options.without_python:
+            pyversion = tools.Version(self._python_version)
+            libformatdata["py_major"] = pyversion.major
+            libformatdata["py_minor"] = pyversion.minor
+
         modules_seen = set()
         detected_libraries = set(tools.collect_libs(self))
         used_libraries = set()
         for module in self._iter_modules():
+            module_libraries = [lib.format(**libformatdata) for lib in self._dependencies["libs"][module]]
             module_added = not self.options.get_safe("without_{}".format(module), False) and all(d in modules_seen for d in self._dependencies["dependencies"][module]) and \
-                           all(l in detected_libraries for l in self._dependencies["libs"][module])
+                           all(l in detected_libraries for l in module_libraries)
             if module_added:
                 modules_seen.add(module)
 
-                used_libraries = used_libraries.union(set(self._dependencies["libs"][module]))
-                self.cpp_info.components[module].libs = self._dependencies["libs"][module]
+                used_libraries = used_libraries.union(module_libraries)
+                self.cpp_info.components[module].libs = module_libraries
 
                 self.cpp_info.components[module].requires = self._dependencies["dependencies"][module] + ["headers"]
                 self.cpp_info.components[module].names["cmake_find_package"] = module
@@ -934,7 +941,12 @@ class BoostConan(ConanFile):
 
         if used_libraries != detected_libraries:
             non_used = detected_libraries.difference(used_libraries)
-            raise ConanInvalidConfiguration("These libraries were not used in conan components: {}".format(non_used))
+            if non_used:
+                raise ConanInvalidConfiguration("These libraries were not used in conan components: {}".format(non_used))
+
+            non_existing = used_libraries.difference(detected_libraries)
+            if non_existing:
+                raise ConanInvalidConfiguration("These libraries were used, but not built: {}".format(non_existing))
 
         if self._zip_bzip2_requires_needed:
             if self.options.bzip2:
@@ -972,6 +984,8 @@ class BoostConan(ConanFile):
                 self.cpp_info.components["headers"].defines.append("BOOST_ERROR_CODE_HEADER_ONLY")
 
             if not self.options.without_python:
+                pyversion = tools.Version(self._python_version)
+                self.cpp_info.components["python{}{}".format(pyversion.major, pyversion.minor)].requires = ["python"]
                 if not self.options.shared:
                     self.cpp_info.components["python"].defines.append("BOOST_PYTHON_STATIC_LIB")
 

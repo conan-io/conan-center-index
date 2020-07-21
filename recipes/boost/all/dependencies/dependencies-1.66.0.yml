@@ -63,14 +63,11 @@ dependencies:
   - math
   mpi:
   - graph
-  - python
   - serialization
   prg_exec_monitor:
   - test
   program_options: []
   python: []
-  python3:
-  - python
   random:
   - math
   - system
@@ -168,9 +165,7 @@ libs:
   program_options:
   - boost_program_options
   python:
-  - boost_python
-  python3:
-  - boost_python3
+  - boost_python{py_major}{py_minor}
   random:
   - boost_random
   regex:

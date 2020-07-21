@@ -1,3 +1,5 @@
+#!/usr/bin/env python3
+
 import argparse
 import dataclasses
 from pathlib import Path
@@ -107,8 +109,6 @@ class BoostDependencyBuilder(object):
 
         filtered_dependency_tree = {k: [d for d in v if d in buildables] for k, v in dependency_tree.items() if k in buildables}
 
-        filtered_dependency_tree = self._fix_dependencies(filtered_dependency_tree)
-
         boost_dependencies = BoostDependencies(export=BoostDependenciesExport(dependencies=filtered_dependency_tree, version=self.boost_version), buildables=buildables)
 
         return boost_dependencies
@@ -136,6 +136,20 @@ class BoostDependencyBuilder(object):
         except (KeyError, ValueError):
             pass
 
+        try:
+            # mpi does not depend on python
+            deptree["mpi"].remove("python")
+        except (KeyError, ValueError):
+            pass
+
+        # if "python" in deptree:
+        #     deptree.setdefault("python", []).remove("mpi_python")
+
+        print(deptree)
+
+        if "mpi_python" in deptree and "python" not in deptree["mpi_python"]:
+            deptree["mpi_python"].append("python")
+
         remaining_tree = self.detect_cycles(deptree)
         if remaining_tree:
             raise Exception("Dependency cycle detected. Remaining tree: {}".format(remaining_tree))
@@ -161,12 +175,9 @@ class BoostDependencyBuilder(object):
             buildable_libs = set("boost_{}".format(lib) if lib_prefix else lib for lib_prefix, lib in buildable_libs)
             buildable_libs = set(l[len("boost_"):] for l in buildable_libs if l.startswith("boost_"))  # list(filter(lambda l: l.startswith("boost"), buildable_libs))
             if not buildable_libs:
-                # Some boost releases support multpile python versions
+                # Some boost releases support multiple python versions
                 if buildable == "python":
-                    for pysuffix in ("", "2", "3"):
-                        boost_py_lib = "python{}".format(pysuffix)
-                        if " boost_{} ".format(boost_py_lib) in jam_text:
-                            buildable_libs.add(boost_py_lib)
+                    buildable_libs.add("python")
             if not buildable_libs:
                 raise Exception("Cannot find any library for buildable {}".format(buildable))
 
@@ -184,6 +195,16 @@ class BoostDependencyBuilder(object):
         if "unit_test_framework" in boost_dependencies.export.dependencies and "test" in module_provides_extra:
             boost_dependencies.export.dependencies["unit_test_framework"].extend(module_provides_extra["test"].difference({"unit_test_framework"}))
 
+        # python and numpy have a version suffix. Add it here.
+        if "python" in libraries:
+            if len(libraries["python"]) != 1:
+                raise Exception("Boost.Python should provide exactly one library")
+            libraries["python"][0] += "{py_major}{py_minor}"
+        if "numpy" in libraries:
+            if len(libraries["numpy"]) != 1:
+                raise Exception("Boost.Numpy should provide exactly one library")
+            libraries["numpy"][0] += "{py_major}{py_minor}"
+
         boost_dependencies.export.libs = libraries
 
         return boost_dependencies
@@ -196,6 +217,8 @@ class BoostDependencyBuilder(object):
         tree = self.do_boostdep_collect()
         tree = self.do_create_libraries(tree)
 
+        tree.export.dependencies = self._fix_dependencies(tree.export.dependencies)
+
         data = dataclasses.asdict(tree.export)
         if self.unsafe:
             data["UNSAFE"] = "!DO NOT COMMIT! !THIS FILE IS GENERATED WITH THE UNSAFE OPTION ENABLED!"
@@ -207,7 +230,7 @@ class BoostDependencyBuilder(object):
 
 def main(args=None) -> int:
     parser = argparse.ArgumentParser()
-    parser.add_argument("-t", dest="tmppath", help="temporary folder where to clone boost")
+    parser.add_argument("-t", dest="tmppath", help="temporary folder where to clone boost (default is system temporary folder)")
     parser.add_argument("-d", dest="boostdep_version", default="1.73.0", type=str, help="boostdep version")
     parser.add_argument("-u", dest="git_url", default=BOOST_GIT_URL, help="boost git url")
     parser.add_argument("-U", dest="git_update", action="store_true", help="update the git repo")
@@ -216,13 +239,15 @@ def main(args=None) -> int:
 
     version_group = parser.add_mutually_exclusive_group(required=True)
     version_group.add_argument("-v", dest="boost_version", help="boost version")
-    version_group.add_argument("-A", dest="boost_version", action="store_const", const=None, help="boost version")
+    version_group.add_argument("-A", dest="boost_version", action="store_const", const=None, help="All boost versions")
     ns = parser.parse_args(args)
 
     if not ns.tmppath:
         ns.tmppath = Path(tempfile.gettempdir())
+    print("Temporary folder is {}".format(ns.tmppath))
     if not ns.outputdir:
         ns.outputdir = Path("dependencies")
+    print("Dependencies folder is {}".format(ns.outputdir))
 
     ns.outputdir.mkdir(exist_ok=True)
 

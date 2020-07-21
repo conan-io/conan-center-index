@@ -69,10 +69,10 @@ dependencies:
   - math
   mpi:
   - graph
-  - python
   - serialization
   mpi_python:
   - mpi
+  - python
   numpy:
   - python
   prg_exec_monitor:
@@ -178,13 +178,13 @@ libs:
   mpi_python:
   - boost_mpi_python
   numpy:
-  - boost_numpy
+  - boost_numpy{py_major}{py_minor}
   prg_exec_monitor:
   - boost_prg_exec_monitor
   program_options:
   - boost_program_options
   python:
-  - boost_python
+  - boost_python{py_major}{py_minor}
   random:
   - boost_random
   regex:
