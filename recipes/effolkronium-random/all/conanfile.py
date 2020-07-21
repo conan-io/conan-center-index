@@ -3,7 +3,7 @@ import os
 from conans import ConanFile, tools
 
 class RandomConan(ConanFile):
-    name = "random"
+    name = "effolkronium-random"
     description = "Random for modern C++ with convenient API."
     license = "MIT"
     topics = ("conan", "random", "header-only")
@@ -17,7 +17,7 @@ class RandomConan(ConanFile):
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
-        os.rename(self.name + "-" + self.version, self._source_subfolder)
+        os.rename("random-" + self.version, self._source_subfolder)
 
     def package(self):
         self.copy("LICENSE.MIT", dst="licenses", src=self._source_subfolder)
@@ -26,3 +26,6 @@ class RandomConan(ConanFile):
     def package_id(self):
         self.info.header_only()
 
+    def package_info(self):
+        self.cpp_info.names["cmake_find_package"] = "effolkronium_random"
+        self.cpp_info.names["cmake_find_package_multi"] = "effolkronium_random"
