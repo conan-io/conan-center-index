@@ -21,7 +21,7 @@ class SimdjsonConan(ConanFile):
     default_options = {'shared': False,
                        'fPIC': True,
                        'threads': True}
-     _cmake = None
+    _cmake = None
 
     @property
     def _source_subfolder(self):
