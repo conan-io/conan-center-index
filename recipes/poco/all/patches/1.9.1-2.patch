@@ -4,10 +4,10 @@
  
  # Version Resource
  if(MSVC AND NOT POCO_STATIC)
--    source_group("Resources" FILES ${PROJECT_SOURCE_DIR}/DLLVersion.rc)
--    list(APPEND SRCS ${PROJECT_SOURCE_DIR}/DLLVersion.rc)
-+    source_group("Resources" FILES ${CMAKE_SOURCE_DIR}/DLLVersion.rc)
-+    list(APPEND SRCS ${CMAKE_SOURCE_DIR}/DLLVersion.rc)
+-    source_group("Resources" FILES ${CMAKE_SOURCE_DIR}/DLLVersion.rc)
+-    list(APPEND SRCS ${CMAKE_SOURCE_DIR}/DLLVersion.rc)
++    source_group("Resources" FILES ${PROJECT_SOURCE_DIR}/DLLVersion.rc)
++    list(APPEND SRCS ${PROJECT_SOURCE_DIR}/DLLVersion.rc)
  endif()
  
  add_library( "${LIBNAME}" SHARED ${SRCS} )
@@ -17,10 +17,10 @@
  
  # Version Resource
  if(MSVC AND NOT POCO_STATIC)
--    source_group("Resources" FILES ${PROJECT_SOURCE_DIR}/DLLVersion.rc)
--    list(APPEND SRCS ${PROJECT_SOURCE_DIR}/DLLVersion.rc)
-+    source_group("Resources" FILES ${CMAKE_SOURCE_DIR}/DLLVersion.rc)
-+    list(APPEND SRCS ${CMAKE_SOURCE_DIR}/DLLVersion.rc)
+-    source_group("Resources" FILES ${CMAKE_SOURCE_DIR}/DLLVersion.rc)
+-    list(APPEND SRCS ${CMAKE_SOURCE_DIR}/DLLVersion.rc)
++    source_group("Resources" FILES ${PROJECT_SOURCE_DIR}/DLLVersion.rc)
++    list(APPEND SRCS ${PROJECT_SOURCE_DIR}/DLLVersion.rc)
  endif()
  
  add_library( "${LIBNAME}" ${LIB_MODE} ${SRCS} )
@@ -30,10 +30,10 @@
  
  # Version Resource
  if(MSVC AND NOT POCO_STATIC)
--    source_group("Resources" FILES ${PROJECT_SOURCE_DIR}/DLLVersion.rc)
--    list(APPEND SRCS ${PROJECT_SOURCE_DIR}/DLLVersion.rc)
-+    source_group("Resources" FILES ${CMAKE_SOURCE_DIR}/DLLVersion.rc)
-+    list(APPEND SRCS ${CMAKE_SOURCE_DIR}/DLLVersion.rc)
+-    source_group("Resources" FILES ${CMAKE_SOURCE_DIR}/DLLVersion.rc)
+-    list(APPEND SRCS ${CMAKE_SOURCE_DIR}/DLLVersion.rc)
++    source_group("Resources" FILES ${PROJECT_SOURCE_DIR}/DLLVersion.rc)
++    list(APPEND SRCS ${PROJECT_SOURCE_DIR}/DLLVersion.rc)
  endif()
  
  # TODO: Is this flag always required?
@@ -43,10 +43,10 @@
  
  # Version Resource
  if(MSVC AND NOT POCO_STATIC)
--    source_group("Resources" FILES ${PROJECT_SOURCE_DIR}/DLLVersion.rc)
--    list(APPEND SRCS ${PROJECT_SOURCE_DIR}/DLLVersion.rc)
-+    source_group("Resources" FILES ${CMAKE_SOURCE_DIR}/DLLVersion.rc)
-+    list(APPEND SRCS ${CMAKE_SOURCE_DIR}/DLLVersion.rc)
+-    source_group("Resources" FILES ${CMAKE_SOURCE_DIR}/DLLVersion.rc)
+-    list(APPEND SRCS ${CMAKE_SOURCE_DIR}/DLLVersion.rc)
++    source_group("Resources" FILES ${PROJECT_SOURCE_DIR}/DLLVersion.rc)
++    list(APPEND SRCS ${PROJECT_SOURCE_DIR}/DLLVersion.rc)
  endif()
  
  add_library( "${LIBNAME}" ${LIB_MODE} ${SRCS} )
@@ -56,10 +56,10 @@
  
  # Version Resource
  if(MSVC AND NOT POCO_STATIC)
--    source_group("Resources" FILES ${PROJECT_SOURCE_DIR}/DLLVersion.rc)
--    list(APPEND SRCS ${PROJECT_SOURCE_DIR}/DLLVersion.rc)
-+    source_group("Resources" FILES ${CMAKE_SOURCE_DIR}/DLLVersion.rc)
-+    list(APPEND SRCS ${CMAKE_SOURCE_DIR}/DLLVersion.rc)
+-    source_group("Resources" FILES ${CMAKE_SOURCE_DIR}/DLLVersion.rc)
+-    list(APPEND SRCS ${CMAKE_SOURCE_DIR}/DLLVersion.rc)
++    source_group("Resources" FILES ${PROJECT_SOURCE_DIR}/DLLVersion.rc)
++    list(APPEND SRCS ${PROJECT_SOURCE_DIR}/DLLVersion.rc)
  endif()
  
  if (NOT POCO_STATIC)
@@ -108,10 +108,10 @@
  
  # Version Resource
  if(MSVC AND NOT POCO_STATIC)
--    source_group("Resources" FILES ${PROJECT_SOURCE_DIR}/DLLVersion.rc)
--    list(APPEND SRCS ${PROJECT_SOURCE_DIR}/DLLVersion.rc)
-+    source_group("Resources" FILES ${CMAKE_SOURCE_DIR}/DLLVersion.rc)
-+    list(APPEND SRCS ${CMAKE_SOURCE_DIR}/DLLVersion.rc)
+-    source_group("Resources" FILES ${CMAKE_SOURCE_DIR}/DLLVersion.rc)
+-    list(APPEND SRCS ${CMAKE_SOURCE_DIR}/DLLVersion.rc)
++    source_group("Resources" FILES ${PROJECT_SOURCE_DIR}/DLLVersion.rc)
++    list(APPEND SRCS ${PROJECT_SOURCE_DIR}/DLLVersion.rc)
  endif()
  
  add_library( "${LIBNAME}" ${LIB_MODE} ${SRCS} )
@@ -121,10 +121,10 @@
  
  # Version Resource
  if(MSVC AND NOT POCO_STATIC)
--    source_group("Resources" FILES ${PROJECT_SOURCE_DIR}/DLLVersion.rc)
--    list(APPEND SRCS ${PROJECT_SOURCE_DIR}/DLLVersion.rc)
-+    source_group("Resources" FILES ${CMAKE_SOURCE_DIR}/DLLVersion.rc)
-+    list(APPEND SRCS ${CMAKE_SOURCE_DIR}/DLLVersion.rc)
+-    source_group("Resources" FILES ${CMAKE_SOURCE_DIR}/DLLVersion.rc)
+-    list(APPEND SRCS ${CMAKE_SOURCE_DIR}/DLLVersion.rc)
++    source_group("Resources" FILES ${PROJECT_SOURCE_DIR}/DLLVersion.rc)
++    list(APPEND SRCS ${PROJECT_SOURCE_DIR}/DLLVersion.rc)
  endif()
  
  # Messages
@@ -134,10 +134,10 @@
  
  # Version Resource
  if(MSVC AND NOT POCO_STATIC)
--    source_group("Resources" FILES ${PROJECT_SOURCE_DIR}/DLLVersion.rc)
--    list(APPEND SRCS ${PROJECT_SOURCE_DIR}/DLLVersion.rc)
-+    source_group("Resources" FILES ${CMAKE_SOURCE_DIR}/DLLVersion.rc)
-+    list(APPEND SRCS ${CMAKE_SOURCE_DIR}/DLLVersion.rc)
+-    source_group("Resources" FILES ${CMAKE_SOURCE_DIR}/DLLVersion.rc)
+-    list(APPEND SRCS ${CMAKE_SOURCE_DIR}/DLLVersion.rc)
++    source_group("Resources" FILES ${PROJECT_SOURCE_DIR}/DLLVersion.rc)
++    list(APPEND SRCS ${PROJECT_SOURCE_DIR}/DLLVersion.rc)
  endif()
  
  add_library( "${LIBNAME}" ${LIB_MODE} ${SRCS} )
@@ -147,10 +147,10 @@
  
  # Version Resource
  if(MSVC AND NOT POCO_STATIC)
--    source_group("Resources" FILES ${PROJECT_SOURCE_DIR}/DLLVersion.rc)
--    list(APPEND SRCS ${PROJECT_SOURCE_DIR}/DLLVersion.rc)
-+    source_group("Resources" FILES ${CMAKE_SOURCE_DIR}/DLLVersion.rc)
-+    list(APPEND SRCS ${CMAKE_SOURCE_DIR}/DLLVersion.rc)
+-    source_group("Resources" FILES ${CMAKE_SOURCE_DIR}/DLLVersion.rc)
+-    list(APPEND SRCS ${CMAKE_SOURCE_DIR}/DLLVersion.rc)
++    source_group("Resources" FILES ${PROJECT_SOURCE_DIR}/DLLVersion.rc)
++    list(APPEND SRCS ${PROJECT_SOURCE_DIR}/DLLVersion.rc)
  endif()
  
  add_library( "${LIBNAME}" ${LIB_MODE} ${SRCS} )
@@ -160,10 +160,10 @@
  
  # Version Resource
  if(MSVC AND NOT POCO_STATIC)
--    source_group("Resources" FILES ${PROJECT_SOURCE_DIR}/DLLVersion.rc)
--    list(APPEND SRCS ${PROJECT_SOURCE_DIR}/DLLVersion.rc)
-+    source_group("Resources" FILES ${CMAKE_SOURCE_DIR}/DLLVersion.rc)
-+    list(APPEND SRCS ${CMAKE_SOURCE_DIR}/DLLVersion.rc)
+-    source_group("Resources" FILES ${CMAKE_SOURCE_DIR}/DLLVersion.rc)
+-    list(APPEND SRCS ${CMAKE_SOURCE_DIR}/DLLVersion.rc)
++    source_group("Resources" FILES ${PROJECT_SOURCE_DIR}/DLLVersion.rc)
++    list(APPEND SRCS ${PROJECT_SOURCE_DIR}/DLLVersion.rc)
  endif()
  
  # Windows and WindowsCE need additional libraries
@@ -173,10 +173,10 @@
  
  # Version Resource
  if(MSVC AND NOT POCO_STATIC)
--    source_group("Resources" FILES ${PROJECT_SOURCE_DIR}/DLLVersion.rc)
--    list(APPEND SRCS ${PROJECT_SOURCE_DIR}/DLLVersion.rc)
-+    source_group("Resources" FILES ${CMAKE_SOURCE_DIR}/DLLVersion.rc)
-+    list(APPEND SRCS ${CMAKE_SOURCE_DIR}/DLLVersion.rc)
+-    source_group("Resources" FILES ${CMAKE_SOURCE_DIR}/DLLVersion.rc)
+-    list(APPEND SRCS ${CMAKE_SOURCE_DIR}/DLLVersion.rc)
++    source_group("Resources" FILES ${PROJECT_SOURCE_DIR}/DLLVersion.rc)
++    list(APPEND SRCS ${PROJECT_SOURCE_DIR}/DLLVersion.rc)
  endif()
  
  add_library( "${LIBNAME}" ${LIB_MODE} ${SRCS} )
@@ -186,10 +186,10 @@
  
  # Version Resource
  if(MSVC AND NOT POCO_STATIC)
--    source_group("Resources" FILES ${PROJECT_SOURCE_DIR}/DLLVersion.rc)
--    list(APPEND SRCS ${PROJECT_SOURCE_DIR}/DLLVersion.rc)
-+    source_group("Resources" FILES ${CMAKE_SOURCE_DIR}/DLLVersion.rc)
-+    list(APPEND SRCS ${CMAKE_SOURCE_DIR}/DLLVersion.rc)
+-    source_group("Resources" FILES ${CMAKE_SOURCE_DIR}/DLLVersion.rc)
+-    list(APPEND SRCS ${CMAKE_SOURCE_DIR}/DLLVersion.rc)
++    source_group("Resources" FILES ${PROJECT_SOURCE_DIR}/DLLVersion.rc)
++    list(APPEND SRCS ${PROJECT_SOURCE_DIR}/DLLVersion.rc)
  endif()
  
  add_library( "${LIBNAME}" ${LIB_MODE} ${SRCS} )
@@ -199,10 +199,10 @@
  
  # Version Resource
  if(MSVC AND NOT POCO_STATIC)
--    source_group("Resources" FILES ${PROJECT_SOURCE_DIR}/DLLVersion.rc)
--    list(APPEND SRCS ${PROJECT_SOURCE_DIR}/DLLVersion.rc)
-+    source_group("Resources" FILES ${CMAKE_SOURCE_DIR}/DLLVersion.rc)
-+    list(APPEND SRCS ${CMAKE_SOURCE_DIR}/DLLVersion.rc)
+-    source_group("Resources" FILES ${CMAKE_SOURCE_DIR}/DLLVersion.rc)
+-    list(APPEND SRCS ${CMAKE_SOURCE_DIR}/DLLVersion.rc)
++    source_group("Resources" FILES ${PROJECT_SOURCE_DIR}/DLLVersion.rc)
++    list(APPEND SRCS ${PROJECT_SOURCE_DIR}/DLLVersion.rc)
  endif()
  
  #TODO: Can we put this with the below includes? PRIVAT eg.
@@ -212,10 +212,10 @@
  
  # Version Resource
  if(MSVC AND NOT POCO_STATIC)
--    source_group("Resources" FILES ${PROJECT_SOURCE_DIR}/DLLVersion.rc)
--    list(APPEND SRCS ${PROJECT_SOURCE_DIR}/DLLVersion.rc)
-+    source_group("Resources" FILES ${CMAKE_SOURCE_DIR}/DLLVersion.rc)
-+    list(APPEND SRCS ${CMAKE_SOURCE_DIR}/DLLVersion.rc)
+-    source_group("Resources" FILES ${CMAKE_SOURCE_DIR}/DLLVersion.rc)
+-    list(APPEND SRCS ${CMAKE_SOURCE_DIR}/DLLVersion.rc)
++    source_group("Resources" FILES ${PROJECT_SOURCE_DIR}/DLLVersion.rc)
++    list(APPEND SRCS ${PROJECT_SOURCE_DIR}/DLLVersion.rc)
  endif()
  
  add_library( "${LIBNAME}" ${LIB_MODE} ${SRCS} )
@@ -225,10 +225,10 @@
  
  # Version Resource
  if(MSVC AND NOT POCO_STATIC)
--    source_group("Resources" FILES ${PROJECT_SOURCE_DIR}/DLLVersion.rc)
--    list(APPEND SRCS ${PROJECT_SOURCE_DIR}/DLLVersion.rc)
-+    source_group("Resources" FILES ${CMAKE_SOURCE_DIR}/DLLVersion.rc)
-+    list(APPEND SRCS ${CMAKE_SOURCE_DIR}/DLLVersion.rc)
+-    source_group("Resources" FILES ${CMAKE_SOURCE_DIR}/DLLVersion.rc)
+-    list(APPEND SRCS ${CMAKE_SOURCE_DIR}/DLLVersion.rc)
++    source_group("Resources" FILES ${PROJECT_SOURCE_DIR}/DLLVersion.rc)
++    list(APPEND SRCS ${PROJECT_SOURCE_DIR}/DLLVersion.rc)
  endif()
  
  add_library( "${LIBNAME}" ${LIB_MODE} ${SRCS} )
@@ -238,10 +238,10 @@
  
  # Version Resource
  if(MSVC AND NOT POCO_STATIC)
--    source_group("Resources" FILES ${PROJECT_SOURCE_DIR}/DLLVersion.rc)
--    list(APPEND SRCS ${PROJECT_SOURCE_DIR}/DLLVersion.rc)
-+    source_group("Resources" FILES ${CMAKE_SOURCE_DIR}/DLLVersion.rc)
-+    list(APPEND SRCS ${CMAKE_SOURCE_DIR}/DLLVersion.rc)
+-    source_group("Resources" FILES ${CMAKE_SOURCE_DIR}/DLLVersion.rc)
+-    list(APPEND SRCS ${CMAKE_SOURCE_DIR}/DLLVersion.rc)
++    source_group("Resources" FILES ${PROJECT_SOURCE_DIR}/DLLVersion.rc)
++    list(APPEND SRCS ${PROJECT_SOURCE_DIR}/DLLVersion.rc)
  endif()
  
  POCO_SOURCES_AUTO_PLAT( SRCS WIN32
@@ -251,10 +251,10 @@
  
  # Version Resource
  if(MSVC AND NOT POCO_STATIC)
--    source_group("Resources" FILES ${PROJECT_SOURCE_DIR}/DLLVersion.rc)
--    list(APPEND SRCS ${PROJECT_SOURCE_DIR}/DLLVersion.rc)
-+    source_group("Resources" FILES ${CMAKE_SOURCE_DIR}/DLLVersion.rc)
-+    list(APPEND SRCS ${CMAKE_SOURCE_DIR}/DLLVersion.rc)
+-    source_group("Resources" FILES ${CMAKE_SOURCE_DIR}/DLLVersion.rc)
+-    list(APPEND SRCS ${CMAKE_SOURCE_DIR}/DLLVersion.rc)
++    source_group("Resources" FILES ${PROJECT_SOURCE_DIR}/DLLVersion.rc)
++    list(APPEND SRCS ${PROJECT_SOURCE_DIR}/DLLVersion.rc)
  endif()
  
  # If POCO_UNBUNDLED is enabled we try to find the required packages
@@ -264,10 +264,10 @@
  
  # Version Resource
  if(MSVC AND NOT POCO_STATIC)
--    source_group("Resources" FILES ${PROJECT_SOURCE_DIR}/DLLVersion.rc)
--    list(APPEND SRCS ${PROJECT_SOURCE_DIR}/DLLVersion.rc)
-+    source_group("Resources" FILES ${CMAKE_SOURCE_DIR}/DLLVersion.rc)
-+    list(APPEND SRCS ${CMAKE_SOURCE_DIR}/DLLVersion.rc)
+-    source_group("Resources" FILES ${CMAKE_SOURCE_DIR}/DLLVersion.rc)
+-    list(APPEND SRCS ${CMAKE_SOURCE_DIR}/DLLVersion.rc)
++    source_group("Resources" FILES ${PROJECT_SOURCE_DIR}/DLLVersion.rc)
++    list(APPEND SRCS ${PROJECT_SOURCE_DIR}/DLLVersion.rc)
  endif()
  
  add_library( "${LIBNAME}" ${LIB_MODE} ${SRCS} )
