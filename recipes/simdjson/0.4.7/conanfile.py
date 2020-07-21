@@ -37,7 +37,7 @@ class SimdjsonConan(ConanFile):
 
     def _is_supported_compiler(self):
         # Try to get by conan. We support more compilers than that.
-        supported_compilers = [("apple-clang", 10), ("gcc", 8)]
+        supported_compilers = [("apple-clang", 10), ("gcc", 7.4), ("clang", 6), ("Visual Studio", 15.7)]
         compiler, version = self.settings.compiler, Version(self.settings.compiler.version)
         return any(compiler == sc[0] and version >= sc[1] for sc in supported_compilers)
 
