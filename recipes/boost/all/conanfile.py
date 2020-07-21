@@ -220,7 +220,7 @@ class BoostConan(ConanFile):
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
         os.rename("boost_%s" % self.version.replace(".", "_"), self._source_subfolder)
-        for patch in self.conan_data["patches"].get(self.version, []):
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
             tools.patch(**patch)
 
     ##################### BUILDING METHODS ###########################
@@ -926,8 +926,10 @@ class BoostConan(ConanFile):
         detected_libraries = set(tools.collect_libs(self))
         used_libraries = set()
         for module in self._iter_modules():
+            if self.options.get_safe("without_{}".format(module), False):
+                continue
             module_libraries = [lib.format(**libformatdata) for lib in self._dependencies["libs"][module]]
-            module_added = not self.options.get_safe("without_{}".format(module), False) and all(d in modules_seen for d in self._dependencies["dependencies"][module]) and \
+            module_added = all(d in modules_seen for d in self._dependencies["dependencies"][module]) and \
                            all(l in detected_libraries for l in module_libraries)
             if module_added:
                 modules_seen.add(module)
