@@ -98,3 +98,4 @@ error:
     yaml_emitter_delete(&emitter);
     return 1;
 }
+

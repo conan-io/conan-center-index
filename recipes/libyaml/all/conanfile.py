@@ -39,6 +39,7 @@ class LibYAMLConan(ConanFile):
     def _configure_cmake(self):
         cmake = CMake(self)
         cmake.definitions["BUILD_TESTING"] = False
+        cmake.definitions["INSTALL_CMAKE_DIR"] = 'lib/cmake/libyaml'
         cmake.definitions["YAML_STATIC_LIB_NAME"] = "yaml"
         cmake.configure(build_folder=self._build_subfolder)
         return cmake
@@ -48,9 +49,15 @@ class LibYAMLConan(ConanFile):
         cmake.build()
 
     def package(self):
-        self.copy(pattern="LICENSE", dst="licenses", src=self._source_subfolder)
+        # 0.2.2 has LICENSE, 0.2.5 has License, so ignore case
+        self.copy(pattern="License", dst="licenses",
+                  src=self._source_subfolder, ignore_case=True)
         cmake = self._configure_cmake()
         cmake.install()
+        os.unlink(os.path.join(self.package_folder, "lib", "cmake", "libyaml",
+                               "yamlConfig.cmake"))
+        os.unlink(os.path.join(self.package_folder, "lib", "cmake", "libyaml",
+                               "yamlConfigVersion.cmake"))
 
     def package_info(self):
         self.cpp_info.libs = tools.collect_libs(self)
@@ -58,3 +65,4 @@ class LibYAMLConan(ConanFile):
             self.cpp_info.defines = (["YAML_DECLARE_EXPORT"] if
                                      self.options.shared else
                                      ["YAML_DECLARE_STATIC"])
+        self.cpp_info.builddirs.append(os.path.join("lib", "cmake"))
