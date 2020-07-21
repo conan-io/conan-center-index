@@ -77,4 +77,5 @@ class DefaultNameConan(ConanFile):
                 self.run(os.path.join(bindir, "chrono_exe"), run_environment=True)
             if not self.options["boost"].without_python:
                 with tools.environment_append({"PYTHONPATH": "{}:{}".format(bindir, libdir)}):
-                    self.run("{} {}".format(sys.executable, os.path.join(self.source_folder, "python.py")))
+                    self.run("{} {}".format(sys.executable, os.path.join(self.source_folder, "python.py")), run_environment=True)
+                self.run(os.path.join(bindir, "numpy_exe"), run_environment=True)

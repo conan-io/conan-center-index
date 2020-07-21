@@ -986,6 +986,7 @@ class BoostConan(ConanFile):
             if not self.options.without_python:
                 pyversion = tools.Version(self._python_version)
                 self.cpp_info.components["python{}{}".format(pyversion.major, pyversion.minor)].requires = ["python"]
+                self.cpp_info.components["numpy{}{}".format(pyversion.major, pyversion.minor)].requires = ["numpy"]
                 if not self.options.shared:
                     self.cpp_info.components["python"].defines.append("BOOST_PYTHON_STATIC_LIB")
 
