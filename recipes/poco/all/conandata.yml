@@ -33,14 +33,22 @@ patches:
   1.9.1:
     - patch_file: patches/1.9.1.patch
       base_path: source_subfolder
+    - patch_file: patches/1.9.1-2.patch
+      base_path: source_subfolder
   1.9.2:
     - patch_file: patches/1.9.2.patch
+      base_path: source_subfolder
+    - patch_file: patches/1.9.2-2.patch
       base_path: source_subfolder
   1.9.3:
     - patch_file: patches/1.9.2.patch
       base_path: source_subfolder
+    - patch_file: patches/1.9.2-2.patch
+      base_path: source_subfolder
   1.9.4:
     - patch_file: patches/1.9.2.patch
+      base_path: source_subfolder
+    - patch_file: patches/1.9.2-2.patch
       base_path: source_subfolder
   1.10.0:
     - patch_file: patches/1.10.0.patch
