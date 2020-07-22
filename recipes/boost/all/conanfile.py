@@ -7,6 +7,7 @@ from conans.errors import ConanInvalidConfiguration
 import os
 import sys
 import shutil
+import shlex
 
 try:
     from cStringIO import StringIO
@@ -55,7 +56,7 @@ class BoostConan(ConanFile):
         "segmented_stacks": [True, False],
         "debug_level": [i for i in range(0, 14)],
         "pch": [True, False],
-        "extra_b2_flags": "ANY",  # custom b2 flags, comma-separated
+        "extra_b2_flags": "ANY",  # custom b2 flags
         "i18n_backend": ["iconv", "icu", None],
     }
     options.update({"without_%s" % libname: [True, False] for libname in lib_list})
@@ -643,7 +644,7 @@ class BoostConan(ConanFile):
         flags.append(cxx_flags)
 
         if self.options.extra_b2_flags:
-            flags.extend(str(self.options.extra_b2_flags).split(','))
+            flags.extend(shlex.split(str(self.options.extra_b2_flags)))
 
         flags.extend(["install",
                       "--prefix=%s" % self.package_folder,
