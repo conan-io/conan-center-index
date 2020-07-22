@@ -118,9 +118,9 @@ class SpdlogConan(ConanFile):
             
         self.cpp_info.components[component_name].defines.append("SPDLOG_FMT_EXTERNAL")
         if self.options["fmt"].header_only:
-            self.cpp_info.components[component_name].requires = ["fmt::fmt"]
-        else:
             self.cpp_info.components[component_name].requires = ["fmt::fmt-header-only"]
+        else:
+            self.cpp_info.components[component_name].requires = ["fmt::fmt"]
         if self.options.wchar_support:
             self.cpp_info.components[component_name].defines.append("SPDLOG_WCHAR_TO_UTF8_SUPPORT")
         if self.options.wchar_filenames:
