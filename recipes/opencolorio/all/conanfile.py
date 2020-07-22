@@ -12,7 +12,6 @@ class OpenColorIOConan(ConanFile):
     default_options = {"shared": False, "fPIC": True}
     generators = "cmake", "cmake_find_package"
     exports_sources = ["CMakeLists.txt", "patches/*"]
-    short_paths = True
 
     _cmake = None
 
