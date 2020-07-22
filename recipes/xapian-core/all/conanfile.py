@@ -1,4 +1,5 @@
 from conans import AutoToolsBuildEnvironment, ConanFile, tools
+from conans.errors import ConanInvalidConfiguration
 from contextlib import contextmanager
 import os
 
@@ -20,6 +21,7 @@ class XapianCoreConan(ConanFile):
         "shared": False,
         "fPIC": True,
     }
+    exports_sources = "patches/**"
 
     _autotools = None
 
@@ -34,11 +36,20 @@ class XapianCoreConan(ConanFile):
     def configure(self):
         if self.options.shared:
             del self.options.fPIC
+        if self.options.shared and self.settings.os == "Windows":
+            raise ConanInvalidConfiguration("shared builds are unavailable due to libtool's inability to create shared libraries")
+
+    def requirements(self):
+        if self.settings.os != "Windows":
+            self.requires("libuuid/1.0.3")
+        self.requires("zlib/1.2.11")
 
     def build_requirements(self):
         if tools.os_info.is_windows and not tools.get_env("CONAN_BASH_PATH") and \
                 tools.os_info.detect_windows_subsystem() != "msys2":
             self.build_requires("msys2/20190524")
+        # if self.settings.compiler == "Visual Studio":
+        #     self.build_requires("automake/1.16.2")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
@@ -49,10 +60,12 @@ class XapianCoreConan(ConanFile):
         env = {}
         if self.settings.compiler == "Visual Studio":
             with tools.vcvars(self.settings):
+                msvc_cl_sh =  os.path.join(self.build_folder, "msvc_cl.sh").replace("\\", "/")
                 env.update({
-                    "AR": "{} lib".format(tools.unix_path(self.deps_user_info["automake"].ar_lib)),
-                    "CC": "{} cl -nologo".format(tools.unix_path(self.deps_user_info["automake"].compile)),
-                    "CXX": "{} cl -nologo".format(tools.unix_path(self.deps_user_info["automake"].compile)),
+                    "AR": "lib",
+                    "CC": msvc_cl_sh,
+                    "CXX": msvc_cl_sh,
+                    "LD": msvc_cl_sh,
                     "NM": "dumpbin -symbols",
                     "OBJDUMP": ":",
                     "RANLIB": ":",
@@ -72,6 +85,11 @@ class XapianCoreConan(ConanFile):
         if self._autotools:
             return self._autotools
         self._autotools = AutoToolsBuildEnvironment(self, win_bash=tools.os_info.is_windows)
+        self._autotools.libs = []
+        self._autotools.link_flags.extend(["-L{}".format(l.replace("\\", "/")) for l in self._autotools.library_paths])
+        self._autotools.library_paths = []
+        if self.settings.compiler == "Visual Studio":
+            self._autotools.cxx_flags.append("-EHsc")
         conf_args = [
             "--datarootdir={}".format(self._datarootdir.replace("\\", "/")),
             "--disable-documentation",
@@ -84,6 +102,8 @@ class XapianCoreConan(ConanFile):
         return self._autotools
 
     def build(self):
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            tools.patch(**patch)
         with self._build_context():
             autotools = self._configure_autotools()
             autotools.make()
@@ -94,6 +114,14 @@ class XapianCoreConan(ConanFile):
             autotools = self._configure_autotools()
             autotools.install()
 
+        if self.settings.compiler == "Visual Studio":
+            if self.options.shared:
+                pass
+            else:
+                os.rename(os.path.join(self.package_folder, "lib", "libxapian.lib"),
+                          os.path.join(self.package_folder, "lib", "xapian.lib"))
+
+        os.unlink(os.path.join(os.path.join(self.package_folder, "bin", "xapian-config")))
         os.unlink(os.path.join(os.path.join(self.package_folder, "lib", "libxapian.la")))
         tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
         tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
@@ -104,7 +132,7 @@ class XapianCoreConan(ConanFile):
         self.cpp_info.libs = ["xapian"]
         if not self.options.shared:
             if self.settings.os == "Linux":
-                self.cpp_info.system_libs = ["uuid", "rt"]
+                self.cpp_info.system_libs = ["rt"]
 
         self.cpp_info.names["cmake_find_package"] = "xapian"
         self.cpp_info.names["cmake_find_package_multi"] = "xapian"
