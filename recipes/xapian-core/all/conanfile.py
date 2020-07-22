@@ -8,7 +8,7 @@ class XapianCoreConan(ConanFile):
     name = "xapian-core"
     description = "Xapian is a highly adaptable toolkit which allows developers to easily add advanced indexing and search facilities to their own applications."
     topics = ("conan", "xapian", "search", "engine", "indexing", "query")
-    license = "GPL-v2"
+    license = "GPL-2.0-or-later"
     homepage = "https://xapian.org/"
     url = "https://github.com/conan-io/conan-center-index"
     settings = "os", "arch", "compiler", "build_type"
