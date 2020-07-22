@@ -48,8 +48,6 @@ class XapianCoreConan(ConanFile):
         if tools.os_info.is_windows and not tools.get_env("CONAN_BASH_PATH") and \
                 tools.os_info.detect_windows_subsystem() != "msys2":
             self.build_requires("msys2/20190524")
-        # if self.settings.compiler == "Visual Studio":
-        #     self.build_requires("automake/1.16.2")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
