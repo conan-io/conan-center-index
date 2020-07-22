@@ -14,10 +14,11 @@ int main(int argc, const char *argv[]) {
         std::cerr << "Need at least one argument\n";
         return 1;
     }
-
     MEDIAINFO_NS::MediaInfo mediainfo;
-    std::cout << "Is MediaInfo ready? " << mediainfo.IsReady() << "\n";
 
+#if defined(LIBMEDIAINFO_SHARED)
+    std::cout << "Is MediaInfo ready? " << mediainfo.IsReady() << "\n";
+#endif
 
     ZenLib::Ztring videofile(argv[1]);
     size_t opened = mediainfo.Open(videofile.To_Unicode());
