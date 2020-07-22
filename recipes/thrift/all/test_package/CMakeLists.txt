@@ -1,18 +1,43 @@
-cmake_minimum_required(VERSION 2.8.12)
+cmake_minimum_required(VERSION 3.1)
 project(test_package)
 
-include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
+include("${CMAKE_BINARY_DIR}/../conanbuildinfo.cmake")
 conan_basic_setup()
 
-set(HEADER_FILES    calculator_constants.h
-                    calculator_types.h
-                    Calculator.h)
+option(THRIFT_COMPILER_AVAILABLE "Thrift compiler is available")
 
-set(SOURCE_FILES    calculator_constants.cpp
-                    calculator_types.cpp
-                    Calculator.cpp
-                    test_package.cpp)
-
-add_executable(${PROJECT_NAME} ${SOURCE_FILES} ${HEADER_FILES})
+add_executable(${PROJECT_NAME} test_package.cpp calc.thrift)
 target_link_libraries(${PROJECT_NAME} ${CONAN_LIBS})
-set_target_properties(${PROJECT_NAME} PROPERTIES CXX_STANDARD 11)
+target_include_directories(${PROJECT_NAME} PRIVATE "${CMAKE_BINARY_DIR}")
+
+
+set(THRIFT_SRCS
+    "${CMAKE_BINARY_DIR}/shared_types.cpp"
+    "${CMAKE_BINARY_DIR}/SharedService.cpp"
+    "${CMAKE_BINARY_DIR}/calc_types.cpp"
+    "${CMAKE_BINARY_DIR}/Calculator.cpp"
+)
+
+if(USE_CXX_11)
+    set_property(TARGET ${PROJECT_NAME} PROPERTY CXX_STANDARD 11)
+else()
+    set_property(TARGET ${PROJECT_NAME} PROPERTY CXX_STANDARD 98)
+endif()
+
+
+if(THRIFT_COMPILER_AVAILABLE)
+    add_custom_command(
+        OUTPUT ${THRIFT_SRCS}
+        COMMAND ${CONAN_BIN_DIRS_THRIFT}/thrift -r -I ${CMAKE_SOURCE_DIR} -out ${CMAKE_CURRENT_BINARY_DIR} --gen cpp ${CMAKE_SOURCE_DIR}/calc.thrift 
+        DEPENDS calc.thrift
+        COMMENT "Generating thrift sources"
+    )
+
+endif()
+
+target_sources(${PROJECT_NAME} PRIVATE
+    "${CMAKE_BINARY_DIR}/shared_types.cpp"
+    "${CMAKE_BINARY_DIR}/SharedService.cpp"
+    "${CMAKE_BINARY_DIR}/calc_types.cpp"
+    "${CMAKE_BINARY_DIR}/Calculator.cpp"
+)

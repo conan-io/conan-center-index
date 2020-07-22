@@ -1,8 +1,16 @@
 sources:
+  "0.9.3":
+    sha256: "906aa8abdfd22846516082185d916e2b8abc897d90384e40279936da9f388aa1"
+    url: "https://github.com/apache/thrift/archive/0.9.3.tar.gz"  
   "0.13.0":
     sha256: "8469c8d72c684c6de72ddf55fc65d1c10868a576e7dc4d1f4a21a59814b97110"
     url: "https://github.com/apache/thrift/archive/0.13.0.tar.gz"
 patches:
+  "0.9.3":
+    - patch_file: "patches/cmake-0.9.3.diff"
+      base_path: "source_subfolder"
+    - patch_file: "patches/CPackConfig-0.9.3.diff"
+      base_path: "source_subfolder"
   "0.13.0":
     - patch_file: "patches/cmake.diff"
       base_path: "source_subfolder"

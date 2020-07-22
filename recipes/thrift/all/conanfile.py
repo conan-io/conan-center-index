@@ -1,5 +1,6 @@
 import os
 from conans import tools, CMake, ConanFile
+from conans.tools import Version
 
 
 class ConanFileDefault(ConanFile):
@@ -13,6 +14,7 @@ class ConanFileDefault(ConanFile):
     generators = "cmake", "cmake_find_package"
 
     settings = "os", "arch", "compiler", "build_type"
+
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
@@ -58,6 +60,15 @@ class ConanFileDefault(ConanFile):
         if self.settings.os == 'Windows':
             del self.options.fPIC
 
+        thrift_version = Version(self.version)
+        # C++11 is mandatory in 0.13.0. Before 0.13.0, use Boost as C++11 is not supported
+        if ((thrift_version.major == "0" and int(thrift_version.minor) < 13) or not tools.valid_min_cppstd(self, "11")):
+            self.options.with_boost_functional = True
+            self.options.with_boost_smart_ptr = True
+            self.options.with_boost_static = True
+            self.options.with_boostthreads = True
+            self.options.with_stdthreads = False
+
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
         extracted_dir = "thrift-" + self.version
@@ -73,7 +84,7 @@ class ConanFileDefault(ConanFile):
         cmake.build()
 
     def requirements(self):
-        self.requires("boost/1.73.0")
+        self.requires("boost/1.69.0")
         if self.settings.os == 'Windows':
             self.requires("winflexbison/2.5.22")
         else:
@@ -81,9 +92,9 @@ class ConanFileDefault(ConanFile):
             self.requires("bison/3.5.3")
 
         if self.options.with_openssl:
-            self.requires("openssl/1.1.1g")
+            self.requires("openssl/1.0.2u")
         if self.options.with_zlib:
-            self.requires("zlib/1.2.11")
+            self.requires("zlib/1.2.8")
         if self.options.with_libevent:
             self.requires("libevent/2.1.11")
 
@@ -105,6 +116,7 @@ class ConanFileDefault(ConanFile):
         self._cmake.definitions["BUILD_LIBRARIES"] = True
         self._cmake.definitions["BUILD_EXAMPLES"] = False
         self._cmake.definitions["BUILD_TUTORIALS"] = False
+        self._cmake.definitions["WITH_QT4"] = False
 
         # Make optional libs "findable"
         if self.options.with_openssl:
@@ -118,12 +130,15 @@ class ConanFileDefault(ConanFile):
         return self._cmake
 
     def package(self):
-        self.copy(pattern="LICENSE", dst="licenses", src=self._source_subfolder)
+        self.copy(pattern="LICENSE", dst="licenses",
+                  src=self._source_subfolder)
         cmake = self._configure_cmake()
         cmake.install()
         # Copy generated headers from build tree
-        build_source_dir = os.path.join(self._build_subfolder, self._source_subfolder)
-        self.copy(pattern="*.h", dst="include", src=build_source_dir, keep_path=True)
+        build_source_dir = os.path.join(
+            self._build_subfolder, self._source_subfolder)
+        self.copy(pattern="*.h", dst="include",
+                  src=build_source_dir, keep_path=True)
         tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
         tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
 
@@ -132,7 +147,7 @@ class ConanFileDefault(ConanFile):
         # Make sure libs are link in correct order. Important thing is that libthrift/thrift is last
         # (a little naive to sort, but libthrift/thrift should end up last since rest of the libs extend it with an abbrevation: 'thriftnb', 'thriftz')
         # The library that needs symbols must be first, then the library that resolves the symbols should come after.
-        self.cpp_info.libs.sort(reverse = True)
+        self.cpp_info.libs.sort(reverse=True)
 
         if self.settings.os == "Windows":
             # To avoid error C2589: '(' : illegal token on right side of '::'
