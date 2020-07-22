@@ -1,0 +1,15 @@
+cmake_minimum_required(VERSION 2.8.11)
+project(test_package)
+
+include("${CMAKE_BINARY_DIR}/conanbuildinfo.cmake")
+conan_basic_setup(TARGETS)
+
+find_package(mpdecimal REQUIRED)
+
+add_executable(${PROJECT_NAME} test_package.c)
+target_link_libraries(${PROJECT_NAME} PRIVATE mpdecimal::libmpdecimal)
+
+if(WITH_CXX)
+    add_executable(${PROJECT_NAME}_cpp test_package.cpp)
+    target_link_libraries(${PROJECT_NAME}_cpp PRIVATE mpdecimal::libmpdecimal++)
+endif()
