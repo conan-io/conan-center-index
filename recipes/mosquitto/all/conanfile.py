@@ -56,12 +56,23 @@ class MosquittoConan(ConanFile):
         return self._cmake
 
     def _patch(self):
-        if not self.options.shared and self.options.fPIC:
+        if not self.options.shared and self.options.get_safe("fPIC"):
             tools.replace_in_file(os.path.join(self._source_subfolder, "lib", "CMakeLists.txt"),
                                   "POSITION_INDEPENDENT_CODE 1",
                                   "POSITION_INDEPENDENT_CODE 0")
+        if self.settings.os == "Windows":
+            tools.replace_in_file(os.path.join(self._source_subfolder, "lib", "CMakeLists.txt"),
+                                "set (LIBRARIES ${LIBRARIES} ws2_32)",
+                                "set (LIBRARIES ${LIBRARIES} ws2_32 crypt32)")
+            tools.replace_in_file(os.path.join(self._source_subfolder, "src", "CMakeLists.txt"),
+                                "set (MOSQ_LIBS ${MOSQ_LIBS} ws2_32)",
+                                "set (MOSQ_LIBS ${MOSQ_LIBS} ws2_32 crypt32)")
+            tools.replace_in_file(os.path.join(self._source_subfolder, "src", "CMakeLists.txt"),
+                                "target_link_libraries(mosquitto_passwd ${OPENSSL_LIBRARIES})",
+                                "target_link_libraries(mosquitto_passwd ${OPENSSL_LIBRARIES} ws2_32 crypt32)")
 
     def build(self):
+        self._patch()
         cmake = self._configure_cmake()
         cmake.build()
 
@@ -87,6 +98,7 @@ class MosquittoConan(ConanFile):
         self.cpp_info.components["libmosquitto"].names["pkgconfig"] = "libmosquitto"
         if self.options.with_tls:
             self.cpp_info.components["libmosquitto"].requires.append("openssl::openssl")
+            self.cpp_info.components["libmosquitto"].defines = ["WITH_TLS"]
         if self.settings.os == "Windows":
             self.cpp_info.components["libmosquitto"].system_libs.append("ws2_32")
         elif self.settings.os == "Linux":
