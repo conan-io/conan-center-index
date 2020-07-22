@@ -6,6 +6,7 @@ import shutil
 
 class MpdecimalConan(ConanFile):
     name = "mpdecimal"
+    version = "2.4.2"
     description = "mpdecimal is a package for correctly-rounded arbitrary precision decimal floating point arithmetic."
     license = "BSD-2-Clause"
     topics = ("conan", "mpdecimal", "multiprecision", "library")
@@ -48,20 +49,9 @@ class MpdecimalConan(ConanFile):
     }
 
     def _patch_sources(self):
-        if self.settings.compiler == "Visual Studio":
-            libmpdec_folder = os.path.join(self._source_subfolder, "libmpdec")
-            main_version, _ = self.version.split(".", 1)
-
-            makefile_vc_original = os.path.join(libmpdec_folder, "Makefile.vc")
-            for msvcrt in ("MDd", "MTd", "MD", "MT"):
-                tools.replace_in_file(makefile_vc_original,
-                                      msvcrt,
-                                      str(self.settings.compiler.runtime))
-
-            tools.replace_in_file(makefile_vc_original,
-                                  self.version,
-                                  main_version)
-        else:
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            tools.patch(**patch)
+        if self.settings.compiler != "Visual Studio":
             """
             Using autotools:
             - Build only shared libraries when shared == True
