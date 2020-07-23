@@ -9,7 +9,7 @@ class ConanFileDefault(ConanFile):
     topics = ("conan", "gsoap", "logging")
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://sourceforge.net/projects/gsoap2"
-    license = "GPLv2"
+    license = ("gSOAP-1.3b", "GPL-2.0-or-later")
     exports_sources = ["CMakeLists.txt", "src/*.cmake", "src/*.txt"]
     generators = "cmake"
     short_paths = True
