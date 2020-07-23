@@ -55,13 +55,14 @@ class SpirvCrossConan(ConanFile):
             del self.options.fPIC
 
     def configure(self):
-        if not self.options.glsl and \
-           (self.options.hlsl or self.options.msl or self.options.cpp or self.options.reflect):
-            raise ConanInvalidConfiguration("hlsl, msl, cpp and reflect require glsl enabled")
         if self.options.shared:
+            del self.options.fPIC
             # these options don't contribute to shared binary
             del self.options.c_api
             del self.options.util
+        if not self.options.glsl and \
+           (self.options.hlsl or self.options.msl or self.options.cpp or self.options.reflect):
+            raise ConanInvalidConfiguration("hlsl, msl, cpp and reflect require glsl enabled")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
