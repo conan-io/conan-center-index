@@ -145,7 +145,9 @@ class SpirvCrossConan(ConanFile):
         if not self.options.shared and self.options.c_api and tools.stdcpp_library(self):
             self.cpp_info.system_libs.append(tools.stdcpp_library(self))
         if self.options.build_executable:
-            self.env_info.PATH.append(os.path.join(self.package_folder, "bin"))
+            bin_path = os.path.join(self.package_folder, "bin")
+            self.output.info("Appending PATH environment variable: {}".format(bin_path))
+            self.env_info.PATH.append(bin_path)
 
     def _get_ordered_libs(self):
         libs = []
