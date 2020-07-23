@@ -294,6 +294,8 @@ class QtConan(ConanFile):
             self.requires("libalsa/1.1.9")
         if self.options.GUI and self.settings.os == "Linux":
             self.requires("xorg/system")
+            if not tools.cross_building(self, skip_x64_x86=True):
+                self.requires("xkbcommon/0.10.0")
         if self.options.opengl != "no":
             self.requires("opengl/system")
         if self.options.with_zstd:
@@ -516,7 +518,8 @@ class QtConan(ConanFile):
                   ("sdl2", "SDL2"),
                   ("openal", "OPENAL"),
                   ("zstd", "ZSTD"),
-                  ("libalsa", "ALSA")]
+                  ("libalsa", "ALSA"),
+                  ("xkbcommon", "XKBCOMMON")]
         for package, var in libmap:
             if package in self.deps_cpp_info.deps:
                 if package == 'freetype':
