@@ -72,7 +72,7 @@ class GdbmConan(ConanFile):
             "--with-readline" if self.options.with_readline else "--without-readline",
             "--enable-libgdbm-compat" if self.options.libgdbm_compat else "--disable-libgdbm-compat",
             "--enable-gdbmtool-debug" if self.options.gdbmtool_debug else "--disable-gdbmtool-debug",
-            "--with-libiconv-prefix={}".format(self.deps_cpp_info["libiconv"].lib_paths[0]) if self.options.with_libiconv else "--without-libiconv-prefix",
+            "--with-libiconv-prefix={}".format(self.deps_cpp_info["libiconv"].rootpath) if self.options.with_libiconv else "--without-libiconv-prefix",
             "--without-libintl-prefix",
             "--disable-rpath",
         ]
