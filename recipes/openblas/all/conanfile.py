@@ -1,4 +1,5 @@
 from conans import ConanFile, CMake, tools
+from conans.errors import ConanException
 import os
 
 
@@ -25,9 +26,9 @@ class OpenblasConan(ConanFile):
     default_options = {
         "shared": False,
         "fPIC": True,
-        "build_lapack": False,
+        "build_lapack": True,
         "use_thread": True,
-        "dynamic_arch": False,
+        "dynamic_arch": True,
         "target": None
     }
     exports_sources = ["CMakeLists.txt", "patches/**"]
@@ -66,14 +67,24 @@ class OpenblasConan(ConanFile):
     def build_requirements(self):
         if tools.os_info.is_windows:
             if "CONAN_BASH_PATH" not in os.environ and tools.os_info.detect_windows_subsystem() != 'msys2':
-                self.build_requires("msys2/20190524")
+                self.build_requires("msys2/20200517")
 
     def _patch_sources(self):
-        if self.version in self.conan_data["patches"]:
+        if self.version in self.conan_data.get("patches", ""):
             for patch in self.conan_data["patches"][self.version]:
                 if "apple_clang" in patch["patch_file"] and not self._is_apple_clang:
                     continue
                 tools.patch(**patch)
+        
+        tools.replace_in_file(os.path.join(self._source_subfolder, "Makefile.install"),
+                              "OPENBLAS_INCLUDE_DIR := $(PREFIX)/include",
+                              "OPENBLAS_INCLUDE_DIR := $(PREFIX)/include/openblas")
+        
+        # This is needed to avoid undefined sprintf symbols when using with msvc
+        if self._is_msvc and tools.Version(self.settings.compiler.version):
+            tools.replace_in_file(os.path.join(self._source_subfolder, "common.h"),
+                                  "#if !defined(_MSC_VER)",
+                                  "#define snprintf _snprintf\n#if !defined(_MSC_VER)")
 
     def _configure_cmake(self):
         if self._cmake:
@@ -103,14 +114,21 @@ class OpenblasConan(ConanFile):
         cmake = self._configure_cmake()
         cmake.build()
 
+    def _install_msys2_package(self, package_name):
+        try:
+            self.run('bash -l -c "pacman -Qi {} > /dev/null"'.format(package_name))
+        except ConanException:
+            self.run('bash -l -c "pacman -S {} --noconfirm"'.format(package_name))
+
     def _build_make(self, args=None):
-        self._patch_sources()
+        if tools.os_info.is_windows:
+            prefix = "mingw-w64-i686" if self.settings.arch == "x86" else "mingw-w64-x86_64"
+            self._install_msys2_package("{}-gcc".format(prefix))
+            self._install_msys2_package("{}-gcc-fortran".format(prefix))
+
         make_options = ["DEBUG={}".format(self._get_make_build_type_debug()),
                         "NO_SHARED={}".format(self._get_make_option_value(not self.options.shared)),
                         "BINARY={}".format(self._get_make_arch()),
-                        #"NO_LAPACKE={}".format(self._get_make_option_value(self.options.NO_LAPACKE)),
-                        #"USE_MASS={}".format(self._get_make_option_value(self.options.USE_MASS),
-                        #"USE_OPENMP={}".format(self._get_make_option_value(self.options.USE_OPENMP),
                         "USE_THREAD={}".format(self._get_make_option_value(self.options.use_thread)),
                         "USE_LOCKING={}".format(self._get_make_option_value(not self.options.use_thread)),
                         "BUILD_WITHOUT_LAPACK={}".format(self._get_make_option_value(not self.options.build_lapack)),
@@ -141,31 +159,29 @@ class OpenblasConan(ConanFile):
         if "AR" in os.environ:
             make_options.append("AR={}".format(os.environ["AR"]))
 
+        use_win_bash = False
+        if tools.os_info.is_windows:
+            make_options.append("LIBNAME=openblas.lib")
+            make_options.append("CC=${MINGW_PREFIX}/bin/gcc")
+            make_options.append("FC=${MINGW_PREFIX}/bin/gfortran")
+            use_win_bash = True
+       
         if args:
             make_options.extend(args)
 
-        self.run("cd {} && make {}".format(self._source_subfolder, ' '.join(make_options)), cwd=self.source_folder)
+        self.run("cd {} && make {}".format(self._source_subfolder, ' '.join(make_options)), cwd=self.source_folder, win_bash=use_win_bash)
 
     def build(self):
-        if self._is_msvc:
-            self._build_cmake()
-        else:
-            self._build_make()
+        self._patch_sources()
+        self._build_make()
 
     def package(self):
         self.copy(pattern="LICENSE", dst="licenses", src=self._source_subfolder)
-        if not self._is_msvc:
-            tools.replace_in_file(os.path.join(self._source_subfolder, "Makefile.install"),
-                                  "OPENBLAS_INCLUDE_DIR := $(PREFIX)/include",
-                                  "OPENBLAS_INCLUDE_DIR := $(PREFIX)/include/openblas")
-            self._build_make(args=["PREFIX={}".format(self.package_folder), 'install'])
-        else:
-            cmake = self._configure_cmake()
-            cmake.install()
+        self._build_make(args=["PREFIX={}".format(tools.unix_path(self.package_folder)), 'install'])
         tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
         tools.rmdir(os.path.join(self.package_folder, "share"))
-        tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
-
+        tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))       
+ 
     def package_info(self):
         self.env_info.OpenBLAS_HOME = self.package_folder
         self.cpp_info.libs = tools.collect_libs(self)
@@ -174,6 +190,8 @@ class OpenblasConan(ConanFile):
                 self.cpp_info.system_libs.append("pthread")
             if self.options.build_lapack:
                 self.cpp_info.system_libs.append("gfortran")
+        if self._is_msvc and tools.Version(self.settings.compiler.version) >= "14":
+            self.cpp_info.system_libs.append("legacy_stdio_definitions")
         self.cpp_info.names["cmake_find_package"] = "OpenBLAS"
         self.cpp_info.names["cmake_find_package_multi"] = "OpenBLAS"
         self.cpp_info.names['pkg_config'] = "OpenBLAS"
