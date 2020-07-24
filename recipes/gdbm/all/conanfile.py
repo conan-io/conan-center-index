@@ -45,6 +45,15 @@ class GdbmConan(ConanFile):
             raise ConanInvalidConfiguration("gdbm is not supported on Windows")
 
     def configure(self):
+        # Disabling NLS will render the dependency on libiconv and gettext moot
+        # as the configure script will no longer look for that
+        if not self.options.with_nls:
+            if self.options.with_libiconv:
+                self.output.error("with_libiconv=True and with_nls=False are "
+                                  "incompatible settings as it's NLS that "
+                                  "requires libiconv")
+            del self.options.with_libiconv
+
         del self.settings.compiler.libcxx
         del self.settings.compiler.cppstd
 
@@ -72,19 +81,28 @@ class GdbmConan(ConanFile):
             "--with-readline" if self.options.with_readline else "--without-readline",
             "--enable-libgdbm-compat" if self.options.libgdbm_compat else "--disable-libgdbm-compat",
             "--enable-gdbmtool-debug" if self.options.gdbmtool_debug else "--disable-gdbmtool-debug",
-            "--with-libiconv-prefix={}".format(self.deps_cpp_info["libiconv"].rootpath) if self.options.with_libiconv else "--without-libiconv-prefix",
-            "--without-libintl-prefix",
             "--disable-rpath",
         ]
         if self.options.shared:
             conf_args.extend(["--enable-shared", "--disable-static"])
         else:
-            conf_args.extend(["--disable-shared", "--enable-static",
-                             "--with-pic" if self.options.fPIC
-                                else "--without-pic"])
+            conf_args.extend([
+                "--disable-shared", "--enable-static",
+                "--with-pic" if self.options.fPIC else "--without-pic"]
+            )
 
         if not self.options.with_nls:
             conf_args.extend(["--disable-nls"])
+
+        if self.options.with_libiconv:
+            conf_args.extend([
+                "--with-libiconv-prefix={}"
+                .format(self.deps_cpp_info["libiconv"].rootpath),
+                "--with-libintl-prefix"
+            ])
+        else:
+            conf_args.extend(['--without-libiconv-prefix',
+                              "--without-libintl-prefix"])
 
         self._autotools.configure(args=conf_args)
         return self._autotools
