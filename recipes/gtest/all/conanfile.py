@@ -90,6 +90,7 @@ class GTestConan(ConanFile):
 
         if not self.options.no_main:
             self.cpp_info.components["gtest_main"].libs = ["gtest_main{}".format(self._postfix)]
+            self.cpp_info.components["gtest_main"].requires = ["libgtest"]
 
         if self.options.build_gmock:
             self.cpp_info.components["gmock"].libs = ["gmock{}".format(self._postfix)]
