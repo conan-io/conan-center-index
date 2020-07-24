@@ -13,6 +13,7 @@ class MpdecimalConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "http://www.bytereef.org/mpdecimal"
     settings = "os", "compiler", "build_type", "arch"
+    exports_sources = "patches/**"
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
