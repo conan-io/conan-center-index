@@ -9,7 +9,6 @@ class LibelfConan(ConanFile):
     description = "ELF object file access library"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://directory.fsf.org/wiki/Libelf"
-    author = "Bincrafters <bincrafters@gmail.com>"
     license = "LGPL-2.0"
     topics = ("conan", "elf", "fsf", "libelf", "object-file")
     exports_sources = ["CMakeLists.txt", "cmake/CMakeLists.txt"]
