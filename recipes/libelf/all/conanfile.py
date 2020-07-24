@@ -17,8 +17,15 @@ class LibelfConan(ConanFile):
     default_options = {"shared": False, "fPIC": True}
     generators = "cmake"
     _autotools = None
-    _source_subfolder = "source_subfolder"
-    _build_subfolder = "build_subfolder"
+    _cmake = None
+
+    @property
+    def _source_subfolder(self):
+        return "source_subfolder"
+
+    @property
+    def _build_subfolder(self):
+        return "build_subfolder"
 
     def config_options(self):
         if self.settings.os != "Linux":
@@ -37,9 +44,11 @@ class LibelfConan(ConanFile):
         os.rename(extracted_dir, self._source_subfolder)
 
     def _configure_cmake(self):
-        cmake = CMake(self)
-        cmake.configure(build_folder=self._build_subfolder)
-        return cmake
+        if self._cmake:
+            return self._cmake
+        self._cmake = CMake(self)
+        self._cmake.configure(build_folder=self._build_subfolder)
+        return self._cmake
 
     def _build_cmake(self):
         shutil.copyfile(os.path.join("cmake", "CMakeLists.txt"), os.path.join(self._source_subfolder, "CMakeLists.txt"))
