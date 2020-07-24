@@ -22,6 +22,7 @@ class GdbmConan(ConanFile):
         "gdbmtool_debug": [True, False],
         "with_libiconv": [True, False],
         "with_readline": [True, False],
+        "with_nls": [True, False],
     }
     default_options = {
         "shared": False,
@@ -30,6 +31,7 @@ class GdbmConan(ConanFile):
         "gdbmtool_debug": True,
         "with_libiconv": False,
         "with_readline": False,
+        "with_nls": True,
     }
 
     _autotools = None
@@ -80,6 +82,9 @@ class GdbmConan(ConanFile):
             conf_args.extend(["--disable-shared", "--enable-static",
                              "--with-pic" if self.options.fPIC
                                 else "--without-pic"])
+
+        if not self.options.with_nls:
+            conf_args.extend(["--disable-nls"])
 
         self._autotools.configure(args=conf_args)
         return self._autotools
