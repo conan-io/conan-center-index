@@ -72,22 +72,27 @@ class GTestConan(ConanFile):
         del self.info.options.no_main
 
     def package_info(self):
-        if self.options.build_gmock:
-            gmock_libs = ['gmock', 'gtest'] if self.options.no_main else ['gmock_main', 'gmock', 'gtest']
-            self.cpp_info.libs = ["{}{}".format(lib, self._postfix) for lib in gmock_libs]
-        else:
-            gtest_libs = ['gtest'] if self.options.no_main else ['gtest_main' , 'gtest']
-            self.cpp_info.libs = ["{}{}".format(lib, self._postfix) for lib in gtest_libs]
-
+        self.cpp_info.name = "GTest"
+        self.cpp_info.components["libgtest"].names["cmake_find_package"] = "gtest"
+        self.cpp_info.components["libgtest"].libs = ["gtest{}".format(self._postfix)]
         if self.settings.os == "Linux":
-            self.cpp_info.system_libs.append("pthread")
+             self.cpp_info.components["libgtest"].system_libs.append("pthread")
 
         if self.options.shared:
-            self.cpp_info.defines.append("GTEST_LINKED_AS_SHARED_LIBRARY=1")
+             self.cpp_info.components["libgtest"].defines.append("GTEST_LINKED_AS_SHARED_LIBRARY=1")
 
         if self.settings.compiler == "Visual Studio":
             if Version(self.settings.compiler.version.value) >= "15":
-                self.cpp_info.defines.append("GTEST_LANG_CXX11=1")
-                self.cpp_info.defines.append("GTEST_HAS_TR1_TUPLE=0")
-        self.cpp_info.names["cmake_find_package"] = "GTest"
-        self.cpp_info.names["cmake_find_package_multi"] = "GTest"
+                self.cpp_info.components["libgtest"].defines.append("GTEST_LANG_CXX11=1")
+                self.cpp_info.components["libgtest"].defines.append("GTEST_HAS_TR1_TUPLE=0")
+
+        if not self.options.no_main:
+            self.cpp_info.components["libgtest_main"].names["cmake_find_package"] = "gtest_main"
+            self.cpp_info.components["libgtest_main"].libs = ["gtest_main{}".format(self._postfix)]
+
+        if self.options.build_gmock:
+            self.cpp_info.components["libgmock"].names["cmake_find_package"] = "gmock"
+            self.cpp_info.components["libgmock"].libs = ["gmock{}".format(self._postfix)]
+            if not self.options.no_main:
+                self.cpp_info.components["libgmock_main"].names["cmake_find_package"] = "gmock_main"
+                self.cpp_info.components["libgmock_main"].libs = ["gmock_main{}".format(self._postfix)]
