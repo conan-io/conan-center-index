@@ -89,8 +89,7 @@ class GTestConan(ConanFile):
                 self.cpp_info.components["libgtest"].defines.append("GTEST_HAS_TR1_TUPLE=0")
 
         if not self.options.no_main:
-            self.cpp_info.components["libgtest_main"].names["cmake_find_package"] = "gtest_main"
-            self.cpp_info.components["libgtest_main"].libs = ["gtest_main{}".format(self._postfix)]
+            self.cpp_info.components["gtest_main"].libs = ["gtest_main{}".format(self._postfix)]
 
         if self.options.build_gmock:
             self.cpp_info.components["libgmock"].names["cmake_find_package"] = "gmock"
