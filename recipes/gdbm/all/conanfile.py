@@ -49,11 +49,9 @@ class GdbmConan(ConanFile):
         # as the configure script will no longer look for that
         if not self.options.with_nls:
             if self.options.with_libiconv:
-                self.output.error("with_libiconv=True when with_nls=False is "
-                                  "not possible as it's NLS that "
-                                  "requires libiconv, setting "
-                                  "with_libiconv=False")
-            self.options.with_libiconv = False
+                raise ConanInvalidConfiguration(
+                    "with_libiconv=True when with_nls=False is not possible "
+                    "as it's NLS that requires libiconv")
 
         del self.settings.compiler.libcxx
         del self.settings.compiler.cppstd
