@@ -92,8 +92,6 @@ class GTestConan(ConanFile):
             self.cpp_info.components["gtest_main"].libs = ["gtest_main{}".format(self._postfix)]
 
         if self.options.build_gmock:
-            self.cpp_info.components["libgmock"].names["cmake_find_package"] = "gmock"
-            self.cpp_info.components["libgmock"].libs = ["gmock{}".format(self._postfix)]
+            self.cpp_info.components["gmock"].libs = ["gmock{}".format(self._postfix)]
             if not self.options.no_main:
-                self.cpp_info.components["libgmock_main"].names["cmake_find_package"] = "gmock_main"
-                self.cpp_info.components["libgmock_main"].libs = ["gmock_main{}".format(self._postfix)]
+                self.cpp_info.components["gmock_main"].libs = ["gmock_main{}".format(self._postfix)]
