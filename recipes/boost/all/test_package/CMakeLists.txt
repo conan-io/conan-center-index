@@ -79,10 +79,6 @@ IF(NOT HEADER_ONLY)
     endif()
 ENDIF()
 
+# Test header-only target
 ADD_EXECUTABLE(lambda_exe lambda.cpp)
-# FIXME: The target Boost::boost cannot be created using current conan...
-if (CONAN_BOOST_FINDPACKAGE)
-    target_link_libraries(lambda_exe Boost::headers)
-else()
-    target_link_libraries(lambda_exe Boost::boost)
-endif()
+target_link_libraries(lambda_exe Boost::boost)

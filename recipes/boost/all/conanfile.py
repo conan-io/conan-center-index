@@ -20,7 +20,7 @@ except ImportError:
 lib_list = ['math', 'wave', 'container', 'contract', 'exception', 'graph', 'iostreams', 'locale', 'log',
             'program_options', 'random', 'regex', 'mpi', 'serialization',
             'coroutine', 'fiber', 'context', 'timer', 'thread', 'chrono', 'date_time',
-            'atomic', 'filesystem', 'system', 'graph_parallel', 'python', 'numpy',
+            'atomic', 'filesystem', 'system', 'graph_parallel', 'python',
             'stacktrace', 'test', 'type_erasure']
 
 
@@ -921,6 +921,8 @@ class BoostConan(ConanFile):
 
         # FIXME: the boost component cannot be made!! But is required to make!! Name it "headers" for now.
         self.cpp_info.components["headers"].libs = []
+        self.cpp_info.components["headers"].names["cmake_find_package"] = "boost"
+        self.cpp_info.components["headers"].names["cmake_find_package_multi"] = "boost"
 
         libformatdata = {}
         if not self.options.without_python:
@@ -995,8 +997,6 @@ class BoostConan(ConanFile):
                 if not self.options.shared:
                     self.cpp_info.components["python"].defines.append("BOOST_PYTHON_STATIC_LIB")
 
-            if not self.options.without_numpy:
-                pyversion = tools.Version(self._python_version)
                 self.cpp_info.components["numpy{}{}".format(pyversion.major, pyversion.minor)].requires = ["numpy"]
 
             if self._is_msvc or self._is_clang_cl:
