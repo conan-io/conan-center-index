@@ -129,10 +129,6 @@ class MpdecimalConan(ConanFile):
                                       "libmpdec.so",
                                       "libmpdec{}".format(shared_ext))
 
-    @property
-    def _version_major(self):
-        return self.version.split(".", 1)[0]
-
     def _build_msvc(self):
         libmpdec_folder = os.path.join(self.build_folder, self._source_subfolder, "libmpdec")
         vcbuild_folder = os.path.join(self.build_folder, self._source_subfolder, "vcbuild")
@@ -155,11 +151,11 @@ class MpdecimalConan(ConanFile):
 
             shutil.copy("mpdecimal.h", dist_folder)
             if self.options.shared:
-                shutil.copy("libmpdec-{}.dll".format(self._version_major), os.path.join(dist_folder, "libmpdec-{}.dll".format(self._version_major)))
-                shutil.copy("libmpdec-{}.dll.exp".format(self._version_major), os.path.join(dist_folder, "libmpdec-{}.exp".format(self._version_major)))
-                shutil.copy("libmpdec-{}.dll.lib".format(self._version_major), os.path.join(dist_folder, "libmpdec-{}.lib".format(self._version_major)))
+                shutil.copy("libmpdec-{}.dll".format(self.version), os.path.join(dist_folder, "libmpdec-{}.dll".format(self.version)))
+                shutil.copy("libmpdec-{}.dll.exp".format(self.version), os.path.join(dist_folder, "libmpdec-{}.exp".format(self.version)))
+                shutil.copy("libmpdec-{}.dll.lib".format(self.version), os.path.join(dist_folder, "libmpdec-{}.lib".format(self.version)))
             else:
-                shutil.copy("libmpdec-{}.lib".format(self._version_major), dist_folder)
+                shutil.copy("libmpdec-{}.lib".format(self.version), dist_folder)
 
     def _configure_autotools(self):
         if self._autotools:
@@ -193,7 +189,7 @@ class MpdecimalConan(ConanFile):
 
     def package_info(self):
         if self.settings.compiler == "Visual Studio":
-            self.cpp_info.libs = ["libmpdec-{}".format(self._version_major)]
+            self.cpp_info.libs = ["libmpdec-{}".format(self.version)]
         else:
             self.cpp_info.libs = ["mpdec"]
         if self.options.shared:
