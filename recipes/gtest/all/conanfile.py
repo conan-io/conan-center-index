@@ -78,7 +78,7 @@ class GTestConan(ConanFile):
         self.cpp_info.components["libgtest"].names["cmake_find_package_multi"] = "gtest"
         self.cpp_info.components["libgtest"].libs = ["gtest{}".format(self._postfix)]
         if self.settings.os == "Linux":
-             self.cpp_info.components["libgtest"].system_libs.append("pthread")
+            self.cpp_info.components["libgtest"].system_libs.append("pthread")
 
         if self.options.shared:
              self.cpp_info.components["libgtest"].defines.append("GTEST_LINKED_AS_SHARED_LIBRARY=1")
