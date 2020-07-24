@@ -81,7 +81,7 @@ class GTestConan(ConanFile):
             self.cpp_info.components["libgtest"].system_libs.append("pthread")
 
         if self.options.shared:
-             self.cpp_info.components["libgtest"].defines.append("GTEST_LINKED_AS_SHARED_LIBRARY=1")
+            self.cpp_info.components["libgtest"].defines.append("GTEST_LINKED_AS_SHARED_LIBRARY=1")
 
         if self.settings.compiler == "Visual Studio":
             if Version(self.settings.compiler.version.value) >= "15":
