@@ -72,8 +72,10 @@ class GTestConan(ConanFile):
         del self.info.options.no_main
 
     def package_info(self):
-        self.cpp_info.name = "GTest"
+        self.cpp_info.names["cmake_find_package"] = "GTest"
+        self.cpp_info.names["cmake_find_package_multi"] = "GTest"
         self.cpp_info.components["libgtest"].names["cmake_find_package"] = "gtest"
+        self.cpp_info.components["libgtest"].names["cmake_find_package_multi"] = "gtest"
         self.cpp_info.components["libgtest"].libs = ["gtest{}".format(self._postfix)]
         if self.settings.os == "Linux":
              self.cpp_info.components["libgtest"].system_libs.append("pthread")
