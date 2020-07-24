@@ -140,12 +140,17 @@ class MpdecimalConan(ConanFile):
         os.mkdir(dist_folder)
 
         shutil.copy(os.path.join(libmpdec_folder, "Makefile.vc"), os.path.join(libmpdec_folder, "Makefile"))
+
+        autotools = AutoToolsBuildEnvironment(self)
+
         with tools.chdir(libmpdec_folder):
             with tools.vcvars(self.settings):
-                # self.run("nmake /nologo clean")
-                self.run("nmake /nologo MACHINE={machine} DLL={dll}".format(
+                self.run("""nmake /nologo MACHINE={machine} DLL={dll} CONAN_CFLAGS="{cflags}" CONAN_LDFLAGS="{ldflags}" """.format(
                     machine="ppro" if self.settings.arch == "x86" else "x64",
-                    dll="1" if self.options.shared else "0"))
+                    dll="1" if self.options.shared else "0",
+                    cflags=" ".join(autotools.flags),
+                    ldflags=" ".join(autotools.link_flags),
+                ))
 
             shutil.copy("mpdecimal.h", dist_folder)
             if self.options.shared:
