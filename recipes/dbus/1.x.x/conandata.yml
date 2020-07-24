@@ -1,0 +1,4 @@
+sources:
+    "1.12.16":
+        url: "https://dbus.freedesktop.org/releases/dbus/dbus-1.12.16.tar.gz"
+        sha256: "54a22d2fa42f2eb2a871f32811c6005b531b9613b1b93a0d269b05e7549fec80"
