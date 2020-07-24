@@ -9,17 +9,6 @@
  endif()
  
  endmacro()
---- Crypto/CMakeLists.txt
-+++ Crypto/CMakeLists.txt
-@@ -21,7 +21,7 @@
-     DEFINE_SYMBOL Crypto_EXPORTS
-     )
- 
--target_link_libraries(Crypto PUBLIC Poco::Foundation OpenSSL::SSL OpenSSL::Crypto)
-+target_link_libraries(Crypto PUBLIC Poco::Foundation OpenSSL::OpenSSL)
- target_include_directories(Crypto
-     PUBLIC
-         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
 --- Data/SQLite/CMakeLists.txt
 +++ Data/SQLite/CMakeLists.txt
 @@ -43,7 +43,7 @@
