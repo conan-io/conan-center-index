@@ -1,3 +1,7 @@
+### 24-July-2020 - 12:52 CEST
+-  [fix] Renamed Jenkins project from conan-center-pull-request to cci to improve issues with long workspace paths in Windows agents.
+-  [feature] Updated Conan client to the 1.27.1 version in Windows and Mac agents.
+
 ### 17-July-2020 - 18:54 CEST
 
 - [feature] Allow documentation inside the repository itself in the `docs` folder
