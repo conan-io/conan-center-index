@@ -433,9 +433,9 @@ class LibcurlConan(ConanFile):
 
         # all these options are exclusive. set just one of them
         # mac builds do not use cmake so don't even bother about darwin_ssl
-        self._cmake.definitions["CMAKE_USE_WINSSL"] = "with_winssl" in self.options and self.options.with_winssl
-        self._cmake.definitions["CMAKE_USE_OPENSSL"] = "with_openssl" in self.options and self.options.with_openssl
-        self._cmake.definitions["CMAKE_USE_WOLFSSL"] = "with_wolfssl" in self.options and self.options.with_wolfssl
+        self._cmake.definitions["CMAKE_USE_WINSSL"] = self.options.get_safe("with_winssl", False)
+        self._cmake.definitions["CMAKE_USE_OPENSSL"] = self.options.with_openssl
+        self._cmake.definitions["CMAKE_USE_WOLFSSL"] = self.options.with_wolfssl
         self._cmake.configure(build_folder=self._build_subfolder)
         return self._cmake
 
