@@ -18,10 +18,13 @@ class ConanSqlite3(ConanFile):
                "enable_column_metadata": [True, False],
                "enable_explain_comments": [True, False],
                "enable_fts3": [True, False],
+               "enable_fts3_parenthesis": [True, False],
                "enable_fts4": [True, False],
                "enable_fts5": [True, False],
                "enable_json1": [True, False],
+               "enable_soundex": [True, False],
                "enable_rtree": [True, False],
+               "use_alloca": [True, False],
                "omit_load_extension": [True, False],
                "enable_unlock_notify": [True, False],
                "disable_gethostuuid": [True, False],
@@ -33,10 +36,13 @@ class ConanSqlite3(ConanFile):
                        "enable_column_metadata": True,
                        "enable_explain_comments": False,
                        "enable_fts3": False,
+                       "enable_fts3_parenthesis": False,
                        "enable_fts4": False,
                        "enable_fts5": False,
                        "enable_json1": False,
+                       "enable_soundex": False,
                        "enable_rtree": True,
+                       "use_alloca": False,
                        "omit_load_extension": False,
                        "enable_unlock_notify": True,
                        "disable_gethostuuid": False,
@@ -73,10 +79,13 @@ class ConanSqlite3(ConanFile):
         self._cmake.definitions["ENABLE_COLUMN_METADATA"] = self.options.enable_column_metadata
         self._cmake.definitions["ENABLE_EXPLAIN_COMMENTS"] = self.options.enable_explain_comments
         self._cmake.definitions["ENABLE_FTS3"] = self.options.enable_fts3
+        self._cmake.definitions["ENABLE_FTS3_PARENTHESIS"] = self.options.enable_fts3_parenthesis
         self._cmake.definitions["ENABLE_FTS4"] = self.options.enable_fts4
         self._cmake.definitions["ENABLE_FTS5"] = self.options.enable_fts5
         self._cmake.definitions["ENABLE_JSON1"] = self.options.enable_json1
+        self._cmake.definitions["ENABLE_SOUNDEX"] = self.options.enable_soundex
         self._cmake.definitions["ENABLE_RTREE"] = self.options.enable_rtree
+        self._cmake.definitions["USE_ALLOCA"] = self.options.use_alloca
         self._cmake.definitions["OMIT_LOAD_EXTENSION"] = self.options.omit_load_extension
         self._cmake.definitions["SQLITE_ENABLE_UNLOCK_NOTIFY"] = self.options.enable_unlock_notify
         self._cmake.definitions["HAVE_FDATASYNC"] = True

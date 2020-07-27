@@ -47,7 +47,7 @@
  if(NOT DEACTIVATE_SNAPPY)
      if(SNAPPY_FOUND)
 -        set(LIBS ${LIBS} ${SNAPPY_LIBRARY})
-+        set(LIBS ${LIBS} "Snappy::Snappy")
++        set(LIBS ${LIBS} "Snappy::snappy")
      else(SNAPPY_FOUND)
          file(GLOB SNAPPY_FILES ${SNAPPY_LOCAL_DIR}/*.cc)
          set(SOURCES ${SOURCES} ${SNAPPY_FILES})

@@ -35,6 +35,8 @@ class FmtConan(ConanFile):
             self.settings.clear()
             del self.options.fPIC
             del self.options.shared
+        elif self.options.shared:
+            del self.options.fPIC
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
@@ -53,9 +55,8 @@ class FmtConan(ConanFile):
         return self._cmake
 
     def build(self):
-        if "patches" in self.conan_data and self.version in self.conan_data["patches"]:
-            for patch in self.conan_data["patches"][self.version]:
-                tools.patch(**patch)
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            tools.patch(**patch)
         if not self.options.header_only:
             cmake = self._configure_cmake()
             cmake.build()
@@ -63,17 +64,13 @@ class FmtConan(ConanFile):
     def package(self):
         self.copy("LICENSE.rst", dst="licenses", src=self._source_subfolder)
         if self.options.header_only:
-            src_dir = os.path.join(self._source_subfolder, "src")
-            header_dir = os.path.join(self._source_subfolder, "include")
-            dst_dir = os.path.join("include", "fmt")
-            self.copy("*.h", dst="include", src=header_dir)
-            self.copy("*.cc", dst=dst_dir, src=src_dir)
+            self.copy("*.h", dst="include", src=os.path.join(self._source_subfolder, "include"))
         else:
             cmake = self._configure_cmake()
             cmake.install()
-        tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
-        tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
-        tools.rmdir(os.path.join(self.package_folder, "share"))
+            tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
+            tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
+            tools.rmdir(os.path.join(self.package_folder, "share"))
 
     def package_id(self):
         if self.options.header_only:
@@ -82,11 +79,13 @@ class FmtConan(ConanFile):
             del self.info.options.with_fmt_alias
 
     def package_info(self):
-        if self.options.with_fmt_alias:
-            self.cpp_info.defines.append("FMT_STRING_ALIAS=1")
         if self.options.header_only:
-            self.cpp_info.defines.append("FMT_HEADER_ONLY")
+            self.cpp_info.components["fmt-header-only"].defines.append("FMT_HEADER_ONLY=1")
+            if self.options.with_fmt_alias:
+                self.cpp_info.components["fmt-header-only"].defines.append("FMT_STRING_ALIAS=1")
         else:
             self.cpp_info.libs = tools.collect_libs(self)
+            if self.options.with_fmt_alias:
+                self.cpp_info.defines.append("FMT_STRING_ALIAS=1")
             if self.options.shared:
                 self.cpp_info.defines.append("FMT_SHARED")

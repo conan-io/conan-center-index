@@ -26,6 +26,8 @@ class GiflibConan(ConanFile):
             del self.options.fPIC
 
     def configure(self):
+        if self.options.shared:
+            del self.options.fPIC
         del self.settings.compiler.libcxx
         del self.settings.compiler.cppstd
 
@@ -45,7 +47,7 @@ class GiflibConan(ConanFile):
     def _patch_sources(self):
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
             tools.patch(**patch)
-    
+
     def build(self):
         self._patch_sources()
 
@@ -57,11 +59,10 @@ class GiflibConan(ConanFile):
         cmake.install()
 
         self.copy("COPYING", src=self._source_subfolder, dst="licenses")
-    
-    def package_info(self):
-        self.cpp_info.libs = tools.collect_libs(self)
 
-        if self.options.shared:
-            self.cpp_info.defines.append("USE_GIF_DLL")
-        else:
-            self.cpp_info.defines.append("USE_GIF_LIB")
+    def package_info(self):
+        self.cpp_info.names["cmake_find_package"] = "GIF"
+        self.cpp_info.names["cmake_find_package_multi"] = "GIF"
+        self.cpp_info.libs = tools.collect_libs(self)
+        if self.settings.compiler == "Visual Studio":
+            self.cpp_info.defines.append("USE_GIF_DLL" if self.options.shared else "USE_GIF_LIB")
