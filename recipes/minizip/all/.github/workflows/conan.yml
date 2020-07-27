@@ -1,0 +1,82 @@
+# bincrafters-conventions:gha-workflow-version:6
+# You can add custom environment variables above the version tag
+# Do not modify the tag or anything below the tag
+# This script gets automatically updated
+
+# Possible configurations:
+# env:
+#   splitByBuildTypes: "false"  # Possible values "false", "true", default: false
+
+# You can furthermore set any environment variable understood by Conan and Conan Package Tools
+
+on: [push, pull_request]
+
+jobs:
+  generate-matrix:
+    name: Generate Job Matrix
+    runs-on: ubuntu-18.04
+    outputs:
+      matrix: ${{ steps.set-matrix.outputs.matrix }}
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-python@v1
+        with:
+          python-version: "3.8"
+      - name: Install Package Tools
+        run: |
+          pip install bincrafters_package_tools
+          conan user
+      - name: Generate Job Matrix
+        id: set-matrix
+        env:
+          splitByBuildTypes: ${{ env.splitByBuildTypes }}
+        run: |
+          MATRIX=$(bincrafters-package-tools generate-ci-jobs --platform gha)
+          echo "${MATRIX}"
+          echo "::set-output name=matrix::${MATRIX}"
+  conan:
+    needs: generate-matrix
+    runs-on: ${{ matrix.config.os }}
+    strategy:
+      fail-fast: false
+      matrix: ${{fromJson(needs.generate-matrix.outputs.matrix)}}
+    name: ${{ matrix.config.name }}
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-python@v1
+        with:
+          python-version: "3.8"
+      - name: Install Conan
+        run: |
+          pip install bincrafters_package_tools
+          conan user
+          echo "::set-env name=CONAN_${{ matrix.config.compiler }}_VERSIONS::${{ matrix.config.version }}"
+          echo "export CONAN_${{ matrix.config.compiler }}_VERSIONS=${{ matrix.config.version }}"
+          compiler="${{ matrix.config.compiler }}"
+          version="${{ matrix.config.version }}"
+          docker_image="${{ matrix.config.dockerImage }}"
+          if [[ "${compiler}" == "GCC" ]] || [[ "${compiler}" == "CLANG" ]]; then
+            if [[ "${docker_image}" == "" ]]; then
+              compiler_lower="${compiler,,}"
+              version_withoutdot="${version//./}"
+              docker_image="conanio/${compiler_lower}${version_withoutdot}"
+            fi
+            echo "::set-env name=CONAN_DOCKER_IMAGE::${docker_image}"
+            echo "export CONAN_DOCKER_IMAGE=${docker_image}"
+          fi
+          build_type="${{ matrix.config.buildType }}"
+          if ! [[ "${build_type}" == "" ]]; then
+            echo "::set-env name=CONAN_BUILD_TYPES::${build_type}"
+            echo "export CONAN_BUILD_TYPES=${build_type}"
+          fi
+          if [[ "${compiler}" == "APPLE_CLANG" ]] && [[ "${version}" == "11.0" ]]; then
+            sudo xcode-select -switch "/Applications/Xcode_11.3.1.app"
+            clang++ --version
+          fi
+        shell: bash
+      - name: Run
+        env:
+          CONAN_LOGIN_USERNAME: ${{ secrets.CONAN_LOGIN_USERNAME }}
+          CONAN_PASSWORD: ${{ secrets.CONAN_PASSWORD }}
+        run: |
+          bincrafters-package-tools --auto

@@ -1,0 +1,1 @@
+import: bincrafters/templates:.ci/travis-macos.yml@master
