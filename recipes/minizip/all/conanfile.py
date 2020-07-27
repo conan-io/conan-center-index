@@ -37,7 +37,6 @@ class LibnameConan(ConanFile):
     def _configure_cmake(self):
         if not self._cmake:
             self._cmake = CMake(self)
-            self._cmake.definitions["BUILD_TESTS"] = False  # example
             self._cmake.configure(build_folder=self._build_subfolder)
         return self._cmake
 
