@@ -15,6 +15,8 @@ class LibYAMLConan(ConanFile):
     options = {"shared": [True, False], "fPIC": [True, False]}
     default_options = {"shared": False, "fPIC": True}
 
+    _cmake = None
+
     @property
     def _source_subfolder(self):
         return "source_subfolder"
@@ -37,12 +39,14 @@ class LibYAMLConan(ConanFile):
         os.rename(extracted_dir, self._source_subfolder)
 
     def _configure_cmake(self):
-        cmake = CMake(self)
-        cmake.definitions["BUILD_TESTING"] = False
-        cmake.definitions["INSTALL_CMAKE_DIR"] = 'lib/cmake/libyaml'
-        cmake.definitions["YAML_STATIC_LIB_NAME"] = "yaml"
-        cmake.configure(build_folder=self._build_subfolder)
-        return cmake
+        if self._cmake:
+            return self._cmake
+        self._cmake = CMake(self)
+        self._cmake.definitions["BUILD_TESTING"] = False
+        self._cmake.definitions["INSTALL_CMAKE_DIR"] = 'lib/self._cmake/libyaml'
+        self._cmake.definitions["YAML_STATIC_LIB_NAME"] = "yaml"
+        self._cmake.configure(build_folder=self._build_subfolder)
+        return self._cmake
 
     def build(self):
         cmake = self._configure_cmake()
