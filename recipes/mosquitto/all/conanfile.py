@@ -56,7 +56,7 @@ class MosquittoConan(ConanFile):
         return self._cmake
 
     def _patch(self):
-        if not self.options.shared and self.options.get_safe("fPIC"):
+        if not self.options.shared and not self.options.get_safe("fPIC"):
             tools.replace_in_file(os.path.join(self._source_subfolder, "lib", "CMakeLists.txt"),
                                   "POSITION_INDEPENDENT_CODE 1",
                                   "POSITION_INDEPENDENT_CODE 0")
