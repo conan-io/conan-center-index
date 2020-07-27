@@ -69,6 +69,6 @@ class SysConfigOpenGLConan(ConanFile):
             self.cpp_info.defines.append("GL_SILENCE_DEPRECATION=1")
             self.cpp_info.frameworks.append("OpenGL")
         elif self.settings.os == "Windows":
-            self.cpp_info.system_libs = ["OpenGL32"]
+            self.cpp_info.system_libs = ["opengl32"]
         elif self.settings.os == "Linux":
             self._fill_cppinfo_from_pkgconfig('gl')
