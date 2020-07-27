@@ -45,6 +45,7 @@ class LibYAMLConan(ConanFile):
             return self._cmake
         self._cmake = CMake(self)
         self._cmake.definitions["INSTALL_CMAKE_DIR"] = 'lib/cmake/libyaml'
+        self._cmake.definitions["YAML_STATIC_LIB_NAME"] = "yaml"
         self._cmake.configure(build_folder=self._build_subfolder)
         return self._cmake
 
