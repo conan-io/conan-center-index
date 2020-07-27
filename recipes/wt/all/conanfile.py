@@ -41,7 +41,7 @@ class WtConan(ConanFile):
         'with_postgres': True,
         'with_mysql': True,
         'with_mssql': False,
-        'with_test': True,
+        'with_test': False,
         'with_dbo': True,
         'with_opengl': False,
         'with_unwind': True,
