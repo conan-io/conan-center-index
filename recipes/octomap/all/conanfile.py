@@ -35,6 +35,10 @@ class OctomapConan(ConanFile):
         if self.settings.os == "Windows":
             del self.options.fPIC
 
+    def configure(self):
+        if self.options.shared:
+            del self.options.fPIC
+
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
         os.rename(self.name + "-" + self.version, self._source_subfolder)
@@ -68,6 +72,17 @@ class OctomapConan(ConanFile):
         self.copy(pattern="*.dll", dst="bin", src=build_bin_dir, keep_path=False)
 
     def package_info(self):
-        self.cpp_info.libs = ["octomap", "octomath"]
+        # TODO: no namespace for CMake imported targets
+        # octomath
+        octomath_cmake = "octomath" if self.options.shared else "octomath-static"
+        self.cpp_info.components["octomath"].names["cmake_find_package"] = octomath_cmake
+        self.cpp_info.components["octomath"].names["cmake_find_package_multi"] = octomath_cmake
+        self.cpp_info.components["octomath"].libs = ["octomath"]
         if self.settings.os == "Linux":
-            self.cpp_info.system_libs.append("m")
+            self.cpp_info.components["octomath"].system_libs.append("m")
+        # octomap
+        octomap_cmake = "octomap" if self.options.shared else "octomap-static"
+        self.cpp_info.components["octomaplib"].names["cmake_find_package"] = octomap_cmake
+        self.cpp_info.components["octomaplib"].names["cmake_find_package_multi"] = octomap_cmake
+        self.cpp_info.components["octomaplib"].libs = ["octomap"]
+        self.cpp_info.components["octomaplib"].requires = ["octomath"]
