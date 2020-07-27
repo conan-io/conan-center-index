@@ -39,7 +39,13 @@ class M4Conan(ConanFile):
             return self._autotools
         conf_args = []
         self._autotools = AutoToolsBuildEnvironment(self, win_bash=tools.os_info.is_windows)
-        self._autotools.configure(args=conf_args, configure_dir=self._source_subfolder)
+        build_canonical_name = None
+        host_canonical_name = None
+        if self.settings.compiler == "Visual Studio":
+            # The somewhat older configure script of m4 does not understand the canonical names of Visual Studio
+            build_canonical_name = False
+            host_canonical_name = False
+        self._autotools.configure(args=conf_args, configure_dir=self._source_subfolder, build=build_canonical_name, host=host_canonical_name)
         return self._autotools
 
     @contextmanager
