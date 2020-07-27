@@ -55,7 +55,7 @@ class NettleTLS(ConanFile):
         del self.settings.compiler.libcxx
         del self.settings.compiler.cppstd
         if tools.Version(self.version) < "3.6" and self.options.get_safe("fat") and self.settings.arch == "x86_64":
-            raise ConanInvalidConfiguration("fat support is broken on this nettle release (due to missing x86_64/sha_ni/sha1-compress.asm source")
+            raise ConanInvalidConfiguration("fat support is broken on this nettle release (due to a missing x86_64/sha_ni/sha1-compress.asm source)")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
