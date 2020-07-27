@@ -6,12 +6,14 @@ import shutil
 
 class MpdecimalConan(ConanFile):
     name = "mpdecimal"
+    version = "2.4.2"
     description = "mpdecimal is a package for correctly-rounded arbitrary precision decimal floating point arithmetic."
     license = "BSD-2-Clause"
     topics = ("conan", "mpdecimal", "multiprecision", "library")
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "http://www.bytereef.org/mpdecimal"
     settings = "os", "compiler", "build_type", "arch"
+    exports_sources = "patches/**"
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
@@ -48,20 +50,9 @@ class MpdecimalConan(ConanFile):
     }
 
     def _patch_sources(self):
-        if self.settings.compiler == "Visual Studio":
-            libmpdec_folder = os.path.join(self._source_subfolder, "libmpdec")
-            main_version, _ = self.version.split(".", 1)
-
-            makefile_vc_original = os.path.join(libmpdec_folder, "Makefile.vc")
-            for msvcrt in ("MDd", "MTd", "MD", "MT"):
-                tools.replace_in_file(makefile_vc_original,
-                                      msvcrt,
-                                      str(self.settings.compiler.runtime))
-
-            tools.replace_in_file(makefile_vc_original,
-                                  self.version,
-                                  main_version)
-        else:
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            tools.patch(**patch)
+        if self.settings.compiler != "Visual Studio":
             """
             Using autotools:
             - Build only shared libraries when shared == True
@@ -138,10 +129,6 @@ class MpdecimalConan(ConanFile):
                                       "libmpdec.so",
                                       "libmpdec{}".format(shared_ext))
 
-    @property
-    def _version_major(self):
-        return self.version.split(".", 1)[0]
-
     def _build_msvc(self):
         libmpdec_folder = os.path.join(self.build_folder, self._source_subfolder, "libmpdec")
         vcbuild_folder = os.path.join(self.build_folder, self._source_subfolder, "vcbuild")
@@ -150,20 +137,25 @@ class MpdecimalConan(ConanFile):
         os.mkdir(dist_folder)
 
         shutil.copy(os.path.join(libmpdec_folder, "Makefile.vc"), os.path.join(libmpdec_folder, "Makefile"))
+
+        autotools = AutoToolsBuildEnvironment(self)
+
         with tools.chdir(libmpdec_folder):
             with tools.vcvars(self.settings):
-                # self.run("nmake /nologo clean")
-                self.run("nmake /nologo MACHINE={machine} DLL={dll}".format(
+                self.run("""nmake /nologo MACHINE={machine} DLL={dll} CONAN_CFLAGS="{cflags}" CONAN_LDFLAGS="{ldflags}" """.format(
                     machine="ppro" if self.settings.arch == "x86" else "x64",
-                    dll="1" if self.options.shared else "0"))
+                    dll="1" if self.options.shared else "0",
+                    cflags=" ".join(autotools.flags),
+                    ldflags=" ".join(autotools.link_flags),
+                ))
 
             shutil.copy("mpdecimal.h", dist_folder)
             if self.options.shared:
-                shutil.copy("libmpdec-{}.dll".format(self._version_major), os.path.join(dist_folder, "libmpdec-{}.dll".format(self._version_major)))
-                shutil.copy("libmpdec-{}.dll.exp".format(self._version_major), os.path.join(dist_folder, "libmpdec-{}.exp".format(self._version_major)))
-                shutil.copy("libmpdec-{}.dll.lib".format(self._version_major), os.path.join(dist_folder, "libmpdec-{}.lib".format(self._version_major)))
+                shutil.copy("libmpdec-{}.dll".format(self.version), os.path.join(dist_folder, "libmpdec-{}.dll".format(self.version)))
+                shutil.copy("libmpdec-{}.dll.exp".format(self.version), os.path.join(dist_folder, "libmpdec-{}.exp".format(self.version)))
+                shutil.copy("libmpdec-{}.dll.lib".format(self.version), os.path.join(dist_folder, "libmpdec-{}.lib".format(self.version)))
             else:
-                shutil.copy("libmpdec-{}.lib".format(self._version_major), dist_folder)
+                shutil.copy("libmpdec-{}.lib".format(self.version), dist_folder)
 
     def _configure_autotools(self):
         if self._autotools:
@@ -197,7 +189,7 @@ class MpdecimalConan(ConanFile):
 
     def package_info(self):
         if self.settings.compiler == "Visual Studio":
-            self.cpp_info.libs = ["libmpdec-{}".format(self._version_major)]
+            self.cpp_info.libs = ["libmpdec-{}".format(self.version)]
         else:
             self.cpp_info.libs = ["mpdec"]
         if self.options.shared:
