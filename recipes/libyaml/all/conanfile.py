@@ -30,6 +30,8 @@ class LibYAMLConan(ConanFile):
             del self.options.fPIC
 
     def configure(self):
+        if self.options.shared:
+            del self.options.fPIC
         del self.settings.compiler.libcxx
         del self.settings.compiler.cppstd
 
@@ -42,9 +44,7 @@ class LibYAMLConan(ConanFile):
         if self._cmake:
             return self._cmake
         self._cmake = CMake(self)
-        self._cmake.definitions["BUILD_TESTING"] = False
-        self._cmake.definitions["INSTALL_CMAKE_DIR"] = 'lib/self._cmake/libyaml'
-        self._cmake.definitions["YAML_STATIC_LIB_NAME"] = "yaml"
+        self._cmake.definitions["INSTALL_CMAKE_DIR"] = 'lib/cmake/libyaml'
         self._cmake.configure(build_folder=self._build_subfolder)
         return self._cmake
 
@@ -58,15 +58,14 @@ class LibYAMLConan(ConanFile):
                   src=self._source_subfolder, ignore_case=True)
         cmake = self._configure_cmake()
         cmake.install()
-        os.unlink(os.path.join(self.package_folder, "lib", "cmake", "libyaml",
-                               "yamlConfig.cmake"))
-        os.unlink(os.path.join(self.package_folder, "lib", "cmake", "libyaml",
-                               "yamlConfigVersion.cmake"))
+        tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
 
     def package_info(self):
-        self.cpp_info.libs = tools.collect_libs(self)
+        self.cpp_info.components["yaml"].libs = ["yaml"]
         if self.settings.compiler == "Visual Studio":
-            self.cpp_info.defines = (["YAML_DECLARE_EXPORT"] if
-                                     self.options.shared else
-                                     ["YAML_DECLARE_STATIC"])
-        self.cpp_info.builddirs.append(os.path.join("lib", "cmake"))
+            self.cpp_info.components["yaml"].defines = [
+                "YAML_DECLARE_EXPORT" if self.options.shared
+                else "YAML_DECLARE_STATIC"
+            ]
+        self.cpp_info.names["cmake_find_package"] = "yaml"
+        self.cpp_info.names["cmake_find_package_multi"] = "yaml"
