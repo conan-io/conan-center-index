@@ -39,21 +39,22 @@ class ConanXOrg(ConanFile):
             if tools.os_info.with_apt:
                 packages = ["xorg-dev", "libx11-xcb-dev", "libxcb-render0-dev", "libxcb-render-util0-dev", "libxcb-xkb-dev",
                             "libxcb-icccm4-dev", "libxcb-image0-dev", "libxcb-keysyms1-dev", "libxcb-randr0-dev", "libxcb-shape0-dev",
-                            "libxcb-sync-dev", "libxcb-xfixes0-dev", "libxcb-xinerama0-dev"]
+                            "libxcb-sync-dev", "libxcb-xfixes0-dev", "libxcb-xinerama0-dev", "xkb-data"]
             elif tools.os_info.with_yum or tools.os_info.with_dnf:
                 packages = ["libxcb-devel", "libfontenc-devel", "libXaw-devel", "libXcomposite-devel",
                             "libXcursor-devel", "libXdmcp-devel", "libXft-devel", "libXtst-devel", "libXinerama-devel",
                             "xorg-x11-xkb-utils-devel", "libXrandr-devel", "libXres-devel", "libXScrnSaver-devel", "libXvMC-devel",
                             "xorg-x11-xtrans-devel", "xcb-util-wm-devel", "xcb-util-image-devel", "xcb-util-keysyms-devel",
-                            "xcb-util-renderutil-devel", "libXdamage-devel", "libXxf86vm-devel", "libXv-devel"]
+                            "xcb-util-renderutil-devel", "libXdamage-devel", "libXxf86vm-devel", "libXv-devel",
+                            "xkeyboard-config-devel"]
             elif tools.os_info.with_pacman:
                 packages = ["libxcb", "libfontenc", "libice", "libsm", "libxaw", "libxcomposite", "libxcursor",
                             "libxdamage", "libxdmcp", "libxft", "libxtst", "libxinerama", "libxkbfile", "libxrandr", "libxres",
                             "libxss", "libxvmc", "xtrans", "xcb-util-wm", "xcb-util-image","xcb-util-keysyms", "xcb-util-renderutil",
-                            "libxxf86vm", "libxv"]
+                            "libxxf86vm", "libxv", "xkeyboard-config"]
             elif tools.os_info.with_zypper:
                 packages = ["xorg-x11-devel", "xcb-util-wm-devel", "xcb-util-image-devel", "xcb-util-keysyms-devel",
-                            "xcb-util-renderutil-devel"]
+                            "xcb-util-renderutil-devel", "xkeyboard-config"]
             else:
                 self.output.warn("Do not know how to install 'xorg' for {}.".format(tools.os_info.linux_distro))
                 packages = []
@@ -69,5 +70,5 @@ class ConanXOrg(ConanFile):
                      "xscrnsaver", "xt", "xtst", "xv", "xvmc", "xxf86vm", "xtrans",
                      "xcb-xkb", "xcb-icccm", "xcb-image", "xcb-keysyms", "xcb-randr", "xcb-render",
                      "xcb-renderutil", "xcb-shape", "xcb-shm", "xcb-sync", "xcb-xfixes",
-                     "xcb-xinerama", "xcb"]:
+                     "xcb-xinerama", "xcb", "xkeyboard-config"]:
             self._fill_cppinfo_from_pkgconfig(name)

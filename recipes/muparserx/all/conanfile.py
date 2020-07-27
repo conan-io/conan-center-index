@@ -13,7 +13,7 @@ class MuparserxConan(ConanFile):
     options = {"shared": [True, False],
                "fPIC": [True, False]}
     default_options = {"shared": False,
-                       "fPIC": False}
+                       "fPIC": True}
     exports_sources = "CMakeLists.txt"
     generators = "cmake"
     _cmake = None
