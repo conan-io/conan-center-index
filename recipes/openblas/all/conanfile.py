@@ -86,34 +86,6 @@ class OpenblasConan(ConanFile):
                                   "#if !defined(_MSC_VER)",
                                   "#define snprintf _snprintf\n#if !defined(_MSC_VER)")
 
-    def _configure_cmake(self):
-        if self._cmake:
-            return self._cmake
-        self._cmake = CMake(self)
-        if self.options.build_lapack:
-            self.output.warn("Building with lapack support requires a Fortran compiler.")
-
-        self._cmake.definitions["NOFORTRAN"] = not self.options.build_lapack
-        self._cmake.definitions["BUILD_WITHOUT_LAPACK"] = not self.options.build_lapack
-        self._cmake.definitions["DYNAMIC_ARCH"] = self.options.dynamic_arch
-        self._cmake.definitions["USE_THREAD"] = self.options.use_thread
-
-        # Required for safe concurrent calls to OpenBLAS routines
-        self._cmake.definitions["USE_LOCKING"] = not self.options.use_thread
-
-        self._cmake.definitions["MSVC_STATIC_CRT"] = False # don't, may lie to consumer, /MD or /MT is managed by conan
-
-        # This is a workaround to add the libm dependency on linux,
-        # which is required to successfully compile on older gcc versions.
-        self._cmake.definitions["ANDROID"] = self.settings.os in ["Linux", "Android"]
-
-        self._cmake.configure(build_folder=self._build_subfolder)
-        return self._cmake
-
-    def _build_cmake(self):
-        cmake = self._configure_cmake()
-        cmake.build()
-
     def _install_msys2_package(self, package_name):
         try:
             self.run('bash -l -c "pacman -Qi {} > /dev/null"'.format(package_name))
@@ -159,7 +131,7 @@ class OpenblasConan(ConanFile):
         if "AR" in os.environ:
             make_options.append("AR={}".format(os.environ["AR"]))
 
-        use_win_bash = False
+        use_win_bash = False           
         if tools.os_info.is_windows:
             make_options.append("LIBNAME=openblas.lib")
             make_options.append("CC=${MINGW_PREFIX}/bin/gcc")
