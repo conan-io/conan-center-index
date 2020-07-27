@@ -21,7 +21,8 @@ class LibnameConan(ConanFile):
     _cmake = None
 
     requires = (
-        "zlib/1.2.11"
+        "zlib/1.2.11",
+        "zstd/1.4.5"
     )
 
     def config_options(self):
