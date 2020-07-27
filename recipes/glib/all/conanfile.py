@@ -52,6 +52,8 @@ class GLibConan(ConanFile):
 
     def build_requirements(self):
         self.build_requires("meson/0.54.2")
+        if self.settings.os == "Windows":
+            self.build_requires("pkgconf/1.7.3")
 
     def requirements(self):
         if self.options.with_pcre:
@@ -96,8 +98,6 @@ class GLibConan(ConanFile):
         return meson
 
     def build(self):
-        if self.settings.os == "Windows":
-            raise ConanInvalidConfiguration('GLib is not yet supported on windows')
         for filename in [os.path.join(self._source_subfolder, "meson.build"),
                          os.path.join(self._source_subfolder, "glib", "meson.build"),
                          os.path.join(self._source_subfolder, "gobject", "meson.build"),
