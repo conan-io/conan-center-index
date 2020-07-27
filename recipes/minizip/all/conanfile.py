@@ -2,7 +2,7 @@ from conans import ConanFile, CMake, tools
 import os
 
 
-class LibnameConan(ConanFile):
+class MinizipConan(ConanFile):
     name = "minizip"
     description = "minizip is a zip manipulation library written in C that is supported on Windows, macOS, and Linux."
     topics = ("conan", "minizip", "compression")
