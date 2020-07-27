@@ -1,7 +1,7 @@
 from conans import ConanFile, CMake, tools
 import os, shutil
 
-class OpenEXRConan(ConanFile):
+class OpenColorIOConan(ConanFile):
     name = "opencolorio"
     description = "A color management framework for visual effects and animation."
     license = "BSD-3-Clause"
@@ -11,7 +11,7 @@ class OpenEXRConan(ConanFile):
     options = {"shared": [True, False], "fPIC": [True, False]}
     default_options = {"shared": False, "fPIC": True}
     generators = "cmake", "cmake_find_package"
-    exports_sources = ["patches/*"]
+    exports_sources = ["CMakeLists.txt", "patches/*"]
 
     _cmake = None
 
@@ -50,13 +50,12 @@ class OpenEXRConan(ConanFile):
         self._cmake.definitions["OCIO_BUILD_PYGLUE"] = False
         self._cmake.definitions["USE_EXTERNAL_YAML"] = True
         self._cmake.definitions["USE_EXTERNAL_LCMS"] = True
-        self._cmake.definitions["YAML_CPP_VERSION"] = self.deps_cpp_info["yaml-cpp"].version
 
         # FIXME: OpenColorIO uses old TinyXML which doesn't have Conan package.
         self._cmake.definitions["USE_EXTERNAL_TINYXML"] = False
         self._cmake.definitions["TINYXML_OBJECT_LIB_EMBEDDED"] = True
         
-        self._cmake.configure(source_folder=self._source_subfolder)
+        self._cmake.configure()
         return self._cmake
 
     def _patch_sources(self):
