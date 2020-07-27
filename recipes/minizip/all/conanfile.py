@@ -3,12 +3,12 @@ import os
 
 
 class LibnameConan(ConanFile):
-    name = "libname"
-    description = "Keep it short"
-    topics = ("conan", "libname", "logging")
-    url = "https://github.com/bincrafters/conan-libname"
-    homepage = "https://github.com/original_author/original_lib"
-    license = "MIT"  # Indicates license type of the packaged library; please use SPDX Identifiers https://spdx.org/licenses/
+    name = "minizip"
+    description = "minizip is a zip manipulation library written in C that is supported on Windows, macOS, and Linux."
+    topics = ("conan", "minizip", "compression")
+    url = "https://github.com/ItsBasi/conan-minizip"
+    homepage = "https://github.com/nmoinvaz/minizip"
+    license = "Zlib"  # Indicates license type of the packaged library; please use SPDX Identifiers https://spdx.org/licenses/
     exports_sources = ["CMakeLists.txt"]
     generators = "cmake"
 
