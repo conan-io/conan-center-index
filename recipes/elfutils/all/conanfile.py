@@ -148,6 +148,10 @@ class ElfutilsConan(ConanFile):
         self.output.info("Setting AR to {}".format(ar))
         self.env_info.AR = ar
 
+        elfclassify = tools.unix_path(os.path.join(self.package_folder, "bin", "eu-elfclassify" + bin_ext))
+        self.output.info("Setting ELFCLASSIFY to {}".format(elfclassify))
+        self.env_info.ELFCLASSIFY = elfclassify
+
         elfcmp = tools.unix_path(os.path.join(self.package_folder, "bin", "eu-elfcmp" + bin_ext))
         self.output.info("Setting ELFCMP to {}".format(elfcmp))
         self.env_info.ELFCMP = elfcmp
