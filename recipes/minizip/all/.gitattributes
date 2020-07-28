@@ -1,5 +1,0 @@
-*.py text eol=lf
-*.yml text eol=lf
-*.diff text eol=lf
-*.conf text eol=lf
-*.md text eol=lf
