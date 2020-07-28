@@ -29,7 +29,7 @@ class GLibConan(ConanFile):
     _build_subfolder = 'build_subfolder'
     short_paths = True
     generators = "pkg_config"
-    requires = "zlib/1.2.11", "libffi/3.3"
+    requires = "zlib/1.2.11", "libffi/3.2.1"
 
     @property
     def _is_msvc(self):
@@ -132,6 +132,8 @@ class GLibConan(ConanFile):
             self._fix_library_names()
         tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
         shutil.move(os.path.join(self.package_folder, "share"), os.path.join(self.package_folder, "bin", "share"))
+        for pdb_file in glob.glob(os.path.join(self.package_folder, "bin", "*.pdb")):
+            os.unlink(pdb_file)
 
     def package_info(self):
         self.cpp_info.libs = ["gio-2.0", "gmodule-2.0", "gobject-2.0", "gthread-2.0", "glib-2.0"]
