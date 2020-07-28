@@ -2,3 +2,6 @@ sources:
   "2.10.0":
     url: "https://github.com/nmoinvaz/minizip/archive/2.10.0.zip"
     sha256: "29c5552b8a3684e2414ea9b67dc65b846571cae220b07d7c0fd10e5aee43c3cb"
+patches:
+  "2.10.0":
+    patch_file: "patches/0001-disable-usage-of-internal-dependencies.patch"

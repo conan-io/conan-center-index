@@ -9,7 +9,7 @@ class MinizipConan(ConanFile):
     url = "https://github.com/ItsBasi/conan-minizip"
     homepage = "https://github.com/nmoinvaz/minizip"
     license = "Zlib"  # Indicates license type of the packaged library; please use SPDX Identifiers https://spdx.org/licenses/
-    exports_sources = ["CMakeLists.txt"]
+    exports_sources = ["CMakeLists.txt", "patches/*"]
     generators = "cmake_find_package"
 
     settings = "os", "arch", "compiler", "build_type"
@@ -41,6 +41,7 @@ class MinizipConan(ConanFile):
         return self._cmake
 
     def build(self):
+        tools.patch(**self.conan_data["patches"][self.version], base_path=self._source_subfolder)
         cmake = self._configure_cmake()
         cmake.build()
 
