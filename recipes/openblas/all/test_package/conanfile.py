@@ -8,6 +8,8 @@ class TestPackageConan(ConanFile):
 
     def build(self):
         cmake = CMake(self)
+        if self.options["openblas"].build_lapack:
+            cmake.definitions["WITH_LAPACK"] = "TRUE"
         cmake.configure()
         cmake.build()
 

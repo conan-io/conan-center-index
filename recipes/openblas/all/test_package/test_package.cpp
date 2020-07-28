@@ -3,8 +3,10 @@
 #include <iostream>
 #include <vector>
 
+#ifdef WITH_LAPACK
 extern "C" void dgetrf_(int* dim1, int* dim2, double* a, int* lda, int* ipiv, int* info);
 extern "C" void dgetrs_(char *TRANS, int *N, int *NRHS, double *A, int *LDA, int *IPIV, double *B, int *LDB, int *INFO );
+#endif
 
 int main()
 {
@@ -18,6 +20,7 @@ int main()
     std::cout << C[i];
   std::cout << std::endl;
 
+#ifdef WITH_LAPACK
   // Solving a system with lapack
   char trans = 'N';
   int dim = 2;
@@ -42,4 +45,5 @@ int main()
   dgetrs_(&trans, &dim, &nrhs, & *a.begin(), &LDA, ipiv, & *b.begin(), &LDB, &info);
 
   std::cout << "solution is:" << "[" << b[0] << ", " << b[1] << ", " << "]" << std::endl;
+#endif
 }
