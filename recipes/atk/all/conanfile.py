@@ -39,6 +39,8 @@ class LibnameConan(ConanFile):
         self.requires('glib/2.65.0')
 
     def configure(self):
+        if self.options.shared:
+            del self.options.fPIC
         del self.settings.compiler.libcxx
         del self.settings.compiler.cppstd
 
@@ -76,10 +78,10 @@ class LibnameConan(ConanFile):
         meson = self._configure_meson()
         meson.install()
         tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
+        tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
         if self.settings.compiler == "Visual Studio" and not self.options.shared:
             os.rename(os.path.join(self.package_folder, 'lib', 'libatk-1.0.a'), os.path.join(self.package_folder, 'lib', 'atk-1.0.lib'))
 
     def package_info(self):
         self.cpp_info.libs = tools.collect_libs(self)
         self.cpp_info.includedirs = ['include/atk-1.0']
-
