@@ -26,8 +26,10 @@ class M4Conan(ConanFile):
         return str(self.settings.compiler).endswith("clang")
 
     def build_requirements(self):
-        if tools.os_info.is_windows and "CONAN_BASH_PATH" not in os.environ and \
-                tools.os_info.detect_windows_subsystem() != "msys2":
+        if (tools.os_info.is_windows
+            and "CONAN_BASH_PATH" not in os.environ
+            and ((tools.os_info.detect_windows_subsystem() != "msys2")
+                 or not tools.which("make"))):
             self.build_requires("msys2/20190524")
 
     def source(self):
