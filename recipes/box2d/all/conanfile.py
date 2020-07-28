@@ -17,7 +17,15 @@ class Box2dConan(ConanFile):
 
     @property
     def _source_subfolder(self):
-        return "sources"
+        return "source_subfolder"
+
+    @property
+    def _build_subfolder(self):
+        return "build_subfolder"
+
+    @property
+    def _is_less_2_4(self):
+        return tools.Version(self.version) < "2.4.0"
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -31,19 +39,30 @@ class Box2dConan(ConanFile):
         tools.get(**self.conan_data["sources"][self.version])
         os.rename("box2d-%s" % self.version, self._source_subfolder)
 
+    def _patch_sources(self):
+        if not self._is_less_2_4:
+            tools.replace_in_file(os.path.join(self._source_subfolder, "src", "CMakeLists.txt"),
+                                  "box2d STATIC",
+                                  "box2d")
+
     def build(self):
+        self._patch_sources()
         cmake = CMake(self)
         cmake.definitions["BOX2D_BUILD_SHARED"] = self.options.shared
         cmake.definitions["BOX2D_BUILD_STATIC"] = not self.options.shared
         if self.settings.os == "Windows" and self.options.shared:
             cmake.definitions["CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS"] = True
         cmake.definitions["BOX2D_BUILD_EXAMPLES"] = False
-        cmake.configure()
+        cmake.definitions["BOX2D_BUILD_TESTBED"] = False
+        cmake.definitions["BOX2D_BUILD_UNIT_TESTS"] = False
+        cmake.configure(build_folder=self._build_subfolder)
         cmake.build()
 
     def package(self):
         self.copy("License.txt", dst="licenses", src=os.path.join(self._source_subfolder, "Box2D"))
+        self.copy("LICENSE", dst="licenses", src=self._source_subfolder)
         self.copy("*.h", dst=os.path.join("include", "Box2D"), src=os.path.join(self._source_subfolder, "Box2D", "Box2D"))
+        self.copy("*.h", dst="include", src=os.path.join(self._source_subfolder, "include"))
         self.copy("*.lib", dst="lib", keep_path=False)
         self.copy("*.dll", dst="bin", keep_path=False)
         self.copy("*.so*", dst="lib", keep_path=False, symlinks=True)
@@ -51,4 +70,6 @@ class Box2dConan(ConanFile):
         self.copy("*.a", dst="lib", keep_path=False)
 
     def package_info(self):
-        self.cpp_info.libs = ["Box2D"]
+        self.cpp_info.libs = ["Box2D"] if self._is_less_2_4 else ["box2d"]
+        self.cpp_info.names["cmake_find_package"] = "Box2D"
+        self.cpp_info.names["cmake_find_package_multi"] = "Box2D"
