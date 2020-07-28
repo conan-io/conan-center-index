@@ -8,6 +8,7 @@ class Box2DTestConan(ConanFile):
 
     def build(self):
         cmake = CMake(self)
+        cmake.definitions["BOX2D_VERSION"] = self.deps_cpp_info["box2d"].version
         cmake.configure()
         cmake.build()
 
