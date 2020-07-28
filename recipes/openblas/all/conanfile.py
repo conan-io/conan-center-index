@@ -59,6 +59,9 @@ class OpenblasConan(ConanFile):
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
+        if not self.options.target and self.options.dynamic_arch and self.settings.arch == "x86_64":
+            # Set target to a reasonable generic old CPU
+            self.options.target = "CORE2"
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
@@ -75,11 +78,11 @@ class OpenblasConan(ConanFile):
                 if "apple_clang" in patch["patch_file"] and not self._is_apple_clang:
                     continue
                 tools.patch(**patch)
-        
+
         tools.replace_in_file(os.path.join(self._source_subfolder, "Makefile.install"),
                               "OPENBLAS_INCLUDE_DIR := $(PREFIX)/include",
                               "OPENBLAS_INCLUDE_DIR := $(PREFIX)/include/openblas")
-        
+
         # This is needed to avoid undefined sprintf symbols when using with msvc
         if self._is_msvc and tools.Version(self.settings.compiler.version):
             tools.replace_in_file(os.path.join(self._source_subfolder, "common.h"),
@@ -131,13 +134,13 @@ class OpenblasConan(ConanFile):
         if "AR" in os.environ:
             make_options.append("AR={}".format(os.environ["AR"]))
 
-        use_win_bash = False           
+        use_win_bash = False
         if tools.os_info.is_windows:
             make_options.append("LIBNAME=openblas.lib")
             make_options.append("CC=${MINGW_PREFIX}/bin/gcc")
             make_options.append("FC=${MINGW_PREFIX}/bin/gfortran")
             use_win_bash = True
-       
+
         if args:
             make_options.extend(args)
 
@@ -152,8 +155,8 @@ class OpenblasConan(ConanFile):
         self._build_make(args=["PREFIX={}".format(tools.unix_path(self.package_folder)), 'install'])
         tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
         tools.rmdir(os.path.join(self.package_folder, "share"))
-        tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))       
- 
+        tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
+
     def package_info(self):
         self.env_info.OpenBLAS_HOME = self.package_folder
         self.cpp_info.libs = tools.collect_libs(self)
