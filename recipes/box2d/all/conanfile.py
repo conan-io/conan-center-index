@@ -8,6 +8,7 @@ class Box2dConan(ConanFile):
     description = "Box2D is a 2D physics engine for games"
     homepage = "http://box2d.org/"
     url = "https://github.com/conan-io/conan-center-index"
+    topics = ("physics-engine", "graphic", "2d", "collision")
     settings = "os", "compiler", "build_type", "arch"
     options = {"shared": [True, False],
                "fPIC": [True, False]}
