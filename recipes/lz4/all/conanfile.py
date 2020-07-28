@@ -19,15 +19,15 @@ class LZ4Conan(ConanFile):
     def _source_subfolder(self):
         return "source_subfolder"
 
+    def config_options(self):
+        if self.settings.os == "Windows":
+            del self.options.fPIC
+
     def configure(self):
         if self.options.shared:
             del self.options.fPIC
         del self.settings.compiler.libcxx
         del self.settings.compiler.cppstd
-
-    def config_options(self):
-        if self.settings.os == "Windows":
-            del self.options.fPIC
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
@@ -37,8 +37,7 @@ class LZ4Conan(ConanFile):
     def _configure_cmake(self):
         cmake = CMake(self)
         cmake.definitions["LZ4_BUNDLED_MODE"] = False
-        if "fPIC" in self.options:
-            cmake.definitions["LZ4_POSITION_INDEPENDENT_LIB"] = self.options.fPIC
+        cmake.definitions["LZ4_POSITION_INDEPENDENT_LIB"] = self.options.get_safe("fPIC", True)
         cmake.configure()
         return cmake
 
