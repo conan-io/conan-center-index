@@ -10,7 +10,7 @@ class MinizipConan(ConanFile):
     homepage = "https://github.com/nmoinvaz/minizip"
     license = "Zlib"  # Indicates license type of the packaged library; please use SPDX Identifiers https://spdx.org/licenses/
     exports_sources = ["CMakeLists.txt"]
-    generators = "cmake"
+    generators = "cmake_find_package"
 
     settings = "os", "arch", "compiler", "build_type"
     options = {"shared": [True, False], "fPIC": [True, False]}
