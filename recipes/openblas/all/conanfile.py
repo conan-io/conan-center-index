@@ -1,4 +1,4 @@
-from conans import ConanFile, CMake, tools
+from conans import ConanFile, tools
 from conans.errors import ConanException
 import os
 
@@ -31,10 +31,9 @@ class OpenblasConan(ConanFile):
         "dynamic_arch": True,
         "target": None
     }
-    exports_sources = ["CMakeLists.txt", "patches/**"]
+    exports_sources = ["patches/**"]
     generators = "cmake"
 
-    _cmake = None
     _source_subfolder = "source_subfolder"
     _build_subfolder = "build_subfolder"
 
@@ -84,13 +83,14 @@ class OpenblasConan(ConanFile):
                               "OPENBLAS_INCLUDE_DIR := $(PREFIX)/include/openblas")
 
         # This is needed to avoid undefined sprintf symbols when using with msvc
-        if self._is_msvc and tools.Version(self.settings.compiler.version):
+        if self._is_msvc:
             tools.replace_in_file(os.path.join(self._source_subfolder, "common.h"),
                                   "#if !defined(_MSC_VER)",
                                   "#define snprintf _snprintf\n#if !defined(_MSC_VER)")
 
     def _install_msys2_package(self, package_name):
         try:
+            # If the pacakge is not resent, an exception is raised
             self.run('bash -l -c "pacman -Qi {} > /dev/null"'.format(package_name))
         except ConanException:
             self.run('bash -l -c "pacman -S {} --noconfirm"'.format(package_name))
