@@ -69,6 +69,7 @@ class LZ4Conan(ConanFile):
         tools.rmdir(os.path.join(self.package_folder, "share"))
 
     def package_info(self):
+        self.cpp_info.names["pkg_config"] = "liblz4"
         self.cpp_info.libs = ["lz4"]
         if self.settings.compiler == "Visual Studio" and self.options.shared:
             self.cpp_info.defines.append("LZ4_DLL_IMPORT")
