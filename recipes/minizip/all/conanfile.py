@@ -8,7 +8,7 @@ class MinizipConan(ConanFile):
     topics = ("conan", "minizip", "compression")
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/nmoinvaz/minizip"
-    license = "Zlib"  # Indicates license type of the packaged library; please use SPDX Identifiers https://spdx.org/licenses/
+    license = "Zlib"
     exports_sources = ["CMakeLists.txt", "patches/*"]
     generators = "cmake_find_package"
 
