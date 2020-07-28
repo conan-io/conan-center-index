@@ -26,6 +26,10 @@ class MinizipConan(ConanFile):
         "bzip2/1.0.8",
     )
 
+    def configure(self):
+        del self.settings.compiler.libcxx
+        del self.settings.compiler.cppstd
+        
     def config_options(self):
         if self.settings.os == 'Windows':
             del self.options.fPIC
