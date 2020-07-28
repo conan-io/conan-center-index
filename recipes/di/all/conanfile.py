@@ -6,9 +6,9 @@ import os
 class DiConan(ConanFile):
     name = "di"
     license = "BSL-1.0"
-    homepage = "https://github.com/boost-experimental/di"
+    homepage = "https://github.com/boost-ext/di"
     url = "https://github.com/conan-io/conan-center-index"
-    description = "[Boost].DI: C++14 Dependency Injection Library."
+    description = "DI: C++14 Dependency Injection Library."
     topics = ("dependency-injection", "metaprogramming", "design-patterns")
     exports_sources = ["BSL-1.0.txt"]
     settings = "compiler"
