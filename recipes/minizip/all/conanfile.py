@@ -22,7 +22,8 @@ class MinizipConan(ConanFile):
 
     requires = (
         "zlib/1.2.11",
-        "zstd/1.4.5"
+        "zstd/1.4.5",
+        "bzip2/1.0.8",
     )
 
     def config_options(self):
