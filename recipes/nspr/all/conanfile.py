@@ -24,6 +24,7 @@ class NsprConan(ConanFile):
         "win32_target": "winnt",
     }
     generators = "cmake"
+    exports_sources = ["patches/**"]
 
     _autotools = None
 
@@ -95,6 +96,9 @@ class NsprConan(ConanFile):
         return self._autotools
 
     def build(self):
+        for patch in self.conan_data["patches"][self.version]:
+            tools.patch(**patch)
+
         with tools.chdir(self._source_subfolder):
             with self._build_context():
                 autotools = self._configure_autotools()

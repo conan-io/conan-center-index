@@ -5,3 +5,11 @@ sources:
   "4.27":
     sha256: 6d495192b6ab00a3c28db053492cf794329f7c0351a5728db198111a1816e89b
     url: https://ftp.mozilla.org/pub/nspr/releases/v4.27/src/nspr-4.27.tar.gz
+
+patches:
+  "4.24":
+    - patch_file: "patches/0001-apple-silicon-support.patch"
+      base_path: "source_subfolder"
+  "4.27":
+    - patch_file: "patches/0001-apple-silicon-support.patch"
+      base_path: "source_subfolder"

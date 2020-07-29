@@ -1,0 +1,88 @@
+From 8fdc1bbcc29eb60968a30c22355ea3dacad52438 Mon Sep 17 00:00:00 2001
+From: Tim Blechmann <tim@klingt.org>
+Date: Wed, 29 Jul 2020 13:22:12 +0800
+Subject: [PATCH] apple silicon support
+
+---
+ configure    | 16 ++--------------
+ configure.in |  2 +-
+ 2 files changed, 3 insertions(+), 15 deletions(-)
+
+diff --git a/configure b/configure
+index 98b3f04..dffd23f 100755
+--- a/configure
++++ b/configure
+@@ -756,7 +756,6 @@ infodir
+ docdir
+ oldincludedir
+ includedir
+-runstatedir
+ localstatedir
+ sharedstatedir
+ sysconfdir
+@@ -868,7 +867,6 @@ datadir='${datarootdir}'
+ sysconfdir='${prefix}/etc'
+ sharedstatedir='${prefix}/com'
+ localstatedir='${prefix}/var'
+-runstatedir='${localstatedir}/run'
+ includedir='${prefix}/include'
+ oldincludedir='/usr/include'
+ docdir='${datarootdir}/doc/${PACKAGE}'
+@@ -1121,15 +1119,6 @@ do
+   | -silent | --silent | --silen | --sile | --sil)
+     silent=yes ;;
+ 
+-  -runstatedir | --runstatedir | --runstatedi | --runstated \
+-  | --runstate | --runstat | --runsta | --runst | --runs \
+-  | --run | --ru | --r)
+-    ac_prev=runstatedir ;;
+-  -runstatedir=* | --runstatedir=* | --runstatedi=* | --runstated=* \
+-  | --runstate=* | --runstat=* | --runsta=* | --runst=* | --runs=* \
+-  | --run=* | --ru=* | --r=*)
+-    runstatedir=$ac_optarg ;;
+-
+   -sbindir | --sbindir | --sbindi | --sbind | --sbin | --sbi | --sb)
+     ac_prev=sbindir ;;
+   -sbindir=* | --sbindir=* | --sbindi=* | --sbind=* | --sbin=* \
+@@ -1267,7 +1256,7 @@ fi
+ for ac_var in	exec_prefix prefix bindir sbindir libexecdir datarootdir \
+ 		datadir sysconfdir sharedstatedir localstatedir includedir \
+ 		oldincludedir docdir infodir htmldir dvidir pdfdir psdir \
+-		libdir localedir mandir runstatedir
++		libdir localedir mandir
+ do
+   eval ac_val=\$$ac_var
+   # Remove trailing slashes.
+@@ -1420,7 +1409,6 @@ Fine tuning of the installation directories:
+   --sysconfdir=DIR        read-only single-machine data [PREFIX/etc]
+   --sharedstatedir=DIR    modifiable architecture-independent data [PREFIX/com]
+   --localstatedir=DIR     modifiable single-machine data [PREFIX/var]
+-  --runstatedir=DIR       modifiable per-process data [LOCALSTATEDIR/run]
+   --libdir=DIR            object code libraries [EPREFIX/lib]
+   --includedir=DIR        C header files [PREFIX/include]
+   --oldincludedir=DIR     C header files for non-gcc [/usr/include]
+@@ -6448,7 +6436,7 @@ fi
+     CFLAGS="$CFLAGS -Wall -fno-common"
+     case "${target_cpu}" in
+         arm*)
+-            CPU_ARCH=arm
++            CPU_ARCH=arm64
+             ;;
+         i*86*|x86_64)
+             if test -n "$USE_64"; then
+diff --git a/configure.in b/configure.in
+index ef46a40..c6cc447 100644
+--- a/configure.in
++++ b/configure.in
+@@ -1317,7 +1317,7 @@ case "$target" in
+     CFLAGS="$CFLAGS -Wall -fno-common"
+     case "${target_cpu}" in
+         arm*)
+-            CPU_ARCH=arm
++            CPU_ARCH=arm64
+             ;;
+         i*86*|x86_64)
+             if test -n "$USE_64"; then
+-- 
+2.27.0
+
