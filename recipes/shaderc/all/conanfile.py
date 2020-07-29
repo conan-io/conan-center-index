@@ -97,9 +97,9 @@ class ShadercConan(ConanFile):
         self.env_info.PATH.append(bin_path)
 
     def _get_ordered_libs(self):
-        libs = ["shaderc"]
+        libs = ["shaderc_shared" if self.options.shared else "shaderc"]
         if not self.options.shared:
             libs.append("shaderc_util")
         if self.options.spvc:
-            libs.append("shaderc_spvc")
+            libs.append("shaderc_spvc_shared" if self.options.shared else "shaderc_spvc")
         return libs

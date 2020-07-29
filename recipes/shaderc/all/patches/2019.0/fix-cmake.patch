@@ -120,7 +120,7 @@
 +      PRIVATE SHADERC_IMPLEMENTATION
 +      PUBLIC SHADERC_SHAREDLIB
 +  )
-+  set_target_properties(shaderc PROPERTIES SOVERSION 1)
++  set_target_properties(shaderc PROPERTIES OUTPUT_NAME "shaderc_shared" SOVERSION 1)
 +endif()
  
  if(SHADERC_ENABLE_INSTALL)
@@ -225,7 +225,7 @@
 +      PRIVATE SHADERC_IMPLEMENTATION
 +      PUBLIC SHADERC_SHAREDLIB
 +  )
-+  set_target_properties(shaderc_spvc PROPERTIES SOVERSION 1)
++  set_target_properties(shaderc_spvc PROPERTIES OUTPUT_NAME "shaderc_spvc_shared" SOVERSION 1)
 +endif()
  
  if (DISABLE_EXCEPTIONS)
