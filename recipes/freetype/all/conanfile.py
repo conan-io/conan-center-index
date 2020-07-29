@@ -29,16 +29,16 @@ class FreetypeConan(ConanFile):
         "with_zlib": True,
         "with_bzip2": True
     }
-    _source_subfolder = "source_subfolder"
-    _build_subfolder = "build_subfolder"
 
-    def requirements(self):
-        if self.options.with_png:
-            self.requires("libpng/1.6.37")
-        if self.options.with_zlib:
-            self.requires("zlib/1.2.11")
-        if self.options.with_bzip2:
-            self.requires("bzip2/1.0.8")
+    _cmake = None
+
+    @property
+    def _source_subfolder(self):
+        return "source_subfolder"
+
+    @property
+    def _build_subfolder(self):
+        return "build_subfolder"
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -48,24 +48,34 @@ class FreetypeConan(ConanFile):
         del self.settings.compiler.libcxx
         del self.settings.compiler.cppstd
 
+    def requirements(self):
+        if self.options.with_png:
+            self.requires("libpng/1.6.37")
+        if self.options.with_zlib:
+            self.requires("zlib/1.2.11")
+        if self.options.with_bzip2:
+            self.requires("bzip2/1.0.8")
+
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
         os.rename("{0}-{1}".format(self.name, self.version), self._source_subfolder)
 
     def _configure_cmake(self):
-        cmake = CMake(self)
-        cmake.definitions["PROJECT_VERSION"] = self._libtool_version
-        cmake.definitions["FT_WITH_ZLIB"] = self.options.with_zlib
-        cmake.definitions["CMAKE_DISABLE_FIND_PACKAGE_ZLIB"] = not self.options.with_zlib
-        cmake.definitions["FT_WITH_PNG"] = self.options.with_png
-        cmake.definitions["CMAKE_DISABLE_FIND_PACKAGE_PNG"] = not self.options.with_png
-        cmake.definitions["FT_WITH_BZIP2"] = self.options.with_bzip2
-        cmake.definitions["CMAKE_DISABLE_FIND_PACKAGE_BZip2"] = not self.options.with_bzip2
+        if self._cmake:
+            return self._cmake
+        self._cmake = CMake(self)
+        self._cmake.definitions["PROJECT_VERSION"] = self._libtool_version
+        self._cmake.definitions["FT_WITH_ZLIB"] = self.options.with_zlib
+        self._cmake.definitions["CMAKE_DISABLE_FIND_PACKAGE_ZLIB"] = not self.options.with_zlib
+        self._cmake.definitions["FT_WITH_PNG"] = self.options.with_png
+        self._cmake.definitions["CMAKE_DISABLE_FIND_PACKAGE_PNG"] = not self.options.with_png
+        self._cmake.definitions["FT_WITH_BZIP2"] = self.options.with_bzip2
+        self._cmake.definitions["CMAKE_DISABLE_FIND_PACKAGE_BZip2"] = not self.options.with_bzip2
         # TODO: Harfbuzz can be added as an option as soon as it is available.
-        cmake.definitions["FT_WITH_HARFBUZZ"] = False
-        cmake.definitions["CMAKE_DISABLE_FIND_PACKAGE_HarfBuzz"] = True
-        cmake.configure(build_dir=self._build_subfolder)
-        return cmake
+        self._cmake.definitions["FT_WITH_HARFBUZZ"] = False
+        self._cmake.definitions["CMAKE_DISABLE_FIND_PACKAGE_HarfBuzz"] = True
+        self._cmake.configure(build_dir=self._build_subfolder)
+        return self._cmake
 
     def build(self):
         cmake = self._configure_cmake()
