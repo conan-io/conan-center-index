@@ -35,6 +35,8 @@ class WolfSSLConan(ConanFile):
             del self.options.fPIC
 
     def configure(self):
+        if self.options.opensslall and not self.options.opensslextra:
+            raise ConanInvalidConfiguration("The option 'opensslall' requires 'opensslextra=True'")
         if self.options.shared:
             del self.options.fPIC
         del self.settings.compiler.cppstd
@@ -84,9 +86,6 @@ class WolfSSLConan(ConanFile):
             conf_args.extend(["--enable-opensslextra"])
             if self.options.opensslall:
                 conf_args.extend(["--enable-opensslall"])
-        else:
-            if self.options.opensslall:
-                conf_args.extend(["--enable-opensslextra --enable-opensslall"])
         if self.options.shared:
             conf_args.extend(["--enable-shared", "--disable-static"])
         else:
