@@ -1,10 +1,8 @@
 #include <libraw/libraw.h>
+#include <iostream>
 
 int main()
 {
-    libraw_data_t* libraw_data = libraw_init(0);
-
-    libraw_close(libraw_data);
-
+    std::cout << libraw_version() << "\n";
     return 0;
 }
