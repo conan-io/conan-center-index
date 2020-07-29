@@ -8,7 +8,6 @@ class Box2dConan(ConanFile):
     description = "Box2D is a 2D physics engine for games"
     homepage = "http://box2d.org/"
     url = "https://github.com/conan-io/conan-center-index"
-    topics = ("physics-engine", "graphic", "2d", "collision")
     settings = "os", "compiler", "build_type", "arch"
     options = {"shared": [True, False],
                "fPIC": [True, False]}
@@ -18,11 +17,7 @@ class Box2dConan(ConanFile):
 
     @property
     def _source_subfolder(self):
-        return "source_subfolder"
-
-    @property
-    def _build_subfolder(self):
-        return "build_subfolder"
+        return "sources"
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -43,7 +38,7 @@ class Box2dConan(ConanFile):
         if self.settings.os == "Windows" and self.options.shared:
             cmake.definitions["CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS"] = True
         cmake.definitions["BOX2D_BUILD_EXAMPLES"] = False
-        cmake.configure(build_folder=self._build_subfolder)
+        cmake.configure()
         cmake.build()
 
     def package(self):
@@ -57,5 +52,3 @@ class Box2dConan(ConanFile):
 
     def package_info(self):
         self.cpp_info.libs = ["Box2D"]
-        self.cpp_info.names["cmake_find_package"] = "Box2D"
-        self.cpp_info.names["cmake_find_package_multi"] = "Box2D"
