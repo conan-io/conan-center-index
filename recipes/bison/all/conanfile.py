@@ -133,7 +133,7 @@ class BisonConan(ConanFile):
         self.cpp_info.libs = ["y"]
 
         self.output.info('Setting BISON_ROOT environment variable: {}'.format(self.package_folder))
-        self.env_info.BISON_ROOT = self.package_folder
+        self.env_info.BISON_ROOT = self.package_folder.replace("\\", "/")
 
         bindir = os.path.join(self.package_folder, "bin")
         self.output.info('Appending PATH environment variable: {}'.format(bindir))
@@ -141,3 +141,7 @@ class BisonConan(ConanFile):
         pkgdir = os.path.join(bindir, 'share', 'bison')
         self.output.info('Setting the BISON_PKGDATADIR environment variable: {}'.format(pkgdir))
         self.env_info.BISON_PKGDATADIR = pkgdir
+
+        yacc_bin = os.path.join(self.package_folder, "bin", "yacc").replace("\\", "/")
+        self.output.info("Setting YACC environment variable: {}".format(yacc_bin))
+        self.env_info.YACC = yacc_bin
