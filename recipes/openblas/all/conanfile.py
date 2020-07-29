@@ -99,7 +99,11 @@ class OpenblasConan(ConanFile):
         if tools.os_info.is_windows:
             prefix = "mingw-w64-i686" if self.settings.arch == "x86" else "mingw-w64-x86_64"
             self._install_msys2_package("{}-gcc".format(prefix))
-            self._install_msys2_package("{}-gcc-fortran".format(prefix))
+            if self.options.build_lapack:
+                self._install_msys2_package("{}-gcc-fortran".format(prefix))
+        else:
+            if self.options.build_lapack:
+                self.output.warn("Building with lapack support requires a Fortran compiler.")
 
         make_options = ["DEBUG={}".format(self._get_make_build_type_debug()),
                         "NO_SHARED={}".format(self._get_make_option_value(not self.options.shared)),
