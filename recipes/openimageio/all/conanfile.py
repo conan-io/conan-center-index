@@ -18,16 +18,14 @@ class OpenImageIOConan(ConanFile):
         "shared": [True, False],
         "fPIC": [True, False],
         "with_dicom": [True, False],
-        "with_raw": [True, False],
-        "with_jpeg": ["libjpeg-turbo", "libjpeg"]
+        "with_raw": [True, False]
     }
 
     default_options = {
         "shared": False,
         "fPIC": True,
         "with_dicom": False, # Heavy dependency, disabled by default
-        "with_raw": False, # libraw is available under CDDL-1.0 or LGPL-2.1, for this reason it is disabled by default
-        "with_jpeg": "libjpeg-turbo"
+        "with_raw": False # libraw is available under CDDL-1.0 or LGPL-2.1, for this reason it is disabled by default
     }
 
     _cmake = None
@@ -35,10 +33,6 @@ class OpenImageIOConan(ConanFile):
     @property
     def _source_subfolder(self):
         return "source_subfolder"
-
-    @property
-    def _use_jpeg_turbo(self):
-        return self.options.with_jpeg == "libjpeg-turbo"
 
     def _configure_cmake(self):
         if self._cmake:
@@ -61,7 +55,7 @@ class OpenImageIOConan(ConanFile):
         # If these variables are not set, the package will be built
         # when required library is found, even if it is not provided
         # by Conan.
-        self._cmake.definitions["USE_JPEGTURBO"] = self._use_jpeg_turbo
+        self._cmake.definitions["USE_JPEGTURBO"] = False
         self._cmake.definitions["USE_JPEG"] = True
         self._cmake.definitions["USE_HDF5"] = False
         self._cmake.definitions["USE_OPENCOLORIO"] = True
@@ -106,11 +100,7 @@ class OpenImageIOConan(ConanFile):
         self.requires("giflib/5.2.1")
         self.requires("freetype/2.10.2")
         self.requires("opencolorio/1.1.1")
-
-        if self._use_jpeg_turbo:
-            self.requires("libjpeg-turbo/2.0.4")
-        else:
-            self.requires("libjpeg/9d")
+        self.requires("libjpeg/9d")
     
         if self.options.with_dicom:
             self.requires("dcmtk/3.6.5")
