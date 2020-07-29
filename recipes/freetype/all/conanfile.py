@@ -23,11 +23,11 @@ class FreetypeConan(ConanFile):
         "with_bzip2": [True, False],
     }
     default_options = {
-        'shared': False,
-        'fPIC': True,
-        'with_png': True,
-        'with_zlib': True,
-        'with_bzip2': True
+        "shared": False,
+        "fPIC": True,
+        "with_png": True,
+        "with_zlib": True,
+        "with_bzip2": True
     }
     _source_subfolder = "source_subfolder"
     _build_subfolder = "build_subfolder"
@@ -50,7 +50,7 @@ class FreetypeConan(ConanFile):
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
-        os.rename('{0}-{1}'.format(self.name, self.version), self._source_subfolder)
+        os.rename("{0}-{1}".format(self.name, self.version), self._source_subfolder)
 
     def _configure_cmake(self):
         cmake = CMake(self)
@@ -109,7 +109,7 @@ conan_staticlibs="{staticlibs}"
 
     @staticmethod
     def _chmod_plus_x(filename):
-        if os.name == 'posix':
+        if os.name == "posix":
             os.chmod(filename, os.stat(filename).st_mode | 0o111)
 
     def package_info(self):
@@ -122,6 +122,6 @@ conan_staticlibs="{staticlibs}"
         self.env_info.FT2_CONFIG = freetype_config
         self.user_info.LIBTOOL_VERSION = self._libtool_version
         self._chmod_plus_x(freetype_config)
-        self.cpp_info.names['cmake_find_package'] = 'Freetype'
-        self.cpp_info.names['cmake_find_package_multi'] = 'Freetype'
-        self.cpp_info.names['pkg_config'] = 'freetype2'
+        self.cpp_info.names["cmake_find_package"] = "Freetype"
+        self.cpp_info.names["cmake_find_package_multi"] = "Freetype"
+        self.cpp_info.names["pkg_config"] = "freetype2"
