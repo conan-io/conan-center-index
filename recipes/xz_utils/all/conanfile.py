@@ -42,13 +42,14 @@ class XZUtils(ConanFile):
 
     def _apply_patches(self):
         # Relax Windows SDK restriction
-        tools.replace_in_file(os.path.join(self._source_subfolder, "windows", "vs2017", "liblzma.vcxproj"),
-                              "<WindowsTargetPlatformVersion>10.0.15063.0</WindowsTargetPlatformVersion>",
-                              "<WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>")
+        if self.version < "5.2.5":
+            tools.replace_in_file(os.path.join(self._source_subfolder, "windows", "vs2017", "liblzma.vcxproj"),
+                                "<WindowsTargetPlatformVersion>10.0.15063.0</WindowsTargetPlatformVersion>",
+                                "<WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>")
 
-        tools.replace_in_file(os.path.join(self._source_subfolder, "windows", "vs2017", "liblzma_dll.vcxproj"),
-                              "<WindowsTargetPlatformVersion>10.0.15063.0</WindowsTargetPlatformVersion>",
-                              "<WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>")
+            tools.replace_in_file(os.path.join(self._source_subfolder, "windows", "vs2017", "liblzma_dll.vcxproj"),
+                                "<WindowsTargetPlatformVersion>10.0.15063.0</WindowsTargetPlatformVersion>",
+                                "<WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
