@@ -1,5 +1,4 @@
 from conans import CMake, ConanFile, tools
-from conans.errors import ConanInvalidConfiguration
 import os
 import string
 
@@ -52,7 +51,7 @@ class AwsSdkCppConan(ConanFile):
     def requirements(self):
         self.requires("aws-c-common/0.4.25")
         self.requires("aws-c-event-stream/0.1.5")
-        self.requires("openssl/1.1.1d")
+        self.requires("openssl/1.1.1g")
         self.requires("zlib/1.2.11")
         if self.options.with_curl:
             self.requires("libcurl/7.68.0")
