@@ -89,7 +89,7 @@ class OpenImageIOConan(ConanFile):
     def requirements(self):
         self.requires("openexr/2.5.2")
         self.requires("libtiff/4.1.0")
-        self.requires("fmt/7.0.1")
+        self.requires("fmt/7.0.2")
         self.requires("boost/1.73.0")
         self.requires("tsl-robin-map/0.6.3")
         self.requires("pugixml/1.10")
