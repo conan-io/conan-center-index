@@ -1,0 +1,35 @@
+--- src/counterexample.c
++++ src/counterexample.c
+@@ -112,12 +112,12 @@
+   derivation_free (cex->d2);
+   free (cex);
+ }
+-
++#ifndef _MSC_VER
+ static int max (int a, int b)
+ {
+   return a < b ? b : a;
+ }
+-
++#endif
+ static void
+ print_counterexample (const counterexample *cex, FILE *out, const char *prefix)
+ {
+--- src/derivation.c
++++ src/derivation.c
+@@ -134,13 +134,13 @@
+   return size;
+ }
+ 
+-
++#ifndef _MSC_VER
+ static int
+ max (int a, int b)
+ {
+   return a < b ? b : a;
+ }
+-
++#endif
+ // Longest distance from root to leaf.
+ static int
+ derivation_depth (const derivation *deriv)
