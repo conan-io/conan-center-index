@@ -27,7 +27,7 @@ class SwigConan(ConanFile):
         if tools.os_info.is_windows and not tools.get_env("CONAN_BASH_PATH") \
                 and tools.os_info.detect_windows_subsystem() != "msys2":
             self.build_requires("msys2/20190524")
-        if tools.os_info.is_windows:
+        if self.settings.compiler == "Visual Studio":
             self.build_requires("winflexbison/2.5.22")
         else:
             self.build_requires("bison/3.5.3")
@@ -105,7 +105,7 @@ class SwigConan(ConanFile):
 
         if self.settings.compiler != "Visual Studio":
             with tools.chdir(os.path.join(self.package_folder, "bin")):
-                strip = tools.get_env("STRIP") or tools.which("strip")
+                strip = (tools.get_env("STRIP") or tools.which("strip")).replace("\\", "/")
                 ext = ".exe" if tools.os_info.is_windows else ""
                 if strip:
                     self.run("{} swig{}".format(strip, ext), win_bash=tools.os_info.is_windows)
