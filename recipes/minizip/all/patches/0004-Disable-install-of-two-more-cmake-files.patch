@@ -1,0 +1,26 @@
+From 94e1f331fa68046fd2321fd6c79bc243fb6b4bc8 Mon Sep 17 00:00:00 2001
+From: ItsBasi <5033630+ItsBasi@users.noreply.github.com>
+Date: Tue, 28 Jul 2020 22:52:57 +0200
+Subject: [PATCH 4/4] Disable install of two more cmake files
+
+---
+ CMakeLists.txt | 3 ---
+ 1 file changed, 3 deletions(-)
+
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 0663fd7..59cfdf7 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -715,9 +715,6 @@ if(NOT SKIP_INSTALL_LIBRARIES AND NOT SKIP_INSTALL_ALL)
+             RUNTIME DESTINATION "${INSTALL_BIN_DIR}"
+             ARCHIVE DESTINATION "${INSTALL_LIB_DIR}"
+             LIBRARY DESTINATION "${INSTALL_LIB_DIR}")
+-    install(EXPORT ${PROJECT_NAME}
+-            DESTINATION "${INSTALL_CMAKE_DIR}"
+-            NAMESPACE "MINIZIP::")
+ 
+     # Create and install CMake package config version file to allow find_package()
+     include(CMakePackageConfigHelpers)
+-- 
+2.28.0.windows.1
+

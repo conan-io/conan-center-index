@@ -1,0 +1,26 @@
+From 3e2ffc99ca036a8e7978218420253ee52971a0e1 Mon Sep 17 00:00:00 2001
+From: ItsBasi <5033630+ItsBasi@users.noreply.github.com>
+Date: Tue, 28 Jul 2020 22:23:39 +0200
+Subject: [PATCH 2/4] Disable install of PKGconfig files
+
+---
+ CMakeLists.txt | 3 ---
+ 1 file changed, 3 deletions(-)
+
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index bb1ce2f..acfe185 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -737,9 +737,6 @@ endif()
+ if(NOT SKIP_INSTALL_HEADERS AND NOT SKIP_INSTALL_ALL)
+     install(FILES ${MINIZIP_PUBLIC_HEADERS} DESTINATION "${INSTALL_INC_DIR}")
+ endif()
+-if(NOT SKIP_INSTALL_FILES AND NOT SKIP_INSTALL_ALL)
+-    install(FILES ${MINIZIP_PC} DESTINATION "${INSTALL_PKGCONFIG_DIR}")
+-endif()
+ 
+ # Build test executables
+ if(MZ_BUILD_TEST)
+-- 
+2.28.0.windows.1
+
