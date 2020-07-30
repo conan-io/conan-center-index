@@ -77,11 +77,14 @@ class BisonConan(ConanFile):
             "--disable-nls",
             "--datarootdir={}".format(os.path.join(self.package_folder, "bin", "share").replace("\\", "/")),
         ]
+        host, build = None, None
         if self.settings.os == "Windows":
             self._autotools.defines.append("_WINDOWS")
         if self.settings.compiler == "Visual Studio":
+            self._autotools.defines.append("NOMINMAX")
             self._autotools.flags.append("-FS")
-        self._autotools.configure(args=args, configure_dir=self._source_subfolder)
+            host, build = False, False
+        self._autotools.configure(args=args, configure_dir=self._source_subfolder, host=host, build=build)
         return self._autotools
 
     def _patch_sources(self):
