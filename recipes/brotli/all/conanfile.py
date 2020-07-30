@@ -55,18 +55,32 @@ class BrotliConan(ConanFile):
         cmake.install()
         tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
 
-    def _get_libraries(self, shared):
-        libs = ["brotlienc", "brotlidec", "brotlicommon"]
-        if not shared:
-            libs = ["{}-static".format(l) for l in libs]
-        return libs
-
     def package_info(self):
-        self.cpp_info.names["cmake_find_package"] = "Brotli"
-        self.cpp_info.names["cmake_find_package_multi"] = "Brotli"
-        self.cpp_info.libs = self._get_libraries(self.options.shared)
-        self.cpp_info.includedirs = ["include", os.path.join("include", "brotli")]
-        if self.options.shared:
-            self.cpp_info.defines.append("BROTLI_SHARED_COMPILATION")
+        includedir = os.path.join("include", "brotli")
+        # brotlicommon
+        self.cpp_info.components["brotlicommon"].names["pkg_config"] = "libbrotlicommon"
+        self.cpp_info.components["brotlicommon"].includedirs.append(includedir)
+        self.cpp_info.components["brotlicommon"].libs = [self._get_decorated_lib("brotlicommon")]
+        # brotlidec
+        self.cpp_info.components["brotlidec"].names["pkg_config"] = "libbrotlidec"
+        self.cpp_info.components["brotlidec"].includedirs.append(includedir)
+        self.cpp_info.components["brotlidec"].libs = [self._get_decorated_lib("brotlidec")]
+        self.cpp_info.components["brotlidec"].requires = ["brotlicommon"]
+        # brotlienc
+        self.cpp_info.components["brotlienc"].names["pkg_config"] = "libbrotlienc"
+        self.cpp_info.components["brotlienc"].includedirs.append(includedir)
+        self.cpp_info.components["brotlienc"].libs = [self._get_decorated_lib("brotlienc")]
+        self.cpp_info.components["brotlienc"].requires = ["brotlicommon"]
         if self.settings.os == "Linux":
-            self.cpp_info.system_libs = ["m"]
+            self.cpp_info.components["brotlienc"].system_libs = ["m"]
+
+        if self.settings.os == "Windows" and self.options.shared:
+            self.cpp_info.components["brotlicommon"].defines.append("BROTLI_SHARED_COMPILATION")
+            self.cpp_info.components["brotlidec"].defines.append("BROTLI_SHARED_COMPILATION")
+            self.cpp_info.components["brotlienc"].defines.append("BROTLI_SHARED_COMPILATION")
+
+    def _get_decorated_lib(self, name):
+        libname = name
+        if not self.options.shared:
+            libname += "-static"
+        return libname
