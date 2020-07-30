@@ -8,7 +8,10 @@ class MBedTLSConan(ConanFile):
     topics = ("conan", "mbedtls", "polarssl", "tls", "security")
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://tls.mbed.org"
-    license = ("GPL-2.0", "Apache-2.0",)
+    license = (
+        "GPL-2.0",
+        "Apache-2.0",
+    )
     exports_sources = "CMakeLists.txt", "patches/**"
     generators = "cmake"
     settings = "os", "compiler", "build_type", "arch"
@@ -47,6 +50,11 @@ class MBedTLSConan(ConanFile):
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
         extracted_dir = "{}-{}".format(self.name, self._version)
+
+        # at some prior point, mbedtls-X.X.X went to mbedtls-mbedtls-X.X.X
+        if self._version >= "2.23.0":
+            extracted_dir = "{}-{}".format(self.name, extracted_dir)
+
         os.rename(extracted_dir, self._source_subfolder)
 
     def _configure_cmake(self):
@@ -62,18 +70,31 @@ class MBedTLSConan(ConanFile):
         return cmake
 
     def build(self):
-        for patch in self.conan_data["patches"][self.version]:
-            tools.patch(**patch)
+        if "patches" in self.conan_data and self.version in self.conan_data["patches"]:
+            for patch in self.conan_data["patches"][self.version]:
+                tools.patch(**patch)
 
         cmake = self._configure_cmake()
         cmake.build()
 
     def package(self):
-        self.copy("LICENSE", src=os.path.join(self.source_folder, self._source_subfolder), dst="licenses")
+        self.copy(
+            "LICENSE",
+            src=os.path.join(self.source_folder, self._source_subfolder),
+            dst="licenses",
+        )
         if self._license == "gpl":
-            self.copy("gpl-2.0.txt", src=os.path.join(self.source_folder, self._source_subfolder), dst="licenses")
+            self.copy(
+                "gpl-2.0.txt",
+                src=os.path.join(self.source_folder, self._source_subfolder),
+                dst="licenses",
+            )
         else:
-            self.copy("apache-2.0.txt", src=os.path.join(self.source_folder, self._source_subfolder), dst="licenses")
+            self.copy(
+                "apache-2.0.txt",
+                src=os.path.join(self.source_folder, self._source_subfolder),
+                dst="licenses",
+            )
         cmake = self._configure_cmake()
         cmake.install()
 
@@ -82,4 +103,8 @@ class MBedTLSConan(ConanFile):
     def package_info(self):
         self.cpp_info.names["cmake_find_package"] = "MbedTLS"
         self.cpp_info.names["cmake_find_package_multi"] = "MbedTLS"
-        self.cpp_info.libs = ["mbedtls", "mbedx509", "mbedcrypto", ]
+        self.cpp_info.libs = [
+            "mbedtls",
+            "mbedx509",
+            "mbedcrypto",
+        ]
