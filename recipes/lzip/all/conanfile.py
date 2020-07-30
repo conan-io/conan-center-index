@@ -18,13 +18,7 @@ class LzipConan(ConanFile):
     def _source_subfolder(self):
         return "source_subfolder"
 
-    def config_options(self):
-        if self.settings.os == "Windows":
-            del self.options.fPIC
-
     def configure(self):
-        if self.options.shared:
-            del self.options.fPIC
         del self.settings.compiler.libcxx
         del self.settings.compiler.cppstd
 
@@ -63,10 +57,6 @@ class LzipConan(ConanFile):
         self._autotools = AutoToolsBuildEnvironment(self, win_bash=tools.os_info.is_windows)
         conf_args = [
         ]
-        if self.options.shared:
-            conf_args.extend(["--enable-shared", "--disable-static"])
-        else:
-            conf_args.extend(["--disable-shared", "--enable-static"])
         self._autotools.configure(args=conf_args, configure_dir=self._source_subfolder)
         return self._autotools
 
