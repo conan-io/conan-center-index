@@ -81,11 +81,9 @@ class WolfSSLConan(ConanFile):
             "--disable-crypttests",
             "--enable-harden",
             "--enable-debug" if self.settings.build_type == "Debug" else "--disable-debug",
+            "--enable-opensslall" if self.options.opensslall else "--disable-opensslall",
+            "--enable-opensslextra" if self.options.opensslextra else "--disable-opensslextra",
         ]
-        if self.options.opensslextra:
-            conf_args.extend(["--enable-opensslextra"])
-            if self.options.opensslall:
-                conf_args.extend(["--enable-opensslall"])
         if self.options.shared:
             conf_args.extend(["--enable-shared", "--disable-static"])
         else:
