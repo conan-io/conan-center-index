@@ -11,14 +11,6 @@ class LzipConan(ConanFile):
     homepage = "https://www.nongnu.org/lzip/"
     url = "https://github.com/conan-io/conan-center-index"
     settings = "os", "arch", "compiler", "build_type"
-    options = {
-        "shared": [True, False],
-        "fPIC": [True, False],
-    }
-    default_options = {
-        "shared": False,
-        "fPIC": True,
-    }
 
     _autotools = None
 
