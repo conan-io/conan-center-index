@@ -1,4 +1,7 @@
 sources:
+  "2.23.0-apache":
+    url: "https://github.com/ARMmbed/mbedtls/archive/mbedtls-2.23.0.tar.gz"
+    sha256: "5c8998217402aa1fc734f4afaeac38fad2421470fac4b3abc112bd46391054fe"
   "2.16.3-apache":
     url: "https://tls.mbed.org/download/mbedtls-2.16.3-apache.tgz"
     sha256: "ec1bee6d82090ed6ea2690784ea4b294ab576a65d428da9fe8750f932d2da661"

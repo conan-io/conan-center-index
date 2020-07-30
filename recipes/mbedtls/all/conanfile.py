@@ -47,6 +47,11 @@ class MBedTLSConan(ConanFile):
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
         extracted_dir = "{}-{}".format(self.name, self._version)
+
+        # at some prior point, mbedtls-X.X.X went to mbedtls-mbedtls-X.X.X
+        if self._version >= '2.23.0':
+            extracted_dir = "{}-{}".format(self.name, extracted_dir)
+
         os.rename(extracted_dir, self._source_subfolder)
 
     def _configure_cmake(self):
@@ -62,8 +67,9 @@ class MBedTLSConan(ConanFile):
         return cmake
 
     def build(self):
-        for patch in self.conan_data["patches"][self.version]:
-            tools.patch(**patch)
+        if "patches" in self.conan_data and  self.version in self.conan_data["patches"]:
+            for patch in self.conan_data["patches"][self.version]:
+                tools.patch(**patch)
 
         cmake = self._configure_cmake()
         cmake.build()
