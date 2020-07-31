@@ -1,10 +1,12 @@
 sources:
-  "0.17.0":
-    url: "https://github.com/apache/arrow/archive/apache-arrow-0.17.0.tar.gz"
-    sha256: "4db2233c25d1ef14f90f9de8e9d808a2d386c67e7116405ddd22d8f981fe66c1"
+  "1.0.0":
+    url: "https://github.com/apache/arrow/archive/apache-arrow-1.0.0.tar.gz"
+    sha256: "08fbd4c633c08939850d619ca0224c75d7a0526467c721c0838b8aa7efccb270"
 patches:
-  "0.17.0":
+  "1.0.0":
     - base_path: "source_subfolder"
-      patch_file: "patches/0001-cmake-0.17.0.patch"
+      patch_file: "patches/1.0.0-0001-cmake.patch"
     - base_path: "source_subfolder"
-      patch_file: "patches/0002-jemalloc-0.17.0.patch"
+      patch_file: "patches/1.0.0-0002-jemalloc.patch"
+    - base_path: "source_subfolder"
+      patch_file: "patches/1.0.0-0003-fix-shared-msvc.patch"
