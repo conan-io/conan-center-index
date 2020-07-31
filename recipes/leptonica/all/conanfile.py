@@ -36,23 +36,23 @@ class LeptonicaConan(ConanFile):
     _source_subfolder = "source_subfolder"
 
     def requirements(self):
-        self.requires.add("zlib/1.2.11")
+        self.requires("zlib/1.2.11")
         if self.options.with_gif:
-            self.requires.add("giflib/5.1.4")
+            self.requires("giflib/5.1.4")
         if self.options.with_jpeg:
-            self.requires.add("libjpeg/9d")
+            self.requires("libjpeg/9d")
         if self.options.with_png:
-            self.requires.add("libpng/1.6.37")
+            self.requires("libpng/1.6.37")
         if self.options.with_tiff:
-            self.requires.add("libtiff/4.1.0")
+            self.requires("libtiff/4.1.0")
         if self.options.with_openjpeg:
-            self.requires.add("openjpeg/2.3.1")
+            self.requires("openjpeg/2.3.1")
         if self.options.with_webp:
-            self.requires.add("libwebp/1.0.3")
+            self.requires("libwebp/1.0.3")
 
     def config_options(self):
         if self.settings.os == "Windows":
-            self.options.remove("fPIC")
+            del self.options.fPIC
 
     def configure(self):
         del self.settings.compiler.libcxx

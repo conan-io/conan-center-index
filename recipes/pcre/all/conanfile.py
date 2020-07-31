@@ -7,6 +7,7 @@ class PCREConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://www.pcre.org"
     description = "Perl Compatible Regular Expressions"
+    topics = ("regex", "regexp", "PCRE")
     license = "BSD-3-Clause"
     exports_sources = ["CMakeLists.txt"]
     generators = "cmake"
