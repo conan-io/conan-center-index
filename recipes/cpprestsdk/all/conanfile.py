@@ -61,7 +61,7 @@ class CppRestSDKConan(ConanFile):
             self.requires("zlib/1.2.11")
         if self.options.with_websockets:
             self.requires("websocketpp/0.8.2")
-        self.requires("boost/1.72.0")
+        self.requires("boost/1.73.0")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
