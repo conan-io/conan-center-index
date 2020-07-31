@@ -46,7 +46,8 @@ class MinizipConan(ConanFile):
         return self._cmake
 
     def build(self):
-        tools.patch(**self.conan_data["patches"][self.version], base_path=self._source_subfolder)
+        for patch in self.conan_data["patches"][self.version]:
+            tools.patch(**patch)
         cmake = self._configure_cmake()
         cmake.build()
 

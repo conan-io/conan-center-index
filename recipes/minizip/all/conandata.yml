@@ -4,4 +4,11 @@ sources:
     sha256: "29c5552b8a3684e2414ea9b67dc65b846571cae220b07d7c0fd10e5aee43c3cb"
 patches:
   "2.10.0":
-    patch_file: "patches/0001-disable-usage-of-internal-dependencies.patch"
+    -  "patch_file": "patches/0001-Disable-usage-of-internal-3rd-party-dependencies.patch"
+       "base_path": "source_subfolder"
+    -  "patch_file": "patches/0002-Disable-install-of-PKGconfig-files.patch"
+       "base_path": "source_subfolder"
+    -  "patch_file": "patches/0003-Disable-install-of-minizipConfigVersion.cmake-and-mi.patch"
+       "base_path": "source_subfolder"
+    -  "patch_file": "patches/0004-Disable-install-of-two-more-cmake-files.patch"
+       "base_path": "source_subfolder"
