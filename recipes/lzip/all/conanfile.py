@@ -86,7 +86,8 @@ class LzipConan(ConanFile):
         self.copy("COPYING", src=self._source_subfolder, dst="licenses")
         with self._build_context():
             autotools = self._configure_autotools()
-            autotools.install()
+            with tools.environment_append({"CONAN_CPU_COUNT": "1"}):
+                autotools.install()
 
         tools.rmdir(os.path.join(self.package_folder, "share"))
 
