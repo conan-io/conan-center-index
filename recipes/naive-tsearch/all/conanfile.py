@@ -66,6 +66,7 @@ class NaiveTsearchConan(ConanFile):
     def package_info(self):
         if self.options.header_only:
             self.cpp_info.components["header_only"].libs = []
+            self.cpp_info.components["header_only"].libdirs = []
             self.cpp_info.components["header_only"].includedirs.append(os.path.join("include", "naive-tsearch"))
             self.cpp_info.components["header_only"].defines = ["NAIVE_TSEARCH_HDRONLY"]
             self.cpp_info.components["header_only"].names["cmake_find_package"] = "naive-tsearch-hdronly"
