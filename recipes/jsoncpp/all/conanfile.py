@@ -47,12 +47,6 @@ class JsoncppConan(ConanFile):
                               "add_subdirectory( example )",
                               "",
                               strict=False)
-        
-        if tools.Version(self.version) <= "0.10.7":
-            tools.replace_in_file(os.path.join(self._source_subfolder, "CMakeLists.txt"),
-                                "SET(INCLUDE_INSTALL_DIR ${CMAKE_INSTALL_PREFIX}/include/jsoncpp",
-                                "SET(INCLUDE_INSTALL_DIR ${CMAKE_INSTALL_PREFIX}/include",
-                                strict=False)
 
     def _configure_cmake(self):
         cmake = CMake(self)
