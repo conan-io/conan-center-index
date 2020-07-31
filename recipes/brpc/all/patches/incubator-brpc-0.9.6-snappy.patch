@@ -1,0 +1,24 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 9a28c306..cd077f8c 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -158,6 +158,7 @@ include_directories(
+ # PROTOBUF_LIBRARIES. Normally, that should be enabled with
+ # protobuf_MODULE_COMPATIBLE; it appears that the endif for the if (0) in
+ # the protobuf recipe should be moved further up
++find_library(SNAPPY_LIB NAMES snappy)
+ set(DYNAMIC_LIB
+     ${GFLAGS_LIBRARY}
+     ${Protobuf_LIBRARIES}
+@@ -168,9 +169,10 @@ set(DYNAMIC_LIB
+     ${THRIFTNB_LIB}
+     ${OPENSSL_LIBRARIES}
+     ${OPENSSL_CRYPTO_LIBRARY}
++    ${SNAPPY_LIB}
+     dl
+     z)
+-set(BRPC_PRIVATE_LIBS "-lgflags -lprotobuf -lleveldb -lprotoc -lssl -lcrypto -ldl -lz")
++set(BRPC_PRIVATE_LIBS "-lgflags -lprotobuf -lleveldb -lprotoc -lssl -lcrypto -lsnappy -ldl -lz")
+ 
+ if(WITH_GLOG)
+     set(DYNAMIC_LIB ${DYNAMIC_LIB} ${GLOG_LIB})

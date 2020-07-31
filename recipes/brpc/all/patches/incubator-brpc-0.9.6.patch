@@ -1,0 +1,77 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index f469eb9f..9a28c306 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -54,7 +54,7 @@ include(GNUInstallDirs)
+ 
+ configure_file(${PROJECT_SOURCE_DIR}/config.h.in ${PROJECT_SOURCE_DIR}/src/butil/config.h @ONLY)
+ 
+-set(CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake)
++list(APPEND CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake)
+ 
+ find_package(GFLAGS REQUIRED)
+ 
+@@ -74,11 +74,6 @@ include_directories(
+     ${CMAKE_CURRENT_BINARY_DIR}
+ )
+ 
+-execute_process(
+-    COMMAND bash -c "git rev-parse --short HEAD | tr -d '\n'"
+-    OUTPUT_VARIABLE BRPC_REVISION
+-)
+-
+ if(CMAKE_SYSTEM_NAME STREQUAL "Darwin")
+     include(CheckFunctionExists)
+     CHECK_FUNCTION_EXISTS(clock_gettime HAVE_CLOCK_GETTIME)
+@@ -137,7 +132,8 @@ if(WITH_GLOG)
+     include_directories(${GLOG_INCLUDE_PATH})
+ endif()
+ 
+-find_library(PROTOC_LIB NAMES protoc)
++# This diff hunk is necessary since a debug build produces protocd
++find_library(PROTOC_LIB NAMES protoc protocd)
+ if(NOT PROTOC_LIB)
+     message(FATAL_ERROR "Fail to find protoc lib")
+ endif()
+@@ -157,9 +153,14 @@ include_directories(
+         ${OPENSSL_INCLUDE_DIR}
+         )
+ 
++# This diff hunk is necessary because the protobuf package disables the
++# backwards-compatible aliasing of Protobuf_LIBRARIES with
++# PROTOBUF_LIBRARIES. Normally, that should be enabled with
++# protobuf_MODULE_COMPATIBLE; it appears that the endif for the if (0) in
++# the protobuf recipe should be moved further up
+ set(DYNAMIC_LIB
+     ${GFLAGS_LIBRARY}
+-    ${PROTOBUF_LIBRARIES}
++    ${Protobuf_LIBRARIES}
+     ${LEVELDB_LIB}
+     ${PROTOC_LIB}
+     ${CMAKE_THREAD_LIBS_INIT}
+diff --git a/cmake/FindGFLAGS.cmake b/cmake/FindGFLAGS.cmake
+index 50950422..0c21004b 100644
+--- a/cmake/FindGFLAGS.cmake
++++ b/cmake/FindGFLAGS.cmake
+@@ -9,7 +9,7 @@ if (GFLAGS_STATIC)
+     set(CMAKE_FIND_LIBRARY_SUFFIXES .a ${CMAKE_FIND_LIBRARY_SUFFIXES})
+   endif (WIN32)
+ endif (GFLAGS_STATIC)
+-find_library(GFLAGS_LIBRARY NAMES gflags libgflags)
++find_library(GFLAGS_LIBRARY NAMES gflags libgflags gflags_debug libgflags_debug gflags_nothreads libgflags_nothreads gflags_nothreads_debug libgflags_nothreads_debug)
+ if(GFLAGS_INCLUDE_PATH AND GFLAGS_LIBRARY)
+   set(GFLAGS_FOUND TRUE)
+ endif(GFLAGS_INCLUDE_PATH AND GFLAGS_LIBRARY)
+diff --git a/src/bvar/scoped_timer.h b/src/bvar/scoped_timer.h
+index b3f1c5c9..bc68b081 100644
+--- a/src/bvar/scoped_timer.h
++++ b/src/bvar/scoped_timer.h
+@@ -48,7 +48,7 @@ public:
+         *_bvar << (butil::cpuwide_time_us() - _start_time);
+     }
+ 
+-    void reset() { _start_time = butil::cpuwide_time_us(); }
++    //void reset() { _start_time = butil::cpuwide_time_us(); }
+ 
+ private:
+     DISALLOW_COPY_AND_ASSIGN(ScopedTimer);
