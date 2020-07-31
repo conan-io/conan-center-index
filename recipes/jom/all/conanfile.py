@@ -9,6 +9,7 @@ class JomInstallerConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "http://wiki.qt.io/Jom"
     license = "GPL-3.0"
+    topics = ("conan", "jom", "build", "makefile", "make")
 
     settings = "os"
 

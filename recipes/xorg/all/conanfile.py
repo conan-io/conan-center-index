@@ -9,6 +9,7 @@ class ConanXOrg(ConanFile):
     homepage = "https://www.x.org/wiki/"
     description = "The X.Org project provides an open source implementation of the X Window System."
     settings = {"os": "Linux"}
+    topics = ("conan", "x11", "xorg")
 
     def package_id(self):
         self.info.header_only()
