@@ -11,4 +11,3 @@ int main() {
     std::cout << "rvarago::absent works! The exact answer is: " << exact_answer << '\n';
     return 0;
 }
-
