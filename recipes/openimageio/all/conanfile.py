@@ -106,7 +106,7 @@ class OpenImageIOConan(ConanFile):
             self.requires("dcmtk/3.6.5")
 
         if self.options.with_raw:
-            self.requires("libraw/0.19.5")
+            self.requires("libraw/0.20.0")
         
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
