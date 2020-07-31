@@ -6,6 +6,7 @@ required_conan_version = ">=1.28.0"
 class GeographiclibConan(ConanFile):
     name = "geographiclib"
     description = "Convert geographic units and solve geodesic problems"
+    topics = ("conan", "geographiclib", "geodesic")
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://geographiclib.sourceforge.io"
     license = "MIT"
