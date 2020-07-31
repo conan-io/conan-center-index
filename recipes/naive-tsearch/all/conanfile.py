@@ -10,7 +10,7 @@ class NaiveTsearchConan(ConanFile):
     homepage = "https://github.com/kulp/naive-tsearch"
     url = "https://github.com/conan-io/conan-center-index"
     settings = "os", "arch", "compiler", "build_type"
-    exports_sources = ['CMakeLists.txt']
+    exports_sources = ["CMakeLists.txt"]
     options = {
         "fPIC": [True, False],
         "header_only": [True, False],
