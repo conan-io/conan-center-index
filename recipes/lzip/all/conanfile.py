@@ -1,6 +1,8 @@
-from conans import AutoToolsBuildEnvironment, ConanFile, tools
+from conans import AutoToolsBuildEnvironment, CMake, ConanFile, tools
+from conans.errors import ConanInvalidConfiguration
 from contextlib import contextmanager
 import os
+import textwrap
 
 
 class LzipConan(ConanFile):
@@ -10,6 +12,7 @@ class LzipConan(ConanFile):
     license = "GPL-v2-or-later"
     homepage = "https://www.nongnu.org/lzip/"
     url = "https://github.com/conan-io/conan-center-index"
+    exports_sources = "patches/**"
     settings = "os", "arch", "compiler", "build_type"
 
     _autotools = None
@@ -18,9 +21,28 @@ class LzipConan(ConanFile):
     def _source_subfolder(self):
         return "source_subfolder"
 
+    def config_options(self):
+        if self.settings.compiler == "Visual Studio":
+            raise ConanInvalidConfiguration("Visual Studio is not supported")
+
     def configure(self):
         del self.settings.compiler.libcxx
         del self.settings.compiler.cppstd
+
+    def _detect_compilers(self):
+        tools.rmdir("detectdir")
+        tools.mkdir("detectdir")
+        with tools.chdir("detectdir"):
+            tools.save("CMakeLists.txt", textwrap.dedent("""\
+                cmake_minimum_required(VERSION 2.8)
+                project(test C CXX)
+                file(WRITE cc.txt "${CMAKE_C_COMPILER}")
+                file(WRITE cxx.txt "${CMAKE_CXX_COMPILER}")
+                """))
+            CMake(self).configure(source_folder="detectdir", build_folder="detectdir")
+            cc = tools.load("cc.txt").strip()
+            cxx = tools.load("cxx.txt").strip()
+        return cc, cxx
 
     def build_requirements(self):
         if tools.os_info.is_windows and not tools.get_env("CONAN_BASH_PATH") and \
@@ -34,22 +56,13 @@ class LzipConan(ConanFile):
     @contextmanager
     def _build_context(self):
         env = {}
-        if self.settings.compiler == "Visual Studio":
-            with tools.vcvars(self.settings):
-                env.update({
-                    "AR": "{} lib".format(tools.unix_path(self.deps_user_info["automake"].ar_lib)),
-                    "CC": "{} cl -nologo".format(tools.unix_path(self.deps_user_info["automake"].compile)),
-                    "CXX": "{} cl -nologo".format(tools.unix_path(self.deps_user_info["automake"].compile)),
-                    "NM": "dumpbin -symbols",
-                    "OBJDUMP": ":",
-                    "RANLIB": ":",
-                    "STRIP": ":",
-                })
-                with tools.environment_append(env):
-                    yield
-        else:
-            with tools.environment_append(env):
-                yield
+        cc, cxx = self._detect_compilers()
+        if not tools.get_env("CC"):
+            env["CC"] = cc
+        if not tools.get_env("CXX"):
+            env["CXX"] = cxx
+        with tools.environment_append(env):
+            yield
 
     def _configure_autotools(self):
         if self._autotools:
@@ -61,6 +74,8 @@ class LzipConan(ConanFile):
         return self._autotools
 
     def build(self):
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            tools.patch(**patch)
         with self._build_context():
             autotools = self._configure_autotools()
             autotools.make()
