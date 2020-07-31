@@ -31,6 +31,10 @@ class OpenvrConan(ConanFile):
         if self.settings.os == "Windows" or self.options.shared:
             del self.options.fPIC
 
+    def configure(self):
+        if self.settings.compiler.cppstd:
+            tools.check_min_cppstd(self, "11")
+
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
         extracted_dir = "{}-{}".format(self.name, self.version)
@@ -41,6 +45,7 @@ class OpenvrConan(ConanFile):
             return self._cmake
         self._cmake = CMake(self)
         self._cmake.definitions["BUILD_SHARED"] = self.options.shared
+        self._cmake.definitions["BUILD_UNIVERSAL"] = False
         self._cmake.configure()
 
         return self._cmake
