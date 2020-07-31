@@ -12,7 +12,8 @@ class AwsSdkCppConan(ConanFile):
     license = "Apache-2.0",
     exports_sources = "CMakeLists.txt",
     generators = "cmake", "cmake_find_package"
-    settings = "os", "arch", "compiler", "build_type",
+    settings = "os", "arch", "compiler", "build_type"
+    short_paths = True
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
@@ -101,10 +102,20 @@ class AwsSdkCppConan(ConanFile):
             if os.path.isfile(cmakelists) and repl in tools.load(cmakelists):
                 tools.replace_in_file(cmakelists, repl, "CONAN_PKG::aws-c-event-stream", strict=False)
 
+    @property
+    def _cpu_count(self):
+        try:
+            cpus = int(tools.cpu_count())
+            return min((cpus, 2))
+        except ValueError:
+            return 2
+
     def build(self):
         self._patch_sources()
         cmake = self._configure_cmake()
-        cmake.build()
+        # Reduce parallelism to avoid out-of-memory on limited memory build systems
+        with tools.environment_append({"CONAN_CPU_COUNT": str(self._cpu_count)}):
+            cmake.build()
 
     def package(self):
         self.copy(pattern="LICENSE", dst="licenses", src=self._source_subfolder)
