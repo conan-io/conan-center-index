@@ -7,7 +7,7 @@ from conans.tools import Version
 
 class BrpcConan(ConanFile):
     name = "brpc"
-    description = "TODO" #FIXME
+    description = "" #FIXME
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "" #FIXME
     topics = ("conan", "brpc", "baidu", "rpc")
@@ -25,6 +25,7 @@ class BrpcConan(ConanFile):
         "fPIC": True,
         "with_snappy": True,
     }
+    requires = "gflags/2.2.2", "protobuf/3.9.1", "leveldb/1.22"
 
     _cmake = None
 
@@ -36,9 +37,6 @@ class BrpcConan(ConanFile):
         if self.settings.os == "Windows":
             del self.options.fPIC
 
-    def requirements(self):
-        self.requires("gflags/2.2.2", "protobuf/3.9.1", "leveldb/1.22")
-
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
         os.rename("incubator-brpc-" + self.version, self._source_subfolder)
@@ -48,6 +46,17 @@ class BrpcConan(ConanFile):
         if self.options.with_snappy:
             tools.patch(**self.conan_data["snappy_patches"][self.version])
 
+    def _configure_cmake(self):
+        if self._cmake:
+            return self.cmake
+        self._cmake = CMake(self)
+        #self._cmake.definitions["CMAKE_TOOLCHAIN_FILE"] = "conan_paths.cmake"
+        self._cmake.definitions["BRPC_REVISION"] = self.conan_data["git_hashes"][self.version]
+        self._cmake.configure()
+        return self._cmake
+
+
     def build(self):
         self._patch_sources()
-        print("build done")
+        cmake = self._configure_cmake()
+
