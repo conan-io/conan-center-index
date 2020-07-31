@@ -13,7 +13,9 @@ class BrpcConan(ConanFile):
     topics = ("conan", "brpc", "baidu", "rpc")
     license = ("") #FIXME
     exports_sources = ["CMakeLists.txt", "patches/**"]
-    generators = "cmake", "cmake_paths", "cmake_find_package"
+    # FIXME see cmake_paths note further down
+    #generators = "cmake", "cmake_paths", "cmake_find_package"
+    generators = "cmake", "cmake_find_package"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False], 
@@ -34,6 +36,8 @@ class BrpcConan(ConanFile):
         return "source_subfolder"
 
     def config_options(self):
+        self.options['protobuf'].with_zlib = True
+        self.options['leveldb'].with_snappy = self.options.with_snappy
         if self.settings.os == "Windows":
             del self.options.fPIC
 
@@ -50,6 +54,7 @@ class BrpcConan(ConanFile):
         if self._cmake:
             return self.cmake
         self._cmake = CMake(self)
+        # FIXME: not sure if TOOLCHAIN file is needed
         #self._cmake.definitions["CMAKE_TOOLCHAIN_FILE"] = "conan_paths.cmake"
         self._cmake.definitions["BRPC_REVISION"] = self.conan_data["git_hashes"][self.version]
         self._cmake.configure()
@@ -59,4 +64,5 @@ class BrpcConan(ConanFile):
     def build(self):
         self._patch_sources()
         cmake = self._configure_cmake()
+        cmake.build()
 
