@@ -1,15 +1,6 @@
 --- cpp/CMakeLists.txt
 +++ cpp/CMakeLists.txt
-@@ -636,7 +636,7 @@ set(ARROW_STATIC_LINK_LIBS)
- set(ARROW_STATIC_INSTALL_INTERFACE_LIBS)
- 
- if(ARROW_USE_OPENSSL)
--  set(ARROW_OPENSSL_LIBS OpenSSL::Crypto OpenSSL::SSL)
-+  set(ARROW_OPENSSL_LIBS OpenSSL::OpenSSL)
-   list(APPEND ARROW_LINK_LIBS ${ARROW_OPENSSL_LIBS})
-   list(APPEND ARROW_STATIC_LINK_LIBS ${ARROW_OPENSSL_LIBS})
-   list(APPEND ARROW_STATIC_INSTALL_INTERFACE_LIBS ${ARROW_OPENSSL_LIBS})
-@@ -644,7 +644,7 @@ endif()
+@@ -654,7 +654,7 @@ endif()
  
  if(ARROW_WITH_BROTLI)
    # Order is important for static linking
@@ -17,31 +8,29 @@
 +  set(ARROW_BROTLI_LIBS Brotli::Brotli)
    list(APPEND ARROW_LINK_LIBS ${ARROW_BROTLI_LIBS})
    list(APPEND ARROW_STATIC_LINK_LIBS ${ARROW_BROTLI_LIBS})
-   list(APPEND ARROW_STATIC_INSTALL_INTERFACE_LIBS ${ARROW_BROTLI_LIBS})
-@@ -661,8 +661,8 @@ if(ARROW_WITH_LZ4)
+ endif()
+@@ -668,8 +668,8 @@ if(ARROW_WITH_LZ4)
  endif()
  
  if(ARROW_WITH_SNAPPY)
 -  list(APPEND ARROW_STATIC_LINK_LIBS Snappy::snappy)
--  list(APPEND ARROW_STATIC_INSTALL_INTERFACE_LIBS Snappy::snappy)
 +  list(APPEND ARROW_STATIC_LINK_LIBS Snappy::Snappy)
-+  list(APPEND ARROW_STATIC_INSTALL_INTERFACE_LIBS Snappy::Snappy)
  endif()
  
  if(ARROW_WITH_ZLIB)
-@@ -683,9 +683,9 @@ if(ARROW_ORC)
+   list(APPEND ARROW_STATIC_LINK_LIBS ZLIB::ZLIB)
+@@ -685,9 +685,9 @@ if(ARROW_ORC)
  endif()
  
  if(ARROW_USE_GLOG)
 -  list(APPEND ARROW_LINK_LIBS glog::glog)
 -  list(APPEND ARROW_STATIC_LINK_LIBS glog::glog)
--  list(APPEND ARROW_STATIC_INSTALL_INTERFACE_LIBS glog::glog)
 +  list(APPEND ARROW_LINK_LIBS GLOG::GLOG)
 +  list(APPEND ARROW_STATIC_LINK_LIBS GLOG::GLOG)
-+  list(APPEND ARROW_STATIC_INSTALL_INTERFACE_LIBS GLOG::GLOG)
    add_definitions("-DARROW_USE_GLOG")
  endif()
  
+ if(ARROW_S3)
 --- cpp/cmake_modules/DefineOptions.cmake
 +++ cpp/cmake_modules/DefineOptions.cmake
 @@ -76,7 +76,7 @@ macro(define_option_string name description default)
@@ -55,7 +44,7 @@
  
 --- cpp/cmake_modules/ThirdpartyToolchain.cmake
 +++ cpp/cmake_modules/ThirdpartyToolchain.cmake
-@@ -792,7 +792,7 @@ if(ARROW_WITH_SNAPPY)
+@@ -854,7 +854,7 @@ if(ARROW_WITH_SNAPPY)
      # location.
      # https://bugzilla.redhat.com/show_bug.cgi?id=1679727
      # https://src.fedoraproject.org/rpms/snappy/pull-request/1
@@ -64,7 +53,7 @@
      if(NOT Snappy_FOUND)
        find_package(SnappyAlt)
      endif()
-@@ -804,14 +804,14 @@ if(ARROW_WITH_SNAPPY)
+@@ -866,14 +866,14 @@ if(ARROW_WITH_SNAPPY)
    elseif(Snappy_SOURCE STREQUAL "SYSTEM")
      # SnappyConfig.cmake is not installed on Ubuntu/Debian
      # TODO: Make a bug report upstream
@@ -81,7 +70,7 @@
    include_directories(SYSTEM ${SNAPPY_INCLUDE_DIRS})
  endif()
  
-@@ -873,7 +873,7 @@ endmacro()
+@@ -938,7 +938,7 @@ endmacro()
  if(ARROW_WITH_BROTLI)
    resolve_dependency(Brotli)
    # TODO: Don't use global includes but rather target_include_directories
@@ -90,7 +79,7 @@
                        INTERFACE_INCLUDE_DIRECTORIES)
    include_directories(SYSTEM ${BROTLI_INCLUDE_DIR})
  endif()
-@@ -985,7 +985,7 @@ endmacro()
+@@ -1057,7 +1057,7 @@ endmacro()
  if(ARROW_USE_GLOG)
    resolve_dependency(GLOG)
    # TODO: Don't use global includes but rather target_include_directories
@@ -99,7 +88,7 @@
    include_directories(SYSTEM ${GLOG_INCLUDE_DIR})
  endif()
  
-@@ -1222,6 +1222,6 @@ macro(build_protobuf)
+@@ -1329,6 +1329,6 @@ macro(build_protobuf)
  endmacro()
 -
  if(ARROW_WITH_PROTOBUF)
@@ -107,7 +96,7 @@
    if(ARROW_WITH_GRPC)
      # gRPC 1.21.0 or later require Protobuf 3.7.0 or later.
      set(ARROW_PROTOBUF_REQUIRED_VERSION "3.7.0")
-@@ -1254,9 +1254,9 @@ if(ARROW_WITH_PROTOBUF)
+@@ -1365,9 +1365,9 @@ if(ARROW_WITH_PROTOBUF)
      set(ARROW_PROTOBUF_LIBPROTOC arrow::protobuf::libprotoc)
    else()
      if(NOT TARGET protobuf::libprotoc)
@@ -119,16 +108,16 @@
        endif()
        if(NOT Protobuf_PROTOC_LIBRARY)
          message(FATAL_ERROR "libprotoc was set to ${Protobuf_PROTOC_LIBRARY}")
-@@ -1682,7 +1682,7 @@ if(ARROW_WITH_RAPIDJSON)
+@@ -1802,7 +1802,7 @@ if(ARROW_WITH_RAPIDJSON)
    elseif(RapidJSON_SOURCE STREQUAL "SYSTEM")
      # Fedora packages place the package information at the wrong location.
      # https://bugzilla.redhat.com/show_bug.cgi?id=1680400
 -    find_package(RapidJSON ${ARROW_RAPIDJSON_REQUIRED_VERSION} HINTS "${CMAKE_ROOT}")
 +    find_package(RapidJSON REQUIRED)
-     if(NOT RapidJSON_FOUND)
-       # Ubuntu / Debian don't package the CMake config
-       find_package(RapidJSONAlt ${ARROW_RAPIDJSON_REQUIRED_VERSION} REQUIRED)
-@@ -1938,7 +1938,7 @@ if(ARROW_WITH_BZ2)
+     if(RapidJSON_FOUND)
+       set(RAPIDJSON_INCLUDE_DIR ${RAPIDJSON_INCLUDE_DIRS})
+     else()
+@@ -2088,7 +2088,7 @@ if(ARROW_WITH_BZ2)
                            PROPERTIES IMPORTED_LOCATION "${BZIP2_LIBRARIES}"
                                       INTERFACE_INCLUDE_DIRECTORIES "${BZIP2_INCLUDE_DIR}")
    endif()
@@ -136,4 +125,4 @@
 +  include_directories(SYSTEM "${BZip2_INCLUDE_DIR}")
  endif()
  
- macro(build_cares)
+ macro(build_utf8proc)
