@@ -1,0 +1,22 @@
+--- configure
++++ configure
+@@ -20,7 +20,7 @@
+ datarootdir='$(prefix)/share'
+ infodir='$(datarootdir)/info'
+ mandir='$(datarootdir)/man'
+-CXX=g++
++#CXX=g++
+ CPPFLAGS=
+ CXXFLAGS='-Wall -W -O2'
+ LDFLAGS=
+@@ -28,7 +28,7 @@
+ # checking whether we are using GNU C++.
+ /bin/sh -c "${CXX} --version" > /dev/null 2>&1 ||
+ 	{
+-	CXX=c++
+-	CXXFLAGS=-O2
++	echo "hello" # CXX=c++
++	echo "hello" # CXXFLAGS=-O2
+ 	}
+ 
+ # Loop over all args
