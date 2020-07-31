@@ -16,7 +16,7 @@ class ArrowConan(ConanFile):
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
-        "with_jemalloc": [True, False],
+        "with_jemalloc": ["auto", True, False],
         "with_deprecated": [True, False],
         "with_cli": [True, False],
         "with_compute": [True, False],
@@ -33,8 +33,6 @@ class ArrowConan(ConanFile):
         "with_openssl": [True, False],
         "with_parquet": [True, False],
         "with_s3": [True, False],
-        "with_sse42": [True, False],
-        "with_simd": [True, False],
         "with_brotli": [True, False],
         "with_bz2": [True, False],
         "with_lz4": [True, False],
@@ -45,7 +43,7 @@ class ArrowConan(ConanFile):
     default_options = {
         "shared": False,
         "fPIC": True,
-        "with_jemalloc": True,
+        "with_jemalloc": "auto",
         "with_deprecated": True,
         "with_cli": False,
         "with_compute": False,
@@ -62,8 +60,6 @@ class ArrowConan(ConanFile):
         "with_openssl": True,
         "with_parquet": False,
         "with_s3": False,
-        "with_sse42": True,
-        "with_simd": True,
         "with_brotli": False,
         "with_bz2": False,
         "with_lz4": False,
@@ -78,11 +74,15 @@ class ArrowConan(ConanFile):
     def _source_subfolder(self):
         return "source_subfolder"
 
+    @property
+    def _with_jemalloc(self):
+        if self.options.with_jemalloc != "auto":
+            return self.options.with_jemalloc
+        return "BSD" in str(self.settings.os)
+
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
-        if self.settings.arch != "x86_64":
-            del self.options.with_sse42
 
     def configure(self):
         if self.options.shared:
@@ -101,7 +101,7 @@ class ArrowConan(ConanFile):
 
     def requirements(self):
         self.requires("protobuf/3.11.4")
-        if self.options.with_jemalloc:
+        if self._with_jemalloc:
             self.requires("jemalloc/5.2.1")
         if self._boost_required:
             self.requires("boost/1.72.0")
@@ -161,12 +161,10 @@ class ArrowConan(ConanFile):
         self._cmake.definitions["ARROW_COMPUTE"] = self.options.with_compute
         self._cmake.definitions["ARROW_CSV"] = self.options.with_csv
         self._cmake.definitions["ARROW_CUDA"] = self.options.with_cuda
-        self._cmake.definitions["ARROW_JEMALLOC"] = self.options.with_jemalloc
+        self._cmake.definitions["ARROW_JEMALLOC"] = self._with_jemalloc
         self._cmake.definitions["ARROW_JSON"] = self.options.with_json
         self._cmake.definitions["ARROW_PARQUET"] = self.options.with_parquet
 
-        self._cmake.definitions["ARROW_SSE42"] = self.options.get_safe("with_sse42")
-        self._cmake.definitions["ARROW_USE_SIMD"] = self.options.with_simd
         # self._cmake.definitions["ARROW_BOOST_VENDORED"] = False
         self._cmake.definitions["BOOST_SOURCE"] = "SYSTEM"
         self._cmake.definitions["ARROW_PROTOBUF_USE_SHARED"] = self.options["protobuf"].shared
@@ -212,8 +210,8 @@ class ArrowConan(ConanFile):
             tools.patch(**patch)
 
     def build(self):
-        if self.options.shared:
-            if not self.options["jemalloc"].shared and self.options["jemalloc"].enable_cxx:
+        if self.options.shared and self._with_jemalloc:
+            if self.options["jemalloc"].enable_cxx:
                 raise ConanInvalidConfiguration("jemmalloc.enable_cxx of a static jemalloc must be disabled")
 
         self._patch_sources()
@@ -229,6 +227,9 @@ class ArrowConan(ConanFile):
         tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
         tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
         tools.rmdir(os.path.join(self.package_folder, "share"))
+
+    def package_id(self):
+        self.options.with_jemalloc = self._with_jemalloc
 
     @property
     def _libs(self):
