@@ -13,8 +13,6 @@ class BrpcConan(ConanFile):
     topics = ("conan", "brpc", "baidu", "rpc")
     license = ("") #FIXME
     exports_sources = ["CMakeLists.txt", "patches/**"]
-    # FIXME see cmake_paths note further down
-    #generators = "cmake", "cmake_paths", "cmake_find_package"
     generators = "cmake", "cmake_find_package"
     settings = "os", "arch", "compiler", "build_type"
     options = {
@@ -52,10 +50,8 @@ class BrpcConan(ConanFile):
 
     def _configure_cmake(self):
         if self._cmake:
-            return self.cmake
+            return self._cmake
         self._cmake = CMake(self)
-        # FIXME: not sure if TOOLCHAIN file is needed
-        #self._cmake.definitions["CMAKE_TOOLCHAIN_FILE"] = "conan_paths.cmake"
         self._cmake.definitions["BRPC_REVISION"] = self.conan_data["git_hashes"][self.version]
         self._cmake.configure()
         return self._cmake
@@ -66,3 +62,8 @@ class BrpcConan(ConanFile):
         cmake = self._configure_cmake()
         cmake.build()
 
+    def package(self):
+        self.copy("LICENSE", dst="licenses", src=self._source_subfolder)
+        cmake = self._configure_cmake()
+        cmake.install()
+        tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
