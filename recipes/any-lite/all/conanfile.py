@@ -6,7 +6,8 @@ class AnyLite(ConanFile):
     name = "any-lite"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/martinmoene/any-lite"
-    description = "any lite - Any objects in C++11 and later in a single-file header-only library"
+    description = ("any lite - A C++17-like any, a type-safe container for single values of \
+                    any type for C++98, C++11 and later in a single-file header-only library")
     topics = ("conan", "cpp11", "cpp14", "cpp17", "any", "any-implementations")
     license = "BSL-1.0"
     no_copy_source = True
