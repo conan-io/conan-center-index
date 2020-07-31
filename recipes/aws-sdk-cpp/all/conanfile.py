@@ -54,7 +54,7 @@ class AwsSdkCppConan(ConanFile):
         self.requires("openssl/1.1.1g")
         self.requires("zlib/1.2.11")
         if self.options.with_curl:
-            self.requires("libcurl/7.68.0")
+            self.requires("libcurl/7.71.1")
 
     @property
     def _cmake_cpp_standard(self):
