@@ -93,7 +93,8 @@ class LibUSBCompatConan(ConanFile):
             conf_args.extend(["--enable-shared", "--disable-static"])
         else:
             conf_args.extend(["--disable-shared", "--enable-static"])
-        self._autotools.configure(args=conf_args, configure_dir=self._source_subfolder)
+        pkg_config_paths = [tools.unix_path(os.path.abspath(self.install_folder))]
+        self._autotools.configure(args=conf_args, configure_dir=self._source_subfolder, pkg_config_paths=pkg_config_paths)
         return self._autotools
 
     @contextmanager
@@ -130,8 +131,9 @@ class LibUSBCompatConan(ConanFile):
 
     def build(self):
         self._patch_sources()
-        with tools.chdir(self._source_subfolder):
-            self.run("{} -fiv".format(os.environ["AUTORECONF"]), win_bash=tools.os_info.is_windows)
+        with tools.environment_append({"AUTOMAKE_CONAN_INCLUDES": tools.get_env("AUTOMAKE_CONAN_INCLUDES", "").replace(";", ":")}):
+            with tools.chdir(self._source_subfolder):
+                self.run("{} -fiv".format(os.environ["AUTORECONF"]), win_bash=tools.os_info.is_windows)
         with self._build_context():
             autotools = self._configure_autotools()
             autotools.make()
