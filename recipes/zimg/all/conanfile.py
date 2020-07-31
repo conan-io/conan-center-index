@@ -9,7 +9,7 @@ class ZimgConan(ConanFile):
     description = "Scaling, colorspace conversion, and dithering library"
     topics = ("conan", "zimg", "image", "manipulation")
     homepage = "https://github.com/sekrit-twc/zimg"
-    author = "Bincrafters <bincrafters@gmail.com>"
+    url = "https://github.com/conan-io/conan-center-index"
     license = "WTFPL"
     settings = "os", "arch", "compiler", "build_type"
     options = {
