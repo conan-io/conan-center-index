@@ -50,6 +50,7 @@ class LibUSBCompatConan(ConanFile):
 
     def build_requirements(self):
         self.build_requires("libtool/2.4.6")
+        self.build_requires("pkgconf/1.7.3")
         if tools.os_info.is_windows and not os.environ.get("CONAN_BASH_PATH") and \
                 tools.os_info.detect_windows_subsystem() != "msys2":
             self.build_requires("msys2/20190524")
