@@ -181,6 +181,7 @@ class GLibConan(ConanFile):
             if self.options.with_selinux:
                 self.cpp_info.components["gio-2.0"].requires.append("libselinux::libselinux")
 
+        self.cpp_info.components["gresource"].libs = [] # this is actualy an executable
         self.cpp_info.components["gresource"].requires.append("libelf::libelf") # this is actualy an executable
 
         self.env_info.PATH.append(os.path.join(self.package_folder, "bin"))
