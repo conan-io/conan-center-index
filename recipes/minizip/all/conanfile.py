@@ -13,8 +13,42 @@ class MinizipConan(ConanFile):
     generators = "cmake_find_package"
 
     settings = "os", "arch", "compiler", "build_type"
-    options = {"shared": [True, False], "fPIC": [True, False]}
-    default_options = {"shared": False, "fPIC": True}
+    options = {
+        "shared": [True, False], 
+        "fPIC": [True, False],
+        "compat": [True, False],
+        "zlib": [True, False],
+        "bzip2": [True, False],
+        "zstd": [True, False],
+        "lzma": [True, False],
+        "pkcrypt": [True, False],
+        "wzaes": [True, False],
+        "libcomp": [True, False],
+        "openssl": [True, False],
+        "libbsd": [True, False],
+        "brg": [True, False],
+        "signing": [True, False],
+        "compress_only": [True, False],
+        "decompress_only": [True, False]
+    }
+    default_options = {
+        "shared": False,
+        "fPIC": True,
+        "compat": True,
+        "zlib": True,
+        "bzip2": True,
+        "lzma": True,
+        "zstd": True,
+        "pkcrypt": True,
+        "wzaes": True,
+        "libcomp": False,
+        "openssl": False,
+        "libbsd": True,
+        "brg": False,
+        "signing": True,
+        "compress_only": False,
+        "decompress_only": False
+    }
 
     _source_subfolder = "source_subfolder"
     _build_subfolder = "build_subfolder"
