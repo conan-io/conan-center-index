@@ -1,6 +1,6 @@
-import os
-
 from conans import ConanFile, CMake, tools
+from conans.errors import ConanInvalidConfiguration
+import os
 
 
 class ITKConan(ConanFile):
@@ -51,14 +51,13 @@ class ITKConan(ConanFile):
 
     def requirements(self):
         self.requires("libjpeg/9d")
-
         self.requires("dcmtk/3.6.5")
         self.requires("double-conversion/3.1.5")
         self.requires("eigen/3.3.7")
         self.requires("expat/2.2.9")
         self.requires("fftw/3.3.8")
         self.requires("hdf5/1.12.0")
-        self.requires("icu/64.2")
+        self.requires("icu/67.1")
         self.requires("libtiff/4.1.0")
         self.requires("libpng/1.6.37")
         self.requires("openjpeg/2.3.1")
@@ -66,7 +65,7 @@ class ITKConan(ConanFile):
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
-        os.rename("ITK-{}".format(self.version), self._source_subfolder)
+        os.rename("InsightToolkit-{}".format(self.version), self._source_subfolder)
 
     def _patch_sources(self):
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
@@ -94,9 +93,12 @@ class ITKConan(ConanFile):
         self._cmake.definitions["ITK_USE_SYSTEM_TIFF"] = True
         self._cmake.definitions["ITK_USE_SYSTEM_ZLIB"] = True
 
-        self._cmake.definitions["ITK_USE_SYSTEM_KWIML"] = False  # FIXME: missing from CCI
-        self._cmake.definitions["ITK_USE_SYSTEM_VXL"] = False  # FIXME: missing from CCI
-        self._cmake.definitions["ITK_USE_SYSTEM_GDCM"] = False  # FIXME: missing from CCI
+        # FIXME: Missing Kwiml recipe
+        self._cmake.definitions["ITK_USE_SYSTEM_KWIML"] = False
+        # FIXME: Missing VXL recipe
+        self._cmake.definitions["ITK_USE_SYSTEM_VXL"] = False
+        # FIXME: Missing gdcm recipe
+        self._cmake.definitions["ITK_USE_SYSTEM_GDCM"] = False
         self._cmake.definitions["GDCM_USE_SYSTEM_OPENJPEG"] = True
 
         self._cmake.definitions["ITK_BUILD_DEFAULT_MODULES"] = False
@@ -206,6 +208,9 @@ class ITKConan(ConanFile):
         return self._cmake
 
     def build(self):
+        if self.options.shared and not self.options["hdf5"].shared:
+            raise ConanInvalidConfiguration("When building a shared itk, hdf5 needs to be shared too (or not linked to by the consumer).\n"
+                                            "This is because H5::DataSpace::ALL might get initialized twice, which will cause a H5::DataSpaceIException to be thrown).")
         self._patch_sources()
         cmake = self._configure_cmake()
         cmake.build()
