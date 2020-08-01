@@ -212,7 +212,7 @@ int32_t test_compress(char *method, mz_stream_create_cb create_compress)
 
     mz_stream_os_create(&in_stream);
 
-    if (mz_stream_os_open(in_stream, "LICENSE", MZ_OPEN_MODE_READ) == MZ_OK)
+    if (mz_stream_os_open(in_stream, "TESTDATA", MZ_OPEN_MODE_READ) == MZ_OK)
     {
         read = mz_stream_os_read(in_stream, buf, UINT16_MAX);
         if (read > 0)
@@ -225,15 +225,15 @@ int32_t test_compress(char *method, mz_stream_create_cb create_compress)
 
     if (read < 0)
     {
-        printf("Failed to read LICENSE\n");
+        printf("Failed to read TESTDATA\n");
         return MZ_OPEN_ERROR;
     }
 
-    printf("LICENSE crc 0x%08x\n", crc32);
+    printf("TESTDATA crc 0x%08x\n", crc32);
 
     mz_stream_os_create(&out_stream);
 
-    snprintf(filename, sizeof(filename), "LICENSE.deflate.%s", method);
+    snprintf(filename, sizeof(filename), "TESTDATA.deflate.%s", method);
     if (mz_stream_os_open(out_stream, filename, MZ_OPEN_MODE_CREATE | MZ_OPEN_MODE_WRITE) == MZ_OK)
     {
         create_compress(&deflate_stream);
