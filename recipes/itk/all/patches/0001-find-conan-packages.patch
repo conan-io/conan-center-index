@@ -87,7 +87,7 @@
  
  if(ITK_USE_SYSTEM_JPEG)
 -  find_package(JPEG REQUIRED)
-+  find_package(libjpeg REQUIRED)
++  find_package(OpenJPEG REQUIRED)
    set(ITKJPEG_INCLUDE_DIRS
      ${ITKJPEG_BINARY_DIR}/src
      )
@@ -96,7 +96,7 @@
 +    #(libjpeg_INCLUDE_DIRS}
      )
 -  set(ITKJPEG_LIBRARIES "${JPEG_LIBRARIES}")
-+  set(ITKJPEG_LIBRARIES ${JPEG_LIBRARIES})
++  set(ITKJPEG_LIBRARIES JPEG::JPEG)
    set(ITKJPEG_NO_SRC 1)
  else()
    set(ITKJPEG_INCLUDE_DIRS
@@ -113,14 +113,45 @@
  else()
    set(ITKDoubleConversion_INCLUDE_DIRS
      ${ITKDoubleConversion_SOURCE_DIR}/src
+--- Modules/ThirdParty/Expat/CMakeLists.txt
++++ Modules/ThirdParty/Expat/CMakeLists.txt
+@@ -6,9 +6,9 @@
+ 
+ if(ITK_USE_SYSTEM_EXPAT)
+   find_package(EXPAT REQUIRED)
+-  set(ITKExpat_INCLUDE_DIRS ${ITKExpat_BINARY_DIR}/src )
+-  set(ITKExpat_SYSTEM_INCLUDE_DIRS "${EXPAT_INCLUDE_DIR}")
+-  set(ITKExpat_LIBRARIES "${EXPAT_LIBRARY}")
++  set(ITKExpat_INCLUDE_DIRS ${EXPAT_INCLUDE_DIRECTORIES})
++  set(ITKExpat_SYSTEM_INCLUDE_DIRS ${EXPAT_INCLUDE_DIRECTORIES})
++  set(ITKExpat_LIBRARIES EXPAT::EXPAT)
+   set(ITKExpat_NO_SRC 1)
+ else()
+   set(ITKExpat_INCLUDE_DIRS
+--- Modules/ThirdParty/HDF5/CMakeLists.txt
++++ Modules/ThirdParty/HDF5/CMakeLists.txt
+@@ -11,7 +11,9 @@
+ 
+ if(ITK_USE_SYSTEM_HDF5)
+-
+-  if(HDF5_DIR)
++find_package(HDF5 REQUIRED)
++set(HDF5_C_SHARED_LIBRARY HDF5::HDF5)
++set(HDF5_C_STATIC_LIBRARY HDF5::HDF5)
++ if(0)
+     # When ITK's config is loaded, load HDF5 too.
+     set(ITKHDF5_EXPORT_CODE_INSTALL "
+ set(HDF5_DIR \"${HDF5_DIR}\")
 --- Modules/ThirdParty/OpenJPEG/src/CMakeLists.txt
 +++ Modules/ThirdParty/OpenJPEG/src/CMakeLists.txt
-@@ -4,5 +4,6 @@
+@@ -4,5 +4,8 @@
  set(ITK3P_INSTALL_RUNTIME_DIR "${ITKOpenJPEG_INSTALL_RUNTIME_DIR}")
  set(ITK3P_INSTALL_LIBRARY_DIR "${ITKOpenJPEG_INSTALL_LIBRARY_DIR}")
  set(ITK3P_INSTALL_ARCHIVE_DIR "${ITKOpenJPEG_INSTALL_ARCHIVE_DIR}")
 -add_subdirectory(openjpeg)
 -itk_module_target(itkopenjpeg NO_INSTALL)
 +find_package(OpenJPEG REQUIRED)
-+add_library(itkopenjpeg UNKNOWN IMPORTED)
++add_library(itkopenjpeg INTERFACE)
 +set_property(TARGET itkopenjpeg PROPERTY INTERFACE_LINK_LIBRARIES OpenJPEG::OpenJPEG)
++#target_compile_definitions(itkopenjpeg INTERFACE)
++install(TARGETS itkopenjpeg EXPORT ${ITK3P_INSTALL_EXPORT_NAME}) 
