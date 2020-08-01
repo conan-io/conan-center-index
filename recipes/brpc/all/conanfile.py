@@ -1,17 +1,13 @@
 import os
 from conans import CMake, ConanFile, tools
-from conans.errors import ConanInvalidConfiguration
-from conans.tools import Version
-
-#FIXME: cleanup imports
 
 class BrpcConan(ConanFile):
     name = "brpc"
-    description = "" #FIXME
+    description = "An industrial-grade RPC framework used throughout Baidu"
     url = "https://github.com/conan-io/conan-center-index"
-    homepage = "" #FIXME
+    homepage = "https://github.com/apache/incubator-brpc"
     topics = ("conan", "brpc", "baidu", "rpc")
-    license = ("") #FIXME
+    license = ("Apache-2.0")
     exports_sources = ["CMakeLists.txt", "patches/**"]
     generators = "cmake", "cmake_find_package"
     settings = "os", "arch", "compiler", "build_type"
@@ -36,6 +32,7 @@ class BrpcConan(ConanFile):
     def config_options(self):
         self.options['protobuf'].with_zlib = True
         self.options['leveldb'].with_snappy = self.options.with_snappy
+        # FIXME: add options for with_glog and with_thrift
         if self.settings.os == "Windows":
             del self.options.fPIC
 
@@ -66,4 +63,12 @@ class BrpcConan(ConanFile):
         self.copy("LICENSE", dst="licenses", src=self._source_subfolder)
         cmake = self._configure_cmake()
         cmake.install()
+        # FIXME: brpc builds both static/shared lib and installation currently
+        # copies both files
         tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
+
+    def package_info(self):
+        self.cpp_info.libs = tools.collect_libs(self)
+        if not self.options.shared:
+            if self.settings.os == "Linux":
+                self.cpp_info.system_libs = ["pthread"]
