@@ -2,6 +2,8 @@ import os
 import glob
 from conans import ConanFile, CMake, tools
 
+required_conan_version = ">=1.28.0"
+
 class GlewConan(ConanFile):
     name = "glew"
     description = "The GLEW library"
@@ -20,7 +22,7 @@ class GlewConan(ConanFile):
         "shared": False,
         "fPIC": True,
     }
-    
+
     _cmake = None
 
     @property
@@ -31,10 +33,6 @@ class GlewConan(ConanFile):
     def _build_subfolder(self):
         return "build_subfolder"
 
-    def requirements(self):
-        self.requires("opengl/system")
-        self.requires("glu/system")
-
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
@@ -44,6 +42,10 @@ class GlewConan(ConanFile):
             del self.options.fPIC
         del self.settings.compiler.libcxx
         del self.settings.compiler.cppstd
+
+    def requirements(self):
+        self.requires("opengl/system")
+        self.requires("glu/system")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
@@ -75,6 +77,13 @@ class GlewConan(ConanFile):
         self.copy(pattern="LICENSE.txt", dst="licenses", src=self._source_subfolder)
 
     def package_info(self):
+        self.cpp_info.filenames["cmake_find_package"] = "GLEW"
+        self.cpp_info.filenames["cmake_find_package_multi"] = "glew"
+        self.cpp_info.names["cmake_find_package"] = "GLEW"
+        self.cpp_info.names["cmake_find_package_multi"] = "GLEW"
+        self.cpp_info.components["glewlib"].names["cmake_find_package"] = "GLEW"
+        self.cpp_info.components["glewlib"].names["cmake_find_package_multi"] = "glew" if self.options.shared else "glew_s"
+        self.cpp_info.components["glewlib"].libs = tools.collect_libs(self)
         if self.settings.os == "Windows" and not self.options.shared:
-            self.cpp_info.defines.append("GLEW_STATIC")
-        self.cpp_info.libs = tools.collect_libs(self)
+            self.cpp_info.components["glewlib"].defines.append("GLEW_STATIC")
+        self.cpp_info.components["glewlib"].requires = ["opengl::opengl", "glu::glu"]
