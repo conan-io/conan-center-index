@@ -1,5 +1,6 @@
-import os
 from conans import CMake, ConanFile, tools
+import glob
+import os
 
 class BrpcConan(ConanFile):
     name = "brpc"
@@ -53,18 +54,25 @@ class BrpcConan(ConanFile):
         self._cmake.configure()
         return self._cmake
 
-
     def build(self):
         self._patch_sources()
         cmake = self._configure_cmake()
         cmake.build()
 
+    def _remove_files(self, path, patterns):
+        for file_pattern in patterns:
+            for file in glob.glob(os.path.join(path, file_pattern)):
+                os.remove(file)
+
     def package(self):
         self.copy("LICENSE", dst="licenses", src=self._source_subfolder)
         cmake = self._configure_cmake()
         cmake.install()
-        # FIXME: brpc builds both static/shared lib and installation currently
-        # copies both files
+        lib_path = os.path.join(self.package_folder, "lib")
+        if self.options.shared:
+            self._remove_files(lib_path, ["lib*.a", "*.lib"])
+        else:
+            self._remove_files(lib_path, ["lib*.so", "*.dll"])
         tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
 
     def package_info(self):
