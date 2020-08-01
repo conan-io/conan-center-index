@@ -55,10 +55,17 @@ class MinizipConan(ConanFile):
     _cmake = None
 
     requires = (
-        "zlib/1.2.11",
-        "zstd/1.4.5",
-        "bzip2/1.0.8",
     )
+    
+    def requirements(self):
+        if self.options.zlib:
+            self.requires("zlib/1.2.11")
+        if self.options.bzip2:
+            self.requires("bzip2/1.0.8")
+        if self.options.zstd:
+            self.requires("zstd/1.4.5")
+        if self.options.openssl:
+            self.requires("openssl/1.1.1g")
 
     def configure(self):
         del self.settings.compiler.libcxx
@@ -76,6 +83,20 @@ class MinizipConan(ConanFile):
     def _configure_cmake(self):
         if not self._cmake:
             self._cmake = CMake(self)
+            self._cmake.definitions["MZ_COMPAT"] = self.options.compat
+            self._cmake.definitions["MZ_ZLIB"] = self.options.zlib
+            self._cmake.definitions["MZ_BZIP2"] = self.options.bzip2
+            self._cmake.definitions["MZ_LZMA"] = self.options.lzma
+            self._cmake.definitions["MZ_ZSTD"] = self.options.zstd
+            self._cmake.definitions["MZ_PKCRYPT"] = self.options.pkcrypt
+            self._cmake.definitions["MZ_WZAES"] = self.options.wzaes
+            self._cmake.definitions["MZ_LIBCOMP"] = self.options.libcomp
+            self._cmake.definitions["MZ_OPENSSL"] = self.options.openssl
+            self._cmake.definitions["MZ_LIBBSD"] = self.options.libbsd
+            self._cmake.definitions["MZ_BRG"] = self.options.brg
+            self._cmake.definitions["MZ_SIGNING"] = self.options.signing
+            self._cmake.definitions["MZ_COMPRESS_ONLY"] = self.options.compress_only
+            self._cmake.definitions["MZ_DECOMPRESS_ONLY"] = self.options.decompress_only
             self._cmake.configure(build_folder=self._build_subfolder)
         return self._cmake
 
