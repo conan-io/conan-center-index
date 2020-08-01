@@ -2,7 +2,6 @@ from conans import CMake, ConanFile, tools
 import glob
 import os
 
-# FIXME: need to add test_package
 class BrpcConan(ConanFile):
     name = "brpc"
     description = "An industrial-grade RPC framework used throughout Baidu"
@@ -34,6 +33,7 @@ class BrpcConan(ConanFile):
         self.requires("gflags/2.2.2")
         self.requires("protobuf/3.9.1")
         self.requires("leveldb/1.22")
+        self.requires("openssl/1.1.1g")
         if self.options.with_glog:
             self.requires("glog/0.4.0")
         if self.options.with_thrift:
