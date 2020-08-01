@@ -86,14 +86,12 @@
 @@ -6,13 +6,13 @@
  
  if(ITK_USE_SYSTEM_JPEG)
--  find_package(JPEG REQUIRED)
-+  find_package(OpenJPEG REQUIRED)
+   find_package(JPEG REQUIRED)
    set(ITKJPEG_INCLUDE_DIRS
      ${ITKJPEG_BINARY_DIR}/src
      )
    set(ITKJPEG_SYSTEM_INCLUDE_DIRS
--    ${JPEG_INCLUDE_DIR}
-+    #(libjpeg_INCLUDE_DIRS}
+     ${JPEG_INCLUDE_DIR}
      )
 -  set(ITKJPEG_LIBRARIES "${JPEG_LIBRARIES}")
 +  set(ITKJPEG_LIBRARIES JPEG::JPEG)
