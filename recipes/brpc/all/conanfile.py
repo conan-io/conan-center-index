@@ -2,6 +2,7 @@ from conans import CMake, ConanFile, tools
 import glob
 import os
 
+# FIXME: need to add test_package
 class BrpcConan(ConanFile):
     name = "brpc"
     description = "An industrial-grade RPC framework used throughout Baidu"
@@ -13,18 +14,31 @@ class BrpcConan(ConanFile):
     generators = "cmake", "cmake_find_package"
     settings = "os", "arch", "compiler", "build_type"
     options = {
-        "shared": [True, False], 
         "with_snappy": [True, False],
+        "with_glog": [True, False],
+        "with_thrift": [True, False],
+        "shared": [True, False], 
         "fPIC": [True, False]
     }
     default_options = {
+        "with_snappy": True,
+        "with_glog": True,
+        "with_thrift": False,
         "shared": False,
         "fPIC": True,
-        "with_snappy": True,
     }
-    requires = "gflags/2.2.2", "protobuf/3.9.1", "leveldb/1.22"
 
     _cmake = None
+
+    def requirements(self):
+        self.requires("gflags/2.2.2")
+        self.requires("protobuf/3.9.1")
+        self.requires("leveldb/1.22")
+        if self.options.with_glog:
+            self.requires("glog/0.4.0")
+        # FIXME: thrift build fails
+        #if self.options.with_thrift:
+        #    self.requires("thrift/0.13.0")
 
     @property
     def _source_subfolder(self):
@@ -33,7 +47,6 @@ class BrpcConan(ConanFile):
     def config_options(self):
         self.options['protobuf'].with_zlib = True
         self.options['leveldb'].with_snappy = self.options.with_snappy
-        # FIXME: add options for with_glog and with_thrift
         if self.settings.os == "Windows":
             del self.options.fPIC
 
@@ -51,6 +64,11 @@ class BrpcConan(ConanFile):
             return self._cmake
         self._cmake = CMake(self)
         self._cmake.definitions["BRPC_REVISION"] = self.conan_data["git_hashes"][self.version]
+        if self.options.with_glog:
+            self._cmake.definitions["WITH_GLOG"] = True
+        # FIXME: thrift build fails
+        #if self.options.with_thrift:
+        #    self._cmake.definitions["WITH_THRIFT"] = True
         self._cmake.configure()
         return self._cmake
 
