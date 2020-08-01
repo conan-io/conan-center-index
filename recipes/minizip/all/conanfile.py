@@ -72,6 +72,8 @@ class MinizipConan(ConanFile):
         del self.settings.compiler.cppstd
         if self.options.signing and not self.options.pkcrypt and not self.options.wzaes:
             raise ConanInvalidConfiguration("pkcrypt or wzaes need to be set, to be able to provide signing support.")
+        if self.options.signing and self.options.brg:
+            raise ConanInvalidConfiguration("Library can not support signing with brg enabled.")
         
     def config_options(self):
         if self.settings.os == 'Windows':
