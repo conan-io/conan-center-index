@@ -929,7 +929,7 @@ static int32_t test_unzip_compat_int(unzFile unzip)
         return err;
     }
 
-    err = unzLocateFile(unzip, "test.txt", (void *)1);
+    err = unzLocateFile(unzip, "test.txt", (unzFileNameComparer)1);
     if (err != UNZ_OK)
     {
         printf("Failed to locate test file (%" PRId32 ")\n", err);
