@@ -47,6 +47,12 @@ This file is an altered source version.
 #ifdef HAVE_ZLIB
 #include "mz_strm_zlib.h"
 #endif
+#ifdef HAVE_LZMA
+#include "mz_strm_lzma.h"
+#endif
+#ifdef HAVE_ZSTD
+#include "mz_strm_zstd.h"
+#endif
 #include "mz_zip.h"
 
 #include <stdio.h> /* printf, snprintf */
@@ -301,6 +307,18 @@ int32_t test_compress(char *method, mz_stream_create_cb create_compress)
 int test_stream_bzip(void)
 {
     return test_compress("bzip", mz_stream_bzip_create);
+}
+#endif
+#ifdef HAVE_LZMA
+int test_stream_lzma(void)
+{
+    return test_compress("lzma", mz_stream_lzma_create);
+}
+#endif
+#ifdef HAVE_ZSTD
+int test_stream_zstd(void)
+{
+    return test_compress("zstd", mz_stream_zstd_create);
 }
 #endif
 #ifdef HAVE_PKCRYPT
@@ -1053,6 +1071,12 @@ int main(int argc, const char *argv[])
 #if !defined(MZ_ZIP_NO_COMPRESSION) && !defined(MZ_ZIP_NO_DECOMPRESSION)
 #ifdef HAVE_BZIP2
     err |= test_stream_bzip();
+#endif
+#ifdef HAVE_LZMA
+    err |= test_stream_lzma();
+#endif
+#ifdef HAVE_ZSTD
+    err |= test_stream_zstd();
 #endif
 #ifdef HAVE_ZLIB
     err |= test_stream_zlib();
