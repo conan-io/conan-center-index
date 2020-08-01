@@ -36,9 +36,8 @@ class BrpcConan(ConanFile):
         self.requires("leveldb/1.22")
         if self.options.with_glog:
             self.requires("glog/0.4.0")
-        # FIXME: thrift build fails
-        #if self.options.with_thrift:
-        #    self.requires("thrift/0.13.0")
+        if self.options.with_thrift:
+            self.requires("thrift/0.13.0")
 
     @property
     def _source_subfolder(self):
@@ -66,9 +65,8 @@ class BrpcConan(ConanFile):
         self._cmake.definitions["BRPC_REVISION"] = self.conan_data["git_hashes"][self.version]
         if self.options.with_glog:
             self._cmake.definitions["WITH_GLOG"] = True
-        # FIXME: thrift build fails
-        #if self.options.with_thrift:
-        #    self._cmake.definitions["WITH_THRIFT"] = True
+        if self.options.with_thrift:
+            self._cmake.definitions["WITH_THRIFT"] = True
         self._cmake.configure()
         return self._cmake
 

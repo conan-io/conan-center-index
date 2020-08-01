@@ -1,8 +1,23 @@
 diff --git a/CMakeLists.txt b/CMakeLists.txt
-index f469eb9f..9a28c306 100644
+index f469eb9f..7f1c9e6f 100644
 --- a/CMakeLists.txt
 +++ b/CMakeLists.txt
-@@ -54,7 +54,7 @@ include(GNUInstallDirs)
+@@ -46,15 +46,20 @@ endif()
+ 
+ if(WITH_THRIFT)
+     set(THRIFT_CPP_FLAG "-DENABLE_THRIFT_FRAMED_PROTOCOL")
+-    set(THRIFTNB_LIB "thriftnb")
+-    set(THRIFT_LIB "thrift")
++    if(RECIPE_BUILD_TYPE MATCHES debug)
++      set(THRIFTNB_LIB "thriftnbd")
++      set(THRIFT_LIB "thriftd")
++    else()
++      set(THRIFTNB_LIB "thriftnb")
++      set(THRIFT_LIB "thrift")
++    endif()
+ endif()
+ 
+ include(GNUInstallDirs)
  
  configure_file(${PROJECT_SOURCE_DIR}/config.h.in ${PROJECT_SOURCE_DIR}/src/butil/config.h @ONLY)
  
@@ -11,7 +26,7 @@ index f469eb9f..9a28c306 100644
  
  find_package(GFLAGS REQUIRED)
  
-@@ -74,11 +74,6 @@ include_directories(
+@@ -74,11 +79,6 @@ include_directories(
      ${CMAKE_CURRENT_BINARY_DIR}
  )
  
@@ -23,7 +38,16 @@ index f469eb9f..9a28c306 100644
  if(CMAKE_SYSTEM_NAME STREQUAL "Darwin")
      include(CheckFunctionExists)
      CHECK_FUNCTION_EXISTS(clock_gettime HAVE_CLOCK_GETTIME)
-@@ -137,7 +132,8 @@ if(WITH_GLOG)
+@@ -130,14 +130,16 @@ endif()
+ 
+ if(WITH_GLOG)
+     find_path(GLOG_INCLUDE_PATH NAMES glog/logging.h)
+-    find_library(GLOG_LIB NAMES glog)
++    # This diff hunk is necessary since a debug build produces glogd
++    find_library(GLOG_LIB NAMES glog glogd)
+     if((NOT GLOG_INCLUDE_PATH) OR (NOT GLOG_LIB))
+         message(FATAL_ERROR "Fail to find glog")
+     endif()
      include_directories(${GLOG_INCLUDE_PATH})
  endif()
  
@@ -33,7 +57,7 @@ index f469eb9f..9a28c306 100644
  if(NOT PROTOC_LIB)
      message(FATAL_ERROR "Fail to find protoc lib")
  endif()
-@@ -157,9 +153,14 @@ include_directories(
+@@ -157,9 +159,14 @@ include_directories(
          ${OPENSSL_INCLUDE_DIR}
          )
  
@@ -62,6 +86,148 @@ index 50950422..0c21004b 100644
  if(GFLAGS_INCLUDE_PATH AND GFLAGS_LIBRARY)
    set(GFLAGS_FOUND TRUE)
  endif(GFLAGS_INCLUDE_PATH AND GFLAGS_LIBRARY)
+diff --git a/src/brpc/stdcxx.h b/src/brpc/stdcxx.h
+new file mode 100644
+index 00000000..5113940a
+--- /dev/null
++++ b/src/brpc/stdcxx.h
+@@ -0,0 +1,124 @@
++/*
++ * Licensed to the Apache Software Foundation (ASF) under one
++ * or more contributor license agreements. See the NOTICE file
++ * distributed with this work for additional information
++ * regarding copyright ownership. The ASF licenses this file
++ * to you under the Apache License, Version 2.0 (the
++ * "License"); you may not use this file except in compliance
++ * with the License. You may obtain a copy of the License at
++ *
++ *   http://www.apache.org/licenses/LICENSE-2.0
++ *
++ * Unless required by applicable law or agreed to in writing,
++ * software distributed under the License is distributed on an
++ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
++ * KIND, either express or implied. See the License for the
++ * specific language governing permissions and limitations
++ * under the License.
++ */
++
++#ifndef _THRIFT_STDCXX_H_
++#define _THRIFT_STDCXX_H_ 1
++
++#include <boost/config.hpp>
++
++///////////////////////////////////////////////////////////////////
++//
++// functional (function, bind)
++//
++///////////////////////////////////////////////////////////////////
++
++#if defined(BOOST_NO_CXX11_HDR_FUNCTIONAL) || (defined(_MSC_VER) && _MSC_VER < 1800) || defined(FORCE_BOOST_FUNCTIONAL)
++#include <boost/tr1/functional.hpp>
++#define _THRIFT_FUNCTIONAL_TR1_ 1
++#endif
++
++#if _THRIFT_FUNCTIONAL_TR1_
++
++  namespace apache { namespace thrift { namespace stdcxx {
++
++    using ::std::tr1::bind;
++    using ::std::tr1::function;
++
++    namespace placeholders {
++      using ::std::tr1::placeholders::_1;
++      using ::std::tr1::placeholders::_2;
++      using ::std::tr1::placeholders::_3;
++      using ::std::tr1::placeholders::_4;
++      using ::std::tr1::placeholders::_5;
++      using ::std::tr1::placeholders::_6;
++      using ::std::tr1::placeholders::_7;
++      using ::std::tr1::placeholders::_8;
++      using ::std::tr1::placeholders::_9;
++    } // apache::thrift::stdcxx::placeholders
++  }}} // apache::thrift::stdcxx
++
++#else
++
++  #include <functional>
++
++  namespace apache { namespace thrift { namespace stdcxx {
++    using ::std::bind;
++    using ::std::function;
++
++    namespace placeholders {
++      using ::std::placeholders::_1;
++      using ::std::placeholders::_2;
++      using ::std::placeholders::_3;
++      using ::std::placeholders::_4;
++      using ::std::placeholders::_5;
++      using ::std::placeholders::_6;
++      using ::std::placeholders::_7;
++      using ::std::placeholders::_8;
++      using ::std::placeholders::_9;
++    } // apache::thrift::stdcxx::placeholders
++  }}} // apache::thrift::stdcxx
++
++#endif
++
++///////////////////////////////////////////////////////////////////
++//
++// Smart Pointers
++//
++///////////////////////////////////////////////////////////////////
++
++// We can use std for memory functions only if the compiler supports template aliasing
++// The macro BOOST_NO_CXX11_SMART_PTR is defined as 1 under Visual Studio 2010 and 2012
++// which do not support the feature, so we must continue to use C++98 and boost on them.
++// We cannot use __cplusplus to detect this either, since Microsoft advertises an older one.
++
++#if defined(BOOST_NO_CXX11_SMART_PTR) || (defined(_MSC_VER) && _MSC_VER < 1800) || defined(FORCE_BOOST_SMART_PTR)
++#include <boost/smart_ptr.hpp>
++#else
++#include <memory>
++#endif
++
++namespace apache { namespace thrift { namespace stdcxx {
++
++#if defined(BOOST_NO_CXX11_SMART_PTR) || (defined(_MSC_VER) && _MSC_VER < 1800) || defined(FORCE_BOOST_SMART_PTR)
++
++  using ::boost::const_pointer_cast;
++  using ::boost::dynamic_pointer_cast;
++  using ::boost::enable_shared_from_this;
++  using ::boost::make_shared;
++  using ::boost::scoped_ptr;
++  using ::boost::shared_ptr;
++  using ::boost::static_pointer_cast;
++  using ::boost::weak_ptr;
++
++#else
++
++  using ::std::const_pointer_cast;
++  using ::std::dynamic_pointer_cast;
++  using ::std::enable_shared_from_this;
++  using ::std::make_shared;
++  template <typename T> using scoped_ptr = std::unique_ptr<T>;		// compiler must support template aliasing
++  using ::std::shared_ptr;
++  using ::std::static_pointer_cast;
++  using ::std::weak_ptr;
++
++#endif
++
++}}} // apache::thrift::stdcxx
++
++#endif // #ifndef _THRIFT_STDCXX_H_
+diff --git a/src/brpc/thrift_service.h b/src/brpc/thrift_service.h
+index ef5e905c..319cf70a 100644
+--- a/src/brpc/thrift_service.h
++++ b/src/brpc/thrift_service.h
+@@ -23,6 +23,7 @@
+ #include "brpc/controller.h"                        // Controller
+ #include "brpc/thrift_message.h"                    // ThriftFramedMessage
+ #include "brpc/describable.h"
++#include "brpc/stdcxx.h" // stdcxx.h copied from thrift 0.11 since brpc still uses 0.11 which provides a bunch of defines that have been removed in 0.13
+ 
+ namespace brpc {
+ 
 diff --git a/src/bvar/scoped_timer.h b/src/bvar/scoped_timer.h
 index b3f1c5c9..bc68b081 100644
 --- a/src/bvar/scoped_timer.h

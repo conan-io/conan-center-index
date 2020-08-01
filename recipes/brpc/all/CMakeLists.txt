@@ -4,6 +4,9 @@ project(cmake_wrapper)
 include(conanbuildinfo.cmake)
 conan_basic_setup()
 
+# disable picking up system-installed libraries with find_library
+set(CMAKE_FIND_USE_CMAKE_SYSTEM_PATH FALSE)
+
 # we need to set the executable manually since that seems to be missing in
 # the generated FindProtobuf.cmake in the protobuf conan package
 find_program(PROTOBUF_PROTOC_EXECUTABLE NAMES protoc)
@@ -11,7 +14,10 @@ find_program(PROTOBUF_PROTOC_EXECUTABLE NAMES protoc)
 set(PROTOBUF_INCLUDE_DIRS "${CONAN_PROTOBUF_ROOT}/include")
 set(PROTOBUF_INCLUDE_DIR "${CONAN_PROTOBUF_ROOT}/include")
 
-# disable picking up system-installed libraries with find_library
-set(CMAKE_FIND_USE_CMAKE_SYSTEM_PATH FALSE)
+find_library(OPENSSL_LIBRARIES NAMES ssl)
+find_library(OPENSSL_CRYPTO_LIBRARY NAMES crypto)
+
+# this is used to select thrift debug vs release libraries in brpc's build
+string(TOLOWER "${CMAKE_BUILD_TYPE}" RECIPE_BUILD_TYPE)
 
 add_subdirectory(source_subfolder)
