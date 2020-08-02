@@ -17,8 +17,5 @@ include_directories(${CMAKE_CURRENT_BINARY_DIR})
 
 set(CMAKE_CXX_STANDARD 11)
 
-add_executable(server server.cpp ${PROTO_SRC} ${PROTO_HEADER})
-target_link_libraries(server ${CONAN_LIBS})
-
-add_executable(client client.cpp ${PROTO_SRC} ${PROTO_HEADER})
-target_link_libraries(client ${CONAN_LIBS})
+add_executable(test test.cpp ${PROTO_SRC} ${PROTO_HEADER})
+target_link_libraries(test ${CONAN_LIBS})
