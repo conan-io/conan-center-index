@@ -1,19 +1,25 @@
 --- CMakeLists.txt	2019-11-29 15:51:38.000000000 -0500
-+++ CMakeLists.txt	2020-04-30 14:25:52.747398200 -0400
-@@ -5,7 +5,7 @@
++++ CMakeLists.txt	2020-08-01 20:25:48.411124700 -0400
+@@ -5,7 +5,6 @@
  # Modules
  list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake/")
  if (WIN32)
 -  include(ChooseMSVCCRT)
-+
  endif()
  include(CheckCXXCompilerFlag)
  include(CheckCCompilerFlag)
-@@ -50,13 +50,9 @@
+@@ -50,13 +49,16 @@
  # Dependencies
  # ============
  set(THIRD_PARTY_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/third-party/")
 -include(LIEFDependencies)
++set(LIEF_FROZEN_ENABLED 0)
++if (LIEF_SUPPORT_CXX14 AND NOT LIEF_DISABLE_FROZEN)
++  message(STATUS "Enable Frozen (C++14 support)")
++  set(LIEF_FROZEN_ENABLED 1)
++endif()
++
++
 
  # LIEF Source definition
  # ======================
@@ -23,7 +29,7 @@
 
  if (LIEF_LOGGING)
    set_source_files_properties(${ELG_SOURCE_DIR}/easylogging++.cc PROPERTIES GENERATED TRUE)
-@@ -73,9 +69,6 @@
+@@ -73,9 +75,6 @@
 
  set(LIBLIEF_SOURCE_FILES
    "${ELG_CC_PATH}"
@@ -33,7 +39,7 @@
    "${LIBFUZZER_SRC_FILES}"
    "${CMAKE_CURRENT_SOURCE_DIR}/src/logging.cpp"
    "${CMAKE_CURRENT_SOURCE_DIR}/src/exception.cpp"
-@@ -123,18 +116,6 @@
+@@ -123,17 +122,6 @@
    ${LIEF_VISITOR_INCLUDE_FILES}
  )
 
@@ -48,22 +54,20 @@
 -  list(APPEND LIEF_INC_FILES           "${LIEF_JSON_HDR}")
 -  list(APPEND LIEF_PUBLIC_INCLUDE_DIR  "${LIBJSON_SOURCE_DIR}/")
 -endif()
--
+
  source_group("Header Files" FILES ${LIEF_INC_FILES})
  source_group("Source Files" FILES ${LIBLIEF_SOURCE_FILES})
-
-@@ -224,9 +205,7 @@
+@@ -224,9 +212,6 @@
 
  # Frozen Configuration
  # ====================
 -if (LIEF_FROZEN_ENABLED)
 -  list(APPEND LIEF_PRIVATE_INCLUDE_DIR "${FROZEN_INCLUDE_DIR}")
 -endif()
-+
 
  # OAT part
  # ========
-@@ -292,9 +271,9 @@
+@@ -292,9 +277,9 @@
  list(APPEND LIEF_PRIVATE_INCLUDE_DIR
    "${LIEF_PUBLIC_INCLUDE_DIR}"
    "${LIEF_PUBLIC_INCLUDE_DIR}"
@@ -74,7 +78,7 @@
    "${ELG_SOURCE_DIR}"
    "${MBEDTLS_INCLUDE_DIRS}"
  )
-@@ -302,9 +281,6 @@
+@@ -302,9 +287,6 @@
 
  # Grouping external projects
  # ==========================
@@ -84,7 +88,7 @@
  if (LIEF_LOGGING)
    source_group("easylogging"     FILES ${ELG_SOURCE_DIR}/easylogging++.cc)
  endif()
-@@ -316,7 +292,7 @@
+@@ -316,7 +298,7 @@
    PRIVATE "${LIEF_PRIVATE_INCLUDE_DIR}")
 
  if (LIEF_ENABLE_JSON)
@@ -93,7 +97,7 @@
  endif()
 
  if (LIEF_LOGGING)
-@@ -324,12 +300,12 @@
+@@ -324,12 +306,12 @@
  endif()
 
  if (LIEF_FROZEN_ENABLED)
@@ -109,7 +113,7 @@
 
  # Flags definition
  # ----------------
-@@ -345,11 +321,7 @@
+@@ -345,11 +327,6 @@
  # with the SpcSpAgencyInfo Critical Extension, which mbed TLS doesn't
  # support, so set MBEDTLS_X509_ALLOW_UNSUPPORTED_CRITICAL_EXTENSION to
  # have it skip this extension.
@@ -118,7 +122,6 @@
 -  -DMBEDTLS_MD4_C
 -  -DMBEDTLS_X509_ALLOW_UNSUPPORTED_CRITICAL_EXTENSION
 -)
-+
 
 
  # ASAN - LSAN - TSAN - USAN

@@ -55,7 +55,7 @@ class LiefConan(ConanFile):
 
     def requirements(self):
         if self.options.with_json:
-            self.requires("nlohmann_json/3.7.3")
+            self.requires("nlohmann_json/3.9.0")
         if self.options.with_frozen:
             self.requires("frozen/1.0.0")
 
@@ -63,6 +63,8 @@ class LiefConan(ConanFile):
         tools.get(**self.conan_data["sources"][self.version])
         extracted_dir = "LIEF-" + self.version
         os.rename(extracted_dir, self._source_subfolder)
+        for patch in self.conan_data["patches"].get(self.version, []):
+            tools.patch(**patch)
 
     def _configure_cmake(self):
         cmake = CMake(self)
@@ -76,6 +78,7 @@ class LiefConan(ConanFile):
         cmake.definitions["LIEF_MACHO"] = self.options.with_macho
 
         cmake.definitions["LIEF_ENABLE_JSON"] = self.options.with_json
+        cmake.definitions["LIEF_DISABLE_FROZEN"] = not self.options.with_frozen
         cmake.definitions["LIEF_C_API"] = self.options.with_c_api
 
         cmake.definitions["LIEF_EXAMPLES"] = False
@@ -86,14 +89,7 @@ class LiefConan(ConanFile):
 
         return cmake
 
-    def _patch_sources(self):
-        patches = [f for f in os.listdir("patches") if f.endswith('.patch')]
-        for patch_file in sorted(patches):
-            self.output.info("Applying " + patch_file)
-            tools.patch(self._source_subfolder, os.path.join("patches", patch_file))
-
     def build(self):
-        self._patch_sources()
         cmake = self._configure_cmake()
         cmake.build()
 
