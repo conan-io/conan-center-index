@@ -2,13 +2,7 @@ sources:
   "0.9.6":
     url: https://github.com/apache/incubator-brpc/archive/0.9.6.zip
     md5: 783b3b0d5b9d254a93f26ce769b00bfc
-git_hashes:
-  "0.9.6": f43bdcec
-main_patches:
+patches:
   "0.9.6":
     base_path: "source_subfolder"
     patch_file: "patches/incubator-brpc-0.9.6.patch"
-snappy_patches:
-  "0.9.6":
-    base_path: "source_subfolder"
-    patch_file: "patches/incubator-brpc-0.9.6-snappy.patch"

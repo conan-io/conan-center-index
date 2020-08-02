@@ -55,19 +55,18 @@ class BrpcConan(ConanFile):
         os.rename("incubator-brpc-" + self.version, self._source_subfolder)
 
     def _patch_sources(self):
-        tools.patch(**self.conan_data["main_patches"][self.version])
-        if self.options.with_snappy:
-            tools.patch(**self.conan_data["snappy_patches"][self.version])
+        tools.patch(**self.conan_data["patches"][self.version])
 
     def _configure_cmake(self):
         if self._cmake:
             return self._cmake
         self._cmake = CMake(self)
-        self._cmake.definitions["BRPC_REVISION"] = self.conan_data["git_hashes"][self.version]
         if self.options.with_glog:
             self._cmake.definitions["WITH_GLOG"] = True
         if self.options.with_thrift:
             self._cmake.definitions["WITH_THRIFT"] = True
+        if self.options.with_snappy:
+            self._cmake.definitions["WITH_SNAPPY"] = True
         self._cmake.configure()
         return self._cmake
 

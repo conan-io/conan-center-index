@@ -1,8 +1,17 @@
 diff --git a/CMakeLists.txt b/CMakeLists.txt
-index f469eb9f..7f1c9e6f 100644
+index f469eb9f..1ef72ac2 100644
 --- a/CMakeLists.txt
 +++ b/CMakeLists.txt
-@@ -46,15 +46,20 @@ endif()
+@@ -14,6 +14,8 @@ if(POLICY CMP0042)
+     cmake_policy(SET CMP0042 NEW)
+ endif()
+ 
++set(BRPC_REVISION "f43bdcec")
++
+ set(BRPC_VERSION 0.9.0)
+ 
+ SET(CPACK_GENERATOR "DEB")
+@@ -46,15 +48,20 @@ endif()
  
  if(WITH_THRIFT)
      set(THRIFT_CPP_FLAG "-DENABLE_THRIFT_FRAMED_PROTOCOL")
@@ -26,7 +35,7 @@ index f469eb9f..7f1c9e6f 100644
  
  find_package(GFLAGS REQUIRED)
  
-@@ -74,11 +79,6 @@ include_directories(
+@@ -74,11 +81,6 @@ include_directories(
      ${CMAKE_CURRENT_BINARY_DIR}
  )
  
@@ -38,7 +47,7 @@ index f469eb9f..7f1c9e6f 100644
  if(CMAKE_SYSTEM_NAME STREQUAL "Darwin")
      include(CheckFunctionExists)
      CHECK_FUNCTION_EXISTS(clock_gettime HAVE_CLOCK_GETTIME)
-@@ -130,14 +130,16 @@ endif()
+@@ -130,14 +132,16 @@ endif()
  
  if(WITH_GLOG)
      find_path(GLOG_INCLUDE_PATH NAMES glog/logging.h)
@@ -57,7 +66,7 @@ index f469eb9f..7f1c9e6f 100644
  if(NOT PROTOC_LIB)
      message(FATAL_ERROR "Fail to find protoc lib")
  endif()
-@@ -157,9 +159,14 @@ include_directories(
+@@ -157,9 +161,14 @@ include_directories(
          ${OPENSSL_INCLUDE_DIR}
          )
  
@@ -73,6 +82,19 @@ index f469eb9f..7f1c9e6f 100644
      ${LEVELDB_LIB}
      ${PROTOC_LIB}
      ${CMAKE_THREAD_LIBS_INIT}
+@@ -171,6 +180,12 @@ set(DYNAMIC_LIB
+     z)
+ set(BRPC_PRIVATE_LIBS "-lgflags -lprotobuf -lleveldb -lprotoc -lssl -lcrypto -ldl -lz")
+ 
++if(WITH_SNAPPY)
++  find_library(SNAPPY_LIB NAMES snappy)
++  set(DYNAMIC_LIB ${DYNAMIC_LIB} ${SNAPPY_LIB})
++  set(BRPC_PRIVATE_LIBS "${BRPC_PRIVATE_LIBS} -lsnappy")
++endif()
++
+ if(WITH_GLOG)
+     set(DYNAMIC_LIB ${DYNAMIC_LIB} ${GLOG_LIB})
+     set(BRPC_PRIVATE_LIBS "${BRPC_PRIVATE_LIBS} -lglog")
 diff --git a/cmake/FindGFLAGS.cmake b/cmake/FindGFLAGS.cmake
 index 50950422..0c21004b 100644
 --- a/cmake/FindGFLAGS.cmake
