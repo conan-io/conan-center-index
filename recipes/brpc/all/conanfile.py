@@ -2,6 +2,7 @@ from conans import CMake, ConanFile, tools
 import glob
 import os
 
+
 class BrpcConan(ConanFile):
     name = "brpc"
     description = "An industrial-grade RPC framework used throughout Baidu"
@@ -16,7 +17,7 @@ class BrpcConan(ConanFile):
         "with_snappy": [True, False],
         "with_glog": [True, False],
         "with_thrift": [True, False],
-        "shared": [True, False], 
+        "shared": [True, False],
         "fPIC": [True, False]
     }
     default_options = {
@@ -62,7 +63,8 @@ class BrpcConan(ConanFile):
         if self._cmake:
             return self._cmake
         self._cmake = CMake(self)
-        self._cmake.definitions["BRPC_REVISION"] = self.conan_data["git_hashes"][self.version]
+        self._cmake.definitions["BRPC_REVISION"] =
+        self.conan_data["git_hashes"][self.version]
         if self.options.with_glog:
             self._cmake.definitions["WITH_GLOG"] = True
         if self.options.with_thrift:
@@ -96,3 +98,4 @@ class BrpcConan(ConanFile):
         if not self.options.shared:
             if self.settings.os == "Linux":
                 self.cpp_info.system_libs = ["pthread"]
+
