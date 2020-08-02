@@ -37,7 +37,7 @@ class UvwConan(ConanFile):
             return True
         if compiler == "clang" and version >= "5":
             return True
-        if compiler == "apple-clang" and version >= "9":
+        if compiler == "apple-clang" and version >= "10":
             return True
         return False
 
