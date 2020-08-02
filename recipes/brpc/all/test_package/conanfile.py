@@ -8,12 +8,10 @@ class TestPackageConan(ConanFile):
 
     def build(self):
         cmake = CMake(self)
-        cmake.definitions["CMAKE_EXPORT_COMPILE_COMMANDS"] = True
         cmake.configure()
         cmake.build()
 
     def test(self):
-        print("test run not yet implemented")
-        #if not tools.cross_building(self.settings):
-        #    bin_path = os.path.join("bin", "test_package")
-        #    self.run(bin_path, run_environment=True)
+        if not tools.cross_building(self.settings):
+            bin_path = os.path.join("bin", "test")
+            self.run(bin_path, run_environment=True)
