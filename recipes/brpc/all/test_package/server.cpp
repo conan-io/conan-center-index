@@ -15,22 +15,22 @@
 // specific language governing permissions and limitations
 // under the License.
 
-// A server to receive EchoRequest and send back EchoResponse.
-
 #include <butil/logging.h>
 #include <brpc/server.h>
+#include <butil/time.h>
+#include <brpc/channel.h>
 #include "echo.pb.h"
 
 DEFINE_bool(echo_attachment, true, "Echo attachment as well");
-DEFINE_int32(port, 8000, "TCP Port of this server");
 DEFINE_int32(idle_timeout_s, -1, "Connection will be closed if there is no "
              "read/write operations during the last `idle_timeout_s'");
-DEFINE_int32(logoff_ms, 2000, "Maximum duration of server's LOGOFF state "
-             "(waiting for client to close connection before server stops)");
+DEFINE_string(attachment, "", "Carry this along with requests");
+DEFINE_string(protocol, "baidu_std", "Protocol type. Defined in src/brpc/options.proto");
+DEFINE_string(connection_type, "", "Connection type. Available values: single, pooled, short");
+DEFINE_string(load_balancer, "", "The algorithm for load balancing");
+DEFINE_int32(timeout_ms, 100, "RPC timeout in milliseconds");
+DEFINE_int32(max_retry, 3, "Max retries(not including the first RPC)"); 
 
-// Your implementation of example::EchoService
-// Notice that implementing brpc::Describable grants the ability to put
-// additional information in /status.
 namespace example {
 class EchoServiceImpl : public EchoService {
 public:
@@ -40,63 +40,84 @@ public:
                       const EchoRequest* request,
                       EchoResponse* response,
                       google::protobuf::Closure* done) {
-        // This object helps you to call done->Run() in RAII style. If you need
-        // to process the request asynchronously, pass done_guard.release().
         brpc::ClosureGuard done_guard(done);
 
         brpc::Controller* cntl =
             static_cast<brpc::Controller*>(cntl_base);
 
-        // The purpose of following logs is to help you to understand
-        // how clients interact with servers more intuitively. You should 
-        // remove these logs in performance-sensitive servers.
         LOG(INFO) << "Received request[log_id=" << cntl->log_id() 
                   << "] from " << cntl->remote_side() 
                   << " to " << cntl->local_side()
                   << ": " << request->message()
                   << " (attached=" << cntl->request_attachment() << ")";
 
-        // Fill response.
         response->set_message(request->message());
 
-        // You can compress the response by setting Controller, but be aware
-        // that compression may be costly, evaluate before turning on.
-        // cntl->set_response_compress_type(brpc::COMPRESS_TYPE_GZIP);
-
         if (FLAGS_echo_attachment) {
-            // Set attachment which is wired to network directly instead of
-            // being serialized into protobuf messages.
             cntl->response_attachment().append(cntl->request_attachment());
         }
     }
 };
-}  // namespace example
+}
 
 int main(int argc, char* argv[]) {
-    // Generally you only need one Server.
+    // Set up and start the server.
     brpc::Server server;
-
-    // Instance of your service.
     example::EchoServiceImpl echo_service_impl;
-
-    // Add the service into server. Notice the second parameter, because the
-    // service is put on stack, we don't want server to delete it, otherwise
-    // use brpc::SERVER_OWNS_SERVICE.
     if (server.AddService(&echo_service_impl, 
                           brpc::SERVER_DOESNT_OWN_SERVICE) != 0) {
         LOG(ERROR) << "Fail to add service";
         return -1;
     }
-
-    // Start the server.
-    brpc::ServerOptions options;
-    options.idle_timeout_sec = FLAGS_idle_timeout_s;
-    if (server.Start(FLAGS_port, &options) != 0) {
+    brpc::ServerOptions server_opts;
+    server_opts.idle_timeout_sec = FLAGS_idle_timeout_s;
+    if (server.Start(0 /* pick available port */, &server_opts) != 0) {
         LOG(ERROR) << "Fail to start EchoServer";
         return -1;
     }
+    auto listen_port = server.listen_address().port;
+    LOG(INFO) << "Server running at " << listen_port;
 
-    // Wait until Ctrl-C is pressed, then Stop() and Join() the server.
-    server.RunUntilAskedToQuit();
+    // client just sends one request to server
+    brpc::Channel channel;
+    brpc::ChannelOptions client_channel_opts;
+    client_channel_opts.protocol = FLAGS_protocol;
+    client_channel_opts.connection_type = FLAGS_connection_type;
+    client_channel_opts.timeout_ms = FLAGS_timeout_ms;
+    client_channel_opts.max_retry = FLAGS_max_retry;
+
+    auto server_connect = std::string("0.0.0.0:") + std::to_string(listen_port);
+    if (channel.Init(server_connect.c_str(), FLAGS_load_balancer.c_str(), &client_channel_opts) != 0) {
+        LOG(ERROR) << "Fail to initialize channel";
+        return -1;
+    }
+    example::EchoService_Stub stub(&channel);
+
+    example::EchoRequest request;
+    example::EchoResponse response;
+    brpc::Controller cntl;
+
+    request.set_message("hello world");
+    cntl.set_log_id(0);
+    cntl.request_attachment().append(FLAGS_attachment);
+    stub.Echo(&cntl, &request, &response, NULL /* block until response or error */);
+    if (!cntl.Failed()) {
+      LOG(INFO) << "Received response from " << cntl.remote_side()
+        << " to " << cntl.local_side()
+        << ": " << response.message() << " (attached="
+        << cntl.response_attachment() << ")"
+        << " latency=" << cntl.latency_us() << "us";
+    } else {
+      LOG(WARNING) << cntl.ErrorText();
+    }
+
+    // shutdown the server
+    if (server.Stop(0) != 0) {
+      LOG(ERROR) << "Server stop failed";
+      return -1;
+    } else {
+      LOG(INFO) << "Server stopped";
+    }
+
     return 0;
 }
