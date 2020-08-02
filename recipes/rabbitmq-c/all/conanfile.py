@@ -2,6 +2,7 @@ import os
 
 from conans import CMake, ConanFile, tools
 
+required_conan_version = ">=1.28.0"
 
 class RabbitmqcConan(ConanFile):
     name = "rabbitmq-c"
@@ -73,18 +74,22 @@ class RabbitmqcConan(ConanFile):
         tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
 
     def package_info(self):
-        # TODO: add cmake import information
-        # - for config file: rabbitmq-c
-        # - imported target: rabbitmq::rabbitmq if shared else rabbitmq::rabbitmq-static)
+        self.cpp_info.filenames["cmake_find_package"] = "rabbitmq-c"
+        self.cpp_info.filenames["cmake_find_package_multi"] = "rabbitmq-c"
+        self.cpp_info.names["cmake_find_package"] = "rabbitmq"
+        self.cpp_info.names["cmake_find_package_multi"] = "rabbitmq"
         self.cpp_info.names["pkg_config"] = "librabbitmq"
+        rabbitmq_target = "rabbitmq" if self.options.shared else "rabbitmq-static"
+        self.cpp_info.components["rabbitmq"].names["cmake_find_package"] = rabbitmq_target
+        self.cpp_info.components["rabbitmq"].names["cmake_find_package_multi"] = rabbitmq_target
         if self.settings.os == "Windows":
-            self.cpp_info.libs = [
+            self.cpp_info.components["rabbitmq"].libs = [
                 "rabbitmq.4" if self.options.shared else "librabbitmq.4"
             ]
-            self.cpp_info.system_libs.extend(["crypt32", "ws2_32"])
+            self.cpp_info.components["rabbitmq"].system_libs.extend(["crypt32", "ws2_32"])
         else:
-            self.cpp_info.libs = ["rabbitmq"]
+            self.cpp_info.components["rabbitmq"].libs = ["rabbitmq"]
             if self.settings.os == "Linux":
-                self.cpp_info.system_libs.append("pthread")
+                self.cpp_info.components["rabbitmq"].system_libs.append("pthread")
         if not self.options.shared:
-            self.cpp_info.defines.append("AMQP_STATIC")
+            self.cpp_info.components["rabbitmq"].defines.append("AMQP_STATIC")
