@@ -15,6 +15,10 @@
 // specific language governing permissions and limitations
 // under the License.
 
+/**
+ * this is a simplified version of the echo_c++ example in brpc
+ */
+
 #include <butil/logging.h>
 #include <brpc/server.h>
 #include <butil/time.h>

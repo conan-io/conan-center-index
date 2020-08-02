@@ -1,6 +1,3 @@
-# this is based off the echo_c++ example provided in brpc but simpler due to
-# conan
-
 cmake_minimum_required(VERSION 3.1.4)
 project(test_package)
 
