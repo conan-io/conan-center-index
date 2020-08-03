@@ -20,6 +20,7 @@ class ZimgConan(ConanFile):
         "shared": False,
         "fPIC": True,
     }
+    exports_sources = "patches/**"
 
     _autotools = None
 
@@ -64,7 +65,6 @@ class ZimgConan(ConanFile):
     def _build_autotools(self):
         with tools.chdir(self._source_subfolder):
             self.run("autoreconf -fiv", win_bash=tools.os_info.is_windows)
-            # self.run("autoreconf --verbose --install --force", win_bash=tools.os_info.is_windows)
         autotools = self._configure_autools()
         autotools.make()
 
@@ -95,6 +95,11 @@ class ZimgConan(ConanFile):
                       platforms=self._sln_platforms)
 
     def build(self):
+        # FIXME: tools.patch cannot handle byte-order-mark (BOM) 0xefbbbf at start of sln file
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            print("patch", patch)
+            tools.patch(**patch)
+
         if self.settings.compiler == "Visual Studio":
             self._build_msvc()
         else:
@@ -116,11 +121,16 @@ class ZimgConan(ConanFile):
         self.copy("zimg++.hpp", src=os.path.join(self._source_subfolder, "src", "zimg", "api"), dst="include")
 
         sln_dir = os.path.join(self._source_subfolder, "_msvc", self._sln_platforms[str(self.settings.arch)], str(self.settings.build_type))
+        print(sln_dir)
         if self.options.shared:
-            os.unlink(os.path.join(sln_dir, "z.lib"))
-
-        self.copy("*.lib", src=sln_dir, dst="lib")
-        self.copy("*.dll", src=sln_dir, dst="bin")
+            self.copy("z_imp.lib", src=sln_dir, dst="lib")
+            self.copy("z.dll", src=sln_dir, dst="bin")
+            os.rename(os.path.join(self.package_folder, "lib", "z_imp.lib"),
+                      os.path.join(self.package_folder, "lib", "zimg.lib"))
+        else:
+            self.copy("z.lib", src=sln_dir, dst="lib")
+            os.rename(os.path.join(self.package_folder, "lib", "z.lib"),
+                      os.path.join(self.package_folder, "lib", "zimg.lib"))
 
     def package(self):
         self.copy("COPYING", src=self._source_subfolder, dst="licenses")
