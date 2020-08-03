@@ -1,4 +1,9 @@
+#ifdef WITH_JSONCPP_PREFIX
+#include <jsoncpp/json/json.h>
+#else
 #include <json/json.h>
+#endif
+
 #include <iostream>
 
 int main(int argc, char **argv)
