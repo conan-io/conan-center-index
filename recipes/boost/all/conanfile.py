@@ -919,7 +919,6 @@ class BoostConan(ConanFile):
                 boost_version_tag = "boost-%s_%s" % (major, minor)
                 self.cpp_info.components["headers"].includedirs = [os.path.join(self.package_folder, "include", boost_version_tag)]
 
-        # FIXME: the boost component cannot be made!! But is required to make!! Name it "headers" for now.
         self.cpp_info.components["headers"].libs = []
         self.cpp_info.components["headers"].names["cmake_find_package"] = "boost"
         self.cpp_info.components["headers"].names["cmake_find_package_multi"] = "boost"
