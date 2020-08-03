@@ -11,7 +11,7 @@ class M4Conan(ConanFile):
     homepage = "https://www.gnu.org/software/m4/"
     license = "GPL-3.0-only"
     exports_sources = ["patches/*.patch"]
-    settings = "os", "arch", "compiler"
+    settings = "os", "arch", "compiler", "build_type"
 
     _autotools = None
     _source_subfolder = "source_subfolder"
@@ -46,6 +46,8 @@ class M4Conan(ConanFile):
             build_canonical_name = False
             host_canonical_name = False
             self._autotools.flags.append("-FS")
+            if self.settings.build_type in ("Debug", "RelWithDebInfo"):
+                self._autotools.link_flags.append("-PDB")
         self._autotools.configure(args=conf_args, configure_dir=self._source_subfolder, build=build_canonical_name, host=host_canonical_name)
         return self._autotools
 
