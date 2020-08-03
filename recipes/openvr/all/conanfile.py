@@ -35,6 +35,10 @@ class OpenvrConan(ConanFile):
         if self.settings.compiler.cppstd:
             tools.check_min_cppstd(self, "11")
 
+        if self.settings.compiler == "gcc" and tools.Version(self.settings.compiler.version) < "5":
+            raise ConanInvalidConfiguration("OpenVR can't be compiled by {0} {1}".format(self.settings.compiler,
+                                                                                         self.settings.compiler.version))
+
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
         extracted_dir = "{}-{}".format(self.name, self.version)
@@ -46,6 +50,7 @@ class OpenvrConan(ConanFile):
         self._cmake = CMake(self)
         self._cmake.definitions["BUILD_SHARED"] = self.options.shared
         self._cmake.definitions["BUILD_UNIVERSAL"] = False
+        self._cmake.definitions["USE_LIBCXX"] = False
         self._cmake.configure()
 
         return self._cmake
