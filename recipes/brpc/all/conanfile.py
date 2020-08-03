@@ -86,7 +86,7 @@ class BrpcConan(ConanFile):
         if self.options.shared:
             self._remove_files(lib_path, ["lib*.a", "*.lib"])
         else:
-            self._remove_files(lib_path, ["lib*.so", "*.dll"])
+            self._remove_files(lib_path, ["*.so", "*.dylib", "*.dll"])
         tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
 
     def package_info(self):
