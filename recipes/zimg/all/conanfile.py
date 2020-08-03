@@ -39,6 +39,9 @@ class ZimgConan(ConanFile):
             self.settings.build_type = "Release"
         if self.settings.build_type not in ("Release", "Debug"):
             raise ConanInvalidConfiguration("Invalid build_type")
+        if self.settings.compiler == "Visual Studio":
+            if self.settings.compiler.version < tools.Version(15):
+                raise ConanInvalidConfiguration("zimg requires at least Visual Studio 15 2017")
 
     def build_requirements(self):
         self.build_requires("libtool/2.4.6")
@@ -82,22 +85,13 @@ class ZimgConan(ConanFile):
     }
 
     def _build_msvc(self):
-        for root, _, files in os.walk(os.path.join(self._source_subfolder, "_msvc")):
-            for file in files:
-                if os.path.splitext(file) != ".vcxproj":
-                    continue
-                f = os.path.join(root, file)
-                tools.replace_in_file(f, "<WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>", "")
-
         msbuild = MSBuild(self)
         msbuild.build(os.path.join(self._source_subfolder, "_msvc", "zimg.sln"),
                       targets=["dll" if self.options.shared else "zimg"],
                       platforms=self._sln_platforms)
 
     def build(self):
-        # FIXME: tools.patch cannot handle byte-order-mark (BOM) 0xefbbbf at start of sln file
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            print("patch", patch)
             tools.patch(**patch)
 
         if self.settings.compiler == "Visual Studio":
@@ -121,7 +115,6 @@ class ZimgConan(ConanFile):
         self.copy("zimg++.hpp", src=os.path.join(self._source_subfolder, "src", "zimg", "api"), dst="include")
 
         sln_dir = os.path.join(self._source_subfolder, "_msvc", self._sln_platforms[str(self.settings.arch)], str(self.settings.build_type))
-        print(sln_dir)
         if self.options.shared:
             self.copy("z_imp.lib", src=sln_dir, dst="lib")
             self.copy("z.dll", src=sln_dir, dst="bin")
