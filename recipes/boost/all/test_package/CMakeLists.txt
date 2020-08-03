@@ -80,5 +80,6 @@ IF(NOT HEADER_ONLY)
 ENDIF()
 
 # Test header-only target
+find_package(Boost REQUIRED)
 ADD_EXECUTABLE(lambda_exe lambda.cpp)
 target_link_libraries(lambda_exe Boost::boost)
