@@ -664,6 +664,8 @@ Examples = bin/datadir/examples""")
             yield element
 
     def _gather_libs(self, p):
+        if not p in self.deps_cpp_info.deps:
+            return []
         libs = ["-l" + i for i in self.deps_cpp_info[p].libs + self.deps_cpp_info[p].system_libs]
         if tools.is_apple_os(self.settings.os):
             libs += ["-framework " + i for i in self.deps_cpp_info[p].frameworks]
@@ -671,15 +673,3 @@ Examples = bin/datadir/examples""")
         for dep in self.deps_cpp_info[p].public_deps:
             libs += self._gather_libs(dep)
         return self._remove_duplicate(libs)
-
-    def _gather_lib_paths(self, p):
-        lib_paths = self.deps_cpp_info[p].lib_paths
-        for dep in self.deps_cpp_info[p].public_deps:
-            lib_paths += self._gather_lib_paths(dep)
-        return self._remove_duplicate(lib_paths)
-
-    def _gather_include_paths(self, p):
-        include_paths = self.deps_cpp_info[p].include_paths
-        for dep in self.deps_cpp_info[p].public_deps:
-            include_paths += self._gather_include_paths(dep)
-        return self._remove_duplicate(include_paths)
