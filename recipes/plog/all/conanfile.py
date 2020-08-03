@@ -1,7 +1,5 @@
-from conans import ConanFile, CMake, tools
-from conans.errors import ConanInvalidConfiguration
-from conans.tools import Version
-import os.path
+import os
+from conans import ConanFile, tools
 
 
 class PlogConan(ConanFile):
@@ -12,7 +10,6 @@ class PlogConan(ConanFile):
     license = "MPL-2.0"
     topics = ("logging", "header-only", "portable")
     no_copy_source = True
-    settings = "compiler"
 
     @property
     def _source_subfolder(self):
