@@ -14,16 +14,18 @@ class MpfrConan(ConanFile):
     settings = "os", "arch", "compiler", "build_type"
     options = {"shared": [True, False], "fPIC": [True, False]}
     default_options = {"shared": False, "fPIC": True}
-    requires = "mpir/3.0.0"
     exports_sources = "CMakeLists.txt"
     generators = "cmake"
 
-    _source_subfolder = "source_subfolder"
     _autotools = None
     _cmake = None
 
+    @property
+    def _source_subfolder(self):
+        return "source_subfolder"
+
     def config_options(self):
-        if self.settings.os == 'Windows':
+        if self.settings.os == "Windows":
             del self.options.fPIC
 
     def configure(self):
@@ -31,6 +33,9 @@ class MpfrConan(ConanFile):
             del self.options.fPIC
         del self.settings.compiler.libcxx
         del self.settings.compiler.cppstd
+
+    def requirements(self):
+        self.requires("mpir/3.0.0")
 
     def build_requirements(self):
         if self.settings.os == "Windows" and self.settings.compiler != "Visual Studio" and \
