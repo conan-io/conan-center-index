@@ -11,7 +11,7 @@ int main(int argc, char **argv) {
     }
 
     Assimp::Importer importer;
-    const aiScene* scene = importer.ReadFile( pFile,
+    const aiScene* scene = importer.ReadFile(argv[1],
         aiProcess_CalcTangentSpace       |
         aiProcess_Triangulate            |
         aiProcess_JoinIdenticalVertices  |
