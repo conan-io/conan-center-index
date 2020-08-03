@@ -1,8 +1,9 @@
 #include <iostream>
+#include <cassert>
 
 #include "Recast.h"
 
 int main() {
-    std::cout << (rcMin(10, 20) == 10);
+    assert(rcSqrt(2) == 4);
     return EXIT_SUCCESS;
 }

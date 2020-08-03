@@ -66,20 +66,25 @@ class RecastNavigationConan(ConanFile):
         cmake.install()
 
     def package_info(self):
-        self.cpp_info.components["Recast"].name = "Recast"
+        self.cpp_info.components["Recast"].names["cmake_find_package"] = "Recast"
+        self.cpp_info.components["Recast"].names["cmake_find_package_multi"] = "Recast"
         self.cpp_info.components["Recast"].libs = ["Recast"]
 
-        self.cpp_info.components["Detour"].name = "Detour"
+        self.cpp_info.components["Detour"].names["cmake_find_package"] = "Detour"
+        self.cpp_info.components["Detour"].names["cmake_find_package_multi"] = "Detour"
         self.cpp_info.components["Detour"].libs = ["Detour"]
 
-        self.cpp_info.components["DetourCrowd"].name = "DetourCrowd"
+        self.cpp_info.components["DetourCrowd"].names["cmake_find_package"] = "DetourCrowd"
+        self.cpp_info.components["DetourCrowd"].names["cmake_find_package_multi"] = "DetourCrowd"
         self.cpp_info.components["DetourCrowd"].libs = ["DetourCrowd"]
         self.cpp_info.components["DetourCrowd"].requires = ["Detour"]
 
-        self.cpp_info.components["DetourTileCache"].name = "DetourTileCache"
+        self.cpp_info.components["DetourTileCache"].names["cmake_find_package"] = "DetourTileCache"
+        self.cpp_info.components["DetourTileCache"].names["cmake_find_package_multi"] = "DetourTileCache"
         self.cpp_info.components["DetourTileCache"].libs = ["DetourTileCache"]
         self.cpp_info.components["DetourTileCache"].requires = ["Detour"]
 
-        self.cpp_info.components["DebugUtils"].name = "DebugUtils"
+        self.cpp_info.components["DebugUtils"].names["cmake_find_package"] = "DebugUtils"
+        self.cpp_info.components["DebugUtils"].names["cmake_find_package_multi"] = "DebugUtils"
         self.cpp_info.components["DebugUtils"].libs = ["DebugUtils"]
         self.cpp_info.components["DebugUtils"].requires = ["Recast", "Detour", "DetourTileCache"]
