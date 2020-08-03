@@ -81,6 +81,12 @@ class BisonConan(ConanFile):
         if self.settings.os == "Windows":
             self._autotools.defines.append("_WINDOWS")
         if self.settings.compiler == "Visual Studio":
+            # Avoid a `Assertion Failed Dialog Box` during configure with build_type=Debug
+            # Visual Studio does not support the %n format flag:
+            # https://docs.microsoft.com/en-us/cpp/c-runtime-library/format-specification-syntax-printf-and-wprintf-functions
+            # Because the %n format is inherently insecure, it is disabled by default. If %n is encountered in a format string,
+            # the invalid parameter handler is invoked, as described in Parameter Validation. To enable %n support, see _set_printf_count_output.
+            args.extend(["gl_cv_func_printf_directive_n=no", "gl_cv_func_snprintf_directive_n=no", "gl_cv_func_snprintf_directive_n=no"])
             self._autotools.flags.append("-FS")
             host, build = False, False
         self._autotools.configure(args=args, configure_dir=self._source_subfolder, host=host, build=build)
