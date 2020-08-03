@@ -9,13 +9,8 @@ class Assimp(ConanFile):
     description = "A library to import and export various 3d-model-formats including scene-post-processing to generate missing render data."
     topics = ("conan", "assimp", "3d")
     license = "BSD-3-Clause"
-
-    requires = "zlib/1.2.11", "irrxml/1.2"
-
     exports_sources = ["CMakeLists.txt"]
-
     generators = "cmake"
-
     settings = "os", "compiler", "build_type", "arch"
     options = {
         "shared": [True, False],
@@ -97,6 +92,10 @@ class Assimp(ConanFile):
 
     _source_subfolder = "source_subfolder"
     _build_subfolder = "build_subfolder"
+
+    def requirements(self):
+        self.requires("zlib/1.2.11")
+        self.requires("irrxml/1.2")
 
     def config_options(self):
         if self.settings.os == "Windows":
