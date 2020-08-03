@@ -2,6 +2,7 @@ import os
 import glob
 from conans import ConanFile, CMake, tools
 
+
 class LodepngConan(ConanFile):
     name = "lodepng"
     description = "PNG encoder and decoder in C and C++, without dependencies."
@@ -61,4 +62,4 @@ class LodepngConan(ConanFile):
         self.copy(pattern="LICENSE", dst="licenses", src=self._source_subfolder)
 
     def package_info(self):
-        self.cpp_info.libs = tools.collect_libs(self)
+        self.cpp_info.libs = ["lodepng"]
