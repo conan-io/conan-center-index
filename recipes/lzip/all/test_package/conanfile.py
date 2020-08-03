@@ -6,7 +6,6 @@ import shutil
 
 class TestPackageConan(ConanFile):
     settings = "os", "compiler", "build_type", "arch"
-    generators = "cmake"
 
     def test(self):
         if not tools.cross_building(self.settings, skip_x64_x86=True):
@@ -26,4 +25,3 @@ class TestPackageConan(ConanFile):
             self.run("{} -d conanfile.py.lz".format(lzip), run_environment=True)
             if tools.sha256sum("conanfile.py") != sha256_original:
                 raise ConanException("sha256 from extracted conanfile.py does not match original")
-
