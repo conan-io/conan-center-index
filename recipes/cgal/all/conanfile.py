@@ -93,7 +93,9 @@ class CgalConan(ConanFile):
             tools.rmdir(os.path.join(self.package_folder, "bin"))
 
     def package_info(self):
-        if not self.options.header_only:
-            self.cpp_info.libs = tools.collect_libs(self)
+        # TODO: add components
         self.cpp_info.names["cmake_find_package"] = "CGAL"
         self.cpp_info.names["cmake_find_package_multi"] = "CGAL"
+        self.cpp_info.libs = tools.collect_libs(self)
+        if self.settings.os == "Linux" and (self.options.with_cgal_core or self.options.with_cgal_imageio):
+            self.cpp_info.system_libs.append("m")
