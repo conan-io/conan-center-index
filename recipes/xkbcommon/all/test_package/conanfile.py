@@ -7,6 +7,9 @@ class TestPackageConan(ConanFile):
     generators = "cmake", "pkg_config"
 
     def build(self):
+        with tools.environment_append({'PKG_CONFIG_PATH': '.'}):
+            self.output.info("xkbcommon libs: %s" % " ".join(tools.PkgConfig("xkbcommon").libs_only_l))
+            self.output.info("xkbcommon-x11 libs: %s" % " ".join(tools.PkgConfig("xkbcommon-x11").libs_only_l))
         cmake = CMake(self)
         cmake.configure()
         cmake.build()
