@@ -81,7 +81,6 @@ class BisonConan(ConanFile):
         if self.settings.os == "Windows":
             self._autotools.defines.append("_WINDOWS")
         if self.settings.compiler == "Visual Studio":
-            self._autotools.defines.append("NOMINMAX")
             self._autotools.flags.append("-FS")
             host, build = False, False
         self._autotools.configure(args=args, configure_dir=self._source_subfolder, host=host, build=build)
