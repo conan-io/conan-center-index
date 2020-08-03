@@ -30,6 +30,11 @@ class MpfrConan(ConanFile):
         del self.settings.compiler.libcxx
         del self.settings.compiler.cppstd
 
+    def build_requirements(self):
+        if self.settings.os == "Windows" and self.settings.compiler != "Visual Studio" and \
+           "CONAN_BASH_PATH" not in os.environ and tools.os_info.detect_windows_subsystem() != "msys2":
+            self.build_requires("msys2/20190524")
+
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
         extracted_dir = self.name + "-" + self.version
@@ -51,7 +56,7 @@ class MpfrConan(ConanFile):
             if self.settings.compiler == "clang" and self.settings.arch == "x86":
                 # fatal error: error in backend: Unsupported library call operation!
                 args.append("--disable-float128")
-            self._autotools = AutoToolsBuildEnvironment(self)
+            self._autotools = AutoToolsBuildEnvironment(self, win_bash=tools.os_info.is_windows)
             self._autotools.configure(args=args, configure_dir=self._source_subfolder)
         return self._autotools
 
