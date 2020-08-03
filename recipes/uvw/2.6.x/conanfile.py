@@ -1,6 +1,6 @@
 import os
 import glob
-from conans import CMake, ConanFile, tools
+from conans import ConanFile, tools
 from conans.errors import ConanInvalidConfiguration
 from conans.tools import Version
 
@@ -50,11 +50,11 @@ class UvwConan(ConanFile):
         if self.settings.compiler.get_safe("cppstd"):
             tools.check_min_cppstd(self, "17")
         if not self._supported_compiler:
-            raise ConanInvalidConfiguration("uvw: Unsupported compiler.")
+            raise ConanInvalidConfiguration("uvw requires C++17. {} {} does not support it.".format(str(self.settings.compiler), self.settings.compiler.version))
 
     def package(self):
         self.copy("*.hpp", dst="include", src=os.path.join(self._source_subfolder, "src"))
-        self.copy("*", dst="include/uvw", src=os.path.join(self._source_subfolder, "src/uvw"))
+        self.copy("*", dst=os.path.join("include", "uvw"), src=os.path.join(self._source_subfolder, "src", "uvw"))
         self.copy("LICENSE", dst="licenses", src=self._source_subfolder)
 
     def package_id(self):
