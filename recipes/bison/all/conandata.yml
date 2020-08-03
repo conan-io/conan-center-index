@@ -11,6 +11,8 @@ patches:
       base_path: "source_subfolder"
     - patch_file: "patches/0002-3.7.1-open-source-file-in-binary-mode-MS-ftell-bug-ks-68337.patch"
       base_path: "source_subfolder"
+    - patch_file: "patches/0005-gnulib-limit-search-range-of-_setmaxstdio.patch"
+      base_path: "source_subfolder"
   "3.5.3":
     - patch_file: "patches/0001-create_pipe-uses-O_TEXT-not-O_BINARY-mode.patch"
       base_path: "source_subfolder"
@@ -19,4 +21,6 @@ patches:
     - patch_file: "patches/0003-3.5.3-msvc-changes.patch"
       base_path: "source_subfolder"
     - patch_file: "patches/0004-3.5.3-relocatable.patch"
+      base_path: "source_subfolder"
+    - patch_file: "patches/0005-gnulib-limit-search-range-of-_setmaxstdio.patch"
       base_path: "source_subfolder"
