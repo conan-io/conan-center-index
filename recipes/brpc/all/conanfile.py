@@ -35,6 +35,7 @@ class BrpcConan(ConanFile):
         self.requires("protobuf/3.9.1")
         self.requires("leveldb/1.22")
         self.requires("openssl/1.1.1g")
+        self.requires("zlib/1.2.11")
         if self.options.with_glog:
             self.requires("glog/0.4.0")
         if self.options.with_thrift:

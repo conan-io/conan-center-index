@@ -11,11 +11,12 @@ set(CMAKE_FIND_USE_CMAKE_SYSTEM_PATH FALSE)
 # the generated FindProtobuf.cmake in the protobuf conan package
 find_program(PROTOBUF_PROTOC_EXECUTABLE NAMES protoc)
 # the brpc build uses both variants of protobuf include directories
-set(PROTOBUF_INCLUDE_DIRS "${CONAN_PROTOBUF_ROOT}/include")
-set(PROTOBUF_INCLUDE_DIR "${CONAN_PROTOBUF_ROOT}/include")
+set(PROTOBUF_INCLUDE_DIRS "${CONAN_INCLUDE_DIRS_PROTOBUF}")
+set(PROTOBUF_INCLUDE_DIR "${CONAN_INCLUDE_DIRS_PROTOBUF}")
 
-find_library(OPENSSL_LIBRARIES NAMES ssl)
-find_library(OPENSSL_CRYPTO_LIBRARY NAMES crypto)
+find_package(OpenSSL REQUIRED)
+set(OPENSSL_LIBRARIES OpenSSL::SSL)
+set(OPENSSL_CRYPTO_LIBRARY OpenSSL::Crypto)
 
 # this is used to select thrift debug vs release libraries in brpc's build
 string(TOLOWER "${CMAKE_BUILD_TYPE}" RECIPE_BUILD_TYPE)

@@ -1,5 +1,5 @@
 diff --git a/CMakeLists.txt b/CMakeLists.txt
-index f469eb9f..1ef72ac2 100644
+index f469eb9f..ab13c96b 100644
 --- a/CMakeLists.txt
 +++ b/CMakeLists.txt
 @@ -14,6 +14,8 @@ if(POLICY CMP0042)
@@ -66,15 +66,14 @@ index f469eb9f..1ef72ac2 100644
  if(NOT PROTOC_LIB)
      message(FATAL_ERROR "Fail to find protoc lib")
  endif()
-@@ -157,9 +161,14 @@ include_directories(
+@@ -157,9 +161,13 @@ include_directories(
          ${OPENSSL_INCLUDE_DIR}
          )
  
 +# This diff hunk is necessary because the protobuf package disables the
 +# backwards-compatible aliasing of Protobuf_LIBRARIES with
 +# PROTOBUF_LIBRARIES. Normally, that should be enabled with
-+# protobuf_MODULE_COMPATIBLE; it appears that the endif for the if (0) in
-+# the protobuf recipe should be moved further up
++# protobuf_MODULE_COMPATIBLE
  set(DYNAMIC_LIB
      ${GFLAGS_LIBRARY}
 -    ${PROTOBUF_LIBRARIES}
@@ -82,7 +81,7 @@ index f469eb9f..1ef72ac2 100644
      ${LEVELDB_LIB}
      ${PROTOC_LIB}
      ${CMAKE_THREAD_LIBS_INIT}
-@@ -171,6 +180,12 @@ set(DYNAMIC_LIB
+@@ -171,6 +179,12 @@ set(DYNAMIC_LIB
      z)
  set(BRPC_PRIVATE_LIBS "-lgflags -lprotobuf -lleveldb -lprotoc -lssl -lcrypto -ldl -lz")
  
