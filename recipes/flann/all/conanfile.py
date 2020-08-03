@@ -26,9 +26,15 @@ class LibFlannConan(ConanFile):
         "with_hdf5": False
     }
 
-    _source_subfolder = "source_subfolder"
-    _build_subfolder = "build_subfolder"
     _cmake = None
+
+    @property
+    def _source_subfolder(self):
+        return "source_subfolder"
+
+    @property
+    def _build_subfolder(self):
+        return "build_subfolder"
 
     def config_options(self):
         if self.settings.compiler == "Visual Studio":
@@ -87,29 +93,22 @@ class LibFlannConan(ConanFile):
         cmake.build()
 
     def package(self):
+        self.copy("COPYING", src=self._source_subfolder, dst="licenses")
         cmake = self._configure_cmake()
         cmake.install()
-
-        self.copy("COPYING", src=self._source_subfolder, dst="licenses")
-
-        # Remove pkg-config files
         tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
-        # Remove MS runtime files (KB-H021)
-        for file_to_remove in ["concrt140.dll", "msvcp140.dll", "vcruntime140.dll"]:
-            path = os.path.join(self.package_folder, "bin", file_to_remove)
-            if os.path.isfile(path):
-                os.remove(path)
-
         # Remove static/dynamic libraries depending on the build mode
         if self.options.shared:
-            for file_to_remove in glob.glob(os.path.join(self.package_folder, "lib", "flann_cpp_s*")):
-                os.remove(file_to_remove)
+            # Remove MS runtime files
+            for dll_pattern_to_remove in ["concrt*.dll", "msvcp*.dll", "vcruntime*.dll"]:
+                for dll_to_remove in glob.glob(os.path.join(self.package_folder, "bin", dll_pattern_to_remove)):
+                    os.remove(dll_to_remove)
         else:
-            if self.settings.os != "Linux":
-                tools.rmdir(os.path.join(self.package_folder, "bin"))
-            else:
-                for file_to_remove in glob.glob(os.path.join(self.package_folder, "lib", "*.so*")):
-                    os.remove(file_to_remove)
+            tools.rmdir(os.path.join(self.package_folder, "bin"))
+        libs_pattern_to_remove = ["*flann_cpp_s.*", "*flann_s.*"] if self.options.shared else ["*flann_cpp.*", "*flann.*"]
+        for lib_pattern_to_remove in libs_pattern_to_remove:
+            for lib_to_remove in glob.glob(os.path.join(self.package_folder, "lib", lib_pattern_to_remove)):
+                os.remove(lib_to_remove)
 
     def package_info(self):
         if self.options.shared:
