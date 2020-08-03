@@ -119,10 +119,25 @@ class LibFlannConan(ConanFile):
                 os.remove(lib_to_remove)
 
     def package_info(self):
-        if self.options.shared:
-            self.cpp_info.libs = ["flann", "flann_cpp"]
-        else:
-            self.cpp_info.libs = ["flann_s", "flann_cpp_s"]
-
+        self.cpp_info.names["cmake_find_package"] = "Flann"
+        self.cpp_info.names["cmake_find_package_multi"] = "flann"
+        # flann_cpp
+        flann_cpp_lib = "flann_cpp" if self.options.shared else "flann_cpp_s"
+        self.cpp_info.components["flann_cpp"].names["cmake_find_package"] = flann_cpp_lib
+        self.cpp_info.components["flann_cpp"].names["cmake_find_package_multi"] = flann_cpp_lib
+        self.cpp_info.components["flann_cpp"].libs = [flann_cpp_lib]
+        if not self.options.shared and tools.stdcpp_library(self):
+            self.cpp_info.components["flann_cpp"].system_libs.append(tools.stdcpp_library(self))
+        self.cpp_info.components["flann_cpp"].requires = ["lz4::lz4"]
+        if self.options.with_hdf5:
+            self.cpp_info.components["flann_cpp"].requires = ["hdf5::hdf5"]
+        # flann
+        flann_c_lib = "flann" if self.options.shared else "flann_s"
+        self.cpp_info.components["flann_c"].names["cmake_find_package"] = flann_c_lib
+        self.cpp_info.components["flann_c"].names["cmake_find_package_multi"] = flann_c_lib
+        self.cpp_info.components["flann_c"].libs = [flann_c_lib]
+        if self.settings.os == "Linux":
+            self.cpp_info.components["flann_c"].system_libs.append("m")
         if not self.options.shared:
-            self.cpp_info.defines.append("FLANN_STATIC")
+            self.cpp_info.components["flann_c"].defines.append("FLANN_STATIC")
+        self.cpp_info.components["flann_c"].requires = ["flann_cpp"]
