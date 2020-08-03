@@ -84,7 +84,7 @@ class BrpcConan(ConanFile):
         cmake.install()
         lib_path = os.path.join(self.package_folder, "lib")
         if self.options.shared:
-            self._remove_files(lib_path, ["lib*.a", "*.lib"])
+            self._remove_files(lib_path, ["*.a", "*.lib"])
         else:
             self._remove_files(lib_path, ["*.so", "*.dylib", "*.dll"])
         tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
