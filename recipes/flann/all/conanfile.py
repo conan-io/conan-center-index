@@ -11,7 +11,7 @@ class LibFlannConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://www.cs.ubc.ca/research/flann/"
     license = "BSD-3-Clause"
-    exports_sources = "CMakeLists.txt"
+    exports_sources = ["CMakeLists.txt", "patches/**"]
     generators = "cmake", "cmake_find_package"
 
     settings = "os", "arch", "compiler", "build_type"
@@ -45,6 +45,7 @@ class LibFlannConan(ConanFile):
             del self.options.fPIC
 
     def requirements(self):
+        self.requires("lz4/1.9.2")
         if self.options.with_hdf5:
             self.requires("hdf5/1.10.6")
 
@@ -68,6 +69,12 @@ class LibFlannConan(ConanFile):
             'add_library(flann SHARED empty.cpp)'
         )
 
+    def _patch_sources(self):
+        for patch in self.conan_data.get("patches", {}).get(self.version, {}):
+            tools.patch(**patch)
+        # remove embeded lz4
+        tools.rmdir(os.path.join(self._source_subfolder, "src", "cpp", "flann", "ext"))
+
     def _configure_cmake(self):
         if self._cmake is not None:
             return self._cmake
@@ -85,14 +92,11 @@ class LibFlannConan(ConanFile):
         # OpenMP support can be added later if needed
         self._cmake.definitions["USE_OPENMP"] = False
 
-        # Workaround issue with flann_cpp
-        if self.settings.os == "Windows" and self.options.shared:
-            self._cmake.definitions["CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS"] = True
-
         self._cmake.configure(build_folder=self._build_subfolder)
         return self._cmake
 
     def build(self):
+        self._patch_sources()
         cmake = self._configure_cmake()
         cmake.build()
 
