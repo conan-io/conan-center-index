@@ -10,37 +10,46 @@ class SeasocksConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/mattgodbolt/seasocks"
     settings = "os", "compiler", "build_type", "arch"
-    options = {"shared": [True, False]}
-    default_options = "shared=True"
+    options = {"shared": [True, False], "support_deflate": [True, False]}
+    default_options = {"shared": True, "support_deflate": True}
     generators = "cmake"
-    exports_sources = "src/main/c/*"
+    exports_sources = ["CMakeLists.txt"]
+
+    _cmake = None
+
+    @property
+    def _source_subfolder(self):
+        return "source_subfolder"
 
     def requirements(self):
-        self.requires("zlib/1.2.11")
+        if self.options.support_deflate:
+            self.requires("zlib/1.2.11")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
-        os.rename("seasocks-" + self.version, "seasocks")
-        # This small hack might be useful to guarantee proper /MT /MD linkage in MSVC
-        # if the packaged project doesn't have variables to set it properly
-        tools.replace_in_file("seasocks/CMakeLists.txt", "project(Seasocks VERSION " + self.version + ")", 'project(Seasocks VERSION ' + self.version + ''')
-include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
-conan_basic_setup()''')
+        os.rename("seasocks-" + self.version, self._source_subfolder)
 
-    def _configure_cmake(self):
-        cmake = CMake(self)
-        cmake.configure(build_folder="build")
-        return cmake
+    def _config_cmake(self):
+        if self._cmake:
+            return self._cmake
+        self._cmake = CMake(self)
+        self._cmake.definitions["DEFLATE_SUPPORT"] = "ON" if self.options.support_deflate else "OFF"
+        self._cmake.definitions["SEASOCKS_EXAMPLE_APP"] = "OFF"
+        self._cmake.definitions["UNITTESTS"] = "OFF"
+        self._cmake.configure()
+        return self._cmake
 
     def build(self):
         cmake = self._config_cmake()
         cmake.build()
 
     def package(self):
-        self.copy(pattern="LICENSE", dst="licenses", src="seasocks")
+        self.copy(pattern="LICENSE", dst="licenses", src=self._source_subfolder)
         cmake = self._config_cmake()
         cmake.install()
-        tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
+        tools.rmdir(os.path.join(self.package_folder, 'lib', 'cmake'))
+        tools.rmdir(os.path.join(self.package_folder, 'CMake'))
+        tools.rmdir(os.path.join(self.package_folder, 'lib', 'pkgconfig'))
 
     def package_info(self):
-        self.cpp_info.libs = ["seasocks"]
+        self.cpp_info.libs = tools.collect_libs(self)
