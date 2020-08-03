@@ -1,0 +1,10 @@
+sources:
+    "1.4.3":
+        url: https://github.com/mattgodbolt/seasocks/archive/v1.4.3.tar.gz
+        sha256: aa0a9be3ae248ceaa611d97ad25be7b3edefef9356453dc7989a1c2b73ac22ba
+    "1.4.2":
+        url: https://github.com/mattgodbolt/seasocks/archive/v1.4.2.tar.gz
+        sha256: 584c60017f716b4b37224135bfede6e6195416f96629db04b386a85a0003f924
+    "1.4.1":
+        url: https://github.com/mattgodbolt/seasocks/archive/v1.4.1.tar.gz
+        sha256: 18601cf18b4eb2ccc352da9dffe39567b332514c3b98050d708dac3cd5a2ed2d
