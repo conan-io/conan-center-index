@@ -25,6 +25,10 @@ class MpirConan(ConanFile):
         if self.settings.os == "Windows":
             del self.options.fPIC
 
+    def configure(self):
+        if self.options.shared:
+            del self.options.fPIC
+
     def build_requirements(self):
         self.build_requires("yasm/1.3.0")
         if self.settings.os == "Windows" and self.settings.compiler != "Visual Studio" and \
@@ -72,7 +76,7 @@ class MpirConan(ConanFile):
                 args.extend(['--disable-static', '--enable-shared'])
             else:
                 args.extend(['--disable-shared', '--enable-static'])
-            args.append("--with-pic" if self.options.get_safe("fPIC") else "--without-pic")
+            args.append("--with-pic" if self.options.get_safe("fPIC", True) else "--without-pic")
 
             args.extend(['--disable-silent-rules', '--enable-gmpcompat', '--enable-cxx'])
             self._autotools.configure(args=args)
