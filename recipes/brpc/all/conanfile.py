@@ -61,10 +61,8 @@ class BrpcConan(ConanFile):
         if self._cmake:
             return self._cmake
         self._cmake = CMake(self)
-        if self.options.with_glog:
-            self._cmake.definitions["WITH_GLOG"] = True
-        if self.options.with_thrift:
-            self._cmake.definitions["WITH_THRIFT"] = True
+        self._cmake.definitions["WITH_GLOG"] = self.options.with_glog
+        self._cmake.definitions["WITH_THRIFT"] = self.options.with_thrift
         if self.options.with_snappy:
             self._cmake.definitions["WITH_SNAPPY"] = True
         self._cmake.configure()
@@ -96,4 +94,3 @@ class BrpcConan(ConanFile):
         if not self.options.shared:
             if self.settings.os == "Linux":
                 self.cpp_info.system_libs = ["pthread"]
-
