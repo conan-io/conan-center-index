@@ -1,4 +1,4 @@
-#include <iostream>
+#include <cstdlib>
 
 #include "EtcImage.h"
 #include "EtcColorFloatRGBA.h"
