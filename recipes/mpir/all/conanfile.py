@@ -14,16 +14,31 @@ class MpirConan(ConanFile):
     settings = "os", "compiler", "arch", "build_type"
     options = {"shared": [True, False], "fPIC": [True, False]}
     default_options = {"shared": False, "fPIC": True}
-    _source_subfolder = "source_subfolder"
-    _platforms = {'x86': 'Win32', 'x86_64': 'x64'}
+
     _autotools = None
 
-    def build_requirements(self):
-        self.build_requires("yasm/1.3.0")
+    @property
+    def _source_subfolder(self):
+        return "source_subfolder"
 
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
+
+    def build_requirements(self):
+        self.build_requires("yasm/1.3.0")
+        if self.settings.os == "Windows" and self.settings.compiler != "Visual Studio" and \
+           "CONAN_BASH_PATH" not in os.environ and tools.os_info.detect_windows_subsystem() != "msys2":
+            self.build_requires("msys2/20190524")
+
+    def source(self):
+        tools.get(keep_permissions=True, **self.conan_data["sources"][self.version])
+        extracted_dir = self.name + "-" + self.version
+        os.rename(extracted_dir, self._source_subfolder)
+
+    @property
+    def _platforms(self):
+        return {"x86": "Win32", "x86_64": "x64"}
 
     @property
     def _dll_or_lib(self):
@@ -36,14 +51,9 @@ class MpirConan(ConanFile):
                                                    "{}_mpir_gc".format(self._dll_or_lib),
                                                    "{}_mpir_gc.vcxproj".format(self._dll_or_lib))
 
-    def source(self):
-        tools.get(keep_permissions=True, **self.conan_data["sources"][self.version])
-        extracted_dir = self.name + "-" + self.version
-        os.rename(extracted_dir, self._source_subfolder)
-
     def _build_visual_studio(self):
         if "MD" in self.settings.compiler.runtime and not self.options.shared: # RuntimeLibrary only defined in lib props files
-                props_path = os.path.join(self._source_subfolder, "build.vc", 
+                props_path = os.path.join(self._source_subfolder, "build.vc",
                 "mpir_{}_{}.props".format(str(self.settings.build_type).lower(), self._dll_or_lib))
                 if self.settings.build_type == "Debug":
                     tools.replace_in_file(props_path, "<RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>",
@@ -56,7 +66,7 @@ class MpirConan(ConanFile):
 
     def _configure_autotools(self):
         if not self._autotools:
-            self._autotools = AutoToolsBuildEnvironment(self)
+            self._autotools = AutoToolsBuildEnvironment(self, win_bash=tools.os_info.is_windows)
             args = []
             if self.options.shared:
                 args.extend(['--disable-static', '--enable-shared'])
@@ -77,14 +87,14 @@ class MpirConan(ConanFile):
                 autotools.make()
 
     def package(self):
-        self.copy("COPYING*", dst="licenses", src=self._source_subfolder)        
+        self.copy("COPYING*", dst="licenses", src=self._source_subfolder)
         if self.settings.compiler == 'Visual Studio':
-            lib_folder = os.path.join(self._source_subfolder, self._dll_or_lib, 
-                                    self._platforms.get(str(self.settings.arch)), 
+            lib_folder = os.path.join(self._source_subfolder, self._dll_or_lib,
+                                    self._platforms.get(str(self.settings.arch)),
                                     str(self.settings.build_type))
             self.copy("*.h", dst="include", src=lib_folder, keep_path=True)
             self.copy(pattern="*.dll*", dst="bin", src=lib_folder, keep_path=False)
-            self.copy(pattern="*.lib", dst="lib", src=lib_folder, keep_path=False)        
+            self.copy(pattern="*.lib", dst="lib", src=lib_folder, keep_path=False)
         else:
             with tools.chdir(self._source_subfolder):
                 autotools = self._configure_autotools()
