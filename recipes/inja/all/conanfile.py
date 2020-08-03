@@ -1,7 +1,5 @@
 import os
-import re
-from conans import ConanFile, CMake, tools
-from conans.errors import ConanInvalidConfiguration
+from conans import ConanFile, tools
 
 
 class InjaConan(ConanFile):
