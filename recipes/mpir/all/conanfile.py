@@ -73,12 +73,12 @@ class MpirConan(ConanFile):
             self._autotools = AutoToolsBuildEnvironment(self, win_bash=tools.os_info.is_windows)
             args = []
             if self.options.shared:
-                args.extend(['--disable-static', '--enable-shared'])
+                args.extend(["--disable-static", "--enable-shared"])
             else:
-                args.extend(['--disable-shared', '--enable-static'])
+                args.extend(["--disable-shared", "--enable-static"])
             args.append("--with-pic" if self.options.get_safe("fPIC", True) else "--without-pic")
 
-            args.extend(['--disable-silent-rules', '--enable-gmpcompat', '--enable-cxx'])
+            args.extend(["--disable-silent-rules", "--enable-gmpcompat", "--enable-cxx"])
             self._autotools.configure(args=args)
         return self._autotools
 
@@ -92,7 +92,7 @@ class MpirConan(ConanFile):
 
     def package(self):
         self.copy("COPYING*", dst="licenses", src=self._source_subfolder)
-        if self.settings.compiler == 'Visual Studio':
+        if self.settings.compiler == "Visual Studio":
             lib_folder = os.path.join(self._source_subfolder, self._dll_or_lib,
                                     self._platforms.get(str(self.settings.arch)),
                                     str(self.settings.build_type))
@@ -103,10 +103,10 @@ class MpirConan(ConanFile):
             with tools.chdir(self._source_subfolder):
                 autotools = self._configure_autotools()
                 autotools.install()
-            tools.rmdir(os.path.join(self.package_folder, 'share'))
+            tools.rmdir(os.path.join(self.package_folder, "share"))
             with tools.chdir(os.path.join(self.package_folder, "lib")):
                 for filename in glob.glob("*.la"):
                     os.unlink(filename)
 
     def package_info(self):
-        self.cpp_info.libs = ['mpir']
+        self.cpp_info.libs = ["mpir"]
