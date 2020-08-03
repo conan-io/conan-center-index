@@ -6,13 +6,17 @@ class BondConan(ConanFile):
     name = "bond"
     version = "9.0.0"
     license = "MIT License"
-    author = "Lu Ye luye@microsoft.com"
-    url = "https://github.com/microsoft/bond.git"
+    homepage = "https://github.com/microsoft/bond.git"
+    url = "https://github.com/conan-io/conan-center-index"
     description = "Bond is a cross-platform framework for working with schematized data. It supports cross-language de/serialization and powerful generic mechanisms for efficiently manipulating data. Bond is broadly used at Microsoft in high scale services."
     topics = ("bond", "microsoft")
     settings = "os", "compiler", "build_type", "arch"
-    options = {"shared": [False, True]}
-    default_options = {"shared": False}
+    options = {
+        "shared": [False, True],
+        "fPIC": [True, False]}
+    default_options = {
+        "shared": False,
+        "fPIC": True}
     build_requires = "boost/1.71.0@conan/stable"
     generators = "cmake"
     exports_sources = ["FindBond.cmake"]
