@@ -45,6 +45,7 @@ class M4Conan(ConanFile):
             # The somewhat older configure script of m4 does not understand the canonical names of Visual Studio
             build_canonical_name = False
             host_canonical_name = False
+            self._autotools.flags.append("-FS")
         self._autotools.configure(args=conf_args, configure_dir=self._source_subfolder, build=build_canonical_name, host=host_canonical_name)
         return self._autotools
 
