@@ -12,8 +12,18 @@ class MpirConan(ConanFile):
     homepage = "http://mpir.org/"
     license = "LGPL-3.0-or-later"
     settings = "os", "compiler", "arch", "build_type"
-    options = {"shared": [True, False], "fPIC": [True, False]}
-    default_options = {"shared": False, "fPIC": True}
+    options = {
+        "shared": [True, False],
+        "fPIC": [True, False],
+        "enable_cxx": [True, False],
+        "enable_gmpcompat": [True, False]
+    }
+    default_options = {
+        "shared": False,
+        "fPIC": True,
+        "enable_cxx": True,
+        "enable_gmpcompat": True
+    }
 
     _autotools = None
 
@@ -28,6 +38,13 @@ class MpirConan(ConanFile):
     def configure(self):
         if self.options.shared:
             del self.options.fPIC
+        if self.settings.compiler == "Visual Studio":
+            del self.options.enable_gmpcompat
+            if self.options.shared:
+                del self.options.enable_cxx
+        if not self.options.get_safe("enable_cxx", False):
+            del self.settings.compiler.libcxx
+            del self.settings.compiler.cppstd
 
     def build_requirements(self):
         self.build_requires("yasm/1.3.0")
@@ -49,11 +66,18 @@ class MpirConan(ConanFile):
         return "dll" if self.options.shared else "lib"
 
     @property
-    def _vcxproj_path(self):
+    def _vcxproj_paths(self):
         compiler_version = self.settings.compiler.version if tools.Version(self.settings.compiler.version) < "16" else "15"
-        return os.path.join(self._source_subfolder,"build.vc{}".format(compiler_version),
-                                                   "{}_mpir_gc".format(self._dll_or_lib),
-                                                   "{}_mpir_gc.vcxproj".format(self._dll_or_lib))
+        build_subdir = "build.vc{}".format(compiler_version)
+        vcxproj_paths = [
+            os.path.join(self._source_subfolder, build_subdir,
+                         "{}_mpir_gc".format(self._dll_or_lib),
+                         "{}_mpir_gc.vcxproj".format(self._dll_or_lib))
+        ]
+        if self.options.get_safe("enable_cxx"):
+            vcxproj_paths.append(os.path.join(self._source_subfolder, build_subdir,
+                                              "lib_mpir_cxx", "lib_mpir_cxx.vcxproj"))
+        return vcxproj_paths
 
     def _build_visual_studio(self):
         if "MD" in self.settings.compiler.runtime and not self.options.shared: # RuntimeLibrary only defined in lib props files
@@ -66,7 +90,8 @@ class MpirConan(ConanFile):
                     tools.replace_in_file(props_path, "<RuntimeLibrary>MultiThreaded</RuntimeLibrary>",
                                                       "<RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>")
         msbuild = MSBuild(self)
-        msbuild.build(self._vcxproj_path, platforms=self._platforms, upgrade_project=False)
+        for vcxproj_path in self._vcxproj_paths:
+            msbuild.build(vcxproj_path, platforms=self._platforms, upgrade_project=False)
 
     def _configure_autotools(self):
         if not self._autotools:
@@ -78,7 +103,9 @@ class MpirConan(ConanFile):
                 args.extend(["--disable-shared", "--enable-static"])
             args.append("--with-pic" if self.options.get_safe("fPIC", True) else "--without-pic")
 
-            args.extend(["--disable-silent-rules", "--enable-gmpcompat", "--enable-cxx"])
+            args.append("--disable-silent-rules")
+            args.append("--enable-cxx" if self.options.get_safe("enable_cxx") else "--disable-cxx")
+            args.append("--enable-gmpcompat" if self.options.get_safe("enable_gmpcompat") else "--disable-gmpcompat")
             self._autotools.configure(args=args)
         return self._autotools
 
@@ -109,4 +136,10 @@ class MpirConan(ConanFile):
                     os.unlink(filename)
 
     def package_info(self):
-        self.cpp_info.libs = ["mpir"]
+        if self.options.get_safe("enable_cxx"):
+            self.cpp_info.libs.append("mpirxx")
+        self.cpp_info.libs.append("mpir")
+        if self.options.get_safe("enable_gmpcompat"):
+            if self.options.get_safe("enable_cxx"):
+                self.cpp_info.libs.append("gmpxx")
+            self.cpp_info.libs.append("gmp")
