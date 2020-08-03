@@ -42,7 +42,7 @@ class XZUtils(ConanFile):
 
     def _apply_patches(self):
         # Relax Windows SDK restriction
-        if self.version < "5.2.5":
+        if tools.Version(self.version) < "5.2.5":
             tools.replace_in_file(os.path.join(self._source_subfolder, "windows", "vs2017", "liblzma.vcxproj"),
                                 "<WindowsTargetPlatformVersion>10.0.15063.0</WindowsTargetPlatformVersion>",
                                 "<WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>")
