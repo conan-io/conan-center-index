@@ -5,7 +5,7 @@ import os
 
 class DefaultNameConan(ConanFile):
     settings = "os", "compiler", "arch", "build_type"
-    generators = "cmake", "cmake_find_package"
+    generators = "cmake", "cmake_find_package", "pkg_config"
 
     def _build_cmake(self, use_find_package):
         cmake = CMake(self)
