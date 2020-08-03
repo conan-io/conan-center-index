@@ -12,7 +12,6 @@ class InjaConan(ConanFile):
     description = "Inja is a template engine for modern C++, loosely inspired by jinja for python"
     topics = ("conan", "jinja2", "string templates", "templates engine")
     no_copy_source = True
-    settings = "compiler"
     requires = (
         "nlohmann_json/3.9.0"
     )
