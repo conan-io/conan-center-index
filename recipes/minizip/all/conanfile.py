@@ -105,7 +105,8 @@ class MinizipConan(ConanFile):
             self._cmake.definitions["MZ_WZAES"] = self.options.wzaes
             self._cmake.definitions["MZ_LIBCOMP"] = self.options.libcomp
             self._cmake.definitions["MZ_OPENSSL"] = self.options.openssl
-            self._cmake.definitions["MZ_LIBBSD"] = self.options.libbsd
+            if "libbsd" in self.options:
+                self._cmake.definitions["MZ_LIBBSD"] = self.options.libbsd
             self._cmake.definitions["MZ_BRG"] = self.options.brg
             self._cmake.definitions["MZ_SIGNING"] = self.options.signing
             self._cmake.definitions["MZ_COMPRESS_ONLY"] = self.options.compress_only
