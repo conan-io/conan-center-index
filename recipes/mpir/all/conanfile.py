@@ -123,7 +123,9 @@ class MpirConan(ConanFile):
             lib_folder = os.path.join(self._source_subfolder, self._dll_or_lib,
                                     self._platforms.get(str(self.settings.arch)),
                                     str(self.settings.build_type))
-            self.copy("*.h", dst="include", src=lib_folder, keep_path=True)
+            self.copy("mpir.h", dst="include", src=lib_folder, keep_path=True)
+            if self.options.get_safe("enable_cxx"):
+                self.copy("mpirxx.h", dst="include", src=lib_folder, keep_path=True)
             self.copy(pattern="*.dll*", dst="bin", src=lib_folder, keep_path=False)
             self.copy(pattern="*.lib", dst="lib", src=lib_folder, keep_path=False)
         else:
