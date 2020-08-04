@@ -59,10 +59,7 @@ class MinizipConan(ConanFile):
     
     def _is_uinix_like(self):
         return self.settings.os == "AIX" or self.settings.os == "Android" or self.settings.os == "FreeBSD" or self.settings.os == "Linux" or self.settings.os == "Macos" or self.settings.os == "SunOS" or self.settings.os == "iOS" or self.settings.os == "tvOS" or self.settings.os == "watchOS";
-        
-    def _is_apple_like(self):
-        return self.settings.os == "Macos" or self.settings.os == "iOS" or self.settings.os == "tvOS" or self.settings.os == "watchOS";
-        
+
     def requirements(self):
         if self.options.zlib:
             self.requires("zlib/1.2.11")
@@ -82,8 +79,6 @@ class MinizipConan(ConanFile):
             raise ConanInvalidConfiguration("pkcrypt or wzaes need to be set, to be able to provide signing support.")
         if self.options.signing and self.options.brg:
             raise ConanInvalidConfiguration("Library can not support signing with brg enabled.")
-        if self.options.libcomp and not self._is_apple_like():
-            raise ConanInvalidConfiguration("libcomp is an option for apple OS.")
         
     def config_options(self):
         if self.settings.os == 'Windows':
