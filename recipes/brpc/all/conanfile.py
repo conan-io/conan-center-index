@@ -45,7 +45,7 @@ class BrpcConan(ConanFile):
     def _source_subfolder(self):
         return "source_subfolder"
 
-    def config_options(self):
+    def configure(self):
         self.options['protobuf'].with_zlib = True
         self.options['leveldb'].with_snappy = self.options.with_snappy
         if self.settings.os == "Windows":
@@ -56,7 +56,8 @@ class BrpcConan(ConanFile):
         os.rename("incubator-brpc-" + self.version, self._source_subfolder)
 
     def _patch_sources(self):
-        tools.patch(**self.conan_data["patches"][self.version])
+        for patch in self.conan_data["patches"][self.version]:
+            tools.patch(**patch)
 
     def _configure_cmake(self):
         if self._cmake:

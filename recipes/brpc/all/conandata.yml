@@ -4,5 +4,7 @@ sources:
     md5: 783b3b0d5b9d254a93f26ce769b00bfc
 patches:
   "0.9.6":
-    base_path: "source_subfolder"
-    patch_file: "patches/incubator-brpc-0.9.6.patch"
+    - base_path: "source_subfolder"
+      patch_file: "patches/incubator-brpc-0.9.6.patch"
+    - base_path: "source_subfolder"
+      patch_file: "patches/incubator-brpc-0.9.6-thrift-0.11.patch"
