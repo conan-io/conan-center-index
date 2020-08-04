@@ -30,14 +30,11 @@ class DataFrameConan(ConanFile):
     generators = "cmake"
     exports_sources = ["CMakeLists.txt", "patches/*"]
 
+    _cmake = None
+
     @property
     def _source_subfolder(self):
         return os.path.join(self.source_folder, "source_subfolder")
-
-    def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        extracted_folder = "DataFrame-{}".format(self.version)
-        os.rename(extracted_folder, self._source_subfolder)
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -85,10 +82,17 @@ class DataFrameConan(ConanFile):
                 )
             )
 
+    def source(self):
+        tools.get(**self.conan_data["sources"][self.version])
+        extracted_folder = "DataFrame-{}".format(self.version)
+        os.rename(extracted_folder, self._source_subfolder)
+
     def _configure_cmake(self):
-        cmake = CMake(self)
-        cmake.configure()
-        return cmake
+        if self._cmake:
+            return self._cmake
+        self._cmake = CMake(self)
+        self._cmake.configure()
+        return self._cmake
 
     def build(self):
         for patch in self.conan_data["patches"][self.version]:
