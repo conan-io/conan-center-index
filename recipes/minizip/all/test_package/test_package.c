@@ -1,8 +1,4 @@
-//#define CONAN_MZ_VERSION "2.10.0"
-//#define HAVE_COMPAT
-
 #include <stdio.h>
-#include <string.h>
 
 #include <mz.h>
 #ifdef HAVE_COMPAT
@@ -12,7 +8,6 @@
 #include <mz_crypt.h>
 #endif
 #include <mz_os.h>
-
 #include <mz_strm.h>
 #include <mz_strm_buf.h>
 #include <mz_strm_mem.h>
@@ -39,13 +34,6 @@
 #ifdef HAVE_LIBCOMP
 #include <mz_strm_libcomp.h>
 #endif
-
-/*
-mz_zip.c
-mz_zip.h
-mz_zip_rw.c
-mz_zip_rw.h
-*/
 
 int test_mz() { return strcmp(MZ_VERSION, CONAN_MZ_VERSION); }
 
