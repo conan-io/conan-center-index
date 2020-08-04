@@ -65,9 +65,11 @@ class ceressolverConan(ConanFile):
 
     def config_options(self):
         if self.settings.os == "Windows":
-            self.options.remove("fPIC")
+            del self.options.fPIC
 
     def configure(self):
+        if self.options.shared:
+            del self.options.fPIC
         if self.settings.build_type == "Debug" and self.options.use_glog:
             raise ConanInvalidConfiguration("Ceres-solver only links against the release version of glog")
         if self.options.use_glog and not self.options.use_gflags: #At this stage we can't check the value of self.options["glog"].with_gflags so we asume it is true because is the default value
