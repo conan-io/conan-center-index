@@ -89,15 +89,18 @@ class ZlibConan(ConanFile):
             tools.replace_in_file('gzguts.h',
                                   '#if defined(_WIN32) || defined(__CYGWIN__)',
                                   '#if defined(_WIN32) || defined(__MINGW32__)')
-            for filename in ['zconf.h', 'zconf.h.cmakein', 'zconf.h.in']:
-                tools.replace_in_file(filename,
-                                      '#ifdef HAVE_UNISTD_H    '
-                                      '/* may be set to #if 1 by ./configure */',
-                                      '#if defined(HAVE_UNISTD_H) && (1-HAVE_UNISTD_H-1 != 0)')
-                tools.replace_in_file(filename,
-                                      '#ifdef HAVE_STDARG_H    '
-                                      '/* may be set to #if 1 by ./configure */',
-                                      '#if defined(HAVE_STDARG_H) && (1-HAVE_STDARG_H-1 != 0)')
+
+            is_apple_clang12 = self.settings.compiler == "apple-clang" and tools.Version(self.settings.compiler.version) >= "12.0"
+            if not is_apple_clang12:
+                for filename in ['zconf.h', 'zconf.h.cmakein', 'zconf.h.in']:
+                    tools.replace_in_file(filename,
+                                          '#ifdef HAVE_UNISTD_H    '
+                                          '/* may be set to #if 1 by ./configure */',
+                                          '#if defined(HAVE_UNISTD_H) && (1-HAVE_UNISTD_H-1 != 0)')
+                    tools.replace_in_file(filename,
+                                          '#ifdef HAVE_STDARG_H    '
+                                          '/* may be set to #if 1 by ./configure */',
+                                          '#if defined(HAVE_STDARG_H) && (1-HAVE_STDARG_H-1 != 0)')
             tools.mkdir("_build")
             with tools.chdir("_build"):
                 if self._use_autotools:
