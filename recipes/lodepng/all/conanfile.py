@@ -5,7 +5,7 @@ from conans import ConanFile, CMake, tools
 class LodepngConan(ConanFile):
     name = "lodepng"
     description = "PNG encoder and decoder in C and C++, without dependencies."
-    license = "ZLIB"
+    license = "Zlib"
     topics = ("conan", "png", "encoder", "decoder")
     homepage = "https://github.com/lvandeve/lodepng"
     url = "https://github.com/conan-io/conan-center-index"

@@ -1,7 +1,6 @@
 #include <iostream>
 #include <vector>
 #include <cstdint>
-#include <cassert>
 #include <fstream>
 
 #include "lodepng.h"
@@ -13,9 +12,7 @@ int main()
 
     std::vector<uint8_t> decoded;
     unsigned width = 0, height = 0;
-    unsigned error = lodepng::decode(decoded, width, height, data);
-    assert(static_cast<bool>(error) == false);
-
+    lodepng::decode(decoded, width, height, data);
     stream.close();
 
     return 0;
