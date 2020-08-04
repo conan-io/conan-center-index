@@ -25,6 +25,8 @@ class GlogConan(ConanFile):
             del self.options.fPIC
 
     def configure(self):
+        if self.options.shared:
+            del self.options.fPIC
         if self.options.with_gflags:
             self.options["gflags"].shared = self.options.shared
 
