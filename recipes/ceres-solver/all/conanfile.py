@@ -111,5 +111,7 @@ class ceressolverConan(ConanFile):
         tools.rmdir(os.path.join(self.package_folder, "CMake"))
 
     def package_info(self):
-        self.cpp_info.libs = tools.collect_libs(self)
-        self.cpp_info.includedirs = ["include",os.path.join("include","ceres")]
+        self.cpp_info.names["cmake_find_package"] = "Ceres"
+        self.cpp_info.names["cmake_find_package_multi"] = "Ceres"
+        self.cpp_info.components["ceres"].libs = tools.collect_libs(self)
+        self.cpp_info.components["ceres"].includedirs = ["include", os.path.join("include","ceres")]
