@@ -78,8 +78,6 @@ class MinizipConan(ConanFile):
     def configure(self):
         del self.settings.compiler.libcxx
         del self.settings.compiler.cppstd
-        if not self._is_uinix_like():
-            del self.options.libbsd
         if self.options.signing and not self.options.pkcrypt and not self.options.wzaes:
             raise ConanInvalidConfiguration("pkcrypt or wzaes need to be set, to be able to provide signing support.")
         if self.options.signing and self.options.brg:
