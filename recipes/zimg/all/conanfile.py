@@ -38,7 +38,7 @@ class ZimgConan(ConanFile):
         if not self.settings.build_type:
             self.settings.build_type = "Release"
         if self.settings.build_type not in ("Release", "Debug"):
-            raise ConanInvalidConfiguration("Invalid build_type")
+            raise ConanInvalidConfiguration("zimg does not support the build type '{}'.".format(self.settings.build_type))
         if self.settings.compiler == "Visual Studio":
             if self.settings.compiler.version < tools.Version(15):
                 raise ConanInvalidConfiguration("zimg requires at least Visual Studio 15 2017")
