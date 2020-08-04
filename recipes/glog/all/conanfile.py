@@ -9,7 +9,7 @@ class GlogConan(ConanFile):
     description = "Google logging library"
     topics = ("conan", "glog", "logging")
     license = "BSD 3-Clause"
-    exports_sources = ["CMakeLists.txt"]
+    exports_sources = ["CMakeLists.txt", "patches/**"]
     generators = "cmake", "cmake_find_package"
     settings = "os", "arch", "compiler", "build_type"
     options = {"shared": [True, False], "fPIC": [True, False], "with_gflags": [True, False], "with_threads": [True, False]}
@@ -51,12 +51,8 @@ class GlogConan(ConanFile):
         return self._cmake
 
     def build(self):
-        if self.options.with_gflags:
-            tools.replace_in_file(os.path.join(self._source_subfolder, "CMakeLists.txt"),
-                                  "gflags 2.2.0", "gflags 2.2.1 REQUIRED")
-            tools.replace_in_file(os.path.join(self._source_subfolder, "CMakeLists.txt"),
-                                  "target_link_libraries (glog PUBLIC gflags)",
-                                  "target_link_libraries (glog PUBLIC ${CONAN_LIBS})")
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            tools.patch(**patch)
         cmake = self._configure_cmake()
         cmake.build()
 
