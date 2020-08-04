@@ -66,10 +66,14 @@ class MinizipConan(ConanFile):
             self.requires("zstd/1.4.5")
         if self.options.openssl:
             self.requires("openssl/1.1.1g")
+        if self.settings.os == "Unix":
+            self.requires("libiconv/1.16")
 
     def configure(self):
         del self.settings.compiler.libcxx
         del self.settings.compiler.cppstd
+        if self.settings.os ~= "Unix":
+            del self.options.libbsd
         if self.options.signing and not self.options.pkcrypt and not self.options.wzaes:
             raise ConanInvalidConfiguration("pkcrypt or wzaes need to be set, to be able to provide signing support.")
         if self.options.signing and self.options.brg:
