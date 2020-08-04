@@ -14,6 +14,8 @@ class GlogConan(ConanFile):
     options = {"shared": [True, False], "fPIC": [True, False], "with_gflags": [True, False], "with_threads": [True, False]}
     default_options = {"shared": False, "fPIC": True, "with_gflags": True, "with_threads": True}
 
+    _cmake = None
+
     @property
     def _source_subfolder(self):
         return "source_subfolder"
@@ -36,12 +38,14 @@ class GlogConan(ConanFile):
         os.rename(extracted_dir, self._source_subfolder)
 
     def _configure_cmake(self):
-        cmake = CMake(self)
-        cmake.definitions["WITH_GFLAGS"] = self.options.with_gflags
-        cmake.definitions["WITH_THREADS"] = self.options.with_threads
-        cmake.definitions["BUILD_TESTING"] = False
-        cmake.configure()
-        return cmake
+        if self._cmake:
+            return self._cmake
+        self._cmake = CMake(self)
+        self._cmake.definitions["WITH_GFLAGS"] = self.options.with_gflags
+        self._cmake.definitions["WITH_THREADS"] = self.options.with_threads
+        self._cmake.definitions["BUILD_TESTING"] = False
+        self._cmake.configure()
+        return self._cmake
 
     def build(self):
         if self.options.with_gflags:
