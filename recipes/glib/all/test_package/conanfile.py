@@ -4,9 +4,12 @@ import os
 
 class TestPackageConan(ConanFile):
     settings = "os", "compiler", "build_type", "arch"
-    generators = "cmake", "cmake_find_package_multi"
+    generators = "cmake", "cmake_find_package_multi", "pkg_config"
 
     def build(self):
+        with tools.environment_append({'PKG_CONFIG_PATH': '.'}):
+            self.output.info("glib-2.0 libs: %s" % " ".join(tools.PkgConfig("glib-2.0").libs_only_l))
+            self.output.info("gmodule-2.0 libs: %s" % " ".join(tools.PkgConfig("gmodule-2.0").libs_only_l))
         cmake = CMake(self)
         cmake.configure()
         cmake.build()
