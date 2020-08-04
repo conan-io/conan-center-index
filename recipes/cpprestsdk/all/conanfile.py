@@ -31,7 +31,6 @@ class CppRestSDKConan(ConanFile):
         "http_client_impl": "winhttp",
         "http_listener_impl": "httpsys"
     }
-    short_paths = True
 
     _cmake = None
 
