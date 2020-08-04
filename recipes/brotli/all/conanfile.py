@@ -73,6 +73,8 @@ class BrotliConan(ConanFile):
         self.cpp_info.components["brotlicommon"].names["pkg_config"] = "libbrotlicommon"
         self.cpp_info.components["brotlicommon"].includedirs.append(includedir)
         self.cpp_info.components["brotlicommon"].libs = [self._get_decorated_lib("brotlicommon")]
+        if self.settings.os == "Windows" and self.options.shared:
+            self.cpp_info.components["brotlicommon"].defines.append("BROTLI_SHARED_COMPILATION")
         # brotlidec
         self.cpp_info.components["brotlidec"].names["pkg_config"] = "libbrotlidec"
         self.cpp_info.components["brotlidec"].includedirs.append(includedir)
@@ -85,11 +87,6 @@ class BrotliConan(ConanFile):
         self.cpp_info.components["brotlienc"].requires = ["brotlicommon"]
         if self.settings.os == "Linux":
             self.cpp_info.components["brotlienc"].system_libs = ["m"]
-
-        if self.settings.os == "Windows" and self.options.shared:
-            self.cpp_info.components["brotlicommon"].defines.append("BROTLI_SHARED_COMPILATION")
-            self.cpp_info.components["brotlidec"].defines.append("BROTLI_SHARED_COMPILATION")
-            self.cpp_info.components["brotlienc"].defines.append("BROTLI_SHARED_COMPILATION")
 
     def _get_decorated_lib(self, name):
         libname = name
