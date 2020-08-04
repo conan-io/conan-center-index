@@ -99,3 +99,5 @@ class CgalConan(ConanFile):
         self.cpp_info.libs = tools.collect_libs(self)
         if self.settings.os == "Linux" and (self.options.with_cgal_core or self.options.with_cgal_imageio):
             self.cpp_info.system_libs.append("m")
+        if not self.options.header_only:
+            self.cpp_info.defines.append("CGAL_NOT_HEADER_ONLY=1")
