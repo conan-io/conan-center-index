@@ -1,7 +1,6 @@
 import os
 from conans import ConanFile, tools, CMake
 from conans.errors import ConanInvalidConfiguration
-from conans.tools import Version
 
 class ceressolverConan(ConanFile):
     name = "ceres-solver"
@@ -76,14 +75,14 @@ class ceressolverConan(ConanFile):
             raise ConanInvalidConfiguration("To depend on glog built with gflags (Default behavior) set use_gflags=True, otherwise Ceres may fail to link due to missing gflags symbols.")
 
     def requirements(self):
-        self.requires.add("eigen/3.3.7")
+        self.requires("eigen/3.3.7")
         if self.options.use_glog:
-            self.requires.add("glog/0.4.0")
+            self.requires("glog/0.4.0")
         if self.options.use_gflags:
-            self.requires.add("gflags/2.2.2")
+            self.requires("gflags/2.2.2")
             self.options["gflags"].nothreads = False
         if self.options.use_TBB:
-            self.requires.add("tbb/2020.0")
+            self.requires("tbb/2020.0")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
