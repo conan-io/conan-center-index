@@ -29,3 +29,6 @@ sources:
   "3.17.3":
     sha256: 0bd60d512275dc9f6ef2a2865426a184642ceb3761794e6b65bff233b91d8c40
     url: https://cmake.org/files/v3.17/cmake-3.17.3.tar.gz
+  "3.18.1":
+    sha256: c0e3338bd37e67155b9d1e9526fec326b5c541f74857771b7ffed0c46ad62508
+    url: https://github.com/Kitware/CMake/releases/download/v3.18.1/cmake-3.18.1.tar.gz
