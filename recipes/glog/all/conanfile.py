@@ -7,6 +7,7 @@ class GlogConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/google/glog/"
     description = "Google logging library"
+    topics = ("conan", "glog", "logging")
     license = "BSD 3-Clause"
     exports_sources = ["CMakeLists.txt"]
     generators = "cmake", "cmake_find_package"
