@@ -1,8 +1,12 @@
-cmake_minimum_required(VERSION 3.0)
+cmake_minimum_required(VERSION 3.4)
 project(cmake_wrapper)
 
 include(conanbuildinfo.cmake)
 conan_basic_setup()
+
+if(BUILD_SHARED_LIBS)
+    set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS ON)
+endif()
 
 add_library(lodepng "source_subfolder/lodepng.h" "source_subfolder/lodepng.cpp")
 
