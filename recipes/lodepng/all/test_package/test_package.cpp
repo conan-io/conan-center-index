@@ -1,7 +1,6 @@
 #include <iostream>
 #include <vector>
 #include <cstdint>
-#include <cassert>
 #include <fstream>
 
 #include "lodepng.h"
