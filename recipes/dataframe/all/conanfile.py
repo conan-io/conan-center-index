@@ -108,8 +108,9 @@ class DataFrameConan(ConanFile):
             tools.rmdir(os.path.join(self.package_folder, dir_to_remove))
 
     def package_info(self):
+        self.cpp_info.names["cmake_find_package"] = "DataFrame"
+        self.cpp_info.names["cmake_find_package_multi"] = "DataFrame"
+        self.cpp_info.names["pkg_config"] = "DataFrame"
         self.cpp_info.libs = tools.collect_libs(self)
-
-        # in linux we need to link also with these libs
         if self.settings.os == "Linux":
             self.cpp_info.system_libs.extend(["pthread", "dl", "rt"])
