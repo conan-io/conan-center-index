@@ -12,12 +12,10 @@ class BondConan(ConanFile):
     topics = ("bond", "microsoft")
     settings = "os", "compiler", "build_type", "arch"
     options = {
-        "shared": [False, True],
         "fPIC": [True, False]}
     default_options = {
-        "shared": False,
         "fPIC": True}
-    build_requires = "boost/1.71.0@conan/stable"
+    build_requires = "boost/1.71.0"
     generators = "cmake"
     exports_sources = ["FindBond.cmake"]
 
