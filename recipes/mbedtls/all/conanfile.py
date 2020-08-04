@@ -42,6 +42,8 @@ class MBedTLSConan(ConanFile):
     def configure(self):
         del self.settings.compiler.cppstd
         del self.settings.compiler.libcxx
+        if tools.Version(self.version) >= "5.2.5":
+            self.license = "Apache-2.0"
 
     def requirements(self):
         if self.options.with_zlib:
