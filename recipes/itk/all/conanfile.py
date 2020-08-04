@@ -49,6 +49,10 @@ class ITKConan(ConanFile):
         del self.settings.compiler.libcxx
         del self.settings.compiler.cppstd
 
+        if self.settings.compiler == "apple-clang":
+            if self.settings.compiler.version < tools.Version(10):
+                raise ConanInvalidConfiguration("itk does not support this compiler version")
+
     def requirements(self):
         self.requires("libjpeg/9d")
         self.requires("dcmtk/3.6.5")
