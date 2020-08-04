@@ -1,0 +1,25 @@
+From 7d8379ba4b3752b8db49fb83373aaa2c67573d12 Mon Sep 17 00:00:00 2001
+From: ItsBasi <5033630+ItsBasi@users.noreply.github.com>
+Date: Sat, 1 Aug 2020 22:56:05 +0200
+Subject: [PATCH 7/9] Display zstd version
+
+---
+ CMakeLists.txt | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 0aa5ac2..772da9e 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -78,7 +78,7 @@ endif()
+ # Check if zstd installation is present
+ if(MZ_ZSTD)
+     find_package(ZSTD REQUIRED)
+-    message(STATUS "Using ZSTD")
++    message(STATUS "Using ZSTD ${zstd_VERSION}")
+     list(APPEND MINIZIP_INC ${zstd_INCLUDE_DIRS})
+     set(PC_PRIVATE_LIBS "${PC_PRIVATE_LIBS} -lzstd")
+ endif()
+-- 
+2.28.0.windows.1
+

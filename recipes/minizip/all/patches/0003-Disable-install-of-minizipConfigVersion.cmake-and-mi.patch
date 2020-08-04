@@ -1,7 +1,7 @@
 From 83c4e878e34121206e319a255c01e16f055d4367 Mon Sep 17 00:00:00 2001
 From: ItsBasi <5033630+ItsBasi@users.noreply.github.com>
 Date: Tue, 28 Jul 2020 22:48:08 +0200
-Subject: [PATCH 3/4] Disable install of minizipConfigVersion.cmake and
+Subject: [PATCH 3/9] Disable install of minizipConfigVersion.cmake and
  minizipConfig.cmake
 
 ---
