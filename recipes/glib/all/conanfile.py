@@ -184,4 +184,6 @@ class GLibConan(ConanFile):
         self.cpp_info.components["gresource"].libs = [] # this is actualy an executable
         self.cpp_info.components["gresource"].requires.append("libelf::libelf") # this is actualy an executable
 
-        self.env_info.PATH.append(os.path.join(self.package_folder, "bin"))
+        bin_path = os.path.join(self.package_folder, "bin")
+        self.output.info("Appending PATH env var with: {}".format(bin_path))
+        self.env_info.PATH.append(bin_path)
