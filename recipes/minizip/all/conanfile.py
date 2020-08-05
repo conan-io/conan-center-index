@@ -21,7 +21,7 @@ class MinizipConan(ConanFile):
         "with_zlib": [True, False],
         "with_bzip2": [True, False],
         "with_zstd": [True, False],
-        "lwith_zma": [True, False],
+        "with_lzma": [True, False],
         "pkcrypt": [True, False],
         "wzaes": [True, False],
         "libcomp": [True, False],
