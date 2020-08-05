@@ -1,0 +1,49 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 72261da..894fd18 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -2,6 +2,9 @@ cmake_minimum_required(VERSION 3.5)
+ 
+ project(hdr_histogram VERSION 0.10.0 LANGUAGES C)
+ 
++include(${PROJECT_BINARY_DIR}/../conanbuildinfo.cmake)
++conan_basic_setup()
++
+ include(GNUInstallDirs)
+ include(CMakePackageConfigHelpers)
+ 
+diff --git a/src/CMakeLists.txt b/src/CMakeLists.txt
+index 9dbb311..5bd6ca4 100644
+--- a/src/CMakeLists.txt
++++ b/src/CMakeLists.txt
+@@ -1,10 +1,3 @@
+-find_package(ZLIB REQUIRED)
+-find_package(Threads REQUIRED)
+-
+-include(CheckLibraryExists)
+-check_library_exists(m ceil "" HAVE_LIBM)
+-check_library_exists(rt clock_gettime "" HAVE_LIBRT)
+-
+ set(HDR_HISTOGRAM_SOURCES
+     hdr_encoding.c
+     hdr_histogram.c
+@@ -33,17 +26,8 @@ function(hdr_histogram_add_library NAME LIBRARY_TYPE DO_INSTALL)
+         ${HDR_HISTOGRAM_SOURCES}
+         ${HDR_HISTOGRAM_PRIVATE_HEADERS}
+         ${HDR_HISTOGRAM_PUBLIC_HEADERS})
+-    target_link_libraries(${NAME}
+-        PRIVATE
+-            ZLIB::ZLIB
+-            Threads::Threads
+-            $<$<BOOL:${HAVE_LIBM}>:m>
+-            $<$<BOOL:${HAVE_LIBRT}>:rt>
+-            $<$<BOOL:${WIN32}>:ws2_32>)
+-    target_include_directories(${NAME}
+-        PUBLIC
+-            $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>
+-            $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>)
++    target_link_libraries(${NAME} ${CONAN_LIBS})
++    target_include_directories(${NAME} PRIVATE ${PROJECT_SOURCE_DIR}/src)
+     if(DO_INSTALL)
+         install(
+             TARGETS ${NAME}

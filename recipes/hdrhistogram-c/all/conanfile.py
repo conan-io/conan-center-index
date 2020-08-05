@@ -17,6 +17,7 @@ class QuickfixConan(ConanFile):
                        "shared": False}
     requires = "zlib/1.2.11"
     generators = "cmake"
+    exports_sources = "patches/**"
     _cmake = None
 
     @property
@@ -30,6 +31,7 @@ class QuickfixConan(ConanFile):
     def _configure_cmake(self):
         if not self._cmake:
             self._cmake = CMake(self)
+            self._cmake.definitions["HDR_HISTOGRAM_BUILD_PROGRAMS"] = False
             self._cmake.configure(source_folder=self._source_subfolder, build_folder=self._build_subfolder)
         return self._cmake
 
@@ -48,6 +50,9 @@ class QuickfixConan(ConanFile):
         pass
 
     def build(self):
+        for patch in self.conan_data["patches"][self.version]:
+            tools.patch(**patch)
+
         cmake = self._configure_cmake()
         cmake.build()
 
