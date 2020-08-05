@@ -34,8 +34,7 @@ class Graphviz(ConanFile):
         # Get windows dependencies from official repo
         if tools.os_info.is_windows and self.settings.os == "Windows":
             git = tools.Git(folder=os.path.join(self._source_subfolder, "windows", "dependencies", "libraries"))
-            git.clone("https://github.com/ErwinJanssen/graphviz-windows-dependencies.git", shallow=True)
-
+            git.clone("https://github.com/ErwinJanssen/graphviz-windows-dependencies.git", branch="141d3a21be904fa8dc2ae3ed01d36684db07a35d", shallow=True)
     def _configure_cmake(self):
         if not self._cmake:
             self._cmake = CMake(self)
