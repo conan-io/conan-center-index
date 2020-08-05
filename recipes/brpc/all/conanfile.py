@@ -21,11 +21,13 @@ class BrpcConan(ConanFile):
         "fPIC": [True, False]
     }
     default_options = {
+        "protobuf:with_zlib": True,
+        "leveldb:with_snappy": True,
         "with_snappy": True,
         "with_glog": True,
         "with_thrift": False,
         "shared": False,
-        "fPIC": True,
+        "fPIC": False,
     }
 
     _cmake = None
@@ -46,8 +48,6 @@ class BrpcConan(ConanFile):
         return "source_subfolder"
 
     def configure(self):
-        self.options['protobuf'].with_zlib = True
-        self.options['leveldb'].with_snappy = self.options.with_snappy
         if self.settings.os == "Windows":
             del self.options.fPIC
 
@@ -71,6 +71,10 @@ class BrpcConan(ConanFile):
         return self._cmake
 
     def build(self):
+        if not self.options['protobuf'].with_zlib:
+            raise ConanInvalidConfiguration("brpc requires protobuf:with_zlib=True")
+        if self.options.with_snappy and not self.options["leveldb"].with_snappy:
+            raise ConanInvalidConfiguration("brpc requires leveldb:with_snappy=True")
         self._patch_sources()
         cmake = self._configure_cmake()
         cmake.build()
