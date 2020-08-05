@@ -53,9 +53,9 @@ class XtensorConan(ConanFile):
         self.requires("xtl/0.6.12")
         self.requires("nlohmann_json/3.7.3")
         if self.options.xsimd:
-            self.requires.add("xsimd/7.4.6")
+            self.requires("xsimd/7.4.6")
         if self.options.tbb:
-            self.requires.add("tbb/2020.0")
+            self.requires("tbb/2020.0")
 
     def package(self):
         self.copy("LICENSE", dst="licenses", src=self._source_subfolder)

@@ -8,7 +8,7 @@ class B2Conan(ConanFile):
     description = "B2 makes it easy to build C++ projects, everywhere."
     topics = ("conan", "installer", "boost", "builder")
     license = "BSL-1.0"
-    settings = "os_build", "arch_build"
+    settings = "os", "arch"
     url = "https://github.com/conan-io/conan-center-index"
 
     '''
@@ -91,7 +91,7 @@ class B2Conan(ConanFile):
     def package_info(self):
         self.cpp_info.bindirs = ["bin"]
         self.env_info.path = [os.path.join(
-            self.package_folder, "bin")] + self.env_info.path
+            self.package_folder, "bin")]
         self.env_info.BOOST_BUILD_PATH = os.path.join(
             self.package_folder, "bin", "b2_src", "src", "kernel")
 
