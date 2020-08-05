@@ -29,7 +29,7 @@ class GLibConan(ConanFile):
     _build_subfolder = 'build_subfolder'
     short_paths = True
     generators = "pkg_config"
-    requires = "zlib/1.2.11", "libffi/3.3"
+    requires = "zlib/1.2.11", "libffi/3.2.1"
 
     @property
     def _is_msvc(self):
@@ -40,8 +40,10 @@ class GLibConan(ConanFile):
             del self.options.fPIC
         del self.settings.compiler.libcxx
         del self.settings.compiler.cppstd
-        if self.settings.os == "Windows" and not self.options.shared:
-            raise ConanInvalidConfiguration("glib can not be built as static on Windows.")
+        if (self.settings.os == "Windows" and not self.options.shared) or\
+           "MT" in self.settings.get_safe("compiler.runtime", default=""):
+            raise ConanInvalidConfiguration("glib can not be built as static library on Windows. "\
+                                           "see https://gitlab.gnome.org/GNOME/glib/-/issues/692")
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -52,6 +54,8 @@ class GLibConan(ConanFile):
 
     def build_requirements(self):
         self.build_requires("meson/0.54.2")
+        if self.settings.os == "Windows":
+            self.build_requires("pkgconf/1.7.3")
 
     def requirements(self):
         if self.options.with_pcre:
@@ -96,8 +100,6 @@ class GLibConan(ConanFile):
         return meson
 
     def build(self):
-        if self.settings.os == "Windows":
-            raise ConanInvalidConfiguration('GLib is not yet supported on windows')
         for filename in [os.path.join(self._source_subfolder, "meson.build"),
                          os.path.join(self._source_subfolder, "glib", "meson.build"),
                          os.path.join(self._source_subfolder, "gobject", "meson.build"),
@@ -132,6 +134,8 @@ class GLibConan(ConanFile):
             self._fix_library_names()
         tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
         shutil.move(os.path.join(self.package_folder, "share"), os.path.join(self.package_folder, "bin", "share"))
+        for pdb_file in glob.glob(os.path.join(self.package_folder, "bin", "*.pdb")):
+            os.unlink(pdb_file)
 
     def package_info(self):
         self.cpp_info.libs = ["gio-2.0", "gmodule-2.0", "gobject-2.0", "gthread-2.0", "glib-2.0"]

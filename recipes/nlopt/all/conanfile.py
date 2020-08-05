@@ -41,6 +41,8 @@ class NloptConan(ConanFile):
             del self.options.fPIC
 
     def configure(self):
+        if self.options.shared:
+            del self.options.fPIC
         if not self.options.enable_cxx_routines:
             del self.settings.compiler.libcxx
             del self.settings.compiler.cppstd
@@ -89,8 +91,6 @@ class NloptConan(ConanFile):
             {"subdir": "newuoa", "license_name": "COPYRIGHT"},
             {"subdir": "slsqp" , "license_name": "COPYRIGHT"},
             {"subdir": "stogo" , "license_name": "COPYRIGHT"},
-            {"subdir": "newuoa", "license_name": "COPYRIGHT"},
-            {"subdir": "newuoa", "license_name": "COPYRIGHT"},
         ]
         for alg_license in algs_licenses:
             self.copy(alg_license["license_name"],
@@ -107,8 +107,12 @@ class NloptConan(ConanFile):
     def package_info(self):
         self.cpp_info.names["cmake_find_package"] = "NLopt"
         self.cpp_info.names["cmake_find_package_multi"] = "NLopt"
-        self.cpp_info.libs = tools.collect_libs(self)
+        self.cpp_info.components["nloptlib"].names["cmake_find_package"] = "nlopt"
+        self.cpp_info.components["nloptlib"].names["cmake_find_package_multi"] = "nlopt"
+        self.cpp_info.components["nloptlib"].libs = tools.collect_libs(self)
         if self.settings.os == "Linux":
-            self.cpp_info.system_libs.append("m")
+            self.cpp_info.components["nloptlib"].system_libs.append("m")
+        if not self.options.shared and self.options.enable_cxx_routines and tools.stdcpp_library(self):
+            self.cpp_info.components["nloptlib"].system_libs.append(tools.stdcpp_library(self))
         if self.settings.os == "Windows" and self.options.shared:
-            self.cpp_info.defines.append("NLOPT_DLL")
+            self.cpp_info.components["nloptlib"].defines.append("NLOPT_DLL")

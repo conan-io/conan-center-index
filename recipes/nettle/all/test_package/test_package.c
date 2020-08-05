@@ -4,8 +4,8 @@
 #include <stdlib.h>
 #include <string.h>
 
-static void display_hex(unsigned length, uint8_t *data) {
-    unsigned i;
+static void display_hex(size_t length, uint8_t *data) {
+    size_t i;
 
     for (i = 0; i<length; i++) {
         printf("%02x ", data[i]);

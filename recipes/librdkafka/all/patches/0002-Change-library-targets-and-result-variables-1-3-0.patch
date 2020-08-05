@@ -22,7 +22,18 @@
    endif()
  endif()
 
-@@ -211,7 +211,7 @@ if(WITH_LIBDL)
+@@ -203,7 +203,9 @@ find_package(Threads REQUIRED)
+ target_link_libraries(rdkafka PUBLIC Threads::Threads)
+
+ if(WITH_SASL_CYRUS)
+-  target_link_libraries(rdkafka PUBLIC ${SASL_LIBRARIES})
++  find_package(cyrus-sasl REQUIRED)
++  target_link_libraries(rdkafka PUBLIC ${cyrus-sasl_LIBRARIES})
++  target_include_directories(rdkafka PUBLIC ${cyrus-sasl_INCLUDE_DIR})
+ endif()
+
+ if(WITH_LIBDL)
+@@ -211,7 +213,7 @@ if(WITH_LIBDL)
  endif()
 
  if(WITH_LZ4_EXT)
