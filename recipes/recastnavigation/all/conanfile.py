@@ -14,11 +14,9 @@ class RecastNavigationConan(ConanFile):
     generators = "cmake"
     settings = "os", "compiler", "build_type", "arch"
     options = {
-        "shared": [True, False],
         "fPIC": [True, False],
     }
     default_options = {
-        "shared": False,
         "fPIC": True,
     }
 
@@ -36,10 +34,6 @@ class RecastNavigationConan(ConanFile):
         if self.settings.os == "Windows":
             del self.options.fPIC
 
-    def configure(self):
-        if self.options.shared:
-            del self.options.fPIC
-
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
         extracted_dir = glob.glob('recastnavigation-*/')[0]
@@ -52,7 +46,7 @@ class RecastNavigationConan(ConanFile):
         self._cmake.definitions["RECASTNAVIGATION_DEMO"] = False
         self._cmake.definitions["RECASTNAVIGATION_TESTS"] = False
         self._cmake.definitions["RECASTNAVIGATION_EXAMPLES"] = False
-        self._cmake.definitions["RECASTNAVIGATION_STATIC"] = not self.options.shared
+        self._cmake.definitions["RECASTNAVIGATION_STATIC"] = True
         self._cmake.configure(build_folder=self._build_subfolder)
         return self._cmake
 
