@@ -5,11 +5,11 @@ import os
 
 class QuickfixConan(ConanFile):
     name = "hdrhistogram-c"
-    license = ""
+    license = "BSD 2-Clause License"
     url = "https://github.com/conan-io/conan-center-index"
-    homepage = ""
-    description = ""
-    topics = ("libraries", "c")
+    homepage = "https://github.com/HdrHistogram/HdrHistogram_c"
+    description = "'C' port of High Dynamic Range (HDR) Histogram"
+    topics = ("libraries", "c", "histogram")
     settings = "os", "compiler", "build_type", "arch"
     options = {"fPIC": [True, False],
                "shared": [True, False]}
@@ -53,7 +53,8 @@ class QuickfixConan(ConanFile):
     def package(self):
         cmake = self._configure_cmake()
         cmake.install()
-        self.copy("LICENSE", dst="licenses", src=self._source_subfolder)
+        self.copy("LICENSE.txt", dst="licenses", src=self._source_subfolder)
+        tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
 
     def package_info(self):
         self.cpp_info.libs = tools.collect_libs(self)
