@@ -1,0 +1,4 @@
+sources:
+  2.44.1:
+    url: "https://gitlab.com/graphviz/graphviz/-/archive/2.44.1/graphviz-2.44.1.tar.gz"
+    sha256: 3aac783a15341c2808141cc38ead408bf3d6ad203e0ed3946c9df595b760edda
