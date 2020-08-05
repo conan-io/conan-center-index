@@ -15,13 +15,13 @@ class TestPackageConan(ConanFile):
                 self._cmake.definitions["MZ_ZIP_NO_DECOMPRESSION"] = "MZ_ZIP_NO_DECOMPRESSION"
             if self.options["minizip"].decompress_only:
                 self._cmake.definitions["MZ_ZIP_NO_COMPRESSION"] = "MZ_ZIP_NO_COMPRESSION"
-            if self.options["minizip"].bzip2:
+            if self.options["minizip"].with_bzip2:
                 self._cmake.definitions["HAVE_BZIP2"] = "HAVE_BZIP2"
-            if self.options["minizip"].zlib:
+            if self.options["minizip"].with_zlib:
                 self._cmake.definitions["HAVE_ZLIB"] = "HAVE_ZLIB"
             if self.options["minizip"].lzma:
                 self._cmake.definitions["HAVE_LZMA"] = "HAVE_LZMA"
-            if self.options["minizip"].zstd:
+            if self.options["minizip"].with_zstd:
                 self._cmake.definitions["HAVE_ZSTD"] = "HAVE_ZSTD"
             if self.options["minizip"].compat:
                 self._cmake.definitions["HAVE_COMPAT"] = "HAVE_COMPAT"

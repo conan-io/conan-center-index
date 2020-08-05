@@ -36,14 +36,14 @@ class MinizipConan(ConanFile):
         "shared": False,
         "fPIC": True,
         "compat": True,
-        "zlib": True,
-        "bzip2": True,
+        "with_zlib": True,
+        "with_bzip2": True,
         "lzma": True,
-        "zstd": True,
+        "with_zstd": True,
         "pkcrypt": True,
         "wzaes": True,
         "libcomp": False,
-        "openssl": False,
+        "with_openssl": False,
         "libbsd": True,
         "brg": False,
         "signing": True,
@@ -70,13 +70,13 @@ class MinizipConan(ConanFile):
                 self.settings.os == "watchOS")
 
     def requirements(self):
-        if self.options.zlib:
+        if self.options.with_zlib:
             self.requires("zlib/1.2.11")
-        if self.options.bzip2:
+        if self.options.with_bzip2:
             self.requires("bzip2/1.0.8")
-        if self.options.zstd:
+        if self.options.with_zstd:
             self.requires("zstd/1.4.5")
-        if self.options.openssl:
+        if self.options.with_openssl:
             self.requires("openssl/1.1.1g")
         if self._is_uinix_like():
             self.requires("libiconv/1.16")
@@ -106,14 +106,14 @@ class MinizipConan(ConanFile):
         if not self._cmake:
             self._cmake = CMake(self)
             self._cmake.definitions["MZ_COMPAT"] = self.options.compat
-            self._cmake.definitions["MZ_ZLIB"] = self.options.zlib
-            self._cmake.definitions["MZ_BZIP2"] = self.options.bzip2
+            self._cmake.definitions["MZ_ZLIB"] = self.options.with_zlib
+            self._cmake.definitions["MZ_BZIP2"] = self.options.with_bzip2
             self._cmake.definitions["MZ_LZMA"] = self.options.lzma
-            self._cmake.definitions["MZ_ZSTD"] = self.options.zstd
+            self._cmake.definitions["MZ_ZSTD"] = self.options.with_zstd
             self._cmake.definitions["MZ_PKCRYPT"] = self.options.pkcrypt
             self._cmake.definitions["MZ_WZAES"] = self.options.wzaes
             self._cmake.definitions["MZ_LIBCOMP"] = self.options.libcomp
-            self._cmake.definitions["MZ_OPENSSL"] = self.options.openssl
+            self._cmake.definitions["MZ_OPENSSL"] = self.options.with_openssl
             self._cmake.definitions["MZ_LIBBSD"] = self.options.libbsd
             self._cmake.definitions["MZ_BRG"] = self.options.brg
             self._cmake.definitions["MZ_SIGNING"] = self.options.signing
