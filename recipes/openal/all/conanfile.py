@@ -41,7 +41,6 @@ class OpenALConan(ConanFile):
             raise ConanInvalidConfiguration("OpenAL can't be compiled by {0} {1}".format(self.settings.compiler,
                                                                                          self.settings.compiler.version))
 
-
     def requirements(self):
         if self.settings.os == "Linux":
             self.requires("libalsa/1.1.9")
@@ -50,8 +49,6 @@ class OpenALConan(ConanFile):
         tools.get(**self.conan_data["sources"][self.version])
         extracted_dir = "openal-soft-openal-soft-" + self.version
         os.rename(extracted_dir, self._source_subfolder)
-        for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            tools.patch(**patch)
 
     def _configure_cmake(self):
         if self._cmake:
@@ -66,6 +63,8 @@ class OpenALConan(ConanFile):
         return self._cmake
 
     def build(self):
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            tools.patch(**patch)
         cmake = self._configure_cmake()
         cmake.build()
 
