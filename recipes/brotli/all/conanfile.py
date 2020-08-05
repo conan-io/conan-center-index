@@ -23,11 +23,11 @@ class BrotliConan(ConanFile):
 
     _cmake = None
 
-    @ property
+    @property
     def _source_subfolder(self):
         return "source_subfolder"
 
-    @ property
+    @property
     def _build_subfolder(self):
         return "build_subfolder"
 
@@ -68,6 +68,8 @@ class BrotliConan(ConanFile):
         tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
 
     def package_info(self):
+        self.cpp_info.names["cmake_find_package"] = "Brotli"
+        self.cpp_info.names["cmake_find_package_multi"] = "Brotli"
         includedir = os.path.join("include", "brotli")
         # brotlicommon
         self.cpp_info.components["brotlicommon"].names["pkg_config"] = "libbrotlicommon"
