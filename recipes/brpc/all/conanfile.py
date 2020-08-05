@@ -32,6 +32,9 @@ class BrpcConan(ConanFile):
 
     _cmake = None
 
+    def build_requirements(self):
+        self.build_requires("protobuf/3.9.1")
+    
     def requirements(self):
         self.requires("gflags/2.2.2")
         self.requires("protobuf/3.9.1")
@@ -99,4 +102,3 @@ class BrpcConan(ConanFile):
         self.cpp_info.libs = ["brpc"]
         if self.settings.os == "Linux":
             self.cpp_info.system_libs = ["dl", "pthread", "rt"]
-
