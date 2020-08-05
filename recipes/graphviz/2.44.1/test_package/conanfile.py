@@ -1,4 +1,4 @@
-import os
+import os, re
 from six import StringIO
 from conans import ConanFile, tools
 
@@ -10,9 +10,9 @@ class TestPackageConan(ConanFile):
         if not tools.cross_building(self.settings):
             output = StringIO()
             self.run("dot -V", output=output, run_environment=True)
-            output_str = str(output.getvalue())
-            self.output.info("Installed version: {}".format(output_str))
-            require_version = str(self.deps_cpp_info["graphviz"].version)
-            self.output.info("Expected version: {}".format(require_version))
-            assert_cmake_version = "dot - graphviz version %s (0)" % require_version
-            assert(assert_cmake_version in output_str)
+            regex = r"(?<=dot - graphviz version )\d.\d{2}.\d"
+            installed_version = re.search(regex, str(output.getvalue()))[0]
+            self.output.info("Installed version: {}".format(installed_version))
+            expected_version = str(self.deps_cpp_info["graphviz"].version)
+            self.output.info("Expected version:  {}".format(expected_version))
+            assert(expected_version in installed_version)
