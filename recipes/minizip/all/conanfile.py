@@ -25,7 +25,7 @@ class MinizipConan(ConanFile):
         "pkcrypt": [True, False],
         "wzaes": [True, False],
         "libcomp": [True, False],
-        "openssl": [True, False],
+        "with_openssl": [True, False],
         "libbsd": [True, False],
         "brg": [True, False],
         "signing": [True, False],
