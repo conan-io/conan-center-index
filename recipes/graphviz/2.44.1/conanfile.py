@@ -22,7 +22,8 @@ class Graphviz(ConanFile):
             self.build_requires("cairo/1.17.2@bincrafters/stable")
 
         if tools.os_info.is_windows and self.settings.os == "Windows":
-            self.build_requires("msys2/20200517")
+            if not tools.get_env("CONAN_BASH_PATH"):
+                self.build_requires("msys2/20200517")
             self.build_requires("strawberryperl/5.30.0.1")
             self.build_requires("winflexbison/2.5.22")
 
