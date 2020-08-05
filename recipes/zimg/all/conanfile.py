@@ -35,8 +35,6 @@ class ZimgConan(ConanFile):
     def configure(self):
         if self.options.shared:
             del self.options.fPIC
-        if not self.settings.build_type:
-            self.settings.build_type = "Release"
         if self.settings.build_type not in ("Release", "Debug"):
             raise ConanInvalidConfiguration("zimg does not support the build type '{}'.".format(self.settings.build_type))
         if self.settings.compiler == "Visual Studio":
