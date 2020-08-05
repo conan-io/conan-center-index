@@ -21,8 +21,6 @@ class BrpcConan(ConanFile):
         "fPIC": [True, False]
     }
     default_options = {
-        "protobuf:with_zlib": True,
-        "leveldb:with_snappy": True,
         "with_snappy": True,
         "with_glog": True,
         "with_thrift": False,
