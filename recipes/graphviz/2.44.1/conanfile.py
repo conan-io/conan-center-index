@@ -77,7 +77,7 @@ class Graphviz(ConanFile):
 
         tools.mkdir("licences")
         if tools.os_info.is_windows and self.settings.os == "Windows":
-            self.copy("COPYING-*", dst="licences", src=os.path.join(self._source_subfolder, "windows", "dependencies", "libraries", "x64"))
+            self.copy("COPYING-*", dst="licenses", src=os.path.join(self._source_subfolder, "windows", "dependencies", "libraries", "x64"))
         self.copy("LICENSE", dst="licenses", src=self._source_subfolder)
         tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
         tools.rmdir(os.path.join(self.package_folder, "share"))
