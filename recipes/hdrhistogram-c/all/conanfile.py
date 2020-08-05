@@ -15,6 +15,7 @@ class QuickfixConan(ConanFile):
                "shared": [True, False]}
     default_options = {"fPIC": True,
                        "shared": False}
+    requires = "zlib/1.2.11"
     generators = "cmake"
     _cmake = None
 
