@@ -4,7 +4,8 @@ import os
 
 class MinizipConan(ConanFile):
     name = "minizip"
-    description = "minizip is a zip manipulation library written in C that is supported on Windows, macOS, and Linux."
+    description = "minizip is a zip manipulation library written in C "
+    "that is supported on Windows, macOS, and Linux."
     topics = ("conan", "minizip", "compression")
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/nmoinvaz/minizip"
@@ -14,7 +15,7 @@ class MinizipConan(ConanFile):
 
     settings = "os", "arch", "compiler", "build_type"
     options = {
-        "shared": [True, False], 
+        "shared": [True, False],
         "fPIC": [True, False],
         "compat": [True, False],
         "zlib": [True, False],
@@ -56,9 +57,17 @@ class MinizipConan(ConanFile):
 
     requires = (
     )
-    
+
     def _is_uinix_like(self):
-        return self.settings.os == "AIX" or self.settings.os == "Android" or self.settings.os == "FreeBSD" or self.settings.os == "Linux" or self.settings.os == "Macos" or self.settings.os == "SunOS" or self.settings.os == "iOS" or self.settings.os == "tvOS" or self.settings.os == "watchOS";
+        return (self.settings.os == "AIX" or
+                self.settings.os == "Android" or
+                self.settings.os == "FreeBSD" or
+                self.settings.os == "Linux" or
+                self.settings.os == "Macos" or
+                self.settings.os == "SunOS" or
+                self.settings.os == "iOS" or
+                self.settings.os == "tvOS" or
+                self.settings.os == "watchOS")
 
     def requirements(self):
         if self.options.zlib:
@@ -75,11 +84,15 @@ class MinizipConan(ConanFile):
     def configure(self):
         del self.settings.compiler.libcxx
         del self.settings.compiler.cppstd
-        if self.options.signing and not self.options.pkcrypt and not self.options.wzaes:
-            raise ConanInvalidConfiguration("pkcrypt or wzaes need to be set, to be able to provide signing support.")
+        if (self.options.signing and
+            not self.options.pkcrypt and
+                not self.options.wzaes):
+            raise ConanInvalidConfiguration(
+                "pkcrypt or wzaes need to be set signing")
         if self.options.signing and self.options.brg:
-            raise ConanInvalidConfiguration("Library can not support signing with brg enabled.")
-        
+            raise ConanInvalidConfiguration(
+                "Library can not support signing with brg")
+
     def config_options(self):
         if self.settings.os == 'Windows':
             del self.options.fPIC
@@ -116,7 +129,8 @@ class MinizipConan(ConanFile):
         cmake.build()
 
     def package(self):
-        self.copy(pattern="LICENSE", dst="licenses", src=self._source_subfolder)
+        self.copy(pattern="LICENSE", dst="licenses",
+                  src=self._source_subfolder)
         cmake = self._configure_cmake()
         cmake.install()
 
