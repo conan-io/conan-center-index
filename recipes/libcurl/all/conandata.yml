@@ -1,4 +1,10 @@
 sources:
+  "7.71.1":
+    sha256: 59ef1f73070de67b87032c72ee6037cedae71dcb1d7ef2d7f59487704aec069d
+    url: https://curl.haxx.se/download/curl-7.71.1.tar.gz
+  "7.71.0":
+    sha256: 62b2b1acee40c4de5a4913e27a4b4194813cf2b7815b73febec7ae53054646ca
+    url: https://curl.haxx.se/download/curl-7.71.0.tar.gz
   "7.70.0":
     sha256: ca2feeb8ef13368ce5d5e5849a5fd5e2dd4755fecf7d8f0cc94000a4206fb8e7
     url: https://curl.haxx.se/download/curl-7.70.0.tar.gz

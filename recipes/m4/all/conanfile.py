@@ -26,8 +26,7 @@ class M4Conan(ConanFile):
         return str(self.settings.compiler).endswith("clang")
 
     def build_requirements(self):
-        if tools.os_info.is_windows and "CONAN_BASH_PATH" not in os.environ and \
-                tools.os_info.detect_windows_subsystem() != "msys2":
+        if tools.os_info.is_windows and not tools.get_env("CONAN_BASH_PATH"):
             self.build_requires("msys2/20190524")
 
     def source(self):
@@ -39,7 +38,13 @@ class M4Conan(ConanFile):
             return self._autotools
         conf_args = []
         self._autotools = AutoToolsBuildEnvironment(self, win_bash=tools.os_info.is_windows)
-        self._autotools.configure(args=conf_args, configure_dir=self._source_subfolder)
+        build_canonical_name = None
+        host_canonical_name = None
+        if self.settings.compiler == "Visual Studio":
+            # The somewhat older configure script of m4 does not understand the canonical names of Visual Studio
+            build_canonical_name = False
+            host_canonical_name = False
+        self._autotools.configure(args=conf_args, configure_dir=self._source_subfolder, build=build_canonical_name, host=host_canonical_name)
         return self._autotools
 
     @contextmanager

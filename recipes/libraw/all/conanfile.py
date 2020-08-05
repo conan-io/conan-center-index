@@ -27,7 +27,8 @@ class LibRawConan(ConanFile):
 
     def requirements(self):
         self.requires("libjpeg/9d")
-        self.requires("lcms/2.10")
+        self.requires("lcms/2.11")
+        self.requires("jasper/2.0.16")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])

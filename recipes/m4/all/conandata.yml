@@ -16,3 +16,5 @@ patches:
       base_path: "source_subfolder"
     - patch_file: "patches/0007-vasnprintf-port-to-macos-10.13.patch"
       base_path: "source_subfolder"
+    - patch_file: "patches/0008-open-files-in-binary-mode.patch"
+      base_path: "source_subfolder"

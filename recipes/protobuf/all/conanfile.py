@@ -16,10 +16,10 @@ class ProtobufConan(ConanFile):
     generators = "cmake"
     short_paths = True
     settings = "os", "arch", "compiler", "build_type"
-    options = {"shared": [True, False], "with_zlib": [
-        True, False], "fPIC": [True, False], "lite": [True, False]}
-    default_options = {"with_zlib": False,
-                       "shared": False, "fPIC": True, "lite": False}
+    options = {"shared": [True, False], "with_zlib": [True, False], "fPIC": [True, False], "lite": [True, False]}
+    default_options = {"with_zlib": False, "shared": False, "fPIC": True, "lite": False}
+
+    _cmake = None
 
     @property
     def _source_subfolder(self):
@@ -50,16 +50,23 @@ class ProtobufConan(ConanFile):
         if self.options.with_zlib:
             self.requires("zlib/1.2.11")
 
+    @property
+    def _cmake_install_base_path(self):
+        return os.path.join("lib", "cmake", "protobuf")
+
     def _configure_cmake(self):
-        cmake = CMake(self)
-        cmake.definitions["protobuf_BUILD_TESTS"] = False
-        cmake.definitions["protobuf_WITH_ZLIB"] = self.options.with_zlib
-        cmake.definitions["protobuf_BUILD_PROTOC_BINARIES"] = not self.options.lite
-        cmake.definitions["protobuf_BUILD_PROTOBUF_LITE"] = self.options.lite
+        if self._cmake:
+            return self._cmake
+        self._cmake = CMake(self)
+        self._cmake.definitions["CMAKE_INSTALL_CMAKEDIR"] = self._cmake_install_base_path.replace("\\", "/")
+        self._cmake.definitions["protobuf_BUILD_TESTS"] = False
+        self._cmake.definitions["protobuf_WITH_ZLIB"] = self.options.with_zlib
+        self._cmake.definitions["protobuf_BUILD_PROTOC_BINARIES"] = not self.options.lite
+        self._cmake.definitions["protobuf_BUILD_PROTOBUF_LITE"] = self.options.lite
         if self.settings.compiler == "Visual Studio":
-            cmake.definitions["protobuf_MSVC_STATIC_RUNTIME"] = "MT" in self.settings.compiler.runtime
-        cmake.configure(build_folder=self._build_subfolder)
-        return cmake
+            self._cmake.definitions["protobuf_MSVC_STATIC_RUNTIME"] = "MT" in self.settings.compiler.runtime
+        self._cmake.configure(build_folder=self._build_subfolder)
+        return self._cmake
 
     def build(self):
         for patch in self.conan_data["patches"][self.version]:
@@ -71,8 +78,6 @@ class ProtobufConan(ConanFile):
         self.copy("LICENSE", dst="licenses", src=self._source_subfolder)
         cmake = self._configure_cmake()
         cmake.install()
-        tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
-        tools.rmdir(os.path.join(self.package_folder, "cmake"))
         tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
 
     def package_info(self):
@@ -80,12 +85,24 @@ class ProtobufConan(ConanFile):
         self.cpp_info.libs.sort(reverse=True)
 
         if self.settings.os == "Linux":
-            self.cpp_info.libs.append("pthread")
+            self.cpp_info.system_libs.append("pthread")
             if self._is_clang_x86 or "arm" in str(self.settings.arch):
-                self.cpp_info.libs.append("atomic")
+                self.cpp_info.system_libs.append("atomic")
 
         if self.settings.os == "Windows":
             if self.options.shared:
                 self.cpp_info.defines = ["PROTOBUF_USE_DLLS"]
         self.cpp_info.names["cmake_find_package"] = "Protobuf"
         self.cpp_info.names["cmake_find_package_multi"] = "Protobuf"
+        self.cpp_info.builddirs = [
+            self._cmake_install_base_path,
+        ]
+        self.cpp_info.build_modules = [
+            os.path.join(self._cmake_install_base_path, "protobuf-generate.cmake"),
+            os.path.join(self._cmake_install_base_path, "protobuf-module.cmake"),
+            os.path.join(self._cmake_install_base_path, "protobuf-options.cmake"),
+        ]
+        bindir = os.path.join(self.package_folder, "bin")
+        self.output.info("Appending PATH environment variable: {}".format(bindir))
+        self.env_info.PATH.append(bindir)
+

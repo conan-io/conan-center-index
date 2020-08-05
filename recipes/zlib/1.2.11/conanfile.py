@@ -18,6 +18,7 @@ class ZlibConan(ConanFile):
     exports_sources = ["CMakeLists.txt", "CMakeLists_minizip.txt", "patches/**"]
     generators = "cmake"
     _source_subfolder = "source_subfolder"
+    topics = ("conan", "zlib", "compression")
 
     def config_options(self):
         if self.settings.os == "Windows":

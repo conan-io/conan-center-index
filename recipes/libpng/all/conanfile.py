@@ -14,6 +14,7 @@ class LibpngConan(ConanFile):
     settings = "os", "arch", "compiler", "build_type"
     options = {"shared": [True, False], "fPIC": [True, False], "api_prefix": "ANY"}
     default_options = {'shared': False, 'fPIC': True, "api_prefix": None}
+    topics = ("conan", "png", "libpng")
 
     _source_subfolder = "source_subfolder"
 

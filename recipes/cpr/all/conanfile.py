@@ -1,4 +1,5 @@
 from conans import ConanFile, CMake, tools
+from conans.tools import Version
 from conans.errors import ConanInvalidConfiguration
 import os
 
@@ -44,7 +45,10 @@ class CprConan(ConanFile):
         os.rename("cpr-{}".format(self.version), self._source_subfolder)
 
     def requirements(self):
-        self.requires("libcurl/7.67.0")
+        if Version(self.version) < "1.5.0":
+            self.requires("libcurl/7.67.0")
+        else:
+            self.requires("libcurl/7.69.1")
         if self.options.with_openssl:
             self.output.warn("OpenSSL support is not stable yet. whoshuu/cpr#31")
 

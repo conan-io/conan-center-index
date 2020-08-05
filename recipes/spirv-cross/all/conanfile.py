@@ -55,13 +55,14 @@ class SpirvCrossConan(ConanFile):
             del self.options.fPIC
 
     def configure(self):
-        if not self.options.glsl and \
-           (self.options.hlsl or self.options.msl or self.options.cpp or self.options.reflect):
-            raise ConanInvalidConfiguration("hlsl, msl, cpp and reflect require glsl enabled")
         if self.options.shared:
+            del self.options.fPIC
             # these options don't contribute to shared binary
             del self.options.c_api
             del self.options.util
+        if not self.options.glsl and \
+           (self.options.hlsl or self.options.msl or self.options.cpp or self.options.reflect):
+            raise ConanInvalidConfiguration("hlsl, msl, cpp and reflect require glsl enabled")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
@@ -141,10 +142,12 @@ class SpirvCrossConan(ConanFile):
         self.cpp_info.includedirs.append(os.path.join("include", "spirv_cross"))
         if self.settings.os == "Linux" and self.options.glsl:
             self.cpp_info.system_libs.append("m")
-        if not self.options.shared and self.options.c_api and self._stdcpp_library:
-            self.cpp_info.system_libs.append(self._stdcpp_library)
+        if not self.options.shared and self.options.c_api and tools.stdcpp_library(self):
+            self.cpp_info.system_libs.append(tools.stdcpp_library(self))
         if self.options.build_executable:
-            self.env_info.PATH.append(os.path.join(self.package_folder, "bin"))
+            bin_path = os.path.join(self.package_folder, "bin")
+            self.output.info("Appending PATH environment variable: {}".format(bin_path))
+            self.env_info.PATH.append(bin_path)
 
     def _get_ordered_libs(self):
         libs = []
@@ -175,13 +178,3 @@ class SpirvCrossConan(ConanFile):
         if self.settings.os == "Windows" and self.settings.build_type == "Debug":
             libs = [lib + "d" for lib in libs]
         return libs
-
-    @property
-    def _stdcpp_library(self):
-        libcxx = self.settings.get_safe("compiler.libcxx")
-        if libcxx in ("libstdc++", "libstdc++11"):
-            return "stdc++"
-        elif libcxx in ("libc++",):
-            return "c++"
-        else:
-            return False
