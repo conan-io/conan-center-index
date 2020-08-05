@@ -1,4 +1,4 @@
-#include <hdr/hdr_histogram.h>
+#include <hdr_histogram.h>
 
 int main(int argc, char** argv)
 {
