@@ -19,6 +19,7 @@ class RecastNavigationConan(ConanFile):
     default_options = {
         "fPIC": True,
     }
+    short_paths = True
 
     _cmake = None
 
