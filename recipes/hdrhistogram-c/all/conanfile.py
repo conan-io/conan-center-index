@@ -32,6 +32,16 @@ class QuickfixConan(ConanFile):
         if not self._cmake:
             self._cmake = CMake(self)
             self._cmake.definitions["HDR_HISTOGRAM_BUILD_PROGRAMS"] = False
+            if self.options.shared:
+                self._cmake.definitions["HDR_HISTOGRAM_BUILD_SHARED"] = True
+                self._cmake.definitions["HDR_HISTOGRAM_INSTALL_SHARED"] = True
+                self._cmake.definitions["HDR_HISTOGRAM_BUILD_STATIC"] = False
+                self._cmake.definitions["HDR_HISTOGRAM_INSTALL_STATIC"] = False
+            else:
+                self._cmake.definitions["HDR_HISTOGRAM_BUILD_SHARED"] = False
+                self._cmake.definitions["HDR_HISTOGRAM_INSTALL_SHARED"] = False
+                self._cmake.definitions["HDR_HISTOGRAM_BUILD_STATIC"] = True
+                self._cmake.definitions["HDR_HISTOGRAM_INSTALL_STATIC"] = True
             self._cmake.configure(source_folder=self._source_subfolder, build_folder=self._build_subfolder)
         return self._cmake
 
