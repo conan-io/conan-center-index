@@ -43,11 +43,8 @@ class ConanRecipe(ConanFile):
     def configure(self):
         if self.options.shared:
             del self.options.fPIC
-        if self.settings.compiler.cppstd and \
-           not self.settings.compiler.cppstd in self._supported_cppstd:
-          raise ConanInvalidConfiguration("This library requires c++11 standard or higher."
-                                          " {} required."
-                                          .format(self.settings.compiler.cppstd))
+        if self.settings.compiler.cppstd:
+            check_min_cppstd(self, "11")
 
 
     def source(self):
