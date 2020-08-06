@@ -48,7 +48,7 @@ class MpirConan(ConanFile):
         self.build_requires("yasm/1.3.0")
         if self.settings.os == "Windows" and self.settings.compiler != "Visual Studio" and \
            "CONAN_BASH_PATH" not in os.environ and tools.os_info.detect_windows_subsystem() != "msys2":
-            self.build_requires("msys2/20190524")
+            self.build_requires("msys2/20200517")
 
     def source(self):
         tools.get(keep_permissions=True, **self.conan_data["sources"][self.version])
