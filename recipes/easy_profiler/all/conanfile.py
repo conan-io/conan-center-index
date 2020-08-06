@@ -60,10 +60,14 @@ class easy_profilerConan(ConanFile):
         return self._cmake
 
     def package(self):
-        self.copy("COPYING", dst="licenses", src=self._source_subfolder)
+        self.copy("LICENSE", dst="licenses", src=self._source_subfolder)
+        self.copy("LICENSE.MIT", dst="licenses", src=self._source_subfolder)
+        self.copy("LICENSE.APACHE", dst="licenses", src=self._source_subfolder)
         cmake = self._configure_cmake()
         cmake.install()
         tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
+        os.remove(os.path.join(self.package_folder, "LICENSE.MIT"))
+        os.remove(os.path.join(self.package_folder, "LICENSE.APACHE"))
 
     def package_info(self):
         self.cpp_info.libs = ["easy_profiler"]
