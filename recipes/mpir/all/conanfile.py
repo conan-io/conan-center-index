@@ -38,10 +38,8 @@ class MpirConan(ConanFile):
     def configure(self):
         if self.options.shared:
             del self.options.fPIC
-        if self.settings.compiler == "Visual Studio":
-            del self.options.enable_gmpcompat
-            if self.options.shared:
-                del self.options.enable_cxx
+        if self.settings.compiler == "Visual Studio" and self.options.shared:
+            del self.options.enable_cxx
         if not self.options.get_safe("enable_cxx", False):
             del self.settings.compiler.libcxx
             del self.settings.compiler.cppstd
@@ -105,7 +103,7 @@ class MpirConan(ConanFile):
 
             args.append("--disable-silent-rules")
             args.append("--enable-cxx" if self.options.get_safe("enable_cxx") else "--disable-cxx")
-            args.append("--enable-gmpcompat" if self.options.get_safe("enable_gmpcompat") else "--disable-gmpcompat")
+            args.append("--enable-gmpcompat" if self.options.enable_gmpcompat else "--disable-gmpcompat")
             self._autotools.configure(args=args)
         return self._autotools
 
@@ -124,8 +122,12 @@ class MpirConan(ConanFile):
                                     self._platforms.get(str(self.settings.arch)),
                                     str(self.settings.build_type))
             self.copy("mpir.h", dst="include", src=lib_folder, keep_path=True)
+            if self.options.enable_gmpcompat:
+                self.copy("gmp.h", dst="include", src=lib_folder, keep_path=True)
             if self.options.get_safe("enable_cxx"):
                 self.copy("mpirxx.h", dst="include", src=lib_folder, keep_path=True)
+                if self.options.enable_gmpcompat:
+                    self.copy("gmpxx.h", dst="include", src=lib_folder, keep_path=True)
             self.copy(pattern="*.dll*", dst="bin", src=lib_folder, keep_path=False)
             self.copy(pattern="*.lib", dst="lib", src=lib_folder, keep_path=False)
         else:
@@ -141,7 +143,7 @@ class MpirConan(ConanFile):
         if self.options.get_safe("enable_cxx"):
             self.cpp_info.libs.append("mpirxx")
         self.cpp_info.libs.append("mpir")
-        if self.options.get_safe("enable_gmpcompat"):
+        if self.options.enable_gmpcompat and self.settings.compiler != "Visual Studio":
             if self.options.get_safe("enable_cxx"):
                 self.cpp_info.libs.append("gmpxx")
             self.cpp_info.libs.append("gmp")
