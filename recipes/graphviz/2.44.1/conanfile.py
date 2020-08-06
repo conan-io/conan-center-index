@@ -43,7 +43,7 @@ class Graphviz(ConanFile):
         folder_name = "%s-%s" % (self.name, self.version)
         os.rename(folder_name, self._source_subfolder)
         if tools.os_info.is_windows and self.settings.os == "Windows":
-            tools.untargz("rxspencer.tar.gz", destination=os.path.join(self._source_subfolder, "windows", "dependencies", "libraries")) #TODO build rxspencer as conan pkg
+            tools.untargz("rxspencer.tar.gz", destination=os.path.join(self._source_subfolder, "windows", "dependencies", "libraries")) #TODO create rxspencer conan pkg
 
     def _configure_cmake(self):
         if not self._cmake:
