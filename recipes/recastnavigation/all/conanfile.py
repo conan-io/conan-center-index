@@ -9,7 +9,7 @@ class RecastNavigationConan(ConanFile):
     description = " Navigation-mesh Toolset for Games"
     topics = ("conan", "navmesh", "recast", "navigation", "crowd")
     url = "https://github.com/conan-io/conan-center-index"
-    license = "ZLIB"
+    license = "Zlib"
     exports_sources = ["CMakeLists.txt"]
     generators = "cmake"
     settings = "os", "compiler", "build_type", "arch"

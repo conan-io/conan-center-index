@@ -1,6 +1,3 @@
-#include <iostream>
-#include <cassert>
-
 #include "Recast.h"
 
 int main() {
