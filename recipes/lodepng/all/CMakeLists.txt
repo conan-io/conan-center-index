@@ -13,6 +13,6 @@ add_library(lodepng "source_subfolder/lodepng.h" "source_subfolder/lodepng.cpp")
 include(GNUInstallDirs)
 install(TARGETS lodepng
     RUNTIME DESTINATION "${CMAKE_INSTALL_BINDIR}"
-    LIBRARY DESTINATION "${CMAKE_INSTALL_LIBRARY}"
-    ARCHIVE DESTINATION "${CMAKE_INSTALL_ARCHIVE}")
+    LIBRARY DESTINATION "${CMAKE_INSTALL_LIBDIR}"
+    ARCHIVE DESTINATION "${CMAKE_INSTALL_LIBDIR}")
 install(FILES "source_subfolder/lodepng.h" DESTINATION include)
