@@ -30,11 +30,6 @@ class ConanRecipe(ConanFile):
     def _build_subfolder(self):
           return "build_subfolder"
 
-    @property
-    def _supported_cppstd(self):
-        return ["11", "gnu11", "14", "gnu14", "17", "gnu17", "20", "gnu20"]
-
-
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
