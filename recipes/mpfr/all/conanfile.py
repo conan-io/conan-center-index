@@ -126,6 +126,8 @@ class MpfrConan(ConanFile):
                 })
                 with tools.environment_append(env):
                     yield
+        else:
+            yield
 
     def build(self):
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
