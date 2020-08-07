@@ -12,6 +12,7 @@ set(HEADERS crypt.h ${PUBLIC_HEADERS})
 if(WIN32)
   set(SOURCES ${SOURCES} iowin32.c)
   set(HEADERS ${HEADERS} iowin32.h)
+  set(PUBLIC_HEADERS ${PUBLIC_HEADERS} iowin32.h)
 
   if(BUILD_SHARED_LIBS)
     set(SOURCES ${SOURCES} minizip1.rc)
