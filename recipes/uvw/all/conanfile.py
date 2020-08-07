@@ -20,7 +20,6 @@ class UvwConan(ConanFile):
         "header-only",
     )
     no_copy_source = True
-    requires = "libuv/1.38.1"
     settings = "compiler"
 
     @property
@@ -40,6 +39,10 @@ class UvwConan(ConanFile):
         if compiler == "apple-clang" and version >= "10":
             return True
         return False
+
+    def requirements(self):
+        if tools.Version(self.version) >= "2.6" and tools.Version(self.version) < "2.7":
+            self.requires("libuv/1.38.1")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
