@@ -1,12 +1,11 @@
 from conans import ConanFile, tools, CMake
 import os
-import glob
 
 
-class easy_profilerConan(ConanFile):
+class EasyProfilerConan(ConanFile):
     name = "easy_profiler"
     description = "Lightweight profiler library for c++"
-    license = "BSD"
+    license = "MIT"
     topics = ("conan", "easy_profiler")
     homepage = "https://github.com/yse/easy_profiler/"
     url = "https://github.com/conan-io/conan-center-index"
@@ -73,5 +72,3 @@ class easy_profilerConan(ConanFile):
         self.cpp_info.libs = ["easy_profiler"]
         if self.settings.os == "Linux":
             self.cpp_info.system_libs = ["m", "pthread"]
-        self.cpp_info.names["cmake_find_package"] = "easy_profiler"
-        self.cpp_info.names["cmake_find_package_multi"] = "easy_profiler"
