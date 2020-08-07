@@ -20,6 +20,7 @@ class EasyProfilerConan(ConanFile):
         "shared": False,
         "fPIC": True
     }
+    short_path = True
 
     _cmake = None
 
