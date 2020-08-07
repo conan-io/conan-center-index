@@ -1,14 +1,11 @@
 from conans import CMake, ConanFile, tools
 from conans.errors import ConanException, ConanInvalidConfiguration
 import os
-import re
-import shutil
 import textwrap
 
 
 class SeasocksConan(ConanFile):
     name = "seasocks"
-
     description = "A tiny embeddable C++ HTTP and WebSocket server for Linux"
     topics = ("seasocks", "embeddable", "webserver", "websockets")
     homepage = "https://github.com/mattgodbolt/seasocks"
@@ -21,14 +18,22 @@ class SeasocksConan(ConanFile):
         "with_zlib": [True, False],
     }
     default_options = {
-        "shared": True,
+        "shared": False,
         "fPIC": True,
         "with_zlib": True,
     }
-    no_copy_source = True
     generators = "cmake", "cmake_find_package"
+    exports_sources = "CMakeLists.txt"
+
+    _cmake = None
+
+    @property
+    def _source_subfolder(self):
+        return "source_subfolder"
 
     def configure(self):
+        if self.settings.os != "Linux":
+            raise ConanInvalidConfiguration("Seasocks doesn't support this os")
         if self.options.shared:
             del self.options.fPIC
 
@@ -38,51 +43,29 @@ class SeasocksConan(ConanFile):
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
-        if self.version == '1.4.4':
-            tools.replace_in_file(
-                "seasocks-" +
-                self.version +
-                "/CMakeLists.txt",
-                "${BUILD_SHARED_LIBS}}\")",
-                "${BUILD_SHARED_LIBS}\")")
+        os.rename("seasocks-{}".format(self.version), self._source_subfolder)
+
+    def _configure_cmake(self):
+        if self._cmake:
+            return self._cmake
+        self._cmake = CMake(self)
+        self._cmake.definitions["DEFLATE_SUPPORT"] = self.options.with_zlib
+        self._cmake.definitions["SEASOCKS_SHARED"] = self.options.shared
+        self._cmake.definitions["SEASOCKS_EXAMPLE_APP"] = False
+        self._cmake.definitions["UNITTESTS"] = False
+        self._cmake.configure()
+        return self._cmake
 
     def build(self):
-        if self.source_folder == self.build_folder:
-            raise ConanException("Cannot build in same folder as sources")
-        tools.save(
-            os.path.join(
-                self.build_folder,
-                "CMakeLists.txt"),
-            textwrap.dedent("""\
-            cmake_minimum_required(VERSION 3.0)
-            project(cmake_wrapper)
-
-            include("{install_folder}/conanbuildinfo.cmake")
-            conan_basic_setup(TARGETS)
-
-            add_subdirectory("{source_folder}/seasocks-{version}" seasocks)
-        """).format(
-                source_folder=self.source_folder.replace(
-                    "\\",
-                    "/"),
-                install_folder=self.install_folder.replace(
-                    "\\",
-                    "/"),
-                version=self.version))
-        cmake = CMake(self)
-        cmake.definitions["DEFLATE_SUPPORT"] = self.options.with_zlib
-        cmake.configure(source_folder=self.build_folder)
+        cmake = self._configure_cmake()
         cmake.build()
 
     def package(self):
-        cmake = CMake(self)
+        self.copy("LICENSE", src=self._source_subfolder, dst="licenses")
+        cmake = self._configure_cmake()
         cmake.install()
-        os.rename(os.path.join(self.package_folder, "share", "licenses"),
-                  os.path.join(self.package_folder, "licenses"))
-        tools.rmdir(os.path.join(self.package_folder, "share"))
         tools.rmdir(os.path.join(self.package_folder, 'lib', 'cmake'))
-        tools.rmdir(os.path.join(self.package_folder, 'CMake'))
-        tools.rmdir(os.path.join(self.package_folder, 'lib', 'pkgconfig'))
+        tools.rmdir(os.path.join(self.package_folder, "share"))
 
     def package_info(self):
         # Set the name of the generated `FindSeasocks.cmake` and
