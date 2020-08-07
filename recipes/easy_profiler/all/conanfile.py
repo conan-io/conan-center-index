@@ -68,6 +68,10 @@ class EasyProfilerConan(ConanFile):
         tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
         os.remove(os.path.join(self.package_folder, "LICENSE.MIT"))
         os.remove(os.path.join(self.package_folder, "LICENSE.APACHE"))
+        if self.settings.os == "Windows":
+            for dll_file in glob.glob(os.path.join(self.package_folder, "bin", "*.dll")):
+                if os.path.basename(dll_file).startswith(("concrt", "msvcp", "vcruntime")):
+                    os.remove(dll_file)
 
     def package_info(self):
         self.cpp_info.libs = ["easy_profiler"]
