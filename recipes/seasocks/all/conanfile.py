@@ -1,7 +1,6 @@
 from conans import CMake, ConanFile, tools
 from conans.errors import ConanException, ConanInvalidConfiguration
 import os
-import textwrap
 
 
 class SeasocksConan(ConanFile):
