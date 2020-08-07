@@ -10,13 +10,15 @@ class RecastNavigationConan(ConanFile):
     topics = ("conan", "navmesh", "recast", "navigation", "crowd")
     url = "https://github.com/conan-io/conan-center-index"
     license = "Zlib"
-    exports_sources = ["CMakeLists.txt"]
+    exports_sources = ["CMakeLists.txt", "patches/*"]
     generators = "cmake"
     settings = "os", "compiler", "build_type", "arch"
     options = {
+        "shared": [True, False],
         "fPIC": [True, False],
     }
     default_options = {
+        "shared": False,
         "fPIC": True,
     }
     short_paths = True
@@ -47,11 +49,12 @@ class RecastNavigationConan(ConanFile):
         self._cmake.definitions["RECASTNAVIGATION_DEMO"] = False
         self._cmake.definitions["RECASTNAVIGATION_TESTS"] = False
         self._cmake.definitions["RECASTNAVIGATION_EXAMPLES"] = False
-        self._cmake.definitions["RECASTNAVIGATION_STATIC"] = True
         self._cmake.configure(build_folder=self._build_subfolder)
         return self._cmake
 
     def build(self):
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            tools.patch(**patch)
         cmake = self._configure_cmake()
         cmake.build()
 
