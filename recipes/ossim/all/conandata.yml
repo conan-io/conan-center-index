@@ -1,0 +1,12 @@
+sources:
+  "2.12.0":
+    url: "https://github.com/ossimlabs/ossim/archive/2.12.0.tar.gz"
+    sha256: "3b0baffcf3a34e040ca13c9e57752ae4b73ec3e766737694e45c72ca0eb04333"
+patches:
+  "2.12.0":
+    - patch_file: "patches/0001-cmake-target-dependencies.patch"
+      base_path: "source_subfolder"
+    - patch_file: "patches/0002-cmake-install-directory.patch"
+      base_path: "source_subfolder"
+    - patch_file: "patches/0003-cxx-fixes.patch"
+      base_path: "source_subfolder"

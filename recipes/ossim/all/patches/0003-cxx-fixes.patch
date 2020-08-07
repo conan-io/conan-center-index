@@ -1,0 +1,56 @@
+--- src/imaging/ossimImageFileWriter.cpp
++++ src/imaging/ossimImageFileWriter.cpp
+@@ -101,7 +101,7 @@ ossimImageFileWriter::ossimImageFileWriter(const ossimFilename& file,
+       ossimNotify(ossimNotifyLevel_DEBUG)
+          << "ossimImageFileWriter::ossimImageFileWriter entered..."
+          << std::endl;
+-#ifdef OSSIM_ID_ENABLED
++#if OSSIM_ID_ENABLED
+       ossimNotify(ossimNotifyLevel_DEBUG)
+          << "OSSIM_ID:  " << OSSIM_ID << std::endl;
+ #endif
+--- src/parallel/ossimMpi.cpp
++++ src/parallel/ossimMpi.cpp
+@@ -173,7 +173,7 @@ ossimMpi::ossimMpi()
+       ossimNotify(ossimNotifyLevel_DEBUG)
+          << "ossimMpi::ossimMpi entered..."
+          << std::endl;
+-#ifdef OSSIM_ID_ENABLED
++#if OSSIM_ID_ENABLED
+       ossimNotify(ossimNotifyLevel_DEBUG)
+          << "OSSIM_ID = " << OSSIM_ID << std::endl;
+ #endif
+--- src/projection/ossimSpaceObliqueMercatorProjection.cpp
++++ src/projection/ossimSpaceObliqueMercatorProjection.cpp
+@@ -22,7 +22,7 @@
+ #define ATOL 1e-50
+ #define FORTPI		0.78539816339744833
+ 
+-double aasin(double v)
++static double aasin(double v)
+ {
+    double av;
+ 
+@@ -32,7 +32,7 @@ double aasin(double v)
+    }
+    return asin(v);
+ }
+-double aacos(double v)
++static double aacos(double v)
+ {
+ 	double av;
+ 
+@@ -42,11 +42,11 @@ double aacos(double v)
+ 	}
+ 	return acos(v);
+ }
+-double asqrt(double v)
++static double asqrt(double v)
+ {
+    return ((v <= 0) ? 0. : sqrt(v));
+ }
+-double aatan2(double n, double d)
++static double aatan2(double n, double d)
+ {
+    return ((fabs(n) < ATOL && fabs(d) < ATOL) ? 0. : atan2(n,d));
+ }
