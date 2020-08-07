@@ -75,7 +75,6 @@ class SeasocksConan(ConanFile):
         cmake.build()
 
     def package(self):
-        self.copy("LICENSE", src=self._source_subfolder, dst="licenses")
         cmake = CMake(self)
         cmake.install()
         os.rename(os.path.join(self.package_folder, "share", "licenses"),
