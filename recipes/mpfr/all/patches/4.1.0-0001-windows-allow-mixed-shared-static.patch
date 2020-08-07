@@ -18,24 +18,3 @@
  fi
  rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
    fi
---- configure.ac
-+++ configure.ac
-@@ -602,7 +602,7 @@
- #endif
-      ]], [[]])],[AC_MSG_RESULT(DLL)],[
-   AC_MSG_RESULT(static)
--  AC_MSG_ERROR([libgmp isn't provided as a DLL: use --enable-static --disable-shared]) ])
-+  dnl AC_MSG_ERROR([libgmp isn't provided as a DLL: use --enable-static --disable-shared]) ])
-    else
-      AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[
- #include "gmp.h"
-@@ -612,7 +612,7 @@
- #endif
-      ]], [[]])],[AC_MSG_RESULT(static)],[
-   AC_MSG_RESULT(DLL)
--  AC_MSG_ERROR([libgmp is provided as a DLL: use --disable-static --enable-shared]) ])
-+  dnl AC_MSG_ERROR([libgmp is provided as a DLL: use --disable-static --enable-shared]) ])
-   fi
-   ;;
- esac
- 
