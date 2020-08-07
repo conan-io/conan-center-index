@@ -12,5 +12,4 @@ class TestPackageConan(ConanFile):
 
     def test(self):
         if not tools.cross_building(self.settings):
-            src = os.path.join(self.source_folder, "tng_example.tng")
-            self.run("{} {}".format(os.path.join("bin", "test_package"), src), run_environment=True)
+            self.run( os.path.join("bin", "test_package"), run_environment=True)
