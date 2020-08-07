@@ -1,6 +1,6 @@
 from conans import ConanFile, tools, CMake
 import os
-
+import glob
 
 class EasyProfilerConan(ConanFile):
     name = "easy_profiler"
