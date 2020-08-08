@@ -1,5 +1,5 @@
-#include <mimalloc.h>
 #include <memory>
+#include <mimalloc.h>
 
 struct Test
 { };
