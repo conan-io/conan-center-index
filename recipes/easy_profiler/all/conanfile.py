@@ -2,6 +2,7 @@ from conans import ConanFile, tools, CMake
 import os
 import glob
 
+
 class EasyProfilerConan(ConanFile):
     name = "easy_profiler"
     description = "Lightweight profiler library for c++"
@@ -17,7 +18,7 @@ class EasyProfilerConan(ConanFile):
         "fPIC": [True, False]
     }
     default_options = {
-        "shared": False,
+        "shared": True,
         "fPIC": True
     }
     short_paths = True
@@ -39,6 +40,11 @@ class EasyProfilerConan(ConanFile):
     def configure(self):
         if self.options.shared:
             del self.options.fPIC
+        # The windows build seems to be giving problems due to certain symbols
+        # not being exported properly for static libraries.
+        if self.options.shared is False and self.settings.os == "Windows":
+            raise ConanInvalidConfiguration("Must be built as shared on \
+              Windows")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
@@ -69,8 +75,10 @@ class EasyProfilerConan(ConanFile):
         os.remove(os.path.join(self.package_folder, "LICENSE.MIT"))
         os.remove(os.path.join(self.package_folder, "LICENSE.APACHE"))
         if self.settings.os == "Windows":
-            for dll_file in glob.glob(os.path.join(self.package_folder, "bin", "*.dll")):
-                if os.path.basename(dll_file).startswith(("concrt", "msvcp", "vcruntime")):
+            for dll_file in \
+              glob.glob(os.path.join(self.package_folder, "bin", "*.dll")):
+                if os.path.basename(dll_file).startswith(("concrt", "msvcp",
+                   "vcruntime")):
                     os.remove(dll_file)
 
     def package_info(self):
