@@ -1,9 +1,7 @@
+import os
 from conans import ConanFile, tools, CMake
 from conans.errors import ConanInvalidConfiguration
 from conans.tools import Version
-from fnmatch import fnmatch
-import os
-import tarfile
 
 
 class SquirrelConan(ConanFile):
@@ -40,6 +38,8 @@ class SquirrelConan(ConanFile):
             del self.options.fPIC
 
     def configure(self):
+        if self.settings.os == "Macos" and tools.Version(self.version) <= "3.1":
+            raise ConanInvalidConfiguration("squirrel 3.1 and earlier does not support Macos")
         if self.options.shared:
             del self.options.fPIC
 
