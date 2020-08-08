@@ -38,8 +38,6 @@ class ClhepConan(ConanFile):
             tools.check_min_cppstd(self, 11)
         if self.settings.compiler == "Visual Studio" and self.options.shared:
             raise ConanInvalidConfiguration("CLHEP doesn't properly build its shared libs with Visual Studio")
-        if self.settings.os == "Windows" and self.settings.compiler == "gcc":
-            raise ConanInvalidConfiguration("CLHEP doesn't support MinGW")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
