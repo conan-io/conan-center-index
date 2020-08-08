@@ -116,4 +116,6 @@ class MimallocConan(ConanFile):
 
     def package_info(self):
         self.cpp_info.libs = tools.collect_libs(self)
-        self.cpp_info.includedirs = [os.path.join("lib", self._cmake_install_folder, "include")]
+        if self.settings.compiler != "Visual Studio":
+            self.cpp_info.includedirs = [
+                os.path.join("lib", self._cmake_install_folder, "include")]
