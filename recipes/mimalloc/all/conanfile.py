@@ -19,7 +19,7 @@ class MimallocConan(ConanFile):
                        "shared": False,
                        "override": True}
     generators = "cmake", "visual_studio"
-    exports_sources = "patches/**"
+    exports_sources = "CMakeLists.txt", "patches/*"
     _cmake_i = None
     _msbuild_i = None
 
@@ -50,8 +50,7 @@ class MimallocConan(ConanFile):
             self._cmake_i.definitions["MI_BUILD_TESTS"] = False
             self._cmake_i.definitions["MI_BUILD_SHARED"] = self.options.shared
             self._cmake_i.definitions["MI_BUILD_STATIC"] = not self.options.shared
-            self._cmake_i.configure(source_folder=self._source_subfolder,
-                build_folder=self._build_subfolder)
+            self._cmake_i.configure(build_folder=self._build_subfolder)
         return self._cmake_i
 
     @property
