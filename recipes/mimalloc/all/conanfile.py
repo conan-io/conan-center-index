@@ -16,7 +16,8 @@ class MimallocConan(ConanFile):
                "shared": [True, False],
                "override": [True, False]}
     default_options = {"fPIC": True,
-                       "shared": False}
+                       "shared": False,
+                       "override": True}
     generators = "cmake", "visual_studio"
     exports_sources = "patches/**"
     _cmake_i = None
