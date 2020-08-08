@@ -69,7 +69,8 @@ class MimallocConan(ConanFile):
             del self.options.fPIC
 
     def configure(self):
-        tools.check_min_cppstd(self, "14")
+        if self.settings.compiler.cppstd:
+            tools.check_min_cppstd(self, "14")
         if self.options.shared:
             del self.options.fPIC
         if self.settings.compiler == "Visual Studio":
