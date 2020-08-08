@@ -1,0 +1,127 @@
+--- 3fd/broker/CMakeLists.txt
++++ 3fd/broker/CMakeLists.txt
+@@ -36,7 +36,7 @@ include_directories(
+ # Dependency libraries:
+ 
+ # Static library source files:
+-add_library(3fd-broker STATIC
++add_library(3fd-broker
+     broker_impl.cpp
+     broker_impl_reader.cpp
+     broker_impl_writer.cpp
+@@ -47,5 +47,5 @@ add_library(3fd-broker STATIC
+-
++target_link_libraries(3fd-broker PRIVATE CONAN_PKG::nanodbc)
+ install(
+     TARGETS 3fd-broker
+-    DESTINATION "${PROJECT_SOURCE_DIR}/../../build/lib"
+-)
+\ No newline at end of file
++    LIBRARY DESTINATION lib ARCHIVE DESTINATION lib RUNTIME DESTINATION bin
++)
+--- 3fd/core/CMakeLists.txt
++++ 3fd/core/CMakeLists.txt
+@@ -37,7 +37,7 @@ include_directories(
+ # Dependency libraries:
+ 
+ # Static library source files:
+-add_library(3fd-core STATIC
++add_library(3fd-core
+     callstacktracer.cpp
+     configuration.cpp
+     dependencies.cpp
+@@ -60,5 +60,5 @@ add_library(3fd-core STATIC
+ 
+ install(
+     TARGETS 3fd-core
+-    DESTINATION "${PROJECT_SOURCE_DIR}/../../build/lib"
+-)
+\ No newline at end of file
++    RUNTIME DESTINATION bin LIBRARY DESTINATION lib ARCHIVE DESTINATION lib
++)
+--- 3fd/opencl/CMakeLists.txt
++++ 3fd/opencl/CMakeLists.txt
+@@ -36,7 +36,7 @@ include_directories(
+ # Dependency libraries:
+ 
+ # Static library source files:
+-add_library(3fd-opencl STATIC
++add_library(3fd-opencl
+     opencl_impl.cpp
+     opencl_impl_commandtracker.cpp
+     opencl_impl_context.cpp
+@@ -51,5 +51,5 @@ add_library(3fd-opencl STATIC
+ 
+ install(
+     TARGETS 3fd-opencl
+-    DESTINATION "${PROJECT_SOURCE_DIR}/../../build/lib"
+-)
+\ No newline at end of file
++    ARCHIVE DESTINATION lib LIBRARY DESTINATION lib RUNTIME DESTINATION bin
++)
+--- 3fd/sqlite/CMakeLists.txt
++++ 3fd/sqlite/CMakeLists.txt
+@@ -36,7 +36,7 @@ include_directories(
+ # Dependency libraries:
+ 
+ # Static library source files:
+-add_library(3fd-sqlite STATIC
++add_library(3fd-sqlite
+     sqlite_databaseconn.cpp
+     sqlite_dbconnpool.cpp
+     sqlite_prepstatement.cpp
+@@ -48,5 +48,5 @@ add_library(3fd-sqlite STATIC
+-
++target_link_libraries(3fd-sqlite PRIVATE CONAN_PKG::sqlite3)
+ install(
+     TARGETS 3fd-sqlite
+-    DESTINATION "${PROJECT_SOURCE_DIR}/../../build/lib"
+-)
+\ No newline at end of file
++    ARCHIVE DESTINATION lib LIBRARY DESTINATION lib RUNTIME DESTINATION bin
++)
+--- 3fd/utils/CMakeLists.txt
++++ 3fd/utils/CMakeLists.txt
+@@ -36,7 +36,7 @@ include_directories(
+ # Dependency libraries:
+ 
+ # Static library source files:
+-add_library(3fd-utils STATIC
++add_library(3fd-utils
+     cmdline.cpp
+     utils_asynchronous.cpp
+     utils_dynmempool.cpp
+@@ -52,5 +52,5 @@ add_library(3fd-utils STATIC
+ 
+ install(
+     TARGETS 3fd-utils
+-    DESTINATION "${PROJECT_SOURCE_DIR}/../../build/lib"
+-)
+\ No newline at end of file
++    ARCHIVE DESTINATION lib LIBRARY DESTINATION lib RUNTIME DESTINATION bin
++)
+--- CMakeLists.txt
++++ CMakeLists.txt
+@@ -2,15 +2,15 @@ cmake_minimum_required(VERSION 3.10)
+ 
+ project(3fd)
+ 
+-add_subdirectory(gtest)
+-add_subdirectory(nanodbc)
+-add_subdirectory(sqlite3)
++#add_subdirectory(gtest)
++#add_subdirectory(nanodbc)
++#add_subdirectory(sqlite3)
+ 
+ add_subdirectory(3fd/core)
+ add_subdirectory(3fd/utils)
+ add_subdirectory(3fd/sqlite)
+ add_subdirectory(3fd/broker)
+ add_subdirectory(3fd/opencl)
+-
++install(DIRECTORY 3fd/core 3fd/utils 3fd/sqlite 3fd/broker 3fd/opencl DESTINATION include/3fd FILES_MATCHING PATTERN *.h PATTERN pch* EXCLUDE)
+-add_subdirectory(UnitTests)
+-add_subdirectory(IntegrationTests)
+\ No newline at end of file
++#add_subdirectory(UnitTests)
++#add_subdirectory(IntegrationTests)

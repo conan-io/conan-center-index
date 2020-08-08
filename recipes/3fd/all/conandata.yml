@@ -1,0 +1,8 @@
+sources:
+  "cci.20200708":
+    url: "https://github.com/faburaya/3fd/archive/81f6c6518aac03c146e93ec739a7398d12b1e714.tar.gz"
+    sha256: "66f3fcc480215f5c5522e220d62a3eb46d2ba45402ace41d6270dcb9f7c1a914"
+patches:
+  "cci.20200708":
+    - base_path: "source_subfolder"
+      patch_file: "patches/0001-add-shared-support.patch"
