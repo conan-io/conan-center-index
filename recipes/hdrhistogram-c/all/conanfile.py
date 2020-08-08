@@ -57,7 +57,8 @@ class QuickfixConan(ConanFile):
             del self.options.fPIC
 
     def configure(self):
-        pass
+        if self.options.shared:
+            del self.options.fPIC
 
     def build(self):
         for patch in self.conan_data["patches"][self.version]:

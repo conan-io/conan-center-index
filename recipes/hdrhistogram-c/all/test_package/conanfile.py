@@ -1,6 +1,5 @@
-import os
-
 from conans import ConanFile, CMake, tools
+import os
 
 
 class HDRHistogramCTestConan(ConanFile):
@@ -13,6 +12,6 @@ class HDRHistogramCTestConan(ConanFile):
         cmake.build()
 
     def test(self):
-        if not tools.cross_building(self):
+        if not tools.cross_building(self.settings):
             bin_path = os.path.join("bin", "hdr_decoder")
             self.run(bin_path, run_environment=True)
