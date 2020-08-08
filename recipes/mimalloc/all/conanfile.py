@@ -13,7 +13,8 @@ class MimallocConan(ConanFile):
     topics = ("libraries", "c", "c++", "malloc", "allocator")
     settings = "os", "compiler", "build_type", "arch"
     options = {"fPIC": [True, False],
-               "shared": [True, False]}
+               "shared": [True, False],
+               "override": [True, False]}
     default_options = {"fPIC": True,
                        "shared": False}
     generators = "cmake", "visual_studio"
