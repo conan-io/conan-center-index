@@ -64,9 +64,6 @@ class MimallocConan(ConanFile):
         tools.get(**self.conan_data["sources"][self.version])
         os.rename("mimalloc-" + self.version, self._source_subfolder)
 
-    def requirements(self):
-        pass
-
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
