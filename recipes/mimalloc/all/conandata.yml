@@ -1,0 +1,4 @@
+sources:
+  "1.6.4":
+    url: "https://github.com/microsoft/mimalloc/archive/v1.6.4.tar.gz"
+    sha256: "fa616b1ae76b558ec38c411c59afa52b5963d7e7ac70551955e0607212d80aad"
