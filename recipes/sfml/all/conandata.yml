@@ -1,0 +1,8 @@
+sources:
+  "2.5.1":
+    url: "https://github.com/SFML/SFML/archive/2.5.1.tar.gz"
+    sha256: "438c91a917cc8aa19e82c6f59f8714da353c488584a007d401efac8368e1c785"
+patches:
+  "2.5.1":
+    - patch_file: "patches/001_disable_deps_installation.patch"
+      base_path: "source_subfolder"
