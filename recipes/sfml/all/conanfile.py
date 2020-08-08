@@ -53,6 +53,16 @@ class SFMLConan(ConanFile):
                 self.requires('xorg/system')
             self.requires('opengl/system')
 
+    def system_requirements(self):
+        if self.settings.os == 'Linux' and tools.os_info.is_linux:
+            if tools.os_info.with_apt:
+                installer = tools.SystemPackageTool()
+                packages = []
+                if self.options.window:
+                    packages.extend(['libudev-dev'])
+                for package in packages:
+                    installer.install(package)
+
     def configure(self):
         if self.options.shared:
             del self.options.fPIC
