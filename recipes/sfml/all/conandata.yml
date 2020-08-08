@@ -6,3 +6,5 @@ patches:
   "2.5.1":
     - patch_file: "patches/001_disable_deps_installation.patch"
       base_path: "source_subfolder"
+    - patch_file: "patches/002_fix_shared.patch"
+      base_path: "source_subfolder"

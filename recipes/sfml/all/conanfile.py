@@ -10,7 +10,7 @@ class SFMLConan(ConanFile):
     homepage = 'https://github.com/SFML/SFML'
     url = 'https://github.com/conan-io/conan-center-index'
     exports_sources = ['CMakeLists.txt', 'patches/*']
-    generators = 'cmake'
+    generators = 'cmake', 'cmake_find_package'
     settings = 'os', 'compiler', 'build_type', 'arch'
     options = {
         'shared': [True, False],
