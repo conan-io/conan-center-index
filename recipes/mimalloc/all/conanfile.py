@@ -48,12 +48,8 @@ class MimallocConan(ConanFile):
         if not self._cmake_i:
             self._cmake_i = CMake(self)
             self._cmake_i.definitions["MI_BUILD_TESTS"] = False
-            if self.options.shared:
-                self._cmake_i.definitions["MI_BUILD_SHARED"] = True
-                self._cmake_i.definitions["MI_BUILD_STATIC"] = False
-            else:
-                self._cmake_i.definitions["MI_BUILD_SHARED"] = False
-                self._cmake_i.definitions["MI_BUILD_STATIC"] = True
+            self._cmake_i.definitions["MI_BUILD_SHARED"] = self.options.shared
+            self._cmake_i.definitions["MI_BUILD_STATIC"] = not self.options.shared
             self._cmake_i.configure(source_folder=self._source_subfolder,
                 build_folder=self._build_subfolder)
         return self._cmake_i
