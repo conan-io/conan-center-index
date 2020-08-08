@@ -1,19 +1,21 @@
 diff --git a/CMakeLists.txt b/CMakeLists.txt
-index 72261da..894fd18 100644
+index 72261da..8e02126 100644
 --- a/CMakeLists.txt
 +++ b/CMakeLists.txt
-@@ -2,6 +2,9 @@ cmake_minimum_required(VERSION 3.5)
+@@ -2,6 +2,11 @@ cmake_minimum_required(VERSION 3.5)
  
  project(hdr_histogram VERSION 0.10.0 LANGUAGES C)
  
 +include(${PROJECT_BINARY_DIR}/../conanbuildinfo.cmake)
 +conan_basic_setup()
 +
++set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS ON)
++
  include(GNUInstallDirs)
  include(CMakePackageConfigHelpers)
  
 diff --git a/src/CMakeLists.txt b/src/CMakeLists.txt
-index 9dbb311..5bd6ca4 100644
+index 9dbb311..3b8d1ff 100644
 --- a/src/CMakeLists.txt
 +++ b/src/CMakeLists.txt
 @@ -1,10 +1,3 @@
@@ -27,7 +29,7 @@ index 9dbb311..5bd6ca4 100644
  set(HDR_HISTOGRAM_SOURCES
      hdr_encoding.c
      hdr_histogram.c
-@@ -33,17 +26,8 @@ function(hdr_histogram_add_library NAME LIBRARY_TYPE DO_INSTALL)
+@@ -33,22 +26,15 @@ function(hdr_histogram_add_library NAME LIBRARY_TYPE DO_INSTALL)
          ${HDR_HISTOGRAM_SOURCES}
          ${HDR_HISTOGRAM_PRIVATE_HEADERS}
          ${HDR_HISTOGRAM_PUBLIC_HEADERS})
@@ -47,3 +49,11 @@ index 9dbb311..5bd6ca4 100644
      if(DO_INSTALL)
          install(
              TARGETS ${NAME}
+             EXPORT ${PROJECT_NAME}-targets
+-            DESTINATION ${CMAKE_INSTALL_LIBDIR})
++            ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
++            LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
++            RUNTIME DESTINATION bin)
+     endif()
+ endfunction()
+ 
