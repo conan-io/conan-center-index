@@ -70,8 +70,8 @@ class MimallocConan(ConanFile):
 
     def package_info(self):
         self.cpp_info.libs = tools.collect_libs(self)
-        self.cpp_info.includedirs = [
-            os.path.join("lib", self._cmake_install_folder, "include")]
+        self.cpp_info.includedirs = [os.path.join("lib", self._cmake_install_folder, "include")]
+        self.cpp_info.libdirs = [os.path.join("lib", self._cmake_install_folder)]
 
         if not self.options.shared:
             if self.settings.os == "Windows":
