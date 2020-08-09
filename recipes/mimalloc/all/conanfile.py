@@ -1,6 +1,4 @@
-from conans import ConanFile, CMake, MSBuild, tools
-from conans.errors import ConanInvalidConfiguration
-from conans.tools import Version
+from conans import ConanFile, CMake, tools
 import os
 
 
@@ -18,10 +16,9 @@ class MimallocConan(ConanFile):
     default_options = {"fPIC": True,
                        "shared": False,
                        "override": True}
-    generators = "cmake", "visual_studio"
+    generators = "cmake"
     exports_sources = "CMakeLists.txt", "patches/*"
     _cmake_i = None
-    _msbuild_i = None
 
     @property
     def _cmake_install_folder(self):
@@ -53,12 +50,6 @@ class MimallocConan(ConanFile):
             self._cmake_i.configure(build_folder=self._build_subfolder)
         return self._cmake_i
 
-    @property
-    def _msbuild(self):
-        if not self._msbuild_i:
-            self._msbuild_i = MSBuild(self)
-        return self._msbuild_i
-
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
         os.rename("mimalloc-" + self.version, self._source_subfolder)
@@ -72,45 +63,19 @@ class MimallocConan(ConanFile):
             tools.check_min_cppstd(self, "14")
         if self.options.shared:
             del self.options.fPIC
-        if self.settings.compiler == "Visual Studio":
-            if Version(self.settings.compiler.version) < "15":
-                raise ConanInvalidConfiguration("Visual Studio 15 2017 or newer is required")
 
     def build(self):
         for patch in self.conan_data["patches"][self.version]:
             tools.patch(**patch)
-
-        if self.settings.compiler == "Visual Studio":
-            target = "mimalloc-override" if self.options.shared else "mimalloc"
-            if Version(self.settings.compiler.version) >= "16":
-                self._msbuild.build(
-                    os.path.join(self._source_subfolder, "ide", "vs2019", "mimalloc.sln"),
-                    targets=[target])
-            else:
-                self._msbuild.build(
-                    os.path.join(self._source_subfolder, "ide", "vs2017", "mimalloc.sln"),
-                    targets=[target])
-        else:
-            self._cmake.build()
+        self._cmake.build()
 
     def package(self):
-        if self.settings.compiler == "Visual Studio":
-            self.copy("*.h", dst="include",
-                src=os.path.join(self._source_subfolder, "include"))
-            self.copy("*.lib", dst="lib",
-                src=os.path.join(self._source_subfolder, "out"),
-                keep_path=False)
-            self.copy("*.dll", dst="bin",
-                src=os.path.join(self._source_subfolder, "out"),
-                keep_path=False)
-        else:
-            self._cmake.install()
-            tools.rmdir(os.path.join(self.package_folder, "lib", self._cmake_install_folder, "cmake"))
+        self._cmake.install()
+        tools.rmdir(os.path.join(self.package_folder, "lib", self._cmake_install_folder, "cmake"))
 
         self.copy("LICENSE", dst="licenses", src=self._source_subfolder)
 
     def package_info(self):
         self.cpp_info.libs = tools.collect_libs(self)
-        if self.settings.compiler != "Visual Studio":
-            self.cpp_info.includedirs = [
-                os.path.join("lib", self._cmake_install_folder, "include")]
+        self.cpp_info.includedirs = [
+            os.path.join("lib", self._cmake_install_folder, "include")]
