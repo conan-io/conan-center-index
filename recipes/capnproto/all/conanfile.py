@@ -1,6 +1,7 @@
 import os
+import glob
 
-from conans import ConanFile, CMake, tools
+from conans import ConanFile, CMake, tools, AutoToolsBuildEnvironment
 from conans.errors import ConanInvalidConfiguration
 
 class CapnprotoConan(ConanFile):
@@ -10,7 +11,7 @@ class CapnprotoConan(ConanFile):
     topics = ("conan", "capnproto", "serialization", "rpc")
     homepage = "https://capnproto.org"
     url = "https://github.com/conan-io/conan-center-index"
-    exports_sources = "CMakeLists.txt"
+    exports_sources = ("CMakeLists.txt", "patches/*")
     generators = "cmake"
     settings = "os", "arch", "compiler", "build_type"
     options = {
@@ -25,6 +26,7 @@ class CapnprotoConan(ConanFile):
     }
 
     _cmake = None
+    _autotools = None
 
     @property
     def _source_subfolder(self):
@@ -56,17 +58,18 @@ class CapnprotoConan(ConanFile):
         if self.settings.compiler == "Visual Studio" and self.options.shared:
             raise ConanInvalidConfiguration("Cap'n Proto doesn't support shared libraries for Visual Studio")
 
+    def build_requirements(self):
+        if self.settings.os == "Linux":
+            self.build_requires("autoconf/2.69")
+
     def requirements(self):
         if not self.options.lite:
             self.requires.add("zlib/1.2.11")
+            self.requires.add("openssl/1.1.1g")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
         os.rename(self.name + "-" + self.version, self._source_subfolder)
-
-    def build(self):
-        cmake = self._configure_cmake()
-        cmake.build()
 
     def _configure_cmake(self):
         if self._cmake:
@@ -78,10 +81,45 @@ class CapnprotoConan(ConanFile):
         self._cmake.configure(build_folder=self._build_subfolder)
         return self._cmake
 
+    def _configure_autotools(self):
+        if self._autotools:
+            return self._autotools
+        configure_dir=os.path.join(self._source_subfolder, "c++")
+        with tools.chdir(configure_dir):
+            self.run("{} --install --verbose -Wall".format(tools.get_env("AUTORECONF")))
+        args = []
+        if self.options.shared:
+            args.extend(["--disable-static", "--enable-shared"])
+        else:
+            args.extend(["--disable-shared", "--enable-static"])
+        if self.options.lite:
+            args.extend(["--without-zlib", "--without-openssl", "--disable-reflection", "--with-external-capnp"])
+        else:
+            args.extend(["--with-zlib", "--with-openssl", "--enable-reflection"])
+        self._autotools = AutoToolsBuildEnvironment(self)
+        self._autotools.configure(args=args, configure_dir=configure_dir)
+        return self._autotools
+
+    def build(self):
+        for patch in self.conan_data["patches"][self.version]:
+            tools.patch(**patch)
+        if self.settings.os == "Windows":
+            cmake = self._configure_cmake()
+            cmake.build()
+        else:
+            autotools = self._configure_autotools()
+            autotools.make()
+
     def package(self):
         self.copy("LICENSE", dst="licenses", src=self._source_subfolder)
-        cmake = self._configure_cmake()
-        cmake.install()
+        if self.settings.os == "Windows":
+            cmake = self._configure_cmake()
+            cmake.install()
+        else:
+            autotools = self._configure_autotools()
+            autotools.install()
+            for la_file in glob.glob(os.path.join(self.package_folder, "lib", "*.la")):
+                os.remove(la_file)
         tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
         tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
 
