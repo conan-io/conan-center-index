@@ -72,6 +72,9 @@ class MimallocConan(ConanFile):
         self.cpp_info.libs = tools.collect_libs(self)
         self.cpp_info.includedirs = [os.path.join("lib", self._cmake_install_folder, "include")]
         self.cpp_info.libdirs = [os.path.join("lib", self._cmake_install_folder)]
+        objext = "obj" if self.settings.compiler == "Visual Studio" else "o"
+        self.cpp_info.exelinkflags = [os.path.join(self.package_folder, "lib", self._cmake_install_folder, "mimalloc.{}".format(objext)]
+        self.cpp_info.sharedlinkflags = [os.path.join(self.package_folder, "lib", self._cmake_install_folder, "mimalloc.{}".format(objext)]
 
         if not self.options.shared:
             if self.settings.os == "Windows":
