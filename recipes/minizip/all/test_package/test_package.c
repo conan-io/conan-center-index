@@ -382,20 +382,6 @@ int strm_test(struct PipelineElement *elements[], int const elementCount) {
   return err;
 }
 
-int test_zip() {
-  int err = 0;
-
-  srand(0);
-
-  void *zipHandle = NULL;
-
-  mz_zip_create(&zipHandle);
-  // mz_zip_open(zipHandle, pipe[0], );
-  mz_zip_delete(&zipHandle);
-
-  return err;
-}
-
 int test_mz_strm() {
 
   int err = 0;
