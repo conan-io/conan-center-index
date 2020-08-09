@@ -35,11 +35,13 @@
 #include <mz_strm_libcomp.h>
 #endif
 
-int test_mz() { return strcmp(MZ_VERSION, CONAN_MZ_VERSION); }
+int test_mz() {
+  printf("Test MZ_VERSION:\n");
+  return strcmp(MZ_VERSION, CONAN_MZ_VERSION);
+}
 
 #ifdef HAVE_COMPAT
 int test_mz_compat() {
-  printf("Test mz_compat:\n");
   {
     printf("Test mz_compat: zip\n");
 
@@ -72,7 +74,6 @@ int test_mz_compat() {
 
 #ifndef MZ_ZIP_NO_ENCRYPTION
 int test_mz_crypt() {
-  printf("Test mz_crypt:\n");
   {
     printf("Test mz_crypt: mz_crypt_crc32\n");
 
@@ -136,7 +137,6 @@ int test_mz_strm_create(char const *methodName,
 }
 
 int test_mz_os() {
-  printf("Test mz_os:\n");
   {
     printf("Test mz_os: mz_path\n");
 
@@ -161,7 +161,6 @@ int test_mz_os() {
 }
 
 int test_mz_strm() {
-  printf("Test mz_strm:\n");
   int err = 0;
 
   // Unconditionaly available stream types
