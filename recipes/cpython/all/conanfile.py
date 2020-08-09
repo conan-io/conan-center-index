@@ -311,16 +311,26 @@ class CPythonConan(ConanFile):
             })
         return os.path.join(self._source_subfolder, "PCBuild", build_subdir_lut[str(self.settings.arch)])
 
+    @property
+    def _install_subprefix(self):
+        if self.settings.compiler == "Visual Studio":
+            return "bin"
+        else:
+            ""
+
     def _msvc_package_layout(self):
+        install_prefix = os.path.join(self.package_folder, self._install_subprefix)
+        tools.mkdir(install_prefix)
         build_path = self._msvc_artifacts_path
         infix = "_d" if self.settings.build_type == "Debug" else ""
+        # FIXME: if cross building, use a build python executable here
         python_built = os.path.join(build_path, "python{}.exe".format(infix))
         layout_args = [
             os.path.join(self._source_subfolder, "PC", "layout", "main.py"),
             "-v",
             "-s", self._source_subfolder,
             "-b", build_path,
-            "--copy", self.package_folder,
+            "--copy", install_prefix,
             "-p",
             "--include-pip",
             "--include-venv",
@@ -331,38 +341,28 @@ class CPythonConan(ConanFile):
         python_args = " ".join("\"{}\"".format(a) for a in layout_args)
         self.run("{} {}".format(python_built, python_args), run_environment=True)
 
-        os.mkdir(os.path.join(self.package_folder, "bin"))
-        for file in os.listdir(self.package_folder):
+        for file in os.listdir(install_prefix):
             if re.match("vcruntime.*", file):
-                os.unlink(os.path.join(self.package_folder, file))
+                os.unlink(os.path.join(install_prefix, file))
                 continue
-            if re.match(".*\\.(exe|dll)", file):
-                os.rename(os.path.join(self.package_folder, file),
-                          os.path.join(self.package_folder, "bin", file))
-        os.unlink(os.path.join(self.package_folder, "LICENSE.txt"))
-        os.rename(os.path.join(self.package_folder, "Lib"),
-                  os.path.join(self.package_folder, "bin", "Lib"))
-        os.rename(os.path.join(self.package_folder, "DLLs"),
-                  os.path.join(self.package_folder, "bin", "DLLs"))
-        os.rename(os.path.join(self.package_folder, "libs"),
-                  os.path.join(self.package_folder, "lib"))
-        for file in os.listdir(os.path.join(self.package_folder, "lib")):
+        os.unlink(os.path.join(install_prefix, "LICENSE.txt"))
+        for file in os.listdir(os.path.join(install_prefix, "libs")):
             if not re.match("python.*", file):
-                os.unlink(os.path.join(self.package_folder, "lib", file))
+                os.unlink(os.path.join(install_prefix, "libs", file))
 
     def _msvc_package_copy(self):
         build_path = self._msvc_artifacts_path
         infix = "_d" if self.settings.build_type == "Debug" else ""
-        self.copy("*.exe", src=build_path, dst=os.path.join(self.package_folder, "bin"))
-        self.copy("*.dll", src=build_path, dst=os.path.join(self.package_folder, "bin"))
-        self.copy("*.pyd", src=build_path, dst=os.path.join(self.package_folder, "bin", "DLLs"))
-        self.copy("python{}{}.lib".format(self._version_major_minor, infix), src=build_path, dst=os.path.join(self.package_folder, "lib"))
-        self.copy("*", src=os.path.join(self._source_subfolder, "Include"), dst=os.path.join(self.package_folder, "include", "python{}".format(self._version_major_minor)))
-        self.copy("pyconfig.h", src=os.path.join(self._source_subfolder, "PC"), dst=os.path.join(self.package_folder, "include", "python{}".format(self._version_major_minor)))
-        self.copy("*.py", src=os.path.join(self._source_subfolder, "lib"), dst=os.path.join(self.package_folder, "bin", "Lib"))
-        tools.rmdir(os.path.join(self.package_folder, "bin", "lib", "test"))
+        self.copy("*.exe", src=build_path, dst=os.path.join(self.package_folder, self._install_subprefix))
+        self.copy("*.dll", src=build_path, dst=os.path.join(self.package_folder, self._install_subprefix))
+        self.copy("*.pyd", src=build_path, dst=os.path.join(self.package_folder, self._install_subprefix, "DLLs"))
+        self.copy("python{}{}.lib".format(self._version_major_minor, infix), src=build_path, dst=os.path.join(self.package_folder, self._install_subprefix, "libs"))
+        self.copy("*", src=os.path.join(self._source_subfolder, "Include"), dst=os.path.join(self.package_folder, self._install_subprefix, "include"))
+        self.copy("pyconfig.h", src=os.path.join(self._source_subfolder, "PC"), dst=os.path.join(self.package_folder, self._install_subprefix, "include"))
+        self.copy("*.py", src=os.path.join(self._source_subfolder, "lib"), dst=os.path.join(self.package_folder, self._install_subprefix, "Lib"))
+        tools.rmdir(os.path.join(self.package_folder, self._install_subprefix, "Lib", "test"))
 
-        self.run("{} -c \"import compileall; compileall.compile_dir('{}')\"".format(os.path.join(build_path, self._cpython_interpreter_name), os.path.join(self.package_folder, "bin", "Lib").replace("\\", "/")),
+        self.run("{} -c \"import compileall; compileall.compile_dir('{}')\"".format(os.path.join(build_path, self._cpython_interpreter_name), os.path.join(self.package_folder, self._install_subprefix, "Lib").replace("\\", "/")),
                  run_environment=True)
 
     def package(self):
@@ -434,12 +434,8 @@ class CPythonConan(ConanFile):
                     res += "m"
         return res
 
-    def package_info(self):
-        # FIXME: conan components Python::Interpreter component, need a target type
-        # self.cpp_info.names["cmake_find_package"] = "Python"
-        # self.cpp_info.names["cmake_find_package_multi"] = "Python"
-        # FIXME: conan components need to generate multiple .pc files (python2, python-27)
-        self.cpp_info.names["pkg_config"] = "python{}".format(self.version.split(".")[0])
+    @property
+    def _lib_name(self):
         if self.settings.compiler == "Visual Studio":
             if self.settings.build_type == "Debug":
                 lib_ext = "_d"
@@ -450,8 +446,19 @@ class CPythonConan(ConanFile):
                 self.cpp_info.includedirs.append(
                     os.path.join("include", "python{}{}".format(self._version_major_minor, self._abi_suffix)))
             lib_ext = self._abi_suffix + (".dll.a" if self.options.shared and self.settings.os == "Windows" else "")
-        self.cpp_info.includedirs.append(os.path.join("include", "python{}".format(self._version_major_minor)))
-        self.cpp_info.libs = ["python{}{}".format(self._version_major_minor, lib_ext)]
+        return "python{}{}".format(self._version_major_minor, lib_ext)
+
+    def package_info(self):
+        # FIXME: conan components Python::Interpreter component, need a target type
+        # self.cpp_info.names["cmake_find_package"] = "Python"
+        # self.cpp_info.names["cmake_find_package_multi"] = "Python"
+        # FIXME: conan components need to generate multiple .pc files (python2, python-27)
+        self.cpp_info.names["pkg_config"] = "python{}".format(self.version.split(".")[0])
+        self.cpp_info.libs = [self._lib_name]
+        self.cpp_info.includedirs = [os.path.join(self._install_subprefix, "include")]
+        if self.settings.compiler != "Visual Studio":
+            self.cpp_info.includedirs.append(os.path.join(self._install_subprefix, "include", "python{}".format(self._version_major_minor)))
+        self.cpp_info.libdirs = [os.path.join(self._install_subprefix, "libs" if self.settings.compiler == "Visual Studio" else "lib")]
         if self.options.shared:
             self.cpp_info.defines.append("Py_ENABLE_SHARED")
         else:

@@ -89,8 +89,8 @@ class TestPackageConan(ConanFile):
             with tools.environment_append({"DISTUTILS_USE_SDK": "1", "MSSdk": "1"}):
                 setup_args = [
                     "{}/setup.py".format(self.source_folder),
-                    "conan",
-                    "--install-folder", self.build_folder,
+                    # "conan",
+                    # "--install-folder", self.build_folder,
                     "build",
                     "--build-base", self.build_folder,
                     "--build-platlib", os.path.join(self.build_folder, "lib_setuptools"),

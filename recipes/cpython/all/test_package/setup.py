@@ -14,59 +14,12 @@ elif PY3:
 else:
     raise Exception
 
-spam_sources = [os.path.join(subdir, "test_module.c")]
-
-
-class ConanCommand(Command):
-    description = "build everything with includes and libs from conan"
-
-    user_options = [
-        ("install-folder=", None, "Install folder of conan"),
-        ("nolink", None, "Don't link to installed conan dependency libraries"),
-    ]
-
-    boolean_options = ["nolink"]
-
-    def initialize_options(self):
-        self.install_folder = None
-        self.nolink = False
-
-    def finalize_options(self):
-        if self.install_folder is None:
-            self.install_folder = os.getcwd()
-
-    def read_conanbuildinfo(self):
-        data = {}
-        current_section = None
-        with open(os.path.join(self.install_folder, "conanbuildinfo.txt")) as f:
-            for line in f.readlines():
-                line = line.strip()
-                if not line:
-                    continue
-                if line.startswith("[") and line.endswith("]"):
-                    current_section = line[1:-1]
-                    data[current_section] = []
-                    continue
-                data[current_section].append(line)
-        return data
-
-    def run(self):
-        conanbuildinfo = self.read_conanbuildinfo()
-        for extmod in self.distribution.ext_modules:
-            extmod.include_dirs.extend(conanbuildinfo["includedirs"])
-            extmod.library_dirs.extend(conanbuildinfo["libdirs"])
-            if not self.nolink:
-                extmod.libraries.extend(conanbuildinfo["libs"])
-
 
 setup(
     name="test_package",
     version="1.0",
     use_2to3=True,
     ext_modules=[
-        Extension("spam", spam_sources),
+        Extension("spam", [os.path.join(subdir, "test_module.c")]),
     ],
-    cmdclass={
-        "conan": ConanCommand,
-    },
 )
