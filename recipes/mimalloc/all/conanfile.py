@@ -22,15 +22,8 @@ class MimallocConan(ConanFile):
 
     @property
     def _cmake_install_folder(self):
-        p1 = self.version.find(".")
-        if p1 != -1:
-            p2 = self.version.find(".", p1 + 1)
-            if p2 != -1:
-                return self.name + "-" + self.version[0:p2]
-            else:
-                return self.name + "-" + self.version
-        else:
-            return self.name + "-" + self.version
+        version = tools.Version(self.version)
+        return "{}-{}.{}".format(self.name, version.major, version.minor)
 
     @property
     def _source_subfolder(self):
