@@ -8,7 +8,7 @@ class MimallocConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/microsoft/mimalloc"
     description = "mimalloc is a compact general purpose allocator with excellent performance."
-    topics = ("libraries", "c", "c++", "malloc", "allocator")
+    topics = ("conan", "mimalloc", "allocator", "performance", "microsoft")
     settings = "os", "compiler", "build_type", "arch"
     options = {"fPIC": [True, False],
                "shared": [True, False],
