@@ -7,7 +7,6 @@ conan_basic_setup()
 include(FindThreads)
 include(FindProtobuf)
 protobuf_generate_cpp(PROTO_SRC PROTO_HEADER echo.proto)
-message("Generated: ${PROTO_SRC} ; ${PROTO_HEADER}")
 
 # for PROTO_HEADER
 include_directories(${CMAKE_CURRENT_BINARY_DIR})

@@ -97,6 +97,36 @@ index f469eb9f..b42f9c0d 100644
  if(WITH_GLOG)
      set(DYNAMIC_LIB ${DYNAMIC_LIB} ${GLOG_LIB})
      set(BRPC_PRIVATE_LIBS "${BRPC_PRIVATE_LIBS} -lglog")
+diff --git a/cmake/CompileProto.cmake b/cmake/CompileProto.cmake
+index a8cf114b..a6bf18e6 100644
+--- a/cmake/CompileProto.cmake
++++ b/cmake/CompileProto.cmake
+@@ -1,3 +1,4 @@
++# 
+ function(compile_proto OUT_HDRS OUT_SRCS DESTDIR HDR_OUTPUT_DIR PROTO_DIR PROTO_FILES)
+   foreach(P ${PROTO_FILES})
+     string(REPLACE .proto .pb.h HDR ${P})
+@@ -7,13 +8,17 @@ function(compile_proto OUT_HDRS OUT_SRCS DESTDIR HDR_OUTPUT_DIR PROTO_DIR PROTO_
+     set(SRC ${DESTDIR}/${SRC})
+     list(APPEND HDRS ${HDR})
+     list(APPEND SRCS ${SRC})
++    if(CMAKE_SYSTEM_NAME STREQUAL "Darwin")
++      list(JOIN CONAN_LIB_DIRS ":" JOINED_CONAN_LIB_DIRS)
++      set(DYLD_LIBRARY_PATH_FRAGMENT DYLD_LIBRARY_PATH=${Protobuf_LIB_DIRS}:${JOINED_CONAN_LIB_DIRS}:${Protobuf_LIB_DIRS_RELEASE}:${Protobuf_LIB_DIRS_DEBUG}:${Protobuf_LIB_DIRS_RELWITHDEBINFO}:${Protobuf_LIB_DIRS_MINSIZEREL})
++    endif()
+     add_custom_command(
+       OUTPUT ${HDR} ${SRC}
+-      COMMAND ${PROTOBUF_PROTOC_EXECUTABLE} ${PROTOC_FLAGS} -I${PROTO_DIR} --cpp_out=${DESTDIR} ${PROTO_DIR}/${P}
++      COMMAND ${DYLD_LIBRARY_PATH_FRAGMENT} ${PROTOBUF_PROTOC_EXECUTABLE} ${PROTOC_FLAGS} -I${PROTO_DIR} --cpp_out=${DESTDIR} ${PROTO_DIR}/${P}
+       COMMAND ${CMAKE_COMMAND} -E copy ${HDR} ${HDR_OUTPUT_DIR}/${HDR_RELATIVE}
+       DEPENDS ${PROTO_DIR}/${P}
+     )
+   endforeach()
+   set(${OUT_HDRS} ${HDRS} PARENT_SCOPE)
+   set(${OUT_SRCS} ${SRCS} PARENT_SCOPE)
+-endfunction()
+\ No newline at end of file
++endfunction()
 diff --git a/cmake/FindGFLAGS.cmake b/cmake/FindGFLAGS.cmake
 index 50950422..0c21004b 100644
 --- a/cmake/FindGFLAGS.cmake

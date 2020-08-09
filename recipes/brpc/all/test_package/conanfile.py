@@ -1,15 +1,16 @@
 import os
-from conans import ConanFile, CMake, tools
+from conans import ConanFile, CMake, RunEnvironment, tools
 
 
 class TestPackageConan(ConanFile):
     settings = "os", "compiler", "build_type", "arch"
-    generators = "cmake"
+    generators = "cmake", "cmake_find_package"
 
     def build(self):
-        cmake = CMake(self)
-        cmake.configure()
-        cmake.build()
+        with tools.environment_append(RunEnvironment(self).vars):
+            cmake = CMake(self)
+            cmake.configure()
+            cmake.build()
 
     def test(self):
         if not tools.cross_building(self.settings):
