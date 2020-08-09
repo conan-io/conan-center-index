@@ -112,6 +112,12 @@ class CPythonConan(ConanFile):
         if self.settings.compiler == "Visual Studio":
             # The msbuild generator only works with Visual Studio
             self.generators.append("msbuild")
+            if self.options.optimizations:
+                raise ConanInvalidConfiguration("This recipe does not support optimized MSVC cpython builds (yet)")
+                # FIXME: optimizations for Visual Studio can be added by, before building the final `build_type`:
+                # 1. build the MSVC PGInstrument build_type,
+                # 2. running the instrumented binaries,
+                # 3. build the MSVC PGUpdate built_type
             if not self.options.shared:
                 raise ConanInvalidConfiguration("MSVC does not support a static build")
             if self._is_py2:
