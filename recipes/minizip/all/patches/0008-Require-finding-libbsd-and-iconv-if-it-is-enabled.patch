@@ -1,7 +1,7 @@
 From 49ad6d4f835ec229d4214d5eabf98ef4ec976d2b Mon Sep 17 00:00:00 2001
 From: ItsBasi <5033630+ItsBasi@users.noreply.github.com>
 Date: Tue, 4 Aug 2020 21:59:52 +0200
-Subject: [PATCH 8/9] Require finding libbsd and iconv if it is enabled
+Subject: [PATCH] Require finding libbsd and iconv if it is enabled
 
 ---
  CMakeLists.txt | 4 ++--

@@ -1,7 +1,7 @@
 From 62670da269486511bfc5afc44488baddce9f64f2 Mon Sep 17 00:00:00 2001
 From: ItsBasi <5033630+ItsBasi@users.noreply.github.com>
 Date: Sat, 1 Aug 2020 18:45:23 +0200
-Subject: [PATCH 5/9] Only use find_package OpenSSL for avoiding pkgconfig
+Subject: [PATCH] Only use find_package OpenSSL for avoiding pkgconfig
 
 ---
  CMakeLists.txt | 19 +++++--------------

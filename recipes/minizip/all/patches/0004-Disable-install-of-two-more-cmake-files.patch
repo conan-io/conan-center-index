@@ -1,7 +1,7 @@
 From 94e1f331fa68046fd2321fd6c79bc243fb6b4bc8 Mon Sep 17 00:00:00 2001
 From: ItsBasi <5033630+ItsBasi@users.noreply.github.com>
 Date: Tue, 28 Jul 2020 22:52:57 +0200
-Subject: [PATCH 4/9] Disable install of two more cmake files
+Subject: [PATCH] Disable install of two more cmake files
 
 ---
  CMakeLists.txt | 3 ---

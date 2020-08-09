@@ -1,7 +1,7 @@
 From 7d8379ba4b3752b8db49fb83373aaa2c67573d12 Mon Sep 17 00:00:00 2001
 From: ItsBasi <5033630+ItsBasi@users.noreply.github.com>
 Date: Sat, 1 Aug 2020 22:56:05 +0200
-Subject: [PATCH 7/9] Display zstd version
+Subject: [PATCH] Display zstd version
 
 ---
  CMakeLists.txt | 2 +-

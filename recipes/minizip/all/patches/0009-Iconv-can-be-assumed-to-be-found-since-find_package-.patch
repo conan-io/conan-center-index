@@ -1,7 +1,7 @@
 From 85d479d15f4c4dc8fc4889b9f7d2af6352892734 Mon Sep 17 00:00:00 2001
 From: ItsBasi <5033630+ItsBasi@users.noreply.github.com>
 Date: Tue, 4 Aug 2020 22:10:18 +0200
-Subject: [PATCH 9/9] Iconv can be assumed to be found since find_package is
+Subject: [PATCH] Iconv can be assumed to be found since find_package is
  required
 
 ---
