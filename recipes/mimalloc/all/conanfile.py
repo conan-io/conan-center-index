@@ -78,8 +78,10 @@ class MimallocConan(ConanFile):
         self.cpp_info.sharedlinkflags = [
             os.path.join(self.package_folder, "lib", self._cmake_install_folder, "mimalloc.{}".format(objext))]
 
+        if self.settings.os == "Linux":
+            self.cpp_info.system_libs.append("pthread")
         if not self.options.shared:
             if self.settings.os == "Windows":
                 self.cpp_info.system_libs.extend(["psapi", "shell32", "user32", "bcrypt"])
             elif self.settings.os == "Linux":
-                self.cpp_info.system_libs.extend(["pthread", "rt"])
+                self.cpp_info.system_libs.append("rt")
