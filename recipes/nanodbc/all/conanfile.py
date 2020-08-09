@@ -41,8 +41,8 @@ class NanodbcConan(ConanFile):
     def configure(self):
         if self.options.shared:
             del self.options.fPIC
-        del self.settings.compiler.libcxx
-        del self.settings.compiler.cppstd
+        if self.settings.compiler.cppstd:
+            tools.check_min_cppstd(self, 14)
 
     def requirements(self):
         if self.options.with_boost:
