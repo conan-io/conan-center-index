@@ -101,7 +101,7 @@ class MimallocConan(ConanFile):
         if self.options.secure:
             name += "-secure"
         if self.settings.build_type not in ("Release", "RelWithDebInfo", "MinSizeRel"):
-            name += "-{}".format(str(self.settings.build_type))
+            name += "-{}".format(str(self.settings.build_type).lower())
         return name
 
     @property
