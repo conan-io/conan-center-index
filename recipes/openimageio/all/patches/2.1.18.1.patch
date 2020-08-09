@@ -21,7 +21,7 @@ index fbf52165..dc4f16d0 100644
  set (CPACK_SOURCE_PACKAGE_FILE_NAME ${PROJECT_NAME}-${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR}.${PROJECT_VERSION_PATCH}-source)
  #set (CPACK_SOURCE_STRIP_FILES Do we need this?)
 diff --git a/src/cmake/externalpackages.cmake b/src/cmake/externalpackages.cmake
-index 7109cb90..dc792817 100644
+index 7109cb90..707cdede 100644
 --- a/src/cmake/externalpackages.cmake
 +++ b/src/cmake/externalpackages.cmake
 @@ -144,7 +144,7 @@ if (LINKSTATIC)
@@ -48,6 +48,24 @@ index 7109cb90..dc792817 100644
  if (MSVC AND NOT LINKSTATIC)
 -    add_definitions (-DOPENEXR_DLL) # Is this needed for new versions?
 +    # add_definitions (-DOPENEXR_DLL) # Is this needed for new versions?
+ endif ()
+ 
+ 
+@@ -214,7 +214,7 @@ endif ()
+ # allow this to be overridden to use the distro-provided package if desired.
+ option (USE_EXTERNAL_PUGIXML "Use an externally built shared library version of the pugixml library" OFF)
+ if (USE_EXTERNAL_PUGIXML)
+-    checked_find_package (PugiXML REQUIRED
++    checked_find_package (pugixml REQUIRED
+                        DEFINITIONS -DUSE_EXTERNAL_PUGIXML=1)
+ endif()
+ 
+@@ -331,7 +331,7 @@ endmacro()
+ option (USE_EMBEDDED_LIBSQUISH
+         "Force use of embedded Libsquish, even if external is found" OFF)
+ if (NOT USE_EMBEDDED_LIBSQUISH)
+-    checked_find_package (Libsquish)
++    checked_find_package (libsquish)
  endif ()
  
  
