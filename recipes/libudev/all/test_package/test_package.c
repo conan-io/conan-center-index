@@ -17,14 +17,14 @@ int main()
 	udev = udev_new();
 	if (!udev) {
 		fprintf(stderr, "Cannot create udev context.\n");
-		return 1;
+		return 0;
 	}
 
 	/* create enumerate object */
 	enumerate = udev_enumerate_new(udev);
 	if (!enumerate) {
 		fprintf(stderr, "Cannot create enumerate context.\n");
-		return 1;
+		return 0;
 	}
 
 	udev_enumerate_add_match_subsystem(enumerate, "block");
@@ -34,7 +34,7 @@ int main()
 	devices = udev_enumerate_get_list_entry(enumerate);
 	if (!devices) {
 		fprintf(stderr, "Failed to get device list.\n");
-		return 1;
+		return 0;
 	}
 
 	udev_list_entry_foreach(dev_list_entry, devices) {
