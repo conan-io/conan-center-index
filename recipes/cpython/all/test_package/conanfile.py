@@ -102,6 +102,12 @@ class TestPackageConan(ConanFile):
     def _test_module(self, module):
         self.run("{} {}/test_package.py -b {} -t {} ".format(tools.get_env("PYTHON"), self.source_folder, self.build_folder, module), run_environment=True)
 
+    def _cpython_option(self, name):
+        try:
+            return getattr(self.options["cpython"], name, False)
+        except ConanException:
+            return False
+
     def test(self):
         if not tools.cross_building(self.settings, skip_x64_x86=True):
             self.run("{} -c \"print('hello world')\"".format(tools.get_env("PYTHON")), run_environment=True)
@@ -112,13 +118,13 @@ class TestPackageConan(ConanFile):
             if version_detected != self.deps_cpp_info["cpython"].version:
                 raise ConanException("python reported wrong version. Expected {exp}. Got {res}.".format(exp=self._py_version, res=version_detected))
 
-            if self.options["cpython"].with_gdbm:
+            if self._cpython_option("with_gdbm"):
                 self._test_module("gdbm")
-            if self.options["cpython"].with_bz2:
+            if self._cpython_option("with_bz2"):
                 self._test_module("bz2")
-            if self.options["cpython"].with_bsddb:
+            if self._cpython_option("with_bsddb"):
                 self._test_module("bsddb")
-            if self.options["cpython"].with_lzma:
+            if self._cpython_option("with_lzma"):
                 self._test_module("lzma")
 
             self._test_module("expat")
