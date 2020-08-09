@@ -119,6 +119,7 @@ class MinizipConan(ConanFile):
             self._cmake.definitions["MZ_SIGNING"] = self.options.signing
             self._cmake.definitions["MZ_COMPRESS_ONLY"] = self.options.compress_only
             self._cmake.definitions["MZ_DECOMPRESS_ONLY"] = self.options.decompress_only
+            self._cmake.definitions["CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS"] = True
             self._cmake.configure(build_folder=self._build_subfolder)
         return self._cmake
 
