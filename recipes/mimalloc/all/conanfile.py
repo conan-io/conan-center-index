@@ -44,11 +44,9 @@ class MimallocConan(ConanFile):
 
     def configure(self):
         if self.options.shared:
-            del self.options.override
+            del self.options.fPIC
         if self.settings.compiler.cppstd:
             tools.check_min_cppstd(self, "14")
-        if self.options.shared:
-            del self.options.fPIC
         if self.settings.compiler == "Visual Studio":
             if self.options.shared == True and "MT" in str(self.settings.compiler.runtime):
                 raise ConanInvalidConfiguration("Cannot use MT(d) runtime when building mimalloc as a shared library")
