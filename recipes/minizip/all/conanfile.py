@@ -84,6 +84,8 @@ class MinizipConan(ConanFile):
     def configure(self):
         del self.settings.compiler.libcxx
         del self.settings.compiler.cppstd
+        if self.options.shared:
+            del self.options.fPIC
         if (self.options.signing and
             not self.options.pkcrypt and
                 not self.options.wzaes):
