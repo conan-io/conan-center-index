@@ -51,12 +51,18 @@ class MinizipConan(ConanFile):
         "decompress_only": False
     }
 
-    _source_subfolder = "source_subfolder"
-    _build_subfolder = "build_subfolder"
     _cmake = None
 
     requires = (
     )
+    
+    @property
+    def _source_subfolder(self):
+        return "source_subfolder"
+
+    @property
+    def _build_subfolder(self):
+        return "build_subfolder"
 
     def _is_uinix_like(self):
         return (self.settings.os == "AIX" or
