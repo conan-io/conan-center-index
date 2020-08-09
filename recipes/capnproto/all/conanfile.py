@@ -58,14 +58,14 @@ class CapnprotoConan(ConanFile):
         if self.settings.compiler == "Visual Studio" and self.options.shared:
             raise ConanInvalidConfiguration("Cap'n Proto doesn't support shared libraries for Visual Studio")
 
+    def requirements(self):
+        if not self.options.lite:
+            self.requires("zlib/1.2.11")
+            self.requires("openssl/1.1.1g")
+
     def build_requirements(self):
         if self.settings.os == "Linux":
             self.build_requires("autoconf/2.69")
-
-    def requirements(self):
-        if not self.options.lite:
-            self.requires.add("zlib/1.2.11")
-            self.requires.add("openssl/1.1.1g")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
