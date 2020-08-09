@@ -273,10 +273,11 @@ class CPythonConan(ConanFile):
             "IncludeExternals": "true",
         }
         projects = self._solution_projects
-        self.output.info("Building Visual Studio projects: {}".format(projects))
+        self.output.info("Building {} Visual Studio projects: {}".format(len(projects), projects))
 
         upgraded = False
-        for project in projects:
+        for project_i, project in enumerate(projects):
+            self.output.info(" [{}/{}] Building project '{}'...".format(project_i, len(projects), project))
             project_file = os.path.join(self._source_subfolder, "PCBuild", project + ".vcxproj")
             msbuild.build(project_file, upgrade_project=not upgraded, build_type="Debug" if self.settings.build_type == "Debug" else "Release",
                           platforms=self._msvc_archs, properties=msbuild_properties)
