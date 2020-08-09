@@ -1,5 +1,9 @@
 #include <stdio.h>
 
+#define MAX_STREAM_NAME_SIZE 256
+#define MAX_STREAM_PATH_SIZE 256
+#define MAX_STREAM_PROPERTIES 8
+
 #include <mz.h>
 #ifdef HAVE_COMPAT
 #include <mz_compat.h>
@@ -122,20 +126,6 @@ int test_mz_crypt() {
 }
 #endif
 
-int test_mz_strm_create(char const *methodName,
-                        mz_stream_create_cb streamFractory) {
-  printf("Test mz_strm: mz_stream_%s_create\n", methodName);
-
-  void *stream = NULL;
-  if (streamFractory(&stream) == NULL) {
-    printf("Failed to create stream %s.", methodName);
-    return 1;
-  }
-  mz_stream_delete(&stream);
-
-  return 0;
-}
-
 int test_mz_os() {
   {
     printf("Test mz_os: mz_path\n");
@@ -160,36 +150,342 @@ int test_mz_os() {
   return 0;
 }
 
-int test_mz_strm() {
+struct StreamProperty {
+  int32_t prop;
+  int64_t value;
+};
+
+struct PipelineElement {
+  mz_stream_create_cb streamFactory;
+  char name[MAX_STREAM_NAME_SIZE];
+  void *stream;
+  char path[MAX_STREAM_PATH_SIZE];
+  int mode;
+  struct StreamProperty proprties[MAX_STREAM_PROPERTIES];
+};
+
+struct PipelineElement createPipelineElement(mz_stream_create_cb streamFactory,
+                                             char const *name,
+                                             char const *path) {
+  struct PipelineElement element;
+  element.streamFactory = streamFactory;
+  if (name != NULL)
+    strncpy_s(&element.name[0], MAX_STREAM_NAME_SIZE, name,
+              strnlen_s(name, MAX_STREAM_NAME_SIZE));
+  else
+    memset(&element.name[0], 0, MAX_STREAM_NAME_SIZE);
+  element.stream = NULL;
+  if (path != NULL)
+    strncpy_s(&element.path[0], MAX_STREAM_PATH_SIZE, path,
+              strnlen_s(path, MAX_STREAM_PATH_SIZE));
+  else
+    memset(&element.path[0], 0, MAX_STREAM_PATH_SIZE);
+  element.mode = 0;
+  for (size_t i = 0; i < MAX_STREAM_PROPERTIES; ++i) {
+    element.proprties[i].prop = -1;
+    element.proprties[i].value = -1;
+  }
+  return element;
+}
+
+struct PipelineElement
+createPipelineElement_name(mz_stream_create_cb streamFactory,
+                           char const *name) {
+  return createPipelineElement(streamFactory, name, NULL);
+}
+
+int strm_create_streams(struct PipelineElement *elements[],
+                        int const elementCount) {
+  int err = 0;
+  for (int i = 0; i < elementCount; ++i) {
+    struct PipelineElement *current = elements[i];
+    if (current->streamFactory(&current->stream) == NULL) {
+      printf("Failed to create stream %s.\n", current->name);
+      err |= 1;
+    }
+  }
+  return err;
+}
+
+int strm_set_stream_bases(struct PipelineElement *elements[],
+                          int const elementCount) {
+  int err = 0;
+  for (int i = 0; i < elementCount; ++i) {
+    struct PipelineElement *current = elements[i];
+    struct PipelineElement *next =
+        i + 1 < elementCount ? elements[i + 1] : NULL;
+    if (next != NULL) {
+      if (mz_stream_set_base(current->stream, next->stream) != 0) {
+        printf("Failed to set stream base %s.\n", current->name);
+        err |= 1;
+      }
+    }
+  }
+  return err;
+}
+
+int strm_open_streams(struct PipelineElement *elements[],
+                      int const elementCount) {
+  int err = 0;
+  for (int i = elementCount - 1; i >= 0; --i) {
+    struct PipelineElement *current = elements[i];
+    if (mz_stream_is_open(current->stream) == 0)
+      continue;
+    if (mz_stream_open(current->stream, current->path, current->mode) != 0) {
+      printf("Failed to open stream %s.\n", current->name);
+      err |= 1;
+    }
+  }
+  return err;
+}
+
+int strm_close_streams(struct PipelineElement *elements[],
+                       int const elementCount) {
+  int err = 0;
+  for (int i = 0; i < elementCount; ++i) {
+    struct PipelineElement *current = elements[i];
+    if (mz_stream_is_open(current->stream) != 0)
+      continue;
+    if (mz_stream_close(current->stream) != 0) {
+      printf("Failed to close stream %s.\n", current->name);
+      err |= 1;
+    }
+  }
+  return err;
+}
+
+int strm_delete_streams(struct PipelineElement *elements[],
+                        int const elementCount) {
+  for (int i = 0; i < elementCount; ++i) {
+    struct PipelineElement *current = elements[i];
+    mz_stream_delete(&current->stream);
+  }
+  return 0;
+}
+
+int strm_set_modes(struct PipelineElement *elements[], int const elementCount,
+                   int const modes) {
+  for (int i = 0; i < elementCount; ++i) {
+    elements[i]->mode = modes;
+  }
+  return 0;
+}
+
+int strm_set_properties(struct PipelineElement *elements[],
+                        int const elementCount) {
+  int err = 0;
+  for (int i = 0; i < elementCount; ++i) {
+    struct PipelineElement *current = elements[i];
+    for (size_t j = 0; j < MAX_STREAM_PROPERTIES; ++j) {
+      if (current->proprties[j].prop >= 0 &&
+          mz_stream_set_prop_int64(current->stream, current->proprties[j].prop,
+                                   current->proprties[j].value) != 0) {
+        printf("Failed to set property for stream %s.\n", current->name);
+        err |= 1;
+      }
+    }
+  }
+  return err;
+}
+
+int strm_write_data(struct PipelineElement *pipe, const size_t bytesToWrite,
+                    int32_t *crc) {
+  int err = 0;
+  srand(0);
+
+  uint8_t buffer[1024];
+  size_t newBytes = 0;
+
+  for (size_t i = 0; i < bytesToWrite && err == 0; i += newBytes) {
+    newBytes = bytesToWrite < sizeof(buffer) ? bytesToWrite : sizeof(buffer);
+
+    for (size_t j = 0; j < newBytes; ++j) {
+      buffer[j] = rand();
+    }
+
+    *crc = mz_crypt_crc32_update(*crc, &buffer[0], (int32_t)newBytes);
+    if (mz_stream_write(pipe->stream, &buffer[0], (int32_t)newBytes) !=
+        (int32_t)newBytes) {
+      printf("Failed to write into stream %s.\n", pipe->name);
+      err |= 1;
+    }
+  }
+
+  return err;
+}
+
+int strm_read_data(struct PipelineElement *pipe, int32_t const bytesToRead,
+                   int32_t expectedCrc) {
+  int32_t actualCrc = 0;
+  char buff[1024];
+  int readBytes = 0;
+  int totalBytesRead = 0;
+  int maxBytesToRead = sizeof(buff);
+
+  while ((readBytes = mz_stream_read(pipe->stream, buff, maxBytesToRead)) > 0 &&
+         totalBytesRead < bytesToRead) {
+    totalBytesRead += readBytes;
+
+    actualCrc = mz_crypt_crc32_update(actualCrc, (uint8_t *)buff, readBytes);
+
+    if (maxBytesToRead > bytesToRead - totalBytesRead)
+      maxBytesToRead = bytesToRead - totalBytesRead;
+  }
+
+  if (actualCrc != expectedCrc) {
+    printf("Failed to verify crc.\n");
+    return 1;
+  } else {
+    return 0;
+  }
+}
+
+int strm_print_pipeline(struct PipelineElement *elements[],
+                        int const elementCount) {
+  printf("Test mz_strm: ");
+  for (int i = 0; i < elementCount; ++i) {
+    printf("%s", elements[i]->name);
+    if (i + 1 < elementCount) {
+      printf(" <-> ");
+    }
+  }
+  printf("\n");
+  return 0;
+}
+
+int strm_test(struct PipelineElement *elements[], int const elementCount) {
+  int err = 0;
+  int32_t expectedCrc = 0;
+  int bytes_to_write = 1024;
+
+  err |= strm_print_pipeline(elements, elementCount);
+
+  err |= strm_set_modes(elements, elementCount,
+                        MZ_OPEN_MODE_WRITE | MZ_OPEN_MODE_CREATE);
+  err |= strm_create_streams(elements, elementCount);
+  err |= strm_set_properties(elements, elementCount);
+  err |= strm_set_stream_bases(elements, elementCount);
+  err |= strm_open_streams(elements, elementCount);
+  err |= strm_write_data(elements[0], bytes_to_write, &expectedCrc);
+  err |= strm_close_streams(elements, elementCount);
+  err |= strm_delete_streams(elements, elementCount);
+
+  err |= strm_set_modes(elements, elementCount, MZ_OPEN_MODE_READ);
+  err |= strm_create_streams(elements, elementCount);
+  err |= strm_set_properties(elements, elementCount);
+  err |= strm_set_stream_bases(elements, elementCount);
+  err |= strm_open_streams(elements, elementCount);
+  err |= strm_read_data(elements[0], bytes_to_write, expectedCrc);
+  err |= strm_close_streams(elements, elementCount);
+  err |= strm_delete_streams(elements, elementCount);
+
+  return err;
+}
+
+int test_zip() {
   int err = 0;
 
-  // Unconditionaly available stream types
-  err |= test_mz_strm_create("os", mz_stream_os_create);
-  err |= test_mz_strm_create("mem", mz_stream_mem_create);
-  err |= test_mz_strm_create("buffered", mz_stream_buffered_create);
-  err |= test_mz_strm_create("split", mz_stream_split_create);
+  srand(0);
 
-// Conditionaly available stream types
-#ifdef HAVE_LIBCOMP
-  err |= test_mz_strm_create("libcomp", mz_stream_libcomp_create);
-#endif
+  void *zipHandle = NULL;
+
+  mz_zip_create(&zipHandle);
+  // mz_zip_open(zipHandle, pipe[0], );
+  mz_zip_delete(&zipHandle);
+
+  return err;
+}
+
+int test_mz_strm() {
+
+  int err = 0;
+
+  {
+    struct PipelineElement os_pipe =
+        createPipelineElement(mz_stream_os_create, "os", "data.buffered");
+    struct PipelineElement buffered_pipe =
+        createPipelineElement_name(mz_stream_buffered_create, "buffered");
+    struct PipelineElement *pipe[] = {&buffered_pipe, &os_pipe};
+    err |= strm_test(pipe, sizeof(pipe) / sizeof(struct PipelineElement *));
+  }
 #ifdef HAVE_ZLIB
-  err |= test_mz_strm_create("zlib", mz_stream_zlib_create);
-#endif
-#ifdef HAVE_BZIP
-  err |= test_mz_strm_create("bzip", mz_stream_bzip_create);
-#endif
-#ifdef HAVE_PKGCRYPT
-  err |= test_mz_strm_create("pkcrypt", mz_stream_pkcrypt_create);
+  {
+    struct PipelineElement os_pipe =
+        createPipelineElement(mz_stream_os_create, "os", "data.zlib");
+    struct PipelineElement zlib_pipe =
+        createPipelineElement_name(mz_stream_zlib_create, "zlib");
+    struct PipelineElement *pipe[] = {&zlib_pipe, &os_pipe};
+    err |= strm_test(pipe, sizeof(pipe) / sizeof(struct PipelineElement *));
+  }
 #endif
 #ifdef HAVE_LZMA
-  err |= test_mz_strm_create("lzma", mz_stream_lzma_create);
+  {
+    struct PipelineElement os_pipe =
+        createPipelineElement(mz_stream_os_create, "os", "data.lzma");
+    struct PipelineElement lzma_pipe =
+        createPipelineElement_name(mz_stream_lzma_create, "lzma");
+    struct PipelineElement *pipe[] = {&lzma_pipe, &os_pipe};
+    err |= strm_test(pipe, sizeof(pipe) / sizeof(struct PipelineElement *));
+  }
 #endif
-#ifdef HAVE_WZAES
-  err |= test_mz_strm_create("wzaes", mz_stream_wzaes_create);
+#ifdef HAVE_BZIP
+  {
+    struct PipelineElement os_pipe =
+        createPipelineElement(mz_stream_os_create, "os", "data.bzip");
+    struct PipelineElement bzip_pipe =
+        createPipelineElement_name(mz_stream_bzip_create, "bzip");
+    struct PipelineElement *pipe[] = {&bzip_pipe, &os_pipe};
+    err |= strm_test(pipe, sizeof(pipe) / sizeof(struct PipelineElement *));
+  }
 #endif
 #ifdef HAVE_ZSTD
-  err |= test_mz_strm_create("zstd", mz_stream_zstd_create);
+  {
+    struct PipelineElement os_pipe =
+        createPipelineElement(mz_stream_os_create, "os", "data.zstd");
+    struct PipelineElement zstd_pipe =
+        createPipelineElement_name(mz_stream_zstd_create, "zstd");
+    struct PipelineElement *pipe[] = {&zstd_pipe, &os_pipe};
+    err |= strm_test(pipe, sizeof(pipe) / sizeof(struct PipelineElement *));
+  }
+#endif
+#ifdef HAVE_WZAES
+  {
+    struct PipelineElement os_pipe =
+        createPipelineElement(mz_stream_os_create, "os", "data.wzaes");
+    struct PipelineElement wzaes_pipe =
+        createPipelineElement(mz_stream_wzaes_create, "wzaes", "password");
+
+    wzaes_pipe.proprties[0].prop = MZ_STREAM_PROP_TOTAL_IN_MAX;
+    wzaes_pipe.proprties[0].value = 1024 * 1024 * 10;
+
+    struct PipelineElement *pipe[] = {&wzaes_pipe, &os_pipe};
+    err |= strm_test(pipe, sizeof(pipe) / sizeof(struct PipelineElement *));
+  }
+#endif
+#ifdef HAVE_PKCRYPT
+  {
+    struct PipelineElement os_pipe =
+        createPipelineElement(mz_stream_os_create, "os", "data.wzaes");
+    struct PipelineElement pkcrypt_pipe =
+        createPipelineElement(mz_stream_pkcrypt_create, "pkcrypt", "password");
+
+    pkcrypt_pipe.proprties[0].prop = MZ_STREAM_PROP_TOTAL_IN_MAX;
+    pkcrypt_pipe.proprties[0].value = 1024 * 1024 * 10;
+
+    struct PipelineElement *pipe[] = {&pkcrypt_pipe, &os_pipe};
+    err |= strm_test(pipe, sizeof(pipe) / sizeof(struct PipelineElement *));
+  }
+#endif
+#ifdef HAVE_LIBCOMP
+  {
+    struct PipelineElement os_pipe =
+        createPipelineElement(mz_stream_os_create, "os", "data.libcomp");
+    struct PipelineElement libcomp_pipe =
+        createPipelineElement_name(mz_stream_libcomp_create, "libcomp");
+
+    struct PipelineElement *pipe[] = {&libcomp_pipe, &os_pipe};
+    err |= strm_test(pipe, sizeof(pipe) / sizeof(struct PipelineElement *));
+  }
 #endif
 
   return err;
