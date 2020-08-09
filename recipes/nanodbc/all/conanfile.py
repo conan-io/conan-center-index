@@ -80,7 +80,11 @@ class NanodbcConan(ConanFile):
         cmake = self._configure_cmake()
         cmake.install()
 
+        tools.rmdir(os.path.join(self.package_folder, "cmake"))
         tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
 
     def package_info(self):
         self.cpp_info.libs = ["nanodbc"]
+        if not self.options.shared:
+            if self.settings.os == "Windows":
+                self.cpp_info.system_libs = ["odbc32"]
