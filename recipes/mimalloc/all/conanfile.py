@@ -79,3 +79,10 @@ class MimallocConan(ConanFile):
         self.cpp_info.libs = tools.collect_libs(self)
         self.cpp_info.includedirs = [
             os.path.join("lib", self._cmake_install_folder, "include")]
+
+        if self.settings.os == "Windows":
+            self.cpp_info.system_libs.extend(["psapi", "shell32", "user32", "bcrypt"])
+        elif self.settings.os != "Android":
+            self.cpp_info.system_libs.extend(["pthread"])
+            if self.settings.os == "Linux":
+                self.cpp_info.system_libs.extend(["rt"])
