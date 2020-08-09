@@ -1,16 +1,13 @@
-#include <memory>
-#include <mimalloc.h>
+#include "mimalloc.h"
 
-struct Test
-{ };
+#include <stdlib.h>
+#include <stdio.h>
 
-int main()
-{
-  auto t0 = std::make_shared< Test >();
+int main() {
+    void *data = malloc(1024);
+    free(data);
 
-  {
-    auto t1 = std::make_unique< Test >();
-  }
-
-  return 0;
+    printf("mimalloc version %d\n", mi_version());
+    mi_stats_print(nullptr);
+    return 0;
 }
