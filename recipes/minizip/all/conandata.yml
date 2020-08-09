@@ -5,21 +5,12 @@ sources:
 patches:
   "2.10.0":
     -  "patch_file": "patches/0001-Disable-usage-of-internal-3rd-party-dependencies.patch"
-       "base_path": "source_subfolder"
     -  "patch_file": "patches/0002-Disable-install-of-PKGconfig-files.patch"
-       "base_path": "source_subfolder"
     -  "patch_file": "patches/0003-Disable-install-of-minizipConfigVersion.cmake-and-mi.patch"
-       "base_path": "source_subfolder"
     -  "patch_file": "patches/0004-Disable-install-of-two-more-cmake-files.patch"
-       "base_path": "source_subfolder"
     -  "patch_file": "patches/0005-Only-use-find_package-OpenSSL-for-avoiding-pkgconfig.patch"
-       "base_path": "source_subfolder"
     -  "patch_file": "patches/0006-Change-variables-names-of-dependencies-to-the-one-ge.patch"
-       "base_path": "source_subfolder"
     -  "patch_file": "patches/0007-Display-zstd-version.patch"
-       "base_path": "source_subfolder"
     -  "patch_file": "patches/0008-Require-finding-libbsd-and-iconv-if-it-is-enabled.patch"
-       "base_path": "source_subfolder"
     -  "patch_file": "patches/0009-Iconv-can-be-assumed-to-be-found-since-find_package-.patch"
-       "base_path": "source_subfolder"
        
