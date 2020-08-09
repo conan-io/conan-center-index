@@ -1,9 +1,9 @@
 cmake_minimum_required(VERSION 2.8.11)
-project(PackageTest LANGUAGES CXX)
+project(PackageTest LANGUAGES C)
 
 include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
 conan_basic_setup()
 
-add_executable(main main.cpp)
+add_executable(test_package test_package.c)
 
-target_link_libraries(main ${CONAN_LIBS})
+target_link_libraries(test_package ${CONAN_LIBS})
