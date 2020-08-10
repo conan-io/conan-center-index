@@ -4,7 +4,7 @@ from conans import ConanFile, tools, CMake
 
 class ZziplibConan(ConanFile):
     name = "zziplib"
-    description = "The ZZIPlib provides read access on ZIP-archives and unpacked data. It features an additional simplified API following the standard Posix API for file access."
+    description = "The ZZIPlib provides read access on ZIP-archives and unpacked data"
     topics = ("conan", "zip", "archive", "decompression")
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/gdraheim/zziplib"
@@ -50,20 +50,21 @@ class ZziplibConan(ConanFile):
         os.rename(extracted_dir, self._source_subfolder)
 
     def _configure_cmake(self):
-        cmake = CMake(self)
+        if not self._cmake:
+            self._cmake = CMake(self)
 
-        cmake.definitions["BUILD_STATIC_LIBS"] = not self.options.shared
+            self._cmake.definitions["BUILD_STATIC_LIBS"] = not self.options.shared
 
-        cmake.definitions["ZZIPCOMPAT"] = not tools.os_info.is_windows
+            self._cmake.definitions["ZZIPCOMPAT"] = not tools.os_info.is_windows
 
-        cmake.definitions["ZZIPSDL"] = False
-        cmake.definitions["ZZIPBINS"] = False
-        cmake.definitions["ZZIPTEST"] = False
-        cmake.definitions["ZZIPDOCS"] = False
+            self._cmake.definitions["ZZIPSDL"] = False
+            self._cmake.definitions["ZZIPBINS"] = False
+            self._cmake.definitions["ZZIPTEST"] = False
+            self._cmake.definitions["ZZIPDOCS"] = False
 
-        cmake.configure()
+            self._cmake.configure(build_folder=self._build_subfolder)
 
-        return cmake
+        return self._cmake
 
     def build(self):
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
@@ -76,7 +77,6 @@ class ZziplibConan(ConanFile):
         cmake.install()
 
         self.copy(pattern="COPYING.LIB", dst="licenses", src=self._source_subfolder)
-        os.rename(os.path.join(self.package_folder, "licenses", "COPYING.LIB"), os.path.join(self.package_folder, "licenses", "License.txt"))
         tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
 
     def package_info(self):
