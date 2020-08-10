@@ -97,7 +97,7 @@ class MinizipConan(ConanFile):
             not self.options.pkcrypt and
                 not self.options.wzaes):
             raise ConanInvalidConfiguration(
-                "pkcrypt or wzaes need to be set signing")
+                "pkcrypt or wzaes need to be set to support signing")
         if self.options.signing and self.options.brg:
             raise ConanInvalidConfiguration(
                 "Library can not support signing with brg")
