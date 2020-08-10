@@ -42,7 +42,7 @@ class EasyProfilerConan(ConanFile):
             del self.options.fPIC
         # The windows build seems to be giving problems due to certain symbols
         # not being exported properly for static libraries.
-        if self.options.shared is False and self.settings.os == "Windows":
+        if not self.options.shared and self.settings.os == "Windows":
             raise ConanInvalidConfiguration("Must be built as shared on \
               Windows")
 
