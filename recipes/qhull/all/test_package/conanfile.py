@@ -8,6 +8,7 @@ class TestPackageConan(ConanFile):
 
     def build(self):
         cmake = CMake(self)
+        cmake.definitions["QHULL_REENTRANT"] = self.options["qhull"].reentrant
         cmake.configure()
         cmake.build()
 

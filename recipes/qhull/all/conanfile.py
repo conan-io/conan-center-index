@@ -1,4 +1,3 @@
-import glob
 import os
 
 from conans import ConanFile, CMake, tools
@@ -6,7 +5,7 @@ from conans import ConanFile, CMake, tools
 class QhullConan(ConanFile):
     name = "qhull"
     description = "Qhull computes the convex hull, Delaunay triangulation, " \
-                  "Voronoi diagram, halfspace intersection  about a point, " \
+                  "Voronoi diagram, halfspace intersection about a point, " \
                   "furthest-site Delaunay triangulation, and furthest-site " \
                   "Voronoi diagram."
     license = "Qhull"
@@ -16,8 +15,16 @@ class QhullConan(ConanFile):
     exports_sources = ["CMakeLists.txt", "patches/**"]
     generators = "cmake"
     settings = "os", "arch", "compiler", "build_type"
-    options = {"shared": [True, False], "fPIC": [True, False]}
-    default_options = {"shared": False, "fPIC": True}
+    options = {
+        "shared": [True, False],
+        "fPIC": [True, False],
+        "reentrant": [True, False]
+    }
+    default_options = {
+        "shared": False,
+        "fPIC": True,
+        "reentrant": True
+    }
 
     _cmake = None
 
@@ -38,6 +45,9 @@ class QhullConan(ConanFile):
             del self.options.fPIC
         del self.settings.compiler.libcxx
         del self.settings.compiler.cppstd
+
+    def package_id(self):
+        del self.info.options.reentrant
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
@@ -69,7 +79,7 @@ class QhullConan(ConanFile):
     def package_info(self):
         self.cpp_info.names["cmake_find_package"] = "Qhull"
         self.cpp_info.names["cmake_find_package_multi"] = "Qhull"
-        self.cpp_info.libs = tools.collect_libs(self)
+        self.cpp_info.libs = [self._qhull_lib_name]
         if self.settings.os == "Linux":
             self.cpp_info.system_libs.append("m")
         if self.settings.compiler == "Visual Studio" and self.options.shared:
@@ -78,3 +88,16 @@ class QhullConan(ConanFile):
         bin_path = os.path.join(self.package_folder, "bin")
         self.output.info("Appending PATH environment variable: {}".format(bin_path))
         self.env_info.PATH.append(bin_path)
+
+    @property
+    def _qhull_lib_name(self):
+        libname = "qhull"
+        if not self.options.shared:
+            libname += "static"
+        if self.settings.build_type == "Debug" or self.options.reentrant:
+            libname += "_"
+            if self.options.reentrant:
+                libname += "r"
+            if self.settings.build_type == "Debug":
+                libname += "d"
+        return libname
