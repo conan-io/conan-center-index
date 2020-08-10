@@ -119,82 +119,70 @@ class SFMLConan(ConanFile):
         self.cpp_info.names["cmake_find_package_multi"] = "SFML"
         self.cpp_info.names["pkg_config"] = "SFML"
 
-        self.cpp_info.components["System"].names["cmake_find_package"] = "system"
-        self.cpp_info.components["System"].names["cmake_find_package_multi"] = "system"
-        self.cpp_info.components["System"].libs = [self._get_decorated_lib("sfml-system")]
+        self.cpp_info.components["system"].libs = [self._get_decorated_lib("sfml-system")]
         if not self.options.shared:
-            self.cpp_info.components["System"].defines = ['SFML_STATIC']
+            self.cpp_info.components["system"].defines = ['SFML_STATIC']
         if self.settings.os == 'Windows':
-            self.cpp_info.components["System"].system_libs = ['winmm']
+            self.cpp_info.components["system"].system_libs = ['winmm']
         elif self.settings.os == 'Linux':
-            self.cpp_info.components["System"].system_libs = ['rt']
+            self.cpp_info.components["system"].system_libs = ['rt']
         elif self.settings.os == 'Android':
-            self.cpp_info.components["System"].system_libs = ['android', 'log']
+            self.cpp_info.components["system"].system_libs = ['android', 'log']
         if self.settings.os != 'Windows':
-            self.cpp_info.components["System"].system_libs = ['pthread']
+            self.cpp_info.components["system"].system_libs = ['pthread']
 
         if self.settings.os in ['Windows', 'Android', 'iOS']:
             sfml_main_suffix = '-d' if self.settings.build_type == 'Debug' else ''
-            self.cpp_info.components["Main"].names["cmake_find_package"] = "main"
-            self.cpp_info.components["Main"].names["cmake_find_package_multi"] = "main"
-            self.cpp_info.components["Main"].libs = ["sfml-main" + sfml_main_suffix]
+            self.cpp_info.components["main"].libs = ["sfml-main" + sfml_main_suffix]
             if not self.options.shared:
-                self.cpp_info.components["Main"].defines = ['SFML_STATIC']
+                self.cpp_info.components["main"].defines = ['SFML_STATIC']
             if self.settings.os == 'Android':
-                self.cpp_info.components["Main"].libs.append(self._get_decorated_lib("sfml-activity"))
-                self.cpp_info.components["Main"].system_libs = ['android', 'log']
+                self.cpp_info.components["main"].libs.append(self._get_decorated_lib("sfml-activity"))
+                self.cpp_info.components["main"].system_libs = ['android', 'log']
 
         if self.options.window or self.options.graphics:
-            self.cpp_info.components["Window"].names["cmake_find_package"] = "window"
-            self.cpp_info.components["Window"].names["cmake_find_package_multi"] = "window"
-            self.cpp_info.components["Window"].libs = [self._get_decorated_lib("sfml-window")]
-            self.cpp_info.components["Window"].requires = ["opengl::opengl", "System"]
+            self.cpp_info.components["window"].libs = [self._get_decorated_lib("sfml-window")]
+            self.cpp_info.components["window"].requires = ["opengl::opengl", "system"]
             if self.settings.os in ['Linux', 'FreeBSD']:
-                self.cpp_info.components["Window"].requires.append('xorg::xorg')
+                self.cpp_info.components["window"].requires.append('xorg::xorg')
             if not self.options.shared:
-                self.cpp_info.components["Window"].defines = ['SFML_STATIC']
+                self.cpp_info.components["window"].defines = ['SFML_STATIC']
             if self.settings.os == 'Windows':
-                self.cpp_info.components["Window"].system_libs = ['winmm', 'gdi32']
+                self.cpp_info.components["window"].system_libs = ['winmm', 'gdi32']
             if self.settings.os == 'Linux':
-                self.cpp_info.components["Window"].system_libs = ['udev']
+                self.cpp_info.components["window"].system_libs = ['udev']
             if self.settings.os == 'FreeBSD':
-                self.cpp_info.components["Window"].system_libs = ['usbhid']
+                self.cpp_info.components["window"].system_libs = ['usbhid']
             elif self.settings.os == "Macos":
-                self.cpp_info.components["Window"].frameworks['Foundation', 'AppKit', 'IOKit', 'Carbon']
+                self.cpp_info.components["window"].frameworks['Foundation', 'AppKit', 'IOKit', 'Carbon']
                 if not self.options.shared:
-                    self.cpp_info.components["Window"].exelinkflags.append("-ObjC")
-                    self.cpp_info.components["Window"].sharedlinkflags = self.cpp_info.components["Window"].exelinkflags
+                    self.cpp_info.components["window"].exelinkflags.append("-ObjC")
+                    self.cpp_info.components["window"].sharedlinkflags = self.cpp_info.components["window"].exelinkflags
             elif self.settings.os == "iOS":
                 self.cpp_info.frameworks['Foundation', 'UIKit', 'CoreGraphics', 'QuartzCore', 'CoreMotion']
             elif self.settings.os == "Android":
-                self.cpp_info.components["Window"].system_libs = ['android']
+                self.cpp_info.components["window"].system_libs = ['android']
 
         if self.options.graphics:
-            self.cpp_info.components["Graphics"].names["cmake_find_package"] = "graphics"
-            self.cpp_info.components["Graphics"].names["cmake_find_package_multi"] = "graphics"
-            self.cpp_info.components["Graphics"].libs = [self._get_decorated_lib("sfml-graphics")]
-            self.cpp_info.components["Graphics"].requires = ["freetype::freetype", "stb::stb", "Window"]
+            self.cpp_info.components["graphics"].libs = [self._get_decorated_lib("sfml-graphics")]
+            self.cpp_info.components["graphics"].requires = ["freetype::freetype", "stb::stb", "window"]
             if not self.options.shared:
-                self.cpp_info.components["Graphics"].defines = ['SFML_STATIC']
+                self.cpp_info.components["graphics"].defines = ['SFML_STATIC']
             if self.settings.os == 'Linux':
-                self.cpp_info.components["Graphics"].system_libs = ['udev']
+                self.cpp_info.components["graphics"].system_libs = ['udev']
 
         if self.options.network:
-            self.cpp_info.components["Network"].names["cmake_find_package"] = "network"
-            self.cpp_info.components["Network"].names["cmake_find_package_multi"] = "network"
-            self.cpp_info.components["Network"].libs = [self._get_decorated_lib("sfml-network")]
-            self.cpp_info.components["Network"].requires = ["System"]
+            self.cpp_info.components["network"].libs = [self._get_decorated_lib("sfml-network")]
+            self.cpp_info.components["network"].requires = ["system"]
             if not self.options.shared:
-                self.cpp_info.components["Network"].defines = ['SFML_STATIC']
+                self.cpp_info.components["network"].defines = ['SFML_STATIC']
             if self.settings.os == 'Windows':
-                self.cpp_info.components["Window"].system_libs = ['ws2_32']
+                self.cpp_info.components["network"].system_libs = ['ws2_32']
 
         if self.options.audio:
-            self.cpp_info.components["Audio"].names["cmake_find_package"] = "audio"
-            self.cpp_info.components["Audio"].names["cmake_find_package_multi"] = "audio"
-            self.cpp_info.components["Audio"].libs = [self._get_decorated_lib("sfml-audio")]
-            self.cpp_info.components["Audio"].requires = ["openal::openal", "flac::flac", "ogg::ogg", "vorbis::vorbis"]
+            self.cpp_info.components["audio"].libs = [self._get_decorated_lib("sfml-audio")]
+            self.cpp_info.components["audio"].requires = ["openal::openal", "flac::flac", "ogg::ogg", "vorbis::vorbis"]
             if not self.options.shared:
-                self.cpp_info.components["Audio"].defines = ['SFML_STATIC']
+                self.cpp_info.components["audio"].defines = ['SFML_STATIC']
             if self.settings.os == "Android":
-                self.cpp_info.components["Audio"].system_libs = ['android']
+                self.cpp_info.components["audio"].system_libs = ['android']
