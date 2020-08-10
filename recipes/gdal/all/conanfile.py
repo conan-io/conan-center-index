@@ -154,6 +154,10 @@ class GdalConan(ConanFile):
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
+        # if tools.Version(self.version) < "3.0.0":
+        #     del self.options.with_tiledb
+        if tools.Version(self.version) < "3.1.0":
+            del self.options.with_exr
 
     def configure(self):
         if self.settings.compiler.cppstd:
@@ -167,10 +171,6 @@ class GdalConan(ConanFile):
         #     del self.options.with_sqlite3
         if not self.options.get_safe("with_sqlite3", False):
             del self.options.with_pcre
-        # if tools.Version(self.version) < "3.0.0":
-        #     del self.options.with_tiledb
-        if tools.Version(self.version) < "3.1.0":
-            del self.options.with_exr
         if self.settings.compiler == "Visual Studio":
             del self.options.threadsafe
             del self.options.with_null
