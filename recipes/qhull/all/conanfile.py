@@ -79,25 +79,46 @@ class QhullConan(ConanFile):
     def package_info(self):
         self.cpp_info.names["cmake_find_package"] = "Qhull"
         self.cpp_info.names["cmake_find_package_multi"] = "Qhull"
-        self.cpp_info.libs = [self._qhull_lib_name]
+        self.cpp_info.components["libqhull"].names["cmake_find_package"] = self._qhull_cmake_name
+        self.cpp_info.components["libqhull"].names["cmake_find_package_multi"] = self._qhull_cmake_name
+        self.cpp_info.components["libqhull"].names["pkg_config"] = self._qhull_pkgconfig_name
+        self.cpp_info.components["libqhull"].libs = [self._qhull_lib_name]
         if self.settings.os == "Linux":
-            self.cpp_info.system_libs.append("m")
+            self.cpp_info.components["libqhull"].system_libs.append("m")
         if self.settings.compiler == "Visual Studio" and self.options.shared:
-            self.cpp_info.defines.extend(["qh_dllimport"])
+            self.cpp_info.components["libqhull"].defines.extend(["qh_dllimport"])
 
         bin_path = os.path.join(self.package_folder, "bin")
         self.output.info("Appending PATH environment variable: {}".format(bin_path))
         self.env_info.PATH.append(bin_path)
 
     @property
-    def _qhull_lib_name(self):
-        libname = "qhull"
+    def _qhull_cmake_name(self):
+        name = ""
+        if self.options.reentrant:
+            name = "qhull_r" if self.options.shared else "qhullstatic_r"
+        else:
+            name = "libqhull" if self.options.shared else "qhullstatic"
+        return name
+
+    @property
+    def _qhull_pkgconfig_name(self):
+        name = "qhull"
         if not self.options.shared:
-            libname += "static"
+            name += "static"
+        if self.options.reentrant:
+            name += "_r"
+        return name
+
+    @property
+    def _qhull_lib_name(self):
+        name = "qhull"
+        if not self.options.shared:
+            name += "static"
         if self.settings.build_type == "Debug" or self.options.reentrant:
-            libname += "_"
+            name += "_"
             if self.options.reentrant:
-                libname += "r"
+                name += "r"
             if self.settings.build_type == "Debug":
-                libname += "d"
-        return libname
+                name += "d"
+        return name
