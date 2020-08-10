@@ -38,6 +38,7 @@
 #ifdef HAVE_LIBCOMP
 #include <mz_strm_libcomp.h>
 #endif
+#include <mz_zip.h>
 
 int test_mz() {
   printf("Test MZ_VERSION:\n");
@@ -192,6 +193,11 @@ struct PipelineElement
 createPipelineElement_name(mz_stream_create_cb streamFactory,
                            char const *name) {
   return createPipelineElement(streamFactory, name, NULL);
+}
+
+struct PipelineElement
+createPipelineElement_bare(mz_stream_create_cb streamFactory) {
+  return createPipelineElement(streamFactory, NULL, NULL);
 }
 
 int strm_create_streams(struct PipelineElement *elements[],
@@ -477,6 +483,50 @@ int test_mz_strm() {
   return err;
 }
 
+int test_mz_zip() {
+  int err = 0;
+  void *zipHandle = NULL;
+  char filename_in_zip[] = "Hello.txt";
+  char data[] =
+      "Hello, World!\nHello, World!\nHello, World!\nHello, World!\nHello, "
+      "World!\nHello, World!\nHello, World!\nHello, World!\nHello, World!\n";
+  int32_t bytes_written = 0;
+
+  struct PipelineElement os_pipe =
+      createPipelineElement(mz_stream_os_create, "os", "mz_zip.zip");
+  struct PipelineElement *pipe[] = {&os_pipe};
+  int const pipe_size = sizeof(pipe) / sizeof(struct PipelineElement *);
+
+  mz_zip_file file_info;
+  memset(&file_info, 0, sizeof(mz_zip_file));
+  file_info.compression_method = MZ_COMPRESS_METHOD_STORE;
+  file_info.filename = &filename_in_zip[0];
+  file_info.version_madeby = MZ_VERSION_MADEBY;
+  file_info.uncompressed_size = strlen(data);
+
+  mz_zip_create(&zipHandle);
+
+  err |= strm_create_streams(pipe, pipe_size);
+  err |= strm_set_modes(pipe, pipe_size, MZ_OPEN_MODE_CREATE);
+  err |= strm_open_streams(pipe, pipe_size);
+  err |= mz_zip_open(zipHandle, pipe[0]->stream, MZ_OPEN_MODE_WRITE);
+  err |= mz_zip_entry_write_open(zipHandle, &file_info,
+                                 MZ_COMPRESS_LEVEL_DEFAULT, 0, NULL);
+
+  bytes_written = mz_zip_entry_write(zipHandle, data, (int32_t)strlen(data));
+  if (bytes_written < MZ_OK)
+    err |= 1;
+
+  err |= mz_zip_entry_close(zipHandle);
+  err |= mz_zip_close(zipHandle);
+  err |= strm_close_streams(pipe, pipe_size);
+  err |= strm_delete_streams(pipe, pipe_size);
+
+  mz_zip_delete(&zipHandle);
+
+  return err;
+}
+
 int main(int argc, const char *argv[]) {
   int err = 0;
 
@@ -489,6 +539,7 @@ int main(int argc, const char *argv[]) {
 #endif
   err |= test_mz_os();
   err |= test_mz_strm();
+  err |= test_mz_zip();
 
   return err;
 }
