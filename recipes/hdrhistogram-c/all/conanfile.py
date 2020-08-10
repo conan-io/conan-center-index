@@ -5,7 +5,7 @@ import os
 
 class QuickfixConan(ConanFile):
     name = "hdrhistogram-c"
-    license = "BSD 2-Clause License"
+    license = ("BSD-2-Clause", "CC0-1.0")
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/HdrHistogram/HdrHistogram_c"
     description = "'C' port of High Dynamic Range (HDR) Histogram"
