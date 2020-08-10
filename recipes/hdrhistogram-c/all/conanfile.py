@@ -17,7 +17,6 @@ class QuickfixConan(ConanFile):
                        "shared": False}
     requires = "zlib/1.2.11"
     generators = "cmake_find_package"
-    exports_sources = "patches/**"
     _cmake = None
 
     @property
@@ -52,8 +51,6 @@ class QuickfixConan(ConanFile):
             del self.options.fPIC
 
     def build(self):
-        for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            tools.patch(**patch)
         cmake = self._configure_cmake()
         cmake.build()
 
