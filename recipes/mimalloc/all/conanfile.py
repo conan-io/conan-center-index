@@ -93,7 +93,7 @@ class MimallocConan(ConanFile):
             cmake = self._configure_cmake()
             cmake.install()
 
-        if self.settings.os == "Windows" and self.options.override and self.options.shared:
+        if self.settings.os == "Windows" and self.options.shared:
             if self.settings.arch == "x86_64":
                 self.copy("mimalloc-redirect.dll", src=os.path.join(self._source_subfolder, "bin"),
                           dst=self._install_prefix)
