@@ -15,21 +15,10 @@ index 72261da..8e02126 100644
  include(CMakePackageConfigHelpers)
  
 diff --git a/src/CMakeLists.txt b/src/CMakeLists.txt
-index 9dbb311..3b8d1ff 100644
+index 9dbb311..f5968c7 100644
 --- a/src/CMakeLists.txt
 +++ b/src/CMakeLists.txt
-@@ -1,10 +1,3 @@
--find_package(ZLIB REQUIRED)
--find_package(Threads REQUIRED)
--
--include(CheckLibraryExists)
--check_library_exists(m ceil "" HAVE_LIBM)
--check_library_exists(rt clock_gettime "" HAVE_LIBRT)
--
- set(HDR_HISTOGRAM_SOURCES
-     hdr_encoding.c
-     hdr_histogram.c
-@@ -33,22 +26,15 @@ function(hdr_histogram_add_library NAME LIBRARY_TYPE DO_INSTALL)
+@@ -33,22 +33,15 @@ function(hdr_histogram_add_library NAME LIBRARY_TYPE DO_INSTALL)
          ${HDR_HISTOGRAM_SOURCES}
          ${HDR_HISTOGRAM_PRIVATE_HEADERS}
          ${HDR_HISTOGRAM_PUBLIC_HEADERS})
