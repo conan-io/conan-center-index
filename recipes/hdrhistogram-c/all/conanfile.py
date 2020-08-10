@@ -74,6 +74,8 @@ class QuickfixConan(ConanFile):
 
     def package_info(self):
         self.cpp_info.libs = tools.collect_libs(self)
+        if self.settings.os == "Linux":
+            self.cpp_info.system_libs = ["m"]
         self.cpp_info.includedirs = [os.path.join("include", "hdr")]
 
         if self.settings.os == "Windows":
