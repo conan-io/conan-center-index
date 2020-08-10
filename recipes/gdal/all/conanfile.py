@@ -181,20 +181,12 @@ class GdalConan(ConanFile):
         if self.settings.os == "Windows" and self.options.with_odbc:
             raise ConanInvalidConfiguration("gdal with odbc on Windows is not yet supported in this recipe")
 
-    def build_requirements(self):
-        if self.settings.os == "Windows" and self.settings.compiler != "Visual Studio" and \
-           "CONAN_BASH_PATH" not in os.environ and tools.os_info.detect_windows_subsystem() != "msys2":
-            self.build_requires("msys2/20190524")
-        if self.settings.os == "Linux":
-            self.build_requires("autoconf/2.69")
-            self.build_requires("libtool/2.4.6")
-
     def requirements(self):
         self.requires("json-c/0.14")
         self.requires("libgeotiff/1.6.0")
         # self.requires("libopencad/0.0.2") # TODO: use conan recipe when available instead of internal one
         self.requires("libtiff/4.1.0")
-        self.requires("proj/7.0.1")
+        self.requires("proj/7.1.0")
         if tools.Version(self.version) >= "3.1.0":
             self.requires("flatbuffers/1.12.0")
         if self.options.get_safe("with_zlib", True):
@@ -204,11 +196,11 @@ class GdalConan(ConanFile):
         if self.options.get_safe("with_zstd"):
             self.requires("zstd/1.4.5")
         if self.options.with_pg:
-            self.requires("libpq/11.5")
+            self.requires("libpq/12.2")
         # if self.options.with_libgrass:
         #     self.requires("libgrass/x.x.x")
         if self.options.with_cfitsio:
-            self.requires("cfitsio/3.470")
+            self.requires("cfitsio/3.480")
         # if self.options.with_pcraster:
         #     self.requires("pcraster-rasterformat/1.3.2")
         if self.options.get_safe("with_png", True):
@@ -226,7 +218,7 @@ class GdalConan(ConanFile):
         if self.options.with_charls:
             self.requires("charls/2.1.0")
         if self.options.with_gif:
-            self.requires("giflib/5.1.4")
+            self.requires("giflib/5.2.1")
         # if self.options.with_ogdi:
         #     self.requires("ogdi/4.1.0")
         # if self.options.with_sosi:
@@ -250,7 +242,7 @@ class GdalConan(ConanFile):
         # elif self.options.with_mysql == "mariadb-connector-c":
         #     self.requires("mariadb-connector-c/3.1.8")
         if self.options.with_xerces:
-            self.requires("xerces-c/3.2.2")
+            self.requires("xerces-c/3.2.3")
         if self.options.with_expat:
             self.requires("expat/2.2.9")
         if self.options.with_libkml:
@@ -260,13 +252,13 @@ class GdalConan(ConanFile):
         # if self.options.with_dods_root:
         #     self.requires("libdap/3.20.6")
         if self.options.with_curl:
-            self.requires("libcurl/7.70.0")
+            self.requires("libcurl/7.71.1")
         if self.options.with_xml2:
             self.requires("libxml2/2.9.10")
         # if self.options.with_spatialite:
         #     self.requires("libspatialite/4.3.0a")
         if self.options.get_safe("with_sqlite3"):
-            self.requires("sqlite3/3.32.1")
+            self.requires("sqlite3/3.32.3")
         # if self.options.with_rasterlite2:
         #     self.requires("rasterlite2/x.x.x")
         if self.options.get_safe("with_pcre"):
@@ -280,7 +272,7 @@ class GdalConan(ConanFile):
         # if self.options.with_sfcgal:
         #     self.requires("sfcgal/1.3.7")
         if self.options.with_qhull:
-            self.requires("qhull/7.3.2")
+            self.requires("qhull/8.0.0")
         # if self.options.with_opencl:
         #     self.requires("opencl-headers/x.x.x")
         if self.options.with_freexl:
@@ -304,7 +296,15 @@ class GdalConan(ConanFile):
         # if not self.options.without_lerc:
         #     self.requires("lerc/2.1") # TODO: use conan recipe (not possible yet because lerc API is broken for GDAL)
         if self.options.get_safe("with_exr"):
-            self.requires("openexr/2.4.0")
+            self.requires("openexr/2.5.2")
+
+    def build_requirements(self):
+        if self.settings.os == "Windows" and self.settings.compiler != "Visual Studio" and \
+           "CONAN_BASH_PATH" not in os.environ and tools.os_info.detect_windows_subsystem() != "msys2":
+            self.build_requires("msys2/20200517")
+        if self.settings.os == "Linux":
+            self.build_requires("autoconf/2.69")
+            self.build_requires("libtool/2.4.6")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
