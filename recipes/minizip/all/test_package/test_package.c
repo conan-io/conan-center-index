@@ -8,7 +8,7 @@
 #ifdef HAVE_COMPAT
 #include <mz_compat.h>
 #endif
-#ifndef MZ_ZIP_NO_ENCRYPTION
+#ifdef HAVE_ENCRYPTION
 #include <mz_crypt.h>
 #endif
 #include <mz_os.h>
@@ -76,7 +76,7 @@ int test_mz_compat() {
 }
 #endif
 
-#ifndef MZ_ZIP_NO_ENCRYPTION
+#ifdef HAVE_ENCRYPTION
 int test_mz_crypt() {
   {
     printf("Test mz_crypt: mz_crypt_crc32\n");
@@ -484,7 +484,7 @@ int main(int argc, const char *argv[]) {
 #ifdef HAVE_COMPAT
   err |= test_mz_compat();
 #endif
-#ifndef MZ_ZIP_NO_ENCRYPTION
+#ifdef HAVE_ENCRYPTION
   err |= test_mz_crypt();
 #endif
   err |= test_mz_os();

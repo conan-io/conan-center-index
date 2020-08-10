@@ -27,8 +27,8 @@ class TestPackageConan(ConanFile):
             cmake.definitions["HAVE_PKCRYPT"] = "HAVE_PKCRYPT"
         if self.options["minizip"].wzaes:
             cmake.definitions["HAVE_WZAES"] = "HAVE_WZAES"
-        if not self.options["minizip"].wzaes and not self.options["minizip"].pkcrypt:
-            cmake.definitions["MZ_ZIP_NO_ENCRYPTION"] = "MZ_ZIP_NO_ENCRYPTION"
+        if self.options["minizip"].wzaes or self.options["minizip"].pkcrypt:
+            cmake.definitions["HAVE_ENCRYPTION"] = "HAVE_ENCRYPTION"
         cmake.configure()
         cmake.build()
 
