@@ -1,7 +1,18 @@
+### 4-August-2020 - 20:19 CEST
+
+- [engineering] Remove short-paths home after creating packages.
+
+### 31-July-2020 - 23:14 CEST
+
+- [engineering] Use `force` flag to update the ConanCenter metadata.
+- [engineering] Remove local packages created after their upload to avoid disk space issues.
+
 ### 24-July-2020 - 13:05 CEST
+
 - Renamed Jenkins project from `conan-center-pull-request` to `cci` to improve issues with long workspace paths in Windows agents.
 
 ### 24-July-2020 - 12:52 CEST
+
 - Updated Conan client to the 1.27.1 version in Windows and Mac agents.
 
 ### 17-July-2020 - 18:54 CEST
