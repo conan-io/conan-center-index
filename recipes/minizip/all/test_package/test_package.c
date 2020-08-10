@@ -484,6 +484,8 @@ int test_mz_strm() {
 }
 
 int test_mz_zip() {
+  printf("Test mz_zip:");
+
   int err = 0;
   void *zipHandle = NULL;
   char filename_in_zip[] = "Hello.txt";
