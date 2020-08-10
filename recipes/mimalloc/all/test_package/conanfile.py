@@ -19,7 +19,6 @@ class MimallocTestConan(ConanFile):
             self._build_basic = True
 
     def build(self):
-        self.output.warn(f"self._build_redefine_malloc: {self._build_redefine_malloc}")
         cmake = CMake(self)
         cmake.definitions["BUILD_BASIC"] = self._build_basic
         cmake.definitions["BUILD_REDEFINE_MALLOC"] = self._build_redefine_malloc
