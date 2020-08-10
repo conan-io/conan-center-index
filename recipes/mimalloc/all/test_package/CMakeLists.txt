@@ -4,8 +4,18 @@ project(PackageTest C CXX)
 include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
 conan_basic_setup()
 
-add_executable(test_package test_package.c)
-target_link_libraries(test_package ${CONAN_LIBS})
+option(BUILD_BASIC           "Build test_basic" OFF)
+option(BUILD_REDEFINE_MALLOC "Build test_redefine_malloc" OFF)
 
-add_executable(test_package_cpp test_package.cpp)
-target_link_libraries(test_package_cpp ${CONAN_LIBS})
+if (BUILD_BASIC)
+    add_executable(test_basic test_basic.c)
+    target_link_libraries(test_basic ${CONAN_LIBS})
+
+    add_executable(test_basic_cpp test_basic.cpp)
+    target_link_libraries(test_basic_cpp ${CONAN_LIBS})
+endif (BUILD_BASIC)
+
+if (BUILD_REDEFINE_MALLOC)
+    add_executable(test_redefine_malloc test_redefine_malloc.c)
+    target_link_libraries(test_redefine_malloc ${CONAN_LIBS})
+endif (BUILD_REDEFINE_MALLOC)

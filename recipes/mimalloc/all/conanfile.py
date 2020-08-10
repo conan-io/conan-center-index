@@ -12,14 +12,18 @@ class MimallocConan(ConanFile):
     topics = ("conan", "mimalloc", "allocator", "performance", "microsoft")
     settings = "os", "compiler", "build_type", "arch"
     options = {
-        "shared": [True, False, "object"],
+        "shared": [True, False],
         "fPIC": [True, False],
         "secure": [True, False],
+        "override": [True, False],
+        "redefine_malloc": [True, False]
     }
     default_options = {
         "shared": False,
         "fPIC": True,
         "secure": False,
+        "override": False,
+        "redefine_malloc": False
     }
     generators = "cmake"
     exports_sources = "CMakeLists.txt", "patches/*"
@@ -32,8 +36,6 @@ class MimallocConan(ConanFile):
     def _build_subfolder(self):
         return "build_subfolder"
 
-    _cmake = None
-
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
         os.rename("mimalloc-" + self.version, self._source_subfolder)
@@ -42,13 +44,28 @@ class MimallocConan(ConanFile):
         if self.settings.os == "Windows":
             del self.options.fPIC
 
+    _single_object_build = False
+
     def configure(self):
         tools.check_min_cppstd(self, "14")
         if self.options.shared:
             del self.options.fPIC
-        if self.settings.compiler == "Visual Studio":
-            if self.options.shared == True and "MT" in str(self.settings.compiler.runtime):
-                raise ConanInvalidConfiguration("Cannot use MT(d) runtime when building mimalloc as a shared library")
+
+        if not self.options.override or self.options.shared:
+            del self.options.redefine_malloc
+
+        if self.options.override:
+            if self.options.shared and self.settings.compiler == "Visual Studio" and \
+                    "MT" in str(self.settings.compiler.runtime):
+                raise ConanInvalidConfiguration(
+                    "Cannot use MT(d) runtime when building mimalloc as a shared library for override")
+
+            # The single object build makes sense only for static override builds in Unix-like systems
+            # cf. https://github.com/microsoft/mimalloc#static-override
+            if not self.options.shared and self.settings.compiler != "Visual Studio":
+                self._single_object_build = True
+
+    _cmake = None
 
     def _configure_cmake(self):
         if self._cmake:
@@ -57,11 +74,12 @@ class MimallocConan(ConanFile):
         if self.settings.compiler == "Visual Studio":
             self._cmake.generator = "NMake Makefiles"
         self._cmake.definitions["CMAKE_BUILD_TYPE"] = self.settings.build_type
-        self._cmake.definitions["MI_BUILD_TESTS"] = False
-        self._cmake.definitions["MI_BUILD_SHARED"] = self.options.shared == True
-        self._cmake.definitions["MI_BUILD_STATIC"] = self.options.shared == False
-        self._cmake.definitions["MI_BUILD_OBJECT"] = self.options.shared == "object"
-        self._cmake.definitions["MI_SECURE"] = "ON" if self.options.secure else "OFF"  # Needs to be ON/OFF!
+        self._cmake.definitions["MI_BUILD_TESTS"] = "OFF"
+        self._cmake.definitions["MI_BUILD_SHARED"] = "ON" if self.options.shared else "OFF"
+        self._cmake.definitions["MI_BUILD_STATIC"] = "ON" if not self.options.shared else "OFF"
+        self._cmake.definitions["MI_BUILD_OBJECT"] = "ON" if self._single_object_build else "OFF"
+        self._cmake.definitions["MI_OVERRIDE"] = "ON" if self.options.override else "OFF"
+        self._cmake.definitions["MI_SECURE"] = "ON" if self.options.secure else "OFF"
         self._cmake.configure(build_folder=self._build_subfolder)
         return self._cmake
 
@@ -81,12 +99,13 @@ class MimallocConan(ConanFile):
             cmake = self._configure_cmake()
             cmake.install()
 
-        if self.settings.os == "Windows":
-            if self.options.shared == True or self.options.shared == "object":
-                if self.settings.arch == "x86_64":
-                    self.copy("mimalloc-redirect.dll", src=os.path.join(self._source_subfolder, "bin"), dst=self._install_prefix)
-                elif self.settings.arch == "x86":
-                    self.copy("mimalloc-redirect32.dll", src=os.path.join(self._source_subfolder, "bin"), dst=self._install_prefix)
+        if self.settings.os == "Windows" and self.options.override:
+            if self.settings.arch == "x86_64":
+                self.copy("mimalloc-redirect.dll", src=os.path.join(self._source_subfolder, "bin"),
+                          dst=self._install_prefix)
+            elif self.settings.arch == "x86":
+                self.copy("mimalloc-redirect32.dll", src=os.path.join(self._source_subfolder, "bin"),
+                          dst=self._install_prefix)
 
         tools.rmdir(os.path.join(self.package_folder, self._install_prefix, "cmake"))
 
@@ -107,8 +126,6 @@ class MimallocConan(ConanFile):
     @property
     def _lib_name(self):
         name = "mimalloc"
-        if self.settings.os == "Windows" and self.options.shared == False:
-            name += "-static"
         if self.options.secure:
             name += "-secure"
         if self.settings.build_type not in ("Release", "RelWithDebInfo", "MinSizeRel"):
@@ -117,11 +134,11 @@ class MimallocConan(ConanFile):
 
     def package_info(self):
         self.cpp_info.includedirs = [os.path.join(self._install_prefix, "include")]
-        if self.options.shared == "object":
-            objext = "obj" if self.settings.os == "Windows" else "o"
-            obj_path = os.path.join(self.package_folder, self._install_prefix, "{}.{}".format(self._obj_name, objext))
+        if self._single_object_build:
+            obj_ext = "obj" if self.settings.os == "Windows" else "o"
+            obj_file = "{}.{}".format(self._obj_name, obj_ext)
+            obj_path = os.path.join(self.package_folder, self._install_prefix, obj_file)
             self.cpp_info.exelinkflags = [obj_path]
-            self.cpp_info.sharedlinkflags = [obj_path]
             self.cpp_info.libdirs = []
             self.cpp_info.bindirs = []
         else:
@@ -131,7 +148,7 @@ class MimallocConan(ConanFile):
 
         if self.settings.os == "Linux":
             self.cpp_info.system_libs.append("pthread")
-        if self.options.shared == False or self.options.shared == "object":
+        if not self.options.shared:
             if self.settings.os == "Windows":
                 self.cpp_info.system_libs.extend(["psapi", "shell32", "user32", "bcrypt"])
             elif self.settings.os == "Linux":
