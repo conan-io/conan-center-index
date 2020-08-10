@@ -62,7 +62,8 @@ class MimallocConan(ConanFile):
 
             # The single object build makes sense only for static override builds in Unix-like systems
             # cf. https://github.com/microsoft/mimalloc#static-override
-            if not self.options.shared and self.settings.compiler != "Visual Studio":
+            if not self.options.shared and self.settings.compiler != "Visual Studio" and \
+                    not self.options.redefine_malloc:
                 self._single_object_build = True
 
     _cmake = None
