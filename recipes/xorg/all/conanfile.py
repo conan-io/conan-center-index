@@ -25,14 +25,14 @@ class ConanXOrg(ConanFile):
         cflags = [flag for flag in pkg_config.cflags_only_other if not flag.startswith("-D")]
         defines = [flag[2:] for flag in pkg_config.cflags_only_other if flag.startswith("-D")]
 
-        self.cpp_info.system_libs.extend(libs)
-        self.cpp_info.libdirs.extend(lib_dirs)
-        self.cpp_info.sharedlinkflags.extend(ldflags)
-        self.cpp_info.exelinkflags.extend(ldflags)
-        self.cpp_info.defines.extend(defines)
-        self.cpp_info.includedirs.extend(include_dirs)
-        self.cpp_info.cflags.extend(cflags)
-        self.cpp_info.cxxflags.extend(cflags)
+        self.cpp_info.components[name].system_libs = libs
+        self.cpp_info.components[name].libdirs = lib_dirs
+        self.cpp_info.components[name].sharedlinkflags = ldflags
+        self.cpp_info.components[name].exelinkflags = ldflags
+        self.cpp_info.components[name].defines = defines
+        self.cpp_info.components[name].includedirs = include_dirs
+        self.cpp_info.components[name].cflags = cflags
+        self.cpp_info.components[name].cxxflags = cflags
 
     def system_requirements(self):
         if tools.os_info.is_linux and self.settings.os == "Linux":
@@ -63,8 +63,6 @@ class ConanXOrg(ConanFile):
                 package_tool.install(update=True, packages=p)
 
     def package_info(self):
-        self.cpp_info.includedirs = []
-        self.cpp_info.libdirs = []
         for name in ["x11", "x11-xcb", "fontenc", "ice", "sm", "xau", "xaw7",
                      "xcomposite", "xcursor", "xdamage", "xdmcp", "xext", "xfixes", "xft", "xi",
                      "xinerama", "xkbfile", "xmu", "xmuu", "xpm", "xrandr", "xrender", "xres",

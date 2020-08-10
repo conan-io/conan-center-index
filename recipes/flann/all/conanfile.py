@@ -11,7 +11,7 @@ class LibFlannConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://www.cs.ubc.ca/research/flann/"
     license = "BSD-3-Clause"
-    exports_sources = "CMakeLists.txt"
+    exports_sources = ["CMakeLists.txt", "patches/**"]
     generators = "cmake", "cmake_find_package"
 
     settings = "os", "arch", "compiler", "build_type"
@@ -26,17 +26,28 @@ class LibFlannConan(ConanFile):
         "with_hdf5": False
     }
 
-    _source_subfolder = "source_subfolder"
-    _build_subfolder = "build_subfolder"
     _cmake = None
 
+    @property
+    def _source_subfolder(self):
+        return "source_subfolder"
+
+    @property
+    def _build_subfolder(self):
+        return "build_subfolder"
+
     def config_options(self):
-        if self.settings.compiler == "Visual Studio":
+        if self.settings.os == "Windows":
+            del self.options.fPIC
+
+    def configure(self):
+        if self.options.shared:
             del self.options.fPIC
 
     def requirements(self):
+        self.requires("lz4/1.9.2")
         if self.options.with_hdf5:
-            self.requires("hdf5/1.10.6")
+            self.requires("hdf5/1.12.0")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
@@ -58,6 +69,12 @@ class LibFlannConan(ConanFile):
             'add_library(flann SHARED empty.cpp)'
         )
 
+    def _patch_sources(self):
+        for patch in self.conan_data.get("patches", {}).get(self.version, {}):
+            tools.patch(**patch)
+        # remove embeded lz4
+        tools.rmdir(os.path.join(self._source_subfolder, "src", "cpp", "flann", "ext"))
+
     def _configure_cmake(self):
         if self._cmake is not None:
             return self._cmake
@@ -75,47 +92,52 @@ class LibFlannConan(ConanFile):
         # OpenMP support can be added later if needed
         self._cmake.definitions["USE_OPENMP"] = False
 
-        # Workaround issue with flann_cpp
-        if self.settings.os == "Windows" and self.options.shared:
-            self._cmake.definitions["CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS"] = True
-
         self._cmake.configure(build_folder=self._build_subfolder)
         return self._cmake
 
     def build(self):
+        self._patch_sources()
         cmake = self._configure_cmake()
         cmake.build()
 
     def package(self):
+        self.copy("COPYING", src=self._source_subfolder, dst="licenses")
         cmake = self._configure_cmake()
         cmake.install()
-
-        self.copy("COPYING", src=self._source_subfolder, dst="licenses")
-
-        # Remove pkg-config files
         tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
-        # Remove MS runtime files (KB-H021)
-        for file_to_remove in ["concrt140.dll", "msvcp140.dll", "vcruntime140.dll"]:
-            path = os.path.join(self.package_folder, "bin", file_to_remove)
-            if os.path.isfile(path):
-                os.remove(path)
-
         # Remove static/dynamic libraries depending on the build mode
         if self.options.shared:
-            for file_to_remove in glob.glob(os.path.join(self.package_folder, "lib", "flann_cpp_s*")):
-                os.remove(file_to_remove)
+            # Remove MS runtime files
+            for dll_pattern_to_remove in ["concrt*.dll", "msvcp*.dll", "vcruntime*.dll"]:
+                for dll_to_remove in glob.glob(os.path.join(self.package_folder, "bin", dll_pattern_to_remove)):
+                    os.remove(dll_to_remove)
         else:
-            if self.settings.os != "Linux":
-                tools.rmdir(os.path.join(self.package_folder, "bin"))
-            else:
-                for file_to_remove in glob.glob(os.path.join(self.package_folder, "lib", "*.so*")):
-                    os.remove(file_to_remove)
+            tools.rmdir(os.path.join(self.package_folder, "bin"))
+        libs_pattern_to_remove = ["*flann_cpp_s.*", "*flann_s.*"] if self.options.shared else ["*flann_cpp.*", "*flann.*"]
+        for lib_pattern_to_remove in libs_pattern_to_remove:
+            for lib_to_remove in glob.glob(os.path.join(self.package_folder, "lib", lib_pattern_to_remove)):
+                os.remove(lib_to_remove)
 
     def package_info(self):
-        if self.options.shared:
-            self.cpp_info.libs = ["flann", "flann_cpp"]
-        else:
-            self.cpp_info.libs = ["flann_s", "flann_cpp_s"]
-
+        self.cpp_info.names["cmake_find_package"] = "Flann"
+        self.cpp_info.names["cmake_find_package_multi"] = "flann"
+        # flann_cpp
+        flann_cpp_lib = "flann_cpp" if self.options.shared else "flann_cpp_s"
+        self.cpp_info.components["flann_cpp"].names["cmake_find_package"] = flann_cpp_lib
+        self.cpp_info.components["flann_cpp"].names["cmake_find_package_multi"] = flann_cpp_lib
+        self.cpp_info.components["flann_cpp"].libs = [flann_cpp_lib]
+        if not self.options.shared and tools.stdcpp_library(self):
+            self.cpp_info.components["flann_cpp"].system_libs.append(tools.stdcpp_library(self))
+        self.cpp_info.components["flann_cpp"].requires = ["lz4::lz4"]
+        if self.options.with_hdf5:
+            self.cpp_info.components["flann_cpp"].requires = ["hdf5::hdf5"]
+        # flann
+        flann_c_lib = "flann" if self.options.shared else "flann_s"
+        self.cpp_info.components["flann_c"].names["cmake_find_package"] = flann_c_lib
+        self.cpp_info.components["flann_c"].names["cmake_find_package_multi"] = flann_c_lib
+        self.cpp_info.components["flann_c"].libs = [flann_c_lib]
+        if self.settings.os == "Linux":
+            self.cpp_info.components["flann_c"].system_libs.append("m")
         if not self.options.shared:
-            self.cpp_info.defines.append("FLANN_STATIC")
+            self.cpp_info.components["flann_c"].defines.append("FLANN_STATIC")
+        self.cpp_info.components["flann_c"].requires = ["flann_cpp"]
