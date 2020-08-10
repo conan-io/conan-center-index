@@ -29,8 +29,8 @@ class MinizipConan(ConanFile):
         "libbsd": [True, False],
         "brg": [True, False],
         "signing": [True, False],
-        "compress_only": [True, False],
-        "decompress_only": [True, False]
+        "compress": [True, False],
+        "decompress": [True, False],
     }
     default_options = {
         "shared": False,
@@ -47,8 +47,8 @@ class MinizipConan(ConanFile):
         "libbsd": True,
         "brg": False,
         "signing": True,
-        "compress_only": False,
-        "decompress_only": False
+        "compress": True,
+        "decompress": True,
     }
 
     _cmake = None
@@ -125,8 +125,8 @@ class MinizipConan(ConanFile):
             self._cmake.definitions["MZ_LIBBSD"] = self.options.libbsd
             self._cmake.definitions["MZ_BRG"] = self.options.brg
             self._cmake.definitions["MZ_SIGNING"] = self.options.signing
-            self._cmake.definitions["MZ_COMPRESS_ONLY"] = self.options.compress_only
-            self._cmake.definitions["MZ_DECOMPRESS_ONLY"] = self.options.decompress_only
+            self._cmake.definitions["MZ_COMPRESS"] = self.options.compress
+            self._cmake.definitions["MZ_DECOMPRESS"] = self.options.decompress
             self._cmake.definitions["CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS"] = True
             self._cmake.configure(build_folder=self._build_subfolder)
         return self._cmake

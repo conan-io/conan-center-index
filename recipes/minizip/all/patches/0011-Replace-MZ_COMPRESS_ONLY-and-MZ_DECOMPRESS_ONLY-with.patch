@@ -1,0 +1,106 @@
+From 1a8fc20026f214de7c25e08c7b71ff9d428a95b5 Mon Sep 17 00:00:00 2001
+From: ItsBasi <5033630+ItsBasi@users.noreply.github.com>
+Date: Mon, 10 Aug 2020 18:25:46 +0200
+Subject: [PATCH] Replace MZ_COMPRESS_ONLY and MZ_DECOMPRESS_ONLY with
+ MZ_COMPRESS and MZ_DECOMPRESS
+
+---
+ CMakeLists.txt | 24 ++++++++++++------------
+ 1 file changed, 12 insertions(+), 12 deletions(-)
+
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 3499d47..d6a06b2 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -21,8 +21,8 @@ option(MZ_OPENSSL "Enables OpenSSL for encryption" OFF)
+ option(MZ_LIBBSD "Enable libbsd crypto random" ON)
+ option(MZ_BRG "Enables Brian Gladman's encryption library" OFF)
+ option(MZ_SIGNING "Enables zip signing support" ON)
+-option(MZ_COMPRESS_ONLY "Only support compression" OFF)
+-option(MZ_DECOMPRESS_ONLY "Only support decompression" OFF)
++option(MZ_COMPRESS "Support compression" ON)
++option(MZ_DECOMPRESS "Support decompression" ON)
+ option(MZ_BUILD_TEST "Builds minizip test executable" OFF)
+ option(MZ_BUILD_UNIT_TEST "Builds minizip unit test project" OFF)
+ option(MZ_BUILD_FUZZ_TEST "Builds minizip fuzzer executables" OFF)
+@@ -309,10 +309,10 @@ if(MZ_COMPAT)
+ endif()
+ 
+ # Setup predefined macros
+-if(MZ_COMPRESS_ONLY)
++if(NOT MZ_DECOMPRESS)
+     list(APPEND MINIZIP_DEF -DMZ_ZIP_NO_DECOMPRESSION)
+ endif()
+-if(MZ_DECOMPRESS_ONLY)
++if(NOT MZ_COMPRESS)
+     list(APPEND MINIZIP_DEF -DMZ_ZIP_NO_COMPRESSION)
+ endif()
+ if(NOT MZ_PKCRYPT AND NOT MZ_WZAES)
+@@ -757,7 +757,7 @@ if(MZ_BUILD_TEST AND MZ_BUILD_UNIT_TEST)
+     add_test(NAME test_cmd COMMAND test_cmd WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR})
+ 
+     function(create_compress_tests EXTRA_NAME EXTRA_ARGS)
+-        if(MZ_DECOMPRESS_ONLY)
++        if(NOT MZ_COMPRESS)
+             return()
+         endif()
+         list(FIND EXTRA_ARGS "-z" ZIPCD_IDX)
+@@ -793,7 +793,7 @@ if(MZ_BUILD_TEST AND MZ_BUILD_UNIT_TEST)
+             add_test(NAME ${COMPRESS_METHOD_NAME}-list-${EXTRA_NAME}
+                      COMMAND minizip_cmd -l ${EXTRA_ARGS} result.zip
+                      WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/test)
+-            if(NOT MZ_COMPRESS_ONLY)
++            if(MZ_DECOMPRESS)
+                 add_test(NAME ${COMPRESS_METHOD_NAME}-unzip-${EXTRA_NAME}
+                          COMMAND minizip_cmd -x -o ${EXTRA_ARGS} -d out result.zip
+                          WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/test)
+@@ -802,7 +802,7 @@ if(MZ_BUILD_TEST AND MZ_BUILD_UNIT_TEST)
+                     COMMAND minizip_cmd ${COMPRESS_METHOD_ARG} -a ${EXTRA_ARGS}
+                         result.zip single.txt
+                     WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/test)
+-            if(NOT MZ_COMPRESS_ONLY)
++            if(MZ_DECOMPRESS)
+                 add_test(NAME ${COMPRESS_METHOD_NAME}-append-unzip-${EXTRA_NAME}
+                             COMMAND minizip_cmd -x -o ${EXTRA_ARGS} -d out result.zip
+                             WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/test)
+@@ -810,7 +810,7 @@ if(MZ_BUILD_TEST AND MZ_BUILD_UNIT_TEST)
+             add_test(NAME ${COMPRESS_METHOD_NAME}-erase-${EXTRA_NAME}
+                     COMMAND minizip_cmd -o -e result.zip test.c test.h
+                     WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/test)
+-            if(NOT MZ_COMPRESS_ONLY)
++            if(MZ_DECOMPRESS)
+                 add_test(NAME ${COMPRESS_METHOD_NAME}-erase-unzip-${EXTRA_NAME}
+                          COMMAND minizip_cmd -x -o ${EXTRA_ARGS} -d out result.zip
+                          WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/test)
+@@ -834,7 +834,7 @@ if(MZ_BUILD_TEST AND MZ_BUILD_UNIT_TEST)
+     endif()
+ 
+     # Perform tests on others
+-    if(NOT MZ_COMPRESS_ONLY)
++    if(MZ_DECOMPRESS)
+         if(MZ_ZLIB)
+             add_test(NAME unzip-tiny
+                      COMMAND minizip_cmd -x -o ${EXTRA_ARGS} -d out
+@@ -866,7 +866,7 @@ if(MZ_BUILD_TEST AND MZ_BUILD_UNIT_TEST)
+                      WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/test)
+         endif()
+     endif()
+-    if(NOT MZ_COMPRESS_ONLY AND NOT MZ_DECOMPRESS_ONLY)
++    if(MZ_COMPRESS AND MZ_DECOMPRESS)
+         if(MZ_ZLIB AND NOT MZ_LIBCOMP)
+             add_test(NAME gz
+                 COMMAND minigzip_cmd random.bin
+@@ -930,8 +930,8 @@ add_feature_info(MZ_OPENSSL MZ_OPENSSL "Enables OpenSSL for encryption")
+ add_feature_info(MZ_LIBBSD MZ_LIBBSD "Build with libbsd for crypto random")
+ add_feature_info(MZ_BRG MZ_BRG "Enables Brian Gladman's encryption library")
+ add_feature_info(MZ_SIGNING MZ_SIGNING "Enables zip signing support")
+-add_feature_info(MZ_COMPRESS_ONLY MZ_COMPRESS_ONLY "Only support compression")
+-add_feature_info(MZ_DECOMPRESS_ONLY MZ_DECOMPRESS_ONLY "Only support decompression")
++add_feature_info(MZ_COMPRESS MZ_COMPRESS "Support compression")
++add_feature_info(MZ_DECOMPRESS MZ_DECOMPRESS "Support decompression")
+ add_feature_info(MZ_BUILD_TEST MZ_BUILD_TEST "Builds minizip test executable")
+ add_feature_info(MZ_BUILD_UNIT_TEST MZ_BUILD_UNIT_TEST "Builds minizip unit test project")
+ add_feature_info(MZ_BUILD_FUZZ_TEST MZ_BUILD_FUZZ_TEST "Builds minizip fuzzer executables")
+-- 
+2.28.0.windows.1
+

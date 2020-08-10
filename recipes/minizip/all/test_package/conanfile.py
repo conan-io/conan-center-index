@@ -9,10 +9,10 @@ class TestPackageConan(ConanFile):
     def build(self):
         cmake = CMake(self)
         cmake.definitions["CONAN_MZ_VERSION"] = self.requires["minizip"].ref.version
-        if self.options["minizip"].compress_only:
-            cmake.definitions["MZ_ZIP_NO_DECOMPRESSION"] = "MZ_ZIP_NO_DECOMPRESSION"
-        if self.options["minizip"].decompress_only:
-            cmake.definitions["MZ_ZIP_NO_COMPRESSION"] = "MZ_ZIP_NO_COMPRESSION"
+        if self.options["minizip"].compress:
+            cmake.definitions["HAVE_COMPRESS"] = "HAVE_COMPRESS"
+        if self.options["minizip"].decompress:
+            cmake.definitions["HAVE_DECOMPRESS"] = "HAVE_DECOMPRESS"
         if self.options["minizip"].with_bzip2:
             cmake.definitions["HAVE_BZIP2"] = "HAVE_BZIP2"
         if self.options["minizip"].with_zlib:
