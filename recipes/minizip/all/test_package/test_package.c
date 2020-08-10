@@ -400,7 +400,7 @@ int test_mz_strm() {
     struct PipelineElement *pipe[] = {&buffered_pipe, &os_pipe};
     err |= strm_test(pipe, sizeof(pipe) / sizeof(struct PipelineElement *));
   }
-#ifdef HAVE_ZLIB
+#if defined(HAVE_ZLIB) && defined(HAVE_COMPRESS) && defined(HAVE_DECOMPRESS)
   {
     struct PipelineElement os_pipe =
         createPipelineElement(mz_stream_os_create, "os", "data.zlib");
@@ -410,7 +410,7 @@ int test_mz_strm() {
     err |= strm_test(pipe, sizeof(pipe) / sizeof(struct PipelineElement *));
   }
 #endif
-#ifdef HAVE_LZMA
+#if defined(HAVE_LZMA) && defined(HAVE_COMPRESS) && defined(HAVE_DECOMPRESS)
   {
     struct PipelineElement os_pipe =
         createPipelineElement(mz_stream_os_create, "os", "data.lzma");
@@ -420,7 +420,7 @@ int test_mz_strm() {
     err |= strm_test(pipe, sizeof(pipe) / sizeof(struct PipelineElement *));
   }
 #endif
-#ifdef HAVE_BZIP
+#if defined(HAVE_BZIP) && defined(HAVE_COMPRESS) && defined(HAVE_DECOMPRESS)
   {
     struct PipelineElement os_pipe =
         createPipelineElement(mz_stream_os_create, "os", "data.bzip");
@@ -430,7 +430,7 @@ int test_mz_strm() {
     err |= strm_test(pipe, sizeof(pipe) / sizeof(struct PipelineElement *));
   }
 #endif
-#ifdef HAVE_ZSTD
+#if defined(HAVE_ZSTD) && defined(HAVE_COMPRESS) && defined(HAVE_DECOMPRESS)
   {
     struct PipelineElement os_pipe =
         createPipelineElement(mz_stream_os_create, "os", "data.zstd");
@@ -440,7 +440,7 @@ int test_mz_strm() {
     err |= strm_test(pipe, sizeof(pipe) / sizeof(struct PipelineElement *));
   }
 #endif
-#ifdef HAVE_WZAES
+#if defined(HAVE_WZAES) && defined(HAVE_COMPRESS) && defined(HAVE_DECOMPRESS)
   {
     struct PipelineElement os_pipe =
         createPipelineElement(mz_stream_os_create, "os", "data.wzaes");
@@ -454,7 +454,7 @@ int test_mz_strm() {
     err |= strm_test(pipe, sizeof(pipe) / sizeof(struct PipelineElement *));
   }
 #endif
-#ifdef HAVE_PKCRYPT
+#if defined(HAVE_PKCRYPT) && defined(HAVE_COMPRESS) && defined(HAVE_DECOMPRESS)
   {
     struct PipelineElement os_pipe =
         createPipelineElement(mz_stream_os_create, "os", "data.wzaes");
@@ -468,7 +468,7 @@ int test_mz_strm() {
     err |= strm_test(pipe, sizeof(pipe) / sizeof(struct PipelineElement *));
   }
 #endif
-#ifdef HAVE_LIBCOMP
+#if defined(HAVE_LIBCOMP) && defined(HAVE_COMPRESS) && defined(HAVE_DECOMPRESS)
   {
     struct PipelineElement os_pipe =
         createPipelineElement(mz_stream_os_create, "os", "data.libcomp");
