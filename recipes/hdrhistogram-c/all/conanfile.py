@@ -16,7 +16,7 @@ class QuickfixConan(ConanFile):
     default_options = {"fPIC": True,
                        "shared": False}
     requires = "zlib/1.2.11"
-    generators = "cmake"
+    generators = "cmake_find_package"
     exports_sources = "patches/**"
     _cmake = None
 
@@ -66,9 +66,9 @@ class QuickfixConan(ConanFile):
 
     def package_info(self):
         self.cpp_info.libs = tools.collect_libs(self)
-        if self.settings.os == "Linux":
-            self.cpp_info.system_libs = ["m", "rt"]
         self.cpp_info.includedirs = ["include", os.path.join("include", "hdr")]
 
+        if self.settings.os == "Linux":
+            self.cpp_info.system_libs = ["m", "rt"]
         elif self.settings.os == "Windows":
             self.cpp_info.system_libs.extend(["ws2_32"])
