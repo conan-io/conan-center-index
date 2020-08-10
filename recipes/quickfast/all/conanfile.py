@@ -96,7 +96,7 @@ class QuickfastConan(ConanFile):
     @property
     def _mwc_command_line(self):
         link_flag = ' -static' if not self.options.shared else ' '
-        fpic_flag = '-fPIC' if self.options.get_safe("fPIC", default=False) else ''
+        fpic_flag = '-fPIC' if self.options.shared or self.options.get_safe("fPIC", default=False) else ''
         platform = self._platform
         build_type = self._build_type
         core_value_template_linkflags = self._core_value_template_linkflags
