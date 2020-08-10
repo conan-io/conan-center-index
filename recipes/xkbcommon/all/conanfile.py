@@ -75,10 +75,10 @@ class XkbcommonConan(ConanFile):
     def package_info(self):
         self.cpp_info.components['libxkbcommon'].libs = ['xkbcommon']
         self.cpp_info.components['libxkbcommon'].name = 'xkbcommon'
-        self.cpp_info.components['libxkbcommon'].requires = ['xorg::xorg']
+        self.cpp_info.components['libxkbcommon'].requires = ['xorg::xkeyboard-config']
         if self.options.with_x11:
             self.cpp_info.components['libxkbcommon-x11'].libs = ['xkbcommon-x11']
             self.cpp_info.components['libxkbcommon-x11'].name = 'xkbcommon-x11'
             self.cpp_info.components['libxkbcommon-x11'].requires = ['libxkbcommon']
-            self.cpp_info.components['libxkbcommon-x11'].requires.append('xorg::xorg')
+            self.cpp_info.components['libxkbcommon-x11'].requires.extend(['xorg::xcb', 'xorg::xcb-xkb'])
 
