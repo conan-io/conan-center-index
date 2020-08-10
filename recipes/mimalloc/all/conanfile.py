@@ -127,6 +127,8 @@ class MimallocConan(ConanFile):
     @property
     def _lib_name(self):
         name = "mimalloc"
+        if self.settings.os == "Windows" and not self.options.shared:
+            name += "-static"
         if self.options.secure:
             name += "-secure"
         if self.settings.build_type not in ("Release", "RelWithDebInfo", "MinSizeRel"):
