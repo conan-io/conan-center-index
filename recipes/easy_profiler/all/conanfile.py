@@ -1,5 +1,4 @@
 from conans import ConanFile, tools, CMake
-from conans.errors import ConanInvalidConfiguration
 import os
 import glob
 
@@ -19,7 +18,7 @@ class EasyProfilerConan(ConanFile):
         "fPIC": [True, False]
     }
     default_options = {
-        "shared": True,
+        "shared": False,
         "fPIC": True
     }
     short_paths = True
@@ -41,11 +40,6 @@ class EasyProfilerConan(ConanFile):
     def configure(self):
         if self.options.shared:
             del self.options.fPIC
-        # The windows build seems to be giving problems due to certain symbols
-        # not being exported properly for static libraries.
-        if not self.options.shared and self.settings.os == "Windows":
-            raise ConanInvalidConfiguration("Must be built as shared on \
-              Windows")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
@@ -86,3 +80,7 @@ class EasyProfilerConan(ConanFile):
         self.cpp_info.libs = ["easy_profiler"]
         if self.settings.os == "Linux":
             self.cpp_info.system_libs = ["m", "pthread"]
+        elif self.settings.os == "Windows":
+            self.cpp_info.system_libs = ["psapi", "ws2_32"]
+            if not self.options.shared:
+                self.cpp_info.defines.append("EASY_PROFILER_STATIC")
