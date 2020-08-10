@@ -32,25 +32,16 @@ class QuickfixConan(ConanFile):
         if not self._cmake:
             self._cmake = CMake(self)
             self._cmake.definitions["HDR_HISTOGRAM_BUILD_PROGRAMS"] = False
-            if self.options.shared:
-                self._cmake.definitions["HDR_HISTOGRAM_BUILD_SHARED"] = True
-                self._cmake.definitions["HDR_HISTOGRAM_INSTALL_SHARED"] = True
-                self._cmake.definitions["HDR_HISTOGRAM_BUILD_STATIC"] = False
-                self._cmake.definitions["HDR_HISTOGRAM_INSTALL_STATIC"] = False
-            else:
-                self._cmake.definitions["HDR_HISTOGRAM_BUILD_SHARED"] = False
-                self._cmake.definitions["HDR_HISTOGRAM_INSTALL_SHARED"] = False
-                self._cmake.definitions["HDR_HISTOGRAM_BUILD_STATIC"] = True
-                self._cmake.definitions["HDR_HISTOGRAM_INSTALL_STATIC"] = True
+            self._cmake.definitions["HDR_HISTOGRAM_BUILD_SHARED"] = self.options.shared
+            self._cmake.definitions["HDR_HISTOGRAM_INSTALL_SHARED"] = self.options.shared
+            self._cmake.definitions["HDR_HISTOGRAM_BUILD_STATIC"] = not self.options.shared
+            self._cmake.definitions["HDR_HISTOGRAM_INSTALL_STATIC"] = not self.options.shared
             self._cmake.configure(source_folder=self._source_subfolder, build_folder=self._build_subfolder)
         return self._cmake
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
         os.rename("HdrHistogram_c-" + self.version, self._source_subfolder)
-
-    def requirements(self):
-        pass
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -61,7 +52,7 @@ class QuickfixConan(ConanFile):
             del self.options.fPIC
 
     def build(self):
-        for patch in self.conan_data["patches"][self.version]:
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
             tools.patch(**patch)
         cmake = self._configure_cmake()
         cmake.build()
@@ -70,16 +61,14 @@ class QuickfixConan(ConanFile):
         cmake = self._configure_cmake()
         cmake.install()
         self.copy("LICENSE.txt", dst="licenses", src=self._source_subfolder)
+        self.copy("COPYING.txt", dst="licenses", src=self._source_subfolder)
         tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
 
     def package_info(self):
         self.cpp_info.libs = tools.collect_libs(self)
         if self.settings.os == "Linux":
-            self.cpp_info.system_libs = ["m"]
-        self.cpp_info.includedirs = [os.path.join("include", "hdr")]
+            self.cpp_info.system_libs = ["m", "rt"]
+        self.cpp_info.includedirs = ["include", os.path.join("include", "hdr")]
 
-        if self.settings.os == "Windows":
+        elif self.settings.os == "Windows":
             self.cpp_info.system_libs.extend(["ws2_32"])
-        elif self.settings.os == "Linux":
-            self.cpp_info.system_libs.extend(["rt"])
-            self.cpp_info.system_libs.extend(["m"])
