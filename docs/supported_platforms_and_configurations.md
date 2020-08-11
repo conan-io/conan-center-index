@@ -4,12 +4,17 @@
 
 ## Windows
 
-- Compilers: Visual Studio versions 2015, 2017 (15.9.19+28307.1000) and 2019 (16.4.4+29728.190)
+- Compilers: Visual Studio:
+  - 2015 (14.0.25431.01 Update 3)
+  - 2017 (15.9.19+28307.1000)
+  - 2019 (16.4.4+29728.190)
 - Release (MT/MD) and Debug (MTd, MDd)
 - Architectures: x86_64
 - Build types: Release, Debug
 - Runtimes: MT/MD (Release), MTd/MDd (Debug)
-- Shared/Static (option `"shared": [True, False]` in the recipe when available)
+- Options:
+  - Shared, Static (option `"shared": [True, False]` in the recipe when available)
+  - Header Only (option `"header_only": [True, False]` is only added with the value True)
 
 ## Linux
 
@@ -21,7 +26,9 @@
   - Clang compiler: `libstdc++`, `libc++`
 - Architectures: x86_64
 - Build types: Release, Debug
-- Options: Shared, Static (option `"shared": [True, False]` in the recipe when available)
+- Options:
+  - Shared, Static (option `"shared": [True, False]` in the recipe when available)
+  - Header Only (option `"header_only": [True, False]` is only added with the value True)
 
 ## OSX
 
@@ -29,4 +36,6 @@
 - C++ Standard Library (`libcxx`): `libc++`
 - Architectures: x86_64
 - Build types: Release, Debug
-- Options: Shared, Static (option ``"shared": [True, False]`` in the recipe when available)
+- Options:
+  - Shared, Static (option ``"shared": [True, False]`` in the recipe when available)
+  - Header Only (option `"header_only": [True, False]` is only added with the value True)

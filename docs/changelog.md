@@ -1,3 +1,9 @@
+### 11-August-2020 - 14:19 CEST
+
+- [engineering] Read allowed users from a file.
+- [engineering] Check for beta users in all environments.
+- [engineering] Set date in issue description for hooks validation job.
+
 ### 4-August-2020 - 20:19 CEST
 
 - [engineering] Remove short-paths home after creating packages.

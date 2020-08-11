@@ -1,0 +1,4 @@
+sources:
+  "3.4.5":
+    url: "https://www.imcce.fr/content/medias/recherche/equipes/asd/calceph/calceph-3.4.5.tar.gz"
+    sha256: "e1b9076b49fee51f7efda22194c8b66aaeebedbdb41d731c5af2cd0b16b39b56"
