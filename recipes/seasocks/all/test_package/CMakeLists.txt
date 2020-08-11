@@ -9,3 +9,4 @@ find_package(Threads REQUIRED)
 
 add_executable(seasocks_test seasocks_test.cpp)
 target_link_libraries(seasocks_test PRIVATE Seasocks::seasocks Threads::Threads)
+set_property(TARGET seasocks_test PROPERTY CXX_STANDARD 11)
