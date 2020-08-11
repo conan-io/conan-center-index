@@ -17,7 +17,7 @@ class TestPackageConan(ConanFile):
             cmake.definitions["HAVE_BZIP2"] = "HAVE_BZIP2"
         if self.options["minizip"].with_zlib:
             cmake.definitions["HAVE_ZLIB"] = "HAVE_ZLIB"
-        if self.options["minizip"].lzma:
+        if self.options["minizip"].with_lzma:
             cmake.definitions["HAVE_LZMA"] = "HAVE_LZMA"
         if self.options["minizip"].with_zstd:
             cmake.definitions["HAVE_ZSTD"] = "HAVE_ZSTD"

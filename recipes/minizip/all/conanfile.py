@@ -22,8 +22,8 @@ class MinizipConan(ConanFile):
         "with_bzip2": [True, False],
         "with_zstd": [True, False],
         "with_openssl": [True, False],
+        "with_lzma": [True, False],
         "compat": [True, False],
-        "lzma": [True, False],
         "pkcrypt": [True, False],
         "wzaes": [True, False],
         "libcomp": [True, False],
@@ -40,8 +40,8 @@ class MinizipConan(ConanFile):
         "with_bzip2": True,
         "with_zstd": True,        
         "with_openssl": False,
+        "with_lzma": True,
         "compat": True,
-        "lzma": True,
         "pkcrypt": True,
         "wzaes": True,
         "libcomp": False,
@@ -117,7 +117,7 @@ class MinizipConan(ConanFile):
             self._cmake.definitions["MZ_COMPAT"] = self.options.compat
             self._cmake.definitions["MZ_ZLIB"] = self.options.with_zlib
             self._cmake.definitions["MZ_BZIP2"] = self.options.with_bzip2
-            self._cmake.definitions["MZ_LZMA"] = self.options.lzma
+            self._cmake.definitions["MZ_LZMA"] = self.options.with_lzma
             self._cmake.definitions["MZ_ZSTD"] = self.options.with_zstd
             self._cmake.definitions["MZ_PKCRYPT"] = self.options.pkcrypt
             self._cmake.definitions["MZ_WZAES"] = self.options.wzaes
