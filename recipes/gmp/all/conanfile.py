@@ -31,6 +31,14 @@ class GmpConan(ConanFile):
             del self.settings.compiler.libcxx
             del self.settings.compiler.cppstd
 
+    def package_id(self):
+        del self.info.options.run_checks  # run_checks doesn't affect package's ID
+
+    def build_requirements(self):
+        if self.settings.os == "Windows" and self.settings.compiler != "Visual Studio" and \
+           "CONAN_BASH_PATH" not in os.environ and tools.os_info.detect_windows_subsystem() != "msys2":
+            self.build_requires("msys2/20200517")
+
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
         os.rename("gmp-" + self.version, self._source_subfolder)
@@ -75,9 +83,6 @@ class GmpConan(ConanFile):
         os.unlink(os.path.join(self.package_folder, "lib", "libgmp.la"))
         if self.options.enable_cxx:
             os.unlink(os.path.join(self.package_folder, "lib", "libgmpxx.la"))
-
-    def package_id(self):
-        del self.info.options.run_checks  # run_checks doesn't affect package's ID
 
     def package_info(self):
         self.cpp_info.components["libgmp"].libs = ["gmp"]
