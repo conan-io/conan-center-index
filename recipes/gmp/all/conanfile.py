@@ -14,7 +14,7 @@ class GmpConan(ConanFile):
     settings = "os", "arch", "compiler", "build_type"
     options = {"shared": [True, False], "fPIC": [True, False], "disable_assembly": [True, False],
                "run_checks": [True, False], "enable_cxx" : [True, False]}
-    default_options = {'shared': False, 'fPIC': True, 'disable_assembly': True, 'run_checks': False, "enable_cxx" : True}
+    default_options = {"shared": False, "fPIC": True, "disable_assembly": True, "run_checks": False, "enable_cxx" : True}
 
     _source_subfolder = "source_subfolder"
     _autotools = None
@@ -24,7 +24,7 @@ class GmpConan(ConanFile):
             del self.options.fPIC
 
     def configure(self):
-        if self.settings.compiler == 'Visual Studio':
+        if self.settings.compiler == "Visual Studio":
             raise ConanInvalidConfiguration("The gmp package cannot be built on Visual Studio.")
 
         if not self.options.enable_cxx:
@@ -53,13 +53,13 @@ class GmpConan(ConanFile):
                 os.chmod(configure_file, configure_stats.st_mode | stat.S_IEXEC)
             configure_args = []
             if self.options.disable_assembly:
-                configure_args.append('--disable-assembly')
+                configure_args.append("--disable-assembly")
             if self.options.shared:
                 configure_args.extend(["--enable-shared", "--disable-static"])
             else:
                 configure_args.extend(["--disable-shared", "--enable-static"])
             if self.options.enable_cxx:
-                configure_args.append('--enable-cxx')
+                configure_args.append("--enable-cxx")
             self._autotools.configure(args=configure_args)
         return self._autotools
 
@@ -69,7 +69,7 @@ class GmpConan(ConanFile):
             autotools.make()
         # INFO: According to the gmp readme file, make check should not be omitted, but it causes timeouts on the CI server.
         if self.options.run_checks:
-            autotools.make(args=['check'])
+            autotools.make(args=["check"])
 
     def package(self):
         self.copy("COPYINGv2", dst="licenses", src=self._source_subfolder)
