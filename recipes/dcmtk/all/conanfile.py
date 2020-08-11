@@ -75,7 +75,7 @@ class DCMTKConan(ConanFile):
         if self.options.charset_conversion == "libiconv":
             self.requires("libiconv/1.16")
         elif self.options.charset_conversion == "icu":
-            self.requires("icu/64.2")
+            self.requires("icu/67.1")
         if self.options.with_libxml2:
             self.requires("libxml2/2.9.10")
         if self.options.with_zlib:
