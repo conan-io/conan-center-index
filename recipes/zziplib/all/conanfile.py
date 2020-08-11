@@ -55,7 +55,7 @@ class ZziplibConan(ConanFile):
 
             self._cmake.definitions["BUILD_STATIC_LIBS"] = not self.options.shared
 
-            self._cmake.definitions["ZZIPCOMPAT"] = not tools.os_info.is_windows
+            self._cmake.definitions["ZZIPCOMPAT"] = (self.settings.os != "Windows")
 
             self._cmake.definitions["ZZIPSDL"] = False
             self._cmake.definitions["ZZIPBINS"] = False
