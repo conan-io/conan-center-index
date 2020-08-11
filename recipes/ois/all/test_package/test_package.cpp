@@ -1,11 +1,9 @@
-#include "OISInputManager.h"
+#include <iostream>
 
-using namespace OIS;
+#include <ois/OIS.h>
 
 int main(int argc, char **argv)
 {
-    ParamList pl;
-    InputManager* inputManager = InputManager::createInputSystem(pl);
-    InputManager::destroyInputSystem(inputManager);
+    std::cout << "OIS version: " << OIS::InputManager::getVersionNumber() << std::endl;
     return 0;
 }

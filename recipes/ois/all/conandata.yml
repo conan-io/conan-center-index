@@ -1,4 +1,8 @@
 sources:
   "1.5":
     url: "https://github.com/wgois/OIS/archive/v1.5.tar.gz"
-    sha256: "5dd9cf8a9a8c0f253fad3e9904923b2dfc740eddbc86415c3f76152bd534f23a"
+    sha256: "aa3e6b840b1149bb06835e04365957f4659c08b3e3095a48b289050f1637a174"
+patches:
+  "1.5":
+    - patch_file: "patches/001_fix.patch"
+      base_path: "source_subfolder"
