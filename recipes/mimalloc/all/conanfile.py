@@ -66,14 +66,12 @@ class MimallocConan(ConanFile):
         self._cmake = CMake(self)
         if self.settings.compiler == "Visual Studio":
             self._cmake.generator = "NMake Makefiles"
-        self._cmake.definitions["CMAKE_BUILD_TYPE"] = self.settings.build_type
-        self._cmake.definitions["MI_BUILD_TESTS"] = "OFF"
-        self._cmake.definitions["MI_BUILD_SHARED"] = "ON" if self.options.shared else "OFF"
-        self._cmake.definitions["MI_BUILD_STATIC"] = "ON" if not self.options.shared and \
-                                                             not self.options.get_safe("single_object", False) else "OFF"
-        self._cmake.definitions["MI_BUILD_OBJECT"] = "ON" if self.options.get_safe("single_object") else "OFF"
-        self._cmake.definitions["MI_OVERRIDE"] = "ON" if self.options.override else "OFF"
-        self._cmake.definitions["MI_SECURE"] = "ON" if self.options.secure else "OFF"
+        self._cmake.definitions["MI_BUILD_TESTS"] = False
+        self._cmake.definitions["MI_BUILD_SHARED"] = self.options.shared
+        self._cmake.definitions["MI_BUILD_STATIC"] = not self.options.shared and not self.options.get_safe("single_object", False)
+        self._cmake.definitions["MI_BUILD_OBJECT"] = self.options.get_safe("single_object", False)
+        self._cmake.definitions["MI_OVERRIDE"] = self.options.override
+        self._cmake.definitions["MI_SECURE"] = self.options.secure
         self._cmake.configure(build_folder=self._build_subfolder)
         return self._cmake
 
