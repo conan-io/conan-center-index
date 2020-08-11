@@ -278,7 +278,7 @@ class GdalConan(ConanFile):
         # if self.options.with_opencl:
         #     self.requires("opencl-headers/x.x.x")
         if self.options.with_freexl:
-            self.requires("freexl/1.0.5")
+            self.requires("freexl/1.0.6")
         # if self.options.with_poppler:
         #     self.requires("poppler/0.83.0")
         # if self.options.with_podofo:
