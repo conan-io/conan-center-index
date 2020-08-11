@@ -9,24 +9,20 @@ class ClipperConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/skyrpex/clipper"
     license = "BSL-1.0"
-    exports_sources = ["CMakeLists.txt"]
+    exports_sources = ["CMakeLists.txt", "patches/*"]
     generators = "cmake"
-
     settings = "arch", "build_type", "compiler", "os"
-
-    options = {
-        "shared": [True, False],
-        "fPIC": [True, False]
-        }
-    default_options = {"shared": False, "fPIC": True}
-
     _cmake = None
     _source_subfolder = "source_subfolder"
     _build_subfolder = "build_subfolder"
+    options = {
+        "shared": [True, False],
+        "fPIC": [True, False]
+    }
+    default_options = {"shared": False, "fPIC": True}
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
-
         extracted_dir = self.name + "-" + self.version
         os.rename(extracted_dir, self._source_subfolder)
 
@@ -43,6 +39,10 @@ class ClipperConan(ConanFile):
         return self._cmake
 
     def build(self):
+        if "patches" in self.conan_data and self.version in self.conan_data["patches"]:
+            for patch in self.conan_data["patches"][self.version]:
+                tools.patch(**patch)
+
         cmake = self._configure_cmake()
         cmake.build()
 
