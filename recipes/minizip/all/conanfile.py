@@ -83,6 +83,9 @@ class MinizipConan(ConanFile):
             self.requires("bzip2/1.0.8")
         if self.options.with_zstd:
             self.requires("zstd/1.4.5")
+        #FIXME: Remove vendor distributed lzma library and add conditional requirement
+        #if self.options.with_lzma:
+        #    self.requires("xz_utils/5.2.4")
         if self.options.with_openssl:
             self.requires("openssl/1.1.1g")
         if self._is_uinix_like():
