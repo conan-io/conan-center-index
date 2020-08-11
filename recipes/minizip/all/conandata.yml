@@ -15,3 +15,4 @@ patches:
     -  "patch_file": "patches/0009-Iconv-can-be-assumed-to-be-found-since-find_package-.patch"
     -  "patch_file": "patches/0010-Let-MSVC-use-the-same-OUTPUT_NAME-as-all-the-other-c.patch"
     -  "patch_file": "patches/0011-Replace-MZ_COMPRESS_ONLY-and-MZ_DECOMPRESS_ONLY-with.patch"
+    -  "patch_file": "patches/0012-Fix-find_package-for-zstd.patch"
