@@ -160,6 +160,8 @@ class GdalConan(ConanFile):
             del self.options.with_exr
 
     def configure(self):
+        if self.options.shared:
+            del self.options.fPIC
         if self.settings.compiler.cppstd:
             min_cppstd = 14 if self.options.with_charls else 11
             tools.check_min_cppstd(self, min_cppstd)
