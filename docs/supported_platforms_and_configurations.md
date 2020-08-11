@@ -9,7 +9,9 @@
 - Architectures: x86_64
 - Build types: Release, Debug
 - Runtimes: MT/MD (Release), MTd/MDd (Debug)
-- Shared/Static (option `"shared": [True, False]` in the recipe when available)
+- Options:
+  - Shared, Static (option `"shared": [True, False]` in the recipe when available)
+  - Header Only (option `"header_only": [True, False]` is only added with the value True)
 
 ## Linux
 
@@ -21,7 +23,9 @@
   - Clang compiler: `libstdc++`, `libc++`
 - Architectures: x86_64
 - Build types: Release, Debug
-- Options: Shared, Static (option `"shared": [True, False]` in the recipe when available)
+- Options:
+  - Shared, Static (option `"shared": [True, False]` in the recipe when available)
+  - Header Only (option `"header_only": [True, False]` is only added with the value True)
 
 ## OSX
 
@@ -29,4 +33,6 @@
 - C++ Standard Library (`libcxx`): `libc++`
 - Architectures: x86_64
 - Build types: Release, Debug
-- Options: Shared, Static (option ``"shared": [True, False]`` in the recipe when available)
+- Options:
+  - Shared, Static (option ``"shared": [True, False]`` in the recipe when available)
+  - Header Only (option `"header_only": [True, False]` is only added with the value True)
