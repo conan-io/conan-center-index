@@ -152,8 +152,8 @@ index 252f5021..61655f65 100644
 +# endif
 +# define NCURSES_API __cdecl
 +#else
-+# define NCURSES_EXPORT_GENERAL_IMPORT @NCURSES_EXPORT@
-+# define NCURSES_EXPORT_GENERAL_EXPORT @NCURSES_EXPORT@
++# define NCURSES_EXPORT_GENERAL_IMPORT
++# define NCURSES_EXPORT_GENERAL_EXPORT
 +# define NCURSES_API /* FIXME: __attribute__ ((cdecl)) is only available on x86 */
  #endif
  
