@@ -36,6 +36,7 @@ class QuickfixConan(ConanFile):
             self._cmake.definitions["HDR_HISTOGRAM_INSTALL_SHARED"] = self.options.shared
             self._cmake.definitions["HDR_HISTOGRAM_BUILD_STATIC"] = not self.options.shared
             self._cmake.definitions["HDR_HISTOGRAM_INSTALL_STATIC"] = not self.options.shared
+            self._cmake.definitions["CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS"] = self.options.shared
             self._cmake.configure(build_dir=self._build_subfolder)
         return self._cmake
 
@@ -69,4 +70,7 @@ class QuickfixConan(ConanFile):
         if self.settings.os == "Linux":
             self.cpp_info.system_libs = ["m", "rt"]
         elif self.settings.os == "Windows":
-            self.cpp_info.system_libs.extend(["ws2_32"])
+            if self.options.shared:
+                self.cpp_info.bindirs = ["lib"]
+            else:
+                self.cpp_info.system_libs.extend(["ws2_32"])
