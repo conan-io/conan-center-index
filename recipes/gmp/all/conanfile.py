@@ -26,7 +26,8 @@ class GmpConan(ConanFile):
     def configure(self):
         if self.settings.compiler == "Visual Studio":
             raise ConanInvalidConfiguration("The gmp package cannot be built on Visual Studio.")
-
+        if self.options.shared:
+            del self.options.fPIC
         if not self.options.enable_cxx:
             del self.settings.compiler.libcxx
             del self.settings.compiler.cppstd
