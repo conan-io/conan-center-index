@@ -76,7 +76,7 @@ class MimallocConan(ConanFile):
         return self._cmake
 
     def build(self):
-        for patch in self.conan_data["patches"][self.version]:
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
             tools.patch(**patch)
         if self.settings.compiler == "Visual Studio" and self.settings.arch == "x86":
             tools.replace_path_in_file(os.path.join(self._source_subfolder, "CMakeLists.txt"),
