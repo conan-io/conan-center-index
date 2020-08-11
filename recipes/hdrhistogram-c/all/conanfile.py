@@ -16,7 +16,8 @@ class QuickfixConan(ConanFile):
     default_options = {"fPIC": True,
                        "shared": False}
     requires = "zlib/1.2.11"
-    generators = "cmake_find_package"
+    generators = "cmake", "cmake_find_package"
+    exports_sources = "CMakeLists.txt"
     _cmake = None
 
     @property
@@ -35,7 +36,7 @@ class QuickfixConan(ConanFile):
             self._cmake.definitions["HDR_HISTOGRAM_INSTALL_SHARED"] = self.options.shared
             self._cmake.definitions["HDR_HISTOGRAM_BUILD_STATIC"] = not self.options.shared
             self._cmake.definitions["HDR_HISTOGRAM_INSTALL_STATIC"] = not self.options.shared
-            self._cmake.configure(source_folder=self._source_subfolder, build_folder=self._build_subfolder)
+            self._cmake.configure(build_dir=self._build_subfolder)
         return self._cmake
 
     def source(self):
