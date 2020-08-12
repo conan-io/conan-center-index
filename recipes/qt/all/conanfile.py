@@ -176,7 +176,7 @@ class QtConan(ConanFile):
 
     def config_options(self):
         if self.settings.os != "Linux":
-            self.options.with_icu = False
+            del self.options.with_icu
         if self.settings.compiler == "apple-clang":
             if tools.Version(self.settings.compiler.version) < "10.0":
                 raise ConanInvalidConfiguration("Old versions of apple sdk are not supported by Qt (QTBUG-76777)")
@@ -189,8 +189,6 @@ class QtConan(ConanFile):
             self.options.with_mysql = False
         if self.settings.os == "Windows":
             self.options.with_mysql = False
-            if not self.options.shared and self.options.with_icu:
-                raise ConanInvalidConfiguration("icu option is not supported on windows in static build. see QTBUG-77120.")
 
         if self.options.widgets and not self.options.GUI:
             raise ConanInvalidConfiguration("using option qt:widgets without option qt:GUI is not possible. "
@@ -270,7 +268,7 @@ class QtConan(ConanFile):
             self.requires("freetype/2.10.1")
         if self.options.with_fontconfig:
             self.requires("fontconfig/2.13.91")
-        if self.options.with_icu:
+        if self.options.get_safe("with_icu", False):
             self.requires("icu/64.2")
         if self.options.with_harfbuzz and not self.options.multiconfiguration:
             self.requires("harfbuzz/2.6.8")
@@ -475,7 +473,7 @@ class QtConan(ConanFile):
         args.append("--glib=" + ("yes" if self.options.with_glib else "no"))
         args.append("--pcre=" + ("system" if self.options.with_pcre2 else "qt"))
         args.append("--fontconfig=" + ("yes" if self.options.with_fontconfig else "no"))
-        args.append("--icu=" + ("yes" if self.options.with_icu else "no"))
+        args.append("--icu=" + ("yes" if self.options.get_safe("with_icu", False) else "no"))
         args.append("--sql-mysql=" + ("yes" if self.options.with_mysql else "no"))
         args.append("--sql-psql=" + ("yes" if self.options.with_pq else "no"))
         args.append("--sql-odbc=" + ("yes" if self.options.with_odbc else "no"))
