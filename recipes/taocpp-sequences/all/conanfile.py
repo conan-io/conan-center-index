@@ -6,10 +6,11 @@ class TaoCPPSequencesonan(ConanFile):
     name = "taocpp-sequences"
     license = "MIT"
     url = "https://github.com/conan-io/conan-center-index"
-    homepage = "hhttps://github.com/taocpp/sequences"
+    homepage = "https://github.com/taocpp/sequences"
     description = "Variadic templates and std::integer_sequence support library"
     topics = ("variadic-template", "template", "interger-sequence")
     no_copy_source = True
+    settings = "os", "compiler", "build_type", "arch"
 
     @property
     def _source_subfolder(self):

@@ -16,7 +16,7 @@ class WinflexbisonConan(ConanFile):
     settings = "os", "build_type", "arch", "compiler"
 
     _source_subfolder = "source_subfolder"
-    
+
     _cmake = None
 
     def config_options(self):
@@ -52,7 +52,7 @@ class WinflexbisonConan(ConanFile):
         self.copy(pattern="*.exe", dst="bin", src=actual_build_path, keep_path=False)
         self.copy(pattern="data/*", dst="bin", src="{}/bison".format(self._source_subfolder), keep_path=True)
         self.copy(pattern="FlexLexer.h", dst="include", src=os.path.join(self._source_subfolder, "flex", "src"), keep_path=False)
-        
+
         # Copy licenses
         self._extract_license()
         self.copy(pattern="COPYING.GPL3", dst="licenses")
@@ -65,3 +65,11 @@ class WinflexbisonConan(ConanFile):
         bindir = os.path.join(self.package_folder, "bin")
         self.output.info("Appending PATH environment variable: {}".format(bindir))
         self.env_info.PATH.append(bindir)
+
+        lex_path = os.path.join(self.package_folder, "bin", "win_flex").replace("\\", "/")
+        self.output.info("Setting LEX environment variable: {}".format(lex_path))
+        self.env_info.LEX = lex_path
+
+        yacc_path = os.path.join(self.package_folder, "bin", "win_bison -y").replace("\\", "/")
+        self.output.info("Setting YACC environment variable: {}".format(yacc_path))
+        self.env_info.YACC = yacc_path

@@ -20,3 +20,12 @@ sources:
   2.12.2:
     url: https://github.com/catchorg/Catch2/archive/v2.12.2.tar.gz
     sha256: 4075d12aa4dc9a5bab00e82e0140b2969b88b8524b224e06ee129fabb9e2944b
+  2.12.3:
+    url: https://github.com/catchorg/Catch2/archive/v2.12.3.tar.gz
+    sha256: 78425e7055cea5bad1ff8db7ea0d6dfc0722ece156be1ccf3597c15e674e6943
+  2.12.4:
+    url: https://github.com/catchorg/Catch2/archive/v2.12.4.tar.gz
+    sha256: 5436725bbc6ee131a0bc9545bef31f0adabbb21fbc39fb6f1b2a42c12e4f8107
+  2.13.0:
+    url: https://github.com/catchorg/Catch2/archive/v2.13.0.tar.gz
+    sha256: 4e6608d3fb0247e2aa988735bae2064381b0ec712f47beb766dd761838a546b6

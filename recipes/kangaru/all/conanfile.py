@@ -1,17 +1,21 @@
 from conans import ConanFile, tools, CMake
 import os
 
+
 class KangaruConan(ConanFile):
     name = "kangaru"
     description = "A dependency injection container for C++11, C++14 and later"
     license = "MIT"
-    topics = ("conan", "gracicot", "kangaru", "DI", "IoC", "inversion of control")
+    topics = ("conan", "gracicot", "kangaru",
+              "DI", "IoC", "inversion of control")
     homepage = "https://github.com/gracicot/kangaru/wiki"
     url = "https://github.com/conan-io/conan-center-index"
+
+    settings = "os", "compiler", "build_type", "arch"
     options = {"reverse_destruction": [True, False],
-                "no_exception": [True, False]}
+               "no_exception": [True, False]}
     default_options = {"reverse_destruction": True,
-                        "no_exception": False}
+                       "no_exception": False}
     no_copy_source = True
 
     @property
@@ -38,3 +42,6 @@ class KangaruConan(ConanFile):
         cmake.install()
         tools.rmdir(os.path.join(self.package_folder, "lib"))
         self.copy(os.path.join(self._source_subfolder, "LICENSE"), "licenses")
+
+    def package_id(self):
+        self.info.header_only()

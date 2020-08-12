@@ -8,17 +8,13 @@ class NinjaConan(ConanFile):
     license = "Apache-2.0"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/ninja-build/ninja"
-    settings = "os", "arch", "compiler"
+    settings = "os", "arch", "compiler", "build_type"
     exports_sources = ["CMakeLists.txt", "*.patch"]
     generators = "cmake"
+    topics = ("conan", "ninja", "build")
 
     _source_subfolder = "source_subfolder"
     _cmake = None
-
-    def configure(self):
-        if self.settings.compiler == "Visual Studio":
-            if self.settings.compiler.runtime != "MT":
-                raise ConanInvalidConfiguration("Only MT MSVC runtime is supported")
 
     def _configure_cmake(self):
         if self._cmake:
@@ -45,10 +41,6 @@ class NinjaConan(ConanFile):
                   src=self._source_subfolder)
         cmake = self._configure_cmake()
         cmake.install()
-
-    def package_id(self):
-        del self.info.settings.compiler
-        del self.info.settings.build_type
 
     def package_info(self):
         self.env_info.PATH.append(os.path.join(self.package_folder, "bin"))

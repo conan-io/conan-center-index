@@ -11,8 +11,20 @@ class SqlcipherConan(ConanFile):
     homepage = "https://www.zetetic.net/sqlcipher/"
     description = "SQLite extension that provides 256 bit AES encryption of database files."
     settings = "os", "compiler", "build_type", "arch"
-    options = {"shared": [True, False], "fPIC": [True, False], "crypto_library": ["openssl", "libressl"]}
-    default_options = {"shared": False, "fPIC": True, "crypto_library": "openssl"}
+    options = {
+                "shared": [True, False],
+                "fPIC": [True, False],
+                "crypto_library": ["openssl", "libressl"],
+                "with_largefile": [True, False],
+                "temporary_store": ["always_file", "default_file", "default_memory", "always_memory"]
+              }
+    default_options = {
+                        "shared": False,
+                        "fPIC": True,
+                        "crypto_library": "openssl",
+                        "with_largefile": True,
+                        "temporary_store": "default_memory"
+                      }
     topics = ("database", "encryption", "SQLite")
     exports_sources = "patches/*"
     generators = "cmake"
@@ -22,36 +34,58 @@ class SqlcipherConan(ConanFile):
     def config_options(self):
         del self.settings.compiler.libcxx
         del self.settings.compiler.cppstd
+        if self.settings.os != "Linux":
+            del self.options.with_largefile
         if self.settings.os == "Windows":
             del self.options.fPIC
 
     def build_requirements(self):
+        # It is possible to have a MinGW cross-build toolchain (Linux to Windows)
+        # Only require msys2 when building on an actual Windows system
+        if self.settings.os == "Windows" and self.settings.compiler == "gcc" and tools.os_info.is_windows:
+            self.build_requires("msys2/20190524")
         self.build_requires("tcl/8.6.10")
 
     def requirements(self):
         if self.options.crypto_library == "openssl":
-            self.requires("openssl/1.1.1d")
+            self.requires("openssl/1.1.1g")
         else:
-            self.requires("libressl/2.9.2")
+            self.requires("libressl/3.2.0")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
         extracted_dir = self.name + "-" + self.version
         os.rename(extracted_dir, self._source_subfolder)
 
+    @property
+    def _temp_store_nmake_value(self):
+        return {"always_file": "0",
+                "default_file": "1",
+                "default_memory": "2",
+                "always_memory": "3"}.get(str(self.options.temporary_store))
+
+    @property
+    def _temp_store_autotools_value(self):
+        return {"always_file": "never",
+                "default_file": "no",
+                "default_memory": "yes",
+                "always_memory": "always"}.get(str(self.options.temporary_store))
+
     def _build_visual(self):
         crypto_dep = self.deps_cpp_info[str(self.options.crypto_library)]
         crypto_incdir = crypto_dep.include_paths[0]
         crypto_libdir = crypto_dep.lib_paths[0]
         libs = map(lambda lib : lib + ".lib", crypto_dep.libs)
+        system_libs = map(lambda lib : lib + ".lib", crypto_dep.system_libs)
 
         nmake_flags = [
-                "TLIBS=\"%s\"" % " ".join(libs),
+                "TLIBS=\"%s %s\"" % (" ".join(libs), " ".join(system_libs)),
                 "LTLIBPATHS=/LIBPATH:%s" % crypto_libdir,
                 "OPTS=\"-I%s -DSQLITE_HAS_CODEC\"" % (crypto_incdir),
                 "NO_TCL=1",
                 "USE_AMALGAMATION=1",
                 "OPT_FEATURE_FLAGS=-DSQLCIPHER_CRYPTO_OPENSSL",
+                "SQLITE_TEMP_STORE=%s" % self._temp_store_nmake_value,
                 "TCLSH_CMD=%s" % self.deps_env_info.TCLSH,
                 ]
 
@@ -74,13 +108,15 @@ class SqlcipherConan(ConanFile):
         autotools_env = AutoToolsBuildEnvironment(self, win_bash=tools.os_info.is_windows)
         if self.settings.os == "Linux":
             autotools_env.libs.append("dl")
+            if not self.options.with_largefile:
+                autotools_env.defines.append("SQLITE_DISABLE_LFS=1")
         autotools_env.defines.extend(["SQLITE_HAS_CODEC", "SQLCIPHER_CRYPTO_OPENSSL"])
 
         # sqlcipher config.sub does not contain android configurations...
         # elf is the most basic `os' for Android
         host = None
         if self.settings.os == "Android":
-            host = "%s-linux-elf" % self.arch_id_str_compiler
+            host = "%s-linux-elf" % self._arch_id_str_compiler
         elif self.settings.os == "Windows":
             arch = str(self.settings.arch)
             if arch == "x86":
@@ -102,9 +138,11 @@ class SqlcipherConan(ConanFile):
                 env_vars["config_TARGET_EXEEXT"] = ".exe"
             else:
                 build = None
+            tclsh_cmd = self.deps_env_info.TCLSH
+            env_vars["TCLSH_CMD"] = tclsh_cmd.replace("\\", "/")
             autotools_env.configure(args=configure_args, host=host, build=build, vars=env_vars)
             if self.settings.os == "Windows":
-                # sqlcipher will create .exe for the build machine, which is Linux...
+                # sqlcipher will create .exe for the build machine, which we defined to Linux...
                 tools.replace_in_file(os.path.join(self.build_folder, self._source_subfolder, "Makefile"), "BEXE = .exe", "BEXE = ")
             autotools_env.make(args=["install"])
 
@@ -125,8 +163,8 @@ class SqlcipherConan(ConanFile):
 
             self._autotools_bool_arg("shared", self.options.shared),
             self._autotools_bool_arg("static", not self.options.shared),
-            "--enable-tempstore=yes",
-            "--with-tcl={}".format(os.path.join(self.deps_env_info.TCL_ROOT, "lib"))
+            "--enable-tempstore=%s" % self._temp_store_autotools_value,
+            "--disable-tcl",
         ]
         if self.settings.os == "Windows":
             args.extend(["config_BUILD_EXEEXT='.exe'", "config_TARGET_EXEEXT='.exe'"])
@@ -173,6 +211,6 @@ class SqlcipherConan(ConanFile):
         self.cpp_info.libs = ["sqlcipher"]
         if self.settings.os == "Linux":
             self.cpp_info.system_libs.extend(["pthread", "dl"])
-        self.cpp_info.defines = ["SQLITE_HAS_CODEC", 'SQLCIPHER_CRYPTO_OPENSSL', 'SQLITE_TEMP_STORE=2']
+        self.cpp_info.defines = ["SQLITE_HAS_CODEC", 'SQLCIPHER_CRYPTO_OPENSSL', 'SQLITE_TEMP_STORE=%s' % self._temp_store_nmake_value]
         # Allow using #include <sqlite3.h> even with sqlcipher (for libs like sqlpp11-connector-sqlite3)
         self.cpp_info.includedirs.append(os.path.join("include", "sqlcipher"))

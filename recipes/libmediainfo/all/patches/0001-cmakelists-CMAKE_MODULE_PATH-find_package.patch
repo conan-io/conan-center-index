@@ -1,0 +1,24 @@
+--- Project/CMake/CMakeLists.txt
++++ Project/CMake/CMakeLists.txt
+@@ -2,7 +2,7 @@
+ 
+ cmake_minimum_required(VERSION 2.8.11)
+ 
+-set(CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake/modules")
++list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake/modules")
+ 
+ set(MediaInfoLib_MAJOR_VERSION 20)
+ set(MediaInfoLib_MINOR_VERSION 03)
+@@ -85,10 +85,10 @@
+ endif()
+ 
+ # use bundled tinyxml only if no system
+-find_package(TinyXML)
++find_package(TinyXML REQUIRED)
+ 
+ # use system curl if is present
+-find_package(CURL)
++find_package(CURL REQUIRED)
+ 
+ include_directories(${MediaInfoLib_SOURCES_PATH})
+ include_directories(${MediaInfoLib_SOURCES_PATH}/ThirdParty/md5/)

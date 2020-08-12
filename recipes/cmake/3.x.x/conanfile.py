@@ -1,6 +1,5 @@
 import os
 from conans import tools, ConanFile, CMake
-from conans.tools import Version
 from conans.errors import ConanInvalidConfiguration, ConanException
 
 
@@ -11,9 +10,15 @@ class CMakeConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/Kitware/CMake"
     license = "BSD-3-Clause"
-    exports_sources = ["CMakeLists.txt"]
     generators = "cmake"
-    settings = "os", "arch", "build_type"
+    settings = "os", "arch", "compiler", "build_type"
+
+    options = {
+        "with_openssl": [True, False, "auto"],
+    }
+    default_options = {
+        "with_openssl": "auto",
+    }
 
     _source_subfolder = "source_subfolder"
     _cmake = None
@@ -21,9 +26,19 @@ class CMakeConan(ConanFile):
     def _minor_version(self):
         return ".".join(str(self.version).split(".")[:2])
 
+    @property
+    def _with_openssl(self):
+        if self.options.with_openssl == "auto":
+            return self.settings.os != "Windows"
+        return self.options.with_openssl
+
     def configure(self):
         if self.settings.os == "Macos" and self.settings.arch == "x86":
             raise ConanInvalidConfiguration("CMake does not support x86 for macOS")
+
+    def requirements(self):
+        if self._with_openssl:
+            self.requires("openssl/1.1.1g")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
@@ -35,12 +50,17 @@ class CMakeConan(ConanFile):
             self._cmake = CMake(self)
             self._cmake.definitions["CMAKE_BOOTSTRAP"] = False
             if self.settings.os == "Linux":
-                self._cmake.definitions["OPENSSL_USE_STATIC_LIBS"] = True
-                self._cmake.definitions["CMAKE_EXE_LINKER_FLAGS"] = "-lz"
-            self._cmake.configure(source_dir=self._source_subfolder)
+                self._cmake.definitions["CMAKE_USE_OPENSSL"] = self._with_openssl
+                if self._with_openssl:
+                    self._cmake.definitions["OPENSSL_USE_STATIC_LIBS"] = not self.options["openssl"].shared
+            self._cmake.configure(source_folder=self._source_subfolder)
         return self._cmake
 
     def build(self):
+        tools.replace_in_file(os.path.join(self._source_subfolder, "CMakeLists.txt"),
+                              "project(CMake)",
+                              "project(CMake)\ninclude(\"{}/conanbuildinfo.cmake\")\nconan_basic_setup()".format(
+                                  self.build_folder.replace("\\", "/")))
         if self.settings.os == "Linux":
             tools.replace_in_file(os.path.join(self._source_subfolder, "Utilities", "cmcurl", "CMakeLists.txt"),
                                   "list(APPEND CURL_LIBS ${OPENSSL_LIBRARIES})",
@@ -53,6 +73,9 @@ class CMakeConan(ConanFile):
         cmake = self._configure_cmake()
         cmake.install()
         tools.rmdir(os.path.join(self.package_folder, "doc"))
+
+    def package_id(self):
+        self.info.options.with_openssl = self._with_openssl
 
     def package_info(self):
         minor = self._minor_version()

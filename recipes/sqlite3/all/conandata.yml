@@ -14,3 +14,9 @@
   "3.32.1":
     "sha256": "8d46ef69b96628bedb781bd8309210f2a1f4a353792097302f6b754044e6540f"
     "url": "https://www.sqlite.org/2020/sqlite-amalgamation-3320100.zip"
+  "3.32.2":
+    "sha256": "7e1ebd182a61682f94b67df24c3e6563ace182126139315b659f25511e2d0b5d"
+    "url": "https://www.sqlite.org/2020/sqlite-amalgamation-3320200.zip"
+  "3.32.3":
+    "sha256": "e9cec01d4519e2d49b3810615237325263fe1feaceae390ee12b4a29bd73dbe2"
+    "url": "https://www.sqlite.org/2020/sqlite-amalgamation-3320300.zip"

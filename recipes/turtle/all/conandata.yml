@@ -2,3 +2,6 @@ sources:
   "1.3.1":
     url: "https://github.com/mat007/turtle/releases/download/v1.3.1/turtle-1.3.1.tar.gz"
     sha256: "96e747159952a002474fb8db8e7a6416dbd6f1ff741c065bd7eef25dbf1ed39e"
+  "1.3.2":
+    url: "https://github.com/mat007/turtle/releases/download/v1.3.2/turtle-1.3.2.tar.gz"
+    sha256: "0551f0e5f19bcee5484a2dfeadd4b56f7142f89ed2a1839dd56ed2d594ef1d4c"

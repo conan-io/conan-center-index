@@ -359,8 +359,7 @@ class BoostConan(ConanFile):
 
     @property
     def _b2_exe(self):
-        b2_exe = "b2.exe" if tools.os_info.is_windows else "b2"
-        return os.path.join(self.deps_cpp_info["b2"].rootpath, "bin", b2_exe)
+        return "b2.exe" if tools.os_info.is_windows else "b2"
 
     @property
     def _bcp_exe(self):
@@ -387,7 +386,7 @@ class BoostConan(ConanFile):
                 if self.options.debug_level:
                     command += " -d%d" % self.options.debug_level
                 self.output.warn(command)
-                self.run(command)
+                self.run(command, run_environment=True)
 
     def _run_bcp(self):
         with tools.vcvars(self.settings) if self._is_msvc or self._is_clang_cl else tools.no_op():
@@ -440,7 +439,7 @@ class BoostConan(ConanFile):
             with tools.chdir(sources):
                 # To show the libraries *1
                 # self.run("%s --show-libraries" % b2_exe)
-                self.run(full_command)
+                self.run(full_command, run_environment=True)
 
     @property
     def _b2_os(self):
@@ -846,8 +845,21 @@ class BoostConan(ConanFile):
                 self.output.info(cmd)
                 self.run(cmd)
 
+    @property
+    def _is_versioned_layout(self):
+        layout = self.options.get_safe("layout")
+        return layout == "versioned" or (layout == "b2-default" and os.name == 'nt')
+
     def package_info(self):
         gen_libs = [] if self.options.header_only else tools.collect_libs(self)
+
+        if self._is_versioned_layout:
+            version_tokens = str(self.version).split(".")
+            if len(version_tokens) >= 2:
+                major = version_tokens[0]
+                minor = version_tokens[1]
+                boost_version_tag = "boost-%s_%s" % (major, minor)
+                self.cpp_info.includedirs = [os.path.join(self.package_folder, "include", boost_version_tag)]
 
         # List of lists, so if more than one matches the lib like serialization and wserialization
         # both will be added to the list
