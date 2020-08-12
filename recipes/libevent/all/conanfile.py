@@ -54,16 +54,6 @@ class LibeventConan(ConanFile):
         extracted_folder = "libevent-release-{0}-stable".format(self.version)
         os.rename(extracted_folder, self._source_subfolder)
 
-    def _patch_sources(self):
-        tools.replace_in_file(os.path.join(self._source_subfolder, "CMakeLists.txt"),
-                              "OPENSSL_INCLUDE_DIR",
-                              "OpenSSL_INCLUDE_DIRS")
-        tools.replace_in_file(os.path.join(self._source_subfolder, "CMakeLists.txt"),
-                              "OPENSSL_LIBRARIES",
-                              "OpenSSL_LIBRARIES")
-        for patch in self.conan_data["patches"][self.version]:
-            tools.patch(**patch)
-
     def _configure_cmake(self):
         if self._cmake:
             return self._cmake
@@ -85,7 +75,8 @@ class LibeventConan(ConanFile):
         return self._cmake
 
     def build(self):
-        self._patch_sources()
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            tools.patch(**patch)
         cmake = self._configure_cmake()
         cmake.build()
 
