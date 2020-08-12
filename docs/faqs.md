@@ -79,10 +79,20 @@ As described in the [Supported platforms and configurations](supported_platforms
 * Few users need different pre-built packages that are not x86_64 packages, this number is less than 10% of total users (data obtained through the download counter from Bintray), and tends to decrease over the years;
 * Some OS are putting the x86 as obsolete, examples [macOS](https://developer.apple.com/documentation/macos-release-notes/macos-catalina-10_15-release-notes) and Ubuntu 20.04;
 * For security reasons, most companies build their own packages from sources, even if they already have a pre-built version available, which further reduces the need for extra configurations;
-* Each recipe results in around 130 packages, and this is only for x86_64, but not all packages are used, some settings remain with zero downloads throughout their life. So, imagine adding more settings that will be rarely used, but that will consume more resources as time and storage, this leaves us in an impractical situation.
+* Each recipe results in around 130 packages, and this is only for x86_64, but not all packages are used, some settings remain with zero downloads throughout their life. So, imagine adding more settings that will rarely be used, but that will consume more resources as time and storage, this leaves us in an impractical situation.
 
 #### But if there are no packages available, what will the x86 validation look like?
 
 As stated earlier, any increase in the number of configurations will result in an impractical scenario. In addition, more validations require more review time for a recipe, which would increase the time for all PRs, delaying the release of a new package. For these reasons, x86 is not validated by the CCI.
 
 We often receive new fixes and improvements to the recipes already available for x86_64, including help for other architectures like x86 and ARM. In addition, we also receive new cases of bugs, for recipes that do not work on a certain platform, but that are necessary for use, which is important to understand where we should put more effort. So we believe that the best way to maintain and add support for other architectures is through the community.
+
+## Why PDB files are not allowed?
+
+The project initially decided not to support the PDB files primarily due to the size of the final package, which could add an exaggerated size and not even used by users. In addition, PDB files need the source code to perform the debugging and even follow the path in which it was created and not the one used by the user, which makes it difficult to use when compared to the regular development flow with the IDE.
+
+However, there are ways to get around this, one of them is through the [/Z7](https://docs.microsoft.com/en-us/cpp/build/reference/z7-zi-zi-debug-information-format) compilation flag, which can be passed through [environment variables](https://docs.microsoft.com/en-us/cpp/build/reference/cl-environment-variables). You can use your [profile](https://docs.conan.io/en/latest/reference/profiles.html#package-settings-and-env-vars) to customize your compiler command line.
+
+#### Why is there no option for PDB, as there is for fPIC?
+
+Adding one more common option, it seems the most simple and obvious solution, but it contains a side effect already seen with fPIC. It is necessary to manage the entire recipe, it has become a Boilerplate. So, adding PDB would be one more point to be reviewed for each recipe. In addition, in the future new options could arise, such as sanity or benchmark, further inflating the recipes. For this reason, a new option will not be added. However, the inclusion of the PDB files is discussed in issue #1982 and there are some ideas for making this possible through a new feature. If you want to comment on the subject, please visit issue.
