@@ -393,7 +393,7 @@ class CPythonConan(ConanFile):
                     fn.readline()
                     text = fn.read()
                 with open(script, "w") as fn:
-                    fn.write("#!/usr/bin/env python{}\n".format(self._version_major_minor))
+                    fn.write("""#!/bin/sh\n''':'\n__file__="$0"; while [ -L "$__file__" ]; do __file__="$(dirname "$__file__")/$(readlink "$__file__")"; done; exec "$(dirname "$__file__")/python{}" "$0" "$@"\n'''\n""".format(self._version_major_minor))
                     fn.write(text)
 
             if not os.path.exists(self._cpython_symlink):
