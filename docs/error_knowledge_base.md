@@ -1,4 +1,5 @@
-## Errors from the conan-center hook (KB-Hxxx)
+# Errors from the conan-center hook (KB-Hxxx)
+
 
 #### **<a name="KB-H001">#KB-H001</a>: "DEPRECATED GLOBAL CPPSTD"**
 
@@ -155,7 +156,7 @@ class SomeRecipe(ConanFile):
     exports = "LICENSE.md" # not allowed
 ```
 
-There is a complete explanation in the [FAQ](https://github.com/conan-io/conan-center-index/wiki/FAQ#should-recipes-export-a-recipes-license).
+There is a complete explanation in the [FAQ](faqs.md#should-recipes-export-a-recipes-license).
 
 #### **<a name="KB-H024">#KB-H024</a>: "TEST PACKAGE FOLDER"**
 

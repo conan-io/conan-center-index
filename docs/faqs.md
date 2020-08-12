@@ -1,3 +1,6 @@
+# FAQs
+
+
 This section gathers the most common questions from the community related to packages and usability of this repository.
 
 ## What is the policy on recipe name collisions?
@@ -71,7 +74,7 @@ Currently, the Jenkins orchestration library for this build service is not avail
 
 ## Why not x86 binaries?
 
-As described in the [Supported platforms and configurations](https://github.com/conan-io/conan-center-index/wiki/Supported-Platforms-And-Configurations), only the x86_64 architecture is available for download, the rest must be built from sources. The reasons behind this decision are:
+As described in the [Supported platforms and configurations](supported_platforms_and_configurations.md), only the x86_64 architecture is available for download, the rest must be built from sources. The reasons behind this decision are:
 
 * Few users need different pre-built packages that are not x86_64 packages, this number is less than 10% of total users (data obtained through the download counter from Bintray), and tends to decrease over the years;
 * Some OS are putting the x86 as obsolete, examples [macOS](https://developer.apple.com/documentation/macos-release-notes/macos-catalina-10_15-release-notes) and Ubuntu 20.04;
