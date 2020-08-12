@@ -317,7 +317,7 @@ class CPythonConan(ConanFile):
         if self.settings.compiler == "Visual Studio":
             return "bin"
         else:
-            ""
+            return ""
 
     def _msvc_package_layout(self):
         install_prefix = os.path.join(self.package_folder, self._install_subprefix)
