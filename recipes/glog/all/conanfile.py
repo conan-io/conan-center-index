@@ -63,6 +63,11 @@ class GlogConan(ConanFile):
         tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
 
     def package_info(self):
-        self.cpp_info.libs = tools.collect_libs(self)
+        self.cpp_info.components["libglog"].libs = tools.collect_libs(self)
+        self.cpp_info.components["libglog"].names["pkgconfig"] = ["libglog"]
         if self.settings.os == "Linux":
-            self.cpp_info.system_libs.append("pthread")
+            self.cpp_info.components["libglog"].system_libs = ["pthread"]
+        elif self.settings.os == "Windows":
+            self.cpp_info.components["libglog"].defines = ["GLOG_NO_ABBREVIATED_SEVERITIES", "GOOGLE_GLOG_DLL_DECL"]
+        if self.options.with_gflags:
+            self.cpp_info.components["libglog"].requires = ["gflags::gflags"]
