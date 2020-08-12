@@ -59,23 +59,27 @@ class CorradeConan(ConanFile):
     def _configure_cmake(self):
         if not self._cmake:
             self._cmake = CMake(self)
-            self._cmake.definitions["BUILD_STATIC"] = not self.options.shared
-            self._cmake.definitions["BUILD_DEPRECARED"] = self.options["build_deprecated"]
-            self._cmake.definitions["WITH_INTERCONNECT"] = self.options["with_interconnect"]
-            self._cmake.definitions["WITH_MAIN"] = self.options["with_main"]
-            self._cmake.definitions["WITH_PLUGINMANAGER"] = self.options["with_pluginmanager"]
-            self._cmake.definitions["WITH_TESTSUITE"] = self.options["with_testsuite"]
-            self._cmake.definitions["WITH_UTILITY"] = self.options["with_utility"]
-            self._cmake.definitions["WITH_RC"] = "ON"
+            def add_cmake_option(option, value):
+                var_name = "{}".format(option).upper()
+                value_str = "{}".format(value)
+                var_value = "ON" if value_str == 'True' else "OFF" if value_str == 'False' else value_str 
+                self._cmake.definitions[var_name] = var_value
+                print("{0}={1}".format(var_name, var_value))
+
+            for option, value in self.options.items():
+                add_cmake_option(option, value)
+
+            add_cmake_option("BUILD_STATIC", not self.options.shared)
+            add_cmake_option("BUILD_STATIC_PIC", not self.options.shared and self.options.get_safe("fPIC") == True)
+
+            if self.settings.compiler == "Visual Studio":
+                self._cmake.definitions["MSVC2015_COMPATIBILITY"] = "ON" if self.settings.compiler.version == "14" else "OFF"
+                self._cmake.definitions["MSVC2017_COMPATIBILITY"] = "ON" if self.settings.compiler.version == "15" else "OFF"
+                self._cmake.definitions["MSVC2019_COMPATIBILITY"] = "ON" if self.settings.compiler.version == "16" else "OFF"
 
             # Corrade uses suffix on the resulting "lib"-folder when running cmake.install()
             # Set it explicitly to empty, else Corrade might set it implicitly (eg. to "64")
             self._cmake.definitions["LIB_SUFFIX"] = ""
-
-            if self.settings.compiler == "Visual Studio":
-                self._cmake.definitions["CORRADE_MSVC2015_COMPATIBILITY"] = "ON" if self.settings.compiler.version == "14" else "OFF"
-                self._cmake.definitions["CORRADE_MSVC2017_COMPATIBILITY"] = "ON" if self.settings.compiler.version == "15" else "OFF"
-                self._cmake.definitions["CORRADE_MSVC2019_COMPATIBILITY"] = "ON" if self.settings.compiler.version == "16" else "OFF"
 
             self._cmake.configure(build_folder=self._build_subfolder)
 
