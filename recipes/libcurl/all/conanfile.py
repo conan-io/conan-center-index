@@ -194,6 +194,9 @@ class LibcurlConan(ConanFile):
         elif self.options.with_openssl:
             openssl_path = self.deps_cpp_info["openssl"].rootpath.replace("\\", "/")
             params.append("--with-ssl=%s" % openssl_path)
+        elif self.options.with_wolfssl:
+            params.append("--with-wolfssl")
+            params.append("--without-ssl")
         else:
             params.append("--without-ssl")
 
