@@ -2,7 +2,6 @@ from conans import ConanFile, CMake, tools
 from conans.errors import ConanInvalidConfiguration
 import os
 
-
 class CorradeConan(ConanFile):
     name = "corrade"
     description = "Corrade is a multiplatform utility library written in C++11/C++14."
@@ -25,16 +24,18 @@ class CorradeConan(ConanFile):
         "with_pluginmanager": [True, False],
         "with_testsuite": [True, False],
         "with_utility": [True, False],
+        "with_rc": [True, False],
     }
     default_options = {
         "shared": False,
         "fPIC": True,
-        "build_deprecated": True,
+        "build_deprecated": False,
         "with_interconnect": True,
         "with_main": True,
         "with_pluginmanager": True,
         "with_testsuite": True,
         "with_utility": True,
+        "with_rc": True,
     }
 
     _source_subfolder = "source_subfolder"
