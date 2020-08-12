@@ -148,8 +148,10 @@ class CorradeConan(ConanFile):
         if self.settings.os == "Linux":
             self.cpp_info.system_libs = ["m", "dl"]
 
-        self.cpp_info.builddirs = [os.path.join(self.package_folder, "lib", "cmake", "Corrade")]
-
-        bindir = os.path.join(self.package_folder, "bin")
-        self.output.info("Appending PATH environment variable: {}".format(bindir))
-        self.env_info.PATH.append(bindir)
+        self.env_info.PATH.append(os.path.join(self.package_folder, "bin"))
+        if self.options.shared:
+            # Help linker find rpaths
+            if self.settings.os == "Linux":
+                self.env_info.LD_LIBRARY_PATH.append(os.path.join(self.package_folder, "lib"))
+            if self.settings.os == "Macos":
+                self.env_info.DYLD_LIBRARY_PATH.append(os.path.join(self.package_folder, "lib"))
