@@ -1,4 +1,5 @@
 from conans import AutoToolsBuildEnvironment, ConanFile, tools
+from contextlib import contextmanager
 import glob
 import os
 
@@ -49,6 +50,9 @@ class CunitConan(ConanFile):
             self.requires("ncurses/6.2")
 
     def build_requirements(self):
+        if tools.os_info.is_windows and not tools.get_env("CONAN_BASH_PATH") and \
+                tools.os_info.detect_windows_subsystem() != "msys2":
+            self.build_requires("msys2/20190524")
         self.build_requires("libtool/2.4.6")
 
     def source(self):
@@ -58,10 +62,30 @@ class CunitConan(ConanFile):
             for f in glob.glob("*.c"):
                 os.chmod(f, 0o644)
 
+    @contextmanager
+    def _build_context(self):
+        env = {}
+        if self.settings.compiler == "Visual Studio":
+            with tools.vcvars(self.settings):
+                env.update({
+                    "AR": "{} lib".format(tools.unix_path(self.deps_user_info["automake"].ar_lib)),
+                    "CC": "{} cl -nologo".format(tools.unix_path(self.deps_user_info["automake"].compile)),
+                    "CXX": "{} cl -nologo".format(tools.unix_path(self.deps_user_info["automake"].compile)),
+                    "NM": "dumpbin -symbols",
+                    "OBJDUMP": ":",
+                    "RANLIB": ":",
+                    "STRIP": ":",
+                })
+                with tools.environment_append(env):
+                    yield
+        else:
+            with tools.environment_append(env):
+                yield
+
     def _configure_autools(self):
         if self._autotools:
             return self._autotools
-        self._autotools = AutoToolsBuildEnvironment(self)
+        self._autotools = AutoToolsBuildEnvironment(self, win_bash=tools.os_info.is_windows)
         self._autotools.libs = []
         conf_args = [
             "--datarootdir={}".format(os.path.join(self.package_folder, "bin", "share").replace("\\", "/")),
@@ -79,16 +103,18 @@ class CunitConan(ConanFile):
         return self._autotools
 
     def build(self):
-        with tools.chdir(self._source_subfolder):
-            self.run("autoreconf -fiv".format(os.environ["AUTORECONF"]))
-            autotools = self._configure_autools()
-            autotools.make()
+        with self._build_context():
+            with tools.chdir(self._source_subfolder):
+                self.run("autoreconf -fiv".format(os.environ["AUTORECONF"]), win_bash=tools.os_info.is_windows)
+                autotools = self._configure_autools()
+                autotools.make()
 
     def package(self):
         self.copy("COPYING", src=self._source_subfolder, dst="licenses")
-        with tools.chdir(self._source_subfolder):
-            autotools = self._configure_autools()
-            autotools.install()
+        with self._build_context():
+            with tools.chdir(self._source_subfolder):
+                autotools = self._configure_autools()
+                autotools.install()
 
         os.unlink(os.path.join(self.package_folder, "lib", "libcunit.la"))
         tools.rmdir(os.path.join(self.package_folder, "bin", "share", "man"))
