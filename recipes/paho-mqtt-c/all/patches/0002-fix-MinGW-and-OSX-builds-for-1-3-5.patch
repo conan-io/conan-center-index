@@ -1,5 +1,5 @@
 diff --git a/CMakeLists.txt b/CMakeLists.txt
-index 531c39c..3df385a 100644
+index 531c39c..86b5538 100644
 --- a/CMakeLists.txt
 +++ b/CMakeLists.txt
 @@ -41,7 +41,7 @@ IF (PAHO_HIGH_PERFORMANCE)
@@ -11,6 +11,15 @@ index 531c39c..3df385a 100644
  ELSEIF(${CMAKE_SYSTEM_NAME} STREQUAL "Darwin")
    ADD_DEFINITIONS(-DOSX)
  ENDIF()
-
-
+@@ -60,10 +60,6 @@ IF (NOT PAHO_BUILD_SHARED AND NOT PAHO_BUILD_STATIC)
+     MESSAGE(FATAL_ERROR "You must set either PAHO_BUILD_SHARED, PAHO_BUILD_STATIC, or both")
+ ENDIF()
+ 
+-IF(PAHO_BUILD_DEB_PACKAGE)
+-    set(CMAKE_INSTALL_DOCDIR share/doc/libpaho-mqtt)
+-ENDIF()
+-
+ ADD_SUBDIRECTORY(src)
+ IF(PAHO_BUILD_SAMPLES)
+     ADD_SUBDIRECTORY(src/samples)
 
