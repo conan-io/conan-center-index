@@ -6,6 +6,10 @@ class TestPackageConan(ConanFile):
     settings = "os", "compiler", "build_type", "arch"
     generators = "cmake"
 
+    @property
+    def _with_jwt(self):
+        return "enable_jwt" in self.options["poco"] and self.options["poco"].enable_jwt == True
+
     def build(self):
         cmake = CMake(self)
         cmake.definitions["TEST_CRYPTO"] = self.options["poco"].enable_crypto == True
@@ -14,7 +18,7 @@ class TestPackageConan(ConanFile):
         cmake.definitions["TEST_NETSSL"] = self.options["poco"].enable_netssl == True
         cmake.definitions["TEST_SQLITE"] = self.options["poco"].enable_data_sqlite == True
         cmake.definitions["TEST_ENCODINGS"] = self.options["poco"].enable_encodings == True
-        cmake.definitions["TEST_JWT"] = self.options["poco"].enable_jwt == True
+        cmake.definitions["TEST_JWT"] = self._with_jwt
         cmake.configure()
         cmake.build()
 
@@ -34,5 +38,5 @@ class TestPackageConan(ConanFile):
                 self.run(os.path.join("bin", "sqlite"), run_environment=True)
             if self.options["poco"].enable_encodings:
                 self.run(os.path.join("bin", "encodings"), run_environment=True)
-            if self.options["poco"].enable_jwt:
+            if self._with_jwt:
                 self.run(os.path.join("bin", "jwt"), run_environment=True)
