@@ -1,3 +1,6 @@
+# Changelog
+
+
 ### 12-August-2020 - 10:12 CEST
 
 - Updated Conan client to the 1.28.1 version in Windows and Mac agents.
