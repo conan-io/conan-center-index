@@ -111,9 +111,6 @@ class NCursesConan(ConanFile):
                 "--enable-interop",
             ])
         if self.settings.compiler == "Visual Studio":
-            self._autotools.defines.append("_WIN32")
-            if self.settings.arch == "x86_64":
-                self._autotools.defines.append("_WIN64")
             conf_args.extend([
                 "ac_cv_func_getopt=yes",
             ])
