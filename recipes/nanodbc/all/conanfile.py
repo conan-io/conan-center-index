@@ -1,4 +1,5 @@
 from conans import CMake, ConanFile, tools
+from conans.errors import ConanInvalidConfiguration
 import glob
 import os
 
@@ -38,11 +39,24 @@ class NanodbcConan(ConanFile):
         if self.settings.os == "Windows":
             del self.options.fPIC
 
+    _compiler_cxx14 = {
+        "gcc": 5,
+        "clang": "3.4",
+        "Visual Studio": 14,
+        "apple-clang": "9.1",  # FIXME: wild guess
+    }
+
     def configure(self):
         if self.options.shared:
             del self.options.fPIC
         if self.settings.compiler.cppstd:
             tools.check_min_cppstd(self, 14)
+        _minimum_compiler = self._compiler_cxx14.get(str(self.settings.compiler))
+        if _minimum_compiler:
+            if tools.Version(self.settings.compiler.version) < _minimum_compiler:
+                raise ConanInvalidConfiguration("nanodbc requires c++14, which your compiler does not support")
+        else:
+            self.output.warn("nanodbc requires c++14, but is unknown to this recipe. Assuming your compiler supports c++14.")
 
     def requirements(self):
         if self.options.with_boost:
