@@ -63,14 +63,11 @@ class GlogConan(ConanFile):
         tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
 
     def package_info(self):
-        self.cpp_info.components["libglog"].libs = tools.collect_libs(self)
-        self.cpp_info.components["libglog"].names["pkgconfig"] = ["libglog"]
+        self.cpp_info.libs = tools.collect_libs(self)
+        self.cpp_info.names["pkgconfig"] = ["libglog"]
         if self.settings.os == "Linux":
-            self.cpp_info.components["libglog"].system_libs = ["pthread"]
+            self.cpp_info.system_libs = ["pthread"]
         elif self.settings.os == "Windows":
-            self.cpp_info.components["libglog"].defines = ["GLOG_NO_ABBREVIATED_SEVERITIES"]
-            if self.settings.compiler == "Visual Studio":
-                decl = "__declspec(dllimport)" if self.options.shared else ""
-                self.cpp_info.components["libglog"].defines.append("GOOGLE_GLOG_DLL_DECL={}".format(decl))
-        if self.options.with_gflags:
-            self.cpp_info.components["libglog"].requires = ["gflags::gflags"]
+            self.cpp_info.defines = ["GLOG_NO_ABBREVIATED_SEVERITIES"]
+            decl = "__declspec(dllimport)" if self.options.shared else ""
+            self.cpp_info.defines.append("GOOGLE_GLOG_DLL_DECL={}".format(decl))
