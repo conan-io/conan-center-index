@@ -1,8 +1,17 @@
 diff --git a/CMakeLists.txt b/CMakeLists.txt
-index b53745b..d8787d8 100644
+index 531c39c..a1fd06b 100644
 --- a/CMakeLists.txt
 +++ b/CMakeLists.txt
-@@ -41,7 +41,7 @@
+@@ -17,7 +17,7 @@
+ 
+ # Note: on OS X you should install XCode and the associated command-line tools
+ 
+-CMAKE_MINIMUM_REQUIRED(VERSION 2.8.12)
++CMAKE_MINIMUM_REQUIRED(VERSION 3.1)
+ PROJECT("Eclipse Paho C" C)
+ MESSAGE(STATUS "CMake version: " ${CMAKE_VERSION})
+ MESSAGE(STATUS "CMake system name: " ${CMAKE_SYSTEM_NAME})
+@@ -41,7 +41,7 @@ IF (PAHO_HIGH_PERFORMANCE)
  ENDIF()
  
  IF(WIN32)
@@ -11,5 +20,6 @@ index b53745b..d8787d8 100644
  ELSEIF(${CMAKE_SYSTEM_NAME} STREQUAL "Darwin")
    ADD_DEFINITIONS(-DOSX)
  ENDIF()
+
 
 
