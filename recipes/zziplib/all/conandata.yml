@@ -1,0 +1,8 @@
+sources:
+  "0.13.71":
+    url: "https://github.com/gdraheim/zziplib/archive/v0.13.71.tar.gz"
+    sha256: "2ee1e0fbbb78ec7cc46bde5b62857bc51f8d665dd265577cf93584344b8b9de2"
+patches:
+  "0.13.71":
+    - patch_file: "patches/001_fix.patch"
+      base_path: "source_subfolder"
