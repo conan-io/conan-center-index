@@ -1,5 +1,5 @@
 from conans import AutoToolsBuildEnvironment, ConanFile, tools
-from contextlib import contextmanager
+from conans.errors import ConanInvalidConfiguration
 import glob
 import os
 
@@ -37,40 +37,12 @@ class LibBsdConan(ConanFile):
             del self.options.fPIC
         del self.settings.compiler.libcxx
         del self.settings.compiler.cppstd
-
-    # def requirements(self):
-    #     pass
-
-    def build_requirements(self):
-        if tools.os_info.is_windows and not tools.get_env("CONAN_BASH_PATH") and \
-                tools.os_info.detect_windows_subsystem() != "msys2":
-            self.build_requires("msys2/20190524")
-        if self.settings.compiler == "Visual Studio":
-            self.build_requires("automake/1.16.2")
+        if self.settings.os != "Linux":
+            raise ConanInvalidConfiguration("libbsd is only available for GNU operating systems (e.g. Linux)")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
         os.rename(glob.glob("libbsd-*")[0], self._source_subfolder)
-
-    @contextmanager
-    def _build_context(self):
-        env = {}
-        if self.settings.compiler == "Visual Studio":
-            with tools.vcvars(self.settings):
-                env.update({
-                    "AR": "{} lib".format(tools.unix_path(self.deps_user_info["automake"].ar_lib)),
-                    "CC": "{} cl -nologo".format(tools.unix_path(self.deps_user_info["automake"].compile)),
-                    "CXX": "{} cl -nologo".format(tools.unix_path(self.deps_user_info["automake"].compile)),
-                    "NM": "dumpbin -symbols",
-                    "OBJDUMP": ":",
-                    "RANLIB": ":",
-                    "STRIP": ":",
-                })
-                with tools.environment_append(env):
-                    yield
-        else:
-            with tools.environment_append(env):
-                yield
 
     def _configure_autotools(self):
         if self._autotools:
@@ -86,15 +58,13 @@ class LibBsdConan(ConanFile):
         return self._autotools
 
     def build(self):
-        with self._build_context():
-            autotools = self._configure_autotools()
-            autotools.make()
+        autotools = self._configure_autotools()
+        autotools.make()
 
     def package(self):
         self.copy("COPYING", src=self._source_subfolder, dst="licenses")
-        with self._build_context():
-            autotools = self._configure_autotools()
-            autotools.install()
+        autotools = self._configure_autotools()
+        autotools.install()
 
         os.unlink(os.path.join(os.path.join(self.package_folder, "lib", "libbsd.la")))
         tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
