@@ -1,3 +1,6 @@
+# Changelog
+
+
 ### 11-August-2020 - 14:19 CEST
 
 - [engineering] Read allowed users from a file.
