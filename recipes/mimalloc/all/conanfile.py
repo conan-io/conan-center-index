@@ -64,6 +64,8 @@ class MimallocConan(ConanFile):
         if self._cmake:
             return self._cmake
         self._cmake = CMake(self)
+        if self._cmake.is_multi_configuration:
+            self._cmake.definitions["CMAKE_BUILD_TYPE"] = self.settings.build_type
         self._cmake.definitions["MI_BUILD_TESTS"] = False
         self._cmake.definitions["MI_BUILD_SHARED"] = self.options.shared
         self._cmake.definitions["MI_BUILD_STATIC"] = not self.options.shared and not self.options.get_safe("single_object", False)
