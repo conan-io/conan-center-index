@@ -247,7 +247,7 @@ index 55c65d1a..3a44d63b 100644
 +		isdll=0
 +		while test \[$]# -gt 0; do
 +			case "\[$]1" in
-+				-link)
++				-link | -MT | -MD | -MTd | -MDd)
 +					# ignore -link argument
 +					;;
 +				-dll)
