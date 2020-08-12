@@ -101,7 +101,7 @@
  #endif
  
 +#if defined(_WIN32)
-+#if defined(DLL_EXPORT)
++#if defined(LIBUSB_COMPAT_EXPORT)
 +#define USB_COMPAT_EXPORTED __declspec(dllexport)
 +#elif !defined(LIBUSB_COMPAT_STATIC)
 +#define USB_COMPAT_EXPORTED __declspec(dllimport)

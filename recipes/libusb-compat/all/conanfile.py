@@ -1,6 +1,9 @@
-from conans import ConanFile, AutoToolsBuildEnvironment, tools
+from conans import ConanFile, AutoToolsBuildEnvironment, CMake, tools
+from conans.errors import ConanException
 from contextlib import contextmanager
 import os
+import re
+import shlex
 
 
 class LibUSBCompatConan(ConanFile):
@@ -9,7 +12,7 @@ class LibUSBCompatConan(ConanFile):
     license = ("LGPL-2.1", "BSD-3-Clause")
     homepage = "https://github.com/libusb/libusb-compat-0.1"
     url = "https://github.com/conan-io/conan-center-index"
-    exports_sources = "patches/**"
+    exports_sources = "patches/**", "CMakelists.txt.in"
     topics = ("conan", "libusb", "compatibility", "usb")
     settings = "os", "compiler", "build_type", "arch"
     options = {
@@ -22,8 +25,10 @@ class LibUSBCompatConan(ConanFile):
         "fPIC": True,
         "enable_logging": False,
     }
-    generators = "pkg_config"
+    generators = "cmake", "pkg_config"
+
     _autotools = None
+    _cmake = None
 
     @property
     def _source_subfolder(self):
@@ -76,6 +81,13 @@ class LibUSBCompatConan(ConanFile):
                 break
         return absolute_libs
 
+    def _configure_cmake(self):
+        if self._cmake:
+            return self._cmake
+        self._cmake = CMake(self)
+        self._cmake.configure(source_dir=os.path.join(self._source_subfolder, "libusb"))
+        return self._cmake
+
     def _configure_autotools(self):
         if self._autotools:
             return self._autotools
@@ -116,6 +128,20 @@ class LibUSBCompatConan(ConanFile):
         else:
             yield
 
+    def _extract_makefile_variable(self, makefile, variable):
+        makefile_contents = tools.load(makefile)
+        match = re.search("{}[ \t]*=[ \t]*((?:(?:[a-zA-Z0-9 \t.=/_-])|(?:\\\\\"))*(?:\\\\\n(?:(?:[a-zA-Z0-9 \t.=/_-])|(?:\\\"))*)*)\n".format(variable), makefile_contents)
+        if not match:
+            raise ConanException("Cannot extract variable {} from {}".format(variable, makefile_contents))
+        lines = [line.strip(" \t\\") for line in match.group(1).split()]
+        return [item for line in lines for item in shlex.split(line) if item]
+
+    def _extract_autotools_variables(self):
+        makefile = os.path.join(self._source_subfolder, "libusb", "Makefile.am")
+        sources = self._extract_makefile_variable(makefile, "libusb_la_SOURCES")
+        headers = self._extract_makefile_variable(makefile, "include_HEADERS")
+        return sources, headers
+
     def _patch_sources(self):
         for patch in self.conan_data["patches"][self.version]:
             tools.patch(**patch)
@@ -131,28 +157,38 @@ class LibUSBCompatConan(ConanFile):
 
     def build(self):
         self._patch_sources()
-        with tools.environment_append({"AUTOMAKE_CONAN_INCLUDES": tools.get_env("AUTOMAKE_CONAN_INCLUDES", "").replace(";", ":")}):
-            with tools.chdir(self._source_subfolder):
-                self.run("{} -fiv".format(os.environ["AUTORECONF"]), win_bash=tools.os_info.is_windows)
         with self._build_context():
             autotools = self._configure_autotools()
-            autotools.make()
+        if self.settings.os == "Windows":
+            cmakelists_in = tools.load("CMakeLists.txt.in")
+            sources, headers = self._extract_autotools_variables()
+            tools.save(os.path.join(self._source_subfolder, "libusb", "CMakeLists.txt"), cmakelists_in.format(
+                libusb_sources=" ".join(sources),
+                libusb_headers=" ".join(headers),
+            ))
+            tools.replace_in_file("config.h", "\n#define API_EXPORTED", "\n#define API_EXPORTED //")
+            cmake = self._configure_cmake()
+            cmake.build()
+        else:
+            with self._build_context():
+                autotools.make()
 
     def package(self):
         self.copy("LICENSE", src=self._source_subfolder, dst="licenses")
-        with self._build_context():
-            autotools = self._configure_autotools()
-            autotools.install()
+        if self.settings.os == "Windows":
+            cmake = self._configure_cmake()
+            cmake.install()
+        else:
+            with self._build_context():
+                autotools = self._configure_autotools()
+                autotools.install()
 
-        os.unlink(os.path.join(self.package_folder, "bin", "libusb-config"))
-        os.unlink(os.path.join(self.package_folder, "lib", "libusb.la"))
-        tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
+            os.unlink(os.path.join(self.package_folder, "bin", "libusb-config"))
+            os.unlink(os.path.join(self.package_folder, "lib", "libusb.la"))
+            tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
 
     def package_info(self):
         self.cpp_info.names["pkg_config"] = "libusb"
-        lib = "usb"
-        if self.settings.compiler == "Visual Studio" and self.options.shared:
-            lib += ".dll.lib"
-        self.cpp_info.libs = [lib]
+        self.cpp_info.libs = ["usb"]
         if not self.options.shared:
             self.cpp_info.defines = ["LIBUSB_COMPAT_STATIC"]
