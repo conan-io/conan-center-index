@@ -28,6 +28,7 @@ class CunitConan(ConanFile):
         "enable_console": True,
         "with_curses": False,
     }
+    exports_sources = "patches/**"
 
     _autotools = None
 
@@ -103,6 +104,8 @@ class CunitConan(ConanFile):
         return self._autotools
 
     def build(self):
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            tools.patch(**patch)
         with self._build_context():
             with tools.chdir(self._source_subfolder):
                 self.run("autoreconf -fiv".format(os.environ["AUTORECONF"]), win_bash=tools.os_info.is_windows)
@@ -124,4 +127,9 @@ class CunitConan(ConanFile):
     def package_info(self):
         self.cpp_info.names["cmake_find_package"] = "CUnit"
         self.cpp_info.names["cmake_find_package_multi"] = "CUnit"
-        self.cpp_info.libs = ["cunit"]
+        libname = "cunit"
+        if self.settings.os == "Windows" and self.options.shared:
+            libname += ".dll" + (".lib" if self.settings.compiler == "Visual Studio" else ".a")
+        self.cpp_info.libs = [libname]
+        if self.settings.os == "Windows" and self.options.shared:
+            self.cpp_info.defines.append("CU_DLL")
