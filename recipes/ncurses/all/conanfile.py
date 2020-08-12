@@ -135,7 +135,7 @@ class NCursesConan(ConanFile):
                     "CC": "cl -nologo",
                     "CXX": "cl -nologo",
                     "LD": "link -nologo",
-                    "LDFLAGS": "user32.lib",
+                    "LDFLAGS": "",
                     "NM": "dumpbin -symbols",
                     "STRIP": ":",
                     "AR": "lib -nologo",
