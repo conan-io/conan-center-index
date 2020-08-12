@@ -95,8 +95,11 @@ class CorradeConan(ConanFile):
         cmake.install()
 
         share_cmake = os.path.join(self.package_folder, "share", "cmake", "Corrade")
-        self.copy("UseCorrade.cmake", src=share_cmake, dst=os.path.join(self.package_folder, "lib", "cmake", "Corrade"))
+        self.copy("CMakeLists.txt", src=share_cmake, dst=os.path.join(self.package_folder, "lib", "cmake", "Corrade"))
+        self.copy("CorradeConfig.cmake", src=share_cmake, dst=os.path.join(self.package_folder, "lib", "cmake", "Corrade"))
         self.copy("CorradeLibSuffix.cmake", src=share_cmake, dst=os.path.join(self.package_folder, "lib", "cmake", "Corrade"))
+        self.copy("FindCorrade.cmake", src=share_cmake, dst=os.path.join(self.package_folder, "lib", "cmake", "Corrade"))
+        self.copy("UseCorrade.cmake", src=share_cmake, dst=os.path.join(self.package_folder, "lib", "cmake", "Corrade"))
         tools.rmdir(os.path.join(self.package_folder, "share"))
 
     def _sort_libs(self, correct_order, libs, lib_suffix="", reverse_result=False):
@@ -118,9 +121,13 @@ class CorradeConan(ConanFile):
         self.cpp_info.names["cmake_find_package"] = "Corrade"
         self.cpp_info.names["cmake_find_package_multi"] = "Corrade"
 
-        self.cpp_info.builddirs.append(os.path.join("lib", "cmake"))
-        self.cpp_info.build_modules.append(os.path.join("lib", "cmake", "Corrade", "UseCorrade.cmake"))
+        self.cpp_info.includedirs.append("include")
+        self.cpp_info.builddirs.append(os.path.join("lib", "cmake", "Corrade"))
+        self.cpp_info.build_modules.append(os.path.join("lib", "cmake", "Corrade", "FindCorrade.cmake"))
         self.cpp_info.build_modules.append(os.path.join("lib", "cmake", "Corrade", "CorradeLibSuffix.cmake"))
+        self.cpp_info.build_modules.append(os.path.join("lib", "cmake", "Corrade", "CMakeLists.txt"))
+        self.cpp_info.build_modules.append(os.path.join("lib", "cmake", "Corrade", "CorradeConfig.cmake"))
+        self.cpp_info.build_modules.append(os.path.join("lib", "cmake", "Corrade", "UseCorrade.cmake"))
 
         # See dependency order here: https://doc.magnum.graphics/magnum/custom-buildsystems.html
         allLibs = [
