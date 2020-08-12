@@ -36,12 +36,15 @@ class TestPackageConan(ConanFile):
     def _py_version(self):
         return self.deps_cpp_info["cpython"].version
 
+    def _pymalloc(self):
+        return "pymalloc" in self.options["cpython"] and self.options["cpython"].pymalloc
+
     @property
     def _cmake_abi(self):
         if self._py_version < tools.Version("3.8"):
             return CmakePython3Abi(
                 debug=self.settings.build_type == "Debug",
-                pymalloc=bool(self.options["cpython"].pymalloc),
+                pymalloc=self._pymalloc,
                 unicode=False,
             )
         else:
