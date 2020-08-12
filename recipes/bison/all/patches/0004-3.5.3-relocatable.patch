@@ -176,7 +176,7 @@
 +#include <limits.h>
 +#include <stdio.h>
 +#include <string.h>
-+#if defined(__linux__) || defined(__CYGWIN__) || defined(__MSYS__)
++#if defined(__linux__)
 +#include <alloca.h>
 +#endif
 +#include <unistd.h>
@@ -190,7 +190,7 @@
 +#define IMPLEMENT_SYS_GET_EXECUTABLE_PATH
 +
 +#if defined(IMPLEMENT_SYS_GET_EXECUTABLE_PATH)
-+#if defined(__linux__) || defined(__CYGWIN__) || defined(__MSYS__) || defined(_MSC_VER)
++#if defined(__linux__)
 +/* Nothing needed, unistd.h is enough. */
 +#elif defined(__APPLE__)
 +#include <mach-o/dyld.h>
@@ -442,7 +442,7 @@
 +  if (system_result != NULL)
 +  {
 +#if defined(IMPLEMENT_SYS_GET_EXECUTABLE_PATH)
-+#if defined(__linux__) || defined(__CYGWIN__) || defined(__MSYS__)
++#if defined(__linux__)
 +    system_result_size = readlink("/proc/self/exe", system_result, max_size);
 +#elif defined(__APPLE__)
 +    uint32_t bufsize = (uint32_t)max_size;

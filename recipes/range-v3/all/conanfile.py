@@ -3,6 +3,7 @@ from conans import ConanFile, CMake, tools
 from conans.errors import ConanInvalidConfiguration
 from conans.tools import Version, check_min_cppstd
 
+
 class Rangev3Conan(ConanFile):
     name = "range-v3"
     license = "BSL-1.0"

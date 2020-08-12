@@ -2,3 +2,6 @@ sources:
   "20190722":
     url: "http://www.iausofa.org/2019_0722_C/sofa_c-20190722.tar.gz"
     sha256: "a7063a140fdc78909f4d5ddf6b30143f9f60bfed7d5141047072515f51fa8647"
+  "20200721":
+    url: "http://www.iausofa.org/2020_0721_C/sofa_c-20200721.tar.gz"
+    sha256: "b10453f20567341171a455e8e1c70a2a7d4a61864aebf19f6fc746734a22efae"

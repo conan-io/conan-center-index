@@ -11,7 +11,7 @@ class M4Conan(ConanFile):
     homepage = "https://www.gnu.org/software/m4/"
     license = "GPL-3.0-only"
     exports_sources = ["patches/*.patch"]
-    settings = "os", "arch", "compiler"
+    settings = "os", "arch", "compiler", "build_type"
 
     _autotools = None
     _source_subfolder = "source_subfolder"
@@ -27,7 +27,7 @@ class M4Conan(ConanFile):
 
     def build_requirements(self):
         if tools.os_info.is_windows and not tools.get_env("CONAN_BASH_PATH"):
-            self.build_requires("msys2/20190524")
+            self.build_requires("msys2/20200517")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
@@ -44,6 +44,15 @@ class M4Conan(ConanFile):
             # The somewhat older configure script of m4 does not understand the canonical names of Visual Studio
             build_canonical_name = False
             host_canonical_name = False
+            self._autotools.flags.append("-FS")
+            # Avoid a `Assertion Failed Dialog Box` during configure with build_type=Debug
+            # Visual Studio does not support the %n format flag:
+            # https://docs.microsoft.com/en-us/cpp/c-runtime-library/format-specification-syntax-printf-and-wprintf-functions
+            # Because the %n format is inherently insecure, it is disabled by default. If %n is encountered in a format string,
+            # the invalid parameter handler is invoked, as described in Parameter Validation. To enable %n support, see _set_printf_count_output.
+            conf_args.extend(["gl_cv_func_printf_directive_n=no", "gl_cv_func_snprintf_directive_n=no", "gl_cv_func_snprintf_directive_n=no"])
+            if self.settings.build_type in ("Debug", "RelWithDebInfo"):
+                self._autotools.link_flags.append("-PDB")
         self._autotools.configure(args=conf_args, configure_dir=self._source_subfolder, build=build_canonical_name, host=host_canonical_name)
         return self._autotools
 

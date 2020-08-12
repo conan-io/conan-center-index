@@ -39,7 +39,7 @@ class BisonConan(ConanFile):
                 tools.os_info.detect_windows_subsystem() != "msys2":
             self.build_requires("msys2/20190524")
         if self.settings.compiler == "Visual Studio":
-            self.build_requires("automake/1.16.1")
+            self.build_requires("automake/1.16.2")
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -77,11 +77,19 @@ class BisonConan(ConanFile):
             "--disable-nls",
             "--datarootdir={}".format(os.path.join(self.package_folder, "bin", "share").replace("\\", "/")),
         ]
+        host, build = None, None
         if self.settings.os == "Windows":
             self._autotools.defines.append("_WINDOWS")
         if self.settings.compiler == "Visual Studio":
+            # Avoid a `Assertion Failed Dialog Box` during configure with build_type=Debug
+            # Visual Studio does not support the %n format flag:
+            # https://docs.microsoft.com/en-us/cpp/c-runtime-library/format-specification-syntax-printf-and-wprintf-functions
+            # Because the %n format is inherently insecure, it is disabled by default. If %n is encountered in a format string,
+            # the invalid parameter handler is invoked, as described in Parameter Validation. To enable %n support, see _set_printf_count_output.
+            args.extend(["gl_cv_func_printf_directive_n=no", "gl_cv_func_snprintf_directive_n=no", "gl_cv_func_snprintf_directive_n=no"])
             self._autotools.flags.append("-FS")
-        self._autotools.configure(args=args, configure_dir=self._source_subfolder)
+            host, build = False, False
+        self._autotools.configure(args=args, configure_dir=self._source_subfolder, host=host, build=build)
         return self._autotools
 
     def _patch_sources(self):
@@ -133,7 +141,7 @@ class BisonConan(ConanFile):
         self.cpp_info.libs = ["y"]
 
         self.output.info('Setting BISON_ROOT environment variable: {}'.format(self.package_folder))
-        self.env_info.BISON_ROOT = self.package_folder
+        self.env_info.BISON_ROOT = self.package_folder.replace("\\", "/")
 
         bindir = os.path.join(self.package_folder, "bin")
         self.output.info('Appending PATH environment variable: {}'.format(bindir))
@@ -141,3 +149,7 @@ class BisonConan(ConanFile):
         pkgdir = os.path.join(bindir, 'share', 'bison')
         self.output.info('Setting the BISON_PKGDATADIR environment variable: {}'.format(pkgdir))
         self.env_info.BISON_PKGDATADIR = pkgdir
+
+        yacc_bin = os.path.join(self.package_folder, "bin", "yacc").replace("\\", "/")
+        self.output.info("Setting YACC environment variable: {}".format(yacc_bin))
+        self.env_info.YACC = yacc_bin
