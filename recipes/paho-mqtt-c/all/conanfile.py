@@ -54,6 +54,7 @@ class PahoMqttcConan(ConanFile):
         self._cmake = CMake(self)
         self._cmake.definitions["PAHO_ENABLE_TESTING"] = False
         self._cmake.definitions["PAHO_BUILD_DOCUMENTATION"] = False
+        self._cmake.definitions["PAHO_ENABLE_CPACK"] = False
         self._cmake.definitions["PAHO_BUILD_ASYNC"] = self.options.asynchronous
         self._cmake.definitions["PAHO_BUILD_STATIC"] = not self.options.shared
         self._cmake.definitions["PAHO_BUILD_SHARED"] = self.options.shared
