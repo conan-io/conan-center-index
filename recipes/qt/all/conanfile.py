@@ -180,15 +180,15 @@ class QtConan(ConanFile):
         if self.settings.compiler == "apple-clang":
             if tools.Version(self.settings.compiler.version) < "10.0":
                 raise ConanInvalidConfiguration("Old versions of apple sdk are not supported by Qt (QTBUG-76777)")
+        if self.settings.compiler == "gcc" and Version(self.settings.compiler.version) < "5.3":
+            del self.options.with_mysql
+        if self.settings.os == "Windows":
+            del self.options.with_mysql
 
     def configure(self):
         if self.settings.os != 'Linux':
             #     self.options.with_libiconv = False # QTBUG-84708
             self.options.with_fontconfig = False
-        if self.settings.compiler == "gcc" and Version(self.settings.compiler.version) < "5.3":
-            self.options.with_mysql = False
-        if self.settings.os == "Windows":
-            self.options.with_mysql = False
 
         if self.options.widgets and not self.options.GUI:
             raise ConanInvalidConfiguration("using option qt:widgets without option qt:GUI is not possible. "
@@ -279,7 +279,7 @@ class QtConan(ConanFile):
         if self.options.with_sqlite3 and not self.options.multiconfiguration:
             self.requires("sqlite3/3.32.2")
             self.options["sqlite3"].enable_column_metadata = True
-        if self.options.with_mysql:
+        if self.options.get_safe("with_mysql", False):
             self.requires("libmysqlclient/8.0.17")
         if self.options.with_pq:
             self.requires("libpq/12.2")
@@ -474,7 +474,7 @@ class QtConan(ConanFile):
         args.append("--pcre=" + ("system" if self.options.with_pcre2 else "qt"))
         args.append("--fontconfig=" + ("yes" if self.options.with_fontconfig else "no"))
         args.append("--icu=" + ("yes" if self.options.get_safe("with_icu", False) else "no"))
-        args.append("--sql-mysql=" + ("yes" if self.options.with_mysql else "no"))
+        args.append("--sql-mysql=" + ("yes" if self.options.get_safe("with_mysql", False) else "no"))
         args.append("--sql-psql=" + ("yes" if self.options.with_pq else "no"))
         args.append("--sql-odbc=" + ("yes" if self.options.with_odbc else "no"))
         args.append("--zstd=" + ("yes" if self.options.with_zstd else "no"))
