@@ -108,11 +108,13 @@
  	(*)	LIB_PREFIX='lib'
  		;;
  	esac
-@@ -5961,6 +5980,108 @@
+@@ -5961,6 +5980,110 @@
  
  		MK_SHARED_LIB='${CC} ${LDFLAGS} ${CFLAGS} -shared -Wl,-soname,'$cf_cv_shared_soname',-stats,-lc -o $@'
  		;;
 +	(mingw*msvc*)
++		LDFLAGS="$LDFLAGS user32.lib"
++		export LDFLAGS
 +		cf_cv_shlib_version=msvcdll
 +		cf_cv_shlib_version_infix=msvcdll
 +		shlibdir=$bindir
@@ -217,7 +219,7 @@
  	(mingw*)
  		cf_cv_shlib_version=mingw
  		cf_cv_shlib_version_infix=mingw
-@@ -7516,26 +7637,26 @@
+@@ -7516,26 +7639,26 @@
  
  	# either way, check for the library header files
  
@@ -249,27 +251,6 @@
    (exit $ac_status); } >/dev/null; then
    if test -s conftest.err; then
      ac_cpp_err=$ac_c_preproc_warn_flag
-@@ -9877,16 +9998,16 @@
- }
- _ACEOF
- rm -f conftest.$ac_objext
--if { (eval echo "$as_me:9880: \"$ac_compile\"") >&5
-+if { (eval echo "$as_me:10001: \"$ac_compile\"") >&5
-   (eval $ac_compile) 2>&5
-   ac_status=$?
--  echo "$as_me:9883: \$? = $ac_status" >&5
-+  echo "$as_me:10004: \$? = $ac_status" >&5
-   (exit $ac_status); } &&
-          { ac_try='test -s conftest.$ac_objext'
--  { (eval echo "$as_me:9886: \"$ac_try\"") >&5
-+  { (eval echo "$as_me:10007: \"$ac_try\"") >&5
-   (eval $ac_try) 2>&5
-   ac_status=$?
--  echo "$as_me:9889: \$? = $ac_status" >&5
-+  echo "$as_me:10010: \$? = $ac_status" >&5
-   (exit $ac_status); }; }; then
-   :
- else
 @@ -9897,7 +10018,7 @@
  rm -f conftest.$ac_objext conftest.$ac_ext
  	 fi
@@ -279,50 +260,7 @@
  
  	 CFLAGS="$cf_trim_CFLAGS"
  	 CPPFLAGS="$cf_trim_CPPFLAGS"
-@@ -9905,10 +10026,10 @@
- 	test -n "$CPPFLAGS" && CPPFLAGS="$CPPFLAGS "
- 	CPPFLAGS="${CPPFLAGS}$cf_cv_posix_c_source"
- 
--echo "${as_me:-configure}:9908: testing if the second compile does not leave our definition intact error ..." 1>&5
-+echo "${as_me:-configure}:10029: testing if the second compile does not leave our definition intact error ..." 1>&5
- 
- 	 cat >conftest.$ac_ext <<_ACEOF
--#line 9911 "configure"
-+#line 10032 "configure"
- #include "confdefs.h"
- #include <sys/types.h>
- int
-@@ -9923,16 +10044,16 @@
- }
- _ACEOF
- rm -f conftest.$ac_objext
--if { (eval echo "$as_me:9926: \"$ac_compile\"") >&5
-+if { (eval echo "$as_me:10047: \"$ac_compile\"") >&5
-   (eval $ac_compile) 2>&5
-   ac_status=$?
--  echo "$as_me:9929: \$? = $ac_status" >&5
-+  echo "$as_me:10050: \$? = $ac_status" >&5
-   (exit $ac_status); } &&
-          { ac_try='test -s conftest.$ac_objext'
--  { (eval echo "$as_me:9932: \"$ac_try\"") >&5
-+  { (eval echo "$as_me:10053: \"$ac_try\"") >&5
-   (eval $ac_try) 2>&5
-   ac_status=$?
--  echo "$as_me:9935: \$? = $ac_status" >&5
-+  echo "$as_me:10056: \$? = $ac_status" >&5
-   (exit $ac_status); }; }; then
-   :
- else
-@@ -9948,7 +10069,7 @@
- rm -f conftest.$ac_objext conftest.$ac_ext
- 
- fi
--echo "$as_me:9951: result: $cf_cv_posix_c_source" >&5
-+echo "$as_me:10072: result: $cf_cv_posix_c_source" >&5
- echo "${ECHO_T}$cf_cv_posix_c_source" >&6
- 
- if test "$cf_cv_posix_c_source" != no ; then
-@@ -25163,11 +25284,25 @@
+@@ -25163,11 +25286,25 @@
  		DFT_DEP_SUFFIX=$DFT_LIB_SUFFIX
  		;;
  	(Xdebug)
@@ -350,7 +288,7 @@
  		DFT_DEP_SUFFIX=$DFT_LIB_SUFFIX
  		;;
  	(Xshared)
-@@ -25176,6 +25311,10 @@
+@@ -25176,6 +25313,10 @@
  			DFT_LIB_SUFFIX='.so'
  			DFT_DEP_SUFFIX=$DFT_LIB_SUFFIX
  			;;
@@ -361,7 +299,7 @@
  		(cygwin*|msys*|mingw*)
  			DFT_LIB_SUFFIX='.dll'
  			DFT_DEP_SUFFIX='.dll.a'
-@@ -25203,7 +25342,14 @@
+@@ -25203,7 +25344,14 @@
  		esac
  		;;
  	(*)
@@ -377,7 +315,7 @@
  		DFT_DEP_SUFFIX=$DFT_LIB_SUFFIX
  		;;
  	esac
-@@ -25252,11 +25398,25 @@
+@@ -25252,11 +25400,25 @@
  		CXX_DEP_SUFFIX=$CXX_LIB_SUFFIX
  		;;
  	(Xdebug)
@@ -405,7 +343,7 @@
  		CXX_DEP_SUFFIX=$CXX_LIB_SUFFIX
  		;;
  	(Xshared)
-@@ -25265,6 +25425,10 @@
+@@ -25265,6 +25427,10 @@
  			CXX_LIB_SUFFIX='.so'
  			CXX_DEP_SUFFIX=$CXX_LIB_SUFFIX
  			;;
@@ -416,7 +354,7 @@
  		(cygwin*|msys*|mingw*)
  			CXX_LIB_SUFFIX='.dll'
  			CXX_DEP_SUFFIX='.dll.a'
-@@ -25292,7 +25456,14 @@
+@@ -25292,7 +25458,14 @@
  		esac
  		;;
  	(*)
@@ -432,7 +370,7 @@
  		CXX_DEP_SUFFIX=$CXX_LIB_SUFFIX
  		;;
  	esac
-@@ -25586,12 +25757,23 @@
+@@ -25586,12 +25759,23 @@
  if test "$with_overwrite" != no ; then
  if test "$NCURSES_LIBUTF8" = 1 ; then
  	NCURSES_LIBUTF8='defined(HAVE_LIBUTF8_H)'
@@ -457,7 +395,7 @@
  # used to separate tack out of the tree
  NCURSES_TREE=
  
-@@ -26124,7 +26306,7 @@
+@@ -26124,7 +26308,7 @@
  #define HAVE_CURSES_DATA_BOOLNAMES 1
  EOF
  
@@ -466,7 +404,7 @@
  ac_config_commands="$ac_config_commands default"
  cat >confcache <<\_ACEOF
  # This file is a shell script that caches the results of configure
-@@ -26513,13 +26695,14 @@
+@@ -26513,13 +26697,14 @@
    "include/MKterm.h.awk" ) CONFIG_FILES="$CONFIG_FILES include/MKterm.h.awk" ;;
    "include/curses.head" ) CONFIG_FILES="$CONFIG_FILES include/curses.head:include/curses.h.in" ;;
    "include/ncurses_dll.h" ) CONFIG_FILES="$CONFIG_FILES include/ncurses_dll.h" ;;
@@ -482,7 +420,7 @@
  echo "$as_me: error: invalid argument: $ac_config_target" >&2;}
     { (exit 1); exit 1; }; };;
    esac
-@@ -27317,7 +27500,7 @@
+@@ -27317,7 +27502,7 @@
  cf_prefix=$LIB_PREFIX
  
  case $cf_cv_shlib_version in
@@ -491,7 +429,7 @@
  	TINFO_NAME=$TINFO_ARG_SUFFIX
  	TINFO_SUFFIX=.dll
  	;;
-@@ -27390,11 +27573,25 @@
+@@ -27390,11 +27575,25 @@
  		cf_depsuf=$cf_suffix
  		;;
  	(Xdebug)
@@ -519,7 +457,7 @@
  		cf_depsuf=$cf_suffix
  		;;
  	(Xshared)
-@@ -27403,6 +27600,10 @@
+@@ -27403,6 +27602,10 @@
  			cf_suffix='.so'
  			cf_depsuf=$cf_suffix
  			;;
@@ -530,7 +468,7 @@
  		(cygwin*|msys*|mingw*)
  			cf_suffix='.dll'
  			cf_depsuf='.dll.a'
-@@ -27430,7 +27631,14 @@
+@@ -27430,7 +27633,14 @@
  		esac
  		;;
  	(*)
@@ -546,7 +484,7 @@
  		cf_depsuf=$cf_suffix
  		;;
  	esac
-@@ -27496,6 +27704,10 @@
+@@ -27496,6 +27706,10 @@
  					cf_cygsuf=`echo "$cf_suffix" | sed -e 's/\.dll/\${ABI_VERSION}.dll/'`
  					cf_add_lib="../lib/lib${cf_libname}${cf_cygsuf}"
  					;;
@@ -557,7 +495,7 @@
  				(*)
  					cf_add_lib=
  					;;
-@@ -27592,10 +27804,10 @@
+@@ -27592,10 +27806,10 @@
  			CXX_MODEL=$cf_ITEM
  			if test "$CXX_MODEL" = SHARED; then
  				case $cf_cv_shlib_version in
@@ -570,7 +508,7 @@
  
  					with_shared_cxx=yes
  					;;
-@@ -27611,11 +27823,25 @@
+@@ -27611,11 +27825,25 @@
  		cf_depsuf=$cf_suffix
  		;;
  	(Xdebug)
@@ -598,7 +536,7 @@
  		cf_depsuf=$cf_suffix
  		;;
  	(Xshared)
-@@ -27624,6 +27850,10 @@
+@@ -27624,6 +27852,10 @@
  			cf_suffix='.so'
  			cf_depsuf=$cf_suffix
  			;;
@@ -609,7 +547,7 @@
  		(cygwin*|msys*|mingw*)
  			cf_suffix='.dll'
  			cf_depsuf='.dll.a'
-@@ -27651,7 +27881,14 @@
+@@ -27651,7 +27883,14 @@
  		esac
  		;;
  	(*)

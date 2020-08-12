@@ -202,11 +202,13 @@ index 55c65d1a..3a44d63b 100644
  		$3=[$]$2
  		;;
  	esac
-@@ -6759,6 +6807,108 @@ CF_EOF
+@@ -6759,6 +6807,110 @@ CF_EOF
  		CF_SHARED_SONAME
  		MK_SHARED_LIB='${CC} ${LDFLAGS} ${CFLAGS} -shared -Wl,-soname,'$cf_cv_shared_soname',-stats,-lc -o $[@]'
  		;;
 +	(mingw*msvc*)
++		LDFLAGS="$LDFLAGS user32.lib"
++		export LDFLAGS
 +		cf_cv_shlib_version=msvcdll
 +		cf_cv_shlib_version_infix=msvcdll
 +		shlibdir=$bindir
