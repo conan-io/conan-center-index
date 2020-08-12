@@ -16,7 +16,7 @@
  find_package(OpenSSL)
  if(OPENSSL_FOUND)
 -    include_directories("${OPENSSL_INCLUDE_DIR}")
-+    include_directories("${OpenSSL_INCLUDE_DIR}")
++    #include_directories("${OPENSSL_INCLUDE_DIR}")
      if(EXISTS ${PROJECT_SOURCE_DIR}/NetSSL_OpenSSL AND ENABLE_NETSSL)
      add_subdirectory(NetSSL_OpenSSL)
      list(APPEND Poco_COMPONENTS "NetSSL_OpenSSL")
