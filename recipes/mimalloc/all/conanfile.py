@@ -64,8 +64,6 @@ class MimallocConan(ConanFile):
         if self._cmake:
             return self._cmake
         self._cmake = CMake(self)
-        if self.settings.compiler == "Visual Studio":
-            self._cmake.generator = "NMake Makefiles"
         self._cmake.definitions["MI_BUILD_TESTS"] = False
         self._cmake.definitions["MI_BUILD_SHARED"] = self.options.shared
         self._cmake.definitions["MI_BUILD_STATIC"] = not self.options.shared and not self.options.get_safe("single_object", False)
