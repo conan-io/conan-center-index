@@ -1,6 +1,7 @@
 from conans import ConanFile, CMake, tools
 import os
 
+required_conan_version = ">=1.28.0"
 
 class LibeventConan(ConanFile):
     name = "libevent"
@@ -23,8 +24,14 @@ class LibeventConan(ConanFile):
     short_paths = True
 
     _cmake = None
-    _source_subfolder = "source_subfolder"
-    _build_subfolder = "build_subfolder"
+
+    @property
+    def _source_subfolder(self):
+        return "source_subfolder"
+
+    @property
+    def _build_subfolder(self):
+        return "build_subfolder"
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -92,14 +99,30 @@ class LibeventConan(ConanFile):
         tools.rmdir(os.path.join(self.package_folder, "cmake"))
 
     def package_info(self):
-        self.cpp_info.libs = tools.collect_libs(self)
-        self.cpp_info.names["cmake_find_package"] = "Libevent"
-        self.cpp_info.names["cmake_find_package_multi"] = "Libevent"
-
-        if self.settings.os == "Linux":
-            self.cpp_info.system_libs.extend(["rt"])
-
+        self.cpp_info.filenames["cmake_find_package"] = "Libevent"
+        self.cpp_info.filenames["cmake_find_package_multi"] = "Libevent"
+        self.cpp_info.names["cmake_find_package"] = "libevent"
+        self.cpp_info.names["cmake_find_package_multi"] = "libevent"
+        # core
+        self.cpp_info.components["core"].names["pkg_config"] = "libevent_core"
+        self.cpp_info.components["core"].libs = ["event_core"]
+        if self.settings.os == "Linux" and not self.options.disable_threads:
+            self.cpp_info.components["core"].system_libs = ["pthread"]
         if self.settings.os == "Windows":
-            self.cpp_info.system_libs.extend(["ws2_32", "Iphlpapi"])
-            if self.options.with_openssl:
-                self.cpp_info.defines.append("EVENT__HAVE_OPENSSL=1")
+            self.cpp_info.components["core"].system_libs = ["ws2_32", "advapi32", "iphlpapi"]
+        # extra
+        self.cpp_info.components["extra"].names["pkg_config"] = "libevent_extra"
+        self.cpp_info.components["extra"].libs = ["event_extra"]
+        if self.settings.os == "Windows":
+            self.cpp_info.components["extra"].system_libs = ["shell32"]
+        self.cpp_info.components["extra"].requires = ["core"]
+        # openssl
+        if self.options.with_openssl:
+            self.cpp_info.components["openssl"].names["pkg_config"] = "libevent_openssl"
+            self.cpp_info.components["openssl"].libs = ["event_openssl"]
+            self.cpp_info.components["openssl"].requires = ["core", "openssl::openssl"]
+        # pthreads
+        if self.settings.os != "Windows" and not self.options.disable_threads:
+            self.cpp_info.components["pthreads"].names["pkg_config"] = "libevent_pthreads"
+            self.cpp_info.components["pthreads"].libs = ["event_pthreads"]
+            self.cpp_info.components["pthreads"].requires = ["core"]
