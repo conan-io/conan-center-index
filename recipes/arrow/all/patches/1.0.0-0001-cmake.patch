@@ -126,3 +126,14 @@
  endif()
  
  macro(build_utf8proc)
+--- cpp/cmake_modules/SetupCxxFlags.cmake
++++ cpp/cmake_modules/SetupCxxFlags.cmake
+@@ -188,7 +188,7 @@
+ message(STATUS "Arrow build warning level: ${BUILD_WARNING_LEVEL}")
+ 
+ macro(arrow_add_werror_if_debug)
+-  if("${CMAKE_BUILD_TYPE}" STREQUAL "DEBUG")
++  if(0)
+     # Treat all compiler warnings as errors
+     if(MSVC)
+       set(CXX_COMMON_FLAGS "${CXX_COMMON_FLAGS} /WX")
