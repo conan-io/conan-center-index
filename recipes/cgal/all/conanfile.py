@@ -10,16 +10,10 @@ class CgalConan(ConanFile):
     homepage = "https://github.com/CGAL/cgal"
     description = "C++ library that aims to provide easy access to efficient and reliable algorithms"\
                   "in computational geometry."
-    topics = ("geometry", "algorithms")
+    topics = ("conan", "cgal", "geometry", "algorithms")
     settings = "os", "compiler", "build_type", "arch"
-    requires = "mpfr/4.0.2", "boost/1.72.0", "eigen/3.3.7"
     generators = "cmake"
     exports_sources = "CMakeLists.txt"
-
-    _source_subfolder = "source_subfolder"
-    _build_subfolder = "build_subfolder"
-    _cmake = None
-
     options = {
         "with_cgal_core": [True, False],
         "with_cgal_qt5": [True, False],
@@ -27,7 +21,6 @@ class CgalConan(ConanFile):
         "shared": [True, False],
         "header_only": [True, False]
     }
-
     default_options = {
         "with_cgal_core": True,
         "with_cgal_qt5": False,
@@ -35,6 +28,16 @@ class CgalConan(ConanFile):
         "shared": False,
         "header_only": True
     }
+
+    _cmake = None
+
+    @property
+    def _source_subfolder(self):
+        return "source_subfolder"
+
+    @property
+    def _build_subfolder(self):
+        return "build_subfolder"
 
     def _configure_cmake(self):
         if not self._cmake:
@@ -55,6 +58,15 @@ class CgalConan(ConanFile):
             raise ConanInvalidConfiguration("Qt Conan package is not available yet.")
         if self.options.header_only:
             del self.options.shared
+
+    def requirements(self):
+        self.requires("boost/1.73.0")
+        self.requires("eigen/3.3.7")
+        self.requires("mpfr/4.0.2")
+
+    def package_id(self):
+        if self.options.header_only:
+            self.info.header_only()
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
@@ -81,11 +93,11 @@ class CgalConan(ConanFile):
             tools.rmdir(os.path.join(self.package_folder, "bin"))
 
     def package_info(self):
-        if not self.options.header_only:
-            self.cpp_info.libs = tools.collect_libs(self)
+        # TODO: add components
         self.cpp_info.names["cmake_find_package"] = "CGAL"
         self.cpp_info.names["cmake_find_package_multi"] = "CGAL"
-
-    def package_id(self):
-        if self.options.header_only:
-            self.info.header_only()
+        self.cpp_info.libs = tools.collect_libs(self)
+        if self.settings.os == "Linux" and (self.options.with_cgal_core or self.options.with_cgal_imageio):
+            self.cpp_info.system_libs.append("m")
+        if not self.options.header_only:
+            self.cpp_info.defines.append("CGAL_NOT_HEADER_ONLY=1")

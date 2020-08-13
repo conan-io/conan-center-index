@@ -9,8 +9,8 @@ sources:
     sha256: 1ae9b657b693254ed0710350df3dcf5232d1f479409a52861b5e5bb5cc3da046
     url: https://github.com/eclipse/paho.mqtt.c/archive/v1.3.4.tar.gz
   "1.3.5":
-    sha256: be62d69ce51ac166543447da474c6a9cfd8ad9f896e2052b9e99fa1fae255189
-    url: https://github.com/eclipse/paho.mqtt.c/files/5029476/paho.mqtt.c-1.3.5.zip
+    sha256: 996eef9e498519da79108f58a887a34abc50cd76770b19b0300b27783706c71f
+    url: https://github.com/eclipse/paho.mqtt.c/archive/v1.3.5.tar.gz
 patches:
   "1.3.0":
     - patch_file: "patches/0001-fix-MinGW-and-OSX-builds-for-1-3-0.patch"

@@ -1,8 +1,8 @@
+#include <stdio.h>
+
 #include <assimp/cimport.h>
 #include <assimp/scene.h>
 #include <assimp/postprocess.h>
-
-#include <stdio.h>
 
 int main(int argc, char **argv) {
   if (argc < 2) {

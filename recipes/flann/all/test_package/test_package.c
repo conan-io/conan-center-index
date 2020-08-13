@@ -1,8 +1,10 @@
-#include <iostream>
 #include <flann/flann.h>
+
+#include <stdio.h>
 
 int main()
 {
     // Simply make sure that it builds an runs
-    std::cout << flann_get_distance_type() << '\n';
+    printf("%i\n", flann_get_distance_type());
+    return 0;
 }

@@ -1,4 +1,5 @@
-## Errors from the conan-center hook (KB-Hxxx)
+# Errors from the conan-center hook (KB-Hxxx)
+
 
 #### **<a name="KB-H001">#KB-H001</a>: "DEPRECATED GLOBAL CPPSTD"**
 
@@ -155,7 +156,7 @@ class SomeRecipe(ConanFile):
     exports = "LICENSE.md" # not allowed
 ```
 
-There is a complete explanation in the [FAQ](https://github.com/conan-io/conan-center-index/wiki/FAQ#should-recipes-export-a-recipes-license).
+There is a complete explanation in the [FAQ](faqs.md#should-recipes-export-a-recipes-license).
 
 #### **<a name="KB-H024">#KB-H024</a>: "TEST PACKAGE FOLDER"**
 
@@ -294,3 +295,7 @@ The CMake definition CMAKE_VERBOSE_MAKEFILE helps for debugging when developing,
 #### **<a name="KB-H047">#KB-H047</a>: "NO ASCII CHARACTERS"**
 
 According to PEP [263](https://www.python.org/dev/peps/pep-0263/), Unicode literals should only appear in Python code if the encoding is declared on one of the first two lines of the source file. Without such a declaration, any Unicode literal will cause a syntax error for Python 2 interpreters.
+
+#### **<a name="KB-H048">#KB-H048</a>: "CMAKE VERSION REQUIRED"**
+
+The file test_package/CMakeLists.txt should require CMake 3.1 by default: `cmake_minimum_required(VERSION 3.1)`. The CMake wrapper file can require CMake 2.8, because Conan recipe and the test package are totally separated. However, if `CMAKE_CXX_STANDARD` or `CXX_STANDARD` is explicit, CMake 3.1 is mandatory.
