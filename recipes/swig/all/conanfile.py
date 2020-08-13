@@ -42,9 +42,9 @@ class SwigConan(ConanFile):
 
     @contextmanager
     def _build_context(self):
-        env = {
-            "YACC": self.deps_user_info["bison"].YACC,
-        }
+        env = {}
+        if self.settings.compiler != "Visual Studio":
+            env["YACC"] = self.deps_user_info["bison"].YACC
         if self.settings.compiler == "Visual Studio":
             with tools.vcvars(self.settings):
                 env.update({
