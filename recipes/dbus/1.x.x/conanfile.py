@@ -27,7 +27,7 @@ class DbusConan(ConanFile):
         "enable_checks": True,
         "install_system_libs": False}
 
-    generators = "cmake"
+    generators = "cmake", "cmake_find_package", "cmake_paths"
 
     _source_subfolder = "source_subfolder"
     _build_subfolder = "build_subfolder"
