@@ -20,6 +20,9 @@ class eigenConan(ConanFile):
         tools.get(**self.conan_data["sources"][self.version])
         os.rename("hana-" + self.version, self._source_subfolder)
 
+    def configure(self):
+        tools.check_min_cppstd(self, "14")
+
     def package(self):
         cmake = CMake(self)
         cmake.configure(source_folder=self._source_subfolder)
