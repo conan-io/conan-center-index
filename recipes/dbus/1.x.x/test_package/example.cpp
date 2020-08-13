@@ -13,12 +13,12 @@ int main() {
 
 	if (dbus_error_is_set(&err)) 
 	{ 
-		fprintf(stderr, "Connection Error (%s)\n", err.message); 
+                std::cout << "Connection Error:\n" << err.message << std::endl;
 		dbus_error_free(&err); 
 		exit(EXIT_FAILURE);
 	}
 
-	if (nullptr == conn) exit(EXIT_FAILURE);
+	if (conn == nullptr) exit(EXIT_FAILURE);
 
 	std::cout << "D-Bus is should work!\n";
 }
