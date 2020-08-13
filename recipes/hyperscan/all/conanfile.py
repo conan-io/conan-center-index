@@ -13,6 +13,8 @@ class HyperscanConan(ConanFile):
     exports_sources = ["CMakeLists.txt"]
     generators = "cmake"
 
+    _cmake = None
+
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
@@ -56,15 +58,17 @@ class HyperscanConan(ConanFile):
             self.required("pcre/8.41")
 
     def _configure_cmake(self):
-        cmake = CMake(self);
-        cmake.definitions["OPTIMISE"] = self.options.optimise
-        cmake.definitions["DEBUG_OUTPUT"] = self.options.debug_output
-        cmake.definitions["BUILD_AVX512"] = self.options.build_avx512
-        cmake.definitions["FAT_RUNTIME"] = self.options.fat_runtime
-        cmake.definitions["BUILD_CHIMERA"] = self.options.build_chimera
-        cmake.definitions["DUMP_SUPPORT"] = self.options.dump_support
-        cmake.configure(source_folder=self._source_subfolder, build_folder=self._build_subfolder)
-        return cmake
+        if self._cmake:
+            return self._cmake
+        self._cmake = CMake(self);
+        self._cmake.definitions["OPTIMISE"] = self.options.optimise
+        self._cmake.definitions["DEBUG_OUTPUT"] = self.options.debug_output
+        self._cmake.definitions["BUILD_AVX512"] = self.options.build_avx512
+        self._cmake.definitions["FAT_RUNTIME"] = self.options.fat_runtime
+        self._cmake.definitions["BUILD_CHIMERA"] = self.options.build_chimera
+        self._cmake.definitions["DUMP_SUPPORT"] = self.options.dump_support
+        self._cmake.configure(source_folder=self._source_subfolder, build_folder=self._build_subfolder)
+        return self._cmake
 
     def configure(self):
         if self.settings.compiler.cppstd:
