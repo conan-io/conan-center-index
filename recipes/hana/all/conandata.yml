@@ -1,10 +1,28 @@
 sources:
-  "49e6694945d9a3bddb315f40922dd92e215b4043":
-    url: "https://github.com/boostorg/hana/archive/49e6694945d9a3bddb315f40922dd92e215b4043.tar.gz"
-    sha256: "0405773aa550a470a474242431bd026e96e88b9429270fbda6c057bb0caaff03"
+  "boost-1.70.0":
+    url: "https://github.com/boostorg/hana/archive/boost-1.70.0.tar.gz"
+    sha256: "c418d9a9f9e64d35500f6dc0fe4a5edc9d436f7f9f21f933c5da679beb0edb74"
+  "boost-1.70.0.beta1":
+    url: "https://github.com/boostorg/hana/archive/boost-1.70.0.beta1.tar.gz"
+    sha256: "ab9f1ab075c3953339768a4bb991347b02e3c42310b7582e28a10b29163b5395"
+  "boost-1.71.0":
+    url: "https://github.com/boostorg/hana/archive/boost-1.71.0.tar.gz"
+    sha256: "f9649d2475cc748fb268cf98f6d0ea1822db40bb496cb9653075a37099840fc4"
+  "boost-1.71.0.beta1":
+    url: "https://github.com/boostorg/hana/archive/boost-1.71.0.beta1.tar.gz"
+    sha256: "b50bb47be75106c19b509cb83fa514ce37e42cadbd48a716da4598003d94054b"
+  "boost-1.72.0":
+    url: "https://github.com/boostorg/hana/archive/boost-1.72.0.tar.gz"
+    sha256: "a25655c23cb4571400d52cce4fe7a00b4e184f093cea4b0ec28f94ab88081c0b"
+  "boost-1.72.0.beta1":
+    url: "https://github.com/boostorg/hana/archive/boost-1.72.0.beta1.tar.gz"
+    sha256: "5f9bd7378b4ffbf65084bdf188a1e9c7da3c6f3be09fddafcc9f47215a99745d"
   "boost-1.73.0":
     url: "https://github.com/boostorg/hana/archive/boost-1.73.0.tar.gz"
     sha256: "760bd700a8fddd7ed3eefeb4d11e1afc239cfc2043ff26ef46225aabe801521f"
-  "1.6.0":
-    url: "https://github.com/boostorg/hana/archive/v1.6.0.tar.gz"
-    sha256: "4238f1a132c783b0013f2f6757370ff0ac2b28fc0c8b862de9d5fb296de5b1cb"
+  "boost-1.73.0.beta1":
+    url: "https://github.com/boostorg/hana/archive/boost-1.73.0.beta1.tar.gz"
+    sha256: "c043e51870e04fa7160dba3aa0c5f5fea984aad6fb14e8935e3d547aa629ced0"
+  "boost-1.74.0.beta1":
+    url: "https://github.com/boostorg/hana/archive/boost-1.74.0.beta1.tar.gz"
+    sha256: "1a63389fc1af5da657c0922db540b39466d5ec1531911b40477254532222e247"
