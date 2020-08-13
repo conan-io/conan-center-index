@@ -5,3 +5,6 @@ sources:
   "boost-1.73.0":
     url: "https://github.com/boostorg/hana/archive/boost-1.73.0.tar.gz"
     sha256: "760bd700a8fddd7ed3eefeb4d11e1afc239cfc2043ff26ef46225aabe801521f"
+  "1.6.0":
+    url: "https://github.com/boostorg/hana/archive/v1.6.0.tar.gz"
+    sha256: "4238f1a132c783b0013f2f6757370ff0ac2b28fc0c8b862de9d5fb296de5b1cb"
