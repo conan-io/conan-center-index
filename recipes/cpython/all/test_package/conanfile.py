@@ -36,6 +36,7 @@ class TestPackageConan(ConanFile):
     def _py_version(self):
         return self.deps_cpp_info["cpython"].version
 
+    @property
     def _pymalloc(self):
         return "pymalloc" in self.options["cpython"] and self.options["cpython"].pymalloc
 
