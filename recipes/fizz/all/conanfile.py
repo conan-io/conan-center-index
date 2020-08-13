@@ -50,10 +50,10 @@ class FizzConan(ConanFile):
         self.requires("gflags/2.2.2")
         self.requires("libiberty/9.1.0")
         self.requires("lz4/1.9.2")
-        self.requires("lzma/9.20")
+        self.requires("lzma_sdk/9.20")
         self.requires("snappy/1.1.7")
         # zlib1g
-        # jemalloc
+        self.requires("jemalloc/5.2.1")
         self.requires("openssl/1.1.1g")
         self.requires("libsodium/1.0.18")
 
