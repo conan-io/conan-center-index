@@ -66,6 +66,10 @@ class HyperscanConan(ConanFile):
         cmake.configure(source_folder=self._source_subfolder, build_folder=self._build_subfolder)
         return cmake
 
+    def configure(self):
+        if self.settings.compiler.cppstd:
+            tools.check_min_cppstd(self, "11")
+
     def build(self):
         cmake = self._configure_cmake()
         cmake.build()
