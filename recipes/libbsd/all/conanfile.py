@@ -21,8 +21,12 @@ class LibBsdConan(ConanFile):
         "shared": False,
         "fPIC": True,
     }
+    exports_sources = "patches/**"
 
     _autotools = None
+
+    def build_requirements(self):
+        self.build_requires("libtool/2.4.6")
 
     @property
     def _source_subfolder(self):
@@ -33,8 +37,8 @@ class LibBsdConan(ConanFile):
             del self.options.fPIC
         del self.settings.compiler.libcxx
         del self.settings.compiler.cppstd
-        if self.settings.os != "Linux":
-            raise ConanInvalidConfiguration("libbsd is only available for GNU operating systems (e.g. Linux)")
+        if not tools.is_apple_os(self.settings.os) and self.settings.os != "Linux":
+            raise ConanInvalidConfiguration("libbsd is only available for GNU-like operating systems (e.g. Linux)")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
@@ -54,6 +58,10 @@ class LibBsdConan(ConanFile):
         return self._autotools
 
     def build(self):
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            tools.patch(**patch)
+        with tools.chdir(self._source_subfolder):
+            self.run("autoreconf -fiv")
         autotools = self._configure_autotools()
         autotools.make()
 
