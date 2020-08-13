@@ -10,9 +10,8 @@ class HyperscanConan(ConanFile):
     description = "High-performance regular expression matching library"
     topics = ("regex", "regular expressions")
     settings = "os", "compiler", "build_type", "arch"
+    exports_sources = ["CMakeLists.txt"]
     generators = "cmake"
-
-    _source_subfolder = "source_subfolder"
 
     options = {
         "shared": [True, False],
@@ -36,6 +35,14 @@ class HyperscanConan(ConanFile):
         "dump_support": False
     }
 
+    @property
+    def _source_subfolder(self):
+        return "source_subfolder"
+
+    @property
+    def _build_subfolder(self):
+        return "build_subfolder"
+
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
         os.rename("hyperscan-{0}".format(self.version), self._source_subfolder)
@@ -56,7 +63,7 @@ class HyperscanConan(ConanFile):
         cmake.definitions["FAT_RUNTIME"] = self.options.fat_runtime
         cmake.definitions["BUILD_CHIMERA"] = self.options.build_chimera
         cmake.definitions["DUMP_SUPPORT"] = self.options.dump_support
-        cmake.configure(source_folder=self._source_subfolder)
+        cmake.configure(source_folder=self._source_subfolder, build_folder=self._build_subfolder)
         return cmake
 
     def build(self):
@@ -71,5 +78,5 @@ class HyperscanConan(ConanFile):
         tools.rmdir(os.path.join(self.package_folder, "share"))
 
     def package_info(self):
-        self.cpp_info.names["cmake_find_package"] = "hyperscan"
+        self.cpp_info.names["pkg_config"] = "libhs"
         self.cpp_info.libs = tools.collect_libs(self)
