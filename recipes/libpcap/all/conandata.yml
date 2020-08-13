@@ -1,0 +1,4 @@
+sources:
+  "1.9.1":
+    sha256: 8ac670de8dd6eff39441580c67f0520f326773422bbf89fdffcd269bd0cfddde
+    url: https://github.com/the-tcpdump-group/libpcap/archive/libpcap-1.9.1.tar.gz
