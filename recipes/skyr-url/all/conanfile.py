@@ -2,6 +2,7 @@ from conans import ConanFile, tools, CMake
 from conans.errors import ConanInvalidConfiguration
 import os
 
+required_conan_version = ">=1.28.0"
 
 class SkyrUrlConan(ConanFile):
     name = "skyr-url"
