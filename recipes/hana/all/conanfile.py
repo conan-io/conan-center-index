@@ -16,7 +16,7 @@ class HanaConan(ConanFile):
 
     _compiler_cpp14_support = {
         "gcc": "5",
-        "Visual Studio": "14",
+        "Visual Studio": "15",
         "clang": "3.4",
         "apple-clang": "3.4",
     }
