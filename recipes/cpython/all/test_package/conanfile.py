@@ -38,7 +38,7 @@ class TestPackageConan(ConanFile):
 
     @property
     def _pymalloc(self):
-        return "pymalloc" in self.options["cpython"] and self.options["cpython"].pymalloc
+        return bool("pymalloc" in self.options["cpython"] and self.options["cpython"].pymalloc)
 
     @property
     def _cmake_abi(self):
