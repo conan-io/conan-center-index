@@ -26,6 +26,7 @@ class eigenConan(ConanFile):
         cmake.install()
 
         self.copy("LICENSE.md", dst="licenses", src=self._source_subfolder)
+        tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
 
     def package_id(self):
         self.info.header_only()
