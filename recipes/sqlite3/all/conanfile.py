@@ -17,6 +17,7 @@ class ConanSqlite3(ConanFile):
                "fPIC": [True, False],
                "threadsafe": [0, 1, 2],
                "enable_column_metadata": [True, False],
+               "enable_dbstat_vtab": [True, False],
                "enable_explain_comments": [True, False],
                "enable_fts3": [True, False],
                "enable_fts3_parenthesis": [True, False],
@@ -24,17 +25,21 @@ class ConanSqlite3(ConanFile):
                "enable_fts5": [True, False],
                "enable_json1": [True, False],
                "enable_soundex": [True, False],
+               "enable_preupdate_hook": [True, False],
                "enable_rtree": [True, False],
                "use_alloca": [True, False],
                "omit_load_extension": [True, False],
                "enable_unlock_notify": [True, False],
+               "enable_default_secure_delete": [True, False],
                "disable_gethostuuid": [True, False],
+               "max_blob_size": "ANY",
                "build_executable": [True, False],
                }
     default_options = {"shared": False,
                        "fPIC": True,
                        "threadsafe": 1,
                        "enable_column_metadata": True,
+                       "enable_dbstat_vtab": False,
                        "enable_explain_comments": False,
                        "enable_fts3": False,
                        "enable_fts3_parenthesis": False,
@@ -42,11 +47,14 @@ class ConanSqlite3(ConanFile):
                        "enable_fts5": False,
                        "enable_json1": False,
                        "enable_soundex": False,
+                       "enable_preupdate_hook": False,
                        "enable_rtree": True,
                        "use_alloca": False,
                        "omit_load_extension": False,
                        "enable_unlock_notify": True,
+                       "enable_default_secure_delete": False,
                        "disable_gethostuuid": False,
+                       "max_blob_size": 1000000000,
                        "build_executable": True,
                        }
 
@@ -80,17 +88,20 @@ class ConanSqlite3(ConanFile):
         self._cmake.definitions["SQLITE3_BUILD_EXECUTABLE"] = self.options.build_executable
         self._cmake.definitions["THREADSAFE"] = self.options.threadsafe
         self._cmake.definitions["ENABLE_COLUMN_METADATA"] = self.options.enable_column_metadata
+        self._cmake.definitions["ENABLE_DBSTAT_VTAB"] = self.options.enable_dbstat_vtab
         self._cmake.definitions["ENABLE_EXPLAIN_COMMENTS"] = self.options.enable_explain_comments
         self._cmake.definitions["ENABLE_FTS3"] = self.options.enable_fts3
         self._cmake.definitions["ENABLE_FTS3_PARENTHESIS"] = self.options.enable_fts3_parenthesis
         self._cmake.definitions["ENABLE_FTS4"] = self.options.enable_fts4
         self._cmake.definitions["ENABLE_FTS5"] = self.options.enable_fts5
         self._cmake.definitions["ENABLE_JSON1"] = self.options.enable_json1
+        self._cmake.definitions["ENABLE_PREUPDATE_HOOK"] = self.options.enable_preupdate_hook
         self._cmake.definitions["ENABLE_SOUNDEX"] = self.options.enable_soundex
         self._cmake.definitions["ENABLE_RTREE"] = self.options.enable_rtree
+        self._cmake.definitions["ENABLE_UNLOCK_NOTIFY"] = self.options.enable_unlock_notify
+        self._cmake.definitions["ENABLE_DEFAULT_SECURE_DELETE"] = self.options.enable_default_secure_delete
         self._cmake.definitions["USE_ALLOCA"] = self.options.use_alloca
         self._cmake.definitions["OMIT_LOAD_EXTENSION"] = self.options.omit_load_extension
-        self._cmake.definitions["SQLITE_ENABLE_UNLOCK_NOTIFY"] = self.options.enable_unlock_notify
         self._cmake.definitions["HAVE_FDATASYNC"] = True
         self._cmake.definitions["HAVE_GMTIME_R"] = True
         self._cmake.definitions["HAVE_LOCALTIME_R"] = self.settings.os != "Windows"
@@ -98,6 +109,7 @@ class ConanSqlite3(ConanFile):
         self._cmake.definitions["HAVE_STRERROR_R"] = True
         self._cmake.definitions["HAVE_USLEEP"] = True
         self._cmake.definitions["DISABLE_GETHOSTUUID"] = self.options.disable_gethostuuid
+        self._cmake.definitions["MAX_BLOB_SIZE"] = self.options.max_blob_size
         self._cmake.configure()
         return self._cmake
 
