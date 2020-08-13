@@ -18,7 +18,7 @@ int main() {
 		exit(EXIT_FAILURE);
 	}
 
-	if (conn == nullptr) exit(EXIT_FAILURE);
+	if (conn == NULL) exit(EXIT_FAILURE);
 
 	std::cout << "D-Bus is should work!\n";
 }
