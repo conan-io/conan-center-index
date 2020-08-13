@@ -85,6 +85,22 @@ if(DISABLE_GETHOSTUUID)
 endif()
 target_compile_definitions(${PROJECT_NAME}  PRIVATE SQLITE_THREADSAFE=${THREADSAFE})
 
+if(THREADSAFE)
+    find_package(Threads REQUIRED)
+    target_link_libraries(${PROJECT_NAME}  PRIVATE Threads::Threads)
+endif()
+
+if(NOT OMIT_LOAD_EXTENSION)
+    target_link_libraries(${PROJECT_NAME}  PRIVATE ${CMAKE_DL_LIBS})
+endif()
+
+if(ENABLE_FTS5)
+    find_library(MATH_LIBRARY m)
+    if(MATH_LIBRARY)
+        target_link_libraries(${PROJECT_NAME}  PRIVATE ${MATH_LIBRARY})
+    endif()
+endif()
+
 install(TARGETS ${PROJECT_NAME}
         RUNTIME DESTINATION bin
         LIBRARY DESTINATION lib
@@ -94,9 +110,8 @@ install(DIRECTORY source_subfolder/ DESTINATION include
         FILES_MATCHING PATTERN "*.h")
 
 if(SQLITE3_BUILD_EXECUTABLE)
-    add_executable(sqlite3-bin source_subfolder/shell.c source_subfolder/sqlite3.c)
-    target_compile_definitions(sqlite3-bin PRIVATE "SQLITE_THREADSAFE=0")
-    target_link_libraries(sqlite3-bin PRIVATE ${CMAKE_DL_LIBS})
+    add_executable(sqlite3-bin source_subfolder/shell.c)
+    target_link_libraries(sqlite3-bin PRIVATE ${PROJECT_NAME})
     set_target_properties(sqlite3-bin PROPERTIES OUTPUT_NAME "sqlite3")
     install(TARGETS sqlite3-bin RUNTIME DESTINATION bin)
 endif()
