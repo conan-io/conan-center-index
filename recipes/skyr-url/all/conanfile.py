@@ -14,7 +14,7 @@ class SkyrUrlConan(ConanFile):
     options = {"shared": [True, False], "fPIC": [True, False], "with_json": [True, False]}
     default_options = {'shared': False, 'fPIC': True, 'with_json': True}
     exports_sources = "CMakeLists.txt"
-    generators = "cmake_find_package_multi"
+    generators = "cmake", "cmake_find_package_multi"
     _cmake = None
 
     @property
@@ -33,7 +33,7 @@ class SkyrUrlConan(ConanFile):
     def _minimum_compilers_version(self):
         # https://github.com/cpp-netlib/url#requirements
         return {
-            "Visual Studio": "15",
+            "Visual Studio": "16",
             "gcc": "7",
             "clang": "5",
             "apple-clang": "10",
@@ -58,9 +58,9 @@ class SkyrUrlConan(ConanFile):
 
     def requirements(self):
         self.requires("tl-expected/1.0.0")
-        self.requires("range-v3/0.10.0")
+        self.requires("range-v3/0.11.0")
         if self.options.with_json:
-            self.requires("nlohmann_json/3.8.0")
+            self.requires("nlohmann_json/3.9.0")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
@@ -85,8 +85,18 @@ class SkyrUrlConan(ConanFile):
         cmake.build()
 
     def package(self):
+        self.copy("LICENSE_1_0.txt", src=self._source_subfolder, dst="licenses")
         cmake = self._configure_cmake()
         cmake.install()
+        tools.rmdir(os.path.join(self.package_folder, "share"))
 
-    def package_id(self):
-        pass
+    def package_info(self):
+        self.cpp_info.filenames["cmake_find_package"] = "skyr-url"
+        self.cpp_info.filenames["cmake_find_package_multi"] = "skyr-url"
+        self.cpp_info.names["cmake_find_package"] = "skyr"
+        self.cpp_info.names["cmake_find_package_multi"] = "skyr"
+        self.cpp_info.components["url"].name = "skyr-url"
+        self.cpp_info.components["url"].libs = self.collect_libs()
+        self.cpp_info.components["url"].requires = ["tl-expected::tl-expected", "range-v3::range-v3" ]
+        if self.options.with_json:
+            self.cpp_info.components["url"].requires.append("nlohmann_json::nlohmann_json")

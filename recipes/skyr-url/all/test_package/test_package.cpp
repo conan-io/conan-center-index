@@ -7,7 +7,9 @@
 #include <skyr/url.hpp>
 
 int main(int argc, char *argv[]) {
-  auto url = skyr::url("http://example.org/\xf0\x9f\x92\xa9");
+  using namespace skyr::literals;
+
+  auto url = "http://sub.example:8090/paths/to/a/file"_url;
   std::cout << url << std::endl;
   std::cout << url.pathname() << std::endl;
 }
