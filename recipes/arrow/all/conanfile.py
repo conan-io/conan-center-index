@@ -101,6 +101,9 @@ class ArrowConan(ConanFile):
             del self.options.fPIC
 
     def configure(self):
+        if self.settings.compiler == "clang" and self.settings.compiler.version <= tools.Version("3.9"):
+            raise ConanInvalidConfiguration("This recipe does not support this compiler version")
+
         if self.options.shared:
             del self.options.fPIC
         if self.options.compute == False and not self._compute(True):
