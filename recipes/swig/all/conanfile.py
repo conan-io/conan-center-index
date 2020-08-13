@@ -30,7 +30,7 @@ class SwigConan(ConanFile):
         if self.settings.compiler == "Visual Studio":
             self.build_requires("winflexbison/2.5.22")
         else:
-            self.build_requires("bison/3.5.3")
+            self.build_requires("bison/3.7.1")
         self.build_requires("automake/1.16.2")
 
     def requirements(self):
@@ -42,18 +42,22 @@ class SwigConan(ConanFile):
 
     @contextmanager
     def _build_context(self):
+        env = {
+            "YACC": self.deps_user_info["bison"].YACC,
+        }
         if self.settings.compiler == "Visual Studio":
             with tools.vcvars(self.settings):
-                env = {
+                env.update({
                     "CC": "{} cl -nologo".format(tools.unix_path(self.deps_user_info["automake"].compile)),
                     "CXX": "{} cl -nologo".format(tools.unix_path(self.deps_user_info["automake"].compile)),
                     "AR": "{} link".format(self.deps_user_info["automake"].ar_lib),
                     "LD": "link",
-                }
+                })
                 with tools.environment_append(env):
                     yield
         else:
-            yield
+            with tools.environment_append(env):
+                yield
 
     def _configure_autotools(self):
         if self._autotools:
