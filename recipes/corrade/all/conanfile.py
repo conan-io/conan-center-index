@@ -64,7 +64,6 @@ class CorradeConan(ConanFile):
                 value_str = "{}".format(value)
                 var_value = "ON" if value_str == 'True' else "OFF" if value_str == 'False' else value_str 
                 self._cmake.definitions[var_name] = var_value
-                print("{0}={1}".format(var_name, var_value))
 
             for option, value in self.options.items():
                 add_cmake_option(option, value)
