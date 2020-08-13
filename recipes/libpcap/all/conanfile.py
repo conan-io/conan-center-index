@@ -5,7 +5,6 @@ import os
 
 class LibPcapConan(ConanFile):
     name = "libpcap"
-    version = "1.9.1"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/the-tcpdump-group/libpcap"
     description = "libpcap is an API for capturing network traffic"
@@ -43,10 +42,8 @@ class LibPcapConan(ConanFile):
 
     def build_requirements(self):
         if self.settings.os == "Linux":
-            if not tools.which("bison"):
-                self.build_requires("bison/3.7.1")
-            if not tools.which("flex"):
-                self.build_requires("flex/2.6.4")
+            self.build_requires("bison/3.7.1")
+            self.build_requires("flex/2.6.4")
 
     def system_requirements(self):
         if self.settings.os == "Linux":
