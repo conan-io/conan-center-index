@@ -199,10 +199,10 @@ class ArrowConan(ConanFile):
     def build_requirements(self):
         if self._with_grpc():
             raise ConanInvalidConfiguration("CCI has no grpc recipe (yet)")
-        if self._with_thrift():
-            raise ConanInvalidConfiguration("CCI has no thrift recipe (yet)")
 
     def requirements(self):
+        if self._with_thrift():
+            self.requires("thrift/0.13.0")
         if self.options.with_backtrace:
             raise ConanInvalidConfiguration("CCI has no backtrace recipe (yet)")
         if self._with_protobuf():
@@ -445,6 +445,8 @@ class ArrowConan(ConanFile):
             self.cpp_info.components["libarrow"].requires.append("uff8proc::uff8proc")
         if self._with_llvm():
             self.cpp_info.components["libarrow"].requires.append("llvm::llvm")
+        if self._with_thrift():
+            self.cpp_info.components["libarrow"].requires.append("thrift::thrift")
 
         if self.options.with_backtrace:
             self.cpp_info.components["libarrow"].requires.append("backtrace::backtrace")
