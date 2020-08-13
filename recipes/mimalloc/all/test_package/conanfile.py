@@ -1,5 +1,4 @@
 from conans import ConanFile, CMake, tools
-from conans.model.options import PackageOptions
 import os
 
 
@@ -10,15 +9,17 @@ class MimallocTestConan(ConanFile):
     _build_basic = False
     _build_redefine_malloc = False
 
-    def configure(self):
-        options = PackageOptions(self.options["mimalloc"])
-        if options.get_safe("redefine_malloc"):
+    def build(self):
+        single_object = "single_object" in self.options["mimalloc"] and \
+                        self.options["mimalloc"].single_object
+        if not single_object and \
+                not self.options["mimalloc"].shared and \
+                self.options["mimalloc"].override:
             self._test_file = "test_redefine_malloc"
             self._build_redefine_malloc = True
         else:
             self._build_basic = True
 
-    def build(self):
         cmake = CMake(self)
         cmake.definitions["BUILD_BASIC"] = self._build_basic
         cmake.definitions["BUILD_REDEFINE_MALLOC"] = self._build_redefine_malloc
