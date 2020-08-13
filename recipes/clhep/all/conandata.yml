@@ -8,3 +8,5 @@ patches:
       base_path: "source_subfolder"
     - patch_file: "patches/mingw-support.patch"
       base_path: "source_subfolder"
+    - patch_file: "patches/msvc-2015-no-SFINAE.patch"
+      base_path: "source_subfolder"
