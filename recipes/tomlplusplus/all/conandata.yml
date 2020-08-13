@@ -11,3 +11,6 @@ sources:
   "2.0.0":
     sha256: 01cf0f659bd70493dbe51c161feb598ffed68d67bcc7f2984aec4b544c368f91
     url: https://github.com/marzer/tomlplusplus/archive/v2.0.0.tar.gz
+  "2.1.0":
+    sha256: c741c95ddc01ee7993c1a426db5cb4d2e35e16f3f240012efdebfdf55712ba38
+    url: https://github.com/marzer/tomlplusplus/archive/v2.1.0.tar.gz

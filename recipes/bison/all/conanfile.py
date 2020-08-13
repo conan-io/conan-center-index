@@ -150,6 +150,5 @@ class BisonConan(ConanFile):
         self.output.info('Setting the BISON_PKGDATADIR environment variable: {}'.format(pkgdir))
         self.env_info.BISON_PKGDATADIR = pkgdir
 
-        yacc_bin = os.path.join(self.package_folder, "bin", "yacc").replace("\\", "/")
-        self.output.info("Setting YACC environment variable: {}".format(yacc_bin))
-        self.env_info.YACC = yacc_bin
+        # yacc is a shell script, so requires a shell (such as bash)
+        self.user_info.YACC = os.path.join(self.package_folder, "bin", "yacc").replace("\\", "/")

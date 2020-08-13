@@ -1,6 +1,7 @@
 import os
 from conans import ConanFile, CMake, tools
 
+required_conan_version = ">=1.28.0"
 
 class ConanSqlite3(ConanFile):
     name = "sqlite3"
@@ -60,6 +61,8 @@ class ConanSqlite3(ConanFile):
             del self.options.fPIC
 
     def configure(self):
+        if self.options.shared:
+            del self.options.fPIC
         del self.settings.compiler.libcxx
         del self.settings.compiler.cppstd
 
@@ -110,16 +113,20 @@ class ConanSqlite3(ConanFile):
         cmake.install()
 
     def package_info(self):
-        self.cpp_info.libs = tools.collect_libs(self)
+        self.cpp_info.filenames["cmake_find_package"] = "SQLite3"
+        self.cpp_info.filenames["cmake_find_package_multi"] = "SQLite3"
+        self.cpp_info.names["cmake_find_package"] = "SQLite"
+        self.cpp_info.names["cmake_find_package_multi"] = "SQLite"
+        self.cpp_info.components["sqlite"].names["cmake_find_package"] = "SQLite3"
+        self.cpp_info.components["sqlite"].names["cmake_find_package_multi"] = "SQLite3"
+        self.cpp_info.components["sqlite"].libs = tools.collect_libs(self)
         if self.settings.os == "Linux":
             if self.options.threadsafe:
-                self.cpp_info.system_libs.append("pthread")
+                self.cpp_info.components["sqlite"].system_libs.append("pthread")
             if not self.options.omit_load_extension:
-                self.cpp_info.system_libs.append("dl")
+                self.cpp_info.components["sqlite"].system_libs.append("dl")
+
         if self.options.build_executable:
             bin_path = os.path.join(self.package_folder, "bin")
             self.output.info("Appending PATH env var with : {}".format(bin_path))
             self.env_info.PATH.append(bin_path)
-
-        self.cpp_info.names["cmake_find_package"] = "SQLite3"
-        self.cpp_info.names["cmake_find_package_multi"] = "SQLite3"
