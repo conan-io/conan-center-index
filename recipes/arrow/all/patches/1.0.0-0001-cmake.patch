@@ -88,6 +88,18 @@
    include_directories(SYSTEM ${GLOG_INCLUDE_DIR})
  endif()
  
+@@ -1139,8 +1139,8 @@
+     build_gflags()
+   elseif(gflags_SOURCE STREQUAL "SYSTEM")
+-    # gflagsConfig.cmake is not installed on Ubuntu/Debian
+-    # TODO: Make a bug report upstream
+-    find_package(gflags ${ARROW_GFLAGS_REQUIRED_VERSION})
++    find_package(gflags REQUIRED)
++    add_library(gflags-shared INTERFACE)
++    target_link_libraries(gflags-shared INTERFACE gflags::gflags)
+     if(NOT gflags_FOUND)
+       find_package(gflagsAlt ${ARROW_GFLAGS_REQUIRED_VERSION} REQUIRED)
+     endif()
 @@ -1329,6 +1329,6 @@ macro(build_protobuf)
  endmacro()
 -
