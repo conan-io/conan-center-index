@@ -43,7 +43,7 @@ class FizzConan(ConanFile):
             del self.options.fPIC
 
     def requirements(self):
-        self.requires("folly/2019.10.21.00")
+        self.requires("folly/2019.10.21.00") # This version is too old for what I am trying to add
         self.requires("boost/1.73.0")
         self.requires("libevent/2.1.12")
         self.requires("double-conversion/3.1.5")
@@ -57,7 +57,7 @@ class FizzConan(ConanFile):
         self.requires("jemalloc/5.2.1")
         self.requires("openssl/1.1.1g")
         self.requires("libsodium/1.0.18")
-        self.requires("fmt/7.0.3") # TBA
+        self.requires("fmt/7.0.3")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
