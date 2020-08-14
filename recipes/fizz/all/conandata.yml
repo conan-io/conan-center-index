@@ -5,4 +5,6 @@ sources:
 patches:
   "2020.08.10.00":
     - base_path: "source_subfolder"
+      patch_file: "patches/0002-cmake-fix-include-dir.patch"
+    - base_path: "source_subfolder"
       patch_file: "patches/0001-cmake-find-gflags.patch"

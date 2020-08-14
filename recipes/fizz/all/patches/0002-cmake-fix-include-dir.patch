@@ -1,0 +1,13 @@
+diff --git a/fizz/CMakeLists.txt b/fizz/CMakeLists.txt
+index cfb81ff5..d26fa2f0 100644
+--- a/fizz/CMakeLists.txt
++++ b/fizz/CMakeLists.txt
+@@ -195,7 +195,7 @@ if (BUILD_SHARED_LIBS)
+     PROPERTIES VERSION ${PROJECT_VERSION} SOVERSION 1)
+ endif()
+ 
+-get_filename_component(FIZZ_BASE_DIR ${CMAKE_SOURCE_DIR}/.. ABSOLUTE)
++get_filename_component(FIZZ_BASE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/.. ABSOLUTE)
+ 
+ target_include_directories(
+   fizz
