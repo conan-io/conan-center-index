@@ -23,7 +23,7 @@ class DocoptCppConan(ConanFile):
 
     def requirements(self):
         if self.options.boost_regex:
-            self.requires("boost/1.71.0")
+            self.requires("boost/1.73.0")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
