@@ -55,6 +55,8 @@ class DlibConan(ConanFile):
             del self.options.with_avx
 
     def configure(self):
+        if self.options.shared:
+            del self.options.fPIC
         if self.settings.compiler == "Visual Studio" and self.options.shared:
             raise ConanInvalidConfiguration("dlib can not be built as a shared library with Visual Studio")
 
