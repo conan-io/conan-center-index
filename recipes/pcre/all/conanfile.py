@@ -69,7 +69,6 @@ class PCREConan(ConanFile):
         tools.get(**self.conan_data["sources"][self.version])
         extracted_dir = self.name + "-" + self.version
         os.rename(extracted_dir, self._source_subfolder)
-        self.patch_cmake()
 
     def requirements(self):
         if self.options.with_bzip2:
@@ -95,6 +94,7 @@ class PCREConan(ConanFile):
         return cmake
 
     def build(self):
+        self.patch_cmake()
         cmake = self._configure_cmake()
         cmake.build()
 
