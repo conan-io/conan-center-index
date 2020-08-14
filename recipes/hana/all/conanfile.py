@@ -10,7 +10,7 @@ class HanaConan(ConanFile):
     description = "Hana is a header-only library for C++ metaprogramming suited for computations on both types and values."
     license = "BSL-1.0"
     topics = ("hana", "metaprogramming", "boost")
-    settings = "os", "compiler"
+    settings = "compiler"
     no_copy_source = True
     exports_sources = "CMakeLists.txt"
 
