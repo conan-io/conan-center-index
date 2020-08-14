@@ -63,8 +63,15 @@ class DocoptCppConan(ConanFile):
         tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
 
     def package_info(self):
-        self.cpp_info.libs = ["docopt"]
+        # TODO: imported CMake target shouldn't be namespaced
+        self.cpp_info.names["cmake_find_package"] = "docopt"
+        self.cpp_info.names["cmake_find_package_multi"] = "docopt"
+        self.cpp_info.names["pkg_config"] = "docopt"
+        cmake_target = "docopt" if self.options.shared else "docopt_s"
+        self.cpp_info.components["docopt"].names["cmake_find_package"] = cmake_target
+        self.cpp_info.components["docopt"].names["cmake_find_package_multi"] = cmake_target
+        self.cpp_info.components["docopt"].libs = ["docopt"]
         if self.settings.os == "Linux":
-            self.cpp_info.system_libs = ["m"]
+            self.cpp_info.components["docopt"].system_libs = ["m"]
         if self.settings.compiler == "Visual Studio" and self.options.shared:
-            self.cpp_info.defines = ["DOCOPT_DLL"]
+            self.cpp_info.components["docopt"].defines = ["DOCOPT_DLL"]
