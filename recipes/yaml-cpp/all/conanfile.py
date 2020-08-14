@@ -32,7 +32,9 @@ class YamlCppConan(ConanFile):
             del self.options.fPIC
 
     def configure(self):
-        if self.settings.compiler.cppstd:
+        if self.settings.compiler == "Visual Studio" and self.settings.compiler.version == "12":
+            raise Exception("Visual Studio 12 not supported: Library needs C++11 standard")
+        elif self.settings.compiler.cppstd:
             tools.check_min_cppstd(self, "11")
 
     def _configure_cmake(self):
