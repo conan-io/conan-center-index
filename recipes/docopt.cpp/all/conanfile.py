@@ -15,7 +15,16 @@ class DocoptCppConan(ConanFile):
     topics = ("CLI", "getopt", "options", "argparser")
     generators = "cmake"
     exports_sources = ["patches/**", "CMakeLists.txt"]
-    _source_subfolder = "source_subfolder"
+
+    _cmake = None
+
+    @property
+    def _source_subfolder(self):
+        return "source_subfolder"
+
+    @property
+    def _build_subfolder(self):
+        return "build_subfolder"
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -35,10 +44,12 @@ class DocoptCppConan(ConanFile):
         os.rename(extracted_dir, self._source_subfolder)
 
     def _configure_cmake(self):
-        cmake = CMake(self)
-        cmake.definitions["USE_BOOST_REGEX"] = self.options.boost_regex
-        cmake.configure()
-        return cmake
+        if self._cmake:
+            return self._cmake
+        self._cmake = CMake(self)
+        self._cmake.definitions["USE_BOOST_REGEX"] = self.options.boost_regex
+        self._cmake.configure(build_folder=self._build_subfolder)
+        return self._cmake
 
     def build(self):
         for patch in self.conan_data["patches"][self.version]:
