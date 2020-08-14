@@ -77,15 +77,21 @@ class SwigConan(ConanFile):
             "--host={}".format(self.settings.arch),
             "--with-swiglibdir={}".format(self._swiglibdir),
         ]
+
+        host, build = None, None
+
         if self.settings.compiler == "Visual Studio":
             self.output.warn("Visual Studio compiler cannot create ccache-swig. Disabling ccache-swig.")
             args.append("--disable-ccache")
             self._autotools.flags.append("-FS")
+            # MSVC canonical names aren't understood
+            host, build = False, False
 
         self._autotools.libs = []
         self._autotools.library_paths = []
 
-        self._autotools.configure(args=args, configure_dir=self._source_subfolder)
+        self._autotools.configure(args=args, configure_dir=self._source_subfolder,
+                                  host=host, build=build)
         return self._autotools
 
     def _patch_sources(self):
