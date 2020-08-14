@@ -23,11 +23,11 @@ class MinizipConan(ConanFile):
         "with_zstd": [True, False],
         "with_openssl": [True, False],
         "with_lzma": [True, False],
+        "with_libbsd": [True, False],
         "compat": [True, False],
         "pkcrypt": [True, False],
         "wzaes": [True, False],
         "libcomp": [True, False],
-        "libbsd": [True, False],
         "brg": [True, False],
         "signing": [True, False],
         "compress": [True, False],
@@ -41,11 +41,11 @@ class MinizipConan(ConanFile):
         "with_zstd": True,        
         "with_openssl": False,
         "with_lzma": True,
+        "with_libbsd": True,
         "compat": True,
         "pkcrypt": True,
         "wzaes": True,
         "libcomp": False,
-        "libbsd": True,
         "brg": False,
         "signing": True,
         "compress": True,
@@ -89,6 +89,8 @@ class MinizipConan(ConanFile):
         #    self.requires("xz_utils/5.2.4")
         if self.options.with_openssl:
             self.requires("openssl/1.1.1g")
+        if self.options.with_libbsd:
+            self.requires("libbsd/0.10.0")
         if self._is_unix_like():
             self.requires("libiconv/1.16")
 
@@ -105,6 +107,8 @@ class MinizipConan(ConanFile):
         if self.options.signing and self.options.brg:
             raise ConanInvalidConfiguration(
                 "Library can not support signing with brg")
+        if not self._is_unix_like():
+            self.options.with_libbsd = False
 
     def config_options(self):
         if self.settings.os == 'Windows':
@@ -127,7 +131,7 @@ class MinizipConan(ConanFile):
             self._cmake.definitions["MZ_WZAES"] = self.options.wzaes
             self._cmake.definitions["MZ_LIBCOMP"] = self.options.libcomp
             self._cmake.definitions["MZ_OPENSSL"] = self.options.with_openssl
-            self._cmake.definitions["MZ_LIBBSD"] = self.options.libbsd
+            self._cmake.definitions["MZ_LIBBSD"] = self.options.with_libbsd
             self._cmake.definitions["MZ_BRG"] = self.options.brg
             self._cmake.definitions["MZ_SIGNING"] = self.options.signing
             self._cmake.definitions["MZ_COMPRESS"] = self.options.compress
