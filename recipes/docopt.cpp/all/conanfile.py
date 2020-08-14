@@ -13,8 +13,8 @@ class DocoptCppConan(ConanFile):
     options = {"shared": [True, False], "fPIC": [True, False], "boost_regex": [True, False]}
     default_options = {"shared": False, "fPIC": True, "boost_regex": False}
     topics = ("CLI", "getopt", "options", "argparser")
-    generators = 'cmake'
-    exports_sources = ['patches/**', 'CMakeLists.txt']
+    generators = "cmake"
+    exports_sources = ["patches/**", "CMakeLists.txt"]
     _source_subfolder = "source_subfolder"
 
     def config_options(self):

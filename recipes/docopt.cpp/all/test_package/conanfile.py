@@ -22,5 +22,5 @@ class DoctestTestConan(ConanFile):
 
             assert(os.path.exists(os.path.join("bin", exe_name)))
         else:
-            exec_path = os.path.join('bin', 'example')
+            exec_path = os.path.join("bin", "example")
             self.run("{} --help".format(exec_path), run_environment=True)
