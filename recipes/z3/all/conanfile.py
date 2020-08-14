@@ -86,6 +86,6 @@ class Z3Conan(ConanFile):
         self.cpp_info.components["libz3"].names["cmake_find_package_multi"] = "libz3"
         if not self.options.shared:
             if self.settings.os  =="Linux":
-                self.cpp_info.components.system_libs.append("pthread")
+                self.cpp_info.components["libz3"].system_libs.append("pthread")
         # FIXME: this generates a Z3::libz3 target instead of z3::libz3.
 
