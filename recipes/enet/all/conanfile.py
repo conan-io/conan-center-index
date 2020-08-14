@@ -41,5 +41,5 @@ class EnetConan(ConanFile):
     def package_info(self):
         self.cpp_info.names["pkg_config"] = "libenet"
         self.cpp_info.libs = tools.collect_libs(self)
-        if self.settings.compiler == "Visual Studio":
+        if self.settings.os == "Windows":
             self.cpp_info.system_libs.extend(["ws2_32", "winmm"])
