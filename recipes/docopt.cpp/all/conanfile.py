@@ -32,6 +32,8 @@ class DocoptCppConan(ConanFile):
     def configure(self):
         if self.options.shared:
             del self.options.fPIC
+        if self.settings.compiler.cppstd:
+            tools.check_min_cppstd(self, "11")
 
     def requirements(self):
         if self.options.boost_regex:
@@ -51,7 +53,7 @@ class DocoptCppConan(ConanFile):
         return self._cmake
 
     def build(self):
-        for patch in self.conan_data["patches"][self.version]:
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
             tools.patch(**patch)
         cmake = self._configure_cmake()
         cmake.build()
@@ -61,6 +63,7 @@ class DocoptCppConan(ConanFile):
         cmake = self._configure_cmake()
         cmake.install()
         tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
+        tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
 
     def package_info(self):
         # TODO: imported CMake target shouldn't be namespaced
