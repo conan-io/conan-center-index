@@ -1,14 +1,8 @@
-/**
- * \file
- * \brief List network card and collect information
- *
- * Copyright 2017 Bincrafters <bincrafters@gmail.com>
- */
-#include <cstdlib>
+#include <stdlib.h>
 
 #include "pcap.h"
 
-int main(int argc, char **argv)
+int main(void)
 {
     char errbuf[PCAP_ERRBUF_SIZE] = {0};
     bpf_u_int32 netp = 0;
