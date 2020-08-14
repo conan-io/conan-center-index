@@ -63,6 +63,10 @@ class FFTWConan(ConanFile):
         tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
 
     def package_info(self):
-        self.cpp_info.libs = tools.collect_libs(self)
+        self.cpp_info.names["cmake_find_package"] = "FFTW3"
+        self.cpp_info.names["cmake_find_package_multi"] = "FFTW3"
+        self.cpp_info.components["fftwlib"].names["cmake_find_package"] = "fftw3"
+        self.cpp_info.components["fftwlib"].names["cmake_find_package_multi"] = "fftw3"
+        self.cpp_info.components["fftwlib"].libs = tools.collect_libs(self)
         if self.settings.os == "Linux":
-            self.cpp_info.system_libs = ["m"]
+            self.cpp_info.components["fftwlib"].system_libs = ["m"]
