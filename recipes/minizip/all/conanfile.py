@@ -23,7 +23,7 @@ class MinizipConan(ConanFile):
         "with_zstd": [True, False],
         "with_openssl": [True, False],
         "with_lzma": [True, False],
-        "with_libbsd": [True, False],
+        "with_libbsd": [True, False, "auto"],
         "compat": [True, False],
         "pkcrypt": [True, False],
         "wzaes": [True, False],
@@ -41,7 +41,7 @@ class MinizipConan(ConanFile):
         "with_zstd": True,        
         "with_openssl": False,
         "with_lzma": True,
-        "with_libbsd": True,
+        "with_libbsd": "auto",
         "compat": True,
         "pkcrypt": True,
         "wzaes": True,
@@ -64,17 +64,13 @@ class MinizipConan(ConanFile):
     @property
     def _build_subfolder(self):
         return "build_subfolder"
-
-    def _is_unix_like(self):
-        return (self.settings.os == "AIX" or
-                self.settings.os == "Android" or
-                self.settings.os == "FreeBSD" or
-                self.settings.os == "Linux" or
-                self.settings.os == "Macos" or
-                self.settings.os == "SunOS" or
-                self.settings.os == "iOS" or
-                self.settings.os == "tvOS" or
-                self.settings.os == "watchOS")
+        
+    @property
+    def _with_libbsd(self):
+        if self.options.with_libbsd == "auto":
+            return self.settings.os != "Windows"
+        else:
+            return bool(self.options.with_libbsd)
 
     def requirements(self):
         if self.options.with_zlib:
@@ -89,9 +85,9 @@ class MinizipConan(ConanFile):
         #    self.requires("xz_utils/5.2.4")
         if self.options.with_openssl:
             self.requires("openssl/1.1.1g")
-        if self.options.with_libbsd:
+        if self._with_libbsd:
             self.requires("libbsd/0.10.0")
-        if self._is_unix_like():
+        if self.settings.os != "Windows":
             self.requires("libiconv/1.16")
 
     def configure(self):
@@ -107,8 +103,6 @@ class MinizipConan(ConanFile):
         if self.options.signing and self.options.brg:
             raise ConanInvalidConfiguration(
                 "Library can not support signing with brg")
-        if not self._is_unix_like():
-            self.options.with_libbsd = False
 
     def config_options(self):
         if self.settings.os == 'Windows':
@@ -131,7 +125,7 @@ class MinizipConan(ConanFile):
             self._cmake.definitions["MZ_WZAES"] = self.options.wzaes
             self._cmake.definitions["MZ_LIBCOMP"] = self.options.libcomp
             self._cmake.definitions["MZ_OPENSSL"] = self.options.with_openssl
-            self._cmake.definitions["MZ_LIBBSD"] = self.options.with_libbsd
+            self._cmake.definitions["MZ_LIBBSD"] = self.options._with_libbsd
             self._cmake.definitions["MZ_BRG"] = self.options.brg
             self._cmake.definitions["MZ_SIGNING"] = self.options.signing
             self._cmake.definitions["MZ_COMPRESS"] = self.options.compress
@@ -152,5 +146,8 @@ class MinizipConan(ConanFile):
         cmake = self._configure_cmake()
         cmake.install()
 
+    def package_id(self):
+        self.info.with_libbsd = self._with_libbsd
+    
     def package_info(self):
         self.cpp_info.libs = ["minizip"]
