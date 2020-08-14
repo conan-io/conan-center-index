@@ -1,0 +1,86 @@
+From 87b28e1d50fc01caaec5c392b5bd3241456058e4 Mon Sep 17 00:00:00 2001
+From: ItsBasi <5033630+ItsBasi@users.noreply.github.com>
+Date: Fri, 14 Aug 2020 23:40:40 +0200
+Subject: [PATCH] FInd openssl and link to it
+
+---
+ CMakeLists.txt | 28 +++++++---------------------
+ 1 file changed, 7 insertions(+), 21 deletions(-)
+
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 99fe78a..2613258 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -84,21 +84,7 @@ endif()
+ 
+ # Check to see if openssl installation is present
+ if(MZ_OPENSSL)
+-    find_package(PkgConfig)
+-    if(PKGCONFIG_FOUND)
+-        pkg_check_modules(OPENSSL openssl)
+-    endif()
+-    if(NOT OPENSSL_FOUND)
+-        find_package(OpenSSL)
+-    endif()
+-    if(OPENSSL_FOUND)
+-        message(STATUS "Using OpenSSL ${OPENSSL_VERSION}")
+-
+-        list(APPEND MINIZIP_INC ${OPENSSL_INCLUDE_DIR})
+-        if(OPENSSL_INCLUDE_DIRS)
+-            list(APPEND MINIZIP_INC ${OPENSSL_INCLUDE_DIRS})
+-        endif()
+-    endif()
++    find_package(OpenSSL REQUIRED)
+ endif()
+ 
+ # Check for system includes
+@@ -203,7 +189,7 @@ if(WIN32)
+ 
+     list(APPEND MINIZIP_SRC "mz_os_win32.c" "mz_strm_os_win32.c")
+     if(MZ_PKCRYPT OR MZ_WZAES)
+-        if(NOT MZ_OPENSSL AND NOT OPENSSL_FOUND AND NOT MZ_BRG)
++        if(NOT MZ_OPENSSL AND NOT OpenSSL_FOUND AND NOT MZ_BRG)
+             list(APPEND MINIZIP_SRC "mz_crypt_win32.c")
+         endif()
+     endif()
+@@ -217,7 +203,7 @@ if(UNIX)
+     list(APPEND STDLIB_DEF -D_POSIX_C_SOURCE=200112L)
+     list(APPEND MINIZIP_SRC "mz_os_posix.c" "mz_strm_os_posix.c")
+ 
+-    if((MZ_PKCRYPT OR MZ_WZAES) AND NOT (MZ_OPENSSL AND OPENSSL_FOUND))
++    if((MZ_PKCRYPT OR MZ_WZAES) AND NOT (MZ_OPENSSL AND OpenSSL_FOUND))
+ 
+         if(APPLE AND NOT MZ_BRG)
+             check_include_file(CommonCrypto/CommonCrypto.h COMMONCRYPTO_FOUND)
+@@ -323,7 +309,7 @@ if(NOT MZ_PKCRYPT AND NOT MZ_WZAES)
+     message(STATUS "Signing not supported when encryption is disabled")
+     set(MZ_SIGNING OFF)
+ endif()
+-if(MZ_BRG OR (MZ_OPENSSL AND NOT OPENSSL_FOUND))
++if(MZ_BRG OR (MZ_OPENSSL AND NOT OpenSSL_FOUND))
+     message(STATUS "Signing not supported with current configuration")
+     set(MZ_SIGNING OFF)
+ endif()
+@@ -378,7 +364,7 @@ if(MZ_BRG)
+ endif()
+ 
+ # Include OpenSSL
+-if(MZ_OPENSSL AND OPENSSL_FOUND)
++if(MZ_OPENSSL AND OpenSSL_FOUND)
+     list(APPEND MINIZIP_SRC "mz_crypt_openssl.c")
+ endif()
+ 
+@@ -622,8 +608,8 @@ endif()
+ if(Iconv_FOUND AND NOT Iconv_IS_BUILT_IN)
+     target_link_libraries(${PROJECT_NAME} ${Iconv_LIBRARIES})
+ endif()
+-if(MZ_OPENSSL AND OPENSSL_FOUND)
+-    target_link_libraries(${PROJECT_NAME} ${OPENSSL_LIBRARIES})
++if(TARGET OpenSSL::OpenSSL)
++    target_link_libraries(${PROJECT_NAME} OpenSSL::OpenSSL)
+ elseif(UNIX)
+     if(APPLE AND (MZ_PKCRYPT OR MZ_WZAES) AND NOT MZ_BRG)
+         message(STATUS "Using CoreFoundation Framework")
+-- 
+2.28.0.windows.1
+

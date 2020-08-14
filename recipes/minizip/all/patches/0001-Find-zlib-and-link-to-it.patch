@@ -1,0 +1,95 @@
+From 015bed3d90751a473bed69d035d631b1722b6ad5 Mon Sep 17 00:00:00 2001
+From: ItsBasi <5033630+ItsBasi@users.noreply.github.com>
+Date: Fri, 14 Aug 2020 23:37:01 +0200
+Subject: [PATCH] Find zlib and link to it
+
+---
+ CMakeLists.txt | 65 ++++----------------------------------------------
+ 1 file changed, 4 insertions(+), 61 deletions(-)
+
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index a6deb4c..6d0bba5 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -68,48 +68,8 @@ set(MINIZIP_INC)
+ set(PC_PRIVATE_LIBS)
+ 
+ # Check if zlib installation is present
+-if(MZ_ZLIB AND NOT MZ_LIBCOMP)
+-    if(NOT ZLIB_FORCE_FETCH)
+-        find_package(ZLIB QUIET)
+-    endif()
+-    if(ZLIB_FOUND AND NOT ZLIB_FORCE_FETCH)
+-        message(STATUS "Using ZLIB ${ZLIB_VERSION_STRING}")
+-        list(APPEND MINIZIP_INC ${ZLIB_INCLUDE_DIRS})
+-        set(PC_PRIVATE_LIBS " -lz")
+-    else()
+-        if(NOT ZLIB_TAG)
+-            set(ZLIB_TAG master)
+-        endif()
+-        if(NOT ZLIB_REPOSITORY)
+-            set(ZLIB_REPOSITORY https://github.com/madler/zlib)
+-        endif()
+-
+-        message(STATUS "Fetching ZLIB ${ZLIB_REPOSITORY} ${ZLIB_TAG}")
+-
+-        if(${CMAKE_VERSION} VERSION_LESS "3.11")
+-            message(FATAL_ERROR "CMake 3.11 required to fetch zlib")
+-        else()
+-            include(FetchContent)
+-
+-            set(ZLIB_SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/lib/zlib)
+-
+-            FetchContent_Declare(zlib
+-                GIT_REPOSITORY ${ZLIB_REPOSITORY}
+-                GIT_TAG ${ZLIB_TAG}
+-                GIT_SHALLOW TRUE
+-                SOURCE_DIR ${ZLIB_SOURCE_DIR}
+-                BINARY_DIR ${ZLIB_SOURCE_DIR})
+-
+-            FetchContent_GetProperties(zlib
+-                POPULATED ZLIB_POPULATED)
+-            if(NOT ZLIB_POPULATED)
+-                FetchContent_Populate(zlib)
+-                add_subdirectory(${ZLIB_SOURCE_DIR} ${ZLIB_BINARY_DIR} EXCLUDE_FROM_ALL)
+-            endif()
+-
+-            list(APPEND MINIZIP_INC ${ZLIB_SOURCE_DIR})
+-        endif()
+-    endif()
++if(MZ_ZLIB)
++    find_package(ZLIB REQUIRED)
+ endif()
+ 
+ # Check if zstd installation is present
+@@ -710,25 +670,8 @@ target_include_directories(${PROJECT_NAME} PRIVATE ${MINIZIP_INC})
+ target_compile_definitions(${PROJECT_NAME} PRIVATE ${MINIZIP_DEF})
+ 
+ # Link with external libraries
+-if(MZ_ZLIB AND NOT MZ_LIBCOMP)
+-    if(ZLIB_FOUND)
+-        target_link_libraries(${PROJECT_NAME} ${ZLIB_LIBRARIES})
+-    else()
+-        # Have to add zlib to install targets
+-        if(NOT DEFINED BUILD_SHARED_LIBS OR NOT ${BUILD_SHARED_LIBS})
+-            set(ZLIB_TARGET zlibstatic)
+-        else()
+-            set(ZLIB_TARGET zlib)
+-        endif()
+-        target_link_libraries(${PROJECT_NAME} ${ZLIB_TARGET})
+-        if(MZ_BUILD_UNIT_TEST)
+-            # Can't disable zlib testing so ctest tries to run zlib example app
+-            add_dependencies(${PROJECT_NAME} example)
+-            if(HAVE_OFF64_T)
+-                add_dependencies(${PROJECT_NAME} example64)
+-            endif()
+-        endif()
+-    endif()
++if(TARGET ZLIB::ZLIB)
++    target_link_libraries(${PROJECT_NAME} ZLIB::ZLIB)
+ endif()
+ if(MZ_ZSTD)
+     if(ZSTD_FOUND)
+-- 
+2.28.0.windows.1
+

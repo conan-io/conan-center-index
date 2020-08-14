@@ -1,0 +1,73 @@
+From 321d60c931c5fc2d75c12443b539b1af6fd8ddd8 Mon Sep 17 00:00:00 2001
+From: ItsBasi <5033630+ItsBasi@users.noreply.github.com>
+Date: Fri, 14 Aug 2020 23:39:30 +0200
+Subject: [PATCH] Find bzip2 and link to it
+
+---
+ CMakeLists.txt | 34 +++-------------------------------
+ 1 file changed, 3 insertions(+), 31 deletions(-)
+
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index d1fa9df..99fe78a 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -79,13 +79,7 @@ endif()
+ 
+ # Check if bzip2 installation is present
+ if(MZ_BZIP2)
+-    find_package(BZip2)
+-    if(BZIP2_FOUND)
+-        message(STATUS "Using BZIP2 ${BZIP2_VERSION_STRING}")
+-        list(APPEND MINIZIP_INC ${BZIP2_INCLUDE_DIRS})
+-        list(APPEND MINIZIP_DEF -DHAVE_BZIP2)
+-        set(PC_PRIVATE_LIBS "${PC_PRIVATE_LIBS} -lbzip2")
+-    endif()
++    find_package(BZip2 REQUIRED)
+ endif()
+ 
+ # Check to see if openssl installation is present
+@@ -417,30 +411,8 @@ endif()
+ # Include BZIP2
+ if(MZ_BZIP2)
+     list(APPEND MINIZIP_DEF -DHAVE_BZIP2)
+-
+     list(APPEND MINIZIP_SRC "mz_strm_bzip.c")
+     list(APPEND MINIZIP_PUBLIC_HEADERS "mz_strm_bzip.h")
+-
+-    if(NOT BZIP2_FOUND)
+-        list(APPEND MINIZIP_DEF -DBZ_NO_STDIO)
+-
+-        set(BZIP2_SRC
+-            lib/bzip2/blocksort.c
+-            lib/bzip2/bzlib.c
+-            lib/bzip2/compress.c
+-            lib/bzip2/crctable.c
+-            lib/bzip2/decompress.c
+-            lib/bzip2/huffman.c
+-            lib/bzip2/randtable.c)
+-
+-        set(BZIP2_PUBLIC_HEADERS
+-            lib/bzip2/bzlib.h
+-            lib/bzip2/bzlib_private.h)
+-
+-        list(APPEND MINIZIP_INC lib/bzip2)
+-
+-        source_group("BZip2" FILES ${BZIP2_SRC} ${BZIP2_PUBLIC_HEADERS})
+-    endif()
+ endif()
+ 
+ # Include LZMA
+@@ -641,8 +613,8 @@ endif()
+ if(TARGET zstd::zstd)
+ 	target_link_libraries(${PROJECT_NAME} zstd::zstd)
+ endif()
+-if(MZ_BZIP2 AND BZIP2_FOUND)
+-    target_link_libraries(${PROJECT_NAME} ${BZIP2_LIBRARIES})
++if(TARGET BZip2::BZip2)
++    target_link_libraries(${PROJECT_NAME} BZip2::BZip2)
+ endif()
+ if(MZ_LIBCOMP)
+     target_link_libraries(${PROJECT_NAME} compression)
+-- 
+2.28.0.windows.1
+

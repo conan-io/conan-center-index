@@ -1,0 +1,44 @@
+From 12ffba2df6342898bde1d13af454692eb8921469 Mon Sep 17 00:00:00 2001
+From: ItsBasi <5033630+ItsBasi@users.noreply.github.com>
+Date: Fri, 14 Aug 2020 23:44:23 +0200
+Subject: [PATCH] Prevent install of forbiden files
+
+---
+ CMakeLists.txt | 10 ----------
+ 1 file changed, 10 deletions(-)
+
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 5c035e2..9484c9e 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -625,9 +625,6 @@ if(NOT SKIP_INSTALL_LIBRARIES AND NOT SKIP_INSTALL_ALL)
+             RUNTIME DESTINATION "${INSTALL_BIN_DIR}"
+             ARCHIVE DESTINATION "${INSTALL_LIB_DIR}"
+             LIBRARY DESTINATION "${INSTALL_LIB_DIR}")
+-    install(EXPORT ${PROJECT_NAME}
+-            DESTINATION "${INSTALL_CMAKE_DIR}"
+-            NAMESPACE "MINIZIP::")
+ 
+     # Create and install CMake package config version file to allow find_package()
+     include(CMakePackageConfigHelpers)
+@@ -639,17 +636,10 @@ if(NOT SKIP_INSTALL_LIBRARIES AND NOT SKIP_INSTALL_ALL)
+     # Create config for find_package()
+     configure_package_config_file(minizipConfig.cmake.in minizipConfig.cmake
+         INSTALL_DESTINATION "${INSTALL_CMAKE_DIR}")
+-
+-    install(FILES ${CMAKE_CURRENT_BINARY_DIR}/minizipConfigVersion.cmake
+-                  ${CMAKE_CURRENT_BINARY_DIR}/minizipConfig.cmake
+-            DESTINATION "${INSTALL_CMAKE_DIR}")
+ endif()
+ if(NOT SKIP_INSTALL_HEADERS AND NOT SKIP_INSTALL_ALL)
+     install(FILES ${MINIZIP_PUBLIC_HEADERS} DESTINATION "${INSTALL_INC_DIR}")
+ endif()
+-if(NOT SKIP_INSTALL_FILES AND NOT SKIP_INSTALL_ALL)
+-    install(FILES ${MINIZIP_PC} DESTINATION "${INSTALL_PKGCONFIG_DIR}")
+-endif()
+ 
+ # Build test executables
+ if(MZ_BUILD_TEST)
+-- 
+2.28.0.windows.1
+

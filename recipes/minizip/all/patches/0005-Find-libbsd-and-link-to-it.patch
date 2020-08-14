@@ -1,0 +1,57 @@
+From 69d3e969ee3352582d4a99dd24c7a01b961c0170 Mon Sep 17 00:00:00 2001
+From: ItsBasi <5033630+ItsBasi@users.noreply.github.com>
+Date: Fri, 14 Aug 2020 23:41:26 +0200
+Subject: [PATCH] Find libbsd and link to it
+
+---
+ CMakeLists.txt | 27 +++++++++++----------------
+ 1 file changed, 11 insertions(+), 16 deletions(-)
+
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 2613258..72950eb 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -233,21 +233,16 @@ if(UNIX)
+         endif()
+ 
+         if(MZ_LIBBSD AND NOT HAVE_ARC4RANDOM_BUF)
+-            find_package(PkgConfig REQUIRED)
+-
+-            pkg_check_modules(LIBBSD libbsd)
+-            if(LIBBSD_FOUND)
+-                check_library_exists("${LIBBSD_LIBRARIES}" "arc4random_buf"
+-                    "${LIBBSD_LIBRARY_DIRS}" HAVE_LIBBSD_ARC4RANDOM_BUF)
+-                if(HAVE_LIBBSD_ARC4RANDOM_BUF)
+-                    list(APPEND MINIZIP_DEF -DHAVE_LIBBSD)
+-                    list(APPEND MINIZIP_DEF -DHAVE_ARC4RANDOM_BUF)
+-                    list(APPEND MINIZIP_INC ${LIBBSD_INCLUDE_DIRS})
+-                    link_directories(${LIBBSD_LIBRARY_DIRS})
+-                endif()
+-            else()
+-                set(MZ_LIBBSD FALSE)
+-            endif()
++            find_package(libbsd REQUIRED COMPONENTS libbsd-overlay)
++
++			check_library_exists("${libbsd_LIBRARIES}" "arc4random_buf"
++				"${libbsd_LIB_DIRS}" HAVE_LIBBSD_ARC4RANDOM_BUF)
++			if(HAVE_LIBBSD_ARC4RANDOM_BUF)
++				list(APPEND MINIZIP_DEF -DHAVE_LIBBSD)
++				list(APPEND MINIZIP_DEF -DHAVE_ARC4RANDOM_BUF)
++			else()
++				message(FATAL_ERROR "Failed to find arc4random_buf in libbsd.")
++			endif()
+         else()
+             set(MZ_LIBBSD FALSE)
+         endif()
+@@ -620,7 +615,7 @@ elseif(UNIX)
+         target_link_libraries(${PROJECT_NAME} ${SECURITY_LIBRARY})
+         set_target_properties(${PROJECT_NAME} PROPERTIES LINK_FLAGS "-Wl,-F/Library/Frameworks")
+     else()
+-        target_link_libraries(${PROJECT_NAME} ${LIBBSD_LIBRARIES})
++        target_link_libraries(${PROJECT_NAME} libbsd::libbsd)
+     endif()
+ elseif(WIN32)
+     if((MZ_PKCRYPT OR MZ_WZAES) AND NOT MZ_BRG)
+-- 
+2.28.0.windows.1
+

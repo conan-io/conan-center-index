@@ -1,0 +1,45 @@
+From e79510b29c38c89643b92663f0970308b5607721 Mon Sep 17 00:00:00 2001
+From: ItsBasi <5033630+ItsBasi@users.noreply.github.com>
+Date: Fri, 14 Aug 2020 23:42:22 +0200
+Subject: [PATCH] Find iconv and link to it
+
+---
+ CMakeLists.txt | 15 ++++-----------
+ 1 file changed, 4 insertions(+), 11 deletions(-)
+
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 72950eb..f0e9fa2 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -250,15 +250,8 @@ if(UNIX)
+ 
+     # Iconv is only necessary when it is not already built-in
+     # FindIconv requires cmake 3.11 or higher
+-    find_package(Iconv QUIET)
+-    if(Iconv_FOUND)
+-        message(STATUS "Using Iconv")
+-        list(APPEND MINIZIP_DEF -DHAVE_ICONV)
+-        list(APPEND MINIZIP_INC ${Iconv_INCLUDE_DIRS})
+-        set(PC_PRIVATE_LIBS "${PC_PRIVATE_LIBS} -liconv")
+-    else()
+-        message(WARNING "Limited encoding support due to missing iconv")
+-    endif()
++    find_package(Iconv REQUIRED)
++    list(APPEND MINIZIP_DEF -DHAVE_ICONV)
+ endif()
+ 
+ # Include compatibility layer
+@@ -600,8 +593,8 @@ endif()
+ if(MZ_LIBCOMP)
+     target_link_libraries(${PROJECT_NAME} compression)
+ endif()
+-if(Iconv_FOUND AND NOT Iconv_IS_BUILT_IN)
+-    target_link_libraries(${PROJECT_NAME} ${Iconv_LIBRARIES})
++if(TARGET Iconv::Iconv)
++    target_link_libraries(${PROJECT_NAME} Iconv::Iconv)
+ endif()
+ if(TARGET OpenSSL::OpenSSL)
+     target_link_libraries(${PROJECT_NAME} OpenSSL::OpenSSL)
+-- 
+2.28.0.windows.1
+
