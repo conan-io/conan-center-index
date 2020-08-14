@@ -65,7 +65,7 @@ class MinizipConan(ConanFile):
     def _build_subfolder(self):
         return "build_subfolder"
 
-    def _is_uinix_like(self):
+    def _is_unix_like(self):
         return (self.settings.os == "AIX" or
                 self.settings.os == "Android" or
                 self.settings.os == "FreeBSD" or
@@ -83,12 +83,13 @@ class MinizipConan(ConanFile):
             self.requires("bzip2/1.0.8")
         if self.options.with_zstd:
             self.requires("zstd/1.4.5")
-        #FIXME: Remove vendor distributed lzma library and add conditional requirement
+        #FIXME: Remove vendor distributed lzma 
+        #library and add conditional requirement
         #if self.options.with_lzma:
         #    self.requires("xz_utils/5.2.4")
         if self.options.with_openssl:
             self.requires("openssl/1.1.1g")
-        if self._is_uinix_like():
+        if self._is_unix_like():
             self.requires("libiconv/1.16")
 
     def configure(self):
