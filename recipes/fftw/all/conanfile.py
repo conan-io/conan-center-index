@@ -18,21 +18,29 @@ class FFTWConan(ConanFile):
                "openmp": [True, False],
                "threads": [True, False],
                "combinedthreads": [True, False]}
-    default_options = {'shared': False,
-                       'fPIC': True,
-                       'precision': 'double',
-                       'openmp': False,
-                       'threads': False,
-                       'combinedthreads': False}
-    _source_subfolder = "source_subfolder"
-    _build_subfolder = "build_subfolder"
+    default_options = {"shared": False,
+                       "fPIC": True,
+                       "precision": "double",
+                       "openmp": False,
+                       "threads": False,
+                       "combinedthreads": False}
+
+    _cmake = None
+
+    @property
+    def _source_subfolder(self):
+        return "source_subfolder"
+
+    @property
+    def _build_subfolder(self):
+        return "build_subfolder"
 
     def configure(self):
         del self.settings.compiler.libcxx
         del self.settings.compiler.cppstd
 
     def config_options(self):
-        if self.settings.os == 'Windows':
+        if self.settings.os == "Windows":
             del self.options.fPIC
 
     def source(self):
@@ -41,15 +49,17 @@ class FFTWConan(ConanFile):
         os.rename(extracted_dir, self._source_subfolder)
 
     def _configure_cmake(self):
-        cmake = CMake(self)
-        cmake.definitions["BUILD_TESTS"] = False
-        cmake.definitions["ENABLE_OPENMP"] = self.options.openmp
-        cmake.definitions["ENABLE_THREADS"] = self.options.threads
-        cmake.definitions["WITH_COMBINED_THREADS"] = self.options.combinedthreads
-        cmake.definitions["ENABLE_FLOAT"] = self.options.precision == "single"
-        cmake.definitions["ENABLE_LONG_DOUBLE"] = self.options.precision == "longdouble"
-        cmake.configure(build_folder=self._build_subfolder)
-        return cmake
+        if self._cmake:
+            return self._cmake
+        self._cmake = CMake(self)
+        self._cmake.definitions["BUILD_TESTS"] = False
+        self._cmake.definitions["ENABLE_OPENMP"] = self.options.openmp
+        self._cmake.definitions["ENABLE_THREADS"] = self.options.threads
+        self._cmake.definitions["WITH_COMBINED_THREADS"] = self.options.combinedthreads
+        self._cmake.definitions["ENABLE_FLOAT"] = self.options.precision == "single"
+        self._cmake.definitions["ENABLE_LONG_DOUBLE"] = self.options.precision == "longdouble"
+        self._cmake.configure(build_folder=self._build_subfolder)
+        return self._cmake
 
     def build(self):
         cmake = self._configure_cmake()
