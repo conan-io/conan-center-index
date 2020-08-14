@@ -66,5 +66,3 @@ class GflagsConan(ConanFile):
             self.cpp_info.libs.extend(['shlwapi'])
         elif self.settings.os == "Linux":
             self.cpp_info.libs.extend(["pthread", "m"])
-        if self.version == "2.2.0" and self.options.shared and self.settings.compiler == "Visual Studio":
-            self.cpp_info.bindirs.append("Lib")
