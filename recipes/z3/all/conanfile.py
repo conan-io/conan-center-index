@@ -1,6 +1,6 @@
 from conans import CMake, ConanFile, tools
-from conans.errors import ConanInvalidConfiguration
 import os
+import textwrap
 
 
 class Z3Conan(ConanFile):
@@ -9,7 +9,7 @@ class Z3Conan(ConanFile):
     topics = ("conan", "z3", "theorem", "SMT", "satisfiability", "prover", "solver")
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/Z3Prover/z3"
-    exports_sources = "CMakeLists.txt"
+    exports_sources = "CMakeLists.txt", "patches/**"
     generators = "cmake"
     license = "MIT"
     settings = "os", "arch", "compiler", "build_type"
@@ -64,6 +64,12 @@ class Z3Conan(ConanFile):
         return self._cmake
 
     def build(self):
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            tools.patch(**patch)
+        tools.save(os.path.join(self._build_subfolder, "gmp.h"), textwrap.dedent("""\
+            #pragma once
+            #include <mpir.h>
+            """))
         cmake = self._configure_cmake()
         cmake.build()
 
