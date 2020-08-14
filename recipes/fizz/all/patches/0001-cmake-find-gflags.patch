@@ -1,0 +1,19 @@
+diff --git a/fizz/CMakeLists.txt b/fizz/CMakeLists.txt
+index cfb81ff5..6f64cfb6 100644
+--- a/fizz/CMakeLists.txt
++++ b/fizz/CMakeLists.txt
+@@ -55,13 +55,7 @@ SET(FIZZ_INCLUDE_DIRECTORIES "")
+ find_package(gflags CONFIG QUIET)
+ if (gflags_FOUND)
+   message(STATUS "Found gflags from package config")
+-  if (TARGET gflags-shared)
+-    list(APPEND FIZZ_SHINY_DEPENDENCIES gflags-shared)
+-  elseif (TARGET gflags)
+-    list(APPEND FIZZ_SHINY_DEPENDENCIES gflags)
+-  else()
+-    message(FATAL_ERROR "Unable to determine the target name for the GFlags package.")
+-  endif()
++  list(APPEND FIZZ_SHINY_DEPENDENCIES gflags::gflags)
+   list(APPEND CMAKE_REQUIRED_LIBRARIES ${GFLAGS_LIBRARIES})
+   list(APPEND CMAKE_REQUIRED_INCLUDES ${GFLAGS_INCLUDE_DIR})
+ else()

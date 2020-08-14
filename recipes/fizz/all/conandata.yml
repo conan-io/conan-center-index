@@ -1,4 +1,8 @@
 sources:
   "2020.08.10.00":
     url: https://github.com/facebookincubator/fizz/archive/v2020.08.10.00.tar.gz
-    sha256: 1c027a53457e87b0b3a475e5c8045b94400c475898c8bd51b0fbd218b99a7f7b
+    sha256: 9bae95950bec440c7e5e277855ed9b72615e55b769526548c4cfe9e992fa5f12
+patches:
+  "2020.08.10.00":
+    - base_path: "source_subfolder"
+      patch_file: "patches/0001-cmake-find-gflags.patch"
