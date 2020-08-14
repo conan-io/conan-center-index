@@ -133,6 +133,7 @@ class CPythonConan(ConanFile):
 
     def requirements(self):
         self.requires("openssl/1.1.1g")
+        self.requires("libxcrypt/4.4.16")
         if not (self.settings.compiler == "Visual Studio" and tools.Version(self.version) >= tools.Version("3.8")):
             self.requires("expat/2.2.9")
         self.requires("mpdecimal/2.4.2")
