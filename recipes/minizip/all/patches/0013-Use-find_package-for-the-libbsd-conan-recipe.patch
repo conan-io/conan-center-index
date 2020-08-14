@@ -1,0 +1,47 @@
+From 03c378f7437416b7f8727eb03ebb5caf992b1545 Mon Sep 17 00:00:00 2001
+From: ItsBasi <5033630+ItsBasi@users.noreply.github.com>
+Date: Fri, 14 Aug 2020 20:13:09 +0200
+Subject: [PATCH] Use find_package for the libbsd conan recipe
+
+---
+ CMakeLists.txt | 23 ++++++++++-------------
+ 1 file changed, 10 insertions(+), 13 deletions(-)
+
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index bc34908..0212a88 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -248,20 +248,17 @@ if(UNIX)
+         endif()
+ 
+         if(MZ_LIBBSD AND NOT HAVE_ARC4RANDOM_BUF)
+-            find_package(PkgConfig REQUIRED)
+-
+-            pkg_check_modules(LIBBSD REQUIRED libbsd)
+-            if(LIBBSD_FOUND)
+-                check_library_exists("${LIBBSD_LIBRARIES}" "arc4random_buf"
+-                    "${LIBBSD_LIBRARY_DIRS}" HAVE_LIBBSD_ARC4RANDOM_BUF)
+-                if(HAVE_LIBBSD_ARC4RANDOM_BUF)
+-                    list(APPEND MINIZIP_DEF -DHAVE_LIBBSD)
+-                    list(APPEND MINIZIP_DEF -DHAVE_ARC4RANDOM_BUF)
+-                    list(APPEND MINIZIP_INC ${LIBBSD_INCLUDE_DIRS})
+-                    link_directories(${LIBBSD_LIBRARY_DIRS})
+-                endif()
++            find_package(libbsd REQUIRED)
++
++            check_library_exists("${libbsd_LIBRARIES}" "arc4random_buf"
++                "${libbsd_LIB_DIRS}" HAVE_LIBBSD_ARC4RANDOM_BUF)
++            if(HAVE_LIBBSD_ARC4RANDOM_BUF)
++                list(APPEND MINIZIP_DEF -DHAVE_LIBBSD)
++                list(APPEND MINIZIP_DEF -DHAVE_ARC4RANDOM_BUF)
++                list(APPEND MINIZIP_INC ${libbsd_INCLUDE_DIRS})
++                link_directories(${libbsd_LIB_DIRS})
+             else()
+-                set(MZ_LIBBSD FALSE)
++                message(FATAL_ERROR "arc4random_buf was not found in one of these libraries: ${libbsd_LIBRARIES}. Looked in these folders: ${libbsd_LIB_DIRS}")
+             endif()
+         else()
+             set(MZ_LIBBSD FALSE)
+-- 
+2.28.0.windows.1
+
