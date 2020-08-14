@@ -137,7 +137,7 @@ class TestPackageConan(ConanFile):
                 self._test_module("lzma")
             # FIXME: don't test curses module until https://github.com/conan-io/conan-center-index/pull/2531 lands
             # with tools.environment_append({"TERM": "ansi"}):
-            #     if self.settings.compiler != "Visual Studio":
+            #     if self._cpython_option("with_curses"):
             #         self._test_module("curses")
 
             self._test_module("expat")
