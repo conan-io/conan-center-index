@@ -119,7 +119,7 @@ class DlibConan(ConanFile):
             tools.rmdir(os.path.join(self.package_folder, dir_to_remove))
 
     def package_info(self):
-        # There is a single library whose name depends on settings
+        self.cpp_info.names["pkg_config"] = "dlib-1"
         self.cpp_info.libs = tools.collect_libs(self)
         if self.settings.os == "Linux":
             self.cpp_info.system_libs = ["pthread"]
