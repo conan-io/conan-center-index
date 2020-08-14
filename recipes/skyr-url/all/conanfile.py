@@ -10,7 +10,7 @@ class SkyrUrlConan(ConanFile):
     description = "A C++ library that implements the WhatWG URL specification"
     topics = ("conan", "whatwg", "url", "parser")
     url = "https://github.com/conan-io/conan-center-index"
-    license = "Boost"
+    license = "BSL-1.0"
     settings = "os", "compiler", "build_type", "arch"
     options = {"shared": [True, False], "fPIC": [True, False], "with_json": [True, False]}
     default_options = {'shared': False, 'fPIC': True, 'with_json': True}
@@ -73,9 +73,9 @@ class SkyrUrlConan(ConanFile):
             return self._cmake
 
         self._cmake = CMake(self)
-        self._cmake.definitions["skyr_BUILD_TESTS"] = "OFF"
-        self._cmake.definitions["skyr_FULL_WARNINGS"] = "OFF"
-        self._cmake.definitions["skyr_WARNINGS_AS_ERRORS"] = "OFF"
+        self._cmake.definitions["skyr_BUILD_TESTS"] = False
+        self._cmake.definitions["skyr_FULL_WARNINGS"] = False
+        self._cmake.definitions["skyr_WARNINGS_AS_ERRORS"] = False
         self._cmake.definitions["skyr_USE_STATIC_CRT"] = not self.options.shared
         self._cmake.definitions["skyr_ENABLE_JSON_FUNCTIONS"] = not self.options.with_json
         self._cmake.configure(build_folder=self._build_subfolder)
