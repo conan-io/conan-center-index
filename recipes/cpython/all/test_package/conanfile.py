@@ -135,6 +135,9 @@ class TestPackageConan(ConanFile):
                 self._test_module("bsddb")
             if self._cpython_option("with_lzma"):
                 self._test_module("lzma")
+            with tools.environment_append({"TERM": "ansi"}):
+                if self.settings.compiler != "Visual Studio":
+                    self._test_module("curses")
 
             self._test_module("expat")
             self._test_module("sqlite3")

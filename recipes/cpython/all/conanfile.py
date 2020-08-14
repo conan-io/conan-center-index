@@ -46,7 +46,7 @@ class CPythonConan(ConanFile):
         "with_nis": False,
         "with_sqlite3": True,
         "with_tkinter": False,  # FIXME: enable by default
-        "with_curses": False,   # FIXME: enable by default
+        "with_curses": True,
 
         # Python 2 options
         "unicode": "ucs2",
@@ -155,7 +155,6 @@ class CPythonConan(ConanFile):
           # TODO: Add tk when available
             raise ConanInvalidConfiguration("tk is not available on CCI (yet)")
         if self.options.get_safe("with_curses", False):
-            raise ConanInvalidConfiguration("ncurses is not available on CCI (yet)")
             self.requires("ncurses/6.2")
         if self._is_py2:
             if self.options.with_bsddb:
@@ -290,6 +289,10 @@ class CPythonConan(ConanFile):
 
     def build(self):
         self._patch_sources()
+
+        if self.options.get_safe("with_curses", False) and not self.options["ncurses"].with_widec:
+            raise ConanInvalidConfiguration("cpython requires ncurses with wide character support")
+
         if self.settings.compiler == "Visual Studio":
             self._msvc_build()
         else:

@@ -169,6 +169,15 @@ def test_decimal():
     print("1/7 =", decimal.Decimal(1) / decimal.Decimal(7))
 
 
+@add_test
+def test_curses():
+    import curses
+    stdscr = curses.initscr()
+
+    stdscr.keypad(True)
+    stdscr.keypad(False)
+
+
 parser = argparse.ArgumentParser()
 parser.add_argument("-b", dest="build_folder", help="build_folder", required=True)
 parser.add_argument("-t", dest="test_module", help="test python module")
