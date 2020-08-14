@@ -4,7 +4,6 @@ import os
 
 class DocoptCppConan(ConanFile):
     name = "docopt.cpp"
-    version = "0.6.2"
     license = "MIT"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/docopt/docopt.cpp"
