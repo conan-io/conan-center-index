@@ -1,0 +1,8 @@
+sources:
+  "1.18.0":
+    - url: "http://download.qt.io/official_releases/qbs/1.18.0/qbs-src-1.18.0.tar.gz"
+      sha256: 3d0211e021bea3e56c4d5a65c789d11543cc0b6e88f1bfe23c2f8ebf0f89f8d4
+
+patches:
+  "1.18.0":
+    - patch_file: "patches/Id906423bd0d8d85b7a4f3342df4b9d39f60c4e36.patch"

@@ -1,0 +1,3 @@
+CppApplication {
+    files: "test.cpp"
+}

@@ -1,0 +1,36 @@
+From 46136e470fc8852ba46f542ebcf92e240cbb78cb Mon Sep 17 00:00:00 2001
+From: Richard Weickelt <richard@weickelt.de>
+Date: Thu, 28 Jan 2021 22:17:19 +0100
+Subject: [PATCH] Fix static build with qmake
+
+Building Qbs statically did not work since Qbs 1.17 because the application
+target did not correctly track the plugins as a dependency. The condition in
+qbs.pro was simply wrong.
+
+Change-Id: Id906423bd0d8d85b7a4f3342df4b9d39f60c4e36
+---
+ qbs.pro | 6 ++----
+ 1 file changed, 2 insertions(+), 4 deletions(-)
+
+diff --git a/qbs.pro b/qbs.pro
+index 565a6a632..0ec8d07b9 100644
+--- a/qbs.pro
++++ b/qbs.pro
+@@ -35,12 +35,10 @@ msbuildlib.subdir = src/lib/msbuild
+ msbuildlib.depends = corelib
+ src_app.subdir = src/app
+ src_app.depends = corelib
++CONFIG(static, static|shared): src_app.depends += src_plugins
+ src_libexec.subdir = src/libexec
+ src_plugins.subdir = src/plugins
+-CONFIG(shared, static|shared) {
+-    src_plugins.depends = corelib
+-    src_app.depends += src_plugins
+-}
++CONFIG(shared, static|shared): src_plugins.depends = corelib
+ src_plugins.depends += msbuildlib
+ tests.depends = static_res
+ static_res.file = static-res.pro
+-- 
+2.25.1
+
