@@ -2,6 +2,7 @@ from conans import AutoToolsBuildEnvironment, ConanFile, MSBuild, tools
 from conans.errors import ConanInvalidConfiguration
 import os
 import re
+import textwrap
 
 
 class CPythonConan(ConanFile):
@@ -380,18 +381,29 @@ class CPythonConan(ConanFile):
             if self._is_py2:
                 scripts = ("2to3", "idle", "pydoc", "python{}-config".format(self._version_major_minor), "smtpd.py")
             else:
-                script_prefixes = ("2to3-", "easy_install-", "idle", "pydoc", "pyvenv-", "pip")
+                script_prefixes = ("2to3-", "easy_install-", "idle", "pydoc", "pyvenv-", "pip*")
                 scripts = tuple(os.path.join(self.package_folder, "bin", sp + self._version_major_minor) for sp in script_prefixes)
 
             for script_name in scripts:
                 script = os.path.join(self.package_folder, "bin", script_name)
                 if not os.path.isfile(script):
                     continue
+                if os.path.islink(script):
+                    continue
                 with open(script, "r") as fn:
                     fn.readline()
                     text = fn.read()
                 with open(script, "w") as fn:
-                    fn.write("""#!/bin/sh\n''':'\n__file__="$0"; while [ -L "$__file__" ]; do __file__="$(dirname "$__file__")/$(readlink "$__file__")"; done; exec "$(dirname "$__file__")/python{}" "$0" "$@"\n'''\n""".format(self._version_major_minor))
+                    fn.write(textwrap.dedent("""\
+                        #!/bin/sh
+                        ''':'
+                        __file__="$0";
+                        while [ -L "$__file__" ]; do
+                            __file__="$(dirname "$__file__")/$(readlink "$__file__")";
+                        done;
+                        exec "$(dirname "$__file__")/python{}" "$0" "$@"
+                        '''
+                        """.format(self._version_major_minor)))
                     fn.write(text)
 
             if not os.path.exists(self._cpython_symlink):
