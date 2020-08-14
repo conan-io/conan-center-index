@@ -133,7 +133,6 @@ class CPythonConan(ConanFile):
 
     def requirements(self):
         self.requires("openssl/1.1.1g")
-        self.requires("libxcrypt/4.4.16")
         if not (self.settings.compiler == "Visual Studio" and tools.Version(self.version) >= tools.Version("3.8")):
             self.requires("expat/2.2.9")
         self.requires("mpdecimal/2.4.2")
@@ -150,13 +149,11 @@ class CPythonConan(ConanFile):
         if self.options.get_safe("with_nis", False):
             # TODO: Add nis when available.
             raise ConanInvalidConfiguration("nis is not available on CCI (yet)")
-            self.requires("nis/x.y.z")
         if self.options.with_sqlite3:
             self.requires("sqlite3/3.31.1")
         if self.options.with_tkinter:
           # TODO: Add tk when available
             raise ConanInvalidConfiguration("tk is not available on CCI (yet)")
-            self.requires("tk/8.6.9.1@bincrafters/stable", private=self._is_installer)
         if self.options.get_safe("with_curses", False):
             raise ConanInvalidConfiguration("ncurses is not available on CCI (yet)")
             self.requires("ncurses/6.2")

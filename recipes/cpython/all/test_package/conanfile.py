@@ -1,4 +1,4 @@
-from conans import ConanFile, CMake, tools, RunEnvironment
+from conans import AutoToolsBuildEnvironment, ConanFile, CMake, tools, RunEnvironment
 from conans.errors import ConanException
 from io import StringIO
 import os
@@ -90,7 +90,12 @@ class TestPackageConan(ConanFile):
             modsrcfolder = "py2" if tools.Version(self.deps_cpp_info["cpython"].version).major < "3" else "py3"
             shutil.copytree(os.path.join(self.source_folder, modsrcfolder), os.path.join(self.build_folder, modsrcfolder))
             shutil.copy(os.path.join(self.source_folder, "setup.py"), os.path.join(self.build_folder, "setup.py"))
-            with tools.environment_append({"DISTUTILS_USE_SDK": "1", "MSSdk": "1"}):
+            env = {
+                "DISTUTILS_USE_SDK": "1",
+                "MSSdk": "1"
+            }
+            env.update(**AutoToolsBuildEnvironment(self).vars)
+            with tools.environment_append(env):
                 setup_args = [
                     "{}/setup.py".format(self.source_folder),
                     # "conan",
