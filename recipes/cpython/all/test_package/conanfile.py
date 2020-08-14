@@ -144,8 +144,8 @@ class TestPackageConan(ConanFile):
             self._test_module("sqlite3")
             self._test_module("decimal")
 
-            if tools.is_apple_os(self.settings.os) and not self.options["cpyton"].shared:
-                self.output.info("Not testing the module, because these seem to not work on apple when cpython is built as a static library")
+            if tools.is_apple_os(self.settings.os) and not self.options["cpython"].shared:
+                self.output.info("Not testing the module, because these seem not to work on apple when cpython is built as a static library")
                 # FIXME: find out why cpython on apple does not allow to use modules linked against a static python
             else:
                 with tools.environment_append({"PYTHONPATH": [os.path.join(self.build_folder, "lib")]}):
