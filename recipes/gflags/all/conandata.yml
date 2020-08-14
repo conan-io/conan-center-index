@@ -2,3 +2,6 @@ sources:
   "2.2.2":
     sha256: 34af2f15cf7367513b352bdcd2493ab14ce43692d2dcd9dfc499492966c64dcf
     url: https://github.com/gflags/gflags/archive/v2.2.2.tar.gz
+  "2.2.0":
+    sha256: 466c36c6508a451734e4f4d76825cf9cd9b8716d2b70ef36479ae40f08271f88
+    url: https://github.com/gflags/gflags/archive/v2.2.0.tar.gz
