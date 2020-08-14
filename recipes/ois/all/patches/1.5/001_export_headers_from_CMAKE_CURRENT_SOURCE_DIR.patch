@@ -9,17 +9,13 @@
 
  install(FILES ${PUBLIC_HEADERS}
    DESTINATION include/ois
-@@ -225,12 +225,3 @@
-   ARCHIVE DESTINATION lib
+@@ -226,9 +226,6 @@
    FRAMEWORK DESTINATION Library/Frameworks
  )
--
+
 -if(MSVC)
 -  install(FILES $<TARGET_PDB_FILE:OIS> DESTINATION bin OPTIONAL)
 -endif(MSVC)
--
--if(UNIX)
--    configure_file(${CMAKE_CURRENT_SOURCE_DIR}/OIS.pc.in ${CMAKE_BINARY_DIR}/OIS.pc @ONLY)
--    install(FILES ${CMAKE_BINARY_DIR}/OIS.pc DESTINATION ${OIS_LIB_DIRECTORY}/pkgconfig)
--endif()
-\ No newline at end of file
+
+ if(UNIX)
+     configure_file(${CMAKE_CURRENT_SOURCE_DIR}/OIS.pc.in ${CMAKE_BINARY_DIR}/OIS.pc @ONLY)
