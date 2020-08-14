@@ -38,8 +38,11 @@ class SquirrelConan(ConanFile):
             del self.options.fPIC
 
     def configure(self):
-        if self.settings.os == "Macos" and tools.Version(self.version) <= "3.1":
-            raise ConanInvalidConfiguration("squirrel 3.1 and earlier does not support Macos")
+        if tools.Version(self.version) <= "3.1":
+            if self.settings.os == "Macos":
+                raise ConanInvalidConfiguration("squirrel 3.1 and earlier does not support Macos")
+            if self.settings.compiler == "clang" and tools.Version(self.settings.compiler.version) < "9":
+                raise ConanInvalidConfiguration("squirrel 3.1 and earlier does not support Clang 8 and earlier")
         if self.options.shared:
             del self.options.fPIC
 
