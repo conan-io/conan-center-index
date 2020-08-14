@@ -44,6 +44,8 @@ class FFTWConan(ConanFile):
             del self.options.fPIC
         del self.settings.compiler.libcxx
         del self.settings.compiler.cppstd
+        if not self.options.threads:
+            del self.options.combinedthreads
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
@@ -57,7 +59,7 @@ class FFTWConan(ConanFile):
         self._cmake.definitions["BUILD_TESTS"] = False
         self._cmake.definitions["ENABLE_OPENMP"] = self.options.openmp
         self._cmake.definitions["ENABLE_THREADS"] = self.options.threads
-        self._cmake.definitions["WITH_COMBINED_THREADS"] = self.options.combinedthreads
+        self._cmake.definitions["WITH_COMBINED_THREADS"] = self.options.get_safe("combinedthreads", False)
         self._cmake.definitions["ENABLE_FLOAT"] = self.options.precision == "single"
         self._cmake.definitions["ENABLE_LONG_DOUBLE"] = self.options.precision == "longdouble"
         self._cmake.configure(build_folder=self._build_subfolder)
@@ -79,6 +81,12 @@ class FFTWConan(ConanFile):
         self.cpp_info.names["cmake_find_package_multi"] = "FFTW3"
         self.cpp_info.components["fftwlib"].names["cmake_find_package"] = "fftw3"
         self.cpp_info.components["fftwlib"].names["cmake_find_package_multi"] = "fftw3"
-        self.cpp_info.components["fftwlib"].libs = tools.collect_libs(self)
+        if self.options.openmp:
+            self.cpp_info.components["fftwlib"].libs.append("fftw3_omp")
+        if self.options.threads and not self.options.combinedthreads:
+            self.cpp_info.components["fftwlib"].libs.append("fftw3_threads")
+        self.cpp_info.components["fftwlib"].libs.append("fftw3")
         if self.settings.os == "Linux":
-            self.cpp_info.components["fftwlib"].system_libs = ["m"]
+            self.cpp_info.components["fftwlib"].system_libs.append("m")
+            if self.options.threads:
+                self.cpp_info.components["fftwlib"].system_libs.append("pthread")
