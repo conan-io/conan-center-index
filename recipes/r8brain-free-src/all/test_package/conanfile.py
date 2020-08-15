@@ -7,9 +7,6 @@ class R8brainFreeSrcTestConan(ConanFile):
     settings = "os", "compiler", "build_type", "arch"
     generators = "cmake"
 
-    def imports(self):
-       self.copy("*.dylib*", dst="bin", src="lib")
-       
     def build(self):
         cmake = CMake(self)
         cmake.configure()
@@ -17,5 +14,5 @@ class R8brainFreeSrcTestConan(ConanFile):
 
     def test(self):
         if not tools.cross_building(self):
-            os.chdir("bin")
-            self.run(".%sexample" % os.sep)
+            bin_path = os.path.join("bin", "example")
+            self.run(bin_path, run_environment=True)
