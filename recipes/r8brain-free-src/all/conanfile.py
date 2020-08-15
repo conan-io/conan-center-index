@@ -30,10 +30,6 @@ class R8brainFreeSrcConan(ConanFile):
         cmake = CMake(self)
         cmake.configure()
         cmake.build()
-        # Explicit way:
-        # self.run('cmake %s/hello %s'
-        #          % (self.source_folder, cmake.command_line))
-        # self.run("cmake --build . %s" % cmake.build_config)
 
     def package(self):
         self.copy(pattern="LICENSE", dst="licenses", src=self._source_subfolder)
