@@ -160,14 +160,12 @@ struct PipelineElement createPipelineElement(mz_stream_create_cb streamFactory,
   struct PipelineElement element;
   element.streamFactory = streamFactory;
   if (name != NULL)
-    strncpy_s(&element.name[0], MAX_STREAM_NAME_SIZE, name,
-              strnlen_s(name, MAX_STREAM_NAME_SIZE));
+    strcpy(&element.name[0], name);
   else
     memset(&element.name[0], 0, MAX_STREAM_NAME_SIZE);
   element.stream = NULL;
   if (path != NULL)
-    strncpy_s(&element.path[0], MAX_STREAM_PATH_SIZE, path,
-              strnlen_s(path, MAX_STREAM_PATH_SIZE));
+    strcpy(&element.path[0], path);
   else
     memset(&element.path[0], 0, MAX_STREAM_PATH_SIZE);
   element.mode = 0;
