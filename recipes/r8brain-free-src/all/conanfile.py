@@ -15,7 +15,7 @@ class R8brainFreeSrcConan(ConanFile):
     generators = "cmake"
 
     def source(self):
-        self.run("git clone https://github.com/avaneev/r8brain-free-src")
+        tools.get(**self.conan_data["sources"][self.version])
 
     def build(self):
         cmake = CMake(self)
