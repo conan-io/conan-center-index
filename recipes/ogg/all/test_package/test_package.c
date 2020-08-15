@@ -1,6 +1,6 @@
 #include "ogg/ogg.h"
 #include <stdio.h>
-#include <cstdlib>
+#include <stdlib.h>
 
 int main () {
   ogg_sync_state og;
