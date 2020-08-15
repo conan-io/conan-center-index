@@ -13,8 +13,6 @@ class R8brainFreeSrcConan(ConanFile):
     topics = ("Audio", "Sample Rate", "Conversion")
     exports_sources = ["CMakeLists.txt"]
     settings = "os", "compiler", "build_type", "arch"
-    options = {"shared": [False]}
-    default_options = {"shared": False}
     generators = "cmake"
 
     @property
