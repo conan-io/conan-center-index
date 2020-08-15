@@ -36,6 +36,7 @@ class R8brainFreeSrcConan(ConanFile):
         # self.run("cmake --build . %s" % cmake.build_config)
 
     def package(self):
+        self.copy(pattern="LICENSE", dst="licenses", src=self._source_subfolder)
         self.copy("*.h", dst="include", src=self._source_subfolder)
         self.copy("*.lib", dst="lib", keep_path=False)
         self.copy("*.dll", dst="bin", keep_path=False)
