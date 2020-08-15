@@ -89,6 +89,9 @@ class FollyConan(ConanFile):
         self.requires("xz_utils/5.2.4")
         self.requires("libdwarf/20191104")
         self.requires("libsodium/1.0.18")
+        if Version(self.version) >= "2020.08.10.00":
+            self.requires("fmt/7.0.3")
+
         if self.settings.os == "Linux":
             self.requires("libiberty/9.1.0")
             self.requires("libunwind/1.3.1")
