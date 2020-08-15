@@ -38,7 +38,7 @@ class MinizipConan(ConanFile):
         "fPIC": True,
         "with_zlib": True,
         "with_bzip2": True,
-        "with_zstd": True,        
+        "with_zstd": True,
         "with_openssl": False,
         "with_lzma": True,
         "with_libbsd": "auto",
@@ -56,7 +56,7 @@ class MinizipConan(ConanFile):
 
     requires = (
     )
-    
+
     @property
     def _source_subfolder(self):
         return "source_subfolder"
@@ -64,7 +64,7 @@ class MinizipConan(ConanFile):
     @property
     def _build_subfolder(self):
         return "build_subfolder"
-        
+
     @property
     def _with_libbsd(self):
         if self.options.with_libbsd == "auto":
@@ -79,7 +79,7 @@ class MinizipConan(ConanFile):
             self.requires("bzip2/1.0.8")
         if self.options.with_zstd:
             self.requires("zstd/1.4.5")
-        #FIXME: Remove vendor distributed lzma 
+        #FIXME: Remove vendor distributed lzma
         #library and add conditional requirement
         #if self.options.with_lzma:
         #    self.requires("xz_utils/5.2.4")
@@ -137,6 +137,7 @@ class MinizipConan(ConanFile):
     def build(self):
         for patch in self.conan_data["patches"][self.version]:
             tools.patch(base_path=self._source_subfolder, **patch)
+        tools.replace_in_file(self._source_subfolder + "/CMakeLists.txt", "find_package(libbsd REQUIRED COMPONENTS libbsd-overlay)", "find_package(libbsd REQUIRED COMPONENTS bsd libbsd-overlay libbsd-ctor)")
         cmake = self._configure_cmake()
         cmake.build()
 
@@ -148,6 +149,6 @@ class MinizipConan(ConanFile):
 
     def package_id(self):
         self.info.with_libbsd = self._with_libbsd
-    
+
     def package_info(self):
         self.cpp_info.libs = ["minizip"]
