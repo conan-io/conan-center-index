@@ -86,13 +86,12 @@ class FollyConan(ConanFile):
         self.requires("bzip2/1.0.8")
         self.requires("zstd/1.4.5")
         self.requires("snappy/1.1.8")
-        if Version(self.version) >= "2019.01.01.00":
-            self.requires("xz_utils/5.2.4")
-            self.requires("libdwarf/20191104")
-            self.requires("libsodium/1.0.18")
-            if self.settings.os == "Linux":
-                self.requires("libiberty/9.1.0")
-                self.requires("libunwind/1.3.1")
+        self.requires("xz_utils/5.2.4")
+        self.requires("libdwarf/20191104")
+        self.requires("libsodium/1.0.18")
+        if self.settings.os == "Linux":
+            self.requires("libiberty/9.1.0")
+            self.requires("libunwind/1.3.1")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
