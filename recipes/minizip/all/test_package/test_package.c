@@ -50,7 +50,7 @@ int test_mz_compat() {
   {
     printf("Test mz_compat: zip\n");
 
-    zipFile zf = zipOpen64("foo.zip", APPEND_STATUS_CREATE);
+    zipFile zf = zipOpen64("\U0001F0C1_compat.zip", APPEND_STATUS_CREATE);
     if (zf == NULL) {
       printf("Failed to open file.\n");
       return 1;
@@ -63,7 +63,7 @@ int test_mz_compat() {
   {
     printf("Test mz_compat: unzip\n");
 
-    unzFile zf = unzOpen64("foo.zip");
+    unzFile zf = unzOpen64("\U0001F0C1_compat.zip");
     if (zf == NULL) {
       printf("Failed to open zipfile.\n");
       return 1;
@@ -381,7 +381,7 @@ int test_mz_strm() {
 
   {
     struct PipelineElement os_pipe =
-        createPipelineElement(mz_stream_os_create, "os", "data.buffered");
+        createPipelineElement(mz_stream_os_create, "os", "\U0001F0C1.buffered");
     struct PipelineElement buffered_pipe =
         createPipelineElement_name(mz_stream_buffered_create, "buffered");
     struct PipelineElement *pipe[] = {&buffered_pipe, &os_pipe};
@@ -390,7 +390,7 @@ int test_mz_strm() {
 #if defined(HAVE_ZLIB) && defined(HAVE_COMPRESS) && defined(HAVE_DECOMPRESS)
   {
     struct PipelineElement os_pipe =
-        createPipelineElement(mz_stream_os_create, "os", "data.zlib");
+        createPipelineElement(mz_stream_os_create, "os", "\U0001F0C1.zlib");
     struct PipelineElement zlib_pipe =
         createPipelineElement_name(mz_stream_zlib_create, "zlib");
     struct PipelineElement *pipe[] = {&zlib_pipe, &os_pipe};
@@ -400,7 +400,7 @@ int test_mz_strm() {
 #if defined(HAVE_LZMA) && defined(HAVE_COMPRESS) && defined(HAVE_DECOMPRESS)
   {
     struct PipelineElement os_pipe =
-        createPipelineElement(mz_stream_os_create, "os", "data.lzma");
+        createPipelineElement(mz_stream_os_create, "os", "\U0001F0C1.lzma");
     struct PipelineElement lzma_pipe =
         createPipelineElement_name(mz_stream_lzma_create, "lzma");
     struct PipelineElement *pipe[] = {&lzma_pipe, &os_pipe};
@@ -410,7 +410,7 @@ int test_mz_strm() {
 #if defined(HAVE_BZIP) && defined(HAVE_COMPRESS) && defined(HAVE_DECOMPRESS)
   {
     struct PipelineElement os_pipe =
-        createPipelineElement(mz_stream_os_create, "os", "data.bzip");
+        createPipelineElement(mz_stream_os_create, "os", "\U0001F0C1.bzip");
     struct PipelineElement bzip_pipe =
         createPipelineElement_name(mz_stream_bzip_create, "bzip");
     struct PipelineElement *pipe[] = {&bzip_pipe, &os_pipe};
@@ -420,7 +420,7 @@ int test_mz_strm() {
 #if defined(HAVE_ZSTD) && defined(HAVE_COMPRESS) && defined(HAVE_DECOMPRESS)
   {
     struct PipelineElement os_pipe =
-        createPipelineElement(mz_stream_os_create, "os", "data.zstd");
+        createPipelineElement(mz_stream_os_create, "os", "\U0001F0C1.zstd");
     struct PipelineElement zstd_pipe =
         createPipelineElement_name(mz_stream_zstd_create, "zstd");
     struct PipelineElement *pipe[] = {&zstd_pipe, &os_pipe};
@@ -430,7 +430,7 @@ int test_mz_strm() {
 #if defined(HAVE_WZAES) && defined(HAVE_COMPRESS) && defined(HAVE_DECOMPRESS)
   {
     struct PipelineElement os_pipe =
-        createPipelineElement(mz_stream_os_create, "os", "data.wzaes");
+        createPipelineElement(mz_stream_os_create, "os", "\U0001F0C1.wzaes");
     struct PipelineElement wzaes_pipe =
         createPipelineElement(mz_stream_wzaes_create, "wzaes", "password");
 
@@ -444,7 +444,7 @@ int test_mz_strm() {
 #if defined(HAVE_PKCRYPT) && defined(HAVE_COMPRESS) && defined(HAVE_DECOMPRESS)
   {
     struct PipelineElement os_pipe =
-        createPipelineElement(mz_stream_os_create, "os", "data.wzaes");
+        createPipelineElement(mz_stream_os_create, "os", "\U0001F0C1.wzaes");
     struct PipelineElement pkcrypt_pipe =
         createPipelineElement(mz_stream_pkcrypt_create, "pkcrypt", "password");
 
@@ -458,7 +458,7 @@ int test_mz_strm() {
 #if defined(HAVE_LIBCOMP) && defined(HAVE_COMPRESS) && defined(HAVE_DECOMPRESS)
   {
     struct PipelineElement os_pipe =
-        createPipelineElement(mz_stream_os_create, "os", "data.libcomp");
+        createPipelineElement(mz_stream_os_create, "os", "\U0001F0C1.libcomp");
     struct PipelineElement libcomp_pipe =
         createPipelineElement_name(mz_stream_libcomp_create, "libcomp");
 
@@ -475,14 +475,14 @@ int test_mz_zip() {
 
   int err = 0;
   void *zipHandle = NULL;
-  char filename_in_zip[] = "Hello.txt";
+  char filename_in_zip[] = "\U0001F0C1.txt";
   char data[] =
       "Hello, World!\nHello, World!\nHello, World!\nHello, World!\nHello, "
       "World!\nHello, World!\nHello, World!\nHello, World!\nHello, World!\n";
   int32_t bytes_written = 0;
 
   struct PipelineElement os_pipe =
-      createPipelineElement(mz_stream_os_create, "os", "mz_zip.zip");
+      createPipelineElement(mz_stream_os_create, "os", "\U0001F0C1.zip");
   struct PipelineElement *pipe[] = {&os_pipe};
   int const pipe_size = sizeof(pipe) / sizeof(struct PipelineElement *);
 
