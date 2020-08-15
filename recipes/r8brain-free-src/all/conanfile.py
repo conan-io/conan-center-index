@@ -1,12 +1,11 @@
 from conans import ConanFile, CMake, tools
 
-
 class R8brainFreeSrcConan(ConanFile):
     name = "r8brain-free-src"
     version = "4.6"
     license = "MIT"
-    author = "Aleksey Vaneev"
-    url = "https://github.com/avaneev/r8brain-free-src"
+    url = "https://github.com/conan-io/conan-center-index"
+    homepage = "https://github.com/avaneev/r8brain-free-srcn"
     description = "https://github.com/avaneev/r8brain-free-src"
     topics = ("Audio", "Sample Rate", "Conversion")
     exports_sources = ["CMakeLists.txt"]
