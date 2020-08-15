@@ -7,6 +7,9 @@ class R8brainFreeSrcTestConan(ConanFile):
     settings = "os", "compiler", "build_type", "arch"
     generators = "cmake"
 
+    def imports(self):
+       self.copy("*.dylib*", dst="bin", src="lib")
+       
     def build(self):
         cmake = CMake(self)
         cmake.configure()
