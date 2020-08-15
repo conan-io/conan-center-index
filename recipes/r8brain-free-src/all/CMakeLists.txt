@@ -4,4 +4,4 @@ project(r8brain-free-src CXX)
 include(conanbuildinfo.cmake)
 conan_basic_setup()
 
-add_library(r8brain r8brain-free-src/r8bbase.cpp)\
+add_library(r8brain source_subfolder/r8bbase.cpp)

@@ -1,3 +1,5 @@
+import os
+
 from conans import ConanFile, CMake, tools
 
 class R8brainFreeSrcConan(ConanFile):
@@ -13,9 +15,15 @@ class R8brainFreeSrcConan(ConanFile):
     options = {"shared": [True, False]}
     default_options = {"shared": False}
     generators = "cmake"
+    
+    @property
+    def _source_subfolder(self):
+        return "source_subfolder"
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
+        extracted_folder = "r8brain-free-src-version-{}".format(self.version)
+        os.rename(extracted_folder, self._source_subfolder)
 
     def build(self):
         cmake = CMake(self)
@@ -27,7 +35,7 @@ class R8brainFreeSrcConan(ConanFile):
         # self.run("cmake --build . %s" % cmake.build_config)
 
     def package(self):
-        self.copy("*.h", dst="include", src="r8brain-free-src")
+        self.copy("*.h", dst="include", src=self._source_subfolder)
         self.copy("*.lib", dst="lib", keep_path=False)
         self.copy("*.dll", dst="bin", keep_path=False)
         self.copy("*.so", dst="lib", keep_path=False)
