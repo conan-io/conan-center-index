@@ -1,4 +1,5 @@
 from conans import ConanFile, CMake, tools
+from conans.errors import ConanInvalidConfiguration
 import os
 
 
@@ -46,6 +47,11 @@ class FFTWConan(ConanFile):
         del self.settings.compiler.cppstd
         if not self.options.threads:
             del self.options.combinedthreads
+        if self.settings.os == "Windows" and self.options.shared:
+            if self.options.openmp:
+                raise ConanInvalidConfiguration("Shared fftw with openmp can't be built on Windows")
+            if self.options.threads and not self.options.combinedthreads:
+                raise ConanInvalidConfiguration("Shared fftw with threads and not combinedthreads can't be built on Windows")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
