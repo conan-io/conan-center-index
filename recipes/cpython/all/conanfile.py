@@ -1,5 +1,6 @@
 from conans import AutoToolsBuildEnvironment, ConanFile, MSBuild, tools
 from conans.errors import ConanInvalidConfiguration
+import glob
 import os
 import re
 import textwrap
@@ -378,22 +379,20 @@ class CPythonConan(ConanFile):
             tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
             tools.rmdir(os.path.join(self.package_folder, "share"))
 
-            if self._is_py2:
-                scripts = ("2to3", "idle", "pydoc", "python{}-config".format(self._version_major_minor), "smtpd.py")
-            else:
-                script_prefixes = ("2to3-", "easy_install-", "idle", "pydoc", "pyvenv-", "pip*")
-                scripts = tuple(os.path.join(self.package_folder, "bin", sp + self._version_major_minor) for sp in script_prefixes)
-
-            for script_name in scripts:
-                script = os.path.join(self.package_folder, "bin", script_name)
-                if not os.path.isfile(script):
+            # Rewrite shebangs of python scripts
+            for filename in os.listdir(os.path.join(self.package_folder, "bin")):
+                filepath = os.path.join(self.package_folder, "bin", filename)
+                if not os.path.isfile(filepath):
                     continue
-                if os.path.islink(script):
+                if os.path.islink(filepath):
                     continue
-                with open(script, "r") as fn:
-                    fn.readline()
+                with open(filepath, "rb") as fn:
+                    firstline = fn.readline(1024)
+                    if not(firstline.startswith(b"#!") and b"/python" in firstline and b"/bin/sh" not in firstline):
+                        continue
                     text = fn.read()
-                with open(script, "w") as fn:
+                self.output.info("Rewriting shebang of {}".format(filename))
+                with open(filepath, "wb") as fn:
                     fn.write(textwrap.dedent("""\
                         #!/bin/sh
                         ''':'
@@ -403,7 +402,7 @@ class CPythonConan(ConanFile):
                         done
                         exec "$(dirname "$__file__")/python{}" "$0" "$@"
                         '''
-                        """.format(self._version_major_minor)))
+                        """.format(self._version_major_minor)).encode())
                     fn.write(text)
 
             if not os.path.exists(self._cpython_symlink):
