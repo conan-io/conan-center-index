@@ -137,17 +137,6 @@ int test_mz_os() {
       return 1;
     }
   }
-  {
-    printf("Test mz_os: mz_os_unicode\n");
-
-    wchar_t *str =
-        mz_os_unicode_string_create(u8"\u0100", MZ_ENCODING_CODEPAGE_437);
-    if (str == NULL) {
-      printf("Failed to create unicode string.");
-      return 1;
-    }
-    mz_os_unicode_string_delete(&str);
-  }
   return 0;
 }
 
