@@ -2,6 +2,7 @@ import os
 
 from conans import ConanFile, CMake, tools
 
+
 class R8brainFreeSrcConan(ConanFile):
     name = "r8brain-free-src"
     version = "4.6"
@@ -15,7 +16,7 @@ class R8brainFreeSrcConan(ConanFile):
     options = {"shared": [True, False]}
     default_options = {"shared": False}
     generators = "cmake"
-    
+
     @property
     def _source_subfolder(self):
         return "source_subfolder"
@@ -44,4 +45,3 @@ class R8brainFreeSrcConan(ConanFile):
 
     def package_info(self):
         self.cpp_info.libs = ["r8brain"]
-
