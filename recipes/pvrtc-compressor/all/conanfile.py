@@ -57,7 +57,7 @@ class PvrtcCompressorConan(ConanFile):
         return self._cmake
 
     def package(self):
-        self.copy("LICENSE.TXT", dst="licenses")
+        self.copy("LICENSE.TXT", dst="licenses", src=self._source_subfolder)
         cmake = self._configure_cmake()
         cmake.install()
 
