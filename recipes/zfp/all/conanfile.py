@@ -21,6 +21,7 @@ class ZfpConan(ConanFile):
         "with_cache_twoway": [True, False],
         "with_cache_fast_hash": [True, False],
         "with_cache_profile": [True, False],
+        "with_openmp": [True, False],
     }
     default_options = {
         "shared": False,
@@ -31,6 +32,7 @@ class ZfpConan(ConanFile):
         "with_cache_twoway": False,
         "with_cache_fast_hash": False,
         "with_cache_profile": False,
+        "with_openmp": False,
     }
 
     _cmake = None
@@ -68,7 +70,8 @@ class ZfpConan(ConanFile):
         self._cmake.definitions["ZFP_WITH_CACHE_TWOWAY"] = self.options.with_cache_twoway
         self._cmake.definitions["ZFP_WITH_CACHE_FAST_HASH"] = self.options.with_cache_fast_hash
         self._cmake.definitions["ZFP_WITH_CACHE_PROFILE"] = self.options.with_cache_profile
-        if not self.options.shared:
+        self._cmake.definitions["ZFP_WITH_OPENMP"] = self.options.with_openmp
+        if self.settings.os != "Windows" and not self.options.shared:
             self._cmake.definitions["ZFP_ENABLE_PIC"] = self.options.fPIC
         self._cmake.configure(build_folder=self._build_subfolder)
         return self._cmake
