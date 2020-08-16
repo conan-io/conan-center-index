@@ -74,6 +74,7 @@ class ZyreConan(ConanFile):
         tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
 
     def package_info(self):
+        self.cpp_info.names["pkg_config"] = "libzyre"
         self.cpp_info.libs = ["zyre"]
         if self.settings.os == "Linux":
             self.cpp_info.system_libs = ["pthread", "dl", "rt", "m"]
