@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 2.8.11)
+cmake_minimum_required(VERSION 3.1)
 project(cmake_wrapper)
 
 include(conanbuildinfo.cmake)
@@ -13,6 +13,7 @@ set(HDRS_FILES ${CMAKE_CURRENT_SOURCE_DIR}/source_subfolder/butteraugli/butterau
 
 add_library(butteraugli_lib ${SRCS_FILES} ${HDRS_FILES})
 target_include_directories(butteraugli_lib PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/source_subfolder)
+set_property(TARGET butteraugli_lib PROPERTY CXX_STANDARD 11)
 
 install(TARGETS butteraugli_lib
     RUNTIME DESTINATION bin
