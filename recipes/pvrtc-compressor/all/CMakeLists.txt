@@ -32,6 +32,7 @@ set(SRCS_FILES
 )
 add_library(pvrtccompressor ${SRCS_FILES})
 target_include_directories(pvrtccompressor PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/source_subfolder)
+set_property(TARGET pvrtccompressor PROPERTY CXX_STANDARD 11)
 
 install(TARGETS pvrtccompressor
     RUNTIME DESTINATION bin
