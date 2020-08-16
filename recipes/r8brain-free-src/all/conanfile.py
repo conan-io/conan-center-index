@@ -25,6 +25,7 @@ class R8brainFreeSrcConan(ConanFile):
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
+            del self.options.shared
 
     def configure(self):
         if self.options.shared:
