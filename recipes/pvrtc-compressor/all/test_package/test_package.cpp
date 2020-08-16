@@ -1,6 +1,7 @@
 #include <iostream>
 #include <stdio.h>
 #include <stdint.h>
+#include <string.h>
 
 #include "RgbBitmap.h"
 #include "RgbaBitmap.h"
