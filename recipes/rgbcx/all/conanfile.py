@@ -20,6 +20,11 @@ class RgbcxConan(ConanFile):
         tools.get(**self.conan_data["sources"][self.version])
         extracted_dir = glob.glob('bc7enc-*/')[0]
         os.rename(extracted_dir, self._source_subfolder)
+        self._patch_sources()
+
+    def _patch_sources(self):
+        tools.replace_in_file(os.path.join(self._source_subfolder, "rgbcx.h"),
+            "#include <stdlib.h>", "#include <stdlib.h>\n#include <string.h>")
 
     def _extract_licenses(self):
         header = tools.load(os.path.join(self.source_folder, self._source_subfolder, "rgbcx.h"))
