@@ -5,9 +5,6 @@ include(conanbuildinfo.cmake)
 conan_basic_setup()
 
 add_library(r8brain source_subfolder/r8bbase.cpp)
-if(MSVC AND BUILD_SHARED_LIBS)
-  set_property(TARGET r8brain PROPERTY WINDOWS_EXPORT_ALL_SYMBOLS TRUE)
-endif()
 
 install(
   TARGETS r8brain

@@ -1,6 +1,7 @@
 import os
 
 from conans import ConanFile, CMake, tools
+from conans.errors import ConanInvalidConfiguration
 
 
 class R8brainFreeSrcConan(ConanFile):
@@ -25,11 +26,12 @@ class R8brainFreeSrcConan(ConanFile):
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
-            del self.options.shared
 
     def configure(self):
         if self.options.shared:
             del self.options.fPIC
+        if self.settings.compiler == "Visual Studio" and self.options.shared:
+            raise ConanInvalidConfiguration("Shared r8brain-free-src cannot be built with Visual Studio")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
