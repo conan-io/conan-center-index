@@ -66,7 +66,6 @@ class IqaConan(ConanFile):
         tools.save("LICENSE", "\n".join(license_content))
 
     def package(self):
-        self.copy(pattern="License.txt", src=self._source_subfolder, dst="licenses")
         cmake = self._configure_cmake()
         cmake.install()
         self._extract_license()
