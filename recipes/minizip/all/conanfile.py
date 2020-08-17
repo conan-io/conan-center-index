@@ -12,7 +12,7 @@ class MinizipConan(ConanFile):
     homepage = "https://github.com/nmoinvaz/minizip"
     license = "Zlib"
     exports_sources = ["CMakeLists.txt", "patches/*"]
-    generators = "cmake_find_package"
+    generators = ["cmake", "cmake_find_package"]
 
     settings = "os", "arch", "compiler", "build_type"
     options = {

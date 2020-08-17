@@ -6,7 +6,6 @@ conan_basic_setup()
 
 add_executable(${PROJECT_NAME} test_package.c)
 target_link_libraries(${PROJECT_NAME} ${CONAN_LIBS})
-
 target_compile_definitions(${PROJECT_NAME} PRIVATE
 	CONAN_MZ_VERSION=\"${CONAN_MZ_VERSION}\"
 	${HAVE_COMPRESS}
