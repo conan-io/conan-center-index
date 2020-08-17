@@ -138,6 +138,7 @@ class MinizipConan(ConanFile):
         for patch in self.conan_data["patches"][self.version]:
             tools.patch(base_path=self._source_subfolder, **patch)
         tools.replace_in_file(self._source_subfolder + "/CMakeLists.txt", "find_package(libbsd REQUIRED COMPONENTS libbsd-overlay)", "find_package(libbsd REQUIRED COMPONENTS bsd libbsd-overlay libbsd-ctor)")
+        tools.replace_in_file(self._source_subfolder + "/CMakeLists.txt", "target_link_libraries(${PROJECT_NAME} libbsd::libbsd)", "target_link_libraries(${PROJECT_NAME} libbsd::libbsd libbsd::libbsd-overlay libbsd::libbsd-ctor)")
         cmake = self._configure_cmake()
         cmake.build()
 
