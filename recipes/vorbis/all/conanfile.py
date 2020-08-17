@@ -1,6 +1,5 @@
 from conans import ConanFile, tools, CMake
 import os
-import glob
 
 
 class VorbisConan(ConanFile):
@@ -63,8 +62,6 @@ class VorbisConan(ConanFile):
         cmake.install()
         tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
         tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
-        for pdb_file in glob.glob(os.path.join(self.package_folder, "bin", "*.pdb")):
-            os.remove(pdb_file)
 
     def package_info(self):
         self.cpp_info.names["cmake_find_package"] = "Vorbis"
