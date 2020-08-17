@@ -4,7 +4,7 @@ import os
 
 class TestPackageConan(ConanFile):
     settings = "os", "compiler", "build_type", "arch"
-    generators = "cmake"
+    generators = "cmake", "cmake_find_package_multi"
 
     def build(self):
         cmake = CMake(self)
@@ -12,6 +12,8 @@ class TestPackageConan(ConanFile):
         cmake.build()
 
     def test(self):
-        with tools.chdir("bin"):
-            self.run("test_package < %s > sample.ogg" % os.path.join(self.source_folder, '8kadpcm.wav'),
-                     run_environment=True)
+        if not tools.cross_building(self.settings):
+            bin_path = os.path.join("bin", "test_package")
+            in_wav_path = os.path.join(self.source_folder, "8kadpcm.wav")
+            out_ogg_path = os.path.join("bin", "sample.ogg")
+            self.run("{0} < {1} > {2}".format(bin_path, in_wav_path, out_ogg_path), run_environment=True)
