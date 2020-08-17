@@ -10,7 +10,7 @@ class VorbisConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://xiph.org/vorbis/"
     license = "BSD-3-Clause"
-    exports_sources = ["CMakeLists.txt"]
+    exports_sources = ["CMakeLists.txt", "patches/**"]
     generators = "cmake"
     settings = "os", "arch", "build_type", "compiler"
     options = {"shared": [True, False], "fPIC": [True, False]}
@@ -52,6 +52,8 @@ class VorbisConan(ConanFile):
         return self._cmake
 
     def build(self):
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            tools.patch(**patch)
         cmake = self._configure_cmake()
         cmake.build()
 
