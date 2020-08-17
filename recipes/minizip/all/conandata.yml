@@ -14,3 +14,4 @@ patches:
     -  "patch_file": "patches/0008-Use-same-output-name-for-all-compilers.patch"
     -  "patch_file": "patches/0009-Prevent-install-of-forbiden-files.patch"
     -  "patch_file": "patches/0010-Replace-MZ_COMPRESS_ONLY-MZ_DECOMPRESS_ONLY-with-MZ_.patch"
+    -  "patch_file": "patches/0011-Guard-the-usage-of-__has_include-behind-the-defined-.patch"
