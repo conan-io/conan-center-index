@@ -58,19 +58,10 @@ class PoshlibConan(ConanFile):
         cmake = self._configure_cmake()
         cmake.build()
 
-    def _extract_license(self):
-        with open(os.path.join(self._source_subfolder, "posh.h")) as f:
-            content_lines = f.readlines()
-        license_content = []
-        for i in range(27, 59):
-            license_content.append(content_lines[i][-1])
-        tools.save("LICENSE", "\n".join(license_content))
-
     def package(self):
         cmake = self._configure_cmake()
         cmake.install()
-        self._extract_license()
-        self.copy(pattern="LICENSE", dst="licenses")
+        self.copy(pattern="LICENSE", dst="licenses", src=self._source_subfolder)
 
     def package_info(self):
         self.cpp_info.libs = tools.collect_libs(self)
