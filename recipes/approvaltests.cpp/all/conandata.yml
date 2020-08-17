@@ -114,3 +114,8 @@ sources:
       sha256: 9a080f5f7c502998a08e1213fd66a884ca278e764e6555bb5eb305810adc28cc
     - url: "https://raw.githubusercontent.com/approvals/ApprovalTests.cpp/v.10.2.1/LICENSE"
       sha256: c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4
+  10.3.0:
+    - url: https://github.com/approvals/ApprovalTests.cpp/releases/download/v.10.3.0/ApprovalTests.v.10.3.0.hpp
+      sha256: 2d86c0c2e09627620e065bbebae5676c7f69e78431bb82f1f7d74334275c9af9
+    - url: "https://raw.githubusercontent.com/approvals/ApprovalTests.cpp/v.10.3.0/LICENSE"
+      sha256: c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4
