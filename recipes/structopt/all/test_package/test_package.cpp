@@ -43,7 +43,10 @@ STRUCTOPT(Options, config_file, bind_address, verbose, log_level, user, files);
 int main(int argc, char *argv[]) {
 
   try {
-    auto options = structopt::app("my_app").parse<Options>(argc, argv);
+    const auto args = std::vector<std::string>{"./main", "config_2.csv", "--bind-address", "192.168.7.3",
+					       "-log-level", "debug", "file1.txt", "file2.txt", "file3.txt",
+					       "file4.txt", "--user", "John Doe", "john.doe@foo.com"};
+    auto options = structopt::app("my_app").parse<Options>(args);
 
     // Print out parsed arguments:
 
