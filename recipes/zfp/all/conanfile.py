@@ -21,6 +21,7 @@ class ZfpConan(ConanFile):
         "with_cache_twoway": [True, False],
         "with_cache_fast_hash": [True, False],
         "with_cache_profile": [True, False],
+        "with_cuda": [True, False],
         "with_openmp": [True, False],
     }
     default_options = {
@@ -32,6 +33,7 @@ class ZfpConan(ConanFile):
         "with_cache_twoway": False,
         "with_cache_fast_hash": False,
         "with_cache_profile": False,
+        "with_cuda": False,
         "with_openmp": False,
     }
 
@@ -52,6 +54,10 @@ class ZfpConan(ConanFile):
     def configure(self):
         if self.options.shared:
             del self.options.fPIC
+        if self.options.with_cuda:
+            self.output.warn("Conan package for CUDA is not available, this package will be used from system.")
+        if self.options.with_openmp:
+            self.output.warn("Conan package for OpenMP is not available, this package will be used from system.")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
@@ -70,6 +76,7 @@ class ZfpConan(ConanFile):
         self._cmake.definitions["ZFP_WITH_CACHE_TWOWAY"] = self.options.with_cache_twoway
         self._cmake.definitions["ZFP_WITH_CACHE_FAST_HASH"] = self.options.with_cache_fast_hash
         self._cmake.definitions["ZFP_WITH_CACHE_PROFILE"] = self.options.with_cache_profile
+        self._cmake.definitions["ZFP_WITH_CUDA"] = self.options.with_cuda
         self._cmake.definitions["ZFP_WITH_OPENMP"] = self.options.with_openmp
         if self.settings.os != "Windows" and not self.options.shared:
             self._cmake.definitions["ZFP_ENABLE_PIC"] = self.options.fPIC
