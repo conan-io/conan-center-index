@@ -75,6 +75,8 @@ class OisConan(ConanFile):
 
     def package_info(self):
         self.cpp_info.libs = tools.collect_libs(self)
+        self.cpp_info.names["cmake_find_package"] = "OIS"
+        self.cpp_info.names["cmake_find_package_multi"] = "OIS"
 
         if self.settings.os == "Macos":
             self.cpp_info.frameworks = ["Foundation", "Cocoa", "IOKit"]
