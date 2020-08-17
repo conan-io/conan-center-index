@@ -10,7 +10,7 @@ class ArduinojsonConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     topics = ("json", "arduino", "iot", "embedded", "esp8266")
     no_copy_source = True
-    
+
     @property
     def _source_subfolder(self):
         return "source_subfolder"
@@ -21,8 +21,5 @@ class ArduinojsonConan(ConanFile):
 
     def package(self):
         self.copy("*LICENSE*", dst="licenses", src=self._source_subfolder)
-        self.copy("*.h", dst="include", src=self._source_subfolder)
-        self.copy("*.hpp", dst="include", src=self._source_subfolder)
-
-    def package_info(self):
-        self.cpp_info.includedirs.append(os.path.join("include", "src"))
+        self.copy("*.h", dst="include", src=os.path.join(self._source_subfolder, "src"))
+        self.copy("*.hpp", dst="include", src=os.path.join(self._source_subfolder, "src"))
