@@ -18,15 +18,6 @@
    if(NOT DEFINED DCMTK_USE_ICU)
 --- Modules/ThirdParty/Eigen3/CMakeLists.txt
 +++ Modules/ThirdParty/Eigen3/CMakeLists.txt
-@@ -5,7 +5,7 @@
- mark_as_advanced(ITK_USE_SYSTEM_EIGEN)
- 
- if(ITK_USE_SYSTEM_EIGEN)
--  set(_eigen_itk_target Eigen3::Eigen)
-+  set(_eigen_itk_target Eigen3::Eigen3)
- else()
-   set(_eigen_itk_target ITKInternalEigen3::Eigen)
- endif()
 @@ -52,9 +52,9 @@
  
  if(ITK_USE_SYSTEM_EIGEN)
@@ -76,8 +67,7 @@
 +find_package(Eigen3 REQUIRED)
  add_executable(main main.cpp)
  target_link_libraries(main PUBLIC ${ITK_LIBRARIES})
--target_link_libraries(main PUBLIC Eigen3::Eigen)
-+target_link_libraries(main PUBLIC Eigen3::Eigen3)
+ target_link_libraries(main PUBLIC Eigen3::Eigen)
  \endcode
   *
   * Then, the user can use Eigen3 as usual:
