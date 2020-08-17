@@ -83,7 +83,7 @@ class PahoMqttcConan(ConanFile):
         self.copy("notice.html", src=self._source_subfolder, dst="licenses")
         cmake = self._configure_cmake()
         cmake.install()
-        tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
+        tools.rmdir(os.path.join(self.package_folder, "lib", "cmake", "share"))
 
     def package_info(self):
         self.cpp_info.libs = tools.collect_libs(self)
