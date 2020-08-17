@@ -12,5 +12,5 @@ class TestPackageConan(ConanFile):
         cmake.build()
 
     def test(self):
-        bin_path = os.path.join("bin", "list_network")
+        bin_path = os.path.join("bin", "test_package")
         self.run(bin_path, run_environment=True)
