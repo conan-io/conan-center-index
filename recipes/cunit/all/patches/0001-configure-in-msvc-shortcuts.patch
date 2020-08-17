@@ -1,0 +1,39 @@
+--- configure.in
++++ configure.in
+@@ -26,7 +26,7 @@
+ 
+ TOPDIR=`pwd`
+ 
+-CFLAGS="$CFLAGS -DRELEASE=@RELEASE@ -Wall -W -pedantic -Wshadow -ansi -I${PWD}/CUnit/Headers -std=c99"
++CFLAGS="$CFLAGS -DRELEASE=@RELEASE@ -pedantic -ansi -I${PWD}/CUnit/Headers -std=c99"
+ LDFLAGS="$LDFLAGS -L${PWD}/CUnit/Sources"
+ 
+ AC_ARG_ENABLE(debug,
+@@ -186,13 +186,13 @@
+ AC_CHECK_FUNC(calloc, [], [echo calloc not found; exit 1])
+ AC_CHECK_FUNC(realloc, [], [echo realloc not found; exit 1])
+ 
+-AC_CHECK_FUNC(strcpy, [], [echo strcpy not found; exit 1])
++dnl AC_CHECK_FUNC(strcpy, [], [echo strcpy not found; exit 1])
+ AC_CHECK_FUNC(strerror, [], [echo strerror not found; exit 1])
+ 
+ AC_CHECK_FUNC(fopen, [], [echo fopen not found; exit 1])
+ AC_CHECK_FUNC(fclose, [], [echo fclose not found; exit 1])
+-AC_CHECK_FUNC(fprintf, [], [echo fprintf not found; exit 1])
+-AC_CHECK_FUNC(snprintf, [], [echo snprintf not found; exit 1])
++dnl AC_CHECK_FUNC(fprintf, [], [echo fprintf not found; exit 1])
++dnl AC_CHECK_FUNC(snprintf, [], [echo snprintf not found; exit 1])
+ AC_CHECK_FUNC(setvbuf, [], [echo setvbuf not found; exit 1])
+ 
+ AC_CHECK_FUNC(time, [], [echo time not found; exit 1])
+--- CUnit/Sources/Makefile.am
++++ CUnit/Sources/Makefile.am
+@@ -67,7 +67,7 @@
+ lib_LTLIBRARIES = libcunit.la
+ libcunit_la_SOURCES = 
+ libcunit_la_LIBADD = $(OBJECT_FILES_SHARED)
+-libcunit_la_LDFLAGS = -version-info @LIBTOOL_CURRENT@:@LIBTOOL_REVISION@:@LIBTOOL_AGE@
++libcunit_la_LDFLAGS = -version-info @LIBTOOL_CURRENT@:@LIBTOOL_REVISION@:@LIBTOOL_AGE@ -no-undefined
+ 
+ 
+ if ENABLE_TEST
