@@ -13,6 +13,20 @@ class VulkanLoaderConan(ConanFile):
     exports_sources = ["CMakeLists.txt"]
     settings = "os", "arch", "build_type", "compiler"
     generators = "cmake", "cmake_find_package"
+    options = {
+        "fPIC": [True, False],
+        "with_wsi_xcb": [True, False],
+        "with_wsi_xlib": [True, False],
+        "with_wsi_wayland": [True, False],
+        "with_wsi_directfb": [True, False],
+    }
+    default_options = {
+        "fPIC": True,
+        "with_wsi_xcb": False,
+        "with_wsi_xlib": False,
+        "with_wsi_wayland": False,
+        "with_wsi_directfb": False,
+    }
 
     _cmake = None
 
@@ -24,9 +38,23 @@ class VulkanLoaderConan(ConanFile):
     def _build_subfolder(self):
         return "build_subfolder"
 
+    def config_options(self):
+        if self.settings.os == "Windows":
+            del self.options.fPIC
+
     def configure(self):
         del self.settings.compiler.libcxx
         del self.settings.compiler.cppstd
+
+        if self.options.with_wsi_wayland:
+            self.output.warn("Conan package for Wayland is not available, this package will be used from system.")
+        if self.options.with_wsi_directfb:
+            self.output.warn("Conan package for DirectFB is not available, this package will be used from system.")
+
+    def requirements(self):
+        self.requires("vulkan-headers/{}".format(self.version))
+        if self.settings.os == "Linux" and (self.options.with_wsi_xcb or self.options.with_wsi_xlib):
+            self.requires("xorg/system")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
@@ -37,14 +65,17 @@ class VulkanLoaderConan(ConanFile):
         extracted_dir = "Vulkan-Loader-" + version
         os.rename(extracted_dir, self._source_subfolder)
 
-    def requirements(self):
-        self.requires("vulkan-headers/{}".format(self.version))
-
     def _configure_cmake(self):
         if self._cmake:
             return self._cmake
         self._cmake = CMake(self)
         self._cmake.definitions["BUILD_TESTS"] = False
+
+        self._cmake.definitions["BUILD_WSI_XCB_SUPPORT"] = self.options.with_wsi_xcb
+        self._cmake.definitions["BUILD_WSI_XLIB_SUPPORT"] = self.options.with_wsi_xlib
+        self._cmake.definitions["BUILD_WSI_WAYLAND_SUPPORT"] = self.options.with_wsi_wayland
+        self._cmake.definitions["BUILD_WSI_DIRECTFB_SUPPORT"] = self.options.with_wsi_directfb
+
         self._cmake.configure(build_folder=self._build_subfolder)
         return self._cmake
 
