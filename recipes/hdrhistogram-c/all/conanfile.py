@@ -34,6 +34,8 @@ class QuickfixConan(ConanFile):
     def configure(self):
         if self.options.shared:
             del self.options.fPIC
+        del self.settings.compiler.cppstd
+        del self.settings.compiler.libcxx
 
     def requirements(self):
         self.requires("zlib/1.2.11")

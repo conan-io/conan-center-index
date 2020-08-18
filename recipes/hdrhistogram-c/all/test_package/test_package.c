@@ -1,7 +1,8 @@
-#include <iostream>
 #include <hdr_histogram.h>
 
-int main(int argc, char** argv)
+#include <stdio.h>
+
+int main()
 {
   struct hdr_histogram* h = NULL;
 
