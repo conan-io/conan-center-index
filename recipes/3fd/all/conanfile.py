@@ -1,4 +1,5 @@
 from conans import CMake, ConanFile, tools
+from conans.errors import ConanInvalidConfiguration
 import glob
 import os
 
@@ -36,11 +37,21 @@ class ThreeFDConan(ConanFile):
         if self.settings.os == "Windows":
             del self.options.fPIC
 
+    _compiler_cppstd17 = {
+        "gcc": 7,
+        "clang": 4,
+        "Visual Studio": 16,
+    }
+
     def configure(self):
         if self.options.shared:
             del self.options.fPIC
-        del self.settings.compiler.libcxx
-        del self.settings.compiler.cppstd
+        if self.settings.compiler.cppstd:
+            tools.check_min_cppstd(self, 17)
+        compiler_version_required = self._compiler_cppstd17.get(str(self.settings.compiler))
+        if compiler_version_required:
+            if tools.Version(self.settings.compiler.version) < compiler_version_required:
+                raise ConanInvalidConfiguration("3fd requires a compiler supporting c++17")
 
     def requirements(self):
         self.requires("nanodbc/cci.20200807")
@@ -54,7 +65,7 @@ class ThreeFDConan(ConanFile):
         if self._cmake:
             return self._cmake
         self._cmake = CMake(self)
-        self._cmake.definitions["CONAN_INSTALL_DIR"] = self.install_folder.replace("\\", "/")
+        self._cmake.definitions["CMAKE_CXX_STANDARD"] = 17
         self._cmake.configure(build_folder=self._build_subfolder)
         return self._cmake
 
@@ -68,7 +79,6 @@ class ThreeFDConan(ConanFile):
 
     def package(self):
         self.copy("LICENSE", src=self._source_subfolder, dst="licenses")
-        self.copy("LICENSE", src=os.path.join(self._source_subfolder, "gtest"), dst="licenses")
         cmake = self._configure_cmake()
         cmake.install()
 
