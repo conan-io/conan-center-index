@@ -29,7 +29,7 @@ class BotanConan(ConanFile):
     default_options = {'amalgamation': True,
                        'with_bzip2': False,
                        'with_openssl': False,
-                       'shared': True,
+                       'shared': False,
                        'fPIC': True,
                        'single_amalgamation': False,
                        'with_sqlite3': False,
