@@ -61,8 +61,7 @@ class CorradeConan(ConanFile):
             self._cmake = CMake(self)
             def add_cmake_option(option, value):
                 var_name = "{}".format(option).upper()
-                value_str = "{}".format(value)
-                var_value = "ON" if value_str == 'True' else "OFF" if value_str == 'False' else value_str 
+                var_value = bool(value)
                 self._cmake.definitions[var_name] = var_value
 
             for option, value in self.options.items():
