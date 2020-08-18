@@ -48,8 +48,7 @@ class CzmqConan(ConanFile):
             self.requires("libcurl/7.71.1")
         if self.options.with_lz4:
             self.requires("lz4/1.9.2")
-        if self.settings.os != "Windows":
-            if self.options.with_libuuid:
+        if self.options.get_safe("with_libuuid"):
                 self.requires("libuuid/1.0.3")
 
     def source(self):
@@ -100,3 +99,10 @@ class CzmqConan(ConanFile):
             self.cpp_info.components["libczmq"].system_libs.append("rpcrt4")
         if not self.options.shared:
             self.cpp_info.components["libczmq"].defines.append("CZMQ_STATIC")
+        self.cpp_info.components["libczmq"].requires = ["openssl::openssl", "zeromq::zeromq"]
+        if self.options.with_libcurl:
+            self.cpp_info.components["libczmq"].requires.append("libcurl::libcurl")
+        if self.options.with_lz4:
+            self.cpp_info.components["libczmq"].requires.append("lz4::lz4")
+        if self.options.get_safe("with_libuuid"):
+            self.cpp_info.components["libczmq"].requires.append("libuuid::libuuid")
