@@ -1,6 +1,5 @@
 from conans import ConanFile, tools, CMake
 import os
-import glob
 
 
 class VorbisConan(ConanFile):
@@ -10,11 +9,16 @@ class VorbisConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://xiph.org/vorbis/"
     license = "BSD-3-Clause"
-    exports_sources = ["CMakeLists.txt"]
+    exports_sources = "CMakeLists.txt", "patches/**"
     settings = "os", "arch", "build_type", "compiler"
-    options = {"shared": [True, False], "fPIC": [True, False]}
-    default_options = {"shared": False, "fPIC": True}
-    requires = "ogg/1.3.4"
+    options = {
+        "shared": [True, False],
+        "fPIC": [True, False],
+    }
+    default_options = {
+        "shared": False,
+        "fPIC": True,
+    }
     generators = "cmake"
 
     _cmake = None
@@ -22,6 +26,9 @@ class VorbisConan(ConanFile):
     @property
     def _source_subfolder(self):
         return  "source_subfolder"
+
+    def requirements(self):
+        self.requires("ogg/1.3.4")
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -44,14 +51,6 @@ class VorbisConan(ConanFile):
         return self._cmake
 
     def build(self):
-        # if self.settings.os == "Windows":
-        #     with tools.chdir(self._source_subfolder):
-        #         tools.replace_in_file("vorbis.pc.in", "Libs.private: -lm", "Libs.private:")
-        # elif self.settings.os == "Linux":
-        #     if "LDFLAGS" in os.environ:
-        #         os.environ["LDFLAGS"] = os.environ["LDFLAGS"] + " -lm"
-        #     else:
-        #         os.environ["LDFLAGS"] = "-lm"
         cmake = self._configure_cmake()
         cmake.build()
 
@@ -63,8 +62,6 @@ class VorbisConan(ConanFile):
         tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
 
     def package_info(self):
-        # self.cpp_info.filenames["cmake_find_package_multi"] = "Vorbis"
-        # self.cpp_info.filenames["cmake_find_package_multi"] = "Vorbis"
         self.cpp_info.names["cmake_find_package"] = "Vorbis"
         self.cpp_info.names["cmake_find_package_multi"] = "Vorbis"
 
@@ -93,5 +90,3 @@ class VorbisConan(ConanFile):
 
         if self.settings.os == "Linux":
             self.cpp_info.components["libvorbis"].system_libs.append("m")
-            self.cpp_info.components["libvorbisenc"].system_libs.append("m")
-            self.cpp_info.components["libvorbisfile"].system_libs.append("m")
