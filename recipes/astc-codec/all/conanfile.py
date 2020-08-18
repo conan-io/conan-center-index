@@ -34,6 +34,10 @@ class AstcCodecConan(ConanFile):
         if self.settings.os == "Windows":
             del self.options.fPIC
 
+    def configure(self):
+        if self.settings.compiler.cppstd:
+            tools.check_min_cppstd(self, "11")
+
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
         extracted_dir = glob.glob("astc-codec-*")[0]
