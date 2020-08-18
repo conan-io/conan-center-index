@@ -9,13 +9,14 @@ class QuickfixConan(ConanFile):
     homepage = "https://github.com/HdrHistogram/HdrHistogram_c"
     description = "'C' port of High Dynamic Range (HDR) Histogram"
     topics = ("libraries", "c", "histogram")
+    exports_sources = ["CMakeLists.txt", "patches/**"]
+    generators = "cmake", "cmake_find_package"
     settings = "os", "compiler", "build_type", "arch"
     options = {"fPIC": [True, False],
                "shared": [True, False]}
     default_options = {"fPIC": True,
                        "shared": False}
-    generators = "cmake", "cmake_find_package"
-    exports_sources = "CMakeLists.txt"
+
     _cmake = None
 
     @property
@@ -54,6 +55,8 @@ class QuickfixConan(ConanFile):
         return self._cmake
 
     def build(self):
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            tools.patch(**patch)
         cmake = self._configure_cmake()
         cmake.build()
 
@@ -75,8 +78,5 @@ class QuickfixConan(ConanFile):
         self.cpp_info.components["hdr_histrogram"].requires = ["zlib::zlib"]
         if self.settings.os == "Linux":
             self.cpp_info.components["hdr_histrogram"].system_libs = ["m", "rt"]
-        elif self.settings.os == "Windows":
-            if self.options.shared:
-                self.cpp_info.components["hdr_histrogram"].bindirs = ["lib"]
-            else:
-                self.cpp_info.components["hdr_histrogram"].system_libs = ["ws2_32"]
+        elif self.settings.os == "Windows" and not self.options.shared:
+            self.cpp_info.components["hdr_histrogram"].system_libs = ["ws2_32"]
