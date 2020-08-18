@@ -91,6 +91,5 @@ class VorbisConan(ConanFile):
         self.cpp_info.components["Enc"].requires.append("libvorbisenc")
         self.cpp_info.components["File"].requires.append("libvorbisenc")
 
-        if not self.options.shared:
-            if self.settings.os == "Linux":
-                self.cpp_info.components["libvorbis"].system_libs.append("m")
+        if self.settings.os == "Linux":
+            self.cpp_info.components["libvorbis"].system_libs.append("m")
