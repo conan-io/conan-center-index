@@ -59,10 +59,12 @@ class VulkanLoaderConan(ConanFile):
 
     def package_info(self):
         self.cpp_info.libs = tools.collect_libs(self)
+
+        self.cpp_info.names["pkg_config"] = "Vulkan-Loader"
+        self.cpp_info.names["cmake_find_package"] = "Vulkan-Loader"
+        self.cpp_info.names["cmake_find_package_multi"] = "Vulkan-Loader"
+
         if self.settings.os != "Windows":
             self.cpp_info.system_libs.extend(["dl", "pthread", "m"])
         if self.settings.os == "Macos":
             self.cpp_info.frameworks.append("CoreFoundation")
-        self.cpp_info.names["pkg_config"] = "Vulkan-Loader"
-        self.cpp_info.names["cmake_find_package"] = "Vulkan-Loader"
-        self.cpp_info.names["cmake_find_package_multi"] = "Vulkan-Loader"
