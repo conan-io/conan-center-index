@@ -28,7 +28,7 @@ int main()
         std::cout << "Device Type:    " << vk::to_string(deviceProperties.deviceType) << std::endl;
         std::cout << "Memory Heaps:   " << deviceMemoryProperties.memoryHeapCount << std::endl;
     }
-    catch(const vk::IncompatibleDriverError& e)
+    catch(const vk::SystemError& e)
     {
         std::cerr << e.what() << '\n';
     }
