@@ -77,6 +77,8 @@ class AwsCCommon(ConanFile):
         self.cpp_info.components["aws-c-common-lib"].libs = ["aws-c-common"]
         if self.settings.os == "Linux":
             self.cpp_info.components["aws-c-common-lib"].system_libs = ["m", "pthread", "rt"]
+        elif self.settings.os == "Windows":
+            self.cpp_info.components["aws-c-common-lib"].system_libs = ["bcrypt", "ws2_32"]
         if not self.options.shared:
             if tools.is_apple_os(self.settings.os):
                 self.cpp_info.components["aws-c-common-lib"].frameworks = ["CoreFoundation"]
