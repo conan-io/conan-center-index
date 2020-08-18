@@ -1,3 +1,15 @@
+Upstreamed in 18f51bcf99101e5bf4c737239c44064227f34db8
+
+ncurses 6.2 - patch 20200229
+
+Upstreamed in 3e37c7d3fa122563a9d88168926f61286ef30cd3
+
+ncurses 6.2 - patch 20200523
+
+Upstreamed in d61c3c6a831d18ef0ed6f797ac97d60fffc2f158
+
+ncurses 6.2 - patch 20200711
+
 From 4a4d205735df2634a328c03629435f440cb5dd3c Mon Sep 17 00:00:00 2001
 From: Anonymous Maarten <anonymous.maarten@gmail.com>
 Date: Tue, 17 Mar 2020 15:38:08 +0100
@@ -190,11 +202,13 @@ index 55c65d1a..3a44d63b 100644
  		$3=[$]$2
  		;;
  	esac
-@@ -6759,6 +6807,37 @@ CF_EOF
+@@ -6759,6 +6807,110 @@ CF_EOF
  		CF_SHARED_SONAME
  		MK_SHARED_LIB='${CC} ${LDFLAGS} ${CFLAGS} -shared -Wl,-soname,'$cf_cv_shared_soname',-stats,-lc -o $[@]'
  		;;
 +	(mingw*msvc*)
++		LDFLAGS="$LDFLAGS user32.lib"
++		export LDFLAGS
 +		cf_cv_shlib_version=msvcdll
 +		cf_cv_shlib_version_infix=msvcdll
 +		shlibdir=$bindir
@@ -224,10 +238,101 @@ index 55c65d1a..3a44d63b 100644
 +		mv "\${IMPORT_LIB}" "\${IMPORT_LIB}"
 +CF_EOF
 +		chmod +x mk_shared_lib.sh
++		cat >mk_prog.sh <<-CF_EOF
++		#!$SHELL
++		shift
++		# Ignore first argument (compiler) and use LD (link.exe) unconditionally
++		LD="[$]LD"
++		clopts=()
++		ldopts=("/subsystem:console")
++		libs=()
++		isdll=0
++		while test \[$]# -gt 0; do
++			case "\[$]1" in
++				-link | -MT | -MD | -MTd | -MDd)
++					# ignore -link argument
++					;;
++				-dll)
++					isdll=1
++					;;
++				-W* | -w*)
++					# ignore warnings
++					;;
++				-D*)
++					clopts+=("\[$]1")
++					;;
++				-I*)
++					clopts+=("\[$]1")
++					;;
++				-l*)
++					libs+=("\`echo \"\[$]1\" | sed \"s/^-l//\"\`")
++					;;
++				-L*)
++					ldopts+=("\`echo \"\[$]1\" | sed \"s/^-L/-LIBPATH:/\"\`")
++					;;
++				*.obj | *.o)
++					ldopts+=("\[$]1")
++					;;
++				-Wl,*)
++					for linkarg in \`echo '\[$]1' | sed -e 's/-Wl,//' -e 's/,/ /'\`; do
++						ldopts+=("\[$]{linkarg}")
++					done
++					;;
++				*.lib)
++					ldopts+=("\[$]1")
++					;;
++				-o)
++					shift
++					ldopts+=("-out:\[$]1")
++					;;
++				*)
++					clopts+=("\[$]1")
++					ldopts+=("\[$]1")
++					;;
++			esac
++			shift
++		done
++		if [[ "\$isdll" -ne 0 ]]; then
++			for lib in \[$]{libs[[*]]}; do
++				ldopts+=("\[$]lib.dll.lib")
++			done
++		else
++			for lib in \[$]{libs[[*]]}; do
++				ldopts+=("\[$]lib.lib")
++			done
++		fi
++		cat <<-EOF
++		Creating program
++		** ld options:   "\[$]{ldopts[[@]]}"
++EOF
++		exec \[$]LD \[$]{ldopts[[@]]}
++CF_EOF
++		chmod +x mk_prog.sh
++		LINK_PROGS="$SHELL ${rel_builddir}/mk_prog.sh"
 +		;;
  	(mingw*)
  		cf_cv_shlib_version=mingw
  		cf_cv_shlib_version_infix=mingw
+--- configure.in
++++ configure.in
+@@ -2181,6 +2181,17 @@ fi
+ fi
+ WITH_OVERWRITE=$with_overwrite
+ 
++### At least on MinGW a shared library build without libtool
++### requires adding the additional libs to the link list.
++case $cf_cv_system_name in
++(*mingw32*|*mingw64*)
++	if test "$DFT_LWR_MODEL" != "libtool"; then
++   	   SHLIB_LIST="$SHLIB_LIST ${LIBS}"
++	fi
++	;;
++*)	;;
++esac
++
+ AC_SUBST(WITH_OVERWRITE)
+ AC_SUBST(TICS_LIST)
+ AC_SUBST(TINFO_LIST)
 diff --git a/mk-1st.awk b/mk-1st.awk
 index 480baad6..b6b7b06d 100644
 --- a/mk-1st.awk
