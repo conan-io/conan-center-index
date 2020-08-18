@@ -12,19 +12,26 @@ int main()
     vk::InstanceCreateInfo instanceCreateInfo;
     instanceCreateInfo.pApplicationInfo = &appInfo;
 
-    vk::Instance instance = vk::createInstance(instanceCreateInfo);
+    try
+    {
+        vk::Instance instance = vk::createInstance(instanceCreateInfo);
 
-    auto physicalDevices = instance.enumeratePhysicalDevices();
-    auto physicalDevice = physicalDevices[0];
-    auto deviceProperties = physicalDevice.getProperties();
-    auto deviceMemoryProperties = physicalDevice.getMemoryProperties();
+        auto physicalDevices = instance.enumeratePhysicalDevices();
+        auto physicalDevice = physicalDevices[0];
+        auto deviceProperties = physicalDevice.getProperties();
+        auto deviceMemoryProperties = physicalDevice.getMemoryProperties();
 
-    std::cout << "Vulkan device created" << std::endl;
-    std::cout << "API Version:    " << deviceProperties.apiVersion << std::endl;
-    std::cout << "Driver Version: " << deviceProperties.driverVersion << std::endl;
-    std::cout << "Device Name:    " << deviceProperties.deviceName << std::endl;
-    std::cout << "Device Type:    " << vk::to_string(deviceProperties.deviceType) << std::endl;
-    std::cout << "Memory Heaps:   " << deviceMemoryProperties.memoryHeapCount << std::endl;
+        std::cout << "Vulkan device created" << std::endl;
+        std::cout << "API Version:    " << deviceProperties.apiVersion << std::endl;
+        std::cout << "Driver Version: " << deviceProperties.driverVersion << std::endl;
+        std::cout << "Device Name:    " << deviceProperties.deviceName << std::endl;
+        std::cout << "Device Type:    " << vk::to_string(deviceProperties.deviceType) << std::endl;
+        std::cout << "Memory Heaps:   " << deviceMemoryProperties.memoryHeapCount << std::endl;
+    }
+    catch(const vk::IncompatibleDriverError& e)
+    {
+        std::cerr << e.what() << '\n';
+    }
 
     return 0;
 }
