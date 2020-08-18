@@ -45,7 +45,7 @@ class CzmqConan(ConanFile):
         self.requires("openssl/1.1.1g")  # zdigest depends on openssl
         self.requires("zeromq/4.3.2")
         if self.options.with_libcurl:
-            self.requires("libcurl/7.69.1")
+            self.requires("libcurl/7.71.1")
         if self.options.with_lz4:
             self.requires("lz4/1.9.2")
         if self.settings.os != "Windows":
