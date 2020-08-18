@@ -2,5 +2,5 @@
 
 int main() {
     _3fd::core::FrameworkInstance _framework;
-    return 0
+    return 0;
 }
