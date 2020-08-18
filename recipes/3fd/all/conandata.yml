@@ -6,3 +6,5 @@ patches:
   "cci.20200708":
     - base_path: "source_subfolder"
       patch_file: "patches/0001-add-shared-support.patch"
+    - base_path: "source_subfolder"
+      patch_file: "patches/0002-add-macos-support.cmake"
