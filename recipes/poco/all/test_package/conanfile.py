@@ -8,7 +8,7 @@ class TestPackageConan(ConanFile):
 
     @property
     def _with_encodings(self):
-        return "enable_encodings" in self.options["pocos"] and self.options["poco"].enable_encodings == True
+        return "enable_encodings" in self.options["poco"] and self.options["poco"].enable_encodings == True
 
     @property
     def _with_jwt(self):
