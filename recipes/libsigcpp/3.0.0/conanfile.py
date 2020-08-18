@@ -35,8 +35,6 @@ class LibSigCppConan(ConanFile):
 
     def configure(self):
         compiler_version = Version(self.settings.compiler.version)
-        if not self.options.shared:
-            raise ConanInvalidConfiguration("This library supported shared option only")
         if self.settings.compiler.cppstd and \
            not self.settings.compiler.cppstd in self._supported_cppstd:
           raise ConanInvalidConfiguration("This library requires c++17 standard or higher."
