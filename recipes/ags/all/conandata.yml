@@ -1,0 +1,4 @@
+sources:
+  "5.4.1":
+    url: https://github.com/GPUOpen-LibrariesAndSDKs/AGS_SDK/archive/v5.4.1.tar.gz
+    sha256: d72766152bc83fe75c12a26db02fcf01dcff269817994dc337c7eca52d69a669
