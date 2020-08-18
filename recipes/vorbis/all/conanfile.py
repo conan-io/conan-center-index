@@ -93,3 +93,5 @@ class VorbisConan(ConanFile):
 
         if self.settings.os == "Linux":
             self.cpp_info.components["libvorbis"].system_libs.append("m")
+            self.cpp_info.components["libvorbisenc"].system_libs.append("m")
+            self.cpp_info.components["libvorbisfile"].system_libs.append("m")
