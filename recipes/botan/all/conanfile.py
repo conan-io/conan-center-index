@@ -1,7 +1,7 @@
 import os
 from conans import ConanFile, tools
 from conans.errors import ConanException, ConanInvalidConfiguration
-from conans.model.version import Version
+from conans.tools import Version
 
 
 class BotanConan(ConanFile):
@@ -57,7 +57,7 @@ class BotanConan(ConanFile):
         if self.options.with_bzip2:
             self.requires("bzip2/1.0.6")
         if self.options.with_openssl:
-            self.requires("openssl/1.0.2t")
+            self.requires("openssl/1.0.2u")
         if self.options.with_zlib:
             self.requires("zlib/1.2.11")
         if self.options.with_sqlite3:
