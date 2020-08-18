@@ -12,10 +12,11 @@ class SiConan(ConanFile):
          for handling pyhsical values defined in the International System of Units."
     topics = ("physical units", "SI-unit-conversion",
               "cplusplus-library", "cplusplus-17")
-    exports_sources = "include/*", "CMakeLists.txt", "test/*", "doc/CMakeLists.txt", "doc/*.md", "cmake/SIConfig.cmake.in"
+    exports_sources = "include/*", "CMakeLists.txt", "test/*", "doc/CMakeLists.txt", "doc/*.md"
     no_copy_source = True
-    generators = "cmake", "txt", "cmake_find_package"
-    build_requires = "Catch2/2.11.1@catchorg/stable"
+    generators = "cmake", "cmake_find_package"
+
+    _cmake = None
 
     @property
     def _source_subfolder(self):
@@ -25,19 +26,22 @@ class SiConan(ConanFile):
     def _build_subfolder(self):
         return "build_subfolder"
 
-
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
-        extracted_folder = "si-{}".format(self.version)
+        extracted_folder = "SI-{}".format(self.version)
         os.rename(extracted_folder, self._source_subfolder)
 
     def _configure_cmake(self):
-        cmake = CMake(self)
-        # Add additional settings with cmake.definitions["SOME_DEFINITION"] = True
-        cmake.configure()
-        return cmake
+        if not self._cmake:
+            self._cmake = CMake(self)
+            # Add additional settings with cmake.definitions["SOME_DEFINITION"] = True
+            self._cmake.definitions["SI_BUILD_TESTING"] = "OFF"
+            self._cmake.definitions["SI_BUILD_DOC"] = "OFF"
+            self._cmake.definitions["SI_INSTALL_LIBRARY"] = "ON"
+            self._cmake.configure(
+                source_folder=self._source_subfolder, build_folder=self._build_subfolder)
+        return self._cmake
 
-    
     def build(self):
         cmake = self._configure_cmake()
         cmake.build()
