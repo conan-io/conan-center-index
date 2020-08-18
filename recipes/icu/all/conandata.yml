@@ -12,9 +12,6 @@ sources:
     url: "https://github.com/unicode-org/icu/releases/download/release-67-1/icu4c-67_1-src.tgz"
     sha256: "94a80cd6f251a53bd2a997f6f1b5ac6653fe791dfab66e1eb0227740fb86d5dc"
 patches:
-  "64.2": []
-  "65.1": []
-  "66.1": []
   "67.1":
     - patch_file: "patches/6aba9344a18f4f32e8070ee53b79495630901c26.patch"
       base_path: "source_subfolder"
