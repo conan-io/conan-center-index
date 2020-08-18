@@ -1,0 +1,22 @@
+--- 3fd/utils/utils_memorypool.cpp
++++ 3fd/utils/utils_memorypool.cpp
+@@ -6,7 +6,7 @@
+ #include "pch.h"
+ #include "utils_memory.h"
+ #include <3fd/core/exceptions.h>
+-
++#include <cstdlib>
+ #include <cassert>
+ #include <cstring>
+ #include <sstream>
+--- 3fd/core/gc_garbagecollector.cpp
++++ 3fd/core/gc_garbagecollector.cpp
+@@ -13,7 +13,7 @@
+ #include <condition_variable>
+ #include <iomanip>
+ #include <sstream>
+-
++#include <cstdlib>
+ namespace _3fd
+ {
+     using std::string;
