@@ -47,8 +47,10 @@ class VulkanLoaderConan(ConanFile):
         del self.settings.compiler.cppstd
 
         if self.options.with_wsi_wayland:
+            # TODO wayland package
             self.output.warn("Conan package for Wayland is not available, this package will be used from system.")
         if self.options.with_wsi_directfb:
+            # TODO directfb package
             self.output.warn("Conan package for DirectFB is not available, this package will be used from system.")
 
     def requirements(self):
