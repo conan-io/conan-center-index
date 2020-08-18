@@ -1,5 +1,4 @@
 from conans import ConanFile, CMake, tools
-from conans.errors import ConanInvalidConfiguration
 import os
 
 
@@ -15,7 +14,6 @@ class QuickfixConan(ConanFile):
                "shared": [True, False]}
     default_options = {"fPIC": True,
                        "shared": False}
-    requires = "zlib/1.2.11"
     generators = "cmake", "cmake_find_package"
     exports_sources = "CMakeLists.txt"
     _cmake = None
@@ -27,6 +25,21 @@ class QuickfixConan(ConanFile):
     @property
     def _build_subfolder(self):
         return "build_subfolder"
+
+    def config_options(self):
+        if self.settings.os == "Windows":
+            del self.options.fPIC
+
+    def configure(self):
+        if self.options.shared:
+            del self.options.fPIC
+
+    def requirements(self):
+        self.requires("zlib/1.2.11")
+
+    def source(self):
+        tools.get(**self.conan_data["sources"][self.version])
+        os.rename("HdrHistogram_c-" + self.version, self._source_subfolder)
 
     def _configure_cmake(self):
         if not self._cmake:
@@ -40,18 +53,6 @@ class QuickfixConan(ConanFile):
             self._cmake.configure(build_dir=self._build_subfolder)
         return self._cmake
 
-    def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        os.rename("HdrHistogram_c-" + self.version, self._source_subfolder)
-
-    def config_options(self):
-        if self.settings.os == "Windows":
-            del self.options.fPIC
-
-    def configure(self):
-        if self.options.shared:
-            del self.options.fPIC
-
     def build(self):
         cmake = self._configure_cmake()
         cmake.build()
@@ -64,13 +65,18 @@ class QuickfixConan(ConanFile):
         tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
 
     def package_info(self):
-        self.cpp_info.libs = tools.collect_libs(self)
-        self.cpp_info.includedirs = ["include", os.path.join("include", "hdr")]
-
+        self.cpp_info.names["cmake_find_package"] = "hdr_histogram"
+        self.cpp_info.names["cmake_find_package_multi"] = "hdr_histogram"
+        hdr_histogram_target = "hdr_histogram" if self.options.shared else "hdr_histogram_static"
+        self.cpp_info.components["hdr_histrogram"].names["cmake_find_package"] = hdr_histogram_target
+        self.cpp_info.components["hdr_histrogram"].names["cmake_find_package_multi"] = hdr_histogram_target
+        self.cpp_info.components["hdr_histrogram"].libs = tools.collect_libs(self)
+        self.cpp_info.components["hdr_histrogram"].includedirs = ["include", os.path.join("include", "hdr")]
+        self.cpp_info.components["hdr_histrogram"].requires = ["zlib::zlib"]
         if self.settings.os == "Linux":
-            self.cpp_info.system_libs = ["m", "rt"]
+            self.cpp_info.components["hdr_histrogram"].system_libs = ["m", "rt"]
         elif self.settings.os == "Windows":
             if self.options.shared:
-                self.cpp_info.bindirs = ["lib"]
+                self.cpp_info.components["hdr_histrogram"].bindirs = ["lib"]
             else:
-                self.cpp_info.system_libs.extend(["ws2_32"])
+                self.cpp_info.components["hdr_histrogram"].system_libs = ["ws2_32"]
