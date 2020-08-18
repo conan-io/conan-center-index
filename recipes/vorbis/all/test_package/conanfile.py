@@ -12,6 +12,6 @@ class TestPackageConan(ConanFile):
         cmake.build()
 
     def test(self):
-        with tools.chdir("bin"):
-            self.run("test_package < %s > sample.ogg" % os.path.join(self.source_folder, '8kadpcm.wav'),
-                     run_environment=True)
+        if not tools.cross_building(self.settings):
+            bin_path = os.path.join("bin", "test_package")
+            self.run("{} < {} > sample.ogg".format(bin_path, os.path.join(self.source_folder, '8kadpcm.wav')), run_environment=True)
