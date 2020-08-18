@@ -13,8 +13,6 @@ class LibSigCppConan(ConanFile):
     description = "libsigc++ implements a typesafe callback system for standard C++."
     topics = ("conan", "libsigcpp", "callback")
     settings = "os", "compiler", "arch", "build_type"
-    options = {"shared": [True, False], "fPIC": [True, False]}
-    default_options = {"shared": True, "fPIC": True}
     exports_sources = ["CMakeLists.txt", "*.patch"]
     generators = "cmake"
 
@@ -34,10 +32,6 @@ class LibSigCppConan(ConanFile):
         supported_compilers = [("apple-clang", 10), ("clang", 6), ("gcc", 7), ("Visual Studio", 15.7)]
         compiler, version = self.settings.compiler, Version(self.settings.compiler.version)
         return any(compiler == sc[0] and version >= sc[1] for sc in supported_compilers)
-
-    def config_options(self):
-        if self.settings.os == "Windows":
-            del self.options.fPIC
 
     def configure(self):
         compiler_version = Version(self.settings.compiler.version)
