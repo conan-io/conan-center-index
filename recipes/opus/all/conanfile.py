@@ -70,7 +70,7 @@ class OpusConan(ConanFile):
     def package_info(self):
         self.cpp_info.names["cmake_find_package"] = "Opus"
         self.cpp_info.names["cmake_find_package_multi"] = "Opus"
-        self.cpp_info.components["libopus"].libs = tools.collect_libs(self)
+        self.cpp_info.components["libopus"].libs = ["opus"]
         self.cpp_info.components["libopus"].includedirs.append(os.path.join("include", "opus"))
         self.cpp_info.components["libopus"].names["cmake_find_package"] = "opus"
         self.cpp_info.components["libopus"].names["cmake_find_package_multi"] = "opus"
