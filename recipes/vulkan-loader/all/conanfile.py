@@ -88,6 +88,7 @@ class VulkanLoaderConan(ConanFile):
         cmake.install()
         self.copy("LICENSE.txt", dst="licenses", src=self._source_subfolder)
         tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
+        tools.rmdir(os.path.join(self.package_folder, "loader"))
 
     def package_info(self):
         self.cpp_info.libs = tools.collect_libs(self)
