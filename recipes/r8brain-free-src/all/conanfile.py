@@ -8,9 +8,9 @@ class R8brainFreeSrcConan(ConanFile):
     name = "r8brain-free-src"
     license = "MIT"
     url = "https://github.com/conan-io/conan-center-index"
-    homepage = "https://github.com/avaneev/r8brain-free-srcn"
+    homepage = "https://github.com/avaneev/r8brain-free-src"
     description = "High-quality pro audio sample rate converter / resampler C++ library"
-    topics = ("Audio", "Sample Rate", "Conversion")
+    topics = ("audio", "sample-rate", "conversion", "audio-processing", "resampler")
     exports_sources = ["CMakeLists.txt"]
     settings = "os", "compiler", "build_type", "arch"
     generators = "cmake"
