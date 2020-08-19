@@ -13,7 +13,7 @@ class FollyConan(ConanFile):
     license = "Apache-2.0"
     settings = "os", "arch", "compiler", "build_type"
     options = {"shared": [True, False], "fPIC": [True, False]}
-    default_options = {"shared": False, "fPIC": True}
+    default_options = {"shared": True, "fPIC": True}
     exports_sources = ["CMakeLists.txt", "patches/*"]
     generators = "cmake", "cmake_find_package"
 
@@ -73,6 +73,10 @@ class FollyConan(ConanFile):
                 self.options.shared:
             raise ConanInvalidConfiguration(
                 "Folly could not be built on Windows as shared library")
+        elif Version(self.version) >= "2020.08.10.00" and \
+                self.settings.compiler == "clang" and self.options.shared:
+            raise ConanInvalidConfiguration(
+                "Folly could not be built by clang as shared library")
 
     def requirements(self):
         self.requires("boost/1.73.0")
@@ -104,7 +108,8 @@ class FollyConan(ConanFile):
     def _configure_cmake(self):
         if not self._cmake:
             self._cmake = CMake(self)
-            self._cmake.definitions["CXX_STD"] = self.settings.get_safe("compiler.cppstd") or "c++14"
+            self._cmake.definitions["CXX_STD"] = self.settings.get_safe(
+                "compiler.cppstd") or "c++14"
             if self.settings.compiler == "Visual Studio":
                 self._cmake.definitions["MSVC_ENABLE_ALL_WARNINGS"] = False
                 self._cmake.definitions["MSVC_USE_STATIC_RUNTIME"] = "MT" in self.settings.compiler.runtime
@@ -118,7 +123,8 @@ class FollyConan(ConanFile):
         cmake.build()
 
     def package(self):
-        self.copy(pattern="LICENSE", dst="licenses", src=self._source_subfolder)
+        self.copy(pattern="LICENSE", dst="licenses",
+                  src=self._source_subfolder)
         cmake = self._configure_cmake()
         cmake.install()
         tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
