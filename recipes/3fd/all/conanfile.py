@@ -52,6 +52,8 @@ class ThreeFDConan(ConanFile):
         if compiler_version_required:
             if tools.Version(self.settings.compiler.version) < compiler_version_required:
                 raise ConanInvalidConfiguration("3fd requires a compiler supporting c++17")
+        if self.settings.os == "Macos":
+            raise ConanInvalidConfiguration("Macos is not supported")
 
     def requirements(self):
         self.requires("nanodbc/cci.20200807")
