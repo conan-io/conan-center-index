@@ -22,7 +22,27 @@ class StructoptConan(ConanFile):
 
     def configure(self):
         if self.settings.compiler.cppstd:
-            tools.check_min_cppstd(self, 17)
+            tools.check_min_cppstd(self, "17")
+        else:
+            self.output.warn("%s recipe lacks information about the %s compiler"
+                             " standard version support" % (self.name, compiler))
+        
+        minimal_version = {
+            "Visual Studio": "16",
+            "gcc": "7.3",
+            "clang": "6",
+            "apple-clang": "10.0"
+        }
+
+        if compiler not in minimal_version:            
+            self.output.info("%s requires a compiler that supports at least"
+                             " C++17" % self.name)
+            return
+
+        if compiler_version < minimal_version[compiler]:
+            raise ConanInvalidConfiguration("%s requires a compiler that supports"
+                                            " at least C++17. %s %s is not" 
+                                            " supported." % (self.name, compiler, Version(self.settings.compiler.version)))
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
