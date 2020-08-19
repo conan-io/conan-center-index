@@ -235,33 +235,69 @@ class ICUBase(ConanFile):
     def package_info(self):
         self.cpp_info.names["cmake_find_package"] = "ICU"
         self.cpp_info.names["cmake_find_package_multi"] = "ICU"
-
-        def lib_name(lib):
-            name = lib
-            if self.settings.os == "Windows":
-                if not self.options.shared:
-                    name = "s" + name
-                if self.settings.build_type == "Debug":
-                    name += "d"
-            return name
-
-        libs = ["icuin" if self.settings.os == "Windows" else "icui18n",
-                "icuio", "icutest", "icutu", "icuuc",
-                "icudt" if self.settings.os == "Windows" else "icudata"]
-        self.cpp_info.libs = [lib_name(lib) for lib in libs]
-        self.cpp_info.bindirs.append("lib")
+        # icudata
+        self.cpp_info.components["icu-data"].names["cmake_find_package"] = "data"
+        self.cpp_info.components["icu-data"].names["cmake_find_package_multi"] = "data"
+        self.cpp_info.components["icu-data"].libs = [self._lib_name("icudt" if self.settings.os == "Windows" else "icudata")]
+        if not self.options.shared:
+            self.cpp_info.components["icu-data"].defines.append("U_STATIC_IMPLEMENTATION")
+        # Alias of data CMake component
+        self.cpp_info.components["icu-data-alias"].names["cmake_find_package"] = "dt"
+        self.cpp_info.components["icu-data-alias"].names["cmake_find_package_multi"] = "dt"
+        self.cpp_info.components["icu-data-alias"].requires = ["icu-data"]
+        # icuuc
+        self.cpp_info.components["icu-uc"].names["cmake_find_package"] = "uc"
+        self.cpp_info.components["icu-uc"].names["cmake_find_package_multi"] = "uc"
+        self.cpp_info.components["icu-uc"].names["pkg_config"] = "icu-uc"
+        self.cpp_info.components["icu-uc"].libs = [self._lib_name("icuuc")]
+        self.cpp_info.components["icu-uc"].requires = ["icu-data"]
+        if self.settings.os == "Linux":
+            self.cpp_info.components["icu-uc"].system_libs = ["m", "pthread"]
+            if self.options.with_dyload:
+                self.cpp_info.components["icu-uc"].system_libs.append("dl")
+        elif self.settings.os == "Windows":
+            self.cpp_info.components["icu-uc"].system_libs = ["advapi32"]
+        # icui18n
+        self.cpp_info.components["icu-i18n"].names["cmake_find_package"] = "i18n"
+        self.cpp_info.components["icu-i18n"].names["cmake_find_package_multi"] = "i18n"
+        self.cpp_info.components["icu-i18n"].names["pkg_config"] = "icu-i18n"
+        self.cpp_info.components["icu-i18n"].libs = [self._lib_name("icuin" if self.settings.os == "Windows" else "icui18n")]
+        self.cpp_info.components["icu-i18n"].requires = ["icu-uc"]
+        if self.settings.os == "Linux":
+            self.cpp_info.components["icu-i18n"].system_libs = ["m"]
+        # Alias of i18n CMake component
+        self.cpp_info.components["icu-i18n-alias"].names["cmake_find_package"] = "in"
+        self.cpp_info.components["icu-i18n-alias"].names["cmake_find_package_multi"] = "in"
+        self.cpp_info.components["icu-i18n-alias"].requires = ["icu-i18n"]
+        # icuio
+        self.cpp_info.components["icu-io"].names["cmake_find_package"] = "io"
+        self.cpp_info.components["icu-io"].names["cmake_find_package_multi"] = "io"
+        self.cpp_info.components["icu-io"].names["pkg_config"] = "icu-io"
+        self.cpp_info.components["icu-io"].libs = [self._lib_name("icuio")]
+        self.cpp_info.components["icu-io"].requires = ["icu-i18n", "icu-uc"]
+        # icutu
+        self.cpp_info.components["icu-tu"].names["cmake_find_package"] = "tu"
+        self.cpp_info.components["icu-tu"].names["cmake_find_package_multi"] = "tu"
+        self.cpp_info.components["icu-tu"].libs = [self._lib_name("icutu")]
+        self.cpp_info.components["icu-tu"].requires = ["icu-i18n", "icu-uc"]
+        if self.settings.os == "Linux":
+            self.cpp_info.components["icu-tu"].system_libs = ["pthread"]
+        # icutest
+        self.cpp_info.components["icu-test"].names["cmake_find_package"] = "test"
+        self.cpp_info.components["icu-test"].names["cmake_find_package_multi"] = "test"
+        self.cpp_info.components["icu-test"].libs = [self._lib_name("icutest")]
+        self.cpp_info.components["icu-test"].requires = ["icu-tu", "icu-uc"]
 
         if self.options.data_packaging in ["files", "archive"]:
             data_path = os.path.join(self.package_folder, "res", self._data_filename).replace("\\", "/")
             self.output.info("Appending ICU_DATA environment variable: {}".format(data_path))
             self.env_info.ICU_DATA.append(data_path)
 
-        if not self.options.shared:
-            self.cpp_info.defines.append("U_STATIC_IMPLEMENTATION")
-        if self.settings.os == "Linux":
-            if self.options.with_dyload:
-                self.cpp_info.system_libs.append("dl")
-            self.cpp_info.system_libs.append("pthread")
-
+    def _lib_name(self, lib):
+        name = lib
         if self.settings.os == "Windows":
-            self.cpp_info.system_libs.append("advapi32")
+            if not self.options.shared:
+                name = "s" + name
+            if self.settings.build_type == "Debug":
+                name += "d"
+        return name
