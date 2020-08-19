@@ -293,6 +293,10 @@ class ICUBase(ConanFile):
             self.output.info("Appending ICU_DATA environment variable: {}".format(data_path))
             self.env_info.ICU_DATA.append(data_path)
 
+        bin_path = os.path.join(self.package_folder, "bin")
+        self.output.info("Appending PATH environment variable: {}".format(bin_path))
+        self.env_info.PATH.append(bin_path)
+
     def _lib_name(self, lib):
         name = lib
         if self.settings.os == "Windows":
