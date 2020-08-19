@@ -23,7 +23,7 @@ if(ISBIGENDIAN)
 endif()
 
 include_directories(
-    common/include
+    ${JPEGXR_FOLDER}/common/include
     ${JPEGXR_FOLDER}/image/sys
     ${JPEGXR_FOLDER}/jxrgluelib
     ${JPEGXR_FOLDER}/jxrtestlib
