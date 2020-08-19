@@ -303,3 +303,7 @@ The file test_package/CMakeLists.txt should require CMake 3.1 by default: `cmake
 #### **<a name="KB-H049">#KB-H049</a>: "CMAKE WINDOWS EXPORT ALL SYMBOLS"**
 
 The CMakeLists.txt definitions [CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS](https://cmake.org/cmake/help/v3.4/variable/CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS.html) and [WINDOWS_EXPORT_ALL_SYMBOLS](https://cmake.org/cmake/help/v3.4/prop_tgt/WINDOWS_EXPORT_ALL_SYMBOLS.html) are available since CMake 3.4 only. Any previous version will ignore it.
+
+#### **<a name="KB-H050">#KB-H050</a>: "DEFAULT SHARED OPTION VALUE"**
+
+By default, all packages should be built as static library (the option ``shared`` is ``False`` in ``default_options``). However, some projects can be restricted to shared library only, for those cases, open a new [issue](https://github.com/conan-io/hooks/issues) to include the package name in the allowlist.
