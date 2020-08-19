@@ -59,10 +59,12 @@ class JxrlibConan(ConanFile):
         self.copy(pattern="LICENSE", dst="licenses", src=self._source_subfolder)
 
     def package_info(self):
-        self.cpp_info.libs = tools.collect_libs(self)
+        self.cpp_info.libs = ["jxrglue", "jpegxr"]
 
         if self.settings.os == "Linux":
             self.cpp_info.system_libs.append("m")
+        if self.settings.os != "Windows":
+            self.cpp_info.defines.append("__ANSI__")
 
         self.cpp_info.names["pkg_config"] = "libjxr"
         self.cpp_info.names["cmake_find_package"] = "JXR"

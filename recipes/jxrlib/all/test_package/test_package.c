@@ -1,6 +1,5 @@
 #include <stdio.h>
 
-#define INITGUID
 #include <JXRTest.h>
 
 int main(int argc, char* argv[])
