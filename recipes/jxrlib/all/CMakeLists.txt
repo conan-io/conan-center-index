@@ -6,8 +6,6 @@ conan_basic_setup()
 
 set(JPEGXR_FOLDER ${CMAKE_CURRENT_SOURCE_DIR}/source_subfolder)
 
-set(CMAKE_DEBUG_POSTFIX "d")
-
 if(NOT MSVC)
     add_definitions(-D__ANSI__)
 endif()
