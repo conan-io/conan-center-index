@@ -1,0 +1,31 @@
+--- CMakeLists.txt
++++ CMakeLists.txt
+@@ -53,17 +53,17 @@
+ message(STATUS "Configuring ${PROJECT_NAME} ${PROJECT_VERSION}")
+ 
+ # Find ogg dependency
+-if(NOT OGG_ROOT)
+-    find_package(PkgConfig QUIET)
+-    pkg_check_modules(PC_OGG QUIET ogg)
+-    find_path(OGG_INCLUDE_DIRS NAMES ogg/ogg.h HINTS ${PC_OGG_INCLUDE_DIRS} PATH_SUFFIXES ogg)
+-    find_library(OGG_LIBRARIES NAMES ogg HINTS ${PC_OGG_LIBRARY_DIRS})
+-else()
+-    find_path(OGG_INCLUDE_DIRS NAMES ogg/ogg.h HINTS ${OGG_ROOT}/include PATH_SUFFIXES ogg)
+-    find_library(OGG_LIBRARIES NAMES ogg HINTS ${OGG_ROOT}/lib ${OGG_ROOT}/lib64)
+-endif()
+-include(FindPackageHandleStandardArgs)
+-find_package_handle_standard_args(OGG DEFAULT_MSG OGG_INCLUDE_DIRS OGG_LIBRARIES)
++find_package(Ogg REQUIRED)
++set(OGG_LIBRARIES Ogg::ogg)
++set(OGG_INCLUDE_DIRS "${Ogg_INCLUDE_DIRS}")
++#    find_path(OGG_INCLUDE_DIRS NAMES ogg/ogg.h HINTS ${PC_OGG_INCLUDE_DIRS} PATH_SUFFIXES ogg)
++#    find_library(OGG_LIBRARIES NAMES ogg HINTS ${PC_OGG_LIBRARY_DIRS})
++#else()
++#    find_path(OGG_INCLUDE_DIRS NAMES ogg/ogg.h HINTS ${OGG_ROOT}/include PATH_SUFFIXES ogg)
++#    find_library(OGG_LIBRARIES NAMES ogg HINTS ${OGG_ROOT}/lib ${OGG_ROOT}/lib64)
++#endif()
++#include(FindPackageHandleStandardArgs)
++#find_package_handle_standard_args(OGG DEFAULT_MSG OGG_INCLUDE_DIRS OGG_LIBRARIES)
+ 
+ add_subdirectory(lib)
+ 
