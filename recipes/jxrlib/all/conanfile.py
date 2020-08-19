@@ -13,11 +13,9 @@ class JxrlibConan(ConanFile):
     generators = "cmake"
     settings = "os", "arch", "compiler", "build_type"
     options = {
-        "shared": [True, False],
         "fPIC": [True, False],
     }
     default_options = {
-        "shared": False,
         "fPIC": True,
     }
 
@@ -36,8 +34,6 @@ class JxrlibConan(ConanFile):
             del self.options.fPIC
 
     def configure(self):
-        if self.options.shared:
-            del self.options.fPIC
         del self.settings.compiler.libcxx
         del self.settings.compiler.cppstd
 

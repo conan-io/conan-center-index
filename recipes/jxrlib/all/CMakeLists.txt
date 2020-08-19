@@ -4,10 +4,6 @@ project(jxrlib C)
 include(conanbuildinfo.cmake)
 conan_basic_setup()
 
-if(WIN32 AND BUILD_SHARED_LIBS)
-    set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS ON)
-endif()
-
 set(JPEGXR_FOLDER ${CMAKE_CURRENT_SOURCE_DIR}/source_subfolder)
 
 set(CMAKE_DEBUG_POSTFIX "d")
