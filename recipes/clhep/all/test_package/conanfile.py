@@ -1,6 +1,6 @@
 import os
-from conans import ConanFile, CMake, tools
 
+from conans import ConanFile, CMake, tools
 
 class TestPackageConan(ConanFile):
     settings = "os", "compiler", "build_type", "arch"
@@ -8,10 +8,11 @@ class TestPackageConan(ConanFile):
 
     def build(self):
         cmake = CMake(self)
+        cmake.definitions["CLHEP_SHARED"] = self.options["clhep"].shared
         cmake.configure()
         cmake.build()
 
     def test(self):
         if not tools.cross_building(self.settings):
-            test_package = os.path.join("bin", "test_package")
-            self.run(test_package, run_environment=True)
+            bin_path = os.path.join("bin", "test_package")
+            self.run(bin_path, run_environment=True)
