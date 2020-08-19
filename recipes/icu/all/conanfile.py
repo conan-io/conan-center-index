@@ -75,15 +75,35 @@ class ICUBase(ConanFile):
             run_configure_icu_file = os.path.join(self._source_subfolder, "source", "runConfigureICU")
 
             flags = "-%s" % self.settings.compiler.runtime
-            if self.settings.get_safe("build_type") in ["Debug", "RelWithDebInfo"] and tools.Version(self.settings.compiler.version) >= "12":
+            if self.settings.build_type in ["Debug", "RelWithDebInfo"] and tools.Version(self.settings.compiler.version) >= "12":
                 flags += " -FS"
             tools.replace_in_file(run_configure_icu_file, "-MDd", flags)
             tools.replace_in_file(run_configure_icu_file, "-MD", flags)
 
         self._workaround_icu_20545()
 
+        env_build = self._configure_autotools()
+        build_dir = os.path.join(self.build_folder, self._source_subfolder, "build")
+        os.mkdir(build_dir)
+        with tools.vcvars(self.settings) if self._is_msvc else tools.no_op():
+            with tools.environment_append(env_build.vars):
+                with tools.chdir(build_dir):
+                    # workaround for https://unicode-org.atlassian.net/browse/ICU-20531
+                    os.makedirs(os.path.join("data", "out", "tmp"))
+
+                    self.run(self._build_config_cmd, win_bash=tools.os_info.is_windows)
+                    command = "make {silent} -j {cpu_count}".format(silent=self._silent,
+                                                                    cpu_count=tools.cpu_count())
+                    self.run(command, win_bash=tools.os_info.is_windows)
+                    if self.options.with_unit_tests:
+                        command = "make {silent} check".format(silent=self._silent)
+                        self.run(command, win_bash=tools.os_info.is_windows)
+
+    def _configure_autotools(self):
+        if self._env_build:
+            return self._env_build
         self._env_build = AutoToolsBuildEnvironment(self)
-        if not self.options.get_safe("shared"):
+        if not self.options.shared:
             self._env_build.defines.append("U_STATIC_IMPLEMENTATION")
         if tools.is_apple_os(self.settings.os):
             self._env_build.defines.append("_DARWIN_C_SOURCE")
@@ -93,31 +113,7 @@ class ICUBase(ConanFile):
 
         if "msys2" in self.deps_user_info:
             self._env_build.vars["PYTHON"] = tools.unix_path(os.path.join(self.deps_env_info["msys2"].MSYS_BIN, "python"), tools.MSYS2)
-
-        build_dir = os.path.join(self.build_folder, self._source_subfolder, "build")
-        os.mkdir(build_dir)
-
-        with tools.vcvars(self.settings) if self._is_msvc else tools.no_op():
-            with tools.environment_append(self._env_build.vars):
-                with tools.chdir(build_dir):
-                    # workaround for https://unicode-org.atlassian.net/browse/ICU-20531
-                    os.makedirs(os.path.join("data", "out", "tmp"))
-
-                    self.run(self._build_config_cmd, win_bash=tools.os_info.is_windows)
-                    if self.options.get_safe("silent"):
-                        silent = "--silent" if self.options.silent else "VERBOSE=1"
-                    else:
-                        silent = "--silent"
-                    command = "make {silent} -j {cpu_count}".format(silent=silent,
-                                                                    cpu_count=tools.cpu_count())
-                    self.run(command, win_bash=tools.os_info.is_windows)
-                    if self.options.get_safe("with_unit_tests"):
-                        command = "make {silent} check".format(silent=silent)
-                        self.run(command, win_bash=tools.os_info.is_windows)
-                    command = "make {silent} install".format(silent=silent)
-                    self.run(command, win_bash=tools.os_info.is_windows)
-
-        self._install_name_tool()
+        return self._env_build
 
     def _workaround_icu_20545(self):
         if tools.os_info.is_windows:
@@ -155,18 +151,16 @@ class ICUBase(ConanFile):
         if not self.options.with_dyload:
             args += ["--disable-dyload"]
 
+        env_build = self._configure_autotools()
         if tools.cross_building(self.settings, skip_x64_x86=True):
-            if self._env_build.build:
-                args.append("--build=%s" % self._env_build.build)
-            if self._env_build.host:
-                args.append("--host=%s" % self._env_build.host)
-            if self._env_build.target:
-                args.append("--target=%s" % self._env_build.target)
+            if env_build.build:
+                args.append("--build=%s" % env_build.build)
+            if env_build.host:
+                args.append("--host=%s" % env_build.host)
+            if env_build.target:
+                args.append("--target=%s" % env_build.target)
 
-        if self.options.get_safe("data_packaging"):
-            args.append("--with-data-packaging={0}".format(self.options.data_packaging))
-        else:
-            args.append("--with-data-packaging=static")
+        args.append("--with-data-packaging={0}".format(self.options.data_packaging))
         datadir = os.path.join(self.package_folder, "lib")
         datadir = datadir.replace("\\", "/") if tools.os_info.is_windows else datadir
         args.append("--datarootdir=%s" % datadir)  # do not use share
@@ -179,15 +173,43 @@ class ICUBase(ConanFile):
             args.extend(["--build={0}".format(mingw_chost),
                          "--host={0}".format(mingw_chost)])
 
-        if self.settings.get_safe("build_type") == "Debug":
+        if self.settings.build_type == "Debug":
             args.extend(["--disable-release", "--enable-debug"])
-        if self.options.get_safe("shared"):
+        if self.options.shared:
             args.extend(["--disable-static", "--enable-shared"])
         else:
             args.extend(["--enable-static", "--disable-shared"])
-        if not self.options.get_safe("with_unit_tests"):
+        if not self.options.with_unit_tests:
             args.append("--disable-tests")
         return "../source/runConfigureICU %s" % " ".join(args)
+
+    @property
+    def _silent(self):
+        return "--silent" if self.options.silent else "VERBOSE=1"
+
+    def package(self):
+        self.copy("LICENSE", dst="licenses", src=os.path.join(self.source_folder, self._source_subfolder))
+
+        env_build = self._configure_autotools()
+        build_dir = os.path.join(self.build_folder, self._source_subfolder, "build")
+        with tools.vcvars(self.settings) if self._is_msvc else tools.no_op():
+            with tools.environment_append(env_build.vars):
+                with tools.chdir(build_dir):
+                    command = "make {silent} install".format(silent=self._silent)
+                    self.run(command, win_bash=tools.os_info.is_windows)
+        self._install_name_tool()
+
+        for dll in glob.glob(os.path.join(self.package_folder, "lib", "*.dll")):
+            shutil.move(dll, os.path.join(self.package_folder, "bin"))
+
+        if self.options.data_packaging in ["files", "archive"]:
+            tools.mkdir(os.path.join(self.package_folder, "res"))
+            shutil.move(self._data_path, os.path.join(self.package_folder, "res"))
+
+        tools.rmdir(os.path.join(self.package_folder, "lib", "icu"))
+        tools.rmdir(os.path.join(self.package_folder, "lib", "man"))
+        tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
+        tools.rmdir(os.path.join(self.package_folder, "share"))
 
     def _install_name_tool(self):
         if tools.is_apple_os(self.settings.os):
@@ -197,13 +219,18 @@ class ICUBase(ConanFile):
                     self.output.info(command)
                     self.run(command)
 
-    def package(self):
-        for dll in glob.glob(os.path.join(self.package_folder, "lib", "*.dll")):
-            shutil.move(dll, os.path.join(self.package_folder, "bin"))
+    @property
+    def _data_path(self):
+        data_dir_name = "icu"
+        if self.settings.os == "Windows" and self.settings.build_type == "Debug":
+            data_dir_name += "d"
+        data_dir = os.path.join(self.package_folder, "lib", data_dir_name, self.version)
+        return os.path.join(data_dir, self._data_filename)
 
-        self.copy("LICENSE", dst="licenses", src=os.path.join(self.source_folder, self._source_subfolder))
-        tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
-        tools.rmdir(os.path.join(self.package_folder, "share"))
+    @property
+    def _data_filename(self):
+        vtag = self.version.split(".")[0]
+        return "icudt{}l.dat".format(vtag)
 
     def package_info(self):
         self.cpp_info.names["cmake_find_package"] = "ICU"
@@ -224,14 +251,9 @@ class ICUBase(ConanFile):
         self.cpp_info.libs = [lib_name(lib) for lib in libs]
         self.cpp_info.bindirs.append("lib")
 
-        data_dir_name = self.name
-        if self.settings.os == "Windows" and self.settings.build_type == "Debug":
-            data_dir_name += "d"
-        data_dir = os.path.join(self.package_folder, "lib", data_dir_name, self.version)
-        vtag = self.version.split(".")[0]
-        data_file = "icudt{v}l.dat".format(v=vtag)
-        data_path = os.path.join(data_dir, data_file).replace("\\", "/")
-        if self.options.get_safe("data_packaging") in ["files", "archive"]:
+        if self.options.data_packaging in ["files", "archive"]:
+            data_path = os.path.join(self.package_folder, "res", self._data_filename).replace("\\", "/")
+            self.output.info("Appending ICU_DATA environment variable: {}".format(data_path))
             self.env_info.ICU_DATA.append(data_path)
 
         if not self.options.shared:
