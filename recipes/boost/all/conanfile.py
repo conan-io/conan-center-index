@@ -14,14 +14,18 @@ try:
 except ImportError:
     from io import StringIO
 
+
+required_conan_version = ">=1.28.0"
+
+
 # From from *1 (see below, b2 --show-libraries), also ordered following linkage order
 # see https://github.com/Kitware/CMake/blob/master/Modules/FindBoost.cmake to know the order
 
-lib_list = ['math', 'wave', 'container', 'contract', 'exception', 'graph', 'iostreams', 'locale', 'log',
-            'program_options', 'random', 'regex', 'mpi', 'serialization',
-            'coroutine', 'fiber', 'context', 'timer', 'thread', 'chrono', 'date_time',
-            'atomic', 'filesystem', 'system', 'graph_parallel', 'python',
-            'stacktrace', 'test', 'type_erasure']
+_LIB_LIST = ['math', 'wave', 'container', 'contract', 'exception', 'graph', 'iostreams', 'locale', 'log',
+    'program_options', 'random', 'regex', 'mpi', 'serialization',
+    'coroutine', 'fiber', 'context', 'timer', 'thread', 'chrono', 'date_time',
+    'atomic', 'filesystem', 'system', 'graph_parallel', 'python',
+    'stacktrace', 'test', 'type_erasure']
 
 
 class BoostConan(ConanFile):
@@ -34,93 +38,100 @@ class BoostConan(ConanFile):
     topics = ("conan", "boost", "libraries", "cpp")
     # The current python option requires the package to be built locally, to find default Python
     # implementation
-    options = {
-        "shared": [True, False],
-        "header_only": [True, False],
-        "error_code_header_only": [True, False],
-        "system_no_deprecated": [True, False],
-        "asio_no_deprecated": [True, False],
-        "filesystem_no_deprecated": [True, False],
-        "fPIC": [True, False],
-        "layout": ["system", "versioned", "tagged", "b2-default"],
-        "magic_autolink": [True, False],  # enables BOOST_ALL_NO_LIB
-        "python_executable": "ANY",  # system default python installation is used, if None
-        "python_version": "ANY",  # major.minor; computed automatically, if None
-        "namespace": "ANY",  # custom boost namespace for bcp, e.g. myboost
-        "namespace_alias": [True, False],  # enable namespace alias for bcp, boost=myboost
-        "multithreading": [True, False],  # enables multithreading support
-        "zlib": [True, False],
-        "bzip2": [True, False],
-        "lzma": [True, False],
-        "zstd": [True, False],
-        "segmented_stacks": [True, False],
-        "debug_level": [i for i in range(0, 14)],
-        "pch": [True, False],
-        "extra_b2_flags": "ANY",  # custom b2 flags
-        "i18n_backend": ["iconv", "icu", None],
-    }
-    options.update({"without_%s" % libname: [True, False] for libname in lib_list})
 
-    default_options = {
-        'shared': False,
-        'header_only': False,
-        'error_code_header_only': False,
-        'system_no_deprecated': False,
-        'asio_no_deprecated': False,
-        'filesystem_no_deprecated': False,
-        'fPIC': True,
-        'layout': 'system',
-        'magic_autolink': False,
-        'python_executable': 'None',
-        'python_version': 'None',
-        'namespace': 'boost',
-        'namespace_alias': False,
-        'multithreading': True,
-        'zlib': True,
-        'bzip2': True,
-        'lzma': False,
-        'zstd': False,
-        'segmented_stacks': False,
-        "debug_level": 0,
-        'pch': True,
-        'extra_b2_flags': 'None',
-        "i18n_backend": 'iconv',
-    }
+    _options = None
+    _default_options = None
 
-    for libname in lib_list:
-        if libname not in ("graph_parallel", "mpi", "python"):
-            default_options.update({"without_%s" % libname: False})
-        else:
-            default_options.update({"without_%s" % libname: True})
+    @property
+    def options(self):
+        if self._options:
+            return self._options
+        self._options = {
+            "shared": [True, False],
+            "header_only": [True, False],
+            "error_code_header_only": [True, False],
+            "system_no_deprecated": [True, False],
+            "asio_no_deprecated": [True, False],
+            "filesystem_no_deprecated": [True, False],
+            "fPIC": [True, False],
+            "layout": ["system", "versioned", "tagged", "b2-default"],
+            "magic_autolink": [True, False],  # enables BOOST_ALL_NO_LIB
+            "python_executable": "ANY",  # system default python installation is used, if None
+            "python_version": "ANY",  # major.minor; computed automatically, if None
+            "namespace": "ANY",  # custom boost namespace for bcp, e.g. myboost
+            "namespace_alias": [True, False],  # enable namespace alias for bcp, boost=myboost
+            "multithreading": [True, False],  # enables multithreading support
+            "zlib": [True, False],
+            "bzip2": [True, False],
+            "lzma": [True, False],
+            "zstd": [True, False],
+            "segmented_stacks": [True, False],
+            "debug_level": [i for i in range(0, 14)],
+            "pch": [True, False],
+            "extra_b2_flags": "ANY",  # custom b2 flags
+            "i18n_backend": ["iconv", "icu", None],
+        }
+        self._options.update({"without_%s" % libname: [True, False] for libname in _LIB_LIST})
+        return self._options
+
+    @options.setter
+    def options(self, options):
+        self._options = options
+
+    @property
+    def default_options(self):
+        if self._default_options:
+            return self._default_options
+        self._default_options = {
+            'shared': False,
+            'header_only': False,
+            'error_code_header_only': False,
+            'system_no_deprecated': False,
+            'asio_no_deprecated': False,
+            'filesystem_no_deprecated': False,
+            'fPIC': True,
+            'layout': 'system',
+            'magic_autolink': False,
+            'python_executable': 'None',
+            'python_version': 'None',
+            'namespace': 'boost',
+            'namespace_alias': False,
+            'multithreading': True,
+            'zlib': True,
+            'bzip2': True,
+            'lzma': False,
+            'zstd': False,
+            'segmented_stacks': False,
+            "debug_level": 0,
+            'pch': True,
+            'extra_b2_flags': 'None',
+            "i18n_backend": 'iconv',
+        }
+        for libname in _LIB_LIST:
+            if libname not in ("graph_parallel", "mpi", "python"):
+                self._default_options.update({"without_%s" % libname: False})
+            else:
+                self._default_options.update({"without_%s" % libname: True})
+        return self._default_options
+
+    @default_options.setter
+    def default_options(self, default_options):
+        self._default_options = default_options
+
     short_paths = True
     no_copy_source = True
     exports_sources = ['patches/*']
+
+    def export(self):
+        self.copy(self._dependency_filename, src="dependencies")
 
     @property
     def _dependency_filename(self):
         return "dependencies-{}.yml".format(self.version)
 
-    def export_sources(self):
-        self.copy(self._dependency_filename, src="dependencies")
-
-    _dependencies_cache = None
-
     @property
     def _dependencies(self):
-        if self._dependencies_cache is None:
-            dep_path = None
-            if self.source_folder:
-                dep_src_path = os.path.join(self.source_folder, self._dependency_filename)
-                if os.path.isfile(dep_src_path):
-                    dep_path = dep_src_path
-            if not dep_path:
-                dep_pkg_path = os.path.join(self.package_folder, "lib", self._dependency_filename)
-                if os.path.isfile(dep_pkg_path):
-                    dep_path = dep_pkg_path
-            if not dep_path:
-                raise ConanException("cannot find {}".format(self._dependency_filename))
-            self._dependencies_cache = yaml.safe_load(open(dep_path))
-        return self._dependencies_cache
+        return yaml.load(open(os.path.join(self.recipe_folder, self._dependency_filename)))
 
     def _iter_modules(self):
         tree = {k: v[:] for k, v in self._dependencies["dependencies"].items()}
@@ -164,6 +175,8 @@ class BoostConan(ConanFile):
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
+
+
 
     def configure(self):
         if not self.options.i18n_backend and not self.options.without_locale:
@@ -633,7 +646,7 @@ class BoostConan(ConanFile):
         else:
             flags.append("variant=release")
 
-        for libname in lib_list:
+        for libname in _LIB_LIST:
             if getattr(self.options, "without_%s" % libname):
                 flags.append("--without-%s" % libname)
 
@@ -876,7 +889,6 @@ class BoostConan(ConanFile):
     ####################################################################
 
     def package(self):
-        self.copy(self._dependency_filename, src=self.source_folder, dst="lib")
         # This stage/lib is in source_folder... Face palm, looks like it builds in build but then
         # copy to source with the good lib name
         self.copy("LICENSE_1_0.txt", dst="licenses", src=os.path.join(self.source_folder,
