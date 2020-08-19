@@ -39,8 +39,7 @@ dependencies:
   - exception
   - system
   - thread
-  date_time:
-  - serialization
+  date_time: []
   exception: []
   fiber:
   - context
@@ -54,7 +53,6 @@ dependencies:
   - random
   - regex
   - serialization
-  - test
   graph_parallel:
   - filesystem
   - graph
@@ -99,6 +97,8 @@ dependencies:
   mpi_python:
   - mpi
   - python
+  nowide:
+  - filesystem
   numpy:
   - python
   prg_exec_monitor:
@@ -126,7 +126,6 @@ dependencies:
   system: []
   test:
   - exception
-  - timer
   test_exec_monitor:
   - test
   thread:
@@ -202,6 +201,8 @@ libs:
   - boost_mpi
   mpi_python:
   - boost_mpi_python
+  nowide:
+  - boost_nowide
   numpy:
   - boost_numpy{py_major}{py_minor}
   prg_exec_monitor:
@@ -246,4 +247,4 @@ libs:
   - boost_wave
   wserialization:
   - boost_wserialization
-version: 1.69.0
+version: 1.74.0

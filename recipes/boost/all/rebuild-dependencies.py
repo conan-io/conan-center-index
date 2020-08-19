@@ -16,10 +16,39 @@ import yaml
 
 BOOST_GIT_URL = "https://github.com/boostorg/boost.git"
 
+CONFIGURE_OPTIONS = (
+    "chrono",
+    "container",
+    "contract",
+    "coroutine",
+    "date_time",
+    "exception",
+    "fiber",
+    "filesystem",
+    "graph",
+    "iostreams",
+    "locale",
+    "math",
+    "mpi",
+    "program_options",
+    "python",
+    "random",
+    "regex",
+    "serialization",
+    "stacktrace",
+    "system",
+    "test",
+    "thread",
+    "timer",
+    "type_erasure",
+    "wave",
+)
+
 
 @dataclasses.dataclass
 class BoostDependenciesExport(object):
     version: str
+    configure_options: List[str]
     dependencies: Dict[str, List[str]] = dataclasses.field(default_factory=dict)
     libs: Dict[str, List[str]] = dataclasses.field(default_factory=dict)
 
@@ -109,7 +138,19 @@ class BoostDependencyBuilder(object):
 
         filtered_dependency_tree = {k: [d for d in v if d in buildables] for k, v in dependency_tree.items() if k in buildables}
 
-        boost_dependencies = BoostDependencies(export=BoostDependenciesExport(dependencies=filtered_dependency_tree, version=self.boost_version), buildables=buildables)
+        configure_options = []
+        for conf_option in CONFIGURE_OPTIONS:
+            if conf_option in filtered_dependency_tree:
+                configure_options.append(conf_option)
+
+        boost_dependencies = BoostDependencies(
+            export=BoostDependenciesExport(
+                version=self.boost_version,
+                configure_options=configure_options,
+                dependencies=filtered_dependency_tree,
+            ),
+            buildables=buildables,
+        )
 
         return boost_dependencies
 
@@ -272,7 +313,7 @@ def main(args=None) -> int:
         )
 
         if not ns.git_update and not boost_collector.boost_path.exists():
-            print("boost directory does not exist. Re-execute this script with the -U to run git update", file=sys.stderr)
+            print("Boost directory does not exist. Re-execute this script with -U to run 'git update'.", file=sys.stderr)
             return 1
 
         if ns.git_update and not git_update_done:

@@ -1,3 +1,29 @@
+configure_options:
+- chrono
+- container
+- contract
+- coroutine
+- date_time
+- exception
+- fiber
+- filesystem
+- graph
+- iostreams
+- locale
+- math
+- mpi
+- program_options
+- python
+- random
+- regex
+- serialization
+- stacktrace
+- system
+- test
+- thread
+- timer
+- type_erasure
+- wave
 dependencies:
   atomic: []
   chrono:
@@ -115,8 +141,8 @@ dependencies:
   - thread
   unit_test_framework:
   - test
-  - test_exec_monitor
   - prg_exec_monitor
+  - test_exec_monitor
   wave:
   - filesystem
   - serialization

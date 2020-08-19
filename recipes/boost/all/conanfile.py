@@ -18,16 +18,6 @@ except ImportError:
 required_conan_version = ">=1.28.0"
 
 
-# From from *1 (see below, b2 --show-libraries), also ordered following linkage order
-# see https://github.com/Kitware/CMake/blob/master/Modules/FindBoost.cmake to know the order
-
-_LIB_LIST = ['math', 'wave', 'container', 'contract', 'exception', 'graph', 'iostreams', 'locale', 'log',
-    'program_options', 'random', 'regex', 'mpi', 'serialization',
-    'coroutine', 'fiber', 'context', 'timer', 'thread', 'chrono', 'date_time',
-    'atomic', 'filesystem', 'system', 'graph_parallel', 'python',
-    'stacktrace', 'test', 'type_erasure']
-
-
 class BoostConan(ConanFile):
     name = "boost"
     settings = "os", "arch", "compiler", "build_type"
@@ -40,7 +30,6 @@ class BoostConan(ConanFile):
     # implementation
 
     _options = None
-    _default_options = None
 
     @property
     def options(self):
@@ -71,7 +60,8 @@ class BoostConan(ConanFile):
             "extra_b2_flags": "ANY",  # custom b2 flags
             "i18n_backend": ["iconv", "icu", None],
         }
-        self._options.update({"without_%s" % libname: [True, False] for libname in _LIB_LIST})
+        for name in self._configure_options:
+            self._options["without_{}".format(name)] = [True, False]
         return self._options
 
     @options.setter
@@ -80,9 +70,7 @@ class BoostConan(ConanFile):
 
     @property
     def default_options(self):
-        if self._default_options:
-            return self._default_options
-        self._default_options = {
+        default_options = {
             'shared': False,
             'header_only': False,
             'error_code_header_only': False,
@@ -107,12 +95,17 @@ class BoostConan(ConanFile):
             'extra_b2_flags': 'None',
             "i18n_backend": 'iconv',
         }
-        for libname in _LIB_LIST:
-            if libname not in ("graph_parallel", "mpi", "python"):
-                self._default_options.update({"without_%s" % libname: False})
-            else:
-                self._default_options.update({"without_%s" % libname: True})
-        return self._default_options
+        for name in self._configure_options:
+            default_options["without_{}".format(name)] = False
+        for name in ("graph_parallel", "mpi", "python", "mpi_python", "numpy"):
+            opt_name = "without_{}".format(name)
+            if opt_name in self.options:
+                default_options[opt_name] = True
+        return default_options
+
+    @property
+    def _configure_options(self):
+        return self._dependencies["configure_options"]
 
     @default_options.setter
     def default_options(self, default_options):
@@ -123,7 +116,7 @@ class BoostConan(ConanFile):
     exports_sources = ['patches/*']
 
     def export(self):
-        self.copy(self._dependency_filename, src="dependencies")
+        self.copy(self._dependency_filename, src="dependencies", dst="dependencies")
 
     @property
     def _dependency_filename(self):
@@ -131,7 +124,7 @@ class BoostConan(ConanFile):
 
     @property
     def _dependencies(self):
-        return yaml.load(open(os.path.join(self.recipe_folder, self._dependency_filename)))
+        return yaml.load(open(os.path.join(self.recipe_folder, "dependencies", self._dependency_filename)))
 
     def _iter_modules(self):
         tree = {k: v[:] for k, v in self._dependencies["dependencies"].items()}
@@ -175,8 +168,6 @@ class BoostConan(ConanFile):
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
-
-
 
     def configure(self):
         if not self.options.i18n_backend and not self.options.without_locale:
@@ -646,7 +637,7 @@ class BoostConan(ConanFile):
         else:
             flags.append("variant=release")
 
-        for libname in _LIB_LIST:
+        for libname in self._configure_options:
             if getattr(self.options, "without_%s" % libname):
                 flags.append("--without-%s" % libname)
 
