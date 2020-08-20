@@ -51,7 +51,7 @@ class JsonSchemaValidatorConan(ConanFile):
                     self.name, min_cppstd, self.settings.compiler, self.settings.compiler.version))
 
     def requirements(self):
-        self.requires("nlohmann_json/3.7.3")
+        self.requires("nlohmann_json/3.9.1")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
