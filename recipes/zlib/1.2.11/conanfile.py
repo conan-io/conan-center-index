@@ -65,6 +65,10 @@ class ZlibConan(ConanFile):
         else:
             make_target = "libz.a"
 
+        if tools.is_apple_os(self.settings.os) and self.settings.get_safe("os.version"):
+            target = tools.apple_deployment_target_flag(self.settings.os, self.settings.os.version)
+            env_build.flags.append(target)
+
         env = {}
         if "clang" in str(self.settings.compiler) and tools.get_env("CC") is None and tools.get_env("CXX") is None:
             env = {"CC": "clang", "CXX": "clang++"}
