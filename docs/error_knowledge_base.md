@@ -303,3 +303,7 @@ The file test_package/CMakeLists.txt should require CMake 3.1 by default: `cmake
 #### **<a name="KB-H050">#KB-H050</a>: "DEFAULT SHARED OPTION VALUE"**
 
 By default, all packages should be built as static library (the option ``shared`` is ``False`` in ``default_options``). However, some projects can be restricted to shared library only, for those cases, open a new [issue](https://github.com/conan-io/hooks/issues) to include the package name in the allowlist.
+
+### **<a name="KB-H051">#KB-H051</a>: "DEFAULT OPTIONS AS DICTIONARY"**
+
+The attribue `default_options` should be a dictionary, for example `default_options = {'shared': False, 'fPIC': True}`.
