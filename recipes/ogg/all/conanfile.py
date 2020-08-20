@@ -66,4 +66,4 @@ class OggConan(ConanFile):
         self.cpp_info.names["cmake_find_package_multi"] = "Ogg"
         self.cpp_info.components["ogglib"].names["cmake_find_package"] = "ogg"
         self.cpp_info.components["ogglib"].names["cmake_find_package_multi"] = "ogg"
-        self.cpp_info.components["ogglib"].libs = tools.collect_libs(self)
+        self.cpp_info.components["ogglib"].libs = ["ogg"]
