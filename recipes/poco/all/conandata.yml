@@ -23,3 +23,38 @@ sources:
   1.10.1:
     sha256: 44592a488d2830c0b4f3bfe4ae41f0c46abbfad49828d938714444e858a00818
     url: http://github.com/pocoproject/poco/archive/poco-1.10.1-release.tar.gz
+patches:
+  1.8.1:
+    - patch_file: patches/1.8.1.patch
+      base_path: source_subfolder
+  1.9.0:
+    - patch_file: patches/1.9.0.patch
+      base_path: source_subfolder
+  1.9.1:
+    - patch_file: patches/1.9.1.patch
+      base_path: source_subfolder
+    - patch_file: patches/1.9.1-2.patch
+      base_path: source_subfolder
+  1.9.2:
+    - patch_file: patches/1.9.2.patch
+      base_path: source_subfolder
+    - patch_file: patches/1.9.2-2.patch
+      base_path: source_subfolder
+  1.9.3:
+    - patch_file: patches/1.9.2.patch
+      base_path: source_subfolder
+    - patch_file: patches/1.9.2-2.patch
+      base_path: source_subfolder
+  1.9.4:
+    - patch_file: patches/1.9.2.patch
+      base_path: source_subfolder
+    - patch_file: patches/1.9.2-2.patch
+      base_path: source_subfolder
+  1.10.0:
+    - patch_file: patches/1.10.0.patch
+      base_path: source_subfolder
+    - patch_file: patches/1.10.0-set-missing-cmake-variable.patch
+      base_path: source_subfolder
+  1.10.1:
+    - patch_file: patches/1.10.1.patch
+      base_path: source_subfolder
