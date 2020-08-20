@@ -29,7 +29,7 @@ class RgbcxConan(ConanFile):
     def package(self):
         self.copy("rgbcx.h", dst="include", src=self._source_subfolder)
         self.copy("rgbcx_table4.h", dst="include", src=self._source_subfolder)
-        self.copy("LICENSE", dst="licenses")
+        self.copy("LICENSE", dst="licenses", src=self._source_subfolder)
 
     def package_id(self):
         self.info.header_only()
