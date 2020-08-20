@@ -6,7 +6,7 @@ from conans import ConanFile, tools
 class RgbcxConan(ConanFile):
     name = "rgbcx"
     description = "High-performance scalar BC1-5 encoders."
-    homepage = "https://github.com/richgel999/bc7enc/blob/master/rgbcx.h"
+    homepage = "https://github.com/richgel999/bc7enc"
     url = "https://github.com/conan-io/conan-center-index"
     topics = ("conan", "BC1", "BC5", "BCx", "encoding")
     license = "MIT", "Unlicense"
