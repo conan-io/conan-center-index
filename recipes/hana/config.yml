@@ -1,31 +1,5 @@
 versions:
-  "boost-1.61.0":
-    folder: all
-  "boost-1.62.0":
-    folder: all
-  "boost-1.63.0":
-    folder: all
-  "boost-1.64.0":
-    folder: all
-  "boost-1.65.0":
-    folder: all
-  "boost-1.65.1":
-    folder: all
-  "boost-1.66.0":
-    folder: all
-  "boost-1.67.0":
-    folder: all
-  "boost-1.68.0":
-    folder: all
-  "boost-1.69.0":
-    folder: all
-  "boost-1.70.0":
-    folder: all
-  "boost-1.71.0":
-    folder: all
-  "boost-1.72.0":
-    folder: all
-  "boost-1.73.0":
-    folder: all
   "boost-1.74.0":
+    folder: all
+  "1.6.0":
     folder: all
