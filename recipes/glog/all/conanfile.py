@@ -8,7 +8,7 @@ class GlogConan(ConanFile):
     homepage = "https://github.com/google/glog/"
     description = "Google logging library"
     topics = ("conan", "glog", "logging")
-    license = "BSD 3-Clause"
+    license = "BSD-3-Clause"
     exports_sources = ["CMakeLists.txt", "patches/**"]
     generators = "cmake", "cmake_find_package"
     settings = "os", "arch", "compiler", "build_type"
@@ -64,5 +64,12 @@ class GlogConan(ConanFile):
 
     def package_info(self):
         self.cpp_info.libs = tools.collect_libs(self)
+        self.cpp_info.names["pkgconfig"] = ["libglog"]
         if self.settings.os == "Linux":
-            self.cpp_info.system_libs.append("pthread")
+            self.cpp_info.system_libs = ["pthread"]
+        elif self.settings.os == "Windows":
+            self.cpp_info.defines = ["GLOG_NO_ABBREVIATED_SEVERITIES"]
+            decl = "__declspec(dllimport)" if self.options.shared else ""
+            self.cpp_info.defines.append("GOOGLE_GLOG_DLL_DECL={}".format(decl))
+        if self.options.with_gflags and not self.options.shared:
+            self.cpp_info.defines.extend(["GFLAGS_DLL_DECLARE_FLAG=", "GFLAGS_DLL_DEFINE_FLAG="])
