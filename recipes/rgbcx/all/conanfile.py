@@ -26,19 +26,10 @@ class RgbcxConan(ConanFile):
         tools.replace_in_file(os.path.join(self._source_subfolder, "rgbcx.h"),
             "#include <stdlib.h>", "#include <stdlib.h>\n#include <string.h>")
 
-    def _extract_licenses(self):
-        header = tools.load(os.path.join(self.source_folder, self._source_subfolder, "rgbcx.h"))
-        mit_content = header[header.find("ALTERNATIVE A - "):header.find("ALTERNATIVE B -")]
-        tools.save("LICENSE_MIT", mit_content)
-        unlicense_content = header[header.find("ALTERNATIVE B - "):header.rfind("*/", 1)]
-        tools.save("LICENSE_UNLICENSE", unlicense_content)
-
     def package(self):
         self.copy("rgbcx.h", dst="include", src=self._source_subfolder)
         self.copy("rgbcx_table4.h", dst="include", src=self._source_subfolder)
-        self._extract_licenses()
-        self.copy("LICENSE_MIT", dst="licenses")
-        self.copy("LICENSE_UNLICENSE", dst="licenses")
+        self.copy("LICENSE", dst="licenses")
 
     def package_id(self):
         self.info.header_only()
