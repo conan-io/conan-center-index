@@ -16,6 +16,7 @@ class BrpcConan(ConanFile):
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "with_snappy": [True, False],
+        "with_zlib": [True, False],
         "with_glog": [True, False],
         "with_thrift": [True, False],
         "shared": [True, False],
@@ -23,6 +24,7 @@ class BrpcConan(ConanFile):
     }
     default_options = {
         "with_snappy": True,
+        "with_zlib": False,
         "with_glog": True,
         "with_thrift": False,
         "shared": False,
@@ -65,6 +67,12 @@ class BrpcConan(ConanFile):
         os.rename(
                 os.path.join(self._source_subfolder, "cmake", "FindGFLAGS.cmake"),
                 os.path.join(self._source_subfolder, "cmake", "FindBRPCGFLAGS.cmake"))
+        if self.options.with_zlib:
+            tools.replace_in_file(
+                    os.path.join(self._source_subfolder, "CMakeLists.txt"),
+                    '''cmake_minimum_required(VERSION 2.8.10)''',
+                    "\n".join(['''cmake_minimum_required(VERSION 3.12)''',
+                               '''add_compile_definitions(WITH_ZLIB)''']))
 
     def _configure_cmake(self):
         if self._cmake:
@@ -78,7 +86,7 @@ class BrpcConan(ConanFile):
         return self._cmake
 
     def build(self):
-        if not self.options['protobuf'].with_zlib:
+        if self.options.with_zlib and not self.options['protobuf'].with_zlib:
             raise ConanInvalidConfiguration("brpc requires protobuf:with_zlib=True")
         if self.options.with_snappy and not self.options["leveldb"].with_snappy:
             raise ConanInvalidConfiguration("brpc requires leveldb:with_snappy=True")

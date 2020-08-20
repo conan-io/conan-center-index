@@ -140,6 +140,146 @@ index 50950422..0c21004b 100644
  if(GFLAGS_INCLUDE_PATH AND GFLAGS_LIBRARY)
    set(GFLAGS_FOUND TRUE)
  endif(GFLAGS_INCLUDE_PATH AND GFLAGS_LIBRARY)
+diff --git a/src/brpc/policy/gzip_compress.cpp b/src/brpc/policy/gzip_compress.cpp
+index edba16d1..d1ac6644 100644
+--- a/src/brpc/policy/gzip_compress.cpp
++++ b/src/brpc/policy/gzip_compress.cpp
+@@ -17,6 +17,7 @@
+ 
+ // Authors: Ge,Jun (gejun@baidu.com)
+ 
++#include <cstdlib>
+ #include <google/protobuf/io/gzip_stream.h>    // GzipXXXStream
+ #include "butil/logging.h"
+ #include "brpc/policy/gzip_compress.h"
+@@ -27,22 +28,31 @@ namespace brpc {
+ namespace policy {
+ 
+ static void LogError(const google::protobuf::io::GzipOutputStream& gzip) {
++#ifdef WITH_ZLIB
+     if (gzip.ZlibErrorMessage()) {
+         LOG(WARNING) << "Fail to decompress: " << gzip.ZlibErrorMessage();
+     } else {
+         LOG(WARNING) << "Fail to decompress.";
+     }
++#endif
++
++    std::abort();
+ }
+ 
+ static void LogError(const google::protobuf::io::GzipInputStream& gzip) {
++#ifdef WITH_ZLIB
+     if (gzip.ZlibErrorMessage()) {
+         LOG(WARNING) << "Fail to decompress: " << gzip.ZlibErrorMessage();
+     } else {
+         LOG(WARNING) << "Fail to decompress.";
+     }
++#endif
++
++    std::abort();
+ }
+ 
+ bool GzipCompress(const google::protobuf::Message& msg, butil::IOBuf* buf) {
++#ifdef WITH_ZLIB
+     butil::IOBufAsZeroCopyOutputStream wrapper(buf);
+     google::protobuf::io::GzipOutputStream::Options gzip_opt;
+     gzip_opt.format = google::protobuf::io::GzipOutputStream::GZIP;
+@@ -52,9 +62,13 @@ bool GzipCompress(const google::protobuf::Message& msg, butil::IOBuf* buf) {
+         return false;
+     }
+     return gzip.Close();
++#endif
++
++    std::abort();
+ }
+ 
+ bool GzipDecompress(const butil::IOBuf& data, google::protobuf::Message* msg) {
++#ifdef WITH_ZLIB
+     butil::IOBufAsZeroCopyInputStream wrapper(data);
+     google::protobuf::io::GzipInputStream gzip(
+             &wrapper, google::protobuf::io::GzipInputStream::GZIP);
+@@ -63,10 +77,14 @@ bool GzipDecompress(const butil::IOBuf& data, google::protobuf::Message* msg) {
+         return false;
+     }
+     return true;
++#endif
++
++    std::abort();
+ }
+ 
+ bool GzipCompress(const butil::IOBuf& msg, butil::IOBuf* buf,
+                   const GzipCompressOptions* options_in) {
++#ifdef WITH_ZLIB
+     butil::IOBufAsZeroCopyOutputStream wrapper(buf);
+     google::protobuf::io::GzipOutputStream::Options gzip_opt;
+     if (options_in) {
+@@ -101,11 +119,15 @@ bool GzipCompress(const butil::IOBuf& msg, butil::IOBuf* buf,
+         out.BackUp(size_out);
+     }
+     return out.Close();
++#endif
++
++    std::abort();
+ }
+ 
+ inline bool GzipDecompressBase(
+     const butil::IOBuf& data, butil::IOBuf* msg,
+     google::protobuf::io::GzipInputStream::Format format) {
++#ifdef WITH_ZLIB
+     butil::IOBufAsZeroCopyInputStream wrapper(data);
+     google::protobuf::io::GzipInputStream in(&wrapper, format);
+     butil::IOBufAsZeroCopyOutputStream out(msg);
+@@ -140,31 +162,50 @@ inline bool GzipDecompressBase(
+         out.BackUp(size_out);
+     }
+     return true;
++#endif
++
++    std::abort();
+ }
+ 
+ bool ZlibCompress(const google::protobuf::Message& res, butil::IOBuf* buf) {
++#ifdef WITH_ZLIB
+     butil::IOBufAsZeroCopyOutputStream wrapper(buf);
+     google::protobuf::io::GzipOutputStream::Options zlib_opt;
+     zlib_opt.format = google::protobuf::io::GzipOutputStream::ZLIB;
+     google::protobuf::io::GzipOutputStream zlib(&wrapper, zlib_opt);
+     return res.SerializeToZeroCopyStream(&zlib) && zlib.Close();
++#endif
++
++    std::abort();
+ }
+ 
+ bool ZlibDecompress(const butil::IOBuf& data, google::protobuf::Message* req) {
++#ifdef WITH_ZLIB
+     butil::IOBufAsZeroCopyInputStream wrapper(data);
+     google::protobuf::io::GzipInputStream zlib(
+         &wrapper, google::protobuf::io::GzipInputStream::ZLIB);
+     return ParsePbFromZeroCopyStream(req, &zlib);
++#endif
++
++    std::abort();
+ }
+ 
+ bool GzipDecompress(const butil::IOBuf& data, butil::IOBuf* msg) {
++#ifdef WITH_ZLIB
+     return GzipDecompressBase(
+         data, msg, google::protobuf::io::GzipInputStream::GZIP);
++#endif
++
++    std::abort();
+ }
+ 
+ bool ZlibDecompress(const butil::IOBuf& data, butil::IOBuf* msg) {
++#ifdef WITH_ZLIB
+     return GzipDecompressBase(
+         data, msg, google::protobuf::io::GzipInputStream::ZLIB);
++#endif
++
++    std::abort();
+ }
+ 
+ }  // namespace policy
 diff --git a/src/butil/mac/foundation_util.h b/src/butil/mac/foundation_util.h
 index 53b29326..8e004381 100644
 --- a/src/butil/mac/foundation_util.h
