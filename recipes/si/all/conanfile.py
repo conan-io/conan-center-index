@@ -51,8 +51,11 @@ class SiConan(ConanFile):
         cmake.test()
 
     def package(self):
+        self.copy("LICENSE", dst="licenses", src=self._source_subfolder)
         cmake = self._configure_cmake()
         cmake.install()
+        #  Remove folder containing cmake-specific files such as SIConfig.cmake and SIVersion.cmake
+        tools.rmdir(os.path.join(self.package_folder, "share"))
 
     def package_id(self):
         self.info.header_only()
