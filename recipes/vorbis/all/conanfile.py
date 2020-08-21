@@ -86,3 +86,12 @@ class VorbisConan(ConanFile):
         self.cpp_info.components["vorbisfile"].names["pkg_config"] = "vorbisfile"
         self.cpp_info.components["vorbisfile"].libs = ["vorbisfile"]
         self.cpp_info.components["vorbisfile"].requires = ["vorbismain"]
+
+        # VorbisConfig.cmake defines components 'Enc' and 'File',
+        # which create the imported targets Vorbis::vorbisenc and Vorbis::vorbisfile
+        self.cpp_info.components["vorbisenc-alias"].names["cmake_find_package"] = "Enc"
+        self.cpp_info.components["vorbisenc-alias"].names["cmake_find_package_multi"] = "Enc"
+        self.cpp_info.components["vorbisenc-alias"].requires.append("vorbisenc")
+        self.cpp_info.components["vorbisfile-alias"].names["cmake_find_package"] = "File"
+        self.cpp_info.components["vorbisfile-alias"].names["cmake_find_package_multi"] = "File"
+        self.cpp_info.components["vorbisfile-alias"].requires.append("vorbisfile")
