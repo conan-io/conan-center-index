@@ -30,7 +30,8 @@ class HanaConan(ConanFile):
         os.rename("hana-" + self.version, self._source_subfolder)
 
     def config_options(self):
-        tools.check_min_cppstd(self, "14")
+        if self.settings.compiler.cppstd:
+            tools.check_min_cppstd(self, "14")
         try:
             minimum_required_version = self._compiler_cpp14_support[str(self.settings.compiler)]
             if self.settings.compiler.version < tools.Version(minimum_required_version):
