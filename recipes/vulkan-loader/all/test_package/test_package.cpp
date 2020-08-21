@@ -5,8 +5,8 @@
 int main()
 {
     vk::ApplicationInfo appInfo;
-	appInfo.pApplicationName = "ConanTestApp";
-	appInfo.pEngineName = "ConanTestEngine";
+    appInfo.pApplicationName = "ConanTestApp";
+    appInfo.pEngineName = "ConanTestEngine";
     appInfo.apiVersion = VK_API_VERSION_1_2;
 
     vk::InstanceCreateInfo instanceCreateInfo;
