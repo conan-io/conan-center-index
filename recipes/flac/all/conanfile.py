@@ -9,8 +9,7 @@ class FlacConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/xiph/flac"
     license = ("BSD-3-Clause", "GPL-2.0-or-later", "LPGL-2.1-or-later", "GFDL-1.2")
-    requires = "ogg/1.3.4"
-    exports_sources = ['CMakeLists.txt', 'patches/*']
+    exports_sources = ["CMakeLists.txt", "patches/*"]
 
     generators = "cmake",
     settings = "os", "compiler", "build_type", "arch"
@@ -29,6 +28,9 @@ class FlacConan(ConanFile):
         if self.settings.os == "Windows":
             del self.options.fPIC
 
+    def requirements(self):
+        self.requires("ogg/1.3.4")
+
     def build_requirements(self):
         self.build_requires("nasm/2.14")
 
@@ -40,13 +42,13 @@ class FlacConan(ConanFile):
         extracted_dir = "{}-{}".format(self.name, self.version)
         os.rename(extracted_dir, self._source_subfolder)
         tools.replace_in_file(
-            os.path.join(self._source_subfolder, 'src', 'libFLAC', 'CMakeLists.txt'),
-            'target_link_libraries(FLAC PRIVATE $<$<BOOL:${HAVE_LROUND}>:m>)',
-            'target_link_libraries(FLAC PUBLIC $<$<BOOL:${HAVE_LROUND}>:m>)')
+            os.path.join(self._source_subfolder, "src", "libFLAC", "CMakeLists.txt"),
+            "target_link_libraries(FLAC PRIVATE $<$<BOOL:${HAVE_LROUND}>:m>)",
+            "target_link_libraries(FLAC PUBLIC $<$<BOOL:${HAVE_LROUND}>:m>)")
         tools.replace_in_file(
-            os.path.join(self._source_subfolder, 'CMakeLists.txt'),
-            'set(CMAKE_EXE_LINKER_FLAGS -no-pie)',
-            '#set(CMAKE_EXE_LINKER_FLAGS -no-pie)')
+            os.path.join(self._source_subfolder, "CMakeLists.txt"),
+            "set(CMAKE_EXE_LINKER_FLAGS -no-pie)",
+            "#set(CMAKE_EXE_LINKER_FLAGS -no-pie)")
 
     def _configure_cmake(self):
         if self._cmake:
@@ -72,8 +74,21 @@ class FlacConan(ConanFile):
         tools.rmdir(os.path.join(self.package_folder, "share"))
 
     def package_info(self):
-        self.cpp_info.libs = ['FLAC++', 'FLAC']
+        self.cpp_info.filenames["cmake_find_package"] = "flac"
+        self.cpp_info.filenames["cmake_find_package_multi"] = "flac"
+        self.cpp_info.names["cmake_find_package"] = "FLAC"
+        self.cpp_info.names["cmake_find_package_multi"] = "FLAC"
+
+        self.cpp_info.components["libflac"].libs = ["FLAC"]
+        self.cpp_info.components["libflac"].names["cmake_find_package"] = "FLAC"
+        self.cpp_info.components["libflac"].names["cmake_find_package_multi"] = "FLAC"
+        self.cpp_info.components["libflac"].requires = ["ogg::ogg"]
+
+        self.cpp_info.components["libflac++"].libs = ["FLAC++"]
+        self.cpp_info.components["libflac++"].requires = ["libflac"]
+        self.cpp_info.components["libflac++"].names["cmake_find_package"] = "FLAC++"
+        self.cpp_info.components["libflac++"].names["cmake_find_package_multi"] = "FLAC++"
         if not self.options.shared:
-            self.cpp_info.defines = ["FLAC__NO_DLL"]
+            self.cpp_info.components["libflac"].defines = ["FLAC__NO_DLL"]
             if self.settings.os == "Linux":
-                self.cpp_info.system_libs += ["m"]
+                self.cpp_info.components["libflac"].system_libs += ["m"]
