@@ -12,7 +12,7 @@ class LibUSBCompatConan(ConanFile):
     license = ("LGPL-2.1", "BSD-3-Clause")
     homepage = "https://github.com/libusb/libusb-compat-0.1"
     url = "https://github.com/conan-io/conan-center-index"
-    exports_sources = "patches/**", "CMakelists.txt.in"
+    exports_sources = "patches/**", "CMakeLists.txt.in"
     topics = ("conan", "libusb", "compatibility", "usb")
     settings = "os", "compiler", "build_type", "arch"
     options = {
