@@ -153,3 +153,5 @@ class MinizipConan(ConanFile):
 
     def package_info(self):
         self.cpp_info.libs = ["minizip"]
+        if tools.is_apple_os(self.settings.os):
+             self.cpp_info.defines = ["HAVE_STRMODE"]
