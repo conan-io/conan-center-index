@@ -82,8 +82,8 @@ class BenchmarkConan(ConanFile):
     def package_info(self):
         self.cpp_info.libs = tools.collect_libs(self)
         if self.settings.os == "Linux":
-            self.cpp_info.libs.extend(["pthread", "rt"])
+            self.cpp_info.system_libs.extend(["pthread", "rt"])
         elif self.settings.os == "Windows":
-            self.cpp_info.libs.append("shlwapi")
+            self.cpp_info.system_libs.append("shlwapi")
         elif self.settings.os == "SunOS":
-            self.cpp_info.libs.append("kstat")
+            self.cpp_info.system_libs.append("kstat")
