@@ -6,8 +6,8 @@ from conans.errors import ConanException
 from conans.errors import ConanInvalidConfiguration
 import os
 import sys
-import shutil
 import shlex
+import shutil
 
 try:
     from cStringIO import StringIO
