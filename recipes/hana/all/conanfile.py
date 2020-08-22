@@ -15,8 +15,8 @@ class HanaConan(ConanFile):
     exports_sources = "CMakeLists.txt"
 
     _compiler_cpp14_support = {
-        "gcc": "5",
-        "Visual Studio": "15",
+        "gcc": "4.9.3",
+        "Visual Studio": "14.0",
         "clang": "3.4",
         "apple-clang": "3.4",
     }
