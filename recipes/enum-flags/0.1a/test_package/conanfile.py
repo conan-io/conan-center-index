@@ -2,9 +2,9 @@ from conans import ConanFile, CMake, tools
 import os
 
 
-class FlagsTestConan(ConanFile):
+class TestPackageConan(ConanFile):
     settings = "os", "compiler", "build_type", "arch"
-    generators = "cmake"
+    generators = "cmake", "cmake_find_package_multi"
 
     def build(self):
         cmake = CMake(self)
@@ -12,7 +12,7 @@ class FlagsTestConan(ConanFile):
         cmake.build()
 
     def test(self):
-        exe_name = "example"
+        exe_name = "test_package"
         if self.settings.os == "Emscripten":
             exe_name += ".js"
         elif tools.os_info.is_windows:

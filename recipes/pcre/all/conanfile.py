@@ -23,9 +23,25 @@ class PCREConan(ConanFile):
         "with_utf": [True, False],
         "with_unicode_properties": [True, False]
     }
-    default_options = {'shared': False, 'fPIC': True, 'with_bzip2': True, 'with_zlib': True, 'with_jit': False, 'build_pcrecpp': False, 'build_pcregrep': False, 'with_utf': False, 'with_unicode_properties': False}
-    _source_subfolder = "source_subfolder"
-    _build_subfolder = "build_subfolder"
+    default_options = {
+        'shared': False,
+        'fPIC': True,
+        'with_bzip2': True,
+        'with_zlib': True,
+        'with_jit': False,
+        'build_pcrecpp': False,
+        'build_pcregrep': False,
+        'with_utf': False,
+        'with_unicode_properties': False
+    }
+
+    @property
+    def _source_subfolder(self):
+        return "source_subfolder"
+
+    @property
+    def _build_subfolder(self):
+        return "build_subfolder"
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -42,15 +58,17 @@ class PCREConan(ConanFile):
         """Patch CMake file to avoid man and share during install stage
         """
         cmake_file = os.path.join(self._source_subfolder, "CMakeLists.txt")
-        tools.replace_in_file(cmake_file, "INSTALL(FILES ${man1} DESTINATION man/man1)", "")
-        tools.replace_in_file(cmake_file, "INSTALL(FILES ${man3} DESTINATION man/man3)", "")
-        tools.replace_in_file(cmake_file, "INSTALL(FILES ${html} DESTINATION share/doc/pcre/html)", "")
+        tools.replace_in_file(
+            cmake_file, "INSTALL(FILES ${man1} DESTINATION man/man1)", "")
+        tools.replace_in_file(
+            cmake_file, "INSTALL(FILES ${man3} DESTINATION man/man3)", "")
+        tools.replace_in_file(
+            cmake_file, "INSTALL(FILES ${html} DESTINATION share/doc/pcre/html)", "")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
         extracted_dir = self.name + "-" + self.version
         os.rename(extracted_dir, self._source_subfolder)
-        self.patch_cmake()
 
     def requirements(self):
         if self.options.with_bzip2:
@@ -76,6 +94,7 @@ class PCREConan(ConanFile):
         return cmake
 
     def build(self):
+        self.patch_cmake()
         cmake = self._configure_cmake()
         cmake.build()
 

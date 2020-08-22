@@ -17,6 +17,9 @@ use_cxx11()
 include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
 conan_basic_setup()
 
+add_executable(core test_core.cpp)
+target_link_libraries(core ${CONAN_LIBS})
+
 option(TEST_NET "Test Net")
 if(TEST_NET)
     add_executable(net test_net.cpp)

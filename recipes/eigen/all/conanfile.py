@@ -1,6 +1,7 @@
 import os
 from conans import ConanFile, tools, CMake
 
+
 class EigenConan(ConanFile):
     name = "eigen"
     url = "https://github.com/conan-io/conan-center-index"
@@ -18,10 +19,7 @@ class EigenConan(ConanFile):
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
-        #Get te extracted folder name. They allways have the format eigen-eigen-xxxxxx
-        listdir = os.listdir()
-        extracted_dir = [i for i in listdir if "eigen-eigen" in i][0]
-        os.rename(extracted_dir, self._source_subfolder)
+        os.rename("eigen-{}".format(self.version), self._source_subfolder)
 
     def package(self):
         cmake = CMake(self)

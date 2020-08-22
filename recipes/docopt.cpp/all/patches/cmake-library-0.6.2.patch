@@ -1,0 +1,58 @@
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -46,20 +46,14 @@ if(MSVC OR XCODE)
+     # static libraries completely separately.
+     # Xcode does not support libraries with only object files as sources.
+     # See https://cmake.org/cmake/help/v3.0/command/add_library.html?highlight=add_library
+-    add_library(docopt SHARED ${docopt_SOURCES} ${docopt_HEADERS})
+-    add_library(docopt_s STATIC ${docopt_SOURCES} ${docopt_HEADERS})
++    add_library(docopt ${docopt_SOURCES} ${docopt_HEADERS})
+ else()
+     # If not using MSVC or Xcode, we will create an intermediate object target
+     # to avoid compiling the source code twice.
+-    add_library(docopt_o OBJECT ${docopt_SOURCES} ${docopt_HEADERS})
+-    set_target_properties(docopt_o PROPERTIES POSITION_INDEPENDENT_CODE TRUE)
+-
+-    add_library(docopt SHARED $<TARGET_OBJECTS:docopt_o>)
+-    add_library(docopt_s STATIC $<TARGET_OBJECTS:docopt_o>)
++    add_library(docopt ${docopt_SOURCES} ${docopt_HEADERS})
+ endif()
+ 
+ target_include_directories(docopt PUBLIC $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}> $<INSTALL_INTERFACE:include/docopt>)
+-target_include_directories(docopt_s PUBLIC $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}> $<INSTALL_INTERFACE:include/docopt>)
+ 
+ if(MSVC)
+     # DOCOPT_DLL: Must be specified when building *and* when using the DLL.
+@@ -72,7 +66,6 @@ endif()
+ 
+ if(NOT MSVC)
+ 	set_target_properties(docopt PROPERTIES OUTPUT_NAME docopt)
+-	set_target_properties(docopt_s PROPERTIES OUTPUT_NAME docopt)
+ endif()
+ 
+ if(USE_BOOST_REGEX)
+@@ -83,9 +76,6 @@ if(USE_BOOST_REGEX)
+     find_package(Boost 1.53 REQUIRED COMPONENTS regex)
+     include_directories(${Boost_INCLUDE_DIRS})
+     target_link_libraries(docopt ${Boost_LIBRARIES})
+-	if(WITH_STATIC)
+-		target_link_libraries(docopt_s ${Boost_LIBRARIES})
+-	endif()
+ endif()
+ 
+ #============================================================================
+@@ -118,10 +108,12 @@ endif()
+ set(export_name "docopt-targets")
+ 
+ # Runtime package
+-install(TARGETS docopt EXPORT ${export_name} DESTINATION ${CMAKE_INSTALL_LIBDIR})
++install(TARGETS docopt EXPORT ${export_name}
++	RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
++	ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
++	LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR})
+ 
+ # Development package
+-install(TARGETS docopt_s EXPORT ${export_name} DESTINATION ${CMAKE_INSTALL_LIBDIR})
+ install(FILES ${docopt_HEADERS} DESTINATION include/docopt)
+ 
+ # CMake Package
