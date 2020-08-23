@@ -28,7 +28,7 @@ class PCREConan(ConanFile):
         'build_pcre2_8': True,
         'build_pcre2_16': True,
         'build_pcre2_32': True,
-        'support_jit': True
+        'support_jit': False
     }
 
     _cmake = None
