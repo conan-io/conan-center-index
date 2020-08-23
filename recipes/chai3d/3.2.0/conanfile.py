@@ -53,11 +53,11 @@ class Chai3dConan(ConanFile):
         # * ode module:
         #  - ode: not available in conan center
         self.requires("eigen/3.3.7")
-        self.requires("glew/2.1.0@bincrafters/stable")
+        self.requires("glew/2.1.0")
         self.requires("libjpeg/9d")
         self.requires("libpng/1.6.37")
         self.requires("openal/1.19.1")
-        self.requires("pugixml/1.10@bincrafters/stable")
+        self.requires("pugixml/1.10")
         self.requires("theora/1.1.1@bincrafters/stable")
         if self.options.with_bullet:
             self.requires("bullet3/2.89")
