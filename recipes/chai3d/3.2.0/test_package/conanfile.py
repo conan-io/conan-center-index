@@ -28,3 +28,4 @@ class Chai3dTestConan(ConanFile):
                 self.run(".%stest_chai3d-ode" % os.sep)
             if self.options["chai3d"].with_gel:
                 self.run(".%stest_chai3d-gel" % os.sep)
+          
