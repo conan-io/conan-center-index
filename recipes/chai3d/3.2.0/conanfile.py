@@ -52,15 +52,15 @@ class Chai3dConan(ConanFile):
         #  - lib3ds: not available in conan center
         # * ode module:
         #  - ode: not available in conan center
-        self.requires.add("eigen/3.3.7")
-        self.requires.add("glew/2.1.0@bincrafters/stable")
-        self.requires.add("libjpeg/9d")
-        self.requires.add("libpng/1.6.37")
-        self.requires.add("openal/1.19.1")
-        self.requires.add("pugixml/1.10@bincrafters/stable")
-        self.requires.add("theora/1.1.1@bincrafters/stable")
+        self.requires("eigen/3.3.7")
+        self.requires("glew/2.1.0@bincrafters/stable")
+        self.requires("libjpeg/9d")
+        self.requires("libpng/1.6.37")
+        self.requires("openal/1.19.1")
+        self.requires("pugixml/1.10@bincrafters/stable")
+        self.requires("theora/1.1.1@bincrafters/stable")
         if self.options.with_bullet:
-            self.requires.add("bullet3/2.89")
+            self.requires("bullet3/2.89")
 
     def configure(self):
         if self.settings.os not in ["Windows", "Linux", "Macos"]:
