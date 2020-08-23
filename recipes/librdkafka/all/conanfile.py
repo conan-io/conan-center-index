@@ -55,6 +55,8 @@ class LibrdkafkaConan(ConanFile):
             self.requires("zstd/1.4.5")
         if self.options.ssl:
             self.requires("openssl/1.1.1g")
+        if self.options.sasl and self.settings.os != "Windows":
+            self.requires("cyrus-sasl/2.1.27")
         if self.options.lz4:
             self.requires("lz4/1.9.2")
 
@@ -112,6 +114,6 @@ class LibrdkafkaConan(ConanFile):
         if self.settings.compiler == "Visual Studio":
             self.cpp_info.system_libs.extend(["crypt32", "ws2_32"])
         elif self.settings.os == "Linux":
-            self.cpp_info.system_libs.extend(["pthread", "m"])
+            self.cpp_info.system_libs.extend(["pthread", "rt", "dl", "m"])
         if not self.options.shared:
             self.cpp_info.defines.append("LIBRDKAFKA_STATICLIB")

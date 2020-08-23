@@ -58,6 +58,13 @@ class AutomakeConan(ConanFile):
     def _patch_files(self):
         for patch in self.conan_data["patches"][self.version]:
             tools.patch(**patch)
+        if self.settings.os == "Windows":
+            # tracing using m4 on Windows returns Windows paths => use cygpath to convert to unix paths
+            tools.replace_in_file(os.path.join(self._source_subfolder, "bin", "aclocal.in"),
+                                               "          $map_traced_defs{$arg1} = $file;",
+                                               "          $file = `cygpath -u $file`;\n"
+                                               "          $file =~ s/^\s+|\s+$//g;\n"
+                                               "          $map_traced_defs{$arg1} = $file;")
 
     def build(self):
         self._patch_files()
@@ -106,6 +113,8 @@ class AutomakeConan(ConanFile):
         automake = tools.unix_path(os.path.join(self.package_folder, "bin", "automake" + bin_ext))
         self.output.info("Setting AUTOMAKE to {}".format(automake))
         self.env_info.AUTOMAKE = automake
+
+        self.output.info("Append M4 include directories to AUTOMAKE_CONAN_INCLUDES environment variable")
 
         self.user_info.compile = os.path.join(self._automake_libdir, "compile")
         self.user_info.ar_lib = os.path.join(self._automake_libdir, "ar-lib")

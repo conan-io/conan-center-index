@@ -66,9 +66,9 @@ class Hdf5Conan(ConanFile):
         if self.options.with_zlib:
             self.requires("zlib/1.2.11")
         if self.options.szip_support == "with_libaec":
-            self.requires.add("libaec/1.0.4")
+            self.requires("libaec/1.0.4")
         elif self.options.szip_support == "with_szip":
-            self.requires.add("szip/2.1.1")
+            self.requires("szip/2.1.1")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])

@@ -2,6 +2,7 @@ from conans import ConanFile, tools
 from conans.errors import ConanException
 import os
 
+
 class SysConfigGLUConan(ConanFile):
     name = "glu"
     version = "system"
@@ -10,18 +11,31 @@ class SysConfigGLUConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://cgit.freedesktop.org/mesa/glu/"
     license = "SGI-B-2.0"
-    settings = ("os",)
+    settings = "os"
+    requires = "opengl/system"
 
-    def requirements(self):
-        self.requires("opengl/system")
+    def system_requirements(self):
+        if tools.os_info.is_linux and self.settings.os == "Linux":
+            package_tool = tools.SystemPackageTool(conanfile=self, default_mode='verify')
+            if tools.os_info.with_yum or tools.os_info.with_dnf:
+                packages = ["mesa-libGLU-devel"]
+            elif tools.os_info.with_apt:
+                packages = ["libglu1-mesa-dev"]
+            elif tools.os_info.with_pacman:
+                packages = ["glu"]
+            elif tools.os_info.with_zypper:
+                packages = ["Mesa-libGLU-devel"]
+            else:
+                packages = []
+                self.output.warn("Don't know how to install GLU for your distro")
 
-    def package_id(self):
-        self.info.header_only()
+            for p in packages:
+                package_tool.install(update=True, packages=p)
 
     def _fill_cppinfo_from_pkgconfig(self, name):
         pkg_config = tools.PkgConfig(name)
         if not pkg_config.provides:
-            raise ConanException("GLU development files aren't available, give up")
+            raise ConanException("GLU development files aren't available, giving up")
         libs = [lib[2:] for lib in pkg_config.libs_only_l]
         lib_dirs = [lib[2:] for lib in pkg_config.libs_only_L]
         ldflags = [flag for flag in pkg_config.libs_only_other]
@@ -38,23 +52,6 @@ class SysConfigGLUConan(ConanFile):
         self.cpp_info.cflags.extend(cflags)
         self.cpp_info.cxxflags.extend(cflags)
 
-    def system_requirements(self):
-        if tools.os_info.is_linux and self.settings.os == "Linux":
-            package_tool = tools.SystemPackageTool(conanfile=self, default_mode='verify')
-            if tools.os_info.with_yum or tools.os_info.with_dnf:
-                packages = ["mesa-libGLU-devel"]
-            elif tools.os_info.with_apt:
-                packages = ["libglu1-mesa-dev"]
-            elif tools.os_info.with_pacman:
-                packages = ["glu"]
-            elif tools.os_info.with_zypper:
-                packages = ["Mesa-libGLU-devel"]
-            else:
-                self.output.warn("Don't know how to install GLU for your distro")
-
-            for p in packages:
-                package_tool.install(update=True, packages=p)
-
     def package_info(self):
         self.cpp_info.include_dirs = []
         self.cpp_info.libdirs = []
@@ -63,3 +60,6 @@ class SysConfigGLUConan(ConanFile):
             self.cpp_info.system_libs = ["Glu32"]
         elif self.settings.os == "Linux":
             self._fill_cppinfo_from_pkgconfig("glu")
+
+    def package_id(self):
+        self.info.header_only()

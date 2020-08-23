@@ -1,0 +1,4 @@
+sources:
+  "3.7.0":
+    sha256: 17f22addd69024da02b760dbf28874d053182b45098c7883204152291bf8e9a3 
+    url: https://github.com/martinus/robin-hood-hashing/archive/3.7.0.zip

@@ -13,7 +13,7 @@ class SimpleWebSocketServerConan(ConanFile):
     no_copy_source = True
     license = "MIT"
     requires = (
-        "openssl/1.1.1d",
+        "openssl/1.1.1g",
     )
     options = {
         "use_asio_standalone": [True, False],
@@ -28,9 +28,13 @@ class SimpleWebSocketServerConan(ConanFile):
 
     def requirements(self):
         if self.options.use_asio_standalone:
-            self.requires("asio/1.13.0")
+            self.requires("asio/1.16.1")
         else:
-            self.requires("boost/1.71.0")
+            self.requires("boost/1.73.0")
+
+    def configure(self):
+        if self.settings.compiler.cppstd:
+            tools.check_min_cppstd(self, "11")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
@@ -39,7 +43,7 @@ class SimpleWebSocketServerConan(ConanFile):
 
     def package(self):
         self.copy(pattern="LICENSE", dst="licenses", src=self._source_subfolder)
-        self.copy(pattern="*.hpp", dst="include/simple-websocket-server", src=self._source_subfolder)
+        self.copy(pattern="*.hpp", dst=os.path.join("include", "simple-websocket-server"), src=self._source_subfolder)
 
     def package_info(self):
         if self.options.use_asio_standalone:

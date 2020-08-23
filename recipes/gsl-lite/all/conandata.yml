@@ -5,3 +5,6 @@ sources:
   0.36.0:
     sha256: ab1bb560611dcf9cef2265b8e40e59689bb4af1fd64914aa4a8eff945dd75057
     url: https://github.com/martinmoene/gsl-lite/archive/v0.36.0.zip
+  0.37.0:
+    sha256: 980c8e91dd25bfaac7bfbd7151f04027fa68ff0bf652baa11de137242641e399
+    url: https://github.com/gsl-lite/gsl-lite/archive/0.37.0.zip

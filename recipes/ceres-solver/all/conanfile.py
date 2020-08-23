@@ -1,7 +1,6 @@
 import os
 from conans import ConanFile, tools, CMake
 from conans.errors import ConanInvalidConfiguration
-from conans.tools import Version
 
 class ceressolverConan(ConanFile):
     name = "ceres-solver"
@@ -65,23 +64,25 @@ class ceressolverConan(ConanFile):
 
     def config_options(self):
         if self.settings.os == "Windows":
-            self.options.remove("fPIC")
+            del self.options.fPIC
 
     def configure(self):
+        if self.options.shared:
+            del self.options.fPIC
         if self.settings.build_type == "Debug" and self.options.use_glog:
             raise ConanInvalidConfiguration("Ceres-solver only links against the release version of glog")
         if self.options.use_glog and not self.options.use_gflags: #At this stage we can't check the value of self.options["glog"].with_gflags so we asume it is true because is the default value
             raise ConanInvalidConfiguration("To depend on glog built with gflags (Default behavior) set use_gflags=True, otherwise Ceres may fail to link due to missing gflags symbols.")
 
     def requirements(self):
-        self.requires.add("eigen/3.3.7")
+        self.requires("eigen/3.3.7")
         if self.options.use_glog:
-            self.requires.add("glog/0.4.0")
+            self.requires("glog/0.4.0")
         if self.options.use_gflags:
-            self.requires.add("gflags/2.2.2")
+            self.requires("gflags/2.2.2")
             self.options["gflags"].nothreads = False
         if self.options.use_TBB:
-            self.requires.add("tbb/2020.0")
+            self.requires("tbb/2020.0")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
@@ -111,5 +112,14 @@ class ceressolverConan(ConanFile):
         tools.rmdir(os.path.join(self.package_folder, "CMake"))
 
     def package_info(self):
-        self.cpp_info.libs = tools.collect_libs(self)
-        self.cpp_info.includedirs = ["include",os.path.join("include","ceres")]
+        self.cpp_info.names["cmake_find_package"] = "Ceres"
+        self.cpp_info.names["cmake_find_package_multi"] = "Ceres"
+        self.cpp_info.components["ceres"].libs = tools.collect_libs(self)
+        self.cpp_info.components["ceres"].includedirs = ["include", os.path.join("include","ceres")]
+        self.cpp_info.components["ceres"].requires = ["eigen::eigen"]
+        if self.options.use_glog:
+            self.cpp_info.components["ceres"].requires.append("glog::glog")
+        if self.options.use_gflags:
+            self.cpp_info.components["ceres"].requires.append("gflags::gflags")
+        if self.options.use_TBB:
+            self.cpp_info.components["ceres"].requires.append("tbb::tbb")

@@ -1,3 +1,7 @@
+Upstreamed in 3e37c7d3fa122563a9d88168926f61286ef30cd3
+
+ncurses 6.2 - patch 20200523
+
 From 2735f43727f8cef9edb406dc361a51014807788c Mon Sep 17 00:00:00 2001
 From: Anonymous Maarten <anonymous.maarten@gmail.com>
 Date: Wed, 26 Feb 2020 19:24:16 +0100
@@ -18,6 +22,7 @@ Fixes these kind of errors on MSVC
 ../ncurses/lib_gen.c(79): error C2059: syntax error: '('
 ../ncurses/lib_gen.c(86): error C2059: syntax error: '('
 (and more)
+
 ---
  ncurses/base/MKlib_gen.sh | 2 +-
  1 file changed, 1 insertion(+), 1 deletion(-)

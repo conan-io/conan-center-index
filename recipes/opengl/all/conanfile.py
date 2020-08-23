@@ -47,7 +47,8 @@ class SysConfigOpenGLConan(ConanFile):
             elif tools.os_info.with_apt:
                 ubuntu_20_or_later = tools.os_info.linux_distro == "ubuntu" and tools.os_info.os_version >= "20"
                 debian_11_or_later = tools.os_info.linux_distro == "debian" and tools.os_info.os_version >= "11"
-                if ubuntu_20_or_later or debian_11_or_later:
+                pop_os_20_or_later = tools.os_info.linux_distro == "pop" and tools.os_info.os_version >= "20"
+                if ubuntu_20_or_later or debian_11_or_later or pop_os_20_or_later:
                     packages = ["libgl-dev"]
                 else:
                     packages = ["libgl1-mesa-dev"]
@@ -56,8 +57,10 @@ class SysConfigOpenGLConan(ConanFile):
             elif tools.os_info.with_zypper:
                 packages = ["Mesa-libGL-devel"]
             else:
+                packages = []
                 self.output.warn("Don't know how to install OpenGL for your distro.")
-            package_tool.install(update=True, packages=packages)
+            for p in packages:
+                package_tool.install(update=True, packages=p)
 
     def package_info(self):
         self.cpp_info.includedirs = []

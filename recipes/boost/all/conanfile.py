@@ -359,8 +359,7 @@ class BoostConan(ConanFile):
 
     @property
     def _b2_exe(self):
-        b2_exe = "b2.exe" if tools.os_info.is_windows else "b2"
-        return os.path.join(self.deps_cpp_info["b2"].rootpath, "bin", b2_exe)
+        return "b2.exe" if tools.os_info.is_windows else "b2"
 
     @property
     def _bcp_exe(self):
@@ -387,7 +386,7 @@ class BoostConan(ConanFile):
                 if self.options.debug_level:
                     command += " -d%d" % self.options.debug_level
                 self.output.warn(command)
-                self.run(command)
+                self.run(command, run_environment=True)
 
     def _run_bcp(self):
         with tools.vcvars(self.settings) if self._is_msvc or self._is_clang_cl else tools.no_op():
@@ -440,7 +439,7 @@ class BoostConan(ConanFile):
             with tools.chdir(sources):
                 # To show the libraries *1
                 # self.run("%s --show-libraries" % b2_exe)
-                self.run(full_command)
+                self.run(full_command, run_environment=True)
 
     @property
     def _b2_os(self):

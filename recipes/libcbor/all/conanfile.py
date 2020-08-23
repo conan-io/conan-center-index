@@ -15,10 +15,12 @@ class LibCborStackConan(ConanFile):
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
+        "custom_alloc": [True, False]
     }
     default_options = {
         "shared": False,
-        "fPIC": True
+        "fPIC": True,
+        "custom_alloc": False
     }
     generators = "cmake"
 
@@ -51,6 +53,7 @@ class LibCborStackConan(ConanFile):
         self._cmake = CMake(self)
         self._cmake.definitions["WITH_EXAMPLES"] = False
         self._cmake.definitions["SANITIZE"] = False
+        self._cmake.definitions["CBOR_CUSTOM_ALLOC"] = self.options.custom_alloc
         
         self._cmake.configure(build_folder=self._build_subfolder)
         return self._cmake

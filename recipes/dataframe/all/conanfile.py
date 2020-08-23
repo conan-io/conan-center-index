@@ -30,20 +30,20 @@ class DataFrameConan(ConanFile):
     generators = "cmake"
     exports_sources = ["CMakeLists.txt", "patches/*"]
 
+    _cmake = None
+
     @property
     def _source_subfolder(self):
         return os.path.join(self.source_folder, "source_subfolder")
-
-    def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        extracted_folder = "DataFrame-{}".format(self.version)
-        os.rename(extracted_folder, self._source_subfolder)
 
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
 
     def configure(self):
+        if self.options.shared:
+            del self.options.fPIC
+
         compiler = str(self.settings.compiler)
         compiler_version = tools.Version(self.settings.compiler.version)
 
@@ -82,10 +82,17 @@ class DataFrameConan(ConanFile):
                 )
             )
 
+    def source(self):
+        tools.get(**self.conan_data["sources"][self.version])
+        extracted_folder = "DataFrame-{}".format(self.version)
+        os.rename(extracted_folder, self._source_subfolder)
+
     def _configure_cmake(self):
-        cmake = CMake(self)
-        cmake.configure()
-        return cmake
+        if self._cmake:
+            return self._cmake
+        self._cmake = CMake(self)
+        self._cmake.configure()
+        return self._cmake
 
     def build(self):
         for patch in self.conan_data["patches"][self.version]:
@@ -108,8 +115,9 @@ class DataFrameConan(ConanFile):
             tools.rmdir(os.path.join(self.package_folder, dir_to_remove))
 
     def package_info(self):
+        self.cpp_info.names["cmake_find_package"] = "DataFrame"
+        self.cpp_info.names["cmake_find_package_multi"] = "DataFrame"
+        self.cpp_info.names["pkg_config"] = "DataFrame"
         self.cpp_info.libs = tools.collect_libs(self)
-
-        # in linux we need to link also with these libs
         if self.settings.os == "Linux":
             self.cpp_info.system_libs.extend(["pthread", "dl", "rt"])

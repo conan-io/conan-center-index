@@ -1,4 +1,4 @@
-#include "tbb/task_group.h"  
+#include "tbb/task_group.h"
 #include "tbb/flow_graph.h"
 #include "tbb/compat/tuple"
 #include <iostream>

@@ -4,10 +4,11 @@ from conans import ConanFile, CMake, tools
 
 class TestPackageConan(ConanFile):
     settings = "os", "compiler", "build_type", "arch"
-    generators = "cmake"
+    generators = "cmake", "cmake_find_package"
 
     def build(self):
         cmake = CMake(self)
+        cmake.definitions["ZSTD_SHARED"] = self.options["zstd"].shared
         cmake.configure()
         cmake.build()
 

@@ -30,6 +30,8 @@ class LibspatialindexConan(ConanFile):
             del self.options.fPIC
 
     def configure(self):
+        if self.options.shared:
+            del self.options.fPIC
         if self.settings.compiler.cppstd:
             tools.check_min_cppstd(self, 11)
 
@@ -60,21 +62,25 @@ class LibspatialindexConan(ConanFile):
         cmake.install()
 
     def package_info(self):
-        self.cpp_info.libs = self._get_ordered_libs()
+        suffix = self._get_lib_suffix()
+        self.cpp_info.components["spatialindex"].libs = ["spatialindex" + suffix]
         if self.settings.os == "Linux":
-            self.cpp_info.system_libs.append("m")
+            self.cpp_info.components["spatialindex"].system_libs.append("m")
+        self.cpp_info.components["spatialindex_c"].libs = ["spatialindex_c" + suffix]
+        self.cpp_info.components["spatialindex_c"].requires = ["spatialindex"]
+        if not self.options.shared and tools.stdcpp_library(self):
+            self.cpp_info.components["spatialindex"].system_libs.append(tools.stdcpp_library(self))
+            self.cpp_info.components["spatialindex_c"].system_libs.append(tools.stdcpp_library(self))
         if not self.options.shared and self.settings.compiler == "Visual Studio":
-            self.cpp_info.defines.append("SIDX_STATIC")
+            self.cpp_info.components["spatialindex"].defines.append("SIDX_STATIC")
+            self.cpp_info.components["spatialindex_c"].defines.append("SIDX_STATIC")
 
-    def _get_ordered_libs(self):
-        ordered_libs = ["spatialindex_c", "spatialindex"]
-        # With Visual Studio, libspatialindex adds -32 or -64 suffix depending on pointer size
+    def _get_lib_suffix(self):
+        suffix = ""
         if self.settings.compiler == "Visual Studio":
-            suffix = ""
             libs = tools.collect_libs(self)
             for lib in libs:
                 if "spatialindex_c" in lib:
                     suffix = lib.split("spatialindex_c", 1)[1]
                     break
-            ordered_libs = [lib + suffix for lib in ordered_libs]
-        return ordered_libs
+        return suffix

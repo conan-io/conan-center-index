@@ -9,7 +9,6 @@ class LibelfConan(ConanFile):
     description = "ELF object file access library"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://directory.fsf.org/wiki/Libelf"
-    author = "Bincrafters <bincrafters@gmail.com>"
     license = "LGPL-2.0"
     topics = ("conan", "elf", "fsf", "libelf", "object-file")
     exports_sources = ["CMakeLists.txt", "cmake/CMakeLists.txt"]
@@ -18,14 +17,23 @@ class LibelfConan(ConanFile):
     default_options = {"shared": False, "fPIC": True}
     generators = "cmake"
     _autotools = None
-    _source_subfolder = "source_subfolder"
-    _build_subfolder = "build_subfolder"
+    _cmake = None
+
+    @property
+    def _source_subfolder(self):
+        return "source_subfolder"
+
+    @property
+    def _build_subfolder(self):
+        return "build_subfolder"
 
     def config_options(self):
         if self.settings.os != "Linux":
             del self.options.fPIC
 
     def configure(self):
+        if self.options.shared:
+            del self.options.fPIC
         del self.settings.compiler.libcxx
         del self.settings.compiler.cppstd
         if self.settings.os != "Linux":
@@ -38,9 +46,11 @@ class LibelfConan(ConanFile):
         os.rename(extracted_dir, self._source_subfolder)
 
     def _configure_cmake(self):
-        cmake = CMake(self)
-        cmake.configure(build_folder=self._build_subfolder)
-        return cmake
+        if self._cmake:
+            return self._cmake
+        self._cmake = CMake(self)
+        self._cmake.configure(build_folder=self._build_subfolder)
+        return self._cmake
 
     def _build_cmake(self):
         shutil.copyfile(os.path.join("cmake", "CMakeLists.txt"), os.path.join(self._source_subfolder, "CMakeLists.txt"))

@@ -14,10 +14,14 @@ class WolfSSLConan(ConanFile):
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
+        "opensslextra": [True, False],
+        "opensslall": [True, False],
     }
     default_options = {
         "shared": False,
         "fPIC": True,
+        "opensslextra": False,
+        "opensslall": False,
     }
 
     _autotools = None
@@ -31,6 +35,8 @@ class WolfSSLConan(ConanFile):
             del self.options.fPIC
 
     def configure(self):
+        if self.options.opensslall and not self.options.opensslextra:
+            raise ConanInvalidConfiguration("The option 'opensslall' requires 'opensslextra=True'")
         if self.options.shared:
             del self.options.fPIC
         del self.settings.compiler.cppstd
@@ -75,6 +81,8 @@ class WolfSSLConan(ConanFile):
             "--disable-crypttests",
             "--enable-harden",
             "--enable-debug" if self.settings.build_type == "Debug" else "--disable-debug",
+            "--enable-opensslall" if self.options.opensslall else "--disable-opensslall",
+            "--enable-opensslextra" if self.options.opensslextra else "--disable-opensslextra",
         ]
         if self.options.shared:
             conf_args.extend(["--enable-shared", "--disable-static"])

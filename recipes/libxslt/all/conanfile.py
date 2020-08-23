@@ -11,10 +11,15 @@ class LibxsltConan(ConanFile):
     homepage = "https://xmlsoft.org"
     license = "MIT"
     settings = "os", "arch", "compiler", "build_type"
-    options = {"shared": [True, False],
-               "fPIC": [True, False]}
+
     default_options = {'shared': False,
-                       'fPIC': True}
+                       'fPIC': True,
+                       "debugger": False,
+                       "crypto": False,
+                       "profiler": False,
+                       "plugins": False}
+    options = {name: [True, False] for name in default_options.keys()}
+    _option_names = [name for name in default_options.keys() if name not in ["shared", "fPIC"]]
     _source_subfolder = "source_subfolder"
     exports_sources = "patches/**"
 
@@ -68,9 +73,12 @@ class LibxsltConan(ConanFile):
                         'include="%s"' % ";".join(self.deps_cpp_info.include_paths),
                         'lib="%s"' % ";".join(self.deps_cpp_info.lib_paths),
                         'iconv=no',
-                        'xslt_debug=no',
-                        'debugger=no',
-                        'crypto=no']
+                        'xslt_debug=no']
+                for name in self._option_names:
+                    cname = {"plugins": "modules"}.get(name, name)
+                    value = getattr(self.options, name)
+                    value = "yes" if value else "no"
+                    args.append("%s=%s" % (cname, value))
                 configure_command = ' '.join(args)
                 self.output.info(configure_command)
                 self.run(configure_command)
@@ -79,6 +87,11 @@ class LibxsltConan(ConanFile):
                 def format_libs(package):
                     libs = []
                     for lib in self.deps_cpp_info[package].libs:
+                        libname = lib
+                        if not libname.endswith('.lib'):
+                            libname += '.lib'
+                        libs.append(libname)
+                    for lib in self.deps_cpp_info[package].system_libs:
                         libname = lib
                         if not libname.endswith('.lib'):
                             libname += '.lib'
@@ -114,12 +127,12 @@ class LibxsltConan(ConanFile):
 
         xml_config = tools.unix_path(self.deps_cpp_info["libxml2"].rootpath) + "/bin/xml2-config"
 
-        configure_args.extend([
-            '--without-crypto',
-            '--without-debugger',
-            '--without-plugins',
-            'XML_CONFIG=%s' % xml_config
-        ])
+        configure_args.append('XML_CONFIG=%s' % xml_config)
+
+        for name in self._option_names:
+            value = getattr(self.options, name)
+            value = ("--with-%s" % name) if value else ("--without-%s" % name)
+            configure_args.append(value)
 
         # Disable --build when building for iPhoneSimulator. The configure script halts on
         # not knowing if it should cross-compile.

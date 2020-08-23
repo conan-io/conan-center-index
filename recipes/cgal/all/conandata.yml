@@ -8,3 +8,6 @@ sources:
   "5.0.2":
     sha256: 4d281e482449de3a7415cfc117ace2341427ffc4a03cb0806794531cacdde38f
     url: https://github.com/CGAL/cgal/releases/download/releases%2FCGAL-5.0.2/CGAL-5.0.2.zip
+  "5.0.3":
+    sha256: d47912d6a9e79492aa41d91c8001fdbf504b9c971d11c293328e189e6779c862
+    url: https://github.com/CGAL/cgal/releases/download/releases%2FCGAL-5.0.3/CGAL-5.0.3.zip

@@ -1,8 +1,10 @@
-cmake_minimum_required(VERSION 2.8.12)
+cmake_minimum_required(VERSION 3.1)
 project(test_package)
 
 include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
 conan_basic_setup()
 
-add_executable(test_package test_package.cpp)
-target_link_libraries(test_package ${CONAN_LIBS})
+find_package(ArduinoJson REQUIRED CONFIG)
+
+add_executable(${PROJECT_NAME} test_package.cpp)
+target_link_libraries(${PROJECT_NAME} ArduinoJson::ArduinoJson) # remove ArduinoJson:: namespace when fixed in conanfile.py

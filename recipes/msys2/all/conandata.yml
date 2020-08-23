@@ -21,3 +21,14 @@ sources:
              "https://sourceforge.net/projects/msys2/files/Base/x86_64/msys2-base-x86_64-20190524.tar.xz",
       ]
       sha256: "168e156fa9f00d90a8445676c023c63be6e82f71487f4e2688ab5cb13b345383"
+  "20200517":
+    - url: [
+             "http://repo.msys2.org/distrib/i686/msys2-base-i686-20200517.tar.xz",
+             "https://sourceforge.net/projects/msys2/files/Base/i686/msys2-base-i686-20200517.tar.xz",
+    ]
+      sha256: "4dbdde708a4bcf3c056e8f4f28b1b0e7a3210ffacc6296a7d11fdaf076fd431e"
+    - url: [
+             "http://repo.msys2.org/distrib/x86_64/msys2-base-x86_64-20200517.tar.xz",
+             "https://sourceforge.net/projects/msys2/files/Base/x86_64/msys2-base-x86_64-20200517.tar.xz",
+      ]
+      sha256: "c4443113497acb2d2e285d40b929fc55f33f8f669902595ecdf66a655b63dc60"
