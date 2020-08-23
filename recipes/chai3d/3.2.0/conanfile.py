@@ -75,7 +75,7 @@ class Chai3dConan(ConanFile):
                 "This package requires Visual Studio editions "
                 "2010 or later")
         elif (self.settings.os == "Macos"
-              and tools.Version(self.settings.os.version) <= "10.8"):
+              and self.settings.get_safe("os.version") and tools.Version(self.settings.os.version) <= "10.8"):
             raise ConanInvalidConfiguration(
                 "Unsupported Macos version. "
                 "This package requires Macos version "
