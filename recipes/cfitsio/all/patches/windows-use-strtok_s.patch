@@ -1,0 +1,14 @@
+--- a/fitsio2.h
++++ b/fitsio2.h
+@@ -26,7 +26,11 @@ extern int Fitsio_Pthread_Status;
+ #define FFUNLOCK1(lockname) (Fitsio_Pthread_Status = pthread_mutex_unlock(&lockname))
+ #define FFLOCK   FFLOCK1(Fitsio_Lock)
+ #define FFUNLOCK FFUNLOCK1(Fitsio_Lock)
++#ifdef _WIN32
++#define ffstrtok(str, tok, save) strtok_s(str, tok, save)
++#else
+ #define ffstrtok(str, tok, save) strtok_r(str, tok, save)
++#endif
+ 
+ #else
+ #define FFLOCK

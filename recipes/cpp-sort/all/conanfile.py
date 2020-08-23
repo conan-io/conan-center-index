@@ -11,6 +11,7 @@ class CppSortConan(ConanFile):
     homepage = "https://github.com/Morwenn/cpp-sort"
     license = "MIT"
     no_copy_source = True
+    settings = "os", "compiler", "build_type", "arch"
 
     _source_subfolder = "source_subfolder"
 

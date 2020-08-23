@@ -1,7 +1,7 @@
 from conans import ConanFile, AutoToolsBuildEnvironment, tools
 from conans.errors import ConanInvalidConfiguration
-from conans.tools import os_info
 import os
+import glob
 
 
 class LibpqConan(ConanFile):
@@ -25,7 +25,7 @@ class LibpqConan(ConanFile):
         if self.settings.compiler == "Visual Studio":
             self.build_requires("strawberryperl/5.30.0.1")
         elif tools.os_info.is_windows:
-            if "CONAN_BASH_PATH" not in os.environ and os_info.detect_windows_subsystem() != 'msys2':
+            if "CONAN_BASH_PATH" not in os.environ and tools.os_info.detect_windows_subsystem() != 'msys2':
                 self.build_requires("msys2/20190524")
     @property
     def _source_subfolder(self):
@@ -46,12 +46,15 @@ class LibpqConan(ConanFile):
     def configure(self):
         del self.settings.compiler.libcxx
         del self.settings.compiler.cppstd
+        if self.settings.compiler != "Visual Studio" and self.settings.os == "Windows":
+            if self.options.shared:
+                raise ConanInvalidConfiguration("static mingw build is not possible")
 
     def requirements(self):
         if self.options.with_zlib:
-            self.requires.add("zlib/1.2.11")
+            self.requires("zlib/1.2.11")
         if self.options.with_openssl:
-            self.requires.add("openssl/1.0.2s")
+            self.requires("openssl/1.1.1g")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
@@ -64,6 +67,8 @@ class LibpqConan(ConanFile):
             args = ['--without-readline']
             args.append('--with-zlib' if self.options.with_zlib else '--without-zlib')
             args.append('--with-openssl' if self.options.with_openssl else '--without-openssl')
+            if tools.cross_building(self.settings) and not self.options.with_openssl:
+                args.append("--disable-strong-random")
             if self.settings.os != "Windows" and self.options.disable_rpath:
                 args.append('--disable-rpath')
             if self._is_clang8_x86:
@@ -71,6 +76,13 @@ class LibpqConan(ConanFile):
             with tools.chdir(self._source_subfolder):
                 self._autotools.configure(args=args)
         return self._autotools
+
+    @property
+    def _make_args(self):
+        args = []
+        if self.settings.os == "Windows":
+            args.append("MAKE_DLL={}".format(str(self.options.shared).lower()))
+        return args
 
     def build(self):
         if self.settings.compiler == "Visual Studio":
@@ -112,18 +124,37 @@ class LibpqConan(ConanFile):
                 with tools.environment_append({"CONFIG": config}):
                     with tools.chdir(os.path.join(self._source_subfolder, "src", "tools", "msvc")):
                         self.run("perl build.pl libpq")
+                        if not self.options.shared:
+                            self.run("perl build.pl libpgport")
         else:
             autotools = self._configure_autotools()
             with tools.chdir(os.path.join(self._source_subfolder, "src", "backend")):
-                autotools.make(target="generated-headers")
+                autotools.make(args=self._make_args, target="generated-headers")
             with tools.chdir(os.path.join(self._source_subfolder, "src", "common")):
-                autotools.make()
+                autotools.make(args=self._make_args)
+            if tools.Version(self.version) >= "12":
+                with tools.chdir(os.path.join(self._source_subfolder, "src", "port")):
+                    autotools.make(args=self._make_args)
             with tools.chdir(os.path.join(self._source_subfolder, "src", "include")):
-                autotools.make()
+                autotools.make(args=self._make_args)
             with tools.chdir(os.path.join(self._source_subfolder, "src", "interfaces", "libpq")):
-                autotools.make()
+                autotools.make(args=self._make_args)
             with tools.chdir(os.path.join(self._source_subfolder, "src", "bin", "pg_config")):
-                autotools.make()
+                autotools.make(args=self._make_args)
+
+    def _remove_unused_libraries_from_package(self):
+        if self.options.shared:
+            if self.settings.os == "Windows":
+                globs = []
+            else:
+                globs = [os.path.join(self.package_folder, "lib", "*.a")]
+        else:
+            globs = [os.path.join(self.package_folder, "lib", "libpq.so*"), os.path.join(self.package_folder, "bin", "*.dll")]
+        if self.settings.os == "Windows":
+            os.unlink(os.path.join(self.package_folder, "lib", "libpq.dll"))
+        for globi in globs:
+            for file in glob.glob(globi):
+                os.remove(file)
 
     def package(self):
         self.copy(pattern="COPYRIGHT", dst="licenses", src=self._source_subfolder)
@@ -136,29 +167,71 @@ class LibpqConan(ConanFile):
             self.copy("*.h", src=os.path.join(self._source_subfolder, "src", "include", "libpq"), dst=os.path.join("include", "libpq"), keep_path=False)
             self.copy("*genbki.h", src=self._source_subfolder, dst=os.path.join("include", "catalog"), keep_path=False)
             self.copy("*pg_type.h", src=self._source_subfolder, dst=os.path.join("include", "catalog"), keep_path=False)
-            self.copy("*.lib", src=self._source_subfolder, dst="lib", keep_path=False)
             if self.options.shared:
-                self.copy("*.dll", src=self._source_subfolder, dst="bin", keep_path=False)
+                self.copy("**/libpq.dll", src=self._source_subfolder, dst="bin", keep_path=False)
+                self.copy("**/libpq.lib", src=self._source_subfolder, dst="lib", keep_path=False)
+            else:
+                self.copy("*.lib", src=self._source_subfolder, dst="lib", keep_path=False)
         else:
-            autotools = self._configure_autotools()
+            autotools = AutoToolsBuildEnvironment(self, win_bash=tools.os_info.is_windows)#self._configure_autotools()
             with tools.chdir(os.path.join(self._source_subfolder, "src", "common")):
-                autotools.install()
+                autotools.install(args=self._make_args)
             with tools.chdir(os.path.join(self._source_subfolder, "src", "include")):
-                autotools.install()
+                autotools.install(args=self._make_args)
             with tools.chdir(os.path.join(self._source_subfolder, "src", "interfaces", "libpq")):
-                autotools.install()
+                autotools.install(args=self._make_args)
+            if tools.Version(self.version) >= "12":
+                with tools.chdir(os.path.join(self._source_subfolder, "src", "port")):
+                    autotools.install(args=self._make_args)
+
             with tools.chdir(os.path.join(self._source_subfolder, "src", "bin", "pg_config")):
-                autotools.install()
+                autotools.install(args=self._make_args)
+
+            self._remove_unused_libraries_from_package()
+
             tools.rmdir(os.path.join(self.package_folder, "include", "postgresql", "server"))
             self.copy(pattern="*.h", dst=os.path.join("include", "catalog"), src=os.path.join(self._source_subfolder, "src", "include", "catalog"))
         self.copy(pattern="*.h", dst=os.path.join("include", "catalog"), src=os.path.join(self._source_subfolder, "src", "backend", "catalog"))
         tools.rmdir(os.path.join(self.package_folder, "share"))
         tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
 
+    def _construct_library_name(self, name):
+        if self.settings.compiler == "Visual Studio":
+            return "lib{}".format(name)
+        return  name
+
     def package_info(self):
+        self.cpp_info.names["cmake_find_package"] = "PostgreSQL"
+        self.cpp_info.names["cmake_find_package_multi"] = "PostgreSQL"
         self.env_info.PostgreSQL_ROOT = self.package_folder
-        self.cpp_info.libs = tools.collect_libs(self)
+
+        self.cpp_info.components["pq"].libs = [self._construct_library_name("pq")]
+
+        if self.options.with_zlib:
+            self.cpp_info.components["pq"].requires.append("zlib::zlib")
+
+        if self.options.with_openssl:
+            self.cpp_info.components["pq"].requires.append("openssl::openssl")
+
+        if not self.options.shared:
+            if self.settings.compiler == "Visual Studio":
+                if tools.Version(self.version) < '12':
+                    self.cpp_info.components["pgport"].libs = ["libpgport"]
+                    self.cpp_info.components["pq"].requires.extend(["pgport"])
+                else:
+                    self.cpp_info.components["pgcommon"].libs = ["libpgcommon"]
+                    self.cpp_info.components["pgport"].libs = ["libpgport"]
+                    self.cpp_info.components["pq"].requires.extend(["pgport", "pgcommon"])
+            else:
+                if tools.Version(self.version) < '12':
+                    self.cpp_info.components["pgcommon"].libs = ["pgcommon"]
+                    self.cpp_info.components["pq"].requires.extend(["pgcommon"])
+                else:
+                    self.cpp_info.components["pgcommon"].libs = ["pgcommon", "pgcommon_shlib"]
+                    self.cpp_info.components["pgport"].libs = ["pgport", "pgport_shlib"]
+                    self.cpp_info.components["pq"].requires.extend(["pgport", "pgcommon"])
+
         if self.settings.os == "Linux":
-            self.cpp_info.libs.append("pthread")
+            self.cpp_info.components["pq"].system_libs = ["pthread"]
         elif self.settings.os == "Windows":
-            self.cpp_info.libs.extend(["ws2_32", "secur32", "advapi32", "shell32", "crypt32", "wldap32"])
+            self.cpp_info.components["pq"].system_libs = ["ws2_32", "secur32", "advapi32", "shell32", "crypt32", "wldap32"]

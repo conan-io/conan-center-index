@@ -1,0 +1,11 @@
+--- a/src/freexl.c
++++ b/src/freexl.c
+@@ -89,7 +89,7 @@ freexl_version (void)
+     return freexlversion;
+ }
+ 
+-#if defined(_WIN32) && !defined(__MINGW32__)
++#if defined(_WIN32) && !defined(__MINGW32__) && _MSC_VER < 1800
+ /* MSVC compiler doesn't support lround() at all */
+ static double
+ round (double num)

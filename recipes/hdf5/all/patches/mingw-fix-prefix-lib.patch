@@ -1,0 +1,11 @@
+--- a/config/cmake_ext_mod/HDFMacros.cmake
++++ b/config/cmake_ext_mod/HDFMacros.cmake
+@@ -117,7 +117,7 @@ macro (HDF_SET_LIB_OPTIONS libtarget libname libtype)
+     set (LIB_RELEASE_NAME "${libname}")
+     set (LIB_DEBUG_NAME "${libname}${LIB_DEBUG_SUFFIX}")
+   else ()
+-    if (WIN32)
++    if (WIN32 AND NOT MINGW)
+       set (LIB_RELEASE_NAME "lib${libname}")
+       set (LIB_DEBUG_NAME "lib${libname}${LIB_DEBUG_SUFFIX}")
+     else ()

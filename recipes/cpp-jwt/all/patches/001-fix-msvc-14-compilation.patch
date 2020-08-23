@@ -1,0 +1,22 @@
+From 67f3dad16aebc78c2d5882be182114934416916d Mon Sep 17 00:00:00 2001
+From: Carlos Gomes Martinho <kmartinho8@gmail.com>
+Date: Mon, 24 Feb 2020 19:54:37 +0100
+Subject: [PATCH] fix: compilation with visual studio 14
+
+---
+ include/jwt/base64.hpp | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/include/jwt/base64.hpp b/include/jwt/base64.hpp
+index 248b10c..7df6245 100644
+--- a/include/jwt/base64.hpp
++++ b/include/jwt/base64.hpp
+@@ -92,7 +92,7 @@ inline std::string base64_encode(const char* in, size_t len)
+   const auto encoded_siz = encoding_size(len);
+   result.resize(encoded_siz);
+ 
+-  constexpr static const EMap emap{};
++  constexpr static const EMap emap;
+ 
+   int i = 0;
+   int j = 0;

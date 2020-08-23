@@ -1,6 +1,3 @@
-#!/usr/bin/env python
-# -*- coding: utf-8 -*-
-
 from conans import ConanFile, CMake, tools
 import os
 
@@ -9,9 +6,8 @@ class PCREConan(ConanFile):
     name = "pcre2"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://www.pcre.org/"
-    author = "Bincrafters <bincrafters@gmail.com>"
     description = "Perl Compatible Regular Expressions"
-    topics = "regex", "regexp", "regular expressions", "PCRE"
+    topics = ("regex", "regexp", "PCRE")
     license = "BSD-3-Clause"
     exports_sources = ["CMakeLists.txt"]
     generators = "cmake"
@@ -38,7 +34,7 @@ class PCREConan(ConanFile):
 
     def config_options(self):
         if self.settings.os == "Windows":
-            self.options.remove("fPIC")
+            del self.options.fPIC
 
     def configure(self):
         del self.settings.compiler.libcxx
@@ -46,7 +42,7 @@ class PCREConan(ConanFile):
 
     def requirements(self):
         if self.options.with_bzip2:
-            self.requires.add("bzip2/1.0.8")
+            self.requires("bzip2/1.0.8")
 
     def _configure_cmake(self):
         cmake = CMake(self)
@@ -82,6 +78,7 @@ class PCREConan(ConanFile):
                 library += ".dll"
             return library
 
+        self.cpp_info.names["pkg_config"] = "libpcre2"
         self.cpp_info.libs = [library_name("pcre2-posix")]
         if self.options.build_pcre2_8:
             self.cpp_info.libs.append(library_name("pcre2-8"))

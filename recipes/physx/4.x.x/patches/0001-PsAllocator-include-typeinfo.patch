@@ -1,0 +1,17 @@
+diff --git a/physx/source/foundation/include/PsAllocator.h b/physx/source/foundation/include/PsAllocator.h
+index 38b70fc3..e831ca65 100644
+--- a/physx/source/foundation/include/PsAllocator.h
++++ b/physx/source/foundation/include/PsAllocator.h
+@@ -37,8 +37,12 @@
+ 
+ #if(PX_WINDOWS_FAMILY || PX_XBOXONE)
+ 	#include <exception>
++#if(_MSC_VER >= 1923)
++	#include <typeinfo>
++#else
+ 	#include <typeinfo.h>
+ #endif
++#endif
+ #if(PX_APPLE_FAMILY)
+ 	#include <typeinfo>
+ #endif

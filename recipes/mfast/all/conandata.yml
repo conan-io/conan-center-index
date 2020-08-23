@@ -1,0 +1,20 @@
+sources:
+  "1.2.1":
+    url: "https://github.com/objectcomputing/mFAST/archive/v1.2.1.tar.gz"
+    sha256: "e6ed19e629a33068b7ab5ebdbd860831f2f2b44b3b361068fbbbe975202a4851"
+patches:
+  "1.2.1":
+    - patch_file: "patches/00001-adapt-cmakelists.patch.txt"
+      base_path: "source_subfolder"
+    - patch_file: "patches/00002-add-conan-libs-to-targets.patch.txt"
+      base_path: "source_subfolder"
+    - patch_file: "patches/00003-add-conan-libs-to-targets.patch.txt"
+      base_path: "source_subfolder"
+    - patch_file: "patches/00004-add-conan-libs-to-targets.patch.txt"
+      base_path: "source_subfolder"
+    - patch_file: "patches/00005-add-conan-libs-to-targets.patch.txt"
+      base_path: "source_subfolder"
+    - patch_file: "patches/00006-add-conan-libs-to-targets.patch.txt"
+      base_path: "source_subfolder"
+    - patch_file: "patches/00007-remove-deprectated-boost-detail-endian.patch.txt"
+      base_path: "source_subfolder"

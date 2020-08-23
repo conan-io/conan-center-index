@@ -1,0 +1,41 @@
+From 982de1f0b669bf67bba769f3fb9439082d4b0953 Mon Sep 17 00:00:00 2001
+From: Tarcisio Rodrigues <tarcisio.genaro@gmail.com>
+Date: Sun, 21 Jun 2020 16:49:43 -0300
+Subject: [PATCH 8/8] manage mysql through conan
+
+---
+ CMakeLists.txt            | 2 --
+ src/C++/MySQLConnection.h | 4 ++--
+ 2 files changed, 2 insertions(+), 4 deletions(-)
+
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 44b8349e..1da4cfd7 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -39,8 +39,6 @@ add_definitions("-DHAVE_SSL=1")
+ endif()
+ 
+ if(HAVE_MYSQL)
+-find_package(MySQL REQUIRED)
+-include_directories(${MYSQL_INCLUDE_DIR})
+ 
+ message("-- Building with MySQL")
+ add_definitions("-DHAVE_MYSQL=1")
+diff --git a/src/C++/MySQLConnection.h b/src/C++/MySQLConnection.h
+index 21d16472..00aadf11 100644
+--- a/src/C++/MySQLConnection.h
++++ b/src/C++/MySQLConnection.h
+@@ -174,8 +174,8 @@ private:
+           throw ConfigError( std::string("Unable to connect to database [") + mysql_error(m_pConnection) + "]" );
+     }
+     #if( MYSQL_VERSION_ID > 50000 )
+-    my_bool reconnect = 1;
+-    mysql_options( m_pConnection, MYSQL_OPT_RECONNECT, static_cast<char*>(&reconnect) );
++    bool reconnect = 1;
++    mysql_options( m_pConnection, MYSQL_OPT_RECONNECT, static_cast<bool*>(&reconnect) );
+     #endif
+   }
+ 
+-- 
+2.25.0
+

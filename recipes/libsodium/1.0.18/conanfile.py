@@ -67,8 +67,9 @@ class LibsodiumConan(ConanFile):
 
     def build_requirements(self):
         # There are several unix tools used (bash scripts for Emscripten, autoreconf on MinGW, etc...)
-        if tools.os_info.is_windows:
-            self.build_requires("msys2/20161025")
+        if self.settings.compiler != "Visual Studio" and tools.os_info.is_windows and \
+                not "CONAN_BASH_PATH" in os.environ and tools.os_info.detect_windows_subsystem() != "Windows":
+            self.build_requires("msys2/20190524")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
@@ -116,12 +117,23 @@ class LibsodiumConan(ConanFile):
         configure_args.append("--host=%s" % host_arch)
         self._build_autotools_impl(configure_args)
 
+    def _build_autotools_neutrino(self, configure_args):
+        neutrino_archs = {"x86_64":"x86_64-pc", "x86":"i586-pc", "armv7":"arm-unknown", "armv8": "aarch64-unknown"}
+        if self.settings.os.version == "7.0" and str(self.settings.arch) in neutrino_archs:
+            host_arch = "%s-nto-qnx7.0.0" % neutrino_archs[str(self.settings.arch)]
+            if self.settings.arch == "armv7":
+                host_arch += "eabi"
+        else:
+            raise ConanInvalidConfiguration("Unsupported arch or Neutrino version for libsodium: {} {}".format(self.settings.os, self.settings.arch))
+        configure_args.append("--host=%s" % host_arch)
+        self._build_autotools_impl(configure_args)
+
     def _build_autotools(self):
         absolute_install_dir = os.path.abspath(os.path.join(".", "install"))
         absolute_install_dir = absolute_install_dir.replace("\\", "/")
         configure_args = self._get_configure_args(absolute_install_dir)
 
-        if self.settings.os == "Linux":
+        if self.settings.os in ["Linux", "FreeBSD"]:
             self._build_autotools_linux(configure_args)
         elif self.settings.os == "Emscripten":
             self._build_autotools_emscripten(configure_args)
@@ -131,8 +143,10 @@ class LibsodiumConan(ConanFile):
             self._build_autotools_darwin(configure_args)
         elif self._is_mingw:
             self._build_autotools_mingw(configure_args)
+        elif self.settings.os == "Neutrino":
+            self._build_autotools_neutrino(configure_args)
         else:
-            raise ConanInvalidConfiguration(f"Unsupported os for libsodium: {self.settings.os}")
+            raise ConanInvalidConfiguration("Unsupported os for libsodium: {}".format(self.settings.os))
 
     def build(self):
         for patch in self.conan_data["patches"][self.version]:
@@ -156,7 +170,7 @@ class LibsodiumConan(ConanFile):
             if not self.options.shared:
                 self.cpp_info.defines = ["SODIUM_STATIC=1"]
         self.cpp_info.libs = tools.collect_libs(self)
-        if self.settings.os == "Linux":
+        if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.system_libs = ["pthread"]
 
     def _package_autotools(self):

@@ -1,6 +1,10 @@
+#if defined(_WIN32)
+#define NOMINMAX
+#endif
+#include <amqpcpp.h>
+
 #include <string>
 #include <iostream>
-#include <amqpcpp.h>
 
 int
 main(int argc, char **argv)

@@ -1,7 +1,5 @@
-# -*- coding: utf-8 -*-
 import os
 from conans import ConanFile, CMake, tools
-
 
 class LibalsaTestConan(ConanFile):
     settings = "os", "compiler", "build_type", "arch"

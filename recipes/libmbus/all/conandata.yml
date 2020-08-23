@@ -1,0 +1,7 @@
+sources:
+  "20200424":
+    sha256: 0357e8795b1685a493399414a676827f4084fcee7806648af65e753ef5734b34
+    url: https://github.com/rscada/libmbus/archive/baf03e2a47500e088161471829a05a3f42f45a0b.zip
+  "20200515":
+    sha256: 80cce810e9d9f3e2c3715e5e07b8f48cca82601a423ebd6eef6b6ee6bb846077
+    url: https://github.com/rscada/libmbus/archive/b5e59aa52f9067a5c18862f9651c592fb56a9219.zip

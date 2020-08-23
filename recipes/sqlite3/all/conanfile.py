@@ -1,6 +1,7 @@
 import os
 from conans import ConanFile, CMake, tools
 
+required_conan_version = ">=1.28.0"
 
 class ConanSqlite3(ConanFile):
     name = "sqlite3"
@@ -18,29 +19,52 @@ class ConanSqlite3(ConanFile):
                "enable_column_metadata": [True, False],
                "enable_explain_comments": [True, False],
                "enable_fts3": [True, False],
+               "enable_fts3_parenthesis": [True, False],
                "enable_fts4": [True, False],
                "enable_fts5": [True, False],
                "enable_json1": [True, False],
+               "enable_soundex": [True, False],
                "enable_rtree": [True, False],
+               "use_alloca": [True, False],
                "omit_load_extension": [True, False],
                "enable_unlock_notify": [True, False],
                "disable_gethostuuid": [True, False],
+               "build_executable": [True, False],
                }
     default_options = {"shared": False,
                        "fPIC": True,
-                       "threadsafe": 0,
+                       "threadsafe": 1,
                        "enable_column_metadata": True,
                        "enable_explain_comments": False,
                        "enable_fts3": False,
+                       "enable_fts3_parenthesis": False,
                        "enable_fts4": False,
                        "enable_fts5": False,
                        "enable_json1": False,
+                       "enable_soundex": False,
                        "enable_rtree": True,
+                       "use_alloca": False,
                        "omit_load_extension": False,
                        "enable_unlock_notify": True,
                        "disable_gethostuuid": False,
+                       "build_executable": True,
                        }
-    _source_subfolder = "source_subfolder"
+
+    _cmake = None
+
+    @property
+    def _source_subfolder(self):
+        return "source_subfolder"
+
+    def config_options(self):
+        if self.settings.os == "Windows":
+            del self.options.fPIC
+
+    def configure(self):
+        if self.options.shared:
+            del self.options.fPIC
+        del self.settings.compiler.libcxx
+        del self.settings.compiler.cppstd
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
@@ -49,43 +73,33 @@ class ConanSqlite3(ConanFile):
         archive_name = os.path.splitext(archive_name)[0]
         os.rename(archive_name, self._source_subfolder)
 
-    def config_options(self):
-        if self.settings.os == "Windows":
-            del self.options.fPIC
-
-    def configure(self):
-        del self.settings.compiler.libcxx
-        del self.settings.compiler.cppstd
-
     def _configure_cmake(self):
-        cmake = CMake(self)
-        cmake.definitions["THREADSAFE"] = self.options.threadsafe
-        cmake.definitions["ENABLE_COLUMN_METADATA"] = self.options.enable_column_metadata
-        cmake.definitions["ENABLE_EXPLAIN_COMMENTS"] = self.options.enable_explain_comments
-        cmake.definitions["ENABLE_FTS3"] = self.options.enable_fts3
-        cmake.definitions["ENABLE_FTS4"] = self.options.enable_fts4
-        cmake.definitions["ENABLE_FTS5"] = self.options.enable_fts5
-        cmake.definitions["ENABLE_JSON1"] = self.options.enable_json1
-        cmake.definitions["ENABLE_RTREE"] = self.options.enable_rtree
-        cmake.definitions["OMIT_LOAD_EXTENSION"] = self.options.omit_load_extension
-        cmake.definitions["SQLITE_ENABLE_UNLOCK_NOTIFY"] = self.options.enable_unlock_notify
-        cmake.definitions["HAVE_FDATASYNC"] = True
-        cmake.definitions["HAVE_GMTIME_R"] = True
-        cmake.definitions["HAVE_LOCALTIME_R"] = True
-        cmake.definitions["HAVE_POSIX_FALLOCATE"] = True
-        cmake.definitions["HAVE_STRERROR_R"] = True
-        cmake.definitions["HAVE_USLEEP"] = True
-        if self.settings.os == "Windows":
-            cmake.definitions["HAVE_LOCALTIME_R"] = False
-            cmake.definitions["HAVE_POSIX_FALLOCATE"] = False
-        if tools.is_apple_os(self.settings.os):
-            cmake.definitions["HAVE_POSIX_FALLOCATE"] = False
-        if self.settings.os == "Android":
-            cmake.definitions["HAVE_POSIX_FALLOCATE"] = False
-        if self.options.disable_gethostuuid:
-            cmake.definitions["DISABLE_GETHOSTUUID"] = True
-        cmake.configure()
-        return cmake
+        if self._cmake:
+            return self._cmake
+        self._cmake = CMake(self)
+        self._cmake.definitions["SQLITE3_BUILD_EXECUTABLE"] = self.options.build_executable
+        self._cmake.definitions["THREADSAFE"] = self.options.threadsafe
+        self._cmake.definitions["ENABLE_COLUMN_METADATA"] = self.options.enable_column_metadata
+        self._cmake.definitions["ENABLE_EXPLAIN_COMMENTS"] = self.options.enable_explain_comments
+        self._cmake.definitions["ENABLE_FTS3"] = self.options.enable_fts3
+        self._cmake.definitions["ENABLE_FTS3_PARENTHESIS"] = self.options.enable_fts3_parenthesis
+        self._cmake.definitions["ENABLE_FTS4"] = self.options.enable_fts4
+        self._cmake.definitions["ENABLE_FTS5"] = self.options.enable_fts5
+        self._cmake.definitions["ENABLE_JSON1"] = self.options.enable_json1
+        self._cmake.definitions["ENABLE_SOUNDEX"] = self.options.enable_soundex
+        self._cmake.definitions["ENABLE_RTREE"] = self.options.enable_rtree
+        self._cmake.definitions["USE_ALLOCA"] = self.options.use_alloca
+        self._cmake.definitions["OMIT_LOAD_EXTENSION"] = self.options.omit_load_extension
+        self._cmake.definitions["SQLITE_ENABLE_UNLOCK_NOTIFY"] = self.options.enable_unlock_notify
+        self._cmake.definitions["HAVE_FDATASYNC"] = True
+        self._cmake.definitions["HAVE_GMTIME_R"] = True
+        self._cmake.definitions["HAVE_LOCALTIME_R"] = self.settings.os != "Windows"
+        self._cmake.definitions["HAVE_POSIX_FALLOCATE"] = not (self.settings.os in ["Windows", "Android"] or tools.is_apple_os(self.settings.os))
+        self._cmake.definitions["HAVE_STRERROR_R"] = True
+        self._cmake.definitions["HAVE_USLEEP"] = True
+        self._cmake.definitions["DISABLE_GETHOSTUUID"] = self.options.disable_gethostuuid
+        self._cmake.configure()
+        return self._cmake
 
     def build(self):
         cmake = self._configure_cmake()
@@ -94,17 +108,27 @@ class ConanSqlite3(ConanFile):
     def package(self):
         header = tools.load(os.path.join(self._source_subfolder, "sqlite3.h"))
         license_content = header[3:header.find("***", 1)]
-        tools.save("LICENSE", license_content)
-
-        self.copy("LICENSE", dst="licenses")
-
+        tools.save(os.path.join(self.package_folder, "licenses", "LICENSE"), license_content)
         cmake = self._configure_cmake()
         cmake.install()
 
     def package_info(self):
-        self.cpp_info.libs = tools.collect_libs(self)
+        self.cpp_info.filenames["cmake_find_package"] = "SQLite3"
+        self.cpp_info.filenames["cmake_find_package_multi"] = "SQLite3"
+        self.cpp_info.names["cmake_find_package"] = "SQLite"
+        self.cpp_info.names["cmake_find_package_multi"] = "SQLite"
+        self.cpp_info.components["sqlite"].names["cmake_find_package"] = "SQLite3"
+        self.cpp_info.components["sqlite"].names["cmake_find_package_multi"] = "SQLite3"
+        self.cpp_info.components["sqlite"].libs = tools.collect_libs(self)
         if self.settings.os == "Linux":
             if self.options.threadsafe:
-                self.cpp_info.libs.append("pthread")
-            if self.options.omit_load_extension == "False":
-                self.cpp_info.libs.append("dl")
+                self.cpp_info.components["sqlite"].system_libs.append("pthread")
+            if not self.options.omit_load_extension:
+                self.cpp_info.components["sqlite"].system_libs.append("dl")
+            if self.options.enable_fts5:
+                self.cpp_info.components["sqlite"].system_libs.append("m")
+
+        if self.options.build_executable:
+            bin_path = os.path.join(self.package_folder, "bin")
+            self.output.info("Appending PATH env var with : {}".format(bin_path))
+            self.env_info.PATH.append(bin_path)

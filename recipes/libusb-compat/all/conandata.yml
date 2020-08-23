@@ -1,0 +1,10 @@
+sources:
+  "0.1.7":
+    url: "https://github.com/libusb/libusb-compat-0.1/releases/download/v0.1.7/libusb-compat-0.1.7.tar.gz"
+    sha256: "0679ce38aa02498c1eea9c13398a0d2356883d574632a59c1e25274ed4925cf8"
+patches:
+  "0.1.7":
+    - patch_file: "patches/0001-fix-autoconf-msvc-mingw.patch"
+      base_path: "source_subfolder"
+    - patch_file: "patches/0002-fix-msvc-linkage-and-fix-msvc-vararg-macros.patch"
+      base_path: "source_subfolder"

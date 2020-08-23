@@ -1,0 +1,35 @@
+--- builds/win32-visualc.mk
++++ builds/win32-visualc.mk
+@@ -8,13 +8,14 @@
+ # the program "jam.exe" will be created in a new directory
+ # named "bin.ntx86"
+ #
+ CC       = cl /nologo
+-CFLAGS   = -DNT 
++CFLAGS   = $(CFLAGS) $(CPPFLAGS) -DNT 
+ TARGET   = /Fejam0
+-LINKLIBS = oldnames.lib kernel32.lib libc.lib
++LINKLIBS = $(LIBS) oldnames.lib kernel32.lib
+ 
+ all: jam0
+ 	attrib -r jambase.c
++	jam0 -v
+-	jam0
++	jam0 JamFile
+ 
+ !include common.mk
+--- builds/win32-gcc.mk
++++ builds/win32-gcc.mk
+@@ -10,9 +10,9 @@
+ # directory named "bin.ntx86"
+ #
+ 
+-CC     = gcc
+-TARGET = -o jam0.exe
+-CFLAGS = -DNT
++CC     = gcc
++TARGET = -o jam0.exe
++CFLAGS += -DNT $(CPPFLAGS)
+ 
+ all: jam0
+ 	attrib -r jambase.c

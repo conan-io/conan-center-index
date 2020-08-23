@@ -1,0 +1,13 @@
+diff --git a/include/date/date.h b/include/date/date.h
+index cb115a9..23cd05a 100644
+--- a/include/date/date.h
++++ b/include/date/date.h
+@@ -31,7 +31,7 @@
+ // We did not mean to shout.
+ 
+ #ifndef HAS_STRING_VIEW
+-#  if __cplusplus >= 201703
++#  if __cplusplus >= 201703 && __has_include(<string_view>)
+ #    define HAS_STRING_VIEW 1
+ #  else
+ #    define HAS_STRING_VIEW 0
