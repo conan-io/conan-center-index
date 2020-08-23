@@ -1,4 +1,3 @@
-
 from conans import ConanFile, tools
 from conans.errors import ConanInvalidConfiguration
 
