@@ -46,11 +46,11 @@ class Chai3dConan(ConanFile):
         return "{0}-{1}".format(os_name, arch_name)
 
     def requirements(self):
-        # the following conan dependencies are missing:
+        # the following conan dependencies are missing:
         # * core:
         #  - giflib: available version (5.1.7) crashes during compilation
         #  - lib3ds: not available in conan center
-        # * ode module:
+        # * ode module:
         #  - ode: not available in conan center
         self.requires("eigen/3.3.7")
         self.requires("glew/2.1.0@bincrafters/stable")
@@ -108,14 +108,14 @@ class Chai3dConan(ConanFile):
 
     def build(self):
         cmake = CMake(self)
-        # build modules on demand
+        # build modules on demand
         for module in modules_list:
             opt_name = "with_{}".format(module)
             opt_value = getattr(self.options, opt_name)
             if opt_value:
                 cmake.definitions["CHAI3D_{}".format(
                     opt_name.upper())] = opt_value
-        # modules need to know where to find the chai3d core targets
+        # modules need to know where to find the chai3d core targets
         cmake.definitions["CHAI3D_DIR"] = os.path.join(self.build_folder,
                                                        self._source_subfolder)
         cmake.configure()
@@ -128,11 +128,11 @@ class Chai3dConan(ConanFile):
                   dst="lib",
                   src=os.path.join(self.build_folder, "lib"),
                   keep_path=False)
-        # headers
+        # headers
         self.copy("*.h",
                   dst="include",
                   src=os.path.join(self._source_subfolder, "src"))
-        # modules headers
+        # modules headers
         for module in modules_list:
             if getattr(self.options, "with_{}".format(module)):
                 mod_path = os.path.join(self._source_subfolder, "modules",
