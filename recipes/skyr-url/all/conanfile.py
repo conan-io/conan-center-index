@@ -71,7 +71,6 @@ class SkyrUrlConan(ConanFile):
     def _configure_cmake(self):
         if self._cmake:
             return self._cmake
-
         self._cmake = CMake(self)
         self._cmake.definitions["skyr_BUILD_TESTS"] = False
         self._cmake.definitions["skyr_FULL_WARNINGS"] = False
