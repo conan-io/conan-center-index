@@ -70,21 +70,21 @@ class LibarchiveConan(ConanFile):
             raise ConanInvalidConfiguration("libxml2 and expat options are exclusive. They cannot be used together as XML engine")
 
     def requirements(self):
-        self.requires.add("zlib/1.2.11")
+        self.requires("zlib/1.2.11")
         if self.options.with_bzip2:
-            self.requires.add("bzip2/1.0.8")
+            self.requires("bzip2/1.0.8")
         if self.options.with_openssl:
-            self.requires.add("openssl/1.1.1d")
+            self.requires("openssl/1.1.1d")
         if self.options.with_lz4:
-            self.requires.add("lz4/1.9.2")
+            self.requires("lz4/1.9.2")
         if self.options.with_zstd:
-            self.requires.add("zstd/1.4.3")
+            self.requires("zstd/1.4.3")
         if self.options.with_lzma:
             self.requires("xz_utils/5.2.4")
         if self.options.with_libxml2:
-            self.requires.add("libxml2/2.9.9")
+            self.requires("libxml2/2.9.9")
         if self.options.with_expat:
-            self.requires.add("expat/2.2.7")
+            self.requires("expat/2.2.7")
         if self.options.with_iconv:
             self.requires("libiconv/1.15")
         if self.options.with_pcreposix:

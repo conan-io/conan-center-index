@@ -1,0 +1,242 @@
+Upstreamed in 04d942c3d98cf0a929c6afb17be8c10d4ae39af0
+
+ncurses 6.2 - patch 20200704
+
+From ed3ad1962ab885b9a9c6e6a3437eb6db274110b5 Mon Sep 17 00:00:00 2001
+From: Anonymous Maarten <anonymous.maarten@gmail.com>
+Date: Sat, 14 Mar 2020 14:15:41 +0100
+Subject: [PATCH 10/15] Pass BUILDING_XXX compile definition while building
+ library XXX
+
+---
+ c++/Makefile.in              |  6 ++---
+ form/Makefile.in             |  6 ++---
+ include/ncurses_dll.h.in     | 49 ++++++------------------------------
+ include/ncurses_exports.h.in | 23 +++++++++--------
+ menu/Makefile.in             |  6 ++---
+ ncurses/Makefile.in          |  8 +++---
+ panel/Makefile.in            |  6 ++---
+ 7 files changed, 35 insertions(+), 69 deletions(-)
+
+diff --git a/c++/Makefile.in b/c++/Makefile.in
+index 9b22b6ac..17b3e069 100644
+--- a/c++/Makefile.in
++++ b/c++/Makefile.in
+@@ -89,7 +89,7 @@ CXXFLAGS	= @CXXFLAGS@ @EXTRA_CXXFLAGS@
+ CXXLIBS		= @CXXLIBS@
+ 
+ INCDIR		= ../include
+-CPPFLAGS	= -DHAVE_CONFIG_H -I../c++ @CPPFLAGS@
++CPPFLAGS	= -DHAVE_CONFIG_H -DBUILDING_NCURSES_CXX -I../c++ @CPPFLAGS@
+ 
+ CTAGS		= @CTAGS@
+ ETAGS		= @ETAGS@
+@@ -97,8 +97,8 @@ ETAGS		= @ETAGS@
+ CC		= ${CXX}
+ CCFLAGS		= $(CPPFLAGS) $(CXXFLAGS)
+ 
+-CFLAGS_LIBTOOL	= $(CCFLAGS)
+-CFLAGS_NORMAL	= $(CCFLAGS)
++CFLAGS_LIBTOOL	= $(CCFLAGS) -DNCURSES_STATIC
++CFLAGS_NORMAL	= $(CCFLAGS) -DNCURSES_STATIC
+ CFLAGS_DEBUG	= $(CCFLAGS) @CXX_G_OPT@ -DTRACE
+ CFLAGS_PROFILE	= $(CCFLAGS) -pg
+ CFLAGS_SHARED	= $(CCFLAGS) @CC_SHARED_OPTS@
+diff --git a/form/Makefile.in b/form/Makefile.in
+index 3e5be8da..34bfd172 100644
+--- a/form/Makefile.in
++++ b/form/Makefile.in
+@@ -92,12 +92,12 @@ CC		= @CC@
+ CPP		= @CPP@
+ CFLAGS		= @CFLAGS@
+ 
+-CPPFLAGS	= -I${top_srcdir}/ncurses -DHAVE_CONFIG_H @CPPFLAGS@
++CPPFLAGS	= -I${top_srcdir}/ncurses -DHAVE_CONFIG_H @CPPFLAGS@ -DBUILDING_FORM
+ 
+ CCFLAGS		= $(CPPFLAGS) $(CFLAGS)
+ 
+-CFLAGS_LIBTOOL	= $(CCFLAGS)
+-CFLAGS_NORMAL	= $(CCFLAGS)
++CFLAGS_LIBTOOL	= $(CCFLAGS) -DNCURSES_STATIC
++CFLAGS_NORMAL	= $(CCFLAGS) -DNCURSES_STATIC
+ CFLAGS_DEBUG	= $(CCFLAGS) @CC_G_OPT@ -DTRACE
+ CFLAGS_PROFILE	= $(CCFLAGS) -pg
+ CFLAGS_SHARED	= $(CCFLAGS) @CC_SHARED_OPTS@
+diff --git a/include/ncurses_dll.h.in b/include/ncurses_dll.h.in
+index f439d480..568112e2 100644
+--- a/include/ncurses_dll.h.in
++++ b/include/ncurses_dll.h.in
+@@ -68,50 +68,15 @@
+ #define NCURSES_PUBLIC_VAR(name) @NCURSES_WRAP_PREFIX@##name
+ #define NCURSES_WRAPPED_VAR(type,name) extern type NCURSES_PUBLIC_VAR(name)(void)
+ 
+-/* no longer needed on cygwin or mingw, thanks to auto-import       */
+-/* but this structure may be useful at some point for an MSVC build */
+-/* so, for now unconditionally define the important flags           */
+-/* "the right way" for proper static and dll+auto-import behavior   */
+-#undef NCURSES_DLL
+-#define NCURSES_STATIC
++#include "ncurses_exports.h"
+ 
+-#if defined(__CYGWIN__) || defined(_WIN32)
+-#  if defined(NCURSES_DLL)
+-#    if defined(NCURSES_STATIC)
+-#      undef NCURSES_STATIC
+-#    endif
+-#  endif
+-#  undef NCURSES_IMPEXP
+-#  undef NCURSES_API
+-#  undef NCURSES_EXPORT
+-#  undef NCURSES_EXPORT_VAR
+-#  if defined(NCURSES_DLL)
+-/* building a DLL */
+-#    define NCURSES_IMPEXP __declspec(dllexport)
+-#  elif defined(NCURSES_STATIC)
+-/* building or linking to a static library */
+-#    define NCURSES_IMPEXP /* nothing */
+-#  else
+-/* linking to the DLL */
+-#    define NCURSES_IMPEXP __declspec(dllimport)
+-#  endif
+-#  define NCURSES_API __cdecl
+-#  define NCURSES_EXPORT(type) NCURSES_IMPEXP type NCURSES_API
+-#  define NCURSES_EXPORT_VAR(type) NCURSES_IMPEXP type
++#if defined(BUILDING_NCURSES)
++# define NCURSES_IMPEXP NCURSES_EXPORT_GENERAL_EXPORT
++#else
++# define NCURSES_IMPEXP NCURSES_EXPORT_GENERAL_IMPORT
+ #endif
+ 
+-/* Take care of non-cygwin platforms */
+-#if !defined(NCURSES_IMPEXP)
+-#  define NCURSES_IMPEXP /* nothing */
+-#endif
+-#if !defined(NCURSES_API)
+-#  define NCURSES_API /* nothing */
+-#endif
+-#if !defined(NCURSES_EXPORT)
+-#  define NCURSES_EXPORT(type) NCURSES_IMPEXP type NCURSES_API
+-#endif
+-#if !defined(NCURSES_EXPORT_VAR)
+-#  define NCURSES_EXPORT_VAR(type) NCURSES_IMPEXP type
+-#endif
++#define NCURSES_EXPORT(type) NCURSES_IMPEXP type NCURSES_API
++#define NCURSES_EXPORT_VAR(type) NCURSES_IMPEXP type
+ 
+ #endif /* NCURSES_DLL_H_incl */
+diff --git a/include/ncurses_exports.h.in b/include/ncurses_exports.h.in
+index 252f5021..61655f65 100644
+--- a/include/ncurses_exports.h.in
++++ b/include/ncurses_exports.h.in
+@@ -31,17 +31,18 @@
+ #define NCURSES_EXPORTS_H_incl 1
+ 
+ #if defined(__CYGWIN__) || defined(_WIN32)
+-#  if defined(NCURSES_DLL)
+-#    define NCURSES_EXPORT __declspec(dllexport)
+-#  elif !defined(NCURSES_STATIC)
+-#    define NCURSES_EXPORT __declspec(dllimport)
+-#  else
+-#    define NCURSES_EXPORT
+-#  endif
+-#endif
+-
+-#if !defined(NCURSES_EXPORT)
+-#  define NCURSES_EXPORT @NCURSES_EXPORT@
++# if defined(NCURSES_STATIC)
++#   define NCURSES_EXPORT_GENERAL_IMPORT
++#   define NCURSES_EXPORT_GENERAL_EXPORT
++# else
++#   define NCURSES_EXPORT_GENERAL_IMPORT __declspec(dllimport)
++#   define NCURSES_EXPORT_GENERAL_EXPORT __declspec(dllexport)
++# endif
++# define NCURSES_API __cdecl
++#else
++# define NCURSES_EXPORT_GENERAL_IMPORT
++# define NCURSES_EXPORT_GENERAL_EXPORT
++# define NCURSES_API /* FIXME: __attribute__ ((cdecl)) is only available on x86 */
+ #endif
+ 
+ #endif /* NCURSES_EXPORTS_H_incl */
+diff --git a/menu/Makefile.in b/menu/Makefile.in
+index 495651c2..bf153602 100644
+--- a/menu/Makefile.in
++++ b/menu/Makefile.in
+@@ -92,12 +92,12 @@ CC		= @CC@
+ CPP		= @CPP@
+ CFLAGS		= @CFLAGS@
+ 
+-CPPFLAGS	= -I${top_srcdir}/ncurses -DHAVE_CONFIG_H @CPPFLAGS@
++CPPFLAGS	= -I${top_srcdir}/ncurses -DHAVE_CONFIG_H @CPPFLAGS@ -DBUILDING_MENU
+ 
+ CCFLAGS		= $(CPPFLAGS) $(CFLAGS)
+ 
+-CFLAGS_LIBTOOL	= $(CCFLAGS)
+-CFLAGS_NORMAL	= $(CCFLAGS)
++CFLAGS_LIBTOOL	= $(CCFLAGS) -DNCURSES_STATIC
++CFLAGS_NORMAL	= $(CCFLAGS) -DNCURSES_STATIC
+ CFLAGS_DEBUG	= $(CCFLAGS) @CC_G_OPT@ -DTRACE
+ CFLAGS_PROFILE	= $(CCFLAGS) -pg
+ CFLAGS_SHARED	= $(CCFLAGS) @CC_SHARED_OPTS@
+diff --git a/ncurses/Makefile.in b/ncurses/Makefile.in
+index b2420788..00129d0b 100644
+--- a/ncurses/Makefile.in
++++ b/ncurses/Makefile.in
+@@ -102,11 +102,11 @@ CPP		= @CPP@
+ CFLAGS		= @CFLAGS@
+ 
+ INCDIR		= $(srcdir)/../include
+-CPPFLAGS	= -DHAVE_CONFIG_H -I../ncurses @CPPFLAGS@
++CPPFLAGS	= -DHAVE_CONFIG_H -DBUILDING_NCURSES -I../ncurses @CPPFLAGS@
+ 
+ CCFLAGS		= $(CPPFLAGS) $(CFLAGS)
+ 
+-BUILD_CPPFLAGS	= -DHAVE_CONFIG_H -DUSE_BUILD_CC -I../ncurses -I$(srcdir) -I../include -I$(INCDIR) @BUILD_CPPFLAGS@ 
++BUILD_CPPFLAGS	= -DHAVE_CONFIG_H -DUSE_BUILD_CC -I../ncurses -I$(srcdir) -I../include -I$(INCDIR) @BUILD_CPPFLAGS@
+ BUILD_CC	= @BUILD_CC@
+ BUILD_CCFLAGS	= @BUILD_CFLAGS@
+ BUILD_LDFLAGS	= @BUILD_LDFLAGS@
+@@ -118,8 +118,8 @@ BUILD_LIBS	= @BUILD_LIBS@
+ BUILD_EXEEXT	= @BUILD_EXEEXT@
+ x		= @EXEEXT@
+ 
+-CFLAGS_LIBTOOL	= $(CCFLAGS)
+-CFLAGS_NORMAL	= $(CCFLAGS)
++CFLAGS_LIBTOOL	= $(CCFLAGS) -DNCURSES_STATIC
++CFLAGS_NORMAL	= $(CCFLAGS) -DNCURSES_STATIC
+ CFLAGS_DEBUG	= $(CCFLAGS) @CC_G_OPT@ -DTRACE
+ CFLAGS_PROFILE	= $(CCFLAGS) -pg
+ CFLAGS_SHARED	= $(CCFLAGS) @CC_SHARED_OPTS@
+diff --git a/panel/Makefile.in b/panel/Makefile.in
+index 5f7b5b92..e1f7e705 100644
+--- a/panel/Makefile.in
++++ b/panel/Makefile.in
+@@ -94,12 +94,12 @@ CC		= @CC@
+ CPP		= @CPP@
+ CFLAGS		= @CFLAGS@
+ 
+-CPPFLAGS	= -I${top_srcdir}/ncurses -DHAVE_CONFIG_H @CPPFLAGS@
++CPPFLAGS	= -I${top_srcdir}/ncurses -DHAVE_CONFIG_H @CPPFLAGS@ -DBUILDING_PANEL
+ 
+ CCFLAGS		= $(CPPFLAGS) $(CFLAGS)
+ 
+-CFLAGS_LIBTOOL	= $(CCFLAGS)
+-CFLAGS_NORMAL	= $(CCFLAGS)
++CFLAGS_LIBTOOL	= $(CCFLAGS) -DNCURSES_STATIC
++CFLAGS_NORMAL	= $(CCFLAGS) -DNCURSES_STATIC
+ CFLAGS_DEBUG	= $(CCFLAGS) @CC_G_OPT@ -DTRACE
+ CFLAGS_PROFILE	= $(CCFLAGS) -pg
+ CFLAGS_SHARED	= $(CCFLAGS) @CC_SHARED_OPTS@
+--- a/progs/Makefile.in
++++ b/progs/Makefile.in
+@@ -97,8 +97,8 @@
+ 
+ CCFLAGS		= $(CPPFLAGS) $(CFLAGS)
+ 
+-CFLAGS_LIBTOOL	= $(CCFLAGS)
+-CFLAGS_NORMAL	= $(CCFLAGS)
++CFLAGS_LIBTOOL	= $(CCFLAGS) -DNCURSES_STATIC
++CFLAGS_NORMAL	= $(CCFLAGS) -DNCURSES_STATIC
+ CFLAGS_DEBUG	= $(CCFLAGS) @CC_G_OPT@ -DTRACE
+ CFLAGS_PROFILE	= $(CCFLAGS) -pg
+ CFLAGS_SHARED	= $(CCFLAGS) @CC_SHARED_OPTS@

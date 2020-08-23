@@ -6,3 +6,7 @@ patches:
   "2.4.1":
     - base_path: source_subfolder
       patch_file: patches/0001-fix-uwp.patch
+    - base_path: source_subfolder
+      patch_file: patches/cmake.patch
+    - base_path: source_subfolder
+      patch_file: patches/string_view.patch

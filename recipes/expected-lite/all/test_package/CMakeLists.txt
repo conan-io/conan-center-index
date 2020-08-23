@@ -1,9 +1,11 @@
-cmake_minimum_required(VERSION 2.8.11)
+cmake_minimum_required(VERSION 3.1)
 project(test_package CXX)
 
 include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
 conan_basic_setup()
 
+find_package(expected-lite REQUIRED CONFIG)
+
 add_executable(${PROJECT_NAME} test_package.cpp)
-target_link_libraries(${PROJECT_NAME} ${CONAN_LIBS})
-set_target_properties(${PROJECT_NAME} PROPERTIES CXX_STANDARD 11)
+target_link_libraries(${PROJECT_NAME} nonstd::expected-lite)
+set_property(TARGET ${PROJECT_NAME} PROPERTY CXX_STANDARD 11)

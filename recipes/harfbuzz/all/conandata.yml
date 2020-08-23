@@ -1,0 +1,8 @@
+sources:
+  "2.6.8":
+    sha256: "059054760ff471d81171659a136dd253a0ddff7faa9249727cca3d7dbd356a6c"
+    url: "https://github.com/harfbuzz/harfbuzz/archive/2.6.8.tar.gz"
+patches:
+  "2.6.8":
+    - patch_file: "patches/source_subfolder.patch"
+      base_path: "."

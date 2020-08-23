@@ -1,0 +1,34 @@
+From e9b67001dd0bac5bae7dd95a7c9a597ae59988c7 Mon Sep 17 00:00:00 2001
+From: Simon Giesecke <simon.giesecke@gmail.com>
+Date: Mon, 19 Aug 2019 10:13:11 +0200
+Subject: [PATCH] Problem: invalid syntax for calling convention on function
+ pointer
+
+Solution: fix syntax and formatting, remove C-ism for defining struct
+---
+ src/thread.cpp | 11 +++++++----
+ 1 file changed, 7 insertions(+), 4 deletions(-)
+
+diff --git a/src/thread.cpp b/src/thread.cpp
+index b81d458a8..6f07e9cee 100644
+--- a/src/thread.cpp
++++ b/src/thread.cpp
+@@ -117,11 +117,14 @@ struct thread_info_t
+ #pragma pack(pop)
+ }
+ 
+-typedef struct _MY_EXCEPTION_REGISTRATION_RECORD
++struct MY_EXCEPTION_REGISTRATION_RECORD
+ {
+-    struct _MY_EXCEPTION_REGISTRATION_RECORD *Next;
+-    void *Handler;
+-} MY_EXCEPTION_REGISTRATION_RECORD;
++    typedef EXCEPTION_DISPOSITION (NTAPI *HandlerFunctionType) (
++      EXCEPTION_RECORD *, void *, CONTEXT *, void *);
++
++    MY_EXCEPTION_REGISTRATION_RECORD *Next;
++    HandlerFunctionType Handler;
++};
+ 
+ static EXCEPTION_DISPOSITION NTAPI continue_execution (EXCEPTION_RECORD *rec,
+ 	void *frame, CONTEXT *ctx, void *disp)

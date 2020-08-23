@@ -8,7 +8,7 @@ class UriparserConan(ConanFile):
     topics = ("conan", "uriparser", "URI", "parser")
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://uriparser.github.io/"
-    exports_sources = "CMakeLists.txt"
+    exports_sources = ["CMakeLists.txt", "patches/**"]
     generators = "cmake"
     license = "BSD-3-Clause"
     settings = "os", "arch", "compiler", "build_type"
@@ -25,8 +25,15 @@ class UriparserConan(ConanFile):
         "with_wchar": True,
     }
 
-    _source_subfolder = "source_subfolder"
-    _build_subfolder = "build_subfolder"
+    _cmake = None
+
+    @property
+    def _source_subfolder(self):
+        return "source_subfolder"
+
+    @property
+    def _build_subfolder(self):
+        return "build_subfolder"
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -44,24 +51,22 @@ class UriparserConan(ConanFile):
         os.rename(extracted_folder, self._source_subfolder)
 
     def _configure_cmake(self):
-        cmake = CMake(self)
-        cmake.definitions["URIPARSER_BUILD_DOCS"] = False
-        cmake.definitions["URIPARSER_BUILD_TESTS"] = False
-        cmake.definitions["URIPARSER_BUILD_TOOLS"] = False
-        cmake.definitions["URIPARSER_BUILD_CHAR"] = self.options.with_char
-        cmake.definitions["URIPARSER_BUILD_WCHAR"] = self.options.with_wchar
+        if self._cmake:
+            return self._cmake
+        self._cmake = CMake(self)
+        self._cmake.definitions["URIPARSER_BUILD_DOCS"] = False
+        self._cmake.definitions["URIPARSER_BUILD_TESTS"] = False
+        self._cmake.definitions["URIPARSER_BUILD_TOOLS"] = False
+        self._cmake.definitions["URIPARSER_BUILD_CHAR"] = self.options.with_char
+        self._cmake.definitions["URIPARSER_BUILD_WCHAR"] = self.options.with_wchar
         if self.settings.compiler == "Visual Studio":
-            cmake.definitions["URIPARSER_MSVC_RUNTIME"] = "/{}".format(self.settings.compiler.runtime)
-        cmake.configure(build_folder=self._build_subfolder)
-        return cmake
-
-    def _patch_sources(self):
-        if not self.options.shared:
-            tools.replace_in_file(os.path.join(self._source_subfolder, "include", "uriparser", "UriBase.h"),
-                                  "__declspec(dllimport)",
-                                  "")
+            self._cmake.definitions["URIPARSER_MSVC_RUNTIME"] = "/{}".format(self.settings.compiler.runtime)
+        self._cmake.configure(build_folder=self._build_subfolder)
+        return self._cmake
 
     def build(self):
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            tools.patch(**patch)
         cmake = self._configure_cmake()
         cmake.build()
 
@@ -73,14 +78,11 @@ class UriparserConan(ConanFile):
         tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
 
     def package_info(self):
-        self.cpp_info.libs = ["uriparser"]
-        self.cpp_info.includedirs = [os.path.join(self.package_folder, "include")]
-        defines = []
+        self.cpp_info.names["pkg_config"] = "liburiparser"
+        self.cpp_info.libs = tools.collect_libs(self)
         if not self.options.shared:
-            defines.append("URI_STATIC_BUILD")
+            self.cpp_info.defines.append("URI_STATIC_BUILD")
         if not self.options.with_char:
-            defines.append("URI_NO_ANSI")
+            self.cpp_info.defines.append("URI_NO_ANSI")
         if not self.options.with_wchar:
-            defines.append("URI_NO_UNICODE")
-        self.cpp_info.defines = defines
-
+            self.cpp_info.defines.append("URI_NO_UNICODE")

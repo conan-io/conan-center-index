@@ -1,0 +1,20 @@
+sources:
+  "2019.10.21.00":
+    url: "https://github.com/facebook/folly/archive/v2019.10.21.00.tar.gz"
+    sha256: "6efcc2b2090691a9fe3d339c433d102d6399bbdc6dc4893080d59f15f648f393"
+patches:
+  "2019.10.21.00":
+    - patch_file: "patches/0001-find-packages.patch"
+      base_path: "source_subfolder"
+    - patch_file: "patches/0002-compiler-flags.patch"
+      base_path: "source_subfolder"
+    - patch_file: "patches/0003-boost-shared-ptr.patch"
+      base_path: "source_subfolder"
+    - patch_file: "patches/0004-disable-posix-names.patch"
+      base_path: "source_subfolder"
+    - patch_file: "patches/0005-include-atomic.patch"
+      base_path: "source_subfolder"
+    - patch_file: "patches/0006-duplicate-hash.patch"
+      base_path: "source_subfolder"
+    - patch_file: "patches/0007-allow-builtins.patch"
+      base_path: "source_subfolder"

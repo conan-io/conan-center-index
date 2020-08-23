@@ -3,10 +3,8 @@
 # (See accompanying file LICENSE.txt or copy at
 # http://www.boost.org/LICENSE_1_0.txt)
 
-project(test_package CXX)
 cmake_minimum_required(VERSION 3.0.0)
-
-set(CMAKE_VERBOSE_MAKEFILE TRUE)
+project(test_package CXX)
 
 include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
 conan_basic_setup(TARGETS)

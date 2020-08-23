@@ -3,6 +3,7 @@ import glob
 import platform
 import shutil
 from conans import ConanFile, tools, AutoToolsBuildEnvironment
+from conans.tools import Version
 
 
 class ICUBase(ConanFile):
@@ -16,26 +17,20 @@ class ICUBase(ConanFile):
     _source_subfolder = "source_subfolder"
     _build_subfolder = "build_subfolder"
     _env_build = None
-    short_paths = True
     settings = "os", "arch", "compiler", "build_type"
+    exports = ["patches/*.patch"]
     options = {"shared": [True, False],
                "fPIC": [True, False],
                "data_packaging": ["files", "archive", "library", "static"],
                "with_unit_tests": [True, False],
-               "silent": [True, False]}
+               "silent": [True, False],
+               "with_dyload": [True, False]}
     default_options = {"shared": False,
                        "fPIC": True,
                        "data_packaging": "archive",
                        "with_unit_tests": False,
-                       "silent": True}
-
-    @property
-    def _the_os(self):
-        return self.settings.get_safe("os") or self.settings.get_safe("os_build")
-
-    @property
-    def _the_arch(self):
-        return self.settings.get_safe("arch") or self.settings.get_safe("arch_build")
+                       "silent": True,
+                       "with_dyload": True}
 
     @property
     def _is_msvc(self):
@@ -43,26 +38,16 @@ class ICUBase(ConanFile):
 
     @property
     def _is_mingw(self):
-        return self._the_os == "Windows" and self.settings.compiler == "gcc"
+        return self.settings.os == "Windows" and self.settings.compiler == "gcc"
 
     def build_requirements(self):
-        if self._the_os == "Windows":
-            self.build_requires("msys2/20161025")
+        if tools.os_info.is_windows and "CONAN_BASH_PATH" not in os.environ and \
+                tools.os_info.detect_windows_subsystem() != "msys2":
+            self.build_requires("msys2/20190524")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
         os.rename("icu", self._source_subfolder)
-
-    def _replace_pythonpath(self):
-        if self._is_msvc:
-            srcdir = os.path.join(self.build_folder, self._source_subfolder, "source")
-            configure = os.path.join(self._source_subfolder, "source", "configure")
-            tools.replace_in_file(configure,
-                                  'PYTHONPATH="$srcdir/data"',
-                                  'PYTHONPATH="%s\\data"' % srcdir)
-            tools.replace_in_file(configure,
-                                  'PYTHONPATH="$srcdir/test/testdata:$srcdir/data"',
-                                  'PYTHONPATH="%s\\test\\testdata;%s\\data"' % (srcdir, srcdir))
 
     def _workaround_icu_20545(self):
         if tools.os_info.is_windows:
@@ -74,30 +59,30 @@ class ICUBase(ConanFile):
                                   "pathBuf.append('/', localError); pathBuf.append(arg, localError);")
 
     def build(self):
-        for filename in glob.glob("patches/*.patch"):
-            self.output.info('applying patch "%s"' % filename)
-            tools.patch(base_path=self._source_subfolder, patch_file=filename)
-
+        for p in self.conan_data["patches"][self.version]:
+            tools.patch(**p)
         if self._is_msvc:
             run_configure_icu_file = os.path.join(self._source_subfolder, 'source', 'runConfigureICU')
 
             flags = "-%s" % self.settings.compiler.runtime
-            if self.settings.get_safe("build_type") == 'Debug':
+            if self.settings.get_safe("build_type") in ['Debug', 'RelWithDebInfo'] and Version(self.settings.compiler.version) >= "12":
                 flags += " -FS"
             tools.replace_in_file(run_configure_icu_file, "-MDd", flags)
             tools.replace_in_file(run_configure_icu_file, "-MD", flags)
 
-        self._replace_pythonpath() # ICU 64.1
         self._workaround_icu_20545()
 
         self._env_build = AutoToolsBuildEnvironment(self)
         if not self.options.get_safe("shared"):
             self._env_build.defines.append("U_STATIC_IMPLEMENTATION")
-        if tools.is_apple_os(self._the_os):
+        if tools.is_apple_os(self.settings.os):
             self._env_build.defines.append("_DARWIN_C_SOURCE")
             if self.settings.get_safe("os.version"):
-                self._env_build.flags.append(tools.apple_deployment_target_flag(self._the_os,
+                self._env_build.flags.append(tools.apple_deployment_target_flag(self.settings.os,
                                                                             self.settings.os.version))
+
+        if "msys2" in self.deps_user_info:
+            self._env_build.vars["PYTHON"] = tools.unix_path(os.path.join(self.deps_env_info["msys2"].MSYS_BIN, "python"), tools.MSYS2)
 
         build_dir = os.path.join(self.build_folder, self._source_subfolder, 'build')
         os.mkdir(build_dir)
@@ -125,30 +110,12 @@ class ICUBase(ConanFile):
         self._install_name_tool()
 
     def package(self):
-        if self._is_msvc:
-            for dll in glob.glob(os.path.join(self.package_folder, 'lib', '*.dll')):
-                shutil.move(dll, os.path.join(self.package_folder, 'bin'))
+        for dll in glob.glob(os.path.join(self.package_folder, 'lib', '*.dll')):
+            shutil.move(dll, os.path.join(self.package_folder, 'bin'))
 
         self.copy("LICENSE", dst="licenses", src=os.path.join(self.source_folder, self._source_subfolder))
         tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
         tools.rmdir(os.path.join(self.package_folder, "share"))
-
-    @staticmethod
-    def detected_os():
-        if tools.OSInfo().is_macos:
-            return "Macos"
-        if tools.OSInfo().is_windows:
-            return "Windows"
-        return platform.system()
-
-    @property
-    def cross_building(self):
-        if tools.cross_building(self.settings):
-            if self._the_os == self.detected_os():
-                if self._the_arch == "x86" and tools.detected_architecture() == "x86_64":
-                    return False
-            return True
-        return False
 
     @property
     def build_config_args(self):
@@ -162,18 +129,22 @@ class ICUBase(ConanFile):
                     ("Linux", "clang"): "Linux",
                     ("Macos", "gcc"): "MacOSX",
                     ("Macos", "clang"): "MacOSX",
-                    ("Macos", "apple-clang"): "MacOSX"}.get((str(self._the_os),
+                    ("Macos", "apple-clang"): "MacOSX"}.get((str(self.settings.os),
                                                              str(self.settings.compiler)))
         arch64 = ['x86_64', 'sparcv9', 'ppc64']
-        bits = "64" if self._the_arch in arch64 else "32"
+        bits = "64" if self.settings.arch in arch64 else "32"
         args = [platform,
                 "--prefix={0}".format(prefix),
                 "--with-library-bits={0}".format(bits),
                 "--disable-samples",
                 "--disable-layout",
-                "--disable-layoutex"]
+                "--disable-layoutex",
+                "--disable-extras"]
+        
+        if not self.options.with_dyload:
+            args += ["--disable-dyload"]
 
-        if self.cross_building:
+        if tools.cross_building(self.settings, skip_x64_x86=True):
             if self._env_build.build:
                 args.append("--build=%s" % self._env_build.build)
             if self._env_build.host:
@@ -193,7 +164,7 @@ class ICUBase(ConanFile):
         args.append("--sbindir=%s" % bindir)
 
         if self._is_mingw:
-            mingw_chost = 'i686-w64-mingw32' if self._the_arch == 'x86' else 'x86_64-w64-mingw32'
+            mingw_chost = 'i686-w64-mingw32' if self.settings.arch == 'x86' else 'x86_64-w64-mingw32'
             args.extend(["--build={0}".format(mingw_chost),
                          "--host={0}".format(mingw_chost)])
 
@@ -212,7 +183,7 @@ class ICUBase(ConanFile):
         return "../source/runConfigureICU %s" % " ".join(self.build_config_args)
 
     def _install_name_tool(self):
-        if tools.is_apple_os(self._the_os):
+        if tools.is_apple_os(self.settings.os):
             with tools.chdir(os.path.join(self.package_folder, 'lib')):
                 for dylib in glob.glob('*icu*.{0}.dylib'.format(self.version)):
                     command = 'install_name_tool -id {0} {1}'.format(os.path.basename(dylib), dylib)
@@ -228,6 +199,9 @@ class ICUBase(ConanFile):
             del self.options.fPIC
 
     def package_info(self):
+        self.cpp_info.names['cmake_find_package'] = 'ICU'
+        self.cpp_info.names['cmake_find_package_multi'] = 'ICU'
+
         def lib_name(lib):
             name = lib
             if self.settings.os == "Windows":
@@ -256,7 +230,9 @@ class ICUBase(ConanFile):
         if not self.options.shared:
             self.cpp_info.defines.append("U_STATIC_IMPLEMENTATION")
         if self.settings.os == 'Linux':
-            self.cpp_info.libs.append('dl')
+            if self.options.with_dyload:
+                self.cpp_info.system_libs.append('dl')
+            self.cpp_info.system_libs.append('pthread')
 
         if self.settings.os == 'Windows':
-            self.cpp_info.libs.append('advapi32')
+            self.cpp_info.system_libs.append('advapi32')

@@ -1,0 +1,473 @@
+--- a/src/cspice/dskx02.c
++++ b/src/cspice/dskx02.c
+@@ -133,6 +133,7 @@ static integer c__0 = 0;
+     extern /* Subroutine */ int insang_(doublereal *, doublereal *, 
+ 	    doublereal *, doublereal *, logical *, doublereal *), pltnrm_(
+ 	    doublereal *, doublereal *, doublereal *, doublereal *);
++    doublereal xpt2[3];
+ 
+ /* $ Abstract */
+ 
+@@ -1315,6 +1316,16 @@ static integer c__0 = 0;
+ 
+ /* $ Version */
+ 
++/* -    SPICELIB Version 1.1.0 28-JUL-2017 (NJB) */
++
++/*        Bug fix: in some cases the previous version of */
++/*        this routine could still return an intercept outside */
++/*        of the segment boundaries by more than the allowed */
++/*        margin. In those cases, the returned plate ID was */
++/*        invalid. Both problems have been corrected. */
++
++/*        See $Revisions for details. */
++
+ /* -    SPICELIB Version 1.0.0 04-APR-2017 (NJB) */
+ 
+ /*        Added test for containment of intersection point */
+@@ -1474,6 +1485,46 @@ static integer c__0 = 0;
+ /* -& */
+ /* $ Revisions */
+ 
++/* -    SPICELIB Version 1.1.0 28-JUL-2017 (NJB) */
++
++/*        Bug fix: in some cases the previous version of this routine */
++/*        could return an intercept outside of the segment boundaries */
++/*        (the "outside intercept") by more than the allowed margin. In */
++/*        those cases, the returned plate ID was invalid. */
++
++/*        Both problems have been corrected. */
++
++/*        Description of the bug */
++/*        ---------------------- */
++
++/*        In the case where all of the follow conditions hold: */
++
++/*           - the input ray's intercepts exist both within and */
++/*             outside the segment's boundaries */
++
++/*           - the outside intercept is considered the nearest */
++/*             solution to the vertex at the time the intercept */
++/*             is found */
++
++/*           - the intercept that should have been selected was found */
++/*             before the outside intercept */
++
++/*        the outside intercept will overwrite the correct intercept. */
++
++/*        In the situation described above, the plate ID returned */
++/*        will not be that of the outside plate. */
++
++/*        Solution */
++/*        -------- */
++
++/*        Each intercept that passes the test for being closest, of */
++/*        all intercepts seen so far, to the ray's vertex is stored */
++/*        in a temporary variable. The output XPT is updated only */
++/*        when the intercept is found to lie within the segment's */
++/*        coordinate bounds, or outside the bounds by no more than */
++/*        the allowed margin. */
++
++
+ /* -    10-SEP-2014 (NJB) */
+ 
+ /*        Bug fix: during an intercept search over the voxel list */
+@@ -1651,9 +1702,9 @@ static integer c__0 = 0;
+ 	}
+ 	for (i__ = 1; i__ <= 3; ++i__) {
+ 	    grdext[(i__1 = i__ - 1) < 3 && 0 <= i__1 ? i__1 : s_rnge("grdext",
+-		     i__1, "dskx02_", (ftnlen)1026)] = vgrext[(i__2 = i__ - 1)
++		     i__1, "dskx02_", (ftnlen)1077)] = vgrext[(i__2 = i__ - 1)
+ 		     < 3 && 0 <= i__2 ? i__2 : s_rnge("vgrext", i__2, "dskx0"
+-		    "2_", (ftnlen)1026)] * voxsiz;
++		    "2_", (ftnlen)1077)] * voxsiz;
+ 	}
+ 
+ /*        Set the margin used for checking whether the ray's vertex */
+@@ -1678,9 +1729,9 @@ static integer c__0 = 0;
+ 
+ 	for (i__ = 1; i__ <= 3; ++i__) {
+ 	    cgrext[(i__1 = i__ - 1) < 3 && 0 <= i__1 ? i__1 : s_rnge("cgrext",
+-		     i__1, "dskx02_", (ftnlen)1053)] = vgrext[(i__2 = i__ - 1)
++		     i__1, "dskx02_", (ftnlen)1104)] = vgrext[(i__2 = i__ - 1)
+ 		     < 3 && 0 <= i__2 ? i__2 : s_rnge("vgrext", i__2, "dskx0"
+-		    "2_", (ftnlen)1053)] / cgscal;
++		    "2_", (ftnlen)1104)] / cgscal;
+ 	}
+ 	cgscl2 = cgscal * cgscal;
+ /* Computing 3rd power */
+@@ -1789,14 +1840,14 @@ static integer c__0 = 0;
+ 
+ 	for (j = 1; j <= 3; ++j) {
+ 	    cgxyz[(i__2 = j - 1) < 3 && 0 <= i__2 ? i__2 : s_rnge("cgxyz", 
+-		    i__2, "dskx02_", (ftnlen)1189)] = (voxlst[(i__3 = j + i__ 
++		    i__2, "dskx02_", (ftnlen)1240)] = (voxlst[(i__3 = j + i__ 
+ 		    * 3 - 4) < 150000 && 0 <= i__3 ? i__3 : s_rnge("voxlst", 
+-		    i__3, "dskx02_", (ftnlen)1189)] - 1) / cgscal + 1;
++		    i__3, "dskx02_", (ftnlen)1240)] - 1) / cgscal + 1;
+ 	}
+ 	cvid = cgxyz[0] + cgrext[0] * (cgxyz[1] + cgxyz[2] * cgrext[1] - (
+ 		cgrext[1] + 1));
+ 	if (cgrptr[(i__2 = cvid - 1) < 100000 && 0 <= i__2 ? i__2 : s_rnge(
+-		"cgrptr", i__2, "dskx02_", (ftnlen)1196)] > 0) {
++		"cgrptr", i__2, "dskx02_", (ftnlen)1247)] > 0) {
+ 
+ /*           This coarse voxel is non-empty; add the index of the */
+ /*           current voxel to the output list.  Save the coordinates of */
+@@ -1804,20 +1855,20 @@ static integer c__0 = 0;
+ 
+ 	    ++to;
+ 	    vxlout[(i__2 = to - 1) < 50000 && 0 <= i__2 ? i__2 : s_rnge("vxl"
+-		    "out", i__2, "dskx02_", (ftnlen)1203)] = i__;
++		    "out", i__2, "dskx02_", (ftnlen)1254)] = i__;
+ 	    for (j = 1; j <= 3; ++j) {
+ 		vxlcg[(i__2 = j + to * 3 - 4) < 150000 && 0 <= i__2 ? i__2 : 
+-			s_rnge("vxlcg", i__2, "dskx02_", (ftnlen)1206)] = 
++			s_rnge("vxlcg", i__2, "dskx02_", (ftnlen)1257)] = 
+ 			cgxyz[(i__3 = j - 1) < 3 && 0 <= i__3 ? i__3 : s_rnge(
+-			"cgxyz", i__3, "dskx02_", (ftnlen)1206)];
++			"cgxyz", i__3, "dskx02_", (ftnlen)1257)];
+ 	    }
+ 
+ /*           Save the coarse voxel start pointer as well. */
+ 
+ 	    vxlstr[(i__2 = to - 1) < 50000 && 0 <= i__2 ? i__2 : s_rnge("vxl"
+-		    "str", i__2, "dskx02_", (ftnlen)1211)] = cgrptr[(i__3 = 
++		    "str", i__2, "dskx02_", (ftnlen)1262)] = cgrptr[(i__3 = 
+ 		    cvid - 1) < 100000 && 0 <= i__3 ? i__3 : s_rnge("cgrptr", 
+-		    i__3, "dskx02_", (ftnlen)1211)];
++		    i__3, "dskx02_", (ftnlen)1262)];
+ 	}
+     }
+ 
+@@ -1870,26 +1921,26 @@ static integer c__0 = 0;
+ /*           the base of its parent coarse voxel. */
+ 
+ 	    j = vxlout[(i__2 = vi - 1) < 50000 && 0 <= i__2 ? i__2 : s_rnge(
+-		    "vxlout", i__2, "dskx02_", (ftnlen)1274)];
++		    "vxlout", i__2, "dskx02_", (ftnlen)1325)];
+ 	    fx = voxlst[(i__2 = j * 3 - 3) < 150000 && 0 <= i__2 ? i__2 : 
+-		    s_rnge("voxlst", i__2, "dskx02_", (ftnlen)1276)] - cgscal 
++		    s_rnge("voxlst", i__2, "dskx02_", (ftnlen)1327)] - cgscal 
+ 		    * (vxlcg[(i__3 = vi * 3 - 3) < 150000 && 0 <= i__3 ? i__3 
+-		    : s_rnge("vxlcg", i__3, "dskx02_", (ftnlen)1276)] - 1);
++		    : s_rnge("vxlcg", i__3, "dskx02_", (ftnlen)1327)] - 1);
+ 	    fy = voxlst[(i__2 = j * 3 - 2) < 150000 && 0 <= i__2 ? i__2 : 
+-		    s_rnge("voxlst", i__2, "dskx02_", (ftnlen)1277)] - cgscal 
++		    s_rnge("voxlst", i__2, "dskx02_", (ftnlen)1328)] - cgscal 
+ 		    * (vxlcg[(i__3 = vi * 3 - 2) < 150000 && 0 <= i__3 ? i__3 
+-		    : s_rnge("vxlcg", i__3, "dskx02_", (ftnlen)1277)] - 1);
++		    : s_rnge("vxlcg", i__3, "dskx02_", (ftnlen)1328)] - 1);
+ 	    fz = voxlst[(i__2 = j * 3 - 1) < 150000 && 0 <= i__2 ? i__2 : 
+-		    s_rnge("voxlst", i__2, "dskx02_", (ftnlen)1278)] - cgscal 
++		    s_rnge("voxlst", i__2, "dskx02_", (ftnlen)1329)] - cgscal 
+ 		    * (vxlcg[(i__3 = vi * 3 - 1) < 150000 && 0 <= i__3 ? i__3 
+-		    : s_rnge("vxlcg", i__3, "dskx02_", (ftnlen)1278)] - 1);
++		    : s_rnge("vxlcg", i__3, "dskx02_", (ftnlen)1329)] - 1);
+ 	    offset = fx + cgscal * (fy - 1) + cgscl2 * (fz - 1);
+ 
+ /*           Now compute the index of voxel-plate list pointer in */
+ /*           the pointer array, and look up the pointer. */
+ 
+ 	    j = vxlstr[(i__2 = vi - 1) < 50000 && 0 <= i__2 ? i__2 : s_rnge(
+-		    "vxlstr", i__2, "dskx02_", (ftnlen)1286)] + offset - 1;
++		    "vxlstr", i__2, "dskx02_", (ftnlen)1337)] + offset - 1;
+ 	    dski02_(handle, dladsc, &c__10, &j, &c__1, &dim, &voxptr);
+ 	    if (failed_()) {
+ 		chkout_("DSKX02", (ftnlen)6);
+@@ -1917,7 +1968,7 @@ static integer c__0 = 0;
+ 		    dski02_(handle, dladsc, &c__11, &i__3, &nplate, &dim, &
+ 			    platid[(i__2 = pntr - 1) < 256000 && 0 <= i__2 ? 
+ 			    i__2 : s_rnge("platid", i__2, "dskx02_", (ftnlen)
+-			    1320)]);
++			    1371)]);
+ 		    if (failed_()) {
+ 			chkout_("DSKX02", (ftnlen)6);
+ 			return 0;
+@@ -1941,7 +1992,7 @@ static integer c__0 = 0;
+ 
+ 		filli_(&vi, &nplate, &source[(i__2 = pntr - 1) < 256000 && 0 
+ 			<= i__2 ? i__2 : s_rnge("source", i__2, "dskx02_", (
+-			ftnlen)1349)]);
++			ftnlen)1400)]);
+ 	    }
+ 
+ /*           NPLATE returns zero or greater. */
+@@ -1981,13 +2032,13 @@ static integer c__0 = 0;
+ /*           ID at index I-1 may have been "marked" via negation. */
+ 
+ 	    if (platid[(i__3 = ordvec[(i__2 = i__ - 1) < 256000 && 0 <= i__2 ?
+-		     i__2 : s_rnge("ordvec", i__2, "dskx02_", (ftnlen)1393)] 
++		     i__2 : s_rnge("ordvec", i__2, "dskx02_", (ftnlen)1444)] 
+ 		    - 1) < 256000 && 0 <= i__3 ? i__3 : s_rnge("platid", i__3,
+-		     "dskx02_", (ftnlen)1393)] == (i__6 = platid[(i__5 = 
++		     "dskx02_", (ftnlen)1444)] == (i__6 = platid[(i__5 = 
+ 		    ordvec[(i__4 = i__ - 2) < 256000 && 0 <= i__4 ? i__4 : 
+-		    s_rnge("ordvec", i__4, "dskx02_", (ftnlen)1393)] - 1) < 
++		    s_rnge("ordvec", i__4, "dskx02_", (ftnlen)1444)] - 1) < 
+ 		    256000 && 0 <= i__5 ? i__5 : s_rnge("platid", i__5, "dsk"
+-		    "x02_", (ftnlen)1393)], abs(i__6))) {
++		    "x02_", (ftnlen)1444)], abs(i__6))) {
+ 
+ /*              The plates having indices ORDVEC(I-1) and ORDVEC(I) are */
+ /*              duplicates. */
+@@ -2001,7 +2052,7 @@ static integer c__0 = 0;
+ /*              index ORDVEC(I). */
+ 
+ 		if (ordvec[(i__2 = i__ - 1) < 256000 && 0 <= i__2 ? i__2 : 
+-			s_rnge("ordvec", i__2, "dskx02_", (ftnlen)1407)] < 
++			s_rnge("ordvec", i__2, "dskx02_", (ftnlen)1458)] < 
+ 			minidx) {
+ 
+ /*                 The plate that was previously at the minimum index is */
+@@ -2009,26 +2060,26 @@ static integer c__0 = 0;
+ /*                 the current plate ID value is ORDVEC(I). */
+ 
+ 		    platid[(i__2 = minidx - 1) < 256000 && 0 <= i__2 ? i__2 : 
+-			    s_rnge("platid", i__2, "dskx02_", (ftnlen)1413)] =
++			    s_rnge("platid", i__2, "dskx02_", (ftnlen)1464)] =
+ 			     -platid[(i__3 = minidx - 1) < 256000 && 0 <= 
+ 			    i__3 ? i__3 : s_rnge("platid", i__3, "dskx02_", (
+-			    ftnlen)1413)];
++			    ftnlen)1464)];
+ 		    minidx = ordvec[(i__2 = i__ - 1) < 256000 && 0 <= i__2 ? 
+ 			    i__2 : s_rnge("ordvec", i__2, "dskx02_", (ftnlen)
+-			    1414)];
++			    1465)];
+ 		} else {
+ 
+ /*                 The current plate is a duplicate; mark it. */
+ 
+ 		    platid[(i__3 = ordvec[(i__2 = i__ - 1) < 256000 && 0 <= 
+ 			    i__2 ? i__2 : s_rnge("ordvec", i__2, "dskx02_", (
+-			    ftnlen)1420)] - 1) < 256000 && 0 <= i__3 ? i__3 : 
+-			    s_rnge("platid", i__3, "dskx02_", (ftnlen)1420)] =
++			    ftnlen)1471)] - 1) < 256000 && 0 <= i__3 ? i__3 : 
++			    s_rnge("platid", i__3, "dskx02_", (ftnlen)1471)] =
+ 			     -platid[(i__5 = ordvec[(i__4 = i__ - 1) < 256000 
+ 			    && 0 <= i__4 ? i__4 : s_rnge("ordvec", i__4, 
+-			    "dskx02_", (ftnlen)1420)] - 1) < 256000 && 0 <= 
++			    "dskx02_", (ftnlen)1471)] - 1) < 256000 && 0 <= 
+ 			    i__5 ? i__5 : s_rnge("platid", i__5, "dskx02_", (
+-			    ftnlen)1420)];
++			    ftnlen)1471)];
+ 		}
+ 	    } else {
+ 
+@@ -2036,7 +2087,7 @@ static integer c__0 = 0;
+ /*              ID has no duplicates. */
+ 
+ 		minidx = ordvec[(i__2 = i__ - 1) < 256000 && 0 <= i__2 ? i__2 
+-			: s_rnge("ordvec", i__2, "dskx02_", (ftnlen)1429)];
++			: s_rnge("ordvec", i__2, "dskx02_", (ftnlen)1480)];
+ 	    }
+ 	}
+ 
+@@ -2061,7 +2112,7 @@ static integer c__0 = 0;
+ /*           Retrieve the current plate ID. */
+ 
+ 	    j = platid[(i__1 = i__ - 1) < 256000 && 0 <= i__1 ? i__1 : s_rnge(
+-		    "platid", i__1, "dskx02_", (ftnlen)1459)];
++		    "platid", i__1, "dskx02_", (ftnlen)1510)];
+ 	    if (j > 0) {
+ 
+ /*              This is not a duplicate plate; consider it. */
+@@ -2073,7 +2124,7 @@ static integer c__0 = 0;
+ /*                 later voxel. */
+ 
+ 		    if (source[(i__1 = i__ - 1) < 256000 && 0 <= i__1 ? i__1 :
+-			     s_rnge("source", i__1, "dskx02_", (ftnlen)1472)] 
++			     s_rnge("source", i__1, "dskx02_", (ftnlen)1523)] 
+ 			    > final) {
+ 
+ /*                    This is a "late plate": it occurs in a voxel later */
+@@ -2102,16 +2153,16 @@ static integer c__0 = 0;
+ 
+ 			vloc = isrchi_(&vids[(i__1 = k - 1) < 3 && 0 <= i__1 ?
+ 				 i__1 : s_rnge("vids", i__1, "dskx02_", (
+-				ftnlen)1506)], &nvbuf, vidxs);
++				ftnlen)1557)], &nvbuf, vidxs);
+ 			if (vloc > 0) {
+ 
+ /*                       The vertex was buffered; just copy it. */
+ 
+ 			    vequ_(&vbuff[(i__1 = vloc * 3 - 3) < 600 && 0 <= 
+ 				    i__1 ? i__1 : s_rnge("vbuff", i__1, "dsk"
+-				    "x02_", (ftnlen)1512)], &points[(i__2 = k *
++				    "x02_", (ftnlen)1563)], &points[(i__2 = k *
+ 				     3 - 3) < 9 && 0 <= i__2 ? i__2 : s_rnge(
+-				    "points", i__2, "dskx02_", (ftnlen)1512)])
++				    "points", i__2, "dskx02_", (ftnlen)1563)])
+ 				    ;
+ 			} else {
+ 
+@@ -2119,11 +2170,11 @@ static integer c__0 = 0;
+ 
+ 			    start = (vids[(i__1 = k - 1) < 3 && 0 <= i__1 ? 
+ 				    i__1 : s_rnge("vids", i__1, "dskx02_", (
+-				    ftnlen)1518)] - 1) * 3 + 1;
++				    ftnlen)1569)] - 1) * 3 + 1;
+ 			    dskd02_(handle, dladsc, &c__19, &start, &c__3, &
+ 				    dim, &points[(i__1 = k * 3 - 3) < 9 && 0 
+ 				    <= i__1 ? i__1 : s_rnge("points", i__1, 
+-				    "dskx02_", (ftnlen)1520)]);
++				    "dskx02_", (ftnlen)1571)]);
+ 			    if (failed_()) {
+ 				chkout_("DSKX02", (ftnlen)6);
+ 				return 0;
+@@ -2135,15 +2186,15 @@ static integer c__0 = 0;
+ 				++nvbuf;
+ 				vequ_(&points[(i__1 = k * 3 - 3) < 9 && 0 <= 
+ 					i__1 ? i__1 : s_rnge("points", i__1, 
+-					"dskx02_", (ftnlen)1536)], &vbuff[(
++					"dskx02_", (ftnlen)1587)], &vbuff[(
+ 					i__2 = nvbuf * 3 - 3) < 600 && 0 <= 
+ 					i__2 ? i__2 : s_rnge("vbuff", i__2, 
+-					"dskx02_", (ftnlen)1536)]);
++					"dskx02_", (ftnlen)1587)]);
+ 				vidxs[(i__1 = nvbuf - 1) < 200 && 0 <= i__1 ? 
+ 					i__1 : s_rnge("vidxs", i__1, "dskx02_"
+-					, (ftnlen)1538)] = vids[(i__2 = k - 1)
++					, (ftnlen)1589)] = vids[(i__2 = k - 1)
+ 					 < 3 && 0 <= i__2 ? i__2 : s_rnge(
+-					"vids", i__2, "dskx02_", (ftnlen)1538)
++					"vids", i__2, "dskx02_", (ftnlen)1589)
+ 					];
+ 			    }
+ 			}
+@@ -2158,8 +2209,8 @@ static integer c__0 = 0;
+ /*                 round-off error from causing the ray to miss the */
+ /*                 plate. Compute the edges of the tetrahedral angle */
+ /*                 with the observer as the apex and the vertices as */
+-/*                 members of the edge rays. Finally see if the */
+-/*                 boresight lies inside the tetrahedron. */
++/*                 members of the edge rays. Finally see if the ray */
++/*                 lies inside the tetrahedron. */
+ 
+ 		    vsubg_(points, obsmat, &c__9, edges);
+ 		    pltexp_(edges, &xpdfrc, xpnts);
+@@ -2175,7 +2226,7 @@ static integer c__0 = 0;
+ 		    }
+ 		    if (hits) {
+ 
+-/*                    The boresight intersects this plate. */
++/*                    The ray intersects this plate. */
+ 
+ 			if (! have || scale < near__) {
+ 
+@@ -2188,10 +2239,14 @@ static integer c__0 = 0;
+ /*                       If this intersection point is closer to the */
+ /*                       ray's vertex than the last one, pick this point */
+ /*                       and the plate it's on. */
+-/*                          ___   ____   __________ */
+-/*                          XPT = VTX2 + SCALE*UDIR */
+ 
+-			    vlcom_(&c_b40, vtx2, &scale, udir, xpt);
++/*                       Note that we don't yet know that this solution */
++/*                       is valid. */
++
++/*                          ___    ____   __________ */
++/*                          XPT2 = VTX2 + SCALE*UDIR */
++
++			    vlcom_(&c_b40, vtx2, &scale, udir, xpt2);
+ 
+ /*                       Compute the voxel grid coordinates of the */
+ /*                       intercept. HITCOR is a double precision vector */
+@@ -2199,25 +2254,25 @@ static integer c__0 = 0;
+ /*                       be precise). Note that the components of HITCOR */
+ /*                       are zero-based. */
+ 
+-			    zztogrid_(xpt, voxori, &voxsiz, hitcor);
++			    zztogrid_(xpt2, voxori, &voxsiz, hitcor);
+ 
+ /*                       Look up the voxel grid coordinates (integer, */
+ /*                       1-based) of the current voxel. */
+ 
+ 			    k = vxlout[(i__2 = source[(i__1 = i__ - 1) < 
+ 				    256000 && 0 <= i__1 ? i__1 : s_rnge("sou"
+-				    "rce", i__1, "dskx02_", (ftnlen)1615)] - 1)
++				    "rce", i__1, "dskx02_", (ftnlen)1670)] - 1)
+ 				     < 50000 && 0 <= i__2 ? i__2 : s_rnge(
+-				    "vxlout", i__2, "dskx02_", (ftnlen)1615)];
++				    "vxlout", i__2, "dskx02_", (ftnlen)1670)];
+ 			    vxc1 = voxlst[(i__1 = k * 3 - 3) < 150000 && 0 <= 
+ 				    i__1 ? i__1 : s_rnge("voxlst", i__1, 
+-				    "dskx02_", (ftnlen)1617)];
++				    "dskx02_", (ftnlen)1672)];
+ 			    vxc2 = voxlst[(i__1 = k * 3 - 2) < 150000 && 0 <= 
+ 				    i__1 ? i__1 : s_rnge("voxlst", i__1, 
+-				    "dskx02_", (ftnlen)1618)];
++				    "dskx02_", (ftnlen)1673)];
+ 			    vxc3 = voxlst[(i__1 = k * 3 - 1) < 150000 && 0 <= 
+ 				    i__1 ? i__1 : s_rnge("voxlst", i__1, 
+-				    "dskx02_", (ftnlen)1619)];
++				    "dskx02_", (ftnlen)1674)];
+ 			    invox = hitcor[0] > vxc1 - xtol - 1 && hitcor[0] <
+ 				     vxc1 + xtol && hitcor[1] > vxc2 - xtol - 
+ 				    1 && hitcor[1] < vxc2 + xtol && hitcor[2] 
+@@ -2230,7 +2285,7 @@ static integer c__0 = 0;
+ /*                          are extended using the "greedy" margin. */
+ 
+ 				dskgtl_(&c__2, &greedm);
+-				zzinvelt_(xpt, &corsys, &dskdsc[6], &dskdsc[
++				zzinvelt_(xpt2, &corsys, &dskdsc[6], &dskdsc[
+ 					16], &greedm, &c__0, &inseg);
+ 				if (inseg) {
+ 
+@@ -2241,13 +2296,14 @@ static integer c__0 = 0;
+ /*                             intercepts beyond the voxel designated by */
+ /*                             FINAL. */
+ 
++				    vequ_(xpt2, xpt);
+ 				    have = TRUE_;
+ 				    near__ = scale;
+ 				    *plid = j;
+ 				    final = source[(i__1 = i__ - 1) < 256000 
+ 					    && 0 <= i__1 ? i__1 : s_rnge(
+ 					    "source", i__1, "dskx02_", (
+-					    ftnlen)1657)];
++					    ftnlen)1714)];
+ 
+ /*                             Indicate that a solution was found. We'll */
+ /*                             keep looking for a better one if PLID is */
+@@ -2268,11 +2324,11 @@ static integer c__0 = 0;
+ 				    if ((i__3 = platid[(i__2 = k - 1) < 
+ 					    256000 && 0 <= i__2 ? i__2 : 
+ 					    s_rnge("platid", i__2, "dskx02_", 
+-					    (ftnlen)1678)], abs(i__3)) == w) {
++					    (ftnlen)1735)], abs(i__3)) == w) {
+ 					platid[(i__2 = k - 1) < 256000 && 0 <=
+ 						 i__2 ? i__2 : s_rnge("platid"
+ 						, i__2, "dskx02_", (ftnlen)
+-						1679)] = w;
++						1736)] = w;
+ 				    }
+ 				}
+ 			    }
+--- a/src/cspice/subpnt.c
++++ b/src/cspice/subpnt.c
+@@ -2095,6 +2095,13 @@ static integer c__3 = 3;
+ 
+ /* $ Version */
+ 
++/* -    SPICELIB Version 2.1.0, 25-OCT-2017 (NJB) */
++
++/*        Bug fix: TRGEPC is now initialized prior to first use. */
++/*        Previously the lack of initialization could cause this routine */
++/*        to fail to find DSK data within the time bounds of a DSK */
++/*        segment. */
++
+ /* -    SPICELIB Version 2.0.0, 04-APR-2017 (NJB) */
+ 
+ /*        Added FAILED tests. */
+@@ -2504,6 +2511,10 @@ static integer c__3 = 3;
+ 
+     vminus_(tpos, obspos);
+ 
++/*     Make a first estimate of the target epoch. */
++
++    *trgepc = *et + s * lt;
++
+ /*     Find the sub-observer point given the target epoch, */
+ /*     observer-target position, and target body orientation we've */
+ /*     already computed. If we're not using light time correction, this */

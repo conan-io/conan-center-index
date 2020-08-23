@@ -20,7 +20,8 @@ class Log4cplusConan(ConanFile):
                "with_iconv": [True, False],
                "working_locale": [True, False],
                "working_c_locale": [True, False],
-               "decorated_name": [True, False]}
+               "decorated_name": [True, False],
+               "unicode": [True, False]}
     default_options = {'shared': False,
                        'fPIC': True,
                        'single_threaded': False,
@@ -28,14 +29,15 @@ class Log4cplusConan(ConanFile):
                        'with_iconv': False,
                        'working_locale': False,
                        'working_c_locale': False,
-                       'decorated_name': False}
+                       'decorated_name': False,
+                       'unicode': True}
     short_paths = True
     _source_subfolder = "source_subfolder"
     _build_subfolder = "build_subfolder"
 
     def requirements(self):
         if self.options.with_iconv:
-            self.requires.add('libiconv/1.15')
+            self.requires.add('libiconv/1.16')
 
     def config_options(self):
         if self.settings.os == 'Windows':
@@ -48,6 +50,7 @@ class Log4cplusConan(ConanFile):
 
     def _configure_cmake(self):
         cmake = CMake(self)
+        cmake.definitions['UNICODE'] = self.options.unicode
         cmake.definitions['LOG4CPLUS_BUILD_TESTING'] = False
         cmake.definitions['WITH_UNIT_TESTS'] = False
         cmake.definitions["LOG4CPLUS_ENABLE_DECORATED_LIBRARY_NAME"] = self.options.decorated_name
@@ -75,5 +78,5 @@ class Log4cplusConan(ConanFile):
         self.cpp_info.libs = tools.collect_libs(self)
         if self.settings.os == "Linux":
             self.cpp_info.system_libs = ["dl", "pthread"]
-        elif self.settings.compiler == "Visual Studio":
+        elif self.settings.os == "Windows":
             self.cpp_info.system_libs = ['Ws2_32']

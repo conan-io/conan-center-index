@@ -1,5 +1,5 @@
-project(test_package)
 cmake_minimum_required(VERSION 2.8.12)
+project(test_package)
 
 SET(CMAKE_CXX_STANDARD 11)
 SET(CMAKE_CXX_STANDARD_REQUIRED ON)

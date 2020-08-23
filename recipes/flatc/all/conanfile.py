@@ -12,7 +12,7 @@ class FlatcConan(ConanFile):
     topics = ("conan", "flatbuffers", "serialization", "rpc", "json-parser", "installer")
     description = "Memory Efficient Serialization Library"
     settings = "os_build", "arch_build"
-    exports_sources = "CMakeLists.txt"
+    exports_sources = ["CMakeLists.txt","patches/**"]
     generators = "cmake"
 
     @property
@@ -22,7 +22,11 @@ class FlatcConan(ConanFile):
     @property
     def _build_subfolder(self):
         return "build_subfolder"
-
+    
+    def _patch_sources(self):
+        for patch in self.conan_data["patches"][self.version]:
+            tools.patch(**patch)
+            
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
         extracted_dir = "flatbuffers-" + self.version
@@ -39,6 +43,7 @@ class FlatcConan(ConanFile):
         return cmake
 
     def build(self):
+        self._patch_sources()
         cmake = self._configure_cmake()
         cmake.build()
 
@@ -48,8 +53,11 @@ class FlatcConan(ConanFile):
         bin_dir = os.path.join(self._build_subfolder, "bin")
         self.copy(pattern="flatc" + extension, dst="bin", src=bin_dir)
         self.copy(pattern="flathash" + extension, dst="bin", src=bin_dir)
+        self.copy(pattern="BuildFlatBuffers.cmake", dst="bin/cmake", src=os.path.join(self._source_subfolder,"CMake"))
 
     def package_info(self):
         bin_path = os.path.join(self.package_folder, "bin")
         self.output.info('Appending PATH environment variable: %s' % bin_path)
         self.env_info.PATH.append(bin_path)
+        self.cpp_info.builddirs.append("bin/cmake")
+        self.cpp_info.build_modules.append("bin/cmake/BuildFlatBuffers.cmake")

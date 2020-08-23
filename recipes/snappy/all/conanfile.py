@@ -15,6 +15,8 @@ class SnappyConan(ConanFile):
     options = {"shared": [True, False], "fPIC": [True, False]}
     default_options = {"shared": False, "fPIC": True}
 
+    _cmake = None
+
     @property
     def _source_subfolder(self):
         return "source_subfolder"
@@ -27,16 +29,24 @@ class SnappyConan(ConanFile):
         if self.settings.os == 'Windows':
             del self.options.fPIC
 
+    def configure(self):
+        if self.options.shared:
+            del self.options.fPIC
+        if self.settings.compiler.cppstd:
+            tools.check_min_cppstd(self, 11)
+
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
-        extracted_dir = self.name + "-" + self.version
+        extracted_dir = "{}-{}".format(self.name, self.version)
         os.rename(extracted_dir, self._source_subfolder)
 
     def _configure_cmake(self):
-        cmake = CMake(self)
-        cmake.definitions["SNAPPY_BUILD_TESTS"] = False
-        cmake.configure(build_folder=self._build_subfolder)
-        return cmake
+        if self._cmake:
+            return self._cmake
+        self._cmake = CMake(self)
+        self._cmake.definitions["SNAPPY_BUILD_TESTS"] = False
+        self._cmake.configure(build_folder=self._build_subfolder)
+        return self._cmake
 
     def build(self):
         cmake = self._configure_cmake()
@@ -49,4 +59,10 @@ class SnappyConan(ConanFile):
         tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
 
     def package_info(self):
-        self.cpp_info.libs = tools.collect_libs(self)
+        self.cpp_info.names["cmake_find_package"] = "Snappy"
+        self.cpp_info.names["cmake_find_package_multi"] = "Snappy"
+        self.cpp_info.components["snappylib"].names["cmake_find_package"] = "snappy"
+        self.cpp_info.components["snappylib"].names["cmake_find_package_multi"] = "snappy"
+        self.cpp_info.components["snappylib"].libs = tools.collect_libs(self)
+        if not self.options.shared and tools.stdcpp_library(self):
+            self.cpp_info.components["snappylib"].system_libs.append(tools.stdcpp_library(self))

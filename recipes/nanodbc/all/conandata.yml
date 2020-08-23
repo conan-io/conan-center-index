@@ -1,0 +1,10 @@
+sources:
+  "cci.20200807":
+    url: "https://github.com/nanodbc/nanodbc/archive/ab8d176262f92d5f75aa2d441bfce27041032201.zip"
+    sha256: "9de057ae6e8d0b9192df1d16ccc70ce7525ca9fe52e56fa8d13cfae9206f8286"
+patches:
+  "cci.20200807":
+    - patch_file: "patches/0001-odbc-from-cci.patch"
+      base_path: "source_subfolder"
+    - patch_file: "patches/0002-allow-windows-shared.patch"
+      base_path: "source_subfolder"

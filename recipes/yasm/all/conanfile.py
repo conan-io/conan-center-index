@@ -4,7 +4,6 @@ import os
 
 class YASMInstallerConan(ConanFile):
     name = "yasm"
-    version = "1.3.0"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/yasm/yasm"
     description = 'Yasm is a complete rewrite of the NASM assembler under the "new" BSD License'

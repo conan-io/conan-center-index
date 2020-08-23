@@ -5,7 +5,9 @@ include(../../../conanbuildinfo.cmake)
 conan_basic_setup()
 
 set(SOURCES ioapi.c mztools.c unzip.c zip.c)
-set(HEADERS crypt.h ioapi.h mztools.h unzip.h zip.h minizip_extern.h)
+set(PUBLIC_HEADERS ioapi.h mztools.h unzip.h zip.h minizip_extern.h)
+# crypt.h is internal-only and should be no-install
+set(HEADERS crypt.h ${PUBLIC_HEADERS})
 
 if(WIN32)
   set(SOURCES ${SOURCES} iowin32.c)
@@ -37,7 +39,7 @@ if(BUILD_SHARED_LIBS)
   endif()
 endif()
 
-set_target_properties(minizip PROPERTIES PUBLIC_HEADER "${HEADERS}")
+set_target_properties(minizip PROPERTIES PUBLIC_HEADER "${PUBLIC_HEADERS}")
 set_target_properties(minizip PROPERTIES SOVERSION 1)
 set_target_properties(minizip PROPERTIES VERSION "1.1.0")
 
