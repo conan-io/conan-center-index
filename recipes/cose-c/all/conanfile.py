@@ -34,6 +34,10 @@ class CoseCStackConan(ConanFile):
     def _build_subfolder(self):
         return "build_subfolder"
 
+    def config_options(self):
+        if self.settings.os == "Windows":
+            del self.options.fPIC
+
     def requirements(self):
         self.requires("cn-cbor/1.0.0")
 
