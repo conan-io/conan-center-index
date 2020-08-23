@@ -311,3 +311,7 @@ By default, all packages should be built as static library (the option ``shared`
 ### **<a name="KB-H051">#KB-H051</a>: "DEFAULT OPTIONS AS DICTIONARY"**
 
 The attribue `default_options` should be a dictionary, for example `default_options = {'shared': False, 'fPIC': True}`.
+
+### **<a name="KB-H052">#KB-H052</a>: "CONFIG.YML HAS NEW VERSION"**
+
+It's important to have new library version defined in both `config.yml` and `conandata.yml`, otherwise newly added version will not be checked and built by CI and will not be available for download.
