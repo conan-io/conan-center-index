@@ -66,6 +66,18 @@ class BotanConan(ConanFile):
                        'enable_modules': None,
                        'system_cert_bundle': None}
 
+    @property
+    def _is_x86(self):
+        return str(self.settings.arch) in ["x86", "x86_64"]
+
+    @property
+    def _is_ppc(self):
+        return "ppc" in str(self.settings.arch)
+
+    @property
+    def _is_arm(self):
+        return "arm" in str(self.settings.arch)
+
     def configure(self):
         self._validate_compiler_settings()
 
@@ -93,6 +105,23 @@ class BotanConan(ConanFile):
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
+        if not self._is_x86:
+            del self.options.with_sse2
+            del self.options.with_ssse3
+            del self.options.with_sse4_1
+            del self.options.with_sse4_2
+            del self.options.with_avx2
+            del self.options.with_bmi2
+            del self.options.with_rdrand
+            del self.options.with_rdseed
+            del self.options.with_aes_ni
+            del self.options.with_sha_ni
+        if not self._is_arm:
+            del self.options.with_neon
+            del self.options.with_armv8crypto
+        if not self._is_ppc:
+            del self.options.with_altivec
+            del self.options.with_powercrypto
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
@@ -245,47 +274,50 @@ class BotanConan(ConanFile):
         if self.settings.build_type == 'RelWithDebInfo':
             build_flags.append('--with-debug-info')
 
-        if not self.options.with_sse2:
-            build_flags.append('--disable-sse2')
+        if self._is_x86:
+            if not self.options.with_sse2:
+                build_flags.append('--disable-sse2')
 
-        if not self.options.with_ssse3:
-            build_flags.append('--disable-ssse3')
+            if not self.options.with_ssse3:
+                build_flags.append('--disable-ssse3')
 
-        if not self.options.with_sse4_1:
-            build_flags.append('--disable-sse4.1')
+            if not self.options.with_sse4_1:
+                build_flags.append('--disable-sse4.1')
 
-        if not self.options.with_sse4_2:
-            build_flags.append('--disable-sse4.2')
+            if not self.options.with_sse4_2:
+                build_flags.append('--disable-sse4.2')
 
-        if not self.options.with_avx2:
-            build_flags.append('--disable-avx2')
+            if not self.options.with_avx2:
+                build_flags.append('--disable-avx2')
 
-        if not self.options.with_bmi2:
-            build_flags.append('--disable-bmi2')
+            if not self.options.with_bmi2:
+                build_flags.append('--disable-bmi2')
 
-        if not self.options.with_rdrand:
-            build_flags.append('--disable-rdrand')
+            if not self.options.with_rdrand:
+                build_flags.append('--disable-rdrand')
 
-        if not self.options.with_rdseed:
-            build_flags.append('--disable-rdseed')
+            if not self.options.with_rdseed:
+                build_flags.append('--disable-rdseed')
 
-        if not self.options.with_aes_ni:
-            build_flags.append('--disable-aes-ni')
+            if not self.options.with_aes_ni:
+                build_flags.append('--disable-aes-ni')
 
-        if not self.options.with_sha_ni:
-            build_flags.append('--disable-sha-ni')
+            if not self.options.with_sha_ni:
+                build_flags.append('--disable-sha-ni')
 
-        if not self.options.with_altivec:
-            build_flags.append('--disable-altivec')
+        if self._is_ppc:
+            if not self.options.with_powercrypto:
+                build_flags.append('--disable-powercrypto')
 
-        if not self.options.with_neon:
-            build_flags.append('--disable-neon')
+            if not self.options.with_altivec:
+                build_flags.append('--disable-altivec')
 
-        if not self.options.with_armv8crypto:
-            build_flags.append('--disable-armv8crypto')
+        if self._is_arm:
+            if not self.options.with_neon:
+                build_flags.append('--disable-neon')
 
-        if not self.options.with_powercrypto:
-            build_flags.append('--disable-powercrypto')
+            if not self.options.with_armv8crypto:
+                build_flags.append('--disable-armv8crypto')
 
         if str(self.settings.build_type).lower() == 'debug':
             build_flags.append('--debug-mode')
