@@ -16,6 +16,7 @@ class JsonSchemaValidatorConan(ConanFile):
     exports_sources = ["CMakeLists.txt"]
     options = {"shared": [True, False], "fPIC": [True, False]}
     default_options = {"shared": False, "fPIC": True}
+    short_paths = True
     _cmake = None
 
     @property
