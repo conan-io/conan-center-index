@@ -29,7 +29,7 @@ class HanaConan(ConanFile):
         tools.get(**self.conan_data["sources"][self.version])
         os.rename("hana-" + self.version, self._source_subfolder)
 
-    def config_options(self):
+    def configure(self):
         if self.settings.compiler.cppstd:
             tools.check_min_cppstd(self, "14")
         try:
