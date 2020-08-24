@@ -21,7 +21,7 @@ class MinizipConan(ConanFile):
         "with_zlib": [True, False],
         "with_bzip2": [True, False],
         "with_zstd": [True, False],
-        "with_openssl": [True, False],
+        "with_openssl": [True, False, "auto"],
         "with_lzma": [True, False],
         "with_libbsd": [True, False, "auto"],
         "compat": [True, False],
@@ -39,7 +39,7 @@ class MinizipConan(ConanFile):
         "with_zlib": True,
         "with_bzip2": True,
         "with_zstd": True,
-        "with_openssl": False,
+        "with_openssl": "auto",
         "with_lzma": True,
         "with_libbsd": "auto",
         "compat": True,
@@ -72,6 +72,13 @@ class MinizipConan(ConanFile):
         else:
             return bool(self.options.with_libbsd)
 
+    @property
+    def _with_openssl(self):
+        if self.options.with_openssl == "auto":
+            return self.settings.os != "Windows"
+        else:
+            return bool(self.options.with_openssl)
+
     def requirements(self):
         if self.options.with_zlib:
             self.requires("zlib/1.2.11")
@@ -83,7 +90,7 @@ class MinizipConan(ConanFile):
         #library and add conditional requirement
         #if self.options.with_lzma:
         #    self.requires("xz_utils/5.2.4")
-        if self.options.with_openssl:
+        if self._with_openssl:
             self.requires("openssl/1.1.1g")
         if self._with_libbsd:
             self.requires("libbsd/0.10.0")
@@ -150,6 +157,7 @@ class MinizipConan(ConanFile):
 
     def package_id(self):
         self.info.with_libbsd = self._with_libbsd
+        self.info.with_openssl = self._with_openssl
 
     def package_info(self):
         self.cpp_info.libs = ["minizip"]
