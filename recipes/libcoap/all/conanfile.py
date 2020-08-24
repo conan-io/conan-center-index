@@ -46,14 +46,6 @@ class LibCoapConan(ConanFile):
         if self.options.dtls_backend == "tinydtls":
             raise ConanInvalidConfiguration("tinydtls not available yet")
 
-    def _patch_files(self):
-        # TODO: Remove custom targets when Conan components be available.
-        if self.options.dtls_backend == "openssl":
-            replace_ssl = 'OpenSSL::SSL'
-            tools.replace_in_file(os.path.join(self._source_subfolder, "CMakeLists.txt"), replace_ssl, "OpenSSL::OpenSSL")
-            replace_crypto = 'OpenSSL::Crypto'
-            tools.replace_in_file(os.path.join(self._source_subfolder, "CMakeLists.txt"), replace_crypto, "OpenSSL::OpenSSL")
-
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
@@ -83,7 +75,6 @@ class LibCoapConan(ConanFile):
         return self._cmake
 
     def build(self):
-        self._patch_files()
         cmake = self._configure_cmake()
         cmake.build()
 
