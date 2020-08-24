@@ -99,7 +99,7 @@ class LibwebsocketsConan(ConanFile):
     }
     default_options = {
         "shared": False,
-        "fPIC": False,
+        "fPIC": True,
         "with_libuv": False,
         "with_libevent": False,
         "with_zlib": False,
