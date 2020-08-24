@@ -82,12 +82,14 @@ class FlacConan(ConanFile):
         self.cpp_info.components["libflac"].libs = ["FLAC"]
         self.cpp_info.components["libflac"].names["cmake_find_package"] = "FLAC"
         self.cpp_info.components["libflac"].names["cmake_find_package_multi"] = "FLAC"
+        self.cpp_info.components["libflac"].names["pkg_config"] = "flac"
         self.cpp_info.components["libflac"].requires = ["ogg::ogg"]
 
         self.cpp_info.components["libflac++"].libs = ["FLAC++"]
         self.cpp_info.components["libflac++"].requires = ["libflac"]
         self.cpp_info.components["libflac++"].names["cmake_find_package"] = "FLAC++"
         self.cpp_info.components["libflac++"].names["cmake_find_package_multi"] = "FLAC++"
+        self.cpp_info.components["libflac++"].names["pkg_config"] = "flac++"
         if not self.options.shared:
             self.cpp_info.components["libflac"].defines = ["FLAC__NO_DLL"]
             if self.settings.os == "Linux":
