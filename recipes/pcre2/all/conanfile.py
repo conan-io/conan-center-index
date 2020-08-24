@@ -76,25 +76,18 @@ class PCREConan(ConanFile):
         self._cmake.configure(build_folder=self._build_subfolder)
         return self._cmake
 
-    def patch_cmake(self):
-        """Patch CMake file to avoid man and share during install stage"""
-
-        cmake_file = os.path.join(self._source_subfolder, "CMakeLists.txt")
-        tools.replace_in_file(cmake_file, "INSTALL(FILES ${man1} DESTINATION man/man1)", "")
-        tools.replace_in_file(cmake_file, "INSTALL(FILES ${man3} DESTINATION man/man3)", "")
-        tools.replace_in_file(cmake_file, "INSTALL(FILES ${html} DESTINATION share/doc/pcre2/html)", "")
-
     def build(self):
-        self.patch_cmake()
         cmake = self._configure_cmake()
         cmake.build()
 
     def package(self):
+        self.copy(pattern="LICENCE", dst="licenses", src=self._source_subfolder)
         cmake = self._configure_cmake()
         cmake.install()
         cmake.patch_config_paths()
+        tools.rmdir(os.path.join(self.package_folder, "man"))
+        tools.rmdir(os.path.join(self.package_folder, "share"))
         tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
-        self.copy(pattern="LICENCE", dst="licenses", src=self._source_subfolder)
 
     def package_info(self):
         def library_name(library):
