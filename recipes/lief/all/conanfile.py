@@ -108,6 +108,9 @@ class LiefConan(ConanFile):
         self.cpp_info.names["cmake_find_package"] = "LIEF"
         self.cpp_info.names["cmake_find_package_multi"] = "LIEF"
         self.cpp_info.libs = tools.collect_libs(self)
+        self.cpp_info.defines = ["_GLIBCXX_USE_CXX11_ABI=1"]
+        if self.options.shared:
+            self.cpp_info.defines.append("LIEF_IMPORT")
         if self.settings.compiler == "Visual Studio":
             self.cpp_info.cxxflags += ["/FIiso646.h"]
         if self.settings.os == "Windows" and self.options.shared:

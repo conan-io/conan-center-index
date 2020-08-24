@@ -11,7 +11,7 @@ int main(int argc, char **argv)
         return 1;
     }
 
-    std::cout << LIEF_NAME << HUMAN_VERSION;
+    std::cout << LIEF_NAME << HUMAN_VERSION << std::endl;
 
 #if defined(_WIN32)
     std::unique_ptr<LIEF::PE::Binary> pe = LIEF::PE::Parser::parse(argv[1]);
