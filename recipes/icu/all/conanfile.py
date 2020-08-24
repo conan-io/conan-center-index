@@ -138,7 +138,7 @@ class ICUBase(ConanFile):
                     ("Macos", "clang"): "MacOSX",
                     ("Macos", "apple-clang"): "MacOSX"}.get((str(self.settings.os),
                                                              str(self.settings.compiler)))
-        arch64 = ["x86_64", "sparcv9", "ppc64"]
+        arch64 = ['x86_64', 'sparcv9', 'ppc64', 'ppc64le', 'armv8', 'armv8.3', 'mips64']
         bits = "64" if self.settings.arch in arch64 else "32"
         args = [platform,
                 "--prefix={0}".format(prefix),

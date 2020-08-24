@@ -19,7 +19,7 @@ class XkbcommonConan(ConanFile):
         "docs": [True, False]
     }
     default_options = {
-        "shared": True,
+        "shared": False,
         "fPIC": True,
         "with_x11": True,
         "with_wayland": False,
@@ -81,4 +81,3 @@ class XkbcommonConan(ConanFile):
             self.cpp_info.components['libxkbcommon-x11'].name = 'xkbcommon-x11'
             self.cpp_info.components['libxkbcommon-x11'].requires = ['libxkbcommon']
             self.cpp_info.components['libxkbcommon-x11'].requires.extend(['xorg::xcb', 'xorg::xcb-xkb'])
-

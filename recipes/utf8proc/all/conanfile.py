@@ -62,6 +62,7 @@ class Utf8ProcConan(ConanFile):
         cmake.install()
 
     def package_info(self):
+        self.cpp_info.names["pkg_config"] = "libutf8proc"
         self.cpp_info.libs = ["utf8proc_static" if self.settings.compiler == "Visual Studio" and not self.options.shared else "utf8proc"]
         if not self.options.shared:
             self.cpp_info.defines = ["UTF8PROC_STATIC"]

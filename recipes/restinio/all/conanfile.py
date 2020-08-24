@@ -49,14 +49,17 @@ class RestinioConan(ConanFile):
 
     def requirements(self):
         self.requires("http_parser/2.9.4")
-        self.requires("fmt/6.2.1")
+        self.requires("fmt/7.0.3")
         self.requires("expected-lite/0.4.0")
         self.requires("optional-lite/3.2.0")
-        self.requires("string-view-lite/1.3.0")
+        self.requires("string-view-lite/1.4.0")
         self.requires("variant-lite/1.2.2")
 
         if self.options.asio == "standalone":
-            self.requires("asio/1.16.1")
+            if tools.Version(self.version) >= "0.6.9":
+                self.requires("asio/1.17.0")
+            else:
+                self.requires("asio/1.16.1")
         else:
             self.requires("boost/1.73.0")
 
