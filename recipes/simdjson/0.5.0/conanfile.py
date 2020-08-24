@@ -44,7 +44,7 @@ class SimdjsonConan(ConanFile):
         if self.options.shared:
             del self.options.fPIC
         if self.settings.compiler.cppstd:
-            tools.check_min_cppstd(self, "17")
+            tools.check_min_cppstd(self, "11")
 
         if not self._is_supported_compiler():
             raise ConanInvalidConfiguration("This library is tested with a family of recent compilers."
