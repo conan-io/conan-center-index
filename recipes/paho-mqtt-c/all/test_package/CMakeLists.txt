@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 2.8.11)
+cmake_minimum_required(VERSION 3.1)
 project(test_package C)
 
 option(BUILD_ASYNC "Build asynchronous example" ON)
