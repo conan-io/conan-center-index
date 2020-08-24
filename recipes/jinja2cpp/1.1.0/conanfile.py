@@ -1,7 +1,5 @@
 import os
-import re
 from conans import ConanFile, CMake, tools
-from conans.errors import ConanInvalidConfiguration
 
 
 class Jinja2cppConan(ConanFile):
@@ -14,23 +12,18 @@ class Jinja2cppConan(ConanFile):
     exports_sources = "CMakeLists.txt", "patches/**"
     generators = "cmake", "cmake_find_package"
     settings = "os", "compiler", "build_type", "arch"
-    options = {
-        "shared": [True, False], "fPIC": [True, False]
-    }
-    default_options = {'shared': False, "fPIC": True}
-    requires = (
-        "variant-lite/1.2.2",
-        "expected-lite/0.3.0",
-        "optional-lite/3.2.0",
-        "string-view-lite/1.3.0",
-        "boost/1.72.0",
-        "fmt/6.1.2",
-        "rapidjson/1.1.0"
-    )
-    
-    _source_subfolder = "source_subfolder"
-    _build_subfolder = "build_subfolder"
-    _cpp_std = 14
+    options = {"shared": [True, False], "fPIC": [True, False]}
+    default_options = {"shared": False, "fPIC": True}
+
+    _cmake = None
+
+    @property
+    def _source_subfolder(self):
+        return "source_subfolder"
+
+    @property
+    def _build_subfolder(self):
+        return "build_subfolder"
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -39,62 +32,61 @@ class Jinja2cppConan(ConanFile):
     def configure(self):
         if self.options.shared:
             del self.options.fPIC
+        if self.settings.compiler.cppstd:
+            tools.check_min_cppstd(self, 14)
 
-        cppstd = self.settings.get_safe("compiler.cppstd")
-        if cppstd:
-            cppstd_pattern = re.compile(r'^(gnu)?(?P<cppstd>\d+)$')
-            m = cppstd_pattern.match(cppstd)
-            cppstd_profile = int(m.group("cppstd"))
-            if cppstd_profile < 14:
-                raise ConanInvalidConfiguration("Minimum C++ Standard required is 14 (provided '{}')".format(cppstd))
-            else:
-                self._cpp_std = cppstd_profile
+    def requirements(self):
+        self.requires("boost/1.74.0")
+        self.requires("expected-lite/0.4.0")
+        self.requires("fmt/6.2.1") # not compatible with fmt >= 7.0.0
+        self.requires("optional-lite/3.2.0")
+        self.requires("rapidjson/cci.20200410")
+        self.requires("string-view-lite/1.4.0")
+        self.requires("variant-lite/1.2.2")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
         extracted_dir = "Jinja2Cpp-" + self.version
         os.rename(extracted_dir, self._source_subfolder)
 
-    def _patch_sources(self):
-        for patch in self.conan_data["patches"][self.version]:
-            tools.patch(**patch)
-
-    def build(self):
-        self._patch_sources()
-        cmake = CMake(self)
-        cmake.definitions["JINJA2CPP_BUILD_TESTS"] = False
-        cmake.definitions["JINJA2CPP_STRICT_WARNINGS"] = False
-        cmake.definitions["JINJA2CPP_BUILD_SHARED"] = self.options.shared
-        cmake.definitions["JINJA2CPP_DEPS_MODE"] = "conan-build"
-        cmake.definitions["JINJA2CPP_CXX_STANDARD"] = self._cpp_std
+    def _configure_cmake(self):
+        if self._cmake:
+            return self._cmake
+        self._cmake = CMake(self)
+        self._cmake.definitions["JINJA2CPP_BUILD_TESTS"] = False
+        self._cmake.definitions["JINJA2CPP_STRICT_WARNINGS"] = False
+        self._cmake.definitions["JINJA2CPP_BUILD_SHARED"] = self.options.shared
+        self._cmake.definitions["JINJA2CPP_DEPS_MODE"] = "conan-build"
+        self._cmake.definitions["JINJA2CPP_CXX_STANDARD"] = self.settings.compiler.get_safe("cppstd", 14)
         # Conan cmake generator omits the build_type flag for MSVC multiconfiguration CMake,
         # but provide build-type-specific runtime type flag. For now, Jinja2C++ build scripts
         # need to know the build type is being built in order to setup internal flags correctly
-        cmake.definitions["JINJA2CPP_CONAN_BUILD_TYPE"] = self.settings.build_type
+        self._cmake.definitions["CMAKE_BUILD_TYPE"] = self.settings.build_type
         compiler = self.settings.get_safe("compiler")
-        if compiler == 'Visual Studio':
+        if compiler == "Visual Studio":
             # Runtime type configuration for Jinja2C++ should be strictly '/MT' or '/MD'
-            runtime = self.settings.get_safe("compiler.runtime")            
-            if runtime == 'MTd':
-                runtime = 'MT'
-            if runtime == 'MDd':
-                runtime = 'MD'
-            cmake.definitions["JINJA2CPP_MSVC_RUNTIME_TYPE"] = '/' + runtime
-            
-        cmake.configure(build_folder=self._build_subfolder)
+            runtime = self.settings.get_safe("compiler.runtime")
+            if runtime == "MTd":
+                runtime = "MT"
+            if runtime == "MDd":
+                runtime = "MD"
+            self._cmake.definitions["JINJA2CPP_MSVC_RUNTIME_TYPE"] = "/" + runtime
+        self._cmake.configure(build_folder=self._build_subfolder)
+        return self._cmake
+
+    def build(self):
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            tools.patch(**patch)
+        cmake = self._configure_cmake()
         cmake.build()
 
     def package(self):
         self.copy("LICENSE", dst="licenses", src=self._source_subfolder)
-        self.copy("*.h", dst="include", src=os.path.join(self._source_subfolder, "include"))
-        self.copy("*.hpp", dst="include", src=os.path.join(self._source_subfolder, "include"))
-        self.copy("*.lib", dst="lib", keep_path=False)
-        self.copy("*.dll", dst="bin", keep_path=False)
-        self.copy("*.so", dst="lib", keep_path=False)
-        self.copy("*.so.*", dst="lib", keep_path=False)
-        self.copy("*.dylib", dst="lib", keep_path=False)
-        self.copy("*.a", dst="lib", keep_path=False)
+        cmake = self._configure_cmake()
+        cmake.install()
+        tools.rmdir(os.path.join(self.package_folder, "lib", "jinja2cpp"))
+        tools.rmdir(os.path.join(self.package_folder, "share"))
 
     def package_info(self):
+        # TODO: CMake imported target shouldn't be namespaced
         self.cpp_info.libs = ["jinja2cpp"]
-
