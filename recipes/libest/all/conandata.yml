@@ -1,0 +1,4 @@
+sources:
+  "3.2.0":
+    sha256: 324b3a2b16cd14ea4234d75fa90f08b29509bac9cd3795c44268e22f906ee0ad
+    url: https://github.com/cisco/libest/archive/r3.2.0.tar.gz
