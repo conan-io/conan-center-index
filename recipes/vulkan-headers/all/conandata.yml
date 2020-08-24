@@ -50,3 +50,12 @@ sources:
   "1.2.148.0":
     url: "https://github.com/KhronosGroup/Vulkan-Headers/archive/sdk-1.2.148.0.tar.gz"
     sha256: "0803784b701c461ff5cce30bb8c598db5780032cf780c954d676e142bc3c373f"
+  "1.2.149.0":
+    url: "https://github.com/KhronosGroup/Vulkan-Headers/archive/v1.2.149.tar.gz"
+    sha256: "332e35104a911447915ccf03f2d61d7e061d3cf5a09419a032b3b09246dcca85"
+  "1.2.150.0":
+    url: "https://github.com/KhronosGroup/Vulkan-Headers/archive/v1.2.150.tar.gz"
+    sha256: "dc6477b06ed04f4df72cb46915131c1a844980c6f4993954672893b69c2ffb57"
+  "1.2.151.0":
+    url: "https://github.com/KhronosGroup/Vulkan-Headers/archive/v1.2.151.tar.gz"
+    sha256: "9a3bb3077c9bb71347d6b9942fa5b728053b67dbd5c1eb9d75a774bccefa18d8"
