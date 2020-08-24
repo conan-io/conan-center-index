@@ -33,7 +33,7 @@ class KangaruConan(ConanFile):
             tools.check_min_cppstd(self, 11)
 
     def package_id(self):
-        self.info.header_only()
+        self.info.settings.clear()
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
