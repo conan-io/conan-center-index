@@ -15,10 +15,16 @@ class ZziplibConan(ConanFile):
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
+        "zzipmapped": [True, False],
+        "zzipfseeko": [True, False],
+        "zzipwrap": [True, False]
     }
     default_options = {
         "shared": False,
         "fPIC": True,
+        "zzipmapped": True,
+        "zzipfseeko": True,
+        "zzipwrap": True
     }
 
     _cmake = None
@@ -31,9 +37,6 @@ class ZziplibConan(ConanFile):
     def _build_subfolder(self):
         return "build_subfolder"
 
-    def requirements(self):
-        self.requires("zlib/1.2.11")
-
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
@@ -43,6 +46,9 @@ class ZziplibConan(ConanFile):
             del self.options.fPIC
         del self.settings.compiler.libcxx
         del self.settings.compiler.cppstd
+
+    def requirements(self):
+        self.requires("zlib/1.2.11")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
@@ -57,6 +63,9 @@ class ZziplibConan(ConanFile):
 
             self._cmake.definitions["ZZIPCOMPAT"] = (self.settings.os != "Windows")
 
+            self._cmake.definitions["ZZIPMMAPPED"] = self.options.zzipmapped
+            self._cmake.definitions["ZZIPFSEEKO"] = self.options.zzipfseeko
+            self._cmake.definitions["ZZIPWRAP"] = self.options.zzipwrap
             self._cmake.definitions["ZZIPSDL"] = False
             self._cmake.definitions["ZZIPBINS"] = False
             self._cmake.definitions["ZZIPTEST"] = False
@@ -80,4 +89,28 @@ class ZziplibConan(ConanFile):
         tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
 
     def package_info(self):
-        self.cpp_info.libs = tools.collect_libs(self)
+        # libzzip
+        self.cpp_info.components["zzip"].names["pkg_config"] = "zziplib"
+        self.cpp_info.components["zzip"].libs = [self._get_decorated_lib("zzip")]
+        self.cpp_info.components["zzip"].requires = ["zlib::zlib"]
+        # libzzipmmapped
+        if self.options.zzipmapped:
+            self.cpp_info.components["zzipmmapped"].names["pkg_config"] = "zzipmmapped"
+            self.cpp_info.components["zzipmmapped"].libs = [self._get_decorated_lib("zzipmmapped")]
+            self.cpp_info.components["zzipmmapped"].requires = ["zlib::zlib"]
+        # libzzipfseeko
+        if self.options.zzipfseeko:
+            self.cpp_info.components["zzipfseeko"].names["pkg_config"] = "zzipfseeko"
+            self.cpp_info.components["zzipfseeko"].libs = [self._get_decorated_lib("zzipfseeko")]
+            self.cpp_info.components["zzipfseeko"].requires = ["zlib::zlib"]
+        # libzzipwrap
+        if self.options.zzipwrap:
+            self.cpp_info.components["zzipwrap"].names["pkg_config"] = "zzipwrap"
+            self.cpp_info.components["zzipwrap"].libs = [self._get_decorated_lib("zzipwrap")]
+            self.cpp_info.components["zzipwrap"].requires = ["zzip", "zlib::zlib"]
+
+    def _get_decorated_lib(self, name):
+        suffix = ""
+        if self.settings.build_type == "Release":
+            suffix += "-" + tools.Version(self.version).major
+        return name + suffix
