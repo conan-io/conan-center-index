@@ -471,7 +471,7 @@ int test_mz_strm() {
 }
 
 int test_mz_zip() {
-  printf("Test mz_zip:");
+  printf("Test mz_zip:\n");
 
   int err = 0;
   void *zipHandle = NULL;
