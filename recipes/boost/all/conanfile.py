@@ -140,9 +140,6 @@ class BoostConan(ConanFile):
                 if not self.options.get_safe('without_%s' % lib):
                     raise ConanInvalidConfiguration("Boost '%s' library requires multi threading" % lib)
 
-    def build_requirements(self):
-        self.build_requires("b2/4.3.0")
-
     def requirements(self):
         if self._zip_bzip2_requires_needed:
             if self.options.zlib:
@@ -168,6 +165,9 @@ class BoostConan(ConanFile):
                 del self.info.options.python_version
             else:
                 self.info.options.python_version = self._python_version
+
+    def build_requirements(self):
+        self.build_requires("b2/4.3.0")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
