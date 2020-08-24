@@ -108,7 +108,7 @@ class LiefConan(ConanFile):
         tools.rmdir(os.path.join(self.package_folder, "share"))
 
     def package_info(self):
-        self.cpp_info.names["pkg_config"] = "LIEF"
+        self.cpp_info.names["pkg_config"] = "lief"
         self.cpp_info.names["cmake_find_package"] = "LIEF"
         self.cpp_info.names["cmake_find_package_multi"] = "LIEF"
         self.cpp_info.libs = tools.collect_libs(self)
