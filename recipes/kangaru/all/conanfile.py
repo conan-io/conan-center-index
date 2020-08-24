@@ -28,6 +28,10 @@ class KangaruConan(ConanFile):
     def _build_subfolder(self):
         return "build_subfolder"
 
+    def configure(self):
+        if self.settings.compiler.cppstd:
+            tools.check_min_cppstd(self, 11)
+
     def package_id(self):
         self.info.header_only()
 
