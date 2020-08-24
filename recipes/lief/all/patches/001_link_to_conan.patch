@@ -1,5 +1,5 @@
---- CMakeLists.txt	2019-11-29 15:51:38.000000000 -0500
-+++ CMakeLists.txt	2020-08-01 20:25:48.411124700 -0400
+--- CMakeLists.txt
++++ CMakeLists.txt
 @@ -5,7 +5,6 @@
  # Modules
  list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake/")
@@ -8,18 +8,17 @@
  endif()
  include(CheckCXXCompilerFlag)
  include(CheckCCompilerFlag)
-@@ -50,13 +49,16 @@
+@@ -49,14 +48,14 @@
+
  # Dependencies
  # ============
- set(THIRD_PARTY_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/third-party/")
+-set(THIRD_PARTY_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/third-party/")
 -include(LIEFDependencies)
 +set(LIEF_FROZEN_ENABLED 0)
 +if (LIEF_SUPPORT_CXX14 AND NOT LIEF_DISABLE_FROZEN)
 +  message(STATUS "Enable Frozen (C++14 support)")
 +  set(LIEF_FROZEN_ENABLED 1)
 +endif()
-+
-+
 
  # LIEF Source definition
  # ======================
@@ -29,7 +28,7 @@
 
  if (LIEF_LOGGING)
    set_source_files_properties(${ELG_SOURCE_DIR}/easylogging++.cc PROPERTIES GENERATED TRUE)
-@@ -73,9 +75,6 @@
+@@ -73,9 +72,6 @@
 
  set(LIBLIEF_SOURCE_FILES
    "${ELG_CC_PATH}"
@@ -39,25 +38,21 @@
    "${LIBFUZZER_SRC_FILES}"
    "${CMAKE_CURRENT_SOURCE_DIR}/src/logging.cpp"
    "${CMAKE_CURRENT_SOURCE_DIR}/src/exception.cpp"
-@@ -123,17 +122,6 @@
-   ${LIEF_VISITOR_INCLUDE_FILES}
+@@ -126,13 +122,11 @@
+ set(LIEF_JSON_SRC "${CMAKE_CURRENT_SOURCE_DIR}/src/visitors/json.cpp")
+ set(LIEF_JSON_HDR
+   "${CMAKE_CURRENT_SOURCE_DIR}/include/LIEF/json.hpp"
+-  "${LIBJSON_SOURCE_DIR}/json.hpp"
  )
 
--set(LIEF_JSON_SRC "${CMAKE_CURRENT_SOURCE_DIR}/src/visitors/json.cpp")
--set(LIEF_JSON_HDR
--  "${CMAKE_CURRENT_SOURCE_DIR}/include/LIEF/json.hpp"
--  "${LIBJSON_SOURCE_DIR}/json.hpp"
--)
--
--if (LIEF_ENABLE_JSON)
--  list(APPEND LIBLIEF_SOURCE_FILES     "${LIEF_JSON_SRC}")
--  list(APPEND LIEF_INC_FILES           "${LIEF_JSON_HDR}")
+ if (LIEF_ENABLE_JSON)
+   list(APPEND LIBLIEF_SOURCE_FILES     "${LIEF_JSON_SRC}")
+   list(APPEND LIEF_INC_FILES           "${LIEF_JSON_HDR}")
 -  list(APPEND LIEF_PUBLIC_INCLUDE_DIR  "${LIBJSON_SOURCE_DIR}/")
--endif()
+ endif()
 
  source_group("Header Files" FILES ${LIEF_INC_FILES})
- source_group("Source Files" FILES ${LIBLIEF_SOURCE_FILES})
-@@ -224,9 +212,6 @@
+@@ -224,9 +218,6 @@
 
  # Frozen Configuration
  # ====================
@@ -67,7 +62,7 @@
 
  # OAT part
  # ========
-@@ -292,9 +277,9 @@
+@@ -292,19 +283,15 @@
  list(APPEND LIEF_PRIVATE_INCLUDE_DIR
    "${LIEF_PUBLIC_INCLUDE_DIR}"
    "${LIEF_PUBLIC_INCLUDE_DIR}"
@@ -76,9 +71,9 @@
    "${CMAKE_BINARY_DIR}"
 +  "${CMAKE_CURRENT_BINARY_DIR}"
    "${ELG_SOURCE_DIR}"
-   "${MBEDTLS_INCLUDE_DIRS}"
+-  "${MBEDTLS_INCLUDE_DIRS}"
  )
-@@ -302,9 +287,6 @@
+
 
  # Grouping external projects
  # ==========================
@@ -88,7 +83,7 @@
  if (LIEF_LOGGING)
    source_group("easylogging"     FILES ${ELG_SOURCE_DIR}/easylogging++.cc)
  endif()
-@@ -316,7 +298,7 @@
+@@ -316,7 +303,7 @@
    PRIVATE "${LIEF_PRIVATE_INCLUDE_DIR}")
 
  if (LIEF_ENABLE_JSON)
@@ -97,7 +92,7 @@
  endif()
 
  if (LIEF_LOGGING)
-@@ -324,12 +306,12 @@
+@@ -324,18 +311,17 @@
  endif()
 
  if (LIEF_FROZEN_ENABLED)
@@ -113,7 +108,13 @@
 
  # Flags definition
  # ----------------
-@@ -345,11 +327,6 @@
+ set_property(TARGET LIB_LIEF PROPERTY CXX_STANDARD              11)
+ set_property(TARGET LIB_LIEF PROPERTY CXX_STANDARD_REQUIRED     ON)
+-set_property(TARGET LIB_LIEF PROPERTY POSITION_INDEPENDENT_CODE ON)
+ set_property(TARGET LIB_LIEF PROPERTY CXX_VISIBILITY_PRESET     hidden)
+
+ target_compile_definitions(LIB_LIEF PUBLIC -D_GLIBCXX_USE_CXX11_ABI=1)
+@@ -345,11 +331,6 @@
  # with the SpcSpAgencyInfo Critical Extension, which mbed TLS doesn't
  # support, so set MBEDTLS_X509_ALLOW_UNSUPPORTED_CRITICAL_EXTENSION to
  # have it skip this extension.
@@ -125,3 +126,24 @@
 
 
  # ASAN - LSAN - TSAN - USAN
+@@ -512,16 +493,16 @@
+
+ install(TARGETS LIB_LIEF
+   ARCHIVE
+-  DESTINATION lib
++  DESTINATION ${CMAKE_INSTALL_LIBDIR}
+   LIBRARY
+-  DESTINATION lib
++  DESTINATION ${CMAKE_INSTALL_LIBDIR}
+   RUNTIME
+-  DESTINATION lib
++  DESTINATION ${CMAKE_INSTALL_BINDIR}
+   COMPONENT libraries)
+
+ install(
+   DIRECTORY ${LIEF_PUBLIC_INCLUDE_DIR}
+-  DESTINATION include
++  DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
+   COMPONENT headers
+   FILES_MATCHING REGEX "(.*).(hpp|h|def)$")
+

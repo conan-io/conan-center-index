@@ -1,5 +1,5 @@
---- include/LIEF/json.hpp	2019-11-29 15:51:38.000000000 -0500
-+++ include/LIEF/json.hpp	2020-04-30 14:29:48.705337300 -0400
+--- include/LIEF/json.hpp
++++ include/LIEF/json.hpp
 @@ -19,7 +19,7 @@
  #include <LIEF/config.h>
 

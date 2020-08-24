@@ -14,4 +14,7 @@ class TestPackageConan(ConanFile):
     def test(self):
         if not tools.cross_building(self.settings):
             bin_path = os.path.join("bin", "test_package")
-            self.run(bin_path, run_environment=True)
+            arg_path = bin_path
+            if self.settings.os == "Windows":
+                arg_path += ".exe"
+            self.run("{0} {1}".format(bin_path, arg_path), run_environment=True)

@@ -1,5 +1,5 @@
---- src/PE/ResourcesManager.cpp	2019-11-29 15:51:38.000000000 -0500
-+++ src/PE/ResourcesManager.cpp	2020-04-30 14:12:47.001136300 -0400
+--- src/PE/ResourcesManager.cpp
++++ src/PE/ResourcesManager.cpp
 @@ -1174,7 +1174,6 @@
 
  std::string ResourcesManager::print(uint32_t depth) const {

@@ -1,5 +1,5 @@
---- cmake/LIEFCompilerDetection.cmake	2019-11-29 15:51:38.000000000 -0500
-+++ cmake/LIEFCompilerDetection.cmake	2020-08-01 20:06:54.507197100 -0400
+--- cmake/LIEFCompilerDetection.cmake
++++ cmake/LIEFCompilerDetection.cmake
 @@ -12,13 +12,21 @@
  endif()
 

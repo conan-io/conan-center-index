@@ -1,5 +1,5 @@
---- include/LIEF/ELF/Parser.hpp	2019-11-29 15:51:38.000000000 -0500
-+++ include/LIEF/ELF/Parser.hpp	2020-04-30 14:58:04.537286500 -0400
+--- include/LIEF/ELF/Parser.hpp
++++ include/LIEF/ELF/Parser.hpp
 @@ -73,7 +73,7 @@
      //! @param[in] file Path to the ELF binary
      //! @param[in] count_mtd Method used to count dynamic symbols. Default: LIEF::ELF::DYNSYM_COUNT_METHODS::COUNT_AUTO
