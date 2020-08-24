@@ -81,6 +81,3 @@ index 99fe78a..2613258 100644
  elseif(UNIX)
      if(APPLE AND (MZ_PKCRYPT OR MZ_WZAES) AND NOT MZ_BRG)
          message(STATUS "Using CoreFoundation Framework")
--- 
-2.28.0.windows.1
-

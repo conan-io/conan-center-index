@@ -19,6 +19,3 @@ index f0e9fa2..0389902 100644
                  ${LZMA_SRC} ${LZMA_PUBLIC_HEADERS})
  
  mz_configure_target(${PROJECT_NAME})
--- 
-2.28.0.windows.1
-

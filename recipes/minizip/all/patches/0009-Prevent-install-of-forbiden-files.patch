@@ -39,6 +39,3 @@ index 5c035e2..9484c9e 100644
  
  # Build test executables
  if(MZ_BUILD_TEST)
--- 
-2.28.0.windows.1
-

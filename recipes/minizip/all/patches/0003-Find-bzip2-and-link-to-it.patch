@@ -68,6 +68,3 @@ index d1fa9df..99fe78a 100644
  endif()
  if(MZ_LIBCOMP)
      target_link_libraries(${PROJECT_NAME} compression)
--- 
-2.28.0.windows.1
-

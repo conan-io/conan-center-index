@@ -101,6 +101,3 @@ index 9484c9e..9f5ef82 100644
  add_feature_info(MZ_BUILD_TEST MZ_BUILD_TEST "Builds minizip test executable")
  add_feature_info(MZ_BUILD_UNIT_TEST MZ_BUILD_UNIT_TEST "Builds minizip unit test project")
  add_feature_info(MZ_BUILD_FUZZ_TEST MZ_BUILD_FUZZ_TEST "Builds minizip fuzzer executables")
--- 
-2.28.0.windows.1
-
