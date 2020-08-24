@@ -25,6 +25,8 @@ class JanssonConan(ConanFile):
         "use_windows_cryptoapi": True
     }
 
+    _cmake = None
+
     @property
     def _source_subfolder(self):
         return "source_subfolder"
@@ -47,20 +49,19 @@ class JanssonConan(ConanFile):
         os.rename(extracted_dir, self._source_subfolder)
 
     def _configure_cmake(self):
-        cmake = CMake(self)
-        cmake.definitions["JANSSON_BUILD_DOCS"] = False
-        cmake.definitions["JANSSON_BUILD_SHARED_LIBS"] = self.options.shared
-        cmake.definitions["JANSSON_EXAMPLES"] = False
-        cmake.definitions["JANSSON_WITHOUT_TESTS"] = True
-        cmake.definitions["USE_URANDOM"] = self.options.use_urandom
-        cmake.definitions["USE_WINDOWS_CRYPTOAPI"] = self.options.use_windows_cryptoapi
-
+        if self._cmake:
+            return self._cmake
+        self._cmake = CMake(self)
+        self._cmake.definitions["JANSSON_BUILD_DOCS"] = False
+        self._cmake.definitions["JANSSON_BUILD_SHARED_LIBS"] = self.options.shared
+        self._cmake.definitions["JANSSON_EXAMPLES"] = False
+        self._cmake.definitions["JANSSON_WITHOUT_TESTS"] = True
+        self._cmake.definitions["USE_URANDOM"] = self.options.use_urandom
+        self._cmake.definitions["USE_WINDOWS_CRYPTOAPI"] = self.options.use_windows_cryptoapi
         if self.settings.compiler == "Visual Studio":
-            if "MT" in self.settings.compiler.runtime:
-                cmake.definitions["JANSSON_STATIC_CRT"] = True
-
-        cmake.configure(build_folder=self._build_subfolder)
-        return cmake
+            self._cmake.definitions["JANSSON_STATIC_CRT"] = str(self.settings.compiler.runtime).startswith("MT")
+        self._cmake.configure(build_folder=self._build_subfolder)
+        return self._cmake
 
     def build(self):
         cmake = self._configure_cmake()
