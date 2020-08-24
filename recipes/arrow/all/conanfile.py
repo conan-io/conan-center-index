@@ -379,9 +379,9 @@ class ArrowConan(ConanFile):
         self.info.options.with_grpc = self._with_grpc()
 
     def package_info(self):
+        self.cpp_info.filenames["cmake_find_package"] = "Arrow"
+        self.cpp_info.filenames["cmake_find_package_multi"] = "Arrow"
         self.cpp_info.components["libarrow"].libs = [self._lib_name("arrow")]
-        self.cpp_info.components["libarrow"].filenames["cmake_find_package"] = "Arrow"
-        self.cpp_info.components["libarrow"].filenames["cmake_find_package_multi"] = "Arrow"
         self.cpp_info.components["libarrow"].names["cmake_find_package"] = "arrow"
         self.cpp_info.components["libarrow"].names["cmake_find_package_multi"] = "arrow"
         self.cpp_info.components["libarrow"].names["pkg_config"] = "arrow"
@@ -390,11 +390,8 @@ class ArrowConan(ConanFile):
             if self.settings.os == "Linux":
                 self.cpp_info.components["libarrow"].system_libs = ["pthread"]
 
-
         if self.options.parquet:
             self.cpp_info.components["libparquet"].libs = [self._lib_name("parquet")]
-            self.cpp_info.components["libparquet"].filenames["cmake_find_package"] = "Parquet"
-            self.cpp_info.components["libparquet"].filenames["cmake_find_package_multi"] = "Parquet"
             self.cpp_info.components["libparquet"].names["cmake_find_package"] = "parquet"
             self.cpp_info.components["libparquet"].names["cmake_find_package_multi"] = "parquet"
             self.cpp_info.components["libparquet"].names["pkg_config"] = "parquet"
@@ -402,8 +399,6 @@ class ArrowConan(ConanFile):
 
         if self.options.plasma:
             self.cpp_info.components["libplasma"].libs = [self._lib_name("plasma")]
-            self.cpp_info.components["libplasma"].filenames["cmake_find_package"] = "Plasma"
-            self.cpp_info.components["libplasma"].filenames["cmake_find_package_multi"] = "Arrow"
             self.cpp_info.components["libplasma"].names["cmake_find_package"] = "plasma"
             self.cpp_info.components["libplasma"].names["cmake_find_package_multi"] = "plasma"
             self.cpp_info.components["libplasma"].names["pkg_config"] = "plasma"
@@ -411,11 +406,9 @@ class ArrowConan(ConanFile):
 
         if self.options.gandiva:
             self.cpp_info.components["libgandiva"].libs = [self._lib_name("gandiva")]
-            self.cpp_info.components["libgandiva"].filenames["cmake_find_package"] = "Gandiva"
-            self.cpp_info.components["libgandiva"].filenames["cmake_find_package_multi"] = "Gandiva"
             self.cpp_info.components["libgandiva"].names["cmake_find_package"] = "gandiva"
-            self.cpp_info.components["libgandiva"].names["cmake_find_package_multi"] = "plasma"
-            self.cpp_info.components["libgandiva"].names["pkg_config"] = "plasma"
+            self.cpp_info.components["libgandiva"].names["cmake_find_package_multi"] = "gandiva"
+            self.cpp_info.components["libgandiva"].names["pkg_config"] = "gandiva"
             self.cpp_info.components["libgandiva"].requires = ["libarrow"]
 
         if self.options.dataset_modules:

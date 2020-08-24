@@ -23,7 +23,7 @@ class EpoxyConan(ConanFile):
         "x11": [True, False]
     }
     default_options = {
-        "shared": True, #shared is the default of native meson projects
+        "shared": False,
         "fPIC": True,
         "glx": True,
         "egl": False,
