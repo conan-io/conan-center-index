@@ -19,19 +19,19 @@ class JanssonConan(ConanFile):
         "use_windows_cryptoapi": [True, False]
     }
     default_options = {
-        'shared': False,
-        'fPIC': True,
-        'use_urandom': True,
-        'use_windows_cryptoapi': True
+        "shared": False,
+        "fPIC": True,
+        "use_urandom": True,
+        "use_windows_cryptoapi": True
     }
 
-    _source_subfolder = "source_subfolder"
-    _build_subfolder = "build_subfolder"
+    @property
+    def _source_subfolder(self):
+        return "source_subfolder"
 
-    def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        extracted_dir = self.name + "-" + self.version
-        os.rename(extracted_dir, self._source_subfolder)
+    @property
+    def _build_subfolder(self):
+        return "build_subfolder"
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -40,6 +40,11 @@ class JanssonConan(ConanFile):
     def configure(self):
         del self.settings.compiler.libcxx
         del self.settings.compiler.cppstd
+
+    def source(self):
+        tools.get(**self.conan_data["sources"][self.version])
+        extracted_dir = self.name + "-" + self.version
+        os.rename(extracted_dir, self._source_subfolder)
 
     def _configure_cmake(self):
         cmake = CMake(self)
@@ -66,9 +71,9 @@ class JanssonConan(ConanFile):
         cmake = self._configure_cmake()
         cmake.install()
         # drop pc and cmake file
-        tools.rmdir(os.path.join(self.package_folder, 'lib', 'pkgconfig'))
-        tools.rmdir(os.path.join(self.package_folder, 'lib', 'cmake'))
-        tools.rmdir(os.path.join(self.package_folder, 'cmake'))
+        tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
+        tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
+        tools.rmdir(os.path.join(self.package_folder, "cmake"))
 
     def package_info(self):
         self.cpp_info.libs = tools.collect_libs(self)
