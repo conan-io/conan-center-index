@@ -58,7 +58,7 @@ class CunitConan(ConanFile):
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
-        os.rename("CUnit-{}".format("-".join(self.version.rsplit(".", 1))), self._source_subfolder)
+        os.rename("CUnit-{}".format(self.version), self._source_subfolder)
         with tools.chdir(self._source_subfolder):
             for f in glob.glob("*.c"):
                 os.chmod(f, 0o644)
