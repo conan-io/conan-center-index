@@ -41,6 +41,9 @@ class LibFtdi(ConanFile):
     def configure(self):
         if self.options.shared:
             del self.options.fPIC
+        if not self.options.enable_cpp_wrapper:
+            del self.settings.compiler.libcxx
+            del self.settings.compiler.cppstd
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
