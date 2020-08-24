@@ -56,6 +56,10 @@ class LiefConan(ConanFile):
         if self.settings.os == "Windows":
             del self.options.fPIC
 
+    def configure(self):
+        if self.settings.compiler == "Visual Studio" and tools.Version(self.settings.compiler.version.value) <= 14 and self.options.shared:
+            raise ConanInvalidConfiguration("{} {} does not support Visual Studio <= 14 with shared:True".format(self.name, self.version))
+
     def requirements(self):
         self.requires("rang/3.1.0")
         self.requires("mbedtls/2.16.3-apache")
