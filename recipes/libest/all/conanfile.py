@@ -46,14 +46,15 @@ class LibEstConan(ConanFile):
         os.rename(extracted_dir, self._source_subfolder)
 
     def _configure_autotools(self):
-        if self._autotools:
-            return self._autotools
-
-        self._autotools = AutoToolsBuildEnvironment(self)
-        # TODO: 
-        # - Static only build: https://github.com/cisco/libest/blob/70824ddc09bee661329b9416082d88566efefb32/intro.txt#L140
-        # - Release build: https://github.com/cisco/libest/blob/70824ddc09bee661329b9416082d88566efefb32/intro.txt#L253
-        self._autotools.configure()
+        if not self._autotools:
+            self._autotools = AutoToolsBuildEnvironment(self)
+            # TODO: 
+            # - Static only build: https://github.com/cisco/libest/blob/70824ddc09bee661329b9416082d88566efefb32/intro.txt#L140
+            # - Release build: https://github.com/cisco/libest/blob/70824ddc09bee661329b9416082d88566efefb32/intro.txt#L253
+            args = []
+            # if not self.options.shared:
+            #     args.append("--disable-shared")
+            self._autotools.configure(args=args)
         return self._autotools
 
     def build(self):
