@@ -11,6 +11,7 @@ class LibEstConan(ConanFile):
     homepage = "https://github.com/cisco/libest"
     url = "https://github.com/conan-io/conan-center-index"
     settings = "os", "compiler", "build_type", "arch"
+    exports_sources = "patches/**"
     options = {"shared": [True, False], "fPIC": [True, False]}
     default_options = {"shared": False, "fPIC": True}
 
@@ -60,6 +61,8 @@ class LibEstConan(ConanFile):
         return self._autotools
 
     def build(self):
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            tools.patch(**patch)
         with tools.chdir(self._source_subfolder):
             autotools = self._configure_autotools()
             autotools.make()
@@ -68,7 +71,7 @@ class LibEstConan(ConanFile):
         self.copy("*LICENSE", src=self._source_subfolder, dst="licenses")
         with tools.chdir(self._source_subfolder):
             autotools = self._configure_autotools()
-        autotools.install()
+            autotools.install()
         os.unlink(os.path.join(self.package_folder, "lib", "libest.la"))
 
     def package_info(self):
