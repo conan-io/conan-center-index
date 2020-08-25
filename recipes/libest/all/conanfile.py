@@ -5,7 +5,7 @@ from conans.errors import ConanInvalidConfiguration
 
 class LibEstConan(ConanFile):
     name = "libest"
-    license = "MIT Cisco" # TBA
+    license = "MIT Cisco"  # TBA
     description = "EST is used for secure certificate enrollment"
     topics = ("conan", "EST", "RFC 7030", "certificate enrollment")
     homepage = "https://github.com/cisco/libest"
@@ -30,7 +30,8 @@ class LibEstConan(ConanFile):
 
     def configure(self):
         if self.settings.os in ("Windows", "Macos"):
-            raise ConanInvalidConfiguration("Platform is currently not supported by this recipe")
+            raise ConanInvalidConfiguration(
+                "Platform is currently not supported by this recipe")
         if self.options.shared:
             del self.options.fPIC
         del self.settings.compiler.libcxx
@@ -49,19 +50,20 @@ class LibEstConan(ConanFile):
             return self._autotools
 
         self._autotools = AutoToolsBuildEnvironment(self)
-        self._autotools.configure(configure_dir=self._source_subfolder)
+        self._autotools.configure()
         return self._autotools
 
     def build(self):
-        autotools = self._configure_autotools()
-        autotools.make()
+        with tools.chdir(self._source_subfolder):
+            autotools = self._configure_autotools()
+            autotools.make()
 
     def package(self):
         self.copy("*LICENSE", src=self._source_subfolder, dst="licenses")
-        autotools = self._configure_autotools()
-        autotools.install()
-        tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
-        tools.rmdir(os.path.join(self.package_folder, "share"))
+        with tools.chdir(self._source_subfolder):
+            autotools = self._configure_autotools()
+            autotools.install()
 
     def package_info(self):
         self.cpp_info.libs = tools.collect_libs(self)
+        self.cpp_info.system_libs = ["dl", "pthread"]
