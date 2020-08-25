@@ -1,5 +1,8 @@
 
 from conans import CMake, ConanFile, tools
+from conans.errors import ConanInvalidConfiguration
+from conans.tools import Version
+
 import os
 
 
@@ -15,6 +18,7 @@ class SiConan(ConanFile):
     exports_sources = "include/*", "CMakeLists.txt", "test/*", "doc/CMakeLists.txt", "doc/*.md"
     no_copy_source = True
     generators = "cmake", "cmake_find_package"
+    settings = {"compiler"}
 
     _cmake = None
 
@@ -25,6 +29,13 @@ class SiConan(ConanFile):
     @property
     def _build_subfolder(self):
         return "build_subfolder"
+
+    def _supports_cpp17(self):
+        supported_compilers = [
+            ("gcc", "7"), ("clang", "5"), ("apple-clang", "10"), ("Visual Studio", "15.7")]
+        compiler = self.settings.compiler
+        version = Version(compiler.version)
+        return any(compiler == sc[0] and version >= sc[1] for sc in supported_compilers)
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
@@ -41,6 +52,12 @@ class SiConan(ConanFile):
             self._cmake.configure(
                 source_folder=self._source_subfolder, build_folder=self._build_subfolder)
         return self._cmake
+
+    def configure(self):
+        if self.settings.compiler.get_safe("cppstd"):
+            tools.check_min_cppstd(self, "17")
+        elif not self._supports_cpp17():
+            raise ConanInvalidConfiguration("SI requires C++17 support")
 
     def build(self):
         cmake = self._configure_cmake()
