@@ -54,7 +54,7 @@ class LibEstConan(ConanFile):
             args = []
             if self.options.shared:
                  args.extend(["--enable-shared", "--disable-static"])
-             else:
+            else:
                  args.extend(["--disable-shared", "--enable-static"])
             self._autotools.configure(args=args)
         return self._autotools
