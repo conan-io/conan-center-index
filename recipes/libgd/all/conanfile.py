@@ -6,7 +6,8 @@ class LibgdConan(ConanFile):
     name = "libgd"
     license = "https://github.com/libgd/libgd/blob/master/COPYING"
     url = "https://github.com/conan-io/conan-center-index"
-    description = "GD is an open source code library for the dynamic creation of images by programmers."
+    description = ("GD is an open source code library for the dynamic "
+                   "creation of images by programmers.")
     topics = ("images", "graphics")
     settings = "os", "compiler", "build_type", "arch"
     homepage = "https://libgd.github.io"
@@ -61,19 +62,20 @@ conan_basic_setup()''')
                 "src",
                 "CMakeLists.txt"),
             '''if (BUILD_SHARED_LIBS)
-	target_link_libraries(${GD_LIB} ${LIBGD_DEP_LIBS})''',
+\ttarget_link_libraries(${GD_LIB} ${LIBGD_DEP_LIBS})''',
             '''if (NOT WIN32)
     list(APPEND LIBGD_DEP_LIBS  m)
 endif()
 if (BUILD_SHARED_LIBS)
-	target_link_libraries(${GD_LIB} ${LIBGD_DEP_LIBS})
+\ttarget_link_libraries(${GD_LIB} ${LIBGD_DEP_LIBS})
 ''')
 
     def build(self):
         cmake = CMake(self)
         cmake.definitions['BUILD_STATIC_LIBS'] = not self.options.shared
-        cmake.definitions["ZLIB_LIBRARY"] = self.deps_cpp_info["zlib"].libs[0]
-        cmake.definitions["ZLIB_INCLUDE_DIR"] = self.deps_cpp_info["zlib"].include_paths[0]
+        zlib_info = self.deps_cpp_info["zlib"]
+        cmake.definitions["ZLIB_LIBRARY"] = zlib_info.libs[0]
+        cmake.definitions["ZLIB_INCLUDE_DIR"] = zlib_info.include_paths[0]
         cmake.configure(
             source_folder=self._source_subfolder,
             build_folder=self._build_subfolder)
@@ -81,7 +83,8 @@ if (BUILD_SHARED_LIBS)
         cmake.install()
 
     def package(self):
-        self.copy("COPYING", src=self._source_subfolder, dst="licenses", ignore_case=True, keep_path=False)
+        self.copy("COPYING", src=self._source_subfolder, dst="licenses",
+                  ignore_case=True, keep_path=False)
         tools.rmdir(os.path.join(self.package_folder, 'share'))
         self.copy("*", src="bin", dst="bin")
         self.copy("*", src="lib", dst="lib")
