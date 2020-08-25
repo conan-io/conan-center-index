@@ -39,10 +39,10 @@ class StructoptConan(ConanFile):
                              " C++17" % self.name)
             return
 
-        if compiler_version < minimal_version[compiler]:
+        if compiler_version < minimal_version[self.settings.compiler]:
             raise ConanInvalidConfiguration("%s requires a compiler that supports"
                                             " at least C++17. %s %s is not" 
-                                            " supported." % (self.name, compiler, Version(self.settings.compiler.version)))
+                                            " supported." % (self.name, self.settings.compiler, Version(self.settings.compiler.version)))
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
