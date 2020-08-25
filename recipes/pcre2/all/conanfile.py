@@ -21,11 +21,25 @@ class PCREConan(ConanFile):
         "build_pcre2_32": [True, False],
         "support_jit": [True, False]
     }
-    default_options = {'shared': False, 'fPIC': True, 'with_bzip2': True, 'build_pcre2_8': True,
-                       'build_pcre2_16': True, 'build_pcre2_32': True, 'support_jit': True}
-    _source_subfolder = "source_subfolder"
-    _build_subfolder = "build_subfolder"
-    requires = "zlib/1.2.11"
+    default_options = {
+        'shared': False,
+        'fPIC': True,
+        'with_bzip2': True,
+        'build_pcre2_8': True,
+        'build_pcre2_16': True,
+        'build_pcre2_32': True,
+        'support_jit': False
+    }
+
+    _cmake = None
+
+    @property
+    def _source_subfolder(self):
+        return "source_subfolder"
+
+    @property
+    def _build_subfolder(self):
+        return "build_subfolder"
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
@@ -41,34 +55,39 @@ class PCREConan(ConanFile):
         del self.settings.compiler.cppstd
 
     def requirements(self):
+        self.requires("zlib/1.2.11")
         if self.options.with_bzip2:
             self.requires("bzip2/1.0.8")
 
     def _configure_cmake(self):
-        cmake = CMake(self)
-        cmake.definitions["PCRE2_BUILD_TESTS"] = False
+        if self._cmake:
+            return self._cmake
+
+        self._cmake = CMake(self)
+        self._cmake.definitions["PCRE2_BUILD_TESTS"] = False
         if self.settings.os == "Windows" and self.settings.compiler == "Visual Studio":
             runtime = not self.options.shared and "MT" in self.settings.compiler.runtime
-            cmake.definitions["PCRE2_STATIC_RUNTIME"] = runtime
-        cmake.definitions["PCRE2_DEBUG"] = self.settings.build_type == "Debug"
-        cmake.definitions["PCRE2_BUILD_PCRE2_8"] = self.options.build_pcre2_8
-        cmake.definitions["PCRE2_BUILD_PCRE2_16"] = self.options.build_pcre2_16
-        cmake.definitions["PCRE2_BUILD_PCRE2_32"] = self.options.build_pcre2_32
-        cmake.definitions["PCRE2_SUPPORT_JIT"] = self.options.support_jit
-        cmake.configure(build_folder=self._build_subfolder)
-        return cmake
+            self._cmake.definitions["PCRE2_STATIC_RUNTIME"] = runtime
+        self._cmake.definitions["PCRE2_DEBUG"] = self.settings.build_type == "Debug"
+        self._cmake.definitions["PCRE2_BUILD_PCRE2_8"] = self.options.build_pcre2_8
+        self._cmake.definitions["PCRE2_BUILD_PCRE2_16"] = self.options.build_pcre2_16
+        self._cmake.definitions["PCRE2_BUILD_PCRE2_32"] = self.options.build_pcre2_32
+        self._cmake.definitions["PCRE2_SUPPORT_JIT"] = self.options.support_jit
+        self._cmake.configure(build_folder=self._build_subfolder)
+        return self._cmake
 
     def build(self):
         cmake = self._configure_cmake()
         cmake.build()
 
     def package(self):
+        self.copy(pattern="LICENCE", dst="licenses", src=self._source_subfolder)
         cmake = self._configure_cmake()
         cmake.install()
         cmake.patch_config_paths()
         tools.rmdir(os.path.join(self.package_folder, "man"))
         tools.rmdir(os.path.join(self.package_folder, "share"))
-        self.copy(pattern="LICENCE", dst="licenses", src=self._source_subfolder)
+        tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
 
     def package_info(self):
         def library_name(library):
@@ -77,6 +96,12 @@ class PCREConan(ConanFile):
             if self.settings.compiler == "gcc" and self.settings.os == "Windows" and self.options.shared:
                 library += ".dll"
             return library
+
+        # May need components for
+        # ./lib/pkgconfig/libpcre2-32.pc
+        # ./lib/pkgconfig/libpcre2-8.pc
+        # ./lib/pkgconfig/libpcre2-posix.pc
+        # ./lib/pkgconfig/libpcre2-16.pc
 
         self.cpp_info.names["pkg_config"] = "libpcre2"
         self.cpp_info.libs = [library_name("pcre2-posix")]
