@@ -17,7 +17,8 @@ class KcovConan(ConanFile):
     exports_sources = "CMakeLists.txt", "patches/**"
     requires = ["zlib/1.2.11",
                 "libiberty/9.1.0",
-                "libcurl/7.64.1"]
+                "libcurl/7.64.1",
+                "elfutils/0.180"]
     generators = "cmake"
 
     _source_subfolder = "source_subfolder"
@@ -32,35 +33,6 @@ class KcovConan(ConanFile):
         tools.get(**self.conan_data["sources"][self.version])
         extracted_dir = self.name + "-" + self.version
         os.rename(extracted_dir, self._source_subfolder)
-
-    def system_requirements(self):
-        required_package = []
-        if self.settings.os == "Linux":
-            if tools.os_info.linux_distro in ["ubuntu", "debian"]:
-                required_package.append("libdw-dev")
-            elif tools.os_info.linux_distro in ["fedora", "centos"]:
-                required_package.append("elfutils-libs")
-            elif tools.os_info.linux_distro == "opensuse":
-                required_package.append("libdw-devel")
-            elif tools.os_info.linux_distro == "arch":
-                required_package.append("libelf")
-
-            if tools.os_info.linux_distro in ["ubuntu", "debian"]:
-                required_package.append("binutils-dev")
-            elif tools.os_info.linux_distro in ["fedora",
-                                                "centos",
-                                                "opensuse"]:
-                required_package.append("binutils-devel")
-            elif tools.os_info.linux_distro == "arch":
-                required_package.append("binutils")
-            elif tools.os_info.is_freebsd:
-                required_package.append("libbfd")
-
-        if required_package is not None:
-            installer = tools.SystemPackageTool()
-            for pack in required_package:
-                if not installer.installed(pack):
-                    raise ConanInvalidConfiguration("kcov requires {}.".format(pack))
 
     def _patch_sources(self):
         for patch in self.conan_data["patches"][self.version]:
