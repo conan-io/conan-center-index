@@ -52,7 +52,7 @@ class LibFtdi(ConanFile):
     def requirements(self):
         self.requires("libusb-compat/0.1.7")
         if self.options.enable_cpp_wrapper:
-            self.requires("boost/1.72.0")
+            self.requires("boost/1.74.0")
 
     def _configure_cmake(self):
         if self._cmake:
