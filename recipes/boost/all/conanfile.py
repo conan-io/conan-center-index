@@ -550,7 +550,7 @@ class BoostConan(ConanFile):
             flags.append("boost.locale.iconv=on boost.locale.icu=off")
         else:
             flags.append("boost.locale.iconv=off boost.locale.icu=off")
-            flags.append("--disable-icu --disable-iconvv")
+            flags.append("--disable-icu --disable-iconv")
 
         def add_defines(option, library):
             if option:
