@@ -18,7 +18,6 @@ class SiConan(ConanFile):
     settings = "os", "arch", "compiler", "build_type"
     no_copy_source = True
     generators = "cmake"
-    settings = {"compiler"}
 
     _cmake = None
 
@@ -29,12 +28,6 @@ class SiConan(ConanFile):
     @property
     def _build_subfolder(self):
         return "build_subfolder"
-
-    def configure(self):
-        if self.settings.compiler.get_safe("cppstd"):
-            tools.check_min_cppstd(self, "17")
-        elif not self._supports_cpp17():
-            raise ConanInvalidConfiguration("SI requires C++17 support")
 
     def _supports_cpp17(self):
         supported_compilers = [
