@@ -71,6 +71,8 @@ class AwsSdkCppConan(ConanFile):
             return self._cmake
         self._cmake = CMake(self)
 
+        if not self.settings.compiler.cppstd:
+            self._cmake.definitions["CMAKE_CXX_STANDARD"] = 11
         self._cmake.definitions["BUILD_DEPS"] = False
         self._cmake.definitions["ENABLE_UNITY_BUILD"] = True
         self._cmake.definitions["ENABLE_RTTI"] = self.options.with_rtti
