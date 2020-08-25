@@ -20,29 +20,26 @@ class StructoptConan(ConanFile):
     def _source_subfolder(self):
         return "source_subfolder"
 
+    @property
+    def _supported_compiler(self):
+        compiler = str(self.settings.compiler)
+        version = tools.Version(self.settings.compiler.version)
+        if compiler == "Visual Studio" and version >= "15":
+            return True
+        if compiler == "gcc" and version >= "9":
+            return True
+        if compiler == "clang" and version >= "5":
+            return True
+        if compiler == "apple-clang" and version >= "10":
+            return True
+        return False    
+
     def configure(self):
-        if self.settings.compiler.cppstd:
+        if self.settings.compiler.get_safe("cppstd"):
             tools.check_min_cppstd(self, "17")
-        else:
-            self.output.warn("%s recipe lacks information about the %s compiler"
-                             " standard version support" % (self.name, self.settings.compiler))
-        
-        minimal_version = {
-            "Visual Studio": "16",
-            "gcc": "7.3",
-            "clang": "6",
-            "apple-clang": "10.0"
-        }
-
-        if self.settings.compiler not in minimal_version:            
-            self.output.info("%s requires a compiler that supports at least"
-                             " C++17" % self.name)
-            return
-
-        if self.settings.compiler.version < minimal_version[self.settings.compiler]:
-            raise ConanInvalidConfiguration("%s requires a compiler that supports"
-                                            " at least C++17. %s %s is not" 
-                                            " supported." % (self.name, self.settings.compiler, Version(self.settings.compiler.version)))
+        if not self._supported_compiler:
+            raise ConanInvalidConfiguration("structopt: Unsupported compiler: {}-{} "
+                                            "(https://github.com/p-ranav/structopt#compiler-compatibility).".format(self.settings.compiler, self.settings.compiler.version))
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
@@ -55,6 +52,3 @@ class StructoptConan(ConanFile):
 
     def package_id(self):
         self.info.header_only()
-
-    def package_info(self):
-        pass
