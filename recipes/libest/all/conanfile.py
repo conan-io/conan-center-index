@@ -5,7 +5,7 @@ from conans.errors import ConanInvalidConfiguration
 
 class LibEstConan(ConanFile):
     name = "libest"
-    license = "BSD-3"
+    license = "BSD-3-Clause"
     description = "EST is used for secure certificate enrollment"
     topics = ("conan", "EST", "RFC 7030", "certificate enrollment")
     homepage = "https://github.com/cisco/libest"
@@ -52,8 +52,10 @@ class LibEstConan(ConanFile):
             # - Static only build: https://github.com/cisco/libest/blob/70824ddc09bee661329b9416082d88566efefb32/intro.txt#L140
             # - Release build: https://github.com/cisco/libest/blob/70824ddc09bee661329b9416082d88566efefb32/intro.txt#L253
             args = []
-            # if not self.options.shared:
-            #     args.append("--disable-shared")
+            if self.options.shared:
+                 args.extend(["--enable-shared", "--disable-static"])
+             else:
+                 args.extend(["--disable-shared", "--enable-static"])
             self._autotools.configure(args=args)
         return self._autotools
 
@@ -66,8 +68,10 @@ class LibEstConan(ConanFile):
         self.copy("*LICENSE", src=self._source_subfolder, dst="licenses")
         with tools.chdir(self._source_subfolder):
             autotools = self._configure_autotools()
-            autotools.install()
+        autotools.install()
+        os.unlink(os.path.join(self.package_folder, "lib", "libest.la"))
 
     def package_info(self):
-        self.cpp_info.libs = tools.collect_libs(self)
-        self.cpp_info.system_libs = ["dl", "pthread"]
+        self.cpp_info.libs = ["est"]
+        if self.settings.os == "Linux":
+            self.cpp_info.system_libs = ["dl", "pthread"]
