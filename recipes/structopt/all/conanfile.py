@@ -25,7 +25,7 @@ class StructoptConan(ConanFile):
             tools.check_min_cppstd(self, "17")
         else:
             self.output.warn("%s recipe lacks information about the %s compiler"
-                             " standard version support" % (self.name, compiler))
+                             " standard version support" % (self.name, self.settings.compiler))
         
         minimal_version = {
             "Visual Studio": "16",
