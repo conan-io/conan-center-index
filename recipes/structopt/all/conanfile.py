@@ -26,12 +26,14 @@ class StructoptConan(ConanFile):
         version = tools.Version(self.settings.compiler.version)
         if compiler == "Visual Studio" and version >= "15":
             return True
-        if compiler == "gcc" and version >= "9":
+        elif compiler == "gcc" and version >= "9":
             return True
-        if compiler == "clang" and version >= "5":
+        elif compiler == "clang" and version >= "5":
             return True
-        if compiler == "apple-clang" and version >= "10":
+        elif compiler == "apple-clang" and version >= "10":
             return True
+        else:
+            self.output.warn("{} recipe lacks information about the {} compiler standard version support".format(self.name, compiler))
         return False    
 
     def configure(self):
