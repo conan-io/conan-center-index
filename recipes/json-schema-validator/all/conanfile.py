@@ -1,7 +1,6 @@
-import os
-import glob
 from conans import ConanFile, CMake, tools
 from conans.errors import ConanInvalidConfiguration
+import os
 
 
 class JsonSchemaValidatorConan(ConanFile):
@@ -33,14 +32,18 @@ class JsonSchemaValidatorConan(ConanFile):
             del self.options.fPIC
 
     def configure(self):
-        min_vs_version = "16" if tools.Version(self.version) <= "2.0.0" else "14"
-        min_cppstd = "17" if self.settings.compiler == "Visual Studio" and tools.Version(self.version) < "2.1.0" else "11"
+        version = tools.Version(self.version)
+        min_vs_version = "16" if version < "2.1.0" else "14"
+        min_cppstd = "17" if self.settings.compiler == "Visual Studio" and version < "2.1.0" else "11"
         if self.settings.get_safe("compiler.cppstd"):
             tools.check_min_cppstd(self, min_cppstd)
-            min_vs_version = "15" if tools.Version(self.version) <= "2.0.0" else "14"
+            min_vs_version = "15" if version < "2.1.0" else "14"
 
-        compilers = {"gcc": "5", "clang": "4",
-                     "Visual Studio": min_vs_version, "apple-clang": "9"}
+        compilers = {
+            "Visual Studio": min_vs_version,
+            "gcc": "5",
+            "clang": "4",
+            "apple-clang": "9"}
         min_version = compilers.get(str(self.settings.compiler))
         if not min_version:
             self.output.warn("{} recipe lacks information about the {} compiler support.".format(
@@ -51,7 +54,7 @@ class JsonSchemaValidatorConan(ConanFile):
                     self.name, min_cppstd, self.settings.compiler, self.settings.compiler.version))
 
     def requirements(self):
-        self.requires("nlohmann_json/3.7.3")
+        self.requires("nlohmann_json/3.9.1")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
@@ -62,7 +65,6 @@ class JsonSchemaValidatorConan(ConanFile):
         if self._cmake:
             return self._cmake
         self._cmake = CMake(self)
-
         self._cmake.definitions["BUILD_TESTS"] = False
         self._cmake.definitions["BUILD_EXAMPLES"] = False
         self._cmake.configure(build_folder=self._build_subfolder)
@@ -74,7 +76,8 @@ class JsonSchemaValidatorConan(ConanFile):
 
     def package(self):
         self.copy("LICENSE", dst="licenses", src=self._source_subfolder)
-        self.copy(os.path.join("src", "json-schema.hpp"), dst=os.path.join("include", "nlohmann"), src=self._source_subfolder, keep_path=False)
+        self.copy(os.path.join("src", "json-schema.hpp"), dst=os.path.join("include", "nlohmann"),  # This is not installed in 2.0.0 correctly
+                  src=self._source_subfolder, keep_path=False)
         cmake = self._configure_cmake()
         cmake.install()
         tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
