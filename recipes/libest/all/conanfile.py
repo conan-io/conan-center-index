@@ -5,7 +5,7 @@ from conans.errors import ConanInvalidConfiguration
 
 class LibEstConan(ConanFile):
     name = "libest"
-    license = "MIT Cisco"  # TBA
+    license = "BSD-3"
     description = "EST is used for secure certificate enrollment"
     topics = ("conan", "EST", "RFC 7030", "certificate enrollment")
     homepage = "https://github.com/cisco/libest"
@@ -50,6 +50,9 @@ class LibEstConan(ConanFile):
             return self._autotools
 
         self._autotools = AutoToolsBuildEnvironment(self)
+        # TODO: 
+        # - Static only build: https://github.com/cisco/libest/blob/70824ddc09bee661329b9416082d88566efefb32/intro.txt#L140
+        # - Release build: https://github.com/cisco/libest/blob/70824ddc09bee661329b9416082d88566efefb32/intro.txt#L253
         self._autotools.configure()
         return self._autotools
 
