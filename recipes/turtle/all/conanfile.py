@@ -1,5 +1,4 @@
-from conans import ConanFile, CMake, tools
-from conans.tools import os_info
+from conans import ConanFile, tools
 import os
 
 
@@ -16,25 +15,16 @@ class TurtleConan(ConanFile):
     def _source_subfolder(self):
         return "source_subfolder"
 
-    _cmake = None
-
-
     def requirements(self):
         self.requires("boost/1.73.0")
 
-    def source(self):
-        tools.get(**self.conan_data["sources"][self.version], destination = self._source_subfolder)
-
-    def package(self):
-        self.copy("**/*.hpp", dst=".", src=self._source_subfolder, keep_path=True)
-        tools.download(
-          "https://www.boost.org/LICENSE_1_0.txt",
-          filename=os.path.join(self.package_folder, "licenses", "LICENSE_1_0.txt"),
-          sha256="c9bff75738922193e67fa726fa225535870d2aa1059f91452c411736284ad566"
-        )
     def package_id(self):
         self.info.header_only()
-        
-    def package_info(self):
-        self.cpp_info.names["cmake_find_package"] = "TURTLE"
-        self.cpp_info.names["cmake_find_package_multi"] = "TURTLE"
+
+    def source(self):
+        tools.get(**self.conan_data["sources"][self.version])
+        os.rename(self.name + "-" + self.version, self._source_subfolder)
+
+    def package(self):
+        self.copy("LICENSE_1_0.txt", dst="licenses", src=self._source_subfolder)
+        self.copy("*.hpp", dst="include", src=os.path.join(self._source_subfolder, "include"))

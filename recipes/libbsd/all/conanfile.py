@@ -78,11 +78,15 @@ class LibBsdConan(ConanFile):
         self.cpp_info.components["bsd"].libs = ["bsd"]
         self.cpp_info.components["bsd"].names["pkg_config"] = "libbsd"
 
-        self.cpp_info.components["libbsd-overlay"].libs = ["bsd"]
+        self.cpp_info.components["libbsd-overlay"].libs = []
+        self.cpp_info.components["libbsd-overlay"].requires = ["bsd"]
         self.cpp_info.components["libbsd-overlay"].includedirs.append(os.path.join("include", "bsd"))
         self.cpp_info.components["libbsd-overlay"].defines = ["LIBBSD_OVERLAY"]
+        self.cpp_info.components["libbsd-overlay"].names["pkg_config"] = "libbsd-overlay"
 
         self.cpp_info.components["libbsd-ctor"].libs = ["bsd-ctor"]
+        self.cpp_info.components["libbsd-ctor"].requires = ["bsd"]
         if self.settings.os == "Linux":
             self.cpp_info.components["libbsd-ctor"].exelinkflags = ["-Wl,-z,nodlopen", "-Wl,-u,libbsd_init_func"]
             self.cpp_info.components["libbsd-ctor"].sharedlinkflags = ["-Wl,-z,nodlopen", "-Wl,-u,libbsd_init_func"]
+        self.cpp_info.components["libbsd-ctor"].names["pkg_config"] = "libbsd-ctor"
