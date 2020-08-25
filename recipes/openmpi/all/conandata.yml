@@ -1,0 +1,21 @@
+sources:
+  "4.0.4":
+    url: "https://download.open-mpi.org/release/open-mpi/v4.0/openmpi-4.0.4.tar.gz"
+    sha1: "e3145347861243d7b0e3876cd196a067609c60be"
+    md5: "48890b54bd0b025918e84f0e47b583b0"
+  "4.0.3":
+    url: "https://download.open-mpi.org/release/open-mpi/v4.0/openmpi-4.0.3.tar.gz"
+    sha1: "9af2ddb903f668225c3122592b80c0a0568383f9"
+    md5: "f4be54a4358a536ec2cdc694c7200f0b"
+  "4.0.2":
+    url: "https://download.open-mpi.org/release/open-mpi/v4.0/openmpi-4.0.2.tar.gz"
+    sha1: "78203f88fd216cbb4191a3533e997efa9d104446"
+    md5: "d712bcc68a5a0bcce76b39843ed48158"
+  "4.0.1":
+    url: "https://download.open-mpi.org/release/open-mpi/v4.0/openmpi-4.0.1.tar.gz"
+    sha1: "93967b5e100b7186f14937e0f41a35a7988134bc"
+    md5: "c72d9eb908a0f60e3155698a646cde38"
+  "4.0.0":
+    url: "https://download.open-mpi.org/release/open-mpi/v4.0/openmpi-4.0.0.tar.gz"
+    sha1: "951a6c18bd5117403455f5a1dd21e6e1157ef1d4"
+    md5: "7b4ddd4ec610cbd1059d23bca3bfd853"
