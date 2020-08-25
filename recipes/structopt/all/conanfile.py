@@ -34,12 +34,12 @@ class StructoptConan(ConanFile):
             "apple-clang": "10.0"
         }
 
-        if compiler not in minimal_version:            
+        if self.settings.compiler not in minimal_version:            
             self.output.info("%s requires a compiler that supports at least"
                              " C++17" % self.name)
             return
 
-        if compiler_version < minimal_version[self.settings.compiler]:
+        if self.settings.compiler.version < minimal_version[self.settings.compiler]:
             raise ConanInvalidConfiguration("%s requires a compiler that supports"
                                             " at least C++17. %s %s is not" 
                                             " supported." % (self.name, self.settings.compiler, Version(self.settings.compiler.version)))
