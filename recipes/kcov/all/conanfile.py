@@ -50,7 +50,7 @@ class KcovConan(ConanFile):
         cmake.install()
         licdir = os.path.join(self.package_folder, "share", "doc", "kcov")
         move(licdir, os.path.join(self.package_folder, "licenses"))
-        rmtree(os.path.join(self.package_folder, "share"))
+        tools.rmdir(os.path.join(self.package_folder, "share"))
 
     def package_info(self):
         bindir = os.path.join(self.package_folder, "bin")
