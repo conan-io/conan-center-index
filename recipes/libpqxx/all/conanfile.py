@@ -92,7 +92,7 @@ class LibpqxxRecipe(ConanFile):
         tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
 
     def package_info(self):
-        self.cpp_info.libs = ["pqxx"]
-
+        self.cpp_info.components["pqxx"].libs = ["pqxx"]
+        self.cpp_info.components["pqxx"].requires = ["libpq::libpq"]
         if self.settings.os == "Windows":
-            self.cpp_info.system_libs = ["wsock32", "ws2_32"]
+            self.cpp_info.components["pqxx"].system_libs = ["wsock32", "ws2_32"]
