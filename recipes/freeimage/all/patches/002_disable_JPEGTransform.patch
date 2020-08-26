@@ -1,0 +1,36 @@
+--- Source/FreeImage.h
++++ Source/FreeImage.h
+@@ -476,6 +476,7 @@
+ /** Lossless JPEG transformations
+ Constants used in FreeImage_JPEGTransform
+ */
++#if 0
+ FI_ENUM(FREE_IMAGE_JPEG_OPERATION) {
+ 	FIJPEG_OP_NONE			= 0,	//! no transformation
+ 	FIJPEG_OP_FLIP_H		= 1,	//! horizontal flip
+@@ -486,6 +487,7 @@
+ 	FIJPEG_OP_ROTATE_180	= 6,	//! 180-degree rotation
+ 	FIJPEG_OP_ROTATE_270	= 7		//! 270-degree clockwise (or 90 ccw)
+ };
++#endif
+ 
+ /** Tone mapping operators.
+ Constants used in FreeImage_ToneMapping.
+@@ -1088,7 +1090,7 @@
+ // --------------------------------------------------------------------------
+ // JPEG lossless transformation routines
+ // --------------------------------------------------------------------------
+-
++#if 0
+ DLL_API BOOL DLL_CALLCONV FreeImage_JPEGTransform(const char *src_file, const char *dst_file, FREE_IMAGE_JPEG_OPERATION operation, BOOL perfect FI_DEFAULT(TRUE));
+ DLL_API BOOL DLL_CALLCONV FreeImage_JPEGTransformU(const wchar_t *src_file, const wchar_t *dst_file, FREE_IMAGE_JPEG_OPERATION operation, BOOL perfect FI_DEFAULT(TRUE));
+ DLL_API BOOL DLL_CALLCONV FreeImage_JPEGCrop(const char *src_file, const char *dst_file, int left, int top, int right, int bottom);
+@@ -1097,7 +1099,7 @@
+ DLL_API BOOL DLL_CALLCONV FreeImage_JPEGTransformCombined(const char *src_file, const char *dst_file, FREE_IMAGE_JPEG_OPERATION operation, int* left, int* top, int* right, int* bottom, BOOL perfect FI_DEFAULT(TRUE));
+ DLL_API BOOL DLL_CALLCONV FreeImage_JPEGTransformCombinedU(const wchar_t *src_file, const wchar_t *dst_file, FREE_IMAGE_JPEG_OPERATION operation, int* left, int* top, int* right, int* bottom, BOOL perfect FI_DEFAULT(TRUE));
+ DLL_API BOOL DLL_CALLCONV FreeImage_JPEGTransformCombinedFromMemory(FIMEMORY* src_stream, FIMEMORY* dst_stream, FREE_IMAGE_JPEG_OPERATION operation, int* left, int* top, int* right, int* bottom, BOOL perfect FI_DEFAULT(TRUE));
+-
++#endif
+ 
+ // --------------------------------------------------------------------------
+ // Image manipulation toolkit

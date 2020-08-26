@@ -1,0 +1,22 @@
+--- Source/FreeImage/Plugin.cpp
++++ Source/FreeImage/Plugin.cpp
+@@ -254,7 +254,9 @@
+ 			s_plugins->AddNode(InitPNM, NULL, "PPMRAW", "Portable Pixelmap (RAW)", "ppm", "^P6");
+ 			s_plugins->AddNode(InitRAS);
+ 			s_plugins->AddNode(InitTARGA);
++#if 0
+ 			s_plugins->AddNode(InitTIFF);
++#endif
+ 			s_plugins->AddNode(InitWBMP);
+ 			s_plugins->AddNode(InitPSD);
+ 			s_plugins->AddNode(InitCUT);
+@@ -263,7 +265,9 @@
+ 			s_plugins->AddNode(InitDDS);
+ 	        s_plugins->AddNode(InitGIF);
+ 	        s_plugins->AddNode(InitHDR);
++#if 0
+ 			s_plugins->AddNode(InitG3);
++#endif
+ 			s_plugins->AddNode(InitSGI);
+ 			s_plugins->AddNode(InitEXR);
+ 			s_plugins->AddNode(InitJ2K);
