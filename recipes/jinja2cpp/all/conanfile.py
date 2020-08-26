@@ -1,5 +1,6 @@
 import os
 from conans import ConanFile, CMake, tools
+from conans.errors import ConanInvalidConfiguration
 
 
 class Jinja2cppConan(ConanFile):
@@ -75,6 +76,8 @@ class Jinja2cppConan(ConanFile):
         return self._cmake
 
     def build(self):
+        if tools.Version(self.deps_cpp_info["fmt"].version) >= "7.0.0":
+            raise ConanInvalidConfiguration("jinja2cpp requires fmt < 7.0.0")
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
             tools.patch(**patch)
         cmake = self._configure_cmake()
