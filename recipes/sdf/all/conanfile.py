@@ -8,7 +8,7 @@ class SdfConan(ConanFile):
     description = "Signed Distance Field Builder for Contour Texturing"
     license = "MIT"
     url = "https://github.com/conan-io/conan-center-index"
-    homepage = "https://github.com/p-ranav/argparse"
+    homepage = "https://github.com/memononen/SDF"
     topics = ("conan", "sdf", "signed", "distance", "field", "contour")
     settings = "os"
     no_copy_source = True

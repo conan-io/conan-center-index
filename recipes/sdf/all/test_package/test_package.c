@@ -24,6 +24,7 @@ int main(int argc, char **argv)
     unsigned char* dest_data = malloc(width * height * bpp);
     if(dest_data == NULL)
     {
+        stbi_image_free(img_data);
         return 1;
     }
 
