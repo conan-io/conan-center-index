@@ -34,16 +34,23 @@ class LibgdConan(ConanFile):
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
-        os.rename('libgd-' + self.version, self._source_subfolder)
+        for name in ['libgd-', 'libgd-gd-']:
+            unpacked = name + self.version
+            if os.path.exists(unpacked):
+                os.rename(unpacked, self._source_subfolder)
+                break
+        else:
+            raise RuntimeError('Did not find the unpacked archive')
         tools.replace_in_file(
             os.path.join(
                 self._source_subfolder,
                 "CMakeLists.txt"),
-            "CMAKE_MINIMUM_REQUIRED(VERSION 2.6 FATAL_ERROR)",
+            "SET(PACKAGE GD)",
             '''cmake_minimum_required (VERSION 3.6 FATAL_ERROR)
 PROJECT(GD C)
 include(${CMAKE_BINARY_DIR}/../conanbuildinfo.cmake)
-conan_basic_setup()''')
+conan_basic_setup()
+SET(PACKAGE GD)''')
         tools.replace_in_file(
             os.path.join(
                 self._source_subfolder,
