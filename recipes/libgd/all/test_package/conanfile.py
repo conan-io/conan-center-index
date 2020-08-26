@@ -17,4 +17,4 @@ class LibgdTestConan(ConanFile):
     def test(self):
         if not tools.cross_building(self.settings):
             os.chdir("bin")
-            self.run(".%slibgd_test" % os.sep)
+            self.run(".%slibgd_test" % os.sep, run_environment=True)
