@@ -99,6 +99,9 @@ class ConanFileDefault(ConanFile):
         self._cmake.definitions["BUILD_EXAMPLES"] = False
         self._cmake.definitions["BUILD_TUTORIALS"] = False
 
+        if self.settings.compiler == "Visual Studio":
+            self._cmake.definitions["WITH_MT"] = "MT" in str(self.settings.compiler.runtime)
+
         # Make optional libs "findable"
         if self.options.with_openssl:
             self._cmake.definitions["OPENSSL_ROOT_DIR"] = self.deps_cpp_info["openssl"].rootpath
@@ -130,7 +133,10 @@ class ConanFileDefault(ConanFile):
         tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
 
     def package_info(self):
-        libsuffix = "d" if self.settings.build_type == "Debug" else ""
+        libsuffix = "{}{}".format(
+            str(self.settings.compiler.runtime).lower() if self.settings.compiler == "Visual Studio" else "",
+            "d" if self.settings.build_type == "Debug" else ""
+        )
 
         self.cpp_info.filenames["cmake_find_package"] = "Thrift"
         self.cpp_info.filenames["cmake_find_package_multi"] = "Thrift"
