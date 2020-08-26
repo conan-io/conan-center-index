@@ -11,8 +11,7 @@ class KittenConan(ConanFile):
     homepage = "https://github.com/rvarago/kitten"
     url = "https://github.com/conan-io/conan-center-index"
     license = "MIT"
-    topics = ("category-theory", "composition",
-              "monadic-interface", "declarative-programming")
+    topics = ("category-theory", "composition", "monadic-interface", "declarative-programming")
     exports_sources = "CMakeLists.txt"
     generators = "cmake"
     no_copy_source = True
@@ -25,18 +24,15 @@ class KittenConan(ConanFile):
         return "source_subfolder"
 
     def _has_support_for_cpp17(self):
-        supported_compilers = [
-            ("apple-clang", 10), ("clang", 5), ("gcc", 7), ("Visual Studio", 15.7)]
-        compiler, version = self.settings.compiler, Version(
-            self.settings.compiler.version)
+        supported_compilers = [("apple-clang", 10), ("clang", 5), ("gcc", 7), ("Visual Studio", 15.7)]
+        compiler, version = self.settings.compiler, Version(self.settings.compiler.version)
         return any(compiler == sc[0] and version >= sc[1] for sc in supported_compilers)
 
     def configure(self):
         if self.settings.compiler.cppstd:
             tools.check_min_cppstd(self, 17)
         if not self._has_support_for_cpp17():
-            raise ConanInvalidConfiguration(
-                "Kitten requires support for C++17")
+            raise ConanInvalidConfiguration("Kitten requires support for C++17")
 
     def package_id(self):
         self.info.header_only()
@@ -59,8 +55,7 @@ class KittenConan(ConanFile):
         cmake.build()
 
     def package(self):
-        self.copy(pattern="LICENSE", dst="licenses",
-                  src=self._source_subfolder)
+        self.copy(pattern="LICENSE", dst="licenses", src=self._source_subfolder)
         cmake = self._configure_cmake()
         cmake.install()
         tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
