@@ -52,5 +52,14 @@ class SigslotConan(ConanFile):
         self.info.header_only()
 
     def package_info(self):
+        self.cpp_info.filenames["cmake_find_package"] = "PalSigslot"
+        self.cpp_info.filenames["cmake_find_package_multi"] = "PalSigslot"
+        self.cpp_info.names["cmake_find_package"] = "Pal"
+        self.cpp_info.names["cmake_find_package_multi"] = "Pal"
+
+        self.cpp_info.components["_sigslot"].libs = []
+        self.cpp_info.components["_sigslot"].names["cmake_find_package"] = "Sigslot"
+        self.cpp_info.components["_sigslot"].names["cmake_find_package_multi"] = "Sigslot"
+
         if self.settings.os == "Windows" and (self.settings.compiler == "Visual Studio" or self.settings.compiler == "clang"):
-            self.cpp_info.exelinkflags.append('/OPT:NOICF')
+            self.cpp_info.components["_sigslot"].exelinkflags.append('/OPT:NOICF')
