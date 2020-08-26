@@ -24,9 +24,9 @@ class KcovConan(ConanFile):
     _build_subfolder = "build_subfolder"
 
     def configure(self):
-        if self.settings.compiler == "Visual Studio":
+        if self.settings.os == "Windows":
             raise ConanInvalidConfiguration(
-                "kcov can not be built by Visual Studio.")
+                "kcov can not be built on windows.")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
