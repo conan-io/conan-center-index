@@ -32,6 +32,8 @@ class KittenConan(ConanFile):
         return any(compiler == sc[0] and version >= sc[1] for sc in supported_compilers)
 
     def configure(self):
+        if self.settings.compiler.cppstd:
+            tools.check_min_cppstd(self, 17)
         if not self._has_support_for_cpp17():
             raise ConanInvalidConfiguration(
                 "Kitten requires support for C++17")
