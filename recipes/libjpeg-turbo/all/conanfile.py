@@ -42,10 +42,6 @@ class LibjpegTurboConan(ConanFile):
     def _source_subfolder(self):
         return "source_subfolder"
 
-    @property
-    def _build_subfolder(self):
-        return "build_subfolder"
-
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
@@ -82,7 +78,7 @@ class LibjpegTurboConan(ConanFile):
         self._cmake.definitions["WITH_12BIT"] = self.options.enable12bit
         if self.settings.compiler == "Visual Studio":
             self._cmake.definitions["WITH_CRT_DLL"] = True # avoid replacing /MD by /MT in compiler flags
-        self._cmake.configure(build_folder=self._build_subfolder)
+        self._cmake.configure()
         return self._cmake
 
     def _patch_sources(self):
