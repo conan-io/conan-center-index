@@ -39,11 +39,11 @@ class LibCoapConan(ConanFile):
     def requirements(self):
         if self.options.dtls_backend == "openssl":
             self.requires("openssl/1.1.1g")
-        if self.options.dtls_backend == "mbedtls":
+        elif self.options.dtls_backend == "mbedtls":
             self.requires("mbedtls/2.16.3-apache")
-        if self.options.dtls_backend == "gnutls":
+        elif self.options.dtls_backend == "gnutls":
             raise ConanInvalidConfiguration("gnu tls not available yet")
-        if self.options.dtls_backend == "tinydtls":
+        elif self.options.dtls_backend == "tinydtls":
             raise ConanInvalidConfiguration("tinydtls not available yet")
 
     def config_options(self):
