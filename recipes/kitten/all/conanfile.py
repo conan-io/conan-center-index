@@ -3,6 +3,7 @@ from conans.errors import ConanInvalidConfiguration
 from conans.tools import Version
 import os.path
 
+required_conan_version = ">=1.28.0"
 
 class KittenConan(ConanFile):
     name = "kitten"
@@ -43,6 +44,9 @@ class KittenConan(ConanFile):
             raise ConanInvalidConfiguration(
                 "Kitten requires support for C++17")
 
+    def package_id(self):
+        self.info.header_only()
+
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
         extracted_dir = self.name + "-" + self.version
@@ -59,5 +63,10 @@ class KittenConan(ConanFile):
         cmake.install()
         tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
 
-    def package_id(self):
-        self.info.header_only()
+    def package_info(self):
+        self.cpp_info.filenames["cmake_find_package"] = "kitten"
+        self.cpp_info.filenames["cmake_find_package_multi"] = "kitten"
+        self.cpp_info.names["cmake_find_package"] = "rvarago"
+        self.cpp_info.names["cmake_find_package_multi"] = "rvarago"
+        self.cpp_info.components["libkitten"].names["cmake_find_package"] = "kitten"
+        self.cpp_info.components["libkitten"].names["cmake_find_package_multi"] = "kitten"
