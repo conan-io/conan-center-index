@@ -19,7 +19,7 @@ class KcovConan(ConanFile):
                 "libcurl/7.64.1",
                 "elfutils/0.180"]
     generators = "cmake"
-
+    _cmake = None
     _source_subfolder = "source_subfolder"
     _build_subfolder = "build_subfolder"
 
@@ -37,15 +37,20 @@ class KcovConan(ConanFile):
         for patch in self.conan_data["patches"][self.version]:
             tools.patch(**patch)
 
+    def _configure_cmake(self):
+        if self._cmake is not None:
+            return self._cmake
+        self._cmake = CMake(self)
+        self._cmake.configure(build_folder=self._build_subfolder)
+        return self._cmake
+
     def build(self):
         self._patch_sources()
-        cmake = CMake(self)
-        cmake.configure(build_folder=self._build_subfolder)
+        cmake = self._configure_cmake()
         cmake.build()
 
     def package(self):
-        cmake = CMake(self)
-        cmake.configure(build_folder=self._build_subfolder)
+        cmake = self._configure_cmake()
         cmake.install()
         tools.rmdir(os.path.join(self.package_folder, "share"))
         self.copy("COPYING*", dst="licenses", src=self._source_subfolder)

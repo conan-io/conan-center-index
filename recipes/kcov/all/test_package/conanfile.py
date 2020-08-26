@@ -1,11 +1,10 @@
 import os
 
-from conans import ConanFile, CMake, tools
+from conans import ConanFile, tools
 
 
 class KcovTestConan(ConanFile):
     settings = "os", "compiler", "build_type", "arch"
-    generators = ["cmake"]
 
     def test(self):
         if not tools.cross_building(self.settings):
