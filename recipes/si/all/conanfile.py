@@ -35,6 +35,21 @@ class SiConan(ConanFile):
         compiler = self.settings.compiler
         version = Version(compiler.version)
         return any(compiler == sc[0] and version >= sc[1] for sc in supported_compilers)
+    
+    def _configure_cmake(self):
+        if not self._cmake:
+            self._cmake = CMake(self)
+            self._cmake.definitions["SI_BUILD_TESTING"] = False
+            self._cmake.definitions["SI_BUILD_DOC"] = False
+            self._cmake.definitions["SI_INSTALL_LIBRARY"] = True
+            self._cmake.configure(build_folder=self._build_subfolder)
+        return self._cmake
+
+    def configure(self):
+        if self.settings.compiler.get_safe("cppstd"):
+            tools.check_min_cppstd(self, "17")
+        elif not self._supports_cpp17():
+            raise ConanInvalidConfiguration("SI requires C++17 support")
 
     def package_id(self):
         self.info.header_only()
@@ -44,23 +59,6 @@ class SiConan(ConanFile):
         extracted_folder = "SI-{}".format(self.version)
         os.rename(extracted_folder, self._source_subfolder)
 
-    def _configure_cmake(self):
-        if not self._cmake:
-            self._cmake = CMake(self)
-            # Add additional settings with cmake.definitions["SOME_DEFINITION"] = True
-            self._cmake.definitions["SI_BUILD_TESTING"] = False
-            self._cmake.definitions["SI_BUILD_DOC"] = False
-            self._cmake.definitions["SI_INSTALL_LIBRARY"] = True
-            self._cmake.configure(
-                source_folder=self._source_subfolder, build_folder=self._build_subfolder)
-        return self._cmake
-
-    def configure(self):
-        if self.settings.compiler.get_safe("cppstd"):
-            tools.check_min_cppstd(self, "17")
-        elif not self._supports_cpp17():
-            raise ConanInvalidConfiguration("SI requires C++17 support")
-
     def build(self):
         cmake = self._configure_cmake()
         cmake.build()
@@ -69,7 +67,6 @@ class SiConan(ConanFile):
         self.copy("LICENSE", dst="licenses", src=self._source_subfolder)
         cmake = self._configure_cmake()
         cmake.install()
-        #  Remove folder containing cmake-specific files such as SIConfig.cmake and SIVersion.cmake
         tools.rmdir(os.path.join(self.package_folder, "share"))
 
     def package_info(self):
