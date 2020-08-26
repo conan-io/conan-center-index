@@ -28,6 +28,7 @@ class ConanFileDefault(ConanFile):
         "with_cpp": [True, False],
         "with_java": [True, False],
         "with_python": [True, False],
+        "with_qt5": [True, False],
         "with_haskell": [True, False],
         "with_plugin": [True, False]
     }
@@ -46,6 +47,7 @@ class ConanFileDefault(ConanFile):
         "with_cpp": True,
         "with_java": False,
         "with_python": False,
+        "with_qt5": False,
         "with_haskell": False,
         "with_plugin": False
     }
@@ -56,6 +58,10 @@ class ConanFileDefault(ConanFile):
 
     def config_options(self):
         if self.settings.os == "Windows":
+            del self.options.fPIC
+
+    def configure(self):
+        if self.options.shared:
             del self.options.fPIC
 
     def source(self):
@@ -134,7 +140,7 @@ class ConanFileDefault(ConanFile):
 
     def package_info(self):
         libsuffix = "{}{}".format(
-            str(self.settings.compiler.runtime).lower() if self.settings.compiler == "Visual Studio" else "",
+            str(self.settings.compiler.runtime).lower()[:2] if self.settings.compiler == "Visual Studio" else "",
             "d" if self.settings.build_type == "Debug" else ""
         )
 
@@ -174,11 +180,12 @@ class ConanFileDefault(ConanFile):
         self.cpp_info.components["libthrift_nb"].names["pkg_config"] = "thrift-nb"
 
         # FIXME: this generates thrift::thriftqt5, but should be thriftqt5::thriftqt5
-        self.cpp_info.components["libthrift_qt5"].libs = ["thriftqt5" + libsuffix]
-        self.cpp_info.components["libthriftz"].requires = ["libthrift"]
-        self.cpp_info.components["libthriftz"].names["cmake_find_package"] = "thriftqt5"
-        self.cpp_info.components["libthriftz"].names["cmake_find_package_multi"] = "thriftqt5"
-        self.cpp_info.components["libthriftz"].names["pkg_config"] = "thrift-qt5"
+        if self.options.with_qt5:
+            self.cpp_info.components["libthrift_qt5"].libs = ["thriftqt5" + libsuffix]
+            self.cpp_info.components["libthriftz"].requires = ["libthrift"]
+            self.cpp_info.components["libthriftz"].names["cmake_find_package"] = "thriftqt5"
+            self.cpp_info.components["libthriftz"].names["cmake_find_package_multi"] = "thriftqt5"
+            self.cpp_info.components["libthriftz"].names["pkg_config"] = "thrift-qt5"
 
         bin_path = os.path.join(self.package_folder, "bin")
         self.output.info("Appending PATH env var with : {}".format(bin_path))
