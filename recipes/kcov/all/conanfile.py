@@ -1,5 +1,4 @@
 import os
-from shutil import rmtree, move
 from conans import ConanFile, CMake, tools
 from conans.errors import ConanInvalidConfiguration
 
@@ -48,8 +47,8 @@ class KcovConan(ConanFile):
         cmake = CMake(self)
         cmake.configure(build_folder=self._build_subfolder)
         cmake.install()
-        licdir = os.path.join(self.package_folder, "share", "doc", "kcov")
-        move(licdir, os.path.join(self.package_folder, "licenses"))
+        tools.rmdir(os.path.join(self.package_folder, "share"))
+        self.copy("COPYING*", dst="licenses", src=self._source_subfolder)
         tools.rmdir(os.path.join(self.package_folder, "share"))
 
     def package_info(self):
