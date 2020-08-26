@@ -16,7 +16,7 @@ class LibpqxxRecipe(ConanFile):
     exports_sources = ["CMakeLists.txt", "patches/*"]
     options = {"shared": [True, False], "fPIC": [True, False]}
     default_options = {"shared": False, "fPIC": True}
-    requires = "libpq/11.5"
+
     _cmake = None
 
     @property
@@ -50,6 +50,9 @@ class LibpqxxRecipe(ConanFile):
 
         if self.settings.compiler.cppstd:
             tools.check_min_cppstd(self, "17")
+
+    def requirements(self):
+        self.requires("libpq/12.2")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
