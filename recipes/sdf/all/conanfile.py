@@ -10,6 +10,7 @@ class SdfConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/p-ranav/argparse"
     topics = ("conan", "sdf", "signed", "distance", "field", "contour")
+    settings = "os"
     no_copy_source = True
 
     @property
