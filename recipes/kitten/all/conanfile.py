@@ -13,17 +13,16 @@ class KittenConan(ConanFile):
     license = "MIT"
     topics = ("category-theory", "composition",
               "monadic-interface", "declarative-programming")
+    exports_sources = "CMakeLists.txt"
+    generators = "cmake"
     no_copy_source = True
     settings = "os", "compiler", "build_type", "arch"
-    generators = "cmake"
+
+    _cmake = None
 
     @property
     def _source_subfolder(self):
         return "source_subfolder"
-
-    @property
-    def _build_subfolder(self):
-        return "build_subfolder"
 
     def _has_support_for_cpp17(self):
         supported_compilers = [
@@ -31,13 +30,6 @@ class KittenConan(ConanFile):
         compiler, version = self.settings.compiler, Version(
             self.settings.compiler.version)
         return any(compiler == sc[0] and version >= sc[1] for sc in supported_compilers)
-
-    def _configure_cmake(self):
-        cmake = CMake(self)
-        cmake.definitions["BUILD_TESTS"] = "OFF"
-        cmake.configure(source_folder=self._source_subfolder,
-                        build_folder=self._build_subfolder)
-        return cmake
 
     def configure(self):
         if not self._has_support_for_cpp17():
@@ -51,6 +43,14 @@ class KittenConan(ConanFile):
         tools.get(**self.conan_data["sources"][self.version])
         extracted_dir = self.name + "-" + self.version
         os.rename(extracted_dir, self._source_subfolder)
+
+    def _configure_cmake(self):
+        if self._cmake:
+            return self._cmake
+        self._cmake = CMake(self)
+        self._cmake.definitions["BUILD_TESTS"] = False
+        self._cmake.configure()
+        return self._cmake
 
     def build(self):
         cmake = self._configure_cmake()
