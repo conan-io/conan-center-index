@@ -113,13 +113,14 @@ class LibjpegTurboConan(ConanFile):
             for bin_file in glob.glob(os.path.join(self.package_folder, "bin", pattern_to_remove)):
                 os.remove(bin_file)
 
-    def _collect_libs(self):
-        libs = ["jpeg"]
-        if self.options.turbojpeg:
-            libs.append("turbojpeg")
-        if self.settings.compiler == "Visual Studio" and not self.options.shared:
-            libs = [lib + "-static" for lib in libs]
-        return libs
-
     def package_info(self):
-        self.cpp_info.libs = self._collect_libs()
+        self.cpp_info.components["jpeg"].names["pkg_config"] = "libjpeg"
+        self.cpp_info.components["jpeg"].libs = [self._lib_name("jpeg")]
+        if self.options.turbojpeg:
+            self.cpp_info.components["turbojpeg"].names["pkg_config"] = "libturbojpeg"
+            self.cpp_info.components["turbojpeg"].libs = [self._lib_name("turbojpeg")]
+
+    def _lib_name(self, name):
+        if self.settings.compiler == "Visual Studio" and not self.options.shared:
+            return name + "-static"
+        return name
