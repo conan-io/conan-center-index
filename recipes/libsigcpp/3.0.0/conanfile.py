@@ -13,7 +13,7 @@ class LibSigCppConan(ConanFile):
     description = "libsigc++ implements a typesafe callback system for standard C++."
     topics = ("conan", "libsigcpp", "callback")
     settings = "os", "compiler", "arch", "build_type"
-    exports_sources = ["CMakeLists.txt", "*.patch"]
+    exports_sources = ["CMakeLists.txt", "patches/**"]
     generators = "cmake"
 
     @property
