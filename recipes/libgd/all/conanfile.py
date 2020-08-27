@@ -64,7 +64,7 @@ if (BUILD_SHARED_LIBS)
 \ttarget_link_libraries(${GD_LIB} ${LIBGD_DEP_LIBS})
 ''')
 
-    def build(self):
+    def _configure_cmake(self):
         cmake = CMake(self)
         cmake.definitions['BUILD_STATIC_LIBS'] = not self.options.shared
         zlib_info = self.deps_cpp_info["zlib"]
@@ -73,10 +73,15 @@ if (BUILD_SHARED_LIBS)
         cmake.configure(
             source_folder=self.source_folder,
             build_folder=self._build_subfolder)
+        return cmake
+
+    def build(self):
+        cmake = self._configure_cmake()
         cmake.build()
-        cmake.install()
 
     def package(self):
+        cmake = self._configure_cmake()
+        cmake.install()
         self.copy("COPYING", src=self._source_subfolder, dst="licenses",
                   ignore_case=True, keep_path=False)
         tools.rmdir(os.path.join(self.package_folder, 'share'))
