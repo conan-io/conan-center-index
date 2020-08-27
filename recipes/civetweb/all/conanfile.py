@@ -48,7 +48,7 @@ class civetwebConan(ConanFile):
 
     def requirements(self):
         if self.options.enable_ssl:
-            self.requires("OpenSSL/1.0.2q@conan/stable")
+            self.requires("openssl/1.1.1g")
 
     def _configure_cmake(self):
         cmake = CMake(self)
