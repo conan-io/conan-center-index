@@ -144,8 +144,8 @@ class LibtorrentConan(ConanFile):
 
         if self.settings.os == "Linux":
             self.cpp_info.components["libtorrent-rasterbar"].system_libs = ["dl", "pthread"]
-        if self.settings.os == "Windows":
-            self.cpp_info.components["libtorrent-rasterbar"].system_libs = ["wsock32", "ws2_32", "iphlpapi", "debug", "dbghelp"]
+        elif self.settings.os == "Windows":
+            self.cpp_info.components["libtorrent-rasterbar"].system_libs = ["wsock32", "ws2_32", "iphlpapi", "dbghelp"]
         elif self.settings.os == "Macos":
             self.cpp_info.components["libtorrent-rasterbar"].frameworks = ["CoreFoundation", "SystemConfiguration"]
 
