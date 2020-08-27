@@ -137,3 +137,12 @@ class LibtorrentConan(ConanFile):
             self.cpp_info.components["libtorrent-rasterbar"].system_libs = ["wsock32", "ws2_32", "iphlpapi", "debug", "dbghelp"]
         elif self.settings.os == "Macos":
             self.cpp_info.components["libtorrent-rasterbar"].frameworks = ["CoreFoundation", "SystemConfiguration"]
+
+        if self.options.enable_encryption:
+            self.cpp_info.components["libtorrent-rasterbar"].defines.extend(["TORRENT_USE_OPENSSL", "TORRENT_USE_LIBCRYPTO"])
+        else:
+            self.cpp_info.components["libtorrent-rasterbar"].defines.append("TORRENT_DISABLE_ENCRYPTION")
+        if self.options.enable_iconv:
+            self.cpp_info.components["libtorrent-rasterbar"].defines.append("TORRENT_USE_ICONV")
+        if not self.options.enable_dht:
+            self.cpp_info.components["libtorrent-rasterbar"].defines.append("TORRENT_DISABLE_DHT")
