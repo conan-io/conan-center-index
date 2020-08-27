@@ -39,13 +39,8 @@ class LibSigCppConan(ConanFile):
         return any(compiler == sc[0] and version >= sc[1] for sc in supported_compilers)
 
     def configure(self):
-        compiler_version = Version(self.settings.compiler.version)
-        if self.settings.compiler.cppstd and \
-           not self.settings.compiler.cppstd in self._supported_cppstd:
-          raise ConanInvalidConfiguration("This library requires c++17 standard or higher."
-                                          " {} required."
-                                          .format(self.settings.compiler.cppstd))
-
+        if self.settings.compiler.cppstd:
+           tools.check_min_cppstd(self, 17)
         if not self._has_support_for_cpp17():
             raise ConanInvalidConfiguration("This library requires C++17 or higher support standard."
                                             " {} {} is not supported."
