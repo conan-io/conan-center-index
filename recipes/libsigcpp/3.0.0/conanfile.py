@@ -78,7 +78,13 @@ class LibSigCppConan(ConanFile):
             tools.rmdir(os.path.join(self.package_folder, "lib", dir_to_remove))
 
     def package_info(self):
-        self.cpp_info.includedirs = [os.path.join("include", "sigc++-3.0")]
-        self.cpp_info.libs = tools.collect_libs(self)
+        # TODO: CMake imported target shouldn't be namespaced
+        self.cpp_info.names["cmake_find_package"] = "sigc++-3"
+        self.cpp_info.names["cmake_find_package_multi"] = "sigc++-3"
+        self.cpp_info.names["pkg_config"] = "sigc++-3.0"
+        self.cpp_info.components["sigc++"].names["cmake_find_package"] = "sigc-3.0"
+        self.cpp_info.components["sigc++"].names["cmake_find_package_multi"] = "sigc-3.0"
+        self.cpp_info.components["sigc++"].includedirs = [os.path.join("include", "sigc++-3.0")]
+        self.cpp_info.components["sigc++"].libs = tools.collect_libs(self)
         if self.settings.os == "Linux":
-            self.cpp_info.system_libs.append("m")
+            self.cpp_info.components["sigc++"].system_libs.append("m")

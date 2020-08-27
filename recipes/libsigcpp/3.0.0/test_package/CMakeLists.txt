@@ -1,10 +1,11 @@
-cmake_minimum_required(VERSION 3.1)
-
-PROJECT(test_package CXX)
+cmake_minimum_required(VERSION 3.8)
+project(test_package CXX)
 
 include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
-CONAN_BASIC_SETUP()
+conan_basic_setup()
 
-ADD_EXECUTABLE(test_package test_package.cpp)
-target_link_libraries(test_package ${CONAN_LIBS})
-set_property(TARGET test_package PROPERTY CXX_STANDARD 17)
+find_package(sigc++-3 REQUIRED CONFIG)
+
+add_executable(${PROJECT_NAME} test_package.cpp)
+target_link_libraries(${PROJECT_NAME} sigc++-3::sigc-3.0) # TODO: remove sigc++-3:: namespace when fixed in cpp_info of recipe
+set_property(TARGET ${PROJECT_NAME} PROPERTY CXX_STANDARD 17)
