@@ -1,4 +1,7 @@
+import glob
 import os
+import shutil
+
 from conans import ConanFile, CMake, tools
 from conans.errors import ConanInvalidConfiguration
 from conans.tools import Version
@@ -67,12 +70,16 @@ class LibSigCppConan(ConanFile):
         self.copy("COPYING", dst="licenses", src=self._source_subfolder)
         cmake = self._configure_cmake()
         cmake.install()
-        tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
-        tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
+        for header_file in glob.glob(os.path.join(self.package_folder, "lib", "sigc++-3.0", "include", "*.h")):
+            shutil.move(
+                header_file,
+                os.path.join(self.package_folder, "include", "sigc++-3.0", os.path.basename(header_file))
+            )
+        for dir_to_remove in ["cmake", "pkgconfig", "sigc++-3.0"]:
+            tools.rmdir(os.path.join(self.package_folder, "lib", dir_to_remove))
 
     def package_info(self):
+        self.cpp_info.includedirs = [os.path.join("include", "sigc++-3.0")]
         self.cpp_info.libs = tools.collect_libs(self)
         if self.settings.os == "Linux":
             self.cpp_info.system_libs.append("m")
-        self.cpp_info.includedirs.extend([os.path.join('include', "sigc++-3.0"),
-                                          os.path.join('lib', "sigc++-3.0", "include")])
