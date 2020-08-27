@@ -1,3 +1,4 @@
+import glob
 import os
 from conans import ConanFile, tools, CMake
 
@@ -13,7 +14,7 @@ class LibgdConan(ConanFile):
     homepage = "https://libgd.github.io"
     options = {"shared": [True, False], "fPIC": [True, False]}
     default_options = {"shared": False, "fPIC": True}
-    exports_sources = "CMakeLists.txt"
+    exports_sources = "CMakeLists.txt", "patches/**"
     generators = "cmake"
     requires = "zlib/1.2.11"
 
@@ -33,36 +34,15 @@ class LibgdConan(ConanFile):
     def _build_subfolder(self):
         return "build_subfolder"
 
-    def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        for name in ['libgd-', 'libgd-gd-']:
-            unpacked = name + self.version
-            if os.path.exists(unpacked):
-                os.rename(unpacked, self._source_subfolder)
-                break
-        else:
-            raise RuntimeError('Did not find the unpacked archive')
+    def _patch(self):
         cmakelists = os.path.join(self._source_subfolder, "CMakeLists.txt")
         tools.replace_in_file(cmakelists, "${CMAKE_SOURCE_DIR}", "${CMAKE_CURRENT_SOURCE_DIR}")
-        tools.replace_in_file(
-            os.path.join(
-                self._source_subfolder,
-                "CMakeLists.txt"),
-            'if(NOT MINGW AND MSVC_VERSION GREATER 1399)',
-            'if (BUILD_STATIC_LIBS AND WIN32 AND NOT MINGW AND NOT MSYS)')
-        tools.replace_in_file(
-            os.path.join(
-                self._source_subfolder,
-                "src",
-                "CMakeLists.txt"),
-            '''if (BUILD_SHARED_LIBS)
-\ttarget_link_libraries(${GD_LIB} ${LIBGD_DEP_LIBS})''',
-            '''if (NOT WIN32)
-    list(APPEND LIBGD_DEP_LIBS  m)
-endif()
-if (BUILD_SHARED_LIBS)
-\ttarget_link_libraries(${GD_LIB} ${LIBGD_DEP_LIBS})
-''')
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            tools.patch(**patch)
+
+    def source(self):
+        tools.get(**self.conan_data["sources"][self.version])
+        os.rename(glob.glob("libgd-*")[0], self._source_subfolder)
 
     def _configure_cmake(self):
         cmake = CMake(self)
@@ -76,6 +56,7 @@ if (BUILD_SHARED_LIBS)
         return cmake
 
     def build(self):
+        self._patch()
         cmake = self._configure_cmake()
         cmake.build()
 
