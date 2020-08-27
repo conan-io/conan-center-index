@@ -149,6 +149,8 @@ class LibtorrentConan(ConanFile):
         elif self.settings.os == "Macos":
             self.cpp_info.components["libtorrent-rasterbar"].frameworks = ["CoreFoundation", "SystemConfiguration"]
 
+        if self.options.shared:
+            self.cpp_info.components["libtorrent-rasterbar"].defines.append("TORRENT_LINKING_SHARED")
         if self.options.enable_encryption:
             self.cpp_info.components["libtorrent-rasterbar"].defines.extend(["TORRENT_USE_OPENSSL", "TORRENT_USE_LIBCRYPTO"])
         else:
