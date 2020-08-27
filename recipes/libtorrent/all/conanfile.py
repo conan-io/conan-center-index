@@ -1,5 +1,5 @@
 from conans import CMake, ConanFile, tools
-from conans.tools import Version
+from conans.errors import ConanInvalidConfiguration
 import os
 
 
@@ -59,6 +59,8 @@ class LibtorrentConan(ConanFile):
             del self.options.fPIC
         if self.settings.compiler.cppstd:
             tools.check_min_cppstd(self, 11)
+        self.options["boost"].header_only = False
+        self.options["boost"].without_system = False
 
     def requirements(self):
         self.requires("boost/1.74.0")
@@ -109,6 +111,8 @@ class LibtorrentConan(ConanFile):
                                   "file_entry& operator=(file_entry&&) & = default;")
 
     def build(self):
+        if self.options["boost"].header_only or self.options["boost"].without_system:
+            raise ConanInvalidConfiguration("libtorrent requires boost with system")
         self._patch_sources()
         cmake = self._configure_cmake()
         cmake.build()
