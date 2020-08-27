@@ -135,6 +135,12 @@ class LibtorrentConan(ConanFile):
         self.cpp_info.components["libtorrent-rasterbar"].includedirs = ["include", os.path.join("include", "libtorrent")]
         self.cpp_info.components["libtorrent-rasterbar"].libs = ["torrent-rasterbar"]
 
+        self.cpp_info.components["libtorrent-rasterbar"].requires = ["boost::boost"]
+        if self.options.enable_encryption:
+            self.cpp_info.components["libtorrent-rasterbar"].requires.append("openssl::openssl")
+        if self.options.enable_iconv:
+            self.cpp_info.components["libtorrent-rasterbar"].requires.append("libiconv::libiconv")
+
         if self.settings.os == "Linux":
             self.cpp_info.components["libtorrent-rasterbar"].system_libs = ["dl", "pthread"]
         if self.settings.os == "Windows":
