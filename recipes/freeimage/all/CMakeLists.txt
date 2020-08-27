@@ -40,7 +40,7 @@ target_include_directories(FreeImage PRIVATE
 )
 target_link_libraries(FreeImage PRIVATE
     ZLIB::ZLIB
-    libjpeg::libjpeg
+    JPEG::JPEG
     OpenJPEG::OpenJPEG
     PNG::PNG
     libwebp::libwebp
