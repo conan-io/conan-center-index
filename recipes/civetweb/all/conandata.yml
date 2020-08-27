@@ -1,0 +1,4 @@
+sources:
+  "1.12":
+    url: "https://github.com/civetweb/civetweb/archive/v1.12.tar.gz"
+    sha256: "8cab1e2ad8fb3e2e81fed0b2321a5afbd7269a644c44ed4c3607e0a212c6d9e1"
