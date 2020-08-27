@@ -126,12 +126,14 @@ class LibtorrentConan(ConanFile):
         self.cpp_info.names["pkg_config"] = "libtorrent-rasterbar"
         self.cpp_info.names["cmake_find_package"] = "LibtorrentRasterbar"
         self.cpp_info.names["cmake_find_package_multi"] = "LibtorrentRasterbar"
-        self.cpp_info.includedirs = ["include", os.path.join("include", "libtorrent")]
-        self.cpp_info.libs = ["torrent-rasterbar"]
+        self.cpp_info.components["libtorrent-rasterbar"].names["cmake_find_package"] = "torrent-rasterbar"
+        self.cpp_info.components["libtorrent-rasterbar"].names["cmake_find_package_multi"] = "torrent-rasterbar"
+        self.cpp_info.components["libtorrent-rasterbar"].includedirs = ["include", os.path.join("include", "libtorrent")]
+        self.cpp_info.components["libtorrent-rasterbar"].libs = ["torrent-rasterbar"]
 
         if self.settings.os == "Linux":
-            self.cpp_info.system_libs = ["dl", "pthread"]
+            self.cpp_info.components["libtorrent-rasterbar"].system_libs = ["dl", "pthread"]
         if self.settings.os == "Windows":
-            self.cpp_info.system_libs = ["wsock32", "ws2_32", "iphlpapi", "debug", "dbghelp"]
+            self.cpp_info.components["libtorrent-rasterbar"].system_libs = ["wsock32", "ws2_32", "iphlpapi", "debug", "dbghelp"]
         elif self.settings.os == "Macos":
-            self.cpp_info.frameworks = ["CoreFoundation", "SystemConfiguration"]
+            self.cpp_info.components["libtorrent-rasterbar"].frameworks = ["CoreFoundation", "SystemConfiguration"]
