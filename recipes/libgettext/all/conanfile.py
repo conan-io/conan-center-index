@@ -3,6 +3,7 @@ import os
 import shutil
 import glob
 
+required_conan_version = ">=1.28.0"
 
 class GetTextConan(ConanFile):
     name = "libgettext"
@@ -11,18 +12,11 @@ class GetTextConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://www.gnu.org/software/gettext"
     license = "GPL-3.0-or-later"
+    deprecated = "gettext"
     settings = "os", "arch", "compiler", "build_type"
     exports_sources = ["patches/*.patch"]
-
-
     options = {"shared": [True, False], "fPIC": [True, False]}
     default_options = {"shared": False, "fPIC": True}
-
-    requires = ("libiconv/1.16")
-
-    def config_options(self):
-        if self.settings.os == 'Windows':
-            del self.options.fPIC
 
     @property
     def _source_subfolder(self):
@@ -40,10 +34,18 @@ class GetTextConan(ConanFile):
     def _make_args(self):
         return ["-C", "intl"]
 
+    def config_options(self):
+        if self.settings.os == 'Windows':
+            del self.options.fPIC
+
     def configure(self):
-        self.output.warn("[DEPRECATED] Use 'gettext/{}@' instead.".format(self.version))
+        if self.options.shared:
+            del self.options.fPIC
         del self.settings.compiler.libcxx
         del self.settings.compiler.cppstd
+
+    def requirements(self):
+        self.requires("libiconv/1.16")
 
     def build_requirements(self):
         if tools.os_info.is_windows:
