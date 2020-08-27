@@ -31,6 +31,15 @@ class FlatbuffersConan(ConanFile):
         if self.settings.os == "Windows":
             del self.options.fPIC
 
+    def configure(self):
+        if self.options.header_only:
+            del self.options.fPIC
+            del self.options.shared
+        elif self.options.shared:
+            del self.options.fPIC
+        if self.settings.compiler.cppstd:
+            tools.check_min_cppstd(self, 11)
+
     def package_id(self):
         if self.options.header_only:
             self.info.header_only()
