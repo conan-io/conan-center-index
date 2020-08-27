@@ -318,4 +318,4 @@ It's important to have new library version defined in both `config.yml` and `con
 
 ### **<a name="KB-H053">#KB-H053</a>: "PRIVATE IMPORTS"**
 
-The recipe imports private conan API, this is strongly discouraged - private imports are subjects to breaking changes. Avoid usage of private APIs, request to publically expose needed methods, if necessary.
+The recipe imports private Conan API, this is strongly discouraged - private imports are subjects to breaking changes. Avoid usage of private APIs, request to publically expose needed methods, if necessary.
