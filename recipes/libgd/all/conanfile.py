@@ -13,6 +13,7 @@ class LibgdConan(ConanFile):
     homepage = "https://libgd.github.io"
     options = {"shared": [True, False], "fPIC": [True, False]}
     default_options = {"shared": False, "fPIC": True}
+    exports_sources = "CMakeLists.txt"
     generators = "cmake"
     requires = "zlib/1.2.11"
 
@@ -41,22 +42,8 @@ class LibgdConan(ConanFile):
                 break
         else:
             raise RuntimeError('Did not find the unpacked archive')
-        tools.replace_in_file(
-            os.path.join(
-                self._source_subfolder,
-                "CMakeLists.txt"),
-            "SET(PACKAGE GD)",
-            '''cmake_minimum_required (VERSION 3.6 FATAL_ERROR)
-PROJECT(GD C)
-include(${CMAKE_BINARY_DIR}/../conanbuildinfo.cmake)
-conan_basic_setup()
-SET(PACKAGE GD)''')
-        tools.replace_in_file(
-            os.path.join(
-                self._source_subfolder,
-                "CMakeLists.txt"),
-            'PROJECT(GD)',
-            '# moved: PROJECT(GD)')
+        cmakelists = os.path.join(self._source_subfolder, "CMakeLists.txt")
+        tools.replace_in_file(cmakelists, "${CMAKE_SOURCE_DIR}", "${CMAKE_CURRENT_SOURCE_DIR}")
         tools.replace_in_file(
             os.path.join(
                 self._source_subfolder,
@@ -84,7 +71,7 @@ if (BUILD_SHARED_LIBS)
         cmake.definitions["ZLIB_LIBRARY"] = zlib_info.libs[0]
         cmake.definitions["ZLIB_INCLUDE_DIR"] = zlib_info.include_paths[0]
         cmake.configure(
-            source_folder=self._source_subfolder,
+            source_folder=self.source_folder,
             build_folder=self._build_subfolder)
         cmake.build()
         cmake.install()
