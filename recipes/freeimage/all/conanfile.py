@@ -41,6 +41,7 @@ class FreeImageConan(ConanFile):
         tools.check_min_cppstd(self, "11")
         if self.options.shared:
             del self.options.fPIC
+        self.output.warn("TIFF and G3 plugins are disabled.")
 
     def requirements(self):
         self.requires("zlib/1.2.11")
