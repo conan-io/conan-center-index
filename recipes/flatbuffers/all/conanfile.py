@@ -24,10 +24,6 @@ class FlatbuffersConan(ConanFile):
     def _source_subfolder(self):
         return "source_subfolder"
 
-    @property
-    def _build_subfolder(self):
-        return "build_subfolder"
-
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
@@ -59,7 +55,7 @@ class FlatbuffersConan(ConanFile):
         self._cmake.definitions["FLATBUFFERS_BUILD_FLATLIB"] = not self.options.shared
         self._cmake.definitions["FLATBUFFERS_BUILD_FLATC"] = False
         self._cmake.definitions["FLATBUFFERS_BUILD_FLATHASH"] = False
-        self._cmake.configure(build_folder=self._build_subfolder)
+        self._cmake.configure()
         return self._cmake
 
     def build(self):
