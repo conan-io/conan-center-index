@@ -3,6 +3,7 @@ import os
 import shutil
 from conans import ConanFile, CMake, tools
 
+required_conan_version = ">=1.28.0"
 
 class FlatbuffersConan(ConanFile):
     name = "flatbuffers"
@@ -82,7 +83,14 @@ class FlatbuffersConan(ConanFile):
                     shutil.move(dll_path, os.path.join(self.package_folder, "bin", os.path.basename(dll_path)))
 
     def package_info(self):
+        self.cpp_info.filenames["cmake_find_package"] = "Flatbuffers"
+        self.cpp_info.filenames["cmake_find_package_multi"] = "Flatbuffers"
+        self.cpp_info.names["cmake_find_package"] = "flatbuffers"
+        self.cpp_info.names["cmake_find_package_multi"] = "flatbuffers"
         if not self.options.header_only:
-            self.cpp_info.libs = tools.collect_libs(self)
+            cmake_target = "flatbuffers_shared" if self.options.shared else "flatbuffers"
+            self.cpp_info.components["libflatbuffers"].names["cmake_find_package"] = cmake_target
+            self.cpp_info.components["libflatbuffers"].names["cmake_find_package_multi"] = cmake_target
+            self.cpp_info.components["libflatbuffers"].libs = tools.collect_libs(self)
             if self.settings.os == "Linux":
-                self.cpp_info.system_libs.append("m")
+                self.cpp_info.components["libflatbuffers"].system_libs.append("m")
