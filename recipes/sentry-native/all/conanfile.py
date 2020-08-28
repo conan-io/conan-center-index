@@ -81,8 +81,8 @@ class SentryNativeConan(ConanFile):
     def package_info(self):
         self.cpp_info.libs = ["sentry"]
         if self.settings.os in ("Android", "Linux"):
-            self.cpp_info.exelinkflags= ["--build-id=sha1"]
-            self.cpp_info.sharedlinkflags = ["--build-id=sha1"]
+            self.cpp_info.exelinkflags = ["-Wl,-E,--build-id=sha1"]
+            self.cpp_info.sharedlinkflags = ["-Wl,-E,--build-id=sha1"]
         if self.settings.os == "Linux":
             self.cpp_info.system_libs = ["pthread", "dl"]
         elif self.settings.os == "Windows":
