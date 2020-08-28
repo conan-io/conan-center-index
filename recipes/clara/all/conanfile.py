@@ -1,6 +1,7 @@
 import os
 from conans import ConanFile, tools
 
+required_conan_version = ">=1.28.0"
 
 class ClaraConan(ConanFile):
     name = "clara"
@@ -10,11 +11,11 @@ class ClaraConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     license = "BSL-1.0"
     no_copy_source = True
+    deprecated = "lyra"
 
-    _source_subfolder = "source_subfolder"
-
-    def configure(self):
-        self.output.warn("clara is unmaintained. Consider updating to lyra/1.2")
+    @property
+    def _source_subfolder(self):
+        return "source_subfolder"
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
