@@ -17,6 +17,7 @@ class LibgdConan(ConanFile):
     exports_sources = "CMakeLists.txt", "patches/**"
     generators = "cmake"
     requires = "zlib/1.2.11"
+    _cmake = None
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -45,15 +46,15 @@ class LibgdConan(ConanFile):
         os.rename(glob.glob("libgd-*")[0], self._source_subfolder)
 
     def _configure_cmake(self):
-        cmake = CMake(self)
-        cmake.definitions['BUILD_STATIC_LIBS'] = not self.options.shared
+        if self._cmake:
+            return self._cmake
+        self._cmake = CMake(self)
+        self._cmake.definitions['BUILD_STATIC_LIBS'] = not self.options.shared
         zlib_info = self.deps_cpp_info["zlib"]
-        cmake.definitions["ZLIB_LIBRARY"] = zlib_info.libs[0]
-        cmake.definitions["ZLIB_INCLUDE_DIR"] = zlib_info.include_paths[0]
-        cmake.configure(
-            source_folder=self.source_folder,
-            build_folder=self._build_subfolder)
-        return cmake
+        self._cmake.definitions["ZLIB_LIBRARY"] = zlib_info.libs[0]
+        self._cmake.definitions["ZLIB_INCLUDE_DIR"] = zlib_info.include_paths[0]
+        self._cmake.configure(build_folder=self._build_subfolder)
+        return self._cmake
 
     def build(self):
         self._patch()
