@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.1)
 project(PackageTest CXX)
 
 include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
-conan_basic_setup()
+conan_basic_setup(TARGETS)
 
 find_package(Sqlpp11 CONFIG REQUIRED)
 
