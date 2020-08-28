@@ -45,7 +45,6 @@ class PolylineencoderConan(ConanFile):
         self.copy("*.h",   dst="include/" + self.name, keep_path=False)
         self.copy("*.a",   dst="lib", keep_path=False)
         self.copy("*.lib", dst="lib", keep_path=False)
-        self.copy("*.pdb", dst="lib", keep_path=False)
 
     def package_info(self):
         self.cpp_info.libs.append(self.name)

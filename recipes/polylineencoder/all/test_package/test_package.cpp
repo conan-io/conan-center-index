@@ -27,8 +27,8 @@ SOFTWARE.
 
 static bool operator==(const gepaf::PolylineEncoder::Point& l, const gepaf::PolylineEncoder::Point& r)
 {
-    return std::abs(l.longitude() - r.longitude()) < std::numeric_limits<double>::epsilon()
-        && std::abs(l.latitude() - r.latitude()) < std::numeric_limits<double>::epsilon();
+    return std::abs((double)(l.longitude() - r.longitude())) < std::numeric_limits<double>::epsilon()
+        && std::abs((double)(l.latitude() - r.latitude())) < std::numeric_limits<double>::epsilon();
 }
 
 static bool operator!=(const gepaf::PolylineEncoder::Point& l, const gepaf::PolylineEncoder::Point& r)
