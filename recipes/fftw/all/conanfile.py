@@ -10,7 +10,7 @@ class FFTWConan(ConanFile):
     homepage = "http://www.fftw.org/"
     license = "GPL-2.0"
     topics = ("conan", "fftw", "dft", "dct", "dst")
-    exports_sources = ["CMakeLists.txt"]
+    exports_sources = ["CMakeLists.txt", "patches/**"]
     generators = "cmake"
     settings = "os", "arch", "compiler", "build_type"
     options = {"shared": [True, False],
@@ -72,6 +72,8 @@ class FFTWConan(ConanFile):
         return self._cmake
 
     def build(self):
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            tools.patch(**patch)
         cmake = self._configure_cmake()
         cmake.build()
 
