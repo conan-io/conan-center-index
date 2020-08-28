@@ -32,7 +32,7 @@ class Package7Zip(ConanFile):
     def build_requirements(self):
         self.build_requires("lzma_sdk/9.20")
 
-        if tools.os_info.is_windows and "make" not in os.environ.get("CONAN_MAKE_PROGRAM", ""):
+        if self.settings.compiler !=  "Visual Studio" and tools.os_info.is_windows and "make" not in os.environ.get("CONAN_MAKE_PROGRAM", ""):
             self.build_requires("make/4.2.1")
 
     def _uncompress_7z(self, filename):

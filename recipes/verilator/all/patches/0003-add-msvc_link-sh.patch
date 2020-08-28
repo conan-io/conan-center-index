@@ -1,0 +1,65 @@
+new file mode 100755
+--- /dev/null
++++ msvc_link.sh
+@@ -0,0 +1,61 @@
++#!/bin/sh
++clopts=()
++ldopts=()
++libs=()
++while test $# -gt 0; do
++    case "$1" in
++        -lm | -pthread | -lpthread)
++            # ignore
++            ;;
++        -Xlinker)
++            shift
++            ;;
++        -W* | -w*)
++            # ignore warnings
++            ;;
++        -D*)
++            clopts+=("$1")
++            ;;
++        -I*)
++            clopts+=("$1")
++            ;;
++        -l*)
++            ldopts+=("`echo "$1.lib" | sed "s/^-l//"`")
++            ;;
++        -LIBPATH*)
++            ldopts+=("$1")
++            ;;
++        -L*)
++            ldopts+=("`echo "$1" | sed "s/^-L/-LIBPATH:/"`")
++            ;;
++        *.obj | *.o)
++            ldopts+=("$1")
++            ;;
++        -Wl,*)
++            for linkarg in `echo '$1' | sed -e 's/-Wl,//' -e 's/,/ /'`; do
++                ldopts+=("${linkarg}")
++            done
++            ;;
++        *.lib)
++            ldopts+=("$1")
++            ;;
++        -o)
++            shift
++            ldopts+=("-out:$1")
++            ;;
++        *)
++            clopts+=("$1")
++            ldopts+=("$1")
++            ;;
++    esac
++    shift
++done
++
++args="${ldopts[@]}"
++
++cat <<-EOF
++    Creating program
++    ** ld options:   "$args"
++EOF
++
++LINK= exec link -nologo -debug:full $args

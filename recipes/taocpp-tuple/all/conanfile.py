@@ -10,6 +10,7 @@ class TaoCPPTupleConan(ConanFile):
     description = "Compile-time-efficient proof-of-concept implementation for std::tuple"
     topics = ("template", "cpp11", "tuple")
     no_copy_source = True
+    settings = "os", "compiler", "build_type", "arch"
 
     @property
     def _source_subfolder(self):

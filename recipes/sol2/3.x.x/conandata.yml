@@ -5,3 +5,6 @@ sources:
   "3.2.0":
     url: "https://github.com/ThePhD/sol2/archive/v3.2.0.tar.gz"
     sha256: "733f03d82df6e0e8a15967831840d240dcb2c606982bec753bd173a9cc1b3435"
+  "3.2.1":
+    url: "https://github.com/ThePhD/sol2/archive/v3.2.1.tar.gz"
+    sha256: "b10f88dc1246f74a10348faef7d2c06e2784693307df74dcd87c4641cf6a6828"

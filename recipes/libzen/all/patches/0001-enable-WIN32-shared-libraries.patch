@@ -1,0 +1,11 @@
+--- Project/CMake/CMakeLists.txt
++++ Project/CMake/CMakeLists.txt
+@@ -7,7 +7,7 @@
+ set(ZenLib_PATCH_VERSION 38)
+ set(ZenLib_VERSION ${ZenLib_MAJOR_VERSION}.${ZenLib_MINOR_VERSION}.${ZenLib_PATCH_VERSION})
+ 
+-if(WIN32)
++if(0)
+   set(BUILD_SHARED_LIBS OFF)
+ else()
+   option(BUILD_SHARED_LIBS "Build shared libs" ON)

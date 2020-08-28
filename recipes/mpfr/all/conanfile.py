@@ -14,21 +14,33 @@ class MpfrConan(ConanFile):
     settings = "os", "arch", "compiler", "build_type"
     options = {"shared": [True, False], "fPIC": [True, False]}
     default_options = {"shared": False, "fPIC": True}
-    requires = "mpir/3.0.0"
     exports_sources = "CMakeLists.txt"
     generators = "cmake"
 
-    _source_subfolder = "source_subfolder"
     _autotools = None
     _cmake = None
 
+    @property
+    def _source_subfolder(self):
+        return "source_subfolder"
+
     def config_options(self):
-        if self.settings.os == 'Windows':
+        if self.settings.os == "Windows":
             del self.options.fPIC
 
     def configure(self):
+        if self.options.shared:
+            del self.options.fPIC
         del self.settings.compiler.libcxx
         del self.settings.compiler.cppstd
+
+    def requirements(self):
+        self.requires("mpir/3.0.0")
+
+    def build_requirements(self):
+        if self.settings.os == "Windows" and self.settings.compiler != "Visual Studio" and \
+           "CONAN_BASH_PATH" not in os.environ and tools.os_info.detect_windows_subsystem() != "msys2":
+            self.build_requires("msys2/20200517")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
@@ -51,7 +63,7 @@ class MpfrConan(ConanFile):
             if self.settings.compiler == "clang" and self.settings.arch == "x86":
                 # fatal error: error in backend: Unsupported library call operation!
                 args.append("--disable-float128")
-            self._autotools = AutoToolsBuildEnvironment(self)
+            self._autotools = AutoToolsBuildEnvironment(self, win_bash=tools.os_info.is_windows)
             self._autotools.configure(args=args, configure_dir=self._source_subfolder)
         return self._autotools
 

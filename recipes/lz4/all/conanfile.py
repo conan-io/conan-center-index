@@ -19,15 +19,15 @@ class LZ4Conan(ConanFile):
     def _source_subfolder(self):
         return "source_subfolder"
 
+    def config_options(self):
+        if self.settings.os == "Windows":
+            del self.options.fPIC
+
     def configure(self):
         if self.options.shared:
             del self.options.fPIC
         del self.settings.compiler.libcxx
         del self.settings.compiler.cppstd
-
-    def config_options(self):
-        if self.settings.os == "Windows":
-            del self.options.fPIC
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
@@ -37,8 +37,7 @@ class LZ4Conan(ConanFile):
     def _configure_cmake(self):
         cmake = CMake(self)
         cmake.definitions["LZ4_BUNDLED_MODE"] = False
-        if "fPIC" in self.options:
-            cmake.definitions["LZ4_POSITION_INDEPENDENT_LIB"] = self.options.fPIC
+        cmake.definitions["LZ4_POSITION_INDEPENDENT_LIB"] = self.options.get_safe("fPIC", True)
         cmake.configure()
         return cmake
 
@@ -69,6 +68,7 @@ class LZ4Conan(ConanFile):
         tools.rmdir(os.path.join(self.package_folder, "share"))
 
     def package_info(self):
+        self.cpp_info.names["pkg_config"] = "liblz4"
         self.cpp_info.libs = ["lz4"]
         if self.settings.compiler == "Visual Studio" and self.options.shared:
             self.cpp_info.defines.append("LZ4_DLL_IMPORT")

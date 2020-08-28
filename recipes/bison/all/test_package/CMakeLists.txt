@@ -1,11 +1,7 @@
 cmake_minimum_required(VERSION 3.0)
 project(test_package)
 
-set(CMAKE_CXX_STANDARD 11)
-
-set(CMAKE_VERBOSE_MAKEFILE TRUE)
-
-include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
+include("${CMAKE_BINARY_DIR}/conanbuildinfo.cmake")
 conan_basic_setup()
 
 find_package(BISON)
@@ -31,4 +27,5 @@ add_library(McParser STATIC
     "${CMAKE_CURRENT_BINARY_DIR}/mc_parser.cpp"
 )
 add_executable(${PROJECT_NAME} test_package.cpp)
+set_propertY(TARGET ${PROJECT_NAME} PROPERTY CXX_STANDARD 11)
 target_link_libraries(${PROJECT_NAME} ${CONAN_LIBS})

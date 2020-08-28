@@ -1,0 +1,8 @@
+sources:
+  "0.11.0":
+    url: "https://github.com/HdrHistogram/HdrHistogram_c/archive/0.11.0.tar.gz"
+    sha256: "c00696b3d81776675aa2bc62d3642e31bd8a48cc9619c9bd7d4a78762896e353"
+patches:
+  "0.11.0":
+    - patch_file: "patches/cmake-install.patch"
+      base_path: "source_subfolder"

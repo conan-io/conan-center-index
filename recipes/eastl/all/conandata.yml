@@ -8,6 +8,9 @@ sources:
   3.16.05:
     url: "https://github.com/electronicarts/EASTL/archive/3.16.05.tar.gz"
     sha256: "deebff248ec0d4da35ca006cec39abdcfe65ccbd7294f6fbdb42fc92232368b6"
+  3.16.07:
+    url: "https://github.com/electronicarts/EASTL/archive/3.16.07.tar.gz"
+    sha256: "f997a81c8cb36618bd4526ea7a02d026c8111d15fbc138c67ba8f4606680d551"
 patches:
   3.15.00:
     - patch_file: "patches/0001-cmake-shared-use-conan-add-install.patch"
@@ -16,5 +19,8 @@ patches:
     - patch_file: "patches/0001-cmake-shared-use-conan-add-install.patch"
       base_path: "source_subfolder"
   3.16.05:
+    - patch_file: "patches/0001-cmake-shared-use-conan-add-install.patch"
+      base_path: "source_subfolder"
+  3.16.07:
     - patch_file: "patches/0001-cmake-shared-use-conan-add-install.patch"
       base_path: "source_subfolder"

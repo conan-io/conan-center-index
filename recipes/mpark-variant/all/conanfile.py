@@ -11,6 +11,7 @@ class VariantConan(ConanFile):
     license = "BSL-1.0"
     exports_sources = ["CMakeLists.txt"]
     generators = "cmake"
+    topics = ("conan", "variant", "mpark-variant")
 
     settings = "os", "arch", "compiler", "build_type"
 

@@ -11,7 +11,7 @@ class ProjConan(ConanFile):
     homepage = "https://proj.org"
     url = "https://github.com/conan-io/conan-center-index"
     exports_sources = ["CMakeLists.txt", "patches/**"]
-    generators = "cmake"
+    generators = "cmake", "cmake_find_package"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
@@ -42,19 +42,23 @@ class ProjConan(ConanFile):
         if self.settings.os == "Windows":
             del self.options.fPIC
 
+    def configure(self):
+        if self.options.shared:
+            del self.options.fPIC
+
     def requirements(self):
-        self.requires("sqlite3/3.31.1")
+        self.requires("sqlite3/3.32.3")
         if self.options.with_tiff:
             self.requires("libtiff/4.1.0")
         if self.options.with_curl:
-            self.requires("libcurl/7.69.1")
+            self.requires("libcurl/7.71.0")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
         os.rename(self.name + "-" + self.version, self._source_subfolder)
 
     def build(self):
-        for patch in self.conan_data["patches"][self.version]:
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
             tools.patch(**patch)
         cmake = self._configure_cmake()
         cmake.build()
@@ -85,31 +89,35 @@ class ProjConan(ConanFile):
         cmake.install()
         tools.rmdir(os.path.join(self.package_folder, "share"))
         tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
-        for data_file in glob.glob(os.path.join(self.package_folder, "res", "*")):
-            if not data_file.endswith("proj.db"):
-                os.remove(data_file)
 
     def package_info(self):
+        # TODO: also define deprecated PROJ4::proj alias?
         self.cpp_info.names["cmake_find_package"] = "PROJ"
         self.cpp_info.names["cmake_find_package_multi"] = "PROJ"
-        self.cpp_info.libs = tools.collect_libs(self)
+        self.cpp_info.components["projlib"].names["cmake_find_package"] = "proj"
+        self.cpp_info.components["projlib"].names["cmake_find_package_multi"] = "proj"
+        self.cpp_info.components["projlib"].libs = tools.collect_libs(self)
         if self.settings.os == "Linux":
-            self.cpp_info.system_libs.append("m")
+            self.cpp_info.components["projlib"].system_libs.append("m")
             if self.options.threadsafe:
-                self.cpp_info.system_libs.append("pthread")
-        if not self.options.shared and self._stdcpp_library:
-            self.cpp_info.system_libs.append(self._stdcpp_library)
+                self.cpp_info.components["projlib"].system_libs.append("pthread")
+        if self.settings.os == "Windows":
+            self.cpp_info.components["projlib"].system_libs.append("shell32")
+            if tools.Version(self.version) >= "7.1.0":
+                self.cpp_info.components["projlib"].system_libs.append("Ole32")
+        if not self.options.shared and tools.stdcpp_library(self):
+            self.cpp_info.components["projlib"].system_libs.append(tools.stdcpp_library(self))
+        self.cpp_info.components["projlib"].requires.append("sqlite3::sqlite3")
+        if self.options.with_tiff:
+            self.cpp_info.components["projlib"].requires.append("libtiff::libtiff")
+        if self.options.with_curl:
+            self.cpp_info.components["projlib"].requires.append("libcurl::libcurl")
         if self.options.shared and self.settings.compiler == "Visual Studio":
-            self.cpp_info.defines.append("PROJ_MSVC_DLL_IMPORT")
-        self.env_info.PROJ_LIB.append(os.path.join(self.package_folder, "res"))
-        self.env_info.PATH.append(os.path.join(self.package_folder, "bin"))
+            self.cpp_info.components["projlib"].defines.append("PROJ_MSVC_DLL_IMPORT")
 
-    @property
-    def _stdcpp_library(self):
-        libcxx = self.settings.get_safe("compiler.libcxx")
-        if libcxx in ("libstdc++", "libstdc++11"):
-            return "stdc++"
-        elif libcxx in ("libc++",):
-            return "c++"
-        else:
-            return False
+        res_path = os.path.join(self.package_folder, "res")
+        self.output.info("Appending PROJ_LIB environment variable: {}".format(res_path))
+        self.env_info.PROJ_LIB.append(res_path)
+        bin_path = os.path.join(self.package_folder, "bin")
+        self.output.info("Appending PATH environment variable: {}".format(bin_path))
+        self.env_info.PATH.append(bin_path)

@@ -9,10 +9,10 @@ class Sol2Conan(ConanFile):
     homepage = "https://github.com/ThePhD/sol2"
     description = "C++17 Lua bindings"
     topics = ("conan", "lua", "c++", "bindings")
-    settings = "os", "compiler"
+    settings = "os", "compiler", "build_type", "arch"
     license = "MIT"
     requires = ["lua/5.3.5"]
-    
+
     _source_subfolder = "source_subfolder"
     _build_subfolder = "build_subfolder"
     _cmake = None
@@ -21,7 +21,7 @@ class Sol2Conan(ConanFile):
         tools.get(**self.conan_data["sources"][self.version])
         extracted_dir = self.name + "-" + self.version
         os.rename(extracted_dir, self._source_subfolder)
-    
+
     def _configure_cmake(self):
         if self._cmake:
             return self._cmake
@@ -32,10 +32,11 @@ class Sol2Conan(ConanFile):
         )
         return self._cmake
 
-
     def _has_support_for_cpp17(self):
-        supported_compilers = [("apple-clang", 10), ("clang", 6), ("gcc", 7), ("Visual Studio", 15.7)]
-        compiler, version = self.settings.compiler, tools.Version(self.settings.compiler.version)
+        supported_compilers = [
+            ("apple-clang", 10), ("clang", 6), ("gcc", 7), ("Visual Studio", 15.7)]
+        compiler, version = self.settings.compiler, tools.Version(
+            self.settings.compiler.version)
         return any(compiler == sc[0] and version >= sc[1] for sc in supported_compilers)
 
     def configure(self):
@@ -49,19 +50,23 @@ class Sol2Conan(ConanFile):
 
     def package(self):
         self.copy("LICENSE.txt", src=self._source_subfolder, dst="licenses")
-        #there is a bug in cmake install in 3.0.3, so handel this
+        # there is a bug in cmake install in 3.0.3, so handel this
         if tools.Version(self.version) == "3.0.3":
-            self.copy("*.h", src=os.path.join(self._source_subfolder, "include"), dst="include", keep_path=True)
-            self.copy("*.hpp", src=os.path.join(self._source_subfolder, "include"), dst="include", keep_path=True)
+            self.copy("*.h", src=os.path.join(self._source_subfolder,
+                                              "include"), dst="include", keep_path=True)
+            self.copy("*.hpp", src=os.path.join(self._source_subfolder,
+                                                "include"), dst="include", keep_path=True)
         else:
             cmake = self._configure_cmake()
             cmake.install()
-            tools.rmdir(os.path.join(self.package_folder, "share")) # constains just # , "pkgconfig"))
-            tools.rmdir(os.path.join(self.package_folder, "lib" )) # constains just # , "cmake"))
+            # constains just # , "pkgconfig"))
+            tools.rmdir(os.path.join(self.package_folder, "share"))
+            # constains just # , "cmake"))
+            tools.rmdir(os.path.join(self.package_folder, "lib"))
 
     def package_id(self):
         self.info.header_only()
 
-    def package_info(self): 
-        if self.options["lua"].compile_as_cpp :
+    def package_info(self):
+        if self.options["lua"].compile_as_cpp:
             self.cpp_info.defines.append("SOL_USING_CXX_LUA=1")

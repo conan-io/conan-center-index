@@ -112,3 +112,5 @@ class SystemcConan(ConanFile):
 
         if self.settings.os == "Linux":
             self.cpp_info.system_libs = ["pthread"]
+        if self.settings.compiler == "Visual Studio":
+            self.cpp_info.cxxflags.append("/vmg")

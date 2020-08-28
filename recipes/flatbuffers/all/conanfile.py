@@ -1,5 +1,6 @@
 """Conan recipe package for Google FlatBuffers
 """
+import glob
 import os
 import shutil
 from conans import ConanFile, CMake, tools
@@ -61,13 +62,9 @@ class FlatbuffersConan(ConanFile):
             cmake.install()
             tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
             if self.settings.os == "Windows" and self.options.shared:
-                if self.settings.compiler == "Visual Studio":
-                    tools.mkdir(os.path.join(self.package_folder, "bin"))
-                    shutil.move(os.path.join(self.package_folder, "lib", "%s.dll" % self.name),
-                                os.path.join(self.package_folder, "bin", "%s.dll" % self.name))
-                elif self.settings.compiler == "gcc":
-                    shutil.move(os.path.join(self.package_folder, "lib", "lib%s.dll" % self.name),
-                                os.path.join(self.package_folder, "bin", "lib%s.dll" % self.name))
+                tools.mkdir(os.path.join(self.package_folder, "bin"))
+                for dll_path in glob.glob(os.path.join(self.package_folder, "lib", "*.dll")):
+                    shutil.move(dll_path, os.path.join(self.package_folder, "bin", os.path.basename(dll_path)))
 
     def package_id(self):
         if self.options.header_only:

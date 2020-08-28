@@ -36,6 +36,8 @@ class CpphttplibConan(ConanFile):
         self.info.header_only()
 
     def package_info(self):
+        self.cpp_info.names["cmake_find_package"] = "httplib"
+        self.cpp_info.names["cmake_find_package_multi"] = "httplib"
         if self.options.with_openssl:
             self.cpp_info.defines.append("CPPHTTPLIB_OPENSSL_SUPPORT")
         if self.options.with_zlib:

@@ -10,6 +10,7 @@ class TaoCPPOperatorsConan(ConanFile):
     description = "A highly efficient, move-aware operators library"
     topics = ("cpp", "cpp11", "header-only", "operators")
     no_copy_source = True
+    settings = "os", "compiler", "build_type", "arch"
 
     @property
     def _source_subfolder(self):

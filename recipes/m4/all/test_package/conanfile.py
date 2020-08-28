@@ -19,6 +19,10 @@ class TestPackageConan(ConanFile):
     def _m4_input_path(self):
         return os.path.join(self.build_folder, "input.m4")
 
+    def build_requirements(self):
+        if tools.os_info.is_windows:
+            self.build_requires("msys2/20190524")
+
     def build(self):
         tools.save(self._m4_input_path, M4_CONTENTS)
 
@@ -30,6 +34,8 @@ class TestPackageConan(ConanFile):
         if not tools.cross_building(self.settings):
             self.run("{} --version".format(m4_bin), run_environment=True)
             self.run("{} -P {}".format(m4_bin, self._m4_input_path))
+
+            self.run("m4 -R {0}/frozen.m4f {0}/test.m4".format(self.source_folder), run_environment=True)
 
             output = StringIO()
             self.run("{} -P {}".format(m4_bin, self._m4_input_path), output=output)

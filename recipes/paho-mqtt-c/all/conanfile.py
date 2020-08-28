@@ -1,26 +1,27 @@
 import os
 from conans import CMake, ConanFile, tools
+from conans.errors import ConanInvalidConfiguration
 
 class PahoMqttcConan(ConanFile):
     name = "paho-mqtt-c"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/eclipse/paho.mqtt.c"
     topics = ("MQTT", "IoT", "eclipse", "SSL", "paho", "C")
-    license = "EPL-1.0"
-    description = """The Eclipse Paho project provides open-source client implementations of MQTT
-    and MQTT-SN messaging protocols aimed at new, existing, and emerging applications for the Internet
-    of Things (IoT)"""
+    license = "EPL-2.0"
+    description = """Eclipse Paho MQTT C client library for Linux, Windows and MacOS"""
     exports_sources = ["CMakeLists.txt", "patches/*"]
     generators = "cmake"
     settings = "os", "arch", "compiler", "build_type"
     options = {"shared": [True, False],
                "fPIC": [True, False],
                "ssl": [True, False],
+               "samples": [True, False],
                "asynchronous": [True, False]}
     default_options = {"shared": False,
                        "fPIC": True,
-                       "ssl": False,
-                       "asynchronous": True}
+                       "ssl": True,
+                       "asynchronous" : True,
+                       "samples": False}
 
     _cmake = None
 
@@ -31,14 +32,19 @@ class PahoMqttcConan(ConanFile):
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
+        # Static linking before 1.3.4 isn't supported
+        if tools.Version(self.version) < "1.3.4":
+            self.options.shared = True
 
     def configure(self):
         del self.settings.compiler.cppstd
         del self.settings.compiler.libcxx
+        if self.options.shared == False and self.settings.os == "Windows" and tools.Version(self.version) < "1.3.4":
+            raise ConanInvalidConfiguration("Static linking in Windows did not work before version 1.3.4")
 
     def requirements(self):
         if self.options.ssl:
-            self.requires("openssl/1.1.1f")
+            self.requires("openssl/1.1.1g")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
@@ -51,12 +57,14 @@ class PahoMqttcConan(ConanFile):
         self._cmake = CMake(self)
         self._cmake.definitions["PAHO_ENABLE_TESTING"] = False
         self._cmake.definitions["PAHO_BUILD_DOCUMENTATION"] = False
-        self._cmake.definitions["PAHO_BUILD_SAMPLES"] = False
-        self._cmake.definitions["PAHO_BUILD_STATIC"] = not self.options.shared
         self._cmake.definitions["PAHO_BUILD_ASYNC"] = self.options.asynchronous
+        self._cmake.definitions["PAHO_BUILD_STATIC"] = not self.options.shared
+        self._cmake.definitions["PAHO_BUILD_SHARED"] = self.options.shared
+        self._cmake.definitions["PAHO_BUILD_SAMPLES"] = self.options.samples
         self._cmake.definitions["PAHO_WITH_SSL"] = self.options.ssl
         if self.options.ssl:
             self._cmake.definitions["OPENSSL_SEARCH_PATH"] = self.deps_cpp_info["openssl"].rootpath
+            self._cmake.definitions["OPENSSL_ROOT_DIR"] = self.deps_cpp_info["openssl"].rootpath
         self._cmake.configure()
         return self._cmake
 
@@ -68,7 +76,11 @@ class PahoMqttcConan(ConanFile):
 
     def package(self):
         self.copy("edl-v10", src=self._source_subfolder, dst="licenses")
-        self.copy("epl-v10", src=self._source_subfolder, dst="licenses")
+        if self.version in ['1.3.0', '1.3.1']:
+            eplfile = "epl-v10"
+        else:
+            eplfile = "epl-v20" # EPL changed to V2
+        self.copy(eplfile, src=self._source_subfolder, dst="licenses")
         self.copy("notice.html", src=self._source_subfolder, dst="licenses")
         cmake = self._configure_cmake()
         cmake.install()
@@ -93,4 +105,3 @@ class PahoMqttcConan(ConanFile):
                 self.cpp_info.system_libs.extend(["c", "pthread"])
         self.cpp_info.names["cmake_find_package"] = "PahoMqttC"
         self.cpp_info.names["cmake_find_package_multi"] = "PahoMqttC"
-

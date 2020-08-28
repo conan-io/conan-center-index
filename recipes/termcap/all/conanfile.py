@@ -17,6 +17,8 @@ class TermcapConan(ConanFile):
     options = {"shared": [True, False], "fPIC": [True, False], }
     default_options = {"shared": False, "fPIC": True, }
 
+    _cmake = None
+
     @property
     def _source_subfolder(self):
         return "source_subfolder"
@@ -43,15 +45,18 @@ class TermcapConan(ConanFile):
         return sources, headers, optional_headers
 
     def _configure_cmake(self):
-        cmake = CMake(self)
+        if self._cmake:
+            return self._cmake
+        self._cmake = CMake(self)
         sources, headers, optional_headers = self._extract_sources()
-        cmake.definitions["TERMCAP_SOURCES"] = ";".join(sources)
-        cmake.definitions["TERMCAP_HEADERS"] = ";".join(headers)
-        cmake.definitions["TERMCAP_INC_OPTS"] = ";".join(optional_headers)
-        cmake.verbose=True
-        cmake.parallel = False
-        cmake.configure()
-        return cmake
+        self._cmake.definitions["TERMCAP_SOURCES"] = ";".join(sources)
+        self._cmake.definitions["TERMCAP_HEADERS"] = ";".join(headers)
+        self._cmake.definitions["TERMCAP_INC_OPTS"] = ";".join(optional_headers)
+        self._cmake.definitions["TERMCAP_CAP_FILE"] = os.path.join(self._source_subfolder, "termcap.src").replace("\\", "/")
+        self._cmake.definitions["CMAKE_INSTALL_SYSCONFDIR"] = os.path.join(self.package_folder, "bin", "etc").replace("\\", "/")
+        self._cmake.verbose = True
+        self._cmake.configure()
+        return self._cmake
 
     def _patch_sources(self):
         for patch in self.conan_data["patches"][self.version]:
@@ -72,9 +77,16 @@ class TermcapConan(ConanFile):
         cmake = self._configure_cmake()
         cmake.install()
 
+    @property
+    def _termcap_path(self):
+        return os.path.join(self.package_folder, "bin", "etc", "termcap")
+
     def package_info(self):
         self.cpp_info.names["cmake_find_package"] = "Termcap"
         self.cpp_info.names["cmake_find_package_multi"] = "Termcap"
         self.cpp_info.libs = tools.collect_libs(self)
         if self.options.shared:
             self.cpp_info.definitions = ["TERMCAP_SHARED"]
+
+        self.output.info("Setting TERMCAP environment variable: {}".format(self._termcap_path))
+        self.env_info.TERMCAP = self._termcap_path

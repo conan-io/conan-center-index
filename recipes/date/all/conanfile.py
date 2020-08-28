@@ -15,10 +15,12 @@ class DateConan(ConanFile):
     generators = "cmake",
     options = {"shared": [True, False],
                "fPIC": [True, False],
+               "header_only": [True, False],
                "use_system_tz_db": [True, False],
                "use_tz_db_in_dot": [True, False]}
     default_options = {"shared": False,
                        "fPIC": True,
+                       "header_only": False,
                        "use_system_tz_db": False,
                        "use_tz_db_in_dot": False}
 
@@ -52,6 +54,8 @@ class DateConan(ConanFile):
             tools.check_min_cppstd(self, "11")
 
     def requirements(self):
+        if self.options.header_only:
+            return
         if not self.options.use_system_tz_db:
             self.requires("libcurl/7.69.1")
 
@@ -63,18 +67,34 @@ class DateConan(ConanFile):
     def build(self):
         for patch in self.conan_data["patches"][self.version]:
             tools.patch(**patch)
+        if self.options.header_only:
+            self.output.info("Header only package, skipping build")
+            return
         cmake = self._configure_cmake()
         cmake.build()
 
     def package(self):
         self.copy(pattern="LICENSE.txt", dst="licenses",
                   src=self._source_subfolder)
+        if self.options.header_only:
+            src = os.path.join(self._source_subfolder, "include", "date")
+            dst = os.path.join("include", "date")
+            self.copy(pattern="date.h", dst=dst, src=src)
+            self.copy(pattern="tz.h", dst=dst, src=src)
+            self.copy(pattern="iso_week.h", dst=dst, src=src)
+            self.copy(pattern="julian.h", dst=dst, src=src)
+            self.copy(pattern="islamic.h", dst=dst, src=src)
+            return
+
         cmake = self._configure_cmake()
         cmake.install()
         tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
         tools.rmdir(os.path.join(self.package_folder, "CMake"))
 
     def package_info(self):
+        if self.options.header_only:
+            return
+
         self.cpp_info.libs = tools.collect_libs(self)
         if self.settings.os == "Linux":
             self.cpp_info.system_libs.append("pthread")
@@ -89,3 +109,7 @@ class DateConan(ConanFile):
             defines.append("DATE_USE_DLL=1")
 
         self.cpp_info.defines.extend(defines)
+
+    def package_id(self):
+        if self.options.header_only:
+            self.info.header_only()
