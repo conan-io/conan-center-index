@@ -1,6 +1,3 @@
-#!/usr/bin/env python
-# -*- coding: utf-8 -*-
-
 from conans import ConanFile, CMake, tools
 import os
 
@@ -9,7 +6,6 @@ class PolylineencoderConan(ConanFile):
     description = "Google Encoded Polyline Algorithm Format library"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/vahancho/polylineencoder"
-    author = "vahancho"
     license = "MIT"
     topics = ("conan", "gepaf", "encoded-polyline", "google-polyline", "polyline")
     settings = "os", "arch", "compiler", "build_type"
@@ -19,9 +15,13 @@ class PolylineencoderConan(ConanFile):
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
         os.rename(self.name + "-" + self.version, self._source_subfolder)
+
         tools.replace_in_file(self._source_subfolder + "/src/polylineencoder.cpp", "#include <cmath>",
         '''#include <cmath>
            #include <limits>''')
+
+        tools.replace_in_file(self._source_subfolder + "/CMakeLists.txt", "add_library(encoder", "add_library(polylineencoder")
+        tools.replace_in_file(self._source_subfolder + "/CMakeLists.txt", "PRIVATE encoder", "PRIVATE polylineencoder")
 
     def build(self):
         c = CMake(self)
@@ -30,6 +30,7 @@ class PolylineencoderConan(ConanFile):
         c.test()
 
     def package(self):
+        self.copy("LICENSE", dst="licenses", src=self._source_subfolder)
         self.copy("*.h",   dst="include/" + self.name, keep_path=False)
         self.copy("*.a",   dst="lib", keep_path=False)
         self.copy("*.lib", dst="lib", keep_path=False)
