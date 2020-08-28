@@ -226,6 +226,9 @@ class LibcurlConan(ConanFile):
         if not self.options.with_ldap:
             params.append("--disable-ldap")
 
+        if self.settings.build_type == "Debug":
+           params.append("--enable-debug")
+
         # Cross building flags
         if tools.cross_building(self.settings):
             if self.settings.os == "Linux" and "arm" in self.settings.arch:
