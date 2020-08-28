@@ -1,4 +1,5 @@
 import os
+import glob
 from conans import ConanFile, CMake, tools
 from conans.errors import ConanInvalidConfiguration
 
@@ -77,6 +78,8 @@ class SentryNativeConan(ConanFile):
         cmake = self._configure_cmake()
         cmake.install()
         tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
+        for pdb in glob.glob(os.path.join(self.package_folder, "bin", "*.pdb")):
+            os.unlink(pdb)
 
     def package_info(self):
         self.cpp_info.libs = ["sentry"]
