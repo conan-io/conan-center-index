@@ -15,9 +15,9 @@ class Libxml2Conan(ConanFile):
     generators = "pkg_config"
 
     # from ./configure and ./win32/configure.js
-    default_options = {'shared': False,
-                       'fPIC': True,
-                       'include_utils': True,
+    default_options = {"shared": False,
+                       "fPIC": True,
+                       "include_utils": True,
                        "c14n": True,
                        "catalog": True,
                        "docbook": True,
@@ -72,11 +72,11 @@ class Libxml2Conan(ConanFile):
 
     @property
     def _is_msvc(self):
-        return self.settings.compiler == 'Visual Studio'
+        return self.settings.compiler == "Visual Studio"
     
     @property
     def _is_mingw(self):
-        return self.settings.compiler == 'gcc' and self.settings.os == 'Windows'
+        return self.settings.compiler == "gcc" and self.settings.os == "Windows"
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
@@ -87,12 +87,14 @@ class Libxml2Conan(ConanFile):
             del self.options.fPIC
 
     def configure(self):
+        if self.options.shared:
+            del self.options.fPIC
         del self.settings.compiler.libcxx
         del self.settings.compiler.cppstd
 
     @contextmanager
     def _msvc_build_environment(self):
-        with tools.chdir(os.path.join(self._source_subfolder, 'win32')):
+        with tools.chdir(os.path.join(self._source_subfolder, "win32")):
             with tools.vcvars(self.settings):
                 with tools.environment_append(VisualStudioBuildEnvironment(self).vars):
                     yield
@@ -109,8 +111,8 @@ class Libxml2Conan(ConanFile):
                     "cruntime=/%s" % self.settings.compiler.runtime,
                     "debug=%s" % debug,
                     "static=%s" % static,
-                    'include="%s"' % ";".join(self.deps_cpp_info.include_paths),
-                    'lib="%s"' % ";".join(self.deps_cpp_info.lib_paths)]
+                    "include='%s'" % ";".join(self.deps_cpp_info.include_paths),
+                    "lib='%s'" % ";".join(self.deps_cpp_info.lib_paths)]
 
             for name in self._option_names:
                 cname = {"mem-debug": "mem_debug",
@@ -120,7 +122,7 @@ class Libxml2Conan(ConanFile):
                 value = "yes" if value else "no"
                 args.append("%s=%s" % (cname, value))
 
-            configure_command = ' '.join(args)
+            configure_command = " ".join(args)
             self.output.info(configure_command)
             self.run(configure_command)
 
@@ -130,18 +132,18 @@ class Libxml2Conan(ConanFile):
                     libs = []
                     for lib in self.deps_cpp_info[package].libs:
                         libname = lib
-                        if not libname.endswith('.lib'):
-                            libname += '.lib'
+                        if not libname.endswith(".lib"):
+                            libname += ".lib"
                         libs.append(libname)
                     tools.replace_in_file("Makefile.msvc",
                                           "LIBS = $(LIBS) %s" % old_libname,
-                                          "LIBS = $(LIBS) %s" % ' '.join(libs))
+                                          "LIBS = $(LIBS) %s" % " ".join(libs))
 
-            fix_library(self.options.zlib, 'zlib', 'zlib.lib')
-            fix_library(self.options.lzma, 'lzma', 'liblzma.lib')
-            fix_library(self.options.iconv, 'libiconv', 'iconv.lib')
-            fix_library(self.options.icu, 'icu', 'advapi32.lib sicuuc.lib sicuin.lib sicudt.lib')
-            fix_library(self.options.icu, 'icu', 'icuuc.lib icuin.lib icudt.lib')
+            fix_library(self.options.zlib, "zlib", "zlib.lib")
+            fix_library(self.options.lzma, "lzma", "liblzma.lib")
+            fix_library(self.options.iconv, "libiconv", "iconv.lib")
+            fix_library(self.options.icu, "icu", "advapi32.lib sicuuc.lib sicuin.lib sicudt.lib")
+            fix_library(self.options.icu, "icu", "icuuc.lib icuin.lib icudt.lib")
 
             self.run("nmake /f Makefile.msvc libxml libxmla libxmladll")
 
@@ -160,19 +162,17 @@ class Libxml2Conan(ConanFile):
         if self._autotools:
             return self._autotools
         self._autotools = AutoToolsBuildEnvironment(self, win_bash=tools.os_info.is_windows)
-        if not tools.os_info.is_windows:
-            self._autotools.fpic = self.options.fPIC
         full_install_subfolder = tools.unix_path(self.package_folder) if tools.os_info.is_windows else self.package_folder
         # fix rpath
         if self.settings.os == "Macos":
             tools.replace_in_file(os.path.join(self._source_subfolder, "configure"), r"-install_name \$rpath/", "-install_name ")
-        configure_args = ['--prefix=%s' % full_install_subfolder]
+        configure_args = ["--prefix=%s" % full_install_subfolder]
         if self._autotools.fpic:
-            configure_args.extend(['--with-pic'])
+            configure_args.extend(["--with-pic"])
         if self.options.shared:
-            configure_args.extend(['--enable-shared', '--disable-static'])
+            configure_args.extend(["--enable-shared", "--disable-static"])
         else:
-            configure_args.extend(['--enable-static', '--disable-shared'])
+            configure_args.extend(["--enable-static", "--disable-shared"])
 
         for name in self._option_names:
             value = getattr(self.options, name)
@@ -204,7 +204,8 @@ class Libxml2Conan(ConanFile):
             autotools.make(["libxml2.la"])
 
             if self.options.include_utils:
-                autotools.make(["xmllint", "xmlcatalog", "xml2-config"])
+                ext = ".exe" if self.settings.os == "Windows" else ""
+                autotools.make(["xmllint" + ext, "xmlcatalog" + ext, "xml2-config"])
 
     def package(self):
         # copy package license
@@ -216,9 +217,10 @@ class Libxml2Conan(ConanFile):
             autotools.make(["install-libLTLIBRARIES", "install-data"])
 
             if self.options.include_utils:
-                autotools.make(["install","xmllint", "xmlcatalog", "xml2-config"])
+                ext = ".exe" if self.settings.os == "Windows" else ""
+                autotools.make(["xmllint" + ext, "xmlcatalog" + ext, "xml2-config"])
 
-            os.unlink(os.path.join(self.package_folder, 'lib', 'libxml2.la'))
+            os.unlink(os.path.join(self.package_folder, "lib", "libxml2.la"))
 
         for prefix in ["run", "test"]:
             for test in glob.glob("%s/bin/%s*" % (self.package_folder, prefix)):
@@ -230,22 +232,22 @@ class Libxml2Conan(ConanFile):
             # remove redundant libraries to avoid confusion
             if not self.options.shared:
                 os.unlink(os.path.join(self.package_folder, "bin", "libxml2.dll"))
-            os.unlink(os.path.join(self.package_folder, 'lib', 'libxml2_a_dll.lib'))
-            os.unlink(os.path.join(self.package_folder, 'lib', 'libxml2_a.lib' if self.options.shared else 'libxml2.lib'))
+            os.unlink(os.path.join(self.package_folder, "lib", "libxml2_a_dll.lib"))
+            os.unlink(os.path.join(self.package_folder, "lib", "libxml2_a.lib" if self.options.shared else "libxml2.lib"))
 
-            pdb_files = glob.glob(os.path.join(self.package_folder, 'bin', '*.pdb'), recursive=True)
+            pdb_files = glob.glob(os.path.join(self.package_folder, "bin", "*.pdb"), recursive=True)
             for pdb in pdb_files:
                 os.unlink(pdb)
 
-        tools.rmdir(os.path.join(self.package_folder, 'share'))
-        tools.rmdir(os.path.join(self.package_folder, 'lib', 'cmake'))
-        tools.rmdir(os.path.join(self.package_folder, 'lib', 'pkgconfig'))
+        tools.rmdir(os.path.join(self.package_folder, "share"))
+        tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
+        tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
 
     def package_info(self):
         if self._is_msvc:
-            self.cpp_info.libs = ['libxml2' if self.options.shared else 'libxml2_a']
+            self.cpp_info.libs = ["libxml2" if self.options.shared else "libxml2_a"]
         else:
-            self.cpp_info.libs = ['xml2']
+            self.cpp_info.libs = ["xml2"]
         self.cpp_info.includedirs.append(os.path.join("include", "libxml2"))
         if not self.options.shared:
             self.cpp_info.defines = ["LIBXML_STATIC"]
@@ -255,9 +257,13 @@ class Libxml2Conan(ConanFile):
             self.env_info.PATH.append(bindir)
 
         if self.settings.os == "Linux" or self.settings.os == "Macos":
-            self.cpp_info.system_libs.append('m')
+            self.cpp_info.system_libs.append("m")
         if self.settings.os == "Windows":
-            self.cpp_info.system_libs.append('ws2_32')
-        self.cpp_info.names["cmake_find_package"] = "LibXml2"
-        self.cpp_info.names["cmake_find_package_multi"] = "LibXml2"
+            self.cpp_info.system_libs.append("ws2_32")
+        if self.options.threads:
+            if self.settings.os == "Linux":
+                self.cpp_info.system_libs.append("pthread")
+
         self.cpp_info.names["pkg_config"] = "libxml-2.0"
+        self.cpp_info.filenames["cmake_find_package"] = "libxml2"
+        self.cpp_info.filenames["cmake_find_package_multi"] = "libxml2"
