@@ -21,7 +21,7 @@ class PclConanRecipe(ConanFile):
         "with_tools": [True, False]
     }
     default_options = {
-        "shared": True,
+        "shared": False,
         "fPIC": True,
         "with_cuda": False,
         "with_tools": False
