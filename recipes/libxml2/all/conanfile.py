@@ -64,11 +64,11 @@ class Libxml2Conan(ConanFile):
         if self.options.iconv:
             self.requires("libiconv/1.16")
         if self.options.icu:
-            self.requires("icu/64.2")
+            self.requires("icu/67.1")
 
     def build_requirements(self):
         if self.settings.compiler != "Visual Studio" and tools.os_info.is_windows and os.environ.get("CONAN_BASH_PATH", None) is None:
-            self.build_requires("msys2/20190524")
+            self.build_requires("msys2/20200517")
 
     @property
     def _is_msvc(self):
