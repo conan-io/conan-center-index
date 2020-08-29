@@ -1,6 +1,6 @@
-#include <stddef.h>
-
 #include <libdis.h>
+
+#include <stddef.h>
 
 int main()
 {
