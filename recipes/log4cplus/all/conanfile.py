@@ -11,9 +11,9 @@ class Log4cplusConan(ConanFile):
     topics = ("conan", "log4cplus", "logging", "log", "logging-library")
     license = ("BSD-2-Clause, Apache-2.0")
     exports_sources = ["CMakeLists.txt"]
-    generators = 'cmake'
-    settings = 'os', 'compiler', 'build_type', 'arch'
-    options = {'shared': [True, False],
+    generators = "cmake"
+    settings = "os", "compiler", "build_type", "arch"
+    options = {"shared": [True, False],
                "fPIC": [True, False],
                "single_threaded": [True, False],
                "build_logging_server": [True, False],
@@ -22,25 +22,25 @@ class Log4cplusConan(ConanFile):
                "working_c_locale": [True, False],
                "decorated_name": [True, False],
                "unicode": [True, False]}
-    default_options = {'shared': False,
-                       'fPIC': True,
-                       'single_threaded': False,
-                       'build_logging_server': False,
-                       'with_iconv': False,
-                       'working_locale': False,
-                       'working_c_locale': False,
-                       'decorated_name': False,
-                       'unicode': True}
+    default_options = {"shared": False,
+                       "fPIC": True,
+                       "single_threaded": False,
+                       "build_logging_server": False,
+                       "with_iconv": False,
+                       "working_locale": False,
+                       "working_c_locale": False,
+                       "decorated_name": False,
+                       "unicode": True}
     short_paths = True
     _source_subfolder = "source_subfolder"
     _build_subfolder = "build_subfolder"
 
     def requirements(self):
         if self.options.with_iconv:
-            self.requires.add('libiconv/1.16')
+            self.requires.add("libiconv/1.16")
 
     def config_options(self):
-        if self.settings.os == 'Windows':
+        if self.settings.os == "Windows":
             del self.options.fPIC
 
     def source(self):
@@ -50,17 +50,17 @@ class Log4cplusConan(ConanFile):
 
     def _configure_cmake(self):
         cmake = CMake(self)
-        cmake.definitions['UNICODE'] = self.options.unicode
-        cmake.definitions['LOG4CPLUS_BUILD_TESTING'] = False
-        cmake.definitions['WITH_UNIT_TESTS'] = False
+        cmake.definitions["UNICODE"] = self.options.unicode
+        cmake.definitions["LOG4CPLUS_BUILD_TESTING"] = False
+        cmake.definitions["WITH_UNIT_TESTS"] = False
         cmake.definitions["LOG4CPLUS_ENABLE_DECORATED_LIBRARY_NAME"] = self.options.decorated_name
-        cmake.definitions['LOG4CPLUS_QT4'] = False
-        cmake.definitions['LOG4CPLUS_QT5'] = False
-        cmake.definitions['LOG4CPLUS_SINGLE_THREADED'] = self.options.single_threaded
-        cmake.definitions['LOG4CPLUS_BUILD_LOGGINGSERVER'] = self.options.build_logging_server
-        cmake.definitions['WITH_ICONV'] = self.options.with_iconv
-        cmake.definitions['LOG4CPLUS_WORKING_LOCALE'] = self.options.working_locale
-        cmake.definitions['LOG4CPLUS_WORKING_C_LOCALE'] = self.options.working_c_locale
+        cmake.definitions["LOG4CPLUS_QT4"] = False
+        cmake.definitions["LOG4CPLUS_QT5"] = False
+        cmake.definitions["LOG4CPLUS_SINGLE_THREADED"] = self.options.single_threaded
+        cmake.definitions["LOG4CPLUS_BUILD_LOGGINGSERVER"] = self.options.build_logging_server
+        cmake.definitions["WITH_ICONV"] = self.options.with_iconv
+        cmake.definitions["LOG4CPLUS_WORKING_LOCALE"] = self.options.working_locale
+        cmake.definitions["LOG4CPLUS_WORKING_C_LOCALE"] = self.options.working_c_locale
         cmake.configure(build_dir=self._build_subfolder)
         return cmake
 
@@ -79,4 +79,4 @@ class Log4cplusConan(ConanFile):
         if self.settings.os == "Linux":
             self.cpp_info.system_libs = ["dl", "pthread"]
         elif self.settings.os == "Windows":
-            self.cpp_info.system_libs = ['Ws2_32']
+            self.cpp_info.system_libs = ["Ws2_32"]
