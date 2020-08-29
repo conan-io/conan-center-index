@@ -199,6 +199,8 @@ class LibwebsocketsConan(ConanFile):
             del self.options.fPIC
 
     def configure(self):
+        if self.options.shared:
+            del self.options.fPIC
         del self.settings.compiler.libcxx
         del self.settings.compiler.cppstd
 
@@ -237,7 +239,6 @@ class LibwebsocketsConan(ConanFile):
         if self.options.with_hubbub:
             raise ConanInvalidConfiguration("Library hubbub not implemented (yet) in CCI")
             # TODO - Add hubbub package when available.
-          
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
