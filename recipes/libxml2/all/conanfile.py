@@ -73,7 +73,7 @@ class Libxml2Conan(ConanFile):
     @property
     def _is_msvc(self):
         return self.settings.compiler == "Visual Studio"
-    
+
     @property
     def _is_mingw(self):
         return self.settings.compiler == "gcc" and self.settings.os == "Windows"
@@ -245,25 +245,42 @@ class Libxml2Conan(ConanFile):
 
     def package_info(self):
         if self._is_msvc:
-            self.cpp_info.libs = ["libxml2" if self.options.shared else "libxml2_a"]
+            self.cpp_info.components["xml2lib"].libs = ["libxml2" if self.options.shared else "libxml2_a"]
         else:
-            self.cpp_info.libs = ["xml2"]
-        self.cpp_info.includedirs.append(os.path.join("include", "libxml2"))
+            self.cpp_info.components["xml2lib"].libs = ["xml2"]
+        self.cpp_info.components["xml2lib"].includedirs.append(os.path.join("include", "libxml2"))
         if not self.options.shared:
-            self.cpp_info.defines = ["LIBXML_STATIC"]
+            self.cpp_info.components["xml2lib"].defines = ["LIBXML_STATIC"]
+
+        if self.settings.os == "Linux" or self.settings.os == "Macos":
+            self.cpp_info.components["xml2lib"].system_libs.append("m")
+        if self.settings.os == "Windows":
+            self.cpp_info.components["xml2lib"].system_libs.append("ws2_32")
+        if self.options.threads:
+            if self.settings.os == "Linux":
+                self.cpp_info.components["xml2lib"].system_libs.append("pthread")
+
+        if self.options.zlib:
+            self.cpp_info.components["xml2lib"].requires.append("zlib::zlib")
+        if self.options.lzma:
+            self.cpp_info.components["xml2lib"].requires.append("xz_utils::xz_utils")
+        if self.options.iconv:
+            self.cpp_info.components["xml2lib"].requires.append("libiconv::libiconv")
+        if self.options.icu:
+            self.cpp_info.components["xml2lib"].requires.append("icu::icu")
+
+        self.cpp_info.components["xml2lib"].names["pkg_config"] = "libxml-2.0"
+        self.cpp_info.filenames["cmake_find_package"] = "LibXml2"
+        self.cpp_info.filenames["cmake_find_package_multi"] = "LibXml2"
+        self.cpp_info.names["cmake_find_package"] = "LibXml2"
+        self.cpp_info.names["cmake_find_package_multi"] = "LibXml2"
+        self.cpp_info.components["xml2lib"].names["cmake_find_package"] = "LibXml2"
+        self.cpp_info.components["xml2lib"].names["cmake_find_package_multi"] = "LibXml2"
+
+        # FIXME: libxml2 package itself creates libxml2-config.cmake file
+
         if self.options.include_utils:
             bindir = os.path.join(self.package_folder, "bin")
             self.output.info("Appending PATH environment variable: {}".format(bindir))
             self.env_info.PATH.append(bindir)
-
-        if self.settings.os == "Linux" or self.settings.os == "Macos":
-            self.cpp_info.system_libs.append("m")
-        if self.settings.os == "Windows":
-            self.cpp_info.system_libs.append("ws2_32")
-        if self.options.threads:
-            if self.settings.os == "Linux":
-                self.cpp_info.system_libs.append("pthread")
-
-        self.cpp_info.names["pkg_config"] = "libxml-2.0"
-        self.cpp_info.filenames["cmake_find_package"] = "libxml2"
-        self.cpp_info.filenames["cmake_find_package_multi"] = "libxml2"
+#             FIXME: cmake creates LibXml2::xmllint imported target for the xmllint executable
