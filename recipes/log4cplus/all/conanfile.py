@@ -94,4 +94,4 @@ class Log4cplusConan(ConanFile):
         if self.settings.os == "Linux":
             self.cpp_info.system_libs = ["dl", "pthread"]
         elif self.settings.os == "Windows":
-            self.cpp_info.system_libs = ["Ws2_32"]
+            self.cpp_info.system_libs = ["advapi32", "Ws2_32"]
