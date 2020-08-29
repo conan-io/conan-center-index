@@ -4,5 +4,9 @@ sources:
     sha256: "de3e578aa582af6e1d7729f39626892fb72dc6573658a221e0905f42a65433da"
 patches:
   "0.23":
-    - patch_file: "patches/001_fix_size_of_void.patch"
+    - patch_file: "patches/0001-fix-size-of-void.patch"
+      base_path: "source_subfolder"
+    - patch_file: "patches/0002-only-build-libdisasm-by-default.patch"
+      base_path: "source_subfolder"
+    - patch_file: "patches/0003-libdisasm-no-undefined.patch"
       base_path: "source_subfolder"
