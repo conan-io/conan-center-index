@@ -4,11 +4,6 @@ project(test_package)
 include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
 conan_basic_setup()
 
-if(UNICODE)
-    add_definitions("-DUNICODE")
-    add_definitions("-D_UNICODE")
-endif()
-
 find_package(log4cplus REQUIRED CONFIG)
 
 add_executable(${PROJECT_NAME} test_package.cpp)
