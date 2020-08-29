@@ -1,7 +1,6 @@
 import os
 import glob
 from conans import ConanFile, CMake, tools
-from conans.errors import ConanInvalidConfiguration
 
 
 class MeshOptimizerConan(ConanFile):
@@ -33,11 +32,6 @@ class MeshOptimizerConan(ConanFile):
     def _build_subfolder(self):
         return "build_subfolder"
 
-    def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        extracted_dir = self.name + "-" + self.version
-        os.rename(extracted_dir, self._source_subfolder)
-
     def config_options(self):
         if self.settings.os == 'Windows':
             del self.options.fPIC
@@ -45,6 +39,11 @@ class MeshOptimizerConan(ConanFile):
     def configure(self):
         if self.options.shared:
             del self.options.fPIC
+
+    def source(self):
+        tools.get(**self.conan_data["sources"][self.version])
+        extracted_dir = self.name + "-" + self.version
+        os.rename(extracted_dir, self._source_subfolder)
 
     def _configure_cmake(self):
         if self._cmake:
@@ -71,3 +70,7 @@ class MeshOptimizerConan(ConanFile):
 
     def package_info(self):
         self.cpp_info.libs = tools.collect_libs(self)
+        if not self.options.shared and tools.stdcpp_library(self):
+            self.cpp_info.system_libs.append(tools.stdcpp_library(self))
+        if self.options.shared and self.settings.os == "Windows":
+            self.cpp_info.defines = ["MESHOPTIMIZER_API=__declspec(dllimport)"]
