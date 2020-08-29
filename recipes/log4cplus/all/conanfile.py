@@ -79,7 +79,13 @@ class Log4cplusConan(ConanFile):
         self._cmake.configure(build_dir=self._build_subfolder)
         return self._cmake
 
+    def _patch_sources(self):
+        # don't force PIC
+        tools.replace_in_file(os.path.join(self._source_subfolder, "CMakeLists.txt"),
+                              "set (CMAKE_POSITION_INDEPENDENT_CODE ON)", "")
+
     def build(self):
+        self._patch_sources()
         cmake = self._configure_cmake()
         cmake.build()
 
