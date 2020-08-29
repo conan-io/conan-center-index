@@ -167,7 +167,6 @@ class PclConanRecipe(ConanFile):
         self.cpp_info.components[name].requires = dependencies
 
     def package_info(self):
-        self.cpp_info.name = "PCL"
         pcl_common = "common"
         pcl_kdtree = "kdtree"
         pcl_octree = "octree"
@@ -186,6 +185,9 @@ class PclConanRecipe(ConanFile):
         pcl_tracking = "tracking"
         pcl_recognition = "recognition"
         pcl_stereo = "stereo"
+
+        self.cpp_info.names["cmake_find_package"] = "PCL"
+        self.cpp_info.names["pkg_config"] = "PCL"
 
         self._update_components(pcl_common, ["eigen::eigen", "boost::boost", "opengl::opengl"])
         self._update_components(pcl_kdtree, [pcl_common, "flann::flann"])
