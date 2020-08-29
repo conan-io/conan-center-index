@@ -40,6 +40,11 @@ class PclConanRecipe(ConanFile):
     def _source_subfolder(self):
         return "source_subfolder"
 
+    @property
+    def _version_suffix(self):
+        semver = tools.Version(self.version)
+        return "{}.{}".format(semver.major, semver.minor)
+
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
         os.rename("pcl-pcl-{}".format(self.version), self._source_subfolder)
@@ -151,7 +156,52 @@ class PclConanRecipe(ConanFile):
         tools.rmdir(os.path.join(self.package_folder, "share"))
         tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
 
+    def _update_components(self, name, dependencies, header_only=False, extra_libs=None):
+        if not extra_libs:
+            extra_libs = []
+        if not header_only:
+            self.cpp_info.components[name].libs = ["pcl_{}".format(lib) for lib in [name] + extra_libs]
+        self.cpp_info.components[name].includedirs = ["include/pcl-{}".format(self._version_suffix)]
+        self.cpp_info.components[name].name = "PCL_{}_LIBRARIES".format(name.upper())
+        self.cpp_info.components[name].names["pkg_config"] = "pcl_{}-{}".format(name, self._version_suffix)
+        self.cpp_info.components[name].requires = dependencies
+
     def package_info(self):
-        semver = tools.Version(self.version)
-        self.cpp_info.includedirs = ["include/pcl-{}.{}".format(semver.major, semver.minor)]
-        self.cpp_info.libs = tools.collect_libs(self)
+        self.cpp_info.name = "PCL"
+        pcl_common = "common"
+        pcl_kdtree = "kdtree"
+        pcl_octree = "octree"
+        pcl_search = "search"
+        pcl_sample_consensus = "sample_consensus"
+        pcl_filters = "filters"
+        pcl_2d = "2d"
+        pcl_geometry = "geometry"
+        pcl_io = "io"
+        pcl_features = "features"
+        pcl_ml = "ml"
+        pcl_segmentation = "segmentation"
+        pcl_surface = "surface"
+        pcl_registration = "registration"
+        pcl_keypoints = "keypoints"
+        pcl_tracking = "tracking"
+        pcl_recognition = "recognition"
+        pcl_stereo = "stereo"
+
+        self._update_components(pcl_common, ["eigen::eigen", "boost::boost", "opengl::opengl"])
+        self._update_components(pcl_kdtree, [pcl_common, "flann::flann"])
+        self._update_components(pcl_octree, [pcl_common])
+        self._update_components(pcl_search, [pcl_common, pcl_kdtree, pcl_octree, "flann::flann"])
+        self._update_components(pcl_sample_consensus, [pcl_common, pcl_search])
+        self._update_components(pcl_filters, [pcl_common, pcl_sample_consensus, pcl_search, pcl_kdtree, pcl_octree])
+        self._update_components(pcl_2d, [pcl_common, pcl_filters], header_only=True)
+        self._update_components(pcl_geometry, [pcl_common], header_only=True)
+        self._update_components(pcl_io, [pcl_common, pcl_octree, "libpng::libpng"], extra_libs=["io_ply"])
+        self._update_components(pcl_features, [pcl_common,pcl_search, pcl_kdtree, pcl_octree, pcl_filters, pcl_2d])
+        self._update_components(pcl_ml, [pcl_common])
+        self._update_components(pcl_segmentation, [pcl_common, pcl_geometry, pcl_search, pcl_sample_consensus, pcl_kdtree, pcl_octree, pcl_features, pcl_filters, pcl_ml])
+        self._update_components(pcl_surface, [pcl_common, pcl_search, pcl_kdtree, pcl_octree, "qhull::qhull"])
+        self._update_components(pcl_registration, [pcl_common, pcl_octree, pcl_kdtree, pcl_search, pcl_sample_consensus, pcl_features, pcl_filters])
+        self._update_components(pcl_keypoints, [pcl_common, pcl_search, pcl_kdtree, pcl_octree, pcl_features, pcl_filters])
+        self._update_components(pcl_tracking, [pcl_common, pcl_search, pcl_kdtree, pcl_filters, pcl_octree])
+        self._update_components(pcl_recognition, [pcl_common, pcl_io, pcl_search, pcl_kdtree, pcl_octree, pcl_features, pcl_filters, pcl_registration, pcl_sample_consensus, pcl_ml])
+        self._update_components(pcl_stereo, [pcl_common, pcl_io])
