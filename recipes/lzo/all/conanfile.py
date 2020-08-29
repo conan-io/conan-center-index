@@ -55,5 +55,6 @@ class LZOConan(ConanFile):
         tools.rmdir(os.path.join(self.package_folder, "share"))
 
     def package_info(self):
+        self.cpp_info.names["pkg_config"] ="lzo2"
         self.cpp_info.includedirs.append(os.path.join("include", "lzo"))
         self.cpp_info.libs = tools.collect_libs(self)
