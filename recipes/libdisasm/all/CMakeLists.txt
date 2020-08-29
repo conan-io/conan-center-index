@@ -38,11 +38,11 @@ set(libdisasm_SRCS
     ${libdisasm_SOURCE_DIR}/libdisasm/x86_operand_list.c
     ${libdisasm_SOURCE_DIR}/libdisasm/x86_operand_list.h
 )
-add_library(libdisasm ${libdisasm_SRCS})
-target_include_directories(libdisasm PRIVATE ${libdisasm_SOURCE_DIR}/libdisasm)
+add_library(disasm ${libdisasm_SRCS})
+target_include_directories(disasm PRIVATE ${libdisasm_SOURCE_DIR}/libdisasm)
 
 install(
-  TARGETS libdisasm
+  TARGETS disasm
   RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
   LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
   ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
