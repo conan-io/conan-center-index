@@ -153,6 +153,19 @@ class MozjpegConan(ConanFile):
         tools.rmdir(os.path.join(self.package_folder, "doc"))
 
     def package_info(self):
-        self.cpp_info.libs = tools.collect_libs(self)
+        # libjpeg
+        self.cpp_info.components["libjpeg"].names["pkg_config"] = "libjpeg"
+        self.cpp_info.components["libjpeg"].libs = [self._lib_name("jpeg")]
         if self.settings.os == "Linux":
-            self.cpp_info.system_libs.append("m")
+            self.cpp_info.components["libjpeg"].system_libs.append("m")
+        # libturbojpeg
+        if self.options.turbojpeg:
+            self.cpp_info.components["libturbojpeg"].names["pkg_config"] = "libturbojpeg"
+            self.cpp_info.components["libturbojpeg"].libs = [self._lib_name("turbojpeg")]
+            if self.settings.os == "Linux":
+                self.cpp_info.components["libturbojpeg"].system_libs.append("m")
+
+    def _lib_name(self, name):
+        if self.settings.os == "Windows" and self.settings.compiler == "Visual Studio" and not self.options.shared:
+            return name + "-static"
+        return name
