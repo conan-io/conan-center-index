@@ -62,7 +62,11 @@ class MozjpegConan(ConanFile):
         del self.settings.compiler.cppstd
 
     def build_requirements(self):
-        self.build_requires("nasm/2.13.02")
+        if self.settings.os != "Windows":
+            self.build_requires("libtool/2.4.6")
+            self.build_requires("pkgconf/1.7.3")
+        if self.options.SIMD:
+            self.build_requires("nasm/2.14")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
