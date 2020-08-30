@@ -127,30 +127,18 @@ class MozjpegConan(ConanFile):
         if self.settings.os == "Windows":
             cmake = self._configure_cmake()
             cmake.install()
+            tools.rmdir(os.path.join(self.package_folder, "doc"))
         else:
             autotools = self._configure_autotools()
             autotools.install()
-        # drop pc and cmake file
-        tools.rmdir(os.path.join(self.package_folder, "share"))
-        tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
-
-        # remove binaries
-        for bin_program in ["cjpeg", "djpeg", "jpegtran", "tjbench", "wrjpgcom", "rdjpgcom"]:
-            for ext in ["", ".exe"]:
-                try:
-                    os.remove(os.path.join(self.package_folder, "bin", bin_program+ext))
-                except OSError:
-                    pass
-        for pdb_file in glob.glob(os.path.join(self.package_folder, "bin", "*.pdb")):
-            os.unlink(pdb_file)
-
-        # drop la files
-        for la in ["libjpeg", "libturbojpeg"]:
-            la_file = os.path.join(self.package_folder, "lib", la + ".la")
-            if os.path.isfile(la_file):
-                os.unlink(la_file)
-
-        tools.rmdir(os.path.join(self.package_folder, "doc"))
+            tools.rmdir(os.path.join(self.package_folder, "share"))
+            tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
+            for la_file in glob.glob(os.path.join(self.package_folder, "lib", "*.la")):
+                os.remove(la_file)
+        # remove binaries and pdb files
+        for bin_pattern_to_remove in ["cjpeg*", "djpeg*", "jpegtran*", "tjbench*", "wrjpgcom*", "rdjpgcom*", "*.pdb"]:
+            for bin_file in glob.glob(os.path.join(self.package_folder, "bin", bin_pattern_to_remove)):
+                os.remove(bin_file)
 
     def package_info(self):
         # libjpeg
