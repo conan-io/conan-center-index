@@ -39,9 +39,17 @@ class MozjpegConan(ConanFile):
         "java": False,
         "enable12bit": False
     }
-    _source_subfolder = "source_subfolder"
-    _build_subfolder = "build_subfolder"
+
     _autotools = None
+    _cmake = None
+
+    @property
+    def _source_subfolder(self):
+        return "source_subfolder"
+
+    @property
+    def _build_subfolder(self):
+        return "build_subfolder"
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -61,23 +69,25 @@ class MozjpegConan(ConanFile):
         os.rename(self.name + "-" + self.version, self._source_subfolder)
 
     def _configure_cmake(self):
-        cmake = CMake(self)
-        cmake.definitions["ENABLE_TESTING"] = False
-        cmake.definitions["ENABLE_STATIC"] = not self.options.shared
-        cmake.definitions["ENABLE_SHARED"] = self.options.shared
-        cmake.definitions["WITH_SIMD"] = self.options.SIMD
-        cmake.definitions["WITH_ARITH_ENC"] = self.options.arithmetic_encoder
-        cmake.definitions["WITH_ARITH_DEC"] = self.options.arithmetic_decoder
-        cmake.definitions["WITH_JPEG7"] = self.options.libjpeg7_compatibility
-        cmake.definitions["WITH_JPEG8"] = self.options.libjpeg8_compatibility
-        cmake.definitions["WITH_MEM_SRCDST"] = self.options.mem_src_dst
-        cmake.definitions["WITH_TURBOJPEG"] = self.options.turbojpeg
-        cmake.definitions["WITH_JAVA"] = self.options.java
-        cmake.definitions["WITH_12BIT"] = self.options.enable12bit
+        if self._cmake:
+            return self._cmake
+        self._cmake = CMake(self)
+        self._cmake.definitions["ENABLE_TESTING"] = False
+        self._cmake.definitions["ENABLE_STATIC"] = not self.options.shared
+        self._cmake.definitions["ENABLE_SHARED"] = self.options.shared
+        self._cmake.definitions["WITH_SIMD"] = self.options.SIMD
+        self._cmake.definitions["WITH_ARITH_ENC"] = self.options.arithmetic_encoder
+        self._cmake.definitions["WITH_ARITH_DEC"] = self.options.arithmetic_decoder
+        self._cmake.definitions["WITH_JPEG7"] = self.options.libjpeg7_compatibility
+        self._cmake.definitions["WITH_JPEG8"] = self.options.libjpeg8_compatibility
+        self._cmake.definitions["WITH_MEM_SRCDST"] = self.options.mem_src_dst
+        self._cmake.definitions["WITH_TURBOJPEG"] = self.options.turbojpeg
+        self._cmake.definitions["WITH_JAVA"] = self.options.java
+        self._cmake.definitions["WITH_12BIT"] = self.options.enable12bit
         if self.settings.compiler == "Visual Studio":
-            cmake.definitions["WITH_CRT_DLL"] = "MD" in str(self.settings.compiler.runtime)
-        cmake.configure(build_folder=self._build_subfolder)
-        return cmake
+            self._cmake.definitions["WITH_CRT_DLL"] = "MD" in str(self.settings.compiler.runtime)
+        self._cmake.configure(build_folder=self._build_subfolder)
+        return self._cmake
 
     def _configure_autotools(self):
         if not self._autotools:
