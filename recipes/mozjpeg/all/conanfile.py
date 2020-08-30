@@ -60,6 +60,7 @@ class MozjpegConan(ConanFile):
             del self.options.fPIC
         del self.settings.compiler.libcxx
         del self.settings.compiler.cppstd
+        self.provides = ["libjpeg", "libjpeg-turbo"] if self.options.turbojpeg else "libjpeg"
 
     def build_requirements(self):
         if self.settings.os != "Windows":
