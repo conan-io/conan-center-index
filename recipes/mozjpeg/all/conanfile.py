@@ -48,6 +48,8 @@ class MozjpegConan(ConanFile):
             del self.options.fPIC
 
     def configure(self):
+        if self.options.shared:
+            del self.options.fPIC
         del self.settings.compiler.libcxx
         del self.settings.compiler.cppstd
 
@@ -87,7 +89,7 @@ class MozjpegConan(ConanFile):
                 args.extend(["--disable-static", "--enable-shared"])
             else:
                 args.extend(["--disable-shared", "--enable-static"])
-            args.append("--with-pic" if self.options.fPIC else "--without-pic")
+            args.append("--with-pic" if self.options.get_safe("fPIC", True) else "--without-pic")
             args.append("--with-simd" if self.options.SIMD else "--without-simd")
             args.append("--with-arith-enc" if self.options.arithmetic_encoder else "--without-arith-enc")
             args.append("--with-arith-dec" if self.options.arithmetic_decoder else "--without-arith-dec")
