@@ -1,5 +1,5 @@
-from conans import ConanFile, CMake, tools
-import os
+from conans import CMake, ConanFile, tools
+import glob, os
 
 
 class ConanFile(ConanFile):
@@ -28,7 +28,7 @@ class ConanFile(ConanFile):
         # "with_asio": [True, False], # osg seems to not work with recent versions of asio
         # "with_collada": [True, False],
         "with_curl": [True, False],
-        # "with_dcmtk": [True, False], # requires the usage of cmake_find_package, which is broken due to #2311
+        "with_dcmtk": [True, False],
         "with_freetype": [True, False],
         "with_gdal": [True, False],
         "with_gif": [True, False],
@@ -58,7 +58,7 @@ class ConanFile(ConanFile):
         # "with_asio": False,
         # "with_collada": False,
         "with_curl": False,
-        # "with_dcmtk": False,
+        "with_dcmtk": False,
         "with_freetype": True,
         "with_gdal": False,
         "with_gif": True,
@@ -68,14 +68,14 @@ class ConanFile(ConanFile):
         "with_jpeg": True,
         "with_openexr": False,
         "with_png": True,
-        "with_tiff": False,
+        "with_tiff": True,
         "with_zlib": True,
     }
 
     short_paths = True
     no_copy_source = True
     exports_sources = "CMakeLists.txt",
-    generators = "cmake"
+    generators = "cmake", "cmake_find_package_multi"
 
     _source_subfolder = "source_subfolder"
 
@@ -84,7 +84,7 @@ class ConanFile(ConanFile):
         return self.settings.os.value in ("Macos", "iOS", "watchOS", "tvOS")
 
     def config_options(self):
-        if self.settings.os == 'Windows':
+        if self.settings.os == "Windows":
             del self.options.fPIC
             # del self.options.with_asio
 
@@ -104,13 +104,14 @@ class ConanFile(ConanFile):
         if self.options.get_safe("with_png"):
             self.options.with_zlib = True
 
-        # if self.options.with_dcmtk:
-        #     self.options.with_zlib = True
-        # These are due to limitations in osg's plugin configuration
-        #     if not self.option.with_png:
-        #         self.options["dcmtk"].with_libpng = False
-        #     if not self.option.with_tiff:
-        #         self.options["dcmtk"].with_libtiff = False
+        if self.options.with_dcmtk:
+            self.options.with_zlib = True
+            # These are due to limitations in osg's plugin configuration, which can only be
+            # controlled via completely disabling cmake's find package mechanism per package
+            if not self.options.with_png:
+                self.options["dcmtk"].with_libpng = False
+            if not self.options.with_tiff:
+                self.options["dcmtk"].with_libtiff = False
 
         if self.options.shared and self.settings.compiler == "Visual Studio":
             # osg expects its dependencies to be shared libraries if it is being built as one
@@ -136,8 +137,8 @@ class ConanFile(ConanFile):
         #     self.requires("libxml2/2.9.10")
         if self.options.with_curl:
             self.requires("libcurl/7.71.1")
-        # if self.options.with_dcmtk:
-        #     self.requires("dcmtk/3.6.5")
+        if self.options.with_dcmtk:
+            self.requires("dcmtk/3.6.5")
         if self.options.with_freetype:
             self.requires("freetype/2.10.2")
         if self.options.with_gdal:
@@ -202,7 +203,7 @@ class ConanFile(ConanFile):
         cmake.definitions["CMAKE_DISABLE_FIND_PACKAGE_GTA"] = not self.options.with_gta
         cmake.definitions["CMAKE_DISABLE_FIND_PACKAGE_CURL"] = not self.options.with_curl
         cmake.definitions["CMAKE_DISABLE_FIND_PACKAGE_LibVNCServer"] = True
-        # cmake.definitions["CMAKE_DISABLE_FIND_PACKAGE_DCMTK"] = not self.options.with_dcmtk
+        cmake.definitions["CMAKE_DISABLE_FIND_PACKAGE_DCMTK"] = not self.options.with_dcmtk
         cmake.definitions["CMAKE_DISABLE_FIND_PACKAGE_FFmpeg"] = True
         cmake.definitions["CMAKE_DISABLE_FIND_PACKAGE_GStreamer"] = True  # not self.options.with_gstreamer
         cmake.definitions["CMAKE_DISABLE_FIND_PACKAGE_GLIB"] = True  # not self.options.with_gstreamer
@@ -443,11 +444,11 @@ class ConanFile(ConanFile):
             self.cpp_info.components[plugin].requires.append("libgta::libgta")
 
         # 3D Image plugins
-        # if self.options.with_dcmtk:
-        #     plugin = setup_plugin("dicom")
-        #     self.cpp_info.components[plugin].requires.extend(("osgVolume", "dcmtk::dcmtk"))
-        #     if self.settings.os == "Windows":
-        #         self.cpp_info.components[plugin].system_libs = ["wsock32", "ws2_32"]
+        if self.options.with_dcmtk:
+            plugin = setup_plugin("dicom")
+            self.cpp_info.components[plugin].requires.extend(("osgVolume", "dcmtk::dcmtk"))
+            if self.settings.os == "Windows":
+                self.cpp_info.components[plugin].system_libs = ["wsock32", "ws2_32"]
 
         # 3rd party 3d plugins
         setup_plugin("3dc")

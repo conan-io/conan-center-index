@@ -7,8 +7,10 @@ class TestPackageConan(ConanFile):
     generators = "cmake_find_package"
 
     def toolchain(self):
+        to_int = lambda x: 1 if x else 0
         toolchain = CMakeToolchain(self)
-        toolchain.definitions["WITH_PNG"] = 1 if self.options["openscenegraph"].with_png else 0
+        toolchain.definitions["WITH_PNG"] = to_int(self.settings.os == "Macos" or self.options["openscenegraph"].with_png)
+        toolchain.definitions["WITH_DCMTK"] = to_int(self.options["openscenegraph"].with_dcmtk)
         toolchain.write_toolchain_files()
 
     def build(self):
