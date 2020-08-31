@@ -76,6 +76,7 @@ class MsgpackConan(ConanFile):
             self.requires("boost/1.74.0")
 
     def package_id(self):
+        del self.info.options.with_boost
         if not self.options.c_api:
             self.info.header_only()
 
