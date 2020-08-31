@@ -1,4 +1,5 @@
 from conans import ConanFile, CMake, tools
+import glob
 import os
 import shutil
 
@@ -17,7 +18,7 @@ class mFASTConan(ConanFile):
                "shared": [True, False]}
     default_options = {"fPIC": True,
                        "shared": False}
-    requires = ["boost/1.73.0", "tinyxml2/8.0.0"]
+    requires = ["boost/1.74.0", "tinyxml2/8.0.0"]
     generators = "cmake"
     exports_sources = "patches/**"
     short_paths = True
@@ -39,7 +40,8 @@ class mFASTConan(ConanFile):
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
-        os.rename("mFAST-" + self.version, self._source_subfolder)
+        extracted_dir = glob.glob("mFAST-*/")[0]
+        os.rename(extracted_dir, self._source_subfolder)
 
     def config_options(self):
         if self.settings.os == "Windows":

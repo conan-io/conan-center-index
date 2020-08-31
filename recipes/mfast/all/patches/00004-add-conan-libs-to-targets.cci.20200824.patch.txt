@@ -1,0 +1,22 @@
+diff --git a/src/mfast/coder/CMakeLists.txt b/src/mfast/coder/CMakeLists.txt
+index 7211a3f..08565b0 100644
+--- a/src/mfast/coder/CMakeLists.txt
++++ b/src/mfast/coder/CMakeLists.txt
+@@ -18,7 +18,7 @@ SET(LIBRARY_OUTPUT_PATH ${PROJECT_BINARY_DIR}/lib)
+ set(mfast_coder_SRCS ${sources} ${headers})
+ 
+ add_library(mfast_coder_static STATIC ${mfast_coder_SRCS})
+-target_link_libraries(mfast_coder_static mfast_static)
++target_link_libraries(mfast_coder_static mfast_static ${CONAN_LIBS})
+ 
+ if (UNIX)
+   set_target_properties(mfast_coder_static PROPERTIES OUTPUT_NAME mfast_coder)
+@@ -44,7 +44,7 @@ if (BUILD_SHARED_LIBS)
+   if (CMAKE_COMPILER_IS_GNUCXX OR ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang"))
+     set_target_properties(mfast_coder PROPERTIES COMPILE_FLAGS -fvisibility=hidden)
+   endif()
+-  target_link_libraries(mfast_coder mfast)
++  target_link_libraries(mfast_coder mfast ${CONAN_LIBS})
+   set_target_properties(mfast_coder PROPERTIES
+                         VERSION "${MFAST_VERSION}"
+                         SOVERSION "${MFAST_SOVERSION}")
