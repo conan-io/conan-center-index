@@ -71,6 +71,6 @@ class LibgdConan(ConanFile):
 
     def package_info(self):
         self.cpp_info.libs = tools.collect_libs(self)
-        if not self.options.shared:
-            self.cpp_info.defines.append('NONDLL')
+        if self.settings.os == 'Windows' and not self.options.shared:
+            self.cpp_info.defines.append('BGD_NONDLL')
             self.cpp_info.defines.append('BGDWIN32')
