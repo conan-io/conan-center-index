@@ -64,6 +64,12 @@ class MsgpackConan(ConanFile):
             del self.options.fPIC
         if not self.options.cpp_api:
             del self.options.with_boost
+        if self.options.get_safe("with_boost"):
+            self.options["boost"].header_only = False
+            self.options["boost"].without_chrono = False
+            self.options["boost"].without_context = False
+            self.options["boost"].without_system = False
+            self.options["boost"].without_timer = False
 
     def requirements(self):
         if self.options.get_safe("with_boost"):
@@ -93,6 +99,11 @@ class MsgpackConan(ConanFile):
         return self._cmake
 
     def build(self):
+        if self.options.get_safe("with_boost") and \
+           (not self.options["boost"].header_only or not self.options["boost"].without_chrono or \
+            not self.options["boost"].without_context or not self.options["boost"].without_system or \
+            not self.options["boost"].without_timer):
+            raise ConanInvalidConfiguration("msgpack with boost requires the following boost components: chrono, context, system and timer.")
         if self.options.c_api:
             cmake = self._configure_cmake()
             cmake.build()
