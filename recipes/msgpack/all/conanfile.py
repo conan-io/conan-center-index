@@ -51,7 +51,7 @@ class MsgpackConan(ConanFile):
         self._cmake = CMake(self)
         self._cmake.definitions["MSGPACK_BOOST"] = self.options.with_boost
         self._cmake.definitions["MSGPACK_32BIT"] = self.settings.arch == "x86"
-        self._cmake.definitions["MSGPACK_BUILD_EXAMPLE"] = False
+        self._cmake.definitions["MSGPACK_BUILD_EXAMPLES"] = False
         self._cmake.definitions["MSGPACK_BUILD_TESTS"] = False
         self._cmake.configure(build_folder=self._build_subfolder)
         return self._cmake
