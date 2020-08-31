@@ -101,9 +101,9 @@ class MsgpackConan(ConanFile):
 
     def build(self):
         if self.options.get_safe("with_boost") and \
-           (not self.options["boost"].header_only or not self.options["boost"].without_chrono or \
-            not self.options["boost"].without_context or not self.options["boost"].without_system or \
-            not self.options["boost"].without_timer):
+           (self.options["boost"].header_only or self.options["boost"].without_chrono or \
+            self.options["boost"].without_context or self.options["boost"].without_system or \
+            self.options["boost"].without_timer):
             raise ConanInvalidConfiguration("msgpack with boost requires the following boost components: chrono, context, system and timer.")
         if self.options.c_api:
             cmake = self._configure_cmake()
