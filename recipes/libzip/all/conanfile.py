@@ -1,0 +1,111 @@
+from conans import ConanFile, CMake, tools
+import os
+
+
+class LibZipConan(ConanFile):
+    name = "libzip"
+    description = "A C library for reading, creating, and modifying zip archives"
+    url = "https://github.com/conan-io/conan-center-index"
+    homepage = "https://github.com/nih-at/libzip"
+    license = "BSD-3-Clause"
+    topics = ("conan", "zip", "libzip", "zip-archives", "zip-editing")
+    exports_sources = ["CMakeLists.txt"]
+    generators = "cmake"
+    _source_subfolder = "source_subfolder"
+    _build_subfolder = "build_subfolder"
+    settings = "os", "compiler", "build_type", "arch"
+    options = {
+        "shared": [True, False],
+        "fPIC": [True, False],
+        "with_bzip2": [True, False],
+        "with_lzma": [True, False],
+        "with_zstd": [True, False],
+        "crypto": [False, "win32", "openssl", "mbedtls", "auto"]
+    }
+    default_options = {
+        "shared": False,
+        "fPIC": True,
+        "with_bzip2": True,
+        "with_lzma": True,
+        "with_zstd": True,
+        "crypto": "auto"
+    }
+
+    @property
+    def _crypto(self):
+        if self.options.crypto == "auto":
+            return "win32" if self.settings.os == "Windows" else "openssl"
+        return self.options.crypto
+
+    def config_options(self):
+        if self.settings.os == "Windows":
+            del self.options.fPIC
+
+    def configure(self):
+        if self._crypto == "win32" and self.settings.os != "Windows":
+            raise ConanInvalidConfiguration("Windows is required to use win32 crypto libraries")
+        del self.settings.compiler.libcxx
+        del self.settings.compiler.cppstd
+
+    def requirements(self):
+        self.requires("zlib/1.2.11")
+
+        if self.options.with_bzip2:
+            self.requires("bzip2/1.0.8")
+
+        if self.options.with_lzma:
+            self.requires("xz_utils/5.2.4")
+
+        if self.options.with_zstd:
+            self.requires("zstd/1.4.5 ")
+
+        if self._crypto == "openssl":
+            self.requires("openssl/1.1.1g")
+        elif self._crypto == "mbedtls":
+            self.requires("mbedtls/2.16.3-gpl")
+
+    def source(self):
+        tools.get(**self.conan_data["sources"][self.version])
+        extracted_dir = self.name + "-" + self.version
+        os.rename(extracted_dir, self._source_subfolder)
+
+    def _configure_cmake(self):
+        cmake = CMake(self)
+        cmake.definitions["BUILD_REGRESS"] = False
+        cmake.definitions["BUILD_EXAMPLES"] = False
+        cmake.definitions["BUILD_DOC"] = False
+
+        cmake.definitions["ENABLE_LZMA"] = self.options.with_lzma
+        cmake.definitions["ENABLE_BZIP2"] = self.options.with_bzip2
+        cmake.definitions["ENABLE_ZSTD"] = self.options.with_zstd
+
+        cmake.definitions["ENABLE_COMMONCRYPTO"] = False  # TODO: We need CommonCrypto package
+        cmake.definitions["ENABLE_GNUTLS"] = False  # TODO: We need GnuTLS package
+
+        cmake.definitions["ENABLE_MBEDTLS"] = self._crypto == "mbedtls"
+        cmake.definitions["ENABLE_OPENSSL"] = self._crypto == "openssl"
+        cmake.definitions["ENABLE_WINDOWS_CRYPTO"] = self._crypto == "win32"
+
+        cmake.configure()
+        self._cmake = cmake
+
+    def build(self):
+        self._configure_cmake()
+        self._cmake.build()
+
+    def package(self):
+        self._cmake.install()
+        self.copy(pattern="LICENSE", dst="licenses", src=self._source_subfolder)
+        tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
+        tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
+
+    def package_id(self):
+        self.info.options.crypto = self._crypto
+
+    def package_info(self):
+        self.cpp_info.libs = ["zip"]
+        if self.settings.os == "Windows" and self._crypto == "win32":
+            self.cpp_info.system_libs.append("bcrypt")
+        bin_path = os.path.join(self.package_folder, "bin")
+        self.output.info("Appending PATH environment variable: {}".format(bin_path))
+        self.env_info.PATH.append(bin_path)
