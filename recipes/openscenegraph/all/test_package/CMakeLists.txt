@@ -3,6 +3,8 @@ project(test_package)
 
 find_package(OpenSceneGraph REQUIRED)
 
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "bin")
+
 include_directories(${OPENSCENEGRAPH_INCLUDE_DIRS})
 link_libraries(${OPENSCENEGRAPH_LIBRARIES})
 add_compile_definitions(${OPENSCENEGRAPH_COMPILE_DEFINITIONS})
