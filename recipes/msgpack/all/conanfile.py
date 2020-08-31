@@ -1,4 +1,5 @@
 from conans import ConanFile, CMake, tools
+from conans.errors import ConanInvalidConfiguration
 import os
 
 
@@ -12,8 +13,23 @@ class MsgpackConan(ConanFile):
     exports_sources = "CMakeLists.txt"
     generators = "cmake"
     settings = "os", "arch", "build_type", "compiler"
-    options = {"fPIC": [True, False], "shared": [True, False], "header_only": [True, False], "with_boost": [True, False]}
-    default_options = {"fPIC": True, "shared": False, "header_only": False, "with_boost": False}
+    options = {
+        "fPIC": [True, False],
+        "shared": [True, False],
+        "c_api": [True, False],
+        "cpp_api": [True, False],
+        "with_boost": [True, False],
+        "header_only": [True, False]
+    }
+    default_options = {
+        "fPIC": True,
+        "shared": False,
+        "c_api": True,
+        "cpp_api": True,
+        "with_boost": False,
+        "header_only": False
+    }
+
     _cmake = None
 
     @property
@@ -29,16 +45,33 @@ class MsgpackConan(ConanFile):
             del self.options.fPIC
 
     def configure(self):
-        del self.settings.compiler.libcxx
-        del self.settings.compiler.cppstd
+        # Deprecate header_only option
         if self.options.header_only:
+            self.options.c_api = False
+            self.options.cpp_api = True
+            self.output.warn("header_only option is deprecated, prefer c_api=False and cpp_api=True")
+        del self.options.header_only
+
+        if not self.options.c_api and not self.options.cpp_api:
+            raise ConanInvalidConfiguration("You must enable at least c_api or cpp_api.")
+        if self.options.c_api:
+            if self.options.shared:
+                del self.options.fPIC
+            del self.settings.compiler.libcxx
+            del self.settings.compiler.cppstd
+        else:
             del self.options.shared
             del self.options.fPIC
+        if not self.options.cpp_api:
             del self.options.with_boost
 
     def requirements(self):
-        if not self.options.header_only and self.options.with_boost:
-            self.requires.add("boost/1.72.0")
+        if self.options.get_safe("with_boost"):
+            self.requires("boost/1.74.0")
+
+    def package_id(self):
+        if not self.options.c_api:
+            self.info.header_only()
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
@@ -49,7 +82,10 @@ class MsgpackConan(ConanFile):
         if self._cmake:
             return self._cmake
         self._cmake = CMake(self)
-        self._cmake.definitions["MSGPACK_BOOST"] = self.options.with_boost
+        self._cmake.definitions["MSGPACK_ENABLE_SHARED"] = self.options.shared
+        self._cmake.definitions["MSGPACK_ENABLE_STATIC"] = not self.options.shared
+        self._cmake.definitions["MSGPACK_ENABLE_CXX"] = self.options.cpp_api
+        self._cmake.definitions["MSGPACK_BOOST"] = self.options.get_safe("with_boost", False)
         self._cmake.definitions["MSGPACK_32BIT"] = self.settings.arch == "x86"
         self._cmake.definitions["MSGPACK_BUILD_EXAMPLES"] = False
         self._cmake.definitions["MSGPACK_BUILD_TESTS"] = False
@@ -57,25 +93,23 @@ class MsgpackConan(ConanFile):
         return self._cmake
 
     def build(self):
-        if not self.options.header_only:
+        if self.options.c_api:
             cmake = self._configure_cmake()
             cmake.build()
 
     def package(self):
         self.copy("LICENSE_1_0.txt", dst="licenses", src=self._source_subfolder)
-        if self.options.header_only:
-            self.copy("*.h", dst="include", src=os.path.join(self._source_subfolder, "include"))
-            self.copy("*.hpp", dst="include", src=os.path.join(self._source_subfolder, "include"))
-        else:
+        if self.options.c_api:
             cmake = self._configure_cmake()
             cmake.install()
             tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
             tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
-
-    def package_id(self):
-        if self.options.header_only:
-            self.info.header_only()
+        else:
+            self.copy("*.h", dst="include", src=os.path.join(self._source_subfolder, "include"))
+            self.copy("*.hpp", dst="include", src=os.path.join(self._source_subfolder, "include"))
 
     def package_info(self):
-        if not self.options.header_only:
+        if self.options.c_api:
             self.cpp_info.libs = tools.collect_libs(self)
+        if self.options.get_safe("with_boost"):
+            self.cpp_info.defines = ["MSGPACK_USE_BOOST"]
