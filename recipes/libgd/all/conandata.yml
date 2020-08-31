@@ -9,6 +9,10 @@ patches:
   "2.2.5":
     - patch_file: "patches/2.2.5-msvc-static-lib.patch"
       base_path: "source_subfolder"
+    - patch_file: "patches/2.2.5-qualify-nondll.patch"
+      base_path: "source_subfolder"
   "2.3.0":
     - patch_file: "patches/remove-unistd-h.patch"
+      base_path: "source_subfolder"
+    - patch_file: "patches/qualify-nondll.patch"
       base_path: "source_subfolder"
