@@ -1,0 +1,89 @@
+--- CMakeLists.txt
++++ CMakeLists.txt
+@@ -144,7 +144,7 @@
+ 
+ IF (ENABLE_LCMS)
+     MESSAGE(STATUS "Check for LCMS2 availability...")
+-    FIND_PACKAGE(LCMS2)
++    FIND_PACKAGE(LCMS2 REQUIRED)
+     IF (LCMS2_FOUND AND (LCMS2_VERSION VERSION_EQUAL 2.1 OR LCMS2_VERSION VERSION_GREATER 2.1))
+         MESSAGE(STATUS "Found LCMS2 : ${LCMS2_LIBRARIES} ${LCMS2_INCLUDE_DIR}")
+         INCLUDE_DIRECTORIES(${LCMS2_INCLUDE_DIR})
+@@ -170,12 +170,12 @@
+ 
+ # For registration to libraw_config.h
+ MACRO_BOOL_TO_01(LCMS_SUPPORT_CAN_BE_COMPILED LIBRAW_USE_LCMS)
+-
+-# zlib library check
+-
+-FIND_PACKAGE(ZLIB)
+-FIND_PACKAGE(JPEG)
+-
++if(ENABLE_ZLIB)
++FIND_PACKAGE(ZLIB REQUIRED)
++endif()
++if(ENABLE_JPEG)
++FIND_PACKAGE(JPEG REQUIRED)
++endif()
+ # Flag to use zlib with LibRaw DNG deflate codec
+ IF(ZLIB_FOUND)
+     ADD_DEFINITIONS(-DUSE_ZLIB)
+@@ -185,7 +185,7 @@
+ MACRO_BOOL_TO_01(ZLIB_FOUND LIBRAW_USE_DNGDEFLATECODEC)
+ 
+ # JPEG library check
+-find_package(JPEG)
++#find_package(JPEG)
+ IF(JPEG_FOUND)
+     if (${JPEG_VERSION} LESS 80)
+         set(JPEG8_FOUND FALSE)
+@@ -213,9 +213,9 @@
+ MACRO_BOOL_TO_01(OpenMP_FOUND LIBRAW_USE_OPENMP)
+ 
+ # Jasper library check
+-
+-FIND_PACKAGE(Jasper)
+-
++if(ENABLE_JASPER)
++FIND_PACKAGE(Jasper REQUIRED)
++endif()
+ # Flag to use libjasper with LibRaw RedCine codec
+ IF(JASPER_FOUND)
+     ADD_DEFINITIONS(-DUSE_JASPER)
+@@ -512,17 +512,17 @@ ENDIF()
+ # Add flag to not support re-entrancy. Faster but cannot be used in multi-threading.
+ # Adjust flag for static lib and 64 bits computers using -fPIC for GCC compiler
+ # Use O4 GCC compilation option to prevent artifacts with OpenMP
+-FOREACH(_curentfile ${libraw_LIB_SRCS})
+-    IF(WIN32 AND MSVC)
+-        SET_SOURCE_FILES_PROPERTIES(${_curentfile} PROPERTIES COMPILE_FLAGS "-w -DLIBRAW_NOTHREADS")
+-    ELSE()
+-        SET_SOURCE_FILES_PROPERTIES(${_curentfile} PROPERTIES COMPILE_FLAGS "-w -DLIBRAW_NOTHREADS -fPIC -O4 ")
+-    ENDIF()
+-ENDFOREACH(_curentfile ${libraw_LIB_SRCS})
++#FOREACH(_curentfile ${libraw_LIB_SRCS})
++#    IF(WIN32 AND MSVC)
++#        SET_SOURCE_FILES_PROPERTIES(${_curentfile} PROPERTIES COMPILE_FLAGS "-w -DLIBRAW_NOTHREADS")
++#    ELSE()
++#        SET_SOURCE_FILES_PROPERTIES(${_curentfile} PROPERTIES COMPILE_FLAGS "-w -DLIBRAW_NOTHREADS -fPIC -O4 ")
++#    ENDIF()
++#ENDFOREACH(_curentfile ${libraw_LIB_SRCS})
+ 
+ add_library(raw ${libraw_LIB_SRCS})
+ add_library(libraw::libraw ALIAS raw)
+-
++target_compile_definitions(raw PRIVATE LIBRAW_NOTHREADS)
+ target_include_directories(raw
+         PUBLIC
+             $<INSTALL_INTERFACE:libraw>
+@@ -582,8 +582,8 @@
+     if(NOT BUILD_SHARED_LIBS)
+         # Use set_target_properties() not append_target_property() here as
+         # POSITION_INDEPENDENT_CODE is a binary ON/OFF switch.
+-        set_target_properties(raw PROPERTIES POSITION_INDEPENDENT_CODE ON)
+-        set_target_properties(raw_r PROPERTIES POSITION_INDEPENDENT_CODE ON)
++        #set_target_properties(raw PROPERTIES POSITION_INDEPENDENT_CODE ON)
++        #set_target_properties(raw_r PROPERTIES POSITION_INDEPENDENT_CODE ON)
+     endif()
+ ENDIF()
+ 
