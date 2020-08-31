@@ -1,5 +1,6 @@
 import os
 from conans import ConanFile, tools
+from conans.errors import ConanInvalidConfiguration
 
 class MicrosoftGslConan(ConanFile):
     name = "ms-gsl"
@@ -29,6 +30,15 @@ class MicrosoftGslConan(ConanFile):
     def _source_subfolder(self):
         return "source_subfolder"
 
+    @property
+    def _compilers_minimum_version(self):
+        return {
+            "gcc": "5",
+            "Visual Studio": "14",
+            "clang": "3.4",
+            "apple-clang": "3.4",
+        }
+
     def config_options(self):
         if tools.Version(self.version) >= "3.0.0":
             del self.options.on_contract_violation
@@ -36,6 +46,12 @@ class MicrosoftGslConan(ConanFile):
     def configure(self):
         if self.settings.compiler.cppstd:
             tools.check_min_cppstd(self, 14)
+        minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
+        if minimum_version:
+            if tools.Version(self.settings.compiler.version) < minimum_version:
+                raise ConanInvalidConfiguration("ms-gsl requires C++14, which your compiler does not fully support.")
+        else:
+            self.output.warn("ms-gsl requires C++14. Your compiler is unknown. Assuming it supports C++14.")
 
     def package_id(self):
         self.info.header_only()
