@@ -120,7 +120,14 @@ class MsgpackConan(ConanFile):
             self.copy("*.hpp", dst="include", src=os.path.join(self._source_subfolder, "include"))
 
     def package_info(self):
+        # TODO: CMake imported targets shouldn't be namespaced
         if self.options.c_api:
-            self.cpp_info.libs = tools.collect_libs(self)
-        if self.options.get_safe("with_boost"):
-            self.cpp_info.defines = ["MSGPACK_USE_BOOST"]
+            self.cpp_info.components["msgpackc"].names["cmake_find_package"] = "msgpackc"
+            self.cpp_info.components["msgpackc"].names["cmake_find_package_multi"] = "msgpackc"
+            self.cpp_info.components["msgpackc"].libs = tools.collect_libs(self)
+        if self.options.cpp_api:
+            self.cpp_info.components["msgpackc-cxx"].names["cmake_find_package"] = "msgpackc-cxx"
+            self.cpp_info.components["msgpackc-cxx"].names["cmake_find_package_multi"] = "msgpackc-cxx"
+            if self.options.with_boost:
+                self.cpp_info.components["msgpackc-cxx"].defines = ["MSGPACK_USE_BOOST"]
+                self.cpp_info.components["msgpackc-cxx"].requires = ["boost::boost"]
