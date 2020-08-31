@@ -82,6 +82,7 @@ class civetwebConan(ConanFile):
         cmake = self._configure_cmake()
         cmake.install()
         shutil.rmtree(os.path.join(self.package_folder, "lib", "cmake"))
+        shutil.rmtree(os.path.join(self.package_folder, "bin"))
 
     def package_info(self):
         self.cpp_info.libs = tools.collect_libs(self)
