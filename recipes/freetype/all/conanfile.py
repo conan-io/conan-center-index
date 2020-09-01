@@ -134,6 +134,8 @@ conan_staticlibs="{staticlibs}"
         self.env_info.FT2_CONFIG = freetype_config
         self.user_info.LIBTOOL_VERSION = self._libtool_version
         self._chmod_plus_x(freetype_config)
+        # cmake's FindFreetype.cmake module with imported target: Freetype::Freetype
         self.cpp_info.names["cmake_find_package"] = "Freetype"
-        self.cpp_info.names["cmake_find_package_multi"] = "freetype" # TODO: CMake config file has a non namespaced imported target
+        # freetype creates freetype-config.cmake with imported target: freetype
+        self.cpp_info.names["cmake_find_package_multi"] = "freetype" # TODO: CMake config file has a non namespaced imported target named 'freetype'
         self.cpp_info.names["pkg_config"] = "freetype2"
