@@ -1,5 +1,5 @@
 import os
-from conans import ConanFile, CMake, tools
+from conans import ConanFile, tools
 from conans.errors import ConanInvalidConfiguration
 from conans.tools import Version, check_min_cppstd
 
@@ -16,7 +16,7 @@ class Rangev3Conan(ConanFile):
 
     @property
     def _source_subfolder(self):
-        return os.path.join(self.source_folder, "source_subfolder")
+        return "source_subfolder"
 
     def _validate_compiler_settings(self):
         # As per https://github.com/ericniebler/range-v3#supported-compilers
@@ -41,6 +41,9 @@ class Rangev3Conan(ConanFile):
         if version >= "0.10":
             self._validate_compiler_settings()
 
+    def package_id(self):
+        self.info.header_only()
+
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
         extracted_folder = self.name + "-" + self.version
@@ -50,5 +53,11 @@ class Rangev3Conan(ConanFile):
         self.copy(pattern="*", dst="include", src=os.path.join(self._source_subfolder, "include"))
         self.copy("LICENSE.txt", dst="licenses", src=self._source_subfolder)
 
-    def package_id(self):
-        self.info.header_only()
+    def package_info(self):
+        self.cpp_info.components["range-v3-meta"].names["cmake_find_package"] = "meta"
+        self.cpp_info.components["range-v3-meta"].names["cmake_find_package_multi"] = "meta"
+        if self.settings.compiler == "Visual Studio":
+            self.cpp_info.components["range-v3-meta"].cxxflags = ["/permissive-"]
+        self.cpp_info.components["range-v3-concepts"].names["cmake_find_package"] = "concepts"
+        self.cpp_info.components["range-v3-concepts"].names["cmake_find_package_multi"] = "concepts"
+        self.cpp_info.components["range-v3-concepts"].requires = ["range-v3-meta"]
