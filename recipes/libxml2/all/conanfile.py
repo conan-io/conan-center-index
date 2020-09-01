@@ -252,7 +252,7 @@ class Libxml2Conan(ConanFile):
         if not self.options.shared:
             self.cpp_info.components["xml2lib"].defines = ["LIBXML_STATIC"]
 
-        if self.settings.os == "Linux" or self.settings.os == "Macos":
+        if self.settings.os == "Linux":
             self.cpp_info.components["xml2lib"].system_libs.append("m")
         if self.settings.os == "Windows":
             self.cpp_info.components["xml2lib"].system_libs.append("ws2_32")
