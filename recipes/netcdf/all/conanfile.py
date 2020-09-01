@@ -72,6 +72,9 @@ class NetcdfConan(ConanFile):
             cmake.definitions["BUILD_SHARED_LIBS"] = self.options.shared
             cmake.definitions["ENABLE_TESTS"] = False
             cmake.definitions["NC_FIND_SHARED_LIBS"] = self.options["hdf5"].shared
+            if self.settings.os == "Windows":
+                cmake.definitions["NC_USE_STATIC_CRT"] = \
+                        "MT" in str(self.settings.compiler.runtime)
 
             cmake.configure(
                 source_folder=self._source_subfolder,
