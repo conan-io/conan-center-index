@@ -50,6 +50,8 @@ class PCREConan(ConanFile):
             del self.options.fPIC
 
     def configure(self):
+        if self.options.shared:
+            del self.options.fPIC
         if not self.options.build_pcrecpp:
             del self.settings.compiler.libcxx
             del self.settings.compiler.cppstd
