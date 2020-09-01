@@ -8,3 +8,9 @@ add_executable(example
     ${CMAKE_SOURCE_DIR}/example.c
 )
 target_link_libraries(example CONAN_PKG::netcdf)
+
+IF(MSVC)
+  SET_TARGET_PROPERTIES(example
+    PROPERTIES LINK_FLAGS_DEBUG " /NODEFAULTLIB:MSVCRT"
+    )
+ENDIF()
