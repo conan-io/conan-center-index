@@ -111,8 +111,8 @@ class JemallocConan(ConanFile):
         return build_type
 
     def _patch_sources(self):
+        makefile_in = os.path.join(self._source_subfolder, "Makefile.in")
         if self.settings.os == "Windows":
-            makefile_in = os.path.join(self._source_subfolder, "Makefile.in")
             tools.replace_in_file(makefile_in,
                                   "DSO_LDFLAGS = @DSO_LDFLAGS@",
                                   "DSO_LDFLAGS = @DSO_LDFLAGS@ -Wl,--out-implib,lib/libjemalloc.a")
@@ -123,6 +123,9 @@ class JemallocConan(ConanFile):
                                   "\t$(INSTALL) -d $(LIBDIR)\n"
                                   "\t$(INSTALL) -m 755 $(objroot)lib/$(LIBJEMALLOC).$(SOREV) $(BINDIR)\n"
                                   "\t$(INSTALL) -m 644 $(objroot)lib/libjemalloc.a $(LIBDIR)")
+        tools.replace_in_file(makefile_in,
+                              "CC_MM = @CC_MM@",
+                              "CC_MM =")
 
     def build(self):
         self._patch_sources()
