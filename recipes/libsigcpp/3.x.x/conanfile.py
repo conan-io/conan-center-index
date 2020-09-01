@@ -1,7 +1,9 @@
+import glob
 import os
+import shutil
+
 from conans import ConanFile, CMake, tools
 from conans.errors import ConanInvalidConfiguration
-from conans.tools import Version
 
 
 class LibSigCppConan(ConanFile):
@@ -13,8 +15,10 @@ class LibSigCppConan(ConanFile):
     description = "libsigc++ implements a typesafe callback system for standard C++."
     topics = ("conan", "libsigcpp", "callback")
     settings = "os", "compiler", "arch", "build_type"
-    exports_sources = ["CMakeLists.txt", "*.patch"]
+    exports_sources = ["CMakeLists.txt", "patches/**"]
     generators = "cmake"
+
+    _cmake = None
 
     @property
     def _source_subfolder(self):
@@ -24,23 +28,14 @@ class LibSigCppConan(ConanFile):
     def _build_subfolder(self):
         return "build_subfolder"
 
-    @property
-    def _supported_cppstd(self):
-        return ["17", "gnu17", "20", "gnu20"]
-
     def _has_support_for_cpp17(self):
         supported_compilers = [("apple-clang", 10), ("clang", 6), ("gcc", 7), ("Visual Studio", 15.7)]
-        compiler, version = self.settings.compiler, Version(self.settings.compiler.version)
+        compiler, version = self.settings.compiler, tools.Version(self.settings.compiler.version)
         return any(compiler == sc[0] and version >= sc[1] for sc in supported_compilers)
 
     def configure(self):
-        compiler_version = Version(self.settings.compiler.version)
-        if self.settings.compiler.cppstd and \
-           not self.settings.compiler.cppstd in self._supported_cppstd:
-          raise ConanInvalidConfiguration("This library requires c++17 standard or higher."
-                                          " {} required."
-                                          .format(self.settings.compiler.cppstd))
-
+        if self.settings.compiler.cppstd:
+           tools.check_min_cppstd(self, 17)
         if not self._has_support_for_cpp17():
             raise ConanInvalidConfiguration("This library requires C++17 or higher support standard."
                                             " {} {} is not supported."
@@ -53,9 +48,11 @@ class LibSigCppConan(ConanFile):
         os.rename(extracted_dir, self._source_subfolder)
 
     def _configure_cmake(self):
-        cmake = CMake(self)
-        cmake.configure(build_folder=self._build_subfolder)
-        return cmake
+        if self._cmake:
+            return self._cmake
+        self._cmake = CMake(self)
+        self._cmake.configure(build_folder=self._build_subfolder)
+        return self._cmake
 
     def build(self):
         for patch in self.conan_data["patches"][self.version]:
@@ -67,12 +64,22 @@ class LibSigCppConan(ConanFile):
         self.copy("COPYING", dst="licenses", src=self._source_subfolder)
         cmake = self._configure_cmake()
         cmake.install()
-        tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
-        tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
+        for header_file in glob.glob(os.path.join(self.package_folder, "lib", "sigc++-3.0", "include", "*.h")):
+            shutil.move(
+                header_file,
+                os.path.join(self.package_folder, "include", "sigc++-3.0", os.path.basename(header_file))
+            )
+        for dir_to_remove in ["cmake", "pkgconfig", "sigc++-3.0"]:
+            tools.rmdir(os.path.join(self.package_folder, "lib", dir_to_remove))
 
     def package_info(self):
-        self.cpp_info.libs = tools.collect_libs(self)
+        # TODO: CMake imported target shouldn't be namespaced
+        self.cpp_info.names["cmake_find_package"] = "sigc++-3"
+        self.cpp_info.names["cmake_find_package_multi"] = "sigc++-3"
+        self.cpp_info.names["pkg_config"] = "sigc++-3.0"
+        self.cpp_info.components["sigc++"].names["cmake_find_package"] = "sigc-3.0"
+        self.cpp_info.components["sigc++"].names["cmake_find_package_multi"] = "sigc-3.0"
+        self.cpp_info.components["sigc++"].includedirs = [os.path.join("include", "sigc++-3.0")]
+        self.cpp_info.components["sigc++"].libs = tools.collect_libs(self)
         if self.settings.os == "Linux":
-            self.cpp_info.system_libs.append("m")
-        self.cpp_info.includedirs.extend([os.path.join('include', "sigc++-3.0"),
-                                          os.path.join('lib', "sigc++-3.0", "include")])
+            self.cpp_info.components["sigc++"].system_libs.append("m")
