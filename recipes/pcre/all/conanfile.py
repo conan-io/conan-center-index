@@ -108,13 +108,28 @@ class PCREConan(ConanFile):
         cmake.install()
 
     def package_info(self):
-        if self.settings.os == "Windows" and self.settings.build_type == "Debug":
-            self.cpp_info.libs = ["pcreposixd", "pcred"]
-        else:
-            self.cpp_info.libs = ["pcreposix", "pcre"]
-        if not self.options.shared:
-            self.cpp_info.defines.append("PCRE_STATIC=1")
-        self.cpp_info.names["pkg_config"] = "libpcre"
-
         self.cpp_info.names["cmake_find_package"] = "PCRE"
         self.cpp_info.names["cmake_find_package_multi"] = "PCRE"
+        # pcre
+        self.cpp_info.components["libpcre"].names["pkg_config"] = "libpcre"
+        self.cpp_info.components["libpcre"].libs = [self._lib_name("pcre")]
+        if self.options.with_bzip2:
+            self.cpp_info.components["libpcre"].requires.append("bzip2::bzip2")
+        if self.options.with_zlib:
+            self.cpp_info.components["libpcre"].requires.append("zlib::zlib")
+        if not self.options.shared:
+            self.cpp_info.components["libpcre"].defines.append("PCRE_STATIC=1")
+        # pcreposix
+        self.cpp_info.components["libpcreposix"].names["pkg_config"] = "libpcreposix"
+        self.cpp_info.components["libpcreposix"].libs = [self._lib_name("pcreposix")]
+        self.cpp_info.components["libpcreposix"].requires = ["libpcre"]
+        # pcrecpp
+        if self.options.build_pcrecpp:
+            self.cpp_info.components["libpcrecpp"].names["pkg_config"] = "libpcrecpp"
+            self.cpp_info.components["libpcrecpp"].libs = [self._lib_name("pcrecpp")]
+            self.cpp_info.components["libpcrecpp"].requires = ["libpcre"]
+
+    def _lib_name(self, name):
+        if self.settings.os == "Windows" and self.settings.build_type == "Debug":
+            return name + "d"
+        return name
