@@ -25,8 +25,8 @@ int main()
             return 1;
         }
     }
-    printf("Size before compression: %4u bytes\n", strlen(text));
-    printf("Size after compression:  %4u bytes\n", compressed_len);
+    printf("Size before compression: %zu bytes\n", strlen(text));
+    printf("Size after compression:  %zu bytes\n", compressed_len);
 
 
     char decompressed[2048];
