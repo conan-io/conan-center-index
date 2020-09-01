@@ -13,10 +13,16 @@ class JasperConan(ConanFile):
     exports_sources = ["CMakeLists.txt", "patches/**"]
     generators = "cmake", "cmake_find_package"
     settings = "os", "compiler", "build_type", "arch"
-    options = {"shared": [True, False],
-               "fPIC": [True, False],
-               "jpegturbo": [True, False]}
-    default_options = {"shared": False, "fPIC": True, "jpegturbo": False}
+    options = {
+        "shared": [True, False],
+        "fPIC": [True, False],
+        "jpegturbo": [True, False],
+    }
+    default_options = {
+        "shared": False,
+        "fPIC": True,
+        "jpegturbo": True,
+    }
 
     _cmake = None
 
