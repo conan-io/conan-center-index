@@ -35,6 +35,8 @@ class PCREConan(ConanFile):
         "with_unicode_properties": False
     }
 
+    _cmake = None
+
     @property
     def _source_subfolder(self):
         return "source_subfolder"
@@ -54,6 +56,17 @@ class PCREConan(ConanFile):
         if self.options.with_unicode_properties:
             self.options.with_utf = True
 
+    def requirements(self):
+        if self.options.with_bzip2:
+            self.requires("bzip2/1.0.8")
+        if self.options.with_zlib:
+            self.requires("zlib/1.2.11")
+
+    def source(self):
+        tools.get(**self.conan_data["sources"][self.version])
+        extracted_dir = self.name + "-" + self.version
+        os.rename(extracted_dir, self._source_subfolder)
+
     def patch_cmake(self):
         """Patch CMake file to avoid man and share during install stage
         """
@@ -65,33 +78,24 @@ class PCREConan(ConanFile):
         tools.replace_in_file(
             cmake_file, "INSTALL(FILES ${html} DESTINATION share/doc/pcre/html)", "")
 
-    def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        extracted_dir = self.name + "-" + self.version
-        os.rename(extracted_dir, self._source_subfolder)
-
-    def requirements(self):
-        if self.options.with_bzip2:
-            self.requires("bzip2/1.0.8")
-        if self.options.with_zlib:
-            self.requires("zlib/1.2.11")
-
     def _configure_cmake(self):
-        cmake = CMake(self)
-        cmake.definitions["PCRE_BUILD_TESTS"] = False
-        cmake.definitions["PCRE_BUILD_PCREGREP"] = self.options.build_pcregrep
-        cmake.definitions["PCRE_BUILD_PCRECPP"] = self.options.build_pcrecpp
-        cmake.definitions["PCRE_SUPPORT_LIBZ"] = self.options.with_zlib
-        cmake.definitions["PCRE_SUPPORT_LIBBZ2"] = self.options.with_bzip2
-        cmake.definitions["PCRE_SUPPORT_JIT"] = self.options.with_jit
-        cmake.definitions["PCRE_SUPPORT_UTF"] = self.options.with_utf
-        cmake.definitions["PCRE_SUPPORT_UNICODE_PROPERTIES"] = self.options.with_unicode_properties
-        cmake.definitions["PCRE_SUPPORT_LIBREADLINE"] = False
-        cmake.definitions["PCRE_SUPPORT_LIBEDIT"] = False
+        if self._cmake:
+            return self._cmake
+        self._cmake = CMake(self)
+        self._cmake.definitions["PCRE_BUILD_TESTS"] = False
+        self._cmake.definitions["PCRE_BUILD_PCREGREP"] = self.options.build_pcregrep
+        self._cmake.definitions["PCRE_BUILD_PCRECPP"] = self.options.build_pcrecpp
+        self._cmake.definitions["PCRE_SUPPORT_LIBZ"] = self.options.with_zlib
+        self._cmake.definitions["PCRE_SUPPORT_LIBBZ2"] = self.options.with_bzip2
+        self._cmake.definitions["PCRE_SUPPORT_JIT"] = self.options.with_jit
+        self._cmake.definitions["PCRE_SUPPORT_UTF"] = self.options.with_utf
+        self._cmake.definitions["PCRE_SUPPORT_UNICODE_PROPERTIES"] = self.options.with_unicode_properties
+        self._cmake.definitions["PCRE_SUPPORT_LIBREADLINE"] = False
+        self._cmake.definitions["PCRE_SUPPORT_LIBEDIT"] = False
         if self.settings.os == "Windows" and self.settings.compiler == "Visual Studio":
-            cmake.definitions["PCRE_STATIC_RUNTIME"] = not self.options.shared and "MT" in self.settings.compiler.runtime
-        cmake.configure(build_folder=self._build_subfolder)
-        return cmake
+            self._cmake.definitions["PCRE_STATIC_RUNTIME"] = not self.options.shared and "MT" in self.settings.compiler.runtime
+        self._cmake.configure(build_folder=self._build_subfolder)
+        return self._cmake
 
     def build(self):
         self.patch_cmake()
