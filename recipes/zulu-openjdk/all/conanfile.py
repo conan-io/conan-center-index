@@ -6,7 +6,9 @@ class ZuluOpenJDK(ConanFile):
     name = "zulu-openjdk"
     url = "https://github.com/conan-io/conan-center-index/"
     description = "A OpenJDK distribution"
+    homepage = "https://www.azul.com"
     license = "https://www.azul.com/products/zulu-and-zulu-enterprise/zulu-terms-of-use/"
+    topics = ("java", "jdk")
     settings = "os", "arch"
 
     @property
