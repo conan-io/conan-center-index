@@ -27,7 +27,7 @@ class LibtiffConan(ConanFile):
         "shared": False,
         "fPIC": True,
         "lzma": True,
-        "jpeg": "libjpeg-turbo",
+        "jpeg": "libjpeg",
         "zlib": True,
         "zstd": True,
         "jbig": True,
