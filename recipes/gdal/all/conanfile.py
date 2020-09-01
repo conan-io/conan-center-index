@@ -214,7 +214,7 @@ class GdalConan(ConanFile):
         if self.options.with_jpeg == "libjpeg":
             self.requires("libjpeg/9d")
         elif self.options.with_jpeg == "libjpeg-turbo":
-            self.requires("libjpeg-turbo/2.0.4")
+            self.requires("libjpeg-turbo/2.0.5")
         if self.options.with_charls:
             self.requires("charls/2.1.0")
         if self.options.with_gif:
@@ -262,7 +262,7 @@ class GdalConan(ConanFile):
         # if self.options.with_rasterlite2:
         #     self.requires("rasterlite2/x.x.x")
         if self.options.get_safe("with_pcre"):
-            self.requires("pcre/8.41")
+            self.requires("pcre/8.44")
         # if self.options.with_epsilon:
         #     self.requires("epsilon/0.9.2")
         if self.options.with_webp:
