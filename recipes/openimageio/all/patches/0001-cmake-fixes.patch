@@ -1,0 +1,218 @@
+--- CMakeLists.txt
++++ CMakeLists.txt
+@@ -100,7 +100,7 @@
+ 
+ 
+ list (APPEND CMAKE_MODULE_PATH
+-      "${PROJECT_SOURCE_DIR}/src/cmake/modules"
++#      "${PROJECT_SOURCE_DIR}/src/cmake/modules"
+       "${PROJECT_SOURCE_DIR}/src/cmake")
+ 
+ include (GNUInstallDirs)
+@@ -126,7 +126,7 @@
+ 
+ include_directories (
+     BEFORE
+-    "${CMAKE_SOURCE_DIR}/src/include"
++    "${PROJECT_SOURCE_DIR}/src/include"
+     "${CMAKE_BINARY_DIR}/src/include"
+     "${CMAKE_BINARY_DIR}/include"
+   )
+--- src/cmake/externalpackages.cmake
++++ src/cmake/externalpackages.cmake
+@@ -111,7 +111,7 @@
+             endif ()
+             add_definitions (${_pkg_DEFINITIONS})
+         else ()
+-            message (STATUS "${ColorRed}${pkgname} library not found ${ColorReset}")
++            message (FATAL_ERROR "${ColorRed}${pkgname} library not found ${ColorReset}")
+             if (${pkgname}_ROOT)
+                 message (STATUS "${ColorRed}    ${pkgname}_ROOT was: ${${pkgname}_ROOT} ${ColorReset}")
+             elseif ($ENV{${pkgname}_ROOT})
+@@ -190,31 +190,31 @@
+ # IlmBase & OpenEXR
+ checked_find_package (OpenEXR 2.0 REQUIRED)
+ # We use Imath so commonly, may as well include it everywhere.
+-include_directories ("${OPENEXR_INCLUDES}" "${ILMBASE_INCLUDES}"
+-                     "${ILMBASE_INCLUDES}/OpenEXR")
++include_directories (${OpenEXR_INCLUDES} #"${ILMBASE_INCLUDES}"
++                    )# "${ILMBASE_INCLUDES}/OpenEXR")
++link_libraries(${OpenEXR_LIBRARIES})
+ if (CMAKE_COMPILER_IS_CLANG AND OPENEXR_VERSION VERSION_LESS 2.3)
+     # clang C++ >= 11 doesn't like 'register' keyword in old exr headers
+     add_compile_options (-Wno-deprecated-register)
+ endif ()
+ if (MSVC AND NOT LINKSTATIC)
+-    add_definitions (-DOPENEXR_DLL) # Is this needed for new versions?
++    #add_definitions (-DOPENEXR_DLL) # Is this needed for new versions?
+ endif ()
+ 
+ 
+-# JPEG -- prefer Turbo-JPEG to regular libjpeg
+-checked_find_package (JPEGTurbo
++checked_find_package (libjpeg-turbo
+                       DEFINITIONS -DUSE_JPEG_TURBO=1
+                       PRINT       JPEG_INCLUDES JPEG_LIBRARIES)
+-if (NOT JPEG_FOUND) # Try to find the non-turbo version
++if(NOT libjpeg-turbo_FOUND)
+     checked_find_package (JPEG REQUIRED)
+-endif ()
+ 
++endif()
+ # Pugixml setup.  Normally we just use the version bundled with oiio, but
+ # some linux distros are quite particular about having separate packages so we
+ # allow this to be overridden to use the distro-provided package if desired.
+ option (USE_EXTERNAL_PUGIXML "Use an externally built shared library version of the pugixml library" OFF)
+ if (USE_EXTERNAL_PUGIXML)
+-    checked_find_package (PugiXML REQUIRED
++    checked_find_package (pugixml REQUIRED
+                        DEFINITIONS -DUSE_EXTERNAL_PUGIXML=1)
+ endif()
+ 
+@@ -234,2 +234,2 @@
+-checked_find_package (Freetype
+-                   DEFINITIONS  -DUSE_FREETYPE=1 )
++checked_find_package (Freetype
++                   DEFINITIONS  -DUSE_FREETYPE=1 )
+@@ -255,12 +255,12 @@
+ checked_find_package (GIF 4)
+ checked_find_package (Libheif 1.3)  # For HEIF/HEIC format
+ checked_find_package (LibRaw)
+-checked_find_package (OpenJpeg)
++checked_find_package (OpenJPEG)
+ checked_find_package (OpenVDB 5.0
+                    DEPS         TBB
+                    DEFINITIONS  -DUSE_OPENVDB=1)
+ checked_find_package (PTex)
+-checked_find_package (Webp)
++checked_find_package (WebP)
+ 
+ option (USE_R3DSDK "Enable R3DSDK (RED camera) support" OFF)
+ checked_find_package (R3DSDK)  # RED camera
+@@ -297,9 +297,9 @@
+     # for an installed version. Still prefer a copy that seems to be
+     # locally installed in this tree.
+     if (NOT BUILD_ROBINMAP_FORCE)
+-        find_package (Robinmap QUIET)
++        find_package (tsl-robin-map REQUIRED)
+     endif ()
+-    # If an external copy wasn't found and we requested that missing
++    set(Robinmap_FOUND ON)# If an external copy wasn't found and we requested that missing
+     # packages be built, or we we are forcing a local copy to be built, then
+     # download and build it.
+     # Download the headers from github
+@@ -321,7 +321,7 @@
+         endif ()
+         set (ROBINMAP_INCLUDE_DIR "${ROBINMAP_INSTALL_DIR}/include")
+     endif ()
+-    checked_find_package (Robinmap REQUIRED)
++    checked_find_package (tsl-robin-map REQUIRED)
+ endmacro()
+ 
+ 
+@@ -331,7 +331,7 @@
+ option (USE_EMBEDDED_LIBSQUISH
+         "Force use of embedded Libsquish, even if external is found" OFF)
+ if (NOT USE_EMBEDDED_LIBSQUISH)
+-    checked_find_package (Libsquish)
++    checked_find_package (libsquish)
+ endif ()
+ 
+ 
+--- src/dds.imageio/CMakeLists.txt
++++ src/dds.imageio/CMakeLists.txt
+@@ -5,7 +5,7 @@
+ if (LIBSQUISH_FOUND)
+     # External libsquish was found -- use it
+     add_oiio_plugin (ddsinput.cpp
+-                     LINK_LIBRARIES Libsquish::Libsquish
++                     LINK_LIBRARIES libsquish::libsquish
+                      )
+ else ()
+     # No external libsquish was found -- use the embedded version.
+diff --git src/include/CMakeLists.txt src/include/CMakeLists.txt
+index faed9f6..768e390 100644
+--- src/include/CMakeLists.txt
++++ src/include/CMakeLists.txt
+@@ -58,6 +58,6 @@
+         ${FMT_INCLUDES}/fmt/format.h
+         ${FMT_INCLUDES}/fmt/ostream.h
+         ${FMT_INCLUDES}/fmt/printf.h )
+-install (FILES ${fmt_headers}
+-         DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/${PROJECT_NAME}/fmt
+-         COMPONENT developer)
++#install (FILES ${fmt_headers}
++#         DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/${PROJECT_NAME}/fmt
++#         COMPONENT developer)
+--- src/jpeg2000.imageio/CMakeLists.txt
++++ src/jpeg2000.imageio/CMakeLists.txt
+@@ -3,7 +3,7 @@
+ # https://github.com/OpenImageIO/oiio/blob/master/LICENSE.md
+ 
+ if (OPENJPEG_FOUND)
+-    if (${OPENJPEG_VERSION} VERSION_LESS 2.0)
++    if (${OpenJPEG_VERSION} VERSION_LESS 2.0)
+         # Old OpenJpeg 1.5. Remove this eventually.
+         #
+         # For reasons I don't understand, OpenJPEG 1.5 fails imageinout_test
+@@ -13,15 +13,15 @@
+         # for now, I'm just disabling jpeg2000 support for that combination.
+         if (EMBEDPLUGINS)
+             add_oiio_plugin (jpeg2000input-v1.cpp jpeg2000output-v1.cpp
+-                             INCLUDE_DIRS ${OPENJPEG_INCLUDES}
+-                             LINK_LIBRARIES ${OPENJPEG_LIBRARIES}
++                             INCLUDE_DIRS ${OpenJPEG_INCLUDES}
++                             LINK_LIBRARIES ${OpenJPEG_LIBRARIES}
+                              DEFINITIONS "-DUSE_OPENJPEG")
+         endif()
+     else ()
+         # OpenJpeg 2.x. Eventually this should be the only one we need.
+         add_oiio_plugin (jpeg2000input.cpp jpeg2000output.cpp
+-                         INCLUDE_DIRS ${OPENJPEG_INCLUDES}
+-                         LINK_LIBRARIES ${OPENJPEG_LIBRARIES}
++                         INCLUDE_DIRS ${OpenJPEG_INCLUDES}
++                         LINK_LIBRARIES ${OpenJPEG_LIBRARIES}
+                          DEFINITIONS "-DUSE_OPENJPEG")
+     endif ()
+ else()
+--- src/libOpenImageIO/CMakeLists.txt
++++ src/libOpenImageIO/CMakeLists.txt
+@@ -136,7 +136,7 @@
+ target_link_libraries (OpenImageIO
+         PUBLIC
+             ${ILMBASE_LIBRARIES}
+-            ${OPENEXR_LIBRARIES}
++            ${OpenEXR_LIBRARIES}
+             ${OpenCV_LIBRARIES}
+             ${GCC_ATOMIC_LIBRARIES}
+         PRIVATE
+@@ -152,12 +152,12 @@
+ if (USE_EXTERNAL_PUGIXML)
+     # insert include path to pugixml first, to ensure that the external
+     # pugixml is found, and not the one in OIIO's include directory.
+-    target_include_directories (OpenImageIO PRIVATE BEFORE ${PUGIXML_INCLUDES})
+-    target_link_libraries (OpenImageIO PRIVATE ${PUGIXML_LIBRARIES})
++    target_include_directories (OpenImageIO PRIVATE BEFORE ${pugixml_INCLUDES})
++    target_link_libraries (OpenImageIO PRIVATE ${pugixml_LIBRARIES})
+ endif()
+ 
+-if (FREETYPE_FOUND)
+-    target_link_libraries (OpenImageIO PRIVATE ${FREETYPE_LIBRARIES})
++if (Freetype_FOUND)
++    target_link_libraries (OpenImageIO PRIVATE Freetype::Freetype)
+ endif()
+ 
+ if (WIN32)
+--- src/raw.imageio/CMakeLists.txt
++++ src/raw.imageio/CMakeLists.txt
+@@ -4,8 +4,8 @@
+ 
+ if (LIBRAW_FOUND)
+     add_oiio_plugin (rawinput.cpp
+-                     INCLUDE_DIRS ${LibRaw_INCLUDE_DIR}
+-                     LINK_LIBRARIES ${LibRaw_r_LIBRARIES}
++                     #INCLUDE_DIRS ${LibRaw_INCLUDE_DIR}
++                     LINK_LIBRARIES libraw::raw_r
+                      DEFINITIONS "-DUSE_LIBRAW=1")
+ else ()
+     message (WARNING "Raw plugin will not be built")
