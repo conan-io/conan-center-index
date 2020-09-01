@@ -129,6 +129,11 @@ class PCREConan(ConanFile):
             self.cpp_info.components["libpcrecpp"].libs = [self._lib_name("pcrecpp")]
             self.cpp_info.components["libpcrecpp"].requires = ["libpcre"]
 
+        if self.options.build_pcregrep:
+            bin_path = os.path.join(self.package_folder, "bin")
+            self.output.info("Appending PATH environment variable: {}".format(bin_path))
+            self.env_info.PATH.append(bin_path)
+
     def _lib_name(self, name):
         if self.settings.os == "Windows" and self.settings.build_type == "Debug":
             return name + "d"
