@@ -447,7 +447,7 @@ class LibwebsocketsConan(ConanFile):
         tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
 
     def package_info(self):
-        # TOTO: CMake imported target shouldn't be namespaced
+        # TODO: CMake imported target shouldn't be namespaced
         cmake_target = "websockets_shared" if self.options.shared else "websockets"
         pkgconfig_name = "libwebsockets" if self.options.shared else "libwebsockets_static"
         self.cpp_info.names["cmake_find_package"] = "Libwebsockets"
