@@ -22,13 +22,13 @@ class PCREConan(ConanFile):
         "support_jit": [True, False]
     }
     default_options = {
-        'shared': False,
-        'fPIC': True,
-        'with_bzip2': True,
-        'build_pcre2_8': True,
-        'build_pcre2_16': True,
-        'build_pcre2_32': True,
-        'support_jit': False
+        "shared": False,
+        "fPIC": True,
+        "with_bzip2": True,
+        "build_pcre2_8": True,
+        "build_pcre2_16": True,
+        "build_pcre2_32": True,
+        "support_jit": False
     }
 
     _cmake = None
