@@ -1,7 +1,5 @@
 from conans import ConanFile, CMake, tools
-from conans.tools import SystemPackageTool
 import os
-import shutil
 
 
 class OpenCVConan(ConanFile):
@@ -46,6 +44,9 @@ class OpenCVConan(ConanFile):
         if self.options.shared:
             del self.options.fPIC
 
+    def build_requirements(self):
+        self.build_requires("gtk/system")
+
     def requirements(self):
         self.requires("zlib/1.2.11")
         if self.options.with_jpeg:
@@ -62,20 +63,6 @@ class OpenCVConan(ConanFile):
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
         os.rename("opencv-{}".format(self.version), self._source_subfolder)
-
-    def system_requirements(self):
-        # TODO: gtk2.0 must be converted to a proxy package.
-        if self.settings.os == "Linux" and tools.os_info.is_linux:
-            if tools.os_info.with_apt:
-                installer = SystemPackageTool()
-                arch_suffix = ""
-                if self.settings.arch == "x86":
-                    arch_suffix = ":i386"
-                elif self.settings.arch == "x86_64":
-                    arch_suffix = ":amd64"
-                packages = ["libgtk2.0-dev%s" % arch_suffix]
-                for package in packages:
-                    installer.install(package)
 
     def _patch_opencv(self):
         tools.rmdir(os.path.join(self._source_subfolder, "3rdparty"))
@@ -131,7 +118,6 @@ class OpenCVConan(ConanFile):
         self._cmake.definitions["BUILD_TIFF"] = False
         self._cmake.definitions["BUILD_JASPER"] = False
         self._cmake.definitions["BUILD_OPENEXR"] = False
-
 
         self._cmake.definitions["WITH_CUFFT"] = False
         self._cmake.definitions["WITH_CUBLAS"] = False
