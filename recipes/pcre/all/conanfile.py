@@ -24,15 +24,15 @@ class PCREConan(ConanFile):
         "with_unicode_properties": [True, False]
     }
     default_options = {
-        'shared': False,
-        'fPIC': True,
-        'with_bzip2': True,
-        'with_zlib': True,
-        'with_jit': False,
-        'build_pcrecpp': False,
-        'build_pcregrep': False,
-        'with_utf': False,
-        'with_unicode_properties': False
+        "shared": False,
+        "fPIC": True,
+        "with_bzip2": True,
+        "with_zlib": True,
+        "with_jit": False,
+        "build_pcrecpp": False,
+        "build_pcregrep": False,
+        "with_utf": False,
+        "with_unicode_properties": False
     }
 
     @property
@@ -104,13 +104,13 @@ class PCREConan(ConanFile):
         cmake.install()
 
     def package_info(self):
-        if self.settings.os == "Windows" and self.settings.build_type == 'Debug':
-            self.cpp_info.libs = ['pcreposixd', 'pcred']
+        if self.settings.os == "Windows" and self.settings.build_type == "Debug":
+            self.cpp_info.libs = ["pcreposixd", "pcred"]
         else:
-            self.cpp_info.libs = ['pcreposix', 'pcre']
+            self.cpp_info.libs = ["pcreposix", "pcre"]
         if not self.options.shared:
             self.cpp_info.defines.append("PCRE_STATIC=1")
-        self.cpp_info.names['pkg_config'] = 'libpcre'
+        self.cpp_info.names["pkg_config"] = "libpcre"
 
         self.cpp_info.names["cmake_find_package"] = "PCRE"
         self.cpp_info.names["cmake_find_package_multi"] = "PCRE"
