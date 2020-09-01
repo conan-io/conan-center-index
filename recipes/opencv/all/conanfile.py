@@ -45,7 +45,7 @@ class OpenCVConan(ConanFile):
             del self.options.fPIC
 
     def build_requirements(self):
-        self.build_requires("gtk/system")
+        self.build_requires("gtk2/system")
 
     def requirements(self):
         self.requires("zlib/1.2.11")
@@ -170,15 +170,6 @@ class OpenCVConan(ConanFile):
                 if self.settings.os == "Linux":
                     self.cpp_info.components[component].system_libs = ["dl", "m", "pthread", "rt"]
 
-        def add_libraries_from_pc(component, library):
-            pkg_config = tools.PkgConfig(library)
-            libs = [lib[2:] for lib in pkg_config.libs_only_l]  # cut -l prefix
-            lib_paths = [lib[2:] for lib in pkg_config.libs_only_L]  # cut -L prefix
-            self.cpp_info.components[component].libs.extend(libs)
-            self.cpp_info.components[component].libdirs.extend(lib_paths)
-            self.cpp_info.components[component].sharedlinkflags.extend(pkg_config.libs_only_other)
-            self.cpp_info.components[component].exelinkflags.extend(pkg_config.libs_only_other)
-
         if self.settings.compiler == "Visual Studio":
             libdir = "lib" if self.options.shared else "staticlib"
             arch = {"x86": "x86",
@@ -219,7 +210,5 @@ class OpenCVConan(ConanFile):
             "videostab": ["core", "flann", "imgproc", "highgui", "features2d", "calib3d", "ml", "video", "legacy", "objdetect", "photo", "gpu"]
         })
 
-        if self.settings.os == "Linux":
-            add_libraries_from_pc("highgui", "gtk+-2.0")
-        elif self.settings.os == "Macos":
+        if self.settings.os == "Macos":
             self.cpp_info.components["highgui"].frameworks = ["Cocoa"]
