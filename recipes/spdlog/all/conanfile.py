@@ -85,8 +85,8 @@ class SpdlogConan(ConanFile):
         tools.replace_in_file(os.path.join(self._source_subfolder, "cmake", "utils.cmake"), "/WX", "")
 
     def build(self):
-        if tools.Version(self.version) < "1.7" and tools.Version(self.deps_cpp_info["fmt"].version) >= 7:
-            raise ConanInvalidConfiguration("The project spdlog/{} requires fmt <7.x".format(self.version))
+        if Version(self.version) < "1.7" and Version(self.deps_cpp_info["fmt"].version) >= 7:
+            raise ConanInvalidConfiguration("The project {}/{} requires fmt < 7.x".format(self.name, self.version))
 
         self._disable_werror()
         if not self.options.header_only:
@@ -115,7 +115,7 @@ class SpdlogConan(ConanFile):
             component_name = "libspdlog"
             self.cpp_info.components["libspdlog"].libs = tools.collect_libs(self)
             self.cpp_info.components["libspdlog"].defines.append("SPDLOG_COMPILED_LIB")
-            
+
         self.cpp_info.components[component_name].defines.append("SPDLOG_FMT_EXTERNAL")
         if self.options["fmt"].header_only:
             self.cpp_info.components[component_name].requires = ["fmt::fmt-header-only"]
