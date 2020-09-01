@@ -16,12 +16,12 @@ class JasperConan(ConanFile):
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
-        "jpegturbo": [True, False],
+        "with_libjpeg": ["libjpeg", "libjpeg-turbo"],
     }
     default_options = {
         "shared": False,
         "fPIC": True,
-        "jpegturbo": True,
+        "with_libjpeg": "libjpeg",
     }
 
     _cmake = None
@@ -43,9 +43,9 @@ class JasperConan(ConanFile):
         del self.settings.compiler.libcxx
 
     def requirements(self):
-        if self.options.jpegturbo:
+        if self.options.with_libjpeg == "libjpeg-turbo":
             self.requires("libjpeg-turbo/2.0.4")
-        else:
+        elif self.options.with_libjpeg == "libjpeg":
             self.requires("libjpeg/9d")
 
     def source(self):
