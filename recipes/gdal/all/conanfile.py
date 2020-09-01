@@ -180,8 +180,6 @@ class GdalConan(ConanFile):
             del self.options.with_png  # and it's not trivial to fix
         else:
             del self.options.with_libiconv
-        if self.settings.os == "Windows" and self.options.with_odbc:
-            raise ConanInvalidConfiguration("gdal with odbc on Windows is not yet supported in this recipe")
 
     def requirements(self):
         self.requires("json-c/0.14")
@@ -549,7 +547,10 @@ class GdalConan(ConanFile):
         args.append("--with-xerces={}".format(tools.unix_path(self.deps_cpp_info["xerces-c"].rootpath) if self.options.with_xerces else "no"))
         args.append("--with-expat={}".format("yes" if self.options.with_expat else "no"))
         args.append("--with-libkml={}".format(tools.unix_path(self.deps_cpp_info["libkml"].rootpath) if self.options.with_libkml else "no"))
-        args.append("--with-odbc={}".format(tools.unix_path(self.deps_cpp_info["odbc"].rootpath) if self.options.with_odbc else "no"))
+        if self.options.with_odbc:
+            args.append("--with-odbc={}".format("yes" if self.settings.os == "Windows" else tools.unix_path(self.deps_cpp_info["odbc"].rootpath)))
+        else:
+            args.append("--without-odbc")
         args.append("--without-dods-root") # TODO: to implement when libdap lib available
         args.append("--with-curl={}".format("yes" if self.options.with_curl else "no"))
         args.append("--with-xml2={}".format("yes" if self.options.with_xml2 else "no"))
@@ -639,6 +640,10 @@ class GdalConan(ConanFile):
                 self.cpp_info.system_libs.append("pthread")
         elif self.settings.os == "Windows":
             self.cpp_info.system_libs.extend(["psapi", "ws2_32"])
+            if self.options.with_odbc and not self.options.shared:
+                self.cpp_info.system_libs.extend(["odbc32", "odbccp32"])
+                if self.settings.compiler == "Visual Studio":
+                    self.cpp_info.system_libs.append("legacy_stdio_definitions")
         if not self.options.shared and tools.stdcpp_library(self):
             self.cpp_info.system_libs.append(tools.stdcpp_library(self))
 
