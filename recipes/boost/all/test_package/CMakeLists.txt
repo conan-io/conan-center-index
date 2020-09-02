@@ -38,6 +38,10 @@ if(NOT HEADER_ONLY)
         find_package(Boost COMPONENTS python REQUIRED)
         add_library(hello_ext MODULE python.cpp)
         set_property(TARGET hello_ext PROPERTY PREFIX "")
+
+        find_package(PythonInterp REQUIRED)
+        find_package(PythonLIBS REQUIRED)
+
         target_include_directories(hello_ext PRIVATE ${PYTHON_INCLUDE_DIRS})
         target_link_libraries(hello_ext PRIVATE Boost::python${PYTHON_COMPONENT_SUFFIX} ${PYTHON_LIBRARIES})
         if(WIN32)
