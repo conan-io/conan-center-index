@@ -1,5 +1,4 @@
 import os
-import shutil
 import glob
 from conans import ConanFile, CMake, tools
 
@@ -43,30 +42,24 @@ class LibjpegTurboConan(ConanFile):
     def _source_subfolder(self):
         return "source_subfolder"
 
-    @property
-    def _build_subfolder(self):
-        return "build_subfolder"
-
-    def build_requirements(self):
-        self.build_requires("nasm/2.14")
+    def config_options(self):
+        if self.settings.os == "Windows":
+            del self.options.fPIC
 
     def configure(self):
         del self.settings.compiler.libcxx
         del self.settings.compiler.cppstd
-        if self.settings.compiler == "Visual Studio":
-            self.options.remove("fPIC")
+        if self.options.shared:
+            del self.options.fPIC
         if self.settings.os == "Emscripten":
             del self.options.SIMD
+
+    def build_requirements(self):
+        self.build_requires("nasm/2.14")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
         os.rename(self.name + "-" + self.version, self._source_subfolder)
-
-    @property
-    def _simd(self):
-        if self.settings.os == "Emscripten":
-            return False
-        return self.options.SIMD
 
     def _configure_cmake(self):
         if self._cmake:
@@ -74,7 +67,7 @@ class LibjpegTurboConan(ConanFile):
         self._cmake = CMake(self, set_cmake_flags=True)
         self._cmake.definitions["ENABLE_STATIC"] = not self.options.shared
         self._cmake.definitions["ENABLE_SHARED"] = self.options.shared
-        self._cmake.definitions["WITH_SIMD"] = self._simd
+        self._cmake.definitions["WITH_SIMD"] = self.options.get_safe("SIMD", False)
         self._cmake.definitions["WITH_ARITH_ENC"] = self.options.arithmetic_encoder
         self._cmake.definitions["WITH_ARITH_DEC"] = self.options.arithmetic_decoder
         self._cmake.definitions["WITH_JPEG7"] = self.options.libjpeg7_compatibility
@@ -85,7 +78,7 @@ class LibjpegTurboConan(ConanFile):
         self._cmake.definitions["WITH_12BIT"] = self.options.enable12bit
         if self.settings.compiler == "Visual Studio":
             self._cmake.definitions["WITH_CRT_DLL"] = True # avoid replacing /MD by /MT in compiler flags
-        self._cmake.configure(build_folder=self._build_subfolder)
+        self._cmake.configure()
         return self._cmake
 
     def _patch_sources(self):
@@ -104,32 +97,26 @@ class LibjpegTurboConan(ConanFile):
         cmake.build()
 
     def package(self):
+        self.copy("LICENSE.md", dst="licenses", src=self._source_subfolder)
         cmake = self._configure_cmake()
         cmake.install()
         # remove unneeded directories
         tools.rmdir(os.path.join(self.package_folder, "share"))
         tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
         tools.rmdir(os.path.join(self.package_folder, "doc"))
-
-        # remove binaries
-        for bin_program in ["cjpeg", "djpeg", "jpegtran", "tjbench", "wrjpgcom", "rdjpgcom"]:
-            for ext in ["", ".exe"]:
-                try:
-                    os.remove(os.path.join(self.package_folder, "bin", bin_program+ext))
-                except OSError:
-                    pass
-        for pdb_file in glob.glob(os.path.join(self.package_folder, "bin", "*.pdb")):
-            os.unlink(pdb_file)
-
-        self.copy("license*", src=self._source_subfolder, dst="licenses", ignore_case=True, keep_path=False)
-
-    def _collect_libs(self):
-        libs = ["jpeg"]
-        if self.options.turbojpeg:
-            libs.append("turbojpeg")
-        if self.settings.compiler == "Visual Studio" and not self.options.shared:
-            libs = [lib + "-static" for lib in libs]
-        return libs
+        # remove binaries and pdb files
+        for pattern_to_remove in ["cjpeg*", "djpeg*", "jpegtran*", "tjbench*", "wrjpgcom*", "rdjpgcom*", "*.pdb"]:
+            for bin_file in glob.glob(os.path.join(self.package_folder, "bin", pattern_to_remove)):
+                os.remove(bin_file)
 
     def package_info(self):
-        self.cpp_info.libs = self._collect_libs()
+        self.cpp_info.components["jpeg"].names["pkg_config"] = "libjpeg"
+        self.cpp_info.components["jpeg"].libs = [self._lib_name("jpeg")]
+        if self.options.turbojpeg:
+            self.cpp_info.components["turbojpeg"].names["pkg_config"] = "libturbojpeg"
+            self.cpp_info.components["turbojpeg"].libs = [self._lib_name("turbojpeg")]
+
+    def _lib_name(self, name):
+        if self.settings.compiler == "Visual Studio" and not self.options.shared:
+            return name + "-static"
+        return name

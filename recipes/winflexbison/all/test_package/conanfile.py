@@ -1,6 +1,7 @@
 from conans import ConanFile, CMake, tools
 import os
 
+
 class TestPackageConan(ConanFile):
     settings = "os", "compiler", "build_type", "arch"
     generators = "cmake"
@@ -15,5 +16,5 @@ class TestPackageConan(ConanFile):
         self.run("win_bison --version", run_environment=True)
 
         if not tools.cross_building(self.settings):
-            cmake = CMake(self)
-            cmake.test()
+            self.run(os.path.join("bin", "bison_test_package"), run_environment=True)
+            self.run("{} {}".format(os.path.join("bin", "flex_test_package"), os.path.join(self.source_folder, "basic_nr.txt")), run_environment=True)

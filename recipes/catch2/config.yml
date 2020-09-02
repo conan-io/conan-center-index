@@ -13,3 +13,9 @@ versions:
     folder: 2.x.x
   2.12.2:
     folder: 2.x.x
+  2.12.3:
+    folder: 2.x.x
+  2.12.4:
+    folder: 2.x.x
+  2.13.0:
+    folder: 2.x.x

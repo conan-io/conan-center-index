@@ -11,3 +11,4 @@ int main() {
   std::cout << base32::encode(decoded) << std::endl; // "C5Q7J833C5S6WRBC41R6RSB1EDTQ4S8"
   return 0;
 }
+

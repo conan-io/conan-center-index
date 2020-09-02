@@ -5,17 +5,16 @@ import os
 
 class PremakeConan(ConanFile):
     name = "premake"
-    version = "5.0.0-alpha14"
     topics = ("conan", "premake", "build", "build-systems")
     description = "Describe your software project just once, using Premake's simple and easy to read syntax, and build it everywhere"
     url = "https://github.com/conan-io/conan-center-index"
-    homepage = "https://premake.github.io/"
+    homepage = "https://premake.github.io"
     license = "BSD-3-Clause"
-    settings = "os_build", "arch_build", "compiler"
+    settings = "os", "arch", "compiler", "build_type"
     _source_subfolder = "source_subfolder"
 
     def configure(self):
-        if self.settings.os_build == "Windows" and self.settings.compiler == "gcc":
+        if self.settings.os == "Windows" and self.settings.compiler == "gcc":
             raise ConanInvalidConfiguration("Building with MinGW isn't supported currently by the recipe")
 
     def source(self):
@@ -25,21 +24,23 @@ class PremakeConan(ConanFile):
 
     @property
     def _platform(self):
-        return {'Windows': 'vs2017',
-                'Linux': 'gmake.unix',
-                'Macos': 'gmake.macosx'}.get(str(self.settings.os_build))
+        if self.version == "5.0.0-alpha14":
+            return {"Windows": "vs2017",
+                    "Linux": "gmake.unix",
+                    "Macos": "gmake.macosx"}.get(str(self.settings.os))
+        else:
+            return {"Windows": "vs2017",
+                    "Linux": "gmake2.unix",
+                    "Macos": "gmake2.macosx"}.get(str(self.settings.os))
 
     def build(self):
-        with tools.chdir(os.path.join(self._source_subfolder, 'build', self._platform)):
-            if self.settings.os_build == 'Windows':
+        with tools.chdir(os.path.join(self._source_subfolder, "build", self._platform)):
+            if self.settings.os == "Windows":
                 msbuild = MSBuild(self)
-                msbuild.build("Premake5.sln", platforms={'x86': 'Win32', 'x86_64': 'x64'}, build_type="Release", arch=self.settings.arch_build)
-            elif self.settings.os_build == 'Linux':
+                msbuild.build("Premake5.sln", platforms={"x86": "Win32", "x86_64": "x64"})
+            elif self.settings.os == "Linux" or self.settings.os == "Macos":
                 env_build = AutoToolsBuildEnvironment(self)
-                env_build.make(args=['config=release'])
-            elif self.settings.os_build == 'Macos':
-                env_build = AutoToolsBuildEnvironment(self)
-                env_build.make(args=['config=release'])
+                env_build.make(args=["config=release"])
 
     def package(self):
         self.copy(pattern="LICENSE.txt", dst="licenses", src=self._source_subfolder)

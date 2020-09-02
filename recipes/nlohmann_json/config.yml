@@ -10,3 +10,7 @@ versions:
     folder: all
   "3.8.0":
     folder: all
+  "3.9.0":
+    folder: all
+  "3.9.1":
+    folder: all

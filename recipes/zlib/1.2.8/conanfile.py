@@ -8,19 +8,26 @@ from conans.errors import ConanException, NotFoundException
 class ZlibConan(ConanFile):
     name = "zlib"
     version = "1.2.8"
+    description = ("A Massively Spiffy Yet Delicately Unobtrusive Compression Library "
+                  "(Also Free, Not to Mention Unencumbered by Patents)")
+    topics = ("conan", "zlib", "compression")
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://zlib.net"
     license = "Zlib"
-    description = ("A Massively Spiffy Yet Delicately Unobtrusive Compression Library "
-                  "(Also Free, Not to Mention Unencumbered by Patents)")
     settings = "os", "arch", "compiler", "build_type"
     options = {"shared": [True, False], "fPIC": [True, False]}
     default_options = {"shared": False, "fPIC": True}
     exports_sources = ["CMakeLists.txt"]
     generators = "cmake"
-    _source_subfolder = "source_subfolder"
-    _build_subfolder = "build_subfolder"
-    
+
+    @property
+    def _source_subfolder(self):
+        return "source_subfolder"
+
+    @property
+    def _build_subfolder(self):
+        return "build_subfolder"
+
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
@@ -28,7 +35,7 @@ class ZlibConan(ConanFile):
     def configure(self):
         del self.settings.compiler.libcxx
         del self.settings.compiler.cppstd
-    
+
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
         os.rename("{}-{}".format(self.name, self.version), self._source_subfolder)
@@ -37,7 +44,7 @@ class ZlibConan(ConanFile):
             configure_file = os.path.join(self._source_subfolder, "configure")
             st = os.stat(configure_file)
             os.chmod(configure_file, st.st_mode | stat.S_IEXEC)
-                
+
     def build(self):
         if self.settings.os != "Windows":
             with tools.chdir(self._source_subfolder):

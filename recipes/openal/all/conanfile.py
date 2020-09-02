@@ -1,5 +1,6 @@
-from conans import CMake, ConanFile, tools
 import os
+from conans import CMake, ConanFile, tools
+from conans.errors import ConanInvalidConfiguration
 
 
 class OpenALConan(ConanFile):
@@ -36,6 +37,10 @@ class OpenALConan(ConanFile):
         del self.settings.compiler.libcxx
         del self.settings.compiler.cppstd
 
+        if tools.Version(self.version) >= "1.20" and self.settings.compiler == "gcc" and tools.Version(self.settings.compiler.version) < "5":
+            raise ConanInvalidConfiguration("OpenAL can't be compiled by {0} {1}".format(self.settings.compiler,
+                                                                                         self.settings.compiler.version))
+
     def requirements(self):
         if self.settings.os == "Linux":
             self.requires("libalsa/1.1.9")
@@ -58,7 +63,7 @@ class OpenALConan(ConanFile):
         return self._cmake
 
     def build(self):
-        for patch in self.conan_data["patches"][self.version]:
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
             tools.patch(**patch)
         cmake = self._configure_cmake()
         cmake.build()

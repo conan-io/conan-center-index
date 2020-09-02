@@ -86,6 +86,8 @@ class CbloscConan(ConanFile):
         self._cmake.definitions["BUILD_STATIC"] = not self.options.shared
         self._cmake.definitions["BUILD_SHARED"] = self.options.shared
         self._cmake.definitions["BUILD_TESTS"] = False
+        if tools.Version(self.version) >= "1.20.0":
+            self._cmake.definitions["BUILD_FUZZERS"] = False
         self._cmake.definitions["BUILD_BENCHMARKS"] = False
         simd_intrinsics = self.options.get_safe("simd_intrinsics", False)
         self._cmake.definitions["DEACTIVATE_SSE2"] = simd_intrinsics not in ["sse2", "avx2"]
