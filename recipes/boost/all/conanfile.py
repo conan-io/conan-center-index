@@ -934,9 +934,15 @@ class BoostConan(ConanFile):
         self.cpp_info.components["dynamic_linking"].names["cmake_find_package"] = "dynamic_linking"
         self.cpp_info.components["dynamic_linking"].names["cmake_find_package_multi"] = "dynamic_linking"
 
+        # - Use 'headers' component for all includes + defines
+        # - Use '_libboost' component to attach extra system_libs, ...
+
         self.cpp_info.components["headers"].libs = []
         self.cpp_info.components["headers"].names["cmake_find_package"] = "headers"
         self.cpp_info.components["headers"].names["cmake_find_package_multi"] = "headers"
+
+        self.cpp_info.components["_libboost"].requires = ["headers"]
+        self.cpp_info.components["_libboost"].bindirs.append("lib")
 
         if self._is_versioned_layout:
             version_tokens = str(self.version).split(".")
@@ -945,12 +951,6 @@ class BoostConan(ConanFile):
                 minor = version_tokens[1]
                 boost_version_tag = "boost-%s_%s" % (major, minor)
                 self.cpp_info.components["headers"].includedirs = [os.path.join(self.package_folder, "include", boost_version_tag)]
-
-        self.cpp_info.components["_libboost"].libs = []
-        self.cpp_info.components["_libboost"].bindirs.append("lib")
-        self.cpp_info.components["_libboost"].names["cmake_find_package"] = "boost"
-        self.cpp_info.components["_libboost"].names["cmake_find_package_multi"] = "boost"
-        self.cpp_info.components["_libboost"].requires = ["headers"]
 
         libformatdata = {}
         if not self.options.without_python:
@@ -994,6 +994,7 @@ class BoostConan(ConanFile):
         if self.options.i18n_backend == 'icu':
             self.cpp_info.components["_libboost"].requires.append("icu::icu")
 
+        # Apply these options to the 'headers' component so header_only has these also applied
         if not self.options.header_only and self.options.shared:
             self.cpp_info.components["headers"].defines.append("BOOST_ALL_DYN_LINK")
 
@@ -1004,7 +1005,7 @@ class BoostConan(ConanFile):
             self.cpp_info.components["headers"].defines.append("BOOST_ASIO_NO_DEPRECATED")
 
         if self.options.filesystem_no_deprecated:
-            self.cpp_info.components["filesystem"].append("BOOST_FILESYSTEM_NO_DEPRECATED")
+            self.cpp_info.components["headers"].append("BOOST_FILESYSTEM_NO_DEPRECATED")
 
         if self.options.segmented_stacks:
             self.cpp_info.components["headers"].extend(["BOOST_USE_SEGMENTED_STACKS", "BOOST_USE_UCONTEXT"])
@@ -1034,12 +1035,12 @@ class BoostConan(ConanFile):
                     self.output.info("Enabled magic autolinking (smart and magic decisions)")
 
                 # https://github.com/conan-community/conan-boost/issues/127#issuecomment-404750974
-                self.cpp_info.components["headers"].system_libs.append("bcrypt")
+                self.cpp_info.components["_libboost"].system_libs.append("bcrypt")
             elif self.settings.os == "Linux":
                 # https://github.com/conan-community/community/issues/135
-                self.cpp_info.components["headers"].system_libs.append("rt")
+                self.cpp_info.components["_libboost"].system_libs.append("rt")
                 if self.options.multithreading:
-                    self.cpp_info.components["headers"].system_libs.append("pthread")
+                    self.cpp_info.components["_libboost"].system_libs.append("pthread")
             elif self.settings.os == "Emscripten":
                 if self.options.multithreading:
                     arch = self.settings.get_safe('arch')
@@ -1049,10 +1050,8 @@ class BoostConan(ConanFile):
                     # So instead we are using the raw compiler flags (that are being activated
                     # from the aforementioned flag)
                     if arch.startswith("x86") or arch.startswith("wasm"):
-                        self.cpp_info.components["headers"].cxxflags.append("-pthread")
-                        self.cpp_info.components["headers"].sharedlinkflags.extend(["-pthread","--shared-memory"])
-                        self.cpp_info.components["headers"].exelinkflags.extend(["-pthread","--shared-memory"])
+                        self.cpp_info.components["_libboost"].cxxflags.append("-pthread")
+                        self.cpp_info.components["_libboost"].sharedlinkflags.extend(["-pthread","--shared-memory"])
+                        self.cpp_info.components["_libboost"].exelinkflags.extend(["-pthread","--shared-memory"])
 
         self.env_info.BOOST_ROOT = self.package_folder
-        self.cpp_info.names["cmake_find_package"] = "Boost"
-        self.cpp_info.names["cmake_find_package_multi"] = "Boost"
