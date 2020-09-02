@@ -103,6 +103,8 @@ patches:
       base_path: "source_subfolder"
     - patch_file: "patches/boost_locale_fail_on_missing_backend.patch"
       base_path: "source_subfolder"
+    - patch_file: "patches/boost_mpi_check.patch"
+      base_path: "source_subfolder"
   1.73.0:
     - patch_file: "patches/boost_build_qcc_fix_debug_build_parameter.patch"
       base_path: "source_subfolder"
