@@ -984,15 +984,22 @@ class BoostConan(ConanFile):
 
         if self._zip_bzip2_requires_needed:
             if self.options.bzip2:
-                self.cpp_info.components["_libboost"].requires.append("bzip2::bzip2")
+                if not self.options.get_safe("without_iostreams", True):
+                    self.cpp_info.components["iostreams"].requires.append("bzip2::bzip2")
             if self.options.zlib:
-                self.cpp_info.components["_libboost"].requires.append("zlib::zlib")
+                if not self.options.get_safe("without_iostreams", True):
+                    self.cpp_info.components["iostreams"].requires.append("zlib::zlib")
         if self.options.lzma:
-            self.cpp_info.components["_libboost"].requires.append("xz_utils::xz_utils")
+            if not self.options.get_safe("without_iostreams", True):
+                self.cpp_info.components["iostreams"].requires.append("xz_utils::xz_utils")
         if self.options.zstd:
-            self.cpp_info.components["_libboost"].requires.append("zstd::zstd")
+            if not self.options.get_safe("without_iostreams", True):
+                self.cpp_info.components["iostreams"].requires.append("zstd::zstd")
         if self.options.i18n_backend == 'icu':
-            self.cpp_info.components["_libboost"].requires.append("icu::icu")
+            if not self.options.get_safe("without_locale", True):
+                self.cpp_info.components["locale"].requires.append("icu::icu")
+            if not self.options.get_safe("without_regex", True):
+                self.cpp_info.components["regex"].requires.append("icu::icu")
 
         # Apply these options to the 'headers' component so header_only has these also applied
         if not self.options.header_only and self.options.shared:
