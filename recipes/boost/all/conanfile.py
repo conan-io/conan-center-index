@@ -1009,10 +1009,6 @@ class BoostConan(ConanFile):
         if self.options.segmented_stacks:
             self.cpp_info.components["headers"].extend(["BOOST_USE_SEGMENTED_STACKS", "BOOST_USE_UCONTEXT"])
 
-        if self.settings.os != "Android":
-            if self._gnu_cxx11_abi:
-                self.cpp_info.components["headers"].defines.append("_GLIBCXX_USE_CXX11_ABI=%s" % self._gnu_cxx11_abi)
-
         if not self.options.header_only:
             if self.options.error_code_header_only:
                 self.cpp_info.components["headers"].defines.append("BOOST_ERROR_CODE_HEADER_ONLY")
