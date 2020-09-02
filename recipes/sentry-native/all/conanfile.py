@@ -29,11 +29,25 @@ class SentryNativeConan(ConanFile):
         "transport": "curl"
     }
 
+    _cmake = None
+
     @property
     def _source_subfolder(self):
         return "source_subfolder"
 
-    _cmake = None
+    def config_options(self):
+        if self.settings.os == "Windows":
+            del self.options.fPIC
+
+    def configure(self):
+        if self.options.shared:
+            del self.options.fPIC
+        if self.settings.compiler.cppstd:
+            tools.check_min_cppstd(self, 11)
+        if self.options.backend == "inproc" and self.settings.os == "Windows":
+            raise ConanInvalidConfiguration("The in-process backend is not supported on Windows")
+        if self.options.transport == "winhttp" and self.settings.os != "Windows":
+            raise ConanInvalidConfiguration("The winhttp transport is only supported on Windows")
 
     def requirements(self):
         if self.options.transport == "curl":
@@ -41,21 +55,13 @@ class SentryNativeConan(ConanFile):
 
         if self.options.backend == "crashpad":
             raise ConanInvalidConfiguration("crashpad not available yet in CCI")
-        if self.options.backend == "breakpad":
+        elif self.options.backend == "breakpad":
             raise ConanInvalidConfiguration("breakpad not available yet in CCI")
-
-    def config_options(self):
-        if self.settings.os == "Windows":
-            del self.options.fPIC
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
         extracted_dir = self.name + "-" + self.version
         os.rename(extracted_dir, self._source_subfolder)
-
-    def configure(self):
-        if self.options.backend == "inproc" and self.settings.os == "Windows":
-            raise ConanInvalidConfiguration("The in-process backend is not supported on Windows")
 
     def _configure_cmake(self):
         if self._cmake:
