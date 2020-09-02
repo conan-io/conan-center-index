@@ -215,6 +215,8 @@ class BoostConan(ConanFile):
                 self.requires("zstd/1.4.3")
         if self.options.i18n_backend == 'icu':
             self.requires("icu/64.2")
+        elif self.options.i18n_backend == 'iconv':
+            self.requires("libiconv/1.16")
 
     def package_id(self):
         if self.options.header_only:
@@ -608,11 +610,13 @@ class BoostConan(ConanFile):
         if self.options.i18n_backend == 'icu':
             flags.append("-sICU_PATH={}".format(self.deps_cpp_info["icu"].rootpath))
             flags.append("boost.locale.iconv=off boost.locale.icu=on")
+            flags.append("--enable-icu --disable-iconv")
         elif self.options.i18n_backend == 'iconv':
             flags.append("boost.locale.iconv=on boost.locale.icu=off")
+            flags.append("--disable-icu --enable-iconv")
         else:
             flags.append("boost.locale.iconv=off boost.locale.icu=off")
-            flags.append("--disable-icu --disable-iconvv")
+            flags.append("--disable-icu --disable-iconv")
 
         def add_defines(option, library):
             if option:
@@ -913,6 +917,13 @@ class BoostConan(ConanFile):
         layout = self.options.get_safe("layout")
         return layout == "versioned" or (layout == "b2-default" and os.name == 'nt')
 
+    @staticmethod
+    def _option_to_conan_requirement(name):
+        return {
+            "lzma": "xz_utils",
+            "iconv": "libiconv",
+        }.get(name, name)
+
     def package_info(self):
         self.cpp_info.filenames["cmake_find_package"] = "Boost"
         self.cpp_info.filenames["cmake_find_package_multi"] = "Boost"
@@ -975,31 +986,26 @@ class BoostConan(ConanFile):
                 self.cpp_info.components[module].names["cmake_find_package"] = module
                 self.cpp_info.components[module].names["cmake_find_package_multi"] = module
 
+                for requirement in self._dependencies.get("requirements", {}).get(module, []):
+                    if requirement == "backtrace":
+                        # FIXME: backtrace not (yet) available in cci
+                        continue
+                    if self.options.get_safe(requirement, None) == False:
+                        continue
+                    conan_requirement = self._option_to_conan_requirement(requirement)
+                    if conan_requirement in ("icu", "iconv"):
+                        print("ICU/ICONV detected", self.options.get_safe("i18n_backend"))
+                        if conan_requirement != self.options.get_safe("i18n_backend"):
+                            continue
+                    print("ADDING", conan_requirement)
+                    self.cpp_info.components[module].requires.append("{0}::{0}".format(conan_requirement))
+
         if used_libraries != detected_libraries:
             non_used = detected_libraries.difference(used_libraries)
             assert len(non_used) == 0, "These libraries were not used in conan components: {}".format(non_used)
 
             non_existing = used_libraries.difference(detected_libraries)
             assert len(non_existing) == 0, "These libraries were used, but not built: {}".format(non_existing)
-
-        if self._zip_bzip2_requires_needed:
-            if self.options.bzip2:
-                if not self.options.get_safe("without_iostreams", True):
-                    self.cpp_info.components["iostreams"].requires.append("bzip2::bzip2")
-            if self.options.zlib:
-                if not self.options.get_safe("without_iostreams", True):
-                    self.cpp_info.components["iostreams"].requires.append("zlib::zlib")
-        if self.options.lzma:
-            if not self.options.get_safe("without_iostreams", True):
-                self.cpp_info.components["iostreams"].requires.append("xz_utils::xz_utils")
-        if self.options.zstd:
-            if not self.options.get_safe("without_iostreams", True):
-                self.cpp_info.components["iostreams"].requires.append("zstd::zstd")
-        if self.options.i18n_backend == 'icu':
-            if not self.options.get_safe("without_locale", True):
-                self.cpp_info.components["locale"].requires.append("icu::icu")
-            if not self.options.get_safe("without_regex", True):
-                self.cpp_info.components["regex"].requires.append("icu::icu")
 
         # Apply these options to the 'headers' component so header_only has these also applied
         if not self.options.header_only and self.options.shared:

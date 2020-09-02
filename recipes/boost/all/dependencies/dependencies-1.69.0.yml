@@ -246,4 +246,19 @@ libs:
   - boost_wave
   wserialization:
   - boost_wserialization
+requirements:
+  iostreams:
+  - zlib
+  - lzma
+  - zstd
+  - bzip2
+  locale:
+  - icu
+  - iconv
+  python:
+  - python
+  regex:
+  - icu
+  stacktrace:
+  - backtrace
 version: 1.69.0

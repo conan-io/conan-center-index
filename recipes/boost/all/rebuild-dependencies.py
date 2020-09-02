@@ -7,7 +7,7 @@ import re
 import subprocess
 import sys
 import tempfile
-from typing import Dict, List
+from typing import Dict, List, Tuple
 
 from conans import tools
 import json
@@ -45,12 +45,40 @@ CONFIGURE_OPTIONS = (
 )
 
 
+CONAN_REQUIREMENTS = (
+    "backtrace",
+    "bzip2",
+    "iconv",
+    "icu",
+    "lzma",
+    "python",
+    "zlib",
+    "zstd",
+)
+
+
+LINUX_SYSTEM_LIBS = (
+    "dl",
+    "m",
+    "rt",
+    "pthread",
+)
+
+
+WINDOWS_SYSTEM_LIBS = (
+    "bcrypt",
+    "coredll",
+    "dbgeng",
+)
+
+
 @dataclasses.dataclass
 class BoostDependenciesExport(object):
     version: str
     configure_options: List[str]
     dependencies: Dict[str, List[str]] = dataclasses.field(default_factory=dict)
     libs: Dict[str, List[str]] = dataclasses.field(default_factory=dict)
+    requirements: Dict[str, List[str]] = dataclasses.field(default_factory=dict)
 
 
 @dataclasses.dataclass
@@ -119,6 +147,67 @@ class BoostDependencyBuilder(object):
             data = json.loads(open("conanbuildinfo.json").read())
             return data["dependencies"][0]["bin_paths"]
 
+    _GREP_IGNORE_PREFIX = ("#", "\"")
+    _GREP_IGNORE_PARTS = ("boost", "<", ">")
+
+    @classmethod
+    def _grep_libs(cls, regex, text):
+        res = set()
+        for m in re.finditer(regex, text, flags=re.MULTILINE):
+            # If text before main capture group contains a string or a comment => ignore
+            ignore = False
+            for ign in cls._GREP_IGNORE_PREFIX:
+                if ign in m.group(1):
+                    ignore = True
+            if ignore:
+                continue
+            l = m.group(2).lower()
+            ignore = False
+            for ign in cls._GREP_IGNORE_PARTS:
+                if ign in l:
+                    ignore = True
+            if ignore:
+                continue
+            res.add(l)
+        return list(res)
+
+    def _grep_requirements(self, component: str) -> List[str]:
+        jam = self.boost_path /  "libs" / component / "build" / "Jamfile.v2"
+        if not jam.is_file():
+            jam = self.boost_path /  "libs" / component / "build" / "Jamfile"
+        if not jam.is_file():
+            sys.stderr.print("Can't find Jamfile for {}. Unable to determine dependencies.\n")
+            return None
+        contents = jam.open().read()
+
+        using = self._grep_libs("\n(.*)using\\s+([^ ;:]+)\\s*", contents)
+        libs = self._grep_libs("\n(.*)\\s(?:searched-)?lib\\s+([^ \t\n;:]+)", contents)
+
+        requirements = using + libs
+        return requirements
+
+    def _sort_requirements(self, requirements: List[str]) -> Tuple[List[str], Dict[str, List[str]], List[str]]:
+        conan_requirements = set()
+        system_libs = {}
+        unknown_libs = set()
+
+        for req in requirements:
+            if req in LINUX_SYSTEM_LIBS:
+                system_libs.setdefault("linux", []).append(req)
+                continue
+            if req in WINDOWS_SYSTEM_LIBS:
+                system_libs.setdefault("windows", []).append(req)
+                continue
+            added = False
+            for conan_req in CONAN_REQUIREMENTS:
+                if conan_req in req:
+                    conan_requirements.add(conan_req)
+                    added = True
+            if added:
+                continue
+            unknown_libs.add(req)
+        return list(conan_requirements), system_libs, list(unknown_libs)
+
     def do_boostdep_collect(self) -> BoostDependencies:
         with tools.chdir(str(self.boost_path)):
             with tools.environment_append({"PATH": self._bin_paths}):
@@ -142,12 +231,26 @@ class BoostDependencyBuilder(object):
         for conf_option in CONFIGURE_OPTIONS:
             if conf_option in filtered_dependency_tree:
                 configure_options.append(conf_option)
+            else:
+                sys.stderr.write("WARN: option {} not available in {}\n".format(conf_option, self.boost_version))
+
+        requirements = {}
+        for conf_option in configure_options:
+            reqs = self._grep_requirements(conf_option)
+            conan_requirements, system_libs, unknown_libs = self._sort_requirements(reqs)
+            if system_libs:
+                sys.stderr.write("WARNING: Module '{}' ({}) has system libraries: {}\n".format(conf_option, self.boost_version, system_libs))
+            if unknown_libs:
+                sys.stderr.write("WARNING: Module '{}' ({})has unknown libs: {}\n".format(conf_option, self.boost_version, unknown_libs))
+            if conan_requirements:
+                requirements[conf_option] = conan_requirements
 
         boost_dependencies = BoostDependencies(
             export=BoostDependenciesExport(
                 version=self.boost_version,
                 configure_options=configure_options,
                 dependencies=filtered_dependency_tree,
+                requirements=requirements,
             ),
             buildables=buildables,
         )
@@ -182,11 +285,6 @@ class BoostDependencyBuilder(object):
             deptree["mpi"].remove("python")
         except (KeyError, ValueError):
             pass
-
-        # if "python" in deptree:
-        #     deptree.setdefault("python", []).remove("mpi_python")
-
-        print(deptree)
 
         if "mpi_python" in deptree and "python" not in deptree["mpi_python"]:
             deptree["mpi_python"].append("python")
