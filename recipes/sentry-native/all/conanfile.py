@@ -38,7 +38,7 @@ class SentryNativeConan(ConanFile):
     def requirements(self):
         if self.options.transport == "curl":
             self.requires("libcurl/7.68.0")
-            
+
         if self.options.backend == "crashpad":
             raise ConanInvalidConfiguration("crashpad not available yet in CCI")
         if self.options.backend == "breakpad":
@@ -79,6 +79,8 @@ class SentryNativeConan(ConanFile):
         tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
 
     def package_info(self):
+        self.cpp_info.names["cmake_find_package"] = "sentry"
+        self.cpp_info.names["cmake_find_package_multi"] = "sentry"
         self.cpp_info.libs = ["sentry"]
         if self.settings.os in ("Android", "Windows"):
             self.cpp_info.exelinkflags= ["--build-id=sha1"]
