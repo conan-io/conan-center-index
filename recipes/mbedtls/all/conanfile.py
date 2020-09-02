@@ -8,23 +8,12 @@ class MBedTLSConan(ConanFile):
     topics = ("conan", "mbedtls", "polarssl", "tls", "security")
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://tls.mbed.org"
-    license = (
-        "GPL-2.0",
-        "Apache-2.0",
-    )
+    license = ("GPL-2.0","Apache-2.0",)
     exports_sources = "CMakeLists.txt", "patches/**"
     generators = "cmake"
     settings = "os", "compiler", "build_type", "arch"
-    options = {
-        "shared": [True, False],
-        "fPIC": [True, False],
-        "with_zlib": [True, False],
-    }
-    default_options = {
-        "shared": False,
-        "fPIC": True,
-        "with_zlib": True,
-    }
+    options = {"shared": [True, False],"fPIC": [True, False],"with_zlib": [True, False]}
+    default_options = {"shared": False,"fPIC": True,"with_zlib": True}
     
     _cmake = None
     
@@ -89,6 +78,6 @@ class MBedTLSConan(ConanFile):
         tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
 
     def package_info(self):
-        self.cpp_info.names["cmake_find_package"] = "MbedTLS"
+        self.cpp_info.names["cmake_find_package"] = "MbedTLS" # TBD: I can not find this in the repo
         self.cpp_info.names["cmake_find_package_multi"] = "MbedTLS"
         self.cpp_info.libs = ["mbedtls", "mbedx509", "mbedcrypto"]
