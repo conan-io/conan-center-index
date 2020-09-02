@@ -1,12 +1,11 @@
 import os
 import glob
 from conans import ConanFile, tools, CMake
-from conans.errors import ConanInvalidConfiguration
 
 
 class RTTRConan(ConanFile):
     name = "rttr"
-    description = "Run Time Type Reflection library"   
+    description = "Run Time Type Reflection library"
     topics = ("conan", "reflection", "rttr", )
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/rttrorg/rttr"
@@ -40,7 +39,7 @@ class RTTRConan(ConanFile):
 
     def _configure_cmake(self):
         cmake = CMake(self)
-        
+
         cmake.definitions["BUILD_DOCUMENTATION"] = False
         cmake.definitions["BUILD_EXAMPLES"] = False
         cmake.definitions["BUILD_UNIT_TESTS"] = False
@@ -51,7 +50,7 @@ class RTTRConan(ConanFile):
         cmake.definitions["BUILD_STATIC"] = not self.options.shared
 
         cmake.configure()
-        
+
         return cmake
 
     def _patch_sources(self):
@@ -68,13 +67,10 @@ class RTTRConan(ConanFile):
         self.copy("LICENSE.txt", src=os.path.join(self.source_folder, self._source_subfolder), dst="licenses")
         cmake = self._configure_cmake()
         cmake.install()
-
         tools.rmdir(os.path.join(self.package_folder, "cmake"))
         tools.rmdir(os.path.join(self.package_folder, "share"))
-
-        pdb_files = glob.glob(os.path.join(self.package_folder, 'bin', '*.pdb'), recursive=True)
-        for pdb in pdb_files:
-            os.unlink(pdb)
+        for pdb in glob.glob(os.path.join(self.package_folder, "bin", "*.pdb")):
+            os.remove(pdb)
 
     def package_info(self):
         self.cpp_info.libs = tools.collect_libs(self)
