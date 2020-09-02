@@ -315,3 +315,9 @@ The attribue `default_options` should be a dictionary, for example `default_opti
 ### **<a name="KB-H052">#KB-H052</a>: "CONFIG.YML HAS NEW VERSION"**
 
 It's important to have new library version defined in both `config.yml` and `conandata.yml`, otherwise newly added version will not be checked and built by CI and will not be available for download.
+
+
+### **<a name="KB-H054">#KB-H054</a>: "HEADER ONLY AND CMAKE TARGET"**
+
+The Conan [CMake generator](https://docs.conan.io/en/latest/integrations/build_system/cmake/cmake_generator.html) offers two approaches for consumption: [global variables](https://docs.conan.io/en/latest/integrations/build_system/cmake/cmake_generator.html#global-variables-approach) and [targets](https://docs.conan.io/en/latest/integrations/build_system/cmake/cmake_generator.html#targets-approach). When building a header only recipe and testing the package with cmake targets in `target_link_libraries` rather than the variable `${CONAN_LIBS}`, the function `conan_basic_setup()` will
+globally include the header directory, shadowing the target linked. Therefore, even though the target is incorrect, the test package will succeed. To avoid the global inclusion and test only the target, `conan_basic_setup(TARGETS)` must be used.
