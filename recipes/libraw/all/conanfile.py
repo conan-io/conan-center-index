@@ -28,7 +28,7 @@ class LibRawConan(ConanFile):
         "shared": False,
         "fPIC": True,
         "rawspeed": False,
-        "with_libjpeg": "libjpeg-turbo",
+        "with_libjpeg": "libjpeg",
         "with_zlib": True,
         "with_lcms": True,
         "with_jasper": True,
