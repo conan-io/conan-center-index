@@ -36,26 +36,21 @@ class DefaultNameConan(ConanFile):
             cmake = CMake(self)
             cmake.definitions["CONAN_INSTALL_FOLDER"] = self.build_folder
             cmake.definitions["Boost_ADDITIONAL_VERSIONS"] = self.deps_cpp_info["boost"].version
-            if self.options["boost"].header_only:
-                cmake.definitions["HEADER_ONLY"] = "TRUE"
-            else:
+            cmake.definitions["HEADER_ONLY"] = self.options["boost"].header_only
+            if not self.options["boost"].header_only:
                 cmake.definitions["Boost_USE_STATIC_LIBS"] = not self.options["boost"].shared
+            cmake.definitions["WITH_PYTHON"] = not self.options["boost"].without_python
             if not self.options["boost"].without_python:
                 cmake.definitions["WITH_PYTHON"] = "TRUE"
                 pyversion = tools.Version(self.options["boost"].python_version)
                 cmake.definitions["Python_ADDITIONAL_VERSIONS"] = "{}.{}".format(pyversion.major, pyversion.minor)
                 cmake.definitions["PYTHON_COMPONENT_SUFFIX"] = "{}{}".format(pyversion.major, pyversion.minor)
-            if not self.options["boost"].without_random:
-                cmake.definitions["WITH_RANDOM"] = "TRUE"
-            if not self.options["boost"].without_regex:
-                cmake.definitions["WITH_REGEX"] = "TRUE"
-            if not self.options["boost"].without_test:
-                cmake.definitions["WITH_TEST"] = "TRUE"
-            if not self.options["boost"].without_coroutine:
-                cmake.definitions["WITH_COROUTINE"] = "TRUE"
-            if not self.options["boost"].without_chrono:
-                cmake.definitions["WITH_CHRONO"] = "TRUE"
-            cmake.definitions["Boost_NO_BOOST_CMAKE"] = "TRUE"
+            cmake.definitions["WITH_RANDOM"] = not self.options["boost"].without_random
+            cmake.definitions["WITH_REGEX"] = not self.options["boost"].without_regex
+            cmake.definitions["WITH_TEST"] = not self.options["boost"].without_test
+            cmake.definitions["WITH_COROUTINE"] = not self.options["boost"].without_coroutine
+            cmake.definitions["WITH_CHRONO"] = not self.options["boost"].without_chrono
+            cmake.definitions["Boost_NO_BOOST_CMAKE"] = True
             cmake.definitions["CONAN_BOOST_FINDPACKAGE"] = conan_boost_findpackage
             cmake.configure(build_folder=build_folder)
             cmake.build()

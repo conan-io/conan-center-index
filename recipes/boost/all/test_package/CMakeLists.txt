@@ -53,4 +53,4 @@ endif()
 # Test header-only target
 find_package(Boost REQUIRED)
 add_executable(lambda_exe lambda.cpp)
-target_link_libraries(lambda_exe PRIVATE Boost::boost)
+target_link_libraries(lambda_exe PRIVATE Boost::headers)

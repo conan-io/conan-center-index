@@ -914,6 +914,30 @@ class BoostConan(ConanFile):
         return layout == "versioned" or (layout == "b2-default" and os.name == 'nt')
 
     def package_info(self):
+        self.cpp_info.filenames["cmake_find_package"] = "Boost"
+        self.cpp_info.filenames["cmake_find_package_multi"] = "Boost"
+        self.cpp_info.names["cmake_find_package"] = "Boost"
+        self.cpp_info.names["cmake_find_package_multi"] = "Boost"
+
+        self.cpp_info.components["diagnostic_definitions"].libs = []
+        self.cpp_info.components["diagnostic_definitions"].defines = ["BOOST_LIB_DIAGNOSTIC"]
+        self.cpp_info.components["diagnostic_definitions"].names["cmake_find_package"] = "diagnostic_definitions"
+        self.cpp_info.components["diagnostic_definitions"].names["cmake_find_package_multi"] = "diagnostic_definitions"
+
+        self.cpp_info.components["disable_autolinking"].libs = []
+        self.cpp_info.components["disable_autolinking"].defines = ["BOOST_ALL_NO_LIB"]
+        self.cpp_info.components["disable_autolinking"].names["cmake_find_package"] = "disable_autolinking"
+        self.cpp_info.components["disable_autolinking"].names["cmake_find_package_multi"] = "disable_autolinking"
+
+        self.cpp_info.components["dynamic_linking"].libs = []
+        self.cpp_info.components["dynamic_linking"].defines = ["BOOST_ALL_DYN_LINK"]
+        self.cpp_info.components["dynamic_linking"].names["cmake_find_package"] = "dynamic_linking"
+        self.cpp_info.components["dynamic_linking"].names["cmake_find_package_multi"] = "dynamic_linking"
+
+        self.cpp_info.components["headers"].libs = []
+        self.cpp_info.components["headers"].names["cmake_find_package"] = "headers"
+        self.cpp_info.components["headers"].names["cmake_find_package_multi"] = "headers"
+
         if self._is_versioned_layout:
             version_tokens = str(self.version).split(".")
             if len(version_tokens) >= 2:
@@ -922,9 +946,11 @@ class BoostConan(ConanFile):
                 boost_version_tag = "boost-%s_%s" % (major, minor)
                 self.cpp_info.components["headers"].includedirs = [os.path.join(self.package_folder, "include", boost_version_tag)]
 
-        self.cpp_info.components["headers"].libs = []
-        self.cpp_info.components["headers"].names["cmake_find_package"] = "boost"
-        self.cpp_info.components["headers"].names["cmake_find_package_multi"] = "boost"
+        self.cpp_info.components["_libboost"].libs = []
+        self.cpp_info.components["_libboost"].bindirs.append("lib")
+        self.cpp_info.components["_libboost"].names["cmake_find_package"] = "boost"
+        self.cpp_info.components["_libboost"].names["cmake_find_package_multi"] = "boost"
+        self.cpp_info.components["_libboost"].requires = ["headers"]
 
         libformatdata = {}
         if not self.options.without_python:
@@ -945,36 +971,34 @@ class BoostConan(ConanFile):
                 used_libraries = used_libraries.union(module_libraries)
                 self.cpp_info.components[module].libs = module_libraries
 
-                self.cpp_info.components[module].requires = self._dependencies["dependencies"][module] + ["headers"]
+                self.cpp_info.components[module].requires = self._dependencies["dependencies"][module] + ["_libboost"]
                 self.cpp_info.components[module].names["cmake_find_package"] = module
                 self.cpp_info.components[module].names["cmake_find_package_multi"] = module
 
         if used_libraries != detected_libraries:
             non_used = detected_libraries.difference(used_libraries)
-            if non_used:
-                raise ConanInvalidConfiguration("These libraries were not used in conan components: {}".format(non_used))
+            assert len(non_used) == 0, "These libraries were not used in conan components: {}".format(non_used)
 
             non_existing = used_libraries.difference(detected_libraries)
-            if non_existing:
-                raise ConanInvalidConfiguration("These libraries were used, but not built: {}".format(non_existing))
+            assert len(non_existing) == 0, "These libraries were used, but not built: {}".format(non_existing)
 
         if self._zip_bzip2_requires_needed:
             if self.options.bzip2:
-                self.cpp_info.components["headers"].requires.append("bzip2::bzip2")
+                self.cpp_info.components["_libboost"].requires.append("bzip2::bzip2")
             if self.options.zlib:
-                self.cpp_info.components["headers"].requires.append("zlib::zlib")
-            if self.options.lzma:
-                self.cpp_info.components["headers"].requires.append("xz_utils::xz_utils")
-            if self.options.zstd:
-                self.cpp_info.components["headers"].requires.append("zstd::zstd")
-            if self.options.i18n_backend == 'icu':
-                self.cpp_info.components["headers"].requires.append("icu::icu")
+                self.cpp_info.components["_libboost"].requires.append("zlib::zlib")
+        if self.options.lzma:
+            self.cpp_info.components["_libboost"].requires.append("xz_utils::xz_utils")
+        if self.options.zstd:
+            self.cpp_info.components["_libboost"].requires.append("zstd::zstd")
+        if self.options.i18n_backend == 'icu':
+            self.cpp_info.components["_libboost"].requires.append("icu::icu")
 
         if not self.options.header_only and self.options.shared:
             self.cpp_info.components["headers"].defines.append("BOOST_ALL_DYN_LINK")
 
         if self.options.system_no_deprecated:
-            self.cpp_info.components["system"].defines.append("BOOST_SYSTEM_NO_DEPRECATED")
+            self.cpp_info.components["headers"].defines.append("BOOST_SYSTEM_NO_DEPRECATED")
 
         if self.options.asio_no_deprecated:
             self.cpp_info.components["headers"].defines.append("BOOST_ASIO_NO_DEPRECATED")
@@ -1034,6 +1058,5 @@ class BoostConan(ConanFile):
                         self.cpp_info.components["headers"].exelinkflags.extend(["-pthread","--shared-memory"])
 
         self.env_info.BOOST_ROOT = self.package_folder
-        self.cpp_info.components["headers"].bindirs.append("lib")
         self.cpp_info.names["cmake_find_package"] = "Boost"
         self.cpp_info.names["cmake_find_package_multi"] = "Boost"
