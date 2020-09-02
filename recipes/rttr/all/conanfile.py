@@ -77,7 +77,15 @@ class RTTRConan(ConanFile):
             os.remove(pdb)
 
     def package_info(self):
-        self.cpp_info.libs = tools.collect_libs(self)
-
+        self.cpp_info.filenames["cmake_find_package"] = "rttr"
+        self.cpp_info.filenames["cmake_find_package_multi"] = "rttr"
+        self.cpp_info.names["cmake_find_package"] = "RTTR"
+        self.cpp_info.names["cmake_find_package_multi"] = "RTTR"
+        cmake_target = "Core" if self.options.shared else "Core_Lib"
+        self.cpp_info.components["_rttr"].names["cmake_find_package"] = cmake_target
+        self.cpp_info.components["_rttr"].names["cmake_find_package_multi"] = cmake_target
+        self.cpp_info.components["_rttr"].libs = tools.collect_libs(self)
         if self.settings.os == "Linux":
-            self.cpp_info.system_libs.extend(["dl", "pthread"])
+            self.cpp_info.components["_rttr"].system_libs = ["dl", "pthread"]
+        if self.options.shared:
+            self.cpp_info.components["_rttr"].defines = ["RTTR_DLL"]
