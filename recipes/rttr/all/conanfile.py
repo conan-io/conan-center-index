@@ -26,7 +26,11 @@ class RTTRConan(ConanFile):
         "with_rtti": False,
     }
 
-    _source_subfolder = "source_subfolder"
+    _cmake = None
+
+    @property
+    def _source_subfolder(self):
+        return "source_subfolder"
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -38,20 +42,18 @@ class RTTRConan(ConanFile):
         os.rename(extracted_dir, self._source_subfolder)
 
     def _configure_cmake(self):
-        cmake = CMake(self)
-
-        cmake.definitions["BUILD_DOCUMENTATION"] = False
-        cmake.definitions["BUILD_EXAMPLES"] = False
-        cmake.definitions["BUILD_UNIT_TESTS"] = False
-        cmake.definitions["BUILD_WITH_RTTI"] = self.options.with_rtti
-        cmake.definitions["BUILD_PACKAGE"] = False
-
-        cmake.definitions["BUILD_RTTR_DYNAMIC"] = self.options.shared
-        cmake.definitions["BUILD_STATIC"] = not self.options.shared
-
-        cmake.configure()
-
-        return cmake
+        if self._cmake:
+            return self._cmake
+        self._cmake = CMake(self)
+        self._cmake.definitions["BUILD_DOCUMENTATION"] = False
+        self._cmake.definitions["BUILD_EXAMPLES"] = False
+        self._cmake.definitions["BUILD_UNIT_TESTS"] = False
+        self._cmake.definitions["BUILD_WITH_RTTI"] = self.options.with_rtti
+        self._cmake.definitions["BUILD_PACKAGE"] = False
+        self._cmake.definitions["BUILD_RTTR_DYNAMIC"] = self.options.shared
+        self._cmake.definitions["BUILD_STATIC"] = not self.options.shared
+        self._cmake.configure()
+        return self._cmake
 
     def build(self):
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
