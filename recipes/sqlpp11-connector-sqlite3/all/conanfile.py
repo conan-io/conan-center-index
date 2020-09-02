@@ -30,11 +30,11 @@ class sqlpp11Conan(ConanFile):
             del self.options.fPIC
 
     def requirements(self):
-        self.requires("sqlpp11/0.58")
+        self.requires("sqlpp11/0.59")
         if self.options.with_sqlcipher:
-            self.requires("sqlcipher/4.3.0")
+            self.requires("sqlcipher/4.4.0")
         else:
-            self.requires("sqlite3/3.30.1")
+            self.requires("sqlite3/3.32.3")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
