@@ -53,13 +53,9 @@ class RTTRConan(ConanFile):
 
         return cmake
 
-    def _patch_sources(self):
-        tools.patch(patch_file="patches/001_fix_build_without_RTTI.patch", base_path=self._source_subfolder)
-        tools.patch(patch_file="patches/002_fix_license_installer.patch", base_path=self._source_subfolder)
-
     def build(self):
-        self._patch_sources()
-
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            tools.patch(**patch)
         cmake = self._configure_cmake()
         cmake.build()
 
