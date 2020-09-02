@@ -88,9 +88,10 @@ class BoostConan(ConanFile):
     }
 
     for libname in lib_list:
-        if libname != "python":
+        if libname != "python" and libname != "mpi":
             default_options.update({"without_%s" % libname: False})
     default_options.update({"without_python": True})
+    default_options.update({"without_mpi": True})
     short_paths = True
     no_copy_source = True
     exports_sources = ['patches/*']
@@ -746,6 +747,10 @@ class BoostConan(ConanFile):
                         executable=self._python_executable,
                         includes=self._python_includes,
                         libraries=self._python_libraries)
+
+        if not self.options.without_mpi:
+            # https://www.boost.org/doc/libs/1_72_0/doc/html/mpi/getting_started.html
+            contents += '\nusing mpi ;'
 
         # Specify here the toolset with the binary if present if don't empty parameter :
         contents += '\nusing "%s" : %s : ' % (self._toolset, self._toolset_version)
