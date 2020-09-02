@@ -82,13 +82,16 @@ class SentryNativeConan(ConanFile):
         self.cpp_info.names["cmake_find_package"] = "sentry"
         self.cpp_info.names["cmake_find_package_multi"] = "sentry"
         self.cpp_info.libs = ["sentry"]
-        if self.settings.os in ("Android", "Windows"):
-            self.cpp_info.exelinkflags= ["--build-id=sha1"]
-            self.cpp_info.sharedlinkflags = ["--build-id=sha1"]
+        if self.settings.os in ["Linux", "Android"]:
+            self.cpp_info.exelinkflags= ["-Wl,-E,--build-id=sha1"]
+            self.cpp_info.sharedlinkflags = ["-Wl,-E,--build-id=sha1"]
         if self.settings.os == "Linux":
             self.cpp_info.system_libs = ["pthread", "dl"]
+        elif self.settings.os == "Android":
+            self.cpp_info.system_libs = ["dl", "log"]
         elif self.settings.os == "Windows":
-            self.cpp_info.system_libs = ["winhttp", "dbghelp", "pathcch"]
-
+            self.cpp_info.system_libs = ["shlwapi", "dbghelp"]
+            if self.options.transport == "winhttp":
+                self.cpp_info.system_libs.append("winhttp")
         if not self.options.shared:
             self.cpp_info.defines = ["SENTRY_BUILD_STATIC"]
