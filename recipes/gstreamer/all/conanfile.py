@@ -3,6 +3,7 @@ import glob
 import os
 import shutil
 
+required_conan_version = ">=1.29"
 
 class GStreamerConan(ConanFile):
     name = "gstreamer"
