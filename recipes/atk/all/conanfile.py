@@ -37,7 +37,7 @@ class LibnameConan(ConanFile):
             self.build_requires('pkgconf/1.7.3')
     
     def requirements(self):
-        self.requires('glib/2.65.0')
+        self.requires('glib/2.65.1')
 
     def configure(self):
         if self.options.shared:
