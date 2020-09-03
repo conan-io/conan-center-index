@@ -9,15 +9,17 @@ class ConanGTK2(ConanFile):
     homepage = "https://www.gtk.org"
     description = "A free and open-source cross-platform widget toolkit for creating graphical user interfaces"
     settings = {"os": "Linux"}
+    options = {"version": [2, 3]}
+    default_options = {"version": 2}
     topics = ("gui", "widget", "graphical")
 
     def package_id(self):
-        self.info.header_only()
+        self.info.settings.clear()
 
     def _fill_cppinfo_from_pkgconfig(self, name):
         pkg_config = tools.PkgConfig(name)
         if not pkg_config.provides:
-            raise ConanException("GTK-2 development files aren't available, give up.")
+            raise ConanException("GTK-{} development files aren't available, give up.".format(self.options.version))
         libs = [lib[2:] for lib in pkg_config.libs_only_l]
         lib_dirs = [lib[2:] for lib in pkg_config.libs_only_L]
         ldflags = [flag for flag in pkg_config.libs_only_other]
@@ -38,19 +40,21 @@ class ConanGTK2(ConanFile):
         if tools.os_info.is_linux and self.settings.os == "Linux":
             package_tool = tools.SystemPackageTool(conanfile=self, default_mode="verify")
             if tools.os_info.with_apt:
-                packages = ["libgtk2.0-dev"]
+                packages = ["libgtk2.0-dev"] if self.options.version == 2 else ["libgtk-3-dev"]
             elif tools.os_info.with_yum or tools.os_info.with_dnf:
-                packages = ["gtk2-devel"]
+                packages = ["gtk{}-devel".format(self.options.version)]
             elif tools.os_info.with_pacman:
-                packages = ["gtk2"]
+                packages = ["gtk{}".format(self.options.version)]
             elif tools.os_info.with_zypper:
-                packages = ["gtk2-devel"]
+                packages = ["gtk{}-devel".format(self.options.version)]
             else:
-                self.output.warn("Do not know how to install 'GTK-2' for {}.".format(tools.os_info.linux_distro))
+                self.output.warn("Do not know how to install 'GTK-{}' for {}."
+                                 .format(self.options.version,
+                                         tools.os_info.linux_distro))
                 packages = []
             for p in packages:
                 package_tool.install(update=True, packages=p)
 
     def package_info(self):
-        for name in ["gtk+-2.0"]:
+        for name in ["gtk+-{}.0".format(self.options.version)]:
             self._fill_cppinfo_from_pkgconfig(name)
