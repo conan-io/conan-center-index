@@ -22,7 +22,7 @@ class ZuluOpenJDK(ConanFile):
         if tools.detected_architecture() != "x86_64":
             raise ConanInvalidConfiguration("Unsupported Architecture.  This package currently only supports x86_64.")
         if platform.system() not in ["Windows", "Darwin", "Linux"]:
-            raise Exception("Unsupported System. This package currently only support Linux/Darwin/Windows")
+            raise ConanInvalidConfiguration("Unsupported System. This package currently only support Linux/Darwin/Windows")
 
     def source(self):
         url = self.conan_data["sources"][self.version]["url"][str(self.settings.os)]
