@@ -994,10 +994,8 @@ class BoostConan(ConanFile):
                         continue
                     conan_requirement = self._option_to_conan_requirement(requirement)
                     if conan_requirement in ("icu", "iconv"):
-                        print("ICU/ICONV detected", self.options.get_safe("i18n_backend"))
                         if conan_requirement != self.options.get_safe("i18n_backend"):
                             continue
-                    print("ADDING", conan_requirement)
                     self.cpp_info.components[module].requires.append("{0}::{0}".format(conan_requirement))
 
         if used_libraries != detected_libraries:
