@@ -86,7 +86,7 @@ int main ( int argc, char** argv )
 	res |= check_plugin ( "gta", WITH_GTA );
 	res |= check_plugin ( "dcm", WITH_DCMTK );
 	res |= check_plugin ( "curl", WITH_CURL ); // Replace with a better test that checks for supported protocols
-	res |= check_plugin ( "osgz", WITH_ZLIB );
+	res |= check_plugin ( "gz", WITH_ZLIB );
 	res |= check_plugin ( "ttf", WITH_FREETYPE );
 
 	return res;
