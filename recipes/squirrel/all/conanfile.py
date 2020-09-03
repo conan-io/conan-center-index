@@ -1,12 +1,14 @@
 import os
 from conans import ConanFile, tools, CMake
 from conans.errors import ConanInvalidConfiguration
-from conans.tools import Version
 
 
 class SquirrelConan(ConanFile):
     name = "squirrel"
-    description = "Squirrel is a high level imperative, object-oriented programming language, designed to be a light-weight scripting language that fits in the size, memory bandwidth, and real-time requirements of applications like video games."
+    description = "Squirrel is a high level imperative, object-oriented programming " \
+                  "language, designed to be a light-weight scripting language that " \
+                  "fits in the size, memory bandwidth, and real-time requirements " \
+                  "of applications like video games."
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "http://www.squirrel-lang.org/"
     license = "MIT"
@@ -55,6 +57,8 @@ class SquirrelConan(ConanFile):
         if self._cmake:
             return self._cmake
         self._cmake = CMake(self)
+        self._cmake.definitions["DISABLE_DYNAMIC"] = not self.options.shared
+        self._cmake.definitions["DISABLE_STATIC"] = self.options.shared
         self._cmake.configure(build_folder=self._build_subfolder)
         return self._cmake
 
@@ -70,7 +74,17 @@ class SquirrelConan(ConanFile):
         cmake.install()
 
     def package_info(self):
-        self.cpp_info.libs = tools.collect_libs(self)
+        # squirrel
+        squirrel_name = "squirrel" if self.options.shared else "squirrel_static"
+        self.cpp_info.components["libsquirrel"].names["cmake_find_package"] = squirrel_name
+        self.cpp_info.components["libsquirrel"].names["cmake_find_package_multi"] = squirrel_name
+        self.cpp_info.components["libsquirrel"].libs = [squirrel_name]
+        # sqstdlib
+        sqstdlib_name = "sqstdlib" if self.options.shared else "sqstdlib_static"
+        self.cpp_info.components["sqstdlib"].names["cmake_find_package"] = sqstdlib_name
+        self.cpp_info.components["sqstdlib"].names["cmake_find_package_multi"] = sqstdlib_name
+        self.cpp_info.components["sqstdlib"].libs = [sqstdlib_name]
+        self.cpp_info.components["sqstdlib"].requires = ["libsquirrel"]
 
         binpath = os.path.join(self.package_folder, "bin")
         self.output.info("Appending PATH env var : {}".format(binpath))
