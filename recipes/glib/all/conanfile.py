@@ -165,11 +165,11 @@ class GLibConan(ConanFile):
         
         self.cpp_info.components["gmodule-export-2.0"].requires.extend(["gmodule-no-export-2.0", "glib-2.0"])
         if self.settings.os == "Linux":
-            self.cpp_info.components["gmodule-export-2.0"].sharedlinkflags = "-Wl,--export-dynamic"
+            self.cpp_info.components["gmodule-export-2.0"].sharedlinkflags.append("-Wl,--export-dynamic")
         
         self.cpp_info.components["gmodule-2.0"].requires.extend(["gmodule-no-export-2.0", "glib-2.0"])
         if self.settings.os == "Linux":
-            self.cpp_info.components["gmodule-2.0"].sharedlinkflags = "-Wl,--export-dynamic"
+            self.cpp_info.components["gmodule-2.0"].sharedlinkflags.append("-Wl,--export-dynamic")
 
         self.cpp_info.components["gobject-2.0"].libs = ["gobject-2.0"]
         self.cpp_info.components["gobject-2.0"].requires.append("glib-2.0")
