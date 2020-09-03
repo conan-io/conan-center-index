@@ -30,7 +30,6 @@ class PclConanRecipe(ConanFile):
                 "eigen/3.3.7",
                 "flann/1.9.1",
                 "libpng/1.6.37",
-                "opengl/system",
                 "qhull/7.3.2")
     generators = ["cmake", "cmake_find_package"]
     exports = ["CMakeLists.txt"]
@@ -94,7 +93,7 @@ class PclConanRecipe(ConanFile):
             "WITH_CUDA": self.options.with_cuda,
             "WITH_VTK": False,
             "WITH_PCAP": False,
-            "WITH_OPENGL": True,
+            "WITH_OPENGL": False,
             "WITH_OPENNI": False,
             "WITH_OPENNI2": False,
             "WITH_ENSENSO": False,
@@ -189,7 +188,7 @@ class PclConanRecipe(ConanFile):
         self.cpp_info.names["cmake_find_package"] = "PCL"
         self.cpp_info.names["pkg_config"] = "PCL"
 
-        self._update_components(pcl_common, ["eigen::eigen", "boost::boost", "opengl::opengl"])
+        self._update_components(pcl_common, ["eigen::eigen", "boost::boost"])
         self._update_components(pcl_kdtree, [pcl_common, "flann::flann"])
         self._update_components(pcl_octree, [pcl_common])
         self._update_components(pcl_search, [pcl_common, pcl_kdtree, pcl_octree, "flann::flann"])
