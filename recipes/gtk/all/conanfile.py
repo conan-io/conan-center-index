@@ -2,8 +2,8 @@ from conans import ConanFile, tools
 from conans.errors import ConanException
 
 
-class ConanGTK2(ConanFile):
-    name = "gtk2"
+class ConanGTK(ConanFile):
+    name = "gtk"
     url = "https://github.com/conan-io/conan-center-index"
     license = "LGPL-2.1-or-later"
     homepage = "https://www.gtk.org"
