@@ -16,7 +16,7 @@ class ZuluOpenJDK(ConanFile):
         folder = {"Linux": "linux", "Darwin": "darwin", "Windows": "win32"}.get(platform.system())
         return os.path.join("include", folder)
 
-    def config_options(self):
+    def configure(self):
         # Checking against self.settings.* would prevent cross-building profiles from working
         # TODO, I think for the new, 2 profile builds, this can be done ...
         if tools.detected_architecture() != "x86_64":
