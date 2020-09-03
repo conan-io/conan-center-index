@@ -1,6 +1,7 @@
 from conans import ConanFile, tools
 from conans.errors import ConanException
 
+required_conan_version = ">=1.29"
 
 class ConanXOrg(ConanFile):
     name = "xorg"
