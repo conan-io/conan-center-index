@@ -4,6 +4,10 @@ project(test_package)
 find_package(OpenSceneGraph REQUIRED)
 
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "bin")
+foreach(config ${CMAKE_CONFIGURATION_TYPES})
+	string(TOUPPER "${config}" config)
+	set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_${config} "bin")
+endforeach()
 
 include_directories(${OPENSCENEGRAPH_INCLUDE_DIRS})
 link_libraries(${OPENSCENEGRAPH_LIBRARIES})
