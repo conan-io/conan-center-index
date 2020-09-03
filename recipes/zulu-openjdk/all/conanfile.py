@@ -12,6 +12,10 @@ class ZuluOpenJDK(ConanFile):
     settings = "os", "arch"
 
     @property
+    def _source_subfolder(self):
+        return "source_subfolder"
+
+    @property
     def _jni_folder(self):
         folder = {"Linux": "linux", "Darwin": "darwin", "Windows": "win32"}.get(platform.system())
         return os.path.join("include", folder)
