@@ -12,7 +12,7 @@ class ZuluOpenJDK(ConanFile):
     settings = "os", "arch"
 
     @property
-    def jni_folder(self):
+    def _jni_folder(self):
         folder = {"Linux": "linux", "Darwin": "darwin", "Windows": "win32"}.get(platform.system())
         return os.path.join("include", folder)
 
