@@ -1,4 +1,5 @@
 from conans import CMake, ConanFile, tools
+from conans.model.version import Version
 import glob, os
 
 
@@ -79,10 +80,6 @@ class ConanFile(ConanFile):
 
     _source_subfolder = "source_subfolder"
 
-    @property
-    def _apple(self):
-        return self.settings.os.value in ("Macos", "iOS", "watchOS", "tvOS")
-
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
@@ -91,7 +88,7 @@ class ConanFile(ConanFile):
             # Default to false with fontconfig until it is supported on Windows
             self.options.use_fontconfig = False
 
-        if self._apple:
+        if tools.is_apple_os(self.settings.os):
             # osg uses native apis on Apple platforms
             del self.options.with_gif
             del self.options.with_jpeg
@@ -307,7 +304,7 @@ class ConanFile(ConanFile):
         self.cpp_info.components["osgDB"].requires = ["osg", "osgUtil", "OpenThreads"]
         if self.settings.os == "Linux":
             self.cpp_info.components["osgDB"].system_libs = ["dl"]
-        elif self._apple:
+        elif tools.is_apple_os(self.settings.os):
             self.cpp_info.components["osgDB"].system_libs = ["Cocoa"]
         if self.options.with_zlib:
             self.cpp_info.components["osgDB"].requires.append("zlib::zlib")
@@ -328,7 +325,7 @@ class ConanFile(ConanFile):
         if self.options.enable_windowing_system:
             if self.settings.os == "Linux":
                 self.cpp_info.components["osgViewer"].requires.append("xorg::xorg")
-            elif self._apple:
+            elif tools.is_apple_os(self.settings.os):
                 self.cpp_info.components["osgViewer"].system_libraries = ["Cocoa"]
         if self.settings.os == "Windows":
             self.cpp_info.components["osgViewer"].system_libraries = ["gdi32"]
@@ -533,19 +530,19 @@ class ConanFile(ConanFile):
         # with_directshow
         # setup_plugin("directshow")
 
-        if self._apple:
+        if tools.is_apple_os(self.settings.os):
             setup_plugin("imageio")
 
-        if self._apple:
+        if (self.settings.os == "Macos" and Version(self.settings.os.version) >= "10.8") or (self.settings.os == "iOS" and Version(self.settings.os.version) >= "6.0"):
             plugin = setup_plugin("avfoundation")
             self.cpp_info.components[plugin].requires.append("osgViewer")
             self.cpp_info.components[plugin].system_libs = ["AVFoundation", "Cocoa", "CoreVideo", "CoreMedia", "QuartzCore"]
 
-        if self._apple:
+        if self.settings.os == "Macos" and Version(self.settings.os.version) <= "10.6" and self.settings.arch == "x86":
             plugin = setup_plugin("qt")
             self.cpp_info.components[plugin].system_libs = ["QuickTime"]
 
-        if self._apple:
+        if self.settings.os == "Macos" and self.settings.arch == "x86":
             plugin = setup_plugin("QTKit")
             self.cpp_info.components[plugin].requires.append("osgViewer")
             self.cpp_info.components[plugin].system_libs = ["QTKit", "Cocoa", "QuickTime", "CoreVideo"]
