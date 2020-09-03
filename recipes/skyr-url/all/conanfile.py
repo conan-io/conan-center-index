@@ -36,7 +36,7 @@ class SkyrUrlConan(ConanFile):
         return {
             "Visual Studio": "16",
             "gcc": "7",
-            "clang": "5",
+            "clang": "6",
             "apple-clang": "10",
         }
 
