@@ -1,5 +1,6 @@
 from conans import ConanFile, tools
-import os, platform
+from conans.errors import ConanInvalidConfiguration
+import os, platform, glob
 
 
 class ZuluOpenJDK(ConanFile):
@@ -38,10 +39,10 @@ class ZuluOpenJDK(ConanFile):
         pass # nothing to do, but this shall trigger no warnings ;-)
 
     def package(self):
-        self.copy(pattern="*", dst=".", src="sources")
+        self.copy(pattern="*", dst=".", src=self._source_subfolder)
 
     def package_info(self):
-        self.cpp_info.includedirs.append(self.jni_folder)
+        self.cpp_info.includedirs.append(self._jni_folder)
 
         java_home = os.path.join(self.package_folder)
         bin_path = os.path.join(java_home, "bin")
