@@ -14,7 +14,7 @@ class MpcConan(ConanFile):
     settings = "os", "arch", "compiler", "build_type"
     options = {"shared": [True, False], "fPIC": [True, False]}
     default_options = {"shared": False, "fPIC": True}
-    requires = "mpfr/4.0.2"
+    requires = "mpfr/4.1.0"
 
     @property
     def _source_subfolder(self):
