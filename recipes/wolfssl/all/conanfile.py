@@ -16,12 +16,32 @@ class WolfSSLConan(ConanFile):
         "fPIC": [True, False],
         "opensslextra": [True, False],
         "opensslall": [True, False],
+        "sslv3": [True, False],
+        "alpn": [True, False],
+        "des3": [True, False],
+        "tls13": [True, False],
+        "certgen": [True, False],
+        "dsa": [True, False],
+        "ripemd": [True, False],
+        "sessioncerts": [True, False],
+        "sni": [True, False],
+        "testcert": [True, False],
     }
     default_options = {
         "shared": False,
         "fPIC": True,
         "opensslextra": False,
         "opensslall": False,
+        "sslv3": False,
+        "alpn": False,
+        "des3": False,
+        "tls13": False,
+        "certgen": False,
+        "dsa": False,
+        "ripemd": False,
+        "sessioncerts": False,
+        "sni": False,
+        "testcert": False,
     }
 
     _autotools = None
@@ -83,6 +103,16 @@ class WolfSSLConan(ConanFile):
             "--enable-debug" if self.settings.build_type == "Debug" else "--disable-debug",
             "--enable-opensslall" if self.options.opensslall else "--disable-opensslall",
             "--enable-opensslextra" if self.options.opensslextra else "--disable-opensslextra",
+            "--enable-sslv3" if self.options.sslv3 else "--disable-sslv3",
+            "--enable-alpn" if self.options.alpn else "--disable-alpn",
+            "--enable-des3" if self.options.des3 else "--disable-des3",
+            "--enable-tls13" if self.options.tls13 else "--disable-tls13",
+            "--enable-certgen" if self.options.certgen else "--disable-certgen",
+            "--enable-dsa" if self.options.dsa else "--disable-dsa",
+            "--enable-ripemd" if self.options.ripemd else "--disable-ripemd",
+            "--enable-sessioncerts" if self.options.sessioncerts else "--disable-sessioncerts",
+            "--enable-sni" if self.options.sni else "--disable-sni",
+            "--enable-testcert" if self.options.testcert else "--disable-testcert",
         ]
         if self.options.shared:
             conf_args.extend(["--enable-shared", "--disable-static"])
