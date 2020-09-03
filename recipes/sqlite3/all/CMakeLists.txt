@@ -111,7 +111,7 @@ if(THREADSAFE)
 endif()
 
 if(NOT OMIT_LOAD_EXTENSION)
-    target_link_libraries(${PROJECT_NAME}  INTERFACE ${CMAKE_DL_LIBS})
+    target_link_libraries(${PROJECT_NAME}  PRIVATE ${CMAKE_DL_LIBS})
 endif()
 
 if(ENABLE_FTS5)
