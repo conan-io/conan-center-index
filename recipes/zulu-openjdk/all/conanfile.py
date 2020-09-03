@@ -28,14 +28,7 @@ class ZuluOpenJDK(ConanFile):
         url = self.conan_data["sources"][self.version]["url"][str(self.settings.os)]
         checksum = self.conan_data["sources"][self.version]["sha256"][str(self.settings.os)]
         tools.get(url, sha256=checksum)
-        filename = os.path.basename(url)
-        if filename.endswith(".zip"):
-            extracted_dir = filename.rstrip(".zip")
-        elif filename.endswith(".tar.gz"):
-            extracted_dir = filename.rstrip(".tar.gz")
-        else:
-            raise Exception("Unexpected source file extension, expected '.zip' or '.tar.gz'")
-        os.rename(extracted_dir, "sources")
+        os.rename(glob.glob("zulu*")[0], self._source_subfolder)
 
     def build(self):
         pass # nothing to do, but this shall trigger no warnings ;-)
