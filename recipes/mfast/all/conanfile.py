@@ -63,14 +63,13 @@ class mFASTConan(ConanFile):
         cmake = self._configure_cmake()
         cmake.install()
         self.copy("licence.txt", dst="licenses", src=self._source_subfolder)
-        if self.settings.os == "Windows":
-            shutil.move(os.path.join(self.package_folder, "CMake"),
-                        os.path.join(self.package_folder, "lib", "cmake", "mFAST"))
-        os.rename(os.path.join(self.package_folder, "lib", "cmake", "mFAST", "mFASTConfig.cmake"),
-                  os.path.join(self.package_folder, "lib", "cmake", "mFAST", "mFASTTools.cmake"))
         tools.rmdir(os.path.join(self.package_folder, "share"))
 
     def package_info(self):
         self.cpp_info.libs = tools.collect_libs(self)
-        self.cpp_info.builddirs = [os.path.join("lib", "cmake", "mFAST")]
-        self.cpp_info.build_modules = [os.path.join("lib", "cmake", "mFAST", "mFASTTools.cmake")]
+        if self.settings.os == "Windows":
+            self.cpp_info.builddirs = [os.path.join("CMake")]
+            self.cpp_info.build_modules = [os.path.join("CMake", "mFASTConfig.cmake")]
+        else:
+            self.cpp_info.builddirs = [os.path.join("lib", "cmake", "mFAST")]
+            self.cpp_info.build_modules = [os.path.join("lib", "cmake", "mFAST", "mFASTConfig.cmake")]
