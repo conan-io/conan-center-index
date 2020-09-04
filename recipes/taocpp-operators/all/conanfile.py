@@ -1,5 +1,5 @@
 import os
-from conans import ConanFile, CMake, tools
+from conans import ConanFile, tools
 
 required_conan_version = ">=1.28.0"
 
@@ -11,11 +11,15 @@ class TaoCPPOperatorsConan(ConanFile):
     description = "A highly efficient, move-aware operators library"
     topics = ("cpp", "cpp11", "header-only", "operators")
     no_copy_source = True
-    settings = "os", "compiler", "build_type", "arch"
+    settings = "compiler"
 
     @property
     def _source_subfolder(self):
         return "source_subfolder"
+
+    def configure(self):
+        if self.settings.compiler.cppstd:
+            tools.check_min_cppstd(self, 11)
 
     def package_id(self):
         self.info.header_only()
@@ -26,12 +30,8 @@ class TaoCPPOperatorsConan(ConanFile):
         os.rename(extracted_dir, self._source_subfolder)
 
     def package(self):
-        cmake = CMake(self)
-        cmake.definitions["TAOCPP_OPERATORS_BUILD_TESTS"] = False
-        cmake.definitions["TAOCPP_OPERATORS_INSTALL_DOC_DIR"] = "licenses"
-        cmake.configure(source_folder=self._source_subfolder)
-        cmake.install()
-        tools.rmdir(os.path.join(self.package_folder, "share"))
+        self.copy("LICENSE*", dst="licenses", src=self._source_subfolder)
+        self.copy("*", dst="include", src=os.path.join(self._source_subfolder, "include"))
 
     def package_info(self):
         self.cpp_info.filenames["cmake_find_package"] = "taocpp-operators"
