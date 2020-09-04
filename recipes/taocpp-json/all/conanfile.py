@@ -1,5 +1,5 @@
 import os
-from conans import ConanFile, CMake, tools
+from conans import ConanFile, tools
 from conans.tools import Version
 from conans.errors import ConanInvalidConfiguration
 
@@ -13,7 +13,7 @@ class TaoCPPJSONConan(ConanFile):
     description = "C++ header-only JSON library"
     topics = ("json", "jaxn", "cbor", "msgpack",
               "ubjson", "json-pointer", "json-patch")
-    settings = "os", "compiler", "build_type", "arch"
+    settings = "compiler"
     no_copy_source = True
 
     @property
@@ -45,14 +45,8 @@ class TaoCPPJSONConan(ConanFile):
         os.rename(extracted_dir, self._source_subfolder)
 
     def package(self):
-        cmake = CMake(self)
-        cmake.definitions["TAOCPP_JSON_BUILD_TESTS"] = False
-        cmake.definitions["TAOCPP_JSON_BUILD_EXAMPLES"] = False
-        cmake.definitions["TAOCPP_JSON_INSTALL_DOC_DIR"] = "licenses"
-        cmake.configure(source_folder=self._source_subfolder)
-        cmake.install()
         self.copy("LICENSE*", dst="licenses", src=self._source_subfolder)
-        tools.rmdir(os.path.join(self.package_folder, "share"))
+        self.copy("*", dst="include", src=os.path.join(self._source_subfolder, "include"))
 
     def package_info(self):
         self.cpp_info.filenames["cmake_find_package"] = "taocpp-json"
