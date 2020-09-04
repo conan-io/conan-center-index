@@ -71,3 +71,5 @@ class sqlpp11Conan(ConanFile):
         self.cpp_info.libs = ["sqlpp11-connector-sqlite3"]
         if self.settings.os == "Linux":
             self.cpp_info.system_libs = ["m"]
+        if self.options.with_sqlcipher:
+            self.cpp_info.defines = ["SQLPP_USE_SQLCIPHER"]
