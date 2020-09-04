@@ -10,7 +10,7 @@ class LibudevConan(ConanFile):
     topics = ("conan", "udev")
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://systemd.io/"
-    license = "LGPL-2.1+"
+    license = "LGPL-2.1-or-later"
     settings = {"os": "Linux"}
 
     def system_requirements(self):
