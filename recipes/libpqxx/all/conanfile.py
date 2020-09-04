@@ -16,7 +16,7 @@ class LibpqxxRecipe(ConanFile):
     exports_sources = ["CMakeLists.txt", "patches/*"]
     options = {"shared": [True, False], "fPIC": [True, False]}
     default_options = {"shared": False, "fPIC": True}
-    requires = "libpq/11.5"
+
     _cmake = None
 
     @property
@@ -32,6 +32,9 @@ class LibpqxxRecipe(ConanFile):
             del self.options.fPIC
 
     def configure(self):
+        if self.options.shared:
+            del self.options.fPIC
+
         compiler = str(self.settings.compiler)
         compiler_version = Version(self.settings.compiler.version.value)
 
@@ -50,6 +53,9 @@ class LibpqxxRecipe(ConanFile):
 
         if self.settings.compiler.cppstd:
             tools.check_min_cppstd(self, "17")
+
+    def requirements(self):
+        self.requires("libpq/12.2")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
@@ -86,7 +92,7 @@ class LibpqxxRecipe(ConanFile):
         tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
 
     def package_info(self):
-        self.cpp_info.libs = ["pqxx"]
-
+        self.cpp_info.components["pqxx"].libs = ["pqxx"]
+        self.cpp_info.components["pqxx"].requires = ["libpq::libpq"]
         if self.settings.os == "Windows":
-            self.cpp_info.system_libs = ["wsock32", "ws2_32"]
+            self.cpp_info.components["pqxx"].system_libs = ["wsock32", "ws2_32"]
