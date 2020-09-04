@@ -1,5 +1,7 @@
 from conans import CMake, ConanFile, tools
+import glob
 import os
+import shutil
 
 
 class SundialsConan(ConanFile):
@@ -79,6 +81,10 @@ class SundialsConan(ConanFile):
         self.copy(pattern="LICENSE", src=self._source_subfolder, dst="licenses")
         cmake = self._configure_cmake()
         cmake.install()
+        if self.settings.os == "Windows" and self.options.shared:
+            tools.mkdir(os.path.join(self.package_folder, "bin"))
+            for dll_path in glob.glob(os.path.join(self.package_folder, "lib", "*.dll")):
+                shutil.move(dll_path, os.path.join(self.package_folder, "bin", os.path.basename(dll_path)))
 
     def package_info(self):
         self.cpp_info.libs = tools.collect_libs(self)
