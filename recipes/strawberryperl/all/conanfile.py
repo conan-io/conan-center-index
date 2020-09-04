@@ -9,7 +9,6 @@ class StrawberryperlConan(ConanFile):
     license = "GNU Public License or the Artistic License"
     homepage = "http://strawberryperl.com"
     url = "https://github.com/conan-io/conan-center-index"
-    author = "Conan Community"
     topics = ("conan", "installer", "perl", "windows")
     settings = "os_build", "arch_build"
     short_paths = True
