@@ -58,7 +58,10 @@ class SkyrUrlConan(ConanFile):
                     self.name, self.settings.compiler, self.settings.compiler.version))
                 
         if self.options.with_fs and str(self.settings.compiler) == "apple-clang" and tools.Version(self.settings.compiler.version) == 11:
-            raise ConanInvalidConfiguration("apple-clang 11 does not support std::filesystem::path")
+            raise ConanInvalidConfiguration("apple-clang 11 is currently not support with filesystem")
+            
+        if self.options.shared and str(self.settings.compiler) == "Visual Studio":
+            raise ConanInvalidConfiguration("Visual Studio shared is currently not supported")
 
     def requirements(self):
         self.requires("tl-expected/1.0.0")
@@ -81,7 +84,7 @@ class SkyrUrlConan(ConanFile):
         self._cmake.definitions["skyr_ENABLE_JSON_FUNCTIONS"] = self.options.with_json
         self._cmake.definitions["skyr_ENABLE_FILESYSTEM_FUNCTIONS"] = self.options.with_fs
         if str(self.settings.compiler) == "Visual Studio":
-            self._cmake.definitions["skyr_USE_STATIC_CRT"] = not self.options.shared       
+            self._cmake.definitions["skyr_USE_STATIC_CRT"] = False       
         self._cmake.configure(build_folder=self._build_subfolder)
         return self._cmake
 
