@@ -3,6 +3,7 @@ from conans import ConanFile, CMake, tools
 from conans.tools import Version
 from conans.errors import ConanInvalidConfiguration
 
+required_conan_version = ">=1.28.0"
 
 class TaoCPPJSONConan(ConanFile):
     name = "taocpp-json"
@@ -35,6 +36,9 @@ class TaoCPPJSONConan(ConanFile):
                                             .format(self.settings.compiler,
                                                     self.settings.compiler.version))
 
+    def package_id(self):
+        self.info.header_only()
+
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
         extracted_dir = "json-" + self.version
@@ -50,5 +54,10 @@ class TaoCPPJSONConan(ConanFile):
         self.copy("LICENSE*", dst="licenses", src=self._source_subfolder)
         tools.rmdir(os.path.join(self.package_folder, "share"))
 
-    def package_id(self):
-        self.info.header_only()
+    def package_info(self):
+        self.cpp_info.filenames["cmake_find_package"] = "taocpp-json"
+        self.cpp_info.filenames["cmake_find_package_multi"] = "taocpp-json"
+        self.cpp_info.names["cmake_find_package"] = "taocpp"
+        self.cpp_info.names["cmake_find_package_multi"] = "taocpp"
+        self.cpp_info.components["_taocpp-json"].names["cmake_find_package"] = "json"
+        self.cpp_info.components["_taocpp-json"].names["cmake_find_package_multi"] = "json"
