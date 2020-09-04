@@ -61,7 +61,7 @@ class SkyrUrlConan(ConanFile):
         self.requires("tl-expected/1.0.0")
         self.requires("range-v3/0.11.0")
         if self.options.with_json:
-            self.requires("nlohmann_json/3.9.0")
+            self.requires("nlohmann_json/3.9.1")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
@@ -75,8 +75,7 @@ class SkyrUrlConan(ConanFile):
         self._cmake.definitions["skyr_BUILD_TESTS"] = False
         self._cmake.definitions["skyr_FULL_WARNINGS"] = False
         self._cmake.definitions["skyr_WARNINGS_AS_ERRORS"] = False
-        self._cmake.definitions["skyr_USE_STATIC_CRT"] = not self.options.shared
-        self._cmake.definitions["skyr_ENABLE_JSON_FUNCTIONS"] = not self.options.with_json
+        self._cmake.definitions["skyr_ENABLE_JSON_FUNCTIONS"] = self.options.with_json
         self._cmake.configure(build_folder=self._build_subfolder)
         return self._cmake
 
