@@ -10,7 +10,7 @@ class sqlpp11Conan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/rbock/sqlpp11-connector-sqlite3"
     license = "BSD-2-Clause"
-    exports_sources = ["CMakeLists.txt"]
+    exports_sources = ["CMakeLists.txt", "patches/**"]
     generators = "cmake"
     options = {"shared": [True, False], "fPIC": [True, False], "with_sqlcipher": [True, False]}
     default_options = {"shared": False, "fPIC": True, "with_sqlcipher": False}
@@ -59,6 +59,8 @@ class sqlpp11Conan(ConanFile):
         return self._cmake
 
     def build(self):
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            tools.patch(**patch)
         cmake = self._configure_cmake()
         cmake.build()
 
