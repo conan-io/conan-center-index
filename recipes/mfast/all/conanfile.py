@@ -25,8 +25,12 @@ class mFASTConan(ConanFile):
     _cmake = None
 
     @property
-    def _mfast_config_dir(self):
+    def _old_mfast_config_dir(self):
         return os.path.join("CMake") if self.settings.os == "Windows" else os.path.join("lib", "cmake", "mFAST")
+
+    @property
+    def _new_mfast_config_dir(self):
+        return os.path.join("res") if self.settings.os == "Windows" else os.path.join("lib", "cmake", "mFAST")
 
     @property
     def _source_subfolder(self):
@@ -68,13 +72,17 @@ class mFASTConan(ConanFile):
         cmake.install()
         self.copy("licence.txt", dst="licenses", src=self._source_subfolder)
         # This makes hook error go away
+        shutil.move(
+            os.path.join(self.package_folder, self._old_mfast_config_dir),
+            os.path.join(self.package_folder, self._new_mfast_config_dir)
+        )
         os.rename(
-            os.path.join(self.package_folder, self._mfast_config_dir, "mFASTConfig.cmake"),
-            os.path.join(self.package_folder, self._mfast_config_dir, "mFASTTools.cmake")
+            os.path.join(self.package_folder, self._new_mfast_config_dir, "mFASTConfig.cmake"),
+            os.path.join(self.package_folder, self._new_mfast_config_dir, "mFASTTools.cmake")
         )
         tools.rmdir(os.path.join(self.package_folder, "share"))
 
     def package_info(self):
         self.cpp_info.libs = tools.collect_libs(self)
-        self.cpp_info.builddirs = [self._mfast_config_dir]
-        self.cpp_info.build_modules = [os.path.join(self._mfast_config_dir, "mFASTTools.cmake")]
+        self.cpp_info.builddirs = [self._new_mfast_config_dir]
+        self.cpp_info.build_modules = [os.path.join(self._new_mfast_config_dir, "mFASTTools.cmake")]
