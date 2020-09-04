@@ -1,6 +1,7 @@
 import os
 from conans import ConanFile, CMake, tools
 
+required_conan_version = ">=1.28.0"
 
 class TaoCPPTupleConan(ConanFile):
     name = "taocpp-tuple"
@@ -16,6 +17,9 @@ class TaoCPPTupleConan(ConanFile):
     def _source_subfolder(self):
         return "source_subfolder"
 
+    def package_id(self):
+        self.info.header_only()
+
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
         extracted_dir = "tuple-" + self.version
@@ -29,5 +33,10 @@ class TaoCPPTupleConan(ConanFile):
         cmake.install()
         tools.rmdir(os.path.join(self.package_folder, "share"))
 
-    def package_id(self):
-        self.info.header_only()
+    def package_info(self):
+        self.cpp_info.filenames["cmake_find_package"] = "taocpp-tuple"
+        self.cpp_info.filenames["cmake_find_package_multi"] = "taocpp-tuple"
+        self.cpp_info.names["cmake_find_package"] = "taocpp"
+        self.cpp_info.names["cmake_find_package_multi"] = "taocpp"
+        self.cpp_info.components["_taocpp-tuple"].names["cmake_find_package"] = "tuple"
+        self.cpp_info.components["_taocpp-tuple"].names["cmake_find_package_multi"] = "tuple"
