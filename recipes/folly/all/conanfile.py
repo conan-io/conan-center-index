@@ -57,28 +57,21 @@ class FollyConan(ConanFile):
                 raise ConanInvalidConfiguration("{} requires C++14 support. The current compiler {} {} does not support it.".format(
                     self.name, self.settings.compiler, self.settings.compiler.version))
 
-        if self.settings.os == "Windows" and \
-                self.settings.arch != "x86_64":
-            raise ConanInvalidConfiguration(
-                "Folly requires a 64bit target architecture")
-        elif self.settings.os == "Windows" and \
-                self.settings.compiler == "Visual Studio" and \
+        if self.settings.os == "Windows" and self.settings.arch != "x86_64":
+            raise ConanInvalidConfiguration("Folly requires a 64bit target architecture")
+        elif self.settings.os == "Windows" and self.settings.compiler == "Visual Studio" and \
                 "MT" in self.settings.compiler.runtime:
-            raise ConanInvalidConfiguration(
-                "Folly could not be build with runtime MT")
+            raise ConanInvalidConfiguration("Folly could not be build with runtime MT")
         elif self.settings.os == "Macos" and self.options.shared:
-            raise ConanInvalidConfiguration(
-                "Folly could not be built by apple-clang as shared library")
-        elif self.settings.os == "Windows" and \
+            raise ConanInvalidConfiguration("Folly could not be built by apple-clang as shared library")
+        elif self.settings.os == "Windows" and self.options.shared:
+            raise ConanInvalidConfiguration("Folly could not be built on Windows as a shared library")
+        elif Version(self.version) >= "2020.08.10.00" and self.settings.compiler == "Visual Studio" and \
+                not self.options.shared:
+            raise ConanInvalidConfiguration("Folly could not be built on Windows as a static library")
+        elif Version(self.version) >= "2020.08.10.00" and self.settings.compiler == "clang" and \
                 self.options.shared:
-            raise ConanInvalidConfiguration(
-                "Folly could not be built on Windows as shared library")
-        elif Version(self.version) >= "2020.08.10.00" and \
-                self.settings.compiler == "Visual Studio" and not self.options.shared:
-        elif Version(self.version) >= "2020.08.10.00" and \
-                self.settings.compiler == "clang" and self.options.shared:
-            raise ConanInvalidConfiguration(
-                "Folly could not be built by clang as shared library")
+            raise ConanInvalidConfiguration("Folly could not be built by clang as a shared library")
 
     def requirements(self):
         self.requires("boost/1.73.0")
