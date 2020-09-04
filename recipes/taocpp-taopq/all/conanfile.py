@@ -4,6 +4,7 @@ from conans import ConanFile, CMake, tools
 from conans.tools import Version
 from conans.errors import ConanInvalidConfiguration
 
+required_conan_version = ">=1.28.0"
 
 class TaoCPPTaopqConan(ConanFile):
     name = "taocpp-taopq"
@@ -71,6 +72,13 @@ class TaoCPPTaopqConan(ConanFile):
         tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
 
     def package_info(self):
-        self.cpp_info.libs = ["taopq"]
+        self.cpp_info.filenames["cmake_find_package"] = "taopq"
+        self.cpp_info.filenames["cmake_find_package_multi"] = "taopq"
+        self.cpp_info.names["cmake_find_package"] = "taocpp"
+        self.cpp_info.names["cmake_find_package_multi"] = "taocpp"
+        self.cpp_info.components["_taocpp-taopq"].names["cmake_find_package"] = "taopq"
+        self.cpp_info.components["_taocpp-taopq"].names["cmake_find_package_multi"] = "taopq"
+        self.cpp_info.components["_taocpp-taopq"].libs = ["taopq"]
         if self.settings.os == "Windows":
-            self.cpp_info.system_libs = ["Ws2_32"]
+            self.cpp_info.components["_taocpp-taopq"].system_libs = ["Ws2_32"]
+        self.cpp_info.components["_taocpp-taopq"].requires = ["libpq::libpq"]
