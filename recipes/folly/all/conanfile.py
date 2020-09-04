@@ -74,6 +74,8 @@ class FollyConan(ConanFile):
             raise ConanInvalidConfiguration(
                 "Folly could not be built on Windows as shared library")
         elif Version(self.version) >= "2020.08.10.00" and \
+                self.settings.compiler == "Visual Studio" and not self.options.shared:
+        elif Version(self.version) >= "2020.08.10.00" and \
                 self.settings.compiler == "clang" and self.options.shared:
             raise ConanInvalidConfiguration(
                 "Folly could not be built by clang as shared library")
