@@ -1,6 +1,7 @@
 import os
 from conans import ConanFile, CMake, tools
 
+required_conan_version = ">=1.28.0"
 
 class TaoCPPOperatorsConan(ConanFile):
     name = "taocpp-operators"
@@ -16,6 +17,9 @@ class TaoCPPOperatorsConan(ConanFile):
     def _source_subfolder(self):
         return "source_subfolder"
 
+    def package_id(self):
+        self.info.header_only()
+
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
         extracted_dir = "operators-" + self.version
@@ -29,5 +33,10 @@ class TaoCPPOperatorsConan(ConanFile):
         cmake.install()
         tools.rmdir(os.path.join(self.package_folder, "share"))
 
-    def package_id(self):
-        self.info.header_only()
+    def package_info(self):
+        self.cpp_info.filenames["cmake_find_package"] = "taocpp-operators"
+        self.cpp_info.filenames["cmake_find_package_multi"] = "taocpp-operators"
+        self.cpp_info.names["cmake_find_package"] = "taocpp"
+        self.cpp_info.names["cmake_find_package_multi"] = "taocpp"
+        self.cpp_info.components["_taocpp-operators"].names["cmake_find_package"] = "operators"
+        self.cpp_info.components["_taocpp-operators"].names["cmake_find_package_multi"] = "operators"
