@@ -44,7 +44,7 @@ class LibUSBConan(ConanFile):
 
     def requirements(self):
         if self.options.enable_udev:
-            self.requires("libudev/virtual")
+            self.requires("libudev/system")
 
     def build_requirements(self):
         if tools.os_info.is_windows and self.settings.compiler != "Visual Studio" and \
