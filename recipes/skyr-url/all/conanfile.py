@@ -57,7 +57,7 @@ class SkyrUrlConan(ConanFile):
                 raise ConanInvalidConfiguration("{} requires C++17 support. The current compiler {} {} does not support it.".format(
                     self.name, self.settings.compiler, self.settings.compiler.version))
                 
-        if self.options.with_fs and str(self.settings.compiler) == "apple-clang" and tools.Version(self.settings.compiler.version) == 11:
+        if self.options.with_fs and str(self.settings.compiler) == "apple-clang":
             raise ConanInvalidConfiguration("apple-clang 11 is currently not support with filesystem")
             
         if self.options.shared:
