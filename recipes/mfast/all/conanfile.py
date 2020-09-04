@@ -23,7 +23,10 @@ class mFASTConan(ConanFile):
     exports_sources = "patches/**"
     short_paths = True
     _cmake = None
-    _mfast_config_dir = None
+
+    @property
+    def _mfast_config_dir(self):
+        return os.path.join("CMake") if self.settings.os == "Windows" else os.path.join("lib", "cmake", "mFAST")
 
     @property
     def _source_subfolder(self):
@@ -64,9 +67,6 @@ class mFASTConan(ConanFile):
         cmake = self._configure_cmake()
         cmake.install()
         self.copy("licence.txt", dst="licenses", src=self._source_subfolder)
-        self._mfast_config_dir = os.path.join("CMake") \
-            if self.settings.os == "Windows" \
-            else os.path.join("lib", "cmake", "mFAST")
         # This makes hook error go away
         os.rename(
             os.path.join(self.package_folder, self._mfast_config_dir, "mFASTConfig.cmake"),
