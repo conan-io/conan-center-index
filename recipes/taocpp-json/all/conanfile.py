@@ -1,6 +1,5 @@
 import os
 from conans import ConanFile, tools
-from conans.tools import Version
 from conans.errors import ConanInvalidConfiguration
 
 required_conan_version = ">=1.28.0"
@@ -20,21 +19,24 @@ class TaoCPPJSONConan(ConanFile):
     def _source_subfolder(self):
         return "source_subfolder"
 
-    def _has_support_for_cpp17(self):
-        supported_compilers = [
-            ("apple-clang", 10), ("clang", 6), ("gcc", 7), ("Visual Studio", 15.7)]
-        compiler, version = self.settings.compiler, Version(
-            self.settings.compiler.version)
-        return any(compiler == sc[0] and version >= sc[1] for sc in supported_compilers)
+    @property
+    def _min_compilers_version(self):
+        return {
+            "gcc": "7",
+            "clang": "6",
+            "apple-clang": "10",
+            "Visual Studio": "15",
+        }
 
     def configure(self):
-        if self.settings.compiler.get_safe("cppstd"):
+        if self.settings.compiler.cppstd:
             tools.check_min_cppstd(self, "17")
-        if not self._has_support_for_cpp17():
-            raise ConanInvalidConfiguration("Taocpp JSON requires C++17 or higher support standard."
-                                            " {} {} is not supported."
-                                            .format(self.settings.compiler,
-                                                    self.settings.compiler.version))
+        min_compiler_version = self._min_compilers_version.get(str(self.settings.compiler), False)
+        if min_compiler_version:
+            if tools.Version(self.settings.compiler.version) < min_compiler_version:
+                raise ConanInvalidConfiguration("taocpp-json requires C++17, which your compiler does not support.")
+        else:
+            self.output.warn("taocpp-json requires C++17. Your compiler is unknown. Assuming it supports C++17.")
 
     def package_id(self):
         self.info.header_only()
