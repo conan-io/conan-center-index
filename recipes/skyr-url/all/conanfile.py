@@ -60,8 +60,8 @@ class SkyrUrlConan(ConanFile):
         if self.options.with_fs and str(self.settings.compiler) == "apple-clang" and tools.Version(self.settings.compiler.version) == 11:
             raise ConanInvalidConfiguration("apple-clang 11 is currently not support with filesystem")
             
-        if self.options.shared and str(self.settings.compiler) == "Visual Studio":
-            raise ConanInvalidConfiguration("Visual Studio shared is currently not supported")
+        if self.options.shared:
+            raise ConanInvalidConfiguration("shared is currently not supported")
 
     def requirements(self):
         self.requires("tl-expected/1.0.0")
