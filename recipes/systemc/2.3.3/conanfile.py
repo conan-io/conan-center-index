@@ -14,6 +14,8 @@ class SystemcConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     license = "Apache-2.0"
     topics = ("simulation", "modeling", "esl", "tlm")
+    exports_sources = ["CMakeLists.txt", "patches/**"]
+    generators = "cmake"
     settings = "os", "compiler", "build_type", "arch"
     options = {
         "shared": [True, False],
@@ -35,8 +37,6 @@ class SystemcConan(ConanFile):
         "enable_immediate_self_notifications": False,
         "enable_pthreads": False
     }
-    generators = "cmake"
-    exports_sources = "patches/**"
 
     _cmake = None
 
@@ -89,7 +89,7 @@ class SystemcConan(ConanFile):
             self.options.enable_immediate_self_notifications
         self._cmake.definitions["ENABLE_PTHREADS"] = \
             self.options.get_safe("enable_pthreads", False)
-        self._cmake.configure(source_folder=self._source_subfolder)
+        self._cmake.configure()
         return self._cmake
 
     def build(self):
