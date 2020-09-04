@@ -18,7 +18,7 @@ class TaoCPPTaopqConan(ConanFile):
     default_options = {"shared": False, "fPIC": True}
     exports_sources = "CMakeLists.txt"
     generators = "cmake", "cmake_find_package"
-    requires = "libpq/11.5"
+
     _cmake = None
 
     @property
@@ -46,6 +46,9 @@ class TaoCPPTaopqConan(ConanFile):
                                             " {} {} is not supported."
                                             .format(self.settings.compiler,
                                                     self.settings.compiler.version))
+
+    def requirements(self):
+        self.requires("libpq/12.2")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
