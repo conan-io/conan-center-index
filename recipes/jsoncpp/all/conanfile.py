@@ -35,19 +35,10 @@ class JsoncppConan(ConanFile):
                                   "explicit operator bool()",
                                   "operator bool()")
 
-        lib_json_cmake = os.path.join(self._source_subfolder, "src", "lib_json", "CMakeLists.txt")
-        if tools.Version(self.version) >= "1.9.3":
-            tools.replace_in_file(
-                lib_json_cmake,
-                "POSITION_INDEPENDENT_CODE ON",
-                ""
-            )
-        else:
-            tools.replace_in_file(
-                lib_json_cmake,
-                "set_target_properties( jsoncpp_lib PROPERTIES POSITION_INDEPENDENT_CODE ON)",
-                ""
-            )
+        if self.settings.os != "Windows" and not self.options.shared and not self.options.fPIC:
+            tools.replace_in_file(os.path.join(self._source_subfolder, "src", "lib_json", "CMakeLists.txt"),
+                                  "POSITION_INDEPENDENT_CODE ON",
+                                  "POSITION_INDEPENDENT_CODE OFF")
         if tools.Version(self.version) > "1.9.0":
             tools.replace_in_file(os.path.join(self._source_subfolder, "src", "lib_json", "CMakeLists.txt"),
                                   "$<BUILD_INTERFACE:${PROJECT_BINARY_DIR}/include/json>",
