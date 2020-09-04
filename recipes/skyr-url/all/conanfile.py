@@ -12,8 +12,8 @@ class SkyrUrlConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     license = "BSL-1.0"
     settings = "os", "compiler", "build_type", "arch"
-    options = {"shared": [True, False], "fPIC": [True, False], "with_json": [True, False]}
-    default_options = {'shared': False, 'fPIC': True, 'with_json': True}
+    options = {"shared": [True, False], "fPIC": [True, False], "with_json": [True, False], "with_fs": [True, False]}
+    default_options = {"shared": False, "fPIC": True, "with_json": True, "with_fs": True}
     exports_sources = "CMakeLists.txt"
     generators = "cmake", "cmake_find_package_multi"
     _cmake = None
@@ -41,7 +41,7 @@ class SkyrUrlConan(ConanFile):
         }
 
     def config_options(self):
-        if self.settings.os == 'Windows':
+        if self.settings.os == "Windows":
             del self.options.fPIC
 
     def configure(self):
@@ -56,6 +56,9 @@ class SkyrUrlConan(ConanFile):
             if tools.Version(self.settings.compiler.version) < min_version:
                 raise ConanInvalidConfiguration("{} requires C++17 support. The current compiler {} {} does not support it.".format(
                     self.name, self.settings.compiler, self.settings.compiler.version))
+                
+        if self.options.with_fs and str(self.settings.compiler) == "apple-clang" and tools.Version(self.settings.compiler.version) == 11:
+            raise ConanInvalidConfiguration("apple-clang 11 does not support std::filesystem::path")
 
     def requirements(self):
         self.requires("tl-expected/1.0.0")
@@ -76,6 +79,7 @@ class SkyrUrlConan(ConanFile):
         self._cmake.definitions["skyr_FULL_WARNINGS"] = False
         self._cmake.definitions["skyr_WARNINGS_AS_ERRORS"] = False
         self._cmake.definitions["skyr_ENABLE_JSON_FUNCTIONS"] = self.options.with_json
+        self._cmake.definitions["skyr_ENABLE_FILESYSTEM_FUNCTIONS"] = self.options.with_fs
         if str(self.settings.compiler) == "Visual Studio":
             self._cmake.definitions["skyr_USE_STATIC_CRT"] = not self.options.shared       
         self._cmake.configure(build_folder=self._build_subfolder)
