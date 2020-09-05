@@ -109,7 +109,7 @@ class MosquittoConan(ConanFile):
         self.cpp_info.components["libmosquittopp"].requires = ["libmosquitto"]
         self.cpp_info.components["libmosquittopp"].names["pkgconfig"] = "libmosquittopp"
         if not self.options.shared:
-            self.cpp_info.components["libmosquitto"].append("LIBMOSQUITTO_STATIC")
+            self.cpp_info.components["libmosquitto"].defines.append("LIBMOSQUITTO_STATIC")
 
         bin_path = os.path.join(self.package_folder, "bin")
         self.output.info("Appending PATH env var with : {}".format(bin_path))
