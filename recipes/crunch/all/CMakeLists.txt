@@ -201,7 +201,11 @@ else(WIN32)
         ${CRUNCH_FOLDER}/crnlib/crn_threading_pthreads.h
         ${CRUNCH_FOLDER}/crnlib/crn_threading_pthreads.cpp
     )
+endif()
 
+add_library(crnlib ${CRNLIB_SRCS})
+
+if(NOT WIN32)
     find_package(Threads REQUIRED)
 
     if(${CMAKE_VERSION} VERSION_LESS "3.0")
@@ -210,8 +214,6 @@ else(WIN32)
         target_link_libraries(crnlib PUBLIC Threads::Threads)
     endif()
 endif()
-
-add_library(crnlib ${CRNLIB_SRCS})
 
 # Crunch
 
@@ -224,7 +226,7 @@ set(CRUNCH_SRCS
 )
 
 add_executable(crunch ${CRUNCH_SRCS})
-target_link_libraries(crunch ${CRUNCH_LIBRARY_NAME} crnlib)
+target_link_libraries(crunch PUBLIC crnlib)
 
 # Install
 
