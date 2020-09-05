@@ -45,11 +45,8 @@ class DarknetConan(ConanFile):
         else:
             return ".so"
 
-    def _activate_makefile(self, option):
-        makefileName = option.upper()
-        with tools.chdir(self._source_subfolder):
-            if getattr(self.options, option) == True:
-                tools.replace_in_file('Makefile', makefileName + '=0', makefileName + '=1')
+    def _patch_sources(self):
+        tools.replace_in_file(os.path.join(self._source_subfolder, "Makefile"), "OPENCV=0", "OPENCV={}".format("1" if self.options.with_opencv else "0")
 
     def configure(self):
         if self.settings.os == "Windows":
