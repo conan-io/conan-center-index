@@ -47,14 +47,14 @@ class SimdjsonConan(ConanFile):
         if self.options.shared:
             del self.options.fPIC
         if self.settings.compiler.cppstd:
-            tools.check_min_cppstd(self, "11")
+            tools.check_min_cppstd(self, "17")
 
         minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
         if minimum_version:
             if tools.Version(self.settings.compiler.version) < minimum_version:
-                raise ConanInvalidConfiguration("{} requires C++14, which your compiler does not fully support.".format(self.name))
+                raise ConanInvalidConfiguration("{} requires C++17, which your compiler does not fully support.".format(self.name))
         else:
-            self.output.warn("{} requires C++14. Your compiler is unknown. Assuming it supports C++14.".format(self.name))
+            self.output.warn("{} requires C++17. Your compiler is unknown. Assuming it supports C++17.".format(self.name))
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
