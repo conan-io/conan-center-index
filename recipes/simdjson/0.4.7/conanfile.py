@@ -30,6 +30,15 @@ class SimdjsonConan(ConanFile):
     def _build_subfolder(self):
           return "build_subfolder"
 
+    @property
+    def _compilers_minimum_version(self):
+        return {
+            "gcc": "7.4",
+            "Visual Studio": "15.7",
+            "clang": "6",
+            "apple-clang": "10",
+        }
+
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
@@ -39,6 +48,13 @@ class SimdjsonConan(ConanFile):
             del self.options.fPIC
         if self.settings.compiler.cppstd:
             tools.check_min_cppstd(self, "11")
+
+        minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
+        if minimum_version:
+            if tools.Version(self.settings.compiler.version) < minimum_version:
+                raise ConanInvalidConfiguration("{} requires C++14, which your compiler does not fully support.".format(self.name))
+        else:
+            self.output.warn("{} requires C++14. Your compiler is unknown. Assuming it supports C++14.".format(self.name))
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
