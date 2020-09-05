@@ -1,6 +1,5 @@
-diff -Naur a/crnlib/crn_core.h b/crnlib/crn_core.h
---- a/crnlib/crn_core.h	2019-06-15 03:59:38.000000000 -0400
-+++ b/crnlib/crn_core.h	2020-09-04 23:14:27.538724100 -0400
+--- crnlib/crn_core.h
++++ crnlib/crn_core.h
 @@ -82,7 +82,7 @@
 
     #define CRNLIB_RESTRICT

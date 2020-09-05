@@ -1,6 +1,5 @@
-diff -Naur a/crnlib/crn_miniz.cpp b/crnlib/crn_miniz.cpp
---- a/crnlib/crn_miniz.cpp	2019-06-15 03:59:38.000000000 -0400
-+++ b/crnlib/crn_miniz.cpp	2020-09-04 23:23:57.324397300 -0400
+--- crnlib/crn_miniz.cpp
++++ crnlib/crn_miniz.cpp
 @@ -1892,7 +1892,7 @@
    *pLen_out = out_buf.m_size-41;
    {
@@ -10,9 +9,8 @@ diff -Naur a/crnlib/crn_miniz.cpp b/crnlib/crn_miniz.cpp
        (mz_uint8)(*pLen_out>>24),(mz_uint8)(*pLen_out>>16),(mz_uint8)(*pLen_out>>8),(mz_uint8)*pLen_out,0x49,0x44,0x41,0x54};
      c=(mz_uint32)mz_crc32(MZ_CRC32_INIT,pnghdr+12,17); for (i=0; i<4; ++i, c<<=8) ((mz_uint8*)(pnghdr+29))[i]=(mz_uint8)(c>>24);
      memcpy(out_buf.m_pBuf, pnghdr, 41);
-diff -Naur a/crnlib/crn_stb_image.cpp b/crnlib/crn_stb_image.cpp
---- a/crnlib/crn_stb_image.cpp	2019-06-15 03:59:38.000000000 -0400
-+++ b/crnlib/crn_stb_image.cpp	2020-09-04 23:26:21.744776200 -0400
+--- crnlib/crn_stb_image.cpp
++++ crnlib/crn_stb_image.cpp
 @@ -3776,7 +3776,7 @@
           if (c1 != 2 || c2 != 2 || (len & 0x80)) {
              // not run-length encoded, so we have to actually use THIS data as a decoded

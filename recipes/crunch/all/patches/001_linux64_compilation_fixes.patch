@@ -1,7 +1,5 @@
-diff --git a/crnlib/crn_timer.h b/crnlib/crn_timer.h
-index f96e532..3d93e44 100644
---- a/crnlib/crn_timer.h
-+++ b/crnlib/crn_timer.h
+--- crnlib/crn_timer.h
++++ crnlib/crn_timer.h
 @@ -49,7 +49,7 @@ namespace crnlib
        timer m_tm;
  
@@ -11,10 +9,8 @@ index f96e532..3d93e44 100644
        
        inline double get_elapsed_secs() const { return m_tm.get_elapsed_secs(); }
        inline double get_elapsed_ms() const { return m_tm.get_elapsed_ms(); }
-diff --git a/crnlib/crn_vector.cpp b/crnlib/crn_vector.cpp
-index 8c21125..7617d38 100644
---- a/crnlib/crn_vector.cpp
-+++ b/crnlib/crn_vector.cpp
+--- crnlib/crn_vector.cpp
++++ crnlib/crn_vector.cpp
 @@ -21,7 +21,7 @@ namespace crnlib
        if (m_capacity >= min_new_capacity)
           return true;
@@ -24,10 +20,8 @@ index 8c21125..7617d38 100644
        if ((grow_hint) && (!math::is_power_of_2(new_capacity)))
           new_capacity = math::next_pow2(new_capacity);
  
-diff --git a/inc/crn_decomp.h b/inc/crn_decomp.h
-index 680beb1..d905bd2 100644
---- a/inc/crn_decomp.h
-+++ b/inc/crn_decomp.h
+--- inc/crn_decomp.h
++++ inc/crn_decomp.h
 @@ -373,8 +373,8 @@ namespace crnd
     enum eClear { cClear };
  
