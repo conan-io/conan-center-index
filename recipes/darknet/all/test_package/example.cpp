@@ -1,5 +1,6 @@
-#include <iostream>
 #include "darknet.h"
+
+#include <iostream>
 
 int main() {
     image image = make_image(2, 3, 1);
