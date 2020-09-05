@@ -55,8 +55,9 @@ class DarknetConan(ConanFile):
         del self.settings.compiler.cppstd
 
     def requirements(self):
-        if self.options.OpenCV:
-            self.requires("opencv/3.4.3")
+        if self.options.with_opencv:
+            # FIXME: opencv recipe is missing on CCI
+            raise ConanInvalidConfiguration("opencv recipe is not (yet) available on CCI")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
