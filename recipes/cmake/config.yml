@@ -21,5 +21,11 @@ versions:
     folder: "3.x.x"
   "3.17.3":
     folder: "3.x.x"
+  "3.17.4":
+    folder: "3.x.x"
+  "3.18.0":
+    folder: "3.x.x"
   "3.18.1":
+    folder: "3.x.x"
+  "3.18.2":
     folder: "3.x.x"

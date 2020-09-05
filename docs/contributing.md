@@ -1,5 +1,5 @@
-Contributing to Conan Center Index
-==================================
+# Contributing to Conan Center Index
+
 
 The following summarizes the process for contributing to the CCI (Conan Center Index) project.
 
@@ -20,7 +20,7 @@ To contribute follow the next steps:
 
 1. Comment in the corresponding issue that you want to contribute the package/fix proposed. If there is no open issue, we strongly suggest
    to open one to gather feedback.
-2. Check the [docs/how_to_add_packages.md](docs/how_to_add_packages.md) if are
+2. Check the [how_to_add_packages.md](how_to_add_packages.md) if are
    contributing for a new package.
 3. Fork the [CCI repository](https://github.com/conan-io/conan-center-index) and create a `package/xxx` branch from the `master` branch and develop
    your fix/packages as discussed in previous step.
@@ -54,20 +54,3 @@ We use the following tags to control the status of the issues:
 - **question**: Further information is requested .
 - **upstream update**: Bump a new package version.
 - **conan.io/center**: Issues and features related to Web UI .
-
-Code of conduct
----------------
-
-Try to be polite, CCI maintainers and contributors are really willing to help and we enjoy it.
-
-Please keep in mind these points:
-
-- There are limited resources/time and not all issues/pull requests can be considered as well as we would like.
-- ``conan-io`` maintainers can tag/close/modify any opened issue and it should not be interpreted as a rude or disrespectful action. It
-  **always** responds to organizational purposes. A closed issue can be perfectly reopened or further commented.
-- It is very hard to keep the project in good health in terms of technical debt, usability, serviceability, etc. If the proposed feature is
-  not clearly stated, enough information is not provided or it is not sure that would be a good feature for the future development of the project, it won't be accepted. The community plays a very important role during this discussion so it strongly encouraged to
-  explain the value of a feature for the community, the needed documentation and its use cases.
-- Backwards compatibility and not breaking users' packages is very important and it won't be done unless there are very good reasons.
-- You should not get bothered if you feel unattended, CCI is an Open Source project, not a commercial product. Try to explain what you
-  really need and we will try to help you.

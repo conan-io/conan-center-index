@@ -6,6 +6,7 @@ from conans.errors import ConanException
 from conans.errors import ConanInvalidConfiguration
 import os
 import sys
+import shlex
 import shutil
 
 try:
@@ -643,7 +644,7 @@ class BoostConan(ConanFile):
         flags.append(cxx_flags)
 
         if self.options.extra_b2_flags:
-            flags.append(str(self.options.extra_b2_flags))
+            flags.extend(shlex.split(str(self.options.extra_b2_flags)))
 
         flags.extend(["install",
                       "--prefix=%s" % self.package_folder,

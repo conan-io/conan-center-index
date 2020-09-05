@@ -2,11 +2,20 @@
 // ToDo: Remove when new version of RapidJson will be available
 #define _SILENCE_CXX17_ITERATOR_BASE_CLASS_DEPRECATION_WARNING
 
+#include <bitserializer/bit_serializer.h>
+#ifdef WITH_CPPRESTSDK
+#include <bitserializer/cpprestjson_archive.h>
+#endif
+#ifdef WITH_RAPIDJSON
+#include <bitserializer/rapidjson_archive.h>
+#endif
+#ifdef WITH_PUGIXML
+#include <bitserializer/pugixml_archive.h>
+#endif
+
 #include <iostream>
 #include <sstream>
 #include <filesystem>
-#include "bitserializer/bit_serializer.h"
-#include "bitserializer/rapidjson_archive.h"
 
 class CTest
 {
@@ -48,5 +57,13 @@ int main() {
 	// Some compilers does not link filesystem automatically
 	std::cout << "Testing the link of C++17 filesystem: " << std::filesystem::temp_directory_path() << std::endl;
 
+#ifdef WITH_CPPRESTSDK
+	TestArchive<BitSerializer::Json::CppRest::JsonArchive>("Implementation based on cpprestsdk");
+#endif
+#ifdef WITH_RAPIDJSON
 	TestArchive<BitSerializer::Json::RapidJson::JsonArchive>("Implementation based on RapidJson");
+#endif
+#ifdef WITH_PUGIXML
+	TestArchive<BitSerializer::Xml::PugiXml::XmlArchive>("Implementation based on pugixml");
+#endif
 }

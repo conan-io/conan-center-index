@@ -1,7 +1,39 @@
+# Changelog
+
+### 17-August-2020 - 11:20 CEST
+
+ - Raise error if zero packages are generated
+ - Remove "No beta user" label if corresponding check pass
+ - [engineering] Unify catchs and simplify slackSend function
+ - [engineering] Pipeline step to create all packages in stages
+ - [engineering] Pipeline step to compute and reduce 'packageID'
+ - [engineering] Simplify 'ComputePackageIDs' command
+
+### 12-August-2020 - 10:12 CEST
+
+- Updated Conan client to the 1.28.1 version in Windows and Mac agents.
+
+### 11-August-2020 - 14:19 CEST
+
+- [engineering] Read allowed users from a file.
+- [engineering] Check for beta users in all environments.
+- [engineering] Set date in issue description for hooks validation job.
+
+### 4-August-2020 - 20:19 CEST
+
+- [engineering] Remove short-paths home after creating packages.
+
+### 31-July-2020 - 23:14 CEST
+
+- [engineering] Use `force` flag to update the ConanCenter metadata.
+- [engineering] Remove local packages created after their upload to avoid disk space issues.
+
 ### 24-July-2020 - 13:05 CEST
+
 - Renamed Jenkins project from `conan-center-pull-request` to `cci` to improve issues with long workspace paths in Windows agents.
 
 ### 24-July-2020 - 12:52 CEST
+
 - Updated Conan client to the 1.27.1 version in Windows and Mac agents.
 
 ### 17-July-2020 - 18:54 CEST

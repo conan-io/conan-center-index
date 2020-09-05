@@ -28,15 +28,15 @@ class MpfrConan(ConanFile):
     exports_sources = "CMakeLists.txt.in", "patches/**"
     generators = "cmake"
 
-    _cmake = None
     _autotools = None
+    _cmake = None
 
     @property
     def _source_subfolder(self):
         return "source_subfolder"
 
     def config_options(self):
-        if self.settings.os == 'Windows':
+        if self.settings.os == "Windows":
             del self.options.fPIC
 
     def configure(self):
@@ -50,9 +50,8 @@ class MpfrConan(ConanFile):
             self.requires("gmp/6.2.0")
 
     def build_requirements(self):
-        if tools.os_info.is_windows and not tools.get_env("CONAN_BASH_PAH") and \
-                tools.os_info.detect_windows_subsystem() != "msys2":
-            self.build_requires("msys2/20190524")
+        if tools.os_info.is_windows and not tools.get_env("CONAN_BASH_PAH"):
+            self.build_requires("msys2/20200517")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])

@@ -8,9 +8,13 @@ This repository includes a Continuous Integration system that will build automat
 
 ### Documentation
 
-* If you want to learn how to contribute new recipes, please read [docs/how_to_add_packages.md](docs/how_to_add_packages.md).
-* Most common questions are listed in [docs/faqs.md](docs/faqs.md).
-* The conan-center hook errors reported by CCI Bot can be found in the [docs/error_knowledge_base.md](docs/error_knowledge_base.md).
+All the documentation is available in this same repository in the [`docs/` subfoler](docs/README.md).
+
+This is a list of shortcuts to some interesting topics:
+
+* If you want to learn how to **contribute new recipes**, please read [docs/how_to_add_packages.md](docs/how_to_add_packages.md).
+* **FAQ**: most common questions are listed in [docs/faqs.md](docs/faqs.md).
+* The conan-center **hook errors** reported by CCI Bot can be found in the [docs/error_knowledge_base.md](docs/error_knowledge_base.md).
 * The internal changes related to infrastructure can be checked in [docs/changelog.md](docs/changelog.md).
 
 

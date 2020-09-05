@@ -138,17 +138,54 @@ class GLibConan(ConanFile):
             os.unlink(pdb_file)
 
     def package_info(self):
-        self.cpp_info.libs = ["gio-2.0", "gmodule-2.0", "gobject-2.0", "gthread-2.0", "glib-2.0"]
+        
+        self.cpp_info.components["glib-2.0"].libs = ["glib-2.0"]
         if self.settings.os == "Linux":
-            self.cpp_info.system_libs.append("pthread")
-            self.cpp_info.system_libs.append("resolv")
-            self.cpp_info.system_libs.append("dl")
+            self.cpp_info.components["glib-2.0"].system_libs.append("pthread")
         if self.settings.os == "Windows":
-            self.cpp_info.system_libs.extend(["ws2_32", "ole32", "shell32", "user32", "advapi32"])
-        self.cpp_info.includedirs.append(os.path.join('include', 'glib-2.0'))
-        self.cpp_info.includedirs.append(os.path.join('lib', 'glib-2.0', 'include'))
-        self.env_info.PATH.append(os.path.join(self.package_folder, "bin"))
+            self.cpp_info.components["glib-2.0"].system_libs.extend(["ws2_32", "ole32", "shell32", "user32", "advapi32"])
         if self.settings.os == "Macos":
-            self.cpp_info.system_libs.append("iconv")
-            self.cpp_info.system_libs.append("resolv")
-            self.cpp_info.frameworks.extend(['Foundation', 'CoreServices', 'CoreFoundation'])
+            self.cpp_info.components["glib-2.0"].system_libs.append("iconv")
+            self.cpp_info.components["glib-2.0"].system_libs.append("resolv")
+            self.cpp_info.components["glib-2.0"].frameworks.extend(['Foundation', 'CoreServices', 'CoreFoundation'])
+        self.cpp_info.components["glib-2.0"].includedirs.append(os.path.join('include', 'glib-2.0'))
+        self.cpp_info.components["glib-2.0"].includedirs.append(os.path.join('lib', 'glib-2.0', 'include'))
+        if self.options.with_pcre:
+            self.cpp_info.components["glib-2.0"].requires.append("pcre::pcre")
+        if self.settings.os != "Linux":
+            self.cpp_info.components["glib-2.0"].requires.append("libgettext::libgettext")
+        if tools.is_apple_os(self.settings.os):
+            self.cpp_info.components["glib-2.0"].requires.append("libiconv::libiconv")
+
+        self.cpp_info.components["gmodule-2.0"].libs = ["gmodule-2.0"]
+        if self.settings.os == "Linux":
+            self.cpp_info.components["gmodule-2.0"].system_libs.append("pthread")
+            self.cpp_info.components["gmodule-2.0"].system_libs.append("dl")
+        self.cpp_info.components["gmodule-2.0"].requires.append("glib-2.0")
+
+        self.cpp_info.components["gobject-2.0"].libs = ["gobject-2.0"]
+        self.cpp_info.components["gobject-2.0"].requires.append("glib-2.0")
+        self.cpp_info.components["gobject-2.0"].requires.append("libffi::libffi")
+
+        self.cpp_info.components["gthread-2.0"].libs = ["gthread-2.0"]
+        if self.settings.os == "Linux":
+            self.cpp_info.components["gthread-2.0"].system_libs.append("pthread")
+        self.cpp_info.components["gthread-2.0"].requires.append("glib-2.0")
+
+        self.cpp_info.components["gio-2.0"].libs = ["gio-2.0"]
+        if self.settings.os == "Linux":
+            self.cpp_info.components["gio-2.0"].system_libs.append("resolv")
+            self.cpp_info.components["gio-2.0"].system_libs.append("dl")
+        self.cpp_info.components["gio-2.0"].requires.extend(["glib-2.0", "gobject-2.0", "gmodule-2.0", "zlib::zlib"])
+        if self.settings.os == "Linux":
+            if self.options.with_mount:
+                self.cpp_info.components["gio-2.0"].requires.append("libmount::libmount")
+            if self.options.with_selinux:
+                self.cpp_info.components["gio-2.0"].requires.append("libselinux::libselinux")
+
+        self.cpp_info.components["gresource"].libs = [] # this is actualy an executable
+        self.cpp_info.components["gresource"].requires.append("libelf::libelf") # this is actualy an executable
+
+        bin_path = os.path.join(self.package_folder, "bin")
+        self.output.info("Appending PATH env var with: {}".format(bin_path))
+        self.env_info.PATH.append(bin_path)

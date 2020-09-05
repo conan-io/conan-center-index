@@ -17,10 +17,10 @@ class PahoMqttcConan(ConanFile):
                "ssl": [True, False],
                "samples": [True, False],
                "asynchronous": [True, False]}
-    default_options = {"shared": True,
+    default_options = {"shared": False,
                        "fPIC": True,
                        "ssl": True,
-                       "asynchronous" : True, 
+                       "asynchronous" : True,
                        "samples": False}
 
     _cmake = None
@@ -32,11 +32,14 @@ class PahoMqttcConan(ConanFile):
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
+        # Static linking before 1.3.4 isn't supported
+        if tools.Version(self.version) < "1.3.4":
+            self.options.shared = True
 
     def configure(self):
         del self.settings.compiler.cppstd
         del self.settings.compiler.libcxx
-        if self.options.shared == False and self.settings.os == "Windows" and self.version in ['1.3.0', '1.3.1']:
+        if self.options.shared == False and self.settings.os == "Windows" and tools.Version(self.version) < "1.3.4":
             raise ConanInvalidConfiguration("Static linking in Windows did not work before version 1.3.4")
 
     def requirements(self):
@@ -102,4 +105,3 @@ class PahoMqttcConan(ConanFile):
                 self.cpp_info.system_libs.extend(["c", "pthread"])
         self.cpp_info.names["cmake_find_package"] = "PahoMqttC"
         self.cpp_info.names["cmake_find_package_multi"] = "PahoMqttC"
-

@@ -9,7 +9,7 @@ class IMGUIConan(ConanFile):
     description = "Bloat-free Immediate Mode Graphical User interface for C++ with minimal dependencies"
     topics = ("conan", "imgui", "gui", "graphical")
     license = "MIT"
-    
+
     exports_sources = ["CMakeLists.txt"]
     generators = "cmake"
 
@@ -19,7 +19,7 @@ class IMGUIConan(ConanFile):
          "fPIC": [True, False]
     }
     default_options = {
-        "shared": False, 
+        "shared": False,
         "fPIC": True
     }
 
@@ -30,7 +30,11 @@ class IMGUIConan(ConanFile):
         return "source_subfolder"
 
     def config_options(self):
-        if self.settings.os == 'Windows':
+        if self.settings.os == "Windows":
+            del self.options.fPIC
+
+    def configure(self):
+        if self.options.shared:
             del self.options.fPIC
 
     def source(self):
@@ -57,3 +61,9 @@ class IMGUIConan(ConanFile):
 
     def package_info(self):
         self.cpp_info.libs = tools.collect_libs(self)
+        if self.settings.os == "Linux":
+            self.cpp_info.system_libs.append("m")
+
+        bin_path = os.path.join(self.package_folder, "bin")
+        self.output.info("Appending PATH env var with : {}".format(bin_path))
+        self.env_info.PATH.append(bin_path)

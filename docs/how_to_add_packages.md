@@ -18,7 +18,7 @@ When the pull request is reviewed and merged, those packages are published to ce
 
 The [conan-center-index](https://github.com/conan-io/conan-center-index) (this repository) contains recipes for the [conan-center](https://bintray.com/conan/conan-center) repository.
 
-To contribute with a Conan recipe into the `conan-center` repository you can submit a [Pull Request](https://github.com/conan-io/conan-center-index/pulls) to the **master branch** of this repository. The connected **continuous integration system** will generate binary packages automatically for the most common platforms and compilers. See [the Supported Platforms and Configurations page](https://github.com/conan-io/conan-center-index/wiki/Supported-Platforms-And-Configurations) to know the generated configurations. For a C++ library, the system is currently generating more than 100 binary packages.
+To contribute with a Conan recipe into the `conan-center` repository you can submit a [Pull Request](https://github.com/conan-io/conan-center-index/pulls) to the **master branch** of this repository. The connected **continuous integration system** will generate binary packages automatically for the most common platforms and compilers. See [the Supported Platforms and Configurations page](supported_platforms_and_configurations.md) to know the generated configurations. For a C++ library, the system is currently generating more than 100 binary packages.
 
 > ⚠️ **Note**: This CI service is not a testing service, it is a binary building service for package **releases**. Unit tests shouldn't be built nor ran in recipes by default. Before submitting a PR it is mandatory to run at least a local package creation.
 
@@ -149,4 +149,4 @@ Call `conan create . lib/1.0@` in the folder of the recipe using the profile you
 
 ### Debugging failed builds
 
-   Go to the [Error Knowledge Base](https://github.com/conan-io/conan-center-index/wiki/Error-Knowledge-Base) page to know more.
+   Go to the [Error Knowledge Base](error_knowledge_base.md) page to know more.

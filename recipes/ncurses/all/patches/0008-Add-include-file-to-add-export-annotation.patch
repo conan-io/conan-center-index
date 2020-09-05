@@ -1,3 +1,11 @@
+Upstreamed in 3e37c7d3fa122563a9d88168926f61286ef30cd3
+
+ncurses 6.2 - patch 20200523
+
+this patch differs with upstream:
+upstream has integrated this fine in ncurses_dll.h.in (instead of creating a new file)
+This change is small, so don't care.  
+
 From ffcd8b69aa8346e94aceefdc4593ad74635708f9 Mon Sep 17 00:00:00 2001
 From: Anonymous Maarten <anonymous.maarten@gmail.com>
 Date: Sat, 14 Mar 2020 12:38:41 +0100

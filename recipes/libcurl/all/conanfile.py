@@ -12,7 +12,7 @@ class LibcurlConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://curl.haxx.se"
     license = "MIT"
-    exports_sources = ["lib_Makefile_add.am", "CMakeLists.txt"]
+    exports_sources = ["lib_Makefile_add.am", "CMakeLists.txt", "patches/*"]
     generators = "cmake", "pkg_config"
 
     settings = "os", "arch", "compiler", "build_type"
@@ -107,8 +107,7 @@ class LibcurlConan(ConanFile):
             if not tools.is_apple_os(self.settings.os) or not self.options.darwin_ssl:
                 self.options["openssl"].shared = self.options.shared
         if self.options.with_libssh2:
-            if self.settings.compiler != "Visual Studio":
-                self.options["libssh2"].shared = self.options.shared
+            self.options["libssh2"].shared = self.options.shared
         if self.options.with_wolfssl:
             # enforce shared linking due to openssl dependency
             if not tools.is_apple_os(self.settings.os) or not self.options.darwin_ssl:
@@ -156,12 +155,17 @@ class LibcurlConan(ConanFile):
         tools.download("https://curl.haxx.se/ca/cacert.pem", "cacert.pem", verify=True)
 
     def build(self):
+        self._patch_sources()
         self._patch_misc_files()
         if self.settings.compiler == "Visual Studio" or self._is_win_x_android:
             self._build_with_cmake()
         else:
             self._build_with_autotools()
 
+
+    def _patch_sources(self):
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            tools.patch(**patch)
 
     def _patch_misc_files(self):
         if self.options.with_largemaxwritesize:
@@ -194,6 +198,10 @@ class LibcurlConan(ConanFile):
         elif self.options.with_openssl:
             openssl_path = self.deps_cpp_info["openssl"].rootpath.replace("\\", "/")
             params.append("--with-ssl=%s" % openssl_path)
+        elif self.options.with_wolfssl:
+            wolfssl_path = self.deps_cpp_info["wolfssl"].rootpath.replace("\\", "/")
+            params.append("--with-wolfssl=%s" % wolfssl_path)
+            params.append("--without-ssl")
         else:
             params.append("--without-ssl")
 

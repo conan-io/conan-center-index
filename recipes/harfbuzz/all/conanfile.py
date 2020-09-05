@@ -14,6 +14,7 @@ class HarfbuzzConan(ConanFile):
     short_paths = True
 
     settings = "os", "arch", "compiler", "build_type"
+    
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
@@ -28,7 +29,7 @@ class HarfbuzzConan(ConanFile):
         "fPIC": True,
         "with_freetype": True,
         "with_icu": False,
-        "with_glib": False,
+        "with_glib": True,
         "with_gdi": True,
         "with_uniscribe": True
     }

@@ -1,4 +1,5 @@
-## Errors from the conan-center hook (KB-Hxxx)
+# Errors from the conan-center hook (KB-Hxxx)
+
 
 #### **<a name="KB-H001">#KB-H001</a>: "DEPRECATED GLOBAL CPPSTD"**
 
@@ -155,7 +156,7 @@ class SomeRecipe(ConanFile):
     exports = "LICENSE.md" # not allowed
 ```
 
-There is a complete explanation in the [FAQ](https://github.com/conan-io/conan-center-index/wiki/FAQ#should-recipes-export-a-recipes-license).
+There is a complete explanation in the [FAQ](faqs.md#should-recipes-export-a-recipes-license).
 
 #### **<a name="KB-H024">#KB-H024</a>: "TEST PACKAGE FOLDER"**
 
@@ -294,3 +295,23 @@ The CMake definition CMAKE_VERBOSE_MAKEFILE helps for debugging when developing,
 #### **<a name="KB-H047">#KB-H047</a>: "NO ASCII CHARACTERS"**
 
 According to PEP [263](https://www.python.org/dev/peps/pep-0263/), Unicode literals should only appear in Python code if the encoding is declared on one of the first two lines of the source file. Without such a declaration, any Unicode literal will cause a syntax error for Python 2 interpreters.
+
+#### **<a name="KB-H048">#KB-H048</a>: "CMAKE VERSION REQUIRED"**
+
+The file test_package/CMakeLists.txt should require CMake 3.1 by default: `cmake_minimum_required(VERSION 3.1)`. The CMake wrapper file can require CMake 2.8, because Conan recipe and the test package are totally separated. However, if `CMAKE_CXX_STANDARD` or `CXX_STANDARD` is explicit, CMake 3.1 is mandatory.
+
+#### **<a name="KB-H049">#KB-H049</a>: "CMAKE WINDOWS EXPORT ALL SYMBOLS"**
+
+The CMakeLists.txt definitions [CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS](https://cmake.org/cmake/help/v3.4/variable/CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS.html) and [WINDOWS_EXPORT_ALL_SYMBOLS](https://cmake.org/cmake/help/v3.4/prop_tgt/WINDOWS_EXPORT_ALL_SYMBOLS.html) are available since CMake 3.4 only. Any previous version will ignore it.
+
+#### **<a name="KB-H050">#KB-H050</a>: "DEFAULT SHARED OPTION VALUE"**
+
+By default, all packages should be built as static library (the option ``shared`` is ``False`` in ``default_options``). However, some projects can be restricted to shared library only, for those cases, open a new [issue](https://github.com/conan-io/hooks/issues) to include the package name in the allowlist.
+
+### **<a name="KB-H051">#KB-H051</a>: "DEFAULT OPTIONS AS DICTIONARY"**
+
+The attribue `default_options` should be a dictionary, for example `default_options = {'shared': False, 'fPIC': True}`.
+
+### **<a name="KB-H052">#KB-H052</a>: "CONFIG.YML HAS NEW VERSION"**
+
+It's important to have new library version defined in both `config.yml` and `conandata.yml`, otherwise newly added version will not be checked and built by CI and will not be available for download.
