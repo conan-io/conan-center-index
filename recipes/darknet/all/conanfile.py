@@ -46,7 +46,7 @@ class DarknetConan(ConanFile):
             return ".so"
 
     def _patch_sources(self):
-        tools.replace_in_file(os.path.join(self._source_subfolder, "Makefile"), "OPENCV=0", "OPENCV={}".format("1" if self.options.with_opencv else "0")
+        tools.replace_in_file(os.path.join(self._source_subfolder, "Makefile"), "OPENCV=0", "OPENCV={}".format("1" if self.options.with_opencv else "0"))
 
     def configure(self):
         if self.settings.os == "Windows":
