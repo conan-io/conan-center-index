@@ -98,7 +98,7 @@ class MosquittoConan(ConanFile):
         self.cpp_info.components["libmosquitto"].names["pkgconfig"] = "libmosquitto"
         if self.options.with_tls:
             self.cpp_info.components["libmosquitto"].requires.append("openssl::openssl")
-            self.cpp_info.components["libmosquitto"].defines = ["WITH_TLS"]
+            self.cpp_info.components["libmosquitto"].defines.append("WITH_TLS")
         if self.settings.os == "Windows":
             self.cpp_info.components["libmosquitto"].system_libs.append("ws2_32")
         elif self.settings.os == "Linux":
@@ -108,6 +108,8 @@ class MosquittoConan(ConanFile):
         self.cpp_info.components["libmosquittopp"].libs = ["mosquittopp" + lib_suffix]
         self.cpp_info.components["libmosquittopp"].requires = ["libmosquitto"]
         self.cpp_info.components["libmosquittopp"].names["pkgconfig"] = "libmosquittopp"
+        if not self.options.shared:
+            self.cpp_info.components["libmosquitto"].append("LIBMOSQUITTO_STATIC")
 
         bin_path = os.path.join(self.package_folder, "bin")
         self.output.info("Appending PATH env var with : {}".format(bin_path))
