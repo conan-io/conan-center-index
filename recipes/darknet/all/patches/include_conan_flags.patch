@@ -1,0 +1,15 @@
+diff -ru a/Makefile b/Makefile
+--- a/Makefile
++++ b/Makefile
+@@ -25,9 +25,9 @@
+ AR=ar
+ ARFLAGS=rcs
+ OPTS=-Ofast
+-LDFLAGS= -lm -pthread 
++LDFLAGS+=${LIBS} -lm -pthread
+ COMMON= -Iinclude/ -Isrc/
+-CFLAGS=-Wall -Wno-unused-result -Wno-unknown-pragmas -Wfatal-errors -fPIC
++CFLAGS+=${CPPFLAGS} -Wall -Wno-unused-result -Wno-unknown-pragmas -Wfatal-errors
+ 
+ ifeq ($(OPENMP), 1) 
+ CFLAGS+= -fopenmp
