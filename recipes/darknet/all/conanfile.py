@@ -19,7 +19,7 @@ class DarknetConan(ConanFile):
     default_options = {
         "shared": False,
         "fPIC": True,
-        "OpenCV": False,
+        "with_opencv": False,
     }
 
     @property
