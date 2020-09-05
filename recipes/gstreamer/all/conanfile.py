@@ -37,8 +37,7 @@ class GStreamerConan(ConanFile):
 
     def build_requirements(self):
         self.build_requires("meson/0.54.2")
-        if not tools.which("pkg-config") or self.settings.os == "Windows":
-            self.build_requires("pkgconf/1.7.3")
+        self.build_requires("pkgconf/1.7.3")
         self.build_requires("bison/3.5.3")
         self.build_requires("flex/2.6.4")
 
@@ -126,4 +125,3 @@ class GStreamerConan(ConanFile):
         elif self.settings.arch == "x86_64":
             self.output.info("Creating GSTREAMER_ROOT_X86_64 env var : %s" % gstreamer_root)
             self.env_info.GSTREAMER_ROOT_X86_64 = gstreamer_root
-
