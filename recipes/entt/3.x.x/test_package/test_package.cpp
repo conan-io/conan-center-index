@@ -50,11 +50,13 @@ int main()
     for (auto i = 0; i < 10; ++i)
     {
         auto entity = registry.create();
+#ifdef ENTT_LESS_3_4_0
         registry.assign<position>(entity, i * 1.f, i * 1.f);
-        if (i % 2 == 0)
-        {
-            registry.assign<velocity>(entity, i * .1f, i * .1f);
-        }
+        if (i % 2 == 0) { registry.assign<velocity>(entity, i * .1f, i * .1f); }
+#else
+        registry.emplace<position>(entity, i * 1.f, i * 1.f);
+        if (i % 2 == 0) { registry.emplace<velocity>(entity, i * .1f, i * .1f); }
+#endif
     }
 
     update(dt, registry);
