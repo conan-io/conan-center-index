@@ -6,7 +6,6 @@ from conans.tools import Version
 
 class SimdjsonConan(ConanFile):
     name = "simdjson"
-    version = '0.4.7'
     description = "Parsing gigabytes of JSON per second"
     topics = ("conan", "json", "parser", "simd", "format")
     url = "https://github.com/conan-io/conan-center-index"
@@ -31,10 +30,6 @@ class SimdjsonConan(ConanFile):
     def _build_subfolder(self):
           return "build_subfolder"
 
-    @property
-    def _supported_cppstd(self):
-        return ["11", "gnu11", "14", "gnu14", "17", "gnu17", "20", "gnu20"]
-
     def _is_supported_compiler(self):
         # Try to get by conan. We support more compilers than that.
         supported_compilers = [("apple-clang", 10), ("gcc", 7.4), ("clang", 6), ("Visual Studio", 15.7)]
@@ -48,11 +43,8 @@ class SimdjsonConan(ConanFile):
     def configure(self):
         if self.options.shared:
             del self.options.fPIC
-        if self.settings.compiler.cppstd and \
-           not self.settings.compiler.cppstd in self._supported_cppstd:
-          raise ConanInvalidConfiguration("This library requires c++11 standard or higher."
-                                          " {} required."
-                                          .format(self.settings.compiler.cppstd))
+        if self.settings.compiler.cppstd:
+            tools.check_min_cppstd(self, "11")
 
         if not self._is_supported_compiler():
             raise ConanInvalidConfiguration("This library is tested with a family of recent compilers."
@@ -83,7 +75,6 @@ class SimdjsonConan(ConanFile):
         cmake = self._configure_cmake()
         cmake.install()
         tools.rmdir(os.path.join(self.package_folder, 'lib', 'cmake'))
-        tools.rmdir(os.path.join(self.package_folder, 'lib', 'pkgconfig'))
         self.copy("LICENSE", src=self._source_subfolder, dst="licenses")
 
     def package_info(self):
@@ -94,5 +85,5 @@ class SimdjsonConan(ConanFile):
             self.cpp_info.defines = ["SIMDJSON_THREADS_ENABLED=1"]
             if self.settings.os == "Linux":
                 self.cpp_info.system_libs.append("pthread")
-            if self.options.shared:
-                self.cpp_info.defines.append("SIMDJSON_USING_LIBRARY=1")
+        if self.options.shared:
+            self.cpp_info.defines.append("SIMDJSON_USING_LIBRARY=1")
