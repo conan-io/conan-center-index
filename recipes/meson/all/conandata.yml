@@ -32,3 +32,6 @@ sources:
   "0.55.0":
     url: "https://github.com/mesonbuild/meson/archive/0.55.0.tar.gz"
     sha256: "9034c943c8cf4d734c0e18e5ba038dd762fcdcc614c45b41703305da8382e90c"
+  "0.55.1":
+    url: "https://github.com/mesonbuild/meson/archive/0.55.1.tar.gz"
+    sha256: "c7ebf2fff5934a974c7edd1aebb5fc9c3e1da5ae3184a29581fde917638eea39"
