@@ -65,7 +65,7 @@ class DarknetConan(ConanFile):
         os.rename(extracted_folder, self._source_subfolder)
 
     def build(self):
-        self._activate_makefile("OpenCV")
+        self._patch_sources()
         with tools.chdir(self._source_subfolder):
             tools.replace_in_file('Makefile', "-fPIC", "")
             tools.replace_in_file('Makefile', "CFLAGS=", "CFLAGS+=${CPPFLAGS} ")
