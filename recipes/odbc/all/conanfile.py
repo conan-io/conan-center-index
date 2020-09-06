@@ -4,18 +4,28 @@ from conans.errors import ConanInvalidConfiguration
 
 
 class OdbcConan(ConanFile):
-    name = 'odbc'
-    description = 'Package providing unixODBC'
-    url = 'https://github.com/conan-io/conan-center-index'
+    name = "odbc"
+    description = "Package providing unixODBC"
+    topics = ("odbc", "database", "dbms", "data-access")
+    url = "https://github.com/conan-io/conan-center-index"
     homepage = "http://www.unixodbc.org"
-    license = ('LGPL-2.1', 'GPL-2.1')
+    license = ("LGPL-2.1", "GPL-2.1")
     exports_sources = "patches/**"
-    settings = 'os', 'compiler', 'build_type', 'arch'
-    options = {'shared': [True, False], 'fPIC': [True, False], 'with_libiconv': [True, False]}
-    default_options = {'shared': False, 'fPIC': True, 'with_libiconv': True}
-    topics = ('odbc', 'database', 'dbms', 'data-access')
+    settings = "os", "compiler", "build_type", "arch"
+    options = {
+        "shared": [True, False],
+        "fPIC": [True, False],
+        "with_libiconv": [True, False]
+    }
+    default_options = {
+        "shared": False,
+        "fPIC": True,
+        "with_libiconv": True
+    }
 
-    _source_subfolder = 'source_subfolder'
+    @property
+    def _source_subfolder(self):
+        return "source_subfolder"
 
     def configure(self):
         del self.settings.compiler.libcxx  # Pure C
@@ -29,23 +39,23 @@ class OdbcConan(ConanFile):
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
-        extracted_dir = 'unixODBC-%s' % self.version
+        extracted_dir = "unixODBC-%s" % self.version
         os.rename(extracted_dir, self._source_subfolder)
 
     def build(self):
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
             tools.patch(**patch)
         env_build = AutoToolsBuildEnvironment(self)
-        static_flag = 'no' if self.options.shared else 'yes'
-        shared_flag = 'yes' if self.options.shared else 'no'
-        libiconv_flag = 'yes' if self.options.with_libiconv else 'no'
-        args = ['--enable-static=%s' % static_flag,
-                '--enable-shared=%s' % shared_flag,
-                '--enable-ltdl-install',
-                '--enable-iconv=%s' % libiconv_flag]
+        static_flag = "no" if self.options.shared else "yes"
+        shared_flag = "yes" if self.options.shared else "no"
+        libiconv_flag = "yes" if self.options.with_libiconv else "no"
+        args = ["--enable-static=%s" % static_flag,
+                "--enable-shared=%s" % shared_flag,
+                "--enable-ltdl-install",
+                "--enable-iconv=%s" % libiconv_flag]
         if self.options.with_libiconv:
             libiconv_prefix = self.deps_cpp_info["libiconv"].rootpath
-            args.append('--with-libiconv-prefix=%s' % libiconv_prefix)
+            args.append("--with-libiconv-prefix=%s" % libiconv_prefix)
 
         env_build.configure(configure_dir=self._source_subfolder, args=args)
         env_build.make()
@@ -59,14 +69,14 @@ class OdbcConan(ConanFile):
         os.remove(os.path.join(self.package_folder, "lib", "libltdl.la"))
 
     def package(self):
-        self.copy('COPYING', src=self._source_subfolder, dst="licenses")
+        self.copy("COPYING", src=self._source_subfolder, dst="licenses")
 
     def package_info(self):
         self.cpp_info.names["cmake_find_package"] = "ODBC"
         self.cpp_info.names["cmake_find_package_multi"] = "ODBC"
 
-        self.env_info.path.append(os.path.join(self.package_folder, 'bin'))
+        self.env_info.path.append(os.path.join(self.package_folder, "bin"))
 
-        self.cpp_info.libs = ['odbc', 'odbccr', 'odbcinst', 'ltdl']
-        if self.settings.os == 'Linux':
-            self.cpp_info.libs.append('dl')
+        self.cpp_info.libs = ["odbc", "odbccr", "odbcinst", "ltdl"]
+        if self.settings.os == "Linux":
+            self.cpp_info.libs.append("dl")
