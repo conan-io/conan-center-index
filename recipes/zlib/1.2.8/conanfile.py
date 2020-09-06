@@ -110,6 +110,7 @@ class ZlibConan(ConanFile):
     def package_info(self):
         self.cpp_info.names["cmake_find_package"] = "ZLIB"
         self.cpp_info.names["cmake_find_package_multi"] = "ZLIB"
+        self.cpp_info.names["pkg_config"] = "zlib"
         if self.settings.os == "Windows":
             self.cpp_info.libs = ["zlib"]
             if self.settings.build_type == "Debug" and self.settings.compiler == "Visual Studio":
