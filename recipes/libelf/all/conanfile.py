@@ -37,6 +37,8 @@ class LibelfConan(ConanFile):
             del self.options.fPIC
         del self.settings.compiler.libcxx
         del self.settings.compiler.cppstd
+        if self.options.shared and self.settings.os not in ["Linux", "Windows"]:
+            raise ConanInvalidConfiguration("libelf can not be built as shared library on non linux or windows platforms")
 
     def build_requirements(self):
         if self.settings.os != "Windows":
