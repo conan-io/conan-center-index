@@ -11,11 +11,12 @@ class LibelfConan(ConanFile):
     homepage = "https://directory.fsf.org/wiki/Libelf"
     license = "LGPL-2.0"
     topics = ("conan", "elf", "fsf", "libelf", "object-file")
-    exports_sources = ["CMakeLists.txt", "cmake/CMakeLists.txt"]
+    exports_sources = "CMakeLists.txt"
+    generators = "cmake"
     settings = "os", "arch", "compiler", "build_type"
     options = {"shared": [True, False], "fPIC": [True, False]}
     default_options = {"shared": False, "fPIC": True}
-    generators = "cmake"
+
     _autotools = None
     _cmake = None
 
@@ -53,7 +54,6 @@ class LibelfConan(ConanFile):
         return self._cmake
 
     def _build_cmake(self):
-        shutil.copyfile(os.path.join("cmake", "CMakeLists.txt"), os.path.join(self._source_subfolder, "CMakeLists.txt"))
         cmake = self._configure_cmake()
         cmake.build()
 
