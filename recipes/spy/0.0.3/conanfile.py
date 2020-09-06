@@ -45,4 +45,4 @@ class SpyConan(ConanFile):
 
     def package(self):
         self.copy("LICENSE.md", dst="licenses", src=self._source_subfolder)
-        self.copy("*.hpp", src=self._source_subfolder)
+        self.copy("*", dst= "include", src=os.path.join(self._source_subfolder, "include"))
