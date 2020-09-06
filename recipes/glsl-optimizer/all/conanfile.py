@@ -24,6 +24,10 @@ class GLSLOptimizerConan(ConanFile):
     def _source_subfolder(self):
         return "source_subfolder"
 
+    def config_options(self):
+        if self.settings.os == "Windows":
+            del self.options.fPIC
+
     def requirements(self):
         if self.settings.os == "Windows":
             self.requires("getopt-for-visual-studio/20200201")
@@ -35,6 +39,7 @@ class GLSLOptimizerConan(ConanFile):
 
     def build(self):
         cmake = CMake(self)
+        cmake.definitions["CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS"] = True
         cmake.configure()
         # All but tests are built, see CMakeLists.txt for details
         cmake.build()
