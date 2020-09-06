@@ -38,6 +38,10 @@ class LibelfConan(ConanFile):
         del self.settings.compiler.libcxx
         del self.settings.compiler.cppstd
 
+    def build_requirements(self):
+        if self.settings.os != "Windows":
+            self.build_requires("autoconf/2.69")
+
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
         extracted_dir = self.name + "-" + self.version
@@ -59,10 +63,13 @@ class LibelfConan(ConanFile):
         cmake.install()
 
     def _configure_autotools(self):
-        if not self._autotools:
-            args = ["--enable-shared={}".format("yes" if self.options.shared else "no")]
-            self._autotools = AutoToolsBuildEnvironment(self, win_bash=tools.os_info.is_windows)
-            self._autotools.configure(configure_dir=self._source_subfolder, args=args)
+        if self._autotools:
+            return self._autotools
+        with tools.chdir(self._source_subfolder):
+            self.run("autoreconf -fiv", run_environment=True)
+        args = ["--enable-shared={}".format("yes" if self.options.shared else "no")]
+        self._autotools = AutoToolsBuildEnvironment(self, win_bash=tools.os_info.is_windows)
+        self._autotools.configure(configure_dir=self._source_subfolder, args=args)
         return self._autotools
 
     def _build_autotools(self):
@@ -72,18 +79,18 @@ class LibelfConan(ConanFile):
     def _package_autotools(self):
         autotools = self._configure_autotools()
         autotools.install()
-        shutil.rmtree(os.path.join(self.package_folder, "share"), ignore_errors=True)
-        shutil.rmtree(os.path.join(self.package_folder, "lib", "locale"), ignore_errors=True)
+        tools.rmdir(os.path.join(self.package_folder, "share"))
+        tools.rmdir(os.path.join(self.package_folder, "lib", "locale"))
         if self.settings.os == "Linux" and self.options.shared:
             os.remove(os.path.join(self.package_folder, "lib", "libelf.a"))
 
     def build(self):
-        tools.replace_in_file(os.path.join(self._source_subfolder, "lib", "Makefile.in"),
-                              "$(LINK_SHLIB)",
-                              "$(LINK_SHLIB) $(LDFLAGS)")
         if self.settings.os == "Windows":
             self._build_cmake()
         else:
+            tools.replace_in_file(os.path.join(self._source_subfolder, "lib", "Makefile.in"),
+                                  "$(LINK_SHLIB)",
+                                  "$(LINK_SHLIB) $(LDFLAGS)")
             self._build_autotools()
 
     def package(self):
@@ -92,7 +99,7 @@ class LibelfConan(ConanFile):
             self._package_cmake()
         else:
             self._package_autotools()
-        tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
+            tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
 
     def package_info(self):
         self.cpp_info.libs = tools.collect_libs(self)
