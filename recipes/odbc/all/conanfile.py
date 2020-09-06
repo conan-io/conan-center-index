@@ -9,7 +9,7 @@ class OdbcConan(ConanFile):
     url = 'https://github.com/conan-io/conan-center-index'
     homepage = "http://www.unixodbc.org"
     license = ('LGPL-2.1', 'GPL-2.1')
-
+    exports_sources = "patches/**"
     settings = 'os', 'compiler', 'build_type', 'arch'
     options = {'shared': [True, False], 'fPIC': [True, False], 'with_libiconv': [True, False]}
     default_options = {'shared': False, 'fPIC': True, 'with_libiconv': True}
@@ -26,13 +26,15 @@ class OdbcConan(ConanFile):
     def requirements(self):
         if self.options.with_libiconv:
             self.requires("libiconv/1.16")
-        
+
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
         extracted_dir = 'unixODBC-%s' % self.version
         os.rename(extracted_dir, self._source_subfolder)
 
     def build(self):
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            tools.patch(**patch)
         env_build = AutoToolsBuildEnvironment(self)
         static_flag = 'no' if self.options.shared else 'yes'
         shared_flag = 'yes' if self.options.shared else 'no'
