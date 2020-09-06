@@ -13,12 +13,20 @@ class GLSLOptimizerConan(ConanFile):
     generators = "cmake"
     exports_sources = "CMakeLists.txt"
 
+    options = {
+        "fPIC": [True, False],
+    }
+    default_options = {
+        "fPIC": True,
+    }
+
     @property
     def _source_subfolder(self):
         return "source_subfolder"
 
     def requirements(self):
-        self.requires("opengl/system")
+        if self.settings.os == "Windows":
+            self.requires("getopt-for-visual-studio/20200201")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
@@ -28,6 +36,7 @@ class GLSLOptimizerConan(ConanFile):
     def build(self):
         cmake = CMake(self)
         cmake.configure()
+        # All but tests are built, see CMakeLists.txt for details
         cmake.build()
 
     def package(self):
@@ -35,4 +44,9 @@ class GLSLOptimizerConan(ConanFile):
         self.copy("*.h", dst="include", src=os.path.join(self._source_subfolder, "src/glsl"))
         self.copy("lib/*", dst="lib", keep_path=False)
         self.copy("bin/*", dst="bin", keep_path=False)
+    
+    def package_info(self):
+        bin_path = os.path.join(self.package_folder, "bin")
+        self.output.info(f"Appending PATH env var with: {bin_path}")
+        self.env_info.PATH.append(bin_path)
 
