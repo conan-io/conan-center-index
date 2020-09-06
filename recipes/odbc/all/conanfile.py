@@ -23,12 +23,14 @@ class OdbcConan(ConanFile):
         "with_libiconv": True
     }
 
+    _autotools = None
+
     @property
     def _source_subfolder(self):
         return "source_subfolder"
 
     def configure(self):
-        del self.settings.compiler.libcxx  # Pure C
+        del self.settings.compiler.libcxx
         del self.settings.compiler.cppstd
         if self.settings.os == "Windows":
             raise ConanInvalidConfiguration("Windows not supported yet. Please, open an issue if you need such support")
@@ -42,10 +44,10 @@ class OdbcConan(ConanFile):
         extracted_dir = "unixODBC-%s" % self.version
         os.rename(extracted_dir, self._source_subfolder)
 
-    def build(self):
-        for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            tools.patch(**patch)
-        env_build = AutoToolsBuildEnvironment(self)
+    def _configure_autotools(self):
+        if self._autotools:
+            return self._autotools
+        self._autotools = AutoToolsBuildEnvironment(self)
         static_flag = "no" if self.options.shared else "yes"
         shared_flag = "yes" if self.options.shared else "no"
         libiconv_flag = "yes" if self.options.with_libiconv else "no"
@@ -56,10 +58,19 @@ class OdbcConan(ConanFile):
         if self.options.with_libiconv:
             libiconv_prefix = self.deps_cpp_info["libiconv"].rootpath
             args.append("--with-libiconv-prefix=%s" % libiconv_prefix)
+        self._autotools.configure(configure_dir=self._source_subfolder, args=args)
+        return self._autotools
 
-        env_build.configure(configure_dir=self._source_subfolder, args=args)
-        env_build.make()
-        env_build.install()
+    def build(self):
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            tools.patch(**patch)
+        autotools = self._configure_autotools()
+        autotools.make()
+
+    def package(self):
+        self.copy("COPYING", src=self._source_subfolder, dst="licenses")
+        autotools = self._configure_autotools()
+        autotools.install()
         tools.rmdir(os.path.join(self.package_folder, "share"))
         tools.rmdir(os.path.join(self.package_folder, "etc"))
         tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
@@ -67,9 +78,6 @@ class OdbcConan(ConanFile):
         os.remove(os.path.join(self.package_folder, "lib", "libodbccr.la"))
         os.remove(os.path.join(self.package_folder, "lib", "libodbcinst.la"))
         os.remove(os.path.join(self.package_folder, "lib", "libltdl.la"))
-
-    def package(self):
-        self.copy("COPYING", src=self._source_subfolder, dst="licenses")
 
     def package_info(self):
         self.cpp_info.names["cmake_find_package"] = "ODBC"
