@@ -1,7 +1,15 @@
 diff -ru a/Makefile b/Makefile
 --- a/Makefile
 +++ b/Makefile
-@@ -25,9 +25,9 @@
+@@ -19,15 +19,15 @@
+ EXEC=darknet
+ OBJDIR=./obj/
+ 
+-CC=gcc
+-CPP=g++
++CC?=gcc
++CPP?=g++
+ NVCC=nvcc 
  AR=ar
  ARFLAGS=rcs
  OPTS=-Ofast
