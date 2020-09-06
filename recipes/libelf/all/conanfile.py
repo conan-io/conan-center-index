@@ -29,7 +29,7 @@ class LibelfConan(ConanFile):
         return "build_subfolder"
 
     def config_options(self):
-        if self.settings.os != "Linux":
+        if self.settings.os == "Windows":
             del self.options.fPIC
 
     def configure(self):
