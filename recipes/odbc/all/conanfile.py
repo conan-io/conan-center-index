@@ -1,3 +1,4 @@
+import glob
 import os
 from conans import ConanFile, AutoToolsBuildEnvironment, tools
 from conans.errors import ConanInvalidConfiguration
@@ -76,10 +77,8 @@ class OdbcConan(ConanFile):
         tools.rmdir(os.path.join(self.package_folder, "share"))
         tools.rmdir(os.path.join(self.package_folder, "etc"))
         tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
-        os.remove(os.path.join(self.package_folder, "lib", "libodbc.la"))
-        os.remove(os.path.join(self.package_folder, "lib", "libodbccr.la"))
-        os.remove(os.path.join(self.package_folder, "lib", "libodbcinst.la"))
-        os.remove(os.path.join(self.package_folder, "lib", "libltdl.la"))
+        for la_file in glob.glob(os.path.join(self.package_folder, "lib", "*.la")):
+            os.remove(la_file)
 
     def package_info(self):
         self.cpp_info.names["cmake_find_package"] = "ODBC"
