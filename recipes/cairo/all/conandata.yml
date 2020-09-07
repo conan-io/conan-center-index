@@ -1,0 +1,8 @@
+sources:
+  "1.17.2":
+    sha256: 
+    url: "https://www.cairographics.org/snapshots/cairo-1.17.2.tar.xz"
+patches:
+  "1.17.2":
+    - patch_file: "patches/0001-msvc-update-build-scripts-to-compile-with-more-featu.patch"
+      base_path: "source_subfolder"
