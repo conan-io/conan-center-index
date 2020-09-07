@@ -84,9 +84,10 @@ class OdbcConan(ConanFile):
     def package_info(self):
         self.cpp_info.names["cmake_find_package"] = "ODBC"
         self.cpp_info.names["cmake_find_package_multi"] = "ODBC"
-
-        self.env_info.path.append(os.path.join(self.package_folder, "bin"))
-
         self.cpp_info.libs = ["odbc", "odbccr", "odbcinst", "ltdl"]
         if self.settings.os == "Linux":
-            self.cpp_info.libs.append("dl")
+            self.cpp_info.system_libs = ["dl", "pthread"]
+
+        bin_path = os.path.join(self.package_folder, "bin")
+        self.output.info("Appending PATH environment variable: {}".format(bin_path))
+        self.env_info.PATH.append(bin_path)
