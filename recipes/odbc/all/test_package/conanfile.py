@@ -2,9 +2,9 @@ from conans import ConanFile, CMake, tools
 import os
 
 
-class FalconTestConan(ConanFile):
-    settings = 'os', 'compiler', 'build_type', 'arch'
-    generators = 'cmake'
+class TestPackageConan(ConanFile):
+    settings = "os", "compiler", "build_type", "arch"
+    generators = "cmake", "cmake_find_package"
 
     def build(self):
         cmake = CMake(self)
@@ -12,6 +12,7 @@ class FalconTestConan(ConanFile):
         cmake.build()
 
     def test(self):
-        self.run(os.path.join('bin', 'example'))
-        if self.settings.os != "Windows":
-            self.run('odbcinst --version', run_environment=True)
+        if not tools.cross_building(self.settings):
+            bin_path = os.path.join("bin", "test_package")
+            self.run(bin_path, run_environment=True)
+            self.run("odbcinst --version", run_environment=True)
