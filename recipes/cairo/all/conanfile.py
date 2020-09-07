@@ -60,14 +60,14 @@ class CairoConan(ConanFile):
         self.requires("libpng/1.6.37")
 
     def build_requirements(self):
-        if self.settings.os == 'Windows':
+        if tools.os_info.is_windows:
             self.build_requires('7zip/19.00')
             if "CONAN_BASH_PATH" not in os.environ:
                 self.build_requires('msys2/20190524')
         self.build_requires("pkgconf/1.7.3")
 
     @property
-    def is_msvc(self):
+    def _is_msvc(self):
         return self.settings.compiler == 'Visual Studio'
 
     def source(self):
@@ -79,7 +79,7 @@ class CairoConan(ConanFile):
     def build(self):
         for patch in self.conan_data["patches"][self.version]:
             tools.patch(**patch)
-        if self.is_msvc:
+        if self._is_msvc:
             self._build_msvc()
         else:
             self._build_configure()
@@ -149,14 +149,13 @@ class CairoConan(ConanFile):
                 env_build.flags.append('-Wno-enum-conversion')
             with tools.environment_append(env_build.vars):
                 self.run('PKG_CONFIG_PATH=%s NOCONFIGURE=1 ./autogen.sh' % pkg_config_path)
-                env_build.pic = self.options.fPIC
                 env_build.configure(args=configure_args, pkg_config_paths=[pkg_config_path])
                 env_build.make()
                 env_build.install()
 
     def package(self):
         self.copy(pattern="LICENSE", dst="licenses", src=self._source_subfolder)
-        if self.is_msvc:
+        if self._is_msvc:
             src = os.path.join(self._source_subfolder, 'src')
             cairo_gobject = os.path.join(self._source_subfolder, 'util', 'cairo-gobject')
             inc = os.path.join('include', 'cairo')
@@ -183,10 +182,10 @@ class CairoConan(ConanFile):
                             os.path.join(self.package_folder, 'lib', "cairo.lib"))
 
     def package_info(self):
-        if not self.is_msvc and self.options.enable_glib:
+        if self.options.get_safe("enable_glib"):
             self.cpp_info.libs.append('cairo-gobject')
         self.cpp_info.libs.append('cairo')
-        if self.is_msvc and not self.options.shared:
+        if self.options.get_safe("shared"):
             self.cpp_info.defines.append('CAIRO_WIN32_STATIC_BUILD=1')
         self.cpp_info.includedirs.append(os.path.join('include', 'cairo'))
         if self.settings.os == "Windows":
