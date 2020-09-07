@@ -63,5 +63,7 @@ class CpphttplibConan(ConanFile):
         if self.options.get_safe("with_brotli"):
             self.cpp_info.defines.append("CPPHTTPLIB_BROTLI_SUPPORT")
         if self.settings.os == "Linux":
-            self.cpp_info.system_libs.append("pthread")
+            self.cpp_info.system_libs = ["pthread"]
+        elif self.settings.os == "Windows":
+            self.cpp_info.system_libs = ["crypt32", "cryptui", "ws2_32"]
         self.cpp_info.includedirs = ["include", os.path.join("include", "httplib")]
