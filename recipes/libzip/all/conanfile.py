@@ -103,9 +103,14 @@ class LibZipConan(ConanFile):
         self.info.options.crypto = self._crypto
 
     def package_info(self):
+        self.cpp_info.names["cmake_find_package"] = "libzip"
+        self.cpp_info.names["cmake_find_package_multi"] = "libzip"
+        self.cpp_info.names["pkg_config"] = "libzip"
+
         self.cpp_info.libs = ["zip"]
         if self.settings.os == "Windows" and self._crypto == "win32":
             self.cpp_info.system_libs.append("bcrypt")
+
         bin_path = os.path.join(self.package_folder, "bin")
         self.output.info("Appending PATH environment variable: {}".format(bin_path))
         self.env_info.PATH.append(bin_path)
