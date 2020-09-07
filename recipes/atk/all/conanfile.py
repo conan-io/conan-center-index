@@ -1,7 +1,6 @@
 from conans import ConanFile, Meson, tools
 from conans.errors import ConanInvalidConfiguration
 import os
-import shutil
 
 required_conan_version = ">=1.29"
 
@@ -20,7 +19,7 @@ class LibnameConan(ConanFile):
         "fPIC": [True, False],
         }
     default_options = {
-        "shared": True,
+        "shared": False,
         "fPIC": True,
         }
 
@@ -33,8 +32,7 @@ class LibnameConan(ConanFile):
     
     def build_requirements(self):
         self.build_requires('meson/0.55.0')
-        if not tools.which('pkg-config') or self.settings.os == "Windows":
-            self.build_requires('pkgconf/1.7.3')
+        self.build_requires('pkgconf/1.7.3')
     
     def requirements(self):
         self.requires('glib/2.65.1')
@@ -49,9 +47,6 @@ class LibnameConan(ConanFile):
         tools.get(**self.conan_data["sources"][self.version])
         extracted_dir = self.name + "-" + self.version
         os.rename(extracted_dir, self._source_subfolder)
-        tools.replace_in_file(os.path.join(self._source_subfolder, 'meson.build'),
-            "subdir('tests')",
-            "#subdir('tests')")
 
     def _configure_meson(self):
         meson = Meson(self)
@@ -64,13 +59,9 @@ class LibnameConan(ConanFile):
         return meson
 
     def build(self):
-        for package in self.deps_cpp_info.deps:
-            lib_path = self.deps_cpp_info[package].rootpath
-            for dirpath, _, filenames in os.walk(lib_path):
-                for filename in filenames:
-                    if filename.endswith('.pc'):
-                        shutil.copyfile(os.path.join(dirpath, filename), filename)
-                        tools.replace_prefix_in_pc_file(filename, lib_path)
+        tools.replace_in_file(os.path.join(self._source_subfolder, 'meson.build'),
+            "subdir('tests')",
+            "#subdir('tests')")
         meson = self._configure_meson()
         meson.build()
 
