@@ -7,7 +7,6 @@ required_conan_version = ">=1.29"
 
 class GStreamerConan(ConanFile):
     name = "gstreamer"
-    version = "1.16.0"
     description = "GStreamer is a development framework for creating applications like media players, video editors, streaming media broadcasters and so on"
     topics = ("conan", "gstreamer", "multimedia", "video", "audio", "broadcasting", "framework", "media")
     url = "https://github.com/conan-io/conan-center-index"
