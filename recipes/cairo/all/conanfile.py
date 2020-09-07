@@ -34,6 +34,8 @@ class CairoConan(ConanFile):
     _source_subfolder = "source_subfolder"
     _build_subfolder = "build_subfolder"
 
+    _env_build = None
+
     def config_options(self):
         del self.settings.compiler.libcxx
         del self.settings.compiler.cppstd
@@ -60,10 +62,8 @@ class CairoConan(ConanFile):
         self.requires("libpng/1.6.37")
 
     def build_requirements(self):
-        if tools.os_info.is_windows:
-            self.build_requires('7zip/19.00')
-            if "CONAN_BASH_PATH" not in os.environ:
-                self.build_requires('msys2/20190524')
+        if tools.os_info.is_windows and not tools.get_env("CONAN_BASH_PATH"):
+            self.build_requires('msys2/20190524')
         self.build_requires("pkgconf/1.7.3")
 
     @property
@@ -113,6 +113,37 @@ class CairoConan(ConanFile):
                     env_build.make(args=args)
                     env_build.make(args=['-C', os.path.join('util', 'cairo-gobject')] + args)
 
+    def _get_env_build(self):
+        if self._env_build:
+            return self._env_build
+
+        pkg_config_path = os.path.abspath('pkgconfig')
+        pkg_config_path = tools.unix_path(pkg_config_path) if self.settings.os == 'Windows' else pkg_config_path
+
+        configure_args = ['--enable-ft' if self.options.enable_ft else '--disable-ft']
+        if self.settings.os != "Windows":
+            configure_args.append('--enable-fc' if self.options.enable_fc else '--disable-fc')
+        if self.settings.os == 'Linux':
+            configure_args.append('--enable-xlib' if self.options.enable_xlib else '--disable-xlib')
+            configure_args.append('--enable-xlib_xrender' if self.options.enable_xlib_xrender else '--disable-xlib_xrender')
+            configure_args.append('--enable-xcb' if self.options.enable_xcb else '--disable-xcb')
+        configure_args.append('--enable-gobject' if self.options.enable_glib else '--disable-gobject')
+        if self.options.shared:
+            configure_args.extend(['--disable-static', '--enable-shared'])
+        else:
+            configure_args.extend(['--enable-static', '--disable-shared'])
+
+        self._env_build = AutoToolsBuildEnvironment(self)
+        if self.settings.os == 'Macos':
+            self._env_build.link_flags.extend(['-framework CoreGraphics',
+                                            '-framework CoreFoundation'])
+        if str(self.settings.compiler) in ['gcc', 'clang', 'apple-clang']:
+            self._env_build.flags.append('-Wno-enum-conversion')
+
+        self.run('PKG_CONFIG_PATH=%s NOCONFIGURE=1 ./autogen.sh' % pkg_config_path)
+        self._env_build.configure(args=configure_args, pkg_config_paths=[pkg_config_path])
+        return self._env_build
+
     def _build_configure(self):
         with tools.chdir(self._source_subfolder):
             # disable build of test suite
@@ -124,34 +155,8 @@ class CairoConan(ConanFile):
             if self.options.enable_ft:
                 tools.replace_in_file(os.path.join(self.source_folder, self._source_subfolder, "src", "cairo-ft-font.c"),
                                       '#if HAVE_UNISTD_H', '#ifdef HAVE_UNISTD_H')
-
-            pkg_config_path = os.path.abspath('pkgconfig')
-            pkg_config_path = tools.unix_path(pkg_config_path) if self.settings.os == 'Windows' else pkg_config_path
-
-            configure_args = ['--enable-ft' if self.options.enable_ft else '--disable-ft']
-            if self.settings.os != "Windows":
-                configure_args.append('--enable-fc' if self.options.enable_fc else '--disable-fc')
-            if self.settings.os == 'Linux':
-                configure_args.append('--enable-xlib' if self.options.enable_xlib else '--disable-xlib')
-                configure_args.append('--enable-xlib_xrender' if self.options.enable_xlib_xrender else '--disable-xlib_xrender')
-                configure_args.append('--enable-xcb' if self.options.enable_xcb else '--disable-xcb')
-            configure_args.append('--enable-gobject' if self.options.enable_glib else '--disable-gobject')
-            if self.options.shared:
-                configure_args.extend(['--disable-static', '--enable-shared'])
-            else:
-                configure_args.extend(['--enable-static', '--disable-shared'])
-
-            env_build = AutoToolsBuildEnvironment(self)
-            if self.settings.os == 'Macos':
-                env_build.link_flags.extend(['-framework CoreGraphics',
-                                             '-framework CoreFoundation'])
-            if str(self.settings.compiler) in ['gcc', 'clang', 'apple-clang']:
-                env_build.flags.append('-Wno-enum-conversion')
-            with tools.environment_append(env_build.vars):
-                self.run('PKG_CONFIG_PATH=%s NOCONFIGURE=1 ./autogen.sh' % pkg_config_path)
-                env_build.configure(args=configure_args, pkg_config_paths=[pkg_config_path])
-                env_build.make()
-                env_build.install()
+            env_build = self._get_env_build()
+            env_build.install()
 
     def package(self):
         self.copy(pattern="LICENSE", dst="licenses", src=self._source_subfolder)
@@ -180,6 +185,14 @@ class CairoConan(ConanFile):
                 self.copy(pattern="*cairo-gobject.lib", dst="lib", src=cairo_gobject, keep_path=False)
                 shutil.move(os.path.join(self.package_folder, 'lib', "cairo-static.lib"),
                             os.path.join(self.package_folder, 'lib', "cairo.lib"))
+        else:
+            with tools.chdir(self._source_subfolder):
+                env_build = self._get_env_build()
+                env_build.install()
+        
+        self.copy("COPYING*", src=self._source_subfolder, dst="licenses", keep_path=False)
+        tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
+
 
     def package_info(self):
         if self.options.get_safe("enable_glib"):
