@@ -84,9 +84,26 @@ class OdbcConan(ConanFile):
     def package_info(self):
         self.cpp_info.names["cmake_find_package"] = "ODBC"
         self.cpp_info.names["cmake_find_package_multi"] = "ODBC"
-        self.cpp_info.libs = ["odbc", "odbccr", "odbcinst", "ltdl"]
+        # odbc
+        self.cpp_info.components["_odbc"].names["pkg_config"] = "odbc"
+        self.cpp_info.components["_odbc"].libs = ["odbc"]
+        self.cpp_info.components["_odbc"].requires = ["odbcltdl"]
+        if self.options.with_libiconv:
+            self.cpp_info.components["_odbc"].requires.append("libiconv::libiconv")
+        # odbcinst
+        self.cpp_info.components["odbcinst"].names["pkg_config"] = "odbcinst"
+        self.cpp_info.components["odbcinst"].libs = ["odbcinst"]
+        self.cpp_info.components["odbcinst"].requires = ["odbcltdl"]
+        # odbccr
+        self.cpp_info.components["odbccr"].names["pkg_config"] = "odbccr"
+        self.cpp_info.components["odbccr"].libs = ["odbccr"]
+
+        self.cpp_info.components["odbcltdl"].libs = ["ltdl"]
+
         if self.settings.os == "Linux":
-            self.cpp_info.system_libs = ["dl", "pthread"]
+            self.cpp_info.components["_odbc"].system_libs = ["pthread"]
+            self.cpp_info.components["odbcinst"].system_libs = ["pthread"]
+            self.cpp_info.components["odbcltdl"].system_libs = ["dl"]
 
         bin_path = os.path.join(self.package_folder, "bin")
         self.output.info("Appending PATH environment variable: {}".format(bin_path))
