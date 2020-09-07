@@ -1,4 +1,5 @@
 from conans import ConanFile, CMake, tools
+from conans.errors import ConanInvalidConfiguration
 import os
 
 
@@ -15,20 +16,24 @@ class PCREConan(ConanFile):
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
-        "with_bzip2": [True, False],
         "build_pcre2_8": [True, False],
         "build_pcre2_16": [True, False],
         "build_pcre2_32": [True, False],
+        "build_pcre2grep": [True, False],
+        "with_zlib": [True, False],
+        "with_bzip2": [True, False],
         "support_jit": [True, False]
     }
     default_options = {
-        'shared': False,
-        'fPIC': True,
-        'with_bzip2': True,
-        'build_pcre2_8': True,
-        'build_pcre2_16': True,
-        'build_pcre2_32': True,
-        'support_jit': False
+        "shared": False,
+        "fPIC": True,
+        "build_pcre2_8": True,
+        "build_pcre2_16": True,
+        "build_pcre2_32": True,
+        "build_pcre2grep": True,
+        "with_zlib": True,
+        "with_bzip2": True,
+        "support_jit": False
     }
 
     _cmake = None
@@ -41,23 +46,33 @@ class PCREConan(ConanFile):
     def _build_subfolder(self):
         return "build_subfolder"
 
-    def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        extracted_dir = self.name + "-" + self.version
-        os.rename(extracted_dir, self._source_subfolder)
-
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
 
     def configure(self):
+        if self.options.shared:
+            del self.options.fPIC
         del self.settings.compiler.libcxx
         del self.settings.compiler.cppstd
+        if not self.options.build_pcre2grep:
+            del self.options.with_zlib
+            del self.options.with_bzip2
+        if not self.options.build_pcre2_8 and not self.options.build_pcre2_16 and not self.options.build_pcre2_32:
+            raise ConanInvalidConfiguration("At least one of build_pcre2_8, build_pcre2_16 or build_pcre2_32 must be enabled")
+        if self.options.build_pcre2grep and not self.options.build_pcre2_8:
+            raise ConanInvalidConfiguration("build_pcre2_8 must be enabled for the pcre2grep program")
 
     def requirements(self):
-        self.requires("zlib/1.2.11")
-        if self.options.with_bzip2:
+        if self.options.get_safe("with_zlib"):
+            self.requires("zlib/1.2.11")
+        if self.options.get_safe("with_bzip2"):
             self.requires("bzip2/1.0.8")
+
+    def source(self):
+        tools.get(**self.conan_data["sources"][self.version])
+        extracted_dir = self.name + "-" + self.version
+        os.rename(extracted_dir, self._source_subfolder)
 
     def _configure_cmake(self):
         if self._cmake:
@@ -90,26 +105,46 @@ class PCREConan(ConanFile):
         tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
 
     def package_info(self):
-        def library_name(library):
-            if self.settings.build_type == "Debug" and self.settings.os == "Windows":
-                library += "d"
-            if self.settings.compiler == "gcc" and self.settings.os == "Windows" and self.options.shared:
-                library += ".dll"
-            return library
-
-        # May need components for
-        # ./lib/pkgconfig/libpcre2-32.pc
-        # ./lib/pkgconfig/libpcre2-8.pc
-        # ./lib/pkgconfig/libpcre2-posix.pc
-        # ./lib/pkgconfig/libpcre2-16.pc
-
         self.cpp_info.names["pkg_config"] = "libpcre2"
-        self.cpp_info.libs = [library_name("pcre2-posix")]
         if self.options.build_pcre2_8:
-            self.cpp_info.libs.append(library_name("pcre2-8"))
+            # pcre2-8
+            self.cpp_info.components["pcre2-8"].names["pkg_config"] = "libpcre2-8"
+            self.cpp_info.components["pcre2-8"].libs = [self._lib_name("pcre2-8")]
+            if not self.options.shared:
+                self.cpp_info.components["pcre2-8"].defines.append("PCRE2_STATIC")
+            # pcre2-posix
+            self.cpp_info.components["pcre2-posix"].names["pkg_config"] = "libpcre2-posix"
+            self.cpp_info.components["pcre2-posix"].libs = [self._lib_name("pcre2-posix")]
+            self.cpp_info.components["pcre2-posix"].requires = ["pcre2-8"]
+        # pcre2-16
         if self.options.build_pcre2_16:
-            self.cpp_info.libs.append(library_name("pcre2-16"))
+            self.cpp_info.components["pcre2-16"].names["pkg_config"] = "libpcre2-16"
+            self.cpp_info.components["pcre2-16"].libs = [self._lib_name("pcre2-16")]
+            if not self.options.shared:
+                self.cpp_info.components["pcre2-16"].defines.append("PCRE2_STATIC")
+        # pcre2-32
         if self.options.build_pcre2_32:
-            self.cpp_info.libs.append(library_name("pcre2-32"))
-        if not self.options.shared:
-            self.cpp_info.defines.append("PCRE2_STATIC")
+            self.cpp_info.components["pcre2-32"].names["pkg_config"] = "libpcre2-32"
+            self.cpp_info.components["pcre2-32"].libs = [self._lib_name("pcre2-32")]
+            if not self.options.shared:
+                self.cpp_info.components["pcre2-32"].defines.append("PCRE2_STATIC")
+
+        if self.options.build_pcre2grep:
+            bin_path = os.path.join(self.package_folder, "bin")
+            self.output.info("Appending PATH environment variable: {}".format(bin_path))
+            self.env_info.PATH.append(bin_path)
+            # FIXME: This is a workaround to avoid ConanException. zlib and bzip2
+            # are optional requirements of pcre2grep executable, not of any pcre2 lib.
+            if self.options.with_zlib:
+                self.cpp_info.components["pcre2-8"].requires.append("zlib::zlib")
+            if self.options.with_bzip2:
+                self.cpp_info.components["pcre2-8"].requires.append("bzip2::bzip2")
+
+    def _lib_name(self, name):
+        libname = name
+        if self.settings.os == "Windows":
+            if self.settings.build_type == "Debug":
+                libname += "d"
+            if self.settings.compiler == "gcc" and self.options.shared:
+                libname += ".dll"
+        return libname
