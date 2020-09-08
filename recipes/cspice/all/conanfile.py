@@ -23,57 +23,27 @@ class CspiceConan(ConanFile):
     def _source_subfolder(self):
         return "source_subfolder"
 
-    @property
-    def _build_subfolder(self):
-        return "build_subfolder"
-
-    @property
-    def _sources_idx_per_triplet(self):
-        # Index of source code per triplet in conadata's "sources" field.
-        return {
-            "Macos": {
-                "x86": {"apple-clang": 0},
-                "x86_64": {"apple-clang": 1}
-            },
-            "Linux": {
-                "x86": {"gcc": 2},
-                "x86_64": {"gcc": 3}
-            },
-            "Windows": {
-                "x86": {"Visual Studio": 4},
-                "x86_64": {"Visual Studio": 5}
-            },
-            "cygwin": {
-                "x86": {"gcc": 6},
-                "x86_64": {"gcc": 7}
-            },
-            "SunOs": {
-                "x86": {"sun-cc": 8},
-                "x86_64": {"sun-cc": 9},
-                "sparc": {"gcc": 10, "sun-cc": 11},
-                "sparcv9": {"gcc": 12, "sun-cc": 13}
-            }
-        }
-
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
 
     def configure(self):
+        if self.options.shared:
+            del self.options.fPIC
         del self.settings.compiler.libcxx
         del self.settings.compiler.cppstd
-
         self._raise_if_not_supported_triplet()
 
     def _raise_if_not_supported_triplet(self):
+        sources_url_per_triplet = self.conan_data["sources"][self.version]["url"]
         the_os = self._get_os_or_subsystem()
-        arch = str(self.settings.arch)
-        compiler = str(self.settings.compiler)
-        if the_os not in self._sources_idx_per_triplet:
+        if the_os not in sources_url_per_triplet:
             raise ConanInvalidConfiguration("cspice does not support {0}".format(the_os))
-        if arch not in self._sources_idx_per_triplet[the_os]:
-            raise ConanInvalidConfiguration("cspice does not support {0} {1}".format(the_os, arch))
-        if compiler not in self._sources_idx_per_triplet[the_os][arch]:
+        compiler = str(self.settings.compiler)
+        if compiler not in sources_url_per_triplet[the_os]:
+            raise ConanInvalidConfiguration("cspice does not support {0} on {1}".format(compiler, the_os))
+        arch = str(self.settings.arch)
+        if arch not in sources_url_per_triplet[the_os][compiler]:
             raise ConanInvalidConfiguration("cspice does not support {0} on {1} {2}".format(compiler, the_os, arch))
 
     def _get_os_or_subsystem(self):
@@ -88,7 +58,6 @@ class CspiceConan(ConanFile):
 
     def build(self):
         self._get_sources()
-        os.rename(self.name, self._source_subfolder)
         for patch in self.conan_data["patches"][self.version]:
             tools.patch(**patch)
         cmake = self._configure_cmake()
@@ -96,25 +65,25 @@ class CspiceConan(ConanFile):
 
     def _get_sources(self):
         the_os = self._get_os_or_subsystem()
-        arch = str(self.settings.arch)
         compiler = str(self.settings.compiler)
-        source_idx = self._sources_idx_per_triplet[the_os][arch][compiler]
-        source = self.conan_data["sources"][self.version][source_idx]
-        url = source["url"]
+        arch = str(self.settings.arch)
+        url = self.conan_data["sources"][self.version]["url"][the_os][compiler][arch]
+        sha256 = self.conan_data["sources"][self.version]["sha256"][the_os][compiler][arch]
         if url.endswith(".tar.Z"): # Python doesn't have any module to uncompress .Z files
             filename = os.path.basename(url)
-            tools.download(url, filename, sha256=source["sha256"])
+            tools.download(url, filename, sha256=sha256)
             command = "zcat {} | tar -xf -".format(filename)
             self.run(command=command)
             os.remove(filename)
         else:
-            tools.get(**source)
+            tools.get(url, sha256=sha256)
+        os.rename(self.name, self._source_subfolder)
 
     def _configure_cmake(self):
         if self._cmake:
             return self._cmake
         self._cmake = CMake(self)
-        self._cmake.configure(build_folder=self._build_subfolder)
+        self._cmake.configure()
         return self._cmake
 
     def package(self):
