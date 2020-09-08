@@ -11,7 +11,7 @@ class ButteraugliConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     settings = "os", "arch", "compiler", "build_type"
     exports_sources = ["CMakeLists.txt", "patches/**"]
-    generators = "cmake"
+    generators = "cmake", "cmake_find_package"
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
@@ -38,6 +38,10 @@ class ButteraugliConan(ConanFile):
     def configure(self):
         if self.options.shared:
             del self.options.fPIC
+
+    def requirements(self):
+        self.requires("libpng/1.6.37")
+        self.requires("libjpeg/9d")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
