@@ -84,15 +84,13 @@
  
 --- a/ogr/ogrsf_frmts/geojson/ogrtopojsonreader.cpp
 +++ b/ogr/ogrsf_frmts/geojson/ogrtopojsonreader.cpp
-@@ -29,7 +29,7 @@
- #include "ogrgeojsonreader.h"
+@@ -30,5 +30,5 @@
  #include "ogrgeojsonutils.h"
  #include "ogr_geojson.h"
 -#include <json.h>  // JSON-C
 +#include <json-c/json.h>  // JSON-C
  #include <ogr_api.h>
  
- CPL_CVSID("$Id: ogrtopojsonreader.cpp 3a7914cee018d5b65dc1639368edbd8faac2543d 2020-01-07 22:30:27 +0100 Even Rouault $")
 --- a/port/cpl_json_header.h
 +++ b/port/cpl_json_header.h
 @@ -33,7 +33,7 @@
