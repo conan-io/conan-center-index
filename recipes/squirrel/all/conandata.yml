@@ -4,5 +4,5 @@ sources:
     sha256: "51942b8638a97b673e34ecf3ca50304996fa99bbdbfa7fe93d9744e6769b2f95"
 patches:
   "3.1":
-    - patch_file: "patches/001_disable_static_linking.patch"
+    - patch_file: "patches/fix-cmake-static-shared.patch"
       base_path: "source_subfolder"
