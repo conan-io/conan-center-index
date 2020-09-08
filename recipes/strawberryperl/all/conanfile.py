@@ -9,7 +9,6 @@ class StrawberryperlConan(ConanFile):
     license = "GNU Public License or the Artistic License"
     homepage = "http://strawberryperl.com"
     url = "https://github.com/conan-io/conan-center-index"
-    author = "Conan Community"
     topics = ("conan", "installer", "perl", "windows")
     settings = "os_build", "arch_build"
     short_paths = True
@@ -19,7 +18,10 @@ class StrawberryperlConan(ConanFile):
             raise ConanInvalidConfiguration("Only windows supported for Strawberry Perl.")
 
     def build(self):
-        tools.get(**self.conan_data["sources"][str(self.settings.arch_build)][self.version])
+        arch_build = str(self.settings.arch_build)
+        url = self.conan_data["sources"][self.version]["url"][arch_build]
+        sha256 = self.conan_data["sources"][self.version]["sha256"][arch_build]
+        tools.get(url, sha256=sha256)
 
     def package(self):
         self.copy(pattern="License.rtf*", dst="licenses", src="licenses")
@@ -33,5 +35,5 @@ class StrawberryperlConan(ConanFile):
 
     def package_info(self):
         bin_path = os.path.join(self.package_folder, "bin")
-        self.output.info('Appending PATH environment variable: %s' % bin_path)
+        self.output.info("Appending PATH environment variable: %s" % bin_path)
         self.env_info.PATH.append(bin_path)
