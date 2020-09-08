@@ -11,7 +11,7 @@ class ZfpConan(ConanFile):
     topics = ("conan", "zfp", "compression", "arrays")
     settings = "os", "arch", "compiler", "build_type"
     exports_sources = ["CMakeLists.txt"]
-    generators = ["cmake", "cmake_find_package"]
+    generators = "cmake"
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
@@ -88,7 +88,14 @@ class ZfpConan(ConanFile):
         cmake = self._configure_cmake()
         cmake.install()
         tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
-        tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
 
     def package_info(self):
-        self.cpp_info.libs = tools.collect_libs(self)
+        # zfp
+        self.cpp_info.components["_zfp"].names["cmake_find_package"] = "zfp"
+        self.cpp_info.components["_zfp"].names["cmake_find_package_multi"] = "zfp"
+        self.cpp_info.components["_zfp"].libs = ["zfp"]
+        # cfp
+        self.cpp_info.components["cfp"].names["cmake_find_package"] = "cfp"
+        self.cpp_info.components["cfp"].names["cmake_find_package_multi"] = "cfp"
+        self.cpp_info.components["cfp"].libs = ["cfp"]
+        self.cpp_info.components["cfp"].requires = ["_zfp"]
