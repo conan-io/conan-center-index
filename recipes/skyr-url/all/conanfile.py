@@ -83,7 +83,7 @@ class SkyrUrlConan(ConanFile):
         self._cmake.definitions["skyr_WARNINGS_AS_ERRORS"] = False
         self._cmake.definitions["skyr_ENABLE_JSON_FUNCTIONS"] = self.options.with_json
         self._cmake.definitions["skyr_ENABLE_FILESYSTEM_FUNCTIONS"] = self.options.with_fs
-        if str(self.settings.compiler) == "Visual Studio":
+        if self.settings.compiler == "Visual Studio":
             self._cmake.definitions["skyr_USE_STATIC_CRT"] = False       
         self._cmake.configure(build_folder=self._build_subfolder)
         return self._cmake
