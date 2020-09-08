@@ -105,6 +105,8 @@ class PkgConfConan(ConanFile):
         self.env_info.PATH.append(bindir)
 
         pkg_config = os.path.join(bindir, "pkgconf").replace("\\", "/")
+        if self.setting.os == "Windows":
+            pkg_config.append(".exe")
         self.output.info("Setting PKG_CONFIG env var: {}".format(pkg_config))
         self.env_info.PKG_CONFIG = pkg_config
 
