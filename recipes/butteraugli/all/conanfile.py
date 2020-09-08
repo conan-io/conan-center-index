@@ -9,9 +9,9 @@ class ButteraugliConan(ConanFile):
     topics = ("conan", "image", "butteraugli", "diff")
     homepage = "https://github.com/google/butteraugli"
     url = "https://github.com/conan-io/conan-center-index"
-    exports_sources = "CMakeLists.txt"
-    generators = "cmake"
     settings = "os", "arch", "compiler", "build_type"
+    exports_sources = ["CMakeLists.txt", "patches/**"]
+    generators = "cmake"
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
@@ -44,6 +44,10 @@ class ButteraugliConan(ConanFile):
         extracted_dir = glob.glob('butteraugli-*/')[0]
         os.rename(extracted_dir, self._source_subfolder)
 
+    def _patch_sources(self):
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            tools.patch(**patch)
+
     def _configure_cmake(self):
         if self._cmake:
             return self._cmake
@@ -52,6 +56,7 @@ class ButteraugliConan(ConanFile):
         return self._cmake
 
     def build(self):
+        self._patch_sources()
         cmake = self._configure_cmake()
         cmake.build()
 
