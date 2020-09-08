@@ -16,7 +16,7 @@ class FollyConan(ConanFile):
     default_options = {"shared": False, "fPIC": True}
     exports_sources = ["CMakeLists.txt", "patches/*"]
     generators = "cmake", "cmake_find_package"
-
+    short_paths = True
     _cmake = None
 
     @property
