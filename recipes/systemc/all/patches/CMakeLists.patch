@@ -2,15 +2,6 @@ diff --git a/CMakeLists.txt b/CMakeLists.txt
 index b7815ae..70804f3 100644
 --- a/CMakeLists.txt
 +++ b/CMakeLists.txt
-@@ -206,6 +206,8 @@ cmake_minimum_required (VERSION 3.1)
- cmake_policy(SET CMP0001 NEW)
- 
- project (SystemCLanguage CXX C)
-+include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
-+conan_basic_setup()
- 
- set(SystemCLanguage_VERSION_FILE "${PROJECT_SOURCE_DIR}/src/sysc/kernel/sc_ver.h")
- if(EXISTS ${SystemCLanguage_VERSION_FILE})
 @@ -273,12 +275,6 @@ if (NOT CMAKE_BUILD_TYPE)
         FORCE)
  endif (NOT CMAKE_BUILD_TYPE)
