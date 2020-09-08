@@ -3,6 +3,8 @@ from conans.errors import ConanInvalidConfiguration
 import os
 
 
+required_conan_version = ">=1.28.0"
+
 class SystemcConan(ConanFile):
     name = "systemc"
     version = "2.3.3"
@@ -12,6 +14,8 @@ class SystemcConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     license = "Apache-2.0"
     topics = ("simulation", "modeling", "esl", "tlm")
+    exports_sources = ["CMakeLists.txt", "patches/**"]
+    generators = "cmake"
     settings = "os", "compiler", "build_type", "arch"
     options = {
         "shared": [True, False],
@@ -33,8 +37,6 @@ class SystemcConan(ConanFile):
         "enable_immediate_self_notifications": False,
         "enable_pthreads": False
     }
-    generators = "cmake"
-    exports_sources = "patches/**"
 
     _cmake = None
 
@@ -87,7 +89,7 @@ class SystemcConan(ConanFile):
             self.options.enable_immediate_self_notifications
         self._cmake.definitions["ENABLE_PTHREADS"] = \
             self.options.get_safe("enable_pthreads", False)
-        self._cmake.configure(source_folder=self._source_subfolder)
+        self._cmake.configure()
         return self._cmake
 
     def build(self):
@@ -105,12 +107,14 @@ class SystemcConan(ConanFile):
         self.copy("NOTICE", dst="licenses", src=self._source_subfolder)
 
     def package_info(self):
-        self.cpp_info.libs = ["systemc"]
-        # FIXME: cmake generates SystemC::systemc target, not SystemC::SystemC
+        self.cpp_info.filenames["cmake_find_package"] = "SystemCLanguage"
+        self.cpp_info.filenames["cmake_find_package_multi"] = "SystemCLanguage"
         self.cpp_info.names["cmake_find_package"] = "SystemC"
         self.cpp_info.names["cmake_find_package_multi"] = "SystemC"
-
+        self.cpp_info.components["_systemc"].names["cmake_find_package"] = "systemc"
+        self.cpp_info.components["_systemc"].names["cmake_find_package_multi"] = "systemc"
+        self.cpp_info.components["_systemc"].libs = ["systemc"]
         if self.settings.os == "Linux":
-            self.cpp_info.system_libs = ["pthread"]
+            self.cpp_info.components["_systemc"].system_libs = ["pthread"]
         if self.settings.compiler == "Visual Studio":
-            self.cpp_info.cxxflags.append("/vmg")
+            self.cpp_info.components["_systemc"].cxxflags.append("/vmg")
