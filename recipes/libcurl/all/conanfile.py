@@ -13,7 +13,7 @@ class LibcurlConan(ConanFile):
     homepage = "https://curl.haxx.se"
     license = "MIT"
     exports_sources = ["lib_Makefile_add.am", "CMakeLists.txt", "patches/*"]
-    generators = "cmake", "pkg_config"
+    generators = "cmake", "cmake_find_package", "pkg_config"
 
     settings = "os", "arch", "compiler", "build_type"
     options = {"shared": [True, False],
@@ -31,6 +31,7 @@ class LibcurlConan(ConanFile):
                "with_libpsl": [True, False],
                "with_largemaxwritesize": [True, False],
                "with_nghttp2": [True, False],
+               "with_zlib": [True, False],
                "with_brotli": [True, False]
                }
     default_options = {"shared": False,
@@ -48,6 +49,7 @@ class LibcurlConan(ConanFile):
                        "with_libpsl": False,
                        "with_largemaxwritesize": False,
                        "with_nghttp2": False,
+                       "with_zlib": True,
                        "with_brotli": False
                        }
 
@@ -145,17 +147,15 @@ class LibcurlConan(ConanFile):
         if self.options.with_libssh2:
             self.options["libssh2"].shared = self.options.shared
 
-        # These options are not used in CMake build
+        # These options are not used in CMake build yet
         if self.settings.compiler == "Visual Studio" or self._is_win_x_android:
             del self.options.with_libidn
             del self.options.with_librtmp
             del self.options.with_libmetalink
             del self.options.with_libpsl
             del self.options.with_nghttp2
-            del self.options.with_brotli
 
     def requirements(self):
-        self.requires("zlib/1.2.11")
         if self.options.with_ssl == "openssl":
             self.requires("openssl/1.1.1g")
         elif self.options.with_ssl == "wolfssl":
@@ -164,6 +164,10 @@ class LibcurlConan(ConanFile):
             self.requires("libnghttp2/1.40.0")
         if self.options.with_libssh2:
             self.requires("libssh2/1.9.0")
+        if self.options.with_zlib:
+            self.requires("zlib/1.2.11")
+        if self.options.with_brotli:
+            self.requires("brotli/1.0.7")
 
     def build_requirements(self):
         if self._is_mingw and tools.os_info.is_windows and not tools.get_env("CONAN_BASH_PATH") and \
@@ -211,7 +215,6 @@ class LibcurlConan(ConanFile):
         params.append("--without-librtmp" if not self.options.with_librtmp else "--with-librtmp")
         params.append("--without-libmetalink" if not self.options.with_libmetalink else "--with-libmetalink")
         params.append("--without-libpsl" if not self.options.with_libpsl else "--with-libpsl")
-        params.append("--without-brotli" if not self.options.with_brotli else "--with-brotli")
 
         if self.options.with_ssl == "openssl":
             openssl_path = self.deps_cpp_info["openssl"].rootpath.replace("\\", "/")
@@ -239,7 +242,12 @@ class LibcurlConan(ConanFile):
         else:
             params.append("--without-nghttp2")
 
-        params.append("--with-zlib=%s" % self.deps_cpp_info["zlib"].lib_paths[0].replace("\\", "/"))
+        if self.options.with_zlib:
+            params.append("--with-zlib=%s" % self.deps_cpp_info["zlib"].lib_paths[0].replace("\\", "/"))
+        else:
+            params.append("--without-zlib")
+
+        params.append("--with-brotli" if self.options.with_brotli else "--without-brotli")
 
         if not self.options.shared:
             params.append("--disable-shared")
@@ -463,13 +471,12 @@ class LibcurlConan(ConanFile):
         self._cmake.definitions["BUILD_SHARED_LIBS"] = self.options.shared
         self._cmake.definitions["CURL_STATICLIB"] = not self.options.shared
         self._cmake.definitions["CMAKE_DEBUG_POSTFIX"] = ""
-        self._cmake.definitions["CMAKE_USE_LIBSSH2"] = self.options.with_libssh2
-
-        # all these options are exclusive. set just one of them
-        # mac builds do not use cmake so don't even bother about darwin_ssl
         self._cmake.definitions["CMAKE_USE_WINSSL"] = self.options.with_ssl == "winssl"
         self._cmake.definitions["CMAKE_USE_OPENSSL"] = self.options.with_ssl == "openssl"
         self._cmake.definitions["CMAKE_USE_WOLFSSL"] = self.options.with_ssl == "wolfssl"
+        self._cmake.definitions["CURL_ZLIB"] = self.options.with_zlib
+        self._cmake.definitions["CURL_BROTLI"] = self.options.with_brotli
+        self._cmake.definitions["CMAKE_USE_LIBSSH2"] = self.options.with_libssh2
         self._cmake.configure(build_folder=self._build_subfolder)
         return self._cmake
 
@@ -526,14 +533,10 @@ class LibcurlConan(ConanFile):
         else:
             self.cpp_info.components["curl"].libs = ["curl"]
             if self.settings.os == "Linux":
-                if self.options.with_libssh2:
-                    self.cpp_info.components["curl"].libs.append("ssh2")
                 if self.options.with_libidn:
                     self.cpp_info.components["curl"].libs.append("idn")
                 if self.options.with_librtmp:
                     self.cpp_info.components["curl"].libs.append("rtmp")
-                if self.options.with_brotli:
-                    self.cpp_info.components["curl"].libs.append("brotlidec")
 
         if self.settings.os == "Linux":
             self.cpp_info.components["curl"].system_libs = ["rt", "pthread"]
@@ -559,12 +562,15 @@ class LibcurlConan(ConanFile):
         if not self.options.shared:
             self.cpp_info.components["curl"].defines.append("CURL_STATICLIB=1")
 
-        self.cpp_info.components["curl"].requires = ["zlib::zlib"]
         if self.options.with_ssl == "openssl":
             self.cpp_info.components["curl"].requires.append("openssl::openssl")
         if self.options.with_ssl == "wolfssl":
             self.cpp_info.components["curl"].requires.append("wolfssl::wolfssl")
-        if self.options.with_libssh2:
-            self.cpp_info.components["curl"].requires.append("libssh2::libssh2")
         if self.options.get_safe("with_nghttp2"):
             self.cpp_info.components["curl"].requires.append("libnghttp2::libnghttp2")
+        if self.options.with_libssh2:
+            self.cpp_info.components["curl"].requires.append("libssh2::libssh2")
+        if self.options.with_zlib:
+            self.cpp_info.components["curl"].requires.append("zlib::zlib")
+        if self.options.with_brotli:
+            self.cpp_info.components["curl"].requires.append("brotli::brotli")
