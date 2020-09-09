@@ -77,18 +77,6 @@ class LibcurlConan(ConanFile):
     def _is_using_cmake_build(self):
         return self.settings.compiler == "Visual Studio" or self._is_win_x_android
 
-    def imports(self):
-        # Copy shared libraries for dependencies to fix DYLD_LIBRARY_PATH problems
-        #
-        # Configure script creates conftest that cannot execute without shared openssl binaries.
-        # Ways to solve the problem:
-        # 1. set *LD_LIBRARY_PATH (works with Linux with RunEnvironment
-        #     but does not work on OS X 10.11 with SIP)
-        # 2. copying dylib's to the build directory (fortunately works on OS X)
-
-        if self.settings.os == "Macos":
-            self.copy("*.dylib*", dst=self._source_subfolder, keep_path=False)
-
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
@@ -181,6 +169,17 @@ class LibcurlConan(ConanFile):
         tools.get(**self.conan_data["sources"][self.version])
         os.rename("curl-%s" % self.version, self._source_subfolder)
         tools.download("https://curl.haxx.se/ca/cacert.pem", "cacert.pem", verify=True)
+
+    def imports(self):
+        # Copy shared libraries for dependencies to fix DYLD_LIBRARY_PATH problems
+        #
+        # Configure script creates conftest that cannot execute without shared openssl binaries.
+        # Ways to solve the problem:
+        # 1. set *LD_LIBRARY_PATH (works with Linux with RunEnvironment
+        #     but does not work on OS X 10.11 with SIP)
+        # 2. copying dylib's to the build directory (fortunately works on OS X)
+        if self.settings.os == "Macos":
+            self.copy("*.dylib*", dst=self._source_subfolder, keep_path=False)
 
     def build(self):
         self._patch_sources()
