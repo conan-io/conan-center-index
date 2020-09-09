@@ -145,14 +145,6 @@ class LibcurlConan(ConanFile):
         if self.options.with_ssl == "wolfssl" and self._is_using_cmake_build and tools.Version(self.version) < "7.70.0":
             raise ConanInvalidConfiguration("Before 7.70.0, libcurl has no wolfssl support for Visual Studio or \"Windows to Android cross compilation\"")
 
-        # enforce shared linking due to openssl dependency
-        if self.options.with_ssl == "openssl":
-            self.options["openssl"].shared = self.options.shared
-        elif self.options.with_ssl == "wolfssl":
-            self.options["wolfssl"].shared = self.options.shared
-        if self.options.with_libssh2:
-            self.options["libssh2"].shared = self.options.shared
-
         # These options are not used in CMake build yet
         if self._is_using_cmake_build:
             del self.options.with_libidn
