@@ -72,6 +72,10 @@ class LibcurlConan(ConanFile):
     def _is_win_x_android(self):
         return self.settings.os == "Android" and tools.os_info.is_windows
 
+    @property
+    def _is_using_cmake_build(self):
+        return self.settings.compiler == "Visual Studio" or self._is_win_x_android
+
     def imports(self):
         # Copy shared libraries for dependencies to fix DYLD_LIBRARY_PATH problems
         #
@@ -138,6 +142,8 @@ class LibcurlConan(ConanFile):
             raise ConanInvalidConfiguration("winssl only suppported on Windows.")
         if self.options.with_ssl == "darwinssl" and not tools.is_apple_os(self.settings.os):
             raise ConanInvalidConfiguration("darwinssl only suppported on Apple like OS (Macos, iOS, watchOS or tvOS).")
+        if self.options.with_ssl == "wolfssl" and self._is_using_cmake_build and tools.Version(self.version) < "7.70.0":
+            raise ConanInvalidConfiguration("Before 7.70.0, libcurl has no wolfssl support for Visual Studio or \"Windows to Android cross compilation\"")
 
         # enforce shared linking due to openssl dependency
         if self.options.with_ssl == "openssl":
@@ -148,7 +154,7 @@ class LibcurlConan(ConanFile):
             self.options["libssh2"].shared = self.options.shared
 
         # These options are not used in CMake build yet
-        if self.settings.compiler == "Visual Studio" or self._is_win_x_android:
+        if self._is_using_cmake_build:
             del self.options.with_libidn
             del self.options.with_librtmp
             del self.options.with_libmetalink
@@ -186,7 +192,7 @@ class LibcurlConan(ConanFile):
     def build(self):
         self._patch_sources()
         self._patch_misc_files()
-        if self.settings.compiler == "Visual Studio" or self._is_win_x_android:
+        if self._is_using_cmake_build:
             self._build_with_cmake()
         else:
             self._build_with_autotools()
@@ -473,7 +479,8 @@ class LibcurlConan(ConanFile):
         self._cmake.definitions["CMAKE_DEBUG_POSTFIX"] = ""
         self._cmake.definitions["CMAKE_USE_WINSSL"] = self.options.with_ssl == "winssl"
         self._cmake.definitions["CMAKE_USE_OPENSSL"] = self.options.with_ssl == "openssl"
-        self._cmake.definitions["CMAKE_USE_WOLFSSL"] = self.options.with_ssl == "wolfssl"
+        if tools.Version(self.version) >= "7.70.0":
+            self._cmake.definitions["CMAKE_USE_WOLFSSL"] = self.options.with_ssl == "wolfssl"
         self._cmake.definitions["USE_NGHTTP2"] = self.options.with_nghttp2
         self._cmake.definitions["CURL_ZLIB"] = self.options.with_zlib
         self._cmake.definitions["CURL_BROTLI"] = self.options.with_brotli
@@ -495,7 +502,7 @@ class LibcurlConan(ConanFile):
         self.copy(pattern="COPYING", dst="licenses", src=self._source_subfolder)
 
         # Execute install
-        if self.settings.compiler == "Visual Studio" or self._is_win_x_android:
+        if self._is_using_cmake_build:
             cmake = self._configure_cmake()
             cmake.install()
         else:
