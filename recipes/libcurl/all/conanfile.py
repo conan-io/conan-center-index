@@ -1,3 +1,4 @@
+import glob
 import os
 import re
 from conans import ConanFile, AutoToolsBuildEnvironment, RunEnvironment, CMake, tools
@@ -488,36 +489,27 @@ class LibcurlConan(ConanFile):
         cmake.build()
 
     def package(self):
-        self.copy(pattern="COPYING", dst="licenses", src=self._source_subfolder)
-
-        # Execute install
+        self.copy("COPYING", dst="licenses", src=self._source_subfolder)
+        self.copy("cacert.pem", dst="res")
         if self._is_using_cmake_build:
             cmake = self._configure_cmake()
             cmake.install()
+            tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
         else:
             env_run = RunEnvironment(self)
             with tools.environment_append(env_run.vars):
                 with tools.chdir(self._source_subfolder):
                     autotools, autotools_vars = self._configure_autotools()
                     autotools.install(vars=autotools_vars)
-        if self._is_mingw:
-            # Handle only mingw libs
-            self.copy(pattern="*.dll", dst="bin", keep_path=False)
-            self.copy(pattern="*dll.a", dst="lib", keep_path=False)
-            self.copy(pattern="*.def", dst="lib", keep_path=False)
-            self.copy(pattern="*.lib", dst="lib", keep_path=False)
-
-        self.copy("cacert.pem", dst="res")
-
-        # no need to distribute share folder (docs/man pages)
-        tools.rmdir(os.path.join(self.package_folder, "share"))
-        # no need for pc files
+            tools.rmdir(os.path.join(self.package_folder, "share"))
+            for la_file in glob.glob(os.path.join(self.package_folder, "lib", "*.la")):
+                os.remove(la_file)
+            if self._is_mingw and self.options.shared:
+                # Handle only mingw libs
+                self.copy(pattern="*.dll", dst="bin", keep_path=False)
+                self.copy(pattern="*.dll.a", dst="lib", keep_path=False)
+                self.copy(pattern="*.lib", dst="lib", keep_path=False)
         tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
-        # no need for cmake files
-        tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
-        # Remove libtool files (*.la)
-        if os.path.isfile(os.path.join(self.package_folder, "lib", "libcurl.la")):
-            os.remove(os.path.join(self.package_folder, "lib", "libcurl.la"))
 
     def package_info(self):
         self.cpp_info.names["cmake_find_package"] = "CURL"
