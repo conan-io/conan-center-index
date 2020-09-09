@@ -13,7 +13,7 @@ class LibcurlConan(ConanFile):
     homepage = "https://curl.haxx.se"
     license = "MIT"
     exports_sources = ["lib_Makefile_add.am", "CMakeLists.txt", "patches/*"]
-    generators = "cmake", "cmake_find_package", "pkg_config"
+    generators = "cmake", "cmake_find_package_multi", "pkg_config"
 
     settings = "os", "arch", "compiler", "build_type"
     options = {"shared": [True, False],
