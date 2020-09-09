@@ -195,10 +195,10 @@ class CairoConan(ConanFile):
 
 
     def package_info(self):
-        if self.options.get_safe("enable_glib"):
+        if not self._is_msvc and self.options.enable_glib:
             self.cpp_info.libs.append('cairo-gobject')
         self.cpp_info.libs.append('cairo')
-        if self.options.get_safe("shared"):
+        if self._is_msvc and not self.options.shared:
             self.cpp_info.defines.append('CAIRO_WIN32_STATIC_BUILD=1')
         self.cpp_info.includedirs.append(os.path.join('include', 'cairo'))
         if self.settings.os == "Windows":
