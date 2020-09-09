@@ -522,8 +522,10 @@ class LibcurlConan(ConanFile):
     def package_info(self):
         self.cpp_info.names["cmake_find_package"] = "CURL"
         self.cpp_info.names["cmake_find_package_multi"] = "CURL"
+        self.cpp_info.names["pkg_config"] = "libcurl"
         self.cpp_info.components["curl"].names["cmake_find_package"] = "libcurl"
         self.cpp_info.components["curl"].names["cmake_find_package_multi"] = "libcurl"
+        self.cpp_info.components["curl"].names["pkg_config"] = "libcurl"
 
         if self.settings.compiler == "Visual Studio":
             self.cpp_info.components["curl"].libs = ["libcurl_imp"] if self.options.shared else ["libcurl"]
