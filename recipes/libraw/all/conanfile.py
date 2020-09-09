@@ -11,7 +11,7 @@ class LibRawConan(ConanFile):
     homepage = "https://www.libraw.org/"
     license = "CDDL-1.0/LGPL-2.1-only"
     exports_sources = "CMakeLists.txt", "patches/**"
-    generators = "cmake", "cmake_find_package"
+    generators = "cmake", "cmake_find_package", "pkg_config"
     settings = "os", "arch", "compiler", "build_type"
 
     options = {
@@ -64,6 +64,9 @@ class LibRawConan(ConanFile):
             self.requires("jasper/2.0.19")
         if self.options.with_openmp:
             self.requires("llvm-openmp/10.0.0")
+
+    def build_requirements(self):
+        self.build_requires("pkgconf/1.7.3")
 
     def source(self):
         for src in self.conan_data["sources"][self.version]:
