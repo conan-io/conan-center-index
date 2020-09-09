@@ -18,10 +18,12 @@ class LibcurlConan(ConanFile):
     settings = "os", "arch", "compiler", "build_type"
     options = {"shared": [True, False],
                "fPIC": [True, False],
+               "with_ssl": [False, "openssl", "wolfssl", "winssl", "darwinssl"],
                "with_openssl": [True, False],
+               "with_wolfssl": [True, False],
                "with_winssl": [True, False],
-               "with_ldap": [True, False],
                "darwin_ssl": [True, False],
+               "with_ldap": [True, False],
                "with_libssh2": [True, False],
                "with_libidn": [True, False],
                "with_librtmp": [True, False],
@@ -29,15 +31,16 @@ class LibcurlConan(ConanFile):
                "with_libpsl": [True, False],
                "with_largemaxwritesize": [True, False],
                "with_nghttp2": [True, False],
-               "with_brotli": [True, False],
-               "with_wolfssl": [True, False]
+               "with_brotli": [True, False]
                }
     default_options = {"shared": False,
                        "fPIC": True,
-                       "with_openssl": True,
-                       "with_winssl": False,
+                       "with_ssl": "openssl",
+                       "with_openssl": True,  # deprecated
+                       "with_wolfssl": False, # deprecated
+                       "with_winssl": False,  # deprecated
+                       "darwin_ssl": True,    # deprecated
                        "with_ldap": False,
-                       "darwin_ssl": True,
                        "with_libssh2": False,
                        "with_libidn": False,
                        "with_librtmp": False,
@@ -45,8 +48,7 @@ class LibcurlConan(ConanFile):
                        "with_libpsl": False,
                        "with_largemaxwritesize": False,
                        "with_nghttp2": False,
-                       "with_brotli": False,
-                       "with_wolfssl": False
+                       "with_brotli": False
                        }
 
     _autotools = False
@@ -81,14 +83,21 @@ class LibcurlConan(ConanFile):
             self.copy("*.dylib*", dst=self._source_subfolder, keep_path=False)
 
     def config_options(self):
-        if not tools.is_apple_os(self.settings.os):
-            del self.options.darwin_ssl
-
-        if self.settings.os != "Windows":
-            del self.options.with_winssl
-
         if self.settings.os == "Windows":
             del self.options.fPIC
+        # Default options
+        if tools.is_apple_os(self.settings.os):
+            self.options.with_ssl = "darwinssl"
+            self.options.with_openssl = False
+            self.options.with_wolfssl = False
+            self.options.with_winssl = False
+            self.options.darwin_ssl = True
+        else:
+            self.options.with_ssl = "openssl"
+            self.options.with_openssl = True
+            self.options.with_wolfssl = False
+            self.options.with_winssl = False
+            self.options.darwin_ssl = False
 
     def configure(self):
         if self.options.shared:
@@ -96,56 +105,65 @@ class LibcurlConan(ConanFile):
         del self.settings.compiler.libcxx
         del self.settings.compiler.cppstd
 
-        # be careful with those flags:
-        # - with_openssl AND darwin_ssl uses darwin_ssl (to maintain recipe compatibilty)
-        # - with_openssl AND NOT darwin_ssl uses openssl
-        # - with_openssl AND with_winssl raises to error
-        # - with_openssl AND NOT with_winssl uses openssl
-        # Moreover darwin_ssl is set by default and with_winssl is not
+        # Deprecated options
+        # ===============================
+        self.output.warn("with_openssl, with_winssl, darwin_ssl and with_wolfssl options are deprecated. Use with_ssl option instead.")
+        if tools.is_apple_os(self.settings.os) and self.options.with_ssl == "darwinssl":
+            if self.options.darwin_ssl:
+                self.options.with_ssl = "darwinssl"
+            elif self.options.with_openssl:
+                self.options.with_ssl = "openssl"
+            elif self.options.with_wolfssl:
+                self.options.with_ssl = "wolfssl"
+            else:
+                self.options.with_ssl = False
+        if not tools.is_apple_os(self.settings.os) and self.options.with_ssl == "openssl":
+            if self.settings.os == "Windows" and self.options.with_winssl:
+                self.options.with_ssl = "winssl"
+            elif self.options.with_openssl:
+                self.options.with_ssl = "openssl"
+            elif self.options.with_wolfssl:
+                self.options.with_ssl = "wolfssl"
+            else:
+                self.options.with_ssl = False
+        del self.options.with_openssl
+        del self.options.with_winssl
+        del self.options.darwin_ssl
+        del self.options.with_wolfssl
+        # ===============================
 
-        if self.settings.os == "Windows" and self.options.with_winssl and self.options.with_openssl:
-            raise ConanInvalidConfiguration("Specify only with_winssl or with_openssl")
+        if self.options.with_ssl == "winssl" and self.settings.os != "Windows":
+            raise ConanInvalidConfiguration("winssl only suppported on Windows.")
+        if self.options.with_ssl == "darwinssl" and not tools.is_apple_os(self.settings.os):
+            raise ConanInvalidConfiguration("darwinssl only suppported on Apple like OS (Macos, iOS, watchOS or tvOS).")
 
-        if self.options.with_openssl and self.options.with_wolfssl:
-            raise ConanInvalidConfiguration("Specify either with_openssl or with_wolfssl")
-
-        if self.options.with_openssl:
-            # enforce shared linking due to openssl dependency
-            if not tools.is_apple_os(self.settings.os) or not self.options.darwin_ssl:
-                self.options["openssl"].shared = self.options.shared
+        # enforce shared linking due to openssl dependency
+        if self.options.with_ssl == "openssl":
+            self.options["openssl"].shared = self.options.shared
+        elif self.options.with_ssl == "wolfssl":
+            self.options["wolfssl"].shared = self.options.shared
         if self.options.with_libssh2:
             self.options["libssh2"].shared = self.options.shared
-        if self.options.with_wolfssl:
-            # enforce shared linking due to openssl dependency
-            if not tools.is_apple_os(self.settings.os) or not self.options.darwin_ssl:
-                self.options["wolfssl"].shared = self.options.shared
+
+        # These options are not used in CMake build
+        if self.settings.compiler == "Visual Studio" or self._is_win_x_android:
+            del self.options.with_libidn
+            del self.options.with_librtmp
+            del self.options.with_libmetalink
+            del self.options.with_libpsl
+            del self.options.with_nghttp2
+            del self.options.with_brotli
 
     def requirements(self):
-        if self._depends_on_openssl:
-            self.requires("openssl/1.1.1g")
-        if self._depends_on_libssh2:
-            self.requires("libssh2/1.9.0")
-        if self.options.with_nghttp2:
-            self.requires("libnghttp2/1.40.0")
-        if self._depends_on_wolfssl:
-            self.requires("wolfssl/4.4.0")
         self.requires("zlib/1.2.11")
-
-    @property
-    def _depends_on_openssl(self):
-        return self.options.with_openssl and \
-               not ((tools.is_apple_os(self.settings.os) and self.options.darwin_ssl) or \
-                    (self.settings.os == "Windows" and self.options.with_winssl))
-
-    @property
-    def _depends_on_libssh2(self):
-        return self.options.with_libssh2 and self.settings.compiler != "Visual Studio"
-
-    @property
-    def _depends_on_wolfssl(self):
-        return self.options.with_wolfssl and \
-               not ((tools.is_apple_os(self.settings.os) and self.options.darwin_ssl) or \
-                    (self.settings.os == "Windows" and self.options.with_winssl))
+        if self.options.with_ssl == "openssl":
+            self.requires("openssl/1.1.1g")
+        elif self.options.with_ssl == "wolfssl":
+            self.requires("wolfssl/4.4.0")
+        if self.options.get_safe("with_nghttp2"):
+            self.requires("libnghttp2/1.40.0")
+        if self.options.with_libssh2:
+            self.requires("libssh2/1.9.0")
 
     def build_requirements(self):
         if self._is_mingw and tools.os_info.is_windows and not tools.get_env("CONAN_BASH_PATH") and \
@@ -182,7 +200,7 @@ class LibcurlConan(ConanFile):
         # https://github.com/curl/curl/issues/2835
         # for additional info, see this comment https://github.com/conan-io/conan-center-index/pull/1008#discussion_r386122685
         if self.settings.compiler == "apple-clang" and self.settings.compiler.version == "9.1":
-            if self.options.darwin_ssl:
+            if self.options.with_ssl == "darwinssl":
                 tools.replace_in_file(os.path.join(self._source_subfolder, "lib", "vtls", "sectransp.c"),
                                       "#define CURL_BUILD_MAC_10_13 MAC_OS_X_VERSION_MAX_ALLOWED >= 101300",
                                       "#define CURL_BUILD_MAC_10_13 0")
@@ -195,18 +213,18 @@ class LibcurlConan(ConanFile):
         params.append("--without-libpsl" if not self.options.with_libpsl else "--with-libpsl")
         params.append("--without-brotli" if not self.options.with_brotli else "--with-brotli")
 
-        if tools.is_apple_os(self.settings.os) and self.options.darwin_ssl:
-            params.append("--with-darwinssl")
-            params.append("--without-ssl")
-        elif self.settings.os == "Windows" and self.options.with_winssl:
-            params.append("--with-winssl")
-            params.append("--without-ssl")
-        elif self.options.with_openssl:
+        if self.options.with_ssl == "openssl":
             openssl_path = self.deps_cpp_info["openssl"].rootpath.replace("\\", "/")
             params.append("--with-ssl=%s" % openssl_path)
-        elif self.options.with_wolfssl:
+        elif self.options.with_ssl == "wolfssl":
             wolfssl_path = self.deps_cpp_info["wolfssl"].rootpath.replace("\\", "/")
             params.append("--with-wolfssl=%s" % wolfssl_path)
+            params.append("--without-ssl")
+        elif self.options.with_ssl == "winssl":
+            params.append("--with-winssl")
+            params.append("--without-ssl")
+        elif self.options.with_ssl == "darwinssl":
+            params.append("--with-darwinssl")
             params.append("--without-ssl")
         else:
             params.append("--without-ssl")
@@ -247,7 +265,6 @@ class LibcurlConan(ConanFile):
                 pass # this just works, conan is great!
 
         return params
-
 
     def _get_linux_arm_host(self):
         arch = None
@@ -293,7 +310,7 @@ class LibcurlConan(ConanFile):
                                   "-lzlib ")
 
         # patch for openssl extras in mingw
-        if self.options.with_openssl:
+        if self.options.with_ssl == "openssl":
             tools.replace_in_file("configure",
                                   "-lcrypto ",
                                   "-lcrypto -lcrypt32 ")
@@ -387,11 +404,11 @@ class LibcurlConan(ConanFile):
                     sysroot, arch_flag, ios_min_version, env_cflags
                 )
 
-                if self.options.with_openssl:
+                if self.options.with_ssl == "openssl":
                     openssl_path = self.deps_cpp_info["openssl"].rootpath
                     openssl_libdir = self.deps_cpp_info["openssl"].libdirs[0]
                     autotools_vars["LDFLAGS"] = "{} {} -L{}/{}".format(arch_flag, sysroot, openssl_path, openssl_libdir)
-                elif self.options.with_wolfssl:
+                elif self.options.with_ssl == "wolfssl":
                     wolfssl_path = self.deps_cpp_info["wolfssl"].rootpath
                     wolfssl_libdir = self.deps_cpp_info["wolfssl"].libdirs[0]
                     autotools_vars["LDFLAGS"] = "{} {} -L{}/{}".format(arch_flag, sysroot, wolfssl_path, wolfssl_libdir)
@@ -450,9 +467,9 @@ class LibcurlConan(ConanFile):
 
         # all these options are exclusive. set just one of them
         # mac builds do not use cmake so don't even bother about darwin_ssl
-        self._cmake.definitions["CMAKE_USE_WINSSL"] = self.options.get_safe("with_winssl", False)
-        self._cmake.definitions["CMAKE_USE_OPENSSL"] = self.options.with_openssl
-        self._cmake.definitions["CMAKE_USE_WOLFSSL"] = self.options.with_wolfssl
+        self._cmake.definitions["CMAKE_USE_WINSSL"] = self.options.with_ssl == "winssl"
+        self._cmake.definitions["CMAKE_USE_OPENSSL"] = self.options.with_ssl == "openssl"
+        self._cmake.definitions["CMAKE_USE_WOLFSSL"] = self.options.with_ssl == "wolfssl"
         self._cmake.configure(build_folder=self._build_subfolder)
         return self._cmake
 
@@ -504,33 +521,34 @@ class LibcurlConan(ConanFile):
         self.cpp_info.components["curl"].names["cmake_find_package"] = "libcurl"
         self.cpp_info.components["curl"].names["cmake_find_package_multi"] = "libcurl"
 
-        if self.settings.compiler != "Visual Studio":
+        if self.settings.compiler == "Visual Studio":
+            self.cpp_info.components["curl"].libs = ["libcurl_imp"] if self.options.shared else ["libcurl"]
+        else:
             self.cpp_info.components["curl"].libs = ["curl"]
             if self.settings.os == "Linux":
-                self.cpp_info.components["curl"].system_libs.extend(["rt", "pthread"])
                 if self.options.with_libssh2:
-                    self.cpp_info.components["curl"].libs.extend(["ssh2"])
+                    self.cpp_info.components["curl"].libs.append("ssh2")
                 if self.options.with_libidn:
-                    self.cpp_info.components["curl"].libs.extend(["idn"])
+                    self.cpp_info.components["curl"].libs.append("idn")
                 if self.options.with_librtmp:
-                    self.cpp_info.components["curl"].libs.extend(["rtmp"])
+                    self.cpp_info.components["curl"].libs.append("rtmp")
                 if self.options.with_brotli:
-                    self.cpp_info.components["curl"].libs.extend(["brotlidec"])
-            if self.settings.os == "Macos":
-                if self.options.with_ldap:
-                    self.cpp_info.components["curl"].system_libs.extend(["ldap"])
-                if self.options.darwin_ssl:
-                    self.cpp_info.components["curl"].frameworks.extend(["Cocoa", "Security"])
-        else:
-            self.cpp_info.components["curl"].libs = ["libcurl_imp"] if self.options.shared else ["libcurl"]
+                    self.cpp_info.components["curl"].libs.append("brotlidec")
 
-        if self.settings.os == "Windows":
+        if self.settings.os == "Linux":
+            self.cpp_info.components["curl"].system_libs = ["rt", "pthread"]
+        elif self.settings.os == "Windows":
             # used on Windows for VS build, native and cross mingw build
-            self.cpp_info.components["curl"].system_libs.append("ws2_32")
+            self.cpp_info.components["curl"].system_libs = ["ws2_32"]
             if self.options.with_ldap:
                 self.cpp_info.components["curl"].system_libs.append("wldap32")
-            if self.options.with_winssl:
+            if self.options.with_ssl == "winssl":
                 self.cpp_info.components["curl"].system_libs.append("Crypt32")
+        elif self.settings.os == "Macos":
+            if self.options.with_ldap:
+                self.cpp_info.components["curl"].system_libs.append("ldap")
+            if self.options.with_ssl == "darwinssl":
+                self.cpp_info.components["curl"].frameworks.extend(["Cocoa", "Security"])
 
         if self._is_mingw:
             # provide pthread for dependent packages
@@ -541,12 +559,12 @@ class LibcurlConan(ConanFile):
         if not self.options.shared:
             self.cpp_info.components["curl"].defines.append("CURL_STATICLIB=1")
 
-        self.cpp_info.components["curl"].requires.append("zlib::zlib")
-        if self._depends_on_openssl:
+        self.cpp_info.components["curl"].requires = ["zlib::zlib"]
+        if self.options.with_ssl == "openssl":
             self.cpp_info.components["curl"].requires.append("openssl::openssl")
-        if self._depends_on_wolfssl:
+        if self.options.with_ssl == "wolfssl":
             self.cpp_info.components["curl"].requires.append("wolfssl::wolfssl")
-        if self._depends_on_libssh2:
+        if self.options.with_libssh2:
             self.cpp_info.components["curl"].requires.append("libssh2::libssh2")
-        if self.options.with_nghttp2:
+        if self.options.get_safe("with_nghttp2"):
             self.cpp_info.components["curl"].requires.append("libnghttp2::libnghttp2")
