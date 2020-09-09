@@ -25,11 +25,19 @@ class GLibConan(ConanFile):
                        "with_elf": True,
                        "with_mount": True,
                        "with_selinux": True}
-    _source_subfolder = "source_subfolder"
-    _build_subfolder = 'build_subfolder'
+    requires = "zlib/1.2.11", "libffi/3.2.1"
     short_paths = True
     generators = "pkg_config"
-    requires = "zlib/1.2.11", "libffi/3.2.1"
+
+    _meson = None
+
+    @property
+    def _source_subfolder(self):
+        return "source_subfolder"
+
+    @property
+    def _build_subfolder(self):
+        return "build_subfolder"
 
     @property
     def _is_msvc(self):
@@ -53,9 +61,8 @@ class GLibConan(ConanFile):
             del self.options.with_selinux
 
     def build_requirements(self):
-        self.build_requires("meson/0.54.2")
-        if self.settings.os == "Windows":
-            self.build_requires("pkgconf/1.7.3")
+        self.build_requires("meson/0.55.0")
+        self.build_requires("pkgconf/1.7.3")
 
     def requirements(self):
         if self.options.with_pcre:
@@ -78,26 +85,27 @@ class GLibConan(ConanFile):
         tools.get(**self.conan_data["sources"][self.version])
         extracted_dir = self.name + "-" + self.version
         os.rename(extracted_dir, self._source_subfolder)
-        tools.replace_in_file(os.path.join(self._source_subfolder, 'meson.build'), \
-            'build_tests = not meson.is_cross_build() or (meson.is_cross_build() and meson.has_exe_wrapper())', \
-            'build_tests = false')
-        tools.replace_in_file(os.path.join(self._source_subfolder, 'meson.build'), \
+        tools.replace_in_file(os.path.join(self._source_subfolder, "meson.build"), \
+            "build_tests = not meson.is_cross_build() or (meson.is_cross_build() and meson.has_exe_wrapper())", \
+            "build_tests = false")
+        tools.replace_in_file(os.path.join(self._source_subfolder, "meson.build"), \
             "subdir('fuzzing')", \
             "#subdir('fuzzing')") # https://gitlab.gnome.org/GNOME/glib/-/issues/2152
 
     def _configure_meson(self):
-        meson = Meson(self)
-        defs = dict()
+        if self._meson:
+            return self._meson
+        self._meson = Meson(self)
         if tools.is_apple_os(self.settings.os):
-            defs["iconv"] = "external"  # https://gitlab.gnome.org/GNOME/glib/issues/1557
+            self._meson.options["iconv"] = "external"  # https://gitlab.gnome.org/GNOME/glib/issues/1557
         if self.settings.os == "Linux":
-            defs["selinux"] = "enabled" if self.options.with_selinux else "disabled"
-            defs["libmount"] = "enabled" if self.options.with_mount else "disabled"
-        defs["internal_pcre"] = not self.options.with_pcre
+            self._meson.options["selinux"] = "enabled" if self.options.with_selinux else "disabled"
+            self._meson.options["libmount"] = "enabled" if self.options.with_mount else "disabled"
+        self._meson.options["internal_pcre"] = not self.options.with_pcre
 
-        meson.configure(source_folder=self._source_subfolder, args=['--wrap-mode=nofallback'],
-                        build_folder=self._build_subfolder, defs=defs)
-        return meson
+        self._meson.configure(source_folder=self._source_subfolder, args=["--wrap-mode=nofallback"],
+                              build_folder=self._build_subfolder)
+        return self._meson
 
     def build(self):
         for filename in [os.path.join(self._source_subfolder, "meson.build"),
@@ -132,56 +140,77 @@ class GLibConan(ConanFile):
             meson = self._configure_meson()
             meson.install()
             self._fix_library_names()
+
         tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
-        shutil.move(os.path.join(self.package_folder, "share"), os.path.join(self.package_folder, "bin", "share"))
+        tools.rmdir(os.path.join(self.package_folder, "share", "bash-completion"))
+        tools.rmdir(os.path.join(self.package_folder, "share", "gettext"))
+        tools.rmdir(os.path.join(self.package_folder, "share", "locale"))
         for pdb_file in glob.glob(os.path.join(self.package_folder, "bin", "*.pdb")):
             os.unlink(pdb_file)
 
+        shutil.move(os.path.join(self.package_folder, "share"),
+                    os.path.join(self.package_folder, "bin", "share"))
+
     def package_info(self):
-        
-        self.cpp_info.components["glib-2.0"].libs = ["glib-2.0"]
+
+        self.cpp_info.components["libglib"].libs = ["glib-2.0"]
         if self.settings.os == "Linux":
-            self.cpp_info.components["glib-2.0"].system_libs.append("pthread")
+            self.cpp_info.components["libglib"].system_libs.append("pthread")
         if self.settings.os == "Windows":
-            self.cpp_info.components["glib-2.0"].system_libs.extend(["ws2_32", "ole32", "shell32", "user32", "advapi32"])
+            self.cpp_info.components["libglib"].system_libs.extend(["ws2_32", "ole32", "shell32", "user32", "advapi32"])
         if self.settings.os == "Macos":
-            self.cpp_info.components["glib-2.0"].system_libs.append("iconv")
-            self.cpp_info.components["glib-2.0"].system_libs.append("resolv")
-            self.cpp_info.components["glib-2.0"].frameworks.extend(['Foundation', 'CoreServices', 'CoreFoundation'])
-        self.cpp_info.components["glib-2.0"].includedirs.append(os.path.join('include', 'glib-2.0'))
-        self.cpp_info.components["glib-2.0"].includedirs.append(os.path.join('lib', 'glib-2.0', 'include'))
+            self.cpp_info.components["libglib"].system_libs.append("iconv")
+            self.cpp_info.components["libglib"].system_libs.append("resolv")
+            self.cpp_info.components["libglib"].frameworks.extend(['Foundation', 'CoreServices', 'CoreFoundation'])
+        self.cpp_info.components["libglib"].includedirs.append(os.path.join('include', 'glib-2.0'))
+        self.cpp_info.components["libglib"].includedirs.append(os.path.join('lib', 'glib-2.0', 'include'))
         if self.options.with_pcre:
-            self.cpp_info.components["glib-2.0"].requires.append("pcre::pcre")
+            self.cpp_info.components["libglib"].requires.append("pcre::pcre")
         if self.settings.os != "Linux":
-            self.cpp_info.components["glib-2.0"].requires.append("libgettext::libgettext")
+            self.cpp_info.components["libglib"].requires.append("libgettext::libgettext")
         if tools.is_apple_os(self.settings.os):
-            self.cpp_info.components["glib-2.0"].requires.append("libiconv::libiconv")
+            self.cpp_info.components["libglib"].requires.append("libiconv::libiconv")
+        self.cpp_info.components["libglib"].names["cmake_find_package"] = "glib-2.0"
+        self.cpp_info.components["libglib"].names["cmake_find_package_multi"] = "glib-2.0"
+        self.cpp_info.components["libglib"].names["pkg_config"] = "glib-2.0"
 
-        self.cpp_info.components["gmodule-2.0"].libs = ["gmodule-2.0"]
+        self.cpp_info.components["gmodule"].libs = ["gmodule-2.0"]
         if self.settings.os == "Linux":
-            self.cpp_info.components["gmodule-2.0"].system_libs.append("pthread")
-            self.cpp_info.components["gmodule-2.0"].system_libs.append("dl")
-        self.cpp_info.components["gmodule-2.0"].requires.append("glib-2.0")
+            self.cpp_info.components["gmodule"].system_libs.append("pthread")
+            self.cpp_info.components["gmodule"].system_libs.append("dl")
+        self.cpp_info.components["gmodule"].requires.append("libglib")
+        self.cpp_info.components["gmodule"].names["cmake_find_package"] = "gmodule-2.0"
+        self.cpp_info.components["gmodule"].names["cmake_find_package_multi"] = "gmodule-2.0"
+        self.cpp_info.components["gmodule"].names["pkg_config"] = "gmodule-2.0"
 
-        self.cpp_info.components["gobject-2.0"].libs = ["gobject-2.0"]
-        self.cpp_info.components["gobject-2.0"].requires.append("glib-2.0")
-        self.cpp_info.components["gobject-2.0"].requires.append("libffi::libffi")
+        self.cpp_info.components["gobject"].libs = ["gobject-2.0"]
+        self.cpp_info.components["gobject"].requires.append("libglib")
+        self.cpp_info.components["gobject"].requires.append("libffi::libffi")
+        self.cpp_info.components["gobject"].names["cmake_find_package"] = "gobject-2.0"
+        self.cpp_info.components["gobject"].names["cmake_find_package_multi"] = "gobject-2.0"
+        self.cpp_info.components["gobject"].names["pkg_config"] = "gobject-2.0"
 
-        self.cpp_info.components["gthread-2.0"].libs = ["gthread-2.0"]
+        self.cpp_info.components["gthread"].libs = ["gthread-2.0"]
         if self.settings.os == "Linux":
-            self.cpp_info.components["gthread-2.0"].system_libs.append("pthread")
-        self.cpp_info.components["gthread-2.0"].requires.append("glib-2.0")
+            self.cpp_info.components["gthread"].system_libs.append("pthread")
+        self.cpp_info.components["gthread"].requires.append("libglib")
+        self.cpp_info.components["gthread"].names["cmake_find_package"] = "gthread-2.0"
+        self.cpp_info.components["gthread"].names["cmake_find_package_multi"] = "gthread-2.0"
+        self.cpp_info.components["gthread"].names["pkg_config"] = "gthread-2.0"
 
-        self.cpp_info.components["gio-2.0"].libs = ["gio-2.0"]
+        self.cpp_info.components["gio"].libs = ["gio-2.0"]
         if self.settings.os == "Linux":
-            self.cpp_info.components["gio-2.0"].system_libs.append("resolv")
-            self.cpp_info.components["gio-2.0"].system_libs.append("dl")
-        self.cpp_info.components["gio-2.0"].requires.extend(["glib-2.0", "gobject-2.0", "gmodule-2.0", "zlib::zlib"])
+            self.cpp_info.components["gio"].system_libs.append("resolv")
+            self.cpp_info.components["gio"].system_libs.append("dl")
+        self.cpp_info.components["gio"].requires.extend(["libglib", "gobject", "gmodule", "zlib::zlib"])
         if self.settings.os == "Linux":
             if self.options.with_mount:
-                self.cpp_info.components["gio-2.0"].requires.append("libmount::libmount")
+                self.cpp_info.components["gio"].requires.append("libmount::libmount")
             if self.options.with_selinux:
-                self.cpp_info.components["gio-2.0"].requires.append("libselinux::libselinux")
+                self.cpp_info.components["gio"].requires.append("libselinux::libselinux")
+        self.cpp_info.components["gio"].names["cmake_find_package"] = "gio-2.0"
+        self.cpp_info.components["gio"].names["cmake_find_package_multi"] = "gio-2.0"
+        self.cpp_info.components["gio"].names["pkg_config"] = "gio-2.0"
 
         self.cpp_info.components["gresource"].libs = [] # this is actualy an executable
         self.cpp_info.components["gresource"].requires.append("libelf::libelf") # this is actualy an executable
@@ -189,3 +218,7 @@ class GLibConan(ConanFile):
         bin_path = os.path.join(self.package_folder, "bin")
         self.output.info("Appending PATH env var with: {}".format(bin_path))
         self.env_info.PATH.append(bin_path)
+
+        aclocal_path = os.path.join(bin_path, "share", "aclocal")
+        self.output.info("Appending ACLOCAL_PATH environment variable: {}".format(aclocal_path))
+        self.env_info.ACLOCAL_PATH.append(aclocal_path)
