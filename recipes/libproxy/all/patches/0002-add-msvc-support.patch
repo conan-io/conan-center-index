@@ -1,0 +1,48 @@
+--- libproxy/modules/config_kde.cpp
++++ libproxy/modules/config_kde.cpp
+@@ -19,7 +19,9 @@
+  ******************************************************************************/
+ 
+ #include <sys/stat.h>
++#if !defined(_MSC_VER)
+ #include <unistd.h>
++#endif
+ 
+ #include <algorithm>
+ #include <cstdlib>
+@@ -137,7 +139,11 @@ private:
+     string command_output(const string &cmdline) throw (runtime_error) {
+         // Capture stderr as well
+         const string command = "(" + cmdline + ")2>&1";
++#if !defined(_MSC_VER)
+         FILE *pipe = popen(command.c_str(), "r");
++#else
++        FILE *pipe = _popen(command.c_str(), "r");
++#endif
+         if (!pipe)
+             throw runtime_error("Unable to run command");
+ 
+@@ -148,7 +154,11 @@ private:
+                 result += buffer; // TODO: If this throws bad_alloc, pipe is leaked
+         }
+ 
++#if !defined(_MSC_VER)
+         if(pclose(pipe) != 0)
++#else
++        if(_pclose(pipe) != 0)
++#endif
+             throw runtime_error("Command failed");
+ 
+         // Trim newlines and whitespace at end
+--- libproxy/url.cpp
++++ libproxy/url.cpp
+@@ -33,7 +33,9 @@
+ #include <cstdlib>    // For atoi()
+ #include <sys/stat.h> // For stat()
+ #include <algorithm> // For transform()
++#if !defined(_MSC_VER)
+ #include <unistd.h>  // For read() close()
++#endif
+ 
+ #ifdef WIN32
+ #include <io.h>
