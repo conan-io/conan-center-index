@@ -1,0 +1,12 @@
+sources:
+  "20200425":
+    - url: "http://www.netlib.org/f2c/src.tgz"
+      sha256: "75cea7d59ae2a704959132938d7e014f9c62602fce1ad1be996ac187ebf95c72"
+    - url: "http://www.netlib.org/f2c/libf2c.zip"
+      sha256: "ca404070e9ce0a9aaa6a71fc7d5489d014ade952c5d6de7efb88de8e24f2e8e0"
+patches:
+  "20200425":
+    - patch_file: "patches/0001-f2c-conan-flags.patch"
+      base_path: "source_subfolder_f2c"
+    - patch_file: "patches/0002-libf2c-conan-flags.patch"
+      base_path: "source_subfolder_libf2c"

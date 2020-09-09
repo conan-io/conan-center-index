@@ -1,0 +1,57 @@
+--- makefile.vc
++++ makefile.vc
+@@ -6,7 +6,7 @@
+ # to the objects in the "w =" list below.
+ 
+-CC = cl
+-CFLAGS = -DUSE_CLOCK -DMSDOS -DNO_ONEXIT -Ot1 -DNO_My_ctype -DNO_ISATTY
++CC = cl -nologo
++CFLAGS = -DUSE_CLOCK -DMSDOS -DNO_ONEXIT -DNO_My_ctype -DNO_ISATTY $(CFLAGS)
+ 
+ .c.obj:
+ 	$(CC) -c $(CFLAGS) $*.c
+--- makefile.u
++++ makefile.u
+@@ -13,7 +13,7 @@
+ # to the CFLAGS = line below.
+ 
+ .SUFFIXES: .c .o
+-CC = cc
++CC ?= cc
+ SHELL = /bin/sh
+-CFLAGS = -O
++#CFLAGS = -O 
+ 
+@@ -69,7 +69,7 @@
+ OFILES = $(MISC) $(POW) $(CX) $(DCX) $(REAL) $(DBL) $(INT) \
+ 	$(HALF) $(CMP) $(EFL) $(CHAR) $(I77) $(TIME)
+ 
+-all: f2c.h signal1.h sysdep1.h libf2c.a
++all: f2c.h signal1.h sysdep1.h $(TARGET)
+ 
+ libf2c.a: $(OFILES)
+ 	ar r libf2c.a $?
+@@ -86,7 +86,7 @@
+ ## arrange for $DYLD_LIBRARY_PATH to include the directory containing libf2c.so.
+ 
+ libf2c.so: $(OFILES)
+-	$(CC) -shared -o libf2c.so $(OFILES)
++	$(CC) -shared -o libf2c.so $(OFILES) $(LDFLAGS)
+ 
+ ### If your system lacks ranlib, you don't need it; see README.
+ 
+@@ -183,10 +183,10 @@
+ xwsne.o:	fmt.h
+ 
+ arith.h: arithchk.c
+-	$(CC) $(CFLAGS) -DNO_FPINIT arithchk.c -lm ||\
+-	 $(CC) -DNO_LONG_LONG $(CFLAGS) -DNO_FPINIT arithchk.c -lm
+-	./a.out >arith.h
+-	rm -f a.out arithchk.o
++	$(CC) $(CFLAGS) -DNO_FPINIT arithchk.c -lm -o exechk ||\
++	 $(CC) -DNO_LONG_LONG $(CFLAGS) -DNO_FPINIT arithchk.c -lm -o exechk 
++	./exechk >arith.h
++	rm -f exechk.exe exechk arithchk.o
+ 
+ check:
+ 	xsum Notice README abort_.c arithchk.c backspac.c c_abs.c c_cos.c \

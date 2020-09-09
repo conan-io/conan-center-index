@@ -1,0 +1,33 @@
+--- makefile.vc
++++ makefile.vc
+@@ -4,7 +4,7 @@
+ #	nmake .
+ 
+ CC = cl
+-CFLAGS = -Ot1 -nologo -DNO_LONG_LONG
++CFLAGS = -nologo $(CFLAGS)
+ 
+ .c.obj:
+ 	$(CC) -c $(CFLAGS) $*.c
+@@ -17,7 +17,7 @@
+ checkfirst: xsum.out
+ 
+ f2c.exe: $(OBJECTS)
+-	$(CC) -Fef2c.exe $(OBJECTS) setargv.obj
++	$(CC) -Fef2c.exe $(OBJECTS) setargv.obj -link $(LDFLAGS)
+ 
+ $(OBJECTS): defs.h ftypes.h defines.h machdefs.h sysdep.h
+ 
+--- makefile.u
++++ makefile.u
+@@ -1,8 +1,8 @@
+ #	Makefile for f2c, a Fortran 77 to C converter
+ 
+ .SUFFIXES: .c .o
+-CC = cc
+-CFLAGS = -O
++CC ?= cc
++CFLAGS ?= -O
+ SHELL = /bin/sh
+ YACC = yacc
+ YFLAGS =
