@@ -48,11 +48,17 @@ class LibcurlConan(ConanFile):
                        "with_brotli": False,
                        "with_wolfssl": False
                        }
-    _source_subfolder = "source_subfolder"
-    _build_subfolder = "build_subfolder"
-    _autotools = False
 
+    _autotools = False
     _cmake = None
+
+    @property
+    def _source_subfolder(self):
+        return "source_subfolder"
+
+    @property
+    def _build_subfolder(self):
+        return "build_subfolder"
 
     @property
     def _is_mingw(self):
@@ -61,7 +67,6 @@ class LibcurlConan(ConanFile):
     @property
     def _is_win_x_android(self):
         return self.settings.os == "Android" and tools.os_info.is_windows
-
 
     def imports(self):
         # Copy shared libraries for dependencies to fix DYLD_LIBRARY_PATH problems
@@ -86,6 +91,8 @@ class LibcurlConan(ConanFile):
             del self.options.fPIC
 
     def configure(self):
+        if self.options.shared:
+            del self.options.fPIC
         del self.settings.compiler.libcxx
         del self.settings.compiler.cppstd
 
@@ -161,7 +168,6 @@ class LibcurlConan(ConanFile):
             self._build_with_cmake()
         else:
             self._build_with_autotools()
-
 
     def _patch_sources(self):
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
@@ -405,7 +411,7 @@ class LibcurlConan(ConanFile):
             self._autotools = AutoToolsBuildEnvironment(self, win_bash=use_win_bash)
 
             if self.settings.os != "Windows":
-                self._autotools.fpic = self.options.fPIC
+                self._autotools.fpic = self.options.get_safe("fPIC", True)
 
             autotools_vars = self._configure_autotools_vars()
 
