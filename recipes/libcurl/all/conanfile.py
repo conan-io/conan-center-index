@@ -153,14 +153,13 @@ class LibcurlConan(ConanFile):
             del self.options.with_librtmp
             del self.options.with_libmetalink
             del self.options.with_libpsl
-            del self.options.with_nghttp2
 
     def requirements(self):
         if self.options.with_ssl == "openssl":
             self.requires("openssl/1.1.1g")
         elif self.options.with_ssl == "wolfssl":
             self.requires("wolfssl/4.4.0")
-        if self.options.get_safe("with_nghttp2"):
+        if self.options.with_nghttp2:
             self.requires("libnghttp2/1.40.0")
         if self.options.with_libssh2:
             self.requires("libssh2/1.9.0")
@@ -474,6 +473,7 @@ class LibcurlConan(ConanFile):
         self._cmake.definitions["CMAKE_USE_WINSSL"] = self.options.with_ssl == "winssl"
         self._cmake.definitions["CMAKE_USE_OPENSSL"] = self.options.with_ssl == "openssl"
         self._cmake.definitions["CMAKE_USE_WOLFSSL"] = self.options.with_ssl == "wolfssl"
+        self._cmake.definitions["USE_NGHTTP2"] = self.options.with_nghttp2
         self._cmake.definitions["CURL_ZLIB"] = self.options.with_zlib
         self._cmake.definitions["CURL_BROTLI"] = self.options.with_brotli
         self._cmake.definitions["CMAKE_USE_LIBSSH2"] = self.options.with_libssh2
@@ -566,7 +566,7 @@ class LibcurlConan(ConanFile):
             self.cpp_info.components["curl"].requires.append("openssl::openssl")
         if self.options.with_ssl == "wolfssl":
             self.cpp_info.components["curl"].requires.append("wolfssl::wolfssl")
-        if self.options.get_safe("with_nghttp2"):
+        if self.options.with_nghttp2:
             self.cpp_info.components["curl"].requires.append("libnghttp2::libnghttp2")
         if self.options.with_libssh2:
             self.cpp_info.components["curl"].requires.append("libssh2::libssh2")
