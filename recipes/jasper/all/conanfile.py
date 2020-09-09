@@ -93,6 +93,9 @@ class JasperConan(ConanFile):
                     os.unlink(dll_file)
 
     def package_info(self):
+        self.cpp_info.names["cmake_find_package"] = "Jasper"
+        self.cpp_info.names["cmake_find_package_multi"] = "Jasper"
+        self.cpp_info.names["pkg_config"] = "jasper"
         self.cpp_info.libs = ["jasper"]
         if self.settings.os == "Linux":
             self.cpp_info.system_libs.append("m")
