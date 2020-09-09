@@ -174,8 +174,9 @@ class LibcurlConan(ConanFile):
             self.build_requires("msys2/20200517")
         elif self._is_win_x_android:
             self.build_requires("ninja/1.10.0")
-        elif self.settings.os == "Linux":
+        elif not tools.os_info.is_windows:
             self.build_requires("libtool/2.4.6")
+            self.build_requires("pkgconf/1.7.3")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
