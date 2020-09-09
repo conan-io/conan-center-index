@@ -57,4 +57,13 @@ class MuslConan(ConanFile):
         autotools.install()
 
     def package_info(self):
-        self.cpp_info.libs = tools.collect_libs(self)
+        bindir = os.path.join(self.package_folder, "bin")
+        self.output.info('Appending PATH environment variable: {}'.format(bindir))
+        self.env_info.PATH.append(bindir)
+
+        musl_cc = os.path.join(self.package_folder, "bin", "musl-gcc") + " -static"
+
+        self.output.info("Setting CC to '{}'".format(musl_cc))
+        self.env_info.CC = musl_cc
+        self.output.info("Setting CXX to '{}'".format(musl_cc))
+        self.env_info.CXX = musl_cc
