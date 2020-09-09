@@ -32,7 +32,7 @@ class LibRawConan(ConanFile):
         "with_zlib": True,
         "with_lcms": True,
         "with_jasper": True,
-        "with_openmp": True,
+        "with_openmp": False,
     }
 
     _cmake = None
@@ -62,6 +62,8 @@ class LibRawConan(ConanFile):
             self.requires("libxml2/2.9.10")
         if self.options.with_jasper:
             self.requires("jasper/2.0.19")
+        if self.options.with_openmp:
+            self.requires("llvm-openmp/10.0.0")
 
     def source(self):
         for src in self.conan_data["sources"][self.version]:
