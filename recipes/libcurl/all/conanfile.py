@@ -113,15 +113,6 @@ class LibcurlConan(ConanFile):
             if not tools.is_apple_os(self.settings.os) or not self.options.darwin_ssl:
                 self.options["wolfssl"].shared = self.options.shared
 
-    def build_requirements(self):
-        if self._is_mingw and tools.os_info.is_windows and not tools.get_env("CONAN_BASH_PATH") and \
-           tools.os_info.detect_windows_subsystem() != "msys2":
-            self.build_requires("msys2/20190524")
-        elif self._is_win_x_android:
-            self.build_requires("ninja/1.9.0")
-        elif self.settings.os == "Linux":
-            self.build_requires("libtool/2.4.6")
-
     def requirements(self):
         if self._depends_on_openssl:
             self.requires("openssl/1.1.1g")
@@ -148,6 +139,15 @@ class LibcurlConan(ConanFile):
         return self.options.with_wolfssl and \
                not ((tools.is_apple_os(self.settings.os) and self.options.darwin_ssl) or \
                     (self.settings.os == "Windows" and self.options.with_winssl))
+
+    def build_requirements(self):
+        if self._is_mingw and tools.os_info.is_windows and not tools.get_env("CONAN_BASH_PATH") and \
+           tools.os_info.detect_windows_subsystem() != "msys2":
+            self.build_requires("msys2/20200517")
+        elif self._is_win_x_android:
+            self.build_requires("ninja/1.10.0")
+        elif self.settings.os == "Linux":
+            self.build_requires("libtool/2.4.6")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
