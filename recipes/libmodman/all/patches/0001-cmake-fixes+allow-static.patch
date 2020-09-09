@@ -1,0 +1,34 @@
+--- libmodman/CMakeLists.txt
++++ libmodman/CMakeLists.txt
+@@ -9,7 +9,7 @@
+ else(WIN32)
+   set(CMAKE_CXX_FLAGS "-fvisibility=hidden ${CMAKE_CXX_FLAGS}")
+ endif(WIN32)
+-include_directories(${CMAKE_SOURCE_DIR})
++include_directories(${PROJECT_SOURCE_DIR})
+ 
+ # PkgConfig file
+ if(NOT WIN32 AND NOT APPLE)
+@@ -42,9 +42,9 @@
+ endif()
+ 
+ # Define the library itself
+-add_library(modman SHARED
++add_library(modman
+             module.hpp
+             module_manager.hpp
+             module_manager.cpp)
+-if(NOT WIN32)
+-  target_link_libraries(modman dl)
++if(${CMAKE_DL_LIBS})
++  target_link_libraries(modman ${CMAKE_DL_LIBS})
+@@ -52,6 +52,6 @@
+-set_target_properties(modman PROPERTIES PREFIX "lib" VERSION 1.0.0 SOVERSION 1)
+-install(TARGETS modman DESTINATION ${LIB_INSTALL_DIR})
++set_target_properties(modman PROPERTIES VERSION 1.0.0 SOVERSION 1)
++install(TARGETS modman ARCHIVE DESTINATION ${LIB_INSTALL_DIR} LIBRARY DESTINATION ${LIB_INSTALL_DIR} RUNTIME DESTINATION ${BIN_INSTALL_DIR})
+ install(FILES   module_manager.hpp module.hpp DESTINATION ${INCLUDE_INSTALL_DIR}/${PROJECT_NAME})
+ 
+ ### Tests
+-add_testdirectory(test)
++#add_testdirectory(test)

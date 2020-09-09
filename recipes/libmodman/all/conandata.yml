@@ -1,0 +1,12 @@
+sources:
+  "2.0.1":
+    url: "https://storage.googleapis.com/google-code-archive-downloads/v2/code.google.com/libmodman/libmodman-2.0.1.zip"
+    sha256: "33c3d1b285abdcac800de9c0c9c683a7cd87f3553de1c63ad3d39fb37972af0b"
+patches:
+  "2.0.1":
+    - patch_file: "patches/0001-cmake-fixes+allow-static.patch"
+      base_path: "source_subfolder"
+    - patch_file: "patches/0002-fix-mingw.patch"
+      base_path: "source_subfolder"
+    - patch_file: "patches/0003-add-typeinfo-include.patch"
+      base_path: "source_subfolder"

@@ -1,0 +1,22 @@
+--- libmodman/module_manager.cpp
++++ libmodman/module_manager.cpp
+@@ -42,7 +42,7 @@
+ #define pdlopenl(filename) LoadLibraryEx(filename, NULL, DONT_RESOLVE_DLL_REFERENCES)
+ #define pdlclose(module) FreeLibrary((pdlmtype) module)
+ static void* pdlsym(pdlmtype mod, string sym) {
+-	return GetProcAddress(mod, sym.c_str());
++	return (void *)GetProcAddress(mod, sym.c_str());
+ }
+ 
+ static pdlmtype pdlreopen(const char* filename, pdlmtype module) {
+--- libmodman/module.hpp
++++ libmodman/module.hpp
+@@ -79,7 +79,7 @@
+ template <class basetype, bool sngl=false>
+ class __MM_DLL_EXPORT extension : public base_extension {
+ public:
+-#ifdef WIN32
++#ifdef _MSC_VER
+ 	static  const char*     base_type() { return __FUNCSIG__; }
+ #else
+ 	static  const char*     base_type() { return typeid(basetype).name(); }

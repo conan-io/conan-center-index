@@ -1,0 +1,11 @@
+--- libmodman/module.hpp
++++ libmodman/module.hpp
+@@ -21,7 +21,7 @@
+ #define MODULE_HPP_
+ 
+ #include <cstdlib> // For NULL
+-
++#include <typeinfo> // for typeid
+ #ifndef MM_MODULE_BUILTIN
+ #define MM_MODULE_BUILTIN
+ #endif
