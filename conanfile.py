@@ -13,6 +13,11 @@ class CopperSpiceConan(ConanFile):
     generators = 'cmake_paths'
     version = '1.6.3'
     license = 'LGPL-2.1-only'
+    description = '''
+    CopperSpice is a set of individual libraries which can be used to develop cross platform software applications in C++.
+    It is a totally open source project released under the LGPL V2.1 license and was initially derived from the Qt framework.
+    '''
+    url = 'http://balmer.intern.colvistec.de/repos/conan-copperspice'
 
     def build(self):
         raise ConanException('This recipe cannot be built, it only packages existing binaries. See README.md for details.')
