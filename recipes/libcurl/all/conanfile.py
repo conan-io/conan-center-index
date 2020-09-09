@@ -53,7 +53,8 @@ class LibcurlConan(ConanFile):
                        "with_brotli": False
                        }
 
-    _autotools = False
+    _autotools = None
+    _autotools_vars = None
     _cmake = None
 
     @property
@@ -340,10 +341,8 @@ class LibcurlConan(ConanFile):
 
     def _build_with_autotools(self):
         with tools.chdir(self._source_subfolder):
-            use_win_bash = self._is_mingw and not tools.cross_building(self.settings)
-
             # autoreconf
-            self.run("./buildconf", win_bash=use_win_bash, run_environment=True)
+            self.run("./buildconf", win_bash=tools.os_info.is_windows, run_environment=True)
 
             # fix generated autotools files on alle to have relocateable binaries
             if tools.is_apple_os(self.settings.os):
@@ -428,33 +427,32 @@ class LibcurlConan(ConanFile):
         return autotools_vars
 
     def _configure_autotools(self):
+        if self._autotools and self._autotools_vars:
+            return self._autotools, self._autotools_vars
 
-        if not self._autotools:
-            use_win_bash = self._is_mingw and not tools.cross_building(self.settings)
-            self._autotools = AutoToolsBuildEnvironment(self, win_bash=use_win_bash)
+        self._autotools = AutoToolsBuildEnvironment(self, win_bash=tools.os_info.is_windows)
 
-            if self.settings.os != "Windows":
-                self._autotools.fpic = self.options.get_safe("fPIC", True)
+        if self.settings.os != "Windows":
+            self._autotools.fpic = self.options.get_safe("fPIC", True)
 
-            autotools_vars = self._configure_autotools_vars()
+        self._autotools_vars = self._configure_autotools_vars()
 
-            # tweaks for mingw
-            if self._is_mingw:
-                # patch autotools files
-                self._patch_mingw_files()
+        # tweaks for mingw
+        if self._is_mingw:
+            # patch autotools files
+            self._patch_mingw_files()
 
-                self._autotools.defines.append("_AMD64_")
+            self._autotools.defines.append("_AMD64_")
 
-            configure_args = self._get_configure_command_args()
+        configure_args = self._get_configure_command_args()
 
-            if self.settings.os == "iOS" and self.settings.arch == "x86_64":
-                # please do not autodetect --build for the iOS simulator, thanks!
-                self._autotools.configure(vars=autotools_vars, args=configure_args, build=False)
-            else:
-                self._autotools.configure(vars=autotools_vars, args=configure_args)
+        if self.settings.os == "iOS" and self.settings.arch == "x86_64":
+            # please do not autodetect --build for the iOS simulator, thanks!
+            self._autotools.configure(vars=self._autotools_vars, args=configure_args, build=False)
+        else:
+            self._autotools.configure(vars=self._autotools_vars, args=configure_args)
 
-
-        return self._autotools, self._configure_autotools_vars()
+        return self._autotools, self._autotools_vars
 
     def _configure_cmake(self):
         if self._cmake:
