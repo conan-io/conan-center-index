@@ -30,6 +30,8 @@ class MuslConan(ConanFile):
     def configure(self):
         if self.settings.os != "Linux":
             raise ConanInvalidConfiguration("musl is only supported on Linux.")
+        if self.settings.compiler != ["gcc", "clang"]:
+            raise ConanInvalidConfiguration("musl is only supported on Linux.")
         if self.options.shared:
             del self.options.fPIC
         del self.settings.compiler.cppstd
@@ -44,7 +46,12 @@ class MuslConan(ConanFile):
         if self._autotools:
             return self._autotools
         self._autotools = AutoToolsBuildEnvironment(self)
-        self._autotools.configure(configure_dir=self._source_subfolder)
+        conf_args = []
+        if self.settings.compiler == "gcc":
+            conf_args.append("--enable-wrapper=gcc")
+        elif self.settings.compiler == "clang":
+            conf_args.append("--enable-wrapper=clang")
+        self._autotools.configure(args=conf_args, configure_dir=self._source_subfolder)
         return self._autotools
 
     def build(self):
@@ -61,9 +68,25 @@ class MuslConan(ConanFile):
         self.output.info('Appending PATH environment variable: {}'.format(bindir))
         self.env_info.PATH.append(bindir)
 
-        musl_cc = os.path.join(self.package_folder, "bin", "musl-gcc") + " -static"
+        musl_cc = None
+        musl_cxx = None
+        musl_ld = None
 
-        self.output.info("Setting CC to '{}'".format(musl_cc))
-        self.env_info.CC = musl_cc
-        self.output.info("Setting CXX to '{}'".format(musl_cc))
-        self.env_info.CXX = musl_cc
+        if self.settings.compiler == "gcc":
+            musl_cc = os.path.join(self.package_folder, "bin", "musl-gcc") + " -static"
+            musl_cxx = musl_cc
+            musl_ld = musl_cc
+        elif self.settings.compiler == "clang":
+            musl_cc = os.path.join(self.package_folder, "bin", "musl-clang") + " -static"
+            musl_cxx = musl_cc
+            musl_ld = os.path.join(self.package_folder, "bin", "ld.musl-clang")
+
+        if musl_cc is not None:
+            self.output.info("Setting CC to '{}'".format(musl_cc))
+            self.env_info.CC = musl_cc
+        if musl_cxx is not None:
+            self.output.info("Setting CXX to '{}'".format(musl_cxx))
+            self.env_info.CXX = musl_cxx
+        if musl_ld is not None:
+            self.output.info("Setting LD to '{}'".format(musl_ld))
+            self.env_info.CXX = musl_ld
