@@ -47,9 +47,10 @@ class JasperConan(ConanFile):
         del self.settings.compiler.libcxx
 
         # Handle deprecated libjpeg option
-        self.output.warn("jpegturbo option is deprecated, use with_libjpeg option instead.")
+        if self.options.jpegturbo:
+            self.output.warn("jpegturbo option is deprecated, use with_libjpeg option instead.")
         if self.options.with_libjpeg == "libjpeg" and self.options.jpegturbo:
-            self.options.with_libjpeg == "libjpeg-turbo"
+            self.options.with_libjpeg = "libjpeg-turbo"
         del self.options.jpegturbo
 
     def requirements(self):
