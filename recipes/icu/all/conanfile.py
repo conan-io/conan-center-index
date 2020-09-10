@@ -244,7 +244,7 @@ class ICUBase(ConanFile):
 
         # icu uses c++, so add the c++ runtime
         if tools.stdcpp_library(self):
-            self.cpp_info.components["icu-data"].system_libs.append(tools.stdcpp_library(self)
+            self.cpp_info.components["icu-data"].system_libs.append(tools.stdcpp_library(self))
 
         # Alias of data CMake component
         self.cpp_info.components["icu-data-alias"].names["cmake_find_package"] = "dt"
