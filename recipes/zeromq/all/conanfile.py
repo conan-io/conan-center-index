@@ -67,7 +67,7 @@ class ZeroMQConan(ConanFile):
         return self._cmake
 
     def _patch_sources(self):
-        for patch in self.conan_data["patches"][self.version]:
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
             tools.patch(**patch)
         os.unlink(os.path.join(self._source_subfolder, "builds", "cmake", "Modules", "FindSodium.cmake"))
 
@@ -96,6 +96,7 @@ class ZeroMQConan(ConanFile):
         tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
         tools.rmdir(os.path.join(self.package_folder, "share"))
         tools.rmdir(os.path.join(self.package_folder, "CMake"))
+        tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
 
     def package_info(self):
         # TODO: CMake imported target shouldn't be namespaced
