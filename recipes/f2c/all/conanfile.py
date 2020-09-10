@@ -31,12 +31,13 @@ class F2cConan(ConanFile):
 
     def config_options(self):
         if self.settings.os == "Windows":
-            del self.options.shared
             del self.options.fPIC
 
     def configure(self):
-        if self.options.get_safe("shared"):
+        if self.options.shared:
             del self.options.fPIC
+            if self.settings.os == "Windows":
+                raise ConanInvalidConfiguration("libf2c cannot be built as a shared library on Windows")
         del self.settings.compiler.libcxx
         del self.settings.compiler.cppstd
         if self.settings.compiler == "Visual Studio" and self.settings.arch == "x86_64":
