@@ -1,12 +1,6 @@
 sources:
-  "1.16.0":
-    sha256: "57dbb3df5781840ca45da6b011deda824e025b22684b5218f167d3a9f721cf3e"
-    url: "https://gitlab.freedesktop.org/gstreamer/gstreamer/-/archive/1.16.0/gstreamer-1.16.0.tar.bz2"
   "1.16.2":
     sha256: "dac037ab84d557f5d4e6e66e833f6bf8cf4f84671a311e0b2df99f9b30a9d693"
     url: "https://gitlab.freedesktop.org/gstreamer/gstreamer/-/archive/1.16.2/gstreamer-1.16.2.tar.bz2"
 patches:
-  "1.16.0":
-    - patch_file: "patches/150.diff"
-      base_path: "source_subfolder"
   "1.16.2": {}
