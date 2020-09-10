@@ -1,4 +1,4 @@
 sources:
-  "cci.20200811":
-    url: "https://github.com/syoyo/tinyexr/archive/cf8550f1b8b9f5f79f02df810c885ed2a2b578f9.tar.gz"
-    sha256: "98605fac488aeff66ef682d3788afaaf587c30dbb24e9de365b203d6f1c5b9b3"
+  "1.0.0":
+    url: "https://github.com/syoyo/tinyexr/archive/v1.0.0.tar.gz"
+    sha256: "d9d135a835916655057ad58fdabe17f4ae7047a0b15e20e891dab4e563275b68"
