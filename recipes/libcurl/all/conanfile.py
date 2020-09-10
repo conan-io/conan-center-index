@@ -19,7 +19,7 @@ class LibcurlConan(ConanFile):
     options = {"shared": [True, False],
                "fPIC": [True, False],
                "with_openssl": [True, False],
-               "with_winssl": [True, False],
+               "with_schannel": [True, False],
                "with_ldap": [True, False],
                "darwin_ssl": [True, False],
                "with_libssh2": [True, False],
@@ -30,12 +30,13 @@ class LibcurlConan(ConanFile):
                "with_largemaxwritesize": [True, False],
                "with_nghttp2": [True, False],
                "with_brotli": [True, False],
-               "with_wolfssl": [True, False]
+               "with_wolfssl": [True, False],
+               "with_winssl": [True, False],
                }
     default_options = {"shared": False,
                        "fPIC": True,
                        "with_openssl": True,
-                       "with_winssl": False,
+                       "with_schannel": False,
                        "with_ldap": False,
                        "darwin_ssl": True,
                        "with_libssh2": False,
@@ -46,7 +47,8 @@ class LibcurlConan(ConanFile):
                        "with_largemaxwritesize": False,
                        "with_nghttp2": False,
                        "with_brotli": False,
-                       "with_wolfssl": False
+                       "with_wolfssl": False,
+                       "with_winssl": False,
                        }
     _source_subfolder = "source_subfolder"
     _build_subfolder = "build_subfolder"
@@ -80,6 +82,7 @@ class LibcurlConan(ConanFile):
             del self.options.darwin_ssl
 
         if self.settings.os != "Windows":
+            del self.options.with_schannel
             del self.options.with_winssl
 
         if self.settings.os == "Windows":
@@ -92,12 +95,16 @@ class LibcurlConan(ConanFile):
         # be careful with those flags:
         # - with_openssl AND darwin_ssl uses darwin_ssl (to maintain recipe compatibilty)
         # - with_openssl AND NOT darwin_ssl uses openssl
-        # - with_openssl AND with_winssl raises to error
-        # - with_openssl AND NOT with_winssl uses openssl
-        # Moreover darwin_ssl is set by default and with_winssl is not
+        # - with_openssl AND with_schannel raises to error
+        # - with_openssl AND NOT with_schannel uses openssl
+        # Moreover darwin_ssl is set by default and with_schannel is not
 
-        if self.settings.os == "Windows" and self.options.with_winssl and self.options.with_openssl:
-            raise ConanInvalidConfiguration("Specify only with_winssl or with_openssl")
+        if self.settings.os == "Windows" and self.options.with_winssl:
+            self.output.warn("with_winssl option is deprecated, use with_schannel option instead.")
+            self.options.with_schannel = True
+
+        if self.settings.os == "Windows" and self.options.with_schannel and self.options.with_openssl:
+            raise ConanInvalidConfiguration("Specify only with_schannel or with_openssl")
 
         if self.options.with_openssl and self.options.with_wolfssl:
             raise ConanInvalidConfiguration("Specify either with_openssl or with_wolfssl")
@@ -137,7 +144,7 @@ class LibcurlConan(ConanFile):
     def _depends_on_openssl(self):
         return self.options.with_openssl and \
                not ((tools.is_apple_os(self.settings.os) and self.options.darwin_ssl) or \
-                    (self.settings.os == "Windows" and self.options.with_winssl))
+                    (self.settings.os == "Windows" and self.options.with_schannel))
 
     @property
     def _depends_on_libssh2(self):
@@ -147,7 +154,7 @@ class LibcurlConan(ConanFile):
     def _depends_on_wolfssl(self):
         return self.options.with_wolfssl and \
                not ((tools.is_apple_os(self.settings.os) and self.options.darwin_ssl) or \
-                    (self.settings.os == "Windows" and self.options.with_winssl))
+                    (self.settings.os == "Windows" and self.options.with_schannel))
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
@@ -192,8 +199,8 @@ class LibcurlConan(ConanFile):
         if tools.is_apple_os(self.settings.os) and self.options.darwin_ssl:
             params.append("--with-darwinssl")
             params.append("--without-ssl")
-        elif self.settings.os == "Windows" and self.options.with_winssl:
-            params.append("--with-winssl")
+        elif self.settings.os == "Windows" and self.options.with_schannel:
+            params.append("--with-schannel")
             params.append("--without-ssl")
         elif self.options.with_openssl:
             openssl_path = self.deps_cpp_info["openssl"].rootpath.replace("\\", "/")
@@ -444,7 +451,7 @@ class LibcurlConan(ConanFile):
 
         # all these options are exclusive. set just one of them
         # mac builds do not use cmake so don't even bother about darwin_ssl
-        self._cmake.definitions["CMAKE_USE_WINSSL"] = self.options.get_safe("with_winssl", False)
+        self._cmake.definitions["CMAKE_USE_SCHANNEL"] = self.options.get_safe("with_schannel", False)
         self._cmake.definitions["CMAKE_USE_OPENSSL"] = self.options.with_openssl
         self._cmake.definitions["CMAKE_USE_WOLFSSL"] = self.options.with_wolfssl
         self._cmake.configure(build_folder=self._build_subfolder)
@@ -523,7 +530,7 @@ class LibcurlConan(ConanFile):
             self.cpp_info.components["curl"].system_libs.append("ws2_32")
             if self.options.with_ldap:
                 self.cpp_info.components["curl"].system_libs.append("wldap32")
-            if self.options.with_winssl:
+            if self.options.with_schannel:
                 self.cpp_info.components["curl"].system_libs.append("Crypt32")
 
         if self._is_mingw:
