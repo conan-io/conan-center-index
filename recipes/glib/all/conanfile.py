@@ -157,11 +157,19 @@ class GLibConan(ConanFile):
         if tools.is_apple_os(self.settings.os):
             self.cpp_info.components["glib-2.0"].requires.append("libiconv::libiconv")
 
-        self.cpp_info.components["gmodule-2.0"].libs = ["gmodule-2.0"]
+        self.cpp_info.components["gmodule-no-export-2.0"].libs = ["gmodule-2.0"]
         if self.settings.os == "Linux":
-            self.cpp_info.components["gmodule-2.0"].system_libs.append("pthread")
-            self.cpp_info.components["gmodule-2.0"].system_libs.append("dl")
-        self.cpp_info.components["gmodule-2.0"].requires.append("glib-2.0")
+            self.cpp_info.components["gmodule-no-export-2.0"].system_libs.append("pthread")
+            self.cpp_info.components["gmodule-no-export-2.0"].system_libs.append("dl")
+        self.cpp_info.components["gmodule-no-export-2.0"].requires.append("glib-2.0")
+        
+        self.cpp_info.components["gmodule-export-2.0"].requires.extend(["gmodule-no-export-2.0", "glib-2.0"])
+        if self.settings.os == "Linux":
+            self.cpp_info.components["gmodule-export-2.0"].sharedlinkflags.append("-Wl,--export-dynamic")
+        
+        self.cpp_info.components["gmodule-2.0"].requires.extend(["gmodule-no-export-2.0", "glib-2.0"])
+        if self.settings.os == "Linux":
+            self.cpp_info.components["gmodule-2.0"].sharedlinkflags.append("-Wl,--export-dynamic")
 
         self.cpp_info.components["gobject-2.0"].libs = ["gobject-2.0"]
         self.cpp_info.components["gobject-2.0"].requires.append("glib-2.0")
@@ -182,6 +190,10 @@ class GLibConan(ConanFile):
                 self.cpp_info.components["gio-2.0"].requires.append("libmount::libmount")
             if self.options.with_selinux:
                 self.cpp_info.components["gio-2.0"].requires.append("libselinux::libselinux")
+        if self.settings.os != "Windows":
+            self.cpp_info.components["gio-unix-2.0"].libs = ["gio-2.0"]
+            self.cpp_info.components["gio-unix-2.0"].requires.extend(["gobject-2.0", "gio-2.0"])
+            self.cpp_info.components["gio-unix-2.0"].includedirs = [os.path.join("include", "gio-unix-2.0")]
 
         self.cpp_info.components["gresource"].libs = [] # this is actualy an executable
         self.cpp_info.components["gresource"].requires.append("libelf::libelf") # this is actualy an executable
