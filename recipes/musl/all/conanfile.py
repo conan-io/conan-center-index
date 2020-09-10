@@ -30,8 +30,8 @@ class MuslConan(ConanFile):
     def configure(self):
         if self.settings.os != "Linux":
             raise ConanInvalidConfiguration("musl is only supported on Linux.")
-        if self.settings.compiler != ["gcc", "clang"]:
-            raise ConanInvalidConfiguration("musl is only supported on Linux.")
+        if str(self.settings.compiler) not in ["gcc", "clang"]:
+            raise ConanInvalidConfiguration("musl is only supported with GCC and Clang.")
         if self.options.shared:
             del self.options.fPIC
         del self.settings.compiler.cppstd
@@ -89,4 +89,4 @@ class MuslConan(ConanFile):
             self.env_info.CXX = musl_cxx
         if musl_ld is not None:
             self.output.info("Setting LD to '{}'".format(musl_ld))
-            self.env_info.CXX = musl_ld
+            self.env_info.LD = musl_ld
