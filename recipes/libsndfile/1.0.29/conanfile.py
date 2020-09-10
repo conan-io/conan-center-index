@@ -104,7 +104,7 @@ class LibsndfileConan(ConanFile):
                 self.cpp_info.components["sndfile"].system_libs = ["m", "dl", "pthread", "rt"]
             elif self.settings.os == "Windows":
                 self.cpp_info.components["sndfile"].system_libs.append("winmm")
-        if self.options.with_alsa:
+        if self.options.get_safe("with_alsa"):
             self.cpp_info.components["sndfile"].requires.append("libalsa::libalsa")
         if self.options.with_sqlite:
             self.cpp_info.components["sndfile"].requires.append("sqlite3::sqlite3")
