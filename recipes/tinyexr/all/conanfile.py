@@ -11,14 +11,14 @@ class TinyExrConan(ConanFile):
     license = "BSD-3-Clause"
     topics = ("conan", "exr", "header-only")
     options = {
-        "with_miniz": [True, False],
+        "with_z": ["zlib", "miniz"],
         "with_piz": [True, False],
         "with_zfp": [True, False],
         "with_thread": [True, False],
         "with_openmp": [True, False],
     }
     default_options = {
-        "with_miniz": True,
+        "with_z": "miniz",
         "with_piz": True,
         "with_zfp": False,
         "with_thread": False,
@@ -31,7 +31,7 @@ class TinyExrConan(ConanFile):
         return "source_subfolder"
 
     def requirements(self):
-        if not self.options.with_miniz:
+        if not self.options.with_z == "miniz":
             self.requires("zlib/1.2.11")
         if self.options.with_zfp:
             self.requires("zfp/0.5.5")
@@ -56,14 +56,12 @@ class TinyExrConan(ConanFile):
     def package(self):
         tools.save(os.path.join(self.package_folder, "licenses", "LICENSE"), self._extracted_license)
         self.copy("tinyexr.h", dst="include", src=self._source_subfolder)
-        self._extract_license()
-        self.copy("LICENSE", dst="licenses")
 
     def package_id(self):
         self.info.header_only()
 
     def package_info(self):
-        self.cpp_info.defines.append("TINYEXR_USE_MINIZ=" + ( "1" if self.options.with_miniz else "0"))
+        self.cpp_info.defines.append("TINYEXR_USE_MINIZ=" + ( "1" if self.options.with_z == "miniz" else "0"))
         self.cpp_info.defines.append("TINYEXR_USE_PIZ=" + ( "1" if self.options.with_piz else "0"))
         self.cpp_info.defines.append("TINYEXR_USE_ZFP=" + ( "1" if self.options.with_zfp else "0"))
         self.cpp_info.defines.append("TINYEXR_USE_THREAD=" + ( "1" if self.options.with_zfp else "0"))
