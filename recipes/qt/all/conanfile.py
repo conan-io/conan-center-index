@@ -190,26 +190,26 @@ class QtConan(ConanFile):
             self.options.opengl = ("dynamic" if self.settings.os == "Windows" else "desktop")
         if self.settings.os != 'Linux':
             #     self.options.with_libiconv = False # QTBUG-84708
-            self.options.with_fontconfig = False
+            del self.options.with_fontconfig
 
         if self.options.widgets and not self.options.GUI:
             raise ConanInvalidConfiguration("using option qt:widgets without option qt:GUI is not possible. "
                                             "You can either disable qt:widgets or enable qt:GUI")
         if not self.options.GUI:
-            self.options.opengl = "no"
-            self.options.with_vulkan = False
-            self.options.with_freetype = False
-            self.options.with_fontconfig = False
-            self.options.with_harfbuzz = False
-            self.options.with_libjpeg = False
-            self.options.with_libpng = False
+            del self.options.opengl
+            del self.options.with_vulkan
+            del self.options.with_freetype
+            del self.options.with_fontconfig
+            del self.options.with_harfbuzz
+            del self.options.with_libjpeg
+            del self.options.with_libpng
 
         if not self.options.qtmultimedia:
-            self.options.with_libalsa = False
-            self.options.with_openal = False
+            del self.options.with_libalsa
+            del self.options.with_openal
 
         if self.settings.os != "Linux":
-            self.options.with_libalsa = False
+            del self.options.with_libalsa
 
         if self.options.qtwebengine:
             if not self.options.shared:
@@ -221,13 +221,13 @@ class QtConan(ConanFile):
             if self.settings.compiler == "gcc" and tools.Version(self.settings.compiler.version) < "5":
                 raise ConanInvalidConfiguration("Compiling Qt WebEngine with gcc < 5 is not supported")
 
-        if self.settings.os == "Android" and self.options.opengl == "desktop":
+        if self.settings.os == "Android" and self.options.get_safe("opengl", "no") == "desktop":
             raise ConanInvalidConfiguration("OpenGL desktop is not supported on Android. Consider using OpenGL es2")
 
-        if self.settings.os != "Windows" and self.options.opengl == "dynamic":
+        if self.settings.os != "Windows" and self.options.get_safe("opengl", "no") == "dynamic":
             raise ConanInvalidConfiguration("Dynamic OpenGL is supported only on Windows.")
 
-        if self.options.with_fontconfig and not self.options.with_freetype:
+        if self.options.get_safe("with_fontconfig", False) and not self.options.get_safe("with_freetype", False):
             raise ConanInvalidConfiguration("with_fontconfig cannot be enabled if with_freetype is disabled.")
 
         if self.settings.os == "Macos":
@@ -266,17 +266,17 @@ class QtConan(ConanFile):
         #     self.requires("libiconv/1.16")# QTBUG-84708
         if self.options.with_doubleconversion and not self.options.multiconfiguration:
             self.requires("double-conversion/3.1.5")
-        if self.options.with_freetype and not self.options.multiconfiguration:
+        if self.options.get_safe("with_freetype", False) and not self.options.multiconfiguration:
             self.requires("freetype/2.10.2")
-        if self.options.with_fontconfig:
+        if self.options.get_safe("with_fontconfig", False):
             self.requires("fontconfig/2.13.91")
         if self.options.get_safe("with_icu", False):
             self.requires("icu/64.2")
-        if self.options.with_harfbuzz and not self.options.multiconfiguration:
+        if self.options.get_safe("with_harfbuzz", False) and not self.options.multiconfiguration:
             self.requires("harfbuzz/2.6.8")
-        if self.options.with_libjpeg and not self.options.multiconfiguration:
+        if self.options.get_safe("with_libjpeg", False) and not self.options.multiconfiguration:
             self.requires("libjpeg/9d")
-        if self.options.with_libpng and not self.options.multiconfiguration:
+        if self.options.get_safe("with_libpng", False) and not self.options.multiconfiguration:
             self.requires("libpng/1.6.37")
         if self.options.with_sqlite3 and not self.options.multiconfiguration:
             self.requires("sqlite3/3.32.2")
@@ -288,15 +288,15 @@ class QtConan(ConanFile):
         if self.options.with_odbc:
             if self.settings.os != "Windows":
                 self.requires("odbc/2.3.7")
-        if self.options.with_openal:
+        if self.options.get_safe("with_openal", False):
             self.requires("openal/1.19.1")
-        if self.options.with_libalsa:
+        if self.options.get_safe("with_libalsa", False):
             self.requires("libalsa/1.1.9")
         if self.options.GUI and self.settings.os == "Linux":
             self.requires("xorg/system")
             if not tools.cross_building(self, skip_x64_x86=True):
                 self.requires("xkbcommon/0.10.0")
-        if self.options.opengl != "no":
+        if self.options.get_safe("opengl", "no") != "no":
             self.requires("opengl/system")
         if self.options.with_zstd:
             self.requires("zstd/1.4.5")
@@ -447,16 +447,17 @@ class QtConan(ConanFile):
         args.append("--zlib=system")
 
         # openGL
-        if self.options.opengl == "no":
+        opengl = self.options.get_safe("opengl", "no")
+        if opengl == "no":
             args += ["-no-opengl"]
-        elif self.options.opengl == "es2":
+        elif opengl == "es2":
             args += ["-opengl es2"]
-        elif self.options.opengl == "desktop":
+        elif opengl == "desktop":
             args += ["-opengl desktop"]
-        elif self.options.opengl == "dynamic":
+        elif opengl == "dynamic":
             args += ["-opengl dynamic"]
 
-        if self.options.with_vulkan:
+        if self.options.get_safe("with_vulkan", False):
             args.append("-vulkan")
         else:
             args.append("-no-vulkan")
@@ -474,7 +475,7 @@ class QtConan(ConanFile):
 
         args.append("--glib=" + ("yes" if self.options.with_glib else "no"))
         args.append("--pcre=" + ("system" if self.options.with_pcre2 else "qt"))
-        args.append("--fontconfig=" + ("yes" if self.options.with_fontconfig else "no"))
+        args.append("--fontconfig=" + ("yes" if self.options.get_safe("with_fontconfig", False) else "no"))
         args.append("--icu=" + ("yes" if self.options.get_safe("with_icu", False) else "no"))
         args.append("--sql-mysql=" + ("yes" if self.options.get_safe("with_mysql", False) else "no"))
         args.append("--sql-psql=" + ("yes" if self.options.with_pq else "no"))
@@ -482,7 +483,7 @@ class QtConan(ConanFile):
         args.append("--zstd=" + ("yes" if self.options.with_zstd else "no"))
 
         if self.options.qtmultimedia:
-            args.append("--alsa=" + ("yes" if self.options.with_libalsa else "no"))
+            args.append("--alsa=" + ("yes" if self.options.get_safe("with_libalsa", False) else "no"))
 
         for opt, conf_arg in [
                               ("with_doubleconversion", "doubleconversion"),
@@ -491,7 +492,7 @@ class QtConan(ConanFile):
                               ("with_libjpeg", "libjpeg"),
                               ("with_libpng", "libpng"),
                               ("with_sqlite3", "sqlite")]:
-            if getattr(self.options, opt):
+            if getattr(self.options, opt, False):
                 if self.options.multiconfiguration:
                     args += ["-qt-" + conf_arg]
                 else:
