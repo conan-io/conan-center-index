@@ -356,8 +356,8 @@ class QtConan(ConanFile):
                 return "macx-tvos-clang"
 
         elif self.settings.os == "Android":
-            return {"clang": "android-clang",
-                    "gcc": "android-g++"}.get(str(self.settings.compiler))
+            if self.settings.compiler == "clang":
+                return "android-clang"
 
         elif self.settings.os == "Windows":
             return {"Visual Studio": "win32-msvc",
