@@ -45,14 +45,16 @@ class TinyExrConan(ConanFile):
         extracted_dir = glob.glob('tinyexr-*/')[0]
         os.rename(extracted_dir, self._source_subfolder)
 
-    def _extract_license(self):
+    @property
+    def _extracted_license(self):
         content_lines = open(os.path.join(self.source_folder, self._source_subfolder, "tinyexr.h")).readlines()
         license_content = []
-        for i in range(1, 25):
+        for i in range(3, 27):
             license_content.append(content_lines[i][:-1])
-        tools.save("LICENSE", "\n".join(license_content))
+        return "\n".join(license_content)
 
     def package(self):
+        tools.save(os.path.join(self.package_folder, "licenses", "LICENSE"), self._extracted_license)
         self.copy("tinyexr.h", dst="include", src=self._source_subfolder)
         self._extract_license()
         self.copy("LICENSE", dst="licenses")
