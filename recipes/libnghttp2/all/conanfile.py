@@ -104,6 +104,19 @@ class Nghttp2Conan(ConanFile):
                               "\n"
                               "link_libraries(\n"
                               "  {} ${{CONAN_LIBS}}\n".format(target_libnghttp2))
+        if not self.options.shared:
+            tools.replace_in_file(os.path.join(self._source_subfolder, "src", "CMakeLists.txt"),
+                                  "\n"
+                                  "  add_library(nghttp2_asio SHARED\n",
+                                  "\n"
+                                  "  add_library(nghttp2_asio\n")
+            tools.replace_in_file(os.path.join(self._source_subfolder, "src", "CMakeLists.txt"),
+                                  "\n"
+                                  "  target_link_libraries(nghttp2_asio\n"
+                                  "    nghttp2\n",
+                                  "\n"
+                                  "  target_link_libraries(nghttp2_asio\n"
+                                  "    {}\n".format(target_libnghttp2))
 
     def build(self):
         self._patch_sources()
