@@ -216,11 +216,9 @@ class LibcurlConan(ConanFile):
         params.append("--without-libpsl" if not self.options.with_libpsl else "--with-libpsl")
 
         if self.options.with_ssl == "openssl":
-            openssl_path = self.deps_cpp_info["openssl"].rootpath.replace("\\", "/")
-            params.append("--with-ssl=%s" % openssl_path)
+            params.append("--with-ssl={}".format(tools.unix_path(self.deps_cpp_info["openssl"].rootpath)))
         elif self.options.with_ssl == "wolfssl":
-            wolfssl_path = self.deps_cpp_info["wolfssl"].rootpath.replace("\\", "/")
-            params.append("--with-wolfssl=%s" % wolfssl_path)
+            params.append("--with-wolfssl={}".format(tools.unix_path(self.deps_cpp_info["wolfssl"].rootpath)))
             params.append("--without-ssl")
         elif self.options.with_ssl == "schannel":
             params.append("--with-schannel")
@@ -232,17 +230,17 @@ class LibcurlConan(ConanFile):
             params.append("--without-ssl")
 
         if self.options.with_libssh2:
-            params.append("--with-libssh2=%s" % self.deps_cpp_info["libssh2"].lib_paths[0].replace("\\", "/"))
+            params.append("--with-libssh2={}".format(tools.unix_path(self.deps_cpp_info["libssh2"].lib_paths[0])))
         else:
             params.append("--without-libssh2")
 
         if self.options.with_nghttp2:
-            params.append("--with-nghttp2=%s" % self.deps_cpp_info["libnghttp2"].rootpath.replace("\\", "/"))
+            params.append("--with-nghttp2={}".format(tools.unix_path(self.deps_cpp_info["libnghttp2"].rootpath)))
         else:
             params.append("--without-nghttp2")
 
         if self.options.with_zlib:
-            params.append("--with-zlib=%s" % self.deps_cpp_info["zlib"].lib_paths[0].replace("\\", "/"))
+            params.append("--with-zlib={}".format(tools.unix_path(self.deps_cpp_info["zlib"].lib_paths[0])))
         else:
             params.append("--without-zlib")
 
