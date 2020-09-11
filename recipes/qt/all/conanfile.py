@@ -526,14 +526,14 @@ class QtConan(ConanFile):
                 args.append("\"%s_LIBS=%s\"" % (var, " ".join(self._gather_libs(package))))
 
         for package in self.deps_cpp_info.deps:
-            args += ["-I " + s for s in self.deps_cpp_info[package].include_paths]
-            args += ["-D " + s for s in self.deps_cpp_info[package].defines]
-            args += ["-L " + s for s in self.deps_cpp_info[package].lib_paths]
+            args += ["-I \"%s\"" % s for s in self.deps_cpp_info[package].include_paths]
+            args += ["-D %s" % s for s in self.deps_cpp_info[package].defines]
+            args += ["-L \"%s\"" % s for s in self.deps_cpp_info[package].lib_paths]
 
         if 'libmysqlclient' in self.deps_cpp_info.deps:
-            args.append("-mysql_config " + os.path.join(self.deps_cpp_info['libmysqlclient'].rootpath, "bin", "mysql_config"))
+            args.append("-mysql_config \"%s\"" % os.path.join(self.deps_cpp_info['libmysqlclient'].rootpath, "bin", "mysql_config"))
         if 'libpq' in self.deps_cpp_info.deps:
-            args.append("-psql_config " + os.path.join(self.deps_cpp_info['libpq'].rootpath, "bin", "pg_config"))
+            args.append("-psql_config \"%s\"" % os.path.join(self.deps_cpp_info['libpq'].rootpath, "bin", "pg_config"))
         if self.settings.os == "Macos":
             args += ["-no-framework"]
         elif self.settings.os == "Android":
