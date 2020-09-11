@@ -24,6 +24,7 @@ class TinyExrConan(ConanFile):
         "with_thread": False,
         "with_openmp": False,
     }
+    exports_sources = "patches/**"
     no_copy_source = True
 
     @property
@@ -31,7 +32,9 @@ class TinyExrConan(ConanFile):
         return "source_subfolder"
 
     def requirements(self):
-        if not self.options.with_z == "miniz":
+        if self.options.with_z == "miniz":
+            self.requires("miniz/2.1.0")
+        else:
             self.requires("zlib/1.2.11")
         if self.options.with_zfp:
             self.requires("zfp/0.5.5")
@@ -44,6 +47,8 @@ class TinyExrConan(ConanFile):
         tools.get(**self.conan_data["sources"][self.version])
         extracted_dir = glob.glob('tinyexr-*/')[0]
         os.rename(extracted_dir, self._source_subfolder)
+        for patch in self.conan_data["patches"].get(self.version, []):
+            tools.patch(**patch)
 
     @property
     def _extracted_license(self):

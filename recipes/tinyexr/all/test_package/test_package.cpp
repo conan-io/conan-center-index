@@ -6,10 +6,6 @@
 #endif
 #endif
 
-#if !TINYEXR_USE_MINIZ
-#include "zlib.h"
-#endif
-
 #define TINYEXR_IMPLEMENTATION
 #include "tinyexr.h"
 
