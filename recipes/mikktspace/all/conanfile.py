@@ -3,7 +3,7 @@ import glob
 from conans import ConanFile, CMake, tools
 
 
-class TgbotConan(ConanFile):
+class MikkTSpaceConan(ConanFile):
     name = "mikktspace"
     description = " A common standard for tangent space used in baking tools to produce normal maps."
     homepage = "https://github.com/mmikk/MikkTSpace"
@@ -71,3 +71,5 @@ class TgbotConan(ConanFile):
 
     def package_info(self):
         self.cpp_info.libs = ["mikktspace"]
+        if self.settings.os == "Linux":
+            self.cpp_info.system_libs = ["m"]
