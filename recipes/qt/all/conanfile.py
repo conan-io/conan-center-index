@@ -90,7 +90,7 @@ class QtConan(ConanFile):
 
     no_copy_source = True
     default_options = {
-        "shared": True,
+        "shared": False,
         "commercial": False,
         "opengl": "auto",
         "with_vulkan": False,
