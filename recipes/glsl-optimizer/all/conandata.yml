@@ -2,3 +2,7 @@ sources:
   "cci.20200323":
     url: "https://github.com/aras-p/glsl-optimizer/archive/d78c3d2f249aa870368ad320905bc954c47704f6.tar.gz"
     sha256: "c1721f4c400082119482d8537c2d423a5af00981be3acc2d6f19dcea2a2b3aee"
+patches:
+  "cci.20200323":
+    - patch_file: "patches/cmake-compiler-flags.patch"
+      base_path: "source_subfolder"

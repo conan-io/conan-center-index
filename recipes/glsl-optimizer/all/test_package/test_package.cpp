@@ -1,8 +1,8 @@
 #include <glsl_optimizer.h>
 
 int main() {
-    // Simple way to referencing the function to make sure stuff are linked correctly
-    glslopt_ctx*(*ptr)(glslopt_target) = glslopt_initialize;
+	glslopt_ctx* ctx = glslopt_initialize(kGlslTargetOpenGL);
+	glslopt_cleanup(ctx);
     return 0;
 }
 
