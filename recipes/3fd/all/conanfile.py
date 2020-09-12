@@ -67,7 +67,6 @@ class ThreeFDConan(ConanFile):
         if self._cmake:
             return self._cmake
         self._cmake = CMake(self)
-        self._cmake.definitions["CMAKE_CXX_STANDARD"] = 17
         self._cmake.configure(build_folder=self._build_subfolder)
         return self._cmake
 
