@@ -10,6 +10,9 @@ endif()
 
 add_library(mikktspace ${CMAKE_CURRENT_SOURCE_DIR}/source_subfolder/mikktspace.c)
 target_include_directories(mikktspace PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/source_subfolder)
+if(CMAKE_HOST_SYSTEM_NAME MATCHES "Linux")
+    target_link_libraries(mikktspace PRIVATE m)
+endif()
 
 install(TARGETS mikktspace
     RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
