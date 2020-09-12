@@ -1,7 +1,7 @@
 #include "test_module.hpp"
 
 class mod2 : public my_extension {
-    int expensive_operation(const int nb) const override {
+    int expensive_operation(int nb) const override {
         return nb * nb;
     }
 };
