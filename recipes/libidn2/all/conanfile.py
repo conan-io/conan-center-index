@@ -20,6 +20,7 @@ class LibIdn(ConanFile):
         "fPIC": True,
     }
     settings = "os", "arch", "compiler", "build_type"
+    exports_sources = "patches/**"
 
     _autotools = None
 
@@ -89,6 +90,8 @@ class LibIdn(ConanFile):
         return self._autotools
 
     def build(self):
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            tools.patch(**patch)
         with self._build_context():
             autotools = self._configure_autotools()
             autotools.make()
@@ -117,5 +120,3 @@ class LibIdn(ConanFile):
         bin_path = os.path.join(self.package_folder, "bin")
         self.output.info("Appending PATH environment variable: {}".format(bin_path))
         self.env_info.PATH.append(bin_path)
-
-
