@@ -8,7 +8,7 @@ class MikkTSpaceConan(ConanFile):
     description = " A common standard for tangent space used in baking tools to produce normal maps."
     homepage = "https://github.com/mmikk/MikkTSpace"
     url = "https://github.com/conan-io/conan-center-index"
-    license = "MIT"
+    license = "Zlib"
     topics = ("conan", "tangent", "space", "normal")
 
     settings = "os", "arch", "compiler", "build_type"
