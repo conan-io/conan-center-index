@@ -40,7 +40,7 @@ class TinyExrConan(ConanFile):
             self.requires("zfp/0.5.5")
 
     def configure(self):
-        if self.options.with_thread:
+        if self.options.with_thread and self.settings.compiler.get_safe("cppstd") :
             tools.check_min_cppstd(self, "11")
 
     def source(self):
