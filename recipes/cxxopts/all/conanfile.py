@@ -13,10 +13,14 @@ class CxxOptsConan(ConanFile):
     options = { "unicode": [True, False] }
     default_options = { "unicode": False }
     no_copy_source = True
-    _source_subfolder = "source_subfolder"
+    
+    @property
+    def _source_subfolder(self):
+        return "source_subfolder"
 
     def configure(self):
-        tools.check_min_cppstd(self, "11")
+        if self.settings.compiler.get_safe("cppstd"):
+            tools.check_min_cppstd(self, "11")
 
     def requirements(self):
         if self.options.unicode:
