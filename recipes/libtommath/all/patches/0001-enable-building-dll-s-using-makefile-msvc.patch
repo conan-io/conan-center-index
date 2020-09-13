@@ -69,7 +69,20 @@
  #endif
  
  #if defined(_WIN32) || defined(_WIN32_WCE)
-@@ -73,6 +79,14 @@
+@@ -46,6 +46,12 @@
+    }
+    return CryptGenRandom(hProv, (DWORD)n, (BYTE *)p) == TRUE ? MP_OKAY : MP_ERR;
+ }
++#else
++static mp_err s_read_wincsp(void *p, size_t n)
++{
++    (void)p; (void)n;
++    return MP_ERR;
++}
+ #endif /* WIN32 */
+ 
+ #if !defined(BN_S_READ_WINCSP_C) && defined(__linux__) && defined(__GLIBC_PREREQ)
+@@ -73,6 +85,14 @@
  #endif
  #endif
  
@@ -84,7 +97,7 @@
  /* We assume all platforms besides windows provide "/dev/urandom".
   * In case yours doesn't, define MP_NO_DEV_URANDOM at compile-time.
   */
-@@ -111,6 +125,12 @@
+@@ -111,6 +131,12 @@
     close(fd);
     return MP_OKAY;
  }
@@ -97,6 +110,19 @@
  #endif
  
  #if defined(MP_PRNG_ENABLE_LTM_RNG)
+@@ -126,6 +132,12 @@
+    if (res != n) return MP_ERR;
+    return MP_OKAY;
+ }
++#else
++static mp_err s_read_ltm_rng(void *p, size_t n)
++{
++    (void)p; (void)n;
++    return MP_ERR;
++}
+ #endif
+ 
+ mp_err s_read_arc4random(void *p, size_t n);
 --- tommath.def
 +++ tommath.def
 @@ -102,6 +102,7 @@
