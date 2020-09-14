@@ -26,6 +26,8 @@ class FontconfigConan(ConanFile):
             self.requires("libuuid/1.0.3")
 
     def configure(self):
+        if tools.Version(self.version) < "2.13.92" and self.settings.os == "Windows":
+            raise ConanInvalidConfiguration("Windows builds are not supported in versions < 2.13.92")
         del self.settings.compiler.libcxx
         del self.settings.compiler.cppstd
 
