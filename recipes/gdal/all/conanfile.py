@@ -180,6 +180,11 @@ class GdalConan(ConanFile):
             del self.options.with_png  # and it's not trivial to fix
         else:
             del self.options.with_libiconv
+        self._strict_options_requirements()
+
+    def _strict_options_requirements(self):
+        if self.options.with_qhull:
+            self.options["qhull"].reentrant = False
 
     def requirements(self):
         self.requires("json-c/0.14")
@@ -297,6 +302,10 @@ class GdalConan(ConanFile):
         #     self.requires("lerc/2.1") # TODO: use conan recipe (not possible yet because lerc API is broken for GDAL)
         if self.options.get_safe("with_exr"):
             self.requires("openexr/2.5.2")
+
+    def _validate_dependency_graph(self):
+        if self.options.with_qhull and self.options["qhull"].reentrant:
+            raise ConanInvalidConfiguration("gdal depends on non-reentrant qhull.")
 
     def build_requirements(self):
         if tools.os_info.is_windows and self.settings.compiler != "Visual Studio" and \
@@ -604,6 +613,7 @@ class GdalConan(ConanFile):
         return self._autotools
 
     def build(self):
+        self._validate_dependency_graph()
         self._patch_sources()
         if self.settings.compiler == "Visual Studio":
             with tools.chdir(self._source_subfolder):
