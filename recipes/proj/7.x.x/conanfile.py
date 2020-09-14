@@ -2,6 +2,8 @@ import os
 
 from conans import ConanFile, CMake, tools, RunEnvironment
 
+required_conan_version = ">=1.28.0"
+
 class ProjConan(ConanFile):
     name = "proj"
     description = "Cartographic Projections and Coordinate Transformations Library."
@@ -98,7 +100,8 @@ class ProjConan(ConanFile):
         tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
 
     def package_info(self):
-        # TODO: also define deprecated PROJ4::proj alias?
+        self.cpp_info.filenames["cmake_find_package"] = "proj"
+        self.cpp_info.filenames["cmake_find_package_multi"] = "proj"
         self.cpp_info.names["cmake_find_package"] = "PROJ"
         self.cpp_info.names["cmake_find_package_multi"] = "PROJ"
         self.cpp_info.components["projlib"].names["cmake_find_package"] = "proj"
