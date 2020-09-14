@@ -2,7 +2,7 @@ from conans import ConanFile, CMake, tools
 import os
 
 
-class QuickfixConan(ConanFile):
+class HdrhistogramcConan(ConanFile):
     name = "hdrhistogram-c"
     license = ("BSD-2-Clause", "CC0-1.0")
     url = "https://github.com/conan-io/conan-center-index"
