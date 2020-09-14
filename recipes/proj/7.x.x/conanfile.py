@@ -51,7 +51,10 @@ class ProjConan(ConanFile):
         if self.options.with_tiff:
             self.requires("libtiff/4.1.0")
         if self.options.with_curl:
-            self.requires("libcurl/7.71.0")
+            self.requires("libcurl/7.72.0")
+
+    def build_requirements(self):
+        self.build_requires("sqlite3/3.32.3")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
