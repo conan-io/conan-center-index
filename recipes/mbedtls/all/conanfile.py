@@ -8,15 +8,15 @@ class MBedTLSConan(ConanFile):
     topics = ("conan", "mbedtls", "polarssl", "tls", "security")
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://tls.mbed.org"
-    license = ("GPL-2.0","Apache-2.0",)
+    license = ("GPL-2.0", "Apache-2.0",)
     exports_sources = "CMakeLists.txt", "patches/**"
     generators = "cmake"
     settings = "os", "compiler", "build_type", "arch"
-    options = {"shared": [True, False],"fPIC": [True, False],"with_zlib": [True, False]}
-    default_options = {"shared": False,"fPIC": True,"with_zlib": True}
-    
+    options = {"shared": [True, False], "fPIC": [True, False], "with_zlib": [True, False]}
+    default_options = {"shared": False, "fPIC": True, "with_zlib": True}
+
     _cmake = None
-    
+
     @property
     def _source_subfolder(self):
         return "source_subfolder"
@@ -30,10 +30,12 @@ class MBedTLSConan(ConanFile):
         return self.version.rsplit("-", 1)[1]
 
     def config_options(self):
-        if self.settings.os == "Windows" or self.options.shared:
+        if self.settings.os == "Windows":
             del self.options.fPIC
 
     def configure(self):
+        if self.options.shared:
+            del self.options.fPIC
         del self.settings.compiler.cppstd
         del self.settings.compiler.libcxx
         if tools.Version(self.version) >= "2.23.0":
@@ -46,7 +48,7 @@ class MBedTLSConan(ConanFile):
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
         extracted_dir = "{}-{}".format(self.name, self._version)
-        if tools.Version(self.version) >= "2.23.0": # mbedtls-X.X.X went to mbedtls-mbedtls-X.X.X
+        if tools.Version(self.version) >= "2.23.0": # went to mbedtls-mbedtls-X.X.X
             extracted_dir = "{}-{}".format(self.name, extracted_dir)
         os.rename(extracted_dir, self._source_subfolder)
 
@@ -69,15 +71,17 @@ class MBedTLSConan(ConanFile):
 
     def package(self):
         self.copy("LICENSE", src=os.path.join(self.source_folder, self._source_subfolder), dst="licenses")
-        if self._license == "gpl":
-            self.copy("gpl-2.0.txt", src=os.path.join(self.source_folder, self._source_subfolder), dst="licenses")
-        else:
-            self.copy("apache-2.0.txt", src=os.path.join(self.source_folder, self._source_subfolder), dst="licenses")
+        if tools.Version(self.version) < "2.23.0": # less then 2.23 is multi-licensed
+            if self._license == "gpl":
+                self.copy("gpl-2.0.txt", src=os.path.join(self.source_folder, self._source_subfolder), dst="licenses")
+            else:
+                self.copy("apache-2.0.txt", src=os.path.join(self.source_folder, self._source_subfolder), dst="licenses")
         cmake = self._configure_cmake()
         cmake.install()
         tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
 
     def package_info(self):
-        self.cpp_info.names["cmake_find_package"] = "MbedTLS" # TBD: I can not find this in the repo
+        # https://gitlab.kitware.com/cmake/cmake/blob/de7c21d677db1ddaeece03c19e13e448f4031511/CMakeLists.txt#L380
+        self.cpp_info.names["cmake_find_package"] = "MbedTLS"
         self.cpp_info.names["cmake_find_package_multi"] = "MbedTLS"
         self.cpp_info.libs = ["mbedtls", "mbedx509", "mbedcrypto"]
