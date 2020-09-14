@@ -1,4 +1,5 @@
 from conans import CMake, ConanFile, tools
+from conans.errors import ConanInvalidConfiguration
 import os
 
 
@@ -23,6 +24,17 @@ class DoxygenConan(ConanFile):
     @property
     def _build_subfolder(self):
         return "build_subfolder"
+
+    _minimum_compiler_version = {
+        "gcc": 5,
+    }
+
+    def configure(self):
+        minimum_compiler_version = self._minimum_compiler_version.get(str(self.settings.compiler))
+        if minimum_compiler_version is not None:
+            if tools.Version(self.settings.compiler.version) < minimum_compiler_version:
+                raise ConanInvalidConfiguration("Compiler version too old. At least {} is required.".format(minimum_compiler_version))
+        del self.settings.compiler.cppstd
 
     def requirements(self):
         self.requires("xapian-core/1.4.16")
@@ -51,6 +63,10 @@ class DoxygenConan(ConanFile):
         return self._cmake
 
     def build(self):
+        if os.path.isfile("Findflex.cmake"):
+            os.unlink("Findflex.cmake")
+        if os.path.isfile("Findbison.cmake"):
+            os.unlink("Findbison.cmake")
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
             tools.patch(**patch)
         cmake = self._configure_cmake()
