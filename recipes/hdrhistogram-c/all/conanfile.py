@@ -23,10 +23,6 @@ class HdrhistogramcConan(ConanFile):
     def _source_subfolder(self):
         return "source_subfolder"
 
-    @property
-    def _build_subfolder(self):
-        return "build_subfolder"
-
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
@@ -53,7 +49,7 @@ class HdrhistogramcConan(ConanFile):
             self._cmake.definitions["HDR_HISTOGRAM_BUILD_STATIC"] = not self.options.shared
             self._cmake.definitions["HDR_HISTOGRAM_INSTALL_STATIC"] = not self.options.shared
             self._cmake.definitions["CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS"] = self.options.shared
-            self._cmake.configure(build_dir=self._build_subfolder)
+            self._cmake.configure()
         return self._cmake
 
     def build(self):
