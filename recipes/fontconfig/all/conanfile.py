@@ -6,7 +6,6 @@ from conans.errors import ConanInvalidConfiguration
 
 
 class FontconfigConan(ConanFile):
-    version = "2.13.92"
     name = "fontconfig"
     license = "MIT"
     url = "https://github.com/conan-io/conan-center-index"
