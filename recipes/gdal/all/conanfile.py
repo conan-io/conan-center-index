@@ -299,12 +299,12 @@ class GdalConan(ConanFile):
             self.requires("openexr/2.5.2")
 
     def build_requirements(self):
-        if self.settings.os == "Windows" and self.settings.compiler != "Visual Studio" and \
-           "CONAN_BASH_PATH" not in os.environ and tools.os_info.detect_windows_subsystem() != "msys2":
+        if tools.os_info.is_windows and self.settings.compiler != "Visual Studio" and \
+           not tools.get_env("CONAN_BASH_PATH") and tools.os_info.detect_windows_subsystem() != "msys2":
             self.build_requires("msys2/20200517")
-        if self.settings.os == "Linux":
-            self.build_requires("autoconf/2.69")
+        if not tools.os_info.is_windows:
             self.build_requires("libtool/2.4.6")
+            self.build_requires("pkgconf/1.7.3")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
