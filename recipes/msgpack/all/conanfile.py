@@ -121,7 +121,7 @@ class MsgpackConan(ConanFile):
             self.copy("*.hpp", dst="include", src=os.path.join(self._source_subfolder, "include"))
 
     def package_info(self):
-        # TODO: CMake imported targets shouldn't be namespaced
+        # TODO: CMake imported targets shouldn't be namespaced (waiting implementation of https://github.com/conan-io/conan/issues/7615)
         if self.options.c_api:
             self.cpp_info.components["msgpackc"].names["cmake_find_package"] = "msgpackc"
             self.cpp_info.components["msgpackc"].names["cmake_find_package_multi"] = "msgpackc"
