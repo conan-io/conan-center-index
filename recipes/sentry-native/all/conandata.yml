@@ -2,4 +2,24 @@ sources:
   "0.2.6":
     url: "https://github.com/getsentry/sentry-native/archive/0.2.6.tar.gz"
     sha256: "e96ed2dee226b978a2d2de552a8d4b8a578bd5990de1c41bf23add455eef597a"
-
+  "0.3.0":
+    url: "https://github.com/getsentry/sentry-native/archive/0.3.0.tar.gz"
+    sha256: "dca57892ab132c3ff3488f269ef0df7b7ecefc26990ab48dfb57de3ed2d459ec"
+  "0.3.1":
+    url: "https://github.com/getsentry/sentry-native/archive/0.3.1.tar.gz"
+    sha256: "edf8ebcb6af87185fd461f7c169e6a255a261558e90d4ddfc40e04e242a3bce4"
+  "0.3.2":
+    url: "https://github.com/getsentry/sentry-native/archive/0.3.2.tar.gz"
+    sha256: "49f1c02a61e01e14a7bcd15364c8ff38eb40639b7ab7351835f346362edcbff8"
+  "0.3.3":
+    url: "https://github.com/getsentry/sentry-native/archive/0.3.3.tar.gz"
+    sha256: "9ef4b3f0f06e0b9964bf347ab4db30844806021d3d04c6283e0fb298e2aa89dd"
+  "0.3.4":
+    url: "https://github.com/getsentry/sentry-native/archive/0.3.4.tar.gz"
+    sha256: "81d3176ea0d62d7bc305c42a03aa54b734729026045822306c58c4d2f8caa752"
+  "0.4.0":
+    url: "https://github.com/getsentry/sentry-native/archive/0.4.0.tar.gz"
+    sha256: "0185bddf37296b2147cb71559ec59f467ac0709cfba9ffac7d7f143864d795e9"
+  "0.4.1":
+    url: "https://github.com/getsentry/sentry-native/archive/0.4.1.tar.gz"
+    sha256: "a7d04fe9b9175c30a58ce20ae23b510595045a66884a447dd21ff2d0c749751b"
