@@ -27,8 +27,8 @@ class CxxOptsConan(ConanFile):
     def _minimum_compilers_version(self):
         return {
             "Visual Studio": "14",
-            "gcc": "5",
-            "clang": "3.8",
+            "gcc": "6",
+            "clang": "4",
             "apple-clang": "8",
         }
 
