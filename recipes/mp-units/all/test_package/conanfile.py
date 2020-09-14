@@ -9,7 +9,7 @@ class TestPackageConan(ConanFile):
     
     # TODO remove when https://github.com/conan-io/conan/issues/7680 is solved (or VS2019 is updated to at least 16.7)
     def _skip_check(self):
-        return self.settings.compiler == "Visual Studio" and Version(self.settings.compiler.version) <= 16
+        return self.settings.compiler == "Visual Studio" and Version(self.settings.compiler.version) <= "16"
 
     def build(self):
         if self._skip_check():
