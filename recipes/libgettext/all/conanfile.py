@@ -123,7 +123,7 @@ class GetTextConan(ConanFile):
 
     def package_info(self):
         if self._is_msvc and self.options.shared:
-            self.cpp_info.libs = ["gnuintl.dll.lib"]
+            self.cpp_info.libs = ["gnuintl.dll"]
         else:
             self.cpp_info.libs = ["gnuintl"]
         if self.settings.os == "Macos":
