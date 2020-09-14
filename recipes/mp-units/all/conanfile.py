@@ -33,11 +33,14 @@ class MPUnitsConan(ConanFile):
         if compiler == "gcc":
             if version < "10.0":
                 raise ConanInvalidConfiguration("mp-units requires at least g++-10")
-        elif compiler == "Visual Studio":
-            if version < "16":
-                raise ConanInvalidConfiguration("mp-units requires at least MSVC 16")
+        # TODO Uncomment when https://github.com/conan-io/conan/issues/7680 is resolved
+        # elif compiler == "Visual Studio":
+        #     if version < "16":
+        #         raise ConanInvalidConfiguration("mp-units requires at least MSVC 16")
+        # else:
+        #     raise ConanInvalidConfiguration("mp-units is supported only by gcc and Visual Studio so far")
         else:
-            raise ConanInvalidConfiguration("mp-units is supported only by gcc and Visual Studio so far")
+            raise ConanInvalidConfiguration("mp-units on ConanCenter is supported only by gcc (more information on getting Windows support can be found here: https://mpusz.github.io/units/usage.html#conan-cmake-release)")
         if compiler.get_safe("cppstd"):
             check_min_cppstd(self, "20")
 
