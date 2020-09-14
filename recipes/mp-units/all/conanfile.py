@@ -31,8 +31,8 @@ class MPUnitsConan(ConanFile):
         compiler = self.settings.compiler
         version = Version(self.settings.compiler.version)
         if compiler == "gcc":
-            if version < "9.3":
-                raise ConanInvalidConfiguration("mp-units requires at least g++-9.3")
+            if version < "10.0":
+                raise ConanInvalidConfiguration("mp-units requires at least g++-10")
         elif compiler == "Visual Studio":
             if version < "16":
                 raise ConanInvalidConfiguration("mp-units requires at least MSVC 16")
@@ -44,12 +44,6 @@ class MPUnitsConan(ConanFile):
     def configure(self):
         self._validate_compiler_settings()
 
-    def requirements(self):
-        compiler = self.settings.compiler
-        version = Version(self.settings.compiler.version)
-        if (compiler == "gcc" and version < "10"):
-            self.requires("range-v3/0.11.0")
-
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
         extracted_dir = "units-" + self.version
@@ -60,24 +54,16 @@ class MPUnitsConan(ConanFile):
         self.copy("LICENSE.md", dst="licenses", src=self._source_subfolder)
 
     def package_id(self):
-        self.info.settings.clear()
-        self.info.settings.compiler = self.settings.compiler
-        self.info.settings.compiler.version = self.settings.compiler.version
+        self.info.header_only()
 
     def package_info(self):
         compiler = self.settings.compiler
         version = Version(self.settings.compiler.version)
         if compiler == "gcc":
             self.cpp_info.cxxflags = [
-                "-Wno-literal-suffix",
-                "-Wno-non-template-friend",
+                "-Wno-non-template-friend"
             ]
-            if version < "10":
-                self.cpp_info.cxxflags.extend([
-                    "-fconcepts"
-                ])
         elif compiler == "Visual Studio":
             self.cpp_info.cxxflags = [
-                "/utf-8",
-                "/wd4455"
+                "/utf-8"
             ]
