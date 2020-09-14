@@ -60,9 +60,9 @@ class CgalConan(ConanFile):
             del self.options.shared
 
     def requirements(self):
-        self.requires("boost/1.73.0")
+        self.requires("boost/1.74.0")
         self.requires("eigen/3.3.7")
-        self.requires("mpfr/4.0.2")
+        self.requires("mpfr/4.1.0")
 
     def package_id(self):
         if self.options.header_only:
