@@ -96,7 +96,8 @@ class CgalConan(ConanFile):
         # TODO: add components
         self.cpp_info.names["cmake_find_package"] = "CGAL"
         self.cpp_info.names["cmake_find_package_multi"] = "CGAL"
-        self.cpp_info.libs = tools.collect_libs(self)
+        if not self.options.header_only:
+            self.cpp_info.libs = tools.collect_libs(self)
         if self.settings.os == "Linux" and (self.options.with_cgal_core or self.options.with_cgal_imageio):
             self.cpp_info.system_libs.append("m")
         if not self.options.header_only:
