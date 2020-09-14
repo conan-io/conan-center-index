@@ -12,6 +12,8 @@ patches:
   "7.1.0":
     - patch_file: "patches/use-cmake-targets-7.1.x.patch"
       base_path: "source_subfolder"
+    - patch_file: "patches/fix-mingw-target-clones.patch"
+      base_path: "source_subfolder"
   "7.0.1":
     - patch_file: "patches/use-cmake-targets-7.0.x.patch"
       base_path: "source_subfolder"
