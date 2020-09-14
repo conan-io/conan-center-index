@@ -6,6 +6,7 @@ from conans.errors import ConanInvalidConfiguration
 
 
 class FontconfigConan(ConanFile):
+    version = "2.13.92"
     name = "fontconfig"
     license = "MIT"
     url = "https://github.com/conan-io/conan-center-index"
@@ -26,8 +27,6 @@ class FontconfigConan(ConanFile):
             self.requires("libuuid/1.0.3")
 
     def configure(self):
-        if self.settings.os == "Windows":
-            raise ConanInvalidConfiguration("Windows builds are not supported.")
         del self.settings.compiler.libcxx
         del self.settings.compiler.cppstd
 
