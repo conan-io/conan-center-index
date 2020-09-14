@@ -308,12 +308,12 @@ class GdalConan(ConanFile):
             raise ConanInvalidConfiguration("gdal depends on non-reentrant qhull.")
 
     def build_requirements(self):
-        if tools.os_info.is_windows and self.settings.compiler != "Visual Studio" and \
-           not tools.get_env("CONAN_BASH_PATH") and tools.os_info.detect_windows_subsystem() != "msys2":
-            self.build_requires("msys2/20200517")
-        if not tools.os_info.is_windows:
-            self.build_requires("libtool/2.4.6")
-            self.build_requires("pkgconf/1.7.3")
+        if self.settings.compiler != "Visual Studio":
+            if tools.os_info.is_windows and not tools.get_env("CONAN_BASH_PATH"):
+                self.build_requires("msys2/20200517")
+            else:
+                self.build_requires("libtool/2.4.6")
+                self.build_requires("pkgconf/1.7.3")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
