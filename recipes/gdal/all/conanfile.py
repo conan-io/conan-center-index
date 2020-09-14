@@ -232,7 +232,7 @@ class GdalConan(ConanFile):
         # if self.options.with_netcdf:
         #     self.requires("netcdf-c/4.7.4")
         if self.options.with_jasper:
-            self.requires("jasper/2.0.16")
+            self.requires("jasper/2.0.19")
         if self.options.with_openjpeg:
             self.requires("openjpeg/2.3.1")
         # if self.options.with_fgdb:
@@ -252,7 +252,7 @@ class GdalConan(ConanFile):
         # if self.options.with_dods_root:
         #     self.requires("libdap/3.20.6")
         if self.options.with_curl:
-            self.requires("libcurl/7.71.1")
+            self.requires("libcurl/7.72.0")
         if self.options.with_xml2:
             self.requires("libxml2/2.9.10")
         # if self.options.with_spatialite:
@@ -272,7 +272,7 @@ class GdalConan(ConanFile):
         # if self.options.with_sfcgal:
         #     self.requires("sfcgal/1.3.7")
         if self.options.with_qhull:
-            self.requires("qhull/8.0.0")
+            self.requires("qhull/8.0.1")
         # if self.options.with_opencl:
         #     self.requires("opencl-headers/x.x.x")
         if self.options.with_freexl:
