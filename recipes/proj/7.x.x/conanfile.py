@@ -1,6 +1,6 @@
 import os
 
-from conans import ConanFile, CMake, tools
+from conans import ConanFile, CMake, tools, RunEnvironment
 
 class ProjConan(ConanFile):
     name = "proj"
@@ -62,8 +62,9 @@ class ProjConan(ConanFile):
     def build(self):
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
             tools.patch(**patch)
-        cmake = self._configure_cmake()
-        cmake.build()
+        with tools.environment_append(RunEnvironment(self).vars):
+            cmake = self._configure_cmake()
+            cmake.build()
 
     def _configure_cmake(self):
         if self._cmake:
