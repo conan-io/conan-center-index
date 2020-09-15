@@ -304,8 +304,8 @@ class ConanFile(ConanFile):
         self.cpp_info.components["osgDB"].requires = ["osg", "osgUtil", "OpenThreads"]
         if self.settings.os == "Linux":
             self.cpp_info.components["osgDB"].system_libs = ["dl"]
-        elif tools.is_apple_os(self.settings.os):
-            self.cpp_info.components["osgDB"].system_libs = ["Cocoa"]
+        elif self.settings.os == "Macos":
+            self.cpp_info.components["osgDB"].frameworks = ["Carbon", "Cocoa"]
         if self.options.with_zlib:
             self.cpp_info.components["osgDB"].requires.append("zlib::zlib")
 
@@ -326,9 +326,9 @@ class ConanFile(ConanFile):
             if self.settings.os == "Linux":
                 self.cpp_info.components["osgViewer"].requires.append("xorg::xorg")
             elif tools.is_apple_os(self.settings.os):
-                self.cpp_info.components["osgViewer"].system_libraries = ["Cocoa"]
+                self.cpp_info.components["osgViewer"].frameworks = ["Cocoa"]
         if self.settings.os == "Windows":
-            self.cpp_info.components["osgViewer"].system_libraries = ["gdi32"]
+            self.cpp_info.components["osgViewer"].system_libs = ["gdi32"]
 
         setup_library("osgAnimation")
         self.cpp_info.components["osgAnimation"].requires = ["osg", "osgText", "osgGA", "osgViewer", "OpenThreads"]
@@ -536,16 +536,16 @@ class ConanFile(ConanFile):
         if (self.settings.os == "Macos" and self.settings.os.version and Version(self.settings.os.version.value) >= "10.8") or (self.settings.os == "iOS" and Version(self.settings.os.version.value) >= "6.0"):
             plugin = setup_plugin("avfoundation")
             self.cpp_info.components[plugin].requires.append("osgViewer")
-            self.cpp_info.components[plugin].system_libs = ["AVFoundation", "Cocoa", "CoreVideo", "CoreMedia", "QuartzCore"]
+            self.cpp_info.components[plugin].frameworks = ["AVFoundation", "Cocoa", "CoreVideo", "CoreMedia", "QuartzCore"]
 
         if self.settings.os == "Macos" and self.settings.os.version and Version(self.settings.os.version.value) <= "10.6" and self.settings.arch == "x86":
             plugin = setup_plugin("qt")
-            self.cpp_info.components[plugin].system_libs = ["QuickTime"]
+            self.cpp_info.components[plugin].frameworks = ["QuickTime"]
 
         if self.settings.os == "Macos" and self.settings.arch == "x86":
             plugin = setup_plugin("QTKit")
             self.cpp_info.components[plugin].requires.append("osgViewer")
-            self.cpp_info.components[plugin].system_libs = ["QTKit", "Cocoa", "QuickTime", "CoreVideo"]
+            self.cpp_info.components[plugin].frameworks = ["QTKit", "Cocoa", "QuickTime", "CoreVideo"]
 
         # with_nvtt
         # setup_plugin("nvtt")
