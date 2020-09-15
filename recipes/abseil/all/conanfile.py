@@ -1,5 +1,6 @@
-import os
 import glob
+import json
+import os
 from conans import ConanFile, CMake, tools
 from conans.errors import ConanInvalidConfiguration, ConanException
 
@@ -15,13 +16,13 @@ class ConanRecipe(ConanFile):
 
     license = "Apache-2.0"
 
-    settings = "os", "arch", "compiler", "build_type"
-
-    options = {"fPIC": [True, False]}
-    default_options = {"fPIC": True}
-
+    exports = "components/**"
     generators = "cmake"
     short_paths = True
+
+    settings = "os", "arch", "compiler", "build_type"
+    options = {"fPIC": [True, False]}
+    default_options = {"fPIC": True}
 
     _cmake = None
 
@@ -67,64 +68,24 @@ conan_basic_setup()""")
         tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
 
     def package_info(self):
-        self.cpp_info.libs = [
-            "absl_flags_parse",
-            "absl_flags_usage",
-            "absl_flags_usage_internal",
-            "absl_flags",
-            "absl_flags_internal",
-            "absl_flags_registry",
-            "absl_flags_config",
-            "absl_flags_program_name",
-            "absl_flags_marshalling",
-            "absl_raw_hash_set",
-            "absl_random_seed_sequences",
-            "absl_hashtablez_sampler",
-            "absl_synchronization",
-            "absl_time",
-            "absl_civil_time",
-            "absl_time_zone",
-            "absl_failure_signal_handler",
-            "absl_random_internal_distribution_test_util",
-            "absl_examine_stack",
-            "absl_symbolize",
-            "absl_str_format_internal",
-            "absl_graphcycles_internal",
-            "absl_stacktrace",
-            "absl_malloc_internal",
-            "absl_demangle_internal",
-            "absl_debugging_internal",
-            "absl_periodic_sampler",
-            "absl_exponential_biased",
-            "absl_random_internal_pool_urbg",
-            "absl_random_distributions",
-            "absl_random_internal_seed_material",
-            "absl_random_seed_gen_exception",
-            "absl_hash",
-            "absl_strings",
-            "absl_strings_internal",
-            "absl_bad_variant_access",
-            "absl_throw_delegate",
-            "absl_city",
-            "absl_base",
-            "absl_dynamic_annotations",
-            "absl_bad_any_cast_impl",
-            "absl_scoped_set_env",
-            "absl_bad_optional_access",
-            "absl_raw_logging_internal",
-            "absl_log_severity",
-            "absl_spinlock_wait",
-            "absl_random_internal_randen",
-            "absl_random_internal_randen_hwaes",
-            "absl_random_internal_randen_slow",
-            "absl_random_internal_randen_hwaes_impl",
-            "absl_leak_check",
-            "absl_leak_check_disable",
-            "absl_int128"
-        ]
-        if self.settings.os == "Linux":
-            self.cpp_info.system_libs.append("pthread")
-        if self.settings.os == "Macos":
-            self.cpp_info.frameworks.append("CoreFoundation")
         self.cpp_info.names["cmake_find_package"] = "absl"
         self.cpp_info.names["cmake_find_package_multi"] = "absl"
+        self._register_components()
+
+    def _register_components(self):
+        components_json_filepath = os.path.join(self.recipe_folder, "components", "components_{}.json".format(self.version))
+        with open(components_json_filepath) as components_json_file:
+            abseil_components = json.load(components_json_file)
+            for component in abseil_components:
+                self._register_component(component)
+
+    def _register_component(self, component):
+        conan_name = component["conan_name"]
+        cmake_target = component["cmake_target"]
+        self.cpp_info.components[conan_name].names["cmake_find_package"] = cmake_target
+        self.cpp_info.components[conan_name].names["cmake_find_package_multi"] = cmake_target
+        self.cpp_info.components[conan_name].libs = component.get("libs", [])
+        self.cpp_info.components[conan_name].defines = component.get("defines", [])
+        self.cpp_info.components[conan_name].system_libs = component.get("system_libs", {}).get(str(self.settings.os), [])
+        self.cpp_info.components[conan_name].frameworks = component.get("frameworks", [])
+        self.cpp_info.components[conan_name].requires = component.get("requires", [])
