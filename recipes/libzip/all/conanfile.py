@@ -72,24 +72,26 @@ class LibZipConan(ConanFile):
         os.rename(extracted_dir, self._source_subfolder)
 
     def _configure_cmake(self):
-        cmake = CMake(self)
-        cmake.definitions["BUILD_REGRESS"] = False
-        cmake.definitions["BUILD_EXAMPLES"] = False
-        cmake.definitions["BUILD_DOC"] = False
+        if self._cmake:
+            return self._cmake
+        self._cmake = CMake(self)
+        self._cmake.definitions["BUILD_REGRESS"] = False
+        self._cmake.definitions["BUILD_EXAMPLES"] = False
+        self._cmake.definitions["BUILD_DOC"] = False
 
-        cmake.definitions["ENABLE_LZMA"] = self.options.with_lzma
-        cmake.definitions["ENABLE_BZIP2"] = self.options.with_bzip2
-        cmake.definitions["ENABLE_ZSTD"] = self.options.with_zstd
+        self._cmake.definitions["ENABLE_LZMA"] = self.options.with_lzma
+        self._cmake.definitions["ENABLE_BZIP2"] = self.options.with_bzip2
+        self._cmake.definitions["ENABLE_ZSTD"] = self.options.with_zstd
 
-        cmake.definitions["ENABLE_COMMONCRYPTO"] = False  # TODO: We need CommonCrypto package
-        cmake.definitions["ENABLE_GNUTLS"] = False  # TODO: We need GnuTLS package
+        self._cmake.definitions["ENABLE_COMMONCRYPTO"] = False  # TODO: We need CommonCrypto package
+        self._cmake.definitions["ENABLE_GNUTLS"] = False  # TODO: We need GnuTLS package
 
-        cmake.definitions["ENABLE_MBEDTLS"] = self._crypto == "mbedtls"
-        cmake.definitions["ENABLE_OPENSSL"] = self._crypto == "openssl"
-        cmake.definitions["ENABLE_WINDOWS_CRYPTO"] = self._crypto == "win32"
+        self._cmake.definitions["ENABLE_MBEDTLS"] = self._crypto == "mbedtls"
+        self._cmake.definitions["ENABLE_OPENSSL"] = self._crypto == "openssl"
+        self._cmake.definitions["ENABLE_WINDOWS_CRYPTO"] = self._crypto == "win32"
 
-        cmake.configure()
-        self._cmake = cmake
+        self._cmake.configure()
+        return self._cmake
 
     def build(self):
         self._configure_cmake()
