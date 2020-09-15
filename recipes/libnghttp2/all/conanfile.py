@@ -43,19 +43,19 @@ class Nghttp2Conan(ConanFile):
                 raise ConanInvalidConfiguration("gcc >= 6.0 required")
 
     def requirements(self):
-        self.requires.add("zlib/1.2.11")
+        self.requires("zlib/1.2.11")
         if self.options.with_app:
-            self.requires.add("openssl/1.1.1d")
-            self.requires.add("c-ares/1.15.0")
-            self.requires.add("libev/4.27")
-            self.requires.add("libevent/2.1.11")
-            self.requires.add("libxml2/2.9.9")
+            self.requires("openssl/1.1.1d")
+            self.requires("c-ares/1.15.0")
+            self.requires("libev/4.27")
+            self.requires("libevent/2.1.11")
+            self.requires("libxml2/2.9.9")
         if self.options.with_hpack:
-            self.requires.add("jansson/2.12")
+            self.requires("jansson/2.12")
         if self.options.with_jemalloc:
-            self.requires.add("jemalloc/5.2.1")
+            self.requires("jemalloc/5.2.1")
         if self.options.with_asio:
-            self.requires.add("boost/1.71.0")
+            self.requires("boost/1.71.0")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
