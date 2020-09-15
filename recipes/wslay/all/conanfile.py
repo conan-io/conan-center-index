@@ -1,13 +1,12 @@
 import os
-import glob
 from conans import ConanFile, tools, CMake
 
 
 class WslayConan(ConanFile):
     name = "wslay"
     description = "The WebSocket library in C"
-    topics = ("conan", "websockets")
-    homepage = "https://github.com/tatsuhiro-t/wslay"
+    topics = ("conan", "websockets", "rfc6455", "communication", "tcp")
+    homepage = "https://tatsuhiro-t.github.io/wslay"
     url = "https://github.com/conan-io/conan-center-index"
     license = "MIT"
 
