@@ -3,7 +3,7 @@ from conans.errors import ConanInvalidConfiguration
 import os
 
 
-class PCREConan(ConanFile):
+class PCRE2Conan(ConanFile):
     name = "pcre2"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://www.pcre.org/"
@@ -79,6 +79,9 @@ class PCREConan(ConanFile):
             return self._cmake
 
         self._cmake = CMake(self)
+        self._cmake.definitions["PCRE2_BUILD_PCRE2GREP"] = self.options.build_pcre2grep
+        self._cmake.definitions["PCRE2_SUPPORT_LIBZ"] = self.options.get_safe("with_zlib", False)
+        self._cmake.definitions["PCRE2_SUPPORT_LIBBZ2"] = self.options.get_safe("with_bzip2", False)
         self._cmake.definitions["PCRE2_BUILD_TESTS"] = False
         if self.settings.os == "Windows" and self.settings.compiler == "Visual Studio":
             runtime = not self.options.shared and "MT" in self.settings.compiler.runtime
