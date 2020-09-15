@@ -23,19 +23,11 @@ class ConanRecipe(ConanFile):
     generators = "cmake"
     short_paths = True
 
+    _cmake = None
+
     @property
     def _source_subfolder(self):
         return "source_subfolder"
-
-    def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        extracted_dir = glob.glob('abseil-cpp-*/')[0]
-        os.rename(extracted_dir, self._source_subfolder)
-        tools.replace_in_file(
-            os.path.join(self._source_subfolder, "CMakeLists.txt"),
-            "project(absl CXX)", """project(absl CXX)
-include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
-conan_basic_setup()""")
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -71,15 +63,26 @@ conan_basic_setup()""")
             raise ConanInvalidConfiguration(
                 "%s requires at least %s %s" % (self.name, compiler, minimal_version[compiler]))
 
+    def source(self):
+        tools.get(**self.conan_data["sources"][self.version])
+        extracted_dir = glob.glob('abseil-cpp-*/')[0]
+        os.rename(extracted_dir, self._source_subfolder)
+
     def _configure_cmake(self):
-        cmake = CMake(self)
-        cmake.definitions["BUILD_TESTING"] = False
-        cmake.configure(
-            source_folder=self._source_subfolder
-        )
-        return cmake
+        if self._cmake:
+            return self._cmake
+        self._cmake = CMake(self)
+        self._cmake.definitions["ABSL_ENABLE_INSTALL"] = True
+        self._cmake.definitions["BUILD_TESTING"] = False
+        self._cmake.configure(source_folder=self._source_subfolder)
+        return self._cmake
 
     def build(self):
+        tools.replace_in_file(
+            os.path.join(self._source_subfolder, "CMakeLists.txt"),
+            "project(absl CXX)", """project(absl CXX)
+include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
+conan_basic_setup()""")
         cmake = self._configure_cmake()
         cmake.build()
 
