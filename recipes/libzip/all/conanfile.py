@@ -11,8 +11,6 @@ class LibZipConan(ConanFile):
     topics = ("conan", "zip", "libzip", "zip-archives", "zip-editing")
     exports_sources = ["CMakeLists.txt"]
     generators = "cmake"
-    _source_subfolder = "source_subfolder"
-    _build_subfolder = "build_subfolder"
     settings = "os", "compiler", "build_type", "arch"
     options = {
         "shared": [True, False],
