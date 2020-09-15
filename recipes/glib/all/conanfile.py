@@ -71,9 +71,6 @@ class GLibConan(ConanFile):
             # for Linux, gettext is provided by libc
             self.requires("libgettext/0.20.1")
 
-        if tools.is_apple_os(self.settings.os):
-            self.requires("libiconv/1.16")
-
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
         extracted_dir = self.name + "-" + self.version
@@ -154,8 +151,6 @@ class GLibConan(ConanFile):
             self.cpp_info.components["glib-2.0"].requires.append("pcre::pcre")
         if self.settings.os != "Linux":
             self.cpp_info.components["glib-2.0"].requires.append("libgettext::libgettext")
-        if tools.is_apple_os(self.settings.os):
-            self.cpp_info.components["glib-2.0"].requires.append("libiconv::libiconv")
 
         self.cpp_info.components["gmodule-no-export-2.0"].libs = ["gmodule-2.0"]
         if self.settings.os == "Linux":
