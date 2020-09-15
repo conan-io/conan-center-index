@@ -237,7 +237,7 @@ class ConanFile(ConanFile):
         tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
 
     def package_info(self):
-        # FindOpenSceneGraph is shipped with cmake and is a traditional cmake script
+        # FindOpenSceneGraph.cmake is shipped with cmake and is a traditional cmake script
         # It doesn't setup targets and only provides a few variables:
         #  - OPENSCENEGRAPH_FOUND
         #  - OPENSCENEGRAPH_VERSION
@@ -246,6 +246,7 @@ class ConanFile(ConanFile):
         # Unfortunately, the cmake_find_package generators don't currently allow directly setting variables,
         # but it will set the last three of these if the name of the package is OPENSCENEGRAPH (it uses
         # the filename for the first, so OpenSceneGraph_FOUND gets set, not OPENSCENEGRAPH_FOUND)
+        # TODO: set OPENSCENEGRAPH_FOUND in cmake_find_package and cmake_find_package_multi
         self.cpp_info.filenames["cmake_find_package"] = "OpenSceneGraph"
         self.cpp_info.filenames["cmake_find_package_multi"] = "OpenSceneGraph"
         self.cpp_info.names["cmake_find_package"] = "OPENSCENEGRAPH"
@@ -262,11 +263,12 @@ class ConanFile(ConanFile):
 
         def setup_plugin(plugin):
             lib = "osgdb_" + plugin
-            self.cpp_info.components[lib].libs = [] if self.options.shared else [lib + postfix]
-            self.cpp_info.components[lib].requires = ["OpenThreads", "osg", "osgDB", "osgUtil"]
+            plugin_library = self.cpp_info.components[lib]
+            plugin_library.libs = [] if self.options.shared else [lib + postfix]
+            plugin_library.requires = ["OpenThreads", "osg", "osgDB", "osgUtil"]
             if not self.options.shared:
-                self.cpp_info.components[lib].libdirs = [os.path.join("lib", "osgPlugins-{}".format(self.version))]
-            return lib
+                plugin_library.libdirs = [os.path.join("lib", "osgPlugins-{}".format(self.version))]
+            return plugin_library
 
         def setup_serializers(lib):
             plugins = []
@@ -276,92 +278,72 @@ class ConanFile(ConanFile):
                 if lib not in ("osgUtil", "osgDB", "osgGA", "osgManipulator", "osgUI", "osgPresentation"):
                     plugins.append("deprecated_{}".format(lib.lower()))
             for plugin in plugins:
-                plugin_lib = setup_plugin(plugin)
-                self.cpp_info.components[plugin_lib].requires.append(lib)
+                setup_plugin(plugin).requires.append(lib)
 
         def setup_library(lib):
-            self.cpp_info.components[lib].libs = [lib + postfix]
-            self.cpp_info.components[lib].names["cmake_find_package"] = lib
-            self.cpp_info.components[lib].filenames["cmake_find_package"] = lib
+            library = self.cpp_info.components[lib]
+            library.libs = [lib + postfix]
             setup_serializers(lib)
+            return library
 
         # Core libraries
         # requires obtained from osg's source code
-        self.cpp_info.components["OpenThreads"].libs = ["OpenThreads" + postfix]
-        self.cpp_info.components["OpenThreads"].names["cmake_find_package"] = "OpenThreads"
-        self.cpp_info.components["OpenThreads"].names["pkg_config"] = "openthreads"
-        if self.settings.os == "Linux":
-            self.cpp_info.components["OpenThreads"].system_libs = ["pthread"]
 
-        setup_library("osg")
-        self.cpp_info.components["osg"].requires = ["OpenThreads", "opengl::opengl"]
+        # TODO: FindOpenThreads.cmake is shipped with CMake, so we should generate separate
+        # files for it with cmake_find_package and cmake_find_package_multi
+        library = self.cpp_info.components["OpenThreads"]
+        library.libs = ["OpenThreads" + postfix]
+        library.names["pkg_config"] = "openthreads"
         if self.settings.os == "Linux":
-            self.cpp_info.components["osg"].system_libs = ["m", "rt", "dl"]
+            library.system_libs = ["pthread"]
+
+        library = setup_library("osg")
+        library.requires = ["OpenThreads", "opengl::opengl"]
+        if self.settings.os == "Linux":
+            library.system_libs = ["m", "rt", "dl"]
         if not self.options.shared:
-            self.cpp_info.components["osg"].defines.append("OSG_LIBRARY_STATIC")
+            library.defines.append("OSG_LIBRARY_STATIC")
 
-        setup_library("osgDB")
-        self.cpp_info.components["osgDB"].requires = ["osg", "osgUtil", "OpenThreads"]
+        library = setup_library("osgDB")
+        library.requires = ["osg", "osgUtil", "OpenThreads"]
         if self.settings.os == "Linux":
-            self.cpp_info.components["osgDB"].system_libs = ["dl"]
+            library.system_libs = ["dl"]
         elif self.settings.os == "Macos":
-            self.cpp_info.components["osgDB"].frameworks = ["Carbon", "Cocoa"]
+            library.frameworks = ["Carbon", "Cocoa"]
         if self.options.with_zlib:
-            self.cpp_info.components["osgDB"].requires.append("zlib::zlib")
+            library.requires.append("zlib::zlib")
 
-        setup_library("osgUtil")
-        self.cpp_info.components["osgUtil"].requires = ["osg", "OpenThreads"]
+        setup_library("osgUtil").requires = ["osg", "OpenThreads"]
+        setup_library("osgGA").requires = ["osgDB", "osgUtil", "osg", "OpenThreads"]
 
-        setup_library("osgGA")
-        self.cpp_info.components["osgGA"].requires = ["osgDB", "osgUtil", "osg", "OpenThreads"]
-
-        setup_library("osgText")
-        self.cpp_info.components["osgText"].requires = ["osgDB", "osg", "osgUtil", "OpenThreads"]
+        library = setup_library("osgText")
+        library.requires = ["osgDB", "osg", "osgUtil", "OpenThreads"]
         if self.options.use_fontconfig:
-            self.cpp_info.components["osgText"].requires.append("fontconfig::fontconfig")
+            library.requires.append("fontconfig::fontconfig")
 
-        setup_library("osgViewer")
-        self.cpp_info.components["osgViewer"].requires = ["osgGA", "osgText", "osgDB", "osgUtil", "osg"]
+        library = setup_library("osgViewer")
+        library.requires = ["osgGA", "osgText", "osgDB", "osgUtil", "osg"]
         if self.options.enable_windowing_system:
             if self.settings.os == "Linux":
-                self.cpp_info.components["osgViewer"].requires.append("xorg::xorg")
+                library.requires.append("xorg::xorg")
             elif tools.is_apple_os(self.settings.os):
-                self.cpp_info.components["osgViewer"].frameworks = ["Cocoa"]
+                library.frameworks = ["Cocoa"]
         if self.settings.os == "Windows":
-            self.cpp_info.components["osgViewer"].system_libs = ["gdi32"]
+            library.system_libs = ["gdi32"]
 
-        setup_library("osgAnimation")
-        self.cpp_info.components["osgAnimation"].requires = ["osg", "osgText", "osgGA", "osgViewer", "OpenThreads"]
+        setup_library("osgAnimation").requires = ["osg", "osgText", "osgGA", "osgViewer", "OpenThreads"]
+        setup_library("osgFX").requires = ["osgUtil", "osgDB", "osg", "OpenThreads"]
+        setup_library("osgManipulator").requires = ["osgViewer", "osgGA", "osgUtil", "osg", "OpenThreads"]
+        setup_library("osgParticle").requires = ["osgUtil", "osgDB", "osg", "OpenThreads"]
+        setup_library("osgUI").requires = ["osgDB", "osgGA", "osgUtil", "osgText", "osgViewer", "osg", "OpenThreads"]
+        setup_library("osgVolume").requires = ["osgGA", "osgDB", "osgUtil", "osg", "OpenThreads"]
+        setup_library("osgShadow").requires = ["osgUtil", "osgDB", "osg", "OpenThreads"]
+        setup_library("osgSim").requires = ["osgText", "osgUtil", "osgDB", "osg", "OpenThreads"]
+        setup_library("osgTerrain").requires = ["osgUtil", "osgDB", "osg", "OpenThreads"]
+        setup_library("osgWidget").requires = ["osgText", "osgViewer", "osgDB", "osg", "OpenThreads"]
+        setup_library("osgPresentation").requires = ["osgViewer", "osgUI", "osgWidget", "osgManipulator", "osgVolume", "osgFX", "osgText", "osgGA", "osgUtil", "osgDB", "osg", "OpenThreads"]
 
-        setup_library("osgFX")
-        self.cpp_info.components["osgFX"].requires = ["osgUtil", "osgDB", "osg", "OpenThreads"]
-
-        setup_library("osgManipulator")
-        self.cpp_info.components["osgManipulator"].requires = ["osgViewer", "osgGA", "osgUtil", "osg", "OpenThreads"]
-
-        setup_library("osgParticle")
-        self.cpp_info.components["osgParticle"].requires = ["osgUtil", "osgDB", "osg", "OpenThreads"]
-
-        setup_library("osgUI")
-        self.cpp_info.components["osgUI"].requires = ["osgDB", "osgGA", "osgUtil", "osgText", "osgViewer", "osg", "OpenThreads"]
-
-        setup_library("osgVolume")
-        self.cpp_info.components["osgVolume"].requires = ["osgGA", "osgDB", "osgUtil", "osg", "OpenThreads"]
-
-        setup_library("osgShadow")
-        self.cpp_info.components["osgShadow"].requires = ["osgUtil", "osgDB", "osg", "OpenThreads"]
-
-        setup_library("osgSim")
-        self.cpp_info.components["osgSim"].requires = ["osgText", "osgUtil", "osgDB", "osg", "OpenThreads"]
-
-        setup_library("osgTerrain")
-        self.cpp_info.components["osgTerrain"].requires = ["osgUtil", "osgDB", "osg", "OpenThreads"]
-
-        setup_library("osgWidget")
-        self.cpp_info.components["osgWidget"].requires = ["osgText", "osgViewer", "osgDB", "osg", "OpenThreads"]
-
-        setup_library("osgPresentation")
-        self.cpp_info.components["osgPresentation"].requires = ["osgViewer", "osgUI", "osgWidget", "osgManipulator", "osgVolume", "osgFX", "osgText", "osgGA", "osgUtil", "osgDB", "osg", "OpenThreads"]
+        # Start of plugins
 
         # NodeKit/Psudo loader plugins
         setup_plugin("osga")
@@ -370,27 +352,20 @@ class ConanFile(ConanFile):
         setup_plugin("trans")
         setup_plugin("normals")
         setup_plugin("revisions")
-
-        plugin = setup_plugin("osgviewer")
-        self.cpp_info.components[plugin].requires.append("osgViewer")
-
-        plugin = setup_plugin("osgshadow")
-        self.cpp_info.components[plugin].requires.append("osgShadow")
-
-        plugin = setup_plugin("osgterrain")
-        self.cpp_info.components[plugin].requires.append("osgTerrain")
+        setup_plugin("osgviewer").requires.append("osgViewer")
+        setup_plugin("osgshadow").requires.append("osgShadow")
+        setup_plugin("osgterrain").requires.append("osgTerrain")
 
         # Main native plugins
         setup_plugin("osg")
 
         plugin = setup_plugin("ive")
-        self.cpp_info.components[plugin].requires.extend(("osgSim", "osgFX", "osgText", "osgTerrain", "osgVolume"))
+        plugin.requires.extend(("osgSim", "osgFX", "osgText", "osgTerrain", "osgVolume"))
         if self.options.with_zlib:
-            self.cpp_info.components[plugin].requires.append("zlib::zlib")
+            plugin.requires.append("zlib::zlib")
 
         # Viewer plugins
-        plugin = setup_plugin("cfg")
-        self.cpp_info.components[plugin].requires.append("osgViewer")
+        setup_plugin("cfg").requires.append("osgViewer")
 
         # Shader plugins
         setup_plugin("glsl")
@@ -407,61 +382,49 @@ class ConanFile(ConanFile):
         setup_plugin("ktx")
 
         if self.options.get_safe("with_jpeg"):
-            plugin = setup_plugin("jpeg")
-            self.cpp_info.components[plugin].requires.append("libjpeg::libjpeg")
+            setup_plugin("jpeg").requires.append("libjpeg::libjpeg")
 
         if self.options.with_jasper:
-            plugin = setup_plugin("jp2")
-            self.cpp_info.components[plugin].requires.append("jasper::jasper")
+            setup_plugin("jp2").requires.append("jasper::jasper")
 
         if self.options.with_openexr:
-            plugin = setup_plugin("exr")
-            self.cpp_info.components[plugin].requires.append("openexr::openexr")
+            setup_plugin("exr").requires.append("openexr::openexr")
 
         if self.options.get_safe("with_gif"):
-            plugin = setup_plugin("gif")
-            self.cpp_info.components[plugin].requires.append("giflib::giflib")
+            setup_plugin("gif").requires.append("giflib::giflib")
 
         if self.options.get_safe("with_png"):
-            plugin = setup_plugin("png")
-            self.cpp_info.components[plugin].requires.extend(("libpng::libpng", "zlib::zlib"))
+            setup_plugin("png").requires.extend(("libpng::libpng", "zlib::zlib"))
 
         if self.options.with_tiff:
-            plugin = setup_plugin("tiff")
-            self.cpp_info.components[plugin].requires.append("libtiff::libtiff")
+            setup_plugin("tiff").requires.append("libtiff::libtiff")
 
         if self.options.with_gdal:
-            plugin = setup_plugin("gdal")
-            self.cpp_info.components[plugin].requires.extend(("osgTerrain", "gdal::gdal"))
-            plugin = setup_plugin("ogr")
-            self.cpp_info.components[plugin].requires.append("gdal::gdal")
+            setup_plugin("gdal").requires.extend(("osgTerrain", "gdal::gdal"))
+            setup_plugin("ogr").requires.append("gdal::gdal")
 
         if self.options.with_gta:
-            plugin = setup_plugin("gta")
-            self.cpp_info.components[plugin].requires.append("libgta::libgta")
+            setup_plugin("gta").requires.append("libgta::libgta")
 
         # 3D Image plugins
         if self.options.with_dcmtk:
             plugin = setup_plugin("dicom")
-            self.cpp_info.components[plugin].requires.extend(("osgVolume", "dcmtk::dcmtk"))
+            plugin.requires.extend(("osgVolume", "dcmtk::dcmtk"))
             if self.settings.os == "Windows":
-                self.cpp_info.components[plugin].system_libs = ["wsock32", "ws2_32"]
+                plugin.system_libs = ["wsock32", "ws2_32"]
 
         # 3rd party 3d plugins
         setup_plugin("3dc")
-
-        plugin = setup_plugin("p3d")
-        self.cpp_info.components[plugin].requires.extend(("osgGA", "osgText", "osgVolume", "osgFX", "osgViewer", "osgPresentation"))
+        setup_plugin("p3d").requires.extend(("osgGA", "osgText", "osgVolume", "osgFX", "osgViewer", "osgPresentation"))
 
         if self.options.with_curl:
             plugin = setup_plugin("curl")
-            self.cpp_info.components[plugin].requires.append("libcurl::libcurl")
+            plugin.requires.append("libcurl::libcurl")
             if self.options.with_zlib:
-                self.cpp_info.components[plugin].requires.append("zlib::zlib")
+                plugin.requires.append("zlib::zlib")
 
         if self.options.with_zlib:
-            plugin = setup_plugin("gz")
-            self.cpp_info.components[plugin].requires.append("zlib::zlib")
+            setup_plugin("gz").requires.append("zlib::zlib")
 
         # with_inventor
         # setup_plugin("iv")
@@ -475,17 +438,10 @@ class ConanFile(ConanFile):
         # with_opencascade
         # setup_plugin("opencascade")
 
-        plugin = setup_plugin("bvh")
-        self.cpp_info.components[plugin].requires.append("osgAnimation")
-
+        setup_plugin("bvh").requires.append("osgAnimation")
         setup_plugin("x")
-
-        plugin = setup_plugin("dxf")
-        self.cpp_info.components[plugin].requires.append("osgText")
-
-        plugin = setup_plugin("openflight")
-        self.cpp_info.components[plugin].requires.append("osgSim")
-
+        setup_plugin("dxf").requires.append("osgText")
+        setup_plugin("openflight").requires.append("osgSim")
         setup_plugin("obj")
         setup_plugin("pic")
         setup_plugin("stl")
@@ -497,29 +453,15 @@ class ConanFile(ConanFile):
         setup_plugin("md2")
         setup_plugin("osgtgz")
         setup_plugin("tgz")
-
-        plugin = setup_plugin("shp")
-        self.cpp_info.components[plugin].requires.extend(("osgSim", "osgTerrain"))
-
-        plugin = setup_plugin("txf")
-        self.cpp_info.components[plugin].requires.append("osgText")
-
+        setup_plugin("shp").requires.extend(("osgSim", "osgTerrain"))
+        setup_plugin("txf").requires.append("osgText")
         setup_plugin("bsp")
         setup_plugin("mdl")
-
-        plugin = setup_plugin("gles")
-        self.cpp_info.components[plugin].requires.extend(("osgUtil", "osgAnimation"))
-
-        plugin = setup_plugin("osgjs")
-        self.cpp_info.components[plugin].requires.extend(("osgAnimation", "osgSim"))
-
-        plugin = setup_plugin("lwo")
-        self.cpp_info.components[plugin].requires.append("osgFX")
-
+        setup_plugin("gles").requires.extend(("osgUtil", "osgAnimation"))
+        setup_plugin("osgjs").requires.extend(("osgAnimation", "osgSim"))
+        setup_plugin("lwo").requires.append("osgFX")
         setup_plugin("ply")
-
-        plugin = setup_plugin("txp")
-        self.cpp_info.components[plugin].requires.extend(("osgSim", "osgText"))
+        setup_plugin("txp").requires.extend(("osgSim", "osgText"))
 
         # with_ffmpeg
         # setup_plugin("ffmpeg")
@@ -535,24 +477,22 @@ class ConanFile(ConanFile):
 
         if (self.settings.os == "Macos" and self.settings.os.version and Version(self.settings.os.version.value) >= "10.8") or (self.settings.os == "iOS" and Version(self.settings.os.version.value) >= "6.0"):
             plugin = setup_plugin("avfoundation")
-            self.cpp_info.components[plugin].requires.append("osgViewer")
-            self.cpp_info.components[plugin].frameworks = ["AVFoundation", "Cocoa", "CoreVideo", "CoreMedia", "QuartzCore"]
+            plugin.requires.append("osgViewer")
+            plugin.frameworks = ["AVFoundation", "Cocoa", "CoreVideo", "CoreMedia", "QuartzCore"]
 
         if self.settings.os == "Macos" and self.settings.os.version and Version(self.settings.os.version.value) <= "10.6" and self.settings.arch == "x86":
-            plugin = setup_plugin("qt")
-            self.cpp_info.components[plugin].frameworks = ["QuickTime"]
+            setup_plugin("qt").frameworks = ["QuickTime"]
 
         if self.settings.os == "Macos" and self.settings.arch == "x86":
             plugin = setup_plugin("QTKit")
-            self.cpp_info.components[plugin].requires.append("osgViewer")
-            self.cpp_info.components[plugin].frameworks = ["QTKit", "Cocoa", "QuickTime", "CoreVideo"]
+            plugin.requires.append("osgViewer")
+            plugin.frameworks = ["QTKit", "Cocoa", "QuickTime", "CoreVideo"]
 
         # with_nvtt
         # setup_plugin("nvtt")
 
         if self.options.with_freetype:
-            plugin = setup_plugin("freetype")
-            self.cpp_info.components[plugin].requires.extend(("osgText", "freetype::freetype"))
+            setup_plugin("freetype").requires.extend(("osgText", "freetype::freetype"))
 
         if self.options.with_zlib:
             setup_plugin("zip")
@@ -569,9 +509,9 @@ class ConanFile(ConanFile):
         setup_plugin("pvr")
 
         plugin = setup_plugin("osc")
-        self.cpp_info.components[plugin].requires.append("osgGA")
+        plugin.requires.append("osgGA")
         if self.settings.os == "Windows":
-            self.cpp_info.components[plugin].system_libs = ["ws2_32", "winmm"]
+            plugin.system_libs = ["ws2_32", "winmm"]
 
         setup_plugin("trk")
         setup_plugin("tf")
@@ -585,8 +525,7 @@ class ConanFile(ConanFile):
         # setup_plugin("sdl")
 
         # if self.options.get_safe("with_asio"):
-        #     plugin = setup_plugin("resthttp")
-        #     self.cpp_info.components[plugin].requires.extend(("osgPresentation", "asio::asio", "boost::boost"))
+        #     setup_plugin("resthttp").requires.extend(("osgPresentation", "asio::asio", "boost::boost"))
 
         # with_zeroconf
         # setup_plugin("zeroconf")
