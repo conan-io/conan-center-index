@@ -50,8 +50,6 @@ class Rvo2Conan(ConanFile):
         return self._cmake
 
     def _patch_sources(self):
-        for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            tools.patch(**patch)
         tools.replace_in_file(os.path.join(self._source_subfolder, "CMakeLists.txt"),
                     "add_subdirectory(examples)",
                     "")
