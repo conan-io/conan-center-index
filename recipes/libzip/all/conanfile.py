@@ -30,6 +30,7 @@ class LibZipConan(ConanFile):
         "with_zstd": True,
         "crypto": "auto"
     }
+    _cmake = None
 
     @property
     def _crypto(self):
