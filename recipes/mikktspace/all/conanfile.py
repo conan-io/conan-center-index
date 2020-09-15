@@ -22,7 +22,7 @@ class MikkTSpaceConan(ConanFile):
     }
 
     generators = "cmake"
-    exports_sources = ['CMakeLists.txt', 'patches/*']
+    exports_sources = ['CMakeLists.txt']
 
     _cmake = None
 
