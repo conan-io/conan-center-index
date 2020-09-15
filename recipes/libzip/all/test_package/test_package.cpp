@@ -45,19 +45,19 @@ main(int argc, char *argv[])
     zip_error_t error;
     const char data [] = {"Bincrafters"};
     const size_t size = sizeof(data);
-	char buffer [256] = {0};
+    char buffer [256] = {0};
 
     zip_error_init(&error);
     /* create source from buffer */
     if ((src = zip_source_buffer_create(data, size, 1, &error)) == NULL) {
-		zip_error_fini(&error);
-		return 1;
+        zip_error_fini(&error);
+        return 1;
     }
 
     /* open zip archive from source */
     if ((za = zip_open_from_source(src, 0, &error)) == NULL) {
-		zip_error_fini(&error);
-		return 0;
+        zip_error_fini(&error);
+        return 0;
     }
     zip_error_fini(&error);
 
@@ -67,7 +67,7 @@ main(int argc, char *argv[])
 
     /* close archive */
     if (zip_close(za) < 0) {
-		return 1;
+        return 1;
     }
 
 
@@ -76,21 +76,21 @@ main(int argc, char *argv[])
     if (zip_source_is_deleted(src)) {
     }
     else {
-		zip_stat_t zst;
+        zip_stat_t zst;
 
-		if (zip_source_stat(src, &zst) < 0) {
-		    return 1;
-		}
+        if (zip_source_stat(src, &zst) < 0) {
+            return 1;
+        }
 
-		if (zip_source_open(src) < 0) {
-		    return 1;
-		}
+        if (zip_source_open(src) < 0) {
+            return 1;
+        }
 
-		if ((zip_uint64_t)zip_source_read(src, buffer, zst.size) < zst.size) {
-		    zip_source_close(src);
-		    return 1;
-		}
-		zip_source_close(src);
+        if ((zip_uint64_t)zip_source_read(src, buffer, zst.size) < zst.size) {
+            zip_source_close(src);
+            return 1;
+        }
+        zip_source_close(src);
     }
 
     /* we're done with src */
