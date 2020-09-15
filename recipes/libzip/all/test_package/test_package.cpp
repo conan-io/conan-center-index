@@ -43,7 +43,7 @@ main(int argc, char *argv[])
     zip_source_t *src;
     zip_t *za;
     zip_error_t error;
-    const char data [] = {"Bincrafters"};
+    const char data [] = {"conan-center-index"};
     const size_t size = sizeof(data);
     char buffer [256] = {0};
 
