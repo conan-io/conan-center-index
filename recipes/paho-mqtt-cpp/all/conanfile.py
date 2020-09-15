@@ -46,7 +46,7 @@ class PahoMqttCppConan(ConanFile):
 
 
     def requirements(self):
-        self.requires("paho-mqtt-c/1.3.4")
+        self.requires("paho-mqtt-c/1.3.5")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
