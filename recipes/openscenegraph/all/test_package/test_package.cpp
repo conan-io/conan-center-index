@@ -6,7 +6,7 @@
 
 #ifdef OSG_LIBRARY_STATIC
 USE_OSGPLUGIN ( bmp )
-#	if WITH_JPEG == 1
+#	if WITH_JPEG == 1 && !defined( __APPLE__ )
 USE_OSGPLUGIN ( jpeg )
 #	endif
 #	if WITH_JASPER == 1
@@ -15,10 +15,10 @@ USE_OSGPLUGIN ( jp2 )
 #	if WITH_OPENEXR == 1
 USE_OSGPLUGIN ( exr )
 #	endif
-#	if WITH_GIF == 1
+#	if WITH_GIF == 1 && !defined( __APPLE__ )
 USE_OSGPLUGIN ( gif )
 #	endif
-#	if WITH_PNG == 1
+#	if WITH_PNG == 1 && !defined( __APPLE__ )
 USE_OSGPLUGIN ( png )
 #	endif
 #	if WITH_TIFF == 1
@@ -41,6 +41,9 @@ USE_OSGPLUGIN ( GZ )
 #	endif
 #	if WITH_FREETYPE == 1
 USE_OSGPLUGIN ( freetype )
+#	endif
+#	if defined( __APPLE__ )
+USE_OSGPLUGIN ( imageio )
 #	endif
 #endif
 
