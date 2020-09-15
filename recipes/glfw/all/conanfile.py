@@ -15,8 +15,8 @@ class GlfwConan(ConanFile):
     homepage = "https://github.com/glfw/glfw"
     topics = ("conan", "gflw", "opengl", "vulkan", "opengl-es")
     generators = "cmake"
-    options = {"shared": [True, False], "fPIC": [True, False]}
-    default_options = {"shared": False, "fPIC": True}
+    options = {"shared": [True, False], "fPIC": [True, False], "vulkanStatic": [True, False]}
+    default_options = {"shared": False, "fPIC": True, "vulkanStatic": False}
     _source_subfolder = "source_subfolder"
     _build_subfolder = "build_subfolder"
     _cmake = None
@@ -29,6 +29,9 @@ class GlfwConan(ConanFile):
             self._cmake.definitions["GLFW_BUILD_DOCS"] = False
             if self.settings.compiler == "Visual Studio":
                 self._cmake.definitions["USE_MSVC_RUNTIME_LIBRARY_DLL"] = "MD" in self.settings.compiler.runtime
+            if self.options.vulkanStatic:
+                self._cmake.definitions["GLFW_VULKAN_STATIC"] = True
+
             self._cmake.configure(source_folder=self._source_subfolder)
         return self._cmake
 
