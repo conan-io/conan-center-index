@@ -97,8 +97,8 @@ class LibZipConan(ConanFile):
         return self._cmake
 
     def build(self):
-        self._configure_cmake()
-        self._cmake.build()
+        cmake = self._configure_cmake()
+        cmake.build()
 
     def package(self):
         cmake = self._configure_cmake()
