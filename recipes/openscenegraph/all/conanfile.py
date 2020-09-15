@@ -533,12 +533,12 @@ class ConanFile(ConanFile):
         if tools.is_apple_os(self.settings.os):
             setup_plugin("imageio")
 
-        if (self.settings.os == "Macos" and Version(self.settings.os.version.value) >= "10.8") or (self.settings.os == "iOS" and Version(self.settings.os.version.value) >= "6.0"):
+        if (self.settings.os == "Macos" and self.settings.os.version and Version(self.settings.os.version.value) >= "10.8") or (self.settings.os == "iOS" and Version(self.settings.os.version.value) >= "6.0"):
             plugin = setup_plugin("avfoundation")
             self.cpp_info.components[plugin].requires.append("osgViewer")
             self.cpp_info.components[plugin].system_libs = ["AVFoundation", "Cocoa", "CoreVideo", "CoreMedia", "QuartzCore"]
 
-        if self.settings.os == "Macos" and Version(self.settings.os.version.value) <= "10.6" and self.settings.arch == "x86":
+        if self.settings.os == "Macos" and self.settings.os.version and Version(self.settings.os.version.value) <= "10.6" and self.settings.arch == "x86":
             plugin = setup_plugin("qt")
             self.cpp_info.components[plugin].system_libs = ["QuickTime"]
 
