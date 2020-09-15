@@ -28,7 +28,7 @@ class CxxOptsConan(ConanFile):
         return {
             "Visual Studio": "14",
             "gcc": "6",
-            "clang": "4",
+            "clang": "3.9",
             "apple-clang": "8",
         }
 
