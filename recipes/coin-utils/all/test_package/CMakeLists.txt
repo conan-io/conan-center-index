@@ -4,8 +4,9 @@ project(test_package)
 include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
 conan_basic_setup(TARGETS)
 
-find_package(httplib REQUIRED CONFIG)
+include(FindPkgConfig)
+
+pkg_check_modules(CoinUtils REQUIRED IMPORTED_TARGET coinutils)
 
 add_executable(${PROJECT_NAME} test_package.cpp)
-target_link_libraries(${PROJECT_NAME} httplib::httplib)
-set_property(TARGET ${PROJECT_NAME} PROPERTY CXX_STANDARD 11)
+target_link_libraries(${PROJECT_NAME} PRIVATE PkgConfig::CoinUtils)

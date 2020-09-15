@@ -1,16 +1,15 @@
-#ifdef WIN32
-#include <windows.h>
-#endif
-#include <iostream>
 #include <sql.h>
 #include <sqlext.h>
 
-int main(int, char* []) {
-    std::cout << "Type of SQL_CHAR is " << SQL_CHAR << std::endl;
+#include <stdio.h>
+
+int main() {
+    printf("Type of SQL_CHAR is %i\n", SQL_CHAR);
+    return 0;
 }
 
 SQLRETURN driver_connect() {
-	SQLHDBC dbc{};
+    SQLHDBC dbc;
     SQLCHAR *connect_string = (unsigned char *)"DSN=mydsn;";
 
     return SQLDriverConnect(dbc, NULL, connect_string, SQL_NTS,
