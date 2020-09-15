@@ -34,34 +34,8 @@ class ConanRecipe(ConanFile):
             del self.options.fPIC
 
     def configure(self):
-        minimal_cpp_standard = "11"
-
-        try:
-            tools.check_min_cppstd(self, minimal_cpp_standard)
-        except ConanInvalidConfiguration:
-            raise
-        except ConanException:
-            # FIXME: We need to handle the case when Conan doesn't know
-            # about a user defined compiler's default standard version
-            self.output.warn(
-                "Unnable to determine the default standard version of the compiler")
-
-        minimal_version = {
-            "Visual Studio": "14",
-        }
-
-        compiler = str(self.settings.compiler)
-        if compiler not in minimal_version:
-            self.output.warn(
-                "%s recipe lacks information about the %s compiler support" % (self.name, compiler))
-            self.output.warn(
-                "%s requires a compiler that supports at least C++%s" % (self.name, minimal_cpp_standard))
-            return
-
-        version = tools.Version(self.settings.compiler.version)
-        if version < minimal_version[compiler]:
-            raise ConanInvalidConfiguration(
-                "%s requires at least %s %s" % (self.name, compiler, minimal_version[compiler]))
+        if self.settings.compiler.cppstd:
+            tools.check_min_cppstd(self, 11)
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
