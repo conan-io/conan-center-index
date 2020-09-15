@@ -33,6 +33,10 @@ class LibZipConan(ConanFile):
     _cmake = None
 
     @property
+    def _source_subfolder(self):
+        return "source_subfolder"
+
+    @property
     def _crypto(self):
         if self.options.crypto == "auto":
             return "win32" if self.settings.os == "Windows" else "openssl"
