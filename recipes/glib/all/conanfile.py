@@ -10,6 +10,7 @@ class GLibConan(ConanFile):
     description = "GLib provides the core application building blocks for libraries and applications written in C"
     topics = ("conan", "glib", "gobject", "gio", "gmodule")
     url = "https://github.com/conan-io/conan-center-index"
+    exports_sources = ["patches/**"]
     homepage = "https://gitlab.gnome.org/GNOME/glib"
     license = "LGPL-2.1"
     settings = "os", "arch", "compiler", "build_type"
@@ -94,12 +95,16 @@ class GLibConan(ConanFile):
             defs["selinux"] = "enabled" if self.options.with_selinux else "disabled"
             defs["libmount"] = "enabled" if self.options.with_mount else "disabled"
         defs["internal_pcre"] = not self.options.with_pcre
+        defs["libelf"] = "enabled" if self.options.with_elf else "disabled"
 
         meson.configure(source_folder=self._source_subfolder, args=['--wrap-mode=nofallback'],
                         build_folder=self._build_subfolder, defs=defs)
         return meson
 
     def build(self):
+        for patch in self.conan_data["patches"][self.version]:
+            tools.patch(**patch)
+
         for filename in [os.path.join(self._source_subfolder, "meson.build"),
                          os.path.join(self._source_subfolder, "glib", "meson.build"),
                          os.path.join(self._source_subfolder, "gobject", "meson.build"),
@@ -196,7 +201,8 @@ class GLibConan(ConanFile):
             self.cpp_info.components["gio-unix-2.0"].includedirs = [os.path.join("include", "gio-unix-2.0")]
 
         self.cpp_info.components["gresource"].libs = [] # this is actualy an executable
-        self.cpp_info.components["gresource"].requires.append("libelf::libelf") # this is actualy an executable
+        if self.options.with_elf:
+            self.cpp_info.components["gresource"].requires.append("libelf::libelf") # this is actualy an executable
 
         bin_path = os.path.join(self.package_folder, "bin")
         self.output.info("Appending PATH env var with: {}".format(bin_path))
