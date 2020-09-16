@@ -308,10 +308,17 @@ The CMakeLists.txt definitions [CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS](https://cmake.
 
 By default, all packages should be built as static library (the option ``shared`` is ``False`` in ``default_options``). However, some projects can be restricted to shared library only, for those cases, open a new [issue](https://github.com/conan-io/hooks/issues) to include the package name in the allowlist.
 
-### **<a name="KB-H051">#KB-H051</a>: "DEFAULT OPTIONS AS DICTIONARY"**
+#### **<a name="KB-H051">#KB-H051</a>: "DEFAULT OPTIONS AS DICTIONARY"**
 
 The attribue `default_options` should be a dictionary, for example `default_options = {'shared': False, 'fPIC': True}`.
 
-### **<a name="KB-H052">#KB-H052</a>: "CONFIG.YML HAS NEW VERSION"**
+#### **<a name="KB-H052">#KB-H052</a>: "CONFIG.YML HAS NEW VERSION"**
 
 It's important to have new library version defined in both `config.yml` and `conandata.yml`, otherwise newly added version will not be checked and built by CI and will not be available for download.
+
+#### **<a name="KB-H053">#KB-H053</a>: "INVALID SYMLINKS"**
+
+All symlinks inside a package should be contained inside the package itself. This error indicates
+that there is at least one symlink that points outside the package. Take advantage of the tool
+[`tools.fix_symlinks`](https://docs.conan.io/en/latest/reference/tools.html?highlight=fix_symlinks#tools-fix-symlinks)
+to check and fix these symlinks.
