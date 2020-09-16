@@ -1,5 +1,6 @@
-import os
 from conans import tools, CMake, ConanFile
+from conans.errors import ConanInvalidConfiguration
+import os
 
 
 class ConanFileDefault(ConanFile):
@@ -28,7 +29,7 @@ class ConanFileDefault(ConanFile):
         "with_cpp": [True, False],
         "with_java": [True, False],
         "with_python": [True, False],
-        "with_qt5": [True, False],
+        "with_qt": [True, False],
         "with_haskell": [True, False],
         "with_plugin": [True, False]
     }
@@ -47,7 +48,7 @@ class ConanFileDefault(ConanFile):
         "with_cpp": True,
         "with_java": False,
         "with_python": False,
-        "with_qt5": False,
+        "with_qt": False,
         "with_haskell": False,
         "with_plugin": False
     }
@@ -85,6 +86,10 @@ class ConanFileDefault(ConanFile):
 
     def requirements(self):
         self.requires("boost/1.74.0")
+
+        if self.options.with_qt:
+            # FIXME: missing qt recipe
+            raise ConanInvalidConfiguration("qt is not (yet) available on cci")
 
         if self.options.with_openssl:
             self.requires("openssl/1.1.1g")
@@ -187,7 +192,7 @@ class ConanFileDefault(ConanFile):
         self.cpp_info.components["libthrift_nb"].names["pkg_config"] = "thrift-nb"
 
         # FIXME: this generates thrift::thriftqt5, but should be thriftqt5::thriftqt5
-        if self.options.with_qt5:
+        if self.options.with_qt:
             self.cpp_info.components["libthrift_qt5"].libs = ["thriftqt5" + libsuffix]
             self.cpp_info.components["libthriftz"].requires = ["libthrift"]
             self.cpp_info.components["libthriftz"].names["cmake_find_package"] = "thriftqt5"
