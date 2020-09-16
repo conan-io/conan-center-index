@@ -12,11 +12,13 @@ class LibreSSLConan(ConanFile):
     options = {"shared": [True, False], "fPIC": [True, False]}
     default_options = {"shared": False, "fPIC": True}
     exports_sources = "CMakeLists.txt"
+    generators = "cmake"
     topics = ("SSL", "TLS", "openssl")
     description = ("LibreSSL is a version of the TLS/crypto stack forked from OpenSSL in 2014, "
                    "with goals of modernizing the codebase, improving security, and applying "
                    "best practice development processes.")
-    generators = "cmake"
+
+    _cmake = None
 
     @property
     def _source_subfolder(self):
@@ -37,33 +39,33 @@ class LibreSSLConan(ConanFile):
         extracted_dir = self.name + "-" + self.version
         os.rename(extracted_dir, self._source_subfolder)
 
+    def _configure_cmake(self):
+        if self._cmake:
+            return self._cmake
+        self._cmake = CMake(self)
+        self._cmake.definitions["LIBRESSL_SKIP_INSTALL"] = False
+        self._cmake.definitions["LIBRESSL_APPS"] = False # Warning: if enabled, do not use cmake installation, to avoid installing files in OPENSSLDIR
+        self._cmake.definitions["LIBRESSL_TESTS"] = False
+        self._cmake.definitions["ENABLE_ASM"] = True
+        self._cmake.definitions["ENABLE_EXTRATESTS"] = False
+        self._cmake.definitions["ENABLE_NC"] = False
+        self._cmake.definitions["OPENSSLDIR"] = "C:/Windows/libressl/ssl" if self.settings.os == "Windows" else "/etc/ssl"
+        self._cmake.configure()
+        return self._cmake
+
     def build(self):
-        cmake = CMake(self)
-        cmake.definitions["BUILD_SHARED"] = self.options.shared
-        cmake.definitions["USE_SHARED"] = self.options.shared
-        # LibreSSL's CMake install rules are a bit weird
-        # explicitly remove CMAKE_INSTALL_PREFIX to avoid defining OPENSSLDIR
-        # as </absolute/path/to/package_folder/etc/ssl>
-        cmake.definitions["CMAKE_INSTALL_PREFIX"] = ""
-        cmake.definitions["LIBRESSL_APPS"] = "OFF"
-        cmake.configure()
+        cmake = self._configure_cmake()
         cmake.build()
 
     def package(self):
-        libressl_include_dir = os.path.join(self._source_subfolder, "include")
-        self.copy("tls.h", dst="include", src=libressl_include_dir)
-        self.copy("openssl/*.h", dst="include", src=libressl_include_dir)
-
         self.copy("*COPYING", dst="licenses", keep_path=False)
-        if self.options.shared:
-            self.copy("*.so*", dst="lib", symlinks=True, keep_path=False)
-            self.copy("*.dylib", dst="lib", symlinks=True, keep_path=False)
-            self.copy("*.dll", dst="bin", keep_path=False)
-            self.copy("*.lib", dst="lib", keep_path=False)
-            self.copy("*.dll.a", dst="lib", keep_path=False)
-        else:
-            self.copy("*.a", dst="lib", keep_path=False)
-            self.copy("*.lib", dst="lib", keep_path=False)
+        cmake = self._configure_cmake()
+        cmake.install()
+        for cmake_file in glob.glob(os.path.join(self.package_folder, "include", "*.cmake")):
+            os.remove(cmake_file)
+        tools.rmdir(os.path.join(self.package_folder, "include", "CMakeFiles"))
+        tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
+        tools.rmdir(os.path.join(self.package_folder, "share"))
 
     def package_info(self):
         self.cpp_info.names["cmake_find_package"] = "LibreSSL"
