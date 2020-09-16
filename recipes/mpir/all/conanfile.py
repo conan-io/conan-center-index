@@ -146,3 +146,7 @@ class MpirConan(ConanFile):
             if self.options.get_safe("enable_cxx"):
                 self.cpp_info.libs.append("gmpxx")
             self.cpp_info.libs.append("gmp")
+
+    def package_id(self):
+        if self.settings.compiler == "Visual Studio" and self.settings.build_type != "Debug":
+            self.info.settings.build_type = "Release"
