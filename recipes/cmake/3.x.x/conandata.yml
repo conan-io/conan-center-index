@@ -20,6 +20,9 @@ sources:
   "3.16.8":
     sha256: 177434021132686cb901fea7db9fa2345efe48d566b998961594d5cc346ac588
     url: https://cmake.org/files/v3.16/cmake-3.16.8.tar.gz
+  "3.16.9":
+    sha256: 1708361827a5a0de37d55f5c9698004c035abb1de6120a376d5d59a81630191f
+    url: https://cmake.org/files/v3.16/cmake-3.16.9.tar.gz
   "3.17.0":
     sha256: b74c05b55115eacc4fa2b77a814981dbda05cdc95a53e279fe16b7b272f00847
     url: https://cmake.org/files/v3.17/cmake-3.17.0.tar.gz
@@ -35,6 +38,9 @@ sources:
   "3.17.4":
     sha256: 86985d73d0a63ec99c236aab5287316e252164f33d7c4cb160954a980c71f36f
     url: https://cmake.org/files/v3.17/cmake-3.17.4.tar.gz
+  "3.17.5":
+    sha256: 8c3083d98fd93c1228d5e4e40dbff2dd88f4f7b73b9fa24a2938627b8bc28f1a
+    url: https://cmake.org/files/v3.17/cmake-3.17.5.tar.gz
   "3.18.0":
     sha256: 83b4ffcb9482a73961521d2bafe4a16df0168f03f56e6624c419c461e5317e29
     url: https://github.com/Kitware/CMake/releases/download/v3.18.0/cmake-3.18.0.tar.gz
