@@ -12,9 +12,9 @@ class TestPackageConan(ConanFile):
             if key.startswith("with_"):
                 toolchain.definitions["OSG_HAS_" + key.upper()] = 1 if value else 0
         if self.settings.os == "Macos":
-            toolchain.definitions["OSG_HAS_WITH_GIF"] = 1
-            toolchain.definitions["OSG_HAS_WITH_JPEG"] = 1
-            toolchain.definitions["OSG_HAS_WITH_PNG"] = 1
+            toolchain.definitions["OSG_HAS_WITH_GIF"] = 0
+            toolchain.definitions["OSG_HAS_WITH_JPEG"] = 0
+            toolchain.definitions["OSG_HAS_WITH_PNG"] = 0
         toolchain.write_toolchain_files()
 
     def build(self):
