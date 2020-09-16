@@ -186,17 +186,27 @@ MALLOCPROXY.DEF =
     def package_info(self):
         self.cpp_info.names["cmake_find_package"] = "TBB"
         self.cpp_info.names["cmake_find_package_multi"] = "TBB"
-        suffix = "_debug" if self.settings.build_type == "Debug" else ""
-        libs = {"tbb": "tbb", "tbbproxy": "tbbmalloc_proxy", "tbbmalloc": "tbbmalloc"}
-        targets = self._get_targets()
-        self.cpp_info.libs = ["{}{}".format(libs[target], suffix) for target in targets]
+        # tbb
+        self.cpp_info.components["libtbb"].names["cmake_find_package"] = "tbb"
+        self.cpp_info.components["libtbb"].names["cmake_find_package_multi"] = "tbb"
+        self.cpp_info.components["libtbb"].libs = [self._lib_name("tbb")]
         if self.settings.os == "Linux":
-            self.cpp_info.system_libs.extend(["dl", "rt", "m", "pthread"])
-
-    def _get_targets(self):
-        targets = ["tbb"]
+            self.cpp_info.components["libtbb"].system_libs = ["dl", "rt", "pthread"]
+        # tbbmalloc
         if self.options.tbbmalloc:
-            targets.append("tbbmalloc")
-        if self.options.tbbproxy:
-            targets.append("tbbproxy")
-        return targets
+            self.cpp_info.components["tbbmalloc"].names["cmake_find_package"] = "tbbmalloc"
+            self.cpp_info.components["tbbmalloc"].names["cmake_find_package_multi"] = "tbbmalloc"
+            self.cpp_info.components["tbbmalloc"].libs = [self._lib_name("tbbmalloc")]
+            if self.settings.os == "Linux":
+                self.cpp_info.components["tbbmalloc"].system_libs = ["dl", "pthread"]
+            # tbbmalloc_proxy
+            if self.options.tbbproxy:
+                self.cpp_info.components["tbbmalloc_proxy"].names["cmake_find_package"] = "tbbmalloc_proxy"
+                self.cpp_info.components["tbbmalloc_proxy"].names["cmake_find_package_multi"] = "tbbmalloc_proxy"
+                self.cpp_info.components["tbbmalloc_proxy"].libs = [self._lib_name("tbbmalloc_proxy")]
+                self.cpp_info.components["tbbmalloc_proxy"].requires = ["tbbmalloc"]
+
+    def _lib_name(self, name):
+        if self.settings.build_type == "Debug":
+            return name + "_debug"
+        return name
