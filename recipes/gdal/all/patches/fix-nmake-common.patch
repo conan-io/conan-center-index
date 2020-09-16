@@ -57,6 +57,17 @@
  
  libjpeg12src:
  	cd libjpeg12
+--- a/frmts/kea/makefile.vc
++++ b/frmts/kea/makefile.vc
+@@ -1,7 +1,7 @@
+ 
+ OBJ	=	keaband.obj keacopy.obj keadataset.obj keadriver.obj keamaskband.obj keaoverview.obj kearat.obj
+ 
+-EXTRAFLAGS 	= 	$(KEA_CFLAGS) -DH5_BUILT_AS_DYNAMIC_LIB 
++EXTRAFLAGS 	= 	$(KEA_CFLAGS)
+ 
+ GDAL_ROOT	=	..\..
+ 
 --- a/frmts/makefile.vc
 +++ b/frmts/makefile.vc
 @@ -3,11 +3,11 @@ GDAL_ROOT = ..

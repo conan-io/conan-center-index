@@ -39,7 +39,7 @@ class GdalConan(ConanFile):
         # "with_mongocxx": [True, False],
         "with_hdf4": [True, False],
         "with_hdf5": [True, False],
-        # "with_kea": [True, False],
+        "with_kea": [True, False],
         # "with_netcdf": [True, False],
         "with_jasper": [True, False],
         "with_openjpeg": [True, False],
@@ -101,7 +101,7 @@ class GdalConan(ConanFile):
         # "with_mongocxx": False,
         "with_hdf4": False,
         "with_hdf5": False,
-        # "with_kea": False,
+        "with_kea": False,
         # "with_netcdf": False,
         "with_jasper": False,
         "with_openjpeg": False,
@@ -234,6 +234,8 @@ class GdalConan(ConanFile):
             self.requires("hdf4/4.2.15")
         if self.options.with_hdf5:
             self.requires("hdf5/1.12.0")
+        if self.options.with_kea:
+            self.requires("kealib/1.4.13")
         # if self.options.with_netcdf:
         #     self.requires("netcdf-c/4.7.4")
         if self.options.with_jasper:
@@ -403,6 +405,8 @@ class GdalConan(ConanFile):
                 args.append("HDF4_HAS_MAXOPENFILES=YES")
         if self.options.with_hdf5:
             args.append("HDF5_DIR=\"{}\"".format(self.deps_cpp_info["hdf5"].rootpath))
+        if self.options.with_kea:
+            args.append("KEA_CFLAGS=\"-I{}\"".format(" -I".join(self.deps_cpp_info["kealib"].include_paths)))
         if not self.options.with_pcidsk:
             self._replace_in_nmake("PCIDSK_SETTING=INTERNAL", "")
         if self.options.with_pg:
@@ -539,7 +543,7 @@ class GdalConan(ConanFile):
         args.append("--without-mongocxx") # TODO: to implement when mongocxx lib available
         args.append("--with-hdf4={}".format("yes" if self.options.with_hdf4 else "no"))
         args.append("--with-hdf5={}".format("yes" if self.options.with_hdf5 else "no"))
-        args.append("--without-kea") # TODO: to implement when kealib available
+        args.append("--with-kea={}".format("yes" if self.options.with_kea else "no"))
         args.append("--without-netcdf") # TODO: to implement when netcdf-c lib available
         args.append("--with-jasper={}".format(tools.unix_path(self.deps_cpp_info["jasper"].rootpath) if self.options.with_jasper else "no"))
         args.append("--with-openjpeg={}".format("yes" if self.options.with_openjpeg else "no"))
