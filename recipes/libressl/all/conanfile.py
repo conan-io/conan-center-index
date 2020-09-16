@@ -5,6 +5,7 @@ import os
 
 class LibreSSLConan(ConanFile):
     name = "libressl"
+    provides = "openssl"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://www.libressl.org/"
     license = ("OpenSSL", "BSD", "ISC")
