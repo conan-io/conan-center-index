@@ -1,4 +1,5 @@
 from conans import ConanFile, CMake, tools
+import glob
 import os
 
 
@@ -65,15 +66,38 @@ class LibreSSLConan(ConanFile):
             self.copy("*.lib", dst="lib", keep_path=False)
 
     def package_info(self):
-        # LibreSSL adds a version number as a suffix to each library on Windows
-        if self.settings.os != "Windows":
-            self.cpp_info.libs = ["tls", "ssl", "crypto"]
-            if self.settings.os == "Linux":
-                self.cpp_info.libs.append("pthread")
-        else:
-            # On MinGW, the link order of libraries matter
-            libs = tools.collect_libs(self)
-            libs.sort(reverse=True)
-            self.cpp_info.libs = libs
-            self.cpp_info.libs.append("ws2_32")
-            self.cpp_info.defines.append("NOCRYPT")
+        self.cpp_info.names["cmake_find_package"] = "LibreSSL"
+        self.cpp_info.names["cmake_find_package_multi"] = "LibreSSL"
+        # Crypto
+        self.cpp_info.components["crypto"].names["cmake_find_package"] = "Crypto"
+        self.cpp_info.components["crypto"].names["cmake_find_package_multi"] = "Crypto"
+        self.cpp_info.components["crypto"].names["pkg_config"] = "libcrypto"
+        self.cpp_info.components["crypto"].libs = [self._lib_name("crypto")]
+        if self.settings.os == "Linux":
+            self.cpp_info.components["crypto"].system_libs = ["pthread", "rt"]
+        elif self.settings.os == "SunOS":
+            self.cpp_info.components["crypto"].system_libs = ["nsl", "socket"]
+        elif self.settings.os == "Windows":
+            self.cpp_info.components["crypto"].system_libs = ["ws2_32"]
+        # SSL
+        self.cpp_info.components["ssl"].names["cmake_find_package"] = "SSL"
+        self.cpp_info.components["ssl"].names["cmake_find_package_multi"] = "SSL"
+        self.cpp_info.components["ssl"].names["pkg_config"] = "libssl"
+        self.cpp_info.components["ssl"].libs = [self._lib_name("ssl")]
+        self.cpp_info.components["ssl"].requires = ["crypto"]
+        # TLS
+        self.cpp_info.components["tls"].names["cmake_find_package"] = "TLS"
+        self.cpp_info.components["tls"].names["cmake_find_package_multi"] = "TLS"
+        self.cpp_info.components["tls"].names["pkg_config"] = "libtls"
+        self.cpp_info.components["tls"].libs = [self._lib_name("tls")]
+        self.cpp_info.components["tls"].requires = ["crypto", "ssl"]
+        # openssl
+        self.cpp_info.components["openssl"].names["pkg_config"] = "openssl"
+        self.cpp_info.components["openssl"].requires = ["crypto", "ssl"]
+
+    def _lib_name(self, name):
+        if self.settings.os == "Windows" and tools.Version(self.version) >= "3.0.0":
+            lib_fullpath = glob.glob(os.path.join(self.package_folder, "lib", "*{}*".format(name)))[0]
+            lib_name = os.path.basename(lib_fullpath).split(".")[0].replace("lib", "")
+            return lib_name
+        return name
