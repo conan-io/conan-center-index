@@ -58,8 +58,8 @@ class LibreSSLConan(ConanFile):
             self.copy("*.so*", dst="lib", symlinks=True, keep_path=False)
             self.copy("*.dylib", dst="lib", symlinks=True, keep_path=False)
             self.copy("*.dll", dst="bin", keep_path=False)
-            # do not forget import libraries
             self.copy("*.lib", dst="lib", keep_path=False)
+            self.copy("*.dll.a", dst="lib", keep_path=False)
         else:
             self.copy("*.a", dst="lib", keep_path=False)
             self.copy("*.lib", dst="lib", keep_path=False)
