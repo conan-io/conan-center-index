@@ -1,4 +1,5 @@
 import os
+import glob
 from conans import ConanFile, CMake, tools
 from conans.errors import ConanInvalidConfiguration
 
@@ -37,8 +38,8 @@ class SentryNativeConan(ConanFile):
 
     def requirements(self):
         if self.options.transport == "curl":
-            self.requires("libcurl/7.68.0")
-            
+            self.requires("libcurl/7.71.0")
+
         if self.options.backend == "crashpad":
             raise ConanInvalidConfiguration("crashpad not available yet in CCI")
         if self.options.backend == "breakpad":
@@ -54,7 +55,7 @@ class SentryNativeConan(ConanFile):
         os.rename(extracted_dir, self._source_subfolder)
 
     def configure(self):
-        if self.options.backend == "inproc" and self.settings.os == "Windows":
+        if self.options.backend == "inproc" and self.settings.os == "Windows" and tools.Version(self.version) < "0.4":
             raise ConanInvalidConfiguration("The in-process backend is not supported on Windows")
 
     def _configure_cmake(self):
@@ -77,16 +78,18 @@ class SentryNativeConan(ConanFile):
         cmake = self._configure_cmake()
         cmake.install()
         tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
+        for pdb in glob.glob(os.path.join(self.package_folder, "bin", "*.pdb")):
+            os.unlink(pdb)
 
     def package_info(self):
         self.cpp_info.libs = ["sentry"]
-        if self.settings.os in ("Android", "Windows"):
-            self.cpp_info.exelinkflags= ["--build-id=sha1"]
-            self.cpp_info.sharedlinkflags = ["--build-id=sha1"]
+        if self.settings.os in ("Android", "Linux"):
+            self.cpp_info.exelinkflags = ["-Wl,-E,--build-id=sha1"]
+            self.cpp_info.sharedlinkflags = ["-Wl,-E,--build-id=sha1"]
         if self.settings.os == "Linux":
             self.cpp_info.system_libs = ["pthread", "dl"]
         elif self.settings.os == "Windows":
-            self.cpp_info.system_libs = ["winhttp", "dbghelp", "pathcch"]
+            self.cpp_info.system_libs = ["winhttp", "dbghelp", "pathcch", "shlwapi"]
 
         if not self.options.shared:
             self.cpp_info.defines = ["SENTRY_BUILD_STATIC"]
