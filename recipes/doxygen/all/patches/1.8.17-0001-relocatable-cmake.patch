@@ -1,8 +1,8 @@
 Result of running:
 - find . -type f -exec sed -i s/CMAKE_SOURCE_DIR/PROJECT_SOURCE_DIR/g {} \;
 - find . -type f -exec sed -i s/CMAKE_BINARY_DIR/PROJECT_BINARY_DIR/g {} \;
-- Adding uuid + rt library to XAPIAN_LIBRARIES when on linux
-
+- fix addon/doxysearch/CMakeLists.txt to use lower case xapian_LIBRARIES and xapian_INCLUDE_DIRS
+FIXME: latest should be fixed by conan!!!
 
 --- CMakeLists.txt
 +++ CMakeLists.txt
@@ -104,7 +104,9 @@ Result of running:
  )
 --- addon/doxysearch/CMakeLists.txt
 +++ addon/doxysearch/CMakeLists.txt
-@@ -2,11 +2,11 @@
+@@ -1,12 +1,12 @@
+-find_package(Xapian REQUIRED)
++find_package(xapian REQUIRED)
  find_package(ZLIB REQUIRED)
  
  if (WIN32)
@@ -114,9 +116,28 @@ Result of running:
  
  include_directories(
 -	${CMAKE_SOURCE_DIR}/qtools
+-	${XAPIAN_INCLUDE_DIR}
 +	${PROJECT_SOURCE_DIR}/qtools
- 	${XAPIAN_INCLUDE_DIR}
++	${xapian_INCLUDE_DIR}
          ${ZLIB_INCLUDE_DIRS}
+ )
+@@ -14,7 +14,7 @@ endif()
+                doxyindexer.cpp
+ )
+ target_link_libraries(doxyindexer
+-                      ${XAPIAN_LIBRARIES}
++                      ${xapian_LIBRARIES}
+                       ${ZLIB_LIBRARIES}
+ 		      ${WIN_EXTRA_LIBS}
+                       qtools
+@@ -24,7 +24,7 @@ add_executable(doxysearch.cgi
+                doxysearch.cpp
+ )
+ target_link_libraries(doxysearch.cgi
+-                      ${XAPIAN_LIBRARIES}
++                      ${xapian_LIBRARIES}
+                       ${ZLIB_LIBRARIES}
+ 		      ${WIN_EXTRA_LIBS}
  )
 --- addon/doxywizard/CMakeLists.txt
 +++ addon/doxywizard/CMakeLists.txt
@@ -458,16 +479,11 @@ Result of running:
  ParseException.cc
 --- cmake/FindXapian.cmake
 +++ cmake/FindXapian.cmake
-@@ -37,6 +37,13 @@
+@@ -37,6 +37,8 @@
     ENDIF(NOT Xapian_FIND_QUIETLY)
  ENDIF(XAPIAN_FOUND)
  
-+IF(CMAKE_HOST_SYSTEM_NAME STREQUAL "Linux")
-+    LIST(APPEND XAPIAN_LIBRARIES rt uuid)
-+ENDIF()
-+IF(NOT CMAKE_HOST_SYSTEM_NAME STREQUAL "Windows")
-+    LIST(APPEND XAPIAN_LIBRARIES CONAN_PKG::libuuid)
-+ENDIF()
++LIST(APPEND XAPIAN_LIBRARIES CONAN_PKG::xapian-core)
 +
  # show the XAPIAN_INCLUDE_DIR and XAPIAN_LIBRARIES variables only in the advanced view
  MARK_AS_ADVANCED(XAPIAN_INCLUDE_DIR XAPIAN_LIBRARIES)

@@ -63,8 +63,6 @@ class DoxygenConan(ConanFile):
         return self._cmake
 
     def build(self):
-        if os.path.isfile("Findxapian.cmake"):
-            os.unlink("Findxapian.cmake")
         if os.path.isfile("Findflex.cmake"):
             os.unlink("Findflex.cmake")
         if os.path.isfile("Findbison.cmake"):
