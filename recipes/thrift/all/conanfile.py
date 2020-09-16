@@ -194,10 +194,10 @@ class ConanFileDefault(ConanFile):
         # FIXME: this generates thrift::thriftqt5, but should be thriftqt5::thriftqt5
         if self.options.with_qt:
             self.cpp_info.components["libthrift_qt5"].libs = ["thriftqt5" + libsuffix]
-            self.cpp_info.components["libthriftz"].requires = ["libthrift"]
-            self.cpp_info.components["libthriftz"].names["cmake_find_package"] = "thriftqt5"
-            self.cpp_info.components["libthriftz"].names["cmake_find_package_multi"] = "thriftqt5"
-            self.cpp_info.components["libthriftz"].names["pkg_config"] = "thrift-qt5"
+            self.cpp_info.components["libthrift_qt5"].requires = ["libthrift", "qt::core"]
+            self.cpp_info.components["libthrift_qt5"].names["cmake_find_package"] = "thriftqt5"
+            self.cpp_info.components["libthrift_qt5"].names["cmake_find_package_multi"] = "thriftqt5"
+            self.cpp_info.components["libthrift_qt5"].names["pkg_config"] = "thrift-qt5"
 
         bin_path = os.path.join(self.package_folder, "bin")
         self.output.info("Appending PATH env var with : {}".format(bin_path))
