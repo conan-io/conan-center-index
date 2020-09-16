@@ -473,7 +473,7 @@ class ConanFile(ConanFile):
         # setup_plugin("directshow")
 
         if tools.is_apple_os(self.settings.os):
-            setup_plugin("imageio")
+            setup_plugin("imageio").frameworks = ["Accelerate"]
 
         if (self.settings.os == "Macos" and self.settings.os.version and Version(self.settings.os.version.value) >= "10.8") or (self.settings.os == "iOS" and Version(self.settings.os.version.value) >= "6.0"):
             plugin = setup_plugin("avfoundation")
