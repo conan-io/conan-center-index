@@ -28,7 +28,7 @@ class CgConan(ConanFile):
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
-        extracted_dir = glob.glob("Cg-Toolkit-{}-*".format(self.version))[0]
+        extracted_dir = glob.glob("Cg-Toolkit-*".format(self.version))[0]
         os.rename(extracted_dir, self._source_subfolder)
 
     def package(self):
