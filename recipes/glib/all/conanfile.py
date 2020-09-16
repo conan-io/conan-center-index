@@ -151,6 +151,8 @@ class GLibConan(ConanFile):
             self.cpp_info.components["glib-2.0"].requires.append("pcre::pcre")
         if self.settings.os != "Linux":
             self.cpp_info.components["glib-2.0"].requires.append("libgettext::libgettext")
+        if tools.is_apple_os(self.settings.os):
+            self.cpp_info.components["glib-2.0"].system_libs = ["iconv"]
 
         self.cpp_info.components["gmodule-no-export-2.0"].libs = ["gmodule-2.0"]
         if self.settings.os == "Linux":
