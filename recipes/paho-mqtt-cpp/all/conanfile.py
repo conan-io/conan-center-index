@@ -19,7 +19,7 @@ class PahoMqttCppConan(ConanFile):
                }
     default_options = {"shared": False,
                        "fPIC": True,
-                       "ssl": False
+                       "ssl": True
                        }
 
     _cmake = None
