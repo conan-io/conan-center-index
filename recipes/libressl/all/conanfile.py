@@ -99,7 +99,9 @@ class LibreSSLConan(ConanFile):
         self.cpp_info.components["openssl"].requires = ["crypto", "ssl"]
 
     def _lib_name(self, name):
-        if self.settings.os == "Windows" and tools.Version(self.version) >= "3.0.0":
+        libressl_version = tools.Version(self.version)
+        if self.settings.os == "Windows" and \
+           (libressl_version >= "3.1.0" or (libressl_version < "3.1.0" and self.options.shared)):
             lib_fullpath = glob.glob(os.path.join(self.package_folder, "lib", "*{}*".format(name)))[0]
             lib_name = os.path.basename(lib_fullpath).split(".")[0].replace("lib", "")
             return lib_name
