@@ -16,14 +16,20 @@ class LibreSSLConan(ConanFile):
                    "with goals of modernizing the codebase, improving security, and applying "
                    "best practice development processes.")
     generators = "cmake"
-    _source_subfolder = "source_subfolder"
 
+    @property
+    def _source_subfolder(self):
+        return "source_subfolder"
 
     def config_options(self):
-        del self.settings.compiler.libcxx
-        del self.settings.compiler.cppstd
         if self.settings.os == "Windows":
             del self.options.fPIC
+
+    def configure(self):
+        if self.options.shared:
+            del self.options.fPIC
+        del self.settings.compiler.libcxx
+        del self.settings.compiler.cppstd
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
