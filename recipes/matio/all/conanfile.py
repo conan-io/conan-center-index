@@ -46,9 +46,9 @@ class MatioConan(ConanFile):
 
     def requirements(self):
         if self.options.with_hdf5:
-            self.requires("hdf5/[>=1.8 <1.13]")
+            self.requires("hdf5/1.12.0")
         if self.options.with_zlib:
-            self.requires("zlib/[>=1.2.3]")
+            self.requires("zlib/1.2.11")
 
     def _patch_sources(self):
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
