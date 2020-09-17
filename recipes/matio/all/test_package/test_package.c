@@ -1,4 +1,6 @@
-#include <matio.h>
+#include "matio.h"
+
+#include <stdio.h>
 
 int main()
 {
