@@ -55,7 +55,7 @@ class MatioConan(ConanFile):
             tools.patch(**patch)
 
     def config_options(self):
-        if self.settings.os == "Windows" or self.options.get_safe("shared"):
+        if self.settings.os == "Windows":
             del self.options.fPIC
 
     def configure(self):
