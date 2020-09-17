@@ -8,3 +8,5 @@ patches:
       base_path: "source_subfolder"
     - patch_file: "patches/disable-hdf5-target.patch"
       base_path: "source_subfolder"
+    - patch_file: "patches/patch-apple-no-undefined.patch"
+      base_path: "source_subfolder"
