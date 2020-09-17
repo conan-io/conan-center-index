@@ -59,10 +59,10 @@ class MatioConan(ConanFile):
             del self.options.fPIC
 
     def configure(self):
-        if self.options.get_safe("with_hdf5") not in (None, "None"):
-            self.options["hdf5"].shared = self.options.with_hdf5 == "shared"
-        if self.options.get_safe("with_zlib") not in (None, "None"):
-            self.options["zlib"].shared = self.options.with_zlib == "shared"
+        if self.options.shared:
+            del self.options.fPIC
+        if not self.options.with_hdf5 and self.options.mat73:
+            raise ConanInvalidConfiguration("Support of version 7.3 MAT files requires HDF5")
         del self.settings.compiler.libcxx
         del self.settings.compiler.cppstd
 
