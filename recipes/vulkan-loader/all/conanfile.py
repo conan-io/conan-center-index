@@ -13,6 +13,7 @@ class VulkanLoaderConan(ConanFile):
     exports_sources = ["CMakeLists.txt"]
     settings = "os", "arch", "build_type", "compiler"
     generators = "cmake", "cmake_find_package"
+    short_paths = True
     options = {
         "with_wsi_xcb": [True, False],
         "with_wsi_xlib": [True, False],
