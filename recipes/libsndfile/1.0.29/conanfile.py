@@ -106,8 +106,6 @@ class LibsndfileConan(ConanFile):
             self.cpp_info.components["sndfile"].requires.append("libalsa::libalsa")
         if self.options.with_sqlite:
             self.cpp_info.components["sndfile"].requires.append("sqlite3::sqlite3")
-        if self.options.with_external_libs:
-            self.cpp_info.components["sndfile"].requires.extend(["flac::flac", "ogg::ogg", "opus::opus", "vorbis::vorbis"])
 
         bin_path = os.path.join(self.package_folder, "bin")
         self.output.info("Appending PATH environment variable: {}".format(bin_path))
