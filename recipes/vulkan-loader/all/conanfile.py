@@ -1,6 +1,7 @@
 import os
 import glob
 from conans import ConanFile, tools, CMake
+from conans.errors import ConanInvalidConfiguration
 
 
 class VulkanLoaderConan(ConanFile):
@@ -22,7 +23,7 @@ class VulkanLoaderConan(ConanFile):
         "with_wsi_directfb": [True, False],
     }
     default_options = {
-        "shared": False,
+        "shared": True,
         "fPIC": True,
         "with_wsi_xcb": True,
         "with_wsi_xlib": True,
@@ -56,8 +57,8 @@ class VulkanLoaderConan(ConanFile):
                 # TODO directfb package
                 self.output.warn("Conan package for DirectFB is not available, this package will be used from system.")
 
-        if self.settings.os != "Macos":
-            self.options.shared = True
+        if self.settings.os != "Macos" and not self.options.shared:
+            raise ConanInvalidConfiguration("Static builds are not supported on {}".format(self.settings.os))
         if self.options.shared:
             del self.options.fPIC
 
