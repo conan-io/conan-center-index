@@ -70,7 +70,6 @@ class MatioConan(ConanFile):
         if self._cmake:
             return self._cmake
 
-        self._patch_sources()
         self._cmake = CMake(self)
         self._cmake.definitions["MATIO_EXTENDED_SPARSE"] = self.options.extended_sparse
         if self.options.get_safe("fPIC"):
