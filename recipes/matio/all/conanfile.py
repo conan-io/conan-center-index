@@ -84,8 +84,7 @@ class MatioConan(ConanFile):
         return self._cmake
 
     def build(self):
-        if self.options.with_hdf5 in (None, "None") and self.options.mat73:
-            raise ConanInvalidConfiguration("Support of version 7.3 MAT files requires HDF5")
+        self._patch_sources()
         cmake = self._configure_cmake()
         cmake.build()
 
