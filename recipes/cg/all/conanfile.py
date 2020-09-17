@@ -22,7 +22,7 @@ class CgConan(ConanFile):
 
     def configure(self):
         if self.settings.os not in ["Windows", "Linux", "Macos"]:
-            raise ConanInvalidConfiguration("ags doesn't support OS: {}.".format(self.settings.os))
+            raise ConanInvalidConfiguration("cg doesn't support OS: {}.".format(self.settings.os))
         if self.settings.arch not in ["x86_64", "x86"]:
             raise ConanInvalidConfiguration("cg doesn't support arch: {}".format(self.settings.arch))
 
@@ -36,9 +36,9 @@ class CgConan(ConanFile):
         arch_str = str(self.settings.arch)
 
         if self.settings.os == "Windows":
-            self.copy("*.h", dst="include", src=os.path.join(self._source_subfolder, "win", "include"))
-            self.copy("*", dst="bin", src=os.path.join(self._source_subfolder, "win", "bin", arch_str), keep_path=False)
-            self.copy("*.lib", dst="lib", src=os.path.join(self._source_subfolder, "win", "lib", arch_str), keep_path=False)
+            self.copy("*.h", dst=os.path.join("include", "Cg"), src=os.path.join(self._source_subfolder, "win", "include", "Cg"))
+            self.copy("cg*", dst="bin", src=os.path.join(self._source_subfolder, "win", "bin", arch_str), keep_path=False)
+            self.copy("cg*.lib", dst="lib", src=os.path.join(self._source_subfolder, "win", "lib", arch_str), keep_path=False)
 
         elif self.settings.os == "Linux":
             self.copy("*.h", dst="include", src=os.path.join(self._source_subfolder, "linux", "include"))
