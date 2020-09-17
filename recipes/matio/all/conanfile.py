@@ -18,8 +18,8 @@ class MatioConan(ConanFile):
         "extended_sparse": [True, False],
         "fPIC": [True, False],
         "mat73": [True, False],
-        "with_hdf5": [None, "shared", "static"],
-        "with_zlib": [None, "shared", "static"]
+        "with_hdf5": [True, False],
+        "with_zlib": [True, False],
     }
     default_options = {
         "shared": False,
