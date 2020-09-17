@@ -27,7 +27,6 @@ class LibsndfileConan(ConanFile):
 
         "with_alsa": False,
         "with_sqlite": True,
-        "with_external_libs": True,
     }
     exports_sources = "CMakeLists.txt"
     generators = "cmake", "cmake_find_package"
