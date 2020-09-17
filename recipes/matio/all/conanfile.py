@@ -77,8 +77,7 @@ class MatioConan(ConanFile):
         self._cmake.definitions["MATIO_MAT73"] = self.options.mat73
         self._cmake.definitions["MATIO_WITH_HDF5"] = self.options.with_hdf5
         self._cmake.definitions["MATIO_WITH_ZLIB"] = self.options.with_zlib
-        if self.options.with_hdf5 not in (None, "None"):
-            self._cmake.definitions["HDF5_USE_STATIC_LIBRARIES"] = self.options.with_hdf5 == "static"
+        self._cmake.definitions["HDF5_USE_STATIC_LIBRARIES"] = self.options.with_hdf5 and not self.options["hdf5"].shared
         self._cmake.configure(build_folder=self._build_subfolder)
         return self._cmake
 
