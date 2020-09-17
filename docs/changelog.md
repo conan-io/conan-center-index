@@ -1,5 +1,21 @@
 # Changelog
 
+### 17-September-2020 - 17:42 CEST
+
+ - [job] Inspect PRs and merge automatically if approved.
+ - [job] Build single reference.
+ - [job] Main tapaholes job: Build single references in correct order.
+ - [feature] Iterate profiles in a given order (adding tests to check).
+ - [feature] Add new users to EAP automatically only on Mondays.
+ - [feature] Distribute jobs taking into account resources.
+ - [feature] Labels 'Error' and 'Unexpected error' are mutually exclusive.
+ - [bugfix] Every new node offers a clean workspace (shorter paths).
+ - [bugfix] Upload packages: upload one first, then the rest to avoid missing files issue.
+ - [bugfix] Fix 'parallelGroup' when there are more workers than tasks.
+ - [bugfix] Retry if failure setting the BuildStatus property.
+ - [fix] Use the actual commit from the 'master' branch to compute diffs.
+ - [fix] Use environment variables to log into Conan repository.
+
 ### 17-August-2020 - 11:20 CEST
 
  - Raise error if zero packages are generated
