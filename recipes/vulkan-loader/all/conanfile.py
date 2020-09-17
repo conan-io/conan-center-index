@@ -14,12 +14,16 @@ class VulkanLoaderConan(ConanFile):
     settings = "os", "arch", "build_type", "compiler"
     generators = "cmake", "cmake_find_package"
     options = {
+        "shared": [True, False],
+        "fPIC": [True, False],
         "with_wsi_xcb": [True, False],
         "with_wsi_xlib": [True, False],
         "with_wsi_wayland": [True, False],
         "with_wsi_directfb": [True, False],
     }
     default_options = {
+        "shared": False,
+        "fPIC": True,
         "with_wsi_xcb": True,
         "with_wsi_xlib": True,
         "with_wsi_wayland": False,
@@ -33,11 +37,13 @@ class VulkanLoaderConan(ConanFile):
         return "source_subfolder"
 
     def config_options(self):
+        if self.settings.os == "Windows":
+            del self.options.fPIC
         if self.settings.os != "Linux":
-            self.options.with_wsi_xcb
-            self.options.with_wsi_xlib
-            self.options.with_wsi_wayland
-            self.options.with_wsi_directfb
+            del self.options.with_wsi_xcb
+            del self.options.with_wsi_xlib
+            del self.options.with_wsi_wayland
+            del self.options.with_wsi_directfb
 
     def configure(self):
         del self.settings.compiler.libcxx
@@ -49,6 +55,11 @@ class VulkanLoaderConan(ConanFile):
             if self.options.with_wsi_directfb:
                 # TODO directfb package
                 self.output.warn("Conan package for DirectFB is not available, this package will be used from system.")
+
+        if self.settings.os != "Macos":
+            self.options.shared = True
+        if self.options.shared:
+            del self.options.fPIC
 
     def requirements(self):
         self.requires("vulkan-headers/{}".format(self.version))
@@ -70,6 +81,8 @@ class VulkanLoaderConan(ConanFile):
             self._cmake.definitions["BUILD_WSI_XLIB_SUPPORT"] = self.options.with_wsi_xlib
             self._cmake.definitions["BUILD_WSI_WAYLAND_SUPPORT"] = self.options.with_wsi_wayland
             self._cmake.definitions["BUILD_WSI_DIRECTFB_SUPPORT"] = self.options.with_wsi_directfb
+        if self.settings.os == "Macos":
+            self._cmake.definitions["BUILD_STATIC_LOADER"] = not self.options.shared
 
         self._cmake.configure()
         return self._cmake
