@@ -45,9 +45,9 @@ class MatioConan(ConanFile):
         os.rename(self.name + "-" + self.version, self._source_subfolder)
 
     def requirements(self):
-        if self.options.get_safe("with_hdf5") not in (None, "None"):
+        if self.options.with_hdf5:
             self.requires("hdf5/[>=1.8 <1.13]")
-        if self.options.get_safe("with_zlib") not in (None, "None"):
+       if self.options.with_zlib:
             self.requires("zlib/[>=1.2.3]")
 
     def _patch_sources(self):
