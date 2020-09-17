@@ -72,8 +72,7 @@ class MatioConan(ConanFile):
 
         self._cmake = CMake(self)
         self._cmake.definitions["MATIO_EXTENDED_SPARSE"] = self.options.extended_sparse
-        if self.options.get_safe("fPIC"):
-            self._cmake.definitions["MATIO_PIC"] = self.options.fPIC
+        self._cmake.definitions["MATIO_PIC"] = self.options.get_safe("fPIC", True)
         self._cmake.definitions["MATIO_SHARED"] = self.options.shared
         self._cmake.definitions["MATIO_MAT73"] = self.options.mat73
         self._cmake.definitions["MATIO_WITH_HDF5"] = self.options.with_hdf5
