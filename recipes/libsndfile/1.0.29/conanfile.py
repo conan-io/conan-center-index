@@ -42,11 +42,10 @@ class LibsndfileConan(ConanFile):
             self.requires("libalsa/1.2.2")
         if self.options.with_sqlite:
             self.requires("sqlite3/3.32.3")
-        if self.options.with_external_libs:
-            self.requires("flac/1.3.3")
-            self.requires("ogg/1.3.4")
-            self.requires("opus/1.3.1")
-            self.requires("vorbis/1.3.7")
+        self.requires("flac/1.3.3")
+        self.requires("ogg/1.3.4")
+        self.requires("opus/1.3.1")
+        self.requires("vorbis/1.3.7")
 
     def config_options(self):
         if self.settings.os == "Windows":
