@@ -20,8 +20,8 @@ class VulkanLoaderConan(ConanFile):
         "with_wsi_directfb": [True, False],
     }
     default_options = {
-        "with_wsi_xcb": False,
-        "with_wsi_xlib": False,
+        "with_wsi_xcb": True,
+        "with_wsi_xlib": True,
         "with_wsi_wayland": False,
         "with_wsi_directfb": False,
     }
