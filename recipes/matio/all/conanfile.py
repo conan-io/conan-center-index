@@ -26,8 +26,8 @@ class MatioConan(ConanFile):
         "extended_sparse": True,
         "fPIC": True,
         "mat73": True,
-        "with_hdf5": "static",
-        "with_zlib": "static"
+        "with_hdf5": True,
+        "with_zlib": True,
     }
 
     _cmake = None
