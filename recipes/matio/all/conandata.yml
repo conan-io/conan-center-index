@@ -6,3 +6,5 @@ patches:
   "1.5.18":
     - patch_file: "patches/require-cmake-3.10.patch"
       base_path: "source_subfolder"
+    - patch_file: "patches/disable-hdf5-target.patch"
+      base_path: "source_subfolder"
