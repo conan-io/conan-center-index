@@ -72,7 +72,7 @@ class LibsndfileConan(ConanFile):
         if self.settings.compiler == "Visual Studio":
             self._cmake.definitions["ENABLE_STATIC_RUNTIME"] = "MT" in str(self.settings.compiler.runtime)
         self._cmake.definitions["BUILD_REGTEST"] = False
-        self._cmake.definitions["ENABLE_EXTERNAL_LIBS"] = self.options.with_external_libs
+        self._cmake.definitions["ENABLE_EXTERNAL_LIBS"] = True
         self._cmake.configure()
         return self._cmake
 
