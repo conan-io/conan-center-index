@@ -11,7 +11,7 @@ class MatioConan(ConanFile):
     description = "Matio is a C library for reading and writing binary MATLAB MAT files."
     topics = ("conan", "matlab", "mat-file", "file-format", "hdf5")
     settings = "os", "compiler", "build_type", "arch"
-    generators = "cmake"
+    generators = "cmake", "cmake_find_package"
     exports_sources = "CMakeLists.txt", "patches/*"
     options = {
         "shared": [True, False],
