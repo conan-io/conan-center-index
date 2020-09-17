@@ -97,6 +97,7 @@ class LibsndfileConan(ConanFile):
         self.cpp_info.names["cmake_find_package"] = "SndFile"
         self.cpp_info.names["pkg_config"] = "sndfile"
         self.cpp_info.components["sndfile"].libs = ["sndfile"]
+        self.cpp_info.components["sndfile"].requires = ["flac::flac", "ogg::ogg", "opus::opus", "vorbis::vorbis"]
         if not self.options.shared:
             if self.settings.os == "Linux":
                 self.cpp_info.components["sndfile"].system_libs = ["m", "dl", "pthread", "rt"]
