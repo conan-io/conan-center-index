@@ -28,10 +28,6 @@ class PoshlibConan(ConanFile):
     def _source_subfolder(self):
         return "source_subfolder"
 
-    @property
-    def _build_subfolder(self):
-        return "build_subfolder"
-
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
         extracted_dir = glob.glob('poshlib-*/')[0]
@@ -51,7 +47,7 @@ class PoshlibConan(ConanFile):
         if self._cmake:
             return self._cmake
         self._cmake = CMake(self)
-        self._cmake.configure(build_folder=self._build_subfolder)
+        self._cmake.configure()
         return self._cmake
 
     def build(self):
