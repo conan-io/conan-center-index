@@ -157,6 +157,7 @@ struct PipelineElement {
 struct PipelineElement createPipelineElement(mz_stream_create_cb streamFactory,
                                              char const *name,
                                              char const *path) {
+  size_t i;
   struct PipelineElement element;
   element.streamFactory = streamFactory;
   if (name != NULL)
@@ -169,7 +170,7 @@ struct PipelineElement createPipelineElement(mz_stream_create_cb streamFactory,
   else
     memset(&element.path[0], 0, MAX_STREAM_PATH_SIZE);
   element.mode = 0;
-  for (size_t i = 0; i < MAX_STREAM_PROPERTIES; ++i) {
+  for (i = 0; i < MAX_STREAM_PROPERTIES; ++i) {
     element.proprties[i].prop = -1;
     element.proprties[i].value = -1;
   }
@@ -190,7 +191,8 @@ createPipelineElement_bare(mz_stream_create_cb streamFactory) {
 int strm_create_streams(struct PipelineElement *elements[],
                         int const elementCount) {
   int err = 0;
-  for (int i = 0; i < elementCount; ++i) {
+  int i;
+  for (i = 0; i < elementCount; ++i) {
     struct PipelineElement *current = elements[i];
     if (current->streamFactory(&current->stream) == NULL) {
       printf("Failed to create stream %s.\n", current->name);
@@ -203,7 +205,8 @@ int strm_create_streams(struct PipelineElement *elements[],
 int strm_set_stream_bases(struct PipelineElement *elements[],
                           int const elementCount) {
   int err = 0;
-  for (int i = 0; i < elementCount; ++i) {
+  int i;
+  for (i = 0; i < elementCount; ++i) {
     struct PipelineElement *current = elements[i];
     struct PipelineElement *next =
         i + 1 < elementCount ? elements[i + 1] : NULL;
@@ -220,7 +223,8 @@ int strm_set_stream_bases(struct PipelineElement *elements[],
 int strm_open_streams(struct PipelineElement *elements[],
                       int const elementCount) {
   int err = 0;
-  for (int i = elementCount - 1; i >= 0; --i) {
+  int i;
+  for (i = elementCount - 1; i >= 0; --i) {
     struct PipelineElement *current = elements[i];
     if (mz_stream_is_open(current->stream) == 0)
       continue;
@@ -235,7 +239,8 @@ int strm_open_streams(struct PipelineElement *elements[],
 int strm_close_streams(struct PipelineElement *elements[],
                        int const elementCount) {
   int err = 0;
-  for (int i = 0; i < elementCount; ++i) {
+  int i;
+  for (i = 0; i < elementCount; ++i) {
     struct PipelineElement *current = elements[i];
     if (mz_stream_is_open(current->stream) != 0)
       continue;
@@ -249,7 +254,8 @@ int strm_close_streams(struct PipelineElement *elements[],
 
 int strm_delete_streams(struct PipelineElement *elements[],
                         int const elementCount) {
-  for (int i = 0; i < elementCount; ++i) {
+  int i;
+  for (i = 0; i < elementCount; ++i) {
     struct PipelineElement *current = elements[i];
     mz_stream_delete(&current->stream);
   }
@@ -258,7 +264,8 @@ int strm_delete_streams(struct PipelineElement *elements[],
 
 int strm_set_modes(struct PipelineElement *elements[], int const elementCount,
                    int const modes) {
-  for (int i = 0; i < elementCount; ++i) {
+  int i;
+  for (i = 0; i < elementCount; ++i) {
     elements[i]->mode = modes;
   }
   return 0;
@@ -267,9 +274,11 @@ int strm_set_modes(struct PipelineElement *elements[], int const elementCount,
 int strm_set_properties(struct PipelineElement *elements[],
                         int const elementCount) {
   int err = 0;
-  for (int i = 0; i < elementCount; ++i) {
+  int i;
+  size_t j;
+  for (i = 0; i < elementCount; ++i) {
     struct PipelineElement *current = elements[i];
-    for (size_t j = 0; j < MAX_STREAM_PROPERTIES; ++j) {
+    for (j = 0; j < MAX_STREAM_PROPERTIES; ++j) {
       if (current->proprties[j].prop >= 0 &&
           mz_stream_set_prop_int64(current->stream, current->proprties[j].prop,
                                    current->proprties[j].value) != 0) {
@@ -284,15 +293,16 @@ int strm_set_properties(struct PipelineElement *elements[],
 int strm_write_data(struct PipelineElement *pipe, const size_t bytesToWrite,
                     int32_t *crc) {
   int err = 0;
+  size_t i, j;
   srand(0);
 
   uint8_t buffer[1024];
   size_t newBytes = 0;
 
-  for (size_t i = 0; i < bytesToWrite && err == 0; i += newBytes) {
+  for (i = 0; i < bytesToWrite && err == 0; i += newBytes) {
     newBytes = bytesToWrite < sizeof(buffer) ? bytesToWrite : sizeof(buffer);
 
-    for (size_t j = 0; j < newBytes; ++j) {
+    for (j = 0; j < newBytes; ++j) {
       buffer[j] = rand();
     }
 
@@ -336,7 +346,8 @@ int strm_read_data(struct PipelineElement *pipe, int32_t const bytesToRead,
 int strm_print_pipeline(struct PipelineElement *elements[],
                         int const elementCount) {
   printf("Test mz_strm: ");
-  for (int i = 0; i < elementCount; ++i) {
+  int i;
+  for (i = 0; i < elementCount; ++i) {
     printf("%s", elements[i]->name);
     if (i + 1 < elementCount) {
       printf(" <-> ");
