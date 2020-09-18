@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.1.0)
 project(test_package LANGUAGES C)
 
-set(CMAKE_C_STANDARD 99)
+set(CMAKE_C_STANDARD 90)
 
 include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
 conan_basic_setup(TARGETS)
