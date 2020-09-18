@@ -37,6 +37,10 @@ class VulkanLoaderConan(ConanFile):
     def _source_subfolder(self):
         return "source_subfolder"
 
+    @property
+    def _apple_os(self):
+        return ["Macos", "iOS", "watchOS", "tvOS"]
+
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
@@ -57,7 +61,7 @@ class VulkanLoaderConan(ConanFile):
                 # TODO directfb package
                 self.output.warn("Conan package for DirectFB is not available, this package will be used from system.")
 
-        if self.settings.os != "Macos" and not self.options.shared:
+        if self.settings.os not in self._apple_os and not self.options.shared:
             raise ConanInvalidConfiguration("Static builds are not supported on {}".format(self.settings.os))
         if self.options.shared:
             del self.options.fPIC
@@ -82,7 +86,7 @@ class VulkanLoaderConan(ConanFile):
             self._cmake.definitions["BUILD_WSI_XLIB_SUPPORT"] = self.options.with_wsi_xlib
             self._cmake.definitions["BUILD_WSI_WAYLAND_SUPPORT"] = self.options.with_wsi_wayland
             self._cmake.definitions["BUILD_WSI_DIRECTFB_SUPPORT"] = self.options.with_wsi_directfb
-        if self.settings.os == "Macos":
+        if self.settings.os in self._apple_os:
             self._cmake.definitions["BUILD_STATIC_LOADER"] = not self.options.shared
 
         self._cmake.configure()
