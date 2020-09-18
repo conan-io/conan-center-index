@@ -1,0 +1,16 @@
+'Fixes' this error:
+Only one of PREFIX or INSTALL_BASE can be given.  Not both.
+
+I don't think the fix is correct.
+But perl is not used, so does it matter?
+
+--- perl/Makefile.PL.in
++++ perl/Makefile.PL.in
+@@ -1,6 +1,6 @@
+ use ExtUtils::MakeMaker;
+ WriteMakefile(
+-    'PREFIX' => '@prefix@',
++    #'PREFIX' => '@prefix@',
+     'NAME'	=> 'Subunit',
+     'VERSION' => '@SUBUNIT_VERSION@',
+     'test' => { 'TESTS' => 'tests/*.pl' },
