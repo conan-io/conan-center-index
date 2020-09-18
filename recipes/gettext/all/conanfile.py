@@ -14,8 +14,8 @@ class GetTextConan(ConanFile):
     license = "GPL-3.0-or-later"
     settings = "os", "arch", "compiler", "build_type"
     exports_sources = ["patches/*.patch"]
-    options = {"shared": [True, False], "fPIC": [True, False]}
-    default_options = {"shared": False, "fPIC": True}
+    options = {"shared": [True, False], "fPIC": [True, False], "threads": ["posix", "solaris", "pth", "windows", "disabled", "auto"]}
+    default_options = {"shared": False, "fPIC": True, "threads": "auto" }
     requires = ("libiconv/1.16")
 
     _autotools = None
@@ -47,6 +47,8 @@ class GetTextConan(ConanFile):
         if self.settings.compiler == "Visual Studio" and \
            tools.Version(self.settings.compiler.version) == "15":
             raise ConanInvalidConfiguration("Gettext does not support Visual Studio 15.")
+        if(self.options.threads == "auto"):
+            self.options.threads = { "Solaris": "solaris", "Windows": "windows" }.get(str(self.settings.os), "posix")
 
     def build_requirements(self):
         if tools.os_info.is_windows:
@@ -75,6 +77,7 @@ class GetTextConan(ConanFile):
                 "--disable-csharp",
                 "--disable-libasprintf",
                 "--disable-curses",
+                "--disable-threads" if self.options.threads == "disabled" else ("--enable-threads=" + str(self.options.threads)),
                 "--with-libiconv-prefix=%s" % libiconv_prefix]
         build = None
         host = None
