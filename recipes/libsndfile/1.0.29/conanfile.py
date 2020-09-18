@@ -17,14 +17,12 @@ class LibsndfileConan(ConanFile):
         "experimental": [True, False],
         "with_alsa": [True, False],
         "with_sqlite": [True, False],
-        "with_external_libs": [True, False]
     }
     default_options = {
         "shared": False,
         "fPIC": True,
         "programs": True,
         "experimental": False,
-
         "with_alsa": False,
         "with_sqlite": True,
     }
