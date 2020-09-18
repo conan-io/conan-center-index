@@ -5,10 +5,10 @@ import os
 
 class CppunitConan(ConanFile):
     name = "cppunit"
-    description = "UNKNOWN DESCRIPTION"
-    topics = "UNKNOWN TOPICS"
-    license = "UNKNOWN LICENSE"
-    homepage = "UNKNOWN HOMEPAGE"
+    description = "CppUnit is the C++ port of the famous JUnit framework for unit testing. Test output is in XML for automatic testing and GUI based for supervised tests."
+    topics = ("conan", "cppunit", "unit-test", "tdd")
+    license = " LGPL-2.1-or-later"
+    homepage = "https://freedesktop.org/wiki/Software/cppunit/"
     url = "https://github.com/conan-io/conan-center-index"
     settings = "os", "arch", "compiler", "build_type"
     options = {
@@ -98,7 +98,8 @@ class CppunitConan(ConanFile):
         tools.rmdir(os.path.join(self.package_folder, "share"))
 
     def package_info(self):
-        self.cpp_info.libs = ["cppunit"]
+        libsuffix = ".dll" if self.settings.os == "Linux" and self.options.shared else ""
+        self.cpp_info.libs = ["cppunit" + libsuffix]
         if not self.options.shared:
             if self.settings.os == "Linux":
                 self.cpp_info.system_libs = ["dl"]
