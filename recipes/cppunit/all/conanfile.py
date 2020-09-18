@@ -98,7 +98,7 @@ class CppunitConan(ConanFile):
         tools.rmdir(os.path.join(self.package_folder, "share"))
 
     def package_info(self):
-        libsuffix = ".dll" if self.settings.os == "Linux" and self.options.shared else ""
+        libsuffix = ".dll" if self.settings.os == "Windows" and self.options.shared else ""
         self.cpp_info.libs = ["cppunit" + libsuffix]
         if not self.options.shared:
             stdlib = tools.stdcpp_library(self)
