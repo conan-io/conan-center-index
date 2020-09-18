@@ -8,7 +8,7 @@ class PopplerDataConan(ConanFile):
     description = "encoding files for use with poppler, enable CJK and Cyrrilic"
     homepage = "https://poppler.freedesktop.org/"
     topics = "conan", "poppler", "pdf", "rendering"
-    license = "GPL-2.0-or-later", "adobe", "MIT"
+    license = "BSD-3-Clause", "GPL-2.0-or-later", "MIT"
     url = "https://github.com/conan-io/conan-center-index"
     exports_sources = "CMakeLists.txt", "patches/**"
     generators = "cmake"
