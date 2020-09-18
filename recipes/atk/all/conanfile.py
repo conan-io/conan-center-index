@@ -55,6 +55,7 @@ class LibnameConan(ConanFile):
         defs['docs'] = 'false'
         args=[]
         args.append('--wrap-mode=nofallback')
+        args.append('--localedir=%s' % os.path.join(self.package_folder, 'bin', 'share', 'locale'))
         meson.configure(defs=defs, build_folder=self._build_subfolder, source_folder=self._source_subfolder, pkg_config_paths='.', args=args)
         return meson
 
