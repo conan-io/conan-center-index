@@ -194,6 +194,7 @@ class GLibConan(ConanFile):
             self.cpp_info.components["gio-unix-2.0"].libs = ["gio-2.0"]
             self.cpp_info.components["gio-unix-2.0"].requires.extend(["gobject-2.0", "gio-2.0"])
             self.cpp_info.components["gio-unix-2.0"].includedirs = [os.path.join("include", "gio-unix-2.0")]
+        self.env_info.GLIB_COMPILE_SCHEMAS = os.path.join(self.package_folder, "bin", "glib-compile-schemas")
 
         self.cpp_info.components["gresource"].libs = [] # this is actualy an executable
         self.cpp_info.components["gresource"].requires.append("libelf::libelf") # this is actualy an executable
