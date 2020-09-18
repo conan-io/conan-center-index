@@ -27,7 +27,7 @@ class VulkanLoaderConan(ConanFile):
         "fPIC": True,
         "with_wsi_xcb": True,
         "with_wsi_xlib": True,
-        "with_wsi_wayland": False,
+        "with_wsi_wayland": True,
         "with_wsi_directfb": False,
     }
 
@@ -68,8 +68,11 @@ class VulkanLoaderConan(ConanFile):
 
     def requirements(self):
         self.requires("vulkan-headers/{}".format(self.version))
-        if self.settings.os == "Linux" and (self.options.with_wsi_xcb or self.options.with_wsi_xlib):
-            self.requires("xorg/system")
+        if self.settings.os == "Linux":
+            if self.options.with_wsi_xcb or self.options.with_wsi_xlib:
+                self.requires("xorg/system")
+            if self.options.with_wsi_wayland:
+                self.requires("wayland/1.18.0")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
