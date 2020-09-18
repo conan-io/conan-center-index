@@ -1,85 +1,83 @@
-from conans import ConanFile, tools
+from conans import CMake, ConanFile, tools
 from conans.errors import ConanInvalidConfiguration
 import os
-import shutil
 
 
-class DoxygenInstallerConan(ConanFile):
+class DoxygenConan(ConanFile):
     name = "doxygen"
     description = "A documentation system for C++, C, Java, IDL and PHP --- Note: Dot is disabled in this package"
     topics = ("conan", "doxygen", "installer", "devtool", "documentation")
-    url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/doxygen/doxygen"
     license = "GPL-2.0-or-later"
-    settings = "os", "arch", "compiler"
+    url = "https://github.com/conan-io/conan-center-index"
+    settings = "os", "arch", "compiler", "build_type"
+    exports_sources = "CMakeLists.txt", "patches/**"
+    generators = "cmake", "cmake_find_package"
+    short_paths = True
+
+    _cmake = None
+
+    @property
+    def _source_subfolder(self):
+        return "source_subfolder"
+
+    @property
+    def _build_subfolder(self):
+        return "build_subfolder"
+
+    _minimum_compiler_version = {
+        "gcc": 5,
+    }
 
     def configure(self):
-        if self.settings.os in ["Linux", "Macos"] and self.settings.arch == "x86":
-            raise ConanInvalidConfiguration("Doxygen is not supported on {}-{}".format(self.os, self.arch))
-        if tools.Version(self.version) >= "1.8.18" and self.settings.compiler == "gcc" and tools.Version(self.settings.compiler.version) < "8":
-            raise ConanInvalidConfiguration("Doxygen requires GLIBCXX_3.4.22 and GLIBC_2.27") # https://abi-laboratory.pro/index.php?view=changelog&l=glibc&v=2.27
+        minimum_compiler_version = self._minimum_compiler_version.get(str(self.settings.compiler))
+        if minimum_compiler_version is not None:
+            if tools.Version(self.settings.compiler.version) < minimum_compiler_version:
+                raise ConanInvalidConfiguration("Compiler version too old. At least {} is required.".format(minimum_compiler_version))
+        del self.settings.compiler.cppstd
 
-    def _unpack_dmg(self, dest_file):
-        mount_point = os.path.join(self.build_folder, "mnt")
-        tools.mkdir(mount_point)
-        self.run("hdiutil attach -mountpoint %s %s" % (mount_point, dest_file))
-        try:
-            for program in ["doxygen", "doxyindexer", "doxysearch.cgi"]:
-                shutil.copy(os.path.join(mount_point, "Doxygen.app", "Contents",
-                                         "Resources", program), self.build_folder)
-            if tools.Version(self.version) < "1.8.18":
-                shutil.copy(os.path.join(mount_point, "Doxygen.app", "Contents",
-                                    "Frameworks", "libclang.dylib"), self.build_folder)
-        finally:
-            self.run("diskutil eject %s" % (mount_point))
-            tools.rmdir(mount_point)
+    def requirements(self):
+        self.requires("xapian-core/1.4.16")
+        self.requires("zlib/1.2.11")
+
+    def build_requirements(self):
+        if tools.os_info.is_windows:
+            self.build_requires("winflexbison/2.5.22")
+        else:
+            self.build_requires("flex/2.6.4")
+            self.build_requires("bison/3.7.1")
+
+    def source(self):
+        tools.get(**self.conan_data["sources"][self.version])
+        os.rename("{}-{}".format(self.name, self.version), self._source_subfolder)
+
+    def _configure_cmake(self):
+        if self._cmake:
+            return self._cmake
+        self._cmake = CMake(self)
+        self._cmake.definitions["build_parse"] = True
+        self._cmake.definitions["build_search"] = True
+        self._cmake.definitions["use_libc++"] = self.settings.compiler.get_safe("libcxx") == "libc++"
+        self._cmake.definitions["win_static"] = "MT" in self.settings.compiler.get_safe("runtime", "")
+        self._cmake.configure(build_folder=self._build_subfolder)
+        return self._cmake
 
     def build(self):
-        os_name = {
-            "Windows": "windows.bin" if self.settings.arch == "x86" else "windows.x64.bin",
-            "Macos": ".dmg",
-            "Linux": "linux"
-        }
-        dest_file = None
-        for data in self.conan_data["sources"][self.version]:
-            sha = data["sha256"]
-            url = data["url"]
-            filename = url[url.rfind("/") + 1:]
-            self.output.info("Downloading: {}".format(url))
-            tools.download(url, filename)
-            tools.check_sha256(filename, sha)
-            if os_name[str(self.settings.os)] in url:
-                dest_file = filename
-
-        if not dest_file:
-            raise ConanInvalidConfiguration("could not find source file fo the configuration")
-
-        tools.unzip("doxygen-{}.linux.bin.tar.gz".format(self.version), pattern="*LICENSE")
-
-        if self.settings.os == "Macos":
-            self._unpack_dmg(dest_file)
-            if tools.Version(self.version) < "1.8.18":
-                # Redirect the path of libclang.dylib to be adjacent to the doxygen executable, instead of in Frameworks
-                self.run('install_name_tool -change "@executable_path/../Frameworks/libclang.dylib" "@executable_path/libclang.dylib" doxygen')
-        else:
-            tools.unzip(dest_file)
+        if os.path.isfile("Findflex.cmake"):
+            os.unlink("Findflex.cmake")
+        if os.path.isfile("Findbison.cmake"):
+            os.unlink("Findbison.cmake")
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            tools.patch(**patch)
+        cmake = self._configure_cmake()
+        cmake.build()
 
     def package(self):
-        if self.settings.os == "Linux":
-            srcdir = "doxygen-{}/bin".format(self.version)
-            self.copy("*", dst="bin", src=srcdir)
-
-        self.copy("doxygen", dst="bin")
-        self.copy("doxyindexer", dst="bin")
-        self.copy("doxysearch.cgi", dst="bin")
-        self.copy("*.exe", dst="bin")
-        self.copy("*.dylib", dst="bin")
-        self.copy("*.dll", dst="bin")
-        self.copy("*LICENSE", dst="licenses", keep_path=False)
+        self.copy("LICENSE", src=self._source_subfolder, dst="licenses")
+        cmake = self._configure_cmake()
+        cmake.install()
 
     def package_info(self):
-        bindir = os.path.join(self.package_folder, "bin")
-        self.env_info.PATH.append(bindir)
-
-    def package_id(self):
-        del self.info.settings.compiler
+        bin_path = os.path.join(self.package_folder, "bin")
+        self.output.info("Appending PATH environment variable: {}".format(bin_path))
+        self.env_info.PATH.append(bin_path)
