@@ -101,8 +101,11 @@ class CppunitConan(ConanFile):
         libsuffix = ".dll" if self.settings.os == "Linux" and self.options.shared else ""
         self.cpp_info.libs = ["cppunit" + libsuffix]
         if not self.options.shared:
+            stdlib = tools.stdcpp_library(self)
+            if stdlib:
+                self.cpp_info.system_libs.append(stdlib)
             if self.settings.os == "Linux":
-                self.cpp_info.system_libs = ["dl"]
+                self.cpp_info.system_libs.append("dl")
         if self.options.shared:
             if self.settings.os == "Windows":
                 self.cpp_info.defines.append("CPPUNIT_DLL")
