@@ -32,7 +32,7 @@ class GetDnsConan(ConanFile):
         "with_libuv": True,
         "with_libidn2": True,
     }
-    generators = "cmake", "cmake_find_package", "pkg_config"
+    generators = "cmake", "pkg_config"
 
     _cmake = None
 
@@ -60,7 +60,6 @@ class GetDnsConan(ConanFile):
         del self.settings.compiler.cppstd
 
     def requirements(self):
-        # self.requires("openssl/1.0.2u")
         self.requires("openssl/1.1.1g")
         if self.options.with_libev:
             self.requires("libev/4.33")
@@ -89,7 +88,6 @@ class GetDnsConan(ConanFile):
         if self._cmake:
             return self._cmake
         self._cmake = CMake(self)
-        self._cmake.verbose = True
         self._cmake.definitions["ENABLE_SHARED"] = self.options.shared
         self._cmake.definitions["ENABLE_STATIC"] = not self.options.shared
         self._cmake.definitions["ENABLE_STUB_ONLY"] = self._stub_only

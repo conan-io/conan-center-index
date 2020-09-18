@@ -1,32 +1,5 @@
 --- CMakeLists.txt
 +++ CMakeLists.txt
-@@ -327,7 +327,7 @@
- set(HAVE_SSL 1)
- set(tlsdir "openssl")
- 
--set(CMAKE_REQUIRED_INCLUDES ${OPENSSL_INCLUDE_DIR})
-+set(CMAKE_REQUIRED_INCLUDES ${OpenSSL_INCLUDE_DIR})
- check_include_file(openssl/ssl.h HAVE_OPENSSL_SSL_H)
- check_include_file(openssl/evp.h HAVE_OPENSSL_EVP_H)
- check_include_file(openssl/err.h HAVE_OPENSSL_ERR_H)
-@@ -335,7 +335,7 @@
- check_include_file(openssl/conf.h HAVE_OPENSSL_CONF_H)
- check_include_file(openssl/engine.h HAVE_OPENSSL_ENGINE_H)
- 
--set(CMAKE_REQUIRED_LIBRARIES ${OPENSSL_LIBRARIES})
-+set(CMAKE_REQUIRED_LIBRARIES ${OpenSSL_LIBRARIES})
- check_function_exists(DSA_SIG_set0 HAVE_DSA_SIG_SET0)
- check_function_exists(DSA_set0_pqg HAVE_DSA_SET0_PQG)
- check_function_exists(DSA_set0_key HAVE_DSA_SET0_KEY)
-@@ -651,7 +651,7 @@
- 
-   # Note - CMake 3.5 doesn't like target_link_libraries on objects,
-   # which would be preferred way to add an include dependency.
--  ${OPENSSL_INCLUDE_DIR}
-+  ${OpenSSL_INCLUDE_DIR}
-   )
- target_compile_definitions(getdns_objects PRIVATE JSMN_GETDNS YXML_GETDNS)
- if (NOT HAVE_SSL_DANE_ENABLE)
 @@ -659,9 +659,6 @@
    target_include_directories(getdns_objects PRIVATE src/ssl_dane)
    set(USE_DANESSL 1)
