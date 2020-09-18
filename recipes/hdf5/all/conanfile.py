@@ -22,7 +22,8 @@ class Hdf5Conan(ConanFile):
         "threadsafe": [True, False],
         "with_zlib": [True, False],
         "szip_support": [None, "with_libaec", "with_szip"],
-        "szip_encoding": [True, False]
+        "szip_encoding": [True, False],
+        "tools": [True, False],
     }
     default_options = {
         "shared": False,
@@ -32,7 +33,8 @@ class Hdf5Conan(ConanFile):
         "threadsafe": False,
         "with_zlib": True,
         "szip_support": None,
-        "szip_encoding": False
+        "szip_encoding": False,
+        "tools": False,
     }
 
     _cmake = None
@@ -121,7 +123,7 @@ class Hdf5Conan(ConanFile):
         self._cmake.definitions["HDF5_ENABLE_DEBUG_APIS"] = False # Option?
         self._cmake.definitions["BUILD_TESTING"] = False
         self._cmake.definitions["HDF5_INSTALL_INCLUDE_DIR"] = os.path.join(self.package_folder, "include", "hdf5")
-        self._cmake.definitions["HDF5_BUILD_TOOLS"] = False
+        self._cmake.definitions["HDF5_BUILD_TOOLS"] = self.options.tools
         self._cmake.definitions["HDF5_BUILD_EXAMPLES"] = False
         self._cmake.definitions["HDF5_BUILD_HL_LIB"] = self.options.hl
         self._cmake.definitions["HDF5_BUILD_FORTRAN"] = False
@@ -145,29 +147,60 @@ class Hdf5Conan(ConanFile):
         os.remove(os.path.join(self.package_folder, "lib", "libhdf5.settings"))
 
     def package_info(self):
-        self.cpp_info.names["cmake_find_package"] = "HDF5"
-        self.cpp_info.names["cmake_find_package_multi"] = "HDF5"
-        self.cpp_info.libs = self._get_ordered_libs()
-        self.cpp_info.includedirs.append(os.path.join(self.package_folder, "include", "hdf5"))
-        if self.options.shared:
-            self.cpp_info.defines.append("H5_BUILT_AS_DYNAMIC_LIB")
-        if self.settings.os == "Linux":
-            self.cpp_info.system_libs.extend(["dl", "m"])
-            if self.options.get_safe("threadsafe"):
-                self.cpp_info.system_libs.append("pthread")
+        self.cpp_info.names["cmake_find_package"] = "hdf5"
+        self.cpp_info.names["cmake_find_package_multi"] = "hdf5"
 
-    def _get_ordered_libs(self):
-        libs = ["hdf5"]
-        if self.options.enable_cxx:
-            libs.insert(0, "hdf5_cpp")
-        if self.options.hl:
-            libs.insert(0, "hdf5_hl")
-            if self.options.enable_cxx:
-                libs.insert(0, "hdf5_hl_cpp")
-        # See config/cmake_ext_mod/HDFMacros.cmake
+        cmakesuffix = "-shared" if self.options.shared else "-static"
+        libprefix = ""
+        libsuffix = ""
         if self.settings.os == "Windows" and self.settings.compiler != "gcc" and not self.options.shared:
-            libs = ["lib" + lib for lib in libs]
+            libprefix = "lib"
         if self.settings.build_type == "Debug":
-            debug_postfix = "_D" if self.settings.os == "Windows" else "_debug"
-            libs = [lib + debug_postfix for lib in libs]
-        return libs
+            libsuffix = "_D" if self.settings.os == "Windows" else "_debug"
+
+        mkhdf5lib = lambda l: libprefix + l + libsuffix
+
+        self.cpp_info.components["libhdf5"].libs = [mkhdf5lib("hdf5")]
+        self.cpp_info.components["libhdf5"].includedirs.append(os.path.join(self.package_folder, "include", "hdf5"))
+        if self.options.shared:
+            self.cpp_info.components["libhdf5"].defines.append("H5_BUILT_AS_DYNAMIC_LIB")
+        if self.settings.os == "Linux":
+            self.cpp_info.components["libhdf5"].system_libs.extend(["dl", "m"])
+            if self.options.get_safe("threadsafe"):
+                self.cpp_info.components["libhdf5"].system_libs.append("pthread")
+        self.cpp_info.components["libhdf5"].names["cmake_find_package"] = "hdf5" + cmakesuffix
+        self.cpp_info.components["libhdf5"].names["cmake_find_package_multi"] = "hdf5" + cmakesuffix
+        self.cpp_info.components["libhdf5"].names["pkg_config"] = "hdf5-{}".format(self.version)
+        if self.options.with_zlib:
+            self.cpp_info.components["libhdf5"].requires.append("zlib::zlib")
+
+        if self.options.enable_cxx:
+            self.cpp_info.components["libhdf5_cpp"].libs = [mkhdf5lib("hdf5_cpp")]
+            self.cpp_info.components["libhdf5_cpp"].requires = ["libhdf5"]
+            self.cpp_info.components["libhdf5_cpp"].names["cmake_find_package"] = "hdf5_cpp" + cmakesuffix
+            self.cpp_info.components["libhdf5_cpp"].names["cmake_find_package_multi"] = "hdf5_cpp" + cmakesuffix
+            self.cpp_info.components["libhdf5_cpp"].names["pkg_config"] = "hdf5_cpp-{}".format(self.version)
+
+        if self.options.hl:
+            self.cpp_info.components["libhdf5_hl"].libs = [mkhdf5lib("hdf5_hl")]
+            self.cpp_info.components["libhdf5_hl"].requires = ["libhdf5"]
+            self.cpp_info.components["libhdf5_hl"].names["cmake_find_package"] = "hdf5_hl" + cmakesuffix
+            self.cpp_info.components["libhdf5_hl"].names["cmake_find_package_multi"] = "hdf5_hl" + cmakesuffix
+            self.cpp_info.components["libhdf5_hl"].names["pkg_config"] = "hdf5_hl-{}".format(self.version)
+
+            if self.options.enable_cxx:
+                self.cpp_info.components["libhdf5_hl_cpp"].libs = [mkhdf5lib("hdf5_hl_cpp")]
+                self.cpp_info.components["libhdf5_hl_cpp"].requires = ["libhdf5_cpp", "libhdf5_hl"]
+                self.cpp_info.components["libhdf5_hl_cpp"].names["cmake_find_package"] = "hdf5_hl_cpp" + cmakesuffix
+                self.cpp_info.components["libhdf5_hl_cpp"].names["cmake_find_package_multi"] = "hdf5_hl_cpp" + cmakesuffix
+                self.cpp_info.components["libhdf5_hl_cpp"].names["pkg_config"] = "hdf5_hl_cpp-{}".format(self.version)
+
+        if self.options.tools:
+            self.cpp_info.components["libhdf5_tools"].libs = [mkhdf5lib("hdf5_tools")]
+            self.cpp_info.components["libhdf5_tools"].requires = ["libhdf5"]
+            self.cpp_info.components["libhdf5_tools"].names["cmake_find_package"] = "hdf5_tools" + cmakesuffix
+            self.cpp_info.components["libhdf5_tools"].names["cmake_find_package_multi"] = "hdf5_tools" + cmakesuffix
+
+        bin_path = os.path.join(self.package_folder, "bin")
+        self.output.info("Appending PATH environment variable: {}".format(bin_path))
+        self.env_info.PATH.append(bin_path)
