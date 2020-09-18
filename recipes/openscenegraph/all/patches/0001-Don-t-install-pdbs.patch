@@ -1,0 +1,41 @@
+From 4006597ee2802dcaa962e8858edf72e82c65ba40 Mon Sep 17 00:00:00 2001
+From: "R. Andrew Ohana" <rao@esi-group.com>
+Date: Thu, 17 Sep 2020 16:48:49 -0700
+Subject: [PATCH 1/4] Don't install pdbs
+
+---
+ CMakeModules/ModuleInstall.cmake | 2 --
+ CMakeModules/OsgMacroUtils.cmake | 4 ----
+ 2 files changed, 6 deletions(-)
+
+diff --git a/CMakeModules/ModuleInstall.cmake b/CMakeModules/ModuleInstall.cmake
+index 21108afda..ddeadd1b8 100644
+--- a/CMakeModules/ModuleInstall.cmake
++++ b/CMakeModules/ModuleInstall.cmake
+@@ -37,8 +37,6 @@ IF(MSVC AND DYNAMIC_OPENSCENEGRAPH)
+ 	IF("${PREFIX}" STREQUAL PREFIX-NOTFOUND) # Fix for PREFIX-NOTFOUND left in file names
+ 	   SET(PREFIX "")
+ 	ENDIF()
+-    INSTALL(FILES ${OUTPUT_BINDIR}/${PREFIX}${LIB_NAME}${CMAKE_RELWITHDEBINFO_POSTFIX}.pdb DESTINATION ${INSTALL_BINDIR} COMPONENT libopenscenegraph CONFIGURATIONS RelWithDebInfo)
+-    INSTALL(FILES ${OUTPUT_BINDIR}/${PREFIX}${LIB_NAME}${CMAKE_DEBUG_POSTFIX}.pdb DESTINATION ${INSTALL_BINDIR} COMPONENT libopenscenegraph CONFIGURATIONS Debug)
+ ENDIF(MSVC AND DYNAMIC_OPENSCENEGRAPH)
+ 
+ IF(NOT OSG_COMPILE_FRAMEWORKS)
+diff --git a/CMakeModules/OsgMacroUtils.cmake b/CMakeModules/OsgMacroUtils.cmake
+index dcc1fe37d..cdae6c921 100644
+--- a/CMakeModules/OsgMacroUtils.cmake
++++ b/CMakeModules/OsgMacroUtils.cmake
+@@ -348,10 +348,6 @@ MACRO(SETUP_PLUGIN PLUGIN_NAME)
+             RUNTIME DESTINATION bin COMPONENT ${PACKAGE_COMPONENT}
+             ARCHIVE DESTINATION lib/${OSG_PLUGINS} COMPONENT libopenscenegraph-dev
+             LIBRARY DESTINATION bin/${OSG_PLUGINS} COMPONENT ${PACKAGE_COMPONENT})
+-        IF(MSVC AND DYNAMIC_OPENSCENEGRAPH)
+-            INSTALL(FILES ${OUTPUT_BINDIR}/${OSG_PLUGINS}/${TARGET_TARGETNAME}${CMAKE_RELWITHDEBINFO_POSTFIX}.pdb DESTINATION bin/${OSG_PLUGINS} COMPONENT ${PACKAGE_COMPONENT} CONFIGURATIONS RelWithDebInfo)
+-            INSTALL(FILES ${OUTPUT_BINDIR}/${OSG_PLUGINS}/${TARGET_TARGETNAME}${CMAKE_DEBUG_POSTFIX}.pdb DESTINATION bin/${OSG_PLUGINS} COMPONENT ${PACKAGE_COMPONENT} CONFIGURATIONS Debug)
+-        ENDIF(MSVC AND DYNAMIC_OPENSCENEGRAPH)
+     ELSE(WIN32)
+         INSTALL(TARGETS ${TARGET_TARGETNAME}
+             RUNTIME DESTINATION bin COMPONENT ${PACKAGE_COMPONENT}
+-- 
+2.21.0.windows.1
+
