@@ -14,7 +14,7 @@ class GStreamerConan(ConanFile):
     license = "GPL-2.0-only"
     settings = "os", "arch", "compiler", "build_type"
     options = {"shared": [True, False], "fPIC": [True, False]}
-    default_options = {"shared": True, "fPIC": True}
+    default_options = {"shared": False, "fPIC": True}
     _source_subfolder = "source_subfolder"
     _build_subfolder = "build_subfolder"
     exports_sources = ["patches/*.diff"]
