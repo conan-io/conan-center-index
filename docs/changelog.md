@@ -1,5 +1,9 @@
 # Changelog
 
+### 18-August-2020 - 18:38 CEST
+
+- Updated Conan client to the 1.29.1 version in Windows and Mac agents.
+
 ### 17-September-2020 - 17:42 CEST
 
  - [job] Inspect PRs and merge automatically if approved.
