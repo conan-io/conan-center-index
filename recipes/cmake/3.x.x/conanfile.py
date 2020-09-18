@@ -2,6 +2,7 @@ import os
 from conans import tools, ConanFile, CMake
 from conans.errors import ConanInvalidConfiguration, ConanException
 
+# This is a test
 
 class CMakeConan(ConanFile):
     name = "cmake"
