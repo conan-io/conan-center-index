@@ -96,3 +96,9 @@ class MatioConan(ConanFile):
             self.cpp_info.libs = ["libmatio"]
         else:
             self.cpp_info.libs = ["matio"]
+        if self.settings.os == "Linux":
+            self.cpp_info.system_libs = ["m"]
+
+        bin_path = os.path.join(self.package_folder, "bin")
+        self.output.info("Appending PATH environment variable: {}".format(bin_path))
+        self.env_info.PATH.append(bin_path)
