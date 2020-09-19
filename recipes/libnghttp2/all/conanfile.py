@@ -133,15 +133,10 @@ class Nghttp2Conan(ConanFile):
         tools.rmdir(os.path.join(self.package_folder, 'lib', 'pkgconfig'))
 
     def package_info(self):
-        self.cpp_info.libs = tools.collect_libs(self)
-        # Make sure nghttp2 is linked after other libs when shared is False.
-        # Name of the static lib is "nghttp2" in 1.39.2 and "nghttp2_static" in 1.40.0.
-        if "nghttp2" in self.cpp_info.libs:
-            self.cpp_info.libs.remove("nghttp2")
-            self.cpp_info.libs.append("nghttp2")
-        if "nghttp2_static" in self.cpp_info.libs:
-            self.cpp_info.libs.remove("nghttp2_static")
-            self.cpp_info.libs.append("nghttp2_static")
+        suffix = "_static" if tools.Version(self.version) > "1.39.2" and not self.options.shared else ""
+        self.cpp_info.libs = ["nghttp2" + suffix]
+        if self.options.with_asio:
+            self.cpp_info.libs.insert(0, "nghttp2_asio")
         if self.settings.compiler == "Visual Studio":
             if not self.options.shared:
                 self.cpp_info.defines.append("NGHTTP2_STATICLIB")
