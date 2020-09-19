@@ -44,7 +44,7 @@ class MBedTLSConan(ConanFile):
 
         if tools.Version(self.version) == "2.23.0" \
             and self.settings.os == "Windows" and self.options.shared:
-            raise ConanInvalidConfiguration("{}/{} does not support shared build on Windows", self.name, self.version)
+            raise ConanInvalidConfiguration("{}/{} does not support shared build on Windows".format(self.name, self.version))
 
     def requirements(self):
         if self.options.with_zlib:
