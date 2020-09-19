@@ -85,7 +85,7 @@ class OatppWebSocketConan(ConanFile):
             os.path.join("include", "oatpp-{}".format(self.version), "oatpp-websocket")
         ]
         self.cpp_info.components["_oatpp-websocket"].libdirs = [os.path.join("lib", "oatpp-{}".format(self.version))]
-        self.cpp_info.components["_oatpp-websocket"].libs = tools.collect_libs(self)
+        self.cpp_info.components["_oatpp-websocket"].libs = ["oatpp-websocket"]
         if self.settings.os == "Linux":
             self.cpp_info.components["_oatpp-websocket"].system_libs = ["pthread"]
         self.cpp_info.components["_oatpp-websocket"].requires = ["oatpp::oatpp"]
