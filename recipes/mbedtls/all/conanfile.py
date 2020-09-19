@@ -1,4 +1,5 @@
 from conans import CMake, ConanFile, tools
+from conans.errors import ConanInvalidConfiguration
 import os
 
 
@@ -40,6 +41,10 @@ class MBedTLSConan(ConanFile):
         del self.settings.compiler.libcxx
         if tools.Version(self.version) >= "2.23.0":
             self.license = "Apache-2.0"
+
+        if tools.Version(self.version) == "2.23.0" \
+            and self.settings.os == "Windows" and self.options.shared:
+            raise ConanInvalidConfiguration("{}/{} does not support shared build on Windows", self.name, self.version)
 
     def requirements(self):
         if self.options.with_zlib:
