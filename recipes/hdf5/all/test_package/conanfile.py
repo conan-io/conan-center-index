@@ -8,7 +8,8 @@ class Hdf5TestConan(ConanFile):
 
     def build(self):
         cmake = CMake(self)
-        cmake.definitions["HDF5_SHARED"] = self.options["hdf5"].shared
+        cmake.definitions["HDF5_FIND_DEBUG"] = True
+        cmake.definitions["HDF5_USE_STATIC_LIBRARIES"] = not self.options["hdf5"].shared
         cmake.configure()
         cmake.build()
 

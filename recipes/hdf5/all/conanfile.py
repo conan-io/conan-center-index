@@ -147,6 +147,9 @@ class Hdf5Conan(ConanFile):
         os.remove(os.path.join(self.package_folder, "lib", "libhdf5.settings"))
 
     def package_info(self):
+        # Only create HDF5-config.cmake, not FindHDF5.cmake
+        self.cpp_info.filenames["cmake_find_package"] = "_hdf5"
+        self.cpp_info.filenames["cmake_find_package_multi"] = "HDF5"
         self.cpp_info.names["cmake_find_package"] = "hdf5"
         self.cpp_info.names["cmake_find_package_multi"] = "hdf5"
 
