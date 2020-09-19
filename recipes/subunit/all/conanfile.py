@@ -1,4 +1,5 @@
 from conans import AutoToolsBuildEnvironment, ConanFile, tools
+from conans.errors import ConanInvalidConfiguration
 from contextlib import contextmanager
 import glob
 import os
@@ -21,7 +22,6 @@ class SubunitConan(ConanFile):
         "fPIC": True,
     }
     exports_sources = "patches/**"
-    generators = "pkg_config"
 
     _autotools = None
 
@@ -36,12 +36,13 @@ class SubunitConan(ConanFile):
     def configure(self):
         if self.options.shared:
             del self.options.fPIC
+            if self.settings.os == "Windows":
+                raise ConanInvalidConfiguration("Cannot build shared subunit libraries on Windows")
 
     def requirements(self):
         self.requires("cppunit/1.15.1")
 
     def build_requirements(self):
-        self.build_requires("pkgconf/1.7.3")
         if tools.os_info.is_windows and not tools.get_env("CONAN_BASH_PATH"):
             self.build_requires("msys2/20200517")
         if self.settings.compiler == "Visual Studio":
@@ -76,12 +77,17 @@ class SubunitConan(ConanFile):
             return self._autotools
         self._autotools = AutoToolsBuildEnvironment(self, win_bash=tools.os_info.is_windows)
         self._autotools.libs = []
+        if self.settings.compiler == "Visual Studio":
+            self._autotools.flags.append("-FS")
+            self._autotools.cxx_flags.append("-EHsc")
         yes_no = lambda v: "yes" if v else "no"
         conf_args = [
             "--enable-shared={}".format(yes_no(self.options.shared)),
             "--enable-static={}".format(yes_no(not self.options.shared)),
             "CHECK_CFLAGS=' '",
             "CHECK_LIBS=' '",
+            "CPPUNIT_CFLAGS='{}'".format(" ".join("-I{}".format(inc) for inc in self.deps_cpp_info["cppunit"].include_paths).replace("\\", "/")),
+            "CPPUNIT_LIBS='{}'".format(" ".join(self.deps_cpp_info["cppunit"].libs)),
         ]
         self._autotools.configure(args=conf_args, configure_dir=self._source_subfolder)
         return self._autotools
@@ -91,7 +97,7 @@ class SubunitConan(ConanFile):
             tools.patch(**patch)
         with self._build_context():
             autotools = self._configure_autotools()
-            autotools.make(args=["-j1"])
+            autotools.make()
 
     def package(self):
         self.copy("COPYING", src=self._source_subfolder, dst="licenses")
