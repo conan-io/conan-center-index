@@ -1,5 +1,6 @@
 from conans import CMake, ConanFile, tools
 from conans.errors import ConanInvalidConfiguration
+import glob
 import os
 
 
@@ -17,7 +18,7 @@ class GetDnsConan(ConanFile):
         "fPIC": [True, False],
         "tls": [False, "gnutls"],
         "stub_only": ["auto", True, False],
-        "with_libev": [True, False],
+        "with_libev": ["auto", True, False],
         "with_libevent": [True, False],
         "with_libuv": [True, False],
         "with_libidn2": [True, False],
@@ -27,14 +28,21 @@ class GetDnsConan(ConanFile):
         "fPIC": True,
         "stub_only": "auto",
         "tls": False,
-        "with_libev": True,
+        "with_libev": "auto",
         "with_libevent": True,
         "with_libuv": True,
         "with_libidn2": True,
     }
-    generators = "cmake", "pkg_config"
+    generators = "cmake", "pkg_config", "cmake_find_package"
 
     _cmake = None
+
+    @property
+    def _with_libev(self):
+        if self.options.with_libev == "auto":
+            return self.settings.os != "Windows"
+        else:
+            return self.options.with_libev
 
     @property
     def _stub_only(self):
@@ -61,7 +69,7 @@ class GetDnsConan(ConanFile):
 
     def requirements(self):
         self.requires("openssl/1.1.1g")
-        if self.options.with_libev:
+        if self._with_libev:
             self.requires("libev/4.33")
         if self.options.with_libevent:
             self.requires("libevent/2.1.12")
@@ -88,10 +96,11 @@ class GetDnsConan(ConanFile):
         if self._cmake:
             return self._cmake
         self._cmake = CMake(self)
+        self._cmake.definitions["OPENSSL_USE_STATIC_LIBS"] = not self.options["openssl"].shared
         self._cmake.definitions["ENABLE_SHARED"] = self.options.shared
         self._cmake.definitions["ENABLE_STATIC"] = not self.options.shared
         self._cmake.definitions["ENABLE_STUB_ONLY"] = self._stub_only
-        self._cmake.definitions["BUILD_LIBEV"] = self.options.with_libev
+        self._cmake.definitions["BUILD_LIBEV"] = self._with_libev
         self._cmake.definitions["BUILD_LIBEVENT2"] = self.options.with_libevent
         self._cmake.definitions["BUILD_LIBUV"] = self.options.with_libuv
         self._cmake.definitions["USE_LIBIDN2"] = self.options.with_libidn2
@@ -104,6 +113,11 @@ class GetDnsConan(ConanFile):
     def build(self):
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
             tools.patch(**patch)
+        # Use FindOpenSSL.cmake to let check_function_exists succeed
+        # Remove other cmake modules as they use FindPkgConfig
+        for fn in glob.glob("Find*cmake"):
+            if "OpenSSL" not in fn:
+                os.unlink(fn)
         cmake = self._configure_cmake()
         cmake.build()
 
@@ -118,9 +132,14 @@ class GetDnsConan(ConanFile):
 
     def package_id(self):
         self.info.options.stub_only = self._stub_only
+        self.info.options.with_libev = self._with_libev
 
     def package_info(self):
-        self.cpp_info.components["libgetdns"].libs = ["getdns"]
+        libsuffix = ""
+        if self.settings.compiler == "Visual Studio" and not self.options.shared:
+            libsuffix = "_static"
+
+        self.cpp_info.components["libgetdns"].libs = ["getdns" + libsuffix]
         self.cpp_info.components["libgetdns"].includedirs.append(os.path.join("include", "getdns"))
         self.cpp_info.components["libgetdns"].names["pkg_config"]= "getdns"
         self.cpp_info.components["libgetdns"].requires = ["openssl::openssl"]
@@ -132,17 +151,17 @@ class GetDnsConan(ConanFile):
             self.cpp_info.components["libgetdns"].requires.extend(["nettle::nettle", "gnutls::gnutls"])
 
         if self.options.with_libevent:
-            self.cpp_info.components["dns_ex_event"].libs = ["getdns_ex_event"]
+            self.cpp_info.components["dns_ex_event"].libs = ["getdns_ex_event" + libsuffix]
             self.cpp_info.components["dns_ex_event"].requires= ["libgetdns", "libevent::libevent"]
             self.cpp_info.components["dns_ex_event"].names["pkg_config"]= "getdns_ext_event"
 
-        if self.options.with_libev:
-            self.cpp_info.components["dns_ex_ev"].libs = ["getdns_ex_ev"]
+        if self._with_libev:
+            self.cpp_info.components["dns_ex_ev"].libs = ["getdns_ex_ev" + libsuffix]
             self.cpp_info.components["dns_ex_ev"].requires = ["libgetdns", "libev::libev"]
             self.cpp_info.components["dns_ex_ev"].names["pkg_config"]= "getdns_ext_ev"
 
         if self.options.with_libuv:
-            self.cpp_info.components["dns_ex_uv"].libs = ["getdns_ex_uv"]
+            self.cpp_info.components["dns_ex_uv"].libs = ["getdns_ex_uv" + libsuffix]
             self.cpp_info.components["dns_ex_uv"].requires = ["libgetdns", "libuv::libuv"]
             self.cpp_info.components["dns_ex_uv"].names["pkg_config"]= "getdns_ext_uv"
 
