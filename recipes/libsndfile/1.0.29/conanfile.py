@@ -89,8 +89,6 @@ class LibsndfileConan(ConanFile):
         tools.rmdir(os.path.join(self.package_folder, "share"))
 
     def package_info(self):
-        self.cpp_info.filenames["cmake_find_package"] = "SndFile"
-        self.cpp_info.filenames["cmake_find_package_multi"] = "SndFile"
         self.cpp_info.names["cmake_find_package"] = "SndFile"
         self.cpp_info.names["cmake_find_package"] = "SndFile"
         self.cpp_info.names["pkg_config"] = "sndfile"
