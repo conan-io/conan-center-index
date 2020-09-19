@@ -91,7 +91,12 @@ class LibCheckConan(ConanFile):
         self.cpp_info.names["cmake_find_package"] = "Check"
         self.cpp_info.names["cmake_find_package_multi"] = "Check"
 
-        self.cpp_info.components["liblibcheck"].libs = ["check"]
+        libsuffix = ""
+        if self.options.shared:
+            if self.settings.compiler == "Visual Studio":
+                libsuffix = "Dynamic"
+
+        self.cpp_info.components["liblibcheck"].libs = ["check" + libsuffix]
         self.cpp_info.components["liblibcheck"].requires.append("subunit::libsubunit")
         if not self.options.shared:
             if self.settings.os == "Linux":
