@@ -44,7 +44,13 @@ class MBedTLSConan(ConanFile):
 
         if tools.Version(self.version) == "2.23.0" \
             and self.settings.os == "Windows" and self.options.shared:
-            raise ConanInvalidConfiguration("{}/{} does not support shared build on Windows".format(self.name, self.version))
+            raise ConanInvalidConfiguration(
+                "{}/{} does not support shared build on Windows".format(self.name, self.version))
+
+        if tools.Version(self.version) == "2.23.0" \
+            and self.settings.compiler == "gcc" and tools.Version(self.settings.compiler.version) < "5":
+            # The command line flags set are not supported on older versions of gcc
+            raise ConanInvalidConfiguration("{}-{} is not supported by this recipe".format(self.settings.compiler, self.settings.compiler.version))
 
     def requirements(self):
         if self.options.with_zlib:
