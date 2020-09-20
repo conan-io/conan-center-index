@@ -6,7 +6,7 @@ import shutil
 class CryptoPPConan(ConanFile):
     name = "cryptopp"
     url = "https://github.com/conan-io/conan-center-index"
-    homepage = "https://github.com/weidai11/cryptopp"
+    homepage = "https://cryptopp.com"
     license = "BSL-1.0"
     description = "Crypto++ Library is a free C++ class library of cryptographic schemes."
     topics = ("conan", "cryptopp", "crypto", "cryptographic", "security")
@@ -15,6 +15,7 @@ class CryptoPPConan(ConanFile):
     default_options = {"shared": False, "fPIC": True}
     generators = "cmake"
     exports_sources = ["CMakeLists.txt", "patches/**"]
+
     _cmake = None
 
     @property
