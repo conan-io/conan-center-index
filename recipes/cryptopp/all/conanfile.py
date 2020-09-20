@@ -86,6 +86,14 @@ class CryptoPPConan(ConanFile):
         tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
 
     def package_info(self):
-        self.cpp_info.libs = tools.collect_libs(self)
+        # TODO: CMake imported target shouldn't be namespaced (waiting https://github.com/conan-io/conan/issues/7615 to be implemented)
+        cmake_target = "cryptopp-shared" if self.options.shared else "cryptopp-static"
+        self.cpp_info.components["libcryptopp"].names["cmake_find_package"] = cmake_target
+        self.cpp_info.components["libcryptopp"].names["cmake_find_package_multi"] = cmake_target
+        self.cpp_info.components["libcryptopp"].libs = tools.collect_libs(self)
         if self.settings.os == "Linux":
-            self.cpp_info.system_libs = ["pthread", "m"]
+            self.cpp_info.components["libcryptopp"].system_libs = ["pthread", "m"]
+        elif self.settings.os == "SunOS":
+            self.cpp_info.components["libcryptopp"].system_libs = ["nsl", "socket"]
+        elif self.settings.os == "Windows":
+            self.cpp_info.components["libcryptopp"].system_libs = ["ws2_32"]
