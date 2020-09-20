@@ -66,6 +66,7 @@ class CryptoPPConan(ConanFile):
         self._cmake.definitions["BUILD_SHARED"] = self.options.shared
         self._cmake.definitions["BUILD_TESTING"] = False
         self._cmake.definitions["BUILD_DOCUMENTATION"] = False
+        self._cmake.definitions["USE_INTERMEDIATE_OBJECTS_TARGET"] = False
         if self.settings.os == "Android":
             self._cmake.definitions["CRYPTOPP_NATIVE_ARCH"] = True
         self._cmake.configure(build_folder=self._build_subfolder)
