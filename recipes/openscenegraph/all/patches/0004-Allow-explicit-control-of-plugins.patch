@@ -1,15 +1,15 @@
-From cced1d94f01b846c3dbb76efeb5949c71f32f6fc Mon Sep 17 00:00:00 2001
+From 04859156034c6762338411d5f2c07d02d0a7b814 Mon Sep 17 00:00:00 2001
 From: "R. Andrew Ohana" <rao@esi-group.com>
 Date: Thu, 17 Sep 2020 17:25:12 -0700
 Subject: [PATCH 4/4] Allow explicit control of plugins
 
 ---
- src/osgDB/CMakeLists.txt            |  8 ++---
- src/osgPlugins/CMakeLists.txt       | 56 ++++++++++++++---------------
- src/osgPlugins/curl/CMakeLists.txt  |  4 +--
+ src/osgDB/CMakeLists.txt            |  8 ++--
+ src/osgPlugins/CMakeLists.txt       | 58 ++++++++++++++---------------
+ src/osgPlugins/curl/CMakeLists.txt  |  4 +-
  src/osgPlugins/dicom/CMakeLists.txt |  2 +-
  src/osgPlugins/ive/CMakeLists.txt   |  2 +-
- 5 files changed, 36 insertions(+), 36 deletions(-)
+ 5 files changed, 37 insertions(+), 37 deletions(-)
 
 diff --git a/src/osgDB/CMakeLists.txt b/src/osgDB/CMakeLists.txt
 index 340aae095..59b8b3a0d 100644
@@ -40,7 +40,7 @@ index 340aae095..59b8b3a0d 100644
      INCLUDE_DIRECTORIES( ${ZLIB_INCLUDE_DIR} )
      SET(COMPRESSION_LIBRARIES ZLIB_LIBRARIES)
 diff --git a/src/osgPlugins/CMakeLists.txt b/src/osgPlugins/CMakeLists.txt
-index 2a88684b5..3e35187a1 100644
+index 2a88684b5..24dc68667 100644
 --- a/src/osgPlugins/CMakeLists.txt
 +++ b/src/osgPlugins/CMakeLists.txt
 @@ -99,29 +99,29 @@ ADD_PLUGIN_DIRECTORY(dot)
@@ -148,7 +148,13 @@ index 2a88684b5..3e35187a1 100644
      ADD_PLUGIN_DIRECTORY(directshow)
  ENDIF()
  
-@@ -246,23 +246,23 @@ IF(NVTT_FOUND)
+@@ -241,28 +241,28 @@ IF(QTKIT_FOUND)
+     ADD_PLUGIN_DIRECTORY(QTKit)
+ ENDIF()
+ 
+-IF(NVTT_FOUND)
++IF(OSG_WITH_NVTT)
+     ADD_PLUGIN_DIRECTORY(nvtt)
  ENDIF()
  
  
