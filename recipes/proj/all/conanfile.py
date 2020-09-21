@@ -1,7 +1,8 @@
-import glob
 import os
 
-from conans import ConanFile, CMake, tools
+from conans import ConanFile, CMake, tools, RunEnvironment
+
+required_conan_version = ">=1.28.0"
 
 class ProjConan(ConanFile):
     name = "proj"
@@ -34,13 +35,12 @@ class ProjConan(ConanFile):
     def _source_subfolder(self):
         return "source_subfolder"
 
-    @property
-    def _build_subfolder(self):
-        return "build_subfolder"
-
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
+        if tools.Version(self.version) < "7.0.0":
+            del self.options.with_tiff
+            del self.options.with_curl
 
     def configure(self):
         if self.options.shared:
@@ -48,39 +48,53 @@ class ProjConan(ConanFile):
 
     def requirements(self):
         self.requires("sqlite3/3.32.3")
-        if self.options.with_tiff:
+        if self.options.get_safe("with_tiff"):
             self.requires("libtiff/4.1.0")
-        if self.options.with_curl:
-            self.requires("libcurl/7.71.0")
+        if self.options.get_safe("with_curl"):
+            self.requires("libcurl/7.72.0")
+
+    def build_requirements(self):
+        self.build_requires("sqlite3/3.32.3")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
         os.rename(self.name + "-" + self.version, self._source_subfolder)
 
     def build(self):
+        self._patch_sources()
+        with tools.environment_append(RunEnvironment(self).vars):
+            cmake = self._configure_cmake()
+            cmake.build()
+
+    def _patch_sources(self):
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
             tools.patch(**patch)
-        cmake = self._configure_cmake()
-        cmake.build()
+        tools.replace_in_file(os.path.join(self._source_subfolder, "CMakeLists.txt"), "/W4", "")
 
     def _configure_cmake(self):
         if self._cmake:
             return self._cmake
         self._cmake = CMake(self)
-        self._cmake.definitions["ENABLE_TIFF"] = self.options.with_tiff
-        self._cmake.definitions["ENABLE_CURL"] = self.options.with_curl
-        self._cmake.definitions["BUILD_TESTING"] = False
         self._cmake.definitions["USE_THREAD"] = self.options.threadsafe
-        self._cmake.definitions["ENABLE_IPO"] = False
         self._cmake.definitions["BUILD_CCT"] = True
         self._cmake.definitions["BUILD_CS2CS"] = True
         self._cmake.definitions["BUILD_GEOD"] = True
         self._cmake.definitions["BUILD_GIE"] = True
         self._cmake.definitions["BUILD_PROJ"] = True
         self._cmake.definitions["BUILD_PROJINFO"] = True
-        self._cmake.definitions["BUILD_PROJSYNC"] = self.options.with_curl
         self._cmake.definitions["PROJ_DATA_SUBDIR"] = "res"
-        self._cmake.configure(build_folder=self._build_subfolder)
+        if tools.Version(self.version) < "7.0.0":
+            self._cmake.definitions["PROJ_TESTS"] = False
+            self._cmake.definitions["BUILD_LIBPROJ_SHARED"] = self.options.shared
+            self._cmake.definitions["ENABLE_LTO"] = False
+            self._cmake.definitions["JNI_SUPPORT"] = False
+        else:
+            self._cmake.definitions["ENABLE_TIFF"] = self.options.with_tiff
+            self._cmake.definitions["ENABLE_CURL"] = self.options.with_curl
+            self._cmake.definitions["BUILD_TESTING"] = False
+            self._cmake.definitions["ENABLE_IPO"] = False
+            self._cmake.definitions["BUILD_PROJSYNC"] = self.options.with_curl
+        self._cmake.configure()
         return self._cmake
 
     def package(self):
@@ -91,9 +105,13 @@ class ProjConan(ConanFile):
         tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
 
     def package_info(self):
-        # TODO: also define deprecated PROJ4::proj alias?
-        self.cpp_info.names["cmake_find_package"] = "PROJ"
-        self.cpp_info.names["cmake_find_package_multi"] = "PROJ"
+        proj_version = tools.Version(self.version)
+        cmake_config_filename = "proj" if proj_version >= "7.0.0" else "proj4"
+        cmake_namespace = "PROJ" if proj_version >= "7.0.0" else "PROJ4"
+        self.cpp_info.filenames["cmake_find_package"] = cmake_config_filename
+        self.cpp_info.filenames["cmake_find_package_multi"] = cmake_config_filename
+        self.cpp_info.names["cmake_find_package"] = cmake_namespace
+        self.cpp_info.names["cmake_find_package_multi"] = cmake_namespace
         self.cpp_info.components["projlib"].names["cmake_find_package"] = "proj"
         self.cpp_info.components["projlib"].names["cmake_find_package_multi"] = "proj"
         self.cpp_info.components["projlib"].libs = tools.collect_libs(self)
@@ -101,16 +119,17 @@ class ProjConan(ConanFile):
             self.cpp_info.components["projlib"].system_libs.append("m")
             if self.options.threadsafe:
                 self.cpp_info.components["projlib"].system_libs.append("pthread")
-        if self.settings.os == "Windows":
-            self.cpp_info.components["projlib"].system_libs.append("shell32")
-            if tools.Version(self.version) >= "7.1.0":
+        elif self.settings.os == "Windows":
+            if proj_version >= "7.0.0":
+                self.cpp_info.components["projlib"].system_libs.append("shell32")
+            if proj_version >= "7.1.0":
                 self.cpp_info.components["projlib"].system_libs.append("Ole32")
         if not self.options.shared and tools.stdcpp_library(self):
             self.cpp_info.components["projlib"].system_libs.append(tools.stdcpp_library(self))
         self.cpp_info.components["projlib"].requires.append("sqlite3::sqlite3")
-        if self.options.with_tiff:
+        if self.options.get_safe("with_tiff"):
             self.cpp_info.components["projlib"].requires.append("libtiff::libtiff")
-        if self.options.with_curl:
+        if self.options.get_safe("with_curl"):
             self.cpp_info.components["projlib"].requires.append("libcurl::libcurl")
         if self.options.shared and self.settings.compiler == "Visual Studio":
             self.cpp_info.components["projlib"].defines.append("PROJ_MSVC_DLL_IMPORT")
