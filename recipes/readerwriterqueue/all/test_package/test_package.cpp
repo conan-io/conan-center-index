@@ -1,8 +1,7 @@
-#include <cassert>
 #include <moodycamel/readerwriterqueue.h>
-#include <thread>
 
-int main(int argc, char **argv) {
+int main() {
   moodycamel::ReaderWriterQueue<int> q;
+  q.enqueue(42);
   return 0;
 }
