@@ -9,8 +9,8 @@ class TinyAlsaConan(ConanFile):
     homepage = "https://github.com/tinyalsa/tinyalsa"
     topics = ("conan", "tiny", "alsa", "sound", "audio", "tinyalsa")
     description = "A small library to interface with ALSA in the Linux kernel"
-    options = {"shared": [True, False]}
-    default_options = {'shared': False}
+    options = {"shared": [True, False], "with_utils": [True, False]}
+    default_options = {'shared': False, 'with_utils': False}
     settings = "os", "compiler", "build_type", "arch"
 
     @property
@@ -43,6 +43,9 @@ class TinyAlsaConan(ConanFile):
 
         tools.rmdir(os.path.join(self.package_folder, "share"))
 
+        if not self.options.with_utils:
+            tools.rmdir(os.path.join(self.package_folder, "bin"))
+
         with tools.chdir(os.path.join(self.package_folder, "lib")):
             files = os.listdir()
             for f in files:
@@ -51,3 +54,7 @@ class TinyAlsaConan(ConanFile):
 
     def package_info(self):
         self.cpp_info.libs = ["tinyalsa"]
+        if self.options.with_utils:
+            bin_path = os.path.join(self.package_folder, "bin")
+            self.output.info('Appending PATH environment variable: %s' % bin_path)
+            self.env_info.path.append(bin_path)
