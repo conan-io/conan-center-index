@@ -1,6 +1,6 @@
 # Changelog
 
-### 18-August-2020 - 18:38 CEST
+### 21-September-2020 - 10:44 CEST
 
 - Updated Conan client to the 1.29.1 version in Windows and Mac agents.
 
