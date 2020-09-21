@@ -1,4 +1,4 @@
-from conans import ConanFile, tools, CMake
+from conans import ConanFile, tools
 from conans.errors import ConanInvalidConfiguration
 import os
 
@@ -12,7 +12,6 @@ class HanaConan(ConanFile):
     topics = ("hana", "metaprogramming", "boost")
     settings = "compiler"
     no_copy_source = True
-    exports_sources = "CMakeLists.txt"
 
     _compiler_cpp14_support = {
         "gcc": "4.9.3",
@@ -25,10 +24,6 @@ class HanaConan(ConanFile):
     def _source_subfolder(self):
         return "_source_subfolder"
 
-    def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        os.rename("hana-" + self.version, self._source_subfolder)
-
     def configure(self):
         if self.settings.compiler.cppstd:
             tools.check_min_cppstd(self, "14")
@@ -40,14 +35,13 @@ class HanaConan(ConanFile):
         except KeyError:
             self.output.warn("This recipe might not support the compiler. Consider adding it.")
 
-    def package(self):
-        cmake = CMake(self)
-        cmake.configure(source_folder=self._source_subfolder)
-        cmake.install()
-
-        self.copy("LICENSE.md", dst="licenses", src=self._source_subfolder)
-        tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
-        tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
-
     def package_id(self):
         self.info.header_only()
+
+    def source(self):
+        tools.get(**self.conan_data["sources"][self.version])
+        os.rename("hana-" + self.version, self._source_subfolder)
+
+    def package(self):
+        self.copy("LICENSE.md", dst="licenses", src=self._source_subfolder)
+        self.copy("*.hpp", dst="include", src=os.path.join(self._source_subfolder, "include"))
