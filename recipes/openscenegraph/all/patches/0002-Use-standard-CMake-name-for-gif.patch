@@ -1,4 +1,4 @@
-From 445edd45fcb3b6adc6cf2de3f788ce29f2d715ad Mon Sep 17 00:00:00 2001
+From 17ad9caac56282e89d0e6a62c9564b99e2736225 Mon Sep 17 00:00:00 2001
 From: "R. Andrew Ohana" <rao@esi-group.com>
 Date: Thu, 17 Sep 2020 16:51:45 -0700
 Subject: [PATCH 2/4] Use standard CMake name for gif

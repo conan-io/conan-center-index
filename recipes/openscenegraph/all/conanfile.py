@@ -232,9 +232,13 @@ class ConanFile(ConanFile):
 
     def package(self):
         CMake(self).install()
-
         self.copy(pattern="LICENSE.txt", dst="licenses", src=self._source_subfolder)
+
         tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
+        for pdb in glob.iglob(os.path.join(self.package_folder, "bin", "*.pdb")):
+            os.unlink(pdb)
+        for pdb in glob.iglob(os.path.join(self.package_folder, "bin", "osgPlugins-{}".format(self.version), "*.pdb")):
+            os.unlink(pdb)
 
     def package_info(self):
         # FindOpenSceneGraph.cmake is shipped with cmake and is a traditional cmake script
