@@ -115,12 +115,25 @@ class LibZipConan(ConanFile):
         self.cpp_info.names["cmake_find_package"] = "libzip"
         self.cpp_info.names["cmake_find_package_multi"] = "libzip"
         self.cpp_info.names["pkg_config"] = "libzip"
-
-        self.cpp_info.libs = ["zip"]
+        self.cpp_info.components["_libzip"].names["cmake_find_package"] = "zip"
+        self.cpp_info.components["_libzip"].names["cmake_find_package_multi"] = "zip"
+        self.cpp_info.components["_libzip"].names["pkg_config"] = "libzip"
+        self.cpp_info.components["_libzip"].libs = ["zip"]
         if self.settings.os == "Windows":
-            self.cpp_info.system_libs = ["advapi32"]
+            self.cpp_info.components["_libzip"].system_libs = ["advapi32"]
             if self._crypto == "win32":
-                self.cpp_info.system_libs.append("bcrypt")
+                self.cpp_info.components["_libzip"].system_libs.append("bcrypt")
+        self.cpp_info.components["_libzip"].requires = ["zlib::zlib"]
+        if self.options.with_bzip2:
+            self.cpp_info.components["_libzip"].requires.append("bzip2::bzip2")
+        if self.options.with_lzma:
+            self.cpp_info.components["_libzip"].requires.append("xz_utils::xz_utils")
+        if self.options.with_zstd:
+            self.cpp_info.components["_libzip"].requires.append("zstd::zstd")
+        if self._crypto == "openssl":
+            self.cpp_info.components["_libzip"].requires.append("openssl::openssl")
+        elif self._crypto == "mbedtls":
+            self.cpp_info.components["_libzip"].requires.append("mbedtls::mbedtls")
 
         bin_path = os.path.join(self.package_folder, "bin")
         self.output.info("Appending PATH environment variable: {}".format(bin_path))
