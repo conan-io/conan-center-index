@@ -1,4 +1,4 @@
-#include <moodycamel/readerwriterqueue.h>
+#include <readerwriterqueue/readerwriterqueue.h>
 
 int main() {
   moodycamel::ReaderWriterQueue<int> q;

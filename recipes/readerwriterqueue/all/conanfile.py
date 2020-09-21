@@ -23,8 +23,8 @@ class ReaderWriterQueue(ConanFile):
                   self._source_subfolder)
 
     def package(self):
-        self.copy("atomicops.h", src=self._source_subfolder, dst="include/moodycamel")
-        self.copy("readerwriterqueue.h", src=self._source_subfolder, dst="include/moodycamel")
+        self.copy("atomicops.h", src=self._source_subfolder, dst=os.path.join("include", "readerwriterqueue"))
+        self.copy("readerwriterqueue.h", src=self._source_subfolder, dst=os.path.join("include", "readerwriterqueue"))
         self.copy("LICENSE.md", src=self._source_subfolder, dst="licenses")
 
     def package_id(self):
