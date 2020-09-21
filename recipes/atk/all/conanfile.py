@@ -1,6 +1,7 @@
 from conans import ConanFile, Meson, tools
 from conans.errors import ConanInvalidConfiguration
 import os
+import glob
 
 required_conan_version = ">=1.29"
 
@@ -72,8 +73,11 @@ class LibnameConan(ConanFile):
         meson.install()
         tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
         tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
-        if self.settings.compiler == "Visual Studio" and not self.options.shared:
-            os.rename(os.path.join(self.package_folder, 'lib', 'libatk-1.0.a'), os.path.join(self.package_folder, 'lib', 'atk-1.0.lib'))
+        if self.settings.compiler == "Visual Studio":
+            for pdb in glob.glob(os.path.join(self.package_folder, "bin", "*.pdb")):
+                os.unlink(pdb)
+            if not self.options.shared:
+                os.rename(os.path.join(self.package_folder, 'lib', 'libatk-1.0.a'), os.path.join(self.package_folder, 'lib', 'atk-1.0.lib'))
 
     def package_info(self):
         self.cpp_info.libs = tools.collect_libs(self)
