@@ -15,7 +15,7 @@ class ReaderWriterQueue(ConanFile):
     
     @property
     def _source_subfolder(self):
-        return "readerwriterqueue"
+        return "sources_subfolder"
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
