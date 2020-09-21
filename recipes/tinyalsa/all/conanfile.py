@@ -51,6 +51,3 @@ class TinyAlsaConan(ConanFile):
 
     def package_info(self):
         self.cpp_info.libs = ["tinyalsa"]
-        self.cpp_info.includedirs = ["include"]
-        self.cpp_info.names["cmake_find_package"] = "TinyALSA"
-        self.cpp_info.names["cmake_find_package_multi"] = "TinyALSA"
