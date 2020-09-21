@@ -66,6 +66,7 @@ class zbarConan(ConanFile):
 
     def build_requirements(self):
         self.build_requires("libtool/2.4.6")
+        self.build_requires("gettext/0.20.1")
 
     def requirements(self):
         if self.options.with_jpeg:
