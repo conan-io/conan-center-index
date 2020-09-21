@@ -70,6 +70,9 @@ class LibZipConan(ConanFile):
         elif self._crypto == "mbedtls":
             self.requires("mbedtls/2.16.3-gpl")
 
+    def package_id(self):
+        self.info.options.crypto = self._crypto
+
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
         extracted_dir = self.name + "-" + self.version
@@ -107,9 +110,6 @@ class LibZipConan(ConanFile):
         self.copy(pattern="LICENSE", dst="licenses", src=self._source_subfolder)
         tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
         tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
-
-    def package_id(self):
-        self.info.options.crypto = self._crypto
 
     def package_info(self):
         self.cpp_info.names["cmake_find_package"] = "libzip"
