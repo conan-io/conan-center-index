@@ -29,7 +29,6 @@ class GLibConan(ConanFile):
     _build_subfolder = 'build_subfolder'
     short_paths = True
     generators = "pkg_config"
-    requires = "zlib/1.2.11", "libffi/3.2.1"
 
     @property
     def _is_msvc(self):
@@ -53,20 +52,22 @@ class GLibConan(ConanFile):
             del self.options.with_selinux
 
     def build_requirements(self):
-        self.build_requires("meson/0.54.2")
+        self.build_requires("meson/0.55.1")
         if self.settings.os == "Windows":
             self.build_requires("pkgconf/1.7.3")
 
     def requirements(self):
+        self.requires("zlib/1.2.11")
+        self.requires("libffi/3.3")
         if self.options.with_pcre:
-            self.requires("pcre/8.41")
+            self.requires("pcre/8.44")
         if self.options.with_elf:
             self.requires("libelf/0.8.13")
         if self.settings.os == "Linux":
             if self.options.with_mount:
                 self.requires("libmount/2.33.1")
             if self.options.with_selinux:
-                self.requires("libselinux/2.9")
+                self.requires("libselinux/3.1")
         else:
             # for Linux, gettext is provided by libc
             self.requires("libgettext/0.20.1")
