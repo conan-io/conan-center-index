@@ -85,6 +85,7 @@ class WtConan(ConanFile):
         self._strict_options_requirements()
 
     def _strict_options_requirements(self):
+        self.options["boost"].header_only = False
         self.options["boost"].without_program_options = False
         self.options["boost"].without_filesystem = False
         self.options["boost"].without_thread = False
@@ -107,7 +108,8 @@ class WtConan(ConanFile):
             self.requires("libunwind/1.3.1")
 
     def _validate_dependency_graph(self):
-        if self.options["boost"].without_program_options or self.options["boost"].without_filesystem or self.options["boost"].without_thread:
+        if self.options["boost"].header_only or self.options["boost"].without_program_options or \
+           self.options["boost"].without_filesystem or self.options["boost"].without_thread:
             raise ConanInvalidConfiguration("wt depends on these boost components: program_options, filesystem, thread")
 
     def source(self):
