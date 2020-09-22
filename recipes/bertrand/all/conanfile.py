@@ -28,12 +28,14 @@ class SiConan(ConanFile):
     def _build_subfolder(self):
         return "build_subfolder"
 
-    def _supports_cpp17(self):
-        supported_compilers = [
-            ("gcc", "7"), ("clang", "5"), ("apple-clang", "10"), ("Visual Studio", "15.7")]
-        compiler = self.settings.compiler
-        version = Version(compiler.version)
-        return any(compiler == sc[0] and version >= sc[1] for sc in supported_compilers)
+    @property
+    def _compilers_minimum_version(self):
+        return {
+            "gcc": "7",
+            "Visual Studio": "15.7",
+            "clang": "5",
+            "apple-clang": "10",
+        }
 
     def _configure_cmake(self):
         if not self._cmake:
@@ -45,9 +47,13 @@ class SiConan(ConanFile):
     def configure(self):
         if self.settings.compiler.get_safe("cppstd"):
             tools.check_min_cppstd(self, "17")
-        elif not self._supports_cpp17():
-            raise ConanInvalidConfiguration("bertrand requires C++17 support")
-
+        minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
+        if minimum_version:
+            if tools.Version(self.settings.compiler.version) < minimum_version:
+                raise ConanInvalidConfiguration("bertrand requires C++17, which your compiler ({} {}) does not support.".format(self.settings.compiler, self.settings.compiler.version))
+        else:
+            self.output.warn("bertrand requires C++17. Your compiler is unknown. Assuming it supports C++17.")
+            
     def package_id(self):
         self.info.header_only()
 
