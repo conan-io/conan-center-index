@@ -12,16 +12,20 @@ class GodotHeadersConan(ConanFile):
     no_copy_source = True
 
     @property
-    def _source_directory(self):
-        return "godot_headers-{}".format(self.version)
+    def _source_subfolder(self):
+        return "source_subfolder"
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
+        source_data = self.conan_data["sources"][self.version]
+        filename = source_data["url"].split("/")[-1]
+        commit = filename.split(".")[0]
+        tools.get(**source_data)
+        tools.rename("godot_headers-{}".format(commit), self._source_subfolder)
 
     def package(self):
-        self.copy("LICENSE*", dst="licenses", src=self._source_directory)
-        self.copy("*.h", dst="include", src=self._source_directory)
-        self.copy("api.json", dst="res", src=self._source_directory)
+        self.copy("LICENSE*", dst="licenses", src=self._source_subfolder)
+        self.copy("*.h", dst="include", src=self._source_subfolder)
+        self.copy("api.json", dst="res", src=self._source_subfolder)
 
     def package_id(self):
         self.info.header_only()
