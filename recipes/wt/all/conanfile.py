@@ -73,6 +73,8 @@ class WtConan(ConanFile):
             del self.options.with_unwind
 
     def configure(self):
+        if self.options.shared:
+            del self.options.fPIC
         if not self.options.with_dbo:
             del self.options.with_sqlite
             del self.options.with_postgres
