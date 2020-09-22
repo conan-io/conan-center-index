@@ -53,10 +53,15 @@ class WtConan(ConanFile):
         "connector_fcgi": False
         }
 
-    _source_subfolder = "source_subfolder"
-    _build_subfolder = "build_subfolder"
-
     _cmake = None
+
+    @property
+    def _source_subfolder(self):
+        return "source_subfolder"
+
+    @property
+    def _build_subfolder(self):
+        return "build_subfolder"
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -65,7 +70,14 @@ class WtConan(ConanFile):
         else:
             del self.options.connector_isapi
         if self.settings.os not in ["Linux", "FreeBSD"]:
-            self.options.with_unwind = False
+            del self.options.with_unwind
+
+    def configure(self):
+        if not self.options.with_dbo:
+            del self.options.with_sqlite
+            del self.options.with_postgres
+            del self.options.with_mysql
+            del self.options.with_mssql
 
     def requirements(self):
         self.requires("boost/1.74.0")
@@ -73,13 +85,13 @@ class WtConan(ConanFile):
             self.requires("zlib/1.2.11")
         if self.options.with_ssl:
             self.requires("openssl/1.1.1g")
-        if self.options.with_sqlite:
+        if self.options.get_safe("with_sqlite"):
             self.requires("sqlite3/3.32.3")
-        if self.options.with_mysql:
+        if self.options.get_safe("with_mysql"):
             self.requires("libmysqlclient/8.0.17")
-        if self.options.with_postgres:
+        if self.options.get_safe("with_postgres"):
             self.requires("libpq/12.2")
-        if self.options.with_unwind:
+        if self.options.get_safe("with_unwind"):
             self.requires("libunwind/1.3.1")
 
     def source(self):
@@ -98,17 +110,17 @@ class WtConan(ConanFile):
         self._cmake.definitions["ENABLE_SSL"] = self.options.with_ssl
         self._cmake.definitions["ENABLE_HARU"] = False
         self._cmake.definitions["ENABLE_PANGO"] = False
-        self._cmake.definitions["ENABLE_SQLITE"] = self.options.with_sqlite
-        self._cmake.definitions["ENABLE_POSTGRES"] = self.options.with_postgres
+        self._cmake.definitions["ENABLE_SQLITE"] = self.options.get_safe("with_sqlite", False)
+        self._cmake.definitions["ENABLE_POSTGRES"] = self.options.get_safe("with_postgres", False)
         self._cmake.definitions["ENABLE_FIREBIRD"] = False
-        self._cmake.definitions["ENABLE_MYSQL"] = self.options.with_mysql
-        self._cmake.definitions["ENABLE_MSSQLSERVER"] = self.options.with_mssql
+        self._cmake.definitions["ENABLE_MYSQL"] = self.options.get_safe("with_mysql", False)
+        self._cmake.definitions["ENABLE_MSSQLSERVER"] = self.options.get_safe("with_mssql", False)
         self._cmake.definitions["ENABLE_QT4"] = False
         self._cmake.definitions["ENABLE_QT5"] = False
         self._cmake.definitions["ENABLE_LIBWTTEST"] = self.options.with_test
         self._cmake.definitions["ENABLE_LIBWTDBO"] = self.options.with_dbo
         self._cmake.definitions["ENABLE_OPENGL"] = self.options.with_opengl
-        self._cmake.definitions["ENABLE_UNWIND"] = self.options.with_unwind
+        self._cmake.definitions["ENABLE_UNWIND"] = self.options.get_safe("with_unwind", False)
         self._cmake.definitions["WT_NO_STD_LOCALE"] = self.options.no_std_locale
         self._cmake.definitions["WT_NO_STD_WSTRING"] = self.options.no_std_wstring
         self._cmake.definitions["MULTI_THREADED"] = self.options.multi_threaded
@@ -131,12 +143,12 @@ class WtConan(ConanFile):
             self._cmake.definitions["OPENSSL_LIBRARIES"] = ";".join(_gather_libs("openssl"))
             self._cmake.definitions["OPENSSL_INCLUDE_DIR"] = ";".join(self.deps_cpp_info["openssl"].include_paths)
             self._cmake.definitions["OPENSSL_FOUND"] = True
-        if self.options.with_mysql:
+        if self.options.get_safe("with_mysql"):
             self._cmake.definitions["MYSQL_LIBRARIES"] = ";".join(_gather_libs("libmysqlclient"))
             self._cmake.definitions["MYSQL_INCLUDE"] = ";".join(self.deps_cpp_info["libmysqlclient"].include_paths)
             self._cmake.definitions["MYSQL_DEFINITIONS"] = ";".join("-D%s" % d for d in self.deps_cpp_info["libmysqlclient"].defines)
             self._cmake.definitions["MYSQL_FOUND"] = True
-        if self.options.with_postgres:
+        if self.options.get_safe("with_postgres"):
             self._cmake.definitions["POSTGRES_LIBRARIES"] = ";".join(_gather_libs("libpq"))
             self._cmake.definitions["POSTGRES_INCLUDE"] = ";".join(self.deps_cpp_info["libpq"].include_paths)
             self._cmake.definitions["POSTGRES_FOUND"] = True
@@ -169,11 +181,11 @@ class WtConan(ConanFile):
         self.cpp_info.libs = []
         if self.options.with_test:
             self.cpp_info.libs.append("wttest")
-        if self.options.with_postgres:
+        if self.options.get_safe("with_postgres"):
             self.cpp_info.libs.append("wtdbopostgres")
-        if self.options.with_sqlite:
+        if self.options.get_safe("with_sqlite"):
             self.cpp_info.libs.append("wtdbosqlite3")
-        if self.options.with_mysql:
+        if self.options.get_safe("with_mysql"):
             self.cpp_info.libs.append("wtdbomysql")
         if self.options.with_mssql:
             self.cpp_info.libs.append("wtdbomssqlserver")
