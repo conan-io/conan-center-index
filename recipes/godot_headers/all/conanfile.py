@@ -1,6 +1,5 @@
 import glob
-from conans import ConanFile
-from conans import tools
+from conans import ConanFile, tools
 
 
 class GodotHeadersConan(ConanFile):
