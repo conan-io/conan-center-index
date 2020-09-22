@@ -71,7 +71,7 @@ class GdalConan(ConanFile):
         # "with_tiledb": [True, False],
         # "with_rasdaman": [True, False],
         # "with_armadillo": [True, False],
-        # "with_cryptopp": [True, False],
+        "with_cryptopp": [True, False],
         "with_crypto": [True, False],
         "without_lerc": [True, False],
         "with_null": [True, False],
@@ -133,7 +133,7 @@ class GdalConan(ConanFile):
         # "with_tiledb": False,
         # "with_rasdaman": False,
         # "with_armadillo": False,
-        # "with_cryptopp": False,
+        "with_cryptopp": False,
         "with_crypto": False,
         "without_lerc": False,
         "with_null": False,
@@ -296,8 +296,8 @@ class GdalConan(ConanFile):
         #     self.requires("raslib/x.x.x")
         # if self.options.with_armadillo:
         #     self.requires("armadillo/9.880.1")
-        # if self.options.with_cryptopp:
-        #     self.requires("cryptopp/8.2.0")
+        if self.options.with_cryptopp:
+            self.requires("cryptopp/8.2.0")
         if self.options.with_crypto:
             self.requires("openssl/1.1.1g")
         # if not self.options.without_lerc:
@@ -444,6 +444,10 @@ class GdalConan(ConanFile):
         if self.options.with_gta:
             args.append("GTA_CFLAGS=\"-I{}\"".format(" -I".join(self.deps_cpp_info["libgta"].include_paths)))
         args.append("QHULL_SETTING={}".format("EXTERNAL" if self.options.with_qhull else "NO"))
+        if self.options.with_cryptopp:
+            args.append("CRYPTOPP_INC=\"-I{}\"".format(" -I".join(self.deps_cpp_info["cryptopp"].include_paths)))
+            if self.options["cryptopp"].shared:
+                args.append("USE_ONLY_CRYPTODLL_ALG=YES")
         if self.options.with_crypto:
             args.append("OPENSSL_INC=\"-I{}\"".format(" -I".join(self.deps_cpp_info["openssl"].include_paths)))
         if not (self.options.get_safe("with_zlib", True) and self.options.get_safe("with_png", True) and bool(self.options.with_jpeg)):
@@ -598,7 +602,7 @@ class GdalConan(ConanFile):
         if tools.Version(self.version) >= "3.1.0":
             args.append("--without-rdb") # commercial library
         args.append("--without-armadillo") # TODO: to implement when armadillo lib available
-        args.append("--without-cryptopp") # TODO: to implement when cryptopp lib available
+        args.append("--with-cryptopp={}".format(tools.unix_path(self.deps_cpp_info["cryptopp"].rootpath) if self.options.with_cryptopp else "no"))
         args.append("--with-crypto={}".format("yes" if self.options.with_crypto else "no"))
         args.append("--with-lerc={}".format("no" if self.options.without_lerc else "yes"))
         if self.options.with_null:
