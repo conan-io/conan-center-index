@@ -1,4 +1,5 @@
 from conans import ConanFile, CMake, tools
+from conans.errors import ConanInvalidConfiguration
 import os
 import shutil
 
@@ -80,6 +81,12 @@ class WtConan(ConanFile):
             del self.options.with_postgres
             del self.options.with_mysql
             del self.options.with_mssql
+        self._strict_options_requirements()
+
+    def _strict_options_requirements(self):
+        self.options["boost"].without_program_options = False
+        self.options["boost"].without_filesystem = False
+        self.options["boost"].without_thread = False
 
     def requirements(self):
         self.requires("boost/1.74.0")
@@ -95,6 +102,10 @@ class WtConan(ConanFile):
             self.requires("libpq/12.2")
         if self.options.get_safe("with_unwind"):
             self.requires("libunwind/1.3.1")
+
+    def _validate_dependency_graph(self):
+        if self.options["boost"].without_program_options or self.options["boost"].without_filesystem or self.options["boost"].without_thread:
+            raise ConanInvalidConfiguration("wt depends on these boost components: program_options, filesystem, thread")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
@@ -164,6 +175,7 @@ class WtConan(ConanFile):
         return self._cmake
 
     def build(self):
+        self._validate_dependency_graph()
         tools.replace_in_file(os.path.join(self._source_subfolder, "CMakeLists.txt"), "find_package(OpenSSL)", "#find_package(OpenSSL)")
         tools.replace_in_file(os.path.join(self._source_subfolder, "CMakeLists.txt"), "INCLUDE(cmake/WtFindMysql.txt)", "#INCLUDE(cmake/WtFindMysql.txt)")
         tools.replace_in_file(os.path.join(self._source_subfolder, "CMakeLists.txt"), "INCLUDE(cmake/WtFindPostgresql.txt)", "#INCLUDE(cmake/WtFindPostgresql.txt)")
