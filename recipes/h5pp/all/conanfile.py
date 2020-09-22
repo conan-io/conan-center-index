@@ -40,8 +40,13 @@ class h5ppConan(ConanFile):
 
     def configure(self):
         if self.settings.compiler.cppstd:
-            tools.check_min_cppstd(self, "17")
-
+            tools.check_min_cppstd(self, 17)
+        minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
+        if minimum_version:
+            if tools.Version(self.settings.compiler.version) < minimum_version:
+                raise ConanInvalidConfiguration("h5pp requires C++17, which your compiler does not support.")
+        else:
+            self.output.warn("h5pp requires C++17. Your compiler is unknown. Assuming it supports C++17.")
 
     def build(self):
         cmake = self._configure_cmake()
