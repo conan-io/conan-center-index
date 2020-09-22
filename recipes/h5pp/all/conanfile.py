@@ -23,6 +23,17 @@ class h5ppConan(ConanFile):
     def _build_subfolder(self):
         return "build_subfolder"
 
+    @property
+    def _compilers_minimum_version(self):
+        return {
+            "gcc": "7.4",
+            "Visual Studio": "15.7",
+            "clang": "6",
+            "apple-clang": "10",
+        }
+
+
+
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
         extracted_dir = self.name + "-" + self.version
