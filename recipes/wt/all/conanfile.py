@@ -58,20 +58,6 @@ class WtConan(ConanFile):
 
     _cmake = None
 
-    requires = ("zlib/1.2.11", "boost/1.73.0")
-
-    def requirements(self):
-        if self.options.with_ssl:
-            self.requires("openssl/1.1.1g")
-        if self.options.with_sqlite:
-            self.requires("sqlite3/3.31.1")
-        if self.options.with_mysql:
-            self.requires("libmysqlclient/8.0.17")
-        if self.options.with_postgres:
-            self.requires("libpq/11.5")
-        if self.options.with_unwind:
-            self.requires("libunwind/1.3.1")
-
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
@@ -80,6 +66,21 @@ class WtConan(ConanFile):
             del self.options.connector_isapi
         if self.settings.os not in ["Linux", "FreeBSD"]:
             self.options.with_unwind = False
+
+    def requirements(self):
+        self.requires("boost/1.74.0")
+        if self.options.connector_http:
+            self.requires("zlib/1.2.11")
+        if self.options.with_ssl:
+            self.requires("openssl/1.1.1g")
+        if self.options.with_sqlite:
+            self.requires("sqlite3/3.32.3")
+        if self.options.with_mysql:
+            self.requires("libmysqlclient/8.0.17")
+        if self.options.with_postgres:
+            self.requires("libpq/12.2")
+        if self.options.with_unwind:
+            self.requires("libunwind/1.3.1")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
