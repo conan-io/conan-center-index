@@ -1,10 +1,4 @@
 sources:
-  "3.0":
-    url: "https://github.com/godotengine/godot_headers/archive/3.0.zip"
-    sha256: "d73f6dc4d060cadc6c37a82f162cbc0e5ba91db6998ad4d25bbd433184723a00"
-  "3.1":
-    url: "https://github.com/godotengine/godot_headers/archive/3.1.zip"
-    sha256: "95ccd7e8b5809f12f048e82f52d59fee054d8e0ed22fd0b40ce6feb00dc09d6b"
   "3.2":
     url: "https://github.com/godotengine/godot_headers/archive/3.2.zip"
     sha256: "324407a0041bfea2def8de77edeccbd63f377633b842398bef5ad02abfbfb0c7"
