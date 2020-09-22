@@ -18,7 +18,7 @@ class GStreamerConan(ConanFile):
     _source_subfolder = "source_subfolder"
     _build_subfolder = "build_subfolder"
 
-    requires = ("glib/2.65.1",)
+    requires = ("glib/2.66.0",)
     generators = "pkg_config"
 
     @property
