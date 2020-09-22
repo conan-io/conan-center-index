@@ -107,6 +107,7 @@ class WtConan(ConanFile):
         if self.options.get_safe("with_unwind"):
             self.requires("libunwind/1.3.1")
 
+    # TODO: move this logic in method which might be implemented by https://github.com/conan-io/conan/issues/7591
     def _validate_dependency_graph(self):
         if self.options["boost"].header_only or self.options["boost"].without_program_options or \
            self.options["boost"].without_filesystem or self.options["boost"].without_thread:
