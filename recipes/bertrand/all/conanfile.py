@@ -56,16 +56,8 @@ class SiConan(ConanFile):
         extracted_folder = "bertrand-{}".format(self.version)
         os.rename(extracted_folder, self._source_subfolder)
 
-    def build(self):
-        cmake = self._configure_cmake()
-        cmake.build()
-
     def package(self):
         self.copy("LICENSE", dst="licenses", src=self._source_subfolder)
         cmake = self._configure_cmake()
         cmake.install()
         tools.rmdir(os.path.join(self.package_folder, "share"))
-
-    def package_info(self):
-        self.cpp_info.names["cmake_find_package"] = "bertrand"
-        self.cpp_info.names["cmake_find_package_multi"] = "bertrand"
