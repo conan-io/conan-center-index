@@ -72,6 +72,9 @@ class h5ppConan(ConanFile):
     def package_info(self):
         if self.settings.compiler == "gcc" and tools.Version(self.settings.compiler.version) < "9":
             self.cpp_info.system_libs = ["stdc++fs"]
+        if self.settings.compiler == "Visual Studio":
+            self.cpp_info.defines = ["NOMINMAX"]
+            self.cpp_info.cxxflags = ["/permissive-"]
         self.cpp_info.names["cmake_find_package"] = "h5pp"
         self.cpp_info.names["cmake_find_package_multi"] = "h5pp"
 
