@@ -165,7 +165,7 @@ int main() {
     static_assert(h5pp::type::sfinae::has_data<std::vector<double>>() and
                   "Compile time type-checker failed. Could not properly detect class member data. Check that you are using a supported compiler!");
 
-    std::string outputFilename = "output/readWrite.h5";
+    std::string outputFilename = "test_package.h5";
     size_t      logLevel       = 2;
     h5pp::File  file(outputFilename, H5F_ACC_TRUNC | H5F_ACC_RDWR, logLevel);
 
