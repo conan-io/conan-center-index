@@ -1,3 +1,4 @@
+import glob
 from conans import ConanFile
 from conans import tools
 
@@ -16,11 +17,8 @@ class GodotHeadersConan(ConanFile):
         return "source_subfolder"
 
     def source(self):
-        source_data = self.conan_data["sources"][self.version]
-        filename = source_data["url"].split("/")[-1]
-        commit = filename.split(".")[0]
-        tools.get(**source_data)
-        tools.rename("godot_headers-{}".format(commit), self._source_subfolder)
+        tools.get(**self.conan_data["sources"][self.version])
+        tools.rename(glob.glob("godot_headers-*")[0], self._source_subfolder)
 
     def package(self):
         self.copy("LICENSE*", dst="licenses", src=self._source_subfolder)
