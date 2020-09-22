@@ -101,6 +101,8 @@ class WtConan(ConanFile):
             self.requires("libmysqlclient/8.0.17")
         if self.options.get_safe("with_postgres"):
             self.requires("libpq/12.2")
+        if self.options.get_safe("with_mssql") and self.settings.os != "Windows":
+            self.requires("odbc/2.3.7")
         if self.options.get_safe("with_unwind"):
             self.requires("libunwind/1.3.1")
 
@@ -166,6 +168,10 @@ class WtConan(ConanFile):
             self._cmake.definitions["POSTGRES_LIBRARIES"] = ";".join(_gather_libs("libpq"))
             self._cmake.definitions["POSTGRES_INCLUDE"] = ";".join(self.deps_cpp_info["libpq"].include_paths)
             self._cmake.definitions["POSTGRES_FOUND"] = True
+        if self.options.get_safe("with_mssql") and self.settings.os != "Windows":
+            self._cmake.definitions["ODBC_LIBRARIES"] = ";".join(_gather_libs("odbc"))
+            self._cmake.definitions["ODBC_INCLUDE"] = ";".join(self.deps_cpp_info["odbc"].include_paths)
+            self._cmake.definitions["ODBC_FOUND"] = True
         if self.settings.os == "Windows":
             self._cmake.definitions["CONNECTOR_FCGI"] = False
             self._cmake.definitions["CONNECTOR_ISAPI"] = self.options.connector_isapi
@@ -180,6 +186,8 @@ class WtConan(ConanFile):
         tools.replace_in_file(os.path.join(self._source_subfolder, "CMakeLists.txt"), "find_package(OpenSSL)", "#find_package(OpenSSL)")
         tools.replace_in_file(os.path.join(self._source_subfolder, "CMakeLists.txt"), "INCLUDE(cmake/WtFindMysql.txt)", "#INCLUDE(cmake/WtFindMysql.txt)")
         tools.replace_in_file(os.path.join(self._source_subfolder, "CMakeLists.txt"), "INCLUDE(cmake/WtFindPostgresql.txt)", "#INCLUDE(cmake/WtFindPostgresql.txt)")
+        if self.settings.os != "Windows":
+            tools.replace_in_file(os.path.join(self._source_subfolder, "CMakeLists.txt"), "INCLUDE(cmake/WtFindOdbc.txt)", "#INCLUDE(cmake/WtFindOdbc.txt)")
         cmake = self._configure_cmake()
         cmake.build()
 
@@ -271,6 +279,10 @@ class WtConan(ConanFile):
             self.cpp_info.components["wtdbomssqlserver"].names["cmake_find_package_multi"] = "DboMSSQLServer"
             self.cpp_info.components["wtdbomssqlserver"].libs = [self._lib_name("wtdbomssqlserver")]
             self.cpp_info.components["wtdbomssqlserver"].requires = ["wtdbo"]
+            if self.settings.os == "Windows":
+                self.cpp_info.components["wtdbomssqlserver"].system_libs.append("odbc32")
+            else:
+                self.cpp_info.components["wtdbomssqlserver"].requires.append("odbc::odbc")
 
     def _lib_name(self, name):
         if self.settings.build_type == "Debug":
