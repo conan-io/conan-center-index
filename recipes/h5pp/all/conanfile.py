@@ -1,6 +1,5 @@
 from conans import ConanFile, CMake, tools
-from conans.tools import download, unzip
-import os, re
+import os
 
 class h5ppConan(ConanFile):
     name = "h5pp"
