@@ -19,7 +19,7 @@ class GodotHeadersConan(ConanFile):
         tools.get(**self.conan_data["sources"][self.version])
 
     def package(self):
-        self.copy("LICENSE.md", dst="licenses", src=self._source_directory)
+        self.copy("LICENSE*", dst="licenses", src=self._source_directory)
         self.copy("*.h", dst="include", src=self._source_directory)
         self.copy("api.json", dst="res", src=self._source_directory)
 
