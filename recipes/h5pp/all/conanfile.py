@@ -1,5 +1,7 @@
-from conans import ConanFile, CMake, tools
 import os
+from conans import ConanFile, CMake, tools
+from conans.errors import ConanInvalidConfiguration
+
 
 class h5ppConan(ConanFile):
     name = "h5pp"
@@ -31,8 +33,6 @@ class h5ppConan(ConanFile):
             "clang": "6",
             "apple-clang": "10",
         }
-
-
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
