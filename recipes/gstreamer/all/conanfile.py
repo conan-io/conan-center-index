@@ -17,7 +17,6 @@ class GStreamerConan(ConanFile):
     default_options = {"shared": False, "fPIC": True}
     _source_subfolder = "source_subfolder"
     _build_subfolder = "build_subfolder"
-    exports_sources = ["patches/*.diff"]
 
     requires = ("glib/2.65.1",)
     generators = "pkg_config"
@@ -44,15 +43,11 @@ class GStreamerConan(ConanFile):
         tools.get(**self.conan_data["sources"][self.version])
         os.rename("%s-%s" % (self.name, self.version), self._source_subfolder)
 
-    def _apply_patches(self):
-        for p in self.conan_data["patches"][self.version]:
-            tools.patch(**p)
-
     def _configure_meson(self):
         meson = Meson(self)
         defs = dict()
         if self.settings.compiler == "Visual Studio":
-            if int(str(self.settings.compiler.version)) < 14:
+            if tools.Version(self.settings.compiler.version) < "14":
                 defs["c_args"] = " -Dsnprintf=_snprintf"
                 defs["cpp_args"] = " -Dsnprintf=_snprintf"
         if self.settings.get_safe("compiler.runtime"):
@@ -67,7 +62,6 @@ class GStreamerConan(ConanFile):
         return meson
 
     def build(self):
-        self._apply_patches()
         with tools.environment_append(VisualStudioBuildEnvironment(self).vars) if self._is_msvc else tools.no_op():
             meson = self._configure_meson()
             meson.build()
