@@ -70,11 +70,10 @@ class h5ppConan(ConanFile):
         tools.rmdir(os.path.join(self.package_folder, "share"))
 
     def package_info(self):
-        if "gcc" in str(self.settings.compiler) and tools.Version(self.settings.compiler.version) < "9":
-            self.cpp_info.libs = ["stdc++fs"]
+        if self.settings.compiler == "gcc" and tools.Version(self.settings.compiler.version) < "9":
+            self.cpp_info.system_libs = ["stdc++fs"]
         self.cpp_info.names["cmake_find_package"] = "h5pp"
         self.cpp_info.names["cmake_find_package_multi"] = "h5pp"
 
     def package_id(self):
         self.info.header_only()
-
