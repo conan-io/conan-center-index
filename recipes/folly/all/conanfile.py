@@ -45,6 +45,8 @@ class FollyConan(ConanFile):
             del self.options.fPIC
 
     def configure(self):
+        if self.options.shared:
+            del self.options.fPIC
         if self.settings.get_safe("compiler.cppstd"):
             tools.check_min_cppstd(self, self._minimum_cpp_standard)
         min_version = self._minimum_compilers_version.get(
@@ -103,6 +105,7 @@ class FollyConan(ConanFile):
     def _configure_cmake(self):
         if not self._cmake:
             self._cmake = CMake(self)
+            self._cmake.definitions["CMAKE_POSITION_INDEPENDENT_CODE"] = self.options.get_safe("fPIC", True)
             self._cmake.definitions["CXX_STD"] = self.settings.get_safe(
                 "compiler.cppstd") or "c++14"
             if self.settings.compiler == "Visual Studio":
