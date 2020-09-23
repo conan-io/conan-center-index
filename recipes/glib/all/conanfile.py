@@ -95,15 +95,17 @@ class GLibConan(ConanFile):
             defs["selinux"] = "enabled" if self.options.with_selinux else "disabled"
             defs["libmount"] = "enabled" if self.options.with_mount else "disabled"
         defs["internal_pcre"] = not self.options.with_pcre
-        defs["libelf"] = "enabled" if self.options.with_elf else "disabled"
+        if tools.Version(self.version) >= tools.Version("2.65.1"):
+            defs["libelf"] = "enabled" if self.options.with_elf else "disabled"
 
         meson.configure(source_folder=self._source_subfolder, args=['--wrap-mode=nofallback'],
                         build_folder=self._build_subfolder, defs=defs)
         return meson
 
     def build(self):
-        for patch in self.conan_data["patches"][self.version]:
-            tools.patch(**patch)
+        if self.version in self.conan_data["patches"]:
+            for patch in self.conan_data["patches"][self.version]:
+                tools.patch(**patch)
 
         for filename in [os.path.join(self._source_subfolder, "meson.build"),
                          os.path.join(self._source_subfolder, "glib", "meson.build"),

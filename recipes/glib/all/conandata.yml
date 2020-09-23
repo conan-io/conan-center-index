@@ -15,6 +15,16 @@ sources:
     url: "https://download.gnome.org/sources/glib/2.66/glib-2.66.0.tar.xz"
     sha256: "c5a66bf143065648c135da4c943d2ac23cce15690fc91c358013b2889111156c"
 patches:
+  "2.65.1":
+    - patch_file: "patches/00-optdeps.patch"
+      base_path: "source_subfolder"
+  "2.65.2":
+    - patch_file: "patches/00-optdeps.patch"
+      base_path: "source_subfolder"
+  "2.65.3":
+    - patch_file: "patches/00-optdeps.patch"
+      base_path: "source_subfolder"
   "2.66.0":
     - patch_file: "patches/00-optdeps.patch"
       base_path: "source_subfolder"
+
