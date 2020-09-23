@@ -3,7 +3,7 @@ from conans import ConanFile, CMake, tools
 
 class EnkiTSConan(ConanFile):
     name = "enkits"
-    description = "A permissively licensed C and C++ Task Scheduler for creating parallel programs. Requires C++11 support."
+    description = "A permissively licensed C and C++ Task Scheduler for creating parallel programs."
     topics = ("conan", "c", "thread", "multithreading", "scheduling", "enkits", "gamedev")
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/dougbinks/enkiTS"
@@ -46,6 +46,7 @@ class EnkiTSConan(ConanFile):
             self._cmake = CMake(self)
             self._cmake.definitions["ENKITS_INSTALL"] = True
             self._cmake.definitions["ENKITS_BUILD_EXAMPLES"] = False
+            self._cmake.definitions["ENKITS_BUILD_SHARED"] = self.options.shared
             self._cmake.configure()
         return self._cmake
 
@@ -62,7 +63,10 @@ class EnkiTSConan(ConanFile):
 
     def package_info(self):
         self.cpp_info.libs = tools.collect_libs(self)
-        if self.settings.os == "Linux":
-            self.cpp_info.system_libs = ["pthread"]
         self.cpp_info.names["cmake_find_package"] = "enkiTS"
         self.cpp_info.names["cmake_find_package_multi"] = "enkiTS"
+        
+        if self.options.shared:
+            self.cpp_info.defines.append("ENKITS_DLL=1")
+        if self.settings.os == "Linux":
+            self.cpp_info.system_libs = ["pthread"]
