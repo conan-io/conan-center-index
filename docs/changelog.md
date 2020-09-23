@@ -1,5 +1,9 @@
 # Changelog
 
+### 23-September-2020 - 15:48 CEST
+
+- [job] AutomaticMerge: Approved and changes requested reviews should prevail.
+
 ### 21-September-2020 - 17:59 CEST
 
 - [fix] Remove duplicated credentials.
