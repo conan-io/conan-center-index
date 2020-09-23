@@ -62,9 +62,10 @@ class EnkiTSConan(ConanFile):
         cmake.install()
 
     def package_info(self):
-        self.cpp_info.libs = tools.collect_libs(self)
-        self.cpp_info.names["cmake_find_package"] = "enkiTS"
-        self.cpp_info.names["cmake_find_package_multi"] = "enkiTS"
+        self.cpp_info.libs = ["enkiTS"]
+        if not self.options.shared:
+            if self.settings.os == "Linux":
+                self.cpp_info.system_libs = ["pthread"]
         
         if self.options.shared:
             self.cpp_info.defines.append("ENKITS_DLL=1")
