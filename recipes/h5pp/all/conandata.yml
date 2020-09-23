@@ -1,0 +1,4 @@
+sources:
+  "1.8.3":
+    sha256: 52d439a0008cb76071f0e839d15ca6a4e911a87dc779f0bbd9dc91d98ba0b52b
+    url: https://github.com/DavidAce/h5pp/archive/v1.8.3.tar.gz
