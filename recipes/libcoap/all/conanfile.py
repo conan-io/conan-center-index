@@ -84,11 +84,13 @@ class LibCoapConan(ConanFile):
         cmake = self._configure_cmake()
         cmake.install()
         tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
-        tools.rmdir(os.path.join(self.package_folder,
-                                 "lib", "libcoap", "cmake"))
 
     def package_info(self):
-        self.cpp_info.libs = ["coap"]
-        self.cpp_info.names['pkg_config'] = "libcoap-2{}".format("-{}".format(self.options.dtls_backend) if self.options.dtls_backend else "")
+        pkgconfig_filename = "libcoap-2{}".format("-{}".format(self.options.dtls_backend) if self.options.dtls_backend else "")
+        self.cpp_info.names["pkg_config"] = pkgconfig_filename 
+        self.cpp_info.components["coap"].names["cmake_find_package"] = "coap"
+        self.cpp_info.components["coap"].names["cmake_find_package_multi"] = "coap"
+        self.cpp_info.components["coap"].names["pkg_config"] = pkgconfig_filename
+        self.cpp_info.components["coap"].libs = ["coap"]
         if self.settings.os == "Linux":
-            self.cpp_info.system_libs = ["pthread"]
+            self.cpp_info.components["coap"].system_libs = ["pthread"]
