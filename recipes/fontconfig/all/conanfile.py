@@ -19,6 +19,10 @@ class FontconfigConan(ConanFile):
     _source_subfolder = "source_subfolder"
     _autotools = None
 
+    def config_options(self):
+        if self.settings.os == "Windows":
+            del self.options.fPIC
+
     def requirements(self):
         self.requires("freetype/2.10.2")
         self.requires("expat/2.2.9")
