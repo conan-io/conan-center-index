@@ -74,26 +74,26 @@ class FollyConan(ConanFile):
             raise ConanInvalidConfiguration("Folly could not be built by clang as a shared library")
 
     def requirements(self):
-        self.requires("boost/1.73.0")
+        self.requires("boost/1.74.0")
+        self.requires("bzip2/1.0.8")
         self.requires("double-conversion/3.1.5")
         self.requires("gflags/2.2.2")
         self.requires("glog/0.4.0")
-        self.requires("libevent/2.1.11")
+        self.requires("libevent/2.1.12")
         self.requires("lz4/1.9.2")
         self.requires("openssl/1.1.1g")
-        self.requires("zlib/1.2.11")
-        self.requires("bzip2/1.0.8")
-        self.requires("zstd/1.4.5")
         self.requires("snappy/1.1.8")
-        self.requires("xz_utils/5.2.4")
-        self.requires("libdwarf/20191104")
-        self.requires("libsodium/1.0.18")
+        self.requires("zlib/1.2.11")
+        self.requires("zstd/1.4.5")
+        if Version(self.version) >= "2019.01.01.00":
+            self.requires("libdwarf/20191104")
+            self.requires("libsodium/1.0.18")
+            self.requires("xz_utils/5.2.4")
+            if self.settings.os == "Linux":
+                self.requires("libiberty/9.1.0")
+                self.requires("libunwind/1.3.1")
         if Version(self.version) >= "2020.08.10.00":
             self.requires("fmt/7.0.3")
-
-        if self.settings.os == "Linux":
-            self.requires("libiberty/9.1.0")
-            self.requires("libunwind/1.3.1")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
