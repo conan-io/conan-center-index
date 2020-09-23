@@ -13,7 +13,6 @@ class h5ppConan(ConanFile):
     settings = "os", "compiler", "build_type", "arch"
     generators = "cmake", "cmake_find_package"
     requires = "eigen/3.3.7", "spdlog/1.7.0", "hdf5/1.12.0"
-    exports_sources = ["CMakeLists.txt"]
 
     _cmake = None
 
