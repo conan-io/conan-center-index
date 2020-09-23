@@ -1,5 +1,4 @@
-from conans import ConanFile, CMake, tools
-from fnmatch import fnmatch
+from conans import ConanFile, tools
 import os
 
 
