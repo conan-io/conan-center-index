@@ -3,6 +3,7 @@ from conans import ConanFile, CMake, tools
 from conans.tools import Version
 from conans.errors import ConanInvalidConfiguration
 
+required_conan_version = ">=1.28.0"
 
 class FollyConan(ConanFile):
     name = "folly"
@@ -129,14 +130,47 @@ class FollyConan(ConanFile):
         tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
 
     def package_info(self):
-        self.cpp_info.libs = tools.collect_libs(self)
+        self.cpp_info.filenames["cmake_find_package"] = "folly"
+        self.cpp_info.filenames["cmake_find_package_multi"] = "folly"
+        self.cpp_info.names["cmake_find_package"] = "Folly"
+        self.cpp_info.names["cmake_find_package_multi"] = "Folly"
+        self.cpp_info.names["pkg_config"] = "libfolly"
+        self.cpp_info.components["libfolly"].names["cmake_find_package"] = "folly"
+        self.cpp_info.components["libfolly"].names["cmake_find_package_multi"] = "folly"
+        self.cpp_info.components["libfolly"].names["pkg_config"] = "libfolly"
+        self.cpp_info.components["libfolly"].libs = tools.collect_libs(self)
+        self.cpp_info.components["libfolly"].requires = [
+            "boost::boost",
+            "bzip2::bzip2",
+            "double-conversion::double-conversion",
+            "gflags::gflags",
+            "glog::glog",
+            "libevent::libevent",
+            "lz4::lz4",
+            "openssl::openssl",
+            "snappy::snappy",
+            "zlib::zlib",
+            "zstd::zstd"
+        ]
+        if Version(self.version) >= "2019.01.01.00":
+            self.cpp_info.components["libfolly"].requires.extend([
+                "libdwarf::libdwarf",
+                "libsodium::libsodium",
+                "xz_utils::xz_utils"
+            ])
+            if self.settings.os == "Linux":
+                self.cpp_info.components["libfolly"].requires.extend([
+                    "libiberty::libiberty",
+                    "libunwind::libunwind"
+                ])
+        if Version(self.version) >= "2020.08.10.00":
+            self.cpp_info.components["libfolly"].requires.append("fmt::fmt")
         if self.settings.os == "Linux":
-            self.cpp_info.system_libs.extend(["pthread", "dl"])
+            self.cpp_info.components["libfolly"].system_libs.extend(["pthread", "dl"])
         elif self.settings.os == "Windows" and self.settings.compiler == "Visual Studio":
-            self.cpp_info.system_libs.extend(["ws2_32", "Iphlpapi", "Crypt32"])
+            self.cpp_info.components["libfolly"].system_libs.extend(["ws2_32", "Iphlpapi", "Crypt32"])
         if (self.settings.os == "Linux" and self.settings.compiler == "clang" and
             self.settings.compiler.libcxx == "libstdc++") or \
            (self.settings.os == "Macos" and self.settings.compiler == "apple-clang" and
-                Version(self.settings.compiler.version.value) == "9.0" and
-                self.settings.compiler.libcxx == "libc++"):
-            self.cpp_info.system_libs.append("atomic")
+            Version(self.settings.compiler.version.value) == "9.0" and self.settings.compiler.libcxx == "libc++"):
+            self.cpp_info.components["libfolly"].system_libs.append("atomic")
