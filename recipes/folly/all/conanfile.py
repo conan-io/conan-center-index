@@ -17,16 +17,12 @@ class FollyConan(ConanFile):
     default_options = {"shared": False, "fPIC": True}
     exports_sources = ["CMakeLists.txt", "patches/*"]
     generators = "cmake", "cmake_find_package"
-    short_paths = True
+
     _cmake = None
 
     @property
     def _source_subfolder(self):
         return "source_subfolder"
-
-    @property
-    def _build_subfolder(self):
-        return "build_subfolder"
 
     @property
     def _minimum_cpp_standard(self):
@@ -112,7 +108,7 @@ class FollyConan(ConanFile):
             if self.settings.compiler == "Visual Studio":
                 self._cmake.definitions["MSVC_ENABLE_ALL_WARNINGS"] = False
                 self._cmake.definitions["MSVC_USE_STATIC_RUNTIME"] = "MT" in self.settings.compiler.runtime
-            self._cmake.configure(build_folder=self._build_subfolder)
+            self._cmake.configure()
         return self._cmake
 
     def build(self):
