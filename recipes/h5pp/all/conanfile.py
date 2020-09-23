@@ -69,13 +69,20 @@ class h5ppConan(ConanFile):
         tools.rmdir(os.path.join(self.package_folder, "share"))
 
     def package_info(self):
-        if self.settings.compiler == "gcc" and tools.Version(self.settings.compiler.version) < "9":
-            self.cpp_info.system_libs = ["stdc++fs"]
-        if self.settings.compiler == "Visual Studio":
-            self.cpp_info.defines = ["NOMINMAX"]
-            self.cpp_info.cxxflags = ["/permissive-"]
         self.cpp_info.names["cmake_find_package"] = "h5pp"
         self.cpp_info.names["cmake_find_package_multi"] = "h5pp"
+        self.cpp_info.components["h5pp_headers"].names["cmake_find_package"] = "headers"
+        self.cpp_info.components["h5pp_headers"].names["cmake_find_package_multi"] = "headers"
+        self.cpp_info.components["h5pp_deps"].names["cmake_find_package"] = "deps"
+        self.cpp_info.components["h5pp_deps"].names["cmake_find_package_multi"] = "deps"
+        self.cpp_info.components["h5pp_deps"].requires = ["eigen::eigen", "spdlog::spdlog", "hdf5::hdf5"]
+        self.cpp_info.components["h5pp_flags"].names["cmake_find_package"] = "flags"
+        self.cpp_info.components["h5pp_flags"].names["cmake_find_package_multi"] = "flags"
+        if self.settings.compiler == "gcc" and tools.Version(self.settings.compiler.version) < "9":
+            self.cpp_info.components["h5pp_flags"].system_libs = ["stdc++fs"]
+        if self.settings.compiler == "Visual Studio":
+            self.cpp_info.components["h5pp_flags"].defines = ["NOMINMAX"]
+            self.cpp_info.components["h5pp_flags"].cxxflags = ["/permissive-"]
 
     def package_id(self):
         self.info.header_only()
