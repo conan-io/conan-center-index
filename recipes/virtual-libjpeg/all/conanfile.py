@@ -7,18 +7,18 @@ class VirtualjpegConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
 
     options = {
-        "implementation": ["libjpeg", "libjpeg-turbo", "openjpeg", "mozjpeg"],
+        "provider": ["libjpeg", "libjpeg-turbo", "openjpeg", "mozjpeg"],
     }
     default_options = {
-        "implementation": "libjpeg-turbo",
+        "provider": "libjpeg-turbo",
     }
 
     def requirements(self):
-        if self.options.implementation == "libjpeg":
+        if self.options.provider == "libjpeg":
             self.requires("libjpeg/9d@")
-        elif self.options.implementation == "libjpeg-turbo":
+        elif self.options.provider == "libjpeg-turbo":
             self.requires("libjpeg-turbo/2.0.5@")
-        elif self.options.implementation == "openjpeg":
+        elif self.options.provider == "openjpeg":
             self.requires("openjpeg/2.3.1@")
-        else: #if self.options.implementation == "mozjpeg":
+        else: #if self.options.provider == "mozjpeg":
             self.requires("mozjpeg/3.3.1@")
