@@ -12,17 +12,13 @@ class h5ppConan(ConanFile):
     license = "MIT"
     settings = "os", "compiler", "build_type", "arch"
     generators = "cmake", "cmake_find_package"
-    requires = "eigen/3.3.7", "spdlog/1.7.0", "hdf5/1.12.0"
+    requires = "eigen/3.3.7", "spdlog/1.8.0", "hdf5/1.12.0"
 
     _cmake = None
 
     @property
     def _source_subfolder(self):
         return "source_subfolder"
-
-    @property
-    def _build_subfolder(self):
-        return "build_subfolder"
 
     @property
     def _compilers_minimum_version(self):
