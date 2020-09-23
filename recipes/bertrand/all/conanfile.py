@@ -5,9 +5,9 @@ from conans.tools import Version
 import os
 
 
-class SiConan(ConanFile):
+class BertrandConan(ConanFile):
     name = "bertrand"
-    license = "LGPLv3"
+    license = "LGPL-3.0-or-later"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/bernedom/bertrand"
     description = "A C++ header only library providing a trivial implementation for design by contract."
