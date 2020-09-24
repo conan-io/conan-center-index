@@ -18,8 +18,6 @@ class BertrandConan(ConanFile):
     no_copy_source = True
     generators = "cmake"
 
-    _cmake = None
-
     @property
     def _source_subfolder(self):
         return "source_subfolder"
@@ -37,23 +35,19 @@ class BertrandConan(ConanFile):
             "apple-clang": "10",
         }
 
-    def _configure_cmake(self):
-        if not self._cmake:
-            self._cmake = CMake(self)
-            self._cmake.definitions["BERTRAND_BUILD_TESTING"] = False
-            self._cmake.configure(build_folder=self._build_subfolder)
-        return self._cmake
-
     def configure(self):
         if self.settings.compiler.get_safe("cppstd"):
             tools.check_min_cppstd(self, "17")
-        minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
+        minimum_version = self._compilers_minimum_version.get(
+            str(self.settings.compiler), False)
         if minimum_version:
             if tools.Version(self.settings.compiler.version) < minimum_version:
-                raise ConanInvalidConfiguration("bertrand requires C++17, which your compiler ({} {}) does not support.".format(self.settings.compiler, self.settings.compiler.version))
+                raise ConanInvalidConfiguration("bertrand requires C++17, which your compiler ({} {}) does not support.".format(
+                    self.settings.compiler, self.settings.compiler.version))
         else:
-            self.output.warn("bertrand requires C++17. Your compiler is unknown. Assuming it supports C++17.")
-            
+            self.output.warn(
+                "bertrand requires C++17. Your compiler is unknown. Assuming it supports C++17.")
+
     def package_id(self):
         self.info.header_only()
 
@@ -64,6 +58,8 @@ class BertrandConan(ConanFile):
 
     def package(self):
         self.copy("LICENSE", dst="licenses", src=self._source_subfolder)
-        cmake = self._configure_cmake()
+        cmake = CMake(self)
+        cmake.definitions["BERTRAND_BUILD_TESTING"] = False
+        cmake.configure(build_folder=self._build_subfolder)
         cmake.install()
         tools.rmdir(os.path.join(self.package_folder, "share"))
