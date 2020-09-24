@@ -177,12 +177,29 @@ class RocksDB(ConanFile):
     def package_info(self):
         self.cpp_info.names["cmake_find_package"] = "RocksDB"
         self.cpp_info.names["cmake_find_package_multi"] = "RocksDB"
-        self.cpp_info.libs = tools.collect_libs(self)
+        cmake_target = "rocksdb-shared" if self.options.shared else "rocksdb"
+        self.cpp_info.components["librocksdb"].names["cmake_find_package"] = cmake_target
+        self.cpp_info.components["librocksdb"].names["cmake_find_package_multi"] = cmake_target
+        self.cpp_info.components["librocksdb"].libs = tools.collect_libs(self)
         if self.settings.os == "Windows":
-            self.cpp_info.system_libs = ["Shlwapi.lib", "Rpcrt4.lib"]
+            self.cpp_info.components["librocksdb"].system_libs = ["shlwapi", "rpcrt4"]
             if self.options.shared:
-                self.cpp_info.defines = ["ROCKSDB_DLL"]
+                self.cpp_info.components["librocksdb"].defines = ["ROCKSDB_DLL"]
         elif self.settings.os == "Linux":
-            self.cpp_info.system_libs = ["pthread", "m"]
+            self.cpp_info.components["librocksdb"].system_libs = ["pthread", "m"]
         if self.options.lite:
-            self.cpp_info.defines.append("ROCKSDB_LITE")
+            self.cpp_info.components["librocksdb"].defines.append("ROCKSDB_LITE")
+        if self.options.with_gflags:
+            self.cpp_info.components["librocksdb"].requires.append("gflags::gflags")
+        if self.options.with_snappy:
+            self.cpp_info.components["librocksdb"].requires.append("snappy::snappy")
+        if self.options.with_lz4:
+            self.cpp_info.components["librocksdb"].requires.append("lz4::lz4")
+        if self.options.with_zlib:
+            self.cpp_info.components["librocksdb"].requires.append("zlib::zlib")
+        if self.options.with_zstd:
+            self.cpp_info.components["librocksdb"].requires.append("zstd::zstd")
+        if self.options.get_safe("with_tbb"):
+            self.cpp_info.components["librocksdb"].requires.append("tbb::tbb")
+        if self.options.with_jemalloc:
+            self.cpp_info.components["librocksdb"].requires.append("jemalloc::jemalloc")
