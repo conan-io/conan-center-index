@@ -62,11 +62,9 @@ class RocksDB(ConanFile):
         if self.settings.arch != "x86_64":
             del self.options.with_tbb
 
-        minimal_cpp_standard = "11"
-        if self.settings.compiler.cppstd:
-            tools.check_min_cppstd(self, minimal_cpp_standard)
-
     def configure(self):
+        if self.settings.compiler.cppstd:
+            tools.check_min_cppstd(self, 11)
         if self.settings.arch not in ["x86_64", "ppc64le", "ppc64", "mips64", "armv8"]:
             raise ConanInvalidConfiguration("Rocksdb requires 64 bits")
 
