@@ -101,9 +101,9 @@ class GStreamerConan(ConanFile):
         self.cpp_info.libs.extend(["gstreamer-1.0", "gstbase-1.0", "gstcontroller-1.0", "gstnet-1.0"])
 
         if self.settings.os == "Linux":
-            self.cpp_info.libs.append("dl")
+            self.cpp_info.system_libs.append("dl")
         elif self.settings.os == "Windows":
-            self.cpp_info.libs.append("ws2_32")
+            self.cpp_info.system_libs.append("ws2_32")
         if not self.options.shared:
             self.cpp_info.defines.append("GST_STATIC_COMPILATION")
         gstreamer_root = self.package_folder
