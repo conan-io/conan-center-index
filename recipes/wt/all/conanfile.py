@@ -95,7 +95,7 @@ class WtConan(ConanFile):
         if self.options.connector_http:
             self.requires("zlib/1.2.11")
         if self.options.with_ssl:
-            self.requires("openssl/1.1.1g")
+            self.requires("openssl/1.1.1h")
         if self.options.get_safe("with_sqlite"):
             self.requires("sqlite3/3.32.3")
         if self.options.get_safe("with_mysql"):
