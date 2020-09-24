@@ -28,7 +28,7 @@ class GdalConan(ConanFile):
         "with_cfitsio": [True, False],
         "with_pcraster": [True, False],
         "with_png": [True, False],
-        # "with_dds": [True, False],
+        "with_dds": [True, False],
         "with_gta": [True, False],
         "with_pcidsk": [True, False],
         "with_jpeg": [None, "libjpeg", "libjpeg-turbo"],
@@ -90,7 +90,7 @@ class GdalConan(ConanFile):
         "with_cfitsio": False,
         "with_pcraster": True,
         "with_png": True,
-        # "with_dds": False,
+        "with_dds": False,
         "with_gta": False,
         "with_pcidsk": True,
         "with_jpeg": "libjpeg",
@@ -210,8 +210,8 @@ class GdalConan(ConanFile):
         #     self.requires("pcraster-rasterformat/1.3.2")
         if self.options.get_safe("with_png", True):
             self.requires("libpng/1.6.37")
-        # if self.options.with_dds:
-        #     self.requires("crunch/104")
+        if self.options.with_dds:
+            self.requires("crunch/cci.20190615")
         if self.options.with_gta:
             self.requires("libgta/1.2.1")
         # if self.options.with_pcidsk:
@@ -461,6 +461,8 @@ class GdalConan(ConanFile):
                 args.append("CHARLS_FLAGS=-DCHARLS_2_1")
             elif charls_version >= "2.0.0":
                 args.append("CHARLS_FLAGS=-DCHARLS_2")
+        if self.options.with_dds:
+            args.append("CRUNCH_INC=\"-I{}\"".format(" -I".join(self.deps_cpp_info["crunch"].include_paths)))
         if self.options.get_safe("with_exr"):
             args.append("EXR_INC=\"-I{}\"".format(" -I".join(self.deps_cpp_info["openexr"].include_paths)))
         # Inject required systems libs of dependencies
@@ -527,7 +529,7 @@ class GdalConan(ConanFile):
         args.append("--with-cfitsio={}".format(tools.unix_path(self.deps_cpp_info["cfitsio"].rootpath) if self.options.with_cfitsio else "no"))
         args.append("--with-pcraster={}".format("internal" if self.options.with_pcraster else "no")) # TODO: use conan recipe when available instead of internal one
         args.append("--with-png={}".format(tools.unix_path(self.deps_cpp_info["libpng"].rootpath) if self.options.with_png else "no"))
-        args.append("--without-dds") # TODO: to implement when crunch lib available
+        args.append("--with-dds={}".format(tools.unix_path(self.deps_cpp_info["crunch"].rootpath) if self.options.with_dds else "no"))
         args.append("--with-gta={}".format(tools.unix_path(self.deps_cpp_info["libgta"].rootpath) if self.options.with_gta else "no"))
         args.append("--with-pcidsk={}".format("internal" if self.options.with_pcidsk else "no")) # TODO: use conan recipe when available instead of internal one
         args.append("--with-libtiff={}".format(tools.unix_path(self.deps_cpp_info["libtiff"].rootpath))) # always required !
