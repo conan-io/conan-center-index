@@ -72,6 +72,17 @@ class FollyConan(ConanFile):
                 self.options.shared:
             raise ConanInvalidConfiguration("Folly could not be built by clang as a shared library")
 
+        self._strip_options_requirements()
+
+    def _strip_options_requirements(self):
+        self.options["boost"].header_only = False
+        for boost_comp in self._required_boost_components:
+            setattr(self.options["boost"], "without_{}".format(boost_comp), False)
+
+    @property
+    def _required_boost_components(self):
+        return ["context", "filesystem", "program_options", "regex", "system", "thread"]
+
     def requirements(self):
         self.requires("boost/1.74.0")
         self.requires("bzip2/1.0.8")
@@ -94,6 +105,11 @@ class FollyConan(ConanFile):
         if Version(self.version) >= "2020.08.10.00":
             self.requires("fmt/7.0.3")
 
+    def _validate_dependency_graph(self):
+        miss_boost_required_comp = any(getattr(self.options["boost"], "without_{}".format(boost_comp), True) for boost_comp in self._required_boost_components)
+        if self.options["boost"].header_only or miss_boost_required_comp:
+            raise ConanInvalidConfiguration("Folly requires these boost components: {}".format(", ".join(self._required_boost_components)))
+
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
         extracted_dir = self.name + "-" + self.version
@@ -112,6 +128,7 @@ class FollyConan(ConanFile):
         return self._cmake
 
     def build(self):
+        self._validate_dependency_graph()
         for patch in self.conan_data["patches"][self.version]:
             tools.patch(**patch)
         cmake = self._configure_cmake()
