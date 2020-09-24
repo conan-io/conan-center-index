@@ -163,7 +163,7 @@ class FollyConan(ConanFile):
             self.cpp_info.components["libfolly"].requires.append("fmt::fmt")
         if self.settings.os == "Linux":
             self.cpp_info.components["libfolly"].system_libs.extend(["pthread", "dl"])
-        elif self.settings.os == "Windows" and self.settings.compiler == "Visual Studio":
+        elif self.settings.os == "Windows":
             self.cpp_info.components["libfolly"].system_libs.extend(["ws2_32", "Iphlpapi", "Crypt32"])
         if (self.settings.os == "Linux" and self.settings.compiler == "clang" and
             self.settings.compiler.libcxx == "libstdc++") or \
