@@ -76,6 +76,22 @@ class RocksDB(ConanFile):
         if self.settings.build_type == "Debug":
             self.options.use_rtti = True  # Rtti are used in asserts for debug mode...
 
+    def requirements(self):
+        if self.options.with_gflags:
+            self.requires("gflags/2.2.2")
+        if self.options.with_snappy:
+            self.requires("snappy/1.1.8")
+        if self.options.with_lz4:
+            self.requires("lz4/1.9.2")
+        if self.options.with_zlib:
+            self.requires("zlib/1.2.11")
+        if self.options.with_zstd:
+            self.requires("zstd/1.4.5")
+        if self.options.get_safe("with_tbb"):
+            self.requires("tbb/2020.2")
+        if self.options.with_jemalloc:
+            self.requires("jemalloc/5.2.1")
+
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
         extracted_dir = "{name}-{version}".format(
@@ -134,22 +150,6 @@ class RocksDB(ConanFile):
         self._patch_sources()
         cmake = self._configure_cmake()
         cmake.build()
-
-    def requirements(self):
-        if self.options.with_gflags:
-            self.requires("gflags/2.2.2")
-        if self.options.with_snappy:
-            self.requires("snappy/1.1.7")
-        if self.options.with_lz4:
-            self.requires("lz4/1.9.2")
-        if self.options.with_zlib:
-            self.requires("zlib/1.2.11")
-        if self.options.with_zstd:
-            self.requires("zstd/1.3.8")
-        if self.options.get_safe("with_tbb"):
-            self.requires("tbb/2019_u9")
-        if self.options.with_jemalloc:
-            self.requires("jemalloc/5.2.1")
 
     def _remove_static_libraries(self):
         for static_lib_name in ["lib*.a", "{}.lib".format(self.name)]:
