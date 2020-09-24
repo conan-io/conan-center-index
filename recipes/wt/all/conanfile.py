@@ -86,9 +86,12 @@ class WtConan(ConanFile):
 
     def _strict_options_requirements(self):
         self.options["boost"].header_only = False
-        self.options["boost"].without_program_options = False
-        self.options["boost"].without_filesystem = False
-        self.options["boost"].without_thread = False
+        for boost_comp in self._required_boost_components:
+            setattr(self.options["boost"], "without_{}".format(boost_comp), False)
+
+    @property
+    def _required_boost_components(self):
+        return ["program_options", "filesystem", "thread"]
 
     def requirements(self):
         self.requires("boost/1.74.0")
@@ -109,9 +112,9 @@ class WtConan(ConanFile):
 
     # TODO: move this logic in method which might be implemented by https://github.com/conan-io/conan/issues/7591
     def _validate_dependency_graph(self):
-        if self.options["boost"].header_only or self.options["boost"].without_program_options or \
-           self.options["boost"].without_filesystem or self.options["boost"].without_thread:
-            raise ConanInvalidConfiguration("wt depends on these boost components: program_options, filesystem, thread")
+        miss_boost_required_comp = any(getattr(self.options["boost"], "without_{}".format(boost_comp), True) for boost_comp in self._required_boost_components)
+        if self.options["boost"].header_only or miss_boost_required_comp:
+            raise ConanInvalidConfiguration("Wt requires these boost components: {}".format(", ".join(self._required_boost_components)))
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
