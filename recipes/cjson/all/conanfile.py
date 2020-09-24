@@ -38,6 +38,8 @@ class CjsonConan(ConanFile):
             del self.options.fPIC
 
     def configure(self):
+        if self.options.shared:
+            del self.options.fPIC
         del self.settings.compiler.libcxx
         del self.settings.compiler.cppstd
 
@@ -79,9 +81,13 @@ class CjsonConan(ConanFile):
         tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
 
     def package_info(self):
-        self.cpp_info.names["cmake_find_package"] = "cjson"
-        self.cpp_info.names["cmake_find_package_multi"] = "cjson"
+        # FIXME: CMake imported target shouldn't be namespaced (requires https://github.com/conan-io/conan/issues/7615)
+        self.cpp_info.names["cmake_find_package"] = "cJSON"
+        self.cpp_info.names["cmake_find_package_multi"] = "cJSON"
         self.cpp_info.names["pkg_config"] = "libcjson"
-        self.cpp_info.libs = tools.collect_libs(self)
+        self.cpp_info.components["_cjson"].names["cmake_find_package"] = "cjson"
+        self.cpp_info.components["_cjson"].names["cmake_find_package_multi"] = "cjson"
+        self.cpp_info.components["_cjson"].names["pkg_config"] = "libcjson"
+        self.cpp_info.components["_cjson"].libs = tools.collect_libs(self)
         if self.settings.os == "Linux":
-            self.cpp_info.system_libs.append("m")
+            self.cpp_info.components["_cjson"].system_libs = ["m"]
