@@ -158,11 +158,10 @@ class RocksDB(ConanFile):
             for file in glob.glob(os.path.join(self.package_folder, "lib", static_lib_name)):
                 os.remove(file)
 
-
     def _remove_cpp_headers(self):
         for path in glob.glob(os.path.join(self.package_folder, "include", "rocksdb", "*")):
             if path != os.path.join(self.package_folder, "include", "rocksdb", "c.h"):
-                if os.path.isfile(path): 
+                if os.path.isfile(path):
                     os.remove(path)
                 else:
                     shutil.rmtree(path)
@@ -175,7 +174,6 @@ class RocksDB(ConanFile):
         if self.options.shared:
             self._remove_static_libraries()
             self._remove_cpp_headers() # Force stable ABI for shared libraries
-
         tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
 
     def package_info(self):
