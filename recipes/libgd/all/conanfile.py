@@ -5,7 +5,7 @@ from conans import ConanFile, tools, CMake
 
 class LibgdConan(ConanFile):
     name = "libgd"
-    license = "https://github.com/libgd/libgd/blob/master/COPYING"
+    license = "BSD-like"
     url = "https://github.com/conan-io/conan-center-index"
     description = ("GD is an open source code library for the dynamic "
                    "creation of images by programmers.")
