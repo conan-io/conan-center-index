@@ -102,7 +102,7 @@ class RocksDB(ConanFile):
         self._cmake.definitions["WITH_LZ4"] = self.options.with_lz4
         self._cmake.definitions["WITH_ZLIB"] = self.options.with_zlib
         self._cmake.definitions["WITH_ZSTD"] = self.options.with_zstd
-        self._cmake.definitions["WITH_TBB"] = self.options.with_tbb
+        self._cmake.definitions["WITH_TBB"] = self.options.get_safe("with_tbb", False)
         self._cmake.definitions["WITH_JEMALLOC"] = self.options.with_jemalloc
         self._cmake.definitions["ROCKSDB_BUILD_SHARED"] = self.options.shared
         self._cmake.definitions["ROCKSDB_LIBRARY_EXPORTS"] = self.settings.os == "Windows" and self.options.shared
@@ -146,7 +146,7 @@ class RocksDB(ConanFile):
             self.requires("zlib/1.2.11")
         if self.options.with_zstd:
             self.requires("zstd/1.3.8")
-        if self.options.with_tbb:
+        if self.options.get_safe("with_tbb"):
             self.requires("tbb/2019_u9")
         if self.options.with_jemalloc:
             self.requires("jemalloc/5.2.1")
