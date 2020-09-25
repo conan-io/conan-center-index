@@ -299,12 +299,12 @@ class Libxml2Conan(ConanFile):
             self.cpp_info.components["xml2lib"].defines = ["LIBXML_STATIC"]
 
         if self.settings.os == "Linux":
-            self.cpp_info.components["xml2lib"].system_libs.append("m")
-        if self.settings.os == "Windows":
-            self.cpp_info.components["xml2lib"].system_libs.append("ws2_32")
-        if self.options.threads:
-            if self.settings.os == "Linux":
+            self.cpp_info.components["xml2lib"].system_libs = ["m"]
+            if self.options.threads:
                 self.cpp_info.components["xml2lib"].system_libs.append("pthread")
+        elif self.settings.os == "Windows":
+            if self.options.ftp or self.options.http:
+                self.cpp_info.components["xml2lib"].system_libs.extend(["ws2_32", "wsock32"])
 
         if self.options.zlib:
             self.cpp_info.components["xml2lib"].requires.append("zlib::zlib")
