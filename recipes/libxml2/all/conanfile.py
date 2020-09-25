@@ -57,16 +57,6 @@ class Libxml2Conan(ConanFile):
     _autotools = None
     _source_subfolder = "source_subfolder"
 
-    def requirements(self):
-        if self.options.zlib:
-            self.requires("zlib/1.2.11")
-        if self.options.lzma:
-            self.requires("xz_utils/5.2.4")
-        if self.options.iconv:
-            self.requires("libiconv/1.16")
-        if self.options.icu:
-            self.requires("icu/67.1")
-
     @property
     def _is_msvc(self):
         return self.settings.compiler == "Visual Studio"
@@ -74,10 +64,6 @@ class Libxml2Conan(ConanFile):
     @property
     def _is_mingw(self):
         return self.settings.compiler == "gcc" and self.settings.os == "Windows"
-
-    def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        os.rename("libxml2-{0}".format(self.version), self._source_subfolder)
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -88,6 +74,20 @@ class Libxml2Conan(ConanFile):
             del self.options.fPIC
         del self.settings.compiler.libcxx
         del self.settings.compiler.cppstd
+
+    def requirements(self):
+        if self.options.zlib:
+            self.requires("zlib/1.2.11")
+        if self.options.lzma:
+            self.requires("xz_utils/5.2.4")
+        if self.options.iconv:
+            self.requires("libiconv/1.16")
+        if self.options.icu:
+            self.requires("icu/67.1")
+
+    def source(self):
+        tools.get(**self.conan_data["sources"][self.version])
+        os.rename("libxml2-{0}".format(self.version), self._source_subfolder)
 
     @contextmanager
     def _msvc_build_environment(self):
@@ -146,7 +146,6 @@ class Libxml2Conan(ConanFile):
 
             if self.options.include_utils:
                 self.run("nmake /f Makefile.msvc utils")
-
 
     def _package_msvc(self):
         with self._msvc_build_environment():
