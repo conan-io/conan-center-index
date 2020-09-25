@@ -177,6 +177,8 @@ class QtConan(ConanFile):
     def config_options(self):
         if self.settings.os != "Linux":
             del self.options.with_icu
+            del self.options.with_fontconfig
+            del self.options.with_libalsa
         if self.settings.compiler == "apple-clang":
             if tools.Version(self.settings.compiler.version) < "10.0":
                 raise ConanInvalidConfiguration("Old versions of apple sdk are not supported by Qt (QTBUG-76777)")
@@ -184,13 +186,14 @@ class QtConan(ConanFile):
             del self.options.with_mysql
         if self.settings.os == "Windows":
             del self.options.with_mysql
+        if self.settings.os == "Macos":
+            del self.settings.os.version
 
     def configure(self):
         if self.options.opengl == "auto":
             self.options.opengl = ("dynamic" if self.settings.os == "Windows" else "desktop")
-        if self.settings.os != 'Linux':
-            #     self.options.with_libiconv = False # QTBUG-84708
-            del self.options.with_fontconfig
+        #if self.settings.os != 'Linux':
+        #         self.options.with_libiconv = False # QTBUG-84708
 
         if self.options.widgets and not self.options.GUI:
             raise ConanInvalidConfiguration("using option qt:widgets without option qt:GUI is not possible. "
@@ -207,9 +210,6 @@ class QtConan(ConanFile):
         if not self.options.qtmultimedia:
             del self.options.with_libalsa
             del self.options.with_openal
-
-        if self.settings.os != "Linux":
-            del self.options.with_libalsa
 
         if self.options.qtwebengine:
             if not self.options.shared:
@@ -229,9 +229,6 @@ class QtConan(ConanFile):
 
         if self.options.get_safe("with_fontconfig", False) and not self.options.get_safe("with_freetype", False):
             raise ConanInvalidConfiguration("with_fontconfig cannot be enabled if with_freetype is disabled.")
-
-        if self.settings.os == "Macos":
-            del self.settings.os.version
 
         if self.options.multiconfiguration:
             del self.settings.build_type
