@@ -316,6 +316,7 @@ class Libxml2Conan(ConanFile):
             self.cpp_info.components["xml2lib"].requires.append("icu::icu")
 
         self.cpp_info.components["xml2lib"].names["pkg_config"] = "libxml-2.0"
+        self.cpp_info.names["pkg_config"] = "libxml-2.0"
         self.cpp_info.filenames["cmake_find_package"] = "LibXml2"
         self.cpp_info.filenames["cmake_find_package_multi"] = "LibXml2"
         self.cpp_info.names["cmake_find_package"] = "LibXml2"
