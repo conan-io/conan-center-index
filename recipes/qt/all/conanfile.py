@@ -244,6 +244,9 @@ class QtConan(ConanFile):
             if self.options.qtwebengine:
                 self.options.with_fontconfig = True
 
+        if "MT" in self.settings.get_safe("compiler.runtime", default="") and self.options.shared:
+            raise ConanInvalidConfiguration("Qt cannot be built as shared library with static runtime")
+
         def _enablemodule(mod):
             if mod != 'qtbase':
                 setattr(self.options, mod, True)
