@@ -7,7 +7,7 @@ class AndroidNDKInstallerConan(ConanFile):
     name = "android-ndk"
     description = "The Android NDK is a toolset that lets you implement parts of your app in " \
                   "native code, using languages such as C and C++"
-    url = "https://github.com/bincrafters/conan-android_ndk_installer"
+    url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://developer.android.com/ndk/"
     topics = ("NDK", "android", "toolchain", "compiler")
     license = "Apache-2.0"
