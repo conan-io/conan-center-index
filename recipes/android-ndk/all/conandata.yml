@@ -1,0 +1,11 @@
+sources:
+    "r21d":
+        "Windows":
+            url: https://dl.google.com/android/repository/android-ndk-r21d-windows-x86_64.zip
+            sha256: 3f4257fc59520ca2366b172c6f7dcff2df06436b668928b0fcd0bab1f24b8b8b
+        "Linux":
+            url: https://dl.google.com/android/repository/android-ndk-r21d-linux-x86_64.zip
+            sha256: 3f4257fc59520ca2366b172c6f7dcff2df06436b668928b0fcd0bab1f24b8b8b
+        "Macos":
+            url: https://dl.google.com/android/repository/android-ndk-r21d-darwin-x86_64.zip
+            sha256: 5851115c6fc4cce26bc320295b52da240665d7ff89bda2f5d5af1887582f5c48
