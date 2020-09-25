@@ -56,8 +56,7 @@ class SrtConan(ConanFile):
         self._cmake.definitions["ENABLE_LOGGING"] = False
         self._cmake.definitions["ENABLE_SHARED"] = self.options.shared
         self._cmake.definitions["ENABLE_STATIC"] = not self.options.shared
-        if self._has_stdcxx_sync:
-            self._cmake.definitions["ENABLE_STDCXX_SYNC"] = True
+        self._cmake.definitions["ENABLE_STDCXX_SYNC"] = self._has_stdcxx_sync
         self._cmake.configure(build_folder=self._build_subfolder)
         return self._cmake
 
