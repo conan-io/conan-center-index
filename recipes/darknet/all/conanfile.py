@@ -94,3 +94,5 @@ class DarknetConan(ConanFile):
         self.cpp_info.libs = ["darknet"]
         if self.settings.os == "Linux":
             self.cpp_info.system_libs = ["m", "pthread"]
+        if tools.stdcpp_library(self):
+            self.cpp_info.system_libs.append(tools.stdcpp_library(self))
