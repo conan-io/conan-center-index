@@ -12,6 +12,7 @@ class Libxml2Conan(ConanFile):
     homepage = "https://xmlsoft.org"
     license = "MIT"
     settings = "os", "arch", "compiler", "build_type"
+    exports_sources = "patches/**"
     generators = "pkg_config"
 
     # from ./configure and ./win32/configure.js
@@ -65,10 +66,6 @@ class Libxml2Conan(ConanFile):
             self.requires("libiconv/1.16")
         if self.options.icu:
             self.requires("icu/67.1")
-
-    def build_requirements(self):
-        if self.settings.compiler != "Visual Studio" and tools.os_info.is_windows and os.environ.get("CONAN_BASH_PATH", None) is None:
-            self.build_requires("msys2/20200517")
 
     @property
     def _is_msvc(self):
@@ -158,6 +155,47 @@ class Libxml2Conan(ConanFile):
             if self.options.include_utils:
                 self.run("nmake /f Makefile.msvc install-dist")
 
+    def _build_mingw(self):
+        with tools.chdir(os.path.join(self._source_subfolder, "win32")):
+            debug = "yes" if self.settings.build_type == "Debug" else "no"
+            static = "no" if self.options.shared else "yes"
+
+            args = [
+                "cscript",
+                "configure.js",
+                "compiler=mingw",
+                'prefix="{}"'.format(self.package_folder),
+                "debug={}".format(debug),
+                "static={}".format(static),
+                'include="{}"'.format(" -I".join(self.deps_cpp_info.include_paths)),
+                'lib="{}"'.format(" -L".join(self.deps_cpp_info.lib_paths))
+            ]
+
+            for name in self._option_names:
+                cname = {"mem-debug": "mem_debug",
+                         "run-debug": "run_debug",
+                         "docbook": "docb"}.get(name, name)
+                value = getattr(self.options, name)
+                value = "yes" if value else "no"
+                args.append("%s=%s" % (cname, value))
+
+            configure_command = " ".join(args)
+            self.output.info(configure_command)
+            self.run(configure_command)
+
+            self.run("mingw32-make -f Makefile.mingw libxml libxmla")
+
+            if self.options.include_utils:
+                self.run("mingw32-make -f Makefile.mingw utils")
+
+    def _package_mingw(self):
+        tools.mkdir(os.path.join(self.package_folder, "include", "libxml2"))
+        with tools.chdir(os.path.join(self._source_subfolder, "win32")):
+            self.run("mingw32-make -f Makefile.mingw install-libs")
+
+            if self.options.include_utils:
+                self.run("mingw32-make -f Makefile.mingw install-dist")
+
     def _configure_autotools(self):
         if self._autotools:
             return self._autotools
@@ -189,6 +227,8 @@ class Libxml2Conan(ConanFile):
         return self._autotools
 
     def _patch_sources(self):
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            tools.patch(**patch)
         # Break dependency of install on build
         for makefile in ("Makefile.mingw", "Makefile.msvc"):
             tools.replace_in_file(os.path.join(self._source_subfolder, "win32", makefile),
@@ -199,6 +239,8 @@ class Libxml2Conan(ConanFile):
         self._patch_sources()
         if self._is_msvc:
             self._build_msvc()
+        elif self._is_mingw:
+            self._build_mingw()
         else:
             autotools = self._configure_autotools()
             autotools.make(["libxml2.la"])
@@ -212,6 +254,15 @@ class Libxml2Conan(ConanFile):
         self.copy("COPYING", src=self._source_subfolder, dst="licenses", ignore_case=True, keep_path=False)
         if self._is_msvc:
             self._package_msvc()
+        elif self._is_mingw:
+            self._package_mingw()
+            if self.options.shared:
+                os.remove(os.path.join(self.package_folder, "lib", "libxml2.a"))
+                os.rename(os.path.join(self.package_folder, "lib", "libxml2.lib"),
+                          os.path.join(self.package_folder, "lib", "libxml2.a"))
+            else:
+                os.remove(os.path.join(self.package_folder, "bin", "libxml2.dll"))
+                os.remove(os.path.join(self.package_folder, "lib", "libxml2.lib"))
         else:
             autotools = self._configure_autotools()
             autotools.make(["install-libLTLIBRARIES", "install-data"])
