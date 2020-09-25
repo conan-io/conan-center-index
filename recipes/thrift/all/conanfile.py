@@ -166,7 +166,6 @@ class ConanFileDefault(ConanFile):
         self.cpp_info.components["libthrift"].names["cmake_find_package_multi"] = "thrift"
         self.cpp_info.components["libthrift"].names["pkg_config"] = "thrift"
         if self.settings.os == "Windows":
-            # To avoid error C2589: "(" : illegal token on right side of "::"
             self.cpp_info.components["libthrift"].defines.append("NOMINMAX")
         elif self.settings.os == "Linux":
             self.cpp_info.components["libthrift"].system_libs.extend(["m", "pthread"])
