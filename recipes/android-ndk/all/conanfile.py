@@ -137,7 +137,7 @@ class AndroidNDKInstallerConan(ConanFile):
             os.chmod(filename, os.stat(filename).st_mode | 0o111)
 
     def package_info(self):
-        # test shall pass, so this runs also in the build as build reuqirement context
+        # test shall pass, so this runs also in the build as build requirement context
         # ndk-build: https://developer.android.com/ndk/guides/ndk-build
         self.env_info.PATH.append(os.path.join(self.package_folder, 'bin'))
 
