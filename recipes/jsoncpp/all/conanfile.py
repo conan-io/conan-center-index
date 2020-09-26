@@ -54,6 +54,13 @@ class JsoncppConan(ConanFile):
         cmake.definitions["JSONCPP_WITH_CMAKE_PACKAGE"] = False
         cmake.definitions["JSONCPP_WITH_STRICT_ISO"] = False
         cmake.definitions["JSONCPP_WITH_PKGCONFIG_SUPPORT"] = False
+        jsoncpp_version = tools.Version(self.version)
+        if jsoncpp_version < "1.9.0" or jsoncpp_version >= "1.9.4":
+            cmake.definitions["BUILD_STATIC_LIBS"] = not self.options.shared
+        if jsoncpp_version >= "1.9.3":
+            cmake.definitions["JSONCPP_WITH_EXAMPLE"] = False
+        if jsoncpp_version >= "1.9.4":
+            cmake.definitions["BUILD_OBJECT_LIBS"] = False
         cmake.configure()
         return cmake
 
