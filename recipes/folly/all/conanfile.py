@@ -3,6 +3,7 @@ from conans import ConanFile, CMake, tools
 from conans.tools import Version
 from conans.errors import ConanInvalidConfiguration
 
+required_conan_version = ">=1.28.0"
 
 class FollyConan(ConanFile):
     name = "folly"
@@ -16,16 +17,12 @@ class FollyConan(ConanFile):
     default_options = {"shared": False, "fPIC": True}
     exports_sources = ["CMakeLists.txt", "patches/*"]
     generators = "cmake", "cmake_find_package"
-    short_paths = True
+
     _cmake = None
 
     @property
     def _source_subfolder(self):
         return "source_subfolder"
-
-    @property
-    def _build_subfolder(self):
-        return "build_subfolder"
 
     @property
     def _minimum_cpp_standard(self):
@@ -45,6 +42,8 @@ class FollyConan(ConanFile):
             del self.options.fPIC
 
     def configure(self):
+        if self.options.shared:
+            del self.options.fPIC
         if self.settings.get_safe("compiler.cppstd"):
             tools.check_min_cppstd(self, self._minimum_cpp_standard)
         min_version = self._minimum_compilers_version.get(
@@ -73,27 +72,43 @@ class FollyConan(ConanFile):
                 self.options.shared:
             raise ConanInvalidConfiguration("Folly could not be built by clang as a shared library")
 
+        self._strip_options_requirements()
+
+    def _strip_options_requirements(self):
+        self.options["boost"].header_only = False
+        for boost_comp in self._required_boost_components:
+            setattr(self.options["boost"], "without_{}".format(boost_comp), False)
+
+    @property
+    def _required_boost_components(self):
+        return ["context", "filesystem", "program_options", "regex", "system", "thread"]
+
     def requirements(self):
-        self.requires("boost/1.73.0")
+        self.requires("boost/1.74.0")
+        self.requires("bzip2/1.0.8")
         self.requires("double-conversion/3.1.5")
         self.requires("gflags/2.2.2")
         self.requires("glog/0.4.0")
-        self.requires("libevent/2.1.11")
+        self.requires("libevent/2.1.12")
         self.requires("lz4/1.9.2")
-        self.requires("openssl/1.1.1g")
-        self.requires("zlib/1.2.11")
-        self.requires("bzip2/1.0.8")
-        self.requires("zstd/1.4.5")
+        self.requires("openssl/1.1.1h")
         self.requires("snappy/1.1.8")
-        self.requires("xz_utils/5.2.4")
-        self.requires("libdwarf/20191104")
-        self.requires("libsodium/1.0.18")
+        self.requires("zlib/1.2.11")
+        self.requires("zstd/1.4.5")
+        if Version(self.version) >= "2019.01.01.00":
+            self.requires("libdwarf/20191104")
+            self.requires("libsodium/1.0.18")
+            self.requires("xz_utils/5.2.4")
+            if self.settings.os == "Linux":
+                self.requires("libiberty/9.1.0")
+                self.requires("libunwind/1.3.1")
         if Version(self.version) >= "2020.08.10.00":
             self.requires("fmt/7.0.3")
 
-        if self.settings.os == "Linux":
-            self.requires("libiberty/9.1.0")
-            self.requires("libunwind/1.3.1")
+    def _validate_dependency_graph(self):
+        miss_boost_required_comp = any(getattr(self.options["boost"], "without_{}".format(boost_comp), True) for boost_comp in self._required_boost_components)
+        if self.options["boost"].header_only or miss_boost_required_comp:
+            raise ConanInvalidConfiguration("Folly requires these boost components: {}".format(", ".join(self._required_boost_components)))
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
@@ -103,15 +118,17 @@ class FollyConan(ConanFile):
     def _configure_cmake(self):
         if not self._cmake:
             self._cmake = CMake(self)
+            self._cmake.definitions["CMAKE_POSITION_INDEPENDENT_CODE"] = self.options.get_safe("fPIC", True)
             self._cmake.definitions["CXX_STD"] = self.settings.get_safe(
                 "compiler.cppstd") or "c++14"
             if self.settings.compiler == "Visual Studio":
                 self._cmake.definitions["MSVC_ENABLE_ALL_WARNINGS"] = False
                 self._cmake.definitions["MSVC_USE_STATIC_RUNTIME"] = "MT" in self.settings.compiler.runtime
-            self._cmake.configure(build_folder=self._build_subfolder)
+            self._cmake.configure()
         return self._cmake
 
     def build(self):
+        self._validate_dependency_graph()
         for patch in self.conan_data["patches"][self.version]:
             tools.patch(**patch)
         cmake = self._configure_cmake()
@@ -126,14 +143,47 @@ class FollyConan(ConanFile):
         tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
 
     def package_info(self):
-        self.cpp_info.libs = tools.collect_libs(self)
+        self.cpp_info.filenames["cmake_find_package"] = "folly"
+        self.cpp_info.filenames["cmake_find_package_multi"] = "folly"
+        self.cpp_info.names["cmake_find_package"] = "Folly"
+        self.cpp_info.names["cmake_find_package_multi"] = "Folly"
+        self.cpp_info.names["pkg_config"] = "libfolly"
+        self.cpp_info.components["libfolly"].names["cmake_find_package"] = "folly"
+        self.cpp_info.components["libfolly"].names["cmake_find_package_multi"] = "folly"
+        self.cpp_info.components["libfolly"].names["pkg_config"] = "libfolly"
+        self.cpp_info.components["libfolly"].libs = tools.collect_libs(self)
+        self.cpp_info.components["libfolly"].requires = [
+            "boost::boost",
+            "bzip2::bzip2",
+            "double-conversion::double-conversion",
+            "gflags::gflags",
+            "glog::glog",
+            "libevent::libevent",
+            "lz4::lz4",
+            "openssl::openssl",
+            "snappy::snappy",
+            "zlib::zlib",
+            "zstd::zstd"
+        ]
+        if Version(self.version) >= "2019.01.01.00":
+            self.cpp_info.components["libfolly"].requires.extend([
+                "libdwarf::libdwarf",
+                "libsodium::libsodium",
+                "xz_utils::xz_utils"
+            ])
+            if self.settings.os == "Linux":
+                self.cpp_info.components["libfolly"].requires.extend([
+                    "libiberty::libiberty",
+                    "libunwind::libunwind"
+                ])
+        if Version(self.version) >= "2020.08.10.00":
+            self.cpp_info.components["libfolly"].requires.append("fmt::fmt")
         if self.settings.os == "Linux":
-            self.cpp_info.system_libs.extend(["pthread", "dl"])
-        elif self.settings.os == "Windows" and self.settings.compiler == "Visual Studio":
-            self.cpp_info.system_libs.extend(["ws2_32", "Iphlpapi", "Crypt32"])
+            self.cpp_info.components["libfolly"].system_libs.extend(["pthread", "dl"])
+        elif self.settings.os == "Windows":
+            self.cpp_info.components["libfolly"].system_libs.extend(["ws2_32", "Iphlpapi", "Crypt32"])
         if (self.settings.os == "Linux" and self.settings.compiler == "clang" and
             self.settings.compiler.libcxx == "libstdc++") or \
            (self.settings.os == "Macos" and self.settings.compiler == "apple-clang" and
-                Version(self.settings.compiler.version.value) == "9.0" and
-                self.settings.compiler.libcxx == "libc++"):
-            self.cpp_info.system_libs.append("atomic")
+            Version(self.settings.compiler.version.value) == "9.0" and self.settings.compiler.libcxx == "libc++"):
+            self.cpp_info.components["libfolly"].system_libs.append("atomic")
