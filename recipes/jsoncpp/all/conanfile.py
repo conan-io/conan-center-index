@@ -15,10 +15,18 @@ class JsoncppConan(ConanFile):
     exports_sources = "CMakeLists.txt"
     generators = "cmake"
 
-    _source_subfolder = "source_subfolder"
+    _cmake = None
+
+    @property
+    def _source_subfolder(self):
+        return "source_subfolder"
+
+    def config_options(self):
+        if self.settings.os == "Windows":
+            del self.options.fPIC
 
     def configure(self):
-        if self.settings.os == "Windows" or self.options.shared:
+        if self.options.shared:
             del self.options.fPIC
 
     def source(self):
@@ -49,20 +57,22 @@ class JsoncppConan(ConanFile):
                               strict=False)
 
     def _configure_cmake(self):
-        cmake = CMake(self)
-        cmake.definitions["JSONCPP_WITH_TESTS"] = False
-        cmake.definitions["JSONCPP_WITH_CMAKE_PACKAGE"] = False
-        cmake.definitions["JSONCPP_WITH_STRICT_ISO"] = False
-        cmake.definitions["JSONCPP_WITH_PKGCONFIG_SUPPORT"] = False
+        if self._cmake:
+            return self._cmake
+        self._cmake = CMake(self)
+        self._cmake.definitions["JSONCPP_WITH_TESTS"] = False
+        self._cmake.definitions["JSONCPP_WITH_CMAKE_PACKAGE"] = False
+        self._cmake.definitions["JSONCPP_WITH_STRICT_ISO"] = False
+        self._cmake.definitions["JSONCPP_WITH_PKGCONFIG_SUPPORT"] = False
         jsoncpp_version = tools.Version(self.version)
         if jsoncpp_version < "1.9.0" or jsoncpp_version >= "1.9.4":
-            cmake.definitions["BUILD_STATIC_LIBS"] = not self.options.shared
+            self._cmake.definitions["BUILD_STATIC_LIBS"] = not self.options.shared
         if jsoncpp_version >= "1.9.3":
-            cmake.definitions["JSONCPP_WITH_EXAMPLE"] = False
+            self._cmake.definitions["JSONCPP_WITH_EXAMPLE"] = False
         if jsoncpp_version >= "1.9.4":
-            cmake.definitions["BUILD_OBJECT_LIBS"] = False
-        cmake.configure()
-        return cmake
+            self._cmake.definitions["BUILD_OBJECT_LIBS"] = False
+        self._cmake.configure()
+        return self._cmake
 
     def build(self):
         self._patch_sources()
