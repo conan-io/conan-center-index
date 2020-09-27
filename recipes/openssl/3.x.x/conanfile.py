@@ -79,8 +79,6 @@ class OpenSSLConan(ConanFile):
         return self._is_clangcl or self._is_msvc
 
     def source(self):
-        # FIXME: For < 3.0.0 the old url contained major.minor.patch, e.g. 1.1.0, but without the letter (e.g. "a")
-        # FIXME: So what will be the old url for >= 3.0.0?
         tools.get(**self.conan_data["sources"][self.version])
         extracted_folder = "openssl-" + self.version
         os.rename(extracted_folder, self._source_subfolder)
