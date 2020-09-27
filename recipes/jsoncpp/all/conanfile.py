@@ -12,7 +12,7 @@ class JsoncppConan(ConanFile):
     settings = "os", "compiler", "arch", "build_type"
     options = {"shared": [True, False], "fPIC": [True, False]}
     default_options = {"shared": False, "fPIC": True}
-    exports_sources = "CMakeLists.txt"
+    exports_sources = ["CMakeLists.txt", "patches/**"]
     generators = "cmake"
 
     _cmake = None
@@ -35,6 +35,9 @@ class JsoncppConan(ConanFile):
         os.rename(extracted_dir, self._source_subfolder)
 
     def _patch_sources(self):
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            tools.patch(**patch)
+
         tools.replace_in_file(os.path.join(self._source_subfolder, "CMakeLists.txt"),
                               "${jsoncpp_SOURCE_DIR}",
                               "${JSONCPP_SOURCE_DIR}")
@@ -43,18 +46,10 @@ class JsoncppConan(ConanFile):
                                   "explicit operator bool()",
                                   "operator bool()")
 
-        if self.settings.os != "Windows" and not self.options.shared and not self.options.fPIC:
-            tools.replace_in_file(os.path.join(self._source_subfolder, "src", "lib_json", "CMakeLists.txt"),
-                                  "POSITION_INDEPENDENT_CODE ON",
-                                  "POSITION_INDEPENDENT_CODE OFF")
-        if tools.Version(self.version) > "1.9.0":
+        if tools.Version(self.version) >= "1.9.0":
             tools.replace_in_file(os.path.join(self._source_subfolder, "src", "lib_json", "CMakeLists.txt"),
                                   "$<BUILD_INTERFACE:${PROJECT_BINARY_DIR}/include/json>",
                                   "")
-        tools.replace_in_file(os.path.join(self._source_subfolder, "CMakeLists.txt"),
-                              "add_subdirectory( example )",
-                              "",
-                              strict=False)
 
     def _configure_cmake(self):
         if self._cmake:
