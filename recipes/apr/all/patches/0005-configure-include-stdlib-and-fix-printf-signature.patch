@@ -1,0 +1,193 @@
+From 93eb0b9295f226dd8022f905be0780094f5d0c67 Mon Sep 17 00:00:00 2001
+From: Tim Blechmann <tim@klingt.org>
+Date: Sun, 27 Sep 2020 13:48:10 +0800
+Subject: [PATCH] configure: include `stdlib` and fix printf signature
+
+fixes compile errors with xcode12
+---
+ build/apr_common.m4 |  4 +++-
+ configure           | 24 ++++++++++++++++++------
+ configure.in        |  5 +++++
+ 3 files changed, 26 insertions(+), 7 deletions(-)
+
+diff --git a/build/apr_common.m4 b/build/apr_common.m4
+index deb6a7f..4adacc8 100644
+--- a/build/apr_common.m4
++++ b/build/apr_common.m4
+@@ -473,11 +473,12 @@ $1
+ #else
+ #define binmode
+ #endif
++#include <stdlib.h>
+ int main()
+ {
+   FILE *f=fopen("conftestval", "w" binmode);
+   if (!f) exit(1);
+-  fprintf(f, "%d\n", sizeof($2));
++  fprintf(f, "%ud\n", sizeof($2));
+   exit(0);
+ }], AC_CV_NAME=`cat conftestval`, AC_CV_NAME=0, ifelse([$3],,,
+ AC_CV_NAME=$3))])dnl
+@@ -531,6 +532,7 @@ AC_TRY_RUN([
+ #include <errno.h>
+ #include <string.h>
+ #include <stdio.h>
++#include <stdlib.h>
+ main()
+ {
+   char buf[1024];
+diff --git a/configure b/configure
+index 7d5b993..b04a073 100755
+--- a/configure
++++ b/configure
+@@ -19313,6 +19313,7 @@ else
+ #include <stdlib.h>
+ #include <stdio.h>
+ #include <unistd.h>
++#include <stdlib.h>
+ 
+ int main(void)
+ {
+@@ -22913,6 +22914,7 @@ else
+ #include <errno.h>
+ #include <string.h>
+ #include <stdio.h>
++#include <stdlib.h>
+ main()
+ {
+   char buf[1024];
+@@ -24481,11 +24483,12 @@ else
+ #else
+ #define binmode
+ #endif
++#include <stdlib.h>
+ int main()
+ {
+   FILE *f=fopen("conftestval", "w" binmode);
+   if (!f) exit(1);
+-  fprintf(f, "%d\n", sizeof(pid_t));
++  fprintf(f, "%ud\n", sizeof(pid_t));
+   exit(0);
+ }
+ _ACEOF
+@@ -24806,11 +24809,12 @@ else
+ #else
+ #define binmode
+ #endif
++#include <stdlib.h>
+ int main()
+ {
+   FILE *f=fopen("conftestval", "w" binmode);
+   if (!f) exit(1);
+-  fprintf(f, "%d\n", sizeof(ssize_t));
++  fprintf(f, "%ud\n", sizeof(ssize_t));
+   exit(0);
+ }
+ _ACEOF
+@@ -24869,11 +24873,12 @@ else
+ #else
+ #define binmode
+ #endif
++#include <stdlib.h>
+ int main()
+ {
+   FILE *f=fopen("conftestval", "w" binmode);
+   if (!f) exit(1);
+-  fprintf(f, "%d\n", sizeof(size_t));
++  fprintf(f, "%ud\n", sizeof(size_t));
+   exit(0);
+ }
+ _ACEOF
+@@ -24933,11 +24938,12 @@ else
+ #else
+ #define binmode
+ #endif
++#include <stdlib.h>
+ int main()
+ {
+   FILE *f=fopen("conftestval", "w" binmode);
+   if (!f) exit(1);
+-  fprintf(f, "%d\n", sizeof(off_t));
++  fprintf(f, "%ud\n", sizeof(off_t));
+   exit(0);
+ }
+ _ACEOF
+@@ -25304,11 +25310,12 @@ $ac_includes_default
+ #else
+ #define binmode
+ #endif
++#include <stdlib.h>
+ int main()
+ {
+   FILE *f=fopen("conftestval", "w" binmode);
+   if (!f) exit(1);
+-  fprintf(f, "%d\n", sizeof(ino_t));
++  fprintf(f, "%ud\n", sizeof(ino_t));
+   exit(0);
+ }
+ _ACEOF
+@@ -25591,11 +25598,12 @@ else
+ #else
+ #define binmode
+ #endif
++#include <stdlib.h>
+ int main()
+ {
+   FILE *f=fopen("conftestval", "w" binmode);
+   if (!f) exit(1);
+-  fprintf(f, "%d\n", sizeof(struct iovec));
++  fprintf(f, "%ud\n", sizeof(struct iovec));
+   exit(0);
+ }
+ _ACEOF
+@@ -26211,6 +26219,8 @@ else
+ #include <sys/types.h>
+ #include <sys/time.h>
+ #include <sys/resource.h>
++#include <stdlib.h>
++
+ int main()
+ {
+     struct rlimit limit;
+@@ -26810,6 +26820,8 @@ else
+ 
+ #include <sys/types.h>
+ #include <pthread.h>
++#include <stdlib.h>
++
+         int main()
+         {
+             pthread_mutex_t mutex;
+diff --git a/configure.in b/configure.in
+index acfb857..619bc08 100644
+--- a/configure.in
++++ b/configure.in
+@@ -615,6 +615,7 @@ if test "$apr_lfs_choice" = "yes"; then
+ #include <stdlib.h>
+ #include <stdio.h>
+ #include <unistd.h>
++#include <stdlib.h>
+ 
+ int main(void)
+ {
+@@ -2208,6 +2209,8 @@ AC_TRY_RUN([
+ #include <sys/types.h>
+ #include <sys/time.h>
+ #include <sys/resource.h>
++#include <stdlib.h>
++
+ int main()
+ {
+     struct rlimit limit;
+@@ -2307,6 +2310,8 @@ if test "$threads" = "1"; then
+       AC_TRY_RUN([
+ #include <sys/types.h>
+ #include <pthread.h>
++#include <stdlib.h>
++
+         int main()
+         {
+             pthread_mutex_t mutex;
+-- 
+2.28.0
+

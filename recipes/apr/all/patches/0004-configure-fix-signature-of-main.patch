@@ -1,0 +1,249 @@
+From cd2b27abe5278c5ead4cc086871fdfa142276171 Mon Sep 17 00:00:00 2001
+From: Tim Blechmann <tim@klingt.org>
+Date: Sun, 27 Sep 2020 13:23:32 +0800
+Subject: [PATCH] configure: fix signature of `main`
+
+untyped `main` causes a compiler error with xcode-12 and therefore
+prevents the configure check from working
+---
+ build/apr_common.m4 | 28 ++++++++++++++--------------
+ configure           | 18 +++++++++---------
+ configure.in        |  6 +++---
+ 3 files changed, 26 insertions(+), 26 deletions(-)
+
+diff --git a/build/apr_common.m4 b/build/apr_common.m4
+index f4e2dfd..deb6a7f 100644
+--- a/build/apr_common.m4
++++ b/build/apr_common.m4
+@@ -162,7 +162,7 @@ changequote([, ])dnl
+   test "x$silent" = "xyes" && apr_configure_args="$apr_configure_args --silent"
+ 
+   dnl AC_CONFIG_SUBDIRS silences option warnings, emulate this for 2.62
+-  apr_configure_args="--disable-option-checking $apr_configure_args" 
++  apr_configure_args="--disable-option-checking $apr_configure_args"
+ 
+   dnl The eval makes quoting arguments work - specifically the second argument
+   dnl where the quoting mechanisms used is "" rather than [].
+@@ -473,7 +473,7 @@ $1
+ #else
+ #define binmode
+ #endif
+-main()
++int main()
+ {
+   FILE *f=fopen("conftestval", "w" binmode);
+   if (!f) exit(1);
+@@ -500,7 +500,7 @@ dnl
+ AC_DEFUN([APR_TRY_COMPILE_NO_WARNING],
+ [apr_save_CFLAGS=$CFLAGS
+  CFLAGS="$CFLAGS $CFLAGS_WARN"
+- if test "$ac_cv_prog_gcc" = "yes"; then 
++ if test "$ac_cv_prog_gcc" = "yes"; then
+    CFLAGS="$CFLAGS -Werror"
+  fi
+  AC_COMPILE_IFELSE(
+@@ -519,9 +519,9 @@ $4])
+ dnl
+ dnl APR_CHECK_STRERROR_R_RC
+ dnl
+-dnl  Decide which style of retcode is used by this system's 
++dnl  Decide which style of retcode is used by this system's
+ dnl  strerror_r().  It either returns int (0 for success, -1
+-dnl  for failure), or it returns a pointer to the error 
++dnl  for failure), or it returns a pointer to the error
+ dnl  string.
+ dnl
+ dnl
+@@ -585,7 +585,7 @@ struct dirent de; de.d_ino;
+ fi
+ ])
+ if test "$apr_cv_dirent_inode" != "no"; then
+-  AC_DEFINE_UNQUOTED(DIRENT_INODE, $apr_cv_dirent_inode, 
++  AC_DEFINE_UNQUOTED(DIRENT_INODE, $apr_cv_dirent_inode,
+     [Define if struct dirent has an inode member])
+ fi
+ ])
+@@ -593,7 +593,7 @@ fi
+ dnl
+ dnl APR_CHECK_DIRENT_TYPE
+ dnl
+-dnl  Decide if d_type is available in the dirent structure 
++dnl  Decide if d_type is available in the dirent structure
+ dnl  on this platform.  Not part of the Single UNIX Spec.
+ dnl  Note that this is worthless without DT_xxx macros, so
+ dnl  look for one while we are at it.
+@@ -609,8 +609,8 @@ struct dirent de; de.d_type = DT_REG;
+ ], apr_cv_dirent_type=d_type)
+ ])
+ if test "$apr_cv_dirent_type" != "no"; then
+-  AC_DEFINE_UNQUOTED(DIRENT_TYPE, $apr_cv_dirent_type, 
+-    [Define if struct dirent has a d_type member]) 
++  AC_DEFINE_UNQUOTED(DIRENT_TYPE, $apr_cv_dirent_type,
++    [Define if struct dirent has a d_type member])
+ fi
+ ])
+ 
+@@ -646,7 +646,7 @@ dnl  if FLAG-TO-SET is null, we automagically determine it's name
+ dnl  by changing all "/" to "_" in the HEADER-FILE and dropping
+ dnl  all "." and "-" chars. If the 3rd parameter is "yes" then instead of
+ dnl  setting to 1 or 0, we set FLAG-TO-SET to yes or no.
+-dnl  
++dnl
+ AC_DEFUN([APR_FLAG_HEADERS], [
+ AC_CHECK_HEADERS($1)
+ for aprt_i in $1
+@@ -692,7 +692,7 @@ dnl bar='${foo}/2'
+ dnl baz='${bar}/3'
+ dnl APR_EXPAND_VAR(fraz, $baz)
+ dnl   $fraz is now "1/2/3"
+-dnl 
++dnl
+ AC_DEFUN([APR_EXPAND_VAR], [
+ ap_last=
+ ap_cur="$2"
+@@ -725,7 +725,7 @@ fi
+ ])
+ 
+ dnl APR_HELP_STRING(LHS, RHS)
+-dnl Autoconf 2.50 can not handle substr correctly.  It does have 
++dnl Autoconf 2.50 can not handle substr correctly.  It does have
+ dnl AC_HELP_STRING, so let's try to call it if we can.
+ dnl Note: this define must be on one line so that it can be properly returned
+ dnl as the help string.  When using this macro with a multi-line RHS, ensure
+@@ -744,7 +744,7 @@ AC_DEFUN([APR_LAYOUT], [
+   # Catch layout names including a slash which will otherwise
+   # confuse the heck out of the sed script.
+   case $2 in
+-  */*) 
++  */*)
+     echo "** Error: $2 is not a valid layout name"
+     exit 1 ;;
+   esac
+@@ -975,7 +975,7 @@ AC_SUBST(MKDEP)
+ ])
+ 
+ dnl
+-dnl APR_CHECK_TYPES_FMT_COMPATIBLE(TYPE-1, TYPE-2, FMT-TAG, 
++dnl APR_CHECK_TYPES_FMT_COMPATIBLE(TYPE-1, TYPE-2, FMT-TAG,
+ dnl                                [ACTION-IF-TRUE], [ACTION-IF-FALSE])
+ dnl
+ dnl Try to determine whether two types are the same and accept the given
+diff --git a/configure b/configure
+index 724af6b..7d5b993 100755
+--- a/configure
++++ b/configure
+@@ -19314,7 +19314,7 @@ else
+ #include <stdio.h>
+ #include <unistd.h>
+ 
+-void main(void)
++int main(void)
+ {
+     int fd, ret = 0;
+     struct stat64 st;
+@@ -24481,7 +24481,7 @@ else
+ #else
+ #define binmode
+ #endif
+-main()
++int main()
+ {
+   FILE *f=fopen("conftestval", "w" binmode);
+   if (!f) exit(1);
+@@ -24806,7 +24806,7 @@ else
+ #else
+ #define binmode
+ #endif
+-main()
++int main()
+ {
+   FILE *f=fopen("conftestval", "w" binmode);
+   if (!f) exit(1);
+@@ -24869,7 +24869,7 @@ else
+ #else
+ #define binmode
+ #endif
+-main()
++int main()
+ {
+   FILE *f=fopen("conftestval", "w" binmode);
+   if (!f) exit(1);
+@@ -24933,7 +24933,7 @@ else
+ #else
+ #define binmode
+ #endif
+-main()
++int main()
+ {
+   FILE *f=fopen("conftestval", "w" binmode);
+   if (!f) exit(1);
+@@ -25304,7 +25304,7 @@ $ac_includes_default
+ #else
+ #define binmode
+ #endif
+-main()
++int main()
+ {
+   FILE *f=fopen("conftestval", "w" binmode);
+   if (!f) exit(1);
+@@ -25591,7 +25591,7 @@ else
+ #else
+ #define binmode
+ #endif
+-main()
++int main()
+ {
+   FILE *f=fopen("conftestval", "w" binmode);
+   if (!f) exit(1);
+@@ -26211,7 +26211,7 @@ else
+ #include <sys/types.h>
+ #include <sys/time.h>
+ #include <sys/resource.h>
+-main()
++int main()
+ {
+     struct rlimit limit;
+     limit.rlim_cur = 0;
+@@ -26474,7 +26474,7 @@ else
+ #ifndef SEM_FAILED
+ #define SEM_FAILED (-1)
+ #endif
+-main()
++int main()
+ {
+     sem_t *psem;
+     const char *sem_name = "/apr_autoconf";
+diff --git a/configure.in b/configure.in
+index 6833b32..acfb857 100644
+--- a/configure.in
++++ b/configure.in
+@@ -616,7 +616,7 @@ if test "$apr_lfs_choice" = "yes"; then
+ #include <stdio.h>
+ #include <unistd.h>
+ 
+-void main(void)
++int main(void)
+ {
+     int fd, ret = 0;
+     struct stat64 st;
+@@ -2208,7 +2208,7 @@ AC_TRY_RUN([
+ #include <sys/types.h>
+ #include <sys/time.h>
+ #include <sys/resource.h>
+-main()
++int main()
+ {
+     struct rlimit limit;
+     limit.rlim_cur = 0;
+@@ -2247,7 +2247,7 @@ AC_TRY_RUN([
+ #ifndef SEM_FAILED
+ #define SEM_FAILED (-1)
+ #endif
+-main()
++int main()
+ {
+     sem_t *psem;
+     const char *sem_name = "/apr_autoconf";
+-- 
+2.28.0
+
