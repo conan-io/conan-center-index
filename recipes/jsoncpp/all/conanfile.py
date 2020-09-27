@@ -80,6 +80,11 @@ class JsoncppConan(ConanFile):
         cmake.install()
 
     def package_info(self):
-        self.cpp_info.names["cmake_find_package"] = "JsonCpp"
-        self.cpp_info.names["cmake_find_package_multi"] = "JsonCpp"
-        self.cpp_info.libs = tools.collect_libs(self)
+        # TODO: CMake imported target shouldn't be namespaced (waiting https://github.com/conan-io/conan/issues/7615 to be implemented)
+        self.cpp_info.names["cmake_find_package"] = "jsoncpp"
+        self.cpp_info.names["cmake_find_package_multi"] = "jsoncpp"
+        self.cpp_info.names["pkg_config"] = "jsoncpp"
+        self.cpp_info.components["libjsoncpp"].names["cmake_find_package"] = "jsoncpp_lib"
+        self.cpp_info.components["libjsoncpp"].names["cmake_find_package_multi"] = "jsoncpp_lib"
+        self.cpp_info.components["libjsoncpp"].names["pkg_config"] = "jsoncpp"
+        self.cpp_info.components["libjsoncpp"].libs = tools.collect_libs(self)
