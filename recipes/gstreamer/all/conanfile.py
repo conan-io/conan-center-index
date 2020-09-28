@@ -15,10 +15,16 @@ class GStreamerConan(ConanFile):
     settings = "os", "arch", "compiler", "build_type"
     options = {"shared": [True, False], "fPIC": [True, False]}
     default_options = {"shared": False, "fPIC": True}
-    _source_subfolder = "source_subfolder"
-    _build_subfolder = "build_subfolder"
+    @property
+    def _source_subfolder(self):
+        return "source_subfolder"
 
-    requires = ("glib/2.66.0",)
+    @property
+    def _build_subfolder(self):
+        return "build_subfolder"
+
+    def requirements(self):
+        self.requires("glib/2.66.0")
     generators = "pkg_config"
 
     @property
@@ -26,6 +32,8 @@ class GStreamerConan(ConanFile):
         return self.settings.compiler == "Visual Studio"
 
     def configure(self):
+        if self.options.shared:
+            del self.options.fPIC
         del self.settings.compiler.libcxx
         del self.settings.compiler.cppstd
 
@@ -46,7 +54,7 @@ class GStreamerConan(ConanFile):
     def _configure_meson(self):
         meson = Meson(self)
         defs = dict()
-        if self.settings.compiler == "Visual Studio":
+        if self._is_msvc():
             if tools.Version(self.settings.compiler.version) < "14":
                 defs["c_args"] = " -Dsnprintf=_snprintf"
                 defs["cpp_args"] = " -Dsnprintf=_snprintf"
