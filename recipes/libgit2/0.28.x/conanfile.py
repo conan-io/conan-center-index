@@ -130,9 +130,9 @@ class LibGit2Conan(ConanFile):
                               "FIND_PKGLIBRARIES(LIBSSH2 libssh2)",
                               "FIND_PACKAGE(Libssh2 REQUIRED)\n"
                               "\tSET(LIBSSH2_FOUND ON)\n"
-                              "\tSET(LIBSSH2_INCLUDE_DIRS ${libssh2_INCLUDE_DIRS})\n"
-                              "\tSET(LIBSSH2_LIBRARIES ${libssh2_LIBRARIES})\n"
-                              "\tSET(LIBSSH2_LIBRARY_DIRS ${libssh2_LIB_DIRS})")
+                              "\tSET(LIBSSH2_INCLUDE_DIRS ${Libssh2_INCLUDE_DIRS})\n"
+                              "\tSET(LIBSSH2_LIBRARIES ${Libssh2_LIBRARIES})\n"
+                              "\tSET(LIBSSH2_LIBRARY_DIRS ${Libssh2_LIB_DIRS})")
         tools.save("FindOpenSSL.cmake",
                    "set(OPENSSL_FOUND ${OpenSSL_FOUND})\n"
                    "set(OPENSSL_INCLUDE_DIR ${OpenSSL_INCLUDE_DIRS})\n"
