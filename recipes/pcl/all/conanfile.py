@@ -24,7 +24,8 @@ class PclConanRecipe(ConanFile):
         "shared": False,
         "fPIC": True,
         "with_cuda": False,
-        "with_tools": False
+        "with_tools": False,
+        "qhull:reentrant": False
     }
     requires = ("boost/1.70.0",
                 "eigen/3.3.7",
@@ -75,6 +76,10 @@ class PclConanRecipe(ConanFile):
         version = tools.Version(self.settings.compiler.version)
         if version < minimal_version[compiler]:
             raise ConanInvalidConfiguration("%s requires a compiler that supports at least C++%s" % (self.name, minimal_cpp_standard))
+        if self.options["qhull"].reentrant:
+            self.output.warn(
+                    "Qhull is set to link the reentrant library. If you experience linking errors, try setting "
+                    "qhull:reentrant=False")
 
     def _configure_cmake(self):
         if self._cmake:
