@@ -13,10 +13,40 @@ class CppSortConan(ConanFile):
     no_copy_source = True
     settings = "os", "compiler", "build_type", "arch"
 
-    _source_subfolder = "source_subfolder"
+    @property
+    def _source_subfolder(self):
+        return "source_subfolder"
+
+    @property
+    def _minimum_cpp_standard(self):
+        return 14
+
+    @property
+    def _minimum_compilers_version(self):
+        return {
+            "apple-clang": "9.4",
+            "clang": "3.8",
+            "gcc": "5.5"
+        }
 
     def configure(self):
-        tools.check_min_cppstd(self, "14")
+        if self.settings.get_safe("compiler.cppstd"):
+            tools.check_min_cppstd(self, self._minimum_cpp_standard)
+
+        compiler = self.settings.compiler
+        try:
+            min_version = self._minimum_compilers_version[str(compiler)]
+            if tools.Version(compiler.version) < min_version:
+                msg = (
+                    "{} requires C++{} features which are not supported by compiler {} {}."
+                ).format(self.name, self._minimum_cpp_standard, compiler, compiler.version)
+                raise ConanInvalidConfiguration(msg)
+        except KeyError:
+            msg = (
+                "{} recipe lacks information about the {} compiler, "
+                "support for the required C++{} features is assumed"
+            ).format(self.name, compiler, self._minimum_cpp_standard)
+            self.output.warn(msg)
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
