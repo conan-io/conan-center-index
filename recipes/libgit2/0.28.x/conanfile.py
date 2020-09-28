@@ -128,7 +128,7 @@ class LibGit2Conan(ConanFile):
     def _patch_sources(self):
         tools.replace_in_file(os.path.join(self._source_subfolder, "src", "CMakeLists.txt"),
                               "FIND_PKGLIBRARIES(LIBSSH2 libssh2)",
-                              "FIND_PACKAGE(libssh2 REQUIRED)\n"
+                              "FIND_PACKAGE(Libssh2 REQUIRED)\n"
                               "\tSET(LIBSSH2_FOUND ON)\n"
                               "\tSET(LIBSSH2_INCLUDE_DIRS ${libssh2_INCLUDE_DIRS})\n"
                               "\tSET(LIBSSH2_LIBRARIES ${libssh2_LIBRARIES})\n"
