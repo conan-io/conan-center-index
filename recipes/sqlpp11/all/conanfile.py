@@ -10,7 +10,10 @@ class Sqlpp11Conan(ConanFile):
     description = "A type safe SQL template library for C++"
     topics = ("SQL", "DSL", "embedded", "data-base")
     no_copy_source = True
-    _source_subfolder = "source_subfolder"
+
+    @property
+    def _source_subfolder(self):
+        return "source_subfolder"
 
     def requirements(self):
         self.requires("date/2.4.1")
@@ -21,8 +24,12 @@ class Sqlpp11Conan(ConanFile):
         os.rename(extracted_dir, self._source_subfolder)
 
     def package(self):
-        self.copy("*LICENSE", dst="licenses", keep_path=False)
-        self.copy("include/*", src=self._source_subfolder)
+        self.copy("LICENSE", dst="licenses", src=self._source_subfolder)
+        self.copy("*.h", dst="include", src=os.path.join(self._source_subfolder, "include"))
 
     def package_id(self):
         self.info.header_only()
+
+    def package_info(self):
+        self.cpp_info.filenames["cmake_find_package"] = "Sqlpp11"
+        self.cpp_info.filenames["cmake_find_package_multi"] = "Sqlpp11"
