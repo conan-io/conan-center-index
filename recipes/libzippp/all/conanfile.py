@@ -10,7 +10,7 @@ class LibZipppConan(ConanFile):
     license = "BSD-3-Clause"
     topics = ("conan", "zip", "libzippp", "zip-archives", "zip-editing")
     exports_sources = ["CMakeLists.txt"]
-    generators = "cmake", "cmake_find_package"
+    generators = "cmake", "cmake_find_package_multi"
     settings = "os", "compiler", "build_type", "arch"
     options = {
         "shared": [True, False],
@@ -59,7 +59,7 @@ class LibZipppConan(ConanFile):
     def _patch_source(self):
         tools.replace_in_file('source_subfolder/CMakeLists.txt',
                               'find_package(LIBZIP MODULE REQUIRED)',
-                              'find_package(libzip REQUIRED)')
+                              'find_package(libzip REQUIRED CONFIG)')
 
     def build(self):
         self._patch_source()
