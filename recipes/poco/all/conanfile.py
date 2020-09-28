@@ -135,7 +135,7 @@ class PocoConan(ConanFile):
         if self.options.enable_netssl or \
                 self.options.enable_crypto or \
                 self.options.get_safe("enable_jwt", False):
-            self.requires("openssl/1.1.1g")
+            self.requires("openssl/1.1.1h")
 
     def _patch_sources(self):
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
