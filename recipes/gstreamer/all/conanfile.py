@@ -54,7 +54,7 @@ class GStreamerConan(ConanFile):
     def _configure_meson(self):
         meson = Meson(self)
         defs = dict()
-        if self._is_msvc():
+        if self._is_msvc:
             if tools.Version(self.settings.compiler.version) < "14":
                 defs["c_args"] = " -Dsnprintf=_snprintf"
                 defs["cpp_args"] = " -Dsnprintf=_snprintf"
