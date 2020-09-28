@@ -13,8 +13,18 @@ class ConanJBig(ConanFile):
     exports_sources = ['CMakeLists.txt', "*.patch"]
     generators = 'cmake'
     settings = "os", "arch", "compiler", "build_type"
-    options = {"shared": [True, False], "fPIC": [True, False]}
-    default_options = {"shared": False, "fPIC": True}
+    options = {
+        "shared": [True, False],
+        "fPIC": [True, False],
+        "build_executables": [True, False]
+    }
+    default_options = {
+        "shared": False,
+        "fPIC": True,
+        "build_executables": True
+    }
+
+    _cmake = None
 
     @property
     def _source_subfolder(self):
@@ -38,9 +48,13 @@ class ConanJBig(ConanFile):
         del self.settings.compiler.cppstd
 
     def _configure_cmake(self):
-        cmake = CMake(self)
-        cmake.configure(build_folder=self._build_subfolder)
-        return cmake
+        if self._cmake:
+            return self._cmake
+
+        self._cmake = CMake(self)
+        self._cmake.definitions["BUILD_EXECUTABLES"] = self.options.build_executables
+        self._cmake.configure(build_folder=self._build_subfolder)
+        return self._cmake
 
     def build(self):
         for patch in self.conan_data["patches"][self.version]:
