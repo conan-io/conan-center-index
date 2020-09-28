@@ -15,6 +15,9 @@ class CppSortConan(ConanFile):
 
     _source_subfolder = "source_subfolder"
 
+    def configure(self):
+        tools.check_min_cppstd(self, "14")
+
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
         extracted_dir = self.name + "-" + self.version
