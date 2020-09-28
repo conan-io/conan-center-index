@@ -95,7 +95,7 @@ class ProjConan(ConanFile):
             self._cmake.definitions["ENABLE_CURL"] = self.options.with_curl
             self._cmake.definitions["BUILD_TESTING"] = False
             self._cmake.definitions["ENABLE_IPO"] = False
-            self._cmake.definitions["BUILD_PROJSYNC"] = self.options.with_curl
+            self._cmake.definitions["BUILD_PROJSYNC"] = self.options.build_executables and self.options.with_curl
         self._cmake.configure()
         return self._cmake
 
@@ -139,6 +139,7 @@ class ProjConan(ConanFile):
         res_path = os.path.join(self.package_folder, "res")
         self.output.info("Appending PROJ_LIB environment variable: {}".format(res_path))
         self.env_info.PROJ_LIB.append(res_path)
-        bin_path = os.path.join(self.package_folder, "bin")
-        self.output.info("Appending PATH environment variable: {}".format(bin_path))
-        self.env_info.PATH.append(bin_path)
+        if self.options.build_executables:
+            bin_path = os.path.join(self.package_folder, "bin")
+            self.output.info("Appending PATH environment variable: {}".format(bin_path))
+            self.env_info.PATH.append(bin_path)
