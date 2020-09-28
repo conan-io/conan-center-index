@@ -68,9 +68,11 @@ class ConanJBig(ConanFile):
         cmake.install()
 
     def package_info(self):
-        bindir = os.path.join(self.package_folder, "bin")
-        self.output.info("Appending PATH environment variable: {}".format(bindir))
-        self.env_info.PATH.append(bindir)
         self.cpp_info.libs = [self.name]
         if self.options.shared and self.settings.compiler == "Visual Studio":
             self.cpp_info.defines = ["_JBIGDLL_"]
+
+        if self.options.build_executables:
+            bin_path = os.path.join(self.package_folder, "bin")
+            self.output.info("Appending PATH environment variable: {}".format(bin_path))
+            self.env_info.PATH.append(bin_path)
