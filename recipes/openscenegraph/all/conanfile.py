@@ -223,9 +223,6 @@ class ConanFile(ConanFile):
         toolchain.write_toolchain_files()
 
     def build(self):
-        # To work around #2311
-        os.unlink("Findopengl.cmake")
-
         cmake = CMake(self)
         cmake.configure()
         cmake.build()
