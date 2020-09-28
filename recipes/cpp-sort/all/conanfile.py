@@ -27,8 +27,13 @@ class CppSortConan(ConanFile):
         cmake.configure(source_folder=self._source_subfolder)
         cmake.install()
 
-        # Copy license file
-        self.copy("license.txt", dst="licenses", src=self._source_subfolder)
+        # Copy license files
+        if tools.Version(self.version) < "1.8.0":
+            license_files = ["license.txt"]
+        else:
+            license_files = ["LICENSE.txt", "NOTICE.txt"]
+        for license_file in license_files:
+            self.copy(license_file, dst="licenses", src=self._source_subfolder)
 
         # Remove CMake config files (only files in lib)
         tools.rmdir(os.path.join(self.package_folder, "lib"))
