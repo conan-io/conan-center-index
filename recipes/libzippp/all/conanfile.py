@@ -15,10 +15,12 @@ class LibZipppConan(ConanFile):
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
+        "with_encryption": [True, False]
     }
     default_options = {
         "shared": False,
         "fPIC": True,
+        "with_encryption": False
     }
     _cmake = None
 
@@ -35,7 +37,6 @@ class LibZipppConan(ConanFile):
             del self.options.fPIC
 
     def requirements(self):
-        self.requires("zlib/1.2.11")
         self.requires("libzip/1.7.3")
 
     def source(self):
@@ -44,11 +45,6 @@ class LibZipppConan(ConanFile):
         extracted_dir = self.name + "-" + self.name + "-v" + self.version + \
             "-" + self.deps_cpp_info["libzip"].version
         os.rename(extracted_dir, self._source_subfolder)
-        tools.replace_in_file('source_subfolder/CMakeLists.txt',
-                              'find_package(LIBZIP MODULE REQUIRED)',
-                              'find_package(libzip REQUIRED)')
-        tools.replace_in_file('source_subfolder/CMakeLists.txt',
-                              'libzip::zip', 'libzip::libzip')
 
     def _configure_cmake(self):
         if self._cmake:
@@ -56,10 +52,17 @@ class LibZipppConan(ConanFile):
         self._cmake = CMake(self)
         self._cmake.definitions["LIBZIPPP_INSTALL"] = True
         self._cmake.definitions["LIBZIPPP_INSTALL_HEADERS"] = True
+        self._cmake.definitions["LIBZIPPP_ENABLE_ENCRYPTION"] = self.options.with_encryption
         self._cmake.configure()
         return self._cmake
 
+    def _patch_source(self):
+        tools.replace_in_file('source_subfolder/CMakeLists.txt',
+                              'find_package(LIBZIP MODULE REQUIRED)',
+                              'find_package(libzip REQUIRED)')
+
     def build(self):
+        self._patch_source()
         cmake = self._configure_cmake()
         cmake.build()
 
@@ -74,3 +77,5 @@ class LibZipppConan(ConanFile):
         self.cpp_info.libs = tools.collect_libs(self)
         self.cpp_info.names["cmake_find_package"] = "libzippp"
         self.cpp_info.names["cmake_find_package_multi"] = "libzippp"
+        if self.options.with_encryption:
+            self.cpp_info.defines.append("LIBZIPPP_WITH_ENCRYPTION")
