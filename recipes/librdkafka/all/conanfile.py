@@ -21,6 +21,7 @@ class LibrdkafkaConan(ConanFile):
         "ssl": [True, False],
         "sasl": [True, False],
         "lz4": [True, False],
+        "refcnt_debug": [True, False],
     }
     default_options = {
         "shared": False,
@@ -31,6 +32,7 @@ class LibrdkafkaConan(ConanFile):
         "ssl": False,
         "sasl": False,
         "lz4": False,
+        "refcnt_debug": False,
     }
     generators = "cmake", "cmake_find_package"
     exports_sources = "CMakeLists.txt", "patches/**"
@@ -73,19 +75,14 @@ class LibrdkafkaConan(ConanFile):
         if self._cmake is not None:
             return self._cmake
         self._cmake = CMake(self)
-        self._cmake.definitions["WITHOUT_OPTIMIZATION"] = (
-            self.settings.build_type == "Debug"
-        )
+        self._cmake.definitions["WITHOUT_OPTIMIZATION"] = self.settings.build_type == "Debug"
         self._cmake.definitions["ENABLE_DEVEL"] = self.settings.build_type == "Debug"
-        self._cmake.definitions["ENABLE_REFCNT_DEBUG"] = (
-            self.settings.build_type == "Debug"
-        )
+        self._cmake.definitions["ENABLE_REFCNT_DEBUG"] = self.options.refcnt_debug
         self._cmake.definitions["RDKAFKA_BUILD_STATIC"] = not self.options.shared
         self._cmake.definitions["RDKAFKA_BUILD_EXAMPLES"] = False
         self._cmake.definitions["RDKAFKA_BUILD_TESTS"] = False
         self._cmake.definitions["WITHOUT_WIN32_CONFIG"] = True
         self._cmake.definitions["WITH_BUNDLED_SSL"] = False
-
         self._cmake.definitions["WITH_ZLIB"] = self.options.zlib
         self._cmake.definitions["WITH_ZSTD"] = self.options.zstd
         self._cmake.definitions["WITH_PLUGINS"] = self.options.plugins
