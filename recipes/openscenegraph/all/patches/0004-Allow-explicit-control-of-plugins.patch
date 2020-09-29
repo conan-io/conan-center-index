@@ -1,7 +1,7 @@
 From 04859156034c6762338411d5f2c07d02d0a7b814 Mon Sep 17 00:00:00 2001
 From: "R. Andrew Ohana" <rao@esi-group.com>
 Date: Thu, 17 Sep 2020 17:25:12 -0700
-Subject: [PATCH 4/4] Allow explicit control of plugins
+Subject: [PATCH 4/5] Allow explicit control of plugins
 
 ---
  src/osgDB/CMakeLists.txt            |  8 ++--
