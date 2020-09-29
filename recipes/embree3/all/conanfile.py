@@ -51,6 +51,7 @@ class Embree(ConanFile):
         "backface_culling": False,
         "ignore_invalid_rays": False,
     }
+    _cmake = None
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -80,28 +81,30 @@ class Embree(ConanFile):
         os.rename(target_name, self._source_folder)
 
     def _configure_cmake(self):
-        cmake = CMake(self)
+        if self._cmake:
+            return self._cmake
+        self._cmake = CMake(self)
 
         # Configure CMake library build:
-        cmake.definitions["EMBREE_STATIC_LIB"] = not self.options.shared
-        cmake.definitions["BUILD_TESTING"] = False
-        cmake.definitions["EMBREE_TUTORIALS"] = False
-        cmake.definitions["EMBREE_GEOMETRY_CURVE"] = self.options.geometry_curve
-        cmake.definitions["EMBREE_GEOMETRY_GRID"] = self.options.geometry_grid
-        cmake.definitions["EMBREE_GEOMETRY_INSTANCE"] = self.options.geometry_instance
-        cmake.definitions["EMBREE_GEOMETRY_QUAD"] = self.options.geometry_quad
-        cmake.definitions["EMBREE_GEOMETRY_SUBDIVISION"] = self.options.geometry_subdivision
-        cmake.definitions["EMBREE_GEOMETRY_TRIANGLE"] = self.options.geometry_triangle
-        cmake.definitions["EMBREE_GEOMETRY_USER"] = self.options.geometry_user
-        cmake.definitions["EMBREE_RAY_PACKETS"] = self.options.ray_packets
-        cmake.definitions["EMBREE_RAY_MASK"] = self.options.ray_masking
-        cmake.definitions["EMBREE_BACKFACE_CULLING"] = self.options.backface_culling
-        cmake.definitions["EMBREE_IGNORE_INVALID_RAYS"] = self.options.ignore_invalid_rays
-        cmake.definitions["EMBREE_ISPC_SUPPORT"] = False
-        cmake.definitions["EMBREE_TASKING_SYSTEM"] = "INTERNAL"
+        self._cmake.definitions["EMBREE_STATIC_LIB"] = not self.options.shared
+        self._cmake.definitions["BUILD_TESTING"] = False
+        self._cmake.definitions["EMBREE_TUTORIALS"] = False
+        self._cmake.definitions["EMBREE_GEOMETRY_CURVE"] = self.options.geometry_curve
+        self._cmake.definitions["EMBREE_GEOMETRY_GRID"] = self.options.geometry_grid
+        self._cmake.definitions["EMBREE_GEOMETRY_INSTANCE"] = self.options.geometry_instance
+        self._cmake.definitions["EMBREE_GEOMETRY_QUAD"] = self.options.geometry_quad
+        self._cmake.definitions["EMBREE_GEOMETRY_SUBDIVISION"] = self.options.geometry_subdivision
+        self._cmake.definitions["EMBREE_GEOMETRY_TRIANGLE"] = self.options.geometry_triangle
+        self._cmake.definitions["EMBREE_GEOMETRY_USER"] = self.options.geometry_user
+        self._cmake.definitions["EMBREE_RAY_PACKETS"] = self.options.ray_packets
+        self._cmake.definitions["EMBREE_RAY_MASK"] = self.options.ray_masking
+        self._cmake.definitions["EMBREE_BACKFACE_CULLING"] = self.options.backface_culling
+        self._cmake.definitions["EMBREE_IGNORE_INVALID_RAYS"] = self.options.ignore_invalid_rays
+        self._cmake.definitions["EMBREE_ISPC_SUPPORT"] = False
+        self._cmake.definitions["EMBREE_TASKING_SYSTEM"] = "INTERNAL"
 
-        cmake.configure(build_folder=self._build_folder)
-        return cmake
+        self._cmake.configure(build_folder=self._build_folder)
+        return self._cmake
 
     def build(self):
         os.remove(os.path.join(self._source_folder, "common", "cmake", "FindTBB.cmake"))
@@ -129,14 +132,6 @@ class Embree(ConanFile):
             tools.rmdir(os.path.join(self.package_folder, "bin"))
 
     def package_info(self):
-        self.cpp_info.libdirs = [
-            "lib"
-        ]
-
-        self.cpp_info.includedirs = [
-            "include"
-        ]
-
         self.cpp_info.libs = tools.collect_libs(self)
         if self.settings.os == "Linux":
             self.cpp_info.system_libs = ["dl", "m", "pthread"]
@@ -156,4 +151,3 @@ class Embree(ConanFile):
             self.settings.compiler == 'apple-clang' and
             self.options.shared == False
         )    
-
