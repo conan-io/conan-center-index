@@ -27,15 +27,11 @@ class libuvConan(ConanFile):
         "patches/*"
     ]
 
+    _cmake = None
+
     @property
     def _source_subfolder_name(self):
         return "source_subfolder"
-
-    def _configure_cmake(self):
-        cmake = CMake(self)
-        cmake.definitions["LIBUV_BUILD_TESTS"] = False
-        cmake.configure()
-        return cmake
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -51,6 +47,14 @@ class libuvConan(ConanFile):
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
         os.rename("libuv-{}".format(self.version), self._source_subfolder_name)
+
+    def _configure_cmake(self):
+        if self._cmake:
+            return self._cmake
+        self._cmake = CMake(self)
+        self._cmake.definitions["LIBUV_BUILD_TESTS"] = False
+        self._cmake.configure()
+        return self._cmake
 
     def build(self):
         if "patches" in self.conan_data and self.version in self.conan_data["patches"]:
