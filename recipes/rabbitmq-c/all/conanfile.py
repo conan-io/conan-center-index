@@ -93,3 +93,5 @@ class RabbitmqcConan(ConanFile):
                 self.cpp_info.components["rabbitmq"].system_libs.append("pthread")
         if not self.options.shared:
             self.cpp_info.components["rabbitmq"].defines.append("AMQP_STATIC")
+        if self.options.ssl:
+            self.cpp_info.components["rabbitmq"].requires.append("openssl::openssl")
