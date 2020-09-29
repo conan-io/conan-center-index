@@ -30,7 +30,7 @@ class libuvConan(ConanFile):
     _cmake = None
 
     @property
-    def _source_subfolder_name(self):
+    def _source_subfolder(self):
         return "source_subfolder"
 
     def config_options(self):
@@ -46,7 +46,7 @@ class libuvConan(ConanFile):
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
-        os.rename("libuv-{}".format(self.version), self._source_subfolder_name)
+        os.rename("libuv-{}".format(self.version), self._source_subfolder)
 
     def _configure_cmake(self):
         if self._cmake:
