@@ -30,7 +30,6 @@ class GLibConan(ConanFile):
     _build_subfolder = 'build_subfolder'
     short_paths = True
     generators = "pkg_config"
-    requires = "zlib/1.2.11", "libffi/3.2.1"
 
     @property
     def _is_msvc(self):
@@ -61,6 +60,8 @@ class GLibConan(ConanFile):
             self.build_requires("pkgconf/1.7.3")
 
     def requirements(self):
+        self.requires("libffi/3.2.1")
+        self.requires("zlib/1.2.11")
         if self.options.with_pcre:
             self.requires("pcre/8.41")
         if self.options.get_safe("with_elf", True):
