@@ -51,7 +51,11 @@ class GLibConan(ConanFile):
         if self.settings.os != "Linux":
             del self.options.with_mount
             del self.options.with_selinux
+
+    def configure(self):
         if tools.Version(self.version) < "2.65.1":
+            if not self.options.with_elf:
+                self.output.warn("libelf dependency can't be disabled in glib < 2.65.1")
             del self.options.with_elf
 
     def build_requirements(self):
