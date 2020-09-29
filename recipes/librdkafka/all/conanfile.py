@@ -114,6 +114,16 @@ class LibrdkafkaConan(ConanFile):
         self.cpp_info.components["rdkafka"].names["cmake_find_package_multi"] = "rdkafka"
         self.cpp_info.components["rdkafka"].names["pkg_config"] = "rdkafka"
         self.cpp_info.components["rdkafka"].libs = ["rdkafka"]
+        if self.options.zlib:
+            self.cpp_info.components["rdkafka"].requires.append("zlib::zlib")
+        if self.options.zstd:
+            self.cpp_info.components["rdkafka"].requires.append("zstd::zstd")
+        if self.options.ssl:
+            self.cpp_info.components["rdkafka"].requires.append("openssl::openssl")
+        if self.options.sasl and self.settings.os != "Windows":
+            self.cpp_info.components["rdkafka"].requires.append("cyrus-sasl::cyrus-sasl")
+        if self.options.lz4:
+            self.cpp_info.components["rdkafka"].requires.append("lz4::lz4")
         if self.settings.compiler == "Visual Studio":
             self.cpp_info.components["rdkafka"].system_libs.extend(["crypt32", "ws2_32"])
         elif self.settings.os == "Linux":
