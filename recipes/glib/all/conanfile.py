@@ -52,6 +52,8 @@ class GLibConan(ConanFile):
         if self.settings.os != "Linux":
             del self.options.with_mount
             del self.options.with_selinux
+        if tools.Version(self.version) < "2.65.1":
+            del self.options.with_elf
 
     def build_requirements(self):
         self.build_requires("meson/0.54.2")
@@ -61,7 +63,7 @@ class GLibConan(ConanFile):
     def requirements(self):
         if self.options.with_pcre:
             self.requires("pcre/8.41")
-        if self.options.with_elf:
+        if self.options.get_safe("with_elf", True):
             self.requires("libelf/0.8.13")
         if self.settings.os == "Linux":
             if self.options.with_mount:
@@ -95,7 +97,7 @@ class GLibConan(ConanFile):
             defs["selinux"] = "enabled" if self.options.with_selinux else "disabled"
             defs["libmount"] = "enabled" if self.options.with_mount else "disabled"
         defs["internal_pcre"] = not self.options.with_pcre
-        if tools.Version(self.version) >= tools.Version("2.65.1"):
+        if tools.Version(self.version) >= "2.65.1":
             defs["libelf"] = "enabled" if self.options.with_elf else "disabled"
 
         meson.configure(source_folder=self._source_subfolder, args=['--wrap-mode=nofallback'],
@@ -145,7 +147,6 @@ class GLibConan(ConanFile):
             os.unlink(pdb_file)
 
     def package_info(self):
-        
         self.cpp_info.components["glib-2.0"].libs = ["glib-2.0"]
         if self.settings.os == "Linux":
             self.cpp_info.components["glib-2.0"].system_libs.append("pthread")
@@ -169,11 +170,11 @@ class GLibConan(ConanFile):
             self.cpp_info.components["gmodule-no-export-2.0"].system_libs.append("pthread")
             self.cpp_info.components["gmodule-no-export-2.0"].system_libs.append("dl")
         self.cpp_info.components["gmodule-no-export-2.0"].requires.append("glib-2.0")
-        
+
         self.cpp_info.components["gmodule-export-2.0"].requires.extend(["gmodule-no-export-2.0", "glib-2.0"])
         if self.settings.os == "Linux":
             self.cpp_info.components["gmodule-export-2.0"].sharedlinkflags.append("-Wl,--export-dynamic")
-        
+
         self.cpp_info.components["gmodule-2.0"].requires.extend(["gmodule-no-export-2.0", "glib-2.0"])
         if self.settings.os == "Linux":
             self.cpp_info.components["gmodule-2.0"].sharedlinkflags.append("-Wl,--export-dynamic")
@@ -203,7 +204,7 @@ class GLibConan(ConanFile):
             self.cpp_info.components["gio-unix-2.0"].includedirs = [os.path.join("include", "gio-unix-2.0")]
 
         self.cpp_info.components["gresource"].libs = [] # this is actualy an executable
-        if self.options.with_elf:
+        if self.options.get_safe("with_elf", True):
             self.cpp_info.components["gresource"].requires.append("libelf::libelf") # this is actualy an executable
 
         bin_path = os.path.join(self.package_folder, "bin")
