@@ -33,7 +33,8 @@ class LibcurlConan(ConanFile):
                "with_largemaxwritesize": [True, False],
                "with_nghttp2": [True, False],
                "with_zlib": [True, False],
-               "with_brotli": [True, False]
+               "with_brotli": [True, False],
+               "with_zstd": [True, False],
                }
     default_options = {"shared": False,
                        "fPIC": True,
@@ -51,7 +52,8 @@ class LibcurlConan(ConanFile):
                        "with_largemaxwritesize": False,
                        "with_nghttp2": False,
                        "with_zlib": True,
-                       "with_brotli": False
+                       "with_brotli": False,
+                       "with_zstd": False,
                        }
 
     _autotools = None
@@ -94,6 +96,10 @@ class LibcurlConan(ConanFile):
             self.options.with_wolfssl = False
             self.options.with_winssl = False
             self.options.darwin_ssl = False
+
+        if tools.Version(self.version) < "7.72.0":
+            del self.options.with_zstd
+
 
     def configure(self):
         if self.options.shared:
@@ -155,6 +161,10 @@ class LibcurlConan(ConanFile):
             self.requires("zlib/1.2.11")
         if self.options.with_brotli:
             self.requires("brotli/1.0.7")
+
+        if tools.Version(self.version) >= "7.72.0":
+            if self.options.with_zstd:
+                self.requires("zstd/1.4.5")
 
     def build_requirements(self):
         if self._is_mingw and tools.os_info.is_windows and not tools.get_env("CONAN_BASH_PATH") and \
@@ -245,6 +255,9 @@ class LibcurlConan(ConanFile):
             params.append("--without-zlib")
 
         params.append("--with-brotli" if self.options.with_brotli else "--without-brotli")
+
+        if tools.Version(self.version) >= "7.72.0":
+            params.append("--with-zstd" if self.options.with_zstd else "--without-zstd")
 
         if not self.options.shared:
             params.append("--disable-shared")
@@ -563,3 +576,7 @@ class LibcurlConan(ConanFile):
             self.cpp_info.components["curl"].requires.append("zlib::zlib")
         if self.options.with_brotli:
             self.cpp_info.components["curl"].requires.append("brotli::brotli")
+
+        if tools.Version(self.version) >= "7.72.0":
+            if self.options.with_zstd:
+                self.cpp_info.components["curl"].requires.append("zstd::zstd")
