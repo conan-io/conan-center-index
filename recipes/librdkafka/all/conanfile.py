@@ -124,8 +124,8 @@ class LibrdkafkaConan(ConanFile):
             self.cpp_info.components["rdkafka"].requires.append("cyrus-sasl::cyrus-sasl")
         if self.options.lz4:
             self.cpp_info.components["rdkafka"].requires.append("lz4::lz4")
-        if self.settings.compiler == "Visual Studio":
-            self.cpp_info.components["rdkafka"].system_libs.extend(["crypt32", "ws2_32"])
+        if self.settings.os == "Windows":
+            self.cpp_info.components["rdkafka"].system_libs.extend(["crypt32", "ws2_32", "secur32"])
         elif self.settings.os == "Linux":
             self.cpp_info.components["rdkafka"].system_libs.extend(["pthread", "rt", "dl", "m"])
         if not self.options.shared:
