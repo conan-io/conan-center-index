@@ -1,5 +1,11 @@
 # Changelog
 
+### 29-September-2020 - 16:21 CEST
+
+- [feature] Use indexer V2 API.
+- [job] Add force parameter to UpdateSearchIndex job to force reindex of packages.
+- [job] New UpdateSearchIndexMaster job to reindex (if needed) packages in ConanCenter repository.
+
 ### 23-September-2020 - 15:48 CEST
 
 - [job] AutomaticMerge: Approved and changes requested reviews should prevail.
