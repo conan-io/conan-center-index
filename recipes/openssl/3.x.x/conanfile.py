@@ -62,6 +62,10 @@ class OpenSSLConan(ConanFile):
             if "CONAN_BASH_PATH" not in os.environ and tools.os_info.detect_windows_subsystem() != "msys2":
                 self.build_requires("msys2/20190524")
 
+    def requirements(self):
+        if self.options.get_safe("zlib") == True:
+            self.requires("zlib/1.2.11")
+
     @property
     def _is_msvc(self):
         return self.settings.compiler == "Visual Studio"
@@ -78,11 +82,6 @@ class OpenSSLConan(ConanFile):
     def _use_nmake(self):
         return self._is_clangcl or self._is_msvc
 
-    def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        extracted_folder = "openssl-" + self.version
-        os.rename(extracted_folder, self._source_subfolder)
-
     def configure(self):
         del self.settings.compiler.libcxx
         del self.settings.compiler.cppstd
@@ -94,9 +93,10 @@ class OpenSSLConan(ConanFile):
         else:
             del self.options.fPIC
 
-    def requirements(self):
-        if self.options.get_safe("zlib") == True:
-            self.requires("zlib/1.2.11")
+    def source(self):
+        tools.get(**self.conan_data["sources"][self.version])
+        extracted_folder = "openssl-" + self.version
+        os.rename(extracted_folder, self._source_subfolder)
 
     @property
     def _target(self):
