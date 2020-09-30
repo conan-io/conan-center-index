@@ -40,6 +40,7 @@ class CMakeConan(ConanFile):
         if self._with_openssl:
             self.requires("openssl/1.1.1g")
 
+
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
         extracted_dir = self.name + "-" + self.version
