@@ -12,12 +12,7 @@ class GodotCppConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/godotengine/godot-cpp"
     topics = ("game-engine", "game-development", "c++")
-    settings = {
-        "arch": ["x86", "x86_64"],
-        "os": ["Windows", "Linux", "Macos"],
-        "compiler": None,
-        "build_type": ["Debug", "Release", "MinSizeRel", "RelWithDebInfo"],
-    }
+    settings = "os", "arch", "compiler", "build_type"
     build_requires = ["scons/3.1.2"]
 
     @property
