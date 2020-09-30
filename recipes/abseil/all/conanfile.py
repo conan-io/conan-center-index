@@ -17,6 +17,7 @@ class ConanRecipe(ConanFile):
 
     license = "Apache-2.0"
 
+    exports_sources = ["CMakeLists.txt", "patches/**"]
     generators = "cmake"
     short_paths = True
 
@@ -51,15 +52,12 @@ class ConanRecipe(ConanFile):
             self._cmake.definitions["CMAKE_CXX_STANDARD"] = 11
         self._cmake.definitions["ABSL_ENABLE_INSTALL"] = True
         self._cmake.definitions["BUILD_TESTING"] = False
-        self._cmake.configure(source_folder=self._source_subfolder)
+        self._cmake.configure()
         return self._cmake
 
     def build(self):
-        tools.replace_in_file(
-            os.path.join(self._source_subfolder, "CMakeLists.txt"),
-            "project(absl CXX)", """project(absl CXX)
-include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
-conan_basic_setup()""")
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            tools.patch(**patch)
         cmake = self._configure_cmake()
         cmake.build()
 

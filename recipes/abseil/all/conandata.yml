@@ -8,3 +8,10 @@ sources:
   "20200923":
     url: "https://github.com/abseil/abseil-cpp/archive/20200923.tar.gz"
     sha256: "b3744a4f7a249d5eaf2309daad597631ce77ea62e0fc6abffbab4b4c3dc0fc08"
+patches:
+  "20200205":
+    - patch_file: "patches/cmake-install.patch"
+      base_path: "source_subfolder"
+  "20200225.2":
+    - patch_file: "patches/cmake-install.patch"
+      base_path: "source_subfolder"
