@@ -1,4 +1,7 @@
 sources:
+  "2.0.21":
+    url: "https://github.com/jasper-software/jasper/archive/version-2.0.21.tar.gz"
+    sha256: "2482def06dfaa33b8d93cbe992a29723309f3c2b6e75674423a52fc82be10418"
   "2.0.19":
     url: "https://github.com/jasper-software/jasper/archive/version-2.0.19.tar.gz"
     sha256: "b9d16162a088617ada36450f2374d72165377cb64b33ed197c200bcfb73ec76c"
