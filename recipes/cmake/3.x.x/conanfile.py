@@ -72,6 +72,8 @@ class CMakeConan(ConanFile):
     def _configure_cmake(self):
         if not self._cmake:
             self._cmake = CMake(self)
+            if not self.settings.compiler.cppstd:
+                self._cmake.definitions["CMAKE_CXX_STANDARD"] = 11
             self._cmake.definitions["CMAKE_BOOTSTRAP"] = False
             if self.settings.os == "Linux":
                 self._cmake.definitions["CMAKE_USE_OPENSSL"] = self._with_openssl
