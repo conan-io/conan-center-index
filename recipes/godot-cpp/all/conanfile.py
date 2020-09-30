@@ -2,6 +2,7 @@ import glob
 import os
 
 from conans import ConanFile, tools
+from conans.errors import ConanInvalidConfiguration
 
 class GodotCppConan(ConanFile):
     name = "godot-cpp"
@@ -65,6 +66,35 @@ class GodotCppConan(ConanFile):
 
     def requirements(self):
         self.requires("godot_headers/{}".format(self.version))
+
+    def configure(self):
+        minimal_cpp_standard = "14"
+        if self.settings.compiler.cppstd:
+            tools.check_min_cppstd(self, minimal_cpp_standard)
+
+        minimal_version = {
+            "gcc": "5",
+            "clang": "4",
+            "apple-clang": "10",
+            "Visual Studio": "15",
+        }
+
+        compiler = str(self.settings.compiler)
+        if compiler not in minimal_version:
+            self.output.warn(
+                "{} recipe lacks information about the {} compiler standard version support".format(self.name, compiler))
+            self.output.warn(
+                "{} requires a compiler that supports at least C++{}".format(self.name, minimal_cpp_standard))
+            return
+
+        version = tools.Version(self.settings.compiler.version)
+        if version < minimal_version[compiler]:
+            if compiler in ["apple-clang", "clang"]:
+                raise ConanInvalidConfiguration(
+                    "{} requires a clang version that supports the '-Og' flag".format(self.name))
+            raise ConanInvalidConfiguration(
+                "{} requires a compiler that supports at least C++{}".format(self.name, minimal_cpp_standard))
+
 
     def build(self):
         self.run(
