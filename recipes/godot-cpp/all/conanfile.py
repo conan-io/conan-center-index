@@ -15,7 +15,7 @@ class GodotCppConan(ConanFile):
     settings = {
         "arch": ["x86", "x86_64"],
         "os": ["Windows", "Linux", "Macos"],
-        "compiler": ["gcc", "clang", "Visual Studio"],
+        "compiler": None,
         "build_type": ["Debug", "Release", "MinSizeRel", "RelWithDebInfo"],
     }
     build_requires = ["scons/3.1.2"]
