@@ -122,7 +122,7 @@ conan_basic_setup()""")
 
         # Save components informations in json file
         with open(self._components_helper_filepath, "w") as json_file:
-            json.dump(components, json_file)
+            json.dump(components, json_file, indent=4)
 
     @property
     def _components_helper_filepath(self):
