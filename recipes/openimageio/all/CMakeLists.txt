@@ -11,4 +11,6 @@ include_directories(
     "${CMAKE_BINARY_DIR}/source_subfolder/include"
 )
 
+set(CMAKE_INSTALL_SYSTEM_RUNTIME_LIBS_SKIP YES)
+
 add_subdirectory(source_subfolder)

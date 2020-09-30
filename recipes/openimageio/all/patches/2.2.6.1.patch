@@ -1,0 +1,121 @@
+diff --git a/src/cmake/compiler.cmake b/src/cmake/compiler.cmake
+index 12a8e819..46c1d0f8 100644
+--- a/src/cmake/compiler.cmake
++++ b/src/cmake/compiler.cmake
+@@ -88,7 +88,7 @@ if (NOT MSVC)
+         add_compile_options ("-Wextra")
+     endif ()
+     if (STOP_ON_WARNING OR DEFINED ENV{CI})
+-        add_compile_options ("-Werror")
++        # add_compile_options ("-Werror")
+         # N.B. Force CI builds (Travis defines $CI) to use -Werror, even if
+         # STOP_ON_WARNING has been switched off by default, which we may do
+         # in release branches.
+diff --git a/src/cmake/externalpackages.cmake b/src/cmake/externalpackages.cmake
+index 1240f22a..78bb257a 100644
+--- a/src/cmake/externalpackages.cmake
++++ b/src/cmake/externalpackages.cmake
+@@ -203,14 +203,14 @@ checked_find_package (TIFF 3.0 REQUIRED)
+ # IlmBase & OpenEXR
+ checked_find_package (OpenEXR 2.0 REQUIRED)
+ # We use Imath so commonly, may as well include it everywhere.
+-include_directories ("${OPENEXR_INCLUDES}" "${ILMBASE_INCLUDES}"
+-                     "${ILMBASE_INCLUDES}/OpenEXR")
++# include_directories ("${OPENEXR_INCLUDES}" "${ILMBASE_INCLUDES}"
++#                      "${ILMBASE_INCLUDES}/OpenEXR")
+ if (CMAKE_COMPILER_IS_CLANG AND OPENEXR_VERSION VERSION_LESS 2.3)
+     # clang C++ >= 11 doesn't like 'register' keyword in old exr headers
+     add_compile_options (-Wno-deprecated-register)
+ endif ()
+ if (MSVC AND NOT LINKSTATIC)
+-    add_definitions (-DOPENEXR_DLL) # Is this needed for new versions?
++    # add_definitions (-DOPENEXR_DLL) # Is this needed for new versions?
+ endif ()
+ 
+ 
+@@ -267,9 +267,8 @@ checked_find_package (Field3D
+                    DEFINITIONS  -DUSE_FIELD3D=1)
+ checked_find_package (GIF 4)
+ checked_find_package (Libheif 1.3)  # For HEIF/HEIC format
+-checked_find_package (LibRaw
+-                    PRINT LibRaw_r_LIBRARIES)
+-checked_find_package (OpenJpeg 2.0)
++checked_find_package (libraw)
++checked_find_package (OpenJPEG 2.0)
+ checked_find_package (OpenVDB 5.0
+                    DEPS         TBB
+                    DEFINITIONS  -DUSE_OPENVDB=1)
+diff --git a/src/include/CMakeLists.txt b/src/include/CMakeLists.txt
+index a60b3b21..b0db9292 100644
+--- a/src/include/CMakeLists.txt
++++ b/src/include/CMakeLists.txt
+@@ -44,6 +44,7 @@ install (FILES ${public_headers}
+          DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/${PROJECT_NAME}
+          COMPONENT developer)
+ 
++set(FMT_INCLUDES "${fmt_INCLUDE_DIR}")
+ set (fmt_headers
+         ${FMT_INCLUDES}/fmt/core.h
+         ${FMT_INCLUDES}/fmt/format-inl.h
+diff --git a/src/jpeg2000.imageio/CMakeLists.txt b/src/jpeg2000.imageio/CMakeLists.txt
+index 575ed0b7..f6995e58 100644
+--- a/src/jpeg2000.imageio/CMakeLists.txt
++++ b/src/jpeg2000.imageio/CMakeLists.txt
+@@ -2,10 +2,10 @@
+ # SPDX-License-Identifier: BSD-3-Clause
+ # https://github.com/OpenImageIO/oiio/blob/master/LICENSE.md
+ 
+-if (OPENJPEG_FOUND)
++if (TARGET OpenJPEG::OpenJPEG)
+     add_oiio_plugin (jpeg2000input.cpp jpeg2000output.cpp
+                      INCLUDE_DIRS ${OPENJPEG_INCLUDES}
+-                     LINK_LIBRARIES ${OPENJPEG_LIBRARIES}
++                     LINK_LIBRARIES OpenJPEG::OpenJPEG
+                      DEFINITIONS "-DUSE_OPENJPEG")
+ else()
+     message (WARNING "Jpeg-2000 plugin will not be built")
+diff --git a/src/libOpenImageIO/CMakeLists.txt b/src/libOpenImageIO/CMakeLists.txt
+index e5e63cb7..164c3560 100644
+--- a/src/libOpenImageIO/CMakeLists.txt
++++ b/src/libOpenImageIO/CMakeLists.txt
+@@ -135,8 +135,7 @@ endif ()
+ 
+ target_link_libraries (OpenImageIO
+         PUBLIC
+-            ${ILMBASE_LIBRARIES}
+-            ${OPENEXR_LIBRARIES}
++            OpenEXR::OpenEXR
+             ${OpenCV_LIBRARIES}
+             ${GCC_ATOMIC_LIBRARIES}
+         PRIVATE
+@@ -153,11 +152,11 @@ if (USE_EXTERNAL_PUGIXML)
+     # insert include path to pugixml first, to ensure that the external
+     # pugixml is found, and not the one in OIIO's include directory.
+     target_include_directories (OpenImageIO PRIVATE BEFORE ${PUGIXML_INCLUDES})
+-    target_link_libraries (OpenImageIO PRIVATE ${PUGIXML_LIBRARIES})
++    target_link_libraries (OpenImageIO PRIVATE pugixml::pugixml)
+ endif()
+ 
+ if (FREETYPE_FOUND)
+-    target_link_libraries (OpenImageIO PRIVATE ${FREETYPE_LIBRARIES})
++    target_link_libraries (OpenImageIO PRIVATE Freetype::Freetype)
+ endif()
+ 
+ if (WIN32)
+diff --git a/src/raw.imageio/CMakeLists.txt b/src/raw.imageio/CMakeLists.txt
+index 81a0ff54..7be59ed7 100644
+--- a/src/raw.imageio/CMakeLists.txt
++++ b/src/raw.imageio/CMakeLists.txt
+@@ -2,10 +2,10 @@
+ # SPDX-License-Identifier: BSD-3-Clause
+ # https://github.com/OpenImageIO/oiio/blob/master/LICENSE.md
+ 
+-if (LIBRAW_FOUND)
++if (TARGET libraw::libraw)
+     add_oiio_plugin (rawinput.cpp
+                      INCLUDE_DIRS ${LibRaw_INCLUDE_DIR}
+-                     LINK_LIBRARIES ${LibRaw_r_LIBRARIES}
++                     LINK_LIBRARIES libraw::libraw
+                      DEFINITIONS "-DUSE_LIBRAW=1")
+ else ()
+     message (WARNING "Raw plugin will not be built")
