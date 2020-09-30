@@ -25,6 +25,10 @@ class GodotCppConan(ConanFile):
         return 64 if self.settings.get_safe("arch") in ["x86_64", "armv8"] else 32
 
     @property
+    def _custom_api_file(self):
+        return "{}/api.json".format(self._godot_headers.res_paths[0])
+
+    @property
     def _headers_dir(self):
         return self._godot_headers.include_paths[0]
 
@@ -103,7 +107,9 @@ class GodotCppConan(ConanFile):
                 "-C{}".format(self._source_subfolder),
                 "-j{}".format(tools.cpu_count()),
                 "generate_bindings=yes",
+                "use_custom_api_file=yes",
                 "bits={}".format(self._bits),
+                "custom_api_file={}".format(self._custom_api_file),
                 "headers_dir={}".format(self._headers_dir),
                 "platform={}".format(self._platform),
                 "target={}".format(self._target),
@@ -111,10 +117,6 @@ class GodotCppConan(ConanFile):
                 "use_mingw={}".format(self._use_mingw),
             ])
         )
-
-    def imports(self):
-        headers_path = os.path.join(self._source_subfolder, "godot_headers")
-        self.copy("api.json", dst=headers_path, src="res", root_package="godot_headers")
 
     def package(self):
         self.copy("LICENSE*", dst="licenses", src=self._source_subfolder)
