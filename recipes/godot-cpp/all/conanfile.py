@@ -18,7 +18,7 @@ class GodotCppConan(ConanFile):
         "compiler": ["gcc", "clang", "Visual Studio"],
         "build_type": ["Debug", "Release", "MinSizeRel", "RelWithDebInfo"],
     }
-    build_requires = ["scons/[~=3]"]
+    build_requires = ["scons/3.1.2"]
 
     @property
     def _bits(self):
