@@ -19,7 +19,6 @@ class ConanRecipe(ConanFile):
 
     exports_sources = ["CMakeLists.txt", "patches/**"]
     generators = "cmake"
-    short_paths = True
 
     settings = "os", "arch", "compiler", "build_type"
     options = {"fPIC": [True, False]}
