@@ -4,6 +4,7 @@ import os
 from conans import ConanFile, tools
 from conans.errors import ConanInvalidConfiguration
 
+
 class GodotCppConan(ConanFile):
     name = "godot-cpp"
     description = "C++ bindings for the Godot script API"
@@ -94,7 +95,6 @@ class GodotCppConan(ConanFile):
                     "{} requires a clang version that supports the '-Og' flag".format(self.name))
             raise ConanInvalidConfiguration(
                 "{} requires a compiler that supports at least C++{}".format(self.name, minimal_cpp_standard))
-
 
     def build(self):
         self.run(
