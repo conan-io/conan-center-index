@@ -1,6 +1,9 @@
 cmake_minimum_required(VERSION 3.1.2)
 project(cmake_wrapper)
 
+include(${PROJECT_BINARY_DIR}/conanbuildinfo.cmake)
+conan_basic_setup(NO_OUTPUT_DIRS)
+
 # Hack to insure that conan's copy of these are used, rather than CMake's
 # If this isn't here, find_package(X11) will pull in CMake's copy
 find_package(Freetype QUIET)
