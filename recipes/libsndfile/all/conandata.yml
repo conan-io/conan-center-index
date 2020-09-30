@@ -1,0 +1,4 @@
+sources:
+  "1.0.29":
+    url: "https://github.com/erikd/libsndfile/archive/v1.0.29.tar.gz"
+    sha256: "c5541ccfa672b3f461ac21a38cdd37b1fe061cc62a422800b9d53649dee549ee"
