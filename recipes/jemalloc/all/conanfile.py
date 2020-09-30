@@ -52,6 +52,10 @@ class JemallocConan(ConanFile):
             del self.options.fPIC
 
     def configure(self):
+        if self.settings.compiler.get_safe("libcxx") == "libc++" and \
+                self.settings.compiler == "clang" and \
+                tools.Version(self.settings.compiler.version) < "10":
+            raise ConanInvalidConfiguration("old libc++ versions are missing a mutex implementation")
         if self.settings.compiler == "Visual Studio" and self.settings.compiler.version != "15":
             # https://github.com/jemalloc/jemalloc/issues/1703
             raise ConanInvalidConfiguration("Only Visual Studio 15 2017 is supported.  Please fix this if other versions are supported")
