@@ -44,7 +44,7 @@ class CMakeConan(ConanFile):
             "gcc": "5",
             "clang": "3.3",
             "apple-clang": "9",
-            "Visual Studio": "15",
+            "Visual Studio": "14",
         }
 
         compiler = str(self.settings.compiler)
