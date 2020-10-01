@@ -105,6 +105,9 @@ class OpenCVConan(ConanFile):
             tools.replace_in_file(os.path.join(self._source_subfolder, "data", "CMakeLists.txt"),
                                   "share/OpenCV/%s" % cascade, "res/%s" % cascade)
 
+        tools.replace_in_file(os.path.join(self._source_subfolder, "CMakeLists.txt"), "staticlib", "lib")
+        tools.replace_in_file(os.path.join(self._source_subfolder, "CMakeLists.txt"), "ANDROID OR NOT UNIX", "FALSE")
+
     def _configure_cmake(self):
         if self._cmake:
             return self._cmake
@@ -156,6 +159,14 @@ class OpenCVConan(ConanFile):
         cmake.install()
         tools.rmdir(os.path.join(self.package_folder, "share"))
         tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
+        if self.settings.os == "Windows":
+            if not self.options.shared:
+                tools.rename(os.path.join(self.package_folder, "staticlib"),
+                             os.path.join(self.package_folder, "lib"))
+            cmake_pattern = os.path.join(self.package_folder, "**", "*.cmake")
+            cmake_files = glob.glob(cmake_pattern, recursive=True)
+            for next_file in cmake_files:
+                os.remove(next_file)
 
     def package_info(self):
         version = self.version.split(".")[:-1]  # last version number is not used
