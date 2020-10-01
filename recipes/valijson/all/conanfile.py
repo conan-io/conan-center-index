@@ -37,4 +37,3 @@ class ValijsonConan(ConanFile):
 
         self.cpp_info.components["libvalijson"].names["cmake_find_package"] = "valijson"
         self.cpp_info.components["libvalijson"].names["cmake_find_package_multi"] = "valijson"
-        self.cpp_info.components["libvalijson"].libs = ["valijson"]
