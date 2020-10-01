@@ -1,4 +1,5 @@
 from conans import ConanFile, CMake, tools
+import shutil
 import os
 
 
@@ -161,12 +162,9 @@ class OpenCVConan(ConanFile):
         tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
         if self.settings.os == "Windows":
             if not self.options.shared:
-                tools.rename(os.path.join(self.package_folder, "staticlib"),
-                             os.path.join(self.package_folder, "lib"))
-            cmake_pattern = os.path.join(self.package_folder, "**", "*.cmake")
-            cmake_files = glob.glob(cmake_pattern, recursive=True)
-            for next_file in cmake_files:
-                os.remove(next_file)
+                shutil.move(os.path.join(self.package_folder, "staticlib"),
+                            os.path.join(self.package_folder, "lib"))
+            tools.remove_files_by_mask(self.package_folder, "*.cmake")
 
     def package_info(self):
         version = self.version.split(".")[:-1]  # last version number is not used
