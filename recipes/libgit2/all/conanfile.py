@@ -142,6 +142,9 @@ class LibGit2Conan(ConanFile):
         tools.replace_in_file(os.path.join(self._source_subfolder, "src", "CMakeLists.txt"),
                               "AND HTTP_PARSER_VERSION_MAJOR EQUAL 2",
                               "")
+        tools.replace_in_file(os.path.join(self._source_subfolder, "src", "CMakeLists.txt"),
+                              "HTTP_PARSER_",
+                              "http_parser_")
         tools.save("FindOpenSSL.cmake",
                    "set(OPENSSL_FOUND ${OpenSSL_FOUND})\n"
                    "set(OPENSSL_INCLUDE_DIR ${OpenSSL_INCLUDE_DIRS})\n"
