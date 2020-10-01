@@ -13,10 +13,8 @@ class Embree(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     topics = ("conan", "embree", "raytracing", "rendering")
     description = "Intel's collection of high-performance ray tracing kernels."
-    generators = "cmake", "cmake_find_package"
+    generators = "cmake"
     homepage = "https://embree.github.io/"
-    _source_folder = "source_subfolder"
-    _build_folder = "build_subfolder"
     exports_sources = "CMakeLists.txt"
     settings = "os", "compiler", "build_type", "arch"
 
@@ -52,6 +50,14 @@ class Embree(ConanFile):
         "ignore_invalid_rays": False,
     }
     _cmake = None
+    
+    @property
+    def _source_subfolder(self):
+        return "source_subfolder"
+
+    @property
+    def _build_subfolder(self):
+        return "build_subfolder"
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -78,7 +84,7 @@ class Embree(ConanFile):
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
         target_name = "{0}-{1}".format("embree", self.version)
-        os.rename(target_name, self._source_folder)
+        os.rename(target_name, self._source_subfolder)
 
     def _configure_cmake(self):
         if self._cmake:
@@ -103,18 +109,18 @@ class Embree(ConanFile):
         self._cmake.definitions["EMBREE_ISPC_SUPPORT"] = False
         self._cmake.definitions["EMBREE_TASKING_SYSTEM"] = "INTERNAL"
 
-        self._cmake.configure(build_folder=self._build_folder)
+        self._cmake.configure(build_folder=self._build_subfolder)
         return self._cmake
 
     def build(self):
-        os.remove(os.path.join(self._source_folder, "common", "cmake", "FindTBB.cmake"))
+        os.remove(os.path.join(self._source_subfolder, "common", "cmake", "FindTBB.cmake"))
         cmake = self._configure_cmake()
         cmake.build()
 
     def package(self):
         cmake = self._configure_cmake()
         cmake.install()
-        self.copy("LICENSE.txt", src=self._source_folder, dst="licenses")
+        self.copy("LICENSE.txt", src=self._source_subfolder, dst="licenses")
         tools.rmdir(os.path.join(self.package_folder, "share"))
         tools.rmdir(os.path.join(self.package_folder, 'lib', 'cmake'))
         for command_file in glob.glob(os.path.join(self.package_folder, "*.command")):
