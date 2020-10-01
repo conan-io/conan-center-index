@@ -62,9 +62,6 @@ class Embree(ConanFile):
             del self.options.fPIC
     
     def configure(self):
-        if self.settings.compiler == "apple-clang" and self.settings.compiler.version == "9.1":
-            self.options.shared = True
-
         version = tools.Version(self.settings.compiler.version)
         if self.settings.compiler == "clang" and version < "4":
             raise ConanInvalidConfiguration("Clang < 4 is not supported")
