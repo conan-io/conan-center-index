@@ -54,7 +54,7 @@ class OpenCVConan(ConanFile):
         if self.options.with_png:
             self.requires("libpng/1.6.37")
         if self.options.with_jasper:
-            self.requires("jasper/2.0.16")
+            self.requires("jasper/2.0.19")
         if self.options.with_openexr:
             self.requires("openexr/2.5.2")
         if self.options.with_tiff:
