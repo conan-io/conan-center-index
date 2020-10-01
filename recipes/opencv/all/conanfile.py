@@ -97,6 +97,9 @@ class OpenCVConan(ConanFile):
             for lib in ["Half", "Iex", "Imath", "IlmImf", "IlmThread"]:
                 tools.replace_in_file(find_openexr, "NAMES %s" % lib, "NAMES %s" % openexr_library_names(lib))
 
+            tools.replace_in_file(os.path.join(self._source_subfolder, "CMakeLists.txt"),
+                                "project(OpenCV CXX C)", "project(OpenCV CXX C)\nset(CMAKE_CXX_STANDARD 11)")
+
         for cascade in ["lbpcascades", "haarcascades"]:
             tools.replace_in_file(os.path.join(self._source_subfolder, "data", "CMakeLists.txt"),
                                   "share/OpenCV/%s" % cascade, "res/%s" % cascade)
@@ -151,6 +154,7 @@ class OpenCVConan(ConanFile):
         cmake = self._configure_cmake()
         cmake.install()
         tools.rmdir(os.path.join(self.package_folder, "share"))
+        tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
 
     def package_info(self):
         version = self.version.split(".")[:-1]  # last version number is not used
