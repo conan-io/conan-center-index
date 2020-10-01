@@ -45,7 +45,8 @@ class OpenCVConan(ConanFile):
             del self.options.fPIC
 
     def build_requirements(self):
-        self.build_requires("gtk/system")
+        if self.settings.os == "Linux":
+            self.build_requires("gtk/system")
 
     def requirements(self):
         self.requires("zlib/1.2.11")
