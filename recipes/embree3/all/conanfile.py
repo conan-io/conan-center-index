@@ -1,10 +1,8 @@
 
-import os
-from conans import CMake, tools
-from conans.tools import Version
-from conans.model.conan_file import ConanFile
-from conans.errors import ConanInvalidConfiguration
 import glob
+import os
+from conans import ConanFile, CMake, tools
+from conans.errors import ConanInvalidConfiguration
 
 
 class Embree(ConanFile):
