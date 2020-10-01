@@ -67,7 +67,14 @@ class CMakeConan(ConanFile):
                                   "list(APPEND CURL_LIBS ${OPENSSL_LIBRARIES})",
                                   "list(APPEND CURL_LIBS ${OPENSSL_LIBRARIES} -ldl -lpthread)")
         cmake = self._configure_cmake()
-        cmake.build()
+        try:
+            cmake.build()
+        except:
+            self.output.info("CMakeOutput.log")
+            print(tools.load("CMakeFiles/CMakeOutput.log"))
+            self.output.info("CMakeError.log")
+            print(tools.load("CMakeFiles/CMakeError.log"))
+            raise
 
     def package(self):
         self.copy("Copyright.txt", dst="licenses", src=self._source_subfolder)
