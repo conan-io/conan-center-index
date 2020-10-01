@@ -62,7 +62,7 @@ class FreetypeConan(ConanFile):
         if self.options.with_bzip2:
             self.requires("bzip2/1.0.8")
         if self.options.get_safe("with_brotli"):
-            self.requires("brotli/1.0.7")
+            self.requires("brotli/1.0.9")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
