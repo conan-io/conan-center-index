@@ -139,6 +139,10 @@ class LibGit2Conan(ConanFile):
                               "\tSET(LIBSSH2_INCLUDE_DIRS ${Libssh2_INCLUDE_DIRS})\n"
                               "\tSET(LIBSSH2_LIBRARIES ${Libssh2_LIBRARIES})\n"
                               "\tSET(LIBSSH2_LIBRARY_DIRS ${Libssh2_LIB_DIRS})")
+
+        tools.replace_in_file(os.path.join(self._source_subfolder, "src", "CMakeLists.txt"),
+                              "FIND_PACKAGE(HTTP_Parser)",
+                              "FIND_PACKAGE(http_parser)")
         tools.replace_in_file(os.path.join(self._source_subfolder, "src", "CMakeLists.txt"),
                               "AND HTTP_PARSER_VERSION_MAJOR EQUAL 2",
                               "")
