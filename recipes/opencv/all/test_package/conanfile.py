@@ -11,11 +11,9 @@ class OpenCVTestConan(ConanFile):
         cmake.configure()
         cmake.build()
 
-    def imports(self):
-        self.copy("*.xml", src="res")
-
     def test(self):
         if not tools.cross_building(self.settings):
             bin_path = os.path.join("bin", "test_package")
             lena = os.path.join(self.source_folder, "lena.jpg")
-            self.run("%s %s" % (bin_path, lena), run_environment=True)
+            res_path = self.deps_cpp_info["opencv"].res_paths[0]
+            self.run("%s %s %s" % (bin_path, res_path,lena), run_environment=True)

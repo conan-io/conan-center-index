@@ -45,6 +45,10 @@ void faceDetection( Mat frame ) {
 int main( int argc, const char** argv ) {
     CvCapture* capture;
 
+    const String res_folder = String(argv[1]) + "/";
+    face_cascade_name.insert(0, res_folder);
+    eyes_cascade_name.insert(0, res_folder);
+
     if (!face_cascade.load(face_cascade_name)) {
         std::cerr << "--(!)Error loading" << std::endl;
         return EXIT_FAILURE;
@@ -54,7 +58,7 @@ int main( int argc, const char** argv ) {
         return EXIT_FAILURE;
     }
 
-    Mat frame = imread(argv[1]);
+    Mat frame = imread(argv[2]);
     if (!frame.empty()) {
         faceDetection(frame);
     }
