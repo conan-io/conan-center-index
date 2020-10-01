@@ -6,7 +6,7 @@ from conans import ConanFile, CMake, tools
 class JasperConan(ConanFile):
     name = "jasper"
     license = "JasPer License Version 2.0"
-    homepage = "https://github.com/mdadams/jasper"
+    homepage = "https://jasper-software.github.io/jasper"
     url = "https://github.com/conan-io/conan-center-index"
     topics = ("conan", "jasper", "tool-kit", "coding")
     description = "JasPer Image Processing/Coding Tool Kit"
