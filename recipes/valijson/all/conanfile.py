@@ -30,5 +30,12 @@ class ValijsonConan(ConanFile):
         self.info.header_only()
 
     def package_info(self):
-        self.cpp_info.names["cmake_find_package"] = "valijson"
-        self.cpp_info.names["cmake_find_package_multi"] = "valijson"
+        
+        # self.cpp_info.filenames["cmake_find_package"] = "valijson" # TBA: There's no installed config file
+        # self.cpp_info.filenames["cmake_find_package_multi"] = "valijson" # TBA: There's no installed config file
+        self.cpp_info.names["cmake_find_package"] = "ValiJSON"
+        self.cpp_info.names["cmake_find_package_multi"] = "ValiJSON"
+
+        self.cpp_info.components["libvalijson"].names["cmake_find_package"] = "valijson"
+        self.cpp_info.components["libvalijson"].names["cmake_find_package_multi"] = "valijson"
+        self.cpp_info.components["libvalijson"].libs = [self._lib_name("valijson")]
