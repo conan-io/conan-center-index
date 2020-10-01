@@ -22,7 +22,7 @@ jobs:
   nasm:
     strategy:
       matrix:
-        build: ['linux-gcc8', 'macos']
+        build: ['linux-gcc8', 'macos', 'windows']
         nasm_versions: ['2.14']
         include:
           - build: 'linux-gcc8'
@@ -40,6 +40,13 @@ jobs:
             compiler: 'apple_clang'
             compiler_version: '11.0'
             xcode_version: '11.4'
+          - build: 'windows'
+            os: 'windows-2019'
+            build_types: 'Release'
+            compiler: 'vs'
+            compiler_version: '16'
+            vs_runtimes: 'MT'
+            archs: 'x86_64'
     runs-on: ${{ matrix.os }}
     steps:
       - name: Configure git
