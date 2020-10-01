@@ -66,7 +66,15 @@ class CMakeConan(ConanFile):
             tools.replace_in_file(os.path.join(self._source_subfolder, "Utilities", "cmcurl", "CMakeLists.txt"),
                                   "list(APPEND CURL_LIBS ${OPENSSL_LIBRARIES})",
                                   "list(APPEND CURL_LIBS ${OPENSSL_LIBRARIES} -ldl -lpthread)")
-        cmake = self._configure_cmake()
+        
+        try:
+            cmake = self._configure_cmake()
+        except:
+            self.output.info("CMakeOutput.log")
+            print(tools.load("CMakeFiles/CMakeOutput.log"))
+            self.output.info("CMakeError.log")
+            print(tools.load("CMakeFiles/CMakeError.log"))
+            raise
         try:
             cmake.build()
         except:
