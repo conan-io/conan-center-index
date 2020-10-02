@@ -131,13 +131,14 @@ class ProtobufConan(ConanFile):
         if self.options.with_zlib:
             self.cpp_info.components["protoc"].requires.append("zlib::zlib")
 
+        lib_suffix = "d" if self.settings.build_type == "Debug" else ""
         self.cpp_info.components["libprotoc"].name = "libprotoc"
-        self.cpp_info.components["libprotoc"].libs = ["protoc"]
+        self.cpp_info.components["libprotoc"].libs = ["libprotoc" + lib_suffix]
         self.cpp_info.components["libprotoc"].requires = ["libprotobuf"]
 
         if not self.options.lite:
             self.cpp_info.components["libprotobuf"].name = "libprotobuf"
-            self.cpp_info.components["libprotobuf"].libs = ["protobuf"]
+            self.cpp_info.components["libprotobuf"].libs = ["libprotobuf" + lib_suffix]
             if self.settings.os == "Linux":
                 self.cpp_info.components["libprotobuf"].system_libs.append("pthread")
                 if self._is_clang_x86 or "arm" in str(self.settings.arch):
@@ -158,7 +159,7 @@ class ProtobufConan(ConanFile):
 
         else:
             self.cpp_info.components["libprotobuf-lite"].name = "libprotobuf-lite"
-            self.cpp_info.components["libprotobuf-lite"].libs = ["protobuf-lite"]
+            self.cpp_info.components["libprotobuf-lite"].libs = ["libprotobuf-lite" + lib_suffix]
             if self.settings.os == "Linux":
                 self.cpp_info.components["libprotobuf-lite"].system_libs.append("pthread")
                 if self._is_clang_x86 or "arm" in str(self.settings.arch):
