@@ -1,4 +1,7 @@
 sources:
   "1.0.4":
-    url: "https://github.com/apolukhin/magic_get/archive/1.0.4.tar.gz"
-    sha256: "58fabdb95f8e8b9cc48a50569ff85a30227a8641c21b9a9fcf5cb0a36c1dd791"
+    - url: "https://github.com/apolukhin/magic_get/archive/1.0.4.tar.gz"
+      sha256: "58fabdb95f8e8b9cc48a50569ff85a30227a8641c21b9a9fcf5cb0a36c1dd791"
+    - url: "https://www.boost.org/LICENSE_1_0.txt"
+      filename: "LICENSE_1_0.txt"
+      sha256: "c9bff75738922193e67fa726fa225535870d2aa1059f91452c411736284ad566"
