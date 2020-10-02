@@ -160,11 +160,8 @@ class OpenCVConan(ConanFile):
         cmake.install()
         tools.rmdir(os.path.join(self.package_folder, "share"))
         tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
-        if self.settings.os == "Windows":
-            if not self.options.shared:
-                shutil.move(os.path.join(self.package_folder, "staticlib"),
-                            os.path.join(self.package_folder, "lib"))
-            tools.remove_files_by_mask(self.package_folder, "*.cmake")
+        tools.rmdir(os.path.join(self.package_folder, "staticlib"))
+        tools.remove_files_by_mask(self.package_folder, "*.cmake")
 
     def package_info(self):
         version = self.version.split(".")[:-1]  # last version number is not used
@@ -183,22 +180,6 @@ class OpenCVConan(ConanFile):
                 self.cpp_info.components[component].requires = requires
                 if self.settings.os == "Linux":
                     self.cpp_info.components[component].system_libs = ["dl", "m", "pthread", "rt"]
-
-        if self.settings.compiler == "Visual Studio":
-            libdir = "lib" if self.options.shared else "staticlib"
-            arch = {"x86": "x86",
-                    "x86_64": "x64"}.get(str(self.settings.arch))
-            if self.settings.compiler.version == "12":
-                libdir = os.path.join(self.package_folder, arch, "vc12", libdir)
-                bindir = os.path.join(self.package_folder, arch, "vc12", "bin")
-            elif self.settings.compiler.version == "14":
-                libdir = os.path.join(self.package_folder, arch, "vc14", libdir)
-                bindir = os.path.join(self.package_folder, arch, "vc14", "bin")
-            else:
-                libdir = os.path.join(self.package_folder, libdir)
-                bindir = os.path.join(self.package_folder, "bin")
-            self.cpp_info.bindirs.append(bindir)
-            self.cpp_info.libdirs.append(libdir)
 
         self.cpp_info.filenames["cmake_find_package"] = "OpenCV"
         self.cpp_info.filenames["cmake_find_package_multi"] = "OpenCV"
