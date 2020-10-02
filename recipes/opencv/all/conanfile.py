@@ -26,7 +26,7 @@ class OpenCVConan(ConanFile):
                        "with_jasper": True,
                        "with_openexr": True}
     exports_sources = "CMakeLists.txt"
-    generators = "cmake"
+    generators = "cmake", "cmake_find_package"
     _cmake = None
 
     @property
@@ -109,6 +109,7 @@ class OpenCVConan(ConanFile):
         tools.replace_in_file(os.path.join(self._source_subfolder, "CMakeLists.txt"), "staticlib", "lib")
         tools.replace_in_file(os.path.join(self._source_subfolder, "CMakeLists.txt"), "ANDROID OR NOT UNIX", "FALSE")
         tools.replace_in_file(os.path.join(self._source_subfolder, "CMakeLists.txt"), "${OpenCV_ARCH}/${OpenCV_RUNTIME}/", "")
+        tools.replace_in_file(os.path.join(self._source_subfolder, "modules", "highgui", "CMakeLists.txt"), "JASPER_", "Jasper_")
 
     def _configure_cmake(self):
         if self._cmake:
