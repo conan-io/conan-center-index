@@ -12,6 +12,7 @@ class LibnameConan(ConanFile):
     license = "BSL-1.0"
     no_copy_source = True
     settings = "os", "compiler", "build_type", "arch"
+    exports_sources = "patches/**"
 
     @property
     def _source_subfolder(self):
@@ -52,11 +53,12 @@ class LibnameConan(ConanFile):
         tools.get(**self.conan_data["sources"][self.version][0])
         extracted_dir = "magic_get-" + self.version
         os.rename(extracted_dir, self._source_subfolder)
-        tools.download(**self.conan_data["sources"][self.version][1])
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            tools.patch(**patch)
 
     def package(self):
         include_folder = os.path.join(self._source_subfolder, "include")
-        self.copy(pattern="BSL-1.0.txt", dst="licenses", src=self.source_folder)
+        self.copy(pattern=os.path.join(self._source_subfolder, "LICENSE_1_0.txt"), dst="licenses", src=self.source_folder)
         self.copy(pattern="*", dst="include", src=include_folder)
 
     def package_id(self):
