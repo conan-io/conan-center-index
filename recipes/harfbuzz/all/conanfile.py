@@ -14,6 +14,7 @@ class HarfbuzzConan(ConanFile):
     short_paths = True
 
     settings = "os", "arch", "compiler", "build_type"
+    
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
@@ -28,7 +29,7 @@ class HarfbuzzConan(ConanFile):
         "fPIC": True,
         "with_freetype": True,
         "with_icu": False,
-        "with_glib": False,
+        "with_glib": True,
         "with_gdi": True,
         "with_uniscribe": True
     }
@@ -40,11 +41,11 @@ class HarfbuzzConan(ConanFile):
 
     def requirements(self):
         if self.options.with_freetype:
-            self.requires("freetype/2.10.1")
+            self.requires("freetype/2.10.2")
         if self.options.with_icu:
-            self.requires("icu/64.2")
+            self.requires("icu/67.1")
         if self.options.with_glib:
-            self.requires("glib/2.65.0")
+            self.requires("glib/2.66.0")
 
     def configure(self):
         if self.options.shared:

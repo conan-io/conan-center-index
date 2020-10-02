@@ -41,3 +41,9 @@ versions:
     folder: all
   10.1.2:
     folder: all
+  10.2.0:
+    folder: all
+  10.2.1:
+    folder: all
+  10.3.0:
+    folder: all

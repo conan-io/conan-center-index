@@ -43,7 +43,7 @@ class ZeroMQConan(ConanFile):
 
     def requirements(self):
         if self.options.encryption == "libsodium":
-            self.requires.add("libsodium/1.0.18")
+            self.requires("libsodium/1.0.18")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
@@ -67,7 +67,7 @@ class ZeroMQConan(ConanFile):
         return self._cmake
 
     def _patch_sources(self):
-        for patch in self.conan_data["patches"][self.version]:
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
             tools.patch(**patch)
         os.unlink(os.path.join(self._source_subfolder, "builds", "cmake", "Modules", "FindSodium.cmake"))
 
@@ -96,30 +96,22 @@ class ZeroMQConan(ConanFile):
         tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
         tools.rmdir(os.path.join(self.package_folder, "share"))
         tools.rmdir(os.path.join(self.package_folder, "CMake"))
+        tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
 
     def package_info(self):
+        # TODO: CMake imported target shouldn't be namespaced
         self.cpp_info.names["cmake_find_package"] = "ZeroMQ"
         self.cpp_info.names["cmake_find_package_multi"] = "ZeroMQ"
-        if self.settings.compiler == "Visual Studio":
-            version = "_".join(self.version.split("."))
-            if self.settings.build_type == "Debug":
-                runtime = "-gd" if self.options.shared else "-sgd"
-            else:
-                runtime = "" if self.options.shared else "-s"
-            library_name = "libzmq-mt%s-%s" % (runtime, version)
-            if not os.path.isfile(os.path.join(self.package_folder, "lib", library_name)):
-                # unfortunately Visual Studio and Ninja generators produce different file names
-                toolset = {"12": "v120",
-                           "14": "v140",
-                           "15": "v141",
-                           "16": "v142"}.get(str(self.settings.compiler.version))
-                library_name = "libzmq-%s-mt%s-%s" % (toolset, runtime, version)
-            self.cpp_info.libs = [library_name]
-        else:
-            self.cpp_info.libs = ["zmq"]
+        self.cpp_info.names["pkg_config"] = "libzmq"
+        libzmq_target = "libzmq" if self.options.shared else "libzmq-static"
+        self.cpp_info.components["libzmq"].names["cmake_find_package"] = libzmq_target
+        self.cpp_info.components["libzmq"].names["cmake_find_package_multi"] = libzmq_target
+        self.cpp_info.components["libzmq"].libs = tools.collect_libs(self)
         if self.settings.os == "Windows":
-            self.cpp_info.system_libs = ["iphlpapi", "ws2_32"]
+            self.cpp_info.components["libzmq"].system_libs = ["iphlpapi", "ws2_32"]
         elif self.settings.os == "Linux":
-            self.cpp_info.system_libs = ["pthread", "rt", "m"]
+            self.cpp_info.components["libzmq"].system_libs = ["pthread", "rt", "m"]
         if not self.options.shared:
-            self.cpp_info.defines.append("ZMQ_STATIC")
+            self.cpp_info.components["libzmq"].defines.append("ZMQ_STATIC")
+        if self.options.encryption == "libsodium":
+            self.cpp_info.components["libzmq"].requires = ["libsodium::libsodium"]

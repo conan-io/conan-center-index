@@ -31,7 +31,6 @@ class CppRestSDKConan(ConanFile):
         "http_client_impl": "winhttp",
         "http_listener_impl": "httpsys"
     }
-    short_paths = True
 
     _cmake = None
 
@@ -56,12 +55,12 @@ class CppRestSDKConan(ConanFile):
             del self.options.fPIC
 
     def requirements(self):
+        self.requires("boost/1.73.0")
         self.requires("openssl/1.1.1g")
         if self.options.with_compression:
             self.requires("zlib/1.2.11")
         if self.options.with_websockets:
             self.requires("websocketpp/0.8.2")
-        self.requires("boost/1.72.0")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
@@ -94,9 +93,8 @@ class CppRestSDKConan(ConanFile):
                                   'libc++', 'libstdc++')
 
     def build(self):
-        if "patches" in self.conan_data and self.version in self.conan_data["patches"]:
-            for patch in self.conan_data["patches"][self.version]:
-                tools.patch(**patch)
+        for patch in self.conan_data.get("patches", {}).get(self.version, {}):
+            tools.patch(**patch)
         self._patch_clang_libcxx()
         cmake = self._configure_cmake()
         cmake.build()
@@ -109,37 +107,40 @@ class CppRestSDKConan(ConanFile):
         tools.rmdir(os.path.join(self.package_folder, "lib", "cpprestsdk"))
 
     def package_info(self):
-        if self.settings.compiler == "Visual Studio":
-            debug_suffix = 'd' if self.settings.build_type == 'Debug' else ''
-            toolset = {'12': '120',
-                       '14': '140',
-                       '15': '141',
-                       '16': '142'}.get(str(self.settings.compiler.version))
-            version_tokens = self.version.split(".")
-            versioned_name = "cpprest%s_%s_%s%s" % (toolset, version_tokens[0], version_tokens[1], debug_suffix)
-            # CppRestSDK uses different library name depends on CMAKE_VS_PLATFORM_TOOLSET
-            if not os.path.isfile(os.path.join(self.package_folder, 'lib', '%s.lib' % versioned_name)):
-                versioned_name = "cpprest_%s_%s%s" % (version_tokens[0], version_tokens[1], debug_suffix)
-            lib_name = versioned_name
-        else:
-            lib_name = 'cpprest'
-
-        self.cpp_info.libs.append(lib_name)
+        # cpprestsdk_boost_internal
+        self.cpp_info.components["cpprestsdk_boost_internal"].includedirs = []
+        self.cpp_info.components["cpprestsdk_boost_internal"].requires = ["boost::boost"]
+        # cpprestsdk_openssl_internal
+        self.cpp_info.components["cpprestsdk_openssl_internal"].includedirs = []
+        self.cpp_info.components["cpprestsdk_openssl_internal"].requires = ["openssl::openssl"]
+        # cpprest
+        self.cpp_info.components["cpprest"].libs = tools.collect_libs(self)
+        self.cpp_info.components["cpprest"].requires = ["cpprestsdk_boost_internal", "cpprestsdk_openssl_internal"]
         if self.settings.os == "Linux":
-            self.cpp_info.system_libs.append("pthread")
+            self.cpp_info.components["cpprest"].system_libs.append("pthread")
         elif self.settings.os == "Windows":
             if self.options.get_safe("http_client_impl") == "winhttp":
-                self.cpp_info.system_libs.append("winhttp")
+                self.cpp_info.components["cpprest"].system_libs.append("winhttp")
             if self.options.get_safe("http_listener_impl") == "httpsys":
-                self.cpp_info.system_libs.append("httpapi")
-            self.cpp_info.system_libs.append("bcrypt")
+                self.cpp_info.components["cpprest"].system_libs.append("httpapi")
+            self.cpp_info.components["cpprest"].system_libs.append("bcrypt")
             if self.options.get_safe("pplx_impl") == "winpplx":
-                self.cpp_info.defines.append("CPPREST_FORCE_PPLX=1")
+                self.cpp_info.components["cpprest"].defines.append("CPPREST_FORCE_PPLX=1")
             if self.options.get_safe("http_client_impl") == "asio":
-                self.cpp_info.defines.append("CPPREST_FORCE_HTTP_CLIENT_ASIO")
+                self.cpp_info.components["cpprest"].defines.append("CPPREST_FORCE_HTTP_CLIENT_ASIO")
             if self.options.get_safe("http_listener_impl") == "asio":
-                self.cpp_info.defines.append("CPPREST_FORCE_HTTP_LISTENER_ASIO")
+                self.cpp_info.components["cpprest"].defines.append("CPPREST_FORCE_HTTP_LISTENER_ASIO")
         elif self.settings.os == "Macos":
-            self.cpp_info.frameworks.extend(["CoreFoundation", "Security"])
+            self.cpp_info.components["cpprest"].frameworks.extend(["CoreFoundation", "Security"])
         if not self.options.shared:
-            self.cpp_info.defines.append("_NO_ASYNCRTIMP")
+            self.cpp_info.components["cpprest"].defines.append("_NO_ASYNCRTIMP")
+        # cpprestsdk_zlib_internal
+        if self.options.with_compression:
+            self.cpp_info.components["cpprestsdk_zlib_internal"].includedirs = []
+            self.cpp_info.components["cpprestsdk_zlib_internal"].requires = ["zlib::zlib"]
+            self.cpp_info.components["cpprest"].requires.append("cpprestsdk_zlib_internal")
+        # cpprestsdk_websocketpp_internal
+        if self.options.with_websockets:
+            self.cpp_info.components["cpprestsdk_websocketpp_internal"].includedirs = []
+            self.cpp_info.components["cpprestsdk_websocketpp_internal"].requires = ["websocketpp::websocketpp"]
+            self.cpp_info.components["cpprest"].requires.append("cpprestsdk_websocketpp_internal")

@@ -1,0 +1,8 @@
+sources:
+  "cci.20170424":
+    url: "https://github.com/google/etc2comp/archive/9cd0f9cae0f32338943699bb418107db61bb66f2.tar.gz"
+    sha256: "719f88aab5dc30c9e4a53c4a5925e22149d0371a16fbe45a1c3a79525a975266"
+patches:
+  "cci.20170424":
+    - patch_file: "patches/fix-cmake.patch"
+      base_path: "source_subfolder"

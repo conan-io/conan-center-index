@@ -26,7 +26,7 @@ if(WIN32)
     endif()
 endif()
 
-add_definitions(-DUSE_JPEG -DUSE_JPEG8)
+add_definitions(-DUSE_JPEG -DUSE_JPEG8 -DUSE_JASPER)
 
 add_library(raw ${headers} ${sources})
 set_property(TARGET raw PROPERTY CXX_STANDARD 11)

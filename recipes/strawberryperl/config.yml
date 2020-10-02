@@ -1,5 +1,5 @@
 versions:
-    5.28.1.1:
-      folder: ALL
-    5.30.0.1:
-      folder: ALL
+  "5.30.0.1":
+    folder: all
+  "5.28.1.1":
+    folder: all
