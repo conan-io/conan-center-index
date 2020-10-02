@@ -137,12 +137,15 @@ class LibiconvConan(ConanFile):
         os.unlink(os.path.join(self.package_folder, "lib", "libiconv.la"))
         tools.rmdir(os.path.join(self.package_folder, "share"))
 
+        if self._is_msvc and self.options.shared:
+            for import_lib in ["iconv", "charset"]:
+                os.rename(os.path.join(self.package_folder, "lib", "{}.dll.lib".format(import_lib)),
+                          os.path.join(self.package_folder, "lib", "{}.lib".format(import_lib)))
+
     def package_info(self):
         self.cpp_info.names["cmake_find_package"] = "Iconv"
         self.cpp_info.names["cmake_find_package_multi"] = "Iconv"
         self.cpp_info.libs = ["iconv", "charset"]
-        if self._is_msvc and self.options.shared:
-            self.cpp_info.libs = [lib + ".dll.lib" for lib in self.cpp_info.libs]
 
         binpath = os.path.join(self.package_folder, "bin")
         self.output.info("Appending PATH environment var: {}".format(binpath))
