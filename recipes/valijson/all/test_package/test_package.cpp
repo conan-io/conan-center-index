@@ -46,7 +46,7 @@ int main(int argc, const char* argv[]) {
     check_document(mySchema, argv[2], true);
     check_document(mySchema, argv[3], false);
 
-    std::cout << "valijson successful run";
+    std::cout << "valijson successful run\n";
 
     return 0;
 }
