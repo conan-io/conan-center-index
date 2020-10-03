@@ -160,6 +160,7 @@ class Libxml2Conan(ConanFile):
         if self._autotools:
             return self._autotools
         self._autotools = AutoToolsBuildEnvironment(self, win_bash=tools.os_info.is_windows)
+        self._autotools.libs = []
         if not tools.os_info.is_windows:
             self._autotools.fpic = self.options.fPIC
         full_install_subfolder = tools.unix_path(self.package_folder) if tools.os_info.is_windows else self.package_folder
