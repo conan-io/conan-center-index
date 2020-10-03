@@ -21,7 +21,7 @@ class NCursesConan(ConanFile):
         "with_extended_colors": [True, False],
         "with_cxx": [True, False],
         "with_progs": [True, False],
-        "with_ticlib": [True, False],
+        "with_ticlib": ["auto", True, False],
         "with_reentrant": [True, False],
         "with_tinfo": ["auto", True, False],
         "with_pcre2": [True, False],
@@ -33,7 +33,7 @@ class NCursesConan(ConanFile):
         "with_extended_colors": True,
         "with_cxx": True,
         "with_progs": True,
-        "with_ticlib": True,
+        "with_ticlib": "auto",
         "with_reentrant": False,
         "with_tinfo": "auto",
         "with_pcre2": False,
@@ -44,6 +44,13 @@ class NCursesConan(ConanFile):
     @property
     def _source_subfolder(self):
         return "source_subfolder"
+
+    @property
+    def _with_ticlib(self):
+        if self.options.with_ticlib == "auto":
+            return self.settings.os != "Windows"
+        else:
+            return self.options.with_ticlib
 
     @property
     def _with_tinfo(self):
@@ -64,8 +71,11 @@ class NCursesConan(ConanFile):
             del self.settings.compiler.cppstd
         if not self.options.with_widec:
             del self.options.with_extended_colors
-        if self._with_tinfo:
-            raise ConanInvalidConfiguration("terminfo cannot be built on Windows because it requires a term driver")
+        if self.settings.os == "Windows":
+            if self._with_tinfo:
+                raise ConanInvalidConfiguration("terminfo cannot be built on Windows because it requires a term driver")
+            if self.options.shared and self._with_ticlib:
+                raise ConanInvalidConfiguration("ticlib cannot be built separately as a shared library on Windows")
 
     def requirements(self):
         if self.options.with_pcre2:
@@ -99,7 +109,7 @@ class NCursesConan(ConanFile):
             "--with-cxx-binding" if self.options.with_cxx else "--without-cxx-binding",
             "--with-progs" if self.options.with_progs else "--without-progs",
             "--with-termlib" if self._with_tinfo else "--without-termlib",
-            "--with-ticlib" if self.options.with_ticlib else "--without-ticlib",
+            "--with-ticlib" if self._with_ticlib else "--without-ticlib",
             "--without-libtool",
             "--without-ada",
             "--without-manpages",
@@ -128,6 +138,7 @@ class NCursesConan(ConanFile):
         if self.settings.compiler == "Visual Studio":
             conf_args.extend([
                 "ac_cv_func_getopt=yes",
+                "ac_cv_func_setvbuf_reversed=no",
             ])
             build = host = "{}-w64-mingw32-msvc7".format(self.settings.arch)
             self._autotools.flags.append("-FS")
@@ -198,6 +209,10 @@ class NCursesConan(ConanFile):
                     res += ".dll.a"
         return res
 
+    def package_id(self):
+        self.info.options.with_ticlib = self._with_ticlib
+        self.info.options.with_tinfo = self._with_tinfo
+
     def package_info(self):
         if self._with_tinfo:
             self.cpp_info.components["tinfo"].libs = ["tinfo" + self._lib_suffix]
@@ -239,7 +254,7 @@ class NCursesConan(ConanFile):
             self.cpp_info.components["curses++"].names["pkg_config"] = "ncurses++" + self._lib_suffix
             self.cpp_info.components["curses++"].requires = ["libcurses"]
 
-        if self.options.with_ticlib:
+        if self._with_ticlib:
             self.cpp_info.components["ticlib"].libs = ["tic" + self._lib_suffix]
             self.cpp_info.components["ticlib"].names["pkg_config"] = "tic" + self._lib_suffix
             self.cpp_info.components["ticlib"].requires = ["libcurses"]
