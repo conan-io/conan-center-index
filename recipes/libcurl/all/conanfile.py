@@ -162,9 +162,8 @@ class LibcurlConan(ConanFile):
         if self.options.with_brotli:
             self.requires("brotli/1.0.7")
 
-        if tools.Version(self.version) >= "7.72.0":
-            if self.options.with_zstd:
-                self.requires("zstd/1.4.5")
+        if self.options.get_safe("with_zstd"):
+            self.requires("zstd/1.4.5")
 
     def build_requirements(self):
         if self._is_mingw and tools.os_info.is_windows and not tools.get_env("CONAN_BASH_PATH") and \
@@ -577,6 +576,5 @@ class LibcurlConan(ConanFile):
         if self.options.with_brotli:
             self.cpp_info.components["curl"].requires.append("brotli::brotli")
 
-        if tools.Version(self.version) >= "7.72.0":
-            if self.options.with_zstd:
-                self.cpp_info.components["curl"].requires.append("zstd::zstd")
+        if self.options.get_safe("with_zstd"):
+            self.cpp_info.components["curl"].requires.append("zstd::zstd")
