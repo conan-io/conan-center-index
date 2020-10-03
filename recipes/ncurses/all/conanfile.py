@@ -23,7 +23,7 @@ class NCursesConan(ConanFile):
         "with_progs": [True, False],
         "with_ticlib": [True, False],
         "with_reentrant": [True, False],
-        "with_tinfo": [True, False],
+        "with_tinfo": ["auto", True, False],
         "with_pcre2": [True, False],
     }
     default_options = {
@@ -35,7 +35,7 @@ class NCursesConan(ConanFile):
         "with_progs": True,
         "with_ticlib": True,
         "with_reentrant": False,
-        "with_tinfo": True,
+        "with_tinfo": "auto",
         "with_pcre2": False,
     }
 
@@ -44,6 +44,13 @@ class NCursesConan(ConanFile):
     @property
     def _source_subfolder(self):
         return "source_subfolder"
+
+    @property
+    def _with_tinfo(self):
+        if self.options.with_tinfo == "auto":
+            return self.settings.os != "Windows"
+        else:
+            return self.options.with_tinfo
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -57,6 +64,8 @@ class NCursesConan(ConanFile):
             del self.settings.compiler.cppstd
         if not self.options.with_widec:
             del self.options.with_extended_colors
+        if self._with_tinfo:
+            raise ConanInvalidConfiguration("terminfo cannot be built on Windows because it requires a term driver")
 
     def requirements(self):
         if self.options.with_pcre2:
@@ -89,7 +98,7 @@ class NCursesConan(ConanFile):
             "--with-pcre2" if self.options.with_pcre2 else "--without-pcre2",
             "--with-cxx-binding" if self.options.with_cxx else "--without-cxx-binding",
             "--with-progs" if self.options.with_progs else "--without-progs",
-            "--with-termlib" if self.options.with_tinfo else "--without-termlib",
+            "--with-termlib" if self._with_tinfo else "--without-termlib",
             "--with-ticlib" if self.options.with_ticlib else "--without-ticlib",
             "--without-libtool",
             "--without-ada",
@@ -190,7 +199,7 @@ class NCursesConan(ConanFile):
         return res
 
     def package_info(self):
-        if self.options.with_tinfo:
+        if self._with_tinfo:
             self.cpp_info.components["tinfo"].libs = ["tinfo" + self._lib_suffix]
             self.cpp_info.components["tinfo"].names["pkg_config"] = "tinfo" + self._lib_suffix
             self.cpp_info.components["tinfo"].includedirs.append(os.path.join("include", "ncurses" + self._suffix))
@@ -202,8 +211,16 @@ class NCursesConan(ConanFile):
             self.cpp_info.components["libcurses"].defines = ["NCURSES_STATIC"]
             if self.settings.os == "Linux":
                 self.cpp_info.components["libcurses"].system_libs = ["dl", "m"]
-        if self.options.with_tinfo:
+        if self._with_tinfo:
             self.cpp_info.components["libcurses"].requires.append("tinfo")
+
+        if self.settings.compiler == "Visual Studio":
+            self.cpp_info.components["libcurses"].requires.extend([
+                "getopt-for-visual-studio::getopt-for-visual-studio",
+                "dirent::dirent",
+            ])
+            if self.options.get_safe("with_extended_colors", False):
+                self.cpp_info.components["libcurses"].requires.append("naive-tsearch::naive-tsearch")
 
         self.cpp_info.components["panel"].libs = ["panel" + self._lib_suffix]
         self.cpp_info.components["panel"].names["pkg_config"] = "panel" + self._lib_suffix
