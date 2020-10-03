@@ -291,38 +291,28 @@ class Libxml2Conan(ConanFile):
 
     def package_info(self):
         if self._is_msvc:
-            self.cpp_info.components["xml2lib"].libs = ["libxml2" if self.options.shared else "libxml2_a"]
+            self.cpp_info.libs = ["libxml2" if self.options.shared else "libxml2_a"]
         else:
-            self.cpp_info.components["xml2lib"].libs = ["xml2"]
-        self.cpp_info.components["xml2lib"].includedirs.append(os.path.join("include", "libxml2"))
+            self.cpp_info.libs = ["xml2"]
+        self.cpp_info.includedirs.append(os.path.join("include", "libxml2"))
         if not self.options.shared:
-            self.cpp_info.components["xml2lib"].defines = ["LIBXML_STATIC"]
+            self.cpp_info.defines = ["LIBXML_STATIC"]
 
         if self.settings.os == "Linux":
-            self.cpp_info.components["xml2lib"].system_libs = ["m"]
+            self.cpp_info.system_libs = ["m"]
             if self.options.threads:
-                self.cpp_info.components["xml2lib"].system_libs.append("pthread")
+                self.cpp_info.system_libs.append("pthread")
         elif self.settings.os == "Windows":
             if self.options.ftp or self.options.http:
-                self.cpp_info.components["xml2lib"].system_libs.extend(["ws2_32", "wsock32"])
+                self.cpp_info.system_libs.extend(["ws2_32", "wsock32"])
 
-        if self.options.zlib:
-            self.cpp_info.components["xml2lib"].requires.append("zlib::zlib")
-        if self.options.lzma:
-            self.cpp_info.components["xml2lib"].requires.append("xz_utils::xz_utils")
-        if self.options.iconv:
-            self.cpp_info.components["xml2lib"].requires.append("libiconv::libiconv")
-        if self.options.icu:
-            self.cpp_info.components["xml2lib"].requires.append("icu::icu")
-
-        self.cpp_info.components["xml2lib"].names["pkg_config"] = "libxml-2.0"
         self.cpp_info.names["pkg_config"] = "libxml-2.0"
         self.cpp_info.filenames["cmake_find_package"] = "LibXml2"
-        self.cpp_info.filenames["cmake_find_package_multi"] = "LibXml2"
+        self.cpp_info.filenames["cmake_find_package_multi"] = "libxml2"
         self.cpp_info.names["cmake_find_package"] = "LibXml2"
-        self.cpp_info.names["cmake_find_package_multi"] = "LibXml2"
-        self.cpp_info.components["xml2lib"].names["cmake_find_package"] = "LibXml2"
-        self.cpp_info.components["xml2lib"].names["cmake_find_package_multi"] = "LibXml2"
+        self.cpp_info.names["cmake_find_package_multi"] = "LibXml2"  # undefined upstream, chosen to be LibXml2 here (don't depend on this!)
+        self.cpp_info.names["cmake_find_package"] = "LibXml2"
+        self.cpp_info.names["cmake_find_package_multi"] = "LibXml2"  # undefined upstream, chosen to be LibXml2 here (don't depend on this!)
 
         # FIXME: libxml2 package itself creates libxml2-config.cmake file
 
