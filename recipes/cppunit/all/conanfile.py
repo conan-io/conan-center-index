@@ -47,10 +47,9 @@ class CppunitConan(ConanFile):
 
     @contextmanager
     def _build_context(self):
-        env = {}
         if self.settings.compiler == "Visual Studio":
             with tools.vcvars(self.settings):
-                env.update({
+                env = {
                     "AR": "{} lib".format(tools.unix_path(self.deps_user_info["automake"].ar_lib)),
                     "CC": "{} cl -nologo".format(tools.unix_path(self.deps_user_info["automake"].compile)),
                     "CXX": "{} cl -nologo".format(tools.unix_path(self.deps_user_info["automake"].compile)),
@@ -58,17 +57,19 @@ class CppunitConan(ConanFile):
                     "OBJDUMP": ":",
                     "RANLIB": ":",
                     "STRIP": ":",
-                })
+                }
                 with tools.environment_append(env):
                     yield
         else:
-            with tools.environment_append(env):
-                yield
+            yield
 
     def _configure_autotools(self):
         if self._autotools:
             return self._autotools
         self._autotools = AutoToolsBuildEnvironment(self, win_bash=tools.os_info.is_windows)
+        if self.settings.compiler == "Visual Studio":
+            self._autotools.flags.append("-FS")
+            self._autotools.cxx_flags.append("-EHsc")
         yes_no = lambda v: "yes" if v else "no"
         conf_args = [
             "--enable-shared={}".format(yes_no(self.options.shared)),
@@ -98,7 +99,7 @@ class CppunitConan(ConanFile):
         tools.rmdir(os.path.join(self.package_folder, "share"))
 
     def package_info(self):
-        libsuffix = ".dll" if self.settings.os == "Windows" and self.options.shared else ""
+        libsuffix = (".dll" if self.settings.os == "Windows" and self.options.shared else "") + (".lib" if self.settings.compiler == "Visual Studio" else "")
         self.cpp_info.libs = ["cppunit" + libsuffix]
         if not self.options.shared:
             stdlib = tools.stdcpp_library(self)
