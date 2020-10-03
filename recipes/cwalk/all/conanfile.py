@@ -17,16 +17,18 @@ class CwalkConan(ConanFile):
     generators = "cmake"
 
     settings = "os", "arch", "compiler", "build_type"
-    options = {"shared": [True, False], "fPIC": [True, False]}
-    default_options = {'shared': False, 'fPIC': True}
+    options = {
+        "shared": [True, False], 
+        "fPIC": [True, False]
+    }
+    default_options = {
+        "shared": False, 
+        "fPIC": True
+    }
 
     @property
     def _source_subfolder(self):
         return "source_subfolder"
-
-    @property
-    def _build_subfolder(self):
-        return "build_subfolder"
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -42,14 +44,13 @@ class CwalkConan(ConanFile):
 
     def build(self):
         cmake = CMake(self)
-        cmake.definitions["CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS"] = self.options.shared and self.settings.os == "Windows"
-        cmake.configure(build_folder=self._build_subfolder)
+        cmake.configure()
         cmake.build(target="cwalk")
 
     def package(self):
         include_dir = os.path.join(self._source_subfolder, 'include')
-        lib_dir = os.path.join(self._build_subfolder, "lib")
-        bin_dir = os.path.join(self._build_subfolder, "bin")
+        lib_dir ="lib"
+        bin_dir = "bin"
 
         self.copy("LICENSE.md", dst="licenses", src=self._source_subfolder)
         self.copy("cwalk.h", dst="include", src=include_dir)
