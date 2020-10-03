@@ -29,17 +29,6 @@
      if(NOT Snappy_FOUND)
        find_package(SnappyAlt REQUIRED)
      endif()
-@@ -938,7 +938,7 @@ endmacro()
- if(ARROW_WITH_BROTLI)
-   resolve_dependency(Brotli)
-   # TODO: Don't use global includes but rather target_include_directories
--  get_target_property(BROTLI_INCLUDE_DIR Brotli::brotlicommon
--                      INTERFACE_INCLUDE_DIRECTORIES)
--  include_directories(SYSTEM ${BROTLI_INCLUDE_DIR})
-+  #get_target_property(BROTLI_INCLUDE_DIR Brotli::brotlicommon
-+  #                   INTERFACE_INCLUDE_DIRECTORIES)
-+  include_directories(SYSTEM ${CONAN_INCLUDE_DIRS_BROTLI})
- endif()
 @@ -1139,8 +1139,8 @@
      build_gflags()
    elseif(gflags_SOURCE STREQUAL "SYSTEM")
