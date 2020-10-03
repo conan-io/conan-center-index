@@ -23,11 +23,6 @@ class EastlConan(ConanFile):
     @property
     def _source_subfolder(self):
         return "source_subfolder"
-
-    @property
-    def _build_subfolder(self):
-        return "build_subfolder"
-
     @property
     def _minimum_cpp_standard(self):
         return 14
@@ -67,7 +62,7 @@ class EastlConan(ConanFile):
         self._cmake = CMake(self)
         self._cmake.definitions["EASTL_BUILD_BENCHMARK"] = False
         self._cmake.definitions["EASTL_BUILD_TESTS"] = False
-        self._cmake.configure(build_folder=self._build_subfolder)
+        self._cmake.configure()
         return self._cmake
 
     def _patch_sources(self):
