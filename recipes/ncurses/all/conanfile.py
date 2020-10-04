@@ -66,6 +66,9 @@ class NCursesConan(ConanFile):
     def configure(self):
         if self.options.shared:
             del self.options.fPIC
+            if self.settings.compiler == "Visual Studio":
+                if "MT" in str(self.settings.compiler.runtime):
+                    raise ConanInvalidConfiguration("Cannot build shared libraries with static (MT) runtime")
         if not self.options.with_cxx:
             del self.settings.compiler.libcxx
             del self.settings.compiler.cppstd
@@ -87,8 +90,7 @@ class NCursesConan(ConanFile):
                 self.requires("naive-tsearch/0.1.1")
 
     def build_requirements(self):
-        if tools.os_info.is_windows and not tools.get_env("CONAN_BASH_PATH") and \
-                tools.os_info.detect_windows_subsystem() != "msys2":
+        if tools.os_info.is_windows and not tools.get_env("CONAN_BASH_PATH"):
             self.build_requires("msys2/20200517")
 
     def source(self):
@@ -248,6 +250,8 @@ class NCursesConan(ConanFile):
         self.cpp_info.components["form"].libs = ["form" + self._lib_suffix]
         self.cpp_info.components["form"].names["pkg_config"] = "form" + self._lib_suffix
         self.cpp_info.components["form"].requires = ["libcurses"]
+        if self.options.with_pcre2:
+            self.cpp_info.components["form"].requires.append("pcre2::pcre2")
 
         if self.options.with_cxx:
             self.cpp_info.components["curses++"].libs = ["ncurses++" + self._lib_suffix]
