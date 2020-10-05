@@ -28,17 +28,14 @@ class PackioConan(ConanFile):
     def _source_subfolder(self):
         return "source_subfolder"
 
-    def _supports_cpp17(self):
-        supported_compilers = [
-            ("apple-clang", 10),
-            ("clang", 6),
-            ("gcc", 7),
-            ("Visual Studio", 16),
-        ]
-        compiler, version = self.settings.compiler, Version(
-            self.settings.compiler.version
-        )
-        return any(compiler == sc[0] and version >= sc[1] for sc in supported_compilers)
+    @property
+    def _compilers_minimum_version(self):
+        return {
+            "apple-clang": 10,
+            "clang": 6,
+            "gcc": 7,
+            "Visual Studio": 16,
+        }
 
     def config_options(self):
         if tools.Version(self.version) < "1.2.0":
@@ -67,8 +64,13 @@ class PackioConan(ConanFile):
     def configure(self):
         if self.settings.compiler.cppstd:
             tools.check_min_cppstd(self, "17")
-        elif not self._supports_cpp17():
-            raise ConanInvalidConfiguration("packio requires C++17 support")
+
+        minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
+        if minimum_version:
+            if tools.Version(self.settings.compiler.version) < minimum_version:
+                raise ConanInvalidConfiguration("packio requires C++17, which your compiler does not support.")
+        else:
+            self.output.warn("packio requires C++17. Your compiler is unknown. Assuming it supports C++17.")
 
     def package(self):
         self.copy("LICENSE.md", dst="licenses", src=self._source_subfolder)
