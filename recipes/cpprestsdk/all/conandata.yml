@@ -1,0 +1,18 @@
+sources:
+  "2.10.15":
+    url: https://github.com/Microsoft/cpprestsdk/archive/v2.10.15.tar.gz
+    sha256: 1c027a53457e87b0b3a475e5c8045b94400c475898c8bd51b0fbd218b99a7f7b
+  "2.10.16":
+    url: https://github.com/Microsoft/cpprestsdk/archive/v2.10.16.tar.gz
+    sha256: 3d75e17c7d79131320438f2a15331f7ca6281c38c0e2daa27f051e290eeb8681
+patches:
+  "2.10.15":
+    - patch_file: "patches/0001-find-cmake-targets.patch"
+      base_path: "source_subfolder"
+    - patch_file: "patches/0002-remove-wconversion.patch"
+      base_path: "source_subfolder"
+  "2.10.16":
+    - patch_file: "patches/0003-find-cmake-targets.patch"
+      base_path: "source_subfolder"
+    - patch_file: "patches/0002-remove-wconversion.patch"
+      base_path: "source_subfolder"

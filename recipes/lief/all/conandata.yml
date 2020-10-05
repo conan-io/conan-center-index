@@ -1,0 +1,18 @@
+sources:
+  "0.10.1":
+    url: "https://github.com/lief-project/LIEF/archive/0.10.1.tar.gz"
+    sha256: "6f30c98a559f137e08b25bcbb376c0259914b33c307b8b901e01ca952241d00a"
+patches:
+  "0.10.1":
+    - patch_file: "patches/001_link_to_conan.patch"
+      base_path: "source_subfolder"
+    - patch_file: "patches/002_fix_resources_manager.patch"
+      base_path: "source_subfolder"
+    - patch_file: "patches/003_fix_json_include_path.patch"
+      base_path: "source_subfolder"
+    - patch_file: "patches/004_fix_elf_parser.patch"
+      base_path: "source_subfolder"
+    - patch_file: "patches/005_fix_compiler_detection.patch"
+      base_path: "source_subfolder"
+    - patch_file: "patches/006_fix_binary_cpp.patch"
+      base_path: "source_subfolder"

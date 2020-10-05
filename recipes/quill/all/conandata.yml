@@ -1,0 +1,16 @@
+sources:
+  "1.2.3":
+    sha256: f318fa87a39aea76c66cfe09c686f5ce2cacaf2980678ada310acac8cf42ffd0
+    url: https://github.com/odygrd/quill/archive/v1.2.3.tar.gz
+  "1.3.1":
+    sha256: 00e491212139462d87897af02794d19b8a213ff190be59a6799aed515463ca78
+    url: https://github.com/odygrd/quill/archive/v1.3.1.tar.gz
+  "1.3.2":
+    sha256: bf7090c4770cf548d0093499ffb15c0d80c87d74c9bd4cb648f6b6c1e8de35b5
+    url: https://github.com/odygrd/quill/archive/v1.3.2.tar.gz
+  "1.3.3":
+    sha256: 5e185ebe7318fe8ce6e3fd849ec8f7fcb1298ab0302b2268382c7aef1c9542ce
+    url: https://github.com/odygrd/quill/archive/v1.3.3.tar.gz
+  "1.4.0":
+    sha256: e6e9b603caa32c6693cccda8c547b298f3f73867a45e49b33c006cb17b24fa33
+    url: https://github.com/odygrd/quill/archive/v1.4.0.tar.gz

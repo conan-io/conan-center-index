@@ -1,7 +1,8 @@
+#include "libpq-fe.h"
+
 #include <stdlib.h>
 #include <stdio.h>
 
-#include "libpq-fe.h"
 
 int main() {
     PGconn *conn = NULL;

@@ -1,8 +1,10 @@
 cmake_minimum_required(VERSION 2.8.12)
-PROJECT(conancmakewrapper)
+project(cmake_wrapper)
 
-message(STATUS "Conan CMake Wrapper")
-include("${CMAKE_CURRENT_SOURCE_DIR}/../conanbuildinfo.cmake")
-CONAN_BASIC_SETUP()
+include(conanbuildinfo.cmake)
+conan_basic_setup()
 
-include("CMakeListsOriginal.cmake")
+# Disable automatic linking on MSVC
+add_definitions(-DPOCO_NO_AUTOMATIC_LIBS)
+
+add_subdirectory(source_subfolder)

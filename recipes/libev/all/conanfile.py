@@ -12,10 +12,20 @@ class LibevConan(ConanFile):
     homepage = "http://software.schmorp.de/pkg/libev.html"
     license = ["BSD-2-Clause", "GPL-2.0-or-later"]
     settings = "os", "arch", "compiler", "build_type"
-    options = {"shared": [True, False], "fPIC": [True, False]}
-    default_options = {"shared": False, "fPIC": True}
+    options = {
+        "shared": [True, False],
+        "fPIC": [True, False],
+    }
+    default_options = {
+        "shared": False,
+        "fPIC": True,
+    }
 
-    _source_subfolder = "source_subfolder"
+    _autotools = None
+
+    @property
+    def _source_subfolder(self):
+        return "source_subfolder"
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -40,16 +50,16 @@ class LibevConan(ConanFile):
             self.build_requires("msys2/20190524")
 
     def _configure_autotools(self):
-        if not hasattr(self, '__autotools'):
-            autotools = AutoToolsBuildEnvironment(self, win_bash=tools.os_info.is_windows)
-            args = []
-            if self.options.shared:
-                args.extend(['--disable-static', '--enable-shared'])
-            else:
-                args.extend(['--disable-shared', '--enable-static'])
-            autotools.configure(configure_dir=self._source_subfolder, args=args)
-            setattr(self, '__autotools', autotools)
-        return getattr(self, '__autotools')
+        if self._autotools:
+            return self._autotools
+        self._autotools = AutoToolsBuildEnvironment(self, win_bash=tools.os_info.is_windows)
+        args = []
+        if self.options.shared:
+            args.extend(['--disable-static', '--enable-shared'])
+        else:
+            args.extend(['--disable-shared', '--enable-static'])
+        self._autotools.configure(configure_dir=self._source_subfolder, args=args)
+        return self._autotools
 
     def build(self):
         autotools = self._configure_autotools()
@@ -59,14 +69,13 @@ class LibevConan(ConanFile):
         self.copy(pattern="LICENSE", dst="licenses", src=self._source_subfolder)
         autotools = self._configure_autotools()
         autotools.install()
+
         tools.rmdir(os.path.join(self.package_folder, 'share'))
-        la_file = os.path.join(self.package_folder, "lib", "libev.la")
-        if os.path.isfile(la_file):
-            os.unlink(la_file)
+        os.unlink(os.path.join(self.package_folder, "lib", "libev.la"))
 
     def package_info(self):
-        self.cpp_info.libs = tools.collect_libs(self)
+        self.cpp_info.libs = ["ev"]
         if self.settings.os == "Linux":
-            self.cpp_info.libs.append("m")
+            self.cpp_info.system_libs.append("m")
         elif self.settings.os == "Windows":
-            self.cpp_info.libs.append("Ws2_32")
+            self.cpp_info.system_libs.append("ws2_32")

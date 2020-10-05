@@ -12,7 +12,12 @@ class UtfCppConan(ConanFile):
     license = "BSL-1.0"
     no_copy_source = True
 
-    _source_subfolder = "source_subfolder"
+    @property
+    def _source_subfolder(self):
+        return "source_subfolder"
+
+    def package_id(self):
+        self.info.header_only()
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
@@ -21,9 +26,12 @@ class UtfCppConan(ConanFile):
 
     def package(self):
         self.copy("*.h",
-                  dst="include",
+                  dst=os.path.join("include", "utf8cpp"),
                   src=os.path.join(self._source_subfolder, "source"))
         self.copy("LICENSE", dst="licenses", src=self._source_subfolder)
 
-    def package_id(self):
-        self.info.header_only()
+    def package_info(self):
+        # TODO: imported CMake target shouldn't be namespaced
+        self.cpp_info.names["cmake_find_package"] = "utf8cpp"
+        self.cpp_info.names["cmake_find_package_multi"] = "utf8cpp"
+        self.cpp_info.includedirs.append(os.path.join("include", "utf8cpp"))

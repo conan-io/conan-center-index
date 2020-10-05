@@ -1,0 +1,27 @@
+From 4ff188d490445fe7bad629a94d5bf4b641d4ab8d Mon Sep 17 00:00:00 2001
+From: Tim Blechmann <tim@klingt.org>
+Date: Thu, 2 Jul 2020 12:04:38 +0800
+Subject: [PATCH] xcode12 compile fix
+
+---
+ gzguts.h | 4 ++++
+ 1 file changed, 4 insertions(+)
+
+diff --git a/gzguts.h b/gzguts.h
+index 990a4d2..c78cb40 100644
+--- a/gzguts.h
++++ b/gzguts.h
+@@ -26,6 +26,10 @@
+ #  include <limits.h>
+ #endif
+ 
++#ifdef __APPLE__
++#include <unistd.h>
++#endif
++
+ #ifndef _POSIX_SOURCE
+ #  define _POSIX_SOURCE
+ #endif
+-- 
+2.27.0
+

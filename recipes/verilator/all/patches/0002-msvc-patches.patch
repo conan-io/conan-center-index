@@ -1,0 +1,141 @@
+--- src/Makefile_obj.in
++++ src/Makefile_obj.in
+@@ -276,7 +276,7 @@
+ $(TGT): $(PREDEP_H) $(OBJS)
+ 	@echo "      Linking $@..."
+ 	-rm -rf $@ $@.exe
+-	${LINK} ${LDFLAGS} -o $@ $(OBJS) $(CCMALLOC) ${LIBS}
++	${LINK} ${LDFLAGS} -o $@$(EXEEXT) $(OBJS) $(CCMALLOC) ${LIBS}
+ 
+ V3Number_test: V3Number_test.o
+ 	${LINK} ${LDFLAGS} -o $@ $^ ${LIBS}
+@@ -287,21 +287,21 @@
+ 	$(PERL) $(ASTGEN) -I$(srcdir) $*.cpp
+ 
+ %.o:	%.cpp
+-	$(OBJCACHE) ${CXX} ${CXXFLAGS} ${CPPFLAGSWALL} -c $<
++	$(OBJCACHE) ${CXX} ${CXXFLAGS} ${CPPFLAGSWALL} -c $< -o $@
+ %.o:	%.c
+-	$(OBJCACHE) ${CC}  ${CFLAGS} ${CPPFLAGSWALL} -c $<
++	$(OBJCACHE) ${CC}  ${CFLAGS} ${CPPFLAGSWALL} -c $< -o $@
+ 
+ V3ParseLex.o:	V3ParseLex.cpp V3Lexer.yy.cpp V3ParseBison.c
+-	$(OBJCACHE) ${CXX} ${CXXFLAGS} ${CPPFLAGSPARSER} -c $<
++	$(OBJCACHE) ${CXX} ${CXXFLAGS} ${CPPFLAGSPARSER} -c $< -o $@
+ 
+ V3ParseGrammar.o:	V3ParseGrammar.cpp V3ParseBison.c
+-	$(OBJCACHE) ${CXX} ${CXXFLAGS} ${CPPFLAGSPARSER} -c $<
++	$(OBJCACHE) ${CXX} ${CXXFLAGS} ${CPPFLAGSPARSER} -c $< -o $@
+ 
+ V3ParseImp.o:	V3ParseImp.cpp V3ParseBison.c
+-	$(OBJCACHE) ${CXX} ${CXXFLAGS} ${CPPFLAGSPARSER} -c $<
++	$(OBJCACHE) ${CXX} ${CXXFLAGS} ${CPPFLAGSPARSER} -c $< -o $@
+ 
+ V3PreProc.o:	V3PreProc.cpp V3PreLex.yy.cpp
+-	$(OBJCACHE) ${CXX} ${CXXFLAGS} ${CPPFLAGSPARSER} -c $<
++	$(OBJCACHE) ${CXX} ${CXXFLAGS} ${CPPFLAGSPARSER} -c $< -o $@
+ 
+ #### Generated files
+ 
+--- src/V3AstNodes.h
++++ src/V3AstNodes.h
+@@ -7543,7 +7543,7 @@
+         V3ERROR_NA;
+     }
+     virtual string emitVerilog() { return "%k%l[%r]"; }
+-    virtual string emitC() { V3ERROR_NA; }
++    virtual string emitC() { V3ERROR_NA_RETURN(""); }
+     virtual string emitSimpleOperator() { return ""; }
+     virtual bool cleanOut() const { return true; }
+     virtual bool cleanLhs() const { return true; }
+--- src/V3EmitC.cpp
++++ src/V3EmitC.cpp
+@@ -2112,7 +2112,7 @@
+         } else {  // Format character
+             inPct = false;
+             switch (tolower(pos[0])) {
+-            case '0' ... '9':
++            case '0': case '1': case '2': case '3': case '4': case '5': case '6': case '7': case '8': case '9':
+             case '.':  // FALLTHRU
+             case '-':
+                 // Digits, like %5d, etc.
+--- src/V3LinkResolve.cpp
++++ src/V3LinkResolve.cpp
+@@ -358,7 +358,7 @@
+                         } else if (inpercent) {
+                             inpercent = 0;
+                             switch (c) {
+-                            case '0' ... '9':
++                            case '0': case '1': case '2': case '3': case '4': case '5': case '6': case '7': case '8': case '9':
+                             case '.': inpercent = true; break;
+                             case '%': break;
+                             default:
+--- src/V3Number.cpp
++++ src/V3Number.cpp
+@@ -188,7 +188,7 @@
+         int got_01 = 0;
+         for (const char* cp = value_startp; *cp; cp++) {
+             switch (tolower(*cp)) {
+-            case '0' ... '9': {
++            case '0': case '1': case '2': case '3': case '4': case '5': case '6': case '7': case '8': case '9': {
+                 if (olen <= 7) {  // 10000000 fits in 32 bits, so ok
+                     // Constants are common, so for speed avoid wide math until we need it
+                     val = val * 10 + (*cp - '0');
+--- src/V3Number.h
++++ src/V3Number.h
+@@ -22,6 +22,7 @@
+ 
+ #include "V3Error.h"
+ 
++#include <algorithm>
+ #include <cmath>
+ #include <limits>
+ #include <vector>
+--- src/V3Os.cpp
++++ src/V3Os.cpp
+@@ -65,7 +65,8 @@
+ #if defined(_MSC_VER)
+     // Note: MinGW does not offer _dupenv_s
+     char* envvalue;
+-    if (_dupenv_s(&envvalue, nullptr, envvar.c_str()) == 0) {
++    int dupres = _dupenv_s(&envvalue, nullptr, envvar.c_str());
++    if ((dupres == 0) && (envvalue != nullptr)) {
+         const std::string result{envvalue};
+         free(envvalue);
+         return result;
+@@ -342,6 +343,9 @@
+ int V3Os::system(const string& command) {
+     UINFO(1, "Running system: " << command << endl);
+     const int ret = ::system(command.c_str());
++#ifdef _MSC_VER
++    return ret;
++#else
+     if (ret == -1) {
+         v3fatal("Failed to execute command:" << command << " " << strerror(errno));
+         return -1;
+@@ -352,4 +356,5 @@
+         UASSERT(exit_code >= 0, "exit code must not be negative");
+         return exit_code;
+     }
++#endif
+ }
+--- include/verilated.cpp
++++ include/verilated.cpp
+@@ -29,6 +28,7 @@
+ #include <algorithm>
+ #include <cctype>
+ #include <cerrno>
+-#include <tgmath.h>
++#include <cmath>
++#include <sstream>
+ #include <sys/stat.h>  // mkdir
+ 
+@@ -678,7 +679,7 @@
+             inPct = false;
+             char fmt = pos[0];
+             switch (fmt) {
+-            case '0' ... '9':
++            case '0': case '1': case '2': case '3': case '4': case '5': case '6': case '7': case '8': case '9':
+                 inPct = true;  // Get more digits
+                 widthSet = true;
+                 width = width * 10 + (fmt - '0');

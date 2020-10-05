@@ -1,0 +1,4 @@
+sources:
+  "3.3":
+    sha256: ac86e5794c6a99c25dee0b60720c7cfd9833ec64785c74838723179830749c9c
+    url: https://ftp.mozilla.org/pub/mozilla/libraries/win32/MozillaBuildSetup-3.3.exe

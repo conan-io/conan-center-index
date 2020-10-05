@@ -1,30 +1,22 @@
 import os
 
-from conans import ConanFile, CMake, tools
+from conans import ConanFile, tools
 from conans.errors import ConanInvalidConfiguration
 
 
-class ConanRecipe(ConanFile):
+class EnttConan(ConanFile):
     name = "entt"
-
     description = "Gaming meets modern C++ - a fast and reliable entity-component system (ECS) and much more"
     topics = ("conan," "entt", "gaming", "entity", "ecs")
-
     homepage = "https://github.com/skypjack/entt"
     url = "https://github.com/conan-io/conan-center-index"
-
     license = "MIT"
-
-    settings = "os", "compiler", "build_type", "arch"
-    generators = "cmake", "cmake_find_package_multi"
+    no_copy_source = True
+    settings = "compiler"
 
     @property
     def _source_subfolder(self):
         return "source_subfolder"
-
-    @property
-    def _build_subfolder(self):
-        return "build_subfolder"
 
     def configure(self):
         minimal_cpp_standard = "17"
@@ -51,35 +43,17 @@ class ConanRecipe(ConanFile):
             raise ConanInvalidConfiguration(
                 "%s requires a compiler that supports at least C++%s" % (self.name, minimal_cpp_standard))
 
-    def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        extracted_dir = "entt-" + self.version
-        os.rename(extracted_dir, self._source_subfolder)
-
-    def _configure_cmake(self):
-        cmake = CMake(self)
-        cmake.definitions["BUILD_TESTING"] = "OFF"
-        cmake.definitions["USE_LIBCPP"] = "OFF"
-        cmake.configure(
-            source_folder=self._source_subfolder,
-            build_folder=self._build_subfolder
-        )
-        return cmake
-
-    def build(self):
-        cmake = self._configure_cmake()
-        cmake.build()
-
-    def package(self):
-        self.copy(pattern="LICENSE", dst="licenses",
-                  src=self._source_subfolder)
-        cmake = self._configure_cmake()
-        cmake.install()
-        tools.rmdir(os.path.join(self.package_folder, "cmake"))
-        tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
-
     def package_id(self):
         self.info.header_only()
 
+    def source(self):
+        tools.get(**self.conan_data["sources"][self.version])
+        os.rename(self.name + "-" + self.version, self._source_subfolder)
+
+    def package(self):
+        self.copy(pattern="LICENSE", dst="licenses", src=self._source_subfolder)
+        self.copy(pattern="*", dst="include", src=os.path.join(self._source_subfolder, "src"))
+
     def package_info(self):
-        self.cpp_info.name = "EnTT"
+        self.cpp_info.names["cmake_find_package"] = "EnTT"
+        self.cpp_info.names["cmake_find_package_multi"] = "EnTT"

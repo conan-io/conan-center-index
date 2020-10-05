@@ -1,0 +1,7 @@
+sources:
+  "0.1.0":
+    url: "https://github.com/kulp/naive-tsearch/releases/download/v0.1.0/naive-tsearch-0.1.0.tar.xz"
+    sha256: "0e45b7ffb5ff98dce56c4e01365905158843f4c75e6bf1061774153f3c63a2a4"
+  "0.1.1":
+    url: "https://github.com/kulp/naive-tsearch/releases/download/v0.1.1/naive-tsearch-0.1.1.tar.xz"
+    sha256: "cb779326a8748fb527ab2f4d199923c92dc7d120988b45400d4b31fd77288a1b"

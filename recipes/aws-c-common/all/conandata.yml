@@ -1,0 +1,8 @@
+sources:
+  "0.4.25":
+    sha256: "f85a8f74e42bd983a4615654457f8037876bc6b8dbf890e368bb516cbc2e9844"
+    url: "https://github.com/awslabs/aws-c-common/archive/v0.4.25.tar.gz"
+patches:
+  "0.4.25":
+    - patch_file: "patches/0001-disable-fPIC.patch"
+      base_path: "source_subfolder"

@@ -1,0 +1,29 @@
+--- a/config/cmake_ext_mod/ConfigureChecks.cmake
++++ b/config/cmake_ext_mod/ConfigureChecks.cmake
+@@ -405,7 +405,7 @@ if (NOT APPLE)
+   if (NOT ${HDF_PREFIX}_SIZEOF_SSIZE_T)
+     set (${HDF_PREFIX}_SIZEOF_SSIZE_T 0)
+   endif ()
+-  if (NOT WINDOWS)
++  if (MINGW OR NOT WINDOWS)
+     HDF_CHECK_TYPE_SIZE (ptrdiff_t    ${HDF_PREFIX}_SIZEOF_PTRDIFF_T)
+   endif ()
+ endif ()
+@@ -429,7 +429,7 @@ else ()
+   HDF_CHECK_TYPE_SIZE (_Bool        ${HDF_PREFIX}_SIZEOF_BOOL)
+ endif ()
+ 
+-if (NOT WINDOWS)
++if (MINGW OR NOT WINDOWS)
+   #-----------------------------------------------------------------------------
+   # Check if the dev_t type is a scalar type
+   #-----------------------------------------------------------------------------
+@@ -558,7 +558,7 @@ endif ()
+ #-----------------------------------------------------------------------------
+ # Check a bunch of other functions
+ #-----------------------------------------------------------------------------
+-if (NOT WINDOWS)
++if (MINGW OR NOT WINDOWS)
+   foreach (test
+       HAVE_ATTRIBUTE
+       HAVE_C99_FUNC

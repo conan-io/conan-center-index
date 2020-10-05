@@ -1,8 +1,10 @@
-PROJECT(test_package)
-cmake_minimum_required(VERSION 2.8)
+cmake_minimum_required(VERSION 3.1)
+project(test_package C)
 
 include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
-CONAN_BASIC_SETUP()
+conan_basic_setup()
 
-ADD_EXECUTABLE(${CMAKE_PROJECT_NAME} test_package.c)
-TARGET_LINK_LIBRARIES(${CMAKE_PROJECT_NAME} ${CONAN_LIBS})
+find_package(ZLIB REQUIRED)
+
+add_executable(${PROJECT_NAME} test_package.c)
+target_link_libraries(${PROJECT_NAME} ZLIB::ZLIB)

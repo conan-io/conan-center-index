@@ -1,11 +1,24 @@
+# IDEs
 .idea
+.vscode
+.project
+.pydevproject
+.settings/
+.ropeproject/
+## emacs
+*~
 
 
-
-# Byte-compiled / optimized / DLL files
+# Byte-compiled / optimized / DLL files / Cache
 __pycache__/
+test_package/__pycache__/
+test_package/build/
+build/
+*.pyc
 *.py[cod]
 *$py.class
+tmp/
+.DS_Store
 
 # C extensions
 *.so
@@ -98,11 +111,11 @@ venv.bak/
 .spyderproject
 .spyproject
 
-# Rope project settings
-.ropeproject
-
 # mkdocs documentation
 /site
 
 # mypy
 .mypy_cache/
+
+# scons build files
+*.dblite
