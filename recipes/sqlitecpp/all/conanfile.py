@@ -19,7 +19,7 @@ class SQLiteCppConan(ConanFile):
                        "fPIC": True,
                        "lint": False
                        }
-    requires = ("sqlite3/3.30.1")
+    requires = ("sqlite3/3.32.3")
 
     @property
     def _source_subfolder(self):
