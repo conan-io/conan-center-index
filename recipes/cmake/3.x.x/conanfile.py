@@ -19,8 +19,12 @@ class CMakeConan(ConanFile):
     default_options = {
         "with_openssl": "auto",
     }
+    exports_sources = "patches/**"
 
-    _source_subfolder = "source_subfolder"
+    @property
+    def _source_subfolder(self):
+        return "source_subfolder"
+
     _cmake = None
 
     def _minor_version(self):
@@ -38,7 +42,7 @@ class CMakeConan(ConanFile):
 
     def requirements(self):
         if self._with_openssl:
-            self.requires("openssl/1.1.1g")
+            self.requires("openssl/1.1.1h")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
@@ -57,6 +61,8 @@ class CMakeConan(ConanFile):
         return self._cmake
 
     def build(self):
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            tools.patch(**patch)
         tools.replace_in_file(os.path.join(self._source_subfolder, "CMakeLists.txt"),
                               "project(CMake)",
                               "project(CMake)\ninclude(\"{}/conanbuildinfo.cmake\")\nconan_basic_setup()".format(

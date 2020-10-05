@@ -44,3 +44,49 @@ sources:
   "3.18.2":
     sha256: 5d4e40fc775d3d828c72e5c45906b4d9b59003c9433ff1b36a1cb552bbd51d7e
     url: https://github.com/Kitware/CMake/releases/download/v3.18.2/cmake-3.18.2.tar.gz
+patches:
+  "3.16.2":
+    - patch_file: "patches/3.16.x-0001-ignore-MSBXXX-warnings.patch"
+      base_path: source_subfolder
+  "3.16.3":
+    - patch_file: "patches/3.16.x-0001-ignore-MSBXXX-warnings.patch"
+      base_path: source_subfolder
+  "3.16.4":
+    - patch_file: "patches/3.16.x-0001-ignore-MSBXXX-warnings.patch"
+      base_path: source_subfolder
+  "3.16.5":
+    - patch_file: "patches/3.16.x-0001-ignore-MSBXXX-warnings.patch"
+      base_path: source_subfolder
+  "3.16.6":
+    - patch_file: "patches/3.16.x-0001-ignore-MSBXXX-warnings.patch"
+      base_path: source_subfolder
+  "3.16.7":
+    - patch_file: "patches/3.16.x-0001-ignore-MSBXXX-warnings.patch"
+      base_path: source_subfolder
+  "3.16.8":
+    - patch_file: "patches/3.16.x-0001-ignore-MSBXXX-warnings.patch"
+      base_path: source_subfolder
+  "3.17.0":
+    - patch_file: "patches/3.17.0-0001-ignore-MSBXXX-warnings.patch"
+      base_path: source_subfolder
+  "3.17.1":
+    - patch_file: "patches/3.17.0-0001-ignore-MSBXXX-warnings.patch"
+      base_path: source_subfolder
+  "3.17.2":
+    - patch_file: "patches/3.17.0-0001-ignore-MSBXXX-warnings.patch"
+      base_path: source_subfolder
+  "3.17.3":
+    - patch_file: "patches/3.17.0-0001-ignore-MSBXXX-warnings.patch"
+      base_path: source_subfolder
+  "3.17.4":
+    - patch_file: "patches/3.17.0-0001-ignore-MSBXXX-warnings.patch"
+      base_path: source_subfolder
+  "3.18.0":
+    - patch_file: "patches/3.17.0-0001-ignore-MSBXXX-warnings.patch"
+      base_path: source_subfolder
+  "3.18.1":
+    - patch_file: "patches/3.17.0-0001-ignore-MSBXXX-warnings.patch"
+      base_path: source_subfolder
+  "3.18.2":
+    - patch_file: "patches/3.17.0-0001-ignore-MSBXXX-warnings.patch"
+      base_path: source_subfolder
