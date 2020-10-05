@@ -21,12 +21,6 @@ class LibpqConan(ConanFile):
     default_options = {'shared': False, 'fPIC': True, 'with_zlib': True, 'with_openssl': False, 'disable_rpath': False}
     _autotools = None
 
-    def build_requirements(self):
-        if self.settings.compiler == "Visual Studio":
-            self.build_requires("strawberryperl/5.30.0.1")
-        elif tools.os_info.is_windows:
-            if "CONAN_BASH_PATH" not in os.environ and tools.os_info.detect_windows_subsystem() != 'msys2':
-                self.build_requires("msys2/20190524")
     @property
     def _source_subfolder(self):
         return "source_subfolder"
@@ -55,6 +49,13 @@ class LibpqConan(ConanFile):
             self.requires("zlib/1.2.11")
         if self.options.with_openssl:
             self.requires("openssl/1.1.1g")
+
+    def build_requirements(self):
+        if self.settings.compiler == "Visual Studio":
+            self.build_requires("strawberryperl/5.30.0.1")
+        elif tools.os_info.is_windows:
+            if "CONAN_BASH_PATH" not in os.environ and tools.os_info.detect_windows_subsystem() != 'msys2':
+                self.build_requires("msys2/20200517")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
