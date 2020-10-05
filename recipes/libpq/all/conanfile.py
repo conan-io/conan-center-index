@@ -127,6 +127,8 @@ class LibpqConan(ConanFile):
                         if not self.options.shared:
                             self.run("perl build.pl libpgport")
         else:
+            if self.settings.os == "Windows":
+                tools.replace_in_file(os.path.join(self._source_subfolder, "configure"), 'LIBS="-lz ', 'LIBS="')
             autotools = self._configure_autotools()
             with tools.chdir(os.path.join(self._source_subfolder, "src", "backend")):
                 autotools.make(args=self._make_args, target="generated-headers")
