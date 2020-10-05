@@ -23,6 +23,9 @@ exec "$meson_dir/meson.py" "$@"
     def requirements(self):
         self.requires("ninja/1.10.1")
 
+    def package_id(self):
+        self.info.header_only()
+
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
         extracted_dir = "meson-" + self.version
@@ -51,6 +54,3 @@ exec "$meson_dir/meson.py" "$@"
 
         self._chmod_plus_x(os.path.join(meson_root, "meson"))
         self._chmod_plus_x(os.path.join(meson_root, "meson.py"))
-
-    def package_id(self):
-        self.info.header_only()
