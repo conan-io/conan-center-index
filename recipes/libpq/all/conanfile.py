@@ -40,9 +40,8 @@ class LibpqConan(ConanFile):
     def configure(self):
         del self.settings.compiler.libcxx
         del self.settings.compiler.cppstd
-        if self.settings.compiler != "Visual Studio" and self.settings.os == "Windows":
-            if self.options.shared:
-                raise ConanInvalidConfiguration("static mingw build is not possible")
+        if self.settings.compiler != "Visual Studio" and self.settings.os == "Windows" and self.options.shared:
+            raise ConanInvalidConfiguration("shared mingw build is not possible")
 
     def requirements(self):
         if self.options.with_zlib:
