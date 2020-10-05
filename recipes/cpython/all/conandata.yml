@@ -2,25 +2,33 @@ sources:
   "2.7.18":
     url: "https://www.python.org/ftp/python/2.7.18/Python-2.7.18.tgz"
     sha256: "da3080e3b488f648a3d7a4560ddee895284c3380b11d6de75edb986526b9a814"
-  "3.7.8":
-    url: "https://www.python.org/ftp/python/3.7.8/Python-3.7.8.tgz"
-    sha256: "0e25835614dc221e3ecea5831b38fa90788b5389b99b675a751414c858789ab0"
-  "3.8.5":
-    url: "https://www.python.org/ftp/python/3.8.5/Python-3.8.5.tgz"
-    sha256: "015115023c382eb6ab83d512762fe3c5502fa0c6c52ffebc4831c4e1a06ffc49"
+  "3.7.9":
+    url: "https://www.python.org/ftp/python/3.7.9/Python-3.7.9.tgz"
+    sha256: "39b018bc7d8a165e59aa827d9ae45c45901739b0bbb13721e4f973f3521c166a"
+  "3.8.6":
+    url: "https://www.python.org/ftp/python/3.8.6/Python-3.8.6.tgz"
+    sha256: "313562ee9986dc369cd678011bdfd9800ef62fbf7b1496228a18f86b36428c21"
+  "3.9.0":
+    url: "https://www.python.org/ftp/python/3.9.0/Python-3.9.0.tgz"
+    sha256: "df796b2dc8ef085edae2597a41c1c0a63625ebd92487adaef2fed22b567873e8"
 patches:
   "2.7.18":
     - patch_file: "patches/0001-2.7.18-msvc.patch"
       base_path: "source_subfolder"
     - patch_file: "patches/0002-2.7.18-add-support-msvc-14.patch"
       base_path: "source_subfolder"
-  "3.7.8":
-    - patch_file: "patches/0001-3.7.8-msvc.patch"
+  "3.7.9":
+    - patch_file: "patches/0001-3.7.9-msvc.patch"
       base_path: "source_subfolder"
-    - patch_file: "patches/0002-3.7.8-relocatable-python-config.patch"
+    - patch_file: "patches/0002-3.7.9-relocatable-python-config.patch"
       base_path: "source_subfolder"
-  "3.8.5":
-    - patch_file: "patches/0001-3.8.5-msvc.patch"
+  "3.8.6":
+    - patch_file: "patches/0001-3.8.6-msvc.patch"
       base_path: "source_subfolder"
-    - patch_file: "patches/0002-3.7.8-relocatable-python-config.patch"
+    - patch_file: "patches/0002-3.7.9-relocatable-python-config.patch"
+      base_path: "source_subfolder"
+  "3.9.0":
+    - patch_file: "patches/0001-3.9.0-msvc.patch"
+      base_path: "source_subfolder"
+    - patch_file: "patches/0002-3.7.9-relocatable-python-config.patch"
       base_path: "source_subfolder"

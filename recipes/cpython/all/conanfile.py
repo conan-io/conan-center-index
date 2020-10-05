@@ -34,10 +34,9 @@ class CPythonConan(ConanFile):
         "with_bsddb": [True, False],
         # Python 3 options
         "with_lzma": [True, False],
-
     }
     default_options = {
-        "shared": True,
+        "shared": False,
         "fPIC": True,
         "optimizations": False,
         "lto": False,
@@ -134,7 +133,7 @@ class CPythonConan(ConanFile):
         os.rename("Python-{}".format(self.version), self._source_subfolder)
 
     def requirements(self):
-        self.requires("openssl/1.1.1g")
+        self.requires("openssl/1.1.1h")
         if not (self.settings.compiler == "Visual Studio" and tools.Version(self.version) >= tools.Version("3.8")):
             self.requires("expat/2.2.9")
         self.requires("mpdecimal/2.4.2")
@@ -152,7 +151,7 @@ class CPythonConan(ConanFile):
             # TODO: Add nis when available.
             raise ConanInvalidConfiguration("nis is not available on CCI (yet)")
         if self.options.with_sqlite3:
-            self.requires("sqlite3/3.31.1")
+            self.requires("sqlite3/3.32.3")
         if self.options.with_tkinter:
           # TODO: Add tk when available
             raise ConanInvalidConfiguration("tk is not available on CCI (yet)")
@@ -290,6 +289,10 @@ class CPythonConan(ConanFile):
             upgraded = True
 
     def build(self):
+        if tools.Version(self.version) >= "3.9.0":
+            if tools.Version(self.deps_cpp_info["mpdecimal"].version) < "2.5.0":
+                raise ConanInvalidConfiguration("cpython 3.9.0 (and newer) require (at least) mpdecimal 2.5.0")
+
         self._patch_sources()
 
         if self.options.get_safe("with_curses", False) and not self.options["ncurses"].with_widec:
