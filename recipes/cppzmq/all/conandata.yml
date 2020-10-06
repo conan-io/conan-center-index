@@ -15,3 +15,6 @@ patches:
   "4.6.0":
     - base_path: "source_subfolder"
       patch_file: "patches/0001-cmakelists-alias-libzmq-no-export.patch"
+  "4.7.1":
+    - base_path: "source_subfolder"
+      patch_file: "patches/0002-cmakelists-alias-libzmq-no-export.patch"
