@@ -1,36 +1,3 @@
---- cpp/CMakeLists.txt
-+++ cpp/CMakeLists.txt
-@@ -654,7 +654,7 @@ endif()
- 
- if(ARROW_WITH_BROTLI)
-   # Order is important for static linking
--  set(ARROW_BROTLI_LIBS Brotli::brotlienc Brotli::brotlidec Brotli::brotlicommon)
-+  set(ARROW_BROTLI_LIBS Brotli::Brotli)
-   list(APPEND ARROW_LINK_LIBS ${ARROW_BROTLI_LIBS})
-   list(APPEND ARROW_STATIC_LINK_LIBS ${ARROW_BROTLI_LIBS})
- endif()
-@@ -668,8 +668,8 @@ if(ARROW_WITH_LZ4)
- endif()
- 
- if(ARROW_WITH_SNAPPY)
--  list(APPEND ARROW_STATIC_LINK_LIBS Snappy::snappy)
-+  list(APPEND ARROW_STATIC_LINK_LIBS Snappy::Snappy)
- endif()
- 
- if(ARROW_WITH_ZLIB)
-   list(APPEND ARROW_STATIC_LINK_LIBS ZLIB::ZLIB)
-@@ -685,9 +685,9 @@ if(ARROW_ORC)
- endif()
- 
- if(ARROW_USE_GLOG)
--  list(APPEND ARROW_LINK_LIBS glog::glog)
--  list(APPEND ARROW_STATIC_LINK_LIBS glog::glog)
-+  list(APPEND ARROW_LINK_LIBS GLOG::GLOG)
-+  list(APPEND ARROW_STATIC_LINK_LIBS GLOG::GLOG)
-   add_definitions("-DARROW_USE_GLOG")
- endif()
- 
- if(ARROW_S3)
 --- cpp/cmake_modules/DefineOptions.cmake
 +++ cpp/cmake_modules/DefineOptions.cmake
 @@ -76,7 +76,7 @@ macro(define_option_string name description default)
@@ -53,7 +20,7 @@
      if(NOT Snappy_FOUND)
        find_package(SnappyAlt)
      endif()
-@@ -866,14 +866,14 @@ if(ARROW_WITH_SNAPPY)
+@@ -866,7 +866,7 @@
    elseif(Snappy_SOURCE STREQUAL "SYSTEM")
      # SnappyConfig.cmake is not installed on Ubuntu/Debian
      # TODO: Make a bug report upstream
@@ -62,32 +29,6 @@
      if(NOT Snappy_FOUND)
        find_package(SnappyAlt REQUIRED)
      endif()
-   endif()
- 
-   # TODO: Don't use global includes but rather target_include_directories
--  get_target_property(SNAPPY_INCLUDE_DIRS Snappy::snappy INTERFACE_INCLUDE_DIRECTORIES)
-+  get_target_property(SNAPPY_INCLUDE_DIRS Snappy::Snappy INTERFACE_INCLUDE_DIRECTORIES)
-   include_directories(SYSTEM ${SNAPPY_INCLUDE_DIRS})
- endif()
- 
-@@ -938,7 +938,7 @@ endmacro()
- if(ARROW_WITH_BROTLI)
-   resolve_dependency(Brotli)
-   # TODO: Don't use global includes but rather target_include_directories
--  get_target_property(BROTLI_INCLUDE_DIR Brotli::brotlicommon
-+  get_target_property(BROTLI_INCLUDE_DIR Brotli::Brotli
-                       INTERFACE_INCLUDE_DIRECTORIES)
-   include_directories(SYSTEM ${BROTLI_INCLUDE_DIR})
- endif()
-@@ -1057,7 +1057,7 @@ endmacro()
- if(ARROW_USE_GLOG)
-   resolve_dependency(GLOG)
-   # TODO: Don't use global includes but rather target_include_directories
--  get_target_property(GLOG_INCLUDE_DIR glog::glog INTERFACE_INCLUDE_DIRECTORIES)
-+  get_target_property(GLOG_INCLUDE_DIR GLOG::GLOG INTERFACE_INCLUDE_DIRECTORIES)
-   include_directories(SYSTEM ${GLOG_INCLUDE_DIR})
- endif()
- 
 @@ -1139,8 +1139,8 @@
      build_gflags()
    elseif(gflags_SOURCE STREQUAL "SYSTEM")
