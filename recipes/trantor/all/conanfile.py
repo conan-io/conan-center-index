@@ -40,15 +40,16 @@ class TrantorConan(ConanFile):
         if self._cmake:
             return self._cmake
         self._cmake = CMake(self)
+        self._cmake.definitions["BUILD_TRANTOR_SHARED"] = self.options.shared
         self._cmake.configure()
         return self._cmake
 
-   def build(self):
+    def build(self):
         cmake = self._configure_cmake()
         cmake.build()
 
     def package(self):
-         self.copy("License", src=self._source_subfolder, dst="licenses")
+        self.copy("License", src=self._source_subfolder, dst="licenses")
         cmake = self._configure_cmake()
         cmake.install()
         tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
