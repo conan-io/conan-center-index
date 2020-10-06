@@ -55,9 +55,6 @@ class PopplerDataConan(ConanFile):
         cmake.install()
         tools.rmdir(os.path.join(self._datadir, "pkgconfig"))
 
-        # Create a dummy header to circumvent CI
-        tools.save(os.path.join(self.package_folder, "include", "_dummy.h"), "")
-
     def package_id(self):
         self.info.header_only()
 
