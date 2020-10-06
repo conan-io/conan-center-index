@@ -7,7 +7,7 @@ class EasyExifConan(ConanFile):
     topics = ("conan", "exif", "image", "multimedia", "format", "graphics")
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/mayanklahiri/easyexif"
-    license = "https://github.com/mayanklahiri/easyexif/blob/master/LICENSE"
+    license = "BSD-2-Clause"
     exports_sources = "CMakeLists.txt"
     settings = "os", "compiler", "build_type", "arch"
     options = {
