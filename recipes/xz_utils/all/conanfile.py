@@ -27,7 +27,7 @@ class XZUtils(ConanFile):
     def build_requirements(self):
         if self._use_winbash and "CONAN_BASH_PATH" not in os.environ and \
                 tools.os_info.detect_windows_subsystem() != "msys2":
-            self.build_requires("msys2/20190524")
+            self.build_requires("msys2/20200517")
 
     def _effective_msbuild_type(self):
         # treat "RelWithDebInfo" and "MinSizeRel" as "Release"
