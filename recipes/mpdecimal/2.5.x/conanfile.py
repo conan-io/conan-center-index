@@ -121,9 +121,10 @@ class MpdecimalConan(ConanFile):
 
     @property
     def _target_names(self):
-        suffix = self._shared_suffix if self.options.shared else ".a"
+        libsuffix = self._shared_suffix if self.options.shared else ".a"
         versionsuffix = ".{}".format(self.version) if self.options.shared else ""
-        return "libmpdec{}{}".format(suffix, versionsuffix), "libmpdec++{}{}".format(suffix, versionsuffix)
+        suffix = "{}{}".format(versionsuffix, libsuffix) if tools.is_apple_os(self.settings.os) else "{}{}".format(libsuffix, versionsuffix)
+        return "libmpdec{}".format(suffix), "libmpdec++{}".format(suffix)
 
     def build(self):
         self._patch_sources()
@@ -164,7 +165,6 @@ class MpdecimalConan(ConanFile):
                 self.copy("*.so", src=builddir, dst="lib")
                 self.copy("*.so.*", src=builddir, dst="lib")
                 self.copy("*.dylib", src=builddir, dst="lib")
-                self.copy("*.dylib.*", src=builddir, dst="lib")
                 self.copy("*.dll", src=builddir, dst="bin")
 
     def package_info(self):
