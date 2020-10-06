@@ -142,11 +142,16 @@ class AndroidNDKInstallerConan(ConanFile):
         self.env_info.PATH.append(os.path.join(self.package_folder, 'bin'))
 
         # this is not enough, I can kill that .....
-        # conan test --profile:build nsdk-default --profile:host default /Users/a4z/elux/conan/myrecipes/android-ndk/all/test_package android-ndk/r21d@
         if not hasattr(self, 'settings_target'):
             return
 
-        if not tools.cross_building(self.settings):
+        # interestingly I can reach that with
+        # conan test --profile:build nsdk-default --profile:host default /Users/a4z/elux/conan/myrecipes/android-ndk/all/test_package android-ndk/r21d@
+        if  self.settings_target is None:
+            return
+
+        # And if we are not building for Android, why bother at all
+        if not self.settings_target.os == "Android":
             return
 
         self.output.info('Creating NDK_ROOT environment variable: %s' % self._ndk_root)
