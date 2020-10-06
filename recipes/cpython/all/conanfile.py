@@ -106,6 +106,8 @@ class CPythonConan(ConanFile):
     def configure(self):
         if self.options.shared:
             del self.options.fPIC
+            if self.settings.compiler == "Visual Studio" and "MT" in str(self.settings.compiler.runtime):
+                raise ConanInvalidConfiguration("cpython does not support MT(d) runtime when building a shared cpython library")
         if tools.is_apple_os(self.settings.os):
             if self._is_py2:
                 # FIXME: python2 does not build on Macos due to a missing uuid_string_t type
@@ -291,7 +293,7 @@ class CPythonConan(ConanFile):
     def build(self):
         if tools.Version(self.version) >= "3.9.0":
             if tools.Version(self.deps_cpp_info["mpdecimal"].version) < "2.5.0":
-                raise ConanInvalidConfiguration("cpython 3.9.0 (and newer) require (at least) mpdecimal 2.5.0")
+                raise ConanInvalidConfiguration("cpython 3.9.0 (and newer) requires (at least) mpdecimal 2.5.0")
 
         self._patch_sources()
 

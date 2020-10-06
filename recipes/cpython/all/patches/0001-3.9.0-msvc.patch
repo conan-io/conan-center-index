@@ -109,7 +109,7 @@
      <ClCompile Include="..\Modules\_decimal\libmpdec\numbertheory.c" />
      <ClCompile Include="..\Modules\_decimal\libmpdec\sixstep.c" />
 -    <ClCompile Include="..\Modules\_decimal\libmpdec\transpose.c" />
-+    <ClCompile Include="..\Modules\_decimal\libmpdec\transpose.c" />->>
++    <ClCompile Include="..\Modules\_decimal\libmpdec\transpose.c" />-->
    </ItemGroup>
    <ItemGroup>
      <CustomBuild Include="..\Modules\_decimal\libmpdec\vcdiv64.asm">

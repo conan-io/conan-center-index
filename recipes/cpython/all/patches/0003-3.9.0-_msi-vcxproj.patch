@@ -1,0 +1,11 @@
+--- PCbuild/_msi.vcxproj
++++ PCbuild/_msi.vcxproj
+@@ -23,7 +23,7 @@
+     </ProjectConfiguration>
+     <ProjectConfiguration Include="PGInstrument|ARM64">
+       <Configuration>PGInstrument</Configuration>
+-      <Platform>ARM4</Platform>
++      <Platform>ARM64</Platform>
+     </ProjectConfiguration>
+     <ProjectConfiguration Include="PGInstrument|Win32">
+       <Configuration>PGInstrument</Configuration>

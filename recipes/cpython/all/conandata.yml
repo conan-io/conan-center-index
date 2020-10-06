@@ -32,3 +32,5 @@ patches:
       base_path: "source_subfolder"
     - patch_file: "patches/0002-3.7.9-relocatable-python-config.patch"
       base_path: "source_subfolder"
+    - patch_file: "patches/0003-3.9.0-_msi-vcxproj.patch"
+      base_path: "source_subfolder"
