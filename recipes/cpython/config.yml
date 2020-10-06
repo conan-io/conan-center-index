@@ -1,7 +1,9 @@
 versions:
   "2.7.18":
     folder: "all"
-  "3.7.8":
+  "3.7.9":
     folder: "all"
-  "3.8.5":
+  "3.8.6":
+    folder: "all"
+  "3.9.0":
     folder: "all"
