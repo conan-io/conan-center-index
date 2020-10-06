@@ -11,5 +11,6 @@ target_link_libraries(${PROJECT_NAME} PRIVATE mpdecimal::libmpdecimal)
 
 if(MPDECIMAL_CXX    )
     add_executable(${PROJECT_NAME}_cpp test_package.cpp)
+    set_propertY(TARGET ${PROJECT_NAME}_cpp PROPERTY CXX_STANDARD 11)
     target_link_libraries(${PROJECT_NAME}_cpp PRIVATE mpdecimal::libmpdecimal++)
 endif()
