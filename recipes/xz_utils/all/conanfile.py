@@ -9,6 +9,7 @@ class XZUtils(ConanFile):
                   " for POSIX-like systems, but also work on some not-so-POSIX systems. XZ Utils are the successor to LZMA Utils."
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://tukaani.org/xz"
+    topics = ("conan", "lzma", "xz", "compression")
     license = "Public Domain, GNU LGPLv2.1, GNU GPLv2, or GNU GPLv3"
 
     settings = "os", "arch", "compiler", "build_type"
