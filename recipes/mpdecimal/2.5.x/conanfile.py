@@ -122,8 +122,8 @@ class MpdecimalConan(ConanFile):
     @property
     def _target_names(self):
         suffix = self._shared_suffix if self.options.shared else ".a"
-        versionsuffix = "-{}".format(self.version) if self.options.shared else ""
-        return "libmpdec{}{}".format(versionsuffix, suffix), "libmpdec++{}{}".format(versionsuffix, suffix)
+        versionsuffix = ".{}".format(self.version) if self.options.shared else ""
+        return "libmpdec{}{}".format(suffix, versionsuffix), "libmpdec++{}{}".format(suffix, versionsuffix)
 
     def build(self):
         self._patch_sources()
@@ -162,7 +162,8 @@ class MpdecimalConan(ConanFile):
             for builddir in builddirs:
                 self.copy("*.a", src=builddir, dst="lib")
                 self.copy("*.so", src=builddir, dst="lib")
-                self.copy("*.dylib", src=builddir, dst="lib")
+                self.copy("*.so.*", src=builddir, dst="lib")
+                self.copy("*.dylib.*", src=builddir, dst="lib")
                 self.copy("*.dll", src=builddir, dst="bin")
 
     def package_info(self):
@@ -171,7 +172,7 @@ class MpdecimalConan(ConanFile):
             lib_pre_suf = ("lib", "-{}".format(self.version))
         elif self.settings.os == "Windows":
             if self.options.shared:
-                lib_pre_suf = ("", ".dll.a")
+                lib_pre_suf = ("", ".dll")
 
         self.cpp_info.components["libmpdecimal"].libs = ["{}mpdec{}".format(*lib_pre_suf)]
         if self.options.shared:
