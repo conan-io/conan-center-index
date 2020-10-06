@@ -8,13 +8,13 @@ class TestPackageConan(ConanFile):
 
     def build(self):
         cmake = CMake(self)
-        cmake.definitions["WITH_CXX"] = self.options["mpdecimal"].with_cxx
+        cmake.definitions["MPDECIMAL_CXX"] = self.options["mpdecimal"].cxx
         cmake.configure()
         cmake.build()
 
     def test(self):
         if not tools.cross_building(self.settings):
             self.run("{} 13 100".format(os.path.join("bin", "test_package")), run_environment=True)
-            if self.options["mpdecimal"].with_cxx:
+            if self.options["mpdecimal"].cxx:
                 self.run("{} 13 100".format(os.path.join("bin", "test_package_cpp")), run_environment=True)
 

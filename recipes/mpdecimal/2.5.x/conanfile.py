@@ -15,12 +15,12 @@ class MpdecimalConan(ConanFile):
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
-        "with_cxx": [True, False],
+        "cxx": [True, False],
     }
     default_options = {
         "shared": False,
         "fPIC": True,
-        "with_cxx": True,
+        "cxx": True,
     }
     exports_sources = "patches/**"
 
@@ -39,7 +39,7 @@ class MpdecimalConan(ConanFile):
             del self.options.fPIC
         if self.settings.arch not in ("x86", "x86_64"):
             raise ConanInvalidConfiguration("Arch is unsupported")
-        if self.options.with_cxx:
+        if self.options.cxx:
             if self.options.shared and self.settings.os == "Windows":
                 raise ConanInvalidConfiguration("A shared libmpdec++ is not possible on Windows (due to non-exportable thread local storage)")
         else:
@@ -73,7 +73,7 @@ class MpdecimalConan(ConanFile):
         mpdecpp_target = "libmpdec++-{}.{}".format(self.version, "dll" if self.options.shared else "lib")
 
         builds = [(libmpdec_folder, mpdec_target)]
-        if self.options.get_safe("with_cxx"):
+        if self.options.cxx:
             builds.append((libmpdecpp_folder, mpdecpp_target))
         with tools.vcvars(self.settings):
             for build_dir, target in builds:
@@ -96,7 +96,7 @@ class MpdecimalConan(ConanFile):
                 shutil.copy("libmpdec-{}.dll.lib".format(self.version), os.path.join(dist_folder, "libmpdec-{}.lib".format(self.version)))
             else:
                 shutil.copy("libmpdec-{}.lib".format(self.version), os.path.join(dist_folder, "libmpdec-{}.lib".format(self.version)))
-        if self.options.with_cxx:
+        if self.options.cxx:
             with tools.chdir(libmpdecpp_folder):
                 shutil.copy("decimal.hh", dist_folder)
                 shutil.copy("libmpdec++-{}.lib".format(self.version), os.path.join(dist_folder, "libmpdec++-{}.lib".format(self.version)))
@@ -106,7 +106,7 @@ class MpdecimalConan(ConanFile):
             return self._autotools
         self._autotools = AutoToolsBuildEnvironment(self, win_bash=tools.os_info.is_windows)
         conf_args = [
-            "--enable-cxx" if self.options.with_cxx else "--disable-cxx"
+            "--enable-cxx" if self.options.cxx else "--disable-cxx"
         ]
         self._autotools.configure(args=conf_args)
         return self._autotools
@@ -136,7 +136,7 @@ class MpdecimalConan(ConanFile):
                 libmpdec, libmpdecpp = self._target_names
                 with tools.chdir("libmpdec"):
                     autotools.make(target=libmpdec)
-                if self.options.with_cxx:
+                if self.options.cxx:
                     with tools.chdir("libmpdec++"):
                         autotools.make(target=libmpdecpp)
 
@@ -146,7 +146,7 @@ class MpdecimalConan(ConanFile):
             distfolder = os.path.join(self.build_folder, self._source_subfolder, "vcbuild", "dist{}".format(32 if self.settings.arch == "x86" else 64))
             self.copy("vc*.h", src=os.path.join(self.build_folder, self._source_subfolder, "libmpdec"), dst="include")
             self.copy("*.h", src=distfolder, dst="include")
-            if self.options.with_cxx:
+            if self.options.cxx:
                 self.copy("*.hh", src=distfolder, dst="include")
             self.copy("*.lib", src=distfolder, dst="lib")
             self.copy("*.dll", src=distfolder, dst="bin")
@@ -154,15 +154,16 @@ class MpdecimalConan(ConanFile):
             mpdecdir = os.path.join(self._source_subfolder, "libmpdec")
             mpdecppdir = os.path.join(self._source_subfolder, "libmpdec++")
             self.copy("mpdecimal.h", src=mpdecdir, dst="include")
-            if self.options.with_cxx:
+            if self.options.cxx:
                 self.copy("decimal.hh", src=mpdecppdir, dst="include")
             builddirs = [mpdecdir]
-            if self.options.with_cxx:
+            if self.options.cxx:
                 builddirs.append(mpdecppdir)
             for builddir in builddirs:
                 self.copy("*.a", src=builddir, dst="lib")
                 self.copy("*.so", src=builddir, dst="lib")
                 self.copy("*.so.*", src=builddir, dst="lib")
+                self.copy("*.dylib", src=builddir, dst="lib")
                 self.copy("*.dylib.*", src=builddir, dst="lib")
                 self.copy("*.dll", src=builddir, dst="bin")
 
@@ -182,6 +183,6 @@ class MpdecimalConan(ConanFile):
             if self.settings.os == "Linux":
                 self.cpp_info.components["libmpdecimal"].system_libs = ["m"]
 
-        if self.options.with_cxx:
+        if self.options.cxx:
             self.cpp_info.components["libmpdecimal++"].libs = ["{}mpdec++{}".format(*lib_pre_suf)]
             self.cpp_info.components["libmpdecimal++"].requires = ["libmpdecimal"]
