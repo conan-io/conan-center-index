@@ -42,14 +42,15 @@ class XZUtils(ConanFile):
         del self.settings.compiler.libcxx
 
     def _apply_patches(self):
-        # Relax Windows SDK restriction
-        tools.replace_in_file(os.path.join(self._source_subfolder, "windows", "vs2017", "liblzma.vcxproj"),
-                              "<WindowsTargetPlatformVersion>10.0.15063.0</WindowsTargetPlatformVersion>",
-                              "<WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>")
+        if tools.Version(self.version) == "5.2.4":
+            # Relax Windows SDK restriction
+            tools.replace_in_file(os.path.join(self._source_subfolder, "windows", "vs2017", "liblzma.vcxproj"),
+                                  "<WindowsTargetPlatformVersion>10.0.15063.0</WindowsTargetPlatformVersion>",
+                                  "<WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>")
 
-        tools.replace_in_file(os.path.join(self._source_subfolder, "windows", "vs2017", "liblzma_dll.vcxproj"),
-                              "<WindowsTargetPlatformVersion>10.0.15063.0</WindowsTargetPlatformVersion>",
-                              "<WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>")
+            tools.replace_in_file(os.path.join(self._source_subfolder, "windows", "vs2017", "liblzma_dll.vcxproj"),
+                                  "<WindowsTargetPlatformVersion>10.0.15063.0</WindowsTargetPlatformVersion>",
+                                  "<WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
@@ -59,7 +60,9 @@ class XZUtils(ConanFile):
     def _build_msvc(self):
         # windows\INSTALL-MSVC.txt
 
-        if self.settings.compiler.version == 15:
+        if self.settings.compiler.version == 15 and tools.Version(self.version) == "5.2.4":
+            # Workaround is required only for 5.2.4 because since 5.2.5 WindowsTargetPlatformVersion is dropped from vcproj file
+            #
             # emulate VS2019+ meaning of WindowsTargetPlatformVersion == "10.0"
             # undocumented method, but officially recommended workaround by microsoft at at
             # https://developercommunity.visualstudio.com/content/problem/140294/windowstargetplatformversion-makes-it-impossible-t.html
