@@ -11,7 +11,7 @@ class PahoMqttCppConan(ConanFile):
     license = "EPL-1.0"
     description = """The open-source client implementations of MQTT and MQTT-SN"""
     exports_sources = ["CMakeLists.txt", "patches/*"]
-    generators = "cmake"
+    generators = "cmake", "cmake_find_package"
     settings = "os", "arch", "compiler", "build_type"
     options = {"shared": [True, False],
                "fPIC": [True, False],
