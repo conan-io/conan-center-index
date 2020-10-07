@@ -29,3 +29,5 @@ versions:
     folder: "3.x.x"
   "3.18.2":
     folder: "3.x.x"
+  "3.18.3":
+    folder: "3.x.x"
