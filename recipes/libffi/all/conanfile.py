@@ -103,9 +103,9 @@ class LibffiConan(ConanFile):
         if self.options.shared:
             self._autotools.defines.append("FFI_BUILDING_DLL")
         if self.settings.compiler == "Visual Studio":
-            if "MT" in self.settings.compiler.runtime:
+            if "MT" in str(self.settings.compiler.runtime):
                 self._autotools.defines.append("USE_STATIC_RTL")
-            if "d" in self.settings.compiler.runtime:
+            if "d" in str(self.settings.compiler.runtime):
                 self._autotools.defines.append("USE_DEBUG_RTL")
         build = None
         host = None
