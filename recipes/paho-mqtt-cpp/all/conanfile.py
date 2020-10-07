@@ -83,7 +83,10 @@ class PahoMqttCppConan(ConanFile):
         self.cpp_info.names["cmake_find_package"] = "PahoMqttCpp"
         self.cpp_info.names["cmake_find_package_multi"] = "PahoMqttCpp"
         target = "paho-mqttpp3" if self.options.shared else "paho-mqttpp3-static"
-        self.cpp_info.components["mqttpp"].names["cmake_find_package"] = target
-        self.cpp_info.components["mqttpp"].names["cmake_find_package_multi"] = target
-        self.cpp_info.components["mqttpp"].requires = ["paho-mqtt-c::paho-mqtt-c"]
-        self.cpp_info.components["mqttpp"].libs = ["paho-mqttpp3"]
+        self.cpp_info.components["paho-mqttpp"].names["cmake_find_package"] = target
+        self.cpp_info.components["paho-mqttpp"].names["cmake_find_package_multi"] = target
+        self.cpp_info.components["paho-mqttpp"].requires = ["paho-mqtt-c::paho-mqtt-c"]
+        if self.settings.os == "Windows":
+            self.cpp_info.components["paho-mqttpp"].libs = [target]
+        else:
+            self.cpp_info.components["paho-mqttpp"].libs = ["paho-mqttpp3"]
