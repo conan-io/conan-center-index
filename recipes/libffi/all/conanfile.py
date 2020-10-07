@@ -1,5 +1,4 @@
 from conans import ConanFile, tools, AutoToolsBuildEnvironment
-from conans.errors import ConanInvalidConfiguration
 from conans.tools import Version
 from contextlib import contextmanager
 import os
@@ -56,10 +55,6 @@ class LibffiConan(ConanFile):
     def configure(self):
         if self.options.shared:
             del self.options.fPIC
-        if Version(self.version) >= "3.3":
-            if self.settings.compiler == "Visual Studio":
-                if "d" in str(self.settings.compiler.runtime):
-                    raise ConanInvalidConfiguration("This version of libffi does not support MTd runtime")
         del self.settings.compiler.libcxx
         del self.settings.compiler.cppstd
 
