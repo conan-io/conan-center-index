@@ -1,0 +1,13 @@
+diff --git a/cmake/SndFileChecks.cmake b/cmake/SndFileChecks.cmake
+index 3528c325..a3853439 100644
+--- a/cmake/SndFileChecks.cmake
++++ b/cmake/SndFileChecks.cmake
+@@ -259,7 +259,7 @@ if (DEFINED ENABLE_STATIC_RUNTIME)
+ 				endforeach (flag_var)
+ 			endif ( )
+ 		else ()
+-			message (FATAL_ERROR "ENABLE_STATIC_RUNTIME option is for CMake < 3.15, use CMAKE_MSVC_RUNTIME_LIBRARY standard option instead.")
++			message (WARNING "ENABLE_STATIC_RUNTIME option is for CMake < 3.15, use CMAKE_MSVC_RUNTIME_LIBRARY standard option instead.")
+ 		endif ()
+ 	else ()
+ 		message(AUTHOR_WARNING "ENABLE_STATIC_RUNTIME option is for MSVC compiler only.")
