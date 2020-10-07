@@ -239,7 +239,7 @@ class GdalConan(ConanFile):
         # if self.options.with_netcdf:
         #     self.requires("netcdf-c/4.7.4")
         if self.options.with_jasper:
-            self.requires("jasper/2.0.19")
+            self.requires("jasper/2.0.21")
         if self.options.with_openjpeg:
             self.requires("openjpeg/2.3.1")
         # if self.options.with_fgdb:
@@ -251,7 +251,7 @@ class GdalConan(ConanFile):
         if self.options.with_xerces:
             self.requires("xerces-c/3.2.3")
         if self.options.with_expat:
-            self.requires("expat/2.2.9")
+            self.requires("expat/2.2.10")
         if self.options.with_libkml:
             self.requires("libkml/1.3.0")
         if self.options.with_odbc and self.settings.os != "Windows":
@@ -265,7 +265,7 @@ class GdalConan(ConanFile):
         # if self.options.with_spatialite:
         #     self.requires("libspatialite/4.3.0a")
         if self.options.get_safe("with_sqlite3"):
-            self.requires("sqlite3/3.32.3")
+            self.requires("sqlite3/3.33.0")
         # if self.options.with_rasterlite2:
         #     self.requires("rasterlite2/x.x.x")
         if self.options.get_safe("with_pcre"):
