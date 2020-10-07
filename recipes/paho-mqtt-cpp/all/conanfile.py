@@ -77,9 +77,13 @@ class PahoMqttCppConan(ConanFile):
         self.copy("notice.html", src=self._source_subfolder, dst="licenses")
         cmake = self._configure_cmake()
         cmake.install()
-        tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
+        # tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
 
     def package_info(self):
-        self.cpp_info.libs = tools.collect_libs(self)
         self.cpp_info.names["cmake_find_package"] = "PahoMqttCpp"
         self.cpp_info.names["cmake_find_package_multi"] = "PahoMqttCpp"
+        target = "paho-mqttpp3" if self.options.shared else "paho-mqttpp3-static"
+        self.cpp_info.components["mqttpp"].names["cmake_find_package"] = target
+        self.cpp_info.components["mqttpp"].names["cmake_find_package_multi"] = target
+        self.cpp_info.components["mqttpp"].requires = ["paho-mqtt-c::paho-mqtt-c"]
+        self.cpp_info.components["mqttpp"].libs = ["libpaho-mqttpp3"]
