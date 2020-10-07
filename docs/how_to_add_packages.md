@@ -2,7 +2,7 @@
 
 ## Join the Early Access Program
 
-The first step in adding packages to ConanCenter is requesting access to the Early Access Program. To enroll in EAP,  please send an email to info@conan.io with the subject [EAP access] or add a comment on this GitHub [issue](https://github.com/conan-io/conan-center-index/issues/4). The EAP was designed to onboard authors to the new process.
+The first step in adding packages to ConanCenter is requesting access to the Early Access Program. To enroll in EAP, please send an email to info@conan.io with the subject [EAP access] or add a comment on this GitHub [issue](https://github.com/conan-io/conan-center-index/issues/4). The EAP was designed to onboard authors to the new process.
 
 With EAP, contribution of packages are now done via pull requests to the recipe found in the Github repository in https://github.com/conan-io/conan-center-index.
 
@@ -21,6 +21,8 @@ The [conan-center-index](https://github.com/conan-io/conan-center-index) (this r
 To contribute with a Conan recipe into the `conan-center` repository you can submit a [Pull Request](https://github.com/conan-io/conan-center-index/pulls) to the **master branch** of this repository. The connected **continuous integration system** will generate binary packages automatically for the most common platforms and compilers. See [the Supported Platforms and Configurations page](supported_platforms_and_configurations.md) to know the generated configurations. For a C++ library, the system is currently generating more than 100 binary packages.
 
 > ⚠️ **Note**: This CI service is not a testing service, it is a binary building service for package **releases**. Unit tests shouldn't be built nor ran in recipes by default. Before submitting a PR it is mandatory to run at least a local package creation.
+
+The CI bot will start a new build only after being approved in EAP. Your PR can be reviewed in the middle time, but is not mandatory.
 
 The CI system will also report with messages in the PR any error in the process, even linking to the logs to see more details and debug.
 
@@ -132,6 +134,13 @@ Then in your `conanfile.py` method, it has to be used to download the sources:
      tools.get(**self.conan_data["sources"][self.version])
 ```
 
+### How to provide a good recipe
+
+The [recipes](https://github.com/conan-io/conan-center-index/tree/master/recipes) available in CCI can be used as good examples, you can use them as the base for your recipe.
+
+If you are looking for header-only projects, you can take a look on [rapidjson](https://github.com/conan-io/conan-center-index/blob/master/recipes/rapidjson/all/conanfile.py), [rapidxml](https://github.com/conan-io/conan-center-index/blob/master/recipes/rapidxml/all/conanfile.py), and [nuklear](https://github.com/conan-io/conan-center-index/blob/master/recipes/nuklear/all/conanfile.py). Also, Conan Docs has a section about [how to package header-only libraries](https://docs.conan.io/en/latest/howtos/header_only.html).
+
+For C/C++ projects which use CMake for building, you can take a look on [szip](https://github.com/conan-io/conan-center-index/blob/master/recipes/szip/all/conanfile.py) and [recastnavigation](https://github.com/conan-io/conan-center-index/blob/master/recipes/recastnavigation/all/conanfile.py).
 
 
 ### Test the recipe locally
@@ -144,9 +153,18 @@ Then in your `conanfile.py` method, it has to be used to download the sources:
 ```
 
   The hook will show error messages but the `conan create` won’t fail unless you export the environment variable `CONAN_HOOK_ERROR_LEVEL=40`.
+  All hook checks will print a similar message:
 
-Call `conan create . lib/1.0@` in the folder of the recipe using the profile you want to test.
+  [HOOK - conan-center.py] post_source(): [LIBCXX MANAGEMENT (KB-H011)] OK
+  [HOOK - conan-center.py] post_package(): ERROR: [PACKAGE LICENSE] No package licenses found
+
+Call `conan create . lib/1.0@` in the folder of the recipe using the profile you want to test. For instance:
+
+    cd conan-center-index/recipes/boost/all
+    conan create . 1.74.0@
 
 ### Debugging failed builds
 
-   Go to the [Error Knowledge Base](error_knowledge_base.md) page to know more.
+   Go to the [Error Knowledge Base](error_knowledge_base.md) page to know more about Conan Center hook errors.
+
+   Some common errors related to Conan can be found on [troubleshooting](https://docs.conan.io/en/latest/faq/troubleshooting.html) section.
