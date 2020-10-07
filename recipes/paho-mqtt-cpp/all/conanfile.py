@@ -86,4 +86,4 @@ class PahoMqttCppConan(ConanFile):
         self.cpp_info.components["mqttpp"].names["cmake_find_package"] = target
         self.cpp_info.components["mqttpp"].names["cmake_find_package_multi"] = target
         self.cpp_info.components["mqttpp"].requires = ["paho-mqtt-c::paho-mqtt-c"]
-        self.cpp_info.components["mqttpp"].libs = ["libpaho-mqttpp3"]
+        self.cpp_info.components["mqttpp"].libs = ["paho-mqttpp3"]
