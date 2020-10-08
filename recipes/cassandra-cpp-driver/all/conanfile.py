@@ -42,7 +42,13 @@ class CassandraCppDriverConan(ConanFile):
     def _configure_cmake(self):
         cmake = CMake(self)
         cmake.definitions["VERSION"] = self.version
+        cmake.definitions["CASS_BUILD_EXAMPLES"] = False
+        cmake.definitions["CASS_BUILD_INTEGRATION_TESTS"] = False
+        cmake.definitions["CASS_BUILD_TESTS"] = False
+        cmake.definitions["CASS_BUILD_UNIT_TESTS"] = False
+        cmake.definitions["CASS_DEBUG_CUSTOM_ALLOC"] = False
         cmake.definitions["CASS_INSTALL_HEADER_IN_SUBDIR"] = self.options.install_header_in_subdir
+        cmake.definitions["CASS_INSTALL_PKG_CONFIG"] = False
 
         if self.options.use_atomic == "boost":
             # Compilation error on Linux
@@ -62,6 +68,7 @@ class CassandraCppDriverConan(ConanFile):
 
         cmake.definitions["CASS_USE_OPENSSL"] = self.options.with_openssl
         cmake.definitions["CASS_USE_ZLIB"] = self.options.with_zlib
+        cmake.definitions["CASS_USE_LIBSSH2"] = False
 
         if self.options.with_kerberos:
             # cmake.definitions["CASS_USE_KERBEROS"] = self.options.with_kerberos

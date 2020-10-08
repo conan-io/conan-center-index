@@ -1,61 +1,42 @@
- CMakeLists.txt                               |  55 ++-----
- src/CMakeLists.txt                           | 211 +++++++++++----------------
- src/third_party/curl/CMakeLists.txt          |  16 +-
- src/third_party/hdr_histogram/CMakeLists.txt |  15 +-
- src/third_party/http-parser/CMakeLists.txt   |  15 +-
+ CMakeLists.txt                               |  30 +----
+ src/CMakeLists.txt                           | 188 ++++++++++++---------------
+ src/third_party/curl/CMakeLists.txt          |  16 +--
+ src/third_party/hdr_histogram/CMakeLists.txt |  15 +--
+ src/third_party/http-parser/CMakeLists.txt   |  16 +--
  src/third_party/minizip/CMakeLists.txt       |  19 +--
- 6 files changed, 114 insertions(+), 217 deletions(-)
+ 6 files changed, 108 insertions(+), 176 deletions(-)
 
 diff --git a/CMakeLists.txt b/CMakeLists.txt
-index c6150948b..b2bee1aa7 100644
+index c6150948b..6d9f13965 100644
 --- a/CMakeLists.txt
 +++ b/CMakeLists.txt
-@@ -1,5 +1,8 @@
- cmake_minimum_required(VERSION 2.8.12)
+@@ -1,6 +1,3 @@
+-cmake_minimum_required(VERSION 2.8.12)
 -project(cassandra C CXX)
-+# project(cassandra C CXX)
-+
-+# include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
-+# conan_basic_setup()
- 
+-
  set(CASS_ROOT_DIR ${CMAKE_CURRENT_SOURCE_DIR})
  set(CASS_SRC_DIR "${CASS_ROOT_DIR}/src")
-@@ -27,61 +30,23 @@ endif()
- # Options
- #---------------
+ set(CASS_INCLUDE_DIR "${CASS_ROOT_DIR}/include")
+@@ -29,8 +26,6 @@ endif()
  
--option(CASS_BUILD_EXAMPLES "Build examples" OFF)
--option(CASS_BUILD_INTEGRATION_TESTS "Build integration tests" OFF)
+ option(CASS_BUILD_EXAMPLES "Build examples" OFF)
+ option(CASS_BUILD_INTEGRATION_TESTS "Build integration tests" OFF)
 -option(CASS_BUILD_SHARED "Build shared library" ON)
 -option(CASS_BUILD_STATIC "Build static library" OFF)
--option(CASS_BUILD_TESTS "Build tests" OFF)
--option(CASS_BUILD_UNIT_TESTS "Build unit tests" OFF)
--option(CASS_DEBUG_CUSTOM_ALLOC "Debug custom allocator" OFF)
- option(CASS_INSTALL_HEADER "Install header file" ON)
- option(CASS_INSTALL_HEADER_IN_SUBDIR "Install header file under 'include/cassandra'" OFF)
--option(CASS_INSTALL_PKG_CONFIG "Install pkg-config file(s)" ON)
- option(CASS_MULTICORE_COMPILATION "Enable multicore compilation" ON)
- option(CASS_USE_BOOST_ATOMIC "Use Boost atomics library" OFF)
+ option(CASS_BUILD_TESTS "Build tests" OFF)
+ option(CASS_BUILD_UNIT_TESTS "Build unit tests" OFF)
+ option(CASS_DEBUG_CUSTOM_ALLOC "Debug custom allocator" OFF)
+@@ -42,7 +37,6 @@ option(CASS_USE_BOOST_ATOMIC "Use Boost atomics library" OFF)
  option(CASS_USE_KERBEROS "Use Kerberos" OFF)
--option(CASS_USE_LIBSSH2 "Use libssh2 for integration tests" OFF)
+ option(CASS_USE_LIBSSH2 "Use libssh2 for integration tests" OFF)
  option(CASS_USE_OPENSSL "Use OpenSSL" ON)
 -option(CASS_USE_STATIC_LIBS "Link static libraries when building executables" OFF)
  option(CASS_USE_STD_ATOMIC "Use C++11 atomics library" OFF)
  option(CASS_USE_ZLIB "Use zlib" ON)
  option(CASS_USE_TIMERFD "Use timerfd (Linux only)" ON)
+@@ -60,28 +54,12 @@ if(CASS_BUILD_INTEGRATION_TESTS OR CASS_BUILD_UNIT_TESTS)
+ endif()
  
--# Handle testing dependencies
--if(CASS_BUILD_TESTS)
--  # Enable integration and unit tests
--  set(CASS_BUILD_INTEGRATION_TESTS ON)
--  set(CASS_BUILD_UNIT_TESTS ON)
--endif()
--
--if(CASS_BUILD_INTEGRATION_TESTS OR CASS_BUILD_UNIT_TESTS)
--  set(CASS_USE_OPENSSL ON) # Required for tests
--  set(CASS_USE_KERBEROS ON) # Required for tests
--endif()
--
  # Determine which driver target should be used as a dependency
 -set(PROJECT_LIB_NAME_TARGET cassandra)
 -if(CASS_USE_STATIC_LIBS OR
@@ -83,23 +64,18 @@ index c6150948b..b2bee1aa7 100644
  include(ClangFormat)
  
  #------------------------
-@@ -222,10 +187,8 @@ endif()
- 
- add_subdirectory(src)
- 
--if(CASS_BUILD_EXAMPLES)
--  add_subdirectory(examples)
--endif()
+@@ -229,3 +207,9 @@ endif()
+ if(CASS_BUILD_INTEGRATION_TESTS OR CASS_BUILD_UNIT_TESTS)
+   add_subdirectory(tests)
+ endif()
++
 +#------------------------
 +# Install licenses
 +#------------------------
- 
--if(CASS_BUILD_INTEGRATION_TESTS OR CASS_BUILD_UNIT_TESTS)
--  add_subdirectory(tests)
--endif()
++
 +install(FILES LICENSE.txt DESTINATION licenses)
 diff --git a/src/CMakeLists.txt b/src/CMakeLists.txt
-index 06b84b759..0c2f343ae 100644
+index 06b84b759..eae72555d 100644
 --- a/src/CMakeLists.txt
 +++ b/src/CMakeLists.txt
 @@ -1,6 +1,41 @@
@@ -144,39 +120,7 @@ index 06b84b759..0c2f343ae 100644
  file(GLOB SOURCES *.cpp *.hpp)
  
  if(APPLE)
-@@ -39,18 +74,24 @@ endif()
- add_subdirectory(third_party/curl)
- add_subdirectory(third_party/hdr_histogram)
- add_subdirectory(third_party/http-parser)
--add_subdirectory(third_party/minizip)
- add_subdirectory(third_party/sparsehash)
- 
-+if(CASS_USE_ZLIB)
-+  add_subdirectory(third_party/minizip)
-+endif()
-+
- list(APPEND INCLUDE_DIRS 
-   third_party/curl
-   third_party/hdr_histogram
-   third_party/http-parser
--  third_party/minizip
-   third_party/mt19937_64
-   third_party/rapidjson/rapidjson
-   third_party/sparsehash/src)
- 
-+if(CASS_USE_ZLIB)
-+  list(APPEND INCLUDE_DIRS third_party/minizip)
-+endif()
-+
- list(APPEND INCLUDE_DIRS ${CASS_INCLUDE_DIR} ${CMAKE_CURRENT_SOURCE_DIR})
- 
- #------------------------------
-@@ -121,83 +162,52 @@ configure_file(
-   ${CASS_ROOT_DIR}/driver_config.hpp.in 
-   ${CMAKE_CURRENT_SOURCE_DIR}/driver_config.hpp)
- 
--
- #------------------------------
+@@ -126,78 +161,46 @@ configure_file(
  # Targets
  #------------------------------
  
@@ -219,10 +163,21 @@ index 06b84b759..0c2f343ae 100644
 +  ${SOURCES}
 +  $<TARGET_OBJECTS:curl_hostcheck>
 +  $<TARGET_OBJECTS:hdr_histogram>
-+  $<TARGET_OBJECTS:http-parser>)
++  $<TARGET_OBJECTS:http-parser>
++  $<TARGET_OBJECTS:minizip>)
 +
-+if(CASS_USE_ZLIB)
-+  target_sources(${PROJECT_LIB_NAME_TARGET} PRIVATE $<TARGET_OBJECTS:minizip>)
++
++conan_target_link_libraries(${PROJECT_LIB_NAME_TARGET})
++
++if(WIN32)
++ target_link_libraries(${PROJECT_LIB_NAME_TARGET}
++    iphlpapi
++    psapi
++    wsock32
++    crypt32
++    ws2_32
++    userenv
++    version)
  endif()
  
 -if(CASS_BUILD_STATIC)
@@ -260,19 +215,6 @@ index 06b84b759..0c2f343ae 100644
 -  if(ZLIB_LIBRARY_NAME)
 -    add_dependencies(cassandra_static ${ZLIB_LIBRARY_NAME})
 -  endif()
-+conan_target_link_libraries(${PROJECT_LIB_NAME_TARGET})
-+
-+if(WIN32)
-+ target_link_libraries(${PROJECT_LIB_NAME_TARGET}
-+    iphlpapi
-+    psapi
-+    wsock32
-+    crypt32
-+    ws2_32
-+    userenv
-+    version)
-+endif()
-+  
 +target_include_directories(${PROJECT_LIB_NAME_TARGET} PRIVATE 
 +  ${INCLUDE_DIRS}
 +)
@@ -295,26 +237,7 @@ index 06b84b759..0c2f343ae 100644
  endif()
  
  #-------------------------------------
-@@ -240,62 +250,17 @@ else()
-   set(INSTALL_HEADER_DIR "include")
- endif()
- 
--if(CASS_INSTALL_PKG_CONFIG)
--  if(NOT WIN32)
--    find_package(PkgConfig)
--    if(PKG_CONFIG_FOUND)
--      set(prefix ${CMAKE_INSTALL_PREFIX})
--      set(exec_prefix ${CMAKE_INSTALL_PREFIX})
--      set(libdir ${CMAKE_INSTALL_PREFIX}/${CMAKE_INSTALL_LIBDIR})
--      set(includedir ${CMAKE_INSTALL_PREFIX}/${INSTALL_HEADER_DIR})
--      set(version ${PROJECT_VERSION_STRING})
--    endif()
--  endif()
--endif()
--
- # Determine if the header should be installed
- if(CASS_INSTALL_HEADER)
-   file(GLOB CASS_API_HEADER_FILES ${CASS_INCLUDE_DIR}/*.h)
+@@ -259,40 +262,17 @@ if(CASS_INSTALL_HEADER)
    install(FILES ${CASS_API_HEADER_FILES} DESTINATION ${INSTALL_HEADER_DIR})
  endif()
  
@@ -352,17 +275,20 @@ index 06b84b759..0c2f343ae 100644
 -        install(FILES "${CMAKE_CURRENT_BINARY_DIR}/cassandra_static.pc"
 -          DESTINATION "${CMAKE_INSTALL_LIBDIR}/pkgconfig")
 -      endif()
--    endif()
--  endif()
--endif()
 +# Install the library
 +install(TARGETS ${PROJECT_LIB_NAME_TARGET}
-+  RUNTIME DESTINATION ${INSTALL_DLL_EXE_DIR}  # for dll/executable/pdb files
-+  LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}  # for shared library
-+  ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}) # for static library
- 
- #-------------------
- # Uninstall target
++RUNTIME DESTINATION ${INSTALL_DLL_EXE_DIR}  # for dll/executable/pdb files
++LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}  # for shared library
++ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}) # for static library
++if(CASS_INSTALL_PKG_CONFIG)
++  if(NOT WIN32)
++    if(PKG_CONFIG_FOUND)
++      configure_file("${PROJECT_SOURCE_DIR}/packaging/cassandra.pc.in" "cassandra.pc" @ONLY)
++      install(FILES "${CMAKE_CURRENT_BINARY_DIR}/cassandra.pc"
++        DESTINATION "${CMAKE_INSTALL_LIBDIR}/pkgconfig")
+     endif()
+   endif()
+ endif()
 diff --git a/src/third_party/curl/CMakeLists.txt b/src/third_party/curl/CMakeLists.txt
 index 63f391752..8c00dd203 100644
 --- a/src/third_party/curl/CMakeLists.txt
@@ -413,10 +339,10 @@ index 41e4bab5b..890df4e4b 100644
 -    FOLDER "Driver/Dependencies")
 -endif()
 diff --git a/src/third_party/http-parser/CMakeLists.txt b/src/third_party/http-parser/CMakeLists.txt
-index 8b9f8dc8e..91ef87798 100644
+index 8b9f8dc8e..574a6acd1 100644
 --- a/src/third_party/http-parser/CMakeLists.txt
 +++ b/src/third_party/http-parser/CMakeLists.txt
-@@ -3,15 +3,8 @@ file(GLOB SOURCES http_parser.c http_parser.h)
+@@ -3,15 +3,7 @@ file(GLOB SOURCES http_parser.c http_parser.h)
  source_group("Source Files\\" REGULAR_EXPRESSION ".*\\.c(pp)?")
  source_group("Header Files\\" REGULAR_EXPRESSION ".*\\.h(pp)?")
  
@@ -426,16 +352,17 @@ index 8b9f8dc8e..91ef87798 100644
 -    POSITION_INDEPENDENT_CODE ON
 -    FOLDER "Driver/Dependencies")
 -endif()
-+add_library(http-parser OBJECT ${SOURCES})
-+set_target_properties(http-parser PROPERTIES 
-+  POSITION_INDEPENDENT_CODE ON
-+  FOLDER "Driver/Dependencies")
- 
+-
 -if(CASS_BUILD_STATIC)
 -  add_library(http-parser_static OBJECT ${SOURCES})
 -  set_target_properties(http-parser_static PROPERTIES 
 -    FOLDER "Driver/Dependencies")
 -endif()
++add_library(http-parser OBJECT ${SOURCES})
++set_target_properties(http-parser PROPERTIES 
++  POSITION_INDEPENDENT_CODE ON
++  FOLDER "Driver/Dependencies")
+\ No newline at end of file
 diff --git a/src/third_party/minizip/CMakeLists.txt b/src/third_party/minizip/CMakeLists.txt
 index 569bf91f6..b2e189360 100644
 --- a/src/third_party/minizip/CMakeLists.txt
