@@ -1,5 +1,7 @@
-from conans import ConanFile, CMake, tools
 import os
+from conans import ConanFile, CMake, tools
+from conans.errors import ConanInvalidConfiguration
+from conans.tools import Version
 
 class TrantorConan(ConanFile):
     name = "trantor"
