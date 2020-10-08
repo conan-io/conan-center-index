@@ -54,7 +54,7 @@ class PocoConan(ConanFile):
         "PocoXML": _PocoComponent("enable_xml", True, ("PocoFoundation", ), True),
         "PocoZip": _PocoComponent("enable_zip", True, ("PocoUtil", "PocoXML", ), True),
     }
-    
+
     for comp in _poco_component_tree.values():
         if comp.option:
             options[comp.option] = [True, False]
@@ -124,9 +124,9 @@ class PocoConan(ConanFile):
         self.requires("pcre/8.41")
         self.requires("zlib/1.2.11")
         if self.options.enable_xml:
-            self.requires("expat/2.2.9")
+            self.requires("expat/2.2.10")
         if self.options.enable_data_sqlite:
-            self.requires("sqlite3/3.31.1")
+            self.requires("sqlite3/3.33.0")
         if self.options.enable_apacheconnector:
             self.requires("apr/1.7.0")
             self.requires("apr-util/1.6.1")
@@ -135,7 +135,7 @@ class PocoConan(ConanFile):
         if self.options.enable_netssl or \
                 self.options.enable_crypto or \
                 self.options.get_safe("enable_jwt", False):
-            self.requires("openssl/1.1.1g")
+            self.requires("openssl/1.1.1h")
 
     def _patch_sources(self):
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
@@ -194,7 +194,7 @@ class PocoConan(ConanFile):
                  else ("d" if self.settings.build_type == "Debug" else "")
 
         self.cpp_info.libs = list("{}{}".format(lib, suffix) for lib in self._ordered_libs)
-        
+
         if self.settings.os == "Linux":
             self.cpp_info.system_libs.extend(["pthread", "dl", "rt"])
 
@@ -202,7 +202,7 @@ class PocoConan(ConanFile):
             self.cpp_info.defines.append("POCO_NO_AUTOMATIC_LIBS")
         if not self.options.shared:
             self.cpp_info.defines.append("POCO_STATIC=ON")
-            if self.settings.compiler == "Visual Studio":
+            if self.settings.os == "Windows":
                 self.cpp_info.system_libs.extend(["ws2_32", "iphlpapi", "crypt32"])
         self.cpp_info.names["cmake_find_package"] = "Poco"
         self.cpp_info.names["cmake_find_package_multi"] = "Poco"
