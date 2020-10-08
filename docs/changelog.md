@@ -1,5 +1,12 @@
 # Changelog
 
+### 07-October-2020 - 17:06 CEST
+
+- [fix] Minor fix to AutomaticMerge job (#390)
+- [fix] Modify temp folder, it will no longer be the root of the workspace.
+- [job] Populate artifact properties from BuildSingleReference job.
+- [job] New job to iterate Github repository (and commit) and find packages missing from remote.
+
 ### 29-September-2020 - 16:21 CEST
 
 - [feature] Use indexer V2 API.
