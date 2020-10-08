@@ -3,6 +3,7 @@ from conans import ConanFile, CMake, tools
 from conans.errors import ConanInvalidConfiguration
 from conans.tools import Version
 
+
 class TrantorConan(ConanFile):
     name = "trantor"
     license = "BSD-3-Clause"
@@ -28,12 +29,13 @@ class TrantorConan(ConanFile):
     def configure(self):
         if self.settings.os == "Windows" and self.settings.compiler == "Visual Studio":
             del self.options.fPIC
-            compiler_version = Version(self.settings.compiler.version.value)
-            if compiler_version < "15":
-                raise ConanInvalidConfiguration("On Windows Trantor can only be built with "
-                                                "Visual Studio 2017 or higher.")
+            #compiler_version = Version(self.settings.compiler.version.value)
+            # if compiler_version < "15":
+            #    raise ConanInvalidConfiguration("On Windows Trantor can only be built with "
+            #                                    "Visual Studio 2017 or higher.")
             if "MT" in self.settings.compiler.runtime and self.options.shared:
-                raise ConanInvalidConfiguration("Trantor can not be built by MSVC and MT runtime as shared library.")
+                raise ConanInvalidConfiguration(
+                    "Trantor can not be built by MSVC and MT runtime as shared library.")
 
     @property
     def _source_subfolder(self):
