@@ -44,9 +44,6 @@ class CassandraCppDriverConan(ConanFile):
         cmake.definitions["VERSION"] = self.version
         cmake.definitions["CASS_INSTALL_HEADER_IN_SUBDIR"] = self.options.install_header_in_subdir
 
-        if self.settings.os == "Macos":
-            raise ConanInvalidConfiguration("Macos is unsuported")
-
         if self.options.use_atomic == "boost":
             # Compilation error on Linux with clang
             # cmake.definitions["CASS_USE_BOOST_ATOMIC"] = True
@@ -82,6 +79,10 @@ class CassandraCppDriverConan(ConanFile):
         if self.settings.os == "Windows":
             del self.options.fPIC
             del self.options.use_timerfd
+
+    def configure(self):
+        if self.settings.os == "Macos":
+            raise ConanInvalidConfiguration("Macos is unsupported")
 
     def requirements(self):
         self.requires("libuv/1.34.2")
