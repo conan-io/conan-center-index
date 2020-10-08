@@ -116,5 +116,8 @@ class CassandraCppDriverConan(ConanFile):
     def package_info(self):
         self.cpp_info.libs = tools.collect_libs(self)
 
-        if not self.options.shared:
-            self.cpp_info.defines.append("CASS_STATIC")
+        if self.settings.os == "Windows":
+            self.cpp_info.libs.extend(["iphlpapi", "psapi", "wsock32",
+                "crypt32", "ws2_32", "userenv", "version"])
+            if not self.options.shared:
+                self.cpp_info.defines = ["CASS_STATIC"]
