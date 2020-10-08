@@ -1,10 +1,8 @@
  CMakeLists.txt                               |  30 +----
- src/CMakeLists.txt                           | 188 ++++++++++++---------------
+ src/CMakeLists.txt                           | 190 ++++++++++++---------------
  src/third_party/curl/CMakeLists.txt          |  16 +--
  src/third_party/hdr_histogram/CMakeLists.txt |  15 +--
- src/third_party/http-parser/CMakeLists.txt   |  16 +--
- src/third_party/minizip/CMakeLists.txt       |  19 +--
- 6 files changed, 108 insertions(+), 176 deletions(-)
+ 4 files changed, 97 insertions(+), 154 deletions(-)
 
 diff --git a/CMakeLists.txt b/CMakeLists.txt
 index c6150948b..6d9f13965 100644
@@ -75,7 +73,7 @@ index c6150948b..6d9f13965 100644
 +
 +install(FILES LICENSE.txt DESTINATION licenses)
 diff --git a/src/CMakeLists.txt b/src/CMakeLists.txt
-index 06b84b759..eae72555d 100644
+index 06b84b759..f79818745 100644
 --- a/src/CMakeLists.txt
 +++ b/src/CMakeLists.txt
 @@ -1,6 +1,41 @@
@@ -120,7 +118,23 @@ index 06b84b759..eae72555d 100644
  file(GLOB SOURCES *.cpp *.hpp)
  
  if(APPLE)
-@@ -126,78 +161,46 @@ configure_file(
+@@ -38,15 +73,11 @@ endif()
+ 
+ add_subdirectory(third_party/curl)
+ add_subdirectory(third_party/hdr_histogram)
+-add_subdirectory(third_party/http-parser)
+-add_subdirectory(third_party/minizip)
+ add_subdirectory(third_party/sparsehash)
+ 
+ list(APPEND INCLUDE_DIRS 
+   third_party/curl
+   third_party/hdr_histogram
+-  third_party/http-parser
+-  third_party/minizip
+   third_party/mt19937_64
+   third_party/rapidjson/rapidjson
+   third_party/sparsehash/src)
+@@ -126,78 +157,44 @@ configure_file(
  # Targets
  #------------------------------
  
@@ -162,9 +176,7 @@ index 06b84b759..eae72555d 100644
 +add_library(${PROJECT_LIB_NAME_TARGET}
 +  ${SOURCES}
 +  $<TARGET_OBJECTS:curl_hostcheck>
-+  $<TARGET_OBJECTS:hdr_histogram>
-+  $<TARGET_OBJECTS:http-parser>
-+  $<TARGET_OBJECTS:minizip>)
++  $<TARGET_OBJECTS:hdr_histogram>)
 +
 +
 +conan_target_link_libraries(${PROJECT_LIB_NAME_TARGET})
@@ -237,7 +249,7 @@ index 06b84b759..eae72555d 100644
  endif()
  
  #-------------------------------------
-@@ -259,40 +262,17 @@ if(CASS_INSTALL_HEADER)
+@@ -259,40 +256,17 @@ if(CASS_INSTALL_HEADER)
    install(FILES ${CASS_API_HEADER_FILES} DESTINATION ${INSTALL_HEADER_DIR})
  endif()
  
@@ -338,56 +350,3 @@ index 41e4bab5b..890df4e4b 100644
 -  set_target_properties(hdr_histogram_static PROPERTIES 
 -    FOLDER "Driver/Dependencies")
 -endif()
-diff --git a/src/third_party/http-parser/CMakeLists.txt b/src/third_party/http-parser/CMakeLists.txt
-index 8b9f8dc8e..574a6acd1 100644
---- a/src/third_party/http-parser/CMakeLists.txt
-+++ b/src/third_party/http-parser/CMakeLists.txt
-@@ -3,15 +3,7 @@ file(GLOB SOURCES http_parser.c http_parser.h)
- source_group("Source Files\\" REGULAR_EXPRESSION ".*\\.c(pp)?")
- source_group("Header Files\\" REGULAR_EXPRESSION ".*\\.h(pp)?")
- 
--if(CASS_BUILD_SHARED)
--  add_library(http-parser OBJECT ${SOURCES})
--  set_target_properties(http-parser PROPERTIES 
--    POSITION_INDEPENDENT_CODE ON
--    FOLDER "Driver/Dependencies")
--endif()
--
--if(CASS_BUILD_STATIC)
--  add_library(http-parser_static OBJECT ${SOURCES})
--  set_target_properties(http-parser_static PROPERTIES 
--    FOLDER "Driver/Dependencies")
--endif()
-+add_library(http-parser OBJECT ${SOURCES})
-+set_target_properties(http-parser PROPERTIES 
-+  POSITION_INDEPENDENT_CODE ON
-+  FOLDER "Driver/Dependencies")
-\ No newline at end of file
-diff --git a/src/third_party/minizip/CMakeLists.txt b/src/third_party/minizip/CMakeLists.txt
-index 569bf91f6..b2e189360 100644
---- a/src/third_party/minizip/CMakeLists.txt
-+++ b/src/third_party/minizip/CMakeLists.txt
-@@ -3,17 +3,8 @@ file(GLOB SOURCES ioapi.c unzip.c crypt.h ioapi.h unzip.h)
- source_group("Source Files\\" REGULAR_EXPRESSION ".*\\.c(pp)?")
- source_group("Header Files\\" REGULAR_EXPRESSION ".*\\.h(pp)?")
- 
--if(CASS_BUILD_SHARED)
--  add_library(minizip OBJECT ${SOURCES})
--  target_include_directories(minizip PRIVATE ${ZLIB_INCLUDE_DIRS})
--  set_target_properties(minizip PROPERTIES 
--    POSITION_INDEPENDENT_CODE ON
--    FOLDER "Driver/Dependencies")
--endif()
--
--if(CASS_BUILD_STATIC)
--  add_library(minizip_static OBJECT ${SOURCES})
--  target_include_directories(minizip_static PRIVATE ${ZLIB_INCLUDE_DIRS})
--  set_target_properties(minizip_static PROPERTIES 
--    FOLDER "Driver/Dependencies")
--endif()
-+add_library(minizip OBJECT ${SOURCES})
-+target_include_directories(minizip PRIVATE ${ZLIB_INCLUDE_DIRS})
-+set_target_properties(minizip PROPERTIES 
-+  POSITION_INDEPENDENT_CODE ON
-+  FOLDER "Driver/Dependencies")
-\ No newline at end of file
