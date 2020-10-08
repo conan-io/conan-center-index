@@ -952,6 +952,11 @@ class BoostConan(ConanFile):
         self.cpp_info.components["headers"].names["cmake_find_package"] = "headers"
         self.cpp_info.components["headers"].names["cmake_find_package_multi"] = "headers"
 
+        # Boost::boost is an alias of Boost::headers
+        self.cpp_info.components["_boost_cmake"].requires = ["headers"]
+        self.cpp_info.components["_boost_cmake"].names["cmake_find_package"] = "boost"
+        self.cpp_info.components["_boost_cmake"].names["cmake_find_package_multi"] = "boost"
+
         self.cpp_info.components["_libboost"].requires = ["headers"]
         self.cpp_info.components["_libboost"].bindirs.append("lib")
 
