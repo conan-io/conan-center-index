@@ -32,6 +32,8 @@ class TrantorConan(ConanFile):
             if compiler_version < "15":
                 raise ConanInvalidConfiguration("On Windows Trantor can only be built with "
                                                 "Visual Studio 2017 or higher.")
+            if "MT" in self.settings.compiler.runtime and self.options.shared:
+                raise ConanInvalidConfiguration("Trantor can not be built by MSVC and MT runtime as shared library.")
 
     @property
     def _source_subfolder(self):
