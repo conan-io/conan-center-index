@@ -12,7 +12,7 @@ class TrantorConan(ConanFile):
     settings = "os", "compiler", "build_type", "arch"
     options = {"shared": [True, False], "fPIC": [True, False]}
     default_options = {"shared": False, "fPIC": True}
-    generators = "cmake"
+    generators = "cmake", "cmake_find_package_multi"
     _cmake = None
 
     def requirements(self):
@@ -31,6 +31,18 @@ class TrantorConan(ConanFile):
     def _source_subfolder(self):
         return "source_subfolder"
 
+    def _patch_sources(self):
+        tools.replace_in_file(os.path.join(self._source_subfolder, "CMakeLists.txt"),
+                              "find_package(c-ares)",
+                              "find_package(c-ares REQUIRED)")
+        tools.replace_in_file(os.path.join(self._source_subfolder, "CMakeLists.txt"),
+                              "target_link_libraries(${PROJECT_NAME} PRIVATE c-ares_lib)",
+                              "target_link_libraries(${PROJECT_NAME} PRIVATE c-ares::cares)")
+        tools.replace_in_file(os.path.join(self._source_subfolder, "CMakeLists.txt"),
+                              "\"${CMAKE_CURRENT_SOURCE_DIR}/cmake_modules/Findc-ares.cmake\"",
+                              "#")
+        tools.rmdir(os.path.join(self._source_subfolder, "cmake_modules"))
+
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
         extracted_dir = "trantor-{}".format(self.version)
@@ -45,6 +57,7 @@ class TrantorConan(ConanFile):
         return self._cmake
 
     def build(self):
+        self._patch_sources()
         cmake = self._configure_cmake()
         cmake.build()
 
