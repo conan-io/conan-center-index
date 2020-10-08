@@ -45,11 +45,14 @@ class CassandraCppDriverConan(ConanFile):
         cmake.definitions["CASS_INSTALL_HEADER_IN_SUBDIR"] = self.options.install_header_in_subdir
 
         if self.options.use_atomic == "boost":
-            # Compilation error on Linux with clang
-            # cmake.definitions["CASS_USE_BOOST_ATOMIC"] = True
-            # cmake.definitions["CASS_USE_STD_ATOMIC"] = False
-            raise ConanInvalidConfiguration(
-                "Boost.Atomic is not supported at the moment")
+            # Compilation error on Linux
+            if self.settings.os == "Linux":
+                raise ConanInvalidConfiguration(
+                    "Boost.Atomic is not supported on Linux at the moment")
+                    
+            cmake.definitions["CASS_USE_BOOST_ATOMIC"] = True
+            cmake.definitions["CASS_USE_STD_ATOMIC"] = False
+            
         elif self.options.use_atomic == "std":
             cmake.definitions["CASS_USE_BOOST_ATOMIC"] = False
             cmake.definitions["CASS_USE_STD_ATOMIC"] = True
