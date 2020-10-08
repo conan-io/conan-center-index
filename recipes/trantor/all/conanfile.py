@@ -24,8 +24,12 @@ class TrantorConan(ConanFile):
             del self.options.fPIC
 
     def configure(self):
-        if self.options.shared:
+        if self.settings.os == "Windows" and self.settings.compiler == "Visual Studio":
             del self.options.fPIC
+            compiler_version = Version(self.settings.compiler.version.value)
+            if compiler_version < "15":
+                raise ConanInvalidConfiguration("On Windows Trantor can only be built with "
+                                                "Visual Studio 2017 or higher.")
 
     @property
     def _source_subfolder(self):
