@@ -60,8 +60,8 @@ class CassandraCppDriverConan(ConanFile):
             cmake.definitions["CASS_USE_BOOST_ATOMIC"] = False
             cmake.definitions["CASS_USE_STD_ATOMIC"] = False
 
-            cmake.definitions["CASS_USE_OPENSSL"] = self.options.with_openssl
-            cmake.definitions["CASS_USE_ZLIB"] = self.options.with_zlib
+        cmake.definitions["CASS_USE_OPENSSL"] = self.options.with_openssl
+        cmake.definitions["CASS_USE_ZLIB"] = self.options.with_zlib
 
         if self.options.with_kerberos:
             # cmake.definitions["CASS_USE_KERBEROS"] = self.options.with_kerberos
