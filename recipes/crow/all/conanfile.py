@@ -8,17 +8,14 @@ class CrowConan(ConanFile):
     topics = ("conan", "web", "microframework", "header-only")
     url = "https://github.com/conan-io/conan-center-index"
     settings = "os", "compiler", "arch", "build_type"
-    generators = "cmake", "cmake_find_package", "cmake_find_package_multi"
     exports_sources = ["patches/*"]
     license = "BSD-3-Clause"
-    no_copy_source = True
 
     @property
     def _source_subfolder(self):
         return "source_subfolder"
 
     def requirements(self):
-        self.requires("openssl/1.1.1h")
         self.requires("boost/1.69.0")
 
     def source(self):
@@ -26,14 +23,13 @@ class CrowConan(ConanFile):
         extracted_dir = "crow-" + self.version
         os.rename(extracted_dir, self._source_subfolder)
 
-    def _configure_cmake(self):
+    def build(self):
+        if tools.Version(self.deps_cpp_info["boost"].version) >= "1.70.0":
+            raise ConanInvalidConfiguration("Crow requires Boost <1.70.0")
+
         tools.patch(**self.conan_data["patches"][self.version])
         cmake = CMake(self)
         cmake.configure(source_folder=self._source_subfolder)
-        return cmake
-
-    def build(self):
-        cmake = self._configure_cmake()
         cmake.build()
 
     def package(self):
@@ -42,3 +38,7 @@ class CrowConan(ConanFile):
 
     def package_id(self):
         self.info.header_only()
+
+    def package_info(self):
+        if self.settings.os == "Linux":
+            self.cpp_info.system_libs = ["pthread"]
