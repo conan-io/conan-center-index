@@ -30,7 +30,6 @@ class SqlcipherConan(ConanFile):
     generators = "cmake"
     _source_subfolder = "source_subfolder"
 
-
     def config_options(self):
         del self.settings.compiler.libcxx
         del self.settings.compiler.cppstd
