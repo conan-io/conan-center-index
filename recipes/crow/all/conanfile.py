@@ -12,7 +12,7 @@ class CrowConan(ConanFile):
     settings = "os", "compiler", "arch", "build_type"
     generators = "cmake", "cmake_find_package", "cmake_find_package_multi"
     exports_sources = ["patches/*"]
-    license = "BSD3"
+    license = "BSD-3-Clause"
     no_copy_source = True
 
     @property
