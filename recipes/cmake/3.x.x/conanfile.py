@@ -102,6 +102,7 @@ class CMakeConan(ConanFile):
 
     def package_id(self):
         self.info.options.with_openssl = self._with_openssl
+        del self.info.settings.compiler
 
     def package_info(self):
         minor = self._minor_version()
