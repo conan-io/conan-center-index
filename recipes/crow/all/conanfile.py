@@ -11,7 +11,6 @@ class CrowConan(ConanFile):
     generators = "cmake", "cmake_find_package", "cmake_find_package_multi"
     exports_sources = ["patches/*"]
     license = "BSD-3-Clause"
-    no_copy_source = True
 
     @property
     def _source_subfolder(self):
