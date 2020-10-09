@@ -108,6 +108,9 @@ class PocoConan(ConanFile):
             raise ConanInvalidConfiguration("Apache connector not supported: https://github.com/pocoproject/poco/issues/1764")
         if self.options.enable_data_mysql:
             raise ConanInvalidConfiguration("MySQL not supported yet, open an issue here please: %s" % self.url)
+        if self.settings.compiler == "Visual Studio":
+            if self.options.shared and "MT" in str(self.compiler.runtime):
+                raise ConanInvalidConfiguration("Cannot build shared poco libraries with MT(d) runtime")
         if self.options.get_safe("enable_data_postgresql", False):
             raise ConanInvalidConfiguration("PostgreSQL not supported yet, open an issue here please: %s" % self.url)
         for compopt in self._poco_component_tree.values():
