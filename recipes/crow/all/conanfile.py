@@ -11,6 +11,7 @@ class CrowConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     settings = "os", "compiler", "arch", "build_type"
     generators = "cmake", "cmake_find_package", "cmake_find_package_multi"
+    exports_sources = ["patches/*"]
     license = "BSD3"
     no_copy_source = True
 
@@ -20,12 +21,13 @@ class CrowConan(ConanFile):
 
     def requirements(self):
         self.requires("openssl/1.1.1h")
-        self.requires("boost/1.74.0")
+        self.requires("boost/1.69.0")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
         extracted_dir = "crow-" + self.version
         os.rename(extracted_dir, self._source_subfolder)
+        tools.patch(**self.conan_data["patches"][self.version])
 
     def _configure_cmake(self):
         cmake = CMake(self)
@@ -38,9 +40,7 @@ class CrowConan(ConanFile):
 
     def package(self):
         self.copy(pattern="LICENSE*", dst="licenses", src=self._source_subfolder)
-        cmake = self._configure_cmake()
-        cmake.install()
-        tools.rmdir(os.path.join(self.package_folder, "lib"))
+        self.copy("*.h", dst="include/crow", src="amalgamate")
 
     def package_id(self):
         self.info.header_only()
