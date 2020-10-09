@@ -1,8 +1,6 @@
 from conans import ConanFile, tools, CMake
 import os
 
-required_conan_version = ">=1.28.0"
-
 class CrowConan(ConanFile):
     name = "crow"
     homepage = "https://github.com/ipkn/crow"
@@ -27,9 +25,9 @@ class CrowConan(ConanFile):
         tools.get(**self.conan_data["sources"][self.version])
         extracted_dir = "crow-" + self.version
         os.rename(extracted_dir, self._source_subfolder)
-        tools.patch(**self.conan_data["patches"][self.version])
 
     def _configure_cmake(self):
+        tools.patch(**self.conan_data["patches"][self.version])
         cmake = CMake(self)
         cmake.configure(source_folder=self._source_subfolder)
         return cmake
