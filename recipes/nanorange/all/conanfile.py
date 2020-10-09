@@ -13,6 +13,8 @@ class NanorangeConan(ConanFile):
     topics = ("ranges", "C++17", "Ranges TS")
     no_copy_source = True
     settings = "compiler"
+    options = {"deprecation_warnings": [True, False], "std_forward_declarations": [True, False]}
+    default_options = {"deprecation_warnings": True, "std_forward_declarations": True}
 
     @property
     def _source_subfolder(self):
@@ -50,3 +52,9 @@ class NanorangeConan(ConanFile):
 
     def package_id(self):
         self.info.header_only()
+
+    def package_info(self):
+        if not self.options.deprecation_warnings:
+            self.cpp_info.defines.append("NANORANGE_NO_DEPRECATION_WARNINGS")
+        if not self.options.std_forward_declarations:
+            self.cpp_info.defines.append("NANORANGE_NO_STD_FORWARD_DECLARATIONS")

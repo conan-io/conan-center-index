@@ -1,0 +1,565 @@
+--- configure
++++ configure
+@@ -4750,49 +4750,65 @@
+   echo $ECHO_N "(cached) $ECHO_C" >&6
+ else
+ 
+-	cf_cv_ar_flags=unknown
+-	for cf_ar_flags in -curvU -curv curv -crv crv -cqv cqv -rv rv
+-	do
++	case $cf_cv_system_name in
++	(*-msvc*)
++		cf_cv_ar_flags=''
++		cat >mk_static_lib.sh <<-EOF
++		#!$SHELL
++		MSVC_BIN="$AR"
++		out="\$1"
++		shift
++		exec \$MSVC_BIN -out:"\$out" \$@
++		EOF
++		chmod +x mk_static_lib.sh
++		AR=`pwd`/mk_static_lib.sh
++		;;
++	(*)
++		cf_cv_ar_flags=unknown
++		for cf_ar_flags in -curvU -curv curv -crv crv -cqv cqv -rv rv
++		do
+ 
+-		# check if $ARFLAGS already contains this choice
+-		if test "x$ARFLAGS" != "x" ; then
+-			cf_check_ar_flags=`echo "x$ARFLAGS" | sed -e "s/$cf_ar_flags\$//" -e "s/$cf_ar_flags / /"`
+-			if test "x$ARFLAGS" != "$cf_check_ar_flags" ; then
+-				cf_cv_ar_flags=
+-				break
++			# check if $ARFLAGS already contains this choice
++			if test "x$ARFLAGS" != "x" ; then
++				cf_check_ar_flags=`echo "x$ARFLAGS" | sed -e "s/$cf_ar_flags\$//" -e "s/$cf_ar_flags / /"`
++				if test "x$ARFLAGS" != "$cf_check_ar_flags" ; then
++					cf_cv_ar_flags=
++					break
++				fi
+ 			fi
+-		fi
+ 
+-		rm -f conftest.$ac_cv_objext
+-		rm -f conftest.a
++			rm -f conftest.$ac_cv_objext
++			rm -f conftest.a
+ 
+-		cat >conftest.$ac_ext <<EOF
+-#line 4770 "configure"
+-int	testdata[3] = { 123, 456, 789 };
+-EOF
+-		if { (eval echo "$as_me:4773: \"$ac_compile\"") >&5
++			cat >conftest.$ac_ext <<-EOF
++			#line 4784 "configure"
++			int	testdata[3] = { 123, 456, 789 };
++			EOF
++			if { (eval echo "$as_me:4787: \"$ac_compile\"") >&5
+   (eval $ac_compile) 2>&5
+   ac_status=$?
+-  echo "$as_me:4776: \$? = $ac_status" >&5
++  echo "$as_me:4790: \$? = $ac_status" >&5
+   (exit $ac_status); } ; then
+-			echo "$AR $ARFLAGS $cf_ar_flags conftest.a conftest.$ac_cv_objext" >&5
+-			$AR $ARFLAGS $cf_ar_flags conftest.a conftest.$ac_cv_objext 2>&5 1>/dev/null
+-			if test -f conftest.a ; then
+-				cf_cv_ar_flags=$cf_ar_flags
+-				break
+-			fi
+-		else
+-			test -n "$verbose" && echo "	cannot compile test-program" 1>&6
++				echo "$AR $ARFLAGS $cf_ar_flags conftest.a conftest.$ac_cv_objext" >&5
++				$AR $ARFLAGS $cf_ar_flags conftest.a conftest.$ac_cv_objext 2>&5 1>/dev/null
++				if test -f conftest.a ; then
++					cf_cv_ar_flags=$cf_ar_flags
++					break
++				fi
++			else
++				test -n "$verbose" && echo "	cannot compile test-program" 1>&6
+ 
+-echo "${as_me:-configure}:4787: testing cannot compile test-program ..." 1>&5
++echo "${as_me:-configure}:4801: testing cannot compile test-program ..." 1>&5
+ 
+-			break
+-		fi
+-	done
+-	rm -f conftest.a conftest.$ac_ext conftest.$ac_cv_objext
++				break
++			fi
++		done
++		rm -f conftest.a conftest.$ac_ext conftest.$ac_cv_objext
++		;;
++	esac
+ 
+ fi
+-echo "$as_me:4795: result: $cf_cv_ar_flags" >&5
++echo "$as_me:4811: result: $cf_cv_ar_flags" >&5
+ echo "${ECHO_T}$cf_cv_ar_flags" >&6
+ 
+ if test -n "$ARFLAGS" ; then
+@@ -5474,6 +5490,9 @@
+ 			LIB_PREFIX=''
+ 		fi
+ 		;;
++	(*-msvc*)
++		LIB_PREFIX=''
++		;;
+ 	(*)	LIB_PREFIX='lib'
+ 		;;
+ 	esac
+@@ -5961,6 +5980,110 @@
+ 
+ 		MK_SHARED_LIB='${CC} ${LDFLAGS} ${CFLAGS} -shared -Wl,-soname,'$cf_cv_shared_soname',-stats,-lc -o $@'
+ 		;;
++	(mingw*msvc*)
++		LDFLAGS="$LDFLAGS user32.lib"
++		export LDFLAGS
++		cf_cv_shlib_version=msvcdll
++		cf_cv_shlib_version_infix=msvcdll
++		shlibdir=$bindir
++		MAKE_DLLS=
++		if test "$DFT_LWR_MODEL" = "shared" ; then
++			LOCAL_LDFLAGS="-link -dll"
++			LOCAL_LDFLAGS2="$LOCAL_LDFLAGS"
++			EXTRA_LDFLAGS="-link -dll $EXTRA_LDFLAGS"
++		fi
++		CC_SHARED_OPTS=
++		MK_SHARED_LIB=$SHELL' '$rel_builddir'/mk_shared_lib.sh $@ ${LD} ${CFLAGS}'
++		RM_SHARED_OPTS="$RM_SHARED_OPTS $rel_builddir/mk_shared_lib.sh *.dll.lib"
++		cat >mk_shared_lib.sh <<-CF_EOF
++		#!$SHELL
++		SHARED_LIB=\$1
++		IMPORT_LIB=\`echo "\$1" | sed -e 's/[0-9]*\.dll$/.dll.lib/'\`
++		shift
++		my_ld=\$1
++		shift
++		cat <<-EOF
++		Linking shared library
++		** SHARED LIB \$SHARED_LIB
++		** IMPORT_LIB \$IMPORT_LIB
++EOF
++		args=\$(echo \$* | sed -E "s#-l(\w*)#\1.dll.lib#g" | sed -E "s#-L(\w*)#-LIBPATH:\1#g")
++		exec \$my_ld -DLL -IMPLIB:"\${IMPORT_LIB}" -OUT:"\${SHARED_LIB}" ${LDFLAGS} \$args
++		mv "\${IMPORT_LIB}" "\${IMPORT_LIB}"
++CF_EOF
++		chmod +x mk_shared_lib.sh
++		cat >mk_prog.sh <<-CF_EOF
++		#!$SHELL
++		shift
++		# Ignore first argument (compiler) and use LD (link.exe) unconditionally
++		LD="$LD"
++		clopts=()
++		ldopts=("/subsystem:console")
++		libs=()
++		isdll=0
++		while test \$# -gt 0; do
++			case "\$1" in
++				-link | -MT | -MD | -MTd | -MDd)
++					# ignore -link argument
++					;;
++				-dll)
++					isdll=1
++					;;
++				-W* | -w*)
++					# ignore warnings
++					;;
++				-D*)
++					clopts+=("\$1")
++					;;
++				-I*)
++					clopts+=("\$1")
++					;;
++				-l*)
++					libs+=("\`echo \"\$1\" | sed \"s/^-l//\"\`")
++					;;
++				-L*)
++					ldopts+=("\`echo \"\$1\" | sed \"s/^-L/-LIBPATH:/\"\`")
++					;;
++				*.obj | *.o)
++					ldopts+=("\$1")
++					;;
++				-Wl,*)
++					for linkarg in \`echo '\$1' | sed -e 's/-Wl,//' -e 's/,/ /'\`; do
++						ldopts+=("\${linkarg}")
++					done
++					;;
++				*.lib)
++					ldopts+=("\$1")
++					;;
++				-o)
++					shift
++					ldopts+=("-out:\$1")
++					;;
++				*)
++					clopts+=("\$1")
++					ldopts+=("\$1")
++					;;
++			esac
++			shift
++		done
++		if [ "\$isdll" -ne 0 ]; then
++			for lib in \${libs[*]}; do
++				ldopts+=("\$lib.dll.lib")
++			done
++		else
++			for lib in \${libs[*]}; do
++				ldopts+=("\$lib.lib")
++			done
++		fi
++		cat <<-EOF
++		Creating program
++		** ld options:   "\${ldopts[@]}"
++EOF
++		exec \$LD \${ldopts[@]}
++CF_EOF
++		chmod +x mk_prog.sh
++		LINK_PROGS="$SHELL ${rel_builddir}/mk_prog.sh"
++		;;
+ 	(mingw*)
+ 		cf_cv_shlib_version=mingw
+ 		cf_cv_shlib_version_infix=mingw
+@@ -7516,26 +7639,26 @@
+ 
+ 	# either way, check for the library header files
+ 
+-for ac_header in pcre2-posix.h pcreposix.h
++for ac_header in pcre2posix.h pcreposix.h
+ do
+ as_ac_Header=`echo "ac_cv_header_$ac_header" | $as_tr_sh`
+-echo "$as_me:7522: checking for $ac_header" >&5
++echo "$as_me:7643: checking for $ac_header" >&5
+ echo $ECHO_N "checking for $ac_header... $ECHO_C" >&6
+ if eval "test \"\${$as_ac_Header+set}\" = set"; then
+   echo $ECHO_N "(cached) $ECHO_C" >&6
+ else
+   cat >conftest.$ac_ext <<_ACEOF
+-#line 7528 "configure"
++#line 7649 "configure"
+ #include "confdefs.h"
+ #include <$ac_header>
+ _ACEOF
+-if { (eval echo "$as_me:7532: \"$ac_cpp conftest.$ac_ext\"") >&5
++if { (eval echo "$as_me:7653: \"$ac_cpp conftest.$ac_ext\"") >&5
+   (eval $ac_cpp conftest.$ac_ext) 2>conftest.er1
+   ac_status=$?
+   egrep -v '^ *\+' conftest.er1 >conftest.err
+   rm -f conftest.er1
+   cat conftest.err >&5
+-  echo "$as_me:7538: \$? = $ac_status" >&5
++  echo "$as_me:7659: \$? = $ac_status" >&5
+   (exit $ac_status); } >/dev/null; then
+   if test -s conftest.err; then
+     ac_cpp_err=$ac_c_preproc_warn_flag
+@@ -9897,7 +10018,7 @@
+ rm -f conftest.$ac_objext conftest.$ac_ext
+ 	 fi
+ 
+-echo "${as_me:-configure}:9900: testing ifdef from value $cf_POSIX_C_SOURCE ..." 1>&5
++echo "${as_me:-configure}:10021: testing ifdef from value $cf_POSIX_C_SOURCE ..." 1>&5
+ 
+ 	 CFLAGS="$cf_trim_CFLAGS"
+ 	 CPPFLAGS="$cf_trim_CPPFLAGS"
+@@ -25163,11 +25286,25 @@
+ 		DFT_DEP_SUFFIX=$DFT_LIB_SUFFIX
+ 		;;
+ 	(Xdebug)
+-		DFT_LIB_SUFFIX='_g.a'
++		case $cf_cv_system_name in
++		(*-msvc*)
++			DFT_LIB_SUFFIX='_g.lib'
++			;;
++		(*)
++			DFT_LIB_SUFFIX='_g.a'
++			;;
++		esac
+ 		DFT_DEP_SUFFIX=$DFT_LIB_SUFFIX
+ 		;;
+ 	(Xprofile)
+-		DFT_LIB_SUFFIX='_p.a'
++		case $cf_cv_system_name in
++		(*-msvc*)
++			DFT_LIB_SUFFIX='_p.lib'
++			;;
++		(*)
++			DFT_LIB_SUFFIX='_p.a'
++			;;
++		esac
+ 		DFT_DEP_SUFFIX=$DFT_LIB_SUFFIX
+ 		;;
+ 	(Xshared)
+@@ -25176,6 +25313,10 @@
+ 			DFT_LIB_SUFFIX='.so'
+ 			DFT_DEP_SUFFIX=$DFT_LIB_SUFFIX
+ 			;;
++		(*-msvc*)
++			DFT_LIB_SUFFIX='.dll'
++			DFT_DEP_SUFFIX='.dll.lib'
++			;;
+ 		(cygwin*|msys*|mingw*)
+ 			DFT_LIB_SUFFIX='.dll'
+ 			DFT_DEP_SUFFIX='.dll.a'
+@@ -25203,7 +25344,14 @@
+ 		esac
+ 		;;
+ 	(*)
+-		DFT_LIB_SUFFIX='.a'
++		case $target in
++		(*-msvc*)
++			DFT_LIB_SUFFIX='.lib'
++			;;
++		(*)
++			DFT_LIB_SUFFIX='.a'
++			;;
++		esac
+ 		DFT_DEP_SUFFIX=$DFT_LIB_SUFFIX
+ 		;;
+ 	esac
+@@ -25252,11 +25400,25 @@
+ 		CXX_DEP_SUFFIX=$CXX_LIB_SUFFIX
+ 		;;
+ 	(Xdebug)
+-		CXX_LIB_SUFFIX='_g.a'
++		case $cf_cv_system_name in
++		(*-msvc*)
++			CXX_LIB_SUFFIX='_g.lib'
++			;;
++		(*)
++			CXX_LIB_SUFFIX='_g.a'
++			;;
++		esac
+ 		CXX_DEP_SUFFIX=$CXX_LIB_SUFFIX
+ 		;;
+ 	(Xprofile)
+-		CXX_LIB_SUFFIX='_p.a'
++		case $cf_cv_system_name in
++		(*-msvc*)
++			CXX_LIB_SUFFIX='_p.lib'
++			;;
++		(*)
++			CXX_LIB_SUFFIX='_p.a'
++			;;
++		esac
+ 		CXX_DEP_SUFFIX=$CXX_LIB_SUFFIX
+ 		;;
+ 	(Xshared)
+@@ -25265,6 +25427,10 @@
+ 			CXX_LIB_SUFFIX='.so'
+ 			CXX_DEP_SUFFIX=$CXX_LIB_SUFFIX
+ 			;;
++		(*-msvc*)
++			CXX_LIB_SUFFIX='.dll'
++			CXX_DEP_SUFFIX='.dll.lib'
++			;;
+ 		(cygwin*|msys*|mingw*)
+ 			CXX_LIB_SUFFIX='.dll'
+ 			CXX_DEP_SUFFIX='.dll.a'
+@@ -25292,7 +25458,14 @@
+ 		esac
+ 		;;
+ 	(*)
+-		CXX_LIB_SUFFIX='.a'
++		case $target in
++		(*-msvc*)
++			CXX_LIB_SUFFIX='.lib'
++			;;
++		(*)
++			CXX_LIB_SUFFIX='.a'
++			;;
++		esac
+ 		CXX_DEP_SUFFIX=$CXX_LIB_SUFFIX
+ 		;;
+ 	esac
+@@ -25586,12 +25759,23 @@
+ if test "$with_overwrite" != no ; then
+ if test "$NCURSES_LIBUTF8" = 1 ; then
+ 	NCURSES_LIBUTF8='defined(HAVE_LIBUTF8_H)'
+-	{ echo "$as_me:25589: WARNING: Wide-character applications must define HAVE_LIBUTF8_H to include curses.h" >&5
++	{ echo "$as_me:25760: WARNING: Wide-character applications must define HAVE_LIBUTF8_H to include curses.h" >&5
+ echo "$as_me: WARNING: Wide-character applications must define HAVE_LIBUTF8_H to include curses.h" >&2;}
+ fi
+ fi
+ WITH_OVERWRITE=$with_overwrite
+ 
++### At least on MinGW a shared library build without libtool
++### requires adding the additional libs to the link list.
++case $cf_cv_system_name in
++(*mingw32*|*mingw64*)
++	if test "$DFT_LWR_MODEL" != "libtool"; then
++   	   SHLIB_LIST="$SHLIB_LIST ${LIBS}"
++	fi
++	;;
++*)	;;
++esac
++
+ # used to separate tack out of the tree
+ NCURSES_TREE=
+ 
+@@ -26124,7 +26308,7 @@
+ #define HAVE_CURSES_DATA_BOOLNAMES 1
+ EOF
+ 
+-ac_config_files="$ac_config_files include/MKterm.h.awk include/curses.head:include/curses.h.in include/ncurses_dll.h include/termcap.h include/unctrl.h $SUB_MAKEFILES Makefile"
++ac_config_files="$ac_config_files include/MKterm.h.awk include/curses.head:include/curses.h.in include/ncurses_dll.h include/ncurses_exports.h include/termcap.h include/unctrl.h $SUB_MAKEFILES Makefile"
+ ac_config_commands="$ac_config_commands default"
+ cat >confcache <<\_ACEOF
+ # This file is a shell script that caches the results of configure
+@@ -26513,13 +26697,14 @@
+   "include/MKterm.h.awk" ) CONFIG_FILES="$CONFIG_FILES include/MKterm.h.awk" ;;
+   "include/curses.head" ) CONFIG_FILES="$CONFIG_FILES include/curses.head:include/curses.h.in" ;;
+   "include/ncurses_dll.h" ) CONFIG_FILES="$CONFIG_FILES include/ncurses_dll.h" ;;
++  "include/ncurses_exports.h" ) CONFIG_FILES="$CONFIG_FILES include/ncurses_exports.h" ;;
+   "include/termcap.h" ) CONFIG_FILES="$CONFIG_FILES include/termcap.h" ;;
+   "include/unctrl.h" ) CONFIG_FILES="$CONFIG_FILES include/unctrl.h" ;;
+   "$SUB_MAKEFILES" ) CONFIG_FILES="$CONFIG_FILES $SUB_MAKEFILES" ;;
+   "Makefile" ) CONFIG_FILES="$CONFIG_FILES Makefile" ;;
+   "default" ) CONFIG_COMMANDS="$CONFIG_COMMANDS default" ;;
+   "include/ncurses_cfg.h" ) CONFIG_HEADERS="$CONFIG_HEADERS include/ncurses_cfg.h:include/ncurses_cfg.hin" ;;
+-  *) { { echo "$as_me:26522: error: invalid argument: $ac_config_target" >&5
++  *) { { echo "$as_me:26705: error: invalid argument: $ac_config_target" >&5
+ echo "$as_me: error: invalid argument: $ac_config_target" >&2;}
+    { (exit 1); exit 1; }; };;
+   esac
+@@ -27317,7 +27502,7 @@
+ cf_prefix=$LIB_PREFIX
+ 
+ case $cf_cv_shlib_version in
+-(cygdll|msysdll|mingw)
++(cygdll|msysdll|mingw|msvcdll)
+ 	TINFO_NAME=$TINFO_ARG_SUFFIX
+ 	TINFO_SUFFIX=.dll
+ 	;;
+@@ -27390,11 +27575,25 @@
+ 		cf_depsuf=$cf_suffix
+ 		;;
+ 	(Xdebug)
+-		cf_suffix='_g.a'
++		case $cf_cv_system_name in
++		(*-msvc*)
++			cf_suffix='_g.lib'
++			;;
++		(*)
++			cf_suffix='_g.a'
++			;;
++		esac
+ 		cf_depsuf=$cf_suffix
+ 		;;
+ 	(Xprofile)
+-		cf_suffix='_p.a'
++		case $cf_cv_system_name in
++		(*-msvc*)
++			cf_suffix='_p.lib'
++			;;
++		(*)
++			cf_suffix='_p.a'
++			;;
++		esac
+ 		cf_depsuf=$cf_suffix
+ 		;;
+ 	(Xshared)
+@@ -27403,6 +27602,10 @@
+ 			cf_suffix='.so'
+ 			cf_depsuf=$cf_suffix
+ 			;;
++		(*-msvc*)
++			cf_suffix='.dll'
++			cf_depsuf='.dll.lib'
++			;;
+ 		(cygwin*|msys*|mingw*)
+ 			cf_suffix='.dll'
+ 			cf_depsuf='.dll.a'
+@@ -27430,7 +27633,14 @@
+ 		esac
+ 		;;
+ 	(*)
+-		cf_suffix='.a'
++		case $target in
++		(*-msvc*)
++			cf_suffix='.lib'
++			;;
++		(*)
++			cf_suffix='.a'
++			;;
++		esac
+ 		cf_depsuf=$cf_suffix
+ 		;;
+ 	esac
+@@ -27496,6 +27706,10 @@
+ 					cf_cygsuf=`echo "$cf_suffix" | sed -e 's/\.dll/\${ABI_VERSION}.dll/'`
+ 					cf_add_lib="../lib/lib${cf_libname}${cf_cygsuf}"
+ 					;;
++				(msvcdll)
++					cf_cygsuf=`echo "$cf_suffix" | sed -e 's/\.dll/\${ABI_VERSION}.dll/'`
++					cf_add_lib="../lib/${cf_libname}${cf_cygsuf}"
++					;;
+ 				(*)
+ 					cf_add_lib=
+ 					;;
+@@ -27592,10 +27806,10 @@
+ 			CXX_MODEL=$cf_ITEM
+ 			if test "$CXX_MODEL" = SHARED; then
+ 				case $cf_cv_shlib_version in
+-				(cygdll|msysdll|mingw)
++				(cygdll|msysdll|mingw|msvcdll)
+ 					test "x$with_shared_cxx" = xno && test -n "$verbose" && echo "	overriding CXX_MODEL to SHARED" 1>&6
+ 
+-echo "${as_me:-configure}:27598: testing overriding CXX_MODEL to SHARED ..." 1>&5
++echo "${as_me:-configure}:27810: testing overriding CXX_MODEL to SHARED ..." 1>&5
+ 
+ 					with_shared_cxx=yes
+ 					;;
+@@ -27611,11 +27825,25 @@
+ 		cf_depsuf=$cf_suffix
+ 		;;
+ 	(Xdebug)
+-		cf_suffix='_g.a'
++		case $cf_cv_system_name in
++		(*-msvc*)
++			cf_suffix='_g.lib'
++			;;
++		(*)
++			cf_suffix='_g.a'
++			;;
++		esac
+ 		cf_depsuf=$cf_suffix
+ 		;;
+ 	(Xprofile)
+-		cf_suffix='_p.a'
++		case $cf_cv_system_name in
++		(*-msvc*)
++			cf_suffix='_p.lib'
++			;;
++		(*)
++			cf_suffix='_p.a'
++			;;
++		esac
+ 		cf_depsuf=$cf_suffix
+ 		;;
+ 	(Xshared)
+@@ -27624,6 +27852,10 @@
+ 			cf_suffix='.so'
+ 			cf_depsuf=$cf_suffix
+ 			;;
++		(*-msvc*)
++			cf_suffix='.dll'
++			cf_depsuf='.dll.lib'
++			;;
+ 		(cygwin*|msys*|mingw*)
+ 			cf_suffix='.dll'
+ 			cf_depsuf='.dll.a'
+@@ -27651,7 +27883,14 @@
+ 		esac
+ 		;;
+ 	(*)
+-		cf_suffix='.a'
++		case $target in
++		(*-msvc*)
++			cf_suffix='.lib'
++			;;
++		(*)
++			cf_suffix='.a'
++			;;
++		esac
+ 		cf_depsuf=$cf_suffix
+ 		;;
+ 	esac

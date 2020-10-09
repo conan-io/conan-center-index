@@ -24,6 +24,7 @@ class BenchmarkConan(ConanFile):
 
     _source_subfolder = "source_subfolder"
     _build_subfolder = "build_subfolder"
+    _cmake = None
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
@@ -42,27 +43,29 @@ class BenchmarkConan(ConanFile):
             raise ConanInvalidConfiguration("Windows shared builds are not supported right now, see issue #639")
 
     def _configure_cmake(self):
-        cmake = CMake(self)
+        if self._cmake:
+            return self._cmake
+        self._cmake = CMake(self)
 
-        cmake.definitions["BENCHMARK_ENABLE_TESTING"] = "OFF"
-        cmake.definitions["BENCHMARK_ENABLE_GTEST_TESTS"] = "OFF"
-        cmake.definitions["BENCHMARK_ENABLE_LTO"] = "ON" if self.options.enable_lto else "OFF"
-        cmake.definitions["BENCHMARK_ENABLE_EXCEPTIONS"] = "ON" if self.options.enable_exceptions else "OFF"
+        self._cmake.definitions["BENCHMARK_ENABLE_TESTING"] = "OFF"
+        self._cmake.definitions["BENCHMARK_ENABLE_GTEST_TESTS"] = "OFF"
+        self._cmake.definitions["BENCHMARK_ENABLE_LTO"] = "ON" if self.options.enable_lto else "OFF"
+        self._cmake.definitions["BENCHMARK_ENABLE_EXCEPTIONS"] = "ON" if self.options.enable_exceptions else "OFF"
 
         # See https://github.com/google/benchmark/pull/638 for Windows 32 build explanation
         if self.settings.os != "Windows":
             if tools.cross_building(self.settings):
-                cmake.definitions["HAVE_STD_REGEX"] = False
-                cmake.definitions["HAVE_POSIX_REGEX"] = False
-                cmake.definitions["HAVE_STEADY_CLOCK"] = False
+                self._cmake.definitions["HAVE_STD_REGEX"] = False
+                self._cmake.definitions["HAVE_POSIX_REGEX"] = False
+                self._cmake.definitions["HAVE_STEADY_CLOCK"] = False
             else:
-                cmake.definitions["BENCHMARK_BUILD_32_BITS"] = "ON" if "64" not in str(self.settings.arch) else "OFF"
-            cmake.definitions["BENCHMARK_USE_LIBCXX"] = "ON" if (str(self.settings.compiler.libcxx) == "libc++") else "OFF"
+                self._cmake.definitions["BENCHMARK_BUILD_32_BITS"] = "ON" if "64" not in str(self.settings.arch) else "OFF"
+            self._cmake.definitions["BENCHMARK_USE_LIBCXX"] = "ON" if (str(self.settings.compiler.libcxx) == "libc++") else "OFF"
         else:
-            cmake.definitions["BENCHMARK_USE_LIBCXX"] = "OFF"
+            self._cmake.definitions["BENCHMARK_USE_LIBCXX"] = "OFF"
 
-        cmake.configure(build_folder=self._build_subfolder)
-        return cmake
+        self._cmake.configure(build_folder=self._build_subfolder)
+        return self._cmake
 
     def build(self):
         cmake = self._configure_cmake()
@@ -79,8 +82,8 @@ class BenchmarkConan(ConanFile):
     def package_info(self):
         self.cpp_info.libs = tools.collect_libs(self)
         if self.settings.os == "Linux":
-            self.cpp_info.libs.extend(["pthread", "rt"])
+            self.cpp_info.system_libs.extend(["pthread", "rt"])
         elif self.settings.os == "Windows":
-            self.cpp_info.libs.append("shlwapi")
+            self.cpp_info.system_libs.append("shlwapi")
         elif self.settings.os == "SunOS":
-            self.cpp_info.libs.append("kstat")
+            self.cpp_info.system_libs.append("kstat")

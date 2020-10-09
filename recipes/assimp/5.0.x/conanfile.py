@@ -9,13 +9,8 @@ class Assimp(ConanFile):
     description = "A library to import and export various 3d-model-formats including scene-post-processing to generate missing render data."
     topics = ("conan", "assimp", "3d")
     license = "BSD-3-Clause"
-
-    requires = "zlib/1.2.11", "irrxml/1.2"
-
     exports_sources = ["CMakeLists.txt"]
-
     generators = "cmake"
-
     settings = "os", "compiler", "build_type", "arch"
     options = {
         "shared": [True, False],
@@ -95,11 +90,26 @@ class Assimp(ConanFile):
     options.update(dict.fromkeys(_format_option_map, [True, False]))
     default_options.update(dict.fromkeys(_format_option_map, True))
 
-    _source_subfolder = "source_subfolder"
-    _build_subfolder = "build_subfolder"
+    _cmake = None
+
+    @property
+    def _source_subfolder(self):
+        return "source_subfolder"
+
+    @property
+    def _build_subfolder(self):
+        return "build_subfolder"
+
+    def requirements(self):
+        self.requires("zlib/1.2.11")
+        self.requires("irrxml/1.2")
 
     def config_options(self):
         if self.settings.os == "Windows":
+            del self.options.fPIC
+
+    def configure(self):
+        if self.options.shared:
             del self.options.fPIC
 
     def source(self):
@@ -107,24 +117,26 @@ class Assimp(ConanFile):
         os.rename("assimp-%s" % self.version, self._source_subfolder)
 
     def _configure_cmake(self):
-        cmake = CMake(self)
-        cmake.definitions["SYSTEM_IRRXML"] = True
-        cmake.definitions["ASSIMP_DOUBLE_PRECISION"] = self.options.double_precision
-        cmake.definitions["ASSIMP_NO_EXPORT"] = False
-        cmake.definitions["ASSIMP_BUILD_ASSIMP_TOOLS"] = False
-        cmake.definitions["ASSIMP_BUILD_TESTS"] = False
-        cmake.definitions["ASSIMP_BUILD_SAMPLES"] = False
-        cmake.definitions["ASSIMP_INSTALL_PDB"] = False
+        if self._cmake:
+            return self._cmake
+        self._cmake = CMake(self)
+        self._cmake.definitions["SYSTEM_IRRXML"] = True
+        self._cmake.definitions["ASSIMP_DOUBLE_PRECISION"] = self.options.double_precision
+        self._cmake.definitions["ASSIMP_NO_EXPORT"] = False
+        self._cmake.definitions["ASSIMP_BUILD_ASSIMP_TOOLS"] = False
+        self._cmake.definitions["ASSIMP_BUILD_TESTS"] = False
+        self._cmake.definitions["ASSIMP_BUILD_SAMPLES"] = False
+        self._cmake.definitions["ASSIMP_INSTALL_PDB"] = False
 
-        cmake.definitions["ASSIMP_ANDROID_JNIIOSYSTEM"] = False
+        self._cmake.definitions["ASSIMP_ANDROID_JNIIOSYSTEM"] = False
 
-        cmake.definitions["ASSIMP_BUILD_ALL_IMPORTERS_BY_DEFAULT"] = False
-        cmake.definitions["ASSIMP_BUILD_ALL_EXPORTERS_BY_DEFAULT"] = False
+        self._cmake.definitions["ASSIMP_BUILD_ALL_IMPORTERS_BY_DEFAULT"] = False
+        self._cmake.definitions["ASSIMP_BUILD_ALL_EXPORTERS_BY_DEFAULT"] = False
         for option, definition in self._format_option_map.items():
-            cmake.definitions[definition] = bool(getattr(self.options, option))
+            self._cmake.definitions[definition] = bool(getattr(self.options, option))
 
-        cmake.configure(build_folder=self._build_subfolder)
-        return cmake
+        self._cmake.configure(build_folder=self._build_subfolder)
+        return self._cmake
 
     def build(self):
         for before, after in [("-fPIC", ""), ("-g ", ""), ('SET(CMAKE_CXX_FLAGS_DEBUG "/D_DEBUG /MDd /Ob2 /DEBUG:FULL /Zi")', "")]:
@@ -143,3 +155,15 @@ class Assimp(ConanFile):
         self.cpp_info.libs = tools.collect_libs(self)
         if self.settings.os == "Linux":
             self.cpp_info.system_libs = ["rt", "m", "pthread"]
+        if not self.options.shared and self._stdcpp_library:
+            self.cpp_info.system_libs.append(self._stdcpp_library)
+
+    @property
+    def _stdcpp_library(self):
+        libcxx = self.settings.get_safe("compiler.libcxx")
+        if libcxx in ("libstdc++", "libstdc++11"):
+            return "stdc++"
+        elif libcxx in ("libc++",):
+            return "c++"
+        else:
+            return False

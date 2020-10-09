@@ -8,7 +8,7 @@ class LibiconvConan(ConanFile):
     description = "Convert text to and from Unicode"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://www.gnu.org/software/libiconv/"
-    topics = "libiconv", "iconv", "text", "encoding", "locale", "unicode", "conversion"
+    topics = ("libiconv", "iconv", "text", "encoding", "locale", "unicode", "conversion")
     license = "LGPL-2.1"
     exports_sources = "patches/**"
     settings = "os", "compiler", "build_type", "arch"
@@ -32,7 +32,7 @@ class LibiconvConan(ConanFile):
     def build_requirements(self):
         if tools.os_info.is_windows and "CONAN_BASH_PATH" not in os.environ \
                 and tools.os_info.detect_windows_subsystem() != "msys2":
-            self.build_requires("msys2/20190524")
+            self.build_requires("msys2/20200517")
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -67,7 +67,7 @@ class LibiconvConan(ConanFile):
             })
             env_vars["win32_target"] = "_WIN32_WINNT_VISTA"
 
-        if not tools.cross_building(self.settings):
+        if not tools.cross_building(self.settings) or self._is_msvc:
             rc = None
             if self.settings.arch == "x86":
                 rc = "windres --target=pe-i386"
@@ -87,17 +87,14 @@ class LibiconvConan(ConanFile):
     def _configure_autotools(self):
         if self._autotools:
             return self._autotools
-        prefix = os.path.abspath(self.package_folder)
         host = None
         build = None
-        if self._use_winbash or self._is_msvc:
-            prefix = prefix.replace("\\", "/")
+        if self._is_msvc:
             build = False
-            if not tools.cross_building(self.settings):
-                if self.settings.arch == "x86":
-                    host = "i686-w64-mingw32"
-                elif self.settings.arch == "x86_64":
-                    host = "x86_64-w64-mingw32"
+            if self.settings.arch == "x86":
+                host = "i686-w64-mingw32"
+            elif self.settings.arch == "x86_64":
+                host = "x86_64-w64-mingw32"
 
         #
         # If you pass --build when building for iPhoneSimulator, the configure script halts.
@@ -108,18 +105,21 @@ class LibiconvConan(ConanFile):
 
         self._autotools = AutoToolsBuildEnvironment(self, win_bash=tools.os_info.is_windows)
 
-        configure_args = ["--prefix=%s" % prefix]
+        configure_args = []
         if self.options.shared:
             configure_args.extend(["--disable-static", "--enable-shared"])
         else:
             configure_args.extend(["--enable-static", "--disable-shared"])
 
+        if self._is_msvc:
+            self._autotools.flags.append("-FS")
+
         self._autotools.configure(args=configure_args, host=host, build=build)
         return self._autotools
 
     def _patch_sources(self):
-        for patchdata in self.conan_data["patches"][self.version]:
-            tools.patch(**patchdata)
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            tools.patch(**patch)
 
     def build(self):
         self._patch_sources()
@@ -137,11 +137,15 @@ class LibiconvConan(ConanFile):
         os.unlink(os.path.join(self.package_folder, "lib", "libiconv.la"))
         tools.rmdir(os.path.join(self.package_folder, "share"))
 
+        if self._is_msvc and self.options.shared:
+            for import_lib in ["iconv", "charset"]:
+                os.rename(os.path.join(self.package_folder, "lib", "{}.dll.lib".format(import_lib)),
+                          os.path.join(self.package_folder, "lib", "{}.lib".format(import_lib)))
+
     def package_info(self):
-        lib = "iconv"
-        if self.settings.os == "Windows" and self.options.shared:
-            lib += ".dll" + ".lib" if self.settings.compiler == "Visual Studio" else ".a"
-        self.cpp_info.libs = [lib]
+        self.cpp_info.names["cmake_find_package"] = "Iconv"
+        self.cpp_info.names["cmake_find_package_multi"] = "Iconv"
+        self.cpp_info.libs = ["iconv", "charset"]
 
         binpath = os.path.join(self.package_folder, "bin")
         self.output.info("Appending PATH environment var: {}".format(binpath))

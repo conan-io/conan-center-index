@@ -1,6 +1,7 @@
 import os
 from conans import ConanFile, CMake, tools
 
+required_conan_version = ">=1.28.0"
 
 class ConanSqlite3(ConanFile):
     name = "sqlite3"
@@ -16,30 +17,44 @@ class ConanSqlite3(ConanFile):
                "fPIC": [True, False],
                "threadsafe": [0, 1, 2],
                "enable_column_metadata": [True, False],
+               "enable_dbstat_vtab": [True, False],
                "enable_explain_comments": [True, False],
                "enable_fts3": [True, False],
+               "enable_fts3_parenthesis": [True, False],
                "enable_fts4": [True, False],
                "enable_fts5": [True, False],
                "enable_json1": [True, False],
+               "enable_soundex": [True, False],
+               "enable_preupdate_hook": [True, False],
                "enable_rtree": [True, False],
+               "use_alloca": [True, False],
                "omit_load_extension": [True, False],
                "enable_unlock_notify": [True, False],
+               "enable_default_secure_delete": [True, False],
                "disable_gethostuuid": [True, False],
+               "max_blob_size": "ANY",
                "build_executable": [True, False],
                }
     default_options = {"shared": False,
                        "fPIC": True,
-                       "threadsafe": 0,
+                       "threadsafe": 1,
                        "enable_column_metadata": True,
+                       "enable_dbstat_vtab": False,
                        "enable_explain_comments": False,
                        "enable_fts3": False,
+                       "enable_fts3_parenthesis": False,
                        "enable_fts4": False,
                        "enable_fts5": False,
                        "enable_json1": False,
+                       "enable_soundex": False,
+                       "enable_preupdate_hook": False,
                        "enable_rtree": True,
+                       "use_alloca": False,
                        "omit_load_extension": False,
                        "enable_unlock_notify": True,
+                       "enable_default_secure_delete": False,
                        "disable_gethostuuid": False,
+                       "max_blob_size": 1000000000,
                        "build_executable": True,
                        }
 
@@ -54,6 +69,8 @@ class ConanSqlite3(ConanFile):
             del self.options.fPIC
 
     def configure(self):
+        if self.options.shared:
+            del self.options.fPIC
         del self.settings.compiler.libcxx
         del self.settings.compiler.cppstd
 
@@ -71,14 +88,20 @@ class ConanSqlite3(ConanFile):
         self._cmake.definitions["SQLITE3_BUILD_EXECUTABLE"] = self.options.build_executable
         self._cmake.definitions["THREADSAFE"] = self.options.threadsafe
         self._cmake.definitions["ENABLE_COLUMN_METADATA"] = self.options.enable_column_metadata
+        self._cmake.definitions["ENABLE_DBSTAT_VTAB"] = self.options.enable_dbstat_vtab
         self._cmake.definitions["ENABLE_EXPLAIN_COMMENTS"] = self.options.enable_explain_comments
         self._cmake.definitions["ENABLE_FTS3"] = self.options.enable_fts3
+        self._cmake.definitions["ENABLE_FTS3_PARENTHESIS"] = self.options.enable_fts3_parenthesis
         self._cmake.definitions["ENABLE_FTS4"] = self.options.enable_fts4
         self._cmake.definitions["ENABLE_FTS5"] = self.options.enable_fts5
         self._cmake.definitions["ENABLE_JSON1"] = self.options.enable_json1
+        self._cmake.definitions["ENABLE_PREUPDATE_HOOK"] = self.options.enable_preupdate_hook
+        self._cmake.definitions["ENABLE_SOUNDEX"] = self.options.enable_soundex
         self._cmake.definitions["ENABLE_RTREE"] = self.options.enable_rtree
+        self._cmake.definitions["ENABLE_UNLOCK_NOTIFY"] = self.options.enable_unlock_notify
+        self._cmake.definitions["ENABLE_DEFAULT_SECURE_DELETE"] = self.options.enable_default_secure_delete
+        self._cmake.definitions["USE_ALLOCA"] = self.options.use_alloca
         self._cmake.definitions["OMIT_LOAD_EXTENSION"] = self.options.omit_load_extension
-        self._cmake.definitions["SQLITE_ENABLE_UNLOCK_NOTIFY"] = self.options.enable_unlock_notify
         self._cmake.definitions["HAVE_FDATASYNC"] = True
         self._cmake.definitions["HAVE_GMTIME_R"] = True
         self._cmake.definitions["HAVE_LOCALTIME_R"] = self.settings.os != "Windows"
@@ -86,6 +109,7 @@ class ConanSqlite3(ConanFile):
         self._cmake.definitions["HAVE_STRERROR_R"] = True
         self._cmake.definitions["HAVE_USLEEP"] = True
         self._cmake.definitions["DISABLE_GETHOSTUUID"] = self.options.disable_gethostuuid
+        self._cmake.definitions["MAX_BLOB_SIZE"] = self.options.max_blob_size
         self._cmake.configure()
         return self._cmake
 
@@ -101,12 +125,21 @@ class ConanSqlite3(ConanFile):
         cmake.install()
 
     def package_info(self):
-        self.cpp_info.libs = tools.collect_libs(self)
+        self.cpp_info.filenames["cmake_find_package"] = "SQLite3"
+        self.cpp_info.filenames["cmake_find_package_multi"] = "SQLite3"
+        self.cpp_info.names["cmake_find_package"] = "SQLite"
+        self.cpp_info.names["cmake_find_package_multi"] = "SQLite"
+        self.cpp_info.components["sqlite"].names["cmake_find_package"] = "SQLite3"
+        self.cpp_info.components["sqlite"].names["cmake_find_package_multi"] = "SQLite3"
+        self.cpp_info.components["sqlite"].libs = tools.collect_libs(self)
         if self.settings.os == "Linux":
             if self.options.threadsafe:
-                self.cpp_info.system_libs.append("pthread")
+                self.cpp_info.components["sqlite"].system_libs.append("pthread")
             if not self.options.omit_load_extension:
-                self.cpp_info.system_libs.append("dl")
+                self.cpp_info.components["sqlite"].system_libs.append("dl")
+            if self.options.enable_fts5:
+                self.cpp_info.components["sqlite"].system_libs.append("m")
+
         if self.options.build_executable:
             bin_path = os.path.join(self.package_folder, "bin")
             self.output.info("Appending PATH env var with : {}".format(bin_path))

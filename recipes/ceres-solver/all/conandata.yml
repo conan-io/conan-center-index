@@ -6,4 +6,3 @@ patches:
   "1.14.0":
     - patch_file: "patches/find-libraries-conan.patch"
       base_path: "source_subfolder"
-

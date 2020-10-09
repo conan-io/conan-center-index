@@ -3,6 +3,7 @@ import os
 import shutil
 import glob
 
+required_conan_version = ">=1.28.0"
 
 class GetTextConan(ConanFile):
     name = "libgettext"
@@ -11,18 +12,11 @@ class GetTextConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://www.gnu.org/software/gettext"
     license = "GPL-3.0-or-later"
+    deprecated = "gettext"
     settings = "os", "arch", "compiler", "build_type"
     exports_sources = ["patches/*.patch"]
-
-    
     options = {"shared": [True, False], "fPIC": [True, False]}
     default_options = {"shared": False, "fPIC": True}
-
-    requires = ("libiconv/1.15")
-
-    def config_options(self):
-        if self.settings.os == 'Windows':
-            del self.options.fPIC
 
     @property
     def _source_subfolder(self):
@@ -40,17 +34,26 @@ class GetTextConan(ConanFile):
     def _make_args(self):
         return ["-C", "intl"]
 
+    def config_options(self):
+        if self.settings.os == 'Windows':
+            del self.options.fPIC
+
     def configure(self):
+        if self.options.shared:
+            del self.options.fPIC
         del self.settings.compiler.libcxx
         del self.settings.compiler.cppstd
+
+    def requirements(self):
+        self.requires("libiconv/1.16")
 
     def build_requirements(self):
         if tools.os_info.is_windows:
             if "CONAN_BASH_PATH" not in os.environ and \
                tools.os_info.detect_windows_subsystem() != "msys2":
-                self.build_requires("msys2/20190524")
+                self.build_requires("msys2/20200517")
         if self._is_msvc:
-            self.build_requires("automake/1.16.1")
+            self.build_requires("automake/1.16.2")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
@@ -59,7 +62,7 @@ class GetTextConan(ConanFile):
 
     def build(self):
         for patch in self.conan_data["patches"][self.version]:
-            tools.patch(**patch)    
+            tools.patch(**patch)
         libiconv_prefix = self.deps_cpp_info["libiconv"].rootpath
         libiconv_prefix = tools.unix_path(libiconv_prefix) if tools.os_info.is_windows else libiconv_prefix
         args = ["HELP2MAN=/bin/true",
@@ -117,11 +120,11 @@ class GetTextConan(ConanFile):
         self.copy(pattern="*libgnuintl.h", dst="include", src=self._source_subfolder, keep_path=False, symlinks=True)
         os.rename(os.path.join(self.package_folder, "include", "libgnuintl.h"),
                   os.path.join(self.package_folder, "include", "libintl.h"))
+        if self._is_msvc and self.options.shared:
+            os.rename(os.path.join(self.package_folder, "lib", "gnuintl.dll.lib"),
+                      os.path.join(self.package_folder, "lib", "gnuintl.lib"))
 
     def package_info(self):
-        if self._is_msvc and self.options.shared:
-            self.cpp_info.libs = ["gnuintl.dll.lib"]
-        else:
-            self.cpp_info.libs = ["gnuintl"]
+        self.cpp_info.libs = ["gnuintl"]
         if self.settings.os == "Macos":
             self.cpp_info.frameworks.extend(['CoreFoundation'])

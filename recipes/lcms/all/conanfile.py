@@ -32,7 +32,10 @@ class LcmsConan(ConanFile):
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
-        os.rename("Little-CMS-lcms%s" % self.version, self._source_subfolder)
+        if os.path.isdir("Little-CMS-lcms%s" % self.version):
+            os.rename("Little-CMS-lcms%s" % self.version, self._source_subfolder)
+        else:
+            os.rename("Little-CMS-%s" % self.version, self._source_subfolder)
 
     def _build_visual_studio(self):
         # since VS2015 vsnprintf is built-in
@@ -104,3 +107,6 @@ class LcmsConan(ConanFile):
                 self.cpp_info.defines.append("CMS_DLL")
         else:
             self.cpp_info.libs = ["lcms2"]
+        self.cpp_info.names["pkg_config"] = "lcms2"
+        if self.settings.os == "Linux":
+            self.cpp_info.system_libs.append("m")

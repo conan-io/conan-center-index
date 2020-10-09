@@ -1,5 +1,6 @@
 import os
 from conans import ConanFile, tools
+from conans.tools import Version
 
 
 class ApprovalTestsCppConan(ConanFile):
@@ -12,22 +13,30 @@ class ApprovalTestsCppConan(ConanFile):
                   "test assertions for each element."
     topics = ("conan", "testing", "unit-testing", "header-only")
     options = {
+        "with_boosttest": [True, False], # Should this be: with_boost_unit_test_framework?
         "with_catch2": [True, False],
         "with_gtest": [True, False],
         "with_doctest": [True, False]
     }
     default_options = {
+        "with_boosttest": False,
         "with_catch2": False,
         "with_gtest": False,
         "with_doctest": False
     }
     no_copy_source = True
 
+    def configure(self):
+        if not self._boost_test_supported():
+            del self.options.with_boosttest
+
     @property
     def _header_file(self):
         return "ApprovalTests.hpp"
 
     def requirements(self):
+        if self.options.get_safe("with_boosttest"):
+            self.requires("boost/1.72.0")
         if self.options.with_catch2:
             self.requires("catch2/2.11.0")
         if self.options.with_gtest:
@@ -54,3 +63,6 @@ class ApprovalTestsCppConan(ConanFile):
 
     def package_id(self):
         self.info.header_only()
+
+    def _boost_test_supported(self):
+        return Version(self.version) >= "8.6.0"

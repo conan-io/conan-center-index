@@ -1,0 +1,34 @@
+sources:
+  1.0.2s:
+    sha256: cabd5c9492825ce5bd23f3c3aeed6a97f8142f606d893df216411f07d1abab96
+    url: https://www.openssl.org/source/openssl-1.0.2s.tar.gz
+  1.0.2t:
+    sha256: 14cb464efe7ac6b54799b34456bd69558a749a4931ecfd9cf9f71d7881cac7bc
+    url: https://www.openssl.org/source/openssl-1.0.2t.tar.gz
+  1.0.2u:
+    sha256: ecd0c6ffb493dd06707d38b14bb4d8c2288bb7033735606569d8f90f89669d16
+    url: https://www.openssl.org/source/openssl-1.0.2u.tar.gz
+  1.1.0k:
+    sha256: efa4965f4f773574d6cbda1cf874dbbe455ab1c0d4f906115f867d30444470b1
+    url: https://www.openssl.org/source/openssl-1.1.0k.tar.gz
+  1.1.0l:
+    sha256: 74a2f756c64fd7386a29184dc0344f4831192d61dc2481a93a4c5dd727f41148
+    url: https://www.openssl.org/source/openssl-1.1.0l.tar.gz
+  1.1.1c:
+    sha256: f6fb3079ad15076154eda9413fed42877d668e7069d9b87396d0804fdb3f4c90
+    url: https://www.openssl.org/source/openssl-1.1.1c.tar.gz
+  1.1.1d:
+    sha256: 1e3a91bc1f9dfce01af26026f856e064eab4c8ee0a8f457b5ae30b40b8b711f2
+    url: https://www.openssl.org/source/openssl-1.1.1d.tar.gz
+  1.1.1e:
+    sha256: 694f61ac11cb51c9bf73f54e771ff6022b0327a43bbdfa1b2f19de1662a6dcbe
+    url: https://www.openssl.org/source/openssl-1.1.1e.tar.gz
+  1.1.1f:
+    sha256: 186c6bfe6ecfba7a5b48c47f8a1673d0f3b0e5ba2e25602dd23b629975da3f35
+    url: https://www.openssl.org/source/openssl-1.1.1f.tar.gz
+  1.1.1g:
+    sha256: ddb04774f1e32f0c49751e21b67216ac87852ceb056b75209af2443400636d46
+    url: https://www.openssl.org/source/openssl-1.1.1g.tar.gz
+  1.1.1h:
+    sha256: 5c9ca8774bd7b03e5784f26ae9e9e6d749c9da2438545077e6b3d755a06595d9
+    url: https://www.openssl.org/source/openssl-1.1.1h.tar.gz

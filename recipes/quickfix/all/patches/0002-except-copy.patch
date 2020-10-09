@@ -1,0 +1,52 @@
+From b91089d531a945cdff2cd50389c03343c91c7b14 Mon Sep 17 00:00:00 2001
+From: Tarcisio Rodrigues <tarcisio.genaro@gmail.com>
+Date: Sun, 14 Jun 2020 16:57:19 -0300
+Subject: [PATCH 2/8] except copy
+
+---
+ include/Except.h | 33 +++++++++++++++++++++++++++++++++
+ 1 file changed, 33 insertions(+)
+ create mode 100644 include/Except.h
+
+diff --git a/include/Except.h b/include/Except.h
+new file mode 100644
+index 00000000..fded28eb
+--- /dev/null
++++ b/include/Except.h
+@@ -0,0 +1,33 @@
++/* -*- C++ -*- */
++
++/****************************************************************************
++** Copyright (c) 2001-2014
++**
++** This file is part of the QuickFIX FIX Engine
++**
++** This file may be distributed under the terms of the quickfixengine.org
++** license as defined by quickfixengine.org and appearing in the file
++** LICENSE included in the packaging of this file.
++**
++** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
++** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
++**
++** See http://www.quickfixengine.org/LICENSE for licensing information.
++**
++** Contact ask@quickfixengine.org if any conditions of this licensing are
++** not clear to you.
++**
++****************************************************************************/
++
++#ifndef FIX_EXCEPT_H
++#define FIX_EXCEPT_H
++
++#ifdef __cpp_noexcept_function_type
++#define NOEXCEPT noexcept
++#define EXCEPT(...) noexcept(false)
++#else
++#define NOEXCEPT throw()
++#define EXCEPT(...) throw(__VA_ARGS__)
++#endif
++
++#endif
+-- 
+2.25.0
+

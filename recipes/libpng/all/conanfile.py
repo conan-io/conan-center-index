@@ -14,15 +14,16 @@ class LibpngConan(ConanFile):
     settings = "os", "arch", "compiler", "build_type"
     options = {"shared": [True, False], "fPIC": [True, False], "api_prefix": "ANY"}
     default_options = {'shared': False, 'fPIC': True, "api_prefix": None}
+    topics = ("conan", "png", "libpng")
 
     _source_subfolder = "source_subfolder"
 
     def requirements(self):
-        self.requires.add("zlib/1.2.11")
+        self.requires("zlib/1.2.11")
 
     def config_options(self):
         if self.settings.os == "Windows":
-            self.options.remove("fPIC")
+            del self.options.fPIC
 
     def configure(self):
         del self.settings.compiler.libcxx
@@ -94,7 +95,7 @@ class LibpngConan(ConanFile):
         else:
             self.cpp_info.libs = ["png16"]
             if str(self.settings.os) in ["Linux", "Android"]:
-                self.cpp_info.libs.append("m")
+                self.cpp_info.system_libs.append("m")
         # use 'd' suffix everywhere except mingw
         if self.settings.build_type == "Debug" and not (self.settings.os == "Windows" and self.settings.compiler == "gcc"):
             self.cpp_info.libs[0] += "d"

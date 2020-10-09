@@ -1,0 +1,53 @@
+Upstreamed in c976a90788f3e50afc773670ff74c5270ecb48df
+
+ncurses 6.2 - patch 20200404
+
+From 6ea68944cf091e3aaa03fef5bb5ec092224021cb Mon Sep 17 00:00:00 2001
+From: Anonymous Maarten <anonymous.maarten@gmail.com>
+Date: Mon, 16 Mar 2020 11:01:28 +0100
+Subject: [PATCH 14/15] avoid macro expansion in args by defining
+ NCURSES_NOMACROS in ncurses/lib_gen.c
+
+Macro expansion from macros in curses.h(.in) will lead to:
+
+spec(dllexport) int __cdecl
+waddchnstr(stdscr,(const chtype * z),-1)
+{
+ ;
+  return waddchnstr(stdscr,(z),-1);
+}
+
+__declspec(dllexport) int __cdecl
+waddnstr(stdscr,(const char * a1),(int z))
+{
+  ;
+  return waddnstr(stdscr,(a1),(z));
+}
+
+__declspec(dllexport) int __cdecl
+waddnstr(stdscr,(const char * z),-1)
+{
+  ;
+  return waddnstr(stdscr,(z),-1);
+}
+
+---
+ ncurses/base/MKlib_gen.sh | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/ncurses/base/MKlib_gen.sh b/ncurses/base/MKlib_gen.sh
+index 5e646e66..f57cd55f 100755
+--- a/ncurses/base/MKlib_gen.sh
++++ b/ncurses/base/MKlib_gen.sh
+@@ -432,7 +432,7 @@ BEGIN		{
+ 		print "#define NCURSES_ATTR_T int"
+ 		print "#include <ncurses_cfg.h>"
+ 		print ""
+-		print "#undef NCURSES_NOMACROS	/* _this_ file uses macros */"
++		print "#define NCURSES_NOMACROS	1"
+ 		print ""
+ 		print "#include <curses.priv.h>"
+ 		print ""
+-- 
+2.21.1
+

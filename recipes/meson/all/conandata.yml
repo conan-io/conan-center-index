@@ -20,3 +20,24 @@ sources:
   "0.54.0":
     url: "https://github.com/mesonbuild/meson/archive/0.54.0.tar.gz"
     sha256: "95efdbaa7cb3e915ab9a7b26b1412475398fdc3e834842a780f1646c7764f2d9"
+  "0.54.1":
+    url: "https://github.com/mesonbuild/meson/archive/0.54.1.tar.gz"
+    sha256: "854e8b94ab36e5aece813d2b2aee8a639bd52201dfea50890722ac9128e2f59e"
+  "0.54.2":
+    url: "https://github.com/mesonbuild/meson/archive/0.54.2.tar.gz"
+    sha256: "85cafdc70ae7d1d9d506e7356b917c649c4df2077bd6a0382db37648aa4ecbdb"
+  "0.54.3":
+    url: "https://github.com/mesonbuild/meson/archive/0.54.3.tar.gz"
+    sha256: "c25caff342b5368bfe33fab6108f454fcf12e2f2cef70817205872ddef669e8b"
+  "0.55.0":
+    url: "https://github.com/mesonbuild/meson/archive/0.55.0.tar.gz"
+    sha256: "9034c943c8cf4d734c0e18e5ba038dd762fcdcc614c45b41703305da8382e90c"
+  "0.55.1":
+    url: "https://github.com/mesonbuild/meson/archive/0.55.1.tar.gz"
+    sha256: "c7ebf2fff5934a974c7edd1aebb5fc9c3e1da5ae3184a29581fde917638eea39"
+  "0.55.2":
+    url: "https://github.com/mesonbuild/meson/archive/0.55.2.tar.gz"
+    sha256: "56244896e56c2b619f819d047b6de412ecc5250975ee8717f1e329113d178e06"
+  "0.55.3":
+    url: "https://github.com/mesonbuild/meson/archive/0.55.3.tar.gz"
+    sha256: "2b276df50c5b13ccdbfb14d3333141e9e7985aca31b60400b3f3e0be2ee6897e"

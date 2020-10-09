@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 2.8)
+cmake_minimum_required(VERSION 3.1)
 project(test_package)
 enable_testing()
 
@@ -9,7 +9,7 @@ if(CONAN_SETTINGS_OS STREQUAL "Android")
     set(CONAN_LIBCXX "") # NDK fails when specified: https://github.com/android-ndk/ndk/issues/541
 endif()
 
-CONAN_BASIC_SETUP()
+conan_basic_setup()
 
 IF(NOT HEADER_ONLY)
     set(boost_components)
@@ -36,8 +36,6 @@ IF(NOT HEADER_ONLY)
 
     MESSAGE("LIBS=> ${CONAN_LIBS}")
 
-    ADD_EXECUTABLE(lambda lambda.cpp)
-
     if (WITH_RANDOM)
         ADD_EXECUTABLE(random_exe random.cpp)
         TARGET_LINK_LIBRARIES(random_exe ${Boost_LIBRARIES})
@@ -48,8 +46,8 @@ IF(NOT HEADER_ONLY)
     endif()
 
     if (WITH_TEST)
-        ADD_EXECUTABLE(test test.cpp)
-        TARGET_LINK_LIBRARIES(test ${CONAN_LIBS})
+        ADD_EXECUTABLE(test_exe test.cpp)
+        TARGET_LINK_LIBRARIES(test_exe ${CONAN_LIBS})
     endif()
 
     if (WITH_COROUTINE)
@@ -75,12 +73,12 @@ IF(NOT HEADER_ONLY)
         ADD_TEST(NAME TestRegex
                  COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} "$<TARGET_FILE:regex_exe>")
     endif()
-ELSE()
-    ADD_EXECUTABLE(lambda lambda.cpp)
 ENDIF()
 
+ADD_EXECUTABLE(lambda_exe lambda.cpp)
+
 ADD_TEST(NAME TestLambda
-         COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} "$<TARGET_FILE:lambda>" ${TEST_ARGS})
+         COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} "$<TARGET_FILE:lambda_exe>" ${TEST_ARGS})
 
 IF(NOT HEADER_ONLY AND WITH_REGEX)
     # Test a different exe linking with the CONAN_LIBS to actually test the package_info

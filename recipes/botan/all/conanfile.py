@@ -1,7 +1,7 @@
 import os
 from conans import ConanFile, tools
 from conans.errors import ConanException, ConanInvalidConfiguration
-from conans.model.version import Version
+from conans.tools import Version
 
 
 class BotanConan(ConanFile):
@@ -23,25 +23,68 @@ class BotanConan(ConanFile):
         'with_sqlite3': [True, False],
         'with_zlib': [True, False],
         'with_boost': [True, False],
+        'with_sse2': [True, False],
+        'with_ssse3': [True, False],
+        'with_sse4_1': [True, False],
+        'with_sse4_2': [True, False],
+        'with_avx2': [True, False],
+        'with_bmi2': [True, False],
+        'with_rdrand': [True, False],
+        'with_rdseed': [True, False],
+        'with_aes_ni': [True, False],
+        'with_sha_ni': [True, False],
+        'with_altivec': [True, False],
+        'with_neon': [True, False],
+        'with_armv8crypto': [True, False],
+        'with_powercrypto': [True, False],
         'enable_modules': "ANY",
         'system_cert_bundle': "ANY"
     }
     default_options = {'amalgamation': True,
                        'with_bzip2': False,
                        'with_openssl': False,
-                       'shared': True,
+                       'shared': False,
                        'fPIC': True,
                        'single_amalgamation': False,
                        'with_sqlite3': False,
                        'with_zlib': False,
                        'with_boost': False,
+                       'with_sse2': True,
+                       'with_ssse3': True,
+                       'with_sse4_1': True,
+                       'with_sse4_2': True,
+                       'with_avx2': True,
+                       'with_bmi2': True,
+                       'with_rdrand': True,
+                       'with_rdseed': True,
+                       'with_aes_ni': True,
+                       'with_sha_ni': True,
+                       'with_altivec': True,
+                       'with_neon': True,
+                       'with_armv8crypto': True,
+                       'with_powercrypto': True,
                        'enable_modules': None,
                        'system_cert_bundle': None}
+
+    @property
+    def _is_x86(self):
+        return str(self.settings.arch) in ["x86", "x86_64"]
+
+    @property
+    def _is_ppc(self):
+        return "ppc" in str(self.settings.arch)
+
+    @property
+    def _is_arm(self):
+        return "arm" in str(self.settings.arch)
 
     def configure(self):
         self._validate_compiler_settings()
 
-        if self.options.single_amalgamation:
+        if Version(self.version) >= "2.14.0":
+            self._validate_v2_14()
+
+        if self.options.get_safe("single_amalgamation"):
             self.options.amalgamation = True
 
         if self.options.with_boost:
@@ -54,7 +97,7 @@ class BotanConan(ConanFile):
         if self.options.with_bzip2:
             self.requires("bzip2/1.0.6")
         if self.options.with_openssl:
-            self.requires("openssl/1.0.2t")
+            self.requires("openssl/1.0.2u")
         if self.options.with_zlib:
             self.requires("zlib/1.2.11")
         if self.options.with_sqlite3:
@@ -65,6 +108,28 @@ class BotanConan(ConanFile):
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
+        if not self._is_x86:
+            del self.options.with_sse2
+            del self.options.with_ssse3
+            del self.options.with_sse4_1
+            del self.options.with_sse4_2
+            del self.options.with_avx2
+            del self.options.with_bmi2
+            del self.options.with_rdrand
+            del self.options.with_rdseed
+            del self.options.with_aes_ni
+            del self.options.with_sha_ni
+        if not self._is_arm:
+            del self.options.with_neon
+            del self.options.with_armv8crypto
+        if not self._is_ppc:
+            del self.options.with_altivec
+            del self.options.with_powercrypto
+
+        # --single-amalgamation option is no longer available
+        # See also https://github.com/randombit/botan/pull/2246
+        if Version(self.version) >= "2.14.0":
+            del self.options.single_amalgamation
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
@@ -118,6 +183,21 @@ class BotanConan(ConanFile):
             raise ConanInvalidConfiguration(
                 'Using Botan with Clang on Linux requires either "compiler.libcxx=libstdc++11" ' \
                 'or "compiler.libcxx=libc++"')
+
+    def _validate_v2_14(self):
+        """disallow configurations that cause issues in Botan >= 2.14.0"""
+
+        compiler = self.settings.compiler
+        compiler_version = Version(compiler.version.value)
+
+        # Some older compilers cannot handle the amalgamated build anymore
+        # See also https://github.com/randombit/botan/issues/2328
+        if self.options.amalgamation:
+            if (compiler == "apple-clang" and compiler_version < "10") or \
+               (compiler == "gcc" and compiler_version < "8") or \
+               (compiler == "clang" and compiler_version < "7"):
+                raise ConanInvalidConfiguration(
+                    "amalgamation is not supported for {} {}".format(compiler, compiler_version))
 
     @property
     def _is_mingw_windows(self):
@@ -189,7 +269,7 @@ class BotanConan(ConanFile):
         if self.options.amalgamation:
             build_flags.append('--amalgamation')
 
-        if self.options.single_amalgamation:
+        if self.options.get_safe("single_amalgamation"):
             build_flags.append('--single-amalgamation-file')
 
         if self.options.system_cert_bundle:
@@ -217,6 +297,51 @@ class BotanConan(ConanFile):
 
         if self.settings.build_type == 'RelWithDebInfo':
             build_flags.append('--with-debug-info')
+
+        if self._is_x86:
+            if not self.options.with_sse2:
+                build_flags.append('--disable-sse2')
+
+            if not self.options.with_ssse3:
+                build_flags.append('--disable-ssse3')
+
+            if not self.options.with_sse4_1:
+                build_flags.append('--disable-sse4.1')
+
+            if not self.options.with_sse4_2:
+                build_flags.append('--disable-sse4.2')
+
+            if not self.options.with_avx2:
+                build_flags.append('--disable-avx2')
+
+            if not self.options.with_bmi2:
+                build_flags.append('--disable-bmi2')
+
+            if not self.options.with_rdrand:
+                build_flags.append('--disable-rdrand')
+
+            if not self.options.with_rdseed:
+                build_flags.append('--disable-rdseed')
+
+            if not self.options.with_aes_ni:
+                build_flags.append('--disable-aes-ni')
+
+            if not self.options.with_sha_ni:
+                build_flags.append('--disable-sha-ni')
+
+        if self._is_ppc:
+            if not self.options.with_powercrypto:
+                build_flags.append('--disable-powercrypto')
+
+            if not self.options.with_altivec:
+                build_flags.append('--disable-altivec')
+
+        if self._is_arm:
+            if not self.options.with_neon:
+                build_flags.append('--disable-neon')
+
+            if not self.options.with_armv8crypto:
+                build_flags.append('--disable-armv8crypto')
 
         if str(self.settings.build_type).lower() == 'debug':
             build_flags.append('--debug-mode')

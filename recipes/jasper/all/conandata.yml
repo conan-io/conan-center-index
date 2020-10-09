@@ -1,7 +1,20 @@
 sources:
-  "2.0.14":
-    url: "https://github.com/mdadams/jasper/archive/version-2.0.14.zip"
-    sha256: "05de26be16cf7356f73e8202c0bf4e05597e2c2698a7100d8603253d65f8a790"
+  "2.0.21":
+    url: "https://github.com/jasper-software/jasper/archive/version-2.0.21.tar.gz"
+    sha256: "2482def06dfaa33b8d93cbe992a29723309f3c2b6e75674423a52fc82be10418"
+  "2.0.19":
+    url: "https://github.com/jasper-software/jasper/archive/version-2.0.19.tar.gz"
+    sha256: "b9d16162a088617ada36450f2374d72165377cb64b33ed197c200bcfb73ec76c"
   "2.0.16":
-    url: "https://github.com/mdadams/jasper/archive/version-2.0.16.zip"
-    sha256: "912495d1074de635fe36884085214cf389403e51f1075d50c6008602e8d9480a"
+    url: "https://github.com/jasper-software/jasper/archive/version-2.0.16.tar.gz"
+    sha256: "f1d8b90f231184d99968f361884e2054a1714fdbbd9944ba1ae4ebdcc9bbfdb1"
+  "2.0.14":
+    url: "https://github.com/jasper-software/jasper/archive/version-2.0.14.tar.gz"
+    sha256: "85266eea728f8b14365db9eaf1edc7be4c348704e562bb05095b9a077cf1a97b"
+patches:
+  "2.0.16":
+    - patch_file: "patches/fix-exported-symbols.patch"
+      base_path: "source_subfolder"
+  "2.0.14":
+    - patch_file: "patches/fix-exported-symbols.patch"
+      base_path: "source_subfolder"

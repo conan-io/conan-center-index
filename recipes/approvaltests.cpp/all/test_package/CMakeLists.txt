@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 2.8)
+cmake_minimum_required(VERSION 3.1)
 PROJECT(test_package)
 
 set(CMAKE_CXX_STANDARD 11)
@@ -8,6 +8,10 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
 CONAN_BASIC_SETUP()
 
+if(WITH_BOOSTTEST)
+    ADD_EXECUTABLE(test_package_boosttest test_boosttest.cpp)
+    target_link_libraries(test_package_boosttest ${CONAN_LIBS})
+endif()
 if(WITH_CATCH)
     ADD_EXECUTABLE(test_package_catch test_catch.cpp)
     target_link_libraries(test_package_catch ${CONAN_LIBS})

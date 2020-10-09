@@ -1,0 +1,16 @@
+sources:
+  "1.2.3":
+    sha256: ead2900cc1123e3c6eb61267396aa6358597366598d199ff62cae4fe22f1cca7
+    url: https://github.com/marzer/tomlplusplus/archive/v1.2.3.tar.gz
+  "1.3.0":
+    sha256: b857813083c7e8937cd559887c994f1df44bcb779d830af369dae46f379c3f57
+    url: https://github.com/marzer/tomlplusplus/archive/v1.3.0.tar.gz
+  "1.3.3":
+    sha256: 1553cdecbfceb890da77895356ed471792e29362af701fe1f08b55c8a42ec746
+    url: https://github.com/marzer/tomlplusplus/archive/v1.3.3.tar.gz
+  "2.0.0":
+    sha256: 01cf0f659bd70493dbe51c161feb598ffed68d67bcc7f2984aec4b544c368f91
+    url: https://github.com/marzer/tomlplusplus/archive/v2.0.0.tar.gz
+  "2.1.0":
+    sha256: c741c95ddc01ee7993c1a426db5cb4d2e35e16f3f240012efdebfdf55712ba38
+    url: https://github.com/marzer/tomlplusplus/archive/v2.1.0.tar.gz

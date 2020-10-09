@@ -1,0 +1,20 @@
+--- meson.build
++++ meson.build
+@@ -84,12 +84,16 @@
+   soversion : '3',
+ )
+
++libpkgconf_dep = declare_dependency(
++    link_with: libpkgconf,
++    compile_args: '-DLIBPKGCONF_EXPORT',
++)
+
+ pkgconf_exe = executable('pkgconf',
+   'cli/main.c',
+   'cli/getopt_long.c',
+   'cli/renderer-msvc.c',
+-  link_with : libpkgconf,
++  dependencies: libpkgconf_dep,
+   install : true)
+
+ if get_option('tests')

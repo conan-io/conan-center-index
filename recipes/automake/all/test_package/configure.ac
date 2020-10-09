@@ -1,23 +1,18 @@
-# Must init the autoconf setup
-# The first parameter is project name
-# second is version number
-# third is bug report address
+AC_PREREQ([2.69])
 AC_INIT([test_package], [1.0])
+AC_CONFIG_AUX_DIR([build-aux])
+AM_INIT_AUTOMAKE([-Wall -Werror foreign])
 
 # Safety checks in case user overwritten --srcdir
 AC_CONFIG_SRCDIR([test_package.cpp])
 
-# Store the auxiliary build tools (e.g., install-sh, config.sub, config.guess)
-# in this dir (build-aux)
-AC_CONFIG_AUX_DIR([build-aux])
+AC_CANONICAL_HOST
+
+# Test includes of extra including directories using conan
+AUTOMAKE_TEST_PACKAGE_PREREQ([1.0])
+AUTOMAKE_TEST_PACKAGE_HELLO([argument1], [argument2], [...], [last argument])
 
 AC_CONFIG_HEADER([config.h])
-AC_OUTPUT
-
-# Init automake, and specify this program use relaxed structures.
-# i.e. this program doesn't follow the gnu coding standards, and doesn't have
-# ChangeLog, COPYING, AUTHORS, INSTALL, README etc. files.
-AM_INIT_AUTOMAKE([-Wall -Werror foreign])
 
 # Check for CC and CXX compiler
 AC_PROG_CC

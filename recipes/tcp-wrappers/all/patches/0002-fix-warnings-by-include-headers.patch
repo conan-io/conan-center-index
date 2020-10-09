@@ -1,0 +1,314 @@
+--- clean_exit.c
++++ clean_exit.c
+@@ -13,8 +13,8 @@
+ #endif
+ 
+ #include <stdio.h>
+-
+-extern void exit();
++#include <stdlib.h>
++#include <unistd.h>
+ 
+ #include "tcpd.h"
+ 
+--- fakelog.c
++++ fakelog.c
+@@ -17,7 +17,7 @@
+ 
+ /* ARGSUSED */
+ 
+-openlog(name, logopt, facility)
++void openlog(name, logopt, facility)
+ char   *name;
+ int     logopt;
+ int     facility;
+@@ -27,7 +27,7 @@
+ 
+ /* vsyslog - format one record */
+ 
+-vsyslog(severity, fmt, ap)
++void vsyslog(severity, fmt, ap)
+ int     severity;
+ char   *fmt;
+ va_list ap;
+@@ -43,7 +43,7 @@
+ 
+ /* VARARGS */
+ 
+-VARARGS(syslog, int, severity)
++void VARARGS(syslog, int, severity)
+ {
+     va_list ap;
+     char   *fmt;
+@@ -56,7 +56,7 @@
+ 
+ /* closelog - dummy */
+ 
+-closelog()
++void closelog()
+ {
+     /* void */
+ }
+--- fix_options.c
++++ fix_options.c
+@@ -29,7 +29,7 @@
+ 
+ /* fix_options - get rid of IP-level socket options */
+ 
+-fix_options(request)
++void fix_options(request)
+ struct request_info *request;
+ {
+ #ifdef IP_OPTIONS
+--- inetcf.c
++++ inetcf.c
+@@ -13,10 +13,9 @@
+ #include <sys/stat.h>
+ #include <stdio.h>
+ #include <errno.h>
++#include <stdlib.h>
+ #include <string.h>
+-
+-extern int errno;
+-extern void exit();
++#include <errno.h>
+ 
+ #include "tcpd.h"
+ #include "inetcf.h"
+@@ -36,6 +35,7 @@
+     0,
+ };
+ 
++int check_path(char *path, struct stat *);
+ static void inet_chk();
+ static char *base_name();
+ 
+--- myvsyslog.c
++++ myvsyslog.c
+@@ -14,13 +14,14 @@
+ #ifdef vsyslog
+ 
+ #include <stdio.h>
++#include <syslog.h>
+ 
+ #include "tcpd.h"
+ #include "mystdarg.h"
+ 
+-myvsyslog(severity, format, ap)
++void myvsyslog(severity, format, ap)
+ int     severity;
+-char   *format;
++const char   *format;
+ va_list ap;
+ {
+     char    fbuf[BUFSIZ];
+--- options.c
++++ options.c
+@@ -46,7 +46,9 @@
+ #include <grp.h>
+ #include <ctype.h>
+ #include <setjmp.h>
++#include <stdlib.h>
+ #include <string.h>
++#include <unistd.h>
+ 
+ #ifndef MAXPATHNAMELEN
+ #define MAXPATHNAMELEN  BUFSIZ
+--- percent_x.c
++++ percent_x.c
+@@ -18,9 +18,9 @@
+ 
+ #include <stdio.h>
+ #include <syslog.h>
++#include <stdlib.h>
+ #include <string.h>
+-
+-extern void exit();
++#include <unistd.h>
+ 
+ /* Local stuff. */
+ 
+--- rfc931.c
++++ rfc931.c
+@@ -23,6 +23,7 @@
+ #include <setjmp.h>
+ #include <signal.h>
+ #include <string.h>
++#include <unistd.h>
+ 
+ /* Local stuff. */
+ 
+--- safe_finger.c
++++ safe_finger.c
+@@ -22,12 +22,16 @@
+ 
+ #include <sys/types.h>
+ #include <sys/stat.h>
++#include <sys/wait.h>
+ #include <signal.h>
+ #include <stdio.h>
+ #include <ctype.h>
++#include <fcntl.h>
+ #include <pwd.h>
++#include <stdlib.h>
++#include <unistd.h>
+ 
+-extern void exit();
++int pipe_stdin(char **);
+ 
+ /* Local stuff */
+ 
+@@ -49,7 +53,7 @@
+     exit(0);
+ }
+ 
+-main(argc, argv)
++int main(argc, argv)
+ int     argc;
+ char  **argv;
+ {
+--- scaffold.c
++++ scaffold.c
+@@ -20,13 +20,12 @@
+ #include <syslog.h>
+ #include <setjmp.h>
+ #include <string.h>
++#include <stdlib.h>
+ 
+ #ifndef INADDR_NONE
+ #define	INADDR_NONE	(-1)		/* XXX should be 0xffffffff */
+ #endif
+ 
+-extern char *malloc();
+-
+ /* Application-specific. */
+ 
+ #include "tcpd.h"
+--- setenv.c
++++ setenv.c
+@@ -9,6 +9,9 @@
+   * 
+   * Author: Wietse Venema, Eindhoven University of Technology, The Netherlands.
+   */
++#include <stdio.h>
++#include <stdlib.h>
++#include <string.h>
+ 
+ #ifndef lint
+ static char sccsid[] = "@(#) setenv.c 1.1 93/03/07 22:47:58";
+@@ -17,12 +20,10 @@
+ /* setenv - update or insert environment (name,value) pair */
+ 
+ int     setenv(name, value, clobber)
+-char   *name;
+-char   *value;
++const char   *name;
++const char   *value;
+ int     clobber;
+ {
+-    char   *malloc();
+-    char   *getenv();
+     char   *cp;
+ 
+     if (clobber == 0 && getenv(name) != 0)
+--- shell_cmd.c
++++ shell_cmd.c
+@@ -16,12 +16,14 @@
+ 
+ #include <sys/types.h>
+ #include <sys/param.h>
++#include <sys/wait.h>
++#include <fcntl.h>
+ #include <signal.h>
+ #include <stdio.h>
+ #include <syslog.h>
++#include <stdlib.h>
+ #include <string.h>
+-
+-extern void exit();
++#include <unistd.h>
+ 
+ /* Local stuff. */
+ 
+--- tcpd.c
++++ tcpd.c
+@@ -24,6 +24,7 @@
+ #include <stdio.h>
+ #include <syslog.h>
+ #include <string.h>
++#include <unistd.h>
+ 
+ #ifndef MAXPATHNAMELEN
+ #define MAXPATHNAMELEN	BUFSIZ
+@@ -41,7 +42,7 @@
+ int     allow_severity = SEVERITY;	/* run-time adjustable */
+ int     deny_severity = LOG_WARNING;	/* ditto */
+ 
+-main(argc, argv)
++int main(argc, argv)
+ int     argc;
+ char  **argv;
+ {
+--- tcpdchk.c
++++ tcpdchk.c
+@@ -24,17 +24,15 @@
+ #include <sys/stat.h>
+ #include <netinet/in.h>
+ #include <arpa/inet.h>
++#include <stdlib.h>
+ #include <stdio.h>
+ #include <syslog.h>
+ #include <setjmp.h>
+ #include <errno.h>
+ #include <netdb.h>
+ #include <string.h>
+-
+-extern int errno;
+-extern void exit();
+-extern int optind;
+-extern char *optarg;
++#include <getopt.h>
++#include <errno.h>
+ 
+ #ifndef INADDR_NONE
+ #define INADDR_NONE     (-1)		/* XXX should be 0xffffffff */
+--- tcpdmatch.c
++++ tcpdmatch.c
+@@ -24,16 +24,14 @@
+ #include <sys/socket.h>
+ #include <netinet/in.h>
+ #include <arpa/inet.h>
++#include <getopt.h>
+ #include <netdb.h>
+ #include <stdio.h>
+ #include <syslog.h>
+ #include <setjmp.h>
++#include <stdlib.h>
+ #include <string.h>
+ 
+-extern void exit();
+-extern int optind;
+-extern char *optarg;
+-
+ #ifndef	INADDR_NONE
+ #define	INADDR_NONE	(-1)		/* XXX should be 0xffffffff */
+ #endif
+--- try-from.c
++++ try-from.c
+@@ -39,5 +39,5 @@
+ 
+-main(argc, argv)
++int main(argc, argv)
+ int     argc;
+ char  **argv;
+ {
+--- update.c
++++ update.c
+@@ -22,6 +22,7 @@
+ #include <stdio.h>
+ #include <syslog.h>
+ #include <string.h>
++#include <unistd.h>
+ 
+ /* Local stuff. */
+ 

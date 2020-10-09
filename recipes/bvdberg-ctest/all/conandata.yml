@@ -1,0 +1,4 @@
+sources:
+  "1.0.0":
+    sha256: 80c5899f529dc57c1eb44113fe452cd90fd69cd1ab3a0431635282f56837205c
+    url: https://github.com/bvdberg/ctest/archive/1.0.0.tar.gz
