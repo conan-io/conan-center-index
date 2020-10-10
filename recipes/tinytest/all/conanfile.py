@@ -22,7 +22,7 @@ class TinyTestConan(ConanFile):
             "gcc": "10.2",
             "Visual Studio": "16.27",
             "clang": "10",
-            "apple-clang": "10",
+            "apple-clang": "11",
         }
 
     def configure(self):
