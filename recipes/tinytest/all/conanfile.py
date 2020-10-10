@@ -2,12 +2,12 @@ import os
 from conans import ConanFile, tools
 from conans.errors import ConanInvalidConfiguration
 
-class TTSConan(ConanFile):
-    name = "tts"
+class TinyTestConan(ConanFile):
+    name = "tinytest"
     license = "MIT"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://jfalcou.github.io/tts/"
-    description = "C++ 20 unit tests library focusing on numerical testing and extensibility..."
+    description = "C++ 20 unit tests library focusing on numerical testing and extensibility."
     topics = ("c++20", "test", "computing")
     settings = "compiler"
     no_copy_source = True
@@ -20,7 +20,7 @@ class TTSConan(ConanFile):
     def _compilers_minimum_version(self):
         return {
             "gcc": "10.2",
-            "Visual Studio": "19.27",
+            "Visual Studio": "16.27",
             "clang": "10",
             "apple-clang": "10",
         }
@@ -40,7 +40,7 @@ class TTSConan(ConanFile):
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
-        extracted_dir = self.name + "-" + self.version
+        extracted_dir = "tts-" + self.version
         os.rename(extracted_dir, self._source_subfolder)
 
     def package(self):
