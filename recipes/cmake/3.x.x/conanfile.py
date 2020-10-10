@@ -11,7 +11,7 @@ class CMakeConan(ConanFile):
     homepage = "https://github.com/Kitware/CMake"
     license = "BSD-3-Clause"
     generators = "cmake"
-    settings = "os", "arch"
+    settings = "os", "arch", "compiler", "build_type"
 
     options = {
         "with_openssl": [True, False, "auto"],
@@ -76,6 +76,8 @@ class CMakeConan(ConanFile):
 
     def package_id(self):
         self.info.options.with_openssl = self._with_openssl
+        del self.info.settings.compiler
+        del self.info.settings.build_type
 
     def package_info(self):
         minor = self._minor_version()
