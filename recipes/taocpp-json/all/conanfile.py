@@ -1,8 +1,8 @@
 import os
-from conans import ConanFile, CMake, tools
-from conans.tools import Version
+from conans import ConanFile, tools
 from conans.errors import ConanInvalidConfiguration
 
+required_conan_version = ">=1.28.0"
 
 class TaoCPPJSONConan(ConanFile):
     name = "taocpp-json"
@@ -12,28 +12,34 @@ class TaoCPPJSONConan(ConanFile):
     description = "C++ header-only JSON library"
     topics = ("json", "jaxn", "cbor", "msgpack",
               "ubjson", "json-pointer", "json-patch")
-    settings = "os", "compiler", "build_type", "arch"
+    settings = "compiler"
     no_copy_source = True
 
     @property
     def _source_subfolder(self):
         return "source_subfolder"
 
-    def _has_support_for_cpp17(self):
-        supported_compilers = [
-            ("apple-clang", 10), ("clang", 6), ("gcc", 7), ("Visual Studio", 15.7)]
-        compiler, version = self.settings.compiler, Version(
-            self.settings.compiler.version)
-        return any(compiler == sc[0] and version >= sc[1] for sc in supported_compilers)
+    @property
+    def _min_compilers_version(self):
+        return {
+            "gcc": "7",
+            "clang": "6",
+            "apple-clang": "10",
+            "Visual Studio": "15",
+        }
 
     def configure(self):
-        if self.settings.compiler.get_safe("cppstd"):
+        if self.settings.compiler.cppstd:
             tools.check_min_cppstd(self, "17")
-        if not self._has_support_for_cpp17():
-            raise ConanInvalidConfiguration("Taocpp JSON requires C++17 or higher support standard."
-                                            " {} {} is not supported."
-                                            .format(self.settings.compiler,
-                                                    self.settings.compiler.version))
+        min_compiler_version = self._min_compilers_version.get(str(self.settings.compiler), False)
+        if min_compiler_version:
+            if tools.Version(self.settings.compiler.version) < min_compiler_version:
+                raise ConanInvalidConfiguration("taocpp-json requires C++17, which your compiler does not support.")
+        else:
+            self.output.warn("taocpp-json requires C++17. Your compiler is unknown. Assuming it supports C++17.")
+
+    def package_id(self):
+        self.info.header_only()
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
@@ -41,14 +47,13 @@ class TaoCPPJSONConan(ConanFile):
         os.rename(extracted_dir, self._source_subfolder)
 
     def package(self):
-        cmake = CMake(self)
-        cmake.definitions["TAOCPP_JSON_BUILD_TESTS"] = False
-        cmake.definitions["TAOCPP_JSON_BUILD_EXAMPLES"] = False
-        cmake.definitions["TAOCPP_JSON_INSTALL_DOC_DIR"] = "licenses"
-        cmake.configure(source_folder=self._source_subfolder)
-        cmake.install()
         self.copy("LICENSE*", dst="licenses", src=self._source_subfolder)
-        tools.rmdir(os.path.join(self.package_folder, "share"))
+        self.copy("*", dst="include", src=os.path.join(self._source_subfolder, "include"))
 
-    def package_id(self):
-        self.info.header_only()
+    def package_info(self):
+        self.cpp_info.filenames["cmake_find_package"] = "taocpp-json"
+        self.cpp_info.filenames["cmake_find_package_multi"] = "taocpp-json"
+        self.cpp_info.names["cmake_find_package"] = "taocpp"
+        self.cpp_info.names["cmake_find_package_multi"] = "taocpp"
+        self.cpp_info.components["_taocpp-json"].names["cmake_find_package"] = "json"
+        self.cpp_info.components["_taocpp-json"].names["cmake_find_package_multi"] = "json"

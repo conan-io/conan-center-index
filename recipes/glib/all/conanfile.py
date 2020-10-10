@@ -29,7 +29,6 @@ class GLibConan(ConanFile):
     _build_subfolder = 'build_subfolder'
     short_paths = True
     generators = "pkg_config"
-    requires = "zlib/1.2.11", "libffi/3.2.1"
 
     @property
     def _is_msvc(self):
@@ -40,8 +39,7 @@ class GLibConan(ConanFile):
             del self.options.fPIC
         del self.settings.compiler.libcxx
         del self.settings.compiler.cppstd
-        if (self.settings.os == "Windows" and not self.options.shared) or\
-           "MT" in self.settings.get_safe("compiler.runtime", default=""):
+        if self.settings.os == "Windows" and not self.options.shared:
             raise ConanInvalidConfiguration("glib can not be built as static library on Windows. "\
                                            "see https://gitlab.gnome.org/GNOME/glib/-/issues/692")
 
@@ -53,20 +51,22 @@ class GLibConan(ConanFile):
             del self.options.with_selinux
 
     def build_requirements(self):
-        self.build_requires("meson/0.54.2")
+        self.build_requires("meson/0.55.1")
         if self.settings.os == "Windows":
             self.build_requires("pkgconf/1.7.3")
 
     def requirements(self):
+        self.requires("zlib/1.2.11")
+        self.requires("libffi/3.3")
         if self.options.with_pcre:
-            self.requires("pcre/8.41")
+            self.requires("pcre/8.44")
         if self.options.with_elf:
             self.requires("libelf/0.8.13")
         if self.settings.os == "Linux":
             if self.options.with_mount:
                 self.requires("libmount/2.33.1")
             if self.options.with_selinux:
-                self.requires("libselinux/2.9")
+                self.requires("libselinux/3.1")
         else:
             # for Linux, gettext is provided by libc
             self.requires("libgettext/0.20.1")
@@ -157,11 +157,19 @@ class GLibConan(ConanFile):
         if tools.is_apple_os(self.settings.os):
             self.cpp_info.components["glib-2.0"].requires.append("libiconv::libiconv")
 
-        self.cpp_info.components["gmodule-2.0"].libs = ["gmodule-2.0"]
+        self.cpp_info.components["gmodule-no-export-2.0"].libs = ["gmodule-2.0"]
         if self.settings.os == "Linux":
-            self.cpp_info.components["gmodule-2.0"].system_libs.append("pthread")
-            self.cpp_info.components["gmodule-2.0"].system_libs.append("dl")
-        self.cpp_info.components["gmodule-2.0"].requires.append("glib-2.0")
+            self.cpp_info.components["gmodule-no-export-2.0"].system_libs.append("pthread")
+            self.cpp_info.components["gmodule-no-export-2.0"].system_libs.append("dl")
+        self.cpp_info.components["gmodule-no-export-2.0"].requires.append("glib-2.0")
+        
+        self.cpp_info.components["gmodule-export-2.0"].requires.extend(["gmodule-no-export-2.0", "glib-2.0"])
+        if self.settings.os == "Linux":
+            self.cpp_info.components["gmodule-export-2.0"].sharedlinkflags.append("-Wl,--export-dynamic")
+        
+        self.cpp_info.components["gmodule-2.0"].requires.extend(["gmodule-no-export-2.0", "glib-2.0"])
+        if self.settings.os == "Linux":
+            self.cpp_info.components["gmodule-2.0"].sharedlinkflags.append("-Wl,--export-dynamic")
 
         self.cpp_info.components["gobject-2.0"].libs = ["gobject-2.0"]
         self.cpp_info.components["gobject-2.0"].requires.append("glib-2.0")
@@ -182,6 +190,11 @@ class GLibConan(ConanFile):
                 self.cpp_info.components["gio-2.0"].requires.append("libmount::libmount")
             if self.options.with_selinux:
                 self.cpp_info.components["gio-2.0"].requires.append("libselinux::libselinux")
+        if self.settings.os != "Windows":
+            self.cpp_info.components["gio-unix-2.0"].libs = ["gio-2.0"]
+            self.cpp_info.components["gio-unix-2.0"].requires.extend(["gobject-2.0", "gio-2.0"])
+            self.cpp_info.components["gio-unix-2.0"].includedirs = [os.path.join("include", "gio-unix-2.0")]
+        self.env_info.GLIB_COMPILE_SCHEMAS = os.path.join(self.package_folder, "bin", "glib-compile-schemas")
 
         self.cpp_info.components["gresource"].libs = [] # this is actualy an executable
         self.cpp_info.components["gresource"].requires.append("libelf::libelf") # this is actualy an executable

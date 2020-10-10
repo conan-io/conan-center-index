@@ -70,3 +70,5 @@ class LibalsaConan(ConanFile):
         self.cpp_info.libs = ["asound"]
         self.cpp_info.system_libs = ["dl", "m", "rt", "pthread"]
         self.cpp_info.names['pkg_config'] = 'alsa'
+        self.cpp_info.names["cmake_find_package"] = "ALSA"
+        self.cpp_info.names["cmake_find_package_multi"] = "ALSA"
