@@ -89,5 +89,5 @@ class BitserializerConan(ConanFile):
         if self.options.with_rapidjson:
             self.cpp_info.components["rapidjson-archive"].requires = ["core", "rapidjson::rapidjson"]
         # pugixml-archive
-        if self.options.with_rapidjson:
+        if self.options.with_pugixml:
             self.cpp_info.components["pugixml-archive"].requires = ["core", "pugixml::pugixml"]
