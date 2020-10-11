@@ -99,7 +99,7 @@ index 575ed0b7..f6995e58 100644
  else()
      message (WARNING "Jpeg-2000 plugin will not be built")
 diff --git a/src/libOpenImageIO/CMakeLists.txt b/src/libOpenImageIO/CMakeLists.txt
-index fe39cdd4..92b404c0 100644
+index fe39cdd4..414907c0 100644
 --- a/src/libOpenImageIO/CMakeLists.txt
 +++ b/src/libOpenImageIO/CMakeLists.txt
 @@ -135,8 +135,7 @@ endif ()
@@ -128,7 +128,7 @@ index fe39cdd4..92b404c0 100644
  
  if (FREETYPE_FOUND)
 -    target_link_libraries (OpenImageIO PRIVATE ${FREETYPE_LIBRARIES})
-+    target_link_libraries (OpenImageIO PRIVATE ${Freetype_LIBRARIES})
++    target_link_libraries (OpenImageIO PRIVATE Freetype::Freetype)
  endif()
  
  if (WIN32)
