@@ -1,0 +1,33 @@
+sources:
+  "1.25.0":
+    url: https://github.com/grpc/grpc/archive/v1.25.0.zip
+    sha256: 82de7c3754df7be44c65fd00decd5e2351ea64e4d21fdaf6d76cea5676f954e8
+  "1.26.0":
+    url: https://github.com/grpc/grpc/archive/v1.26.0.zip
+    sha256: b90b2328e8546065578cc7a2b354ba50461365e162d8745e539045b1ca040963
+  "1.27.0":
+    url: https://github.com/grpc/grpc/archive/v1.27.0.zip
+    sha256: 038d61ff86c91f44131daef5755dc25ce5131cbc53f1789bd126e924272a6675
+  "1.27.2":
+    url: https://github.com/grpc/grpc/archive/v1.27.2.zip
+    sha256: bdf770bd85493710fcbf21ffcabfcac938f3bea5c15d9cfb63fa81097157449f
+  "1.27.3":
+    url: https://github.com/grpc/grpc/archive/v1.27.3.zip
+    sha256: bad0de89c09137704821818f5d25566ee4c58698e99e3df67e878ef5da221159
+patches:
+  "1.25.0":
+    - patch_file: "patches/1.25.x.cmake.patch"
+      base_path: "source_subfolder"
+  "1.26.0":
+    - patch_file: "patches/1.26.x.cmake.patch"
+      base_path: "source_subfolder"
+  "1.27.0":
+    - patch_file: "patches/1.27.x.cmake.patch"
+      base_path: "source_subfolder"
+  "1.27.2":
+    - patch_file: "patches/1.27.x.cmake.patch"
+      base_path: "source_subfolder"
+  "1.27.3":
+    - patch_file: "patches/1.27.x.cmake.patch"
+      base_path: "source_subfolder"
+

@@ -1,0 +1,112 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 3f9d19ea0c..3465b0e34d 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -18383,104 +18383,3 @@ target_link_libraries(uri_fuzzer_test_one_entry
+ 
+ 
+ endif()
+-
+-
+-
+-
+-
+-
+-
+-if(gRPC_INSTALL)
+-  install(EXPORT gRPCTargets
+-    DESTINATION ${gRPC_INSTALL_CMAKEDIR}
+-    NAMESPACE gRPC::
+-  )
+-endif()
+-
+-include(CMakePackageConfigHelpers)
+-
+-configure_file(cmake/gRPCConfig.cmake.in
+-  gRPCConfig.cmake @ONLY)
+-write_basic_package_version_file(${CMAKE_CURRENT_BINARY_DIR}/gRPCConfigVersion.cmake
+-  VERSION ${PACKAGE_VERSION}
+-  COMPATIBILITY AnyNewerVersion)
+-install(FILES
+-    ${CMAKE_CURRENT_BINARY_DIR}/gRPCConfig.cmake
+-    ${CMAKE_CURRENT_BINARY_DIR}/gRPCConfigVersion.cmake
+-  DESTINATION ${gRPC_INSTALL_CMAKEDIR}
+-)
+-install(FILES
+-    ${CMAKE_CURRENT_SOURCE_DIR}/cmake/modules/Findc-ares.cmake
+-  DESTINATION ${gRPC_INSTALL_CMAKEDIR}/modules
+-)
+-
+-install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/etc/roots.pem
+-  DESTINATION ${gRPC_INSTALL_SHAREDIR})
+-
+-# Function to generate pkg-config files.
+-function(generate_pkgconfig name description version requires
+-                            libs libs_private output_filename)
+-  set(PC_NAME "${name}")
+-  set(PC_DESCRIPTION "${description}")
+-  set(PC_VERSION "${version}")
+-  set(PC_REQUIRES "${requires}")
+-  set(PC_LIB "${libs}")
+-  set(PC_LIBS_PRIVATE "${libs_private}")
+-  set(output_filepath "${grpc_BINARY_DIR}/libs/opt/pkgconfig/${output_filename}")
+-  configure_file(
+-    "${grpc_SOURCE_DIR}/cmake/pkg-config-template.pc.in"
+-    "${output_filepath}"
+-    @ONLY)
+-  install(FILES "${output_filepath}"
+-    DESTINATION "lib/pkgconfig/")
+-endfunction()
+-
+-# gpr .pc file
+-generate_pkgconfig(
+-  "gpr"
+-  "gRPC platform support library"
+-  "${gRPC_CORE_VERSION}"
+-  ""
+-  "-lgpr -labsl_bad_optional_access -labsl_strings -labsl_strings_internal -labsl_int128 -labsl_base -labsl_spinlock_wait -labsl_dynamic_annotations -labsl_throw_delegate -labsl_raw_logging_internal -labsl_log_severity"
+-  ""
+-  "gpr.pc")
+-
+-# grpc .pc file
+-generate_pkgconfig(
+-  "gRPC"
+-  "high performance general RPC framework"
+-  "${gRPC_CORE_VERSION}"
+-  "gpr openssl"
+-  "-lgrpc -laddress_sorting -lupb -lcares -lz -labsl_bad_optional_access -labsl_strings -labsl_strings_internal -labsl_int128 -labsl_base -labsl_spinlock_wait -labsl_dynamic_annotations -labsl_throw_delegate -labsl_raw_logging_internal -labsl_log_severity"
+-  ""
+-  "grpc.pc")
+-
+-# grpc_unsecure .pc file
+-generate_pkgconfig(
+-  "gRPC unsecure"
+-  "high performance general RPC framework without SSL"
+-  "${gRPC_CORE_VERSION}"
+-  "gpr"
+-  "-lgrpc_unsecure -labsl_bad_optional_access -labsl_strings -labsl_strings_internal -labsl_int128 -labsl_base -labsl_spinlock_wait -labsl_dynamic_annotations -labsl_throw_delegate -labsl_raw_logging_internal -labsl_log_severity"
+-  ""
+-  "grpc_unsecure.pc")
+-
+-# grpc++ .pc file
+-generate_pkgconfig(
+-  "gRPC++"
+-  "C++ wrapper for gRPC"
+-  "${PACKAGE_VERSION}"
+-  "grpc"
+-  "-lgrpc++ -labsl_bad_optional_access -labsl_strings -labsl_strings_internal -labsl_int128 -labsl_base -labsl_spinlock_wait -labsl_dynamic_annotations -labsl_throw_delegate -labsl_raw_logging_internal -labsl_log_severity"
+-  ""
+-  "grpc++.pc")
+-
+-# grpc++_unsecure .pc file
+-generate_pkgconfig(
+-  "gRPC++ unsecure"
+-  "C++ wrapper for gRPC without SSL"
+-  "${PACKAGE_VERSION}"
+-  "grpc_unsecure"
+-  "-lgrpc++_unsecure -labsl_bad_optional_access -labsl_strings -labsl_strings_internal -labsl_int128 -labsl_base -labsl_spinlock_wait -labsl_dynamic_annotations -labsl_throw_delegate -labsl_raw_logging_internal -labsl_log_severity"
+-  ""
+-  "grpc++_unsecure.pc")
+-- 
+2.28.0
+
