@@ -88,7 +88,7 @@ class LibX264Conan(ConanFile):
                 self._autotools.flags.append('-FS')
             if tools.is_apple_os(self.settings.os) and self.settings.get_safe("os.version"):
                 mac_version_min = tools.apple_deployment_target_flag(self.settings.os,
-                                                               self.settings.os.version)
+                                                                     self.settings.os.version)
                 args.append("--extra-cflags=%s" % mac_version_min)
             self._autotools.configure(args=args, build=False, vars=self._override_env, configure_dir=self._source_subfolder)
         return self._autotools
