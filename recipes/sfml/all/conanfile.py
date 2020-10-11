@@ -44,7 +44,7 @@ class SFMLConan(ConanFile):
             self.requires('freetype/2.10.1')
             self.requires('stb/20200203')
         if self.options.audio:
-            self.requires('openal/1.19.1')
+            self.requires('openal/1.20.1')
             self.requires('flac/1.3.3')
             self.requires('ogg/1.3.4')
             self.requires('vorbis/1.3.6')
@@ -105,8 +105,6 @@ class SFMLConan(ConanFile):
         cmake.install()
 
         tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
-        os.remove(os.path.join(self.package_folder, "license.md"))
-        os.remove(os.path.join(self.package_folder, "readme.md"))
 
     def _get_decorated_lib(self, name):
         suffix = '-s' if not self.options.shared else ''
@@ -181,7 +179,7 @@ class SFMLConan(ConanFile):
 
         if self.options.audio:
             self.cpp_info.components["audio"].libs = [self._get_decorated_lib("sfml-audio")]
-            self.cpp_info.components["audio"].requires = ["openal::openal", "flac::flac", "ogg::ogg", "vorbis::vorbis"]
+            self.cpp_info.components["audio"].requires = ["openal::openal", "flac::flac", "ogg::ogg", "vorbis::vorbis", "system"]
             if not self.options.shared:
                 self.cpp_info.components["audio"].defines = ['SFML_STATIC']
             if self.settings.os == "Android":
