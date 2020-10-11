@@ -151,6 +151,7 @@ class LibffiConan(ConanFile):
             os.unlink(os.path.join(self.package_folder, "lib", "libffi.la"))
 
     def package_info(self):
+        self.cpp_info.filenames["pkg_config"] = "libffi"
         if not self.options.shared:
             self.cpp_info.defines = ["FFI_BUILDING"]
         libffi = "ffi"
