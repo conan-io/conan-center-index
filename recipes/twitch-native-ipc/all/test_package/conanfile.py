@@ -17,4 +17,4 @@ class TwitchNativeIpcTestConan(ConanFile):
     def test(self):
         if not tools.cross_building(self):
             os.chdir("bin")
-            self.run(".%sexample" % os.sep)
+            self.run(".%sexample" % os.sep, run_environment=True)

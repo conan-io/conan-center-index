@@ -75,11 +75,11 @@ class TwitchNativeIpcConan(ConanFile):
         cmake = self._configure_cmake()
         cmake.install()
 
-        pdb_files = glob.glob(os.path.join(self.package_folder, "bin", "*.pdb"), recursive=True)
+        pdb_files = glob.glob(os.path.join(self.package_folder, "lib", "*.pdb"), recursive=True)
         for pdb in pdb_files:
             os.unlink(pdb)
 
     def package_info(self):
         self.cpp_info.libs = tools.collect_libs(self)
-        if self.settings.os == "Windows":
+        if self.settings.os == "Windows" and self.options.shared:
             self.cpp_info.defines = ["NATIVEIPC_IMPORT"]
