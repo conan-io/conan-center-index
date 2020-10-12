@@ -102,7 +102,7 @@ class CassandraCppDriverConan(ConanFile):
         self.requires("http_parser/2.9.2")
 
         if self.options.with_openssl:
-            self.requires("openssl/1.1.1g")
+            self.requires("openssl/1.1.1h")
 
         if self.options.with_zlib:
             self.requires("minizip/1.2.11")
