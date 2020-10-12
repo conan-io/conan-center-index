@@ -31,7 +31,7 @@ class TwitchNativeIpcConan(ConanFile):
             del self.options.fPIC
 
     def configure(self):
-        if self.settings.os_build != "Windows" and self.settings.os_build != "Macos":
+        if self.settings.os != "Windows" and self.settings.os != "Macos":
             raise ConannvalidConfiguration("Only Windows and Macos supported")
 
         if self.options.shared:
