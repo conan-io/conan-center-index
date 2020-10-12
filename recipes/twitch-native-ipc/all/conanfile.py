@@ -11,7 +11,7 @@ class TwitchNativeIpcConan(ConanFile):
     topics = ("<twitch>", "<ipc>")
     settings = "os", "compiler", "build_type", "arch"
     options = {"shared": [True, False], "fPIC": [True, False]}
-    default_options = {"shared": False, "fPIC": True, "libuv:shared":False}
+    default_options = {"shared": False, "fPIC": True, "libuv:shared": False}
     generators = "cmake"
     exports = ["CMakeLists.txt", "patches/**"]
     requires = "libuv/1.38.1"
@@ -51,7 +51,6 @@ class TwitchNativeIpcConan(ConanFile):
 
         if self.settings.os == "Windows":
             self._cmake.definitions["MSVC_DYNAMIC_RUNTIME"] = False if self.settings.compiler.runtime in ["MT", "MTd"] else True
-
 
         self._cmake.configure(build_folder=self._build_subfolder)
         return self._cmake
