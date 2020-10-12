@@ -34,10 +34,10 @@ class OpenALConan(ConanFile):
     def configure(self):
         if self.options.shared:
             del self.options.fPIC
-        del self.settings.compiler.libcxx
-        del self.settings.compiler.cppstd
-
-        if tools.Version(self.version) >= "1.20" and self.settings.compiler == "gcc" and tools.Version(self.settings.compiler.version) < "5":
+        if tools.Version(self.version) < "1.20":
+            del self.settings.compiler.libcxx
+            del self.settings.compiler.cppstd
+        elif self.settings.compiler == "gcc" and tools.Version(self.settings.compiler.version) < "5":
             raise ConanInvalidConfiguration("OpenAL can't be compiled by {0} {1}".format(self.settings.compiler,
                                                                                          self.settings.compiler.version))
 
@@ -80,6 +80,8 @@ class OpenALConan(ConanFile):
         self.cpp_info.names["cmake_find_package"] = "OpenAL"
         self.cpp_info.names["cmake_find_package_multi"] = "OpenAL"
         self.cpp_info.libs = tools.collect_libs(self)
+        if tools.Version(self.version) >= "1.20" and tools.stdcpp_library(self):
+            self.cpp_info.system_libs.append(tools.stdcpp_library(self))
         if self.settings.os == "Linux":
             self.cpp_info.system_libs.extend(["dl", "m"])
         elif self.settings.os == "Macos":
