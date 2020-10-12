@@ -42,9 +42,7 @@ class TwitchNativeIpcConan(ConanFile):
             self._cmake.definitions["MSVC_DYNAMIC_RUNTIME"] = False if self.settings.compiler.runtime in ["MT", "MTd"] else True
 
 
-            #with tools.chdir(self._source_subfolder):
         self._cmake.configure(build_folder=self._build_subfolder)
-#        self._cmake.configure(source_folder=self._source_subfolder, build_folder=self._build_subfolder)
         return self._cmake
 
     def build(self):
