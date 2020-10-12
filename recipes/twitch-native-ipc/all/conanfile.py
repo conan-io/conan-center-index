@@ -35,10 +35,10 @@ class TwitchNativeIpcConan(ConanFile):
 
     def configure(self):
         if self.settings.os == "Windows":
-            if self.compiler == "Visual Studio" and Version(self.settings.compiler.version.value) < "15":
+            if self.settings.compiler == "Visual Studio" and Version(self.settings.compiler.version.value) < "15":
                 raise ConanInvalidConfiguration("MSVC < 14 unsupported")
         elif self.settings.os == "Macos":
-            if self.compiler == "apple-clang" and Version(self.settings.compiler.version.value) < "10":
+            if self.settings.compiler == "apple-clang" and Version(self.settings.compiler.version.value) < "10":
                 raise ConanInvalidConfiguration("apple-clang < 10 unsupported")
         else:
             raise ConanInvalidConfiguration("Only Windows and Macos supported")
