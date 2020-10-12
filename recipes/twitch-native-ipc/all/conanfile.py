@@ -5,16 +5,16 @@ import os
 class TwitchNativeIpcConan(ConanFile):
     name = "twitch-native-ipc"
     license = "MIT"
-    url = "https://github.com/twitchtv/twitch-native-ipc"
+    homepage = "https://github.com/twitchtv/twitch-native-ipc"
+    url = "https://github.com/conan-io/conan-center-index"
     description = "Twitch natve ipc library"
     topics = ("<twitch>", "<ipc>")
     settings = "os", "compiler", "build_type", "arch"
-    options = {"shared": [True, False]}
-    default_options = {"shared": False, "libuv:shared":False}
+    options = {"shared": [True, False], "fPIC": [True, False]}
+    default_options = {"shared": False, "fPIC": True, "libuv:shared":False}
     generators = "cmake"
     exports = ["CMakeLists.txt", "patches/**"]
     requires = "libuv/1.38.1"
-    build_requires = "gtest/1.10.0"
 
     _cmake = None
 
@@ -25,6 +25,14 @@ class TwitchNativeIpcConan(ConanFile):
     @property
     def _build_subfolder(self):
         return "build_subfolder"
+
+    def config_options(self):
+        if self.settings.os == "Windows":
+            del self.options.fPIC
+
+    def configure(self):
+        if self.options.shared:
+            del self.options.fPIC
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
@@ -52,6 +60,7 @@ class TwitchNativeIpcConan(ConanFile):
         cmake.build()
 
     def package(self):
+        self.copy("LICENSE", dst="licenses", src=self._source_subfolder)
         cmake = self._configure_cmake()
         cmake.install()
 
