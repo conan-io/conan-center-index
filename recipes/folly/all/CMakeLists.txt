@@ -5,7 +5,7 @@ include(conanbuildinfo.cmake)
 conan_basic_setup()
 
 if(MSVC)
-    add_compile_options(/std:c++latest)
+    add_compile_options(/std:c++latest /permissive-)
 endif()
 
 add_subdirectory(source_subfolder)
