@@ -11,10 +11,10 @@ class TwitchNativeIpcConan(ConanFile):
     homepage = "https://github.com/twitchtv/twitch-native-ipc"
     url = "https://github.com/conan-io/conan-center-index"
     description = "Twitch natve ipc library"
-    topics = ("<twitch>", "<ipc>")
+    topics = ("twitch", "ipc")
     settings = "os", "compiler", "build_type", "arch"
     options = {"shared": [True, False], "fPIC": [True, False]}
-    default_options = {"shared": False, "fPIC": True, "libuv:shared": False}
+    default_options = {"shared": False, "fPIC": True}
     generators = "cmake"
     exports = ["CMakeLists.txt", "patches/**"]
     requires = "libuv/1.38.1"
@@ -59,7 +59,7 @@ class TwitchNativeIpcConan(ConanFile):
         self._cmake.definitions["BUILD_SHARED_LIBS"] = self.options.shared
 
         if self.settings.os == "Windows":
-            self._cmake.definitions["MSVC_DYNAMIC_RUNTIME"] = False if self.settings.compiler.runtime in ["MT", "MTd"] else True
+            self._cmake.definitions["MSVC_DYNAMIC_RUNTIME"] = self.settings.compiler.runtime in ("MD", "MDd")
 
         self._cmake.configure(build_folder=self._build_subfolder)
         return self._cmake
@@ -81,3 +81,5 @@ class TwitchNativeIpcConan(ConanFile):
 
     def package_info(self):
         self.cpp_info.libs = tools.collect_libs(self)
+        if self.settings.os == "Windows":
+            self.cpp_info.defines = ["NATIVEIPC_IMPORT"]
