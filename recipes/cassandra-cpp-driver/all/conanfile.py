@@ -44,6 +44,8 @@ class CassandraCppDriverConan(ConanFile):
         cmake.definitions["VERSION"] = self.version
         cmake.definitions["CASS_BUILD_EXAMPLES"] = False
         cmake.definitions["CASS_BUILD_INTEGRATION_TESTS"] = False
+        cmake.definitions["CASS_BUILD_SHARED"] = self.options.shared
+        cmake.definitions["CASS_BUILD_STATIC"] = not self.options.shared
         cmake.definitions["CASS_BUILD_TESTS"] = False
         cmake.definitions["CASS_BUILD_UNIT_TESTS"] = False
         cmake.definitions["CASS_DEBUG_CUSTOM_ALLOC"] = False
@@ -67,6 +69,7 @@ class CassandraCppDriverConan(ConanFile):
             cmake.definitions["CASS_USE_STD_ATOMIC"] = False
 
         cmake.definitions["CASS_USE_OPENSSL"] = self.options.with_openssl
+        cmake.definitions["CASS_USE_STATIC_LIBS"] = False
         cmake.definitions["CASS_USE_ZLIB"] = self.options.with_zlib
         cmake.definitions["CASS_USE_LIBSSH2"] = False
 
@@ -119,6 +122,7 @@ class CassandraCppDriverConan(ConanFile):
         cmake.build()
 
     def package(self):
+        self.copy(pattern="LICENSE.txt", dst="licenses", src=self._source_subfolder)
         cmake = self._configure_cmake()
         cmake.install()
 

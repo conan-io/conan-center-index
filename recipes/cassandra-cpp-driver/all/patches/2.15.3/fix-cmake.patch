@@ -1,11 +1,9 @@
- CMakeLists.txt                               |  30 +----
- src/CMakeLists.txt                           | 190 ++++++++++++---------------
- src/third_party/curl/CMakeLists.txt          |  16 +--
- src/third_party/hdr_histogram/CMakeLists.txt |  15 +--
- 4 files changed, 97 insertions(+), 154 deletions(-)
+ CMakeLists.txt     |  4 ---
+ src/CMakeLists.txt | 78 +++++++++++++++++++++++++++++++++++++++---------------
+ 2 files changed, 57 insertions(+), 25 deletions(-)
 
 diff --git a/CMakeLists.txt b/CMakeLists.txt
-index c6150948b..6d9f13965 100644
+index c6150948b..669eb086e 100644
 --- a/CMakeLists.txt
 +++ b/CMakeLists.txt
 @@ -1,6 +1,3 @@
@@ -15,46 +13,7 @@ index c6150948b..6d9f13965 100644
  set(CASS_ROOT_DIR ${CMAKE_CURRENT_SOURCE_DIR})
  set(CASS_SRC_DIR "${CASS_ROOT_DIR}/src")
  set(CASS_INCLUDE_DIR "${CASS_ROOT_DIR}/include")
-@@ -29,8 +26,6 @@ endif()
- 
- option(CASS_BUILD_EXAMPLES "Build examples" OFF)
- option(CASS_BUILD_INTEGRATION_TESTS "Build integration tests" OFF)
--option(CASS_BUILD_SHARED "Build shared library" ON)
--option(CASS_BUILD_STATIC "Build static library" OFF)
- option(CASS_BUILD_TESTS "Build tests" OFF)
- option(CASS_BUILD_UNIT_TESTS "Build unit tests" OFF)
- option(CASS_DEBUG_CUSTOM_ALLOC "Debug custom allocator" OFF)
-@@ -42,7 +37,6 @@ option(CASS_USE_BOOST_ATOMIC "Use Boost atomics library" OFF)
- option(CASS_USE_KERBEROS "Use Kerberos" OFF)
- option(CASS_USE_LIBSSH2 "Use libssh2 for integration tests" OFF)
- option(CASS_USE_OPENSSL "Use OpenSSL" ON)
--option(CASS_USE_STATIC_LIBS "Link static libraries when building executables" OFF)
- option(CASS_USE_STD_ATOMIC "Use C++11 atomics library" OFF)
- option(CASS_USE_ZLIB "Use zlib" ON)
- option(CASS_USE_TIMERFD "Use timerfd (Linux only)" ON)
-@@ -60,28 +54,12 @@ if(CASS_BUILD_INTEGRATION_TESTS OR CASS_BUILD_UNIT_TESTS)
- endif()
- 
- # Determine which driver target should be used as a dependency
--set(PROJECT_LIB_NAME_TARGET cassandra)
--if(CASS_USE_STATIC_LIBS OR
--   (WIN32 AND (CASS_BUILD_INTEGRATION_TESTS OR CASS_BUILD_UNIT_TESTS)))
--  set(CASS_USE_STATIC_LIBS ON) # Not all driver internals are exported for test executable (e.g. CASS_EXPORT)
--  set(CASS_BUILD_STATIC ON)
--  set(PROJECT_LIB_NAME_TARGET cassandra_static)
--endif()
--
--# Ensure the driver is configured to build
--if(NOT CASS_BUILD_SHARED AND NOT CASS_BUILD_STATIC)
--  message(FATAL_ERROR "Driver is not Configured to Build: Ensure shared and/or static library is enabled")
--endif()
--
--if(CASS_DEBUG_CUSTOM_ALLOC AND CASS_USE_STATIC_LIBS)
--  message(WARNING "Debugging the custom allocator while static linking the library can cause your application to fail")
--endif()
-+set(PROJECT_LIB_NAME_TARGET ${PROJECT_NAME})
- 
- #------------------------
+@@ -81,7 +78,6 @@ endif()
  # Dependencies
  #------------------------
  
@@ -62,24 +21,23 @@ index c6150948b..6d9f13965 100644
  include(ClangFormat)
  
  #------------------------
-@@ -229,3 +207,9 @@ endif()
- if(CASS_BUILD_INTEGRATION_TESTS OR CASS_BUILD_UNIT_TESTS)
-   add_subdirectory(tests)
- endif()
-+
-+#------------------------
-+# Install licenses
-+#------------------------
-+
-+install(FILES LICENSE.txt DESTINATION licenses)
 diff --git a/src/CMakeLists.txt b/src/CMakeLists.txt
-index 06b84b759..f79818745 100644
+index 06b84b759..71232e9da 100644
 --- a/src/CMakeLists.txt
 +++ b/src/CMakeLists.txt
-@@ -1,6 +1,41 @@
+@@ -1,6 +1,50 @@
  include(CheckSymbolExists)
  include(CheckCXXSourceCompiles)
  
++#------------------------
++# Windows libraries
++#------------------------
++
++if(WIN32)
++  # Assign additional library requirements for Windows
++  set(CASS_LIBS iphlpapi psapi wsock32 crypt32 ws2_32 userenv version)
++endif()
++
 +#------------------------
 +# Libuv
 +#------------------------
@@ -118,7 +76,7 @@ index 06b84b759..f79818745 100644
  file(GLOB SOURCES *.cpp *.hpp)
  
  if(APPLE)
-@@ -38,15 +73,11 @@ endif()
+@@ -38,18 +82,14 @@ endif()
  
  add_subdirectory(third_party/curl)
  add_subdirectory(third_party/hdr_histogram)
@@ -127,226 +85,62 @@ index 06b84b759..f79818745 100644
  add_subdirectory(third_party/sparsehash)
  
  list(APPEND INCLUDE_DIRS 
-   third_party/curl
-   third_party/hdr_histogram
+-  third_party/curl
+-  third_party/hdr_histogram
 -  third_party/http-parser
 -  third_party/minizip
-   third_party/mt19937_64
+-  third_party/mt19937_64
++  third_party/curl # FIXME: Use conan package
++  third_party/hdr_histogram # FIXME: Use conan package
++  third_party/mt19937_64 # FIXME: Use conan package
    third_party/rapidjson/rapidjson
-   third_party/sparsehash/src)
-@@ -126,78 +157,44 @@ configure_file(
- # Targets
- #------------------------------
+-  third_party/sparsehash/src)
++  third_party/sparsehash/src) # FIXME: Use conan package
  
--if(CASS_BUILD_SHARED)
--  add_library(cassandra SHARED 
--    ${SOURCES}
--    $<TARGET_OBJECTS:curl_hostcheck>
+ list(APPEND INCLUDE_DIRS ${CASS_INCLUDE_DIR} ${CMAKE_CURRENT_SOURCE_DIR})
+ 
+@@ -130,11 +170,11 @@ if(CASS_BUILD_SHARED)
+   add_library(cassandra SHARED 
+     ${SOURCES}
+     $<TARGET_OBJECTS:curl_hostcheck>
 -    $<TARGET_OBJECTS:hdr_histogram>
 -    $<TARGET_OBJECTS:http-parser>
 -    $<TARGET_OBJECTS:minizip>)
--  target_link_libraries(cassandra ${CASS_LIBS})
++    $<TARGET_OBJECTS:hdr_histogram>)
+   target_link_libraries(cassandra ${CASS_LIBS})
 -  target_include_directories(cassandra PRIVATE ${INCLUDE_DIRS} ${CASS_INCLUDES})
--
--  set_target_properties(cassandra PROPERTIES OUTPUT_NAME cassandra)
--  set_target_properties(cassandra PROPERTIES VERSION ${PROJECT_VERSION_STRING} SOVERSION ${PROJECT_VERSION_MAJOR})
--  set_target_properties(cassandra PROPERTIES
--      COMPILE_PDB_NAME "cassandra"
--      COMPILE_PDB_OUTPUT_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}")
--  set_target_properties(cassandra PROPERTIES
--      ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}
--      LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}
--      RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
--  set_target_properties(cassandra PROPERTIES FOLDER "Driver")
--
--  target_compile_definitions(cassandra PRIVATE CASS_BUILDING)
--
--  if(CASS_USE_BOOST_ATOMIC AND BOOST_LIBRARY_NAME)
--    add_dependencies(cassandra ${BOOST_LIBRARY_NAME})
--  endif()
--  if(LIBUV_LIBRARY_NAME)
--    add_dependencies(cassandra ${LIBUV_LIBRARY_NAME})
--  endif()
--  if(OPENSSL_LIBRARY_NAME)
--    add_dependencies(cassandra ${OPENSSL_LIBRARY_NAME})
--  endif()
--  if(ZLIB_LIBRARY_NAME)
--    add_dependencies(cassandra ${ZLIB_LIBRARY_NAME})
--  endif()
-+add_library(${PROJECT_LIB_NAME_TARGET}
-+  ${SOURCES}
-+  $<TARGET_OBJECTS:curl_hostcheck>
-+  $<TARGET_OBJECTS:hdr_histogram>)
-+
-+
-+conan_target_link_libraries(${PROJECT_LIB_NAME_TARGET})
-+
-+if(WIN32)
-+ target_link_libraries(${PROJECT_LIB_NAME_TARGET}
-+    iphlpapi
-+    psapi
-+    wsock32
-+    crypt32
-+    ws2_32
-+    userenv
-+    version)
- endif()
++  target_include_directories(cassandra PRIVATE ${INCLUDE_DIRS})
++  
++  conan_target_link_libraries(cassandra)
  
--if(CASS_BUILD_STATIC)
--  add_library(cassandra_static STATIC
--    ${SOURCES}
--    $<TARGET_OBJECTS:curl_hostcheck_static>
+   set_target_properties(cassandra PROPERTIES OUTPUT_NAME cassandra)
+   set_target_properties(cassandra PROPERTIES VERSION ${PROJECT_VERSION_STRING} SOVERSION ${PROJECT_VERSION_MAJOR})
+@@ -167,11 +207,12 @@ if(CASS_BUILD_STATIC)
+   add_library(cassandra_static STATIC
+     ${SOURCES}
+     $<TARGET_OBJECTS:curl_hostcheck_static>
 -    $<TARGET_OBJECTS:hdr_histogram_static>
 -    $<TARGET_OBJECTS:http-parser_static>
 -    $<TARGET_OBJECTS:minizip_static>)
--  target_link_libraries(cassandra_static ${CASS_LIBS})
++    $<TARGET_OBJECTS:hdr_histogram_static>)
++
+   target_link_libraries(cassandra_static ${CASS_LIBS})
 -  target_include_directories(cassandra_static PRIVATE ${INCLUDE_DIRS} ${CASS_INCLUDES})
--
--  set_target_properties(cassandra_static PROPERTIES OUTPUT_NAME cassandra_static)
--  set_target_properties(cassandra_static PROPERTIES VERSION ${PROJECT_VERSION_STRING} SOVERSION ${PROJECT_VERSION_MAJOR})
--  set_target_properties(cassandra_static PROPERTIES
--      COMPILE_PDB_NAME "cassandra_static"
--      COMPILE_PDB_OUTPUT_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}")
--  set_target_properties(cassandra_static PROPERTIES
--      ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}
--      LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}
--      RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
--  set_target_properties(cassandra_static PROPERTIES FOLDER "Driver")
--
--  target_compile_definitions(cassandra_static PRIVATE CASS_STATIC)
--
--  if(CASS_USE_BOOST_ATOMIC AND BOOST_LIBRARY_NAME)
--    add_dependencies(cassandra_static ${BOOST_LIBRARY_NAME})
--  endif()
--  if(LIBUV_LIBRARY_NAME)
--    add_dependencies(cassandra_static ${LIBUV_LIBRARY_NAME})
--  endif()
--  if(OPENSSL_LIBRARY_NAME)
--    add_dependencies(cassandra_static ${OPENSSL_LIBRARY_NAME})
--  endif()
--  if(ZLIB_LIBRARY_NAME)
--    add_dependencies(cassandra_static ${ZLIB_LIBRARY_NAME})
--  endif()
-+target_include_directories(${PROJECT_LIB_NAME_TARGET} PRIVATE 
-+  ${INCLUDE_DIRS}
-+)
-+
-+set_target_properties(${PROJECT_LIB_NAME_TARGET} PROPERTIES OUTPUT_NAME ${PROJECT_LIB_NAME_TARGET})
-+set_target_properties(${PROJECT_LIB_NAME_TARGET} PROPERTIES VERSION ${PROJECT_VERSION_STRING} SOVERSION ${PROJECT_VERSION_MAJOR})
-+set_target_properties(${PROJECT_LIB_NAME_TARGET} PROPERTIES
-+  COMPILE_PDB_NAME "${PROJECT_LIB_NAME_TARGET}"
-+  COMPILE_PDB_OUTPUT_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}")
-+set_target_properties(${PROJECT_LIB_NAME_TARGET} PROPERTIES
-+  ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}
-+  LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}     RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
-+set_target_properties(${PROJECT_LIB_NAME_TARGET} PROPERTIES FOLDER "Driver")
-+
-+get_target_property(target_type ${PROJECT_LIB_NAME_TARGET} TYPE)
-+if (target_type STREQUAL "SHARED_LIBRARY")
-+  target_compile_definitions(${PROJECT_LIB_NAME_TARGET} PRIVATE CASS_BUILDING)
-+elseif(target_type STREQUAL "STATIC_LIBRARY")
-+  target_compile_definitions(${PROJECT_LIB_NAME_TARGET} PRIVATE CASS_STATIC)
- endif()
++  target_include_directories(cassandra_static PRIVATE ${INCLUDE_DIRS})
++  
++  conan_target_link_libraries(cassandra_static)
  
- #-------------------------------------
-@@ -259,40 +256,17 @@ if(CASS_INSTALL_HEADER)
-   install(FILES ${CASS_API_HEADER_FILES} DESTINATION ${INSTALL_HEADER_DIR})
- endif()
- 
--# Install the dynamic/shared library
--if(CASS_BUILD_SHARED)
--  install(TARGETS cassandra
--    RUNTIME DESTINATION ${INSTALL_DLL_EXE_DIR}  # for dll/executable/pdb files
--    LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}  # for shared library
--    ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}) # for static library
--  if(CASS_INSTALL_PKG_CONFIG)
--    if(NOT WIN32)
--      if(PKG_CONFIG_FOUND)
--        configure_file("${PROJECT_SOURCE_DIR}/packaging/cassandra.pc.in" "cassandra.pc" @ONLY)
--        install(FILES "${CMAKE_CURRENT_BINARY_DIR}/cassandra.pc"
--          DESTINATION "${CMAKE_INSTALL_LIBDIR}/pkgconfig")
--      endif()
--    endif()
--  endif()
+   set_target_properties(cassandra_static PROPERTIES OUTPUT_NAME cassandra_static)
+   set_target_properties(cassandra_static PROPERTIES VERSION ${PROJECT_VERSION_STRING} SOVERSION ${PROJECT_VERSION_MAJOR})
+@@ -274,11 +315,6 @@ if(CASS_BUILD_SHARED)
+       endif()
+     endif()
+   endif()
 -  if(WIN32)
 -    install(FILES $<TARGET_PDB_FILE:cassandra>
 -      DESTINATION "${INSTALL_DLL_EXE_DIR}"
 -      OPTIONAL)
 -  endif()
--endif()
--
--if(CASS_BUILD_STATIC)
--  install(TARGETS cassandra_static
--    RUNTIME DESTINATION ${INSTALL_DLL_EXE_DIR}  # for dll/executable/pdb files
--    LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}  # for shared library
--    ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}) # for static library
--  if(CASS_INSTALL_PKG_CONFIG)
--    if(NOT WIN32)
--      if(PKG_CONFIG_FOUND)
--        configure_file("${PROJECT_SOURCE_DIR}/packaging/cassandra_static.pc.in" "cassandra_static.pc" @ONLY)
--        install(FILES "${CMAKE_CURRENT_BINARY_DIR}/cassandra_static.pc"
--          DESTINATION "${CMAKE_INSTALL_LIBDIR}/pkgconfig")
--      endif()
-+# Install the library
-+install(TARGETS ${PROJECT_LIB_NAME_TARGET}
-+RUNTIME DESTINATION ${INSTALL_DLL_EXE_DIR}  # for dll/executable/pdb files
-+LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}  # for shared library
-+ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}) # for static library
-+if(CASS_INSTALL_PKG_CONFIG)
-+  if(NOT WIN32)
-+    if(PKG_CONFIG_FOUND)
-+      configure_file("${PROJECT_SOURCE_DIR}/packaging/cassandra.pc.in" "cassandra.pc" @ONLY)
-+      install(FILES "${CMAKE_CURRENT_BINARY_DIR}/cassandra.pc"
-+        DESTINATION "${CMAKE_INSTALL_LIBDIR}/pkgconfig")
-     endif()
-   endif()
  endif()
-diff --git a/src/third_party/curl/CMakeLists.txt b/src/third_party/curl/CMakeLists.txt
-index 63f391752..8c00dd203 100644
---- a/src/third_party/curl/CMakeLists.txt
-+++ b/src/third_party/curl/CMakeLists.txt
-@@ -3,16 +3,8 @@ file(GLOB SOURCES *.cpp *.hpp)
- source_group("Source Files\\" REGULAR_EXPRESSION ".*\\.c(pp)?")
- source_group("Header Files\\" REGULAR_EXPRESSION ".*\\.h(pp)?")
  
--if(CASS_BUILD_SHARED)
--  add_library(curl_hostcheck OBJECT ${SOURCES})
--  set_target_properties(curl_hostcheck PROPERTIES 
--    POSITION_INDEPENDENT_CODE ON 
--    FOLDER "Driver/Dependencies")
--endif()
--
--if(CASS_BUILD_STATIC)
--  add_library(curl_hostcheck_static OBJECT ${SOURCES})
--  set_target_properties(curl_hostcheck_static PROPERTIES 
--    FOLDER "Driver/Dependencies")
--endif()
-+add_library(curl_hostcheck OBJECT ${SOURCES})
-+set_target_properties(curl_hostcheck PROPERTIES 
-+  POSITION_INDEPENDENT_CODE ON 
-+  FOLDER "Driver/Dependencies")
- 
-diff --git a/src/third_party/hdr_histogram/CMakeLists.txt b/src/third_party/hdr_histogram/CMakeLists.txt
-index 41e4bab5b..890df4e4b 100644
---- a/src/third_party/hdr_histogram/CMakeLists.txt
-+++ b/src/third_party/hdr_histogram/CMakeLists.txt
-@@ -3,15 +3,8 @@ file(GLOB SOURCES *.cpp *.hpp)
- source_group("Source Files\\" REGULAR_EXPRESSION ".*\\.c(pp)?")
- source_group("Header Files\\" REGULAR_EXPRESSION ".*\\.h(pp)?")
- 
--if(CASS_BUILD_SHARED)
--  add_library(hdr_histogram OBJECT ${SOURCES})
--  set_target_properties(hdr_histogram PROPERTIES 
--    POSITION_INDEPENDENT_CODE ON
--    FOLDER "Driver/Dependencies")
--endif()
-+add_library(hdr_histogram OBJECT ${SOURCES})
-+set_target_properties(hdr_histogram PROPERTIES 
-+  POSITION_INDEPENDENT_CODE ON
-+  FOLDER "Driver/Dependencies")
- 
--if(CASS_BUILD_STATIC)
--  add_library(hdr_histogram_static OBJECT ${SOURCES})
--  set_target_properties(hdr_histogram_static PROPERTIES 
--    FOLDER "Driver/Dependencies")
--endif()
+ if(CASS_BUILD_STATIC)
