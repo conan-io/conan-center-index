@@ -1,6 +1,8 @@
 from conans import ConanFile, CMake, tools
 from conans.errors import ConanInvalidConfiguration
+from conans.tools import Version
 import os
+import glob
 
 
 class TwitchNativeIpcConan(ConanFile):
@@ -32,9 +34,14 @@ class TwitchNativeIpcConan(ConanFile):
             del self.options.fPIC
 
     def configure(self):
-        if self.settings.os != "Windows" and self.settings.os != "Macos":
+        if self.settings.os == "Windows":
+            if self.compiler == "Visual Studio" and Version(self.settings.compiler.version.value) < "15":
+                raise ConanInvalidConfiguration("MSVC < 14 unsupported")
+        elif self.settings.os == "Macos":
+            if self.compiler == "apple-clang" and Version(self.settings.compiler.version.value) < "10":
+                raise ConanInvalidConfiguration("apple-clang < 10 unsupported")
+        else:
             raise ConanInvalidConfiguration("Only Windows and Macos supported")
-
 
         if self.options.shared:
             del self.options.fPIC
@@ -67,6 +74,10 @@ class TwitchNativeIpcConan(ConanFile):
         self.copy("LICENSE", dst="licenses", src=self._source_subfolder)
         cmake = self._configure_cmake()
         cmake.install()
+
+        pdb_files = glob.glob(os.path.join(self.package_folder, "bin", "*.pdb"), recursive=True)
+        for pdb in pdb_files:
+            os.unlink(pdb)
 
     def package_info(self):
         self.cpp_info.libs = tools.collect_libs(self)
