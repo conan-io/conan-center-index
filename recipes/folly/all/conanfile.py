@@ -16,7 +16,7 @@ class FollyConan(ConanFile):
     options = {"shared": [True, False], "fPIC": [True, False]}
     default_options = {"shared": False, "fPIC": True}
     exports_sources = ["CMakeLists.txt", "patches/*"]
-    generators = "cmake", "cmake_find_package"
+    generators = "cmake", "cmake_find_package", "cmake_find_package_multi"
 
     _cmake = None
 
@@ -44,7 +44,7 @@ class FollyConan(ConanFile):
     def configure(self):
         if self.options.shared:
             del self.options.fPIC
-        if self.settings.get_safe("compiler.cppstd"):
+        if self.settings.compiler.cppstd:
             tools.check_min_cppstd(self, self._minimum_cpp_standard)
         min_version = self._minimum_compilers_version.get(
             str(self.settings.compiler))
@@ -58,26 +58,13 @@ class FollyConan(ConanFile):
 
         if self.settings.os == "Windows" and self.settings.arch != "x86_64":
             raise ConanInvalidConfiguration("Folly requires a 64bit target architecture")
-        elif self.settings.os == "Windows" and self.settings.compiler == "Visual Studio" and \
-                "MT" in self.settings.compiler.runtime:
-            raise ConanInvalidConfiguration("Folly could not be build with runtime MT")
-        elif self.settings.os == "Macos" and self.options.shared:
-            raise ConanInvalidConfiguration("Folly could not be built by apple-clang as shared library")
-        elif self.settings.os == "Windows" and self.options.shared:
-            raise ConanInvalidConfiguration("Folly could not be built on Windows as a shared library")
-        elif Version(self.version) >= "2020.08.10.00" and self.settings.compiler == "Visual Studio" and \
-                not self.options.shared:
-            raise ConanInvalidConfiguration("Folly could not be built on Windows as a static library")
-        elif Version(self.version) >= "2020.08.10.00" and self.settings.compiler == "clang" and \
-                self.options.shared:
-            raise ConanInvalidConfiguration("Folly could not be built by clang as a shared library")
-
-        self._strip_options_requirements()
-
-    def _strip_options_requirements(self):
-        self.options["boost"].header_only = False
-        for boost_comp in self._required_boost_components:
-            setattr(self.options["boost"], "without_{}".format(boost_comp), False)
+        if self.options.shared:
+            if self.settings.compiler == "Visual Studio":
+                raise ConanInvalidConfiguration("shared folly on MSVC is not supported")
+            elif self.settings.os == "Macos":
+                raise ConanInvalidConfiguration("Folly could not be built by apple-clang as shared library")
+            if Version(self.version) >= "2020.08.10.00" and self.settings.compiler == "clang":
+                raise ConanInvalidConfiguration("Folly could not be built by clang as a shared library")
 
     @property
     def _required_boost_components(self):
@@ -123,7 +110,7 @@ class FollyConan(ConanFile):
                 "compiler.cppstd") or "c++14"
             if self.settings.compiler == "Visual Studio":
                 self._cmake.definitions["MSVC_ENABLE_ALL_WARNINGS"] = False
-                self._cmake.definitions["MSVC_USE_STATIC_RUNTIME"] = "MT" in self.settings.compiler.runtime
+                self._cmake.definitions["MSVC_USE_STATIC_RUNTIME"] = "MT" in str(self.settings.compiler.runtime)
             self._cmake.configure()
         return self._cmake
 

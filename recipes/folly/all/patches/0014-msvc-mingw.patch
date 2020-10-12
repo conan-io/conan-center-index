@@ -1,0 +1,37 @@
+--- CMakeLists.txt
++++ CMakeLists.txt
+@@ -28,7 +28,7 @@
+ endif()
+ 
+ # includes
+-set(CMAKE_MODULE_PATH
++list(APPEND CMAKE_MODULE_PATH
+   "${CMAKE_CURRENT_SOURCE_DIR}/CMake"
+   # for in-fbsource builds
+   "${CMAKE_CURRENT_SOURCE_DIR}/../opensource/fbcode_builder/CMake"
+@@ -103,7 +103,7 @@
+ list(APPEND CMAKE_REQUIRED_LIBRARIES Threads::Threads)
+ list(APPEND FOLLY_LINK_LIBRARIES Threads::Threads)
+ 
+-if(CMAKE_SYSTEM_NAME STREQUAL "Windows")
++if(MSVC)
+   include(FollyCompilerMSVC)
+ else()
+   include(FollyCompilerUnix)
+@@ -442,11 +442,11 @@
+   ${CMAKE_CURRENT_BINARY_DIR}/libfolly.pc.gen
+   @ONLY
+ )
+-file(
+-  GENERATE
+-  OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/libfolly.pc
+-  INPUT ${CMAKE_CURRENT_BINARY_DIR}/libfolly.pc.gen
+-)
++file(WRITE "${CMAKE_CURRENT_BINARY_DIR}/libfolly.pc" "") #file(
++#  GENERATE
++#  OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/libfolly.pc
++#  INPUT ${CMAKE_CURRENT_BINARY_DIR}/libfolly.pc.gen
++#)
+ install(
+   FILES ${CMAKE_CURRENT_BINARY_DIR}/libfolly.pc
+   DESTINATION ${LIB_INSTALL_DIR}/pkgconfig
