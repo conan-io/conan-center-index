@@ -52,7 +52,7 @@ class BitserializerConan(ConanFile):
         if self.options.with_cpprestsdk:
             self.requires("cpprestsdk/2.10.16")
         if self.options.with_rapidjson:
-            self.requires("rapidjson/cci.20200410")
+            self.requires("rapidjson/1.1.0")
         if self.options.with_pugixml:
             self.requires("pugixml/1.10")
 
