@@ -42,10 +42,26 @@ class STXConan(ConanFile):
         if self.options.visible_panic_hook == None:
             self.options.visible_panic_hook = self.options.shared
 
-        if (self.settings.os == 'Windows' and
-                self.settings.compiler == 'Visual Studio' and
-                self.options.shared and
-                tools.Version(self.version) <= tools.Version('1.0.1')):
+        compiler = self.settings.compiler
+        compiler_version = tools.Version(self.settings.compiler.version)
+        standards = ['17', '20', 'gnu17', 'gnu20']
+
+        if compiler.cppstd and not str(compiler.cppstd) in standards:
+            raise ConanInvalidConfiguration('STX requires C++17 support')
+
+        if compiler == 'Visual Studio' and compiler_version < 16:
+            raise ConanInvalidConfiguration('STX requires C++17 support')
+
+        if compiler in ['gcc', 'clang'] and compiler_version < 6:
+            raise ConanInvalidConfiguration('STX requires C++17 support')
+
+        if compiler == 'apple-clang':
+            raise ConanInvalidConfiguration(
+                'STX requires C++17 language and standard library features'
+            )
+
+        if (compiler == 'Visual Studio' and self.options.shared and
+                tools.Version(self.version) <= '1.0.1'):
             raise ConanInvalidConfiguration(
                 'shared library build does not work on windows with '
                 'STX version <= 1.0.1')
