@@ -17,7 +17,7 @@ class TwitchNativeIpcConan(ConanFile):
     default_options = {"shared": False, "fPIC": True}
     generators = "cmake"
     exports = ["CMakeLists.txt", "patches/**"]
-    requires = "libuv/1.38.1"
+    requires = "libuv/1.40.0"
 
     _cmake = None
 
@@ -34,14 +34,15 @@ class TwitchNativeIpcConan(ConanFile):
             del self.options.fPIC
 
     def configure(self):
-        if self.settings.os == "Windows":
-            if self.settings.compiler == "Visual Studio" and Version(self.settings.compiler.version.value) < "15":
-                raise ConanInvalidConfiguration("MSVC < 14 unsupported")
-        elif self.settings.os == "Macos":
-            if self.settings.compiler == "apple-clang" and Version(self.settings.compiler.version.value) < "10":
-                raise ConanInvalidConfiguration("apple-clang < 10 unsupported")
-        else:
-            raise ConanInvalidConfiguration("Only Windows and Macos supported")
+        version = Version(self.settings.compiler.version.value)
+        if self.settings.compiler == "Visual Studio" and version < "15":
+            raise ConanInvalidConfiguration("MSVC < 14 unsupported")
+        elif self.settings.compiler == "apple-clang" and version < "10":
+            raise ConanInvalidConfiguration("apple-clang < 10 unsupported")
+        elif self.settings.compiler == "gcc" and version < "8":
+            raise ConanInvalidConfiguration("gcc < 8 unsupported")
+        elif self.settings.compiler == "clang" and version < "8":
+            raise ConanInvalidConfiguration("clang < 8 unsupported")
 
         if self.options.shared:
             del self.options.fPIC
@@ -80,6 +81,6 @@ class TwitchNativeIpcConan(ConanFile):
             os.unlink(pdb)
 
     def package_info(self):
-        self.cpp_info.libs = tools.collect_libs(self)
+        self.cpp_info.libs = ["nativeipc"]
         if self.settings.os == "Windows" and self.options.shared:
             self.cpp_info.defines = ["NATIVEIPC_IMPORT"]

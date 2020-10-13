@@ -43,12 +43,14 @@ index 5f4bb4c..9b2856a 100644
      string(APPEND CMAKE_C_FLAGS ${unix_flags})
  endmacro()
 diff --git a/libnativeipc/CMakeLists.txt b/libnativeipc/CMakeLists.txt
-index fe5cc30..4e6730a 100644
+index fe5cc30..173a156 100644
 --- a/libnativeipc/CMakeLists.txt
 +++ b/libnativeipc/CMakeLists.txt
-@@ -82,6 +82,7 @@ endif()
+@@ -81,7 +81,9 @@ if(MSVC)
+ endif()
  
  install(TARGETS nativeipc
++  LIBRARY DESTINATION lib
    ARCHIVE DESTINATION lib
 +  RUNTIME DESTINATION bin
    )
