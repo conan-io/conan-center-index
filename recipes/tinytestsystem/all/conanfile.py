@@ -3,7 +3,7 @@ from conans import ConanFile, tools
 from conans.errors import ConanInvalidConfiguration
 
 class TinyTestConan(ConanFile):
-    name = "tinytest"
+    name = "tinytestsystem"
     license = "MIT"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://jfalcou.github.io/tts/"
@@ -21,8 +21,7 @@ class TinyTestConan(ConanFile):
         return {
             "gcc": "10.2",
             "Visual Studio": "16.27",
-            "clang": "10",
-            "apple-clang": "11",
+            "clang": "10"
         }
 
     def configure(self):
