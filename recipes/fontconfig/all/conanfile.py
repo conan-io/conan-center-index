@@ -28,8 +28,8 @@ class FontconfigConan(ConanFile):
             del self.options.fPIC
 
     def configure(self):
-        if self.settings.os == "Windows":
-            raise ConanInvalidConfiguration("Windows builds are not supported.")
+        if self.settings.compiler == "Visual Studio":
+            raise ConanInvalidConfiguration("Visual Studio builds are not supported.")
         if self.options.shared:
             del self.options.fPIC
         del self.settings.compiler.libcxx
@@ -42,7 +42,10 @@ class FontconfigConan(ConanFile):
             self.requires("libuuid/1.0.3")
 
     def build_requirements(self):
-        self.build_requires("gperf/3.1")
+        if tools.os_info.is_windows and not tools.get_env("CONAN_BASH_PATH"):
+            self.build_requires("msys2/20200517")
+        else:
+            self.build_requires("gperf/3.1")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
@@ -54,11 +57,11 @@ class FontconfigConan(ConanFile):
             args = ["--enable-static=%s" % ("no" if self.options.shared else "yes"),
                     "--enable-shared=%s" % ("yes" if self.options.shared else "no"),
                     "--disable-docs"]
-            args.append("--sysconfdir=%s" % os.path.join(self.package_folder, "bin", "etc"))
-            args.append("--datadir=%s" % os.path.join(self.package_folder, "bin", "share"))
-            args.append("--datarootdir=%s" % os.path.join(self.package_folder, "bin", "share"))
-            args.append("--localstatedir=%s" % os.path.join(self.package_folder, "bin", "var"))
-            self._autotools = AutoToolsBuildEnvironment(self)
+            args.append("--sysconfdir=%s" % tools.unix_path(os.path.join(self.package_folder, "bin", "etc")))
+            args.append("--datadir=%s" % tools.unix_path(os.path.join(self.package_folder, "bin", "share")))
+            args.append("--datarootdir=%s" % tools.unix_path(os.path.join(self.package_folder, "bin", "share")))
+            args.append("--localstatedir=%s" % tools.unix_path(os.path.join(self.package_folder, "bin", "var")))
+            self._autotools = AutoToolsBuildEnvironment(self, win_bash=tools.os_info.is_windows)
             self._autotools.configure(configure_dir=self._source_subfolder, args=args)
             tools.replace_in_file("Makefile", "po-conf test", "po-conf")
         return self._autotools
@@ -83,6 +86,8 @@ class FontconfigConan(ConanFile):
         for f in glob.glob(os.path.join(self.package_folder, "bin", "etc", "fonts", "conf.d", "*.conf")):
             if os.path.islink(f):
                 os.unlink(f)
+        for def_file in glob.glob(os.path.join(self.package_folder, "lib", "*.def")):
+            os.remove(def_file)
 
     def package_info(self):
         self.cpp_info.libs = ["fontconfig"]
