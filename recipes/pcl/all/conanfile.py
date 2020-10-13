@@ -48,6 +48,11 @@ class PclConanRecipe(ConanFile):
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
         os.rename("pcl-pcl-{}".format(self.version), self._source_subfolder)
+        tools.replace_in_file(
+            os.path.join(self._source_subfolder, "CMakeLists.txt"),
+            """set(CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake/Modules/" ${CMAKE_MODULE_PATH})""",
+            """list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake/Modules/")"""
+        )
 
     def config_options(self):
         if self.settings.os == "Windows":
