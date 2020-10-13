@@ -48,7 +48,7 @@ class SqlcipherConan(ConanFile):
 
     def requirements(self):
         if self.options.crypto_library == "openssl":
-            self.requires("openssl/1.1.1g")
+            self.requires("openssl/1.1.1h")
         else:
             self.requires("libressl/3.2.0")
 

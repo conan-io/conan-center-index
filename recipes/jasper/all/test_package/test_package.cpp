@@ -37,5 +37,5 @@ int main(int argc, char **argv)
 	t /= numiters;
 	printf("zero time %.3f us\n", t * 1e6);
 
-	exit(0);
+	return 0;
 }

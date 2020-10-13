@@ -12,13 +12,21 @@ class JsoncppConan(ConanFile):
     settings = "os", "compiler", "arch", "build_type"
     options = {"shared": [True, False], "fPIC": [True, False]}
     default_options = {"shared": False, "fPIC": True}
-    exports_sources = "CMakeLists.txt"
+    exports_sources = ["CMakeLists.txt", "patches/**"]
     generators = "cmake"
 
-    _source_subfolder = "source_subfolder"
+    _cmake = None
+
+    @property
+    def _source_subfolder(self):
+        return "source_subfolder"
+
+    def config_options(self):
+        if self.settings.os == "Windows":
+            del self.options.fPIC
 
     def configure(self):
-        if self.settings.os == "Windows" or self.options.shared:
+        if self.options.shared:
             del self.options.fPIC
 
     def source(self):
@@ -27,6 +35,9 @@ class JsoncppConan(ConanFile):
         os.rename(extracted_dir, self._source_subfolder)
 
     def _patch_sources(self):
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            tools.patch(**patch)
+
         tools.replace_in_file(os.path.join(self._source_subfolder, "CMakeLists.txt"),
                               "${jsoncpp_SOURCE_DIR}",
                               "${JSONCPP_SOURCE_DIR}")
@@ -35,27 +46,28 @@ class JsoncppConan(ConanFile):
                                   "explicit operator bool()",
                                   "operator bool()")
 
-        if self.settings.os != "Windows" and not self.options.shared and not self.options.fPIC:
-            tools.replace_in_file(os.path.join(self._source_subfolder, "src", "lib_json", "CMakeLists.txt"),
-                                  "set_target_properties( jsoncpp_lib PROPERTIES POSITION_INDEPENDENT_CODE ON)",
-                                  "set_target_properties( jsoncpp_lib PROPERTIES POSITION_INDEPENDENT_CODE OFF)")
-        if tools.Version(self.version) > "1.9.0":
+        if tools.Version(self.version) >= "1.9.0":
             tools.replace_in_file(os.path.join(self._source_subfolder, "src", "lib_json", "CMakeLists.txt"),
                                   "$<BUILD_INTERFACE:${PROJECT_BINARY_DIR}/include/json>",
                                   "")
-        tools.replace_in_file(os.path.join(self._source_subfolder, "CMakeLists.txt"),
-                              "add_subdirectory( example )",
-                              "",
-                              strict=False)
 
     def _configure_cmake(self):
-        cmake = CMake(self)
-        cmake.definitions["JSONCPP_WITH_TESTS"] = False
-        cmake.definitions["JSONCPP_WITH_CMAKE_PACKAGE"] = False
-        cmake.definitions["JSONCPP_WITH_STRICT_ISO"] = False
-        cmake.definitions["JSONCPP_WITH_PKGCONFIG_SUPPORT"] = False
-        cmake.configure()
-        return cmake
+        if self._cmake:
+            return self._cmake
+        self._cmake = CMake(self)
+        self._cmake.definitions["JSONCPP_WITH_TESTS"] = False
+        self._cmake.definitions["JSONCPP_WITH_CMAKE_PACKAGE"] = False
+        self._cmake.definitions["JSONCPP_WITH_STRICT_ISO"] = False
+        self._cmake.definitions["JSONCPP_WITH_PKGCONFIG_SUPPORT"] = False
+        jsoncpp_version = tools.Version(self.version)
+        if jsoncpp_version < "1.9.0" or jsoncpp_version >= "1.9.4":
+            self._cmake.definitions["BUILD_STATIC_LIBS"] = not self.options.shared
+        if jsoncpp_version >= "1.9.3":
+            self._cmake.definitions["JSONCPP_WITH_EXAMPLE"] = False
+        if jsoncpp_version >= "1.9.4":
+            self._cmake.definitions["BUILD_OBJECT_LIBS"] = False
+        self._cmake.configure()
+        return self._cmake
 
     def build(self):
         self._patch_sources()
@@ -68,6 +80,11 @@ class JsoncppConan(ConanFile):
         cmake.install()
 
     def package_info(self):
-        self.cpp_info.names["cmake_find_package"] = "JsonCpp"
-        self.cpp_info.names["cmake_find_package_multi"] = "JsonCpp"
-        self.cpp_info.libs = tools.collect_libs(self)
+        # TODO: CMake imported target shouldn't be namespaced (waiting https://github.com/conan-io/conan/issues/7615 to be implemented)
+        self.cpp_info.names["cmake_find_package"] = "jsoncpp"
+        self.cpp_info.names["cmake_find_package_multi"] = "jsoncpp"
+        self.cpp_info.names["pkg_config"] = "jsoncpp"
+        self.cpp_info.components["libjsoncpp"].names["cmake_find_package"] = "jsoncpp_lib"
+        self.cpp_info.components["libjsoncpp"].names["cmake_find_package_multi"] = "jsoncpp_lib"
+        self.cpp_info.components["libjsoncpp"].names["pkg_config"] = "jsoncpp"
+        self.cpp_info.components["libjsoncpp"].libs = tools.collect_libs(self)

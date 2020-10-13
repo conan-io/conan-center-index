@@ -3,11 +3,13 @@ import os
 
 class TestPackageConan(ConanFile):
     settings = "os", "compiler", "build_type", "arch"
-    generators = "cmake"
+    generators = "cmake", "cmake_find_package_multi"
 
     def build(self):
         cmake = CMake(self)
-        cmake.definitions["BUILD_ASYNC"] = self.options["paho-mqtt-c"].asynchronous
+        cmake.definitions["PAHO_MQTT_C_ASYNC"] = self.options["paho-mqtt-c"].asynchronous
+        cmake.definitions["PAHO_MQTT_C_SHARED"] = self.options["paho-mqtt-c"].shared
+        cmake.definitions["PAHO_MQTT_C_WITH_SSL"] = self.options["paho-mqtt-c"].ssl
         cmake.configure()
         cmake.build()
 

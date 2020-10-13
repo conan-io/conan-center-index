@@ -79,13 +79,23 @@ class OpenblasConan(ConanFile):
         tools.rmdir(os.path.join(self.package_folder, "share"))
 
     def package_info(self):
-        self.env_info.OpenBLAS_HOME = self.package_folder
-        self.cpp_info.libs = tools.collect_libs(self)
-        if self.settings.os == "Linux":
-            if self.options.use_thread:
-                self.cpp_info.system_libs.append("pthread")
-            if self.options.build_lapack:
-                self.cpp_info.system_libs.append("gfortran")
+        # CMake config file:
+        # - OpenBLAS always has one and only one of these components: openmp, pthread or serial.
+        # - Whatever if this component is requested or not, official CMake imported target is always OpenBLAS::OpenBLAS
+        # - TODO: add openmp component when implemented in this recipe
         self.cpp_info.names["cmake_find_package"] = "OpenBLAS"
         self.cpp_info.names["cmake_find_package_multi"] = "OpenBLAS"
-        self.cpp_info.names['pkg_config'] = "OpenBLAS"
+        self.cpp_info.names["pkg_config"] = "openblas"
+        cmake_component_name = "pthread" if self.options.use_thread else "serial"
+        self.cpp_info.components["openblas_component"].names["cmake_find_package"] = cmake_component_name
+        self.cpp_info.components["openblas_component"].names["cmake_find_package_multi"] = cmake_component_name
+        self.cpp_info.components["openblas_component"].names["pkg_config"] = "openblas"
+        self.cpp_info.components["openblas_component"].libs = tools.collect_libs(self)
+        if self.settings.os == "Linux":
+            if self.options.use_thread:
+                self.cpp_info.components["openblas_component"].system_libs.append("pthread")
+            if self.options.build_lapack:
+                self.cpp_info.components["openblas_component"].system_libs.append("gfortran")
+
+        self.output.info("Setting OpenBLAS_HOME environment variable: {}".format(self.package_folder))
+        self.env_info.OpenBLAS_HOME = self.package_folder

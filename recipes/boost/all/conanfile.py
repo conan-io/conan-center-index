@@ -15,7 +15,6 @@ try:
 except ImportError:
     from io import StringIO
 
-
 required_conan_version = ">=1.28.0"
 
 
@@ -183,12 +182,8 @@ class BoostConan(ConanFile):
                 if not self.options.get_safe('without_%s' % lib):
                     raise ConanInvalidConfiguration("Boost '%s' library requires multi threading" % lib)
 
-        if not self.options.without_python and not self.options.python_version:
-            # The python version (currently) really needs to be stored in the package (and not only in the package_id)
-            # Dependencies of boost need to be able to query the value of options["boost"].python_version
-            # Adding it to package_info is not enough
-            # FIXME: A conan python package will fix this by obviating the need fot a python_version option
-            self.options.python_version = self._detect_python_version()
+        if self.settings.compiler == "Visual Studio" and "MT" in self.settings.compiler.runtime and self.options.shared:
+            raise ConanInvalidConfiguration("Boost can not be built as shared library with MT runtime.")
 
     def _check_options(self):
         for mod_name, mod_deps in self._dependencies["dependencies"].items():
@@ -201,7 +196,8 @@ class BoostConan(ConanFile):
                             raise ConanInvalidConfiguration("{} requires {}: {} is disabled".format(mod_name, mod_deps, mod_dep))
 
     def build_requirements(self):
-        self.build_requires("b2/4.2.0")
+        if not self.options.header_only:
+            self.build_requires("b2/4.2.0")
 
     def requirements(self):
         if self._zip_bzip2_requires_needed:
@@ -228,6 +224,8 @@ class BoostConan(ConanFile):
             del self.info.options.python_executable  # PATH to the interpreter is not important, only version matters
             if self.options.without_python:
                 del self.info.options.python_version
+            else:
+                self.info.options.python_version = self._python_version
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
@@ -298,7 +296,8 @@ class BoostConan(ConanFile):
         """
         return self._get_python_sc_var(name) or self._get_python_du_var(name)
 
-    def _detect_python_version(self):
+    @property
+    def _python_version(self):
         """
         obtain version of python interpreter
         :return: python interpreter version, in format major.minor
@@ -306,11 +305,10 @@ class BoostConan(ConanFile):
         version = self._run_python_script("from __future__ import print_function; "
                                           "import sys; "
                                           "print('%s.%s' % (sys.version_info[0], sys.version_info[1]))")
+        if self.options.python_version and version != self.options.python_version:
+            raise ConanInvalidConfiguration("detected python version %s doesn't match conan option %s" % (version,
+                                                                                          self.options.python_version))
         return version
-
-    @property
-    def _python_version(self):
-        return str(self.options.python_version)
 
     @property
     def _python_inc(self):
@@ -610,10 +608,8 @@ class BoostConan(ConanFile):
         if self.options.i18n_backend == 'icu':
             flags.append("-sICU_PATH={}".format(self.deps_cpp_info["icu"].rootpath))
             flags.append("boost.locale.iconv=off boost.locale.icu=on")
-            flags.append("--enable-icu --disable-iconv")
         elif self.options.i18n_backend == 'iconv':
             flags.append("boost.locale.iconv=on boost.locale.icu=off")
-            flags.append("--disable-icu --enable-iconv")
         else:
             flags.append("boost.locale.iconv=off boost.locale.icu=off")
             flags.append("--disable-icu --disable-iconv")
@@ -888,7 +884,6 @@ class BoostConan(ConanFile):
         # copy to source with the good lib name
         self.copy("LICENSE_1_0.txt", dst="licenses", src=os.path.join(self.source_folder,
                                                                       self._source_subfolder))
-
         tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
         if self.options.header_only:
             self.copy(pattern="*", dst="include/boost", src="%s/boost" % self._boost_dir)
@@ -1071,3 +1066,6 @@ class BoostConan(ConanFile):
                         self.cpp_info.components["_libboost"].exelinkflags.extend(["-pthread","--shared-memory"])
 
         self.env_info.BOOST_ROOT = self.package_folder
+        self.cpp_info.components["_libboost"].bindirs.append("lib")
+        self.cpp_info.names["cmake_find_package"] = "Boost"
+        self.cpp_info.names["cmake_find_package_multi"] = "Boost"

@@ -6,7 +6,7 @@ import os
 class PkgConfConan(ConanFile):
     name = "pkgconf"
     url = "https://github.com/conan-io/conan-center-index"
-    homepage = "http://pkgconf.org/"
+    homepage = "https://git.sr.ht/~kaniini/pkgconf"
     topics = ("conan", "pkgconf")
     settings = "os", "arch", "compiler", "build_type"
     license = "ISC"
@@ -46,7 +46,7 @@ class PkgConfConan(ConanFile):
         os.rename("pkgconf-pkgconf-{}".format(self.version), self._source_subfolder)
 
     def build_requirements(self):
-        self.build_requires("meson/0.53.2")
+        self.build_requires("meson/0.55.1")
 
     @property
     def _sharedstatedir(self):
@@ -104,7 +104,8 @@ class PkgConfConan(ConanFile):
         self.output.info("Appending PATH env var: {}".format(bindir))
         self.env_info.PATH.append(bindir)
 
-        pkg_config = os.path.join(bindir, "pkgconf").replace("\\", "/")
+        exesuffix = ".exe" if self.settings.os == "Windows" else ""
+        pkg_config = os.path.join(bindir, "pkgconf" + exesuffix).replace("\\", "/")
         self.output.info("Setting PKG_CONFIG env var: {}".format(pkg_config))
         self.env_info.PKG_CONFIG = pkg_config
 
