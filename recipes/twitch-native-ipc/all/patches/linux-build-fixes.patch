@@ -1,3 +1,16 @@
+diff --git a/libnativeipc/CMakeLists.txt b/libnativeipc/CMakeLists.txt
+index fe5cc30..e8f20cd 100644
+--- a/libnativeipc/CMakeLists.txt
++++ b/libnativeipc/CMakeLists.txt
+@@ -22,7 +22,7 @@ target_sources(nativeipc PRIVATE
+   src/LogMacrosWithHandle.h
+   src/Message.h
+   src/OperationQueue.cpp
+-  src/OperationQUeue.h
++  src/OperationQueue.h
+   src/Pipe-ClientTransport.cpp
+   src/Pipe-ClientTransport.h
+   src/Pipe-ServerTransport.cpp
 diff --git a/libnativeipc/include/nativeipc/ConnectionFactory.h b/libnativeipc/include/nativeipc/ConnectionFactory.h
 index 0dd3aaa..e72682b 100644
 --- a/libnativeipc/include/nativeipc/ConnectionFactory.h
