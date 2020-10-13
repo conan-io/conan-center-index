@@ -44,10 +44,9 @@ class STXConan(ConanFile):
 
         compiler = self.settings.compiler
         compiler_version = tools.Version(self.settings.compiler.version)
-        standards = ['17', '20', 'gnu17', 'gnu20']
 
-        if compiler.cppstd and not str(compiler.cppstd) in standards:
-            raise ConanInvalidConfiguration('STX requires C++17 support')
+        if compiler.get_safe('cppstd'):
+            tools.check_min_cppstd(self, 17)
 
         if compiler == 'Visual Studio' and compiler_version < 16:
             raise ConanInvalidConfiguration(
@@ -95,9 +94,8 @@ class STXConan(ConanFile):
     def source(self):
         tools.get(**self.conan_data['sources'][self.version])
         tools.rename(src=f'STX-{self.version}', dst='source_subfolder')
-        if self.version in self.conan_data['patches']:
-            for patch in self.conan_data['patches'][self.version]:
-                tools.patch(base_path='source_subfolder', **patch)
+        for patch in self.conan_data.get('patches', {}).get(self.version, []):
+            tools.patch(**patch)
 
     def build(self):
         cmake = CMake(self)
