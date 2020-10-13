@@ -39,6 +39,9 @@ class FruitConan(ConanFile):
             del self.options.fPIC
 
     def configure(self):
+        if self.options.shared:
+            del self.options.fPIC
+
         compiler = str(self.settings.compiler)
         compiler_version = Version(self.settings.compiler.version.value)
 

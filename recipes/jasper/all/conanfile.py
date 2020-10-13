@@ -6,17 +6,25 @@ from conans import ConanFile, CMake, tools
 class JasperConan(ConanFile):
     name = "jasper"
     license = "JasPer License Version 2.0"
-    homepage = "https://github.com/mdadams/jasper"
+    homepage = "https://jasper-software.github.io/jasper"
     url = "https://github.com/conan-io/conan-center-index"
     topics = ("conan", "jasper", "tool-kit", "coding")
     description = "JasPer Image Processing/Coding Tool Kit"
     exports_sources = ["CMakeLists.txt", "patches/**"]
     generators = "cmake", "cmake_find_package"
     settings = "os", "compiler", "build_type", "arch"
-    options = {"shared": [True, False],
-               "fPIC": [True, False],
-               "jpegturbo": [True, False]}
-    default_options = {"shared": False, "fPIC": True, "jpegturbo": False}
+    options = {
+        "shared": [True, False],
+        "fPIC": [True, False],
+        "with_libjpeg": ["libjpeg", "libjpeg-turbo"],
+        "jpegturbo": [True, False]
+    }
+    default_options = {
+        "shared": False,
+        "fPIC": True,
+        "with_libjpeg": "libjpeg",
+        "jpegturbo": False
+    }
 
     _cmake = None
 
@@ -33,13 +41,22 @@ class JasperConan(ConanFile):
             del self.options.fPIC
 
     def configure(self):
+        if self.options.shared:
+            del self.options.fPIC
         del self.settings.compiler.cppstd
         del self.settings.compiler.libcxx
 
-    def requirements(self):
+        # Handle deprecated libjpeg option
         if self.options.jpegturbo:
-            self.requires("libjpeg-turbo/2.0.4")
-        else:
+            self.output.warn("jpegturbo option is deprecated, use with_libjpeg option instead.")
+        if self.options.with_libjpeg == "libjpeg" and self.options.jpegturbo:
+            self.options.with_libjpeg = "libjpeg-turbo"
+        del self.options.jpegturbo
+
+    def requirements(self):
+        if self.options.with_libjpeg == "libjpeg-turbo":
+            self.requires("libjpeg-turbo/2.0.5")
+        elif self.options.with_libjpeg == "libjpeg":
             self.requires("libjpeg/9d")
 
     def source(self):
@@ -77,6 +94,9 @@ class JasperConan(ConanFile):
                     os.unlink(dll_file)
 
     def package_info(self):
+        self.cpp_info.names["cmake_find_package"] = "Jasper"
+        self.cpp_info.names["cmake_find_package_multi"] = "Jasper"
+        self.cpp_info.names["pkg_config"] = "jasper"
         self.cpp_info.libs = ["jasper"]
         if self.settings.os == "Linux":
             self.cpp_info.system_libs.append("m")

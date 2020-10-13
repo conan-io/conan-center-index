@@ -2,3 +2,6 @@ sources:
   "3.2.1":
     url: "https://github.com/msgpack/msgpack-c/archive/cpp-3.2.1.tar.gz"
     sha256: "464f46744a6be778626d11452c4db3c2d09461080c6db42e358e21af19d542f6"
+  "3.3.0":
+    url: "https://github.com/msgpack/msgpack-c/archive/cpp-3.3.0.tar.gz"
+    sha256: "754c3ace499a63e45b77ef4bcab4ee602c2c414f58403bce826b76ffc2f77d0b"

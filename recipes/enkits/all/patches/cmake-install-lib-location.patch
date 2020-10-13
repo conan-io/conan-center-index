@@ -1,0 +1,5 @@
+--- CMakeLists.txt
++++ CMakeLists.txt
+@@ -63,1 +63,1 @@
+-    install(TARGETS enkiTS DESTINATION "${CMAKE_INSTALL_PREFIX}/lib/enkiTS")
++    install(TARGETS enkiTS ARCHIVE LIBRARY RUNTIME)

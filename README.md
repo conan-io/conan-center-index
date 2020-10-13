@@ -8,7 +8,7 @@ This repository includes a Continuous Integration system that will build automat
 
 ### Documentation
 
-All the documentation is available in this same repository in the [`docs/` subfoler](docs/README.md).
+All the documentation is available in this same repository in the [`docs/` subfolder](docs/README.md).
 
 This is a list of shortcuts to some interesting topics:
 

@@ -3,6 +3,22 @@
 #include <cstdlib>
 #include <iostream>
 
+#ifndef EA_COMPILER_IS_ANSIC
+#define EA_COMPILER_IS_ANSIC 0
+#endif
+#ifndef EA_COMPILER_IS_C99
+#define EA_COMPILER_IS_C99 0
+#endif
+#ifndef EA_COMPILER_IS_C99
+#define EA_COMPILER_IS_C99 0
+#endif
+#ifndef EA_COMPILER_HAS_C99_TYPES
+#define EA_COMPILER_HAS_C99_TYPES 0
+#endif
+#ifndef EA_COMPILER_IS_CPLUSPLUS
+#define EA_COMPILER_IS_CPLUSPLUS 0
+#endif
+
 int main() {
 #define PRINT_COMPILER_INFO(VAR) std::cout << #VAR << ": " << (VAR) << '\n'
 

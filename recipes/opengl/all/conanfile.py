@@ -63,12 +63,16 @@ class SysConfigOpenGLConan(ConanFile):
                 package_tool.install(update=True, packages=p)
 
     def package_info(self):
+        # TODO: Workaround for #2311 until a better solution can be found
+        self.cpp_info.filenames["cmake_find_package"] = "opengl_system"
+        self.cpp_info.filenames["cmake_find_package_multi"] = "opengl_system"
+
         self.cpp_info.includedirs = []
         self.cpp_info.libdirs = []
         if self.settings.os == "Macos":
             self.cpp_info.defines.append("GL_SILENCE_DEPRECATION=1")
             self.cpp_info.frameworks.append("OpenGL")
         elif self.settings.os == "Windows":
-            self.cpp_info.system_libs = ["OpenGL32"]
+            self.cpp_info.system_libs = ["opengl32"]
         elif self.settings.os == "Linux":
             self._fill_cppinfo_from_pkgconfig('gl')

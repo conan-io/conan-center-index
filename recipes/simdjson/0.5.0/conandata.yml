@@ -1,0 +1,5 @@
+sources:
+  "0.5.0":
+    url: "https://github.com/lemire/simdjson/archive/v0.5.0.tar.gz"
+    sha256: "60846ae482e17230e41f5abf8f058a6e367c2a0ec1b5a6fd7a883a54ad21bee8"
+
