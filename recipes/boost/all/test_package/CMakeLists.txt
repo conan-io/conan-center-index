@@ -9,7 +9,7 @@ if(CONAN_SETTINGS_OS STREQUAL "Android")
     set(CONAN_LIBCXX "") # NDK fails when specified: https://github.com/android-ndk/ndk/issues/541
 endif()
 
-CONAN_BASIC_SETUP()
+conan_basic_setup()
 
 IF(NOT HEADER_ONLY)
     set(boost_components)

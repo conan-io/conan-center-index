@@ -1,7 +1,6 @@
 from conans import ConanFile, Meson, tools
 from conans.errors import ConanInvalidConfiguration
 import os
-import shutil
 import glob
 
 
@@ -80,15 +79,6 @@ class EpoxyConan(ConanFile):
         return self._meson
 
     def build(self):
-        for package in self.deps_cpp_info.deps:
-            lib_path = self.deps_cpp_info[package].rootpath
-            for dirpath, _, filenames in os.walk(lib_path):
-                for filename in filenames:
-                    if filename.endswith(".pc"):
-                        if filename in ["cairo.pc", "fontconfig.pc", "xext.pc", "xi.pc", "x11.pc", "xcb.pc"]:
-                            continue
-                        shutil.copyfile(os.path.join(dirpath, filename), filename)
-                        tools.replace_prefix_in_pc_file(filename, lib_path)
         with tools.environment_append(tools.RunEnvironment(self).vars):
             meson = self._configure_meson()
             meson.build()

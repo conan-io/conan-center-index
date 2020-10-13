@@ -1,5 +1,6 @@
-import os
 from conans import tools, CMake, ConanFile
+from conans.errors import ConanInvalidConfiguration
+import os
 
 
 class ConanFileDefault(ConanFile):
@@ -28,6 +29,7 @@ class ConanFileDefault(ConanFile):
         "with_cpp": [True, False],
         "with_java": [True, False],
         "with_python": [True, False],
+        "with_qt": [True, False],
         "with_haskell": [True, False],
         "with_plugin": [True, False]
     }
@@ -46,31 +48,34 @@ class ConanFileDefault(ConanFile):
         "with_cpp": True,
         "with_java": False,
         "with_python": False,
+        "with_qt": False,
         "with_haskell": False,
         "with_plugin": False
     }
-    _source_subfolder = "source_subfolder"
-    _build_subfolder = "build_subfolder"
+    short_paths = True
 
     _cmake = None
 
+    @property
+    def _source_subfolder(self):
+        return "source_subfolder"
+
+    @property
+    def _build_subfolder(self):
+        return "build_subfolder"
+
     def config_options(self):
-        if self.settings.os == 'Windows':
+        if self.settings.os == "Windows":
+            del self.options.fPIC
+
+    def configure(self):
+        if self.options.shared:
             del self.options.fPIC
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
         extracted_dir = "thrift-" + self.version
         os.rename(extracted_dir, self._source_subfolder)
-
-    def build(self):
-        for p in self.conan_data["patches"][self.version]:
-            tools.patch(**p)
-        for f in ["Findflex.cmake", "Findbison.cmake"]:
-            if os.path.isfile(f):
-                os.unlink(f)
-        cmake = self._configure_cmake()
-        cmake.build()
 
     def build_requirements(self):
         if tools.os_info.is_windows:
@@ -80,10 +85,14 @@ class ConanFileDefault(ConanFile):
             self.build_requires("bison/3.5.3")
 
     def requirements(self):
-        self.requires("boost/1.73.0")
+        self.requires("boost/1.74.0")
+
+        if self.options.with_qt:
+            # FIXME: missing qt recipe
+            raise ConanInvalidConfiguration("qt is not (yet) available on cci")
 
         if self.options.with_openssl:
-            self.requires("openssl/1.1.1g")
+            self.requires("openssl/1.1.1h")
         if self.options.with_zlib:
             self.requires("zlib/1.2.11")
         if self.options.with_libevent:
@@ -101,23 +110,35 @@ class ConanFileDefault(ConanFile):
         self._cmake.definitions["USE_BOOST_THREAD"] = self.options.with_boostthreads
         self._cmake.definitions["WITH_SHARED_LIB"] = self.options.shared
         self._cmake.definitions["WITH_STATIC_LIB"] = not self.options.shared
-        self._cmake.definitions["BOOST_ROOT"] = self.deps_cpp_info['boost'].rootpath
+        self._cmake.definitions["BOOST_ROOT"] = self.deps_cpp_info["boost"].rootpath
         self._cmake.definitions["BUILD_TESTING"] = False
         self._cmake.definitions["BUILD_COMPILER"] = True
         self._cmake.definitions["BUILD_LIBRARIES"] = True
         self._cmake.definitions["BUILD_EXAMPLES"] = False
         self._cmake.definitions["BUILD_TUTORIALS"] = False
 
+        if self.settings.compiler == "Visual Studio":
+            self._cmake.definitions["WITH_MT"] = "MT" in str(self.settings.compiler.runtime)
+
         # Make optional libs "findable"
         if self.options.with_openssl:
-            self._cmake.definitions["OPENSSL_ROOT_DIR"] = self.deps_cpp_info['openssl'].rootpath
+            self._cmake.definitions["OPENSSL_ROOT_DIR"] = self.deps_cpp_info["openssl"].rootpath
         if self.options.with_zlib:
-            self._cmake.definitions["ZLIB_ROOT"] = self.deps_cpp_info['zlib'].rootpath
+            self._cmake.definitions["ZLIB_ROOT"] = self.deps_cpp_info["zlib"].rootpath
         if self.options.with_libevent:
-            self._cmake.definitions["LIBEVENT_ROOT"] = self.deps_cpp_info['libevent'].rootpath
+            self._cmake.definitions["LIBEVENT_ROOT"] = self.deps_cpp_info["libevent"].rootpath
 
         self._cmake.configure(build_folder=self._build_subfolder)
         return self._cmake
+
+    def build(self):
+        for p in self.conan_data["patches"][self.version]:
+            tools.patch(**p)
+        for f in ["Findflex.cmake", "Findbison.cmake"]:
+            if os.path.isfile(f):
+                os.unlink(f)
+        cmake = self._configure_cmake()
+        cmake.build()
 
     def package(self):
         self.copy(pattern="LICENSE", dst="licenses", src=self._source_subfolder)
@@ -130,17 +151,52 @@ class ConanFileDefault(ConanFile):
         tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
 
     def package_info(self):
-        self.cpp_info.libs = tools.collect_libs(self)
-        # Make sure libs are link in correct order. Important thing is that libthrift/thrift is last
-        # (a little naive to sort, but libthrift/thrift should end up last since rest of the libs extend it with an abbrevation: 'thriftnb', 'thriftz')
-        # The library that needs symbols must be first, then the library that resolves the symbols should come after.
-        self.cpp_info.libs.sort(reverse = True)
+        libsuffix = "{}{}".format(
+            str(self.settings.compiler.runtime).lower()[:2] if self.settings.compiler == "Visual Studio" else "",
+            "d" if self.settings.build_type == "Debug" else ""
+        )
 
+        self.cpp_info.filenames["cmake_find_package"] = "Thrift"
+        self.cpp_info.filenames["cmake_find_package_multi"] = "Thrift"
+        self.cpp_info.names["cmake_find_package"] = "thrift"
+        self.cpp_info.names["cmake_find_package_multi"] = "thrift"
+
+        self.cpp_info.components["libthrift"].libs = ["thrift" + libsuffix]
+        self.cpp_info.components["libthrift"].names["cmake_find_package"] = "thrift"
+        self.cpp_info.components["libthrift"].names["cmake_find_package_multi"] = "thrift"
+        self.cpp_info.components["libthrift"].names["pkg_config"] = "thrift"
         if self.settings.os == "Windows":
-            # To avoid error C2589: '(' : illegal token on right side of '::'
-            self.cpp_info.defines.append("NOMINMAX")
+            self.cpp_info.components["libthrift"].defines.append("NOMINMAX")
         elif self.settings.os == "Linux":
-            self.cpp_info.system_libs.extend(["m", "pthread"])
+            self.cpp_info.components["libthrift"].system_libs.extend(["m", "pthread"])
+        self.cpp_info.components["libthrift"].requires.append("boost::boost")
+        if self.options.with_openssl:
+            self.cpp_info.components["libthrift"].requires.append("openssl::openssl")
+        if self.options.with_libevent:
+            self.cpp_info.components["libthrift"].requires.append("libevent::libevent")
+
+        # FIXME: this generates thrift::thriftz, but should be thriftz::thriftz
+        if self.options.with_zlib:
+            self.cpp_info.components["libthrift_z"].libs = ["thriftz" + libsuffix]
+            self.cpp_info.components["libthrift_z"].requires = ["libthrift", "zlib::zlib"]
+            self.cpp_info.components["libthrift_z"].names["cmake_find_package"] = "thriftz"
+            self.cpp_info.components["libthrift_z"].names["cmake_find_package_multi"] = "thriftz"
+            self.cpp_info.components["libthrift_z"].names["pkg_config"] = "thrift-z"
+
+        # FIXME: this generates thrift::thriftnb, but should be thriftnb::thriftnb
+        self.cpp_info.components["libthrift_nb"].libs = ["thriftnb" + libsuffix]
+        self.cpp_info.components["libthrift_nb"].requires = ["libthrift"]
+        self.cpp_info.components["libthrift_nb"].names["cmake_find_package"] = "thriftnb"
+        self.cpp_info.components["libthrift_nb"].names["cmake_find_package_multi"] = "thriftnb"
+        self.cpp_info.components["libthrift_nb"].names["pkg_config"] = "thrift-nb"
+
+        # FIXME: this generates thrift::thriftqt5, but should be thriftqt5::thriftqt5
+        if self.options.with_qt:
+            self.cpp_info.components["libthrift_qt5"].libs = ["thriftqt5" + libsuffix]
+            self.cpp_info.components["libthrift_qt5"].requires = ["libthrift", "qt::core"]
+            self.cpp_info.components["libthrift_qt5"].names["cmake_find_package"] = "thriftqt5"
+            self.cpp_info.components["libthrift_qt5"].names["cmake_find_package_multi"] = "thriftqt5"
+            self.cpp_info.components["libthrift_qt5"].names["pkg_config"] = "thrift-qt5"
 
         bin_path = os.path.join(self.package_folder, "bin")
         self.output.info("Appending PATH env var with : {}".format(bin_path))

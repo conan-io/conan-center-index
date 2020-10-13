@@ -1,0 +1,48 @@
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -21,10 +21,6 @@ option(JINJA2CPP_STRICT_WARNINGS "Enable additional warnings and treat them as e
+ option(JINJA2CPP_BUILD_SHARED "Build shared linkage version of Jinja2Cpp" OFF)
+ option(JINJA2CPP_PIC "Control -fPIC option for library build" OFF)
+ 
+-if (DEFINED BUILD_SHARED_LIBS)
+-    set(JINJA2CPP_BUILD_SHARED BUILD_SHARED_LIBS)
+-endif ()
+-
+ if (JINJA2CPP_BUILD_SHARED)
+     set(JINJA2CPP_PIC ON)
+     set(JINJA2CPP_MSVC_RUNTIME_TYPE "/MD")
+@@ -219,7 +215,7 @@ set_target_properties(${LIB_TARGET_NAME} PROPERTIES
+ 
+ set_property(TARGET ${LIB_TARGET_NAME} PROPERTY PUBLIC_HEADER ${PublicHeaders} ${JINJA2CPP_EXTRA_PUBLIC_HEADERS})
+ 
+-configure_file(jinja2cpp.pc.in jinja2cpp.pc @ONLY)
++configure_file(jinja2cpp.pc.in ${CMAKE_BINARY_DIR}/jinja2cpp.pc @ONLY)
+ 
+ if (JINJA2CPP_BUILD_TESTS)
+     enable_testing()
+@@ -281,7 +277,7 @@ install(
+         InstallTargets
+     RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
+     LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+-    ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}/static
++    ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
+     PUBLIC_HEADER DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/jinja2cpp
+ )
+ 
+--- a/thirdparty/thirdparty-conan-build.cmake
++++ b/thirdparty/thirdparty-conan-build.cmake
+@@ -8,7 +8,11 @@ find_package(string-view-lite)
+ find_package(Boost)
+ set(CONAN_BOOST_PACKAGE_NAME Boost::Boost)
+ find_package(fmt)
+-find_package(rapidjson)
++find_package(RapidJSON)
+ 
+-set(JINJA2_PRIVATE_LIBS_INT ${CONAN_BOOST_PACKAGE_NAME} fmt::fmt rapidjson::rapidjson)
+-set(JINJA2_PUBLIC_LIBS_INT expected-lite::expected-lite variant-lite::variant-lite optional-lite::optional-lite string-view-lite::string-view-lite)
++# TODO: replace conan targets by official imported targets when fixed in corresponding recipes:
++# - CONAN_PKG::rapidjson => rapidjson
++# - CONAN_PKG::optional-lite => nonstd::optional-lite
++# - CONAN_PKG::variant-lite => nonstd::variant-lite
++set(JINJA2_PRIVATE_LIBS_INT ${CONAN_BOOST_PACKAGE_NAME} fmt::fmt CONAN_PKG::rapidjson)
++set(JINJA2_PUBLIC_LIBS_INT nonstd::expected-lite CONAN_PKG::variant-lite CONAN_PKG::optional-lite nonstd::string-view-lite)

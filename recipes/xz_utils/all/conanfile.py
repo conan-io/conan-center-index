@@ -9,6 +9,7 @@ class XZUtils(ConanFile):
                   " for POSIX-like systems, but also work on some not-so-POSIX systems. XZ Utils are the successor to LZMA Utils."
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://tukaani.org/xz"
+    topics = ("conan", "lzma", "xz", "compression")
     license = "Public Domain, GNU LGPLv2.1, GNU GPLv2, or GNU GPLv3"
 
     settings = "os", "arch", "compiler", "build_type"
@@ -26,7 +27,7 @@ class XZUtils(ConanFile):
     def build_requirements(self):
         if self._use_winbash and "CONAN_BASH_PATH" not in os.environ and \
                 tools.os_info.detect_windows_subsystem() != "msys2":
-            self.build_requires("msys2/20190524")
+            self.build_requires("msys2/20200517")
 
     def _effective_msbuild_type(self):
         # treat "RelWithDebInfo" and "MinSizeRel" as "Release"
@@ -41,14 +42,15 @@ class XZUtils(ConanFile):
         del self.settings.compiler.libcxx
 
     def _apply_patches(self):
-        # Relax Windows SDK restriction
-        tools.replace_in_file(os.path.join(self._source_subfolder, "windows", "vs2017", "liblzma.vcxproj"),
-                              "<WindowsTargetPlatformVersion>10.0.15063.0</WindowsTargetPlatformVersion>",
-                              "<WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>")
+        if tools.Version(self.version) == "5.2.4":
+            # Relax Windows SDK restriction
+            tools.replace_in_file(os.path.join(self._source_subfolder, "windows", "vs2017", "liblzma.vcxproj"),
+                                  "<WindowsTargetPlatformVersion>10.0.15063.0</WindowsTargetPlatformVersion>",
+                                  "<WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>")
 
-        tools.replace_in_file(os.path.join(self._source_subfolder, "windows", "vs2017", "liblzma_dll.vcxproj"),
-                              "<WindowsTargetPlatformVersion>10.0.15063.0</WindowsTargetPlatformVersion>",
-                              "<WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>")
+            tools.replace_in_file(os.path.join(self._source_subfolder, "windows", "vs2017", "liblzma_dll.vcxproj"),
+                                  "<WindowsTargetPlatformVersion>10.0.15063.0</WindowsTargetPlatformVersion>",
+                                  "<WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
@@ -58,7 +60,9 @@ class XZUtils(ConanFile):
     def _build_msvc(self):
         # windows\INSTALL-MSVC.txt
 
-        if self.settings.compiler.version == 15:
+        if self.settings.compiler.version == 15 and tools.Version(self.version) == "5.2.4":
+            # Workaround is required only for 5.2.4 because since 5.2.5 WindowsTargetPlatformVersion is dropped from vcproj file
+            #
             # emulate VS2019+ meaning of WindowsTargetPlatformVersion == "10.0"
             # undocumented method, but officially recommended workaround by microsoft at at
             # https://developercommunity.visualstudio.com/content/problem/140294/windowstargetplatformversion-makes-it-impossible-t.html

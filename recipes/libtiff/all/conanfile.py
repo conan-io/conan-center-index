@@ -9,27 +9,31 @@ class LibtiffConan(ConanFile):
     license = "MIT"
     homepage = "http://www.simplesystems.org/libtiff"
     topics = ("tiff", "image", "bigtiff", "tagged-image-file-format")
-    exports_sources = ["CMakeLists.txt"]
+    exports_sources = "CMakeLists.txt", "patches/**"
     generators = "cmake", "cmake_find_package"
     settings = "os", "compiler", "build_type", "arch"
-    options = {"shared": [True, False],
-               "fPIC": [True, False],
-               "lzma": [True, False],
-               "jpeg": [True, False],
-               "zlib": [True, False],
-               "zstd": [True, False],
-               "jbig": [True, False],
-               "webp": [True, False],
-               "cxx":  [True, False]}
-    default_options = {"shared": False,
-                       "fPIC": True,
-                       "lzma": True,
-                       "jpeg": True,
-                       "zlib": True,
-                       "zstd": True,
-                       "jbig": True,
-                       "webp": True,
-                       "cxx":  True}
+    options = {
+        "shared": [True, False],
+        "fPIC": [True, False],
+        "lzma": [True, False],
+        "jpeg": [False, "libjpeg-turbo", "libjpeg"],
+        "zlib": [True, False],
+        "zstd": [True, False],
+        "jbig": [True, False],
+        "webp": [True, False],
+        "cxx":  [True, False],
+    }
+    default_options = {
+        "shared": False,
+        "fPIC": True,
+        "lzma": True,
+        "jpeg": "libjpeg",
+        "zlib": True,
+        "zstd": True,
+        "jbig": True,
+        "webp": True,
+        "cxx":  True,
+    }
     _cmake = None
 
     @property
@@ -57,8 +61,10 @@ class LibtiffConan(ConanFile):
             self.requires("zlib/1.2.11")
         if self.options.lzma:
             self.requires("xz_utils/5.2.4")
-        if self.options.jpeg:
+        if self.options.jpeg == "libjpeg":
             self.requires("libjpeg/9d")
+        if self.options.jpeg == "libjpeg-turbo":
+            self.requires("libjpeg-turbo/2.0.5")
         if self.options.jbig:
             self.requires("jbig/20160605")
         if self.options.get_safe("zstd"):
@@ -71,6 +77,8 @@ class LibtiffConan(ConanFile):
         os.rename("tiff-" + self.version, self._source_subfolder)
 
     def _patch_sources(self):
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            tools.patch(**patch)
         if self.options.shared and self.settings.compiler == "Visual Studio":
             # https://github.com/Microsoft/vcpkg/blob/master/ports/tiff/fix-cxx-shared-libs.patch
             tools.replace_in_file(os.path.join(self._source_subfolder, "libtiff", "CMakeLists.txt"),
@@ -93,7 +101,7 @@ class LibtiffConan(ConanFile):
         if not self._cmake:
             self._cmake = CMake(self)
             self._cmake.definitions["lzma"] = self.options.lzma
-            self._cmake.definitions["jpeg"] = self.options.jpeg
+            self._cmake.definitions["jpeg"] = self.options.jpeg != False
             self._cmake.definitions["jbig"] = self.options.jbig
             self._cmake.definitions["zlib"] = self.options.zlib
             self._cmake.definitions["zstd"] = self.options.get_safe("zstd", False)
