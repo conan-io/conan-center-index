@@ -16,14 +16,12 @@ class FontconfigConan(ConanFile):
     options = {"shared": [True, False], "fPIC": [True, False]}
     default_options = {"shared": False, "fPIC": True}
     generators = "pkg_config"
-    _source_subfolder = "source_subfolder"
+
     _autotools = None
 
-    def requirements(self):
-        self.requires("freetype/2.10.2")
-        self.requires("expat/2.2.10")
-        if self.settings.os == "Linux":
-            self.requires("libuuid/1.0.3")
+    @property
+    def _source_subfolder(self):
+        return "source_subfolder"
 
     def configure(self):
         if self.settings.os == "Windows":
@@ -31,13 +29,19 @@ class FontconfigConan(ConanFile):
         del self.settings.compiler.libcxx
         del self.settings.compiler.cppstd
 
+    def requirements(self):
+        self.requires("freetype/2.10.2")
+        self.requires("expat/2.2.10")
+        if self.settings.os == "Linux":
+            self.requires("libuuid/1.0.3")
+
+    def build_requirements(self):
+        self.build_requires("gperf/3.1")
+
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
         extrated_dir = self.name + "-" + self.version
         os.rename(extrated_dir, self._source_subfolder)
-
-    def build_requirements(self):
-        self.build_requires("gperf/3.1")
 
     def _configure_autotools(self):
         if not self._autotools:
@@ -73,7 +77,6 @@ class FontconfigConan(ConanFile):
         for f in glob.glob(os.path.join(self.package_folder, "bin", "etc", "fonts", "conf.d", "*.conf")):
             if os.path.islink(f):
                 os.unlink(f)
-
 
     def package_info(self):
         self.cpp_info.libs = ["fontconfig"]
