@@ -34,7 +34,7 @@ class TwitchNativeIpcConan(ConanFile):
             del self.options.fPIC
 
     def configure(self):
-        version = Version(self.settings.compiler.version.value)
+        version = Version(self.settings.compiler.version)
         if self.settings.compiler == "Visual Studio" and version < "15":
             raise ConanInvalidConfiguration("MSVC < 14 unsupported")
         elif self.settings.compiler == "apple-clang" and version < "10":
