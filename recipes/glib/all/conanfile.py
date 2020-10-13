@@ -5,6 +5,7 @@ import shutil
 import glob
 
 
+
 class GLibConan(ConanFile):
     name = "glib"
     description = "GLib provides the core application building blocks for libraries and applications written in C"
