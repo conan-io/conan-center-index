@@ -316,6 +316,6 @@ The attribue `default_options` should be a dictionary, for example `default_opti
 
 It's important to have new library version defined in both `config.yml` and `conandata.yml`, otherwise newly added version will not be checked and built by CI and will not be available for download.
 
-### **<a name="KB-H053">#KB-H053</a>: "PRIVATE IMPORTS"**
+#### **<a name="KB-H053">#KB-H053</a>: "PRIVATE IMPORTS"**
 
 The recipe imports private Conan API, this is strongly discouraged - private imports are subjects to breaking changes. Avoid usage of private APIs, request to publically expose needed methods, if necessary.
