@@ -1,5 +1,28 @@
 # Changelog
 
+### 10-October-2020 - 21:20 CEST
+
+ - [fix] Wait longer for Artifactory to create new repositories.
+
+### 10-October-2020 - 20:52 CEST
+
+ - [job] TapaholesRepo: use full path to the recipe itself.
+
+### 10-October-2020 - 20:36 CEST
+
+ - [job] BuildSingleReference: assign properties at recipe-revision level
+
+### 10-October-2020 - 15:53 CEST
+
+ - [job] TapaholesRepo: create remote repository for each run.
+ - [job] BuildSingleReference: apply environment to every Conan command.
+
+### 09-October-2020 - 23:43 CEST
+
+ - [fix] AutomaticMerge: if the PR cannot be merged (conflicts) go and try the next one.
+ - [fix] Use existing TMP folder in Windows.
+ - [fix] BuildSingleReference: minor fixes.
+
 ### 07-October-2020 - 17:06 CEST
 
 - [fix] Minor fix to AutomaticMerge job (#390)
