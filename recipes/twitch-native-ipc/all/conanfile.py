@@ -85,5 +85,8 @@ class TwitchNativeIpcConan(ConanFile):
         if self.settings.os == "Windows" and self.options.shared:
             self.cpp_info.defines = ["NATIVEIPC_IMPORT"]
 
+        if self.settings.os == "Linux":
+            self.cpp_info.system_libs = ["m"]
+
         if tools.stdcpp_library(self):
             self.cpp_info.system_libs.append(tools.stdcpp_library(self))
