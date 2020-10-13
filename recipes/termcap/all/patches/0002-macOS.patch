@@ -1,20 +1,8 @@
 diff --git a/tparam.c b/tparam.c
-index 5a9809a..d967e6d 100644
+index 5a9809a..09ef456 100644
 --- a/tparam.c
 +++ b/tparam.c
-@@ -22,8 +22,9 @@ Boston, MA 02111-1307, USA.  */
- #endif
- 
- #ifdef emacs
--#include "lisp.h"		/* for xmalloc */
--#else
-+#include <lisp.h>   /* xmalloc is here */
-+
-+#else /* not emacs */
- 
- #ifdef STDC_HEADERS
- #include <stdlib.h>
-@@ -40,6 +41,10 @@ char *realloc ();
+@@ -40,6 +40,10 @@ char *realloc ();
  
  #endif /* not emacs */
  
@@ -25,12 +13,3 @@ index 5a9809a..d967e6d 100644
  #ifndef NULL
  #define NULL (char *) 0
  #endif
-@@ -165,7 +170,7 @@ tparam1 (string, outstring, len, up, left, argp)
- 	      outlen *= 2;
- 	      new = (char *) xrealloc (outstring, outlen);
- 	    }
--	  
-+
- 	  op = new + offset;
- 	  outend = new + outlen;
- 	  outstring = new;
