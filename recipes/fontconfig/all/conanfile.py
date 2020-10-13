@@ -82,5 +82,9 @@ class FontconfigConan(ConanFile):
         self.cpp_info.names["cmake_find_package"] = "Fontconfig"
         self.cpp_info.names["cmake_find_package_multi"] = "Fontconfig"
 
-        self.env_info.FONTCONFIG_FILE = os.path.join(self.package_folder, "bin", "etc", "fonts", "fonts.conf")
-        self.env_info.FONTCONFIG_PATH = os.path.join(self.package_folder, "bin", "etc", "fonts")
+        fontconfig_file = os.path.join(self.package_folder, "bin", "etc", "fonts", "fonts.conf")
+        self.output.info("Creating FONTCONFIG_FILE environment variable: {}".format(fontconfig_file))
+        self.env_info.FONTCONFIG_FILE = fontconfig_file
+        fontconfig_path = os.path.join(self.package_folder, "bin", "etc", "fonts")
+        self.output.info("Creating FONTCONFIG_PATH environment variable: {}".format(fontconfig_path))
+        self.env_info.FONTCONFIG_PATH = fontconfig_path
