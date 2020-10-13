@@ -9,7 +9,7 @@ class STXConan(ConanFile):
     license = 'MIT'
     url = 'https://github.com/conan-io/conan-center-index'
     description = 'C++17 & C++ 20 error-handling and utility extensions.'
-    generators = 'cmake_find_package'
+    generators = 'cmake', 'cmake_find_package'
     topics = 'error-handling', 'result', 'option', 'backtrace', 'panic'
     settings = 'os', 'compiler', 'build_type', 'arch'
     options = {
@@ -26,7 +26,7 @@ class STXConan(ConanFile):
         'shared': False,
         'fPIC': True,
     }
-    exports_sources = ['patches/*']
+    exports_sources = ['CMakeLists.txt', 'patches/*']
 
     def config_options(self):
         if self.settings.os == 'Windows':
@@ -92,16 +92,12 @@ class STXConan(ConanFile):
         if self.options.backtrace:
             self.requires('abseil/20200923.1')
 
-    @property
-    def _source_subfolder(self):
-        return f'STX-{self.version}'
-
     def source(self):
         tools.get(**self.conan_data['sources'][self.version])
-
+        tools.rename(src=f'STX-{self.version}', dst='source_subfolder')
         if self.version in self.conan_data['patches']:
             for patch in self.conan_data['patches'][self.version]:
-                tools.patch(base_path=self._source_subfolder, **patch)
+                tools.patch(base_path='source_subfolder', **patch)
 
     def build(self):
         cmake = CMake(self)
@@ -114,14 +110,14 @@ class STXConan(ConanFile):
         cmake.definitions['STX_VISIBLE_PANIC_HOOK'] = \
             self.options.visible_panic_hook
 
-        cmake.configure(source_dir=self._source_subfolder)
+        cmake.configure()
         cmake.build()
 
     def package(self):
         self.copy(
             '*.h',
             dst='include',
-            src=os.path.join(self._source_subfolder, 'include')
+            src=os.path.join('source_subfolder', 'include')
         )
 
         self.copy('*.lib', dst='lib', keep_path=False)
@@ -130,7 +126,7 @@ class STXConan(ConanFile):
         self.copy('*.dylib', dst='lib', keep_path=False)
         self.copy('*.a', dst='lib', keep_path=False)
 
-        self.copy('LICENSE', dst='licenses', src=self._source_subfolder)
+        self.copy('LICENSE', dst='licenses', src='source_subfolder')
 
     def package_info(self):
         self.cpp_info.libs = tools.collect_libs(self)
