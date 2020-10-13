@@ -36,6 +36,30 @@ class CMakeConan(ConanFile):
         if self.settings.os == "Macos" and self.settings.arch == "x86":
             raise ConanInvalidConfiguration("CMake does not support x86 for macOS")
 
+        minimal_cpp_standard = "11"
+        if self.settings.compiler.cppstd:
+            tools.check_min_cppstd(self, minimal_cpp_standard)
+
+        minimal_version = {
+            "gcc": "5",
+            "clang": "3.3",
+            "apple-clang": "9",
+            "Visual Studio": "14",
+        }
+
+        compiler = str(self.settings.compiler)
+        if compiler not in minimal_version:
+            self.output.warn(
+                "{} recipe lacks information about the {} compiler standard version support".format(self.name, compiler))
+            self.output.warn(
+                "{} requires a compiler that supports at least C++{}".format(self.name, minimal_cpp_standard))
+            return
+
+        version = tools.Version(self.settings.compiler.version)
+        if version < minimal_version[compiler]:
+            raise ConanInvalidConfiguration(
+                "{} requires a compiler that supports at least C++{}".format(self.name, minimal_cpp_standard))
+
     def requirements(self):
         if self._with_openssl:
             self.requires("openssl/1.1.1h")
@@ -48,6 +72,8 @@ class CMakeConan(ConanFile):
     def _configure_cmake(self):
         if not self._cmake:
             self._cmake = CMake(self)
+            if not self.settings.compiler.cppstd:
+                self._cmake.definitions["CMAKE_CXX_STANDARD"] = 11
             self._cmake.definitions["CMAKE_BOOTSTRAP"] = False
             if self.settings.os == "Linux":
                 self._cmake.definitions["CMAKE_USE_OPENSSL"] = self._with_openssl
@@ -76,6 +102,7 @@ class CMakeConan(ConanFile):
 
     def package_id(self):
         self.info.options.with_openssl = self._with_openssl
+        del self.info.settings.compiler
 
     def package_info(self):
         minor = self._minor_version()
