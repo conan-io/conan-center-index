@@ -8,3 +8,5 @@ patches:
       base_path: "source_subfolder"
     - patch_file: "patches/linux-build-fixes.patch"
       base_path: "source_subfolder"
+    - patch_file: "patches/export-fixes.patch"
+      base_path: "source_subfolder"

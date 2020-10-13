@@ -1,13 +1,14 @@
-#include <iostream>
+#include <stdio.h>
+#include <stdlib.h>
 #include <nativeipc/ConnectionExports.h>
 
 int main() {
-    auto server = Twitch_IPC_ConnectionCreateServer("test");
-    auto client = Twitch_IPC_ConnectionCreateClient("test");
+    void *server = Twitch_IPC_ConnectionCreateServer("test");
+    void *client = Twitch_IPC_ConnectionCreateClient("test");
 
     if(server && client)
     {
-        std::cout << "success\n";
+        printf("success\n");
         Twitch_IPC_ConnectionDestroy(server);
         Twitch_IPC_ConnectionDestroy(client);
     }
