@@ -14,17 +14,17 @@ class STXConan(ConanFile):
     settings = 'os', 'compiler', 'build_type', 'arch'
     options = {
         'backtrace': [True, False],
-        'panic_backtrace': [True, False],
-        'override_panic_handler': [True, False],
+        'panic_handler': [None, 'default', 'backtrace'],
         'shared': [True, False],
         'fPIC': [True, False],
         'visible_panic_hook': [True, False],
     }
     default_options = {
         'backtrace': False,
-        'override_panic_handler': False,
+        'panic_handler': 'default',
         'shared': False,
         'fPIC': True,
+        'visible_panic_hook': False,
     }
     exports_sources = ['CMakeLists.txt', 'patches/*']
 
@@ -33,14 +33,14 @@ class STXConan(ConanFile):
             del self.options.fPIC
 
     def configure(self):
-        if self.options.panic_backtrace == None:
-            self.options.panic_backtrace = (
-                self.options.backtrace and
-                not self.options.override_panic_handler
-            )
-
         if self.options.visible_panic_hook == None:
             self.options.visible_panic_hook = self.options.shared
+
+        if (self.options.panic_handler == 'backtrace' and
+                not self.options.backtrace):
+            raise ConanInvalidConfiguration(
+                'panic_handler=backtrace requires backtrace=True'
+            )
 
         compiler = self.settings.compiler
         compiler_version = tools.Version(self.settings.compiler.version)
@@ -102,9 +102,9 @@ class STXConan(ConanFile):
         cmake.definitions['STX_BUILD_SHARED'] = self.options.shared
         cmake.definitions['STX_ENABLE_BACKTRACE'] = self.options.backtrace
         cmake.definitions['STX_ENABLE_PANIC_BACKTRACE'] = \
-            self.options.panic_backtrace
+            self.options.panic_handler == 'backtrace'
         cmake.definitions['STX_OVERRIDE_PANIC_HANDLER'] = \
-            self.options.override_panic_handler
+            self.options.panic_handler == None
         cmake.definitions['STX_VISIBLE_PANIC_HOOK'] = \
             self.options.visible_panic_hook
 
@@ -138,8 +138,8 @@ class STXConan(ConanFile):
         if self.options.visible_panic_hook:
             self.cpp_info.defines.append('STX_VISIBLE_PANIC_HOOK')
 
-        if self.options.override_panic_handler:
+        if self.options.panic_handler == None:
             self.cpp_info.defines.append('STX_OVERRIDE_PANIC_HANDLER')
 
-        if self.options.backtrace and not self.options.override_panic_handler:
+        if self.options.panic_handler == 'backtrace':
             self.cpp_info.defines.append('STX_ENABLE_PANIC_BACKTRACE')
