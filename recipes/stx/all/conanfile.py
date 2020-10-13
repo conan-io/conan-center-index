@@ -50,21 +50,43 @@ class STXConan(ConanFile):
             raise ConanInvalidConfiguration('STX requires C++17 support')
 
         if compiler == 'Visual Studio' and compiler_version < 16:
-            raise ConanInvalidConfiguration('STX requires C++17 support')
+            raise ConanInvalidConfiguration(
+                'STX requires C++17 support, use at least VS 2019'
+            )
 
-        if compiler in ['gcc', 'clang'] and compiler_version < 6:
-            raise ConanInvalidConfiguration('STX requires C++17 support')
+        if compiler == 'gcc' and compiler_version < 8:
+            raise ConanInvalidConfiguration(
+                'STX requires C++17 support, use at least GCC 8'
+            )
+
+        if (compiler == 'clang' and compiler.libcxx and
+                compiler.libcxx in ['libstdc++', 'libstdc++11'] and
+                compiler_version < 9):
+            raise ConanInvalidConfiguration(
+                'STX requires C++17 language and standard library features '
+                'which clang & libc++ < 10 lack'
+            )
+
+        if (compiler == 'clang' and compiler.libcxx and
+                compiler.libcxx == 'libc++' and
+                compiler_version < 10):
+            raise ConanInvalidConfiguration(
+                'STX requires C++17 language and standard library features '
+                'which clang & libc++ < 10 lack'
+            )
 
         if compiler == 'apple-clang':
             raise ConanInvalidConfiguration(
-                'STX requires C++17 language and standard library features'
+                'STX requires C++17 language and standard library features '
+                'which apple-clang and libc++ lack'
             )
 
         if (compiler == 'Visual Studio' and self.options.shared and
                 tools.Version(self.version) <= '1.0.1'):
             raise ConanInvalidConfiguration(
                 'shared library build does not work on windows with '
-                'STX version <= 1.0.1')
+                'STX version <= 1.0.1'
+            )
 
     def requirements(self):
         if self.options.backtrace:
