@@ -26,7 +26,7 @@ class LibsndfileConan(ConanFile):
         "with_alsa": False,
         "with_sqlite": True,
     }
-    exports_sources = "CMakeLists.txt"
+    exports_sources = ["CMakeLists.txt", "patches/**"]
     generators = "cmake", "cmake_find_package"
 
     _cmake = None
@@ -75,6 +75,8 @@ class LibsndfileConan(ConanFile):
         return self._cmake
 
     def build(self):
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            tools.patch(**patch)
         cmake = self._configure_cmake()
         cmake.build()
 
