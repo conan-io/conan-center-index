@@ -53,14 +53,9 @@ class CassandraCppDriverConan(ConanFile):
         cmake.definitions["CASS_INSTALL_PKG_CONFIG"] = False
 
         if self.options.use_atomic == "boost":
-            # Compilation error on Linux
-            if self.settings.os == "Linux":
-                raise ConanInvalidConfiguration(
-                    "Boost.Atomic is not supported on Linux at the moment")
-                    
             cmake.definitions["CASS_USE_BOOST_ATOMIC"] = True
             cmake.definitions["CASS_USE_STD_ATOMIC"] = False
-            
+
         elif self.options.use_atomic == "std":
             cmake.definitions["CASS_USE_BOOST_ATOMIC"] = False
             cmake.definitions["CASS_USE_STD_ATOMIC"] = True
@@ -73,11 +68,9 @@ class CassandraCppDriverConan(ConanFile):
         cmake.definitions["CASS_USE_ZLIB"] = self.options.with_zlib
         cmake.definitions["CASS_USE_LIBSSH2"] = False
 
-        if self.options.with_kerberos:
-            # cmake.definitions["CASS_USE_KERBEROS"] = self.options.with_kerberos
-            raise ConanInvalidConfiguration(
-                "Kerberos is not supported at the moment")
-
+        # FIXME
+        # cmake.definitions["CASS_USE_KERBEROS"] = self.options.with_kerberos
+        
         if self.settings.os == "Linux":
             cmake.definitions["CASS_USE_TIMERFD"] = self.options.use_timerfd
 
@@ -96,6 +89,16 @@ class CassandraCppDriverConan(ConanFile):
     def configure(self):
         if self.settings.os == "Macos":
             raise ConanInvalidConfiguration("Macos is unsupported")
+
+        if self.options.use_atomic == "boost":
+            # Compilation error on Linux
+            if self.settings.os == "Linux":
+                raise ConanInvalidConfiguration(
+                    "Boost.Atomic is not supported on Linux at the moment")
+
+        if self.options.with_kerberos:
+            raise ConanInvalidConfiguration(
+                "Kerberos is not supported at the moment")
 
     def requirements(self):
         self.requires("libuv/1.34.2")
