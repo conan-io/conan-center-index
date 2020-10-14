@@ -29,20 +29,29 @@ class TwitchNativeIpcConan(ConanFile):
     def _build_subfolder(self):
         return "build_subfolder"
 
+    @property
+    def _compilers_min_version(self):
+        return {
+            "gcc": "8",
+            "clang": "8",
+            "apple-clang": "10",
+            "Visual Studio": "15",
+        }
+
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
 
     def configure(self):
-        version = Version(self.settings.compiler.version)
-        if self.settings.compiler == "Visual Studio" and version < "15":
-            raise ConanInvalidConfiguration("MSVC < 14 unsupported")
-        elif self.settings.compiler == "apple-clang" and version < "10":
-            raise ConanInvalidConfiguration("apple-clang < 10 unsupported")
-        elif self.settings.compiler == "gcc" and version < "8":
-            raise ConanInvalidConfiguration("gcc < 8 unsupported")
-        elif self.settings.compiler == "clang" and version < "8":
-            raise ConanInvalidConfiguration("clang < 8 unsupported")
+        if self.settings.compiler.cppstd:
+            tools.check_min_cppstd(self, 17)
+
+        min_version = self._compilers_min_version.get(str(self.settings.compiler), False)
+        if min_version:
+            if tools.Version(self.settings.compiler.version) < min_version:
+                raise ConanInvalidConfiguration("twitch-native-ipc requires C++17")
+        else:
+            self.output.warn("unknown compiler, assuming C++17 support")
 
         if self.options.shared:
             del self.options.fPIC
@@ -57,7 +66,6 @@ class TwitchNativeIpcConan(ConanFile):
         self._cmake = CMake(self)
         self._cmake.definitions["ENABLE_CODE_FORMATTING"] = False
         self._cmake.definitions["BUILD_TESTING"] = False
-        self._cmake.definitions["BUILD_SHARED_LIBS"] = self.options.shared
 
         if self.settings.os == "Windows":
             self._cmake.definitions["MSVC_DYNAMIC_RUNTIME"] = self.settings.compiler.runtime in ("MD", "MDd")
