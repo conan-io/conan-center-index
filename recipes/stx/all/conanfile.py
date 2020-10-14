@@ -90,7 +90,7 @@ class STXConan(ConanFile):
 
     def source(self):
         tools.get(**self.conan_data['sources'][self.version])
-        tools.rename(src=f'STX-{self.version}', dst='source_subfolder')
+        tools.rename('STX-{}'.format(self.version), dst='source_subfolder')
         for patch in self.conan_data.get('patches', {}).get(self.version, []):
             tools.patch(**patch)
 
