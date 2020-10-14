@@ -33,9 +33,6 @@ class STXConan(ConanFile):
             del self.options.fPIC
 
     def configure(self):
-        if self.options.visible_panic_hook == None:
-            self.options.visible_panic_hook = self.options.shared
-
         if (self.options.panic_handler == 'backtrace' and
                 not self.options.backtrace):
             raise ConanInvalidConfiguration(
