@@ -53,5 +53,5 @@ class MagicEnumConan(ConanFile):
         os.rename(extracted_dir, self._source_subfolder)
 
     def package(self):
-        self.copy("include/*", src=self._source_subfolder)
+        self.copy("*", dst="include", src=os.path.join(self._source_subfolder, "include"))
         self.copy("LICENSE", dst="licenses" , src=self._source_subfolder)
