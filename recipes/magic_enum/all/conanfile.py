@@ -19,6 +19,7 @@ class MagicEnumConan(ConanFile):
     homepage = "https://github.com/Neargye/magic_enum"
     license = "MIT"
     settings = "compiler"
+    no_copy_source = True
 
     @property
     def _source_subfolder(self):
