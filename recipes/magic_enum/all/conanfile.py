@@ -20,13 +20,9 @@ class MagicEnumConan(ConanFile):
     license = "MIT"
     settings = "compiler"
 
-    _source_subfolder = "source_subfolder"
-
-
-    def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        extracted_dir = self.name + "-" + self.version
-        os.rename(extracted_dir, self._source_subfolder)
+    @property
+    def _source_subfolder(self):
+        return "source_subfolder"
 
     @property
     def _compilers_minimum_version(self):
@@ -48,9 +44,14 @@ class MagicEnumConan(ConanFile):
                                             "(https://github.com/Neargye/magic_enum#compiler-compatibility)."
                                             .format(self.settings.compiler, self.settings.compiler.version))
 
+    def package_id(self):
+        self.info.header_only()
+
+    def source(self):
+        tools.get(**self.conan_data["sources"][self.version])
+        extracted_dir = self.name + "-" + self.version
+        os.rename(extracted_dir, self._source_subfolder)
+
     def package(self):
         self.copy("include/*", src=self._source_subfolder)
         self.copy("LICENSE", dst="licenses" , src=self._source_subfolder)
-
-    def package_id(self):
-        self.info.header_only()
