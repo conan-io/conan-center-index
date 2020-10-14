@@ -668,8 +668,8 @@ class GdalConan(ConanFile):
             self.cpp_info.system_libs.append(tools.stdcpp_library(self))
 
         gdal_data_path = os.path.join(self.package_folder, "res", "gdal")
-        self.output.info("Appending GDAL_DATA environment variable: {}".format(gdal_data_path))
-        self.env_info.GDAL_DATA.append(gdal_data_path)
+        self.output.info("Creating GDAL_DATA environment variable: {}".format(gdal_data_path))
+        self.env_info.GDAL_DATA = gdal_data_path
         bin_path = os.path.join(self.package_folder, "bin")
         self.output.info("Appending PATH environment variable: {}".format(bin_path))
         self.env_info.PATH.append(bin_path)
