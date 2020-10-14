@@ -2,8 +2,6 @@ from conans import ConanFile, CMake, tools
 from conans.errors import ConanInvalidConfiguration
 from conans.tools import Version
 import os
-import glob
-
 
 class TwitchNativeIpcConan(ConanFile):
     name = "twitch-native-ipc"
@@ -83,10 +81,7 @@ class TwitchNativeIpcConan(ConanFile):
         self.copy("LICENSE", dst="licenses", src=self._source_subfolder)
         cmake = self._configure_cmake()
         cmake.install()
-
-        pdb_files = glob.glob(os.path.join(self.package_folder, "lib", "*.pdb"), recursive=True)
-        for pdb in pdb_files:
-            os.unlink(pdb)
+        tools.remove_files_by_mask(os.path.join(self.package_folder, "lib"), "*.pdb")
 
     def package_info(self):
         self.cpp_info.libs = ["nativeipc"]
