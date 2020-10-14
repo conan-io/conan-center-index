@@ -9,13 +9,18 @@ class DataFrameConan(ConanFile):
     license = "BSD-3-Clause"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/hosseinmoein/DataFrame"
-    description = "C++ DataFrame -- R's and Pandas DataFrame in modern C++ using native types, continuous memory storage, and no virtual functions"
+    description = "C++ DataFrame for statistical, Financial, and ML analysis -- in modern C++ using native types, continuous memory storage, and no pointers are involved"
     topics = (
         "conan",
         "dataframe",
         "numerical-analysis",
         "multidimensional-data",
         "heterogeneous",
+        "cpp",
+        "statistical-analysis",
+        "financial-data-analysis",
+        "trading-strategies",
+        "machine-learning",
     )
     settings = "os", "compiler", "build_type", "arch"
     options = {
