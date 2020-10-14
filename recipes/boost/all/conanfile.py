@@ -155,7 +155,7 @@ class BoostConan(ConanFile):
             if self.options.bzip2:
                 self.requires("bzip2/1.0.8")
             if self.options.lzma:
-                self.requires("xz_utils/5.2.4")
+                self.requires("xz_utils/5.2.5")
             if self.options.zstd:
                 self.requires("zstd/1.4.5")
         if self.options.i18n_backend == 'icu':
