@@ -48,7 +48,7 @@ class PclConanRecipe(ConanFile):
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
         os.rename("pcl-pcl-{}".format(self.version), self._source_subfolder)
-        cmake_lists = os.path.join(self._source_subfolder, "CMakeLists.txt"),
+        cmake_lists = os.path.join(self._source_subfolder, "CMakeLists.txt")
         tools.replace_in_file(
             cmake_lists,
             """set(CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake/Modules/" ${CMAKE_MODULE_PATH})""",
@@ -176,11 +176,16 @@ class PclConanRecipe(ConanFile):
         tools.rmdir(os.path.join(self.package_folder, "share"))
         tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
 
+    def _lib_name(self, lib):
+        if self.settings.compiler == "Visual Studio" and self.settings.build_type == "Debug":
+            return "pcl_{}d".format(lib)
+        return "pcl_{}".format(lib)
+
     def _update_components(self, name, dependencies, header_only=False, extra_libs=None):
         if not extra_libs:
             extra_libs = []
         if not header_only:
-            self.cpp_info.components[name].libs = ["pcl_{}".format(lib) for lib in [name] + extra_libs]
+            self.cpp_info.components[name].libs = [self._lib_name(lib) for lib in [name] + extra_libs]
         self.cpp_info.components[name].includedirs = ["include/pcl-{}".format(self._version_suffix)]
         self.cpp_info.components[name].name = "PCL_{}_LIBRARIES".format(name.upper())
         self.cpp_info.components[name].names["pkg_config"] = "pcl_{}-{}".format(name, self._version_suffix)
