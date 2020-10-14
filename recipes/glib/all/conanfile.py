@@ -5,6 +5,7 @@ import shutil
 import glob
 
 
+
 class GLibConan(ConanFile):
     name = "glib"
     description = "GLib provides the core application building blocks for libraries and applications written in C"
@@ -51,7 +52,7 @@ class GLibConan(ConanFile):
             del self.options.with_selinux
 
     def build_requirements(self):
-        self.build_requires("meson/0.55.1")
+        self.build_requires("meson/0.55.3")
         if self.settings.os == "Windows":
             self.build_requires("pkgconf/1.7.3")
 
