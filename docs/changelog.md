@@ -1,5 +1,9 @@
 # Changelog
 
+### 14-October-2020 - 17:49 CEST
+
+- [hotfix] Use non greedy regex to capture the pull-request number.
+
 ### 10-October-2020 - 21:20 CEST
 
  - [fix] Wait longer for Artifactory to create new repositories.
