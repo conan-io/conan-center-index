@@ -45,42 +45,42 @@ class CassandraCppDriverConan(ConanFile):
         if self._cmake:
             return self._cmake
             
-        _cmake = CMake(self)
-        _cmake.definitions["VERSION"] = self.version
-        _cmake.definitions["CASS_BUILD_EXAMPLES"] = False
-        _cmake.definitions["CASS_BUILD_INTEGRATION_TESTS"] = False
-        _cmake.definitions["CASS_BUILD_SHARED"] = self.options.shared
-        _cmake.definitions["CASS_BUILD_STATIC"] = not self.options.shared
-        _cmake.definitions["CASS_BUILD_TESTS"] = False
-        _cmake.definitions["CASS_BUILD_UNIT_TESTS"] = False
-        _cmake.definitions["CASS_DEBUG_CUSTOM_ALLOC"] = False
-        _cmake.definitions["CASS_INSTALL_HEADER_IN_SUBDIR"] = self.options.install_header_in_subdir
-        _cmake.definitions["CASS_INSTALL_PKG_CONFIG"] = False
+        self._cmake = CMake(self)
+        self._cmake.definitions["VERSION"] = self.version
+        self._cmake.definitions["CASS_BUILD_EXAMPLES"] = False
+        self._cmake.definitions["CASS_BUILD_INTEGRATION_TESTS"] = False
+        self._cmake.definitions["CASS_BUILD_SHARED"] = self.options.shared
+        self._cmake.definitions["CASS_BUILD_STATIC"] = not self.options.shared
+        self._cmake.definitions["CASS_BUILD_TESTS"] = False
+        self._cmake.definitions["CASS_BUILD_UNIT_TESTS"] = False
+        self._cmake.definitions["CASS_DEBUG_CUSTOM_ALLOC"] = False
+        self._cmake.definitions["CASS_INSTALL_HEADER_IN_SUBDIR"] = self.options.install_header_in_subdir
+        self._cmake.definitions["CASS_INSTALL_PKG_CONFIG"] = False
 
         if self.options.use_atomic == "boost":
-            _cmake.definitions["CASS_USE_BOOST_ATOMIC"] = True
-            _cmake.definitions["CASS_USE_STD_ATOMIC"] = False
+            self._cmake.definitions["CASS_USE_BOOST_ATOMIC"] = True
+            self._cmake.definitions["CASS_USE_STD_ATOMIC"] = False
 
         elif self.options.use_atomic == "std":
-            _cmake.definitions["CASS_USE_BOOST_ATOMIC"] = False
-            _cmake.definitions["CASS_USE_STD_ATOMIC"] = True
+            self._cmake.definitions["CASS_USE_BOOST_ATOMIC"] = False
+            self._cmake.definitions["CASS_USE_STD_ATOMIC"] = True
         else:
-            _cmake.definitions["CASS_USE_BOOST_ATOMIC"] = False
-            _cmake.definitions["CASS_USE_STD_ATOMIC"] = False
+            self._cmake.definitions["CASS_USE_BOOST_ATOMIC"] = False
+            self._cmake.definitions["CASS_USE_STD_ATOMIC"] = False
 
-        _cmake.definitions["CASS_USE_OPENSSL"] = self.options.with_openssl
-        _cmake.definitions["CASS_USE_STATIC_LIBS"] = False
-        _cmake.definitions["CASS_USE_ZLIB"] = self.options.with_zlib
-        _cmake.definitions["CASS_USE_LIBSSH2"] = False
+        self._cmake.definitions["CASS_USE_OPENSSL"] = self.options.with_openssl
+        self._cmake.definitions["CASS_USE_STATIC_LIBS"] = False
+        self._cmake.definitions["CASS_USE_ZLIB"] = self.options.with_zlib
+        self._cmake.definitions["CASS_USE_LIBSSH2"] = False
 
         # FIXME
-        # _cmake.definitions["CASS_USE_KERBEROS"] = self.options.with_kerberos
+        # self._cmake.definitions["CASS_USE_KERBEROS"] = self.options.with_kerberos
         
         if self.settings.os == "Linux":
-            _cmake.definitions["CASS_USE_TIMERFD"] = self.options.use_timerfd
+            self._cmake.definitions["CASS_USE_TIMERFD"] = self.options.use_timerfd
 
-        _cmake.configure()
-        return _cmake
+        self._cmake.configure()
+        return self._cmake
 
     @property
     def _source_subfolder(self):
