@@ -11,6 +11,7 @@ class Sol2Conan(ConanFile):
     topics = ("conan", "lua", "c++", "bindings")
     settings = "compiler"
     license = "MIT"
+    no_copy_source = True
 
     @property
     def _source_subfolder(self):
