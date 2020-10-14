@@ -6,6 +6,7 @@ from conans.errors import ConanException
 from conans.errors import ConanInvalidConfiguration
 import os
 import sys
+import shlex
 import shutil
 
 try:
@@ -140,6 +141,13 @@ class BoostConan(ConanFile):
                 if not self.options.get_safe('without_%s' % lib):
                     raise ConanInvalidConfiguration("Boost '%s' library requires multi threading" % lib)
 
+        if self.settings.compiler == "Visual Studio" and "MT" in self.settings.compiler.runtime and self.options.shared:
+            raise ConanInvalidConfiguration("Boost can not be built as shared library with MT runtime.")
+
+    def build_requirements(self):
+        if not self.options.header_only:
+            self.build_requires("b2/4.3.0")
+
     def requirements(self):
         if self._zip_bzip2_requires_needed:
             if self.options.zlib:
@@ -165,9 +173,6 @@ class BoostConan(ConanFile):
                 del self.info.options.python_version
             else:
                 self.info.options.python_version = self._python_version
-
-    def build_requirements(self):
-        self.build_requires("b2/4.3.0")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
@@ -643,7 +648,7 @@ class BoostConan(ConanFile):
         flags.append(cxx_flags)
 
         if self.options.extra_b2_flags:
-            flags.append(str(self.options.extra_b2_flags))
+            flags.extend(shlex.split(str(self.options.extra_b2_flags)))
 
         flags.extend(["install",
                       "--prefix=%s" % self.package_folder,

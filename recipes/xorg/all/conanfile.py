@@ -1,6 +1,7 @@
 from conans import ConanFile, tools
 from conans.errors import ConanException
 
+required_conan_version = ">=1.29"
 
 class ConanXOrg(ConanFile):
     name = "xorg"
@@ -33,6 +34,7 @@ class ConanXOrg(ConanFile):
         self.cpp_info.components[name].includedirs = include_dirs
         self.cpp_info.components[name].cflags = cflags
         self.cpp_info.components[name].cxxflags = cflags
+        self.cpp_info.components[name].version = pkg_config.version[0]
 
     def system_requirements(self):
         if tools.os_info.is_linux and self.settings.os == "Linux":

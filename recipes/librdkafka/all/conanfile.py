@@ -110,10 +110,22 @@ class LibrdkafkaConan(ConanFile):
         tools.rmdir(os.path.join(self.package_folder, "share"))
 
     def package_info(self):
-        self.cpp_info.libs = ["rdkafka", "rdkafka++"]
+        self.cpp_info.names["cmake_find_package"] = "RdKafka"
+        self.cpp_info.names["cmake_find_package_multi"] = "RdKafka"
+        # rdkafka
+        self.cpp_info.components["rdkafka"].names["cmake_find_package"] = "rdkafka"
+        self.cpp_info.components["rdkafka"].names["cmake_find_package_multi"] = "rdkafka"
+        self.cpp_info.components["rdkafka"].names["pkg_config"] = "rdkafka"
+        self.cpp_info.components["rdkafka"].libs = ["rdkafka"]
         if self.settings.compiler == "Visual Studio":
-            self.cpp_info.system_libs.extend(["crypt32", "ws2_32"])
+            self.cpp_info.components["rdkafka"].system_libs.extend(["crypt32", "ws2_32"])
         elif self.settings.os == "Linux":
-            self.cpp_info.system_libs.extend(["pthread", "rt", "dl", "m"])
+            self.cpp_info.components["rdkafka"].system_libs.extend(["pthread", "rt", "dl", "m"])
         if not self.options.shared:
-            self.cpp_info.defines.append("LIBRDKAFKA_STATICLIB")
+            self.cpp_info.components["rdkafka"].defines.append("LIBRDKAFKA_STATICLIB")
+        # rdkafka++
+        self.cpp_info.components["rdkafka++"].names["cmake_find_package"] = "rdkafka++"
+        self.cpp_info.components["rdkafka++"].names["cmake_find_package_multi"] = "rdkafka++"
+        self.cpp_info.components["rdkafka++"].names["pkg_config"] = "rdkafka++"
+        self.cpp_info.components["rdkafka++"].libs = ["rdkafka++"]
+        self.cpp_info.components["rdkafka++"].requires = ["rdkafka"]

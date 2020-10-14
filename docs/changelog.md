@@ -1,13 +1,79 @@
 # Changelog
 
+### 10-October-2020 - 21:20 CEST
+
+ - [fix] Wait longer for Artifactory to create new repositories.
+
+### 10-October-2020 - 20:52 CEST
+
+ - [job] TapaholesRepo: use full path to the recipe itself.
+
+### 10-October-2020 - 20:36 CEST
+
+ - [job] BuildSingleReference: assign properties at recipe-revision level
+
+### 10-October-2020 - 15:53 CEST
+
+ - [job] TapaholesRepo: create remote repository for each run.
+ - [job] BuildSingleReference: apply environment to every Conan command.
+
+### 09-October-2020 - 23:43 CEST
+
+ - [fix] AutomaticMerge: if the PR cannot be merged (conflicts) go and try the next one.
+ - [fix] Use existing TMP folder in Windows.
+ - [fix] BuildSingleReference: minor fixes.
+
+### 07-October-2020 - 17:06 CEST
+
+- [fix] Minor fix to AutomaticMerge job (#390)
+- [fix] Modify temp folder, it will no longer be the root of the workspace.
+- [job] Populate artifact properties from BuildSingleReference job.
+- [job] New job to iterate Github repository (and commit) and find packages missing from remote.
+
+### 29-September-2020 - 16:21 CEST
+
+- [feature] Use indexer V2 API.
+- [job] Add force parameter to UpdateSearchIndex job to force reindex of packages.
+- [job] New UpdateSearchIndexMaster job to reindex (if needed) packages in ConanCenter repository.
+
+### 23-September-2020 - 15:48 CEST
+
+- [job] AutomaticMerge: Approved and changes requested reviews should prevail.
+
+### 21-September-2020 - 17:59 CEST
+
+- [fix] Remove duplicated credentials.
+- [job] AutomaticMerge: Block if a team member requested changes on any commit.
+- [job] AutomaticMerge: Show pull request number on the summary.
+
+### 21-September-2020 - 10:44 CEST
+
+- Updated Conan client to the 1.29.1 version in Windows and Mac agents.
+
+### 17-September-2020 - 17:42 CEST
+
+- [job] Inspect PRs and merge automatically if approved.
+- [job] Build single reference.
+- [job] Main tapaholes job: Build single references in correct order.
+- [feature] Iterate profiles in a given order (adding tests to check).
+- [feature] Add new users to EAP automatically only on Mondays.
+- [feature] Distribute jobs taking into account resources.
+- [feature] Labels 'Error' and 'Unexpected error' are mutually exclusive.
+- [bugfix] Every new node offers a clean workspace (shorter paths).
+- [bugfix] Upload packages: upload one first, then the rest to avoid missing files issue.
+- [bugfix] Fix 'parallelGroup' when there are more workers than tasks.
+- [bugfix] Retry if failure setting the BuildStatus property.
+- [fix] Use the actual commit from the 'master' branch to compute diffs.
+- [fix] Use environment variables to log into Conan repository.
+
 ### 17-August-2020 - 11:20 CEST
 
- - Raise error if zero packages are generated
- - Remove "No beta user" label if corresponding check pass
- - [engineering] Unify catchs and simplify slackSend function
- - [engineering] Pipeline step to create all packages in stages
- - [engineering] Pipeline step to compute and reduce 'packageID'
- - [engineering] Simplify 'ComputePackageIDs' command
+- Raise error if zero packages are generated
+- Remove "No beta user" label if corresponding check pass
+- [engineering] Unify catchs and simplify slackSend function
+- [engineering] Pipeline step to create all packages in stages
+- [engineering] Pipeline step to compute and reduce 'packageID'
+- [engineering] Simplify 'ComputePackageIDs' command
 
 ### 12-August-2020 - 10:12 CEST
 

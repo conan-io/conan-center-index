@@ -107,3 +107,7 @@ class OpenEXRConan(ConanFile):
 
         if self.settings.os == "Linux":
             self.cpp_info.system_libs.append("pthread")
+
+        stdlib = tools.stdcpp_library(self)
+        if not self.options.shared and stdlib:
+            self.cpp_info.system_libs.append(stdlib)

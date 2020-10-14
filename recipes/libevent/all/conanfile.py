@@ -94,6 +94,9 @@ class LibeventConan(ConanFile):
         self.cpp_info.filenames["cmake_find_package_multi"] = "Libevent"
         self.cpp_info.names["cmake_find_package"] = "libevent"
         self.cpp_info.names["cmake_find_package_multi"] = "libevent"
+        # libevent
+        self.cpp_info.components["liblibevent"].names["pkg_config"] = "libevent"
+        self.cpp_info.components["liblibevent"].requires = ["core", "extra"]
         # core
         self.cpp_info.components["core"].names["pkg_config"] = "libevent_core"
         self.cpp_info.components["core"].libs = ["event_core"]

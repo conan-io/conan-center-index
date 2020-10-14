@@ -1,0 +1,12 @@
+sources:
+  "1.5.18":
+    url: "https://downloads.sourceforge.net/project/matio/matio/1.5.18/matio-1.5.18.tar.gz"
+    sha256: "5fad71a63a854d821cc6f4e8c84da837149dd5fb57e1e2baeffd85fa0f28fe25"
+patches:
+  "1.5.18":
+    - patch_file: "patches/require-cmake-3.10.patch"
+      base_path: "source_subfolder"
+    - patch_file: "patches/disable-hdf5-target.patch"
+      base_path: "source_subfolder"
+    - patch_file: "patches/patch-apple-no-undefined.patch"
+      base_path: "source_subfolder"
