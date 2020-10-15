@@ -103,7 +103,9 @@ class LibcurlConan(ConanFile):
 
         # Deprecated options
         # ===============================
-        self.output.warn("with_openssl, with_winssl, darwin_ssl and with_wolfssl options are deprecated. Use with_ssl option instead.")
+        if (tools.is_apple_os(self.settings.os) and (self.options.with_openssl or self.options.with_wolfssl or self.options.with_winssl or not self.options.darwin_ssl)) or \
+           (not tools.is_apple_os(self.settings.os) and (not self.options.with_openssl or self.options.with_wolfssl or self.options.with_winssl or self.options.darwin_ssl)):
+            self.output.warn("with_openssl, with_winssl, darwin_ssl and with_wolfssl options are deprecated. Use with_ssl option instead.")
         if tools.is_apple_os(self.settings.os) and self.options.with_ssl == "darwinssl":
             if self.options.darwin_ssl:
                 self.options.with_ssl = "darwinssl"
