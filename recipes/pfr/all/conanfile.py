@@ -10,7 +10,6 @@ class LibnameConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/apolukhin/magic_get"
     license = "BSL-1.0"
-    no_copy_source = True
     settings = "os", "compiler", "build_type", "arch"
     exports_sources = "patches/**"
 
@@ -53,6 +52,8 @@ class LibnameConan(ConanFile):
         tools.get(**self.conan_data["sources"][self.version][0])
         extracted_dir = "magic_get-" + self.version
         os.rename(extracted_dir, self._source_subfolder)
+    
+    def build(self):
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
             tools.patch(**patch)
 

@@ -4,5 +4,5 @@ sources:
       sha256: "58fabdb95f8e8b9cc48a50569ff85a30227a8641c21b9a9fcf5cb0a36c1dd791"
 patches:
   "1.0.4":
-    - patch_file: "patches/50.patch"
+    - patch_file: "patches/50_add_license.patch"
       base_path: "source_subfolder"
