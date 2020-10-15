@@ -52,7 +52,7 @@ IF(NOT HEADER_ONLY)
 
     if (WITH_COROUTINE)
         ADD_EXECUTABLE(coroutine_exe coroutine.cpp)
-        TARGET_LINK_LIBRARIES(coroutine_exe ${Boost_LIBRARIES})
+        TARGET_LINK_LIBRARIES(coroutine_exe ${CONAN_LIBS})
     endif()
 
     if (WITH_CHRONO)
