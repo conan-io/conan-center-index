@@ -33,7 +33,8 @@ class LibcurlConan(ConanFile):
                "with_largemaxwritesize": [True, False],
                "with_nghttp2": [True, False],
                "with_zlib": [True, False],
-               "with_brotli": [True, False]
+               "with_brotli": [True, False],
+               "with_zstd": [True, False]
                }
     default_options = {"shared": False,
                        "fPIC": True,
@@ -51,7 +52,8 @@ class LibcurlConan(ConanFile):
                        "with_largemaxwritesize": False,
                        "with_nghttp2": False,
                        "with_zlib": True,
-                       "with_brotli": False
+                       "with_brotli": False,
+                       "with_zstd": False
                        }
 
     _autotools = None
@@ -78,9 +80,15 @@ class LibcurlConan(ConanFile):
     def _is_using_cmake_build(self):
         return self.settings.compiler == "Visual Studio" or self._is_win_x_android
 
+    @property
+    def _has_zstd_option(self):
+        return tools.Version(self.version) >= "7.72.0"
+
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
+        if not self._has_zstd_option:
+            del self.options.with_zstd
         # Default options
         if tools.is_apple_os(self.settings.os):
             self.options.with_ssl = "darwinssl"
@@ -153,6 +161,8 @@ class LibcurlConan(ConanFile):
             self.requires("zlib/1.2.11")
         if self.options.with_brotli:
             self.requires("brotli/1.0.7")
+        if self.options.get_safe("with_zstd"):
+            self.requires("zstd/1.4.5")
 
     def package_id(self):
         # Deprecated options
@@ -213,6 +223,11 @@ class LibcurlConan(ConanFile):
                                       "#define CURL_BUILD_MAC_10_13 MAC_OS_X_VERSION_MAX_ALLOWED >= 101300",
                                       "#define CURL_BUILD_MAC_10_13 0")
 
+        if self._has_zstd_option:
+            # Custom findZstd.cmake file relies on pkg-config file, make sure that it's consumed on all platforms
+            tools.replace_in_file(os.path.join(self._source_subfolder, "CMake", "FindZstd.cmake"),
+                                  "if(UNIX)", "if(TRUE)")
+
     def _get_configure_command_args(self):
         params = []
         params.append("--without-libidn2" if not self.options.with_libidn else "--with-libidn2")
@@ -250,6 +265,9 @@ class LibcurlConan(ConanFile):
             params.append("--without-zlib")
 
         params.append("--with-brotli" if self.options.with_brotli else "--without-brotli")
+
+        if self._has_zstd_option:
+            params.append("--with-zstd" if self.options.with_zstd else "--without-zstd")
 
         if not self.options.shared:
             params.append("--disable-shared")
@@ -477,6 +495,8 @@ class LibcurlConan(ConanFile):
         self._cmake.definitions["USE_NGHTTP2"] = self.options.with_nghttp2
         self._cmake.definitions["CURL_ZLIB"] = self.options.with_zlib
         self._cmake.definitions["CURL_BROTLI"] = self.options.with_brotli
+        if self._has_zstd_option:
+            self._cmake.definitions["CURL_ZSTD"] = self.options.with_zstd
         self._cmake.definitions["CMAKE_USE_LIBSSH2"] = self.options.with_libssh2
         self._cmake.configure(build_folder=self._build_subfolder)
         return self._cmake
@@ -568,3 +588,5 @@ class LibcurlConan(ConanFile):
             self.cpp_info.components["curl"].requires.append("zlib::zlib")
         if self.options.with_brotli:
             self.cpp_info.components["curl"].requires.append("brotli::brotli")
+        if self.options.get_safe("with_zstd"):
+            self.cpp_info.components["curl"].requires.append("zstd::zstd")
