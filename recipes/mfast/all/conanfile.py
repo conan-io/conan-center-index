@@ -46,6 +46,8 @@ class mFASTConan(ConanFile):
             self._cmake.definitions["BUILD_TESTS"] = False
             self._cmake.definitions["BUILD_EXAMPLES"] = False
             self._cmake.definitions["BUILD_PACKAGES"] = False
+            if not self.settings.compiler.cppstd and self.version != "1.2.1":
+                self._cmake.definitions["CMAKE_CXX_STANDARD"] = 11
             self._cmake.configure(source_folder=self._source_subfolder, build_folder=self._build_subfolder)
         return self._cmake
 

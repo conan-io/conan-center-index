@@ -20,3 +20,5 @@ patches:
       base_path: "source_subfolder"
     - patch_file: "patches/00003-remove-deprectated-boost-detail-endian.cci.20200824.patch"
       base_path: "source_subfolder"
+    - patch_file: "patches/00004-remove-cxx-std.cci.20200824.patch"
+      base_path: "source_subfolder"
