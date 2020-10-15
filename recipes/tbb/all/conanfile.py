@@ -1,6 +1,5 @@
 import os
 from conans import ConanFile, tools
-from conans.client.tools import intel
 from conans.errors import ConanInvalidConfiguration
 from conans.model.version import Version
 
@@ -171,7 +170,7 @@ MALLOCPROXY.DEF =
             targets = ["tbb", "tbbmalloc", "tbbproxy"]
             context = tools.no_op()
             if self.settings.compiler == "intel":
-                context = intel.compilervars(self)
+                context = tools.intel_compilervars(self)
             elif self._is_msvc:
                 # intentionally not using vcvars for clang-cl yet
                 context = tools.vcvars(self.settings)
