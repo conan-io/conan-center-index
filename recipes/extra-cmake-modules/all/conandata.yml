@@ -1,0 +1,4 @@
+sources:
+  "5.75.0":
+    url: "https://download.kde.org/stable/frameworks/5.75/extra-cmake-modules-5.75.0.zip"
+    sha256: "dc937fd2018eb8285c1b07d4b5de104c60959404c4979883f6bdb0a4d40cf98e"
