@@ -36,7 +36,7 @@ class CprConan(ConanFile):
             del self.options.fPIC
         if self.options.with_openssl:
             # If using OpenSSL, we need it to be active in libcurl too
-            self.options["libcurl"].with_openssl = True
+            self.options["libcurl"].with_ssl = "openssl"
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
