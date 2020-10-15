@@ -5,7 +5,6 @@ import shutil
 import glob
 
 
-
 class GLibConan(ConanFile):
     name = "glib"
     description = "GLib provides the core application building blocks for libraries and applications written in C"
@@ -79,12 +78,6 @@ class GLibConan(ConanFile):
         tools.get(**self.conan_data["sources"][self.version])
         extracted_dir = self.name + "-" + self.version
         os.rename(extracted_dir, self._source_subfolder)
-        tools.replace_in_file(os.path.join(self._source_subfolder, 'meson.build'), \
-            'build_tests = not meson.is_cross_build() or (meson.is_cross_build() and meson.has_exe_wrapper())', \
-            'build_tests = false')
-        tools.replace_in_file(os.path.join(self._source_subfolder, 'meson.build'), \
-            "subdir('fuzzing')", \
-            "#subdir('fuzzing')") # https://gitlab.gnome.org/GNOME/glib/-/issues/2152
 
     def _configure_meson(self):
         meson = Meson(self)
@@ -100,7 +93,13 @@ class GLibConan(ConanFile):
                         build_folder=self._build_subfolder, defs=defs)
         return meson
 
-    def build(self):
+    def _patch_sources(self):
+        tools.replace_in_file(os.path.join(self._source_subfolder, 'meson.build'), \
+            'build_tests = not meson.is_cross_build() or (meson.is_cross_build() and meson.has_exe_wrapper())', \
+            'build_tests = false')
+        tools.replace_in_file(os.path.join(self._source_subfolder, 'meson.build'), \
+            "subdir('fuzzing')", \
+            "#subdir('fuzzing')") # https://gitlab.gnome.org/GNOME/glib/-/issues/2152
         for filename in [os.path.join(self._source_subfolder, "meson.build"),
                          os.path.join(self._source_subfolder, "glib", "meson.build"),
                          os.path.join(self._source_subfolder, "gobject", "meson.build"),
@@ -115,6 +114,8 @@ class GLibConan(ConanFile):
                                 "if cc.has_function('ngettext')",
                                 "if false #cc.has_function('ngettext')")
 
+    def build(self):
+        self._patch_sources()
         with tools.environment_append(VisualStudioBuildEnvironment(self).vars) if self._is_msvc else tools.no_op():
             meson = self._configure_meson()
             meson.build()
@@ -139,7 +140,7 @@ class GLibConan(ConanFile):
             os.unlink(pdb_file)
 
     def package_info(self):
-        
+
         self.cpp_info.components["glib-2.0"].libs = ["glib-2.0"]
         if self.settings.os == "Linux":
             self.cpp_info.components["glib-2.0"].system_libs.append("pthread")
@@ -163,11 +164,11 @@ class GLibConan(ConanFile):
             self.cpp_info.components["gmodule-no-export-2.0"].system_libs.append("pthread")
             self.cpp_info.components["gmodule-no-export-2.0"].system_libs.append("dl")
         self.cpp_info.components["gmodule-no-export-2.0"].requires.append("glib-2.0")
-        
+
         self.cpp_info.components["gmodule-export-2.0"].requires.extend(["gmodule-no-export-2.0", "glib-2.0"])
         if self.settings.os == "Linux":
             self.cpp_info.components["gmodule-export-2.0"].sharedlinkflags.append("-Wl,--export-dynamic")
-        
+
         self.cpp_info.components["gmodule-2.0"].requires.extend(["gmodule-no-export-2.0", "glib-2.0"])
         if self.settings.os == "Linux":
             self.cpp_info.components["gmodule-2.0"].sharedlinkflags.append("-Wl,--export-dynamic")
