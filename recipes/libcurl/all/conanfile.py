@@ -122,10 +122,6 @@ class LibcurlConan(ConanFile):
                 self.options.with_ssl = "wolfssl"
             else:
                 self.options.with_ssl = False
-        del self.options.with_openssl
-        del self.options.with_winssl
-        del self.options.darwin_ssl
-        del self.options.with_wolfssl
         # ===============================
 
         if self.options.with_ssl == "schannel" and self.settings.os != "Windows":
@@ -155,6 +151,13 @@ class LibcurlConan(ConanFile):
             self.requires("zlib/1.2.11")
         if self.options.with_brotli:
             self.requires("brotli/1.0.7")
+
+    def package_id(self):
+        # Deprecated options
+        del self.info.options.with_openssl
+        del self.info.options.with_winssl
+        del self.info.options.darwin_ssl
+        del self.info.options.with_wolfssl
 
     def build_requirements(self):
         if self._is_mingw and tools.os_info.is_windows and not tools.get_env("CONAN_BASH_PATH") and \
