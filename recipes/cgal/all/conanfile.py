@@ -60,9 +60,9 @@ class CgalConan(ConanFile):
             del self.options.shared
 
     def requirements(self):
-        self.requires("boost/1.73.0")
+        self.requires("boost/1.74.0")
         self.requires("eigen/3.3.7")
-        self.requires("mpfr/4.0.2")
+        self.requires("mpfr/4.1.0")
 
     def package_id(self):
         if self.options.header_only:
@@ -96,7 +96,8 @@ class CgalConan(ConanFile):
         # TODO: add components
         self.cpp_info.names["cmake_find_package"] = "CGAL"
         self.cpp_info.names["cmake_find_package_multi"] = "CGAL"
-        self.cpp_info.libs = tools.collect_libs(self)
+        if not self.options.header_only:
+            self.cpp_info.libs = tools.collect_libs(self)
         if self.settings.os == "Linux" and (self.options.with_cgal_core or self.options.with_cgal_imageio):
             self.cpp_info.system_libs.append("m")
         if not self.options.header_only:

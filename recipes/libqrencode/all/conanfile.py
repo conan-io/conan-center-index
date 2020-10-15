@@ -1,5 +1,5 @@
-from conans import CMake, ConanFile, tools
 import os
+from conans import CMake, ConanFile, tools
 
 
 class LibqrencodeConan(ConanFile):
@@ -7,7 +7,8 @@ class LibqrencodeConan(ConanFile):
     description = "A fast and compact QR Code encoding library"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/fukuchi/libqrencode"
-    license = ("LGPL-2.1-or-later")
+    license = "LGPL-2.1-or-later"
+    topics = ("conan", "graphics")
     exports_sources = "CMakeLists.txt", "patches/**"
     generators = "cmake", "cmake_find_package"
     settings = "os", "arch", "compiler", "build_type"

@@ -1,9 +1,9 @@
 import os
-
 from conans import ConanFile, tools
 from conans.errors import ConanInvalidConfiguration
 from conans.model.version import Version
 
+required_conan_version = ">=1.28.0"
 
 class CppTaskflowConan(ConanFile):
     name = "cpp-taskflow"
@@ -12,16 +12,15 @@ class CppTaskflowConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/cpp-taskflow/cpp-taskflow"
     license = "MIT"
-
     no_copy_source = True
-
     settings = "os", "compiler"
+    deprecated = "taskflow"
 
-    _source_subfolder = "source_subfolder"
+    @property
+    def _source_subfolder(self):
+        return "source_subfolder"
 
     def configure(self):
-        self.output.warn("[DEPRECATED] Package 'cpp-taskflow/{0}' is being deprecated. Change yours to require 'taskflow/{0}' instead".format(self.version))
-
         compiler = str(self.settings.compiler)
         compiler_version = tools.Version(self.settings.compiler.version)
         min_req_cppstd = "17" if tools.Version(self.version) <= "2.2.0" else "14"

@@ -552,6 +552,11 @@ class OpenSSLConan(ConanFile):
             # /Library/Developer/CommandLineTools/usr/bin/ar: internal ranlib command failed
             if self.settings.os == "Macos" and self._full_version < "1.1.0":
                 parallel = False
+
+            # Building in parallel for versions less than 1.0.2d causes errors
+            # See https://github.com/openssl/openssl/issues/298
+            if self._full_version < "1.0.2d":
+                parallel = False
             command.append(("-j%s" % tools.cpu_count()) if parallel else "-j1")
         self.run(" ".join(command), win_bash=self._win_bash)
 

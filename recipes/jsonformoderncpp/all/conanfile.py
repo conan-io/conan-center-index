@@ -1,6 +1,7 @@
 from conans import ConanFile, tools, CMake
 import os
 
+required_conan_version = ">=1.28.0"
 
 class JsonformoderncppConan(ConanFile):
     name = "jsonformoderncpp"
@@ -11,6 +12,7 @@ class JsonformoderncppConan(ConanFile):
     settings = "os", "compiler", "arch", "build_type"
     no_copy_source = True
     license = "MIT"
+    deprecated = "nlohmann_json"
     options = {
         "multiple_headers": [True, False]
     }
@@ -26,9 +28,6 @@ class JsonformoderncppConan(ConanFile):
         tools.get(**self.conan_data["sources"][self.version])
         extracted_dir = "json-" + self.version
         os.rename(extracted_dir, self._source_subfolder)
-
-    def configure(self):
-        self.output.warn("[DEPRECATED] Package jsonformoderncpp is being deprecated. Change yours to require nlohmann_json instead")
 
     def _configure_cmake(self):
         cmake = CMake(self)
