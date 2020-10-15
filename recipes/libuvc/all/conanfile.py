@@ -2,6 +2,7 @@ import os
 from conans import ConanFile, CMake, tools
 from conans.errors import ConanInvalidConfiguration
 
+required_conan_version = ">=1.28.0"
 
 class LibuvcConan(ConanFile):
     name = "libuvc"
@@ -14,7 +15,6 @@ class LibuvcConan(ConanFile):
     options = {"shared": [True, False], "fPIC": [True, False], "jpeg_turbo": [True, False]}
     default_options = {"shared": False, "fPIC": True, "jpeg_turbo": False}
     generators = "cmake", "cmake_find_package"
-    requires = "libusb/1.0.23"
     exports_sources = ["CMakeLists.txt", "patches/*"]
     _cmake = None
 
@@ -37,20 +37,21 @@ class LibuvcConan(ConanFile):
             # Upstream issues, e.g.:
             # https://github.com/libuvc/libuvc/issues/100
             # https://github.com/libuvc/libuvc/issues/105
-            raise ConanInvalidConfiguration("'{}' is not compatible with Windows.".format(self.name))
+            raise ConanInvalidConfiguration("libuvc is not compatible with Visual Studio.")
         if self.options.shared:
             del self.options.fPIC
+
+    def requirements(self):
+        self.requires("libusb/1.0.23")
+        if self.options.jpeg_turbo:
+            self.requires("libjpeg-turbo/2.0.5")
+        else:
+            self.requires("libjpeg/9d")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
         extracted_dir = self.name + "-" + self.version
         os.rename(extracted_dir, self._source_subfolder)
-
-    def requirements(self):
-        if self.options.jpeg_turbo:
-            self.requires("libjpeg-turbo/2.0.4")
-        else:
-            self.requires("libjpeg/9d")
 
     def _configure_cmake(self):
         if not self._cmake:
@@ -73,4 +74,17 @@ class LibuvcConan(ConanFile):
         tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
 
     def package_info(self):
-        self.cpp_info.libs = tools.collect_libs(self)
+        self.cpp_info.filenames["cmake_find_package"] = "libuvc"
+        self.cpp_info.filenames["cmake_find_package_multi"] = "libuvc"
+        self.cpp_info.names["cmake_find_package"] = "LibUVC"
+        self.cpp_info.names["cmake_find_package_multi"] = "LibUVC"
+        self.cpp_info.names["pkg_config"] = "libuvc"
+        cmake_target = "UVCShared" if self.options.shared else "UVCStatic"
+        self.cpp_info.components["_libuvc"].names["cmake_find_package"] = cmake_target
+        self.cpp_info.components["_libuvc"].names["cmake_find_package_multi"] = cmake_target
+        self.cpp_info.components["_libuvc"].names["pkg_config"] = "libuvc"
+        self.cpp_info.components["_libuvc"].libs = tools.collect_libs(self)
+        self.cpp_info.components["_libuvc"].requires = [
+            "libusb::libusb",
+            "libjpeg-turbo::libjpeg-turbo" if self.options.jpeg_turbo else "libjpeg::libjpeg"
+        ]

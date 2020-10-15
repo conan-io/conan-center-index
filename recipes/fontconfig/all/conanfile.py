@@ -73,6 +73,7 @@ class FontconfigConan(ConanFile):
             if os.path.islink(f):
                 os.unlink(f)
 
+
     def package_info(self):
         self.cpp_info.libs = ["fontconfig"]
         if self.settings.os == "Linux":

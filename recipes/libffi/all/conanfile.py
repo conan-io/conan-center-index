@@ -1,5 +1,4 @@
 from conans import ConanFile, tools, AutoToolsBuildEnvironment
-from conans.errors import ConanInvalidConfiguration
 from conans.tools import Version
 from contextlib import contextmanager
 import os
@@ -56,10 +55,6 @@ class LibffiConan(ConanFile):
     def configure(self):
         if self.options.shared:
             del self.options.fPIC
-        if Version(self.version) >= "3.3":
-            if self.settings.compiler == "Visual Studio":
-                if "d" in str(self.settings.compiler.runtime):
-                    raise ConanInvalidConfiguration("This version of libffi does not support MTd runtime")
         del self.settings.compiler.libcxx
         del self.settings.compiler.cppstd
 
@@ -108,9 +103,9 @@ class LibffiConan(ConanFile):
         if self.options.shared:
             self._autotools.defines.append("FFI_BUILDING_DLL")
         if self.settings.compiler == "Visual Studio":
-            if "MT" in self.settings.compiler.runtime:
+            if "MT" in str(self.settings.compiler.runtime):
                 self._autotools.defines.append("USE_STATIC_RTL")
-            if "d" in self.settings.compiler.runtime:
+            if "d" in str(self.settings.compiler.runtime):
                 self._autotools.defines.append("USE_DEBUG_RTL")
         build = None
         host = None
@@ -156,6 +151,7 @@ class LibffiConan(ConanFile):
             os.unlink(os.path.join(self.package_folder, "lib", "libffi.la"))
 
     def package_info(self):
+        self.cpp_info.filenames["pkg_config"] = "libffi"
         if not self.options.shared:
             self.cpp_info.defines = ["FFI_BUILDING"]
         libffi = "ffi"

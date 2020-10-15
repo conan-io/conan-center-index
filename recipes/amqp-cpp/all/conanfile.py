@@ -45,7 +45,7 @@ class AmqpcppConan(ConanFile):
 
     def requirements(self):
         if self.options.get_safe("linux_tcp_module"):
-            self.requires("openssl/1.1.1d")
+            self.requires("openssl/1.1.1h")
 
     def _configure_cmake(self):
         if self._cmake:

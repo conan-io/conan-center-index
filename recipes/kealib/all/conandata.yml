@@ -1,0 +1,8 @@
+sources:
+  "1.4.13":
+    url: "https://github.com/ubarsc/kealib/archive/kealib-1.4.13.tar.gz"
+    sha256: "2a254eb557a4ec20638a5134ed549a16b7f64977f37de3cf3853a206c8d82199"
+patches:
+  "1.4.13":
+    - patch_file: "patches/fix-export-symbols-and-cmake.patch"
+      base_path: "source_subfolder"

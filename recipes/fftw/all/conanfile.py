@@ -2,6 +2,7 @@ from conans import ConanFile, CMake, tools
 from conans.errors import ConanInvalidConfiguration
 import os
 
+required_conan_version = ">=1.28.0"
 
 class FFTWConan(ConanFile):
     name = "fftw"
@@ -85,16 +86,34 @@ class FFTWConan(ConanFile):
         tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
 
     def package_info(self):
-        self.cpp_info.names["cmake_find_package"] = "FFTW3"
-        self.cpp_info.names["cmake_find_package_multi"] = "FFTW3"
-        self.cpp_info.components["fftwlib"].names["cmake_find_package"] = "fftw3"
-        self.cpp_info.components["fftwlib"].names["cmake_find_package_multi"] = "fftw3"
+        prec_suffix = self._prec_suffix[str(self.options.precision)]
+        cmake_config_name = "FFTW3" + prec_suffix
+        cmake_namespace = "FFTW3"
+        cmake_target_name = "fftw3" + prec_suffix
+        pkgconfig_name = "fftw" + prec_suffix
+        lib_name = "fftw3" + prec_suffix
+        self.cpp_info.filenames["cmake_find_package"] = cmake_config_name
+        self.cpp_info.filenames["cmake_find_package_multi"] = cmake_config_name
+        self.cpp_info.names["cmake_find_package"] = cmake_namespace
+        self.cpp_info.names["cmake_find_package_multi"] = cmake_namespace
+        self.cpp_info.names["pkg_config"] = pkgconfig_name
+        self.cpp_info.components["fftwlib"].names["cmake_find_package"] = cmake_target_name
+        self.cpp_info.components["fftwlib"].names["cmake_find_package_multi"] = cmake_target_name
+        self.cpp_info.components["fftwlib"].names["pkg_config"] = pkgconfig_name
         if self.options.openmp:
-            self.cpp_info.components["fftwlib"].libs.append("fftw3_omp")
+            self.cpp_info.components["fftwlib"].libs.append(lib_name + "_omp")
         if self.options.threads and not self.options.combinedthreads:
-            self.cpp_info.components["fftwlib"].libs.append("fftw3_threads")
-        self.cpp_info.components["fftwlib"].libs.append("fftw3")
+            self.cpp_info.components["fftwlib"].libs.append(lib_name + "_threads")
+        self.cpp_info.components["fftwlib"].libs.append(lib_name)
         if self.settings.os == "Linux":
             self.cpp_info.components["fftwlib"].system_libs.append("m")
             if self.options.threads:
                 self.cpp_info.components["fftwlib"].system_libs.append("pthread")
+
+    @property
+    def _prec_suffix(self):
+        return {
+            "double": "",
+            "single": "f",
+            "longdouble": "l"
+        }

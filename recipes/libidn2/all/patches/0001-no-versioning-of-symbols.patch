@@ -1,0 +1,22 @@
+--- lib/puny_decode.c
++++ lib/puny_decode.c
+@@ -224,7 +224,7 @@
+ 
+ /* Create a compatibility symbol if supported.  Hidden references make
+    the target symbol hidden, hence the alias.  */
+-#ifdef HAVE_SYMVER_ALIAS_SUPPORT
++#if 0 //def HAVE_SYMVER_ALIAS_SUPPORT
+ __typeof__ (_idn2_punycode_decode_internal) _idn2_punycode_decode
+    __attribute__ ((visibility ("default"),
+                    alias ("_idn2_punycode_decode_internal")));
+--- lib/puny_encode.c
++++ lib/puny_encode.c
+@@ -225,7 +225,7 @@
+ 
+ /* Create a compatibility symbol if supported.  Hidden references make
+    the target symbol hidden, hence the alias.  */
+-#ifdef HAVE_SYMVER_ALIAS_SUPPORT
++#if 0 //def HAVE_SYMVER_ALIAS_SUPPORT
+ __typeof__ (_idn2_punycode_encode_internal) _idn2_punycode_encode
+    __attribute__ ((visibility ("default"),
+                    alias ("_idn2_punycode_encode_internal")));

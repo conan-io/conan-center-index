@@ -10,6 +10,7 @@ class LibjpegTurboConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://libjpeg-turbo.org"
     license = "BSD-3-Clause, Zlib"
+    provides = "libjpeg"
     exports_sources = "CMakeLists.txt"
     generators = "cmake"
     settings = "os", "arch", "compiler", "build_type"

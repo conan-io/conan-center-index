@@ -1,8 +1,8 @@
 # Supported platforms and configurations
 
 
-- For a **C++** library (with ``"shared"`` option) the system is generating **130** binary packages.
-- For a **pure C** library (with ``"shared"`` option but without ``compiler.libcxx``) the system generates **110** binary packages.
+- For a **C++** library (with ``"shared"`` option) the system is generating **136** binary packages.
+- For a **pure C** library (with ``"shared"`` option but without ``compiler.libcxx``) the system generates **88** binary packages.
 - A package is also generated for those recipes with the `"header_only"` option.
 
 ## Windows
