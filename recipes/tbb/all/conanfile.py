@@ -1,7 +1,6 @@
 import os
 from conans import ConanFile, tools
 from conans.errors import ConanInvalidConfiguration
-from conans.model.version import Version
 
 
 class TBBConan(ConanFile):
