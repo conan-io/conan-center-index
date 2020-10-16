@@ -45,15 +45,21 @@ class PixmanConan(ConanFile):
         tools.get(**self.conan_data["sources"][self.version])
         os.rename(self.name + "-" + self.version, self._source_subfolder)
 
-        if self.settings.os == 'Macos':
+    def _patch_sources(self):
+        if self.settings.compiler == "Visual Studio":
+            tools.replace_in_file(os.path.join(self._source_subfolder, "Makefile.win32.common"),
+                                  "-MDd ", "-{} ".format(str(self.settings.compiler.runtime)))
+            tools.replace_in_file(os.path.join(self._source_subfolder, "Makefile.win32.common"),
+                                  "-MD ", "-{} ".format(str(self.settings.compiler.runtime)))
+        if self.settings.os == "Macos":
             # https://lists.freedesktop.org/archives/pixman/2014-November/003461.html
-            test_makefile = os.path.join(self._source_subfolder, 'test', 'Makefile.in')
+            test_makefile = os.path.join(self._source_subfolder, "test", "Makefile.in")
             tools.replace_in_file(test_makefile,
-                                  'region_test_OBJECTS = region-test.$(OBJEXT)',
-                                  'region_test_OBJECTS = region-test.$(OBJEXT) utils.$(OBJEXT)')
+                                  "region_test_OBJECTS = region-test.$(OBJEXT)",
+                                  "region_test_OBJECTS = region-test.$(OBJEXT) utils.$(OBJEXT)")
             tools.replace_in_file(test_makefile,
-                                  'scaling_helpers_test_OBJECTS = scaling-helpers-test.$(OBJEXT)',
-                                  'scaling_helpers_test_OBJECTS = scaling-helpers-test.$(OBJEXT) utils.$(OBJEXT)')
+                                  "scaling_helpers_test_OBJECTS = scaling-helpers-test.$(OBJEXT)",
+                                  "scaling_helpers_test_OBJECTS = scaling-helpers-test.$(OBJEXT) utils.$(OBJEXT)")
 
     def _configure_autotools(self):
         if not self._autotools:
@@ -67,6 +73,7 @@ class PixmanConan(ConanFile):
         return self._autotools
 
     def build(self):
+        self._patch_sources()
         if self.settings.compiler == "Visual Studio":
             with tools.vcvars(self.settings):
                 make_vars = {
@@ -75,10 +82,6 @@ class PixmanConan(ConanFile):
                     "SSSE3": "on",
                     "CFG": str(self.settings.build_type).lower(),
                 }
-                tools.replace_in_file(os.path.join(self._source_subfolder, 'Makefile.win32.common'),
-                                        '-MDd ', '-%s ' % str(self.settings.compiler.runtime))
-                tools.replace_in_file(os.path.join(self._source_subfolder, 'Makefile.win32.common'),
-                                        '-MD ', '-%s ' % str(self.settings.compiler.runtime))
                 var_args = " ".join("{}={}".format(k, v) for k, v in make_vars.items())
                 self.run("make -C {}/pixman -f Makefile.win32 {}".format(self._source_subfolder, var_args),
                             win_bash=True)
