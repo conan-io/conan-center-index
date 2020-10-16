@@ -31,3 +31,8 @@ class VariantConan(ConanFile):
     def package(self):
         self.copy(pattern="LICENSE.md", dst="licenses", src=self._source_subfolder)
         self.copy("*", dst="include", src=os.path.join(self._source_subfolder, "include"))
+
+    def package_info(self):
+        # TODO: CMake imported target shouldn't be namespaced (waiting https://github.com/conan-io/conan/issues/7615 to be implemented)
+        self.cpp_info.names["cmake_find_package"] = "mpark_variant"
+        self.cpp_info.names["cmake_find_package_multi"] = "mpark_variant"
