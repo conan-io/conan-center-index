@@ -21,7 +21,7 @@ class IgnitionMathConan(ConanFile):
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
-        version_major = self.version[0]
+        version_major = self.version.split('.')[0]
         os.rename(f"ign-math-ignition-math{version_major}_{self.version}", self._source_subfolder)
 
     def requirements(self):
@@ -47,7 +47,7 @@ class IgnitionMathConan(ConanFile):
         tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
 
     def package_info(self):
-        version_major = self.version[0]
+        version_major = self.version.split('.')[0]
         self.cpp_info.libs = tools.collect_libs(self)
         self.cpp_info.names["cmake_find_package"] = f"ignition-math{version_major}"
         self.cpp_info.names["cmake_find_package_multi"] = f"ignition-math{version_major}"
