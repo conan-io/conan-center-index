@@ -38,8 +38,6 @@ class OpenEXRConan(ConanFile):
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
         os.rename("openexr-{}".format(self.version), self._source_subfolder)
-        for p in self.conan_data["patches"][self.version]:
-            tools.patch(**p)
 
     def _configure_cmake(self):
         if self._cmake:
@@ -59,6 +57,8 @@ class OpenEXRConan(ConanFile):
         return self._cmake
 
     def _patch_sources(self):
+        for patch in self.conan_data["patches"][self.version]:
+            tools.patch(**patch)
         # Fix dependency of IlmBase
         tools.replace_in_file(os.path.join(self._source_subfolder, "IlmBase", "Half", "CMakeLists.txt"),
                               "ADD_LIBRARY ( Half_static STATIC\n    half.cpp",
