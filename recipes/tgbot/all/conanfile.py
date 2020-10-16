@@ -18,6 +18,8 @@ class TgbotConan(ConanFile):
     generators = "cmake", "cmake_find_package"
     exports_sources = ['CMakeLists.txt', 'patches/*']
 
+    _cmake = None
+
     @property
     def _source_subfolder(self):
         return "source_subfolder"
@@ -37,10 +39,12 @@ class TgbotConan(ConanFile):
         self.requires("openssl/1.1.1h")
 
     def _configure_cmake(self):
-        cmake = CMake(self)
-        cmake.definitions["ENABLE_TESTS"] = False
-        cmake.configure()
-        return cmake
+        if self._cmake:
+            return self._cmake
+        self._cmake = CMake(self)
+        self._cmake.definitions["ENABLE_TESTS"] = False
+        self._cmake.configure()
+        return self._cmake
 
     def build(self):
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
