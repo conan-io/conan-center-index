@@ -41,6 +41,10 @@ class XZUtils(ConanFile):
         del self.settings.compiler.cppstd
         del self.settings.compiler.libcxx
 
+    def source(self):
+        tools.get(**self.conan_data["sources"][self.version])
+        os.rename("xz-" + self.version, self._source_subfolder)
+
     def _apply_patches(self):
         if tools.Version(self.version) == "5.2.4":
             # Relax Windows SDK restriction
@@ -51,11 +55,6 @@ class XZUtils(ConanFile):
             tools.replace_in_file(os.path.join(self._source_subfolder, "windows", "vs2017", "liblzma_dll.vcxproj"),
                                   "<WindowsTargetPlatformVersion>10.0.15063.0</WindowsTargetPlatformVersion>",
                                   "<WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>")
-
-    def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        os.rename("xz-" + self.version, self._source_subfolder)
-        self._apply_patches()
 
     def _build_msvc(self):
         # windows\INSTALL-MSVC.txt
@@ -104,6 +103,7 @@ class XZUtils(ConanFile):
             env_build.install()
 
     def build(self):
+        self._apply_patches()
         if self.settings.compiler == "Visual Studio":
             self._build_msvc()
         else:
