@@ -25,19 +25,21 @@ class PixmanConan(ConanFile):
         return os.path.join("include", "pixman-1")
 
     def config_options(self):
+        if self.settings.os == "Windows":
+            del self.options.fPIC
+
+    def configure(self):
+        if self.options.shared:
+            del self.options.fPIC
         del self.settings.compiler.libcxx
         del self.settings.compiler.cppstd
-        if self.settings.os == 'Windows':
-            del self.options.fPIC
+        if self.settings.os == "Windows" and self.options.shared:
+            raise ConanInvalidConfiguration("pixman can only built as static library for Windows")
 
     def build_requirements(self):
         if tools.os_info.is_windows:
             if "CONAN_BASH_PATH" not in os.environ and tools.os_info.detect_windows_subsystem() != 'msys2':
                 self.build_requires("msys2/20200517")
-
-    def configure(self):
-        if self.settings.os == "Windows" and self.options.shared:
-            raise ConanInvalidConfiguration("pixman can only built as static library for Windows")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
