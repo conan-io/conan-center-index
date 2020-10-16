@@ -8,7 +8,6 @@ class VariantConan(ConanFile):
     homepage = "https://github.com/mpark/variant"
     description = "C++17 std::variant for C++11/14/17"
     license = "BSL-1.0"
-    exports_sources = ["CMakeLists.txt"]
     topics = ("conan", "variant", "mpark-variant")
     settings = "compiler"
 
