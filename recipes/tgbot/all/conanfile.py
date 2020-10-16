@@ -25,11 +25,6 @@ class TgbotConan(ConanFile):
     def _source_subfolder(self):
         return "source_subfolder"
 
-    def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        extracted_dir = self.name + "-cpp-" + self.version
-        os.rename(extracted_dir, self._source_subfolder)
-
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
@@ -38,6 +33,11 @@ class TgbotConan(ConanFile):
         self.requires("boost/1.74.0")
         self.requires("libcurl/7.72.0")
         self.requires("openssl/1.1.1h")
+
+    def source(self):
+        tools.get(**self.conan_data["sources"][self.version])
+        extracted_dir = self.name + "-cpp-" + self.version
+        os.rename(extracted_dir, self._source_subfolder)
 
     def _configure_cmake(self):
         if self._cmake:
