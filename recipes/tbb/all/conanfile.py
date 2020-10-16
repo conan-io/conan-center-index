@@ -71,17 +71,17 @@ that have future-proof scalability"""
         tools.get(**self.conan_data["sources"][self.version])
         os.rename("one{}-{}".format(self.name.upper(), self.version.upper()), self._source_subfolder)
 
-        # Get the version of the current compiler instead of gcc
-        linux_include = os.path.join(self._source_subfolder, "build", "linux.inc")
-        tools.replace_in_file(linux_include, "shell gcc", "shell $(CC)")
-        tools.replace_in_file(linux_include, "= gcc", "= $(CC)")
-
     def build(self):
         def add_flag(name, value):
             if name in os.environ:
                 os.environ[name] += " " + value
             else:
                 os.environ[name] = value
+
+        # Get the version of the current compiler instead of gcc
+        linux_include = os.path.join(self._source_subfolder, "build", "linux.inc")
+        tools.replace_in_file(linux_include, "shell gcc", "shell $(CC)")
+        tools.replace_in_file(linux_include, "= gcc", "= $(CC)")
 
         if self.version != "2019_u9" and self.settings.build_type == "Debug":
             tools.replace_in_file(os.path.join(self._source_subfolder, "Makefile"), "release", "debug")
