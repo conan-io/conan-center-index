@@ -88,10 +88,9 @@ class IgnitionMathConan(ConanFile):
         tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
 
         # Remove MS runtime files
-        if self.options.shared:
-            for dll_pattern_to_remove in ["concrt*.dll", "msvcp*.dll", "vcruntime*.dll"]:
-                for dll_to_remove in glob.glob(os.path.join(self.package_folder, "bin", dll_pattern_to_remove)):
-                    os.remove(dll_to_remove)
+        for dll_pattern_to_remove in ["concrt*.dll", "msvcp*.dll", "vcruntime*.dll"]:
+            for dll_to_remove in glob.glob(os.path.join(self.package_folder, "bin", dll_pattern_to_remove)):
+                os.remove(dll_to_remove)
 
     def package_info(self):
         version_major = self.version.split(".")[0]
