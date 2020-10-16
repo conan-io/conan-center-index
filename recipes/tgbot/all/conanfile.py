@@ -17,11 +17,6 @@ class TgbotConan(ConanFile):
 
     generators = "cmake", "cmake_find_package"
     exports_sources = ['CMakeLists.txt', 'patches/*']
-    requires = (
-        "boost/1.71.0",
-        "openssl/1.1.1d",
-        "libcurl/7.67.0"
-    )
 
     @property
     def _source_subfolder(self):
@@ -35,6 +30,11 @@ class TgbotConan(ConanFile):
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
+
+    def requirements(self):
+        self.requires("boost/1.74.0")
+        self.requires("libcurl/7.72.0")
+        self.requires("openssl/1.1.1h")
 
     def _configure_cmake(self):
         cmake = CMake(self)
