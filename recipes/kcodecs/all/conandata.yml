@@ -1,0 +1,4 @@
+sources:
+  "5.75.0":
+    url: "https://download.kde.org/stable/frameworks/5.75/kcodecs-5.75.0.zip"
+    sha256: "dcf154a6b8e15dece75b4a4bbb8618ed85e18434a3a230357836491fa2a7a520"
