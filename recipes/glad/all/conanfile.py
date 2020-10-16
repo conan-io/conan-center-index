@@ -52,8 +52,15 @@ class GladConan(ConanFile):
         "wgl_version": "None"
     }
 
-    _source_subfolder = "source_subfolder"
-    _build_subfolder = "build_subfolder"
+    _cmake = None
+
+    @property
+    def _source_subfolder(self):
+        return "source_subfolder"
+
+    @property
+    def _build_subfolder(self):
+        return "build_subfolder"
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -95,19 +102,21 @@ class GladConan(ConanFile):
         cmake.build()
 
     def _configure_cmake(self):
-        cmake = CMake(self)
+        if self._cmake:
+            return self._cmake
+        self._cmake = CMake(self)
         if "gl_profile" in self.options:
-            cmake.definitions["GLAD_PROFILE"] = self.options.gl_profile
-        cmake.definitions["GLAD_API"] = self._get_api()
-        cmake.definitions["GLAD_EXTENSIONS"] = self.options.extensions
-        cmake.definitions["GLAD_SPEC"] = self.options.spec
-        cmake.definitions["GLAD_NO_LOADER"] = self.options.no_loader
-        cmake.definitions["GLAD_GENERATOR"] = "c" if self.settings.build_type == "Release" else "c-debug"
-        cmake.definitions["GLAD_EXPORT"] = True
-        cmake.definitions["GLAD_INSTALL"] = True
+            self._cmake.definitions["GLAD_PROFILE"] = self.options.gl_profile
+        self._cmake.definitions["GLAD_API"] = self._get_api()
+        self._cmake.definitions["GLAD_EXTENSIONS"] = self.options.extensions
+        self._cmake.definitions["GLAD_SPEC"] = self.options.spec
+        self._cmake.definitions["GLAD_NO_LOADER"] = self.options.no_loader
+        self._cmake.definitions["GLAD_GENERATOR"] = "c" if self.settings.build_type == "Release" else "c-debug"
+        self._cmake.definitions["GLAD_EXPORT"] = True
+        self._cmake.definitions["GLAD_INSTALL"] = True
 
-        cmake.configure(build_folder=self._build_subfolder)
-        return cmake
+        self._cmake.configure(build_folder=self._build_subfolder)
+        return self._cmake
 
     def _get_api(self):
         if self.options.spec == "gl":
