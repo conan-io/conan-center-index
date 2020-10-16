@@ -15,7 +15,9 @@ class IgnitionMathConan(ConanFile):
     settings = "os", "compiler", "build_type", "arch"
     options = {"shared": [True, False], "fPIC": [True, False]}
     default_options = {"shared": False, "fPIC": True}
-    generators = "cmake", "cmake_find_package_multi"
+    generators = "cmake_find_package_multi"
+
+    _cmake = None
 
     @property
     def _minimum_cpp_standard(self):
@@ -39,6 +41,9 @@ class IgnitionMathConan(ConanFile):
             del self.options.fPIC
 
     def configure(self):
+        if self.options.shared:
+            del self.options.fPIC
+
         if self.settings.get_safe("compiler.cppstd"):
             tools.check_min_cppstd(self, self._minimum_cpp_standard)
         min_version = self._minimum_compilers_version.get(str(self.settings.compiler))
@@ -70,19 +75,24 @@ class IgnitionMathConan(ConanFile):
         self.requires("eigen/3.3.7")
 
     def _configure_cmake(self):
-        self.cmake = CMake(self)
-        self.cmake.definitions["BUILD_TESTING"] = False
-        self.cmake.definitions["BUILD_SHARED_LIBS"] = self.options.shared
-        self.cmake.configure(source_folder=self._source_subfolder)
+        if self._cmake is not None:
+            return self._cmake
+        self._cmake = CMake(self)
+        self._cmake.definitions["BUILD_TESTING"] = False
+        self._cmake.definitions["BUILD_SHARED_LIBS"] = self.options.shared
+        self._cmake.configure(source_folder=self._source_subfolder)
+        return self._cmake
 
     def build(self):
         self._install_ign_cmake()
         self._configure_cmake()
-        self.cmake.build()
+        cmake = self._configure_cmake()
+        cmake.build()
 
     def package(self):
         self.copy("LICENSE", dst="licenses", src=self._source_subfolder)
-        self.cmake.install()
+        cmake = self._configure_cmake()
+        cmake.install()
         tools.rmdir(os.path.join(self.package_folder, "share"))
         tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
         tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
@@ -95,14 +105,10 @@ class IgnitionMathConan(ConanFile):
     def package_info(self):
         version_major = self.version.split(".")[0]
         self.cpp_info.libs = tools.collect_libs(self)
-        self.cpp_info.names["cmake_find_package"] = "ignition-math{}".format(
-            version_major
-        )
         self.cpp_info.names["cmake_find_package_multi"] = "ignition-math{}".format(
             version_major
         )
         self.cpp_info.includedirs = ["include/ignition/math{}".format(version_major)]
-        self.copy("LICENSE", dst="licenses", src=self._source_subfolder)
 
     def _install_ign_cmake(self):
         # Get and build ign-cmake. This is just a set of cmake macros used by all the ignition
