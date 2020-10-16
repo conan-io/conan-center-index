@@ -29,6 +29,8 @@ class XZUtils(ConanFile):
             del self.options.fPIC
 
     def configure(self):
+        if self.options.shared:
+            del self.options.fPIC
         del self.settings.compiler.cppstd
         del self.settings.compiler.libcxx
 
@@ -80,7 +82,7 @@ class XZUtils(ConanFile):
             args = []
             env_build = AutoToolsBuildEnvironment(self, win_bash=tools.os_info.is_windows)
             args = ["--disable-doc"]
-            if self.settings.os != "Windows" and self.options.fPIC:
+            if self.settings.os != "Windows" and self.options.get_safe("fPIC", True):
                 args.append("--with-pic")
             if self.options.shared:
                 args.extend(["--disable-static", "--enable-shared"])
