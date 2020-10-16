@@ -97,11 +97,11 @@ class PixmanConan(ConanFile):
         else:
             autotools = self._configure_autotools()
             autotools.install()
-        la = os.path.join(self.package_folder, "lib", "libpixman-1.la")
-        if os.path.isfile(la):
-            os.unlink(la)
+            tools.rmdir(os.path.join(self.package_folder, 'lib', 'pkgconfig'))
+            la = os.path.join(self.package_folder, "lib", "libpixman-1.la")
+            if os.path.isfile(la):
+                os.unlink(la)
         self.copy(os.path.join(self._source_subfolder, 'COPYING'), dst='licenses')
-        tools.rmdir(os.path.join(self.package_folder, 'lib', 'pkgconfig'))
 
     def package_info(self):
         self.cpp_info.libs = tools.collect_libs(self)
