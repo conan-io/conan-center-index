@@ -91,10 +91,11 @@ class STXConan(ConanFile):
     def source(self):
         tools.get(**self.conan_data['sources'][self.version])
         tools.rename('STX-{}'.format(self.version), dst='source_subfolder')
+
+    def build(self):
         for patch in self.conan_data.get('patches', {}).get(self.version, []):
             tools.patch(**patch)
 
-    def build(self):
         cmake = CMake(self)
         cmake.definitions['STX_BUILD_SHARED'] = self.options.shared
         cmake.definitions['STX_ENABLE_BACKTRACE'] = self.options.backtrace
