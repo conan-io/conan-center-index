@@ -1,0 +1,4 @@
+sources:
+  "10.0.0":
+    url: "https://github.com/osrf/sdformat/archive/sdformat10_10.0.0.zip"
+    sha256: "3ead4b6f3222c626489aa013f4e28473293a13ed07a6fb54eff24aab321aacd9"
