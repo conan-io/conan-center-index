@@ -13,8 +13,8 @@ class IgnitionMathConan(ConanFile):
     description = " Math classes and functions for robot applications"
     topics = ("ignition", "math", "robotics", "gazebo")
     settings = "os", "compiler", "build_type", "arch"
-    options = {"shared": [True, False], "fPIC": [True, False]}
-    default_options = {"shared": False, "fPIC": True}
+    options = {"shared": [True, False]}
+    default_options = {"shared": False}
     generators = "cmake_find_package_multi"
 
     _cmake = None
@@ -36,14 +36,7 @@ class IgnitionMathConan(ConanFile):
     def _source_subfolder(self):
         return "source_subfolder"
 
-    def config_options(self):
-        if self.settings.os == "Windows":
-            del self.options.fPIC
-
     def configure(self):
-        if self.options.shared:
-            del self.options.fPIC
-
         if self.settings.get_safe("compiler.cppstd"):
             tools.check_min_cppstd(self, self._minimum_cpp_standard)
         min_version = self._minimum_compilers_version.get(str(self.settings.compiler))
