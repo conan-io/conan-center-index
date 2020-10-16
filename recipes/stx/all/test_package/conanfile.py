@@ -1,6 +1,7 @@
 from conans import ConanFile, CMake, tools
 import os
 
+
 class STXTestConan(ConanFile):
     settings = 'os', 'compiler', 'build_type', 'arch'
     generators = 'cmake'
@@ -12,4 +13,4 @@ class STXTestConan(ConanFile):
 
     def test(self):
         if not tools.cross_building(self.settings):
-            self.run(os.path.join('bin', 'example_basic'), run_environment=True)
+            self.run(os.path.join('bin', 'example'), run_environment=True)
