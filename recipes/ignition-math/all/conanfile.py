@@ -11,47 +11,85 @@ class IgnitionMathConan(ConanFile):
     description = " Math classes and functions for robot applications"
     topics = ("ignition", "math", "robotics", "gazebo")
     settings = "os", "compiler", "build_type", "arch"
-    options = {"shared": [True, False]}
-    default_options = {"shared": False}
+    options = {"shared": [True, False], "fPIC": [True, False]}
+    default_options = {"shared": False, "fPIC": True}
     generators = "cmake", "cmake_find_package_multi"
+
+    @property
+    def _minimum_cpp_standard(self):
+        return 17
+
+    @property
+    def _minimum_compilers_version(self):
+        return {
+            "Visual Studio": "16",
+            "gcc": "7",
+            "clang": "5",
+            "apple-clang": "10",
+        }
 
     @property
     def _source_subfolder(self):
         return "source_subfolder"
 
+    def configure(self):
+        if self.settings.get_safe("compiler.cppstd"):
+            tools.check_min_cppstd(self, self._minimum_cpp_standard)
+        min_version = self._minimum_compilers_version.get(str(self.settings.compiler))
+        if not min_version:
+            self.output.warn(
+                "{} recipe lacks information about the {} compiler support.".format(
+                    self.name, self.settings.compiler
+                )
+            )
+        else:
+            if tools.Version(self.settings.compiler.version) < min_version:
+                raise ConanInvalidConfiguration(
+                    "{} requires c++17 support. The current compiler {} {} does not support it.".format(
+                        self.name,
+                        self.settings.compiler,
+                        self.settings.compiler.version,
+                    )
+                )
+
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
-        version_major = self.version.split('.')[0]
-        os.rename(f"ign-math-ignition-math{version_major}_{self.version}", self._source_subfolder)
+        version_major = self.version.split(".")[0]
+        os.rename(
+            "ign-math-ignition-math{}_{}".format(version_major, self.version),
+            self._source_subfolder,
+        )
 
     def requirements(self):
         self.requires("eigen/3.3.7")
 
     def _configure_cmake(self):
-        cmake = CMake(self)
-        cmake.definitions["BUILD_TESTING"] = False
-        cmake.configure(source_folder=self._source_subfolder)
-        return cmake
+        self.cmake = CMake(self)
+        self.cmake.definitions["BUILD_TESTING"] = False
+        self.cmake.configure(source_folder=self._source_subfolder)
 
     def build(self):
         self._install_ign_cmake()
-        cmake = self._configure_cmake()
-        cmake.build()
+        self._configure_cmake()
+        self.cmake.build()
 
     def package(self):
         self.copy("LICENSE", dst="licenses", src=self._source_subfolder)
-        cmake = self._configure_cmake()
-        cmake.install()
+        self.cmake.install()
         tools.rmdir(os.path.join(self.package_folder, "share"))
         tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
         tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
 
     def package_info(self):
-        version_major = self.version.split('.')[0]
+        version_major = self.version.split(".")[0]
         self.cpp_info.libs = tools.collect_libs(self)
-        self.cpp_info.names["cmake_find_package"] = f"ignition-math{version_major}"
-        self.cpp_info.names["cmake_find_package_multi"] = f"ignition-math{version_major}"
-        self.cpp_info.includedirs = [f"include/ignition/math{version_major}"]
+        self.cpp_info.names["cmake_find_package"] = "ignition-math{}".format(
+            version_major
+        )
+        self.cpp_info.names["cmake_find_package_multi"] = "ignition-math{}".format(
+            version_major
+        )
+        self.cpp_info.includedirs = ["include/ignition/math{}".format(version_major)]
         self.copy("LICENSE", dst="licenses", src=self._source_subfolder)
 
     def _install_ign_cmake(self):
@@ -60,9 +98,9 @@ class IgnitionMathConan(ConanFile):
         # TODO: find a way of using an ign-make Conan package as a
         # build_requirement
         self.run(
-            "git clone --depth=1 https://github.com/ignitionrobotics/ign-cmake.git --branch ignition-cmake2_2.5.0")
+            "git clone --depth=1 https://github.com/ignitionrobotics/ign-cmake.git --branch ignition-cmake2_2.5.0"
+        )
         cmake = CMake(self)
-        cmake.configure(source_folder="ign-cmake",
-                        build_folder="build_ign-cmake")
+        cmake.configure(source_folder="ign-cmake", build_folder="build_ign-cmake")
         cmake.build()
         cmake.install()
