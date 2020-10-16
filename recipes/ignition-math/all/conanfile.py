@@ -57,9 +57,12 @@ class IgnitionMathConan(ConanFile):
     def _install_ign_cmake(self):
         # Get and build ign-cmake. This is just a set of cmake macros used by all the ignition
         # packages.
-        # TODO: find a way of using an ign-make Conan package as a build_requirement
-        self.run("git clone --depth=1 https://github.com/ignitionrobotics/ign-cmake.git --branch ignition-cmake2_2.5.0")
+        # TODO: find a way of using an ign-make Conan package as a
+        # build_requirement
+        self.run(
+            "git clone --depth=1 https://github.com/ignitionrobotics/ign-cmake.git --branch ignition-cmake2_2.5.0")
         cmake = CMake(self)
-        cmake.configure(source_folder="ign-cmake", build_folder="build_ign-cmake")
+        cmake.configure(source_folder="ign-cmake",
+                        build_folder="build_ign-cmake")
         cmake.build()
         cmake.install()
