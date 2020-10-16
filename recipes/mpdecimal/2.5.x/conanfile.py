@@ -47,7 +47,10 @@ class MpdecimalConan(ConanFile):
             del self.settings.compiler.cppstd
 
     def build_requirements(self):
-        self.build_requires("autoconf/2.69")
+        if self.settings.compiler != "Visual Studio":
+            self.build_requires("autoconf/2.69")
+            if tools.os_info.is_windows:
+                self.build_requires("msys2/20200517")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
