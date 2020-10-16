@@ -71,6 +71,7 @@ class IgnitionMathConan(ConanFile):
     def _configure_cmake(self):
         self.cmake = CMake(self)
         self.cmake.definitions["BUILD_TESTING"] = False
+        self.cmake.definitions["BUILD_SHARED_LIBS"] = self.options.shared
         self.cmake.configure(source_folder=self._source_subfolder)
 
     def build(self):
@@ -84,6 +85,12 @@ class IgnitionMathConan(ConanFile):
         tools.rmdir(os.path.join(self.package_folder, "share"))
         tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
         tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
+
+        # Remove MS runtime files
+        if self.options.shared:
+            for dll_pattern_to_remove in ["concrt*.dll", "msvcp*.dll", "vcruntime*.dll"]:
+                for dll_to_remove in glob.glob(os.path.join(self.package_folder, "bin", dll_pattern_to_remove)):
+                    os.remove(dll_to_remove)
 
     def package_info(self):
         version_major = self.version.split(".")[0]
