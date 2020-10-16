@@ -23,7 +23,9 @@ class TgbotConan(ConanFile):
         "libcurl/7.67.0"
     )
 
-    _source_subfolder = "tgbot"
+    @property
+    def _source_subfolder(self):
+        return "source_subfolder"
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
