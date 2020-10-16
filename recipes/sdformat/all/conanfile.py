@@ -12,6 +12,8 @@ class SDFormat(ConanFile):
     description = "Simulation Description Format (SDFormat) parser and description files."
     topics = ("ignition", "robotics", "simulation")
     settings = "os", "compiler", "build_type", "arch"
+    options = {"shared": [True, False], "fPIC": [True, False]}
+    default_options = {"shared": False, "fPIC": True}
     generators = "cmake", "cmake_find_package_multi"
 
     @property
@@ -30,6 +32,10 @@ class SDFormat(ConanFile):
     @property
     def _source_subfolder(self):
         return "source_subfolder"
+
+    def config_options(self):
+        if self.settings.os == "Windows":
+            del self.options.fPIC
 
     def configure(self):
         if self.settings.get_safe("compiler.cppstd"):
