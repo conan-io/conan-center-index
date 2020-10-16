@@ -63,10 +63,9 @@ class LuaConan(ConanFile):
     def package_info(self):
         self.cpp_info.libs = tools.collect_libs(self)
         self.cpp_info.includedirs.append(os.path.join("include", "lua"))
+        if self.settings.os == "Linux":
+            self.cpp_info.system_libs = ["dl", "m"]
         if self.settings.os in ["Linux", "Macos"]:
             self.cpp_info.defines.extend(["LUA_USE_DLOPEN", "LUA_USE_POSIX"])
-            self.cpp_info.system_libs = ["m"]
-            if self.settings.os != "Macos":
-                self.cpp_info.system_libs.append("dl")
         elif self.settings.os == "Windows" and self.options.shared:
             self.cpp_info.defines.append("LUA_BUILD_AS_DLL")
