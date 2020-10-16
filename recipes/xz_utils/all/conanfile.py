@@ -1,3 +1,4 @@
+import glob
 import os
 from conans import ConanFile, tools, AutoToolsBuildEnvironment, MSBuild
 from conans.tools import Version
@@ -15,6 +16,8 @@ class XZUtils(ConanFile):
     settings = "os", "arch", "compiler", "build_type"
     options = {"shared": [True, False], "fPIC": [True, False]}
     default_options = {"shared": False, "fPIC": True}
+
+    _autotools = None
 
     @property
     def _source_subfolder(self):
@@ -77,29 +80,29 @@ class XZUtils(ConanFile):
                 use_env=False,
                 upgrade_project=False)
 
-    def _build_configure(self):
-        with tools.chdir(self._source_subfolder):
-            args = []
-            env_build = AutoToolsBuildEnvironment(self, win_bash=tools.os_info.is_windows)
-            args = ["--disable-doc"]
-            if self.settings.os != "Windows" and self.options.get_safe("fPIC", True):
-                args.append("--with-pic")
-            if self.options.shared:
-                args.extend(["--disable-static", "--enable-shared"])
-            else:
-                args.extend(["--enable-static", "--disable-shared"])
-            if self.settings.build_type == "Debug":
-                args.append("--enable-debug")
-            env_build.configure(args=args, build=False)
-            env_build.make()
-            env_build.install()
+    def _configure_autotools(self):
+        if self._autotools:
+            return self._autotools
+        self._autotools = AutoToolsBuildEnvironment(self, win_bash=tools.os_info.is_windows)
+        args = ["--disable-doc"]
+        if self.settings.os != "Windows" and self.options.get_safe("fPIC", True):
+            args.append("--with-pic")
+        if self.options.shared:
+            args.extend(["--disable-static", "--enable-shared"])
+        else:
+            args.extend(["--enable-static", "--disable-shared"])
+        if self.settings.build_type == "Debug":
+            args.append("--enable-debug")
+        self._autotools.configure(configure_dir=self._source_subfolder, args=args, build=False)
+        return self._autotools
 
     def build(self):
         self._apply_patches()
         if self.settings.compiler == "Visual Studio":
             self._build_msvc()
         else:
-            self._build_configure()
+            autotools = self._configure_autotools()
+            autotools.make()
 
     def package(self):
         self.copy(pattern="COPYING", dst="licenses", src=self._source_subfolder)
@@ -116,14 +119,13 @@ class XZUtils(ConanFile):
                 self.copy(pattern="*.dll", dst="bin", src=bin_dir, keep_path=False)
             os.rename(os.path.join(self.package_folder, "lib", "liblzma.lib"),
                       os.path.join(self.package_folder, "lib", "lzma.lib"))
-
-        # Remove/rename forbidden files/folders in central repository
-        tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
-        tools.rmdir(os.path.join(self.package_folder, "share"))
-        try:
-            os.remove(os.path.join(self.package_folder, "lib", "liblzma.la"))
-        except:
-            pass
+        else:
+            autotools = self._configure_autotools()
+            autotools.install()
+            tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
+            tools.rmdir(os.path.join(self.package_folder, "share"))
+            for la_file in glob.glob(os.path.join(self.package_folder, "lib", "*.la")):
+                os.remove(la_file)
 
     def package_info(self):
         if not self.options.shared:
