@@ -5,4 +5,4 @@ sources:
 patches:
   "1.2":
     - patch_file: "patches/001-build-system.patch"
-      base_path: "tgbot"
+      base_path: "source_subfolder"
