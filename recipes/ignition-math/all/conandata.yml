@@ -1,0 +1,4 @@
+sources:
+  "6.6.0":
+    url: "https://github.com/ignitionrobotics/ign-math/archive/ignition-math6_6.6.0.zip"
+    sha256: "7c29a8fa49edba1cff8e6a6194ae74942a103eefc3504b3afb63de54d7a510e9"
