@@ -17,12 +17,12 @@ class PixmanConan(ConanFile):
     _autotools = None
 
     @property
-    def _includedir(self):
-        return os.path.join("include", "pixman-1")
+    def _source_subfolder(self):
+        return "source_subfolder"
 
     @property
-    def _folder(self):
-        return "{}-{}".format(self.name, self.version)
+    def _includedir(self):
+        return os.path.join("include", "pixman-1")
 
     def config_options(self):
         del self.settings.compiler.libcxx
@@ -41,10 +41,11 @@ class PixmanConan(ConanFile):
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
+        os.rename(self.name + "-" + self.version, self._source_subfolder)
 
         if self.settings.os == 'Macos':
             # https://lists.freedesktop.org/archives/pixman/2014-November/003461.html
-            test_makefile = os.path.join(self._folder, 'test', 'Makefile.in')
+            test_makefile = os.path.join(self._source_subfolder, 'test', 'Makefile.in')
             tools.replace_in_file(test_makefile,
                                   'region_test_OBJECTS = region-test.$(OBJEXT)',
                                   'region_test_OBJECTS = region-test.$(OBJEXT) utils.$(OBJEXT)')
@@ -60,7 +61,7 @@ class PixmanConan(ConanFile):
             else:
                 args.extend(["--enable-static", "--disable-shared"])
             self._autotools = AutoToolsBuildEnvironment(self, win_bash=tools.os_info.is_windows)
-            self._autotools.configure(configure_dir=self._folder, args=args)
+            self._autotools.configure(configure_dir=self._source_subfolder, args=args)
         return self._autotools
 
     def build(self):
@@ -72,12 +73,12 @@ class PixmanConan(ConanFile):
                     "SSSE3": "on",
                     "CFG": str(self.settings.build_type).lower(),
                 }
-                tools.replace_in_file(os.path.join(self._folder, 'Makefile.win32.common'),
+                tools.replace_in_file(os.path.join(self._source_subfolder, 'Makefile.win32.common'),
                                         '-MDd ', '-%s ' % str(self.settings.compiler.runtime))
-                tools.replace_in_file(os.path.join(self._folder, 'Makefile.win32.common'),
+                tools.replace_in_file(os.path.join(self._source_subfolder, 'Makefile.win32.common'),
                                         '-MD ', '-%s ' % str(self.settings.compiler.runtime))
                 var_args = " ".join("{}={}".format(k, v) for k, v in make_vars.items())
-                self.run("make -C {}/pixman -f Makefile.win32 {}".format(self._folder, var_args),
+                self.run("make -C {}/pixman -f Makefile.win32 {}".format(self._source_subfolder, var_args),
                             win_bash=True)
         else:
             autotools = self._configure_autotools()
@@ -94,7 +95,7 @@ class PixmanConan(ConanFile):
         la = os.path.join(self.package_folder, "lib", "libpixman-1.la")
         if os.path.isfile(la):
             os.unlink(la)
-        self.copy(os.path.join(self._folder, 'COPYING'), dst='licenses')
+        self.copy(os.path.join(self._source_subfolder, 'COPYING'), dst='licenses')
         tools.rmdir(os.path.join(self.package_folder, 'lib', 'pkgconfig'))
 
     def package_info(self):
