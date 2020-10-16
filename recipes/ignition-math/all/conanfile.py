@@ -33,6 +33,10 @@ class IgnitionMathConan(ConanFile):
     def _source_subfolder(self):
         return "source_subfolder"
 
+    def config_options(self):
+        if self.settings.os == "Windows":
+            del self.options.fPIC
+
     def configure(self):
         if self.settings.get_safe("compiler.cppstd"):
             tools.check_min_cppstd(self, self._minimum_cpp_standard)
