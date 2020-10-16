@@ -29,6 +29,10 @@ class TgbotConan(ConanFile):
         if self.settings.os == "Windows":
             del self.options.fPIC
 
+    def configure(self):
+        if self.options.shared:
+            del self.options.fPIC
+
     def requirements(self):
         self.requires("boost/1.74.0")
         self.requires("libcurl/7.72.0")
