@@ -14,6 +14,8 @@ class LuaConan(ConanFile):
     options = {"shared": [False, True], "fPIC": [True, False], "compile_as_cpp": [True, False]}
     default_options = {"shared": False, "fPIC": True, "compile_as_cpp": False}
 
+    _cmake = None
+
     @property
     def _source_subfolder(self):
         return "source_subfolder"
@@ -33,12 +35,14 @@ class LuaConan(ConanFile):
             del self.settings.compiler.cppstd
 
     def _configure_cmake(self):
-        cmake = CMake(self)
-        cmake.definitions["SOURCE_SUBDIR"] = self._source_subfolder
-        cmake.definitions["SKIP_INSTALL_TOOLS"] = True
-        cmake.definitions["COMPILE_AS_CPP"] = self.options.compile_as_cpp
-        cmake.configure()
-        return cmake
+        if self._cmake:
+            return self._cmake
+        self._cmake = CMake(self)
+        self._cmake.definitions["SOURCE_SUBDIR"] = self._source_subfolder
+        self._cmake.definitions["SKIP_INSTALL_TOOLS"] = True
+        self._cmake.definitions["COMPILE_AS_CPP"] = self.options.compile_as_cpp
+        self._cmake.configure()
+        return self._cmake
 
     def build(self):
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
