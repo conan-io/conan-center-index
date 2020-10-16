@@ -20,15 +20,6 @@ class XZUtils(ConanFile):
     def _source_subfolder(self):
         return "source_subfolder"
 
-    @property
-    def _use_winbash(self):
-        return tools.os_info.is_windows
-
-    def build_requirements(self):
-        if self._use_winbash and "CONAN_BASH_PATH" not in os.environ and \
-                tools.os_info.detect_windows_subsystem() != "msys2":
-            self.build_requires("msys2/20200517")
-
     def _effective_msbuild_type(self):
         # treat "RelWithDebInfo" and "MinSizeRel" as "Release"
         return "Debug" if self.settings.build_type == "Debug" else "Release"
@@ -40,6 +31,11 @@ class XZUtils(ConanFile):
     def configure(self):
         del self.settings.compiler.cppstd
         del self.settings.compiler.libcxx
+
+    def build_requirements(self):
+        if tools.os_info.is_windows and self.settings.compiler != "Visual Studio" and \
+           not tools.get_env("CONAN_BASH_PATH") and tools.os_info.detect_windows_subsystem() != "msys2":
+            self.build_requires("msys2/20200517")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
@@ -82,7 +78,7 @@ class XZUtils(ConanFile):
     def _build_configure(self):
         with tools.chdir(self._source_subfolder):
             args = []
-            env_build = AutoToolsBuildEnvironment(self, win_bash=self._use_winbash)
+            env_build = AutoToolsBuildEnvironment(self, win_bash=tools.os_info.is_windows)
             args = ["--disable-doc"]
             if self.settings.os != "Windows" and self.options.fPIC:
                 args.append("--with-pic")
