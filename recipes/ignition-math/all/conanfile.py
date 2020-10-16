@@ -1,6 +1,7 @@
 import os
 
 from conans import CMake, ConanFile, tools
+from conans.errors import ConanInvalidConfiguration
 
 
 class IgnitionMathConan(ConanFile):
