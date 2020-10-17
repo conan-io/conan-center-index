@@ -115,5 +115,6 @@ int main(int argc, char **argv)
     /* deallocate each non-null entry in argtable[] */
     arg_freetable(argtable,sizeof(argtable)/sizeof(argtable[0]));
 
+    printf("Finish! (%d)\n", exitcode);
     return exitcode;
     }

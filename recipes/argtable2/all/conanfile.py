@@ -1,5 +1,4 @@
 from conans import AutoToolsBuildEnvironment, ConanFile, tools
-from contextlib import contextmanager
 import os
 
 
@@ -43,34 +42,12 @@ class Argtable2Conan(ConanFile):
         del self.settings.compiler.cppstd
 
     def build_requirements(self):
-        if tools.os_info.is_windows and not tools.get_env("CONAN_BASH_PATH"):
+        if tools.os_info.is_windows and self.settings.compiler != "Visual Studio":
             self.build_requires("msys2/20200517")
-        if self.settings.compiler == "Visual Studio":
-            self.build_requires("automake/1.16.2")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
         os.rename("argtable{}".format(self.version.replace(".", "-")), self._source_subfolder)
-
-    @contextmanager
-    def _build_context(self):
-        env = {}
-        if self.settings.compiler == "Visual Studio":
-            with tools.vcvars(self.settings):
-                env.update({
-                    "AR": "{} lib".format(tools.unix_path(self.deps_user_info["automake"].ar_lib)),
-                    "CC": "{} cl -nologo".format(tools.unix_path(self.deps_user_info["automake"].compile)),
-                    "CXX": "{} cl -nologo".format(tools.unix_path(self.deps_user_info["automake"].compile)),
-                    "NM": "dumpbin -symbols",
-                    "OBJDUMP": ":",
-                    "RANLIB": ":",
-                    "STRIP": ":",
-                })
-                with tools.environment_append(env):
-                    yield
-        else:
-            with tools.environment_append(env):
-                yield
 
     def _configure_autotools(self):
         if self._autotools:
@@ -84,23 +61,22 @@ class Argtable2Conan(ConanFile):
         self._autotools.configure(args=conf_args, configure_dir=self._source_subfolder)
         return self._autotools
 
-    def _run_makefile(self, target):
-            if self.settings.compiler != "Visual Studio":
-                autotools = AutoToolsBuildEnvironment(self)
-                autotools.libs = []
-                vars = " ".join("{}='{}'".format(k, v) for k, v in autotools.vars)
-                with tools.environment_append(autotools.vars):
-                    self.run("nmake -f 'src/Makefile.nmake' {}".format(target, vars), run_environment=True)
+    def _run_nmake(self, target):
+        autotools = AutoToolsBuildEnvironment(self)
+        autotools.libs = []
+        vars = " ".join("CONAN_{}=\"{}\"".format(k, v) for k, v in autotools.vars.items())
+        with tools.vcvars(self.settings):
+            with tools.chdir(os.path.join(self._source_subfolder, "src")):
+                self.run("nmake -f Makefile.nmake {} {}".format(target, vars), run_environment=True)
 
     def build(self):
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
             tools.patch(**patch)
         if self.settings.compiler == "Visual Studio":
-            self._run_makefile("argtable2.dll" if self.options.shared else "argtable2.lib")
+            self._run_nmake("argtable2.dll" if self.options.shared else "argtable2.lib")
         else:
-            with self._build_context():
-                autotools = self._configure_autotools()
-                autotools.make()
+            autotools = self._configure_autotools()
+            autotools.make()
 
     def package(self):
         self.copy("COPYING", src=self._source_subfolder, dst="licenses")
@@ -109,12 +85,11 @@ class Argtable2Conan(ConanFile):
             self.copy("*.dll", src=os.path.join(self._source_subfolder, "src"), dst="bin")
             self.copy("argtable2.h", src=os.path.join(self._source_subfolder, "src"), dst="include")
             if self.options.shared:
-                os.rename(os.path.join(self.package_folder, "lib", "impargparse2.lib"),
-                          os.path.join(self.package_folder, "lib", "argparse2.lib"))
+                os.rename(os.path.join(self.package_folder, "lib", "impargtable2.lib"),
+                          os.path.join(self.package_folder, "lib", "argtable2.lib"))
         else:
-            with self._build_context():
-                autotools = self._configure_autotools()
-                autotools.install()
+            autotools = self._configure_autotools()
+            autotools.install()
 
             tools.remove_files_by_mask(os.path.join(self.package_folder, "lib"), "*.la")
             tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
