@@ -58,3 +58,19 @@
 -set_target_properties(raw_r PROPERTIES POSITION_INDEPENDENT_CODE ON)
 +#set_target_properties(raw PROPERTIES POSITION_INDEPENDENT_CODE ON)
 +#set_target_properties(raw_r PROPERTIES POSITION_INDEPENDENT_CODE ON)
+--- cmake/modules/FindLCMS2.cmake
++++ cmake/modules/FindLCMS2.cmake
+@@ -16,11 +16,11 @@
+ 
+ # use pkg-config to get the directories and then use these values
+ # in the FIND_PATH() and FIND_LIBRARY() calls
+-if(NOT WIN32)
++if(1)
+    find_package(PkgConfig)
+    pkg_check_modules(PC_LCMS2 lcms2)
+    set(LCMS2_DEFINITIONS ${PC_LCMS2_CFLAGS_OTHER})
+-endif(NOT WIN32)
++endif()
+ 
+ find_path(LCMS2_INCLUDE_DIR lcms2.h
+    PATHS
