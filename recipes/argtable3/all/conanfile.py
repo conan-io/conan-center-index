@@ -63,10 +63,14 @@ class Argtable3Conan(ConanFile):
         cmake = self._configure_cmake()
         cmake.install()
 
+        tools.rmdir(os.path.join(self.package_folder, "cmake"))
         tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
 
     def package_info(self):
         self.cpp_info.libs = ["argtable3" if self.options.shared else "argtable3_static"]
+        if not self.options.shared:
+            if self.settings.os == "Linux":
+                self.settings.system_libs.append("m")
         # FIXME: the cmake targets are exported without namespace
         self.cpp_info.filenames["cmake_find_package"] = "Argtable3"
         self.cpp_info.filenames["cmake_find_package_config"] = "Argtable3"
