@@ -1,0 +1,22 @@
+--- libcpuid/CMakeLists.txt
++++ libcpuid/CMakeLists.txt
+@@ -13,7 +13,7 @@
+ endif()
+ 
+ if(UNIX)
+-  add_library(cpuid SHARED ${cpuid_sources})
++  add_library(cpuid ${cpuid_sources})
+ else()
+   add_library(cpuid ${cpuid_sources})
+ endif()
+--- cpuid_tool/CMakeLists.txt
++++ cpuid_tool/CMakeLists.txt
+@@ -2,7 +2,7 @@
+ 
+ target_link_libraries(cpuid_tool cpuid)
+ 
+-if(WIN32)
++if(0)
+   install(
+     TARGETS cpuid_tool
+     CONFIGURATIONS Debug
