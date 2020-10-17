@@ -41,7 +41,6 @@ class LuaConan(ConanFile):
             return self._cmake
         self._cmake = CMake(self)
         self._cmake.definitions["SOURCE_SUBDIR"] = self._source_subfolder
-        self._cmake.definitions["LUA_VERSION"] = str(self.version)
         self._cmake.definitions["SKIP_INSTALL_TOOLS"] = True
         self._cmake.definitions["COMPILE_AS_CPP"] = self.options.compile_as_cpp
         self._cmake.configure()
