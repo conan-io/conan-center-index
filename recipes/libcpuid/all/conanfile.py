@@ -5,8 +5,8 @@ import os
 
 class LibCpuidConan(ConanFile):
     name = "libcpuid"
-    description = "a small C library for x86 CPU detection and feature extraction"
-    topics = "UNKNOWN TOPICS"
+    description = "libcpuid  is a small C library for x86 CPU detection and feature extraction"
+    topics = ("conan", "libcpuid", "detec", "cpu", "intel", "amd", "x86_64")
     license = "https://github.com/anrieff/libcpuid"
     homepage = "https://github.com/anrieff/libcpuid"
     url = "https://github.com/conan-io/conan-center-index"
@@ -19,6 +19,7 @@ class LibCpuidConan(ConanFile):
         "shared": False,
         "fPIC": True,
     }
+    generators = "cmake"
     exports_sources = "CMakeLists.txt", "patches/**"
 
     _cmake = None
@@ -52,7 +53,7 @@ class LibCpuidConan(ConanFile):
             return self._cmake
         self._cmake = CMake(self)
         self._cmake.definitions["ENABLE_DOCS"] = False
-        self._cmake.configure(source_folder=self._source_subfolder, build_folder=self._build_subfolder)
+        self._cmake.configure(build_folder=self._build_subfolder)
         return self._cmake
 
     def build(self):
