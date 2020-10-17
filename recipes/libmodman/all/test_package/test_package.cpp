@@ -26,9 +26,10 @@ int main(int argc, char *argv[])
 
     std::cout << "Found " << exts.size() << " extensions:\n";
     for (unsigned int j = 0; j < exts.size(); j++) {
-        std::cout << "- " << typeid(*(exts[j])).name() << "\n";
+        my_extension *ext = exts[j];
+        std::cout << "- " << typeid(ext).name() << "\n";
         for (int i = 0; i < 20; ++i) {
-            std::cout << "  f(" << i << ") = " << exts[j]->expensive_operation(i) << "\n";
+            std::cout << "  f(" << i << ") = " << ext->expensive_operation(i) << "\n";
         }
     }
     if (exts.size() != 2) {
