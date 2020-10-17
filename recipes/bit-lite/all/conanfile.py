@@ -9,7 +9,7 @@ class BitLiteConan(ConanFile):
     homepage = "https://github.com/martinmoene/bit-lite"
     description = ("bit is a C++20 bit operations for C++98 and later \
                     in a single-file header-only library.")
-    topics = ("conan", "cpp98", "cpp11", "cpp14", "cpp17", "cpp20")
+    topics = ("conan", "bit-lite", "bit", "manipulation", )
     license = "BSL-1.0"
     no_copy_source = True
 
