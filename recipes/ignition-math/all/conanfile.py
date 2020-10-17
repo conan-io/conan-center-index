@@ -16,6 +16,7 @@ class IgnitionMathConan(ConanFile):
     options = {"shared": [True, False]}
     default_options = {"shared": False}
     generators = "cmake_find_package_multi"
+    exports_sources = ["patches/**"]
 
     _cmake = None
 
@@ -77,6 +78,8 @@ class IgnitionMathConan(ConanFile):
         return self._cmake
 
     def build(self):
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            tools.patch(**patch)
         self._install_ign_cmake()
         self._configure_cmake()
         cmake = self._configure_cmake()
