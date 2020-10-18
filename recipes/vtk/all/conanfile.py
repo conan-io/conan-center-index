@@ -6,38 +6,33 @@ from conans import ConanFile, CMake, tools
 
 class VTKConan(ConanFile):
     name = "vtk" # DO NOT SUBMIT!! Should it stay lowercase or be uppercase?
-    version = "8.2.0"
-    description = "Visualization Toolkit by Kitware"
-    url = "http://github.com/bilke/conan-vtk"
+    version = "9.0.1"
+    url = "https://github.com/conan-io/conan-center-index"
+    homepage = "https://vtk.org/"
     license = "MIT"
+    description = "Visualization Toolkit by Kitware"
     generators = "cmake"
-    settings = "os", "compiler", "build_type", "arch"
+    settings = "os", "arch", "compiler", "build_type"
     revision_mode = "scm"
-    exports = ["LICENSE.md", "CMakeLists.txt", "FindVTK.cmake",
-        "vtknetcdf_snprintf.diff", "vtktiff_mangle.diff"]
+    exports = ["LICENSE.md", "CMakeLists.txt", "FindVTK.cmake", "patches/**"]
     source_subfolder = "source_subfolder"
     options = {"shared": [True, False], "qt": [True, False], "mpi": [True, False],
-               "fPIC": [True, False], "minimal": [True, False], "ioxml": [True, False],
-               "ioexport": [True, False], "mpi_minimal": [True, False]}
+                "fPIC": [True, False], "minimal": [True, False], "ioxml": [True, False],
+                "ioexport": [True, False], "mpi_minimal": [True, False]}
     default_options = ("shared=False", "qt=False", "mpi=False", "fPIC=False",
-        "minimal=False", "ioxml=False", "ioexport=False", "mpi_minimal=False")
-
-    short_paths = True
+                "minimal=False", "ioxml=False", "ioexport=False", "mpi_minimal=False")
+    topics = ("conan", "VTK") # DO NOT SUBMIT!!!  Need suplementation like "3D graphics" and more ("Para View"?)
 
     version_split = version.split('.')
-    short_version = "%s.%s" % (version_split[0], version_split[1])
+    short_version = "{}.{}".format(version_split[0], version_split[1])
 
     def source(self):
-        tools.get("https://github.com/Kitware/{0}/archive/v{1}.tar.gz"
-                  .format(self.name.upper(), self.version))
-        extracted_dir = self.name.upper() + "-" + self.version
-        os.rename(extracted_dir, self.source_subfolder)
-        tools.patch(base_path=self.source_subfolder, patch_file="vtknetcdf_snprintf.diff")
-        tools.patch(base_path=self.source_subfolder, patch_file="vtktiff_mangle.diff")
+        tools.get(**self.conan_data["sources"][self.version])
+        os.rename("{}-{}".format(self.name, self.version), self.source_subfolder)
 
     def requirements(self):
         if self.options.qt:
-            self.requires("qt/5.12.4@bincrafters/stable")
+            self.requires("qt/5.15.1@bincrafters/stable")
             self.options["qt"].shared = True
             if tools.os_info.is_linux:
                 self.options["qt"].qtx11extras = True
@@ -82,6 +77,9 @@ class VTKConan(ConanFile):
             del self.options.fPIC
 
     def build(self):
+        for patch in self.conan_data["patches"][self.version]:
+            tools.patch(**patch)
+
         cmake = CMake(self)
         cmake.definitions["BUILD_TESTING"] = "OFF"
         cmake.definitions["BUILD_EXAMPLES"] = "OFF"
