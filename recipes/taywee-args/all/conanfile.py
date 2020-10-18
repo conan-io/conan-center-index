@@ -3,10 +3,10 @@ import os
 
 required_conan_version = ">=1.28.0"
 
-class ArgsConan(ConanFile):
-    name = "args"
+class TayweeArgsConan(ConanFile):
+    name = "taywee-args"
     description = "A simple, small, flexible, single-header C++11 argument parsing library"
-    topics = ("conan", "args", "argument-parser", "header-only")
+    topics = ("conan", "taywee-args", "args", "argument-parser", "header-only")
     license = "MIT"
     homepage = "https://github.com/Taywee/args"
     url = "https://github.com/conan-io/conan-center-index"
@@ -26,7 +26,7 @@ class ArgsConan(ConanFile):
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
-        os.rename(self.name + "-" + self.version, self._source_subfolder)
+        os.rename("args-" + self.version, self._source_subfolder)
 
     def package(self):
         self.copy("LICENSE", dst="licenses", src=self._source_subfolder)
