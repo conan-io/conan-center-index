@@ -77,7 +77,7 @@ class QtConan(ConanFile):
         "with_openal": [True, False],
         "with_zstd": [True, False],
 
-        "GUI": [True, False],
+        "gui": [True, False],
         "widgets": [True, False],
 
         "device": "ANY",
@@ -113,7 +113,7 @@ class QtConan(ConanFile):
         "with_openal": True,
         "with_zstd": True,
 
-        "GUI": True,
+        "gui": True,
         "widgets": True,
 
         "device": None,
@@ -134,12 +134,9 @@ class QtConan(ConanFile):
             self.build_requires("ninja/1.10.0")
             # gperf, bison, flex, python >= 2.7.5 & < 3
             if self.settings.os != "Windows":
-                if not tools.which("bison"):
-                    self.build_requires("bison/3.5.3")
-                if not tools.which("gperf"):
-                    self.build_requires("gperf/3.1")
-                if not tools.which("flex"):
-                    self.build_requires("flex/2.6.4")
+                self.build_requires("bison/3.7.1")
+                self.build_requires("gperf/3.1")
+                self.build_requires("flex/2.6.4")
 
             # Check if a valid python2 is available in PATH or it will failflex
             # Start by checking if python2 can be found
@@ -195,10 +192,10 @@ class QtConan(ConanFile):
         #if self.settings.os != 'Linux':
         #         self.options.with_libiconv = False # QTBUG-84708
 
-        if self.options.widgets and not self.options.GUI:
-            raise ConanInvalidConfiguration("using option qt:widgets without option qt:GUI is not possible. "
-                                            "You can either disable qt:widgets or enable qt:GUI")
-        if not self.options.GUI:
+        if self.options.widgets and not self.options.gui:
+            raise ConanInvalidConfiguration("using option qt:widgets without option qt:gui is not possible. "
+                                            "You can either disable qt:widgets or enable qt:gui")
+        if not self.options.gui:
             del self.options.opengl
             del self.options.with_vulkan
             del self.options.with_freetype
@@ -256,12 +253,12 @@ class QtConan(ConanFile):
 
     def requirements(self):
         if self.options.openssl:
-            self.requires("openssl/1.1.1g")
+            self.requires("openssl/1.1.1h")
         if self.options.with_pcre2:
-            self.requires("pcre2/10.33")
+            self.requires("pcre2/10.35")
 
         if self.options.with_glib:
-            self.requires("glib/2.66.0")
+            self.requires("glib/2.66.1")
         # if self.options.with_libiconv: # QTBUG-84708
         #     self.requires("libiconv/1.16")# QTBUG-84708
         if self.options.with_doubleconversion and not self.options.multiconfiguration:
@@ -271,15 +268,15 @@ class QtConan(ConanFile):
         if self.options.get_safe("with_fontconfig", False):
             self.requires("fontconfig/2.13.91")
         if self.options.get_safe("with_icu", False):
-            self.requires("icu/64.2")
+            self.requires("icu/67.1")
         if self.options.get_safe("with_harfbuzz", False) and not self.options.multiconfiguration:
-            self.requires("harfbuzz/2.6.8")
+            self.requires("harfbuzz/2.7.2")
         if self.options.get_safe("with_libjpeg", False) and not self.options.multiconfiguration:
             self.requires("libjpeg/9d")
         if self.options.get_safe("with_libpng", False) and not self.options.multiconfiguration:
             self.requires("libpng/1.6.37")
         if self.options.with_sqlite3 and not self.options.multiconfiguration:
-            self.requires("sqlite3/3.32.2")
+            self.requires("sqlite3/3.33.0")
             self.options["sqlite3"].enable_column_metadata = True
         if self.options.get_safe("with_mysql", False):
             self.requires("libmysqlclient/8.0.17")
@@ -289,10 +286,10 @@ class QtConan(ConanFile):
             if self.settings.os != "Windows":
                 self.requires("odbc/2.3.7")
         if self.options.get_safe("with_openal", False):
-            self.requires("openal/1.19.1")
+            self.requires("openal/1.20.1")
         if self.options.get_safe("with_libalsa", False):
-            self.requires("libalsa/1.1.9")
-        if self.options.GUI and self.settings.os == "Linux":
+            self.requires("libalsa/1.2.2")
+        if self.options.gui and self.settings.os == "Linux":
             self.requires("xorg/system")
             if not tools.cross_building(self, skip_x64_x86=True):
                 self.requires("xkbcommon/0.10.0")
@@ -301,7 +298,7 @@ class QtConan(ConanFile):
         if self.options.with_zstd:
             self.requires("zstd/1.4.5")
         if self.options.qtwebengine and self.settings.os == "Linux":
-            self.requires("expat/2.2.9")
+            self.requires("expat/2.2.10")
             self.requires("opus/1.3.1")
 
     def source(self):
@@ -415,7 +412,7 @@ class QtConan(ConanFile):
             args.append("-commercial")
         else:
             args.append("-opensource")
-        if not self.options.GUI:
+        if not self.options.gui:
             args.append("-no-gui")
         if not self.options.widgets:
             args.append("-no-widgets")
@@ -638,14 +635,10 @@ Examples = bin/datadir/examples""")
                 tools.rmdir(os.path.join(self.package_folder, "licenses", module))
         tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
         tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
-        for file_to_remove in glob.glob(os.path.join(self.package_folder, "lib", "*.la*")):
-            os.remove(file_to_remove)
-        for file_to_remove in glob.glob(os.path.join(self.package_folder, "lib", "*.pdb*")):
-            os.remove(file_to_remove)
-        for root, dirs, files in os.walk(os.path.join(self.package_folder, "bin")):
-            for name in files:
-                if name.endswith('.pdb'):
-                    os.remove(os.path.join(root, name))
+        tools.remove_files_by_mask(os.path.join(self.package_folder, 'lib'), '*.la*')
+        tools.remove_files_by_mask(os.path.join(self.package_folder, 'lib'), '*.pdb*')
+        for root, _, _ in os.walk(os.path.join(self.package_folder, 'bin')):
+            tools.remove_files_by_mask(root, '*.pdb')
 
     def package_id(self):
         del self.info.options.cross_compile
