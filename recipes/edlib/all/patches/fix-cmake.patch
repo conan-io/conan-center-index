@@ -1,0 +1,31 @@
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -58,8 +58,6 @@ target_include_directories(edlib PUBLIC
+     $<INSTALL_INTERFACE:include>)
+ 
+ # Build binaries.
+-add_executable(helloWorld apps/hello-world/helloWorld.c)
+-target_link_libraries(helloWorld edlib)
+ 
+ include(CTest)
+ if (BUILD_TESTING)
+@@ -69,14 +67,17 @@ if (BUILD_TESTING)
+   add_test(edlib_tests ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/runTests)
+ endif()
+ 
+-if (NOT WIN32) # If on windows, do not build binaries that do not support windows.
++if (FALSE) # If on windows, do not build binaries that do not support windows.
+   add_executable(edlib-aligner apps/aligner/aligner.cpp)
+   target_link_libraries(edlib-aligner edlib)
+ endif()
+ 
+ 
+ # Create target 'install' for installing libraries.
+-install(TARGETS edlib DESTINATION ${CMAKE_INSTALL_LIBDIR})
++install(TARGETS edlib 
++  RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
++  LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
++  ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR})
+ install(FILES edlib/include/edlib.h DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
+ 
+ # configure and install pkg-config file
