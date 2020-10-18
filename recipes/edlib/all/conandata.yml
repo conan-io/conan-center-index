@@ -4,5 +4,5 @@ sources:
     sha256: "0436f14b0339dabd2aab7faf3779ac1b4bbbdc46246c1bff49be997fe4b4e2c7"
 patches:
   "1.2.6":
-    - patch_file: "patches/fix-cmake.patch"
+    - patch_file: "patches/cmake-install-and-export-symbols.patch"
       base_path: "source_subfolder"

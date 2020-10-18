@@ -41,6 +41,8 @@ class EdlibConan(ConanFile):
             return self._cmake
         self._cmake = CMake(self)
         self._cmake.definitions["BUILD_TESTING"] = False
+        self._cmake.definitions["EDLIB_BUILD_EXAMPLES"] = False
+        self._cmake.definitions["EDLIB_BUILD_UTILITIES"] = False
         self._cmake.configure()
         return self._cmake
 
@@ -59,5 +61,7 @@ class EdlibConan(ConanFile):
     def package_info(self):
         self.cpp_info.names["pkg_config"] = "edlib-{}".format(tools.Version(self.version).major)
         self.cpp_info.libs = ["edlib"]
+        if self.options.shared:
+            self.cpp_info.defines = ["EDLIB_SHARED"]
         if not self.options.shared and tools.stdcpp_library(self):
             self.cpp_info.system_libs = [tools.stdcpp_library(self)]
