@@ -131,7 +131,7 @@ class QtConan(ConanFile):
         if tools.os_info.is_windows and self.settings.compiler == "Visual Studio":
             self.build_requires("jom/1.1.3")
         if self.options.qtwebengine:
-            self.build_requires("ninja/1.10.0")
+            self.build_requires("ninja/1.10.1")
             # gperf, bison, flex, python >= 2.7.5 & < 3
             if self.settings.os != "Windows":
                 self.build_requires("bison/3.7.1")
