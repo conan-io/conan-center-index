@@ -38,17 +38,33 @@ class MBitsArgsConan(ConanFile):
     def configure(self):
         if self.options.shared:
             del self.options.fPIC
+
+            compiler = str(self.settings.compiler)
+            runtime = self.settings.compiler.get_safe("runtime")
+            if compiler == "Visual Studio" and runtime and str(runtime)[:2] == "MT":
+                raise ConanInvalidConfiguration(
+                    "mbits-args: combining shared library with private C++ "
+                    "library (MT/MTd) is not supported.")
+
         if self.settings.compiler.get_safe("cppstd"):
             tools.check_min_cppstd(self, "17")
+
         minimum_version = self._compilers_minimum_version.get(
             str(self.settings.compiler), False)
         if not minimum_version:
             self.output.warn(
                 "mbits-args requires C++17. Your compiler is unknown. Assuming it supports C++17.")
         elif tools.Version(self.settings.compiler.version) < minimum_version:
-            raise ConanInvalidConfiguration("mbits-args: Unsupported compiler: {}-{}; "
+            raise ConanInvalidConfiguration("mbits-args: Unsupported compiler: {} {}; "
                                             "minimal version known to work is {}."
                                             .format(self.settings.compiler, self.settings.compiler.version, minimum_version))
+        elif str(self.settings.compiler) == "clang" and tools.Version(self.settings.compiler.version) < "8":
+            libcxx = self.settings.compiler.get_safe("libcxx")
+            if libcxx and str(libcxx) == "libc++":
+                raise ConanInvalidConfiguration("mbits-args: Unsupported compiler: clang {} with libc++;\n"
+                                                "minimal version known to work is either clang 8 with "
+                                                "libc++ or clang {} with libstdc++/libstdc++11."
+                                                .format(self.settings.compiler.version, minimum_version))
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
