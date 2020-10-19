@@ -20,10 +20,10 @@ class LibcurlConan(ConanFile):
     options = {"shared": [True, False],
                "fPIC": [True, False],
                "with_ssl": [False, "openssl", "wolfssl", "schannel", "darwinssl"],
-               "with_openssl": [True, False],
-               "with_wolfssl": [True, False],
-               "with_winssl": [True, False],
-               "darwin_ssl": [True, False],
+               "with_openssl": [True, False, "deprecated"],
+               "with_wolfssl": [True, False, "deprecated"],
+               "with_winssl": [True, False, "deprecated"],
+               "darwin_ssl": [True, False, "deprecated"],
                "with_ldap": [True, False],
                "with_libssh2": [True, False],
                "with_libidn": [True, False],
@@ -39,10 +39,10 @@ class LibcurlConan(ConanFile):
     default_options = {"shared": False,
                        "fPIC": True,
                        "with_ssl": "openssl",
-                       "with_openssl": True,  # deprecated
-                       "with_wolfssl": False, # deprecated
-                       "with_winssl": False,  # deprecated
-                       "darwin_ssl": True,    # deprecated
+                       "with_openssl": "deprecated",
+                       "with_wolfssl": "deprecated",
+                       "with_winssl": "deprecated",
+                       "darwin_ssl": "deprecated",
                        "with_ldap": False,
                        "with_libssh2": False,
                        "with_libidn": False,
@@ -90,18 +90,7 @@ class LibcurlConan(ConanFile):
         if not self._has_zstd_option:
             del self.options.with_zstd
         # Default options
-        if tools.is_apple_os(self.settings.os):
-            self.options.with_ssl = "darwinssl"
-            self.options.with_openssl = False
-            self.options.with_wolfssl = False
-            self.options.with_winssl = False
-            self.options.darwin_ssl = True
-        else:
-            self.options.with_ssl = "openssl"
-            self.options.with_openssl = True
-            self.options.with_wolfssl = False
-            self.options.with_winssl = False
-            self.options.darwin_ssl = False
+        self.options.with_ssl = "darwinssl" if tools.is_apple_os(self.settings.os) else "openssl"
 
     def configure(self):
         if self.options.shared:
@@ -111,27 +100,26 @@ class LibcurlConan(ConanFile):
 
         # Deprecated options
         # ===============================
-        if (tools.is_apple_os(self.settings.os) and (self.options.with_openssl or self.options.with_wolfssl or self.options.with_winssl or not self.options.darwin_ssl)) or \
-           (not tools.is_apple_os(self.settings.os) and (not self.options.with_openssl or self.options.with_wolfssl or self.options.with_winssl or self.options.darwin_ssl)):
+        if (any(deprecated_option != "deprecated" for deprecated_option in [self.options.with_openssl, self.options.with_wolfssl, self.options.with_winssl, self.options.darwin_ssl])):
             self.output.warn("with_openssl, with_winssl, darwin_ssl and with_wolfssl options are deprecated. Use with_ssl option instead.")
-        if tools.is_apple_os(self.settings.os) and self.options.with_ssl == "darwinssl":
-            if self.options.darwin_ssl:
-                self.options.with_ssl = "darwinssl"
-            elif self.options.with_openssl:
-                self.options.with_ssl = "openssl"
-            elif self.options.with_wolfssl:
-                self.options.with_ssl = "wolfssl"
-            else:
-                self.options.with_ssl = False
-        if not tools.is_apple_os(self.settings.os) and self.options.with_ssl == "openssl":
-            if self.settings.os == "Windows" and self.options.with_winssl:
-                self.options.with_ssl = "schannel"
-            elif self.options.with_openssl:
-                self.options.with_ssl = "openssl"
-            elif self.options.with_wolfssl:
-                self.options.with_ssl = "wolfssl"
-            else:
-                self.options.with_ssl = False
+            if tools.is_apple_os(self.settings.os) and self.options.with_ssl == "darwinssl":
+                if self.options.darwin_ssl == True:
+                    self.options.with_ssl = "darwinssl"
+                elif self.options.with_openssl == True:
+                    self.options.with_ssl = "openssl"
+                elif self.options.with_wolfssl == True:
+                    self.options.with_ssl = "wolfssl"
+                else:
+                    self.options.with_ssl = False
+            if not tools.is_apple_os(self.settings.os) and self.options.with_ssl == "openssl":
+                if self.settings.os == "Windows" and self.options.with_winssl == True:
+                    self.options.with_ssl = "schannel"
+                elif self.options.with_openssl == True:
+                    self.options.with_ssl = "openssl"
+                elif self.options.with_wolfssl == True:
+                    self.options.with_ssl = "wolfssl"
+                else:
+                    self.options.with_ssl = False
         # ===============================
 
         if self.options.with_ssl == "schannel" and self.settings.os != "Windows":
