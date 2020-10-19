@@ -4,6 +4,6 @@ project(test_package)
 include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
 conan_basic_setup()
 
-find_package(ignition-cmake2)
+find_package(ignition-cmake2 REQUIRED CONFIG)
 
 include(IgnUtils)
