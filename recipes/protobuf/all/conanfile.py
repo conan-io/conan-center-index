@@ -133,7 +133,7 @@ class ProtobufConan(ConanFile):
 
         lib_suffix = "d" if self.settings.build_type == "Debug" else ""
         self.cpp_info.components["libprotoc"].name = "libprotoc"
-        self.cpp_info.components["libprotoc"].libs = ["libprotoc" + lib_suffix]
+        self.cpp_info.components["libprotoc"].libs = [lib_prefix + "protoc" + lib_suffix]
         self.cpp_info.components["libprotoc"].requires = ["libprotobuf"]
 
         if not self.options.lite:
