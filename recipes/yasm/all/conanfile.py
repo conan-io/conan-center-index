@@ -19,6 +19,9 @@ class YASMInstallerConan(ConanFile):
         del self.settings.compiler.libcxx
         del self.settings.compiler.cppstd
 
+    def package_id(self):
+        del self.info.settings.compiler
+
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
         extracted_dir = 'yasm-%s' % self.version
@@ -71,6 +74,3 @@ class YASMInstallerConan(ConanFile):
         bin_path = os.path.join(self.package_folder, "bin")
         self.output.info("Appending PATH environment variable: {}".format(bin_path))
         self.env_info.path.append(bin_path)
-
-    def package_id(self):
-        del self.info.settings.compiler
