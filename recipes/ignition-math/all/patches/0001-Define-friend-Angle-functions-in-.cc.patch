@@ -1,0 +1,69 @@
+From 8e3d2298024b74d5e0820190b65587d43a6bef03 Mon Sep 17 00:00:00 2001
+From: Juan Oxoby <juan@vicarious.com>
+Date: Mon, 19 Oct 2020 11:10:08 -0700
+Subject: [PATCH] Define friend Angle functions in .cc
+
+Signed-off-by: Juan Oxoby <juan@vicarious.com>
+---
+ include/ignition/math/Angle.hh | 14 ++------------
+ src/Angle.cc                   | 16 ++++++++++++++++
+ 2 files changed, 18 insertions(+), 12 deletions(-)
+
+diff --git a/include/ignition/math/Angle.hh b/include/ignition/math/Angle.hh
+index b3d4345..3fe6920 100644
+--- a/include/ignition/math/Angle.hh
++++ b/include/ignition/math/Angle.hh
+@@ -222,24 +222,14 @@ namespace ignition
+       /// \param[in] _a Angle to output.
+       /// \return The output stream.
+       public: friend std::ostream &operator<<(std::ostream &_out,
+-                                              const ignition::math::Angle &_a)
+-      {
+-        _out << _a.Radian();
+-        return _out;
+-      }
++                                              const ignition::math::Angle &_a);
+ 
+       /// \brief Stream extraction operator. Assumes input is in radians.
+       /// \param[in,out] _in Input stream.
+       /// \param[out] _a Angle to read value into.
+       /// \return The input stream.
+       public: friend std::istream &operator>>(std::istream &_in,
+-                                              ignition::math::Angle &_a)
+-      {
+-        // Skip white spaces
+-        _in.setf(std::ios_base::skipws);
+-        _in >> _a.value;
+-        return _in;
+-      }
++                                              ignition::math::Angle &_a);
+ 
+       /// The angle in radians
+       private: double value{0};
+diff --git a/src/Angle.cc b/src/Angle.cc
+index c62dda9..03bb8a3 100644
+--- a/src/Angle.cc
++++ b/src/Angle.cc
+@@ -188,3 +188,19 @@ double Angle::operator()() const
+ {
+   return this->value;
+ }
++
++//////////////////////////////////////////////////
++std::ostream &ignition::math::operator<<(std::ostream &_out, const Angle &_a)
++{
++  _out << _a.Radian();
++  return _out;
++}
++
++//////////////////////////////////////////////////
++std::istream &ignition::math::operator>>(std::istream &_in, Angle &_a)
++{
++  // Skip white spaces
++  _in.setf(std::ios_base::skipws);
++  _in >> _a.value;
++  return _in;
++}
+-- 
+2.17.1
+
