@@ -22,6 +22,7 @@ class VTKConan(ConanFile):
     default_options = {"shared": False, "qt": False, "mpi": False, "fPIC": False,
                 "minimal": False, "ioxml": False, "ioexport": False, "mpi_minimal": False}
     topics = ("conan", "VTK") # DO NOT SUBMIT!!!  Need suplementation like "3D graphics" and more ("Para View"?)
+    short_paths = True
 
     version_split = version.split('.')
     short_version = "{}.{}".format(version_split[0], version_split[1])
@@ -77,7 +78,7 @@ class VTKConan(ConanFile):
             del self.options.fPIC
 
     def build(self):
-        for patch in self.conan_data["patches"][self.version]:
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
             tools.patch(**patch)
 
         cmake = CMake(self)
