@@ -10,7 +10,10 @@ class YASMInstallerConan(ConanFile):
     topics = ("conan", "yasm", "installer", "assembler")
     license = "BSD"
     settings = "os_build", "arch_build", "compiler"
-    _source_subfolder = "sources"
+
+    @property
+    def _source_subfolder(self):
+        return "source_subfolder"
 
     def configure(self):
         del self.settings.compiler.libcxx
@@ -21,7 +24,7 @@ class YASMInstallerConan(ConanFile):
         extracted_dir = 'yasm-%s' % self.version
         os.rename(extracted_dir, self._source_subfolder)
         tools.download('https://raw.githubusercontent.com/yasm/yasm/bcc01c59d8196f857989e6ae718458c296ca20e3/YASM-VERSION-GEN.bat',
-                       os.path.join('sources', 'YASM-VERSION-GEN.bat'))
+                       os.path.join(self._source_subfolder, 'YASM-VERSION-GEN.bat'))
 
     def build(self):
         if self.settings.os_build == 'Windows':
