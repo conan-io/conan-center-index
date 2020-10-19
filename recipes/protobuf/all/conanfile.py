@@ -131,6 +131,7 @@ class ProtobufConan(ConanFile):
         if self.options.with_zlib:
             self.cpp_info.components["protoc"].requires.append("zlib::zlib")
 
+        lib_prefix = "lib" if self.settings.compiler == "Visual Studio" else ""
         lib_suffix = "d" if self.settings.build_type == "Debug" else ""
         self.cpp_info.components["libprotoc"].name = "libprotoc"
         self.cpp_info.components["libprotoc"].libs = [lib_prefix + "protoc" + lib_suffix]
