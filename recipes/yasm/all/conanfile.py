@@ -65,7 +65,9 @@ class YASMInstallerConan(ConanFile):
         tools.rmdir(os.path.join(self.package_folder, "share"))
 
     def package_info(self):
-        self.env_info.PATH.append(os.path.join(self.package_folder, 'bin'))
+        bin_path = os.path.join(self.package_folder, "bin")
+        self.output.info("Appending PATH environment variable: {}".format(bin_path))
+        self.env_info.path.append(bin_path)
 
     def package_id(self):
         del self.info.settings.compiler
