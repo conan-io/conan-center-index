@@ -56,7 +56,7 @@ class AsyncplusplusConan(ConanFile):
         # FIXME: official CMake target is exported without namespace
         self.cpp_info.names["cmake_find_package"] = "Async++"
         self.cpp_info.names["cmake_find_package_multi"] = "Async++"
-        self.cpp_info.libs = ["Async++"]
+        self.cpp_info.libs = tools.collect_libs(self)
         if not self.options.shared:
             self.cpp_info.defines = ["LIBASYNC_STATIC"]
         if self.settings.os == "Linux":
