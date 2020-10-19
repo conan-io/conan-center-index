@@ -14,13 +14,13 @@ class VTKConan(ConanFile):
     generators = "cmake"
     settings = "os", "arch", "compiler", "build_type"
     revision_mode = "scm"
-    exports = ["LICENSE.md", "CMakeLists.txt", "FindVTK.cmake", "patches/**"]
+    exports = ["CMakeLists.txt", "FindVTK.cmake", "patches/**"]
     source_subfolder = "source_subfolder"
     options = {"shared": [True, False], "qt": [True, False], "mpi": [True, False],
                 "fPIC": [True, False], "minimal": [True, False], "ioxml": [True, False],
                 "ioexport": [True, False], "mpi_minimal": [True, False]}
-    default_options = ("shared=False", "qt=False", "mpi=False", "fPIC=False",
-                "minimal=False", "ioxml=False", "ioexport=False", "mpi_minimal=False")
+    default_options = {"shared": False, "qt": False, "mpi": False, "fPIC": False,
+                "minimal": False, "ioxml": False, "ioexport": False, "mpi_minimal": False}
     topics = ("conan", "VTK") # DO NOT SUBMIT!!!  Need suplementation like "3D graphics" and more ("Para View"?)
 
     version_split = version.split('.')
