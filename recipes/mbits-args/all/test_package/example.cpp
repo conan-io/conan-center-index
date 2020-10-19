@@ -1,4 +1,5 @@
 #include <args/parser.hpp>
+#include <cstdio>
 #include <numeric>
 #include <vector>
 

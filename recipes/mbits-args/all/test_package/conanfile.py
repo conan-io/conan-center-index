@@ -15,5 +15,4 @@ class LibargsTestConan(ConanFile):
     def test(self):
         if not tools.cross_building(self):
             bin_path = os.path.join("bin", "example")
-            self.run("{} --sum 1000 700 1".format(bin_path),
-                     run_environment=True)
+            self.run("{} --sum 1000 700 1".format(bin_path))
