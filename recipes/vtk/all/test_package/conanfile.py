@@ -11,7 +11,7 @@ class TestVTKConan(ConanFile):
         cmake.build()
 
     def test(self):
-        bin_path = os.path.join("bin", "test_package")
+        bin_path = os.path.join("bin", "test_vtk_package")
         if self.settings.os == "Windows":
             self.run(bin_path, run_environment=True)
         elif self.settings.os == "Macos":
