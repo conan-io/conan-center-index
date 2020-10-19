@@ -18,19 +18,6 @@ class IgnitionCmakeConan(ConanFile):
     _cmake = None
 
     @property
-    def _minimum_cpp_standard(self):
-        return 17
-
-    @property
-    def _minimum_compilers_version(self):
-        return {
-            "Visual Studio": "16",
-            "gcc": "7",
-            "clang": "5",
-            "apple-clang": "10",
-        }
-
-    @property
     def _source_subfolder(self):
         return "source_subfolder"
 
@@ -63,4 +50,4 @@ class IgnitionCmakeConan(ConanFile):
         version_major = tools.Version(self.version).major
         self.cpp_info.names["cmake_find_package"] = "ignition-cmake{}".format(version_major)
         self.cpp_info.names["cmake_find_package_multi"] = "ignition-cmake{}".format(version_major)
-        self.cpp_info.builddirs = ["lib", "cmake", "ignition-cmake{}".format(self._version_major), "cmake{}".format(version_major)]
+        self.cpp_info.builddirs = ["lib", "cmake", "ignition-cmake{}".format(version_major), "cmake{}".format(version_major)]
