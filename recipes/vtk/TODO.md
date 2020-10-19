@@ -1,16 +1,17 @@
 
 
 TODO:
+=============
 1. Upper case VTK package name
 2. Debug "_d" the same as VTK default
-3. Move libraries sorting to separate method
-4. Enable libraries sorting only for gcc
+3. DONE: Move libraries sorting to separate method
+4. DONE: Enable libraries sorting only for gcc
 5. Implement "cmake_find_package_multi"
 6. Add 2 more defines when building with Qt
 7. What default_options should be? (aligned with VTK or conan or fastest build etc?)
-8. Do/Why we need "FindVTK.cmake" file?
+8. DONE: Do/Why we need "FindVTK.cmake" file? We do not need it
 9. DONE: Verify if there should be "vtk-9.0" or "vtk-9.0.1" in "FindVTK.cmake" file
-10. Should be:
+10. Which is correct?
         exports = ["CMakeLists.txt", "FindVTK.cmake", "patches/**"]
     or
         exports_sources = ["CMakeLists.txt", "FindVTK.cmake", "patches/**"]
@@ -20,10 +21,13 @@ TODO:
 12. A lot of *.h files are in double and tripple nested subfolders. Should it be like this?
         Using like "#include <afsf/sfdsf/sdfdsfds/sfds/*.h>" wil be highly inconvienient.
         If they are public headers maybe they should be added to self.cpp_info.includedirs?
-
+13. DONE: Licenses are in "c:\.conan\08a57b\1\share\licenses\conanvtk\" while musbe be in "c:\.conan\08a57b\1\licenses\"
+14. DONE: Verify Win Release
+15. Verify Win Debug
 
 
 NOTES:
+=============
 1. Oryginal CMakeLists.txt was repalced by zlib/1.2.11/CMakeLists.txt and modified
 2. vtknetcdf_snprintf.diff => vtknetcdf_snprintf.patch, vtktiff_mangle.diff => vtktiff_mangle.patch
 4. Include path is "Path is "c:\.conan\08a57b\1\include\vtk-9.0\octree\"
@@ -36,6 +40,7 @@ NOTES:
 
 
 USEFUL LINKS AND COMMANDS:
+================================
 https://github.com/conan-io/conan-center-index/blob/master/docs/how_to_add_packages.md
 
 conan config install https://github.com/conan-io/hooks.git -sf hooks -tf hooks

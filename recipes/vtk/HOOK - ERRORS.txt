@@ -1,19 +1,11 @@
 
-HOOK errors from "build" 2020-10-19 (SHA 61ebafe33f7a5034ec82be858ee34036d35f1cd4 +1)
+HOOK errors from "build" 2020-10-19 (SHA 85609fa04871c307b78199a3180cde741ba4f097 +1)
 ==================================
 
-  -- Installing: C:/.conan/08a57b/1/include/vtk-9.0/vtkXYZMolReader2.h
-  -- Installing: C:/.conan/08a57b/1/include/vtk-9.0/vtkDomainsChemistryModule.h
-  -- Installing: C:/.conan/08a57b/1/lib/vtk/hierarchy/conanvtk/vtkDomainsChemistry-hierarchy.txt
-  -- Installing: C:/.conan/08a57b/1/lib/vtkDomainsChemistry-9.0.lib
-[HOOK - conan-center.py] post_package(): ERROR: [PACKAGE LICENSE (KB-H012)] No 'licenses' folder found in package: C:\.conan\08a57b\1  (https://github.com/conan-io/conan-center-index/blob/master/docs/error_knowledge_base.md#KB-H012)
-[HOOK - conan-center.py] post_package(): ERROR: [DEFAULT PACKAGE LAYOUT (KB-H013)] Unknown folder 'share' in the package (https://github.com/conan-io/conan-center-index/blob/master/docs/error_knowledge_base.md#KB-H013)
-[HOOK - conan-center.py] post_package(): [DEFAULT PACKAGE LAYOUT (KB-H013)] If you are trying to package a tool put all the contents under the 'bin' folder
-[HOOK - conan-center.py] post_package(): [MATCHING CONFIGURATION (KB-H014)] OK
-[HOOK - conan-center.py] post_package(): [SHARED ARTIFACTS (KB-H015)] OK
+WIN: No HOOK errors - Hooray!!
+(however log was cut, and beggining is missing)
 
 
-
-HOOK errors from "build test_package" 2020-10-19 (SHA 61ebafe33f7a5034ec82be858ee34036d35f1cd4 + 1)
+HOOK errors from "build test_package" 2020-10-19 (SHA 85609fa04871c307b78199a3180cde741ba4f097 + 1)
 ==================================
-No HOOK errors - Hooray!!
+WIN: No HOOK errors - Hooray!!

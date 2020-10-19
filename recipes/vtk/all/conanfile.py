@@ -180,6 +180,10 @@ class VTKConan(ConanFile):
         shutil.rmtree(os.path.join(self.package_folder, 'lib', 'vtk')) #
         # "$\package\lib\cmake" contains a lot of *.cmake files. conan-center HOOK disallow *.cmake files in package.
         shutil.rmtree(os.path.join(self.package_folder, 'lib', 'cmake'))
+        # Licences are created in "$\package\share\licenses\conanvtk\" while their must be in "$\package\licenses\"
+        os.rename(os.path.join(self.package_folder, 'share', 'licenses', 'conanvtk'), os.path.join(self.package_folder, 'licenses'))
+        shutil.rmtree(os.path.join(self.package_folder, 'share'))
+
 
     # For static linking in GCC libraries must be provided in appropriate order.
     # I couldn't find what is correct order of VTK libraries.
