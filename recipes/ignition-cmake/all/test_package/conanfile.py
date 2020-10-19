@@ -10,6 +10,9 @@ class TestPackageConan(ConanFile):
     def build(self):
         cmake = CMake(self)
         cmake.configure()
+        cmake.build()
 
     def test(self):
-        pass
+        if not tools.cross_building(self.settings):
+            bin_path = os.path.join("bin", "test_package")
+            self.run(bin_path, run_environment=True)
