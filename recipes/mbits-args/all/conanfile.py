@@ -17,6 +17,7 @@ class MBitsArgsConan(ConanFile):
     options = {"shared": [True, False], "fPIC": [True, False]}
     default_options = {"shared": False, "fPIC": True}
     generators = "cmake"
+    exports_sources = "CMakeLists.txt"
 
     _cmake = None
 
@@ -78,7 +79,7 @@ class MBitsArgsConan(ConanFile):
         self._cmake.definitions["LIBARGS_TESTING"] = False
         self._cmake.definitions["LIBARGS_INSTALL"] = True
         self._cmake.definitions["LIBARGS_SHARED"] = self.options.shared
-        self._cmake.configure(source_folder=self._source_subfolder)
+        self._cmake.configure()
         return self._cmake
 
     def build(self):
