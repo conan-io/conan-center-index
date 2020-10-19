@@ -1,5 +1,6 @@
 import os
 import re
+import shutil
 
 from fnmatch import fnmatch
 from conans import ConanFile, CMake, tools
@@ -77,10 +78,7 @@ class VTKConan(ConanFile):
         if self.settings.compiler == "Visual Studio":
             del self.options.fPIC
 
-    def build(self):
-        for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            tools.patch(**patch)
-
+    def _configure_cmake(self):
         cmake = CMake(self)
         cmake.definitions["BUILD_TESTING"] = "OFF"
         cmake.definitions["BUILD_EXAMPLES"] = "OFF"
@@ -112,6 +110,15 @@ class VTKConan(ConanFile):
             self.output.info("cmake build: %s" % self.build_folder)
 
         cmake.configure(build_folder='build')
+        return cmake
+
+    def build(self):
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            tools.patch(**patch)
+
+        cmake = self._configure_cmake()
+
+        # DO NOT SUBMIT!!!  Do we still need this "if" in new conan?
         if self.settings.os == 'Macos':
             # run_environment does not work here because it appends path just from
             # requirements, not from this package itself
@@ -120,7 +127,6 @@ class VTKConan(ConanFile):
             self.run('DYLD_LIBRARY_PATH={0} cmake --build build {1} -j'.format(lib_path, cmake.build_config))
         else:
             cmake.build()
-        cmake.install()
 
     # From https://git.ircad.fr/conan/conan-vtk/blob/stable/8.2.0-r1/conanfile.py
     def cmake_fix_path(self, file_path, package_name):
@@ -154,25 +160,34 @@ class VTKConan(ConanFile):
                 file.write(file_data)
 
     def package(self):
-        for path, subdirs, names in os.walk(os.path.join(self.package_folder, 'lib', 'cmake')):
-            for name in names:
-                if fnmatch(name, '*.cmake'):
-                    cmake_file = os.path.join(path, name)
+        cmake = self._configure_cmake()
+        cmake.install()
+        # conan-center HOOK fails when package contains *.cmake files
+        # for path, subdirs, names in os.walk(os.path.join(self.package_folder, 'lib', 'cmake')):
+        #     for name in names:
+        #         if fnmatch(name, '*.cmake'):
+        #             cmake_file = os.path.join(path, name)
 
-                    # if self.options.external_tiff:
-                        # self.cmake_fix_path(cmake_file, "libtiff")
-                    # if self.options.external_zlib:
-                        # self.cmake_fix_path(cmake_file, "zlib")
+        #             # if self.options.external_tiff:
+        #                 # self.cmake_fix_path(cmake_file, "libtiff")
+        #             # if self.options.external_zlib:
+        #                 # self.cmake_fix_path(cmake_file, "zlib")
 
-                    if tools.os_info.is_macos:
-                        self.cmake_fix_macos_sdk_path(cmake_file)
+        #             if tools.os_info.is_macos:
+        #                 self.cmake_fix_macos_sdk_path(cmake_file)
+        
+        # "$\package\lib\vtk" contains "hierarchy\conanvtk\" and a lot of *.txt files in it.
+        shutil.rmtree(os.path.join(self.package_folder, 'lib', 'vtk')) #
+        # "$\package\lib\cmake" contains a lot of *.cmake files. conan-center HOOK disallow *.cmake files in package.
+        shutil.rmtree(os.path.join(self.package_folder, 'lib', 'cmake'))
 
-    def package_info(self):
-        # For static linking in GCC libraries must be provided in appropriate order.
-        # I couldn't find what is correct order of VTK libraries.
-        # ${CONAN_LIBS} in VTK 7.1 has following order, which not necessary is correct, but it was used as starting point
-        # ${CONAN_LIBS} = ['vtkCommonColor', 'vtkCommonCore', 'vtksys', 'vtkCommonDataModel', 'vtkCommonMath', 'vtkCommonMisc', 'vtkCommonSystem', 'vtkCommonTransforms', 'vtkCommonComputationalGeometry', 'vtkCommonExecutionModel', 'vtkDICOMParser', 'vtkFiltersCore', 'vtkFiltersExtraction', 'vtkFiltersGeneral', 'vtkFiltersStatistics', 'vtkImagingFourier', 'vtkImagingCore', 'vtkalglib', 'vtkFiltersGeometry', 'vtkFiltersHybrid', 'vtkImagingSources', 'vtkRenderingCore', 'vtkFiltersSources', 'vtkFiltersModeling', 'vtkIOCore', 'vtkzlib', 'vtkIOExport', 'vtkIOImage', 'vtkmetaio', 'vtkjpeg', 'vtkpng', 'vtktiff', 'vtkRenderingGL2PSOpenGL2', 'vtkRenderingOpenGL2', 'vtkglew', 'vtkgl2ps', 'vtkIOGeometry', 'vtkIOLegacy', 'vtkIOXML', 'vtkIOXMLParser', 'vtkexpat', 'vtkImagingColor', 'vtkImagingGeneral', 'vtkImagingHybrid', 'vtkImagingMath', 'vtkInteractionStyle', 'vtkInteractionWidgets', 'vtkRenderingAnnotation', 'vtkRenderingFreeType', 'vtkfreetype', 'vtkRenderingVolume', 'vtkRenderingContext2D', 'vtkRenderingContextOpenGL2', 'vtkRenderingVolumeOpenGL2', 'vtkViewsContext2D', 'vtkViewsCore']
-        libs = tools.collect_libs(self)
+    # For static linking in GCC libraries must be provided in appropriate order.
+    # I couldn't find what is correct order of VTK libraries.
+    # ${CONAN_LIBS} in VTK 7.1 has following order, which not necessary is correct, but it was used as starting point
+    # ${CONAN_LIBS} = ['vtkCommonColor', 'vtkCommonCore', 'vtksys', 'vtkCommonDataModel', 'vtkCommonMath', 'vtkCommonMisc', 'vtkCommonSystem', 'vtkCommonTransforms', 'vtkCommonComputationalGeometry', 'vtkCommonExecutionModel', 'vtkDICOMParser', 'vtkFiltersCore', 'vtkFiltersExtraction', 'vtkFiltersGeneral', 'vtkFiltersStatistics', 'vtkImagingFourier', 'vtkImagingCore', 'vtkalglib', 'vtkFiltersGeometry', 'vtkFiltersHybrid', 'vtkImagingSources', 'vtkRenderingCore', 'vtkFiltersSources', 'vtkFiltersModeling', 'vtkIOCore', 'vtkzlib', 'vtkIOExport', 'vtkIOImage', 'vtkmetaio', 'vtkjpeg', 'vtkpng', 'vtktiff', 'vtkRenderingGL2PSOpenGL2', 'vtkRenderingOpenGL2', 'vtkglew', 'vtkgl2ps', 'vtkIOGeometry', 'vtkIOLegacy', 'vtkIOXML', 'vtkIOXMLParser', 'vtkexpat', 'vtkImagingColor', 'vtkImagingGeneral', 'vtkImagingHybrid', 'vtkImagingMath', 'vtkInteractionStyle', 'vtkInteractionWidgets', 'vtkRenderingAnnotation', 'vtkRenderingFreeType', 'vtkfreetype', 'vtkRenderingVolume', 'vtkRenderingContext2D', 'vtkRenderingContextOpenGL2', 'vtkRenderingVolumeOpenGL2', 'vtkViewsContext2D', 'vtkViewsCore']
+    def _sort_libs(self, libs):
+        if self.settings.compiler != "gcc":
+            return libs
         libs_ordered = []
         print('VTK libs before sort: ' + (';'.join(libs)))
         order = ['vtkViewsCore', 'vtkViewsContext2D', 'vtkRenderingVolumeOpenGL2', 'vtkRenderingContextOpenGL2', 'vtkRenderingContext2D', 'vtkRenderingVolume', 'vtkfreetype', 'vtkRenderingFreeType', 'vtkRenderingAnnotation', 'vtkInteractionWidgets', 'vtkInteractionStyle', 'vtkImagingMath', 'vtkImagingHybrid', 'vtkImagingGeneral', 'vtkImagingColor', 'vtkexpat', 'vtkIOXMLParser', 'vtkIOXML', 'vtkIOLegacy', 'vtkIOGeometry', 'vtkgl2ps', 'vtkglew', 'vtkRenderingOpenGL2', 'vtkRenderingGL2PSOpenGL2', 'vtktiff', 'vtkpng', 'vtkjpeg', 'vtkmetaio', 'vtkIOImage', 'vtkIOExport', 'vtkzlib', 'vtkIOCore', 'vtkFiltersModeling', 'vtkFiltersSources', 'vtkRenderingCore', 'vtkImagingSources', 'vtkFiltersHybrid', 'vtkFiltersGeometry', 'vtkalglib', 'vtkImagingCore', 'vtkImagingFourier', 'vtkFiltersStatistics', 'vtkFiltersGeneral', 'vtkFiltersExtraction', 'vtkFiltersCore', 'vtkDICOMParser', 'vtkCommonExecutionModel', 'vtkCommonComputationalGeometry', 'vtkCommonDataModel', 'vtkCommonSystem', 'vtkCommonTransforms', 'vtkCommonMath', 'vtkCommonMisc', 'vtkCommonCore', 'vtkCommonColor', 'vtksys']
@@ -184,7 +199,11 @@ class VTKConan(ConanFile):
                     break
         libs_ordered = libs + libs_ordered # add unordered elements, if any
         print('VTK libs ordered: ' + (';'.join(libs_ordered)))
-        self.cpp_info.libs = libs_ordered
+        return libs_ordered
+
+    def package_info(self):
+        libs = tools.collect_libs(self)
+        self.cpp_info.libs = self._sort_libs(libs)
 
         # Adding system libs without 'lib' prefix and '.so' or '.so.X' suffix.
         if self.settings.os == 'Linux':

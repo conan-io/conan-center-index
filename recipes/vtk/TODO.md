@@ -17,8 +17,9 @@ TODO:
 11. Do we need to extend library paths?
         self.run("DYLD_LIBRARY_PATH=%s %s" % (os.environ.get('DYLD_LIBRARY_PATH', ''), bin_path), run_environment=True)
         self.run("LD_LIBRARY_PATH=%s %s" % (os.environ.get('LD_LIBRARY_PATH', ''), bin_path), run_environment=True)
-
-
+12. A lot of *.h files are in double and tripple nested subfolders. Should it be like this?
+        Using like "#include <afsf/sfdsf/sdfdsfds/sfds/*.h>" wil be highly inconvienient.
+        If they are public headers maybe they should be added to self.cpp_info.includedirs?
 
 
 
@@ -26,6 +27,9 @@ NOTES:
 1. Oryginal CMakeLists.txt was repalced by zlib/1.2.11/CMakeLists.txt and modified
 2. vtknetcdf_snprintf.diff => vtknetcdf_snprintf.patch, vtktiff_mangle.diff => vtktiff_mangle.patch
 4. Include path is "Path is "c:\.conan\08a57b\1\include\vtk-9.0\octree\"
+5. Folders from package removed
+    - "c:\.conan\08a57b\1\lib\vtk\"    - hierarchy\conanvtk\ a lot of *.txt files. I belive they are not needed
+    - "c:\.conan\08a57b\1\lib\cmake\"  -  a lot of *.cmake files - HOOK report errors
 5. Progress:
     - first round: all necessary files copied and adopted to conan-center structure
     - First successful Win VS2019 Release local build, unfortunatelly with HOOK errors. Package not tested yet.
