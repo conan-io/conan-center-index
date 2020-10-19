@@ -1,5 +1,9 @@
 # Changelog
 
+### 19-October-2020 - 17:15 CEST
+
+- Updated Conan client to the 1.30.2 version in Windows and Mac agents.
+
 ### 14-October-2020 - 17:49 CEST
 
 - [hotfix] Use non greedy regex to capture the pull-request number.
