@@ -8,7 +8,7 @@ class YASMInstallerConan(ConanFile):
     homepage = "https://github.com/yasm/yasm"
     description = 'Yasm is a complete rewrite of the NASM assembler under the "new" BSD License'
     topics = ("conan", "yasm", "installer", "assembler")
-    license = "BSD"
+    license = "BSD-2-Clause"
     settings = "os_build", "arch_build", "compiler"
 
     @property
