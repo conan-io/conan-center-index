@@ -1,11 +1,12 @@
 
-HOOK errors from "build" 2020-10-19 (SHA 85609fa04871c307b78199a3180cde741ba4f097 +1)
+HOOK errors from "build" 2020-10-19 (SHA 14c305b62e18f3755d84bb5acdb0a4a7e6780026 +1)
 ==================================
 
-WIN: No HOOK errors - Hooray!!
-(however log was cut, and beggining is missing)
+WIN Release: No HOOK errors - Hooray!! - however log was cut, and beggining is missing
+WIN Debug: No HOOK errors - Hooray!! - however log was cut, and beggining is missing
 
 
-HOOK errors from "build test_package" 2020-10-19 (SHA 85609fa04871c307b78199a3180cde741ba4f097 + 1)
+HOOK errors from "build test_package" 2020-10-19 (SHA 14c305b62e18f3755d84bb5acdb0a4a7e6780026 + 1)
 ==================================
-WIN: No HOOK errors - Hooray!!
+WIN Release: No HOOK errors - Hooray!!
+WIN Debug: No HOOK errors - Hooray!!

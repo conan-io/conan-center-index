@@ -3,7 +3,7 @@
 TODO:
 =============
 1. Upper case VTK package name
-2. Debug "_d" the same as VTK default
+2. DONE: Debug "_d" the same as VTK default
 3. DONE: Move libraries sorting to separate method
 4. DONE: Enable libraries sorting only for gcc
 5. Implement "cmake_find_package_multi"
@@ -12,9 +12,9 @@ TODO:
 8. DONE: Do/Why we need "FindVTK.cmake" file? We do not need it
 9. DONE: Verify if there should be "vtk-9.0" or "vtk-9.0.1" in "FindVTK.cmake" file
 10. Which is correct?
-        exports = ["CMakeLists.txt", "FindVTK.cmake", "patches/**"]
+        exports = ["CMakeLists.txt", "patches/**"]
     or
-        exports_sources = ["CMakeLists.txt", "FindVTK.cmake", "patches/**"]
+        exports_sources = ["CMakeLists.txt", "patches/**"]
 11. Do we need to extend library paths?
         self.run("DYLD_LIBRARY_PATH=%s %s" % (os.environ.get('DYLD_LIBRARY_PATH', ''), bin_path), run_environment=True)
         self.run("LD_LIBRARY_PATH=%s %s" % (os.environ.get('LD_LIBRARY_PATH', ''), bin_path), run_environment=True)
@@ -23,7 +23,10 @@ TODO:
         If they are public headers maybe they should be added to self.cpp_info.includedirs?
 13. DONE: Licenses are in "c:\.conan\08a57b\1\share\licenses\conanvtk\" while musbe be in "c:\.conan\08a57b\1\licenses\"
 14. DONE: Verify Win Release
-15. Verify Win Debug
+15. DONE: Verify Win Debug
+16. Shouldn't "exports = ["CMakeLists.txt", "patches/**"]" contain also other files?
+
+
 
 
 NOTES:
@@ -35,8 +38,7 @@ NOTES:
     - "c:\.conan\08a57b\1\lib\vtk\"    - hierarchy\conanvtk\ a lot of *.txt files. I belive they are not needed
     - "c:\.conan\08a57b\1\lib\cmake\"  -  a lot of *.cmake files - HOOK report errors
 5. Progress:
-    - first round: all necessary files copied and adopted to conan-center structure
-    - First successful Win VS2019 Release local build, unfortunatelly with HOOK errors. Package not tested yet.
+    - Win local Release and Dubug Susscessful including test_package and no erros from conan-center HOOKs
 
 
 USEFUL LINKS AND COMMANDS:
@@ -49,8 +51,8 @@ conan config set hooks.conan-center
 conan create . vtk/9.0.1@
 --- is equivalent to --vv--
 $ conan export .
-$ conan install vtk/9.0.1@ --build=vtk
+$ conan install vtk/9.0.1@ --build=vtk -s build_type=Debug
 # package is created now, use test to test it
-$ conan test test_package vtk/9.0.1@
+$ conan test test_package vtk/9.0.1@ -s build_type=Debug
 
 

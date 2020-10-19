@@ -15,7 +15,7 @@ class VTKConan(ConanFile):
     generators = "cmake"
     settings = "os", "arch", "compiler", "build_type"
     revision_mode = "scm"
-    exports = ["CMakeLists.txt", "FindVTK.cmake", "patches/**"]
+    exports = ["CMakeLists.txt", "patches/**"]
     source_subfolder = "source_subfolder"
     options = {"shared": [True, False], "qt": [True, False], "mpi": [True, False],
                 "fPIC": [True, False], "minimal": [True, False], "ioxml": [True, False],
@@ -101,9 +101,6 @@ class VTKConan(ConanFile):
         if self.options.mpi_minimal:
             cmake.definitions["Module_vtkIOParallelXML"] = "ON"
             cmake.definitions["Module_vtkParallelMPI"] = "ON"
-
-        if self.settings.build_type == "Debug" and self.settings.compiler == "Visual Studio":
-            cmake.definitions["CMAKE_DEBUG_POSTFIX"] = "_d"
 
         if self.settings.os == 'Macos':
             self.env['DYLD_LIBRARY_PATH'] = os.path.join(self.build_folder, 'lib')
