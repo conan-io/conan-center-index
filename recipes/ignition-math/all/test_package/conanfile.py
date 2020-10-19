@@ -7,6 +7,7 @@ class TestPackageConan(ConanFile):
 
     def build(self):
         cmake = CMake(self)
+        cmake.definitions["IGN_MATH_MAJOR_VER"] = tools.Version(self.deps_cpp_info["ignition-math"].version).major
         cmake.configure()
         cmake.build()
 
