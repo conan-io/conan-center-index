@@ -201,6 +201,7 @@ class VTKConan(ConanFile):
                 self.cpp_info.frameworks.extend(["CoreFoundation"]) # 'libvtkRenderingOpenGL2-9.0.a' require '_CFRelease', '_CFRetain', '_objc_msgSend' and much more which are in 'CoreFoundation' library
                 self.cpp_info.frameworks.extend(["Cocoa"])          # 'libvtkRenderingOpenGL2-9.0.a' require '_CGWarpMouseCursorPosition' and more, 'libvtkRenderingUI-9.0.a' require '_OBJC_CLASS_$_NSApplication' and more, which are in 'Cocoa' library
 
+        # DO NOT SUBMIT!!! Why "vtknetcdf" and "vtknetcdfcpp" are treated exeptionally from all other modules?
         self.cpp_info.includedirs = [
             "include/vtk-%s" % self.short_version,
             "include/vtk-%s/vtknetcdf/include" % self.short_version,

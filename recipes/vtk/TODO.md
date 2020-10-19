@@ -9,7 +9,7 @@ TODO:
 6. Add 2 more defines when building with Qt
 7. What default_options should be? (aligned with VTK or conan or fastest build etc?)
 8. Do/Why we need "FindVTK.cmake" file?
-9. Verify if there should be "vtk-9.0" or "vtk-9.0.1" in "FindVTK.cmake" file
+9. DONE: Verify if there should be "vtk-9.0" or "vtk-9.0.1" in "FindVTK.cmake" file
 10. Should be:
         exports = ["CMakeLists.txt", "FindVTK.cmake", "patches/**"]
     or
@@ -25,9 +25,10 @@ TODO:
 NOTES:
 1. Oryginal CMakeLists.txt was repalced by zlib/1.2.11/CMakeLists.txt and modified
 2. vtknetcdf_snprintf.diff => vtknetcdf_snprintf.patch, vtktiff_mangle.diff => vtktiff_mangle.patch
-3. Progress:
+4. Include path is "Path is "c:\.conan\08a57b\1\include\vtk-9.0\octree\"
+5. Progress:
     - first round: all necessary files copied and adopted to conan-center structure
-    - Didn't try to build package yet!
+    - First successful Win VS2019 Release local build, unfortunatelly with HOOK errors. Package not tested yet.
 
 
 USEFUL LINKS AND COMMANDS:
