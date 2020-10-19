@@ -23,8 +23,8 @@ class MBitsArgsConan(ConanFile):
     _compilers_minimum_version = {
         "gcc": "8",
         "clang": "7.0",
-        "intel": "19",
         "Visual Studio": "16",
+        "apple-clang": "10.0",
     }
 
     @property
@@ -36,6 +36,8 @@ class MBitsArgsConan(ConanFile):
             del self.options.fPIC
 
     def configure(self):
+        if self.options.shared:
+            del self.options.fPIC
         if self.settings.compiler.get_safe("cppstd"):
             tools.check_min_cppstd(self, "17")
         minimum_version = self._compilers_minimum_version.get(
@@ -52,8 +54,6 @@ class MBitsArgsConan(ConanFile):
         tools.get(**self.conan_data["sources"][self.version])
         os.rename("args-{}".format(self.version),
                   self._source_subfolder)
-        for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            tools.patch(**patch)
 
     def _configure_cmake(self):
         if self._cmake is not None:
