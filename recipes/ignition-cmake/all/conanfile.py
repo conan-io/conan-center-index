@@ -14,6 +14,7 @@ class IgnitionCmakeConan(ConanFile):
     topics = ("ignition", "robotics", "cmake")
     settings = "os", "compiler", "build_type", "arch"
     generators = "cmake", "cmake_find_package_multi"
+    exports_sources = "CMakeLists.txt", "patches/**"
 
     _cmake = None
 
@@ -37,6 +38,8 @@ class IgnitionCmakeConan(ConanFile):
         os.rename(glob.glob("ign-cmake*")[0], self._source_subfolder)
 
     def build(self):
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            tools.patch(**patch)
         cmake = self._configure_cmake()
         cmake.build()
 
