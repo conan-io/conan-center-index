@@ -138,7 +138,7 @@ class ProtobufConan(ConanFile):
 
         if not self.options.lite:
             self.cpp_info.components["libprotobuf"].name = "libprotobuf"
-            self.cpp_info.components["libprotobuf"].libs = ["libprotobuf" + lib_suffix]
+            self.cpp_info.components["libprotobuf"].libs = [lib_prefix + "protobuf" + lib_suffix]
             if self.settings.os == "Linux":
                 self.cpp_info.components["libprotobuf"].system_libs.append("pthread")
                 if self._is_clang_x86 or "arm" in str(self.settings.arch):
