@@ -59,8 +59,8 @@ class MBitsArgsConan(ConanFile):
         if self._cmake is not None:
             return self._cmake
         self._cmake = CMake(self)
-        self._cmake.definitions["LIBARGS_TESTING"] = "OFF"
-        self._cmake.definitions["LIBARGS_INSTALL"] = "ON"
+        self._cmake.definitions["LIBARGS_TESTING"] = False
+        self._cmake.definitions["LIBARGS_INSTALL"] = True
         self._cmake.definitions["LIBARGS_SHARED"] = self.options.shared
         self._cmake.configure(source_folder=self._source_subfolder)
         return self._cmake
