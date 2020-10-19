@@ -61,5 +61,7 @@ class IgnitionCmakeConan(ConanFile):
 
     def package_info(self):
         version_major = tools.Version(self.version).major
-        self.cpp_info.names["cmake_find_package"] = "ignition-cmake{}".format(self.version_major)
-        self.cpp_info.names["cmake_find_package_multi"] = "ignition-cmake{}".format(self.version_major)
+```suggestion```suggestion
+        self.cpp_info.names["cmake_find_package"] = "ignition-cmake{}".format(version_major)
+        self.cpp_info.names["cmake_find_package_multi"] = "ignition-cmake{}".format(version_major)
+        self.cpp_info.builddirs = ["lib", "cmake", "ignition-cmake{}".format(self._version_major), "cmake{}".format(version_major)]
