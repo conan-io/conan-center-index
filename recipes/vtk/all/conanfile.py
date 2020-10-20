@@ -1,13 +1,11 @@
 import os
 import re
-import shutil
 
 from fnmatch import fnmatch
 from conans import ConanFile, CMake, tools
 
 class VTKConan(ConanFile):
     name = "vtk"
-    version = "9.0.1"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://vtk.org/"
     license = "BSD license"
@@ -120,13 +118,13 @@ class VTKConan(ConanFile):
         cmake = self._configure_cmake()
         cmake.install()
 
-        # "$\package\lib\vtk" contains "hierarchy\conanvtk\" and a lot of *.txt files in it.
-        shutil.rmtree(os.path.join(self.package_folder, 'lib', 'vtk')) #
-        # "$\package\lib\cmake" contains a lot of *.cmake files. conan-center HOOK disallow *.cmake files in package.
-        shutil.rmtree(os.path.join(self.package_folder, 'lib', 'cmake'))
-        # Licences are created in "$\package\share\licenses\conanvtk\" while their must be in "$\package\licenses\"
+        # "$\package\lib\vtk" contains "hierarchy\conanvtk\" and a lot of *.txt files in it. I believe they are not needed. Remove them.
+        tools.rmdir(os.path.join(self.package_folder, 'lib', 'vtk'))
+        # "$\package\lib\cmake" contains a lot of *.cmake files. conan-center HOOK disallow *.cmake files in package. Remove them.
+        tools.rmdir(os.path.join(self.package_folder, 'lib', 'cmake'))
+        # Licenses are created in "$\package\share\licenses\conanvtk\" while their must be in "$\package\licenses\". Move them from former to latter.
         os.rename(os.path.join(self.package_folder, 'share', 'licenses', 'conanvtk'), os.path.join(self.package_folder, 'licenses'))
-        shutil.rmtree(os.path.join(self.package_folder, 'share'))
+        tools.rmdir(os.path.join(self.package_folder, 'share'))
 
     # GCC static linking require providing libraries in appropriate order.
     # Below "order" is not necessary is correct (couldn't find the correct one), but it is used as good starting point.
