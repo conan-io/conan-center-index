@@ -6,7 +6,7 @@ from fnmatch import fnmatch
 from conans import ConanFile, CMake, tools
 
 class VTKConan(ConanFile):
-    name = "vtk" # DO NOT SUBMIT!! Should it stay lowercase or be uppercase?
+    name = "vtk"
     version = "9.0.1"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://vtk.org/"
@@ -22,7 +22,7 @@ class VTKConan(ConanFile):
                 "ioexport": [True, False], "mpi_minimal": [True, False]}
     default_options = {"shared": False, "qt": False, "mpi": False, "fPIC": False,
                 "minimal": False, "ioxml": False, "ioexport": False, "mpi_minimal": False}
-    topics = ("conan", "VTK") # DO NOT SUBMIT!!!  Need suplementation like "3D graphics" and more ("Para View"?)
+    topics = ("conan", "VTK") # DO NOT SUBMIT!!!  Need supplementation like "3D graphics" and more ("Para View"?)
     short_paths = True
 
     version_split = version.split('.')
@@ -203,6 +203,8 @@ class VTKConan(ConanFile):
         return libs_ordered
 
     def package_info(self):
+        self.cpp_info.names["cmake_find_package"] = "VTK"
+        self.cpp_info.names["cmake_find_package_multi"] = "VTK"
         libs = tools.collect_libs(self)
         self.cpp_info.libs = self._sort_libs(libs)
 

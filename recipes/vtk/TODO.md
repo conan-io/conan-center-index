@@ -2,11 +2,11 @@
 
 TODO:
 =============
-1. Upper case VTK package name
+1. DONE: Upper case VTK package name
 2. DONE: Debug "_d" the same as VTK default
 3. DONE: Move libraries sorting to separate method
 4. DONE: Enable libraries sorting only for gcc
-5. Implement "cmake_find_package_multi"
+5. DONE: Implement "cmake_find_package_multi"
 6. Add 2 more defines when building with Qt
 7. What default_options should be? (aligned with VTK or conan or fastest build etc?)
 8. DONE: Do/Why we need "FindVTK.cmake" file? We do not need it
