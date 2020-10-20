@@ -14,7 +14,6 @@ class VTKConan(ConanFile):
     description = "Visualization Toolkit by Kitware"
     generators = "cmake"
     settings = "os", "arch", "compiler", "build_type"
-    revision_mode = "scm"
     exports_sources = ["CMakeLists.txt", "patches/**"]
     source_subfolder = "source_subfolder"
     options = {"shared": [True, False], "qt": [True, False], "mpi": [True, False],

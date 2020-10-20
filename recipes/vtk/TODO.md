@@ -49,6 +49,9 @@ https://github.com/conan-io/conan-center-index/blob/master/docs/how_to_add_packa
 
 conan config install https://github.com/conan-io/hooks.git -sf hooks -tf hooks
 conan config set hooks.conan-center
+$ conan config set hooks.my_custom_hook/hook  # Activates 'my_custom_hook'
+$ conan config rm hooks.my_custom_hook/hook  # Deactivates 'my_custom_hook'
+
 
 conan create . vtk/9.0.1@
 --- is equivalent to --vv--
