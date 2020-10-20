@@ -10,12 +10,12 @@ class VTKConan(ConanFile):
     version = "9.0.1"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://vtk.org/"
-    license = "MIT"
+    license = "BSD license"
     description = "Visualization Toolkit by Kitware"
     generators = "cmake"
     settings = "os", "arch", "compiler", "build_type"
     revision_mode = "scm"
-    exports = ["CMakeLists.txt", "patches/**"]
+    exports_sources = ["CMakeLists.txt", "patches/**"]
     source_subfolder = "source_subfolder"
     options = {"shared": [True, False], "qt": [True, False], "mpi": [True, False],
                 "fPIC": [True, False], "minimal": [True, False], "ioxml": [True, False],

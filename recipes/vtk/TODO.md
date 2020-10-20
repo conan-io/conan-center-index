@@ -11,7 +11,7 @@ TODO:
 7. What default_options should be? (aligned with VTK or conan or fastest build etc?)
 8. DONE: Do/Why we need "FindVTK.cmake" file? We do not need it
 9. DONE: Verify if there should be "vtk-9.0" or "vtk-9.0.1" in "FindVTK.cmake" file
-10. Which is correct?
+10. DONE: Which is correct?
         exports = ["CMakeLists.txt", "patches/**"]
     or
         exports_sources = ["CMakeLists.txt", "patches/**"]
@@ -19,12 +19,14 @@ TODO:
         self.run("DYLD_LIBRARY_PATH=%s %s" % (os.environ.get('DYLD_LIBRARY_PATH', ''), bin_path), run_environment=True)
         self.run("LD_LIBRARY_PATH=%s %s" % (os.environ.get('LD_LIBRARY_PATH', ''), bin_path), run_environment=True)
 12. A lot of *.h files are in double and tripple nested subfolders. Should it be like this?
-        Using like "#include <afsf/sfdsf/sdfdsfds/sfds/*.h>" wil be highly inconvienient.
+        Using like "#include <afsf/sfdsf/sdfdsfds/sfds/*.h>" wil be highly inconvinient.
         If they are public headers maybe they should be added to self.cpp_info.includedirs?
 13. DONE: Licenses are in "c:\.conan\08a57b\1\share\licenses\conanvtk\" while musbe be in "c:\.conan\08a57b\1\licenses\"
 14. DONE: Verify Win Release
 15. DONE: Verify Win Debug
-16. Shouldn't "exports = ["CMakeLists.txt", "patches/**"]" contain also other files?
+16. DONE: Shouldn't "exports = ["CMakeLists.txt", "patches/**"]" contain also other files?
+17. In recipe there is "self.requires("qt/5.15.1@bincrafters/stable")".
+        Shouldn't be range there? (e.g. "self.requires("qt/5.15.*@bincrafters/stable")")
 
 
 
@@ -38,7 +40,7 @@ NOTES:
     - "c:\.conan\08a57b\1\lib\vtk\"    - hierarchy\conanvtk\ a lot of *.txt files. I belive they are not needed
     - "c:\.conan\08a57b\1\lib\cmake\"  -  a lot of *.cmake files - HOOK report errors
 5. Progress:
-    - Win local Release and Dubug Susscessful including test_package and no erros from conan-center HOOKs
+    - Win local Release and Debug Successful including test_package and no errors from conan-center HOOKs
 
 
 USEFUL LINKS AND COMMANDS:
