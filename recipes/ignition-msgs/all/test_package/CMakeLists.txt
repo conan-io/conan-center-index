@@ -4,7 +4,7 @@ project(test_package)
 include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
 conan_basic_setup()
 
-set(IGN_MSGS_MAJOR_VER "" CACHE STRING "Version of igition-math")
+set(IGN_MSGS_MAJOR_VER "" CACHE STRING "Version of ignition-msgs")
 
 if(NOT IGN_MATH_MAJOR_VER)
     message(FATAL_ERROR "IGN_MSGS_MAJOR_VER not set")
