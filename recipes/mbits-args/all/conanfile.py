@@ -40,9 +40,7 @@ class MBitsArgsConan(ConanFile):
         if self.options.shared:
             del self.options.fPIC
 
-            compiler = str(self.settings.compiler)
-            runtime = self.settings.compiler.get_safe("runtime")
-            if compiler == "Visual Studio" and runtime and str(runtime)[:2] == "MT":
+            if self.settings.compiler == "Visual Studio" and "MT" in str(self.settings.compiler.runtime):
                 raise ConanInvalidConfiguration(
                     "mbits-args: combining shared library with private C++ "
                     "library (MT/MTd) is not supported.")
@@ -93,4 +91,10 @@ class MBitsArgsConan(ConanFile):
                   "licenses", keep_path=False, src=self._source_subfolder)
 
     def package_info(self):
-        self.cpp_info.libs = ["args"]
+        self.cpp_info.filenames["cmake_find_package"] = "args"
+        self.cpp_info.filenames["cmake_find_package_multi"] = "args"
+        self.cpp_info.names["cmake_find_package"] = "mbits"
+        self.cpp_info.names["cmake_find_package_multi"] = "mbits"
+        self.cpp_info.components["libargs"].names["cmake_find_package"] = "args"
+        self.cpp_info.components["libargs"].names["cmake_find_package_multi"] = "args"
+        self.cpp_info.components["libargs"].libs = tools.collect_libs(self)
