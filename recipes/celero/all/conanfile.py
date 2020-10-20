@@ -3,6 +3,8 @@ import os
 from conans import ConanFile, CMake, tools
 from conans.errors import ConanInvalidConfiguration
 
+required_conan_version = ">=1.28.0"
+
 class CeleroConan(ConanFile):
     name = "celero"
     description = "C++ Benchmarking Library"
@@ -84,6 +86,8 @@ class CeleroConan(ConanFile):
 
     def package_info(self):
         # FIXME: official CMake target is exported without namespace
+        self.cpp_info.filenames["cmake_find_package"] = "Celero"
+        self.cpp_info.filenames["cmake_find_package_multi"] = "Celero"
         self.cpp_info.names["cmake_find_package"] = "celero"
         self.cpp_info.names["cmake_find_package_multi"] = "celero"
         self.cpp_info.libs = tools.collect_libs(self)
