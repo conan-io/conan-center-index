@@ -1,0 +1,11 @@
+cmake_minimum_required(VERSION 3.8)
+project(test_package)
+
+include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
+conan_basic_setup()
+
+add_executable(${PROJECT_NAME} test_package.cpp)
+conan_target_link_libraries(${PROJECT_NAME})
+
+set_property(TARGET ${PROJECT_NAME} PROPERTY CXX_STANDARD 17)
+set_property(TARGET ${PROJECT_NAME} PROPERTY CXX_STANDARD_REQUIRED ON)
