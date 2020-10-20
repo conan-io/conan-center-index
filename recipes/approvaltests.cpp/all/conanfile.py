@@ -69,13 +69,16 @@ class ApprovalTestsCppConan(ConanFile):
     def _boost_test_supported(self):
         return Version(self.version) >= "8.6.0"
 
+    def _std_puttime_required(self):
+        return Version(self.version) >= "10.2.0"
+
     def _validate_compiler_settings(self):
         compiler = str(self.settings.compiler)
         version = tools.Version(self.settings.compiler.version)
 
-        self._check_compiler_version_not_less_than(compiler, version, "gcc", "5")
+        if self._std_puttime_required():
+            self._check_compiler_version_not_less_than(compiler, version, "gcc", "5")
 
-    @staticmethod
-    def _check_compiler_version_not_less_than(my_compiler, my_version, compiler, compiler_min_version):
+    def _check_compiler_version_not_less_than(self, my_compiler, my_version, compiler, compiler_min_version):
         if my_compiler == compiler and my_version < compiler_min_version:
-            raise ConanInvalidConfiguration(f"ApprovalTests.cpp does not support {compiler} < {compiler_min_version}")
+            raise ConanInvalidConfiguration(f"Version {self.version} of ApprovalTests.cpp does not support {compiler} < {compiler_min_version}")
