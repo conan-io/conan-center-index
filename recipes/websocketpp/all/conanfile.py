@@ -1,5 +1,5 @@
 import os
-from conans import ConanFile, tools, CMake
+from conans import ConanFile, tools
 
 
 class WebsocketPPConan(ConanFile):
@@ -10,8 +10,7 @@ class WebsocketPPConan(ConanFile):
     homepage = "https://github.com/zaphoyd/websocketpp"
     license = "BSD-3-Clause"
     settings = "os", "arch", "compiler", "build_type"
-    exports_sources = ["CMakeLists.txt", "patches/*"]
-    generators = "cmake"
+    exports_sources = ["patches/*"]
     options = {"asio": ["boost", "standalone"]}
     default_options = {"asio": "boost"}
     
