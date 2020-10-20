@@ -92,7 +92,7 @@ class LibX264Conan(ConanFile):
             build_canonical_name = None
             host_canonical_name = None
             if self.settings.compiler == "Visual Studio":
-                # The somewhat older configure script of m4 does not understand the canonical names of Visual Studio
+                # autotools does not know about the msvc canonical name(s)
                 build_canonical_name = False
                 host_canonical_name = False
             self._autotools.configure(args=args, vars=self._override_env, configure_dir=self._source_subfolder, build=build_canonical_name, host=host_canonical_name)
