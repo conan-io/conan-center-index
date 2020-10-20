@@ -73,12 +73,9 @@ class ApprovalTestsCppConan(ConanFile):
         return Version(self.version) >= "10.2.0"
 
     def _validate_compiler_settings(self):
-        compiler = str(self.settings.compiler)
-        version = tools.Version(self.settings.compiler.version)
-
         if self._std_puttime_required():
-            self._check_compiler_version_not_less_than(compiler, version, "gcc", "5")
+            self._require_at_least_compiler_version("gcc", 5)
 
-    def _check_compiler_version_not_less_than(self, my_compiler, my_version, compiler, compiler_min_version):
-        if my_compiler == compiler and my_version < compiler_min_version:
-            raise ConanInvalidConfiguration(f"Version {self.version} of ApprovalTests.cpp does not support {compiler} < {compiler_min_version}")
+    def _require_at_least_compiler_version(self, compiler, compiler_version):
+        if self.settings.compiler == compiler and tools.Version(self.settings.compiler.version) < compiler_version:
+            raise ConanInvalidConfiguration("{}/{} with compiler {} requires at least compiler version {}".format(self.name, self.version, compiler, compiler_version))
