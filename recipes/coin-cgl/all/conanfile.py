@@ -9,7 +9,7 @@ class CoinCglConan(ConanFile):
     description = "COIN-OR Cut Generator Library"
     topics = ("conan", "clp", "simplex", "solver", "linear", "programming")
     url = "https://github.com/conan-io/conan-center-index"
-    homepage = "https://github.com/coin-or/Clp"
+    homepage = "https://github.com/coin-or/Cgl"
     license = ("EPL-2.0",)
     settings = "os", "arch", "build_type", "compiler"
     options = {
