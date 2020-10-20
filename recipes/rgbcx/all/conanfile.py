@@ -20,12 +20,12 @@ class RgbcxConan(ConanFile):
         extracted_dir = glob.glob('bc7enc-*/')[0]
         os.rename(extracted_dir, self._source_subfolder)
 
-    def _patch_sources(self):
+    def build(self):
         tools.replace_in_file(os.path.join(self._source_subfolder, "rgbcx.h"),
-            "#include <stdlib.h>", "#include <stdlib.h>\n#include <string.h>")
+                              "#include <stdlib.h>",
+                              "#include <stdlib.h>\n#include <string.h>")
 
     def package(self):
-        self._patch_sources()
         self.copy("rgbcx.h", dst="include", src=self._source_subfolder)
         self.copy("rgbcx_table4.h", dst="include", src=self._source_subfolder)
         self.copy("LICENSE", dst="licenses", src=self._source_subfolder)
