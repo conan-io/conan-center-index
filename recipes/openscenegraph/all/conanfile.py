@@ -123,13 +123,13 @@ class ConanFile(ConanFile):
         # if self.options.with_collada:
         #     self.requires("libxml2/2.9.10")
         if self.options.with_curl:
-            self.requires("libcurl/7.71.1")
+            self.requires("libcurl/7.73.0")
         if self.options.get_safe("with_dcmtk"):
             self.requires("dcmtk/3.6.5")
         if self.options.with_freetype:
             self.requires("freetype/2.10.2")
         if self.options.with_gdal:
-            self.requires("gdal/3.1.0")
+            self.requires("gdal/3.1.2")
         if self.options.get_safe("with_gif"):
             self.requires("giflib/5.2.1")
         # if self.options.with_gstreamer:
@@ -137,11 +137,11 @@ class ConanFile(ConanFile):
         if self.options.with_gta:
             self.requires("libgta/1.2.1")
         if self.options.with_jasper:
-            self.requires("jasper/2.0.16")
+            self.requires("jasper/2.0.21")
         if self.options.get_safe("with_jpeg"):
             self.requires("libjpeg/9d")
         if self.options.get_safe("with_openexr"):
-            self.requires("openexr/2.5.2")
+            self.requires("openexr/2.5.3")
         if self.options.get_safe("with_png"):
             self.requires("libpng/1.6.37")
         if self.options.with_tiff:
