@@ -2,7 +2,6 @@ import glob
 import os
 
 from conans import CMake, ConanFile, tools
-from conans.errors import ConanInvalidConfiguration
 
 
 class IgnitionCmakeConan(ConanFile):
@@ -53,4 +52,7 @@ class IgnitionCmakeConan(ConanFile):
         version_major = tools.Version(self.version).major
         self.cpp_info.names["cmake_find_package"] = "ignition-cmake{}".format(version_major)
         self.cpp_info.names["cmake_find_package_multi"] = "ignition-cmake{}".format(version_major)
-        self.cpp_info.builddirs = ["lib", "cmake", "ignition-cmake{}".format(version_major), "cmake{}".format(version_major)]
+        self.cpp_info.builddirs = [
+            os.path.join("lib", "cmake", "ignition-cmake{}".format(version_major)),
+            os.path.join("lib", "cmake", "ignition-cmake{}".format(version_major), "cmake{}".format(version_major)),
+        ]
