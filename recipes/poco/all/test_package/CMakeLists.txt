@@ -1,21 +1,10 @@
-cmake_minimum_required(VERSION 3.0)
+cmake_minimum_required(VERSION 3.1)
 project(MyHello)
-
-macro(use_cxx11)
-  if(CMAKE_VERSION VERSION_LESS "3.1")
-    if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
-      set (CMAKE_CXX_FLAGS "--std=gnu++11 ${CMAKE_CXX_FLAGS}")
-    endif()
-  else()
-    set(CMAKE_CXX_STANDARD 11)
-  endif()
-endmacro()
-
-use_cxx11()
-
 
 include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
 conan_basic_setup()
+
+set(CMAKE_CXX_STANDARD 11)
 
 add_executable(core test_core.cpp)
 target_link_libraries(core ${CONAN_LIBS})
@@ -53,7 +42,6 @@ endif()
 
 option(TEST_SQLITE "Test Sqlite")
 if(TEST_SQLITE)
-    cmake_minimum_required(VERSION 3.13)
     add_executable(sqlite test_sqlite.cpp)
     target_link_libraries(sqlite ${CONAN_LIBS})
 endif()

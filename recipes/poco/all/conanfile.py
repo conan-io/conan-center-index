@@ -133,8 +133,8 @@ class PocoConan(ConanFile):
         if self.options.enable_apacheconnector:
             self.requires("apr/1.7.0")
             self.requires("apr-util/1.6.1")
+            # FIXME: missing apache2 recipe
             raise ConanInvalidConfiguration("apache2 is not (yet) available on CCI")
-            self.requires("apache2/x.y.z")
         if self.options.enable_netssl or \
                 self.options.enable_crypto or \
                 self.options.get_safe("enable_jwt", False):
