@@ -103,6 +103,9 @@ class MpirConan(ConanFile):
             args.append("--disable-silent-rules")
             args.append("--enable-cxx" if self.options.get_safe("enable_cxx") else "--disable-cxx")
             args.append("--enable-gmpcompat" if self.options.enable_gmpcompat else "--disable-gmpcompat")
+
+            # compiler checks are written for C89 but compilers that default to C99 treat implicit functions as error
+            self._autotools.flags.append("-Wno-implicit-function-declaration")            
             self._autotools.configure(args=args)
         return self._autotools
 
