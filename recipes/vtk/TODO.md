@@ -15,9 +15,8 @@ TODO:
         exports = ["CMakeLists.txt", "patches/**"]
     or
         exports_sources = ["CMakeLists.txt", "patches/**"]
-11. Do we need to extend library paths?
+11. DONE: Do we need to extend library paths?
         self.run("DYLD_LIBRARY_PATH=%s %s" % (os.environ.get('DYLD_LIBRARY_PATH', ''), bin_path), run_environment=True)
-        self.run("LD_LIBRARY_PATH=%s %s" % (os.environ.get('LD_LIBRARY_PATH', ''), bin_path), run_environment=True)
 12. A lot of *.h files are in double and tripple nested subfolders. Should it be like this?
         Using like "#include <afsf/sfdsf/sdfdsfds/sfds/*.h>" wil be highly inconvinient.
         If they are public headers maybe they should be added to self.cpp_info.includedirs?

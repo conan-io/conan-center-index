@@ -113,65 +113,12 @@ class VTKConan(ConanFile):
             tools.patch(**patch)
 
         cmake = self._configure_cmake()
-
-        # DO NOT SUBMIT!!!  Do we still need this "if" in new conan?
-        if self.settings.os == 'Macos':
-            # run_environment does not work here because it appends path just from
-            # requirements, not from this package itself
-            # https://docs.conan.io/en/latest/reference/build_helpers/run_environment.html#runenvironment
-            lib_path = os.path.join(self.build_folder, 'lib')
-            self.run('DYLD_LIBRARY_PATH={0} cmake --build build {1} -j'.format(lib_path, cmake.build_config))
-        else:
-            cmake.build()
-
-    # From https://git.ircad.fr/conan/conan-vtk/blob/stable/8.2.0-r1/conanfile.py
-    def cmake_fix_path(self, file_path, package_name):
-        try:
-            tools.replace_in_file(
-                file_path,
-                self.deps_cpp_info[package_name].rootpath.replace('\\', '/'),
-                "${CONAN_" + package_name.upper() + "_ROOT}",
-                strict=False
-            )
-        except:
-            self.output.info("Ignoring {0}...".format(package_name))
-
-    def cmake_fix_macos_sdk_path(self, file_path):
-        # Read in the file
-        with open(file_path, 'r') as file:
-            file_data = file.read()
-
-        if file_data:
-            # Replace the target string
-            file_data = re.sub(
-                # Match sdk path
-                r';/Applications/Xcode\.app/Contents/Developer/Platforms/MacOSX\.platform/Developer/SDKs/MacOSX\d\d\.\d\d\.sdk/usr/include',
-                '',
-                file_data,
-                re.M
-            )
-
-            # Write the file out again
-            with open(file_path, 'w') as file:
-                file.write(file_data)
+        cmake.build()
 
     def package(self):
         cmake = self._configure_cmake()
         cmake.install()
-        # conan-center HOOK fails when package contains *.cmake files
-        # for path, subdirs, names in os.walk(os.path.join(self.package_folder, 'lib', 'cmake')):
-        #     for name in names:
-        #         if fnmatch(name, '*.cmake'):
-        #             cmake_file = os.path.join(path, name)
 
-        #             # if self.options.external_tiff:
-        #                 # self.cmake_fix_path(cmake_file, "libtiff")
-        #             # if self.options.external_zlib:
-        #                 # self.cmake_fix_path(cmake_file, "zlib")
-
-        #             if tools.os_info.is_macos:
-        #                 self.cmake_fix_macos_sdk_path(cmake_file)
-        
         # "$\package\lib\vtk" contains "hierarchy\conanvtk\" and a lot of *.txt files in it.
         shutil.rmtree(os.path.join(self.package_folder, 'lib', 'vtk')) #
         # "$\package\lib\cmake" contains a lot of *.cmake files. conan-center HOOK disallow *.cmake files in package.
@@ -180,11 +127,8 @@ class VTKConan(ConanFile):
         os.rename(os.path.join(self.package_folder, 'share', 'licenses', 'conanvtk'), os.path.join(self.package_folder, 'licenses'))
         shutil.rmtree(os.path.join(self.package_folder, 'share'))
 
-
-    # For static linking in GCC libraries must be provided in appropriate order.
-    # I couldn't find what is correct order of VTK libraries.
-    # ${CONAN_LIBS} in VTK 7.1 has following order, which not necessary is correct, but it was used as starting point
-    # ${CONAN_LIBS} = ['vtkCommonColor', 'vtkCommonCore', 'vtksys', 'vtkCommonDataModel', 'vtkCommonMath', 'vtkCommonMisc', 'vtkCommonSystem', 'vtkCommonTransforms', 'vtkCommonComputationalGeometry', 'vtkCommonExecutionModel', 'vtkDICOMParser', 'vtkFiltersCore', 'vtkFiltersExtraction', 'vtkFiltersGeneral', 'vtkFiltersStatistics', 'vtkImagingFourier', 'vtkImagingCore', 'vtkalglib', 'vtkFiltersGeometry', 'vtkFiltersHybrid', 'vtkImagingSources', 'vtkRenderingCore', 'vtkFiltersSources', 'vtkFiltersModeling', 'vtkIOCore', 'vtkzlib', 'vtkIOExport', 'vtkIOImage', 'vtkmetaio', 'vtkjpeg', 'vtkpng', 'vtktiff', 'vtkRenderingGL2PSOpenGL2', 'vtkRenderingOpenGL2', 'vtkglew', 'vtkgl2ps', 'vtkIOGeometry', 'vtkIOLegacy', 'vtkIOXML', 'vtkIOXMLParser', 'vtkexpat', 'vtkImagingColor', 'vtkImagingGeneral', 'vtkImagingHybrid', 'vtkImagingMath', 'vtkInteractionStyle', 'vtkInteractionWidgets', 'vtkRenderingAnnotation', 'vtkRenderingFreeType', 'vtkfreetype', 'vtkRenderingVolume', 'vtkRenderingContext2D', 'vtkRenderingContextOpenGL2', 'vtkRenderingVolumeOpenGL2', 'vtkViewsContext2D', 'vtkViewsCore']
+    # GCC static linking require providing libraries in appropriate order.
+    # Below "order" is not necessary is correct (couldn't find the correct one), but it is used as good starting point.
     def _sort_libs(self, libs):
         if self.settings.compiler != "gcc":
             return libs
