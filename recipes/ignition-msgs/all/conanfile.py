@@ -36,18 +36,6 @@ class IgnitionMsgsConan(ConanFile):
     def _source_subfolder(self):
         return "source_subfolder"
 
-    @property
-    def _cmake_source_subfolder(self):
-        return "cmake_source_subfolder"
-
-    @property
-    def _cmake_build_subfolder(self):
-        return "cmake_build_subfolder"
-
-    @property
-    def _cmake_prefix_subfolder(self):
-        return "cmake_prefix_subfolder"
-
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
         version_major = self.version.split(".")[0]
