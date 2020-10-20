@@ -1,0 +1,8 @@
+sources:
+  "0.2.2":
+    url: "https://github.com/plasma-umass/coz/archive/0.2.2.tar.gz"
+    sha256: "5e671c5b7e2920e295d2da793e5eb4d60b36889fd86c9dc40cacfe0d3ec24d0f"
+patches:
+  "0.2.2":
+    - patch_file: "patches/gettid.patch"
+      base_path: "source_subfolder"
