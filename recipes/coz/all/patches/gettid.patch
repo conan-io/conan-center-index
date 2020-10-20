@@ -1,0 +1,26 @@
+commit 040144656146014d1ae356f73af96fefda1a3090
+Author: pmcgleenon <pmcgleenon@users.noreply.github.com>
+Date:   Fri Oct 9 12:42:55 2020 +0100
+
+    Fixed issue with gettid() not available with glibc < 2.30.
+    
+    In that case use the syscall interface directly
+    
+    https://stackoverflow.com/questions/30680550/c-gettid-was-not-declared-in-this-scope
+
+diff --git a/libcoz/perf.h b/libcoz/perf.h
+index 88f26cf..4ad60f8 100644
+--- a/libcoz/perf.h
++++ b/libcoz/perf.h
+@@ -18,6 +18,11 @@
+ #include "ccutil/log.h"
+ #include "ccutil/wrapped_array.h"
+ 
++#if __GLIBC__ == 2 && __GLIBC_MINOR__ < 30
++#include <sys/syscall.h>
++#define gettid() syscall(SYS_gettid)
++#endif
++
+ // Workaround for missing hw_breakpoint.h include file:
+ //   This include file just defines constants used to configure watchpoint registers.
+ //   This will be constant across x86 systems.
