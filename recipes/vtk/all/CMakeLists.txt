@@ -1,7 +1,6 @@
 cmake_minimum_required(VERSION 2.8)
 project(conanvtk)
 
-message(STATUS "Conan CMake Wrapper")
 include(conanbuildinfo.cmake)
 conan_basic_setup()
 
