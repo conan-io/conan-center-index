@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 2.8)
-project(conanvtk) # DO NOT SUBMIT!!! What is goal of this file? Is it correct name for project which it defines?
+project(conanvtk)
 
 message(STATUS "Conan CMake Wrapper")
 include(conanbuildinfo.cmake)

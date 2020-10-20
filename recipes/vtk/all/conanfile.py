@@ -21,7 +21,8 @@ class VTKConan(ConanFile):
                 "ioexport": [True, False], "mpi_minimal": [True, False]}
     default_options = {"shared": False, "qt": False, "mpi": False, "fPIC": False,
                 "minimal": False, "ioxml": False, "ioexport": False, "mpi_minimal": False}
-    topics = ("conan", "VTK") # DO NOT SUBMIT!!!  Need supplementation like "3D graphics" and more ("Para View"?)
+    topics = ("conan", "VTK", "3D rendering", "2D plotting", "3D interaction", "3D manipulation", 
+                "graphics", "image processing", "scientific visualization", "geometry modeling")
     short_paths = True
 
     version_split = version.split('.')
@@ -33,7 +34,7 @@ class VTKConan(ConanFile):
 
     def requirements(self):
         if self.options.qt:
-            self.requires("qt/5.15.1@bincrafters/stable")
+            self.requires("qt/[>=5.15.0]@bincrafters/stable")
             self.options["qt"].shared = True
             if tools.os_info.is_linux:
                 self.options["qt"].qtx11extras = True
@@ -166,7 +167,8 @@ class VTKConan(ConanFile):
                 self.cpp_info.frameworks.extend(["CoreFoundation"]) # 'libvtkRenderingOpenGL2-9.0.a' require '_CFRelease', '_CFRetain', '_objc_msgSend' and much more which are in 'CoreFoundation' library
                 self.cpp_info.frameworks.extend(["Cocoa"])          # 'libvtkRenderingOpenGL2-9.0.a' require '_CGWarpMouseCursorPosition' and more, 'libvtkRenderingUI-9.0.a' require '_OBJC_CLASS_$_NSApplication' and more, which are in 'Cocoa' library
 
-        # DO NOT SUBMIT!!! Why "vtknetcdf" and "vtknetcdfcpp" are treated exeptionally from all other modules?
+        # Why "vtknetcdf" and "vtknetcdfcpp" are treated exceptionally from all other modules?
+        # There are a lot of other *.h in subfolders, should they be directly exposed too?
         self.cpp_info.includedirs = [
             "include/vtk-%s" % self.short_version,
             "include/vtk-%s/vtknetcdf/include" % self.short_version,

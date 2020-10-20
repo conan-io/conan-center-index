@@ -11,6 +11,7 @@ class TestVTKConan(ConanFile):
         cmake.build()
 
     def test(self):
-        bin_path = os.path.join("bin", "test_vtk_package")  # Replace "bin" by "Debug" on Win or "." (dot) on Mac for "cmake_find_package_multi"
-        # self.run("LD_LIBRARY_PATH=%s %s" % (os.environ.get('LD_LIBRARY_PATH', ''), bin_path), run_environment=True) for Lnx DO NOT SUBMIT!!! Remove this line when test pass on Lnx
+        # Replace "bin" by "Debug" on Win or by "." (dot) on Mac for "cmake_find_package_multi"
+        bin_path = os.path.join("bin", "test_vtk_package")
+        # Lnx: self.run("LD_LIBRARY_PATH=%s %s" % (os.environ.get('LD_LIBRARY_PATH', ''), bin_path), run_environment=True)
         self.run(bin_path, run_environment=True)
