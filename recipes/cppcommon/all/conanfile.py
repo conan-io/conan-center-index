@@ -82,9 +82,6 @@ class CppCommon(ConanFile):
     def package(self):
         cmake = self._configure_cmake()
         cmake.install()
-        include = os.path.join(self._source_subfolder, "include")
-        self.copy("*.h", src=include, dst="include", keep_path=True)
-        self.copy("*.inl", src=include, dst="include", keep_path=True)
         self.copy("LICENSE", dst="licenses", src=self._source_subfolder)
 
     def package_info(self):

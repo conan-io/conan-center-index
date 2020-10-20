@@ -17,6 +17,12 @@ install(TARGETS cppcommon
         LIBRARY DESTINATION lib
         ARCHIVE DESTINATION lib)
 
+install(DIRECTORY source_subfolder/include/
+        DESTINATION include
+        FILES_MATCHING
+        PATTERN "*.h"
+        PATTERN "*.inl")
+
 conan_target_link_libraries(cppcommon)
 
 target_compile_features(cppcommon PUBLIC cxx_std_17)
