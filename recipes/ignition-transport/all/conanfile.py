@@ -87,7 +87,6 @@ class IgnitionTransportConan(ConanFile):
         self._cmake = CMake(self)
         self._cmake.verbose = True
         self._cmake.definitions["BUILD_TESTING"] = False
-        # self._cmake.definitions["CMAKE_PREFIX_PATH"] = os.path.join(self.build_folder, self._cmake_prefix_subfolder)
         self._cmake.configure()
         return self._cmake
 
