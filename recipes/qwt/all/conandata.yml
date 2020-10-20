@@ -1,0 +1,4 @@
+sources:
+  "6.1.5":
+    url: "https://sourceforge.net/projects/qwt/files/qwt/6.1.5/qwt-6.1.5.zip"
+    sha256: "a1208783c2639101b11a9f359d98eaf007e95f7292f1c1df5514884dd8b4373d"
