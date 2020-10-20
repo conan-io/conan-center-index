@@ -9,8 +9,8 @@ class IgnitionMsgsConan(ConanFile):
     license = "Apache-2.0"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://ignitionrobotics.org/libs/msgs"
-    description = "Ignition Messages is a component in the ignition framework, a set of libraries designed to rapidly develop robot applications."
-    topics = ("ignition", "msgs", "robotics", "gazebo")
+    description = "Protobuf messages and functions for robot applications."
+    topics = ("ignition", "robotics", "gazebo", "protobuf", "messages")
     settings = "os", "compiler", "build_type", "arch"
     options = {"shared": [True, False], "fPIC": [True, False]}
     default_options = {"shared": False, "fPIC": True}
@@ -85,7 +85,7 @@ class IgnitionMsgsConan(ConanFile):
     def requirements(self):
         self.requires("tinyxml2/8.0.0")
         self.requires("protobuf/3.12.3")
-        self.requires("ignition-msgs/6.6.0")
+        self.requires("ignition-math/6.6.0")
 
     def build_requirements(self):
         self.build_requires("pkgconf/1.7.3")
