@@ -1,14 +1,10 @@
 sources:
   "6.6.0":
-    - url: "https://github.com/ignitionrobotics/ign-math/archive/ignition-math6_6.6.0.zip"
-      sha256: "7c29a8fa49edba1cff8e6a6194ae74942a103eefc3504b3afb63de54d7a510e9"
-    - url: "https://github.com/ignitionrobotics/ign-cmake/archive/ignition-cmake2_2.5.0.tar.gz"
-      sha256: "7b8ae0f55c066776f991250f4e84e8af57e76ccf69f9a841a8906a3805e368de"
+    url: "https://github.com/ignitionrobotics/ign-math/archive/ignition-math6_6.6.0.zip"
+    sha256: "7c29a8fa49edba1cff8e6a6194ae74942a103eefc3504b3afb63de54d7a510e9"
 patches:
   "6.6.0":
     - base_path: "source_subfolder"
       patch_file: "patches/0001-Define-time_regex-locally.patch"
     - base_path: "source_subfolder"
       patch_file: "patches/0002-cmake-fixes.patch"
-    - base_path: "cmake_source_subfolder"
-      patch_file: "patches/0003-cmake-fixes-2.patch"

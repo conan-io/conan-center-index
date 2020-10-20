@@ -1,4 +1,3 @@
-import glob
 import os
 
 from conans import CMake, ConanFile, tools
@@ -50,14 +49,12 @@ class IgnitionMathConan(ConanFile):
         return "cmake_prefix_subfolder"
 
     def source(self):
-        for sources in self.conan_data["sources"][self.version]:
-            tools.get(**sources)
+        tools.get(**self.conan_data["sources"][self.version])
         version_major = self.version.split(".")[0]
         os.rename(
             "ign-math-ignition-math{}_{}".format(version_major, self.version),
             self._source_subfolder,
         )
-        os.rename(glob.glob("ign-cmake*")[0], self._cmake_source_subfolder)
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -90,13 +87,7 @@ class IgnitionMathConan(ConanFile):
 
     def build_requirements(self):
         self.build_requires("pkgconf/1.7.3")
-
-    def _build_ign_cmake(self):
-        cmake = CMake(self)
-        cmake.definitions["CMAKE_INSTALL_PREFIX"] = os.path.join(self.build_folder, self._cmake_prefix_subfolder)
-        cmake.configure(source_folder=self._cmake_source_subfolder, build_folder=self._cmake_build_subfolder)
-        cmake.build()
-        cmake.install()
+        self.build_requires("ignition-cmake/2.5.0")
 
     def _configure_cmake(self):
         if self._cmake is not None:
@@ -104,14 +95,13 @@ class IgnitionMathConan(ConanFile):
         self._cmake = CMake(self)
         self._cmake.verbose = True
         self._cmake.definitions["BUILD_TESTING"] = False
-        self._cmake.definitions["CMAKE_PREFIX_PATH"] = os.path.join(self.build_folder, self._cmake_prefix_subfolder)
+        # self._cmake.definitions["CMAKE_PREFIX_PATH"] = os.path.join(self.build_folder, self._cmake_prefix_subfolder)
         self._cmake.configure()
         return self._cmake
 
     def build(self):
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
             tools.patch(**patch)
-        self._build_ign_cmake()
         cmake = self._configure_cmake()
         cmake.build()
 
