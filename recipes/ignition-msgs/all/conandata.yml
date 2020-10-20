@@ -1,0 +1,4 @@
+sources:
+  "6.0.0":
+    url: "https://github.com/ignitionrobotics/ign-msgs/archive/ignition-msgs6_6.0.0.zip"
+    sha256: "dc14090eb2ac68a9699a1a751977183bfb6940e5843733198be6fb7ccd6a1497"
