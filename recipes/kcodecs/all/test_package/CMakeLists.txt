@@ -8,3 +8,4 @@ find_package(Qt5 CONFIG REQUIRED Core)
 
 add_executable(example example.cpp)
 target_link_libraries(example CONAN_PKG::kcodecs Qt5::Core)
+set_property(TARGET example PROPERTY CXX_STANDARD 11)
