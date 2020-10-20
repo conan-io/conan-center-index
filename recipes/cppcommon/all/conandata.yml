@@ -6,3 +6,5 @@ patches:
   "1.0.0.0":
     - patch_file: "patches/00001-update-cmakelists.patch"
       base_path: "source_subfolder"
+    - patch_file: "patches/00002-fix-cross-platform-issues.patch"
+      base_path: "source_subfolder"
