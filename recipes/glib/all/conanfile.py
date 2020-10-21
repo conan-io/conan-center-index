@@ -109,6 +109,9 @@ class GLibConan(ConanFile):
         tools.replace_in_file(os.path.join(self._source_subfolder, "meson.build"),
                               "libintl = cc.find_library('intl', required : false)",
                               "libintl = cc.find_library('gnuintl', required : false)")
+        tools.replace_in_file(os.path.join(self._source_subfolder, "gio", "gdbus-2.0", "codegen", "gdbus-codegen.in"),
+                              "'share'",
+                              "'res'")
         if self.settings.os != "Linux":
             tools.replace_in_file(os.path.join(self._source_subfolder, 'meson.build'),
                                 "if cc.has_function('ngettext')",
@@ -135,7 +138,7 @@ class GLibConan(ConanFile):
             meson.install()
             self._fix_library_names()
         tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
-        shutil.move(os.path.join(self.package_folder, "share"), os.path.join(self.package_folder, "bin", "share"))
+        shutil.move(os.path.join(self.package_folder, "share"), os.path.join(self.package_folder, "res"))
         for pdb_file in glob.glob(os.path.join(self.package_folder, "bin", "*.pdb")):
             os.unlink(pdb_file)
 
