@@ -58,6 +58,7 @@ class PopplerDataConan(ConanFile):
         cmake.install()
         tools.rmdir(os.path.join(self._datadir, "pkgconfig"))
 
+    @property
     def _poppler_datadir(self):
         return os.path.join(self._datadir, "poppler")
 
