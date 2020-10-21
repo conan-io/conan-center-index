@@ -47,6 +47,10 @@ class CppCommon(ConanFile):
             self._cmake.configure(build_folder=self._build_subfolder)
         return self._cmake
 
+    def _patch(self):
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            tools.patch(**patch)
+
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
         os.rename("CppCommon-" + self.version,
@@ -74,8 +78,7 @@ class CppCommon(ConanFile):
             self.output.warn("cppcommon requires C++17. Your compiler is unknown. Assuming it supports C++17.")
 
     def build(self):
-        for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            tools.patch(**patch)
+        self._patch()
         cmake = self._configure_cmake()
         cmake.build()
 
