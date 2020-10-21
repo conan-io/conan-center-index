@@ -9,6 +9,7 @@ class PopplerDataConan(ConanFile):
     topics = "conan", "poppler", "pdf", "rendering"
     license = "BSD-3-Clause", "GPL-2.0-or-later", "MIT"
     url = "https://github.com/conan-io/conan-center-index"
+    settings = "os", "arch", "compiler", "build_type"  # Added to avoid hook warnings while building
     exports_sources = "CMakeLists.txt", "patches/**"
     generators = "cmake"
 
@@ -25,6 +26,9 @@ class PopplerDataConan(ConanFile):
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
         os.rename("poppler-data-{}".format(self.version), self._source_subfolder)
+
+    def package_id(self):
+        self.info.header_only()
 
     @property
     def _datadir(self):
@@ -53,9 +57,6 @@ class PopplerDataConan(ConanFile):
         cmake = self._configure_cmake()
         cmake.install()
         tools.rmdir(os.path.join(self._datadir, "pkgconfig"))
-
-    def package_id(self):
-        self.info.header_only()
 
     def _poppler_datadir(self):
         return os.path.join(self._datadir, "poppler")
