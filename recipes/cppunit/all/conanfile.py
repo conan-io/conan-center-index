@@ -94,13 +94,16 @@ class CppunitConan(ConanFile):
             autotools = self._configure_autotools()
             autotools.install()
 
+        if self.settings.compiler == "Visual Studio" and self.options.shared:
+            os.rename(os.path.join(self.package_folder, "lib", "cppunit.dll.lib"),
+                      os.path.join(self.package_folder, "lib", "cppunit.lib"))
+
         os.unlink(os.path.join(self.package_folder, "lib", "libcppunit.la"))
         tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
         tools.rmdir(os.path.join(self.package_folder, "share"))
 
     def package_info(self):
-        libsuffix = (".dll" if self.settings.os == "Windows" and self.options.shared else "") + (".lib" if self.settings.compiler == "Visual Studio" else "")
-        self.cpp_info.libs = ["cppunit" + libsuffix]
+        self.cpp_info.libs = ["cppunit"]
         if not self.options.shared:
             stdlib = tools.stdcpp_library(self)
             if stdlib:
