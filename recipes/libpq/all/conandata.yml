@@ -1,4 +1,13 @@
 sources:
+  "13.0":
+    url: "https://ftp.postgresql.org/pub/source/v13.0/postgresql-13.0.tar.gz"
+    sha256: "67b09fca40a35360aef82fee43546271e6a04c33276e0093c5fb48653b2f5afa"
+  "12.4":
+    url: "https://ftp.postgresql.org/pub/source/v12.4/postgresql-12.4.tar.gz"
+    sha256: "9749b891b9d8f984312fe510a7a3613035134cee1e634793dac5568d1e1a5852"
+  "12.3":
+    url: "https://ftp.postgresql.org/pub/source/v12.3/postgresql-12.3.tar.gz"
+    sha256: "708fd5b32a97577679d3c13824c633936f886a733fc55ab5a9240b615a105f50"
   "12.2":
     url: "https://ftp.postgresql.org/pub/source/v12.2/postgresql-12.2.tar.gz"
     sha256: "8808449444ee9b086054a6dcfbfb98029e4f8022372c2edf3de5b6d8f417c8e4"
