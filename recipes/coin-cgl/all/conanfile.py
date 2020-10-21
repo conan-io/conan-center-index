@@ -97,10 +97,6 @@ class CoinCglConan(ConanFile):
             autotools.make()
 
     def package(self):
-
-        # FIXME: missing CglLandP.hpp etc headers in include
-
-
         self.copy("LICENSE", src=self._source_subfolder, dst="licenses")
         with self._build_context():
             autotools = self._configure_autotools()
