@@ -15,7 +15,7 @@ class KArchiveConan(ConanFile):
         "with_lzma": [True, False],
         "fPIC": [True, False]
     }
-    default_options = {"shared": False, "fPIC": True, "with_bzip2": True, "with_lzma": True, "zlib:shared": True}
+    default_options = {"shared": False, "fPIC": True, "with_bzip2": True, "with_lzma": True}
     exports_sources = ["CMakeLists.txt"]
     generators = "cmake"
 
