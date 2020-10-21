@@ -35,7 +35,7 @@ class QwtConan(ConanFile):
         "svg": False
 
     }
-    generators = "qmake", "cmake"
+    generators = "qmake"
 
     @property
     def _source_subfolder(self):
