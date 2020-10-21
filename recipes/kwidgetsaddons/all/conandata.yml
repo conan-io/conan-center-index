@@ -1,0 +1,4 @@
+sources:
+  "5.75.0":
+    url: "https://download.kde.org/stable/frameworks/5.75/kwidgetsaddons-5.75.0.zip"
+    sha256: "33d691a98eeabdbc840a3e194f8041d662d7d302b37725248251e3b19680eea7"
