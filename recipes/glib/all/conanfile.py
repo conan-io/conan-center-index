@@ -26,7 +26,7 @@ class GLibConan(ConanFile):
                        "with_mount": True,
                        "with_selinux": True}
     _source_subfolder = "source_subfolder"
-    _build_subfolder = 'build_subfolder'
+    _build_subfolder = "build_subfolder"
     short_paths = True
     generators = "pkg_config"
 
@@ -89,15 +89,15 @@ class GLibConan(ConanFile):
             defs["libmount"] = "enabled" if self.options.with_mount else "disabled"
         defs["internal_pcre"] = not self.options.with_pcre
 
-        meson.configure(source_folder=self._source_subfolder, args=['--wrap-mode=nofallback'],
+        meson.configure(source_folder=self._source_subfolder, args=["--wrap-mode=nofallback"],
                         build_folder=self._build_subfolder, defs=defs)
         return meson
 
     def _patch_sources(self):
-        tools.replace_in_file(os.path.join(self._source_subfolder, 'meson.build'), \
-            'build_tests = not meson.is_cross_build() or (meson.is_cross_build() and meson.has_exe_wrapper())', \
-            'build_tests = false')
-        tools.replace_in_file(os.path.join(self._source_subfolder, 'meson.build'), \
+        tools.replace_in_file(os.path.join(self._source_subfolder, "meson.build"), \
+            "build_tests = not meson.is_cross_build() or (meson.is_cross_build() and meson.has_exe_wrapper())", \
+            "build_tests = false")
+        tools.replace_in_file(os.path.join(self._source_subfolder, "meson.build"), \
             "subdir('fuzzing')", \
             "#subdir('fuzzing')") # https://gitlab.gnome.org/GNOME/glib/-/issues/2152
         for filename in [os.path.join(self._source_subfolder, "meson.build"),
@@ -113,7 +113,7 @@ class GLibConan(ConanFile):
                               "'share'",
                               "'res'")
         if self.settings.os != "Linux":
-            tools.replace_in_file(os.path.join(self._source_subfolder, 'meson.build'),
+            tools.replace_in_file(os.path.join(self._source_subfolder, "meson.build"),
                                 "if cc.has_function('ngettext')",
                                 "if false #cc.has_function('ngettext')")
 
@@ -152,9 +152,9 @@ class GLibConan(ConanFile):
         if self.settings.os == "Macos":
             self.cpp_info.components["glib-2.0"].system_libs.append("iconv")
             self.cpp_info.components["glib-2.0"].system_libs.append("resolv")
-            self.cpp_info.components["glib-2.0"].frameworks.extend(['Foundation', 'CoreServices', 'CoreFoundation'])
-        self.cpp_info.components["glib-2.0"].includedirs.append(os.path.join('include', 'glib-2.0'))
-        self.cpp_info.components["glib-2.0"].includedirs.append(os.path.join('lib', 'glib-2.0', 'include'))
+            self.cpp_info.components["glib-2.0"].frameworks.extend(["Foundation", "CoreServices", "CoreFoundation"])
+        self.cpp_info.components["glib-2.0"].includedirs.append(os.path.join("include", "glib-2.0"))
+        self.cpp_info.components["glib-2.0"].includedirs.append(os.path.join("lib", "glib-2.0", "include"))
         if self.options.with_pcre:
             self.cpp_info.components["glib-2.0"].requires.append("pcre::pcre")
         if self.settings.os != "Linux":
