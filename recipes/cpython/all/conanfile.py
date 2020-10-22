@@ -138,7 +138,7 @@ class CPythonConan(ConanFile):
         self.requires("openssl/1.1.1h")
         if not (self.settings.compiler == "Visual Studio" and tools.Version(self.version) >= tools.Version("3.8")):
             self.requires("expat/2.2.9")
-        self.requires("mpdecimal/2.4.2")
+        self.requires("mpdecimal/2.5.0")
         self.requires("zlib/1.2.11")
         if self.settings.compiler != "Visual Studio" or tools.Version(self.version) >= "3.8":
             self.requires("libffi/3.3")
