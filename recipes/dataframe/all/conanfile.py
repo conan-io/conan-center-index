@@ -70,7 +70,8 @@ class DataFrameConan(ConanFile):
             "Visual Studio": "15",
             "gcc": "7",
             "clang": "6",
-            # "apple-clang": "9.0",
+            "apple-clang": "10.0",
+            # "apple-clang": "9.1",
         }
 
         if compiler not in minimal_version:
