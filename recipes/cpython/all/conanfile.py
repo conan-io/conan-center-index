@@ -138,7 +138,10 @@ class CPythonConan(ConanFile):
         self.requires("openssl/1.1.1h")
         if not (self.settings.compiler == "Visual Studio" and tools.Version(self.version) >= tools.Version("3.8")):
             self.requires("expat/2.2.9")
-        self.requires("mpdecimal/2.5.0")
+        if tools.Version(self.version) < "3.9":
+            self.requires("mpdecimal/2.4.2")
+        else:
+            self.requires("mpdecimal/2.5.0")
         self.requires("zlib/1.2.11")
         if self.settings.compiler != "Visual Studio" or tools.Version(self.version) >= "3.8":
             self.requires("libffi/3.3")
@@ -291,7 +294,10 @@ class CPythonConan(ConanFile):
             upgraded = True
 
     def build(self):
-        if tools.Version(self.version) >= "3.9.0":
+        if tools.Version(self.version) < "3.9.0":
+            if tools.Version(self.deps_cpp_info["mpdecimal"].version) >= "2.5.0":
+                raise ConanInvalidConfiguration("cpython versions lesser then 3.9.0 require a mpdecimal lesser then 2.5.0")
+        else:
             if tools.Version(self.deps_cpp_info["mpdecimal"].version) < "2.5.0":
                 raise ConanInvalidConfiguration("cpython 3.9.0 (and newer) requires (at least) mpdecimal 2.5.0")
 
