@@ -23,9 +23,6 @@ class VTKConan(ConanFile):
                 "graphics", "image processing", "scientific visualization", "geometry modeling")
     short_paths = True
 
-    version_split = version.split('.')
-    short_version = "{}.{}".format(version_split[0], version_split[1])
-
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
         os.rename("{}-{}".format(self.name, self.version), self.source_subfolder)
@@ -165,10 +162,12 @@ class VTKConan(ConanFile):
                 self.cpp_info.frameworks.extend(["CoreFoundation"]) # 'libvtkRenderingOpenGL2-9.0.a' require '_CFRelease', '_CFRetain', '_objc_msgSend' and much more which are in 'CoreFoundation' library
                 self.cpp_info.frameworks.extend(["Cocoa"])          # 'libvtkRenderingOpenGL2-9.0.a' require '_CGWarpMouseCursorPosition' and more, 'libvtkRenderingUI-9.0.a' require '_OBJC_CLASS_$_NSApplication' and more, which are in 'Cocoa' library
 
+        version_split = self.version.split('.')
+        short_version = "{}.{}".format(version_split[0], version_split[1])
         # Why "vtknetcdf" and "vtknetcdfcpp" are treated exceptionally from all other modules?
         # There are a lot of other *.h in subfolders, should they be directly exposed too?
         self.cpp_info.includedirs = [
-            "include/vtk-%s" % self.short_version,
-            "include/vtk-%s/vtknetcdf/include" % self.short_version,
-            "include/vtk-%s/vtknetcdfcpp" % self.short_version
+            "include/vtk-{}".format(short_version),
+            "include/vtk-{}/vtknetcdf/include".format(short_version),
+            "include/vtk-{}/vtknetcdfcpp".format(short_version)
         ]
