@@ -139,6 +139,8 @@ class PocoConan(ConanFile):
                 self.options.enable_crypto or \
                 self.options.get_safe("enable_jwt", False):
             self.requires("openssl/1.1.1h")
+        if self.options.enable_data_odbc and self.settings.os != "Windows":
+            self.requires("odbc/2.3.7")
 
     def _patch_sources(self):
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
@@ -207,5 +209,7 @@ class PocoConan(ConanFile):
             self.cpp_info.defines.append("POCO_STATIC=ON")
             if self.settings.os == "Windows":
                 self.cpp_info.system_libs.extend(["ws2_32", "iphlpapi", "crypt32"])
+                if self.options.enable_data_odbc:
+                    self.cpp_info.system_libs.extend(["odbc32", "odbccp32"])
         self.cpp_info.names["cmake_find_package"] = "Poco"
         self.cpp_info.names["cmake_find_package_multi"] = "Poco"
