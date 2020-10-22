@@ -79,6 +79,9 @@ class PopplerConan(ConanFile):
             del self.options.with_gtk
         if self.options.fontconfiguration == "win32" and self.settings.os != "Windows":
             raise ConanInvalidConfiguration("'win32' option of fontconfig is only available on Windows")
+        if self.settings.compiler == "gcc":
+            if tools.Version(self.settings.compiler.version) < 5:
+                raise ConanInvalidConfiguration("poppler requires at least gcc 5")
 
     def build_requirements(self):
         self.build_requires("pkgconf/1.7.3")
@@ -169,7 +172,7 @@ class PopplerConan(ConanFile):
         self._cmake.definitions["ENABLE_GTK_DOC"] = False
         self._cmake.definitions["ENABLE_QT5"] = self.options.with_qt and tools.Version(self.deps_user_info["qt"].version).major == 5
         self._cmake.definitions["ENABLE_QT6"] = self.options.with_qt and tools.Version(self.deps_user_info["qt"].version).major == 6
-        self._cmake.definitions["enable_openjpeg"] = "openjpeg2" if self.options.with_openjpeg else "none"
+        self._cmake.definitions["ENABLE_LIBOPENJPEG"] = "openjpeg2" if self.options.with_openjpeg else "none"
         if self.options.with_openjpeg:
             # FIXME: openjpeg's cmake_find_package should provide these variables
             self._cmake.definitions["OPENJPEG_MAJOR_VERSION"] = self.requires["openjpeg"].ref.version.split(".", 1)[0]
