@@ -153,7 +153,7 @@ class CPythonConan(ConanFile):
             # TODO: Add nis when available.
             raise ConanInvalidConfiguration("nis is not available on CCI (yet)")
         if self.options.with_sqlite3:
-            self.requires("sqlite3/3.32.3")
+            self.requires("sqlite3/3.33.0")
         if self.options.with_tkinter:
           # TODO: Add tk when available
             raise ConanInvalidConfiguration("tk is not available on CCI (yet)")
@@ -164,7 +164,7 @@ class CPythonConan(ConanFile):
                 self.requires("libdb/5.3.28")
         else:
             if self.options.with_lzma:
-                self.requires("xz_utils/5.2.4")
+                self.requires("xz_utils/5.2.5")
 
     def _configure_autotools(self):
         if self._autotools:
