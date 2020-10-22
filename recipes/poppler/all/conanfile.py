@@ -89,7 +89,7 @@ class PopplerConan(ConanFile):
     def requirements(self):
         self.requires("poppler-data/0.4.9")
         self.requires("freetype/2.10.4")
-        if self.settings.os == "Windows":
+        if self.settings.compiler == "Visual Studio":
             self.requires("libiconv/1.16")
         if self.options.fontconfiguration == "fontconfig":
             self.require("fontconfig/2.13.91")
@@ -165,11 +165,10 @@ class PopplerConan(ConanFile):
         self._cmake.definitions["WITH_Iconv"] = True
         self._cmake.definitions["ENABLE_ZLIB"] = self.options.with_zlib
         self._cmake.definitions["ENABLE_LIBOPENJPEG"] = "openjpeg2" if self.options.with_openjpeg else "none"
-        self._cmake.definitions["ENABLE_CMS"] = "lcms" if self.options.with_lcms else "none"
+        self._cmake.definitions["ENABLE_CMS"] = "lcms2" if self.options.with_lcms else "none"
         self._cmake.definitions["ENABLE_LIBCURL"] = self.options.with_libcurl
 
-
-        self._cmake.definitions["POPPLER_DATADIR"] = self.deps_user_info["poppler-data"].datadir
+        self._cmake.definitions["POPPLER_DATADIR"] = self.deps_user_info["poppler-data"].datadir.replace("\\", "/")
         self._cmake.definitions["FONT_CONFIGURATION"] = self.options.fontconfiguration
         self._cmake.definitions["BUILD_CPP_TESTS"] = False
         self._cmake.definitions["ENABLE_GTK_DOC"] = False
@@ -196,6 +195,7 @@ class PopplerConan(ConanFile):
             tools.replace_in_file(poppler_global, "__declspec(dllimport)", "")
             tools.replace_in_file(poppler_global, "__declspec(dllexport)", "")
 
+
     def build(self):
         self._patch_sources()
         cmake = self._configure_cmake()
@@ -210,6 +210,9 @@ class PopplerConan(ConanFile):
     def package_info(self):
         self.cpp_info.components["libpoppler"].libs = ["poppler"]
         self.cpp_info.components["libpoppler"].names["pkg_config"] = ["poppler"]
+        if not self.options.shared:
+            self.cpp_info.components["libpoppler"].defines = ["POPPLER_STATIC"]
+
         if self.settings.os == "Linux":
             self.cpp_info.components["libpoppler"].system_libs = ["pthread"]
         elif self.settings.os == "Windows":

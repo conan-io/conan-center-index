@@ -16,12 +16,20 @@
  if(NOT (EXISTS ${TESTDATADIR} AND EXISTS ${TESTDATADIR}/test-poppler.c))
    message(WARNING "
   No test data found in $testdatadir.
+@@ -546,1 +546,1 @@
+-add_library(poppler STATIC ${poppler_SRCS})
++add_library(poppler ${poppler_SRCS})
 @@ -832,4 +832,4 @@
          COMMAND tar -C ${CMAKE_BINARY_DIR} -rf ${CMAKE_BINARY_DIR}/${ARCHIVE_NAME}.tar ChangeLog --transform='s,,${ARCHIVE_NAME}/,' --owner root:0 --group root:0
          COMMAND tar -C ${CMAKE_BINARY_DIR} -rf ${CMAKE_BINARY_DIR}/${ARCHIVE_NAME}.tar glib/reference/html --transform='s,,${ARCHIVE_NAME}/,' --owner root:0 --group root:0
          COMMAND xz -9 ${CMAKE_BINARY_DIR}/${ARCHIVE_NAME}.tar
 -    WORKING_DIRECTORY ${CMAKE_SOURCE_DIR})
 +    WORKING_DIRECTORY ${PROJECT_SOURCE_DIR})
+--- cpp/CMakeLists.txt
++++ cpp/CMakeLists.txt
+@@ -33,1 +33,1 @@
+-target_link_libraries(poppler-cpp poppler ${ICONV_LIBRARIES})
++target_link_libraries(poppler-cpp poppler CONAN_PKG::libiconv)
 --- cpp/tests/CMakeLists.txt
 +++ cpp/tests/CMakeLists.txt
 @@ -2,7 +2,7 @@

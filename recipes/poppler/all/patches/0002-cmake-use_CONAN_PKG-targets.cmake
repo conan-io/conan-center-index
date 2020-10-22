@@ -63,3 +63,16 @@
 @@ -45,1 +45,1 @@
 -target_link_libraries(poppler-qt6 poppler Qt6::Core Qt6::Gui ${FREETYPE_LIBRARIES})
 +target_link_libraries(poppler-qt6 poppler Qt6::Core Qt6::Gui CONAN_PKG::freetype)
+--- cmake/modules/FindLCMS2.cmake
++++ cmake/modules/FindLCMS2.cmake
+@@ -19,5 +19,5 @@
+-if(NOT WIN32)
++if(1)
+    find_package(PkgConfig)
+    pkg_check_modules(PC_LCMS2 lcms2)
+    set(LCMS2_DEFINITIONS ${PC_LCMS2_CFLAGS_OTHER})
+-endif(NOT WIN32)
++endif()
+@@ -32,1 +32,1 @@
+-find_library(LCMS2_LIBRARIES NAMES lcms2 liblcms2 lcms-2 liblcms-2
++find_library(LCMS2_LIBRARIES NAMES lcms2 liblcms2 lcms-2 liblcms-2 lcms2_static

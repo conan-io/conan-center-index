@@ -14,3 +14,5 @@ patches:
       base_path: "source_subfolder"
     - patch_file: "patches/0005-fix-visual-studio-basetsd.h-libjpeg-INT32.patch"
       base_path: "source_subfolder"
+    - patch_file: "patches/0006-missing-symbol-dll-windows.patch"
+      base_path: "source_subfolder"
