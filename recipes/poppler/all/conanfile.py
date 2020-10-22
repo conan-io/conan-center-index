@@ -89,8 +89,7 @@ class PopplerConan(ConanFile):
     def requirements(self):
         self.requires("poppler-data/0.4.9")
         self.requires("freetype/2.10.4")
-        if self.settings.compiler == "Visual Studio":
-            self.requires("libiconv/1.16")
+        self.requires("libiconv/1.16")
         if self.options.fontconfiguration == "fontconfig":
             self.require("fontconfig/2.13.91")
         if self.options.with_cairo:
@@ -219,8 +218,6 @@ class PopplerConan(ConanFile):
             self.cpp_info.components["libpoppler"].system_libs = ["gdi32"]
 
         self.cpp_info.components["libpoppler"].requires = ["poppler-data::poppler-data", "freetype::freetype"]
-        if self.settings.os == "Windows":
-            self.cpp_info.components["libpoppler"].requires.append("libiconv::libiconv")
         if self.options.fontconfiguration == "fontconfig":
             self.cpp_info.components["libpoppler"].requires.append("fontconfig::fontconfig")
         if self.options.with_openjpeg:
@@ -243,7 +240,7 @@ class PopplerConan(ConanFile):
         self.cpp_info.components["libpoppler-cpp"].libs = ["poppler-cpp"]
         self.cpp_info.components["libpoppler-cpp"].includedirs.append(os.path.join("include", "poppler", "cpp"))
         self.cpp_info.components["libpoppler-cpp"].names["pkg_config"] = ["poppler-cpp"]
-        self.cpp_info.components["libpoppler-cpp"].requires = ["libpoppler"]
+        self.cpp_info.components["libpoppler-cpp"].requires = ["libpoppler", "libiconv::libiconv"]
 
         if self.options.splash:
             self.cpp_info.components["libpoppler-splash"].libs = []
