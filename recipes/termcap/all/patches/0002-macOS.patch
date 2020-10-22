@@ -1,0 +1,15 @@
+diff --git a/tparam.c b/tparam.c
+index 5a9809a..09ef456 100644
+--- a/tparam.c
++++ b/tparam.c
+@@ -40,6 +40,10 @@ char *realloc ();
+ 
+ #endif /* not emacs */
+ 
++#ifdef HAVE_UNISTD_H
++#include <unistd.h>
++#endif
++
+ #ifndef NULL
+ #define NULL (char *) 0
+ #endif

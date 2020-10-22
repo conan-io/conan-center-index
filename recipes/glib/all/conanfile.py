@@ -26,7 +26,7 @@ class GLibConan(ConanFile):
                        "with_mount": True,
                        "with_selinux": True}
     _source_subfolder = "source_subfolder"
-    _build_subfolder = 'build_subfolder'
+    _build_subfolder = "build_subfolder"
     short_paths = True
     generators = "pkg_config"
 
@@ -51,7 +51,7 @@ class GLibConan(ConanFile):
             del self.options.with_selinux
 
     def build_requirements(self):
-        self.build_requires("meson/0.55.1")
+        self.build_requires("meson/0.55.3")
         if self.settings.os == "Windows":
             self.build_requires("pkgconf/1.7.3")
 
@@ -78,12 +78,6 @@ class GLibConan(ConanFile):
         tools.get(**self.conan_data["sources"][self.version])
         extracted_dir = self.name + "-" + self.version
         os.rename(extracted_dir, self._source_subfolder)
-        tools.replace_in_file(os.path.join(self._source_subfolder, 'meson.build'), \
-            'build_tests = not meson.is_cross_build() or (meson.is_cross_build() and meson.has_exe_wrapper())', \
-            'build_tests = false')
-        tools.replace_in_file(os.path.join(self._source_subfolder, 'meson.build'), \
-            "subdir('fuzzing')", \
-            "#subdir('fuzzing')") # https://gitlab.gnome.org/GNOME/glib/-/issues/2152
 
     def _configure_meson(self):
         meson = Meson(self)
@@ -95,11 +89,17 @@ class GLibConan(ConanFile):
             defs["libmount"] = "enabled" if self.options.with_mount else "disabled"
         defs["internal_pcre"] = not self.options.with_pcre
 
-        meson.configure(source_folder=self._source_subfolder, args=['--wrap-mode=nofallback'],
+        meson.configure(source_folder=self._source_subfolder, args=["--wrap-mode=nofallback"],
                         build_folder=self._build_subfolder, defs=defs)
         return meson
 
-    def build(self):
+    def _patch_sources(self):
+        tools.replace_in_file(os.path.join(self._source_subfolder, "meson.build"), \
+            "build_tests = not meson.is_cross_build() or (meson.is_cross_build() and meson.has_exe_wrapper())", \
+            "build_tests = false")
+        tools.replace_in_file(os.path.join(self._source_subfolder, "meson.build"), \
+            "subdir('fuzzing')", \
+            "#subdir('fuzzing')") # https://gitlab.gnome.org/GNOME/glib/-/issues/2152
         for filename in [os.path.join(self._source_subfolder, "meson.build"),
                          os.path.join(self._source_subfolder, "glib", "meson.build"),
                          os.path.join(self._source_subfolder, "gobject", "meson.build"),
@@ -109,11 +109,16 @@ class GLibConan(ConanFile):
         tools.replace_in_file(os.path.join(self._source_subfolder, "meson.build"),
                               "libintl = cc.find_library('intl', required : false)",
                               "libintl = cc.find_library('gnuintl', required : false)")
+        tools.replace_in_file(os.path.join(self._source_subfolder, "gio", "gdbus-2.0", "codegen", "gdbus-codegen.in"),
+                              "'share'",
+                              "'res'")
         if self.settings.os != "Linux":
-            tools.replace_in_file(os.path.join(self._source_subfolder, 'meson.build'),
+            tools.replace_in_file(os.path.join(self._source_subfolder, "meson.build"),
                                 "if cc.has_function('ngettext')",
                                 "if false #cc.has_function('ngettext')")
 
+    def build(self):
+        self._patch_sources()
         with tools.environment_append(VisualStudioBuildEnvironment(self).vars) if self._is_msvc else tools.no_op():
             meson = self._configure_meson()
             meson.build()
@@ -133,12 +138,12 @@ class GLibConan(ConanFile):
             meson.install()
             self._fix_library_names()
         tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
-        shutil.move(os.path.join(self.package_folder, "share"), os.path.join(self.package_folder, "bin", "share"))
+        shutil.move(os.path.join(self.package_folder, "share"), os.path.join(self.package_folder, "res"))
         for pdb_file in glob.glob(os.path.join(self.package_folder, "bin", "*.pdb")):
             os.unlink(pdb_file)
 
     def package_info(self):
-        
+
         self.cpp_info.components["glib-2.0"].libs = ["glib-2.0"]
         if self.settings.os == "Linux":
             self.cpp_info.components["glib-2.0"].system_libs.append("pthread")
@@ -147,9 +152,9 @@ class GLibConan(ConanFile):
         if self.settings.os == "Macos":
             self.cpp_info.components["glib-2.0"].system_libs.append("iconv")
             self.cpp_info.components["glib-2.0"].system_libs.append("resolv")
-            self.cpp_info.components["glib-2.0"].frameworks.extend(['Foundation', 'CoreServices', 'CoreFoundation'])
-        self.cpp_info.components["glib-2.0"].includedirs.append(os.path.join('include', 'glib-2.0'))
-        self.cpp_info.components["glib-2.0"].includedirs.append(os.path.join('lib', 'glib-2.0', 'include'))
+            self.cpp_info.components["glib-2.0"].frameworks.extend(["Foundation", "CoreServices", "CoreFoundation"])
+        self.cpp_info.components["glib-2.0"].includedirs.append(os.path.join("include", "glib-2.0"))
+        self.cpp_info.components["glib-2.0"].includedirs.append(os.path.join("lib", "glib-2.0", "include"))
         if self.options.with_pcre:
             self.cpp_info.components["glib-2.0"].requires.append("pcre::pcre")
         if self.settings.os != "Linux":
@@ -162,11 +167,11 @@ class GLibConan(ConanFile):
             self.cpp_info.components["gmodule-no-export-2.0"].system_libs.append("pthread")
             self.cpp_info.components["gmodule-no-export-2.0"].system_libs.append("dl")
         self.cpp_info.components["gmodule-no-export-2.0"].requires.append("glib-2.0")
-        
+
         self.cpp_info.components["gmodule-export-2.0"].requires.extend(["gmodule-no-export-2.0", "glib-2.0"])
         if self.settings.os == "Linux":
             self.cpp_info.components["gmodule-export-2.0"].sharedlinkflags.append("-Wl,--export-dynamic")
-        
+
         self.cpp_info.components["gmodule-2.0"].requires.extend(["gmodule-no-export-2.0", "glib-2.0"])
         if self.settings.os == "Linux":
             self.cpp_info.components["gmodule-2.0"].sharedlinkflags.append("-Wl,--export-dynamic")
