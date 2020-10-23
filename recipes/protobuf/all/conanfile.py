@@ -48,7 +48,7 @@ class ProtobufConan(ConanFile):
                                                 "Visual Studio 2015 or higher.")
 
     def requirements(self):
-        if self.options.with_zlib:
+        if self.options.with_zlib and not self.options.lite:
             self.requires("zlib/1.2.11")
 
     @property
@@ -60,9 +60,9 @@ class ProtobufConan(ConanFile):
             self._cmake = CMake(self)
             self._cmake.definitions["CMAKE_INSTALL_CMAKEDIR"] = self._cmake_install_base_path.replace("\\", "/")
             self._cmake.definitions["protobuf_BUILD_TESTS"] = False
-            self._cmake.definitions["protobuf_WITH_ZLIB"] = self.options.with_zlib
+            self._cmake.definitions["protobuf_WITH_ZLIB"] = self.options.with_zlib and not self.options.lite
             if self.settings.compiler == "Visual Studio":
-                self._cmake.definitions["protobuf_MSVC_STATIC_RUNTIME"] = "MT" in self.settings.compiler.runtime
+                self._cmake.definitions["protobuf_MSVC_STATIC_RUNTIME"] = "MT" in str(self.settings.compiler.runtime)
             self._cmake.configure(build_folder=self._build_subfolder)
         return self._cmake
 
@@ -72,7 +72,7 @@ class ProtobufConan(ConanFile):
         tools.replace_in_file(
             os.path.join(self._source_subfolder, "cmake", "protobuf-config.cmake.in"),
             "@_protobuf_FIND_ZLIB@",
-            "# CONAN PATCH @_protobuf_FIND_ZLIB@"
+            "# CONAN PATCH _protobuf_FIND_ZLIB@"
         )
         tools.replace_in_file(
             os.path.join(self._source_subfolder, "cmake", "protobuf-config.cmake.in"),
@@ -114,11 +114,10 @@ class ProtobufConan(ConanFile):
                   os.path.join(self.package_folder, "lib", "cmake", "protobuf", "protobuf-generate.cmake"))
 
         if self.options.lite:
-            for f in glob.glob(os.path.join(self.package_folder, "lib", "libprotobuf.*")):
-                os.remove(f)
+            tools.remove_files_by_mask(os.path.join(self.package_folder, "lib"), "libprotobuf.*")
+            tools.remove_files_by_mask(os.path.join(self.package_folder, "bin"), "protoc*")
         else:
-            for f in glob.glob(os.path.join(self.package_folder, "lib", "libprotobuf-lite.*")):
-                os.remove(f)
+            tools.remove_files_by_mask(os.path.join(self.package_folder, "lib"), "libprotobuf-lite.*")
 
     def package_info(self):
         self.cpp_info.filenames["cmake_find_package"] = "Protobuf"
@@ -127,16 +126,14 @@ class ProtobufConan(ConanFile):
         self.cpp_info.names["cmake_find_package"] = "protobuf"
         self.cpp_info.names["cmake_find_package_multi"] = "protobuf"
 
-        self.cpp_info.components["protoc"].name = "protoc"
-        if self.options.with_zlib:
-            self.cpp_info.components["protoc"].requires.append("zlib::zlib")
-
         lib_prefix = "lib" if self.settings.compiler == "Visual Studio" else ""
         lib_suffix = "d" if self.settings.build_type == "Debug" else ""
 
         if not self.options.lite:
             self.cpp_info.components["libprotobuf"].name = "libprotobuf"
             self.cpp_info.components["libprotobuf"].libs = [lib_prefix + "protobuf" + lib_suffix]
+            if self.options.with_zlib:
+                self.cpp_info.components["libprotobuf"].requires = ["zlib::zlib"]
             if self.settings.os == "Linux":
                 self.cpp_info.components["libprotobuf"].system_libs.append("pthread")
                 if self._is_clang_x86 or "arm" in str(self.settings.arch):
@@ -159,6 +156,12 @@ class ProtobufConan(ConanFile):
             self.cpp_info.components["libprotoc"].libs = [lib_prefix + "protoc" + lib_suffix]
             self.cpp_info.components["libprotoc"].requires = ["libprotobuf"]
 
+            self.cpp_info.components["protoc"].name = "protoc"
+            self.cpp_info.components["protoc"].requires.extend(["libprotoc", "libprotobuf"])
+
+            bindir = os.path.join(self.package_folder, "bin")
+            self.output.info("Appending PATH environment variable: {}".format(bindir))
+            self.env_info.PATH.append(bindir)
         else:
             self.cpp_info.components["libprotobuf-lite"].name = "libprotobuf-lite"
             self.cpp_info.components["libprotobuf-lite"].libs = [lib_prefix + "protobuf-lite" + lib_suffix]
@@ -169,8 +172,3 @@ class ProtobufConan(ConanFile):
             if self.settings.os == "Windows":
                 if self.options.shared:
                     self.cpp_info.components["libprotobuf-lite"].defines = ["PROTOBUF_USE_DLLS"]
-
-
-        bindir = os.path.join(self.package_folder, "bin")
-        self.output.info("Appending PATH environment variable: {}".format(bindir))
-        self.env_info.PATH.append(bindir)
