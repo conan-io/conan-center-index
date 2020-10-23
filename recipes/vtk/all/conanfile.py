@@ -34,40 +34,49 @@ class VTKConan(ConanFile):
             if tools.os_info.is_linux:
                 self.options["qt"].qtx11extras = True
 
-    def _system_package_architecture(self):
-        if tools.os_info.with_apt:
-            if self.settings.arch == "x86":
-                return ':i386'
-            elif self.settings.arch == "x86_64":
-                return ':amd64'
-
-        if tools.os_info.with_yum:
-            if self.settings.arch == "x86":
-                return '.i686'
-            elif self.settings.arch == 'x86_64':
-                return '.x86_64'
-        return ""
-
-    def build_requirements(self):
-        pack_names = None
-        if not self.options.minimal and tools.os_info.is_linux:
-            if tools.os_info.with_apt:
-                pack_names = [
-                    "freeglut3-dev",
-                    "mesa-common-dev",
-                    "mesa-utils-extra",
-                    "libgl1-mesa-dev",
-                    "libglapi-mesa",
-                    "libsm-dev",
-                    "libx11-dev",
-                    "libxext-dev",
-                    "libxt-dev",
-                    "libglu1-mesa-dev"]
-
-        if pack_names:
-            installer = tools.SystemPackageTool()
-            for item in pack_names:
-                installer.install(item + self._system_package_architecture())
+    # def _system_package_architecture(self):
+    #     if tools.os_info.with_apt:
+    #         if self.settings.arch == "x86":
+    #             return ':i386'
+    #         elif self.settings.arch == "x86_64":
+    #             return ':amd64'
+    #
+    #     if tools.os_info.with_yum:
+    #         if self.settings.arch == "x86":
+    #             return '.i686'
+    #         elif self.settings.arch == 'x86_64':
+    #             return '.x86_64'
+    #     return ""
+    #
+    # def build_requirements(self):
+    #     pack_names = None
+    #     if not self.options.minimal and tools.os_info.is_linux:
+    #         if tools.os_info.with_apt:
+    #             pack_names = [
+    #                 "freeglut3-dev",
+    #                 "mesa-common-dev",
+    #                 "mesa-utils-extra",
+    #                 "libgl1-mesa-dev",
+    #                 "libglapi-mesa",
+    #                 "libsm-dev",
+    #                 "libx11-dev",
+    #                 "libxext-dev",
+    #                 "libxt-dev",
+    #                 "libglu1-mesa-dev"]
+    #
+    #     if pack_names:
+    #         installer = tools.SystemPackageTool()
+    #         for item in pack_names:
+    #             installer.install(item + self._system_package_architecture())
+    
+    def requirements(self):
+        # 1) Is it correct that "opengl/system" is required for every OS?
+        # 2) Is it correct that "opengl/system" is even when compiled without Qt?
+        self.requires("opengl/system")
+        if self.settings.os == "Linux":
+            if self.options.x11:
+                # Do we need "xorg/system"?
+                self.requires("xorg/system")
 
     def config_options(self):
         if self.settings.compiler == "Visual Studio":
