@@ -43,6 +43,8 @@ class VTKConan(ConanFile):
         tools.get(**self.conan_data["sources"][self.version])
         os.rename("{}-{}".format(self.name, self.version), self.source_subfolder)
 
+    # Below code is inncorrect and should be removed after successful Lnx package build.
+    # Until then, keeping it for reference. 
     # def _system_package_architecture(self):
     #     if tools.os_info.with_apt:
     #         if self.settings.arch == "x86":
@@ -87,8 +89,8 @@ class VTKConan(ConanFile):
                 # Do we need "xorg/system"?
                 self.requires("xorg/system")
         if self.options.with_qt:
-            # FIXME: Missing qt recipe. PR with Qt: https://github.com/conan-io/conan-center-index/pull/1759
-            # self.requires("qt/5.15.1")
+            # FIXME: Missing qt recipe. Qt recipe PR: https://github.com/conan-io/conan-center-index/pull/1759
+            # When qt available, "self.requires("qt/5.15.1")" should replace below line.
             raise ConanInvalidConfiguration("VTK option 'with_qt' requires 'qt:shared=True'")
                 
     def _configure_cmake(self):
@@ -106,10 +108,11 @@ class VTKConan(ConanFile):
             self._cmake.definitions["Module_vtkIOXML"] = "ON"
         if self.options.ioexport:
             self._cmake.definitions["Module_vtkIOExport"] = "ON"
-        if self.options.with_qt:
+        if self.options.qt:
             self._cmake.definitions["VTK_Group_Qt"] = "ON"
-            self._cmake.definitions["VTK_QT_VERSION"] = "5"
-            self._cmake.definitions["VTK_BUILD_QT_DESIGNER_PLUGIN"] = "OFF"
+            self._cmake.definitions["VTK_MODULE_ENABLE_VTK_GUISupportQt"] = "YES"
+            self._cmake.definitions["VTK_MODULE_ENABLE_VTK_GUISupportQtOpenGL"] = "YES"
+            self._cmake.definitions["VTK_MODULE_ENABLE_VTK_RenderingQt"] = "YES"
         if self.options.mpi:
             self._cmake.definitions["VTK_Group_MPI"] = "ON"
             self._cmake.definitions["Module_vtkIOParallelXML"] = "ON"
@@ -185,7 +188,8 @@ class VTKConan(ConanFile):
         version_split = self.version.split('.')
         short_version = "{}.{}".format(version_split[0], version_split[1])
         # Why "vtknetcdf" and "vtknetcdfcpp" are treated exceptionally from all other modules?
-        # There are a lot of other *.h in subfolders, should they be directly exposed too?
+        # There are a lot of other *.h in subfolders, should they be directly exposed too
+        # or maybe those two should be removed from below?
         self.cpp_info.includedirs = [
             "include/vtk-{}".format(short_version),
             "include/vtk-{}/vtknetcdf/include".format(short_version),
