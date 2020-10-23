@@ -238,9 +238,17 @@ class CPythonConan(ConanFile):
     @property
     def _solution_projects(self):
         solution_path = os.path.join(self._source_subfolder, "PCBuild", "pcbuild.sln")
-        project_set = set(m.group(1) for m in re.finditer("\"([^\"]+)\\.vcxproj\"", open(solution_path).read()))
+        projects = set(m.group(1) for m in re.finditer("\"([^\"]+)\\.vcxproj\"", open(solution_path).read()))
         discarded = self._msvc_discarded_projects
-        projects = set(filter(lambda p: os.path.basename(p) not in discarded, project_set))
+
+        def project_build(name):
+            if os.path.basename(name) in discarded:
+                return False
+            if "test" in name:
+                return False
+            return True
+
+        projects = set(p for p in projects if project_build(p))
         return projects
 
     @property
@@ -286,12 +294,13 @@ class CPythonConan(ConanFile):
         self.output.info("Building {} Visual Studio projects: {}".format(len(projects), projects))
 
         upgraded = False
-        for project_i, project in enumerate(projects):
-            self.output.info(" [{}/{}] Building project '{}'...".format(project_i, len(projects), project))
-            project_file = os.path.join(self._source_subfolder, "PCBuild", project + ".vcxproj")
-            msbuild.build(project_file, upgrade_project=not upgraded, build_type="Debug" if self.settings.build_type == "Debug" else "Release",
-                          platforms=self._msvc_archs, properties=msbuild_properties)
-            upgraded = True
+        with tools.no_op():
+            for project_i, project in enumerate(projects):
+                self.output.info("[{}/{}] Building project '{}'...".format(project_i, len(projects), project))
+                project_file = os.path.join(self._source_subfolder, "PCBuild", project + ".vcxproj")
+                msbuild.build(project_file, upgrade_project=not upgraded, build_type="Debug" if self.settings.build_type == "Debug" else "Release",
+                              platforms=self._msvc_archs, properties=msbuild_properties)
+                upgraded = True
 
     def build(self):
         if tools.Version(self.version) < "3.9.0":

@@ -9,6 +9,22 @@
  Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "_multiprocessing", "_multiprocessing.vcxproj", "{9E48B300-37D1-11DD-8C41-005056C00008}"
  EndProject
  Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "python3dll", "python3dll.vcxproj", "{885D4898-D08D-4091-9C40-C700CFE3FC5A}"
+--- PCbuild/python.vcxproj
++++ PCbuild/python.vcxproj
+@@ -85,1 +85,1 @@
+-  <Target Name="ValidateUcrtbase" AfterTargets="AfterBuild" Condition="$(Configuration) != 'PGInstrument'">
++  <!--<Target Name="ValidateUcrtbase" AfterTargets="AfterBuild" Condition="$(Configuration) != 'PGInstrument'">
+@@ -93,1 +93,1 @@
+-  </Target>
++  </Target>-->
+--- PCbuild/_freeze_importlib.vcxproj
++++ PCbuild/_freeze_importlib.vcxproj
+@@ -110,1 +110,1 @@
+-  <Target Name="RebuildImportLib" AfterTargets="AfterBuild" Condition="$(Configuration) == 'Debug' or $(Configuration) == 'Release'"
++  <!--<Target Name="RebuildImportLib" AfterTargets="AfterBuild" Condition="$(Configuration) == 'Debug' or $(Configuration) == 'Release'"
+@@ -112,1 +112,1 @@
+-  </Target>
++  </Target>-->
 --- PCbuild/_bz2.vcxproj
 +++ PCbuild/_bz2.vcxproj
 @@ -39,7 +39,7 @@
