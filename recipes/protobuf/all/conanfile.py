@@ -133,9 +133,6 @@ class ProtobufConan(ConanFile):
 
         lib_prefix = "lib" if self.settings.compiler == "Visual Studio" else ""
         lib_suffix = "d" if self.settings.build_type == "Debug" else ""
-        self.cpp_info.components["libprotoc"].name = "libprotoc"
-        self.cpp_info.components["libprotoc"].libs = [lib_prefix + "protoc" + lib_suffix]
-        self.cpp_info.components["libprotoc"].requires = ["libprotobuf"]
 
         if not self.options.lite:
             self.cpp_info.components["libprotobuf"].name = "libprotobuf"
@@ -157,6 +154,10 @@ class ProtobufConan(ConanFile):
                 os.path.join(self._cmake_install_base_path, "protobuf-module.cmake"),
                 os.path.join(self._cmake_install_base_path, "protobuf-options.cmake"),
             ])
+
+            self.cpp_info.components["libprotoc"].name = "libprotoc"
+            self.cpp_info.components["libprotoc"].libs = [lib_prefix + "protoc" + lib_suffix]
+            self.cpp_info.components["libprotoc"].requires = ["libprotobuf"]
 
         else:
             self.cpp_info.components["libprotobuf-lite"].name = "libprotobuf-lite"
