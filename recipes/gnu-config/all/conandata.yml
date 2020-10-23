@@ -1,4 +1,4 @@
 sources:
-  "cci.20200712":
-    url: "http://git.savannah.gnu.org/cgit/config.git/snapshot/config-2593751ef276497e312d7c4ce7fd049614c7bf80.tar.gz"
-    sha256: "b90ec3ccb67cbace74f076d179dd367ef63d3d7be4136fefe4c6968a9d6d8d34"
+  "cci.20201022":
+    url: "http://git.savannah.gnu.org/cgit/config.git/snapshot/config-1c4398015583eb77bc043234f5734be055e64bea.tar.gz"
+    sha256: "339eb64757bf5af9e23ca15daa136acdd9d778753377190ce17fba7e1b222aff"
