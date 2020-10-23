@@ -97,9 +97,9 @@ class VTKConan(ConanFile):
             cmake.definitions["Module_vtkIOParallelXML"] = "ON"
             cmake.definitions["Module_vtkParallelMPI"] = "ON"
 
-        if self.settings.os == 'Macos':
-            self.env['DYLD_LIBRARY_PATH'] = os.path.join(self.build_folder, 'lib')
-            self.output.info("cmake build: %s" % self.build_folder)
+        # if self.settings.os == 'Macos':
+        #     self.env['DYLD_LIBRARY_PATH'] = os.path.join(self.build_folder, 'lib')
+        #     self.output.info("cmake build: %s" % self.build_folder)
 
         cmake.configure(build_folder='build')
         return cmake
