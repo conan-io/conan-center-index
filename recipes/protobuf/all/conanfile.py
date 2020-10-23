@@ -46,9 +46,11 @@ class ProtobufConan(ConanFile):
             if compiler_version < "14":
                 raise ConanInvalidConfiguration("On Windows Protobuf can only be built with "
                                                 "Visual Studio 2015 or higher.")
+        if self.options.lite:
+            del self.options.with_zlib
 
     def requirements(self):
-        if self.options.with_zlib and not self.options.lite:
+        if self.options.get_safe("with_zlib")
             self.requires("zlib/1.2.11")
 
     @property
@@ -60,7 +62,7 @@ class ProtobufConan(ConanFile):
             self._cmake = CMake(self)
             self._cmake.definitions["CMAKE_INSTALL_CMAKEDIR"] = self._cmake_install_base_path.replace("\\", "/")
             self._cmake.definitions["protobuf_BUILD_TESTS"] = False
-            self._cmake.definitions["protobuf_WITH_ZLIB"] = self.options.with_zlib and not self.options.lite
+            self._cmake.definitions["protobuf_WITH_ZLIB"] = self.options.get_safe("with_zlib", False)
             if self.settings.compiler == "Visual Studio":
                 self._cmake.definitions["protobuf_MSVC_STATIC_RUNTIME"] = "MT" in str(self.settings.compiler.runtime)
             self._cmake.configure(build_folder=self._build_subfolder)
@@ -99,6 +101,12 @@ class ProtobufConan(ConanFile):
             '# Version info variable',
             'endif()',
         )
+        tools.replace_in_file(
+            os.path.join(self._source_subfolder, "cmake", "install.cmake"),
+            'PROPERTY INSTALL_RPATH "@loader_path/../lib")',
+            'PROPERTY INSTALL_RPATH "@executable_path/../${CMAKE_INSTALL_LIBDIR}")',
+        )
+
         cmake = self._configure_cmake()
         cmake.build()
 
