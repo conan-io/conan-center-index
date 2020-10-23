@@ -46,6 +46,8 @@ class ProtobufConan(ConanFile):
             if compiler_version < "14":
                 raise ConanInvalidConfiguration("On Windows Protobuf can only be built with "
                                                 "Visual Studio 2015 or higher.")
+        if tools.is_apple_os(self.settings.os) and self.options.shared:
+            raise ConanInvalidConfiguration("Protobuf could not be build as shared library for Mac.")
         if self.options.lite:
             del self.options.with_zlib
 
@@ -94,11 +96,6 @@ class ProtobufConan(ConanFile):
             os.path.join(self._source_subfolder, "cmake", "protobuf-module.cmake.in"),
             '# Version info variable',
             'endif()',
-        )
-        tools.replace_in_file(
-            os.path.join(self._source_subfolder, "cmake", "install.cmake"),
-            'PROPERTY INSTALL_RPATH "@loader_path/../lib")',
-            'PROPERTY INSTALL_RPATH "@executable_path/../${CMAKE_INSTALL_LIBDIR}")',
         )
 
         cmake = self._configure_cmake()
