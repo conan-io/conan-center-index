@@ -520,6 +520,11 @@ class OpenSSLConan(ConanFile):
         return "cc"
 
     def build(self):
+        # FIXME: Temporary patch until https://github.com/openssl/openssl/pull/13225 is merged (if it works)
+        with tools.chdir(self._source_subfolder):
+            tools.replace_in_file(
+                "configdata.pm.in", 'my $prepend = <<"_____";', "my $prepend = <<'_____';", strict=True)
+
         with tools.vcvars(self.settings) if self._use_nmake else tools.no_op():
             env_vars = {"PERL": self._perl}
             if self.settings.compiler == "apple-clang":
