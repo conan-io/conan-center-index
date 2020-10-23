@@ -78,18 +78,12 @@ class ProtobufConan(ConanFile):
         )
         tools.replace_in_file(
             os.path.join(self._source_subfolder, "cmake", "protobuf-config.cmake.in"),
-            'include("${CMAKE_CURRENT_LIST_DIR}/protobuf-targets.cmake")',
-            '# CONAN PATCH include("${CMAKE_CURRENT_LIST_DIR}/protobuf-targets.cmake")'
-        )
-        tools.replace_in_file(
-            os.path.join(self._source_subfolder, "cmake", "protobuf-config.cmake.in"),
-            'COMMAND  protobuf::protoc',
-            'COMMAND "${CMAKE_COMMAND}"',
-        )
-        tools.replace_in_file(
-            os.path.join(self._source_subfolder, "cmake", "protobuf-config.cmake.in"),
-            'ARGS --${protobuf_generate_LANGUAGE}_out',
-            'ARGS -E env "DYLD_LIBRARY_PATH=${Protobuf_LIB_DIRS}:${CONAN_LIB_DIRS}:${Protobuf_LIB_DIRS_RELEASE}:${Protobuf_LIB_DIRS_DEBUG}:${Protobuf_LIB_DIRS_RELWITHDEBINFO}:${Protobuf_LIB_DIRS_MINSIZEREL}" protoc --${protobuf_generate_LANGUAGE}_out',
+            """COMMAND  protobuf::protoc
+      ARGS --${protobuf_generate_LANGUAGE}_out ${_dll_export_decl}${protobuf_generate_PROTOC_OUT_DIR} ${_protobuf_include_path} ${_abs_file}
+      DEPENDS ${_abs_file} protobuf::protoc""",
+            """COMMAND "${CMAKE_COMMAND}"  #FIXME: use conan binary component
+      ARGS -E env "DYLD_LIBRARY_PATH=${Protobuf_LIB_DIRS}:${CONAN_LIB_DIRS}:${Protobuf_LIB_DIRS_RELEASE}:${Protobuf_LIB_DIRS_DEBUG}:${Protobuf_LIB_DIRS_RELWITHDEBINFO}:${Protobuf_LIB_DIRS_MINSIZEREL}" protoc --${protobuf_generate_LANGUAGE}_out ${_dll_export_decl}${protobuf_generate_PROTOC_OUT_DIR} ${_protobuf_include_path} ${_abs_file}
+      DEPENDS ${_abs_file} USES_TERMINAL"""
         )
         tools.replace_in_file(
             os.path.join(self._source_subfolder, "cmake", "protobuf-module.cmake.in"),
