@@ -3,6 +3,7 @@ import re
 
 from fnmatch import fnmatch
 from conans import ConanFile, CMake, tools
+from conans.errors import ConanInvalidConfiguration
 
 class VTKConan(ConanFile):
     name = "vtk"
@@ -14,25 +15,33 @@ class VTKConan(ConanFile):
     settings = "os", "arch", "compiler", "build_type"
     exports_sources = ["CMakeLists.txt", "patches/**"]
     source_subfolder = "source_subfolder"
-    options = {"shared": [True, False], "qt": [True, False], "mpi": [True, False],
+    options = {"shared": [True, False], "with_qt": [True, False], "mpi": [True, False],
                 "fPIC": [True, False], "minimal": [True, False], "ioxml": [True, False],
                 "ioexport": [True, False], "mpi_minimal": [True, False]}
-    default_options = {"shared": False, "qt": False, "mpi": False, "fPIC": False,
+    default_options = {"shared": False, "with_qt": False, "mpi": False, "fPIC": False,
                 "minimal": False, "ioxml": False, "ioexport": False, "mpi_minimal": False}
     topics = ("conan", "VTK", "3D rendering", "2D plotting", "3D interaction", "3D manipulation", 
                 "graphics", "image processing", "scientific visualization", "geometry modeling")
     short_paths = True
+    _cmake = None
+
+    def config_options(self):
+        if self.settings.os == "Windows":
+            del self.options.fPIC
+
+    def configure(self):
+        if self.settings.os == "Linux":
+            raise ConanInvalidConfiguration("VTK Conan package do not support Linux yet. Any help appreciated!")
+        if self.options.with_qt:
+            if self.options["qt"].shared == False:
+                raise ConanInvalidConfiguration("VTK option 'with_qt' requires 'qt:shared=True'")
+            if self.settings.os == "Linux":
+                if self.options["qt"].qtx11extras == False:
+                    raise ConanInvalidConfiguration("VTK option 'with_qt' requires 'qt:qtx11extras=True'")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
         os.rename("{}-{}".format(self.name, self.version), self.source_subfolder)
-
-    def requirements(self):
-        if self.options.qt:
-            self.requires("qt/5.15.1@bincrafters/stable")
-            self.options["qt"].shared = True
-            if tools.os_info.is_linux:
-                self.options["qt"].qtx11extras = True
 
     # def _system_package_architecture(self):
     #     if tools.os_info.with_apt:
@@ -77,41 +86,43 @@ class VTKConan(ConanFile):
             if self.options.x11:
                 # Do we need "xorg/system"?
                 self.requires("xorg/system")
-
-    def config_options(self):
-        if self.settings.compiler == "Visual Studio":
-            del self.options.fPIC
-
+        if self.options.with_qt:
+            # FIXME: Missing qt recipe. PR with Qt: https://github.com/conan-io/conan-center-index/pull/1759
+            # self.requires("qt/5.15.1")
+            raise ConanInvalidConfiguration("VTK option 'with_qt' requires 'qt:shared=True'")
+                
     def _configure_cmake(self):
-        cmake = CMake(self)
-        cmake.definitions["BUILD_TESTING"] = "OFF"
-        cmake.definitions["BUILD_EXAMPLES"] = "OFF"
-        cmake.definitions["BUILD_SHARED_LIBS"] = self.options.shared
+        if self._cmake:
+            return self._cmake
+        self._cmake = CMake(self)
+        self._cmake.definitions["BUILD_TESTING"] = "OFF"
+        self._cmake.definitions["BUILD_EXAMPLES"] = "OFF"
+        self._cmake.definitions["BUILD_SHARED_LIBS"] = self.options.shared
 
         if self.options.minimal:
-            cmake.definitions["VTK_Group_StandAlone"] = "OFF"
-            cmake.definitions["VTK_Group_Rendering"] = "OFF"
+            self._cmake.definitions["VTK_Group_StandAlone"] = "OFF"
+            self._cmake.definitions["VTK_Group_Rendering"] = "OFF"
         if self.options.ioxml:
-            cmake.definitions["Module_vtkIOXML"] = "ON"
+            self._cmake.definitions["Module_vtkIOXML"] = "ON"
         if self.options.ioexport:
-            cmake.definitions["Module_vtkIOExport"] = "ON"
-        if self.options.qt:
-            cmake.definitions["VTK_Group_Qt"] = "ON"
-            cmake.definitions["VTK_QT_VERSION"] = "5"
-            cmake.definitions["VTK_BUILD_QT_DESIGNER_PLUGIN"] = "OFF"
+            self._cmake.definitions["Module_vtkIOExport"] = "ON"
+        if self.options.with_qt:
+            self._cmake.definitions["VTK_Group_Qt"] = "ON"
+            self._cmake.definitions["VTK_QT_VERSION"] = "5"
+            self._cmake.definitions["VTK_BUILD_QT_DESIGNER_PLUGIN"] = "OFF"
         if self.options.mpi:
-            cmake.definitions["VTK_Group_MPI"] = "ON"
-            cmake.definitions["Module_vtkIOParallelXML"] = "ON"
+            self._cmake.definitions["VTK_Group_MPI"] = "ON"
+            self._cmake.definitions["Module_vtkIOParallelXML"] = "ON"
         if self.options.mpi_minimal:
-            cmake.definitions["Module_vtkIOParallelXML"] = "ON"
-            cmake.definitions["Module_vtkParallelMPI"] = "ON"
+            self._cmake.definitions["Module_vtkIOParallelXML"] = "ON"
+            self._cmake.definitions["Module_vtkParallelMPI"] = "ON"
 
         # if self.settings.os == 'Macos':
         #     self.env['DYLD_LIBRARY_PATH'] = os.path.join(self.build_folder, 'lib')
         #     self.output.info("cmake build: %s" % self.build_folder)
 
-        cmake.configure(build_folder='build')
-        return cmake
+        self._cmake.configure(build_folder='build')
+        return self._cmake
 
     def build(self):
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
@@ -161,7 +172,7 @@ class VTKConan(ConanFile):
             self.cpp_info.system_libs.append('pthread')
             self.cpp_info.system_libs.append('dl')            # 'libvtksys-7.1.a' require 'dlclose', 'dlopen', 'dlsym' and 'dlerror' which on CentOS are in 'dl' library
             
-        if not self.options.shared and self.options.qt:
+        if not self.options.shared and self.options.with_qt:
             if self.settings.os == 'Windows':
                 self.cpp_info.system_libs.append('Ws2_32')    # 'vtksys-9.0d.lib' require 'gethostbyname', 'gethostname', 'WSAStartup' and 'WSACleanup' which are in 'Ws2_32.lib' library
                 self.cpp_info.system_libs.append('Psapi')     # 'vtksys-9.0d.lib' require 'GetProcessMemoryInfo' which is in 'Psapi.lib' library
