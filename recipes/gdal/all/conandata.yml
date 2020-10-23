@@ -1,0 +1,38 @@
+sources:
+  "3.1.0":
+    url: "https://github.com/OSGeo/gdal/releases/download/v3.1.0/gdal-3.1.0.tar.gz"
+    sha256: "6793ddb2b1ca042494d938ac82c71d06b9125bbb00c9bb9414a7c5e3a707c639"
+  "3.1.2":
+    url: "https://github.com/OSGeo/gdal/releases/download/v3.1.2/gdal-3.1.2.tar.gz"
+    sha256: "39713b8af4e4dcd5e0d2d84a7f94660da59bb710cca80bcac07e719435add6dc"
+patches:
+  "3.1.0":
+    - patch_file: "patches/fix-autotools.patch"
+      base_path: "source_subfolder"
+    - patch_file: "patches/fix-nmake-common.patch"
+      base_path: "source_subfolder"
+    - patch_file: "patches/fix-nmake-opt-3.1.0.patch"
+      base_path: "source_subfolder"
+    - patch_file: "patches/fix-import-dll-msvc.patch"
+      base_path: "source_subfolder"
+    - patch_file: "patches/ogrflatgeobuflayer-stdexcept.patch"
+      base_path: "source_subfolder"
+    - patch_file: "patches/makefile-mitigate-long-line.patch"
+      base_path: "source_subfolder"
+    - patch_file: "patches/fix-include-jsonc.patch"
+      base_path: "source_subfolder"
+    - patch_file: "patches/fix-include-xerces-3.1.0.patch"
+      base_path: "source_subfolder"
+  "3.1.2":
+    - patch_file: "patches/fix-autotools.patch"
+      base_path: "source_subfolder"
+    - patch_file: "patches/fix-nmake-common.patch"
+      base_path: "source_subfolder"
+    - patch_file: "patches/fix-nmake-opt-3.1.2.patch"
+      base_path: "source_subfolder"
+    - patch_file: "patches/fix-import-dll-msvc.patch"
+      base_path: "source_subfolder"
+    - patch_file: "patches/fix-include-jsonc.patch"
+      base_path: "source_subfolder"
+    - patch_file: "patches/fix-include-xerces-3.1.2.patch"
+      base_path: "source_subfolder"

@@ -1,4 +1,8 @@
 sources:
-  "3.2.1":
-    url: "https://bitbucket.org/multicoreware/x265/downloads/x265_3.2.1.tar.gz"
-    sha256: "7cf8ed2927fcb2914cdca51c974594770da705cb43288beea62b69c53725b5d7"
+  3.2.1:
+    url: "https://github.com/videolan/x265/archive/3.2.1.tar.gz"
+    sha256: "b5ee7ea796a664d6e2763f9c0ae281fac5d25892fc2cb134698547103466a06a"
+patches:
+  3.2.1:
+    - patch_file: "patches/0001-remove_register_classifier.patch"
+      base_path: "source_subfolder"

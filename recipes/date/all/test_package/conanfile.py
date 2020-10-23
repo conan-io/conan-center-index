@@ -8,6 +8,7 @@ class TestPackageConan(ConanFile):
 
     def build(self):
         cmake = CMake(self)
+        cmake.definitions["DATE_HEADER_ONLY"] = self.options["date:header_only"]
         cmake.configure()
         cmake.build()
 

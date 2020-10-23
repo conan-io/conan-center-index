@@ -14,8 +14,8 @@ max_line_length = 200
 [*.yml]
 tab_width = 2
 
-[{Makefile, Makefile.am, Makefile.in}]
+[{Makefile,Makefile.am,Makefile.in}]
 indent_style = tab
 
-[*.{diff, patch}]
+[*.{diff,patch}]
 trim_trailing_whitespace = false

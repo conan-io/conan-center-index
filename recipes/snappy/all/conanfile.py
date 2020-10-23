@@ -32,6 +32,8 @@ class SnappyConan(ConanFile):
     def configure(self):
         if self.options.shared:
             del self.options.fPIC
+        if self.settings.compiler.cppstd:
+            tools.check_min_cppstd(self, 11)
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
@@ -59,4 +61,8 @@ class SnappyConan(ConanFile):
     def package_info(self):
         self.cpp_info.names["cmake_find_package"] = "Snappy"
         self.cpp_info.names["cmake_find_package_multi"] = "Snappy"
-        self.cpp_info.libs = tools.collect_libs(self)
+        self.cpp_info.components["snappylib"].names["cmake_find_package"] = "snappy"
+        self.cpp_info.components["snappylib"].names["cmake_find_package_multi"] = "snappy"
+        self.cpp_info.components["snappylib"].libs = tools.collect_libs(self)
+        if not self.options.shared and tools.stdcpp_library(self):
+            self.cpp_info.components["snappylib"].system_libs.append(tools.stdcpp_library(self))

@@ -1,0 +1,4 @@
+sources:
+  "2.3.0":
+    url: "https://github.com/GPUOpen-LibrariesAndSDKs/VulkanMemoryAllocator/archive/v2.3.0.zip"
+    sha256: "1c222c372e90f1a0d5e765420974842cf2503683ca14c30f8a0df340ba541f02"

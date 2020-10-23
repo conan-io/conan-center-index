@@ -1,0 +1,42 @@
+--- cmake/PocoMacros.cmake
++++ cmake/PocoMacros.cmake
+@@ -40,7 +40,7 @@ if(WIN32)
+ 			endforeach()
+ 		endif(X64)
+ 	endif()
+-	find_program(CMAKE_MC_COMPILER mc.exe HINTS "${sdk_bindir}" "${kit_bindir}" "${kit81_bindir}" ${kit10_bindir}
++	find_program(CMAKE_MC_COMPILER mc.exe windmc.exe HINTS "${sdk_bindir}" "${kit_bindir}" "${kit81_bindir}" ${kit10_bindir}
+ 		DOC "path to message compiler")
+ 	if(NOT CMAKE_MC_COMPILER)
+ 		message(FATAL_ERROR "message compiler not found: required to build")
+@@ -279,7 +279,7 @@
+ 
+ if(MSVC)
+ # install the targets pdb
+-	POCO_INSTALL_PDB(${target_name})
++	# POCO_INSTALL_PDB(${target_name})
+ endif()
+ 
+ endmacro()
+--- Foundation/CMakeLists.txt
++++ Foundation/CMakeLists.txt
+@@ -101,7 +101,7 @@
+ )
+ 
+ if(POCO_UNBUNDLED)
+-	target_link_libraries(Foundation PUBLIC Pcre::Pcre ZLIB::ZLIB)
++	target_link_libraries(Foundation PUBLIC PCRE::PCRE ZLIB::ZLIB)
+ 	target_compile_definitions(Foundation PUBLIC POCO_UNBUNDLED)
+ endif(POCO_UNBUNDLED)
+ 
+--- NetSSL_Win/CMakeLists.txt
++++ NetSSL_Win/CMakeLists.txt
+@@ -21,7 +21,7 @@
+ 	DEFINE_SYMBOL NetSSL_Win_EXPORTS
+ )
+ 
+-target_link_libraries(NetSSLWin PUBLIC Poco::Net Poco::Util Crypt32.lib)
++target_link_libraries(NetSSLWin PUBLIC Poco::Net Poco::Util Crypt32.lib ws2_32 )
+ target_include_directories(NetSSLWin
+ 	PUBLIC
+ 		$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>

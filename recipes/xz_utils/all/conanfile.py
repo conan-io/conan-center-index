@@ -1,3 +1,4 @@
+import glob
 import os
 from conans import ConanFile, tools, AutoToolsBuildEnvironment, MSBuild
 from conans.tools import Version
@@ -9,24 +10,18 @@ class XZUtils(ConanFile):
                   " for POSIX-like systems, but also work on some not-so-POSIX systems. XZ Utils are the successor to LZMA Utils."
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://tukaani.org/xz"
+    topics = ("conan", "lzma", "xz", "compression")
     license = "Public Domain, GNU LGPLv2.1, GNU GPLv2, or GNU GPLv3"
 
     settings = "os", "arch", "compiler", "build_type"
     options = {"shared": [True, False], "fPIC": [True, False]}
     default_options = {"shared": False, "fPIC": True}
 
+    _autotools = None
+
     @property
     def _source_subfolder(self):
         return "source_subfolder"
-
-    @property
-    def _use_winbash(self):
-        return tools.os_info.is_windows
-
-    def build_requirements(self):
-        if self._use_winbash and "CONAN_BASH_PATH" not in os.environ and \
-                tools.os_info.detect_windows_subsystem() != "msys2":
-            self.build_requires("msys2/20190524")
 
     def _effective_msbuild_type(self):
         # treat "RelWithDebInfo" and "MinSizeRel" as "Release"
@@ -37,39 +32,42 @@ class XZUtils(ConanFile):
             del self.options.fPIC
 
     def configure(self):
+        if self.options.shared:
+            del self.options.fPIC
         del self.settings.compiler.cppstd
         del self.settings.compiler.libcxx
 
-    def _apply_patches(self):
-        # Relax Windows SDK restriction
-        tools.replace_in_file(os.path.join(self._source_subfolder, "windows", "vs2017", "liblzma.vcxproj"),
-                              "<WindowsTargetPlatformVersion>10.0.15063.0</WindowsTargetPlatformVersion>",
-                              "<WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>")
-
-        tools.replace_in_file(os.path.join(self._source_subfolder, "windows", "vs2017", "liblzma_dll.vcxproj"),
-                              "<WindowsTargetPlatformVersion>10.0.15063.0</WindowsTargetPlatformVersion>",
-                              "<WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>")
+    def build_requirements(self):
+        if tools.os_info.is_windows and self.settings.compiler != "Visual Studio" and \
+           not tools.get_env("CONAN_BASH_PATH") and tools.os_info.detect_windows_subsystem() != "msys2":
+            self.build_requires("msys2/20200517")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
         os.rename("xz-" + self.version, self._source_subfolder)
-        self._apply_patches()
 
-    def _build_msvc(self):
-        # windows\INSTALL-MSVC.txt
-
-        if self.settings.compiler.version == 15:
+    def _apply_patches(self):
+        if tools.Version(self.version) == "5.2.4" and self.settings.compiler == "Visual Studio":
+            # Relax Windows SDK restriction
+            # Workaround is required only for 5.2.4 because since 5.2.5 WindowsTargetPlatformVersion is dropped from vcproj file
+            #
             # emulate VS2019+ meaning of WindowsTargetPlatformVersion == "10.0"
             # undocumented method, but officially recommended workaround by microsoft at at
             # https://developercommunity.visualstudio.com/content/problem/140294/windowstargetplatformversion-makes-it-impossible-t.html
+            windows_target_platform_version_old = "<WindowsTargetPlatformVersion>10.0.15063.0</WindowsTargetPlatformVersion>"
+            if self.settings.compiler.version == 15:
+                windows_target_platform_version_new = "<WindowsTargetPlatformVersion>$([Microsoft.Build.Utilities.ToolLocationHelper]::GetLatestSDKTargetPlatformVersion('Windows', '10.0'))</WindowsTargetPlatformVersion>"
+            else:
+                windows_target_platform_version_new = "<WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>"
             tools.replace_in_file(os.path.join(self._source_subfolder, "windows", "vs2017", "liblzma.vcxproj"),
-                                  "<WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>",
-                                  "<WindowsTargetPlatformVersion>$([Microsoft.Build.Utilities.ToolLocationHelper]::GetLatestSDKTargetPlatformVersion('Windows', '10.0'))</WindowsTargetPlatformVersion>")
-
+                                  windows_target_platform_version_old,
+                                  windows_target_platform_version_new)
             tools.replace_in_file(os.path.join(self._source_subfolder, "windows", "vs2017", "liblzma_dll.vcxproj"),
-                                  "<WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>",
-                                  "<WindowsTargetPlatformVersion>$([Microsoft.Build.Utilities.ToolLocationHelper]::GetLatestSDKTargetPlatformVersion('Windows', '10.0'))</WindowsTargetPlatformVersion>")
+                                  windows_target_platform_version_old,
+                                  windows_target_platform_version_new)
 
+    def _build_msvc(self):
+        # windows\INSTALL-MSVC.txt
         msvc_version = "vs2017" if Version(self.settings.compiler.version) >= "15" else "vs2013"
         with tools.chdir(os.path.join(self._source_subfolder, "windows", msvc_version)):
             target = "liblzma_dll" if self.options.shared else "liblzma"
@@ -82,28 +80,29 @@ class XZUtils(ConanFile):
                 use_env=False,
                 upgrade_project=False)
 
-    def _build_configure(self):
-        with tools.chdir(self._source_subfolder):
-            args = []
-            env_build = AutoToolsBuildEnvironment(self, win_bash=self._use_winbash)
-            args = ["--disable-doc"]
-            if self.settings.os != "Windows" and self.options.fPIC:
-                args.append("--with-pic")
-            if self.options.shared:
-                args.extend(["--disable-static", "--enable-shared"])
-            else:
-                args.extend(["--enable-static", "--disable-shared"])
-            if self.settings.build_type == "Debug":
-                args.append("--enable-debug")
-            env_build.configure(args=args, build=False)
-            env_build.make()
-            env_build.install()
+    def _configure_autotools(self):
+        if self._autotools:
+            return self._autotools
+        self._autotools = AutoToolsBuildEnvironment(self, win_bash=tools.os_info.is_windows)
+        args = ["--disable-doc"]
+        if self.settings.os != "Windows" and self.options.get_safe("fPIC", True):
+            args.append("--with-pic")
+        if self.options.shared:
+            args.extend(["--disable-static", "--enable-shared"])
+        else:
+            args.extend(["--enable-static", "--disable-shared"])
+        if self.settings.build_type == "Debug":
+            args.append("--enable-debug")
+        self._autotools.configure(configure_dir=self._source_subfolder, args=args, build=False)
+        return self._autotools
 
     def build(self):
+        self._apply_patches()
         if self.settings.compiler == "Visual Studio":
             self._build_msvc()
         else:
-            self._build_configure()
+            autotools = self._configure_autotools()
+            autotools.make()
 
     def package(self):
         self.copy(pattern="COPYING", dst="licenses", src=self._source_subfolder)
@@ -120,14 +119,13 @@ class XZUtils(ConanFile):
                 self.copy(pattern="*.dll", dst="bin", src=bin_dir, keep_path=False)
             os.rename(os.path.join(self.package_folder, "lib", "liblzma.lib"),
                       os.path.join(self.package_folder, "lib", "lzma.lib"))
-
-        # Remove/rename forbidden files/folders in central repository
-        tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
-        tools.rmdir(os.path.join(self.package_folder, "share"))
-        try:
-            os.remove(os.path.join(self.package_folder, "lib", "liblzma.la"))
-        except:
-            pass
+        else:
+            autotools = self._configure_autotools()
+            autotools.install()
+            tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
+            tools.rmdir(os.path.join(self.package_folder, "share"))
+            for la_file in glob.glob(os.path.join(self.package_folder, "lib", "*.la")):
+                os.remove(la_file)
 
     def package_info(self):
         if not self.options.shared:

@@ -6,6 +6,7 @@ from conans.errors import ConanException
 from conans.errors import ConanInvalidConfiguration
 import os
 import sys
+import shlex
 import shutil
 
 try:
@@ -47,12 +48,13 @@ class BoostConan(ConanFile):
         "python_version": "ANY",  # major.minor; computed automatically, if None
         "namespace": "ANY",  # custom boost namespace for bcp, e.g. myboost
         "namespace_alias": [True, False],  # enable namespace alias for bcp, boost=myboost
+        "multithreading": [True, False],  # enables multithreading support
         "zlib": [True, False],
         "bzip2": [True, False],
         "lzma": [True, False],
         "zstd": [True, False],
         "segmented_stacks": [True, False],
-        "debug_level": [i for i in range(1, 14)],
+        "debug_level": [i for i in range(0, 14)],
         "pch": [True, False],
         "extra_b2_flags": "ANY",  # custom b2 flags
         "i18n_backend": ["iconv", "icu", None],
@@ -73,12 +75,13 @@ class BoostConan(ConanFile):
         'python_version': 'None',
         'namespace': 'boost',
         'namespace_alias': False,
+        'multithreading': True,
         'zlib': True,
         'bzip2': True,
         'lzma': False,
         'zstd': False,
         'segmented_stacks': False,
-        "debug_level": 2,
+        "debug_level": 0,
         'pch': True,
         'extra_b2_flags': 'None',
         "i18n_backend": 'iconv',
@@ -93,16 +96,20 @@ class BoostConan(ConanFile):
     exports_sources = ['patches/*']
 
     @property
+    def _source_subfolder(self):
+        return "source_subfolder"
+
+    @property
     def _bcp_dir(self):
         return "custom-boost"
 
     @property
-    def _folder_name(self):
-        return "boost_%s" % self.version.replace(".", "_")
-
-    @property
     def _is_msvc(self):
         return self.settings.compiler == "Visual Studio"
+
+    @property
+    def _is_clang_cl(self):
+        return self.settings.os == "Windows" and self.settings.compiler == "clang"
 
     @property
     def _zip_bzip2_requires_needed(self):
@@ -125,8 +132,21 @@ class BoostConan(ConanFile):
         if not self.options.i18n_backend and not self.options.without_locale:
             raise ConanInvalidConfiguration("Boost 'locale' library requires a i18n_backend, either 'icu' or 'iconv'")
 
+        if not self.options.multithreading:
+            # * For the reason 'thread' is deactivate look at https://stackoverflow.com/a/20991533
+            #   Look also on the comments of the answer for more details
+            # * Although the 'context' and 'atomic' library does not mention anything about threading,
+            #   when being build the compiler uses the -pthread flag, which makes it quite dangerous
+            for lib in ['locale', 'coroutine', 'wave', 'type_erasure', 'fiber', 'thread', 'context', 'atomic']:
+                if not self.options.get_safe('without_%s' % lib):
+                    raise ConanInvalidConfiguration("Boost '%s' library requires multi threading" % lib)
+
+        if self.settings.compiler == "Visual Studio" and "MT" in self.settings.compiler.runtime and self.options.shared:
+            raise ConanInvalidConfiguration("Boost can not be built as shared library with MT runtime.")
+
     def build_requirements(self):
-        self.build_requires("b2/4.2.0")
+        if not self.options.header_only:
+            self.build_requires("b2/4.2.0")
 
     def requirements(self):
         if self._zip_bzip2_requires_needed:
@@ -156,9 +176,9 @@ class BoostConan(ConanFile):
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
-        if self.version in self.conan_data["patches"]:
-            for patch in self.conan_data["patches"][self.version]:
-                tools.patch(**patch)
+        os.rename("boost_%s" % self.version.replace(".", "_"), self._source_subfolder)
+        for patch in self.conan_data["patches"].get(self.version, []):
+            tools.patch(**patch)
 
     ##################### BUILDING METHODS ###########################
 
@@ -328,7 +348,7 @@ class BoostConan(ConanFile):
         raise ConanInvalidConfiguration("couldn't locate python libraries - make sure you have installed python development files")
 
     def _clean(self):
-        src = os.path.join(self.source_folder, self._folder_name)
+        src = os.path.join(self.source_folder, self._source_subfolder)
         clean_dirs = [os.path.join(self.build_folder, "bin.v2"),
                       os.path.join(self.build_folder, "architecture"),
                       os.path.join(self.source_folder, self._bcp_dir),
@@ -344,12 +364,11 @@ class BoostConan(ConanFile):
 
     @property
     def _b2_exe(self):
-        b2_exe = "b2.exe" if tools.os_info.is_windows else "b2"
-        return os.path.join(self.deps_cpp_info["b2"].rootpath, "bin", b2_exe)
+        return "b2.exe" if tools.os_info.is_windows else "b2"
 
     @property
     def _bcp_exe(self):
-        folder = os.path.join(self.source_folder, self._folder_name, "dist", "bin")
+        folder = os.path.join(self.source_folder, self._source_subfolder, "dist", "bin")
         return os.path.join(folder, "bcp.exe" if tools.os_info.is_windows else "bcp")
 
     @property
@@ -358,33 +377,35 @@ class BoostConan(ConanFile):
 
     @property
     def _boost_dir(self):
-        return self._bcp_dir if self._use_bcp else self._folder_name
+        return self._bcp_dir if self._use_bcp else self._source_subfolder
 
     @property
     def _boost_build_dir(self):
-        return os.path.join(self.source_folder, self._folder_name, "tools", "build")
+        return os.path.join(self.source_folder, self._source_subfolder, "tools", "build")
 
     def _build_bcp(self):
-        folder = os.path.join(self.source_folder, self._folder_name, 'tools', 'bcp')
+        folder = os.path.join(self.source_folder, self._source_subfolder, 'tools', 'bcp')
         with tools.vcvars(self.settings) if self._is_msvc else tools.no_op():
             with tools.chdir(folder):
-                command = "%s -j%s --abbreviate-paths -d2 toolset=%s" % (self._b2_exe, tools.cpu_count(), self._toolset)
+                command = "%s -j%s --abbreviate-paths toolset=%s" % (self._b2_exe, tools.cpu_count(), self._toolset)
+                if self.options.debug_level:
+                    command += " -d%d" % self.options.debug_level
                 self.output.warn(command)
-                self.run(command)
+                self.run(command, run_environment=True)
 
     def _run_bcp(self):
-        with tools.vcvars(self.settings) if self._is_msvc else tools.no_op():
+        with tools.vcvars(self.settings) if self._is_msvc or self._is_clang_cl else tools.no_op():
             with tools.chdir(self.source_folder):
                 os.mkdir(self._bcp_dir)
                 namespace = "--namespace=%s" % self.options.namespace
                 alias = "--namespace-alias" if self.options.namespace_alias else ""
-                boostdir = "--boost=%s" % self._folder_name
+                boostdir = "--boost=%s" % self._source_subfolder
                 libraries = {"build", "boost-build.jam", "boostcpp.jam", "boost_install", "headers"}
-                for d in os.listdir(os.path.join(self._folder_name, "boost")):
-                    if os.path.isdir(os.path.join(self._folder_name, "boost", d)):
+                for d in os.listdir(os.path.join(self._source_subfolder, "boost")):
+                    if os.path.isdir(os.path.join(self._source_subfolder, "boost", d)):
                         libraries.add(d)
-                for d in os.listdir(os.path.join(self._folder_name, "libs")):
-                    if os.path.isdir(os.path.join(self._folder_name, "libs", d)):
+                for d in os.listdir(os.path.join(self._source_subfolder, "libs")):
+                    if os.path.isdir(os.path.join(self._source_subfolder, "libs", d)):
                         libraries.add(d)
                 libraries = ' '.join(libraries)
                 command = "{bcp} {namespace} {alias} " \
@@ -423,27 +444,7 @@ class BoostConan(ConanFile):
             with tools.chdir(sources):
                 # To show the libraries *1
                 # self.run("%s --show-libraries" % b2_exe)
-                self.run(full_command)
-
-        arch = self.settings.get_safe('arch')
-        if arch.startswith("asm.js"):
-            self._create_emscripten_libs()
-
-    def _create_emscripten_libs(self):
-        # Boost Build doesn't create the libraries, but it gets close,
-        # leaving .bc files where the libraries would be.
-        staged_libs = os.path.join(
-            self.source_folder, self._boost_dir, "stage", "lib"
-        )
-        for bc_file in os.listdir(staged_libs):
-            if bc_file.startswith("lib") and bc_file.endswith(".bc"):
-                a_file = bc_file[:-3] + ".a"
-                cmd = "emar q {dst} {src}".format(
-                    dst=os.path.join(staged_libs, a_file),
-                    src=os.path.join(staged_libs, bc_file),
-                )
-                self.output.info(cmd)
-                self.run(cmd)
+                self.run(full_command, run_environment=True)
 
     @property
     def _b2_os(self):
@@ -570,7 +571,8 @@ class BoostConan(ConanFile):
         if self._is_msvc and self.settings.compiler.runtime:
             flags.append("runtime-link=%s" % ("static" if "MT" in str(self.settings.compiler.runtime) else "shared"))
 
-        flags.append("threading=multi")
+        # For details https://boostorg.github.io/build/manual/master/index.html
+        flags.append("threading=%s" % ("single" if not self.options.multithreading else "multi" ))
 
         flags.append("link=%s" % ("static" if not self.options.shared else "shared"))
         if self.settings.build_type == "Debug":
@@ -593,9 +595,14 @@ class BoostConan(ConanFile):
         if self.settings.os != "Windows":
             if self.options.fPIC:
                 cxx_flags.append("-fPIC")
+        if self.settings.build_type == "RelWithDebInfo":
+            if self.settings.compiler == "gcc" or "clang" in str(self.settings.compiler):
+                cxx_flags.append("-g")
+            elif self.settings.compiler == "Visual Studio":
+                cxx_flags.append("/Z7")
 
         # Standalone toolchain fails when declare the std lib
-        if self.settings.os != "Android":
+        if self.settings.os != "Android" and self.settings.os != "Emscripten":
             try:
                 if self._gnu_cxx11_abi:
                     flags.append("define=_GLIBCXX_USE_CXX11_ABI=%s" % self._gnu_cxx11_abi)
@@ -629,8 +636,10 @@ class BoostConan(ConanFile):
                                                                     self.settings.os.version))
 
         if self.settings.os == "iOS":
-            cxx_flags.append("-DBOOST_AC_USE_PTHREADS")
-            cxx_flags.append("-DBOOST_SP_USE_PTHREADS")
+            if self.options.multithreading:
+                cxx_flags.append("-DBOOST_AC_USE_PTHREADS")
+                cxx_flags.append("-DBOOST_SP_USE_PTHREADS")
+
             cxx_flags.append("-fvisibility=hidden")
             cxx_flags.append("-fvisibility-inlines-hidden")
             cxx_flags.append("-fembed-bitcode")
@@ -639,13 +648,14 @@ class BoostConan(ConanFile):
         flags.append(cxx_flags)
 
         if self.options.extra_b2_flags:
-            flags.append(str(self.options.extra_b2_flags))
+            flags.extend(shlex.split(str(self.options.extra_b2_flags)))
 
         flags.extend(["install",
                       "--prefix=%s" % self.package_folder,
                       "-j%s" % tools.cpu_count(),
-                      "--abbreviate-paths",
-                      "-d%s" % str(self.options.debug_level)])
+                      "--abbreviate-paths"])
+        if self.options.debug_level:
+            flags.append("-d%d" % self.options.debug_level)
         return flags
 
     @property
@@ -659,13 +669,13 @@ class BoostConan(ConanFile):
         if arch.startswith('arm'):
             if 'hf' in arch:
                 flags.append('-mfloat-abi=hard')
+        elif self.settings.os == "Emscripten":
+            pass
         elif arch in ["x86", "x86_64"]:
             pass
         elif arch.startswith("ppc"):
             pass
         elif arch.startswith("mips"):
-            pass
-        elif arch.startswith("asm.js"):
             pass
         else:
             self.output.warn("Unable to detect the appropriate ABI for %s architecture." % arch)
@@ -710,8 +720,8 @@ class BoostConan(ConanFile):
         contents = ""
         if self._zip_bzip2_requires_needed:
             def create_library_config(deps_name, name):
-                includedir = self.deps_cpp_info[deps_name].include_paths[0].replace('\\', '/')
-                libdir = self.deps_cpp_info[deps_name].lib_paths[0].replace('\\', '/')
+                includedir = '"%s"' % self.deps_cpp_info[deps_name].include_paths[0].replace('\\', '/')
+                libdir = '"%s"' % self.deps_cpp_info[deps_name].lib_paths[0].replace('\\', '/')
                 lib = self.deps_cpp_info[deps_name].libs[0]
                 version = self.deps_cpp_info[deps_name].version
                 return "\nusing {name} : {version} : " \
@@ -743,7 +753,7 @@ class BoostConan(ConanFile):
 
         # Specify here the toolset with the binary if present if don't empty parameter :
         contents += '\nusing "%s" : %s : ' % (self._toolset, self._toolset_version)
-        contents += ' %s' % self._cxx.replace("\\", "/")
+        contents += ' "%s"' % self._cxx.replace("\\", "/")
 
         if tools.is_apple_os(self.settings.os):
             if self.settings.compiler == "apple-clang":
@@ -816,13 +826,45 @@ class BoostConan(ConanFile):
         # This stage/lib is in source_folder... Face palm, looks like it builds in build but then
         # copy to source with the good lib name
         self.copy("LICENSE_1_0.txt", dst="licenses", src=os.path.join(self.source_folder,
-                                                                      self._folder_name))
+                                                                      self._source_subfolder))
         tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
         if self.options.header_only:
             self.copy(pattern="*", dst="include/boost", src="%s/boost" % self._boost_dir)
 
+        if self.settings.os == "Emscripten":
+            self._create_emscripten_libs()
+
+    def _create_emscripten_libs(self):
+        # Boost Build doesn't create the libraries, but it gets close,
+        # leaving .bc files where the libraries would be.
+        staged_libs = os.path.join(
+            self.package_folder, "lib"
+        )
+        for bc_file in os.listdir(staged_libs):
+            if bc_file.startswith("lib") and bc_file.endswith(".bc"):
+                a_file = bc_file[:-3] + ".a"
+                cmd = "emar q {dst} {src}".format(
+                    dst=os.path.join(staged_libs, a_file),
+                    src=os.path.join(staged_libs, bc_file),
+                )
+                self.output.info(cmd)
+                self.run(cmd)
+
+    @property
+    def _is_versioned_layout(self):
+        layout = self.options.get_safe("layout")
+        return layout == "versioned" or (layout == "b2-default" and os.name == 'nt')
+
     def package_info(self):
         gen_libs = [] if self.options.header_only else tools.collect_libs(self)
+
+        if self._is_versioned_layout:
+            version_tokens = str(self.version).split(".")
+            if len(version_tokens) >= 2:
+                major = version_tokens[0]
+                minor = version_tokens[1]
+                boost_version_tag = "boost-%s_%s" % (major, minor)
+                self.cpp_info.includedirs = [os.path.join(self.package_folder, "include", boost_version_tag)]
 
         # List of lists, so if more than one matches the lib like serialization and wserialization
         # both will be added to the list
@@ -877,7 +919,7 @@ class BoostConan(ConanFile):
                 if not self.options.shared:
                     self.cpp_info.defines.append("BOOST_PYTHON_STATIC_LIB")
 
-            if self._is_msvc:
+            if self._is_msvc or self._is_clang_cl:
                 if not self.options.magic_autolink:
                     # DISABLES AUTO LINKING! NO SMART AND MAGIC DECISIONS THANKS!
                     self.cpp_info.defines.append("BOOST_ALL_NO_LIB")
@@ -892,8 +934,22 @@ class BoostConan(ConanFile):
                 # https://github.com/conan-community/conan-boost/issues/127#issuecomment-404750974
                 self.cpp_info.system_libs.append("bcrypt")
             elif self.settings.os == "Linux":
-                # https://github.com/conan-community/conan-boost/issues/135
-                self.cpp_info.system_libs.extend(["pthread", "rt"])
+                # https://github.com/conan-community/community/issues/135
+                self.cpp_info.system_libs.append("rt")
+                if self.options.multithreading:
+                    self.cpp_info.system_libs.append("pthread")
+            elif self.settings.os == "Emscripten":
+                if self.options.multithreading:
+                    arch = self.settings.get_safe('arch')
+                    # https://emscripten.org/docs/porting/pthreads.html
+                    # The documentation mentions that we should be using the "-s USE_PTHREADS=1"
+                    # but it was causing problems with the target based configurations in conan
+                    # So instead we are using the raw compiler flags (that are being activated
+                    # from the aformentioned flag)
+                    if arch.startswith("x86") or arch.startswith("wasm"):
+                        self.cpp_info.cxxflags.append("-pthread")
+                        self.cpp_info.sharedlinkflags.extend(["-pthread","--shared-memory"])
+                        self.cpp_info.exelinkflags.extend(["-pthread","--shared-memory"])
 
         self.env_info.BOOST_ROOT = self.package_folder
         self.cpp_info.bindirs.append("lib")

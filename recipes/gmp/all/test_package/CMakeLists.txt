@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 2.8.12)
+cmake_minimum_required(VERSION 3.1)
 project(test_package)
 
 include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
@@ -10,5 +10,4 @@ target_link_libraries(${PROJECT_NAME} ${CONAN_LIBS})
 if (ENABLE_CXX)
     add_executable(${PROJECT_NAME}_cpp test_package.cpp)
     target_link_libraries(${PROJECT_NAME}_cpp ${CONAN_LIBS})
-    set_property(TARGET ${PROJECT_NAME}_cpp PROPERTY LINKER_LANGUAGE CXX)
 endif()

@@ -9,7 +9,7 @@ class Libx265Conan(ConanFile):
     topics = ("conan", "libx265", "codec", "video", "H.265")
     url = "https://github.com/conan-io/conan-center-index"
     homepage = " https://bitbucket.org/multicoreware/x265"
-    exports_sources = "CMakeLists.txt"
+    exports_sources = ["CMakeLists.txt", "patches/*"]
     generators = "cmake"
     license = ("GPL-2.0-only", "commercial")  # https://bitbucket.org/multicoreware/x265/src/default/COPYING
     settings = "os", "arch", "compiler", "build_type"
@@ -48,7 +48,7 @@ class Libx265Conan(ConanFile):
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
-        os.rename("x265_{}".format(self.version), self._source_subfolder)
+        os.rename("x265-{}".format(self.version), self._source_subfolder)
 
     def _configure_cmake(self):
         if self._cmake:
@@ -79,6 +79,8 @@ class Libx265Conan(ConanFile):
                 "list(APPEND PLATFORM_LIBS pthread)", "")
             tools.replace_in_file(cmakelists,
                 "list(APPEND PLATFORM_LIBS rt)", "")
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            tools.patch(**patch)
 
     def build(self):
         self._patch_sources()

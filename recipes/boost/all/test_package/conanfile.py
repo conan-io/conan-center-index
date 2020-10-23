@@ -1,5 +1,4 @@
-from conans.model.conan_file import ConanFile, tools
-from conans import CMake
+from conans import ConanFile, CMake, tools
 import os
 import sys
 
@@ -9,26 +8,27 @@ class DefaultNameConan(ConanFile):
     generators = "cmake"
 
     def build(self):
-        cmake = CMake(self)
-        if self.options["boost"].header_only:
-            cmake.definitions["HEADER_ONLY"] = "TRUE"
-        else:
-            cmake.definitions["Boost_USE_STATIC_LIBS"] = not self.options["boost"].shared
-        if not self.options["boost"].without_python:
-            cmake.definitions["WITH_PYTHON"] = "TRUE"
-        if not self.options["boost"].without_random:
-            cmake.definitions["WITH_RANDOM"] = "TRUE"
-        if not self.options["boost"].without_regex:
-            cmake.definitions["WITH_REGEX"] = "TRUE"
-        if not self.options["boost"].without_test:
-            cmake.definitions["WITH_TEST"] = "TRUE"
-        if not self.options["boost"].without_coroutine:
-            cmake.definitions["WITH_COROUTINE"] = "TRUE"
-        if not self.options["boost"].without_chrono:
-            cmake.definitions["WITH_CHRONO"] = "TRUE"
-        cmake.definitions["Boost_NO_BOOST_CMAKE"] = "TRUE"
-        cmake.configure()
-        cmake.build()
+        with tools.vcvars(self.settings) if (self.settings.os == "Windows" and self.settings.compiler == "clang") else tools.no_op():
+            cmake = CMake(self)
+            if self.options["boost"].header_only:
+                cmake.definitions["HEADER_ONLY"] = "TRUE"
+            else:
+                cmake.definitions["Boost_USE_STATIC_LIBS"] = not self.options["boost"].shared
+            if not self.options["boost"].without_python:
+                cmake.definitions["WITH_PYTHON"] = "TRUE"
+            if not self.options["boost"].without_random:
+                cmake.definitions["WITH_RANDOM"] = "TRUE"
+            if not self.options["boost"].without_regex:
+                cmake.definitions["WITH_REGEX"] = "TRUE"
+            if not self.options["boost"].without_test:
+                cmake.definitions["WITH_TEST"] = "TRUE"
+            if not self.options["boost"].without_coroutine:
+                cmake.definitions["WITH_COROUTINE"] = "TRUE"
+            if not self.options["boost"].without_chrono:
+                cmake.definitions["WITH_CHRONO"] = "TRUE"
+            cmake.definitions["Boost_NO_BOOST_CMAKE"] = "TRUE"
+            cmake.configure()
+            cmake.build()
 
     def test(self):
         if tools.cross_building(self.settings):

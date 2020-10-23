@@ -1,8 +1,5 @@
-#!/usr/bin/env python
-# -*- coding: utf-8 -*-
 import os
 from conans import ConanFile, CMake, tools
-
 
 class TestZlibConan(ConanFile):
     settings = "os", "compiler", "arch", "build_type"

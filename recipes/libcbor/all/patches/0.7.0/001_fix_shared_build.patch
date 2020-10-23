@@ -1,0 +1,1609 @@
+diff --git a/src/CMakeLists.txt b/src/CMakeLists.txt
+index 00a718e..2a1492b 100644
+--- a/src/CMakeLists.txt
++++ b/src/CMakeLists.txt
+@@ -11,16 +11,19 @@ if (NOT DEFINED CMAKE_MACOSX_RPATH)
+ 	set(CMAKE_MACOSX_RPATH 0)
+ endif()
+ 
+-add_library(cbor STATIC ${SOURCES})
+-add_library(cbor_shared SHARED ${SOURCES})
++add_library(cbor ${SOURCES})
++target_include_directories(cbor PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
+ 
++include(GenerateExportHeader)
++generate_export_header(cbor EXPORT_FILE_NAME ${CMAKE_CURRENT_BINARY_DIR}/cbor/cbor_export.h)
++target_include_directories(cbor PUBLIC ${CMAKE_CURRENT_BINARY_DIR})
++install(FILES ${CMAKE_CURRENT_BINARY_DIR}/cbor/cbor_export.h DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/cbor)
+ 
+ if (NOT ${CBOR_VERSION_MAJOR} EQUAL 0)
+ 	MESSAGE(FATAL_ERROR "Change the shared library version scheme to reflect https://github.com/PJK/libcbor/issues/52.")
+ endif()
+ 
+-set_target_properties(cbor_shared PROPERTIES
+-		OUTPUT_NAME cbor
++set_target_properties(cbor PROPERTIES
+ 		VERSION ${CBOR_VERSION}
+ 		MACHO_COMPATIBILITY_VERSION ${CBOR_VERSION_MAJOR}.${CBOR_VERSION_MINOR}.0
+ 		SOVERSION ${CBOR_VERSION_MAJOR}.${CBOR_VERSION_MINOR})
+@@ -28,15 +31,15 @@ set_target_properties(cbor_shared PROPERTIES
+ configure_file(libcbor.pc.in libcbor.pc @ONLY)
+ 
+ # http://www.cmake.org/Wiki/CMake:Install_Commands
+-install(TARGETS cbor_shared
++install(TARGETS cbor
+ 	ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
+ 	LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+-	RUNTIME DESTINATION bin)
++	RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})
+ 
+-install(DIRECTORY cbor DESTINATION include
++install(DIRECTORY cbor DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
+                 FILES_MATCHING PATTERN "*.h")
+ 
+-install(FILES cbor.h DESTINATION include)
++install(FILES cbor.h DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
+ 
+ install(FILES "${CMAKE_CURRENT_BINARY_DIR}/libcbor.pc"
+ 	DESTINATION "${CMAKE_INSTALL_PREFIX}/${CMAKE_INSTALL_LIBDIR}/pkgconfig")
+diff --git a/src/allocators.c b/src/allocators.c
+index 273e093..43c5440 100644
+--- a/src/allocators.c
++++ b/src/allocators.c
+@@ -7,9 +7,9 @@
+ 
+ #include "cbor/common.h"
+ 
+-_cbor_malloc_t _cbor_malloc = malloc;
+-_cbor_realloc_t _cbor_realloc = realloc;
+-_cbor_free_t _cbor_free = free;
++CBOR_EXPORT _cbor_malloc_t _cbor_malloc = malloc;
++CBOR_EXPORT _cbor_realloc_t _cbor_realloc = realloc;
++CBOR_EXPORT _cbor_free_t _cbor_free = free;
+ 
+ void cbor_set_allocs(_cbor_malloc_t custom_malloc,
+                      _cbor_realloc_t custom_realloc, _cbor_free_t custom_free) {
+diff --git a/src/cbor.h b/src/cbor.h
+index f4dfc9e..1f4f23d 100644
+--- a/src/cbor.h
++++ b/src/cbor.h
+@@ -23,6 +23,7 @@
+ #include "cbor/encoding.h"
+ #include "cbor/serialization.h"
+ #include "cbor/streaming.h"
++#include "cbor/cbor_export.h"
+ 
+ #ifdef __cplusplus
+ extern "C" {
+@@ -42,8 +43,8 @@ extern "C" {
+  * @return **new** CBOR item or `NULL` on failure. In that case, \p result
+  * contains location and description of the error.
+  */
+-cbor_item_t* cbor_load(cbor_data source, size_t source_size,
+-                       struct cbor_load_result* result);
++CBOR_EXPORT cbor_item_t* cbor_load(cbor_data source, size_t source_size,
++                                   struct cbor_load_result* result);
+ 
+ /** Deep copy of an item
+  *
+@@ -52,12 +53,12 @@ cbor_item_t* cbor_load(cbor_data source, size_t source_size,
+  * @param item[borrow] item to copy
+  * @return **new** CBOR deep copy
+  */
+-cbor_item_t* cbor_copy(cbor_item_t* item);
++CBOR_EXPORT cbor_item_t* cbor_copy(cbor_item_t* item);
+ 
+ #if CBOR_PRETTY_PRINTER
+ #include <stdio.h>
+ 
+-void cbor_describe(cbor_item_t* item, FILE* out);
++CBOR_EXPORT void cbor_describe(cbor_item_t* item, FILE* out);
+ #endif
+ 
+ #ifdef __cplusplus
+diff --git a/src/cbor/arrays.h b/src/cbor/arrays.h
+index 3851975..883e948 100644
+--- a/src/cbor/arrays.h
++++ b/src/cbor/arrays.h
+@@ -9,6 +9,7 @@
+ #define LIBCBOR_ARRAYS_H
+ 
+ #include "cbor/common.h"
++#include "cbor/cbor_export.h"
+ 
+ #ifdef __cplusplus
+ extern "C" {
+@@ -19,14 +20,14 @@ extern "C" {
+  * @param item[borrow] An array
+  * @return The number of members
+  */
+-size_t cbor_array_size(const cbor_item_t* item);
++CBOR_EXPORT size_t cbor_array_size(const cbor_item_t* item);
+ 
+ /** Get the size of the allocated storage
+  *
+  * @param item[borrow] An array
+  * @return The size of the allocated storage (number of items)
+  */
+-size_t cbor_array_allocated(const cbor_item_t* item);
++CBOR_EXPORT size_t cbor_array_allocated(const cbor_item_t* item);
+ 
+ /** Get item by index
+  *
+@@ -34,7 +35,7 @@ size_t cbor_array_allocated(const cbor_item_t* item);
+  * @param index The index
+  * @return **incref** The item, or `NULL` in case of boundary violation
+  */
+-cbor_item_t* cbor_array_get(const cbor_item_t* item, size_t index);
++CBOR_EXPORT cbor_item_t* cbor_array_get(const cbor_item_t* item, size_t index);
+ 
+ /** Set item by index
+  *
+@@ -45,7 +46,8 @@ cbor_item_t* cbor_array_get(const cbor_item_t* item, size_t index);
+  * @param index The index, first item is 0.
+  * @return true on success, false on allocation failure.
+  */
+-bool cbor_array_set(cbor_item_t* item, size_t index, cbor_item_t* value);
++CBOR_EXPORT bool cbor_array_set(cbor_item_t* item, size_t index,
++                                cbor_item_t* value);
+ 
+ /** Replace item at an index
+  *
+@@ -56,21 +58,22 @@ bool cbor_array_set(cbor_item_t* item, size_t index, cbor_item_t* value);
+  * @param index The index, first item is 0.
+  * @return true on success, false on allocation failure.
+  */
+-bool cbor_array_replace(cbor_item_t* item, size_t index, cbor_item_t* value);
++CBOR_EXPORT bool cbor_array_replace(cbor_item_t* item, size_t index,
++                                    cbor_item_t* value);
+ 
+ /** Is the array definite?
+  *
+  * @param item[borrow] An array
+  * @return Is the array definite?
+  */
+-bool cbor_array_is_definite(const cbor_item_t* item);
++CBOR_EXPORT bool cbor_array_is_definite(const cbor_item_t* item);
+ 
+ /** Is the array indefinite?
+  *
+  * @param item[borrow] An array
+  * @return Is the array indefinite?
+  */
+-bool cbor_array_is_indefinite(const cbor_item_t* item);
++CBOR_EXPORT bool cbor_array_is_indefinite(const cbor_item_t* item);
+ 
+ /** Get the array contents
+  *
+@@ -80,20 +83,20 @@ bool cbor_array_is_indefinite(const cbor_item_t* item);
+  * @param item[borrow] An array
+  * @return #cbor_array_size items
+  */
+-cbor_item_t** cbor_array_handle(const cbor_item_t* item);
++CBOR_EXPORT cbor_item_t** cbor_array_handle(const cbor_item_t* item);
+ 
+ /** Create new definite array
+  *
+  * @param size Number of slots to preallocate
+  * @return **new** array or `NULL` upon malloc failure
+  */
+-cbor_item_t* cbor_new_definite_array(size_t size);
++CBOR_EXPORT cbor_item_t* cbor_new_definite_array(size_t size);
+ 
+ /** Create new indefinite array
+  *
+  * @return **new** array or `NULL` upon malloc failure
+  */
+-cbor_item_t* cbor_new_indefinite_array();
++CBOR_EXPORT cbor_item_t* cbor_new_indefinite_array();
+ 
+ /** Append to the end
+  *
+@@ -104,7 +107,7 @@ cbor_item_t* cbor_new_indefinite_array();
+  * @param pushee[incref] The item to push
+  * @return true on success, false on failure
+  */
+-bool cbor_array_push(cbor_item_t* array, cbor_item_t* pushee);
++CBOR_EXPORT bool cbor_array_push(cbor_item_t* array, cbor_item_t* pushee);
+ 
+ #ifdef __cplusplus
+ }
+diff --git a/src/cbor/bytestrings.h b/src/cbor/bytestrings.h
+index 9f9322c..7324441 100644
+--- a/src/cbor/bytestrings.h
++++ b/src/cbor/bytestrings.h
+@@ -9,6 +9,7 @@
+ #define LIBCBOR_BYTESTRINGS_H
+ 
+ #include "cbor/common.h"
++#include "cbor/cbor_export.h"
+ 
+ #ifdef __cplusplus
+ extern "C" {
+@@ -27,21 +28,21 @@ extern "C" {
+  * @param item[borrow] a definite bytestring
+  * @return length of the binary data. Zero if no chunk has been attached yet
+  */
+-size_t cbor_bytestring_length(const cbor_item_t *item);
++CBOR_EXPORT size_t cbor_bytestring_length(const cbor_item_t *item);
+ 
+ /** Is the byte string definite?
+  *
+  * @param item[borrow] a byte string
+  * @return Is the byte string definite?
+  */
+-bool cbor_bytestring_is_definite(const cbor_item_t *item);
++CBOR_EXPORT bool cbor_bytestring_is_definite(const cbor_item_t *item);
+ 
+ /** Is the byte string indefinite?
+  *
+  * @param item[borrow] a byte string
+  * @return Is the byte string indefinite?
+  */
+-bool cbor_bytestring_is_indefinite(const cbor_item_t *item);
++CBOR_EXPORT bool cbor_bytestring_is_indefinite(const cbor_item_t *item);
+ 
+ /** Get the handle to the binary data
+  *
+@@ -52,7 +53,7 @@ bool cbor_bytestring_is_indefinite(const cbor_item_t *item);
+  * @return The address of the binary data. `NULL` if no data have been assigned
+  * yet.
+  */
+-cbor_mutable_data cbor_bytestring_handle(const cbor_item_t *item);
++CBOR_EXPORT cbor_mutable_data cbor_bytestring_handle(const cbor_item_t *item);
+ 
+ /** Set the handle to the binary data
+  *
+@@ -61,9 +62,9 @@ cbor_mutable_data cbor_bytestring_handle(const cbor_item_t *item);
+  * libcbor will deallocate it when appropriate using its free function
+  * @param length Length of the data block
+  */
+-void cbor_bytestring_set_handle(cbor_item_t *item,
+-                                cbor_mutable_data CBOR_RESTRICT_POINTER data,
+-                                size_t length);
++CBOR_EXPORT void cbor_bytestring_set_handle(cbor_item_t *item,
++                                            cbor_mutable_data CBOR_RESTRICT_POINTER data,
++                                            size_t length);
+ 
+ /** Get the handle to the array of chunks
+  *
+@@ -73,14 +74,15 @@ void cbor_bytestring_set_handle(cbor_item_t *item,
+  * @param item[borrow] A indefinite byte string
+  * @return array of #cbor_bytestring_chunk_count definite bytestrings
+  */
+-cbor_item_t **cbor_bytestring_chunks_handle(const cbor_item_t *item);
++CBOR_EXPORT cbor_item_t **cbor_bytestring_chunks_handle(
++    const cbor_item_t *item);
+ 
+ /** Get the number of chunks this string consist of
+  *
+  * @param item[borrow] A indefinite bytestring
+  * @return The chunk count. 0 for freshly created items.
+  */
+-size_t cbor_bytestring_chunk_count(const cbor_item_t *item);
++CBOR_EXPORT size_t cbor_bytestring_chunk_count(const cbor_item_t *item);
+ 
+ /** Appends a chunk to the bytestring
+  *
+@@ -93,7 +95,8 @@ size_t cbor_bytestring_chunk_count(const cbor_item_t *item);
+  * @return true on success, false on realloc failure. In that case, the refcount
+  * of `chunk` is not increased and the `item` is left intact.
+  */
+-bool cbor_bytestring_add_chunk(cbor_item_t *item, cbor_item_t *chunk);
++CBOR_EXPORT bool cbor_bytestring_add_chunk(cbor_item_t *item,
++                                           cbor_item_t *chunk);
+ 
+ /** Creates a new definite byte string
+  *
+@@ -101,7 +104,7 @@ bool cbor_bytestring_add_chunk(cbor_item_t *item, cbor_item_t *chunk);
+  *
+  * @return **new** definite bytestring. `NULL` on malloc failure.
+  */
+-cbor_item_t *cbor_new_definite_bytestring();
++CBOR_EXPORT cbor_item_t *cbor_new_definite_bytestring();
+ 
+ /** Creates a new indefinite byte string
+  *
+@@ -109,7 +112,7 @@ cbor_item_t *cbor_new_definite_bytestring();
+  *
+  * @return **new** indefinite bytestring. `NULL` on malloc failure.
+  */
+-cbor_item_t *cbor_new_indefinite_bytestring();
++CBOR_EXPORT cbor_item_t *cbor_new_indefinite_bytestring();
+ 
+ /** Creates a new byte string and initializes it
+  *
+@@ -120,7 +123,7 @@ cbor_item_t *cbor_new_indefinite_bytestring();
+  * @return A **new** byte string with content `handle`. `NULL` on malloc
+  * failure.
+  */
+-cbor_item_t *cbor_build_bytestring(cbor_data handle, size_t length);
++CBOR_EXPORT cbor_item_t *cbor_build_bytestring(cbor_data handle, size_t length);
+ 
+ #ifdef __cplusplus
+ }
+diff --git a/src/cbor/callbacks.c b/src/cbor/callbacks.c
+index 7d0f1c6..3f1f547 100644
+--- a/src/cbor/callbacks.c
++++ b/src/cbor/callbacks.c
+@@ -69,7 +69,7 @@ void cbor_null_uint8_callback(void *_ctx, uint8_t _val) CBOR_DUMMY_CALLBACK
+ 
+     void cbor_null_indef_break_callback(void *_ctx) CBOR_DUMMY_CALLBACK
+ 
+-    const struct cbor_callbacks cbor_empty_callbacks = {
++    CBOR_EXPORT const struct cbor_callbacks cbor_empty_callbacks = {
+         /* Type 0 - Unsigned integers */
+         .uint8 = cbor_null_uint8_callback,
+         .uint16 = cbor_null_uint16_callback,
+diff --git a/src/cbor/callbacks.h b/src/cbor/callbacks.h
+index 1d37f3e..ea6a9a8 100644
+--- a/src/cbor/callbacks.h
++++ b/src/cbor/callbacks.h
+@@ -9,6 +9,7 @@
+ #define LIBCBOR_CALLBACKS_H
+ 
+ #include "cbor/common.h"
++#include "cbor/cbor_export.h"
+ 
+ #ifdef __cplusplus
+ extern "C" {
+@@ -105,79 +106,79 @@ struct cbor_callbacks {
+ };
+ 
+ /** Dummy callback implementation - does nothing */
+-void cbor_null_uint8_callback(void *, uint8_t);
++CBOR_EXPORT void cbor_null_uint8_callback(void *, uint8_t);
+ 
+ /** Dummy callback implementation - does nothing */
+-void cbor_null_uint16_callback(void *, uint16_t);
++CBOR_EXPORT void cbor_null_uint16_callback(void *, uint16_t);
+ 
+ /** Dummy callback implementation - does nothing */
+-void cbor_null_uint32_callback(void *, uint32_t);
++CBOR_EXPORT void cbor_null_uint32_callback(void *, uint32_t);
+ 
+ /** Dummy callback implementation - does nothing */
+-void cbor_null_uint64_callback(void *, uint64_t);
++CBOR_EXPORT void cbor_null_uint64_callback(void *, uint64_t);
+ 
+ /** Dummy callback implementation - does nothing */
+-void cbor_null_negint8_callback(void *, uint8_t);
++CBOR_EXPORT void cbor_null_negint8_callback(void *, uint8_t);
+ 
+ /** Dummy callback implementation - does nothing */
+-void cbor_null_negint16_callback(void *, uint16_t);
++CBOR_EXPORT void cbor_null_negint16_callback(void *, uint16_t);
+ 
+ /** Dummy callback implementation - does nothing */
+-void cbor_null_negint32_callback(void *, uint32_t);
++CBOR_EXPORT void cbor_null_negint32_callback(void *, uint32_t);
+ 
+ /** Dummy callback implementation - does nothing */
+-void cbor_null_negint64_callback(void *, uint64_t);
++CBOR_EXPORT void cbor_null_negint64_callback(void *, uint64_t);
+ 
+ /** Dummy callback implementation - does nothing */
+-void cbor_null_string_callback(void *, cbor_data, size_t);
++CBOR_EXPORT void cbor_null_string_callback(void *, cbor_data, size_t);
+ 
+ /** Dummy callback implementation - does nothing */
+-void cbor_null_string_start_callback(void *);
++CBOR_EXPORT void cbor_null_string_start_callback(void *);
+ 
+ /** Dummy callback implementation - does nothing */
+-void cbor_null_byte_string_callback(void *, cbor_data, size_t);
++CBOR_EXPORT void cbor_null_byte_string_callback(void *, cbor_data, size_t);
+ 
+ /** Dummy callback implementation - does nothing */
+-void cbor_null_byte_string_start_callback(void *);
++CBOR_EXPORT void cbor_null_byte_string_start_callback(void *);
+ 
+ /** Dummy callback implementation - does nothing */
+-void cbor_null_array_start_callback(void *, size_t);
++CBOR_EXPORT void cbor_null_array_start_callback(void *, size_t);
+ 
+ /** Dummy callback implementation - does nothing */
+-void cbor_null_indef_array_start_callback(void *);
++CBOR_EXPORT void cbor_null_indef_array_start_callback(void *);
+ 
+ /** Dummy callback implementation - does nothing */
+-void cbor_null_map_start_callback(void *, size_t);
++CBOR_EXPORT void cbor_null_map_start_callback(void *, size_t);
+ 
+ /** Dummy callback implementation - does nothing */
+-void cbor_null_indef_map_start_callback(void *);
++CBOR_EXPORT void cbor_null_indef_map_start_callback(void *);
+ 
+ /** Dummy callback implementation - does nothing */
+-void cbor_null_tag_callback(void *, uint64_t);
++CBOR_EXPORT void cbor_null_tag_callback(void *, uint64_t);
+ 
+ /** Dummy callback implementation - does nothing */
+-void cbor_null_float2_callback(void *, float);
++CBOR_EXPORT void cbor_null_float2_callback(void *, float);
+ 
+ /** Dummy callback implementation - does nothing */
+-void cbor_null_float4_callback(void *, float);
++CBOR_EXPORT void cbor_null_float4_callback(void *, float);
+ 
+ /** Dummy callback implementation - does nothing */
+-void cbor_null_float8_callback(void *, double);
++CBOR_EXPORT void cbor_null_float8_callback(void *, double);
+ 
+ /** Dummy callback implementation - does nothing */
+-void cbor_null_null_callback(void *);
++CBOR_EXPORT void cbor_null_null_callback(void *);
+ 
+ /** Dummy callback implementation - does nothing */
+-void cbor_null_undefined_callback(void *);
++CBOR_EXPORT void cbor_null_undefined_callback(void *);
+ 
+ /** Dummy callback implementation - does nothing */
+-void cbor_null_boolean_callback(void *, bool);
++CBOR_EXPORT void cbor_null_boolean_callback(void *, bool);
+ 
+ /** Dummy callback implementation - does nothing */
+-void cbor_null_indef_break_callback(void *);
++CBOR_EXPORT void cbor_null_indef_break_callback(void *);
+ 
+ /** Dummy callback bundle - does nothing */
+-extern const struct cbor_callbacks cbor_empty_callbacks;
++CBOR_EXPORT extern const struct cbor_callbacks cbor_empty_callbacks;
+ 
+ #ifdef __cplusplus
+ }
+diff --git a/src/cbor/common.h b/src/cbor/common.h
+index d54a23c..1070fae 100644
+--- a/src/cbor/common.h
++++ b/src/cbor/common.h
+@@ -15,6 +15,7 @@
+ #include <stdlib.h>
+ #include "cbor/configuration.h"
+ #include "data.h"
++#include "cbor/cbor_export.h"
+ 
+ #ifdef __cplusplus
+ extern "C" {
+@@ -87,9 +88,9 @@ typedef void *(*_cbor_malloc_t)(size_t);
+ typedef void *(*_cbor_realloc_t)(void *, size_t);
+ typedef void (*_cbor_free_t)(void *);
+ 
+-extern _cbor_malloc_t _cbor_malloc;
+-extern _cbor_realloc_t _cbor_realloc;
+-extern _cbor_free_t _cbor_free;
++CBOR_EXPORT extern _cbor_malloc_t _cbor_malloc;
++CBOR_EXPORT extern _cbor_realloc_t _cbor_realloc;
++CBOR_EXPORT extern _cbor_free_t _cbor_free;
+ 
+ /** Sets the memory management routines to use.
+  *
+@@ -108,8 +109,9 @@ extern _cbor_free_t _cbor_free;
+  * @param custom_realloc realloc implementation
+  * @param custom_free free implementation
+  */
+-void cbor_set_allocs(_cbor_malloc_t custom_malloc,
+-                     _cbor_realloc_t custom_realloc, _cbor_free_t custom_free);
++CBOR_EXPORT void cbor_set_allocs(_cbor_malloc_t custom_malloc,
++                                 _cbor_realloc_t custom_realloc, 
++                                 _cbor_free_t custom_free);
+ 
+ #define _CBOR_MALLOC _cbor_malloc
+ #define _CBOR_REALLOC _cbor_realloc
+@@ -134,7 +136,7 @@ void cbor_set_allocs(_cbor_malloc_t custom_malloc,
+  * @param item[borrow]
+  * @return The type
+  */
+-cbor_type cbor_typeof(
++CBOR_EXPORT cbor_type cbor_typeof(
+     const cbor_item_t *item); /* Will be inlined iff link-time opt is enabled */
+ 
+ /* Standard item types as described by the RFC */
+@@ -143,49 +145,49 @@ cbor_type cbor_typeof(
+  * @param item[borrow] the item
+  * @return Is the item an #CBOR_TYPE_UINT?
+  */
+-bool cbor_isa_uint(const cbor_item_t *item);
++CBOR_EXPORT bool cbor_isa_uint(const cbor_item_t *item);
+ 
+ /** Does the item have the appropriate major type?
+  * @param item[borrow] the item
+  * @return Is the item a #CBOR_TYPE_NEGINT?
+  */
+-bool cbor_isa_negint(const cbor_item_t *item);
++CBOR_EXPORT bool cbor_isa_negint(const cbor_item_t *item);
+ 
+ /** Does the item have the appropriate major type?
+  * @param item[borrow] the item
+  * @return Is the item a #CBOR_TYPE_BYTESTRING?
+  */
+-bool cbor_isa_bytestring(const cbor_item_t *item);
++CBOR_EXPORT bool cbor_isa_bytestring(const cbor_item_t *item);
+ 
+ /** Does the item have the appropriate major type?
+  * @param item[borrow] the item
+  * @return Is the item a #CBOR_TYPE_STRING?
+  */
+-bool cbor_isa_string(const cbor_item_t *item);
++CBOR_EXPORT bool cbor_isa_string(const cbor_item_t *item);
+ 
+ /** Does the item have the appropriate major type?
+  * @param item[borrow] the item
+  * @return Is the item an #CBOR_TYPE_ARRAY?
+  */
+-bool cbor_isa_array(const cbor_item_t *item);
++CBOR_EXPORT bool cbor_isa_array(const cbor_item_t *item);
+ 
+ /** Does the item have the appropriate major type?
+  * @param item[borrow] the item
+  * @return Is the item a #CBOR_TYPE_MAP?
+  */
+-bool cbor_isa_map(const cbor_item_t *item);
++CBOR_EXPORT bool cbor_isa_map(const cbor_item_t *item);
+ 
+ /** Does the item have the appropriate major type?
+  * @param item[borrow] the item
+  * @return Is the item a #CBOR_TYPE_TAG?
+  */
+-bool cbor_isa_tag(const cbor_item_t *item);
++CBOR_EXPORT bool cbor_isa_tag(const cbor_item_t *item);
+ 
+ /** Does the item have the appropriate major type?
+  * @param item[borrow] the item
+  * @return Is the item a #CBOR_TYPE_FLOAT_CTRL?
+  */
+-bool cbor_isa_float_ctrl(const cbor_item_t *item);
++CBOR_EXPORT bool cbor_isa_float_ctrl(const cbor_item_t *item);
+ 
+ /* Practical types with respect to their semantics (but not tag values) */
+ 
+@@ -193,19 +195,19 @@ bool cbor_isa_float_ctrl(const cbor_item_t *item);
+  * @param item[borrow] the item
+  * @return  Is the item an integer, either positive or negative?
+  */
+-bool cbor_is_int(const cbor_item_t *item);
++CBOR_EXPORT bool cbor_is_int(const cbor_item_t *item);
+ 
+ /** Is the item an a floating point number?
+  * @param item[borrow] the item
+  * @return  Is the item a floating point number?
+  */
+-bool cbor_is_float(const cbor_item_t *item);
++CBOR_EXPORT bool cbor_is_float(const cbor_item_t *item);
+ 
+ /** Is the item an a boolean?
+  * @param item[borrow] the item
+  * @return  Is the item a boolean?
+  */
+-bool cbor_is_bool(const cbor_item_t *item);
++CBOR_EXPORT bool cbor_is_bool(const cbor_item_t *item);
+ 
+ /** Does this item represent `null`
+  * \rst
+@@ -214,7 +216,7 @@ bool cbor_is_bool(const cbor_item_t *item);
+  * @param item[borrow] the item
+  * @return  Is the item (CBOR logical) null?
+  */
+-bool cbor_is_null(const cbor_item_t *item);
++CBOR_EXPORT bool cbor_is_null(const cbor_item_t *item);
+ 
+ /** Does this item represent `undefined`
+  * \rst
+@@ -223,7 +225,7 @@ bool cbor_is_null(const cbor_item_t *item);
+  * @param item[borrow] the item
+  * @return Is the item (CBOR logical) undefined?
+  */
+-bool cbor_is_undef(const cbor_item_t *item);
++CBOR_EXPORT bool cbor_is_undef(const cbor_item_t *item);
+ 
+ /*
+  * ============================================================================
+@@ -238,7 +240,7 @@ bool cbor_is_undef(const cbor_item_t *item);
+  * @param item[incref] item the item
+  * @return the input reference
+  */
+-cbor_item_t *cbor_incref(cbor_item_t *item);
++CBOR_EXPORT cbor_item_t *cbor_incref(cbor_item_t *item);
+ 
+ /** Decreases the reference count by one, deallocating the item if needed
+  *
+@@ -247,7 +249,7 @@ cbor_item_t *cbor_incref(cbor_item_t *item);
+  *
+  * @param item[take] the item. Set to `NULL` if deallocated
+  */
+-void cbor_decref(cbor_item_t **item);
++CBOR_EXPORT void cbor_decref(cbor_item_t **item);
+ 
+ /** Decreases the reference count by one, deallocating the item if needed
+  *
+@@ -256,7 +258,7 @@ void cbor_decref(cbor_item_t **item);
+  *
+  * @param item[take] the item
+  */
+-void cbor_intermediate_decref(cbor_item_t *item);
++CBOR_EXPORT void cbor_intermediate_decref(cbor_item_t *item);
+ 
+ /** Get the reference count
+  *
+@@ -267,7 +269,7 @@ void cbor_intermediate_decref(cbor_item_t *item);
+  * @param item[borrow] the item
+  * @return the reference count
+  */
+-size_t cbor_refcount(const cbor_item_t *item);
++CBOR_EXPORT size_t cbor_refcount(const cbor_item_t *item);
+ 
+ /** Provides CPP-like move construct
+  *
+@@ -283,7 +285,7 @@ size_t cbor_refcount(const cbor_item_t *item);
+  * @param item[take] the item
+  * @return the item with reference count decreased by one
+  */
+-cbor_item_t *cbor_move(cbor_item_t *item);
++CBOR_EXPORT cbor_item_t *cbor_move(cbor_item_t *item);
+ 
+ #ifdef __cplusplus
+ }
+diff --git a/src/cbor/data.h b/src/cbor/data.h
+index 7f703bc..646ca48 100644
+--- a/src/cbor/data.h
++++ b/src/cbor/data.h
+@@ -12,6 +12,7 @@
+ #include <stddef.h>
+ #include <stdint.h>
+ #include <stdlib.h>
++#include "cbor/cbor_export.h"
+ 
+ #ifdef __cplusplus
+ extern "C" {
+diff --git a/src/cbor/encoding.h b/src/cbor/encoding.h
+index 34a7382..ec0b65d 100644
+--- a/src/cbor/encoding.h
++++ b/src/cbor/encoding.h
+@@ -9,6 +9,7 @@
+ #define LIBCBOR_ENCODING_H
+ 
+ #include "cbor/common.h"
++#include "cbor/cbor_export.h"
+ 
+ #ifdef __cplusplus
+ extern "C" {
+@@ -20,49 +21,50 @@ extern "C" {
+  * ============================================================================
+  */
+ 
+-size_t cbor_encode_uint8(uint8_t, unsigned char *, size_t);
++CBOR_EXPORT size_t cbor_encode_uint8(uint8_t, unsigned char *, size_t);
+ 
+-size_t cbor_encode_uint16(uint16_t, unsigned char *, size_t);
++CBOR_EXPORT size_t cbor_encode_uint16(uint16_t, unsigned char *, size_t);
+ 
+-size_t cbor_encode_uint32(uint32_t, unsigned char *, size_t);
++CBOR_EXPORT size_t cbor_encode_uint32(uint32_t, unsigned char *, size_t);
+ 
+-size_t cbor_encode_uint64(uint64_t, unsigned char *, size_t);
++CBOR_EXPORT size_t cbor_encode_uint64(uint64_t, unsigned char *, size_t);
+ 
+-size_t cbor_encode_uint(uint64_t, unsigned char *, size_t);
++CBOR_EXPORT size_t cbor_encode_uint(uint64_t, unsigned char *, size_t);
+ 
+-size_t cbor_encode_negint8(uint8_t, unsigned char *, size_t);
++CBOR_EXPORT size_t cbor_encode_negint8(uint8_t, unsigned char *, size_t);
+ 
+-size_t cbor_encode_negint16(uint16_t, unsigned char *, size_t);
++CBOR_EXPORT size_t cbor_encode_negint16(uint16_t, unsigned char *, size_t);
+ 
+-size_t cbor_encode_negint32(uint32_t, unsigned char *, size_t);
++CBOR_EXPORT size_t cbor_encode_negint32(uint32_t, unsigned char *, size_t);
+ 
+-size_t cbor_encode_negint64(uint64_t, unsigned char *, size_t);
++CBOR_EXPORT size_t cbor_encode_negint64(uint64_t, unsigned char *, size_t);
+ 
+-size_t cbor_encode_negint(uint64_t, unsigned char *, size_t);
++CBOR_EXPORT size_t cbor_encode_negint(uint64_t, unsigned char *, size_t);
+ 
+-size_t cbor_encode_bytestring_start(size_t, unsigned char *, size_t);
++CBOR_EXPORT size_t cbor_encode_bytestring_start(size_t, unsigned char *,
++                                                size_t);
+ 
+-size_t cbor_encode_indef_bytestring_start(unsigned char *, size_t);
++CBOR_EXPORT size_t cbor_encode_indef_bytestring_start(unsigned char *, size_t);
+ 
+-size_t cbor_encode_string_start(size_t, unsigned char *, size_t);
++CBOR_EXPORT size_t cbor_encode_string_start(size_t, unsigned char *, size_t);
+ 
+-size_t cbor_encode_indef_string_start(unsigned char *, size_t);
++CBOR_EXPORT size_t cbor_encode_indef_string_start(unsigned char *, size_t);
+ 
+-size_t cbor_encode_array_start(size_t, unsigned char *, size_t);
++CBOR_EXPORT size_t cbor_encode_array_start(size_t, unsigned char *, size_t);
+ 
+-size_t cbor_encode_indef_array_start(unsigned char *, size_t);
++CBOR_EXPORT size_t cbor_encode_indef_array_start(unsigned char *, size_t);
+ 
+-size_t cbor_encode_map_start(size_t, unsigned char *, size_t);
++CBOR_EXPORT size_t cbor_encode_map_start(size_t, unsigned char *, size_t);
+ 
+-size_t cbor_encode_indef_map_start(unsigned char *, size_t);
++CBOR_EXPORT size_t cbor_encode_indef_map_start(unsigned char *, size_t);
+ 
+-size_t cbor_encode_tag(uint64_t, unsigned char *, size_t);
++CBOR_EXPORT size_t cbor_encode_tag(uint64_t, unsigned char *, size_t);
+ 
+-size_t cbor_encode_bool(bool, unsigned char *, size_t);
++CBOR_EXPORT size_t cbor_encode_bool(bool, unsigned char *, size_t);
+ 
+-size_t cbor_encode_null(unsigned char *, size_t);
++CBOR_EXPORT size_t cbor_encode_null(unsigned char *, size_t);
+ 
+-size_t cbor_encode_undef(unsigned char *, size_t);
++CBOR_EXPORT size_t cbor_encode_undef(unsigned char *, size_t);
+ 
+ /** Encodes a half-precision float
+  *
+@@ -90,15 +92,15 @@ size_t cbor_encode_undef(unsigned char *, size_t);
+  * @param buffer_size Available space in the buffer
+  * @return number of bytes written
+  */
+-size_t cbor_encode_half(float, unsigned char *, size_t);
++CBOR_EXPORT size_t cbor_encode_half(float, unsigned char *, size_t);
+ 
+-size_t cbor_encode_single(float, unsigned char *, size_t);
++CBOR_EXPORT size_t cbor_encode_single(float, unsigned char *, size_t);
+ 
+-size_t cbor_encode_double(double, unsigned char *, size_t);
++CBOR_EXPORT size_t cbor_encode_double(double, unsigned char *, size_t);
+ 
+-size_t cbor_encode_break(unsigned char *, size_t);
++CBOR_EXPORT size_t cbor_encode_break(unsigned char *, size_t);
+ 
+-size_t cbor_encode_ctrl(uint8_t, unsigned char *, size_t);
++CBOR_EXPORT size_t cbor_encode_ctrl(uint8_t, unsigned char *, size_t);
+ 
+ #ifdef __cplusplus
+ }
+diff --git a/src/cbor/floats_ctrls.h b/src/cbor/floats_ctrls.h
+index 7e60620..82449da 100644
+--- a/src/cbor/floats_ctrls.h
++++ b/src/cbor/floats_ctrls.h
+@@ -9,6 +9,7 @@
+ #define LIBCBOR_FLOATS_CTRLS_H
+ 
+ #include "cbor/common.h"
++#include "cbor/cbor_export.h"
+ 
+ #ifdef __cplusplus
+ extern "C" {
+@@ -25,14 +26,14 @@ extern "C" {
+  * @param item[borrow] A float or ctrl item
+  * @return Is this a ctrl value?
+  */
+-bool cbor_float_ctrl_is_ctrl(const cbor_item_t *item);
++CBOR_EXPORT bool cbor_float_ctrl_is_ctrl(const cbor_item_t *item);
+ 
+ /** Get the float width
+  *
+  * @param item[borrow] A float or ctrl item
+  * @return The width.
+  */
+-cbor_float_width cbor_float_get_width(const cbor_item_t *item);
++CBOR_EXPORT cbor_float_width cbor_float_get_width(const cbor_item_t *item);
+ 
+ /** Get a half precision float
+  *
+@@ -41,7 +42,7 @@ cbor_float_width cbor_float_get_width(const cbor_item_t *item);
+  * @param[borrow] A half precision float
+  * @return half precision value
+  */
+-float cbor_float_get_float2(const cbor_item_t *item);
++CBOR_EXPORT float cbor_float_get_float2(const cbor_item_t *item);
+ 
+ /** Get a single precision float
+  *
+@@ -50,7 +51,7 @@ float cbor_float_get_float2(const cbor_item_t *item);
+  * @param[borrow] A signle precision float
+  * @return single precision value
+  */
+-float cbor_float_get_float4(const cbor_item_t *item);
++CBOR_EXPORT float cbor_float_get_float4(const cbor_item_t *item);
+ 
+ /** Get a double precision float
+  *
+@@ -59,7 +60,7 @@ float cbor_float_get_float4(const cbor_item_t *item);
+  * @param[borrow] A double precision float
+  * @return double precision value
+  */
+-double cbor_float_get_float8(const cbor_item_t *item);
++CBOR_EXPORT double cbor_float_get_float8(const cbor_item_t *item);
+ 
+ /** Get the float value represented as double
+  *
+@@ -68,14 +69,14 @@ double cbor_float_get_float8(const cbor_item_t *item);
+  * @param[borrow] Any float
+  * @return double precision value
+  */
+-double cbor_float_get_float(const cbor_item_t *item);
++CBOR_EXPORT double cbor_float_get_float(const cbor_item_t *item);
+ 
+ /** Get value from a boolean ctrl item
+  *
+  * @param item[borrow] A ctrl item
+  * @return boolean value
+  */
+-bool cbor_get_bool(const cbor_item_t *item);
++CBOR_EXPORT bool cbor_get_bool(const cbor_item_t *item);
+ 
+ /** Constructs a new ctrl item
+  *
+@@ -83,7 +84,7 @@ bool cbor_get_bool(const cbor_item_t *item);
+  *
+  * @return **new** 1B ctrl or `NULL` upon memory allocation failure
+  */
+-cbor_item_t *cbor_new_ctrl();
++CBOR_EXPORT cbor_item_t *cbor_new_ctrl();
+ 
+ /** Constructs a new float item
+  *
+@@ -91,7 +92,7 @@ cbor_item_t *cbor_new_ctrl();
+  *
+  * @return **new** 2B float or `NULL` upon memory allocation failure
+  */
+-cbor_item_t *cbor_new_float2();
++CBOR_EXPORT cbor_item_t *cbor_new_float2();
+ 
+ /** Constructs a new float item
+  *
+@@ -99,7 +100,7 @@ cbor_item_t *cbor_new_float2();
+  *
+  * @return **new** 4B float or `NULL` upon memory allocation failure
+  */
+-cbor_item_t *cbor_new_float4();
++CBOR_EXPORT cbor_item_t *cbor_new_float4();
+ 
+ /** Constructs a new float item
+  *
+@@ -107,26 +108,26 @@ cbor_item_t *cbor_new_float4();
+  *
+  * @return **new** 8B float or `NULL` upon memory allocation failure
+  */
+-cbor_item_t *cbor_new_float8();
++CBOR_EXPORT cbor_item_t *cbor_new_float8();
+ 
+ /** Constructs new null ctrl item
+  *
+  * @return **new** null ctrl item or `NULL` upon memory allocation failure
+  */
+-cbor_item_t *cbor_new_null();
++CBOR_EXPORT cbor_item_t *cbor_new_null();
+ 
+ /** Constructs new undef ctrl item
+  *
+  * @return **new** undef ctrl item or `NULL` upon memory allocation failure
+  */
+-cbor_item_t *cbor_new_undef();
++CBOR_EXPORT cbor_item_t *cbor_new_undef();
+ 
+ /** Constructs new boolean ctrl item
+  *
+  * @param value The value to use
+  * @return **new** boolen ctrl item or `NULL` upon memory allocation failure
+  */
+-cbor_item_t *cbor_build_bool(bool value);
++CBOR_EXPORT cbor_item_t *cbor_build_bool(bool value);
+ 
+ /** Assign a control value
+  *
+@@ -139,70 +140,70 @@ cbor_item_t *cbor_build_bool(bool value);
+  * @param value The simple value to assign. Please consult the standard for
+  * 	allowed values
+  */
+-void cbor_set_ctrl(cbor_item_t *item, uint8_t value);
++CBOR_EXPORT void cbor_set_ctrl(cbor_item_t *item, uint8_t value);
+ 
+ /** Assign a boolean value to a boolean ctrl item
+  *
+  * @param item[borrow] A ctrl item
+  * @param value The simple value to assign.
+  */
+-void cbor_set_bool(cbor_item_t *item, bool value);
++CBOR_EXPORT void cbor_set_bool(cbor_item_t *item, bool value);
+ 
+ /** Assigns a float value
+  *
+  * @param item[borrow] A half precision float
+  * @param value The value to assign
+  */
+-void cbor_set_float2(cbor_item_t *item, float value);
++CBOR_EXPORT void cbor_set_float2(cbor_item_t *item, float value);
+ 
+ /** Assigns a float value
+  *
+  * @param item[borrow] A single precision float
+  * @param value The value to assign
+  */
+-void cbor_set_float4(cbor_item_t *item, float value);
++CBOR_EXPORT void cbor_set_float4(cbor_item_t *item, float value);
+ 
+ /** Assigns a float value
+  *
+  * @param item[borrow] A double precision float
+  * @param value The value to assign
+  */
+-void cbor_set_float8(cbor_item_t *item, double value);
++CBOR_EXPORT void cbor_set_float8(cbor_item_t *item, double value);
+ 
+ /** Reads the control value
+  *
+  * @param item[borrow] A ctrl item
+  * @return the simple value
+  */
+-uint8_t cbor_ctrl_value(const cbor_item_t *item);
++CBOR_EXPORT uint8_t cbor_ctrl_value(const cbor_item_t *item);
+ 
+ /** Constructs a new float
+  *
+  * @param value the value to use
+  * @return **new** float
+  */
+-cbor_item_t *cbor_build_float2(float value);
++CBOR_EXPORT cbor_item_t *cbor_build_float2(float value);
+ 
+ /** Constructs a new float
+  *
+  * @param value the value to use
+  * @return **new** float or `NULL` upon memory allocation failure
+  */
+-cbor_item_t *cbor_build_float4(float value);
++CBOR_EXPORT cbor_item_t *cbor_build_float4(float value);
+ 
+ /** Constructs a new float
+  *
+  * @param value the value to use
+  * @return **new** float or `NULL` upon memory allocation failure
+  */
+-cbor_item_t *cbor_build_float8(double value);
++CBOR_EXPORT cbor_item_t *cbor_build_float8(double value);
+ 
+ /** Constructs a ctrl item
+  *
+  * @param value the value to use
+  * @return **new** ctrl item or `NULL` upon memory allocation failure
+  */
+-cbor_item_t *cbor_build_ctrl(uint8_t value);
++CBOR_EXPORT cbor_item_t *cbor_build_ctrl(uint8_t value);
+ 
+ #ifdef __cplusplus
+ }
+diff --git a/src/cbor/ints.h b/src/cbor/ints.h
+index f965c29..793882e 100644
+--- a/src/cbor/ints.h
++++ b/src/cbor/ints.h
+@@ -9,6 +9,7 @@
+ #define LIBCBOR_INTS_H
+ 
+ #include "cbor/common.h"
++#include "cbor/cbor_export.h"
+ 
+ #ifdef __cplusplus
+ extern "C" {
+@@ -25,35 +26,35 @@ extern "C" {
+  * @param item[borrow] positive or negative integer
+  * @return the value
+  */
+-uint8_t cbor_get_uint8(const cbor_item_t *item);
++CBOR_EXPORT uint8_t cbor_get_uint8(const cbor_item_t *item);
+ 
+ /** Extracts the integer value
+  *
+  * @param item[borrow] positive or negative integer
+  * @return the value
+  */
+-uint16_t cbor_get_uint16(const cbor_item_t *item);
++CBOR_EXPORT uint16_t cbor_get_uint16(const cbor_item_t *item);
+ 
+ /** Extracts the integer value
+  *
+  * @param item[borrow] positive or negative integer
+  * @return the value
+  */
+-uint32_t cbor_get_uint32(const cbor_item_t *item);
++CBOR_EXPORT uint32_t cbor_get_uint32(const cbor_item_t *item);
+ 
+ /** Extracts the integer value
+  *
+  * @param item[borrow] positive or negative integer
+  * @return the value
+  */
+-uint64_t cbor_get_uint64(const cbor_item_t *item);
++CBOR_EXPORT uint64_t cbor_get_uint64(const cbor_item_t *item);
+ 
+ /** Extracts the integer value
+  *
+  * @param item[borrow] positive or negative integer
+  * @return the value, extended to `uint64_t`
+  */
+-uint64_t cbor_get_int(const cbor_item_t *item);
++CBOR_EXPORT uint64_t cbor_get_int(const cbor_item_t *item);
+ 
+ /** Assigns the integer value
+  *
+@@ -61,7 +62,7 @@ uint64_t cbor_get_int(const cbor_item_t *item);
+  * @param value the value to assign. For negative integer, the logical value is
+  * `-value - 1`
+  */
+-void cbor_set_uint8(cbor_item_t *item, uint8_t value);
++CBOR_EXPORT void cbor_set_uint8(cbor_item_t *item, uint8_t value);
+ 
+ /** Assigns the integer value
+  *
+@@ -69,7 +70,7 @@ void cbor_set_uint8(cbor_item_t *item, uint8_t value);
+  * @param value the value to assign. For negative integer, the logical value is
+  * `-value - 1`
+  */
+-void cbor_set_uint16(cbor_item_t *item, uint16_t value);
++CBOR_EXPORT void cbor_set_uint16(cbor_item_t *item, uint16_t value);
+ 
+ /** Assigns the integer value
+  *
+@@ -77,7 +78,7 @@ void cbor_set_uint16(cbor_item_t *item, uint16_t value);
+  * @param value the value to assign. For negative integer, the logical value is
+  * `-value - 1`
+  */
+-void cbor_set_uint32(cbor_item_t *item, uint32_t value);
++CBOR_EXPORT void cbor_set_uint32(cbor_item_t *item, uint32_t value);
+ 
+ /** Assigns the integer value
+  *
+@@ -85,14 +86,14 @@ void cbor_set_uint32(cbor_item_t *item, uint32_t value);
+  * @param value the value to assign. For negative integer, the logical value is
+  * `-value - 1`
+  */
+-void cbor_set_uint64(cbor_item_t *item, uint64_t value);
++CBOR_EXPORT void cbor_set_uint64(cbor_item_t *item, uint64_t value);
+ 
+ /** Queries the integer width
+  *
+  *  @param item[borrow] positive or negative integer item
+  *  @return the width
+  */
+-cbor_int_width cbor_int_get_width(const cbor_item_t *item);
++CBOR_EXPORT cbor_int_width cbor_int_get_width(const cbor_item_t *item);
+ 
+ /** Marks the integer item as a positive integer
+  *
+@@ -100,7 +101,7 @@ cbor_int_width cbor_int_get_width(const cbor_item_t *item);
+  *
+  * @param item[borrow] positive or negative integer item
+  */
+-void cbor_mark_uint(cbor_item_t *item);
++CBOR_EXPORT void cbor_mark_uint(cbor_item_t *item);
+ 
+ /** Marks the integer item as a negative integer
+  *
+@@ -108,7 +109,7 @@ void cbor_mark_uint(cbor_item_t *item);
+  *
+  * @param item[borrow] positive or negative integer item
+  */
+-void cbor_mark_negint(cbor_item_t *item);
++CBOR_EXPORT void cbor_mark_negint(cbor_item_t *item);
+ 
+ /** Allocates new integer with 1B width
+  *
+@@ -117,7 +118,7 @@ void cbor_mark_negint(cbor_item_t *item);
+  * @return **new** positive integer or `NULL` on memory allocation failure. The
+  * value is not initialized
+  */
+-cbor_item_t *cbor_new_int8();
++CBOR_EXPORT cbor_item_t *cbor_new_int8();
+ 
+ /** Allocates new integer with 2B width
+  *
+@@ -126,7 +127,7 @@ cbor_item_t *cbor_new_int8();
+  * @return **new** positive integer or `NULL` on memory allocation failure. The
+  * value is not initialized
+  */
+-cbor_item_t *cbor_new_int16();
++CBOR_EXPORT cbor_item_t *cbor_new_int16();
+ 
+ /** Allocates new integer with 4B width
+  *
+@@ -135,7 +136,7 @@ cbor_item_t *cbor_new_int16();
+  * @return **new** positive integer or `NULL` on memory allocation failure. The
+  * value is not initialized
+  */
+-cbor_item_t *cbor_new_int32();
++CBOR_EXPORT cbor_item_t *cbor_new_int32();
+ 
+ /** Allocates new integer with 8B width
+  *
+@@ -144,63 +145,63 @@ cbor_item_t *cbor_new_int32();
+  * @return **new** positive integer or `NULL` on memory allocation failure. The
+  * value is not initialized
+  */
+-cbor_item_t *cbor_new_int64();
++CBOR_EXPORT cbor_item_t *cbor_new_int64();
+ 
+ /** Constructs a new positive integer
+  *
+  * @param value the value to use
+  * @return **new** positive integer or `NULL` on memory allocation failure
+  */
+-cbor_item_t *cbor_build_uint8(uint8_t value);
++CBOR_EXPORT cbor_item_t *cbor_build_uint8(uint8_t value);
+ 
+ /** Constructs a new positive integer
+  *
+  * @param value the value to use
+  * @return **new** positive integer or `NULL` on memory allocation failure
+  */
+-cbor_item_t *cbor_build_uint16(uint16_t value);
++CBOR_EXPORT cbor_item_t *cbor_build_uint16(uint16_t value);
+ 
+ /** Constructs a new positive integer
+  *
+  * @param value the value to use
+  * @return **new** positive integer or `NULL` on memory allocation failure
+  */
+-cbor_item_t *cbor_build_uint32(uint32_t value);
++CBOR_EXPORT cbor_item_t *cbor_build_uint32(uint32_t value);
+ 
+ /** Constructs a new positive integer
+  *
+  * @param value the value to use
+  * @return **new** positive integer or `NULL` on memory allocation failure
+  */
+-cbor_item_t *cbor_build_uint64(uint64_t value);
++CBOR_EXPORT cbor_item_t *cbor_build_uint64(uint64_t value);
+ 
+ /** Constructs a new negative integer
+  *
+  * @param value the value to use
+  * @return **new** negative integer or `NULL` on memory allocation failure
+  */
+-cbor_item_t *cbor_build_negint8(uint8_t value);
++CBOR_EXPORT cbor_item_t *cbor_build_negint8(uint8_t value);
+ 
+ /** Constructs a new negative integer
+  *
+  * @param value the value to use
+  * @return **new** negative integer or `NULL` on memory allocation failure
+  */
+-cbor_item_t *cbor_build_negint16(uint16_t value);
++CBOR_EXPORT cbor_item_t *cbor_build_negint16(uint16_t value);
+ 
+ /** Constructs a new negative integer
+  *
+  * @param value the value to use
+  * @return **new** negative integer or `NULL` on memory allocation failure
+  */
+-cbor_item_t *cbor_build_negint32(uint32_t value);
++CBOR_EXPORT cbor_item_t *cbor_build_negint32(uint32_t value);
+ 
+ /** Constructs a new negative integer
+  *
+  * @param value the value to use
+  * @return **new** negative integer or `NULL` on memory allocation failure
+  */
+-cbor_item_t *cbor_build_negint64(uint64_t value);
++CBOR_EXPORT cbor_item_t *cbor_build_negint64(uint64_t value);
+ 
+ #ifdef __cplusplus
+ }
+diff --git a/src/cbor/maps.h b/src/cbor/maps.h
+index 4e27eef..0e54bfd 100644
+--- a/src/cbor/maps.h
++++ b/src/cbor/maps.h
+@@ -9,6 +9,7 @@
+ #define LIBCBOR_MAPS_H
+ 
+ #include "cbor/common.h"
++#include "cbor/cbor_export.h"
+ 
+ #ifdef __cplusplus
+ extern "C" {
+@@ -25,28 +26,28 @@ extern "C" {
+  * @param item[borrow] A map
+  * @return The number of pairs
+  */
+-size_t cbor_map_size(const cbor_item_t *item);
++CBOR_EXPORT size_t cbor_map_size(const cbor_item_t *item);
+ 
+ /** Get the size of the allocated storage
+  *
+  * @param item[borrow] A map
+  * @return Allocated storage size (as the number of #cbor_pair items)
+  */
+-size_t cbor_map_allocated(const cbor_item_t *item);
++CBOR_EXPORT size_t cbor_map_allocated(const cbor_item_t *item);
+ 
+ /** Create a new definite map
+  *
+  * @param size The number of slots to preallocate
+  * @return **new** definite map. `NULL` on malloc failure.
+  */
+-cbor_item_t *cbor_new_definite_map(size_t size);
++CBOR_EXPORT cbor_item_t *cbor_new_definite_map(size_t size);
+ 
+ /** Create a new indefinite map
+  *
+  * @param size The number of slots to preallocate
+  * @return **new** definite map. `NULL` on malloc failure.
+  */
+-cbor_item_t *cbor_new_indefinite_map();
++CBOR_EXPORT cbor_item_t *cbor_new_indefinite_map();
+ 
+ /** Add a pair to the map
+  *
+@@ -58,7 +59,7 @@ cbor_item_t *cbor_new_indefinite_map();
+  * @return `true` on success, `false` if either reallocation failed or the
+  * preallcoated storage is full
+  */
+-bool cbor_map_add(cbor_item_t *item, struct cbor_pair pair);
++CBOR_EXPORT bool cbor_map_add(cbor_item_t *item, struct cbor_pair pair);
+ 
+ /** Add a key to the map
+  *
+@@ -69,7 +70,7 @@ bool cbor_map_add(cbor_item_t *item, struct cbor_pair pair);
+  * @return `true` on success, `false` if either reallocation failed or the
+  * preallcoated storage is full
+  */
+-bool _cbor_map_add_key(cbor_item_t *item, cbor_item_t *key);
++CBOR_EXPORT bool _cbor_map_add_key(cbor_item_t *item, cbor_item_t *key);
+ 
+ /** Add a value to the map
+  *
+@@ -80,21 +81,21 @@ bool _cbor_map_add_key(cbor_item_t *item, cbor_item_t *key);
+  * @return `true` on success, `false` if either reallocation failed or the
+  * preallcoated storage is full
+  */
+-bool _cbor_map_add_value(cbor_item_t *item, cbor_item_t *value);
++CBOR_EXPORT bool _cbor_map_add_value(cbor_item_t *item, cbor_item_t *value);
+ 
+ /** Is this map definite?
+  *
+  * @param item[borrow] A map
+  * @return Is this map definite?
+  */
+-bool cbor_map_is_definite(const cbor_item_t *item);
++CBOR_EXPORT bool cbor_map_is_definite(const cbor_item_t *item);
+ 
+ /** Is this map indefinite?
+  *
+  * @param item[borrow] A map
+  * @return Is this map indefinite?
+  */
+-bool cbor_map_is_indefinite(const cbor_item_t *item);
++CBOR_EXPORT bool cbor_map_is_indefinite(const cbor_item_t *item);
+ 
+ /** Get the pairs storage
+  *
+@@ -102,7 +103,7 @@ bool cbor_map_is_indefinite(const cbor_item_t *item);
+  * @return Array of #cbor_map_size pairs. Manipulation is possible as long as
+  * references remain valid.
+  */
+-struct cbor_pair *cbor_map_handle(const cbor_item_t *item);
++CBOR_EXPORT struct cbor_pair *cbor_map_handle(const cbor_item_t *item);
+ 
+ #ifdef __cplusplus
+ }
+diff --git a/src/cbor/serialization.h b/src/cbor/serialization.h
+index ef68cf8..4ba4a7a 100644
+--- a/src/cbor/serialization.h
++++ b/src/cbor/serialization.h
+@@ -9,6 +9,7 @@
+ #define LIBCBOR_SERIALIZATION_H
+ 
+ #include "cbor/common.h"
++#include "cbor/cbor_export.h"
+ 
+ #ifdef __cplusplus
+ extern "C" {
+@@ -27,8 +28,9 @@ extern "C" {
+  * @param buffer_size Size of the \p buffer
+  * @return Length of the result. 0 on failure.
+  */
+-size_t cbor_serialize(const cbor_item_t *item, cbor_mutable_data buffer,
+-                      size_t buffer_size);
++CBOR_EXPORT size_t cbor_serialize(const cbor_item_t *item,
++                                  cbor_mutable_data buffer,
++                                  size_t buffer_size);
+ 
+ /** Serialize the given item, allocating buffers as needed
+  *
+@@ -42,8 +44,9 @@ size_t cbor_serialize(const cbor_item_t *item, cbor_mutable_data buffer,
+  * @return Length of the result. 0 on failure, in which case \p buffer is
+  * ``NULL``.
+  */
+-size_t cbor_serialize_alloc(const cbor_item_t *item, cbor_mutable_data *buffer,
+-                            size_t *buffer_size);
++CBOR_EXPORT size_t cbor_serialize_alloc(const cbor_item_t *item,
++                                        cbor_mutable_data *buffer,
++                                        size_t *buffer_size);
+ 
+ /** Serialize an uint
+  *
+@@ -52,7 +55,8 @@ size_t cbor_serialize_alloc(const cbor_item_t *item, cbor_mutable_data *buffer,
+  * @param buffer_size Size of the \p buffer
+  * @return Length of the result. 0 on failure.
+  */
+-size_t cbor_serialize_uint(const cbor_item_t *, cbor_mutable_data, size_t);
++CBOR_EXPORT size_t cbor_serialize_uint(const cbor_item_t *, cbor_mutable_data,
++                                       size_t);
+ 
+ /** Serialize a negint
+  *
+@@ -61,7 +65,8 @@ size_t cbor_serialize_uint(const cbor_item_t *, cbor_mutable_data, size_t);
+  * @param buffer_size Size of the \p buffer
+  * @return Length of the result. 0 on failure.
+  */
+-size_t cbor_serialize_negint(const cbor_item_t *, cbor_mutable_data, size_t);
++CBOR_EXPORT size_t cbor_serialize_negint(const cbor_item_t *, cbor_mutable_data,
++                                         size_t);
+ 
+ /** Serialize a bytestring
+  *
+@@ -70,7 +75,8 @@ size_t cbor_serialize_negint(const cbor_item_t *, cbor_mutable_data, size_t);
+  * @param buffer_size Size of the \p buffer
+  * @return Length of the result. 0 on failure.
+  */
+-size_t cbor_serialize_bytestring(const cbor_item_t *, cbor_mutable_data,
++CBOR_EXPORT size_t cbor_serialize_bytestring(const cbor_item_t *,
++                                             cbor_mutable_data,
+                                  size_t);
+ 
+ /** Serialize a string
+@@ -80,7 +86,8 @@ size_t cbor_serialize_bytestring(const cbor_item_t *, cbor_mutable_data,
+  * @param buffer_size Size of the \p buffer
+  * @return Length of the result. 0 on failure.
+  */
+-size_t cbor_serialize_string(const cbor_item_t *, cbor_mutable_data, size_t);
++CBOR_EXPORT size_t cbor_serialize_string(const cbor_item_t *, cbor_mutable_data,
++                                         size_t);
+ 
+ /** Serialize an array
+  *
+@@ -89,7 +96,8 @@ size_t cbor_serialize_string(const cbor_item_t *, cbor_mutable_data, size_t);
+  * @param buffer_size Size of the \p buffer
+  * @return Length of the result. 0 on failure.
+  */
+-size_t cbor_serialize_array(const cbor_item_t *, cbor_mutable_data, size_t);
++CBOR_EXPORT size_t cbor_serialize_array(const cbor_item_t *, cbor_mutable_data,
++                                        size_t);
+ 
+ /** Serialize a map
+  *
+@@ -98,7 +106,8 @@ size_t cbor_serialize_array(const cbor_item_t *, cbor_mutable_data, size_t);
+  * @param buffer_size Size of the \p buffer
+  * @return Length of the result. 0 on failure.
+  */
+-size_t cbor_serialize_map(const cbor_item_t *, cbor_mutable_data, size_t);
++CBOR_EXPORT size_t cbor_serialize_map(const cbor_item_t *, cbor_mutable_data,
++                                      size_t);
+ 
+ /** Serialize a tag
+  *
+@@ -107,7 +116,8 @@ size_t cbor_serialize_map(const cbor_item_t *, cbor_mutable_data, size_t);
+  * @param buffer_size Size of the \p buffer
+  * @return Length of the result. 0 on failure.
+  */
+-size_t cbor_serialize_tag(const cbor_item_t *, cbor_mutable_data, size_t);
++CBOR_EXPORT size_t cbor_serialize_tag(const cbor_item_t *, cbor_mutable_data,
++                                      size_t);
+ 
+ /** Serialize a
+  *
+@@ -116,8 +126,9 @@ size_t cbor_serialize_tag(const cbor_item_t *, cbor_mutable_data, size_t);
+  * @param buffer_size Size of the \p buffer
+  * @return Length of the result. 0 on failure.
+  */
+-size_t cbor_serialize_float_ctrl(const cbor_item_t *, cbor_mutable_data,
+-                                 size_t);
++CBOR_EXPORT size_t cbor_serialize_float_ctrl(const cbor_item_t *,
++                                             cbor_mutable_data,
++                                             size_t);
+ 
+ #ifdef __cplusplus
+ }
+diff --git a/src/cbor/streaming.h b/src/cbor/streaming.h
+index d9d54b8..afdc835 100644
+--- a/src/cbor/streaming.h
++++ b/src/cbor/streaming.h
+@@ -10,6 +10,7 @@
+ 
+ #include "callbacks.h"
+ #include "cbor/common.h"
++#include "cbor/cbor_export.h"
+ 
+ #ifdef __cplusplus
+ extern "C" {
+@@ -25,7 +26,7 @@ extern "C" {
+  * @param callbacks The callback bundle
+  * @param context An arbitrary pointer to allow for maintaining context.
+  */
+-struct cbor_decoder_result cbor_stream_decode(
++CBOR_EXPORT struct cbor_decoder_result cbor_stream_decode(
+     cbor_data buffer, size_t buffer_size,
+     const struct cbor_callbacks* callbacks, void* context);
+ 
+diff --git a/src/cbor/strings.h b/src/cbor/strings.h
+index 342d098..4930d4b 100644
+--- a/src/cbor/strings.h
++++ b/src/cbor/strings.h
+@@ -9,6 +9,7 @@
+ #define LIBCBOR_STRINGS_H
+ 
+ #include "cbor/common.h"
++#include "cbor/cbor_export.h"
+ 
+ #ifdef __cplusplus
+ extern "C" {
+@@ -27,7 +28,7 @@ extern "C" {
+  * @param item[borrow] a definite string
+  * @return length of the string. Zero if no chunk has been attached yet
+  */
+-size_t cbor_string_length(const cbor_item_t *item);
++CBOR_EXPORT size_t cbor_string_length(const cbor_item_t *item);
+ 
+ /** The number of codepoints in this string
+  *
+@@ -36,21 +37,21 @@ size_t cbor_string_length(const cbor_item_t *item);
+  * @param item[borrow] A string
+  * @return The number of codepoints in this string
+  */
+-size_t cbor_string_codepoint_count(const cbor_item_t *item);
++CBOR_EXPORT size_t cbor_string_codepoint_count(const cbor_item_t *item);
+ 
+ /** Is the string definite?
+  *
+  * @param item[borrow] a string
+  * @return Is the string definite?
+  */
+-bool cbor_string_is_definite(const cbor_item_t *item);
++CBOR_EXPORT bool cbor_string_is_definite(const cbor_item_t *item);
+ 
+ /** Is the string indefinite?
+  *
+  * @param item[borrow] a string
+  * @return Is the string indefinite?
+  */
+-bool cbor_string_is_indefinite(const cbor_item_t *item);
++CBOR_EXPORT bool cbor_string_is_indefinite(const cbor_item_t *item);
+ 
+ /** Get the handle to the underlying string
+  *
+@@ -61,7 +62,7 @@ bool cbor_string_is_indefinite(const cbor_item_t *item);
+  * @return The address of the underlying string. `NULL` if no data have been
+  * assigned yet.
+  */
+-cbor_mutable_data cbor_string_handle(const cbor_item_t *item);
++CBOR_EXPORT cbor_mutable_data cbor_string_handle(const cbor_item_t *item);
+ 
+ /** Set the handle to the underlying string
+  *
+@@ -76,9 +77,9 @@ cbor_mutable_data cbor_string_handle(const cbor_item_t *item);
+  * libcbor will deallocate it when appropriate using its free function
+  * @param length Length of the data block
+  */
+-void cbor_string_set_handle(cbor_item_t *item,
+-                            cbor_mutable_data CBOR_RESTRICT_POINTER data,
+-                            size_t length);
++CBOR_EXPORT void cbor_string_set_handle(cbor_item_t *item,
++                                        cbor_mutable_data CBOR_RESTRICT_POINTER data,
++                                        size_t length);
+ 
+ /** Get the handle to the array of chunks
+  *
+@@ -88,14 +89,14 @@ void cbor_string_set_handle(cbor_item_t *item,
+  * @param item[borrow] A indefinite string
+  * @return array of #cbor_string_chunk_count definite strings
+  */
+-cbor_item_t **cbor_string_chunks_handle(const cbor_item_t *item);
++CBOR_EXPORT cbor_item_t **cbor_string_chunks_handle(const cbor_item_t *item);
+ 
+ /** Get the number of chunks this string consist of
+  *
+  * @param item[borrow] A indefinite string
+  * @return The chunk count. 0 for freshly created items.
+  */
+-size_t cbor_string_chunk_count(const cbor_item_t *item);
++CBOR_EXPORT size_t cbor_string_chunk_count(const cbor_item_t *item);
+ 
+ /** Appends a chunk to the string
+  *
+@@ -108,7 +109,7 @@ size_t cbor_string_chunk_count(const cbor_item_t *item);
+  * @return true on success. false on realloc failure. In that case, the refcount
+  * of `chunk` is not increased and the `item` is left intact.
+  */
+-bool cbor_string_add_chunk(cbor_item_t *item, cbor_item_t *chunk);
++CBOR_EXPORT bool cbor_string_add_chunk(cbor_item_t *item, cbor_item_t *chunk);
+ 
+ /** Creates a new definite string
+  *
+@@ -116,7 +117,7 @@ bool cbor_string_add_chunk(cbor_item_t *item, cbor_item_t *chunk);
+  *
+  * @return **new** definite string. `NULL` on malloc failure.
+  */
+-cbor_item_t *cbor_new_definite_string();
++CBOR_EXPORT cbor_item_t *cbor_new_definite_string();
+ 
+ /** Creates a new indefinite string
+  *
+@@ -124,7 +125,7 @@ cbor_item_t *cbor_new_definite_string();
+  *
+  * @return **new** indefinite string. `NULL` on malloc failure.
+  */
+-cbor_item_t *cbor_new_indefinite_string();
++CBOR_EXPORT cbor_item_t *cbor_new_indefinite_string();
+ 
+ /** Creates a new string and initializes it
+  *
+@@ -133,7 +134,7 @@ cbor_item_t *cbor_new_indefinite_string();
+  * @param val A null-terminated UTF-8 string
+  * @return A **new** string with content `handle`. `NULL` on malloc failure.
+  */
+-cbor_item_t *cbor_build_string(const char *val);
++CBOR_EXPORT cbor_item_t *cbor_build_string(const char *val);
+ 
+ /** Creates a new string and initializes it
+  *
+@@ -142,7 +143,7 @@ cbor_item_t *cbor_build_string(const char *val);
+  * @param val A UTF-8 string, at least \p length long (excluding the null byte)
+  * @return A **new** string with content `handle`. `NULL` on malloc failure.
+  */
+-cbor_item_t *cbor_build_stringn(const char *val, size_t length);
++CBOR_EXPORT cbor_item_t *cbor_build_stringn(const char *val, size_t length);
+ 
+ #ifdef __cplusplus
+ }
+diff --git a/src/cbor/tags.h b/src/cbor/tags.h
+index 6e76c82..6b8f871 100644
+--- a/src/cbor/tags.h
++++ b/src/cbor/tags.h
+@@ -9,6 +9,7 @@
+ #define LIBCBOR_TAGS_H
+ 
+ #include "cbor/common.h"
++#include "cbor/cbor_export.h"
+ 
+ #ifdef __cplusplus
+ extern "C" {
+@@ -26,28 +27,28 @@ extern "C" {
+  * @return **new** tag. Item reference is `NULL`. Returns `NULL` upon
+  * 	memory allocation failure
+  */
+-cbor_item_t *cbor_new_tag(uint64_t value);
++CBOR_EXPORT cbor_item_t *cbor_new_tag(uint64_t value);
+ 
+ /** Get the tagged item
+  *
+  * @param item[borrow] A tag
+  * @return **incref** the tagged item
+  */
+-cbor_item_t *cbor_tag_item(const cbor_item_t *item);
++CBOR_EXPORT cbor_item_t *cbor_tag_item(const cbor_item_t *item);
+ 
+ /** Get tag value
+  *
+  * @param item[borrow] A tag
+  * @return The tag value. Please consult the tag repository
+  */
+-uint64_t cbor_tag_value(const cbor_item_t *item);
++CBOR_EXPORT uint64_t cbor_tag_value(const cbor_item_t *item);
+ 
+ /** Set the tagged item
+  *
+  * @param item[borrow] A tag
+  * @param tagged_item[incref] The item to tag
+  */
+-void cbor_tag_set_item(cbor_item_t *item, cbor_item_t *tagged_item);
++CBOR_EXPORT void cbor_tag_set_item(cbor_item_t *item, cbor_item_t *tagged_item);
+ 
+ /** Build a new tag
+  *
+@@ -55,7 +56,7 @@ void cbor_tag_set_item(cbor_item_t *item, cbor_item_t *tagged_item);
+  * @param value Tag value
+  * @return **new** tag item
+  */
+-cbor_item_t *cbor_build_tag(uint64_t value, cbor_item_t *item);
++CBOR_EXPORT cbor_item_t *cbor_build_tag(uint64_t value, cbor_item_t *item);
+ 
+ #ifdef __cplusplus
+ }

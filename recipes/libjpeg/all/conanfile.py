@@ -56,7 +56,7 @@ class LibjpegConan(ConanFile):
             else:
                 tools.replace_in_file("makefile.vc", "(cvars)", "(cvarsmt)")
                 tools.replace_in_file("makefile.vc", "(conlibs)", "(conlibsmt)")
-            target = "libjpeg.dll.lib" if self.options.shared else "libjpeg.lib"
+            target = "{}/libjpeg.lib".format( "shared" if self.options.shared else "static" )
             with tools.vcvars(self.settings):
                 self.run("nmake -f makefile.vc {} {}".format(" ".join(make_args), target))
 
@@ -105,8 +105,10 @@ class LibjpegConan(ConanFile):
         if self.settings.compiler == "Visual Studio":
             for filename in ["jpeglib.h", "jerror.h", "jconfig.h", "jmorecfg.h"]:
                 self.copy(pattern=filename, dst="include", src=self._source_subfolder, keep_path=False)
+            
             self.copy(pattern="*.lib", dst="lib", src=self._source_subfolder, keep_path=False)
-            self.copy(pattern="*.dll", dst="bin", src=self._source_subfolder, keep_path=False)
+            if self.options.shared:
+                self.copy(pattern="*.dll", dst="bin", src=self._source_subfolder, keep_path=False)
         else:
             autotools = self._configure_autotools()
             autotools.install()
@@ -121,11 +123,10 @@ class LibjpegConan(ConanFile):
                     os.unlink(os.path.join(bindir, file))
 
     def package_info(self):
+        self.cpp_info.names["cmake_find_package"] = "JPEG"
+        self.cpp_info.names["cmake_find_package_multi"] = "JPEG"
         if self.settings.compiler == "Visual Studio":
-            lib = "libjpeg"
-            if self.options.shared:
-                lib += ".dll.lib"
-            self.cpp_info.libs = [lib]
+            self.cpp_info.libs = ["libjpeg"]
         else:
             self.cpp_info.libs = ["jpeg"]
         if not self.options.shared:

@@ -29,7 +29,7 @@ class UnitsConan(ConanFile):
         }.get(str(self.settings.compiler))
         if not minimum_version:
             self.output.warn(
-                "Unknown compiler: assuminging compiler supports C++14")
+                "Unknown compiler: assuming compiler supports C++14")
         else:
             if Version(self.settings.compiler.version) < minimum_version:
                 raise ConanInvalidConfiguration(

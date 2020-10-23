@@ -86,6 +86,9 @@ class LibX264Conan(ConanFile):
                 self._autotools.flags.append('-%s' % str(self.settings.compiler.runtime))
                 # cannot open program database ... if multiple CL.EXE write to the same .PDB file, please use /FS
                 self._autotools.flags.append('-FS')
+            if tools.is_apple_os(self.settings.os) and self.settings.get_safe("os.version"):
+                self._autotools.flags.append(tools.apple_deployment_target_flag(self.settings.os,
+                                                                                self.settings.os.version))
             self._autotools.configure(args=args, build=False, vars=self._override_env, configure_dir=self._source_subfolder)
         return self._autotools
 

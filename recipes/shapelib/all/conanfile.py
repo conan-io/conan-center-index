@@ -9,8 +9,8 @@ class ShapelibConan(ConanFile):
     topics = ("conan", "shapelib", "osgeo", "shapefile", "esri", "geospatial")
     homepage = "https://github.com/OSGeo/shapelib"
     url = "https://github.com/conan-io/conan-center-index"
-    exports_sources = 'CMakeLists.txt'
-    generators = 'cmake'
+    exports_sources = "CMakeLists.txt"
+    generators = "cmake"
     settings = "os", "arch", "compiler", "build_type"
     options = {"shared": [True, False], "fPIC": [True, False]}
     default_options = {"shared": False, "fPIC": True}
@@ -28,17 +28,18 @@ class ShapelibConan(ConanFile):
             del self.options.fPIC
 
     def configure(self):
+        if self.options.shared:
+            del self.options.fPIC
         del self.settings.compiler.libcxx
         del self.settings.compiler.cppstd
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
         os.rename(self.name + "-" + self.version, self._source_subfolder)
-        tools.replace_in_file(os.path.join(self._source_subfolder, "CMakeLists.txt"),
-                              "set(BUILD_TEST ON)",
-                              "")
 
     def build(self):
+        tools.replace_in_file(os.path.join(self._source_subfolder, "CMakeLists.txt"),
+                              "set(BUILD_TEST ON)", "")
         cmake = CMake(self)
         cmake.configure(build_folder=self._build_subfolder)
         cmake.build(target="shp")
@@ -57,8 +58,10 @@ class ShapelibConan(ConanFile):
         self.copy(pattern="*.dll", dst="bin", src=build_bin_dir, keep_path=False)
 
     def package_info(self):
-        self.cpp_info.names["cmake_find_package"] = "shp"
-        self.cpp_info.names["cmake_find_package_multi"] = "shp"
-        self.cpp_info.libs = tools.collect_libs(self)
+        self.cpp_info.names["cmake_find_package"] = "shapelib"
+        self.cpp_info.names["cmake_find_package_multi"] = "shapelib"
+        self.cpp_info.components["shp"].names["cmake_find_package"] = "shp"
+        self.cpp_info.components["shp"].names["cmake_find_package_multi"] = "shp"
+        self.cpp_info.components["shp"].libs = tools.collect_libs(self)
         if self.settings.os == "Linux":
-            self.cpp_info.system_libs.append("m")
+            self.cpp_info.components["shp"].system_libs.append("m")

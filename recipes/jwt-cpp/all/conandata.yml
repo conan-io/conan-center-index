@@ -2,7 +2,13 @@ sources:
     "0.3.1":
         url: "https://github.com/Thalhammer/jwt-cpp/archive/v0.3.1.zip"
         sha256: "c19677c2bbfc51c9a0b3825bc5787a7cdea14e5d4c578283e5d9e94025865420"
+    "0.4.0":
+        url: "https://github.com/Thalhammer/jwt-cpp/archive/v0.4.0.zip"
+        sha256: "8a267a283715cda7746182a63f5ee4d6398058991bb71c212e99038297346538"
 patches:
     "0.3.1":
         - patch_file: "patches/0002-fix-openssl-change-version.patch"
+          base_path: "source_subfolder"
+    "0.4.0":
+        - patch_file: "patches/0003-fix-picojson-header-location-for-conan.patch"
           base_path: "source_subfolder"

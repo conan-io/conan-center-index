@@ -10,11 +10,12 @@ class CbloscConan(ConanFile):
     homepage = "https://github.com/Blosc/c-blosc"
     url = "https://github.com/conan-io/conan-center-index"
     exports_sources = ["CMakeLists.txt", "patches/**"]
-    generators = "cmake"
+    generators = "cmake", "cmake_find_package"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
+        "simd_intrinsics": [None, "sse2", "avx2"],
         "with_lz4": [True, False],
         "with_snappy": [True, False],
         "with_zlib": [True, False],
@@ -23,6 +24,7 @@ class CbloscConan(ConanFile):
     default_options = {
         "shared": False,
         "fPIC": True,
+        "simd_intrinsics": "sse2",
         "with_lz4": True,
         "with_snappy": True,
         "with_zlib": True,
@@ -44,32 +46,37 @@ class CbloscConan(ConanFile):
             del self.options.fPIC
 
     def configure(self):
+        if self.options.shared:
+            del self.options.fPIC
         del self.settings.compiler.cppstd
-        # Snappy is a C++ library with C API. C-Blosc only uses the C API of
-        # Snappy, but if C-Blosc is shared (and snappy static), we have to use
-        # C++ linker.
-        if not (self.options.with_snappy and self.options.shared):
-            del self.settings.compiler.libcxx
+        del self.settings.compiler.libcxx
+        if self.settings.arch not in ["x86", "x86_64"]:
+            del self.options.simd_intrinsics
 
     def requirements(self):
         if self.options.with_lz4:
-            self.requires.add("lz4/1.9.2")
+            self.requires("lz4/1.9.2")
         if self.options.with_snappy:
-            self.requires.add("snappy/1.1.8")
+            self.requires("snappy/1.1.8")
         if self.options.with_zlib:
-            self.requires.add("zlib/1.2.11")
+            self.requires("zlib/1.2.11")
         if self.options.with_zstd:
-            self.requires.add("zstd/1.4.4")
+            self.requires("zstd/1.4.5")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
         os.rename(self.name + "-" + self.version, self._source_subfolder)
 
     def build(self):
-        for patch in self.conan_data["patches"][self.version]:
-            tools.patch(**patch)
+        self._patch_sources()
         cmake = self._configure_cmake()
         cmake.build()
+
+    def _patch_sources(self):
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            tools.patch(**patch)
+        # Remove folder containing custom FindLib.cmake files
+        tools.rmdir(os.path.join(self._source_subfolder, "cmake"))
 
     def _configure_cmake(self):
         if self._cmake:
@@ -79,16 +86,20 @@ class CbloscConan(ConanFile):
         self._cmake.definitions["BUILD_STATIC"] = not self.options.shared
         self._cmake.definitions["BUILD_SHARED"] = self.options.shared
         self._cmake.definitions["BUILD_TESTS"] = False
+        if tools.Version(self.version) >= "1.20.0":
+            self._cmake.definitions["BUILD_FUZZERS"] = False
         self._cmake.definitions["BUILD_BENCHMARKS"] = False
-        self._cmake.definitions["DEACTIVATE_SSE2"] = False
-        self._cmake.definitions["DEACTIVATE_AVX2"] = False
+        simd_intrinsics = self.options.get_safe("simd_intrinsics", False)
+        self._cmake.definitions["DEACTIVATE_SSE2"] = simd_intrinsics not in ["sse2", "avx2"]
+        self._cmake.definitions["DEACTIVATE_AVX2"] = simd_intrinsics != "avx2"
         self._cmake.definitions["DEACTIVATE_LZ4"] = not self.options.with_lz4
         self._cmake.definitions["DEACTIVATE_SNAPPY"] = not self.options.with_snappy
         self._cmake.definitions["DEACTIVATE_ZLIB"] = not self.options.with_zlib
         self._cmake.definitions["DEACTIVATE_ZSTD"] = not self.options.with_zstd
         self._cmake.definitions["DEACTIVATE_SYMBOLS_CHECK"] = True
         self._cmake.definitions["PREFER_EXTERNAL_LZ4"] = True
-        self._cmake.definitions["PREFER_EXTERNAL_SNAPPY"] = True
+        if tools.Version(self.version) < "1.19.0":
+            self._cmake.definitions["PREFER_EXTERNAL_SNAPPY"] = True
         self._cmake.definitions["PREFER_EXTERNAL_ZLIB"] = True
         self._cmake.definitions["PREFER_EXTERNAL_ZSTD"] = True
         self._cmake.configure(build_folder=self._build_subfolder)
@@ -103,6 +114,7 @@ class CbloscConan(ConanFile):
         tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
 
     def package_info(self):
+        self.cpp_info.names["pkg_config"] = "blosc"
         self.cpp_info.libs = tools.collect_libs(self)
         if self.settings.os == "Linux":
             self.cpp_info.system_libs.append("pthread")
