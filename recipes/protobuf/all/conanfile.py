@@ -50,7 +50,7 @@ class ProtobufConan(ConanFile):
             del self.options.with_zlib
 
     def requirements(self):
-        if self.options.get_safe("with_zlib")
+        if self.options.get_safe("with_zlib"):
             self.requires("zlib/1.2.11")
 
     @property
