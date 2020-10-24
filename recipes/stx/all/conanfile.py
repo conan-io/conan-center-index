@@ -47,12 +47,14 @@ class STXConan(ConanFile):
 
         if compiler == 'Visual Studio' and compiler_version < 16:
             raise ConanInvalidConfiguration(
-                'STX requires C++17 support, use at least VS 2019'
+                'STX requires C++17 language and standard library features '
+                'which VS < 2019 lacks'
             )
 
         if compiler == 'gcc' and compiler_version < 8:
             raise ConanInvalidConfiguration(
-                'STX requires C++17 support, use at least GCC 8'
+                'STX requires C++17 language and standard library features '
+                'which GCC < 8 lacks'
             )
 
         if (compiler == 'clang' and compiler.libcxx and
@@ -60,7 +62,7 @@ class STXConan(ConanFile):
                 compiler_version < 9):
             raise ConanInvalidConfiguration(
                 'STX requires C++17 language and standard library features '
-                'which clang & libc++ < 10 lack'
+                'which clang < 9 with libc++ lacks'
             )
 
         if (compiler == 'clang' and compiler.libcxx and
@@ -68,13 +70,13 @@ class STXConan(ConanFile):
                 compiler_version < 10):
             raise ConanInvalidConfiguration(
                 'STX requires C++17 language and standard library features '
-                'which clang & libc++ < 10 lack'
+                'which clang < 10 with libc++ lacks'
             )
 
         if compiler == 'apple-clang':
             raise ConanInvalidConfiguration(
                 'STX requires C++17 language and standard library features '
-                'which apple-clang and libc++ lack'
+                'which apple-clang with libc++ lacks'
             )
 
         if (compiler == 'Visual Studio' and self.options.shared and
