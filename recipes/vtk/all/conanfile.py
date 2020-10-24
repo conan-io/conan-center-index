@@ -17,7 +17,7 @@ class VTKConan(ConanFile):
     source_subfolder = "source_subfolder"
     topics = ("conan", "VTK", "3D rendering", "2D plotting", "3D interaction", "3D manipulation", 
                 "graphics", "image processing", "scientific visualization", "geometry modeling")
-    groups = ["StandAlone", "Rendering", "MPI", "Qt", "Imaging", "Tk", "Views", "Web"]
+    groups = ["StandAlone", "Rendering", "MPI", "Qt", "Imaging", "Views", "Web"]
     modules = [
         "ChartsCore",
         "CommonComputationalGeometry",
