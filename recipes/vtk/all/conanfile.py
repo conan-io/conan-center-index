@@ -152,9 +152,9 @@ class VTKConan(ConanFile):
     }, **{"group_{}".format(group.lower()): [True, False] for group in groups},
     **{"module_{}".format(module.lower()): [True, False] for module in modules}
     )
-    # default_options are set to the same values as clean VTK 9.0.1 cmake installation has.
+    # default_options are set to the same values as clean VTK 9.0.1 cmake installation has, except "shared" which Conan require to be "False" by default.
     default_options = dict({
-        "shared": True,
+        "shared": False,
         "fPIC": False,
         }, **{"group_{}".format(group.lower()): True for group in groups if (group in ["StandAlone", "Rendering"])},
         **{"group_{}".format(group.lower()): False for group in groups if (group not in ["StandAlone", "Rendering"])},
