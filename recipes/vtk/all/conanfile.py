@@ -243,14 +243,15 @@ class VTKConan(ConanFile):
         self._cmake.definitions["BUILD_SHARED_LIBS"] = "ON" if self.options.shared else "OFF"
 
         for group in self.groups:
-            self._cmake.definitions["VTK_Group_{}".format(group)] = self.options.get_safe("group_{}".format(group.lower()))
+            self._cmake.definitions["VTK_GROUP_ENABLE_{}".format(group)] = self.options.get_safe("group_{}".format(group.lower()), default="NO")
         for module in self.modules:
-            self._cmake.definitions["Module_vtk{}".format(module)] = self.options.get_safe("module_{}".format(module.lower()))
+            self._cmake.definitions["VTK_MODULE_ENABLE_VTK_{}".format(module)] = self.options.get_safe("module_{}".format(module.lower()), default="NO")
 
-        if self.options.group_qt:
-            self._cmake.definitions["VTK_MODULE_ENABLE_VTK_GUISupportQt"] = "YES" if self.options.group_qt else "NO"
-            self._cmake.definitions["VTK_MODULE_ENABLE_VTK_GUISupportQtOpenGL"] = "YES" if self.options.group_qt else "NO"
-            self._cmake.definitions["VTK_MODULE_ENABLE_VTK_RenderingQt"] = "YES" if self.options.group_qt else "NO"
+        # Should we add below defines depending on "group_qt"? Or rather that should be driven by package consumer "vtk:module_guisupportqt=True" and "vtk:module_renderingqt=True"?
+        self._cmake.definitions["VTK_MODULE_ENABLE_VTK_GUISupportQt"] = "YES" if self.options.group_qt else "NO"
+        self._cmake.definitions["VTK_MODULE_ENABLE_VTK_RenderingQt"] = "YES" if self.options.group_qt else "NO"
+        # Looks like "VTK_MODULE_ENABLE_VTK_GUISupportQtOpenGL" doesn't exist in VTK 9.0.1
+        # self._cmake.definitions["VTK_MODULE_ENABLE_VTK_GUISupportQtOpenGL"] = "YES" if self.options.group_qt else "NO"
 
         # Introducing groups and modules
         # self._cmake.definitions["VTK_Group_StandAlone"] = "OFF" if self.options.minimal else "ON"
