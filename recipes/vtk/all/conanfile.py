@@ -15,13 +15,155 @@ class VTKConan(ConanFile):
     settings = "os", "arch", "compiler", "build_type"
     exports_sources = ["CMakeLists.txt", "patches/**"]
     source_subfolder = "source_subfolder"
-    options = {"shared": [True, False], "with_qt": [True, False], "mpi": [True, False],
-                "fPIC": [True, False], "minimal": [True, False], "ioxml": [True, False],
-                "ioexport": [True, False], "mpi_minimal": [True, False]}
-    default_options = {"shared": False, "with_qt": False, "mpi": False, "fPIC": False,
-                "minimal": False, "ioxml": False, "ioexport": False, "mpi_minimal": False}
     topics = ("conan", "VTK", "3D rendering", "2D plotting", "3D interaction", "3D manipulation", 
                 "graphics", "image processing", "scientific visualization", "geometry modeling")
+    groups = ["StandAlone", "Rendering", "MPI", "Qt", "Imaging", "Tk", "Views", "Web"]
+    modules = [
+        "ChartsCore",
+        "CommonComputationalGeometry",
+        "CommonCore",
+        "CommonDataModel",
+        "CommonExecutionModel",
+        "CommonMisc",
+        "CommonSystem",
+        "CommonTransforms",
+        "diy2",
+        "DomainsChemistry",
+        "DomainsChemistryOpenGL2",
+        "DomainsParallelChemistry",
+        "FiltersAMR",
+        "FiltersCore",
+        "FiltersExtraction",
+        "FiltersFlowPaths",
+        "FiltersGeneral",
+        "FiltersGeneric",
+        "FiltersGeometry",
+        "FiltersHybrid",
+        "FiltersHyperTree",
+        "FiltersImaging",
+        "FiltersImaging",
+        "FiltersModeling",
+        "FiltersParallel",
+        "FiltersParallelDIY2",
+        "FiltersParallelGeometry",
+        "FiltersParallelImaging",
+        "FiltersParallelMPI",
+        "FiltersParallelVerdict",
+        "FiltersPoints",
+        "FiltersProgrammable",
+        "FiltersSelection",
+        "FiltersSMP",
+        "FiltersSources",
+        "FiltersStatistics",
+        "FiltersTexture",
+        "FiltersTopology",
+        "FiltersVerdict",
+        "GeovisCore",
+        "GUISupportQt",
+        "GUISupportQtSQL",
+        "ImagingColor",
+        "ImagingColor",
+        "ImagingCore",
+        "ImagingFourier",
+        "ImagingFourier",
+        "ImagingGeneral",
+        "ImagingGeneral",
+        "ImagingHybrid",
+        "ImagingHybrid",
+        "ImagingMath",
+        "ImagingMath",
+        "ImagingMorphological",
+        "ImagingMorphological",
+        "ImagingOpenGL2",
+        "ImagingSources",
+        "ImagingSources",
+        "ImagingStatistics",
+        "ImagingStatistics",
+        "ImagingStencil",
+        "ImagingStencil",
+        "InfovisCore",
+        "InfovisLayout",
+        "InteractionImage",
+        "InteractionImage",
+        "InteractionStyle",
+        "InteractionWidgets",
+        "IOAMR",
+        "IOAsynchronous",
+        "IOCityGML",
+        "IOCore",
+        "IOEnSight",
+        "IOExodus",
+        "IOExport",
+        "IOExportOpenGL2",
+        "IOExportPDF",
+        "IOGeometry",
+        "IOImage",
+        "IOImport",
+        "IOInfovis",
+        "IOLegacy",
+        "IOLSDyna",
+        "IOMINC",
+        "IOMovie",
+        "IOMPIImage",
+        "IOMPIParallel",
+        "IONetCDF",
+        "IOParallel",
+        "IOParallelNetCDF",
+        "IOParallelXML",
+        "IOPLY",
+        "IOSegY",
+        "IOSQL",
+        "IOTecplotTable",
+        "IOVeraOut",
+        "IOVideo",
+        "IOXdmf3",
+        "IOXML",
+        "IOXMLParser",
+        "ParallelCore",
+        "ParallelMPI",
+        "RenderingAnnotation",
+        "RenderingContext2D",
+        "RenderingContextOpenGL2",
+        "RenderingCore",
+        "RenderingFreeType",
+        "RenderingGL2PSOpenGL2",
+        "RenderingImage",
+        "RenderingImage",
+        "RenderingLabel",
+        "RenderingLICOpenGL2",
+        "RenderingLOD",
+        "RenderingOpenGL2",
+        "RenderingOpenVR",
+        "RenderingQt",
+        "RenderingTk",
+        "RenderingVolume",
+        "RenderingVolumeOpenGL2",
+        "ViewsContext2D",
+        "ViewsContext2D",
+        "ViewsCore",
+        "ViewsGeovis",
+        "ViewsInfovis",
+        "ViewsQt",
+        "WebCore",
+        "WebGLExporter",
+        "WebPython",
+    ]
+    options = dict({"shared": [True, False], "fPIC": [True, False],
+    }, **{"group_{}".format(group.lower()): [True, False] for group in groups},
+    **{"module_{}".format(module.lower()): [True, False] for module in modules}
+    )
+    # default_options are set to the same values as clean VTK 9.0.1 cmake installation has.
+    default_options = dict({
+        "shared": True,
+        "fPIC": False,
+        }, **{"group_{}".format(group.lower()): True for group in groups if (group in ["StandAlone", "Rendering"])},
+        **{"group_{}".format(group.lower()): False for group in groups if (group not in ["StandAlone", "Rendering"])},
+        **{"module_{}".format(module.lower()): False for module in modules})
+    # options = {"shared": [True, False], "with_qt": [True, False], "mpi": [True, False],
+    #             "fPIC": [True, False], "minimal": [True, False], "ioxml": [True, False],
+    #             "ioexport": [True, False], "mpi_minimal": [True, False]}
+    # default_options = {"shared": False, "with_qt": False, "mpi": False, "fPIC": False,
+    #             "minimal": False, "ioxml": False, "ioexport": False, "mpi_minimal": False}
     short_paths = True
     _cmake = None
 
@@ -75,17 +217,22 @@ class VTKConan(ConanFile):
     #             installer.install(item + self._system_package_architecture())
     
     def requirements(self):
-        # 1) Is it correct that "opengl/system" is required for every OS?
-        # 2) Is it correct that "opengl/system" is even when compiled without Qt?
-        self.requires("opengl/system")
+        if self.options.group_rendering:
+            # 1) Is it correct that "opengl/system" is required for every OS?
+            # 2) Is it correct that "opengl/system" is required even when compiled without Qt? Probably this question was answered itself due to above "if"
+            self.requires("opengl/system")
         if self.settings.os == "Linux":
             if self.options.x11:
                 # Do we need "xorg/system"?
                 self.requires("xorg/system")
-        if self.options.with_qt:
+        if self.options.module_ioxdmf3:
+            self.requires("boost/1.74.0") # DO NOT SUBMIT! Was "boost/1.66.0@conan/stable" foe VTK 8.2.0. What should be for VTK 9.0.1?
+        # if self.options.with_qt:
+        if self.options.group_qt:
             # FIXME: Missing qt recipe. Qt recipe PR: https://github.com/conan-io/conan-center-index/pull/1759
             # When qt available, "self.requires("qt/5.15.1")" should replace below line.
             raise ConanInvalidConfiguration("qt is not (yet) available on conan-center-index")
+        
                 
     def _configure_cmake(self):
         if self._cmake:
@@ -95,23 +242,34 @@ class VTKConan(ConanFile):
         self._cmake.definitions["BUILD_EXAMPLES"] = "OFF"
         self._cmake.definitions["BUILD_SHARED_LIBS"] = "ON" if self.options.shared else "OFF"
 
-        self._cmake.definitions["VTK_Group_StandAlone"] = "OFF" if self.options.minimal else "ON"
-        self._cmake.definitions["VTK_Group_Rendering"] = "OFF" if self.options.minimal else "ON"
+        for group in self.groups:
+            self._cmake.definitions["VTK_Group_{}".format(group)] = self.options.get_safe("group_{}".format(group.lower()))
+        for module in self.modules:
+            self._cmake.definitions["Module_vtk{}".format(module)] = self.options.get_safe("module_{}".format(module.lower()))
 
-        self._cmake.definitions["Module_vtkIOXML"] = "ON" if self.options.ioxml else "OFF"
+        if self.options.group_qt:
+            self._cmake.definitions["VTK_MODULE_ENABLE_VTK_GUISupportQt"] = "YES" if self.options.group_qt else "NO"
+            self._cmake.definitions["VTK_MODULE_ENABLE_VTK_GUISupportQtOpenGL"] = "YES" if self.options.group_qt else "NO"
+            self._cmake.definitions["VTK_MODULE_ENABLE_VTK_RenderingQt"] = "YES" if self.options.group_qt else "NO"
 
-        self._cmake.definitions["Module_vtkIOExport"] = "ON" if self.options.ioexport else "OFF"
-
-        self._cmake.definitions["VTK_Group_Qt"] = "ON" if self.options.with_qt else "OFF"
-        self._cmake.definitions["VTK_MODULE_ENABLE_VTK_GUISupportQt"] = "YES" if self.options.with_qt else "NO"
-        self._cmake.definitions["VTK_MODULE_ENABLE_VTK_GUISupportQtOpenGL"] = "YES" if self.options.with_qt else "NO"
-        self._cmake.definitions["VTK_MODULE_ENABLE_VTK_RenderingQt"] = "YES" if self.options.with_qt else "NO"
-
-        self._cmake.definitions["VTK_Group_MPI"] = "ON" if self.options.mpi else "OFF"
-        self._cmake.definitions["Module_vtkIOParallelXML"] = "ON" if self.options.mpi else "OFF"
-
-        self._cmake.definitions["Module_vtkIOParallelXML"] = "ON" if self.options.mpi_minimal else "OFF"
-        self._cmake.definitions["Module_vtkParallelMPI"] = "ON" if self.options.mpi_minimal else "OFF"
+        # Introducing groups and modules
+        # self._cmake.definitions["VTK_Group_StandAlone"] = "OFF" if self.options.minimal else "ON"
+        # self._cmake.definitions["VTK_Group_Rendering"] = "OFF" if self.options.minimal else "ON"
+        #
+        # self._cmake.definitions["Module_vtkIOXML"] = "ON" if self.options.ioxml else "OFF"
+        #
+        # self._cmake.definitions["Module_vtkIOExport"] = "ON" if self.options.ioexport else "OFF"
+        #
+        # self._cmake.definitions["VTK_Group_Qt"] = "ON" if self.options.with_qt else "OFF"
+        # self._cmake.definitions["VTK_MODULE_ENABLE_VTK_GUISupportQt"] = "YES" if self.options.with_qt else "NO"
+        # self._cmake.definitions["VTK_MODULE_ENABLE_VTK_GUISupportQtOpenGL"] = "YES" if self.options.with_qt else "NO"
+        # self._cmake.definitions["VTK_MODULE_ENABLE_VTK_RenderingQt"] = "YES" if self.options.with_qt else "NO"
+        #
+        # self._cmake.definitions["VTK_Group_MPI"] = "ON" if self.options.mpi else "OFF"
+        # self._cmake.definitions["Module_vtkIOParallelXML"] = "ON" if self.options.mpi else "OFF"
+        #
+        # self._cmake.definitions["Module_vtkIOParallelXML"] = "ON" if self.options.mpi_minimal else "OFF"
+        # self._cmake.definitions["Module_vtkParallelMPI"] = "ON" if self.options.mpi_minimal else "OFF"
 
         # if self.settings.os == 'Macos':
         #     self.env['DYLD_LIBRARY_PATH'] = os.path.join(self.build_folder, 'lib')
@@ -121,12 +279,13 @@ class VTKConan(ConanFile):
         return self._cmake
 
     def build(self):
-        if self.options.with_qt:
+        # if self.options.with_qt:
+        if self.options.group_qt:
             if self.options["qt"].shared == False:
-                raise ConanInvalidConfiguration("VTK option 'with_qt' requires 'qt:shared=True'")
+                raise ConanInvalidConfiguration("VTK option 'group_qt' requires 'qt:shared=True'")
             if self.settings.os == "Linux":
                 if self.options["qt"].qtx11extras == False:
-                    raise ConanInvalidConfiguration("VTK option 'with_qt' requires 'qt:qtx11extras=True'")
+                    raise ConanInvalidConfiguration("VTK option 'group_qt' requires 'qt:qtx11extras=True'")
                 
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
             tools.patch(**patch)
@@ -175,7 +334,8 @@ class VTKConan(ConanFile):
             self.cpp_info.system_libs.append('pthread')
             self.cpp_info.system_libs.append('dl')            # 'libvtksys-7.1.a' require 'dlclose', 'dlopen', 'dlsym' and 'dlerror' which on CentOS are in 'dl' library
             
-        if not self.options.shared and self.options.with_qt:
+        # if not self.options.shared and self.options.with_qt:
+        if not self.options.shared and self.options.group_qt:
             if self.settings.os == 'Windows':
                 self.cpp_info.system_libs.append('Ws2_32')    # 'vtksys-9.0d.lib' require 'gethostbyname', 'gethostname', 'WSAStartup' and 'WSACleanup' which are in 'Ws2_32.lib' library
                 self.cpp_info.system_libs.append('Psapi')     # 'vtksys-9.0d.lib' require 'GetProcessMemoryInfo' which is in 'Psapi.lib' library
