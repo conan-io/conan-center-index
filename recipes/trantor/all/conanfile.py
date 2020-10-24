@@ -51,6 +51,9 @@ class TrantorConan(ConanFile):
         tools.replace_in_file(os.path.join(self._source_subfolder, "CMakeLists.txt"),
                               "\"${CMAKE_CURRENT_SOURCE_DIR}/cmake_modules/Findc-ares.cmake\"",
                               "#")
+        tools.replace_in_file(os.path.join(self._source_subfolder, "CMakeLists.txt"),
+                              "ws2_32 Rpcrt4",
+                              "ws2_32 Rpcrt4 Crypt32 Secur32")
         tools.rmdir(os.path.join(self._source_subfolder, "cmake_modules"))
 
     def source(self):
