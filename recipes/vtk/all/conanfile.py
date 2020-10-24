@@ -1,12 +1,12 @@
 import os
 import re
 
-from fnmatch import fnmatch
 from conans import ConanFile, CMake, tools
 from conans.errors import ConanInvalidConfiguration
 
 class VTKConan(ConanFile):
     name = "vtk"
+    # version = "9.0.1"  # DO NOT SUBMIT!!! Remove this line in final version of PR to conan-center-index
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://vtk.org/"
     license = "BSD license"
@@ -32,12 +32,6 @@ class VTKConan(ConanFile):
     def configure(self):
         if self.settings.os == "Linux":
             raise ConanInvalidConfiguration("VTK Conan package do not support Linux yet. Any help appreciated!")
-        if self.options.with_qt:
-            if self.options["qt"].shared == False:
-                raise ConanInvalidConfiguration("VTK option 'with_qt' requires 'qt:shared=True'")
-            if self.settings.os == "Linux":
-                if self.options["qt"].qtx11extras == False:
-                    raise ConanInvalidConfiguration("VTK option 'with_qt' requires 'qt:qtx11extras=True'")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
@@ -91,7 +85,7 @@ class VTKConan(ConanFile):
         if self.options.with_qt:
             # FIXME: Missing qt recipe. Qt recipe PR: https://github.com/conan-io/conan-center-index/pull/1759
             # When qt available, "self.requires("qt/5.15.1")" should replace below line.
-            raise ConanInvalidConfiguration("VTK option 'with_qt' requires 'qt:shared=True'")
+            raise ConanInvalidConfiguration("qt is not (yet) available on conan-center-index")
                 
     def _configure_cmake(self):
         if self._cmake:
@@ -99,26 +93,25 @@ class VTKConan(ConanFile):
         self._cmake = CMake(self)
         self._cmake.definitions["BUILD_TESTING"] = "OFF"
         self._cmake.definitions["BUILD_EXAMPLES"] = "OFF"
-        self._cmake.definitions["BUILD_SHARED_LIBS"] = self.options.shared
+        self._cmake.definitions["BUILD_SHARED_LIBS"] = "ON" if self.options.shared else "OFF"
 
-        if self.options.minimal:
-            self._cmake.definitions["VTK_Group_StandAlone"] = "OFF"
-            self._cmake.definitions["VTK_Group_Rendering"] = "OFF"
-        if self.options.ioxml:
-            self._cmake.definitions["Module_vtkIOXML"] = "ON"
-        if self.options.ioexport:
-            self._cmake.definitions["Module_vtkIOExport"] = "ON"
-        if self.options.qt:
-            self._cmake.definitions["VTK_Group_Qt"] = "ON"
-            self._cmake.definitions["VTK_MODULE_ENABLE_VTK_GUISupportQt"] = "YES"
-            self._cmake.definitions["VTK_MODULE_ENABLE_VTK_GUISupportQtOpenGL"] = "YES"
-            self._cmake.definitions["VTK_MODULE_ENABLE_VTK_RenderingQt"] = "YES"
-        if self.options.mpi:
-            self._cmake.definitions["VTK_Group_MPI"] = "ON"
-            self._cmake.definitions["Module_vtkIOParallelXML"] = "ON"
-        if self.options.mpi_minimal:
-            self._cmake.definitions["Module_vtkIOParallelXML"] = "ON"
-            self._cmake.definitions["Module_vtkParallelMPI"] = "ON"
+        self._cmake.definitions["VTK_Group_StandAlone"] = "OFF" if self.options.minimal else "ON"
+        self._cmake.definitions["VTK_Group_Rendering"] = "OFF" if self.options.minimal else "ON"
+
+        self._cmake.definitions["Module_vtkIOXML"] = "ON" if self.options.ioxml else "OFF"
+
+        self._cmake.definitions["Module_vtkIOExport"] = "ON" if self.options.ioexport else "OFF"
+
+        self._cmake.definitions["VTK_Group_Qt"] = "ON" if self.options.with_qt else "OFF"
+        self._cmake.definitions["VTK_MODULE_ENABLE_VTK_GUISupportQt"] = "YES" if self.options.with_qt else "NO"
+        self._cmake.definitions["VTK_MODULE_ENABLE_VTK_GUISupportQtOpenGL"] = "YES" if self.options.with_qt else "NO"
+        self._cmake.definitions["VTK_MODULE_ENABLE_VTK_RenderingQt"] = "YES" if self.options.with_qt else "NO"
+
+        self._cmake.definitions["VTK_Group_MPI"] = "ON" if self.options.mpi else "OFF"
+        self._cmake.definitions["Module_vtkIOParallelXML"] = "ON" if self.options.mpi else "OFF"
+
+        self._cmake.definitions["Module_vtkIOParallelXML"] = "ON" if self.options.mpi_minimal else "OFF"
+        self._cmake.definitions["Module_vtkParallelMPI"] = "ON" if self.options.mpi_minimal else "OFF"
 
         # if self.settings.os == 'Macos':
         #     self.env['DYLD_LIBRARY_PATH'] = os.path.join(self.build_folder, 'lib')
@@ -128,6 +121,13 @@ class VTKConan(ConanFile):
         return self._cmake
 
     def build(self):
+        if self.options.with_qt:
+            if self.options["qt"].shared == False:
+                raise ConanInvalidConfiguration("VTK option 'with_qt' requires 'qt:shared=True'")
+            if self.settings.os == "Linux":
+                if self.options["qt"].qtx11extras == False:
+                    raise ConanInvalidConfiguration("VTK option 'with_qt' requires 'qt:qtx11extras=True'")
+                
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
             tools.patch(**patch)
 
@@ -190,8 +190,8 @@ class VTKConan(ConanFile):
         # Why "vtknetcdf" and "vtknetcdfcpp" are treated exceptionally from all other modules?
         # There are a lot of other *.h in subfolders, should they be directly exposed too
         # or maybe those two should be removed from below?
-        self.cpp_info.includedirs = [
-            "include/vtk-{}".format(short_version),
-            "include/vtk-{}/vtknetcdf/include".format(short_version),
-            "include/vtk-{}/vtknetcdfcpp".format(short_version)
-        ]
+        self.cpp_info.includedirs.extend([
+            os.path.join("include", "vtk-{}").format(short_version),
+            os.path.join("include", "vtk-{}", "vtknetcdf", "include").format(short_version),
+            os.path.join("include", "vtk-{}", "vtknetcdfcpp").format(short_version)
+        ])
