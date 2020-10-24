@@ -6,7 +6,7 @@ from conans.errors import ConanInvalidConfiguration
 
 class VTKConan(ConanFile):
     name = "vtk"
-    # version = "9.0.1"  # DO NOT SUBMIT!!! Remove this line in final version of PR to conan-center-index
+    version = "9.0.1"  # DO NOT SUBMIT!!! Remove this line in final version of PR to conan-center-index
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://vtk.org/"
     license = "BSD license"
@@ -17,8 +17,8 @@ class VTKConan(ConanFile):
     source_subfolder = "source_subfolder"
     topics = ("conan", "VTK", "3D rendering", "2D plotting", "3D interaction", "3D manipulation", 
                 "graphics", "image processing", "scientific visualization", "geometry modeling")
-    groups = ["StandAlone", "Rendering", "MPI", "Qt", "Imaging", "Views", "Web"]
-    modules = [
+    _groups = ["StandAlone", "Rendering", "MPI", "Qt", "Imaging", "Views", "Web"]
+    _modules = [
         "ChartsCore",
         "CommonComputationalGeometry",
         "CommonCore",
@@ -149,16 +149,16 @@ class VTKConan(ConanFile):
         "WebPython",
     ]
     options = dict({"shared": [True, False], "fPIC": [True, False],
-    }, **{"group_{}".format(group.lower()): [True, False] for group in groups},
-    **{"module_{}".format(module.lower()): [True, False] for module in modules}
+    }, **{"group_{}".format(group.lower()): [True, False] for group in _groups},
+    **{"module_{}".format(module.lower()): [True, False] for module in _modules}
     )
     # default_options are set to the same values as clean VTK 9.0.1 cmake installation has, except "shared" which Conan require to be "False" by default.
     default_options = dict({
         "shared": False,
         "fPIC": False,
-        }, **{"group_{}".format(group.lower()): True for group in groups if (group in ["StandAlone", "Rendering"])},
-        **{"group_{}".format(group.lower()): False for group in groups if (group not in ["StandAlone", "Rendering"])},
-        **{"module_{}".format(module.lower()): False for module in modules})
+        }, **{"group_{}".format(group.lower()): True for group in _groups if (group in ["StandAlone", "Rendering"])},
+        **{"group_{}".format(group.lower()): False for group in _groups if (group not in ["StandAlone", "Rendering"])},
+        **{"module_{}".format(module.lower()): False for module in _modules})
     # options = {"shared": [True, False], "with_qt": [True, False], "mpi": [True, False],
     #             "fPIC": [True, False], "minimal": [True, False], "ioxml": [True, False],
     #             "ioexport": [True, False], "mpi_minimal": [True, False]}
@@ -242,9 +242,9 @@ class VTKConan(ConanFile):
         self._cmake.definitions["BUILD_EXAMPLES"] = "OFF"
         self._cmake.definitions["BUILD_SHARED_LIBS"] = "ON" if self.options.shared else "OFF"
 
-        for group in self.groups:
+        for group in self._groups:
             self._cmake.definitions["VTK_GROUP_ENABLE_{}".format(group)] = self.options.get_safe("group_{}".format(group.lower()), default="NO")
-        for module in self.modules:
+        for module in self._modules:
             self._cmake.definitions["VTK_MODULE_ENABLE_VTK_{}".format(module)] = self.options.get_safe("module_{}".format(module.lower()), default="NO")
 
         # Should we add below defines depending on "group_qt"? Or rather that should be driven by package consumer "vtk:module_guisupportqt=True" and "vtk:module_renderingqt=True"?
@@ -253,7 +253,8 @@ class VTKConan(ConanFile):
         # Looks like "VTK_MODULE_ENABLE_VTK_GUISupportQtOpenGL" doesn't exist in VTK 9.0.1
         # self._cmake.definitions["VTK_MODULE_ENABLE_VTK_GUISupportQtOpenGL"] = "YES" if self.options.group_qt else "NO"
 
-        # Introducing groups and modules
+        # I believe introducing _groups and _modules, makes this code deprecated.
+        #       Leave it temporarily until tests are finished
         # self._cmake.definitions["VTK_Group_StandAlone"] = "OFF" if self.options.minimal else "ON"
         # self._cmake.definitions["VTK_Group_Rendering"] = "OFF" if self.options.minimal else "ON"
         #
@@ -348,7 +349,7 @@ class VTKConan(ConanFile):
 
         version_split = self.version.split('.')
         short_version = "{}.{}".format(version_split[0], version_split[1])
-        # Why "vtknetcdf" and "vtknetcdfcpp" are treated exceptionally from all other modules?
+        # Why "vtknetcdf" and "vtknetcdfcpp" are treated exceptionally from all other _modules?
         # There are a lot of other *.h in subfolders, should they be directly exposed too
         # or maybe those two should be removed from below?
         self.cpp_info.includedirs.extend([
