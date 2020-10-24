@@ -10,7 +10,7 @@ class ValijsonConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/tristanpenman/valijson"
     license = "BSD-2-Clause"
-    no_copy_source = True
+    exports_sources = ["include/*", "patches/**"]
 
     @property
     def _source_subfolder(self):
@@ -20,6 +20,10 @@ class ValijsonConan(ConanFile):
         tools.get(**self.conan_data["sources"][self.version])
         extracted_dir = glob.glob(self.name + "-*/")[0]
         os.rename(extracted_dir, self._source_subfolder)
+
+        patches = self.conan_data["patches"][self.version]
+        for patch in patches:
+            tools.patch(**patch)
 
     def package(self):
         include_folder = os.path.join(self._source_subfolder, "include")
