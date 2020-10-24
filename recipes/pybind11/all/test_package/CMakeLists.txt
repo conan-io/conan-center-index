@@ -1,11 +1,7 @@
-cmake_minimum_required(VERSION 2.8.11)
+cmake_minimum_required(VERSION 3.4)
 project(test_package CXX)
 
-find_package(PythonInterp REQUIRED)
-find_package(PythonLibs REQUIRED)
-
 find_package(pybind11 REQUIRED)
-include(pybind11Tools)
 
 include("${CMAKE_BINARY_DIR}/conanbuildinfo.cmake")
 conan_basic_setup()
