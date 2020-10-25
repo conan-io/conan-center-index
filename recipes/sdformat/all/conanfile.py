@@ -69,10 +69,13 @@ class SDFormat(ConanFile):
         self.requires("tinyxml2/8.0.0")
 
     def _configure_cmake(self):
-        self.cmake = CMake(self)
-        self.cmake.definitions["BUILD_TESTING"] = False
-        self.cmake.definitions["USE_INTERNAL_URDF"] = True
-        self.cmake.configure(source_folder=self._source_subfolder)
+        if self._cmake is not None:
+            return self._cmake
+        self._cmake = CMake(self)
+        self._cmake.definitions["BUILD_TESTING"] = False
+        self._cmake.definitions["USE_INTERNAL_URDF"] = True
+        self._cmake.configure(source_folder=self._source_subfolder)
+        return self._cmake
 
     def build(self):
         self._configure_cmake()
