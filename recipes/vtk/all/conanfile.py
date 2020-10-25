@@ -14,7 +14,7 @@ class VTKConan(ConanFile):
     generators = "cmake"
     settings = "os", "arch", "compiler", "build_type"
     exports_sources = ["CMakeLists.txt", "patches/**"]
-    source_subfolder = "source_subfolder"
+    _source_subfolder = "source_subfolder"
     topics = ("conan", "VTK", "3D rendering", "2D plotting", "3D interaction", "3D manipulation", 
                 "graphics", "image processing", "scientific visualization", "geometry modeling")
     _groups = ["StandAlone", "Rendering", "MPI", "Qt", "Imaging", "Views", "Web"]
@@ -253,13 +253,14 @@ class VTKConan(ConanFile):
         if self.settings.os == "Windows":
             del self.options.fPIC
 
-    def configure(self):
-        if self.settings.os == "Linux":
-            raise ConanInvalidConfiguration("VTK Conan package do not support Linux yet. Any help appreciated!")
+    # def configure(self):
+    #     if self.settings.os == "Linux":
+    #         raise ConanInvalidConfiguration("VTK Conan package do not support Linux yet. Any help appreciated!")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
-        os.rename("{}-{}".format(self.name, self.version), self.source_subfolder)
+        extracted_dir = self.name.upper() + "-" + self.version
+        os.rename(extracted_dir, self._source_subfolder)        
 
     # Below code is inncorrect and should be removed after successful Lnx package build.
     # Until then, keeping it for reference. 
@@ -300,15 +301,13 @@ class VTKConan(ConanFile):
     
     def requirements(self):
         if self.options.group_rendering:
-            # 1) Is it correct that "opengl/system" is required for every OS?
-            # 2) Is it correct that "opengl/system" is required even when compiled without Qt? Probably this question was answered itself due to above "if"
             self.requires("opengl/system")
-        if self.settings.os == "Linux":
-            if self.options.x11:
-                # Do we need "xorg/system"?
-                self.requires("xorg/system")
+            # Is "xorg/system" needed for build? What about runtime?
+            # if self.settings.os == "Linux":
+            #     if self.options.x11:
+            #         self.requires("xorg/system")
         if self.options.module_ioxdmf3:
-            self.requires("boost/1.74.0") # DO NOT SUBMIT! Was "boost/1.66.0@conan/stable" foe VTK 8.2.0. What should be for VTK 9.0.1?
+            self.requires("boost/1.74.0") # DO NOT SUBMIT! Was "boost/1.66.0@conan/stable" for VTK 8.2.0. What should be for VTK 9.0.1?
         # if self.options.with_qt:
         if self.options.group_qt:
             # FIXME: Missing qt recipe. Qt recipe PR: https://github.com/conan-io/conan-center-index/pull/1759
@@ -333,11 +332,11 @@ class VTKConan(ConanFile):
             if self.options.get_safe("module_{}".format(module.lower()), default=False):
                 self._cmake.definitions["VTK_MODULE_ENABLE_VTK_{}".format(module)] = "WANT" if self.options.get_safe("module_{}".format(module.lower()), default=False) else "DEFAULT"
 
-        # Should we add below defines depending on "group_qt"? Or rather that should be driven by package consumer "vtk:module_guisupportqt=True" and "vtk:module_renderingqt=True"?
-        self._cmake.definitions["VTK_MODULE_ENABLE_VTK_GUISupportQt"] = "YES" if self.options.group_qt else "DEFAULT"
-        self._cmake.definitions["VTK_MODULE_ENABLE_VTK_RenderingQt"] = "YES" if self.options.group_qt else "DEFAULT"
-        # Looks like "VTK_MODULE_ENABLE_VTK_GUISupportQtOpenGL" doesn't exist in VTK 9.0.1
-        # self._cmake.definitions["VTK_MODULE_ENABLE_VTK_GUISupportQtOpenGL"] = "YES" if self.options.group_qt else "NO"
+        # # Should we add below defines depending on "group_qt"? Or rather that should be driven by package consumer "vtk:module_guisupportqt=True" and "vtk:module_renderingqt=True"?
+        # self._cmake.definitions["VTK_MODULE_ENABLE_VTK_GUISupportQt"] = "YES" if self.options.group_qt else "DEFAULT"
+        # self._cmake.definitions["VTK_MODULE_ENABLE_VTK_RenderingQt"] = "YES" if self.options.group_qt else "DEFAULT"
+        # # Looks like "VTK_MODULE_ENABLE_VTK_GUISupportQtOpenGL" doesn't exist in VTK 9.0.1
+        # # self._cmake.definitions["VTK_MODULE_ENABLE_VTK_GUISupportQtOpenGL"] = "YES" if self.options.group_qt else "NO"
 
         # I believe introducing _groups and _modules, makes this code deprecated.
         #       Leave it temporarily until tests are finished
