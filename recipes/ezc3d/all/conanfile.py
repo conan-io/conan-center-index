@@ -9,7 +9,7 @@ class Ezc3dConan(ConanFile):
     topics = ("conan", "ezc3d", "c3d")
     homepage = "https://github.com/pyomeca/ezc3d"
     url = "https://github.com/conan-io/conan-center-index"
-    exports_sources = "CMakeLists.txt"
+    exports_sources = ["CMakeLists.txt", "patches/**"]
     generators = "cmake"
     settings = "os", "arch", "compiler", "build_type"
     options = {"shared": [True, False], "fPIC": [True, False]}
@@ -37,6 +37,8 @@ class Ezc3dConan(ConanFile):
         os.rename(extracted_dir, self._source_subfolder)
 
     def _patch_sources(self):
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            tools.patch(**patch)
         # don't force PIC
         tools.replace_in_file(os.path.join(self._source_subfolder, "CMakeLists.txt"),
                               "set(CMAKE_POSITION_INDEPENDENT_CODE ON)", "")
