@@ -1,5 +1,7 @@
-from conans import ConanFile, CMake, tools
 import os
+
+from conans import CMake, ConanFile, tools
+
 
 class TestPackageConan(ConanFile):
     settings = "os", "compiler", "build_type", "arch"
@@ -7,6 +9,7 @@ class TestPackageConan(ConanFile):
 
     def build(self):
         cmake = CMake(self)
+        cmake.definitions["SDFORMAT_VER"] = tools.Version(self.deps_cpp_info["sdformat"].version).major
         cmake.configure()
         cmake.build()
 

@@ -2,12 +2,20 @@ cmake_minimum_required(VERSION 3.10.2)
 project(test_package)
 
 include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
-conan_basic_setup(TARGETS)
+conan_basic_setup()
 
-set(SDFORMAT_MAJOR_VER 10)
+set(SDFORMAT_VER "" CACHE STRING "Version of sdformat")
 
-find_package(sdformat${SDFORMAT_MAJOR_VER} REQUIRED CONFIG)
+if(NOT SDFORMAT_VER)
+    message(FATAL_ERROR "SDFORMAT_VER not set")
+endif()
+
+find_package(sdformat${SDFORMAT_VER} REQUIRED CONFIG)
 
 add_executable(${PROJECT_NAME} test_package.cpp)
-target_link_libraries(${PROJECT_NAME} sdformat${SDFORMAT_MAJOR_VER}::sdformat${SDFORMAT_MAJOR_VER})
-set_property(TARGET ${PROJECT_NAME} PROPERTY CXX_STANDARD 17)
+target_link_libraries(${PROJECT_NAME} sdformat${SDFORMAT_VER}::sdformat${SDFORMAT_VER})
+set_target_properties(${PROJECT_NAME} PROPERTIES
+    CXX_STANDARD 17
+    CXX_STANDARD_REQUIRED ON
+    CXX_EXTENSIONS ON
+)

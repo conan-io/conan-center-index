@@ -16,6 +16,7 @@ class SDFormat(ConanFile):
     options = {"fPIC": [True, False]}
     default_options = {"fPIC": True}
     generators = "cmake", "cmake_find_package_multi"
+    exports_sources = "CMakeLists.txt"
 
     _cmake = None
 
