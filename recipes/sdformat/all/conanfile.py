@@ -65,7 +65,7 @@ class SDFormat(ConanFile):
         os.rename("sdformat-sdformat{}_{}".format(version_major, self.version), self._source_subfolder)
 
     def requirements(self):
-        self.requires("ignition-math/6.4.0")
+        self.requires("ignition-math/6.6.0")
         self.requires("tinyxml2/8.0.0")
 
     def _configure_cmake(self):
