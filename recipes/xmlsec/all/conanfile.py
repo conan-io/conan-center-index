@@ -13,11 +13,13 @@ class XmlSecConan(ConanFile):
     topics = ("xml", "signature", "encryption")
     options = {
         "shared": [True, False], 
-        "fPIC": [True, False]
+        "fPIC": [True, False],
+        "with_xslt": [True, False]
         }
     default_options = {
         "shared": False,
-        "fPIC": True
+        "fPIC": True,
+        "with_xslt": False
         }
     
     _autotools = None
@@ -29,6 +31,8 @@ class XmlSecConan(ConanFile):
     def requirements(self):
         self.requires("libxml2/2.9.10")
         self.requires("openssl/1.1.1g")
+        if self.options.with_xslt:
+            self.requires("libxslt/1.1.34")
     
     def configure(self):
         del self.settings.compiler.libcxx
@@ -51,7 +55,8 @@ class XmlSecConan(ConanFile):
             "--enable-crypto-dl=no",
             "--enable-apps-crypto-dl=no",
         ]
-        configure_args.append("--with-libxslt=no")
+        if not self.options.with_xslt:
+            configure_args.append("--with-libxslt=no")
         if self.options.shared:
             configure_args.extend(["--disable-static", "--enable-shared"])
         else:
@@ -78,7 +83,8 @@ class XmlSecConan(ConanFile):
     def package_info(self):
         self.cpp_info.includedirs = ["include", os.path.join("include", "xmlsec1")]
         self.cpp_info.defines.append("XMLSEC_CRYPTO_OPENSSL")
-        self.cpp_info.defines.append("XMLSEC_NO_XSLT")
+        if not self.options.with_xslt:
+            self.cpp_info.defines.append("XMLSEC_NO_XSLT")
         self.cpp_info.defines.append("XMLSEC_NO_SIZE_T")
         self.cpp_info.libs = ["xmlsec1-openssl", "xmlsec1"]
         self.cpp_info.names["pkg_config"] = "xmlsec1"
