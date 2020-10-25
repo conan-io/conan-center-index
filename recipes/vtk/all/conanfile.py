@@ -307,7 +307,7 @@ class VTKConan(ConanFile):
             #     if self.options.x11:
             #         self.requires("xorg/system")
         if self.options.module_ioxdmf3:
-            self.requires("boost/1.74.0") # DO NOT SUBMIT! Was "boost/1.66.0@conan/stable" for VTK 8.2.0. What should be for VTK 9.0.1?
+            self.requires("boost/1.74.0")
         # if self.options.with_qt:
         if self.options.group_qt:
             # FIXME: Missing qt recipe. Qt recipe PR: https://github.com/conan-io/conan-center-index/pull/1759
