@@ -9,11 +9,6 @@ conan_basic_setup(TARGETS)
 add_executable(${PROJECT_NAME} test_package.cpp)
 target_link_libraries(${PROJECT_NAME} CONAN_PKG::vtk)
 
-# From oryginal recipe
-# if(UNIX AND NOT APPLE)
-#     TARGET_LINK_LIBRARIES(${PROJECT_NAME} m)
-# endif()
-
 
 #############################
 # Below is working test for "cmake_find_package_multi" generator (above is for "cmake" generator).

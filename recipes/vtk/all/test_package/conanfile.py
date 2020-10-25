@@ -14,5 +14,4 @@ class TestVTKConan(ConanFile):
         if not tools.cross_building(self.settings):
             # Replace "bin" by "Debug" on Win or by "." (dot) on Mac when testing "cmake_find_package_multi"
             bin_path = os.path.join("bin", "test_vtk_package")
-            # Lnx only. Remove me when Lnx succeed: self.run("LD_LIBRARY_PATH=%s %s" % (os.environ.get('LD_LIBRARY_PATH', ''), bin_path), run_environment=True)
             self.run(bin_path, run_environment=True)

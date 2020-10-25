@@ -14,11 +14,10 @@ class VTKConan(ConanFile):
     generators = "cmake"
     settings = "os", "arch", "compiler", "build_type"
     exports_sources = ["CMakeLists.txt", "patches/**"]
-    _source_subfolder = "source_subfolder"
     topics = ("conan", "VTK", "3D rendering", "2D plotting", "3D interaction", "3D manipulation", 
                 "graphics", "image processing", "scientific visualization", "geometry modeling")
     _groups = ["StandAlone", "Rendering", "MPI", "Qt", "Imaging", "Views", "Web"]
-    # _modules taken from CMake GUI
+    # _modules are taken from CMake GUI
     _modules = [
         "AcceleratorsVTKm"
         "ChartsCore",
@@ -241,80 +240,30 @@ class VTKConan(ConanFile):
         }, **{"group_{}".format(group.lower()): True for group in _groups if (group in ["StandAlone", "Rendering"])},
         **{"group_{}".format(group.lower()): False for group in _groups if (group not in ["StandAlone", "Rendering"])},
         **{"module_{}".format(module.lower()): False for module in _modules})
-    # options = {"shared": [True, False], "with_qt": [True, False], "mpi": [True, False],
-    #             "fPIC": [True, False], "minimal": [True, False], "ioxml": [True, False],
-    #             "ioexport": [True, False], "mpi_minimal": [True, False]}
-    # default_options = {"shared": False, "with_qt": False, "mpi": False, "fPIC": False,
-    #             "minimal": False, "ioxml": False, "ioexport": False, "mpi_minimal": False}
     short_paths = True
+    _source_subfolder = "source_subfolder"
     _cmake = None
+
 
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
-
-    # def configure(self):
-    #     if self.settings.os == "Linux":
-    #         raise ConanInvalidConfiguration("VTK Conan package do not support Linux yet. Any help appreciated!")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
         extracted_dir = self.name.upper() + "-" + self.version
         os.rename(extracted_dir, self._source_subfolder)        
 
-    # Below code is inncorrect and should be removed after successful Lnx package build.
-    # Until then, keeping it for reference. 
-    # def _system_package_architecture(self):
-    #     if tools.os_info.with_apt:
-    #         if self.settings.arch == "x86":
-    #             return ':i386'
-    #         elif self.settings.arch == "x86_64":
-    #             return ':amd64'
-    #
-    #     if tools.os_info.with_yum:
-    #         if self.settings.arch == "x86":
-    #             return '.i686'
-    #         elif self.settings.arch == 'x86_64':
-    #             return '.x86_64'
-    #     return ""
-    #
-    # def build_requirements(self):
-    #     pack_names = None
-    #     if not self.options.minimal and tools.os_info.is_linux:
-    #         if tools.os_info.with_apt:
-    #             pack_names = [
-    #                 "freeglut3-dev",
-    #                 "mesa-common-dev",
-    #                 "mesa-utils-extra",
-    #                 "libgl1-mesa-dev",
-    #                 "libglapi-mesa",
-    #                 "libsm-dev",
-    #                 "libx11-dev",
-    #                 "libxext-dev",
-    #                 "libxt-dev",
-    #                 "libglu1-mesa-dev"]
-    #
-    #     if pack_names:
-    #         installer = tools.SystemPackageTool()
-    #         for item in pack_names:
-    #             installer.install(item + self._system_package_architecture())
-    
     def requirements(self):
         if self.options.group_rendering:
             self.requires("opengl/system")
-            # Is "xorg/system" needed for build? What about runtime?
-            # if self.settings.os == "Linux":
-            #     if self.options.x11:
-            #         self.requires("xorg/system")
         if self.options.module_ioxdmf3:
             self.requires("boost/1.74.0")
-        # if self.options.with_qt:
         if self.options.group_qt:
             # FIXME: Missing qt recipe. Qt recipe PR: https://github.com/conan-io/conan-center-index/pull/1759
             # When qt available, "self.requires("qt/5.15.1")" should replace below line.
             raise ConanInvalidConfiguration("qt is not (yet) available on conan-center-index")
-        
-                
+
     def _configure_cmake(self):
         if self._cmake:
             return self._cmake
@@ -332,41 +281,10 @@ class VTKConan(ConanFile):
             if self.options.get_safe("module_{}".format(module.lower()), default=False):
                 self._cmake.definitions["VTK_MODULE_ENABLE_VTK_{}".format(module)] = "WANT" if self.options.get_safe("module_{}".format(module.lower()), default=False) else "DEFAULT"
 
-        # # Should we add below defines depending on "group_qt"? Or rather that should be driven by package consumer "vtk:module_guisupportqt=True" and "vtk:module_renderingqt=True"?
-        # self._cmake.definitions["VTK_MODULE_ENABLE_VTK_GUISupportQt"] = "YES" if self.options.group_qt else "DEFAULT"
-        # self._cmake.definitions["VTK_MODULE_ENABLE_VTK_RenderingQt"] = "YES" if self.options.group_qt else "DEFAULT"
-        # # Looks like "VTK_MODULE_ENABLE_VTK_GUISupportQtOpenGL" doesn't exist in VTK 9.0.1
-        # # self._cmake.definitions["VTK_MODULE_ENABLE_VTK_GUISupportQtOpenGL"] = "YES" if self.options.group_qt else "NO"
-
-        # I believe introducing _groups and _modules, makes this code deprecated.
-        #       Leave it temporarily until tests are finished
-        # self._cmake.definitions["VTK_Group_StandAlone"] = "OFF" if self.options.minimal else "ON"
-        # self._cmake.definitions["VTK_Group_Rendering"] = "OFF" if self.options.minimal else "ON"
-        #
-        # self._cmake.definitions["Module_vtkIOXML"] = "ON" if self.options.ioxml else "OFF"
-        #
-        # self._cmake.definitions["Module_vtkIOExport"] = "ON" if self.options.ioexport else "OFF"
-        #
-        # self._cmake.definitions["VTK_Group_Qt"] = "ON" if self.options.with_qt else "OFF"
-        # self._cmake.definitions["VTK_MODULE_ENABLE_VTK_GUISupportQt"] = "YES" if self.options.with_qt else "NO"
-        # self._cmake.definitions["VTK_MODULE_ENABLE_VTK_GUISupportQtOpenGL"] = "YES" if self.options.with_qt else "NO"
-        # self._cmake.definitions["VTK_MODULE_ENABLE_VTK_RenderingQt"] = "YES" if self.options.with_qt else "NO"
-        #
-        # self._cmake.definitions["VTK_Group_MPI"] = "ON" if self.options.mpi else "OFF"
-        # self._cmake.definitions["Module_vtkIOParallelXML"] = "ON" if self.options.mpi else "OFF"
-        #
-        # self._cmake.definitions["Module_vtkIOParallelXML"] = "ON" if self.options.mpi_minimal else "OFF"
-        # self._cmake.definitions["Module_vtkParallelMPI"] = "ON" if self.options.mpi_minimal else "OFF"
-
-        # if self.settings.os == 'Macos':
-        #     self.env['DYLD_LIBRARY_PATH'] = os.path.join(self.build_folder, 'lib')
-        #     self.output.info("cmake build: %s" % self.build_folder)
-
         self._cmake.configure(build_folder='build')
         return self._cmake
 
     def build(self):
-        # if self.options.with_qt:
         if self.options.group_qt:
             if self.options["qt"].shared == False:
                 raise ConanInvalidConfiguration("VTK option 'group_qt' requires 'qt:shared=True'")
@@ -393,7 +311,7 @@ class VTKConan(ConanFile):
         tools.rmdir(os.path.join(self.package_folder, 'share'))
 
     # GCC static linking require providing libraries in appropriate order.
-    # Below "order" is not necessary is correct (couldn't find the correct one), but it is used as good starting point.
+    # Below "order" is not necessary correct (couldn't find the correct one), but after few trials, it worked for one configuration.
     def _sort_libs(self, libs):
         if self.settings.compiler != "gcc":
             return libs
@@ -421,7 +339,6 @@ class VTKConan(ConanFile):
             self.cpp_info.system_libs.append('pthread')
             self.cpp_info.system_libs.append('dl')            # 'libvtksys-7.1.a' require 'dlclose', 'dlopen', 'dlsym' and 'dlerror' which on CentOS are in 'dl' library
             
-        # if not self.options.shared and self.options.with_qt:
         if not self.options.shared and self.options.group_qt:
             if self.settings.os == 'Windows':
                 self.cpp_info.system_libs.append('Ws2_32')    # 'vtksys-9.0d.lib' require 'gethostbyname', 'gethostname', 'WSAStartup' and 'WSACleanup' which are in 'Ws2_32.lib' library
