@@ -78,8 +78,8 @@ class SDFormat(ConanFile):
         return self._cmake
 
     def build(self):
-        self._configure_cmake()
-        self.cmake.build()
+        cmake = self._configure_cmake()
+        cmake.build()
 
     def package(self):
         self.copy("LICENSE", dst="licenses", src=self._source_subfolder)
