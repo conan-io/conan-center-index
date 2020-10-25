@@ -6,7 +6,7 @@ from conans.errors import ConanInvalidConfiguration
 
 class VTKConan(ConanFile):
     name = "vtk"
-    version = "9.0.1"  # DO NOT SUBMIT!!! Remove this line in final version of PR to conan-center-index
+    # version = "9.0.1"  # DO NOT SUBMIT!!! Remove this line in final version of PR to conan-center-index
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://vtk.org/"
     license = "BSD license"
