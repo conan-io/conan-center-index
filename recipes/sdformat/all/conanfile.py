@@ -16,6 +16,8 @@ class SDFormat(ConanFile):
     default_options = {"fPIC": True}
     generators = "cmake", "cmake_find_package_multi"
 
+    _cmake = None
+
     @property
     def _minimum_cpp_standard(self):
         return 17
