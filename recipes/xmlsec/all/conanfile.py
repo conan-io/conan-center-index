@@ -58,7 +58,7 @@ class XmlSecConan(ConanFile):
         if self._autotools:
             return self._autotools
         self._autotools = AutoToolsBuildEnvironment(self)
-        yes_no = lambda v: "yes" if v else "no",
+        yes_no = lambda v: "yes" if v else "no"
         configure_args = [
             "--enable-crypto-dl={}".format(yes_no(False)),
             "--enable-apps-crypto-dl={}".format(yes_no(False)),
