@@ -524,6 +524,8 @@ class OpenSSLConan(ConanFile):
         with tools.chdir(self._source_subfolder):
             tools.replace_in_file(
                 "configdata.pm.in", 'my $prepend = <<"_____";', "my $prepend = <<'_____';", strict=True)
+            tools.replace_in_file(
+                os.path.join("util", "dofile.pl"), 'use lib "$FindBin::Bin/../Configurations";', "use lib '$FindBin::Bin/../Configurations';", strict=True)
 
         with tools.vcvars(self.settings) if self._use_nmake else tools.no_op():
             env_vars = {"PERL": self._perl}
