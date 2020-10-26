@@ -17,14 +17,18 @@ class OpenCVConan(ConanFile):
                "with_png": [True, False],
                "with_tiff": [True, False],
                "with_jasper": [True, False],
-               "with_openexr": [True, False]}
+               "with_openexr": [True, False],
+               "with_eigen": [True, False],
+               "with_tbb": [True, False]}
     default_options = {"shared": False,
                        "fPIC": True,
                        "with_jpeg": True,
                        "with_png": True,
                        "with_tiff": True,
                        "with_jasper": True,
-                       "with_openexr": True}
+                       "with_openexr": True,
+                       "with_eigen": True,
+                       "with_tbb": False}
     exports_sources = "CMakeLists.txt"
     generators = "cmake", "cmake_find_package"
     _cmake = None
@@ -64,6 +68,10 @@ class OpenCVConan(ConanFile):
             self.requires("openexr/2.5.2")
         if self.options.with_tiff:
             self.requires("libtiff/4.1.0")
+        if self.options.with_eigen:
+            self.requires("eigen/3.3.7")
+        if self.options.with_tbb:
+            self.requires("tbb/2020.2")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
@@ -146,6 +154,8 @@ class OpenCVConan(ConanFile):
         self._cmake.definitions["WITH_TIFF"] = self.options.with_tiff
         self._cmake.definitions["WITH_JASPER"] = self.options.with_jasper
         self._cmake.definitions["WITH_OPENEXR"] = self.options.with_openexr
+        self._cmake.definitions["WITH_EIGEN"] = self.options.with_eigen
+        self._cmake.definitions["WITH_TBB"] = self.options.with_tbb
         self._cmake.definitions["OPENCV_MODULES_PUBLIC"] = "opencv"
 
         if self.settings.compiler == "Visual Studio":
@@ -186,28 +196,52 @@ class OpenCVConan(ConanFile):
                 if self.settings.os == "Linux":
                     self.cpp_info.components[component].system_libs = ["dl", "m", "pthread", "rt"]
 
+        def get_components():
+            components = []
+            if self.options.with_jasper:
+                components.append("jasper::jasper")
+            if self.options.with_png:
+                components.append("libpng::libpng")
+            if self.options.with_jpeg:
+                components.append("libjpeg::libjpeg")
+            if self.options.with_tiff:
+                components.append("libtiff::libtiff")
+            if self.options.with_openexr:
+                components.append("openexr::openexr")
+            if self.options.with_eigen:
+                components.append("eigen::eigen")
+            if self.options.with_tbb:
+                components.append("tbb::tbb")
+            return components
+
+        def eigen():
+            return ["eigen::eigen"] if self.options.with_eigen else []
+
+        def tbb():
+            return ["tbb::tbb"] if self.options.with_tbb else []
+
         self.cpp_info.filenames["cmake_find_package"] = "OpenCV"
         self.cpp_info.filenames["cmake_find_package_multi"] = "OpenCV"
 
         add_components({
-            "core": ["zlib::zlib"],
-            "flann": ["core"],
-            "imgproc": ["core"],
-            "highgui": ["core", "imgproc", "jasper::jasper", "zlib::zlib", "libpng::libpng", "libjpeg::libjpeg", "libtiff::libtiff", "jasper::jasper", "openexr::openexr"],
-            "features2d": ["core", "flann", "imgproc", "highgui"],
-            "calib3d": ["core", "flann", "imgproc", "highgui", "features2d"],
-            "ml": ["core"],
-            "video": ["core", "imgproc"],
-            "legacy": ["core", "flann", "imgproc", "highgui", "features2d", "calib3d", "ml", "video"],
-            "objdetect": ["core", "imgproc", "highgui"],
-            "photo": ["core", "imgproc"],
-            "gpu": ["core", "flann", "imgproc", "highgui", "features2d", "calib3d", "ml", "video", "legacy", "objdetect", "photo"],
-            "nonfree": ["core", "flann", "imgproc", "highgui", "features2d", "calib3d", "ml", "video", "legacy", "objdetect", "photo", "gpu"],
-            "contrib": ["core", "flann", "imgproc", "highgui", "features2d", "calib3d", "ml", "video", "legacy", "objdetect", "photo", "gpu", "nonfree"],
-            "stitching": ["core", "flann", "imgproc", "highgui", "features2d", "calib3d", "ml", "video", "legacy", "objdetect", "photo", "gpu", "nonfree"],
-            "superres": ["core", "flann", "imgproc", "highgui", "features2d", "calib3d", "ml", "video", "legacy", "objdetect", "photo", "gpu"],
-            "ts": ["core", "flann", "highgui", "features2d", "calib3d", "video"],
-            "videostab": ["core", "flann", "imgproc", "highgui", "features2d", "calib3d", "ml", "video", "legacy", "objdetect", "photo", "gpu"]
+            "core": ["zlib::zlib"] + tbb(),
+            "flann": ["core"] + tbb(),
+            "imgproc": ["core"] + tbb(),
+            "highgui": ["core", "imgproc"] + get_components(),
+            "features2d": ["core", "flann", "imgproc", "highgui"] + tbb(),
+            "calib3d": ["core", "flann", "imgproc", "highgui", "features2d"] + tbb(),
+            "ml": ["core"] + tbb(),
+            "video": ["core", "imgproc"] + tbb(),
+            "legacy": ["core", "flann", "imgproc", "highgui", "features2d", "calib3d", "ml", "video"] + eigen() + tbb(),
+            "objdetect": ["core", "imgproc", "highgui"] + tbb(),
+            "photo": ["core", "imgproc"] + tbb(),
+            "gpu": ["core", "flann", "imgproc", "highgui", "features2d", "calib3d", "ml", "video", "legacy", "objdetect", "photo"] + tbb(),
+            "nonfree": ["core", "flann", "imgproc", "highgui", "features2d", "calib3d", "ml", "video", "legacy", "objdetect", "photo", "gpu"] + tbb(),
+            "contrib": ["core", "flann", "imgproc", "highgui", "features2d", "calib3d", "ml", "video", "legacy", "objdetect", "photo", "gpu", "nonfree"] + tbb(),
+            "stitching": ["core", "flann", "imgproc", "highgui", "features2d", "calib3d", "ml", "video", "legacy", "objdetect", "photo", "gpu", "nonfree"] + tbb(),
+            "superres": ["core", "flann", "imgproc", "highgui", "features2d", "calib3d", "ml", "video", "legacy", "objdetect", "photo", "gpu"] + tbb(),
+            "ts": ["core", "flann", "highgui", "features2d", "calib3d", "video"] + tbb(),
+            "videostab": ["core", "flann", "imgproc", "highgui", "features2d", "calib3d", "ml", "video", "legacy", "objdetect", "photo", "gpu"] + tbb()
         })
 
         if self.settings.os == "Macos":
