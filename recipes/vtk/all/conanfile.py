@@ -3,7 +3,7 @@ import re
 
 from conans import ConanFile, CMake, tools
 from conans.errors import ConanInvalidConfiguration
-from conans.tools import Version
+
 
 class VTKConan(ConanFile):
     name = "vtk"
@@ -252,11 +252,8 @@ class VTKConan(ConanFile):
 
     def configure(self):
         compiler = str(self.settings.compiler)
-        version = tools.Version(self.settings.compiler.version)
-        if compiler == "apple-clang" and version < "10":
-            raise ConanInvalidConfiguration("VTK requires apple-clang to be at least 10.0 version. Found {}.".format(self.settings.compiler.version))
-        if compiler == "apple-clang" and version >= "11":
-            raise ConanInvalidConfiguration("VTK requires apple-clang to be at lower than 11.0 version. Found {}.".format(self.settings.compiler.version))
+        if compiler == "apple-clang" and self.options.shared:
+            raise ConanInvalidConfiguration("VTK on apple-clang requires to be static (vtk:shared=False).")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
