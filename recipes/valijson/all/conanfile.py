@@ -22,8 +22,7 @@ class ValijsonConan(ConanFile):
         os.rename(extracted_dir, self._source_subfolder)
 
     def build(self):
-        patches = self.conan_data["patches"][self.version]
-        for patch in patches:
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
             tools.patch(**patch)
 
     def package(self):
