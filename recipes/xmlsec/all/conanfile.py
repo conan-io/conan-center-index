@@ -43,6 +43,8 @@ class XmlSecConan(ConanFile):
         del self.settings.compiler.cppstd
         
     def build_requirements(self):
+        if tools.os_info.is_windows and not tools.get_env("CONAN_BASH_PATH"):
+            self.build_requires("msys2/20200517")
         self.build_requires("libtool/2.4.6")
         self.build_requires("pkgconf/1.7.3")
 
@@ -70,7 +72,7 @@ class XmlSecConan(ConanFile):
 
     def build(self):
         with tools.chdir(self._source_subfolder):
-            self.run("autoreconf -fiv")
+            self.run("autoreconf -fiv", run_environment=True, win_bash=tools.os_info.is_windows)
         autotools = self._configure_autotools()
         autotools.make()
 
