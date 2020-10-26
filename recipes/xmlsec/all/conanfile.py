@@ -1,6 +1,5 @@
 from conans import ConanFile, tools, AutoToolsBuildEnvironment
 import os
-import glob
 
 class XmlSecConan(ConanFile):
     name = "xmlsec"
@@ -81,8 +80,7 @@ class XmlSecConan(ConanFile):
         autotools = self._configure_autotools()
         autotools.install()
         tools.rmdir(os.path.join(self.package_folder, "share"))
-        for la_file in glob.glob(os.path.join(self.package_folder, "lib", "*.la")):
-            os.remove(la_file)
+        tools.remove_files_by_mask(os.path.join(self.package_folder, "lib"), "*.la")
         tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
         os.remove(os.path.join(self.package_folder, "lib", "xmlsec1Conf.sh"))
 
