@@ -59,16 +59,14 @@ class XmlSecConan(ConanFile):
         if self._autotools:
             return self._autotools
         self._autotools = AutoToolsBuildEnvironment(self)
+        yes_no = lambda v: "yes" if v else "no",
         configure_args = [
-            "--enable-crypto-dl=no",
-            "--enable-apps-crypto-dl=no",
+            "--enable-crypto-dl={}".format(yes_no(False)),
+            "--enable-apps-crypto-dl={}".format(yes_no(False)),
+            "--with-libxslt={}".format(yes_no(self.options.with_xslt)),
+            "--enable-shared={}".format(yes_no(self.options.shared)),
+            "--enable-static={}".format(yes_no(not self.options.shared)),
         ]
-        if not self.options.with_xslt:
-            configure_args.append("--with-libxslt=no")
-        if self.options.shared:
-            configure_args.extend(["--disable-static", "--enable-shared"])
-        else:
-            configure_args.extend(["--disable-shared", "--enable-static"])
         self._autotools.configure(args=configure_args, configure_dir=self._source_subfolder)
         return self._autotools
 
