@@ -27,6 +27,14 @@ class STXConan(ConanFile):
         'visible_panic_hook': False,
     }
     exports_sources = ['CMakeLists.txt', 'patches/*']
+    
+    @property
+    def _source_subfolder(self):
+        return "source_subfolder"
+        
+    @property
+    def _build_subfolder(self):
+        return "build_subfolder"
 
     def config_options(self):
         if self.settings.os == 'Windows':
@@ -92,7 +100,7 @@ class STXConan(ConanFile):
 
     def source(self):
         tools.get(**self.conan_data['sources'][self.version])
-        tools.rename('STX-{}'.format(self.version), dst='source_subfolder')
+        tools.rename('STX-{}'.format(self.version), dst=self._source_subfolder)
 
     def build(self):
         for patch in self.conan_data.get('patches', {}).get(self.version, []):
@@ -108,14 +116,14 @@ class STXConan(ConanFile):
         cmake.definitions['STX_VISIBLE_PANIC_HOOK'] = \
             self.options.visible_panic_hook
 
-        cmake.configure()
+        cmake.configure(build_folder=self._build_subfolder)
         cmake.build()
 
     def package(self):
         self.copy(
             '*.h',
             dst='include',
-            src=os.path.join('source_subfolder', 'include')
+            src=os.path.join(self._source_subfolder, 'include')
         )
 
         self.copy('*.lib', dst='lib', keep_path=False)
@@ -124,7 +132,7 @@ class STXConan(ConanFile):
         self.copy('*.dylib', dst='lib', keep_path=False)
         self.copy('*.a', dst='lib', keep_path=False)
 
-        self.copy('LICENSE', dst='licenses', src='source_subfolder')
+        self.copy('LICENSE', dst='licenses', src=self._source_subfolder)
 
     def package_info(self):
         self.cpp_info.libs = tools.collect_libs(self)

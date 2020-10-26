@@ -6,7 +6,9 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
 include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
-conan_basic_setup(TARGETS)
+conan_basic_setup()
+
+find_package(stx CONFIG REQUIRED)
 
 add_executable(example example.cpp)
-target_link_libraries(example PRIVATE CONAN_PKG::stx)
+target_link_libraries(example PRIVATE stx)
