@@ -29,6 +29,9 @@ sources:
   "7.0.3":
     sha256: b4b51bc16288e2281cddc59c28f0b4f84fed58d016fb038273a09f05f8473297
     url: https://github.com/fmtlib/fmt/archive/7.0.3.tar.gz
+  "7.1.0":
+    sha256: a53bce7e3b7ee8c7374723262a43356afff176b1684b86061748409e6f8b56c5
+    url: https://github.com/fmtlib/fmt/archive/7.1.0.tar.gz
 patches:
   "5.3.0":
     - patch_file: "patches/fix-install-5.3.0.patch"
