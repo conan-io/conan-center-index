@@ -89,7 +89,7 @@ class XmlSecConan(ConanFile):
         os.remove(os.path.join(self.package_folder, "lib", "xmlsec1Conf.sh"))
 
     def package_info(self):
-        self.cpp_info.includedirs = ["include", os.path.join("include", "xmlsec1")]
+        self.cpp_info.includedirs.append(os.path.join("include", "xmlsec1"))
         self.cpp_info.defines.append("XMLSEC_CRYPTO_OPENSSL")
         if not self.options.with_xslt:
             self.cpp_info.defines.append("XMLSEC_NO_XSLT")
