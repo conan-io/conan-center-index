@@ -1,11 +1,9 @@
 #include <DataFrame/DataFrame.h>
 
 #include <cassert>
-#include <cmath>
 #include <iostream>
-#include <limits>
 #include <string>
-#include <typeinfo>
+#include <utility>
 
 using namespace hmdf;
 
