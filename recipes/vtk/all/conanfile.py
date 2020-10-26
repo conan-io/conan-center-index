@@ -255,6 +255,8 @@ class VTKConan(ConanFile):
         version = tools.Version(self.settings.compiler.version)
         if compiler == "apple-clang" and version < "10":
             raise ConanInvalidConfiguration("VTK requires apple-clang to be at least 10.0 version. Found {}.".format(self.settings.compiler.version))
+        if compiler == "apple-clang" and version >= "11":
+            raise ConanInvalidConfiguration("VTK requires apple-clang to be at lower than 11.0 version. Found {}.".format(self.settings.compiler.version))
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
