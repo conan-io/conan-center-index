@@ -70,8 +70,11 @@ class XmlSecConan(ConanFile):
         return self._autotools
 
     def build(self):
-        with tools.chdir(self._source_subfolder):
-            self.run("autoreconf -fiv", run_environment=True, win_bash=tools.os_info.is_windows)
+        # FIXME: conan is missing a feature to change the join character on lists of environment variables
+        # e.g. self.env_info.AUTOMAKE_CONAN_INCLUDES.joiner = ":"
+        with tools.environment_append({"AUTOMAKE_CONAN_INCLUDES": tools.get_env("AUTOMAKE_CONAN_INCLUDES", "").replace(";", ":")}):
+            with tools.chdir(self._source_subfolder):
+                self.run("autoreconf -fiv", run_environment=True, win_bash=tools.os_info.is_windows)
         autotools = self._configure_autotools()
         autotools.make()
 
