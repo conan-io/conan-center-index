@@ -5,3 +5,5 @@ sources:
   "2.6.0":
     - patch_file: "patches/cmake-install-pic-cxx-standard-sytem-libs.patch"
       base_path: "source_subfolder"
+    - patch_file: "patches/lowercase-include-system-libs-windows.patch"
+      base_path: "source_subfolder"
