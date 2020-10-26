@@ -89,4 +89,4 @@ class CeleroConan(ConanFile):
         if self.settings.os == "Linux":
             self.cpp_info.system_libs = ["pthread"]
         elif self.settings.os == "Windows":
-            self.cpp_info.system_libs = ["powrprof"]
+            self.cpp_info.system_libs = ["powrprof", "psapi"]
