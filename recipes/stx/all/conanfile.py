@@ -151,3 +151,6 @@ class STXConan(ConanFile):
 
         if self.options.panic_handler == 'backtrace':
             self.cpp_info.defines.append('STX_ENABLE_PANIC_BACKTRACE')
+
+        if self.settings.os == 'Android':
+            self.cpp_info.system_libs = ['atomic']
