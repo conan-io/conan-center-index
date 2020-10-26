@@ -10,7 +10,7 @@ class ValijsonConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/tristanpenman/valijson"
     license = "BSD-2-Clause"
-    exports_sources = ["include/*", "patches/**"]
+    exports_sources = ["patches/**"]
 
     @property
     def _source_subfolder(self):
