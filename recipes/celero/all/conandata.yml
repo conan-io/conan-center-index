@@ -7,3 +7,5 @@ sources:
       base_path: "source_subfolder"
     - patch_file: "patches/lowercase-include-system-libs-windows.patch"
       base_path: "source_subfolder"
+    - patch_file: "patches/typo-declspec.patch"
+      base_path: "source_subfolder"
