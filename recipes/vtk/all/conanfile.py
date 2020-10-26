@@ -3,6 +3,7 @@ import re
 
 from conans import ConanFile, CMake, tools
 from conans.errors import ConanInvalidConfiguration
+from conans.tools import Version
 
 class VTKConan(ConanFile):
     name = "vtk"
@@ -14,7 +15,7 @@ class VTKConan(ConanFile):
     generators = "cmake"
     settings = "os", "arch", "compiler", "build_type"
     exports_sources = ["CMakeLists.txt", "patches/**"]
-    topics = ("conan", "VTK", "3D rendering", "2D plotting", "3D interaction", "3D manipulation", 
+    topics = ("conan", "VTK", "3D rendering", "2D plotting", "3D interaction", "3D manipulation",
                 "graphics", "image processing", "scientific visualization", "geometry modeling")
     _groups = ["StandAlone", "Rendering", "MPI", "Qt", "Imaging", "Views", "Web"]
     # _modules are taken from CMake GUI
@@ -249,10 +250,16 @@ class VTKConan(ConanFile):
         if self.settings.os == "Windows":
             del self.options.fPIC
 
+    def configure(self):
+        compiler = str(self.settings.compiler)
+        version = tools.Version(self.settings.compiler.version)
+        if compiler == "apple-clang" and version < "10":
+            raise ConanInvalidConfiguration("VTK requires apple-clang to be at least 10.0 version. Found {}.".format(self.settings.compiler.version))
+
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
         extracted_dir = self.name.upper() + "-" + self.version
-        os.rename(extracted_dir, self._source_subfolder)        
+        os.rename(extracted_dir, self._source_subfolder)
 
     def requirements(self):
         if self.options.group_rendering:
@@ -276,7 +283,7 @@ class VTKConan(ConanFile):
         for group in self._groups:
             self._cmake.definitions["VTK_GROUP_ENABLE_{}".format(group)] = "WANT" if self.options.get_safe("group_{}".format(group.lower()), default=False) else "DEFAULT"
         for module in self._modules:
-            # Defines shouldn't be left uninitalized, however VTK has so many _modules, that 
+            # Defines shouldn't be left uninitalized, however VTK has so many _modules, that
             # it ends up as "The command line is too long." error on Windows.
             if self.options.get_safe("module_{}".format(module.lower()), default=False):
                 self._cmake.definitions["VTK_MODULE_ENABLE_VTK_{}".format(module)] = "WANT" if self.options.get_safe("module_{}".format(module.lower()), default=False) else "DEFAULT"
@@ -291,7 +298,7 @@ class VTKConan(ConanFile):
             if self.settings.os == "Linux":
                 if self.options["qt"].qtx11extras == False:
                     raise ConanInvalidConfiguration("VTK option 'group_qt' requires 'qt:qtx11extras=True'")
-                
+
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
             tools.patch(**patch)
 
@@ -319,7 +326,7 @@ class VTKConan(ConanFile):
         print('VTK libs before sort: ' + (';'.join(libs)))
         order = ['vtkViewsCore', 'vtkViewsContext2D', 'vtkRenderingVolumeOpenGL2', 'vtkRenderingContextOpenGL2', 'vtkRenderingContext2D', 'vtkRenderingVolume', 'vtkfreetype', 'vtkRenderingFreeType', 'vtkRenderingAnnotation', 'vtkInteractionWidgets', 'vtkInteractionStyle', 'vtkImagingMath', 'vtkImagingHybrid', 'vtkImagingGeneral', 'vtkImagingColor', 'vtkexpat', 'vtkIOXMLParser', 'vtkIOXML', 'vtkIOLegacy', 'vtkIOGeometry', 'vtkgl2ps', 'vtkglew', 'vtkRenderingOpenGL2', 'vtkRenderingGL2PSOpenGL2', 'vtktiff', 'vtkpng', 'vtkjpeg', 'vtkmetaio', 'vtkIOImage', 'vtkIOExport', 'vtkzlib', 'vtkIOCore', 'vtkFiltersModeling', 'vtkFiltersSources', 'vtkRenderingCore', 'vtkImagingSources', 'vtkFiltersHybrid', 'vtkFiltersGeometry', 'vtkalglib', 'vtkImagingCore', 'vtkImagingFourier', 'vtkFiltersStatistics', 'vtkFiltersGeneral', 'vtkFiltersExtraction', 'vtkFiltersCore', 'vtkDICOMParser', 'vtkCommonExecutionModel', 'vtkCommonComputationalGeometry', 'vtkCommonDataModel', 'vtkCommonSystem', 'vtkCommonTransforms', 'vtkCommonMath', 'vtkCommonMisc', 'vtkCommonCore', 'vtkCommonColor', 'vtksys']
         for item in order:
-            for idx in range(len(libs)): 
+            for idx in range(len(libs)):
                 if item.lower() in libs[idx].lower():
                     value = libs.pop(idx)
                     libs_ordered.append(value)
@@ -338,7 +345,7 @@ class VTKConan(ConanFile):
         if self.settings.os == 'Linux':
             self.cpp_info.system_libs.append('pthread')
             self.cpp_info.system_libs.append('dl')            # 'libvtksys-7.1.a' require 'dlclose', 'dlopen', 'dlsym' and 'dlerror' which on CentOS are in 'dl' library
-            
+
         if not self.options.shared and self.options.group_qt:
             if self.settings.os == 'Windows':
                 self.cpp_info.system_libs.append('Ws2_32')    # 'vtksys-9.0d.lib' require 'gethostbyname', 'gethostname', 'WSAStartup' and 'WSACleanup' which are in 'Ws2_32.lib' library
