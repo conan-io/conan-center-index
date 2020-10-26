@@ -12,7 +12,7 @@ class CeleroConan(ConanFile):
     topics = ("conan", "celero", "benchmark", "benchmark-tests", "measurements", "microbenchmarks")
     homepage = "https://github.com/DigitalInBlue/Celero"
     url = "https://github.com/conan-io/conan-center-index"
-    exports_sources = "CMakeLists.txt"
+    exports_sources = ["CMakeLists.txt", "patches/**"]
     generators = "cmake"
     settings = "os", "arch", "compiler", "build_type"
     options = {"shared": [True, False], "fPIC": [True, False]}
@@ -52,20 +52,12 @@ class CeleroConan(ConanFile):
         tools.get(**self.conan_data["sources"][self.version])
         os.rename("Celero-" + self.version, self._source_subfolder)
 
-    def _patch_sources(self):
-        cmakelists = os.path.join(self._source_subfolder, "CMakeLists.txt")
-        tools.replace_in_file(cmakelists,
-                              "target_compile_options(${PROJECT_NAME} PRIVATE -fPIC)",
-                              "")
-        tools.replace_in_file(cmakelists,
-                              "ARCHIVE DESTINATION ${CMAKE_INSTALL_PREFIX}/lib/static",
-                              "ARCHIVE DESTINATION ${CMAKE_INSTALL_PREFIX}/lib")
-
     def _configure_cmake(self):
         if self._cmake:
             return self._cmake
         self._cmake = CMake(self)
         self._cmake.definitions["CELERO_COMPILE_DYNAMIC_LIBRARIES"] = self.options.shared
+        self._cmake.definitions["CELERO_COMPILE_PIC"] = self.options.get_safe("fPIC", True)
         self._cmake.definitions["CELERO_ENABLE_EXPERIMENTS"] = False
         self._cmake.definitions["CELERO_ENABLE_FOLDERS"] = False
         self._cmake.definitions["CELERO_ENABLE_TESTS"] = False
@@ -74,7 +66,8 @@ class CeleroConan(ConanFile):
         return self._cmake
 
     def build(self):
-        self._patch_sources()
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            tools.patch(**patch)
         cmake = self._configure_cmake()
         cmake.build()
 
