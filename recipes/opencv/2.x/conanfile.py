@@ -49,7 +49,7 @@ class OpenCVConan(ConanFile):
 
     def configure(self):
         if self.settings.compiler == "Visual Studio" and \
-           "MT" in self.settings.compiler.runtime and self.options.shared:
+           "MT" in str(self.settings.compiler.runtime) and self.options.shared:
             raise ConanInvalidConfiguration("Visual Studio and Runtime MT is not supported for shared library.")
         if self.options.shared:
             del self.options.fPIC
@@ -149,7 +149,6 @@ class OpenCVConan(ConanFile):
         self._cmake.definitions["WITH_GSTREAMER"] = False
         self._cmake.definitions["WITH_OPENCL"] = False
         self._cmake.definitions["WITH_CUDA"] = False
-        self._cmake.definitions["WITH_ZLIB"] = True
 
         self._cmake.definitions["WITH_JPEG"] = self.options.with_jpeg
         self._cmake.definitions["WITH_PNG"] = self.options.with_png
