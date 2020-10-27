@@ -11,4 +11,4 @@ conan_basic_setup()
 find_package(stx CONFIG REQUIRED)
 
 add_executable(example example.cpp)
-target_link_libraries(example PRIVATE stx)
+target_link_libraries(example PRIVATE stx::stx)
