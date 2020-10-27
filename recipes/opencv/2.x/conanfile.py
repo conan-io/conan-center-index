@@ -189,25 +189,31 @@ class OpenCVConan(ConanFile):
 
         def add_components(components):
             # TODO: OpenCV doesn't use cmake target namespace
-            for component, requires in components.items():
-                self.cpp_info.components[component].names["cmake_find_package"] = "opencv_" + component
-                self.cpp_info.components[component].names["cmake_find_package_multi"] = "opencv_" + component
-                self.cpp_info.components[component].libs = [get_lib_name(component)]
-                self.cpp_info.components[component].requires = requires
+            for component in components:
+                conan_component = component["target"]
+                cmake_target = component["target"]
+                lib_name = get_lib_name(component["lib"])
+                requires = component["requires"]
+                self.cpp_info.components[conan_component].names["cmake_find_package"] = cmake_target
+                self.cpp_info.components[conan_component].names["cmake_find_package_multi"] = cmake_target
+                self.cpp_info.components[conan_component].libs = [lib_name]
+                self.cpp_info.components[conan_component].requires = requires
                 if self.settings.os == "Linux":
-                    self.cpp_info.components[component].system_libs = ["dl", "m", "pthread", "rt"]
+                    self.cpp_info.components[conan_component].system_libs = ["dl", "m", "pthread", "rt"]
 
                 # CMake components names
-                self.cpp_info.components[component + "_alias"].names["cmake_find_package"] = component
-                self.cpp_info.components[component + "_alias"].names["cmake_find_package_multi"] = component
-                self.cpp_info.components[component + "_alias"].requires = [component]
-                self.cpp_info.components[component + "_alias"].includedirs = []
-                self.cpp_info.components[component + "_alias"].libdirs = []
-                self.cpp_info.components[component + "_alias"].resdirs = []
-                self.cpp_info.components[component + "_alias"].bindirs = []
-                self.cpp_info.components[component + "_alias"].frameworkdirs = []
+                conan_component_alias = conan_component + "_alias"
+                cmake_component = component["lib"]
+                self.cpp_info.components[conan_component_alias].names["cmake_find_package"] = cmake_component
+                self.cpp_info.components[conan_component_alias].names["cmake_find_package_multi"] = cmake_component
+                self.cpp_info.components[conan_component_alias].requires = [conan_component]
+                self.cpp_info.components[conan_component_alias].includedirs = []
+                self.cpp_info.components[conan_component_alias].libdirs = []
+                self.cpp_info.components[conan_component_alias].resdirs = []
+                self.cpp_info.components[conan_component_alias].bindirs = []
+                self.cpp_info.components[conan_component_alias].frameworkdirs = []
 
-        def get_components():
+        def imageformats_deps():
             components = []
             if self.options.with_jasper:
                 components.append("jasper::jasper")
@@ -219,10 +225,6 @@ class OpenCVConan(ConanFile):
                 components.append("libtiff::libtiff")
             if self.options.with_openexr:
                 components.append("openexr::openexr")
-            if self.options.with_eigen:
-                components.append("eigen::eigen")
-            if self.options.with_tbb:
-                components.append("tbb::tbb")
             return components
 
         def eigen():
@@ -234,28 +236,28 @@ class OpenCVConan(ConanFile):
         self.cpp_info.filenames["cmake_find_package"] = "OpenCV"
         self.cpp_info.filenames["cmake_find_package_multi"] = "OpenCV"
 
-        add_components({
-            "core": ["zlib::zlib"] + tbb(),
-            "flann": ["core"] + tbb(),
-            "imgproc": ["core"] + tbb(),
-            "highgui": ["core", "imgproc"] + get_components(),
-            "features2d": ["core", "flann", "imgproc", "highgui"] + tbb(),
-            "calib3d": ["core", "flann", "imgproc", "highgui", "features2d"] + tbb(),
-            "ml": ["core"] + tbb(),
-            "video": ["core", "imgproc"] + tbb(),
-            "legacy": ["core", "flann", "imgproc", "highgui", "features2d", "calib3d", "ml", "video"] + eigen() + tbb(),
-            "objdetect": ["core", "imgproc", "highgui"] + tbb(),
-            "photo": ["core", "imgproc"] + tbb(),
-            "gpu": ["core", "flann", "imgproc", "highgui", "features2d", "calib3d", "ml", "video", "legacy", "objdetect", "photo"] + tbb(),
-            "nonfree": ["core", "flann", "imgproc", "highgui", "features2d", "calib3d", "ml", "video", "legacy", "objdetect", "photo", "gpu"] + tbb(),
-            "contrib": ["core", "flann", "imgproc", "highgui", "features2d", "calib3d", "ml", "video", "legacy", "objdetect", "photo", "gpu", "nonfree"] + tbb(),
-            "stitching": ["core", "flann", "imgproc", "highgui", "features2d", "calib3d", "ml", "video", "legacy", "objdetect", "photo", "gpu", "nonfree"] + tbb(),
-            "superres": ["core", "flann", "imgproc", "highgui", "features2d", "calib3d", "ml", "video", "legacy", "objdetect", "photo", "gpu"] + tbb(),
-            "ts": ["core", "flann", "highgui", "features2d", "calib3d", "video"] + tbb(),
-            "videostab": ["core", "flann", "imgproc", "highgui", "features2d", "calib3d", "ml", "video", "legacy", "objdetect", "photo", "gpu"] + tbb()
-        })
+        add_components([
+            {"target": "opencv_core",       "lib": "core",       "requires": ["zlib::zlib"] + tbb()},
+            {"target": "opencv_flann",      "lib": "flann",      "requires": ["opencv_core"] + tbb()},
+            {"target": "opencv_imgproc",    "lib": "imgproc",    "requires": ["opencv_core"] + tbb()},
+            {"target": "opencv_highgui",    "lib": "highgui",    "requires": ["opencv_core", "opencv_imgproc"] + eigen() + tbb() + imageformats_deps()},
+            {"target": "opencv_features2d", "lib": "features2d", "requires": ["opencv_core", "opencv_flann", "opencv_imgproc", "opencv_highgui"] + tbb()},
+            {"target": "opencv_calib3d",    "lib": "calib3d",    "requires": ["opencv_core", "opencv_flann", "opencv_imgproc", "opencv_highgui", "opencv_features2d"] + tbb()},
+            {"target": "opencv_ml",         "lib": "ml",         "requires": ["opencv_core"] + tbb()},
+            {"target": "opencv_video",      "lib": "video",      "requires": ["opencv_core", "opencv_imgproc"] + tbb()},
+            {"target": "opencv_legacy",     "lib": "legacy",     "requires": ["opencv_core", "opencv_flann", "opencv_imgproc", "opencv_highgui", "opencv_features2d", "opencv_calib3d", "opencv_ml", "opencv_video"] + eigen() + tbb()},
+            {"target": "opencv_objdetect",  "lib": "objdetect",  "requires": ["opencv_core", "opencv_imgproc", "opencv_highgui"] + tbb()},
+            {"target": "opencv_photo",      "lib": "photo",      "requires": ["opencv_core", "opencv_imgproc"] + tbb()},
+            {"target": "opencv_gpu",        "lib": "gpu",        "requires": ["opencv_core", "opencv_flann", "opencv_imgproc", "opencv_highgui", "opencv_features2d", "opencv_calib3d", "opencv_ml", "opencv_video", "opencv_legacy", "opencv_objdetect", "opencv_photo"] + tbb()},
+            {"target": "opencv_nonfree",    "lib": "nonfree",    "requires": ["opencv_core", "opencv_flann", "opencv_imgproc", "opencv_highgui", "opencv_features2d", "opencv_calib3d", "opencv_ml", "opencv_video", "opencv_legacy", "opencv_objdetect", "opencv_photo", "opencv_gpu"] + tbb()},
+            {"target": "opencv_contrib",    "lib": "contrib",    "requires": ["opencv_core", "opencv_flann", "opencv_imgproc", "opencv_highgui", "opencv_features2d", "opencv_calib3d", "opencv_ml", "opencv_video", "opencv_legacy", "opencv_objdetect", "opencv_photo", "opencv_gpu", "opencv_nonfree"] + tbb()},
+            {"target": "opencv_stitching",  "lib": "stitching",  "requires": ["opencv_core", "opencv_flann", "opencv_imgproc", "opencv_highgui", "opencv_features2d", "opencv_calib3d", "opencv_ml", "opencv_video", "opencv_legacy", "opencv_objdetect", "opencv_photo", "opencv_gpu", "opencv_nonfree"] + tbb()},
+            {"target": "opencv_superres",   "lib": "superres",   "requires": ["opencv_core", "opencv_flann", "opencv_imgproc", "opencv_highgui", "opencv_features2d", "opencv_calib3d", "opencv_ml", "opencv_video", "opencv_legacy", "opencv_objdetect", "opencv_photo", "opencv_gpu"] + tbb()},
+            {"target": "opencv_ts",         "lib": "ts",         "requires": ["opencv_core", "opencv_flann", "opencv_highgui", "opencv_features2d", "opencv_calib3d", "opencv_video"] + tbb()},
+            {"target": "opencv_videostab",  "lib": "videostab",  "requires": ["opencv_core", "opencv_flann", "opencv_imgproc", "opencv_highgui", "opencv_features2d", "opencv_calib3d", "opencv_ml", "opencv_video", "opencv_legacy", "opencv_objdetect", "opencv_photo", "opencv_gpu"] + tbb()}
+        ])
 
         if self.settings.os == "Windows":
-            self.cpp_info.components["highgui"].system_libs = ["comctl32", "gdi32", "ole32", "setupapi", "ws2_32", "vfw32"]
+            self.cpp_info.components["opencv_highgui"].system_libs = ["comctl32", "gdi32", "ole32", "setupapi", "ws2_32", "vfw32"]
         elif self.settings.os == "Macos":
-            self.cpp_info.components["highgui"].frameworks = ["Cocoa"]
+            self.cpp_info.components["opencv_highgui"].frameworks = ["Cocoa"]
