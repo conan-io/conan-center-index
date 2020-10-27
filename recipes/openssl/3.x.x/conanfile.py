@@ -59,8 +59,8 @@ class OpenSSLConan(ConanFile):
             if not self.options.no_asm and not tools.which("nasm"):
                 self.build_requires("nasm/2.14")
         if self._win_bash:
-            if "CONAN_BASH_PATH" not in os.environ and tools.os_info.detect_windows_subsystem() != "msys2":
-                self.build_requires("msys2/20190524")
+            if "CONAN_BASH_PATH" not in os.environ:
+                self.build_requires("msys2/20200517")
 
     def requirements(self):
         if self.options.get_safe("zlib") == True:
