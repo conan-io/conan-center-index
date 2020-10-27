@@ -11,7 +11,7 @@ there is a duplicate follow some rules:
 
  * Static linkage (option `shared=False`) is preferred over dynamic linking.
  * On Windows, `MT/MTd` runtime linkage goes before `MD/MDd` linkage.
- * Optimized binaries (`build_type=Release`) are preferred over _debug_ ones.
+ * Optimized binaries (`build_type=Release`) are preferred over its _debug_ counterpart.
  * Older compiler versions are considered first.
  * In Linux, GCC is iterated before Clang.
 
