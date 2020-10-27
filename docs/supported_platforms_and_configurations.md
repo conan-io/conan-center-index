@@ -16,8 +16,8 @@ there is a duplicate follow some rules:
  * In Linux, GCC is iterated before Clang.
 
 Currently, given the following supported platforms and configurations we 
-are generating around 130 different binary packages for a C++ library 
-and 90 for a C library. 
+are generating **136 different binary packages for a C++ library** 
+and **88 for a C library**. 
 
 
 ## Windows
