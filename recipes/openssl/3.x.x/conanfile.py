@@ -405,6 +405,9 @@ class OpenSSLConan(ConanFile):
         {defines}
         includes => add({includes}),
         lflags => add("{lflags}"),
+        {shared_target}
+        {shared_cflag}
+        {shared_extension}
         {cc}
         {cxx}
         {ar}
@@ -444,6 +447,15 @@ class OpenSSLConan(ConanFile):
             ancestor = '[ "%s", asm("%s") ]' % (self._ancestor_target, self._asm_target)
         else:
             ancestor = '[ "%s" ]' % self._ancestor_target
+        shared_cflag = ''
+        shared_extension = ''
+        shared_target = ''
+        if self.settings.os == 'Neutrino':
+            if self.options.shared:
+                shared_extension = 'shared_extension => ".so.\$(SHLIB_VERSION_NUMBER)",'
+                shared_target = 'shared_target  => "gnu-shared",'
+            if self.options.fPIC:
+                shared_cflag = 'shared_cflag => "-fPIC",'
 
         config = config_template.format(targets=targets,
                                         target=self._target,
@@ -457,6 +469,9 @@ class OpenSSLConan(ConanFile):
                                         defines=defines,
                                         includes=includes,
                                         perlasm_scheme=perlasm_scheme,
+                                        shared_target=shared_target,
+                                        shared_extension=shared_extension,
+                                        shared_cflag=shared_cflag,
                                         lflags=" ".join(env_build.link_flags))
         self.output.info("using target: %s -> %s" % (self._target, self._ancestor_target))
         self.output.info(config)
