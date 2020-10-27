@@ -48,7 +48,7 @@ and 90 for a C library.
   - Shared, Static (option `"shared": [True, False]` in the recipe when available)
   - Header Only (option `"header_only": [True, False]` is only added with the value True)
 
-## OSX
+## MacOS
 
 - Compilers: Apple-clang versions 9.1, 10.0, 11.0 (three latest versions, we will rotate the older when a new compiler version is released)
 - C++ Standard Library (`libcxx`): `libc++`
