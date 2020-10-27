@@ -198,6 +198,16 @@ class OpenCVConan(ConanFile):
                 if self.settings.os == "Linux":
                     self.cpp_info.components[component].system_libs = ["dl", "m", "pthread", "rt"]
 
+                # CMake components names
+                self.cpp_info.components[component + "_alias"].names["cmake_find_package"] = component
+                self.cpp_info.components[component + "_alias"].names["cmake_find_package_multi"] = component
+                self.cpp_info.components[component + "_alias"].requires = [component]
+                self.cpp_info.components[component + "_alias"].includedirs = []
+                self.cpp_info.components[component + "_alias"].libdirs = []
+                self.cpp_info.components[component + "_alias"].resdirs = []
+                self.cpp_info.components[component + "_alias"].bindirs = []
+                self.cpp_info.components[component + "_alias"].frameworkdirs = []
+
         def get_components():
             components = []
             if self.options.with_jasper:
