@@ -134,6 +134,10 @@ class CPythonConan(ConanFile):
         tools.get(**self.conan_data["sources"][self.version])
         os.rename("Python-{}".format(self.version), self._source_subfolder)
 
+    @property
+    def _with_libffi(self):
+        return self.settings.compiler != "Visual Studio" or tools.Version(self.version) >= "3.8"
+
     def requirements(self):
         self.requires("openssl/1.1.1h")
         if not (self.settings.compiler == "Visual Studio" and tools.Version(self.version) >= tools.Version("3.8")):
@@ -143,7 +147,7 @@ class CPythonConan(ConanFile):
         else:
             self.requires("mpdecimal/2.5.0")
         self.requires("zlib/1.2.11")
-        if self.settings.compiler != "Visual Studio" or tools.Version(self.version) >= "3.8":
+        if self._with_libffi:
             self.requires("libffi/3.3")
         if self.settings.os != "Windows":
             self.requires("libuuid/1.0.3")
@@ -236,7 +240,6 @@ class CPythonConan(ConanFile):
                                   "MultiThreadedDebugDLL", runtime_library)
             # Remove vendored packages
             tools.rmdir(os.path.join(self._source_subfolder, "Modules", "_decimal", "libmpdec"))
-            tools.rmdir(os.path.join(self._source_subfolder, "Modules", "_ctypes", "libffi_msvc"))
 
     @property
     def _solution_projects(self):
@@ -406,7 +409,7 @@ class CPythonConan(ConanFile):
     def package(self):
         self.copy("LICENSE", src=self._source_subfolder, dst="licenses")
         if self.settings.compiler == "Visual Studio":
-            if self._is_py2 or self.options["libffi"].shared:
+            if self._is_py2 or (self._with_libffi and self.options["libffi"].shared):
                 self._msvc_package_copy()
             else:
                 self._msvc_package_layout()
