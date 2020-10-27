@@ -207,7 +207,7 @@ class OpenCVConan(ConanFile):
                 self.cpp_info.components[component + "_alias"].bindirs = []
                 self.cpp_info.components[component + "_alias"].frameworkdirs = []
 
-        def get_components():
+        def imageformats_deps():
             components = []
             if self.options.with_jasper:
                 components.append("jasper::jasper")
@@ -219,10 +219,6 @@ class OpenCVConan(ConanFile):
                 components.append("libtiff::libtiff")
             if self.options.with_openexr:
                 components.append("openexr::openexr")
-            if self.options.with_eigen:
-                components.append("eigen::eigen")
-            if self.options.with_tbb:
-                components.append("tbb::tbb")
             return components
 
         def eigen():
@@ -238,7 +234,7 @@ class OpenCVConan(ConanFile):
             "core": ["zlib::zlib"] + tbb(),
             "flann": ["core"] + tbb(),
             "imgproc": ["core"] + tbb(),
-            "highgui": ["core", "imgproc"] + get_components(),
+            "highgui": ["core", "imgproc"] + eigen() + tbb() + imageformats_deps(),
             "features2d": ["core", "flann", "imgproc", "highgui"] + tbb(),
             "calib3d": ["core", "flann", "imgproc", "highgui", "features2d"] + tbb(),
             "ml": ["core"] + tbb(),
