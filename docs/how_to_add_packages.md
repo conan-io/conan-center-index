@@ -24,7 +24,7 @@ When pull requests are merged, the CI will upload the generated packages to [JFr
 
 ## How to submit a Pull Request
 
-To contribute with a Conan recipe into the `conan-center` repository you can submit a [Pull Request](https://github.com/conan-io/conan-center-index/pulls) to the **master branch** of this repository. The connected **continuous integration system** will generate binary packages automatically for the most common platforms and compilers. See [the Supported Platforms and Configurations page](supported_platforms_and_configurations.md) to know the generated configurations. For a C++ library, the system is currently generating more than 100 binary packages.
+To contribute a Conan recipe into the `conan-center` repository you can submit a [Pull Request](https://github.com/conan-io/conan-center-index/pulls). The connected **continuous integration system** will generate binary packages automatically for the most common platforms and compilers. See [the Supported Platforms and Configurations page](supported_platforms_and_configurations.md) to know the generated configurations. For a C++ library, the system is currently generating more than 100 binary packages.
 
 > ⚠️ **Note**: This CI service is not a testing service, it is a binary building service for package **releases**. Unit tests shouldn't be built nor run in recipes by default. Please, before submitting a PR ensure that it works locally for some configurations.
 
