@@ -1,9 +1,24 @@
 # Supported platforms and configurations
 
+The pipeline iterates a fixed list of profiles for every Conan reference, 
+it computes the packageID for each profile and discard duplicates. Then it 
+builds the packages for the remaining profiles and upload them to 
+[JFrog ConanCenter](https://conan.io/center/) once the pull-request is merged.
 
-- For a **C++** library (with ``"shared"`` option) the system is generating **136** binary packages.
-- For a **pure C** library (with ``"shared"`` option but without ``compiler.libcxx``) the system generates **88** binary packages.
-- A package is also generated for those recipes with the `"header_only"` option.
+Because duplicated packageIDs are discarded, the pipeline iterates the 
+profiles always in the same order and the profiles selected to build when 
+there is a duplicate follow some rules:
+
+ * Static linkage (option `shared=False`) is preferred over dynamic linking.
+ * On Windows, `MT/MTd` runtime linkage goes before `MD/MDd` linkage.
+ * Optimized binaries (`build_type=Release`) are preferred over _debug_ ones.
+ * Older compiler versions are considered first.
+ * In Linux, GCC is iterated before Clang.
+
+Currently, given the following supported platforms and configurations we 
+are generating around 130 different binary packages for a C++ library 
+and 90 for a C library. 
+
 
 ## Windows
 
