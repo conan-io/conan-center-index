@@ -234,6 +234,8 @@ class CPythonConan(ConanFile):
                                   "MultiThreadedDLL", runtime_library)
             tools.replace_in_file(os.path.join(self._source_subfolder, "PCbuild", "pyproject.props"),
                                   "MultiThreadedDebugDLL", runtime_library)
+            # Remove the vendored mpdecimal
+            tools.rmdir(os.path.join(self._source_subfolder, "Modules", "_decimal", "libmpdec"))
 
     @property
     def _solution_projects(self):
