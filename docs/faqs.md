@@ -51,7 +51,7 @@ No, recipes do not need to export a recipe license. Recipes and all files contri
 
 ## Why recipes that use build tools (like CMake) that have packages in Conan Center do not use it as a build require by default?
 
-We generally consider tools like CMake as a standard tool to have installed in your system. Having the `cmake` package as a build require in all the recipes that use it will be an overkill, as every build require is installed like a requirement and takes time to download. However, `cmake` could be useful to use in your profile:
+We generally consider tools like CMake as a standard tool to have installed in your system. Having the `cmake` package as a build require in **all** the recipes that use it will be an overkill, as every build requirement is installed like a requirement and takes time to download. However, `cmake` could still be useful to use in your profile:
 
 ```
 [build_requires]
