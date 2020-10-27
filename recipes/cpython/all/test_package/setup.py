@@ -1,16 +1,22 @@
 import os
 import sys
 
+# Hack to work around Python 3.8+ secure dll loading
+# See https://docs.python.org/3/whatsnew/3.8.html#bpo-36085-whatsnew
+if hasattr(os, "add_dll_directory"):
+    for directory in os.environ.get("PATH", "").split(os.pathsep):
+        if os.path.isdir(directory):
+            os.add_dll_directory(directory)
 
 PY2 = (2, 0) <= sys.version_info < (3, 0)
 PY3 = (3, 0) <= sys.version_info < (4, 0)
 
 if PY2:
     subdir = "py2"
-    from distutils.core import setup, Command, Extension
+    from distutils.core import setup, Extension
 elif PY3:
     subdir = "py3"
-    from setuptools import setup, Command, Extension
+    from setuptools import setup, Extension
 else:
     raise Exception
 

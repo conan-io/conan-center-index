@@ -1,0 +1,67 @@
+--- Modules/_ctypes/malloc_closure.c
++++ Modules/_ctypes/malloc_closure.c
+@@ -87,7 +87,7 @@
+ }
+ 
+ /******************************************************************/
+-
++#if 0
+ /* put the item back into the free list */
+ void ffi_closure_free(void *p)
+ {
+@@ -114,3 +114,4 @@
+ #endif
+     return (void *)item;
+ }
++#endif
+--- Modules/_ctypes/cfield.c
++++ Modules/_ctypes/cfield.c
+@@ -1506,7 +1506,11 @@ P_get(void *ptr, Py_ssize_t size)
+     return PyLong_FromVoidPtr(*(void **)ptr);
+ }
+ 
+-static struct fielddesc formattable[] = {
++#define FORMATTABLE_SIZE 30
++static struct fielddesc formattable[FORMATTABLE_SIZE];
++
++static void formattable_init(void) {
++struct fielddesc my_formattable[] = {
+     { 's', s_set, s_get, &ffi_type_pointer},
+     { 'b', b_set, b_get, &ffi_type_schar},
+     { 'B', B_set, B_get, &ffi_type_uchar},
+@@ -1560,6 +1564,11 @@ static struct fielddesc formattable[] = {
+     { 'O', O_set, O_get, &ffi_type_pointer},
+     { 0, NULL, NULL, NULL},
+ };
++    size_t nb = 1;
++    for (struct fielddesc *pos = my_formattable; pos->code; ++pos, ++nb);
++    if (FORMATTABLE_SIZE < nb) abort();
++    memcpy(formattable, my_formattable, nb * sizeof(struct fielddesc));
++}
+ 
+ /*
+   Ideas: Implement VARIANT in this table, using 'V' code.
+@@ -1574,6 +1583,7 @@ _ctypes_get_fielddesc(const char *fmt)
+ 
+     if (!initialized) {
+         initialized = 1;
++        formattable_init();
+ #ifdef CTYPES_UNICODE
+         if (sizeof(wchar_t) == sizeof(short))
+             _ctypes_get_fielddesc("u")->pffi_type = &ffi_type_sshort;
+@@ -1636,7 +1646,7 @@ typedef struct _ffi_type
+     struct _ffi_type **elements;
+ } ffi_type;
+ */
+-
++#if 0
+ /* align and size are bogus for void, but they must not be zero */
+ ffi_type ffi_type_void = { 1, 1, FFI_TYPE_VOID };
+ 
+@@ -1663,5 +1673,5 @@ ffi_type ffi_type_longdouble = { sizeof(long double), LONGDOUBLE_ALIGN,
+                                  FFI_TYPE_LONGDOUBLE };
+ 
+ ffi_type ffi_type_pointer = { sizeof(void *), VOID_P_ALIGN, FFI_TYPE_POINTER };
+-
++#endif
+ /*---------------- EOF ----------------*/

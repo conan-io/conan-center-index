@@ -234,8 +234,9 @@ class CPythonConan(ConanFile):
                                   "MultiThreadedDLL", runtime_library)
             tools.replace_in_file(os.path.join(self._source_subfolder, "PCbuild", "pyproject.props"),
                                   "MultiThreadedDebugDLL", runtime_library)
-            # Remove the vendored mpdecimal
+            # Remove vendored packages
             tools.rmdir(os.path.join(self._source_subfolder, "Modules", "_decimal", "libmpdec"))
+            tools.rmdir(os.path.join(self._source_subfolder, "Modules", "_ctypes", "libffi_msvc"))
 
     @property
     def _solution_projects(self):
@@ -385,16 +386,31 @@ class CPythonConan(ConanFile):
         self.copy("*.py", src=os.path.join(self._source_subfolder, "lib"), dst=os.path.join(self.package_folder, self._msvc_install_subprefix, "Lib"))
         tools.rmdir(os.path.join(self.package_folder, self._msvc_install_subprefix, "Lib", "test"))
 
+        packages = {}
+        get_name_version = lambda fn: fn.split(".", 2)[:2]
+        whldir = os.path.join(self._source_subfolder, "Lib", "ensurepip", "_bundled")
+        for fn in filter(lambda n: n.endswith(".whl"), os.listdir(whldir)):
+            name, version = get_name_version(fn)
+            add = True
+            if name in packages:
+                pname, pversion = get_name_version(packages[name])
+                add = tools.Version(version) > tools.Version(pversion)
+            if add:
+                packages[name] = fn
+        for fname in packages.values():
+            tools.unzip(filename=os.path.join(whldir, fname), destination=os.path.join(self.package_folder, "bin", "Lib", "site-packages"))
+
         self.run("{} -c \"import compileall; compileall.compile_dir('{}')\"".format(os.path.join(build_path, self._cpython_interpreter_name), os.path.join(self.package_folder, self._msvc_install_subprefix, "Lib").replace("\\", "/")),
                  run_environment=True)
 
     def package(self):
         self.copy("LICENSE", src=self._source_subfolder, dst="licenses")
         if self.settings.compiler == "Visual Studio":
-            if self._is_py2:
+            if self._is_py2 or self.options["libffi"].shared:
                 self._msvc_package_copy()
             else:
                 self._msvc_package_layout()
+            tools.remove_files_by_mask(os.path.join(self.package_folder, "bin"), "vcruntime*")
         else:
             autotools = self._configure_autotools()
             autotools.install()
