@@ -2,6 +2,8 @@ from conans import ConanFile, CMake, tools
 from conans.errors import ConanInvalidConfiguration
 import os
 
+required_conan_version = ">=1.29.1"
+
 
 class OpenCVConan(ConanFile):
     name = "opencv"
@@ -48,7 +50,7 @@ class OpenCVConan(ConanFile):
     def configure(self):
         if self.settings.compiler == "Visual Studio" and \
            "MT" in self.settings.compiler.runtime and self.options.shared:
-           raise ConanInvalidConfiguration("Visual Studio and Runtime MT is not supported for shared library.")
+            raise ConanInvalidConfiguration("Visual Studio and Runtime MT is not supported for shared library.")
         if self.options.shared:
             del self.options.fPIC
 
@@ -244,5 +246,7 @@ class OpenCVConan(ConanFile):
             "videostab": ["core", "flann", "imgproc", "highgui", "features2d", "calib3d", "ml", "video", "legacy", "objdetect", "photo", "gpu"] + tbb()
         })
 
-        if self.settings.os == "Macos":
+        if self.settings.os == "Windows":
+            self.cpp_info.components["highgui"].system_libs = ["comctl32", "gdi32", "ole32", "setupapi", "ws2_32", "vfw32"]
+        elif self.settings.os == "Macos":
             self.cpp_info.components["highgui"].frameworks = ["Cocoa"]
