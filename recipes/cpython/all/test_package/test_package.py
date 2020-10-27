@@ -184,6 +184,14 @@ def test_curses():
     stdscr.keypad(False)
 
 
+@add_test
+def test_ctypes():
+    import _ctypes
+
+    errno = _ctypes.get_errno()
+    print("errno={}".format(errno))
+
+
 parser = argparse.ArgumentParser()
 parser.add_argument("-b", dest="build_folder", help="build_folder", required=True)
 parser.add_argument("-t", dest="test_module", help="test python module")
