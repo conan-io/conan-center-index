@@ -18,7 +18,7 @@ When the pull request is reviewed and merged, those packages are published to [J
 
 The [conan-center-index](https://github.com/conan-io/conan-center-index) (this repository) contains recipes for the remote [conan-center](https://conan.io/center/) repository. This remote is added by default to a clean installation of the Conan client.
 
-Recipes are contributed filing pull-requests to this `conan-center-index` repository as it is explained in the section below.
+Recipes are contributed by opening pull-requests to this `conan-center-index` repository as it is explained in the section below.
 
 When pull requests are merged, the CI will upload the generated packages to [JFrog ConanCenter](https://conan.io/center/). Packages generated and uploaded by this CI process don't include any _user_ or _channel_ (existing references with any `@user/channel` should be considered as deprecated in favor of packages without it). Once the packages are uploaded, you will be able to install them using the reference as `name/version` (requires Conan >= 1.21): `conan install cmake/3.18.2@`.
 
