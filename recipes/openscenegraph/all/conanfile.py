@@ -73,12 +73,12 @@ class ConanFile(ConanFile):
     }
 
     short_paths = True
-    no_copy_source = True
     exports_sources = "CMakeLists.txt", "patches/*.patch"
     generators = "cmake", "cmake_find_package"
 
-    _source_subfolder = "source_subfolder"
-    _build_subfolder = "build_subfolder"
+    @property
+    def _source_subfolder(self):
+        return "source_subfolder"
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -152,6 +152,7 @@ class ConanFile(ConanFile):
         tools.get(**self.conan_data["sources"][self.version])
         os.rename("OpenSceneGraph-OpenSceneGraph-" + self.version, self._source_subfolder)
 
+    def _patch_sources(self):
         for patch in self.conan_data["patches"].get(self.version, []):
             tools.patch(**patch)
 
@@ -160,6 +161,8 @@ class ConanFile(ConanFile):
             os.unlink(os.path.join(self._source_subfolder, "CMakeModules", "Find{}.cmake".format(package)))
 
     def build(self):
+        self._patch_sources()
+
         cmake = CMake(self)
 
         cmake.definitions["USE_3RDPARTY_BIN"] = False
