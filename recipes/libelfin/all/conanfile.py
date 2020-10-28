@@ -11,22 +11,15 @@ class LibelfinConan(ConanFile):
     license = "MIT"
     topics = ("conan", "elf", "dwarf", "libelfin")
 
-    generators = "cmake"
     settings = "os", "arch", "compiler", "build_type"
     options = {"shared": [True, False], "fPIC": [True, False]}
     default_options = {"shared": False, "fPIC": True}
 
     exports_sources = "CMakeLists.txt", "patches/*"
+    generators = "cmake"
 
     _source_subfolder = "source_subfolder"
     _cmake = None
-
-    def _configure_cmake(self):
-        if self._cmake:
-            return self._cmake
-        self._cmake = CMake(self)
-        self._cmake.configure()
-        return self._cmake
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -46,16 +39,26 @@ class LibelfinConan(ConanFile):
         extracted_dir = self.name + "-" + self.version
         os.rename(extracted_dir, self._source_subfolder)
 
+    def _configure_cmake(self):
+        if self._cmake:
+            return self._cmake
+        self._cmake = CMake(self)
+        self._cmake.configure()
+        return self._cmake
+
     def build(self):
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
             tools.patch(**patch)
         cmake = self._configure_cmake()
-        if self.should_build:
-            cmake.build()
+        cmake.build()
 
     def package(self):
         cmake = self._configure_cmake()
         cmake.install()
 
     def package_info(self):
-        self.cpp_info.libs = ["dwarf++", "elf++"]
+        self.cpp_info.components["libelf++"].names["pkg_config"] = "libelf++"
+        self.cpp_info.components["libelf++"].libs = ["elf++"]
+        self.cpp_info.components["libdwarf++"].names["pkg_config"] = "libdwarf++"
+        self.cpp_info.components["libdwarf++"].libs = ["dwarf++"]
+        self.cpp_info.components["libdwarf++"].requires = ["libelf++"]
