@@ -83,7 +83,7 @@ class ConanFile(ConanFile):
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
-            # del self.options.with_asio
+            del self.options.with_asio
 
             # Default to false with fontconfig until it is supported on Windows
             self.options.use_fontconfig = False
@@ -115,10 +115,10 @@ class ConanFile(ConanFile):
         if self.options.use_fontconfig:
             self.requires("fontconfig/2.13.91")
 
-        # if self.options.get_safe("with_asio"):
-        # Should these be private requires?
-        #     self.requires("asio/1.17.0")
-        #     self.requires("boost/1.74.0")
+        if self.options.get_safe("with_asio", False):
+            # Should these be private requires?
+            self.requires("asio/1.16.0")
+            self.requires("boost/1.73.0")
         # if self.options.with_collada:
         #     self.requires("libxml2/2.9.10")
         if self.options.with_curl:
@@ -205,7 +205,7 @@ class ConanFile(ConanFile):
         cmake.definitions["OSG_WITH_POPPLER"] = False
         cmake.definitions["OSG_WITH_RSVG"] = False
         cmake.definitions["OSG_WITH_NVTT"] = False
-        cmake.definitions["OSG_WITH_ASIO"] = False  # self.options.get_safe("with_asio", False)
+        cmake.definitions["OSG_WITH_ASIO"] = self.options.get_safe("with_asio", False)
         cmake.definitions["OSG_WITH_ZEROCONF"] = False
         cmake.definitions["OSG_WITH_LIBLAS"] = False
         cmake.definitions["OSG_WITH_GIF"] = self.options.get_safe("with_gif", False)
@@ -521,8 +521,8 @@ class ConanFile(ConanFile):
         # with_sdl
         # setup_plugin("sdl")
 
-        # if self.options.get_safe("with_asio"):
-        #     setup_plugin("resthttp").requires.extend(("osgPresentation", "asio::asio", "boost::boost"))
+        if self.options.get_safe("with_asio", False):
+            setup_plugin("resthttp").requires.extend(("osgPresentation", "asio::asio", "boost::boost"))
 
         # with_zeroconf
         # setup_plugin("zeroconf")
