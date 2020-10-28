@@ -122,6 +122,8 @@ class CPythonConan(ConanFile):
                 # 1. build the MSVC PGInstrument build_type,
                 # 2. run the instrumented binaries, (PGInstrument should have created a `python.bat` file in the PCbuild folder)
                 # 3. build the MSVC PGUpdate build_type
+            if self.settings.build_type == "Debug" and "d" not in self.settings.compiler.runtime:
+                raise ConanInvalidConfiguration("Building debug cpython requires a debug runtime (Debug cpython requires _CrtReportMode symbol, which only debug runtimes define)")
             if not self.options.shared:
                 raise ConanInvalidConfiguration("MSVC does not support a static build")
             if self._is_py2:
