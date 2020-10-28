@@ -20,4 +20,4 @@ class TestPackageConan(ConanFile):
                 bin_path = os.path.join("bin", "test_package")
                 self.run(bin_path, run_environment=True)
             if self.options["flatbuffers"].flatc:
-                self.run("flatc", run_environment=True)
+                self.run("flatc --version", run_environment=True)
