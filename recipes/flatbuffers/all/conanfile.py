@@ -24,25 +24,28 @@ class FlatbuffersConan(ConanFile):
     def _source_subfolder(self):
         return "source_subfolder"
 
-    def config_options(self):
-        if self.settings.os == "Windows":
-            del self.options.fPIC
+    #def config_options(self):
+        #if self.settings.os == "Windows":
+        #    del self.options.fPIC
 
     def configure(self):
-        if self.options.header_only:
-            del self.options.fPIC
-            del self.options.shared
-        elif self.options.shared:
-            del self.options.fPIC
-        if self.settings.compiler.cppstd:
-            tools.check_min_cppstd(self, 11)
         if self.options.autodetect:
             settings_target = getattr(self, 'settings_target', None)
             self.options.flatc = settings_target is not None
             self.options.flatbuffers = settings_target is None
+        del self.options.autodetect
+        if not (not self.options.header_only and self.options.flatbuffers):
+            del self.options.fPIC
+            del self.options.shared
+        elif self.options.shared and self.options.flatbuffers:
+            del self.options.fPIC
+        if not self.options.flatbuffers:
+            del self.options.header_only
+        if self.settings.compiler.cppstd:
+            tools.check_min_cppstd(self, 11)
 
     def package_id(self):
-        if self.options.header_only:
+        if self.options.flatbuffers and self.options.header_only:
             self.info.header_only()
 
     def source(self):
@@ -63,7 +66,7 @@ class FlatbuffersConan(ConanFile):
         return self._cmake
 
     def build(self):
-        if not self.options.header_only or self.options.flatc:
+        if (self.options.flatbuffers and not self.options.header_only) or self.options.flatc:
             cmake = self._configure_cmake()
             cmake.build()
 
@@ -89,7 +92,7 @@ class FlatbuffersConan(ConanFile):
                 for dll_path in glob.glob(os.path.join(self.package_folder, "lib", "*.dll")):
                     shutil.move(dll_path, os.path.join(self.package_folder, "bin", os.path.basename(dll_path)))
         
-        if not self.options.flatbuffers and not self.options.header_only and self.options.flatc:
+        if not self.options.flatbuffers and self.options.flatc:
             tools.rmdir(os.path.join(self.package_folder, "include"))
 
     def package_info(self):  
@@ -109,8 +112,4 @@ class FlatbuffersConan(ConanFile):
                 self.cpp_info.components["libflatbuffers"].system_libs.append("m")
         if self.options.flatbuffers and self.options.header_only:
             self.cpp_info.builddirs.append("bin/cmake")
-            self.cpp_info.build_modules.append("bin/cmake/BuildFlatBuffers.cmake")  
-        if self.options.flatc:
-            bin_path = os.path.join(self.package_folder, "bin")
-            self.output.info('Appending PATH environment variable: %s' % bin_path)
-            self.env_info.PATH.append(bin_path)
+            self.cpp_info.build_modules.append("bin/cmake/BuildFlatBuffers.cmake") 
