@@ -15,7 +15,6 @@ class ConanFile(ConanFile):
         "shared": [True, False],
         "fPIC": [True, False],
         "build_applications": [True, False],
-        "build_examples": [True, False],
         "enable_notify": [True, False],
         "enable_deprecated_api": [True, False],
         "enable_readfile": [True, False],
@@ -45,7 +44,6 @@ class ConanFile(ConanFile):
         "shared": False,
         "fPIC": True,
         "build_applications": False,
-        "build_examples": False,
         "enable_notify": True,
         "enable_deprecated_api": False,
         "enable_readfile": True,
@@ -171,7 +169,7 @@ class ConanFile(ConanFile):
         cmake.definitions["DYNAMIC_OPENTHREADS"] = self.options.shared
 
         cmake.definitions["BUILD_OSG_APPLICATIONS"] = self.options.build_applications
-        cmake.definitions["BUILD_OSG_EXAMPLES"] = self.options.build_examples
+        cmake.definitions["BUILD_OSG_EXAMPLES"] = False
 
         cmake.definitions["OSG_NOTIFY_DISABLED"] = not self.options.enable_notify
         cmake.definitions["OSG_USE_DEPRECATED_API"] = self.options.enable_deprecated_api
