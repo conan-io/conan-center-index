@@ -409,7 +409,7 @@ class CPythonConan(ConanFile):
     def package(self):
         self.copy("LICENSE", src=self._source_subfolder, dst="licenses")
         if self.settings.compiler == "Visual Studio":
-            if self._is_py2 or (self._with_libffi and self.options["libffi"].shared):
+            if self._is_py2 or (self._with_libffi and self.options["libffi"].shared) or "d" in str(self.settings.compiler.runtime):
                 self._msvc_package_copy()
             else:
                 self._msvc_package_layout()
