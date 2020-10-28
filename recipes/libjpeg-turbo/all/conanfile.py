@@ -69,6 +69,8 @@ class LibjpegTurboConan(ConanFile):
             raise ConanInvalidConfiguration("12-bit samples is not allowed with libjpeg v7/v8 API/ABI")
         if self.options.get_safe("java", False) and not self.options.shared:
             raise ConanInvalidConfiguration("java wrapper requires shared libjpeg-turbo")
+        if self.settings.compiler == "Visual Studio" and self.options.shared and str(self.settings.compiler).startswith("MT"):
+            raise ConanInvalidConfiguration("shared libjpeg-turbo can't be built with MT or MTd")
 
     @property
     def _is_arithmetic_encoding_enabled(self):
