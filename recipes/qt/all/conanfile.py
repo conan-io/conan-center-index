@@ -56,7 +56,7 @@ class QtConan(ConanFile):
         "shared": [True, False],
         "commercial": [True, False],
 
-        "opengl": ["no", "es2", "desktop", "dynamic", "auto"],
+        "opengl": ["no", "es2", "desktop", "dynamic"],
         "with_vulkan": [True, False],
         "openssl": [True, False],
         "with_pcre2": [True, False],
@@ -92,7 +92,7 @@ class QtConan(ConanFile):
     default_options = {
         "shared": False,
         "commercial": False,
-        "opengl": "auto",
+        "opengl": "desktop",
         "with_vulkan": False,
         "openssl": True,
         "with_pcre2": True,
@@ -182,13 +182,12 @@ class QtConan(ConanFile):
         if self.settings.compiler == "gcc" and Version(self.settings.compiler.version) < "5.3":
             del self.options.with_mysql
         if self.settings.os == "Windows":
-            del self.options.with_mysql
+            self.options.with_mysql = False
+            self.options.opengl = "dynamic"
         if self.settings.os == "Macos":
             del self.settings.os.version
 
     def configure(self):
-        if self.options.opengl == "auto":
-            self.options.opengl = ("dynamic" if self.settings.os == "Windows" else "desktop")
         #if self.settings.os != 'Linux':
         #         self.options.with_libiconv = False # QTBUG-84708
 
