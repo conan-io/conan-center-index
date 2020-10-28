@@ -80,7 +80,7 @@ class Ezc3dConan(ConanFile):
 
     def package_info(self):
         # FIXME: remove namespace for imported target
-        self.cpp_info.includedirs = [os.path.join("include", "ezc3d")]
+        self.cpp_info.includedirs.append(os.path.join("include", "ezc3d"))
         lib_suffix = {"Debug": "_debug"}.get(str(self.settings.build_type), "")
         self.cpp_info.libs = ["ezc3d" + lib_suffix]
         if self.settings.os == "Linux":
