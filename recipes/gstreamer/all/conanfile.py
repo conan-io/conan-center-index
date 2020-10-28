@@ -44,8 +44,11 @@ class GStreamerConan(ConanFile):
     def build_requirements(self):
         self.build_requires("meson/0.54.2")
         self.build_requires("pkgconf/1.7.3")
-        self.build_requires("bison/3.5.3")
-        self.build_requires("flex/2.6.4")
+        if self.settings.os == 'Windows':
+            self.build_requires("winflexbison/2.5.22")
+        else:
+            self.build_requires("bison/3.5.3")
+            self.build_requires("flex/2.6.4")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
