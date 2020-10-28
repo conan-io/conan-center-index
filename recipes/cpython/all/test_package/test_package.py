@@ -177,11 +177,9 @@ def test_decimal():
 
 @add_test
 def test_curses():
-    import curses
-    stdscr = curses.initscr()
+    import _curses
 
-    stdscr.keypad(True)
-    stdscr.keypad(False)
+    print("Using python cursesmodel.c version {}".format(_curses.version))
 
 
 @add_test

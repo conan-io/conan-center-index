@@ -135,10 +135,9 @@ class TestPackageConan(ConanFile):
                 self._test_module("bsddb")
             if self._cpython_option("with_lzma"):
                 self._test_module("lzma")
-            # FIXME: don't test curses module until https://github.com/conan-io/conan-center-index/pull/2531 lands
-            # with tools.environment_append({"TERM": "ansi"}):
-            #     if self._cpython_option("with_curses"):
-            #         self._test_module("curses")
+            if self._cpython_option("with_curses"):
+                with tools.environment_append({"TERM": "ansi"}):
+                    self._test_module("curses")
 
             self._test_module("expat")
             self._test_module("sqlite3")
