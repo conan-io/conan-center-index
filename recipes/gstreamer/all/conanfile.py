@@ -97,6 +97,7 @@ class GStreamerConan(ConanFile):
         tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
         tools.rmdir(os.path.join(self.package_folder, "lib", "gstreamer-1.0", "pkgconfig"))
         tools.rmdir(os.path.join(self.package_folder, "share"))
+        tools.remove_files_by_mask(self.package_folder, "*.pdb")
 
     def package_info(self):
         self.cpp_info.includedirs = [os.path.join("include", "gstreamer-1.0")]
