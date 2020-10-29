@@ -81,6 +81,9 @@ class PopplerConan(ConanFile):
         if self.settings.compiler == "gcc":
             if tools.Version(self.settings.compiler.version) < 5:
                 raise ConanInvalidConfiguration("poppler requires at least gcc 5")
+        elif self.settings.compiler == "Visual Studio":
+            if tools.Version(self.settings.compiler.version) < 15:
+                raise ConanInvalidConfiguration("poppler requires at least Visual Studio 15 (2017)")
 
     def build_requirements(self):
         self.build_requires("pkgconf/1.7.3")
