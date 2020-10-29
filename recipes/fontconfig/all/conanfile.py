@@ -42,10 +42,9 @@ class FontconfigConan(ConanFile):
             self.requires("libuuid/1.0.3")
 
     def build_requirements(self):
+        self.build_requires("gperf/3.1")
         if tools.os_info.is_windows and not tools.get_env("CONAN_BASH_PATH"):
             self.build_requires("msys2/20200517")
-        else:
-            self.build_requires("gperf/3.1")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
