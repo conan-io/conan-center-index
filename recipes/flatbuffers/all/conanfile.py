@@ -27,12 +27,10 @@ class FlatbuffersConan(ConanFile):
     def _patch_sources(self):
         for patch in self.conan_data["patches"][self.version]:
             tools.patch(**patch)
-            
-    #def config_options(self):
-        #if self.settings.os == "Windows":
-        #    del self.options.fPIC
 
     def configure(self):
+        if self.settings.os == "Windows":
+           del self.options.fPIC
         if self.options.autodetect:
             settings_target = getattr(self, 'settings_target', None)
             self.options.flatc = settings_target is not None
@@ -48,9 +46,9 @@ class FlatbuffersConan(ConanFile):
         if self.settings.compiler.cppstd:
             tools.check_min_cppstd(self, 11)
 
-    # def package_id(self):
-    #     if self.options.flatbuffers and self.options.header_only:
-    #         self.info.header_only()
+    def package_id(self):
+        if self.options.flatbuffers and self.options.header_only and not self.options.flatc:
+            self.info.header_only()
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
@@ -62,10 +60,10 @@ class FlatbuffersConan(ConanFile):
             return self._cmake
         self._cmake = CMake(self)
         self._cmake.definitions["FLATBUFFERS_BUILD_TESTS"] = False
-        self._cmake.definitions["FLATBUFFERS_BUILD_SHAREDLIB"] = self.options.shared
-        self._cmake.definitions["FLATBUFFERS_BUILD_FLATLIB"] =  not self.options.shared
+        self._cmake.definitions["FLATBUFFERS_BUILD_SHAREDLIB"] = self.options.flatbuffers and self.options.shared
+        self._cmake.definitions["FLATBUFFERS_BUILD_FLATLIB"] =  self.options.flatbuffers and not self.options.shared
         self._cmake.definitions["FLATBUFFERS_BUILD_FLATC"] = self.options.flatc
-        self._cmake.definitions["FLATBUFFERS_BUILD_FLATHASH"] = self.options.flatc
+        self._cmake.definitions["FLATBUFFERS_BUILD_FLATHASH"] = False
         self._cmake.definitions["FLATBUFFERS_STATIC_FLATC"] = not self.options.shared
         self._cmake.configure()
         return self._cmake
