@@ -23,7 +23,11 @@ class FlatbuffersConan(ConanFile):
     @property
     def _source_subfolder(self):
         return "source_subfolder"
-
+    
+    def _patch_sources(self):
+        for patch in self.conan_data["patches"][self.version]:
+            tools.patch(**patch)
+            
     #def config_options(self):
         #if self.settings.os == "Windows":
         #    del self.options.fPIC
@@ -34,7 +38,7 @@ class FlatbuffersConan(ConanFile):
             self.options.flatc = settings_target is not None
             self.options.flatbuffers = settings_target is None
         del self.options.autodetect
-        if not (not self.options.header_only and self.options.flatbuffers):
+        if self.options.header_only and self.options.flatbuffers and not self.options.flatc:
             del self.options.fPIC
             del self.options.shared
         elif self.options.shared and self.options.flatbuffers:
@@ -44,9 +48,9 @@ class FlatbuffersConan(ConanFile):
         if self.settings.compiler.cppstd:
             tools.check_min_cppstd(self, 11)
 
-    def package_id(self):
-        if self.options.flatbuffers and self.options.header_only:
-            self.info.header_only()
+    # def package_id(self):
+    #     if self.options.flatbuffers and self.options.header_only:
+    #         self.info.header_only()
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
@@ -58,14 +62,16 @@ class FlatbuffersConan(ConanFile):
             return self._cmake
         self._cmake = CMake(self)
         self._cmake.definitions["FLATBUFFERS_BUILD_TESTS"] = False
-        self._cmake.definitions["FLATBUFFERS_BUILD_SHAREDLIB"] = self.options.flatbuffers and self.options.shared
-        self._cmake.definitions["FLATBUFFERS_BUILD_FLATLIB"] = self.options.flatbuffers and not self.options.shared
+        self._cmake.definitions["FLATBUFFERS_BUILD_SHAREDLIB"] = self.options.shared
+        self._cmake.definitions["FLATBUFFERS_BUILD_FLATLIB"] =  not self.options.shared
         self._cmake.definitions["FLATBUFFERS_BUILD_FLATC"] = self.options.flatc
-        self._cmake.definitions["FLATBUFFERS_BUILD_FLATHASH"] = False
+        self._cmake.definitions["FLATBUFFERS_BUILD_FLATHASH"] = self.options.flatc
+        self._cmake.definitions["FLATBUFFERS_STATIC_FLATC"] = not self.options.shared
         self._cmake.configure()
         return self._cmake
 
     def build(self):
+        self._patch_sources()
         if (self.options.flatbuffers and not self.options.header_only) or self.options.flatc:
             cmake = self._configure_cmake()
             cmake.build()
@@ -113,3 +119,7 @@ class FlatbuffersConan(ConanFile):
         if self.options.flatbuffers and self.options.header_only:
             self.cpp_info.builddirs.append("bin/cmake")
             self.cpp_info.build_modules.append("bin/cmake/BuildFlatBuffers.cmake") 
+        if self.options.flatc:
+            bindir = os.path.join(self.package_folder, "bin")
+            self.output.info("Appending PATH environment variable: {}".format(bindir))
+            self.env_info.PATH.append(bindir)
