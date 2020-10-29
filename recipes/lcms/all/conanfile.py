@@ -14,7 +14,7 @@ class LcmsConan(ConanFile):
     settings = "os", "arch", "compiler", "build_type"
     options = {"shared": [True, False], "fPIC": [True, False]}
     default_options = {"shared": False, "fPIC": True}
-    generators = "cmake"
+
     _source_subfolder = "source_subfolder"
 
     def config_options(self):
