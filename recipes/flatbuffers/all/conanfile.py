@@ -13,8 +13,8 @@ class FlatbuffersConan(ConanFile):
     topics = ("conan", "flatbuffers", "serialization", "rpc", "json-parser")
     description = "Memory Efficient Serialization Library"
     settings = "os", "compiler", "build_type", "arch"
-    options = {"shared": [True, False], "fPIC": [True, False], "header_only": [True, False], "flatc": [True, False], "flatbuffers": [True, False], "autodetect": [True, False] }
-    default_options = {"shared": False, "fPIC": True, "header_only": False, "flatc": True, "flatbuffers": True, "autodetect": True}
+    options = {"shared": [True, False], "fPIC": [True, False], "header_only": [True, False], "flatc": [True, False], "flatbuffers": [True, False], "options_from_context": [True, False] }
+    default_options = {"shared": False, "fPIC": True, "header_only": False, "flatc": True, "flatbuffers": True, "options_from_context": True}
     exports_sources = ["CMakeLists.txt","patches/**"]
     generators = "cmake"
 
@@ -34,11 +34,11 @@ class FlatbuffersConan(ConanFile):
            del self.options.fPIC
 
         # Detect if host or build context
-        if self.options.autodetect:
+        if self.options.options_from_context:
             settings_target = getattr(self, 'settings_target', None)
             self.options.flatc = settings_target is not None
             self.options.flatbuffers = settings_target is None
-        del self.options.autodetect
+        del self.options.options_from_context
 
         if not self.options.flatbuffers:
             del self.options.header_only
