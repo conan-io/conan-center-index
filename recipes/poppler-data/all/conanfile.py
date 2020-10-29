@@ -67,4 +67,4 @@ class PopplerDataConan(ConanFile):
         self.cpp_info.bindirs = []
         self.cpp_info.includedirs = []
         self.user_info.datadir = self._poppler_datadir
-        self.cpp_info.defines = ["POPPLER_DATADIR={}".format(self._poppler_datadir)]
+        self.cpp_info.defines = ["POPPLER_DATADIR={}".format(self._poppler_datadir.replace("\\", "//"))]
