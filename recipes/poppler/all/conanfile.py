@@ -154,14 +154,14 @@ class PopplerConan(ConanFile):
         self._cmake.definitions["ENABLE_CPP"] = True
 
         self._cmake.definitions["ENABLE_SPLASH"] = self.options.splash
-        self._cmake.definitions["WITH_FONTCONFIGURATION"] = self.options.fontconfiguration
+        self._cmake.definitions["FONT_CONFIGURATION"] = self.options.fontconfiguration
         self._cmake.definitions["ENABLE_JPEG"] = self.options.with_libjpeg
         self._cmake.definitions["WITH_PNG"] = self.options.with_png
         self._cmake.definitions["WITH_TIFF"] = self.options.with_tiff
         self._cmake.definitions["WITH_NSS3"] = self.options.with_nss
         self._cmake.definitions["WITH_Cairo"] = self.options.with_cairo
-        self._cmake.definitions["WITH_GLIB"] = self.options.get_safe("with_glib", False)
-        self._cmake.definitions["WITH_GObjectIntrospection"] = self.options.get_safe("with_gobject_introspection", False)
+        self._cmake.definitions["ENABLE_GLIB"] = self.options.get_safe("with_glib", False)
+        self._cmake.definitions["ENABLE_GOBJECT_INTROSPECTION"] = self.options.get_safe("with_gobject_introspection", False)
         self._cmake.definitions["WITH_GTK"] = self.options.get_safe("with_gtk", False)
         self._cmake.definitions["WITH_Iconv"] = True
         self._cmake.definitions["ENABLE_ZLIB"] = self.options.with_zlib
