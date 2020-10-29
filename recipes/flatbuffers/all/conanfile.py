@@ -56,11 +56,11 @@ class FlatbuffersConan(ConanFile):
         else:
             self._header_only = self.options.header_only
 
-        if self._header_only and not self.options.flatc:
-            del self.options.shared
-
         if (self.options.shared and self.options.flatbuffers) or self._header_only or (not self.options.flatbuffers and self.options.flatc):
             del self.options.fPIC
+            
+        if self._header_only and not self.options.flatc:
+            del self.options.shared
 
         if self.settings.compiler.cppstd:
             tools.check_min_cppstd(self, 11)
