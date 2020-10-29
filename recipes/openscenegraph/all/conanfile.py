@@ -158,10 +158,11 @@ class ConanFile(ConanFile):
             # Prefer conan's find package scripts over osg's
             os.unlink(os.path.join(self._source_subfolder, "CMakeModules", "Find{}.cmake".format(package)))
 
-    def build(self):
-        self._patch_sources()
+    def _configured_cmake(self):
+        if hasattr(self, "_cmake"):
+            return self._cmake
 
-        cmake = CMake(self)
+        self._cmake = cmake = CMake(self)
 
         cmake.definitions["USE_3RDPARTY_BIN"] = False
 
@@ -221,10 +222,17 @@ class ConanFile(ConanFile):
         cmake.definitions["OSG_MSVC_VERSIONED_DLL"] = False
 
         cmake.configure()
-        cmake.build()
+
+        return cmake
+
+    def build(self):
+        self._patch_sources()
+
+        self._configured_cmake().build()
 
     def package(self):
-        CMake(self).install()
+        self._configured_cmake().install()
+
         self.copy(pattern="LICENSE.txt", dst="licenses", src=self._source_subfolder)
 
         tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
