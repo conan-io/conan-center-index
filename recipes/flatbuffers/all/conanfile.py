@@ -15,7 +15,7 @@ class FlatbuffersConan(ConanFile):
     settings = "os", "compiler", "build_type", "arch"
     options = {"shared": [True, False], "fPIC": [True, False], "header_only": [True, False], "flatc": [True, False], "flatbuffers": [True, False], "autodetect": [True, False] }
     default_options = {"shared": False, "fPIC": True, "header_only": False, "flatc": True, "flatbuffers": True, "autodetect": True}
-    exports_sources = "CMakeLists.txt"
+    exports_sources = ["CMakeLists.txt","patches/**"]
     generators = "cmake"
 
     _cmake = None
