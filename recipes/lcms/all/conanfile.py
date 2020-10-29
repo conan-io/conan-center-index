@@ -17,11 +17,6 @@ class LcmsConan(ConanFile):
     generators = "cmake"
     _source_subfolder = "source_subfolder"
 
-    def build_requirements(self):
-        if tools.os_info.is_windows and "CONAN_BASH_PATH" not in os.environ and \
-                tools.os_info.detect_windows_subsystem() != "msys2":
-            self.build_requires("msys2/20190524")
-
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
@@ -29,6 +24,11 @@ class LcmsConan(ConanFile):
     def configure(self):
         del self.settings.compiler.libcxx
         del self.settings.compiler.cppstd
+
+    def build_requirements(self):
+        if tools.os_info.is_windows and self.settings.compiler != "Visual Studio" and \
+           not tools.get_env("CONAN_BASH_PATH") and tools.os_info.detect_windows_subsystem() != "msys2":
+            self.build_requires("msys2/20200517")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
