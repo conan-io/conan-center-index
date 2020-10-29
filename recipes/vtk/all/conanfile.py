@@ -254,6 +254,8 @@ class VTKConan(ConanFile):
         compiler = str(self.settings.compiler)
         if compiler == "apple-clang" and self.options.shared:
             raise ConanInvalidConfiguration("VTK on apple-clang requires to be static (vtk:shared=False).")
+        if self.settings.compiler == "Visual Studio" and "MT" in self.settings.compiler.runtime and self.options.shared:
+            raise ConanInvalidConfiguration("VTK can not be built as shared library with MT runtime.")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
