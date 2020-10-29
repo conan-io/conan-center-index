@@ -16,6 +16,7 @@ class PopplerConan(ConanFile):
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
+        "cpp": [True, False],
         "fontconfiguration": ["generic", "fontconfig", "win32"],
         "splash": [True, False],
         "float": [True, False],
@@ -24,6 +25,7 @@ class PopplerConan(ConanFile):
         "with_gobject_introspection": [True, False],
         "with_qt": [True, False],
         "with_gtk": [True, False],
+        "with_libiconv": [True, False],
         "with_openjpeg": [True, False],
         "with_lcms": [True, False],
         "with_libjpeg": ["libjpeg", False],
@@ -37,6 +39,7 @@ class PopplerConan(ConanFile):
     default_options = {
         "shared": False,
         "fPIC": True,
+        "cpp": True,
         "fontconfiguration": "generic",
         "with_cairo": False,
         "splash": True,
@@ -44,6 +47,7 @@ class PopplerConan(ConanFile):
         "with_gobject_introspection": True,
         "with_qt": False,
         "with_gtk": False,
+        "with_libiconv": True,
         "with_openjpeg": True,
         "with_lcms": True,
         "with_libjpeg": "libjpeg",
@@ -76,6 +80,8 @@ class PopplerConan(ConanFile):
         if not self.options.get_safe("with_glib"):
             del self.options.with_gobject_introspection
             del self.options.with_gtk
+        if not self.options.cpp:
+            del self.options.with_libiconv
         if self.options.fontconfiguration == "win32" and self.settings.os != "Windows":
             raise ConanInvalidConfiguration("'win32' option of fontconfig is only available on Windows")
         if self.settings.compiler == "gcc":
@@ -91,7 +97,8 @@ class PopplerConan(ConanFile):
     def requirements(self):
         self.requires("poppler-data/0.4.9")
         self.requires("freetype/2.10.4")
-        self.requires("libiconv/1.16")
+        if self.options.get_safe("with_libiconv"):
+            self.requires("libiconv/1.16")
         if self.options.fontconfiguration == "fontconfig":
             self.require("fontconfig/2.13.91")
         if self.options.with_cairo:
@@ -151,7 +158,7 @@ class PopplerConan(ConanFile):
         self._cmake.definitions["BUILD_CPP_TESTS"] = False
 
         self._cmake.definitions["ENABLE_UTILS"] = False
-        self._cmake.definitions["ENABLE_CPP"] = True
+        self._cmake.definitions["ENABLE_CPP"] = self.options.cpp
 
         self._cmake.definitions["ENABLE_SPLASH"] = self.options.splash
         self._cmake.definitions["FONT_CONFIGURATION"] = self.options.fontconfiguration
@@ -163,7 +170,7 @@ class PopplerConan(ConanFile):
         self._cmake.definitions["ENABLE_GLIB"] = self.options.get_safe("with_glib", False)
         self._cmake.definitions["ENABLE_GOBJECT_INTROSPECTION"] = self.options.get_safe("with_gobject_introspection", False)
         self._cmake.definitions["WITH_GTK"] = self.options.get_safe("with_gtk", False)
-        self._cmake.definitions["WITH_Iconv"] = True
+        self._cmake.definitions["WITH_Iconv"] = self.options.get_safe("with_libiconv")
         self._cmake.definitions["ENABLE_ZLIB"] = self.options.with_zlib
         self._cmake.definitions["ENABLE_LIBOPENJPEG"] = "openjpeg2" if self.options.with_openjpeg else "none"
         self._cmake.definitions["ENABLE_CMS"] = "lcms2" if self.options.with_lcms else "none"
@@ -239,10 +246,13 @@ class PopplerConan(ConanFile):
         if self.options.with_zlib:
             self.cpp_info.components["libpoppler"].requires.append("zlib::zlib")
 
-        self.cpp_info.components["libpoppler-cpp"].libs = ["poppler-cpp"]
-        self.cpp_info.components["libpoppler-cpp"].includedirs.append(os.path.join("include", "poppler", "cpp"))
-        self.cpp_info.components["libpoppler-cpp"].names["pkg_config"] = ["poppler-cpp"]
-        self.cpp_info.components["libpoppler-cpp"].requires = ["libpoppler", "libiconv::libiconv"]
+        if self.options.cpp:
+            self.cpp_info.components["libpoppler-cpp"].libs = ["poppler-cpp"]
+            self.cpp_info.components["libpoppler-cpp"].includedirs.append(os.path.join("include", "poppler", "cpp"))
+            self.cpp_info.components["libpoppler-cpp"].names["pkg_config"] = ["poppler-cpp"]
+            self.cpp_info.components["libpoppler-cpp"].requires = ["libpoppler"]
+            if self.options.get_safe("with_libiconv"):
+                self.cpp_info.components["libpoppler-cpp"].requires.append("libiconv::libiconv")
 
         if self.options.splash:
             self.cpp_info.components["libpoppler-splash"].libs = []
