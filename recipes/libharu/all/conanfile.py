@@ -86,3 +86,5 @@ class LibharuConan(ConanFile):
         self.cpp_info.libs = ["hpdf" + libsuffix]
         if self.settings.os == "Windows" and self.options.shared:
             self.cpp_info.defines = ["HPDF_DLL"]
+        if self.settings.os == "Linux" and not self.options.shared:
+            self.cpp_info.system_libs = ["m"]
