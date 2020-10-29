@@ -288,6 +288,7 @@ class ConanFile(ConanFile):
         def setup_library(lib):
             library = self.cpp_info.components[lib]
             library.libs = [lib + postfix]
+            library.names["pkg_config"] = "openscenegraph-{}".format(lib)
             setup_serializers(lib)
             return library
 
