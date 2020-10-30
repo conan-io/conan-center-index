@@ -1,0 +1,4 @@
+sources:
+  "v190600.2020-10-29":
+    sha256: 36c7232f70fd0b27bc5d671fb75102e6c27d7f89c1b1e3d07ef17b779a0f281c
+    url: https://github.com/PortAudio/portaudio/archive/88c71a6ec478ed693adf86d1ff08134273c1e5e7.zip
