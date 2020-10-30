@@ -139,6 +139,7 @@ class CairoConan(ConanFile):
                                             '-framework CoreFoundation'])
         if str(self.settings.compiler) in ['gcc', 'clang', 'apple-clang']:
             self._env_build.flags.append('-Wno-enum-conversion')
+        configure_args.append("--datarootdir=%s" % os.path.join(self.package_folder, "res"))
 
         self.run('PKG_CONFIG_PATH=%s NOCONFIGURE=1 ./autogen.sh' % pkg_config_path)
         self._env_build.configure(args=configure_args, pkg_config_paths=[pkg_config_path])
@@ -189,6 +190,7 @@ class CairoConan(ConanFile):
             with tools.chdir(self._source_subfolder):
                 env_build = self._get_env_build()
                 env_build.install()
+        tools.remove_files_by_mask(self.package_folder, "*.la")
         
         self.copy("COPYING*", src=self._source_subfolder, dst="licenses", keep_path=False)
         tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
