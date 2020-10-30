@@ -15,7 +15,11 @@ class LcmsConan(ConanFile):
     options = {"shared": [True, False], "fPIC": [True, False]}
     default_options = {"shared": False, "fPIC": True}
 
-    _source_subfolder = "source_subfolder"
+    _autotools = None
+
+    @property
+    def _source_subfolder(self):
+        return "source_subfolder"
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -58,26 +62,27 @@ class LcmsConan(ConanFile):
             msbuild = MSBuild(self)
             msbuild.build("lcms2.sln", targets=[target], platforms={"x86": "Win32"}, upgrade_project=upgrade_project)
 
-    def _build_configure(self):
-        env_build = AutoToolsBuildEnvironment(self, win_bash=tools.os_info.is_windows)
-        with tools.chdir(self._source_subfolder):
-            args = ["prefix=%s" % self.package_folder]
-            if self.options.shared:
-                args.extend(["--disable-static", "--enable-shared"])
-            else:
-                args.extend(["--disable-shared", "--enable-static"])
-            args.append("--without-tiff")
-            args.append("--without-jpeg")
-            env_build.configure(args=args)
-            env_build.make()
-            env_build.make(args=["install"])
+    def _configure_autotools(self):
+        if self._autotools:
+            return self._autotools
+        self._autotools = AutoToolsBuildEnvironment(self, win_bash=tools.os_info.is_windows)
+        args = []
+        if self.options.shared:
+            args.extend(["--disable-static", "--enable-shared"])
+        else:
+            args.extend(["--disable-shared", "--enable-static"])
+        args.append("--without-tiff")
+        args.append("--without-jpeg")
+        self._autotools.configure(args=args, configure_dir=self._source_subfolder)
+        return self._autotools
 
     def build(self):
         self._patch_sources()
         if self.settings.compiler == "Visual Studio":
             self._build_visual_studio()
         else:
-            self._build_configure()
+            autotools = self._configure_autotools()
+            autotools.make()
 
     def package(self):
         self.copy(pattern="COPYING", dst="licenses", src=self._source_subfolder)
@@ -89,21 +94,24 @@ class LcmsConan(ConanFile):
             else:
                 self.copy(pattern="*.lib", src=os.path.join(self._source_subfolder, "Lib", "MS"), dst="lib",
                           keep_path=False)
-        # remove entire share directory
-        tools.rmdir(os.path.join(self.package_folder, "share"))
-        # remove pkgconfig
-        tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
-        # remove la files
-        la = os.path.join(self.package_folder, "lib", "liblcms2.la")
-        if os.path.isfile(la):
-            os.unlink(la)
-        # remove binaries
-        for bin_program in ["tificc", "linkicc", "transicc", "psicc", "jpgicc"]:
-            for ext in ["", ".exe"]:
-                try:
-                    os.remove(os.path.join(self.package_folder, "bin", bin_program + ext))
-                except:
-                    pass
+        else:
+            autotools = self._configure_autotools()
+            autotools.install()
+            # remove entire share directory
+            tools.rmdir(os.path.join(self.package_folder, "share"))
+            # remove pkgconfig
+            tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
+            # remove la files
+            la = os.path.join(self.package_folder, "lib", "liblcms2.la")
+            if os.path.isfile(la):
+                os.unlink(la)
+            # remove binaries
+            for bin_program in ["tificc", "linkicc", "transicc", "psicc", "jpgicc"]:
+                for ext in ["", ".exe"]:
+                    try:
+                        os.remove(os.path.join(self.package_folder, "bin", bin_program + ext))
+                    except:
+                        pass
 
     def package_info(self):
         if self.settings.compiler == "Visual Studio":
