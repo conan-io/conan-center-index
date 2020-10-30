@@ -39,12 +39,18 @@ class LcmsConan(ConanFile):
         else:
             os.rename("Little-CMS-%s" % self.version, self._source_subfolder)
 
-    def _build_visual_studio(self):
-        # since VS2015 vsnprintf is built-in
-        if Version(self.settings.compiler.version) >= "14":
+    def _patch_sources(self):
+        if self.settings.compiler == "Visual Studio" and Version(self.settings.compiler.version) >= "14":
+            # since VS2015 vsnprintf is built-in
             path = os.path.join(self._source_subfolder, "src", "lcms2_internal.h")
             tools.replace_in_file(path, "#       define vsnprintf  _vsnprintf", "")
+        if self.settings.os == "Android" and tools.os_info.is_windows:
+            # remove escape for quotation marks, to make ndk on windows happy
+            tools.replace_in_file(os.path.join(self._source_subfolder, "configure"),
+                                  "s/[	 `~#$^&*(){}\\\\|;'\\\''\"<>?]/\\\\&/g",
+                                  "s/[	 `~#$^&*(){}\\\\|;<>?]/\\\\&/g")
 
+    def _build_visual_studio(self):
         with tools.chdir(os.path.join(self._source_subfolder, "Projects", "VC2013")):
             target = "lcms2_DLL" if self.options.shared else "lcms2_static"
             upgrade_project = Version(self.settings.compiler.version) > "12"
@@ -53,10 +59,6 @@ class LcmsConan(ConanFile):
             msbuild.build("lcms2.sln", targets=[target], platforms={"x86": "Win32"}, upgrade_project=upgrade_project)
 
     def _build_configure(self):
-        if self.settings.os == "Android" and tools.os_info.is_windows:
-            # remove escape for quotation marks, to make ndk on windows happy
-            tools.replace_in_file(os.path.join(self._source_subfolder, "configure"),
-                "s/[	 `~#$^&*(){}\\\\|;'\\\''\"<>?]/\\\\&/g", "s/[	 `~#$^&*(){}\\\\|;<>?]/\\\\&/g")
         env_build = AutoToolsBuildEnvironment(self, win_bash=tools.os_info.is_windows)
         with tools.chdir(self._source_subfolder):
             args = ["prefix=%s" % self.package_folder]
@@ -71,6 +73,7 @@ class LcmsConan(ConanFile):
             env_build.make(args=["install"])
 
     def build(self):
+        self._patch_sources()
         if self.settings.compiler == "Visual Studio":
             self._build_visual_studio()
         else:
