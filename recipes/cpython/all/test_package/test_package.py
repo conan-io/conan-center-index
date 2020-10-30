@@ -179,7 +179,7 @@ def test_decimal():
 def test_curses():
     import _curses
 
-    print("Using python cursesmodel.c version {}".format(_curses.version))
+    print("Using _curses version {}".format(_curses.version))
 
 
 @add_test
