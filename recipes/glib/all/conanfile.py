@@ -19,7 +19,7 @@ class GLibConan(ConanFile):
                "with_elf": [True, False],
                "with_selinux": [True, False],
                "with_mount": [True, False]}
-    default_options = {"shared": True,
+    default_options = {"shared": False,
                        "fPIC": True,
                        "with_pcre": True,
                        "with_elf": True,
@@ -46,6 +46,7 @@ class GLibConan(ConanFile):
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
+            self.options.shared = True
         if self.settings.os != "Linux":
             del self.options.with_mount
             del self.options.with_selinux
