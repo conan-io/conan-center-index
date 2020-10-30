@@ -591,6 +591,10 @@ class BoostConan(ConanFile):
 
         # CXX FLAGS
         cxx_flags = []
+        # Extract CXXFLAGS from CXX
+        if tools.get_env("CXX"):
+            cxx_flags.extend(shlex.split(tools.get_env("CXX"))[1:])
+
         # fPIC DEFINITION
         if self.settings.os != "Windows":
             if self.options.fPIC:
@@ -702,7 +706,7 @@ class BoostConan(ConanFile):
     @property
     def _cxx(self):
         if "CXX" in os.environ:
-            return os.environ["CXX"]
+            return shlex.split(tools.get_env("CXX"))[0]
         if tools.is_apple_os(self.settings.os) and self.settings.compiler == "apple-clang":
             return tools.XCRun(self.settings).cxx
         compiler_version = str(self.settings.compiler.version)
