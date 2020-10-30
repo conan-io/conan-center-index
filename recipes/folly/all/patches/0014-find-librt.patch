@@ -9,7 +9,7 @@ index 6b8b308c7..908d72d51 100644
 +if (CMAKE_SYSTEM_NAME STREQUAL "Linux")
 +  find_library(LIBRT rt)
 +  if (LIBRT)
-+    set(CMAKE_REQUIRED_LIBRARIES "rt")
++    list(APPEND CMAKE_REQUIRED_LIBRARIES "rt")
 +  endif()
 +endif()
 +
