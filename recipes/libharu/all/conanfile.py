@@ -22,7 +22,6 @@ class LibharuConan(ConanFile):
     }
     generators = "cmake", "cmake_find_package"
 
-    _autotools = None
     _cmake = None
 
     @property
