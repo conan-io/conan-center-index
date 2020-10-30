@@ -40,5 +40,7 @@ patches:
       base_path: "source_subfolder"
     - patch_file: "patches/3.9.0-0003-_ctypes-ffi.patch"
       base_path: "source_subfolder"
+    - patch_file: "patches/3.9.0-0004-setup.py-pass-CFLAGS-CPPFLAGS.patch"
+      base_path: "source_subfolder"
     - patch_file: "patches/3.x-0001-relocatable-python-config.patch"
       base_path: "source_subfolder"
