@@ -19,12 +19,14 @@ class CppCommon(ConanFile):
                "shared": [True, False],
                "benchmarks": [True, False],
                "examples": [True, False],
-               "tests": [True, False]}
+               "tests": [True, False],
+               "pdbs": [True, False]}
     default_options = {"fPIC": True,
                        "shared": False,
                        "benchmarks": False,
                        "examples": False,
-                       "tests": False}
+                       "tests": False,
+                       "pdbs": False}
     requires = ["fmt/7.0.3", "stduuid/1.0"]
     generators = "cmake"
     exports_sources = ["patches/**", "CMakeLists.txt"]
@@ -54,6 +56,7 @@ class CppCommon(ConanFile):
             self._cmake.definitions["CPPCOMMON_BENCHMARKS"] = "ON" if self.options.benchmarks else "OFF"
             self._cmake.definitions["CPPCOMMON_EXAMPLES"] = "ON" if self.options.examples else "OFF"
             self._cmake.definitions["CPPCOMMON_TESTS"] = "ON" if self.options.tests else "OFF"
+            self._cmake.definitions["CPPCOMMON_PDB"] = "ON" if self.options.pdbs else "OFF"
             self._cmake.configure(build_folder=self._build_subfolder)
         return self._cmake
 

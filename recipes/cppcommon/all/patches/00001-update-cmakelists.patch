@@ -1,5 +1,5 @@
 diff --git a/CMakeLists.txt b/CMakeLists.txt
-index dcd57785b..6ac5a2e38 100644
+index dcd57785b..2699c8b0a 100644
 --- a/CMakeLists.txt
 +++ b/CMakeLists.txt
 @@ -18,40 +18,40 @@ if(DOXYGEN_FOUND)
@@ -126,7 +126,8 @@ index dcd57785b..6ac5a2e38 100644
 +    ARCHIVE DESTINATION lib)
  
    # Install *.pdb files
-   if(MSVC)
+-  if(MSVC)
++  if(MSVC AND CPPCOMMON_PDB)
      foreach(INSTALL_TARGET_PDB ${INSTALL_TARGETS_PDB})
 -      install(FILES $<TARGET_PDB_FILE:${INSTALL_TARGET_PDB}> DESTINATION "${PROJECT_SOURCE_DIR}/bin")
 +      install(FILES $<TARGET_PDB_FILE:${INSTALL_TARGET_PDB}> DESTINATION bin OPTIONAL)
