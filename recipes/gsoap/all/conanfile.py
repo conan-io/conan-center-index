@@ -63,7 +63,7 @@ class ConanFileDefault(ConanFile):
             return self._cmake
         self._cmake = CMake(self)
         self._cmake.definitions["GSOAP_PATH"] = self._source_subfolder
-        self._cmake.definitions["BUILD_TOOLS"] = True
+        self._cmake.definitions["BUILD_TOOLS"] = not tools.cross_building(self.settings)
         self._cmake.definitions["WITH_OPENSSL"] = self.options.with_openssl
         self._cmake.definitions["WITH_IPV6"] = self.options.with_ipv6
         self._cmake.definitions["WITH_COOKIES"] = self.options.with_cookies
@@ -78,7 +78,7 @@ class ConanFileDefault(ConanFile):
             defines.append("WITH_OPENSSL")
             defines.append("WITH_GZIP")
         else:
-            libs = ["gsoap++", ]
+            libs = ["gsoap++", "gsoap" ]
         self.cpp_info.libs = libs
 
         if self.options.with_ipv6:
@@ -89,9 +89,15 @@ class ConanFileDefault(ConanFile):
             defines.append("WITH_C_LOCALE")
         self.cpp_info.defines = defines
 
+        if not tools.cross_building(self.settings):
+            bindir = os.path.join(self.package_folder, "bin")
+            self.output.info("Appending PATH environment variable: {}".format(bindir))
+            self.env_info.PATH.append(bindir)
+
     def package(self):
         self.copy(pattern="GPLv2_license.txt", dst="licenses", src=self._source_subfolder)
         self.copy(pattern="LICENSE.txt", dst="licenses", src=self._source_subfolder)
         cmake = self._configure_cmake()
         cmake.install()
         shutil.move(os.path.join(self.package_folder, 'import'), os.path.join(self.package_folder, 'bin', 'import'))
+        shutil.move(os.path.join(self.package_folder, 'plugin'), os.path.join(self.package_folder, 'bin', 'plugin'))
