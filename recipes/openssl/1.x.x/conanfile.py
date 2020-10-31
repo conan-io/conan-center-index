@@ -582,8 +582,7 @@ class OpenSSLConan(ConanFile):
     def _make(self):
         with tools.chdir(self._source_subfolder):
             # workaround for clang-cl not producing .pdb files
-            if self._is_clangcl:
-                tools.save("ossl_static.pdb", "")
+            tools.save("ossl_static.pdb", "")
             args = " ".join(self._configure_args)
             self.output.info(self._configure_args)
 
