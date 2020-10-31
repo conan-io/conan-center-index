@@ -111,6 +111,7 @@ class SubunitConan(ConanFile):
             if os.path.isdir(d):
                 tools.rmdir(d)
         tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
+        tools.rmdir(os.path.join(self.package_folder, "Library"))
 
     def package_info(self):
         self.cpp_info.components["libsubunit"].libs = ["subunit"]
