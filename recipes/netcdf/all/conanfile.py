@@ -1,4 +1,5 @@
 from conans import CMake, ConanFile, tools
+import glob
 import os
 
 
@@ -27,7 +28,7 @@ class NetcdfConan(ConanFile):
         "cdf5": True,
         "dap": True,
     }
-    generators = "cmake_find_package", "cmake"
+    generators = "cmake_find_package", "cmake_find_package_multi", "cmake"
 
     _cmake = None
 
@@ -102,6 +103,9 @@ class NetcdfConan(ConanFile):
         tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
         tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
         tools.rmdir(os.path.join(self.package_folder, "share"))
+        for fn in glob.glob(os.path.join(self.package_folder, "bin", "*")):
+            if "netcdf" not in os.path.basename(fn):
+                os.unlink(fn)
 
     def package_info(self):
         self.cpp_info.names["pkg_config"] = "netcdf"
@@ -118,4 +122,4 @@ class NetcdfConan(ConanFile):
             self.cpp_info.components["libnetcdf"].system_libs = ["dl", "m"]
         elif self.settings.os == "Windows":
             if self.options.shared:
-                self.cpp_info.defines.append("DLL_NETCDF")
+                self.cpp_info.components["libnetcdf"].defines.append("DLL_NETCDF")
