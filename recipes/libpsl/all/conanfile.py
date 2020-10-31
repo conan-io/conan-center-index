@@ -1,6 +1,7 @@
 from conans import ConanFile, Meson, tools
 import os
 
+required_conan_version = ">=1.29.1"
 
 class LibPslConan(ConanFile):
     name = "libpsl"
