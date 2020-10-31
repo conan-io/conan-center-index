@@ -80,9 +80,10 @@ class LibharuConan(ConanFile):
         tools.save(os.path.join(self.package_folder, "licenses", "LICENSE"), self._extract_license())
 
     def package_info(self):
+        libprefix = "lib" if self.settings.compiler == "Visual Studio" else ""
         libsuffix = "{}{}".format("" if self.options.shared else "s",
                                   "d" if self.settings.compiler == "Visual Studio" and self.settings.build_type == "Debug" else "")
-        self.cpp_info.libs = ["hpdf" + libsuffix]
+        self.cpp_info.libs = ["{}hpdf{}".format(libprefix, libsuffix)]
         if self.settings.os == "Windows" and self.options.shared:
             self.cpp_info.defines = ["HPDF_DLL"]
         if self.settings.os == "Linux" and not self.options.shared:
