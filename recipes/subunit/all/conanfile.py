@@ -107,6 +107,9 @@ class SubunitConan(ConanFile):
         os.unlink(os.path.join(self.package_folder, "lib", "libsubunit.la"))
         for d in glob.glob(os.path.join(self.package_folder, "lib", "python*")):
             tools.rmdir(d)
+        for d in glob.glob(os.path.join(self.package_folder, "lib", "*")):
+            if os.path.isdir(d):
+                tools.rmdir(d)
         tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
 
     def package_info(self):
