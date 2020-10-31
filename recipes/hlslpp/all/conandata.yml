@@ -1,0 +1,4 @@
+sources:
+  "2.0":
+    url: "https://github.com/redorav/hlslpp/archive/2.0.tar.gz"
+    sha256: "63ca1fb18e129d9daf045160a96867b934c9a4595a094298597ff18192fc476b"

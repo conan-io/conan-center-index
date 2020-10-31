@@ -1,0 +1,8 @@
+sources:
+  "3.1.5":
+    url: "https://github.com/argtable/argtable3/archive/v3.1.5.1c1bb23.tar.gz"
+    sha256: "e2435562ece10bbf52c21811fe6ec25a3574054886cb56d483e5c17451329bb4"
+patches:
+  "3.1.5":
+    - patch_file: "patches/3.1.5-0001-cmake-fixes.patch"
+      base_path: "source_subfolder"

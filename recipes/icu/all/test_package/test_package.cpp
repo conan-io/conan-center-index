@@ -27,6 +27,7 @@
 */
 
 #include <stdio.h>
+#define U_DEFINE_FALSE_AND_TRUE 1
 #include "unicode/utypes.h"
 #include "unicode/uchar.h"
 #include "unicode/locid.h"

@@ -10,7 +10,6 @@ class RgbcxConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     topics = ("conan", "BC1", "BC5", "BCx", "encoding")
     license = "MIT", "Unlicense"
-    no_copy_source = True
 
     @property
     def _source_subfolder(self):
@@ -20,11 +19,11 @@ class RgbcxConan(ConanFile):
         tools.get(**self.conan_data["sources"][self.version])
         extracted_dir = glob.glob('bc7enc-*/')[0]
         os.rename(extracted_dir, self._source_subfolder)
-        self._patch_sources()
 
-    def _patch_sources(self):
+    def build(self):
         tools.replace_in_file(os.path.join(self._source_subfolder, "rgbcx.h"),
-            "#include <stdlib.h>", "#include <stdlib.h>\n#include <string.h>")
+                              "#include <stdlib.h>",
+                              "#include <stdlib.h>\n#include <string.h>")
 
     def package(self):
         self.copy("rgbcx.h", dst="include", src=self._source_subfolder)

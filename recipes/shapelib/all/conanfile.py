@@ -36,11 +36,10 @@ class ShapelibConan(ConanFile):
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
         os.rename(self.name + "-" + self.version, self._source_subfolder)
-        tools.replace_in_file(os.path.join(self._source_subfolder, "CMakeLists.txt"),
-                              "set(BUILD_TEST ON)",
-                              "")
 
     def build(self):
+        tools.replace_in_file(os.path.join(self._source_subfolder, "CMakeLists.txt"),
+                              "set(BUILD_TEST ON)", "")
         cmake = CMake(self)
         cmake.configure(build_folder=self._build_subfolder)
         cmake.build(target="shp")

@@ -16,6 +16,9 @@ class NinjaConan(ConanFile):
     _source_subfolder = "source_subfolder"
     _cmake = None
 
+    def package_id(self):
+        del self.info.settings.compiler
+
     def _configure_cmake(self):
         if self._cmake:
             return self._cmake

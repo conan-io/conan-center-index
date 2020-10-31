@@ -7,20 +7,27 @@ class YASMInstallerConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/yasm/yasm"
     description = 'Yasm is a complete rewrite of the NASM assembler under the "new" BSD License'
-    license = "BSD"
+    topics = ("conan", "yasm", "installer", "assembler")
+    license = "BSD-2-Clause"
     settings = "os_build", "arch_build", "compiler"
-    _source_subfolder = "sources"
+
+    @property
+    def _source_subfolder(self):
+        return "source_subfolder"
 
     def configure(self):
         del self.settings.compiler.libcxx
         del self.settings.compiler.cppstd
+
+    def package_id(self):
+        del self.info.settings.compiler
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
         extracted_dir = 'yasm-%s' % self.version
         os.rename(extracted_dir, self._source_subfolder)
         tools.download('https://raw.githubusercontent.com/yasm/yasm/bcc01c59d8196f857989e6ae718458c296ca20e3/YASM-VERSION-GEN.bat',
-                       os.path.join('sources', 'YASM-VERSION-GEN.bat'))
+                       os.path.join(self._source_subfolder, 'YASM-VERSION-GEN.bat'))
 
     def build(self):
         if self.settings.os_build == 'Windows':
@@ -36,7 +43,7 @@ class YASMInstallerConan(ConanFile):
                     msbuild.build_env.link_flags.append('/MACHINE:X86')
                 elif self.settings.arch_build == "x86_64":
                     msbuild.build_env.link_flags.append('/SAFESEH:NO /MACHINE:X64')
-                msbuild.build(project_file="yasm.sln", arch=self.settings.arch_build, build_type="Release",
+                msbuild.build(project_file="yasm.sln", arch=str(self.settings.arch_build), build_type="Release",
                               targets=["yasm"], platforms={"x86": "Win32"}, force_vcvars=True)
 
     def _build_configure(self):
@@ -64,7 +71,6 @@ class YASMInstallerConan(ConanFile):
         tools.rmdir(os.path.join(self.package_folder, "share"))
 
     def package_info(self):
-        self.env_info.PATH.append(os.path.join(self.package_folder, 'bin'))
-
-    def package_id(self):
-        del self.info.settings.compiler
+        bin_path = os.path.join(self.package_folder, "bin")
+        self.output.info("Appending PATH environment variable: {}".format(bin_path))
+        self.env_info.PATH.append(bin_path)
