@@ -1,6 +1,7 @@
 import os
 import glob
 from conans import ConanFile, CMake, tools
+from conans.errors import ConanInvalidConfiguration
 
 
 class LibjpegTurboConan(ConanFile):
@@ -52,11 +53,38 @@ class LibjpegTurboConan(ConanFile):
         del self.settings.compiler.cppstd
         if self.options.shared:
             del self.options.fPIC
-        if self.settings.os == "Emscripten":
+
+        if self.options.enable12bit:
+            del self.options.java
+            del self.options.turbojpeg
+        if self.options.enable12bit or self.settings.os == "Emscripten":
             del self.options.SIMD
+        if self.options.enable12bit or self.options.libjpeg7_compatibility or self.options.libjpeg8_compatibility:
+            del self.options.arithmetic_encoder
+            del self.options.arithmetic_decoder
+        if self.options.libjpeg8_compatibility:
+            del self.options.mem_src_dst
+
+        if self.options.enable12bit and (self.options.libjpeg7_compatibility or self.options.libjpeg8_compatibility):
+            raise ConanInvalidConfiguration("12-bit samples is not allowed with libjpeg v7/v8 API/ABI")
+        if self.options.get_safe("java", False) and not self.options.shared:
+            raise ConanInvalidConfiguration("java wrapper requires shared libjpeg-turbo")
+        if self.settings.compiler == "Visual Studio" and self.options.shared and str(self.settings.compiler.runtime).startswith("MT"):
+            raise ConanInvalidConfiguration("shared libjpeg-turbo can't be built with MT or MTd")
+
+    @property
+    def _is_arithmetic_encoding_enabled(self):
+        return self.options.get_safe("arithmetic_encoder", False) or \
+               self.options.libjpeg7_compatibility or self.options.libjpeg8_compatibility
+
+    @property
+    def _is_arithmetic_decoding_enabled(self):
+        return self.options.get_safe("arithmetic_decoder", False) or \
+               self.options.libjpeg7_compatibility or self.options.libjpeg8_compatibility
 
     def build_requirements(self):
-        self.build_requires("nasm/2.14")
+        if self.options.get_safe("SIMD"):
+            self.build_requires("nasm/2.14")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
@@ -69,13 +97,13 @@ class LibjpegTurboConan(ConanFile):
         self._cmake.definitions["ENABLE_STATIC"] = not self.options.shared
         self._cmake.definitions["ENABLE_SHARED"] = self.options.shared
         self._cmake.definitions["WITH_SIMD"] = self.options.get_safe("SIMD", False)
-        self._cmake.definitions["WITH_ARITH_ENC"] = self.options.arithmetic_encoder
-        self._cmake.definitions["WITH_ARITH_DEC"] = self.options.arithmetic_decoder
+        self._cmake.definitions["WITH_ARITH_ENC"] = self._is_arithmetic_encoding_enabled
+        self._cmake.definitions["WITH_ARITH_DEC"] = self._is_arithmetic_decoding_enabled
         self._cmake.definitions["WITH_JPEG7"] = self.options.libjpeg7_compatibility
         self._cmake.definitions["WITH_JPEG8"] = self.options.libjpeg8_compatibility
-        self._cmake.definitions["WITH_MEM_SRCDST"] = self.options.mem_src_dst
-        self._cmake.definitions["WITH_TURBOJPEG"] = self.options.turbojpeg
-        self._cmake.definitions["WITH_JAVA"] = self.options.java
+        self._cmake.definitions["WITH_MEM_SRCDST"] = self.options.get_safe("mem_src_dst", False)
+        self._cmake.definitions["WITH_TURBOJPEG"] = self.options.get_safe("turbojpeg", False)
+        self._cmake.definitions["WITH_JAVA"] = self.options.get_safe("java", False)
         self._cmake.definitions["WITH_12BIT"] = self.options.enable12bit
         if self.settings.compiler == "Visual Studio":
             self._cmake.definitions["WITH_CRT_DLL"] = True # avoid replacing /MD by /MT in compiler flags
@@ -113,7 +141,7 @@ class LibjpegTurboConan(ConanFile):
     def package_info(self):
         self.cpp_info.components["jpeg"].names["pkg_config"] = "libjpeg"
         self.cpp_info.components["jpeg"].libs = [self._lib_name("jpeg")]
-        if self.options.turbojpeg:
+        if self.options.get_safe("turbojpeg"):
             self.cpp_info.components["turbojpeg"].names["pkg_config"] = "libturbojpeg"
             self.cpp_info.components["turbojpeg"].libs = [self._lib_name("turbojpeg")]
 
