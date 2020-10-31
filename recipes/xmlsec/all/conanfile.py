@@ -87,7 +87,7 @@ class XmlSecConan(ConanFile):
             self.output.info(configure_command)
             self.run(configure_command)
 
-            # Fix library names because they can be not just zlib.lib
+            # Fix library names
             def format_libs(package):
                 libs = []
                 for lib in self.deps_cpp_info[package].libs:
@@ -107,6 +107,9 @@ class XmlSecConan(ConanFile):
             if self.options.with_xslt:
                 tools.replace_in_file("Makefile.msvc", "libxslt.lib", format_libs("libxslt"))
                 tools.replace_in_file("Makefile.msvc", "libxslt_a.lib", format_libs("libxslt"))
+
+            if self.settings.build_type == "Debug":
+                tools.replace_in_file("Makefile.msvc", "libcrypto.lib", "libcryptod.lib")
 
             self.run("nmake /f Makefile.msvc")
 
