@@ -1,4 +1,5 @@
 from conans import ConanFile, AutoToolsBuildEnvironment, tools, VisualStudioBuildEnvironment
+from conans.errors import ConanInvalidConfiguration
 import os
 import glob
 import shutil
@@ -46,6 +47,11 @@ class CairoConan(ConanFile):
             del self.options.enable_xlib
             del self.options.enable_xlib_xrender
             del self.options.enable_xcb
+
+    def configure(self):
+        if self._is_msvc:
+            if self.settings.build_type not in ['Debug', 'Release']:
+                raise ConanInvalidConfiguration("MSVC build supports only Debug or Release build type")
 
     def requirements(self):
         if self.options.enable_ft:
@@ -133,7 +139,7 @@ class CairoConan(ConanFile):
         else:
             configure_args.extend(['--enable-static', '--disable-shared'])
 
-        self._env_build = AutoToolsBuildEnvironment(self)
+        self._env_build = AutoToolsBuildEnvironment(self, win_bash=tools.os_info.is_windows)
         if self.settings.os == 'Macos':
             self._env_build.link_flags.extend(['-framework CoreGraphics',
                                             '-framework CoreFoundation'])
@@ -141,7 +147,7 @@ class CairoConan(ConanFile):
             self._env_build.flags.append('-Wno-enum-conversion')
         configure_args.append("--datarootdir=%s" % os.path.join(self.package_folder, "res"))
 
-        self.run('PKG_CONFIG_PATH=%s NOCONFIGURE=1 ./autogen.sh' % pkg_config_path)
+        self.run('PKG_CONFIG_PATH=%s NOCONFIGURE=1 ./autogen.sh' % pkg_config_path, win_bash=tools.os_info.is_windows, run_environment=True)
         self._env_build.configure(args=configure_args, pkg_config_paths=[pkg_config_path])
         return self._env_build
 
