@@ -591,10 +591,6 @@ class BoostConan(ConanFile):
 
         # CXX FLAGS
         cxx_flags = []
-        # Extract CXXFLAGS from CXX
-        if tools.get_env("CXX"):
-            cxx_flags.extend(shlex.split(tools.get_env("CXX"))[1:])
-
         # fPIC DEFINITION
         if self.settings.os != "Windows":
             if self.options.fPIC:
@@ -706,7 +702,7 @@ class BoostConan(ConanFile):
     @property
     def _cxx(self):
         if "CXX" in os.environ:
-            return shlex.split(tools.get_env("CXX"))[0]
+            return os.environ["CXX"]
         if tools.is_apple_os(self.settings.os) and self.settings.compiler == "apple-clang":
             return tools.XCRun(self.settings).cxx
         compiler_version = str(self.settings.compiler.version)
@@ -757,7 +753,7 @@ class BoostConan(ConanFile):
 
         # Specify here the toolset with the binary if present if don't empty parameter :
         contents += '\nusing "%s" : %s : ' % (self._toolset, self._toolset_version)
-        contents += ' "%s"' % self._cxx.replace("\\", "/")
+        contents += ' %s' % self._cxx.replace("\\", "/")
 
         if tools.is_apple_os(self.settings.os):
             if self.settings.compiler == "apple-clang":
@@ -774,6 +770,8 @@ class BoostConan(ConanFile):
             contents += '<cxxflags>"%s" ' % os.environ["CXXFLAGS"]
         if "CFLAGS" in os.environ:
             contents += '<cflags>"%s" ' % os.environ["CFLAGS"]
+        if "CPPFLAGS" in os.environ:
+            contents += '<compileflags>"%s" ' % os.environ["CPPFLAGS"]
         if "LDFLAGS" in os.environ:
             contents += '<linkflags>"%s" ' % os.environ["LDFLAGS"]
         if "ASFLAGS" in os.environ:
