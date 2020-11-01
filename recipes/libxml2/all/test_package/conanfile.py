@@ -17,3 +17,6 @@ class TestPackageConan(ConanFile):
             arg_path = os.path.abspath(os.path.join(os.path.dirname(__file__), "books.xml"))
             bin_arg_path = "%s %s" % (bin_path, arg_path)
             self.run(bin_arg_path, run_environment=True)
+
+            if self.options["libxml2"].include_utils:
+                self.run("xmllint --version", run_environment=True)

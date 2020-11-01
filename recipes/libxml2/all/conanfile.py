@@ -83,7 +83,7 @@ class Libxml2Conan(ConanFile):
         if self.options.iconv:
             self.requires("libiconv/1.16")
         if self.options.icu:
-            self.requires("icu/67.1")
+            self.requires("icu/68.1")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
@@ -180,12 +180,13 @@ class Libxml2Conan(ConanFile):
 
             configure_command = " ".join(args)
             self.output.info(configure_command)
-            self.run(configure_command)
+            self.run(configure_command, run_environment=True)
 
-            self.run("mingw32-make -f Makefile.mingw libxml libxmla")
+            with tools.environment_append({"CFLAGS": tools.get_env("CFLAGS", "") + " -DIN_LIBXML"}):
+                self.run("mingw32-make -f Makefile.mingw {} -j{}".format("libxml" if self.options.shared else "libxmla", tools.cpu_count()), run_environment=True)
 
             if self.options.include_utils:
-                self.run("mingw32-make -f Makefile.mingw utils")
+                self.run("mingw32-make -f Makefile.mingw utils -j{}".format(tools.cpu_count()), run_environment=True)
 
     def _package_mingw(self):
         tools.mkdir(os.path.join(self.package_folder, "include", "libxml2"))

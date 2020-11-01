@@ -1,5 +1,17 @@
 --- a/win32/Makefile.mingw
 +++ b/win32/Makefile.mingw
+@@ -35,1 +35,1 @@
+-CPP = gcc.exe -E
++CPP ?= gcc.exe -E
+@@ -42,1 +42,1 @@
+-CC = gcc.exe
++CC ?= gcc.exe
+@@ -62,1 +62,1 @@
+-LD = gcc.exe
++LD = $(CC)
+@@ -94,1 +94,1 @@
+-AR = ar.exe
++AR ?= ar.exe
 @@ -246,18 +246,17 @@ distclean : clean
  rebuild : clean all
  
@@ -28,3 +40,17 @@
  
  install-dist : install-libs
  	cmd.exe /C "copy $(BINDIR)\xml*.exe $(BINPREFIX)"
+@@ -322,11 +322,11 @@
+ ifeq ($(STATIC),1)
+ $(BINDIR)/%.exe : $(UTILS_SRCDIR)/%.c
+ 	$(CC) -DLIBXML_STATIC $(CFLAGS) -o $(subst .c,.o,$(UTILS_INTDIR)/$(<F)) -c $< 
+-	$(LD) $(LDFLAGS) -o $@ $(subst .c,.o,$(UTILS_INTDIR)/$(<F)) -l$(XML_BASENAME) $(LIBS) 
++	$(LD) $(LDFLAGS) -o $@ $(subst .c,.o,$(UTILS_INTDIR)/$(<F)) $(BINDIR)/$(XML_A) $(LIBS) 
+ else
+ $(BINDIR)/%.exe : $(UTILS_SRCDIR)/%.c
+ 	$(CC) $(CFLAGS) -o $(subst .c,.o,$(UTILS_INTDIR)/$(<F)) -c $< 
+-	$(LD) $(LDFLAGS) -o $@ $(subst .c,.o,$(UTILS_INTDIR)/$(<F)) -l$(XML_BASENAME) $(LIBS) 
++	$(LD) $(LDFLAGS) -o $@ $(subst .c,.o,$(UTILS_INTDIR)/$(<F)) $(BINDIR)/$(XML_IMP) $(LIBS) 
+ endif
+ 
+ # Builds xmllint and friends. Uses the implicit rule for commands.
