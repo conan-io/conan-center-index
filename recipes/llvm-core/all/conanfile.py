@@ -220,10 +220,10 @@ class LLVMCoreConan(ConanFile):
             with components_path.open(mode='w') as file:
                 json.dump(components, file, indent=4)
         else:
+            suffixes = ['.dylib', '.so']
             for file in package_path.joinpath('lib').iterdir():
-                for suffix in ['.dylib', '.so']:
-                    if suffix not in file.suffixes:
-                        file.unlink()
+                if not any(suffix in file.suffixes for suffix in suffixes):
+                    file.unlink()
 
     def package_info(self):
         if self.options.shared:
