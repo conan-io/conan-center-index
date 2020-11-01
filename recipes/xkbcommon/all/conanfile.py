@@ -24,9 +24,11 @@ class XkbcommonConan(ConanFile):
         "fPIC": True,
         "with_x11": True,
         "with_wayland": False,
-        "xkbregistry": False, # FIXME: should be True, but requires pkg_config generator which will improperly model xorg pkg-config files
+        "xkbregistry": True,
         "docs": False
     }
+
+    generators = "pkg_config"
 
     _meson = None
 
@@ -51,8 +53,6 @@ class XkbcommonConan(ConanFile):
             raise ConanInvalidConfiguration("This library is only compatible with Linux")
         del self.settings.compiler.libcxx
         del self.settings.compiler.cppstd
-        if self.options.get_safe("xkbregistry"):
-            raise ConanInvalidConfiguration("xkbregistry can't be enabled yet.")
 
     def requirements(self):
         self.requires("xorg/system")
@@ -79,6 +79,12 @@ class XkbcommonConan(ConanFile):
             "default_library": ("shared" if self.options.shared else "static")}
         if self._has_xkbregistry_option:
             defs["enable-xkbregistry"] = self.options.xkbregistry
+
+        # workaround for https://github.com/conan-io/conan-center-index/issues/3377
+        # FIXME: do not remove this pkg-config file once xorg recipe fixed
+        xeyboard_config_pkgfile = os.path.join(self.build_folder, "xkeyboard-config.pc")
+        if os.path.isfile(xeyboard_config_pkgfile):
+            os.remove(xeyboard_config_pkgfile)
 
         self._meson = Meson(self)
         self._meson.configure(
