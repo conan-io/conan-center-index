@@ -156,7 +156,7 @@ class XmlSecConan(ConanFile):
         if self._is_msvc:
             self._build_msvc()
         else:
-            # FIXME: conan is missing a feature to change the join character on lists of environment variables
+            # FIXME: conan is missing a feature to change the join character on lists of environment variables (fix for mingw on Windows)
             # e.g. self.env_info.AUTOMAKE_CONAN_INCLUDES.joiner = ":"
             with tools.environment_append({"AUTOMAKE_CONAN_INCLUDES": tools.get_env("AUTOMAKE_CONAN_INCLUDES", "").replace(";", ":")}):
                 with tools.chdir(self._source_subfolder):
