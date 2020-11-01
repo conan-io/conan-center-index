@@ -6,7 +6,7 @@ int main() {
   mario.format().color(Color::white).border("").corner("").column_separator("").padding(0);
   size_t rows = 16;
   for (size_t i = 0; i < rows; ++i) {
-    std::vector<std::variant<std::string, Table>> row;
+    std::vector<std::variant<std::string, const char*, Table>> row;
     size_t cols = 30;
     for (size_t j = 0; j < cols; ++j) {
       row.push_back("█");
