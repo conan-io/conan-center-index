@@ -18,9 +18,13 @@ class NamedTypeConan(ConanFile):
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
         url = self.conan_data["sources"][self.version]["url"]
-        extracted_dir = "NamedType-" + os.path.splitext(os.path.basename(url))[0]
+        if self.version == "20190324":
+            # non-release version
+            extracted_dir = "NamedType-" + os.path.splitext(os.path.basename(url))[0]
+        else:
+            extracted_dir = self.name + "-" + self.version
         os.rename(extracted_dir, self._source_subfolder)
 
     def package(self):
-        self.copy("*.hpp", dst="include", src=self._source_subfolder)
+        self.copy("*.hpp", dst="include", src=self._source_subfolder, keep_path=False)
         self.copy("LICENSE", dst="licenses", src=self._source_subfolder)
