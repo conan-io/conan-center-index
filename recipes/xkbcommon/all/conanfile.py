@@ -34,12 +34,12 @@ class XkbcommonConan(ConanFile):
         del self.settings.compiler.libcxx
         del self.settings.compiler.cppstd
 
-    def build_requirements(self):
-        self.build_requires("meson/0.54.2")
-        self.build_requires("bison/3.5.3")
-
     def requirements(self):
         self.requires("xorg/system")
+
+    def build_requirements(self):
+        self.build_requires("meson/0.56.0")
+        self.build_requires("bison/3.7.1")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
