@@ -1,6 +1,12 @@
 --- CMakeLists.txt
 +++ CMakeLists.txt
-@@ -404,62 +404,9 @@
+@@ -398,68 +398,12 @@
+             COMPONENT devel)
+ endif()
+
+-install(FILES license.md DESTINATION ${SFML_MISC_INSTALL_PREFIX})
+-install(FILES readme.md DESTINATION ${SFML_MISC_INSTALL_PREFIX})
+-
  # install 3rd-party libraries and tools
  if(SFML_OS_WINDOWS)
 
@@ -63,7 +69,7 @@
 
      # install the Xcode templates if requested
      if(SFML_INSTALL_XCODE_TEMPLATES)
-@@ -479,34 +426,9 @@
+@@ -479,34 +423,9 @@
  elseif(SFML_OS_IOS)
 
      # fix CMake install rules broken for iOS (see http://public.kitware.com/Bug/view.php?id=12506)
