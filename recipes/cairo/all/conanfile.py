@@ -147,7 +147,12 @@ class CairoConan(ConanFile):
             self._env_build.flags.append('-Wno-enum-conversion')
         configure_args.append("--datarootdir=%s" % os.path.join(self.package_folder, "res"))
 
-        self.run('PKG_CONFIG_PATH=%s NOCONFIGURE=1 ./autogen.sh' % pkg_config_path, win_bash=tools.os_info.is_windows, run_environment=True)
+        env_vars = {
+            "PKG_CONFIG_PATH" : pkg_config_path,
+             "NOCONFIGURE": "1"
+             }
+        with tools.environment_append(env_vars):
+            self.run("./autogen.sh", win_bash=tools.os_info.is_windows, run_environment=True)
         self._env_build.configure(args=configure_args, pkg_config_paths=[pkg_config_path])
         return self._env_build
 
