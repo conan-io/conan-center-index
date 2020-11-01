@@ -1,4 +1,5 @@
 from conans import ConanFile, tools, AutoToolsBuildEnvironment, VisualStudioBuildEnvironment
+from conans.errors import ConanInvalidConfiguration
 from contextlib import contextmanager
 import os
 
@@ -12,16 +13,18 @@ class XmlSecConan(ConanFile):
     settings = "os", "compiler", "arch", "build_type"
     topics = ("xml", "signature", "encryption")
     options = {
-        "shared": [True, False], 
+        "shared": [True, False],
         "fPIC": [True, False],
-        "with_xslt": [True, False]
+        "with_openssl": [True, False],
+        "with_xslt": [True, False],
         }
     default_options = {
         "shared": False,
         "fPIC": True,
+        "with_openssl": True,
         "with_xslt": False
         }
-    
+
     _autotools = None
 
     @property
@@ -30,10 +33,11 @@ class XmlSecConan(ConanFile):
 
     def requirements(self):
         self.requires("libxml2/2.9.10")
-        self.requires("openssl/1.1.1h")
+        if self.options.with_openssl:
+            self.requires("openssl/1.1.1h")
         if self.options.with_xslt:
             self.requires("libxslt/1.1.34")
-    
+
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
@@ -41,9 +45,13 @@ class XmlSecConan(ConanFile):
     def configure(self):
         if self.options.shared:
             del self.options.fPIC
+            if self.settings.os == "Windows" and not self._is_msvc:
+                raise ConanInvalidConfiguration("Shared mingw builds are not supported (due to libtool blocking static dependencies)")
+        if not self.options.with_openssl:
+            raise ConanInvalidConfiguration("At least one crypto engine needs to be enabled")
         del self.settings.compiler.libcxx
         del self.settings.compiler.cppstd
-        
+
     def build_requirements(self):
         if self.settings.compiler != "Visual Studio" and tools.os_info.is_windows and os.environ.get("CONAN_BASH_PATH", None) is None:
             self.build_requires("msys2/20200517")
@@ -52,13 +60,13 @@ class XmlSecConan(ConanFile):
 
     @property
     def _is_msvc(self):
-        return self.settings.compiler == 'Visual Studio'
+        return self.settings.compiler == "Visual Studio"
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
-        extracted_folder = "xmlsec-xmlsec-{}".format(self.version.replace('.', '_'))
+        extracted_folder = "xmlsec-xmlsec-{}".format(self.version.replace(".", "_"))
         os.rename(extracted_folder, self._source_subfolder)
-    
+
     @contextmanager
     def _msvc_build_environment(self):
         with tools.chdir(os.path.join(self._source_subfolder, 'win32')):
@@ -67,23 +75,28 @@ class XmlSecConan(ConanFile):
                     yield
 
     def _build_msvc(self):
+        yes_no = lambda v: "yes" if v else "no"
         with self._msvc_build_environment():
-            debug = "yes" if self.settings.build_type == "Debug" else "no"
-            static = "no" if self.options.shared else "yes"
+            crypto_engines = []
+            if self.options.with_openssl:
+                ov = tools.Version(self.deps_cpp_info["openssl"].version)
+                crypto_engines.append("openssl={}{}0".format(ov.major, ov.minor))
+            args = [
+                "cscript",
+                "configure.js",
+                "prefix={}".format(self.package_folder),
+                "cruntime=/{}".format(self.settings.compiler.runtime),
+                "debug={}".format(yes_no(self.settings.build_type == "Debug")),
+                "static={}".format(yes_no(not self.options.shared)),
+                "include=\"{}\"".format(";".join(self.deps_cpp_info.include_paths)),
+                "lib=\"{}\"".format(";".join(self.deps_cpp_info.lib_paths)),
+                "with-dl=no",
+                "xslt={}".format(yes_no(self.options.with_xslt)),
+                "iconv={}".format(yes_no(False)),
+                "crypto={}".format(",".join(crypto_engines)),
+            ]
 
-            args = ["cscript",
-                    "configure.js",
-                    "prefix=%s" % self.package_folder,
-                    "cruntime=/%s" % self.settings.compiler.runtime,
-                    "debug=%s" % debug,
-                    "static=%s" % static,
-                    'include="%s"' % ";".join(self.deps_cpp_info.include_paths),
-                    'lib="%s"' % ";".join(self.deps_cpp_info.lib_paths),
-                    'with-dl=no',
-                    "xslt=%s" % ("yes" if self.options.with_xslt else "no"),
-                    'iconv=no']
-
-            configure_command = ' '.join(args)
+            configure_command = " ".join(args)
             self.output.info(configure_command)
             self.run(configure_command)
 
@@ -92,15 +105,15 @@ class XmlSecConan(ConanFile):
                 libs = []
                 for lib in self.deps_cpp_info[package].libs:
                     libname = lib
-                    if not libname.endswith('.lib'):
-                        libname += '.lib'
+                    if not libname.endswith(".lib"):
+                        libname += ".lib"
                     libs.append(libname)
                 for lib in self.deps_cpp_info[package].system_libs:
                     libname = lib
-                    if not libname.endswith('.lib'):
-                        libname += '.lib'
+                    if not libname.endswith(".lib"):
+                        libname += ".lib"
                     libs.append(libname)
-                return ' '.join(libs)
+                return " ".join(libs)
 
             tools.replace_in_file("Makefile.msvc", "libxml2.lib", format_libs("libxml2"))
             tools.replace_in_file("Makefile.msvc", "libxml2_a.lib", format_libs("libxml2"))
@@ -121,13 +134,18 @@ class XmlSecConan(ConanFile):
         if self._autotools:
             return self._autotools
         self._autotools = AutoToolsBuildEnvironment(self, win_bash=tools.os_info.is_windows)
-        full_install_subfolder = tools.unix_path(self.package_folder) if tools.os_info.is_windows else self.package_folder
+        if not self.options.shared:
+            self._autotools.defines.append("XMLSEC_STATIC")
         yes_no = lambda v: "yes" if v else "no"
         configure_args = [
-            "--prefix=%s" % full_install_subfolder,
             "--enable-crypto-dl={}".format(yes_no(False)),
             "--enable-apps-crypto-dl={}".format(yes_no(False)),
             "--with-libxslt={}".format(yes_no(self.options.with_xslt)),
+            "--with-openssl={}".format(tools.unix_path(self.deps_cpp_info["openssl"].rootpath) if self.options.with_openssl else "no"),
+            "--enable-mscrypto={}".format(yes_no(False)),   # Built on mingw
+            "--enable-mscng={}".format(yes_no(False)),      # Build on mingw
+            "--enable-docs={}".format(yes_no(False)),
+            "--enable-mans={}".format(yes_no(False)),
             "--enable-shared={}".format(yes_no(self.options.shared)),
             "--enable-static={}".format(yes_no(not self.options.shared)),
         ]
@@ -148,14 +166,14 @@ class XmlSecConan(ConanFile):
 
     def package(self):
         self.copy("Copyright", src=self._source_subfolder, dst="licenses")
-        
+
         if self._is_msvc:
             self._package_msvc()
             if not self.options.shared:
                 tools.remove_files_by_mask(os.path.join(self.package_folder, "bin"), "*.dll")
             tools.remove_files_by_mask(os.path.join(self.package_folder, "bin"), "*.pdb")
-            os.unlink(os.path.join(self.package_folder, 'lib', 'libxmlsec-openssl_a.lib' if self.options.shared else 'libxmlsec-openssl.lib'))
-            os.unlink(os.path.join(self.package_folder, 'lib', 'libxmlsec_a.lib' if self.options.shared else 'libxmlsec.lib'))
+            os.unlink(os.path.join(self.package_folder, "lib", "libxmlsec-openssl_a.lib" if self.options.shared else "libxmlsec-openssl.lib"))
+            os.unlink(os.path.join(self.package_folder, "lib", "libxmlsec_a.lib" if self.options.shared else "libxmlsec.lib"))
         else:
             autotools = self._configure_autotools()
             autotools.install()
@@ -165,22 +183,30 @@ class XmlSecConan(ConanFile):
             os.remove(os.path.join(self.package_folder, "lib", "xmlsec1Conf.sh"))
 
     def package_info(self):
-        if self._is_msvc:
-            if self.options.shared:
-                self.cpp_info.libs = ["libxmlsec-openssl", "libxmlsec"]
-            else: 
-                self.cpp_info.libs = ["libxmlsec-openssl_a", "libxmlsec_a"]
-        else:
-            self.cpp_info.libs = ["xmlsec1-openssl", "xmlsec1"]
-        self.cpp_info.includedirs.append(os.path.join("include", "xmlsec1"))
-        self.cpp_info.defines.append("XMLSEC_CRYPTO_OPENSSL")
-        if not self.options.with_xslt:
-            self.cpp_info.defines.append("XMLSEC_NO_XSLT")
-        self.cpp_info.defines.append("XMLSEC_NO_SIZE_T")
+        prefix = "lib" if self._is_msvc else ""
+        infix = "" if self._is_msvc else str(tools.Version(self.version).major)
+        suffix = "_a" if self._is_msvc and not self.options.shared else ""
+
+        get_libname = lambda libname: prefix + "xmlsec" + infix + (("-" + libname) if libname else "") + suffix
+
+        self.cpp_info.components["libxmlsec"].libs = [get_libname(None)]
+        self.cpp_info.components["libxmlsec"].includedirs.append(os.path.join("include", "xmlsec" + tools.Version(self.version).major))
+        self.cpp_info.components["libxmlsec"].requires = ["libxml2::libxml2"]
+        self.cpp_info.components["libxmlsec"].names["pkg_config"] = "xmlsec{}".format(tools.Version(self.version).major)
         if not self.options.shared:
-            self.cpp_info.defines.append("XMLSEC_STATIC")
-        self.cpp_info.names["pkg_config"] = "xmlsec1"
+            self.cpp_info.components["libxmlsec"].defines.append("XMLSEC_STATIC")
+        if self.options.with_xslt:
+            self.cpp_info.components["libxmlsec"].requires.append("libxslt::libxslt")
+        else:
+            self.cpp_info.components["libxmlsec"].defines.append("XMLSEC_NO_XSLT=1")
+        self.cpp_info.components["libxmlsec"].defines.extend(["XMLSEC_NO_SIZE_T", "XMLSEC_NO_GOST=1", "XMLSEC_NO_CRYPTO_DYNAMIC_LOADING=1"])
         if self.settings.os == "Linux":
-            self.cpp_info.system_libs = ["m", "dl", "pthread"]
+            self.cpp_info.components["libxmlsec"].system_libs = ["m", "dl", "pthread"]
         if self.settings.os == "Windows":
-            self.cpp_info.system_libs = ["crypt32", "ws2_32", "advapi32", "user32", "bcrypt"]
+            self.cpp_info.components["libxmlsec"].system_libs = ["crypt32", "ws2_32", "advapi32", "user32", "bcrypt"]
+
+        if self.options.with_openssl:
+            self.cpp_info.components["openssl"].libs = [get_libname("openssl")]
+            self.cpp_info.components["openssl"].requires = ["libxmlsec", "openssl::openssl"]
+            self.cpp_info.components["openssl"].defines = ["XMLSEC_CRYPTO_OPENSSL=1"]
+            self.cpp_info.components["libxmlsec"].names["pkg_config"] = "xmlsec{}-openssl".format(tools.Version(self.version).major)
