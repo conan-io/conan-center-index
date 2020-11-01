@@ -149,6 +149,7 @@ class XmlSecConan(ConanFile):
             "--enable-shared={}".format(yes_no(self.options.shared)),
             "--enable-static={}".format(yes_no(not self.options.shared)),
         ]
+        self._autotools.libs = []
         self._autotools.configure(args=configure_args, configure_dir=self._source_subfolder)
         return self._autotools
 
