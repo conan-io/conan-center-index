@@ -61,20 +61,19 @@ class GStreamerConan(ConanFile):
         if self._meson:
             return self._meson
         meson = Meson(self)
-        defs = dict()
         if self._is_msvc:
             if tools.Version(self.settings.compiler.version) < "14":
-                defs["c_args"] = " -Dsnprintf=_snprintf"
-                defs["cpp_args"] = " -Dsnprintf=_snprintf"
+                meson.options["c_args"] = " -Dsnprintf=_snprintf"
+                meson.options["cpp_args"] = " -Dsnprintf=_snprintf"
         if self.settings.get_safe("compiler.runtime"):
-            defs["b_vscrt"] = str(self.settings.compiler.runtime).lower()
-        defs["tools"] = "disabled"
-        defs["examples"] = "disabled"
-        defs["benchmarks"] = "disabled"
-        defs["tests"] = "disabled"
+            meson.options["b_vscrt"] = str(self.settings.compiler.runtime).lower()
+        meson.options["tools"] = "disabled"
+        meson.options["examples"] = "disabled"
+        meson.options["benchmarks"] = "disabled"
+        meson.options["tests"] = "disabled"
         meson.configure(build_folder=self._build_subfolder,
                         source_folder=self._source_subfolder,
-                        defs=defs, args=['--wrap-mode=nofallback'])
+                        args=['--wrap-mode=nofallback'])
         self._meson = meson
         return self._meson
 
