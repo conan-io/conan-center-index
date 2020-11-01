@@ -60,38 +60,7 @@ class LLVMCoreConan(ConanFile):
 
     _source_subfolder = 'source'
 
-    def config_options(self):
-        if self.settings.os == 'Windows':
-            del self.options.fPIC
-            del self.options.components
-            del self.options.with_zlib
-            del self.options.with_xml2
-            del self.options.with_ffi
-
-    def requirements(self):
-        if self.options.get_safe('with_zlib', False):
-            self.requires('zlib/1.2.11')
-        if self.options.get_safe('with_xml2', False):
-            self.requires('libxml2/2.9.10')
-        if self.options.get_safe('with_ffi', False):
-            self.requires('libffi/3.3')
-
-    def configure(self):
-        if self.settings.os == 'Windows' and self.options.shared:
-            raise ConanInvalidConfiguration('shared lib not supported')
-        if self.options.exceptions and not self.options.rtti:
-            raise ConanInvalidConfiguration('exceptions require rtti support')
-
-    def source(self):
-        tools.get(**self.conan_data['sources'][self.version])
-        source_path = Path(f'llvm-{self.version}.src')
-        source_path.rename(self._source_subfolder)
-
-        if self.version in self.conan_data['patches']:
-            for patch in self.conan_data['patches'][self.version]:
-                tools.patch(**patch)
-
-    def build(self):
+    def _configure_cmake(self):
         if self.settings.compiler == 'Visual Studio':
             generator = os.getenv('CONAN_CMAKE_GENERATOR', 'NMake Makefiles')
             cmake = CMake(self, generator=generator)
@@ -164,7 +133,41 @@ class LLVMCoreConan(ConanFile):
                 self.deps_cpp_info['libffi'].include_paths[0]
             cmake.definitions['FFI_LIBRARY_DIR'] = \
                 self.deps_cpp_info['libffi'].lib_paths[0]
+        return cmake
 
+    def config_options(self):
+        if self.settings.os == 'Windows':
+            del self.options.fPIC
+            del self.options.components
+            del self.options.with_zlib
+            del self.options.with_xml2
+            del self.options.with_ffi
+
+    def requirements(self):
+        if self.options.get_safe('with_zlib', False):
+            self.requires('zlib/1.2.11')
+        if self.options.get_safe('with_xml2', False):
+            self.requires('libxml2/2.9.10')
+        if self.options.get_safe('with_ffi', False):
+            self.requires('libffi/3.3')
+
+    def configure(self):
+        if self.settings.os == 'Windows' and self.options.shared:
+            raise ConanInvalidConfiguration('shared lib not supported')
+        if self.options.exceptions and not self.options.rtti:
+            raise ConanInvalidConfiguration('exceptions require rtti support')
+
+    def source(self):
+        tools.get(**self.conan_data['sources'][self.version])
+        source_path = Path(f'llvm-{self.version}.src')
+        source_path.rename(self._source_subfolder)
+
+        if self.version in self.conan_data['patches']:
+            for patch in self.conan_data['patches'][self.version]:
+                tools.patch(**patch)
+
+    def build(self):
+        cmake = self._configure_cmake()
         cmake.configure()
         cmake.build()
 
@@ -172,11 +175,7 @@ class LLVMCoreConan(ConanFile):
         self.copy('LICENSE.TXT', dst='licenses', src=self._source_subfolder)
         package_path = Path(self.package_folder)
 
-        if self.settings.compiler == 'Visual Studio':
-            generator = os.getenv('CONAN_CMAKE_GENERATOR', 'NMake Makefiles')
-            cmake = CMake(self, generator=generator)
-        else:
-            cmake = CMake(self)
+        cmake = self._configure_cmake()
         cmake.install()
 
         if not self.options.shared:
