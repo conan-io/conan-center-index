@@ -25,8 +25,16 @@ class XkbcommonConan(ConanFile):
         "with_wayland": False,
         "docs": False
     }
-    _source_subfolder = "source_subfolder"
-    _build_subfolder = "build_subfolder"
+
+    _meson = None
+
+    @property
+    def _source_subfolder(self):
+        return "source_subfolder"
+
+    @property
+    def _build_subfolder(self):
+        return "build_subfolder"
 
     def configure(self):
         if self.settings.os != "Linux":
@@ -47,6 +55,8 @@ class XkbcommonConan(ConanFile):
         os.rename(extracted_dir, self._source_subfolder)
 
     def _configure_meson(self):
+        if self._meson:
+            return self._meson
         defs={
             "enable-wayland": self.options.with_wayland,
             "enable-docs": self.options.docs,
@@ -54,13 +64,13 @@ class XkbcommonConan(ConanFile):
             "libdir": os.path.join(self.package_folder, "lib"),
             "default_library": ("shared" if self.options.shared else "static")}
 
-        meson = Meson(self)
-        meson.configure(
+        self._meson = Meson(self)
+        self._meson.configure(
             defs=defs,
             source_folder=self._source_subfolder,
             build_folder=self._build_subfolder,
             pkg_config_paths=self.build_folder)
-        return meson
+        return self._meson
 
     def build(self):
         meson = self._configure_meson()
