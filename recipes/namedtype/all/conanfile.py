@@ -22,7 +22,7 @@ class NamedTypeConan(ConanFile):
             # non-release version
             extracted_dir = "NamedType-" + os.path.splitext(os.path.basename(url))[0]
         else:
-            extracted_dir = self.name + "-" + self.version
+            extracted_dir = "NamedType-" + self.version
         os.rename(extracted_dir, self._source_subfolder)
 
     def package(self):
