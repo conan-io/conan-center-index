@@ -15,6 +15,9 @@ class GStreamerConan(ConanFile):
     settings = "os", "arch", "compiler", "build_type"
     options = {"shared": [True, False], "fPIC": [True, False]}
     default_options = {"shared": False, "fPIC": True}
+
+    _meson = None
+
     @property
     def _source_subfolder(self):
         return "source_subfolder"
@@ -55,6 +58,8 @@ class GStreamerConan(ConanFile):
         os.rename("%s-%s" % (self.name, self.version), self._source_subfolder)
 
     def _configure_meson(self):
+        if self._meson:
+            return self._meson
         meson = Meson(self)
         defs = dict()
         if self._is_msvc:
@@ -70,7 +75,8 @@ class GStreamerConan(ConanFile):
         meson.configure(build_folder=self._build_subfolder,
                         source_folder=self._source_subfolder,
                         defs=defs, args=['--wrap-mode=nofallback'])
-        return meson
+        self._meson = meson
+        return self._meson
 
     def build(self):
         with tools.environment_append(VisualStudioBuildEnvironment(self).vars) if self._is_msvc else tools.no_op():
@@ -100,7 +106,7 @@ class GStreamerConan(ConanFile):
         tools.remove_files_by_mask(self.package_folder, "*.pdb")
 
     def package_info(self):
-        self.cpp_info.includedirs = [os.path.join("include", "gstreamer-1.0")]
+        self.cpp_info.includedirs.append(os.path.join("include", "gstreamer-1.0"))
 
         gst_plugin_path = os.path.join(self.package_folder, "lib", "gstreamer-1.0")
         if self.options.shared:
