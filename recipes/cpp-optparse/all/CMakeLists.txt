@@ -19,3 +19,9 @@ install(DIRECTORY source_subfolder/
         DESTINATION include
         FILES_MATCHING
         PATTERN "*.h")
+
+if(WIN32)
+    if(BUILD_SHARED_LIBS)
+        set_target_properties(OptionParser PROPERTIES WINDOWS_EXPORT_ALL_SYMBOLS TRUE)
+    endif()
+endif()
