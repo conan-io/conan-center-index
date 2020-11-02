@@ -144,8 +144,8 @@ class XmlSecConan(ConanFile):
             "--with-openssl={}".format(tools.unix_path(self.deps_cpp_info["openssl"].rootpath) if self.options.with_openssl else "no"),
             "--enable-mscrypto={}".format(yes_no(False)),   # Built on mingw
             "--enable-mscng={}".format(yes_no(False)),      # Build on mingw
-            "--enable-docs={}".format(yes_no(False)),
-            "--enable-mans={}".format(yes_no(False)),
+            "--enable-docs=no",
+            "--enable-mans=no",
             "--enable-shared={}".format(yes_no(self.options.shared)),
             "--enable-static={}".format(yes_no(not self.options.shared)),
         ]
