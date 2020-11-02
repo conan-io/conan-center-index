@@ -1,0 +1,8 @@
+patches:
+  "8605a8e886647e964180cb7a622424404a1da01f":
+    - patch_file: "patches/00001-update-cmakelists.patch"
+      base_path: "source_subfolder"
+sources:
+  "8605a8e886647e964180cb7a622424404a1da01f":
+    url: "https://github.com/chronoxor/CppBenchmark/archive/8605a8e886647e964180cb7a622424404a1da01f.tar.gz"
+    sha256: "f0b88802b4418b13c04ae4dfdb859b2cb81142a47ca473ad447a8be087e0adee"
