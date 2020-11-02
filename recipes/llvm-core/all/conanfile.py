@@ -182,22 +182,33 @@ class LLVMCoreConan(ConanFile):
         if not self.options.shared:
             self.run('cmake --graphviz=graph/llvm.dot .')
             with tools.chdir('graph'):
-                dot_text = tools.load('llvm.dot').replace(' ', '')
+                dot_text = tools.load('llvm.dot')
 
-            dep_regex = re.compile(r'//(.+)->(.+)$', re.MULTILINE)
+            dep_regex = re.compile(r'//\s(.+)\s->\s(.+)$', re.MULTILINE)
             deps = re.findall(dep_regex, dot_text)
+
+            dummy_targets = defaultdict(list)
+            for target, dep in deps:
+                if not target.startswith('LLVM') and not dep.startswith('obj'):
+                    dummy_targets[target].append(dep)
 
             components = defaultdict(list)
             for lib, dep in deps:
                 if not lib.startswith('LLVM'):
                     continue
-                elif dep.startswith('llvm-') or dep.startswith('-delayload:'):
+                elif dep.startswith('-delayload:'):
                     continue
                 elif dep.startswith('LLVM'):
                     components[dep]
                 elif Path(dep).exists():
                     dep = Path(dep).stem.replace('lib', '')
-                components[lib].append(dep.replace('-l', ''))
+                dep = dep.replace('-l', '')
+
+                if dep in dummy_targets.keys():
+                    components[lib].extend(dummy_targets[dep])
+                    components[lib] = list(set(components[lib]))
+                else:
+                    components[lib].append(dep)
 
         tools.rmdir(str(package_path.joinpath('bin').resolve()))
         tools.rmdir(str(package_path.joinpath('lib', 'cmake').resolve()))
