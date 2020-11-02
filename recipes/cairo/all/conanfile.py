@@ -208,11 +208,49 @@ class CairoConan(ConanFile):
 
 
     def package_info(self):
-        if not self._is_msvc and self.options.enable_glib:
-            self.cpp_info.libs.append('cairo-gobject')
-        self.cpp_info.libs.append('cairo')
-        if self._is_msvc and not self.options.shared:
-            self.cpp_info.defines.append('CAIRO_WIN32_STATIC_BUILD=1')
-        self.cpp_info.includedirs.append(os.path.join('include', 'cairo'))
+        self.cpp_info.components["cairo_"].names["pkg_config"] = "cairo"
+        self.cpp_info.components["cairo_"].libs = ["cairo"]
+        self.cpp_info.components["cairo_"].includedirs = [os.path.join('include', 'cairo')]
+        self.cpp_info.components["cairo_"].requires = ["pixman::pixman", "libpng::libpng", "zlib::zlib"]
+        if self.options.enable_ft:
+            self.cpp_info.components["cairo_"].requires.append("freetype::freetype")
+        
         if self.settings.os == "Windows":
-            self.cpp_info.system_libs.extend(['gdi32','msimg32','user32'])
+            if not self.options.shared:
+                self.cpp_info.components["cairo_"].defines.append('CAIRO_WIN32_STATIC_BUILD=1')
+        else:
+            if self.options.enable_glib:
+                self.cpp_info.components["cairo_"].requires.extend(["glib::gobject-2.0", "glib::glib-2.0"])
+            if self.options.enable_fc:
+                self.cpp_info.components["cairo_"].requires.append("fontconfig::fontconfig")
+        if self.settings.os == "Linux":
+            if self.options.enable_xcb:
+                self.cpp_info.components["cairo_"].requires.extend(["xorg::xcb-shm", "xorg::xcb"])
+            if self.options.enable_xlib_xrender:
+                self.cpp_info.components["cairo_"].requires.extend(["xorg::xcb-render"])
+            if self.options.enable_xlib:
+                self.cpp_info.components["cairo_"].requires.extend(["xorg::x11", "xorg::xext"])
+
+
+        if self.settings.os == "Windows":
+            self.cpp_info.components["cairo-win32"].names["pkg_config"] = "cairo-win32"
+            self.cpp_info.components["cairo-win32"].requires = ["cairo_", "pixman::pixman", "libpng::libpng"]
+            self.cpp_info.components["cairo-win32"].includedirs = [os.path.join('include', 'cairo')]
+
+        if self.options.enable_glib:
+            self.cpp_info.components["cairo-gobject"].names["pkg_config"] = "cairo-gobject"
+            self.cpp_info.components["cairo-gobject"].libs = ["cairo-gobject"]
+            self.cpp_info.components["cairo-gobject"].requires = ["cairo_", "glib::gobject-2.0", "glib::glib-2.0"]
+            self.cpp_info.components["cairo-gobject"].includedirs = [os.path.join('include', 'cairo')]
+        if self.settings.os != "Windows":
+            if self.options.enable_fc:
+                self.cpp_info.components["cairo-fc"].names["pkg_config"] = "cairo-fc"
+                self.cpp_info.components["cairo-fc"].requires = ["cairo_", "fontconfig::fontconfig"]
+                self.cpp_info.components["cairo-fc"].includedirs = [os.path.join('include', 'cairo')]
+            if self.options.enable_ft:
+                self.cpp_info.components["cairo-ft"].names["pkg_config"] = "cairo-ft"
+                self.cpp_info.components["cairo-ft"].requires = ["cairo_", "freetype::freetype"]
+                self.cpp_info.components["cairo-ft"].includedirs = [os.path.join('include', 'cairo')]
+            self.cpp_info.components["cairo-pdf"].names["pkg_config"] = "cairo-pdf"
+            self.cpp_info.components["cairo-pdf"].requires = ["cairo_", "zlib::zlib"]
+            self.cpp_info.components["cairo-pdf"].includedirs = [os.path.join('include', 'cairo')]
