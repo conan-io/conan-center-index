@@ -149,7 +149,9 @@ class XmlSecConan(ConanFile):
             "--enable-shared={}".format(yes_no(self.options.shared)),
             "--enable-static={}".format(yes_no(not self.options.shared)),
         ]
-        self._autotools.libs = ["pthread"]
+        self._autotools.libs = []
+        if self.settings.os == "Linux":
+            self._autotools.libs.append("pthread")
         self._autotools.configure(args=configure_args, configure_dir=self._source_subfolder)
         return self._autotools
 
