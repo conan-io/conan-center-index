@@ -2,6 +2,7 @@ from conans.errors import ConanInvalidConfiguration
 from conans import ConanFile, CMake, tools
 
 from pathlib import Path
+from collections import defaultdict
 import json
 import re
 import os
@@ -179,33 +180,24 @@ class LLVMCoreConan(ConanFile):
         cmake.install()
 
         if not self.options.shared:
-            lib_regex = re.compile(
-                r'add_library\((\w+?)\s.*?\)'
-                r'(?:(?:#|\w|\s|\()+?'
-                r'INTERFACE_LINK_LIBRARIES\s\"((?:;|:|/|\.|\w|\s|-|\(|\))+?)\"'
-                r'(?:.|\n)*?\))?'
-            )
-            exports_file = 'LLVMExports.cmake'
-            exports_path = package_path.joinpath('lib', 'cmake', 'llvm')
-            exports_path = exports_path.joinpath(exports_file)
+            self.run('cmake --graphviz=graph/llvm.dot .')
+            with tools.chdir('graph'):
+                dot_text = tools.load('llvm.dot').replace(' ', '')
 
-            exports = tools.load(str(exports_path.resolve()))
-            exports = exports.replace(r'\$<LINK_ONLY:', '')
-            exports = exports.replace(r'>', '')
+            dep_regex = re.compile(r'//(.+)->(.+)$', re.MULTILINE)
+            deps = re.findall(dep_regex, dot_text)
 
-            components = {}
-            for match in re.finditer(lib_regex, exports):
-                lib, deps = match.groups()
+            components = defaultdict(list)
+            for lib, dep in deps:
                 if not lib.startswith('LLVM'):
                     continue
-
-                components[lib] = []
-                for dep in deps.split(';') if deps is not None else []:
-                    if Path(dep).exists():
-                        dep = Path(dep).stem.replace('lib', '')
-                    elif dep.startswith('-delayload:'):
-                        continue
-                    components[lib].append(dep.replace('-l', ''))
+                elif dep.startswith('llvm-') or dep.startswith('-delayload:'):
+                    continue
+                elif dep.startswith('LLVM'):
+                    components[dep]
+                elif Path(dep).exists():
+                    dep = Path(dep).stem.replace('lib', '')
+                components[lib].append(dep.replace('-l', ''))
 
         tools.rmdir(str(package_path.joinpath('bin').resolve()))
         tools.rmdir(str(package_path.joinpath('lib', 'cmake').resolve()))
