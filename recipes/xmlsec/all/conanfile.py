@@ -191,7 +191,7 @@ class XmlSecConan(ConanFile):
         get_libname = lambda libname: prefix + "xmlsec" + infix + (("-" + libname) if libname else "") + suffix
 
         self.cpp_info.components["libxmlsec"].libs = [get_libname(None)]
-        self.cpp_info.components["libxmlsec"].includedirs.append(os.path.join("include", "xmlsec" + tools.Version(self.version).major))
+        self.cpp_info.components["libxmlsec"].includedirs.append(os.path.join("include", "xmlsec{}".format(tools.Version(self.version).major)))
         self.cpp_info.components["libxmlsec"].requires = ["libxml2::libxml2"]
         self.cpp_info.components["libxmlsec"].names["pkg_config"] = "xmlsec{}".format(tools.Version(self.version).major)
         if not self.options.shared:
