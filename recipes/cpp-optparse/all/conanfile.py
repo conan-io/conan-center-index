@@ -4,7 +4,7 @@ import os
 import shutil
 
 
-class CppCommon(ConanFile):
+class CppOptparse(ConanFile):
     name = "cpp-optparse"
     license = "MIT"
     url = "https://github.com/conan-io/conan-center-index"
