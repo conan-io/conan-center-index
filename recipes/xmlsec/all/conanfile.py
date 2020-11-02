@@ -53,7 +53,7 @@ class XmlSecConan(ConanFile):
         del self.settings.compiler.cppstd
 
     def build_requirements(self):
-        if self.settings.compiler != "Visual Studio" and tools.os_info.is_windows and os.environ.get("CONAN_BASH_PATH", None) is None:
+        if not self._is_msvc and tools.os_info.is_windows and os.environ.get("CONAN_BASH_PATH", None) is None:
             self.build_requires("msys2/20200517")
         self.build_requires("libtool/2.4.6")
         self.build_requires("pkgconf/1.7.3")
