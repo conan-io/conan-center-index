@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.16)
 
 project(log.c 
-	    VERSION 1.0 
+	    VERSION 0.1.0 
 	    DESCRIPTION "A simple logging library implemented in C99" 
 	    HOMEPAGE_URL "https://github.com/rxi/log.c"
 	    LANGUAGES C
