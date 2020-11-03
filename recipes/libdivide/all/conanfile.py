@@ -47,5 +47,5 @@ class LibdivideConan(ConanFile):
             self.cpp_info.defines = [
                 {"sse2": "LIBDIVIDE_SSE2",
                  "avx2": "LIBDIVIDE_AVX2",
-                 "avx512": "LIBDIVIDE_AVX512"}.get(str(simd))
+                 "avx512": "LIBDIVIDE_AVX512"}[str(simd)]
             ]
