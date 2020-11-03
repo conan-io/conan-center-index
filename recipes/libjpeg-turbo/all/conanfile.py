@@ -25,7 +25,9 @@ class LibjpegTurboConan(ConanFile):
                "mem_src_dst": [True, False],
                "turbojpeg": [True, False],
                "java": [True, False],
-               "enable12bit": [True, False]}
+               "enable12bit": [True, False],
+               "keep_binaries": [True, False],
+    }
     default_options = {"shared": False,
                        "fPIC": True,
                        "SIMD": True,
@@ -36,7 +38,9 @@ class LibjpegTurboConan(ConanFile):
                        "mem_src_dst": True,
                        "turbojpeg": True,
                        "java": False,
-                       "enable12bit": False}
+                       "enable12bit": False,
+                       "keep_binaries" : False,
+    }
 
     _cmake = None
 
@@ -89,11 +93,16 @@ class LibjpegTurboConan(ConanFile):
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
         os.rename(self.name + "-" + self.version, self._source_subfolder)
+        if tools.cross_building(self.settings):
+            tools.replace_in_file(os.path.join(self._source_subfolder,"CMakeLists.txt"),"CMAKE_SYSTEM_PROCESSOR","CMAKE_SYSTEM_PROCESSOR_TARGET")
 
     def _configure_cmake(self):
         if self._cmake:
             return self._cmake
         self._cmake = CMake(self, set_cmake_flags=True)
+        if tools.cross_building(self.settings):
+            if self.settings.arch == "armv8":
+                self._cmake.definitions["CMAKE_SYSTEM_PROCESSOR_TARGET"] = "aarch64"
         self._cmake.definitions["ENABLE_STATIC"] = not self.options.shared
         self._cmake.definitions["ENABLE_SHARED"] = self.options.shared
         self._cmake.definitions["WITH_SIMD"] = self.options.get_safe("SIMD", False)
@@ -134,9 +143,10 @@ class LibjpegTurboConan(ConanFile):
         tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
         tools.rmdir(os.path.join(self.package_folder, "doc"))
         # remove binaries and pdb files
-        for pattern_to_remove in ["cjpeg*", "djpeg*", "jpegtran*", "tjbench*", "wrjpgcom*", "rdjpgcom*", "*.pdb"]:
-            for bin_file in glob.glob(os.path.join(self.package_folder, "bin", pattern_to_remove)):
-                os.remove(bin_file)
+        if not self.options.keep_binaries:
+            for pattern_to_remove in ["cjpeg*", "djpeg*", "jpegtran*", "tjbench*", "wrjpgcom*", "rdjpgcom*", "*.pdb"]:
+                for bin_file in glob.glob(os.path.join(self.package_folder, "bin", pattern_to_remove)):
+                    os.remove(bin_file)
 
     def package_info(self):
         self.cpp_info.components["jpeg"].names["pkg_config"] = "libjpeg"
