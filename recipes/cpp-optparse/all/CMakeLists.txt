@@ -16,9 +16,3 @@ install(TARGETS OptionParser
     ARCHIVE DESTINATION lib)
 
 install(FILES source_subfolder/OptionParser.h DESTINATION include)
-
-if(WIN32)
-    if(BUILD_SHARED_LIBS)
-        set_target_properties(OptionParser PROPERTIES WINDOWS_EXPORT_ALL_SYMBOLS TRUE)
-    endif()
-endif()
