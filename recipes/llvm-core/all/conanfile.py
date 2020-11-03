@@ -61,6 +61,40 @@ class LLVMCoreConan(ConanFile):
 
     _source_subfolder = 'source'
 
+    def _supports_compiler(self):
+        compiler_version = tools.Version(self.settings.compiler.version)
+        compiler = self.settings.compiler.value
+        unsupported_combinations = [
+            [
+                compiler == 'gcc',
+                compiler_version.major == '5',
+                compiler_version.minor < '1'
+            ],
+            [
+                compiler == 'gcc',
+                compiler_version.major < '5'
+            ],
+            [
+                compiler == 'Visual Studio',
+                compiler_version.major == '16',
+                compiler_version.minor < '5'
+            ],
+            [
+                compiler == 'Visual Studio',
+                compiler_version.major < '15'
+            ]
+        ]
+        if any(all(combination) for combination in unsupported_combinations):
+            raise ConanInvalidConfiguration(
+                'unsupported compiler: "{}", version "{}"'
+                .format(compiler, compiler_version)
+            )
+
+    def _patch_sources(self):
+        if self.version in self.conan_data['patches']:
+            for patch in self.conan_data['patches'][self.version]:
+                tools.patch(**patch)
+
     def _configure_cmake(self):
         if self.settings.compiler == 'Visual Studio':
             generator = os.getenv('CONAN_CMAKE_GENERATOR', 'NMake Makefiles')
@@ -157,15 +191,13 @@ class LLVMCoreConan(ConanFile):
             raise ConanInvalidConfiguration('shared lib not supported')
         if self.options.exceptions and not self.options.rtti:
             raise ConanInvalidConfiguration('exceptions require rtti support')
+        self._supports_compiler()
 
     def source(self):
         tools.get(**self.conan_data['sources'][self.version])
         source_path = Path(f'llvm-{self.version}.src')
         source_path.rename(self._source_subfolder)
-
-        if self.version in self.conan_data['patches']:
-            for patch in self.conan_data['patches'][self.version]:
-                tools.patch(**patch)
+        self._patch_sources()
 
     def build(self):
         cmake = self._configure_cmake()
