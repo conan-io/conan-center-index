@@ -15,6 +15,9 @@ add_subdirectory("source_subfolder")
 conan_target_link_libraries(cppbenchmark)
 
 target_compile_features(cppbenchmark PUBLIC cxx_std_17)
+if(CPPBENCHMARK_TESTS)
+    target_compile_features(cppbenchmark-tests PUBLIC cxx_std_17)
+endif()
 
 install(DIRECTORY source_subfolder/include/
         DESTINATION include
@@ -23,7 +26,7 @@ install(DIRECTORY source_subfolder/include/
         PATTERN "*.inl")
 
 if(UNIX AND NOT APPLE)
-    # target_link_libraries(cppbenchmark pthread dl rt)
+    target_link_libraries(cppbenchmark pthread)
 endif()
 
 if(WIN32)
