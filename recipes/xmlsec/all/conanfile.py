@@ -141,7 +141,7 @@ class XmlSecConan(ConanFile):
             "--enable-crypto-dl={}".format(yes_no(False)),
             "--enable-apps-crypto-dl={}".format(yes_no(False)),
             "--with-libxslt={}".format(yes_no(self.options.with_xslt)),
-            "--with-openssl={}".format(tools.unix_path(self.deps_cpp_info["openssl"].rootpath) if self.options.with_openssl else "no"),
+            "--with-openssl={}".format(yes_no(self.options.with_openssl)),
             "--enable-mscrypto={}".format(yes_no(False)),   # Built on mingw
             "--enable-mscng={}".format(yes_no(False)),      # Build on mingw
             "--enable-docs=no",
@@ -150,8 +150,6 @@ class XmlSecConan(ConanFile):
             "--enable-static={}".format(yes_no(not self.options.shared)),
         ]
         self._autotools.libs = []
-        if self.settings.os == "Linux":
-            self._autotools.libs.append("pthread")
         self._autotools.configure(args=configure_args, configure_dir=self._source_subfolder)
         return self._autotools
 
