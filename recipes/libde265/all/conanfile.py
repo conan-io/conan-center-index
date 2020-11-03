@@ -9,7 +9,7 @@ class Libde265Conan(ConanFile):
     topics = ("conan", "libde265", "codec", "video", "h.265")
     homepage = "https://github.com/strukturag/libde265"
     url = "https://github.com/conan-io/conan-center-index"
-    exports_sources = "CMakeLists.txt"
+    exports_sources = ["CMakeLists.txt", "patches/**"]
     generators = "cmake"
     settings = "os", "arch", "compiler", "build_type"
     options = {
@@ -44,6 +44,8 @@ class Libde265Conan(ConanFile):
         os.rename(self.name + "-" + self.version, self._source_subfolder)
 
     def _patch_sources(self):
+        for patch_data in self.conan_data.get("patches", {}).get(self.version, []):
+            tools.patch(**patch_data)
         tools.replace_in_file(os.path.join(self._source_subfolder, "CMakeLists.txt"),
                               "set(CMAKE_POSITION_INDEPENDENT_CODE ON)", "")
 
@@ -52,6 +54,7 @@ class Libde265Conan(ConanFile):
             return self._cmake
         self._cmake = CMake(self)
         self._cmake.definitions["CMAKE_POSITION_INDEPENDENT_CODE"] = self.options.get_safe("fPIC", True)
+        self._cmake.definitions["ENABLE_SDL"] = False
         self._cmake.definitions["DISABLE_SSE"] = not self.options.sse
         self._cmake.configure()
         return self._cmake
