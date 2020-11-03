@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.14)
+cmake_minimum_required(VERSION 3.4.3)
 project(conanllvm)
 
 message(STATUS "Conan CMake Wrapper")
