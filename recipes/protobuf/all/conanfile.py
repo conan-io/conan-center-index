@@ -70,9 +70,12 @@ class ProtobufConan(ConanFile):
             self._cmake.configure(build_folder=self._build_subfolder)
         return self._cmake
 
-    def build(self):
-        for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            tools.patch(**patch)
+    def _patch_sources(self):
+        if "patches" in self.conan_data:
+            if self.version in self.conan_data["patches"]:
+                for patch in self.conan_data.get("patches", {}).get(self.version, []):
+                    tools.patch(**patch)
+
         tools.replace_in_file(
             os.path.join(self._source_subfolder, "cmake", "protobuf-config.cmake.in"),
             "@_protobuf_FIND_ZLIB@",
@@ -116,6 +119,8 @@ if(DEFINED Protobuf_SRC_ROOT_FOLDER)""",
             'endif()',
         )
 
+    def build(self):
+        self._patch_sources()
         cmake = self._configure_cmake()
         cmake.build()
 
