@@ -6,9 +6,9 @@ conan_basic_setup()
 
 add_library(OptionParser source_subfolder/OptionParser.cpp)
 
-target_include_directories(OptionParser PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/source_subfolder)
-
-conan_target_link_libraries(OptionParser)
+if(MSVC AND BUILD_SHARED_LIBS)
+    set_target_properties(OptionParser PROPERTIES WINDOWS_EXPORT_ALL_SYMBOLS TRUE)
+endif()
 
 install(TARGETS OptionParser
     RUNTIME DESTINATION bin
