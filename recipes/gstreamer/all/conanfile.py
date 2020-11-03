@@ -15,7 +15,7 @@ class GStreamerConan(ConanFile):
     settings = "os", "arch", "compiler", "build_type"
     options = {"shared": [True, False], "fPIC": [True, False]}
     default_options = {"shared": False, "fPIC": True}
-
+    generators = "pkg_config"
     _meson = None
 
     @property
@@ -28,7 +28,6 @@ class GStreamerConan(ConanFile):
 
     def requirements(self):
         self.requires("glib/2.66.2")
-    generators = "pkg_config"
 
     @property
     def _is_msvc(self):
