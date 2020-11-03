@@ -18,6 +18,10 @@ class FastcppcsvparserConan(ConanFile):
     def _source_subfolder(self):
         return "source_subfolder"
 
+    def configure(self):
+        if self.settings.compiler.cppstd:
+            tools.check_min_cppstd(self, 11)
+
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
         url = self.conan_data["sources"][self.version]["url"]
