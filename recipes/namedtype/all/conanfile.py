@@ -20,7 +20,6 @@ class NamedTypeConan(ConanFile):
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
-        url = self.conan_data["sources"][self.version]["url"]
         extracted_dir = glob.glob("NamedType-*")[0]
         os.rename(extracted_dir, self._source_subfolder)
 
