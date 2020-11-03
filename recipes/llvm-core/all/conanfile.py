@@ -182,7 +182,7 @@ class LLVMCoreConan(ConanFile):
         if not self.options.shared:
             self.run('cmake --graphviz=graph/llvm.dot .')
             with tools.chdir('graph'):
-                dot_text = tools.load('llvm.dot')
+                dot_text = tools.load('llvm.dot').replace('\r\n', '\n')
 
             dep_regex = re.compile(r'//\s(.+)\s->\s(.+)$', re.MULTILINE)
             deps = re.findall(dep_regex, dot_text)
