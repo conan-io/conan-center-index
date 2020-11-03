@@ -91,9 +91,8 @@ class LLVMCoreConan(ConanFile):
             )
 
     def _patch_sources(self):
-        if self.version in self.conan_data['patches']:
-            for patch in self.conan_data['patches'][self.version]:
-                tools.patch(**patch)
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            tools.patch(**patch)
 
     def _configure_cmake(self):
         if self.settings.compiler == 'Visual Studio':
