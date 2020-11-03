@@ -27,21 +27,6 @@ class CppOptparse(ConanFile):
     def _build_subfolder(self):
         return "build_subfolder"
 
-    def _configure_cmake(self):
-        if not self._cmake:
-            self._cmake = CMake(self)
-            self._cmake.configure(build_folder=self._build_subfolder)
-        return self._cmake
-
-    def _patch(self):
-        for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            tools.patch(**patch)
-
-    def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        os.rename("cpp-optparse-" + self.version,
-            self._source_subfolder)
-
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
