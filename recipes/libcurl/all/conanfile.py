@@ -153,7 +153,7 @@ class LibcurlConan(ConanFile):
             self.requires("brotli/1.0.9")
         if self.options.get_safe("with_zstd"):
             self.requires("zstd/1.4.5")
-        if self.options.get_safe("with_c_ares"):
+        if self.options.with_c_ares:
             self.requires("c-ares/1.16.1")
 
     def package_id(self):
@@ -588,5 +588,5 @@ class LibcurlConan(ConanFile):
             self.cpp_info.components["curl"].requires.append("brotli::brotli")
         if self.options.get_safe("with_zstd"):
             self.cpp_info.components["curl"].requires.append("zstd::zstd")
-        if self.options.get_safe("with_c_ares"):
+        if self.options.with_c_ares:
             self.cpp_info.components["curl"].requires.append("c-ares::c-ares")
