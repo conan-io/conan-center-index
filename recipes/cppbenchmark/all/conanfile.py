@@ -1,7 +1,7 @@
 from conans import ConanFile, CMake, tools
 from conans.errors import ConanInvalidConfiguration
 import os
-import shutil
+import glob
 
 
 class CppBenchmark(ConanFile):
@@ -20,7 +20,7 @@ class CppBenchmark(ConanFile):
                        "shared": False,
                        "tests": False,
                        "pdbs": False}
-    requires = ["hdrhistogram-c/0.11.1", "cpp-optparse/2ec0b7aca9a692ff93017ed44ca9d13a8e7d4d00"]
+    requires = ["hdrhistogram-c/0.11.1", "cpp-optparse/cci.20171104"]
     generators = "cmake"
     exports_sources = ["patches/**", "CMakeLists.txt"]
     _cmake = None
@@ -57,8 +57,8 @@ class CppBenchmark(ConanFile):
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
-        os.rename("CppBenchmark-" + self.version,
-            self._source_subfolder)
+        extracted_dir = glob.glob("CppBenchmark-*")[0]
+        os.rename(extracted_dir, self._source_subfolder)
 
     def config_options(self):
         if self.settings.os == "Windows":
