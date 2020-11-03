@@ -1,6 +1,6 @@
 from conans import ConanFile, CMake, tools
 import os
-import shutil
+import glob
 
 
 class CppOptparse(ConanFile):
@@ -50,9 +50,18 @@ class CppOptparse(ConanFile):
         if self.options.shared:
             del self.options.fPIC
 
-    def build(self):
-        self._patch()
+    def source(self):
+        tools.get(**self.conan_data["sources"][self.version])
+        extracted_dir = glob.glob("cpp-optparse-*")[0]
+        os.rename(extracted_dir, self._source_subfolder)
 
+    def _configure_cmake(self):
+        if not self._cmake:
+            self._cmake = CMake(self)
+            self._cmake.configure(build_folder=self._build_subfolder)
+        return self._cmake
+
+    def build(self):
         cmake = self._configure_cmake()
         cmake.build()
 
