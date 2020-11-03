@@ -15,10 +15,7 @@ install(TARGETS OptionParser
     LIBRARY DESTINATION lib
     ARCHIVE DESTINATION lib)
 
-install(DIRECTORY source_subfolder/
-        DESTINATION include
-        FILES_MATCHING
-        PATTERN "*.h")
+install(FILES source_subfolder/OptionParser.h DESTINATION include)
 
 if(WIN32)
     if(BUILD_SHARED_LIBS)
