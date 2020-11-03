@@ -1,5 +1,5 @@
 #include <tuple>
-#include <named_type.hpp>
+#include <NamedType/named_type.hpp>
 
 int main() {
     using Meter = fluent::NamedType<

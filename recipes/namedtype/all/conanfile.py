@@ -50,5 +50,8 @@ class NamedTypeConan(ConanFile):
                     self.name, self._minimum_cpp_standard, self.settings.compiler, self.settings.compiler.version))
 
     def package(self):
-        self.copy("*.hpp", dst="include", src=self._source_subfolder, keep_path=False)
+        if self.version == "20190324":
+            self.copy("*.hpp", dst="include/NamedType", src=self._source_subfolder)
+        else:
+            self.copy("*.hpp", dst="include", src=os.path.join(self._source_subfolder, 'include'))
         self.copy("LICENSE", dst="licenses", src=self._source_subfolder)
