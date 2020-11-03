@@ -73,19 +73,13 @@ class LibrdkafkaConan(ConanFile):
         if self._cmake is not None:
             return self._cmake
         self._cmake = CMake(self)
-        self._cmake.definitions["WITHOUT_OPTIMIZATION"] = (
-            self.settings.build_type == "Debug"
-        )
+        self._cmake.definitions["WITHOUT_OPTIMIZATION"] = self.settings.build_type == "Debug"
         self._cmake.definitions["ENABLE_DEVEL"] = self.settings.build_type == "Debug"
-        self._cmake.definitions["ENABLE_REFCNT_DEBUG"] = (
-            self.settings.build_type == "Debug"
-        )
         self._cmake.definitions["RDKAFKA_BUILD_STATIC"] = not self.options.shared
         self._cmake.definitions["RDKAFKA_BUILD_EXAMPLES"] = False
         self._cmake.definitions["RDKAFKA_BUILD_TESTS"] = False
         self._cmake.definitions["WITHOUT_WIN32_CONFIG"] = True
         self._cmake.definitions["WITH_BUNDLED_SSL"] = False
-
         self._cmake.definitions["WITH_ZLIB"] = self.options.zlib
         self._cmake.definitions["WITH_ZSTD"] = self.options.zstd
         self._cmake.definitions["WITH_PLUGINS"] = self.options.plugins
@@ -117,8 +111,20 @@ class LibrdkafkaConan(ConanFile):
         self.cpp_info.components["rdkafka"].names["cmake_find_package_multi"] = "rdkafka"
         self.cpp_info.components["rdkafka"].names["pkg_config"] = "rdkafka"
         self.cpp_info.components["rdkafka"].libs = ["rdkafka"]
-        if self.settings.compiler == "Visual Studio":
-            self.cpp_info.components["rdkafka"].system_libs.extend(["crypt32", "ws2_32"])
+        if self.options.zlib:
+            self.cpp_info.components["rdkafka"].requires.append("zlib::zlib")
+        if self.options.zstd:
+            self.cpp_info.components["rdkafka"].requires.append("zstd::zstd")
+        if self.options.ssl:
+            self.cpp_info.components["rdkafka"].requires.append("openssl::openssl")
+        if self.options.sasl and self.settings.os != "Windows":
+            self.cpp_info.components["rdkafka"].requires.append("cyrus-sasl::cyrus-sasl")
+        if self.options.lz4:
+            self.cpp_info.components["rdkafka"].requires.append("lz4::lz4")
+        if self.settings.os == "Windows":
+            self.cpp_info.components["rdkafka"].system_libs = ["ws2_32", "secur32"]
+            if self.options.ssl:
+                self.cpp_info.components["rdkafka"].system_libs.append("crypt32")
         elif self.settings.os == "Linux":
             self.cpp_info.components["rdkafka"].system_libs.extend(["pthread", "rt", "dl", "m"])
         if not self.options.shared:
