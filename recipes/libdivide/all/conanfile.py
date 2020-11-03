@@ -9,12 +9,22 @@ class LibdivideConan(ConanFile):
     license = ["Zlib", "BSL-1.0"]
     homepage = "http://libdivide.com/"
     url = "https://github.com/conan-io/conan-center-index"
-    settings = "compiler"
+    settings = "arch", "compiler"
     no_copy_source = True
+    options = {
+        "simd_intrinsics": [False, "sse2", "avx2", "avx512"]
+    }
+    default_options = {
+        "simd_intrinsics": False
+    }
 
     @property
     def _source_subfolder(self):
         return "source_subfolder"
+
+    def config_options(self):
+        if self.settings.arch not in ["x86", "x86_64"]:
+            del self.options.simd_intrinsics
 
     def configure(self):
         if self.settings.compiler.cppstd:
@@ -30,3 +40,12 @@ class LibdivideConan(ConanFile):
     def package(self):
         self.copy("LICENSE.txt", dst="licenses", src=self._source_subfolder)
         self.copy("libdivide.h", dst="include", src=self._source_subfolder)
+
+    def package_info(self):
+        simd = self.options.get_safe("simd_intrinsics", False)
+        if bool(simd):
+            self.cpp_info.defines = [
+                {"sse2": "LIBDIVIDE_SSE2",
+                 "avx2": "LIBDIVIDE_AVX2",
+                 "avx512": "LIBDIVIDE_AVX512"}.get(str(simd))
+            ]
