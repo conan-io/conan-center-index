@@ -10,7 +10,7 @@ class CppOptparse(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/weisslj/cpp-optparse"
     description = "Python's excellent OptionParser in C++"
-    topics = ("conan", "utils", "library")
+    topics = ("conan", "cpp-optparse", "argument", "parsing")
     settings = "os", "compiler", "build_type", "arch"
     options = {"fPIC": [True, False],
                "shared": [True, False]}
