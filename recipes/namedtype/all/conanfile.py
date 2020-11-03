@@ -1,3 +1,4 @@
+import glob
 import os
 from conans import ConanFile, tools
 from conans.errors import ConanInvalidConfiguration
@@ -20,11 +21,7 @@ class NamedTypeConan(ConanFile):
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
         url = self.conan_data["sources"][self.version]["url"]
-        if self.version == "20190324":
-            # non-release version
-            extracted_dir = "NamedType-" + os.path.splitext(os.path.basename(url))[0]
-        else:
-            extracted_dir = "NamedType-" + self.version
+        extracted_dir = glob.glob("NamedType-*")[0]
         os.rename(extracted_dir, self._source_subfolder)
 
     @property
