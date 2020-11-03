@@ -1,0 +1,18 @@
+diff --git a/CMake/FollyConfigChecks.cmake b/CMake/FollyConfigChecks.cmake
+index 6b8b308c7..908d72d51 100644
+--- a/CMake/FollyConfigChecks.cmake
++++ b/CMake/FollyConfigChecks.cmake
+@@ -83,6 +83,13 @@ string(REGEX REPLACE
+   CMAKE_REQUIRED_FLAGS
+   "${CMAKE_REQUIRED_FLAGS}")
+ 
++if (CMAKE_SYSTEM_NAME STREQUAL "Linux")
++  find_library(LIBRT rt)
++  if (LIBRT)
++    list(APPEND CMAKE_REQUIRED_LIBRARIES "rt")
++  endif()
++endif()
++
+ check_symbol_exists(pthread_atfork pthread.h FOLLY_HAVE_PTHREAD_ATFORK)
+ 
+ # Unfortunately check_symbol_exists() does not work for memrchr():
