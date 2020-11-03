@@ -4,7 +4,7 @@ project(cpp-optparser)
 include(conanbuildinfo.cmake)
 conan_basic_setup()
 
-add_library(OptionParser ${CMAKE_CURRENT_SOURCE_DIR}/source_subfolder/OptionParser.cpp)
+add_library(OptionParser source_subfolder/OptionParser.cpp)
 
 target_include_directories(OptionParser PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/source_subfolder)
 
