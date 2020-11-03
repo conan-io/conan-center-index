@@ -1,0 +1,61 @@
+--- a/src/Console.cpp
++++ b/src/Console.cpp
+@@ -21,7 +21,7 @@
+ using namespace celero;
+ 
+ #ifdef WIN32
+-#include <Windows.h>
++#include <windows.h>
+ #include <stdio.h>
+ #else
+ #include <iostream>
+--- a/src/Exceptions.cpp
++++ b/src/Exceptions.cpp
+@@ -22,7 +22,7 @@
+ #include <celero/TestFixture.h>
+ 
+ #ifdef WIN32
+-#include <Windows.h>
++#include <windows.h>
+ #endif // WIN32
+ 
+ #include <iomanip>
+--- a/src/Memory.cpp
++++ b/src/Memory.cpp
+@@ -20,9 +20,9 @@
+ #include <sstream>
+ 
+ #ifdef WIN32
+-#include <Windows.h>
++#include <windows.h>
+ 
+-#include <Psapi.h>
++#include <psapi.h>
+ #elif defined(__APPLE__)
+ #include <sys/param.h>
+ #include <sys/sysctl.h>
+--- a/src/Timer.cpp
++++ b/src/Timer.cpp
+@@ -21,7 +21,7 @@
+ #include <iostream>
+ 
+ #ifdef WIN32
+-#include <Windows.h>
++#include <windows.h>
+ LARGE_INTEGER QPCFrequency;
+ #else
+ #include <chrono>
+--- a/src/Utilities.cpp
++++ b/src/Utilities.cpp
+@@ -20,9 +20,9 @@
+ #include <celero/Utilities.h>
+ 
+ #ifdef WIN32
+-#include <Windows.h>
++#include <windows.h>
+ 
+-#include <PowrProf.h>
++#include <powrprof.h>
+ #endif
+ 
+ #ifdef max
