@@ -10,7 +10,7 @@ class NamedTypeConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/joboccara/NamedType"
     description = "Implementation of strong types in C++"
-    topics = ("strong types",)
+    topics = ("strong types", "header-only")
     settings = "compiler"
     no_copy_source = True
 
