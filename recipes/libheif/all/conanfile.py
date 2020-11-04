@@ -71,8 +71,8 @@ class Libheif(ConanFile):
         tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
 
     def package_info(self):
-        self.cpp_info.names["cmake_find_package"] = "heif"
-        self.cpp_info.names["cmake_find_package_multi"] = "heif"
+        self.cpp_info.names["cmake_find_package"] = "libheif"
+        self.cpp_info.names["cmake_find_package_multi"] = "libheif"
         self.cpp_info.names["pkg_config"] = "libheif"
         self.cpp_info.libs = ["heif"]
         if not self.options.shared:
