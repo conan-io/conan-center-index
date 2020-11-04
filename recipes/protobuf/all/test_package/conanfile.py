@@ -9,7 +9,6 @@ class TestPackageConan(ConanFile):
 
     def build(self):
         cmake = CMake(self)
-        #cmake.definitions["protobuf_LITE"] = self.options["protobuf"].lite
         cmake.configure()
         cmake.build()
 

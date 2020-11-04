@@ -71,10 +71,8 @@ class ProtobufConan(ConanFile):
         return self._cmake
 
     def _patch_sources(self):
-        if "patches" in self.conan_data:
-            if self.version in self.conan_data["patches"]:
-                for patch in self.conan_data.get("patches", {}).get(self.version, []):
-                    tools.patch(**patch)
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            tools.patch(**patch)
 
         tools.replace_in_file(
             os.path.join(self._source_subfolder, "cmake", "protobuf-config.cmake.in"),
