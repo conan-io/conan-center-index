@@ -1,0 +1,4 @@
+sources:
+  "1.47.0":
+    sha256: "d624f9701f2e59a8283ebc01f3adcaed892a09d9743ce6e8ad82f27913309902"
+    url: "https://github.com/GNOME/pango/archive/1.47.0.tar.gz"
