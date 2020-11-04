@@ -63,11 +63,7 @@ class LibnameConan(ConanFile):
             self.requires("xorg/system")
         if self.options.with_openssl:
             self.requires("openssl/1.1.1g")   
-
-    def system_requirements(self):
-        installer = tools.SystemPackageTool()
-        if tools.os_info.with_apt:
-            installer.install('libcap-dev')
+        self.requires("libcap/2.45")
 
     def config_options(self):
         if self.settings.os == 'Windows':
