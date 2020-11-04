@@ -1,6 +1,6 @@
  CMakeLists.txt     |  4 ---
- src/CMakeLists.txt | 78 +++++++++++++++++++++++++++++++++++++++---------------
- 2 files changed, 57 insertions(+), 25 deletions(-)
+ src/CMakeLists.txt | 84 ++++++++++++++++++++++++++++++++++++------------------
+ 2 files changed, 57 insertions(+), 31 deletions(-)
 
 diff --git a/CMakeLists.txt b/CMakeLists.txt
 index c6150948b..669eb086e 100644
@@ -22,7 +22,7 @@ index c6150948b..669eb086e 100644
  
  #------------------------
 diff --git a/src/CMakeLists.txt b/src/CMakeLists.txt
-index 06b84b759..71232e9da 100644
+index 06b84b759..7e81b2a06 100644
 --- a/src/CMakeLists.txt
 +++ b/src/CMakeLists.txt
 @@ -1,6 +1,50 @@
@@ -93,13 +93,26 @@ index 06b84b759..71232e9da 100644
 +  third_party/curl # FIXME: Use conan package
 +  third_party/hdr_histogram # FIXME: Use conan package
 +  third_party/mt19937_64 # FIXME: Use conan package
++  third_party/sparsehash/src) # FIXME: Use conan package
    third_party/rapidjson/rapidjson
 -  third_party/sparsehash/src)
-+  third_party/sparsehash/src) # FIXME: Use conan package
  
  list(APPEND INCLUDE_DIRS ${CASS_INCLUDE_DIR} ${CMAKE_CURRENT_SOURCE_DIR})
  
-@@ -130,11 +170,11 @@ if(CASS_BUILD_SHARED)
+@@ -69,12 +109,6 @@ if(WIN32)
+   endif()
+ endif()
+ 
+-if("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
+-  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wconversion -Wno-sign-conversion -Wno-shorten-64-to-32 -Wno-undefined-var-template -Werror")
+-elseif("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU") # To many superfluous warnings generated with GCC when using -Wconversion (see: https://gcc.gnu.org/bugzilla/show_bug.cgi?id=40752)
+-  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Werror")
+-endif()
+-
+ #------------------------------
+ # Build configured header
+ #------------------------------
+@@ -130,11 +164,11 @@ if(CASS_BUILD_SHARED)
    add_library(cassandra SHARED 
      ${SOURCES}
      $<TARGET_OBJECTS:curl_hostcheck>
@@ -115,7 +128,7 @@ index 06b84b759..71232e9da 100644
  
    set_target_properties(cassandra PROPERTIES OUTPUT_NAME cassandra)
    set_target_properties(cassandra PROPERTIES VERSION ${PROJECT_VERSION_STRING} SOVERSION ${PROJECT_VERSION_MAJOR})
-@@ -167,11 +207,12 @@ if(CASS_BUILD_STATIC)
+@@ -167,11 +201,12 @@ if(CASS_BUILD_STATIC)
    add_library(cassandra_static STATIC
      ${SOURCES}
      $<TARGET_OBJECTS:curl_hostcheck_static>
@@ -132,7 +145,7 @@ index 06b84b759..71232e9da 100644
  
    set_target_properties(cassandra_static PROPERTIES OUTPUT_NAME cassandra_static)
    set_target_properties(cassandra_static PROPERTIES VERSION ${PROJECT_VERSION_STRING} SOVERSION ${PROJECT_VERSION_MAJOR})
-@@ -274,11 +315,6 @@ if(CASS_BUILD_SHARED)
+@@ -274,11 +309,6 @@ if(CASS_BUILD_SHARED)
        endif()
      endif()
    endif()
