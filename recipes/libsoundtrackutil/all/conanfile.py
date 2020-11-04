@@ -11,8 +11,8 @@ class LibSoundtrackUtilConan(ConanFile):
     description = "Twitch Soundtrack utililty library"
     topics = ("twitch", "soundtrack")
     settings = "os", "compiler", "build_type", "arch"
-    options = {"shared": [True, False], "fPIC": [True, False]}
-    default_options = {"shared": False, "fPIC": True}
+    options = {"fPIC": [True, False]}
+    default_options = {"fPIC": True}
     generators = "cmake"
     exports = ["CMakeLists.txt", "patches/**"]
     requires = ("twitch-native-ipc/3.1.1",
@@ -52,9 +52,6 @@ class LibSoundtrackUtilConan(ConanFile):
                 raise ConanInvalidConfiguration("{} requires C++17".format(self.name))
         else:
             self.output.warn("unknown compiler, assuming C++17 support")
-
-        if self.options.shared:
-            del self.options.fPIC
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
