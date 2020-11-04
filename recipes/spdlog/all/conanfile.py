@@ -49,9 +49,9 @@ class SpdlogConan(ConanFile):
 
     def requirements(self):
         if Version(self.version) >= "1.7.0":
-            self.requires("fmt/7.0.3")
+            self.requires("fmt/7.1.1")
         elif Version(self.version) >= "1.5.0":
-            self.requires("fmt/6.2.0")
+            self.requires("fmt/6.2.1")
         else:
             self.requires("fmt/6.0.0")
 
