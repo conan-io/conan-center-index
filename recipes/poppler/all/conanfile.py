@@ -180,8 +180,8 @@ class PopplerConan(ConanFile):
         self._cmake.definitions["FONT_CONFIGURATION"] = self.options.fontconfiguration
         self._cmake.definitions["BUILD_CPP_TESTS"] = False
         self._cmake.definitions["ENABLE_GTK_DOC"] = False
-        self._cmake.definitions["ENABLE_QT5"] = self.options.with_qt and tools.Version(self.deps_user_info["qt"].version).major == 5
-        self._cmake.definitions["ENABLE_QT6"] = self.options.with_qt and tools.Version(self.deps_user_info["qt"].version).major == 6
+        self._cmake.definitions["ENABLE_QT5"] = self.options.with_qt and tools.Version(self.deps_cpp_info["qt"].version).major == "5"
+        self._cmake.definitions["ENABLE_QT6"] = self.options.with_qt and tools.Version(self.deps_cpp_info["qt"].version).major == "6"
         self._cmake.definitions["ENABLE_LIBOPENJPEG"] = "openjpeg2" if self.options.with_openjpeg else "none"
         if self.options.with_openjpeg:
             # FIXME: openjpeg's cmake_find_package should provide these variables
