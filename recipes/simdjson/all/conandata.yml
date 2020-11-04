@@ -5,6 +5,6 @@ sources:
   "0.5.0":
     url: "https://github.com/lemire/simdjson/archive/v0.5.0.tar.gz"
     sha256: "60846ae482e17230e41f5abf8f058a6e367c2a0ec1b5a6fd7a883a54ad21bee8"
-  "0.6.0":
-    url: "https://github.com/lemire/simdjson/archive/v0.6.0.tar.gz"
-    sha256: "f3d91afe578a88140ed2e5f0b60c5bfddd0426631c38506f5c70762691adb85e"
+  "0.6.1":
+    url: "https://github.com/lemire/simdjson/archive/v0.6.1.tar.gz"
+    sha256: "57ce12d94555cddc358a96a4995fb74375683a5ae09d3c7323dbd8ba09f4a850"
