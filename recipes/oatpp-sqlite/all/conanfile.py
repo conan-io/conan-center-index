@@ -6,7 +6,6 @@ class OatppsqliteConan(ConanFile):
     name = "oatpp-sqlite"
     version = "1.2.0"
     license = "Apache-2.0"
-    author = "Marcin Romanowski <nicraMarcin> for Leonid Stryzhevskyi <lganzzzo>"
     homepage = "https://github.com/oatpp/oatpp-sqlite"
     url = "https://github.com/conan-io/conan-center-index"
     description = "oat++ SQLite library"
@@ -90,3 +89,4 @@ class OatppsqliteConan(ConanFile):
         if self.settings.os == "Linux":
             self.cpp_info.components["_oatpp-sqlite"].system_libs = ["pthread"]
         self.cpp_info.components["_oatpp-sqlite"].requires = ["oatpp::oatpp", "sqlite3::sqlite3"]
+
