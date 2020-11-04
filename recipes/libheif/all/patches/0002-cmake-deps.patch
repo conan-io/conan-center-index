@@ -1,5 +1,5 @@
 diff --git a/libheif/CMakeLists.txt b/libheif/CMakeLists.txt
-index 21e08a8..a72636f 100644
+index 21e08a8..8c48ee4 100644
 --- a/libheif/CMakeLists.txt
 +++ b/libheif/CMakeLists.txt
 @@ -59,40 +59,40 @@ target_compile_definitions(heif
@@ -32,7 +32,7 @@ index 21e08a8..a72636f 100644
  endif()
  
 -if(X265_FOUND)
-+if(x265_FOUND)
++if(libx265_FOUND)
      target_compile_definitions(heif PRIVATE HAVE_X265=1)
      target_sources(heif PRIVATE
          heif_encoder_x265.cc
@@ -40,18 +40,18 @@ index 21e08a8..a72636f 100644
      )
  
 -    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${X265_CFLAGS}")
-+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${x265_CFLAGS}")
++    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${libx265_CFLAGS}")
  
 -    if (NOT "${X265_LIBRARY_DIRS}" STREQUAL "")
 -        set(X265_LINKDIR "-L${X265_LIBRARY_DIRS}")
-+    if (NOT "${x265_LIBRARY_DIRS}" STREQUAL "")
-+        set(X265_LINKDIR "-L${x265_LIBRARY_DIRS}")
++    if (NOT "${libx265_LIBRARY_DIRS}" STREQUAL "")
++        set(X265_LINKDIR "-L${libx265_LIBRARY_DIRS}")
      endif()
  
 -    include_directories(SYSTEM ${X265_INCLUDE_DIR})
 -    target_link_libraries(heif PRIVATE ${X265_LIBRARIES} ${X265_LINKDIR})
-+    include_directories(SYSTEM ${x265_INCLUDE_DIR})
-+    target_link_libraries(heif PRIVATE ${x265_LIBRARIES} ${X265_LINKDIR})
++    include_directories(SYSTEM ${libx265_INCLUDE_DIR})
++    target_link_libraries(heif PRIVATE ${libx265_LIBRARIES} ${X265_LINKDIR})
  
      install(FILES heif_encoder_x265.h DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/${PROJECT_NAME})
  endif()

@@ -1,5 +1,5 @@
 diff --git a/CMakeLists.txt b/CMakeLists.txt
-index 5076fec..87887f7 100644
+index 5076fec..b75be8e 100644
 --- a/CMakeLists.txt
 +++ b/CMakeLists.txt
 @@ -41,8 +41,6 @@ set(CMAKE_CXX_EXTENSIONS OFF)
@@ -11,6 +11,35 @@ index 5076fec..87887f7 100644
  # Create the compile command database for clang by default
  set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
  
+@@ -55,8 +53,8 @@ if (has_potentially_evaluated_expression)
+ endif()
+ 
+ LIST (APPEND CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake/modules")
+-find_package(Libde265 REQUIRED)
+-find_package(X265)
++find_package(libde265 REQUIRED)
++find_package(libx265)
+ find_package(LibAOM)
+ 
+ if (LIBDE265_FOUND)
+@@ -65,7 +63,7 @@ else ()
+     message("HEIF decoder, libde265: not found")
+ endif ()
+ 
+-if (X265_FOUND)
++if (libx265_FOUND)
+     message("HEIF encoder, x265: found")
+ else ()
+     message("HEIF encoder, x265: not found")
+@@ -100,7 +98,7 @@ if (LIBDE265_FOUND)
+ else()
+     set(have_libde265 no)
+ endif()
+-if (X265_FOUND)
++if (libx265_FOUND)
+     set(have_x265 yes)
+ else()
+     set(have_x265 no)
 @@ -128,4 +126,3 @@ if(WITH_EXAMPLES)
      add_subdirectory (examples)
  endif()
