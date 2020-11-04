@@ -52,7 +52,7 @@ class LibnameConan(ConanFile):
 
 
     def requirements(self):
-        self.requires("libsndfile/1.0.28")
+        self.requires("libsndfile/1.0.30")
         if self.options.with_alsa:
             self.requires("libalsa/1.1.9")
         if self.options.with_glib:
@@ -62,7 +62,7 @@ class LibnameConan(ConanFile):
         if self.options.with_x11:
             self.requires("xorg/system")
         if self.options.with_openssl:
-            self.requires("openssl/1.1.1g")   
+            self.requires("openssl/1.1.1h")   
         self.requires("libcap/2.45")
 
     def config_options(self):
