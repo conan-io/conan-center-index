@@ -10,7 +10,7 @@ void eat_cookies( int count, boolean_ leave_crumbs )
 
 void santa( int num_cookies )
 {
-    const boolean_ leave_crumbs = num_cookies > 4;
+    const boolean_ leave_crumbs( num_cookies > 4 );
 
 //  eat_cookies( leave_crumbs, num_cookies );  // Does not compile: wrong argument order
     eat_cookies( num_cookies, leave_crumbs );  // Ok
