@@ -3,8 +3,8 @@ from conans.errors import ConanInvalidConfiguration
 from conans.tools import Version
 import os
 
-class LibSoundtrackUtilConan(ConanFile):
-    name = "libsoundtrackutil"
+class TwitchLibSoundtrackUtilConan(ConanFile):
+    name = "twitch-libsoundtrackutil"
     license = "MIT"
     homepage = "https://github.com/twitchtv/libsoundtrackutil"
     url = "https://github.com/conan-io/conan-center-index"
@@ -55,7 +55,7 @@ class LibSoundtrackUtilConan(ConanFile):
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
-        os.rename("{}-{}".format(self.name, self.version), self._source_subfolder)
+        os.rename("{}-{}".format("libsoundtrackutil", self.version), self._source_subfolder)
 
     def _configure_cmake(self):
         if self._cmake:

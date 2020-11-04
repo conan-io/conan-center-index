@@ -1,8 +1,4 @@
 sources:
-  "0.0.7":
-    url: https://github.com/twitchtv/libsoundtrackutil/archive/v0.0.7.tar.gz
-    sha256: "ad04393f1c2625001f77c65a1d5879d1da57cf4d6b6651fe1beede5379efb83f"
-patches:
-  "0.0.7":
-    - patch_file: "patches/out.patch"
-      base_path: "source_subfolder"
+  "0.0.8":
+    url: https://github.com/twitchtv/libsoundtrackutil/archive/v0.0.8.tar.gz
+    sha256: "95546c40850ee02c03424ca189d66cb4359117b47c87ccc18c5ebe348fd4e040"
