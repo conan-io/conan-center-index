@@ -62,42 +62,29 @@ class LLVMCoreConan(ConanFile):
     _source_subfolder = 'source'
 
     def _supports_compiler(self):
-        compiler_version = tools.Version(self.settings.compiler.version)
         compiler = self.settings.compiler.value
+        version = tools.Version(self.settings.compiler.version)
         unsupported_combinations = [
-            [
-                compiler == 'gcc',
-                compiler_version.major == '5',
-                compiler_version.minor < '1'
-            ],
-            [
-                compiler == 'gcc',
-                compiler_version.major < '5'
-            ],
-            [
-                compiler == 'Visual Studio',
-                compiler_version.major == '16',
-                compiler_version.minor < '5'
-            ],
-            [
-                compiler == 'Visual Studio',
-                compiler_version.major < '15'
-            ]
+            [compiler == 'gcc', version.major == '5', version.minor < '1'],
+            [compiler == 'gcc', version.major < '5'],
+            [compiler == 'Visual Studio', version.major < '15']
         ]
+
         if any(all(combination) for combination in unsupported_combinations):
             raise ConanInvalidConfiguration(
                 'unsupported compiler: "{}", version "{}"'
-                .format(compiler, compiler_version)
+                .format(compiler, version)
             )
 
     def _patch_sources(self):
-        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+        for patch in self.conan_data.get('patches', {}).get(self.version, []):
             tools.patch(**patch)
 
     def _configure_cmake(self):
         if self.settings.compiler == 'Visual Studio':
             generator = os.getenv('CONAN_CMAKE_GENERATOR', 'NMake Makefiles')
             cmake = CMake(self, generator=generator)
+            cmake.definitions['LLVM_TEMPORARILY_ALLOW_OLD_TOOLCHAIN'] = True
         else:
             cmake = CMake(self)
 
