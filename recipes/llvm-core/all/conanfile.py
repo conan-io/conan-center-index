@@ -207,7 +207,7 @@ class LLVMCoreConan(ConanFile):
 
             dummy_targets = defaultdict(list)
             for target, dep in deps:
-                if not target.startswith('LLVM') and not dep.startswith('obj'):
+                if not target.startswith('LLVM'):
                     dummy_targets[target].append(dep)
 
             components = defaultdict(list)
