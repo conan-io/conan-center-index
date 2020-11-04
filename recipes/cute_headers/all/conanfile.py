@@ -9,7 +9,7 @@ class CuteHeadersConan(ConanFile):
     topics = ("conan", "various", "pure-c")
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/RandyGaul/cute_headers"
-    license = "Unlicense"  # This library (cute-headers) is public domain software, i.e. not copyrighted
+    license = "Unlicense"
     no_copy_source = True
 
     def _extract_license(self):
