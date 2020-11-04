@@ -8,7 +8,7 @@ class LibSoundtrackUtilConan(ConanFile):
     license = "MIT"
     homepage = "https://github.com/twitchtv/libsoundtrackutil"
     url = "https://github.com/conan-io/conan-center-index"
-    description = "Twitch Soundtrack utililty library"
+    description = "Twitch Soundtrack utility library"
     topics = ("twitch", "soundtrack")
     settings = "os", "compiler", "build_type", "arch"
     options = {"fPIC": [True, False]}
@@ -84,9 +84,6 @@ class LibSoundtrackUtilConan(ConanFile):
 
     def package_info(self):
         self.cpp_info.libs = ["libsoundtrackutil"]
-
-#        if self.settings.os == "Linux":
-#            self.cpp_info.system_libs = ["m"]
 
         if tools.stdcpp_library(self):
             self.cpp_info.system_libs.append(tools.stdcpp_library(self))
