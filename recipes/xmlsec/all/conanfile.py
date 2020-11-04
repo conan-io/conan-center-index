@@ -210,4 +210,4 @@ class XmlSecConan(ConanFile):
             self.cpp_info.components["openssl"].libs = [get_libname("openssl")]
             self.cpp_info.components["openssl"].requires = ["libxmlsec", "openssl::openssl"]
             self.cpp_info.components["openssl"].defines = ["XMLSEC_CRYPTO_OPENSSL=1"]
-            self.cpp_info.components["libxmlsec"].names["pkg_config"] = "xmlsec{}-openssl".format(tools.Version(self.version).major)
+            self.cpp_info.components["openssl"].names["pkg_config"] = "xmlsec{}-openssl".format(tools.Version(self.version).major)
