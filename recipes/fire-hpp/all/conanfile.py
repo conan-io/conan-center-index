@@ -10,7 +10,7 @@ class FireHppConan(ConanFile):
     license = "BSL-1.0"
     no_copy_source = True
     settings = "os", "arch", "compiler", "build_type"
-    exports_sources = ["LICENSE"]
+    exports_sources = ["bsl_1_0"]
 
     _source_subfolder = "source_subfolder"
     _build_subfolder = "build_subfolder"
@@ -21,6 +21,7 @@ class FireHppConan(ConanFile):
         url = self.conan_data["sources"][self.version]["url"]
         tar_name = url[url.rfind("/")+1:url.find(".tar.gz")]
         extracted_dir = "{}-{}".format(self.name, tar_name)
+        os.rename("bsl_1_0", "LICENSE")
         os.rename(extracted_dir, self._source_subfolder)
 
     def _configure_cmake(self):
