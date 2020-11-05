@@ -10,8 +10,8 @@ class OatpplibresslConan(ConanFile):
     description = "oat++ libressl library"
     topics = ("conan", "oat++", "oatpp", "libressl")
     settings = "os", "compiler", "build_type", "arch"
-    options = {"shared": [True, False]}
-    default_options = {"shared": False}
+    options = {"shared": [True, False], "fPIC": [True, False]}
+    default_options = {"shared": False, "fPIC": True}
     generators = "cmake", "cmake_find_package"
     exports_sources = "CMakeLists.txt"
 
