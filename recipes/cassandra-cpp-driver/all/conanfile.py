@@ -73,7 +73,7 @@ class CassandraCppDriverConan(ConanFile):
         self._cmake.definitions["CASS_USE_ZLIB"] = self.options.with_zlib
         self._cmake.definitions["CASS_USE_LIBSSH2"] = False
 
-        # FIXME
+        # FIXME: Use conan package if you want to run tests
         # self._cmake.definitions["CASS_USE_KERBEROS"] = self.options.with_kerberos
         
         if self.settings.os == "Linux":
