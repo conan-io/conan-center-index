@@ -59,7 +59,7 @@ class GtkmmConan(ConanFile):
         return self._autoconf
 
     def build(self):
-        tools.replace_in_file(self._source_subfolder + '/configure', "gtk+-2.0 >= 2.24.0", "gtk+-2.0")
+        tools.replace_in_file(os.path.join(self._source_subfolder, 'configure'), "gtk+-2.0 >= 2.24.0", "gtk+-2.0")
 
         autoconf = self._configure_build()
         autoconf.configure(configure_dir=self._source_subfolder,
