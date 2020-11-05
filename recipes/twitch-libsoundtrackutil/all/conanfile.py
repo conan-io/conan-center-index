@@ -60,6 +60,7 @@ class TwitchLibSoundtrackUtilConan(ConanFile):
     def _configure_cmake(self):
         if self._cmake:
             return self._cmake
+
         self._cmake = CMake(self)
         self._cmake.definitions["ENABLE_CODE_FORMATTING"] = False
         self._cmake.definitions["BUILD_TESTING"] = False
