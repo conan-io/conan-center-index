@@ -339,8 +339,44 @@ class GdalConan(ConanFile):
         for lib_subdir in embedded_libs:
             tools.rmdir(os.path.join(self._source_subfolder, lib_subdir))
 
-    def _replace_in_nmake(self, str1, str2):
-        tools.replace_in_file(os.path.join(self.build_folder, self._source_subfolder, "nmake.opt"), str1, str2, strict=False)
+    def _edit_nmake_opt(self):
+        simd_intrinsics = str(self.options.get_safe("simd_intrinsics", False))
+        if simd_intrinsics != "avx":
+            self._replace_in_nmake_opt("AVXFLAGS = /DHAVE_AVX_AT_COMPILE_TIME", "")
+        if simd_intrinsics not in ["sse3", "avx"]:
+            self._replace_in_nmake_opt("SSSE3FLAGS = /DHAVE_SSSE3_AT_COMPILE_TIME", "")
+        if simd_intrinsics not in ["sse", "sse3", "avx"]:
+            self._replace_in_nmake_opt("SSEFLAGS = /DHAVE_SSE_AT_COMPILE_TIME", "")
+        if self.options.without_pam:
+            self._replace_in_nmake_opt("PAM_SETTING=-DPAM_ENABLED", "")
+        if not self.options.with_gnm:
+            self._replace_in_nmake_opt("INCLUDE_GNM_FRMTS = YES", "")
+        if not self.options.with_odbc:
+            self._replace_in_nmake_opt("ODBC_SUPPORTED = 1", "")
+        if not bool(self.options.with_jpeg):
+            self._replace_in_nmake_opt("JPEG_SUPPORTED = 1", "")
+        self._replace_in_nmake_opt("JPEG12_SUPPORTED = 1", "")
+        if not self.options.with_pcidsk:
+            self._replace_in_nmake_opt("PCIDSK_SETTING=INTERNAL", "")
+        if self.options.with_pg:
+            self._replace_in_nmake_opt("#PG_LIB = n:\\pkg\\libpq_win32\\lib\\libpqdll.lib wsock32.lib", "PG_LIB=")
+        if self.options.with_mysql == "libmysqlclient":
+            self._replace_in_nmake_opt("#MYSQL_LIB = D:\\Software\\MySQLServer4.1\\lib\\opt\\libmysql.lib advapi32.lib", "MYSQL_LIB=")
+        if self.options.get_safe("with_sqlite3"):
+            self._replace_in_nmake_opt("#SQLITE_LIB=N:\\pkg\\sqlite-win32\\sqlite3_i.lib", "SQLITE_LIB=")
+        if self.options.with_curl:
+            self._replace_in_nmake_opt("#CURL_LIB = $(CURL_DIR)/libcurl.lib wsock32.lib wldap32.lib winmm.lib", "CURL_LIB=")
+        if self.options.with_freexl:
+            self._replace_in_nmake_opt("#FREEXL_LIBS = e:/freexl-1.0.0a/freexl_i.lib", "FREEXL_LIBS=")
+        if not (self.options.get_safe("with_zlib", True) and self.options.get_safe("with_png", True) and bool(self.options.with_jpeg)):
+            self._replace_in_nmake_opt("MRF_SETTING=yes", "")
+        if self.options.with_charls:
+            self._replace_in_nmake_opt("#CHARLS_LIB=e:\\work\\GIS\gdal\\supportlibs\\charls\\bin\\Release\\x86\\CharLS.lib", "CHARLS_LIB=")
+        # Inject required systems libs of dependencies
+        self._replace_in_nmake_opt("ADD_LIBS	= ", "ADD_LIBS={}".format(" ".join([lib + ".lib" for lib in self.deps_cpp_info.system_libs])))
+
+    def _replace_in_nmake_opt(self, str1, str2):
+        tools.replace_in_file(os.path.join(self.build_folder, self._source_subfolder, "nmake.opt"), str1, str2)
 
     def _get_nmake_args(self):
         if self._nmake_args:
@@ -352,34 +388,16 @@ class GdalConan(ConanFile):
         if self.settings.arch == "x86_64":
             args.append("WIN64=1")
         args.append("DEBUG={}".format("1" if self.settings.build_type == "Debug" else "0"))
-        # SIMD Intrinsics
-        simd_intrinsics = str(self.options.get_safe("simd_intrinsics", False))
-        if simd_intrinsics != "avx":
-            self._replace_in_nmake("AVXFLAGS = /DHAVE_AVX_AT_COMPILE_TIME", "")
-        if simd_intrinsics not in ["sse3", "avx"]:
-            self._replace_in_nmake("SSSE3FLAGS = /DHAVE_SSSE3_AT_COMPILE_TIME", "")
-        if simd_intrinsics not in ["sse", "sse3", "avx"]:
-            self._replace_in_nmake("SSEFLAGS = /DHAVE_SSE_AT_COMPILE_TIME", "")
-        # Other settings
-        if self.options.without_pam:
-            self._replace_in_nmake("PAM_SETTING=-DPAM_ENABLED", "")
         args.append("DLLBUILD={}".format("1" if self.options.shared else "0"))
-        if not self.options.with_gnm:
-            self._replace_in_nmake("INCLUDE_GNM_FRMTS = YES", "")
         args.append("PROJ_INCLUDE=\"-I{}\"".format(" -I".join(self.deps_cpp_info["proj"].include_paths)))
         if self.options.with_libiconv:
             args.append("LIBICONV_INCLUDE=\"-I{}\"".format(" -I".join(self.deps_cpp_info["libiconv"].include_paths)))
             args.append("LIBICONV_CFLAGS=\"-DICONV_CONST=\"")
-        if not self.options.with_odbc:
-            self._replace_in_nmake("ODBC_SUPPORTED = 1", "")
         args.append("JPEG_EXTERNAL_LIB=1")
-        if self.options.with_jpeg =="libjpeg":
+        if self.options.with_jpeg == "libjpeg":
             args.append("JPEGDIR=\"{}\"".format(" -I".join(self.deps_cpp_info["libjpeg"].include_paths)))
-        elif self.options.with_jpeg =="libjpeg-turbo":
+        elif self.options.with_jpeg == "libjpeg-turbo":
             args.append("JPEGDIR=\"{}\"".format(" -I".join(self.deps_cpp_info["libjpeg-turbo"].include_paths)))
-        else:
-            self._replace_in_nmake("JPEG_SUPPORTED = 1", "")
-        self._replace_in_nmake("JPEG12_SUPPORTED = 1", "")
         args.append("PNG_EXTERNAL_LIB=1")
         args.append("PNGDIR=\"{}\"".format(" -I".join(self.deps_cpp_info["libpng"].include_paths)))
         if self.options.with_gif:
@@ -407,24 +425,18 @@ class GdalConan(ConanFile):
             args.append("HDF5_DIR=\"{}\"".format(self.deps_cpp_info["hdf5"].rootpath))
         if self.options.with_kea:
             args.append("KEA_CFLAGS=\"-I{}\"".format(" -I".join(self.deps_cpp_info["kealib"].include_paths)))
-        if not self.options.with_pcidsk:
-            self._replace_in_nmake("PCIDSK_SETTING=INTERNAL", "")
         if self.options.with_pg:
             args.append("PG_INC_DIR=\"{}\"".format(" -I".join(self.deps_cpp_info["libpq"].include_paths)))
-            self._replace_in_nmake("#PG_LIB = n:\\pkg\\libpq_win32\\lib\\libpqdll.lib wsock32.lib", "PG_LIB=")
         if self.options.with_mysql == "libmysqlclient":
             args.append("MYSQL_INC_DIR=\"{}\"".format(" -I".join(self.deps_cpp_info["libmysqlclient"].include_paths)))
-            self._replace_in_nmake("#MYSQL_LIB = D:\\Software\\MySQLServer4.1\\lib\\opt\\libmysql.lib advapi32.lib", "MYSQL_LIB=")
         if self.options.get_safe("with_sqlite3"):
             args.append("SQLITE_INC=\"-I{}\"".format(" -I".join(self.deps_cpp_info["sqlite3"].include_paths)))
-            self._replace_in_nmake("#SQLITE_LIB=N:\\pkg\\sqlite-win32\\sqlite3_i.lib", "SQLITE_LIB=")
         if self.options.get_safe("with_pcre"):
             args.append("PCRE_INC=\"-I{}\"".format(" -I".join(self.deps_cpp_info["pcre"].include_paths)))
         if self.options.with_cfitsio:
             args.append("FITS_INC_DIR=\"{}\"".format(" -I".join(self.deps_cpp_info["cfitsio"].include_paths)))
         if self.options.with_curl:
             args.append("CURL_INC=\"-I{}\"".format(" -I".join(self.deps_cpp_info["libcurl"].include_paths)))
-            self._replace_in_nmake("#CURL_LIB = $(CURL_DIR)/libcurl.lib wsock32.lib wldap32.lib winmm.lib", "CURL_LIB=")
         if self.options.with_geos:
             args.append("GEOS_CFLAGS=\"-I{} -DHAVE_GEOS\"".format(" -I".join(self.deps_cpp_info["geos"].include_paths)))
         if self.options.with_openjpeg:
@@ -439,8 +451,6 @@ class GdalConan(ConanFile):
             args.append("WEBP_CFLAGS=\"-I{}\"".format(" -I".join(self.deps_cpp_info["libwebp"].include_paths)))
         if self.options.with_xml2:
             args.append("LIBXML2_INC=\"-I{}\"".format(" -I".join(self.deps_cpp_info["libxml2"].include_paths)))
-        if self.options.with_freexl:
-            self._replace_in_nmake("#FREEXL_LIBS = e:/freexl-1.0.0a/freexl_i.lib", "FREEXL_LIBS=")
         if self.options.with_gta:
             args.append("GTA_CFLAGS=\"-I{}\"".format(" -I".join(self.deps_cpp_info["libgta"].include_paths)))
         args.append("QHULL_SETTING={}".format("EXTERNAL" if self.options.with_qhull else "NO"))
@@ -450,12 +460,9 @@ class GdalConan(ConanFile):
                 args.append("USE_ONLY_CRYPTODLL_ALG=YES")
         if self.options.with_crypto:
             args.append("OPENSSL_INC=\"-I{}\"".format(" -I".join(self.deps_cpp_info["openssl"].include_paths)))
-        if not (self.options.get_safe("with_zlib", True) and self.options.get_safe("with_png", True) and bool(self.options.with_jpeg)):
-            self._replace_in_nmake("MRF_SETTING=yes", "")
         if self.options.without_lerc:
             args.append("HAVE_LERC=0")
         if self.options.with_charls:
-            self._replace_in_nmake("#CHARLS_LIB=e:\\work\\GIS\gdal\\supportlibs\\charls\\bin\\Release\\x86\\CharLS.lib", "CHARLS_LIB=")
             charls_version = tools.Version(self.deps_cpp_info["charls"].version)
             if charls_version >= "2.1.0":
                 args.append("CHARLS_FLAGS=-DCHARLS_2_1")
@@ -465,8 +472,6 @@ class GdalConan(ConanFile):
             args.append("CRUNCH_INC=\"-I{}\"".format(" -I".join(self.deps_cpp_info["crunch"].include_paths)))
         if self.options.get_safe("with_exr"):
             args.append("EXR_INC=\"-I{}\"".format(" -I".join(self.deps_cpp_info["openexr"].include_paths)))
-        # Inject required systems libs of dependencies
-        self._replace_in_nmake("ADD_LIBS	= ", "ADD_LIBS={}".format(" ".join([lib + ".lib" for lib in self.deps_cpp_info.system_libs])))
 
         self._nmake_args = args
         return self._nmake_args
@@ -626,10 +631,11 @@ class GdalConan(ConanFile):
         self._validate_dependency_graph()
         self._patch_sources()
         if self.settings.compiler == "Visual Studio":
+            self._edit_nmake_opt()
             with tools.chdir(self._source_subfolder):
                 with tools.vcvars(self.settings):
                     with tools.environment_append(VisualStudioBuildEnvironment(self).vars):
-                        self.run("nmake -f makefile.vc devinstall {}".format(" ".join(self._get_nmake_args())))
+                        self.run("nmake -f makefile.vc {}".format(" ".join(self._get_nmake_args())))
         else:
             autotools = self._configure_autotools()
             with tools.chdir(self._source_subfolder):
@@ -638,6 +644,10 @@ class GdalConan(ConanFile):
     def package(self):
         self.copy("LICENSE.TXT", dst="licenses", src=self._source_subfolder)
         if self.settings.compiler == "Visual Studio":
+            with tools.chdir(self._source_subfolder):
+                with tools.vcvars(self.settings):
+                    with tools.environment_append(VisualStudioBuildEnvironment(self).vars):
+                        self.run("nmake -f makefile.vc devinstall {}".format(" ".join(self._get_nmake_args())))
             for pdb_file in glob.glob(os.path.join(self.package_folder, "lib", "*.pdb")):
                 os.remove(pdb_file)
         else:
