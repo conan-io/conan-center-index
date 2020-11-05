@@ -3,8 +3,8 @@ from conans.errors import ConanInvalidConfiguration
 from conans.tools import Version
 import os
 
-class TwitchLibSoundtrackUtilConan(ConanFile):
-    name = "twitch-libsoundtrackutil"
+class TwitchTvLibSoundtrackUtilConan(ConanFile):
+    name = "twitchtv-libsoundtrackutil"
     license = "MIT"
     homepage = "https://github.com/twitchtv/libsoundtrackutil"
     url = "https://github.com/conan-io/conan-center-index"
