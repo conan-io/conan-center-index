@@ -2,13 +2,13 @@
 
 ## Join the Early Access Program
 
-The first step in adding packages to ConanCenter is requesting access to the Early Access Program. To enroll in EAP,  please send an email to info@conan.io with the subject [EAP access] or add a comment on this GitHub [issue](https://github.com/conan-io/conan-center-index/issues/4). The EAP was designed to onboard authors to the new process.
+The first step in adding packages to ConanCenter is requesting access to the Early Access Program. To enroll in EAP, please add a comment on this GitHub [issue](https://github.com/conan-io/conan-center-index/issues/4). The EAP was designed to onboard authors to the new process.
 
-With EAP, contribution of packages are now done via pull requests to the recipe found in the Github repository in https://github.com/conan-io/conan-center-index.
+The contribution of packages is done via pull requests to the recipes found in this Github repository https://github.com/conan-io/conan-center-index.
 
 The specific steps to add new packages are:
 * Fork the [conan-center-index](https://github.com/conan-io/conan-center-index) git repository, and then clone it.
-* Create a new folder with the Conan package recipe (conanfile.py)
+* Create a new folder with the Conan package recipe (conanfile.py).
 * Push to GitHub, and submit a pull request.
 * Our automated build service will build 100+ different configurations, and provide messages that indicate if there were any issues found during the pull request on GitHub.
 
@@ -20,19 +20,19 @@ The [conan-center-index](https://github.com/conan-io/conan-center-index) (this r
 
 Recipes are contributed by opening pull-requests to this `conan-center-index` repository as it is explained in the section below.
 
-When pull requests are merged, the CI will upload the generated packages to [JFrog ConanCenter](https://conan.io/center/). Packages generated and uploaded by this CI process don't include any _user_ or _channel_ (existing references with any `@user/channel` should be considered as deprecated in favor of packages without it). Once the packages are uploaded, you will be able to install them using the reference as `name/version` (requires Conan >= 1.21): `conan install cmake/3.18.2@`.
+When pull requests are merged, the CI will upload the generated packages to [JFrog ConanCenter](https://conan.io/center/). Packages generated and uploaded by this build service don't include any _user_ or _channel_ (existing references with any `@user/channel` should be considered as deprecated in favor of packages without it). Once the packages are uploaded, you will be able to install them using the reference as `name/version` (requires Conan >= 1.21): `conan install cmake/3.18.2@`.
 
 ## How to submit a Pull Request
 
-To contribute a Conan recipe into the `conan-center` repository you can submit a [Pull Request](https://github.com/conan-io/conan-center-index/pulls). The connected **continuous integration system** will generate binary packages automatically for the most common platforms and compilers. See [the Supported Platforms and Configurations page](supported_platforms_and_configurations.md) for a list of generated configurations. For a C++ library, the system is currently generating more than 100 binary packages.
+To contribute a Conan recipe into the `conan-center-index` repository you can submit a [Pull Request](https://github.com/conan-io/conan-center-index/pulls). The **build service** associated to this repo will generate binary packages automatically for the most common platforms and compilers. See [the Supported Platforms and Configurations page](supported_platforms_and_configurations.md) for a list of generated configurations. For a C++ library, the system is currently generating more than 100 binary packages.
 
-> ⚠️ **Note**: This CI service is not a testing service, it is a binary building service for package **releases**. Unit tests shouldn't be built nor run in recipes by default. Please, before submitting a PR ensure that it works locally for some configurations.
+> ⚠️ **Note**: This not a testing service, it is a binary building service for package **releases**. Unit tests shouldn't be built nor run in recipes by default. Before submitting a pull request, please ensure that it works locally for some configurations.
 
 The pipeline will report errors and build logs by creating a comment in the pull-request after every commit. The message will include links to the logs for inspecting.
 
 ### Before start
 
-Make sure you are using the latest [Conan client](https://conan.io/downloads) version, the recipes might evolve introducing features of the newer Conan releases.
+Make sure you are using the latest [Conan client](https://conan.io/downloads) version, as recipes might evolve introducing features of the newer Conan releases.
 
 
 ### The recipe folder
