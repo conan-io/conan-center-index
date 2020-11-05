@@ -1,5 +1,5 @@
 diff --git a/CMakeLists.txt b/CMakeLists.txt
-index dcd57785b..2699c8b0a 100644
+index dcd57785b..6b02a5aba 100644
 --- a/CMakeLists.txt
 +++ b/CMakeLists.txt
 @@ -18,40 +18,40 @@ if(DOXYGEN_FOUND)
@@ -20,9 +20,8 @@ index dcd57785b..2699c8b0a 100644
 +# include(SystemInformation)
  
  # External packages
--find_package(Threads REQUIRED)
+ find_package(Threads REQUIRED)
 -if(UNIX AND NOT APPLE AND NOT MSYS)
-+# find_package(Threads REQUIRED)
 +if(FALSE)
    find_package(LibBFD)
    find_package(LibDL)
@@ -41,9 +40,8 @@ index dcd57785b..2699c8b0a 100644
 +# add_subdirectory("modules")
  
  # Link libraries
--list(APPEND LINKLIBS Threads::Threads)
+ list(APPEND LINKLIBS Threads::Threads)
 -if(UNIX AND NOT APPLE AND NOT MSYS)
-+# list(APPEND LINKLIBS Threads::Threads)
 +if(FALSE)
    list(APPEND LINKLIBS ${LIBBFD_LIBRARIES})
    list(APPEND LINKLIBS ${LIBDL_LIBRARIES})
@@ -64,16 +62,14 @@ index dcd57785b..2699c8b0a 100644
  include_directories(SYSTEM "${CMAKE_CURRENT_SOURCE_DIR}/plugins")
  
  # Library
-@@ -67,9 +67,9 @@ file(GLOB_RECURSE LIB_HEADER_FILES "include/*.h")
- file(GLOB_RECURSE LIB_INLINE_FILES "include/*.inl")
+@@ -68,8 +68,8 @@ file(GLOB_RECURSE LIB_INLINE_FILES "include/*.inl")
  file(GLOB_RECURSE LIB_SOURCE_FILES "source/*.cpp")
  add_library(cppcommon ${LIB_HEADER_FILES} ${LIB_INLINE_FILES} ${LIB_SOURCE_FILES})
--set_target_properties(cppcommon PROPERTIES COMPILE_FLAGS "${PEDANTIC_COMPILE_FLAGS}" FOLDER "libraries")
+ set_target_properties(cppcommon PROPERTIES COMPILE_FLAGS "${PEDANTIC_COMPILE_FLAGS}" FOLDER "libraries")
 -target_include_directories(cppcommon PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/include" PUBLIC ${vld})
 -target_link_libraries(cppcommon ${LINKLIBS} fmt)
-+set_target_properties(cppcommon PROPERTIES FOLDER libraries)
 +target_include_directories(cppcommon PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/include")
-+# target_link_libraries(cppcommon ${LINKLIBS} fmt)
++target_link_libraries(cppcommon ${LINKLIBS})
  list(APPEND INSTALL_TARGETS cppcommon)
  list(APPEND LINKLIBS cppcommon)
  

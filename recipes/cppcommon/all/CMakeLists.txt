@@ -29,7 +29,7 @@ install(DIRECTORY source_subfolder/plugins/
         PATTERN "*.h")
 
 if(UNIX AND NOT APPLE)
-    target_link_libraries(cppcommon pthread dl rt)
+    target_link_libraries(cppcommon dl rt)
 endif()
 
 if(WIN32)
