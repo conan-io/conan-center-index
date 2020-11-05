@@ -1,7 +1,6 @@
 import os
 
 from conans import ConanFile, Meson, tools
-from conans.errors import ConanInvalidConfiguration
 
 
 class LibSigCppConan(ConanFile):
@@ -35,10 +34,6 @@ class LibSigCppConan(ConanFile):
             del self.options.fPIC
 
     def configure(self):
-        if self.settings.compiler == "Visual Studio":
-            raise ConanInvalidConfiguration(
-                "Visual Studio is not (yet) supported."
-            )
         if self.options.shared:
             del self.options.fPIC
 
@@ -50,9 +45,23 @@ class LibSigCppConan(ConanFile):
         if self._meson:
             return self._meson
         self._meson = Meson(self)
+
+        args = [
+            "-Dmaintainer-mode=false",
+            "-Ddist-warnings=no",
+            "-Ddist-warnings=no",
+            "-Dbuild-deprecated-api=true",
+            "-Dbuild-documentation=false",
+            "-Dvalidation=false",
+            "-Dbuild-pdf=false",
+            "-Dbuild-examples=false",
+            "-Dbenchmark=false",
+        ]
+
         self._meson.configure(
             source_folder=self._source_subfolder,
             build_folder=self._build_subfolder,
+            args=args,
         )
         return self._meson
 
