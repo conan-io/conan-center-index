@@ -64,7 +64,7 @@ class TwitchLibSoundtrackUtilConan(ConanFile):
         self._cmake.definitions["ENABLE_CODE_FORMATTING"] = False
         self._cmake.definitions["BUILD_TESTING"] = False
 
-        if self.settings.os == "Windows":
+        if self.settings.compiler == "Visual Studio":
             self._cmake.definitions["MSVC_DYNAMIC_RUNTIME"] = self.settings.compiler.runtime in ("MD", "MDd")
 
         self._cmake.configure(build_folder=self._build_subfolder)
