@@ -1,8 +1,8 @@
 diff --git a/CMakeLists.txt b/CMakeLists.txt
-index 1db1778..9e5e259 100644
+index 1db1778..1e19e9f 100644
 --- a/CMakeLists.txt
 +++ b/CMakeLists.txt
-@@ -18,41 +18,41 @@ if(DOXYGEN_FOUND)
+@@ -18,25 +18,25 @@ if(DOXYGEN_FOUND)
  endif()
  
  # CMake module path
@@ -20,16 +20,14 @@ index 1db1778..9e5e259 100644
 +# include(SystemInformation)
  
  # External packages
--find_package(Threads REQUIRED)
-+# find_package(Threads REQUIRED)
+ find_package(Threads REQUIRED)
  
  # Modules
 -add_subdirectory("modules")
 +# add_subdirectory("modules")
  
  # Link libraries
--list(APPEND LINKLIBS Threads::Threads)
-+# list(APPEND LINKLIBS Threads::Threads)
+ list(APPEND LINKLIBS Threads::Threads)
  
  # System directories
 -include_directories(SYSTEM "${CMAKE_CURRENT_SOURCE_DIR}/modules")
@@ -37,14 +35,12 @@ index 1db1778..9e5e259 100644
  
  # Library
  file(GLOB_RECURSE LIB_HEADER_FILES "include/*.h")
- file(GLOB_RECURSE LIB_INLINE_FILES "include/*.inl")
- file(GLOB_RECURSE LIB_SOURCE_FILES "source/*.cpp")
+@@ -45,14 +45,14 @@ file(GLOB_RECURSE LIB_SOURCE_FILES "source/*.cpp")
  add_library(cppbenchmark ${LIB_HEADER_FILES} ${LIB_INLINE_FILES} ${LIB_SOURCE_FILES})
--set_target_properties(cppbenchmark PROPERTIES COMPILE_FLAGS "${PEDANTIC_COMPILE_FLAGS}" FOLDER "libraries")
-+set_target_properties(cppbenchmark PROPERTIES FOLDER "libraries")
+ set_target_properties(cppbenchmark PROPERTIES COMPILE_FLAGS "${PEDANTIC_COMPILE_FLAGS}" FOLDER "libraries")
  target_include_directories(cppbenchmark PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/include")
 -target_link_libraries(cppbenchmark ${LINKLIBS} cpp-optparse HdrHistogram)
-+# target_link_libraries(cppbenchmark ${LINKLIBS} cpp-optparse HdrHistogram)
++target_link_libraries(cppbenchmark ${LINKLIBS})
  list(APPEND INSTALL_TARGETS cppbenchmark)
  list(APPEND LINKLIBS cppbenchmark)
  
@@ -56,30 +52,22 @@ index 1db1778..9e5e259 100644
    file(GLOB EXAMPLE_HEADER_FILES "examples/*.h")
    file(GLOB EXAMPLE_INLINE_FILES "examples/*.inl")
    file(GLOB EXAMPLE_SOURCE_FILES RELATIVE "${CMAKE_CURRENT_SOURCE_DIR}/examples" "examples/*.cpp")
-@@ -65,13 +65,13 @@ if(NOT CPPBENCHMARK_MODULE)
+@@ -65,8 +65,8 @@ if(NOT CPPBENCHMARK_MODULE)
      list(APPEND INSTALL_TARGETS ${EXAMPLE_TARGET})
      list(APPEND INSTALL_TARGETS_PDB ${EXAMPLE_TARGET})
    endforeach()
 -
 -  # Tests
 +endif()
-+if(CPPBENCHMARK_TESTS)
++if(FALSE)
    file(GLOB TESTS_HEADER_FILES "tests/*.h")
    file(GLOB TESTS_INLINE_FILES "tests/*.inl")
    file(GLOB TESTS_SOURCE_FILES "tests/*.cpp")
-   add_executable(cppbenchmark-tests ${TESTS_HEADER_FILES} ${TESTS_INLINE_FILES} ${TESTS_SOURCE_FILES} ${Catch2})
--  set_target_properties(cppbenchmark-tests PROPERTIES COMPILE_FLAGS "${PEDANTIC_COMPILE_FLAGS}" FOLDER "tests")
-+  set_target_properties(cppbenchmark-tests PROPERTIES FOLDER "tests")
-   target_include_directories(cppbenchmark-tests PRIVATE ${Catch2})
-   target_link_libraries(cppbenchmark-tests ${LINKLIBS})
-   list(APPEND INSTALL_TARGETS cppbenchmark-tests)
-@@ -79,18 +79,18 @@ if(NOT CPPBENCHMARK_MODULE)
- 
+@@ -80,17 +80,17 @@ if(NOT CPPBENCHMARK_MODULE)
    # CTest
    enable_testing()
--  add_test(cppbenchmark-tests cppbenchmark-tests --durations yes --order lex)
+   add_test(cppbenchmark-tests cppbenchmark-tests --durations yes --order lex)
 -
-+  add_test(NAME cppbenchmark-tests COMMAND cppbenchmark-tests --durations yes --order lex)
 +endif()
    # Install
    install(TARGETS ${INSTALL_TARGETS}
@@ -92,7 +80,7 @@ index 1db1778..9e5e259 100644
  
    # Install *.pdb files
 -  if(MSVC)
-+  if(MSVC AND CPPBENCHMARK_PDB)
++  if(MSVC AND FALSE)
      foreach(INSTALL_TARGET_PDB ${INSTALL_TARGETS_PDB})
 -      install(FILES $<TARGET_PDB_FILE:${INSTALL_TARGET_PDB}> DESTINATION "${PROJECT_SOURCE_DIR}/bin")
 +      install(FILES $<TARGET_PDB_FILE:${INSTALL_TARGET_PDB}> DESTINATION bin OPTIONAL)

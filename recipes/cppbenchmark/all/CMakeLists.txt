@@ -8,16 +8,11 @@ if(WIN32)
     add_definitions (-D_CRT_SECURE_NO_WARNINGS)
 endif()
 
-enable_testing()
-
 add_subdirectory("source_subfolder")
 
 conan_target_link_libraries(cppbenchmark)
 
 target_compile_features(cppbenchmark PUBLIC cxx_std_17)
-if(CPPBENCHMARK_TESTS)
-    target_compile_features(cppbenchmark-tests PUBLIC cxx_std_17)
-endif()
 
 install(DIRECTORY source_subfolder/include/
         DESTINATION include
@@ -25,13 +20,6 @@ install(DIRECTORY source_subfolder/include/
         PATTERN "*.h"
         PATTERN "*.inl")
 
-if(UNIX AND NOT APPLE)
-    target_link_libraries(cppbenchmark pthread)
-endif()
-
-if(WIN32)
-    # target_link_libraries(cppbenchmark rpcrt4 userenv)
-    if(BUILD_SHARED_LIBS)
-        set_target_properties(cppbenchmark PROPERTIES WINDOWS_EXPORT_ALL_SYMBOLS TRUE)
-    endif()
+if(WIN32 AND BUILD_SHARED_LIBS)
+    set_target_properties(cppbenchmark PROPERTIES WINDOWS_EXPORT_ALL_SYMBOLS TRUE)
 endif()

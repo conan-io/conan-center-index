@@ -13,13 +13,9 @@ class CppBenchmark(ConanFile):
     topics = ("conan", "utils", "library", "benchmark")
     settings = "os", "compiler", "build_type", "arch"
     options = {"fPIC": [True, False],
-               "shared": [True, False],
-               "tests": [True, False],
-               "pdbs": [True, False]}
+               "shared": [True, False]}
     default_options = {"fPIC": True,
-                       "shared": False,
-                       "tests": False,
-                       "pdbs": False}
+                       "shared": False}
     requires = ["hdrhistogram-c/0.11.1", "cpp-optparse/cci.20171104"]
     generators = "cmake"
     exports_sources = ["patches/**", "CMakeLists.txt"]
@@ -46,8 +42,6 @@ class CppBenchmark(ConanFile):
         if not self._cmake:
             self._cmake = CMake(self)
             self._cmake.definitions["CPPBENCHMARK_MODULE"] = "OFF"
-            self._cmake.definitions["CPPBENCHMARK_TESTS"] = "ON" if self.options.tests else "OFF"
-            self._cmake.definitions["CPPBENCHMARK_PDB"] = "ON" if self.options.pdbs else "OFF"
             self._cmake.configure(build_folder=self._build_subfolder)
         return self._cmake
 
@@ -78,18 +72,11 @@ class CppBenchmark(ConanFile):
         else:
             self.output.warn("cppbenchmark requires C++17. Your compiler is unknown. Assuming it supports C++17.")
 
-    def requirements(self):
-        if self.options.tests:
-           self.requires("catch2/2.13.2")
-
     def build(self):
         self._patch()
 
         cmake = self._configure_cmake()
         cmake.build()
-
-        if self.options.tests:
-            cmake.test(output_on_failure=True)
 
     def package(self):
         cmake = self._configure_cmake()
@@ -98,6 +85,3 @@ class CppBenchmark(ConanFile):
 
     def package_info(self):
         self.cpp_info.libs = tools.collect_libs(self)
-
-        if self.settings.os == "Linux":
-            self.cpp_info.system_libs = ["pthread"]
