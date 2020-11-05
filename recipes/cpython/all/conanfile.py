@@ -138,6 +138,7 @@ class CPythonConan(ConanFile):
 
     @property
     def _with_libffi(self):
+        # cpython 3.7.7 on MSVC uses an ancient libffi 2.00-beta (which is not available at cci, and is API/ABI incompatible with current 3.2+)
         return self.settings.compiler != "Visual Studio" or tools.Version(self.version) >= "3.8"
 
     def requirements(self):
@@ -149,7 +150,7 @@ class CPythonConan(ConanFile):
             self.requires("mpdecimal/2.5.0")
         self.requires("zlib/1.2.11")
         if self._with_libffi:
-            self.requires("libffi/3.3")
+            self.requires("libffi/3.2.1")
         if self.settings.os != "Windows":
             self.requires("libuuid/1.0.3")
             self.requires("libxcrypt/4.4.16")
@@ -318,6 +319,10 @@ class CPythonConan(ConanFile):
             if tools.Version(self.deps_cpp_info["mpdecimal"].version) < "2.5.0":
                 raise ConanInvalidConfiguration("cpython 3.9.0 (and newer) requires (at least) mpdecimal 2.5.0")
 
+        if self._with_libffi:
+            if tools.Version(self.deps_cpp_info["libffi"].version) >= "3.3" and "d" in str(self.settings.compiler.runtime):
+                raise ConanInvalidConfiguration("libffi versions >= 3.3 cause 'read access violations' when using a debug runtime (MTd/MDd) ")
+
         self._patch_sources()
 
         if self.options.get_safe("with_curses", False) and not self.options["ncurses"].with_widec:
@@ -411,7 +416,7 @@ class CPythonConan(ConanFile):
     def package(self):
         self.copy("LICENSE", src=self._source_subfolder, dst="licenses")
         if self.settings.compiler == "Visual Studio":
-            if self._is_py2 or (self._with_libffi and self.options["libffi"].shared) or "d" in str(self.settings.compiler.runtime):
+            if self._is_py2 or (self._with_libffi and self.options["libffi"].shared):
                 self._msvc_package_copy()
             else:
                 self._msvc_package_layout()
