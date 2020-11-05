@@ -5,7 +5,6 @@ from conans import ConanFile, AutoToolsBuildEnvironment, tools
 
 class ResiprocateConan(ConanFile):
     name = "resiprocate"
-    version = "1.12.0"
     license = "https://github.com/resiprocate/resiprocate/blob/master/COPYING"
     url = "http://www.resiprocate.org"
     author = "resiprocate-devel@resiprocate.org"
@@ -17,8 +16,7 @@ class ResiprocateConan(ConanFile):
     install_dir = tempfile.mkdtemp(suffix=name)
 
     def source(self):
-        print(os.path.join(self.install_dir, "lib"))
-        tools.get("https://www.resiprocate.org/files/pub/reSIProcate/releases/resiprocate-%s.tar.gz" % self.version)
+        tools.get(**self.conan_data["sources"][self.version])
 
     def build(self):
         env_build = AutoToolsBuildEnvironment(self)
