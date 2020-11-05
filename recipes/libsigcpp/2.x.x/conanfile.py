@@ -13,7 +13,6 @@ class LibSigCppConan(ConanFile):
         "libsigc++ implements a typesafe callback system for standard C++."
     )
     topics = ("conan", "libsigcpp", "callback")
-    generators = "pkg_config"
     settings = "os", "compiler", "arch", "build_type"
     options = {
         "shared": [True, False],
@@ -70,7 +69,7 @@ class LibSigCppConan(ConanFile):
         meson = self._configure_build()
         meson.install()
 
-        tools.rmdir(os.path.join(self.package_folder, "lib/pkgconfig"))
+        tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
 
     def package_info(self):
         self.cpp_info.includedirs = [
