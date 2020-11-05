@@ -1,9 +1,9 @@
 import os
 
 from conans import ConanFile, tools, AutoToolsBuildEnvironment
-from conans.errors import ConanException
+from conans.errors import ConanInvalidConfiguration
 
-class ConanGTK(ConanFile):
+class GtkmmConan(ConanFile):
     name = "gtkmm"
     url = "https://github.com/conan-io/conan-center-index"
     license = "LGPL-2.1-or-later"
