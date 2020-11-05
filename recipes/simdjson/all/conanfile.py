@@ -1,7 +1,6 @@
 import os
 from conans import ConanFile, CMake, tools
 from conans.errors import ConanInvalidConfiguration
-from conans.tools import Version
 
 
 class SimdjsonConan(ConanFile):
@@ -24,11 +23,11 @@ class SimdjsonConan(ConanFile):
 
     @property
     def _source_subfolder(self):
-          return "source_subfolder"
+        return "source_subfolder"
 
     @property
     def _build_subfolder(self):
-          return "build_subfolder"
+        return "build_subfolder"
 
     @property
     def _compilers_minimum_version(self):
@@ -36,7 +35,7 @@ class SimdjsonConan(ConanFile):
             "gcc": "7.4",
             "Visual Studio": "15.7",
             "clang": "6",
-            "apple-clang": "10",
+            "apple-clang": "9.4",
         }
 
     def config_options(self):
