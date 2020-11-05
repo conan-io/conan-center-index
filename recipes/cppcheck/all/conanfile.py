@@ -12,7 +12,7 @@ class CppcheckConan(ConanFile):
     description = "Cppcheck is an analysis tool for C/C++ code."
     license = "GPL-3.0-or-later"
     generators = "cmake"
-    settings = "compiler", "arch", "os"
+    settings = "os", "arch", "compiler", "build_type"
     options = {"use_z3": [True, False]}
     default_options = {"use_z3": False}
     
