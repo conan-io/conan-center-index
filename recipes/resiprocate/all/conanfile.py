@@ -5,10 +5,10 @@ from conans import ConanFile, AutoToolsBuildEnvironment, tools
 
 class ResiprocateConan(ConanFile):
     name = "resiprocate"
-    license = "https://github.com/resiprocate/resiprocate/blob/master/COPYING"
-    url = "http://www.resiprocate.org"
-    author = "resiprocate-devel@resiprocate.org"
     description = "The project is dedicated to maintaining a complete, correct, and commercially usable implementation of SIP and a few related protocols. "
+    topics = ("conan", "resiprocate", "sip")
+    url = "https://github.com/conan-io/conan-center-index"
+    homepage = "http://www.resiprocate.org"
     settings = "os", "compiler", "build_type", "arch"
     generators = "cmake"
     exports = "LICENSE"
