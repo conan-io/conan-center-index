@@ -21,10 +21,6 @@ class CppcheckConan(ConanFile):
     @property
     def _build_subfolder(self):
         return "build_subfolder"
-        
-    def requirements(self):
-        if self.options.with_z3:
-            self.requires("z3/4.8.8")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
