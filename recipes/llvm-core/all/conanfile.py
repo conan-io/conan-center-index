@@ -33,9 +33,9 @@ class LLVMCoreConan(ConanFile):
         'unwind_tables': [True, False],
         'expensive_checks': [True, False],
         'use_perf': [True, False],
+        'with_ffi': [True, False],
         'with_zlib': [True, False],
-        'with_xml2': [True, False],
-        'with_ffi': [True, False]
+        'with_xml2': [True, False]
     }
     default_options = {
         'shared': False,
@@ -50,9 +50,9 @@ class LLVMCoreConan(ConanFile):
         'unwind_tables': True,
         'expensive_checks': False,
         'use_perf': False,
+        'with_ffi': False,
         'with_zlib': True,
-        'with_xml2': True,
-        'with_ffi': False
+        'with_xml2': True
     }
 
     exports_sources = ['CMakeLists.txt', 'patches/*']
@@ -94,10 +94,9 @@ class LLVMCoreConan(ConanFile):
         cmake.definitions['LLVM_TARGETS_TO_BUILD'] = self.options.targets
         cmake.definitions['LLVM_TARGET_ARCH'] = 'host'
         cmake.definitions['LLVM_BUILD_LLVM_DYLIB'] = self.options.shared
+        cmake.definitions['LLVM_DYLIB_COMPONENTS'] = self.options.components
         cmake.definitions['LLVM_ENABLE_PIC'] = \
             self.options.get_safe('fPIC', default=False)
-        cmake.definitions['LLVM_DYLIB_COMPONENTS'] = \
-            self.options.get_safe('components', default='all')
 
         cmake.definitions['LLVM_ABI_BREAKING_CHECKS'] = 'WITH_ASSERTS'
         cmake.definitions['LLVM_ENABLE_WARNINGS'] = True
@@ -144,29 +143,26 @@ class LLVMCoreConan(ConanFile):
         cmake.definitions['LLVM_ENABLE_Z3_SOLVER'] = False
         cmake.definitions['LLVM_ENABLE_LIBPFM'] = False
         cmake.definitions['LLVM_ENABLE_LIBEDIT'] = False
+        cmake.definitions['LLVM_ENABLE_FFI'] = self.options.with_ffi
         cmake.definitions['LLVM_ENABLE_ZLIB'] = \
             self.options.get_safe('with_zlib', False)
         cmake.definitions['LLVM_ENABLE_LIBXML2'] = \
             self.options.get_safe('with_xml2', False)
-        cmake.definitions['LLVM_ENABLE_FFI'] = \
-            self.options.get_safe('with_ffi', False)
         return cmake
 
     def config_options(self):
         if self.settings.os == 'Windows':
             del self.options.fPIC
-            del self.options.components
             del self.options.with_zlib
             del self.options.with_xml2
-            del self.options.with_ffi
 
     def requirements(self):
+        if self.options.with_ffi:
+            self.requires('libffi/3.3')
         if self.options.get_safe('with_zlib', False):
             self.requires('zlib/1.2.11')
         if self.options.get_safe('with_xml2', False):
             self.requires('libxml2/2.9.10')
-        if self.options.get_safe('with_ffi', False):
-            self.requires('libffi/3.3')
 
     def configure(self):
         if self.settings.os == 'Windows' and self.options.shared:
@@ -216,10 +212,10 @@ class LLVMCoreConan(ConanFile):
                     dummy_targets[target].append(dep)
 
             cmake_targets = {
+                'libffi::libffi': 'ffi',
                 'ZLIB::ZLIB': 'z',
                 'Iconv::Iconv': 'iconv',
-                'LibXml2::LibXml2': 'xml2',
-                'libffi::libffi': 'ffi'
+                'LibXml2::LibXml2': 'xml2'
             }
 
             components = defaultdict(list)
@@ -275,11 +271,11 @@ class LLVMCoreConan(ConanFile):
         with components_path.open(mode='r') as file:
             components = json.load(file)
 
-        dependencies = ['z', 'iconv', 'xml2', 'ffi']
+        dependencies = ['ffi', 'z', 'iconv', 'xml2']
         targets = {
+            'ffi': 'libffi::libffi',
             'z': 'zlib::zlib',
-            'xml2': 'libxml2::libxml2',
-            'ffi': 'libffi::libffi'
+            'xml2': 'libxml2::libxml2'
         }
 
         for lib, deps in components.items():
