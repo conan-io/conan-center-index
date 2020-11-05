@@ -42,11 +42,9 @@ class CppcheckConan(ConanFile):
 
     def _configure_cmake(self):
         cmake = CMake(self)
-        cmake.definitions["USE_Z3"] = "ON" if self.options.with_z3 else "OFF"
-        cmake.definitions["HAVE_RULES"] = "ON" if self.options.have_rules else "OFF"
-        cmake.definitions["Z3_LIBRARIES"] = "z3::z3"
-        cmake.definitions["Z3_CXX_INCLUDE_DIRS"] = "${z3_INCLUDE_DIRS}"
-        cmake.definitions["USE_MATCHCOMPILER"] = "ON" if self.settings.build_type == "Release" else "OFF"
+        cmake.definitions["USE_Z3"] = self.options.with_z3
+        cmake.definitions["HAVE_RULES"] = self.options.have_rules
+        cmake.definitions["USE_MATCHCOMPILER"] = self.settings.build_type == "Release"
         cmake.configure(build_folder=self._build_subfolder)
         return cmake
 
