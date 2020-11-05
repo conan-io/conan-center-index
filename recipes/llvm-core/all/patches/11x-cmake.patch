@@ -1,13 +1,15 @@
 --- cmake/config-ix.cmake
 +++ cmake/config-ix.cmake
-@@ -166,6 +166,7 @@
-         else()
-           include_directories(${LIBXML2_INCLUDE_DIR})
-         endif()
-+        set(LIBXML2_LIBRARIES "xml2;iconv;z")
-       endif()
-     endif()
-   endif()
+@@ -159,6 +159,9 @@
+     set(LIBXML2_FOUND 0)
+     if((LLVM_ENABLE_LIBXML2) AND ((CMAKE_SYSTEM_NAME MATCHES "Linux") AND (ICONV_LIBRARY_PATH) OR APPLE))
+       find_package(LibXml2)
++      set(LIBXML2_FOUND 1)
++      list(GET LibXml2_INCLUDE_DIRS -1 LIBXML2_INCLUDE_DIR)
++      set(LIBXML2_LIBRARIES ${LibXml2_LIBRARIES})
+       if (LIBXML2_FOUND)
+         set(LLVM_LIBXML2_ENABLED 1)
+         if ((CMAKE_OSX_SYSROOT) AND (EXISTS ${CMAKE_OSX_SYSROOT}/${LIBXML2_INCLUDE_DIR}))
 @@ -321,7 +321,7 @@
      message(FATAL_ERROR "libffi includes are not found.")
    endif()
@@ -51,5 +53,5 @@
 -  endif()
    set_property(TARGET LLVMWindowsManifest PROPERTY
 -    LLVM_SYSTEM_LIBS ${xml2_library})
-+      LLVM_SYSTEM_LIBS ${LIBXML2_LIBRARIES})
++    LLVM_SYSTEM_LIBS ${LIBXML2_LIBRARIES})
  endif()

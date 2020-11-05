@@ -56,7 +56,7 @@ class LLVMCoreConan(ConanFile):
     }
 
     exports_sources = ['CMakeLists.txt', 'patches/*']
-    generators = 'cmake'
+    generators = ['cmake', 'cmake_find_package']
     no_copy_source = True
 
     _source_subfolder = 'source'
@@ -106,8 +106,10 @@ class LLVMCoreConan(ConanFile):
         cmake.definitions['LLVM_ENABLE_LIBCXX'] = \
             'clang' in str(self.settings.compiler)
 
-        cmake.definitions['LLVM_USE_RELATIVE_PATHS_IN_DEBUG_INFO'] = True
+        # TODO: Temporary hack, it needs to be fixed from outside the recipe.
         cmake.definitions['LLVM_TEMPORARILY_ALLOW_OLD_TOOLCHAIN'] = False
+
+        cmake.definitions['LLVM_USE_RELATIVE_PATHS_IN_DEBUG_INFO'] = True
         cmake.definitions['LLVM_BUILD_INSTRUMENTED_COVERAGE'] = False
         cmake.definitions['LLVM_OPTIMIZED_TABLEGEN'] = True
         cmake.definitions['LLVM_REVERSE_ITERATION'] = False
@@ -142,18 +144,12 @@ class LLVMCoreConan(ConanFile):
         cmake.definitions['LLVM_ENABLE_Z3_SOLVER'] = False
         cmake.definitions['LLVM_ENABLE_LIBPFM'] = False
         cmake.definitions['LLVM_ENABLE_LIBEDIT'] = False
-
         cmake.definitions['LLVM_ENABLE_ZLIB'] = \
             self.options.get_safe('with_zlib', False)
         cmake.definitions['LLVM_ENABLE_LIBXML2'] = \
             self.options.get_safe('with_xml2', False)
         cmake.definitions['LLVM_ENABLE_FFI'] = \
             self.options.get_safe('with_ffi', False)
-        if self.options.get_safe('with_ffi', False):
-            cmake.definitions['FFI_INCLUDE_DIR'] = \
-                self.deps_cpp_info['libffi'].include_paths[0]
-            cmake.definitions['FFI_LIBRARY_DIR'] = \
-                self.deps_cpp_info['libffi'].lib_paths[0]
         return cmake
 
     def config_options(self):
@@ -186,6 +182,15 @@ class LLVMCoreConan(ConanFile):
         self._patch_sources()
 
     def build(self):
+        # TODO: Temporary hack, it needs to be fixed from outside the recipe.
+        if Path('FindIconv.cmake').exists():
+            tools.replace_in_file(
+                'FindIconv.cmake',
+                'set(Iconv_LIBRARY_LIST iconv charset)',
+                'set(Iconv_LIBRARY_LIST iconv)',
+                strict=False
+            )
+
         cmake = self._configure_cmake()
         cmake.configure()
         cmake.build()
@@ -210,6 +215,13 @@ class LLVMCoreConan(ConanFile):
                 if not target.startswith('LLVM'):
                     dummy_targets[target].append(dep)
 
+            cmake_targets = {
+                'ZLIB::ZLIB': 'z',
+                'Iconv::Iconv': 'iconv',
+                'LibXml2::LibXml2': 'xml2',
+                'libffi::libffi': 'ffi'
+            }
+
             components = defaultdict(list)
             for lib, dep in deps:
                 if not lib.startswith('LLVM'):
@@ -218,6 +230,8 @@ class LLVMCoreConan(ConanFile):
                     continue
                 elif dep.startswith('LLVM'):
                     components[dep]
+                elif dep in cmake_targets:
+                    dep = cmake_targets[dep]
                 elif Path(dep).exists():
                     dep = Path(dep).stem.replace('lib', '')
                 dep = dep.replace('-l', '')
