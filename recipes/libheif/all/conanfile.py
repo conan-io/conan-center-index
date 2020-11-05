@@ -74,10 +74,16 @@ class Libheif(ConanFile):
         self.cpp_info.names["cmake_find_package"] = "libheif"
         self.cpp_info.names["cmake_find_package_multi"] = "libheif"
         self.cpp_info.names["pkg_config"] = "libheif"
-        self.cpp_info.libs = ["heif"]
+
+        self.cpp_info.components["heif"].names["cmake_find_package"] = "heif"
+        self.cpp_info.components["heif"].names["cmake_find_package_multi"] = "heif"
+        self.cpp_info.components["heif"].requires = ["libde265::libde265"]
+
+        self.cpp_info.components["heif"].libs = ["heif"]
+
         if not self.options.shared:
-            self.cpp_info.defines = ["LIBHEIF_STATIC_BUILD"]
+            self.cpp_info.components["heif"].defines = ["LIBHEIF_STATIC_BUILD"]
         if self.settings.os == "Linux":
-            self.cpp_info.system_libs = ["m", "pthread"]
+            self.cpp_info.components["heif"].system_libs = ["m", "pthread"]
         if not self.options.shared and tools.stdcpp_library(self):
-            self.cpp_info.system_libs.append(tools.stdcpp_library(self))
+            self.cpp_info.components["heif"].system_libs.append(tools.stdcpp_library(self))
