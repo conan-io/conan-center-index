@@ -11,11 +11,11 @@ class CppcheckConan(ConanFile):
     topics = ("Cpp Check", "static analyzer")
     description = "Cppcheck is an analysis tool for C/C++ code."
     license = "GPL-3.0-or-later"
-    generators = "cmake_find_package"
+    generators = {"cmake", "cmake_find_package"}
     settings = "os", "arch", "compiler", "build_type"
     options = {"with_z3": [True, False], "have_rules": [True, False]}
     default_options = {"with_z3": True, "have_rules": True}
-    exports_sources = ["patches/**"]
+    exports_sources = ["CMakeLists.txt", "patches/**"]
     
     @property
     def _source_subfolder(self):
@@ -47,7 +47,7 @@ class CppcheckConan(ConanFile):
         cmake.definitions["Z3_LIBRARIES"] = "z3::z3"
         cmake.definitions["Z3_CXX_INCLUDE_DIRS"] = "${z3_INCLUDE_DIRS}"
         cmake.definitions["USE_MATCHCOMPILER"] = "ON" if self.settings.build_type == "Release" else "OFF"
-        cmake.configure(build_folder=self._build_subfolder, source_folder=self._source_subfolder)
+        cmake.configure(build_folder=self._build_subfolder)
         return cmake
 
     def build(self):
