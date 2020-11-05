@@ -142,8 +142,7 @@ class CPythonConan(ConanFile):
 
     def requirements(self):
         self.requires("openssl/1.1.1h")
-        if not (self.settings.compiler == "Visual Studio" and tools.Version(self.version) >= tools.Version("3.8")):
-            self.requires("expat/2.2.10")
+        self.requires("expat/2.2.10")
         if tools.Version(self.version) < "3.8":
             self.requires("mpdecimal/2.4.2")
         else:
@@ -242,6 +241,7 @@ class CPythonConan(ConanFile):
                                   "MultiThreadedDebugDLL", runtime_library)
             # Remove vendored packages
             tools.rmdir(os.path.join(self._source_subfolder, "Modules", "_decimal", "libmpdec"))
+            tools.rmdir(os.path.join(self._source_subfolder, "Modules", "expat"))
 
     @property
     def _solution_projects(self):
