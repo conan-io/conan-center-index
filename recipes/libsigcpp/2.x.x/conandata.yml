@@ -1,0 +1,4 @@
+sources:
+  "2.10.4":
+    url: https://download.gnome.org/sources/libsigc++/2.10/libsigc++-2.10.4.tar.xz
+    sha256: 1f5874358d9a21379024a4f4edba80a8a3aeb33f0531b192a6b1c35ed7dbfa3e
