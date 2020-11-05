@@ -1,7 +1,7 @@
 from conans import ConanFile, CMake, tools
 from conans.errors import ConanInvalidConfiguration
 import os
-import shutil
+import glob
 
 
 class CppCommon(ConanFile):
@@ -66,8 +66,8 @@ class CppCommon(ConanFile):
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
-        os.rename("CppCommon-" + self.version,
-            self._source_subfolder)
+        extracted_dir = glob.glob("CppCommon-*")[0]
+        os.rename(extracted_dir, self._source_subfolder)
 
     def config_options(self):
         if self.settings.os == "Windows":
