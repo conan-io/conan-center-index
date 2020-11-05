@@ -1,6 +1,8 @@
 #include <iostream>
+#include "oatpp-libressl/Config.hpp"
 
 int main() {
-    // std::cout << "OK" << std::endl;	
-    // exit(0);
+    {        
+        oatpp::libressl::Config config;
+    }
 }
