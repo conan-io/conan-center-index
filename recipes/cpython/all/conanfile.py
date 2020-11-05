@@ -128,7 +128,7 @@ class CPythonConan(ConanFile):
                 raise ConanInvalidConfiguration("MSVC does not support a static build")
             if self._is_py2:
                 if self.settings.compiler.version >= tools.Version("14"):
-                    self.output.warn("Visual Studio versions 14 and higher are not supported")
+                    self.output.warn("Visual Studio versions 14 and higher were never officially supported by the cpython developers")
             if str(self.settings.arch) not in self._msvc_archs:
                 raise ConanInvalidConfiguration("Visual Studio does not support this architecure")
 
