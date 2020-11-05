@@ -314,9 +314,9 @@ class CPythonConan(ConanFile):
         if tools.Version(self.version) < "3.8.0":
             if tools.Version(self.deps_cpp_info["mpdecimal"].version) >= "2.5.0":
                 raise ConanInvalidConfiguration("cpython versions lesser then 3.8.0 require a mpdecimal lesser then 2.5.0")
-        else:
+        elif tools.Version(self.version) >= "3.9.0":
             if tools.Version(self.deps_cpp_info["mpdecimal"].version) < "2.5.0":
-                raise ConanInvalidConfiguration("cpython 3.8.0 (and newer) requires (at least) mpdecimal 2.5.0")
+                raise ConanInvalidConfiguration("cpython 3.9.0 (and newer) requires (at least) mpdecimal 2.5.0")
 
         self._patch_sources()
 
