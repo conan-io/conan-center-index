@@ -80,21 +80,39 @@ class ProtobufConan(ConanFile):
         )
         tools.replace_in_file(
             os.path.join(self._source_subfolder, "cmake", "protobuf-config.cmake.in"),
-            """COMMAND  protobuf::protoc
+            "include(\"${CMAKE_CURRENT_LIST_DIR}/protobuf-targets.cmake\")",
+            "# CONAN PATCH include(\"${CMAKE_CURRENT_LIST_DIR}/protobuf-targets.cmake\")"
+        )
+        if tools.Version(self.version) < "3.12.0":
+            tools.replace_in_file(
+                os.path.join(self._source_subfolder, "cmake", "protobuf-config.cmake.in"),
+                """COMMAND  protobuf::protoc
       ARGS --${protobuf_generate_LANGUAGE}_out ${_dll_export_decl}${protobuf_generate_PROTOC_OUT_DIR} ${_protobuf_include_path} ${_abs_file}
       DEPENDS ${_abs_file} protobuf::protoc""",
-            """COMMAND "${CMAKE_COMMAND}"  #FIXME: use conan binary component
+                """COMMAND "${CMAKE_COMMAND}"  #FIXME: use conan binary component
       ARGS -E env "DYLD_LIBRARY_PATH=${Protobuf_LIB_DIRS}:${CONAN_LIB_DIRS}:${Protobuf_LIB_DIRS_RELEASE}:${Protobuf_LIB_DIRS_DEBUG}:${Protobuf_LIB_DIRS_RELWITHDEBINFO}:${Protobuf_LIB_DIRS_MINSIZEREL}" protoc --${protobuf_generate_LANGUAGE}_out ${_dll_export_decl}${protobuf_generate_PROTOC_OUT_DIR} ${_protobuf_include_path} ${_abs_file}
       DEPENDS ${_abs_file} USES_TERMINAL"""
+            )
+        else:
+            tools.replace_in_file(
+                os.path.join(self._source_subfolder, "cmake", "protobuf-config.cmake.in"),
+                """COMMAND  protobuf::protoc
+      ARGS --${protobuf_generate_LANGUAGE}_out ${_dll_export_decl}${protobuf_generate_PROTOC_OUT_DIR} ${_plugin} ${_protobuf_include_path} ${_abs_file}
+      DEPENDS ${_abs_file} protobuf::protoc""",
+                """COMMAND "${CMAKE_COMMAND}"  #FIXME: use conan binary component
+      ARGS -E env "DYLD_LIBRARY_PATH=${Protobuf_LIB_DIRS}:${CONAN_LIB_DIRS}:${Protobuf_LIB_DIRS_RELEASE}:${Protobuf_LIB_DIRS_DEBUG}:${Protobuf_LIB_DIRS_RELWITHDEBINFO}:${Protobuf_LIB_DIRS_MINSIZEREL}" protoc --${protobuf_generate_LANGUAGE}_out ${_dll_export_decl}${protobuf_generate_PROTOC_OUT_DIR} ${_plugin} ${_protobuf_include_path} ${_abs_file}
+      DEPENDS ${_abs_file} USES_TERMINAL"""
+            )
+
+        tools.replace_in_file(
+            os.path.join(self._source_subfolder, "cmake", "protobuf-module.cmake.in"),
+            'if(DEFINED Protobuf_SRC_ROOT_FOLDER)',
+            """if(0)
+if(DEFINED Protobuf_SRC_ROOT_FOLDER)""",
         )
         tools.replace_in_file(
             os.path.join(self._source_subfolder, "cmake", "protobuf-module.cmake.in"),
-            '# Environment',
-            'if(0)',
-        )
-        tools.replace_in_file(
-            os.path.join(self._source_subfolder, "cmake", "protobuf-module.cmake.in"),
-            '# Version info variable',
+            '# Define upper case versions of output variables',
             'endif()',
         )
 
