@@ -352,7 +352,21 @@ class CPythonConan(ConanFile):
     def _msvc_install_subprefix(self):
         return "bin"
 
+    def _copy_essential_dlls(self):
+        if self.settings.compiler == "Visual Studio":
+            # Until MSVC builds support cross building, copy dll's of essential (shared) dependencies to python binary location.
+            # These dll's are required when running the layout tool using the newly built python executable.
+            dest_path = os.path.join(self.build_folder, self._msvc_artifacts_path)
+            if self._with_libffi:
+                for bin_path in self.deps_cpp_info["libffi"].bin_paths:
+                    self.copy("*.dll", src=bin_path, dst=dest_path)
+            for bin_path in self.deps_cpp_info["expat"].bin_paths:
+                self.copy("*.dll", src=bin_path, dst=dest_path)
+            for bin_path in self.deps_cpp_info["zlib"].bin_paths:
+                self.copy("*.dll", src=bin_path, dst=dest_path)
+
     def _msvc_package_layout(self):
+        self._copy_essential_dlls()
         install_prefix = os.path.join(self.package_folder, self._msvc_install_subprefix)
         tools.mkdir(install_prefix)
         build_path = self._msvc_artifacts_path
@@ -416,7 +430,7 @@ class CPythonConan(ConanFile):
     def package(self):
         self.copy("LICENSE", src=self._source_subfolder, dst="licenses")
         if self.settings.compiler == "Visual Studio":
-            if self._is_py2 or (self._with_libffi and self.options["libffi"].shared):
+            if self._is_py2:
                 self._msvc_package_copy()
             else:
                 self._msvc_package_layout()
