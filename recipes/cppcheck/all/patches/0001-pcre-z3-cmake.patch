@@ -1,0 +1,28 @@
+diff --git a/cmake/findDependencies.cmake b/cmake/findDependencies.cmake
+index 18f8499ac7bf048cf15fc6dba1d0a76004342e37..61d210f7ef4447613630a3f75ec732b12d40a115 100644
+--- a/cmake/findDependencies.cmake
++++ b/cmake/findDependencies.cmake
+@@ -7,10 +7,12 @@ if (BUILD_GUI)
+ endif()
+ 
+ if (HAVE_RULES)
+-    find_library(PCRE_LIBRARY pcre)
+-    if (NOT PCRE_LIBRARY)
++    find_package(pcre)
++    if (NOT PCRE_FOUND)
+         message(FATAL_ERROR "pcre dependency for RULES has not been found")
+     endif()
++	set(PCRE_LIBRARY ${PCRE_LIBRARIES})
++    include_directories(cppcheck SYSTEM ${PCRE_INCLUDE_DIRS})
+ endif()
+ 
+ if (USE_Z3)
+@@ -25,6 +27,8 @@ if (USE_Z3)
+             message(FATAL_ERROR "z3++.h has not been found")
+         endif()
+     endif()
++	set(Z3_LIBRARIES ${z3_LIBRARIES})
++	set(Z3_CXX_INCLUDE_DIRS ${z3_INCLUDE_DIRS})
+     include_directories(cppcheck SYSTEM ${Z3_CXX_INCLUDE_DIRS})
+ endif()
+ 
