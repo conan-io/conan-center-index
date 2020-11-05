@@ -35,13 +35,9 @@ class LibSigCppConan(ConanFile):
             del self.options.fPIC
 
     def configure(self):
-        if (
-            self.settings.compiler == "Visual Studio"
-            and "MT" in str(self.settings.compiler.runtime)
-            and self.options.shared
-        ):
+        if self.settings.compiler == "Visual Studio":
             raise ConanInvalidConfiguration(
-                "Visual Studio and Runtime MT is not supported for shared library."
+                "Visual Studio is not (yet) supported."
             )
         if self.options.shared:
             del self.options.fPIC
@@ -77,3 +73,7 @@ class LibSigCppConan(ConanFile):
             "lib/sigc++-2.0/include",
         ]
         self.cpp_info.libs = tools.collect_libs(self)
+
+        self.cpp_info.names["pkg_config"] = "sigc++-2.0"
+        self.cpp_info.names["cmake_find_package"] = "sigc-2.0"
+        self.cpp_info.names["cmake_find_package_multi"] = "sigc++-2"
