@@ -143,7 +143,7 @@ class CPythonConan(ConanFile):
     def requirements(self):
         self.requires("openssl/1.1.1h")
         if not (self.settings.compiler == "Visual Studio" and tools.Version(self.version) >= tools.Version("3.8")):
-            self.requires("expat/2.2.9")
+            self.requires("expat/2.2.10")
         if tools.Version(self.version) < "3.8":
             self.requires("mpdecimal/2.4.2")
         else:
@@ -164,7 +164,7 @@ class CPythonConan(ConanFile):
         if self.options.with_sqlite3:
             self.requires("sqlite3/3.33.0")
         if self.options.with_tkinter:
-          # TODO: Add tk when available
+            # TODO: Add tk when available
             raise ConanInvalidConfiguration("tk is not available on CCI (yet)")
         if self.options.get_safe("with_curses", False):
             self.requires("ncurses/6.2")
