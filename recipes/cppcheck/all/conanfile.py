@@ -13,8 +13,6 @@ class CppcheckConan(ConanFile):
     license = "GPL-3.0-or-later"
     generators = "cmake_find_package"
     settings = "os", "arch", "compiler", "build_type"
-    options = {"with_z3": [True, False]}
-    default_options = {"with_z3": True}
     
     @property
     def _source_subfolder(self):
@@ -35,7 +33,7 @@ class CppcheckConan(ConanFile):
 
     def _configure_cmake(self):
         cmake = CMake(self)
-        cmake.definitions["USE_Z3"] = "ON" if self.options.with_z3 else "OFF"
+        cmake.definitions["USE_Z3"] = "OFF"
         cmake.configure(build_folder=self._build_subfolder, source_folder=self._source_subfolder)
         return cmake
 
