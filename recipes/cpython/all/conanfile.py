@@ -168,12 +168,10 @@ class CPythonConan(ConanFile):
             raise ConanInvalidConfiguration("tk is not available on CCI (yet)")
         if self.options.get_safe("with_curses", False):
             self.requires("ncurses/6.2")
-        if self._is_py2:
-            if self.options.with_bsddb:
-                self.requires("libdb/5.3.28")
-        else:
-            if self.options.with_lzma:
-                self.requires("xz_utils/5.2.5")
+        if self.options.get_safe("with_bsddb", False):
+            self.requires("libdb/5.3.28")
+        if self.options.get_safe("with_lzma", False):
+            self.requires("xz_utils/5.2.5")
 
     def _configure_autotools(self):
         if self._autotools:
@@ -514,9 +512,6 @@ class CPythonConan(ConanFile):
             else:
                 lib_ext = ""
         else:
-            if self._is_py3:
-                self.cpp_info.includedirs.append(
-                    os.path.join("include", "python{}{}".format(self._version_major_minor, self._abi_suffix)))
             lib_ext = self._abi_suffix + (".dll.a" if self.options.shared and self.settings.os == "Windows" else "")
         return "python{}{}".format(self._version_major_minor, lib_ext)
 
@@ -525,21 +520,63 @@ class CPythonConan(ConanFile):
         # self.cpp_info.names["cmake_find_package"] = "Python"
         # self.cpp_info.names["cmake_find_package_multi"] = "Python"
         # FIXME: conan components need to generate multiple .pc files (python2, python-27)
-        self.cpp_info.names["pkg_config"] = "python{}".format(self.version.split(".")[0])
-        self.cpp_info.libs = [self._lib_name]
+
+        py_version = tools.Version(self.version)
+
+        # python component: "Build a C extension for Python"
         if self.settings.compiler == "Visual Studio":
-            self.cpp_info.includedirs = [os.path.join(self._msvc_install_subprefix, "include")]
-            self.cpp_info.libdirs = [os.path.join(self._msvc_install_subprefix, "libs")]
+            self.cpp_info.components["python"].includedirs = [os.path.join(self._msvc_install_subprefix, "include")]
+            self.cpp_info.components["python"].libdirs = [os.path.join(self._msvc_install_subprefix, "libs")]
         else:
-            self.cpp_info.includedirs.append(os.path.join("include", "python{}".format(self._version_major_minor)))
+            self.cpp_info.components["python"].includedirs.append(os.path.join("include", "python{}".format(self._version_major_minor)))
         if self.options.shared:
-            self.cpp_info.defines.append("Py_ENABLE_SHARED")
+            self.cpp_info.components["python"].defines.append("Py_ENABLE_SHARED")
         else:
-            self.cpp_info.defines.append("Py_NO_ENABLE_SHARED")
+            self.cpp_info.components["python"].defines.append("Py_NO_ENABLE_SHARED")
             if self.settings.os == "Linux":
-                self.cpp_info.system_libs.extend(["dl", "m", "pthread", "util"])
+                self.cpp_info.components["python"].system_libs.extend(["dl", "m", "pthread", "util"])
             elif self.settings.os == "Windows":
-                self.cpp_info.system_libs.extend(["shlwapi", "version", "ws2_32"])
+                self.cpp_info.components["python"].system_libs.extend(["shlwapi", "version", "ws2_32"])
+        self.cpp_info.components["_common"].names["pkg_config"] = "_python_common"
+        if self.settings.os != "Windows":
+            self.cpp_info.components["python"].requires.append("libxcrypt::libxcrypt")
+        self.cpp_info.components["python"].names["pkg_config"] = "python-{}.{}".format(py_version.major, py_version.minor)
+
+        self.cpp_info.components["_python_copy"].names["pkg_config"] = "python{}".format(py_version.major)
+        self.cpp_info.components["_python_copy"].requires = ["python"]
+
+        # embed component: "Embed Python into an application"
+        self.cpp_info.components["embed"].libs = [self._lib_name]
+        self.cpp_info.components["embed"].names["pkg_config"] = "python-{}.{}-embed".format(py_version.major, py_version.minor)
+        self.cpp_info.components["embed"].requires = ["python"]
+
+        self.cpp_info.components["_embed_copy"].requires = ["embed"]
+        self.cpp_info.components["_embed_copy"].names["pkg_config"] = ["python{}-embed".format(py_version.major)]
+
+        # hidden components: the C extensions of python are built as dynamically loaded shared libraries.
+        # C extensions or applications with an embedded Python should not need to link to them..
+        self.cpp_info.components["_hidden"].requires = [
+            "openssl::openssl",
+            "expat::expat",
+            "mpdecimal::mpdecimal",
+            "zlib::zlib",
+        ]
+        if self._with_libffi:
+            self.cpp_info.components["_hidden"].requires.append("libffi::libffi")
+        if self.settings.os != "Windows":
+            self.cpp_info.components["_hidden"].requires.extend(["libuuid::libuuid", "libxcrypt::libxcrypt"])
+        if self.options.with_bz2:
+            self.cpp_info.components["_hidden"].requires.append("bzip2::bzip2")
+        if self.options.get_safe("with_gdbm", False):
+            self.cpp_info.components["_hidden"].requires.append("gdbm::gdbm")
+        if self.options.with_sqlite3:
+            self.cpp_info.components["_hidden"].requires.append("sqlite3::sqlite3")
+        if self.options.get_safe("with_curses", False):
+            self.cpp_info.components["_hidden"].requires.append("ncurses::ncurses")
+        if self.options.get_safe("with_bsddb"):
+            self.cpp_info.components["_hidden"].requires.append("libdb::libdb")
+        if self.options.get_safe("with_lzma"):
+            self.cpp_info.components["_hidden"].requires.append("xz_utils::xz_utils")
 
         python = self._cpython_interpreter_path
         self.output.info("Setting PYTHON environment variable: {}".format(python))
