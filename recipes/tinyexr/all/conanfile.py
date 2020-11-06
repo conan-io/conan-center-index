@@ -55,7 +55,7 @@ class TinyExrConan(ConanFile):
             license_content.append(content_lines[i][:-1])
         return "\n".join(license_content)
 
-    def build():
+    def build(self):
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
             tools.patch(**patch)
 
