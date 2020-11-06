@@ -40,7 +40,13 @@ class LibSigCppConan(ConanFile):
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
         os.rename("libsigc++-{}".format(self.version), self._source_subfolder)
-        tools.replace_in_file(os.path.join(self.source_folder, self._source_subfolder, 'meson.build'), "subdir('tests')", '')
+        tools.replace_in_file(
+            os.path.join(
+                self.source_folder, self._source_subfolder, "meson.build"
+            ),
+            "subdir('tests')",
+            "",
+        )
 
     def _configure_build(self):
         if self._meson:
