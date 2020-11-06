@@ -53,6 +53,7 @@ class Libheif(ConanFile):
             return self._cmake
         self._cmake = CMake(self)
         self._cmake.definitions["WITH_EXAMPLES"] = False
+        self._cmake.definitions['CMAKE_DISABLE_FIND_PACKAGE_X265'] = not self.options.with_x265
         self._cmake.configure()
         return self._cmake
 
