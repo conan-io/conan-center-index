@@ -320,13 +320,13 @@ class CPythonConan(ConanFile):
                 raise ConanInvalidConfiguration("cpython 3.9.0 (and newer) requires (at least) mpdecimal 2.5.0")
 
         if self._with_libffi:
-            if tools.Version(self.deps_cpp_info["libffi"].version) >= "3.3" and "d" in str(self.settings.compiler.runtime):
+            if tools.Version(self.deps_cpp_info["libffi"].version) >= "3.3" and self.settings.compiler == "Visual Studio" and "d" in str(self.settings.compiler.runtime):
                 raise ConanInvalidConfiguration("libffi versions >= 3.3 cause 'read access violations' when using a debug runtime (MTd/MDd) ")
-
-        self._patch_sources()
 
         if self.options.get_safe("with_curses", False) and not self.options["ncurses"].with_widec:
             raise ConanInvalidConfiguration("cpython requires ncurses with wide character support")
+
+        self._patch_sources()
 
         if self.settings.compiler == "Visual Studio":
             self._msvc_build()
