@@ -20,7 +20,7 @@ int main()
     using namespace CppCommon;
 
     DLL plugin;
-    std::cout << std::boolalpha << !plugin.IsLoaded() << "\n";
+    std::cout << std::boolalpha << plugin.IsLoaded() << "\n";
     plugin.Load("plugin-function");
     std::cout << plugin.IsLoaded();
 }

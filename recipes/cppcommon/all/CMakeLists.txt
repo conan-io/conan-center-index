@@ -11,7 +11,7 @@ endif()
 
 add_subdirectory("source_subfolder")
 
-conan_target_link_libraries(cppcommon)
+target_link_libraries(cppcommon PRIVATE ${CONAN_LIBS})
 
 target_compile_features(cppcommon PUBLIC cxx_std_17)
 
@@ -27,11 +27,11 @@ install(DIRECTORY source_subfolder/plugins/
         PATTERN "*.h")
 
 if(UNIX AND NOT APPLE)
-    target_link_libraries(cppcommon dl rt)
+    target_link_libraries(cppcommon PUBLIC dl rt)
 endif()
 
 if(WIN32)
-    target_link_libraries(cppcommon rpcrt4 userenv)
+    target_link_libraries(cppcommon PUBLIC rpcrt4 userenv)
     if(BUILD_SHARED_LIBS)
         set_target_properties(cppcommon PROPERTIES WINDOWS_EXPORT_ALL_SYMBOLS TRUE)
     endif()

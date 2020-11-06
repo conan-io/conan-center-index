@@ -1,5 +1,5 @@
 diff --git a/CMakeLists.txt b/CMakeLists.txt
-index dcd57785b..591d05533 100644
+index dcd57785b..62e19f8f0 100644
 --- a/CMakeLists.txt
 +++ b/CMakeLists.txt
 @@ -18,40 +18,40 @@ if(DOXYGEN_FOUND)
@@ -69,7 +69,7 @@ index dcd57785b..591d05533 100644
 -target_include_directories(cppcommon PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/include" PUBLIC ${vld})
 -target_link_libraries(cppcommon ${LINKLIBS} fmt)
 +target_include_directories(cppcommon PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/include")
-+target_link_libraries(cppcommon ${LINKLIBS})
++target_link_libraries(cppcommon PUBLIC ${LINKLIBS})
  list(APPEND INSTALL_TARGETS cppcommon)
  list(APPEND LINKLIBS cppcommon)
  
