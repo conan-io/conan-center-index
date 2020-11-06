@@ -1,5 +1,4 @@
 import os
-import glob
 from conans import ConanFile, tools
 
 
@@ -10,6 +9,8 @@ class TinyExrConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     license = "BSD-3-Clause"
     topics = ("conan", "exr", "header-only")
+    exports_sources = ["patches/*"]
+    settings = "os"
     options = {
         "with_z": ["zlib", "miniz"],
         "with_piz": [True, False],
@@ -24,8 +25,6 @@ class TinyExrConan(ConanFile):
         "with_thread": False,
         "with_openmp": False,
     }
-    exports_sources = "patches/**"
-    no_copy_source = True
 
     @property
     def _source_subfolder(self):
@@ -45,10 +44,8 @@ class TinyExrConan(ConanFile):
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
-        extracted_dir = glob.glob('tinyexr-*/')[0]
+        extracted_dir = self.name + "-" + self.version
         os.rename(extracted_dir, self._source_subfolder)
-        for patch in self.conan_data["patches"].get(self.version, []):
-            tools.patch(**patch)
 
     @property
     def _extracted_license(self):
@@ -57,6 +54,10 @@ class TinyExrConan(ConanFile):
         for i in range(3, 27):
             license_content.append(content_lines[i][:-1])
         return "\n".join(license_content)
+
+    def build(self):
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            tools.patch(**patch)
 
     def package(self):
         tools.save(os.path.join(self.package_folder, "licenses", "LICENSE"), self._extracted_license)
@@ -71,3 +72,6 @@ class TinyExrConan(ConanFile):
         self.cpp_info.defines.append("TINYEXR_USE_ZFP=" + ( "1" if self.options.with_zfp else "0"))
         self.cpp_info.defines.append("TINYEXR_USE_THREAD=" + ( "1" if self.options.with_zfp else "0"))
         self.cpp_info.defines.append("TINYEXR_USE_OPENMP=" + ( "1" if self.options.with_zfp else "0"))
+
+        if self.settings.os == "Linux" and self.options.with_thread:
+            self.cpp_info.system_libs = ["pthread"]
