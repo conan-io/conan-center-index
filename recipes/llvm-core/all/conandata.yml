@@ -9,4 +9,6 @@ patches:
           patch_file: "patches/11x-vs2019.patch"
         - base_path: "source"
           patch_file: "patches/11x-cmake.patch"
+        - base_path: "source"
+          patch_file: "patches/11x-native.patch"
 
