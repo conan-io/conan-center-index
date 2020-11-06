@@ -1,0 +1,12 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 90e16c2..88fd6e2 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -62,6 +62,7 @@ endif()
+ enable_testing()
+
+ project(OpenCV CXX C)
++set(CMAKE_CXX_STANDARD 11)
+
+ if(MSVC)
+   set(CMAKE_USE_RELATIVE_PATHS ON CACHE INTERNAL "" FORCE)

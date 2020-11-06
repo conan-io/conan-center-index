@@ -1,0 +1,51 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 90e16c2..5cbfe61 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -286,7 +286,7 @@ endif()
+ 
+ if(WIN32)
+   if(DEFINED OpenCV_RUNTIME AND DEFINED OpenCV_ARCH)
+-    set(OpenCV_INSTALL_BINARIES_PREFIX "${OpenCV_ARCH}/${OpenCV_RUNTIME}/")
++    set(OpenCV_INSTALL_BINARIES_PREFIX "")
+   else()
+     message(STATUS "Can't detect runtime and/or arch")
+     set(OpenCV_INSTALL_BINARIES_PREFIX "")
+@@ -326,11 +326,11 @@ else()
+   set(3P_LIBRARY_OUTPUT_PATH      "${OpenCV_BINARY_DIR}/3rdparty/lib${LIB_SUFFIX}")
+   if(WIN32)
+     if(OpenCV_STATIC)
+-      set(OPENCV_LIB_INSTALL_PATH   "${OpenCV_INSTALL_BINARIES_PREFIX}staticlib${LIB_SUFFIX}")
++      set(OPENCV_LIB_INSTALL_PATH   "${OpenCV_INSTALL_BINARIES_PREFIX}lib${LIB_SUFFIX}")
+     else()
+       set(OPENCV_LIB_INSTALL_PATH   "${OpenCV_INSTALL_BINARIES_PREFIX}lib${LIB_SUFFIX}")
+     endif()
+-    set(OPENCV_3P_LIB_INSTALL_PATH  "${OpenCV_INSTALL_BINARIES_PREFIX}staticlib${LIB_SUFFIX}")
++    set(OPENCV_3P_LIB_INSTALL_PATH  "${OpenCV_INSTALL_BINARIES_PREFIX}lib${LIB_SUFFIX}")
+     set(OPENCV_SAMPLES_SRC_INSTALL_PATH    samples/native)
+   else()
+     set(OPENCV_LIB_INSTALL_PATH     lib${LIB_SUFFIX})
+@@ -660,7 +660,7 @@ if(NOT OPENCV_LICENSE_FILE)
+ endif()
+ 
+ # for UNIX it does not make sense as LICENSE and readme will be part of the package automatically
+-if(ANDROID OR NOT UNIX)
++if(FALSE)
+   install(FILES ${OPENCV_LICENSE_FILE}
+         PERMISSIONS OWNER_READ GROUP_READ WORLD_READ
+         DESTINATION . COMPONENT libs)
+diff --git a/modules/highgui/CMakeLists.txt b/modules/highgui/CMakeLists.txt
+index d59e95a..4abe511 100644
+--- a/modules/highgui/CMakeLists.txt
++++ b/modules/highgui/CMakeLists.txt
+@@ -35,8 +35,8 @@ if(HAVE_TIFF)
+ endif()
+ 
+ if(HAVE_JASPER)
+-  ocv_include_directories(${JASPER_INCLUDE_DIR})
+-  list(APPEND GRFMT_LIBS ${JASPER_LIBRARIES})
++  ocv_include_directories(${Jasper_INCLUDE_DIR})
++  list(APPEND GRFMT_LIBS ${Jasper_LIBRARIES})
+ endif()
+ 
+ if(HAVE_OPENEXR)
