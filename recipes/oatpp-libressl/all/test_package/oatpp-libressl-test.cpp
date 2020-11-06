@@ -5,4 +5,5 @@ int main() {
     {        
         oatpp::libressl::Config config;
     }
+    return 0;
 }

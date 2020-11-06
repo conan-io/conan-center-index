@@ -6,6 +6,8 @@ from conans import ConanFile, CMake, tools
 class OatppLibresslTestConan(ConanFile):
     settings = "os", "compiler", "build_type", "arch"
     generators = "cmake", "cmake_find_package"
+    options = {"fPIC": [True, False]}
+    default_options = {"fPIC": True}
 
     def build(self):
         cmake = CMake(self)
