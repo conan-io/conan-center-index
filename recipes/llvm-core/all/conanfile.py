@@ -102,8 +102,6 @@ class LLVMCoreConan(ConanFile):
         cmake.definitions['LLVM_ENABLE_WARNINGS'] = True
         cmake.definitions['LLVM_ENABLE_PEDANTIC'] = True
         cmake.definitions['LLVM_ENABLE_WERROR'] = False
-        cmake.definitions['LLVM_ENABLE_LIBCXX'] = \
-            'clang' in str(self.settings.compiler)
 
         # TODO: Temporary hack, it needs to be fixed from outside the recipe.
         cmake.definitions['LLVM_TEMPORARILY_ALLOW_OLD_TOOLCHAIN'] = False
