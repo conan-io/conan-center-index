@@ -13,6 +13,5 @@ class TestPackageConan(ConanFile):
 
     def test(self):
         if not tools.cross_building(self.settings):
-            file_name = os.path.join(self.source_folder, "sip.txt")
             bin_path = os.path.join("bin", "test_package")
-            self.run("{0} {1}".format(bin_path, file_name), run_environment=True)
+            self.run(bin_path, run_environment=True)
