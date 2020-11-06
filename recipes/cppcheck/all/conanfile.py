@@ -11,7 +11,7 @@ class CppcheckConan(ConanFile):
     topics = ("Cpp Check", "static analyzer")
     description = "Cppcheck is an analysis tool for C/C++ code."
     license = "GPL-3.0-or-later"
-    generators = {"cmake", "cmake_find_package"}
+    generators = {"cmake"}
     settings = "os", "arch", "compiler", "build_type"
     options = {"with_z3": [True, False], "have_rules": [True, False]}
     default_options = {"with_z3": True, "have_rules": True}
