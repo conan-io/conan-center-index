@@ -32,7 +32,15 @@
      if test "$PROJ_FOUND" = "no"; then
          AC_LANG_PUSH([C++])
          AC_CHECK_LIB(proj,internal_proj_create_from_wkt,PROJ_FOUND=yes,PROJ_FOUND=no,)
-@@ -2019,7 +2016,7 @@ else
+@@ -1876,7 +1873,6 @@ else
+ 
+   DDS_SETTING=yes
+   CRUNCHDIR="$with_dds"
+-  LIBS="-L$with_dds/lib/ -lcrunch $LIBS"
+   echo "using libcrunch from $with_dds."
+ 
+ fi
+@@ -2012,7 +2008,7 @@ else
    AC_MSG_RESULT([using libtiff from ${with_libtiff}.])
  
    dnl Check for the BigTIFF enabled library (libtiff >= 4.0)
@@ -41,7 +49,7 @@
  
  fi
  
-@@ -2089,7 +2086,6 @@ else
+@@ -2082,7 +2078,6 @@ else
  
    dnl We now require libgeotiff 1.5.0
    dnl first check if $with_geotiff/lib has the library:
@@ -49,7 +57,7 @@
  
    if test $GEOTIFF_SETTING = "external" ; then
      LIBS="-L$with_geotiff/lib -lgeotiff $LIBS"
-@@ -2649,6 +2645,10 @@ if test x"$with_hdf4" = x"no" ; then
+@@ -2650,6 +2645,10 @@ if test x"$with_hdf4" = x"no" ; then
  
    echo "hdf4 support disabled."
  
@@ -60,7 +68,7 @@
  else
  
    if test x"$with_hdf4" = x"yes" -o x"$with_hdf4" = x"" ; then
-@@ -2779,7 +2779,6 @@ elif test "$with_hdf5" = "yes" -o "$with_hdf5" = "" ; then
+@@ -2780,7 +2779,6 @@ elif test "$with_hdf5" = "yes" -o "$with_hdf5" = "" ; then
      # Test that the package found is for the right architecture
      saved_LIBS="$LIBS"
      LIBS="$HDF5_LIBS"
@@ -68,7 +76,34 @@
      LIBS="$saved_LIBS"
  
      if test "$HAVE_HDF5" = "yes"; then
-@@ -3714,18 +3713,15 @@ MYSQL_CONFIG=no
+@@ -2849,21 +2847,21 @@ KEA_CONFIG=no
+ 
+ AC_ARG_WITH(kea,[  --with-kea[=ARG]      Include kealib (ARG=path to kea-config) [[default=yes]]],,)
+ 
++AC_MSG_CHECKING([for kea])
+ if test "$with_kea" = "yes" -o "x$with_kea" = "x" ; then
+-  AC_PATH_PROG(KEA_CONFIG, kea-config, no)
++  HAVE_KEA=yes
++  AC_MSG_RESULT([yes])
+ else
+-   KEA_CONFIG=$with_kea
++  HAVE_KEA=no
++  AC_MSG_RESULT([no])
+ fi
+ 
+-AC_MSG_CHECKING([for kea])
+ 
+ if test "$KEA_CONFIG" = "no" ; then
+ 
+-  HAVE_KEA=no
+   KEA_LIB=
+   KEA_INC=
+ 
+-  AC_MSG_RESULT([no])
+ 
+ else
+   if test -d $KEA_CONFIG ; then
+@@ -3715,18 +3713,15 @@ MYSQL_CONFIG=no
  AC_ARG_WITH(mysql,[  --with-mysql[=ARG]      Include MySQL (ARG=path to mysql_config) [[default=no]]],,)
  
  if test "$with_mysql" = "yes" ; then
@@ -89,7 +124,7 @@
    MYSQL_LIB=
    MYSQL_INC=
  
-@@ -3819,8 +3815,11 @@ dnl Check for Expat configuration.
+@@ -3820,8 +3815,11 @@ dnl Check for Expat configuration.
  dnl ---------------------------------------------------------------------------
  
  dnl Expat 1.95.0 released in 2000-09-28
@@ -103,7 +138,7 @@
  
  if test "$HAVE_EXPAT" = "yes"; then
      LIBS="$EXPAT_LDFLAGS $LIBS"
-@@ -3833,6 +3832,7 @@ m4_foreach_w([frmt],EXPAT_DRIVERS,[
+@@ -3834,6 +3832,7 @@ m4_foreach_w([frmt],EXPAT_DRIVERS,[
    fi 
  ])
  
@@ -111,7 +146,7 @@
  fi
  
  AC_SUBST([HAVE_EXPAT], $HAVE_EXPAT)
-@@ -4058,29 +4058,16 @@ AC_ARG_WITH(curl,
+@@ -4059,29 +4058,17 @@ AC_ARG_WITH(curl,
  dnl Clear some cache variables
  unset ac_cv_path_LIBCURL
  
@@ -119,9 +154,7 @@
 -  LIBCURL_CONFIG="$with_curl"
 -elif test "$with_curl" = "no" ; then
 -  LIBCURL_CONFIG=no
-+if test "$with_curl" = "yes" ; then
-+  PKG_CHECK_MODULES([CURL], [libcurl], [CURL_SETTING=yes], [CURL_SETTING=no])
- else
+-else
 -  AC_PATH_PROG(LIBCURL_CONFIG, curl-config, no)
 -fi
 -
@@ -133,7 +166,10 @@
 -  AC_MSG_RESULT([        found libcurl version $CURL_VER])
 -
 -  AC_CHECK_LIB(curl,curl_global_init,CURL_SETTING=yes,CURL_SETTING=no,`$LIBCURL_CONFIG --libs`)
--
+ 
++if test "$with_curl" = "yes" ; then
++  PKG_CHECK_MODULES([CURL], [libcurl], [CURL_SETTING=yes], [CURL_SETTING=no])
++else
 +  CURL_SETTING=no
  fi
  
@@ -146,7 +182,7 @@
  m4_foreach_w([frmt],CURL_FORMATS,[
    driver_enabled=m4_join([_],[$INTERNAL_FORMAT],frmt,[ENABLED])
    if test "x$driver_enabled" = "xyes"; then
-@@ -4120,7 +4107,6 @@ if test "x$with_xml2" = "xyes" -o "x$with_xml2" = "x" ; then
+@@ -4121,7 +4108,6 @@ if test "x$with_xml2" = "xyes" -o "x$with_xml2" = "x" ; then
    if test "${HAVE_LIBXML2}" = "yes"; then
      SAVED_LIBS="${LIBS}"
      LIBS="${LIBXML2_LIBS}"
@@ -154,7 +190,7 @@
      LIBS="${SAVED_LIBS}"
    fi
  
-@@ -4241,9 +4227,12 @@ dnl ---------------------------------------------------------------------------
+@@ -4242,9 +4228,12 @@ dnl ---------------------------------------------------------------------------
  dnl Check for SQLite (only if SpatiaLite is not detected)
  dnl ---------------------------------------------------------------------------
  
@@ -169,7 +205,7 @@
  
      if test "$HAVE_SQLITE3" = "yes"; then
          LIBS="$SQLITE3_LDFLAGS $LIBS"
-@@ -4596,8 +4585,12 @@ dnl ---------------------------------------------------------------------------
+@@ -4597,8 +4586,12 @@ dnl ---------------------------------------------------------------------------
  dnl Check if geos library is available.
  dnl ---------------------------------------------------------------------------
  
@@ -183,7 +219,7 @@
  if test "${HAVE_GEOS}" = "yes" ; then
  
    AC_MSG_NOTICE([Using C API from GEOS $GEOS_VERSION])
-@@ -4606,6 +4599,7 @@ if test "${HAVE_GEOS}" = "yes" ; then
+@@ -4607,6 +4600,7 @@ if test "${HAVE_GEOS}" = "yes" ; then
    LIBS="${GEOS_LIBS} ${LIBS}"
    HAVE_GEOS_RESULT="yes"
  fi
@@ -191,7 +227,7 @@
  
  dnl ---------------------------------------------------------------------------
  dnl Check if SFCGAL library is available.
-@@ -4640,20 +4634,18 @@ elif test "$with_qhull" = "yes" -o "$with_qhull" = "" ; then
+@@ -4641,20 +4635,18 @@ elif test "$with_qhull" = "yes" -o "$with_qhull" = "" ; then
    # qhull/qhull.h
    AC_CHECK_HEADERS([qhull/libqhull.h])
    if test "$ac_cv_header_qhull_libqhull_h" = "yes"; then
@@ -214,7 +250,7 @@
      fi
    fi
  
-@@ -4740,7 +4732,9 @@ AC_MSG_CHECKING([for FreeXL support])
+@@ -4741,7 +4733,9 @@ AC_MSG_CHECKING([for FreeXL support])
  HAVE_FREEXL=no
  FREEXL_INCLUDE=
  
@@ -225,7 +261,7 @@
    AC_CHECK_HEADERS(freexl.h)
    AC_CHECK_LIB(freexl,freexl_open,FREEXL_LIBS="-lfreexl",FREEXL_LIBS=missing)
  
-@@ -4846,8 +4840,7 @@ if test "$with_libjson_c" = "external" -o "$with_libjson_c" = "" -o "$with_libjs
+@@ -4847,8 +4841,7 @@ if test "$with_libjson_c" = "external" -o "$with_libjson_c" = "" -o "$with_libjs
  elif test "$with_libjson_c" = "internal" ; then
    LIBJSONC_SETTING=internal
  elif test "$with_libjson_c" != "no"; then
@@ -235,7 +271,7 @@
  else
    AC_MSG_ERROR([libjson-c (internal or external) is required])
  fi
-@@ -5951,7 +5944,6 @@ else
+@@ -5952,7 +5945,6 @@ else
      # Test that the package found is for the right architecture
      saved_LIBS="$LIBS"
      LIBS="$EXR_LIBS"
