@@ -6,5 +6,3 @@ patches:
   "1.9.1":
     - base_path: "source_subfolder"
       patch_file: "patches/0001-cmake.patch"
-    - base_path: "source_subfolder"
-      patch_file: "patches/0002-cmake-deps.patch"

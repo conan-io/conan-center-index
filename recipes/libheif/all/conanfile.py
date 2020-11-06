@@ -10,7 +10,7 @@ class Libheif(ConanFile):
     homepage = "https://github.com/strukturag/libheif"
     license = ("LGPL-3.0-only", "GPL-3.0-or-later", "MIT")
     exports_sources = ["CMakeLists.txt", "patches/**"]
-    generators = "cmake", "cmake_find_package"
+    generators = "cmake"
     settings = "os", "arch", "compiler", "build_type"
     options = {"shared": [True, False], "fPIC": [True, False],
                "with_x265": [True, False]}
@@ -38,6 +38,9 @@ class Libheif(ConanFile):
         extracted_dir = '{}-{}'.format(self.name, self.version)
         os.rename(extracted_dir, self._source_subfolder)
 
+    def build_requirements(self):
+        self.build_requires("pkgconf/1.7.3")
+
     def requirements(self):
         self.requires("libde265/1.0.8")
         if self.options.with_x265:
@@ -46,8 +49,7 @@ class Libheif(ConanFile):
     def _patch_sources(self):
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
             tools.patch(**patch)
-        for target in ["X265", "Libde265", "LibAOM"]:
-            os.unlink(os.path.join(self._source_subfolder, "cmake", "modules", "Find"+target+".cmake"))
+        os.unlink(os.path.join(self._source_subfolder, "cmake", "modules", "FindLibAOM.cmake"))
 
     def _configure_cmake(self):
         if self._cmake:
