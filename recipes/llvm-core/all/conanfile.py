@@ -99,7 +99,7 @@ class LLVMCoreConan(ConanFile):
         # TODO: Temporary hack, it needs to be fixed from outside the recipe.
         cmake.definitions['LLVM_TEMPORARILY_ALLOW_OLD_TOOLCHAIN'] = True
 
-        cmake.definitions['LLVM_USE_RELATIVE_PATHS_IN_DEBUG_INFO'] = True
+        cmake.definitions['LLVM_USE_RELATIVE_PATHS_IN_DEBUG_INFO'] = False
         cmake.definitions['LLVM_BUILD_INSTRUMENTED_COVERAGE'] = False
         cmake.definitions['LLVM_OPTIMIZED_TABLEGEN'] = True
         cmake.definitions['LLVM_REVERSE_ITERATION'] = False
