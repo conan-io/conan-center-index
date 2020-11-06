@@ -11,7 +11,7 @@ class ResiprocateConan(ConanFile):
     homepage = "http://www.resiprocate.org"
     settings = "os", "compiler", "build_type", "arch"
     generators = "cmake"
-    license = "BSD"
+    license = "VSL-1.0"
     install_dir = tempfile.mkdtemp(suffix=name)
 
     def source(self):
