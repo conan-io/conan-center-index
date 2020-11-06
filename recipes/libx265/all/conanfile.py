@@ -1,4 +1,5 @@
 from conans import CMake, ConanFile, tools
+from conans.errors import ConanInvalidConfiguration
 import os
 import shutil
 
@@ -16,6 +17,7 @@ class Libx265Conan(ConanFile):
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
+        "assembly": [True, False],
         "bit_depth": [8, 10, 12],
         "HDR10": [True, False],
         "SVG_HEVC_encoder": [True, False],
@@ -23,6 +25,7 @@ class Libx265Conan(ConanFile):
     default_options = {
         "shared": False,
         "fPIC": True,
+        "assembly": False,
         "bit_depth": 8,
         "HDR10": False,
         "SVG_HEVC_encoder": False,
@@ -45,6 +48,9 @@ class Libx265Conan(ConanFile):
     def configure(self):
         if self.options.shared:
             del self.options.fPIC
+        if self.settings.os != "Windows":
+            if self.options.assembly and (self.options.shared or self.options.get_safe("fPIC", True)):
+                raise ConanInvalidConfiguration("Cannot enable assembly for when building libx265 as a shared library or with fPIC enabled")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
@@ -54,7 +60,9 @@ class Libx265Conan(ConanFile):
         if self._cmake:
             return self._cmake
         self._cmake = CMake(self)
+        self._cmake.definitions["ENABLE_PIC"] = self.options.get_safe("fPIC", True)
         self._cmake.definitions["ENABLE_SHARED"] = self.options.shared
+        self._cmake.definitions["ENABLE_ASSEMBLY"] = self.options.assembly
         self._cmake.definitions["ENABLE_LIBNUMA"] = False
         if self.settings.os == "Macos":
             self._cmake.definitions["CMAKE_SHARED_LINKER_FLAGS"] = "-Wl,-read_only_relocs,suppress"
@@ -119,10 +127,6 @@ class Libx265Conan(ConanFile):
             self.cpp_info.system_libs.extend(["dl", "pthread", "m"])
         if self.settings.os == "Android":
             self.cpp_info.libs.extend(["dl", "m"])
-        libcxx = self.settings.get_safe("compiler.libcxx")
-        if libcxx in ["libstdc++", "libstdc++11"]:
-            self.cpp_info.system_libs.append("stdc++")
-        elif libcxx == "libc++":
-            self.cpp_info.system_libs.append("c++")
-        elif libcxx in ["c++_static", "c++_shared"]:
-            self.cpp_info.system_libs.extend([libcxx, "c++abi"])
+        libcxx = tools.stdcpp_library(self)
+        if libcxx:
+            self.cpp_info.system_libs.append(libcxx)
