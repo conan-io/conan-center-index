@@ -42,7 +42,7 @@ class OatpplibresslConan(ConanFile):
             raise ConanInvalidConfiguration("oatpp-libressl requires GCC >=5")
 
     def requirements(self):
-        self.requires("oatpp/1.2.0")
+        self.requires("oatpp/" + self.version)
         self.requires("libressl/3.2.0")
 
     def source(self):
