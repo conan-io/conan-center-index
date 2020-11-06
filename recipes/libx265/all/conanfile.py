@@ -113,6 +113,8 @@ class Libx265Conan(ConanFile):
         tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
 
     def package_info(self):
+        self.cpp_info.names["cmake_find_package"] = "x265"
+        self.cpp_info.names["cmake_find_package_multi"] = "x265"
         self.cpp_info.names["pkg_config"] = "x265"
         self.cpp_info.libs = ["x265"]
         if self.settings.os == "Linux":
