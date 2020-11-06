@@ -9,7 +9,7 @@ class ElfioConan(ConanFile):
     description = "A header-only C++ library that provides a simple interface for reading and generating files in ELF binary format."
     topics = ("conan", "elfio", "elf")
     license = "MIT"
-
+    settings = "compiler"
     no_copy_source = True
 
     @property
