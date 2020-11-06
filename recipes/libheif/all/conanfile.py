@@ -44,7 +44,7 @@ class Libheif(ConanFile):
     def requirements(self):
         self.requires("libde265/1.0.8")
         if self.options.with_x265:
-            self.requires("libx265/3.2.1")
+            self.requires("libx265/3.4")
 
     def _patch_sources(self):
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
