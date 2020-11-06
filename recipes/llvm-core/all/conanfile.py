@@ -5,7 +5,6 @@ from pathlib import Path
 from collections import defaultdict
 import json
 import re
-import os
 
 
 class LLVMCoreConan(ConanFile):
@@ -81,13 +80,7 @@ class LLVMCoreConan(ConanFile):
             tools.patch(**patch)
 
     def _configure_cmake(self):
-        if self.settings.compiler == 'Visual Studio':
-            generator = os.getenv('CONAN_CMAKE_GENERATOR', 'NMake Makefiles')
-            cmake = CMake(self, generator=generator)
-            cmake.definitions['LLVM_TEMPORARILY_ALLOW_OLD_TOOLCHAIN'] = True
-        else:
-            cmake = CMake(self)
-
+        cmake = CMake(self)
         cmake.definitions['BUILD_SHARED_LIBS'] = False
         cmake.definitions['CMAKE_SKIP_RPATH'] = True
 
