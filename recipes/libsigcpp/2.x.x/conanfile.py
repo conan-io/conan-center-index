@@ -29,6 +29,9 @@ class LibSigCppConan(ConanFile):
     def _build_subfolder(self):
         return "build_subfolder"
 
+    def build_requirements(self):
+        self.build_requires("meson/0.56.0")
+
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
