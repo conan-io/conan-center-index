@@ -9,8 +9,6 @@ if(WIN32)
     add_definitions (-D_WIN32_WINNT=_WIN32_WINNT_WIN8)
 endif()
 
-enable_testing()
-
 add_subdirectory("source_subfolder")
 
 conan_target_link_libraries(cppcommon)
