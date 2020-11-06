@@ -91,5 +91,3 @@ class LibSigCppConan(ConanFile):
         self.cpp_info.libs = tools.collect_libs(self)
 
         self.cpp_info.names["pkg_config"] = "sigc++-2.0"
-        self.cpp_info.names["cmake_find_package"] = "sigc-2.0"
-        self.cpp_info.names["cmake_find_package_multi"] = "sigc++-2"
