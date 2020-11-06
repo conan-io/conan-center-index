@@ -28,5 +28,5 @@ class ElfioConan(ConanFile):
         self.info.header_only()
 
     def package(self):
-        self.copy("COPYING", src=os.path.join(self.source_folder, self._source_subfolder), dst="licenses")
-        self.copy(pattern=os.path.join("elfio", "*.hpp"), src=os.path.join(self.source_folder, self._source_subfolder), dst="include")
+        self.copy("COPYING", src=self._source_subfolder, dst="licenses")
+        self.copy(pattern=os.path.join("elfio", "*.hpp"), src=self._source_subfolder, dst="include")
