@@ -4,7 +4,6 @@
 #include "time/timespan.h"
 #include "system/dll.h"
 
-// Plugins definitions
 #include "interface/interface.h"
 
 #include <sstream>

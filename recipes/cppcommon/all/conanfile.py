@@ -19,7 +19,7 @@ class CppCommon(ConanFile):
                "shared": [True, False]}
     default_options = {"fPIC": True,
                        "shared": False}
-    requires = ["fmt/7.0.3", "stduuid/1.0"]
+    requires = ["fmt/7.1.2", "stduuid/1.0"]
     generators = "cmake"
     exports_sources = ["patches/**", "CMakeLists.txt"]
     _cmake = None
