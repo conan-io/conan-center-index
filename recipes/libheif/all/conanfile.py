@@ -38,9 +38,6 @@ class Libheif(ConanFile):
         extracted_dir = '{}-{}'.format(self.name, self.version)
         os.rename(extracted_dir, self._source_subfolder)
 
-    def build_requirements(self):
-        self.build_requires("pkgconf/1.7.3")
-
     def requirements(self):
         self.requires("libde265/1.0.8")
         if self.options.with_x265:
