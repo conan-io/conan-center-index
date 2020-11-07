@@ -111,6 +111,21 @@ class LeptonicaConan(ConanFile):
                                   "if(NOT JP2K)",
                                   "if(FALSE)")
 
+        # Remove detection of fmemopen() on macOS < 10.13
+        # CheckFunctionExists will find it in the link library.
+        # There's no error because it's not including the header with the
+        # deprecation macros.
+        if self.settings.os == 'Macos':
+            if tools.Version(self.settings.os.version) < '10.13':
+                configure_cmake = os.path.join(self._source_subfolder,
+                                               'cmake',
+                                               'Configure.cmake')
+                tools.replace_in_file(configure_cmake,
+                                      'set(functions_list\n    '
+                                      'fmemopen\n    fstatat\n)',
+                                      'set(functions_list\n    '
+                                      'fstatat\n)')
+
         # upstream uses obsolete FOO_LIBRARY that is not generated
         # by cmake_find_package generator (upstream PR 456)
         if tools.Version(self.version) <= '1.78.0':
