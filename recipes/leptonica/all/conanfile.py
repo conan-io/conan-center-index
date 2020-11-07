@@ -115,7 +115,7 @@ class LeptonicaConan(ConanFile):
         # CheckFunctionExists will find it in the link library.
         # There's no error because it's not including the header with the
         # deprecation macros.
-        if self.settings.os == 'Macos':
+        if self.settings.os == 'Macos' and self.settings.os.version:
             if tools.Version(self.settings.os.version) < '10.13':
                 configure_cmake = os.path.join(self._source_subfolder,
                                                'cmake',
