@@ -90,10 +90,26 @@ class LeptonicaConan(ConanFile):
         return cmake
 
     def build(self):
+        cmake_original = os.path.join(self._source_subfolder,
+                                      "CMakeListsOriginal.txt")
         # disable pkgconfig
-        tools.replace_in_file(os.path.join(self._source_subfolder, "CMakeListsOriginal.txt"),
+        tools.replace_in_file(cmake_original,
                               "if (PKG_CONFIG_FOUND)",
                               "if (FALSE)")
+
+        # short out conditionals that don't respect
+        # CMAKE_DISABLE_FIND_PACKAGE_x
+        if not self.options.with_webp:
+            tools.replace_in_file(cmake_original,
+                                  "if(NOT WEBP)",
+                                  "if(FALSE)")
+            tools.replace_in_file(cmake_original,
+                                  "if(NOT WEBPMUX)",
+                                  "if(FALSE)")
+        if not self.options.with_openjpeg:
+            tools.replace_in_file(cmake_original,
+                                  "if(NOT JP2K)",
+                                  "if(FALSE)")
 
         # upstream uses obsolete FOO_LIBRARY that is not generated
         # by cmake_find_package generator (upstream PR 456)
