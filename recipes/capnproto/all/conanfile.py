@@ -63,7 +63,7 @@ class CapnprotoConan(ConanFile):
     def requirements(self):
         if not self.options.lite:
             self.requires("zlib/1.2.11")
-            self.requires("openssl/1.1.1g")
+            self.requires("openssl/1.1.1h")
 
     def build_requirements(self):
         if self.settings.os == "Linux":
