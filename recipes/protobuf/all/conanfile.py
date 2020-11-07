@@ -192,3 +192,9 @@ if(DEFINED Protobuf_SRC_ROOT_FOLDER)""",
             if self.settings.os == "Windows":
                 if self.options.shared:
                     self.cpp_info.components["libprotobuf-lite"].defines = ["PROTOBUF_USE_DLLS"]
+
+            self.cpp_info.components["libprotobuf-lite"].build_modules.extend([
+                os.path.join(self._cmake_install_base_path, "protobuf-generate.cmake"),
+                os.path.join(self._cmake_install_base_path, "protobuf-module.cmake"),
+                os.path.join(self._cmake_install_base_path, "protobuf-options.cmake"),
+            ])
