@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.13)
 project(cmake_wrapper)
 
-include(${CMAKE_CURRENT_BINARY_DIR}/../conanbuildinfo.cmake)
+include(conanbuildinfo.cmake)
 conan_basic_setup()
 
 if(WIN32)
