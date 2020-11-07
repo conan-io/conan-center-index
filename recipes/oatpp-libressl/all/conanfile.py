@@ -72,8 +72,11 @@ class OatpplibresslConan(ConanFile):
 
     def package_info(self):
         self.cpp_info.filenames["cmake_find_package"] = "oatpp-libressl"
+        self.cpp_info.filenames["cmake_find_package_multi"] = "oatpp-libressl"
         self.cpp_info.names["cmake_find_package"] = "oatpp"
+        self.cpp_info.names["cmake_find_package_multi"] = "oatpp"
         self.cpp_info.components["_oatpp-libressl"].names["cmake_find_package"] = "oatpp-libressl"
+        self.cpp_info.components["_oatpp-websocket"].names["cmake_find_package_multi"] = "oatpp-libressl"
         self.cpp_info.components["_oatpp-libressl"].includedirs = [
             os.path.join("include", "oatpp-{}".format(self.version), "oatpp-libressl")
         ]
