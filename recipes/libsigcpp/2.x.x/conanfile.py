@@ -1,6 +1,6 @@
 import os
 
-from conans import ConanFile, Meson, tools
+from conans import ConanFile, Meson, tools, ConanInvalidConfiguration
 
 
 class LibSigCppConan(ConanFile):
@@ -29,18 +29,6 @@ class LibSigCppConan(ConanFile):
     def _build_subfolder(self):
         return "build_subfolder"
 
-    @property
-    def _supported_compiler(self):
-        compiler = str(self.settings.compiler)
-        version = tools.Version(self.settings.compiler.version)
-        if (
-            not self.options.shared
-            and compiler == "Visual Studio"
-            and version <= "15"
-        ):
-            return False
-        return True
-
     def build_requirements(self):
         self.build_requires("meson/0.56.0")
 
@@ -49,6 +37,20 @@ class LibSigCppConan(ConanFile):
             del self.options.fPIC
 
     def configure(self):
+        compiler = str(self.settings.compiler)
+        version = tools.Version(self.settings.compiler.version)
+        if (
+            not self.options.shared
+            and compiler == "Visual Studio"
+            and version <= "15"
+        ):
+            raise ConanInvalidConfiguration(
+                "{} {} is not supported for static compilation".format(
+                    compiler,
+                    version,
+                )
+            )
+
         if self.options.shared:
             del self.options.fPIC
 
