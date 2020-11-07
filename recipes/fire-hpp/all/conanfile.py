@@ -21,9 +21,7 @@ class FireHppConan(ConanFile):
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
-        url = self.conan_data["sources"][self.version]["url"]
-        tar_name = url[url.rfind("/")+1:url.find(".tar.gz")]
-        extracted_dir = "{}-{}".format(self.name, tar_name)
+        extracted_dir = "{}-{}".format(self.name, self.version)
         os.rename(extracted_dir, self._source_subfolder)
 
     def _configure_cmake(self):
@@ -35,16 +33,10 @@ class FireHppConan(ConanFile):
         self._cmake.configure(source_folder=self._source_subfolder, build_folder=self._build_subfolder)
         return self._cmake
 
-    def _extract_license(self):
-        tmp = tools.load(os.path.join(self.source_folder, self._source_subfolder, "include", "fire-hpp", "fire.hpp"))
-        license_contents = tmp[4:tmp.find("*/", 1)]
-        tools.save("LICENSE", license_contents)
-
     def package(self):
-        self._extract_license()
-        self.copy("LICENSE", dst="licenses")
         cmake = self._configure_cmake()
         cmake.install()
+        self.copy("LICENCE", dst="licenses", src=self._source_subfolder)
         tools.rmdir(os.path.join(self.package_folder, "lib"))
 
     def package_id(self):
