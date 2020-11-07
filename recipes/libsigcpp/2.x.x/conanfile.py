@@ -43,7 +43,7 @@ class LibSigCppConan(ConanFile):
         if (
             not self.options.shared
             and compiler == "Visual Studio"
-            and version <= "15"
+            and version <= "16"
         ):
             raise ConanInvalidConfiguration(
                 "{} {} is not supported for static compilation".format(
