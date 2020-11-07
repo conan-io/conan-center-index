@@ -1,6 +1,7 @@
 import os
 
-from conans import ConanFile, Meson, tools, ConanInvalidConfiguration
+from conans.errors import ConanInvalidConfiguration
+from conans import ConanFile, Meson, tools
 
 
 class LibSigCppConan(ConanFile):
