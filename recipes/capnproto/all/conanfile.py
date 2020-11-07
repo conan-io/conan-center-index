@@ -66,7 +66,7 @@ class CapnprotoConan(ConanFile):
             self.requires("openssl/1.1.1h")
 
     def build_requirements(self):
-        if self.settings.os == "Linux":
+        if self.settings.os != "Windows":
             self.build_requires("autoconf/2.69")
 
     def source(self):
