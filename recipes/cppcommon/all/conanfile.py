@@ -15,13 +15,10 @@ class CppCommon(ConanFile):
         " and others."
     topics = ("conan", "utils", "library")
     settings = "os", "compiler", "build_type", "arch"
-    options = {"fPIC": [True, False],
-               "shared": [True, False]}
-    default_options = {"fPIC": True,
-                       "shared": False}
-    requires = ["fmt/7.1.2", "stduuid/1.0"]
-    generators = "cmake"
+    options = {"fPIC": [True, False], "shared": [True, False]}
+    default_options = {"fPIC": True, "shared": False}
     exports_sources = ["patches/**", "CMakeLists.txt"]
+    generators = "cmake", "cmake_find_package"
     _cmake = None
 
     @property
@@ -40,22 +37,6 @@ class CppCommon(ConanFile):
             "gcc": 7,
             "Visual Studio": 16,
         }
-
-    def _configure_cmake(self):
-        if not self._cmake:
-            self._cmake = CMake(self)
-            self._cmake.definitions["CPPCOMMON_MODULE"] = "OFF"
-            self._cmake.configure(build_folder=self._build_subfolder)
-        return self._cmake
-
-    def _patch(self):
-        for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            tools.patch(**patch)
-
-    def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        extracted_dir = glob.glob("CppCommon-*")[0]
-        os.rename(extracted_dir, self._source_subfolder)
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -78,24 +59,41 @@ class CppCommon(ConanFile):
         else:
             self.output.warn("cppcommon requires C++17. Your compiler is unknown. Assuming it supports C++17.")
 
-    def build(self):
-        self._patch()
+    def requirements(self):
+        self.requires("fmt/7.1.2")
+        if self.settings.os == "Linux":
+            self.requires("libuuid/1.0.3")
 
+    def source(self):
+        tools.get(**self.conan_data["sources"][self.version])
+        extracted_dir = glob.glob("CppCommon-*")[0]
+        os.rename(extracted_dir, self._source_subfolder)
+
+    def _configure_cmake(self):
+        if not self._cmake:
+            self._cmake = CMake(self)
+            self._cmake.definitions["CPPCOMMON_MODULE"] = "OFF"
+            self._cmake.configure(build_folder=self._build_subfolder)
+        return self._cmake
+
+    def build(self):
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            tools.patch(**patch)
         cmake = self._configure_cmake()
         cmake.build()
 
     def package(self):
+        self.copy("LICENSE", dst="licenses", src=self._source_subfolder)
         cmake = self._configure_cmake()
         cmake.install()
-        self.copy("LICENSE", dst="licenses", src=self._source_subfolder)
+        self.copy(pattern="*.h", dst="include", src=os.path.join(self._source_subfolder, "include"))
+        self.copy(pattern="*.inl", dst="include", src=os.path.join(self._source_subfolder, "include"))
+        self.copy(pattern="*.h", dst=os.path.join("include", "plugins"), src=os.path.join(self._source_subfolder, "plugins"))
 
     def package_info(self):
         self.cpp_info.libs = tools.collect_libs(self)
-
         self.cpp_info.includedirs.append(os.path.join("include", "plugins"))
-
         if self.settings.os == "Linux":
-            self.cpp_info.system_libs = ["pthread", "rt", "dl"]
-
+            self.cpp_info.system_libs = ["pthread", "rt", "dl", "m", "bfd"]
         if self.settings.os == "Windows":
             self.cpp_info.system_libs = ["userenv", "rpcrt4"]
