@@ -1,5 +1,6 @@
 import os
 from conans import ConanFile, CMake, tools
+from conans.errors import ConanInvalidConfiguration
 from glob import glob
 
 
@@ -22,9 +23,18 @@ class CppCmdConan(ConanFile):
     def _build_subfolder(self):
         return "build_subfolder"
 
+    def _supports_cpp17(self):
+        supported_compilers = [
+            ("gcc", "8"), ("clang", "7"), ("apple-clang", "10.2"), ("Visual Studio", "15.7")]
+        compiler = self.settings.compiler
+        version = tools.Version(compiler.version)
+        return any(compiler == sc[0] and version >= sc[1] for sc in supported_compilers)
+
     def configure(self):
-        if self.settings.compiler.cppstd:
+        if self.settings.compiler.get_safe("cppstd"):
             tools.check_min_cppstd(self, "17")
+        elif not self._supports_cpp17():
+            raise ConanInvalidConfiguration("cppcmd requires C++17 support")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
