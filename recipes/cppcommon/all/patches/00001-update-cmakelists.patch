@@ -21,15 +21,14 @@ index dcd57785b..62e19f8f0 100644
  
  # External packages
  find_package(Threads REQUIRED)
--if(UNIX AND NOT APPLE AND NOT MSYS)
-+if(FALSE)
+ if(UNIX AND NOT APPLE AND NOT MSYS)
    find_package(LibBFD)
    find_package(LibDL)
    find_package(LibRT)
-   find_package(LibUUID)
+-  find_package(LibUUID)
++  find_package(libuuid) #FIXME: CCI does not generate correctly #3441
  endif()
--if(WIN32 OR MSYS)
-+if(FALSE)
+ if(WIN32 OR MSYS)
    find_package(DbgHelp)
    find_package(RPC)
    find_package(Userenv)
@@ -41,15 +40,14 @@ index dcd57785b..62e19f8f0 100644
  
  # Link libraries
  list(APPEND LINKLIBS Threads::Threads)
--if(UNIX AND NOT APPLE AND NOT MSYS)
-+if(FALSE)
+ if(UNIX AND NOT APPLE AND NOT MSYS)
    list(APPEND LINKLIBS ${LIBBFD_LIBRARIES})
    list(APPEND LINKLIBS ${LIBDL_LIBRARIES})
    list(APPEND LINKLIBS ${LIBRT_LIBRARIES})
-   list(APPEND LINKLIBS ${LIBUUID_LIBRARIES})
+-  list(APPEND LINKLIBS ${LIBUUID_LIBRARIES})
++  list(APPEND LINKLIBS CONAN_PKG::libuuid)
  endif()
--if(WIN32 OR MSYS)
-+if(FALSE)
+ if(WIN32 OR MSYS)
    list(APPEND LINKLIBS ${DBGHELP_LIBRARIES})
    list(APPEND LINKLIBS ${RPC_LIBRARIES})
    list(APPEND LINKLIBS ${USERENV_LIBRARIES})
@@ -62,14 +60,15 @@ index dcd57785b..62e19f8f0 100644
  include_directories(SYSTEM "${CMAKE_CURRENT_SOURCE_DIR}/plugins")
  
  # Library
-@@ -68,8 +68,8 @@ file(GLOB_RECURSE LIB_INLINE_FILES "include/*.inl")
+@@ -68,8 +68,9 @@ file(GLOB_RECURSE LIB_INLINE_FILES "include/*.inl")
  file(GLOB_RECURSE LIB_SOURCE_FILES "source/*.cpp")
  add_library(cppcommon ${LIB_HEADER_FILES} ${LIB_INLINE_FILES} ${LIB_SOURCE_FILES})
  set_target_properties(cppcommon PROPERTIES COMPILE_FLAGS "${PEDANTIC_COMPILE_FLAGS}" FOLDER "libraries")
 -target_include_directories(cppcommon PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/include" PUBLIC ${vld})
 -target_link_libraries(cppcommon ${LINKLIBS} fmt)
 +target_include_directories(cppcommon PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/include")
-+target_link_libraries(cppcommon PUBLIC ${LINKLIBS})
++target_compile_features(cppcommon PUBLIC cxx_std_17)
++target_link_libraries(cppcommon PUBLIC ${LINKLIBS} CONAN_PKG::fmt)
  list(APPEND INSTALL_TARGETS cppcommon)
  list(APPEND LINKLIBS cppcommon)
  
@@ -121,7 +120,7 @@ index dcd57785b..62e19f8f0 100644
  
    # Install *.pdb files
 -  if(MSVC)
-+  if(MSVC AND FALSE)
++  if(FALSE)
      foreach(INSTALL_TARGET_PDB ${INSTALL_TARGETS_PDB})
        install(FILES $<TARGET_PDB_FILE:${INSTALL_TARGET_PDB}> DESTINATION "${PROJECT_SOURCE_DIR}/bin")
      endforeach()
