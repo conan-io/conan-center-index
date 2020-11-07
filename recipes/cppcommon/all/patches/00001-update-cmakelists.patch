@@ -26,7 +26,7 @@ index dcd57785b..2dde9577f 100644
    find_package(LibDL)
    find_package(LibRT)
 -  find_package(LibUUID)
-+  find_package(libuuid)
++  find_package(libuuid) #FIXME: CCI does not generate correctly #3441
  endif()
  if(WIN32 OR MSYS)
    find_package(DbgHelp)
