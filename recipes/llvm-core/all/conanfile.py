@@ -80,6 +80,10 @@ class LLVMCoreConan(ConanFile):
         for patch in self.conan_data.get('patches', {}).get(self.version, []):
             tools.patch(**patch)
 
+    def _patch_build(self):
+        if Path('FindIconv.cmake').exists():
+            tools.replace_in_file('FindIconv.cmake', 'iconv charset', 'iconv')
+
     def _configure_cmake(self):
         cmake = CMake(self)
         cmake.definitions['BUILD_SHARED_LIBS'] = False
@@ -97,9 +101,7 @@ class LLVMCoreConan(ConanFile):
         cmake.definitions['LLVM_ENABLE_PEDANTIC'] = True
         cmake.definitions['LLVM_ENABLE_WERROR'] = False
 
-        # TODO: Temporary hack, it needs to be fixed from outside the recipe.
         cmake.definitions['LLVM_TEMPORARILY_ALLOW_OLD_TOOLCHAIN'] = True
-
         cmake.definitions['LLVM_USE_RELATIVE_PATHS_IN_DEBUG_INFO'] = False
         cmake.definitions['LLVM_BUILD_INSTRUMENTED_COVERAGE'] = False
         cmake.definitions['LLVM_OPTIMIZED_TABLEGEN'] = True
@@ -170,15 +172,7 @@ class LLVMCoreConan(ConanFile):
         self._patch_sources()
 
     def build(self):
-        # TODO: Temporary hack, it needs to be fixed from outside the recipe.
-        if Path('FindIconv.cmake').exists():
-            tools.replace_in_file(
-                'FindIconv.cmake',
-                'set(Iconv_LIBRARY_LIST iconv charset)',
-                'set(Iconv_LIBRARY_LIST iconv)',
-                strict=False
-            )
-
+        self._patch_build()
         cmake = self._configure_cmake()
         cmake.configure()
         cmake.build()
