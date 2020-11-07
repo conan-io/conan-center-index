@@ -95,7 +95,7 @@ class CppCommon(ConanFile):
         self.cpp_info.includedirs.append(os.path.join("include", "plugins"))
 
         if self.settings.os == "Linux":
-            self.cpp_info.system_libs = ["rt", "dl"]
+            self.cpp_info.system_libs = ["pthread", "rt", "dl"]
 
         if self.settings.os == "Windows":
             self.cpp_info.system_libs = ["userenv", "rpcrt4"]
