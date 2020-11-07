@@ -1,4 +1,4 @@
 sources:
-  "cci.20201107":
-    url: "https://github.com/remysalim/cppcmd/archive/265863f25617cd2be664ad9c9dd17151204f6124.tar.gz"
-    sha256: 3cd6b259270b855da6e9a69dcf53c744fc76d06210cee390fc9ce4bf11b2d47d
+  "0.1.0":
+    url: "https://github.com/remysalim/cppcmd/archive/v0.1.0.tar.gz"
+    sha256: f9813c298f40fd29ebdfa0a9e68cdea80ec1b0f93c32e8fafef58dc01eb48368
