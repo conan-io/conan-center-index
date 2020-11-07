@@ -66,14 +66,14 @@ class LLVMCoreConan(ConanFile):
         unsupported_combinations = [
             [compiler == 'gcc', version.major == '5', version.minor < '1'],
             [compiler == 'gcc', version.major < '5'],
+            [compiler == 'clang', version.major < '4'],
+            [compiler == 'apple-clang', version.major < '9'],
             [compiler == 'Visual Studio', version.major < '15']
         ]
 
         if any(all(combination) for combination in unsupported_combinations):
-            raise ConanInvalidConfiguration(
-                'unsupported compiler: "{}", version "{}"'
-                .format(compiler, version)
-            )
+            message = 'unsupported compiler: "{}", version "{}"'
+            raise ConanInvalidConfiguration(message.format(compiler, version))
 
     def _patch_sources(self):
         for patch in self.conan_data.get('patches', {}).get(self.version, []):
