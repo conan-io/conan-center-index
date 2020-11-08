@@ -25,6 +25,8 @@ class PdalConan(ConanFile):
 
     _source_subfolder = "source_subfolder"
 
+    _cmake = None
+
     def requirements(self):
         self.requires("gdal/3.1.4")
         self.requires("libgeotiff/1.6.0")
@@ -53,23 +55,20 @@ class PdalConan(ConanFile):
         os.rename("PDAL-%s-src" % self.version, self._source_subfolder)
 
     def _configure_cmake(self):
-        cmake = CMake(self)
-        cmake.definitions["CMAKE_POSITION_INDEPENDENT_CODE"] = self.options.get_safe("fPIC", True)
-        cmake.definitions["WITH_TESTS"] = False
-        cmake.definitions["WITH_LAZPERF"] = False
-        cmake.definitions["WITH_LASZIP"] = self.options.with_laszip
-        cmake.definitions["WITH_ZSTD"] = self.options.with_zstd
-        cmake.definitions["WITH_ZLIB"] = True
+        if self._cmake:
+            return self._cmake
+
+        self._cmake = CMake(self)
+        self._cmake.definitions["CMAKE_POSITION_INDEPENDENT_CODE"] = self.options.get_safe("fPIC", True)
+        self._cmake.definitions["WITH_TESTS"] = False
+        self._cmake.definitions["WITH_LAZPERF"] = False
+        self._cmake.definitions["WITH_LASZIP"] = self.options.with_laszip
+        self._cmake.definitions["WITH_ZSTD"] = self.options.with_zstd
+        self._cmake.definitions["WITH_ZLIB"] = True
         # disable plugin that requires postgresql
-        cmake.definitions["BUILD_PLUGIN_PGPOINTCLOUD"] = False
-        # disabling libxml2 support is only done via patching
-        if not self.options.with_xml:
-            tools.replace_in_file(
-                os.path.join(self._source_subfolder, "CMakeLists.txt"),
-                "include(${PDAL_CMAKE_DIR}/libxml2.cmake)",
-                "#include(${PDAL_CMAKE_DIR}/libxml2.cmake)")
-        cmake.configure()
-        return cmake
+        self._cmake.definitions["BUILD_PLUGIN_PGPOINTCLOUD"] = False
+        self._cmake.configure()
+        return self._cmake
 
     def _patch_sources(self):
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
@@ -78,6 +77,12 @@ class PdalConan(ConanFile):
         # LASzip works fine
         for module in ('ZSTD', 'ICONV', 'GeoTIFF', 'Curl'):
             os.remove(os.path.join(self._source_subfolder, "cmake", "modules", "Find"+module+".cmake"))
+        # disabling libxml2 support is only done via patching
+        if not self.options.with_xml:
+            tools.replace_in_file(
+                os.path.join(self._source_subfolder, "CMakeLists.txt"),
+                "include(${PDAL_CMAKE_DIR}/libxml2.cmake)",
+                "#include(${PDAL_CMAKE_DIR}/libxml2.cmake)")
 
     def build(self):
         self._patch_sources()
