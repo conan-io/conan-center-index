@@ -528,7 +528,7 @@ class CPythonConan(ConanFile):
             self.cpp_info.components["python"].includedirs = [os.path.join(self._msvc_install_subprefix, "include")]
             self.cpp_info.components["python"].libdirs = [os.path.join(self._msvc_install_subprefix, "libs")]
         else:
-            self.cpp_info.components["python"].includedirs.append(os.path.join("include", "python{}".format(self._version_major_minor)))
+            self.cpp_info.components["python"].includedirs.append(os.path.join("include", "python{}{}".format(self._version_major_minor, self._abi_suffix)))
         if self.options.shared:
             self.cpp_info.components["python"].defines.append("Py_ENABLE_SHARED")
         else:
