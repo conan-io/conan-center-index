@@ -4,7 +4,7 @@ import os
 
 class MongoCDriverConan(ConanFile):
     name = "mongo-c-driver"
-    license = "Apache License 2.0"
+    license = "Apache-2.0"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://mongoc.org/"
     description = "A Cross Platform MongoDB Client Library for C"
