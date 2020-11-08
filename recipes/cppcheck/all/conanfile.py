@@ -42,6 +42,7 @@ class CppcheckConan(ConanFile):
 
     def _configure_cmake(self):
         cmake = CMake(self)
+        cmake.definitions["ENABLE_OSS_FUZZ"] = False
         cmake.definitions["USE_Z3"] = self.options.with_z3
         cmake.definitions["HAVE_RULES"] = self.options.have_rules
         cmake.definitions["USE_MATCHCOMPILER"] = self.settings.build_type == "Release"
