@@ -1,16 +1,16 @@
+from conans import ConanFile, CMake, tools
 import os
 
-from conans import ConanFile, CMake, tools
 
 class TestPackageConan(ConanFile):
-    settings = "os", "compiler", "build_type", "arch"
-    generators = "cmake"
+    settings = "os", "arch", "compiler", "build_type"
+    generators = "cmake", "cmake_find_package_multi"
 
     def build(self):
-        cmake = CMake(self)
-        cmake.definitions["CAPNP_LITE"] = self.options["capnproto"].lite
-        cmake.configure()
-        cmake.build()
+        with tools.run_environment(self):
+            cmake = CMake(self)
+            cmake.configure()
+            cmake.build()
 
     def test(self):
         if not tools.cross_building(self.settings):
