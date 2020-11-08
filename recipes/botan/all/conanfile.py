@@ -248,10 +248,8 @@ class BotanConan(ConanFile):
             botan_extra_cxx_flags.append('-fPIC')
 
         if self.settings.os == "Macos" and self.settings.os.version:
-            macos_min_version = tools.apple_deployment_target_flag(self.settings.os,
-                                                                   self.settings.os.version)
             macos_sdk_path = "-isysroot {}".format(tools.XCRun(self.settings).sdk_path)
-            botan_extra_cxx_flags.extend([macos_min_version, macos_sdk_path])
+            botan_extra_cxx_flags.append(macos_sdk_path)
 
         # This is to work around botan's configure script that *replaces* its
         # standard (platform dependent) flags in presence of an environment
