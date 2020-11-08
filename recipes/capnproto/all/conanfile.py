@@ -43,7 +43,7 @@ class CapnprotoConan(ConanFile):
         return {
             "Visual Studio": "15",
             "gcc": "5",
-            "clang": "3.4",
+            "clang": "5",
             "apple-clang": "5.1",
         }
 
