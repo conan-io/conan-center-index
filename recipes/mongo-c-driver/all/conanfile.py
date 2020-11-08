@@ -10,6 +10,7 @@ class MongoCDriverConan(ConanFile):
     description = "A Cross Platform MongoDB Client Library for C"
     topics = ("conan", "libbson", "libmongoc", "mongo", "mongodb", "database", "db")
     settings = "os", "compiler", "build_type", "arch"
+    exports_sources = ["patches/**"]
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
@@ -51,12 +52,12 @@ class MongoCDriverConan(ConanFile):
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
-        if self.options.shared:
-            del self.options.fPIC
 
     def configure(self):
         del self.settings.compiler.libcxx
         del self.settings.compiler.cppstd
+        if self.options.shared:
+            del self.options.fPIC
 
     def requirements(self):
         if self.options.with_ssl == 'OPENSSL':
@@ -92,11 +93,12 @@ class MongoCDriverConan(ConanFile):
         self._cmake.definitions["CMAKE_INSTALL_SYSTEM_RUNTIME_LIBS_SKIP"] = "TRUE"
         self._cmake.definitions["ENABLE_TESTS"] = "OFF"
         self._cmake.definitions["ENABLE_EXAMPLES"] = "OFF"
-        # todo: apply patch https://github.com/microsoft/vcpkg/blob/master/ports/mongo-c-driver/disable-static-when-dynamic-build.patch
         self._cmake.definitions["ENABLE_STATIC"] = "OFF" if self.options.shared else "ON"
         self._cmake.definitions["ENABLE_SSL"] = self.options.with_ssl
         self._cmake.definitions["ENABLE_ZLIB"] = self.options.with_zlib
         self._cmake.definitions["ENABLE_SHM_COUNTERS"] = "OFF"
+        self._cmake.definitions["ENABLE_BSON"] = "ON"
+        self._cmake.definitions["ENABLE_MONGOC"] = "ON"
         if self.options.with_zlib == 'SYSTEM':
             self._cmake.definitions["ZLIB_ROOT"] = self.deps_cpp_info["zlib"].rootpath
         if self.options.with_ssl == 'OPENSSL':
@@ -110,15 +112,8 @@ class MongoCDriverConan(ConanFile):
         return self._cmake
 
     def _patch_sources(self):
-        # todo: fix it https://github.com/bincrafters/community/issues/995
-        tools.replace_in_file(
-            os.path.join(self._source_subfolder, "src", "libmongoc", "CMakeLists.txt"),
-            "add_executable (mongoc-stat ${PROJECT_SOURCE_DIR}/../../src/tools/mongoc-stat.c)",
-            "# add_executable (mongoc-stat ${PROJECT_SOURCE_DIR}/../../src/tools/mongoc-stat.c)")
-        tools.replace_in_file(
-            os.path.join(self._source_subfolder, "src", "libmongoc", "CMakeLists.txt"),
-            "target_link_libraries (mongoc-stat mongoc_shared ${LIBRARIES})",
-            "# target_link_libraries (mongoc-stat mongoc_shared ${LIBRARIES})")
+        for patch in self.conan_data["patches"][self.version]:
+            tools.patch(**patch)
         if self.options.with_ssl == 'LIBRESSL':
             tools.replace_in_file(
                 os.path.join(self._source_subfolder, "src", "libmongoc", "CMakeLists.txt"),

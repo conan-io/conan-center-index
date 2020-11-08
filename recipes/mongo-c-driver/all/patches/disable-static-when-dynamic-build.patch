@@ -1,0 +1,171 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 8aceaae8e..232be5c67 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -158,18 +158,14 @@ if (NOT ENABLE_STATIC MATCHES "^(ON|OFF|AUTO|BUILD_ONLY|DONT_INSTALL)$")
+    )
+ endif ()
+ 
+-set (MONGOC_ENABLE_STATIC_BUILD 0)
+-set (MONGOC_ENABLE_STATIC_INSTALL 0)
+-
+ if (ENABLE_STATIC MATCHES "^(ON|AUTO)$")
+    message (STATUS "Build and install static libraries")
+    set (MONGOC_ENABLE_STATIC_BUILD 1)
+    set (MONGOC_ENABLE_STATIC_INSTALL 1)
+-elseif (ENABLE_STATIC MATCHES "^(BUILD_ONLY|DONT_INSTALL)$")
+-   message (STATUS "Build only static libraries")
+-   set (MONGOC_ENABLE_STATIC_BUILD 1)
+ else ()
+-   message (STATUS "Don't build static libraries")
++   message (STATUS "Build and install dynamic libraries")
++   set (MONGOC_ENABLE_STATIC_BUILD 0)
++   set (MONGOC_ENABLE_STATIC_INSTALL 0)
+ endif()
+ 
+ if (ENABLE_BSON STREQUAL SYSTEM)
+diff --git a/src/libbson/CMakeLists.txt b/src/libbson/CMakeLists.txt
+index 6c2737339..54cb2f1e6 100644
+--- a/src/libbson/CMakeLists.txt
++++ b/src/libbson/CMakeLists.txt
+@@ -230,6 +230,7 @@ set (HEADERS_FORWARDING
+    ${PROJECT_SOURCE_DIR}/src/bson/forwarding/bson.h
+ )
+ 
++if (NOT MONGOC_ENABLE_STATIC_BUILD)
+ add_library (bson_shared SHARED ${SOURCES} ${HEADERS} ${HEADERS_FORWARDING})
+ set (CMAKE_CXX_VISIBILITY_PRESET hidden)
+ target_compile_definitions (bson_shared PRIVATE BSON_COMPILATION JSONSL_PARSE_NAN)
+@@ -273,7 +274,7 @@ if (WIN32)
+    set (BSON_SYSTEM_LIBRARIES ${BSON_SYSTEM_LIBRARIES} ws2_32)
+ endif ()
+ 
+-if (MONGOC_ENABLE_STATIC_BUILD)
++else ()
+    add_library (bson_static STATIC ${SOURCES} ${HEADERS} ${HEADERS_FORWARDING})
+    target_compile_definitions (bson_static
+       PUBLIC BSON_STATIC
+@@ -329,8 +330,8 @@ set (BSON_HEADER_INSTALL_DIR
+    "${CMAKE_INSTALL_INCLUDEDIR}/libbson-${BSON_API_VERSION}"
+ )
+ 
+-if (MONGOC_ENABLE_STATIC_INSTALL)
+-   set (TARGETS_TO_INSTALL bson_shared bson_static)
++if (MONGOC_ENABLE_STATIC_BUILD)
++   set (TARGETS_TO_INSTALL bson_static)
+ else ()
+    set (TARGETS_TO_INSTALL bson_shared)
+ endif ()
+@@ -376,6 +377,7 @@ endforeach ()
+ set (VERSION "${BSON_VERSION}")
+ set (prefix "${CMAKE_INSTALL_PREFIX}")
+ set (libdir "\${prefix}/${CMAKE_INSTALL_LIBDIR}")
++if (MONGOC_ENABLE_STATIC_BUILD)
+ configure_file (
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/libbson-1.0.pc.in
+    ${CMAKE_CURRENT_BINARY_DIR}/src/libbson-1.0.pc
+@@ -388,7 +390,7 @@ install (
+       ${CMAKE_INSTALL_LIBDIR}/pkgconfig
+ )
+ 
+-if (MONGOC_ENABLE_STATIC_INSTALL)
++else()
+    configure_file (
+       ${CMAKE_CURRENT_SOURCE_DIR}/src/libbson-static-1.0.pc.in
+       ${CMAKE_CURRENT_BINARY_DIR}/src/libbson-static-1.0.pc
+diff --git a/src/libmongoc/CMakeLists.txt b/src/libmongoc/CMakeLists.txt
+index 4abae3403..1dcda094c 100644
+--- a/src/libmongoc/CMakeLists.txt
++++ b/src/libmongoc/CMakeLists.txt
+@@ -725,27 +725,38 @@ if (MONGOC_ENABLE_MONGODB_AWS_AUTH)
+    endif()
+ endif ()
+ 
+-add_library (mongoc_shared SHARED ${SOURCES} ${HEADERS} ${HEADERS_FORWARDING})
+-set_target_properties (mongoc_shared PROPERTIES CMAKE_CXX_VISIBILITY_PRESET hidden)
+-target_link_libraries (mongoc_shared PRIVATE ${LIBRARIES} PUBLIC ${BSON_LIBRARIES})
+-target_include_directories (mongoc_shared BEFORE PUBLIC ${MONGOC_INTERNAL_INCLUDE_DIRS})
+-target_include_directories (mongoc_shared PRIVATE ${PRIVATE_ZLIB_INCLUDES})
+-target_include_directories (mongoc_shared PRIVATE ${LIBMONGOCRYPT_INCLUDE_DIRECTORIES})
+-if (MONGOC_ENABLE_MONGODB_AWS_AUTH)
+-   target_include_directories (mongoc_shared PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/../kms-message/src")
+-   if (APPLE)
+-      set_target_properties (mongoc_shared PROPERTIES LINK_FLAGS "-Wl,-unexported_symbols_list,${CMAKE_CURRENT_SOURCE_DIR}/../../build/cmake/libmongoc-hidden-symbols.txt")
+-   elseif (UNIX)
+-      set_target_properties (mongoc_shared PROPERTIES LINK_FLAGS "-Wl,--version-script=${CMAKE_CURRENT_SOURCE_DIR}/../../build/cmake/libmongoc-hidden-symbols.map")
+-   endif ()
+-
+-endif ()
+-target_compile_definitions (mongoc_shared PRIVATE MONGOC_COMPILATION ${KMS_MSG_DEFINITIONS})
+-
+-set_target_properties (mongoc_shared PROPERTIES VERSION 0.0.0 SOVERSION 0)
+-set_target_properties (mongoc_shared PROPERTIES OUTPUT_NAME "${MONGOC_OUTPUT_BASENAME}-${MONGOC_API_VERSION}")
++if (NOT MONGOC_ENABLE_STATIC_BUILD)
++   add_library (mongoc_shared SHARED ${SOURCES} ${HEADERS} ${HEADERS_FORWARDING})
++   set_target_properties (mongoc_shared PROPERTIES CMAKE_CXX_VISIBILITY_PRESET hidden)
++   target_link_libraries (mongoc_shared PRIVATE ${LIBRARIES} PUBLIC ${BSON_LIBRARIES})
++   target_include_directories (mongoc_shared BEFORE PUBLIC ${MONGOC_INTERNAL_INCLUDE_DIRS})
++   target_include_directories (mongoc_shared PRIVATE ${PRIVATE_ZLIB_INCLUDES})
++   target_include_directories (mongoc_shared PRIVATE ${LIBMONGOCRYPT_INCLUDE_DIRECTORIES})
++   if (MONGOC_ENABLE_MONGODB_AWS_AUTH)
++      target_include_directories (mongoc_shared PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/../kms-message/src")
++      if (APPLE)
++         set_target_properties (mongoc_shared PROPERTIES LINK_FLAGS "-Wl,-unexported_symbols_list,${CMAKE_CURRENT_SOURCE_DIR}/../../build/cmake/libmongoc-hidden-symbols.txt")
++      elseif (UNIX)
++         set_target_properties (mongoc_shared PROPERTIES LINK_FLAGS "-Wl,--version-script=${CMAKE_CURRENT_SOURCE_DIR}/../../build/cmake/libmongoc-hidden-symbols.map")
++      endif ()
+ 
+-if (MONGOC_ENABLE_STATIC_BUILD)
++   endif ()
++   target_compile_definitions (mongoc_shared PRIVATE MONGOC_COMPILATION ${KMS_MSG_DEFINITIONS})
++
++   set_target_properties (mongoc_shared PROPERTIES VERSION 0.0.0 SOVERSION 0)
++   set_target_properties (mongoc_shared PROPERTIES OUTPUT_NAME "${MONGOC_OUTPUT_BASENAME}-${MONGOC_API_VERSION}")
++
++   if (ENABLE_APPLE_FRAMEWORK)
++      set_target_properties (mongoc_shared PROPERTIES
++              FRAMEWORK TRUE
++              MACOSX_FRAMEWORK_BUNDLE_VERSION ${MONGOC_VERSION}
++              MACOSX_FRAMEWORK_SHORT_VERSION_STRING ${MONGOC_VERSION}
++              MACOSX_FRAMEWORK_IDENTIFIER org.mongodb.mongoc
++              OUTPUT_NAME "${MONGOC_OUTPUT_BASENAME}"
++              PUBLIC_HEADER "${HEADERS}"
++              )
++   endif ()
++else ()
+    add_library (mongoc_static STATIC ${SOURCES} ${HEADERS} ${HEADERS_FORWARDING})
+    target_link_libraries (mongoc_static ${STATIC_LIBRARIES} ${BSON_STATIC_LIBRARIES})
+    if (NOT WIN32 AND ENABLE_PIC)
+@@ -766,19 +777,12 @@ if (MONGOC_ENABLE_STATIC_BUILD)
+    set_target_properties (mongoc_static PROPERTIES OUTPUT_NAME "${MONGOC_OUTPUT_BASENAME}-static-${MONGOC_API_VERSION}")
+ endif ()
+ 
+-if (ENABLE_APPLE_FRAMEWORK)
+-   set_target_properties (mongoc_shared PROPERTIES
+-      FRAMEWORK TRUE
+-      MACOSX_FRAMEWORK_BUNDLE_VERSION ${MONGOC_VERSION}
+-      MACOSX_FRAMEWORK_SHORT_VERSION_STRING ${MONGOC_VERSION}
+-      MACOSX_FRAMEWORK_IDENTIFIER org.mongodb.mongoc
+-      OUTPUT_NAME "${MONGOC_OUTPUT_BASENAME}"
+-      PUBLIC_HEADER "${HEADERS}"
+-   )
+-endif ()
+-
+ add_executable (mongoc-stat ${PROJECT_SOURCE_DIR}/../../src/tools/mongoc-stat.c)
++if (NOT MONGOC_ENABLE_STATIC_BUILD)
+ target_link_libraries (mongoc-stat mongoc_shared ${LIBRARIES})
++else ()
++target_link_libraries (mongoc-stat mongoc_static ${STATIC_LIBRARIES})
++endif ()
+ 
+ # mongoc-stat works if shared memory performance counters are enabled.
+ if (ENABLE_SHM_COUNTERS STREQUAL "ON")
+@@ -1040,7 +1044,7 @@ file (COPY ${PROJECT_SOURCE_DIR}/tests/x509gen DESTINATION ${PROJECT_BINARY_DIR}
+ file (COPY ${PROJECT_SOURCE_DIR}/tests/release_files DESTINATION ${PROJECT_BINARY_DIR}/tests)
+ 
+ if (MONGOC_ENABLE_STATIC_INSTALL)
+-   set (TARGETS_TO_INSTALL mongoc_shared mongoc_static)
++   set (TARGETS_TO_INSTALL mongoc_static)
+ else ()
+    set (TARGETS_TO_INSTALL mongoc_shared)
+ endif ()
