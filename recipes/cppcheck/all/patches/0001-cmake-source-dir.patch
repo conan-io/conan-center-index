@@ -1,16 +1,3 @@
-diff --git a/oss-fuzz/CMakeLists.txt b/oss-fuzz/CMakeLists.txt
-index b9a3e195ea8cf64fd9c078c5102d82a25b2435ca..41bcdccf4e536f08aa5e450320a715d7df8b5b84 100644
---- a/oss-fuzz/CMakeLists.txt
-+++ b/oss-fuzz/CMakeLists.txt
-@@ -5,7 +5,7 @@ if (ENABLE_OSS_FUZZ AND CMAKE_CXX_COMPILER_ID MATCHES "Clang")
-             $<TARGET_OBJECTS:simplecpp_objs_sanitized>
-             $<TARGET_OBJECTS:tinyxml_objs_sanitized>
-             $<TARGET_OBJECTS:lib_objs_sanitized>)
--    target_include_directories(fuzz-client PRIVATE ${CMAKE_SOURCE_DIR}/lib ${CMAKE_SOURCE_DIR}/externals/simplecpp ${CMAKE_SOURCE_DIR}/externals/tinyxml ${CMAKE_SOURCE_DIR}/externals)
-+    target_include_directories(fuzz-client PRIVATE ${PROJECT_SOURCE_DIR}/lib ${PROJECT_SOURCE_DIR}/externals/simplecpp ${PROJECT_SOURCE_DIR}/externals/tinyxml ${PROJECT_SOURCE_DIR}/externals)
-     target_compile_options(fuzz-client PRIVATE -fsanitize=fuzzer)
-     # requires CMake >= 3.13
-     #target_link_options(fuzz-client PRIVATE -fsanitize=address -fsanitize=fuzzer)
 diff --git a/tools/CMakeLists.txt b/tools/CMakeLists.txt
 index 303b8d55f77cd36bc597ddfc406bc5fe7c2992e5..e25948fa14664d9a8b758586a75369ecde111ddb 100644
 --- a/tools/CMakeLists.txt
@@ -46,23 +33,3 @@ index 303b8d55f77cd36bc597ddfc406bc5fe7c2992e5..e25948fa14664d9a8b758586a75369ec
 +        WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
          DEPENDS dmake)
 \ No newline at end of file
-diff --git a/cmake/clang_tidy.cmake b/cmake/clang_tidy.cmake
-index 21b71ffeee066c37fbb21232aa558b026b7159b7..2bc45ab826719a56ed8d90ea62cb05a00e58b140 100644
---- a/cmake/clang_tidy.cmake
-+++ b/cmake/clang_tidy.cmake
-@@ -1,12 +1,12 @@
- find_program(CLANG_TIDY NAMES clang-tidy clang-tidy-10 clang-tidy-9 clang-tidy-8)
- message(STATUS "CLANG_TIDY=${CLANG_TIDY}")
- if (CLANG_TIDY)
--    set(CLANG_TIDY_SRCS ${CMAKE_SOURCE_DIR}/cli/*.cpp ${CMAKE_SOURCE_DIR}/lib/*.cpp)
-+    set(CLANG_TIDY_SRCS ${PROJECT_SOURCE_DIR}/cli/*.cpp ${PROJECT_SOURCE_DIR}/lib/*.cpp)
-     if (BUILD_GUI)
--        list(APPEND CLANG_TIDY_SRCS ${CMAKE_SOURCE_DIR}/gui/*.cpp)
-+        list(APPEND CLANG_TIDY_SRCS ${PROJECT_SOURCE_DIR}/gui/*.cpp)
-     endif()
-     if (BUILD_TESTS)
--        list(APPEND CLANG_TIDY_SRCS ${CMAKE_SOURCE_DIR}/test/*.cpp)
-+        list(APPEND CLANG_TIDY_SRCS ${PROJECT_SOURCE_DIR}/test/*.cpp)
-     endif()
- 
-     add_custom_target(run-clang-tidy ${CLANG_TIDY} -p=${CMAKE_BINARY_DIR} ${CLANG_TIDY_SRCS})
