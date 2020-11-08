@@ -10,3 +10,5 @@ patches:
       base_path: "source_subfolder"
     - patch_file: "patches/0003-stdexcept.patch"
       base_path: "source_subfolder"
+    - patch_file: "patches/0004-cstdlib.patch"
+      base_path: "source_subfolder"
