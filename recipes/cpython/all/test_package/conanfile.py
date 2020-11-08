@@ -108,8 +108,22 @@ class TestPackageConan(ConanFile):
                     setup_args.append("--debug")
                 self.run("{} {}".format(tools.get_env("PYTHON"), " ".join("\"{}\"".format(a) for a in setup_args)), run_environment=True)
 
-    def _test_module(self, module):
-        self.run("{} {}/test_package.py -b {} -t {} ".format(tools.get_env("PYTHON"), self.source_folder, self.build_folder, module), run_environment=True)
+    def _test_module(self, module, should_work):
+        try:
+            self.run("{} {}/test_package.py -b {} -t {} ".format(tools.get_env("PYTHON"), self.source_folder, self.build_folder, module), run_environment=True)
+            works = True
+        except ConanException as e:
+            works = False
+            exception = e
+        if should_work == works:
+            self.output.info("Result of test was expected.")
+        else:
+            if works:
+                raise ConanException("Module '{}' works, but should not have worked".format(module))
+            else:
+                self.output.warn("Module '{}' does not work, but should have worked".format(module))
+                raise exception
+
 
     def _cpython_option(self, name):
         try:
@@ -127,22 +141,18 @@ class TestPackageConan(ConanFile):
             if version_detected != self.deps_cpp_info["cpython"].version:
                 raise ConanException("python reported wrong version. Expected {exp}. Got {res}.".format(exp=self._py_version, res=version_detected))
 
-            if self._cpython_option("with_gdbm"):
-                self._test_module("gdbm")
-            if self._cpython_option("with_bz2"):
-                self._test_module("bz2")
-            if self._cpython_option("with_bsddb"):
-                self._test_module("bsddb")
-            if self._cpython_option("with_lzma"):
-                self._test_module("lzma")
-            if self._cpython_option("with_curses"):
-                with tools.environment_append({"TERM": "ansi"}):
-                    self._test_module("curses")
+            self._test_module("gdbm", self._cpython_option("with_gdbm"))
+            self._test_module("bz2", self._cpython_option("with_bz2"))
+            self._test_module("bsddb", self._cpython_option("with_bsddb"))
+            self._test_module("lzma", self._cpython_option("with_lzma"))
+            self._test_module("tkinter", self._cpython_option("with_tkinter"))
+            with tools.environment_append({"TERM": "ansi"}):
+                self._test_module("curses", self._cpython_option("with_curses"))
 
-            self._test_module("expat")
-            self._test_module("sqlite3")
-            self._test_module("decimal")
-            self._test_module("ctypes")
+            self._test_module("expat", True)
+            self._test_module("sqlite3", True)
+            self._test_module("decimal", True)
+            self._test_module("ctypes", True)
 
             if tools.is_apple_os(self.settings.os) and not self.options["cpython"].shared:
                 self.output.info("Not testing the module, because these seem not to work on apple when cpython is built as a static library")
@@ -150,10 +160,10 @@ class TestPackageConan(ConanFile):
             else:
                 with tools.environment_append({"PYTHONPATH": [os.path.join(self.build_folder, "lib")]}):
                     self.output.info("Testing module (spam) using cmake built module")
-                    self._test_module("spam")
+                    self._test_module("spam", True)
 
                 with tools.environment_append({"PYTHONPATH": [os.path.join(self.build_folder, "lib_setuptools")]}):
                     self.output.info("Testing module (spam) using setup.py built module")
-                    self._test_module("spam")
+                    self._test_module("spam", True)
 
             self.run(os.path.join("bin", "test_package"), run_environment=True)

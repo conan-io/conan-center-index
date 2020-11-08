@@ -190,6 +190,14 @@ def test_ctypes():
     print("errno={}".format(errno))
 
 
+@add_test
+def test_tkinter():
+    import _tkinter
+
+    print("tcl version: {}".format(_tkinter.TCL_VERSION))
+    print("tk version: {}".format(_tkinter.TK_VERSION))
+
+
 parser = argparse.ArgumentParser()
 parser.add_argument("-b", dest="build_folder", help="build_folder", required=True)
 parser.add_argument("-t", dest="test_module", help="test python module")

@@ -125,50 +125,6 @@
      <ProjectReference Include="_socket.vcxproj">
        <Project>{86937f53-c189-40ef-8ce8-8759d8e7d480}</Project>
        <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
---- PCbuild/_tkinter.vcxproj
-+++ PCbuild/_tkinter.vcxproj
-@@ -45,7 +45,7 @@
-     <ConfigurationType>DynamicLibrary</ConfigurationType>
-     <CharacterSet>NotSet</CharacterSet>
-   </PropertyGroup>
--  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
-+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" /><!-- TODO <Import Project="../../conan_tk.props" />-->
-   <PropertyGroup>
-     <TargetExt>.pyd</TargetExt>
-   </PropertyGroup>
-@@ -53,7 +53,7 @@
-   </ImportGroup>
-   <ImportGroup Label="PropertySheets">
-     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
--    <Import Project="tcltk.props" />
-+    <!--<Import Project="tcltk.props" />-->
-   </ImportGroup>
-   <PropertyGroup Label="UserMacros" />
-   <PropertyGroup>
-@@ -65,7 +65,7 @@
-       <PreprocessorDefinitions>WITH_APPINIT;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-     </ClCompile>
-     <Link>
--      <AdditionalDependencies>$(tcltkLib);%(AdditionalDependencies)</AdditionalDependencies>
-+      <AdditionalDependencies>%(AdditionalDependencies)</AdditionalDependencies>
-     </Link>
-   </ItemDefinitionGroup>
-   <ItemGroup>
-@@ -77,12 +77,12 @@
-       <Project>{cf7ac3d1-e2df-41d2-bea6-1e2556cdea26}</Project>
-       <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
-     </ProjectReference>
--    <ProjectReference Include="tcl.vcxproj">
-+    <!--<ProjectReference Include="tcl.vcxproj">
-       <Project>{b5fd6f1d-129e-4bff-9340-03606fac7283}</Project>
-     </ProjectReference>
-     <ProjectReference Include="tk.vcxproj">
-       <Project>{7e85eccf-a72c-4da4-9e52-884508e80ba1}</Project>
--    </ProjectReference>
-+    </ProjectReference>-->
-   </ItemGroup>
-   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
-   <ImportGroup Label="ExtensionTargets">
 --- PCbuild/bz2.vcxproj
 +++ PCbuild/bz2.vcxproj
 @@ -47,7 +47,7 @@
@@ -280,3 +236,43 @@
    </ItemGroup>
    <ItemGroup>
      <ProjectReference Include="pythoncore.vcxproj">
+--- PCbuild/_tkinter.vcxproj
++++ PCbuild/_tkinter.vcxproj
+@@ -45,7 +45,7 @@
+     <ConfigurationType>DynamicLibrary</ConfigurationType>
+     <CharacterSet>NotSet</CharacterSet>
+   </PropertyGroup>
+-  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
++  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" /><Import Project="../../conan_tk.props" />
+   <PropertyGroup>
+     <TargetExt>.pyd</TargetExt>
+   </PropertyGroup>
+@@ -61,11 +61,11 @@
+   </PropertyGroup>
+   <ItemDefinitionGroup>
+     <ClCompile>
+-      <AdditionalIncludeDirectories>$(tcltkDir)include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
++      <AdditionalIncludeDirectories>%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+       <PreprocessorDefinitions>WITH_APPINIT;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+     </ClCompile>
+     <Link>
+-      <AdditionalDependencies>$(tcltkLib);%(AdditionalDependencies)</AdditionalDependencies>
++      <AdditionalDependencies>%(AdditionalDependencies)</AdditionalDependencies>
+     </Link>
+   </ItemDefinitionGroup>
+   <ItemGroup>
+@@ -77,12 +77,12 @@
+       <Project>{cf7ac3d1-e2df-41d2-bea6-1e2556cdea26}</Project>
+       <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
+     </ProjectReference>
+-    <ProjectReference Include="tcl.vcxproj">
++    <!--<ProjectReference Include="tcl.vcxproj">
+       <Project>{b5fd6f1d-129e-4bff-9340-03606fac7283}</Project>
+     </ProjectReference>
+     <ProjectReference Include="tk.vcxproj">
+       <Project>{7e85eccf-a72c-4da4-9e52-884508e80ba1}</Project>
+-    </ProjectReference>
++    </ProjectReference>-->
+   </ItemGroup>
+   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+   <ImportGroup Label="ExtensionTargets">

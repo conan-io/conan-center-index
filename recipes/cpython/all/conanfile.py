@@ -46,7 +46,7 @@ class CPythonConan(ConanFile):
         "with_gdbm": True,
         "with_nis": False,
         "with_sqlite3": True,
-        "with_tkinter": False,  # FIXME: enable by default
+        "with_tkinter": True,
         "with_curses": True,
 
         # Python 2 options
@@ -164,8 +164,7 @@ class CPythonConan(ConanFile):
         if self.options.with_sqlite3:
             self.requires("sqlite3/3.33.0")
         if self.options.with_tkinter:
-            # TODO: Add tk when available
-            raise ConanInvalidConfiguration("tk is not available on CCI (yet)")
+            self.requires("tk/8.6.10")
         if self.options.get_safe("with_curses", False):
             self.requires("ncurses/6.2")
         if self.options.get_safe("with_bsddb", False):
@@ -178,15 +177,16 @@ class CPythonConan(ConanFile):
             return self._autotools
         self._autotools = AutoToolsBuildEnvironment(self, win_bash=tools.os_info.is_windows)
         self._autotools.libs = []
+        yes_no = lambda v: "yes" if v else "no"
         conf_args = [
-            "--enable-shared" if self.options.shared else "--disable-shared",
-            "--with-doc-strings" if self.options.docstrings else "--without-doc-strings",
-            "--with-pymalloc" if self.options.pymalloc else "--without-pymalloc",
+            "--enable-shared={}".format(yes_no(self.options.shared)),
+            "--with-doc-strings={}".format(yes_no(self.options.docstrings)),
+            "--with-pymalloc={}".format(yes_no(self.options.pymalloc)),
             "--with-system-expat",
             "--with-system-ffi",
-            "--enable-optimizations" if self.options.optimizations else "--disable-optimizations",
-            "--with-lto" if self.options.lto else "--without-lto",
-            "--with-pydebug" if self.settings.build_type == "Debug" else "--without-pydebug",
+            "--enable-optimizations={}".format(yes_no(self.options.optimizations)),
+            "--with-lto={}".format(yes_no(self.options.lto)),
+            "--with-pydebug={}".format(yes_no(self.settings.build_type == "Debug")),
         ]
         if self._is_py2:
             conf_args.extend([
@@ -196,7 +196,7 @@ class CPythonConan(ConanFile):
             conf_args.extend([
                 "--with-system-libmpdec",
                 "--with-openssl={}".format(self.deps_cpp_info["openssl"].rootpath),
-                "--disable-loadable-sqlite-extensions" if self.options["sqlite3"].omit_load_extension else "--enable-loadable-sqlite-extensions",
+                "--enable-loadable-sqlite-extensions={}".format(yes_no(not self.options["sqlite3"].omit_load_extension)),
             ])
         if self.settings.compiler == "intel":
             conf_args.extend(["--with-icc"])
@@ -205,9 +205,13 @@ class CPythonConan(ConanFile):
         if self.options.with_tkinter:
             tcltk_includes = []
             tcltk_libs = []
+            # FIXME: collect using some conan util (https://github.com/conan-io/conan/issues/7656)
             for dep in ("tcl", "tk", "zlib"):
                 tcltk_includes += ["-I{}".format(d) for d in self.deps_cpp_info[dep].include_paths]
                 tcltk_libs += ["-l{}".format(lib) for lib in self.deps_cpp_info[dep].libs]
+            if self.settings.os == "Linux" and not self.options["tk"].shared:
+                # FIXME: use info from xorg.components (x11, xscrnsaver)
+                tcltk_libs.extend(["-l{}".format(lib) for lib in ("X11", "Xss")])
             conf_args.extend([
                 "--with-tcltk-includes={}".format(" ".join(tcltk_includes)),
                 "--with-tcltk-libs={}".format(" ".join(tcltk_libs)),
@@ -382,6 +386,8 @@ class CPythonConan(ConanFile):
             "--include-venv",
             "--include-dev",
         ]
+        if self.options.with_tkinter:
+            layout_args.append("--include-tcltk")
         if self.settings.build_type == "Debug":
             layout_args.append("-d")
         python_args = " ".join("\"{}\"".format(a) for a in layout_args)
@@ -577,6 +583,8 @@ class CPythonConan(ConanFile):
             self.cpp_info.components["_hidden"].requires.append("libdb::libdb")
         if self.options.get_safe("with_lzma"):
             self.cpp_info.components["_hidden"].requires.append("xz_utils::xz_utils")
+        if self.options.get_safe("with_tkinter"):
+            self.cpp_info.components["_hidden"].requires.append("tk::tk")
 
         python = self._cpython_interpreter_path
         self.output.info("Setting PYTHON environment variable: {}".format(python))
