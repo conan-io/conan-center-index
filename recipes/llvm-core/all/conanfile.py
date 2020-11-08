@@ -162,9 +162,11 @@ class LLVMCoreConan(ConanFile):
 
     def configure(self):
         if self.settings.os == 'Windows' and self.options.shared:
-            raise ConanInvalidConfiguration('shared lib not supported')
+            message = 'Shared build not supported on Windows'
+            raise ConanInvalidConfiguration(message)
         if self.options.exceptions and not self.options.rtti:
-            raise ConanInvalidConfiguration('exceptions require rtti support')
+            message = 'Cannot enable exceptions without rtti support'
+            raise ConanInvalidConfiguration(message)
         self._supports_compiler()
 
     def source(self):
