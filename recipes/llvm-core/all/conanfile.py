@@ -58,7 +58,9 @@ class LLVMCoreConan(ConanFile):
     generators = ['cmake', 'cmake_find_package']
     no_copy_source = True
 
-    _source_subfolder = 'source'
+    @property
+    def _source_subfolder(self):
+        return 'source'
 
     def _supports_compiler(self):
         compiler = self.settings.compiler.value
