@@ -12,7 +12,7 @@ class CapnprotoConan(ConanFile):
     homepage = "https://capnproto.org"
     url = "https://github.com/conan-io/conan-center-index"
     exports_sources = ("CMakeLists.txt", "patches/**")
-    generators = "cmake"
+    generators = "cmake", "cmake_find_package"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
@@ -50,7 +50,6 @@ class CapnprotoConan(ConanFile):
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
-            del self.options.with_openssl
 
     def configure(self):
         if self.options.shared:
@@ -66,7 +65,7 @@ class CapnprotoConan(ConanFile):
             raise ConanInvalidConfiguration("Cap'n Proto doesn't support shared libraries for Visual Studio")
 
     def requirements(self):
-        if self.options.get_safe("with_openssl"):
+        if self.options.with_openssl:
             self.requires("openssl/1.1.1h")
         if self.options.with_zlib:
             self.requires("zlib/1.2.11")
@@ -86,6 +85,7 @@ class CapnprotoConan(ConanFile):
         self._cmake.definitions["BUILD_TESTING"] = False
         self._cmake.definitions["EXTERNAL_CAPNP"] = False
         self._cmake.definitions["CAPNP_LITE"] = False
+        self._cmake.definitions["WITH_OPENSSL"] = self.options.with_openssl
         self._cmake.configure(build_folder=self._build_subfolder)
         return self._cmake
 
@@ -157,7 +157,7 @@ function(CAPNP_GENERATE_CPP SOURCES HEADERS)""")
         ]
         if self.options.with_zlib:
             components.append({"name": "kj-gzip", "requires": ["kj", "kj-async", "zlib::zlib"]})
-        if self.options.get_safe("with_openssl"):
+        if self.options.with_openssl:
             components.append({"name": "kj-tls", "requires": ["kj", "kj-async", "openssl::openssl"]})
 
         for component in components:
