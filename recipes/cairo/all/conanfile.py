@@ -1,7 +1,6 @@
 from conans import ConanFile, AutoToolsBuildEnvironment, tools, VisualStudioBuildEnvironment
 from conans.errors import ConanInvalidConfiguration
 import os
-import glob
 import shutil
 
 
@@ -125,9 +124,6 @@ class CairoConan(ConanFile):
         if self._env_build:
             return self._env_build
 
-        pkg_config_path = os.path.abspath('pkgconfig')
-        pkg_config_path = tools.unix_path(pkg_config_path) if self.settings.os == 'Windows' else pkg_config_path
-
         configure_args = ['--enable-ft' if self.options.with_freetype else '--disable-ft']
         if self.settings.os != "Windows":
             configure_args.append('--enable-fc' if self.options.with_fontconfig else '--disable-fc')
@@ -150,12 +146,11 @@ class CairoConan(ConanFile):
         configure_args.append("--datarootdir=%s" % os.path.join(self.package_folder, "res"))
 
         env_vars = {
-            "PKG_CONFIG_PATH" : pkg_config_path,
              "NOCONFIGURE": "1"
              }
         with tools.environment_append(env_vars):
             self.run("./autogen.sh", win_bash=tools.os_info.is_windows, run_environment=True)
-        self._env_build.configure(args=configure_args, pkg_config_paths=[pkg_config_path])
+        self._env_build.configure(args=configure_args)
         return self._env_build
 
     def _build_configure(self):
@@ -163,9 +158,6 @@ class CairoConan(ConanFile):
             # disable build of test suite
             tools.replace_in_file(os.path.join('test', 'Makefile.am'), 'noinst_PROGRAMS = cairo-test-suite$(EXEEXT)',
                                   '')
-            os.makedirs('pkgconfig')
-            for pc_name in  glob.glob('%s/*.pc' % self.build_folder):
-                shutil.copy(pc_name, os.path.join('pkgconfig', os.path.basename(pc_name)))
             if self.options.with_freetype:
                 tools.replace_in_file(os.path.join(self.source_folder, self._source_subfolder, "src", "cairo-ft-font.c"),
                                       '#if HAVE_UNISTD_H', '#ifdef HAVE_UNISTD_H')
