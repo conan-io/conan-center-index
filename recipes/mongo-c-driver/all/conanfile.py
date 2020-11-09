@@ -20,7 +20,8 @@ class MongoCDriverConan(ConanFile):
         "with_ssl": [False, 'DARWIN', 'WINDOWS', 'OPENSSL', 'LIBRESSL'],
         "with_snappy": [True, False],
         "with_zlib": [True, False],
-        "with_zstd": [True, False]
+        "with_zstd": [True, False],
+        "with_icu": [True, False]
     }
 
     default_options = {
@@ -29,7 +30,8 @@ class MongoCDriverConan(ConanFile):
         "with_ssl": 'OPENSSL',
         "with_snappy": True,
         "with_zlib": True,
-        "with_zstd": True
+        "with_zstd": True,
+        "with_icu": True
     }
 
     _cmake = None
@@ -68,6 +70,8 @@ class MongoCDriverConan(ConanFile):
             self.requires("zlib/1.2.11")
         if self.options.with_zstd:
             self.requires("zstd/1.4.5")
+        if self.options.with_icu:
+            self.requires("icu/68.1")
 
     def build_requirements(self):
         if self.options.with_zstd:
@@ -141,6 +145,7 @@ class MongoCDriverConan(ConanFile):
         self._cmake.definitions["ENABLE_SNAPPY"] = "ON" if self.options.with_snappy else "OFF"
         self._cmake.definitions["ENABLE_ZLIB"] = "SYSTEM" if self.options.with_zlib else "OFF"
         self._cmake.definitions["ENABLE_ZSTD"] = "ON" if self.options.with_zstd else "OFF"
+        self._cmake.definitions["ENABLE_ICU"] = "ON" if self.options.with_icu else "OFF"
         self._cmake.definitions["ENABLE_SHM_COUNTERS"] = "OFF"
         self._cmake.definitions["ENABLE_BSON"] = "ON"
         self._cmake.definitions["ENABLE_MONGOC"] = "ON"
@@ -196,6 +201,8 @@ class MongoCDriverConan(ConanFile):
             self.cpp_info.components["mongoc"].requires.append("zlib::zlib")
         if self.options.with_zstd:
             self.cpp_info.components["mongoc"].requires.append("zstd::zstd")
+        if self.options.with_icu:
+            self.cpp_info.components["mongoc"].requires.append("icu::icu")
         # bson
         self.cpp_info.components["bson"].names["cmake_find_package"] = "bson" if self.options.shared else "bson_static"
         self.cpp_info.components["bson"].names["cmake_find_package_multi"] = "bson" if self.options.shared else "bson_static"
