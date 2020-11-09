@@ -1,19 +1,5 @@
-diff --git a/c++/Makefile.am b/c++/Makefile.am
-index fe40a0a..93c172b 100644
 --- a/c++/Makefile.am
 +++ b/c++/Makefile.am
-@@ -251,9 +251,9 @@ MAYBE_KJ_TLS_TESTS=
- endif
- 
- if LITE_MODE
--lib_LTLIBRARIES = libkj.la libkj-test.la libcapnp.la
-+lib_LTLIBRARIES = libkj.la libcapnp.la
- else
--lib_LTLIBRARIES = libkj.la libkj-test.la libkj-async.la libkj-http.la $(MAYBE_KJ_TLS_LA) $(MAYBE_KJ_GZIP_LA) libcapnp.la libcapnp-rpc.la libcapnp-json.la libcapnpc.la
-+lib_LTLIBRARIES = libkj.la libkj-async.la libkj-http.la $(MAYBE_KJ_TLS_LA) $(MAYBE_KJ_GZIP_LA) libcapnp.la libcapnp-rpc.la libcapnp-json.la libcapnpc.la
- endif
- 
- libkj_la_LIBADD = $(PTHREAD_LIBS)
 @@ -425,158 +425,3 @@ endif LITE_MODE
  #  src/capnp/serialize-snappy*
  #  src/capnp/benchmark/...

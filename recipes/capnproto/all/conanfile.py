@@ -154,6 +154,7 @@ function(CAPNP_GENERATE_CPP SOURCES HEADERS)""")
             {"name": "kj", "requires": []},
             {"name": "kj-async", "requires": ["kj"]},
             {"name": "kj-http", "requires": ["kj", "kj-async"]},
+            {"name": "kj-test", "requires": ["kj"]},
         ]
         if self.options.with_zlib:
             components.append({"name": "kj-gzip", "requires": ["kj", "kj-async", "zlib::zlib"]})
