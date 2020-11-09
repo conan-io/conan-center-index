@@ -1,9 +1,9 @@
-import os
 from conans import ConanFile, CMake, tools
+import os
 
 
-class MongoCDriverTestConan(ConanFile):
-    settings = "os", "compiler", "build_type", "arch"
+class TestPackageConan(ConanFile):
+    settings = "os", "arch", "compiler", "build_type"
     generators = "cmake"
 
     def build(self):
@@ -13,6 +13,6 @@ class MongoCDriverTestConan(ConanFile):
         cmake.build()
 
     def test(self):
-        if not tools.cross_building(self):
-            self.run(os.path.join("bin", "mongo-c-driver-tester"),
-                     run_environment=True)
+        if not tools.cross_building(self.settings):
+            bin_path = os.path.join("bin", "test_package")
+            self.run(bin_path, run_environment=True)
