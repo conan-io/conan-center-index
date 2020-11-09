@@ -69,7 +69,7 @@ class MongoCDriverConan(ConanFile):
     def requirements(self):
         if self.options.with_ssl == "openssl":
             self.requires("openssl/1.1.1h")
-        if self.options.with_ssl == "libressl":
+        elif self.options.with_ssl == "libressl":
             self.requires("libressl/3.2.0")
         if self.options.with_sasl == "cyrus":
             self.requires("cyrus-sasl/2.1.27")
@@ -83,7 +83,7 @@ class MongoCDriverConan(ConanFile):
             self.requires("icu/68.1")
 
     def build_requirements(self):
-        if self.options.with_zstd:
+        if self.options.with_ssl == "libressl" or self.options.with_zstd:
             self.build_requires("pkgconf/1.7.3")
 
     def source(self):
@@ -114,44 +114,6 @@ class MongoCDriverConan(ConanFile):
                               "OPENSSL_LIBRARIES", "OpenSSL_LIBRARIES")
         tools.replace_in_file(os.path.join(self._source_subfolder, "src", "libmongoc", "CMakeLists.txt"),
                               "OPENSSL_INCLUDE_DIR", "OpenSSL_INCLUDE_DIR")
-
-        if self.options.with_ssl == "libressl":
-            tools.replace_in_file(
-                os.path.join(self._source_subfolder, "src", "libmongoc", "CMakeLists.txt"),
-                self._libressl_find_pattern,
-                self._libressl_replacement_pattern.format(
-                    LIBRESSL_INCLUDE_DIRS=self.deps_cpp_info["libressl"].include_paths[0],
-                    LIBRESSL_LIBRARY_DIRS=self.deps_cpp_info["libressl"].lib_paths[0]
-                ))
-
-    _libressl_find_pattern = '''
-   if (ENABLE_SSL STREQUAL LIBRESSL)
-      include (FindPkgConfig)
-      message ("-- Searching for LibreSSL/libtls")
-      pkg_check_modules (LIBRESSL libtls)
-      if (LIBRESSL_FOUND)
-         message ("--   Found ${LIBRESSL_LIBRARIES}")
-         set (SSL_LIBRARIES ${LIBRESSL_LIBRARIES})
-         if (LIBRESSL_INCLUDE_DIRS)
-           include_directories ("${LIBRESSL_INCLUDE_DIRS}")
-         endif ()
-         link_directories ("${LIBRESSL_LIBRARY_DIRS}")
-         set (LIBRESSL 1)
-      else ()
-         message ("--   Not found")
-      endif ()
-   endif ()
-'''
-
-    _libressl_replacement_pattern = '''
-   if (ENABLE_SSL STREQUAL LIBRESSL)
-        message ("--   USE LIBRESSL include: {LIBRESSL_INCLUDE_DIRS}!")
-        message ("--   USE LIBRESSL library: {LIBRESSL_LIBRARY_DIRS}!")
-        include_directories ("{LIBRESSL_INCLUDE_DIRS}")
-        link_directories ("{LIBRESSL_LIBRARY_DIRS}")
-        set (LIBRESSL 1)
-   endif ()
-'''
 
     @property
     def ssl_cmake_value(self):
