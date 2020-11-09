@@ -35,7 +35,7 @@ class CyrusSaslConan(ConanFile):
         "with_sqlite3": [True, False],
     }
     default_options = {
-        "shared": False,
+        "shared": True,
         "fPIC": True,
         "with_openssl": True,
         "with_cram": True,
