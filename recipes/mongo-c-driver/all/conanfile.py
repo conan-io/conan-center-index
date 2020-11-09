@@ -12,19 +12,21 @@ class MongoCDriverConan(ConanFile):
     topics = ("conan", "libbson", "libmongoc", "mongo", "mongodb", "database", "db")
     settings = "os", "compiler", "build_type", "arch"
     exports_sources = ["CMakeLists.txt", "patches/**"]
-    generators = "cmake", "cmake_find_package"
+    generators = "cmake", "cmake_find_package", "pkg_config"
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
         "with_ssl": [False, 'DARWIN', 'WINDOWS', 'OPENSSL', 'LIBRESSL'],
-        "with_zlib": [True, False]
+        "with_zlib": [True, False],
+        "with_zstd": [True, False]
     }
 
     default_options = {
         "shared": False,
         "fPIC": True,
         "with_ssl": 'OPENSSL',
-        "with_zlib": True
+        "with_zlib": True,
+        "with_zstd": True
     }
 
     _cmake = None
@@ -55,6 +57,12 @@ class MongoCDriverConan(ConanFile):
             self.requires("libressl/3.2.0")
         if self.options.with_zlib:
             self.requires("zlib/1.2.11")
+        if self.options.with_zstd:
+            self.requires("zstd/1.4.5")
+
+    def build_requirements(self):
+        if self.options.with_zstd:
+            self.build_requires("pkgconf/1.7.3")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
@@ -112,7 +120,7 @@ class MongoCDriverConan(ConanFile):
         self._cmake.definitions["ENABLE_SSL"] = self.options.with_ssl
         self._cmake.definitions["ENABLE_SNAPPY"] = "OFF"
         self._cmake.definitions["ENABLE_ZLIB"] = "SYSTEM" if self.options.with_zlib else "OFF"
-        self._cmake.definitions["ENABLE_ZSTD"] = "OFF"
+        self._cmake.definitions["ENABLE_ZSTD"] = "ON" if self.options.with_zstd else "OFF"
         self._cmake.definitions["ENABLE_SHM_COUNTERS"] = "OFF"
         self._cmake.definitions["ENABLE_BSON"] = "ON"
         self._cmake.definitions["ENABLE_MONGOC"] = "ON"
@@ -160,6 +168,8 @@ class MongoCDriverConan(ConanFile):
             self.cpp_info.components["mongoc"].requires.append("libressl::libressl")
         if self.options.with_zlib:
             self.cpp_info.components["mongoc"].requires.append("zlib::zlib")
+        if self.options.with_zstd:
+            self.cpp_info.components["mongoc"].requires.append("zstd::zstd")
         # bson
         self.cpp_info.components["bson"].names["cmake_find_package"] = "bson" if self.options.shared else "bson_static"
         self.cpp_info.components["bson"].names["cmake_find_package_multi"] = "bson" if self.options.shared else "bson_static"
