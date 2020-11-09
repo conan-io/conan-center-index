@@ -49,6 +49,8 @@ class CairoConan(ConanFile):
             del self.options.enable_xcb
 
     def configure(self):
+        del self.settings.compiler.cppstd
+        del self.settings.compiler.libcxx
         if self._is_msvc:
             if self.settings.build_type not in ['Debug', 'Release']:
                 raise ConanInvalidConfiguration("MSVC build supports only Debug or Release build type")
