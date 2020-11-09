@@ -14,6 +14,7 @@ class MongoCDriverConan(ConanFile):
     settings = "os", "compiler", "build_type", "arch"
     exports_sources = ["CMakeLists.txt", "patches/**"]
     generators = "cmake", "cmake_find_package", "pkg_config"
+    short_paths = True
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
