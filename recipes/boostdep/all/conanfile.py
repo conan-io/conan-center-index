@@ -37,6 +37,7 @@ class BoostDepConan(ConanFile):
         if self._cmake:
             return self._cmake
         self._cmake = CMake(self)
+        self._cmake.definitions["Boost_USE_STATIC_LIBS"] = not self.options["boost"].shared
         self._cmake.configure(build_folder=self._build_subfolder)
         return self._cmake
 
