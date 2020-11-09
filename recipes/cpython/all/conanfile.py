@@ -277,12 +277,12 @@ class CPythonConan(ConanFile):
 
             # Remove solution project to avoid upgrading the complete solution which is now broken due to missing dependencies (missing msbuild include files)
             # (it would be fine to remove this solution unconditionally and upgrade every project on demand)
-            os.unlink(os.path.join(self._source_subfolder, "PCBuild", "pcbuild.sln"))
+            os.unlink(os.path.join(self._source_subfolder, "PCbuild", "pcbuild.sln"))
 
     @property
     def _solution_projects(self):
         if self.options.shared:
-            solution_path = os.path.join(self._source_subfolder, "PCBuild", "pcbuild.sln")
+            solution_path = os.path.join(self._source_subfolder, "PCbuild", "pcbuild.sln")
             projects = set(m.group(1) for m in re.finditer("\"([^\"]+)\\.vcxproj\"", open(solution_path).read()))
             discarded = self._msvc_discarded_projects
 
@@ -344,7 +344,7 @@ class CPythonConan(ConanFile):
         with tools.no_op():
             for project_i, project in enumerate(projects):
                 self.output.info("[{}/{}] Building project '{}'...".format(project_i, len(projects), project))
-                project_file = os.path.join(self._source_subfolder, "PCBuild", project + ".vcxproj")
+                project_file = os.path.join(self._source_subfolder, "PCbuild", project + ".vcxproj")
                 msbuild.build(project_file, upgrade_project=upgrade_next, build_type="Debug" if self.settings.build_type == "Debug" else "Release",
                               platforms=self._msvc_archs, properties=msbuild_properties)
                 upgrade_next = upgrade_next and not self._supports_modules
@@ -385,7 +385,7 @@ class CPythonConan(ConanFile):
                 "armv8_32": "arm32",
                 "armv8": "arm64",
             })
-        return os.path.join(self._source_subfolder, "PCBuild", build_subdir_lut[str(self.settings.arch)])
+        return os.path.join(self._source_subfolder, "PCbuild", build_subdir_lut[str(self.settings.arch)])
 
     @property
     def _msvc_install_subprefix(self):
