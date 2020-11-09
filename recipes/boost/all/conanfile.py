@@ -963,6 +963,7 @@ class BoostConan(ConanFile):
                 boost_version_tag = "boost-%s_%s" % (major, minor)
                 self.cpp_info.components["headers"].includedirs = [os.path.join(self.package_folder, "include", boost_version_tag)]
 
+        libprefix = "lib" if self.settings.compiler == "Visual Studio" else ""
         libformatdata = {}
         if not self.options.without_python:
             pyversion = tools.Version(self._python_version)
@@ -975,7 +976,7 @@ class BoostConan(ConanFile):
         for module in self._iter_modules():
             if self.options.get_safe("without_{}".format(module), False) or not all(d in modules_seen for d in self._dependencies["dependencies"][module]):
                 continue
-            module_libraries = [lib.format(**libformatdata) for lib in self._dependencies["libs"][module]]
+            module_libraries = [libprefix + lib.format(**libformatdata) for lib in self._dependencies["libs"][module]]
             if all(l in detected_libraries for l in module_libraries):
                 modules_seen.add(module)
 
