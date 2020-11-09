@@ -46,7 +46,12 @@ class Libheif(ConanFile):
     def _patch_sources(self):
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
             tools.patch(**patch)
-        os.unlink(os.path.join(self._source_subfolder, "cmake", "modules", "FindLibAOM.cmake"))
+        # Disable find_package for 1.9.1 by direct patching
+        tools.replace_in_file(os.path.join(self._source_subfolder, "CMakeLists.txt"),
+                             "find_package(LibAOM)", "")
+        if not self.options.with_x265:
+            tools.replace_in_file(os.path.join(self._source_subfolder, "CMakeLists.txt"),
+                                 "find_package(X265)", "")
 
     def _configure_cmake(self):
         if self._cmake:
