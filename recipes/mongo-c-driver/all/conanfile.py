@@ -94,27 +94,24 @@ class MongoCDriverConan(ConanFile):
     def _patch_sources(self):
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
             tools.patch(**patch)
-        # Fix Snappy
-        tools.replace_in_file(os.path.join(self._source_subfolder, "src", "libmongoc", "CMakeLists.txt"),
-                              "include (FindSnappy)\nif (SNAPPY_INCLUDE_DIRS)",
-                              "if(ENABLE_SNAPPY MATCHES \"ON\")\n  find_package(Snappy REQUIRED)")
-        tools.replace_in_file(os.path.join(self._source_subfolder, "src", "libmongoc", "CMakeLists.txt"),
-                              "SNAPPY_LIBRARIES",
-                              "Snappy_LIBRARIES")
-        tools.replace_in_file(os.path.join(self._source_subfolder, "src", "libmongoc", "CMakeLists.txt"),
-                              "SNAPPY_INCLUDE_DIRS",
-                              "Snappy_INCLUDE_DIRS")
-        # Fix Openssl
-        tools.replace_in_file(os.path.join(self._source_subfolder, "src", "libmongoc", "CMakeLists.txt"),
-                              "OPENSSL_FOUND", "OpenSSL_FOUND")
-        tools.replace_in_file(os.path.join(self._source_subfolder, "src", "libmongoc", "CMakeLists.txt"),
-                              "OPENSSL_VERSION", "OpenSSL_VERSION")
-        tools.replace_in_file(os.path.join(self._source_subfolder, "src", "libmongoc", "CMakeLists.txt"),
-                              "OPENSSL_CRYPTO_LIBRARY", "OpenSSL_Crypto_LIBS")
-        tools.replace_in_file(os.path.join(self._source_subfolder, "src", "libmongoc", "CMakeLists.txt"),
-                              "OPENSSL_LIBRARIES", "OpenSSL_LIBRARIES")
-        tools.replace_in_file(os.path.join(self._source_subfolder, "src", "libmongoc", "CMakeLists.txt"),
-                              "OPENSSL_INCLUDE_DIR", "OpenSSL_INCLUDE_DIR")
+        to_replace_old_new = [
+            # Fix Snappy
+            {"old": "include (FindSnappy)\nif (SNAPPY_INCLUDE_DIRS)",
+             "new": "if(ENABLE_SNAPPY MATCHES \"ON\")\n  find_package(Snappy REQUIRED)"},
+            {"old": "SNAPPY_LIBRARIES", "new": "Snappy_LIBRARIES"},
+            {"old": "SNAPPY_INCLUDE_DIRS", "new": "Snappy_LIBRARIES"},
+            # Fix Openssl
+            {"old": "OPENSSL_FOUND", "new": "OpenSSL_FOUND"},
+            {"old": "OPENSSL_VERSION", "new": "OpenSSL_VERSION"},
+            {"old": "OPENSSL_CRYPTO_LIBRARY", "new": "OpenSSL_Crypto_LIBS"},
+            {"old": "OPENSSL_LIBRARIES", "new": "OpenSSL_LIBRARIES"},
+            {"old": "OPENSSL_INCLUDE_DIR", "new": "OpenSSL_INCLUDE_DIR"},
+            # Fix LibreSSL
+            {"old": "set (SSL_LIBRARIES -ltls -lcrypto)", "new": ""},
+        ]
+        for old_new in to_replace_old_new:
+            tools.replace_in_file(os.path.join(self._source_subfolder, "src", "libmongoc", "CMakeLists.txt"),
+                                  old_new["old"], old_new["new"])
 
     @property
     def ssl_cmake_value(self):
