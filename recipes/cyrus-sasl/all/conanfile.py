@@ -77,13 +77,13 @@ class CyrusSaslConan(ConanFile):
 
     def requirements(self):
         if self.options.with_openssl:
-            self.requires("openssl/1.1.1g")
+            self.requires("openssl/1.1.1h")
         if self.options.with_postgresql:
-            self.requires("libpq/12.2")
+            self.requires("libpq/13.0")
         if self.options.with_mysql:
             self.requires("libmysqlclient/8.0.17")
         if self.options.with_sqlite3:
-            self.requires("sqlite3/3.32.3")
+            self.requires("sqlite3/3.33.0")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
