@@ -21,7 +21,8 @@ class MongoCDriverConan(ConanFile):
         "with_snappy": [True, False],
         "with_zlib": [True, False],
         "with_zstd": [True, False],
-        "with_icu": [True, False]
+        "with_icu": [True, False],
+        "srv": [True, False]
     }
 
     default_options = {
@@ -31,7 +32,8 @@ class MongoCDriverConan(ConanFile):
         "with_snappy": True,
         "with_zlib": True,
         "with_zstd": True,
-        "with_icu": True
+        "with_icu": True,
+        "srv": True
     }
 
     _cmake = None
@@ -140,6 +142,7 @@ class MongoCDriverConan(ConanFile):
         self._cmake.definitions["CMAKE_INSTALL_SYSTEM_RUNTIME_LIBS_SKIP"] = "TRUE"
         self._cmake.definitions["ENABLE_TESTS"] = "OFF"
         self._cmake.definitions["ENABLE_EXAMPLES"] = "OFF"
+        self._cmake.definitions["ENABLE_SRV"] = "ON" if self.options.srv else "OFF"
         self._cmake.definitions["ENABLE_STATIC"] = "OFF" if self.options.shared else "ON"
         self._cmake.definitions["ENABLE_SSL"] = self.options.with_ssl
         self._cmake.definitions["ENABLE_SNAPPY"] = "ON" if self.options.with_snappy else "OFF"
@@ -205,6 +208,8 @@ class MongoCDriverConan(ConanFile):
             self.cpp_info.components["mongoc"].requires.append("zstd::zstd")
         if self.options.with_icu:
             self.cpp_info.components["mongoc"].requires.append("icu::icu")
+        if self.options.srv:
+            self.cpp_info.components["mongoc"].system_libs.append("dnsapi" if self.settings.os == "Windows" else "resolv")
         # bson
         self.cpp_info.components["bson"].names["cmake_find_package"] = "bson" if self.options.shared else "bson_static"
         self.cpp_info.components["bson"].names["cmake_find_package_multi"] = "bson" if self.options.shared else "bson_static"
