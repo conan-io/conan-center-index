@@ -1,16 +1,14 @@
 cmake_minimum_required(VERSION 3.1)
-project(mongo-c-driver-tester C)
+project(test_package C)
 
 include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
 conan_basic_setup()
 
-add_executable(${PROJECT_NAME} tester.c)
+find_package(mongoc REQUIRED CONFIG)
 
+add_executable(${PROJECT_NAME} test_package.c)
 if(MONGO-C-DRIVER_SHARED)
-    message(STATUS "shared mongoc ${CONAN_LIBS}")
-    target_link_libraries(${PROJECT_NAME} ${CONAN_LIBS})
+  target_link_libraries(${PROJECT_NAME} mongo::mongoc mongo::bson)
 else()
-    message(STATUS "static mongoc ${CONAN_LIBS}")
-    target_link_libraries(${PROJECT_NAME} ${CONAN_LIBS})
+  target_link_libraries(${PROJECT_NAME} mongo::mongoc_static mongo::bson_static)
 endif()
-
