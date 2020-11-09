@@ -275,6 +275,10 @@ class CPythonConan(ConanFile):
             tools.replace_in_file(os.path.join(self._source_subfolder, "PCbuild", "pythonw.vcxproj"),
                                   "<ItemDefinitionGroup>", "<ItemDefinitionGroup><ClCompile><PreprocessorDefinitions>Py_NO_ENABLE_SHARED;%(PreprocessorDefinitions)</PreprocessorDefinitions></ClCompile>")
 
+            # Remove solution project to avoid upgrading the complete solution which is now broken due to missing dependencies (missing msbuild include files)
+            # (it would be fine to remove this solution unconditionally and upgrade every project on demand)
+            os.unlink(os.path.join(self._source_subfolder, "PCBuild", "pcbuild.sln"))
+
     @property
     def _solution_projects(self):
         if self.options.shared:
@@ -292,7 +296,7 @@ class CPythonConan(ConanFile):
             projects = set(p for p in projects if project_build(p))
             return projects
         else:
-            return ("pythoncore", "python", "pythonw")
+            return "pythoncore", "python", "pythonw"
 
     @property
     def _msvc_discarded_projects(self):
@@ -336,14 +340,14 @@ class CPythonConan(ConanFile):
         projects = self._solution_projects
         self.output.info("Building {} Visual Studio projects: {}".format(len(projects), projects))
 
-        upgraded = False
+        upgrade_next = True
         with tools.no_op():
             for project_i, project in enumerate(projects):
                 self.output.info("[{}/{}] Building project '{}'...".format(project_i, len(projects), project))
                 project_file = os.path.join(self._source_subfolder, "PCBuild", project + ".vcxproj")
-                msbuild.build(project_file, upgrade_project=not upgraded, build_type="Debug" if self.settings.build_type == "Debug" else "Release",
+                msbuild.build(project_file, upgrade_project=upgrade_next, build_type="Debug" if self.settings.build_type == "Debug" else "Release",
                               platforms=self._msvc_archs, properties=msbuild_properties)
-                upgraded = True
+                upgrade_next = upgrade_next and not self._supports_modules
 
     def build(self):
         if self._supports_modules:
