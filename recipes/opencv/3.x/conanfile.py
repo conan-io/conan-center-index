@@ -108,27 +108,6 @@ class OpenCVConan(ConanFile):
             tools.replace_in_file(find_openexr, "SET(OPENEXR_LIBSEARCH_SUFFIXES Win32/Release Win32 Win32/Debug)", "")
             tools.replace_in_file(find_openexr, r'SET(OPENEXR_ROOT "C:/Deploy" CACHE STRING "Path to the OpenEXR \"Deploy\" folder")', "")
 
-            def openexr_library_names(name):
-                # OpenEXR library may have different names, depends on namespace versioning, static, debug, etc.
-                reference = str(self.requires["openexr"])
-                version_name = reference.split("@")[0]
-                version = version_name.split("/")[1]
-                version_tokens = version.split(".")
-                major, minor = version_tokens[0], version_tokens[1]
-                suffix = "%s_%s" % (major, minor)
-                names = ["%s-%s" % (name, suffix),
-                         "%s-%s_s" % (name, suffix),
-                         "%s-%s_d" % (name, suffix),
-                         "%s-%s_s_d" % (name, suffix),
-                         "%s" % name,
-                         "%s_s" % name,
-                         "%s_d" % name,
-                         "%s_s_d" % name]
-                return " ".join(names)
-
-            #for lib in ['Half', 'Iex', 'Imath', 'IlmImf', 'IlmThread']:
-            #        tools.replace_in_file(find_openexr, 'NAMES %s' % lib, 'NAMES %s' % openexr_library_names(lib))
-
         tools.replace_in_file(os.path.join(self._source_subfolder, "CMakeLists.txt"), "ANDROID OR NOT UNIX", "FALSE")
         tools.replace_in_file(os.path.join(self._source_subfolder, "modules", "imgcodecs", "CMakeLists.txt"), "JASPER_", "Jasper_")
 
@@ -201,7 +180,7 @@ class OpenCVConan(ConanFile):
             self._cmake.definitions["BUILD_WITH_STATIC_CRT"] = self.settings.compiler.runtime in ("MT", "MTd")
         if self.options.with_openexr:
             self._cmake.definitions['OPENEXR_ROOT'] = self.deps_cpp_info['openexr'].rootpath
-        self._cmake.definitions["ENABLE_PIC"] = self.options.get_safe("fPIC", False)
+        self._cmake.definitions["ENABLE_PIC"] = self.options.get_safe("fPIC", True)
 
         self._cmake.configure(build_folder=self._build_subfolder)
         return self._cmake
@@ -215,10 +194,10 @@ class OpenCVConan(ConanFile):
         self.copy("LICENSE", dst="licenses", src=self._source_subfolder)
         cmake = self._configure_cmake()
         cmake.install()
-        #tools.rmdir(os.path.join(self.package_folder, "share"))
-        #tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
-        #tools.rmdir(os.path.join(self.package_folder, "staticlib"))
-        #tools.remove_files_by_mask(self.package_folder, "*.cmake")
+        tools.rmdir(os.path.join(self.package_folder, "share"))
+        tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
+        tools.rmdir(os.path.join(self.package_folder, "staticlib"))
+        tools.remove_files_by_mask(self.package_folder, "*.cmake")
 
     def package_info(self):
         version = self.version.split(".")[:-1]  # last version number is not used
