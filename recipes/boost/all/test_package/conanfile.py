@@ -4,7 +4,7 @@ import shutil
 import sys
 
 
-class DefaultNameConan(ConanFile):
+class TestPackageConan(ConanFile):
     settings = "os", "compiler", "arch", "build_type"
     generators = "cmake", "cmake_find_package"
 
@@ -52,6 +52,7 @@ class DefaultNameConan(ConanFile):
             cmake.definitions["WITH_CHRONO"] = not self.options["boost"].without_chrono
             cmake.definitions["Boost_NO_BOOST_CMAKE"] = True
             cmake.definitions["CONAN_BOOST_FINDPACKAGE"] = conan_boost_findpackage
+            cmake.definitions["Boost_NO_BOOST_CMAKE"] = True
             cmake.configure(build_folder=build_folder)
             cmake.build()
 

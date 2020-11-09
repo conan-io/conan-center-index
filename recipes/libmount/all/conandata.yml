@@ -1,4 +1,7 @@
 sources:
+  "2.36":
+    url: "https://mirrors.edge.kernel.org/pub/linux/utils/util-linux/v2.36/util-linux-2.36.tar.gz"
+    sha256: "82942cd877a989f6d12d4ce2c757fb67ec53d8c5cd9af0537141ec5f84a2eea3"
   "2.33.1":
     url: "https://mirrors.edge.kernel.org/pub/linux/utils/util-linux/v2.33/util-linux-2.33.1.tar.gz"
     sha256: "e15bd3142b3a0c97fffecaed9adfdef8ab1d29211215d7ae614c177ef826e73a"
