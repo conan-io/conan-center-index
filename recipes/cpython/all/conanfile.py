@@ -393,6 +393,8 @@ class CPythonConan(ConanFile):
         python_args = " ".join("\"{}\"".format(a) for a in layout_args)
         self.run("{} {}".format(python_built, python_args), run_environment=True)
 
+        tools.rmdir(os.path.join(self.package_folder, "bin", "tcl"))
+
         for file in os.listdir(install_prefix):
             if re.match("vcruntime.*", file):
                 os.unlink(os.path.join(install_prefix, file))
