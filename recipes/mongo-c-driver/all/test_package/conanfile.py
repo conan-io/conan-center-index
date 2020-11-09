@@ -8,6 +8,7 @@ class MongoCDriverTestConan(ConanFile):
 
     def build(self):
         cmake = CMake(self)
+        cmake.definitions["MONGO-C-DRIVER_SHARED"] = self.options["mongo-c-driver"].shared
         cmake.configure()
         cmake.build()
 

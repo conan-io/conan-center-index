@@ -99,6 +99,8 @@ class MongoCDriverConan(ConanFile):
         self._cmake.definitions["ENABLE_SHM_COUNTERS"] = "OFF"
         self._cmake.definitions["ENABLE_BSON"] = "ON"
         self._cmake.definitions["ENABLE_MONGOC"] = "ON"
+        if self.settings.os == "Windows":
+            self._cmake.definitions["CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS"] = self.options.shared
         if self.options.with_zlib == 'SYSTEM':
             self._cmake.definitions["ZLIB_ROOT"] = self.deps_cpp_info["zlib"].rootpath
         if self.options.with_ssl == 'OPENSSL':
