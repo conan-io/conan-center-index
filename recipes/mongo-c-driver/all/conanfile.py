@@ -17,6 +17,7 @@ class MongoCDriverConan(ConanFile):
         "shared": [True, False],
         "fPIC": [True, False],
         "with_ssl": [False, 'DARWIN', 'WINDOWS', 'OPENSSL', 'LIBRESSL'],
+        "with_snappy": [True, False],
         "with_zlib": [True, False],
         "with_zstd": [True, False]
     }
@@ -25,6 +26,7 @@ class MongoCDriverConan(ConanFile):
         "shared": False,
         "fPIC": True,
         "with_ssl": 'OPENSSL',
+        "with_snappy": True,
         "with_zlib": True,
         "with_zstd": True
     }
@@ -55,6 +57,8 @@ class MongoCDriverConan(ConanFile):
         if self.options.with_ssl == 'LIBRESSL':
             self.output.warn("Can be broken. Prefer OpenSSL instead of LIBRESSL")
             self.requires("libressl/3.2.0")
+        if self.options.with_snappy:
+            self.requires("snappy/1.1.8")
         if self.options.with_zlib:
             self.requires("zlib/1.2.11")
         if self.options.with_zstd:
@@ -71,6 +75,17 @@ class MongoCDriverConan(ConanFile):
     def _patch_sources(self):
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
             tools.patch(**patch)
+        # Fix Snappy
+        tools.replace_in_file(os.path.join(self._source_subfolder, "src", "libmongoc", "CMakeLists.txt"),
+                              "include (FindSnappy)\nif (SNAPPY_INCLUDE_DIRS)",
+                              "if(ENABLE_SNAPPY MATCHES \"ON\")\n  find_package(Snappy REQUIRED)")
+        tools.replace_in_file(os.path.join(self._source_subfolder, "src", "libmongoc", "CMakeLists.txt"),
+                              "SNAPPY_LIBRARIES",
+                              "Snappy_LIBRARIES")
+        tools.replace_in_file(os.path.join(self._source_subfolder, "src", "libmongoc", "CMakeLists.txt"),
+                              "SNAPPY_INCLUDE_DIRS",
+                              "Snappy_INCLUDE_DIRS")
+
         if self.options.with_ssl == 'LIBRESSL':
             tools.replace_in_file(
                 os.path.join(self._source_subfolder, "src", "libmongoc", "CMakeLists.txt"),
@@ -118,7 +133,7 @@ class MongoCDriverConan(ConanFile):
         self._cmake.definitions["ENABLE_EXAMPLES"] = "OFF"
         self._cmake.definitions["ENABLE_STATIC"] = "OFF" if self.options.shared else "ON"
         self._cmake.definitions["ENABLE_SSL"] = self.options.with_ssl
-        self._cmake.definitions["ENABLE_SNAPPY"] = "OFF"
+        self._cmake.definitions["ENABLE_SNAPPY"] = "ON" if self.options.with_snappy else "OFF"
         self._cmake.definitions["ENABLE_ZLIB"] = "SYSTEM" if self.options.with_zlib else "OFF"
         self._cmake.definitions["ENABLE_ZSTD"] = "ON" if self.options.with_zstd else "OFF"
         self._cmake.definitions["ENABLE_SHM_COUNTERS"] = "OFF"
@@ -166,6 +181,8 @@ class MongoCDriverConan(ConanFile):
             self.cpp_info.components["mongoc"].requires.append("openssl::openssl")
         elif self.options.with_ssl == "LIBRESSL":
             self.cpp_info.components["mongoc"].requires.append("libressl::libressl")
+        if self.options.with_snappy:
+            self.cpp_info.components["mongoc"].requires.append("snappy::snappy")
         if self.options.with_zlib:
             self.cpp_info.components["mongoc"].requires.append("zlib::zlib")
         if self.options.with_zstd:
