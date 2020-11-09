@@ -81,8 +81,6 @@ class LeptonicaConan(ConanFile):
         cmake.definitions['CMAKE_DISABLE_FIND_PACKAGE_PNG'] = not self.options.with_png
         cmake.definitions['CMAKE_DISABLE_FIND_PACKAGE_TIFF'] = not self.options.with_tiff
         cmake.definitions['CMAKE_DISABLE_FIND_PACKAGE_JPEG'] = not self.options.with_jpeg
-        cmake.definitions['CMAKE_DISABLE_FIND_PACKAGE_webp'] = not self.options.with_webp
-        cmake.definitions['CMAKE_DISABLE_FIND_PACKAGE_openjp2'] = not self.options.with_openjpeg
 
         cmake.definitions['SW_BUILD'] = False
 
