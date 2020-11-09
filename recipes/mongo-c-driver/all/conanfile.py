@@ -18,6 +18,7 @@ class MongoCDriverConan(ConanFile):
         "shared": [True, False],
         "fPIC": [True, False],
         "with_ssl": [False, 'DARWIN', 'WINDOWS', 'OPENSSL', 'LIBRESSL'],
+        "with_sasl": [False, "sspi", "cyrus"],
         "with_snappy": [True, False],
         "with_zlib": [True, False],
         "with_zstd": [True, False],
@@ -29,6 +30,7 @@ class MongoCDriverConan(ConanFile):
         "shared": False,
         "fPIC": True,
         "with_ssl": 'OPENSSL',
+        "with_sasl": False,
         "with_snappy": True,
         "with_zlib": True,
         "with_zstd": True,
@@ -49,6 +51,7 @@ class MongoCDriverConan(ConanFile):
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
+            self.options.with_sasl = "sspi"
 
     def configure(self):
         del self.settings.compiler.libcxx
@@ -59,6 +62,8 @@ class MongoCDriverConan(ConanFile):
             raise ConanInvalidConfiguration("with_ssl=DARWIN only allowed on Apple os family")
         if self.options.with_ssl == "WINDOWS" and self.settings.os != "Windows":
             raise ConanInvalidConfiguration("with_ssl=WINDOWS only allowed on Windows")
+        if self.options.with_sasl == "sspi" and self.settings.os != "Windows":
+            raise ConanInvalidConfiguration("with_sasl=sspi only allowed on Windows")
 
     def requirements(self):
         if self.options.with_ssl == 'OPENSSL':
@@ -66,6 +71,8 @@ class MongoCDriverConan(ConanFile):
         if self.options.with_ssl == 'LIBRESSL':
             self.output.warn("Can be broken. Prefer OpenSSL instead of LIBRESSL")
             self.requires("libressl/3.2.0")
+        if self.options.with_sasl == "cyrus":
+            self.requires("cyrus-sasl/2.1.27")
         if self.options.with_snappy:
             self.requires("snappy/1.1.8")
         if self.options.with_zlib:
@@ -135,6 +142,13 @@ class MongoCDriverConan(ConanFile):
    endif ()
 '''
 
+    @property
+    def sasl_cmake_value(self):
+        return {
+            "sspi": "SSPI",
+            "cyrus": "CYRUS",
+        }.get(str(self.options.with_sasl), "OFF")
+
     def _configure_cmake(self):
         if self._cmake:
             return self._cmake
@@ -145,6 +159,7 @@ class MongoCDriverConan(ConanFile):
         self._cmake.definitions["ENABLE_SRV"] = "ON" if self.options.srv else "OFF"
         self._cmake.definitions["ENABLE_STATIC"] = "OFF" if self.options.shared else "ON"
         self._cmake.definitions["ENABLE_SSL"] = self.options.with_ssl
+        self._cmake.definitions["ENABLE_SASL"] = self.sasl_cmake_value
         self._cmake.definitions["ENABLE_SNAPPY"] = "ON" if self.options.with_snappy else "OFF"
         self._cmake.definitions["ENABLE_ZLIB"] = "SYSTEM" if self.options.with_zlib else "OFF"
         self._cmake.definitions["ENABLE_ZSTD"] = "ON" if self.options.with_zstd else "OFF"
@@ -200,6 +215,10 @@ class MongoCDriverConan(ConanFile):
             self.cpp_info.components["mongoc"].requires.append("openssl::openssl")
         elif self.options.with_ssl == "LIBRESSL":
             self.cpp_info.components["mongoc"].requires.append("libressl::libressl")
+        if self.options.with_sasl == "sspi":
+            self.cpp_info.components["mongoc"].system_libs.extend(["secur32", "crypt32", "shlwapi"])
+        elif self.options.with_sasl == "cyrus":
+            self.cpp_info.components["mongoc"].requires.append("cyrus-sasl::cyrus-sasl")
         if self.options.with_snappy:
             self.cpp_info.components["mongoc"].requires.append("snappy::snappy")
         if self.options.with_zlib:
