@@ -53,7 +53,7 @@ class PangoConan(ConanFile):
 
     def _configure_meson(self):
         defs = dict()
-        defs["introspection"] = "false"
+        defs["introspection"] = "disabled"
         meson = Meson(self)
         meson.configure(build_folder="build", source_folder=self._source_subfolder, defs=defs, args=['--wrap-mode=nofallback'])
         return meson
