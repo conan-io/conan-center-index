@@ -61,9 +61,14 @@ class TestPackageConan(ConanFile):
             return False
         return True
 
+    @property
+    def _supports_modules(self):
+        return self.settings.compiler != "Visual Studio" or self.options["cpython"].shared
+
     def build(self):
         cmake = CMake(self)
         py_major = self.deps_cpp_info["cpython"].version.split(".")[0]
+        cmake.definitions["BUILD_MODULE"] = self._supports_modules
         cmake.definitions["PY_VERSION_MAJOR"] = py_major
         cmake.definitions["PY_VERSION_MAJOR_MINOR"] = ".".join(self._py_version.split(".")[:2])
         cmake.definitions["PY_VERSION"] = self._py_version
@@ -86,27 +91,28 @@ class TestPackageConan(ConanFile):
             cmake.configure()
         cmake.build()
 
-        with tools.vcvars(self.settings) if self.settings.compiler == "Visual Studio" else tools.no_op():
-            modsrcfolder = "py2" if tools.Version(self.deps_cpp_info["cpython"].version).major < "3" else "py3"
-            shutil.copytree(os.path.join(self.source_folder, modsrcfolder), os.path.join(self.build_folder, modsrcfolder))
-            shutil.copy(os.path.join(self.source_folder, "setup.py"), os.path.join(self.build_folder, "setup.py"))
-            env = {
-                "DISTUTILS_USE_SDK": "1",
-                "MSSdk": "1"
-            }
-            env.update(**AutoToolsBuildEnvironment(self).vars)
-            with tools.environment_append(env):
-                setup_args = [
-                    "{}/setup.py".format(self.source_folder),
-                    # "conan",
-                    # "--install-folder", self.build_folder,
-                    "build",
-                    "--build-base", self.build_folder,
-                    "--build-platlib", os.path.join(self.build_folder, "lib_setuptools"),
-                ]
-                if self.settings.build_type == "Debug":
-                    setup_args.append("--debug")
-                self.run("{} {}".format(tools.get_env("PYTHON"), " ".join("\"{}\"".format(a) for a in setup_args)), run_environment=True)
+        if self._supports_modules:
+            with tools.vcvars(self.settings) if self.settings.compiler == "Visual Studio" else tools.no_op():
+                modsrcfolder = "py2" if tools.Version(self.deps_cpp_info["cpython"].version).major < "3" else "py3"
+                shutil.copytree(os.path.join(self.source_folder, modsrcfolder), os.path.join(self.build_folder, modsrcfolder))
+                shutil.copy(os.path.join(self.source_folder, "setup.py"), os.path.join(self.build_folder, "setup.py"))
+                env = {
+                    "DISTUTILS_USE_SDK": "1",
+                    "MSSdk": "1"
+                }
+                env.update(**AutoToolsBuildEnvironment(self).vars)
+                with tools.environment_append(env):
+                    setup_args = [
+                        "{}/setup.py".format(self.source_folder),
+                        # "conan",
+                        # "--install-folder", self.build_folder,
+                        "build",
+                        "--build-base", self.build_folder,
+                        "--build-platlib", os.path.join(self.build_folder, "lib_setuptools"),
+                    ]
+                    if self.settings.build_type == "Debug":
+                        setup_args.append("--debug")
+                    self.run("{} {}".format(tools.get_env("PYTHON"), " ".join("\"{}\"".format(a) for a in setup_args)), run_environment=True)
 
     def _test_module(self, module, should_work):
         try:
@@ -124,7 +130,6 @@ class TestPackageConan(ConanFile):
                 self.output.warn("Module '{}' does not work, but should have worked".format(module))
                 raise exception
 
-
     def _cpython_option(self, name):
         try:
             return getattr(self.options["cpython"], name, False)
@@ -141,29 +146,31 @@ class TestPackageConan(ConanFile):
             if version_detected != self.deps_cpp_info["cpython"].version:
                 raise ConanException("python reported wrong version. Expected {exp}. Got {res}.".format(exp=self._py_version, res=version_detected))
 
-            self._test_module("gdbm", self._cpython_option("with_gdbm"))
-            self._test_module("bz2", self._cpython_option("with_bz2"))
-            self._test_module("bsddb", self._cpython_option("with_bsddb"))
-            self._test_module("lzma", self._cpython_option("with_lzma"))
-            self._test_module("tkinter", self._cpython_option("with_tkinter"))
-            with tools.environment_append({"TERM": "ansi"}):
-                self._test_module("curses", self._cpython_option("with_curses"))
+            if self._supports_modules:
+                self._test_module("gdbm", self._cpython_option("with_gdbm"))
+                self._test_module("bz2", self._cpython_option("with_bz2"))
+                self._test_module("bsddb", self._cpython_option("with_bsddb"))
+                self._test_module("lzma", self._cpython_option("with_lzma"))
+                self._test_module("tkinter", self._cpython_option("with_tkinter"))
+                with tools.environment_append({"TERM": "ansi"}):
+                    self._test_module("curses", self._cpython_option("with_curses"))
 
-            self._test_module("expat", True)
-            self._test_module("sqlite3", True)
-            self._test_module("decimal", True)
-            self._test_module("ctypes", True)
+                self._test_module("expat", True)
+                self._test_module("sqlite3", True)
+                self._test_module("decimal", True)
+                self._test_module("ctypes", True)
 
             if tools.is_apple_os(self.settings.os) and not self.options["cpython"].shared:
                 self.output.info("Not testing the module, because these seem not to work on apple when cpython is built as a static library")
                 # FIXME: find out why cpython on apple does not allow to use modules linked against a static python
             else:
-                with tools.environment_append({"PYTHONPATH": [os.path.join(self.build_folder, "lib")]}):
-                    self.output.info("Testing module (spam) using cmake built module")
-                    self._test_module("spam", True)
+                if self._supports_modules:
+                    with tools.environment_append({"PYTHONPATH": [os.path.join(self.build_folder, "lib")]}):
+                        self.output.info("Testing module (spam) using cmake built module")
+                        self._test_module("spam", True)
 
-                with tools.environment_append({"PYTHONPATH": [os.path.join(self.build_folder, "lib_setuptools")]}):
-                    self.output.info("Testing module (spam) using setup.py built module")
-                    self._test_module("spam", True)
+                    with tools.environment_append({"PYTHONPATH": [os.path.join(self.build_folder, "lib_setuptools")]}):
+                        self.output.info("Testing module (spam) using setup.py built module")
+                        self._test_module("spam", True)
 
             self.run(os.path.join("bin", "test_package"), run_environment=True)

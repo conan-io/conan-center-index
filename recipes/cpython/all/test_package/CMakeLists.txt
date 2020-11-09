@@ -51,44 +51,48 @@ if(PYTHONLIBS_VERSION_STRING)
     endif()
 endif()
 
-add_library(spam MODULE "py${PY_VERSION_MAJOR}/test_module.c")
-target_include_directories(spam
-    PRIVATE
-        ${PYTHON_INCLUDE_DIRS}
-)
-target_link_libraries(spam PRIVATE
-    ${PYTHON_LIBRARIES}
-)
-set_property(TARGET spam PROPERTY PREFIX "")
-if(MSVC)
-    if(CONAN_SETTINGS_BUILD_TYPE STREQUAL "Debug")
-        set(SUFFIX "_d.pyd")
-    else()
-        set(SUFFIX ".pyd")
-    endif()
-    set_property(TARGET spam PROPERTY SUFFIX "${SUFFIX}")
-endif()
+option(BUILD_MODULE "Build python module")
 
-option(USE_FINDPYTHON_X "Use new-style FindPythonX module")
-if(USE_FINDPYTHON_X AND NOT (CMAKE_VERSION VERSION_LESS "3.16"))
-    # Require CMake 3.16 because this version introduces Python${PY_VERSION_MAJOR}_FIND_ABI
-    find_package(Python${PY_VERSION_MAJOR} REQUIRED COMPONENTS Interpreter Development)
-    message("Python${PY_VERSION_MAJOR}_EXECUTABLE: ${Python${PY_VERSION_MAJOR}_EXECUTABLE}")
-    message("Python${PY_VERSION_MAJOR}_INTERPRETER_ID: ${Python${PY_VERSION_MAJOR}_INTERPRETER_ID}")
-    message("Python${PY_VERSION_MAJOR}_VERSION: ${Python${PY_VERSION_MAJOR}_VERSION}")
-    message("Python${PY_VERSION_MAJOR}_INCLUDE_DIRS: ${Python${PY_VERSION_MAJOR}_INCLUDE_DIRS}")
-    message("Python${PY_VERSION_MAJOR}_LIBRARIES: ${Python${PY_VERSION_MAJOR}_LIBRARIES}")
-    if(NOT Python${PY_VERSION_MAJOR}_VERSION STREQUAL "${PY_VERSION}")
-        message("Python_ADDITIONAL_VERSIONS does not match PY_VERSION")
-        message(FATAL_ERROR "CMake detected wrong cpython version")
+if(BUILD_MODULE)
+    add_library(spam MODULE "py${PY_VERSION_MAJOR}/test_module.c")
+    target_include_directories(spam
+        PRIVATE
+            ${PYTHON_INCLUDE_DIRS}
+    )
+    target_link_libraries(spam PRIVATE
+        ${PYTHON_LIBRARIES}
+    )
+    set_property(TARGET spam PROPERTY PREFIX "")
+    if(MSVC)
+        if(CONAN_SETTINGS_BUILD_TYPE STREQUAL "Debug")
+            set(SUFFIX "_d.pyd")
+        else()
+            set(SUFFIX ".pyd")
+        endif()
+        set_property(TARGET spam PROPERTY SUFFIX "${SUFFIX}")
     endif()
 
-    if(PY_VERSION_MAJOR STREQUAL "2")
-        python2_add_library(spam2 "py${PY_VERSION_MAJOR}/test_module.c")
-    elseif(PY_VERSION_MAJOR STREQUAL "3")
-        python3_add_library(spam2 "py${PY_VERSION_MAJOR}/test_module.c")
-    else()
-        message(FATAL_ERROR "Unknown PY_VERSION_MAJOR")
+    option(USE_FINDPYTHON_X "Use new-style FindPythonX module")
+    if(USE_FINDPYTHON_X AND NOT (CMAKE_VERSION VERSION_LESS "3.16"))
+        # Require CMake 3.16 because this version introduces Python${PY_VERSION_MAJOR}_FIND_ABI
+        find_package(Python${PY_VERSION_MAJOR} REQUIRED COMPONENTS Interpreter Development)
+        message("Python${PY_VERSION_MAJOR}_EXECUTABLE: ${Python${PY_VERSION_MAJOR}_EXECUTABLE}")
+        message("Python${PY_VERSION_MAJOR}_INTERPRETER_ID: ${Python${PY_VERSION_MAJOR}_INTERPRETER_ID}")
+        message("Python${PY_VERSION_MAJOR}_VERSION: ${Python${PY_VERSION_MAJOR}_VERSION}")
+        message("Python${PY_VERSION_MAJOR}_INCLUDE_DIRS: ${Python${PY_VERSION_MAJOR}_INCLUDE_DIRS}")
+        message("Python${PY_VERSION_MAJOR}_LIBRARIES: ${Python${PY_VERSION_MAJOR}_LIBRARIES}")
+        if(NOT Python${PY_VERSION_MAJOR}_VERSION STREQUAL "${PY_VERSION}")
+            message("Python_ADDITIONAL_VERSIONS does not match PY_VERSION")
+            message(FATAL_ERROR "CMake detected wrong cpython version")
+        endif()
+
+        if(PY_VERSION_MAJOR STREQUAL "2")
+            python2_add_library(spam2 "py${PY_VERSION_MAJOR}/test_module.c")
+        elseif(PY_VERSION_MAJOR STREQUAL "3")
+            python3_add_library(spam2 "py${PY_VERSION_MAJOR}/test_module.c")
+        else()
+            message(FATAL_ERROR "Unknown PY_VERSION_MAJOR")
+        endif()
     endif()
 endif()
 

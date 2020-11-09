@@ -67,6 +67,10 @@ class CPythonConan(ConanFile):
         return tuple(self.version.split("."))
 
     @property
+    def _supports_modules(self):
+        return self.settings.compiler != "Visual Studio" or self.options.shared
+
+    @property
     def _version_major_minor(self):
         if self.settings.compiler == "Visual Studio":
             joiner = ""
@@ -108,6 +112,13 @@ class CPythonConan(ConanFile):
             del self.options.fPIC
             if self.settings.compiler == "Visual Studio" and "MT" in str(self.settings.compiler.runtime):
                 raise ConanInvalidConfiguration("cpython does not support MT(d) runtime when building a shared cpython library")
+        if not self._supports_modules:
+                del self.options.with_bz2
+                del self.options.with_sqlite3
+                del self.options.with_tkinter
+
+                del self.options.with_bsddb
+                del self.options.with_lzma
         if tools.is_apple_os(self.settings.os):
             if self._is_py2:
                 # FIXME: python2 does not build on Macos due to a missing uuid_string_t type
@@ -124,8 +135,6 @@ class CPythonConan(ConanFile):
                 # 3. build the MSVC PGUpdate build_type
             if self.settings.build_type == "Debug" and "d" not in self.settings.compiler.runtime:
                 raise ConanInvalidConfiguration("Building debug cpython requires a debug runtime (Debug cpython requires _CrtReportMode symbol, which only debug runtimes define)")
-            if not self.options.shared:
-                raise ConanInvalidConfiguration("MSVC does not support a static build")
             if self._is_py2:
                 if self.settings.compiler.version >= tools.Version("14"):
                     self.output.warn("Visual Studio versions 14 and higher were never officially supported by the cpython developers")
@@ -139,31 +148,32 @@ class CPythonConan(ConanFile):
     @property
     def _with_libffi(self):
         # cpython 3.7.7 on MSVC uses an ancient libffi 2.00-beta (which is not available at cci, and is API/ABI incompatible with current 3.2+)
-        return self.settings.compiler != "Visual Studio" or tools.Version(self.version) >= "3.8"
+        return self._supports_modules and (self.settings.compiler != "Visual Studio" or tools.Version(self.version) >= "3.8")
 
     def requirements(self):
-        self.requires("openssl/1.1.1h")
-        self.requires("expat/2.2.10")
-        if tools.Version(self.version) < "3.8":
-            self.requires("mpdecimal/2.4.2")
-        else:
-            self.requires("mpdecimal/2.5.0")
         self.requires("zlib/1.2.11")
-        if self._with_libffi:
-            self.requires("libffi/3.2.1")
+        if self._supports_modules:
+            self.requires("openssl/1.1.1h")
+            self.requires("expat/2.2.10")
+            if self._with_libffi:
+                self.requires("libffi/3.2.1")
+            if tools.Version(self.version) < "3.8":
+                self.requires("mpdecimal/2.4.2")
+            else:
+                self.requires("mpdecimal/2.5.0")
         if self.settings.os != "Windows":
             self.requires("libuuid/1.0.3")
             self.requires("libxcrypt/4.4.16")
-        if self.options.with_bz2:
+        if self.options.get_safe("with_bz2"):
             self.requires("bzip2/1.0.8")
         if self.options.get_safe("with_gdbm", False):
             self.requires("gdbm/1.18.1")
         if self.options.get_safe("with_nis", False):
             # TODO: Add nis when available.
             raise ConanInvalidConfiguration("nis is not available on CCI (yet)")
-        if self.options.with_sqlite3:
+        if self.options.get_safe("with_sqlite3"):
             self.requires("sqlite3/3.33.0")
-        if self.options.with_tkinter:
+        if self.options.get_safe("with_tkinter"):
             self.requires("tk/8.6.10")
         if self.options.get_safe("with_curses", False):
             self.requires("ncurses/6.2")
@@ -190,7 +200,7 @@ class CPythonConan(ConanFile):
         ]
         if self._is_py2:
             conf_args.extend([
-                "--enable-unicode={}".format(self.options.unicode),
+                "--enable-unicode={}".format(yes_no(self.options.unicode)),
             ])
         if self._is_py3:
             conf_args.extend([
@@ -246,21 +256,43 @@ class CPythonConan(ConanFile):
             tools.rmdir(os.path.join(self._source_subfolder, "Modules", "_decimal", "libmpdec"))
             tools.rmdir(os.path.join(self._source_subfolder, "Modules", "expat"))
 
+        # Enable static MSVC cpython
+        if not self.options.shared:
+            tools.replace_in_file(os.path.join(self._source_subfolder, "PCbuild", "pythoncore.vcxproj"),
+                                  "<PreprocessorDefinitions>","<PreprocessorDefinitions>Py_NO_BUILD_SHARED;")
+            tools.replace_in_file(os.path.join(self._source_subfolder, "PCbuild", "pythoncore.vcxproj"),
+                                  "Py_ENABLE_SHARED", "Py_NO_ENABLE_SHARED", strict=False)
+            tools.replace_in_file(os.path.join(self._source_subfolder, "PCbuild", "pythoncore.vcxproj"),
+                                  "DynamicLibrary", "StaticLibrary")
+
+            tools.replace_in_file(os.path.join(self._source_subfolder, "PCbuild", "python.vcxproj"),
+                                  "<Link>", "<Link><AdditionalDependencies>shlwapi.lib;ws2_32.lib;pathcch.lib;version.lib;%(AdditionalDependencies)</AdditionalDependencies>")
+            tools.replace_in_file(os.path.join(self._source_subfolder, "PCbuild", "python.vcxproj"),
+                                  "<PreprocessorDefinitions>","<PreprocessorDefinitions>Py_NO_ENABLE_SHARED;")
+            py_version = tools.Version(self.version)
+            tools.replace_in_file(os.path.join(self._source_subfolder, "PCbuild", "pythonw.vcxproj"),
+                                  "<Link>", "<Link><AdditionalDependencies>python{}{}.lib;shlwapi.lib;ws2_32.lib;pathcch.lib;version.lib;%(AdditionalDependencies)</AdditionalDependencies>".format(py_version.major, py_version.minor))
+            tools.replace_in_file(os.path.join(self._source_subfolder, "PCbuild", "pythonw.vcxproj"),
+                                  "<ItemDefinitionGroup>", "<ItemDefinitionGroup><ClCompile><PreprocessorDefinitions>Py_NO_ENABLE_SHARED;%(PreprocessorDefinitions)</PreprocessorDefinitions></ClCompile>")
+
     @property
     def _solution_projects(self):
-        solution_path = os.path.join(self._source_subfolder, "PCBuild", "pcbuild.sln")
-        projects = set(m.group(1) for m in re.finditer("\"([^\"]+)\\.vcxproj\"", open(solution_path).read()))
-        discarded = self._msvc_discarded_projects
+        if self.options.shared:
+            solution_path = os.path.join(self._source_subfolder, "PCBuild", "pcbuild.sln")
+            projects = set(m.group(1) for m in re.finditer("\"([^\"]+)\\.vcxproj\"", open(solution_path).read()))
+            discarded = self._msvc_discarded_projects
 
-        def project_build(name):
-            if os.path.basename(name) in discarded:
-                return False
-            if "test" in name:
-                return False
-            return True
+            def project_build(name):
+                if os.path.basename(name) in discarded:
+                    return False
+                if "test" in name:
+                    return False
+                return True
 
-        projects = set(p for p in projects if project_build(p))
-        return projects
+            projects = set(p for p in projects if project_build(p))
+            return projects
+        else:
+            return ("pythoncore", "python", "pythonw")
 
     @property
     def _msvc_discarded_projects(self):
@@ -314,12 +346,13 @@ class CPythonConan(ConanFile):
                 upgraded = True
 
     def build(self):
-        if tools.Version(self.version) < "3.8.0":
-            if tools.Version(self.deps_cpp_info["mpdecimal"].version) >= "2.5.0":
-                raise ConanInvalidConfiguration("cpython versions lesser then 3.8.0 require a mpdecimal lesser then 2.5.0")
-        elif tools.Version(self.version) >= "3.9.0":
-            if tools.Version(self.deps_cpp_info["mpdecimal"].version) < "2.5.0":
-                raise ConanInvalidConfiguration("cpython 3.9.0 (and newer) requires (at least) mpdecimal 2.5.0")
+        if self._supports_modules:
+            if tools.Version(self.version) < "3.8.0":
+                if tools.Version(self.deps_cpp_info["mpdecimal"].version) >= "2.5.0":
+                    raise ConanInvalidConfiguration("cpython versions lesser then 3.8.0 require a mpdecimal lesser then 2.5.0")
+            elif tools.Version(self.version) >= "3.9.0":
+                if tools.Version(self.deps_cpp_info["mpdecimal"].version) < "2.5.0":
+                    raise ConanInvalidConfiguration("cpython 3.9.0 (and newer) requires (at least) mpdecimal 2.5.0")
 
         if self._with_libffi:
             if tools.Version(self.deps_cpp_info["libffi"].version) >= "3.3" and self.settings.compiler == "Visual Studio" and "d" in str(self.settings.compiler.runtime):
@@ -436,7 +469,7 @@ class CPythonConan(ConanFile):
     def package(self):
         self.copy("LICENSE", src=self._source_subfolder, dst="licenses")
         if self.settings.compiler == "Visual Studio":
-            if self._is_py2:
+            if self._is_py2 or not self.options.shared:
                 self._msvc_package_copy()
             else:
                 self._msvc_package_layout()
@@ -544,8 +577,8 @@ class CPythonConan(ConanFile):
             if self.settings.os == "Linux":
                 self.cpp_info.components["python"].system_libs.extend(["dl", "m", "pthread", "util"])
             elif self.settings.os == "Windows":
-                self.cpp_info.components["python"].system_libs.extend(["shlwapi", "version", "ws2_32"])
-        self.cpp_info.components["_common"].names["pkg_config"] = "_python_common"
+                self.cpp_info.components["python"].system_libs.extend(["pathcch", "shlwapi", "version", "ws2_32"])
+        self.cpp_info.components["python"].requires = ["zlib::zlib"]
         if self.settings.os != "Windows":
             self.cpp_info.components["python"].requires.append("libxcrypt::libxcrypt")
         self.cpp_info.components["python"].names["pkg_config"] = "python-{}.{}".format(py_version.major, py_version.minor)
@@ -561,32 +594,32 @@ class CPythonConan(ConanFile):
         self.cpp_info.components["_embed_copy"].requires = ["embed"]
         self.cpp_info.components["_embed_copy"].names["pkg_config"] = ["python{}-embed".format(py_version.major)]
 
-        # hidden components: the C extensions of python are built as dynamically loaded shared libraries.
-        # C extensions or applications with an embedded Python should not need to link to them..
-        self.cpp_info.components["_hidden"].requires = [
-            "openssl::openssl",
-            "expat::expat",
-            "mpdecimal::mpdecimal",
-            "zlib::zlib",
-        ]
-        if self._with_libffi:
-            self.cpp_info.components["_hidden"].requires.append("libffi::libffi")
-        if self.settings.os != "Windows":
-            self.cpp_info.components["_hidden"].requires.extend(["libuuid::libuuid", "libxcrypt::libxcrypt"])
-        if self.options.with_bz2:
-            self.cpp_info.components["_hidden"].requires.append("bzip2::bzip2")
-        if self.options.get_safe("with_gdbm", False):
-            self.cpp_info.components["_hidden"].requires.append("gdbm::gdbm")
-        if self.options.with_sqlite3:
-            self.cpp_info.components["_hidden"].requires.append("sqlite3::sqlite3")
-        if self.options.get_safe("with_curses", False):
-            self.cpp_info.components["_hidden"].requires.append("ncurses::ncurses")
-        if self.options.get_safe("with_bsddb"):
-            self.cpp_info.components["_hidden"].requires.append("libdb::libdb")
-        if self.options.get_safe("with_lzma"):
-            self.cpp_info.components["_hidden"].requires.append("xz_utils::xz_utils")
-        if self.options.get_safe("with_tkinter"):
-            self.cpp_info.components["_hidden"].requires.append("tk::tk")
+        if self._supports_modules:
+            # hidden components: the C extensions of python are built as dynamically loaded shared libraries.
+            # C extensions or applications with an embedded Python should not need to link to them..
+            self.cpp_info.components["_hidden"].requires = [
+                "openssl::openssl",
+                "expat::expat",
+                "mpdecimal::mpdecimal",
+            ]
+            if self._with_libffi:
+                self.cpp_info.components["_hidden"].requires.append("libffi::libffi")
+            if self.settings.os != "Windows":
+                self.cpp_info.components["_hidden"].requires.extend(["libuuid::libuuid", "libxcrypt::libxcrypt"])
+            if self.options.with_bz2:
+                self.cpp_info.components["_hidden"].requires.append("bzip2::bzip2")
+            if self.options.get_safe("with_gdbm", False):
+                self.cpp_info.components["_hidden"].requires.append("gdbm::gdbm")
+            if self.options.with_sqlite3:
+                self.cpp_info.components["_hidden"].requires.append("sqlite3::sqlite3")
+            if self.options.get_safe("with_curses", False):
+                self.cpp_info.components["_hidden"].requires.append("ncurses::ncurses")
+            if self.options.get_safe("with_bsddb"):
+                self.cpp_info.components["_hidden"].requires.append("libdb::libdb")
+            if self.options.get_safe("with_lzma"):
+                self.cpp_info.components["_hidden"].requires.append("xz_utils::xz_utils")
+            if self.options.get_safe("with_tkinter"):
+                self.cpp_info.components["_hidden"].requires.append("tk::tk")
 
         python = self._cpython_interpreter_path
         self.output.info("Setting PYTHON environment variable: {}".format(python))
