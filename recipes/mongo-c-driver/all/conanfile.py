@@ -48,7 +48,7 @@ class MongoCDriverConan(ConanFile):
 
     def requirements(self):
         if self.options.with_ssl == 'OPENSSL':
-            self.requires("openssl/1.1.1g")
+            self.requires("openssl/1.1.1h")
         if self.options.with_ssl == 'LIBRESSL':
             self.output.warn("Can be broken. Prefer OpenSSL instead of LIBRESSL")
             self.requires("libressl/3.2.0")
