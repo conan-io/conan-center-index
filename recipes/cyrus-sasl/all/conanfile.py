@@ -193,6 +193,7 @@ class CyrusSaslConan(ConanFile):
             os.remove(la_file)
 
     def package_info(self):
+        self.cpp_info.names["pkg_config"] = "libsasl2"
         self.cpp_info.libs = tools.collect_libs(self)
         bindir = os.path.join(self.package_folder, "bin")
         self.output.info("Appending PATH environment variable: {}".format(bindir))
