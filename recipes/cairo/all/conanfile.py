@@ -16,20 +16,20 @@ class CairoConan(ConanFile):
     settings = "os", "arch", "compiler", "build_type"
     options = {"shared": [True, False],
         "fPIC": [True, False],
-        "enable_ft": [True, False],
-        "enable_fc": [True, False],
-        "enable_xlib": [True, False],
-        "enable_xlib_xrender": [True, False],
-        "enable_xcb": [True, False],
-        "enable_glib": [True, False]}
+        "with_freetype": [True, False],
+        "with_fontconfig": [True, False],
+        "with_xlib": [True, False],
+        "with_xlib_xrender": [True, False],
+        "with_xcb": [True, False],
+        "with_glib": [True, False]}
     default_options = {'shared': False,
         'fPIC': True,
-        "enable_ft": True,
-        "enable_fc": True,
-        "enable_xlib": True,
-        "enable_xlib_xrender": False,
-        "enable_xcb": True,
-        "enable_glib": True}
+        "with_freetype": True,
+        "with_fontconfig": True,
+        "with_xlib": True,
+        "with_xlib_xrender": False,
+        "with_xcb": True,
+        "with_glib": True}
     generators = "pkg_config"
 
     _source_subfolder = "source_subfolder"
@@ -42,11 +42,11 @@ class CairoConan(ConanFile):
         del self.settings.compiler.cppstd
         if self.settings.os == 'Windows':
             del self.options.fPIC
-            del self.options.enable_fc
+            del self.options.with_fontconfig
         if self.settings.os != 'Linux':
-            del self.options.enable_xlib
-            del self.options.enable_xlib_xrender
-            del self.options.enable_xcb
+            del self.options.with_xlib
+            del self.options.with_xlib_xrender
+            del self.options.with_xcb
 
     def configure(self):
         del self.settings.compiler.cppstd
@@ -56,14 +56,14 @@ class CairoConan(ConanFile):
                 raise ConanInvalidConfiguration("MSVC build supports only Debug or Release build type")
 
     def requirements(self):
-        if self.options.enable_ft:
+        if self.options.with_freetype:
             self.requires("freetype/2.10.4")
-        if self.settings.os != "Windows" and self.options.enable_fc:
+        if self.options.get_safe("with_fontconfig", False):
             self.requires("fontconfig/2.13.91")
         if self.settings.os == 'Linux':
-            if self.options.enable_xlib or self.options.enable_xlib_xrender or self.options.enable_xcb:
+            if self.options.with_xlib or self.options.with_xlib_xrender or self.options.with_xcb:
                 self.requires("xorg/system")
-        if self.options.enable_glib:
+        if self.options.with_glib:
             self.requires("glib/2.67.0")
         self.requires("zlib/1.2.11")
         self.requires("pixman/0.40.0")
@@ -82,9 +82,7 @@ class CairoConan(ConanFile):
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
-
-        os.rename('cairo-%s' % self.version, self._source_subfolder)
-        
+        os.rename('cairo-%s' % self.version, self._source_subfolder)        
 
     def build(self):
         for patch in self.conan_data["patches"][self.version]:
@@ -130,14 +128,14 @@ class CairoConan(ConanFile):
         pkg_config_path = os.path.abspath('pkgconfig')
         pkg_config_path = tools.unix_path(pkg_config_path) if self.settings.os == 'Windows' else pkg_config_path
 
-        configure_args = ['--enable-ft' if self.options.enable_ft else '--disable-ft']
+        configure_args = ['--enable-ft' if self.options.with_freetype else '--disable-ft']
         if self.settings.os != "Windows":
-            configure_args.append('--enable-fc' if self.options.enable_fc else '--disable-fc')
+            configure_args.append('--enable-fc' if self.options.with_fontconfig else '--disable-fc')
         if self.settings.os == 'Linux':
-            configure_args.append('--enable-xlib' if self.options.enable_xlib else '--disable-xlib')
-            configure_args.append('--enable-xlib_xrender' if self.options.enable_xlib_xrender else '--disable-xlib_xrender')
-            configure_args.append('--enable-xcb' if self.options.enable_xcb else '--disable-xcb')
-        configure_args.append('--enable-gobject' if self.options.enable_glib else '--disable-gobject')
+            configure_args.append('--enable-xlib' if self.options.with_xlib else '--disable-xlib')
+            configure_args.append('--enable-xlib_xrender' if self.options.with_xlib_xrender else '--disable-xlib_xrender')
+            configure_args.append('--enable-xcb' if self.options.with_xcb else '--disable-xcb')
+        configure_args.append('--enable-gobject' if self.options.with_glib else '--disable-gobject')
         if self.options.shared:
             configure_args.extend(['--disable-static', '--enable-shared'])
         else:
@@ -168,7 +166,7 @@ class CairoConan(ConanFile):
             os.makedirs('pkgconfig')
             for pc_name in  glob.glob('%s/*.pc' % self.build_folder):
                 shutil.copy(pc_name, os.path.join('pkgconfig', os.path.basename(pc_name)))
-            if self.options.enable_ft:
+            if self.options.with_freetype:
                 tools.replace_in_file(os.path.join(self.source_folder, self._source_subfolder, "src", "cairo-ft-font.c"),
                                       '#if HAVE_UNISTD_H', '#ifdef HAVE_UNISTD_H')
             env_build = self._get_env_build()
@@ -216,23 +214,23 @@ class CairoConan(ConanFile):
         self.cpp_info.components["cairo_"].libs = ["cairo"]
         self.cpp_info.components["cairo_"].includedirs = [os.path.join('include', 'cairo')]
         self.cpp_info.components["cairo_"].requires = ["pixman::pixman", "libpng::libpng", "zlib::zlib"]
-        if self.options.enable_ft:
+        if self.options.with_freetype:
             self.cpp_info.components["cairo_"].requires.append("freetype::freetype")
         
         if self.settings.os == "Windows":
             if not self.options.shared:
                 self.cpp_info.components["cairo_"].defines.append('CAIRO_WIN32_STATIC_BUILD=1')
         else:
-            if self.options.enable_glib:
+            if self.options.with_glib:
                 self.cpp_info.components["cairo_"].requires.extend(["glib::gobject-2.0", "glib::glib-2.0"])
-            if self.options.enable_fc:
+            if self.options.with_fontconfig:
                 self.cpp_info.components["cairo_"].requires.append("fontconfig::fontconfig")
         if self.settings.os == "Linux":
-            if self.options.enable_xcb:
+            if self.options.with_xcb:
                 self.cpp_info.components["cairo_"].requires.extend(["xorg::xcb-shm", "xorg::xcb"])
-            if self.options.enable_xlib_xrender:
+            if self.options.with_xlib_xrender:
                 self.cpp_info.components["cairo_"].requires.extend(["xorg::xcb-render"])
-            if self.options.enable_xlib:
+            if self.options.with_xlib:
                 self.cpp_info.components["cairo_"].requires.extend(["xorg::x11", "xorg::xext"])
 
 
@@ -241,17 +239,17 @@ class CairoConan(ConanFile):
             self.cpp_info.components["cairo-win32"].requires = ["cairo_", "pixman::pixman", "libpng::libpng"]
             self.cpp_info.components["cairo-win32"].includedirs = [os.path.join('include', 'cairo')]
 
-        if self.options.enable_glib:
+        if self.options.with_glib:
             self.cpp_info.components["cairo-gobject"].names["pkg_config"] = "cairo-gobject"
             self.cpp_info.components["cairo-gobject"].libs = ["cairo-gobject"]
             self.cpp_info.components["cairo-gobject"].requires = ["cairo_", "glib::gobject-2.0", "glib::glib-2.0"]
             self.cpp_info.components["cairo-gobject"].includedirs = [os.path.join('include', 'cairo')]
         if self.settings.os != "Windows":
-            if self.options.enable_fc:
+            if self.options.with_fontconfig:
                 self.cpp_info.components["cairo-fc"].names["pkg_config"] = "cairo-fc"
                 self.cpp_info.components["cairo-fc"].requires = ["cairo_", "fontconfig::fontconfig"]
                 self.cpp_info.components["cairo-fc"].includedirs = [os.path.join('include', 'cairo')]
-            if self.options.enable_ft:
+            if self.options.with_freetype:
                 self.cpp_info.components["cairo-ft"].names["pkg_config"] = "cairo-ft"
                 self.cpp_info.components["cairo-ft"].requires = ["cairo_", "freetype::freetype"]
                 self.cpp_info.components["cairo-ft"].includedirs = [os.path.join('include', 'cairo')]
