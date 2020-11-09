@@ -103,6 +103,17 @@ class MongoCDriverConan(ConanFile):
         tools.replace_in_file(os.path.join(self._source_subfolder, "src", "libmongoc", "CMakeLists.txt"),
                               "SNAPPY_INCLUDE_DIRS",
                               "Snappy_INCLUDE_DIRS")
+        # Fix Openssl
+        tools.replace_in_file(os.path.join(self._source_subfolder, "src", "libmongoc", "CMakeLists.txt"),
+                              "OPENSSL_FOUND", "OpenSSL_FOUND")
+        tools.replace_in_file(os.path.join(self._source_subfolder, "src", "libmongoc", "CMakeLists.txt"),
+                              "OPENSSL_VERSION", "OpenSSL_VERSION")
+        tools.replace_in_file(os.path.join(self._source_subfolder, "src", "libmongoc", "CMakeLists.txt"),
+                              "OPENSSL_CRYPTO_LIBRARY", "OpenSSL_Crypto_LIBS")
+        tools.replace_in_file(os.path.join(self._source_subfolder, "src", "libmongoc", "CMakeLists.txt"),
+                              "OPENSSL_LIBRARIES", "OpenSSL_LIBRARIES")
+        tools.replace_in_file(os.path.join(self._source_subfolder, "src", "libmongoc", "CMakeLists.txt"),
+                              "OPENSSL_INCLUDE_DIR", "OpenSSL_INCLUDE_DIR")
 
         if self.options.with_ssl == 'LIBRESSL':
             tools.replace_in_file(
