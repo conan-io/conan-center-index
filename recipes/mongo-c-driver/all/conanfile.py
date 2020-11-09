@@ -10,7 +10,7 @@ class MongoCDriverConan(ConanFile):
     description = "A Cross Platform MongoDB Client Library for C"
     topics = ("conan", "libbson", "libmongoc", "mongo", "mongodb", "database", "db")
     settings = "os", "compiler", "build_type", "arch"
-    exports_sources = ["patches/**"]
+    exports_sources = ["CMakeLists.txt", "patches/**"]
     generators = "cmake"
     options = {
         "shared": [True, False],
@@ -122,10 +122,7 @@ class MongoCDriverConan(ConanFile):
         if self.options.with_ssl == 'OPENSSL':
             self._cmake.definitions["OPENSSL_ROOT_DIR"] = self.deps_cpp_info["openssl"].rootpath
 
-        self._cmake.configure(
-            source_folder=self._source_subfolder,
-            build_folder=self._build_subfolder
-        )
+        self._cmake.configure(build_folder=self._build_subfolder)
 
         return self._cmake
 
