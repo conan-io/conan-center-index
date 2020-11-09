@@ -25,7 +25,6 @@ class MongoCDriverConan(ConanFile):
         "with_zlib": 'BUNDLED'
     }
     generators = "cmake"
-    no_copy_source = True
     _cmake = None
 
     @property
@@ -43,9 +42,9 @@ class MongoCDriverConan(ConanFile):
             version=self.version
         )
         os.rename(extracted_dir, self._source_subfolder)
-        self._patch_sources()
 
     def build(self):
+        self._patch_sources()
         cmake = self._configure_cmake()
         cmake.build()
 
