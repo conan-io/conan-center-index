@@ -4,6 +4,7 @@ import os
 
 required_conan_version = ">=1.28.0"
 
+
 class MongoCDriverConan(ConanFile):
     name = "mongo-c-driver"
     license = "Apache-2.0"
