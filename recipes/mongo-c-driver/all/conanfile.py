@@ -187,6 +187,8 @@ class MongoCDriverConan(ConanFile):
         if not self.options.shared:
             self.cpp_info.components["mongoc"].defines = ["MONGOC_STATIC"]
         self.cpp_info.components["mongoc"].requires = ["bson"]
+        if self.settings.os == "Windows":
+            self.cpp_info.components["mongoc"].system_libs.append("ws2_32")
         if self.options.with_ssl == "DARWIN":
             self.cpp_info.components["mongoc"].frameworks.extend(["CoreFoundation", "Security"])
         elif self.options.with_ssl == "WINDOWS":
