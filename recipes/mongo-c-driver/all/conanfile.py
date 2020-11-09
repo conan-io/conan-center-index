@@ -12,19 +12,19 @@ class MongoCDriverConan(ConanFile):
     topics = ("conan", "libbson", "libmongoc", "mongo", "mongodb", "database", "db")
     settings = "os", "compiler", "build_type", "arch"
     exports_sources = ["CMakeLists.txt", "patches/**"]
-    generators = "cmake"
+    generators = "cmake", "cmake_find_package"
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
         "with_ssl": [False, 'DARWIN', 'WINDOWS', 'OPENSSL', 'LIBRESSL'],
-        "with_zlib": [False, 'SYSTEM', 'BUNDLED']
+        "with_zlib": [True, False]
     }
 
     default_options = {
         "shared": False,
         "fPIC": True,
         "with_ssl": 'OPENSSL',
-        "with_zlib": 'BUNDLED'
+        "with_zlib": True
     }
 
     _cmake = None
@@ -53,10 +53,8 @@ class MongoCDriverConan(ConanFile):
         if self.options.with_ssl == 'LIBRESSL':
             self.output.warn("Can be broken. Prefer OpenSSL instead of LIBRESSL")
             self.requires("libressl/3.2.0")
-        if self.options.with_zlib == 'SYSTEM':
+        if self.options.with_zlib:
             self.requires("zlib/1.2.11")
-            if tools.os_info.is_windows:
-                self.output.warn("Usage zlib provided by conan on Windows can be broken")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
@@ -113,15 +111,13 @@ class MongoCDriverConan(ConanFile):
         self._cmake.definitions["ENABLE_STATIC"] = "OFF" if self.options.shared else "ON"
         self._cmake.definitions["ENABLE_SSL"] = self.options.with_ssl
         self._cmake.definitions["ENABLE_SNAPPY"] = "OFF"
-        self._cmake.definitions["ENABLE_ZLIB"] = self.options.with_zlib
+        self._cmake.definitions["ENABLE_ZLIB"] = "SYSTEM" if self.options.with_zlib else "OFF"
         self._cmake.definitions["ENABLE_ZSTD"] = "OFF"
         self._cmake.definitions["ENABLE_SHM_COUNTERS"] = "OFF"
         self._cmake.definitions["ENABLE_BSON"] = "ON"
         self._cmake.definitions["ENABLE_MONGOC"] = "ON"
         if self.settings.os == "Windows":
             self._cmake.definitions["CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS"] = self.options.shared
-        if self.options.with_zlib == 'SYSTEM':
-            self._cmake.definitions["ZLIB_ROOT"] = self.deps_cpp_info["zlib"].rootpath
         if self.options.with_ssl == 'OPENSSL':
             self._cmake.definitions["OPENSSL_ROOT_DIR"] = self.deps_cpp_info["openssl"].rootpath
 
@@ -162,7 +158,7 @@ class MongoCDriverConan(ConanFile):
             self.cpp_info.components["mongoc"].requires.append("openssl::openssl")
         elif self.options.with_ssl == "LIBRESSL":
             self.cpp_info.components["mongoc"].requires.append("libressl::libressl")
-        if self.options.with_zlib == "SYSTEM":
+        if self.options.with_zlib:
             self.cpp_info.components["mongoc"].requires.append("zlib::zlib")
         # bson
         self.cpp_info.components["bson"].names["cmake_find_package"] = "bson" if self.options.shared else "bson_static"
