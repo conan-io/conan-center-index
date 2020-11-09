@@ -11,6 +11,7 @@ class MongoCDriverConan(ConanFile):
     topics = ("conan", "libbson", "libmongoc", "mongo", "mongodb", "database", "db")
     settings = "os", "compiler", "build_type", "arch"
     exports_sources = ["patches/**"]
+    generators = "cmake"
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
@@ -24,8 +25,8 @@ class MongoCDriverConan(ConanFile):
         "with_ssl": 'OPENSSL',
         "with_zlib": 'BUNDLED'
     }
-    generators = "cmake"
     no_copy_source = True
+
     _cmake = None
 
     @property
@@ -35,19 +36,6 @@ class MongoCDriverConan(ConanFile):
     @property
     def _build_subfolder(self):
         return "build_subfolder"
-
-    def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        extracted_dir = "{name}-{version}".format(
-            name=self.name,
-            version=self.version
-        )
-        os.rename(extracted_dir, self._source_subfolder)
-        self._patch_sources()
-
-    def build(self):
-        cmake = self._configure_cmake()
-        cmake.build()
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -70,48 +58,14 @@ class MongoCDriverConan(ConanFile):
             if tools.os_info.is_windows:
                 self.output.warn("Usage zlib provided by conan on Windows can be broken")
 
-    def package(self):
-        self.copy(pattern="COPYING", dst="licenses", src=self._source_subfolder)
-        self.copy(pattern="THIRD_PARTY_NOTICES", dst="licenses", src=self._source_subfolder)
-
-        cmake = self._configure_cmake()
-        cmake.install()
-        tools.rmdir(os.path.join(self.package_folder, "share"))
-        tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
-        tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
-
-    def package_info(self):
-        self.cpp_info.libs = ["bson-1.0", "mongoc-1.0"] if self.options.shared else \
-            ["bson-static-1.0", "mongoc-static-1.0"]
-        self.cpp_info.includedirs.append(os.path.join("include", "libmongoc-1.0"))
-        self.cpp_info.includedirs.append(os.path.join("include", "libbson-1.0"))
-
-    def _configure_cmake(self):
-        if self._cmake:
-            return self._cmake
-        self._cmake = CMake(self)
-        self._cmake.definitions["CMAKE_INSTALL_SYSTEM_RUNTIME_LIBS_SKIP"] = "TRUE"
-        self._cmake.definitions["ENABLE_TESTS"] = "OFF"
-        self._cmake.definitions["ENABLE_EXAMPLES"] = "OFF"
-        self._cmake.definitions["ENABLE_STATIC"] = "OFF" if self.options.shared else "ON"
-        self._cmake.definitions["ENABLE_SSL"] = self.options.with_ssl
-        self._cmake.definitions["ENABLE_ZLIB"] = self.options.with_zlib
-        self._cmake.definitions["ENABLE_SHM_COUNTERS"] = "OFF"
-        self._cmake.definitions["ENABLE_BSON"] = "ON"
-        self._cmake.definitions["ENABLE_MONGOC"] = "ON"
-        if self.settings.os == "Windows":
-            self._cmake.definitions["CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS"] = self.options.shared
-        if self.options.with_zlib == 'SYSTEM':
-            self._cmake.definitions["ZLIB_ROOT"] = self.deps_cpp_info["zlib"].rootpath
-        if self.options.with_ssl == 'OPENSSL':
-            self._cmake.definitions["OPENSSL_ROOT_DIR"] = self.deps_cpp_info["openssl"].rootpath
-
-        self._cmake.configure(
-            source_folder=self._source_subfolder,
-            build_folder=self._build_subfolder
+    def source(self):
+        tools.get(**self.conan_data["sources"][self.version])
+        extracted_dir = "{name}-{version}".format(
+            name=self.name,
+            version=self.version
         )
-
-        return self._cmake
+        os.rename(extracted_dir, self._source_subfolder)
+        self._patch_sources()
 
     def _patch_sources(self):
         for patch in self.conan_data["patches"][self.version]:
@@ -153,3 +107,50 @@ class MongoCDriverConan(ConanFile):
         set (LIBRESSL 1)
    endif ()
 '''
+
+    def _configure_cmake(self):
+        if self._cmake:
+            return self._cmake
+        self._cmake = CMake(self)
+        self._cmake.definitions["CMAKE_INSTALL_SYSTEM_RUNTIME_LIBS_SKIP"] = "TRUE"
+        self._cmake.definitions["ENABLE_TESTS"] = "OFF"
+        self._cmake.definitions["ENABLE_EXAMPLES"] = "OFF"
+        self._cmake.definitions["ENABLE_STATIC"] = "OFF" if self.options.shared else "ON"
+        self._cmake.definitions["ENABLE_SSL"] = self.options.with_ssl
+        self._cmake.definitions["ENABLE_ZLIB"] = self.options.with_zlib
+        self._cmake.definitions["ENABLE_SHM_COUNTERS"] = "OFF"
+        self._cmake.definitions["ENABLE_BSON"] = "ON"
+        self._cmake.definitions["ENABLE_MONGOC"] = "ON"
+        if self.settings.os == "Windows":
+            self._cmake.definitions["CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS"] = self.options.shared
+        if self.options.with_zlib == 'SYSTEM':
+            self._cmake.definitions["ZLIB_ROOT"] = self.deps_cpp_info["zlib"].rootpath
+        if self.options.with_ssl == 'OPENSSL':
+            self._cmake.definitions["OPENSSL_ROOT_DIR"] = self.deps_cpp_info["openssl"].rootpath
+
+        self._cmake.configure(
+            source_folder=self._source_subfolder,
+            build_folder=self._build_subfolder
+        )
+
+        return self._cmake
+
+    def build(self):
+        cmake = self._configure_cmake()
+        cmake.build()
+
+    def package(self):
+        self.copy(pattern="COPYING", dst="licenses", src=self._source_subfolder)
+        self.copy(pattern="THIRD_PARTY_NOTICES", dst="licenses", src=self._source_subfolder)
+
+        cmake = self._configure_cmake()
+        cmake.install()
+        tools.rmdir(os.path.join(self.package_folder, "share"))
+        tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
+        tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
+
+    def package_info(self):
+        self.cpp_info.libs = ["bson-1.0", "mongoc-1.0"] if self.options.shared else \
+            ["bson-static-1.0", "mongoc-static-1.0"]
+        self.cpp_info.includedirs.append(os.path.join("include", "libmongoc-1.0"))
+        self.cpp_info.includedirs.append(os.path.join("include", "libbson-1.0"))
