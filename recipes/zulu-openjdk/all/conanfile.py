@@ -39,7 +39,7 @@ class ZuluOpenJDK(ConanFile):
         pass # nothing to do, but this shall trigger no warnings ;-)
 
     def package(self):
-        self.copy(pattern="*", dst="bin", src=os.path.join(self._source_subfolder, "bin"))
+        self.copy(pattern="*", dst="bin", src=os.path.join(self._source_subfolder, "bin"), excludes=("msvcp140.dll", "vcruntime140.dll"))
         self.copy(pattern="*", dst="include", src=os.path.join(self._source_subfolder, "include"))
         self.copy(pattern="*", dst="lib", src=os.path.join(self._source_subfolder, "lib"))
         self.copy(pattern="*", dst="res", src=os.path.join(self._source_subfolder, "conf"))
