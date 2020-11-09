@@ -111,7 +111,9 @@ class MongoCDriverConan(ConanFile):
         self._cmake.definitions["ENABLE_EXAMPLES"] = "OFF"
         self._cmake.definitions["ENABLE_STATIC"] = "OFF" if self.options.shared else "ON"
         self._cmake.definitions["ENABLE_SSL"] = self.options.with_ssl
+        self._cmake.definitions["ENABLE_SNAPPY"] = "OFF"
         self._cmake.definitions["ENABLE_ZLIB"] = self.options.with_zlib
+        self._cmake.definitions["ENABLE_ZSTD"] = "OFF"
         self._cmake.definitions["ENABLE_SHM_COUNTERS"] = "OFF"
         self._cmake.definitions["ENABLE_BSON"] = "ON"
         self._cmake.definitions["ENABLE_MONGOC"] = "ON"
