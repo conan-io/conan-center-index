@@ -182,7 +182,11 @@ class MongoCDriverConan(ConanFile):
         if not self.options.shared:
             self.cpp_info.components["mongoc"].defines = ["MONGOC_STATIC"]
         self.cpp_info.components["mongoc"].requires = ["bson"]
-        if self.options.with_ssl == "OPENSSL":
+        if self.options.with_ssl == "DARWIN":
+            self.cpp_info.components["mongoc"].frameworks.extend(["CoreFoundation", "Security"])
+        elif self.options.with_ssl == "WINDOWS":
+            self.cpp_info.components["mongoc"].system_libs.extend(["secur32", "crypt32", "bcrypt"])
+        elif self.options.with_ssl == "OPENSSL":
             self.cpp_info.components["mongoc"].requires.append("openssl::openssl")
         elif self.options.with_ssl == "LIBRESSL":
             self.cpp_info.components["mongoc"].requires.append("libressl::libressl")
