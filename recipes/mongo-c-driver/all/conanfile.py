@@ -59,11 +59,7 @@ class MongoCDriverConan(ConanFile):
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
-        extracted_dir = "{name}-{version}".format(
-            name=self.name,
-            version=self.version
-        )
-        os.rename(extracted_dir, self._source_subfolder)
+        os.rename(self.name + "-" + self.version, self._source_subfolder)
 
     def _patch_sources(self):
         for patch in self.conan_data["patches"][self.version]:
