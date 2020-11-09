@@ -1,6 +1,7 @@
 from conans import ConanFile, CMake, tools
 import os
 
+required_conan_version = ">=1.28.0"
 
 class MongoCDriverConan(ConanFile):
     name = "mongo-c-driver"
@@ -144,7 +145,34 @@ class MongoCDriverConan(ConanFile):
         tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
 
     def package_info(self):
-        self.cpp_info.libs = ["bson-1.0", "mongoc-1.0"] if self.options.shared else \
-            ["bson-static-1.0", "mongoc-static-1.0"]
-        self.cpp_info.includedirs.append(os.path.join("include", "libmongoc-1.0"))
-        self.cpp_info.includedirs.append(os.path.join("include", "libbson-1.0"))
+        self.cpp_info.filenames["cmake_find_package"] = "mongoc"
+        self.cpp_info.filenames["cmake_find_package_multi"] = "mongoc"
+        self.cpp_info.names["cmake_find_package"] = "mongo"
+        self.cpp_info.names["cmake_find_package_multi"] = "mongo"
+        # mongoc
+        self.cpp_info.components["mongoc"].names["cmake_find_package"] = "mongoc" if self.options.shared else "mongoc_static"
+        self.cpp_info.components["mongoc"].names["cmake_find_package_multi"] = "mongoc" if self.options.shared else "mongoc_static"
+        self.cpp_info.components["mongoc"].names["pkg_config"] = "libmongoc-1.0" if self.options.shared else "libmongoc-static-1.0"
+        self.cpp_info.components["mongoc"].includedirs = [os.path.join("include", "libmongoc-1.0")]
+        self.cpp_info.components["mongoc"].libs = ["mongoc-1.0" if self.options.shared else "mongoc-static-1.0"]
+        if not self.options.shared:
+            self.cpp_info.components["mongoc"].defines = ["MONGOC_STATIC"]
+        self.cpp_info.components["mongoc"].requires = ["bson"]
+        if self.options.with_ssl == "OPENSSL":
+            self.cpp_info.components["mongoc"].requires.append("openssl::openssl")
+        elif self.options.with_ssl == "LIBRESSL":
+            self.cpp_info.components["mongoc"].requires.append("libressl::libressl")
+        if self.options.with_zlib == "SYSTEM":
+            self.cpp_info.components["mongoc"].requires.append("zlib::zlib")
+        # bson
+        self.cpp_info.components["bson"].names["cmake_find_package"] = "bson" if self.options.shared else "bson_static"
+        self.cpp_info.components["bson"].names["cmake_find_package_multi"] = "bson" if self.options.shared else "bson_static"
+        self.cpp_info.components["bson"].names["pkg_config"] = "libbson-1.0" if self.options.shared else "libbson-static-1.0"
+        self.cpp_info.components["bson"].includedirs = [os.path.join("include", "libbson-1.0")]
+        self.cpp_info.components["bson"].libs = ["bson-1.0" if self.options.shared else "bson-static-1.0"]
+        if not self.options.shared:
+            self.cpp_info.components["bson"].defines = ["BSON_STATIC"]
+        if self.settings.os == "Linux":
+            self.cpp_info.components["bson"].system_libs = ["m", "pthread", "rt"]
+        elif self.settings.os == "Windows":
+            self.cpp_info.components["bson"].system_libs = ["ws2_32"]
