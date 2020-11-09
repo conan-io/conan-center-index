@@ -83,6 +83,8 @@ class MongoCDriverConan(ConanFile):
     def package_info(self):
         self.cpp_info.libs = ["mongoc-1.0", "bson-1.0"] if self.options.shared else \
             ["mongoc-static-1.0", "bson-static-1.0"]
+        if not self.options.shared:
+            self.cpp_info.defines = ["BSON_STATIC", "MONGOC_STATIC"]
         self.cpp_info.includedirs.append(os.path.join("include", "libmongoc-1.0"))
         self.cpp_info.includedirs.append(os.path.join("include", "libbson-1.0"))
 
