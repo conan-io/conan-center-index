@@ -74,7 +74,7 @@ class CairoConan(ConanFile):
             self.build_requires('msys2/20200517')
         if not self._is_msvc:
             self.build_requires("libtool/2.4.6")
-        self.build_requires("pkgconf/1.7.3")
+            self.build_requires("pkgconf/1.7.3")
 
     @property
     def _is_msvc(self):
