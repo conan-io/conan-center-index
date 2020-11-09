@@ -46,7 +46,7 @@ class CPythonConan(ConanFile):
         "with_gdbm": True,
         "with_nis": False,
         "with_sqlite3": True,
-        "with_tkinter": True,
+        "with_tkinter": False,  # FIXME: re-enable once https://github.com/conan-io/conan-center-index/pull/3458 gets merged
         "with_curses": True,
 
         # Python 2 options
