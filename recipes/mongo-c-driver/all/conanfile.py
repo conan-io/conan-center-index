@@ -1,4 +1,5 @@
 from conans import ConanFile, CMake, tools
+from conans.errors import ConanInvalidConfiguration
 import os
 
 required_conan_version = ">=1.28.0"
@@ -50,6 +51,10 @@ class MongoCDriverConan(ConanFile):
         del self.settings.compiler.cppstd
         if self.options.shared:
             del self.options.fPIC
+        if self.options.with_ssl == "DARWIN" and not tools.is_apple_os(self.settings.os):
+            raise ConanInvalidConfiguration("with_ssl=DARWIN only allowed on Apple os family")
+        if self.options.with_ssl == "WINDOWS" and self.settings.os != "Windows":
+            raise ConanInvalidConfiguration("with_ssl=WINDOWS only allowed on Windows")
 
     def requirements(self):
         if self.options.with_ssl == 'OPENSSL':
