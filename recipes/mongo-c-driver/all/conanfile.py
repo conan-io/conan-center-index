@@ -172,13 +172,13 @@ class MongoCDriverConan(ConanFile):
         tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
 
     def package_info(self):
-        self.cpp_info.filenames["cmake_find_package"] = "mongoc"
-        self.cpp_info.filenames["cmake_find_package_multi"] = "mongoc"
+        self.cpp_info.filenames["cmake_find_package"] = "mongoc-1.0"
+        self.cpp_info.filenames["cmake_find_package_multi"] = "mongoc-1.0"
         self.cpp_info.names["cmake_find_package"] = "mongo"
         self.cpp_info.names["cmake_find_package_multi"] = "mongo"
         # mongoc
-        self.cpp_info.components["mongoc"].names["cmake_find_package"] = "mongoc" if self.options.shared else "mongoc_static"
-        self.cpp_info.components["mongoc"].names["cmake_find_package_multi"] = "mongoc" if self.options.shared else "mongoc_static"
+        self.cpp_info.components["mongoc"].names["cmake_find_package"] = "mongoc_shared" if self.options.shared else "mongoc_static"
+        self.cpp_info.components["mongoc"].names["cmake_find_package_multi"] = "mongoc_shared" if self.options.shared else "mongoc_static"
         self.cpp_info.components["mongoc"].names["pkg_config"] = "libmongoc-1.0" if self.options.shared else "libmongoc-static-1.0"
         self.cpp_info.components["mongoc"].includedirs = [os.path.join("include", "libmongoc-1.0")]
         self.cpp_info.components["mongoc"].libs = ["mongoc-1.0" if self.options.shared else "mongoc-static-1.0"]
@@ -210,8 +210,8 @@ class MongoCDriverConan(ConanFile):
         if self.options.srv:
             self.cpp_info.components["mongoc"].system_libs.append("dnsapi" if self.settings.os == "Windows" else "resolv")
         # bson
-        self.cpp_info.components["bson"].names["cmake_find_package"] = "bson" if self.options.shared else "bson_static"
-        self.cpp_info.components["bson"].names["cmake_find_package_multi"] = "bson" if self.options.shared else "bson_static"
+        self.cpp_info.components["bson"].names["cmake_find_package"] = "bson_shared" if self.options.shared else "bson_static"
+        self.cpp_info.components["bson"].names["cmake_find_package_multi"] = "bson_shared" if self.options.shared else "bson_static"
         self.cpp_info.components["bson"].names["pkg_config"] = "libbson-1.0" if self.options.shared else "libbson-static-1.0"
         self.cpp_info.components["bson"].includedirs = [os.path.join("include", "libbson-1.0")]
         self.cpp_info.components["bson"].libs = ["bson-1.0" if self.options.shared else "bson-static-1.0"]
