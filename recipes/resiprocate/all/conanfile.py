@@ -66,8 +66,9 @@ class ResiprocateConan(ConanFile):
 
     def package(self):
         self.copy("COPYING", src=self._source_subfolder, dst="licenses")
-        autotools = self._configure_autotools()
-        autotools.install()
+        with tools.chdir(self._source_subfolder):
+            autotools = self._configure_autotools()
+            autotools.install()
         tools.rmdir(os.path.join(os.path.join(self.package_folder, "share")))
         tools.remove_files_by_mask(os.path.join(self.package_folder), "*.la")
 
