@@ -99,7 +99,7 @@ class MongoCDriverConan(ConanFile):
             {"old": "include (FindSnappy)\nif (SNAPPY_INCLUDE_DIRS)",
              "new": "if(ENABLE_SNAPPY MATCHES \"ON\")\n  find_package(Snappy REQUIRED)"},
             {"old": "SNAPPY_LIBRARIES", "new": "Snappy_LIBRARIES"},
-            {"old": "SNAPPY_INCLUDE_DIRS", "new": "Snappy_LIBRARIES"},
+            {"old": "SNAPPY_INCLUDE_DIRS", "new": "Snappy_INCLUDE_DIRS"},
             # Fix Openssl
             {"old": "OPENSSL_FOUND", "new": "OpenSSL_FOUND"},
             {"old": "OPENSSL_VERSION", "new": "OpenSSL_VERSION"},
