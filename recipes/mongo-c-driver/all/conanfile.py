@@ -99,7 +99,7 @@ class MongoCDriverConan(ConanFile):
             {"old": "include (FindSnappy)\nif (SNAPPY_INCLUDE_DIRS)",
              "new": "if(ENABLE_SNAPPY MATCHES \"ON\")\n  find_package(Snappy REQUIRED)"},
             {"old": "SNAPPY_LIBRARIES", "new": "Snappy_LIBRARIES"},
-            {"old": "SNAPPY_INCLUDE_DIRS", "new": "Snappy_LIBRARIES"},
+            {"old": "SNAPPY_INCLUDE_DIRS", "new": "Snappy_INCLUDE_DIRS"},
             # Fix Openssl
             {"old": "OPENSSL_FOUND", "new": "OpenSSL_FOUND"},
             {"old": "OPENSSL_VERSION", "new": "OpenSSL_VERSION"},
@@ -114,7 +114,7 @@ class MongoCDriverConan(ConanFile):
                                   old_new["old"], old_new["new"])
 
     @property
-    def ssl_cmake_value(self):
+    def _ssl_cmake_value(self):
         return {
             "darwin": "DARWIN",
             "windows": "WINDOWS",
@@ -123,7 +123,7 @@ class MongoCDriverConan(ConanFile):
         }.get(str(self.options.with_ssl), "OFF")
 
     @property
-    def sasl_cmake_value(self):
+    def _sasl_cmake_value(self):
         return {
             "sspi": "SSPI",
             "cyrus": "CYRUS",
@@ -133,22 +133,33 @@ class MongoCDriverConan(ConanFile):
         if self._cmake:
             return self._cmake
         self._cmake = CMake(self)
-        self._cmake.definitions["CMAKE_INSTALL_SYSTEM_RUNTIME_LIBS_SKIP"] = "TRUE"
+        self._cmake.definitions["ENABLE_SSL"] = self._ssl_cmake_value
+        self._cmake.definitions["ENABLE_SASL"] = self._sasl_cmake_value
+        self._cmake.definitions["ENABLE_STATIC"] = "OFF" if self.options.shared else "ON"
         self._cmake.definitions["ENABLE_TESTS"] = "OFF"
         self._cmake.definitions["ENABLE_EXAMPLES"] = "OFF"
         self._cmake.definitions["ENABLE_SRV"] = "ON" if self.options.srv else "OFF"
-        self._cmake.definitions["ENABLE_STATIC"] = "OFF" if self.options.shared else "ON"
-        self._cmake.definitions["ENABLE_SSL"] = self.ssl_cmake_value
-        self._cmake.definitions["ENABLE_SASL"] = self.sasl_cmake_value
+        self._cmake.definitions["ENABLE_MAINTAINER_FLAGS"] = "OFF"
+        self._cmake.definitions["ENABLE_AUTOMATIC_INIT_AND_CLEANUP"] = "ON"
+        self._cmake.definitions["ENABLE_CRYPTO_SYSTEM_PROFILE"] = "OFF"
+        self._cmake.definitions["ENABLE_TRACING"] = "OFF"
+        self._cmake.definitions["ENABLE_COVERAGE"] = "OFF"
+        self._cmake.definitions["ENABLE_SHM_COUNTERS"] = "OFF"
+        self._cmake.definitions["ENABLE_MONGOC"] = "ON"
+        self._cmake.definitions["ENABLE_BSON"] = "ON"
         self._cmake.definitions["ENABLE_SNAPPY"] = "ON" if self.options.with_snappy else "OFF"
         self._cmake.definitions["ENABLE_ZLIB"] = "SYSTEM" if self.options.with_zlib else "OFF"
         self._cmake.definitions["ENABLE_ZSTD"] = "ON" if self.options.with_zstd else "OFF"
+        self._cmake.definitions["ENABLE_MAN_PAGES"] = False
+        self._cmake.definitions["ENABLE_HTML_DOCS"] = False
+        self._cmake.definitions["ENABLE_EXTRA_ALIGNMENT"] = True
+        self._cmake.definitions["ENABLE_RDTSCP"] = False
+        self._cmake.definitions["ENABLE_APPLE_FRAMEWORK"] = False
         self._cmake.definitions["ENABLE_ICU"] = "ON" if self.options.with_icu else "OFF"
-        self._cmake.definitions["ENABLE_SHM_COUNTERS"] = "OFF"
-        self._cmake.definitions["ENABLE_BSON"] = "ON"
-        self._cmake.definitions["ENABLE_MONGOC"] = "ON"
-        if self.settings.os == "Windows":
-            self._cmake.definitions["CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS"] = self.options.shared
+        self._cmake.definitions["ENABLE_UNINSTALL"] = False
+        self._cmake.definitions["ENABLE_CLIENT_SIDE_ENCRYPTION"] = "OFF" # libmongocrypt recipe not yet in CCI
+        self._cmake.definitions["ENABLE_MONGODB_AWS_AUTH"] = "AUTO"
+        self._cmake.definitions["ENABLE_PIC"] = self.options.get_safe("fPIC", True)
         if self.options.with_ssl == "openssl":
             self._cmake.definitions["OPENSSL_ROOT_DIR"] = self.deps_cpp_info["openssl"].rootpath
 
@@ -172,13 +183,13 @@ class MongoCDriverConan(ConanFile):
         tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
 
     def package_info(self):
-        self.cpp_info.filenames["cmake_find_package"] = "mongoc"
-        self.cpp_info.filenames["cmake_find_package_multi"] = "mongoc"
+        self.cpp_info.filenames["cmake_find_package"] = "mongoc-1.0"
+        self.cpp_info.filenames["cmake_find_package_multi"] = "mongoc-1.0"
         self.cpp_info.names["cmake_find_package"] = "mongo"
         self.cpp_info.names["cmake_find_package_multi"] = "mongo"
         # mongoc
-        self.cpp_info.components["mongoc"].names["cmake_find_package"] = "mongoc" if self.options.shared else "mongoc_static"
-        self.cpp_info.components["mongoc"].names["cmake_find_package_multi"] = "mongoc" if self.options.shared else "mongoc_static"
+        self.cpp_info.components["mongoc"].names["cmake_find_package"] = "mongoc_shared" if self.options.shared else "mongoc_static"
+        self.cpp_info.components["mongoc"].names["cmake_find_package_multi"] = "mongoc_shared" if self.options.shared else "mongoc_static"
         self.cpp_info.components["mongoc"].names["pkg_config"] = "libmongoc-1.0" if self.options.shared else "libmongoc-static-1.0"
         self.cpp_info.components["mongoc"].includedirs = [os.path.join("include", "libmongoc-1.0")]
         self.cpp_info.components["mongoc"].libs = ["mongoc-1.0" if self.options.shared else "mongoc-static-1.0"]
@@ -210,8 +221,8 @@ class MongoCDriverConan(ConanFile):
         if self.options.srv:
             self.cpp_info.components["mongoc"].system_libs.append("dnsapi" if self.settings.os == "Windows" else "resolv")
         # bson
-        self.cpp_info.components["bson"].names["cmake_find_package"] = "bson" if self.options.shared else "bson_static"
-        self.cpp_info.components["bson"].names["cmake_find_package_multi"] = "bson" if self.options.shared else "bson_static"
+        self.cpp_info.components["bson"].names["cmake_find_package"] = "bson_shared" if self.options.shared else "bson_static"
+        self.cpp_info.components["bson"].names["cmake_find_package_multi"] = "bson_shared" if self.options.shared else "bson_static"
         self.cpp_info.components["bson"].names["pkg_config"] = "libbson-1.0" if self.options.shared else "libbson-static-1.0"
         self.cpp_info.components["bson"].includedirs = [os.path.join("include", "libbson-1.0")]
         self.cpp_info.components["bson"].libs = ["bson-1.0" if self.options.shared else "bson-static-1.0"]
