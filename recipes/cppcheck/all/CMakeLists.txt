@@ -9,5 +9,6 @@ conan_global_flags()
 
 # Setup libraries to link
 set(Z3_LIBRARIES CONAN_PKG::z3)
+set(PCRE_LIBRARY CONAN_PKG::pcre)
 
 add_subdirectory(source_subfolder)
