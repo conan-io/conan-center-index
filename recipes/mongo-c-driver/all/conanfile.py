@@ -139,14 +139,26 @@ class MongoCDriverConan(ConanFile):
         self._cmake.definitions["ENABLE_TESTS"] = "OFF"
         self._cmake.definitions["ENABLE_EXAMPLES"] = "OFF"
         self._cmake.definitions["ENABLE_SRV"] = "ON" if self.options.srv else "OFF"
+        self._cmake.definitions["ENABLE_MAINTAINER_FLAGS"] = "OFF"
+        self._cmake.definitions["ENABLE_AUTOMATIC_INIT_AND_CLEANUP"] = "ON"
+        self._cmake.definitions["ENABLE_CRYPTO_SYSTEM_PROFILE"] = "OFF"
+        self._cmake.definitions["ENABLE_TRACING"] = "OFF"
+        self._cmake.definitions["ENABLE_COVERAGE"] = "OFF"
         self._cmake.definitions["ENABLE_SHM_COUNTERS"] = "OFF"
         self._cmake.definitions["ENABLE_MONGOC"] = "ON"
         self._cmake.definitions["ENABLE_BSON"] = "ON"
         self._cmake.definitions["ENABLE_SNAPPY"] = "ON" if self.options.with_snappy else "OFF"
         self._cmake.definitions["ENABLE_ZLIB"] = "SYSTEM" if self.options.with_zlib else "OFF"
         self._cmake.definitions["ENABLE_ZSTD"] = "ON" if self.options.with_zstd else "OFF"
+        self._cmake.definitions["ENABLE_MAN_PAGES"] = False
+        self._cmake.definitions["ENABLE_HTML_DOCS"] = False
+        self._cmake.definitions["ENABLE_EXTRA_ALIGNMENT"] = True
+        self._cmake.definitions["ENABLE_RDTSCP"] = False
+        self._cmake.definitions["ENABLE_APPLE_FRAMEWORK"] = False
         self._cmake.definitions["ENABLE_ICU"] = "ON" if self.options.with_icu else "OFF"
+        self._cmake.definitions["ENABLE_UNINSTALL"] = False
         self._cmake.definitions["ENABLE_CLIENT_SIDE_ENCRYPTION"] = "OFF" # libmongocrypt recipe not yet in CCI
+        self._cmake.definitions["ENABLE_MONGODB_AWS_AUTH"] = "AUTO"
         self._cmake.definitions["ENABLE_PIC"] = self.options.get_safe("fPIC", True)
         if self.options.with_ssl == "openssl":
             self._cmake.definitions["OPENSSL_ROOT_DIR"] = self.deps_cpp_info["openssl"].rootpath
