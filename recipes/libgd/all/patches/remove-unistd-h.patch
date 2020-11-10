@@ -1,0 +1,12 @@
+diff --git a/src/getopt.c b/src/getopt.c
+index 8651b87..b5eaa18 100644
+--- a/src/getopt.c
++++ b/src/getopt.c
+@@ -33,7 +33,6 @@
+ #include <stdio.h>
+ #include <stdlib.h>
+ #include <string.h>
+-#include <unistd.h>
+ 
+ int	opterr = 1,		/* if error message should be printed */
+ 	optind = 1,		/* index into parent argv vector */

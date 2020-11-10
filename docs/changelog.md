@@ -1,5 +1,17 @@
 # Changelog
 
+### 23-October-2020 - 17:13 CEST
+
+- [feature] ListProfiles: Add 'profiles' to inputs, make it required.
+- [feature] Tapaholes: Parameter to accept packages in order from a JSON list.
+- [fix] AutomaticMerge: Consider pagination when reading pull-request reviews.
+- [job] PopulateProperties: Compute and assign properties to packages-revs and recipe-revs.
+- [job] PromotePackages: Copy Conan packages and properties from one repo to another.
+
+### 19-October-2020 - 17:15 CEST
+
+- Updated Conan client to the 1.30.2 version in Windows and Mac agents.
+
 ### 14-October-2020 - 17:49 CEST
 
 - [hotfix] Use non greedy regex to capture the pull-request number.

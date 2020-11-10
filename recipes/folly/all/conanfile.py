@@ -179,7 +179,7 @@ class FollyConan(ConanFile):
         if Version(self.version) >= "2020.08.10.00":
             self.cpp_info.components["libfolly"].requires.append("fmt::fmt")
         if self.settings.os == "Linux":
-            self.cpp_info.components["libfolly"].system_libs.extend(["pthread", "dl"])
+            self.cpp_info.components["libfolly"].system_libs.extend(["pthread", "dl", "rt"])
         elif self.settings.os == "Windows":
             self.cpp_info.components["libfolly"].system_libs.extend(["ws2_32", "Iphlpapi", "Crypt32"])
         if (self.settings.os == "Linux" and self.settings.compiler == "clang" and

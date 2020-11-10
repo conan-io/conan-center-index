@@ -14,6 +14,16 @@ using valijson::SchemaParser;
 using valijson::Validator;
 using valijson::adapters::RapidJsonAdapter;
 
+// To check successful compilation
+#include <valijson/adapters/nlohmann_json_adapter.hpp>
+#include <valijson/utils/nlohmann_json_utils.hpp>
+
+#define PICOJSON_USE_INT64
+#include <valijson/adapters/picojson_adapter.hpp>
+#include <valijson/utils/picojson_utils.hpp>
+
+#include <valijson/internal/optional.hpp>
+
 void check_document(const Schema& mySchema, const char* filename, bool is_valid_expectation) {
     rapidjson::Document myTargetDoc;
     if (!valijson::utils::loadDocument(filename, myTargetDoc)) {

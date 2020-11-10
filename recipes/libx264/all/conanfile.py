@@ -89,7 +89,14 @@ class LibX264Conan(ConanFile):
             if tools.is_apple_os(self.settings.os) and self.settings.get_safe("os.version"):
                 self._autotools.flags.append(tools.apple_deployment_target_flag(self.settings.os,
                                                                                 self.settings.os.version))
-            self._autotools.configure(args=args, build=False, vars=self._override_env, configure_dir=self._source_subfolder)
+            build_canonical_name = None
+            host_canonical_name = None
+            if self.settings.compiler == "Visual Studio":
+                # autotools does not know about the msvc canonical name(s)
+                build_canonical_name = False
+                host_canonical_name = False
+            self._autotools.configure(args=args, vars=self._override_env, configure_dir=self._source_subfolder, build=build_canonical_name, host=host_canonical_name)
+
         return self._autotools
 
     def build(self):
