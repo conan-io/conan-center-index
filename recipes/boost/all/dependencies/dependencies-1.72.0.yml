@@ -260,4 +260,7 @@ requirements:
   - icu
   stacktrace:
   - backtrace
+static_only:
+- boost_exception
+- boost_test_exec_monitor
 version: 1.72.0

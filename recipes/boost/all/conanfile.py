@@ -182,7 +182,7 @@ class BoostConan(ConanFile):
                 if not self.options.get_safe('without_%s' % lib):
                     raise ConanInvalidConfiguration("Boost '%s' library requires multi threading" % lib)
 
-        if self.settings.compiler == "Visual Studio" and "MT" in self.settings.compiler.runtime and self.options.shared:
+        if self.settings.compiler == "Visual Studio" and "MT" in str(self.settings.compiler.runtime) and self.options.shared:
             raise ConanInvalidConfiguration("Boost can not be built as shared library with MT runtime.")
 
     def _check_options(self):
@@ -625,8 +625,9 @@ class BoostConan(ConanFile):
             add_defines(self.options.lzma, "xz_utils")
             add_defines(self.options.zstd, "zstd")
 
-        if self._is_msvc and self.settings.compiler.runtime:
+        if self._is_msvc:
             flags.append("runtime-link=%s" % ("static" if "MT" in str(self.settings.compiler.runtime) else "shared"))
+            flags.append("runtime-debugging=%s" % ("on" if "d" in str(self.settings.compiler.runtime) else "off"))
 
         # For details https://boostorg.github.io/build/manual/master/index.html
         flags.append("threading=%s" % ("single" if not self.options.multithreading else "multi" ))
@@ -852,30 +853,41 @@ class BoostConan(ConanFile):
 
     @property
     def _toolset(self):
-        compiler = str(self.settings.compiler)
         if self._is_msvc:
             return "msvc"
-        elif self.settings.os == "Windows" and compiler == "clang":
+        elif self.settings.os == "Windows" and self.settings.compiler == "clang":
             return "clang-win"
-        elif self.settings.os == "Emscripten" and compiler == "clang":
+        elif self.settings.os == "Emscripten" and self.settings.compiler == "clang":
             return "emscripten"
-        elif compiler == "gcc" and tools.is_apple_os(self.settings.os):
+        elif self.settings.compiler == "gcc" and tools.is_apple_os(self.settings.os):
             return "darwin"
-        elif compiler == "apple-clang":
+        elif self.settings.compiler == "apple-clang":
             return "clang-darwin"
-        elif self.settings.os == "Android" and compiler == "clang":
+        elif self.settings.os == "Android" and self.settings.compiler == "clang":
             return "clang-linux"
-        elif str(self.settings.compiler) in ["clang", "gcc"]:
-            return compiler
-        elif compiler == "sun-cc":
+        elif self.settings.compiler in ["clang", "gcc"]:
+            return str(self.settings.compiler)
+        elif self.settings.compiler == "sun-cc":
             return "sunpro"
-        elif compiler == "intel":
-            toolset = {"Macos": "intel-darwin",
-                       "Windows": "intel-win",
-                       "Linux": "intel-linux"}.get(str(self.settings.os))
-            return toolset
+        elif self.settings.compiler == "intel":
+            return {
+                "Macos": "intel-darwin",
+                "Windows": "intel-win",
+                "Linux": "intel-linux",
+            }[str(self.settings.os)]
         else:
-            return compiler
+            return str(self.settings.compiler)
+
+    @property
+    def _toolset_tag(self):
+        if self._is_msvc:
+            return "vc{}".format(self._toolset_version.replace(".",""))
+        else:
+            # FIXME: missing toolset tags for compilers (see self._toolset)
+            compiler = str(self.settings.compiler)
+            if self.settings.compiler == "apple-clang":
+                compiler = "darwin"
+            return "{}{}".format(compiler, self.settings.compiler.version)
 
     ####################################################################
 
@@ -890,6 +902,17 @@ class BoostConan(ConanFile):
 
         if self.settings.os == "Emscripten":
             self._create_emscripten_libs()
+
+        if self._is_msvc and self.options.shared:
+            # Some boost releases contain both static and shared variants of some libraries (if shared=True)
+            all_libs = set(tools.collect_libs(self, "lib"))
+            static_libs = set(l for l in all_libs if l.startswith("lib"))
+            shared_libs = all_libs.difference(static_libs)
+            static_libs = set(l[3:] for l in static_libs)
+            common_libs = static_libs.intersection(shared_libs)
+            for common_lib in common_libs:
+                self.output.info("Unlinking static duplicate library: {}".format(os.path.join(self.package_folder, "lib", "lib{}.lib".format(common_lib))))
+                os.unlink(os.path.join(self.package_folder, "lib", "lib{}.lib".format(common_lib)))
 
     def _create_emscripten_libs(self):
         # Boost Build doesn't create the libraries, but it gets close,
@@ -955,20 +978,45 @@ class BoostConan(ConanFile):
         self.cpp_info.components["_libboost"].requires = ["headers"]
         self.cpp_info.components["_libboost"].bindirs.append("lib")
 
+        libsuffix = ""
         if self._is_versioned_layout:
-            version_tokens = str(self.version).split(".")
-            if len(version_tokens) >= 2:
-                major = version_tokens[0]
-                minor = version_tokens[1]
-                boost_version_tag = "boost-%s_%s" % (major, minor)
-                self.cpp_info.components["headers"].includedirs = [os.path.join(self.package_folder, "include", boost_version_tag)]
+            version = tools.Version(self.version)
+            self.cpp_info.components["headers"].includedirs.append(os.path.join("include", "boost-{}_{}".format(version.major, version.minor)))
 
-        libprefix = "lib" if self.settings.compiler == "Visual Studio" else ""
+            # https://www.boost.org/doc/libs/1_73_0/more/getting_started/windows.html#library-naming
+            toolset_tag = "-{}".format(self._toolset_tag)
+            threading_tag = "-mt" if self.options.multithreading else ""
+            abi_tag = ""
+            if self._is_msvc:
+                # FIXME: add 'y' when using cpython cci package and when python is built in debug mode
+                static_runtime_key = "s" if "MT" in str(self.settings.compiler.runtime) else ""
+                debug_runtime_key = "g" if "d" in str(self.settings.compiler.runtime) else ""
+                debug_key = "d" if self.settings.build_type == "Debug" else ""
+                abi = static_runtime_key + debug_runtime_key + debug_key
+                if abi:
+                    abi_tag = "-{}".format(abi)
+
+            arch_tag = "-{}{}".format(self._b2_architecture[0], self._b2_address_model)
+            version = tools.Version(self.version)
+            if not version.patch or version.patch == "0":
+                version_tag = "-{}_{}".format(version.major, version.minor)
+            else:
+                version_tag = "-{}_{}_{}".format(version.major, version.minor, version.patch)
+            libsuffix = toolset_tag + threading_tag + abi_tag + arch_tag + version_tag
+            self.output.info("Versioning library suffix: {}".format(libsuffix))
+
         libformatdata = {}
         if not self.options.without_python:
             pyversion = tools.Version(self._python_version)
             libformatdata["py_major"] = pyversion.major
             libformatdata["py_minor"] = pyversion.minor
+
+        def add_libprefix(n):
+            """ On MSVC, static libraries are built with a 'lib' prefix. Some libraries do not support shared, so are always built as a static library. """
+            libprefix = ""
+            if self.settings.compiler == "Visual Studio" and (not self.options.shared or n in self._dependencies["static_only"]):
+                libprefix = "lib"
+            return libprefix + n
 
         modules_seen = set()
         detected_libraries = set(tools.collect_libs(self))
@@ -976,10 +1024,10 @@ class BoostConan(ConanFile):
         for module in self._iter_modules():
             if self.options.get_safe("without_{}".format(module), False) or not all(d in modules_seen for d in self._dependencies["dependencies"][module]):
                 continue
-            module_libraries = [libprefix + lib.format(**libformatdata) for lib in self._dependencies["libs"][module]]
+
+            module_libraries = [add_libprefix(lib.format(**libformatdata)) + libsuffix for lib in self._dependencies["libs"][module]]
             if all(l in detected_libraries for l in module_libraries):
                 modules_seen.add(module)
-
                 used_libraries = used_libraries.union(module_libraries)
                 self.cpp_info.components[module].libs = module_libraries
 

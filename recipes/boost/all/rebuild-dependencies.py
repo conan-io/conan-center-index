@@ -79,6 +79,7 @@ class BoostDependenciesExport(object):
     dependencies: Dict[str, List[str]] = dataclasses.field(default_factory=dict)
     libs: Dict[str, List[str]] = dataclasses.field(default_factory=dict)
     requirements: Dict[str, List[str]] = dataclasses.field(default_factory=dict)
+    static_only: List[str] = dataclasses.field(default_factory=list)
 
 
 @dataclasses.dataclass
@@ -172,12 +173,12 @@ class BoostDependencyBuilder(object):
         return list(res)
 
     def _grep_requirements(self, component: str) -> List[str]:
-        jam = self.boost_path /  "libs" / component / "build" / "Jamfile.v2"
+        jam = self.boost_path / "libs" / component / "build" / "Jamfile.v2"
         if not jam.is_file():
-            jam = self.boost_path /  "libs" / component / "build" / "Jamfile"
+            jam = self.boost_path / "libs" / component / "build" / "Jamfile"
         if not jam.is_file():
-            sys.stderr.print("Can't find Jamfile for {}. Unable to determine dependencies.\n")
-            return None
+            sys.stderr.write("Can't find Jamfile for {}. Unable to determine dependencies.\n")
+            return []
         contents = jam.open().read()
 
         using = self._grep_libs("\n(.*)using\\s+([^ ;:]+)\\s*", contents)
@@ -241,7 +242,7 @@ class BoostDependencyBuilder(object):
             if system_libs:
                 sys.stderr.write("WARNING: Module '{}' ({}) has system libraries: {}\n".format(conf_option, self.boost_version, system_libs))
             if unknown_libs:
-                sys.stderr.write("WARNING: Module '{}' ({})has unknown libs: {}\n".format(conf_option, self.boost_version, unknown_libs))
+                sys.stderr.write("WARNING: Module '{}' ({}) has unknown libs: {}\n".format(conf_option, self.boost_version, unknown_libs))
             if conan_requirements:
                 requirements[conf_option] = conan_requirements
 
@@ -251,6 +252,7 @@ class BoostDependencyBuilder(object):
                 configure_options=configure_options,
                 dependencies=filtered_dependency_tree,
                 requirements=requirements,
+                static_only=[],
             ),
             buildables=buildables,
         )
@@ -313,6 +315,7 @@ class BoostDependencyBuilder(object):
             buildable_libs = re.findall("[ \n](boost-)?lib ([a-zA-Z0-9_]+)[ \n]", jam_text)
             buildable_libs = set("boost_{}".format(lib) if lib_prefix else lib for lib_prefix, lib in buildable_libs)
             buildable_libs = set(l[len("boost_"):] for l in buildable_libs if l.startswith("boost_"))  # list(filter(lambda l: l.startswith("boost"), buildable_libs))
+
             if not buildable_libs:
                 # Some boost releases support multiple python versions
                 if buildable == "python":
@@ -345,6 +348,10 @@ class BoostDependencyBuilder(object):
             libraries["numpy"][0] += "{py_major}{py_minor}"
 
         boost_dependencies.export.libs = libraries
+        boost_dependencies.export.static_only = [
+            "boost_exception",
+            "boost_test_exec_monitor",
+        ]
 
         return boost_dependencies
 
