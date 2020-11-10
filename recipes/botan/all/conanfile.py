@@ -185,7 +185,7 @@ class BotanConan(ConanFile):
                 'or "compiler.libcxx=libc++"')
 
     def _validate_v2_14(self):
-        """disallow configurations that cause issues in Botan >= 2.14.0"""
+        """ Disallow configurations that cause issues in Botan >= 2.14.0 """
 
         compiler = self.settings.compiler
         compiler_version = Version(compiler.version.value)
