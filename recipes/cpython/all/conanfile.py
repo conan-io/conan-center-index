@@ -261,39 +261,63 @@ class CPythonConan(ConanFile):
             tools.replace_in_file(os.path.join(self._source_subfolder, "PCbuild", "pythoncore.vcxproj"),
                                   "<PreprocessorDefinitions>","<PreprocessorDefinitions>Py_NO_BUILD_SHARED;")
             tools.replace_in_file(os.path.join(self._source_subfolder, "PCbuild", "pythoncore.vcxproj"),
-                                  "Py_ENABLE_SHARED", "Py_NO_ENABLE_SHARED", strict=False)
+                                  "Py_ENABLE_SHARED", "Py_NO_ENABLE_SHARED")
             tools.replace_in_file(os.path.join(self._source_subfolder, "PCbuild", "pythoncore.vcxproj"),
                                   "DynamicLibrary", "StaticLibrary")
 
             tools.replace_in_file(os.path.join(self._source_subfolder, "PCbuild", "python.vcxproj"),
                                   "<Link>", "<Link><AdditionalDependencies>shlwapi.lib;ws2_32.lib;pathcch.lib;version.lib;%(AdditionalDependencies)</AdditionalDependencies>")
             tools.replace_in_file(os.path.join(self._source_subfolder, "PCbuild", "python.vcxproj"),
-                                  "<PreprocessorDefinitions>","<PreprocessorDefinitions>Py_NO_ENABLE_SHARED;")
+                                  "<PreprocessorDefinitions>", "<PreprocessorDefinitions>Py_NO_ENABLE_SHARED;")
             py_version = tools.Version(self.version)
+
             tools.replace_in_file(os.path.join(self._source_subfolder, "PCbuild", "pythonw.vcxproj"),
-                                  "<Link>", "<Link><AdditionalDependencies>python{}{}.lib;shlwapi.lib;ws2_32.lib;pathcch.lib;version.lib;%(AdditionalDependencies)</AdditionalDependencies>".format(py_version.major, py_version.minor))
+                                  "<Link>", "<Link><AdditionalDependencies>shlwapi.lib;ws2_32.lib;pathcch.lib;version.lib;%(AdditionalDependencies)</AdditionalDependencies>")
             tools.replace_in_file(os.path.join(self._source_subfolder, "PCbuild", "pythonw.vcxproj"),
                                   "<ItemDefinitionGroup>", "<ItemDefinitionGroup><ClCompile><PreprocessorDefinitions>Py_NO_ENABLE_SHARED;%(PreprocessorDefinitions)</PreprocessorDefinitions></ClCompile>")
 
-            # Remove solution project to avoid upgrading the complete solution which is now broken due to missing dependencies (missing msbuild include files)
-            # (it would be fine to remove this solution unconditionally and upgrade every project on demand)
-            os.unlink(os.path.join(self._source_subfolder, "PCbuild", "pcbuild.sln"))
+    def _upgrade_single_project_file(self, project_file):
+        """
+        `devenv /upgrade <project.vcxproj>` will upgrade *ALL* projects referenced by the project.
+        By temporarily moving the solution project, only one project is upgraded
+        This is needed for static cpython or for disabled optional dependencies (e.g. tkinter=False)
+        Restore it afterwards because it is needed to build some targets.
+        """
+        os.rename(os.path.join(self._source_subfolder, "PCbuild", "pcbuild.sln"),
+                  os.path.join(self._source_subfolder, "PCbuild", "pcbuild.sln.bak"))
+        os.rename(os.path.join(self._source_subfolder, "PCbuild", "pcbuild.proj"),
+                  os.path.join(self._source_subfolder, "PCbuild", "pcbuild.proj.bak"))
+        with tools.vcvars(self.settings):
+            self.run("devenv \"{}\" /upgrade".format(project_file), run_environment=True)
+        os.rename(os.path.join(self._source_subfolder, "PCbuild", "pcbuild.sln.bak"),
+                  os.path.join(self._source_subfolder, "PCbuild", "pcbuild.sln"))
+        os.rename(os.path.join(self._source_subfolder, "PCbuild", "pcbuild.proj.bak"),
+                  os.path.join(self._source_subfolder, "PCbuild", "pcbuild.proj"))
 
     @property
     def _solution_projects(self):
         if self.options.shared:
             solution_path = os.path.join(self._source_subfolder, "PCbuild", "pcbuild.sln")
             projects = set(m.group(1) for m in re.finditer("\"([^\"]+)\\.vcxproj\"", open(solution_path).read()))
-            discarded = self._msvc_discarded_projects
 
             def project_build(name):
-                if os.path.basename(name) in discarded:
+                if os.path.basename(name) in self._msvc_discarded_projects:
                     return False
                 if "test" in name:
                     return False
                 return True
 
-            projects = set(p for p in projects if project_build(p))
+            def sort_importance(key):
+                importance = (
+                    "pythoncore",   # The python library MUST be built first. All modules and executables depend on it
+                    "python",       # Build the python executable next (for convenience, when debugging)
+                )
+                try:
+                    return importance.index(key)
+                except ValueError:
+                    return len(importance)
+
+            projects = sorted((p for p in projects if project_build(p)), key=sort_importance)
             return projects
         else:
             return "pythoncore", "python", "pythonw"
@@ -340,14 +364,13 @@ class CPythonConan(ConanFile):
         projects = self._solution_projects
         self.output.info("Building {} Visual Studio projects: {}".format(len(projects), projects))
 
-        upgrade_next = True
         with tools.no_op():
-            for project_i, project in enumerate(projects):
+            for project_i, project in enumerate(projects, 1):
                 self.output.info("[{}/{}] Building project '{}'...".format(project_i, len(projects), project))
                 project_file = os.path.join(self._source_subfolder, "PCbuild", project + ".vcxproj")
-                msbuild.build(project_file, upgrade_project=upgrade_next, build_type="Debug" if self.settings.build_type == "Debug" else "Release",
+                self._upgrade_single_project_file(project_file)
+                msbuild.build(project_file, upgrade_project=False, build_type="Debug" if self.settings.build_type == "Debug" else "Release",
                               platforms=self._msvc_archs, properties=msbuild_properties)
-                upgrade_next = upgrade_next and not self._supports_modules
 
     def build(self):
         if self._supports_modules:
