@@ -114,7 +114,7 @@ class MongoCDriverConan(ConanFile):
                                   old_new["old"], old_new["new"])
 
     @property
-    def ssl_cmake_value(self):
+    def _ssl_cmake_value(self):
         return {
             "darwin": "DARWIN",
             "windows": "WINDOWS",
@@ -123,7 +123,7 @@ class MongoCDriverConan(ConanFile):
         }.get(str(self.options.with_ssl), "OFF")
 
     @property
-    def sasl_cmake_value(self):
+    def _sasl_cmake_value(self):
         return {
             "sspi": "SSPI",
             "cyrus": "CYRUS",
@@ -138,8 +138,8 @@ class MongoCDriverConan(ConanFile):
         self._cmake.definitions["ENABLE_EXAMPLES"] = "OFF"
         self._cmake.definitions["ENABLE_SRV"] = "ON" if self.options.srv else "OFF"
         self._cmake.definitions["ENABLE_STATIC"] = "OFF" if self.options.shared else "ON"
-        self._cmake.definitions["ENABLE_SSL"] = self.ssl_cmake_value
-        self._cmake.definitions["ENABLE_SASL"] = self.sasl_cmake_value
+        self._cmake.definitions["ENABLE_SSL"] = self._ssl_cmake_value
+        self._cmake.definitions["ENABLE_SASL"] = self._sasl_cmake_value
         self._cmake.definitions["ENABLE_SNAPPY"] = "ON" if self.options.with_snappy else "OFF"
         self._cmake.definitions["ENABLE_ZLIB"] = "SYSTEM" if self.options.with_zlib else "OFF"
         self._cmake.definitions["ENABLE_ZSTD"] = "ON" if self.options.with_zstd else "OFF"
