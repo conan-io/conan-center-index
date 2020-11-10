@@ -63,7 +63,7 @@ class OpenCVConan(ConanFile):
     def build_requirements(self):
         if self.settings.os == "Linux":
             self.build_requires("gtk/system")
-            self.build_requires("gtkmm/system")
+            # self.build_requires("gtkmm/system")
 
     def requirements(self):
         self.requires("zlib/1.2.11")
@@ -270,18 +270,18 @@ class OpenCVConan(ConanFile):
 
         add_components([
             {"target": "opencv_core",       "lib": "core",       "requires": ["zlib::zlib"] + tbb()},
-            {"target": "opencv_flann",      "lib": "flann",      "requires": ["opencv_core"] + tbb()},
-            {"target": "opencv_imgproc",    "lib": "imgproc",    "requires": ["opencv_core"] + tbb()},
-            {"target": "opencv_imgcodecs",  "lib": "imgcodecs",  "requires": ["opencv_core", "opencv_imgproc"] + tbb()},
-            {"target": "opencv_highgui",    "lib": "highgui",    "requires": ["opencv_core", "opencv_imgproc", "opencv_imgcodecs"] + eigen() + tbb() + imageformats_deps()},
-            {"target": "opencv_features2d", "lib": "features2d", "requires": ["opencv_core", "opencv_flann", "opencv_imgproc", "opencv_highgui"] + tbb()},
-            {"target": "opencv_calib3d",    "lib": "calib3d",    "requires": ["opencv_core", "opencv_flann", "opencv_imgproc", "opencv_highgui", "opencv_features2d"] + tbb()},
-            {"target": "opencv_ml",         "lib": "ml",         "requires": ["opencv_core"] + tbb()},
-            {"target": "opencv_video",      "lib": "video",      "requires": ["opencv_core", "opencv_imgproc"] + tbb()},
-            {"target": "opencv_videoio",    "lib": "videoio",    "requires": ["opencv_core", "opencv_imgproc", "opencv_video"] + tbb()},
-            {"target": "opencv_objdetect",  "lib": "objdetect",  "requires": ["opencv_core", "opencv_imgproc", "opencv_highgui"] + tbb()},
-            {"target": "opencv_photo",      "lib": "photo",      "requires": ["opencv_core", "opencv_imgproc"] + tbb()},
-            {"target": "opencv_stitching",  "lib": "stitching",  "requires": ["opencv_core", "opencv_flann", "opencv_imgproc", "opencv_highgui", "opencv_features2d", "opencv_calib3d", "opencv_ml", "opencv_video", "opencv_objdetect", "opencv_photo"] + tbb()},
+            {"target": "opencv_flann",      "lib": "flann",      "requires": ["opencv_core"]},
+            {"target": "opencv_imgproc",    "lib": "imgproc",    "requires": ["opencv_core"]},
+            {"target": "opencv_imgcodecs",  "lib": "imgcodecs",  "requires": ["opencv_core", "opencv_imgproc"]},
+            {"target": "opencv_highgui",    "lib": "highgui",    "requires": ["opencv_core", "opencv_imgproc", "opencv_imgcodecs"] + eigen() + imageformats_deps()},
+            {"target": "opencv_features2d", "lib": "features2d", "requires": ["opencv_core", "opencv_flann", "opencv_imgproc", "opencv_highgui"]},
+            {"target": "opencv_calib3d",    "lib": "calib3d",    "requires": ["opencv_core", "opencv_flann", "opencv_imgproc", "opencv_highgui", "opencv_features2d"]},
+            {"target": "opencv_ml",         "lib": "ml",         "requires": ["opencv_core"]},
+            {"target": "opencv_video",      "lib": "video",      "requires": ["opencv_core", "opencv_imgproc"]},
+            {"target": "opencv_videoio",    "lib": "videoio",    "requires": ["opencv_core", "opencv_imgproc", "opencv_video"]},
+            {"target": "opencv_objdetect",  "lib": "objdetect",  "requires": ["opencv_core", "opencv_imgproc", "opencv_highgui"]},
+            {"target": "opencv_photo",      "lib": "photo",      "requires": ["opencv_core", "opencv_imgproc"]},
+            {"target": "opencv_stitching",  "lib": "stitching",  "requires": ["opencv_core", "opencv_flann", "opencv_imgproc", "opencv_highgui", "opencv_features2d", "opencv_calib3d", "opencv_ml", "opencv_video", "opencv_objdetect", "opencv_photo"]},
         ])
 
         if self.settings.os == "Windows":
