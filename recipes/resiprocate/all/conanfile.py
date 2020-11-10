@@ -1,4 +1,5 @@
 import os
+import shutil
 from conans import ConanFile, AutoToolsBuildEnvironment, tools
 
 
@@ -40,6 +41,7 @@ class ResiprocateConan(ConanFile):
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
+        shutil.rmtree(self._source_subfolder, ignore_errors=True)
         os.rename("{}-{}".format(self.name, self.version), self._source_subfolder)
 
     def _configure_autotools(self):
@@ -56,19 +58,17 @@ class ResiprocateConan(ConanFile):
             "--with-pic={}".format(yes_no(not self.options.get_safe("fPIC", False))),
         ]
 
-        self._autotools.configure(args=configure_args)
+        self._autotools.configure(args=configure_args, configure_dir=self._source_subfolder)
         return self._autotools
 
     def build(self):
-        with tools.chdir(self._source_subfolder):
-            autotools = self._configure_autotools()
-            autotools.make()
+        autotools = self._configure_autotools()
+        autotools.make()
 
     def package(self):
         self.copy("COPYING", src=self._source_subfolder, dst="licenses")
-        with tools.chdir(self._source_subfolder):
-            autotools = self._configure_autotools()
-            autotools.install()
+        autotools = self._configure_autotools()
+        autotools.install()
         tools.rmdir(os.path.join(os.path.join(self.package_folder, "share")))
         tools.remove_files_by_mask(os.path.join(self.package_folder), "*.la")
 
