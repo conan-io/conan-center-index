@@ -2,7 +2,7 @@ from conans import ConanFile, CMake, tools
 from conans.errors import ConanInvalidConfiguration
 import os
 
-class OatpplibresslConan(ConanFile):
+class OatppLibresslConan(ConanFile):
     name = "oatpp-libressl"
     license = "Apache-2.0"
     homepage = "https://github.com/oatpp/oatpp-libressl"
@@ -76,7 +76,7 @@ class OatpplibresslConan(ConanFile):
         self.cpp_info.names["cmake_find_package"] = "oatpp"
         self.cpp_info.names["cmake_find_package_multi"] = "oatpp"
         self.cpp_info.components["_oatpp-libressl"].names["cmake_find_package"] = "oatpp-libressl"
-        self.cpp_info.components["_oatpp-websocket"].names["cmake_find_package_multi"] = "oatpp-libressl"
+        self.cpp_info.components["_oatpp-libressl"].names["cmake_find_package_multi"] = "oatpp-libressl"
         self.cpp_info.components["_oatpp-libressl"].includedirs = [
             os.path.join("include", "oatpp-{}".format(self.version), "oatpp-libressl")
         ]
