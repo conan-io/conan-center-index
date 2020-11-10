@@ -133,6 +133,7 @@ class MongoCDriverConan(ConanFile):
         if self._cmake:
             return self._cmake
         self._cmake = CMake(self)
+        self._cmake.definitions["CMAKE_INSTALL_SYSTEM_RUNTIME_LIBS_SKIP"] = "TRUE"
         self._cmake.definitions["ENABLE_SSL"] = self._ssl_cmake_value
         self._cmake.definitions["ENABLE_SASL"] = self._sasl_cmake_value
         self._cmake.definitions["ENABLE_STATIC"] = "OFF" if self.options.shared else "ON"
