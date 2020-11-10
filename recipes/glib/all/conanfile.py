@@ -202,7 +202,6 @@ class GLibConan(ConanFile):
             self.cpp_info.components["gio-windows-2.0"].requires = ["gobject-2.0", "gmodule-no-export-2.0", "gio-2.0"]
             self.cpp_info.components["gio-windows-2.0"].includedirs = [os.path.join('include', 'gio-win32-2.0')]
         else:
-            self.cpp_info.components["gio-unix-2.0"].libs = ["gio-2.0"]
             self.cpp_info.components["gio-unix-2.0"].requires.extend(["gobject-2.0", "gio-2.0"])
             self.cpp_info.components["gio-unix-2.0"].includedirs = [os.path.join("include", "gio-unix-2.0")]
         self.env_info.GLIB_COMPILE_SCHEMAS = os.path.join(self.package_folder, "bin", "glib-compile-schemas")
