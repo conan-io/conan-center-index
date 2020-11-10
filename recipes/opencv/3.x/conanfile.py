@@ -108,6 +108,7 @@ class OpenCVConan(ConanFile):
             tools.replace_in_file(find_openexr, "SET(OPENEXR_LIBSEARCH_SUFFIXES Win32/Release Win32 Win32/Debug)", "")
             tools.replace_in_file(find_openexr, r'SET(OPENEXR_ROOT "C:/Deploy" CACHE STRING "Path to the OpenEXR \"Deploy\" folder")', "")
 
+        tools.replace_in_file(os.path.join(self._source_subfolder, "data", "CMakeLists.txt"), "${OPENCV_OTHER_INSTALL_PATH}", "res")
         tools.replace_in_file(os.path.join(self._source_subfolder, "CMakeLists.txt"), "ANDROID OR NOT UNIX", "FALSE")
         tools.replace_in_file(os.path.join(self._source_subfolder, "modules", "imgcodecs", "CMakeLists.txt"), "JASPER_", "Jasper_")
 
