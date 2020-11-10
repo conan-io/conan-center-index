@@ -3,6 +3,7 @@ import os
 from conans.errors import ConanInvalidConfiguration
 from conans import ConanFile, Meson, tools
 
+required_conan_version = ">=1.29.0"
 
 class LibSigCppConan(ConanFile):
     name = "libsigcpp"
@@ -36,6 +37,8 @@ class LibSigCppConan(ConanFile):
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
+        if self.settings.compiler == "Visual Studio":
+            self.options.shared = True
 
     def configure(self):
         compiler = str(self.settings.compiler)
@@ -98,7 +101,7 @@ class LibSigCppConan(ConanFile):
         self.copy("COPYING", dst="licenses", src=self._source_subfolder)
         meson = self._configure_build()
         meson.install()
-
+        tools.remove_files_by_mask(os.path.join(self.package_folder, "bin"), "*.pdb")
         tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
 
     def package_info(self):
