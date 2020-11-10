@@ -133,7 +133,6 @@ class MongoCDriverConan(ConanFile):
         if self._cmake:
             return self._cmake
         self._cmake = CMake(self)
-        self._cmake.definitions["CMAKE_INSTALL_SYSTEM_RUNTIME_LIBS_SKIP"] = "TRUE"
         self._cmake.definitions["ENABLE_TESTS"] = "OFF"
         self._cmake.definitions["ENABLE_EXAMPLES"] = "OFF"
         self._cmake.definitions["ENABLE_SRV"] = "ON" if self.options.srv else "OFF"
