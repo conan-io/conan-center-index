@@ -1,6 +1,4 @@
-cmake_minimum_required(VERSION 3.15)
-cmake_policy(SET CMP0091 NEW)
-set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
+cmake_minimum_required(VERSION 2.8.11)
 project(cmake_wrapper)
 
 include(conanbuildinfo.cmake)
