@@ -133,19 +133,19 @@ class MongoCDriverConan(ConanFile):
         if self._cmake:
             return self._cmake
         self._cmake = CMake(self)
+        self._cmake.definitions["ENABLE_SSL"] = self._ssl_cmake_value
+        self._cmake.definitions["ENABLE_SASL"] = self._sasl_cmake_value
+        self._cmake.definitions["ENABLE_STATIC"] = "OFF" if self.options.shared else "ON"
         self._cmake.definitions["ENABLE_TESTS"] = "OFF"
         self._cmake.definitions["ENABLE_EXAMPLES"] = "OFF"
         self._cmake.definitions["ENABLE_SRV"] = "ON" if self.options.srv else "OFF"
-        self._cmake.definitions["ENABLE_STATIC"] = "OFF" if self.options.shared else "ON"
-        self._cmake.definitions["ENABLE_SSL"] = self._ssl_cmake_value
-        self._cmake.definitions["ENABLE_SASL"] = self._sasl_cmake_value
+        self._cmake.definitions["ENABLE_SHM_COUNTERS"] = "OFF"
+        self._cmake.definitions["ENABLE_MONGOC"] = "ON"
+        self._cmake.definitions["ENABLE_BSON"] = "ON"
         self._cmake.definitions["ENABLE_SNAPPY"] = "ON" if self.options.with_snappy else "OFF"
         self._cmake.definitions["ENABLE_ZLIB"] = "SYSTEM" if self.options.with_zlib else "OFF"
         self._cmake.definitions["ENABLE_ZSTD"] = "ON" if self.options.with_zstd else "OFF"
         self._cmake.definitions["ENABLE_ICU"] = "ON" if self.options.with_icu else "OFF"
-        self._cmake.definitions["ENABLE_SHM_COUNTERS"] = "OFF"
-        self._cmake.definitions["ENABLE_BSON"] = "ON"
-        self._cmake.definitions["ENABLE_MONGOC"] = "ON"
         self._cmake.definitions["ENABLE_CLIENT_SIDE_ENCRYPTION"] = "OFF" # libmongocrypt recipe not yet in CCI
         self._cmake.definitions["ENABLE_PIC"] = self.options.get_safe("fPIC", True)
         if self.options.with_ssl == "openssl":
