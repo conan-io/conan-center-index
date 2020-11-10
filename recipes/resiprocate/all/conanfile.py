@@ -55,12 +55,14 @@ class ResiprocateConan(ConanFile):
             "--with-postgresql={}".format(yes_no(not self.options.with_postgresql)),
             "--with-pic={}".format(yes_no(not self.options.get_safe("fPIC", False))),
         ]
-        self._autotools.configure(args=configure_args, configure_dir=self._source_subfolder)
+
+        self._autotools.configure(args=configure_args)
         return self._autotools
 
     def build(self):
-        autotools = self._configure_autotools()
-        autotools.make()
+        with tools.chdir(self._source_subfolder):
+            autotools = self._configure_autotools()
+            autotools.make()
 
     def package(self):
         self.copy("COPYING", src=self._source_subfolder, dst="licenses")
