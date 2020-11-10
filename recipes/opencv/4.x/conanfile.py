@@ -126,8 +126,7 @@ class OpenCVConan(ConanFile):
         self._cmake.definitions["BUILD_opencv_python_bindings_g"] = self.options.with_python2 or self.options.with_python
         self._cmake.definitions["BUILD_opencv_python_tests"] = False
 
-        if not self.options.shared:
-            self._cmake.definitions["ENABLE_FPIC"] = self.options.fPIC
+        self._cmake.definitions["ENABLE_PIC"] = self.options.get_safe("fPIC", True)
 
         self._cmake.definitions["WITH_1394"] = False
         self._cmake.definitions["WITH_ADE"] = False
