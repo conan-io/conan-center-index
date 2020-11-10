@@ -63,6 +63,8 @@ class OpenCVConan(ConanFile):
         if self.settings.compiler == "Visual Studio" and \
            "MT" in str(self.settings.compiler.runtime) and self.options.shared:
             raise ConanInvalidConfiguration("Visual Studio and Runtime MT is not supported for shared library.")
+        if self.settings.compiler.cppstd:
+            tools.check_min_cppstd(self, 11)
         if self.options.shared:
             del self.options.fPIC
 
