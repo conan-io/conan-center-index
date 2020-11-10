@@ -184,6 +184,8 @@ class MongoCDriverConan(ConanFile):
         tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
 
     def package_info(self):
+        # FIXME: two CMake module/config files should be generated (mongoc-1.0-config.cmake and bson-1.0-config.cmake),
+        # but it can't be modeled right now.
         self.cpp_info.filenames["cmake_find_package"] = "mongoc-1.0"
         self.cpp_info.filenames["cmake_find_package_multi"] = "mongoc-1.0"
         self.cpp_info.names["cmake_find_package"] = "mongo"
