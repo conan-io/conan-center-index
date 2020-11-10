@@ -50,8 +50,6 @@ class ProtobufConan(ConanFile):
                 raise ConanInvalidConfiguration("Protobuf can't be build with shared + MT(d) runtimes")
         if tools.is_apple_os(self.settings.os) and self.options.shared:
             raise ConanInvalidConfiguration("Protobuf could not be build as shared library for Mac.")
-        if self.options.lite:
-            del self.options.with_zlib
 
     def requirements(self):
         if self.options.get_safe("with_zlib"):
@@ -135,10 +133,7 @@ if(DEFINED Protobuf_SRC_ROOT_FOLDER)""",
         os.rename(os.path.join(self.package_folder, "lib", "cmake", "protobuf", "protobuf-config.cmake"),
                   os.path.join(self.package_folder, "lib", "cmake", "protobuf", "protobuf-generate.cmake"))
 
-        if self.options.lite:
-            tools.remove_files_by_mask(os.path.join(self.package_folder, "lib"), "libprotobuf.*")
-            tools.remove_files_by_mask(os.path.join(self.package_folder, "bin"), "protoc*")
-        else:
+        if not self.options.lite:
             tools.remove_files_by_mask(os.path.join(self.package_folder, "lib"), "libprotobuf-lite.*")
 
     def package_info(self):
@@ -151,41 +146,41 @@ if(DEFINED Protobuf_SRC_ROOT_FOLDER)""",
         lib_prefix = "lib" if self.settings.compiler == "Visual Studio" else ""
         lib_suffix = "d" if self.settings.build_type == "Debug" else ""
 
-        if not self.options.lite:
-            self.cpp_info.components["libprotobuf"].name = "libprotobuf"
-            self.cpp_info.components["libprotobuf"].libs = [lib_prefix + "protobuf" + lib_suffix]
-            if self.options.with_zlib:
-                self.cpp_info.components["libprotobuf"].requires = ["zlib::zlib"]
-            if self.settings.os == "Linux":
-                self.cpp_info.components["libprotobuf"].system_libs.append("pthread")
-                if self._is_clang_x86 or "arm" in str(self.settings.arch):
-                    self.cpp_info.components["libprotobuf"].system_libs.append("atomic")
-            if self.settings.os == "Windows":
-                if self.options.shared:
-                    self.cpp_info.components["libprotobuf"].defines = ["PROTOBUF_USE_DLLS"]
+        self.cpp_info.components["libprotobuf"].name = "libprotobuf"
+        self.cpp_info.components["libprotobuf"].libs = [lib_prefix + "protobuf" + lib_suffix]
+        if self.options.with_zlib:
+            self.cpp_info.components["libprotobuf"].requires = ["zlib::zlib"]
+        if self.settings.os == "Linux":
+            self.cpp_info.components["libprotobuf"].system_libs.append("pthread")
+            if self._is_clang_x86 or "arm" in str(self.settings.arch):
+                self.cpp_info.components["libprotobuf"].system_libs.append("atomic")
+        if self.settings.os == "Windows":
+            if self.options.shared:
+                self.cpp_info.components["libprotobuf"].defines = ["PROTOBUF_USE_DLLS"]
 
-            self.cpp_info.components["libprotobuf"].builddirs = [
-                self._cmake_install_base_path,
-            ]
+        self.cpp_info.components["libprotobuf"].builddirs = [
+            self._cmake_install_base_path,
+        ]
 
-            self.cpp_info.components["libprotobuf"].builddirs = [self._cmake_install_base_path]
-            self.cpp_info.components["libprotobuf"].build_modules.extend([
-                os.path.join(self._cmake_install_base_path, "protobuf-generate.cmake"),
-                os.path.join(self._cmake_install_base_path, "protobuf-module.cmake"),
-                os.path.join(self._cmake_install_base_path, "protobuf-options.cmake"),
-            ])
+        self.cpp_info.components["libprotobuf"].builddirs = [self._cmake_install_base_path]
+        self.cpp_info.components["libprotobuf"].build_modules.extend([
+            os.path.join(self._cmake_install_base_path, "protobuf-generate.cmake"),
+            os.path.join(self._cmake_install_base_path, "protobuf-module.cmake"),
+            os.path.join(self._cmake_install_base_path, "protobuf-options.cmake"),
+        ])
 
-            self.cpp_info.components["libprotoc"].name = "libprotoc"
-            self.cpp_info.components["libprotoc"].libs = [lib_prefix + "protoc" + lib_suffix]
-            self.cpp_info.components["libprotoc"].requires = ["libprotobuf"]
+        self.cpp_info.components["libprotoc"].name = "libprotoc"
+        self.cpp_info.components["libprotoc"].libs = [lib_prefix + "protoc" + lib_suffix]
+        self.cpp_info.components["libprotoc"].requires = ["libprotobuf"]
 
-            self.cpp_info.components["protoc"].name = "protoc"
-            self.cpp_info.components["protoc"].requires.extend(["libprotoc", "libprotobuf"])
+        self.cpp_info.components["protoc"].name = "protoc"
+        self.cpp_info.components["protoc"].requires.extend(["libprotoc", "libprotobuf"])
 
-            bindir = os.path.join(self.package_folder, "bin")
-            self.output.info("Appending PATH environment variable: {}".format(bindir))
-            self.env_info.PATH.append(bindir)
-        else:
+        bindir = os.path.join(self.package_folder, "bin")
+        self.output.info("Appending PATH environment variable: {}".format(bindir))
+        self.env_info.PATH.append(bindir)
+
+        if self.options.lite:
             self.cpp_info.components["libprotobuf-lite"].name = "libprotobuf-lite"
             self.cpp_info.components["libprotobuf-lite"].libs = [lib_prefix + "protobuf-lite" + lib_suffix]
             if self.settings.os == "Linux":
