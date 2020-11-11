@@ -25,7 +25,7 @@ class Libx265Conan(ConanFile):
     default_options = {
         "shared": False,
         "fPIC": True,
-        "assembly": False,
+        "assembly": True,
         "bit_depth": 8,
         "HDR10": False,
         "SVG_HEVC_encoder": False,
