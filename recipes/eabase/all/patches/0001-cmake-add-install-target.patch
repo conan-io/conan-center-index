@@ -1,8 +1,0 @@
---- CMakeLists.txt	2019-07-10 22:32:53.000000000 +0200
-+++ CMakeLists.txt	2019-11-05 19:08:39.897423767 +0100
-@@ -32,3 +32,5 @@
- 	#-------------------------------------------------------------------------------------------
- 	target_include_directories(EABase INTERFACE include/Common)
- endif()
-+
-+install(DIRECTORY include/Common DESTINATION include)
