@@ -6,9 +6,11 @@
 # ifdef _WIN32
 #  define TEST_IMPORT __declspec(dllimport)
 # else
-#  define TEST_EXPORT
+#  define TEST_IMPORT
 # endif
 
+TEST_IMPORT const char *test_library_version(void);
+TEST_IMPORT void test_library_something(void);
 #endif
 
 int main()
