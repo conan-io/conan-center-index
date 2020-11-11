@@ -5,7 +5,7 @@ using namespace restinio;
 
 template<typename T>
 std::ostream & operator<<(std::ostream & to, const optional_t<T> & v) {
-    if(v) to << *v;
+    if(v) to << v.value();
     return to;
 }
 
