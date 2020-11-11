@@ -995,6 +995,11 @@ class BoostConan(ConanFile):
                 abi = static_runtime_key + debug_runtime_key + debug_key
                 if abi:
                     abi_tag = "-{}".format(abi)
+            else:
+                debug_tag = "d" if self.settings.build_type == "Debug" else ""
+                abi = debug_tag
+                if abi:
+                    abi_tag = "-{}".format(abi)
 
             arch_tag = "-{}{}".format(self._b2_architecture[0], self._b2_address_model)
             version = tools.Version(self.version)
