@@ -1,0 +1,41 @@
+--- CMakeLists.txt
++++ CMakeLists.txt
+@@ -6,6 +6,9 @@
+ CMAKE_MINIMUM_REQUIRED( VERSION 2.8 )
+ OPTION( TEST "Built unit tests" OFF )
+ 
++include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
++conan_basic_setup()
++
+ SET ( ly_base_dir	${PROJECT_SOURCE_DIR} )
+ SET ( ly_src_dir	${ly_base_dir}/source )
+ SET ( ly_inc_dir	${ly_base_dir}/include )
+@@ -23,12 +26,12 @@
+ INCLUDE_DIRECTORIES( BEFORE ${ly_inc_dir} )
+ 
+ # this creates the static library (.a)
+-ADD_LIBRARY				( ${ly_lib_static} STATIC ${ly_source_files} )
++ADD_LIBRARY				( ${ly_lib_static}  ${ly_source_files} )
+ 
+ # this creates the shared library (.so)
+-ADD_LIBRARY				( ${ly_lib_shared} SHARED ${ly_source_files} )
+-SET_TARGET_PROPERTIES	( ${ly_lib_shared} PROPERTIES OUTPUT_NAME "${ly_lib_name}" )
+-SET_TARGET_PROPERTIES	( ${ly_lib_shared} PROPERTIES PREFIX "lib" )
++#ADD_LIBRARY				( ${ly_lib_shared} SHARED ${ly_source_files} )
++#SET_TARGET_PROPERTIES	( ${ly_lib_shared} PROPERTIES OUTPUT_NAME "${ly_lib_name}" )
++#SET_TARGET_PROPERTIES	( ${ly_lib_shared} PROPERTIES PREFIX "lib" )
+ 
+ # this creates the conversion tool
+ ADD_EXECUTABLE			( yuvconvert ${ly_base_dir}/util/yuvconvert.cc )
+@@ -81,9 +84,9 @@
+ 
+ 
+ # install the conversion tool, .so, .a, and all the header files
+-INSTALL ( PROGRAMS ${CMAKE_BINARY_DIR}/yuvconvert			DESTINATION bin )
++#INSTALL ( PROGRAMS ${CMAKE_BINARY_DIR}/yuvconvert			DESTINATION bin )
+ INSTALL ( TARGETS ${ly_lib_static}						DESTINATION lib )
+-INSTALL ( TARGETS ${ly_lib_shared} LIBRARY				DESTINATION lib RUNTIME DESTINATION bin )
++#INSTALL ( TARGETS ${ly_lib_shared} LIBRARY				DESTINATION lib RUNTIME DESTINATION bin )
+ INSTALL ( DIRECTORY ${PROJECT_SOURCE_DIR}/include/		DESTINATION include )
+ 
+ # create the .deb and .rpm packages using cpack
