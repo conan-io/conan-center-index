@@ -1,4 +1,5 @@
 from conans import ConanFile, AutoToolsBuildEnvironment, tools
+from conans.errors import ConanInvalidConfiguration
 import os
 
 class Argon2Conan(ConanFile):
@@ -23,6 +24,9 @@ class Argon2Conan(ConanFile):
         del self.settings.compiler.libcxx
         del self.settings.compiler.cppstd
 
+        if self.settings.os == "Windows":
+            raise ConanInvalidConfiguration("argon2 can not be built on Windows")
+
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
         os.rename("phc-winner-argon2-{0}".format(self.version), "argon2")
@@ -35,7 +39,7 @@ class Argon2Conan(ConanFile):
     def package(self):
         self.copy("*LICENSE", src="", dst="licenses", keep_path=False)
         self.copy("*argon2.h", dst="include/argon2", src="", keep_path=False)
-        if self.options.shared == True:
+        if self.options.shared:
             self.run("ln -s libargon2.so.1 libargon2.so")
             self.copy("*libargon2.so*", dst="lib", src="", keep_path=False, symlinks=True)
             self.copy("*libargon2.dylib", dst="lib", src="", keep_path=False)
@@ -49,3 +53,4 @@ class Argon2Conan(ConanFile):
         self.cpp_info.libs = ['argon2']        
         if self.settings.os == "Linux":
             self.cpp_info.system_libs = ['pthread']
+
