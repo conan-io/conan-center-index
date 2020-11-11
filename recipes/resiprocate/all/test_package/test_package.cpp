@@ -40,12 +40,12 @@ int main(int argc, char* argv[])
 {
     Log::initialize(Log::Cout, Log::Warning, argv[0]);
 
-    auto msg = SipMessage::make(Data(Data::Share, sipRawData.data()), true);
+    SipMessage* msg = SipMessage::make(Data(Data::Share, sipRawData.data()), true);
     if (!msg)
     {
         return 1;
     }
-    std::shared_ptr<SipMessage> forDel(msg);
+
     std::cout << std::string(msg->methodStr().data()) << std::endl;
     std::string headers = "";
     for (int i = 0; i < Headers::Type::MAX_HEADERS; i++)
@@ -59,12 +59,13 @@ int main(int argc, char* argv[])
         {
             headers += std::string(value.getBuffer(), value.getLength());
         }
-        headers += '\r\n';
+        headers += "\r\n";
     }
 
     std::cout << headers << std::endl;
     std::cout << std::string(msg->getRawBody().getBuffer(), msg->getRawBody().getLength()) << std::endl;
 
+    delete msg;
     return 0;
 }
 
