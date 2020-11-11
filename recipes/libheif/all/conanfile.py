@@ -76,6 +76,7 @@ class Libheif(ConanFile):
 
         self.cpp_info.components["heif"].names["cmake_find_package"] = "heif"
         self.cpp_info.components["heif"].names["cmake_find_package_multi"] = "heif"
+        self.cpp_info.components["heif"].names["pkg_config"] = "libheif"
         self.cpp_info.components["heif"].requires = ["libde265::libde265"]
         if self.options.with_x265:
             self.cpp_info.components["heif"].requires.append("libx265::libx265")
