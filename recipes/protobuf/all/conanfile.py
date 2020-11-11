@@ -65,8 +65,10 @@ class ProtobufConan(ConanFile):
         if not self._cmake:
             self._cmake = CMake(self)
             self._cmake.definitions["CMAKE_INSTALL_CMAKEDIR"] = self._cmake_install_base_path.replace("\\", "/")
-            self._cmake.definitions["protobuf_BUILD_TESTS"] = False
             self._cmake.definitions["protobuf_WITH_ZLIB"] = self.options.with_zlib
+            self._cmake.definitions["protobuf_BUILD_TESTS"] = False
+            self._cmake.definitions["protobuf_BUILD_PROTOC_BINARIES"] = True
+            self._cmake.definitions["protobuf_BUILD_LIBPROTOC"] = True
             if self.settings.compiler == "Visual Studio":
                 self._cmake.definitions["protobuf_MSVC_STATIC_RUNTIME"] = "MT" in str(self.settings.compiler.runtime)
             self._cmake.configure(build_folder=self._build_subfolder)
