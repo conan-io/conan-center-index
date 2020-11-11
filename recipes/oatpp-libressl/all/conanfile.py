@@ -12,8 +12,8 @@ class OatppLibresslConan(ConanFile):
     settings = "os", "compiler", "build_type", "arch"
     options = {"shared": [True, False], "fPIC": [True, False]}
     default_options = {"shared": False, "fPIC": True}
-    generators = "cmake", "cmake_find_package"
-    exports_sources = "CMakeLists.txt"
+    generators = "cmake", "cmake_find_package", "pkg_config"
+    exports_sources = "CMakeLists.txt", "patches/**"
 
     _cmake = None
 
@@ -41,6 +41,10 @@ class OatppLibresslConan(ConanFile):
         if self.settings.compiler == "gcc" and tools.Version(self.settings.compiler.version) < "5":
             raise ConanInvalidConfiguration("oatpp-libressl requires GCC >=5")
 
+    def build_requirements(self):
+        if tools.os_info.is_windows and not tools.get_env("CONAN_BASH_PATH"):
+            self.build_requires("msys2/20200517")
+
     def requirements(self):
         self.requires("oatpp/" + self.version)
         self.requires("libressl/3.2.0")
@@ -61,6 +65,8 @@ class OatppLibresslConan(ConanFile):
         return self._cmake
 
     def build(self):
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            tools.patch(**patch)
         cmake = self._configure_cmake()
         cmake.build()
 
