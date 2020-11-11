@@ -7,10 +7,11 @@ class TestPackageConan(ConanFile):
     generators = "cmake", "cmake_find_package_multi"
 
     def build(self):
-        cmake = CMake(self)
-        cmake.definitions["protobuf_LITE"] = self.options["protobuf"].lite
-        cmake.configure()
-        cmake.build()
+        if not tools.cross_building(self.settings, skip_x64_x86=True):
+            cmake = CMake(self)
+            cmake.definitions["protobuf_LITE"] = self.options["protobuf"].lite
+            cmake.configure()
+            cmake.build()
 
     def test(self):
         if not tools.cross_building(self.settings):
