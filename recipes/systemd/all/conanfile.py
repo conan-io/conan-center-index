@@ -32,7 +32,7 @@ class SystemdConan(ConanFile):
     def _fill_cppinfo_from_pkgconfig(self, name, component_name):
         pkg_config = tools.PkgConfig(name)
         if not pkg_config.provides:
-            raise ConanException(f"{name} development files aren't available, give up")
+            raise ConanException("{} development files aren't available, give up".format(name))
         libs = [lib[2:] for lib in pkg_config.libs_only_l]
         lib_dirs = [lib[2:] for lib in pkg_config.libs_only_L]
         ldflags = [flag for flag in pkg_config.libs_only_other]
@@ -53,5 +53,5 @@ class SystemdConan(ConanFile):
         self.info.header_only()
 
     def package_info(self):
-        self._fill_cppinfo_from_pkgconfig("systemd", "systemd")
+        self._fill_cppinfo_from_pkgconfig("systemd", "libsystemd")
         self._fill_cppinfo_from_pkgconfig("libudev", "udev")
