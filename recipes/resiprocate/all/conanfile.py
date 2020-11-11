@@ -23,6 +23,14 @@ class ResiprocateConan(ConanFile):
     _autotools = None
 
     @property
+    def _is_msvc(self):
+        return self.settings.compiler == "Visual Studio"
+
+    @property
+    def _is_mingw_windows(self):
+        return self.settings.os == "Windows" and tools.os_info.is_windows and self.settings.compiler == "gcc"
+
+    @property
     def _source_subfolder(self):
         return "source_subfolder"
 
@@ -46,7 +54,7 @@ class ResiprocateConan(ConanFile):
     def _configure_autotools(self):
         if self._autotools:
             return self._autotools
-        self._autotools = AutoToolsBuildEnvironment(self)
+        self._autotools = AutoToolsBuildEnvironment(self, win_bash = self._is_msvc or self._is_mingw_windows)
         yes_no = lambda v: "yes" if v else "no"
         configure_args = [
             "--enable-shared={}".format(yes_no(self.options.shared)),
@@ -54,9 +62,11 @@ class ResiprocateConan(ConanFile):
             "--with-ssl={}".format(yes_no(not self.options.with_ssl)),
             "--with-mysql={}".format(yes_no(not self.options.with_mysql)),
             "--with-postgresql={}".format(yes_no(not self.options.with_postgresql)),
-            "--with-pic={}".format(yes_no(not self.options.get_safe("fPIC", False))),
             "--prefix={}".format(tools.unix_path(self.package_folder))
         ]
+
+        if self.settings.os == "Linux":
+            configure_args.extend(["--with-pic={}".format(yes_no(not self.options.get_safe("fPIC", False)))])
 
         self._autotools.configure(configure_dir=self._source_subfolder, args=configure_args)
         return self._autotools
