@@ -1,0 +1,40 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index d90ac5f..46a6f79 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -100,12 +100,12 @@ list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}/cmake/module")
+ 
+ find_package(LibreSSL 3.0.0 REQUIRED)
+ 
+-message("LIBRESSL_INCLUDE_DIR=${LIBRESSL_INCLUDE_DIR}")
+-message("LIBRESSL_TLS_LIBRARY=${LIBRESSL_TLS_LIBRARY}")
+-message("LIBRESSL_SSL_LIBRARY=${LIBRESSL_SSL_LIBRARY}")
+-message("LIBRESSL_CRYPTO_LIBRARY=${LIBRESSL_CRYPTO_LIBRARY}")
+-message("LIBRESSL_LIBRARIES=${LIBRESSL_LIBRARIES}")
+-message("LIBRESSL_VERSION=${LIBRESSL_VERSION}")
++message("libressl_INCLUDE_DIR=${libressl_INCLUDE_DIR}")
++message("libressl_TLS_LIBRARY=${libressl_TLS_LIBRARY}")
++message("libressl_SSL_LIBRARY=${libressl_SSL_LIBRARY}")
++message("libressl_CRYPTO_LIBRARY=${libressl_CRYPTO_LIBRARY}")
++message("libressl_LIBRARIES=${libressl_LIBRARIES}")
++message("libressl_VERSION=${libressl_VERSION}")
+ 
+ message("\n############################################################################\n")
+ 
+diff --git a/src/CMakeLists.txt b/src/CMakeLists.txt
+index ace3b13..2d90b68 100644
+--- a/src/CMakeLists.txt
++++ b/src/CMakeLists.txt
+@@ -30,11 +30,7 @@ target_include_directories(${OATPP_THIS_MODULE_NAME}
+         PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>
+ )
+ 
+-target_link_libraries(${OATPP_THIS_MODULE_NAME}
+-        PUBLIC LibreSSL::TLS
+-        PUBLIC LibreSSL::SSL
+-        PUBLIC LibreSSL::Crypto
+-)
++target_link_libraries(${OATPP_THIS_MODULE_NAME} PUBLIC CONAN_PKG::libressl)
+ 
+ #######################################################################################################
+ ## install targets
