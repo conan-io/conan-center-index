@@ -9,6 +9,10 @@ class OatppLibresslTestConan(ConanFile):
     options = {"fPIC": [True, False]}
     default_options = {"fPIC": True}
 
+    def config_options(self):
+        if self.settings.os == "Windows":
+            del self.options.fPIC
+
     def build(self):
         cmake = CMake(self)
         cmake.configure()
