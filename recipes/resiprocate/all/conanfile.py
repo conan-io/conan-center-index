@@ -2,7 +2,6 @@ import os
 import shutil
 from conans import ConanFile, AutoToolsBuildEnvironment, tools
 
-
 class ResiprocateConan(ConanFile):
     name = "resiprocate"
     description = "The project is dedicated to maintaining a complete, correct, and commercially usable implementation of SIP and a few related protocols. "
