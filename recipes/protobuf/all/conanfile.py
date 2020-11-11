@@ -141,8 +141,9 @@ if(DEFINED Protobuf_SRC_ROOT_FOLDER)""",
             tools.remove_files_by_mask(os.path.join(self.package_folder, "lib"), "libprotobuf-lite.*")
 
     def package_info(self):
+        # The module name is Protobuf while the config name is protobuf
         self.cpp_info.filenames["cmake_find_package"] = "Protobuf"
-        self.cpp_info.filenames["cmake_find_package_multi"] = "Protobuf"
+        self.cpp_info.filenames["cmake_find_package_multi"] = "protobuf"
 
         self.cpp_info.names["cmake_find_package"] = "protobuf"
         self.cpp_info.names["cmake_find_package_multi"] = "protobuf"
