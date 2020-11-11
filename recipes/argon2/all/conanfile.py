@@ -13,7 +13,13 @@ class Argon2Conan(ConanFile):
     default_options = {"shared": False, "fPIC": True}
     generators = "cmake", "cmake_find_package"
 
+    def config_options(self):
+        if self.settings.os == "Windows":
+            del self.options.fPIC
+
     def configure(self):
+        if self.options.shared:
+            del self.options.fPIC
         del self.settings.compiler.libcxx
         del self.settings.compiler.cppstd
 
@@ -27,6 +33,7 @@ class Argon2Conan(ConanFile):
             self.run("make OPTTARGET="+arch+" libs")
 
     def package(self):
+        self.copy("*LICENSE", src="", dst="licenses", keep_path=False)
         self.copy("*argon2.h", dst="include/argon2", src="", keep_path=False)
         if self.options.shared == True:
             self.run("ln -s libargon2.so.1 libargon2.so")
