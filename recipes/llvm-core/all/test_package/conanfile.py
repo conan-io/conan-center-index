@@ -1,9 +1,9 @@
 from conans import ConanFile, CMake, tools
 
-from pathlib import Path
+import os.path
 
 
-class LLVMTestPackageConan(ConanFile):
+class LLVMCoreTestPackageConan(ConanFile):
     settings = ('os', 'arch', 'compiler', 'build_type')
     generators = ('cmake', 'cmake_find_package')
 
@@ -28,11 +28,12 @@ class LLVMTestPackageConan(ConanFile):
                     test_package = False
 
         if test_package:
-            executable = Path('bin').joinpath('test_package')
-            input = Path(__file__).parent.joinpath('test_function.ll')
-            command = [str(file.resolve()) for file in (executable, input)]
+            command = [
+                os.path.join('bin', 'test_package'),
+                os.path.join(os.path.dirname(__file__), 'test_function.ll')
+            ]
             self.run(command, run_environment=True)
 
-        llvm_path = Path(self.deps_cpp_info['llvm-core'].rootpath)
-        license_file = llvm_path.joinpath('licenses', 'LICENSE.TXT')
-        assert license_file.exists()
+        llvm_path = self.deps_cpp_info['llvm-core'].rootpath
+        license_path = os.path.join(llvm_path, 'licenses', 'LICENSE.TXT')
+        assert os.path.exists(license_path)

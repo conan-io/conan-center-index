@@ -1,10 +1,11 @@
 from conans.errors import ConanInvalidConfiguration
 from conans import ConanFile, CMake, tools
 
-from pathlib import Path
 from collections import defaultdict
 import json
 import re
+import os.path
+import os
 
 
 class LLVMCoreConan(ConanFile):
@@ -83,7 +84,7 @@ class LLVMCoreConan(ConanFile):
             tools.patch(**patch)
 
     def _patch_build(self):
-        if Path('FindIconv.cmake').exists():
+        if os.path.exists('FindIconv.cmake'):
             tools.replace_in_file('FindIconv.cmake', 'iconv charset', 'iconv')
 
     def _configure_cmake(self):
@@ -171,8 +172,7 @@ class LLVMCoreConan(ConanFile):
 
     def source(self):
         tools.get(**self.conan_data['sources'][self.version])
-        source_path = Path(f'llvm-{self.version}.src')
-        source_path.rename(self._source_subfolder)
+        os.rename('llvm-{}.src'.format(self.version), self._source_subfolder)
         self._patch_sources()
 
     def build(self):
@@ -183,7 +183,7 @@ class LLVMCoreConan(ConanFile):
 
     def package(self):
         self.copy('LICENSE.TXT', dst='licenses', src=self._source_subfolder)
-        package_path = Path(self.package_folder)
+        lib_path = os.path.join(self.package_folder, 'lib')
 
         cmake = self._configure_cmake()
         cmake.install()
@@ -218,8 +218,9 @@ class LLVMCoreConan(ConanFile):
                     components[dep]
                 elif dep in cmake_targets:
                     dep = cmake_targets[dep]
-                elif Path(dep).exists():
-                    dep = Path(dep).stem.replace('lib', '')
+                elif os.path.exists(dep):
+                    dep = os.path.splitext(os.path.basename(dep))[0]
+                    dep = dep.replace('lib', '')
                 dep = dep.replace('-l', '')
 
                 if dep in dummy_targets.keys():
@@ -228,23 +229,24 @@ class LLVMCoreConan(ConanFile):
                 else:
                     components[lib].append(dep)
 
-        tools.rmdir(str(package_path.joinpath('bin').resolve()))
-        tools.rmdir(str(package_path.joinpath('lib', 'cmake').resolve()))
-        tools.rmdir(str(package_path.joinpath('share').resolve()))
+        tools.rmdir(os.path.join(self.package_folder, 'bin'))
+        tools.rmdir(os.path.join(self.package_folder, 'lib', 'cmake'))
+        tools.rmdir(os.path.join(self.package_folder, 'share'))
 
-        for file in package_path.joinpath('lib').iterdir():
-            if 'LLVM' not in file.stem:
-                file.unlink()
+        for name in os.listdir(lib_path):
+            if 'LLVM' not in name:
+                os.remove(os.path.join(lib_path, name))
 
         if not self.options.shared:
-            components_path = package_path.joinpath('lib', 'components.json')
-            with components_path.open(mode='w') as file:
-                json.dump(components, file, indent=4)
+            components_path = \
+                os.path.join(self.package_folder, 'lib', 'components.json')
+            with open(components_path, 'w') as components_file:
+                json.dump(components, components_file, indent=4)
         else:
             suffixes = ['.dylib', '.so']
-            for file in package_path.joinpath('lib').iterdir():
-                if not any(suffix in file.suffixes for suffix in suffixes):
-                    file.unlink()
+            for name in os.listdir(lib_path):
+                if not any(suffix in name for suffix in suffixes):
+                    os.remove(os.path.join(lib_path, name))
 
     def package_info(self):
         if self.options.shared:
@@ -256,10 +258,10 @@ class LLVMCoreConan(ConanFile):
                 self.cpp_info.system_libs = ['curses', 'm']
             return
 
-        package_path = Path(self.package_folder)
-        components_path = package_path.joinpath('lib', 'components.json')
-        with components_path.open(mode='r') as file:
-            components = json.load(file)
+        components_path = \
+            os.path.join(self.package_folder, 'lib', 'components.json')
+        with open(components_path, 'r') as components_file:
+            components = json.load(components_file)
 
         dependencies = ['ffi', 'z', 'iconv', 'xml2']
         targets = {
