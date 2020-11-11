@@ -58,7 +58,7 @@ class ResiprocateConan(ConanFile):
             "--prefix={}".format(tools.unix_path(self.package_folder))
         ]
 
-        self._autotools.configure(configure_dir=self._source_subfolder, args=config_args)
+        self._autotools.configure(configure_dir=self._source_subfolder, args=configure_args)
         return self._autotools
 
     def build(self):
