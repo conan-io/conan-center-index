@@ -30,6 +30,9 @@ class LibalsaConan(ConanFile):
         tools.get(**self.conan_data["sources"][self.version])
         os.rename("alsa-lib-{}".format(self.version), self._source_subfolder)
 
+    def build_requirements(self):
+        self.build_requires("libtool/2.4.6")
+
     def _configure_autotools(self):
         if not self._autotools:
             self._autotools = AutoToolsBuildEnvironment(self)
@@ -44,6 +47,7 @@ class LibalsaConan(ConanFile):
 
             args = ["--enable-static=yes", "--enable-shared=no"] \
                     if not self.options.shared else ["--enable-static=no", "--enable-shared=yes"]
+            args.append("--datarootdir=%s" % os.path.join(self.package_folder, "res", "share"))
             if self.options.disable_python:
                 args.append("--disable-python")
             self._autotools.configure(args=args)
