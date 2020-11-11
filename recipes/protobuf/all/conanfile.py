@@ -150,7 +150,9 @@ if(DEFINED Protobuf_SRC_ROOT_FOLDER)""",
         lib_prefix = "lib" if self.settings.compiler == "Visual Studio" else ""
         lib_suffix = "d" if self.settings.build_type == "Debug" else ""
 
-        self.cpp_info.components["libprotobuf"].name = "libprotobuf"
+        self.cpp_info.components["libprotobuf"].names["cmake_find_package"] = "libprotobuf"
+        self.cpp_info.components["libprotobuf"].names["cmake_find_package_multi"] = "libprotobuf"
+        self.cpp_info.components["libprotobuf"].names["pkg_config"] = "protobuf"
         self.cpp_info.components["libprotobuf"].libs = [lib_prefix + "protobuf" + lib_suffix]
         if self.options.with_zlib:
             self.cpp_info.components["libprotobuf"].requires = ["zlib::zlib"]
@@ -185,7 +187,9 @@ if(DEFINED Protobuf_SRC_ROOT_FOLDER)""",
         self.env_info.PATH.append(bindir)
 
         if self.options.lite:
-            self.cpp_info.components["libprotobuf-lite"].name = "libprotobuf-lite"
+            self.cpp_info.components["libprotobuf-lite"].names["cmake_find_package"] = "libprotobuf-lite"
+            self.cpp_info.components["libprotobuf-lite"].names["cmake_find_package_multi"] = "libprotobuf-lite"
+            self.cpp_info.components["libprotobuf-lite"].names["pkg_config"] = "protobuf-lite"
             self.cpp_info.components["libprotobuf-lite"].libs = [lib_prefix + "protobuf-lite" + lib_suffix]
             if self.settings.os == "Linux":
                 self.cpp_info.components["libprotobuf-lite"].system_libs.append("pthread")
