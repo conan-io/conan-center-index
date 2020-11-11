@@ -63,7 +63,6 @@ class LibalsaConan(ConanFile):
         with tools.chdir(self._source_subfolder):
             autotools = self._configure_autotools()
             autotools.install()
-        tools.rmdir(os.path.join(self.package_folder, "share"))
         tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))        
         for l in ["asound", "atopology"]:
             la_file = os.path.join(self.package_folder, "lib", "lib%s.la" % l)
