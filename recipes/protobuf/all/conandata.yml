@@ -12,3 +12,5 @@ patches:
   3.12.4:
     - patch_file: "patches/upstream-pr-7761-cmake-regex-fix.patch"
       base_path: "source_subfolder"
+    - patch_file: "patches/upstream-issue-7567-no-export-template-define.patch"
+      base_path: "source_subfolder"
