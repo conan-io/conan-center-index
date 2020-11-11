@@ -48,9 +48,10 @@ class Libx265Conan(ConanFile):
     def configure(self):
         if self.options.shared:
             del self.options.fPIC
-        if self.settings.os != "Windows":
-            if self.options.assembly and (self.options.shared or self.options.get_safe("fPIC", True)):
-                raise ConanInvalidConfiguration("Cannot enable assembly for when building libx265 as a shared library or with fPIC enabled")
+
+    def build_requirements(self):
+        if self.options.assembly:
+            self.build_requires("nasm/2.14")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
@@ -123,9 +124,15 @@ class Libx265Conan(ConanFile):
     def package_info(self):
         self.cpp_info.names["pkg_config"] = "x265"
         self.cpp_info.libs = ["x265"]
-        if self.settings.os == "Linux":
+        if self.settings.os == "Windows":
+            if self.options.shared:
+                self.cpp_info.defines.append("X265_API_IMPORTS")
+        elif self.settings.os == "Linux":
             self.cpp_info.system_libs.extend(["dl", "pthread", "m"])
-        if self.settings.os == "Android":
+            if not self.options.shared:
+                if self.settings.compiler != "Visual Studio":
+                    self.cpp_info.sharedlinkflags = ["-Wl,-Bsymbolic,-znoexecstack"]
+        elif self.settings.os == "Android":
             self.cpp_info.libs.extend(["dl", "m"])
         libcxx = tools.stdcpp_library(self)
         if libcxx:
