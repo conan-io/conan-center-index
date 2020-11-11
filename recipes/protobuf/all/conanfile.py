@@ -54,7 +54,7 @@ class ProtobufConan(ConanFile):
             raise ConanInvalidConfiguration("Protobuf could not be build as shared library for Mac.")
 
     def requirements(self):
-        if self.options.get_safe("with_zlib"):
+        if self.options.with_zlib:
             self.requires("zlib/1.2.11")
 
     @property
@@ -66,7 +66,7 @@ class ProtobufConan(ConanFile):
             self._cmake = CMake(self)
             self._cmake.definitions["CMAKE_INSTALL_CMAKEDIR"] = self._cmake_install_base_path.replace("\\", "/")
             self._cmake.definitions["protobuf_BUILD_TESTS"] = False
-            self._cmake.definitions["protobuf_WITH_ZLIB"] = self.options.get_safe("with_zlib", False)
+            self._cmake.definitions["protobuf_WITH_ZLIB"] = self.options.with_zlib
             if self.settings.compiler == "Visual Studio":
                 self._cmake.definitions["protobuf_MSVC_STATIC_RUNTIME"] = "MT" in str(self.settings.compiler.runtime)
             self._cmake.configure(build_folder=self._build_subfolder)
