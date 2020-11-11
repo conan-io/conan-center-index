@@ -55,9 +55,10 @@ class ResiprocateConan(ConanFile):
             "--with-mysql={}".format(yes_no(not self.options.with_mysql)),
             "--with-postgresql={}".format(yes_no(not self.options.with_postgresql)),
             "--with-pic={}".format(yes_no(not self.options.get_safe("fPIC", False))),
+            "--prefix={}".format(tools.unix_path(self.package_folder))
         ]
 
-        self._autotools.configure(args=configure_args, configure_dir=self._source_subfolder)
+        self._autotools.configure(configure_dir=self._source_subfolder, args=config_args)
         return self._autotools
 
     def build(self):
