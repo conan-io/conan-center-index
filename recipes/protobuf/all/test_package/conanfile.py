@@ -1,6 +1,5 @@
-import os
 from conans import ConanFile, CMake, RunEnvironment, tools
-import shutil
+import os
 
 
 class TestPackageConan(ConanFile):
