@@ -4,6 +4,8 @@ project(test_package)
 include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
 conan_basic_setup()
 
+find_package(libheif REQUIRED CONFIG)
+
 add_executable(${PROJECT_NAME} test_package.cpp)
-target_link_libraries(${PROJECT_NAME} ${CONAN_LIBS})
-set_target_properties(${PROJECT_NAME} PROPERTIES CXX_STANDARD 11)
+target_link_libraries(${PROJECT_NAME} libheif::heif)
+set_property(TARGET ${PROJECT_NAME} PROPERTY CXX_STANDARD 11)
