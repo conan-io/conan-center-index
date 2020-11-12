@@ -110,13 +110,13 @@ class CairoConan(ConanFile):
                     env_build = AutoToolsBuildEnvironment(self)
                     args=[
                         "-f", "Makefile.win32",
-                        "CFG={}".format(self.settings.build_type).lower()),
+                        "CFG={}".format(str(self.settings.build_type).lower()),
                         "CAIRO_HAS_FC_FONT=0",
-                        "ZLIB_PATH={}".format(self.deps_cpp_info["zlib"].rootpath,
-                        "LIBPNG_PATH={}'.format(self.deps_cpp_info["libpng"].rootpath),
+                        "ZLIB_PATH={}".format(self.deps_cpp_info["zlib"].rootpath),
+                        "LIBPNG_PATH={}".format(self.deps_cpp_info["libpng"].rootpath),
                         "PIXMAN_PATH={}".format(self.deps_cpp_info['pixman'].rootpath),
                         "FREETYPE_PATH={}".format(self.deps_cpp_info['freetype'].rootpath),
-                        "GOBJECT_PATH={}".format(self.deps_cpp_info['glib'].rootpath),
+                        "GOBJECT_PATH={}".format(self.deps_cpp_info['glib'].rootpath)
                     ]
                     
                     env_build.make(args=args)
@@ -132,11 +132,11 @@ class CairoConan(ConanFile):
             "--datarootdir={}".format(tools.unix_path(os.path.join(self.package_folder, "res"))),
             "--enable-ft={}".format(yes_no(self.options.with_freetype)),
             "--enable-gobject={}".format(yes_no(self.options.with_glib)),
-            "--enable-fc={}".format(yes_no(self.options.get_safe("with_fontconfig")),
-            "--enable-xlib={}".format(yes_no(self.options.get_safe("with_xlib")),
-            "--enable-xlib_xrender={}".format(yes_no(self.options.get_safe("with_xlib_xrender")),
-            "--enable-xcb={}".format(yes_no(self.options.get_safe("xcb")),
-            "--disable-shared={}".format(yes_no(self.options.shared)),
+            "--enable-fc={}".format(yes_no(self.options.get_safe("with_fontconfig"))),
+            "--enable-xlib={}".format(yes_no(self.options.get_safe("with_xlib"))),
+            "--enable-xlib_xrender={}".format(yes_no(self.options.get_safe("with_xlib_xrender"))),
+            "--enable-xcb={}".format(yes_no(self.options.get_safe("xcb"))),
+            "--enable-shared={}".format(yes_no(self.options.shared)),
             "--enable-static={}".format(yes_no(not self.options.shared)),
         ]
         if tools.is_apple_os(self.settings.os):
@@ -145,11 +145,6 @@ class CairoConan(ConanFile):
         if str(self.settings.compiler) in ["gcc", "clang", "apple-clang"]:
             self._env_build.flags.append("-Wno-enum-conversion")
 
-        env_vars = {
-             "NOCONFIGURE": "1"
-             }
-        with tools.environment_append(env_vars):
-            self.run("./autogen.sh", win_bash=tools.os_info.is_windows, run_environment=True)
         self._env_build.configure(args=configure_args)
         return self._env_build
 
@@ -161,7 +156,11 @@ class CairoConan(ConanFile):
             if self.options.with_freetype:
                 tools.replace_in_file(os.path.join(self.source_folder, self._source_subfolder, "src", "cairo-ft-font.c"),
                                       '#if HAVE_UNISTD_H', '#ifdef HAVE_UNISTD_H')
+            
+            with tools.environment_append({"NOCONFIGURE": "1"}):
+                self.run("./autogen.sh", win_bash=tools.os_info.is_windows, run_environment=True)
             env_build = self._get_env_build()
+            env_build.make()
 
     def package(self):
         self.copy(pattern="LICENSE", dst="licenses", src=self._source_subfolder)
