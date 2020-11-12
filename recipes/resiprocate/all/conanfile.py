@@ -51,6 +51,8 @@ class ResiprocateConan(ConanFile):
             self.requires("libpq/11.5")
         if self.options.with_mysql:
             self.requires("libmysqlclient/8.0.17")
+        if self._is_mingw_windows and not self._is_msvc:
+            self.requires("cygwin_installer/2.9.0")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
