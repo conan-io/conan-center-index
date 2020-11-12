@@ -144,6 +144,7 @@ if(DEFINED Protobuf_SRC_ROOT_FOLDER)""",
 
         if not self.options.lite:
             tools.remove_files_by_mask(os.path.join(self.package_folder, "lib"), "libprotobuf-lite.*")
+            tools.remove_files_by_mask(os.path.join(self.package_folder, "bin"), "libprotobuf-lite.*")
 
     def package_info(self):
         # The module name is Protobuf while the config name is protobuf
