@@ -178,6 +178,11 @@ class BoostConan(ConanFile):
         if self.settings.os == "Windows":
             del self.options.fPIC
 
+        # Test whether all config_options from the yml are available in CONFIGURE_OPTIONS
+        for opt_name in self._configure_options:
+            if "without_{}".format(opt_name) not in self.options:
+                raise ConanException("{} has the configure options {} which is not available in conanfile.py".format(self._dependency_filename, opt_name))
+
         # Remove options not supported by this version of boost
         for dep_name in CONFIGURE_OPTIONS:
             if dep_name not in self._configure_options:
