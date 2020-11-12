@@ -156,6 +156,10 @@ class GdalConan(ConanFile):
         return "build_subfolder"
 
     @property
+    def _has_with_exr_option(self):
+        return tools.Version(self.version) >= "3.1.0"
+
+    @property
     def _has_with_heif_option(self):
         return tools.Version(self.version) >= "3.2.0"
 
@@ -164,7 +168,7 @@ class GdalConan(ConanFile):
             del self.options.fPIC
         # if tools.Version(self.version) < "3.0.0":
         #     del self.options.with_tiledb
-        if tools.Version(self.version) < "3.1.0":
+        if not self._has_with_exr_option:
             del self.options.with_exr
         # if tools.Version(self.version) < "3.2.0":
             # del self.options.with_libdeflate
@@ -635,7 +639,7 @@ class GdalConan(ConanFile):
         args.append("--with-lerc={}".format("no" if self.options.without_lerc else "yes"))
         if self.options.with_null:
             args.append("--with-null")
-        if self.options.get_safe("with_exr") is not None:
+        if self._has_with_exr_option:
             args.append("--with-exr={}".format("yes" if self.options.with_exr else "no"))
         if self._has_with_heif_option:
             args.append("--with-heif={}".format("yes" if self.options.with_heif else "no"))
