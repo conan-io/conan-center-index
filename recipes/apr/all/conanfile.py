@@ -118,6 +118,8 @@ class AprConan(ConanFile):
             self.cpp_info.defines = ["APR_DECLARE_STATIC"]
             if self.settings.os == "Linux":
                 self.cpp_info.system_libs = ["dl", "pthread"]
+            if self.settings.os == "Windows":
+                self.cpp_info.system_libs = ["rpcrt4"]
 
         apr_root = self.package_folder
         if tools.os_info.is_windows:

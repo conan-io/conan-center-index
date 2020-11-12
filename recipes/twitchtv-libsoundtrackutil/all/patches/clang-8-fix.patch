@@ -1,0 +1,12 @@
+diff --git a/libsoundtrackutil/include/libsoundtrackutil/ByteStream.h b/libsoundtrackutil/include/libsoundtrackutil/ByteStream.h
+index 6c0151d..5176bf0 100644
+--- a/libsoundtrackutil/include/libsoundtrackutil/ByteStream.h
++++ b/libsoundtrackutil/include/libsoundtrackutil/ByteStream.h
+@@ -5,6 +5,7 @@
+ #pragma once
+ 
+ #include <gsl/span>
++#include <cstring>
+ #include <vector>
+ 
+ namespace Twitch::Utility {

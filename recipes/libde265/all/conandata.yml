@@ -1,0 +1,8 @@
+sources:
+  "1.0.8":
+    url: "https://github.com/strukturag/libde265/archive/v1.0.8.tar.gz"
+    sha256: "c5ab61185f283f46388c700c43dc08606b0e260cd53f06b967ec0ad7a809ff11"
+patches:
+  "1.0.8":
+    - patch_file: "patches/optional-sdl.patch"
+      base_path: "source_subfolder"

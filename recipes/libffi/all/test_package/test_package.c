@@ -35,6 +35,8 @@ int main()
             puts("1 ffi_prep_cif FAILED.\n\n");
             return EXIT_FAILURE;
         }
+        #ifndef DISABLE_FFI_CALL
+        // this fails on msvc debug runtime because of https://github.com/libffi/libffi/issues/456
         unsigned rvalue = 0;
         unsigned arg1 = 13;
         const unsigned expected_ret = 3 * arg1;
@@ -45,6 +47,7 @@ int main()
             printf("ffi_call FAILED. Expected %d, but got %d.\n", expected_ret, rvalue);
             return EXIT_FAILURE;
         }
+        #endif
         return EXIT_SUCCESS;
     }
     {

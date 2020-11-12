@@ -9,7 +9,7 @@ class FastcppcsvparserConan(ConanFile):
     topics = ("conan", "fast-cpp-csv-parser", "csv", "parser", "header-only")
     homepage = "https://github.com/ben-strasser/fast-cpp-csv-parser"
     url = "https://github.com/conan-io/conan-center-index"
-    settings = "os"
+    settings = "os", "compiler"
     no_copy_source = True
     options = {"with_thread": [True, False]}
     default_options = {"with_thread": True}
@@ -17,6 +17,10 @@ class FastcppcsvparserConan(ConanFile):
     @property
     def _source_subfolder(self):
         return "source_subfolder"
+
+    def configure(self):
+        if self.settings.compiler.cppstd:
+            tools.check_min_cppstd(self, 11)
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])

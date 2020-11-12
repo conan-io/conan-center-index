@@ -44,7 +44,8 @@ class OatppWebSocketConan(ConanFile):
             raise ConanInvalidConfiguration("oatpp-websocket requires GCC >=5")
 
     def requirements(self):
-        self.requires("oatpp/1.0.0")
+        # oatpp and oatpp-websocket are tightly coupled so use the same version
+        self.requires("oatpp/" + self.version)
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])

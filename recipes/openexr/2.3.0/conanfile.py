@@ -32,14 +32,16 @@ class OpenEXRConan(ConanFile):
         if self.settings.os == "Windows":
             del self.options.fPIC
 
+    def configure(self):
+        if self.options.shared:
+            del self.options.fPIC
+
     def requirements(self):
         self.requires("zlib/1.2.11")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
         os.rename("openexr-{}".format(self.version), self._source_subfolder)
-        for p in self.conan_data["patches"][self.version]:
-            tools.patch(**p)
 
     def _configure_cmake(self):
         if self._cmake:
@@ -59,6 +61,8 @@ class OpenEXRConan(ConanFile):
         return self._cmake
 
     def _patch_sources(self):
+        for patch in self.conan_data["patches"][self.version]:
+            tools.patch(**patch)
         # Fix dependency of IlmBase
         tools.replace_in_file(os.path.join(self._source_subfolder, "IlmBase", "Half", "CMakeLists.txt"),
                               "ADD_LIBRARY ( Half_static STATIC\n    half.cpp",
