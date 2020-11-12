@@ -139,10 +139,7 @@ class CairoConan(ConanFile):
             "--enable-shared={}".format(yes_no(self.options.shared)),
             "--enable-static={}".format(yes_no(not self.options.shared)),
         ]
-        if tools.is_apple_os(self.settings.os):
-            self._env_build.link_flags.extend(["-framework CoreGraphics",
-                                            "-framework CoreFoundation"])
-        if str(self.settings.compiler) in ["gcc", "clang", "apple-clang"]:
+        if self.settings.compiler in ["gcc", "clang", "apple-clang"]:
             self._env_build.flags.append("-Wno-enum-conversion")
 
         self._env_build.configure(args=configure_args)
