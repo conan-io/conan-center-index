@@ -41,10 +41,6 @@ class OatppLibresslConan(ConanFile):
         if self.settings.compiler == "gcc" and tools.Version(self.settings.compiler.version) < "5":
             raise ConanInvalidConfiguration("oatpp-libressl requires GCC >=5")
 
-    def build_requirements(self):
-        if tools.os_info.is_windows and not tools.get_env("CONAN_BASH_PATH"):
-            self.build_requires("msys2/20200517")
-
     def requirements(self):
         self.requires("oatpp/" + self.version)
         self.requires("libressl/3.2.0")
