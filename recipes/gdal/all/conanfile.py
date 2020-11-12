@@ -686,6 +686,8 @@ class GdalConan(ConanFile):
                 self.cpp_info.system_libs.append("pthread")
         elif self.settings.os == "Windows":
             self.cpp_info.system_libs.extend(["psapi", "ws2_32"])
+            if tools.Version(self.version) >= "3.2.0" and self.settings.compiler == "Visual Studio":
+                self.cpp_info.system_libs.append("wbemuuid")
             if self.options.with_odbc and not self.options.shared:
                 self.cpp_info.system_libs.extend(["odbc32", "odbccp32"])
                 if self.settings.compiler == "Visual Studio":
