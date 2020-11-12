@@ -22,24 +22,25 @@ class ResiprocateConan(ConanFile):
                        "with_mysql": True}
     _autotools = None
 
+
     @property
     def _is_msvc(self):
         return self.settings.compiler == "Visual Studio"
 
     @property
     def _is_mingw_windows(self):
-        return self.settings.os == "Windows" and tools.os_info.is_windows and self.settings.compiler == "gcc"
+        return tools.os_info.is_windows and (self.settings.compiler == 'gcc' or tools.cross_building(self.settings))
 
     @property
     def _source_subfolder(self):
         return "source_subfolder"
 
     def config_options(self):
-        if self.settings.os != "Linux":
+        if self.settings.os == 'Windows':
             del self.options.fPIC
 
     def build_requirements(self):
-        if self.settings.os == "Windows" and tools.os_info.is_windows:
+        if self._is_mingw_windows and not self._is_msvc:
             if "CONAN_BASH_PATH" not in os.environ and tools.os_info.detect_windows_subsystem() != 'msys2':
                 self.build_requires("msys2/20190524")
 
