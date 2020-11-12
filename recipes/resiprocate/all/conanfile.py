@@ -45,8 +45,9 @@ class ResiprocateConan(ConanFile):
             self.requires("libpq/11.5")
         if self.options.with_mysql:
             self.requires("libmysqlclient/8.0.17")
-        if self._is_mingw_windows:
-            self.requires("msys2_installer/latest@bincrafters/stable")
+        if self.settings.os == "Windows" and tools.os_info.is_windows:
+            if "CONAN_BASH_PATH" not in os.environ and tools.os_info.detect_windows_subsystem() != 'msys2':
+                self.build_requires("msys2/20190524")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
