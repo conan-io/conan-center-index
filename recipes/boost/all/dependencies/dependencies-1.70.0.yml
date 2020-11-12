@@ -1,4 +1,5 @@
 configure_options:
+- atomic
 - chrono
 - container
 - contract
@@ -8,8 +9,10 @@ configure_options:
 - fiber
 - filesystem
 - graph
+- graph_parallel
 - iostreams
 - locale
+- log
 - math
 - mpi
 - program_options
@@ -247,10 +250,10 @@ libs:
   - boost_wserialization
 requirements:
   iostreams:
-  - zlib
-  - lzma
   - zstd
   - bzip2
+  - zlib
+  - lzma
   locale:
   - icu
   - iconv
