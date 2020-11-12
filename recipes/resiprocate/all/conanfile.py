@@ -22,7 +22,6 @@ class ResiprocateConan(ConanFile):
                        "with_mysql": True}
     _autotools = None
 
-
     @property
     def _is_msvc(self):
         return self.settings.compiler == "Visual Studio"
