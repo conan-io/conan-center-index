@@ -19,5 +19,7 @@ sources:
     sha256: "ca562c00e61663c418bd9fdc6c70bdeaedafba8bef328cb6046a1d6390d39a71"
 patches:
   "2.12.1":
-     - patch_file: "dll-dir.patch"
+     - patch_file: "patches/dll-dir.patch"
+       base_path: "sources"
+     - patch_file: "patches/fix-unrecognized-linker-flag.patch"
        base_path: "sources"
