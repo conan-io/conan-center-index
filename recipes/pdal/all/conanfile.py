@@ -28,6 +28,12 @@ class PdalConan(ConanFile):
     _cmake = None
 
     def requirements(self):
+        # TODO package improvements:
+        # - add a requirement to libunwind (in CCI)
+        # - switch from vendored arbiter (not in CCI). disabled openssl and curl are deps of arbiter
+        # - switch from vendor/nanoflann (in CCI)
+        # - switch from vendor/nlohmann to nlohmann_json (in CCI)
+        # - evaluate dependency to boost instead of boost parts in vendor/pdalboost
         self.requires("gdal/3.1.4")
         self.requires("libgeotiff/1.6.0")
         if self.options.with_xml:
