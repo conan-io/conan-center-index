@@ -228,14 +228,30 @@ class BoostConan(ConanFile):
                     return True
         return False
 
+    @property
+    def _with_zlib(self):
+        return not self.options.header_only and self._with_xxx("zlib") and self.options.zlib
+
+    @property
+    def _with_bzip2(self):
+        return not self.options.header_only and self._with_xxx("bzip2") and self.options.bzip2
+
+    @property
+    def _with_lzma(self):
+        return not self.options.header_only and self._with_xxx("lzma") and self.options.lzma
+
+    @property
+    def _with_zstd(self):
+        return not self.options.header_only and self._with_xxx("zstd") and self.options.zstd
+
     def requirements(self):
-        if self._with_xxx("zlib"):
+        if self._with_zlib:
             self.requires("zlib/1.2.11")
-        if self._with_xxx("bzip2"):
+        if self._with_bzip2:
             self.requires("bzip2/1.0.8")
-        if self._with_xxx("lzma"):
+        if self._with_lzma:
             self.requires("xz_utils/5.2.5")
-        if self._with_xxx("zstd"):
+        if self._with_zstd:
             self.requires("zstd/1.4.5")
 
         if self._with_xxx("icu") and self.options.i18n_backend == "icu":
@@ -627,10 +643,10 @@ class BoostConan(ConanFile):
         if self.options.layout is not "b2-default":
             flags.append("--layout=%s" % self.options.layout)
         flags.append("--user-config=%s" % os.path.join(self._boost_build_dir, 'user-config.jam'))
-        flags.append("-sNO_ZLIB=%s" % ("0" if self.options.zlib else "1"))
-        flags.append("-sNO_BZIP2=%s" % ("0" if self.options.bzip2 else "1"))
-        flags.append("-sNO_LZMA=%s" % ("0" if self.options.lzma else "1"))
-        flags.append("-sNO_ZSTD=%s" % ("0" if self.options.zstd else "1"))
+        flags.append("-sNO_ZLIB=%s" % ("0" if self._with_zlib else "1"))
+        flags.append("-sNO_BZIP2=%s" % ("0" if self._with_bzip2 else "1"))
+        flags.append("-sNO_LZMA=%s" % ("0" if self._with_lzma else "1"))
+        flags.append("-sNO_ZSTD=%s" % ("0" if self._with_zstd else "1"))
 
         if self.options.i18n_backend == 'icu':
             flags.append("-sICU_PATH={}".format(self.deps_cpp_info["icu"].rootpath))
@@ -641,16 +657,18 @@ class BoostConan(ConanFile):
             flags.append("boost.locale.iconv=off boost.locale.icu=off")
             flags.append("--disable-icu --disable-iconv")
 
-        def add_defines(option, library):
-            if option:
-                for define in self.deps_cpp_info[library].defines:
-                    flags.append("define=%s" % define)
+        def add_defines(library):
+            for define in self.deps_cpp_info[library].defines:
+                flags.append("define=%s" % define)
 
-        if self._zip_bzip2_requires_needed:
-            add_defines(self.options.zlib, "zlib")
-            add_defines(self.options.bzip2, "bzip2")
-            add_defines(self.options.lzma, "xz_utils")
-            add_defines(self.options.zstd, "zstd")
+        if self._with_zlib:
+            add_defines("zlib")
+        if self._with_bzip2:
+            add_defines("bzip2")
+        if self._with_lzma:
+            add_defines("xz_utils")
+        if self._with_zstd:
+            add_defines("zstd")
 
         if self._is_msvc:
             flags.append("runtime-link=%s" % ("static" if "MT" in str(self.settings.compiler.runtime) else "shared"))
@@ -819,13 +837,13 @@ class BoostConan(ConanFile):
                                               lib=lib)
 
             contents = ""
-            if self.options.zlib:
+            if self._with_zlib:
                 contents += create_library_config("zlib", "zlib")
-            if self.options.bzip2:
+            if self._with_bzip2:
                 contents += create_library_config("bzip2", "bzip2")
-            if self.options.lzma:
+            if self._with_lzma:
                 contents += create_library_config("xz_utils", "lzma")
-            if self.options.zstd:
+            if self._with_zstd:
                 contents += create_library_config("zstd", "zstd")
 
         if not self.options.without_python:
