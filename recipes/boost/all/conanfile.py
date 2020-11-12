@@ -540,7 +540,7 @@ class BoostConan(ConanFile):
         if self._b2_abi:
             flags.append("abi=%s" % self._b2_abi)
 
-        if self.options.layout is not "b2-default":
+        if self.options.layout != "b2-default":
             flags.append("--layout=%s" % self.options.layout)
         flags.append("--user-config=%s" % os.path.join(self._boost_build_dir, 'user-config.jam'))
         flags.append("-sNO_ZLIB=%s" % ("0" if self.options.zlib else "1"))
