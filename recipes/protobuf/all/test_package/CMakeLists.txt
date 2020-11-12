@@ -4,7 +4,7 @@ project(test_package)
 include("${CMAKE_BINARY_DIR}/conanbuildinfo.cmake")
 conan_basic_setup(TARGETS)
 
-find_package(Protobuf CONFIG REQUIRED)
+find_package(protobuf CONFIG REQUIRED)
 
 find_program(PROTOC_PROGRAM protoc)
 if (NOT PROTOC_PROGRAM)
