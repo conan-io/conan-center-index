@@ -137,7 +137,7 @@ if(DEFINED Protobuf_SRC_ROOT_FOLDER)""",
         cmake.install()
         tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
         os.unlink(os.path.join(self.package_folder, self._cmake_install_base_path, "protobuf-config-version.cmake"))
-        os.unlink(os.path.join(self.package_folder, self._cmake_install_base_path", "protobuf-targets.cmake"))
+        os.unlink(os.path.join(self.package_folder, self._cmake_install_base_path, "protobuf-targets.cmake"))
         os.unlink(os.path.join(self.package_folder, self._cmake_install_base_path, "protobuf-targets-{}.cmake".format(str(self.settings.build_type).lower())))
         os.rename(os.path.join(self.package_folder, self._cmake_install_base_path, "protobuf-config.cmake"),
                   os.path.join(self.package_folder, self._cmake_install_base_path, "protobuf-generate.cmake"))
