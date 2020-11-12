@@ -34,15 +34,22 @@
  
  # this creates the conversion tool
  ADD_EXECUTABLE			( yuvconvert ${ly_base_dir}/util/yuvconvert.cc )
-@@ -81,9 +90,9 @@
+@@ -81,9 +90,15 @@
  
  
  # install the conversion tool, .so, .a, and all the header files
 -INSTALL ( PROGRAMS ${CMAKE_BINARY_DIR}/yuvconvert			DESTINATION bin )
-+#INSTALL ( PROGRAMS ${CMAKE_BINARY_DIR}/yuvconvert			DESTINATION bin )
- INSTALL ( TARGETS ${ly_lib_static}						DESTINATION lib )
+-INSTALL ( TARGETS ${ly_lib_static}						DESTINATION lib )
 -INSTALL ( TARGETS ${ly_lib_shared} LIBRARY				DESTINATION lib RUNTIME DESTINATION bin )
++#INSTALL ( PROGRAMS ${CMAKE_BINARY_DIR}/yuvconvert			DESTINATION bin )
++#INSTALL ( TARGETS ${ly_lib_static}						DESTINATION lib )
 +#INSTALL ( TARGETS ${ly_lib_shared} LIBRARY				DESTINATION lib RUNTIME DESTINATION bin )
++
++INSTALL(TARGETS ${ly_lib_static}
++    RUNTIME DESTINATION bin
++    LIBRARY DESTINATION lib
++    ARCHIVE DESTINATION lib
++)
  INSTALL ( DIRECTORY ${PROJECT_SOURCE_DIR}/include/		DESTINATION include )
  
  # create the .deb and .rpm packages using cpack
