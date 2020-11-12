@@ -1,0 +1,86 @@
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -24,6 +24,9 @@
+ CMAKE_MINIMUM_REQUIRED(VERSION 3.0.2)
+ 
+ macro(CeleroSetDefaultCompilerOptions)
++	set_target_properties(${PROJECT_NAME} PROPERTIES
++		POSITION_INDEPENDENT_CODE "${CELERO_COMPILE_PIC}"
++	)
+ 	if(${CMAKE_CXX_COMPILER_ID} STREQUAL MSVC)
+ 		target_compile_options(${PROJECT_NAME} PRIVATE /D_VARIADIC_MAX=10 )
+ 		target_compile_options(${PROJECT_NAME} PRIVATE /D_CRT_SECURE_NO_WARNINGS)
+@@ -31,7 +34,6 @@ macro(CeleroSetDefaultCompilerOptions)
+ 		target_compile_options(${PROJECT_NAME} PRIVATE /MP)
+ 		target_compile_options(${PROJECT_NAME} PRIVATE /D_SCL_SECURE_NO_WARNINGS)
+ 		target_compile_options(${PROJECT_NAME} PRIVATE /permissive-)
+-		target_compile_options(${PROJECT_NAME} PRIVATE /std:c++14)
+ 
+         if(CELERO_TREAT_WARNINGS_AS_ERRORS)
+             target_compile_options(${PROJECT_NAME} PRIVATE /WX)
+@@ -39,12 +41,10 @@ macro(CeleroSetDefaultCompilerOptions)
+ 
+ 	elseif(${CMAKE_CXX_COMPILER_ID} STREQUAL GNU)
+ 		target_compile_options(${PROJECT_NAME} PRIVATE -Wall)
+-		target_compile_options(${PROJECT_NAME} PRIVATE -fPIC)
+-		target_compile_options(${PROJECT_NAME} PRIVATE -std=c++14)
+ 
+ 	elseif(${CMAKE_CXX_COMPILER_ID} STREQUAL Clang)
+ 		if(${CMAKE_SYSTEM_NAME} STREQUAL Windows)
+-			target_compile_options(${PROJECT_NAME} PRIVATE -Xclang -std=c++14)
++			target_compile_options(${PROJECT_NAME} PRIVATE -Xclang)
+ 			target_compile_options(${PROJECT_NAME} PRIVATE -Wno-c++98-compat)
+ 			target_compile_options(${PROJECT_NAME} PRIVATE -Wno-c++98-compat-pedantic)
+ 			target_compile_options(${PROJECT_NAME} PRIVATE -Wno-reserved-id-macro)
+@@ -53,8 +53,6 @@ macro(CeleroSetDefaultCompilerOptions)
+ 			endif()
+ 		else()
+ 			target_compile_options(${PROJECT_NAME} PRIVATE -Wall)
+-			target_compile_options(${PROJECT_NAME} PRIVATE -fPIC)
+-			target_compile_options(${PROJECT_NAME} PRIVATE -std=c++14)
+ 			if(CELERO_TREAT_WARNINGS_AS_ERRORS)
+ 				target_compile_options(${PROJECT_NAME} PRIVATE -Werror)
+ 			endif()
+@@ -62,8 +60,6 @@ macro(CeleroSetDefaultCompilerOptions)
+ 
+ 	elseif(${CMAKE_CXX_COMPILER_ID} STREQUAL AppleClang)
+ 		target_compile_options(${PROJECT_NAME} PRIVATE -Wall)
+-		target_compile_options(${PROJECT_NAME} PRIVATE -fPIC)
+-		target_compile_options(${PROJECT_NAME} PRIVATE -std=c++14)
+ 
+ 		if(CELERO_TREAT_WARNINGS_AS_ERRORS)
+ 			target_compile_options(${PROJECT_NAME} PRIVATE -Werror)
+@@ -83,6 +79,7 @@ include(CheckIncludeFile)
+ #
+ 
+ option(CELERO_COMPILE_DYNAMIC_LIBRARIES "Set to ON to build Celero for dynamic linking.  Use OFF for static." ON)
++option(CELERO_COMPILE_PIC "Set to ON to build Celero as a position-independent library." ON)
+ option(CELERO_ENABLE_EXPERIMENTS "Set to ON to automatically build all examples." OFF)
+ option(CELERO_ENABLE_FOLDERS "Enable to put Celero in its own solution folder under Visual Studio" ON)
+ option(CELERO_ENABLE_TESTS "Enable building and running unit tests." OFF)
+@@ -101,6 +98,7 @@ set_property(GLOBAL PROPERTY USE_FOLDERS ON)
+ #
+ 
+ set(CMAKE_CXX_STANDARD 14)
++set(CMAKE_CXX_EXTENSIONS OFF)
+ 
+ set(CMAKE_DEBUG_POSTFIX          "d" CACHE STRING "add a postfix, usually d on windows")
+ set(CMAKE_RELEASE_POSTFIX        ""  CACHE STRING "add a postfix, usually empty on windows")
+@@ -178,7 +176,7 @@ target_sources(${PROJECT_NAME} PRIVATE
+ 
+ if(MSVC)
+ 	set(SYSLIBS
+-		PowrProf.lib
++		powrprof psapi
+ 		)
+ else()
+ 	#pthread is required for std::thread to work.
+@@ -204,7 +202,7 @@ install(TARGETS ${PROJECT_NAME}
+   EXPORT ${PROJECT_NAME}-target
+   RUNTIME DESTINATION ${CMAKE_INSTALL_PREFIX}/bin
+   LIBRARY DESTINATION ${CMAKE_INSTALL_PREFIX}/lib
+-  ARCHIVE DESTINATION ${CMAKE_INSTALL_PREFIX}/lib/static
++  ARCHIVE DESTINATION ${CMAKE_INSTALL_PREFIX}/lib
+ )
+ 
+ install(DIRECTORY include DESTINATION ${CMAKE_INSTALL_PREFIX})

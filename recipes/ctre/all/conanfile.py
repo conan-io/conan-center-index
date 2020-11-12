@@ -20,12 +20,13 @@ class CtreConan(ConanFile):
         compiler = self.settings.compiler
         version = tools.Version(self.settings.compiler.version)
 
+        min_gcc = "7.4" if self.version < "3" else "8"
         if self.settings.compiler.get_safe("cppstd"):
             tools.check_min_cppstd(self, "17")
         if compiler == "Visual Studio" and version < "15":
             raise ConanInvalidConfiguration("ctre doesn't support MSVC < 15")
-        elif compiler == "gcc" and version < "7.4":
-            raise ConanInvalidConfiguration("ctre doesn't support gcc < 7.4")
+        elif compiler == "gcc" and version < min_gcc:
+            raise ConanInvalidConfiguration("ctre doesn't support gcc < {}".format(min_gcc))
         elif compiler == "clang" and version < "6.0":
             raise ConanInvalidConfiguration("ctre doesn't support clang < 6.0")
         elif compiler == "apple-clang" and version < "10.0":

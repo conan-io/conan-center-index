@@ -1,0 +1,4 @@
+sources:
+  "1.2.30":
+    url: "https://github.com/lsh123/xmlsec/archive/xmlsec-1_2_30.tar.gz"
+    sha256: "57f6a5f3b9f2d17859a5583dc0b23f47130cc1c909ed6caf596ab0cd388237ec"

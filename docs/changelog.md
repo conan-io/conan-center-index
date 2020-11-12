@@ -1,5 +1,51 @@
 # Changelog
 
+### 23-October-2020 - 17:13 CEST
+
+- [feature] ListProfiles: Add 'profiles' to inputs, make it required.
+- [feature] Tapaholes: Parameter to accept packages in order from a JSON list.
+- [fix] AutomaticMerge: Consider pagination when reading pull-request reviews.
+- [job] PopulateProperties: Compute and assign properties to packages-revs and recipe-revs.
+- [job] PromotePackages: Copy Conan packages and properties from one repo to another.
+
+### 19-October-2020 - 17:15 CEST
+
+- Updated Conan client to the 1.30.2 version in Windows and Mac agents.
+
+### 14-October-2020 - 17:49 CEST
+
+- [hotfix] Use non greedy regex to capture the pull-request number.
+
+### 10-October-2020 - 21:20 CEST
+
+ - [fix] Wait longer for Artifactory to create new repositories.
+
+### 10-October-2020 - 20:52 CEST
+
+ - [job] TapaholesRepo: use full path to the recipe itself.
+
+### 10-October-2020 - 20:36 CEST
+
+ - [job] BuildSingleReference: assign properties at recipe-revision level
+
+### 10-October-2020 - 15:53 CEST
+
+ - [job] TapaholesRepo: create remote repository for each run.
+ - [job] BuildSingleReference: apply environment to every Conan command.
+
+### 09-October-2020 - 23:43 CEST
+
+ - [fix] AutomaticMerge: if the PR cannot be merged (conflicts) go and try the next one.
+ - [fix] Use existing TMP folder in Windows.
+ - [fix] BuildSingleReference: minor fixes.
+
+### 07-October-2020 - 17:06 CEST
+
+- [fix] Minor fix to AutomaticMerge job (#390)
+- [fix] Modify temp folder, it will no longer be the root of the workspace.
+- [job] Populate artifact properties from BuildSingleReference job.
+- [job] New job to iterate Github repository (and commit) and find packages missing from remote.
+
 ### 29-September-2020 - 16:21 CEST
 
 - [feature] Use indexer V2 API.

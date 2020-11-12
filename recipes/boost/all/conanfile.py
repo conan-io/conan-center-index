@@ -141,8 +141,12 @@ class BoostConan(ConanFile):
                 if not self.options.get_safe('without_%s' % lib):
                     raise ConanInvalidConfiguration("Boost '%s' library requires multi threading" % lib)
 
+        if self.settings.compiler == "Visual Studio" and "MT" in self.settings.compiler.runtime and self.options.shared:
+            raise ConanInvalidConfiguration("Boost can not be built as shared library with MT runtime.")
+
     def build_requirements(self):
-        self.build_requires("b2/4.2.0")
+        if not self.options.header_only:
+            self.build_requires("b2/4.2.0")
 
     def requirements(self):
         if self._zip_bzip2_requires_needed:
@@ -151,11 +155,11 @@ class BoostConan(ConanFile):
             if self.options.bzip2:
                 self.requires("bzip2/1.0.8")
             if self.options.lzma:
-                self.requires("xz_utils/5.2.4")
+                self.requires("xz_utils/5.2.5")
             if self.options.zstd:
-                self.requires("zstd/1.4.3")
+                self.requires("zstd/1.4.5")
         if self.options.i18n_backend == 'icu':
-            self.requires("icu/64.2")
+            self.requires("icu/67.1")
 
     def package_id(self):
         if self.options.header_only:
