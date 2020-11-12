@@ -83,6 +83,8 @@ int main(int, char *[])
         std::printf("Log initialization failed: %s\n", ex.what());
         return 1;
     }
+
+    return 0;
 }
 
 #include "spdlog/sinks/stdout_color_sinks.h"
