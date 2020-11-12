@@ -108,14 +108,16 @@ class CairoConan(ConanFile):
                 env_msvc.flags.append('/FS')  # C1041 if multiple CL.EXE write to the same .PDB file, please use /FS
                 with tools.environment_append(env_msvc.vars):
                     env_build = AutoToolsBuildEnvironment(self)
-                    args=['-f', 'Makefile.win32']
-                    args.append('CFG=%s' % str(self.settings.build_type).lower())
-                    args.append('CAIRO_HAS_FC_FONT=0')
-                    args.append('ZLIB_PATH=%s' % self.deps_cpp_info['zlib'].rootpath)
-                    args.append('LIBPNG_PATH=%s' % self.deps_cpp_info['libpng'].rootpath)
-                    args.append('PIXMAN_PATH=%s' % self.deps_cpp_info['pixman'].rootpath)
-                    args.append('FREETYPE_PATH=%s' % self.deps_cpp_info['freetype'].rootpath)
-                    args.append('GOBJECT_PATH=%s' % self.deps_cpp_info['glib'].rootpath)
+                    args=[
+                        "-f", "Makefile.win32",
+                        "CFG={}".format(self.settings.build_type).lower()),
+                        "CAIRO_HAS_FC_FONT=0",
+                        "ZLIB_PATH={}".format(self.deps_cpp_info["zlib"].rootpath,
+                        "LIBPNG_PATH={}'.format(self.deps_cpp_info["libpng"].rootpath),
+                        "PIXMAN_PATH={}".format(self.deps_cpp_info['pixman'].rootpath),
+                        "FREETYPE_PATH={}".format(self.deps_cpp_info['freetype'].rootpath),
+                        "GOBJECT_PATH={}".format(self.deps_cpp_info['glib'].rootpath),
+                    ]
                     
                     env_build.make(args=args)
                     env_build.make(args=['-C', os.path.join('util', 'cairo-gobject')] + args)
@@ -124,26 +126,24 @@ class CairoConan(ConanFile):
         if self._env_build:
             return self._env_build
 
-        configure_args = ['--enable-ft' if self.options.with_freetype else '--disable-ft']
-        if self.settings.os != "Windows":
-            configure_args.append('--enable-fc' if self.options.with_fontconfig else '--disable-fc')
-        if self.settings.os == 'Linux':
-            configure_args.append('--enable-xlib' if self.options.with_xlib else '--disable-xlib')
-            configure_args.append('--enable-xlib_xrender' if self.options.with_xlib_xrender else '--disable-xlib_xrender')
-            configure_args.append('--enable-xcb' if self.options.with_xcb else '--disable-xcb')
-        configure_args.append('--enable-gobject' if self.options.with_glib else '--disable-gobject')
-        if self.options.shared:
-            configure_args.extend(['--disable-static', '--enable-shared'])
-        else:
-            configure_args.extend(['--enable-static', '--disable-shared'])
-
         self._env_build = AutoToolsBuildEnvironment(self, win_bash=tools.os_info.is_windows)
-        if self.settings.os == 'Macos':
-            self._env_build.link_flags.extend(['-framework CoreGraphics',
-                                            '-framework CoreFoundation'])
-        if str(self.settings.compiler) in ['gcc', 'clang', 'apple-clang']:
-            self._env_build.flags.append('-Wno-enum-conversion')
-        configure_args.append("--datarootdir=%s" % os.path.join(self.package_folder, "res"))
+        yes_no = lambda v: "yes" if v else "no"
+        configure_args = [
+            "--datarootdir={}".format(tools.unix_path(os.path.join(self.package_folder, "res"))),
+            "--enable-ft={}".format(yes_no(self.options.with_freetype)),
+            "--enable-gobject={}".format(yes_no(self.options.with_glib)),
+            "--enable-fc={}".format(yes_no(self.options.get_safe("with_fontconfig")),
+            "--enable-xlib={}".format(yes_no(self.options.get_safe("with_xlib")),
+            "--enable-xlib_xrender={}".format(yes_no(self.options.get_safe("with_xlib_xrender")),
+            "--enable-xcb={}".format(yes_no(self.options.get_safe("xcb")),
+            "--disable-shared={}".format(yes_no(self.options.shared)),
+            "--enable-static={}".format(yes_no(not self.options.shared)),
+        ]
+        if tools.is_apple_os(self.settings.os):
+            self._env_build.link_flags.extend(["-framework CoreGraphics",
+                                            "-framework CoreFoundation"])
+        if str(self.settings.compiler) in ["gcc", "clang", "apple-clang"]:
+            self._env_build.flags.append("-Wno-enum-conversion")
 
         env_vars = {
              "NOCONFIGURE": "1"
@@ -162,7 +162,6 @@ class CairoConan(ConanFile):
                 tools.replace_in_file(os.path.join(self.source_folder, self._source_subfolder, "src", "cairo-ft-font.c"),
                                       '#if HAVE_UNISTD_H', '#ifdef HAVE_UNISTD_H')
             env_build = self._get_env_build()
-            env_build.install()
 
     def package(self):
         self.copy(pattern="LICENSE", dst="licenses", src=self._source_subfolder)
