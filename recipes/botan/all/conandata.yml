@@ -21,3 +21,5 @@ patches:
   "2.12.1":
      - patch_file: "dll-dir.patch"
        base_path: "sources"
+     - patch_file: "fix-unrecognized-linker-flag.patch"
+       base_path: "sources"
