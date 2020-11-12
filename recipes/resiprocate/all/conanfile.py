@@ -29,7 +29,7 @@ class ResiprocateConan(ConanFile):
 
     @property
     def _is_mingw_windows(self):
-        return tools.os_info.is_windows and (self.settings.compiler == 'gcc' or tools.cross_building(self.settings))
+        return self.settings.os == "Windows" and (self.settings.compiler == 'gcc' or tools.cross_building(self.settings))
 
     @property
     def _source_subfolder(self):
