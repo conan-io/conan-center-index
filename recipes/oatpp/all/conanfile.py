@@ -14,7 +14,7 @@ class OatppConan(ConanFile):
     settings = "os", "compiler", "build_type", "arch"
     options = {"shared": [True, False], "fPIC": [True, False]}
     default_options = {"shared": False, "fPIC": True}
-    exports_sources = "CMakeLists.txt"
+    exports_sources = ["CMakeLists.txt", "patches/**"]
     _cmake = None
 
     @property
@@ -38,9 +38,6 @@ class OatppConan(ConanFile):
         if self.settings.os == "Windows" and self.options.shared:
             raise ConanInvalidConfiguration("oatpp can not be built as shared library on Windows")
 
-        if self.settings.compiler == "gcc" and tools.Version(self.settings.compiler.version) < "5":
-            raise ConanInvalidConfiguration("oatpp requires GCC >=5")
-
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
         os.rename("oatpp-{0}".format(self.version), self._source_subfolder)
@@ -56,6 +53,8 @@ class OatppConan(ConanFile):
         return self._cmake
 
     def build(self):
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            tools.patch(**patch)
         cmake = self._configure_cmake()
         cmake.build()
 

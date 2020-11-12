@@ -1,0 +1,28 @@
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -93,6 +93,9 @@ endif()
+ if(OATPP_DISABLE_LOGE)
+     add_definitions(-DOATPP_DISABLE_LOGE)
+ endif()
++if(CMAKE_COMPILER_IS_GNUCXX AND ${CMAKE_CXX_COMPILER_VERSION} VERSION_LESS 5.0)
++    add_definitions(-DOATPP_DISABLE_STD_PUT_TIME)
++endif()
+ 
+ message("\n############################################################################\n")
+ 
+--- a/src/oatpp/core/base/Environment.cpp
++++ b/src/oatpp/core/base/Environment.cpp
+@@ -93,7 +93,13 @@ void DefaultLogger::log(v_int32 priority, const std::string& tag, const std::str
+     time_t seconds = std::chrono::duration_cast<std::chrono::seconds>(time).count();
+     struct tm now;
+     localtime_r(&seconds, &now);
++#ifdef OATPP_DISABLE_STD_PUT_TIME
++	  char timeBuffer[50];
++    strftime(timeBuffer, sizeof(timeBuffer), m_config.timeFormat, &now);
++    std::cout << timeBuffer;
++#else
+     std::cout << std::put_time(&now, m_config.timeFormat);
++#endif
+     indent = true;
+   }
+ 
