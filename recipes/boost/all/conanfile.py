@@ -18,6 +18,38 @@ except ImportError:
 required_conan_version = ">=1.28.0"
 
 
+CONFIGURE_OPTIONS = (
+    "atomic",
+    "chrono",
+    "container",
+    "contract",
+    "coroutine",
+    "date_time",
+    "exception",
+    "fiber",
+    "filesystem",
+    "graph",
+    "graph_parallel",
+    "iostreams",
+    "locale",
+    "log",
+    "math",
+    "mpi",
+    "program_options",
+    "python",
+    "random",
+    "regex",
+    "serialization",
+    "stacktrace",
+    "system",
+    "test",
+    "thread",
+    "timer",
+    "type_erasure",
+    "wave",
+)
+
+
 class BoostConan(ConanFile):
     name = "boost"
     settings = "os", "arch", "compiler", "build_type"
@@ -26,90 +58,67 @@ class BoostConan(ConanFile):
     homepage = "https://www.boost.org"
     license = "BSL-1.0"
     topics = ("conan", "boost", "libraries", "cpp")
-    # The current python option requires the package to be built locally, to find default Python
-    # implementation
 
     _options = None
 
-    @property
-    def options(self):
-        if self._options:
-            return self._options
-        self._options = {
-            "shared": [True, False],
-            "header_only": [True, False],
-            "error_code_header_only": [True, False],
-            "system_no_deprecated": [True, False],
-            "asio_no_deprecated": [True, False],
-            "filesystem_no_deprecated": [True, False],
-            "fPIC": [True, False],
-            "layout": ["system", "versioned", "tagged", "b2-default"],
-            "magic_autolink": [True, False],  # enables BOOST_ALL_NO_LIB
-            "python_executable": "ANY",  # system default python installation is used, if None
-            "python_version": "ANY",  # major.minor; computed automatically, if None
-            "namespace": "ANY",  # custom boost namespace for bcp, e.g. myboost
-            "namespace_alias": [True, False],  # enable namespace alias for bcp, boost=myboost
-            "multithreading": [True, False],  # enables multithreading support
-            "zlib": [True, False],
-            "bzip2": [True, False],
-            "lzma": [True, False],
-            "zstd": [True, False],
-            "segmented_stacks": [True, False],
-            "debug_level": [i for i in range(0, 14)],
-            "pch": [True, False],
-            "extra_b2_flags": "ANY",  # custom b2 flags
-            "i18n_backend": ["iconv", "icu", None],
-        }
-        for name in self._configure_options:
-            self._options["without_{}".format(name)] = [True, False]
-        return self._options
 
-    @options.setter
-    def options(self, options):
-        self._options = options
+    options = {
+        "shared": [True, False],
+        "header_only": [True, False],
+        "error_code_header_only": [True, False],
+        "system_no_deprecated": [True, False],
+        "asio_no_deprecated": [True, False],
+        "filesystem_no_deprecated": [True, False],
+        "fPIC": [True, False],
+        "layout": ["system", "versioned", "tagged", "b2-default"],
+        "magic_autolink": [True, False],  # enables BOOST_ALL_NO_LIB
+        "python_executable": "ANY",  # system default python installation is used, if None
+        "python_version": "ANY",  # major.minor; computed automatically, if None
+        "namespace": "ANY",  # custom boost namespace for bcp, e.g. myboost
+        "namespace_alias": [True, False],  # enable namespace alias for bcp, boost=myboost
+        "multithreading": [True, False],  # enables multithreading support
+        "zlib": [True, False],
+        "bzip2": [True, False],
+        "lzma": [True, False],
+        "zstd": [True, False],
+        "segmented_stacks": [True, False],
+        "debug_level": [i for i in range(0, 14)],
+        "pch": [True, False],
+        "extra_b2_flags": "ANY",  # custom b2 flags
+        "i18n_backend": ["iconv", "icu", None],
+    }
+    for _name in CONFIGURE_OPTIONS:
+        options["without_{}".format(_name)] = [True, False]
 
-    @property
-    def default_options(self):
-        default_options = {
-            'shared': False,
-            'header_only': False,
-            'error_code_header_only': False,
-            'system_no_deprecated': False,
-            'asio_no_deprecated': False,
-            'filesystem_no_deprecated': False,
-            'fPIC': True,
-            'layout': 'system',
-            'magic_autolink': False,
-            'python_executable': 'None',
-            'python_version': 'None',
-            'namespace': 'boost',
-            'namespace_alias': False,
-            'multithreading': True,
-            'zlib': True,
-            'bzip2': True,
-            'lzma': False,
-            'zstd': False,
-            'segmented_stacks': False,
-            "debug_level": 0,
-            'pch': True,
-            'extra_b2_flags': 'None',
-            "i18n_backend": 'iconv',
-        }
-        for name in self._configure_options:
-            default_options["without_{}".format(name)] = False
-        for name in ("graph_parallel", "mpi", "python", "mpi_python", "numpy"):
-            opt_name = "without_{}".format(name)
-            if opt_name in self.options:
-                default_options[opt_name] = True
-        return default_options
-
-    @property
-    def _configure_options(self):
-        return self._dependencies["configure_options"]
-
-    @default_options.setter
-    def default_options(self, default_options):
-        self._default_options = default_options
+    default_options = {
+        "shared": False,
+        "header_only": False,
+        "error_code_header_only": False,
+        "system_no_deprecated": False,
+        "asio_no_deprecated": False,
+        "filesystem_no_deprecated": False,
+        "fPIC": True,
+        "layout": "system",
+        "magic_autolink": False,
+        "python_executable": "None",
+        "python_version": "None",
+        "namespace": "boost",
+        "namespace_alias": False,
+        "multithreading": True,
+        "zlib": True,
+        "bzip2": True,
+        "lzma": False,
+        "zstd": False,
+        "segmented_stacks": False,
+        "debug_level": 0,
+        "pch": True,
+        "extra_b2_flags": "None",
+        "i18n_backend": "iconv",
+    }
+    for _name in CONFIGURE_OPTIONS:
+        default_options["without_{}".format(_name)] = False
+    for _name in ("graph_parallel", "mpi", "python",):
+        default_options["without_{}".format(_name)] = True
 
     short_paths = True
     no_copy_source = True
@@ -169,6 +178,15 @@ class BoostConan(ConanFile):
         if self.settings.os == "Windows":
             del self.options.fPIC
 
+        # Remove options not supported by this version of boost
+        for dep_name in CONFIGURE_OPTIONS:
+            if dep_name not in self._configure_options:
+                delattr(self.options, "without_{}".format(dep_name))
+
+    @property
+    def _configure_options(self):
+        return self._dependencies["configure_options"]
+
     def configure(self):
         if not self.options.i18n_backend and not self.options.without_locale:
             raise ConanInvalidConfiguration("Boost 'locale' library requires a i18n_backend, either 'icu' or 'iconv'")
@@ -185,33 +203,39 @@ class BoostConan(ConanFile):
         if self.settings.compiler == "Visual Studio" and "MT" in str(self.settings.compiler.runtime) and self.options.shared:
             raise ConanInvalidConfiguration("Boost can not be built as shared library with MT runtime.")
 
-    def _check_options(self):
+        # Check, when a boost module is enabled, whether the boost modules it depends on are enabled as well.
         for mod_name, mod_deps in self._dependencies["dependencies"].items():
-            without_option = "without_{}".format(mod_name)
-            known_option = without_option in self.options
-            if known_option:
-                if not self.options.get_safe(without_option):
-                    for mod_dep in mod_deps:
-                        if self.options.get_safe("without_{}".format(mod_dep), False):
-                            raise ConanInvalidConfiguration("{} requires {}: {} is disabled".format(mod_name, mod_deps, mod_dep))
+            if not self.options.get_safe("without_{}".format(mod_name), True):
+                for mod_dep in mod_deps:
+                    if self.options.get_safe("without_{}".format(mod_dep), False):
+                        raise ConanInvalidConfiguration("{} requires {}: {} is disabled".format(mod_name, mod_deps, mod_dep))
 
     def build_requirements(self):
         if not self.options.header_only:
             self.build_requires("b2/4.2.0")
 
+    def _with_xxx(self, xxx):
+        if self.options.header_only:
+            return False
+        for name, reqs in self._dependencies["requirements"].items():
+            if xxx in reqs:
+                if not self.options.get_safe("without_{}".format(name), True):
+                    return True
+        return False
+
     def requirements(self):
-        if self._zip_bzip2_requires_needed:
-            if self.options.zlib:
-                self.requires("zlib/1.2.11")
-            if self.options.bzip2:
-                self.requires("bzip2/1.0.8")
-            if self.options.lzma:
-                self.requires("xz_utils/5.2.5")
-            if self.options.zstd:
-                self.requires("zstd/1.4.5")
-        if self.options.i18n_backend == 'icu':
-            self.requires("icu/67.1")
-        elif self.options.i18n_backend == 'iconv':
+        if self._with_xxx("zlib"):
+            self.requires("zlib/1.2.11")
+        if self._with_xxx("bzip2"):
+            self.requires("bzip2/1.0.8")
+        if self._with_xxx("lzma"):
+            self.requires("xz_utils/5.2.5")
+        if self._with_xxx("zstd"):
+            self.requires("zstd/1.4.5")
+
+        if self._with_xxx("icu") and self.options.i18n_backend == "icu":
+            self.requires("icu/68.1")
+        elif self._with_xxx("iconv") and self.options.i18n_backend == "iconv":
             self.requires("libiconv/1.16")
 
     def package_id(self):
@@ -474,8 +498,6 @@ class BoostConan(ConanFile):
                 self.run(command)
 
     def build(self):
-        self._check_options()
-
         if self.options.header_only:
             self.output.warn("Header only package, skipping build")
             return
