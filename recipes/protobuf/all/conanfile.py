@@ -39,8 +39,13 @@ class ProtobufConan(ConanFile):
         extracted_folder = self.name + "-" + self.version
         os.rename(extracted_folder, self._source_subfolder)
 
+
+    def config_options(self):
+        if self.settings.os == "Windows":
+            del self.options.fPIC
+
     def configure(self):
-        if self.settings.os == "Windows" and self.settings.compiler == "Visual Studio":
+        if self.options.shared:
             del self.options.fPIC
 
             compiler_version = Version(self.settings.compiler.version.value)
