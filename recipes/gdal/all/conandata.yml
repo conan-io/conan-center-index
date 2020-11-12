@@ -64,3 +64,5 @@ patches:
       base_path: "source_subfolder"
     - patch_file: "patches/3.2.x/fix-include-xerces.patch"
       base_path: "source_subfolder"
+    - patch_file: "patches/3.2.x/missing-makefile-vc-heif.patch"
+      base_path: "source_subfolder"

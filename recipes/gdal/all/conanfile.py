@@ -77,7 +77,7 @@ class GdalConan(ConanFile):
         "without_lerc": [True, False],
         "with_null": [True, False],
         "with_exr": [True, False],
-        # "with_heif": [True, False],
+        "with_heif": [True, False],
     }
     default_options = {
         "shared": False,
@@ -141,7 +141,7 @@ class GdalConan(ConanFile):
         "without_lerc": False,
         "with_null": False,
         "with_exr": False,
-        # "with_heif": False,
+        "with_heif": False,
     }
 
     _autotools= None
@@ -155,6 +155,10 @@ class GdalConan(ConanFile):
     def _build_subfolder(self):
         return "build_subfolder"
 
+    @property
+    def _has_with_heif_option(self):
+        return tools.Version(self.version) >= "3.2.0"
+
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
@@ -163,8 +167,9 @@ class GdalConan(ConanFile):
         if tools.Version(self.version) < "3.1.0":
             del self.options.with_exr
         # if tools.Version(self.version) < "3.2.0":
-        #     del self.options.with_libdeflate
-        #     del self.options.with_heif
+            # del self.options.with_libdeflate
+        if not self._has_with_heif_option:
+            del self.options.with_heif
 
     def configure(self):
         if self.options.shared:
@@ -313,8 +318,8 @@ class GdalConan(ConanFile):
         #     self.requires("lerc/2.1") # TODO: use conan recipe (not possible yet because lerc API is broken for GDAL)
         if self.options.get_safe("with_exr"):
             self.requires("openexr/2.5.2")
-        # if self.options.get_safe("with_heif"):
-        #     self.requires("libheif/1.9.1")
+        if self.options.get_safe("with_heif"):
+            self.requires("libheif/1.9.1")
 
     def _validate_dependency_graph(self):
         if self.options.with_qhull and self.options["qhull"].reentrant:
@@ -483,6 +488,8 @@ class GdalConan(ConanFile):
             args.append("CRUNCH_INC=\"-I{}\"".format(" -I".join(self.deps_cpp_info["crunch"].include_paths)))
         if self.options.get_safe("with_exr"):
             args.append("EXR_INC=\"-I{}\"".format(" -I".join(self.deps_cpp_info["openexr"].include_paths)))
+        if self.options.get_safe("with_heif"):
+            args.append("HEIF_INC=\"-I{}\"".format(" -I".join(self.deps_cpp_info["libheif"].include_paths)))
 
         self._nmake_args = args
         return self._nmake_args
@@ -630,8 +637,8 @@ class GdalConan(ConanFile):
             args.append("--with-null")
         if self.options.get_safe("with_exr") is not None:
             args.append("--with-exr={}".format("yes" if self.options.with_exr else "no"))
-        if tools.Version(self.version) >= "3.2.0":
-            args.append("--without-heif") # TODO: to implement when libheif recipe available
+        if self._has_with_heif_option:
+            args.append("--with-heif={}".format("yes" if self.options.with_heif else "no"))
 
         # Inject -stdlib=libc++ for clang with libc++
         env_build_vars = self._autotools.vars
