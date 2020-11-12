@@ -33,7 +33,8 @@ target_include_directories(${PROJECT_NAME} PUBLIC ${PROJECT_SOURCE_DIR} ${PROJEC
 
 # Library info
 set_target_properties(${PROJECT_NAME} PROPERTIES
-    VERSION ${PROJECT_VERSION})
+    VERSION ${PROJECT_VERSION}
+	C_STANDARD 99)
 
 # Conan options
 if (COLOR)
