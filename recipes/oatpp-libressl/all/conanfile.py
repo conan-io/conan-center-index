@@ -12,8 +12,8 @@ class OatppLibresslConan(ConanFile):
     settings = "os", "compiler", "build_type", "arch"
     options = {"shared": [True, False], "fPIC": [True, False]}
     default_options = {"shared": False, "fPIC": True}
-    generators = "cmake", "cmake_find_package", "pkg_config"
-    exports_sources = "CMakeLists.txt", "patches/**"
+    generators = "cmake", "cmake_find_package"
+    exports_sources = "CMakeLists.txt"
 
     _cmake = None
 
@@ -56,13 +56,10 @@ class OatppLibresslConan(ConanFile):
         self._cmake = CMake(self)
         self._cmake.definitions["OATPP_BUILD_TESTS"] = False
         self._cmake.definitions["OATPP_MODULES_LOCATION"] = "INSTALLED"
-        self._cmake.definitions["OATPP_DIR_SRC"] = self.deps_cpp_info["oatpp"].include_paths[0]
         self._cmake.configure(build_folder=self._build_subfolder)
         return self._cmake
 
     def build(self):
-        for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            tools.patch(**patch)
         cmake = self._configure_cmake()
         cmake.build()
 
