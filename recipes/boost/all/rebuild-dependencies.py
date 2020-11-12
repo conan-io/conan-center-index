@@ -5,18 +5,25 @@ import dataclasses
 from pathlib import Path
 import re
 import subprocess
-import sys
 import tempfile
 from typing import Dict, List, Tuple
 
 from conans import tools
+import logging
+import pprint
 import json
 import yaml
+
+
+log = logging.Logger("boost-dependency-builder")
+log.parent = logging.root
+log.setLevel(logging.WARNING)
 
 
 BOOST_GIT_URL = "https://github.com/boostorg/boost.git"
 
 CONFIGURE_OPTIONS = (
+    "atomic",
     "chrono",
     "container",
     "contract",
@@ -26,8 +33,10 @@ CONFIGURE_OPTIONS = (
     "fiber",
     "filesystem",
     "graph",
+    "graph_parallel",
     "iostreams",
     "locale",
+    "log",
     "math",
     "mpi",
     "program_options",
@@ -177,7 +186,7 @@ class BoostDependencyBuilder(object):
         if not jam.is_file():
             jam = self.boost_path / "libs" / component / "build" / "Jamfile"
         if not jam.is_file():
-            sys.stderr.write("Can't find Jamfile for {}. Unable to determine dependencies.\n")
+            log.warning("Can't find Jamfile for %s. Unable to determine dependencies.", component)
             return []
         contents = jam.open().read()
 
@@ -214,6 +223,7 @@ class BoostDependencyBuilder(object):
             with tools.environment_append({"PATH": self._bin_paths}):
                 buildables = subprocess.check_output(["boostdep", "--list-buildable"])
                 buildables = buildables.decode().splitlines()
+                log.debug("`boostdep --list--buildable` returned these buildables: %s", buildables)
 
                 # modules = subprocess.check_output(["boostdep", "--list-modules"])
                 # modules = modules.decode().splitlines()
@@ -225,6 +235,8 @@ class BoostDependencyBuilder(object):
                     module_ts_output = subprocess.check_output(["boostdep", "--track-sources", module])
                     mod_deps = re.findall("\n([A-Za-z_-]+):\n", module_ts_output.decode())
                     dependency_tree[module] = mod_deps
+                log.debug("Using `boostdep --track-sources`, the following dependency tree was calculated:")
+                log.debug(pprint.pformat(dependency_tree))
 
         filtered_dependency_tree = {k: [d for d in v if d in buildables] for k, v in dependency_tree.items() if k in buildables}
 
@@ -233,16 +245,18 @@ class BoostDependencyBuilder(object):
             if conf_option in filtered_dependency_tree:
                 configure_options.append(conf_option)
             else:
-                sys.stderr.write("WARN: option {} not available in {}\n".format(conf_option, self.boost_version))
+                log.warning("option %s not available in %s", conf_option, self.boost_version)
+
+        log.debug("Following config_options remain: %s", configure_options)
 
         requirements = {}
         for conf_option in configure_options:
             reqs = self._grep_requirements(conf_option)
             conan_requirements, system_libs, unknown_libs = self._sort_requirements(reqs)
             if system_libs:
-                sys.stderr.write("WARNING: Module '{}' ({}) has system libraries: {}\n".format(conf_option, self.boost_version, system_libs))
+                log.warning("Module '%s' (%s) has system libraries: %s", conf_option, self.boost_version, system_libs)
             if unknown_libs:
-                sys.stderr.write("WARNING: Module '{}' ({}) has unknown libs: {}\n".format(conf_option, self.boost_version, unknown_libs))
+                log.warning("Module '%s' (%s) has unknown libs: %s", conf_option, self.boost_version, unknown_libs)
             if conan_requirements:
                 requirements[conf_option] = conan_requirements
 
@@ -376,8 +390,9 @@ class BoostDependencyBuilder(object):
 
 def main(args=None) -> int:
     parser = argparse.ArgumentParser()
+    parser.add_argument("--verbose", dest="verbose", action="store_true", help="verbose output")
     parser.add_argument("-t", dest="tmppath", help="temporary folder where to clone boost (default is system temporary folder)")
-    parser.add_argument("-d", dest="boostdep_version", default="1.73.0", type=str, help="boostdep version")
+    parser.add_argument("-d", dest="boostdep_version", default="1.74.0", type=str, help="boostdep version")
     parser.add_argument("-u", dest="git_url", default=BOOST_GIT_URL, help="boost git url")
     parser.add_argument("-U", dest="git_update", action="store_true", help="update the git repo")
     parser.add_argument("-o", dest="outputdir", default=None, type=Path, help="output dependency dir")
@@ -387,6 +402,10 @@ def main(args=None) -> int:
     version_group.add_argument("-v", dest="boost_version", help="boost version")
     version_group.add_argument("-A", dest="boost_version", action="store_const", const=None, help="All boost versions")
     ns = parser.parse_args(args)
+
+    logging.basicConfig(format="[%(levelname)s] %(message)s")
+    if ns.verbose:
+        log.setLevel(logging.DEBUG)
 
     if not ns.tmppath:
         ns.tmppath = Path(tempfile.gettempdir())
@@ -418,7 +437,7 @@ def main(args=None) -> int:
         )
 
         if not ns.git_update and not boost_collector.boost_path.exists():
-            print("Boost directory does not exist. Re-execute this script with -U to run 'git update'.", file=sys.stderr)
+            log.error("Boost directory does not exist. Re-execute this script with -U to run 'git update'.")
             return 1
 
         if ns.git_update and not git_update_done:
@@ -436,4 +455,5 @@ def main(args=None) -> int:
 
 
 if __name__ == "__main__":
+    import sys
     sys.exit(main())
