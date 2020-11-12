@@ -43,7 +43,7 @@ class OatppLibresslConan(ConanFile):
 
     def requirements(self):
         self.requires("oatpp/" + self.version)
-        self.requires("libressl/3.2.0")
+        self.requires("libressl/3.2.1")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
