@@ -1,5 +1,4 @@
 from conans import ConanFile, CMake, tools
-from conans.errors import ConanInvalidConfiguration
 import os
 
 
@@ -35,9 +34,6 @@ class OatppConan(ConanFile):
         if self.settings.compiler.cppstd:
             tools.check_min_cppstd(self, 11)
 
-        if self.settings.os == "Windows" and self.options.shared:
-            raise ConanInvalidConfiguration("oatpp can not be built as shared library on Windows")
-
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
         os.rename("oatpp-{0}".format(self.version), self._source_subfolder)
@@ -48,7 +44,6 @@ class OatppConan(ConanFile):
 
         self._cmake = CMake(self)
         self._cmake.definitions["OATPP_BUILD_TESTS"] = False
-        self._cmake.definitions["CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS"] = True
         self._cmake.configure(build_folder=self._build_subfolder)
         return self._cmake
 
