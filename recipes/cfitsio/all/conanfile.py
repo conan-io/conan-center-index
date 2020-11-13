@@ -77,7 +77,7 @@ class CfitsioConan(ConanFile):
         cmake.build()
 
     def _patch_sources(self):
-        for patch in self.conan_data["patches"][self.version]:
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
             tools.patch(**patch)
         # Remove embedded zlib files
         for zlib_file in glob.glob(os.path.join(self._source_subfolder, "zlib", "*")):
