@@ -47,7 +47,7 @@ class LibalsaConan(ConanFile):
 
             args = ["--enable-static=yes", "--enable-shared=no"] \
                     if not self.options.shared else ["--enable-static=no", "--enable-shared=yes"]
-            args.append("--datarootdir=%s" % os.path.join(self.package_folder, "res", "share"))
+            args.append("--datarootdir=%s" % os.path.join(self.package_folder, "res"))
             if self.options.disable_python:
                 args.append("--disable-python")
             self._autotools.configure(args=args)
