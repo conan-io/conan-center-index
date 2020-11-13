@@ -12,7 +12,7 @@ class CfitsioConan(ConanFile):
     homepage = "https://heasarc.gsfc.nasa.gov/fitsio/"
     url = "https://github.com/conan-io/conan-center-index"
     exports_sources = ["CMakeLists.txt", "patches/**"]
-    generators = "cmake"
+    generators = "cmake", "cmake_find_package"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
@@ -94,7 +94,7 @@ class CfitsioConan(ConanFile):
         self._cmake.definitions["CFITSIO_USE_SSSE3"] = self.options.get_safe("simd_intrinsics") == "ssse3"
         if self.settings.os != "Windows":
             self._cmake.definitions["CFITSIO_USE_BZIP2"] = self.options.with_bzip2
-            self._cmake.definitions["CFITSIO_USE_CURL"] = self.options.with_curl
+            self._cmake.definitions["UseCurl"] = self.options.with_curl
         self._cmake.configure(build_folder=self._build_subfolder)
         return self._cmake
 
@@ -106,7 +106,6 @@ class CfitsioConan(ConanFile):
 
     def package_info(self):
         self.cpp_info.libs = tools.collect_libs(self)
-        self.cpp_info.includedirs.append(os.path.join("include", "cfitsio"))
         if self.settings.os == "Linux":
             self.cpp_info.system_libs.append("m")
             if self.options.threadsafe:

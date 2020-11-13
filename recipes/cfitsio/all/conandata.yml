@@ -9,10 +9,10 @@ patches:
   "3.470":
     - patch_file: "patches/windows-use-strtok_s.patch"
       base_path: "source_subfolder"
-    - patch_file: "patches/fix-cmake.patch"
+    - patch_file: "patches/fix-cmake-3.470.patch"
       base_path: "source_subfolder"
   "3.480":
     - patch_file: "patches/windows-use-strtok_s.patch"
       base_path: "source_subfolder"
-    - patch_file: "patches/fix-cmake.patch"
+    - patch_file: "patches/fix-cmake-3.470.patch"
       base_path: "source_subfolder"
