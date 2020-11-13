@@ -27,6 +27,9 @@ class Argon2Conan(ConanFile):
         if self.settings.os == "Windows":
             raise ConanInvalidConfiguration("argon2 can not be built on Windows")
 
+        if self.settings.os == "Macos" and self.options.shared:
+            raise ConanInvalidConfiguration("argon2 can not be built as shared on MacOS")
+
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
         os.rename("phc-winner-argon2-{0}".format(self.version), "argon2")
