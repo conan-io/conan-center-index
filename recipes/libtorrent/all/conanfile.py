@@ -55,8 +55,6 @@ class LibtorrentConan(ConanFile):
             del self.options.fPIC
         if self.settings.compiler.cppstd:
             tools.check_min_cppstd(self, 11)
-        self.options["boost"].header_only = False
-        self.options["boost"].without_system = False
 
     def requirements(self):
         self.requires("boost/1.73.0")
@@ -64,6 +62,11 @@ class LibtorrentConan(ConanFile):
             self.requires("openssl/1.1.1h")
         if self.options.enable_iconv:
             self.requires("libiconv/1.16")
+
+    def _validate_dependency_graph(self):
+        if tools.Version(self.deps_cpp_info["boost"].version) < "1.69.0" and \
+           (self.options["boost"].header_only or self.options["boost"].without_system):
+            raise ConanInvalidConfiguration("libtorrent requires boost with system, which is non-header only in boost < 1.69.0")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
@@ -108,8 +111,7 @@ class LibtorrentConan(ConanFile):
                                   "file_entry& operator=(file_entry&&) & = default;")
 
     def build(self):
-        if self.options["boost"].header_only or self.options["boost"].without_system:
-            raise ConanInvalidConfiguration("libtorrent requires boost with system")
+        self._validate_dependency_graph()
         self._patch_sources()
         cmake = self._configure_cmake()
         cmake.build()
