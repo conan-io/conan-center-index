@@ -68,8 +68,7 @@ class CfitsioConan(ConanFile):
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
-        url = self.conan_data["sources"][self.version]["url"]
-        extracted_dir = os.path.basename(url).replace(".tar.gz", "").replace(".zip", "")
+        extracted_dir = glob.glob("cfitsio-*")[0]
         os.rename(extracted_dir, self._source_subfolder)
 
     def build(self):
