@@ -61,7 +61,7 @@ class LibtorrentConan(ConanFile):
     def requirements(self):
         self.requires("boost/1.74.0")
         if self.options.enable_encryption:
-            self.requires("openssl/1.1.1g")
+            self.requires("openssl/1.1.1h")
         if self.options.enable_iconv:
             self.requires("libiconv/1.16")
 
