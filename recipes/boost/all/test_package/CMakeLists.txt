@@ -40,7 +40,7 @@ if(NOT HEADER_ONLY)
         set_property(TARGET hello_ext PROPERTY PREFIX "")
 
         find_package(PythonInterp REQUIRED)
-        find_package(PythonLIBS REQUIRED)
+        find_package(PythonLibs REQUIRED)
 
         target_include_directories(hello_ext PRIVATE ${PYTHON_INCLUDE_DIRS})
         target_link_libraries(hello_ext PRIVATE Boost::python${PYTHON_COMPONENT_SUFFIX} ${PYTHON_LIBRARIES})

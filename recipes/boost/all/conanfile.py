@@ -218,6 +218,10 @@ class BoostConan(ConanFile):
                     if self.options.get_safe("without_{}".format(mod_dep), False):
                         raise ConanInvalidConfiguration("{} requires {}: {} is disabled".format(mod_name, mod_deps, mod_dep))
 
+        if not self.options.without_python:
+            if not self.options.python_version:
+                self.options.python_version = self._detect_python_version()
+
     def build_requirements(self):
         if not self.options.header_only:
             self.build_requires("b2/4.2.0")
@@ -344,15 +348,19 @@ class BoostConan(ConanFile):
         """
         return self._get_python_sc_var(name) or self._get_python_du_var(name)
 
-    @property
-    def _python_version(self):
+    def _detect_python_version(self):
         """
         obtain version of python interpreter
         :return: python interpreter version, in format major.minor
         """
-        version = self._run_python_script("from __future__ import print_function; "
-                                          "import sys; "
-                                          "print('%s.%s' % (sys.version_info[0], sys.version_info[1]))")
+        return self._run_python_script("from __future__ import print_function; "
+                                       "import sys; "
+                                       "print('%s.%s' % (sys.version_info[0], sys.version_info[1]))")
+
+
+    @property
+    def _python_version(self):
+        version = self._detect_python_version()
         if self.options.python_version and version != self.options.python_version:
             raise ConanInvalidConfiguration("detected python version %s doesn't match conan option %s" % (version,
                                                                                           self.options.python_version))
@@ -988,6 +996,7 @@ class BoostConan(ConanFile):
         return {
             "lzma": "xz_utils",
             "iconv": "libiconv",
+            "python": None,  # FIXME: change to cpython when it becomes available
         }.get(name, name)
 
     def package_info(self):
@@ -1095,6 +1104,8 @@ class BoostConan(ConanFile):
                     if self.options.get_safe(requirement, None) == False:
                         continue
                     conan_requirement = self._option_to_conan_requirement(requirement)
+                    if not conan_requirement:
+                        continue
                     if conan_requirement in ("icu", "iconv"):
                         if conan_requirement != self.options.get_safe("i18n_backend"):
                             continue
