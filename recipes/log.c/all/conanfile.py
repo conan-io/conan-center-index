@@ -4,7 +4,6 @@ import glob
 
 class logcConan(ConanFile):
     name = "log.c"
-    version = "0.1.0"
     license = "MIT"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/rxi/log.c"
@@ -33,7 +32,7 @@ class logcConan(ConanFile):
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
-        tools.rename(glob.glob("log.c-*")[0], self._source_subfolder)
+        tools.rename(glob.glob(self.name + "-*/")[0], self._source_subfolder)
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
             tools.patch(**patch)
 

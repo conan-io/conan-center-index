@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.16)
 
 project(log.c
-	    VERSION 0.1.0
+	    VERSION 20200620
 	    DESCRIPTION "A simple logging library implemented in C99"
 	    HOMEPAGE_URL "https://github.com/rxi/log.c"
 	    LANGUAGES C
@@ -23,7 +23,7 @@ set(SRC_FOLDER "source_subfolder")
 set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS ON)
 
 # Library files SHARED or STATIC set by Conan with BUILD_SHARED_LIBS
-add_library(${PROJECT_NAME} ${SRC_FOLDER}/src/log.c ${SRC_FOLDER}/src/log.h "${PROJECT_BINARY_DIR}/log_export.h")
+add_library(${PROJECT_NAME} ${SRC_FOLDER}/src/log.c ${SRC_FOLDER}/src/log.h ${PROJECT_BINARY_DIR}/log_export.h)
 
 
 include(GenerateExportHeader)
@@ -34,12 +34,12 @@ target_include_directories(${PROJECT_NAME} PUBLIC ${PROJECT_SOURCE_DIR} ${PROJEC
 # Library info
 set_target_properties(${PROJECT_NAME} PROPERTIES
     VERSION ${PROJECT_VERSION}
-	C_STANDARD 99)
+    C_STANDARD 99)
 
 # Conan options
 if (COLOR)
     TARGET_COMPILE_DEFINITIONS(${PROJECT_NAME} PRIVATE LOG_USE_COLOR)
-    message(STATUS "LOG_USE_COLOR")
+    message(STATUS "LOG_USE_COLOR ON")
 endif()
 
 install(FILES ${SRC_FOLDER}/src/log.h DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
