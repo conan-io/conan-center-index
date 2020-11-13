@@ -1,0 +1,4 @@
+sources:
+  "cci.20171104":
+    url: "https://github.com/weisslj/cpp-optparse/archive/2ec0b7aca9a692ff93017ed44ca9d13a8e7d4d00.tar.gz"
+    sha256: "93353036f1405c87d72296a6c3f64ac793f2a8617cbe5e7633a8c9f72536f519"

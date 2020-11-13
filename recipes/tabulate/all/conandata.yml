@@ -2,3 +2,6 @@ sources:
   "1.0":
     url: https://github.com/p-ranav/tabulate/archive/v1.0.tar.gz
     sha256: 34eda3605e2ce0c7ca339fa2af6a0c77a5e49321b2f549ff5313f955273c8ac8
+  "1.3":
+    url: https://github.com/p-ranav/tabulate/archive/v1.3.tar.gz
+    sha256: d1739e82f9f5acab084a5166a78714fde5198ce6b9448ec8ae8e403085048f7e

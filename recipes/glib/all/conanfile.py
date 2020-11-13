@@ -19,7 +19,7 @@ class GLibConan(ConanFile):
                "with_elf": [True, False],
                "with_selinux": [True, False],
                "with_mount": [True, False]}
-    default_options = {"shared": True,
+    default_options = {"shared": False,
                        "fPIC": True,
                        "with_pcre": True,
                        "with_elf": True,
@@ -46,6 +46,7 @@ class GLibConan(ConanFile):
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
+            self.options.shared = True
         if self.settings.os != "Linux":
             del self.options.with_mount
             del self.options.with_selinux
@@ -190,13 +191,17 @@ class GLibConan(ConanFile):
             self.cpp_info.components["gio-2.0"].system_libs.append("resolv")
             self.cpp_info.components["gio-2.0"].system_libs.append("dl")
         self.cpp_info.components["gio-2.0"].requires.extend(["glib-2.0", "gobject-2.0", "gmodule-2.0", "zlib::zlib"])
+        if self.settings.os == "Macos":
+            self.cpp_info.components["gio-2.0"].frameworks.append("AppKit")
         if self.settings.os == "Linux":
             if self.options.with_mount:
                 self.cpp_info.components["gio-2.0"].requires.append("libmount::libmount")
             if self.options.with_selinux:
                 self.cpp_info.components["gio-2.0"].requires.append("libselinux::libselinux")
-        if self.settings.os != "Windows":
-            self.cpp_info.components["gio-unix-2.0"].libs = ["gio-2.0"]
+        if self.settings.os == "Windows":
+            self.cpp_info.components["gio-windows-2.0"].requires = ["gobject-2.0", "gmodule-no-export-2.0", "gio-2.0"]
+            self.cpp_info.components["gio-windows-2.0"].includedirs = [os.path.join('include', 'gio-win32-2.0')]
+        else:
             self.cpp_info.components["gio-unix-2.0"].requires.extend(["gobject-2.0", "gio-2.0"])
             self.cpp_info.components["gio-unix-2.0"].includedirs = [os.path.join("include", "gio-unix-2.0")]
         self.env_info.GLIB_COMPILE_SCHEMAS = os.path.join(self.package_folder, "bin", "glib-compile-schemas")

@@ -1,0 +1,8 @@
+sources:
+  "1.17.2":
+    url: "https://github.com/mongodb/mongo-c-driver/releases/download/1.17.2/mongo-c-driver-1.17.2.tar.gz"
+    sha256: "bc53d5f72ab628a1ae549db6888325d6dc34db3ca31c5e16e550c1bb4266d864"
+patches:
+  "1.17.2":
+    - patch_file: "patches/disable-shared-when-static.patch"
+      base_path: "source_subfolder"
