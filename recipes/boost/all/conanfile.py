@@ -133,7 +133,10 @@ class BoostConan(ConanFile):
 
     @property
     def _dependencies(self):
-        return yaml.load(open(os.path.join(self.recipe_folder, "dependencies", self._dependency_filename)))
+        dependencies_filepath = os.path.join(self.recipe_folder, "dependencies", self._dependency_filename)
+        if not os.path.isfile(dependencies_filepath):
+            raise ConanException("Cannot find {}".format(dependencies_filepath))
+        return yaml.load(open(dependencies_filepath))
 
     def _iter_modules(self):
         tree = {k: v[:] for k, v in self._dependencies["dependencies"].items()}
