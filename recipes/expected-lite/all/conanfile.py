@@ -18,7 +18,7 @@ class ExpectedLiteConan(ConanFile):
         return "source_subfolder"
 
     def configure(self):
-        if self.settings.compiler.cppstd:
+        if tools.valid_min_cppstd(self, 11):
             tools.check_min_cppstd(self, 11)
 
     def package_id(self):
