@@ -1,0 +1,64 @@
+diff --git a/include/errors/exceptions_handler.h b/include/errors/exceptions_handler.h
+index b17e843d2..79ae0fe9b 100644
+--- a/include/errors/exceptions_handler.h
++++ b/include/errors/exceptions_handler.h
+@@ -69,7 +69,7 @@ private:
+     const Impl& impl() const noexcept { return reinterpret_cast<Impl const&>(_storage); }
+ 
+     static const size_t StorageSize = 72;
+-#if defined(__APPLE__)
++#if defined(unix) || defined(__unix) || defined(__unix__) || defined(__APPLE__)
+     static const size_t StorageAlign = 16;
+ #else
+     static const size_t StorageAlign = 8;
+diff --git a/include/math/math.h b/include/math/math.h
+index e40c02330..2178e75f3 100644
+--- a/include/math/math.h
++++ b/include/math/math.h
+@@ -55,7 +55,10 @@ public:
+         \param divider - Divider
+         \return Calculated value of (operant * multiplier / divider) expression
+     */
++#if defined(__GNUC__) && defined(__SIZEOF_INT128__) || defined(_MSC_VER)
+     static uint64_t MulDiv64(uint64_t operant, uint64_t multiplier, uint64_t divider);
++#endif
++
+ };
+ 
+ /*! \example math_math.cpp Math example */
+diff --git a/source/errors/exceptions_handler.cpp b/source/errors/exceptions_handler.cpp
+index f16c566c1..cf5eeb02e 100644
+--- a/source/errors/exceptions_handler.cpp
++++ b/source/errors/exceptions_handler.cpp
+@@ -637,7 +637,7 @@ ExceptionsHandler::ExceptionsHandler()
+ {
+     // Check implementation storage parameters
+     static_assert((sizeof(Impl) <= StorageSize), "ExceptionsHandler::StorageSize must be increased!");
+-    static_assert((alignof(Impl) == StorageAlign), "ExceptionsHandler::StorageAlign must be adjusted!");
++    static_assert((StorageAlign % alignof(Impl) == 0), "ExceptionsHandler::StorageAlign must be adjusted!");
+ 
+     // Create the implementation instance
+     new(&_storage)Impl();
+diff --git a/source/math/math.cpp b/source/math/math.cpp
+index 32c9a9dd1..42818b9ef 100644
+--- a/source/math/math.cpp
++++ b/source/math/math.cpp
+@@ -14,9 +14,10 @@
+ 
+ namespace CppCommon {
+ 
++#if defined(__GNUC__) && defined(__SIZEOF_INT128__) || defined(_MSC_VER)
+ uint64_t Math::MulDiv64(uint64_t operant, uint64_t multiplier, uint64_t divider)
+ {
+-#if defined(__GNUC__)
++#if defined(__GNUC__) && defined(__SIZEOF_INT128__)
+     __uint128_t a = operant;
+     __uint128_t b = multiplier;
+     __uint128_t c = divider;
+@@ -308,5 +309,6 @@ done:
+     #error MulDiv64 is no supported!
+ #endif
+ }
++#endif
+ 
+ } // namespace CppCommon
