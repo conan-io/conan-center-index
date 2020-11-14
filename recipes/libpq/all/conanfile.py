@@ -17,8 +17,15 @@ class LibpqConan(ConanFile):
         "fPIC": [True, False],
         "with_zlib": [True, False],
         "with_openssl": [True, False],
-        "disable_rpath": [True, False]}
-    default_options = {'shared': False, 'fPIC': True, 'with_zlib': True, 'with_openssl': False, 'disable_rpath': False}
+        "disable_rpath": [True, False]
+    }
+    default_options = {
+        'shared': False,
+        'fPIC': True,
+        'with_zlib': True,
+        'with_openssl': False,
+        'disable_rpath': False
+    }
     _autotools = None
 
     def build_requirements(self):
