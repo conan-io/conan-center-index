@@ -25,7 +25,6 @@ class LibwebsocketsConan(ConanFile):
         "ssl_client_use_os_ca_certs": [True, False],                            # SSL support should make use of the OS-installed CA root certs
         "ssl_server_with_ecdh_cert": [True, False],                             # Include SSL server use ECDH certificate
 
-
         "enable_network": [True, False],                                        # Compile with network-related code
         "role_h1": [True, False],                                               # Compile with support for http/1 (needed for ws)
         "role_ws": [True, False],                                               # Compile with support for websockets
@@ -218,10 +217,10 @@ class LibwebsocketsConan(ConanFile):
             self.requires("libmount/2.33.1")
 
         if self.options.with_sqlite3:
-            self.requires("sqlite3/3.31.1")
+            self.requires("sqlite3/3.33.0")
 
         if self.options.with_ssl == "openssl":
-            self.requires("openssl/1.1.1g")
+            self.requires("openssl/1.1.1h")
 
         if self.options.with_ssl == "mbedtls-apache":
             self.requires("mbedtls/2.16.3-apache")
