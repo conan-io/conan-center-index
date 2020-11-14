@@ -418,15 +418,17 @@ class LibwebsocketsConan(ConanFile):
         self._cmake.definitions["LWS_WITH_ALSA"] = False
         self._cmake.definitions["LWS_WITH_GTK"] = False
 
+        self._cmake.definitions["LWS_WITH_SYS_SMD"] = False if self.settings.os == "Windows" else True # New in 4.1.4
+
         self._cmake.configure()
         return self._cmake
 
     def _patch_sources(self):
-        if tools.Version(self.version) == "4.0.15" and self.options.with_ssl != "False":
+        if tools.Version(self.version) == "4.0.15" and self.options.with_ssl:
             tools.replace_in_file(
                 os.path.join(self._source_subfolder, "CMakeLists.txt"),
                 "list(APPEND LIB_LIST ws2_32.lib userenv.lib psapi.lib iphlpapi.lib)",
-                "list(APPEND LIB_LIST ws2_32.lib userenv.lib psapi.lib iphlpapi.lib Crypt32.lib)"
+                "list(APPEND LIB_LIST ws2_32.lib userenv.lib psapi.lib iphlpapi.lib crypt32.lib)"
             )
 
     def build(self):
@@ -455,7 +457,7 @@ class LibwebsocketsConan(ConanFile):
         self.cpp_info.components["_libwebsockets"].names["pkgconfig_name"] = pkgconfig_name
         self.cpp_info.components["_libwebsockets"].libs = tools.collect_libs(self)
         if self.settings.os == "Windows":
-            self.cpp_info.components["_libwebsockets"].system_libs.append("ws2_32")
+            self.cpp_info.components["_libwebsockets"].system_libs.extend(["ws2_32", "crypt32.lib"])
         elif self.settings.os == "Linux":
             self.cpp_info.components["_libwebsockets"].system_libs.extend(["dl", "m"])
         if self.options.with_libuv:
