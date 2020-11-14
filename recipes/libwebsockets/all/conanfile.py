@@ -457,7 +457,7 @@ class LibwebsocketsConan(ConanFile):
         self.cpp_info.components["_libwebsockets"].names["pkgconfig_name"] = pkgconfig_name
         self.cpp_info.components["_libwebsockets"].libs = tools.collect_libs(self)
         if self.settings.os == "Windows":
-            self.cpp_info.components["_libwebsockets"].system_libs.extend(["ws2_32", "crypt32.lib"])
+            self.cpp_info.components["_libwebsockets"].system_libs.extend(["ws2_32", "crypt32"])
         elif self.settings.os == "Linux":
             self.cpp_info.components["_libwebsockets"].system_libs.extend(["dl", "m"])
         if self.options.with_libuv:
