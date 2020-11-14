@@ -1,8 +1,8 @@
 sources:
-  "1767":
+  "20201106":
     url: "https://chromium.googlesource.com/libyuv/libyuv/+archive/2664f649bc0a32e05f5bc3ff4d12134e41aa08c4.tar.gz"
 
 patches:
-  "1767":
+  "20201106":
     - base_path: "."
       patch_file: "patches/001-cmake.patch"
