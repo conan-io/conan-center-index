@@ -90,7 +90,7 @@ class CMakeConan(ConanFile):
         if self.settings.os == "Linux":
             tools.replace_in_file(os.path.join(self._source_subfolder, "Utilities", "cmcurl", "CMakeLists.txt"),
                                   "list(APPEND CURL_LIBS ${OPENSSL_LIBRARIES})",
-                                  "list(APPEND CURL_LIBS ${OPENSSL_LIBRARIES} -ldl -lpthread)")
+                                  "list(APPEND CURL_LIBS ${OPENSSL_LIBRARIES} ${CMAKE_DL_LIBS} pthread)")
         cmake = self._configure_cmake()
         cmake.build()
 
