@@ -419,13 +419,11 @@ class LibwebsocketsConan(ConanFile):
         self._cmake.definitions["LWS_WITH_ALSA"] = False
         self._cmake.definitions["LWS_WITH_GTK"] = False
 
-
-
         self._cmake.configure()
         return self._cmake
 
     def _patch_sources(self):
-        if self.options.with_ssl != "False":
+        if tools.Version(self.version) == "4.0.15" and self.options.with_ssl != "False":
             tools.replace_in_file(
                 os.path.join(self._source_subfolder, "CMakeLists.txt"),
                 "list(APPEND LIB_LIST ws2_32.lib userenv.lib psapi.lib iphlpapi.lib)",
