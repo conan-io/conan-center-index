@@ -76,4 +76,3 @@ class LibalsaConan(ConanFile):
         self.cpp_info.names["cmake_find_package"] = "ALSA"
         self.cpp_info.names["cmake_find_package_multi"] = "ALSA"
         self.env_info.ALSA_CONFIG_DIR = os.path.join(self.package_folder, "res", "alsa")
-        self.env_info.ALSA_CONFIG_PATH = os.path.join(self.package_folder, "res", "alsa")
