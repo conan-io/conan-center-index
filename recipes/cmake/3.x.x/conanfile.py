@@ -86,7 +86,7 @@ class CMakeConan(ConanFile):
         tools.replace_in_file(os.path.join(self._source_subfolder, "CMakeLists.txt"),
                               "project(CMake)",
                               "project(CMake)\ninclude(\"{}/conanbuildinfo.cmake\")\nconan_basic_setup()".format(
-                                  self.build_folder.replace("\\", "/")))
+                                  self.install_folder.replace("\\", "/")))
         if self.settings.os == "Linux":
             tools.replace_in_file(os.path.join(self._source_subfolder, "Utilities", "cmcurl", "CMakeLists.txt"),
                                   "list(APPEND CURL_LIBS ${OPENSSL_LIBRARIES})",
