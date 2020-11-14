@@ -99,6 +99,10 @@ class LibpqConan(ConanFile):
                 tools.replace_in_file(os.path.join(self._source_subfolder, "src", "tools", "msvc", "MKvcbuild.pm"),
                                       "$libpq = $solution->AddProject('libpq', 'dll', 'interfaces',",
                                       "$libpq = $solution->AddProject('libpq', 'lib', 'interfaces',")
+            system_libs = ", ".join(["'{}.lib'".format(lib) for lib in self.deps_cpp_info.system_libs])
+            tools.replace_in_file(os.path.join(self._source_subfolder, "src", "tools", "msvc", "Project.pm"),
+                                  "libraries             => [],",
+                                  "libraries             => [{}],".format(system_libs))
             runtime = {'MT': 'MultiThreaded',
                        'MTd': 'MultiThreadedDebug',
                        'MD': 'MultiThreadedDLL',
