@@ -35,16 +35,15 @@ class LibalsaConan(ConanFile):
 
     def _configure_autotools(self):
         if not self._autotools:
-            self._autotools = AutoToolsBuildEnvironment(self)
-            with tools.environment_append(self._autotools.vars):
-                self.run("touch ltconfig")
-                self.run("libtoolize --force --copy --automake")
-                self.run("aclocal $ACLOCAL_FLAGS")
-                self.run("autoheader")
-                self.run("automake --foreign --copy --add-missing")
-                self.run("touch depcomp")
-                self.run("autoconf")
+            self.run("touch ltconfig", run_environment=True)
+            self.run("libtoolize --force --copy --automake", run_environment=True)
+            self.run("aclocal $ACLOCAL_FLAGS", run_environment=True)
+            self.run("autoheader", run_environment=True)
+            self.run("automake --foreign --copy --add-missing", run_environment=True)
+            self.run("touch depcomp", run_environment=True)
+            self.run("autoconf", run_environment=True)
 
+            self._autotools = AutoToolsBuildEnvironment(self)
             args = ["--enable-static=yes", "--enable-shared=no"] \
                     if not self.options.shared else ["--enable-static=no", "--enable-shared=yes"]
             args.append("--datarootdir=%s" % os.path.join(self.package_folder, "res"))
