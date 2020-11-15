@@ -33,7 +33,6 @@ class PdalConan(ConanFile):
     def requirements(self):
         # TODO package improvements:
         # - switch from vendored arbiter (not in CCI). disabled openssl and curl are deps of arbiter
-        # - switch from vendor/nanoflann (in CCI)
         # - switch from vendor/nlohmann to nlohmann_json (in CCI)
         # - evaluate dependency to boost instead of boost parts in vendor/pdalboost
         self.requires("gdal/3.1.4")
@@ -46,6 +45,8 @@ class PdalConan(ConanFile):
             self.requires("laszip/3.4.3")
         if self.options.get_safe("with_unwind"):
             self.requires("libunwind/1.3.1")
+        # vendored nanoflann is 1.3.1 with minor code removal
+        self.requires("nanoflann/1.3.1")
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -95,6 +96,8 @@ class PdalConan(ConanFile):
                 os.path.join(self._source_subfolder, "CMakeLists.txt"),
                 "include(${PDAL_CMAKE_DIR}/libxml2.cmake)",
                 "#include(${PDAL_CMAKE_DIR}/libxml2.cmake)")
+        # remove vendored nanoflann. include path is patched
+        tools.rmdir(os.path.join(self._source_subfolder, 'vendor', 'nanoflann'))
 
     def build(self):
         self._patch_sources()
