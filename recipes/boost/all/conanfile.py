@@ -226,30 +226,39 @@ class BoostConan(ConanFile):
         if not self.options.header_only:
             self.build_requires("b2/4.2.0")
 
-    def _with_xxx(self, xxx):
-        if self.options.header_only:
-            return False
+    def _with_dependency(self, dependency):
+        """
+        Return true when dependency is required according to the dependencies-x.y.z.yml file
+        """
         for name, reqs in self._dependencies["requirements"].items():
-            if xxx in reqs:
+            if dependency in reqs:
                 if not self.options.get_safe("without_{}".format(name), True):
                     return True
         return False
 
     @property
     def _with_zlib(self):
-        return not self.options.header_only and self._with_xxx("zlib") and self.options.zlib
+        return not self.options.header_only and self._with_dependency("zlib") and self.options.zlib
 
     @property
     def _with_bzip2(self):
-        return not self.options.header_only and self._with_xxx("bzip2") and self.options.bzip2
+        return not self.options.header_only and self._with_dependency("bzip2") and self.options.bzip2
 
     @property
     def _with_lzma(self):
-        return not self.options.header_only and self._with_xxx("lzma") and self.options.lzma
+        return not self.options.header_only and self._with_dependency("lzma") and self.options.lzma
 
     @property
     def _with_zstd(self):
-        return not self.options.header_only and self._with_xxx("zstd") and self.options.zstd
+        return not self.options.header_only and self._with_dependency("zstd") and self.options.zstd
+
+    @property
+    def _with_icu(self):
+        return not self.options.header_only and self._with_dependency("icu") and self.options.i18n_backend == "icu"
+
+    @property
+    def _with_iconv(self):
+        return not self.options.header_only and self._with_dependency("iconv") and self.options.i18n_backend == "iconv"
 
     def requirements(self):
         if self._with_zlib:
@@ -261,9 +270,9 @@ class BoostConan(ConanFile):
         if self._with_zstd:
             self.requires("zstd/1.4.5")
 
-        if self._with_xxx("icu") and self.options.i18n_backend == "icu":
+        if self._with_icu:
             self.requires("icu/68.1")
-        elif self._with_xxx("iconv") and self.options.i18n_backend == "iconv":
+        elif self._with_iconv:
             self.requires("libiconv/1.16")
 
     def package_id(self):
