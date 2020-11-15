@@ -13,6 +13,16 @@ index 1d1e8af85..a3969996b 100644
      set(PDAL_HAVE_LIBGEOTIFF 1)
      mark_as_advanced(CLEAR TIFF_INCLUDE_DIR)
      mark_as_advanced(CLEAR TIFF_LIBRARY)
+diff --git a/cmake/unwind.cmake b/cmake/unwind.cmake
+index 460a43c15..aa4356070 100644
+--- a/cmake/unwind.cmake
++++ b/cmake/unwind.cmake
+@@ -1,4 +1,4 @@
+ #
+ # Unwind
+ #
+-find_package(Libunwind QUIET)
++find_package(libunwind QUIET)
 diff --git a/cmake/zstd.cmake b/cmake/zstd.cmake
 index bfaa5b20e..afba1f5d8 100644
 --- a/cmake/zstd.cmake
@@ -31,3 +41,19 @@ index bfaa5b20e..afba1f5d8 100644
          set(CMAKE_REQUIRED_LIBRARIES ${CMAKE_REQUIRED_LIBRARIES}
              "${ZSTD_STATIC_LIB}")
          mark_as_advanced(CLEAR ZSTD_INCLUDE_DIRS)
+diff --git a/pdal/util/CMakeLists.txt b/pdal/util/CMakeLists.txt
+index db42c7f53..c28f08046 100644
+--- a/pdal/util/CMakeLists.txt
++++ b/pdal/util/CMakeLists.txt
+@@ -9,9 +9,9 @@ endif()
+ include(${PDAL_CMAKE_DIR}/execinfo.cmake)
+ include(${PDAL_CMAKE_DIR}/unwind.cmake)
+ 
+-if(LIBUNWIND_FOUND)
++if(libunwind_FOUND)
+     set(BACKTRACE_SOURCE BacktraceUnwind.cpp)
+-    set(BACKTRACE_LIBRARIES ${LIBUNWIND_LIBRARIES})
++    set(BACKTRACE_LIBRARIES ${libunwind_LIBRARIES})
+ elseif(LIBEXECINFO_FOUND)
+     set(BACKTRACE_SOURCE BacktraceExecinfo.cpp)
+     set(BACKTRACE_LIBRARIES ${LIBEXECINFO_LIBRARIES})

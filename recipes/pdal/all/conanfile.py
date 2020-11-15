@@ -13,11 +13,14 @@ class PdalConan(ConanFile):
     settings = "os", "arch", "compiler", "build_type"
     options = {"shared": [True, False],
                "fPIC": [True, False],
+               "with_unwind": [True, False],
                "with_xml": [True, False],
                "with_zstd": [True, False],
-               "with_laszip": [True, False]}
+               "with_laszip": [True, False],
+               }
     default_options = {"shared": False,
                        "fPIC": True,
+                       "with_unwind": False,
                        "with_xml": True,
                        "with_zstd": True,
                        "with_laszip": True}
@@ -29,7 +32,6 @@ class PdalConan(ConanFile):
 
     def requirements(self):
         # TODO package improvements:
-        # - add a requirement to libunwind (in CCI)
         # - switch from vendored arbiter (not in CCI). disabled openssl and curl are deps of arbiter
         # - switch from vendor/nanoflann (in CCI)
         # - switch from vendor/nlohmann to nlohmann_json (in CCI)
@@ -42,10 +44,14 @@ class PdalConan(ConanFile):
             self.requires("zstd/1.4.5")
         if self.options.with_laszip:
             self.requires("laszip/3.4.3")
+        if self.options.get_safe("with_unwind"):
+            self.requires("libunwind/1.3.1")
 
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
+        if self.settings.os not in ["Linux", "FreeBSD"]:
+            del self.options.with_unwind
 
     def configure(self):
         # upstream export/install targets do not work with static builds
