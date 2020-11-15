@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.1)
 project(test_package)
 
-include("${CONAN_INSTALL_FOLDER}/conanbuildinfo.cmake")
+include("${CMAKE_BINARY_DIR}/conanbuildinfo.cmake")
 conan_basic_setup(TARGETS)
 
 if(NOT HEADER_ONLY)
@@ -10,6 +10,7 @@ if(NOT HEADER_ONLY)
         add_executable(random_exe random.cpp)
         target_link_libraries(random_exe PRIVATE Boost::random)
     endif()
+
     if(WITH_REGEX)
         find_package(Boost COMPONENTS regex REQUIRED)
         add_executable(regex_exe regex.cpp)
