@@ -83,3 +83,7 @@ class OatppSwaggerConan(ConanFile):
         if self.settings.os == "Linux":
             self.cpp_info.components["_oatpp-swagger"].system_libs = ["pthread"]
         self.cpp_info.components["_oatpp-swagger"].requires = ["oatpp::oatpp"]
+        # export env var
+        res_path = os.path.join(self.package_folder, "include", "oatpp-{}".format(self.version), "bin", "oatpp-swagger", "res")
+        self.output.info("Creating OATPP_SWAGGER_RES_PATH environment variable: {}".format(res_path))
+        self.env_info.OATPP_SWAGGER_RES_PATH = res_path

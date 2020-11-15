@@ -14,6 +14,6 @@ class OatppSwaggerTestConan(ConanFile):
 
     def test(self):
         if not tools.cross_building(self):
-           self.run(os.path.join("bin", "oatpp-swagger-test"), run_environment=True)
+           self.run(os.path.join("bin", "test_package"), run_environment=True)
 
 
