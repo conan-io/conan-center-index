@@ -78,7 +78,6 @@ class ZlibConan(ConanFile):
 
     def _build_zlib_cmake(self):
         cmake = CMake(self)
-        cmake.verbose = True
         cmake.configure(build_dir=".")
         # we need to build only libraries without test example/example64 and minigzip/minigzip64
         make_target = "zlib" if self.options.shared else "zlibstatic"
