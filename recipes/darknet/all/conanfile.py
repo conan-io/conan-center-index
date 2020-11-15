@@ -47,6 +47,8 @@ class DarknetConan(ConanFile):
             return ".so"
 
     def _patch_sources(self):
+        for patch in self.conan_data["patches"].get(self.version, []):
+            tools.patch(**patch)
         tools.replace_in_file(os.path.join(self._source_subfolder, "Makefile"), "OPENCV=0", "OPENCV={}".format("1" if self.options.with_opencv else "0"))
         tools.replace_in_file(
             os.path.join(self._source_subfolder, "Makefile"),
@@ -74,8 +76,6 @@ class DarknetConan(ConanFile):
         tools.get(**self.conan_data["sources"][self.version])
         extracted_folder = self.name + "-" + self._commit
         os.rename(extracted_folder, self._source_subfolder)
-        for patch in self.conan_data["patches"].get(self.version, []):
-            tools.patch(**patch)
 
     def build(self):
         self._patch_sources()
