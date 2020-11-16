@@ -221,6 +221,7 @@ class BoostConan(ConanFile):
         if not self.options.without_python:
             if not self.options.python_version:
                 self.options.python_version = self._detect_python_version()
+                self.options.python_executable = self._python_executable
 
     def build_requirements(self):
         if not self.options.header_only:
