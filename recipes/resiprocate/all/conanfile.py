@@ -3,6 +3,9 @@ import shutil
 from conans import ConanFile, AutoToolsBuildEnvironment, tools
 from conans.errors import ConanInvalidConfiguration
 
+
+required_conan_version = ">=1.29.1"
+
 class ResiprocateConan(ConanFile):
     name = "resiprocate"
     description = "The project is dedicated to maintaining a complete, correct, and commercially usable implementation of SIP and a few related protocols. "
