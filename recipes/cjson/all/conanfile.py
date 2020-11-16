@@ -15,13 +15,13 @@ class CjsonConan(ConanFile):
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
-        "build_utils": [True, False],
+        "with_build_utils": [True, False],
         "use_locales": [True, False]
     }
     default_options = {
         "shared": False,
         "fPIC": True,
-        "build_utils": True,
+        "with_build_utils": True,
         "use_locales": True
     }
 
@@ -66,7 +66,7 @@ class CjsonConan(ConanFile):
         self._cmake.definitions["ENABLE_TARGET_EXPORT"] = False
         self._cmake.definitions["BUILD_SHARED_AND_STATIC_LIBS"] = False
         self._cmake.definitions["CJSON_OVERRIDE_BUILD_SHARED_LIBS"] = False
-        self._cmake.definitions["ENABLE_CJSON_UTILS"] = self.options.build_utils
+        self._cmake.definitions["ENABLE_CJSON_UTILS"] = self.options.with_build_utils
         self._cmake.definitions["ENABLE_CJSON_TEST"] = False
         self._cmake.definitions["ENABLE_LOCALES"] = self.options.use_locales
         self._cmake.definitions["ENABLE_FUZZING"] = False
