@@ -4,7 +4,7 @@ from conans.errors import ConanInvalidConfiguration
 
 
 class AclConan(ConanFile):
-    name = "acl"
+    name = "nfrechette-acl"
     description = "Animation Compression Library"
     topics = ("animation", "compression")
     license = "MIT"
