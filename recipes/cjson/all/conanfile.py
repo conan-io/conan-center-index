@@ -15,13 +15,13 @@ class CjsonConan(ConanFile):
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
-        "cjson_utils": [True, False],
+        "utils": [True, False],
         "use_locales": [True, False]
     }
     default_options = {
         "shared": False,
         "fPIC": True,
-        "cjson_utils": False,
+        "utils": False,
         "use_locales": True
     }
 
@@ -66,7 +66,7 @@ class CjsonConan(ConanFile):
         self._cmake.definitions["ENABLE_TARGET_EXPORT"] = False
         self._cmake.definitions["BUILD_SHARED_AND_STATIC_LIBS"] = False
         self._cmake.definitions["CJSON_OVERRIDE_BUILD_SHARED_LIBS"] = False
-        self._cmake.definitions["ENABLE_CJSON_UTILS"] = self.options.cjson_utils
+        self._cmake.definitions["ENABLE_CJSON_UTILS"] = self.options.utils
         self._cmake.definitions["ENABLE_CJSON_TEST"] = False
         self._cmake.definitions["ENABLE_LOCALES"] = self.options.use_locales
         self._cmake.definitions["ENABLE_FUZZING"] = False
@@ -94,7 +94,7 @@ class CjsonConan(ConanFile):
         if self.settings.os == "Linux":
             self.cpp_info.components["_cjson"].system_libs = ["m"]
 
-        if self.options.cjson_utils:
+        if self.options.utils:
             self.cpp_info.components["cjson_utils"].names["cmake_find_package"] = "cjson_utils"
             self.cpp_info.components["cjson_utils"].names["cmake_find_package_multi"] = "cjson_utils"
             self.cpp_info.components["cjson_utils"].names["pkg_config"] = "libcjson_utils"
