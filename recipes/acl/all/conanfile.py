@@ -1,5 +1,6 @@
 import os
 from conans import ConanFile, tools
+from conans.errors import ConanInvalidConfiguration
 
 
 class AclConan(ConanFile):
@@ -17,6 +18,15 @@ class AclConan(ConanFile):
 
     def requirements(self):
         self.requires("rtm/2.0.0")
+
+    def configure(self):
+        minimal_cpp_standard = "11"
+        if self.settings.compiler.cppstd:
+            tools.check_min_cppstd(self, minimal_cpp_standard)
+
+        if self.settings.compiler == "gcc" and tools.Version(self.settings.compiler.version) < "5":
+            raise ConanInvalidConfiguration("acl can't be compiled by {0} {1}".format(self.settings.compiler,
+                                                                                      self.settings.compiler.version))
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
