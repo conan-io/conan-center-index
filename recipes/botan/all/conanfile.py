@@ -9,7 +9,7 @@ class BotanConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/randombit/botan"
     license = "BSD-2-Clause"
-    exports = ["dll-dir.patch"]
+    exports = ["patches/*"]
     description = "Botan is a cryptography library written in C++11."
     topics = ("cryptography", "crypto", "C++11", "tls")
     settings = 'os', 'arch', 'compiler', 'build_type'
