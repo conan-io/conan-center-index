@@ -1,26 +1,26 @@
-import os
 from conans import CMake, ConanFile, tools
-from conans.errors import ConanInvalidConfiguration
+import glob
+import os
 
 
-class CoseCStackConan(ConanFile):
+class CoseCConan(ConanFile):
     name = "cose-c"
     license = "BSD-3-Clause"
     homepage = "https://github.com/cose-wg/COSE-C"
     url = "https://github.com/conan-io/conan-center-index"
     description = """Implementation of COSE in C using cn-cbor and openssl"""
     topics = ("cbor")
-    exports_sources = ['CMakeLists.txt']
+    exports_sources = ["CMakeLists.txt"]
     settings = "os", "compiler", "build_type", "arch"
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
-        "use_mbedtls": [True, False]
+        "with_ssl": ["openssl", "mbedtls"]
     }
     default_options = {
         "shared": False,
         "fPIC": True,
-        "use_mbedtls": False
+        "with_ssl": "openssl"
     }
     generators = "cmake", "cmake_find_package"
 
@@ -38,24 +38,21 @@ class CoseCStackConan(ConanFile):
         if self.settings.os == "Windows":
             del self.options.fPIC
 
-    def requirements(self):
-        self.requires("cn-cbor/1.0.0")
-
-        if self.options.use_mbedtls:
-            self.requires("mbedtls/2.16.3-gpl")
-        else:
-            self.requires("openssl/1.1.1h")
-
     def configure(self):
         del self.settings.compiler.libcxx
         del self.settings.compiler.cppstd
 
+    def requirements(self):
+        self.requires("cn-cbor/1.0.0")
+
+        if self.options.with_ssl == "mbedtls":
+            self.requires("mbedtls/2.23.0")
+        else:
+            self.requires("openssl/1.1.1h")
+
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
-        extracted_dir = self.name.upper() + "-" + \
-            os.path.basename(
-                self.conan_data["sources"][self.version]["url"]).split(".")[0]
-        os.rename(extracted_dir, self._source_subfolder)
+        os.rename(glob.glob("COSE-C-*")[0], self._source_subfolder)
 
     def _configure_cmake(self):
         if self._cmake:
@@ -65,7 +62,7 @@ class CoseCStackConan(ConanFile):
         self._cmake.definitions["COSE_C_BUILD_TESTS"] = False
         self._cmake.definitions["COSE_C_BUILD_DOCS"] = False
         self._cmake.definitions["COSE_C_BUILD_DUMPER"] = False
-        self._cmake.definitions["COSE_C_USE_MBEDTLS"] = self.options.use_mbedtls
+        self._cmake.definitions["COSE_C_USE_MBEDTLS"] = self.options.with_ssl == "mbedtls"
         self._cmake.definitions["COSE_C_USE_FIND_PACKAGE"] = True
         self._cmake.definitions["COSE_C_EXPORT_TARGETS"] = True
         self._cmake.configure(build_folder=self._build_subfolder)
