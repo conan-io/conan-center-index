@@ -49,8 +49,6 @@ class Argon2Conan(ConanFile):
         self.copy("*argon2.a", dst="lib", src="", keep_path=False)
 
     def package_info(self):
-        self.cpp_info.includedirs = ['include']
-        self.cpp_info.libdirs = ['lib']
         self.cpp_info.libs = ['argon2']        
         if self.settings.os == "Linux":
             self.cpp_info.system_libs = ['pthread']
