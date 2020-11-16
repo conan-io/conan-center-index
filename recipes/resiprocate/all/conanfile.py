@@ -1,6 +1,7 @@
 import os
 import shutil
 from conans import ConanFile, AutoToolsBuildEnvironment, tools
+from conans.errors import ConanInvalidConfiguration
 
 class ResiprocateConan(ConanFile):
     name = "resiprocate"
@@ -23,37 +24,22 @@ class ResiprocateConan(ConanFile):
     _autotools = None
 
     @property
-    def _is_msvc(self):
-        return self.settings.compiler == "Visual Studio"
-
-    @property
-    def _is_mingw_windows(self):
-        return self.settings.os == "Windows" and (self.settings.compiler == 'gcc' or tools.cross_building(self.settings))
-
-    @property
     def _source_subfolder(self):
         return "source_subfolder"
 
-    def config_options(self):
-        if self.settings.os == 'Windows':
-            del self.options.fPIC
-
-    def build_requirements(self):
-        if self._is_mingw_windows and not self._is_msvc:
-            if "CONAN_BASH_PATH" not in os.environ and tools.os_info.detect_windows_subsystem() != 'msys2':
-                self.build_requires("msys2/20190524")
-
     def requirements(self):
+        if self.settings.os in ("Windows", "Macos"):
+            raise ConanInvalidConfiguration("OS is not supported")
         if self.options.with_ssl:
             self.requires("openssl/1.1.1h")
         if self.options.with_postgresql:
             self.requires("libpq/11.5")
         if self.options.with_mysql:
             self.requires("libmysqlclient/8.0.17")
-        if self._is_mingw_windows and not self._is_msvc:
-            self.requires("cygwin_installer/2.9.0")
 
     def source(self):
+        if not self.version:
+            self.version = next(iter(self.conan_data["sources"]))
         tools.get(**self.conan_data["sources"][self.version])
         shutil.rmtree(self._source_subfolder, ignore_errors=True)
         os.rename("{}-{}".format(self.name, self.version), self._source_subfolder)
@@ -61,7 +47,7 @@ class ResiprocateConan(ConanFile):
     def _configure_autotools(self):
         if self._autotools:
             return self._autotools
-        self._autotools = AutoToolsBuildEnvironment(self, win_bash = self._is_msvc or self._is_mingw_windows)
+        self._autotools = AutoToolsBuildEnvironment(self)
         yes_no = lambda v: "yes" if v else "no"
         configure_args = [
             "--enable-shared={}".format(yes_no(self.options.shared)),
@@ -69,11 +55,8 @@ class ResiprocateConan(ConanFile):
             "--with-ssl={}".format(yes_no(not self.options.with_ssl)),
             "--with-mysql={}".format(yes_no(not self.options.with_mysql)),
             "--with-postgresql={}".format(yes_no(not self.options.with_postgresql)),
-            "--prefix={}".format(tools.unix_path(self.package_folder))
+            "--with-pic={}".format(yes_no(not self.options.fPIC))
         ]
-
-        if self.settings.os == "Linux":
-            configure_args.extend(["--with-pic={}".format(yes_no(not self.options.get_safe("fPIC", False)))])
 
         self._autotools.configure(configure_dir=self._source_subfolder, args=configure_args)
         return self._autotools
