@@ -50,7 +50,6 @@ class Argon2Conan(ConanFile):
         self.copy("*argon2.a", dst="lib", src="", keep_path=False)
 
     def package_info(self):
-        self.cpp_info.filenames["cmake_find_package"] = "argon2"
         self.cpp_info.includedirs = ['include']
         self.cpp_info.libdirs = ['lib']
         self.cpp_info.libs = ['argon2']        
