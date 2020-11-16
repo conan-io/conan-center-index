@@ -1,7 +1,6 @@
 from conans import ConanFile
-from conans.client import output
 from six import StringIO
-import subprocess
+
 
 class TestPackage(ConanFile):
 
