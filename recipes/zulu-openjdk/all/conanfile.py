@@ -9,7 +9,7 @@ class ZuluOpenJDK(ConanFile):
     description = "A OpenJDK distribution"
     homepage = "https://www.azul.com"
     license = "https://www.azul.com/products/zulu-and-zulu-enterprise/zulu-terms-of-use/"
-    topics = ("java", "jdk")
+    topics = ("java", "jdk", "openjdk")
     settings = "os", "arch"
 
     @property
@@ -39,7 +39,12 @@ class ZuluOpenJDK(ConanFile):
         pass # nothing to do, but this shall trigger no warnings ;-)
 
     def package(self):
-        self.copy(pattern="*", dst=".", src=self._source_subfolder)
+        self.copy(pattern="*", dst="bin", src=os.path.join(self._source_subfolder, "bin"), excludes=("msvcp140.dll", "vcruntime140.dll"))
+        self.copy(pattern="*", dst="include", src=os.path.join(self._source_subfolder, "include"))
+        self.copy(pattern="*", dst="lib", src=os.path.join(self._source_subfolder, "lib"))
+        self.copy(pattern="*", dst="res", src=os.path.join(self._source_subfolder, "conf"))
+        self.copy(pattern="*", dst="licenses", src=os.path.join(self._source_subfolder, "legal"))
+        self.copy(pattern="*", dst=os.path.join("lib", "jmods"), src=os.path.join(self._source_subfolder, "jmods"))
 
     def package_info(self):
         self.cpp_info.includedirs.append(self._jni_folder)
