@@ -56,4 +56,4 @@ class ZuluOpenJDK(ConanFile):
         self.env_info.JAVA_HOME = java_home
 
         self.output.info("Appending PATH environment variable with : {0}".format(bin_path))
-        self.env_info.path.append(bin_path)
+        self.env_info.PATH.append(bin_path)
