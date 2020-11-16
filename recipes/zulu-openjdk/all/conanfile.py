@@ -1,6 +1,6 @@
 from conans import ConanFile, tools
 from conans.errors import ConanInvalidConfiguration
-import os, platform, glob
+import os, glob
 
 
 class ZuluOpenJDK(ConanFile):
