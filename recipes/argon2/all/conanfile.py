@@ -4,7 +4,7 @@ import os
 
 class Argon2Conan(ConanFile):
     name = "argon2"
-    license = "Apache 2.0"
+    license = "Apache 2.0", "CC0-1.0"
     homepage = "https://github.com/P-H-C/phc-winner-argon2"
     url = "https://github.com/conan-io/conan-center-index"
     description = "Argon2 password hashing library"
@@ -56,4 +56,3 @@ class Argon2Conan(ConanFile):
         self.cpp_info.libs = ['argon2']        
         if self.settings.os == "Linux":
             self.cpp_info.system_libs = ['pthread']
-
