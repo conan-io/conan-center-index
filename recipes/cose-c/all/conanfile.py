@@ -10,7 +10,7 @@ class CoseCConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     description = """Implementation of COSE in C using cn-cbor and openssl"""
     topics = ("cbor")
-    exports_sources = ["CMakeLists.txt"]
+    exports_sources =  ["CMakeLists.txt", "patches/**"]
     settings = "os", "compiler", "build_type", "arch"
     options = {
         "shared": [True, False],
@@ -69,6 +69,8 @@ class CoseCConan(ConanFile):
         return self._cmake
 
     def build(self):
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            tools.patch(**patch)
         cmake = self._configure_cmake()
         cmake.build()
 
@@ -80,3 +82,8 @@ class CoseCConan(ConanFile):
 
     def package_info(self):
         self.cpp_info.libs = tools.collect_libs(self)
+
+        if self.options.with_ssl == "mbedtls":
+            self.cpp_info.defines.append("COSE_C_USE_MBEDTLS")
+        else:
+            self.cpp_info.defines.append("COSE_C_USE_OPENSSL")
