@@ -37,7 +37,7 @@ class Argon2Conan(ConanFile):
 
     def package(self):
         self.copy("*LICENSE", src="", dst="licenses", keep_path=False)
-        self.copy("*argon2.h", dst="include/argon2", src="", keep_path=False)
+        self.copy("*argon2.h", dst=os.path.join("include", "argon2"), src="", keep_path=False)
         
         if self.options.shared:
             if self.settings.os == "Linux":
