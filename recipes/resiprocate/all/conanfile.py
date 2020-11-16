@@ -41,7 +41,6 @@ class ResiprocateConan(ConanFile):
         if not self.version:
             self.version = next(iter(self.conan_data["sources"]))
         tools.get(**self.conan_data["sources"][self.version])
-        shutil.rmtree(self._source_subfolder, ignore_errors=True)
         os.rename("{}-{}".format(self.name, self.version), self._source_subfolder)
 
     def _configure_autotools(self):
