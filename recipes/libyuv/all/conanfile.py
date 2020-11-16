@@ -14,7 +14,7 @@ class LibyuvConan(ConanFile):
                "fPIC": [True, False]}
     default_options = {'shared': False,
                        'fPIC': True}
-    requires = ("libjpeg-turbo/2.0.2")
+    requires = ("libjpeg-turbo/2.0.5")
     exports_sources = ["CMakeLists.txt", "patches/**"]
     generators = "cmake"
 
