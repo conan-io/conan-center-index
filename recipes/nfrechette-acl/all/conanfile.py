@@ -11,6 +11,7 @@ class AclConan(ConanFile):
     homepage = "https://github.com/nfrechette/acl"
     url = "https://github.com/conan-io/conan-center-index"
     no_copy_source = True
+    settings = "compiler"
 
     @property
     def _source_subfolder(self):
