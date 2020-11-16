@@ -38,7 +38,8 @@ class BotanConan(ConanFile):
         'with_armv8crypto': [True, False],
         'with_powercrypto': [True, False],
         'enable_modules': "ANY",
-        'system_cert_bundle': "ANY"
+        'system_cert_bundle': "ANY",
+        'module_policy': [None, 'bsi', 'modern', 'nist']
     }
     default_options = {'amalgamation': True,
                        'with_bzip2': False,
@@ -64,7 +65,8 @@ class BotanConan(ConanFile):
                        'with_armv8crypto': True,
                        'with_powercrypto': True,
                        'enable_modules': None,
-                       'system_cert_bundle': None}
+                       'system_cert_bundle': None,
+                       'module_policy': None}
 
     @property
     def _is_x86(self):
@@ -294,6 +296,9 @@ class BotanConan(ConanFile):
         if self.options.with_boost:
             build_flags.append('--with-boost')
             build_flags.extend(self._dependency_build_flags("boost"))
+
+        if self.options.module_policy:
+            build_flags.append('--module-policy={}'.format(self.options.module_policy))
 
         if self.settings.build_type == 'RelWithDebInfo':
             build_flags.append('--with-debug-info')
