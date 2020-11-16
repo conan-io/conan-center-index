@@ -41,8 +41,6 @@ class ResiprocateConan(ConanFile):
             self.requires("libmysqlclient/8.0.17")
 
     def source(self):
-        if not self.version:
-            self.version = next(iter(self.conan_data["sources"]))
         tools.get(**self.conan_data["sources"][self.version])
         os.rename("{}-{}".format(self.name, self.version), self._source_subfolder)
 
