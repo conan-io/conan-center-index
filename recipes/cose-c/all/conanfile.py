@@ -82,7 +82,10 @@ class CoseCConan(ConanFile):
 
     def package_info(self):
         self.cpp_info.libs = tools.collect_libs(self)
-
+        if self.settings.os == "Windows":
+            self.cpp_info.system_libs.extend(["ws2_32", "secur32", "crypt32", "bcrypt"])
+        if self.settings.os == "Macos":
+            self.cpp_info.frameworks.extend(["CoreFoundation", "Security"])
         if self.options.with_ssl == "mbedtls":
             self.cpp_info.defines.append("COSE_C_USE_MBEDTLS")
         else:
