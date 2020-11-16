@@ -12,7 +12,6 @@ class Argon2Conan(ConanFile):
     settings = "os", "compiler", "build_type", "arch"
     options = {"shared": [True, False], "fPIC": [True, False]}
     default_options = {"shared": False, "fPIC": True}
-    generators = "cmake", "cmake_find_package"
 
     def config_options(self):
         if self.settings.os == "Windows":
