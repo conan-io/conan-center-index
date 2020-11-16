@@ -1,4 +1,6 @@
 from conans import ConanFile
+from conans.client import output
+from six import StringIO
 import subprocess
 
 class TestPackage(ConanFile):
@@ -7,8 +9,10 @@ class TestPackage(ConanFile):
         pass # nothing to build, but tests should not warn
 
     def test(self):
-        output = subprocess.run(['java', '--version'], stdout=subprocess.PIPE)
-        version_info = output.stdout.decode('utf-8')
+        test_cmd = ['java', '--version']
+        output = StringIO()
+        self.run(test_cmd, output=output)
+        version_info = output.getvalue()
         if "Zulu" in version_info:
             pass
         else:
