@@ -9,4 +9,4 @@ find_package(oatpp-sqlite REQUIRED)
 add_executable(${PROJECT_NAME} test_package.cpp)
 set_property(TARGET ${PROJECT_NAME} PROPERTY CXX_STANDARD 11)
 
-target_link_libraries(${PROJECT_NAME} PRIVATE CONAN_PKG::oatpp-sqlite)
+target_link_libraries(${PROJECT_NAME} PRIVATE oatpp::oatpp-sqlite)
