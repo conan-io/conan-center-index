@@ -25,7 +25,7 @@ class Argon2Conan(ConanFile):
         del self.settings.compiler.cppstd
 
         if self.settings.os == "Windows":
-            raise ConanInvalidConfiguration("argon2 can not be built on Windows")
+            raise ConanInvalidConfiguration("argon2 recipe currently does not offer Windows support")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
