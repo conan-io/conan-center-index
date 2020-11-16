@@ -22,12 +22,10 @@ class ZuluOpenJDK(ConanFile):
         return os.path.join("include", folder)
 
     def configure(self):
-        # Checking against self.settings.* would prevent cross-building profiles from working
-        # TODO, I think for the new, 2 profile builds, this can be done ...
-        if tools.detected_architecture() != "x86_64":
+        if self.settings.arch != "x86_64":
             raise ConanInvalidConfiguration("Unsupported Architecture.  This package currently only supports x86_64.")
-        if platform.system() not in ["Windows", "Darwin", "Linux"]:
-            raise ConanInvalidConfiguration("Unsupported System. This package currently only support Linux/Darwin/Windows")
+        if self.settings.os not in ["Windows", "Macos", "Linux"]:
+            raise ConanInvalidConfiguration("Unsupported os. This package currently only support Linux/Macos/Windows")
 
     def source(self):
         url = self.conan_data["sources"][self.version]["url"][str(self.settings.os)]
@@ -51,7 +49,7 @@ class ZuluOpenJDK(ConanFile):
         self.cpp_info.libdirs = ["lib"]
         self.cpp_info.libs = tools.collect_libs(self)
 
-        java_home = os.path.join(self.package_folder)
+        java_home = self.package_folder
         bin_path = os.path.join(java_home, "bin")
 
         self.output.info("Creating JAVA_HOME environment variable with : {0}".format(java_home))
