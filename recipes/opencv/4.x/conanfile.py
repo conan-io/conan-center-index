@@ -261,7 +261,8 @@ class OpenCVConan(ConanFile):
         debug = "d" if self.settings.build_type == "Debug" and self.settings.compiler == "Visual Studio" else ""
 
         def get_lib_name(module):
-            return "opencv_%s%s%s" % (module, version, debug)
+            prefix = "" if module in ("correspondence", "multiview", "numeric") else "opencv_"
+            return "%s%s%s%s" % (prefix, module, version, debug)
 
         def add_components(components):
             # TODO: OpenCV doesn't use cmake target namespace
