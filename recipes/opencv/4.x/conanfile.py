@@ -65,8 +65,8 @@ class OpenCVConan(ConanFile):
             raise ConanInvalidConfiguration("Visual Studio and Runtime MT is not supported for shared library.")
         if self.options.shared:
             del self.options.fPIC
-        if self.options.with_jpeg2000 == "jasper" and self.options.with_jpeg:
-            self.options["jasper"].with_libjpeg = self.options.with_jpeg
+        self.options["libtiff"].jpeg = self.options.with_jpeg
+        self.options["jasper"].with_libjpeg = self.options.with_jpeg
 
     def requirements(self):
         self.requires("zlib/1.2.11")
@@ -102,9 +102,8 @@ class OpenCVConan(ConanFile):
         tools.get(**self.conan_data["sources"][self.version][0])
         os.rename("opencv-{}".format(self.version), self._source_subfolder)
 
-        if self.options.contrib:
-            tools.get(**self.conan_data["sources"][self.version][1])
-            os.rename("opencv_contrib-{}".format(self.version), self._contrib_folder)
+        tools.get(**self.conan_data["sources"][self.version][1])
+        os.rename("opencv_contrib-{}".format(self.version), self._contrib_folder)
 
     def _patch_opencv(self):
         for directory in ['libjasper', 'libjpeg-turbo', 'libjpeg', 'libpng', 'libtiff', 'libwebp', 'openexr', 'protobuf', 'zlib']:
@@ -117,8 +116,6 @@ class OpenCVConan(ConanFile):
             tools.replace_in_file(find_openexr, "SET(OPENEXR_LIBSEARCH_SUFFIXES x64/Release x64 x64/Debug)", "")
             tools.replace_in_file(find_openexr, "SET(OPENEXR_LIBSEARCH_SUFFIXES Win32/Release Win32 Win32/Debug)", "")
 
-        tools.replace_in_file(os.path.join(self._source_subfolder, "data", "CMakeLists.txt"), "${OPENCV_OTHER_INSTALL_PATH}", "res")
-        tools.replace_in_file(os.path.join(self._source_subfolder, "cmake", "OpenCVInstallLayout.cmake"), "staticlib", "lib")
         tools.replace_in_file(os.path.join(self._source_subfolder, "CMakeLists.txt"), "ANDROID OR NOT UNIX", "FALSE")
         tools.replace_in_file(os.path.join(self._source_subfolder, "modules", "imgcodecs", "CMakeLists.txt"), "JASPER_", "Jasper_")
 
@@ -226,36 +223,18 @@ class OpenCVConan(ConanFile):
         self._cmake.definitions["WITH_MSMF"] = self.settings.compiler == "Visual Studio"
         self._cmake.definitions["WITH_MSMF_DXVA"] = self.settings.compiler == "Visual Studio"
         self._cmake.definitions["OPENCV_MODULES_PUBLIC"] = "opencv"
-
+        if self.options.contrib:
+            self._cmake.definitions['OPENCV_EXTRA_MODULES_PATH'] = os.path.join(self.build_folder, self._contrib_folder, 'modules')
         if self.options.with_openexr:
             self._cmake.definitions["OPENEXR_ROOT"] = self.deps_cpp_info["openexr"].rootpath
-
-        #if self.options.with_jpeg2000 == "openjpeg":
-        #    openjpeg_version = tools.Version(self.deps_cpp_info["openjpeg"].version)
-        #    cmake.definitions["OpenJPEG_FOUND"] = True
-        #    cmake.definitions["OPENJPEG_LIBRARIES"] = ";".join(self._gather_libs("openjpeg"))
-        #    cmake.definitions["OPENJPEG_INCLUDE_DIRS"] = ";".join(self._gather_include_paths("openjpeg"))
-        #    cmake.definitions["OPENJPEG_MAJOR_VERSION"] = openjpeg_version.major
-        #    cmake.definitions["OPENJPEG_MINOR_VERSION"] = openjpeg_version.minor
-        #    cmake.definitions["OPENJPEG_BUILD_VERSION"] = openjpeg_version.patch
-
+        if self.options.with_jpeg2000 == "openjpeg":
+            openjpeg_version = tools.Version(self.deps_cpp_info["openjpeg"].version)
+            self._cmake.definitions["OPENJPEG_MAJOR_VERSION"] = openjpeg_version.major
+            self._cmake.definitions["OPENJPEG_MINOR_VERSION"] = openjpeg_version.minor
+            self._cmake.definitions["OPENJPEG_BUILD_VERSION"] = openjpeg_version.patch
         if self.options.parallel:
             self._cmake.definitions["WITH_TBB"] = self.options.parallel == "tbb"
             self._cmake.definitions["WITH_OPENMP"] = self.options.parallel == "openmp"
-
-        #if self.options.contrib:
-        #    # OpenCV doesn't use find_package for freetype & harfbuzz, so let's specify them
-        #    self._cmake.definitions["OPENCV_EXTRA_MODULES_PATH"] = os.path.join(self.build_folder, self._contrib_folder, 'modules')
-        #    self._cmake.definitions["FREETYPE_FOUND"] = True
-        #    self._cmake.definitions["FREETYPE_LIBRARIES"] = ';'.join(self.deps_cpp_info["freetype"].libs)
-        #    self._cmake.definitions["FREETYPE_INCLUDE_DIRS"] = ';'.join(self.deps_cpp_info["freetype"].include_paths)
-        #    self._cmake.definitions["HARFBUZZ_FOUND"] = True
-        #    self._cmake.definitions["HARFBUZZ_LIBRARIES"] = ';'.join(self.deps_cpp_info["harfbuzz"].libs)
-        #    self._cmake.definitions["HARFBUZZ_INCLUDE_DIRS"] = ';'.join(self.deps_cpp_info["harfbuzz"].include_paths)
-        #    self._cmake.definitions["GFLAGS_LIBRARY_DIR_HINTS"] = ';'.join(self.deps_cpp_info["gflags"].lib_paths)
-        #    self._cmake.definitions["GFLAGS_INCLUDE_DIR_HINTS"] = ';'.join(self.deps_cpp_info["gflags"].include_paths)
-        #    self._cmake.definitions["GLOG_LIBRARY_DIR_HINTS"] = ';'.join(self.deps_cpp_info["glog"].lib_paths)
-        #    self._cmake.definitions["GLOG_INCLUDE_DIR_HINTS"] = ';'.join(self.deps_cpp_info["glog"].include_paths)
 
         self._cmake.definitions["ENABLE_PIC"] = self.options.get_safe("fPIC", True)
 
@@ -271,11 +250,10 @@ class OpenCVConan(ConanFile):
         cmake.build()
 
     def package(self):
-        # self.copy("LICENSE", dst="licenses", src=self._source_subfolder)
+        self.copy("LICENSE", dst="licenses", src=self._source_subfolder)
         cmake = self._configure_cmake()
         cmake.install()
-        #tools.rmdir(os.path.join(self.package_folder, "share"))
-        #tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
+        tools.rmdir(os.path.join(self.package_folder, "cmake"))
 
     def package_info(self):
         version = self.version.split(".")[:-1]  # last version number is not used
@@ -332,13 +310,18 @@ class OpenCVConan(ConanFile):
             return ["eigen::eigen"] if self.options.with_eigen else []
 
         def parallel():
-            # TODO: Check openmp
             if self.options.parallel:
                 return ["tbb::tbb"] if self.options.parallel == "tbb" else ["openmp"]
             return []
 
         def gtk():
             return ["gtk::gtk"] if self.options.get_safe("with_gtk") else []
+
+        def freetype():
+            return ["freetype::freetype"] if self.options.contrib else []
+
+        def xfeatures2d():
+            return ["opencv_xfeatures2d"] if self.options.contrib else []
 
         self.cpp_info.filenames["cmake_find_package"] = "OpenCV"
         self.cpp_info.filenames["cmake_find_package_multi"] = "OpenCV"
@@ -352,12 +335,53 @@ class OpenCVConan(ConanFile):
             {"target": "opencv_features2d", "lib": "features2d", "requires": ["opencv_core", "opencv_flann", "opencv_imgproc"] + eigen()},
             {"target": "opencv_imgcodecs",  "lib": "imgcodecs",  "requires": ["opencv_core", "opencv_imgproc", "zlib::zlib"] + eigen() + imageformats_deps()},
             {"target": "opencv_videoio",    "lib": "videoio",    "requires": ["opencv_core", "opencv_imgproc", "opencv_imgcodecs"] + eigen()},
-            {"target": "opencv_calib3d",    "lib": "calib3d",    "requires": ["opencv_core", "opencv_flann", "opencv_imgproc", "opencv_highgui", "opencv_features2d"]+ eigen()},
-            {"target": "opencv_highgui",    "lib": "highgui",    "requires": ["opencv_core", "opencv_imgproc", "opencv_imgcodecs", "opencv_videoio"] + eigen() + gtk()},
+            {"target": "opencv_calib3d",    "lib": "calib3d",    "requires": ["opencv_core", "opencv_flann", "opencv_imgproc", "opencv_features2d"]+ eigen()},
+            {"target": "opencv_highgui",    "lib": "highgui",    "requires": ["opencv_core", "opencv_imgproc", "opencv_imgcodecs", "opencv_videoio"] + freetype() + eigen() + gtk()},
             {"target": "opencv_objdetect",  "lib": "objdetect",  "requires": ["opencv_core", "opencv_flann", "opencv_imgproc", "opencv_features2d", "opencv_calib3d"] + eigen()},
-            {"target": "opencv_stitching",  "lib": "stitching",  "requires": ["opencv_core", "opencv_flann", "opencv_imgproc", "opencv_features2d", "opencv_calib3d"] + eigen()},
+            {"target": "opencv_stitching",  "lib": "stitching",  "requires": ["opencv_core", "opencv_flann", "opencv_imgproc", "opencv_features2d", "opencv_calib3d"] + xfeatures2d() + eigen()},
             {"target": "opencv_video",      "lib": "video",      "requires": ["opencv_core", "opencv_flann", "opencv_imgproc", "opencv_features2d", "opencv_calib3d"] + eigen()},
         ])
+
+        if self.options.contrib:
+            add_components([
+                {"target": "opencv_intensity_transform", "lib": "intensity_transform", "requires": ["opencv_core", "opencv_imgproc"] + eigen()},
+                {"target": "opencv_phase_unwrapping",    "lib": "phase_unwrapping",    "requires": ["opencv_core", "opencv_imgproc"] + eigen()},
+                {"target": "opencv_plot",                "lib": "plot",                "requires": ["opencv_core", "opencv_imgproc"] + eigen()},
+                {"target": "opencv_quality",             "lib": "quality",             "requires": ["opencv_core", "opencv_imgproc", "opencv_ml"] + eigen()},
+                {"target": "opencv_reg",                 "lib": "reg",                 "requires": ["opencv_core", "opencv_imgproc"] + eigen()},
+                {"target": "opencv_surface_matching",    "lib": "surface_matching",    "requires": ["opencv_core", "opencv_flann"] + eigen()},
+                {"target": "opencv_xphoto",              "lib": "xphoto",              "requires": ["opencv_core", "opencv_imgproc", "opencv_photo"] + eigen()},
+                {"target": "opencv_alphamat",            "lib": "alphamat",            "requires": ["opencv_core", "opencv_imgproc"] + eigen()},
+                {"target": "opencv_freetype",            "lib": "freetype",            "requires": ["opencv_core", "opencv_imgproc", "freetype::freetype", "harfbuzz::harfbuzz"] + eigen()},
+                {"target": "opencv_fuzzy",               "lib": "fuzzy",               "requires": ["opencv_core", "opencv_imgproc"] + eigen()},
+                {"target": "opencv_hfs",                 "lib": "hfs",                 "requires": ["opencv_core", "opencv_imgproc"] + eigen()},
+                {"target": "opencv_img_hash",            "lib": "img_hash",            "requires": ["opencv_core", "opencv_imgproc"] + eigen()},
+                {"target": "opencv_line_descriptor",     "lib": "line_descriptor",     "requires": ["opencv_core", "opencv_flann", "opencv_imgproc", "opencv_features2d"] + eigen()},
+                {"target": "opencv_saliency",            "lib": "saliency",            "requires": ["opencv_core", "opencv_flann", "opencv_imgproc", "opencv_features2d"] + eigen()},
+                {"target": "opencv_datasets",            "lib": "datasets",            "requires": ["opencv_core", "opencv_flann", "opencv_imgproc", "opencv_ml", "opencv_imgcodecs"] + eigen()},
+                {"target": "opencv_rapid",               "lib": "rapid",               "requires": ["opencv_core", "opencv_flann", "opencv_imgproc", "opencv_features2d", "opencv_calib3d"] + eigen()},
+                {"target": "opencv_rgbd",                "lib": "rgbd",                "requires": ["opencv_core", "opencv_flann", "opencv_imgproc", "opencv_features2d", "opencv_calib3d"] + eigen()},
+                {"target": "opencv_shape",               "lib": "shape",               "requires": ["opencv_core", "opencv_flann", "opencv_imgproc", "opencv_features2d", "opencv_calib3d"] + eigen()},
+                {"target": "opencv_structured_light",    "lib": "structured_light",    "requires": ["opencv_core", "opencv_flann", "opencv_imgproc", "opencv_phase_unwrapping", "opencv_features2d", "opencv_calib3d"] + eigen()},
+                {"target": "opencv_videostab",           "lib": "videostab",           "requires": ["opencv_core", "opencv_flann", "opencv_imgproc", "opencv_photo", "opencv_features2d", "opencv_imgcodecs", "opencv_videoio", "opencv_calib3d", "opencv_video"] + eigen()},
+                {"target": "opencv_xfeatures2d",         "lib": "xfeatures2d",         "requires": ["opencv_core", "opencv_flann", "opencv_imgproc", "opencv_ml", "opencv_features2d", "opencv_calib3d", "opencv_shape", ] + eigen()},
+                {"target": "opencv_ximgproc",            "lib": "ximgproc",            "requires": ["opencv_core", "opencv_flann", "opencv_imgproc", "opencv_features2d", "opencv_imgcodecs", "opencv_calib3d", "opencv_video"] + eigen()},
+                {"target": "opencv_xobjdetect",          "lib": "xobjdetect",          "requires": ["opencv_core", "opencv_flann", "opencv_imgproc", "opencv_features2d", "opencv_imgcodecs", "opencv_calib3d", "opencv_objdetect"] + eigen()},
+                {"target": "opencv_aruco",               "lib": "aruco",               "requires": ["opencv_core", "opencv_flann", "opencv_imgproc", "opencv_features2d", "opencv_imgcodecs", "opencv_calib3d"] + eigen()},
+                {"target": "opencv_bgsegm",              "lib": "bgsegm",              "requires": ["opencv_core", "opencv_flann", "opencv_imgproc", "opencv_features2d", "opencv_calib3d", "opencv_video"] + eigen()},
+                {"target": "opencv_bioinspired",         "lib": "bioinspired",         "requires": ["opencv_core", "opencv_imgproc", "opencv_imgcodecs", "opencv_videoio", "opencv_highgui"] + eigen()},
+                {"target": "opencv_ccalib",              "lib": "ccalib",              "requires": ["opencv_core", "opencv_flann", "opencv_imgproc", "opencv_features2d", "opencv_imgcodecs", "opencv_videoio", "opencv_calib3d", "opencv_highgui"] + eigen()},
+                {"target": "opencv_dpm",                 "lib": "dpm",                 "requires": ["opencv_core", "opencv_flann", "opencv_imgproc", "opencv_features2d", "opencv_imgcodecs", "opencv_videoio", "opencv_calib3d", "opencv_highgui", "opencv_objdetect"] + eigen()},
+                {"target": "opencv_face",                "lib": "face",                "requires": ["opencv_core", "opencv_flann", "opencv_imgproc", "opencv_photo", "opencv_features2d", "opencv_calib3d", "opencv_objdetect"] + eigen()},
+                {"target": "opencv_optflow",             "lib": "optflow",             "requires": ["opencv_core", "opencv_flann", "opencv_imgproc", "opencv_video", "opencv_features2d", "opencv_imgcodecs", "opencv_calib3d", "opencv_video", "opencv_ximgproc"] + eigen()},
+                {"target": "opencv_sfm",                 "lib": "sfm",                 "requires": ["opencv_core", "opencv_flann", "opencv_imgproc", "opencv_ml", "opencv_features2d", "opencv_imgcodecs", "opencv_calib3d", "opencv_shape", "opencv_xfeatures2d", "correspondence", "multiview", "numeric", "glog::glog", "gflags::gflags"] + eigen()},
+                {"target": "correspondence",             "lib": "correspondence",      "requires": ["glog::glog", "multiview"] + eigen()},
+                {"target": "multiview",                  "lib": "multiview",           "requires": ["glog::glog", "numeric"] + eigen()},
+                {"target": "numeric",                    "lib": "numeric",             "requires": eigen()},
+                {"target": "opencv_superres",            "lib": "superres",            "requires": ["opencv_core", "opencv_flann", "opencv_imgproc", "opencv_features2d", "opencv_imgcodecs", "opencv_videoio", "opencv_calib3d", "opencv_video", "opencv_ximgproc", "opencv_optflow"] + eigen()},
+                {"target": "opencv_tracking",            "lib": "tracking",            "requires": ["opencv_core", "opencv_flann", "opencv_imgproc", "opencv_ml", "opencv_plot", "opencv_features2d", "opencv_imgcodecs", "opencv_calib3d", "opencv_datasets", "opencv_video"] + eigen()},
+                {"target": "opencv_stereo",              "lib": "stereo",              "requires": ["opencv_core", "opencv_flann", "opencv_imgproc", "opencv_ml", "opencv_plot", "opencv_features2d", "opencv_imgcodecs", "opencv_calib3d", "opencv_datasets", "opencv_video", "opencv_tracking"] + eigen()},
+            ])
 
         if self.settings.os == "Windows":
             self.cpp_info.components["opencv_highgui"].system_libs = ["comctl32", "gdi32", "ole32", "setupapi", "ws2_32", "vfw32"]
