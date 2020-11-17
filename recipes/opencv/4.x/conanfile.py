@@ -7,7 +7,7 @@ required_conan_version = ">=1.29.1"
 
 class OpenCVConan(ConanFile):
     name = "opencv"
-    license = " Apache-2.0"
+    license = "Apache-2.0"
     homepage = "https://opencv.org"
     description = "OpenCV (Open Source Computer Vision Library)"
     url = "https://github.com/conan-io/conan-center-index"
