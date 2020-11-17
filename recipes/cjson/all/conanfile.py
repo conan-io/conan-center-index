@@ -1,6 +1,7 @@
 import os
 
 from conans import ConanFile, CMake, tools
+from conans.errors import ConanInvalidConfiguration
 
 class CjsonConan(ConanFile):
     name = "cjson"
@@ -44,6 +45,8 @@ class CjsonConan(ConanFile):
             del self.options.fPIC
         del self.settings.compiler.libcxx
         del self.settings.compiler.cppstd
+        if self.settings.compiler == "Visual Studio" and self.options.shared and self.settings.compiler.runtime == "MTd":
+            raise ConanInvalidConfiguration("shared cjson is not supported with MTd runtime")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
