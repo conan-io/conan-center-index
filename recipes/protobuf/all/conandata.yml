@@ -8,6 +8,9 @@ sources:
   3.12.4:
     sha256: 512e5a674bf31f8b7928a64d8adf73ee67b8fe88339ad29adaa3b84dbaa570d8
     url: https://github.com/protocolbuffers/protobuf/archive/v3.12.4.tar.gz
+  3.14.0:
+    sha256: d0f5f605d0d656007ce6c8b5a82df3037e1d8fe8b121ed42e536f569dec16113
+    url: https://github.com/protocolbuffers/protobuf/archive/v3.14.0.tar.gz
 patches:
   3.12.4:
     - patch_file: "patches/upstream-pr-7761-cmake-regex-fix.patch"
