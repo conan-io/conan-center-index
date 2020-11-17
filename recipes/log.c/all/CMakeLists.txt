@@ -1,9 +1,7 @@
-cmake_minimum_required(VERSION 3.16)
+cmake_minimum_required(VERSION 3.4)
 
 project(log.c
 	    VERSION 0.1.0
-	    DESCRIPTION "A simple logging library implemented in C99"
-	    HOMEPAGE_URL "https://github.com/rxi/log.c"
 	    LANGUAGES C
 	)
 
@@ -23,13 +21,9 @@ set(SRC_FOLDER "source_subfolder")
 set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS ON)
 
 # Library files SHARED or STATIC set by Conan with BUILD_SHARED_LIBS
-add_library(${PROJECT_NAME} ${SRC_FOLDER}/src/log.c ${SRC_FOLDER}/src/log.h ${PROJECT_BINARY_DIR}/log_export.h)
+add_library(${PROJECT_NAME} ${SRC_FOLDER}/src/log.c ${SRC_FOLDER}/src/log.h)
 
-
-include(GenerateExportHeader)
-generate_export_header(${PROJECT_NAME} BASE_NAME log)
-
-target_include_directories(${PROJECT_NAME} PUBLIC ${PROJECT_SOURCE_DIR} ${PROJECT_BINARY_DIR})
+target_include_directories(${PROJECT_NAME} PUBLIC ${PROJECT_SOURCE_DIR})
 
 # Library info
 set_target_properties(${PROJECT_NAME} PROPERTIES
@@ -39,23 +33,11 @@ set_target_properties(${PROJECT_NAME} PROPERTIES
 # Conan options
 if (COLOR)
     TARGET_COMPILE_DEFINITIONS(${PROJECT_NAME} PRIVATE LOG_USE_COLOR)
-    message(STATUS "LOG_USE_COLOR ON")
 endif()
 
 install(FILES ${SRC_FOLDER}/src/log.h DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
-install(FILES ${PROJECT_BINARY_DIR}/log_export.h DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
 install(FILES ${SRC_FOLDER}/LICENSE DESTINATION ${CMAKE_INSTALL_PREFIX}/licenses)
 install(TARGETS ${PROJECT_NAME}
 LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
 ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
-RUNTIME DESTINATION bin)
-
-message(STATUS "summary of build options:
-    Install prefix:  ${CMAKE_INSTALL_PREFIX}
-    Target system:   ${CMAKE_SYSTEM_NAME}
-	Build shared lib:    ${BUILD_SHARED_LIBS}
-    Compiler:
-      C compiler:    ${CMAKE_C_COMPILER}
-      CFLAGS:        ${CMAKE_C_FLAGS_${_build_type}} ${CMAKE_C_FLAGS}
-")
-
+RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})

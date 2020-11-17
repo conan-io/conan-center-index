@@ -33,8 +33,6 @@ class logcConan(ConanFile):
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
         tools.rename(glob.glob(self.name + "-*/")[0], self._source_subfolder)
-        for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            tools.patch(**patch)
 
     def _configure_cmake(self):
         if self._cmake:
