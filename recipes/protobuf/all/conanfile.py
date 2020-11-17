@@ -48,17 +48,16 @@ class ProtobufConan(ConanFile):
         if self.options.shared:
             del self.options.fPIC
 
-            if self.settings.os == "Windows":
-                compiler_version = Version(self.settings.compiler.version.value)
-                if compiler_version < "14":
-                    raise ConanInvalidConfiguration("On Windows Protobuf can only be built with "
-                                                    "Visual Studio 2015 or higher.")
-                if self.options.shared and "MT" in self.settings.compiler.runtime:
-                    raise ConanInvalidConfiguration("Protobuf can't be build with shared + MT(d) runtimes")
+            if self.settings.os == "Windows" and "MT" in self.settings.compiler.runtime:
+                raise ConanInvalidConfiguration("Protobuf can't be build with shared + MT(d) runtimes")
 
             if tools.is_apple_os(self.settings.os):
                 raise ConanInvalidConfiguration("Protobuf could not be build as shared library for Mac.")
 
+        if self.settings.compiler == "Visual Studio":
+            if Version(self.settings.compiler.version) < "14":
+                raise ConanInvalidConfiguration("On Windows Protobuf can only be built with "
+                                                "Visual Studio 2015 or higher.")
     def requirements(self):
         if self.options.with_zlib:
             self.requires("zlib/1.2.11")
