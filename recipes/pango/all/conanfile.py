@@ -38,7 +38,7 @@ class PangoConan(ConanFile):
 
     def requirements(self):
         if self.settings.os != "Windows":
-            self.requires("fontconfig/2.13.91")
+            self.requires("fontconfig/2.13.92")
         if self.settings.os == "Linux":
             self.requires("xorg/system")
         self.requires("cairo/1.17.2")
