@@ -40,16 +40,18 @@ class Argon2Conan(ConanFile):
 
     def package(self):
         self.copy("*LICENSE", src=self._source_subfolder, dst="licenses", keep_path=False)
-        self.copy("*argon2.h", dst=os.path.join("include", "argon2"), src="", keep_path=False)
-        
+   with tools.chdir(self._source_subfolder):
+            self.run("make OPTTARGET={} DESTDIR={} PREFIX= LIBRARY_REL=lib install".format(self._arch, self.package_folder))
+
+        # drop unneeded dirs
+        tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
+        tools.rmdir(os.path.join(self.package_folder, "bin"))
+        # drop unneeded libs
         if self.options.shared:
-            if self.settings.os == "Linux":
-                self.run("ln -s libargon2.so.1 libargon2.so")
-                self.copy("*argon2.so*", dst="lib", src="", keep_path=False, symlinks=True)
-            elif self.settings.os == "Macos":
-                self.copy("*.dylib", dst="lib", src="", keep_path=False)
-        
-        self.copy("*argon2.a", dst="lib", src="", keep_path=False)
+            tools.remove_files_by_mask(os.path.join(self.package_folder, "lib"), "*.a*")
+        else:
+            tools.remove_files_by_mask(os.path.join(self.package_folder, "lib"), "*.so*")
+            tools.remove_files_by_mask(os.path.join(self.package_folder, "lib"), "*.dylib")
 
     def package_info(self):
         self.cpp_info.libs = ['argon2']        
