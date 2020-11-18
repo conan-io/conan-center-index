@@ -20,8 +20,6 @@ class NotcursesConan(ConanFile):
 
     def source(self):
         self.run("git clone https://github.com/dankamongmen/notcurses.git")
-include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
-conan_basic_setup()''')
 
     def build(self):
         cmake = CMake(self)
