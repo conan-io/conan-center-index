@@ -1,4 +1,4 @@
-from conans import ConanFile, tools
+from conans import ConanFile, MSBuild, tools
 from conans.errors import ConanInvalidConfiguration
 import os
 
@@ -15,10 +15,7 @@ class Argon2Conan(ConanFile):
     settings = "os", "compiler", "build_type", "arch"
     options = {"shared": [True, False], "fPIC": [True, False]}
     default_options = {"shared": False, "fPIC": True}
-
-    @property
-    def _arch(self):
-        return str(self.settings.arch).replace("_", "-")
+    exports_sources = "patches/**"
 
     @property
     def _source_subfolder(self):
@@ -42,13 +39,15 @@ class Argon2Conan(ConanFile):
         os.rename("phc-winner-argon2-{0}".format(self.version), self._source_subfolder)
 
     def build(self):
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            tools.patch(**patch)
         with tools.chdir(self._source_subfolder):
-            self.run("make OPTTARGET={} libs".format(self._arch))
+            self.run("make libs")
 
     def package(self):
         self.copy("*LICENSE", src=self._source_subfolder, dst="licenses", keep_path=False)
         with tools.chdir(self._source_subfolder):
-            self.run("make OPTTARGET={} DESTDIR={} PREFIX= LIBRARY_REL=lib install".format(self._arch, self.package_folder))
+            self.run("make DESTDIR={} PREFIX= LIBRARY_REL=lib install".format(self.package_folder))
         # drop unneeded dirs
         tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
         tools.rmdir(os.path.join(self.package_folder, "bin"))
