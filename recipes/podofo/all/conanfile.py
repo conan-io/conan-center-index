@@ -77,11 +77,7 @@ class OatppSwaggerConan(ConanFile):
         tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
 
     def package_info(self):
-        self.cpp_info.filenames["cmake_find_package"] = "podofo"
-        self.cpp_info.filenames["cmake_find_package_multi"] = "podofo"
         self.cpp_info.names["pkg_config"] = "libpodofo-0"
-        self.cpp_info.names["cmake_find_package"] = "podofo"
-        self.cpp_info.names["cmake_find_package_multi"] = "podofo"
         self.cpp_info.libs = ["podofo"]
         if self.settings.os == "Linux":
             self.cpp_info.system_libs = ["pthread"]
