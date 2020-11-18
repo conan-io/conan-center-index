@@ -38,8 +38,6 @@ class OatppSwaggerConan(ConanFile):
         if self.settings.os == "Macos" and self.options.shared:
             raise ConanInvalidConfiguration("currently this recipe doesn't support shared libraries on MacOS")
 
-        if self.settings.compiler == "gcc" and tools.Version(self.settings.compiler.version) < "5":
-            raise ConanInvalidConfiguration("PoDoFo requires GCC >=5")
 
     def requirements(self):
         self.requires("freetype/2.10.4")
