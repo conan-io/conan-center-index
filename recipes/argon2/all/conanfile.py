@@ -13,6 +13,9 @@ class Argon2Conan(ConanFile):
     options = {"shared": [True, False], "fPIC": [True, False]}
     default_options = {"shared": False, "fPIC": True}
 
+  @property
+  def _source_subfolder(self):
+    return "source_subfolder"
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
