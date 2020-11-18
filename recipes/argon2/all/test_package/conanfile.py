@@ -13,5 +13,5 @@ class Argon2TestConan(ConanFile):
 
     def test(self):
         if not tools.cross_building(self):
-            os.chdir("bin")
-            self.run(".%sargon2-test" % os.sep)
+            bin_path = os.path.join("bin", "argon2-test")
+            self.run(bin_path, run_environment=True)

@@ -1,4 +1,4 @@
-from conans import ConanFile, AutoToolsBuildEnvironment, tools
+from conans import ConanFile, tools
 from conans.errors import ConanInvalidConfiguration
 import os
 
@@ -12,6 +12,14 @@ class Argon2Conan(ConanFile):
     settings = "os", "compiler", "build_type", "arch"
     options = {"shared": [True, False], "fPIC": [True, False]}
     default_options = {"shared": False, "fPIC": True}
+
+    @property
+    def _arch(self):
+        return str(self.settings.arch).replace("_", "-")
+
+    @property
+    def _source_subfolder(self):
+        return "source_subfolder"
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -28,25 +36,25 @@ class Argon2Conan(ConanFile):
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
-        os.rename("phc-winner-argon2-{0}".format(self.version), "argon2")
+        os.rename("phc-winner-argon2-{0}".format(self.version), self._source_subfolder)
 
     def build(self):
-        arch = str(self.settings.arch).replace("_", "-")
-        with tools.chdir("argon2"):
-            self.run("make OPTTARGET="+arch+" libs")
+        with tools.chdir(self._source_subfolder):
+            self.run("make OPTTARGET={} libs".format(self._arch))
 
     def package(self):
-        self.copy("*LICENSE", src="", dst="licenses", keep_path=False)
-        self.copy("*argon2.h", dst=os.path.join("include", "argon2"), src="", keep_path=False)
-        
+        self.copy("*LICENSE", src=self._source_subfolder, dst="licenses", keep_path=False)
+        with tools.chdir(self._source_subfolder):
+            self.run("make OPTTARGET={} DESTDIR={} PREFIX= LIBRARY_REL=lib install".format(self._arch, self.package_folder))
+        # drop unneeded dirs
+        tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
+        tools.rmdir(os.path.join(self.package_folder, "bin"))
+        # drop unneeded libs
         if self.options.shared:
-            if self.settings.os == "Linux":
-                self.run("ln -s libargon2.so.1 libargon2.so")
-                self.copy("*argon2.so*", dst="lib", src="", keep_path=False, symlinks=True)
-            elif self.settings.os == "Macos":
-                self.copy("*.dylib", dst="lib", src="", keep_path=False)
-        
-        self.copy("*argon2.a", dst="lib", src="", keep_path=False)
+            tools.remove_files_by_mask(os.path.join(self.package_folder, "lib"), "*.a*")
+        else:
+            tools.remove_files_by_mask(os.path.join(self.package_folder, "lib"), "*.so*")
+            tools.remove_files_by_mask(os.path.join(self.package_folder, "lib"), "*.dylib")
 
     def package_info(self):
         self.cpp_info.libs = ['argon2']        
