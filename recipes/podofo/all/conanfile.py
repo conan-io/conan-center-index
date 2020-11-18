@@ -40,7 +40,7 @@ class OatppSwaggerConan(ConanFile):
 
     def requirements(self):
         self.requires("freetype/2.10.4")
-        if self.settings.os == "Linux":
+        if str(self.settings.os) in ["Linux", "Macos"]:
             self.requires("fontconfig/2.13.92")
         self.requires("libjpeg/9d")
         self.requires("libunistring/0.9.10")
