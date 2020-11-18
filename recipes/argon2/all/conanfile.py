@@ -60,6 +60,6 @@ class Argon2Conan(ConanFile):
             tools.remove_files_by_mask(os.path.join(self.package_folder, "lib"), "*.dylib")
 
     def package_info(self):
-        self.cpp_info.libs = ['argon2']        
+        self.cpp_info.libs = ["argon2"]
         if self.settings.os == "Linux":
-            self.cpp_info.system_libs = ['pthread']
+            self.cpp_info.system_libs = ["pthread"]
