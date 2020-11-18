@@ -57,11 +57,7 @@ class OatppWebSocketConan(ConanFile):
 
         self._cmake = CMake(self)
         self._cmake.definitions["OATPP_BUILD_TESTS"] = False
-        self._cmake.definitions["OATPP_MODULES_LOCATION"] = "CUSTOM"
-        self._cmake.definitions["OATPP_DIR_LIB"] = os.path.join(
-            self.deps_cpp_info["oatpp"].rootpath, self.deps_cpp_info["oatpp"].libdirs[0]
-        )
-        self._cmake.definitions["OATPP_DIR_SRC"] = self.deps_cpp_info["oatpp"].include_paths[0]
+        self._cmake.definitions["OATPP_MODULES_LOCATION"] = "INSTALLED"
         self._cmake.configure(build_folder=self._build_subfolder)
         return self._cmake
 
