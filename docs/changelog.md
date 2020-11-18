@@ -1,5 +1,9 @@
 # Changelog
 
+### 18-November-2020 - 11:23 CEST
+
+- Updated Conan client to the 1.31.3 version in Windows and Mac agents.
+
 ### 23-October-2020 - 17:13 CEST
 
 - [feature] ListProfiles: Add 'profiles' to inputs, make it required.
