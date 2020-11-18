@@ -36,7 +36,7 @@ class OatppSwaggerConan(ConanFile):
             tools.check_min_cppstd(self, 11)
 
         if self.settings.os == "Macos" and self.options.shared:
-            raise ConanInvalidConfiguration("PoDoFo doesn't support shared libraries on MacOS")
+            raise ConanInvalidConfiguration("currently this recipe doesn't support shared libraries on MacOS")
 
         if self.settings.compiler == "gcc" and tools.Version(self.settings.compiler.version) < "5":
             raise ConanInvalidConfiguration("PoDoFo requires GCC >=5")
