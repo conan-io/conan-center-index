@@ -4,7 +4,7 @@ import os
 
 class OatppSwaggerConan(ConanFile):
     name = "podofo"
-    license = "GPL-2.0"
+    license = "GPL-3.0", "LGPL-3.0"
     homepage = "http://podofo.sourceforge.net"
     url = "https://github.com/conan-io/conan-center-index"
     description = "PoDoFo is a library to work with the PDF file format."
