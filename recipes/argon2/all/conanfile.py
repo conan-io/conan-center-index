@@ -37,9 +37,8 @@ class Argon2Conan(ConanFile):
         os.rename("phc-winner-argon2-{0}".format(self.version), "argon2")
 
     def build(self):
-        arch = str(self.settings.arch).replace("_", "-")
-        with tools.chdir("argon2"):
-            self.run("make OPTTARGET="+arch+" libs")
+  with tools.chdir(self._source_subfolder):
+    self.run("make OPTTARGET={} libs".format(self._arch))
 
     def package(self):
         self.copy("*LICENSE", src=self._source_subfolder, dst="licenses", keep_path=False)
