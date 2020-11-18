@@ -1,5 +1,5 @@
 #include <iostream>
-#include "argon2/argon2.h"
+#include "argon2.h"
 
 int main() {
 
