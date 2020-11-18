@@ -4,7 +4,7 @@ import os
 
 class OatppSwaggerConan(ConanFile):
     name = "podofo"
-    license = "GNU-2"
+    license = "GPL-2.0"
     homepage = "http://podofo.sourceforge.net"
     url = "https://github.com/conan-io/conan-center-index"
     description = "PoDoFo is a library to work with the PDF file format."
@@ -46,7 +46,7 @@ class OatppSwaggerConan(ConanFile):
         self.requires("libunistring/0.9.10")
         self.requires("libtiff/4.1.0"),
         self.requires("libidn/1.36")
-        self.requires("openssl/1.1.1g")
+        self.requires("openssl/1.1.1h")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
