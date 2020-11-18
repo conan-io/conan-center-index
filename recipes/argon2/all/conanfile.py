@@ -13,6 +13,9 @@ class Argon2Conan(ConanFile):
     options = {"shared": [True, False], "fPIC": [True, False]}
     default_options = {"shared": False, "fPIC": True}
 
+  @property
+  def _source_subfolder(self):
+    return "source_subfolder"
     @property
     def _arch(self):
         return str(self.settings.arch).replace("_", "-")
