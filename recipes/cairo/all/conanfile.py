@@ -58,7 +58,7 @@ class CairoConan(ConanFile):
         if self.options.with_freetype:
             self.requires("freetype/2.10.4")
         if self.options.get_safe("with_fontconfig", False):
-            self.requires("fontconfig/2.13.91")
+            self.requires("fontconfig/2.13.92")
         if self.settings.os == 'Linux':
             if self.options.with_xlib or self.options.with_xlib_xrender or self.options.with_xcb:
                 self.requires("xorg/system")
@@ -213,6 +213,7 @@ class CairoConan(ConanFile):
             if self.options.with_fontconfig:
                 self.cpp_info.components["cairo_"].requires.append("fontconfig::fontconfig")
         if self.settings.os == "Linux":
+            self.cpp_info.components["cairo_"].system_libs = ["pthread"]
             if self.options.with_xcb:
                 self.cpp_info.components["cairo_"].requires.extend(["xorg::xcb-shm", "xorg::xcb"])
             if self.options.with_xlib_xrender:
