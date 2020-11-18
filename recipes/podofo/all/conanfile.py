@@ -47,7 +47,7 @@ class OatppSwaggerConan(ConanFile):
             self.requires("fontconfig/2.13.92")
         self.requires("libjpeg/9d")
         self.requires("libunistring/0.9.10")
-        self.requires("libtiff/4.1.0"),
+        self.requires("libtiff/4.1.0")
         self.requires("libidn/1.36")
         self.requires("openssl/1.1.1h")
 
