@@ -2,6 +2,9 @@ from conans import ConanFile, tools
 from conans.errors import ConanInvalidConfiguration
 import os
 
+required_conan_version = ">=1.29.1"
+
+
 class Argon2Conan(ConanFile):
     name = "argon2"
     license = "Apache 2.0", "CC0-1.0"
