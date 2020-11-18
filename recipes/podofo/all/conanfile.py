@@ -77,16 +77,9 @@ class OatppSwaggerConan(ConanFile):
     def package_info(self):
         self.cpp_info.filenames["cmake_find_package"] = "podofo"
         self.cpp_info.filenames["cmake_find_package_multi"] = "podofo"
+        self.cpp_info.names["pkg_config"] = "libpodofo-0"
         self.cpp_info.names["cmake_find_package"] = "podofo"
         self.cpp_info.names["cmake_find_package_multi"] = "podofo"
-        self.cpp_info.components["_podofo"].names["cmake_find_package"] = "podofo"
-        self.cpp_info.components["_podofo"].names["cmake_find_package_multi"] = "podofo"
-        self.cpp_info.components["_podofo"].includedirs = ["include"]
-        self.cpp_info.components["_podofo"].libdirs = ["lib"]
-        self.cpp_info.components["_podofo"].libs = ["podofo"]
+        self.cpp_info.libs = ["podofo"]
         if self.settings.os == "Linux":
-            self.cpp_info.components["_podofo"].system_libs = ["pthread"]
-        self.cpp_info.components["_podofo"].requires = ["freetype::freetype", "libjpeg::libjpeg", 
-            "libunistring::libunistring", "libtiff::libtiff", "libidn::libidn", "openssl::openssl"]
-        if self.settings.os == "Linux":
-            self.cpp_info.components["_podofo"].requires.append("fontconfig::fontconfig")
+            self.cpp_info.system_libs = ["pthread"]
