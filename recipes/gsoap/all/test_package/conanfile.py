@@ -8,7 +8,7 @@ class TestGsoapConan(ConanFile):
 
     @property
     def _wsdl_available(self):
-        return self.options["gsoap"].tools and not tools.cross_bulding(self.settings, skip_x64_x86=True)
+        return self.options["gsoap"].tools and not tools.cross_building(self.settings, skip_x64_x86=True)
 
     def build(self):
         if self._wsdl_available:
