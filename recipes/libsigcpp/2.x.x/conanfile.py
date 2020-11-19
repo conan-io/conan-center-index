@@ -5,6 +5,7 @@ from conans import ConanFile, Meson, tools
 
 required_conan_version = ">=1.29.0"
 
+
 class LibSigCppConan(ConanFile):
     name = "libsigcpp"
     homepage = "https://github.com/libsigcplusplus/libsigcplusplus"
@@ -101,8 +102,16 @@ class LibSigCppConan(ConanFile):
         self.copy("COPYING", dst="licenses", src=self._source_subfolder)
         meson = self._configure_build()
         meson.install()
-        tools.remove_files_by_mask(os.path.join(self.package_folder, "bin"), "*.pdb")
+        tools.remove_files_by_mask(
+            os.path.join(self.package_folder, "bin"), "*.pdb"
+        )
         tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
+
+        if self.settings.compiler and not self.options.shared:
+            os.rename(
+                os.path.join(self.package_folder, "lib", "libsigc-2.0.a"),
+                os.path.join(self.package_folder, "lib", "sigc-2.0.lib"),
+            )
 
     def package_info(self):
         self.cpp_info.includedirs = [
