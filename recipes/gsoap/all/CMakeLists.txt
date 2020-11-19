@@ -19,7 +19,7 @@ if(${BUILD_TOOLS})
   include(${CMAKE_SOURCE_DIR}/src/wsdl2h.cmake)
 
   install(FILES ${CMAKE_SOURCE_DIR}/${GSOAP_PATH}/gsoap/typemap.dat DESTINATION res)
-  install(DIRECTORY ${CMAKE_SOURCE_DIR}/${GSOAP_PATH}/gsoap/import DESTINATION .
+  install(DIRECTORY ${CMAKE_SOURCE_DIR}/${GSOAP_PATH}/gsoap/import DESTINATION bin
           FILES_MATCHING PATTERN "*.h")
 endif()
 

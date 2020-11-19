@@ -1,4 +1,5 @@
 from conans import ConanFile, CMake, tools
+from conans.errors import ConanInvalidConfiguration
 import os, shutil
 
 
@@ -25,21 +26,33 @@ class ConanFileDefault(ConanFile):
         return "build_subfolder"
 
     settings = "os", "arch", "compiler", "build_type"
-    options = {"with_openssl": [True, False],
-               "with_ipv6": [True, False],
-               "with_cookies": [True, False],
-               "with_c_locale": [True, False]}
+    options = {
+        "tools": [True, False],
+        "with_openssl": [True, False],
+        "with_ipv6": [True, False],
+        "with_cookies": [True, False],
+        "with_c_locale": [True, False],
+    }
     default_options = {
-        'with_openssl': True,
-        'with_ipv6': True,
-        'with_cookies': True,
-        'with_c_locale': True}
+        "tools": True,
+        "with_openssl": True,
+        "with_ipv6": True,
+        "with_cookies": True,
+        "with_c_locale": True,
+    }
 
+    def config_options(self):
+        if tools.cross_building(self.settings):
+            self.options.tools = False
+
+    def configure(self):
+        if tools.cross_building(self.settings) and self.options.tools:
+            raise ConanInvalidConfiguration("Cannot build tools when cross building")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
         # Rename to "source_subfolder" is a convention to simplify later steps
-        extracted_dir = "gsoap-" + self.version[:self.version.rindex('.')]
+        extracted_dir = "gsoap-" + self.version[:self.version.rindex(".")]
         os.rename(extracted_dir, self._source_subfolder)
 
     def build(self):
@@ -63,13 +76,19 @@ class ConanFileDefault(ConanFile):
             return self._cmake
         self._cmake = CMake(self)
         self._cmake.definitions["GSOAP_PATH"] = self._source_subfolder
-        self._cmake.definitions["BUILD_TOOLS"] = True
+        self._cmake.definitions["BUILD_TOOLS"] = self.options.tools
         self._cmake.definitions["WITH_OPENSSL"] = self.options.with_openssl
         self._cmake.definitions["WITH_IPV6"] = self.options.with_ipv6
         self._cmake.definitions["WITH_COOKIES"] = self.options.with_cookies
         self._cmake.definitions["WITH_C_LOCALE"] = self.options.with_c_locale
         self._cmake.configure(build_folder=self._build_subfolder)
         return self._cmake
+
+    def package(self):
+        self.copy(pattern="GPLv2_license.txt", dst="licenses", src=self._source_subfolder)
+        self.copy(pattern="LICENSE.txt", dst="licenses", src=self._source_subfolder)
+        cmake = self._configure_cmake()
+        cmake.install()
 
     def package_info(self):
         defines = []
@@ -88,10 +107,3 @@ class ConanFileDefault(ConanFile):
         if self.options.with_c_locale:
             defines.append("WITH_C_LOCALE")
         self.cpp_info.defines = defines
-
-    def package(self):
-        self.copy(pattern="GPLv2_license.txt", dst="licenses", src=self._source_subfolder)
-        self.copy(pattern="LICENSE.txt", dst="licenses", src=self._source_subfolder)
-        cmake = self._configure_cmake()
-        cmake.install()
-        shutil.move(os.path.join(self.package_folder, 'import'), os.path.join(self.package_folder, 'bin', 'import'))

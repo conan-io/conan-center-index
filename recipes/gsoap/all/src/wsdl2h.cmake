@@ -18,7 +18,7 @@ set(SRC_CPP
     ${CMAKE_BINARY_DIR}/generated/wsdlC.cpp
     )
 
-if(${WITH_OPENSSL})
+if(WITH_OPENSSL)
     list(APPEND SRC_CPP
          ${GSOAP_PATH}/gsoap/plugin/httpda.c
          ${GSOAP_PATH}/gsoap/plugin/smdevp.c
@@ -31,7 +31,7 @@ set_source_files_properties(${CMAKE_BINARY_DIR}/generated/wsdlC.cpp PROPERTIES G
 
 add_custom_command(
     OUTPUT ${CMAKE_BINARY_DIR}/generated/wsdlC.cpp
-    COMMAND $<TARGET_FILE:soapcpp2> -I${GSOAP_PATH}/gsoap/import -SC -pwsdl -d${CMAKE_BINARY_DIR}/generated ${WSDL2H_PATH}/wsdl.h
+    COMMAND $<TARGET_FILE:soapcpp2> -CS -I${GSOAP_PATH}/gsoap/import -pwsdl -d${CMAKE_BINARY_DIR}/generated ${WSDL2H_PATH}/wsdl.h
     COMMENT "Parsing WSDL and Schema definitions"
     WORKING_DIRECTORY ${WSDL2H_PATH}
     )
@@ -46,7 +46,7 @@ target_include_directories(wsdl2h
     PRIVATE ${CMAKE_BINARY_DIR}/generated
     PRIVATE ${WSDL2H_PATH})
 add_dependencies(wsdl2h WSDL2H_GENERATORS)
-if(${WITH_OPENSSL})
+if(WITH_OPENSSL)
     target_include_directories(wsdl2h PRIVATE ${GSOAP_PATH}/gsoap/plugin)
     target_compile_definitions(wsdl2h PRIVATE WITH_OPENSSL WITH_GZIP)
     target_link_libraries(wsdl2h ${CONAN_LIBS})

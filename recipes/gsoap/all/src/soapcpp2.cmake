@@ -19,32 +19,20 @@ set_source_files_properties(${CMAKE_BINARY_DIR}/generated/lex.yy.c PROPERTIES GE
 add_custom_target(create-generated-folder ALL
     COMMAND ${CMAKE_COMMAND} -E make_directory ${CMAKE_BINARY_DIR}/generated)
 
-if(WIN32)
-    add_custom_command(
-        OUTPUT ${CMAKE_BINARY_DIR}/generated/soapcpp2_yacc.tab.c
-        COMMAND ${CONAN_WINFLEXBISON_ROOT}/bin/win_bison.exe -d -v -o ${CMAKE_BINARY_DIR}/generated/soapcpp2_yacc.tab.c ${STDCPP2_PATH}/soapcpp2_yacc.y
-        COMMENT "Run BISON on soapcpp2"
-    )
+find_package(FLEX REQUIRED)
+find_package(BISON REQUIRED)
 
-    add_custom_command(
-        OUTPUT ${CMAKE_BINARY_DIR}/generated/lex.yy.c
-        COMMAND ${CONAN_WINFLEXBISON_ROOT}/bin/win_flex.exe -o ${CMAKE_BINARY_DIR}/generated/lex.yy.c ${STDCPP2_PATH}/soapcpp2_lex.l
-        COMMENT "Run FLEX on soapcpp2"
-    )
+add_custom_command(
+    OUTPUT ${CMAKE_BINARY_DIR}/generated/soapcpp2_yacc.tab.c
+    COMMAND "${BISON_EXECUTABLE}" -d -v -o ${CMAKE_BINARY_DIR}/generated/soapcpp2_yacc.tab.c ${STDCPP2_PATH}/soapcpp2_yacc.y
+    COMMENT "Run BISON on soapcpp2"
+)
 
-else()
-    add_custom_command(
-        OUTPUT ${CMAKE_BINARY_DIR}/generated/soapcpp2_yacc.tab.c
-        COMMAND ${CONAN_BISON_ROOT}/bin/yacc -d -v -o ${CMAKE_BINARY_DIR}/generated/soapcpp2_yacc.tab.c ${STDCPP2_PATH}/soapcpp2_yacc.y
-        COMMENT "Run YACC on soapcpp2"
-    )
-
-    add_custom_command(
-        OUTPUT ${CMAKE_BINARY_DIR}/generated/lex.yy.c
-        COMMAND ${CONAN_FLEX_ROOT}/bin/flex -o ${CMAKE_BINARY_DIR}/generated/lex.yy.c ${STDCPP2_PATH}/soapcpp2_lex.l
-        COMMENT "Run FLEX on soapcpp2"
-    )
-endif()
+add_custom_command(
+    OUTPUT ${CMAKE_BINARY_DIR}/generated/lex.yy.c
+    COMMAND "${FLEX_EXECUTABLE}" -o ${CMAKE_BINARY_DIR}/generated/lex.yy.c ${STDCPP2_PATH}/soapcpp2_lex.l
+    COMMENT "Run FLEX on soapcpp2"
+)
 
 add_custom_target(FLEXBISON_GENERATORS
     DEPENDS
