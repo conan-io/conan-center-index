@@ -29,4 +29,5 @@ int main()
         std::cout << ch << ' ';
     });
     // prints: h e l l o   w o r l d
+    return 0;
 }
