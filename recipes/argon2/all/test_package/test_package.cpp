@@ -1,4 +1,4 @@
-#include <iostream>
+#include <stdio.h>
 #include "argon2.h"
 
 int main() {
@@ -11,13 +11,13 @@ int main() {
     // high-level API
     argon2id_hash_encoded(2,1<<16,2,pwd,sizeof(pwd),salt,sizeof(salt),32,encoded,sizeof(encoded));
 
-    std::cout << "Encoded password: " << encoded << std::endl;
+    printf("Encoded password: %s", encoded);
     int res =  argon2id_verify(encoded, pwd, sizeof(pwd));
 
     if (res == 0){
-        std::cout << "Verify password OK" << std::endl;
+        printf("Verify password OK\n");
     } else {
-        std::cout << "Something went wrong while verify password" << std::endl;
+        printf("Something went wrong while verify password\n");
     }
 
     return 0;
