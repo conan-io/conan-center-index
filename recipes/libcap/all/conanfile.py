@@ -53,6 +53,12 @@ class LibcapConan(ConanFile):
         self._autotools_env["DESTDIR"] = self.package_folder
         self._autotools_env["prefix"] = "/"
         self._autotools_env["lib"] = "lib"
+
+        if tools.cross_building(self.settings) and not tools.get_env("BUILD_CC"):
+            native_cc = tools.which("cc")
+            self.output.info("Using native compiler '{}'".format(native_cc))
+            self._autotools_env["BUILD_CC"] = native_cc
+
         return self._autotools, self._autotools_env
 
     def build(self):
@@ -61,6 +67,18 @@ class LibcapConan(ConanFile):
             make_rules,
             "IPATH += -fPIC -I$(KERNEL_HEADERS) -I$(topdir)/libcap/include",
             "IPATH += -I$(KERNEL_HEADERS) -I$(topdir)/libcap/include")
+        tools.replace_in_file(
+            make_rules,
+            "CC := $(CROSS_COMPILE)gcc",
+            "CC ?= $(CROSS_COMPILE)gcc")
+        tools.replace_in_file(
+            make_rules,
+            "AR := $(CROSS_COMPILE)ar",
+            "AR ?= $(CROSS_COMPILE)ar")
+        tools.replace_in_file(
+            make_rules,
+            "RANLIB := $(CROSS_COMPILE)ranlib",
+            "RANLIB ?= $(CROSS_COMPILE)ranlib")
 
         with tools.chdir(os.path.join(self._source_subfolder, self.name)):
             env_build, env_build_vars = self._configure_autotools()
