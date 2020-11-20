@@ -44,10 +44,6 @@ class DbusConan(ConanFile):
             raise ConanInvalidConfiguration("D-Bus is not compatible with Windows")
         if self.settings.os == "Macos":
             raise ConanInvalidConfiguration("D-Bus is not compatible with MacOS")
-    
-    def configure(self):
-        del self.settings.compiler.libcxx
-        del self.settings.compiler.cppstd
 
         del self.settings.compiler.libcxx
         del self.settings.compiler.cppstd
