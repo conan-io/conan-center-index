@@ -13,7 +13,7 @@ class LibnameConan(ConanFile):
     homepage = "http://pulseaudio.org/"
     license = "LGPL-2.1"
 
-    generators = 'pkg_config'
+    generators = "pkg_config"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
@@ -87,14 +87,14 @@ class LibnameConan(ConanFile):
             args=[]
             
             # FIXME: add dbus when #2147 is merged
-            for lib in ['alsa', 'x11', 'openssl']:
-                args.append("--%s-%s" % ('enable' if getattr(self.options, 'with_' + lib) else 'disable', lib))
-            args.append("--%s-glib2" % ('enable' if self.options.with_glib else 'disable'))
-            args.append("--%s-fftw" % ('with' if self.options.with_fftw else 'without'))
+            for lib in ["alsa", "x11", "openssl"]:
+                args.append("--%s-%s" % ("enable" if getattr(self.options, "with_" + lib) else "disable", lib))
+            args.append("--%s-glib2" % ("enable" if self.options.with_glib else "disable"))
+            args.append("--%s-fftw" % ("with" if self.options.with_fftw else "without"))
             if self.options.shared:
-                args.extend(['--enable-shared=yes', '--enable-static=no'])
+                args.extend(["--enable-shared=yes", "--enable-static=no"])
             else:
-                args.extend(['--enable-shared=no', '--enable-static=yes'])
+                args.extend(["--enable-shared=no", "--enable-static=yes"])
             args.append("--with-udev-rules-dir=%s" % os.path.join(self.package_folder, "bin", "udev", "rules.d"))
             with tools.environment_append({"PKG_CONFIG_PATH": self.build_folder}):
                 with tools.environment_append({
@@ -110,7 +110,7 @@ class LibnameConan(ConanFile):
             lib_path = self.deps_cpp_info[package].rootpath
             for dirpath, _, filenames in os.walk(lib_path):
                 for filename in filenames:
-                    if filename.endswith('.pc'):
+                    if filename.endswith(".pc"):
                         shutil.copyfile(os.path.join(dirpath, filename), filename)
                         tools.replace_prefix_in_pc_file(filename, lib_path)
 
@@ -121,20 +121,20 @@ class LibnameConan(ConanFile):
         self.copy(pattern="LICENSE", dst="licenses", src=self._source_subfolder)
         autotools = self._configure_autotools()
         autotools.install()
-        tools.rmdir(os.path.join(self.package_folder, 'etc'))
-        tools.rmdir(os.path.join(self.package_folder, 'share'))
-        tools.rmdir(os.path.join(self.package_folder, 'lib', 'cmake'))
-        tools.rmdir(os.path.join(self.package_folder, 'lib', 'pkgconfig'))
+        tools.rmdir(os.path.join(self.package_folder, "etc"))
+        tools.rmdir(os.path.join(self.package_folder, "share"))
+        tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
+        tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
         for f in glob.glob(os.path.join(self.package_folder, "lib", "**", "*.la"), recursive=True):
             os.remove(f)
 
     def package_info(self):
-        self.cpp_info.libdirs = ['lib', os.path.join('lib', 'pulseaudio')]
+        self.cpp_info.libdirs = ["lib", os.path.join("lib", "pulseaudio")]
         if self.options.with_glib:
-            self.cpp_info.libs.append('pulse-mainloop-glib')
-        self.cpp_info.libs.extend(['pulse-simple', 'pulse'])
+            self.cpp_info.libs.append("pulse-mainloop-glib")
+        self.cpp_info.libs.extend(["pulse-simple", "pulse"])
         if not self.options.shared:
-            self.cpp_info.libs.append('pulsecommon-%s' % self.version)
-        self.cpp_info.defines = ['_REENTRANT']
-        self.cpp_info.names['pkg_config'] = 'libpulse'
+            self.cpp_info.libs.append("pulsecommon-%s" % self.version)
+        self.cpp_info.defines = ["_REENTRANT"]
+        self.cpp_info.names["pkg_config"] = "libpulse"
 
