@@ -101,6 +101,7 @@ class LibnameConan(ConanFile):
             os.rename(os.path.join(self.package_folder, 'lib', 'libgdk_pixbuf-2.0.a'), os.path.join(self.package_folder, 'lib', 'gdk_pixbuf-2.0.lib'))
         tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
         tools.rmdir(os.path.join(self.package_folder, "share"))
+        tools.remove_files_by_mask(self.package_folder, "*.pdb")
 
     def package_info(self):
         self.cpp_info.libs = tools.collect_libs(self)
