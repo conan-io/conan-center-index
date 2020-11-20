@@ -76,7 +76,8 @@ class LibsndfileConan(ConanFile):
             self._cmake.definitions["CMAKE_DISABLE_FIND_PACKAGE_Vorbis"] = True
             self._cmake.definitions["CMAKE_DISABLE_FIND_PACKAGE_FLAC"] = True
             self._cmake.definitions["CMAKE_DISABLE_FIND_PACKAGE_Opus"] = True
-        self._cmake.definitions["CMAKE_DISABLE_FIND_PACKAGE_ALSA"] = not self.options.get_safe("with_alsa", False)
+        if not self.options.get_safe("with_alsa", False):
+            self._cmake.definitions["CMAKE_DISABLE_FIND_PACKAGE_ALSA"] = True
         self._cmake.definitions["BUILD_PROGRAMS"] = self.options.programs
         self._cmake.definitions["BUILD_EXAMPLES"] = False
         self._cmake.definitions["BUILD_TESTING"] = False
