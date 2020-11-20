@@ -43,6 +43,10 @@ class LibnameConan(ConanFile):
             del self.options.fPIC
         del self.settings.compiler.libcxx
         del self.settings.compiler.cppstd
+        if self.settings.os == "Macos":
+            # when running gdk-pixbuf-query-loaders
+            # dyld: malformed mach-o: load commands size (97560) > 32768
+            raise ConanInvalidConfiguration('This package does not support Macos currently')
     
     def build_requirements(self):
         self.build_requires('meson/0.54.2')
