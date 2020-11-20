@@ -8,7 +8,7 @@ Avoid trailing white-space characters, if possible
 
 ## Quotes
 
-If possible, try to avoid mixing single quotes (`'`) over double quotes (`"`) in python code (`conanfile.py`, `test_package/conanfile.py`). Consistency in preferred.
+If possible, try to avoid mixing single quotes (`'`) and double quotes (`"`) in python code (`conanfile.py`, `test_package/conanfile.py`). Consistency in preferred.
 
 ## Order of methods and attributes
 
