@@ -22,8 +22,13 @@ class AtSPI2AtkConan(ConanFile):
         "fPIC": True,
         }
 
-    _source_subfolder = "source_subfolder"
-    _build_subfolder = "build_subfolder"
+    @property
+    def _source_subfolder(self):
+        return "source_subfolder"
+
+    @property
+    def _build_subfolder(self):
+        return "build_subfolder"
 
     def configure(self):
         if self.options.shared:
@@ -32,10 +37,8 @@ class AtSPI2AtkConan(ConanFile):
         del self.settings.compiler.cppstd
 
     def build_requirements(self):
-        if not tools.which('meson'):
-            self.build_requires('meson/0.54.2')
-        if not tools.which('pkg-config'):
-            self.build_requires('pkgconf/1.7.3')
+        self.build_requires('meson/0.54.2')
+        self.build_requires('pkgconf/1.7.3')
 
     def requirements(self):
         self.requires('at-spi2-core/2.38.0')
