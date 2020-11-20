@@ -1,0 +1,26 @@
+diff --git a/cmake/FindMINIZIP.cmake b/cmake/FindMINIZIP.cmake
+index ed19782..aedc142 100644
+--- a/cmake/FindMINIZIP.cmake
++++ b/cmake/FindMINIZIP.cmake
+@@ -52,7 +52,7 @@ unset(MINIZIP_SEARCH_HKEY)
+ SetSuffixes(MINIZIP)
+ foreach(search ${MINIZIP_SEARCH_PATHS})
+     FIND_PATH(MINIZIP_INCLUDE_DIR
+-        NAMES minizip/zip.h
++        NAMES minizip/zip.h zip.h
+         PATHS ${search}
+         PATH_SUFFIXES include
+     )
+diff --git a/include/xlsxwriter/packager.h b/include/xlsxwriter/packager.h
+index b45a2fb..24a224f 100644
+--- a/include/xlsxwriter/packager.h
++++ b/include/xlsxwriter/packager.h
+@@ -12,7 +12,7 @@
+ #include <stdint.h>
+ 
+ #ifdef USE_SYSTEM_MINIZIP
+-#include "minizip/zip.h"
++#include "zip.h"
+ #else
+ #include "third_party/zip.h"
+ #endif
