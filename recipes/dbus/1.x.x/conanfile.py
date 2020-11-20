@@ -31,8 +31,14 @@ class DbusConan(ConanFile):
 
     generators = "cmake", "cmake_find_package", "cmake_paths"
 
-    _source_subfolder = "source_subfolder"
-    _build_subfolder = "build_subfolder"
+    @property
+    def _source_subfolder(self):
+        return "source_subfolder"
+
+    @property
+    def _build_subfolder(self):
+        return "build_subfolder"
+        
     _cmake = None
 
     def configure(self):
