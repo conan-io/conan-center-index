@@ -81,6 +81,7 @@ class LibnameConan(ConanFile):
         defs['jasper'] = 'true' if self.options.with_jasper else 'false'
         defs['x11'] = 'false'
         defs['builtin_loaders'] = 'all'
+        defs['gio_sniffing'] = 'false'
         args=[]
         args.append('--wrap-mode=nofallback')
         meson.configure(defs=defs, build_folder=self._build_subfolder, source_folder=self._source_subfolder, pkg_config_paths='.', args=args)
