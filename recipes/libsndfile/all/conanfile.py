@@ -18,6 +18,7 @@ class LibsndfileConan(ConanFile):
         "experimental": [True, False],
         "with_alsa": [True, False],
         "with_sqlite": ["deprecated", True, False],
+        "with_flac_opus_vorbis": [True, False],
     }
     default_options = {
         "shared": False,
@@ -26,6 +27,8 @@ class LibsndfileConan(ConanFile):
         "experimental": False,
         "with_alsa": False,
         "with_sqlite": "deprecated",
+        "with_flac_opus_vorbis": True,
+
     }
     exports_sources = ["CMakeLists.txt", "patches/**"]
     generators = "cmake", "cmake_find_package"
@@ -39,10 +42,11 @@ class LibsndfileConan(ConanFile):
     def requirements(self):
         if self.options.get_safe("with_alsa"):
             self.requires("libalsa/1.2.2")
-        self.requires("flac/1.3.3")
-        self.requires("ogg/1.3.4")
-        self.requires("opus/1.3.1")
-        self.requires("vorbis/1.3.7")
+        if self.options.with_flac_opus_vorbis:
+            self.requires("ogg/1.3.4")
+            self.requires("vorbis/1.3.7")
+            self.requires("flac/1.3.3")
+            self.requires("opus/1.3.1")
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -64,6 +68,15 @@ class LibsndfileConan(ConanFile):
         if self._cmake:
             return self._cmake
         self._cmake = CMake(self)
+        self._cmake.definitions["CMAKE_DISABLE_FIND_PACKAGE_Sndio"] = True  # FIXME: missing sndio cci recipe (check whether it is really required)
+        self._cmake.definitions["CMAKE_DISABLE_FIND_PACKAGE_Speex"] = True  # FIXME: missing sndio cci recipe (check whether it is really required)
+        self._cmake.definitions["CMAKE_DISABLE_FIND_PACKAGE_SQLite3"] = True  # only used for regtest
+        if not self.options.with_flac_opus_vorbis:
+            self._cmake.definitions["CMAKE_DISABLE_FIND_PACKAGE_Ogg"] = True
+            self._cmake.definitions["CMAKE_DISABLE_FIND_PACKAGE_Vorbis"] = True
+            self._cmake.definitions["CMAKE_DISABLE_FIND_PACKAGE_FLAC"] = True
+            self._cmake.definitions["CMAKE_DISABLE_FIND_PACKAGE_Opus"] = True
+        self._cmake.definitions["CMAKE_DISABLE_FIND_PACKAGE_ALSA"] = not self.options.get_safe("with_alsa", False)
         self._cmake.definitions["BUILD_PROGRAMS"] = self.options.programs
         self._cmake.definitions["BUILD_EXAMPLES"] = False
         self._cmake.definitions["BUILD_TESTING"] = False
@@ -97,7 +110,8 @@ class LibsndfileConan(ConanFile):
         self.cpp_info.names["cmake_find_package"] = "SndFile"
         self.cpp_info.names["pkg_config"] = "sndfile"
         self.cpp_info.components["sndfile"].libs = ["sndfile"]
-        self.cpp_info.components["sndfile"].requires = ["flac::flac", "ogg::ogg", "opus::opus", "vorbis::vorbis"]
+        if self.options.with_flac_opus_vorbis:
+            self.cpp_info.components["sndfile"].requires.extend(["ogg::ogg", "vorbis::vorbis", "flac::flac", "opus::opus"])
         if not self.options.shared:
             if self.settings.os == "Linux":
                 self.cpp_info.components["sndfile"].system_libs = ["m", "dl", "pthread", "rt"]
