@@ -50,8 +50,7 @@ class LibnameConan(ConanFile):
     
     def build_requirements(self):
         self.build_requires('meson/0.54.2')
-        if not tools.which('pkg-config') or self.settings.os == "Windows":
-            self.build_requires('pkgconf/1.7.3')
+        self.build_requires('pkgconf/1.7.3')
     
     def requirements(self):
         self.requires('glib/2.67.0')
