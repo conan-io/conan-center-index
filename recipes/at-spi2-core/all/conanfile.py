@@ -44,10 +44,8 @@ class LibnameConan(ConanFile):
         del self.settings.compiler.cppstd
     
     def build_requirements(self):
-        if not tools.which("meson"):
-            self.build_requires("meson/0.54.2")
-        if not tools.which("pkg-config"):
-            self.build_requires("pkgconf/1.7.3")
+        self.build_requires("meson/0.54.2")
+        self.build_requires("pkgconf/1.7.3")
     
     def requirements(self):
         self.requires("glib/2.67.0")
