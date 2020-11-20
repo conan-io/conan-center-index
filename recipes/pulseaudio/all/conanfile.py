@@ -49,6 +49,8 @@ class LibnameConan(ConanFile):
     def configure(self):
         if self.settings.os != "Linux":
             raise ConanInvalidConfiguration("pulseaudio supports only linux currently")
+        if self.options.shared:
+            del self.options.fPIC
         del self.settings.compiler.libcxx
         del self.settings.compiler.cppstd
 
