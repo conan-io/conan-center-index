@@ -1,4 +1,5 @@
 from conans import ConanFile, CMake, tools
+from conans.errors import ConanInvalidConfiguration
 import os
 
 
@@ -16,7 +17,7 @@ class LibsndfileConan(ConanFile):
         "programs": [True, False],
         "experimental": [True, False],
         "with_alsa": [True, False],
-        "with_sqlite": [True, False],
+        "with_sqlite": ["deprecated", True, False],
     }
     default_options = {
         "shared": False,
@@ -24,7 +25,7 @@ class LibsndfileConan(ConanFile):
         "programs": True,
         "experimental": False,
         "with_alsa": False,
-        "with_sqlite": True,
+        "with_sqlite": "deprecated",
     }
     exports_sources = ["CMakeLists.txt", "patches/**"]
     generators = "cmake", "cmake_find_package"
@@ -38,8 +39,6 @@ class LibsndfileConan(ConanFile):
     def requirements(self):
         if self.options.get_safe("with_alsa"):
             self.requires("libalsa/1.2.2")
-        if self.options.with_sqlite:
-            self.requires("sqlite3/3.32.3")
         self.requires("flac/1.3.3")
         self.requires("ogg/1.3.4")
         self.requires("opus/1.3.1")
@@ -53,6 +52,9 @@ class LibsndfileConan(ConanFile):
     def configure(self):
         if self.options.shared:
             del self.options.fPIC
+        if self.options.with_sqlite != "deprecated":
+            raise ConanInvalidConfiguration("with_sqlite is a deprecated option. Do not use.")
+        del self.options.with_sqlite
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
@@ -103,8 +105,6 @@ class LibsndfileConan(ConanFile):
                 self.cpp_info.components["sndfile"].system_libs.append("winmm")
         if self.options.get_safe("with_alsa"):
             self.cpp_info.components["sndfile"].requires.append("libalsa::libalsa")
-        if self.options.with_sqlite:
-            self.cpp_info.components["sndfile"].requires.append("sqlite3::sqlite3")
 
         bin_path = os.path.join(self.package_folder, "bin")
         self.output.info("Appending PATH environment variable: {}".format(bin_path))
