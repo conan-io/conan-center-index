@@ -16,8 +16,15 @@ class PangoConan(ConanFile):
     options = {"shared": [True, False], "fPIC": [True, False]}
     default_options = {"shared": False, "fPIC": True}
     generators = "pkg_config"
-    _source_subfolder = "source_subfolder"
     _autotools = None
+    
+    @property
+    def _source_subfolder(self):
+        return "source_subfolder"
+
+    @property
+    def _build_subfolder(self):
+        return "build_subfolder"
 
     @property
     def _is_msvc(self):
@@ -54,7 +61,7 @@ class PangoConan(ConanFile):
         defs = dict()
         defs["introspection"] = "disabled"
         meson = Meson(self)
-        meson.configure(build_folder="build", source_folder=self._source_subfolder, defs=defs, args=['--wrap-mode=nofallback'])
+        meson.configure(build_folder=self._build_subfolder, source_folder=self._source_subfolder, defs=defs, args=['--wrap-mode=nofallback'])
         return meson
 
     def build(self):
