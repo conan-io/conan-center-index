@@ -1,24 +1,16 @@
-#include <cstdlib>
 #include <iostream>
 
 #include <dbus/dbus.h>
 
 int main() {
-	DBusError err;
-	DBusConnection* conn;
-	int ret;
+    int major_version = 0;
+    int minor_version = 0;
+    int micro_version = 0;
 
-	dbus_error_init(&err);
-	conn = dbus_bus_get(DBUS_BUS_SESSION, &err);
+    dbus_get_version(&major_version, &minor_version, &micro_version);
 
-	if (dbus_error_is_set(&err)) 
-	{ 
-                std::cout << "Connection Error:\n" << err.message << std::endl;
-		dbus_error_free(&err); 
-		exit(EXIT_FAILURE);
-	}
-
-	if (conn == NULL) exit(EXIT_FAILURE);
-
-	std::cout << "D-Bus is should work!\n";
+    std::cout << "D-Bus version: "
+        << major_version << "."
+        << minor_version << "." 
+        << micro_version << std::endl;
 }

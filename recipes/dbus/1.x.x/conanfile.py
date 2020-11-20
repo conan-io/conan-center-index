@@ -1,6 +1,6 @@
 import os
 from conans import CMake, ConanFile, tools
-
+from conans.errors import ConanInvalidConfiguration
 
 class DbusConan(ConanFile):
     name = "dbus"
@@ -39,7 +39,9 @@ class DbusConan(ConanFile):
 
     def config_options(self):
         if self.settings.os == 'Windows':
-            del self.options.fPIC
+            raise ConanInvalidConfiguration("D-Bus is not compatible with Windows")
+        if self.settings.os == "Macos":
+            raise ConanInvalidConfiguration("D-Bus is not compatible with MacOS")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
