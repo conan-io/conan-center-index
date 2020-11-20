@@ -19,7 +19,7 @@ class LibnameConan(ConanFile):
         "fPIC": [True, False],
         "with_libpng": [True, False],
         "with_libtiff": [True, False],
-        "with_libjpeg": [True, False],
+        "with_libjpeg": ["libjpeg", "libjpeg-turbo", False],
         "with_jasper": [True, False],
         }
     default_options = {
@@ -27,7 +27,7 @@ class LibnameConan(ConanFile):
         "fPIC": True,
         "with_libpng": True,
         "with_libtiff": True,
-        "with_libjpeg": True,
+        "with_libjpeg": "libjpeg",
         "with_jasper": False,
         }
 
@@ -58,8 +58,10 @@ class LibnameConan(ConanFile):
             self.requires('libpng/1.6.37')
         if self.options.with_libtiff:
             self.requires('libtiff/4.0.9')
-        if self.options.with_libjpeg:
-            self.requires('libjpeg/9d')
+        if self.options.with_libjpeg == "libjpeg-turbo":
+            self.requires("libjpeg-turbo/2.0.5")
+        elif self.options.with_libjpeg == "libjpeg":
+            self.requires("libjpeg/9d")
         if self.options.with_jasper:
             self.requires('jasper/2.0.19')
 
