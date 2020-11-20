@@ -45,6 +45,10 @@ class LibnameConan(ConanFile):
         return "source_subfolder"
 
     _autotools = None
+    
+    def config_options(self):
+        if self.settings.os == "Windows":
+            del self.options.fPIC
 
     def configure(self):
         if self.settings.os != "Linux":
@@ -71,10 +75,6 @@ class LibnameConan(ConanFile):
         # FIXME: enable when #2147 is merged
         # if self.options.with_dbus
         #     self.requires("dbus/1.12.16")
-
-    def config_options(self):
-        if self.settings.os == 'Windows':
-            del self.options.fPIC
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
