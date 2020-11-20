@@ -50,8 +50,8 @@ class RestinioConan(ConanFile):
     def requirements(self):
         self.requires("http_parser/2.9.4")
         self.requires("fmt/7.1.2")
-        self.requires("expected-lite/0.4.0")
-        self.requires("optional-lite/3.2.0")
+        self.requires("expected-lite/0.5.0")
+        self.requires("optional-lite/3.3.0")
         self.requires("string-view-lite/1.6.0")
         self.requires("variant-lite/1.2.2")
 
