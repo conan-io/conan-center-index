@@ -32,8 +32,7 @@ class PangoConan(ConanFile):
         del self.settings.compiler.cppstd
 
     def build_requirements(self):
-        if not tools.which("pkg-config"):
-            self.build_requires("pkgconf/1.7.3")
+        self.build_requires("pkgconf/1.7.3")
         self.build_requires("meson/0.54.2")
 
     def requirements(self):
@@ -137,4 +136,3 @@ class PangoConan(ConanFile):
 
 
         self.env_info.PATH.append(os.path.join(self.package_folder, 'bin'))
-
