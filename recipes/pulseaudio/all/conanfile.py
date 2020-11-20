@@ -5,7 +5,7 @@ import glob
 import shutil
 
 
-class LibnameConan(ConanFile):
+class PulseAudioConan(ConanFile):
     name = "pulseaudio"
     description = "PulseAudio is a sound system for POSIX OSes, meaning that it is a proxy for sound applications."
     topics = ("conan", "pulseaudio", "sound")
@@ -137,4 +137,3 @@ class LibnameConan(ConanFile):
             self.cpp_info.libs.append("pulsecommon-%s" % self.version)
         self.cpp_info.defines = ["_REENTRANT"]
         self.cpp_info.names["pkg_config"] = "libpulse"
-
