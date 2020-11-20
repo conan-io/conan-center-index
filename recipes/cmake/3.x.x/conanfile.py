@@ -85,12 +85,12 @@ class CMakeConan(ConanFile):
     def build(self):
         tools.replace_in_file(os.path.join(self._source_subfolder, "CMakeLists.txt"),
                               "project(CMake)",
-                              "project(CMake)\ninclude(\"{}/conanbuildinfo.cmake\")\nconan_basic_setup()".format(
-                                  self.build_folder.replace("\\", "/")))
+                              "project(CMake)\ninclude(\"{}/conanbuildinfo.cmake\")\nconan_basic_setup(NO_OUTPUT_DIRS)".format(
+                                  self.install_folder.replace("\\", "/")))
         if self.settings.os == "Linux":
             tools.replace_in_file(os.path.join(self._source_subfolder, "Utilities", "cmcurl", "CMakeLists.txt"),
                                   "list(APPEND CURL_LIBS ${OPENSSL_LIBRARIES})",
-                                  "list(APPEND CURL_LIBS ${OPENSSL_LIBRARIES} -ldl -lpthread)")
+                                  "list(APPEND CURL_LIBS ${OPENSSL_LIBRARIES} ${CMAKE_DL_LIBS} pthread)")
         cmake = self._configure_cmake()
         cmake.build()
 
