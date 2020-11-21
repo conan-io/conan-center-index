@@ -1,5 +1,4 @@
-#include <iostream>
-
+#include <stdio.h>
 #include <dbus/dbus.h>
 
 int main() {
@@ -9,8 +8,5 @@ int main() {
 
     dbus_get_version(&major_version, &minor_version, &micro_version);
 
-    std::cout << "D-Bus version: "
-        << major_version << "."
-        << minor_version << "." 
-        << micro_version << std::endl;
+    printf("D-Bus version: v%i.%i.%i\n", major_version, minor_version, micro_version);
 }

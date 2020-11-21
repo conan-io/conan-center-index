@@ -1,10 +1,12 @@
 import os
+import shutil
 from conans import CMake, ConanFile, tools
 from conans.errors import ConanInvalidConfiguration
 
+
 class DbusConan(ConanFile):
     name = "dbus"
-    license = "AFL-2.1"
+    license = ("AFL-2.1", "GPL-2.0-or-later")
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://www.freedesktop.org/wiki/Software/dbus"
     description = "D-Bus is a simple system for interprocess communication and coordination."
@@ -33,15 +35,14 @@ class DbusConan(ConanFile):
     _build_subfolder = "build_subfolder"
     _cmake = None
 
-    requires = (
-        "expat/2.2.9"
-    )
-
-    def config_options(self):
+    def configure(self):
         if self.settings.os == 'Windows':
             raise ConanInvalidConfiguration("D-Bus is not compatible with Windows")
         if self.settings.os == "Macos":
             raise ConanInvalidConfiguration("D-Bus is not compatible with MacOS")
+
+        del self.settings.compiler.libcxx
+        del self.settings.compiler.cppstd
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
@@ -49,8 +50,9 @@ class DbusConan(ConanFile):
         os.rename(extracted_dir, self._source_subfolder)
 
     def requirements(self):
+        self.requires("expat/2.2.10")
         if self.options.with_glib:
-            self.requires("glib/2.65.0")
+            self.requires("glib/2.67.0")
 
         if self.options.with_x11:
             self.requires("xorg/system")
@@ -92,8 +94,8 @@ class DbusConan(ConanFile):
         cmake = self._configure_cmake()
         cmake.install()
 
-        for i in ["var", "share", "bin", "etc"]:
-            tools.rmdir(os.path.join(self.package_folder, i))
+        for i in ["var", "share", "etc"]:
+            shutil.move(os.path.join(self.package_folder, i), os.path.join(self.package_folder, "res", i))
 
         tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
         tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
