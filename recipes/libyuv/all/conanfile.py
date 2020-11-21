@@ -11,15 +11,19 @@ class LibyuvConan(ConanFile):
     license = "BSD-3-Clause"
     settings = "os", "compiler", "arch", "build_type"
     options = {"shared": [True, False],
-               "fPIC": [True, False]
+               "fPIC": [True, False],
                "jpeg": [False, "libjpeg", "libjpeg-turbo"]}
     default_options = {"shared": False,
-                       "fPIC": True
+                       "fPIC": True,
                        "jpeg": "libjpeg"}
     exports_sources = ["CMakeLists.txt", "patches/**"]
     generators = "cmake"
 
     _cmake = None
+
+    @property
+    def _source_subfolder(self):
+        return "source_subfolder"
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -36,7 +40,8 @@ class LibyuvConan(ConanFile):
             self.requires("libjpeg-turbo/2.0.5")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
+        tools.get(**self.conan_data["sources"]
+                  [self.version], destination=self._source_subfolder)
 
     def _configure_cmake(self):
         if self._cmake:
