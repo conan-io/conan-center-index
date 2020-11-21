@@ -21,9 +21,19 @@ class LibyuvConan(ConanFile):
 
     _cmake = None
 
-    def configure(self):
+    def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
+
+    def configure(self):
+        if self.options.shared:
+            del self.options.fPIC
+
+    def requirements(self):
+        if self.options.jpeg == "libjpeg":
+            self.requires("libjpeg/9d")
+        elif self.options.jpeg == "libjpeg-turbo":
+            self.requires("libjpeg-turbo/2.0.5")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
