@@ -60,7 +60,8 @@ class PaloozaConan(ConanFile):
         #raise Exception(inspect.currentframe().f_code.co_name)
 
     def build_id(self):
-        raise Exception(inspect.currentframe().f_code.co_name)
+        pass # 10
+        #raise Exception(inspect.currentframe().f_code.co_name)
 
     def deploy(self):
         raise Exception(inspect.currentframe().f_code.co_name)
