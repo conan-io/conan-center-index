@@ -12,3 +12,5 @@ patches:
   "2.0.3":
     - patch_file: "patches/0001-add-msvc_cl-sh.patch"
       base_path: ""
+    - patch_file: "patches/2.0.3-0001-add-missing-include.patch"
+      base_path: "source_subfolder"
