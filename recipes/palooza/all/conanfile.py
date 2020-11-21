@@ -4,10 +4,9 @@ import inspect
 
 class PaloozaConan(ConanFile):
     name = "palooza"
-    version = "1.0"
     license = "<Put the package license here>"
-    author = "<Put your name here> <And your email here>"
-    url = "<Package recipe repository url here, for issues about the package>"
+    url = "https://github.com/conan-io/conan-center-index"
+    homepage = "https://github.com/conan-io/conan-center-index"
     description = "<Description of Palooza here>"
     topics = ("<Put some tag here>", "<here>", "<and here>")
     settings = "os", "compiler", "build_type", "arch"
