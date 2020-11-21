@@ -4,7 +4,7 @@ project(test_package)
 include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
 conan_basic_setup()
 
-if(TINYSPLICE_API_0_3)
+if(TINYSPLINE_API_0_3)
   add_definitions(-DTINYSPLICE_API_0_3)
 endif()
 add_executable(${PROJECT_NAME}_c test_package.c)

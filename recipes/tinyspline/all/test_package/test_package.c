@@ -2,7 +2,7 @@
 
 int main() {
   tsBSpline spline;
-#ifdef TINYSPLICE_API_0_3
+#ifdef TINYSPLINE_API_0_3
   tsStatus status;
   ts_bspline_new(6, 3, 3, TS_OPENED, &spline, &status);
 #else

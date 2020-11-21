@@ -1,4 +1,4 @@
-#ifdef TINYSPLICE_API_0_3
+#ifdef TINYSPLINE_API_0_3
 # include <tinysplinecxx.h>
 #else
 # include <tinysplinecpp.h>
