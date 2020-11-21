@@ -304,7 +304,10 @@ class ArrowConan(ConanFile):
         self._cmake.definitions["RE2_SOURCE"] = "SYSTEM"
         self._cmake.definitions["ZLIB_SOURCE"] = "SYSTEM"
         self._cmake.definitions["ARROW_WITH_ZSTD"] = self.options.with_zstd
-        self._cmake.definitions["ZSTD_SOURCE"] = "SYSTEM"
+        if self.version >= tools.Version("2.0"):
+            self._cmake.definitions["zstd_SOURCE"] = "SYSTEM"
+        else:
+            self._cmake.definitions["ZSTD_SOURCE"] = "SYSTEM"
         self._cmake.definitions["ORC_SOURCE"] = "SYSTEM"
         self._cmake.definitions["ARROW_WITH_THRIFT"] = self._with_thrift()
         self._cmake.definitions["Thrift_SOURCE"] = "SYSTEM"
@@ -324,11 +327,11 @@ class ArrowConan(ConanFile):
         self._cmake.definitions["ARROW_BUILD_TESTS"] = False
         self._cmake.definitions["ARROW_ENABLE_TIMING_TESTS"] = False
         self._cmake.definitions["ARROW_BUILD_BENCHMARKS"] = False
-
         self._cmake.definitions["LLVM_SOURCE"] = "SYSTEM"
         self._cmake.definitions["ARROW_WITH_UTF8PROC"] = self._with_utf8proc()
         self._cmake.definitions["utf8proc_SOURCE"] = "SYSTEM"
 
+        self._cmake.definitions["BUILD_WARNING_LEVEL"] = "PRODUCTION"
         if self.settings.compiler == "Visual Studio":
             self._cmake.definitions["ARROW_USE_STATIC_CRT"] = "MT" in str(self.settings.compiler.runtime)
 

@@ -2,6 +2,9 @@ sources:
   "1.0.0":
     url: "https://github.com/apache/arrow/archive/apache-arrow-1.0.0.tar.gz"
     sha256: "08fbd4c633c08939850d619ca0224c75d7a0526467c721c0838b8aa7efccb270"
+  "2.0.0":
+    url: "https://github.com/apache/arrow/archive/apache-arrow-2.0.0.tar.gz"
+    sha256: "ea299df9cf440cfc43393ce12ee6d9a4c9d0dfa9fde33c3bc9b70ec25520a844"
 patches:
   "1.0.0":
     - base_path: "source_subfolder"
@@ -10,5 +13,14 @@ patches:
       patch_file: "patches/1.0.0-0002-jemalloc.patch"
     - base_path: "source_subfolder"
       patch_file: "patches/1.0.0-0003-fix-shared-msvc.patch"
+    - base_path: "source_subfolder"
+      patch_file: "patches/1.0.0-0004-mallctl-takes-size_t.patch"
+  "2.0.0":
+    - base_path: "source_subfolder"
+      patch_file: "patches/2.0.0-0001-cmake.patch"
+    - base_path: "source_subfolder"
+      patch_file: "patches/2.0.0-0002-jemalloc.patch"
+    - base_path: "source_subfolder"
+      patch_file: "patches/2.0.0-0003-fix-shared-msvc.patch"
     - base_path: "source_subfolder"
       patch_file: "patches/1.0.0-0004-mallctl-takes-size_t.patch"
