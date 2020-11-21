@@ -84,7 +84,7 @@ class TinysplineConan(ConanFile):
 
     def package_info(self):
         if tools.Version(self.version) < "0.3.0":
-            lib_prefix = "lib" if self.settings.compiler == "Visual Studio" else ""
+            lib_prefix = "lib" if self.settings.compiler == "Visual Studio" and not self.options.shared else ""
             lib_suffix = "d" if self.settings.compiler == "Visual Studio" and self.settings.build_type == "Debug" else ""
             cpp_prefix = "cpp"
         else:
