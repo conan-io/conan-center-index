@@ -43,7 +43,8 @@ class PaloozaConan(ConanFile):
         #raise Exception(inspect.currentframe().f_code.co_name)
 
     def requirements(self):
-        raise Exception(inspect.currentframe().f_code.co_name)
+        pass # 8
+        #raise Exception(inspect.currentframe().f_code.co_name)
 
     def build_requirements(self):
         raise Exception(inspect.currentframe().f_code.co_name)
