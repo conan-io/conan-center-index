@@ -16,7 +16,8 @@ class PaloozaConan(ConanFile):
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
-        raise Exception(inspect.currentframe().f_code.co_name)
+        pass # 13
+        # raise Exception(inspect.currentframe().f_code.co_name)
 
     def build(self):
         raise Exception(inspect.currentframe().f_code.co_name)
