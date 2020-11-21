@@ -57,7 +57,7 @@ class LibyuvConan(ConanFile):
         cmake.build()
 
     def package(self):
-        self.copy("LICENSE", src=".", dst="licenses")
+        self.copy("LICENSE", src=self._source_subfolder, dst="licenses")
         cmake = self._configure_cmake()
         cmake.install()
 
