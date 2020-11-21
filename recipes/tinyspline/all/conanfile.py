@@ -49,6 +49,11 @@ class TinysplineConan(ConanFile):
         if self._cmake:
             return self._cmake
         self._cmake = CMake(self)
+        self._cmake.definitions["TINYSPLINE_BUILD_EXAMPLES"] = False
+        self._cmake.definitions["TINYSPLINE_BUILD_TESTS"] = False
+        self._cmake.definitions["TINYSPLINE_BUILD_DOCS"] = False
+        self._cmake.definitions["TINYSPLINE_INSTALL_BINARY_DIR"] = "bin"
+        self._cmake.definitions["TINYSPLINE_INSTALL_LIBRARY_DIR"] = "lib"
         self._cmake.definitions["TINYSPLINE_DISABLE_CXX"] = not self.options.cxx
         self._cmake.definitions["TINYSPLINE_DISABLE_CSHARP"] = True
         self._cmake.definitions["TINYSPLINE_DISABLE_D"] = True
@@ -74,7 +79,19 @@ class TinysplineConan(ConanFile):
         cmake = self._configure_cmake()
         cmake.install()
 
+        tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
+        tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
+
     def package_info(self):
-        self.cpp_info.libs = tools.collect_libs(self)
+        self.cpp_info.components["libtinyspline"].libs = ["tinyspline"]
+        self.cpp_info.components["libtinyspline"].names["pkg_config"] = "tinyspline"
+
+        cpp_prefix = "cpp" if tools.Version(self.version) < "0.3.0" else "cxx"
+
+        # FIXME: create tinysplinecxx::tinysplinecxx in tinycplinecxx-config.cmake
+        self.cpp_info.components["libtinysplinecxx"].libs = ["tinyspline{}".format(cpp_prefix)]
+        self.cpp_info.components["libtinysplinecxx"].names["pkg_config"] = "tinyspline{}".format(cpp_prefix)
+
         if self.settings.os == "Linux":
-            self.cpp_info.system_libs = ["m"]
+            self.cpp_info.components["libtinyspline"].system_libs = ["m"]
+            self.cpp_info.components["libtinysplinecxx"].system_libs = ["m"]
