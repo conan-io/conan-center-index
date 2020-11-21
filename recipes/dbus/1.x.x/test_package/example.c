@@ -9,4 +9,5 @@ int main() {
     dbus_get_version(&major_version, &minor_version, &micro_version);
 
     printf("D-Bus version: v%i.%i.%i\n", major_version, minor_version, micro_version);
+    return 0;
 }

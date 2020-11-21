@@ -14,4 +14,4 @@ class DbusTestConan(ConanFile):
     def test(self):
         if not tools.cross_building(self.settings):
             self.run("dbus-monitor --help", run_environment=True)
-            self.run(os.path.join("bin", "example"), run_environment=True, ignore_errors=True)
+            self.run(os.path.join("bin", "example"), run_environment=True)
