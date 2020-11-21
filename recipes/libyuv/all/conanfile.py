@@ -11,10 +11,11 @@ class LibyuvConan(ConanFile):
     license = "BSD"
     settings = "os", "compiler", "arch", "build_type"
     options = {"shared": [True, False],
-               "fPIC": [True, False]}
-    default_options = {'shared': False,
-                       'fPIC': True}
-    requires = ("libjpeg-turbo/2.0.5")
+               "fPIC": [True, False]
+               "jpeg": [False, "libjpeg", "libjpeg-turbo"]}
+    default_options = {"shared": False,
+                       "fPIC": True
+                       "jpeg": "libjpeg"}
     exports_sources = ["CMakeLists.txt", "patches/**"]
     generators = "cmake"
 
