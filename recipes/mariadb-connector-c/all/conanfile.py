@@ -120,7 +120,7 @@ class MariadbConnectorcConan(ConanFile):
 
     def package_info(self):
         self.cpp_info.names["pkg_config"] = "libmariadb"
-        self.cpp_info.includedirs = [os.path.join("include", "mariadb")]
+        self.cpp_info.includedirs.append(os.path.join("include", "mariadb"))
         self.cpp_info.libs = tools.collect_libs(self)
         if self.settings.os == "Linux":
             self.cpp_info.system_libs = ["dl", "m", "pthread"]
