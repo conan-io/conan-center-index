@@ -10,11 +10,12 @@ class PaloozaConan(ConanFile):
     description = "<Description of Palooza here>"
     topics = ("<Put some tag here>", "<here>", "<and here>")
     settings = "os", "compiler", "build_type", "arch"
-    options = {"shared": [True, False]}
-    default_options = {"shared": False}
+    options = {"shared": [True, False], "fPIC": [True, False]}
+    default_options = {"shared": False, "fPIC": True}
     generators = "cmake"
 
     def source(self):
+        tools.get(**self.conan_data["sources"][self.version])
         raise Exception(inspect.currentframe().f_code.co_name)
 
     def build(self):
@@ -39,6 +40,8 @@ class PaloozaConan(ConanFile):
         #raise Exception(inspect.currentframe().f_code.co_name)
 
     def config_options(self):
+        if self.settings.os == "Windows":
+            del self.options.fPIC
         pass # 6
         #raise Exception(inspect.currentframe().f_code.co_name)
 
