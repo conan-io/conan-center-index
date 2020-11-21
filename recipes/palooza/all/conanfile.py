@@ -38,7 +38,8 @@ class PaloozaConan(ConanFile):
         raise Exception(inspect.currentframe().f_code.co_name)
 
     def config_options(self):
-        raise Exception(inspect.currentframe().f_code.co_name)
+        pass # 6
+        #raise Exception(inspect.currentframe().f_code.co_name)
 
     def requirements(self):
         raise Exception(inspect.currentframe().f_code.co_name)
