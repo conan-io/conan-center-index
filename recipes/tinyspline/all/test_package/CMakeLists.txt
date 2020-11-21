@@ -5,7 +5,7 @@ include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
 conan_basic_setup()
 
 if(TINYSPLINE_API_0_3)
-  add_definitions(-DTINYSPLICE_API_0_3)
+  add_definitions(-DTINYSPLINE_API_0_3)
 endif()
 add_executable(${PROJECT_NAME}_c test_package.c)
 target_link_libraries(${PROJECT_NAME}_c ${CONAN_LIBS})
