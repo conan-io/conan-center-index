@@ -43,14 +43,14 @@ class PaloozaConan(ConanFile):
                     names.append(os.path.join("bin", "mylib.dll"))
             if self.settings.os == "Linux":
                 if self.options.shared:
-                    names = [os.path.join("lib", "libmylib.a")]
-                else:
                     names = [os.path.join("lib", "libmylib.so")]
+                else:
+                    names = [os.path.join("lib", "libmylib.a")]
             if self.settings.os == "Macos":
                 if self.options.shared:
-                    names = [os.path.join("lib", "libmylib.a")]
-                else:
                     names = [os.path.join("lib", "libmylib.dylib")]
+                else:
+                    names = [os.path.join("lib", "libmylib.a")]
             for name in names:
                 self.touch(name)
         pass # 16
