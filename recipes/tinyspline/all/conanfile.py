@@ -85,17 +85,18 @@ class TinysplineConan(ConanFile):
     def package_info(self):
         if tools.Version(self.version) < "0.3.0":
             lib_prefix = "lib" if self.settings.compiler == "Visual Studio" else ""
+            lib_suffix = "d" if self.settings.compiler == "Visual Studio" and self.settings.build_type == "Debug" else ""
             cpp_prefix = "cpp"
         else:
             lib_prefix = ""
+            lib_suffix = ""
             cpp_prefix = "cxx"
 
-        self.cpp_info.components["libtinyspline"].libs = ["{}tinyspline".format(lib_prefix)]
+        self.cpp_info.components["libtinyspline"].libs = ["{}tinyspline{}".format(lib_prefix, lib_suffix)]
         self.cpp_info.components["libtinyspline"].names["pkg_config"] = "tinyspline"
 
-
         # FIXME: create tinysplinecxx::tinysplinecxx in tinycplinecxx-config.cmake
-        self.cpp_info.components["libtinysplinecxx"].libs = ["{}tinyspline{}".format(lib_prefix, cpp_prefix)]
+        self.cpp_info.components["libtinysplinecxx"].libs = ["{}tinyspline{}{}".format(lib_prefix, cpp_prefix, lib_suffix)]
         self.cpp_info.components["libtinysplinecxx"].names["pkg_config"] = "tinyspline{}".format(cpp_prefix)
 
         if self.settings.os == "Linux":
