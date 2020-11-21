@@ -27,6 +27,9 @@ class Re2CConan(ConanFile):
         del self.settings.compiler.cppstd
         del self.settings.compiler.libcxx
 
+    def package_id(self):
+        del self.info.settings.compiler
+
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
         os.rename("re2c-{}".format(self.version), self._source_subfolder)
