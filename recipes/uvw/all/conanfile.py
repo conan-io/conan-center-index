@@ -2,7 +2,6 @@ import os
 import glob
 from conans import ConanFile, tools
 from conans.errors import ConanInvalidConfiguration
-from conans.tools import Version
 
 
 class UvwConan(ConanFile):
@@ -41,12 +40,11 @@ class UvwConan(ConanFile):
         return False
 
     def requirements(self):
-        if tools.Version(self.version) >= "2.6" and tools.Version(self.version) < "2.7":
-            self.requires("libuv/1.38.1")
+        self.requires("libuv/1.40.0")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
-        archive_name = glob.glob("{}-{}_libuv-*".format(self.name, self.version))[0]
+        archive_name = glob.glob("{}-{}_libuv*".format(self.name, self.version))[0]
         os.rename(archive_name, self._source_subfolder)
 
     def configure(self):
