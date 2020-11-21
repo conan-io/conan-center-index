@@ -1,0 +1,4 @@
+sources:
+  "1.0":
+    sha256: 820688d1e0387ff55194ae20036cbae0fb3c7d11b7c3f46492369723c01df96f
+    url: https://github.com/chriskohlhoff/asio/archive/asio-1-18-0.tar.gz
