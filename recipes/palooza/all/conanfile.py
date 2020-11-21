@@ -70,7 +70,8 @@ class PaloozaConan(ConanFile):
         #raise Exception(inspect.currentframe().f_code.co_name)
         
     def export_sources(self):
-        raise Exception(inspect.currentframe().f_code.co_name)
+        pass # 5
+        #raise Exception(inspect.currentframe().f_code.co_name)
 
     def test(self):
         raise Exception(inspect.currentframe().f_code.co_name)
