@@ -13,6 +13,7 @@ class MariadbConnectorcConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     exports_sources = ["CMakeLists.txt", "patches/**"]
     generators = "cmake", "cmake_find_package"
+    short_paths = True
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
