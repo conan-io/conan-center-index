@@ -24,7 +24,8 @@ class PaloozaConan(ConanFile):
         # raise Exception(inspect.currentframe().f_code.co_name)
 
     def package(self):
-        raise Exception(inspect.currentframe().f_code.co_name)
+        pass # 16
+        # raise Exception(inspect.currentframe().f_code.co_name)
 
     def package_info(self):
         raise Exception(inspect.currentframe().f_code.co_name)
