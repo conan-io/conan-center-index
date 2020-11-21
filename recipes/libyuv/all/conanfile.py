@@ -8,7 +8,7 @@ class LibyuvConan(ConanFile):
     homepage = "https://chromium.googlesource.com/libyuv/libyuv/"
     description = "libyuv is an open source project that includes YUV scaling and conversion functionality."
     topics = ["YUV", "libyuv", "google", "chromium"]
-    license = "BSD"
+    license = "BSD-3-Clause"
     settings = "os", "compiler", "arch", "build_type"
     options = {"shared": [True, False],
                "fPIC": [True, False]
