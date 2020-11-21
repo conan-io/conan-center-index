@@ -128,3 +128,7 @@ class MariadbConnectorcConan(ConanFile):
             self.cpp_info.system_libs = ["ws2_32", "shlwapi"]
             if self.options.with_ssl == "schannel":
                 self.cpp_info.system_libs.append("secur32")
+
+        plugin_dir = os.path.join(self.package_folder, "lib", "plugin").replace("\\", "/")
+        self.output.info("Creating MARIADB_PLUGIN_DIR environment variable: {}".format(plugin_dir))
+        self.env_info.MARIADB_PLUGIN_DIR = plugin_dir
