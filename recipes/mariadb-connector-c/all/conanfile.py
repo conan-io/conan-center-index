@@ -2,6 +2,8 @@ from conans import ConanFile, CMake, tools
 from conans.errors import ConanInvalidConfiguration
 import os
 
+required_conan_version = ">=1.29.1"
+
 
 class MariadbConnectorcConan(ConanFile):
     name = "mariadb-connector-c"
@@ -117,6 +119,7 @@ class MariadbConnectorcConan(ConanFile):
         cmake.install()
         tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
         tools.rmdir(os.path.join(self.package_folder, "symbols"))
+        tools.remove_files_by_mask(os.path.join(self.package_folder, "lib"), "*.pdb")
 
     def package_info(self):
         self.cpp_info.names["pkg_config"] = "libmariadb"
