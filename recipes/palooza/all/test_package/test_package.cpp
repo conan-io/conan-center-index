@@ -1,7 +1,7 @@
-#include <asio.hpp>
+#include <test.h>
+#include <iostream>
 
 int main()
 {
-	auto && service = asio::io_service{};
-	(void)service;
+    std::cout << "test" << std::endl;
 }

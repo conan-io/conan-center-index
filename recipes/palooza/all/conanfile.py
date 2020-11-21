@@ -1,5 +1,6 @@
 from conans import ConanFile, CMake, tools
 import inspect
+import os
 
 
 class PaloozaConan(ConanFile):
@@ -23,7 +24,35 @@ class PaloozaConan(ConanFile):
         pass # 15
         # raise Exception(inspect.currentframe().f_code.co_name)
 
+    def touch(self, filename):
+        with open(filename, "w") as f:
+            f.write("")
+
     def package(self):
+        with tools.chdir(self.package_folder):
+            tools.mkdir("licenses")
+            tools.mkdir("lib")
+            tools.mkdir("bin")
+            tools.mkdir("include")
+            self.touch(os.path.join("include", "test.h"))
+            self.touch(os.path.join("licenses", "LICENSE"))
+            names = []
+            if self.settings.os == "Windows":
+                names = [os.path.join("lib", "mylib.lib")]
+                if self.options.shared:
+                    names.append(os.path.join("bin", "mylib.dll"))
+            if self.settings.os == "Linux":
+                if self.options.shared:
+                    names = [os.path.join("lib", "libmylib.a")]
+                else:
+                    names = [os.path.join("lib", "libmylib.so")]
+            if self.settings.os == "Macos":
+                if self.options.shared:
+                    names = [os.path.join("lib", "libmylib.a")]
+                else:
+                    names = [os.path.join("lib", "libmylib.dylib")]
+            for name in names:
+                self.touch(name)
         pass # 16
         # raise Exception(inspect.currentframe().f_code.co_name)
 
