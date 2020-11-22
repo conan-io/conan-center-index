@@ -30,3 +30,5 @@ patches:
   3.17.03:
     - patch_file: "patches/3.17.03-0001-cmake-shared-use-conan-add-install.patch"
       base_path: "source_subfolder"
+    - patch_file: "patches/3.17.03-0002-revert-c++14-constexpr.patch"
+      base_path: "source_subfolder"
