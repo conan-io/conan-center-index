@@ -27,13 +27,14 @@ class LibnameConan(ConanFile):
         return "build_subfolder"
 
     def requirements(self):
-        self.requires('opencv/4.5.0@')
-        self.requires('eigen/3.3.8@')
-        self.requires('zlib/1.2.11@')
+        self.requires("opencv/4.5.0@")
+        self.requires("eigen/3.3.8@")
+        self.requires("zlib/1.2.11@")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version],
-                  filename='aruco.zip')
+        tools.get(
+            **self.conan_data["sources"][self.version], filename="aruco.zip"
+        )
         extracted_dir = self.name + "-" + self.version
         os.rename(extracted_dir, self._source_subfolder)
 
@@ -46,9 +47,7 @@ class LibnameConan(ConanFile):
         self._cmake.definitions["BUILD_UTILS"] = "OFF"
         self._cmake.definitions["BUILD_DEBPACKAGE"] = "OFF"
         self._cmake.definitions["USE_OWN_EIGEN"] = "OFF"
-        self._cmake.configure(
-            build_folder=self._build_subfolder
-        )
+        self._cmake.configure(build_folder=self._build_subfolder)
         return self._cmake
 
     def configure(self):
@@ -60,8 +59,9 @@ class LibnameConan(ConanFile):
         cmake.build()
 
     def package(self):
-        self.copy(pattern="LICENSE", dst="licenses",
-                  src=self._source_subfolder)
+        self.copy(
+            pattern="LICENSE", dst="licenses", src=self._source_subfolder
+        )
 
         cmake = self._configure_cmake()
         cmake.install()
@@ -69,5 +69,5 @@ class LibnameConan(ConanFile):
         tools.rmdir(os.path.join(self.package_folder, "share"))
 
     def package_info(self):
-        self.cpp_info.includedirs = ['include', 'include/aruco']
+        self.cpp_info.includedirs = ["include", "include/aruco"]
         self.cpp_info.libs = tools.collect_libs(self)
