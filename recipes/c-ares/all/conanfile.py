@@ -1,6 +1,7 @@
-import glob
 import os
 from conans import ConanFile, CMake, tools
+
+required_conan_version = ">=1.29.1"
 
 
 class CAresConan(ConanFile):
@@ -62,8 +63,7 @@ class CAresConan(ConanFile):
         tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
         tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
         tools.rmdir(os.path.join(self.package_folder, "share"))
-        for pdb_file in glob.glob(os.path.join(self.package_folder, "bin", "*.pdb")):
-            os.remove(pdb_file)
+        tools.remove_files_by_mask(os.path.join(self.package_folder, "bin"), "*.pdb")
 
     def package_info(self):
         self.cpp_info.names["pkg_config"] = "libcares"
