@@ -12,16 +12,14 @@ class LibxlsxwriterConan(ConanFile):
     settings = "os", "compiler", "build_type", "arch"
     options = {
         "shared": [True, False],
-        "fPIC": [True, False],
-        "use_system_minizip": [True, False]
+        "fPIC": [True, False]
     }
     default_options = {
         "shared": False, 
-        "fPIC": True,
-        "use_system_minizip": False,
+        "fPIC": True
     }
     exports_sources = ["CMakeLists.txt", "patches/*"]
-    generators = "cmake"
+    generators = "cmake", "cmake_find_package_multi"
 
     _cmake = None
 
@@ -36,12 +34,11 @@ class LibxlsxwriterConan(ConanFile):
     def configure(self):
         if self.options.shared:
             del self.options.fPIC
-        if self.options.use_system_minizip:
-            self.options["zlib"].minizip = True
         del self.settings.compiler.libcxx
         del self.settings.compiler.cppstd
 
     def requirements(self):
+        self.requires("minizip/1.2.11")
         self.requires("zlib/1.2.11")
 
     def source(self):
@@ -57,11 +54,10 @@ class LibxlsxwriterConan(ConanFile):
             return self._cmake
 
         self._cmake = CMake(self)
-        self._cmake.definitions['BUILD_TESTS'] = False
-        self._cmake.definitions['BUILD_EXAMPLES'] = False
-        self._cmake.definitions['USE_STATIC_MSVC_RUNTIME'] = (self.settings.os == "Windows" and "MT" in str(self.settings.compiler.runtime))
-        self._cmake.definitions['USE_SYSTEM_MINIZIP'] = self.options.use_system_minizip
-        self._cmake.definitions['MINIZIP_ROOT'] = self.deps_cpp_info["zlib"].rootpath
+        self._cmake.definitions["BUILD_TESTS"] = False
+        self._cmake.definitions["BUILD_EXAMPLES"] = False
+        self._cmake.definitions["USE_STATIC_MSVC_RUNTIME"] = (self.settings.os == "Windows" and "MT" in str(self.settings.compiler.runtime))
+        self._cmake.definitions["USE_SYSTEM_MINIZIP"] = True
 
         self._cmake.configure()
         return self._cmake
@@ -79,5 +75,4 @@ class LibxlsxwriterConan(ConanFile):
 
     def package_info(self):
         self.cpp_info.libs = ["xlsxwriter"]
-        self.cpp_info.names["cmake_find_package"] = ["libxlsxwriter"]
-        self.cpp_info.names["cmake_find_package_multi"] = ["libxlsxwriter"]
+

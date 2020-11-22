@@ -1,0 +1,13 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 2359933..b70cd2b 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -180,7 +180,7 @@ endif()
+ # INCLUDES
+ # --------
+ enable_language(CXX)
+-list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
++#list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
+ 
+ # ZLIB
+ find_package(ZLIB REQUIRED "1.0")
