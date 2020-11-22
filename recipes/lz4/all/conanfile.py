@@ -75,4 +75,4 @@ class LZ4Conan(ConanFile):
         self.cpp_info.names["pkg_config"] = "liblz4"
         self.cpp_info.libs = ["lz4"]
         if self.settings.compiler == "Visual Studio" and self.options.shared:
-            self.cpp_info.defines.append("LZ4_DLL_IMPORT")
+            self.cpp_info.defines.append("LZ4_DLL_IMPORT=1")
