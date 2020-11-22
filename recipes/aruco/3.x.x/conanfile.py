@@ -27,9 +27,8 @@ class LibnameConan(ConanFile):
         return "build_subfolder"
 
     def requirements(self):
-        # self.requires('opencv/4.2.0@conan/stable')
-        self.requires('opencv/2.4.13.7@')
-        self.requires('eigen/3.3.7@')
+        self.requires('opencv/4.5.0@')
+        self.requires('eigen/3.3.8@')
         self.requires('zlib/1.2.11@')
 
     def source(self):
