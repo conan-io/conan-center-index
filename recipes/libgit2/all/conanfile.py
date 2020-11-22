@@ -22,6 +22,7 @@ class LibGit2Conan(ConanFile):
         "with_https": [False, "openssl", "mbedtls", "winhttp", "security"],
         "with_sha1": ["collisiondetection", "commoncrypto", "openssl", "mbedtls", "generic", "win32"],
         "with_ntlmclient": [True, False],
+        "with_regex": ["default", "builtin", "pcre", "pcre2"],
     }
     default_options = {
         "shared": False,
@@ -32,6 +33,7 @@ class LibGit2Conan(ConanFile):
         "with_https": "openssl",
         "with_sha1": "collisiondetection",
         "with_ntlmclient": True,
+        "with_regex": "default",
     }
 
     @property
@@ -84,6 +86,10 @@ class LibGit2Conan(ConanFile):
             self.requires("mbedtls/2.16.3-gpl")
         if tools.is_apple_os(self.settings.os) and self.options.with_iconv:
             self.requires("libiconv/1.16")
+        if self.options.with_regex == "pcre":
+            self.requires("pcre/8.44")
+        elif self.options.with_regex == "pcre2":
+            self.requires("pcre2/10.35")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
@@ -123,6 +129,9 @@ class LibGit2Conan(ConanFile):
         cmake.definitions["BUILD_CLAR"] = False
         cmake.definitions["BUILD_EXAMPLES"] = False
         cmake.definitions["USE_HTTP_PARSER"] = "system"
+
+        if self.options.with_regex != "default":
+            cmake.definitions["REGEX_BACKEND"] = self.options.with_regex
 
         if self.settings.compiler == "Visual Studio":
             cmake.definitions["STATIC_CRT"] = "MT" in str(self.settings.compiler.runtime)
