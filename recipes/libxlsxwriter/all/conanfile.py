@@ -19,7 +19,7 @@ class LibxlsxwriterConan(ConanFile):
         "fPIC": True
     }
     exports_sources = ["CMakeLists.txt", "patches/*"]
-    generators = "cmake", "cmake_find_package_multi"
+    generators = "cmake"
 
     _cmake = None
 
