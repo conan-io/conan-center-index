@@ -171,8 +171,13 @@ class ArrowConan(ConanFile):
         if required or self.options.with_boost == "auto":
             if self.options.gandiva:
                 return True
-            if self.options.parquet and self.settings.compiler == "gcc" and self.settings.compiler.version < tools.Version("4.9"):
-                return True
+            version = tools.Version(self.version)
+            if version.major == "1":
+                if self.options.parquet and self.settings.compiler == "gcc" and self.settings.compiler.version < tools.Version("4.9"):
+                    return True
+            elif version.major == "2":
+                if self.settings.compiler == "Visual Studio":
+                    return True
             return False
         else:
             return bool(self.options.with_boost)
@@ -428,6 +433,9 @@ class ArrowConan(ConanFile):
                 self.cpp_info.components["libgandiva"].requires.append("boost::boost")
             if self.options.parquet and self.settings.compiler == "gcc" and self.settings.compiler.version < tools.Version("4.9"):
                 self.cpp_info.components["libparquet"].requires.append("boost::boost")
+            if tools.Version(self.version) >= "2.0":
+                # FIXME: only headers components is used
+                self.cpp_info.components["libarrow"].requires.append("boost::boost")
         if self._with_openssl():
             self.cpp_info.components["libarrow"].requires.append("openssl::openssl")
         if self._with_gflags():
