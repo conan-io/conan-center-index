@@ -36,10 +36,19 @@ class LZ4Conan(ConanFile):
         extracted_folder = "{0}-{1}".format(self.name, self.version)
         os.rename(extracted_folder, self._source_subfolder)
 
+    @property
+    def _cmakelists_subfolder(self):
+        if tools.Version(self.version) < "1.9.3":
+            subfolder = os.path.join("contrib", "cmake_unofficial")
+        else:
+            subfolder = os.path.join("build", "cmake")
+        return os.path.join(self._source_subfolder, subfolder).replace("\\", "/")
+
     def _configure_cmake(self):
         if self._cmake:
             return self._cmake
         self._cmake = CMake(self)
+        self._cmake.definitions["CONAN_LZ4_CMAKELISTS_SUBFOLDER"] = self._cmakelists_subfolder
         self._cmake.definitions["LZ4_BUILD_CLI"] = False
         self._cmake.definitions["LZ4_BUILD_LEGACY_LZ4C"] = False
         self._cmake.definitions["LZ4_BUNDLED_MODE"] = False
