@@ -66,6 +66,7 @@ class CAresConan(ConanFile):
         self.cpp_info.names["pkg_config"] = "libcares"
         self.cpp_info.components["cares"].names["cmake_find_package"] = "cares"
         self.cpp_info.components["cares"].names["cmake_find_package_multi"] = "cares"
+        self.cpp_info.components["cares"].names["pkg_config"] = "libcares"
         self.cpp_info.components["cares"].libs = tools.collect_libs(self)
         if not self.options.shared:
             self.cpp_info.components["cares"].defines.append("CARES_STATICLIB")
