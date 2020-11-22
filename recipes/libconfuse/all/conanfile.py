@@ -97,3 +97,4 @@ class LibConfuse(ConanFile):
         if self.settings.os == "Windows" and self.options.shared:
             lib += ".dll.{}".format("lib" if self.settings.compiler == "Visual Studio" else "a")
         self.cpp_info.libs = [lib]
+        self.cpp_info.names["pkg_config"] = "libconfuse"
