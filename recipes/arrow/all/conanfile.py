@@ -209,11 +209,11 @@ class ArrowConan(ConanFile):
         if self.options.with_backtrace:
             raise ConanInvalidConfiguration("CCI has no backtrace recipe (yet)")
         if self._with_protobuf():
-            self.requires("protobuf/3.11.4")
+            self.requires("protobuf/3.12.4")
         if self._with_jemalloc():
             self.requires("jemalloc/5.2.1")
         if self._with_boost():
-            self.requires("boost/1.72.0")
+            self.requires("boost/1.74.0")
         if self.options.with_cuda:
             raise ConanInvalidConfiguration("CCI has no cuda recipe (yet)")
         if self.options.with_flight_rpc:
@@ -229,11 +229,11 @@ class ArrowConan(ConanFile):
         if self._with_llvm():
             raise ConanInvalidConfiguration("CCI has no llvm recipe (yet)")
         if self._with_openssl():
-            self.requires("openssl/1.1.1g")
+            self.requires("openssl/1.1.1h")
         if self.options.with_s3:
             self.requires("aws-sdk-cpp/1.7.299")
         if self.options.with_brotli:
-            self.requires("brotli/1.0.7")
+            self.requires("brotli/1.0.9")
         if self.options.with_bz2:
             self.requires("bzip2/1.0.8")
         if self.options.with_orc:
@@ -245,9 +245,9 @@ class ArrowConan(ConanFile):
         if self.options.with_zlib:
             self.requires("zlib/1.2.11")
         if self.options.with_zstd:
-            self.requires("zstd/1.4.4")
+            self.requires("zstd/1.4.5")
         if self._with_re2():
-            self.requires("re2/20200301")
+            self.requires("re2/20201101")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
