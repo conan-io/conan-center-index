@@ -304,7 +304,7 @@ class ArrowConan(ConanFile):
         self._cmake.definitions["RE2_SOURCE"] = "SYSTEM"
         self._cmake.definitions["ZLIB_SOURCE"] = "SYSTEM"
         self._cmake.definitions["ARROW_WITH_ZSTD"] = self.options.with_zstd
-        if self.version >= tools.Version("2.0"):
+        if tools.Version(self.version) >= "2.0":
             self._cmake.definitions["zstd_SOURCE"] = "SYSTEM"
         else:
             self._cmake.definitions["ZSTD_SOURCE"] = "SYSTEM"
