@@ -89,6 +89,32 @@ class OpenSSLConan(ConanFile):
                "no_sha": [True, False],
                "no_async": [True, False],
                "no_dso": [True, False],
+               "no_aria": [True, False],
+               "no_blake2": [True, False],
+               "no_camellia": [True, False],
+               "no_cast": [True, False],
+               "no_chacha": [True, False],
+               "no_cms": [True, False],
+               "no_comp": [True, False],
+               "no_ct": [True, False],
+               "no_deprecated": [True, False],
+               "no_dgram": [True, False],
+               "no_engine": [True, False],
+               "no_filenames": [True, False],
+               "no_gost": [True, False],
+               "no_idea": [True, False],
+               "no_md4": [True, False],
+               "no_ocsp": [True, False],
+               "no_pinshared": [True, False],
+               "no_rmd160": [True, False],
+               "no_sm2": [True, False],
+               "no_sm3": [True, False],
+               "no_sm4": [True, False],
+               "no_srp": [True, False],
+               "no_srtp": [True, False],
+               "no_ssl": [True, False],
+               "no_ts": [True, False],
+               "no_whirlpool": [True, False],
                "capieng_dialog": [True, False],
                "enable_capieng": [True, False],
                "openssldir": "ANY"}
@@ -105,6 +131,27 @@ class OpenSSLConan(ConanFile):
               del self.options.no_rc4
               del self.options.no_rc5
               del self.options.no_zlib
+
+        if self._full_version < "1.1.0":
+              del self.options.no_camellia
+              del self.options.no_cast
+              del self.options.no_cms
+              del self.options.no_comp
+              del self.options.no_dgram
+              del self.options.no_engine
+              del self.options.no_idea
+              del self.options.no_md4
+              del self.options.no_ocsp
+              del self.options.no_srp
+              del self.options.no_ts
+              del self.options.no_whirlpool
+
+        if self._full_version < "1.1.1":
+              del self.options.no_aria
+              del self.options.no_pinshared
+              del self.options.no_sm2
+              del self.options.no_sm3
+              del self.options.no_sm4
 
         if self.settings.os != "Windows":
             del self.options.capieng_dialog

@@ -96,6 +96,8 @@ class DataFrameConan(ConanFile):
         if self._cmake:
             return self._cmake
         self._cmake = CMake(self)
+        if tools.Version(self.version) >= "1.14.0":
+            self._cmake.definitions["ENABLE_TESTING"] = False
         self._cmake.configure()
         return self._cmake
 

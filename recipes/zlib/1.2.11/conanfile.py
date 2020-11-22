@@ -135,8 +135,9 @@ class ZlibConan(ConanFile):
                     current_lib = os.path.join(lib_path, "zlibstatic%s.lib" % suffix)
                     os.rename(current_lib, os.path.join(lib_path, "zlib.lib"))
                 elif self.settings.compiler == "gcc":
-                    current_lib = os.path.join(lib_path, "libzlibstatic.a")
-                    os.rename(current_lib, os.path.join(lib_path, "libzlib.a"))
+                    if self.settings.os != "Windows" or not self.settings.os.subsystem:
+                        current_lib = os.path.join(lib_path, "libzlibstatic.a")
+                        os.rename(current_lib, os.path.join(lib_path, "libzlib.a"))
                 elif self.settings.compiler == "clang":
                     current_lib = os.path.join(lib_path, "zlibstatic.lib")
                     os.rename(current_lib, os.path.join(lib_path, "zlib.lib"))
@@ -174,6 +175,6 @@ class ZlibConan(ConanFile):
             self.cpp_info.libs.append('minizip')
             if self.options.shared:
                 self.cpp_info.defines.append('MINIZIP_DLL')
-        self.cpp_info.libs.append('zlib' if self.settings.os == "Windows" else "z")
+        self.cpp_info.libs.append("zlib" if self.settings.os == "Windows" and not self.settings.os.subsystem else "z")
         self.cpp_info.names["cmake_find_package"] = "ZLIB"
         self.cpp_info.names["cmake_find_package_multi"] = "ZLIB"

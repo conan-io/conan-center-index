@@ -73,7 +73,12 @@ class VerilatorConan(ConanFile):
         conf_args = [
             "--datarootdir={}/bin/share".format(tools.unix_path(self.package_folder)),
         ]
-        self._autotools.configure(args=conf_args, configure_dir=os.path.join(self.build_folder, self._source_subfolder))
+        yacc = tools.get_env("YACC")
+        if yacc:
+            if yacc.endswith(" -y"):
+                yacc = yacc[:-3]
+        with tools.environment_append({"YACC": yacc}):
+            self._autotools.configure(args=conf_args, configure_dir=os.path.join(self.build_folder, self._source_subfolder))
         return self._autotools
 
     @property
