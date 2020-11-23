@@ -32,6 +32,9 @@ class OpenALConan(ConanFile):
             del self.options.fPIC
     @property
     def _supports_cxx14(self):
+        if self.settings.compiler == "clang" and self.settings.compiler.libcxx in ("libstdc++", "libstdc++11"):
+            if tools.Version(self.settings.compiler.version) < "9":
+                return False, "openal on clang {} cannot be built with stdlibc++(11) c++ runtime".format(self.settings.compiler.version)
         min_version = {
             "Visual Studio": "15",
             "gcc": "5",
