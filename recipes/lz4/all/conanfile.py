@@ -15,6 +15,8 @@ class LZ4Conan(ConanFile):
     options = {"shared": [True, False], "fPIC": [True, False]}
     default_options = {"shared": False, "fPIC": True}
 
+    _cmake = None
+
     @property
     def _source_subfolder(self):
         return "source_subfolder"
@@ -34,28 +36,29 @@ class LZ4Conan(ConanFile):
         extracted_folder = "{0}-{1}".format(self.name, self.version)
         os.rename(extracted_folder, self._source_subfolder)
 
+    @property
+    def _cmakelists_subfolder(self):
+        if tools.Version(self.version) < "1.9.3":
+            subfolder = os.path.join("contrib", "cmake_unofficial")
+        else:
+            subfolder = os.path.join("build", "cmake")
+        return os.path.join(self._source_subfolder, subfolder).replace("\\", "/")
+
     def _configure_cmake(self):
-        cmake = CMake(self)
-        cmake.definitions["LZ4_BUNDLED_MODE"] = False
-        cmake.definitions["LZ4_POSITION_INDEPENDENT_LIB"] = self.options.get_safe("fPIC", True)
-        cmake.configure()
-        return cmake
-
-    def _patch_sources(self):
-        for patch in self.conan_data["patches"][self.version]:
-            tools.patch(**patch)
-
-        # Disable building and installing programs by default
-        cmakefile = os.path.join(self._source_subfolder, "contrib", "cmake_unofficial", "CMakeLists.txt")
-        tools.replace_in_file(cmakefile, "set(LZ4_PROGRAMS_BUILT lz4cli)", "")
-        tools.replace_in_file(cmakefile, "list(APPEND LZ4_PROGRAMS_BUILT lz4c)", "")
-        tools.save(cmakefile,
-                   "set_target_properties(lz4c PROPERTIES EXCLUDE_FROM_ALL 1 EXCLUDE_FROM_DEFAULT_BUILD 1)\n"
-                   "set_target_properties(lz4cli PROPERTIES EXCLUDE_FROM_ALL 1 EXCLUDE_FROM_DEFAULT_BUILD 1)",
-                   append=True)
+        if self._cmake:
+            return self._cmake
+        self._cmake = CMake(self)
+        self._cmake.definitions["CONAN_LZ4_CMAKELISTS_SUBFOLDER"] = self._cmakelists_subfolder
+        self._cmake.definitions["LZ4_BUILD_CLI"] = False
+        self._cmake.definitions["LZ4_BUILD_LEGACY_LZ4C"] = False
+        self._cmake.definitions["LZ4_BUNDLED_MODE"] = False
+        self._cmake.definitions["LZ4_POSITION_INDEPENDENT_LIB"] = self.options.get_safe("fPIC", True)
+        self._cmake.configure()
+        return self._cmake
 
     def build(self):
-        self._patch_sources()
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            tools.patch(**patch)
         cmake = self._configure_cmake()
         cmake.build()
 
@@ -71,4 +74,4 @@ class LZ4Conan(ConanFile):
         self.cpp_info.names["pkg_config"] = "liblz4"
         self.cpp_info.libs = ["lz4"]
         if self.settings.compiler == "Visual Studio" and self.options.shared:
-            self.cpp_info.defines.append("LZ4_DLL_IMPORT")
+            self.cpp_info.defines.append("LZ4_DLL_IMPORT=1")
