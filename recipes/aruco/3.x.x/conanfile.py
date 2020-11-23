@@ -1,5 +1,4 @@
 from conans import ConanFile, tools, CMake
-from conans.errors import ConanInvalidConfiguration
 import os
 
 
@@ -31,8 +30,6 @@ class LibnameConan(ConanFile):
             del self.options.fPIC
 
     def configure(self):
-        if self.settings.compiler == "gcc" and tools.Version(self.settings.compiler.version) < "6":
-            raise ConanInvalidConfiguration("Gcc 4.x and 5.x can not build Aruco 3.x")
         if self.options.shared:
             del self.options.fPIC
 
