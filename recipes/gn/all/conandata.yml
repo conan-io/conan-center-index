@@ -1,0 +1,7 @@
+sources:
+  "1868":
+    url: "https://gn.googlesource.com/gn/+archive/646a62e029de4827e384c8517dc62fd3c7f85207.tar.gz"
+patches:
+  "1868":
+   - base_path: source_subfolder
+     patch_file: patches/001-header-git-commit-1868.patch
