@@ -11,7 +11,7 @@ class SpirvtoolsConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     short_paths = True
     settings = "os", "compiler", "arch", "build_type"
-    exports_sources = ["CMakeLists.txt"]
+    exports_sources = ["CMakeLists.txt", "patches/**"]
     license = "Apache-2.0"
     generators = "cmake"
     _cmake = None
@@ -44,10 +44,15 @@ class SpirvtoolsConan(ConanFile):
             tools.check_min_cppstd(self, 11)
 
     def requirements(self):
-        self.requires("spirv-headers/{}".format(self._get_compatible_spirv_headers_version()))
+        self.requires("spirv-headers/{}".format(self._get_compatible_spirv_headers_version))
 
+    @property
     def _get_compatible_spirv_headers_version(self):
-        return "1.5.3" if tools.Version(self.version[1:]) >= "2020.2" else "1.5.1"
+        return {
+            "v2019.2": "1.5.1",
+            "v2020.3": "1.5.3",
+            "v2020.5": "1.5.4",
+        }.get(str(self.version))
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
@@ -64,7 +69,7 @@ class SpirvtoolsConan(ConanFile):
             cmake.definitions["CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS"] = True
 
         # Required by the project's CMakeLists.txt
-        cmake.definitions["SPIRV-Headers_SOURCE_DIR"] = self.deps_cpp_info["spirv-headers"].rootpath
+        cmake.definitions["SPIRV-Headers_SOURCE_DIR"] = self.deps_cpp_info["spirv-headers"].rootpath.replace("\\", "/")
 
         # There are some switch( ) statements that are causing errors
         # need to turn this off
@@ -86,6 +91,8 @@ class SpirvtoolsConan(ConanFile):
         cmake.build()
 
     def _patch_sources(self):
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            tools.patch(**patch)
         # CMAKE_POSITION_INDEPENDENT_CODE was set ON for the entire
         # project in the lists file.
         tools.replace_in_file(os.path.join(self._source_subfolder, "CMakeLists.txt"),
