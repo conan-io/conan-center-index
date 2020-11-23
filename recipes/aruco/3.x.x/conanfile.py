@@ -38,6 +38,12 @@ class LibnameConan(ConanFile):
         self.requires("eigen/3.3.8")
         self.requires("zlib/1.2.11")
 
+        self.options[
+            "opencv"
+        ].shared = (
+            self.options.shared
+        )  # For some reason, this is not automagically inherited from self.options.shared
+
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
         extracted_dir = self.name + "-" + self.version
@@ -56,9 +62,6 @@ class LibnameConan(ConanFile):
         self._cmake.definitions["INSTALL_DOC"] = "OFF"
         self._cmake.definitions["USE_OWN_EIGEN3"] = "OFF"
         self._cmake.definitions["BUILD_SHARED_LIBS"] = self.options.shared
-        self._cmake.definitions[
-            "CMAKE_POSITION_INDEPENDENT_CODE"
-        ] = self.options.get_safe("fPIC", True)
         self._cmake.configure(build_folder=self._build_subfolder)
         return self._cmake
 
