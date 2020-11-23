@@ -9,7 +9,6 @@ class LibnameConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://www.uco.es/investiga/grupos/ava/node/26"
     license = "GPL-3.0-only"
-    no_copy_source = True
     exports_sources = "CMakeLists.txt"
     generators = "cmake", "cmake_find_package"
     _cmake = None
@@ -41,7 +40,7 @@ class LibnameConan(ConanFile):
 
     def source(self):
         tools.get(
-            **self.conan_data["sources"][self.version], filename="aruco.zip"
+            **self.conan_data["sources"][self.version]
         )
         extracted_dir = self.name + "-" + self.version
         os.rename(extracted_dir, self._source_subfolder)
@@ -54,13 +53,12 @@ class LibnameConan(ConanFile):
         self._cmake.definitions["BUILD_GLSAMPLES"] = "OFF"
         self._cmake.definitions["BUILD_UTILS"] = "OFF"
         self._cmake.definitions["BUILD_DEBPACKAGE"] = "OFF"
-        self._cmake.definitions["USE_OWN_EIGEN"] = "OFF"
+        self._cmake.definitions["BUILD_SVM"] = "OFF"
+        self._cmake.definitions["INSTALL_DOC"] = "OFF"
+        self._cmake.definitions["USE_OWN_EIGEN3"] = "OFF"
+        self._cmake.definitions["BUILD_SHARED_LIBS"] = self.options.shared
         self._cmake.configure(build_folder=self._build_subfolder)
         return self._cmake
-
-    def configure(self):
-        if self.options.shared:
-            del self.options.fPIC
 
     def build(self):
         cmake = self._configure_cmake()
@@ -77,5 +75,7 @@ class LibnameConan(ConanFile):
         tools.rmdir(os.path.join(self.package_folder, "share"))
 
     def package_info(self):
-        self.cpp_info.includedirs = ["include", "include/aruco"]
+        self.cpp_info.includedirs.append("include")
+        self.cpp_info.includedirs.append(os.path.join("include", "aruco"))
         self.cpp_info.libs = tools.collect_libs(self)
+        self.cpp_info.names["pkg_config"] = "aruco"
