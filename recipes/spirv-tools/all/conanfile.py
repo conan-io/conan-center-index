@@ -1,4 +1,5 @@
 from conans import ConanFile, tools, CMake
+from conans.errors import ConanInvalidConfiguration
 import os
 import glob
 
@@ -46,6 +47,8 @@ class SpirvtoolsConan(ConanFile):
             tools.check_min_cppstd(self, 11)
 
     def requirements(self):
+        if not self._get_compatible_spirv_headers_version:
+            raise ConanInvalidConfiguration("unknown spirv-headers version")
         self.requires("spirv-headers/{}".format(self._get_compatible_spirv_headers_version))
 
     @property
@@ -54,7 +57,12 @@ class SpirvtoolsConan(ConanFile):
             "v2019.2": "1.5.1",
             "v2020.3": "1.5.3",
             "v2020.5": "1.5.4",
-        }.get(str(self.version))
+        }.get(str(self.version), False)
+
+    def _validate_dependency_graph(self):
+        if self.deps_cpp_info["spirv-headers"].version != self._get_compatible_spirv_headers_version:
+            raise ConanInvalidConfiguration("spirv-tools {0} requires spirv-headers {1}"
+                                            .format(self.version, self._get_compatible_spirv_headers_version))
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
@@ -91,6 +99,7 @@ class SpirvtoolsConan(ConanFile):
         return self._cmake
 
     def build(self):
+        self._validate_dependency_graph()
         self._patch_sources()
         cmake = self._configure_cmake()
         cmake.build()
