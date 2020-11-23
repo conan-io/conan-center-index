@@ -1,5 +1,7 @@
-Patch from https://github.com/KhronosGroup/SPIRV-Tools/commit/a1d38174b1f7d2651c718ae661886d606cb50a32
-Mandatory in v2020.5 otherwise compilation fails
+Patch from 2 PR:
+https://github.com/KhronosGroup/SPIRV-Tools/pull/3943
+https://github.com/KhronosGroup/SPIRV-Tools/pull/4014
+Mandatory in v2020.5 with spirv-headers 1.5.4, otherwise compilation fails
 with 'SPV_OPERAND_TYPE_FRAGMENT_SHADING_RATE': undeclared identifier
 --- a/include/spirv-tools/libspirv.h
 +++ b/include/spirv-tools/libspirv.h
@@ -218,3 +220,24 @@ with 'SPV_OPERAND_TYPE_FRAGMENT_SHADING_RATE': undeclared identifier
    }
    return SPV_SUCCESS;
  }
+--- a/source/val/validation_state.cpp
++++ b/source/val/validation_state.cpp
+@@ -1517,6 +1517,18 @@ std::string ValidationState_t::VkErrorID(uint32_t id,
+       return VUID_WRAP(VUID-WorkgroupSize-WorkgroupSize-04426);
+     case 4427:
+       return VUID_WRAP(VUID-WorkgroupSize-WorkgroupSize-04427);
++    case 4484:
++      return VUID_WRAP(VUID-PrimitiveShadingRateKHR-PrimitiveShadingRateKHR-04484);
++    case 4485:
++      return VUID_WRAP(VUID-PrimitiveShadingRateKHR-PrimitiveShadingRateKHR-04485);
++    case 4486:
++      return VUID_WRAP(VUID-PrimitiveShadingRateKHR-PrimitiveShadingRateKHR-04486);
++    case 4490:
++      return VUID_WRAP(VUID-ShadingRateKHR-ShadingRateKHR-04490);
++    case 4491:
++      return VUID_WRAP(VUID-ShadingRateKHR-ShadingRateKHR-04491);
++    case 4492:
++      return VUID_WRAP(VUID-ShadingRateKHR-ShadingRateKHR-04492);
+     default:
+       return "";  // unknown id
+   };
