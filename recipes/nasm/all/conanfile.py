@@ -11,6 +11,7 @@ class NASMConan(ConanFile):
     license = "BSD-2-Clause"
     settings = "os", "arch", "compiler", "build_type"
     topics = ("conan", "nasm", "installer", "assembler")
+    exports_sources = "patches/**"
     _autotools = None
 
     @property
@@ -36,7 +37,9 @@ class NASMConan(ConanFile):
     def _build_vs(self):
         with tools.chdir(self._source_subfolder):
             with tools.vcvars(self.settings):
-                self.run("nmake /f {}".format(os.path.join("Mkfiles", "msvc.mak")))
+                autotools = AutoToolsBuildEnvironment(self)
+                autotools.flags.append("-nologo")
+                self.run("nmake /f {} {}".format(os.path.join("Mkfiles", "msvc.mak"), " ".join("{}=\"{}\"".format(k, v) for k, v in autotools.vars.items())))
                 shutil.copy("nasm.exe", "nasmw.exe")
                 shutil.copy("ndisasm.exe", "ndisasmw.exe")
 
@@ -53,6 +56,8 @@ class NASMConan(ConanFile):
         return self._autotools
 
     def build(self):
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            tools.patch(**patch)
         if self.settings.os == "Windows":
             self._build_vs()
         else:

@@ -11,3 +11,7 @@ sources:
   "2.15.05":
     sha256: e2b1c1cb0250fbf2a91c6fdbf42b3b9d568cbe0d7b90af64e02f128c67ae4f83
     url: http://www.nasm.us/pub/nasm/releasebuilds/2.15.05/nasm-2.15.05.tar.gz
+patches:
+  "2.15.05":
+    - patch_file: "patches/2.15.05-0001-disable-newly-integrated-dependency-tracking.patch"
+      base_path: "source_subfolder"
