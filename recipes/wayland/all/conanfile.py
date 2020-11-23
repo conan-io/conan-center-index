@@ -64,7 +64,8 @@ class WaylandConan(ConanFile):
                 'libraries': 'true' if self.options.enable_libraries else 'false',
                 'dtd_validation': 'true' if self.options.enable_dtd_validation else 'false',
                 'documentation': 'false',
-            })
+            },
+            args=['--datadir=%s' % os.path.join(self.package_folder, "res")])
         return self._meson
 
     def build(self):
@@ -76,7 +77,6 @@ class WaylandConan(ConanFile):
         meson = self._configure_meson()
         meson.install()
         tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
-        tools.rmdir(os.path.join(self.package_folder, "share"))
 
     def package_info(self):
         self.cpp_info.components["wayland-scanner"].names["pkg_config"] = "wayland-scanner"
