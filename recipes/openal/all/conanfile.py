@@ -37,11 +37,18 @@ class OpenALConan(ConanFile):
             "Visual Studio": "15",
         }.get(str(self.settings.compiler))
 
+    @property
+    def _openal_cxx_backend(self):
+        return tools.Version(self.version) >= "1.20"
+
     def configure(self):
         if self.options.shared:
             del self.options.fPIC
-        del self.settings.compiler.libcxx
+        # OpenAL's API is pure C, thus the c++ standard does not matter
+        # Because the backend is C++, the C++ STL matters
         del self.settings.compiler.cppstd
+        if not self._openal_cxx_backend:
+            del self.settings.compiler.libcxx
 
         if tools.Version(self.version) >= "1.21":
             minimum_compiler_version = self._minimum_compiler_supports_cxx14
@@ -93,12 +100,16 @@ class OpenALConan(ConanFile):
         self.cpp_info.names["cmake_find_package"] = "OpenAL"
         self.cpp_info.names["cmake_find_package_multi"] = "OpenAL"
         self.cpp_info.libs = tools.collect_libs(self)
+        self.cpp_info.includedirs.append(os.path.join("include", "AL"))
         if self.settings.os == "Linux":
             self.cpp_info.system_libs.extend(["dl", "m"])
         elif self.settings.os == "Macos":
             self.cpp_info.frameworks.extend(["AudioToolbox", "CoreAudio", "CoreFoundation"])
         elif self.settings.os == "Windows":
             self.cpp_info.system_libs.extend(["winmm", "ole32", "shell32", "User32"])
-        self.cpp_info.includedirs = ["include", "include/AL"]
+        if self._openal_cxx_backend:
+            libcxx = tools.stdcpp_library(self)
+            if libcxx:
+                self.cpp_info.system_libs.append(libcxx)
         if not self.options.shared:
             self.cpp_info.defines.append("AL_LIBTYPE_STATIC")

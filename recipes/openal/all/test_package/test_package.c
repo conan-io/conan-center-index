@@ -1,9 +1,9 @@
+#include "alc.h"
+#include "al.h"
+#include "alext.h"
+
 #include <stdio.h>
 #include <string.h>
-
-#include <AL/alc.h>
-#include <AL/al.h>
-#include <AL/alext.h>
 
 static ALenum checkALErrors(int linenum)
 {
