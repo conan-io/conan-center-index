@@ -47,7 +47,7 @@ class LibnameConan(ConanFile):
         if self._cmake:
             return self._cmake
         self._cmake = CMake(self)
-        self._cmake.definitions["ARUCO_DEVINSTALL"] = "OFF"
+        self._cmake.definitions["ARUCO_DEVINSTALL"] = "ON"
         self._cmake.definitions["BUILD_TESTS"] = "OFF"
         self._cmake.definitions["BUILD_GLSAMPLES"] = "OFF"
         self._cmake.definitions["BUILD_UTILS"] = "OFF"
