@@ -94,8 +94,8 @@ class MozjpegConan(ConanFile):
         self._cmake.definitions["WITH_TURBOJPEG"] = self.options.turbojpeg
         self._cmake.definitions["WITH_JAVA"] = self.options.java
         self._cmake.definitions["WITH_12BIT"] = self.options.enable12bit
+        self._cmake.definitions["CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT"] = False
         self._cmake.definitions["PNG_SUPPORTED"] = False  # PNG and zlib are only required for executables (and static libraries)
-        self._cmake.definitions["CMAKE_INSTALL_DEFAULT_PREFIX"] = self.package_folder.replace("\\", "/")
         if self.settings.compiler == "Visual Studio":
             self._cmake.definitions["WITH_CRT_DLL"] = "MD" in str(self.settings.compiler.runtime)
         self._cmake.configure(build_folder=self._build_subfolder)
