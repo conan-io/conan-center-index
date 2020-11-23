@@ -32,10 +32,21 @@ class OpenALConan(ConanFile):
             del self.options.fPIC
 
     @property
-    def _minimum_compiler_supports_cxx14(self):
-        return  {
-            "Visual Studio": "15",
+    def _supports_cxx11(self):
+        if self.settings.compiler == "clang" and self.settings.compiler.libcxx in ("libstdc++", "libstdc++11"):
+            if tools.Version(self.settings.compiler.version) < "9":
+                return False, "openal on clang {} cannot be built with stdlibc++(11) c++ runtime".format(self.settings.compiler.version)
+        min_version =  {
+            "Visual Studio": "13",
+            "gcc": "5",
+            "clang": "5",
         }.get(str(self.settings.compiler))
+        if min_version:
+            if tools.Version(self.settings.compiler.version) < min_version:
+                return False, "This compiler version does not support c++"
+            else:
+                return True, "Unknown compiler. Assuming your compiler supports c++11"
+        return True, None
 
     @property
     def _openal_cxx_backend(self):
@@ -50,16 +61,14 @@ class OpenALConan(ConanFile):
         if not self._openal_cxx_backend:
             del self.settings.compiler.libcxx
 
-        if tools.Version(self.version) >= "1.21":
-            minimum_compiler_version = self._minimum_compiler_supports_cxx14
-            if minimum_compiler_version:
-                if tools.Version(self.settings.compiler.version) < minimum_compiler_version:
-                    raise ConanInvalidConfiguration("openal requires c++ 14, which this compiler does not support")
-            else:
-                self.output.warn("openal requires a compiler supporting c++14. I don't know whether your compiler does, so I assume it does.")
-        if tools.Version(self.version) >= "1.20" and self.settings.compiler == "gcc" and tools.Version(self.settings.compiler.version) < "5":
-            raise ConanInvalidConfiguration("OpenAL can't be compiled by {0} {1}".format(self.settings.compiler,
-                                                                                         self.settings.compiler.version))
+        # openal 1.20 requires c++11, openal 1.21 requires c++ 14
+        # For now, the compiler requirements are the same...
+        if tools.Version(self.version) >= "1.20":
+            ok, msg = self._supports_cxx11
+            if not ok:
+                raise ConanInvalidConfiguration(msg)
+            if msg:
+                self.output.warn(msg)
 
     def requirements(self):
         if self.settings.os == "Linux":
