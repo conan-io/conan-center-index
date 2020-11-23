@@ -39,9 +39,7 @@ class LibnameConan(ConanFile):
         self.requires("zlib/1.2.11")
 
     def source(self):
-        tools.get(
-            **self.conan_data["sources"][self.version]
-        )
+        tools.get(**self.conan_data["sources"][self.version])
         extracted_dir = self.name + "-" + self.version
         os.rename(extracted_dir, self._source_subfolder)
 
@@ -49,6 +47,7 @@ class LibnameConan(ConanFile):
         if self._cmake:
             return self._cmake
         self._cmake = CMake(self)
+        self._cmake.definitions["ARUCO_DEVINSTALL"] = "OFF"
         self._cmake.definitions["BUILD_TESTS"] = "OFF"
         self._cmake.definitions["BUILD_GLSAMPLES"] = "OFF"
         self._cmake.definitions["BUILD_UTILS"] = "OFF"
@@ -57,6 +56,9 @@ class LibnameConan(ConanFile):
         self._cmake.definitions["INSTALL_DOC"] = "OFF"
         self._cmake.definitions["USE_OWN_EIGEN3"] = "OFF"
         self._cmake.definitions["BUILD_SHARED_LIBS"] = self.options.shared
+        self._cmake.definitions[
+            "CMAKE_POSITION_INDEPENDENT_CODE"
+        ] = self.options.get_safe("fPIC", True)
         self._cmake.configure(build_folder=self._build_subfolder)
         return self._cmake
 
