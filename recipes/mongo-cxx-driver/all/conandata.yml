@@ -1,0 +1,8 @@
+sources:
+  "3.4.0":
+    url: https://github.com/mongodb/mongo-cxx-driver/archive/r3.4.0.tar.gz
+    sha256: e9772ac5cf1c996c2f77fd78e25aaf74a2abf5f3864cb31b18d64955fd41c14d
+patches:
+  "3.4.0":
+    - patch_file: "patches/diff.patch"
+      base_path: "source_subfolder"

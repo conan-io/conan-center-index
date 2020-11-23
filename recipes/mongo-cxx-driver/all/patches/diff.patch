@@ -1,0 +1,169 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index c6f56e4..8057203 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -89,68 +89,8 @@ endif()
+ 
+ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+ 
+-add_custom_target(hugo_dir
+-    COMMAND ${CMAKE_COMMAND} -E make_directory hugo
+-)
+-
+-add_custom_target(hugo
+-    DEPENDS hugo_dir
+-    WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/docs
+-    COMMAND hugo
+-    VERBATIM
+-)
+-
+-add_custom_target(hugo-deploy
+-    DEPENDS hugo
+-    WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+-    COMMAND etc/deploy-to-ghpages.pl --hugo git@github.com:mongodb/mongo-cxx-driver
+-    VERBATIM
+-)
+-
+-add_custom_target(docs_dir_current
+-    COMMAND ${CMAKE_COMMAND} -E make_directory docs/api/current
+-)
+-
+-add_custom_target(doxygen-current
+-    DEPENDS docs_dir_current
+-    WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+-    COMMAND doxygen ${CMAKE_CURRENT_SOURCE_DIR}/Doxyfile
+-    VERBATIM
+-)
+-
+-add_custom_target(doxygen-all
+-    WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+-    COMMAND etc/generate-all-apidocs.pl
+-    VERBATIM
+-)
+-
+-add_custom_target(doxygen-deploy
+-    DEPENDS doxygen-all
+-    WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+-    COMMAND etc/deploy-to-ghpages.pl --doxygen git@github.com:mongodb/mongo-cxx-driver
+-    VERBATIM
+-)
+-
+-add_custom_target(format
+-    python ${CMAKE_SOURCE_DIR}/etc/clang_format.py format
+-    VERBATIM
+-)
+-
+-add_custom_target(format-lint
+-    python ${CMAKE_SOURCE_DIR}/etc/clang_format.py lint
+-    VERBATIM
+-)
+-
+-add_custom_target(docs
+-    DEPENDS hugo doxygen-current
+-)
+-
+ set(THIRD_PARTY_SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/src/third_party)
++set(MONGO_CXX_PROJECT_DIR ${CMAKE_CURRENT_SOURCE_DIR})
++set(MONGO_CXX_PROJECT_BIN_DIR ${CMAKE_CURRENT_BINARY_DIR})
+ 
+-enable_testing()
+-
+-add_subdirectory(src)
+-
+-add_subdirectory(examples EXCLUDE_FROM_ALL)
+-
+-add_subdirectory(benchmark EXCLUDE_FROM_ALL)
++add_subdirectory(src)
+\ No newline at end of file
+diff --git a/src/CMakeLists.txt b/src/CMakeLists.txt
+index 40cd480..08cd37f 100644
+--- a/src/CMakeLists.txt
++++ b/src/CMakeLists.txt
+@@ -13,5 +13,8 @@
+ # limitations under the License.
+ 
+ add_definitions(-DMONGO_CXX_DRIVER_COMPILING)
++add_definitions(-D_SCL_SECURE_NO_WARNINGS)
++add_definitions(-D_SILENCE_CXX17_ITERATOR_BASE_CLASS_DEPRECATION_WARNING)
++add_definitions(-D_DISABLE_EXTENDED_ALIGNED_STORAGE)
+ add_subdirectory(bsoncxx)
+ add_subdirectory(mongocxx)
+diff --git a/src/bsoncxx/CMakeLists.txt b/src/bsoncxx/CMakeLists.txt
+index b2d2b60..a4110fa 100644
+--- a/src/bsoncxx/CMakeLists.txt
++++ b/src/bsoncxx/CMakeLists.txt
+@@ -72,7 +72,7 @@ endif()
+ set(BSONCXX_VERSION_NO_EXTRA ${BSONCXX_VERSION_MAJOR}.${BSONCXX_VERSION_MINOR}.${BSONCXX_VERSION_PATCH})
+ set(BSONCXX_VERSION ${BSONCXX_VERSION_NO_EXTRA}${BSONCXX_VERSION_EXTRA})
+ set(BSONCXX_INLINE_NAMESPACE "v${BSONCXX_ABI_VERSION}")
+-set(BSONCXX_HEADER_INSTALL_DIR "${CMAKE_INSTALL_INCLUDEDIR}/bsoncxx/${BSONCXX_INLINE_NAMESPACE}" CACHE INTERNAL "")
++set(BSONCXX_HEADER_INSTALL_DIR "${CMAKE_INSTALL_INCLUDEDIR}" CACHE INTERNAL "")
+ 
+ set(LIBBSON_REQUIRED_VERSION 1.10.0)
+ set(LIBBSON_REQUIRED_ABI_VERSION 1.0)
+@@ -112,8 +112,8 @@ set(bsoncxx_sources
+ )
+ 
+ include_directories(
+-    ${CMAKE_SOURCE_DIR}/src
+-    ${CMAKE_BINARY_DIR}/src
++    ${MONGO_CXX_PROJECT_DIR}/src
++    ${MONGO_CXX_PROJECT_BIN_DIR}/src
+ )
+ 
+ if (BSONCXX_POLY_USE_BOOST)
+@@ -247,6 +247,4 @@ write_basic_package_version_file(
+ install(
+   FILES ${CMAKE_CURRENT_BINARY_DIR}/${PKG}-config.cmake ${CMAKE_CURRENT_BINARY_DIR}/${PKG}-config-version.cmake
+   DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/${PKG}-${BSONCXX_VERSION}
+-)
+-
+-add_subdirectory(test)
++)
+\ No newline at end of file
+diff --git a/src/bsoncxx/stdx/make_unique.hpp b/src/bsoncxx/stdx/make_unique.hpp
+index d954eae..737e76b 100644
+--- a/src/bsoncxx/stdx/make_unique.hpp
++++ b/src/bsoncxx/stdx/make_unique.hpp
+@@ -48,7 +48,7 @@ using ::boost::make_unique;
+ BSONCXX_INLINE_NAMESPACE_END
+ }  // namespace bsoncxx
+ 
+-#elif __cplusplus >= 201402L
++#elif defined(BSONCXX_POLY_USE_STD)
+ 
+ #include <memory>
+ 
+diff --git a/src/mongocxx/CMakeLists.txt b/src/mongocxx/CMakeLists.txt
+index fd5ef76..b89273e 100644
+--- a/src/mongocxx/CMakeLists.txt
++++ b/src/mongocxx/CMakeLists.txt
+@@ -28,7 +28,7 @@ option(MONGOCXX_ENABLE_SLOW_TESTS "Run slow tests when invoking the the test tar
+ set(MONGOCXX_VERSION_NO_EXTRA ${MONGOCXX_VERSION_MAJOR}.${MONGOCXX_VERSION_MINOR}.${MONGOCXX_VERSION_PATCH})
+ set(MONGOCXX_VERSION ${MONGOCXX_VERSION_NO_EXTRA}${MONGOCXX_VERSION_EXTRA})
+ set(MONGOCXX_INLINE_NAMESPACE "v${MONGOCXX_ABI_VERSION}")
+-set(MONGOCXX_HEADER_INSTALL_DIR "${CMAKE_INSTALL_INCLUDEDIR}/mongocxx/${MONGOCXX_INLINE_NAMESPACE}" CACHE INTERNAL "")
++set(MONGOCXX_HEADER_INSTALL_DIR "${CMAKE_INSTALL_INCLUDEDIR}" CACHE INTERNAL "")
+ 
+ set(LIBMONGOC_REQUIRED_VERSION 1.10.0)
+ set(LIBMONGOC_REQUIRED_ABI_VERSION 1.0)
+@@ -117,8 +117,8 @@ set(mongocxx_sources
+ )
+ 
+ include_directories(
+-    ${CMAKE_SOURCE_DIR}/src
+-    ${CMAKE_BINARY_DIR}/src
++    ${MONGO_CXX_PROJECT_DIR}/src
++    ${MONGO_CXX_PROJECT_BIN_DIR}/src
+ )
+ 
+ # We define two libraries: the normal library and the testing-only library.  The testing-only
+@@ -240,6 +240,4 @@ write_basic_package_version_file(
+ install(
+   FILES ${CMAKE_CURRENT_BINARY_DIR}/${PKG}-config.cmake ${CMAKE_CURRENT_BINARY_DIR}/${PKG}-config-version.cmake
+   DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/${PKG}-${MONGOCXX_VERSION}
+-)
+-
+-add_subdirectory(test)
++)
+\ No newline at end of file
