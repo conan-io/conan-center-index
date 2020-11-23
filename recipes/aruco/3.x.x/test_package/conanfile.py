@@ -7,12 +7,6 @@ class TestPackageConan(ConanFile):
     generators = "cmake"
 
     settings = "os", "compiler", "arch", "build_type"
-    options = {"shared": [False, True], "fPIC": [False, True]}
-    default_options = {"shared": False, "fPIC": True}
-
-    def configure(self):
-        if self.options.shared:
-            del self.options.fPIC
 
     def build(self):
         cmake = CMake(self)

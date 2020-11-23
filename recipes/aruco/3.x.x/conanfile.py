@@ -26,10 +26,18 @@ class LibnameConan(ConanFile):
     def _build_subfolder(self):
         return "build_subfolder"
 
+    def config_options(self):
+        if self.settings.os == "Windows":
+            del self.options.fPIC
+
+    def configure(self):
+        if self.options.shared:
+            del self.options.fPIC
+
     def requirements(self):
-        self.requires("opencv/4.5.0@")
-        self.requires("eigen/3.3.8@")
-        self.requires("zlib/1.2.11@")
+        self.requires("opencv/4.5.0")
+        self.requires("eigen/3.3.8")
+        self.requires("zlib/1.2.11")
 
     def source(self):
         tools.get(
