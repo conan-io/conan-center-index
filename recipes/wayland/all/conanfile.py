@@ -26,8 +26,13 @@ class WaylandConan(ConanFile):
         "enable_dtd_validation": True,
     }
 
-    _source_subfolder = "source_subfolder"
-    _build_subfolder = "build_subfolder"
+    @property
+    def _source_subfolder(self):
+        return "source_subfolder"
+    
+    @property
+    def _build_subfolder(self):
+        return "build_subfolder"
     _meson = None
 
     def requirements(self):
@@ -35,7 +40,7 @@ class WaylandConan(ConanFile):
             self.requires("libffi/3.3")
         if self.options.enable_dtd_validation:
             self.requires("libxml2/2.9.10")
-        self.requires("expat/2.2.9")
+        self.requires("expat/2.2.10")
 
     def build_requirements(self):
         self.build_requires('meson/0.54.2')
