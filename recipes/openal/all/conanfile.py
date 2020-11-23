@@ -31,12 +31,25 @@ class OpenALConan(ConanFile):
         if self.settings.os == "Windows":
             del self.options.fPIC
 
+    @property
+    def _minimum_compiler_supports_cxx14(self):
+        return  {
+            "Visual Studio": "15",
+        }.get(str(self.settings.compiler))
+
     def configure(self):
         if self.options.shared:
             del self.options.fPIC
         del self.settings.compiler.libcxx
         del self.settings.compiler.cppstd
 
+        if tools.Version(self.version) >= "1.21":
+            minimum_compiler_version = self._minimum_compiler_supports_cxx14
+            if minimum_compiler_version:
+                if tools.Version(self.settings.compiler.version) < minimum_compiler_version:
+                    raise ConanInvalidConfiguration("openal requires c++ 14, which this compiler does not support")
+            else:
+                self.output.warn("openal requires a compiler supporting c++14. I don't know whether your compiler does, so I assume it does.")
         if tools.Version(self.version) >= "1.20" and self.settings.compiler == "gcc" and tools.Version(self.settings.compiler.version) < "5":
             raise ConanInvalidConfiguration("OpenAL can't be compiled by {0} {1}".format(self.settings.compiler,
                                                                                          self.settings.compiler.version))
