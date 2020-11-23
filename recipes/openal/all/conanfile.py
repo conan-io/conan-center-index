@@ -74,7 +74,7 @@ class OpenALConan(ConanFile):
         if not self._openal_cxx_backend:
             del self.settings.compiler.libcxx
 
-        if tools.Version(self.version) >= "1.22":
+        if tools.Version(self.version) >= "1.21":
             ok, msg = self._supports_cxx14
             if not ok:
                 raise ConanInvalidConfiguration(msg)
