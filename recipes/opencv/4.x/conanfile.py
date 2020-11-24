@@ -261,7 +261,7 @@ class OpenCVConan(ConanFile):
                       os.path.join(self.package_folder, "res", "setup_vars_opencv4.cmd"))
 
     def package_info(self):
-        version = self.version.split(".")[:-1]  # last version number is not used
+        version = self.version.split(".")
         version = "".join(version) if self.settings.os == "Windows" else ""
         debug = "d" if self.settings.build_type == "Debug" and self.settings.compiler == "Visual Studio" else ""
 
