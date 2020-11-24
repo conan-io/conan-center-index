@@ -2,6 +2,7 @@ from conans import ConanFile, CMake, tools
 from conans.errors import ConanInvalidConfiguration
 import os
 
+
 class GnConan(ConanFile):
     name = "gn"
     description = "GN is a meta-build system that generates build files for Ninja"
@@ -20,6 +21,10 @@ class GnConan(ConanFile):
     def _python_executable(self):
         return "python"
 
+    def configure(self):
+        if self.settings.compiler.cppstd:
+            tools.check_min_cppstd(self, 17)
+
     def source(self):
         tools.get(**self.conan_data["sources"][self.version], destination=self._source_subfolder)
 
@@ -31,12 +36,15 @@ class GnConan(ConanFile):
             tools.patch(**patch)
 
         gen = os.path.join(self._source_subfolder, "build", "gen.py")
-        self.run("{} {} --out-path {}".format(self._python_executable, gen, self.build_folder))
-        self.run("ninja -C {} -j {}".format(self.build_folder, tools.cpu_count()), run_environment=True)
+        self.run("{} {} --out-path {}".format(self._python_executable,
+                                              gen, self.build_folder))
+        self.run("ninja -C {} -j {}".format(self.build_folder,
+                                            tools.cpu_count()), run_environment=True)
 
     def package(self):
         gn_executable = "gn.exe" if self.settings.os == "Windows" else "gn"
-        self.copy(pattern=gn_executable, dst="bin", src=self.build_folder, keep_path=False)
+        self.copy(pattern=gn_executable, dst="bin",
+                  src=self.build_folder, keep_path=False)
         self.copy("LICENSE", src=self._source_subfolder, dst="licenses")
 
     def package_info(self):
