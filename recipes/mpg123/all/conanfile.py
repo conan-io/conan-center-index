@@ -9,7 +9,7 @@ class Mpg123Conan(ConanFile):
     topics = ("conan", "mpg123", "mpeg", "audio", "player", "decoder")
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "http://mpg123.org/"
-    license = "??"
+    license = "LGPL-2.1-or-later", "GPL-2.0-or-later
     settings = "os", "compiler", "build_type", "arch"
     options = {
         "shared": [True, False],
