@@ -1,53 +1,100 @@
 from conans import ConanFile, tools, AutoToolsBuildEnvironment
-from os import path
+from os import path, rename
 
 
 class OpenmpiConan(ConanFile):
     name = "openmpi"
-    license = "3-clause BSD license"
-    author = "Conan Community"
+    license = "BSD-3-Clause"
     url = "https://github.com/conan-io/conan-center-index"
     description = "A High Performance Message Passing Library"
     topics = ("conan", "openmpi", "mpi")
     homepage = "https://www.open-mpi.org/"
     settings = "os", "compiler", "build_type", "arch"
-    options = {"shared": [True, False]}
-    default_options = {"shared": False}
+    options = {
+        "shared": [True, False],
+        "fPIC": [True, False],
+    }
+    default_options = {"shared": False, "fPIC": True}
     generators = "cmake"
+    _autotools = None
+
+
+    @property
+    def _build_subfolder(self):
+        return path.join(self.build_folder, "build_subfolder")
+
+    @property
+    def _source_subfolder(self):
+        return path.join(self.build_folder, "source_subfolder")
+
+
+
+    def _configure_autotools(self):
+        if self._autotools:
+            return self._autotools
+
+        configure_folder = path.join(self.build_folder, self._source_subfolder)
+        self._autotools = AutoToolsBuildEnvironment(self)
+        self._autotools.fpic = self.options.fPIC
+
+        args = ["--prefix={}".format(self._build_subfolder)]
+        args.append("--with-pic" if self.options.fPIC else "--without-pic")
+
+        if self.settings.build_type == "Debug":
+            args.append("--enable-debug")
+        if self.options.shared:
+            args.extend(["--enable-shared", "--disable-static"])
+        else:
+            args.extend(["--enable-static", "--disable-shared"])
+
+        self._autotools.configure(
+            configure_dir=configure_folder,
+            args=args
+        )
+
+        return self._autotools
+
+    def config_options(self):
+        if self.settings.os == "Windows":
+            raise ConanInvalidConfiguration(
+                "OpenMPI is not supported on Windows systems"
+            )
+
 
     def source(self):
         self.output.info("Downloading OpenMPI from the mirror")
 
-        url = self.conan_data["sources"][self.version]["url"]
-        tools.get(
-            url,
-            sha1=self.conan_data["sources"][self.version]["sha1"],
-            md5=self.conan_data["sources"][self.version]["md5"],
+        tools.get(**self.conan_data["sources"][self.version])
+        rename(
+            "{name}-{version}".format(
+                name=self.name, version=self.version
+            ),
+            "source_subfolder"
         )
 
     def build(self):
-        autotools = AutoToolsBuildEnvironment(self)
-
-        folder_name = "{name}-{version}".format(
-            name=self.name, version=self.version
-        )
-
-        autotools.configure(
-            configure_dir=path.join(self.build_folder, folder_name)
-        )
+        autotools = self._configure_autotools()
         autotools.make()
         autotools.install()
 
+    def package(self):
+        bin_dir = path.join(self._build_subfolder, "bin")
+        lib_dir = path.join(self._build_subfolder, "lib")
+        include_dir = path.join(self._build_subfolder, "include")
+
+        self.copy("LICENSE", src=self._source_subfolder, dst="licenses")
+
+        self.copy("*", src=bin_dir, dst="bin")
+        self.copy("*so", src=lib_dir, dst="lib")
+        self.copy("*", src=include_dir, dst="include")
+
     def package_info(self):
-        pkg_config_path = path.join(self.package_folder, "lib", "pkgconfig")
-        with tools.environment_append({"PKG_CONFIG_PATH": pkg_config_path}):
-            pkg_config_c = tools.PkgConfig(
-                "ompi-c", static=not self.options.shared
-            )
-            pkg_config_cxx = tools.PkgConfig(
-                "ompi-cxx", static=not self.options.shared
-            )
-            self.cpp_info.cflags = pkg_config_c.cflags
-            self.cpp_info.cxxflags = pkg_config_cxx.cflags
-            self.cpp_info.sharedlinkflags = pkg_config_c.libs
-            self.cpp_info.exelinkflags = pkg_config_c.libs
+        self.cpp_info.libs = ['mpi', 'open-rte', 'open-pal']
+        if self.settings.os == "Linux":
+            self.cpp_info.libs.extend(['dl', 'pthread', 'rt', 'util'])
+        self.env_info.MPI_HOME = self.package_folder
+        self.env_info.OPAL_PREFIX = self.package_folder
+        mpi_bin = path.join(self.package_folder, "bin")
+        self.env_info.MPI_BIN = mpi_bin
+        self.env_info.PATH.append(mpi_bin)
+        self.cpp_info.libdirs = ["lib"]

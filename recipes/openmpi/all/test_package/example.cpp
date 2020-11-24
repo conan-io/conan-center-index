@@ -25,4 +25,6 @@ int main() {
 
     // Finalize the MPI environment.
     MPI_Finalize();
+
+    return 0;
 }
