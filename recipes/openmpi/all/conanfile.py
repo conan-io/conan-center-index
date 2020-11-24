@@ -1,4 +1,5 @@
 from conans import ConanFile, tools, AutoToolsBuildEnvironment
+from conans.errors import ConanInvalidConfiguration
 from os import path, rename
 
 
