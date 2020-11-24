@@ -135,6 +135,7 @@ class Cc65Conan(ConanFile):
             self._package_autotools()
 
     def package_id(self):
+        del self.info.settings.compiler
         if self.settings.compiler == "Visual Studio":
             if self.settings.arch == "x86_64":
                 self.info.settings.arch = "x86"
