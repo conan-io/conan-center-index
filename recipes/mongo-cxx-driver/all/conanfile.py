@@ -36,6 +36,9 @@ class MongoCxxConan(ConanFile):
         return "build_subfolder"
 
     def configure(self):
+        if self.settings.os == "Windows":
+            del self.options.fPIC
+
         if self.settings.compiler == "Visual Studio" and self.options.polyfill != "boost":
             raise ConanInvalidConfiguration("For MSVC, best to use the boost polyfill")
 
