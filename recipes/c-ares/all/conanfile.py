@@ -1,6 +1,8 @@
 import os
 from conans import ConanFile, CMake, tools
 
+required_conan_version = ">=1.29.1"
+
 
 class CAresConan(ConanFile):
     name = "c-ares"
@@ -61,11 +63,13 @@ class CAresConan(ConanFile):
         tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
         tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
         tools.rmdir(os.path.join(self.package_folder, "share"))
+        tools.remove_files_by_mask(os.path.join(self.package_folder, "bin"), "*.pdb")
 
     def package_info(self):
         self.cpp_info.names["pkg_config"] = "libcares"
         self.cpp_info.components["cares"].names["cmake_find_package"] = "cares"
         self.cpp_info.components["cares"].names["cmake_find_package_multi"] = "cares"
+        self.cpp_info.components["cares"].names["pkg_config"] = "libcares"
         self.cpp_info.components["cares"].libs = tools.collect_libs(self)
         if not self.options.shared:
             self.cpp_info.components["cares"].defines.append("CARES_STATICLIB")

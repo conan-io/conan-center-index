@@ -11,6 +11,7 @@ class EigenConan(ConanFile):
     license = "MPL-2.0"
     topics = ("eigen", "algebra", "linear-algebra", "vector", "numerical")
     settings = "os", "compiler", "build_type", "arch"
+    exports_sources = ["patches/*"]
     no_copy_source = True
 
     @property
@@ -20,6 +21,8 @@ class EigenConan(ConanFile):
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
         os.rename("eigen-{}".format(self.version), self._source_subfolder)
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            tools.patch(**patch)
 
     def package(self):
         cmake = CMake(self)

@@ -1,6 +1,7 @@
 from conans import ConanFile, CMake, tools
 import os
 import sys
+from platform import python_version
 
 
 class TestPackageConan(ConanFile):
@@ -22,4 +23,5 @@ class TestPackageConan(ConanFile):
     def test(self):
         if not tools.cross_building(self.settings):
             with tools.environment_append({"PYTHONPATH": "lib"}):
-                self.run("{} {}".format(self._python_interpreter, os.path.join(self.source_folder, "test.py")), run_environment=True)
+                self.run("{} {}".format(self._python_interpreter, os.path.join(
+                    self.source_folder, "test.py")), run_environment=True)
