@@ -42,8 +42,13 @@ class MongoCxxConan(ConanFile):
     def configure(self):
         if self.options.shared:
             del self.options.fPIC
-        if self.settings.compiler == "Visual Studio" and self.options.polyfill != "boost":
-            raise ConanInvalidConfiguration("For MSVC, best to use the boost polyfill")
+
+        if self.options.polyfill == "mnmlstc":
+            # TODO: add mnmlstc support
+            # Cannot model mnmlstc (not packaged, is pulled dynamically) or
+            # std::experimental (how to check availability in stdlib?) polyfill
+            # dependencies
+            raise ConanInvalidConfiguration("mnmlstc is not yet supported")
 
         if self.settings.compiler.get_safe("cppstd"):
             tools.check_min_cppstd(self, "17" if self.options.polyfill == "std" else "11")
@@ -52,10 +57,6 @@ class MongoCxxConan(ConanFile):
         self.requires("mongo-c-driver/1.17.2")
         if self.options.polyfill == "boost":
             self.requires("boost/1.74.0")
-
-        # Cannot model mnmlstc (not packaged, is pulled dynamically) or
-        # std::experimental (how to check availability in stdlib?) polyfill
-        # dependencies
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
