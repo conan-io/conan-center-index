@@ -3,6 +3,9 @@ import os
 import glob
 
 
+required_conan_version = ">=1.29.1"
+
+
 class MozjpegConan(ConanFile):
     name = "mozjpeg"
     description = "MozJPEG is an improved JPEG encoder"
