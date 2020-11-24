@@ -1,6 +1,7 @@
 from conans import ConanFile, CMake, tools
 from conans.errors import ConanInvalidConfiguration
 import os
+import shutil
 
 
 class MongoCxxConan(ConanFile):
@@ -11,7 +12,7 @@ class MongoCxxConan(ConanFile):
     description = "C++ Driver for MongoDB"
     topics = ("conan", "libbsoncxx", "libmongocxx", "mongo", "mongodb", "database", "db")
     settings = "os", "compiler", "arch", "build_type"
-    exports_sources = ["CMakeLists.txt", "patches/**", "Find*.cmake"]
+    exports_sources = ["CMakeLists.txt", "patches/**"]
     generators = ("cmake", "cmake_find_package")
     options = {
         "shared": [True, False],
@@ -71,6 +72,13 @@ class MongoCxxConan(ConanFile):
         self._cmake.definitions["BUILD_VERSION"] = self.version
         self._cmake.definitions["BSONCXX_LINK_WITH_STATIC_MONGOC"] = not self.options["mongo-c-driver"].shared
         self._cmake.definitions["MONGOCXX_LINK_WITH_STATIC_MONGOC"] = not self.options["mongo-c-driver"].shared
+        # FIXME: two CMake module/config files should be generated (mongoc-1.0-config.cmake and bson-1.0-config.cmake),
+        # but it can't be modeled right now.
+        # Fix should happen in mongo-c-driver recipe
+        shutil.copy(
+            os.path.abspath(os.path.join(self._build_subfolder, "../Findmongoc-1.0.cmake")),
+            os.path.abspath(os.path.join(self._build_subfolder, "../Findbson-1.0.cmake"))
+        )
         self._cmake.configure(build_folder=self._build_subfolder)
         return self._cmake
 

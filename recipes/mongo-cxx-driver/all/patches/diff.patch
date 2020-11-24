@@ -71,7 +71,7 @@ index d1bf5e9..9a1ee89 100644
  add_subdirectory(mongocxx)
  
 diff --git a/src/bsoncxx/CMakeLists.txt b/src/bsoncxx/CMakeLists.txt
-index 7c79f45..fe6f99a 100644
+index 7c79f45..0fcb305 100644
 --- a/src/bsoncxx/CMakeLists.txt
 +++ b/src/bsoncxx/CMakeLists.txt
 @@ -71,7 +71,7 @@ set(BSONCXX_VERSION_NO_EXTRA ${BSONCXX_VERSION_MAJOR}.${BSONCXX_VERSION_MINOR}.$
@@ -83,7 +83,17 @@ index 7c79f45..fe6f99a 100644
  
  set(LIBBSON_REQUIRED_VERSION 1.13.0)
  set(LIBBSON_REQUIRED_ABI_VERSION 1.0)
-@@ -139,8 +139,8 @@ set(bsoncxx_sources
+@@ -79,7 +79,8 @@ set(LIBBSON_REQUIRED_ABI_VERSION 1.0)
+ set(bsoncxx_pkg_dep "")
+ 
+ # Attempt to find libbson by new package name (without lib).
+-find_package(bson-${LIBBSON_REQUIRED_ABI_VERSION} ${LIBBSON_REQUIRED_VERSION} QUIET)
++find_package(bson-${LIBBSON_REQUIRED_ABI_VERSION} ${LIBBSON_REQUIRED_VERSION} REQUIRED)
++set(bson-${LIBBSON_REQUIRED_ABI_VERSION}_FOUND TRUE)
+ 
+ if(bson-${LIBBSON_REQUIRED_ABI_VERSION}_FOUND)
+   message ("found libbson version ${bson-${LIBBSON_REQUIRED_ABI_VERSION}_VERSION}")
+@@ -139,8 +140,8 @@ set(bsoncxx_sources
  )
  
  include_directories(
@@ -94,7 +104,7 @@ index 7c79f45..fe6f99a 100644
  )
  
  if(BSONCXX_POLY_USE_BOOST)
-@@ -204,8 +204,6 @@ if(BSONCXX_BUILD_STATIC)
+@@ -204,8 +205,6 @@ if(BSONCXX_BUILD_STATIC)
  endif()
  bsoncxx_install("${bsoncxx_target_list}" "${bsoncxx_pkg_dep}")
  
