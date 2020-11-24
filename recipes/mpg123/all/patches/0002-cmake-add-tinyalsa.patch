@@ -44,7 +44,7 @@
          message(FATAL_ERROR "Dunno how to find modules: ${CHECK_MODULES}")
 --- ports/cmake/src/libout123/modules/CMakeLists.txt
 +++ ports/cmake/src/libout123/modules/CMakeLists.txt
-@@ -3,17 +3,21 @@
+@@ -3,17 +3,24 @@
          "${CMAKE_CURRENT_SOURCE_DIR}/../../../../../src/libout123/modules/$<$<STREQUAL:${DEFAULT_OUTPUT_MODULE},dummy>:dummy.c>"
          "${CMAKE_CURRENT_SOURCE_DIR}/../../../../../src/libout123/modules/$<$<STREQUAL:${DEFAULT_OUTPUT_MODULE},coreaudio>:coreaudio.c>"
          "${CMAKE_CURRENT_SOURCE_DIR}/../../../../../src/libout123/modules/$<$<STREQUAL:${DEFAULT_OUTPUT_MODULE},alsa>:alsa.c>"
@@ -65,9 +65,12 @@
 +    elif(DEFAULT_OUTPUT_MODULE STREQUAL "tinyalsa")
 +        target_compile_definitions(defaultmodule PRIVATE ${TINYALSA_CFLAGS})
      endif()
++    if(BUILD_SHARED_LIBS)
++        set_target_properties(defaultmodule PROPERTIES POSITION_INDEPENDENT_CODE ON)
++    endif()
  else()
      set(CMAKE_SHARED_MODULE_PREFIX "")
-@@ -38,13 +42,23 @@
+@@ -38,13 +45,23 @@
      list(FIND OUTPUT_MODULES pulse INDEX)
      if(NOT INDEX EQUAL -1)
          add_library(output_pulse MODULE "${CMAKE_CURRENT_SOURCE_DIR}/../../../../../src/libout123/modules/pulse.c")
