@@ -257,7 +257,7 @@ class QtConan(ConanFile):
             self.requires("pcre2/10.35")
 
         if self.options.with_glib:
-            self.requires("glib/2.66.2")
+            self.requires("glib/2.67.0")
         # if self.options.with_libiconv: # QTBUG-84708
         #     self.requires("libiconv/1.16")# QTBUG-84708
         if self.options.with_doubleconversion and not self.options.multiconfiguration:
@@ -265,9 +265,9 @@ class QtConan(ConanFile):
         if self.options.get_safe("with_freetype", False) and not self.options.multiconfiguration:
             self.requires("freetype/2.10.4")
         if self.options.get_safe("with_fontconfig", False):
-            self.requires("fontconfig/2.13.91")
+            self.requires("fontconfig/2.13.92")
         if self.options.get_safe("with_icu", False):
-            self.requires("icu/67.1")
+            self.requires("icu/68.1")
         if self.options.get_safe("with_harfbuzz", False) and not self.options.multiconfiguration:
             self.requires("harfbuzz/2.7.2")
         if self.options.get_safe("with_libjpeg", False) and not self.options.multiconfiguration:
@@ -290,7 +290,7 @@ class QtConan(ConanFile):
         if self.options.get_safe("with_openal", False):
             self.requires("openal/1.20.1")
         if self.options.get_safe("with_libalsa", False):
-            self.requires("libalsa/1.2.2")
+            self.requires("libalsa/1.2.4")
         if self.options.gui and self.settings.os == "Linux":
             self.requires("xorg/system")
             if not tools.cross_building(self, skip_x64_x86=True):
