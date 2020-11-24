@@ -67,7 +67,7 @@ class QtConan(ConanFile):
         "with_fontconfig": [True, False],
         "with_icu": [True, False],
         "with_harfbuzz": [True, False],
-        "with_libjpeg": [True, False],
+        "with_libjpeg": ["libjpeg", "libjpeg-turbo", False],
         "with_libpng": [True, False],
         "with_sqlite3": [True, False],
         "with_mysql": [True, False],
@@ -103,7 +103,7 @@ class QtConan(ConanFile):
         "with_fontconfig": True,
         "with_icu": True,
         "with_harfbuzz": False,
-        "with_libjpeg": True,
+        "with_libjpeg": "libjpeg",
         "with_libpng": True,
         "with_sqlite3": True,
         "with_mysql": True,
@@ -271,7 +271,10 @@ class QtConan(ConanFile):
         if self.options.get_safe("with_harfbuzz", False) and not self.options.multiconfiguration:
             self.requires("harfbuzz/2.7.2")
         if self.options.get_safe("with_libjpeg", False) and not self.options.multiconfiguration:
-            self.requires("libjpeg/9d")
+            if self.options.with_libjpeg == "libjpeg-turbo":
+                self.requires("libjpeg-turbo/2.0.5")
+            else:
+                self.requires("libjpeg/9d")
         if self.options.get_safe("with_libpng", False) and not self.options.multiconfiguration:
             self.requires("libpng/1.6.37")
         if self.options.with_sqlite3 and not self.options.multiconfiguration:
@@ -507,6 +510,7 @@ class QtConan(ConanFile):
                   ("icu", "ICU"),
                   ("harfbuzz", "HARFBUZZ"),
                   ("libjpeg", "LIBJPEG"),
+                  ("libjpeg-turbo", "LIBJPEG"),
                   ("libpng", "LIBPNG"),
                   ("sqlite3", "SQLITE"),
                   ("libmysqlclient", "MYSQL"),
