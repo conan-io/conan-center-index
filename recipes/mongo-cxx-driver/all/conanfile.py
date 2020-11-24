@@ -23,7 +23,6 @@ class MongoCxxConan(ConanFile):
         "fPIC": True,
         "polyfill": "boost"
     }
-    requires = "mongo-c-driver/1.17.2"
 
     _cmake = None
 
