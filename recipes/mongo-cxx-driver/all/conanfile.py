@@ -47,6 +47,8 @@ class MongoCxxConan(ConanFile):
         if self.settings.compiler.get_safe("cppstd"):
             tools.check_min_cppstd(self, "17" if self.options.polyfill == "std" else "11")
 
+    def requirements(self):
+        self.requires("mongo-c-driver/1.17.2")
         if self.options.polyfill == "boost":
             self.requires("boost/1.74.0")
 
