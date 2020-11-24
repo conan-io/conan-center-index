@@ -256,6 +256,9 @@ class OpenCVConan(ConanFile):
         cmake = self._configure_cmake()
         cmake.install()
         tools.rmdir(os.path.join(self.package_folder, "cmake"))
+        if os.path.isfile(os.path.join(self.package_folder, "setup_vars_opencv4.cmd")):
+            os.rename(os.path.join(self.package_folder, "setup_vars_opencv4.cmd"),
+                      os.path.join(self.package_folder, "res", "setup_vars_opencv4.cmd"))
 
     def package_info(self):
         version = self.version.split(".")[:-1]  # last version number is not used
