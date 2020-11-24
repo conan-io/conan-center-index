@@ -602,6 +602,11 @@ class QtConan(ConanFile):
                 if self.settings.os == "Windows":
                     build_env["PATH"] = [os.path.join(self.source_folder, "qt5", "gnuwin32", "bin")]
                 with tools.environment_append(build_env):
+                    
+                    if tools.os_info.is_macos:
+                        open(".qmake.stash" , 'w').close()
+                        open(".qmake.super" , 'w').close()
+
                     self.run("%s/qt5/configure %s" % (self.source_folder, " ".join(args)), run_environment=True)
                     if tools.os_info.is_macos:
                         with open("bash_env", "w") as f:
