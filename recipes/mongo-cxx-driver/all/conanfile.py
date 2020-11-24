@@ -45,10 +45,8 @@ class MongoCxxConan(ConanFile):
         if self.settings.compiler == "Visual Studio" and self.options.polyfill != "boost":
             raise ConanInvalidConfiguration("For MSVC, best to use the boost polyfill")
 
-        tools.check_min_cppstd(self, "11")
-
-        if self.options.polyfill == "std":
-            tools.check_min_cppstd(self, "17")
+        if self.settings.compiler.get_safe("cppstd"):
+            tools.check_min_cppstd(self, "17" if self.options.polyfill == "std" else "11")
 
         if self.options.polyfill == "boost":
             self.requires("boost/1.74.0")
