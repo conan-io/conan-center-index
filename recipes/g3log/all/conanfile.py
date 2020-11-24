@@ -93,4 +93,4 @@ class G3logConan(ConanFile):
     def package_info(self):
         self.cpp_info.libs = ["g3logger"]
         if str(self.settings.os) in ["Linux", "Android"]:
-            self.cpp_info.libs.append('pthread')
+            self.cpp_info.system_libs.append('pthread')

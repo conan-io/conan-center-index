@@ -17,7 +17,7 @@ class OpusFileConan(ConanFile):
     requires = (
         "opus/1.3.1",
         "ogg/1.3.4",
-        "openssl/1.1.1g"
+        "openssl/1.1.1h"
     )
     exports = ["patches/*"]
     _autotools = None

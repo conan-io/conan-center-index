@@ -17,8 +17,15 @@ class LibpqConan(ConanFile):
         "fPIC": [True, False],
         "with_zlib": [True, False],
         "with_openssl": [True, False],
-        "disable_rpath": [True, False]}
-    default_options = {'shared': False, 'fPIC': True, 'with_zlib': True, 'with_openssl': False, 'disable_rpath': False}
+        "disable_rpath": [True, False]
+    }
+    default_options = {
+        'shared': False,
+        'fPIC': True,
+        'with_zlib': True,
+        'with_openssl': False,
+        'disable_rpath': False
+    }
     _autotools = None
 
     def build_requirements(self):
@@ -54,7 +61,7 @@ class LibpqConan(ConanFile):
         if self.options.with_zlib:
             self.requires("zlib/1.2.11")
         if self.options.with_openssl:
-            self.requires("openssl/1.1.1g")
+            self.requires("openssl/1.1.1h")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
@@ -92,6 +99,10 @@ class LibpqConan(ConanFile):
                 tools.replace_in_file(os.path.join(self._source_subfolder, "src", "tools", "msvc", "MKvcbuild.pm"),
                                       "$libpq = $solution->AddProject('libpq', 'dll', 'interfaces',",
                                       "$libpq = $solution->AddProject('libpq', 'lib', 'interfaces',")
+            system_libs = ", ".join(["'{}.lib'".format(lib) for lib in self.deps_cpp_info.system_libs])
+            tools.replace_in_file(os.path.join(self._source_subfolder, "src", "tools", "msvc", "Project.pm"),
+                                  "libraries             => [],",
+                                  "libraries             => [{}],".format(system_libs))
             runtime = {'MT': 'MultiThreaded',
                        'MTd': 'MultiThreadedDebug',
                        'MD': 'MultiThreadedDLL',

@@ -1,4 +1,7 @@
 sources:
-  1.12.5:
+  "1.12.5":
     url: https://github.com/ValveSoftware/openvr/archive/v1.12.5.tar.gz
     sha256: f3cdbaa946688553638e6d65978f156311c9b08825316198d925f5eade6cfeb7
+  "1.14.15":
+    url: https://github.com/ValveSoftware/openvr/archive/v1.14.15.tar.gz
+    sha256: 40644e569f057e86c733d818a22d821c640307e5058d95958414422134d79584

@@ -116,6 +116,8 @@ class ceressolverConan(ConanFile):
         self.cpp_info.names["cmake_find_package_multi"] = "Ceres"
         self.cpp_info.components["ceres"].libs = tools.collect_libs(self)
         self.cpp_info.components["ceres"].includedirs = ["include", os.path.join("include","ceres")]
+        if not self.options.use_glog:
+            self.cpp_info.components["ceres"].includedirs.append(os.path.join("include","ceres", "internal", "miniglog"))
         self.cpp_info.components["ceres"].requires = ["eigen::eigen"]
         if self.options.use_glog:
             self.cpp_info.components["ceres"].requires.append("glog::glog")
