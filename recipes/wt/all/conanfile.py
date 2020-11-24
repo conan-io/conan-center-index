@@ -108,7 +108,7 @@ class WtConan(ConanFile):
         if self.options.get_safe("with_mssql") and self.settings.os != "Windows":
             self.requires("odbc/2.3.7")
         if self.options.get_safe("with_unwind"):
-            self.requires("libunwind/1.3.1")
+            self.requires("libunwind/1.5.0")
 
     # TODO: move this logic in method which might be implemented by https://github.com/conan-io/conan/issues/7591
     def _validate_dependency_graph(self):
