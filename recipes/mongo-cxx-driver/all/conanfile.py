@@ -69,6 +69,7 @@ class MongoCxxConan(ConanFile):
 
         self._cmake = CMake(self)
         self._cmake.definitions["BSONCXX_POLY_USE_MNMLSTC"] = self.options.polyfill == "mnmlstc"
+        self._cmake.definitions["BSONCXX_POLY_USE_STD"] = self.options.polyfill == "std"
         self._cmake.definitions["BSONCXX_POLY_USE_STD_EXPERIMENTAL"] = self.options.polyfill == "experimental"
         self._cmake.definitions["BSONCXX_POLY_USE_BOOST"] = self.options.polyfill == "boost"
         self._cmake.definitions["BUILD_VERSION"] = self.version
