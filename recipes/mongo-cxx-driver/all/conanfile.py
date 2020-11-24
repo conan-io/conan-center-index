@@ -75,10 +75,7 @@ class MongoCxxConan(ConanFile):
         # FIXME: two CMake module/config files should be generated (mongoc-1.0-config.cmake and bson-1.0-config.cmake),
         # but it can't be modeled right now.
         # Fix should happen in mongo-c-driver recipe
-        shutil.copy(
-            os.path.abspath(os.path.join(self._build_subfolder, "../Findmongoc-1.0.cmake")),
-            os.path.abspath(os.path.join(self._build_subfolder, "../Findbson-1.0.cmake"))
-        )
+        shutil.copy("Findmongoc-1.0.cmake", "Findbson-1.0.cmake")
         self._cmake.configure(build_folder=self._build_subfolder)
         return self._cmake
 
