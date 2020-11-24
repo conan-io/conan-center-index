@@ -11,8 +11,8 @@ class MongoCxxConan(ConanFile):
     description = "C++ Driver for MongoDB"
     topics = ("conan", "libbsoncxx", "libmongocxx", "mongo", "mongodb", "database", "db")
     settings = "os", "compiler", "arch", "build_type"
-    exports_sources = ["CMakeLists.txt", "patches/**"]
-    generators = "cmake"
+    exports_sources = ["CMakeLists.txt", "patches/**", "Find*.cmake"]
+    generators = ("cmake", "cmake_find_package")
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
@@ -23,7 +23,7 @@ class MongoCxxConan(ConanFile):
         "fPIC": True,
         "polyfill": "boost"
     }
-    requires = "mongo-c-driver/1.16.1@bincrafters/stable"
+    requires = "mongo-c-driver/1.17.2"
 
     _cmake = None
 
@@ -63,7 +63,8 @@ class MongoCxxConan(ConanFile):
         self._cmake.definitions["BSONCXX_POLY_USE_MNMLSTC"] = self.options.polyfill == "mnmlstc"
         self._cmake.definitions["BSONCXX_POLY_USE_STD_EXPERIMENTAL"] = self.options.polyfill == "experimental"
         self._cmake.definitions["BSONCXX_POLY_USE_BOOST"] = self.options.polyfill == "boost"
-        self._cmake.configure(source_dir=self._source_subfolder)
+        self._cmake.definitions["BUILD_VERSION"] = self.version
+        self._cmake.configure(build_folder=self._build_subfolder)
         return self._cmake
 
     def _patch_sources(self):
@@ -71,25 +72,26 @@ class MongoCxxConan(ConanFile):
             tools.patch(**patch)
 
     def build(self):
-        conan_magic_lines = '''project(MONGO_CXX_DRIVER LANGUAGES CXX)
-        include(../conanbuildinfo.cmake)
-        conan_basic_setup()
-        '''
-
         if self.settings.compiler == "Visual Studio":
-            conan_magic_lines += "add_definitions(-D_ENABLE_EXTENDED_ALIGNED_STORAGE)"
+            cmake_file = os.path.join(self._source_subfolder, "../CMakeLists.txt")
+            tools.replace_in_file(
+                cmake_file,
+                'add_subdirectory("source_subfolder")',
+                'add_subdirectory("source_subfolder")\nadd_definitions(-D_ENABLE_EXTENDED_ALIGNED_STORAGE)'
+            )
 
-        cmake_file = os.path.join(self._source_subfolder, "CMakeLists.txt")
-        tools.replace_in_file(cmake_file, "project(MONGO_CXX_DRIVER LANGUAGES CXX)", conan_magic_lines)
-
-        # self._patch_sources()
+        self._patch_sources()
 
         cmake = self._configure_cmake()
         cmake.build()
 
     def package(self):
+        self.copy(pattern="LICENSE", dst="licenses", src=self._source_subfolder)
+        self.copy(pattern="THIRD-PARTY-NOTICES", dst="licenses", src=self._source_subfolder)
         cmake = self._configure_cmake()
         cmake.install()
+        tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
+        tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
 
     def package_info(self):
         # Need to ensure mongocxx is linked before bsoncxx
