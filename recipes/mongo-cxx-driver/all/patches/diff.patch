@@ -56,20 +56,6 @@ index b38f9af..7ec9d72 100644
  	endif()
      endif()
  
-diff --git a/src/CMakeLists.txt b/src/CMakeLists.txt
-index d1bf5e9..9a1ee89 100644
---- a/src/CMakeLists.txt
-+++ b/src/CMakeLists.txt
-@@ -13,6 +13,9 @@
- # limitations under the License.
- 
- add_definitions(-DMONGO_CXX_DRIVER_COMPILING)
-+add_definitions(-D_SCL_SECURE_NO_WARNINGS)
-+add_definitions(-D_SILENCE_CXX17_ITERATOR_BASE_CLASS_DEPRECATION_WARNING)
-+add_definitions(-D_DISABLE_EXTENDED_ALIGNED_STORAGE)
- add_subdirectory(bsoncxx)
- add_subdirectory(mongocxx)
- 
 diff --git a/src/bsoncxx/CMakeLists.txt b/src/bsoncxx/CMakeLists.txt
 index 7c79f45..0fcb305 100644
 --- a/src/bsoncxx/CMakeLists.txt

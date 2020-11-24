@@ -88,14 +88,6 @@ class MongoCxxConan(ConanFile):
             tools.patch(**patch)
 
     def build(self):
-        if self.settings.compiler == "Visual Studio":
-            cmake_file = os.path.join(self._source_subfolder, "../CMakeLists.txt")
-            tools.replace_in_file(
-                cmake_file,
-                'add_subdirectory("source_subfolder")',
-                'add_subdirectory("source_subfolder")\nadd_definitions(-D_ENABLE_EXTENDED_ALIGNED_STORAGE)'
-            )
-
         self._patch_sources()
 
         cmake = self._configure_cmake()
