@@ -4,10 +4,12 @@ import os
 
 class TestPackageConan(ConanFile):
     settings = "os", "compiler", "build_type", "arch"
-    generators = "cmake"
+    generators = "cmake", "cmake_find_package_multi"
 
     def build(self):
         cmake = CMake(self)
+        cmake.definitions["MONGO-CXX-DRIVER_SHARED"] = self.options["mongo-cxx-driver"].shared
+        cmake.definitions["MONGO-CXX-DRIVER_POLYFILL_STD"] = self.options["mongo-cxx-driver"].polyfill == "std"
         cmake.configure()
         cmake.build()
 

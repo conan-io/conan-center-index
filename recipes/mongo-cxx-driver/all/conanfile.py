@@ -116,15 +116,33 @@ class MongoCxxConan(ConanFile):
         tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
 
     def package_info(self):
-        # Need to ensure mongocxx is linked before bsoncxx
-        self.cpp_info.libs = sorted(tools.collect_libs(self), reverse=True)
-        self.cpp_info.includedirs.extend([os.path.join("include", lib, "v_noabi") for lib in ["bsoncxx", "mongocxx"]])
-        self.cpp_info.names["pkg_config"] = "libmongocxx"
-        self.cpp_info.names["cmake_find_package"] = "libmongocxx"
-        self.cpp_info.names["cmake_find_package_multi"] = "libmongocxx"
+        # FIXME: two CMake module/config files should be generated (mongocxx-config.cmake and bsoncxx-config.cmake),
+        # but it can't be modeled right now.
+        self.cpp_info.filenames["cmake_find_package"] = "mongocxx"
+        self.cpp_info.filenames["cmake_find_package_multi"] = "mongocxx"
+        self.cpp_info.names["cmake_find_package"] = "mongo"
+        self.cpp_info.names["cmake_find_package_multi"] = "mongo"
 
-        if self.options.polyfill == "mnmlstc":
-            self.cpp_info.includedirs.append(os.path.join("include", "bsoncxx", "third_party", "mnmlstc"))
-
+        # mongocxx
+        self.cpp_info.components["mongocxx"].names["cmake_find_package"] = "mongocxx_shared" if self.options.shared else "mongocxx_static"
+        self.cpp_info.components["mongocxx"].names["cmake_find_package_multi"] = "mongocxx_shared" if self.options.shared else "mongocxx_static"
+        self.cpp_info.components["mongocxx"].names["pkg_config"] = "libmongocxx"
+        self.cpp_info.components["mongocxx"].includedirs = [os.path.join("include", "lib", "v_noabi", "mongocxx")]
+        self.cpp_info.components["mongocxx"].libs = ["mongocxx" if self.options.shared else "mongocxx-static"]
         if not self.options.shared:
-            self.cpp_info.defines.extend(["BSONCXX_STATIC", "MONGOCXX_STATIC"])
+            self.cpp_info.components["mongocxx"].defines = ["MONGOCXX_STATIC"]
+        self.cpp_info.components["mongocxx"].requires = ["mongo-c-driver::mongoc", "bsoncxx"]
+
+        # bsoncxx
+        self.cpp_info.components["bsoncxx"].names["cmake_find_package"] = "bsoncxx_shared" if self.options.shared else "bsoncxx_static"
+        self.cpp_info.components["bsoncxx"].names["cmake_find_package_multi"] = "bsoncxx_shared" if self.options.shared else "bsoncxx_static"
+        self.cpp_info.components["bsoncxx"].names["pkg_config"] = "libbsoncxx" if self.options.shared else "libbsoncxx-static"
+        self.cpp_info.components["bsoncxx"].includedirs = [os.path.join("include", "lib", "v_noabi", "bsoncxx")]
+        self.cpp_info.components["bsoncxx"].libs = ["bsoncxx" if self.options.shared else "bsoncxx-static"]
+        if not self.options.shared:
+            self.cpp_info.components["bsoncxx"].defines = ["BSONCXX_STATIC"]
+        self.cpp_info.components["bsoncxx"].requires = ["mongo-c-driver::bson"]
+        if self.options.polyfill == "boost":
+            self.cpp_info.components["bsoncxx"].requires.append("boost::boost")
+        if self.options.polyfill == "mnmlstc":
+            self.cpp_info.components["bsoncxx"].includedirs.append(os.path.join("include", "bsoncxx", "third_party", "mnmlstc"))
