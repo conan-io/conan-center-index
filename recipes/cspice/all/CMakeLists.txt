@@ -15,6 +15,13 @@ elseif(UNIX)
   target_compile_options(cspice PRIVATE -ansi)
 endif()
 
+# Behavior of implicitly defined functions changed in AppleClang 12
+# https://developer.apple.com/documentation/xcode-release-notes/xcode-12-release-notes
+if(CMAKE_C_COMPILER_ID STREQUAL "AppleClang" AND 
+   CMAKE_C_COMPILER_VERSION VERSION_GREATER_EQUAL "12")
+   target_compile_options(cspice PRIVATE -Wno-error=implicit-function-declaration)
+endif()
+
 install(
   TARGETS cspice
   EXPORT cspice
