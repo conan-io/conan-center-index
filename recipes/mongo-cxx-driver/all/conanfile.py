@@ -1,6 +1,7 @@
 from conans import ConanFile, CMake, tools
 from conans.errors import ConanInvalidConfiguration
 import os
+import glob
 import shutil
 
 
@@ -107,7 +108,10 @@ class MongoCxxConan(ConanFile):
         cmake = self._configure_cmake()
         cmake.install()
 
-        tools.rmdir(os.path.join(self.package_folder, "bin"))
+        if self.settings.os == "Windows":
+            for dll_file in glob.glob(os.path.join(self.package_folder, "bin", "*.dll")):
+                if os.path.basename(dll_file).startswith(("concrt", "msvcp", "vcruntime")):
+                    os.remove(dll_file)
         tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
         tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
 
