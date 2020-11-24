@@ -42,7 +42,7 @@ class DepotToolsConan(ConanFile):
         tools.get(**self.conan_data["sources"][self.version], destination=self._source_subfolder)
         self._dereference_symlinks()
 
-        for patch in self.conan_data["patches"][self.version]:
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
             tools.patch(**patch)
 
     def package(self):
