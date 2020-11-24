@@ -90,12 +90,10 @@ class OpenmpiConan(ConanFile):
         self.copy("*", src=include_dir, dst="include")
 
     def package_info(self):
-        self.cpp_info.libs = ['mpi', 'open-rte', 'open-pal']
+        self.cpp_info.libs = ["mpi", "open-rte", "open-pal"]
         if self.settings.os == "Linux":
-            self.cpp_info.libs.extend(['dl', 'pthread', 'rt', 'util'])
+            self.cpp_info.system_libs = ["dl", "pthread", "rt", "util"]
         self.env_info.MPI_HOME = self.package_folder
-        self.env_info.OPAL_PREFIX = self.package_folder
         mpi_bin = path.join(self.package_folder, "bin")
         self.env_info.MPI_BIN = mpi_bin
         self.env_info.PATH.append(mpi_bin)
-        self.cpp_info.libdirs = ["lib"]
