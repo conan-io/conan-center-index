@@ -1,13 +1,13 @@
 import os
 import shutil
 
-from conans import ConanFile, tools, Meson, RunEnvironment
+from conans import ConanFile, tools, Meson, RunEnvironment, CMake
 from conans.errors import ConanException
 
 
 class TestPackageConan(ConanFile):
     settings = "os", "compiler", "build_type", "arch"
-    generators = "qt"
+    generators = "qt", "cmake", "cmake_find_package_multi"
 
     def build_requirements(self):
         if tools.os_info.is_windows and self.settings.compiler == "Visual Studio":
@@ -73,9 +73,22 @@ class TestPackageConan(ConanFile):
                     raise
                 meson.build()
 
+    def _build_with_cmake_find_package_multi(self):
+        self.output.info("Building with cmake_find_package_multi")
+        env_build = RunEnvironment(self)
+        with tools.environment_append(env_build.vars):
+            cmake = CMake(self, set_cmake_flags=True)
+            if self.settings.os == "Macos":
+                cmake.definitions['CMAKE_OSX_DEPLOYMENT_TARGET'] = '10.14'
+
+            self.run("moc %s -o moc_greeter.cpp" % os.path.join(self.source_folder, "greeter.h"), run_environment=True)
+            cmake.configure()
+            cmake.build()
+
     def build(self):
         self._build_with_qmake()
         self._build_with_meson()
+        self._build_with_cmake_find_package_multi()
 
     def _test_with_qmake(self):
         self.output.info("Testing qmake")
@@ -90,8 +103,14 @@ class TestPackageConan(ConanFile):
             self.output.info("Testing Meson")
             shutil.copy("qt.conf", "meson_folder")
             self.run(os.path.join("meson_folder", "test_package"), run_environment=True)
+    
+    def _test_with_cmake_find_package_multi(self):
+        self.output.info("Testing CMake_find_package_multi")
+        shutil.copy("qt.conf", "bin")
+        self.run(os.path.join("bin", "test_package"), run_environment=True)
 
     def test(self):
         if not tools.cross_building(self.settings, skip_x64_x86=True):
             self._test_with_qmake()
             self._test_with_meson()
+            self._test_with_cmake_find_package_multi()
