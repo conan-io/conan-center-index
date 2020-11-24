@@ -119,6 +119,9 @@ class MongoCxxConan(ConanFile):
         # Need to ensure mongocxx is linked before bsoncxx
         self.cpp_info.libs = sorted(tools.collect_libs(self), reverse=True)
         self.cpp_info.includedirs.extend([os.path.join("include", lib, "v_noabi") for lib in ["bsoncxx", "mongocxx"]])
+        self.cpp_info.names["pkg_config"] = "libmongocxx"
+        self.cpp_info.names["cmake_find_package"] = "libmongocxx"
+        self.cpp_info.names["cmake_find_package_multi"] = "libmongocxx"
 
         if self.options.polyfill == "mnmlstc":
             self.cpp_info.includedirs.append(os.path.join("include", "bsoncxx", "third_party", "mnmlstc"))
