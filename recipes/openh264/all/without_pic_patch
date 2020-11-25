@@ -1,0 +1,309 @@
+[HOOK - conan-center.py] pre_export(): [DEPRECATED GLOBAL CPPSTD (KB-H001)] OK
+[HOOK - conan-center.py] pre_export(): [REFERENCE LOWERCASE (KB-H002)] OK
+[HOOK - conan-center.py] pre_export(): [RECIPE METADATA (KB-H003)] OK
+[HOOK - conan-center.py] pre_export(): [HEADER_ONLY, NO COPY SOURCE (KB-H005)] OK
+[HOOK - conan-center.py] pre_export(): [FPIC OPTION (KB-H006)] OK
+[HOOK - conan-center.py] pre_export(): [VERSION RANGES (KB-H008)] OK
+[HOOK - conan-center.py] pre_export(): [RECIPE FOLDER SIZE (KB-H009)] Total recipe size: 73.482421875 KB
+[HOOK - conan-center.py] pre_export(): [RECIPE FOLDER SIZE (KB-H009)] OK
+[HOOK - conan-center.py] pre_export(): [EXPORT LICENSE (KB-H023)] exports: None
+[HOOK - conan-center.py] pre_export(): [EXPORT LICENSE (KB-H023)] exports: patches/**
+[HOOK - conan-center.py] pre_export(): [EXPORT LICENSE (KB-H023)] OK
+[HOOK - conan-center.py] pre_export(): [TEST PACKAGE FOLDER (KB-H024)] OK
+[HOOK - conan-center.py] pre_export(): [META LINES (KB-H025)] OK
+[HOOK - conan-center.py] pre_export(): [CONAN CENTER INDEX URL (KB-H027)] OK
+[HOOK - conan-center.py] pre_export(): [CMAKE MINIMUM VERSION (KB-H028)] OK
+[HOOK - conan-center.py] pre_export(): [TEST PACKAGE - RUN ENVIRONMENT (KB-H029)] OK
+[HOOK - conan-center.py] pre_export(): [SYSTEM REQUIREMENTS (KB-H032)] OK
+[HOOK - conan-center.py] pre_export(): [CONANDATA.YML FORMAT (KB-H030)] OK
+[HOOK - conan-center.py] pre_export(): [TEST PACKAGE - NO IMPORTS() (KB-H034)] OK
+[HOOK - conan-center.py] pre_export(): [NO AUTHOR (KB-H037)] OK
+[HOOK - conan-center.py] pre_export(): [NO TARGET NAME (KB-H040)] OK
+[HOOK - conan-center.py] pre_export(): [NO FINAL ENDLINE (KB-H041)] OK
+[HOOK - conan-center.py] pre_export(): [NO REQUIRES.ADD() (KB-H044)] OK
+[HOOK - conan-center.py] pre_export(): [DELETE OPTIONS (KB-H045)] OK
+[HOOK - conan-center.py] pre_export(): [NO ASCII CHARACTERS (KB-H047)] OK
+[HOOK - conan-center.py] pre_export(): [CMAKE VERBOSE MAKEFILE (KB-H046)] OK
+[HOOK - conan-center.py] pre_export(): [CMAKE VERSION REQUIRED (KB-H048)] OK
+[HOOK - conan-center.py] pre_export(): [CMAKE WINDOWS EXPORT ALL SYMBOLS (KB-H049)] OK
+[HOOK - conan-center.py] pre_export(): [DEFAULT OPTIONS AS DICTIONARY (KB-H051)] OK
+[HOOK - conan-center.py] pre_export(): [CONFIG.YML HAS NEW VERSION (KB-H052)] OK
+Exporting package recipe
+openh264/1.7.0 exports: File 'conandata.yml' found. Exporting it...
+openh264/1.7.0 exports: Copied 1 '.yml' file: conandata.yml
+openh264/1.7.0 exports_sources: Copied 2 '.patch' files: 1.7.0-0001-platform-android.mk.patch, 1.7.0-0002-no-fpic.patch
+[HOOK - conan-center.py] post_export(): [CONANDATA.YML REDUCE (KB-H031)] Saving conandata.yml: {'sources': {'1.7.0': {'url': 'https://github.com/cisco/openh264/archive/v1.7.0.tar.gz', 'sha256': '9c07c38d7de00046c9c52b12c76a2af7648b70d05bd5460c8b67f6895738653f'}}, 'patches': {'1.7.0': [{'base_path': 'source_subfolder', 'patch_file': 'patches/1.7.0-0001-platform-android.mk.patch'}]}}
+[HOOK - conan-center.py] post_export(): [CONANDATA.YML REDUCE (KB-H031)] New conandata.yml contents: patches:
+  1.7.0:
+  - base_path: source_subfolder
+    patch_file: patches/1.7.0-0001-platform-android.mk.patch
+sources:
+  1.7.0:
+    sha256: 9c07c38d7de00046c9c52b12c76a2af7648b70d05bd5460c8b67f6895738653f
+    url: https://github.com/cisco/openh264/archive/v1.7.0.tar.gz
+
+[HOOK - conan-center.py] post_export(): [CONANDATA.YML REDUCE (KB-H031)] OK
+[HOOK - conan-center.py] post_export(): [DEFAULT SHARED OPTION VALUE (KB-H050)] OK
+openh264/1.7.0: A new conanfile.py version was exported
+openh264/1.7.0: Folder: /home/maarten/.conan/data/openh264/1.7.0/_/_/export
+openh264/1.7.0: Package recipe modified in export, forcing source folder removal
+openh264/1.7.0: Use the --keep-source, -k option to skip it
+openh264/1.7.0: Exported revision: 66d584b12da7b4da2213762a6fb943ca
+Configuration:
+[settings]
+arch=x86_64
+arch_build=x86_64
+build_type=Release
+compiler=clang
+compiler.libcxx=libstdc++
+compiler.version=8
+os=Linux
+os_build=Linux
+[options]
+openh264:fPIC=False
+[build_requires]
+[env]
+CC=/usr/bin/clang
+CXX=/usr/bin/clang++
+openh264/1.7.0: Forced build from source
+openh264/1.7.0 (test package): Installing package
+Requirements
+    openh264/1.7.0 from local cache - Cache
+Packages
+    openh264/1.7.0:7f24cae6673376bf862ec3e1742ec059030d1def - Build
+Build requirements
+    nasm/2.14 from 'conan-center' - Cache
+Build requirements packages
+    nasm/2.14:24647d9fe8ec489125dfbae4b3ebefaf7581674c - Cache
+
+Installing (downloading, building) binaries...
+nasm/2.14: Already installed!
+nasm/2.14: Appending PATH environment variable: /home/maarten/.conan/data/nasm/2.14/_/_/package/24647d9fe8ec489125dfbae4b3ebefaf7581674c/bin
+[HOOK - conan-center.py] post_package_info(): [CMAKE FILE NOT IN BUILD FOLDERS (KB-H019)] OK
+openh264/1.7.0: Applying build-requirement: nasm/2.14
+[HOOK - conan-center.py] pre_source(): [IMMUTABLE SOURCES (KB-H010)] OK
+openh264/1.7.0: Configuring sources in /home/maarten/.conan/data/openh264/1.7.0/_/_/source
+
+[HOOK - conan-center.py] post_source(): [LIBCXX MANAGEMENT (KB-H011)] OK
+[HOOK - conan-center.py] post_source(): [CPPSTD MANAGEMENT (KB-H022)] OK
+openh264/1.7.0: Copying sources to build folder
+openh264/1.7.0: Building your package in /home/maarten/.conan/data/openh264/1.7.0/_/_/build/7f24cae6673376bf862ec3e1742ec059030d1def
+openh264/1.7.0: Generator txt created conanbuildinfo.txt
+[HOOK - conan-center.py] pre_build(): [FPIC MANAGEMENT (KB-H007)] 'fPIC' option not found
+[HOOK - conan-center.py] pre_build(): [FPIC MANAGEMENT (KB-H007)] OK
+openh264/1.7.0: Calling build()
+
+----Running------
+> make libopenh264.so 'ARCH=x86_64' -j8
+-----------------
+/usr/bin/clang++ -m64 -O3 -O3 -DNDEBUG -m64 -DX86_ASM -DHAVE_AVX2 -Wall -fno-strict-aliasing -fPIC -MMD -MP -DGENERATED_VERSION_HEADER -m64 -O3 -stdlib=libstdc++ -DHAVE_AVX2 -I./codec/api/svc -I./codec/common/inc -Icodec/common/inc  -I./codec/encoder/core/inc -I./codec/encoder/plus/inc -I./codec/processing/interface -c -o codec/encoder/core/src/au_set.o codec/encoder/core/src/au_set.cpp
+/usr/bin/clang++ -m64 -O3 -O3 -DNDEBUG -m64 -DX86_ASM -DHAVE_AVX2 -Wall -fno-strict-aliasing -fPIC -MMD -MP -DGENERATED_VERSION_HEADER -m64 -O3 -stdlib=libstdc++ -DHAVE_AVX2 -I./codec/api/svc -I./codec/common/inc -Icodec/common/inc  -I./codec/encoder/core/inc -I./codec/encoder/plus/inc -I./codec/processing/interface -c -o codec/encoder/core/src/deblocking.o codec/encoder/core/src/deblocking.cpp
+/usr/bin/clang++ -m64 -O3 -O3 -DNDEBUG -m64 -DX86_ASM -DHAVE_AVX2 -Wall -fno-strict-aliasing -fPIC -MMD -MP -DGENERATED_VERSION_HEADER -m64 -O3 -stdlib=libstdc++ -DHAVE_AVX2 -I./codec/api/svc -I./codec/common/inc -Icodec/common/inc  -I./codec/encoder/core/inc -I./codec/encoder/plus/inc -I./codec/processing/interface -c -o codec/encoder/core/src/decode_mb_aux.o codec/encoder/core/src/decode_mb_aux.cpp
+/usr/bin/clang++ -m64 -O3 -O3 -DNDEBUG -m64 -DX86_ASM -DHAVE_AVX2 -Wall -fno-strict-aliasing -fPIC -MMD -MP -DGENERATED_VERSION_HEADER -m64 -O3 -stdlib=libstdc++ -DHAVE_AVX2 -I./codec/api/svc -I./codec/common/inc -Icodec/common/inc  -I./codec/encoder/core/inc -I./codec/encoder/plus/inc -I./codec/processing/interface -c -o codec/encoder/core/src/encode_mb_aux.o codec/encoder/core/src/encode_mb_aux.cpp
+/usr/bin/clang++ -m64 -O3 -O3 -DNDEBUG -m64 -DX86_ASM -DHAVE_AVX2 -Wall -fno-strict-aliasing -fPIC -MMD -MP -DGENERATED_VERSION_HEADER -m64 -O3 -stdlib=libstdc++ -DHAVE_AVX2 -I./codec/api/svc -I./codec/common/inc -Icodec/common/inc  -I./codec/encoder/core/inc -I./codec/encoder/plus/inc -I./codec/processing/interface -c -o codec/encoder/core/src/encoder.o codec/encoder/core/src/encoder.cpp
+/usr/bin/clang++ -m64 -O3 -O3 -DNDEBUG -m64 -DX86_ASM -DHAVE_AVX2 -Wall -fno-strict-aliasing -fPIC -MMD -MP -DGENERATED_VERSION_HEADER -m64 -O3 -stdlib=libstdc++ -DHAVE_AVX2 -I./codec/api/svc -I./codec/common/inc -Icodec/common/inc  -I./codec/encoder/core/inc -I./codec/encoder/plus/inc -I./codec/processing/interface -c -o codec/encoder/core/src/encoder_data_tables.o codec/encoder/core/src/encoder_data_tables.cpp
+/usr/bin/clang++ -m64 -O3 -O3 -DNDEBUG -m64 -DX86_ASM -DHAVE_AVX2 -Wall -fno-strict-aliasing -fPIC -MMD -MP -DGENERATED_VERSION_HEADER -m64 -O3 -stdlib=libstdc++ -DHAVE_AVX2 -I./codec/api/svc -I./codec/common/inc -Icodec/common/inc  -I./codec/encoder/core/inc -I./codec/encoder/plus/inc -I./codec/processing/interface -c -o codec/encoder/core/src/encoder_ext.o codec/encoder/core/src/encoder_ext.cpp
+/usr/bin/clang++ -m64 -O3 -O3 -DNDEBUG -m64 -DX86_ASM -DHAVE_AVX2 -Wall -fno-strict-aliasing -fPIC -MMD -MP -DGENERATED_VERSION_HEADER -m64 -O3 -stdlib=libstdc++ -DHAVE_AVX2 -I./codec/api/svc -I./codec/common/inc -Icodec/common/inc  -I./codec/encoder/core/inc -I./codec/encoder/plus/inc -I./codec/processing/interface -c -o codec/encoder/core/src/get_intra_predictor.o codec/encoder/core/src/get_intra_predictor.cpp
+/usr/bin/clang++ -m64 -O3 -O3 -DNDEBUG -m64 -DX86_ASM -DHAVE_AVX2 -Wall -fno-strict-aliasing -fPIC -MMD -MP -DGENERATED_VERSION_HEADER -m64 -O3 -stdlib=libstdc++ -DHAVE_AVX2 -I./codec/api/svc -I./codec/common/inc -Icodec/common/inc  -I./codec/encoder/core/inc -I./codec/encoder/plus/inc -I./codec/processing/interface -c -o codec/encoder/core/src/md.o codec/encoder/core/src/md.cpp
+/usr/bin/clang++ -m64 -O3 -O3 -DNDEBUG -m64 -DX86_ASM -DHAVE_AVX2 -Wall -fno-strict-aliasing -fPIC -MMD -MP -DGENERATED_VERSION_HEADER -m64 -O3 -stdlib=libstdc++ -DHAVE_AVX2 -I./codec/api/svc -I./codec/common/inc -Icodec/common/inc  -I./codec/encoder/core/inc -I./codec/encoder/plus/inc -I./codec/processing/interface -c -o codec/encoder/core/src/mv_pred.o codec/encoder/core/src/mv_pred.cpp
+/usr/bin/clang++ -m64 -O3 -O3 -DNDEBUG -m64 -DX86_ASM -DHAVE_AVX2 -Wall -fno-strict-aliasing -fPIC -MMD -MP -DGENERATED_VERSION_HEADER -m64 -O3 -stdlib=libstdc++ -DHAVE_AVX2 -I./codec/api/svc -I./codec/common/inc -Icodec/common/inc  -I./codec/encoder/core/inc -I./codec/encoder/plus/inc -I./codec/processing/interface -c -o codec/encoder/core/src/nal_encap.o codec/encoder/core/src/nal_encap.cpp
+/usr/bin/clang++ -m64 -O3 -O3 -DNDEBUG -m64 -DX86_ASM -DHAVE_AVX2 -Wall -fno-strict-aliasing -fPIC -MMD -MP -DGENERATED_VERSION_HEADER -m64 -O3 -stdlib=libstdc++ -DHAVE_AVX2 -I./codec/api/svc -I./codec/common/inc -Icodec/common/inc  -I./codec/encoder/core/inc -I./codec/encoder/plus/inc -I./codec/processing/interface -c -o codec/encoder/core/src/paraset_strategy.o codec/encoder/core/src/paraset_strategy.cpp
+/usr/bin/clang++ -m64 -O3 -O3 -DNDEBUG -m64 -DX86_ASM -DHAVE_AVX2 -Wall -fno-strict-aliasing -fPIC -MMD -MP -DGENERATED_VERSION_HEADER -m64 -O3 -stdlib=libstdc++ -DHAVE_AVX2 -I./codec/api/svc -I./codec/common/inc -Icodec/common/inc  -I./codec/encoder/core/inc -I./codec/encoder/plus/inc -I./codec/processing/interface -c -o codec/encoder/core/src/picture_handle.o codec/encoder/core/src/picture_handle.cpp
+/usr/bin/clang++ -m64 -O3 -O3 -DNDEBUG -m64 -DX86_ASM -DHAVE_AVX2 -Wall -fno-strict-aliasing -fPIC -MMD -MP -DGENERATED_VERSION_HEADER -m64 -O3 -stdlib=libstdc++ -DHAVE_AVX2 -I./codec/api/svc -I./codec/common/inc -Icodec/common/inc  -I./codec/encoder/core/inc -I./codec/encoder/plus/inc -I./codec/processing/interface -c -o codec/encoder/core/src/ratectl.o codec/encoder/core/src/ratectl.cpp
+/usr/bin/clang++ -m64 -O3 -O3 -DNDEBUG -m64 -DX86_ASM -DHAVE_AVX2 -Wall -fno-strict-aliasing -fPIC -MMD -MP -DGENERATED_VERSION_HEADER -m64 -O3 -stdlib=libstdc++ -DHAVE_AVX2 -I./codec/api/svc -I./codec/common/inc -Icodec/common/inc  -I./codec/encoder/core/inc -I./codec/encoder/plus/inc -I./codec/processing/interface -c -o codec/encoder/core/src/ref_list_mgr_svc.o codec/encoder/core/src/ref_list_mgr_svc.cpp
+/usr/bin/clang++ -m64 -O3 -O3 -DNDEBUG -m64 -DX86_ASM -DHAVE_AVX2 -Wall -fno-strict-aliasing -fPIC -MMD -MP -DGENERATED_VERSION_HEADER -m64 -O3 -stdlib=libstdc++ -DHAVE_AVX2 -I./codec/api/svc -I./codec/common/inc -Icodec/common/inc  -I./codec/encoder/core/inc -I./codec/encoder/plus/inc -I./codec/processing/interface -c -o codec/encoder/core/src/sample.o codec/encoder/core/src/sample.cpp
+/usr/bin/clang++ -m64 -O3 -O3 -DNDEBUG -m64 -DX86_ASM -DHAVE_AVX2 -Wall -fno-strict-aliasing -fPIC -MMD -MP -DGENERATED_VERSION_HEADER -m64 -O3 -stdlib=libstdc++ -DHAVE_AVX2 -I./codec/api/svc -I./codec/common/inc -Icodec/common/inc  -I./codec/encoder/core/inc -I./codec/encoder/plus/inc -I./codec/processing/interface -c -o codec/encoder/core/src/set_mb_syn_cabac.o codec/encoder/core/src/set_mb_syn_cabac.cpp
+/usr/bin/clang++ -m64 -O3 -O3 -DNDEBUG -m64 -DX86_ASM -DHAVE_AVX2 -Wall -fno-strict-aliasing -fPIC -MMD -MP -DGENERATED_VERSION_HEADER -m64 -O3 -stdlib=libstdc++ -DHAVE_AVX2 -I./codec/api/svc -I./codec/common/inc -Icodec/common/inc  -I./codec/encoder/core/inc -I./codec/encoder/plus/inc -I./codec/processing/interface -c -o codec/encoder/core/src/set_mb_syn_cavlc.o codec/encoder/core/src/set_mb_syn_cavlc.cpp
+/usr/bin/clang++ -m64 -O3 -O3 -DNDEBUG -m64 -DX86_ASM -DHAVE_AVX2 -Wall -fno-strict-aliasing -fPIC -MMD -MP -DGENERATED_VERSION_HEADER -m64 -O3 -stdlib=libstdc++ -DHAVE_AVX2 -I./codec/api/svc -I./codec/common/inc -Icodec/common/inc  -I./codec/encoder/core/inc -I./codec/encoder/plus/inc -I./codec/processing/interface -c -o codec/encoder/core/src/slice_multi_threading.o codec/encoder/core/src/slice_multi_threading.cpp
+/usr/bin/clang++ -m64 -O3 -O3 -DNDEBUG -m64 -DX86_ASM -DHAVE_AVX2 -Wall -fno-strict-aliasing -fPIC -MMD -MP -DGENERATED_VERSION_HEADER -m64 -O3 -stdlib=libstdc++ -DHAVE_AVX2 -I./codec/api/svc -I./codec/common/inc -Icodec/common/inc  -I./codec/encoder/core/inc -I./codec/encoder/plus/inc -I./codec/processing/interface -c -o codec/encoder/core/src/svc_base_layer_md.o codec/encoder/core/src/svc_base_layer_md.cpp
+/usr/bin/clang++ -m64 -O3 -O3 -DNDEBUG -m64 -DX86_ASM -DHAVE_AVX2 -Wall -fno-strict-aliasing -fPIC -MMD -MP -DGENERATED_VERSION_HEADER -m64 -O3 -stdlib=libstdc++ -DHAVE_AVX2 -I./codec/api/svc -I./codec/common/inc -Icodec/common/inc  -I./codec/encoder/core/inc -I./codec/encoder/plus/inc -I./codec/processing/interface -c -o codec/encoder/core/src/svc_enc_slice_segment.o codec/encoder/core/src/svc_enc_slice_segment.cpp
+/usr/bin/clang++ -m64 -O3 -O3 -DNDEBUG -m64 -DX86_ASM -DHAVE_AVX2 -Wall -fno-strict-aliasing -fPIC -MMD -MP -DGENERATED_VERSION_HEADER -m64 -O3 -stdlib=libstdc++ -DHAVE_AVX2 -I./codec/api/svc -I./codec/common/inc -Icodec/common/inc  -I./codec/encoder/core/inc -I./codec/encoder/plus/inc -I./codec/processing/interface -c -o codec/encoder/core/src/svc_encode_mb.o codec/encoder/core/src/svc_encode_mb.cpp
+/usr/bin/clang++ -m64 -O3 -O3 -DNDEBUG -m64 -DX86_ASM -DHAVE_AVX2 -Wall -fno-strict-aliasing -fPIC -MMD -MP -DGENERATED_VERSION_HEADER -m64 -O3 -stdlib=libstdc++ -DHAVE_AVX2 -I./codec/api/svc -I./codec/common/inc -Icodec/common/inc  -I./codec/encoder/core/inc -I./codec/encoder/plus/inc -I./codec/processing/interface -c -o codec/encoder/core/src/svc_encode_slice.o codec/encoder/core/src/svc_encode_slice.cpp
+/usr/bin/clang++ -m64 -O3 -O3 -DNDEBUG -m64 -DX86_ASM -DHAVE_AVX2 -Wall -fno-strict-aliasing -fPIC -MMD -MP -DGENERATED_VERSION_HEADER -m64 -O3 -stdlib=libstdc++ -DHAVE_AVX2 -I./codec/api/svc -I./codec/common/inc -Icodec/common/inc  -I./codec/encoder/core/inc -I./codec/encoder/plus/inc -I./codec/processing/interface -c -o codec/encoder/core/src/svc_mode_decision.o codec/encoder/core/src/svc_mode_decision.cpp
+/usr/bin/clang++ -m64 -O3 -O3 -DNDEBUG -m64 -DX86_ASM -DHAVE_AVX2 -Wall -fno-strict-aliasing -fPIC -MMD -MP -DGENERATED_VERSION_HEADER -m64 -O3 -stdlib=libstdc++ -DHAVE_AVX2 -I./codec/api/svc -I./codec/common/inc -Icodec/common/inc  -I./codec/encoder/core/inc -I./codec/encoder/plus/inc -I./codec/processing/interface -c -o codec/encoder/core/src/svc_motion_estimate.o codec/encoder/core/src/svc_motion_estimate.cpp
+/usr/bin/clang++ -m64 -O3 -O3 -DNDEBUG -m64 -DX86_ASM -DHAVE_AVX2 -Wall -fno-strict-aliasing -fPIC -MMD -MP -DGENERATED_VERSION_HEADER -m64 -O3 -stdlib=libstdc++ -DHAVE_AVX2 -I./codec/api/svc -I./codec/common/inc -Icodec/common/inc  -I./codec/encoder/core/inc -I./codec/encoder/plus/inc -I./codec/processing/interface -c -o codec/encoder/core/src/svc_set_mb_syn_cabac.o codec/encoder/core/src/svc_set_mb_syn_cabac.cpp
+/usr/bin/clang++ -m64 -O3 -O3 -DNDEBUG -m64 -DX86_ASM -DHAVE_AVX2 -Wall -fno-strict-aliasing -fPIC -MMD -MP -DGENERATED_VERSION_HEADER -m64 -O3 -stdlib=libstdc++ -DHAVE_AVX2 -I./codec/api/svc -I./codec/common/inc -Icodec/common/inc  -I./codec/encoder/core/inc -I./codec/encoder/plus/inc -I./codec/processing/interface -c -o codec/encoder/core/src/svc_set_mb_syn_cavlc.o codec/encoder/core/src/svc_set_mb_syn_cavlc.cpp
+/usr/bin/clang++ -m64 -O3 -O3 -DNDEBUG -m64 -DX86_ASM -DHAVE_AVX2 -Wall -fno-strict-aliasing -fPIC -MMD -MP -DGENERATED_VERSION_HEADER -m64 -O3 -stdlib=libstdc++ -DHAVE_AVX2 -I./codec/api/svc -I./codec/common/inc -Icodec/common/inc  -I./codec/encoder/core/inc -I./codec/encoder/plus/inc -I./codec/processing/interface -c -o codec/encoder/core/src/wels_preprocess.o codec/encoder/core/src/wels_preprocess.cpp
+/usr/bin/clang++ -m64 -O3 -O3 -DNDEBUG -m64 -DX86_ASM -DHAVE_AVX2 -Wall -fno-strict-aliasing -fPIC -MMD -MP -DGENERATED_VERSION_HEADER -m64 -O3 -stdlib=libstdc++ -DHAVE_AVX2 -I./codec/api/svc -I./codec/common/inc -Icodec/common/inc  -I./codec/encoder/core/inc -I./codec/encoder/plus/inc -I./codec/processing/interface -c -o codec/encoder/core/src/wels_task_base.o codec/encoder/core/src/wels_task_base.cpp
+/usr/bin/clang++ -m64 -O3 -O3 -DNDEBUG -m64 -DX86_ASM -DHAVE_AVX2 -Wall -fno-strict-aliasing -fPIC -MMD -MP -DGENERATED_VERSION_HEADER -m64 -O3 -stdlib=libstdc++ -DHAVE_AVX2 -I./codec/api/svc -I./codec/common/inc -Icodec/common/inc  -I./codec/encoder/core/inc -I./codec/encoder/plus/inc -I./codec/processing/interface -c -o codec/encoder/core/src/wels_task_encoder.o codec/encoder/core/src/wels_task_encoder.cpp
+/usr/bin/clang++ -m64 -O3 -O3 -DNDEBUG -m64 -DX86_ASM -DHAVE_AVX2 -Wall -fno-strict-aliasing -fPIC -MMD -MP -DGENERATED_VERSION_HEADER -m64 -O3 -stdlib=libstdc++ -DHAVE_AVX2 -I./codec/api/svc -I./codec/common/inc -Icodec/common/inc  -I./codec/encoder/core/inc -I./codec/encoder/plus/inc -I./codec/processing/interface -c -o codec/encoder/core/src/wels_task_management.o codec/encoder/core/src/wels_task_management.cpp
+sh ./codec/common/generate_version.sh ./
+fatal: not a git repository (or any parent up to mount point /)
+Stopping at filesystem boundary (GIT_DISCOVERY_ACROSS_FILESYSTEM not set).
+Generated codec/common/inc/version_gen.h
+nasm -DUNIX64 -DHAVE_AVX2 -f elf64 -I./codec/common/x86/   -o codec/encoder/core/x86/coeff.o codec/encoder/core/x86/coeff.asm
+nasm -DUNIX64 -DHAVE_AVX2 -f elf64 -I./codec/common/x86/   -o codec/encoder/core/x86/dct.o codec/encoder/core/x86/dct.asm
+nasm -DUNIX64 -DHAVE_AVX2 -f elf64 -I./codec/common/x86/   -o codec/encoder/core/x86/intra_pred.o codec/encoder/core/x86/intra_pred.asm
+nasm -DUNIX64 -DHAVE_AVX2 -f elf64 -I./codec/common/x86/   -o codec/encoder/core/x86/matrix_transpose.o codec/encoder/core/x86/matrix_transpose.asm
+nasm -DUNIX64 -DHAVE_AVX2 -f elf64 -I./codec/common/x86/   -o codec/encoder/core/x86/memzero.o codec/encoder/core/x86/memzero.asm
+nasm -DUNIX64 -DHAVE_AVX2 -f elf64 -I./codec/common/x86/   -o codec/encoder/core/x86/quant.o codec/encoder/core/x86/quant.asm
+nasm -DUNIX64 -DHAVE_AVX2 -f elf64 -I./codec/common/x86/   -o codec/encoder/core/x86/sample_sc.o codec/encoder/core/x86/sample_sc.asm
+nasm -DUNIX64 -DHAVE_AVX2 -f elf64 -I./codec/common/x86/   -o codec/encoder/core/x86/score.o codec/encoder/core/x86/score.asm
+/usr/bin/clang++ -m64 -O3 -O3 -DNDEBUG -m64 -DX86_ASM -DHAVE_AVX2 -Wall -fno-strict-aliasing -fPIC -MMD -MP -DGENERATED_VERSION_HEADER -m64 -O3 -stdlib=libstdc++ -DHAVE_AVX2 -I./codec/api/svc -I./codec/common/inc -Icodec/common/inc  -I./codec/decoder/core/inc -I./codec/decoder/plus/inc -c -o codec/decoder/core/src/au_parser.o codec/decoder/core/src/au_parser.cpp
+/usr/bin/clang++ -m64 -O3 -O3 -DNDEBUG -m64 -DX86_ASM -DHAVE_AVX2 -Wall -fno-strict-aliasing -fPIC -MMD -MP -DGENERATED_VERSION_HEADER -m64 -O3 -stdlib=libstdc++ -DHAVE_AVX2 -I./codec/api/svc -I./codec/common/inc -Icodec/common/inc  -I./codec/decoder/core/inc -I./codec/decoder/plus/inc -c -o codec/decoder/core/src/bit_stream.o codec/decoder/core/src/bit_stream.cpp
+/usr/bin/clang++ -m64 -O3 -O3 -DNDEBUG -m64 -DX86_ASM -DHAVE_AVX2 -Wall -fno-strict-aliasing -fPIC -MMD -MP -DGENERATED_VERSION_HEADER -m64 -O3 -stdlib=libstdc++ -DHAVE_AVX2 -I./codec/api/svc -I./codec/common/inc -Icodec/common/inc  -I./codec/decoder/core/inc -I./codec/decoder/plus/inc -c -o codec/decoder/core/src/cabac_decoder.o codec/decoder/core/src/cabac_decoder.cpp
+/usr/bin/clang++ -m64 -O3 -O3 -DNDEBUG -m64 -DX86_ASM -DHAVE_AVX2 -Wall -fno-strict-aliasing -fPIC -MMD -MP -DGENERATED_VERSION_HEADER -m64 -O3 -stdlib=libstdc++ -DHAVE_AVX2 -I./codec/api/svc -I./codec/common/inc -Icodec/common/inc  -I./codec/decoder/core/inc -I./codec/decoder/plus/inc -c -o codec/decoder/core/src/deblocking.o codec/decoder/core/src/deblocking.cpp
+/usr/bin/clang++ -m64 -O3 -O3 -DNDEBUG -m64 -DX86_ASM -DHAVE_AVX2 -Wall -fno-strict-aliasing -fPIC -MMD -MP -DGENERATED_VERSION_HEADER -m64 -O3 -stdlib=libstdc++ -DHAVE_AVX2 -I./codec/api/svc -I./codec/common/inc -Icodec/common/inc  -I./codec/decoder/core/inc -I./codec/decoder/plus/inc -c -o codec/decoder/core/src/decode_mb_aux.o codec/decoder/core/src/decode_mb_aux.cpp
+/usr/bin/clang++ -m64 -O3 -O3 -DNDEBUG -m64 -DX86_ASM -DHAVE_AVX2 -Wall -fno-strict-aliasing -fPIC -MMD -MP -DGENERATED_VERSION_HEADER -m64 -O3 -stdlib=libstdc++ -DHAVE_AVX2 -I./codec/api/svc -I./codec/common/inc -Icodec/common/inc  -I./codec/decoder/core/inc -I./codec/decoder/plus/inc -c -o codec/decoder/core/src/decode_slice.o codec/decoder/core/src/decode_slice.cpp
+/usr/bin/clang++ -m64 -O3 -O3 -DNDEBUG -m64 -DX86_ASM -DHAVE_AVX2 -Wall -fno-strict-aliasing -fPIC -MMD -MP -DGENERATED_VERSION_HEADER -m64 -O3 -stdlib=libstdc++ -DHAVE_AVX2 -I./codec/api/svc -I./codec/common/inc -Icodec/common/inc  -I./codec/decoder/core/inc -I./codec/decoder/plus/inc -c -o codec/decoder/core/src/decoder.o codec/decoder/core/src/decoder.cpp
+/usr/bin/clang++ -m64 -O3 -O3 -DNDEBUG -m64 -DX86_ASM -DHAVE_AVX2 -Wall -fno-strict-aliasing -fPIC -MMD -MP -DGENERATED_VERSION_HEADER -m64 -O3 -stdlib=libstdc++ -DHAVE_AVX2 -I./codec/api/svc -I./codec/common/inc -Icodec/common/inc  -I./codec/decoder/core/inc -I./codec/decoder/plus/inc -c -o codec/decoder/core/src/decoder_core.o codec/decoder/core/src/decoder_core.cpp
+/usr/bin/clang++ -m64 -O3 -O3 -DNDEBUG -m64 -DX86_ASM -DHAVE_AVX2 -Wall -fno-strict-aliasing -fPIC -MMD -MP -DGENERATED_VERSION_HEADER -m64 -O3 -stdlib=libstdc++ -DHAVE_AVX2 -I./codec/api/svc -I./codec/common/inc -Icodec/common/inc  -I./codec/decoder/core/inc -I./codec/decoder/plus/inc -c -o codec/decoder/core/src/decoder_data_tables.o codec/decoder/core/src/decoder_data_tables.cpp
+/usr/bin/clang++ -m64 -O3 -O3 -DNDEBUG -m64 -DX86_ASM -DHAVE_AVX2 -Wall -fno-strict-aliasing -fPIC -MMD -MP -DGENERATED_VERSION_HEADER -m64 -O3 -stdlib=libstdc++ -DHAVE_AVX2 -I./codec/api/svc -I./codec/common/inc -Icodec/common/inc  -I./codec/decoder/core/inc -I./codec/decoder/plus/inc -c -o codec/decoder/core/src/error_concealment.o codec/decoder/core/src/error_concealment.cpp
+/usr/bin/clang++ -m64 -O3 -O3 -DNDEBUG -m64 -DX86_ASM -DHAVE_AVX2 -Wall -fno-strict-aliasing -fPIC -MMD -MP -DGENERATED_VERSION_HEADER -m64 -O3 -stdlib=libstdc++ -DHAVE_AVX2 -I./codec/api/svc -I./codec/common/inc -Icodec/common/inc  -I./codec/decoder/core/inc -I./codec/decoder/plus/inc -c -o codec/decoder/core/src/fmo.o codec/decoder/core/src/fmo.cpp
+/usr/bin/clang++ -m64 -O3 -O3 -DNDEBUG -m64 -DX86_ASM -DHAVE_AVX2 -Wall -fno-strict-aliasing -fPIC -MMD -MP -DGENERATED_VERSION_HEADER -m64 -O3 -stdlib=libstdc++ -DHAVE_AVX2 -I./codec/api/svc -I./codec/common/inc -Icodec/common/inc  -I./codec/decoder/core/inc -I./codec/decoder/plus/inc -c -o codec/decoder/core/src/get_intra_predictor.o codec/decoder/core/src/get_intra_predictor.cpp
+/usr/bin/clang++ -m64 -O3 -O3 -DNDEBUG -m64 -DX86_ASM -DHAVE_AVX2 -Wall -fno-strict-aliasing -fPIC -MMD -MP -DGENERATED_VERSION_HEADER -m64 -O3 -stdlib=libstdc++ -DHAVE_AVX2 -I./codec/api/svc -I./codec/common/inc -Icodec/common/inc  -I./codec/decoder/core/inc -I./codec/decoder/plus/inc -c -o codec/decoder/core/src/manage_dec_ref.o codec/decoder/core/src/manage_dec_ref.cpp
+/usr/bin/clang++ -m64 -O3 -O3 -DNDEBUG -m64 -DX86_ASM -DHAVE_AVX2 -Wall -fno-strict-aliasing -fPIC -MMD -MP -DGENERATED_VERSION_HEADER -m64 -O3 -stdlib=libstdc++ -DHAVE_AVX2 -I./codec/api/svc -I./codec/common/inc -Icodec/common/inc  -I./codec/decoder/core/inc -I./codec/decoder/plus/inc -c -o codec/decoder/core/src/memmgr_nal_unit.o codec/decoder/core/src/memmgr_nal_unit.cpp
+/usr/bin/clang++ -m64 -O3 -O3 -DNDEBUG -m64 -DX86_ASM -DHAVE_AVX2 -Wall -fno-strict-aliasing -fPIC -MMD -MP -DGENERATED_VERSION_HEADER -m64 -O3 -stdlib=libstdc++ -DHAVE_AVX2 -I./codec/api/svc -I./codec/common/inc -Icodec/common/inc  -I./codec/decoder/core/inc -I./codec/decoder/plus/inc -c -o codec/decoder/core/src/mv_pred.o codec/decoder/core/src/mv_pred.cpp
+/usr/bin/clang++ -m64 -O3 -O3 -DNDEBUG -m64 -DX86_ASM -DHAVE_AVX2 -Wall -fno-strict-aliasing -fPIC -MMD -MP -DGENERATED_VERSION_HEADER -m64 -O3 -stdlib=libstdc++ -DHAVE_AVX2 -I./codec/api/svc -I./codec/common/inc -Icodec/common/inc  -I./codec/decoder/core/inc -I./codec/decoder/plus/inc -c -o codec/decoder/core/src/parse_mb_syn_cabac.o codec/decoder/core/src/parse_mb_syn_cabac.cpp
+/usr/bin/clang++ -m64 -O3 -O3 -DNDEBUG -m64 -DX86_ASM -DHAVE_AVX2 -Wall -fno-strict-aliasing -fPIC -MMD -MP -DGENERATED_VERSION_HEADER -m64 -O3 -stdlib=libstdc++ -DHAVE_AVX2 -I./codec/api/svc -I./codec/common/inc -Icodec/common/inc  -I./codec/decoder/core/inc -I./codec/decoder/plus/inc -c -o codec/decoder/core/src/parse_mb_syn_cavlc.o codec/decoder/core/src/parse_mb_syn_cavlc.cpp
+/usr/bin/clang++ -m64 -O3 -O3 -DNDEBUG -m64 -DX86_ASM -DHAVE_AVX2 -Wall -fno-strict-aliasing -fPIC -MMD -MP -DGENERATED_VERSION_HEADER -m64 -O3 -stdlib=libstdc++ -DHAVE_AVX2 -I./codec/api/svc -I./codec/common/inc -Icodec/common/inc  -I./codec/decoder/core/inc -I./codec/decoder/plus/inc -c -o codec/decoder/core/src/pic_queue.o codec/decoder/core/src/pic_queue.cpp
+/usr/bin/clang++ -m64 -O3 -O3 -DNDEBUG -m64 -DX86_ASM -DHAVE_AVX2 -Wall -fno-strict-aliasing -fPIC -MMD -MP -DGENERATED_VERSION_HEADER -m64 -O3 -stdlib=libstdc++ -DHAVE_AVX2 -I./codec/api/svc -I./codec/common/inc -Icodec/common/inc  -I./codec/decoder/core/inc -I./codec/decoder/plus/inc -c -o codec/decoder/core/src/rec_mb.o codec/decoder/core/src/rec_mb.cpp
+/usr/bin/clang++ -m64 -O3 -O3 -DNDEBUG -m64 -DX86_ASM -DHAVE_AVX2 -Wall -fno-strict-aliasing -fPIC -MMD -MP -DGENERATED_VERSION_HEADER -m64 -O3 -stdlib=libstdc++ -DHAVE_AVX2 -I./codec/api/svc -I./codec/common/inc -Icodec/common/inc  -I./codec/decoder/core/inc -I./codec/decoder/plus/inc -c -o codec/decoder/plus/src/welsDecoderExt.o codec/decoder/plus/src/welsDecoderExt.cpp
+nasm -DUNIX64 -DHAVE_AVX2 -f elf64 -I./codec/common/x86/   -o codec/decoder/core/x86/dct.o codec/decoder/core/x86/dct.asm
+nasm -DUNIX64 -DHAVE_AVX2 -f elf64 -I./codec/common/x86/   -o codec/decoder/core/x86/intra_pred.o codec/decoder/core/x86/intra_pred.asm
+/usr/bin/clang++ -m64 -O3 -O3 -DNDEBUG -m64 -DX86_ASM -DHAVE_AVX2 -Wall -fno-strict-aliasing -fPIC -MMD -MP -DGENERATED_VERSION_HEADER -m64 -O3 -stdlib=libstdc++ -DHAVE_AVX2 -I./codec/api/svc -I./codec/common/inc -Icodec/common/inc  -I./codec/processing/interface -I./codec/processing/src/common -I./codec/processing/src/adaptivequantization -I./codec/processing/src/downsample -I./codec/processing/src/scrolldetection -I./codec/processing/src/vaacalc -c -o codec/processing/src/adaptivequantization/AdaptiveQuantization.o codec/processing/src/adaptivequantization/AdaptiveQuantization.cpp
+/usr/bin/clang++ -m64 -O3 -O3 -DNDEBUG -m64 -DX86_ASM -DHAVE_AVX2 -Wall -fno-strict-aliasing -fPIC -MMD -MP -DGENERATED_VERSION_HEADER -m64 -O3 -stdlib=libstdc++ -DHAVE_AVX2 -I./codec/api/svc -I./codec/common/inc -Icodec/common/inc  -I./codec/processing/interface -I./codec/processing/src/common -I./codec/processing/src/adaptivequantization -I./codec/processing/src/downsample -I./codec/processing/src/scrolldetection -I./codec/processing/src/vaacalc -c -o codec/processing/src/backgrounddetection/BackgroundDetection.o codec/processing/src/backgrounddetection/BackgroundDetection.cpp
+/usr/bin/clang++ -m64 -O3 -O3 -DNDEBUG -m64 -DX86_ASM -DHAVE_AVX2 -Wall -fno-strict-aliasing -fPIC -MMD -MP -DGENERATED_VERSION_HEADER -m64 -O3 -stdlib=libstdc++ -DHAVE_AVX2 -I./codec/api/svc -I./codec/common/inc -Icodec/common/inc  -I./codec/processing/interface -I./codec/processing/src/common -I./codec/processing/src/adaptivequantization -I./codec/processing/src/downsample -I./codec/processing/src/scrolldetection -I./codec/processing/src/vaacalc -c -o codec/processing/src/common/memory.o codec/processing/src/common/memory.cpp
+/usr/bin/clang++ -m64 -O3 -O3 -DNDEBUG -m64 -DX86_ASM -DHAVE_AVX2 -Wall -fno-strict-aliasing -fPIC -MMD -MP -DGENERATED_VERSION_HEADER -m64 -O3 -stdlib=libstdc++ -DHAVE_AVX2 -I./codec/api/svc -I./codec/common/inc -Icodec/common/inc  -I./codec/processing/interface -I./codec/processing/src/common -I./codec/processing/src/adaptivequantization -I./codec/processing/src/downsample -I./codec/processing/src/scrolldetection -I./codec/processing/src/vaacalc -c -o codec/processing/src/common/WelsFrameWork.o codec/processing/src/common/WelsFrameWork.cpp
+/usr/bin/clang++ -m64 -O3 -O3 -DNDEBUG -m64 -DX86_ASM -DHAVE_AVX2 -Wall -fno-strict-aliasing -fPIC -MMD -MP -DGENERATED_VERSION_HEADER -m64 -O3 -stdlib=libstdc++ -DHAVE_AVX2 -I./codec/api/svc -I./codec/common/inc -Icodec/common/inc  -I./codec/processing/interface -I./codec/processing/src/common -I./codec/processing/src/adaptivequantization -I./codec/processing/src/downsample -I./codec/processing/src/scrolldetection -I./codec/processing/src/vaacalc -c -o codec/processing/src/common/WelsFrameWorkEx.o codec/processing/src/common/WelsFrameWorkEx.cpp
+/usr/bin/clang++ -m64 -O3 -O3 -DNDEBUG -m64 -DX86_ASM -DHAVE_AVX2 -Wall -fno-strict-aliasing -fPIC -MMD -MP -DGENERATED_VERSION_HEADER -m64 -O3 -stdlib=libstdc++ -DHAVE_AVX2 -I./codec/api/svc -I./codec/common/inc -Icodec/common/inc  -I./codec/processing/interface -I./codec/processing/src/common -I./codec/processing/src/adaptivequantization -I./codec/processing/src/downsample -I./codec/processing/src/scrolldetection -I./codec/processing/src/vaacalc -c -o codec/processing/src/complexityanalysis/ComplexityAnalysis.o codec/processing/src/complexityanalysis/ComplexityAnalysis.cpp
+/usr/bin/clang++ -m64 -O3 -O3 -DNDEBUG -m64 -DX86_ASM -DHAVE_AVX2 -Wall -fno-strict-aliasing -fPIC -MMD -MP -DGENERATED_VERSION_HEADER -m64 -O3 -stdlib=libstdc++ -DHAVE_AVX2 -I./codec/api/svc -I./codec/common/inc -Icodec/common/inc  -I./codec/processing/interface -I./codec/processing/src/common -I./codec/processing/src/adaptivequantization -I./codec/processing/src/downsample -I./codec/processing/src/scrolldetection -I./codec/processing/src/vaacalc -c -o codec/processing/src/denoise/denoise.o codec/processing/src/denoise/denoise.cpp
+/usr/bin/clang++ -m64 -O3 -O3 -DNDEBUG -m64 -DX86_ASM -DHAVE_AVX2 -Wall -fno-strict-aliasing -fPIC -MMD -MP -DGENERATED_VERSION_HEADER -m64 -O3 -stdlib=libstdc++ -DHAVE_AVX2 -I./codec/api/svc -I./codec/common/inc -Icodec/common/inc  -I./codec/processing/interface -I./codec/processing/src/common -I./codec/processing/src/adaptivequantization -I./codec/processing/src/downsample -I./codec/processing/src/scrolldetection -I./codec/processing/src/vaacalc -c -o codec/processing/src/denoise/denoise_filter.o codec/processing/src/denoise/denoise_filter.cpp
+/usr/bin/clang++ -m64 -O3 -O3 -DNDEBUG -m64 -DX86_ASM -DHAVE_AVX2 -Wall -fno-strict-aliasing -fPIC -MMD -MP -DGENERATED_VERSION_HEADER -m64 -O3 -stdlib=libstdc++ -DHAVE_AVX2 -I./codec/api/svc -I./codec/common/inc -Icodec/common/inc  -I./codec/processing/interface -I./codec/processing/src/common -I./codec/processing/src/adaptivequantization -I./codec/processing/src/downsample -I./codec/processing/src/scrolldetection -I./codec/processing/src/vaacalc -c -o codec/processing/src/downsample/downsample.o codec/processing/src/downsample/downsample.cpp
+/usr/bin/clang++ -m64 -O3 -O3 -DNDEBUG -m64 -DX86_ASM -DHAVE_AVX2 -Wall -fno-strict-aliasing -fPIC -MMD -MP -DGENERATED_VERSION_HEADER -m64 -O3 -stdlib=libstdc++ -DHAVE_AVX2 -I./codec/api/svc -I./codec/common/inc -Icodec/common/inc  -I./codec/processing/interface -I./codec/processing/src/common -I./codec/processing/src/adaptivequantization -I./codec/processing/src/downsample -I./codec/processing/src/scrolldetection -I./codec/processing/src/vaacalc -c -o codec/processing/src/downsample/downsamplefuncs.o codec/processing/src/downsample/downsamplefuncs.cpp
+/usr/bin/clang++ -m64 -O3 -O3 -DNDEBUG -m64 -DX86_ASM -DHAVE_AVX2 -Wall -fno-strict-aliasing -fPIC -MMD -MP -DGENERATED_VERSION_HEADER -m64 -O3 -stdlib=libstdc++ -DHAVE_AVX2 -I./codec/api/svc -I./codec/common/inc -Icodec/common/inc  -I./codec/processing/interface -I./codec/processing/src/common -I./codec/processing/src/adaptivequantization -I./codec/processing/src/downsample -I./codec/processing/src/scrolldetection -I./codec/processing/src/vaacalc -c -o codec/processing/src/imagerotate/imagerotate.o codec/processing/src/imagerotate/imagerotate.cpp
+/usr/bin/clang++ -m64 -O3 -O3 -DNDEBUG -m64 -DX86_ASM -DHAVE_AVX2 -Wall -fno-strict-aliasing -fPIC -MMD -MP -DGENERATED_VERSION_HEADER -m64 -O3 -stdlib=libstdc++ -DHAVE_AVX2 -I./codec/api/svc -I./codec/common/inc -Icodec/common/inc  -I./codec/processing/interface -I./codec/processing/src/common -I./codec/processing/src/adaptivequantization -I./codec/processing/src/downsample -I./codec/processing/src/scrolldetection -I./codec/processing/src/vaacalc -c -o codec/processing/src/imagerotate/imagerotatefuncs.o codec/processing/src/imagerotate/imagerotatefuncs.cpp
+/usr/bin/clang++ -m64 -O3 -O3 -DNDEBUG -m64 -DX86_ASM -DHAVE_AVX2 -Wall -fno-strict-aliasing -fPIC -MMD -MP -DGENERATED_VERSION_HEADER -m64 -O3 -stdlib=libstdc++ -DHAVE_AVX2 -I./codec/api/svc -I./codec/common/inc -Icodec/common/inc  -I./codec/processing/interface -I./codec/processing/src/common -I./codec/processing/src/adaptivequantization -I./codec/processing/src/downsample -I./codec/processing/src/scrolldetection -I./codec/processing/src/vaacalc -c -o codec/processing/src/scenechangedetection/SceneChangeDetection.o codec/processing/src/scenechangedetection/SceneChangeDetection.cpp
+/usr/bin/clang++ -m64 -O3 -O3 -DNDEBUG -m64 -DX86_ASM -DHAVE_AVX2 -Wall -fno-strict-aliasing -fPIC -MMD -MP -DGENERATED_VERSION_HEADER -m64 -O3 -stdlib=libstdc++ -DHAVE_AVX2 -I./codec/api/svc -I./codec/common/inc -Icodec/common/inc  -I./codec/processing/interface -I./codec/processing/src/common -I./codec/processing/src/adaptivequantization -I./codec/processing/src/downsample -I./codec/processing/src/scrolldetection -I./codec/processing/src/vaacalc -c -o codec/processing/src/scrolldetection/ScrollDetection.o codec/processing/src/scrolldetection/ScrollDetection.cpp
+/usr/bin/clang++ -m64 -O3 -O3 -DNDEBUG -m64 -DX86_ASM -DHAVE_AVX2 -Wall -fno-strict-aliasing -fPIC -MMD -MP -DGENERATED_VERSION_HEADER -m64 -O3 -stdlib=libstdc++ -DHAVE_AVX2 -I./codec/api/svc -I./codec/common/inc -Icodec/common/inc  -I./codec/processing/interface -I./codec/processing/src/common -I./codec/processing/src/adaptivequantization -I./codec/processing/src/downsample -I./codec/processing/src/scrolldetection -I./codec/processing/src/vaacalc -c -o codec/processing/src/scrolldetection/ScrollDetectionFuncs.o codec/processing/src/scrolldetection/ScrollDetectionFuncs.cpp
+/usr/bin/clang++ -m64 -O3 -O3 -DNDEBUG -m64 -DX86_ASM -DHAVE_AVX2 -Wall -fno-strict-aliasing -fPIC -MMD -MP -DGENERATED_VERSION_HEADER -m64 -O3 -stdlib=libstdc++ -DHAVE_AVX2 -I./codec/api/svc -I./codec/common/inc -Icodec/common/inc  -I./codec/processing/interface -I./codec/processing/src/common -I./codec/processing/src/adaptivequantization -I./codec/processing/src/downsample -I./codec/processing/src/scrolldetection -I./codec/processing/src/vaacalc -c -o codec/processing/src/vaacalc/vaacalcfuncs.o codec/processing/src/vaacalc/vaacalcfuncs.cpp
+/usr/bin/clang++ -m64 -O3 -O3 -DNDEBUG -m64 -DX86_ASM -DHAVE_AVX2 -Wall -fno-strict-aliasing -fPIC -MMD -MP -DGENERATED_VERSION_HEADER -m64 -O3 -stdlib=libstdc++ -DHAVE_AVX2 -I./codec/api/svc -I./codec/common/inc -Icodec/common/inc  -I./codec/processing/interface -I./codec/processing/src/common -I./codec/processing/src/adaptivequantization -I./codec/processing/src/downsample -I./codec/processing/src/scrolldetection -I./codec/processing/src/vaacalc -c -o codec/processing/src/vaacalc/vaacalculation.o codec/processing/src/vaacalc/vaacalculation.cpp
+nasm -DUNIX64 -DHAVE_AVX2 -f elf64 -I./codec/common/x86/   -o codec/processing/src/x86/denoisefilter.o codec/processing/src/x86/denoisefilter.asm
+nasm -DUNIX64 -DHAVE_AVX2 -f elf64 -I./codec/common/x86/   -o codec/processing/src/x86/downsample_bilinear.o codec/processing/src/x86/downsample_bilinear.asm
+nasm -DUNIX64 -DHAVE_AVX2 -f elf64 -I./codec/common/x86/   -o codec/processing/src/x86/vaa.o codec/processing/src/x86/vaa.asm
+/usr/bin/clang++ -m64 -O3 -O3 -DNDEBUG -m64 -DX86_ASM -DHAVE_AVX2 -Wall -fno-strict-aliasing -fPIC -MMD -MP -DGENERATED_VERSION_HEADER -m64 -O3 -stdlib=libstdc++ -DHAVE_AVX2 -I./codec/api/svc -I./codec/common/inc -Icodec/common/inc   -c -o codec/common/src/common_tables.o codec/common/src/common_tables.cpp
+/usr/bin/clang++ -m64 -O3 -O3 -DNDEBUG -m64 -DX86_ASM -DHAVE_AVX2 -Wall -fno-strict-aliasing -fPIC -MMD -MP -DGENERATED_VERSION_HEADER -m64 -O3 -stdlib=libstdc++ -DHAVE_AVX2 -I./codec/api/svc -I./codec/common/inc -Icodec/common/inc   -c -o codec/common/src/copy_mb.o codec/common/src/copy_mb.cpp
+/usr/bin/clang++ -m64 -O3 -O3 -DNDEBUG -m64 -DX86_ASM -DHAVE_AVX2 -Wall -fno-strict-aliasing -fPIC -MMD -MP -DGENERATED_VERSION_HEADER -m64 -O3 -stdlib=libstdc++ -DHAVE_AVX2 -I./codec/api/svc -I./codec/common/inc -Icodec/common/inc   -c -o codec/common/src/cpu.o codec/common/src/cpu.cpp
+/usr/bin/clang++ -m64 -O3 -O3 -DNDEBUG -m64 -DX86_ASM -DHAVE_AVX2 -Wall -fno-strict-aliasing -fPIC -MMD -MP -DGENERATED_VERSION_HEADER -m64 -O3 -stdlib=libstdc++ -DHAVE_AVX2 -I./codec/api/svc -I./codec/common/inc -Icodec/common/inc   -c -o codec/common/src/crt_util_safe_x.o codec/common/src/crt_util_safe_x.cpp
+/usr/bin/clang++ -m64 -O3 -O3 -DNDEBUG -m64 -DX86_ASM -DHAVE_AVX2 -Wall -fno-strict-aliasing -fPIC -MMD -MP -DGENERATED_VERSION_HEADER -m64 -O3 -stdlib=libstdc++ -DHAVE_AVX2 -I./codec/api/svc -I./codec/common/inc -Icodec/common/inc   -c -o codec/common/src/deblocking_common.o codec/common/src/deblocking_common.cpp
+/usr/bin/clang++ -m64 -O3 -O3 -DNDEBUG -m64 -DX86_ASM -DHAVE_AVX2 -Wall -fno-strict-aliasing -fPIC -MMD -MP -DGENERATED_VERSION_HEADER -m64 -O3 -stdlib=libstdc++ -DHAVE_AVX2 -I./codec/api/svc -I./codec/common/inc -Icodec/common/inc   -c -o codec/common/src/expand_pic.o codec/common/src/expand_pic.cpp
+/usr/bin/clang++ -m64 -O3 -O3 -DNDEBUG -m64 -DX86_ASM -DHAVE_AVX2 -Wall -fno-strict-aliasing -fPIC -MMD -MP -DGENERATED_VERSION_HEADER -m64 -O3 -stdlib=libstdc++ -DHAVE_AVX2 -I./codec/api/svc -I./codec/common/inc -Icodec/common/inc   -c -o codec/common/src/intra_pred_common.o codec/common/src/intra_pred_common.cpp
+/usr/bin/clang++ -m64 -O3 -O3 -DNDEBUG -m64 -DX86_ASM -DHAVE_AVX2 -Wall -fno-strict-aliasing -fPIC -MMD -MP -DGENERATED_VERSION_HEADER -m64 -O3 -stdlib=libstdc++ -DHAVE_AVX2 -I./codec/api/svc -I./codec/common/inc -Icodec/common/inc   -c -o codec/common/src/mc.o codec/common/src/mc.cpp
+/usr/bin/clang++ -m64 -O3 -O3 -DNDEBUG -m64 -DX86_ASM -DHAVE_AVX2 -Wall -fno-strict-aliasing -fPIC -MMD -MP -DGENERATED_VERSION_HEADER -m64 -O3 -stdlib=libstdc++ -DHAVE_AVX2 -I./codec/api/svc -I./codec/common/inc -Icodec/common/inc   -c -o codec/common/src/memory_align.o codec/common/src/memory_align.cpp
+/usr/bin/clang++ -m64 -O3 -O3 -DNDEBUG -m64 -DX86_ASM -DHAVE_AVX2 -Wall -fno-strict-aliasing -fPIC -MMD -MP -DGENERATED_VERSION_HEADER -m64 -O3 -stdlib=libstdc++ -DHAVE_AVX2 -I./codec/api/svc -I./codec/common/inc -Icodec/common/inc   -c -o codec/common/src/sad_common.o codec/common/src/sad_common.cpp
+/usr/bin/clang++ -m64 -O3 -O3 -DNDEBUG -m64 -DX86_ASM -DHAVE_AVX2 -Wall -fno-strict-aliasing -fPIC -MMD -MP -DGENERATED_VERSION_HEADER -m64 -O3 -stdlib=libstdc++ -DHAVE_AVX2 -I./codec/api/svc -I./codec/common/inc -Icodec/common/inc   -c -o codec/common/src/utils.o codec/common/src/utils.cpp
+/usr/bin/clang++ -m64 -O3 -O3 -DNDEBUG -m64 -DX86_ASM -DHAVE_AVX2 -Wall -fno-strict-aliasing -fPIC -MMD -MP -DGENERATED_VERSION_HEADER -m64 -O3 -stdlib=libstdc++ -DHAVE_AVX2 -I./codec/api/svc -I./codec/common/inc -Icodec/common/inc   -c -o codec/common/src/welsCodecTrace.o codec/common/src/welsCodecTrace.cpp
+/usr/bin/clang++ -m64 -O3 -O3 -DNDEBUG -m64 -DX86_ASM -DHAVE_AVX2 -Wall -fno-strict-aliasing -fPIC -MMD -MP -DGENERATED_VERSION_HEADER -m64 -O3 -stdlib=libstdc++ -DHAVE_AVX2 -I./codec/api/svc -I./codec/common/inc -Icodec/common/inc   -c -o codec/common/src/WelsTaskThread.o codec/common/src/WelsTaskThread.cpp
+/usr/bin/clang++ -m64 -O3 -O3 -DNDEBUG -m64 -DX86_ASM -DHAVE_AVX2 -Wall -fno-strict-aliasing -fPIC -MMD -MP -DGENERATED_VERSION_HEADER -m64 -O3 -stdlib=libstdc++ -DHAVE_AVX2 -I./codec/api/svc -I./codec/common/inc -Icodec/common/inc   -c -o codec/common/src/WelsThread.o codec/common/src/WelsThread.cpp
+/usr/bin/clang++ -m64 -O3 -O3 -DNDEBUG -m64 -DX86_ASM -DHAVE_AVX2 -Wall -fno-strict-aliasing -fPIC -MMD -MP -DGENERATED_VERSION_HEADER -m64 -O3 -stdlib=libstdc++ -DHAVE_AVX2 -I./codec/api/svc -I./codec/common/inc -Icodec/common/inc   -c -o codec/common/src/WelsThreadLib.o codec/common/src/WelsThreadLib.cpp
+/usr/bin/clang++ -m64 -O3 -O3 -DNDEBUG -m64 -DX86_ASM -DHAVE_AVX2 -Wall -fno-strict-aliasing -fPIC -MMD -MP -DGENERATED_VERSION_HEADER -m64 -O3 -stdlib=libstdc++ -DHAVE_AVX2 -I./codec/api/svc -I./codec/common/inc -Icodec/common/inc   -c -o codec/common/src/WelsThreadPool.o codec/common/src/WelsThreadPool.cpp
+nasm -DUNIX64 -DHAVE_AVX2 -f elf64 -I./codec/common/x86/   -o codec/common/x86/cpuid.o codec/common/x86/cpuid.asm
+nasm -DUNIX64 -DHAVE_AVX2 -f elf64 -I./codec/common/x86/   -o codec/common/x86/dct.o codec/common/x86/dct.asm
+nasm -DUNIX64 -DHAVE_AVX2 -f elf64 -I./codec/common/x86/   -o codec/common/x86/deblock.o codec/common/x86/deblock.asm
+nasm -DUNIX64 -DHAVE_AVX2 -f elf64 -I./codec/common/x86/   -o codec/common/x86/expand_picture.o codec/common/x86/expand_picture.asm
+nasm -DUNIX64 -DHAVE_AVX2 -f elf64 -I./codec/common/x86/   -o codec/common/x86/intra_pred_com.o codec/common/x86/intra_pred_com.asm
+nasm -DUNIX64 -DHAVE_AVX2 -f elf64 -I./codec/common/x86/   -o codec/common/x86/mb_copy.o codec/common/x86/mb_copy.asm
+nasm -DUNIX64 -DHAVE_AVX2 -f elf64 -I./codec/common/x86/   -o codec/common/x86/mc_chroma.o codec/common/x86/mc_chroma.asm
+nasm -DUNIX64 -DHAVE_AVX2 -f elf64 -I./codec/common/x86/   -o codec/common/x86/mc_luma.o codec/common/x86/mc_luma.asm
+nasm -DUNIX64 -DHAVE_AVX2 -f elf64 -I./codec/common/x86/   -o codec/common/x86/satd_sad.o codec/common/x86/satd_sad.asm
+nasm -DUNIX64 -DHAVE_AVX2 -f elf64 -I./codec/common/x86/   -o codec/common/x86/vaa.o codec/common/x86/vaa.asm
+/usr/bin/clang++ -m64 -O3 -O3 -DNDEBUG -m64 -DX86_ASM -DHAVE_AVX2 -Wall -fno-strict-aliasing -fPIC -MMD -MP -DGENERATED_VERSION_HEADER -m64 -O3 -stdlib=libstdc++ -DHAVE_AVX2 -I./codec/api/svc -I./codec/common/inc -Icodec/common/inc  -I./codec/encoder/core/inc -I./codec/encoder/plus/inc -I./codec/processing/interface -c -o codec/encoder/plus/src/welsEncoderExt.o codec/encoder/plus/src/welsEncoderExt.cpp
+rm -f libopenh264.so.1.7.0
+/usr/bin/clang++ -shared -o libopenh264.so.1.7.0 codec/encoder/core/src/au_set.o codec/encoder/core/src/deblocking.o codec/encoder/core/src/decode_mb_aux.o codec/encoder/core/src/encode_mb_aux.o codec/encoder/core/src/encoder.o codec/encoder/core/src/encoder_data_tables.o codec/encoder/core/src/encoder_ext.o codec/encoder/core/src/get_intra_predictor.o codec/encoder/core/src/md.o codec/encoder/core/src/mv_pred.o codec/encoder/core/src/nal_encap.o codec/encoder/core/src/paraset_strategy.o codec/encoder/core/src/picture_handle.o codec/encoder/core/src/ratectl.o codec/encoder/core/src/ref_list_mgr_svc.o codec/encoder/core/src/sample.o codec/encoder/core/src/set_mb_syn_cabac.o codec/encoder/core/src/set_mb_syn_cavlc.o codec/encoder/core/src/slice_multi_threading.o codec/encoder/core/src/svc_base_layer_md.o codec/encoder/core/src/svc_enc_slice_segment.o codec/encoder/core/src/svc_encode_mb.o codec/encoder/core/src/svc_encode_slice.o codec/encoder/core/src/svc_mode_decision.o codec/encoder/core/src/svc_motion_estimate.o codec/encoder/core/src/svc_set_mb_syn_cabac.o codec/encoder/core/src/svc_set_mb_syn_cavlc.o codec/encoder/core/src/wels_preprocess.o codec/encoder/core/src/wels_task_base.o codec/encoder/core/src/wels_task_encoder.o codec/encoder/core/src/wels_task_management.o codec/encoder/plus/src/welsEncoderExt.o codec/encoder/core/x86/coeff.o codec/encoder/core/x86/dct.o codec/encoder/core/x86/intra_pred.o codec/encoder/core/x86/matrix_transpose.o codec/encoder/core/x86/memzero.o codec/encoder/core/x86/quant.o codec/encoder/core/x86/sample_sc.o codec/encoder/core/x86/score.o codec/decoder/core/src/au_parser.o codec/decoder/core/src/bit_stream.o codec/decoder/core/src/cabac_decoder.o codec/decoder/core/src/deblocking.o codec/decoder/core/src/decode_mb_aux.o codec/decoder/core/src/decode_slice.o codec/decoder/core/src/decoder.o codec/decoder/core/src/decoder_core.o codec/decoder/core/src/decoder_data_tables.o codec/decoder/core/src/error_concealment.o codec/decoder/core/src/fmo.o codec/decoder/core/src/get_intra_predictor.o codec/decoder/core/src/manage_dec_ref.o codec/decoder/core/src/memmgr_nal_unit.o codec/decoder/core/src/mv_pred.o codec/decoder/core/src/parse_mb_syn_cabac.o codec/decoder/core/src/parse_mb_syn_cavlc.o codec/decoder/core/src/pic_queue.o codec/decoder/core/src/rec_mb.o codec/decoder/plus/src/welsDecoderExt.o codec/decoder/core/x86/dct.o codec/decoder/core/x86/intra_pred.o codec/processing/src/adaptivequantization/AdaptiveQuantization.o codec/processing/src/backgrounddetection/BackgroundDetection.o codec/processing/src/common/memory.o codec/processing/src/common/WelsFrameWork.o codec/processing/src/common/WelsFrameWorkEx.o codec/processing/src/complexityanalysis/ComplexityAnalysis.o codec/processing/src/denoise/denoise.o codec/processing/src/denoise/denoise_filter.o codec/processing/src/downsample/downsample.o codec/processing/src/downsample/downsamplefuncs.o codec/processing/src/imagerotate/imagerotate.o codec/processing/src/imagerotate/imagerotatefuncs.o codec/processing/src/scenechangedetection/SceneChangeDetection.o codec/processing/src/scrolldetection/ScrollDetection.o codec/processing/src/scrolldetection/ScrollDetectionFuncs.o codec/processing/src/vaacalc/vaacalcfuncs.o codec/processing/src/vaacalc/vaacalculation.o codec/processing/src/x86/denoisefilter.o codec/processing/src/x86/downsample_bilinear.o codec/processing/src/x86/vaa.o codec/common/src/common_tables.o codec/common/src/copy_mb.o codec/common/src/cpu.o codec/common/src/crt_util_safe_x.o codec/common/src/deblocking_common.o codec/common/src/expand_pic.o codec/common/src/intra_pred_common.o codec/common/src/mc.o codec/common/src/memory_align.o codec/common/src/sad_common.o codec/common/src/utils.o codec/common/src/welsCodecTrace.o codec/common/src/WelsTaskThread.o codec/common/src/WelsThread.o codec/common/src/WelsThreadLib.o codec/common/src/WelsThreadPool.o codec/common/x86/cpuid.o codec/common/x86/dct.o codec/common/x86/deblock.o codec/common/x86/expand_picture.o codec/common/x86/intra_pred_com.o codec/common/x86/mb_copy.o codec/common/x86/mc_chroma.o codec/common/x86/mc_luma.o codec/common/x86/satd_sad.o codec/common/x86/vaa.o -m64 -m64 -lpthread  -Wl,-soname,libopenh264.so.4
+ln -sfn libopenh264.so.1.7.0 libopenh264.so.4
+ln -sfn libopenh264.so.4 libopenh264.so
+
+----Running------
+> make 'ARCH=x86_64' 'install-static-lib' -j8
+-----------------
+sh ./codec/common/generate_version.sh ./
+fatal: not a git repository (or any parent up to mount point /)
+Stopping at filesystem boundary (GIT_DISCOVERY_ACROSS_FILESYSTEM not set).
+mkdir -p /home/maarten/.conan/data/openh264/1.7.0/_/_/package/7f24cae6673376bf862ec3e1742ec059030d1def/include/wels
+install -m 644 .//codec/api/svc/codec*.h /home/maarten/.conan/data/openh264/1.7.0/_/_/package/7f24cae6673376bf862ec3e1742ec059030d1def/include/wels
+Keeping existing codec/common/inc/version_gen.h
+rm -f libopenh264.a
+ar crD libopenh264.a codec/encoder/core/src/au_set.o codec/encoder/core/src/deblocking.o codec/encoder/core/src/decode_mb_aux.o codec/encoder/core/src/encode_mb_aux.o codec/encoder/core/src/encoder.o codec/encoder/core/src/encoder_data_tables.o codec/encoder/core/src/encoder_ext.o codec/encoder/core/src/get_intra_predictor.o codec/encoder/core/src/md.o codec/encoder/core/src/mv_pred.o codec/encoder/core/src/nal_encap.o codec/encoder/core/src/paraset_strategy.o codec/encoder/core/src/picture_handle.o codec/encoder/core/src/ratectl.o codec/encoder/core/src/ref_list_mgr_svc.o codec/encoder/core/src/sample.o codec/encoder/core/src/set_mb_syn_cabac.o codec/encoder/core/src/set_mb_syn_cavlc.o codec/encoder/core/src/slice_multi_threading.o codec/encoder/core/src/svc_base_layer_md.o codec/encoder/core/src/svc_enc_slice_segment.o codec/encoder/core/src/svc_encode_mb.o codec/encoder/core/src/svc_encode_slice.o codec/encoder/core/src/svc_mode_decision.o codec/encoder/core/src/svc_motion_estimate.o codec/encoder/core/src/svc_set_mb_syn_cabac.o codec/encoder/core/src/svc_set_mb_syn_cavlc.o codec/encoder/core/src/wels_preprocess.o codec/encoder/core/src/wels_task_base.o codec/encoder/core/src/wels_task_encoder.o codec/encoder/core/src/wels_task_management.o codec/encoder/plus/src/welsEncoderExt.o codec/encoder/core/x86/coeff.o codec/encoder/core/x86/dct.o codec/encoder/core/x86/intra_pred.o codec/encoder/core/x86/matrix_transpose.o codec/encoder/core/x86/memzero.o codec/encoder/core/x86/quant.o codec/encoder/core/x86/sample_sc.o codec/encoder/core/x86/score.o codec/decoder/core/src/au_parser.o codec/decoder/core/src/bit_stream.o codec/decoder/core/src/cabac_decoder.o codec/decoder/core/src/deblocking.o codec/decoder/core/src/decode_mb_aux.o codec/decoder/core/src/decode_slice.o codec/decoder/core/src/decoder.o codec/decoder/core/src/decoder_core.o codec/decoder/core/src/decoder_data_tables.o codec/decoder/core/src/error_concealment.o codec/decoder/core/src/fmo.o codec/decoder/core/src/get_intra_predictor.o codec/decoder/core/src/manage_dec_ref.o codec/decoder/core/src/memmgr_nal_unit.o codec/decoder/core/src/mv_pred.o codec/decoder/core/src/parse_mb_syn_cabac.o codec/decoder/core/src/parse_mb_syn_cavlc.o codec/decoder/core/src/pic_queue.o codec/decoder/core/src/rec_mb.o codec/decoder/plus/src/welsDecoderExt.o codec/decoder/core/x86/dct.o codec/decoder/core/x86/intra_pred.o codec/processing/src/adaptivequantization/AdaptiveQuantization.o codec/processing/src/backgrounddetection/BackgroundDetection.o codec/processing/src/common/memory.o codec/processing/src/common/WelsFrameWork.o codec/processing/src/common/WelsFrameWorkEx.o codec/processing/src/complexityanalysis/ComplexityAnalysis.o codec/processing/src/denoise/denoise.o codec/processing/src/denoise/denoise_filter.o codec/processing/src/downsample/downsample.o codec/processing/src/downsample/downsamplefuncs.o codec/processing/src/imagerotate/imagerotate.o codec/processing/src/imagerotate/imagerotatefuncs.o codec/processing/src/scenechangedetection/SceneChangeDetection.o codec/processing/src/scrolldetection/ScrollDetection.o codec/processing/src/scrolldetection/ScrollDetectionFuncs.o codec/processing/src/vaacalc/vaacalcfuncs.o codec/processing/src/vaacalc/vaacalculation.o codec/processing/src/x86/denoisefilter.o codec/processing/src/x86/downsample_bilinear.o codec/processing/src/x86/vaa.o codec/common/src/common_tables.o codec/common/src/copy_mb.o codec/common/src/cpu.o codec/common/src/crt_util_safe_x.o codec/common/src/deblocking_common.o codec/common/src/expand_pic.o codec/common/src/intra_pred_common.o codec/common/src/mc.o codec/common/src/memory_align.o codec/common/src/sad_common.o codec/common/src/utils.o codec/common/src/welsCodecTrace.o codec/common/src/WelsTaskThread.o codec/common/src/WelsThread.o codec/common/src/WelsThreadLib.o codec/common/src/WelsThreadPool.o codec/common/x86/cpuid.o codec/common/x86/dct.o codec/common/x86/deblock.o codec/common/x86/expand_picture.o codec/common/x86/intra_pred_com.o codec/common/x86/mb_copy.o codec/common/x86/mc_chroma.o codec/common/x86/mc_luma.o codec/common/x86/satd_sad.o codec/common/x86/vaa.o
+mkdir -p /home/maarten/.conan/data/openh264/1.7.0/_/_/package/7f24cae6673376bf862ec3e1742ec059030d1def/lib
+install -m 644 libopenh264.a /home/maarten/.conan/data/openh264/1.7.0/_/_/package/7f24cae6673376bf862ec3e1742ec059030d1def/lib
+openh264/1.7.0: Package '7f24cae6673376bf862ec3e1742ec059030d1def' built
+openh264/1.7.0: Build folder /home/maarten/.conan/data/openh264/1.7.0/_/_/build/7f24cae6673376bf862ec3e1742ec059030d1def
+openh264/1.7.0: Generated conaninfo.txt
+openh264/1.7.0: Generated conanbuildinfo.txt
+openh264/1.7.0: Generating the package
+openh264/1.7.0: Package folder /home/maarten/.conan/data/openh264/1.7.0/_/_/package/7f24cae6673376bf862ec3e1742ec059030d1def
+openh264/1.7.0: Calling package()
+[HOOK - conan-center.py] post_package(): [PACKAGE LICENSE (KB-H012)] OK
+[HOOK - conan-center.py] post_package(): [DEFAULT PACKAGE LAYOUT (KB-H013)] OK
+[HOOK - conan-center.py] post_package(): [MATCHING CONFIGURATION (KB-H014)] OK
+[HOOK - conan-center.py] post_package(): [SHARED ARTIFACTS (KB-H015)] OK
+[HOOK - conan-center.py] post_package(): [PC-FILES (KB-H020)] OK
+[HOOK - conan-center.py] post_package(): [CMAKE-MODULES-CONFIG-FILES (KB-H016)] OK
+[HOOK - conan-center.py] post_package(): [PDB FILES NOT ALLOWED (KB-H017)] OK
+[HOOK - conan-center.py] post_package(): [LIBTOOL FILES PRESENCE (KB-H018)] OK
+[HOOK - conan-center.py] post_package(): [MS RUNTIME FILES (KB-H021)] OK
+openh264/1.7.0 package(): Packaged 1 '.a' file: libopenh264.a
+openh264/1.7.0 package(): Packaged 4 '.h' files: codec_def.h, codec_ver.h, codec_app_def.h, codec_api.h
+openh264/1.7.0 package(): Packaged 1 file: LICENSE
+openh264/1.7.0: Package '7f24cae6673376bf862ec3e1742ec059030d1def' created
+openh264/1.7.0: Created package revision f47fafc9149df34f2d87cee052cfac13
+[HOOK - conan-center.py] post_package_info(): [CMAKE FILE NOT IN BUILD FOLDERS (KB-H019)] OK
+openh264/1.7.0 (test package): Generator cmake created conanbuildinfo.cmake
+openh264/1.7.0 (test package): Generator txt created conanbuildinfo.txt
+openh264/1.7.0 (test package): Generated conaninfo.txt
+openh264/1.7.0 (test package): Generated graphinfo
+Using lockfile: '/home/maarten/programming/conan-center-index/recipes/openh264/all/test_package/build/5aede187a368baa4adbfcb6525a9ca44c41d4e6b/conan.lock'
+Using cached profile from lockfile
+[HOOK - conan-center.py] pre_build(): [FPIC MANAGEMENT (KB-H007)] 'fPIC' option not found
+[HOOK - conan-center.py] pre_build(): [FPIC MANAGEMENT (KB-H007)] OK
+openh264/1.7.0 (test package): Calling build()
+
+----Running------
+> cd '/home/maarten/programming/conan-center-index/recipes/openh264/all/test_package/build/5aede187a368baa4adbfcb6525a9ca44c41d4e6b' && cmake -G "Unix Makefiles" -DCMAKE_BUILD_TYPE="Release" -DCONAN_IN_LOCAL_CACHE="OFF" -DCONAN_COMPILER="clang" -DCONAN_COMPILER_VERSION="8" -DCONAN_CXX_FLAGS="-m64" -DCONAN_SHARED_LINKER_FLAGS="-m64" -DCONAN_C_FLAGS="-m64" -DCONAN_LIBCXX="libstdc++" -DCMAKE_EXPORT_NO_PACKAGE_REGISTRY="ON" -DCONAN_EXPORTED="1" -Wno-dev '/home/maarten/programming/conan-center-index/recipes/openh264/all/test_package'
+-----------------
+-- The C compiler identification is Clang 8.0.0
+-- The CXX compiler identification is Clang 8.0.0
+-- Check for working C compiler: /usr/bin/clang
+-- Check for working C compiler: /usr/bin/clang - works
+-- Detecting C compiler ABI info
+-- Detecting C compiler ABI info - done
+-- Detecting C compile features
+-- Detecting C compile features - done
+-- Check for working CXX compiler: /usr/bin/clang++
+-- Check for working CXX compiler: /usr/bin/clang++ - works
+-- Detecting CXX compiler ABI info
+-- Detecting CXX compiler ABI info - done
+-- Detecting CXX compile features
+-- Detecting CXX compile features - done
+-- Conan: called by CMake conan helper
+-- Conan: Adjusting output directories
+-- Conan: Using cmake global configuration
+-- Conan: Adjusting default RPATHs Conan policies
+-- Conan: Adjusting language standard
+-- Conan: Compiler Clang>=8, checking major version 8
+-- Conan: Checking correct version: 8
+-- Conan: C++ stdlib: libstdc++
+-- Configuring done
+-- Generating done
+CMake Warning:
+  Manually-specified variables were not used by the project:
+
+    CMAKE_EXPORT_NO_PACKAGE_REGISTRY
+
+
+-- Build files have been written to: /home/maarten/programming/conan-center-index/recipes/openh264/all/test_package/build/5aede187a368baa4adbfcb6525a9ca44c41d4e6b
+
+----Running------
+> cmake --build '/home/maarten/programming/conan-center-index/recipes/openh264/all/test_package/build/5aede187a368baa4adbfcb6525a9ca44c41d4e6b' '--' '-j8'
+-----------------
+Scanning dependencies of target test_package
+[ 50%] Building C object CMakeFiles/test_package.dir/test_package.c.o
+[100%] Linking C executable bin/test_package
+[100%] Built target test_package
+openh264/1.7.0 (test package): Running test()
+
+----Running------
+> bin/test_package
+-----------------
+OpenH264 version: 1.7.0
+openh264/1.7.0: WARN: Build folder is dirty, removing it: /home/maarten/.conan/data/openh264/1.7.0/_/_/build/7f24cae6673376bf862ec3e1742ec059030d1def
