@@ -14,8 +14,16 @@ class CspiceConan(ConanFile):
     exports = ["TSPA.txt"]
     generators = "cmake"
     settings = "os", "arch", "compiler", "build_type"
-    options = {"shared": [True, False], "fPIC": [True, False]}
-    default_options = {"shared": False, "fPIC": True}
+    options = {
+        "shared": [True, False],
+        "fPIC": [True, False],
+        "build_utilities": [True, False]
+    }
+    default_options = {
+        "shared": False,
+        "fPIC": True,
+        "build_utilities": True
+    }
 
     _cmake = None
 
@@ -83,6 +91,7 @@ class CspiceConan(ConanFile):
         if self._cmake:
             return self._cmake
         self._cmake = CMake(self)
+        self._cmake.definitions["BUILD_UTILITIES"] = self.options.build_utilities
         self._cmake.configure()
         return self._cmake
 
