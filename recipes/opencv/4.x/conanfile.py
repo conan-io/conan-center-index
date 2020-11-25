@@ -57,7 +57,7 @@ class OpenCVConan(ConanFile):
         if self.settings.os == "Windows":
             del self.options.fPIC
         if self.settings.os != "Linux":
-            del self.options.gtk
+            del self.options.with_gtk
 
     def configure(self):
         if self.settings.compiler == "Visual Studio" and \
@@ -256,9 +256,12 @@ class OpenCVConan(ConanFile):
         cmake = self._configure_cmake()
         cmake.install()
         tools.rmdir(os.path.join(self.package_folder, "cmake"))
+        if os.path.isfile(os.path.join(self.package_folder, "setup_vars_opencv4.cmd")):
+            os.rename(os.path.join(self.package_folder, "setup_vars_opencv4.cmd"),
+                      os.path.join(self.package_folder, "res", "setup_vars_opencv4.cmd"))
 
     def package_info(self):
-        version = self.version.split(".")[:-1]  # last version number is not used
+        version = self.version.split(".")
         version = "".join(version) if self.settings.os == "Windows" else ""
         debug = "d" if self.settings.build_type == "Debug" and self.settings.compiler == "Visual Studio" else ""
 
