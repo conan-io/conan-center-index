@@ -44,6 +44,24 @@ class OpenH264Conan(ConanFile):
         extracted_dir = self.name + "-" + self.version
         os.rename(extracted_dir, self._source_subfolder)
 
+    def _patch_sources(self):
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            tools.patch(**patch)
+        if self.settings.compiler == "Visual Studio":
+            tools.replace_in_file(os.path.join(self._source_subfolder, "build", "platform-msvc.mk"),
+                                "CFLAGS_OPT += -MT",
+                                "CFLAGS_OPT += -%s" % str(self.settings.compiler.runtime))
+            tools.replace_in_file(os.path.join(self._source_subfolder, "build", "platform-msvc.mk"),
+                                "CFLAGS_DEBUG += -MTd -Gm",
+                                "CFLAGS_DEBUG += -%s -Gm" % str(self.settings.compiler.runtime))
+        if self.settings.os == "Android":
+                tools.replace_in_file(os.path.join(self._source_subfolder, "codec", "build", "android", "dec", "jni", "Application.mk"),
+                    "APP_STL := stlport_shared",
+                    "APP_STL := %s" % str(self.settings.compiler.libcxx))
+                tools.replace_in_file(os.path.join(self._source_subfolder, "codec", "build", "android", "dec", "jni", "Application.mk"),
+                    "APP_PLATFORM := android-12",
+                    "APP_PLATFORM := %s" % self._android_target)
+
     @property
     def _library_filename(self):
         prefix = "" if self.settings.compiler == "Visual Studio" else "lib"
@@ -77,6 +95,10 @@ class OpenH264Conan(ConanFile):
         return arch
 
     @property
+    def _android_target(self):
+        return "android-%s" % str(self.settings.os.api_level)
+
+    @property
     def _make_args(self):
         prefix = os.path.abspath(self.package_folder)
         if tools.os_info.is_windows:
@@ -97,35 +119,23 @@ class OpenH264Conan(ConanFile):
             if self.settings.os == "Windows":
                 args.append("OS=mingw_nt")
             if self.settings.os == "Android":
-                args.append("NDKLEVEL=%s" % str(self.settings.os.api_level))
                 libcxx = str(self.settings.compiler.libcxx)
-                args.append("STL_LIB=" + ("$(NDKROOT)/sources/cxx-stl/llvm-libc++/libs/$(APP_ABI)/lib%s "
-                        % "c++_static.a" if libcxx == "c++_static" else "c++_shared.so") +
-                    "$(NDKROOT)/sources/cxx-stl/llvm-libc++/libs/$(APP_ABI)/libc++abi.a")
-                args.append("OS=android")
+                stl_lib = "$(NDKROOT)/sources/cxx-stl/llvm-libc++/libs/$(APP_ABI)/lib%s " % ("c++_static.a" if libcxx == "c++_static" else "c++_shared.so") \
+                          + "$(NDKROOT)/sources/cxx-stl/llvm-libc++/libs/$(APP_ABI)/libc++abi.a"
                 ndk_home = os.environ["ANDROID_NDK_HOME"]
-                args.append("NDKROOT=%s" % ndk_home)  # not NDK_ROOT here
-                target = "android-%s" % str(self.settings.os.api_level)
-                args.append("TARGET=%s" % target)
-                tools.replace_in_file(os.path.join("codec", "build", "android", "dec", "jni", "Application.mk"),
-                    "APP_STL := stlport_shared",
-                    "APP_STL := %s" % str(self.settings.compiler.libcxx))
-                tools.replace_in_file(os.path.join("codec", "build", "android", "dec", "jni", "Application.mk"),
-                    "APP_PLATFORM := android-12",
-                    "APP_PLATFORM := %s" % target)
-                args.append("CCASFLAGS=$(CFLAGS) -fno-integrated-as")
+                args.extend([
+                    "NDKLEVEL=%s" % str(self.settings.os.api_level),
+                    "STL_LIB=%s" % stl_lib,
+                    "OS=android",
+                    "NDKROOT=%s" % ndk_home,  # not NDK_ROOT here
+                    "TARGET=%s" % self._android_target,
+                    "CCASFLAGS=$(CFLAGS) -fno-integrated-as",
+                ])
+
         return args
 
     def build(self):
-        for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            tools.patch(**patch)
-        if self.settings.compiler == "Visual Studio":
-            tools.replace_in_file(os.path.join("build", "platform-msvc.mk"),
-                                "CFLAGS_OPT += -MT",
-                                "CFLAGS_OPT += -%s" % str(self.settings.compiler.runtime))
-            tools.replace_in_file(os.path.join("build", "platform-msvc.mk"),
-                                "CFLAGS_DEBUG += -MTd -Gm",
-                                "CFLAGS_DEBUG += -%s -Gm" % str(self.settings.compiler.runtime))
+        self._patch_sources()
         with tools.vcvars(self.settings) if self.settings.compiler == "Visual Studio" else tools.no_op():
             with tools.chdir(self._source_subfolder):
                 env_build = AutoToolsBuildEnvironment(self)
