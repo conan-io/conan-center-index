@@ -53,8 +53,7 @@ class GLibConan(ConanFile):
 
     def build_requirements(self):
         self.build_requires("meson/0.55.3")
-        if self.settings.os == "Windows":
-            self.build_requires("pkgconf/1.7.3")
+        self.build_requires("pkgconf/1.7.3")
 
     def requirements(self):
         self.requires("zlib/1.2.11")
