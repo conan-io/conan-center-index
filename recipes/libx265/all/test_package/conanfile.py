@@ -17,12 +17,10 @@ class TestPackageConan(ConanFile):
     def build(self):
         cmake = CMake(self)
         cmake.definitions["TEST_LIBRARY"] = self._test_shared_library
-        cmake.definitions["CMAKE_INSTALL_PREFIX"] = self.build_folder.replace("\\", "/")
         cmake.configure()
         cmake.build()
 
     def test(self):
         if not tools.cross_building(self.settings):
-            with tools.environment_append({"LD_LIBRARY_PATH": "bin", "DYLD_LIBRARY_PATH": "bin"}):
-                bin_path = os.path.join("bin", "test_package")
-                self.run(bin_path, run_environment=True)
+            bin_path = os.path.join("bin", "test_package")
+            self.run(bin_path, run_environment=True)
