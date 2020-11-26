@@ -91,12 +91,6 @@ class OpenH264Conan(ConanFile):
         ])
 
         if self.settings.compiler == "Visual Studio":
-            tools.replace_in_file(os.path.join("build", "platform-msvc.mk"),
-                                "CFLAGS_OPT += -MT",
-                                "CFLAGS_OPT += -%s" % str(self.settings.compiler.runtime))
-            tools.replace_in_file(os.path.join("build", "platform-msvc.mk"),
-                                "CFLAGS_DEBUG += -MTd -Gm",
-                                "CFLAGS_DEBUG += -%s -Gm" % str(self.settings.compiler.runtime))
             args.append("OS=msvc")
             env_build.flags.append("-FS")
         else:
@@ -125,6 +119,13 @@ class OpenH264Conan(ConanFile):
     def build(self):
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
             tools.patch(**patch)
+        if self.settings.compiler == "Visual Studio":
+            tools.replace_in_file(os.path.join("build", "platform-msvc.mk"),
+                                "CFLAGS_OPT += -MT",
+                                "CFLAGS_OPT += -%s" % str(self.settings.compiler.runtime))
+            tools.replace_in_file(os.path.join("build", "platform-msvc.mk"),
+                                "CFLAGS_DEBUG += -MTd -Gm",
+                                "CFLAGS_DEBUG += -%s -Gm" % str(self.settings.compiler.runtime))
         with tools.vcvars(self.settings) if self.settings.compiler == "Visual Studio" else tools.no_op():
             with tools.chdir(self._source_subfolder):
                 env_build = AutoToolsBuildEnvironment(self)
