@@ -124,11 +124,11 @@ class LibtorrentConan(ConanFile):
             tools.replace_in_file(os.path.join(self._source_subfolder, "CMakeLists.txt"),
                                   "find_public_dependency(Iconv)",
                                   replace)
-        if self.settings.compiler == "clang" and self.settings.compiler.libcxx == "libstdc++":
-            # https://github.com/arvidn/libtorrent/issues/3557
-            tools.replace_in_file(os.path.join(self._source_subfolder, "include", "libtorrent", "file_storage.hpp"),
-                                  "file_entry& operator=(file_entry&&) & noexcept = default;",
-                                  "file_entry& operator=(file_entry&&) & = default;")
+            if self.settings.compiler == "clang" and self.settings.compiler.libcxx == "libstdc++":
+                # https://github.com/arvidn/libtorrent/issues/3557
+                tools.replace_in_file(os.path.join(self._source_subfolder, "include", "libtorrent", "file_storage.hpp"),
+                                      "file_entry& operator=(file_entry&&) & noexcept = default;",
+                                      "file_entry& operator=(file_entry&&) & = default;")
 
     def build(self):
         self._validate_dependency_graph()
