@@ -42,6 +42,33 @@ class MongoCxxConan(ConanFile):
         if self.settings.os == "Windows":
             del self.options.fPIC
 
+    @property
+    def _minimal_std_version(self):
+        return "17" if self.options.polyfill == "std" else "11"
+
+    @property
+    def _compilers_minimum_version(self):
+        if self.options.polyfill == "std":
+            # C++17
+            return {
+                "Visual Studio": "15",
+                "gcc": "7",
+                "clang": "5",
+                "apple-clang": "10"
+            }
+        elif self.options.polyfill == "boost":
+            # C++11
+            return {
+                "Visual Studio": "14",
+                "gcc": "5",
+                "clang": "3.3",
+                "apple-clang": "9"
+            }
+        else:
+            raise ConanInvalidConfiguration(
+                "please, specify _compilers_minimum_version for {} polyfill".format(self.options.polyfill)
+            )
+
     def configure(self):
         if self.options.shared:
             del self.options.fPIC
@@ -56,7 +83,17 @@ class MongoCxxConan(ConanFile):
             raise ConanInvalidConfiguration("experimental polyfill is not yet supported")
 
         if self.settings.compiler.get_safe("cppstd"):
-            tools.check_min_cppstd(self, "17" if self.options.polyfill == "std" else "11")
+            tools.check_min_cppstd(self, self._minimal_std_version)
+        else:
+            compiler = str(self.settings.compiler)
+            version = tools.Version(self.settings.compiler.version)
+            if version < self._compilers_minimum_version[compiler]:
+                raise ConanInvalidConfiguration(
+                    "{} requires a compiler that supports at least C++{}".format(
+                        self.name,
+                        self._minimal_std_version
+                    )
+                )
 
     def requirements(self):
         self.requires("mongo-c-driver/1.17.2")
@@ -80,6 +117,9 @@ class MongoCxxConan(ConanFile):
         self._cmake.definitions["BSONCXX_LINK_WITH_STATIC_MONGOC"] = not self.options["mongo-c-driver"].shared
         self._cmake.definitions["MONGOCXX_LINK_WITH_STATIC_MONGOC"] = not self.options["mongo-c-driver"].shared
         self._cmake.definitions["MONGOCXX_ENABLE_SSL"] = self.options.with_ssl
+        if self.settings.compiler.get_safe("cppstd") is None:
+            self.output.warn("The recipe will force the cppstd to {}".format(self._minimal_std_version))
+            self._cmake.definitions["CMAKE_CXX_STANDARD"] = self._minimal_std_version
         # FIXME: two CMake module/config files should be generated (mongoc-1.0-config.cmake and bson-1.0-config.cmake),
         # but it can't be modeled right now.
         # Fix should happen in mongo-c-driver recipe
