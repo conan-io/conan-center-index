@@ -54,11 +54,12 @@ if(BUILD_UTILITIES)
     # Each .pgm file is the entry point of an executable
     file(GLOB PGM_FILES "${UTILITY_SRC_DIR}/*.pgm")
 
-    # Remove existing main.c file if any (in Windows source code only?)
-    file(REMOVE "${UTILITY_SRC_DIR}/main.c")
-
     # Source files common to all executables in this subfolder
+    # Ignore these files: main.c, <pgmfilename>.c, <pgmfilename>_main.c
+    # (might have been pre-generated, specially in Windows source code)
     file(GLOB CSPICE_UTILITY_SRC_FILES ${UTILITY_SRC_DIR}/*.c)
+    get_filename_component(MAIN_SRC_FILE "${UTILITY_SRC_DIR}/main.c" ABSOLUTE)
+    list(REMOVE_ITEM CSPICE_UTILITY_SRC_FILES "${MAIN_SRC_FILE}")
     foreach(PGM_FILE ${PGM_FILES})
       get_filename_component(CSPICE_UTILITY ${PGM_FILE} NAME_WE)
       get_filename_component(PGM_MAIN_SRC_FILE "${UTILITY_SRC_DIR}/${CSPICE_UTILITY}_main.c" ABSOLUTE)
@@ -74,7 +75,7 @@ if(BUILD_UTILITIES)
       get_filename_component(CSPICE_UTILITY ${PGM_FILE} NAME_WE)
 
       # Generate <pgm_filename>_main.c file from .pgm file
-      set(PGM_MAIN_SRC_FILE "${UTILITY_SRC_DIR}/${CSPICE_UTILITY}_main.c")
+      set(PGM_MAIN_SRC_FILE "${CMAKE_CURRENT_BINARY_DIR}/cspice_generated/${CSPICE_SUBDIR}/${CSPICE_UTILITY}_main.c")
       add_custom_target(${CSPICE_UTILITY}_PGM DEPENDS ${PGM_FILE} ${PGM_MAIN_SRC_FILE})
       add_custom_command(
         OUTPUT ${PGM_MAIN_SRC_FILE}
@@ -82,18 +83,25 @@ if(BUILD_UTILITIES)
         COMMAND ${CMAKE_COMMAND} -E copy_if_different ${PGM_FILE} ${PGM_MAIN_SRC_FILE}
       )
 
-      # Generate <pgm_filename>.c from main.x file
+      # Generate <pgm_filename>.c from main.x file if it exists
       set(INPUT_MAIN_FILE "${UTILITY_SRC_DIR}/main.x")
-      set(GENERIC_MAIN_SRC_FILE "${UTILITY_SRC_DIR}/${CSPICE_UTILITY}.c")
-      add_custom_target(${CSPICE_UTILITY}_MAIN DEPENDS ${INPUT_MAIN_FILE} ${GENERIC_MAIN_SRC_FILE})
-      add_custom_command(
-        OUTPUT ${GENERIC_MAIN_SRC_FILE}
-        DEPENDS ${INPUT_MAIN_FILE}
-        COMMAND ${CMAKE_COMMAND} -E copy_if_different ${INPUT_MAIN_FILE} ${GENERIC_MAIN_SRC_FILE}
-      )
+      set(GENERIC_MAIN_SRC_FILE "")
+      if(EXISTS ${INPUT_MAIN_FILE})
+        set(GENERIC_MAIN_SRC_FILE "${CMAKE_CURRENT_BINARY_DIR}/cspice_generated/${CSPICE_SUBDIR}/${CSPICE_UTILITY}.c")
+        add_custom_target(${CSPICE_UTILITY}_MAIN DEPENDS ${INPUT_MAIN_FILE} ${GENERIC_MAIN_SRC_FILE})
+        add_custom_command(
+          OUTPUT ${GENERIC_MAIN_SRC_FILE}
+          DEPENDS ${INPUT_MAIN_FILE}
+          COMMAND ${CMAKE_COMMAND} -E copy_if_different ${INPUT_MAIN_FILE} ${GENERIC_MAIN_SRC_FILE}
+        )
+      endif()
 
       add_executable(${CSPICE_UTILITY} ${PGM_MAIN_SRC_FILE} ${GENERIC_MAIN_SRC_FILE})
-      add_dependencies(${CSPICE_UTILITY} ${CSPICE_UTILITY}_PGM ${CSPICE_UTILITY}_MAIN)
+      add_dependencies(${CSPICE_UTILITY} ${CSPICE_UTILITY}_PGM)
+      if(TARGET ${CSPICE_UTILITY}_MAIN)
+        add_dependencies(${CSPICE_UTILITY} ${CSPICE_UTILITY}_MAIN)
+      endif()
+      target_include_directories(${CSPICE_UTILITY} PRIVATE ${UTILITY_SRC_DIR})
       target_link_libraries(${CSPICE_UTILITY} PRIVATE csupport cspice)
       if(TARGET ${CSPICE_SUBDIR}_commonlib)
         target_link_libraries(${CSPICE_UTILITY} PRIVATE ${CSPICE_SUBDIR}_commonlib)
