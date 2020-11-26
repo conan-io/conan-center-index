@@ -11,7 +11,6 @@ class CspiceConan(ConanFile):
     homepage = "https://naif.jpl.nasa.gov/naif/toolkit.html"
     url = "https://github.com/conan-io/conan-center-index"
     exports_sources = ["CMakeLists.txt", "patches/**"]
-    exports = ["TSPA.txt"]
     generators = "cmake"
     settings = "os", "arch", "compiler", "build_type"
     options = {
@@ -96,9 +95,15 @@ class CspiceConan(ConanFile):
         return self._cmake
 
     def package(self):
-        self.copy("TSPA.txt", dst="licenses")
+        tools.save(os.path.join(self.package_folder, "licenses", "LICENSE"), self._extract_license())
         cmake = self._configure_cmake()
         cmake.install()
+
+    def _extract_license(self):
+        spiceusr_header = tools.load(os.path.join(self._source_subfolder, "include", "SpiceUsr.h"))
+        begin = spiceusr_header.find("-Disclaimer")
+        end = spiceusr_header.find("-Required_Reading", begin)
+        return spiceusr_header[begin:end]
 
     def package_info(self):
         self.cpp_info.libs = tools.collect_libs(self)
