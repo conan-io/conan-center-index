@@ -6,7 +6,7 @@ class ceressolverConan(ConanFile):
     name = "ceres-solver"
     license = "BSD-3-Clause"
     url = "https://github.com/conan-io/conan-center-index"
-    homepage = "http://ceres-solver.org/r"
+    homepage = "http://ceres-solver.org/"
     description = ("Ceres Solver is an open source C++ library for modeling\
                     and solving large, complicated optimization problems")
     topics = ("optimization","Non-linear Least Squares")
