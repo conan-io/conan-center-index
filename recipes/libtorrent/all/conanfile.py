@@ -50,14 +50,31 @@ class LibtorrentConan(ConanFile):
         if self.settings.os == "Windows":
             del self.options.fPIC
 
+    def _check_compiler_supports_cxx14(self):
+        min_compiler_version = {
+            "Visual Studio": "14",
+            "gcc": "5",
+            "clang": "5",
+            "apple-clang": "5",
+        }.get(str(self.settings.compiler))
+        if min_compiler_version is None:
+            self.output.warn("Unknown compiler. Assuming it is supporting c++14")
+        if tools.Version(self.settings.compiler.version) < min_compiler_version:
+            raise ConanInvalidConfiguration("This compiler (version) does not support c++ 14.")
+        return True, None
+
     def configure(self):
         if self.options.shared:
             del self.options.fPIC
         if self.settings.compiler.cppstd:
-            tools.check_min_cppstd(self, 11)
+            if tools.Version(self.version) < "2.0":
+                tools.check_min_cppstd(self, 11)
+            else:
+                self._check_compiler_supports_cxx14()
+                tools.check_min_cppstd(self, 14)
 
     def requirements(self):
-        self.requires("boost/1.73.0")
+        self.requires("boost/1.74.0")
         if self.options.enable_encryption:
             self.requires("openssl/1.1.1h")
         if self.options.enable_iconv:
@@ -89,6 +106,8 @@ class LibtorrentConan(ConanFile):
         self._cmake.definitions["build_tools"] = False
         self._cmake.definitions["python-bindings"] = False
         self._cmake.definitions["python-bindings"] = False
+        if self.settings.compiler == "Visual Studio":
+            self._cmake.definitions["static_runtime"] = "MT" in str(self.settings.compiler.runtime)
         self._cmake.configure()
         return self._cmake
 
@@ -97,13 +116,14 @@ class LibtorrentConan(ConanFile):
             tools.patch(**patch_data)
 
         tools.replace_in_file(os.path.join(self._source_subfolder, "CMakeLists.txt"), "/W4", "")
-        if self.options.enable_iconv:
-            replace = "find_public_dependency(Iconv REQUIRED)"
-        else:
-            replace = "set(Iconv_FOUND OFF)"
-        tools.replace_in_file(os.path.join(self._source_subfolder, "CMakeLists.txt"),
-                              "find_public_dependency(Iconv)",
-                              replace)
+        if tools.Version(self.version) < "2.0":
+            if self.options.enable_iconv:
+                replace = "find_public_dependency(Iconv REQUIRED)"
+            else:
+                replace = "set(Iconv_FOUND OFF)"
+            tools.replace_in_file(os.path.join(self._source_subfolder, "CMakeLists.txt"),
+                                  "find_public_dependency(Iconv)",
+                                  replace)
         if self.settings.compiler == "clang" and self.settings.compiler.libcxx == "libstdc++":
             # https://github.com/arvidn/libtorrent/issues/3557
             tools.replace_in_file(os.path.join(self._source_subfolder, "include", "libtorrent", "file_storage.hpp"),
