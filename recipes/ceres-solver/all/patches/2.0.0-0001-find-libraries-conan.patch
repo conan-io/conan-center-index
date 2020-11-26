@@ -97,4 +97,3 @@ diff -u cmake/FindGlog.cmake cmake_conan/FindGlog.cmake
    # Windows (for C:/Program Files prefix).
    list(APPEND GLOG_CHECK_LIBRARY_SUFFIXES
      glog/lib
-Only in cmake: FindGlog_conan.cmake

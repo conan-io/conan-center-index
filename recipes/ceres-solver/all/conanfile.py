@@ -39,6 +39,7 @@ class ceressolverConan(ConanFile):
     def _configure_cmake(self):
         if not self._cmake:
             self._cmake = CMake(self)       #You can check what these flags do in http://ceres-solver.org/installation.html
+            self._cmake.definitions["LIB_SUFFIX"] = ""
             self._cmake.definitions["GFLAGS"] = self.options.use_gflags
             self._cmake.definitions["BUILD_EXAMPLES"] = False           #Requires gflags
             self._cmake.definitions["BUILD_TESTING"] = False            #Requires gflags
@@ -57,7 +58,7 @@ class ceressolverConan(ConanFile):
             self._cmake.definitions["CXX11_THREADS"] = self.options.use_CXX11_threads
             self._cmake.definitions["CXX11"] = self.options.use_CXX11
             self._cmake.definitions["SCHUR_SPECIALIZATIONS"] = self.options.use_schur_specializations
-            if self.settings.os == "Windows":
+            if self.settings.compiler == "Visual Studio":
                 self._cmake.definitions["MSVC_USE_STATIC_CRT"] = str(self.settings.compiler.runtime) == "MT" or str(self.settings.compiler.runtime) == "MTd"
             self._cmake.configure()
         return self._cmake
@@ -75,14 +76,14 @@ class ceressolverConan(ConanFile):
             raise ConanInvalidConfiguration("To depend on glog built with gflags (Default behavior) set use_gflags=True, otherwise Ceres may fail to link due to missing gflags symbols.")
 
     def requirements(self):
-        self.requires("eigen/3.3.7")
+        self.requires("eigen/3.3.8")
         if self.options.use_glog:
             self.requires("glog/0.4.0")
         if self.options.use_gflags:
             self.requires("gflags/2.2.2")
             self.options["gflags"].nothreads = False
         if self.options.use_TBB:
-            self.requires("tbb/2020.0")
+            self.requires("tbb/2020.2")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
@@ -90,15 +91,7 @@ class ceressolverConan(ConanFile):
         os.rename(extracted_dir, self._source_subfolder)
 
     def build(self):
-        #Make sure that cmake finds gflags is use_gflags=True
-        tools.replace_in_file(os.path.join(self._source_subfolder, "CMakeLists.txt"),
-                              "find_package(Gflags)",
-                              "find_package(Gflags REQUIRED)")
-        #On windows the library names can be gflags.dll or gflags_static.lib
-        tools.replace_in_file(os.path.join(self._source_subfolder, "cmake", "FindGflags.cmake"),
-                              "find_library(GFLAGS_LIBRARY NAMES gflags",
-                              "find_library(GFLAGS_LIBRARY NAMES gflags gflags_static")
-        for patch in self.conan_data["patches"][self.version]:
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
             tools.patch(**patch)
         cmake = self._configure_cmake()
         cmake.build()
@@ -107,14 +100,13 @@ class ceressolverConan(ConanFile):
         cmake = self._configure_cmake()
         cmake.install()
         self.copy("LICENSE", src=self._source_subfolder, dst="licenses")
-        tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
         tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
         tools.rmdir(os.path.join(self.package_folder, "CMake"))
 
     def package_info(self):
         self.cpp_info.names["cmake_find_package"] = "Ceres"
         self.cpp_info.names["cmake_find_package_multi"] = "Ceres"
-        self.cpp_info.components["ceres"].libs = tools.collect_libs(self)
+        self.cpp_info.components["ceres"].libs = ["ceres"]
         self.cpp_info.components["ceres"].includedirs = ["include", os.path.join("include","ceres")]
         if not self.options.use_glog:
             self.cpp_info.components["ceres"].includedirs.append(os.path.join("include","ceres", "internal", "miniglog"))
