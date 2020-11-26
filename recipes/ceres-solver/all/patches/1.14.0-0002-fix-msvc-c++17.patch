@@ -24,7 +24,7 @@ diff --git a/internal/ceres/schur_eliminator_impl.h b/internal/ceres/schur_elimi
 index 203dcc9ef..06d0983b9 100644
 --- a/internal/ceres/schur_eliminator_impl.h
 +++ b/internal/ceres/schur_eliminator_impl.h
-@@ -151,9 +151,6 @@ void SchurEliminator<kRowBlockSize, kEBlockSize, kFBlockSize>::Init(
+@@ -154,9 +154,6 @@ void SchurEliminator<kRowBlockSize, kEBlockSize, kFBlockSize>::Init(
    const Chunk& chunk = chunks_.back();
  
    uneliminated_row_begins_ = chunk.start + chunk.size;
