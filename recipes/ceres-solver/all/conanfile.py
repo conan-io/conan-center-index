@@ -47,6 +47,18 @@ class ceressolverConan(ConanFile):
             del self.options.use_CXX11_threads
             del self.options.use_CXX11
 
+    def _check_cxx14_supported(self):
+        min_compiler_version = {
+            "gcc": "5",
+            "Visual Studio": "14",
+            "clang": "5",
+            "apple-clang": "5",
+        }.get(str(self.settings.compiler))
+        if not min_compiler_version:
+            self.output.warn("Unknown compiler. Presuming it supports c++14.")
+        elif tools.Version(self.settings.compiler.version) < min_compiler_version:
+            raise ConanInvalidConfiguration("Current compiler version does not support c++14")
+
     def configure(self):
         if self.options.shared:
             del self.options.fPIC
@@ -57,6 +69,9 @@ class ceressolverConan(ConanFile):
         if tools.Version(self.version) >= "2.0":
             # 1.x uses ceres-solver specific FindXXX.cmake modules
             self.generators.append("cmake_find_package")
+            if self.settings.compiler.cppstd:
+                tools.check_min_cppstd(self, 14)
+            self._check_cxx14_supported()
 
     def requirements(self):
         self.requires("eigen/3.3.8")
@@ -77,6 +92,7 @@ class ceressolverConan(ConanFile):
         if self._cmake:
             return self._cmake
         self._cmake = CMake(self)       #You can check what these flags do in http://ceres-solver.org/installation.html
+        self._cmake.definitions["CMAKE_CXX_STANDARD"] = "14"
         self._cmake.definitions["LIB_SUFFIX"] = ""
         self._cmake.definitions["GFLAGS"] = self.options.use_gflags
         self._cmake.definitions["BUILD_EXAMPLES"] = False           #Requires gflags
@@ -118,9 +134,12 @@ class ceressolverConan(ConanFile):
         tools.rmdir(os.path.join(self.package_folder, "CMake"))
 
     def package_info(self):
+        libsuffix = ""
+        if self.settings.build_type == "Debug":
+            libsuffix = "-debug"
         self.cpp_info.names["cmake_find_package"] = "Ceres"
         self.cpp_info.names["cmake_find_package_multi"] = "Ceres"
-        self.cpp_info.components["ceres"].libs = ["ceres"]
+        self.cpp_info.components["ceres"].libs = ["ceres{}".format(libsuffix)]
         self.cpp_info.components["ceres"].includedirs = ["include", os.path.join("include","ceres")]
         if not self.options.use_glog:
             self.cpp_info.components["ceres"].includedirs.append(os.path.join("include","ceres", "internal", "miniglog"))
