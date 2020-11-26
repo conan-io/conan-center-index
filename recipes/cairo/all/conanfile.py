@@ -243,5 +243,6 @@ class CairoConan(ConanFile):
             self.cpp_info.components["cairo-pdf"].requires = ["cairo_", "zlib::zlib"]
 
         if self.settings.os == "Linux":
-            self.cpp_info.components["cairo-xlib"].names["pkg_config"] = "cairo-xlib"
-            self.cpp_info.components["cairo-xlib"].requires = ["cairo_", "xorg::x11", "xorg::xext"]
+            if self.options.with_xlib:
+                self.cpp_info.components["cairo-xlib"].names["pkg_config"] = "cairo-xlib"
+                self.cpp_info.components["cairo-xlib"].requires = ["cairo_", "xorg::x11", "xorg::xext"]

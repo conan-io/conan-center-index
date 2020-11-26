@@ -1,0 +1,22 @@
+--- cmake/IgnUtils.cmake
++++ cmake/IgnUtils.cmake
+@@ -1372,7 +1372,7 @@ macro(_ign_add_library_or_component)
+     # Generate export macro headers
+     # Note: INTERFACE libraries do not need the export header
+     set(binary_include_dir
+-      "${CMAKE_BINARY_DIR}/include/${include_dir}")
++      "${PROJECT_BINARY_DIR}/include/${include_dir}")
+ 
+     set(implementation_file_name "${binary_include_dir}/detail/Export.hh")
+ 
+--- cmake/IgnSetCompilerFlags.cmake
++++ cmake/IgnSetCompilerFlags.cmake
+@@ -78,7 +78,7 @@ macro(ign_setup_unix)
+     set(CMAKE_SYSTEM_PROCESSOR ${CMAKE_SYSTEM_PROCESSOR} CACHE INTERNAL
+         "processor type (i386 and x86_64)")
+     if(CMAKE_SYSTEM_PROCESSOR MATCHES "x86_64")
+-      set(IGN_ADD_fPIC_TO_LIBRARIES true)
++      #set(IGN_ADD_fPIC_TO_LIBRARIES true)
+     endif(CMAKE_SYSTEM_PROCESSOR MATCHES "x86_64")
+   endif(CMAKE_UNAME)
+ 
