@@ -18,12 +18,14 @@ class MongoCxxConan(ConanFile):
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
-        "polyfill": ["std", "boost", "mnmlstc", "experimental"]
+        "polyfill": ["std", "boost", "mnmlstc", "experimental"],
+        "with_ssl": [True, False]
     }
     default_options = {
         "shared": False,
         "fPIC": True,
-        "polyfill": "boost"
+        "polyfill": "boost",
+        "with_ssl": True
     }
 
     _cmake = None
@@ -45,11 +47,13 @@ class MongoCxxConan(ConanFile):
             del self.options.fPIC
 
         if self.options.polyfill == "mnmlstc":
-            # TODO: add mnmlstc support
-            # Cannot model mnmlstc (not packaged, is pulled dynamically) or
-            # std::experimental (how to check availability in stdlib?) polyfill
-            # dependencies
-            raise ConanInvalidConfiguration("mnmlstc is not yet supported")
+            # TODO: add mnmlstc polyfill support
+            # Cannot model mnmlstc (not packaged, is pulled dynamically) polyfill dependencies
+            raise ConanInvalidConfiguration("mnmlstc polyfill is not yet supported")
+        if self.options.polyfill == "experimental":
+            # TODO: add experimental support
+            # Cannot model std::experimental (how to check availability in stdlib?)
+            raise ConanInvalidConfiguration("experimental polyfill is not yet supported")
 
         if self.settings.compiler.get_safe("cppstd"):
             tools.check_min_cppstd(self, "17" if self.options.polyfill == "std" else "11")
@@ -75,6 +79,7 @@ class MongoCxxConan(ConanFile):
         self._cmake.definitions["BUILD_VERSION"] = self.version
         self._cmake.definitions["BSONCXX_LINK_WITH_STATIC_MONGOC"] = not self.options["mongo-c-driver"].shared
         self._cmake.definitions["MONGOCXX_LINK_WITH_STATIC_MONGOC"] = not self.options["mongo-c-driver"].shared
+        self._cmake.definitions["MONGOCXX_ENABLE_SSL"] = self.options.with_ssl
         # FIXME: two CMake module/config files should be generated (mongoc-1.0-config.cmake and bson-1.0-config.cmake),
         # but it can't be modeled right now.
         # Fix should happen in mongo-c-driver recipe
@@ -123,7 +128,9 @@ class MongoCxxConan(ConanFile):
         self.cpp_info.components["mongocxx"].includedirs = [os.path.join("include", "lib", "v_noabi", "mongocxx")]
         self.cpp_info.components["mongocxx"].libs = ["mongocxx" if self.options.shared else "mongocxx-static"]
         if not self.options.shared:
-            self.cpp_info.components["mongocxx"].defines = ["MONGOCXX_STATIC"]
+            self.cpp_info.components["mongocxx"].defines.append("MONGOCXX_STATIC")
+        if self.options.with_ssl:
+            self.cpp_info.components["mongocxx"].defines.append("MONGOCXX_ENABLE_SSL")
         self.cpp_info.components["mongocxx"].requires = ["mongo-c-driver::mongoc", "bsoncxx"]
 
         # bsoncxx
