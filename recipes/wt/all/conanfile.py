@@ -153,7 +153,7 @@ class WtConan(ConanFile):
 
         def _gather_libs(p):
             libs = self.deps_cpp_info[p].libs + self.deps_cpp_info[p].system_libs
-            if not getattr(self.options[p], "shared", False):
+            if "shared" not in self.options[p] or not self.options[p].shared:
                 for dep in self.deps_cpp_info[p].public_deps:
                     for l in _gather_libs(dep):
                         if not l in libs:
