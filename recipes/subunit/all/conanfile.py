@@ -38,6 +38,10 @@ class SubunitConan(ConanFile):
             del self.options.fPIC
             if self.settings.os == "Windows":
                 raise ConanInvalidConfiguration("Cannot build shared subunit libraries on Windows")
+        if self.settings.compiler == "apple-clang" and tools.Version(self.settings.compiler.version) < "10":
+            # Complete error is:
+            # make[2]: *** No rule to make target `/Applications/Xcode-9.4.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.13.sdk/System/Library/Perl/5.18/darwin-thread-multi-2level/CORE/config.h', needed by `Makefile'.  Stop.
+            raise ConanInvalidConfiguration("Due to weird make error involving missing config.h file in sysroot")
 
     def requirements(self):
         self.requires("cppunit/1.15.1")
