@@ -106,7 +106,7 @@ class CspiceConan(ConanFile):
         return spiceusr_header[begin:end]
 
     def package_info(self):
-        self.cpp_info.libs = tools.collect_libs(self)
+        self.cpp_info.libs = ["cspice"]
         if self.settings.os == "Linux":
             self.cpp_info.system_libs.append("m")
 
