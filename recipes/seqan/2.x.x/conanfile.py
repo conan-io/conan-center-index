@@ -22,9 +22,25 @@ SeqAn is easy to use and simplifies the development of new software tools with a
     def _source_subfolder(self):
         return "source_subfolder"
 
+    @property
+    def _compilers_minimum_version(self):
+        return {
+            "gcc": "5",
+            "Visual Studio": "14",
+            "clang": "3.4",
+            "apple-clang": "3.4"
+        }
+
     def configure(self):
         if self.settings.compiler.cppstd:
             tools.check_min_cppstd(self, 14)
+        minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
+        if minimum_version:
+            if tools.Version(self.settings.compiler.version) < minimum_version:
+                raise ConanInvalidConfiguration("seqan requires C++14, which your compiler does not fully support.")
+        else:
+            self.output.warn("seqan requires C++14. Your compiler is unknown. Assuming it supports C++14.")
+
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
