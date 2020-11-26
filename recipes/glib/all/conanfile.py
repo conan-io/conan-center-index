@@ -64,7 +64,7 @@ class GLibConan(ConanFile):
             self.requires("libelf/0.8.13")
         if self.settings.os == "Linux":
             if self.options.with_mount:
-                self.requires("libmount/2.33.1")
+                self.requires("libmount/2.36")
             if self.options.with_selinux:
                 self.requires("libselinux/3.1")
         else:
