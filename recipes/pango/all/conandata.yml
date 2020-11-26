@@ -1,0 +1,4 @@
+sources:
+  "1.48.0":
+    sha256: "d76513ac89341883320bd5ea063ec7005e70d962deedc064c62d6f17f6769b88"
+    url: "https://github.com/GNOME/pango/archive/1.48.0.tar.gz"
