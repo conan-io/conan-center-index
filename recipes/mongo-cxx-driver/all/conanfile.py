@@ -169,8 +169,6 @@ class MongoCxxConan(ConanFile):
         self.cpp_info.components["mongocxx"].libs = ["mongocxx" if self.options.shared else "mongocxx-static"]
         if not self.options.shared:
             self.cpp_info.components["mongocxx"].defines.append("MONGOCXX_STATIC")
-        if self.options.with_ssl:
-            self.cpp_info.components["mongocxx"].defines.append("MONGOCXX_ENABLE_SSL")
         self.cpp_info.components["mongocxx"].requires = ["mongo-c-driver::mongoc", "bsoncxx"]
 
         # bsoncxx
