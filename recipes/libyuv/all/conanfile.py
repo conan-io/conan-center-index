@@ -66,4 +66,4 @@ class LibyuvConan(ConanFile):
         cmake.install()
 
     def package_info(self):
-        self.cpp_info.libs.append("yuv")
+        self.cpp_info.libs = ["yuv"]
