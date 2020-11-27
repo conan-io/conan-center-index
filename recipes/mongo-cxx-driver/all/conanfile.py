@@ -134,6 +134,8 @@ class MongoCxxConan(ConanFile):
             tools.patch(**patch)
 
     def build(self):
+        if self.options.with_ssl and not bool(self.options["mongo-c-driver"].with_ssl):
+            raise ConanInvalidConfiguration("mongo-cxx-driver with_ssl=True requires mongo-c-driver with a ssl implementation")
         self._patch_sources()
 
         cmake = self._configure_cmake()
