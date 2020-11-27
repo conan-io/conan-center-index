@@ -41,6 +41,11 @@ class PistacheConan(ConanFile):
         if self.settings.os != "Linux":
             raise ConanInvalidConfiguration("Pistache is only support by Linux.")
 
+        # https://github.com/pistacheio/pistache/issues/835
+        if self.settings.compiler == "clang" and self.settings.compiler.libcxx == "libc++":
+            raise ConanInvalidConfiguration("Pistache can not use libc++. For more info see pistacheio/pistache#835.")
+
+
         if self.options.shared:
             del self.options.fPIC
 
