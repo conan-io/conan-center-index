@@ -1,5 +1,12 @@
 # Changelog
 
+### 27-November-2020 - 10:14 CEST
+
+ - [feature] More (and better) properties are stored in Artifactory for each package.
+ - [feature] Use modularized jobs in CI to run parts of the pipeline.
+ - [fix] Fix error affecting PRs that were blocked in the past by a team member
+ - [fix] Fix issue with properties associated to new configurations
+
 ### 18-November-2020 - 12:58 CEST
 
 - [fix] Notify unexpected errors to slack channel (add link to message).
