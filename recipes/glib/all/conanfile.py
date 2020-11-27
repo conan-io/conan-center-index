@@ -52,7 +52,7 @@ class GLibConan(ConanFile):
             del self.options.with_selinux
 
     def build_requirements(self):
-        self.build_requires("meson/0.55.3")
+        self.build_requires("meson/0.56.0")
         self.build_requires("pkgconf/1.7.3")
 
     def requirements(self):
