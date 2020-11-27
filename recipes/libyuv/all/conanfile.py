@@ -47,6 +47,10 @@ class LibyuvConan(ConanFile):
         if self._cmake:
             return self._cmake
         self._cmake = CMake(self)
+
+        if not self.options.with_jpeg:
+            self._cmake.definitions["CMAKE_DISABLE_FIND_PACKAGE_JPEG"] = True
+
         self._cmake.configure()
         return self._cmake
 
