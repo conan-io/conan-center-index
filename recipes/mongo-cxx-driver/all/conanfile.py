@@ -182,5 +182,3 @@ class MongoCxxConan(ConanFile):
         self.cpp_info.components["bsoncxx"].requires = ["mongo-c-driver::bson"]
         if self.options.polyfill == "boost":
             self.cpp_info.components["bsoncxx"].requires.append("boost::boost")
-        if self.options.polyfill == "mnmlstc":
-            self.cpp_info.components["bsoncxx"].includedirs.append(os.path.join("include", "bsoncxx", "third_party", "mnmlstc"))
