@@ -2,7 +2,6 @@ from conans import ConanFile, tools, AutoToolsBuildEnvironment, RunEnvironment
 from conans.errors import ConanInvalidConfiguration
 import os
 import glob
-import shutil
 
 
 class PulseAudioConan(ConanFile):
@@ -99,21 +98,12 @@ class PulseAudioConan(ConanFile):
             with tools.environment_append({"PKG_CONFIG_PATH": self.build_folder}):
                 with tools.environment_append({
                         "FFTW_CFLAGS": tools.PkgConfig("fftw").cflags,
-                        "FFTW_LIBS": tools.PkgConfig("fftw").libs}):
+                        "FFTW_LIBS": tools.PkgConfig("fftw").libs} if self.options.with_fftw else tools.no_op()):
                     with tools.environment_append(RunEnvironment(self).vars):
                         self._autotools.configure(args=args,  configure_dir=self._source_subfolder)
         return self._autotools
 
     def build(self):
-        
-        for package in self.deps_cpp_info.deps:
-            lib_path = self.deps_cpp_info[package].rootpath
-            for dirpath, _, filenames in os.walk(lib_path):
-                for filename in filenames:
-                    if filename.endswith(".pc"):
-                        shutil.copyfile(os.path.join(dirpath, filename), filename)
-                        tools.replace_prefix_in_pc_file(filename, lib_path)
-
         autotools = self._configure_autotools()
         autotools.make()
 
