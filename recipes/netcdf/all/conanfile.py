@@ -6,8 +6,8 @@ import os
 class NetcdfConan(ConanFile):
     name = "netcdf"
     description = "The Unidata network Common Data Form (netCDF) is an interface for scientific data access and a freely-distributed software library that provides an implementation of the interface."
-    topics = "UNKNOWN TOPICS"
-    license = "https://github.com/Unidata/netcdf-c"
+    topics = ("unidata", "unidata-netcdf", "networking")
+    license = "BSD-3-Clause"
     homepage = "https://github.com/Unidata/netcdf-c"
     url = "https://github.com/conan-io/conan-center-index"
     settings = "os", "arch", "compiler", "build_type"
