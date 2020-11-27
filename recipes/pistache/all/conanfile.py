@@ -37,7 +37,7 @@ class PistacheConan(ConanFile):
             "gcc": "5",
             "clang": "3.4",
         }
-        if self.options.os != "Linux":
+        if self.settings.os != "Linux":
             raise ConanInvalidConfiguration("Pistache is only support by Linux.")
 
         if self.options.shared:
