@@ -72,7 +72,7 @@ class PistacheConan(ConanFile):
             return self._cmake
         self._cmake = CMake(self)
         self._cmake.definitions["PISTACHE_ENABLE_NETWORK_TESTS"] = False
-        self._cmake.definitions["PISTACHE_USE_SSL"] = False
+        self._cmake.definitions["PISTACHE_USE_SSL"] = True
         self._cmake.configure(build_folder=self._build_subfolder)
         return self._cmake
 
