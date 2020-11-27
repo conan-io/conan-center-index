@@ -103,14 +103,17 @@ class OpenH264Conan(ConanFile):
         prefix = os.path.abspath(self.package_folder)
         if tools.os_info.is_windows:
             prefix = tools.unix_path(prefix)
-        env_build = AutoToolsBuildEnvironment(self)
-        if self.options.shared:
-            env_build.fpic = True
-        args = ["{}={}".format(k, v) for k,v in env_build.vars.items()]
-        args.extend([
+        args = [
             "ARCH=%s" % self._make_arch,
             "PREFIX=%s" % prefix,
-        ])
+        ]
+        env_build = AutoToolsBuildEnvironment(self)
+        if self.settings.compiler == "Visual Studio":
+            env_build.flags.extend(["-nologo", "-{}".format(self.settings.compiler.runtime)])
+            env_build.link_flags.insert(0, "-link")
+        if self.options.shared:
+            env_build.fpic = True
+        args.extend(["{}={}".format(k, v) for k,v in env_build.vars.items()])
 
         if self.settings.compiler == "Visual Studio":
             args.append("OS=msvc")
