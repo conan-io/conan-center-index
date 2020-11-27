@@ -84,16 +84,20 @@ class MongoCxxConan(ConanFile):
 
         if self.settings.compiler.get_safe("cppstd"):
             tools.check_min_cppstd(self, self._minimal_std_version)
-        else:
-            compiler = str(self.settings.compiler)
-            version = tools.Version(self.settings.compiler.version)
-            if version < self._compilers_minimum_version[compiler]:
-                raise ConanInvalidConfiguration(
-                    "{} requires a compiler that supports at least C++{}".format(
-                        self.name,
-                        self._minimal_std_version
-                    )
+
+        compiler = str(self.settings.compiler)
+        if compiler not in self._compilers_minimum_version:
+            self.output.warn("Unknown compiler, assuming it supports at least C++{}".format(self._minimal_std_version))
+            return
+
+        version = tools.Version(self.settings.compiler.version)
+        if version < self._compilers_minimum_version[compiler]:
+            raise ConanInvalidConfiguration(
+                "{} requires a compiler that supports at least C++{}".format(
+                    self.name,
+                    self._minimal_std_version
                 )
+            )
 
     def requirements(self):
         self.requires("mongo-c-driver/1.17.2")
