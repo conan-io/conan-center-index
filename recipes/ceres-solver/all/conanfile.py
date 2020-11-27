@@ -148,7 +148,7 @@ class ceressolverConan(ConanFile):
                 self.cpp_info.components["ceres"].system_libs.append("pthread")
         elif tools.is_apple_os(self.settings.os):
             if tools.Version(self.version) >= "2":
-                self.cpp_info.frameworks = ["Accelerate"]
+                self.cpp_info.components["ceres"].frameworks = ["Accelerate"]
         self.cpp_info.components["ceres"].requires = ["eigen::eigen"]
         if self.options.use_glog:
             self.cpp_info.components["ceres"].requires.append("glog::glog")
@@ -156,3 +156,6 @@ class ceressolverConan(ConanFile):
             self.cpp_info.components["ceres"].requires.append("gflags::gflags")
         if self.options.use_TBB:
             self.cpp_info.components["ceres"].requires.append("tbb::tbb")
+        libcxx = tools.stdcpp_library(self)
+        if libcxx:
+            self.cpp_info.components["ceres"].system_libs.append(libcxx)
