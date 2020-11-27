@@ -129,6 +129,13 @@ class LibtorrentConan(ConanFile):
                 tools.replace_in_file(os.path.join(self._source_subfolder, "include", "libtorrent", "file_storage.hpp"),
                                       "file_entry& operator=(file_entry&&) & noexcept = default;",
                                       "file_entry& operator=(file_entry&&) & = default;")
+        else:
+            min_compiler_version = {
+                "gcc": "5",
+            }.get(str(self.settings.compiler))
+            if min_compiler_version:
+                if tools.Version(self.settings.compiler.version) < min_compiler_version:
+                    raise ConanInvalidConfiguration("This compiler cannot build libtorrent due to missing features")
 
     def build(self):
         self._validate_dependency_graph()
