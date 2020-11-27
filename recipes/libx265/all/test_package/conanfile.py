@@ -23,9 +23,10 @@ class TestPackageConan(ConanFile):
         cmake.build()
 
     def test(self):
-        # Copy all libraries so in bin folder so we don't need any LD_LIBRARY_PATH/DYLD_LIBRARY_PATH (which might conflict with run_environment argument of self.run)
+        # Copy all libraries to current and bin folderso we don't need any LD_LIBRARY_PATH/DYLD_LIBRARY_PATH/PATH (which might conflict with run_environment argument of self.run)
         for fn in glob.glob(os.path.join("lib", "*")):
             shutil.copy(src=fn, dst="bin")
+            shutil.copy(src=fn, dst=".")
         if not tools.cross_building(self.settings):
             bin_path = os.path.join("bin", "test_package")
             self.run(bin_path, run_environment=True)
