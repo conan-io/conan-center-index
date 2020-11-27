@@ -6,7 +6,7 @@ import glob
 class tngConan(ConanFile):
     name = "tng"
     description = "External GROMACS library for loading tng files."
-    license = "BSD"
+    license = "BSD-3-Clause"
     topics = ("conan", "tng", "gromacs")
     homepage = "https://github.com/gromacs/tng/"
     url = "https://github.com/conan-io/conan-center-index"
@@ -63,6 +63,8 @@ class tngConan(ConanFile):
             return self._cmake
         self._cmake = CMake(self)
         self._cmake.definitions["TNG_BUILD_OWN_ZLIB"] = False
+        self._cmake.definitions["TNG_BUILD_EXAMPLES"] = False
+        self._cmake.definitions["TNG_BUILD_TEST"] = False
         self._cmake.configure(build_folder=self._build_subfolder)
         return self._cmake
 
