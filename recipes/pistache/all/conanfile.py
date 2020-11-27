@@ -36,9 +36,9 @@ class PistacheConan(ConanFile):
         compilers = {
             "gcc": "5",
             "clang": "3.4",
-            "Visual Studio": "14",
-            "apple-clang": "9.1"
         }
+        if self.options.os != "Linux":
+            raise ConanInvalidConfiguration("Pistache is only support by Linux.")
 
         if self.options.shared:
             del self.options.fPIC
