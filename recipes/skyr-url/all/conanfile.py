@@ -32,11 +32,11 @@ class SkyrUrlConan(ConanFile):
 
     @property
     def _minimum_compilers_version(self):
-        # https://github.com/cpp-netlib/url#requirements
+        # https://github.com/cpp-netlib/url/tree/v1.12.0#requirements
         return {
             "Visual Studio": "16",
             "gcc": "7",
-            "clang": "6",
+            "clang": "6" if tools.Version(self.version) <= "1.12.0" else "8",
             "apple-clang": "10",
         }
 
@@ -47,8 +47,7 @@ class SkyrUrlConan(ConanFile):
     def configure(self):
         if self.settings.get_safe("compiler.cppstd"):
             tools.check_min_cppstd(self, self._minimum_cpp_standard)
-        min_version = self._minimum_compilers_version.get(
-            str(self.settings.compiler))
+        min_version = self._minimum_compilers_version.get(str(self.settings.compiler))
         if not min_version:
             self.output.warn("{} recipe lacks information about the {} compiler support.".format(
                 self.name, self.settings.compiler))
@@ -58,7 +57,7 @@ class SkyrUrlConan(ConanFile):
                     self.name, self.settings.compiler, self.settings.compiler.version))
                 
         if self.options.with_fs and str(self.settings.compiler) == "apple-clang":
-            raise ConanInvalidConfiguration("apple-clang 11 is currently not support with filesystem")
+            raise ConanInvalidConfiguration("apple-clang currently does not support with filesystem")
             
         if self.options.shared:
             raise ConanInvalidConfiguration("shared is currently not supported")
