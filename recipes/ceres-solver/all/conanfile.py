@@ -146,6 +146,8 @@ class ceressolverConan(ConanFile):
         if self.settings.os == "Linux":
             if self.options.get_safe("use_CXX11_threads", True):
                 self.cpp_info.components["ceres"].system_libs.append("pthread")
+        elif tools.is_apple_os(self.settings.os):
+            self.cpp_info.frameworkd("Accelerate")
         self.cpp_info.components["ceres"].requires = ["eigen::eigen"]
         if self.options.use_glog:
             self.cpp_info.components["ceres"].requires.append("glog::glog")
