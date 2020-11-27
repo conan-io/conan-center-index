@@ -1,22 +1,28 @@
 --- CMakeLists.txt
 +++ CMakeLists.txt
-@@ -659,9 +659,6 @@
+@@ -659,9 +659,9 @@
    target_include_directories(getdns_objects PRIVATE src/ssl_dane)
    set(USE_DANESSL 1)
  endif ()
 -if (Libidn_FOUND)
 -  target_include_directories(getdns_objects PRIVATE ${LIBIDN_INCLUDE_DIR})
 -endif ()
++#if (Libidn_FOUND)
++#  target_include_directories(getdns_objects PRIVATE ${LIBIDN_INCLUDE_DIR})
++#endif ()
  if (Libidn2_FOUND)
    target_include_directories(getdns_objects PRIVATE ${LIBIDN2_INCLUDE_DIR})
  endif ()
-@@ -695,9 +692,6 @@
+@@ -695,9 +695,9 @@
    if (Libunbound_FOUND)
      target_link_libraries(getdns PUBLIC Libunbound::Libunbound)
    endif ()
 -  if (Libidn_FOUND)
 -    target_link_libraries(getdns PUBLIC Libidn::Libidn)
 -  endif ()
++# if (Libidn_FOUND)
++#   target_link_libraries(getdns PUBLIC Libidn::Libidn)
++# endif ()
    if (Libidn2_FOUND)
      target_link_libraries(getdns PUBLIC Libidn2::Libidn2)
    endif ()
