@@ -3,6 +3,8 @@ import glob
 from conans import ConanFile, CMake, tools
 from conans.errors import ConanException
 
+required_conan_version = ">=1.28.0"
+
 
 class GlfwConan(ConanFile):
     name = "glfw"
@@ -68,6 +70,11 @@ class GlfwConan(ConanFile):
         tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
 
     def package_info(self):
+        # FIXME: official CMake imported target is not namespaced
+        self.cpp_info.filenames["cmake_find_package"] = "glfw3"
+        self.cpp_info.filenames["cmake_find_package_multi"] = "glfw3"
+        self.cpp_info.names["cmake_find_package"] = "glfw"
+        self.cpp_info.names["cmake_find_package_multi"] = "glfw"
         self.cpp_info.names["pkg_config"] = "glfw3"
         self.cpp_info.libs = tools.collect_libs(self)
         if self.settings.os == "Linux":
