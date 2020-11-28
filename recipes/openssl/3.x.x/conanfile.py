@@ -82,16 +82,18 @@ class OpenSSLConan(ConanFile):
     def _use_nmake(self):
         return self._is_clangcl or self._is_msvc
 
-    def configure(self):
-        del self.settings.compiler.libcxx
-        del self.settings.compiler.cppstd
-
     def config_options(self):
         if self.settings.os != "Windows":
             del self.options.capieng_dialog
             del self.options.enable_capieng
         else:
             del self.options.fPIC
+
+    def configure(self):
+        if self.options.shared:
+            del self.options.fPIC
+        del self.settings.compiler.libcxx
+        del self.settings.compiler.cppstd
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
