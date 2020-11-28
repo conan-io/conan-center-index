@@ -58,6 +58,7 @@ class GlfwConan(ConanFile):
             self._cmake.definitions["GLFW_BUILD_EXAMPLES"] = False
             self._cmake.definitions["GLFW_BUILD_TESTS"] = False
             self._cmake.definitions["GLFW_BUILD_DOCS"] = False
+            self._cmake.definitions["GLFW_INSTALL"] = True
             if self.settings.compiler == "Visual Studio":
                 self._cmake.definitions["USE_MSVC_RUNTIME_LIBRARY_DLL"] = "MD" in self.settings.compiler.runtime
             self._cmake.configure()
