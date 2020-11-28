@@ -67,10 +67,6 @@ class GlfwConan(ConanFile):
         self._patch_sources()
         cmake = self._configure_cmake()
         cmake.build()
-        if self.settings.os == "Macos" and self.options.shared:
-            with tools.chdir(os.path.join(self._source_subfolder, 'src')):
-                for filename in glob.glob('*.dylib'):
-                    self.run('install_name_tool -id {filename} {filename}'.format(filename=filename))
 
     def package(self):
         self.copy("LICENSE*", dst="licenses", src=self._source_subfolder)
