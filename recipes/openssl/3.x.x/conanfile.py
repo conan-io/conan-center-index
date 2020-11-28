@@ -364,7 +364,7 @@ class OpenSSLConan(ConanFile):
             if self.options.capieng_dialog:
                 args.append("-DOPENSSL_CAPIENG_DIALOG=1")
         else:
-            args.append("-fPIC" if self.options.fPIC else "no-pic")
+            args.append("-fPIC" if self.options.get_safe("fPIC") else "no-pic")
         if self.settings.os == "Neutrino":
             args.append("-lsocket no-asm")
 
@@ -456,7 +456,7 @@ class OpenSSLConan(ConanFile):
             if self.options.shared:
                 shared_extension = 'shared_extension => ".so.\$(SHLIB_VERSION_NUMBER)",'
                 shared_target = 'shared_target  => "gnu-shared",'
-            if self.options.fPIC:
+            if self.options.get_safe("fPIC"):
                 shared_cflag = 'shared_cflag => "-fPIC",'
 
         config = config_template.format(targets=targets,
