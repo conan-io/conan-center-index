@@ -47,6 +47,11 @@ class GlfwConan(ConanFile):
         extracted_dir = "{}-{}".format(self.name, self.version)
         os.rename(extracted_dir, self._source_subfolder)
 
+    def _patch_sources(self):
+        # don't force PIC
+        tools.replace_in_file(os.path.join(self._source_subfolder, "src", "CMakeLists.txt"),
+                              "POSITION_INDEPENDENT_CODE ON", "")
+
     def _configure_cmake(self):
         if not self._cmake:
             self._cmake = CMake(self)
@@ -59,6 +64,7 @@ class GlfwConan(ConanFile):
         return self._cmake
 
     def build(self):
+        self._patch_sources()
         cmake = self._configure_cmake()
         cmake.build()
         if self.settings.os == "Macos" and self.options.shared:
