@@ -1,7 +1,6 @@
 import os
 import glob
 from conans import ConanFile, CMake, tools
-from conans.errors import ConanException
 
 required_conan_version = ">=1.28.0"
 
