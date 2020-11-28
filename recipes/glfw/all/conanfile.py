@@ -15,12 +15,16 @@ class GlfwConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/glfw/glfw"
     topics = ("conan", "gflw", "opengl", "vulkan", "opengl-es")
+    exports_sources = "CMakeLists.txt"
     generators = "cmake"
     options = {"shared": [True, False], "fPIC": [True, False]}
     default_options = {"shared": False, "fPIC": True}
-    _source_subfolder = "source_subfolder"
-    _build_subfolder = "build_subfolder"
+
     _cmake = None
+
+    @property
+    def _source_subfolder(self):
+        return "source_subfolder"
 
     def _configure_cmake(self):
         if not self._cmake:
@@ -30,7 +34,7 @@ class GlfwConan(ConanFile):
             self._cmake.definitions["GLFW_BUILD_DOCS"] = False
             if self.settings.compiler == "Visual Studio":
                 self._cmake.definitions["USE_MSVC_RUNTIME_LIBRARY_DLL"] = "MD" in self.settings.compiler.runtime
-            self._cmake.configure(source_folder=self._source_subfolder)
+            self._cmake.configure()
         return self._cmake
 
     def requirements(self):
