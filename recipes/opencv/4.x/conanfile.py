@@ -69,6 +69,9 @@ class OpenCVConan(ConanFile):
             del self.options.fPIC
         self.options["libtiff"].jpeg = self.options.with_jpeg
         self.options["jasper"].with_libjpeg = self.options.with_jpeg
+        # https://github.com/openexr/openexr/issues/221
+        if tools.cross_building(self.settings):
+            self.options.with_openexr = False  # required because this forces linkage to libc++_shared.so
 
     def requirements(self):
         self.requires("zlib/1.2.11")
@@ -242,8 +245,23 @@ class OpenCVConan(ConanFile):
 
         if self.settings.compiler == "Visual Studio":
             self._cmake.definitions["BUILD_WITH_STATIC_CRT"] = "MT" in str(self.settings.compiler.runtime)
-        self._cmake.configure(build_folder=self._build_subfolder)
 
+        if self.settings.os == "Android":
+            self._cmake.definitions["ANDROID_STL"] = "c++_static"
+            self._cmake.definitions["ANDROID_NATIVE_API_LEVEL"] = self.settings.os.api_level
+            self._cmake.definitions["ANDROID_ABI"] = tools.to_android_abi(str(self.settings.arch))
+            self._cmake.definitions["BUILD_ANDROID_EXAMPLES"] = False
+            # TODO: "Use NVidia carotene acceleration library for ARM platform"
+            # if we want to support this, we must include an extra library 
+            # "lib/libtegra_hal.a" for shared=False, don"t know how to do that.
+            # Therefore we disable this for the moment
+            self._cmake.definitions["WITH_CAROTENE"] = False
+            if "ANDROID_NDK_HOME" in os.environ:
+                self._cmake.definitions["ANDROID_NDK"] = os.environ.get("ANDROID_NDK_HOME")
+            self._cmake.definitions["WITH_OPENEXR"] = False
+                
+            
+        self._cmake.configure(build_folder=self._build_subfolder)
         return self._cmake
 
     def build(self):
@@ -284,6 +302,17 @@ class OpenCVConan(ConanFile):
                 if self.settings.os == "Linux":
                     self.cpp_info.components[conan_component].system_libs = ["dl", "m", "pthread", "rt"]
 
+                if self.settings.os == "Android":
+                    self.cpp_info.components[conan_component].includedirs = [
+                        os.path.join("sdk", "native", "jni", "include")]
+                    self.cpp_info.components[conan_component].system_libs += ["log"]
+                    if not self.options.shared:
+                        self.cpp_info.components[conan_component].libdirs.append(
+                            os.path.join("sdk", "native", "staticlibs", tools.to_android_abi(str(self.settings.arch))))
+                        # TODO this doesn't work for cmake target based projects
+                        # self.cpp_info.components[conan_component].libdirs += ["lib"]
+                        # self.cpp_info.components[conan_component].libs += ["cpufeatures", "tegra_hal"]
+ 
                 # CMake components names
                 conan_component_alias = conan_component + "_alias"
                 cmake_component = component["lib"]

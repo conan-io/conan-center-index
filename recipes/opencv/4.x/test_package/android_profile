@@ -1,0 +1,15 @@
+include(default)
+
+[settings]
+arch=armv8
+compiler=clang
+compiler.libcxx=libc++
+compiler.version=8
+os=Android
+os.api_level=21
+
+[build_requires]
+android_ndk_installer/r20@bincrafters/stable
+
+[options]
+[env]
