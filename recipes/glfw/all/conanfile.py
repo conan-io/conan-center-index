@@ -10,37 +10,22 @@ class GlfwConan(ConanFile):
     description = "GLFW is a free, Open Source, multi-platform library for OpenGL, OpenGL ES and Vulkan" \
                   "application development. It provides a simple, platform-independent API for creating" \
                   "windows, contexts and surfaces, reading input, handling events, etc."
-    settings = "os", "arch", "build_type", "compiler"
     license = "Zlib"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/glfw/glfw"
     topics = ("conan", "gflw", "opengl", "vulkan", "opengl-es")
-    exports_sources = "CMakeLists.txt"
-    generators = "cmake"
+
+    settings = "os", "arch", "build_type", "compiler"
     options = {"shared": [True, False], "fPIC": [True, False]}
     default_options = {"shared": False, "fPIC": True}
 
+    exports_sources = "CMakeLists.txt"
+    generators = "cmake"
     _cmake = None
 
     @property
     def _source_subfolder(self):
         return "source_subfolder"
-
-    def _configure_cmake(self):
-        if not self._cmake:
-            self._cmake = CMake(self)
-            self._cmake.definitions["GLFW_BUILD_EXAMPLES"] = False
-            self._cmake.definitions["GLFW_BUILD_TESTS"] = False
-            self._cmake.definitions["GLFW_BUILD_DOCS"] = False
-            if self.settings.compiler == "Visual Studio":
-                self._cmake.definitions["USE_MSVC_RUNTIME_LIBRARY_DLL"] = "MD" in self.settings.compiler.runtime
-            self._cmake.configure()
-        return self._cmake
-
-    def requirements(self):
-        self.requires("opengl/system")
-        if self.settings.os == "Linux":
-            self.requires("xorg/system")
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -52,10 +37,26 @@ class GlfwConan(ConanFile):
         del self.settings.compiler.libcxx
         del self.settings.compiler.cppstd
 
+    def requirements(self):
+        self.requires("opengl/system")
+        if self.settings.os == "Linux":
+            self.requires("xorg/system")
+
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
         extracted_dir = "{}-{}".format(self.name, self.version)
         os.rename(extracted_dir, self._source_subfolder)
+
+    def _configure_cmake(self):
+        if not self._cmake:
+            self._cmake = CMake(self)
+            self._cmake.definitions["GLFW_BUILD_EXAMPLES"] = False
+            self._cmake.definitions["GLFW_BUILD_TESTS"] = False
+            self._cmake.definitions["GLFW_BUILD_DOCS"] = False
+            if self.settings.compiler == "Visual Studio":
+                self._cmake.definitions["USE_MSVC_RUNTIME_LIBRARY_DLL"] = "MD" in self.settings.compiler.runtime
+            self._cmake.configure()
+        return self._cmake
 
     def build(self):
         cmake = self._configure_cmake()
