@@ -14,7 +14,7 @@ class SkyrUrlConan(ConanFile):
     settings = "os", "compiler", "build_type", "arch"
     options = {"shared": [True, False], "fPIC": [True, False], "with_json": [True, False], "with_fs": [True, False]}
     default_options = {"shared": False, "fPIC": True, "with_json": True, "with_fs": True}
-    exports_sources = "CMakeLists.txt", "patches/*"
+    exports_sources = "CMakeLists.txt"
     generators = "cmake", "cmake_find_package_multi"
     _cmake = None
 
@@ -89,8 +89,6 @@ class SkyrUrlConan(ConanFile):
         return self._cmake
 
     def build(self):
-        for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            tools.patch(**patch)
         cmake = self._configure_cmake()
         cmake.build()
 
