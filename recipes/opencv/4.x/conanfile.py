@@ -258,8 +258,9 @@ class OpenCVConan(ConanFile):
             self._cmake.definitions["WITH_CAROTENE"] = False
             if "ANDROID_NDK_HOME" in os.environ:
                 self._cmake.definitions["ANDROID_NDK"] = os.environ.get("ANDROID_NDK_HOME")
-                
-            
+
+        # TODO: avoid python2 warning and numpy error, is this the best way to do it?
+        self._cmake.definitions["OPENCV_PYTHON_SKIP_DETECTION"] = True
         self._cmake.configure(build_folder=self._build_subfolder)
         return self._cmake
 
