@@ -59,6 +59,10 @@ class SkyrUrlConan(ConanFile):
         if self.options.with_fs and self.settings.compiler == "apple-clang":
             raise ConanInvalidConfiguration("apple-clang currently does not support with filesystem")
 
+        if self.options.shared:
+            # https://github.com/cpp-netlib/url/blob/dd345361ed86e4c1cabfe94743a8e769b346840c/src/CMakeLists.txt#L17
+            raise ConanInvalidConfiguration("shared is currently not supported by upstream")
+
         if tools.Version(self.version) >= "1.13.0" and not self.settings.compiler == "Visual Studio":
             # There's tedious compilation errors in C3i against ranges-v3
             raise ConanInvalidConfiguration("{}/{} with {} is currently not supported".format(self.name, self.version, self.settings.compiler))
