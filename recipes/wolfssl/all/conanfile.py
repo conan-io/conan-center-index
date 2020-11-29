@@ -144,7 +144,7 @@ class WolfSSLConan(ConanFile):
         self.cpp_info.names["pkg_config"] = "wolfssl"
         libname = "wolfssl"
         if self.settings.compiler == "Visual Studio" and self.options.shared:
-            libname += ".dll"
+            libname += ".dll.lib"
         self.cpp_info.libs = [libname]
         if self.options.shared:
             self.cpp_info.defines.append("WOLFSSL_DLL")
