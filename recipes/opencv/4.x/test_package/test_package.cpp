@@ -7,7 +7,6 @@
  */
 #include <opencv2/core.hpp>
 #include <opencv2/imgproc.hpp>
-#include <stdio.h>
 
 #define w 400
 
@@ -73,8 +72,6 @@ int main( void ){
   MyLine( rook_image, Point( 3*w/4, 7*w/8 ), Point( 3*w/4, w ) );
   //![draw_rook]
 
-  /* report successful execution on stdout */
-  printf("test_package main() returning 0\n");
   return(0);
 }
 
