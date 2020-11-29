@@ -1,0 +1,13 @@
+diff --git a/src/CMakeLists.txt b/src/CMakeLists.txt
+index 887d3128..d5dc8a76 100644
+--- a/src/CMakeLists.txt
++++ b/src/CMakeLists.txt
+@@ -14,7 +14,7 @@ configure_file(
+ # skyr-url
+ #################################################
+ 
+-add_library(skyr-url STATIC)
++add_library(skyr-url)
+ 
+ target_sources(skyr-url
+     PRIVATE
