@@ -45,13 +45,13 @@ class Nghttp2Conan(ConanFile):
     def requirements(self):
         self.requires("zlib/1.2.11")
         if self.options.with_app:
-            self.requires("openssl/1.1.1d")
-            self.requires("c-ares/1.15.0")
-            self.requires("libev/4.27")
-            self.requires("libevent/2.1.11")
-            self.requires("libxml2/2.9.9")
+            self.requires("openssl/1.1.1h")
+            self.requires("c-ares/1.17.1")
+            self.requires("libev/4.33")
+            self.requires("libevent/2.1.12")
+            self.requires("libxml2/2.9.10")
         if self.options.with_hpack:
-            self.requires("jansson/2.12")
+            self.requires("jansson/2.13.1")
         if self.options.with_jemalloc:
             self.requires("jemalloc/5.2.1")
         if self.options.with_asio:
