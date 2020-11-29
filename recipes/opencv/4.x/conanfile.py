@@ -16,7 +16,7 @@ class OpenCVConan(ConanFile):
     options = {"shared": [True, False],
                "fPIC": [True, False],
                "contrib": [True, False],
-               "parallel": [False, "tbb", "openmp"],
+               "parallel": [False, "tbb", "openmp", "pthreads"],
                "with_jpeg": [False, "libjpeg", "libjpeg-turbo"],
                "with_png": [True, False],
                "with_tiff": [True, False],
@@ -27,7 +27,7 @@ class OpenCVConan(ConanFile):
                "with_gtk": [True, False]}
     default_options = {"shared": False,
                        "fPIC": True,
-                       "parallel": False,
+                       "parallel": "pthreads",
                        "contrib": False,
                        "with_jpeg": "libjpeg",
                        "with_png": True,
@@ -240,6 +240,7 @@ class OpenCVConan(ConanFile):
         if self.options.parallel:
             self._cmake.definitions["WITH_TBB"] = self.options.parallel == "tbb"
             self._cmake.definitions["WITH_OPENMP"] = self.options.parallel == "openmp"
+            self._cmake.definitions["WITH_PTHREADS_PF"] = self.options.parallel == "pthreads"
 
         self._cmake.definitions["ENABLE_PIC"] = self.options.get_safe("fPIC", True)
 
@@ -345,7 +346,7 @@ class OpenCVConan(ConanFile):
             return ["eigen::eigen"] if self.options.with_eigen else []
 
         def parallel():
-            if self.options.parallel:
+            if self.options.parallel and self.options.parallel != "pthreads":
                 return ["tbb::tbb"] if self.options.parallel == "tbb" else ["openmp"]
             return []
 
