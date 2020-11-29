@@ -13,8 +13,8 @@ class SysConfigEGLConan(ConanFile):
     settings = ("os",)
 
     def configure(self):
-        if self.settings.os == "Macos":
-            raise ConanInvalidConfiguration("This recipes does not support macos")
+        if self.settings.os != "Linux":
+            raise ConanInvalidConfiguration("This recipes supports only Linux")
             
     def package_id(self):
         self.info.header_only()
@@ -69,7 +69,4 @@ class SysConfigEGLConan(ConanFile):
 
         self.cpp_info.includedirs = []
         self.cpp_info.libdirs = []
-        if self.settings.os == "Windows":
-            self.cpp_info.system_libs = ["EGL"]
-        elif self.settings.os == "Linux":
-            self._fill_cppinfo_from_pkgconfig('egl')
+        self._fill_cppinfo_from_pkgconfig('egl')
