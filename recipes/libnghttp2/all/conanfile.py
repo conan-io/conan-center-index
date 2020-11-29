@@ -78,6 +78,10 @@ class Nghttp2Conan(ConanFile):
 
         cmake.definitions["ENABLE_ASIO_LIB"] = "ON" if self.options.with_asio else "OFF"
 
+        if tools.Version(self.version) >= "1.42.0":
+            # backward-incompatible change in 1.42.0
+            cmake.definitions["STATIC_LIB_SUFFIX"] = "_static"
+
         if self.options.with_app:
             cmake.definitions["OPENSSL_ROOT_DIR"] = self.deps_cpp_info["openssl"].rootpath
         if self.options.with_asio:
