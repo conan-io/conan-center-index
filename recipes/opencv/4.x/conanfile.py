@@ -69,8 +69,10 @@ class OpenCVConan(ConanFile):
             del self.options.fPIC
         self.options["libtiff"].jpeg = self.options.with_jpeg
         self.options["jasper"].with_libjpeg = self.options.with_jpeg
+
         # https://github.com/openexr/openexr/issues/221
-        if tools.cross_building(self):
+        #if tools.cross_building(self):
+        if self.settings.os == "Android":
             self.options.with_openexr = False  # required because this forces linkage to libc++_shared.so
 
     def requirements(self):
