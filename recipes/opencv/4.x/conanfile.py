@@ -27,7 +27,7 @@ class OpenCVConan(ConanFile):
                "with_gtk": [True, False]}
     default_options = {"shared": False,
                        "fPIC": True,
-                       "parallel": "pthreads",
+                       "parallel": False,
                        "contrib": False,
                        "with_jpeg": "libjpeg",
                        "with_png": True,
