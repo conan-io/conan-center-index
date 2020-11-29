@@ -70,7 +70,7 @@ class OpenCVConan(ConanFile):
         self.options["libtiff"].jpeg = self.options.with_jpeg
         self.options["jasper"].with_libjpeg = self.options.with_jpeg
         # https://github.com/openexr/openexr/issues/221
-        if tools.cross_building(self.settings):
+        if tools.cross_building(self):
             self.options.with_openexr = False  # required because this forces linkage to libc++_shared.so
 
     def requirements(self):
