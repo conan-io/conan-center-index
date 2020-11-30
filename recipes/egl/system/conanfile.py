@@ -55,7 +55,7 @@ class SysConfigEGLConan(ConanFile):
             elif tools.os_info.with_pacman:
                 packages = ["libglvnd"]
             elif tools.os_info.with_zypper:
-                packages = ["mesa-libEGL-devel"]
+                packages = ["Mesa-libEGL-devel"]
             else:
                 packages = []
                 self.output.warn("Don't know how to install EGL for your distro.")
