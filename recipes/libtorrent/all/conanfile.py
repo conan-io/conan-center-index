@@ -52,7 +52,7 @@ class LibtorrentConan(ConanFile):
 
     def _check_compiler_supports_cxx14(self):
         min_compiler_version = {
-            "Visual Studio": "14",
+            "Visual Studio": "15",
             "gcc": "5",
             "clang": "5",
             "apple-clang": "5",
