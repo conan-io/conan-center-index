@@ -14,6 +14,9 @@ sources:
   "2.16.0":
     url: "https://github.com/randombit/botan/archive/2.16.0.tar.gz"
     sha256: "8f448b97120e884d755b946045753876d688b01f48f5e6a1cf37aebd5afecbe5"
+  "2.17.0":
+    url: "https://github.com/randombit/botan/archive/2.17.0.tar.gz"
+    sha256: "32874e4e14bf11428e1bc4919e5ee174a68e2f480d37bc79ed015b2b5ef87fef"
   "2.17.1":
     url: "https://github.com/randombit/botan/archive/2.17.1.tar.gz"
     sha256: "ca562c00e61663c418bd9fdc6c70bdeaedafba8bef328cb6046a1d6390d39a71"
