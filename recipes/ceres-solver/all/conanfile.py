@@ -92,7 +92,6 @@ class ceressolverConan(ConanFile):
         if self._cmake:
             return self._cmake
         self._cmake = CMake(self)       #You can check what these flags do in http://ceres-solver.org/installation.html
-        self._cmake.definitions["CMAKE_CXX_STANDARD"] = "14"
         self._cmake.definitions["LIB_SUFFIX"] = ""
         self._cmake.definitions["GFLAGS"] = self.options.use_gflags
         self._cmake.definitions["BUILD_EXAMPLES"] = False           #Requires gflags
@@ -101,7 +100,7 @@ class ceressolverConan(ConanFile):
         self._cmake.definitions["CUSTOM_BLAS"] = self.options.use_custom_blas
         self._cmake.definitions["GLOG_PREFER_EXPORTED_GLOG_CMAKE_CONFIGURATION"] = False      #Set to false to Force CMake to use the conan-generated dependencies
         self._cmake.definitions["EIGENSPARSE"] = self.options.use_eigen_sparse
-        self._cmake.definitions["SUITESPARSE"] = False  #Optional. Not sufpported right now because SuiteSparse is not part of conan-index
+        self._cmake.definitions["SUITESPARSE"] = False  #Optional. Not supported right now because SuiteSparse is not part of conan-index
         self._cmake.definitions["LAPACK"] = False       #Optional. Not supported right now because LAPACK is not part of conan-index
         self._cmake.definitions["CXSPARSE"] = False     #Optional. Not supported right now because CXSSPARSE is not part of conan-index
         self._cmake.definitions["MINIGLOG"] = not self.options.use_glog
