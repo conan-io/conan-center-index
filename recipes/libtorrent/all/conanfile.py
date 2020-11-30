@@ -66,11 +66,12 @@ class LibtorrentConan(ConanFile):
     def configure(self):
         if self.options.shared:
             del self.options.fPIC
-        if self.settings.compiler.cppstd:
-            if tools.Version(self.version) < "2.0":
+        if tools.Version(self.version) < "2.0":
+            if self.settings.compiler.cppstd:
                 tools.check_min_cppstd(self, 11)
-            else:
-                self._check_compiler_supports_cxx14()
+        else:
+            self._check_compiler_supports_cxx14()
+            if self.settings.compiler.cppstd:
                 tools.check_min_cppstd(self, 14)
 
     def requirements(self):
