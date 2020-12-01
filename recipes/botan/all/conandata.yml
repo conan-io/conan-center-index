@@ -29,3 +29,6 @@ patches:
        base_path: "sources"
      - patch_file: "patches/fix-unrecognized-linker-flag.patch"
        base_path: "sources"
+  "2.17.2":
+     - patch_file: "patches/vs2015-install-fix.patch"
+       base_path: "sources"
