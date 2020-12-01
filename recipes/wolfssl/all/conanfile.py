@@ -1,4 +1,5 @@
 from conans import AutoToolsBuildEnvironment, ConanFile, tools
+from conans.errors import ConanInvalidConfiguration
 from contextlib import contextmanager
 import os
 
@@ -63,9 +64,8 @@ class WolfSSLConan(ConanFile):
         del self.settings.compiler.libcxx
 
     def build_requirements(self):
-        if tools.os_info.is_windows and not tools.get_env("CONAN_BASH_PATH") and \
-                tools.os_info.detect_windows_subsystem() != "msys2":
-            self.build_requires("msys2/20190524")
+        if tools.os_info.is_windows and not tools.get_env("CONAN_BASH_PATH"):
+            self.build_requires("msys2/20200517")
         self.build_requires("libtool/2.4.6")
 
     def source(self):
@@ -96,28 +96,27 @@ class WolfSSLConan(ConanFile):
         self._autotools.libs = []
         if self.settings.compiler == "Visual Studio":
             self._autotools.flags.append("-FS")
+        yes_no = lambda v: "yes" if v else "no"
         conf_args = [
             "--disable-examples",
             "--disable-crypttests",
             "--enable-harden",
-            "--enable-debug" if self.settings.build_type == "Debug" else "--disable-debug",
-            "--enable-opensslall" if self.options.opensslall else "--disable-opensslall",
-            "--enable-opensslextra" if self.options.opensslextra else "--disable-opensslextra",
-            "--enable-sslv3" if self.options.sslv3 else "--disable-sslv3",
-            "--enable-alpn" if self.options.alpn else "--disable-alpn",
-            "--enable-des3" if self.options.des3 else "--disable-des3",
-            "--enable-tls13" if self.options.tls13 else "--disable-tls13",
-            "--enable-certgen" if self.options.certgen else "--disable-certgen",
-            "--enable-dsa" if self.options.dsa else "--disable-dsa",
-            "--enable-ripemd" if self.options.ripemd else "--disable-ripemd",
-            "--enable-sessioncerts" if self.options.sessioncerts else "--disable-sessioncerts",
-            "--enable-sni" if self.options.sni else "--disable-sni",
-            "--enable-testcert" if self.options.testcert else "--disable-testcert",
+            "--enable-debug={}".format(yes_no(self.settings.build_type == "Debug")),
+            "--enable-opensslall={}".format(yes_no(self.options.opensslall)),
+            "--enable-opensslextra={}".format(yes_no(self.options.opensslextra)),
+            "--enable-sslv3={}".format(yes_no(self.options.sslv3)),
+            "--enable-alpn={}".format(yes_no(self.options.alpn)),
+            "--enable-des3={}".format(yes_no(self.options.des3)),
+            "--enable-tls13={}".format(yes_no(self.options.tls13)),
+            "--enable-certgen={}".format(yes_no(self.options.certgen)),
+            "--enable-dsa={}".format(yes_no(self.options.dsa)),
+            "--enable-ripemd={}".format(yes_no(self.options.ripemd)),
+            "--enable-sessioncerts={}".format(yes_no(self.options.sessioncerts)),
+            "--enable-sni={}".format(yes_no(self.options.sni)),
+            "--enable-testcert={}".format(yes_no(self.options.testcert)),
+            "--enable-shared={}".format(yes_no(self.options.shared)),
+            "--enable-static={}".format(yes_no(not self.options.shared)),
         ]
-        if self.options.shared:
-            conf_args.extend(["--enable-shared", "--disable-static"])
-        else:
-            conf_args.extend(["--disable-shared", "--enable-static"])
         self._autotools.configure(args=conf_args, configure_dir=self._source_subfolder)
         return self._autotools
 
@@ -142,6 +141,7 @@ class WolfSSLConan(ConanFile):
         tools.rmdir(os.path.join(self.package_folder, "share"))
 
     def package_info(self):
+        self.cpp_info.names["pkg_config"] = "wolfssl"
         libname = "wolfssl"
         if self.settings.compiler == "Visual Studio" and self.options.shared:
             libname += ".dll.lib"
