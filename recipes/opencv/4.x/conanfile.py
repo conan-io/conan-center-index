@@ -16,7 +16,7 @@ class OpenCVConan(ConanFile):
     options = {"shared": [True, False],
                "fPIC": [True, False],
                "contrib": [True, False],
-               "parallel": [False, "tbb", "openmp", "pthreads"],
+               "parallel": [False, "tbb", "openmp"],
                "with_jpeg": [False, "libjpeg", "libjpeg-turbo"],
                "with_png": [True, False],
                "with_tiff": [True, False],
@@ -201,7 +201,6 @@ class OpenCVConan(ConanFile):
         self._cmake.definitions["WITH_OPENVX"] = False
         self._cmake.definitions["WITH_PLAIDML"] = False
         self._cmake.definitions["WITH_PROTOBUF"] = False
-        self._cmake.definitions["WITH_PTHREADS_PF"] = False
         self._cmake.definitions["WITH_PVAPI"] = False
         self._cmake.definitions["WITH_QT"] = False
         self._cmake.definitions["WITH_QUIRC"] = False
@@ -240,7 +239,6 @@ class OpenCVConan(ConanFile):
         if self.options.parallel:
             self._cmake.definitions["WITH_TBB"] = self.options.parallel == "tbb"
             self._cmake.definitions["WITH_OPENMP"] = self.options.parallel == "openmp"
-            self._cmake.definitions["WITH_PTHREADS_PF"] = self.options.parallel == "pthreads"
 
         self._cmake.definitions["ENABLE_PIC"] = self.options.get_safe("fPIC", True)
 
@@ -253,7 +251,6 @@ class OpenCVConan(ConanFile):
             self._cmake.definitions["ANDROID_ABI"] = tools.to_android_abi(str(self.settings.arch))
             self._cmake.definitions["BUILD_ANDROID_EXAMPLES"] = False
             # TODO: special features for Android - not all are always available
-            self._cmake.definitions["WITH_PTHREADS_PF"] = True # available if NOT WIN32 OR MINGW
             self._cmake.definitions["WITH_CPUFEATURES"] = True  # always available
             self._cmake.definitions["WITH_CAROTENE"] = False  # available for ARM OR AARCH64 but not IOS
             self._cmake.definitions["WITH_ANDROID_MEDIANDK"] = False  # available for ANDROID_NATIVE_API_LEVEL > 20
@@ -346,7 +343,7 @@ class OpenCVConan(ConanFile):
             return ["eigen::eigen"] if self.options.with_eigen else []
 
         def parallel():
-            if self.options.parallel and self.options.parallel != "pthreads":
+            if self.options.parallel:
                 return ["tbb::tbb"] if self.options.parallel == "tbb" else ["openmp"]
             return []
 
