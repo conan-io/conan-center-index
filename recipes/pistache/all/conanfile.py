@@ -15,8 +15,8 @@ class PistacheConan(ConanFile):
     topics = ("http", "rest", "framework", "networking")
     description = "Pistache is a modern and elegant HTTP and REST framework for C++"
     settings = "os", "compiler", "arch", "build_type"
-    options = {"shared": [True, False], "fPIC": [True, False]}
-    default_options = {"shared": False, "fPIC": True}
+    options = {"shared": [True, False], "fPIC": [True, False], "with_ssl": [True, False]}
+    default_options = {"shared": False, "fPIC": True, "with_ssl": True}
     exports_sources = ["CMakeLists.txt"]
     generators = "cmake"
     _cmake = None
@@ -35,48 +35,53 @@ class PistacheConan(ConanFile):
 
     def configure(self):
         compilers = {
-            "gcc": "5",
-            "clang": "3.4",
+            "gcc": "7",
+            "clang": "6",
         }
         if self.settings.os != "Linux":
             raise ConanInvalidConfiguration("Pistache is only support by Linux.")
-
-        # https://github.com/pistacheio/pistache/issues/835
-        if self.settings.compiler == "clang" and self.settings.compiler.libcxx == "libc++":
-            raise ConanInvalidConfiguration("Pistache can not use libc++. For more info see pistacheio/pistache#835.")
-
 
         if self.options.shared:
             del self.options.fPIC
 
         if self.settings.compiler.cppstd:
-            tools.check_min_cppstd(self, 14)
+            tools.check_min_cppstd(self, 17)
         minimum_compiler = compilers.get(str(self.settings.compiler))
         if minimum_compiler:
             if tools.Version(self.settings.compiler.version) < minimum_compiler:
-                raise ConanInvalidConfiguration("Pistache requires c++14, which your compiler does not support.")
+                raise ConanInvalidConfiguration("Pistache requires c++17, which your compiler does not support.")
         else:
-            self.output.warn("Pistache requires c++14, but is unknown to this recipe. Assuming your compiler supports c++14.")
+            self.output.warn("Pistache requires c++17, but is unknown to this recipe. Assuming your compiler supports c++14.")
 
     def requirements(self):
-        self.requires("openssl/1.1.1h")
         self.requires("rapidjson/1.1.0")
+        if self.options.with_ssl:
+            self.requires("openssl/1.1.1h")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
         extracted_dir = glob.glob("pistache-*")[0]
         os.rename(extracted_dir, self._source_subfolder)
 
+    def _patch_sources(self):
+        # https://github.com/pistacheio/pistache/issues/835
+        include_folder = os.path.join(self._source_subfolder, "include", "pistache")
+        os.remove(os.path.join(include_folder, "string_view.h"))
+        tools.replace_in_file(os.path.join(include_folder, "router.h"),
+                              '"pistache/string_view.h"',
+                              "<string_view>")
+
     def _configure_cmake(self):
         if self._cmake:
             return self._cmake
         self._cmake = CMake(self)
         self._cmake.definitions["PISTACHE_ENABLE_NETWORK_TESTS"] = False
-        self._cmake.definitions["PISTACHE_USE_SSL"] = True
+        self._cmake.definitions["PISTACHE_USE_SSL"] = self.options.with_ssl
         self._cmake.configure(build_folder=self._build_subfolder)
         return self._cmake
 
     def build(self):
+        self._patch_sources()
         cmake = self._configure_cmake()
         cmake.build()
 
@@ -98,7 +103,9 @@ class PistacheConan(ConanFile):
         self.cpp_info.components["libpistache"].names["cmake_find_package"] = "pistache" + suffix
         self.cpp_info.components["libpistache"].names["cmake_find_package_multi"] = "pistache" + suffix
         self.cpp_info.components["libpistache"].libs = tools.collect_libs(self)
-        self.cpp_info.components["libpistache"].requires = ["openssl::openssl", "rapidjson::rapidjson"]
-        self.cpp_info.components["libpistache"].defines = ["PISTACHE_USE_SSL=1"]
+        self.cpp_info.components["libpistache"].requires = ["rapidjson::rapidjson"]
+        if self.options.with_ssl:
+            self.cpp_info.components["libpistache"].requires.append("openssl::openssl")
+            self.cpp_info.components["libpistache"].defines = ["PISTACHE_USE_SSL=1"]
         if self.settings.os == "Linux":
             self.cpp_info.components["libpistache"].system_libs = ["pthread"]
