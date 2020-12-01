@@ -27,7 +27,7 @@ class OpenCVConan(ConanFile):
                "with_gtk": [True, False]}
     default_options = {"shared": False,
                        "fPIC": True,
-                       "parallel": "pthreads",
+                       "parallel": False,
                        "contrib": False,
                        "with_jpeg": "libjpeg",
                        "with_png": True,
@@ -253,6 +253,7 @@ class OpenCVConan(ConanFile):
             self._cmake.definitions["ANDROID_ABI"] = tools.to_android_abi(str(self.settings.arch))
             self._cmake.definitions["BUILD_ANDROID_EXAMPLES"] = False
             # TODO: special features for Android - not all are always available
+            self._cmake.definitions["WITH_PTHREADS_PF"] = True # available if NOT WIN32 OR MINGW
             self._cmake.definitions["WITH_CPUFEATURES"] = True  # always available
             self._cmake.definitions["WITH_CAROTENE"] = False  # available for ARM OR AARCH64 but not IOS
             self._cmake.definitions["WITH_ANDROID_MEDIANDK"] = False  # available for ANDROID_NATIVE_API_LEVEL > 20
