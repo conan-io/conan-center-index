@@ -10,6 +10,7 @@
 #     http://creativecommons.org/publicdomain/zero/1.0/
 #
 ########################################################################
+cmake_minimum_required(VERSION 3.1)
 
 function(add_base64_test TEST_NAME)
     unset(SRC_FILE)
