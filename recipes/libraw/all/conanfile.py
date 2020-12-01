@@ -53,7 +53,7 @@ class LibRawConan(ConanFile):
         if self.options.with_libjpeg == "libjpeg":
             self.requires("libjpeg/9d")
         if self.options.with_libjpeg == "libjpeg-turbo":
-            self.requires("libjpeg-turbo/2.0.5")
+            self.requires("libjpeg-turbo/2.0.6")
         if self.options.with_zlib:
             self.requires("zlib/1.2.11")
         if self.options.with_lcms:
@@ -61,7 +61,7 @@ class LibRawConan(ConanFile):
         if self.options.rawspeed:
             self.requires("libxml2/2.9.10")
         if self.options.with_jasper:
-            self.requires("jasper/2.0.19")
+            self.requires("jasper/2.0.21")
         if self.options.with_openmp:
             self.requires("llvm-openmp/10.0.0")
 
@@ -79,14 +79,20 @@ class LibRawConan(ConanFile):
             return self._cmake
 
         self._cmake = CMake(self)
-        self._cmake.definitions["ENABLE_JASPER"] = self.options.with_jasper
-        self._cmake.definitions["ENABLE_ZLIB"] = self.options.with_zlib
-        self._cmake.definitions["ENABLE_JPEG"] = self.options.with_libjpeg != False
         self._cmake.definitions["ENABLE_OPENMP"] = self.options.with_openmp
+
+        if self.options.with_libjpeg == False:
+            self._cmake.definitions["CMAKE_DISABLE_FIND_PACKAGE_JPEG"] = True
+        if not self.options.with_jasper:
+            self._cmake.definitions["CMAKE_DISABLE_FIND_PACKAGE_JASPER"] = True
+        if not self.options.with_zlib:
+            self._cmake.definitions["CMAKE_DISABLE_FIND_PACKAGE_ZLIB"] = True
+        if not self.options.with_openmp:
+            self._cmake.definitions["CMAKE_DISABLE_FIND_PACKAGE_OpenMP"] = True
 
         self._cmake.definitions["ENABLE_EXAMPLES"] = False
 
-        self._cmake.definitions["LIBRAW_PATH"] = os.path.join(self.source_folder, self._source_subfolder)
+        self._cmake.definitions["LIBRAW_PATH"] = os.path.join(self.source_folder, self._source_subfolder).replace("\\", "/")
         self._cmake.definitions["LIBRAW_INSTALL"] = True
         self._cmake.definitions["INSTALL_CMAKE_MODULE_PATH"] = os.path.join(self.package_folder, "lib", "cmake")
 
@@ -97,6 +103,9 @@ class LibRawConan(ConanFile):
     def build(self):
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
             tools.patch(**patch)
+        tools.save("FindJasper.cmake", "\nset(JASPER_INCLUDE_DIR ${Jasper_INCLUDE_DIRS})\nset(JASPER_LIBRARIES ${Jasper_LIBRARIES})", append=True)
+        # tools.save("FindJasper.cmake", "\nset(JASPER_INCLUDE_DIRECTORIES ${Jasper_INCLUDE_DIRECTORIES}\nset(JASPER_LIBRARIES ${Jasper_LIBRARIES}", append=True)
+
         cmake = self._configure_cmake()
         cmake.build()
 
@@ -109,13 +118,15 @@ class LibRawConan(ConanFile):
         tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
         tools.rmdir(os.path.join(self.package_folder, "share"))
 
-
     def package_info(self):
         self.cpp_info.filenames["cmake_find_package"] = "LibRaw"
         self.cpp_info.filenames["cmake_find_package_multi"] = "LibRaw"
 
         self.cpp_info.components["raw"].libs = ["raw"]
         self.cpp_info.components["raw_r"].libs = ["raw_r"]
+
+        self.cpp_info.components["raw"].names["pkg_config"] = "libraw"
+        self.cpp_info.components["raw_r"].names["pkg_config"] = "libraw_r"
 
         if self.settings.os == "Linux":
             self.cpp_info.components["raw_r"].system_libs = ["pthread"]

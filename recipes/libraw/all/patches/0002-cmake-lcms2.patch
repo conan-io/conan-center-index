@@ -1,0 +1,5 @@
+--- cmake/modules/FindLCMS2.cmake
++++ cmake/modules/FindLCMS2.cmake
+@@ -32,1 +32,1 @@
+-find_library(LCMS2_LIBRARIES NAMES lcms2 liblcms2 lcms-2 liblcms-2
++find_library(LCMS2_LIBRARIES NAMES lcms2 liblcms2 lcms-2 liblcms-2 lcms2_static liblcms2_static

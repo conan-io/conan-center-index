@@ -13,6 +13,8 @@ patches:
   "0.20.0":
     - patch_file: "patches/0001-cmake-no-fpic-add-enable-options.patch"
       base_path: "cmake_subfolder"
+    - patch_file: "patches/0002-cmake-lcms2.patch"
+      base_path: "cmake_subfolder"
   "0.19.5":
-    - patch_file: "patches/0001-cmake-no-fpic-add-enable-options.patch"
+    - patch_file: "patches/0002-cmake-lcms2.patch"
       base_path: "cmake_subfolder"
