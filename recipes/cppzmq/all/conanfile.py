@@ -51,4 +51,3 @@ class CppZmqConan(ConanFile):
 
     def package_id(self):
         self.info.header_only()
-
