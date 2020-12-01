@@ -1,5 +1,6 @@
-#include <libbase64.h>
 #include <stdio.h>
+#include <string.h>
+#include <libbase64.h>
 
 int main() {
   int flags = 0;
@@ -13,7 +14,7 @@ int main() {
   printf("decoded size (\"any carnal pleasure\"): %zu\n", enclen);
   base64_encode(enc, enclen, dec, &declen, flags);
   dec[declen] = '\0';
-  printf(dec);
+  printf("%s\n", dec);
   return 0;
 }
 
