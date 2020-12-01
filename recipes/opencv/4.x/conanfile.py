@@ -27,7 +27,7 @@ class OpenCVConan(ConanFile):
                "with_gtk": [True, False]}
     default_options = {"shared": False,
                        "fPIC": True,
-                       "parallel": False,
+                       "parallel": "pthreads",
                        "contrib": False,
                        "with_jpeg": "libjpeg",
                        "with_png": True,
@@ -71,7 +71,7 @@ class OpenCVConan(ConanFile):
         self.options["jasper"].with_libjpeg = self.options.with_jpeg
 
         if self.settings.os == "Android":
-            self.options.with_openexr = False  # required because this forces linkage to libc++_shared.so
+            self.options.with_openexr = False  # disabled because this forces linkage to libc++_shared.so
 
     def requirements(self):
         self.requires("zlib/1.2.11")
@@ -252,11 +252,9 @@ class OpenCVConan(ConanFile):
             self._cmake.definitions["ANDROID_NATIVE_API_LEVEL"] = self.settings.os.api_level
             self._cmake.definitions["ANDROID_ABI"] = tools.to_android_abi(str(self.settings.arch))
             self._cmake.definitions["BUILD_ANDROID_EXAMPLES"] = False
-            # TODO: "Use NVidia carotene acceleration library for ARM platform"
-            # if we want to support this, we must include an extra library 
-            # "lib/libtegra_hal.a" for shared=False, don"t know how to do that.
-            # Therefore we disable this for the moment
-            self._cmake.definitions["WITH_CAROTENE"] = False
+            # TODO: special features for Android - not all are always available
+            self._cmake.definitions["WITH_CPUFEATURES"] = True  # always available
+            self._cmake.definitions["WITH_CAROTENE"] = False  # available for ARM OR AARCH64 but not IOS
             self._cmake.definitions["WITH_ANDROID_MEDIANDK"] = False  # available for ANDROID_NATIVE_API_LEVEL > 20
             if "ANDROID_NDK_HOME" in os.environ:
                 self._cmake.definitions["ANDROID_NDK"] = os.environ.get("ANDROID_NDK_HOME")
@@ -312,9 +310,8 @@ class OpenCVConan(ConanFile):
                             os.path.join("sdk", "native", "staticlibs", tools.to_android_abi(str(self.settings.arch))))
                         if conan_component == "opencv_core":
                             self.cpp_info.components[conan_component].libdirs.append("lib")
-                            self.cpp_info.components[conan_component].libs.append("cpufeatures")
-                        # TODO this doesn't work for cmake target based projects
-                        # self.cpp_info.components[conan_component].libs += ["cpufeatures", "tegra_hal"]
+                            self.cpp_info.components[conan_component].libs.append("cpufeatures")  # always available
+                            # self.cpp_info.components[conan_component].libs.append("tegra_hal")  # available for ARM OR AARCH64 but not IOS
  
                 # CMake components names
                 conan_component_alias = conan_component + "_alias"
