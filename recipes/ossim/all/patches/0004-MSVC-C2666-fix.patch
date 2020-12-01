@@ -1,0 +1,61 @@
+--- include/ossim/base/ossimString.h
++++ include/ossim/base/ossimString.h
+@@ -235,7 +235,7 @@ public:
+    }
+ 
+    /**
+-    *  @brief  Test if this ossimString is equal to a C sting.
++    *  @brief  Test if this ossimString is equal to a C string.
+     *  @param rhs C string to compare.
+     *  @return  True if strings are equal.
+     *  False if rhs is not equal null or null.
+@@ -250,6 +250,22 @@ public:
+       return result;
+    }
+ 
++   /**
++    *  @brief  Test if this ossimString is equal to character.
++    *  @param rhs character to compare.
++    *  @return  True if strings are equal.
++    *  False if rhs is not equal null or null.
++    */
++   bool operator==(char rhs) const
++   {
++      bool result = false;
++      if (rhs)
++      {
++         result = (m_str.compare(std::string(1, rhs)) == 0);
++      }
++      return result;
++   }
++
+    /**
+     *  @brief  Test if this ossimString is not equal to another ossimString.
+     *  @param rhs ossimString to compare.
+@@ -261,7 +277,7 @@ public:
+    }
+ 
+    /**
+-    *  @brief  Test if this ossimString is not equal to a C sting.
++    *  @brief  Test if this ossimString is not equal to a C string.
+     *  @param rhs C string to compare.
+     *  @return  True if strings are not equal or rhs is null.
+     *  False if rhs equal to this string.
+@@ -276,6 +292,16 @@ public:
+       return result;
+    }
+ 
++   /**
++    *  @brief  Test if this ossimString is not equal to a char.
++    *  @param ch character to compare.
++    *  @return  True if char is not equal.  False otherwise.
++    */
++   bool operator!=(char rhs) const
++   {
++       return !(m_str.compare(std::string(1, rhs)) == 0);
++   }
++
+    bool operator<(const ossimString& rhs) const
+    {
+       return m_str < rhs.m_str;
+

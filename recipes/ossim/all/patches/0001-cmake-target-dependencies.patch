@@ -62,7 +62,7 @@
 -      include_directories( ${JSONCPP_INCLUDE_DIR} )
 -      set( ossimDependentLibs ${ossimDependentLibs} ${JSONCPP_LIBRARY} )
 +      # include_directories( ${JSONCPP_INCLUDE_DIR} )
-+      set( ossimDependentLibs ${ossimDependentLibs} JsonCpp::JsonCpp )
++      set( ossimDependentLibs ${ossimDependentLibs} jsoncpp::jsoncpp )
        message("-- Found JsonCpp: ${JSONCPP_INCLUDE_DIR}" )
     else( JSONCPP_FOUND )
        message( FATAL_ERROR "Could not find required JsonCpp package!" )

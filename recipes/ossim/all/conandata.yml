@@ -10,3 +10,5 @@ patches:
       base_path: "source_subfolder"
     - patch_file: "patches/0003-cxx-fixes.patch"
       base_path: "source_subfolder"
+    - patch_file: "patches/0004-MSVC-C2666-fix.patch"
+      base_path: "source_subfolder"
