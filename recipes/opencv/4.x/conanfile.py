@@ -257,6 +257,7 @@ class OpenCVConan(ConanFile):
             # "lib/libtegra_hal.a" for shared=False, don"t know how to do that.
             # Therefore we disable this for the moment
             self._cmake.definitions["WITH_CAROTENE"] = False
+            self._cmake.definitions["WITH_ANDROID_MEDIANDK"] = False  # available for ANDROID_NATIVE_API_LEVEL > 20
             if "ANDROID_NDK_HOME" in os.environ:
                 self._cmake.definitions["ANDROID_NDK"] = os.environ.get("ANDROID_NDK_HOME")
 
@@ -304,12 +305,15 @@ class OpenCVConan(ConanFile):
                 if self.settings.os == "Android":
                     self.cpp_info.components[conan_component].includedirs = [
                         os.path.join("sdk", "native", "jni", "include")]
-                    self.cpp_info.components[conan_component].system_libs += ["log"]
+                    self.cpp_info.components[conan_component].system_libs.append("log")
+                    # self.cpp_info.components[conan_component].system_libs.append("mediandk")  # available for ANDROID_NATIVE_API_LEVEL > 20
                     if not self.options.shared:
                         self.cpp_info.components[conan_component].libdirs.append(
                             os.path.join("sdk", "native", "staticlibs", tools.to_android_abi(str(self.settings.arch))))
+                        if conan_component == "opencv_core":
+                            self.cpp_info.components[conan_component].libdirs.append("lib")
+                            self.cpp_info.components[conan_component].libs.append("cpufeatures")
                         # TODO this doesn't work for cmake target based projects
-                        # self.cpp_info.components[conan_component].libdirs += ["lib"]
                         # self.cpp_info.components[conan_component].libs += ["cpufeatures", "tegra_hal"]
  
                 # CMake components names
