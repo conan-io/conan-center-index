@@ -122,8 +122,11 @@ class LibRawConan(ConanFile):
         self.cpp_info.filenames["cmake_find_package"] = "LibRaw"
         self.cpp_info.filenames["cmake_find_package_multi"] = "LibRaw"
 
-        self.cpp_info.components["raw"].libs = ["raw"]
-        self.cpp_info.components["raw_r"].libs = ["raw_r"]
+        libsuffix = ""
+        if self.options.shared and self.settings.compiler == "Visual Studio":
+            libsuffix = "d"
+        self.cpp_info.components["raw"].libs = ["raw" + libsuffix]
+        self.cpp_info.components["raw_r"].libs = ["raw_r" + libsuffix]
 
         self.cpp_info.components["raw"].names["pkg_config"] = "libraw"
         self.cpp_info.components["raw_r"].names["pkg_config"] = "libraw_r"
