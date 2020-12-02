@@ -1012,6 +1012,8 @@ class BoostConan(ConanFile):
         }.get(name, name)
 
     def package_info(self):
+        self.env_info.BOOST_ROOT = self.package_folder
+
         self.cpp_info.filenames["cmake_find_package"] = "Boost"
         self.cpp_info.filenames["cmake_find_package_multi"] = "Boost"
         self.cpp_info.names["cmake_find_package"] = "Boost"
@@ -1192,8 +1194,3 @@ class BoostConan(ConanFile):
                         self.cpp_info.components["_libboost"].cxxflags.append("-pthread")
                         self.cpp_info.components["_libboost"].sharedlinkflags.extend(["-pthread","--shared-memory"])
                         self.cpp_info.components["_libboost"].exelinkflags.extend(["-pthread","--shared-memory"])
-
-        self.env_info.BOOST_ROOT = self.package_folder
-        self.cpp_info.components["_libboost"].bindirs.append("lib")
-        self.cpp_info.names["cmake_find_package"] = "Boost"
-        self.cpp_info.names["cmake_find_package_multi"] = "Boost"
