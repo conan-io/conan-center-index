@@ -15,7 +15,13 @@ int main(int argc, char *argv[])
         return 1;
     }
 
-    if (!mm.load_dir(argv[1]) && argc > 2) {
+    if (argc < 2) {
+        std::cerr << "Need module directory argument!\n";
+        return 1;
+    }
+
+
+    if (!mm.load_dir(argv[1])) {
         if (!mm.load_dir(argv[1], false)) {
             std::cerr << "Unable to load modules!\n";
             return 1;

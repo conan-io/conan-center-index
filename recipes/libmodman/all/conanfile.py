@@ -1,4 +1,5 @@
 from conans import ConanFile, CMake, tools
+from conans.errors import ConanInvalidConfiguration
 import os
 
 
@@ -39,6 +40,8 @@ class LibModManConan(ConanFile):
     def configure(self):
         if self.options.shared:
             del self.options.fPIC
+        if self.settings.compiler == "Visual Studio" and self.options.shared and self.settings.build_type == "Debug" and self.settings.compiler.version <= "14":
+            raise ConanInvalidConfiguration("Cannot build a debug libmodman on MSVC <= 2015 (because test_package fails)")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
@@ -77,6 +80,8 @@ class LibModManConan(ConanFile):
         self.cpp_info.libs = ["modman"]
         if self.settings.os == "Linux":
             self.cpp_info.system_libs = ["dl", "m"]
+        if self.settings.os == "Windows":
+            self.cpp_info.defines = ["WIN32"]
 
         self.cpp_info.names["pkg_config"] = "libmodman-2.0"
         self.cpp_info.names["cmake_find_package"] = "libmodman"  # FIXME: generates `libmodman` target (not `libmodman::libmodman`)
