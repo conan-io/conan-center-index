@@ -250,6 +250,9 @@ class OpenCVConan(ConanFile):
             self._cmake.definitions["ANDROID_NATIVE_API_LEVEL"] = self.settings.os.api_level
             self._cmake.definitions["ANDROID_ABI"] = tools.to_android_abi(str(self.settings.arch))
             self._cmake.definitions["BUILD_ANDROID_EXAMPLES"] = False
+            # TODO: special features for Android - not all are always available
+            self._cmake.definitions["WITH_CAROTENE"] = False  # available for ARM OR AARCH64 but not IOS
+            # self._cmake.definitions["WITH_ANDROID_MEDIANDK"] = False  # available for ANDROID_NATIVE_API_LEVEL > 20
             if "ANDROID_NDK_HOME" in os.environ:
                 self._cmake.definitions["ANDROID_NDK"] = os.environ.get("ANDROID_NDK_HOME")
 
