@@ -250,9 +250,6 @@ class OpenCVConan(ConanFile):
             self._cmake.definitions["ANDROID_NATIVE_API_LEVEL"] = self.settings.os.api_level
             self._cmake.definitions["ANDROID_ABI"] = tools.to_android_abi(str(self.settings.arch))
             self._cmake.definitions["BUILD_ANDROID_EXAMPLES"] = False
-            # TODO: special features for Android - not all are always available
-            self._cmake.definitions["WITH_CAROTENE"] = False  # available for ARM OR AARCH64 but not IOS
-            self._cmake.definitions["WITH_ANDROID_MEDIANDK"] = False  # available for ANDROID_NATIVE_API_LEVEL > 20
             if "ANDROID_NDK_HOME" in os.environ:
                 self._cmake.definitions["ANDROID_NDK"] = os.environ.get("ANDROID_NDK_HOME")
 
@@ -301,15 +298,14 @@ class OpenCVConan(ConanFile):
                     self.cpp_info.components[conan_component].includedirs = [
                         os.path.join("sdk", "native", "jni", "include")]
                     self.cpp_info.components[conan_component].system_libs.append("log")
-                    #if int(str(self.settings.os.api_level)) > 20:
-                    #    self.cpp_info.components[conan_component].system_libs.append("mediandk")
+                    if int(str(self.settings.os.api_level)) > 20:
+                        self.cpp_info.components[conan_component].system_libs.append("mediandk")
                     if not self.options.shared:
                         self.cpp_info.components[conan_component].libdirs.append(
                             os.path.join("sdk", "native", "staticlibs", tools.to_android_abi(str(self.settings.arch))))
                         if conan_component == "opencv_core":
                             self.cpp_info.components[conan_component].libdirs.append("lib")
-                            self.cpp_info.components[conan_component].libs.append("cpufeatures")
-                            # self.cpp_info.components[conan_component].libs.append("tegra_hal")  # available for ARM OR AARCH64 but not IOS
+                            self.cpp_info.components[conan_component].libs += tools.collect_libs(self)
  
                 # CMake components names
                 conan_component_alias = conan_component + "_alias"
