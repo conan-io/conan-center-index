@@ -9,7 +9,7 @@ class CppcodecConan(ConanFile):
     homepage = "https://github.com/aklomp/base64"
     description = "Fast Base64 stream encoder/decoder"
     topics = ("base64", "codec")
-    exports_sources = ["patches/**"]
+    exports_sources = "patches/**", "CMakeLists.txt"
     generators = "cmake"
     settings = "os", "arch", "compiler", "build_type"
     options = {
@@ -44,7 +44,7 @@ class CppcodecConan(ConanFile):
 
     def _configure_cmake(self):
         cmake = CMake(self)
-        cmake.configure(source_folder=self._source_subfolder, build_folder=self._build_subfolder)
+        cmake.configure(build_folder=self._build_subfolder)
         return cmake
 
     def _build_cmake(self):
