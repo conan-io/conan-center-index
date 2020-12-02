@@ -75,6 +75,7 @@ class BoostConan(ConanFile):
         "fPIC": [True, False],
         "layout": ["system", "versioned", "tagged", "b2-default"],
         "magic_autolink": [True, False],  # enables BOOST_ALL_NO_LIB
+        "diagnostic_definitions": [True, False],  # enables BOOST_LIB_DIAGNOSTIC
         "python_executable": "ANY",  # system default python installation is used, if None
         "python_version": "ANY",  # major.minor; computed automatically, if None
         "namespace": "ANY",  # custom boost namespace for bcp, e.g. myboost
@@ -102,6 +103,7 @@ class BoostConan(ConanFile):
         "fPIC": True,
         "layout": "system",
         "magic_autolink": False,
+        "diagnostic_definitions": False,
         "python_executable": "None",
         "python_version": "None",
         "namespace": "boost",
@@ -1015,21 +1017,6 @@ class BoostConan(ConanFile):
         self.cpp_info.names["cmake_find_package"] = "Boost"
         self.cpp_info.names["cmake_find_package_multi"] = "Boost"
 
-        self.cpp_info.components["diagnostic_definitions"].libs = []
-        self.cpp_info.components["diagnostic_definitions"].defines = ["BOOST_LIB_DIAGNOSTIC"]
-        self.cpp_info.components["diagnostic_definitions"].names["cmake_find_package"] = "diagnostic_definitions"
-        self.cpp_info.components["diagnostic_definitions"].names["cmake_find_package_multi"] = "diagnostic_definitions"
-
-        self.cpp_info.components["disable_autolinking"].libs = []
-        self.cpp_info.components["disable_autolinking"].defines = ["BOOST_ALL_NO_LIB"]
-        self.cpp_info.components["disable_autolinking"].names["cmake_find_package"] = "disable_autolinking"
-        self.cpp_info.components["disable_autolinking"].names["cmake_find_package_multi"] = "disable_autolinking"
-
-        self.cpp_info.components["dynamic_linking"].libs = []
-        self.cpp_info.components["dynamic_linking"].defines = ["BOOST_ALL_DYN_LINK"]
-        self.cpp_info.components["dynamic_linking"].names["cmake_find_package"] = "dynamic_linking"
-        self.cpp_info.components["dynamic_linking"].names["cmake_find_package_multi"] = "dynamic_linking"
-
         # - Use 'headers' component for all includes + defines
         # - Use '_libboost' component to attach extra system_libs, ...
 
@@ -1044,6 +1031,38 @@ class BoostConan(ConanFile):
 
         self.cpp_info.components["_libboost"].requires = ["headers"]
         self.cpp_info.components["_libboost"].bindirs.append("lib")
+
+        self.cpp_info.components["diagnostic_definitions"].libs = []
+        self.cpp_info.components["diagnostic_definitions"].names["cmake_find_package"] = "diagnostic_definitions"
+        self.cpp_info.components["diagnostic_definitions"].names["cmake_find_package_multi"] = "diagnostic_definitions"
+        self.cpp_info.components["_libboost"].requires.append("diagnostic_definitions")
+        if self.options.diagnostic_definitions:
+            self.cpp_info.components["diagnostic_definitions"].defines = ["BOOST_LIB_DIAGNOSTIC"]
+
+        self.cpp_info.components["disable_autolinking"].libs = []
+        self.cpp_info.components["disable_autolinking"].names["cmake_find_package"] = "disable_autolinking"
+        self.cpp_info.components["disable_autolinking"].names["cmake_find_package_multi"] = "disable_autolinking"
+        self.cpp_info.components["_libboost"].requires.append("disable_autolinking")
+        if not self.options.header_only:
+            if self._is_msvc or self._is_clang_cl:
+                if self.options.magic_autolink:
+                    if self.options.layout == "system":
+                        self.cpp_info.components["_libboost"].defines.append("BOOST_AUTO_LINK_SYSTEM")
+                    elif self.options.layout == "tagged":
+                        self.cpp_info.components["_libboost"].defines.append("BOOST_AUTO_LINK_TAGGED")
+                    self.output.info("Enabled magic autolinking (smart and magic decisions)")
+                else:
+                    # DISABLES AUTO LINKING! NO SMART AND MAGIC DECISIONS THANKS!
+                    self.cpp_info.components["disable_autolinking"].defines = ["BOOST_ALL_NO_LIB"]
+                    self.output.info("Disabled magic autolinking (smart and magic decisions)")
+
+        self.cpp_info.components["dynamic_linking"].libs = []
+        self.cpp_info.components["dynamic_linking"].names["cmake_find_package"] = "dynamic_linking"
+        self.cpp_info.components["dynamic_linking"].names["cmake_find_package_multi"] = "dynamic_linking"
+        self.cpp_info.components["_libboost"].requires.append("dynamic_linking")
+        if not self.options.header_only and self.options.shared:
+            # A Boost::dynamic_linking cmake target does only make sense for a shared boost package
+            self.cpp_info.components["dynamic_linking"].defines = ["BOOST_ALL_DYN_LINK"]
 
         libsuffix = ""
         if self._is_versioned_layout:
@@ -1128,10 +1147,6 @@ class BoostConan(ConanFile):
             non_existing = used_libraries.difference(detected_libraries)
             assert len(non_existing) == 0, "These libraries were used, but not built: {}".format(non_existing)
 
-        # Apply these options to the 'headers' component so header_only has these also applied
-        if not self.options.header_only and self.options.shared:
-            self.cpp_info.components["headers"].defines.append("BOOST_ALL_DYN_LINK")
-
         if self.options.system_no_deprecated:
             self.cpp_info.components["headers"].defines.append("BOOST_SYSTEM_NO_DEPRECATED")
 
@@ -1155,18 +1170,6 @@ class BoostConan(ConanFile):
                     self.cpp_info.components["python"].defines.append("BOOST_PYTHON_STATIC_LIB")
 
                 self.cpp_info.components["numpy{}{}".format(pyversion.major, pyversion.minor)].requires = ["numpy"]
-
-            if self._is_msvc or self._is_clang_cl:
-                if not self.options.magic_autolink:
-                    # DISABLES AUTO LINKING! NO SMART AND MAGIC DECISIONS THANKS!
-                    self.cpp_info.components["headers"].defines.append("BOOST_ALL_NO_LIB")
-                    self.output.info("Disabled magic autolinking (smart and magic decisions)")
-                else:
-                    if self.options.layout == "system":
-                        self.cpp_info.components["headers"].defines.append("BOOST_AUTO_LINK_SYSTEM")
-                    elif self.options.layout == "tagged":
-                        self.cpp_info.components["headers"].defines.append("BOOST_AUTO_LINK_TAGGED")
-                    self.output.info("Enabled magic autolinking (smart and magic decisions)")
 
                 # https://github.com/conan-community/conan-boost/issues/127#issuecomment-404750974
                 self.cpp_info.components["_libboost"].system_libs.append("bcrypt")
