@@ -22,10 +22,13 @@ log.setLevel(logging.WARNING)
 
 BOOST_GIT_URL = "https://github.com/boostorg/boost.git"
 
+# When adding (or removing) an option, also add this option to the list in
+# `conanfile.py` and re-run this script.
 CONFIGURE_OPTIONS = (
     "atomic",
     "chrono",
     "container",
+    "context",
     "contract",
     "coroutine",
     "date_time",
@@ -373,6 +376,22 @@ class BoostDependencyBuilder(object):
     def _outputpath(self) -> Path:
         return self.outputdir / "dependencies-{}.yml".format(self.boost_version)
 
+    @classmethod
+    def _sort_item(cls, item):
+        if isinstance(item, dict):
+            items = sorted(item.items())
+            new_items = []
+            for item in sorted(items):
+                new_items.append((item[0], cls._sort_item(item[1])))
+            return dict(new_items)
+        elif isinstance(item, tuple):
+            return tuple(cls._sort_item(e) for e in sorted(item))
+        elif isinstance(item, list):
+            return list(cls._sort_item(e) for e in sorted(item))
+        else:
+            print("UNKNOWN", type(item), item)
+            return item
+
     def do_create_dependency_file(self) -> None:
         tree = self.do_boostdep_collect()
         tree = self.do_create_libraries(tree)
@@ -382,6 +401,8 @@ class BoostDependencyBuilder(object):
         data = dataclasses.asdict(tree.export)
         if self.unsafe:
             data["UNSAFE"] = "!DO NOT COMMIT! !THIS FILE IS GENERATED WITH THE UNSAFE OPTION ENABLED!"
+
+        data = self._sort_item(data)
 
         print("Creating {}".format(self.outputdir))
         with self._outputpath.open("w") as fout:

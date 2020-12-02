@@ -2,6 +2,7 @@ configure_options:
 - atomic
 - chrono
 - container
+- context
 - contract
 - coroutine
 - date_time
@@ -144,8 +145,8 @@ dependencies:
   type_erasure:
   - thread
   unit_test_framework:
-  - test
   - prg_exec_monitor
+  - test
   - test_exec_monitor
   wave:
   - filesystem
@@ -250,13 +251,13 @@ libs:
   - boost_wserialization
 requirements:
   iostreams:
-  - zstd
   - bzip2
-  - zlib
   - lzma
+  - zlib
+  - zstd
   locale:
-  - icu
   - iconv
+  - icu
   python:
   - python
   regex:
