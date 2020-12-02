@@ -6,7 +6,7 @@ patches:
   "20.09.0":
     - patch_file: "patches/0001-cmake-use-PROJECT_SOURCE_DIR-fix-CMAKE_MODULE_PATH.patch"
       base_path: "source_subfolder"
-    - patch_file: "patches/0002-cmake-use_CONAN_PKG-targets.cmake"
+    - patch_file: "patches/0002-cmake-use_CONAN_PKG-targets.patch"
       base_path: "source_subfolder"
     - patch_file: "patches/0003-cmake-disable-tests.cmake"
       base_path: "source_subfolder"
