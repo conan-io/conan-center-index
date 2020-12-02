@@ -56,6 +56,9 @@ class RootConan(ConanFile):
         # "libuuid/1.0.3",
     )
 
+    def configure(self):
+        tools.check_min_cppstd(self, "11")
+
     @property
     def _rootsrcdir(self) -> str:
         version = self.version.replace("v", "")
@@ -192,9 +195,28 @@ class RootConan(ConanFile):
     def package_info(self):
         self.cpp_info.names["cmake_find_package"] = "ROOT"
         self.cpp_info.names["cmake_find_package_multi"] = "ROOT"
-        libs = tools.collect_libs(self)
-        libs = self._fix_tbb_libs(libs)
-        self.cpp_info.libs = libs
+        # see root-config --libs for a list of libs
+        self.cpp_info.libs = [
+            "Core",
+            "Imt",
+            "RIO",
+            "Net",
+            "Hist",
+            "Graf",
+            "Graf3d",
+            "Gpad",
+            "ROOTVecOps",
+            "Tree ",
+            "TreePlayer",
+            "Rint",
+            "Postscript",
+            "Matrix",
+            "Physics",
+            "MathCore",
+            "Thread",
+            "MultiProc",
+            "ROOTDataFrame",
+        ]
         self.cpp_info.builddirs = [f"res{os.sep}cmake"]
         self.cpp_info.build_modules.extend(
             [
