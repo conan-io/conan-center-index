@@ -68,11 +68,13 @@ class PclConanRecipe(ConanFile):
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
-
-    def configure(self):
+    
+    def _check_msvc(self):
         if (tools.msvs_toolset(self) == "v140" or
                 self.settings.compiler == "Visual Studio" and tools.Version(self.settings.compiler.version) < "15"):
             raise ConanInvalidConfiguration("Unsupported Visual Studio Compiler or Toolset")
+
+    def _check_cxx_standard(self):
         minimal_cpp_standard = "14"
         if self.settings.compiler.cppstd:
             tools.check_min_cppstd(self, minimal_cpp_standard)
@@ -92,6 +94,19 @@ class PclConanRecipe(ConanFile):
         version = tools.Version(self.settings.compiler.version)
         if version < minimal_version[compiler]:
             raise ConanInvalidConfiguration("%s requires a compiler that supports at least C++%s" % (self.name, minimal_cpp_standard))
+
+    def _check_libcxx_compatibility(self):
+        if self.settings.compiler == "clang" and self.settings.compiler.libcxx == "libc++":
+            version = tools.Version(self.settings.compiler.version)
+            minimum_version = 6 
+            if version < minimum_version:
+                raise ConanInvalidConfiguration("Clang with libc++ is version %s but must be at least version %s" %
+                        (version, minimum_version))
+        
+    def configure(self):
+        self._check_msvc()
+        self._check_cxx_standard()
+        self._check_libcxx_compatibility()
         if self.options["qhull"].reentrant:
             self.output.warn(
                     "Qhull is set to link the reentrant library. If you experience linking errors, try setting "
