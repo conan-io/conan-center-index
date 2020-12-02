@@ -9,14 +9,14 @@ class CppcodecConan(ConanFile):
     homepage = "https://github.com/aklomp/base64"
     description = "Fast Base64 stream encoder/decoder"
     topics = ("base64", "codec")
-    exports_sources = ["CMakeLists.txt", "cmake/*", "test/*"]
+    exports_sources = ["patches/**"]
     generators = "cmake"
     settings = "os", "arch", "compiler", "build_type"
     options = {
-        "fPIC": [True, False],
+        "fPIC": [True, False]
     }
     default_options = {
-        "fPIC": True,
+        "fPIC": True
     }
 
     @property
@@ -37,17 +37,10 @@ class CppcodecConan(ConanFile):
         tools.get(**self.conan_data["sources"][self.version])
         extracted_dir = self.name + "-" + self.version
         os.rename(extracted_dir, self._source_subfolder)
-        if self.settings.compiler == "Visual Studio":
-            os.rename("CMakeLists.txt", os.path.join(self._source_subfolder, "CMakeLists.txt"))
-            os.rename("cmake", os.path.join(self._source_subfolder, "cmake"))
-            os.rename(os.path.join("test", "CMakeLists.txt"), os.path.join(self._source_subfolder, "test", "CMakeLists.txt"))
-        else:
-            s = "lib/libbase64.o: $(OBJS)"
-            tools.replace_in_file(os.path.join(self._source_subfolder, "Makefile"), s, """
-all: lib/libbase64.a
-lib/libbase64.a: lib/libbase64.o
-	$(AR) rc $@ $<
-""" + s)
+
+    def _patch_sources(self):
+        for patch in self.conan_data["patches"][self.version]:
+            tools.patch(**patch)
 
     def _configure_cmake(self):
         cmake = CMake(self)
@@ -56,7 +49,7 @@ lib/libbase64.a: lib/libbase64.o
 
     def _build_cmake(self):
         cmake = self._configure_cmake()
-        cmake.build(target=self.name)
+        cmake.build(target="base64")
 
     def _build_autotools(self):
         autotools = AutoToolsBuildEnvironment(self)
@@ -71,15 +64,12 @@ lib/libbase64.a: lib/libbase64.o
         else:
             # ARM-specific instructions can be enabled here
             extra_env = {}
-        if self.settings.os == "Macos":
-            extra_env["OBJCOPY"] = "llvm-objcopy"
-        if self.settings.os == "Windows" and self.settings.compiler == "gcc":
-            extra_env["IS_MINGW"] = "1"
         with tools.environment_append(extra_env):
             with tools.chdir(self._source_subfolder):
-                autotools.make()
+                autotools.make(target="lib/libbase64.a")
 
     def build(self):
+        self._patch_sources()
         if self.settings.compiler == "Visual Studio":
             self._build_cmake()
         else:
@@ -92,4 +82,4 @@ lib/libbase64.a: lib/libbase64.o
         self.copy("LICENSE", dst="licenses", src=self._source_subfolder)
 
     def package_info(self):
-        self.cpp_info.libs = [self.name]
+        self.cpp_info.libs = ["base64"]
