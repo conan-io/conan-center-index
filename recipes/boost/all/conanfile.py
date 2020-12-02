@@ -90,8 +90,7 @@ class BoostConan(ConanFile):
         "extra_b2_flags": "ANY",  # custom b2 flags
         "i18n_backend": ["iconv", "icu", None],
     }
-    for _name in CONFIGURE_OPTIONS:
-        options["without_{}".format(_name)] = [True, False]
+    options.update({"without_{}".format(_name): [True, False] for _name in CONFIGURE_OPTIONS})
 
     default_options = {
         "shared": False,
@@ -118,10 +117,8 @@ class BoostConan(ConanFile):
         "extra_b2_flags": "None",
         "i18n_backend": "iconv",
     }
-    for _name in CONFIGURE_OPTIONS:
-        default_options["without_{}".format(_name)] = False
-    for _name in ("graph_parallel", "mpi", "python",):
-        default_options["without_{}".format(_name)] = True
+    default_options.update({"without_{}".format(_name): False for _name in CONFIGURE_OPTIONS})
+    default_options.update({"without_{}".format(_name): True for _name in ("graph_parallel", "mpi", "python")})
 
     short_paths = True
     no_copy_source = True
