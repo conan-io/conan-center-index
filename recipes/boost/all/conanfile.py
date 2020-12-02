@@ -1051,21 +1051,21 @@ class BoostConan(ConanFile):
         self.cpp_info.components["_boost_cmake"].names["cmake_find_package"] = "boost"
         self.cpp_info.components["_boost_cmake"].names["cmake_find_package_multi"] = "boost"
 
-        self.cpp_info.components["_libboost"].requires = ["headers"]
-        self.cpp_info.components["_libboost"].bindirs.append("lib")
-
-        self.cpp_info.components["diagnostic_definitions"].libs = []
-        self.cpp_info.components["diagnostic_definitions"].names["cmake_find_package"] = "diagnostic_definitions"
-        self.cpp_info.components["diagnostic_definitions"].names["cmake_find_package_multi"] = "diagnostic_definitions"
-        self.cpp_info.components["_libboost"].requires.append("diagnostic_definitions")
-        if self.options.diagnostic_definitions:
-            self.cpp_info.components["diagnostic_definitions"].defines = ["BOOST_LIB_DIAGNOSTIC"]
-
-        self.cpp_info.components["disable_autolinking"].libs = []
-        self.cpp_info.components["disable_autolinking"].names["cmake_find_package"] = "disable_autolinking"
-        self.cpp_info.components["disable_autolinking"].names["cmake_find_package_multi"] = "disable_autolinking"
-        self.cpp_info.components["_libboost"].requires.append("disable_autolinking")
         if not self.options.header_only:
+            self.cpp_info.components["_libboost"].requires = ["headers"]
+            self.cpp_info.components["_libboost"].bindirs.append("lib")
+
+            self.cpp_info.components["diagnostic_definitions"].libs = []
+            self.cpp_info.components["diagnostic_definitions"].names["cmake_find_package"] = "diagnostic_definitions"
+            self.cpp_info.components["diagnostic_definitions"].names["cmake_find_package_multi"] = "diagnostic_definitions"
+            self.cpp_info.components["_libboost"].requires.append("diagnostic_definitions")
+            if self.options.diagnostic_definitions:
+                self.cpp_info.components["diagnostic_definitions"].defines = ["BOOST_LIB_DIAGNOSTIC"]
+
+            self.cpp_info.components["disable_autolinking"].libs = []
+            self.cpp_info.components["disable_autolinking"].names["cmake_find_package"] = "disable_autolinking"
+            self.cpp_info.components["disable_autolinking"].names["cmake_find_package_multi"] = "disable_autolinking"
+            self.cpp_info.components["_libboost"].requires.append("disable_autolinking")
             if self._is_msvc or self._is_clang_cl:
                 if self.options.magic_autolink:
                     if self.options.layout == "system":
@@ -1078,95 +1078,94 @@ class BoostConan(ConanFile):
                     self.cpp_info.components["disable_autolinking"].defines = ["BOOST_ALL_NO_LIB"]
                     self.output.info("Disabled magic autolinking (smart and magic decisions)")
 
-        self.cpp_info.components["dynamic_linking"].libs = []
-        self.cpp_info.components["dynamic_linking"].names["cmake_find_package"] = "dynamic_linking"
-        self.cpp_info.components["dynamic_linking"].names["cmake_find_package_multi"] = "dynamic_linking"
-        self.cpp_info.components["_libboost"].requires.append("dynamic_linking")
-        if not self.options.header_only and self.options.shared:
-            # A Boost::dynamic_linking cmake target does only make sense for a shared boost package
-            self.cpp_info.components["dynamic_linking"].defines = ["BOOST_ALL_DYN_LINK"]
+            self.cpp_info.components["dynamic_linking"].libs = []
+            self.cpp_info.components["dynamic_linking"].names["cmake_find_package"] = "dynamic_linking"
+            self.cpp_info.components["dynamic_linking"].names["cmake_find_package_multi"] = "dynamic_linking"
+            self.cpp_info.components["_libboost"].requires.append("dynamic_linking")
+            if self.options.shared:
+                # A Boost::dynamic_linking cmake target does only make sense for a shared boost package
+                self.cpp_info.components["dynamic_linking"].defines = ["BOOST_ALL_DYN_LINK"]
 
-        libsuffix = ""
-        if self._is_versioned_layout:
-            # https://www.boost.org/doc/libs/1_73_0/more/getting_started/windows.html#library-naming
-            toolset_tag = "-{}".format(self._toolset_tag)
-            threading_tag = "-mt" if self.options.multithreading else ""
-            abi_tag = ""
-            if self._is_msvc:
-                # FIXME: add 'y' when using cpython cci package and when python is built in debug mode
-                static_runtime_key = "s" if "MT" in str(self.settings.compiler.runtime) else ""
-                debug_runtime_key = "g" if "d" in str(self.settings.compiler.runtime) else ""
-                debug_key = "d" if self.settings.build_type == "Debug" else ""
-                abi = static_runtime_key + debug_runtime_key + debug_key
-                if abi:
-                    abi_tag = "-{}".format(abi)
-            else:
-                debug_tag = "d" if self.settings.build_type == "Debug" else ""
-                abi = debug_tag
-                if abi:
-                    abi_tag = "-{}".format(abi)
+            libsuffix = ""
+            if self._is_versioned_layout:
+                # https://www.boost.org/doc/libs/1_73_0/more/getting_started/windows.html#library-naming
+                toolset_tag = "-{}".format(self._toolset_tag)
+                threading_tag = "-mt" if self.options.multithreading else ""
+                abi_tag = ""
+                if self._is_msvc:
+                    # FIXME: add 'y' when using cpython cci package and when python is built in debug mode
+                    static_runtime_key = "s" if "MT" in str(self.settings.compiler.runtime) else ""
+                    debug_runtime_key = "g" if "d" in str(self.settings.compiler.runtime) else ""
+                    debug_key = "d" if self.settings.build_type == "Debug" else ""
+                    abi = static_runtime_key + debug_runtime_key + debug_key
+                    if abi:
+                        abi_tag = "-{}".format(abi)
+                else:
+                    debug_tag = "d" if self.settings.build_type == "Debug" else ""
+                    abi = debug_tag
+                    if abi:
+                        abi_tag = "-{}".format(abi)
 
-            arch_tag = "-{}{}".format(self._b2_architecture[0], self._b2_address_model)
-            version = tools.Version(self.version)
-            if not version.patch or version.patch == "0":
-                version_tag = "-{}_{}".format(version.major, version.minor)
-            else:
-                version_tag = "-{}_{}_{}".format(version.major, version.minor, version.patch)
-            libsuffix = toolset_tag + threading_tag + abi_tag + arch_tag + version_tag
-            self.output.info("Versioning library suffix: {}".format(libsuffix))
+                arch_tag = "-{}{}".format(self._b2_architecture[0], self._b2_address_model)
+                version = tools.Version(self.version)
+                if not version.patch or version.patch == "0":
+                    version_tag = "-{}_{}".format(version.major, version.minor)
+                else:
+                    version_tag = "-{}_{}_{}".format(version.major, version.minor, version.patch)
+                libsuffix = toolset_tag + threading_tag + abi_tag + arch_tag + version_tag
+                self.output.info("Versioning library suffix: {}".format(libsuffix))
 
-        libformatdata = {}
-        if not self.options.without_python:
-            pyversion = tools.Version(self._python_version)
-            libformatdata["py_major"] = pyversion.major
-            libformatdata["py_minor"] = pyversion.minor
+            libformatdata = {}
+            if not self.options.without_python:
+                pyversion = tools.Version(self._python_version)
+                libformatdata["py_major"] = pyversion.major
+                libformatdata["py_minor"] = pyversion.minor
 
-        def add_libprefix(n):
-            """ On MSVC, static libraries are built with a 'lib' prefix. Some libraries do not support shared, so are always built as a static library. """
-            libprefix = ""
-            if self.settings.compiler == "Visual Studio" and (not self.options.shared or n in self._dependencies["static_only"]):
-                libprefix = "lib"
-            return libprefix + n
+            def add_libprefix(n):
+                """ On MSVC, static libraries are built with a 'lib' prefix. Some libraries do not support shared, so are always built as a static library. """
+                libprefix = ""
+                if self.settings.compiler == "Visual Studio" and (not self.options.shared or n in self._dependencies["static_only"]):
+                    libprefix = "lib"
+                return libprefix + n
 
-        modules_seen = set()
-        detected_libraries = set(tools.collect_libs(self))
-        used_libraries = set()
-        for module in self._iter_modules():
-            if self.options.get_safe("without_{}".format(module), False) or not all(d in modules_seen for d in self._dependencies["dependencies"][module]):
-                continue
+            modules_seen = set()
+            detected_libraries = set(tools.collect_libs(self))
+            used_libraries = set()
+            for module in self._iter_modules():
+                if self.options.get_safe("without_{}".format(module), False) or not all(d in modules_seen for d in self._dependencies["dependencies"][module]):
+                    continue
 
-            module_libraries = [add_libprefix(lib.format(**libformatdata)) + libsuffix for lib in self._dependencies["libs"][module]]
-            if all(l in detected_libraries for l in module_libraries):
-                modules_seen.add(module)
-                used_libraries = used_libraries.union(module_libraries)
-                self.cpp_info.components[module].libs = module_libraries
+                module_libraries = [add_libprefix(lib.format(**libformatdata)) + libsuffix for lib in self._dependencies["libs"][module]]
+                if all(l in detected_libraries for l in module_libraries):
+                    modules_seen.add(module)
+                    used_libraries = used_libraries.union(module_libraries)
+                    self.cpp_info.components[module].libs = module_libraries
 
-                self.cpp_info.components[module].requires = self._dependencies["dependencies"][module] + ["_libboost"]
-                self.cpp_info.components[module].names["cmake_find_package"] = module
-                self.cpp_info.components[module].names["cmake_find_package_multi"] = module
+                    self.cpp_info.components[module].requires = self._dependencies["dependencies"][module] + ["_libboost"]
+                    self.cpp_info.components[module].names["cmake_find_package"] = module
+                    self.cpp_info.components[module].names["cmake_find_package_multi"] = module
 
-                for requirement in self._dependencies.get("requirements", {}).get(module, []):
-                    if requirement == "backtrace":
-                        # FIXME: backtrace not (yet) available in cci
-                        continue
-                    if self.options.get_safe(requirement, None) == False:
-                        continue
-                    conan_requirement = self._option_to_conan_requirement(requirement)
-                    if not conan_requirement:
-                        continue
-                    if conan_requirement in ("icu", "iconv"):
-                        if conan_requirement != self.options.get_safe("i18n_backend"):
+                    for requirement in self._dependencies.get("requirements", {}).get(module, []):
+                        if requirement == "backtrace":
+                            # FIXME: backtrace not (yet) available in cci
                             continue
-                    self.cpp_info.components[module].requires.append("{0}::{0}".format(conan_requirement))
+                        if self.options.get_safe(requirement, None) == False:
+                            continue
+                        conan_requirement = self._option_to_conan_requirement(requirement)
+                        if not conan_requirement:
+                            continue
+                        if conan_requirement in ("icu", "iconv"):
+                            if conan_requirement != self.options.get_safe("i18n_backend"):
+                                continue
+                        self.cpp_info.components[module].requires.append("{0}::{0}".format(conan_requirement))
 
-        if used_libraries != detected_libraries:
-            non_used = detected_libraries.difference(used_libraries)
-            assert len(non_used) == 0, "These libraries were not used in conan components: {}".format(non_used)
+            if used_libraries != detected_libraries:
+                non_used = detected_libraries.difference(used_libraries)
+                assert len(non_used) == 0, "These libraries were not used in conan components: {}".format(non_used)
 
-            non_existing = used_libraries.difference(detected_libraries)
-            assert len(non_existing) == 0, "These libraries were used, but not built: {}".format(non_existing)
+                non_existing = used_libraries.difference(detected_libraries)
+                assert len(non_existing) == 0, "These libraries were used, but not built: {}".format(non_existing)
 
-        if not self.options.header_only:
             if not self.options.without_python:
                 pyversion = tools.Version(self._python_version)
                 self.cpp_info.components["python{}{}".format(pyversion.major, pyversion.minor)].requires = ["python"]
@@ -1184,7 +1183,7 @@ class BoostConan(ConanFile):
                     self.cpp_info.components["_libboost"].system_libs.append("pthread")
             elif self.settings.os == "Emscripten":
                 if self.options.multithreading:
-                    arch = self.settings.get_safe('arch')
+                    arch = str(self.settings.arch)
                     # https://emscripten.org/docs/porting/pthreads.html
                     # The documentation mentions that we should be using the "-s USE_PTHREADS=1"
                     # but it was causing problems with the target based configurations in conan
