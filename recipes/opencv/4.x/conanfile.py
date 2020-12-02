@@ -245,7 +245,7 @@ class OpenCVConan(ConanFile):
         if self.settings.compiler == "Visual Studio":
             self._cmake.definitions["BUILD_WITH_STATIC_CRT"] = "MT" in str(self.settings.compiler.runtime)
 
-        if self.settings.os == "Android":
+        if self.settings.os == "Android":  # TODO see if check are working
             self._cmake.definitions["ANDROID_STL"] = "c++_static"
             self._cmake.definitions["ANDROID_NATIVE_API_LEVEL"] = self.settings.os.api_level
             self._cmake.definitions["ANDROID_ABI"] = tools.to_android_abi(str(self.settings.arch))
