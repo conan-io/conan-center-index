@@ -1024,6 +1024,26 @@ class BoostConan(ConanFile):
         self.cpp_info.components["headers"].names["cmake_find_package"] = "headers"
         self.cpp_info.components["headers"].names["cmake_find_package_multi"] = "headers"
 
+        if self.options.system_no_deprecated:
+            self.cpp_info.components["headers"].defines.append("BOOST_SYSTEM_NO_DEPRECATED")
+
+        if self.options.asio_no_deprecated:
+            self.cpp_info.components["headers"].defines.append("BOOST_ASIO_NO_DEPRECATED")
+
+        if self.options.filesystem_no_deprecated:
+            self.cpp_info.components["headers"].append("BOOST_FILESYSTEM_NO_DEPRECATED")
+
+        if self.options.segmented_stacks:
+            self.cpp_info.components["headers"].extend(["BOOST_USE_SEGMENTED_STACKS", "BOOST_USE_UCONTEXT"])
+
+        if not self.options.header_only:
+            if self.options.error_code_header_only:
+                self.cpp_info.components["headers"].defines.append("BOOST_ERROR_CODE_HEADER_ONLY")
+
+        if self._is_versioned_layout:
+            version = tools.Version(self.version)
+            self.cpp_info.components["headers"].includedirs.append(os.path.join("include", "boost-{}_{}".format(version.major, version.minor)))
+
         # Boost::boost is an alias of Boost::headers
         self.cpp_info.components["_boost_cmake"].requires = ["headers"]
         self.cpp_info.components["_boost_cmake"].names["cmake_find_package"] = "boost"
@@ -1066,9 +1086,6 @@ class BoostConan(ConanFile):
 
         libsuffix = ""
         if self._is_versioned_layout:
-            version = tools.Version(self.version)
-            self.cpp_info.components["headers"].includedirs.append(os.path.join("include", "boost-{}_{}".format(version.major, version.minor)))
-
             # https://www.boost.org/doc/libs/1_73_0/more/getting_started/windows.html#library-naming
             toolset_tag = "-{}".format(self._toolset_tag)
             threading_tag = "-mt" if self.options.multithreading else ""
@@ -1147,22 +1164,7 @@ class BoostConan(ConanFile):
             non_existing = used_libraries.difference(detected_libraries)
             assert len(non_existing) == 0, "These libraries were used, but not built: {}".format(non_existing)
 
-        if self.options.system_no_deprecated:
-            self.cpp_info.components["headers"].defines.append("BOOST_SYSTEM_NO_DEPRECATED")
-
-        if self.options.asio_no_deprecated:
-            self.cpp_info.components["headers"].defines.append("BOOST_ASIO_NO_DEPRECATED")
-
-        if self.options.filesystem_no_deprecated:
-            self.cpp_info.components["headers"].append("BOOST_FILESYSTEM_NO_DEPRECATED")
-
-        if self.options.segmented_stacks:
-            self.cpp_info.components["headers"].extend(["BOOST_USE_SEGMENTED_STACKS", "BOOST_USE_UCONTEXT"])
-
         if not self.options.header_only:
-            if self.options.error_code_header_only:
-                self.cpp_info.components["headers"].defines.append("BOOST_ERROR_CODE_HEADER_ONLY")
-
             if not self.options.without_python:
                 pyversion = tools.Version(self._python_version)
                 self.cpp_info.components["python{}{}".format(pyversion.major, pyversion.minor)].requires = ["python"]
