@@ -27,8 +27,8 @@ class PclConanRecipe(ConanFile):
         "with_tools": False,
         "qhull:reentrant": False
     }
-    requires = ("boost/1.70.0",
-                "eigen/3.3.7",
+    requires = ("boost/1.74.0",
+                "eigen/3.3.8",
                 "flann/1.9.1",
                 "libpng/1.6.37",
                 "qhull/7.3.2")
