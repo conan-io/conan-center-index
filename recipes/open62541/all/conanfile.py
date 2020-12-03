@@ -1,6 +1,5 @@
 import os
 from conans import ConanFile, CMake, tools
-from conans.model.version import Version
 from conans.errors import ConanInvalidConfiguration
 import glob
 import shutil
@@ -90,7 +89,7 @@ class Open62541Conan(ConanFile):
         return "source_subfolder"
 
     def requirements(self):
-        if Version(self.version) >= "1.1.0":
+        if tools.Version(self.version) >= "1.1.0":
             if self.options.encryption == "mbedtls-apache":
                 self.requires("mbedtls/2.16.3-apache")
             elif self.options.encryption == "mbedtls-gpl":
@@ -191,12 +190,10 @@ class Open62541Conan(ConanFile):
         self._cmake = CMake(self)
         self._cmake.verbose = True
 
-        version = Version(self.version)
-        self._cmake.definitions["OPEN62541_VER_MAJOR"] = version.major(
-            fill=False)
-        self._cmake.definitions["OPEN62541_VER_MINOR"] = version.minor(
-            fill=False)
-        self._cmake.definitions["OPEN62541_VER_PATCH"] = version.patch()
+        version = tools.Version(self.version)
+        self._cmake.definitions["OPEN62541_VER_MAJOR"] = version.major
+        self._cmake.definitions["OPEN62541_VER_MINOR"] = version.minor
+        self._cmake.definitions["OPEN62541_VER_PATCH"] = version.patch
 
         self._cmake.definitions["UA_LOGLEVEL"] = self._get_log_level()
         self._cmake.definitions["UA_ENABLE_SUBSCRIPTIONS"] = self.options.subscription
