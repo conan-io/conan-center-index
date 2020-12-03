@@ -1,7 +1,6 @@
 from conans import ConanFile, tools, AutoToolsBuildEnvironment, RunEnvironment
 from conans.errors import ConanInvalidConfiguration
 import os
-import glob
 
 
 class PulseAudioConan(ConanFile):
@@ -115,8 +114,7 @@ class PulseAudioConan(ConanFile):
         tools.rmdir(os.path.join(self.package_folder, "share"))
         tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
         tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
-        for f in glob.glob(os.path.join(self.package_folder, "lib", "**", "*.la"), recursive=True):
-            os.remove(f)
+        tools.remove_files_by_mask(self.package_folder, "*.la")
 
     def package_info(self):
         self.cpp_info.libdirs = ["lib", os.path.join("lib", "pulseaudio")]
@@ -127,3 +125,4 @@ class PulseAudioConan(ConanFile):
             self.cpp_info.libs.append("pulsecommon-%s" % self.version)
         self.cpp_info.defines = ["_REENTRANT"]
         self.cpp_info.names["pkg_config"] = "libpulse"
+        # FIXME: add cmake generators when conan can generate PULSEAUDIO_INCLUDE_DIR PULSEAUDIO_LIBRARY vars
