@@ -31,16 +31,16 @@ class Open62541Conan(ConanFile):
         "methods": [True, False],
         "dynamic_nodes": [True, False],
         "single_header": [True, False],
-        "multithreading": [None, "Threadsafe", "Internal threads"],
+        "multithreading": ["None", "Threadsafe", "Internal threads"],
         "imutable_nodes": [True, False],
         "web_socket": [True, False],
         "discovery": [True, False],
         "discovery_semaphore": [True, False],
         "discovery_multicast": [True, False],
         "query": [True, False],
-        "encryption": [None, "openssl", "mbedtls-apache", "mbedtls-gpl"],
+        "encryption": ["None", "openssl", "mbedtls-apache", "mbedtls-gpl"],
         "json_support": [True, False],
-        "pub_sub": [None, "Simple", "Ethernet", "Ethernet_XDP"],
+        "pub_sub": ["None", "Simple", "Ethernet", "Ethernet_XDP"],
         "data_access": [True, False],
         "compiled_nodeset_descriptions": [True, False],
         "namespace_zero": ["MINIMAL", "REDUCED", "FULL"],
@@ -60,16 +60,16 @@ class Open62541Conan(ConanFile):
         "methods": True,
         "dynamic_nodes": True,
         "single_header": False,
-        "multithreading": None,
+        "multithreading": "None",
         "imutable_nodes": False,
         "web_socket": False,
         "discovery": True,
         "discovery_semaphore": True,
         "discovery_multicast": False,
         "query": False,
-        "encryption": None,
+        "encryption": "None",
         "json_support": False,
-        "pub_sub": None,
+        "pub_sub": "None",
         "data_access": True,
         "compiled_nodeset_descriptions": True,
         "namespace_zero": "FULL",
@@ -127,7 +127,7 @@ class Open62541Conan(ConanFile):
                 raise ConanInvalidConfiguration(
                     "Lower Open62541 versions than 1.1.0 do not support openssl")
 
-            if self.options.multithreading != None:
+            if self.options.multithreading != "None":
                 raise ConanInvalidConfiguration(
                     "Lower Open62541 versions than 1.1.0 do not fully support multithreading!")
 
@@ -139,7 +139,7 @@ class Open62541Conan(ConanFile):
             raise ConanInvalidConfiguration(
                 "Clang compiler can not be used to build a static library")
 
-        if self.options.pub_sub != None and self.settings.os != "Linux":
+        if self.options.pub_sub != "None" and self.settings.os != "Linux":
             raise ConanInvalidConfiguration(
                 "PubSub over Ethernet is not supported for your OS!")
 
@@ -188,7 +188,7 @@ class Open62541Conan(ConanFile):
 
     def _get_multithreading_option(self):
         return {
-            None: "0",
+            "None": "0",
             "Threadsafe": "100",
             "Internal threads": "200"
         }.get(str(self.options.multithreading), "0")
@@ -224,12 +224,12 @@ class Open62541Conan(ConanFile):
         self._cmake.definitions["UA_ENABLE_DISCOVERY_MULTICAST"] = self.options.discovery_multicast
         self._cmake.definitions["UA_ENABLE_DISCOVERY_SEMAPHORE"] = self.options.discovery_semaphore
         self._cmake.definitions["UA_ENABLE_QUERY"] = self.options.query
-        if self.options.encryption != None:
+        if self.options.encryption != "None":
             self._cmake.definitions["UA_ENABLE_ENCRYPTION"] = True
             if self.options.encryption == "openssl":
                 self._cmake.definitions["UA_ENABLE_ENCRYPTION_OPENSSL"] = True
         self._cmake.definitions["UA_ENABLE_JSON_ENCODING"] = self.options.json_support
-        if self.options.pub_sub != None:
+        if self.options.pub_sub != "None":
             self._cmake.definitions["UA_ENABLE_PUBSUB"] = True
             if self.settings.os == "Linux" and self.options.pub_sub == "Ethernet":
                 self._cmake.definitions["UA_ENABLE_PUBSUB_ETH_UADP"] = True
