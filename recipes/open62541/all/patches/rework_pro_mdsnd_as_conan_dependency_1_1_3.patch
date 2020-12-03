@@ -1,0 +1,93 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 2fd6ef29..4943c9ef 100755
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -425,9 +425,6 @@ mark_as_advanced(UA_PACK_DEBIAN)
+ set(UA_DYNAMIC_LINKING OFF)
+ if(BUILD_SHARED_LIBS)
+   set(UA_DYNAMIC_LINKING ON)
+-  if(UA_ENABLE_DISCOVERY_MULTICAST)
+-      set(MDNSD_DYNAMIC_LINKING ON)
+-  endif()
+ endif()
+ 
+ # Warn if experimental features are enabled
+@@ -659,8 +656,8 @@ configure_file(include/open62541/config.h.in ${PROJECT_BINARY_DIR}/src_generated
+ configure_file(open62541.pc.in ${PROJECT_BINARY_DIR}/src_generated/open62541.pc @ONLY)
+ 
+ if(UA_ENABLE_DISCOVERY_MULTICAST)
++    find_package(pro-mdnsd)
+     set(MDNSD_LOGLEVEL 300 CACHE STRING "Level at which logs shall be reported" FORCE)
+-    configure_file("deps/mdnsd/libmdnsd/mdnsd_config.h.in" "${PROJECT_BINARY_DIR}/src_generated/mdnsd_config.h")
+ endif()
+ 
+ set(exported_headers ${exported_headers}
+@@ -945,22 +942,6 @@ if(UA_DEBUG_DUMP_PKGS)
+     list(APPEND lib_sources ${PROJECT_SOURCE_DIR}/tests/testing-plugins/testing_networklayers.c)
+ endif()
+ 
+-if(UA_ENABLE_DISCOVERY_MULTICAST)
+-    # prepend in list, otherwise it complains that winsock2.h has to be included before windows.h
+-    set(internal_headers ${PROJECT_BINARY_DIR}/src_generated/mdnsd_config.h
+-                         ${PROJECT_SOURCE_DIR}/deps/mdnsd/libmdnsd/1035.h
+-                         ${PROJECT_SOURCE_DIR}/deps/mdnsd/libmdnsd/xht.h
+-                         ${PROJECT_SOURCE_DIR}/deps/mdnsd/libmdnsd/sdtxt.h
+-                         ${PROJECT_SOURCE_DIR}/deps/mdnsd/libmdnsd/mdnsd.h
+-                         ${internal_headers} )
+-    set(lib_sources ${PROJECT_SOURCE_DIR}/src/server/ua_server_discovery_mdns.c
+-        ${PROJECT_SOURCE_DIR}/deps/mdnsd/libmdnsd/1035.c
+-        ${PROJECT_SOURCE_DIR}/deps/mdnsd/libmdnsd/xht.c
+-        ${PROJECT_SOURCE_DIR}/deps/mdnsd/libmdnsd/sdtxt.c
+-        ${PROJECT_SOURCE_DIR}/deps/mdnsd/libmdnsd/mdnsd.c
+-        ${lib_sources})
+-endif()
+-
+ if(UA_BUILD_FUZZING OR UA_BUILD_OSS_FUZZ)
+     set(lib_sources
+         ${lib_sources}
+@@ -1250,13 +1231,13 @@ add_dependencies(open62541-object open62541-code-generation)
+ # Ensure that the open62541::open62541 alias can be used inside open62541's build
+ add_library(open62541::open62541 ALIAS open62541)
+ 
++if(UA_ENABLE_DISCOVERY_MULTICAST)
++    target_link_libraries(open62541 PUBLIC pro-mdnsd::pro-mdnsd)
++endif()
++
+ # Export Symbols
+ target_compile_definitions(open62541-object PRIVATE -DUA_DYNAMIC_LINKING_EXPORT)
+ target_compile_definitions(open62541 PRIVATE -DUA_DYNAMIC_LINKING_EXPORT)
+-if(UA_ENABLE_DISCOVERY_MULTICAST)
+-    target_compile_definitions(open62541-object PRIVATE -DMDNSD_DYNAMIC_LINKING_EXPORT)
+-    target_compile_definitions(open62541 PRIVATE -DMDNSD_DYNAMIC_LINKING_EXPORT)
+-endif()
+ # Generate properly versioned shared library links on Linux
+ SET_TARGET_PROPERTIES(open62541 PROPERTIES SOVERSION "${OPEN62541_VER_MAJOR}" VERSION "${OPEN62541_VER_MAJOR}.${OPEN62541_VER_MINOR}.${OPEN62541_VER_PATCH}")
+ 
+diff --git a/src/server/ua_discovery_manager.h b/src/server/ua_discovery_manager.h
+index 7787b40e..bdeabeeb 100644
+--- a/src/server/ua_discovery_manager.h
++++ b/src/server/ua_discovery_manager.h
+@@ -50,7 +50,7 @@ typedef struct periodicServerRegisterCallback_entry {
+ 
+ #ifdef UA_ENABLE_DISCOVERY_MULTICAST
+ 
+-#include "mdnsd/libmdnsd/mdnsd.h"
++#include "mdnsd/mdnsd.h"
+ 
+ /**
+  * TXT record:
+diff --git a/src/server/ua_server_discovery_mdns.c b/src/server/ua_server_discovery_mdns.c
+index 6121b8c3..3442ebb4 100644
+--- a/src/server/ua_server_discovery_mdns.c
++++ b/src/server/ua_server_discovery_mdns.c
+@@ -11,8 +11,8 @@
+ #ifdef UA_ENABLE_DISCOVERY_MULTICAST
+ 
+ #ifndef UA_ENABLE_AMALGAMATION
+-#include "mdnsd/libmdnsd/xht.h"
+-#include "mdnsd/libmdnsd/sdtxt.h"
++#include "mdnsd/xht.h"
++#include "mdnsd/sdtxt.h"
+ #endif
+ 
+ #ifdef _WIN32
