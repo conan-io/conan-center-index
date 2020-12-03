@@ -31,10 +31,11 @@
  * This is a port of curve_fitting.cc to the minimal C API for Ceres.
  */
 
+#include "ceres/c_api.h"
+
 #include <math.h>
 #include <stdio.h>
 #include <string.h>  // For NULL
-#include "ceres/c_api.h"
 
 /* Data generated using the following octave code.
  *
