@@ -153,11 +153,10 @@ class WtConan(ConanFile):
 
         def _gather_libs(p):
             libs = self.deps_cpp_info[p].libs + self.deps_cpp_info[p].system_libs
-            if not getattr(self.options[p], "shared", False):
-                for dep in self.deps_cpp_info[p].public_deps:
-                    for l in _gather_libs(dep):
-                        if not l in libs:
-                            libs.append(l)
+            for dep in self.deps_cpp_info[p].public_deps:
+                for l in _gather_libs(dep):
+                    if not l in libs:
+                        libs.append(l)
             return libs
 
         if self.options.with_ssl:
