@@ -53,5 +53,9 @@ class PciUtilsConan(ConanFile):
             tools.rename(src=os.path.join(self._source_subfolder, "lib", "libpci.so.3.7.0"),
                 dst=os.path.join(self.package_folder, "lib", "libpci.so"))
 
+        tools.rmdir(os.path.join(self.package_folder, "sbin"))
+        tools.rmdir(os.path.join(self.package_folder, "share"))
+        tools.rmdir(os.path.join(self.package_folder, "man"))
+
     def package_info(self):
         self.cpp_info.libs = ["pci"]
