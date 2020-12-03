@@ -62,6 +62,7 @@ set_target_properties(dwarf++ PROPERTIES
     PUBLIC_HEADER "${dwarf_headers}"
     VERSION ${CONAN_PACKAGE_VERSION})
 
+include(GNUInstallDirs)
 install(TARGETS elf++
     ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
     LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
