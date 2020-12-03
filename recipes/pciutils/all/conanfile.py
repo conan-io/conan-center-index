@@ -42,8 +42,9 @@ class PciUtilsConan(ConanFile):
             self.run("make SHARED={} ZLIB={} DNS=no all".format(yes_no(self.options.shared), yes_no(self.options.with_zlib)))
 
     def package(self):
+        yes_no = lambda v: "yes" if v else "no"
         with tools.chdir(self._source_subfolder):
-            self.run("make PREFIX={} install-pcilib".format(self.package_folder))
+            self.run("make PREFIX={} SHARED={} install install-pcilib".format(self.package_folder, yes_no(self.options.shared)))
 
         self.copy("COPYING", src=self._source_subfolder, dst="licenses")
         self.copy("*.h", src=self._source_subfolder, dst="include", keep_path=True)
