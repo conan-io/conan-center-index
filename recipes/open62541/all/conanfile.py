@@ -104,12 +104,6 @@ class Open62541Conan(ConanFile):
                 self.requires("mbedtls/2.16.3-apache")
             elif self.options.encryption == "mbedtls-gpl":
                 self.requires("mbedtls/2.16.3-gpl")
-            elif self.options.encryption == "openssl":
-                raise ConanInvalidConfiguration(
-                    "Versions of Open62541 lower than 1.1.0 do not support openssl")
-            if self.options.web_socket:
-                raise ConanInvalidConfiguration(
-                    "Versions of Open62541 lower than 1.1.0 do not fully support websockets")
 
         if self.options.discovery_multicast:
             self.requires("pro-mdnsd/0.8.4")
@@ -128,6 +122,23 @@ class Open62541Conan(ConanFile):
             if self.options.discovery_multicast or self.options.discovery_semaphore:
                 raise ConanInvalidConfiguration(
                     "Open62541 requires discovery option")
+
+        if tools.Version(self.version) <= "1.1.0":
+            if self.options.encryption == "openssl":
+                raise ConanInvalidConfiguration(
+                    "Versions of Open62541 lower than 1.1.0 do not support openssl")
+
+            if self.options.web_socket:
+                raise ConanInvalidConfiguration(
+                    "Versions of Open62541 lower than 1.1.0 do not fully support websockets")
+
+        if self.settings.compiler == "clang" and not self.options.shared:
+            raise ConanInvalidConfiguration(
+                "Clang compiler can not be used to build a static library")
+
+        if self.options.pub_sub != "None" and self.settings.os != "Linux":
+            raise ConanInvalidConfiguration(
+                "PubSub over Ethernet is not supported for your OS!")
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -183,10 +194,6 @@ class Open62541Conan(ConanFile):
         if self._cmake:
             return self._cmake
 
-        if self.settings.compiler == "clang" and not self.options.shared:
-            raise ConanInvalidConfiguration(
-                "Clang compiler can not be used to build a static library")
-
         self._cmake = CMake(self)
         self._cmake.verbose = True
 
@@ -224,9 +231,6 @@ class Open62541Conan(ConanFile):
                 self._cmake.definitions["UA_ENABLE_PUBSUB_ETH_UADP"] = True
             elif self.settings.os == "Linux" and self.options.pub_sub == "Ethernet_XDP":
                 self._cmake.definitions["UA_ENABLE_PUBSUB_ETH_UADP_XDP"] = True
-            else:
-                raise ConanInvalidConfiguration(
-                    "PubSub over Ethernet is not supported for your OS!")
         self._cmake.definitions["UA_ENABLE_DA"] = self.options.data_access
         if self.options.compiled_nodeset_descriptions == True:
             self._cmake.definitions["UA_ENABLE_NODESET_COMPILER_DESCRIPTIONS"] = self.options.compiled_nodeset_descriptions
