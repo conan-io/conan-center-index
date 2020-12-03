@@ -1,7 +1,6 @@
 import os
 from conans import ConanFile, CMake, tools
 from conans.errors import ConanInvalidConfiguration
-import glob
 import shutil
 import yaml
 
@@ -126,11 +125,15 @@ class Open62541Conan(ConanFile):
         if tools.Version(self.version) <= "1.1.0":
             if self.options.encryption == "openssl":
                 raise ConanInvalidConfiguration(
-                    "Versions of Open62541 lower than 1.1.0 do not support openssl")
+                    "Lower Open62541 versions than 1.1.0 do not support openssl")
+
+            if self.options.multithreading != None:
+                raise ConanInvalidConfiguration(
+                    "Lower Open62541 versions than 1.1.0 do not fully support multithreading!")
 
             if self.options.web_socket:
                 raise ConanInvalidConfiguration(
-                    "Versions of Open62541 lower than 1.1.0 do not fully support websockets")
+                    "Lower Open62541 versions than 1.1.0 do not fully support websockets")
 
         if self.settings.compiler == "clang" and not self.options.shared:
             raise ConanInvalidConfiguration(
@@ -208,8 +211,9 @@ class Open62541Conan(ConanFile):
         self._cmake.definitions["UA_ENABLE_METHODCALLS"] = self.options.methods
         self._cmake.definitions["UA_ENABLE_NODEMANAGEMENT"] = self.options.dynamic_nodes
         self._cmake.definitions["UA_ENABLE_AMALGAMATION"] = self.options.single_header
-        self._cmake.definitions["UA_ENABLE_MULTITHREADING"] = self._get_multithreading_option(
-        )
+        if version >= "1.1.3":
+            self._cmake.definitions["UA_MULTITHREADING"] = self._get_multithreading_option(
+            )
         self._cmake.definitions["UA_ENABLE_IMMUTABLE_NODES"] = self.options.imutable_nodes
         self._cmake.definitions["UA_ENABLE_WEBSOCKET_SERVER"] = self.options.web_socket
         if self.options.historize != False:
@@ -259,10 +263,10 @@ class Open62541Conan(ConanFile):
         cmake = self._configure_cmake()
         cmake.install()
 
-        for f in glob.glob(os.path.join(self.package_folder, "bin", "*.pdb")):
-            os.remove(f)
-        for f in glob.glob(os.path.join(self.package_folder, "lib", "*.pdb")):
-            os.remove(f)
+        tools.remove_files_by_mask(os.path.join(
+            self.package_folder, "bin"), '*.pdb')
+        tools.remove_files_by_mask(os.path.join(
+            self.package_folder, "lib"), '*.pdb')
 
         tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
         tools.rmdir(os.path.join(self.package_folder, "share"))
