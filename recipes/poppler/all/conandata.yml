@@ -8,7 +8,7 @@ patches:
       base_path: "source_subfolder"
     - patch_file: "patches/0002-cmake-use_CONAN_PKG-targets.patch"
       base_path: "source_subfolder"
-    - patch_file: "patches/0003-cmake-disable-tests.cmake"
+    - patch_file: "patches/0003-cmake-disable-tests.patch"
       base_path: "source_subfolder"
     - patch_file: "patches/0004-add-POPPLER_DATADIR-environment-variable.patch"
       base_path: "source_subfolder"
