@@ -2,7 +2,7 @@ import os
 from conans import ConanFile, AutoToolsBuildEnvironment, CMake, tools
 
 
-class CppcodecConan(ConanFile):
+class Base64Conan(ConanFile):
     name = "base64"
     license = "BSD-2-Clause"
     url = "https://github.com/conan-io/conan-center-index"
