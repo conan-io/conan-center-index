@@ -117,7 +117,7 @@ class Open62541Conan(ConanFile):
 
     def _patch_sources(self):
         for patch in self.conan_data["patches"][self.version]:
-            tools.patch(**patch, fuzz=True)
+            tools.patch(**patch)
 
     def configure(self):
         if not self.options.subscription:
@@ -190,12 +190,14 @@ class Open62541Conan(ConanFile):
 
         self._cmake = CMake(self)
         self._cmake.verbose = True
+
         version = Version(self.version)
         self._cmake.definitions["OPEN62541_VER_MAJOR"] = version.major(
             fill=False)
         self._cmake.definitions["OPEN62541_VER_MINOR"] = version.minor(
             fill=False)
         self._cmake.definitions["OPEN62541_VER_PATCH"] = version.patch()
+
         self._cmake.definitions["UA_LOGLEVEL"] = self._get_log_level()
         self._cmake.definitions["UA_ENABLE_SUBSCRIPTIONS"] = self.options.subscription
         self._cmake.definitions["UA_ENABLE_SUBSCRIPTIONS_EVENTS"] = self.options.subscription_events
@@ -241,7 +243,8 @@ class Open62541Conan(ConanFile):
         if self.settings.compiler == "Visual Studio" and self.options.shared == True:
             self._cmake.definitions["UA_MSVC_FORCE_STATIC_CRT"] = True
         self._cmake.definitions["UA_COMPILE_AS_CXX"] = self.options.cpp_compatible
-        self._cmake.configure()
+
+        self._cmake.configure(source_dir=self._source_subfolder)
         return self._cmake
 
     def build(self):
