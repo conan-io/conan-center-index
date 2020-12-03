@@ -25,23 +25,23 @@ class Open62541Conan(ConanFile):
     options = {
         "fPIC": [True, False],
         "shared": [True, False],
-        "historize": ["Off", "On", "Experimental"],
+        "historize": [True, False, "Experimental"],
         "logging_level": ["Fatal", "Error", "Warning", "Info", "Debug", "Trace"],
         "subscription": [True, False],
         "subscription_events": [True, False],
         "methods": [True, False],
         "dynamic_nodes": [True, False],
         "single_header": [True, False],
-        "multithreading": ["Off", "Threadsafe", "Internal threads"],
+        "multithreading": [None, "Threadsafe", "Internal threads"],
         "imutable_nodes": [True, False],
         "web_socket": [True, False],
         "discovery": [True, False],
         "discovery_semaphore": [True, False],
         "discovery_multicast": [True, False],
         "query": [True, False],
-        "encryption": ["None", "openssl", "mbedtls-apache", "mbedtls-gpl"],
+        "encryption": [None, "openssl", "mbedtls-apache", "mbedtls-gpl"],
         "json_support": [True, False],
-        "pub_sub": ["None", "Simple", "Ethernet", "Ethernet_XDP"],
+        "pub_sub": [None, "Simple", "Ethernet", "Ethernet_XDP"],
         "data_access": [True, False],
         "compiled_nodeset_descriptions": [True, False],
         "namespace_zero": ["MINIMAL", "REDUCED", "FULL"],
@@ -54,23 +54,23 @@ class Open62541Conan(ConanFile):
     default_options = {
         "fPIC": True,
         "shared": False,
-        "historize": "Off",
+        "historize": False,
         "logging_level": "Info",
         "subscription": True,
         "subscription_events": False,
         "methods": True,
         "dynamic_nodes": True,
         "single_header": False,
-        "multithreading": "Off",
+        "multithreading": None,
         "imutable_nodes": False,
         "web_socket": False,
         "discovery": True,
         "discovery_semaphore": True,
         "discovery_multicast": False,
         "query": False,
-        "encryption": "None",
+        "encryption": None,
         "json_support": False,
-        "pub_sub": "None",
+        "pub_sub": None,
         "data_access": True,
         "compiled_nodeset_descriptions": True,
         "namespace_zero": "FULL",
@@ -136,7 +136,7 @@ class Open62541Conan(ConanFile):
             raise ConanInvalidConfiguration(
                 "Clang compiler can not be used to build a static library")
 
-        if self.options.pub_sub != "None" and self.settings.os != "Linux":
+        if self.options.pub_sub != None and self.settings.os != "Linux":
             raise ConanInvalidConfiguration(
                 "PubSub over Ethernet is not supported for your OS!")
 
@@ -185,7 +185,7 @@ class Open62541Conan(ConanFile):
 
     def _get_multithreading_option(self):
         return {
-            "Off": "0",
+            None: "0",
             "Threadsafe": "100",
             "Internal threads": "200"
         }.get(str(self.options.multithreading), "0")
@@ -212,7 +212,7 @@ class Open62541Conan(ConanFile):
         )
         self._cmake.definitions["UA_ENABLE_IMMUTABLE_NODES"] = self.options.imutable_nodes
         self._cmake.definitions["UA_ENABLE_WEBSOCKET_SERVER"] = self.options.web_socket
-        if self.options.historize != "Off":
+        if self.options.historize != False:
             self._cmake.definitions["UA_ENABLE_HISTORIZING"] = True
             if self.options.historize == "Experimental":
                 self._cmake.definitions["UA_ENABLE_EXPERIMENTAL_HISTORIZING"] = True
@@ -220,12 +220,12 @@ class Open62541Conan(ConanFile):
         self._cmake.definitions["UA_ENABLE_DISCOVERY_MULTICAST"] = self.options.discovery_multicast
         self._cmake.definitions["UA_ENABLE_DISCOVERY_SEMAPHORE"] = self.options.discovery_semaphore
         self._cmake.definitions["UA_ENABLE_QUERY"] = self.options.query
-        if self.options.encryption != "None":
+        if self.options.encryption != None:
             self._cmake.definitions["UA_ENABLE_ENCRYPTION"] = True
             if self.options.encryption == "openssl":
                 self._cmake.definitions["UA_ENABLE_ENCRYPTION_OPENSSL"] = True
         self._cmake.definitions["UA_ENABLE_JSON_ENCODING"] = self.options.json_support
-        if self.options.pub_sub != "None":
+        if self.options.pub_sub != None:
             self._cmake.definitions["UA_ENABLE_PUBSUB"] = True
             if self.settings.os == "Linux" and self.options.pub_sub == "Ethernet":
                 self._cmake.definitions["UA_ENABLE_PUBSUB_ETH_UADP"] = True
