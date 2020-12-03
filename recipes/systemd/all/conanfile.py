@@ -18,11 +18,11 @@ class SystemdConan(ConanFile):
             if tools.os_info.with_yum or tools.os_info.with_dnf:
                 packages = ["systemd", "systemd-libs", "libudev-devel"]
             elif tools.os_info.with_apt:
-                packages = ["libsystemd-dev", "libudev-dev"]
+                packages = ["libsystemd-dev", "libudev-dev", "systemd"]
             elif tools.os_info.with_pacman:
                 packages = ["systemd", "systemd-libs"]
             elif tools.os_info.with_zypper:
-                packages = ["systemd-devel", "libudev-devel"]
+                packages = ["systemd-devel", "libudev-devel", "systemd"]
             else:
                 self.output.warn("Do not know how to install 'systemd' for {}.".format(tools.os_info.linux_distro))
                 packages = []
