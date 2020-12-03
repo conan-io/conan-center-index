@@ -35,11 +35,9 @@ class TreeSitterConan(ConanFile):
 
     def package(self):
         self.copy("LICENSE", src=self._source_subfolder, dst="licenses")
-        autotools = self._configure_autotools()
-        with tools.chdir(self._source_subfolder):
-            autotools.install(args=["PREFIX=install/"])
-        shutil.copytree(os.path.join(self._source_subfolder, "install/include"), os.path.join(self.package_folder, "include"))
-        shutil.copytree(os.path.join(self._source_subfolder, "install/lib"), os.path.join(self.package_folder, "lib"))
+        shutil.copytree(os.path.join(self._source_subfolder, "lib/include"), os.path.join(self.package_folder, "include"))
+        self.copy("libtree-sitter.a", src=self._source_subfolder, dst=os.path.join(self.package_folder, "lib"))
+        self.copy("libtree-sitter.so*", src=self._source_subfolder, dst=os.path.join(self.package_folder, "lib"))
 
     def package_info(self):
         self.cpp_info.libs = ["libtree-sitter.a"]
