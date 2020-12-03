@@ -53,7 +53,7 @@ class Open62541Conan(ConanFile):
     }
     default_options = {
         "fPIC": True,
-        "shared": True,
+        "shared": False,
         "historize": "Off",
         "logging_level": "Info",
         "subscription": True,
