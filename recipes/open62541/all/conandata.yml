@@ -7,16 +7,8 @@ sources:
     sha256: "12770bf9f5d9f44dedce0d1b34066dd14111d24c73a2f0153420e0a750e85d19"
 patches:
   "1.0.3":
-    - patch_file: "patches/set_static_version.patch"
-      base_path: "source_subfolder"
-    - patch_file: "patches/remove_clang_sanitizer_1_0_3.patch"
-      base_path: "source_subfolder"
-    - patch_file: "patches/rework_pro_mdsnd_as_conan_dependency_1_0_3.patch"
+    - patch_file: "patches/1_0_3.patch"
       base_path: "source_subfolder"
   "1.1.3":
-    - patch_file: "patches/set_static_version.patch"
-      base_path: "source_subfolder"
-    - patch_file: "patches/remove_clang_sanitizer_1_1_3.patch"
-      base_path: "source_subfolder"
-    - patch_file: "patches/rework_pro_mdsnd_as_conan_dependency_1_1_3.patch"
+    - patch_file: "patches/1_1_3.patch"
       base_path: "source_subfolder"
