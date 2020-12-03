@@ -31,7 +31,7 @@ class TinygltfConan(ConanFile):
             tools.check_min_cppstd(self, 11)
 
     def requirements(self):
-        self.requires("nlohmann_json/3.9.0")
+        self.requires("nlohmann_json/3.9.1")
         if self.options.draco:
             self.requires("draco/1.3.6")
         if self.options.stb_image or self.options.stb_image_write:

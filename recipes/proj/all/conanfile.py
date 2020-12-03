@@ -49,14 +49,14 @@ class ProjConan(ConanFile):
             del self.options.fPIC
 
     def requirements(self):
-        self.requires("sqlite3/3.32.3")
+        self.requires("sqlite3/3.33.0")
         if self.options.get_safe("with_tiff"):
             self.requires("libtiff/4.1.0")
         if self.options.get_safe("with_curl"):
-            self.requires("libcurl/7.72.0")
+            self.requires("libcurl/7.73.0")
 
     def build_requirements(self):
-        self.build_requires("sqlite3/3.32.3")
+        self.build_requires("sqlite3/3.33.0")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
@@ -64,7 +64,7 @@ class ProjConan(ConanFile):
 
     def build(self):
         self._patch_sources()
-        with tools.environment_append(RunEnvironment(self).vars):
+        with tools.run_environment(self):
             cmake = self._configure_cmake()
             cmake.build()
 

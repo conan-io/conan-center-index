@@ -8,3 +8,6 @@ sources:
   "0.7.0":
     sha256: "4fe6627407a656d0d73879c0346b251ccdcfb718c37bef5410ba172c7c7d5f9a"
     url: "https://github.com/Neargye/magic_enum/archive/v0.7.0.tar.gz"
+  "0.7.1":
+    url: "https://github.com/Neargye/magic_enum/archive/v0.7.1.tar.gz"
+    sha256: "11bb590dd055194e92936fa4d0652084c14bd23ac8e4b5a02271b6259a05cec9"

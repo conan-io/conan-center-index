@@ -34,7 +34,8 @@ class LibcurlConan(ConanFile):
                "with_nghttp2": [True, False],
                "with_zlib": [True, False],
                "with_brotli": [True, False],
-               "with_zstd": [True, False]
+               "with_zstd": [True, False],
+               "with_c_ares": [True, False],
                }
     default_options = {"shared": False,
                        "fPIC": True,
@@ -53,7 +54,8 @@ class LibcurlConan(ConanFile):
                        "with_nghttp2": False,
                        "with_zlib": True,
                        "with_brotli": False,
-                       "with_zstd": False
+                       "with_zstd": False,
+                       "with_c_ares": False,
                        }
 
     _autotools = None
@@ -151,6 +153,8 @@ class LibcurlConan(ConanFile):
             self.requires("brotli/1.0.9")
         if self.options.get_safe("with_zstd"):
             self.requires("zstd/1.4.5")
+        if self.options.with_c_ares:
+            self.requires("c-ares/1.16.1")
 
     def package_id(self):
         # Deprecated options
@@ -269,6 +273,10 @@ class LibcurlConan(ConanFile):
 
         if self.settings.build_type == "Debug":
            params.append("--enable-debug")
+
+        if self.options.with_c_ares:
+            params.append("--enable-ares")
+            params.append("--enable-threaded-resolver")
 
         # Cross building flags
         if tools.cross_building(self.settings):
@@ -486,6 +494,8 @@ class LibcurlConan(ConanFile):
         if self._has_zstd_option:
             self._cmake.definitions["CURL_ZSTD"] = self.options.with_zstd
         self._cmake.definitions["CMAKE_USE_LIBSSH2"] = self.options.with_libssh2
+        self._cmake.definitions["ENABLE_ARES"] = self.options.with_c_ares
+
         self._cmake.configure(build_folder=self._build_subfolder)
         return self._cmake
 
@@ -578,3 +588,5 @@ class LibcurlConan(ConanFile):
             self.cpp_info.components["curl"].requires.append("brotli::brotli")
         if self.options.get_safe("with_zstd"):
             self.cpp_info.components["curl"].requires.append("zstd::zstd")
+        if self.options.with_c_ares:
+            self.cpp_info.components["curl"].requires.append("c-ares::c-ares")

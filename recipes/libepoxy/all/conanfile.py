@@ -43,6 +43,7 @@ class EpoxyConan(ConanFile):
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
+            self.options.shared = True
         if self.settings.os != "Linux":
             del self.options.glx
             del self.options.egl

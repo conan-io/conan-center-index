@@ -1,5 +1,25 @@
 # Changelog
 
+### 27-November-2020 - 10:14 CEST
+
+ - [feature] More (and better) properties are stored in Artifactory for each package.
+ - [feature] Use modularized jobs in CI to run parts of the pipeline.
+ - [fix] Fix error affecting PRs that were blocked in the past by a team member
+ - [fix] Fix issue with properties associated to new configurations
+
+### 18-November-2020 - 12:58 CEST
+
+- [fix] Notify unexpected errors to slack channel (add link to message).
+- [job] AutomaticMerge: Fix PRs blocked by non team member users.
+- [bug] Build everything but OK or INVALID_CONFIG.
+- [fix] Do not use `--all` argument with `conan upload` when the package ID is given.
+- [fix] Fix error getting properties when the recipe doesn't have options.
+- [job] Tapaholes: Propose new profile set including new compiler configurations.
+
+### 18-November-2020 - 11:23 CEST
+
+- Updated Conan client to the 1.31.3 version in Windows and Mac agents.
+
 ### 23-October-2020 - 17:13 CEST
 
 - [feature] ListProfiles: Add 'profiles' to inputs, make it required.

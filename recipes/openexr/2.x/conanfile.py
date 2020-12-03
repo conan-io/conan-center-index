@@ -96,10 +96,10 @@ class OpenEXRConan(ConanFile):
         self.cpp_info.libs = ["IlmImf{}".format(lib_suffix),
                               "IlmImfUtil{}".format(lib_suffix),
                               "IlmThread{}".format(lib_suffix),
-                              "Iex{}".format(lib_suffix),
-                              "IexMath{}".format(lib_suffix),
                               "Imath{}".format(lib_suffix),
-                              "Half{}".format(lib_suffix)]
+                              "Half{}".format(lib_suffix),
+                              "IexMath{}".format(lib_suffix),
+                              "Iex{}".format(lib_suffix)]
 
         self.cpp_info.includedirs = [os.path.join("include", "OpenEXR"), "include"]
         if self.options.shared and self.settings.os == "Windows":

@@ -5,3 +5,6 @@ sources:
   1.7.6:
     url: https://github.com/bernedom/SI/archive/1.7.6.tar.gz
     sha256: 88041156890c34f7ca92f3ae385b19189583aa5c59ac470bfe2db6df5d5c954b
+  2.0.0:
+    url: https://github.com/bernedom/SI/archive/2.0.0.tar.gz
+    sha256: 162c75f268eb8dab533f2c70b786a83888b7b7b26c48a502b1375e01d5ca2bf9

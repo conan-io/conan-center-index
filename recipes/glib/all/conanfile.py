@@ -53,8 +53,7 @@ class GLibConan(ConanFile):
 
     def build_requirements(self):
         self.build_requires("meson/0.55.3")
-        if self.settings.os == "Windows":
-            self.build_requires("pkgconf/1.7.3")
+        self.build_requires("pkgconf/1.7.3")
 
     def requirements(self):
         self.requires("zlib/1.2.11")
@@ -65,7 +64,7 @@ class GLibConan(ConanFile):
             self.requires("libelf/0.8.13")
         if self.settings.os == "Linux":
             if self.options.with_mount:
-                self.requires("libmount/2.33.1")
+                self.requires("libmount/2.36")
             if self.options.with_selinux:
                 self.requires("libselinux/3.1")
         else:
@@ -198,8 +197,10 @@ class GLibConan(ConanFile):
                 self.cpp_info.components["gio-2.0"].requires.append("libmount::libmount")
             if self.options.with_selinux:
                 self.cpp_info.components["gio-2.0"].requires.append("libselinux::libselinux")
-        if self.settings.os != "Windows":
-            self.cpp_info.components["gio-unix-2.0"].libs = ["gio-2.0"]
+        if self.settings.os == "Windows":
+            self.cpp_info.components["gio-windows-2.0"].requires = ["gobject-2.0", "gmodule-no-export-2.0", "gio-2.0"]
+            self.cpp_info.components["gio-windows-2.0"].includedirs = [os.path.join('include', 'gio-win32-2.0')]
+        else:
             self.cpp_info.components["gio-unix-2.0"].requires.extend(["gobject-2.0", "gio-2.0"])
             self.cpp_info.components["gio-unix-2.0"].includedirs = [os.path.join("include", "gio-unix-2.0")]
         self.env_info.GLIB_COMPILE_SCHEMAS = os.path.join(self.package_folder, "bin", "glib-compile-schemas")
