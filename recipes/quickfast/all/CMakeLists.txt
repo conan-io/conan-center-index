@@ -59,6 +59,8 @@ else()
 	target_compile_definitions(quickfast PUBLIC -DQUICKFAST_HAS_DLL=0)
 endif()
 
+target_compile_features(quickfast PUBLIC cxx_std_11)
+
 if(BOOST_BIND_NO_PLACEHOLDERS)
 	target_compile_definitions(quickfast PRIVATE BOOST_BIND_NO_PLACEHOLDERS)
 endif()
