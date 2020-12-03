@@ -70,7 +70,5 @@ class QuickfastConan(ConanFile):
         self.cpp_info.libs = tools.collect_libs(self)
         self.cpp_info.includedirs.append(os.path.join("include", "quickfast"))
         self.cpp_info.defines.append("BOOST_BIND_NO_PLACEHOLDERS")
-        if self.options.shared:
-            self.cpp_info.defines.append("QUICKFAST_BUILD_DLL")
-        else:
+        if not self.options.shared:
             self.cpp_info.defines.append("QUICKFAST_HAS_DLL=0")
