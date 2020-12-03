@@ -13,7 +13,7 @@ class PciUtilsConan(ConanFile):
     settings = "os", "compiler", "build_type", "arch"
     options = {"shared": [True, False], "fPIC": [True, False], "with_zlib": [True, False], "with_udev": [True, False]}
     default_options = {"shared": False, "fPIC": True, "with_zlib": True, "with_udev": False}
-    _autotools = None
+
 
     @property
     def _source_subfolder(self):
