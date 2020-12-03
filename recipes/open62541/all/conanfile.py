@@ -85,6 +85,10 @@ class Open62541Conan(ConanFile):
 
     _cmake = None
 
+    @property
+    def _source_subfolder(self):
+        return "source_subfolder"
+
     def requirements(self):
         if Version(self.version) >= "1.1.0":
             if self.options.encryption == "mbedtls-apache":
@@ -111,13 +115,9 @@ class Open62541Conan(ConanFile):
         if self.options.discovery_multicast:
             self.requires("pro-mdnsd/0.8.4")
 
-    @property
-    def _source_subfolder(self):
-        return "source_subfolder"
-
     def _patch_sources(self):
         for patch in self.conan_data["patches"][self.version]:
-            tools.patch(**patch)
+            tools.patch(**patch, fuzz=True)
 
     def configure(self):
         if not self.options.subscription:
@@ -150,7 +150,7 @@ class Open62541Conan(ConanFile):
             for path, submodule in submodules_data["submodules"][self.version].items():
                 filename = os.path.basename(submodule["url"])
                 archive_name = submodule["archive_pattern"].format(
-                    version=os.path.splitext(filename)[0])
+                    version=os.path.splitext(filename.replace('v', ''))[0])
 
                 submodule_data = {
                     "url": submodule["url"],
