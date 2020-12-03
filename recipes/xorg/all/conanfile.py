@@ -35,6 +35,7 @@ class ConanXOrg(ConanFile):
         self.cpp_info.components[name].cflags = cflags
         self.cpp_info.components[name].cxxflags = cflags
         self.cpp_info.components[name].version = pkg_config.version[0]
+        self.cpp_info.components[name].filenames["pkg_config"] = name + "_system"
 
     def system_requirements(self):
         if tools.os_info.is_linux and self.settings.os == "Linux":
