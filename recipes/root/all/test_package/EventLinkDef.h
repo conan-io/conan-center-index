@@ -1,5 +1,4 @@
 #include "Event.hpp"
-#include "Particle.hpp"
 
 #ifdef __CLING__
 #pragma link C++ class Event+;
