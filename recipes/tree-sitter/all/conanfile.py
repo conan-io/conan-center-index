@@ -18,10 +18,9 @@ class TreeSitterConan(ConanFile):
     def _source_subfolder(self):
         return "source_subfolder"
 
-    def build_requirements(self):
-        if tools.os_info.is_windows:
-            if "CONAN_BASH_PATH" not in os.environ and tools.os_info.detect_windows_subsystem() != 'msys2':
-                self.build_requires("msys2/20190524")
+    def requirements(self):
+        if self.settings.os in ("Windows", "Macos"):
+            raise ConanInvalidConfiguration("tree-sitter is not support on {}.".format(self.settings.os))
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
@@ -36,9 +35,6 @@ class TreeSitterConan(ConanFile):
     def build(self):
         autotools = self._configure_autotools()
         with tools.chdir(self._source_subfolder):
-            if tools.os_info.is_windows:
-                tools.replace_in_file("Makefile", " -fPIC ", " ")
-                tools.replace_in_file("Makefile", "CFLAGS ?= -O3 -Wall -Wextra -Werror", "CFLAGS = -O3")
             autotools.make()
 
     def package(self):
