@@ -265,7 +265,7 @@ class Open62541Conan(ConanFile):
 
         if self.settings.os == "Windows" and self.options.shared:
             self.copy("*.dll", dst="bin", keep_path=False)
-            tools.remove_files_by_mask(self.package_folder, '*.pdb')
+            tools.remove_files_by_mask(self.package_folder, '*.dll')
 
         tools.remove_files_by_mask(os.path.join(
             self.package_folder, "bin"), '*.pdb')
