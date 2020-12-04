@@ -1,5 +1,6 @@
 import os
 from conans import ConanFile, AutoToolsBuildEnvironment, tools
+from conans.errors import ConanInvalidConfiguration
 import shutil
 
 required_conan_version = ">=1.29.1"
