@@ -36,6 +36,9 @@ class TreeSitterConan(ConanFile):
     def build(self):
         autotools = self._configure_autotools()
         with tools.chdir(self._source_subfolder):
+            if tools.os_info.is_windows:
+                tools.replace_in_file("Makefile", " -fPIC ", " ")
+                tools.replace_in_file("Makefile", "CFLAGS ?= -O3 -Wall -Wextra -Werror", "CFLAGS = -O3")
             autotools.make()
 
     def package(self):
