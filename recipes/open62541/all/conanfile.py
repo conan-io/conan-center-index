@@ -265,8 +265,9 @@ class Open62541Conan(ConanFile):
 
         if self.settings.os == "Windows" and self.options.shared:
             self.copy("*.dll", dst="bin", keep_path=False)
-            tools.remove_files_by_mask(self.package_folder, '*.dll')
+            tools.remove_files_by_mask(self.package_folder, '*.pdb')
 
+        tools.remove_files_by_mask(os.path.join(
             self.package_folder, "bin"), '*.pdb')
         tools.remove_files_by_mask(os.path.join(
             self.package_folder, "lib"), '*.pdb')
@@ -276,10 +277,10 @@ class Open62541Conan(ConanFile):
         tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
 
     def package_info(self):
-        self.cpp_info.names["cmake_find_package"]="open62541"
-        self.cpp_info.names["cmake_find_package_multi"]="open62541"
-        self.cpp_info.libs=tools.collect_libs(self)
-        self.cpp_info.includedirs=[
+        self.cpp_info.names["cmake_find_package"] = "open62541"
+        self.cpp_info.names["cmake_find_package_multi"] = "open62541"
+        self.cpp_info.libs = tools.collect_libs(self)
+        self.cpp_info.includedirs = [
             "include",
             os.path.join("include", "plugin")
         ]
@@ -290,7 +291,7 @@ class Open62541Conan(ConanFile):
             self.cpp_info.includedirs.append(os.path.join("include", "win32"))
         else:
             self.cpp_info.includedirs.append(os.path.join("include", "posix"))
-        self.cpp_info.builddirs=[
+        self.cpp_info.builddirs = [
             "lib",
             os.path.join("lib", "cmake"),
             os.path.join("lib", "cmake", "open62541")
