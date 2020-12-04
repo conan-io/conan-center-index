@@ -18,6 +18,11 @@ class TreeSitterConan(ConanFile):
     def _source_subfolder(self):
         return "source_subfolder"
 
+    def build_requirements(self):
+        if tools.os_info.is_windows:
+            if "CONAN_BASH_PATH" not in os.environ and tools.os_info.detect_windows_subsystem() != 'msys2':
+                self.build_requires("msys2/20190524")
+
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
         os.rename("{}-{}".format(self.name, self.version), self._source_subfolder)
