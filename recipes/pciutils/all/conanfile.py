@@ -43,7 +43,7 @@ class PciUtilsConan(ConanFile):
 
     def _make(self, targets):
         yes_no = lambda v: "yes" if v else "no"
-        fpic = "-fPIC" if self.options.fPIC else ""
+        fpic = "-fPIC" if self.options.get_safe("fPIC") else ""
         autotools = AutoToolsBuildEnvironment(self)
         autotools.make(args=["SHARED={}".format(yes_no(self.options.shared)),
                              "ZLIB={}".format(yes_no(self.options.with_zlib)),
