@@ -2,6 +2,22 @@ from conans import ConanFile, tools, CMake
 import os
 import glob
 
+# TODO:
+# patch 3rd-parties
+# easyloggingpp
+# glad
+# glfw
+# imgui
+# libusb
+# live555
+# rapidxml
+# realsense-file
+# https://github.com/ros/console_bridge
+# https://github.com/ros/roscpp_core
+# https://github.com/ros/ros_comm
+# sqlite
+# tclap
+# tinyfiledialogs
 
 class LibRealSenseConan(ConanFile):
     name = "librealsense"
