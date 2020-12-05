@@ -22,7 +22,7 @@ class CozConan(ConanFile):
     _source_subfolder = "source_subfolder"
 
     def configure(self):
-        if self.settings.compiler == "Visual Studio":
+        if self.settings.os == "Macos" or self.settings.compiler == "Visual Studio":
             raise ConanInvalidConfiguration(
                 "libelfin doesn't support compiler: {} on OS: {}.".format(
                     self.settings.compiler, self.settings.os))
