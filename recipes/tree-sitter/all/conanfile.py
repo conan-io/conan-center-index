@@ -15,7 +15,6 @@ class TreeSitterConan(ConanFile):
     settings = "os", "compiler", "build_type", "arch"
     _autotools = None
 
-
     @property
     def _source_subfolder(self):
         return "source_subfolder"
