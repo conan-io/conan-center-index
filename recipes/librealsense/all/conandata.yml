@@ -1,0 +1,4 @@
+sources:
+  "2.40.0":
+    url: "https://github.com/IntelRealSense/librealsense/archive/v2.40.0.tar.gz"
+    sha256: "7270081d6a289b1f8eee57b46d0e5bced1f912bbd7630281f7a72a741c98ba3b"
