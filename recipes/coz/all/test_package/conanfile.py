@@ -7,7 +7,7 @@ class TestPackageConan(ConanFile):
     generators = "cmake"
 
     def build(self):
-        cmake = CMake(self)
+        cmake = CMake(self, build_type="RelWithDebInfo")
         cmake.configure()
         cmake.build()
 
