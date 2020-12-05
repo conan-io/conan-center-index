@@ -18,12 +18,8 @@ class CozConan(ConanFile):
     exports_sources = "CMakeLists.txt", "patches/*"
     generators = "cmake"
 
-    _source_subfolder = "source_subfolder"
     _cmake = None
-
-    def config_options(self):
-        if self.settings.os == "Windows":
-            del self.options.fPIC
+    _source_subfolder = "source_subfolder"
 
     def configure(self):
         if self.settings.compiler == "Visual Studio":
