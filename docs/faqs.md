@@ -1,6 +1,5 @@
 # FAQs
 
-
 This section gathers the most common questions from the community related to packages and usability of this repository.
 
 ## What is the policy on recipe name collisions?
@@ -97,7 +96,6 @@ However, there are ways to get around this, one of them is through the [/Z7](htt
 
 Adding one more common option, it seems the most simple and obvious solution, but it contains a side effect already seen with fPIC. It is necessary to manage the entire recipe, it has become a Boilerplate. So, adding PDB would be one more point to be reviewed for each recipe. In addition, in the future new options could arise, such as sanity or benchmark, further inflating the recipes. For this reason, a new option will not be added. However, the inclusion of the PDB files is discussed in issue [#1982](https://github.com/conan-io/conan-center-index/issues/1982) and there are some ideas for making this possible through a new feature. If you want to comment on the subject, please visit issue.
 
-
 ## Why _installer_ packages remove some settings from their package ID?
 
 There are some recipes in `conan-center-index` that provide packages that contain only executables (some examples are `b2`, `cmake` or `make`), these packages are used in
@@ -106,3 +104,9 @@ There are some recipes in `conan-center-index` that provide packages that contai
 We decided that these packages (as long as they match the premises) should list all the settings needed to build, so building from sources will generate the expected binary, but they will **remove `compiler` setting inside the `package_id()` method**. As a consequence, the CI will generate packages only for one compiler reducing the workload in the pipeline and the number of possible package IDs.
 
 Note about `build_type`.- We retain the `build_type` setting to make it possible for the users to _debug_ these installer packages. We considered removing this settings and it would be possible to compile these packages in _debug_ mode, but if we remove it from the packageID, the compiled package would override the existing _release_ binary, and it'd be quite inconvenient for the users to compile the binary every time they need to switch from _debug_ to _release_.
+
+## What is the policy for changing a dependency's version
+
+Yes, the main problem is when there is a conflict because two graphs require a different version of some requirements. We would really want to avoid this situation, so it is perfectly ok to open a PR to upgrade only a requirement. Diligence must be paid when submitting PRs of this nature.
+
+This is not a trivial issue, in `conan-center-index` we don't run any complete testing matrix, we only ensure that packages successfully build and pass a simple test. Without reassurance about regression and most of projects don't use a specific version for dependencies there is no garauntee changing the dependencies will not have any side-effects. There are cases where the version(s) of dependencies are very hard requirements and need to be the exact same in order to link. If you are interested to know about the origin, please, read [here](https://github.com/conan-io/conan-center-index/pull/2477).
