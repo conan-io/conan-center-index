@@ -6,3 +6,5 @@ patches:
   "0.2.2":
     - patch_file: "patches/gettid.patch"
       base_path: "source_subfolder"
+    - patch_file: "patches/python.patch"
+      base_path: "source_subfolder"
