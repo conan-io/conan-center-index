@@ -12,9 +12,10 @@ class GmpConan(ConanFile):
     license = ("LGPL-3.0", "GPL-2.0")
     homepage = "https://gmplib.org"
     settings = "os", "arch", "compiler", "build_type"
-    options = {"shared": [True, False], "fPIC": [True, False], "disable_assembly": [True, False],
+    options = {"shared": [True, False], "fPIC": [True, False],
+               "disable_assembly": [True, False], "enable_fat": [True, False],
                "run_checks": [True, False], "enable_cxx" : [True, False]}
-    default_options = {"shared": False, "fPIC": True, "disable_assembly": True, "run_checks": False, "enable_cxx" : True}
+    default_options = {"shared": False, "fPIC": True, "disable_assembly": True, "enable_fat": False, "run_checks": False, "enable_cxx" : True}
 
     _source_subfolder = "source_subfolder"
     _autotools = None
@@ -22,12 +23,16 @@ class GmpConan(ConanFile):
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
+        if self.settings.arch not in ["x86", "x86_64"]:
+            del self.options.enable_fat
 
     def configure(self):
         if self.settings.compiler == "Visual Studio":
             raise ConanInvalidConfiguration("The gmp package cannot be built on Visual Studio.")
         if self.options.shared:
             del self.options.fPIC
+        if self.options.enable_fat:
+            del self.options.disable_assembly
         if not self.options.enable_cxx:
             del self.settings.compiler.libcxx
             del self.settings.compiler.cppstd
@@ -53,7 +58,9 @@ class GmpConan(ConanFile):
                 configure_stats = os.stat(configure_file)
                 os.chmod(configure_file, configure_stats.st_mode | stat.S_IEXEC)
             configure_args = []
-            if self.options.disable_assembly:
+            if self.options.enable_fat:
+                configure_args.append("--enable-fat")
+            elif self.options.disable_assembly:
                 configure_args.append("--disable-assembly")
             if self.options.shared:
                 configure_args.extend(["--enable-shared", "--disable-static"])
