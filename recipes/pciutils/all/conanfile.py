@@ -14,7 +14,6 @@ class PciUtilsConan(ConanFile):
     options = {"shared": [True, False], "fPIC": [True, False], "with_zlib": [True, False], "with_udev": [True, False]}
     default_options = {"shared": False, "fPIC": True, "with_zlib": True, "with_udev": False}
 
-
     @property
     def _source_subfolder(self):
         return "source_subfolder"
@@ -43,13 +42,13 @@ class PciUtilsConan(ConanFile):
 
     def _make(self, targets):
         yes_no = lambda v: "yes" if v else "no"
-        fpic = "-fPIC" if self.options.get_safe("fPIC") else ""
         autotools = AutoToolsBuildEnvironment(self)
         autotools.make(args=["SHARED={}".format(yes_no(self.options.shared)),
                              "ZLIB={}".format(yes_no(self.options.with_zlib)),
                              "HWDB={}".format(yes_no(self.options.with_udev)),
                              "PREFIX={}".format(self.package_folder),
-                             "OPT={}".format(fpic),
+                             "OPT={}".format("{} {}".format(
+                                 autotools.vars["CPPFLAGS"], autotools.vars["CFLAGS"])),
                              "DNS=no"],
                        target=" ".join(targets))
 
