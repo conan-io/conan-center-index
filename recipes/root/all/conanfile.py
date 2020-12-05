@@ -13,7 +13,6 @@ class PythonOption:
     # in future we may allow the user to specify a version when
     # libPython is available in Conan Center Index.
     ALL = [OFF, SYSTEM]
-    DEFAULT = OFF
 
 
 class RootConan(ConanFile):
@@ -63,9 +62,7 @@ class RootConan(ConanFile):
         "libpng/1.6.37",
     )
 
-    def __init__(self, *args, **kwargs):
-        super(RootConan, self).__init__(*args, **kwargs)
-        self._cmake = None
+    _cmake = None
 
     @property
     def _minimum_cpp_standard(self):
@@ -108,8 +105,6 @@ class RootConan(ConanFile):
 
     def source(self):
         self._checkout_source()
-        self._fix_source_permissions()
-        self._patch_source_cmake()
 
     def _checkout_source(self):
         tools.get(**self.conan_data["sources"][self.version])
@@ -211,9 +206,7 @@ class RootConan(ConanFile):
                     # resources get installed.
                     # Set install prefix to work around these limitations
                     # Following: https://github.com/conan-io/conan/issues/3695
-                    "CMAKE_INSTALL_PREFIX": "{}{}res".format(
-                        self.package_folder, os.sep
-                    ),
+                    "CMAKE_INSTALL_PREFIX": os.sep.join((self.package_folder, "res")),
                     # Fix some Conan-ROOT CMake variable naming differences
                     "PNG_PNG_INCLUDE_DIR": ";".join(
                         self.deps_cpp_info["libpng"].include_paths
@@ -248,6 +241,8 @@ class RootConan(ConanFile):
             return "ON"
 
     def build(self):
+        self._fix_source_permissions()
+        self._patch_source_cmake()
         self._configured_cmake.build()
 
     def package(self):
@@ -259,10 +254,7 @@ class RootConan(ConanFile):
                 os.sep.join((self.package_folder, dir)),
             )
         # Fix for CMAKE-MODULES-CONFIG-FILES (KB-H016)
-        for cmakefile in glob(
-            os.sep.join((self.package_folder, "res", "cmake", "*Config*.cmake"))
-        ):
-            os.remove(cmakefile)
+        tools.remove_files_by_mask(self.package_folder, "*Config*.cmake")
         # Fix for CMAKE FILE NOT IN BUILD FOLDERS (KB-H019)
         os.remove(
             os.sep.join((self.package_folder, "res", "tutorials", "CTestCustom.cmake"))
