@@ -1,7 +1,12 @@
-#include <GLFW/glfw3.h>
 #include <glbinding/glbinding.h>
 
+#define GLFW_INCLUDE_NONE
+#include <GLFW/glfw3.h>
+
 int main() {
+#if defined(__APPLE__) && defined(__MACH__)
+    glfwInitHint(GLFW_COCOA_MENUBAR, GLFW_FALSE);
+#endif
     if (!glfwInit()) return 1;
 
     glfwDefaultWindowHints();
