@@ -13,6 +13,10 @@ class TreeSitterConan(ConanFile):
     homepage = "https://tree-sitter.github.io/tree-sitter"
     license = "MIT"
     settings = "os", "compiler", "build_type", "arch"
+    options = {"fPIC": [True, False],
+               "shared": [True, False]}
+    default_options = {"fPIC": True,
+                       "shared": False}
     _autotools = None
 
     @property
@@ -37,6 +41,8 @@ class TreeSitterConan(ConanFile):
         autotools = self._configure_autotools()
         with tools.chdir(self._source_subfolder):
             autotools.make()
+
+
 
     def package(self):
         self.copy("LICENSE", src=self._source_subfolder, dst="licenses")
