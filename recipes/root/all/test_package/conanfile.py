@@ -20,7 +20,7 @@ class RootTestConan(ConanFile):
         with tools.environment_append(env_build.vars):
             cmake = CMake(self)
             cmake.configure(
-                {
+                defs={
                     "CMAKE_CXX_STANDARD": self._cmake_cxx_standard,
                 }
             )
