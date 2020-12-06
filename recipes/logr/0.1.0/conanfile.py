@@ -1,4 +1,5 @@
 from conans import ConanFile, CMake, tools
+from conans.errors import ConanInvalidConfiguration
 import os
 
 class LogrConan(ConanFile):
@@ -34,6 +35,29 @@ class LogrConan(ConanFile):
 
     def requirements(self):
         self.requires( "fmt/7.1.2" )
+
+    def configure(self):
+        minimal_cpp_standard = "17"
+        if self.settings.compiler.cppstd:
+            tools.check_min_cppstd(self, minimal_cpp_standard)
+        minimal_version = {
+            "gcc": "7",
+            "clang": "7",
+            "apple-clang": "10",
+            "Visual Studio": "16"
+        }
+        compiler = str(self.settings.compiler)
+        if compiler not in minimal_version:
+            self.output.warn(
+                "%s recipe lacks information about the %s compiler standard version support" % (self.name, compiler))
+            self.output.warn(
+                "%s requires a compiler that supports at least C++%s" % (self.name, minimal_cpp_standard))
+            return
+
+        version = tools.Version(self.settings.compiler.version)
+        if version < minimal_version[compiler]:
+            raise ConanInvalidConfiguration("%s requires a compiler that supports at least C++%s" % (self.name, minimal_cpp_standard))
+
 
     def _configure_cmake(self):
         if self._cmake:
