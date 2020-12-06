@@ -15,6 +15,9 @@ class PythonOption:
     ALL = [OFF, SYSTEM]
 
 
+
+required_conan_version = ">=1.29.1"
+
 class RootConan(ConanFile):
     name = "root"
     version = "v6-22-02"
