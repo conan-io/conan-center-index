@@ -86,6 +86,3 @@ class LogrConan(ConanFile):
 
     def package_id(self):
         self.info.header_only()
-
-    def package_info(self):
-        self.info.header_only()
