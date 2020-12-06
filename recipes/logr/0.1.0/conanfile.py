@@ -14,13 +14,13 @@ class LogrConan(ConanFile):
     settings = "os", "compiler", "build_type", "arch"
     exports_sources = ["CMakeLists.txt"]
 
-    options = { 'spdlog_backend' : [True, False],
-                'glog_backend' : [True, False],
-                'log4cplus_backend' : [True, False] }
+    options = { "spdlog_backend" : [True, False],
+                "glog_backend" : [True, False],
+                "log4cplus_backend" : [True, False] }
 
-    default_options = { 'spdlog_backend': True,
-                        'glog_backend': True,
-                        'log4cplus_backend': True }
+    default_options = { "spdlog_backend": True,
+                        "glog_backend": True,
+                        "log4cplus_backend": True }
 
     _cmake = None
 
@@ -63,11 +63,11 @@ class LogrConan(ConanFile):
             return self._cmake
 
         self._cmake = CMake(self)
-        self._cmake.definitions['LOGR_WITH_SPDLOG_BACKEND'] = self.options.spdlog_backend
-        self._cmake.definitions['LOGR_WITH_GLOG_BACKEND'] = self.options.glog_backend
-        self._cmake.definitions['LOGR_WITH_LOG4CPLUS_BACKEND'] = self.options.log4cplus_backend
+        self._cmake.definitions["LOGR_WITH_SPDLOG_BACKEND"] = self.options.spdlog_backend
+        self._cmake.definitions["LOGR_WITH_GLOG_BACKEND"] = self.options.glog_backend
+        self._cmake.definitions["LOGR_WITH_LOG4CPLUS_BACKEND"] = self.options.log4cplus_backend
 
-        self._cmake.definitions['LOGR_INSTALL'] = True
+        self._cmake.definitions["LOGR_INSTALL"] = True
 
         self._cmake.configure(build_folder=self._build_subfolder)
         return self._cmake
