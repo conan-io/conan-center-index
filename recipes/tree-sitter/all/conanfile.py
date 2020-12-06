@@ -39,8 +39,8 @@ class TreeSitterConan(ConanFile):
 
     def build(self):
         autotools = self._configure_autotools()
+
         with tools.chdir(self._source_subfolder):
-            tools.replace_in_file("Makefile", "PREFIX ?= /usr/local", "PREFIX ?= {}".format(self.package_folder))
             autotools.make()
 
     def package(self):
@@ -48,13 +48,18 @@ class TreeSitterConan(ConanFile):
 
         autotools = self._configure_autotools()
         with tools.chdir(self._source_subfolder):
-            autotools.install()
+            autotools.install(args=["PREFIX={}".format(self.package_folder)])
 
-        shutil.rmtree(os.path.join(self.package_folder, "lib/pkgconfig"), ignore_errors=True)
+            if self.options.shared:
+                tools.remove_files_by_mask(os.path.join(self.package_folder, "lib"), "*.a")
+            else:
+                tools.remove_files_by_mask(os.path.join(self.package_folder, "lib"), "*.so*")
+                tools.remove_files_by_mask(os.path.join(self.package_folder, "lib"), "*.dylib*")
+
+        tools.rmdir(os.path.join(self.package_folder, os.path.join("lib", "pkgconfig")))
+
 
     def package_info(self):
-        self.cpp_info.names["pkg_config"] = self.name
-        if self.options.shared:
-            self.cpp_info.libs = ["libtree-sitter.so"]
-        else:
-            self.cpp_info.libs = ["libtree-sitter.a"]
+        self.cpp_info.names["pkg_config"] = "tree-sitter"
+        self.cpp_info.libs = ["tree-sitter"]
+
