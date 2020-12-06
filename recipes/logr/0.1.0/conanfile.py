@@ -12,7 +12,6 @@ class LogrConan(ConanFile):
     topics = ("logger", "development", "util", "utils")
     generators = "cmake"
     settings = "os", "compiler", "build_type", "arch"
-    build_policy = "missing"
     exports_sources = ["CMakeLists.txt"]
 
     options = { 'spdlog_backend' : [True, False],
