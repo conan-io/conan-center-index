@@ -33,7 +33,7 @@ class LogrConan(ConanFile):
         return "build_subfolder"
 
     def requirements(self):
-        self.requires( "fmt/7.1.2" )
+        self.requires("fmt/7.1.2")
 
     def configure(self):
         minimal_cpp_standard = "17"
