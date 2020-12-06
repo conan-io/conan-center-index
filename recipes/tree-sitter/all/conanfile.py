@@ -47,11 +47,15 @@ class TreeSitterConan(ConanFile):
     def package(self):
         self.copy("LICENSE", src=self._source_subfolder, dst="licenses")
         shutil.copytree(os.path.join(self._source_subfolder, "lib/include"), os.path.join(self.package_folder, "include"))
-        self.copy("libtree-sitter.a", src=self._source_subfolder, dst=os.path.join(self.package_folder, "lib"))
-        self.copy("libtree-sitter.so*", src=self._source_subfolder, dst=os.path.join(self.package_folder, "lib"))
+        if self.options.shared:
+            self.copy("*.so*", src=self._source_subfolder, dst=os.path.join(self.package_folder, "lib"))
+            self.copy("*.dylib*", src=self._source_subfolder, dst=os.path.join(self.package_folder, "lib"))
+        else:
+            self.copy("*.a", src=self._source_subfolder, dst=os.path.join(self.package_folder, "lib"))
 
     def package_info(self):
-        self.cpp_info.libs = ["libtree-sitter.a"]
-        lib_path = os.path.join(self.package_folder, "lib")
-        self.output.info("Appending PATH environment variable: {}".format(lib_path))
-        self.env_info.PATH.append(lib_path)
+        self.cpp_info.names["pkg_config"] = self.name
+        if self.options.shared:
+            self.cpp_info.libs = ["libtree-sitter.so*"]
+        else:
+            self.cpp_info.libs = ["libtree-sitter.a"]
