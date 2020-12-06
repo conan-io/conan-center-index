@@ -24,7 +24,7 @@ class TreeSitterConan(ConanFile):
         return "source_subfolder"
 
     def requirements(self):
-        if self.settings.os in ("Windows", "Macos"):
+        if self.settings.os == "Windows":
             raise ConanInvalidConfiguration("tree-sitter is not support on {}.".format(self.settings.os))
 
     def source(self):
@@ -51,7 +51,6 @@ class TreeSitterConan(ConanFile):
             autotools.install()
 
     def package_info(self):
-        self.cpp_info.names["pkg_config"] = self.name
         if self.options.shared:
             self.cpp_info.libs = ["libtree-sitter.so"]
         else:
