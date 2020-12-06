@@ -105,11 +105,6 @@ class PocoConan(ConanFile):
             del self.options.enable_jwt
 
     def configure(self):
-        if self.settings.os == "Macos" and self.options.shared:
-            if self.options.get_safe("enable_data_postgresql", False):
-                raise ConanInvalidConfiguration("Macos shared build with PostreSQL isn't supported")
-            if self.options.get_safe("enable_data_mysql", False):
-                raise ConanInvalidConfiguration("Macos shared build with MySQL isn't supported")
         if self.options.enable_apacheconnector:
             raise ConanInvalidConfiguration("Apache connector not supported: https://github.com/pocoproject/poco/issues/1764")
         if self.settings.compiler == "Visual Studio":
