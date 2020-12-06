@@ -50,7 +50,10 @@ class TreeSitterConan(ConanFile):
         with tools.chdir(self._source_subfolder):
             autotools.install()
 
+        shutil.rmtree(os.path.join(self.package_folder, "lib/pkgconfig"), ignore_errors=True)
+
     def package_info(self):
+        self.cpp_info.names["pkg_config"] = self.name
         if self.options.shared:
             self.cpp_info.libs = ["libtree-sitter.so"]
         else:
