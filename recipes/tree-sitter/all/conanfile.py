@@ -53,6 +53,6 @@ class TreeSitterConan(ConanFile):
     def package_info(self):
         self.cpp_info.names["pkg_config"] = self.name
         if self.options.shared:
-            self.cpp_info.libs = ["libtree-sitter.so*"]
+            self.cpp_info.libs = ["libtree-sitter.so"]
         else:
             self.cpp_info.libs = ["libtree-sitter.a"]
