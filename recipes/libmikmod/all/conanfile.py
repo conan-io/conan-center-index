@@ -37,6 +37,8 @@ class LibmikmodConan(ConanFile):
     _source_subfolder = "source_subfolder"
     _build_subfolder = "build_subfolder"
 
+    _cmake = None
+
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
@@ -54,6 +56,8 @@ class LibmikmodConan(ConanFile):
             del self.options.with_coreaudio
 
     def configure(self):
+        if self.options.shared:
+            del self.options.fPIC
         del self.settings.compiler.libcxx
         del self.settings.compiler.cppstd
 
@@ -70,17 +74,19 @@ class LibmikmodConan(ConanFile):
         os.rename(extracted_dir, self._source_subfolder)
 
     def _configure_cmake(self):
-        cmake = CMake(self, set_cmake_flags=True)
-        cmake.definitions["ENABLE_STATIC"] = not self.options.shared
-        cmake.definitions["ENABLE_DOC"] = False
-        cmake.definitions["ENABLE_DSOUND"] = self.options.get_safe("with_dsound", False)
-        cmake.definitions["ENABLE_MMSOUND"] = self.options.get_safe("with_mmsound", False)
-        cmake.definitions["ENABLE_ALSA"] = self.options.get_safe("with_alsa", False)
-        cmake.definitions["ENABLE_OSS"] = self.options.get_safe("with_oss", False)
-        cmake.definitions["ENABLE_PULSE"] = self.options.get_safe("with_pulse", False)
-        cmake.definitions["ENABLE_COREAUDIO"] = self.options.get_safe("with_coreaudio", False)
-        cmake.configure(build_folder=self._build_subfolder, source_folder=self._source_subfolder)
-        return cmake
+        if self._cmake:
+            return self._cmake
+        self._cmake = CMake(self, set_cmake_flags=True)
+        self._cmake.definitions["ENABLE_STATIC"] = not self.options.shared
+        self._cmake.definitions["ENABLE_DOC"] = False
+        self._cmake.definitions["ENABLE_DSOUND"] = self.options.get_safe("with_dsound", False)
+        self._cmake.definitions["ENABLE_MMSOUND"] = self.options.get_safe("with_mmsound", False)
+        self._cmake.definitions["ENABLE_ALSA"] = self.options.get_safe("with_alsa", False)
+        self._cmake.definitions["ENABLE_OSS"] = self.options.get_safe("with_oss", False)
+        self._cmake.definitions["ENABLE_PULSE"] = self.options.get_safe("with_pulse", False)
+        self._cmake.definitions["ENABLE_COREAUDIO"] = self.options.get_safe("with_coreaudio", False)
+        self._cmake.configure(build_folder=self._build_subfolder, source_folder=self._source_subfolder)
+        return self._cmake
 
     def build(self):
         # 0001:
