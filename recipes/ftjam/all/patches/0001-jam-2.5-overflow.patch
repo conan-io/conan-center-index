@@ -1,0 +1,74 @@
+From: Lubomir Rintel <lkundrak@v3.sk>
+Subject: [PATCH] Fix stack smashing in variable expansion
+
+Apparently, Fedora's compiler flags were too long for jam's mind,
+resulting in out-of-bounds write on stack. This patch increases length
+of variable expansion buffer (and filename buffer, just in case) as
+well as adds checks for buffer overflows in some places.
+
+--- expand.c	2003-04-23 06:45:50.000000000 +0200
++++ expand.c	2009-07-25 15:59:30.319767119 +0200
+@@ -27,6 +27,7 @@
+  * 10/22/02 (seiwald) - list_new() now does its own newstr()/copystr()
+  * 11/04/02 (seiwald) - const-ing for string literals
+  * 12/30/02 (armstrong) - fix out-of-bounds access in var_expand()
++ * 25/07/09 (lkundrak@v3.sk) - fix stack overflows in var_expand()
+  */
+
+ # include "jam.h"
+@@ -286,7 +286,13 @@ var_expand(
+ 		    if( colon && edits.filemods )
+ 			var_edit_file( value->string, out, &edits );
+-		    else
++		    else {
++			if( out + strlen( value->string ) > out_buf + sizeof( out_buf ) ) {
++			     fprintf( stderr, "ERROR: String longer than %i characters: '%s' + '%s'\n",
++				 sizeof( out_buf ), out, value->string );
++			     exit( 1 );
++			}
+ 			strcpy( out, value->string );
++		    }
+
+ 		    if( colon && ( edits.upshift || edits.downshift ) )
+ 			var_edit_shift( out, &edits );
+@@ -303,6 +303,11 @@ var_expand(
+ 		      ( list_next( value ) || list_next( vars ) ) )
+ 		    {
+ 			out += strlen( out );
++			if( out + strlen( edits.join.ptr ) > out_buf + sizeof( out_buf ) ) {
++			     fprintf( stderr, "ERROR: String longer than %i characters: '%s' + '%s'\n",
++				 sizeof( out_buf ), out, edits.join.ptr );
++			     exit( 1 );
++			}
+ 			strcpy( out, edits.join.ptr );
+ 			out += strlen( out );
+ 			continue;
+@@ -326,5 +326,10 @@ var_expand(
+ 		    for( rem = remainder; rem; rem = list_next( rem ) )
+ 		    {
++			if( out1 + strlen( rem->string ) > out_buf + sizeof( out_buf ) ) {
++			     fprintf( stderr, "ERROR: String longer than %i characters: '%s' + '%s'\n",
++				 sizeof( out_buf ), out, rem->string );
++			     exit( 1 );
++			}
+ 			strcpy( out1, rem->string );
+ 			l = list_new( l, out_buf, 0 );
+ 		    }
+
+--- jam.h.	2004-06-23 19:45:36.000000000 +0200
++++ jam.h	2009-07-25 15:59:35.464767132 +0200
+@@ -472,8 +472,12 @@
+
+ /* You probably don't need to muck with these. */
+
+-# define MAXSYM	1024	/* longest symbol in the environment */
+-# define MAXJPATH 1024	/* longest filename */
++# define MAXSYM	65536	/* longest symbol in the environment */
++# ifdef PATH_MAX
++# define MAXJPATH PATH_MAX	/* longest filename */
++# else
++# define MAXJPATH 4096
++# endif
+
+ # define MAXJOBS 64	/* silently enforce -j limit */
+ # define MAXARGC 32	/* words in $(JAMSHELL) */

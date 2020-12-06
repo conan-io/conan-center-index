@@ -1,3 +1,7 @@
+Upstreamed in 04d942c3d98cf0a929c6afb17be8c10d4ae39af0
+
+ncurses 6.2 - patch 20200704
+
 From ed3ad1962ab885b9a9c6e6a3437eb6db274110b5 Mon Sep 17 00:00:00 2001
 From: Anonymous Maarten <anonymous.maarten@gmail.com>
 Date: Sat, 14 Mar 2020 14:15:41 +0100
@@ -148,8 +152,8 @@ index 252f5021..61655f65 100644
 +# endif
 +# define NCURSES_API __cdecl
 +#else
-+# define NCURSES_EXPORT_GENERAL_IMPORT @NCURSES_EXPORT@
-+# define NCURSES_EXPORT_GENERAL_EXPORT @NCURSES_EXPORT@
++# define NCURSES_EXPORT_GENERAL_IMPORT
++# define NCURSES_EXPORT_GENERAL_EXPORT
 +# define NCURSES_API /* FIXME: __attribute__ ((cdecl)) is only available on x86 */
  #endif
  
@@ -223,6 +227,16 @@ index 5f7b5b92..e1f7e705 100644
  CFLAGS_DEBUG	= $(CCFLAGS) @CC_G_OPT@ -DTRACE
  CFLAGS_PROFILE	= $(CCFLAGS) -pg
  CFLAGS_SHARED	= $(CCFLAGS) @CC_SHARED_OPTS@
--- 
-2.21.1
-
+--- a/progs/Makefile.in
++++ b/progs/Makefile.in
+@@ -97,8 +97,8 @@
+ 
+ CCFLAGS		= $(CPPFLAGS) $(CFLAGS)
+ 
+-CFLAGS_LIBTOOL	= $(CCFLAGS)
+-CFLAGS_NORMAL	= $(CCFLAGS)
++CFLAGS_LIBTOOL	= $(CCFLAGS) -DNCURSES_STATIC
++CFLAGS_NORMAL	= $(CCFLAGS) -DNCURSES_STATIC
+ CFLAGS_DEBUG	= $(CCFLAGS) @CC_G_OPT@ -DTRACE
+ CFLAGS_PROFILE	= $(CCFLAGS) -pg
+ CFLAGS_SHARED	= $(CCFLAGS) @CC_SHARED_OPTS@

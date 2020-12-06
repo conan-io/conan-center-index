@@ -12,3 +12,5 @@ patches:
   "1.10.0":
     - patch_file: "patches/gtest-1.10.0.patch"
       base_path: "source_subfolder"
+    - patch_file: "patches/gtest-1.10.0-override.patch"
+      base_path: "source_subfolder"

@@ -14,14 +14,12 @@ extern "C" {
 #ifdef _MSC_VER
   #ifdef USE_GIF_LIB
     #define GIF_EXPORT
-    #define GIF_EXTERN extern
   #else /* USE_GIF_LIB */
     #ifdef USE_GIF_DLL
       #define GIF_EXPORT __declspec(dllimport)
     #else /* USE_GIF_DLL */
       #define GIF_EXPORT __declspec(dllexport)
     #endif /* USE_GIF_DLL */
-    #define GIF_EXTERN
   #endif /* USE_GIF_LIB */
 #endif /* _MSC_VER */
 
@@ -317,21 +315,21 @@ GIF_EXPORT int EGifGCBToSavedExtension(const GraphicsControlBlock *GCB,
 
 #define GIF_FONT_WIDTH  8
 #define GIF_FONT_HEIGHT 8
-GIF_EXPORT GIF_EXTERN const unsigned char GifAsciiTable8x8[][GIF_FONT_WIDTH];
+GIF_EXPORT extern const unsigned char GifAsciiTable8x8[][GIF_FONT_WIDTH];
 
-GIF_EXPORT GIF_EXTERN void GifDrawText8x8(SavedImage *Image,
+GIF_EXPORT void GifDrawText8x8(SavedImage *Image,
                      const int x, const int y,
                      const char *legend, const int color);
 
-GIF_EXPORT GIF_EXTERN void GifDrawBox(SavedImage *Image,
+GIF_EXPORT void GifDrawBox(SavedImage *Image,
                     const int x, const int y,
                     const int w, const int d, const int color);
 
-GIF_EXPORT GIF_EXTERN void GifDrawRectangle(SavedImage *Image,
+GIF_EXPORT void GifDrawRectangle(SavedImage *Image,
                    const int x, const int y,
                    const int w, const int d, const int color);
 
-GIF_EXPORT GIF_EXTERN void GifDrawBoxedText8x8(SavedImage *Image,
+GIF_EXPORT void GifDrawBoxedText8x8(SavedImage *Image,
                           const int x, const int y,
                           const char *legend,
                           const int border, const int bg, const int fg);

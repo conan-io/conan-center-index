@@ -1,7 +1,6 @@
 import os
 
 from conans import ConanFile, CMake, tools
-from conans.errors import ConanInvalidConfiguration
 
 class Hdf4Conan(ConanFile):
     name = "hdf4"
@@ -10,7 +9,7 @@ class Hdf4Conan(ConanFile):
     topics = ("conan", "hdf4", "hdf", "data")
     homepage = "https://portal.hdfgroup.org/display/HDF4/HDF4"
     url = "https://github.com/conan-io/conan-center-index"
-    exports_sources = "CMakeLists.txt"
+    exports_sources = ["CMakeLists.txt", "patches/**"]
     generators = "cmake"
     settings = "os", "arch", "compiler", "build_type"
     options = {
@@ -43,31 +42,31 @@ class Hdf4Conan(ConanFile):
             del self.options.fPIC
 
     def configure(self):
+        if self.options.shared:
+            del self.options.fPIC
         del self.settings.compiler.libcxx
         del self.settings.compiler.cppstd
         if not bool(self.options.szip_support):
             del self.options.szip_encoding
-        elif self.options.szip_support == "with_szip" and \
-             self.options.szip_encoding and \
-             not self.options["szip"].enable_encoding:
-            raise ConanInvalidConfiguration("encoding must be enabled in the dependency (szip:enable_encoding=True)")
 
     def requirements(self):
-        self.requires.add("zlib/1.2.11")
+        self.requires("zlib/1.2.11")
         if self.options.jpegturbo:
-            self.requires.add("libjpeg-turbo/2.0.4")
+            self.requires("libjpeg-turbo/2.0.4")
         else:
-            self.requires.add("libjpeg/9d")
+            self.requires("libjpeg/9d")
         if self.options.szip_support == "with_libaec":
-            self.requires.add("libaec/1.0.4")
+            self.requires("libaec/1.0.4")
         elif self.options.szip_support == "with_szip":
-            self.requires.add("szip/2.1.1")
+            self.requires("szip/2.1.1")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
         os.rename("hdf-" + self.version, self._source_subfolder)
 
     def build(self):
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            tools.patch(**patch)
         cmake = self._configure_cmake()
         cmake.build()
 
@@ -105,19 +104,47 @@ class Hdf4Conan(ConanFile):
         os.remove(os.path.join(self.package_folder, "lib", "libhdf4.settings"))
 
     def package_info(self):
-        self.cpp_info.libs = self._get_ordered_libs()
-        self.cpp_info.includedirs.append(os.path.join(self.package_folder, "include", "hdf4"))
-        if self.options.shared:
-            self.cpp_info.defines.append("H4_BUILT_AS_DYNAMIC_LIB")
-        if self.settings.os == "Linux":
-            self.cpp_info.system_libs = ["m"]
+        self.cpp_info.names["pkg_config"] = "hdf"
+        unofficial_includedir = os.path.join(self.package_folder, "include", "hdf4")
+        # xdr
+        xdr_cmake = "xdr-shared" if self.options.shared else "xdr-static"
+        self.cpp_info.components["xdr"].names["cmake_find_package"] = xdr_cmake
+        self.cpp_info.components["xdr"].names["cmake_find_package_multi"] = xdr_cmake
+        self.cpp_info.components["xdr"].includedirs.append(unofficial_includedir)
+        self.cpp_info.components["xdr"].libs = [self._get_decorated_lib("xdr")]
+        if self.settings.os == "Windows":
+            self.cpp_info.components["xdr"].system_libs.append("ws2_32")
+        # hdf
+        hdf_cmake = "hdf-shared" if self.options.shared else "hdf-static"
+        self.cpp_info.components["hdf"].names["cmake_find_package"] = hdf_cmake
+        self.cpp_info.components["hdf"].names["cmake_find_package_multi"] = hdf_cmake
+        self.cpp_info.components["hdf"].includedirs.append(unofficial_includedir)
+        self.cpp_info.components["hdf"].libs = [self._get_decorated_lib("hdf")]
+        self.cpp_info.components["hdf"].requires = [
+            "zlib::zlib",
+            "libjpeg-turbo::libjpeg-turbo" if self.options.jpegturbo else "libjpeg::libjpeg"
+        ]
+        if self.options.szip_support == "with_libaec":
+            self.cpp_info.components["hdf"].requires.append("libaec::libaec")
+        elif self.options.szip_support == "with_szip":
+            self.cpp_info.components["hdf"].requires.append("szip::szip")
+        # mfhdf
+        mfhdf_cmake = "mfhdf-shared" if self.options.shared else "mfhdf-static"
+        self.cpp_info.components["mfhdf"].names["cmake_find_package"] = mfhdf_cmake
+        self.cpp_info.components["mfhdf"].names["cmake_find_package_multi"] = mfhdf_cmake
+        self.cpp_info.components["mfhdf"].includedirs.append(unofficial_includedir)
+        self.cpp_info.components["mfhdf"].libs = [self._get_decorated_lib("mfhdf")]
+        self.cpp_info.components["mfhdf"].requires = ["xdr", "hdf"]
 
-    def _get_ordered_libs(self):
-        libs = ["mfhdf", "xdr", "hdf"]
-        # See config/cmake_ext_mod/HDFMacros.cmake
+        if self.options.shared:
+            self.cpp_info.components["xdr"].defines.append("H4_BUILT_AS_DYNAMIC_LIB=1")
+            self.cpp_info.components["hdf"].defines.append("H4_BUILT_AS_DYNAMIC_LIB=1")
+            self.cpp_info.components["mfhdf"].defines.append("H4_BUILT_AS_DYNAMIC_LIB=1")
+
+    def _get_decorated_lib(self, name):
+        libname = name
         if self.settings.os == "Windows" and self.settings.compiler != "gcc" and not self.options.shared:
-            libs = ["lib" + lib for lib in libs]
+            libname = "lib" + libname
         if self.settings.build_type == "Debug":
-            debug_postfix = "_D" if self.settings.os == "Windows" else "_debug"
-            libs = [lib + debug_postfix for lib in libs]
-        return libs
+            libname += "_D" if self.settings.os == "Windows" else "_debug"
+        return libname

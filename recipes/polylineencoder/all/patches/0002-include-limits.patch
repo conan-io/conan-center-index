@@ -1,0 +1,12 @@
+diff --git a/src/polylineencoder.cpp b/src/polylineencoder.cpp
+index 202bc65..4e1f7c5 100644
+--- a/src/polylineencoder.cpp
++++ b/src/polylineencoder.cpp
+@@ -25,6 +25,7 @@
+ #include <cinttypes>
+ #include <cassert>
+ #include <cmath>
++#include <limits>
+ 
+ #include "polylineencoder.h"
+ 

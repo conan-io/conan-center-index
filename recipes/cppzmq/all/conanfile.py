@@ -11,7 +11,8 @@ class CppZmqConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     exports_sources = "CMakeLists.txt", "patches/**"
     generators = "cmake", "cmake_find_package"
-    requires = "zeromq/4.3.2"
+    requires = "zeromq/4.3.3"
+    settings = "os", "compiler", "build_type", "arch"
 
     _cmake = None
 
@@ -41,7 +42,8 @@ class CppZmqConan(ConanFile):
         cmake.build()
 
     def package(self):
-        self.copy(pattern="LICENSE", dst="licenses", src=self._source_subfolder)
+        self.copy(pattern="LICENSE", dst="licenses",
+                  src=self._source_subfolder)
         cmake = self._configure_cmake()
         cmake.install()
 

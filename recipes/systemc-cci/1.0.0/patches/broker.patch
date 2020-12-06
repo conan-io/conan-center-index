@@ -1,0 +1,28 @@
+diff --git a/src/cci_utils/broker.cpp b/src/cci_utils/broker.cpp
+index f46957f..8c3fc4c 100644
+--- a/src/cci_utils/broker.cpp
++++ b/src/cci_utils/broker.cpp
+@@ -79,7 +79,8 @@ namespace cci_utils {
+     }
+   }
+ 
+-  cci_value broker::get_cci_value(const std::string &parname) const
++  cci_value broker::get_cci_value(const std::string &parname,
++		  const cci::cci_originator& originator) const
+   {
+     if (sendToParent(parname)) {
+       return m_parent.get_cci_value(parname);
+diff --git a/src/cci_utils/broker.h b/src/cci_utils/broker.h
+index 4bec972..b7faa35 100644
+--- a/src/cci_utils/broker.h
++++ b/src/cci_utils/broker.h
+@@ -65,7 +65,8 @@ namespace cci_utils
+     void lock_preset_value(const std::string &parname);
+ 
+     /// Get current cci_value
+-    cci::cci_value get_cci_value(const std::string &parname) const;
++    cci::cci_value get_cci_value(const std::string &parname,
++        const cci::cci_originator& originator = cci::cci_originator()) const;
+     
+     /// return a handle with which to access a parameter
+     cci::cci_param_untyped_handle get_param_handle(const std::string &parname,

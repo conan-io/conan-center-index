@@ -31,6 +31,8 @@ class LibUSBConan(ConanFile):
         os.rename(extracted_folder, self._source_subfolder)
 
     def configure(self):
+        if self.options.shared:
+            del self.options.fPIC
         del self.settings.compiler.libcxx
         del self.settings.compiler.cppstd
 
@@ -41,9 +43,9 @@ class LibUSBConan(ConanFile):
             del self.options.fPIC
 
     def build_requirements(self):
-        if tools.os_info.is_windows and "CONAN_BASH_PATH" not in os.environ and \
-                tools.os_info.detect_windows_subsystem() != "msys2":
-            self.build_requires("msys2/20190524")
+        if tools.os_info.is_windows and self.settings.compiler != "Visual Studio" and \
+           not tools.get_env("CONAN_BASH_PATH") and tools.os_info.detect_windows_subsystem() != "msys2":
+            self.build_requires("msys2/20200517")
 
     def system_requirements(self):
         if self.settings.os == "Linux":

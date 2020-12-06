@@ -21,3 +21,33 @@ versions:
     folder: all
   8.8.0:
     folder: all
+  8.8.1:
+    folder: all
+  8.9.0:
+    folder: all
+  8.9.1:
+    folder: all
+  8.9.2:
+    folder: all
+  9.0.0:
+    folder: all
+  10.0.0:
+    folder: all
+  10.0.1:
+    folder: all
+  10.1.0:
+    folder: all
+  10.1.1:
+    folder: all
+  10.1.2:
+    folder: all
+  10.2.0:
+    folder: all
+  10.2.1:
+    folder: all
+  10.3.0:
+    folder: all
+  10.4.0:
+    folder: all
+  10.5.0:
+    folder: all

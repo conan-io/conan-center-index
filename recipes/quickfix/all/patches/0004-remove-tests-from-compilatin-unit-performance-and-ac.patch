@@ -1,0 +1,25 @@
+From 08dc23e525c4659be9271012c25f43fb193db025 Mon Sep 17 00:00:00 2001
+From: Tarcisio Rodrigues <tarcisio.genaro@gmail.com>
+Date: Tue, 9 Jun 2020 08:45:53 -0300
+Subject: [PATCH 4/8] remove tests from compilatin (unit, performance and
+ acceptance tests)
+
+---
+ src/CMakeLists.txt | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/src/CMakeLists.txt b/src/CMakeLists.txt
+index cb4a60c6..df3c245a 100644
+--- a/src/CMakeLists.txt
++++ b/src/CMakeLists.txt
+@@ -1,6 +1,6 @@
+ add_subdirectory(C++)
+ 
+-if( WIN32 OR ${CMAKE_SYSTEM_NAME} STREQUAL "Linux" )
++if( FALSE )
+ 
+ add_executable(at at.cpp getopt.c)
+ 
+-- 
+2.25.0
+

@@ -2,6 +2,7 @@ import os
 
 from conans import ConanFile, CMake, tools
 
+
 class CerealConan(ConanFile):
     name = "cereal"
     description = "Serialization header-only library for C++11."
@@ -11,7 +12,7 @@ class CerealConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     exports_sources = "CMakeLists.txt"
     generators = "cmake"
-    settings = "os"
+    settings = "os", "compiler", "build_type", "arch"
     options = {"thread_safe": [True, False]}
     default_options = {"thread_safe": False}
     no_copy_source = True

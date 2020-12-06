@@ -1,6 +1,7 @@
 import os
+
 from conans import ConanFile, tools
-from conans.tools import Version
+from conans.tools import Version, ConanInvalidConfiguration
 
 
 class ApprovalTestsCppConan(ConanFile):
@@ -25,10 +26,12 @@ class ApprovalTestsCppConan(ConanFile):
         "with_doctest": False
     }
     no_copy_source = True
+    settings = "compiler"
 
     def configure(self):
         if not self._boost_test_supported():
             del self.options.with_boosttest
+        self._validate_compiler_settings()
 
     @property
     def _header_file(self):
@@ -66,3 +69,16 @@ class ApprovalTestsCppConan(ConanFile):
 
     def _boost_test_supported(self):
         return Version(self.version) >= "8.6.0"
+
+    def _std_puttime_required(self):
+        return Version(self.version) >= "10.2.0"
+
+    def _validate_compiler_settings(self):
+        if self._std_puttime_required():
+            self._require_at_least_compiler_version("gcc", 5)
+
+    def _require_at_least_compiler_version(self, compiler, compiler_version):
+        if self.settings.compiler == compiler and tools.Version(self.settings.compiler.version) < compiler_version:
+            raise ConanInvalidConfiguration(
+                "{}/{} with compiler {} requires at least compiler version {}".
+                    format(self.name, self.version, compiler, compiler_version))

@@ -9,6 +9,7 @@ class TweetnaclConan(ConanFile):
     homepage = "https://tweetnacl.cr.yp.to"
     url = "https://github.com/conan-io/conan-center-index"
     description = "TweetNaCl is the world's first auditable high-security cryptographic library"
+    topics = ("nacl", "tweetnacl", "encryption", "signature", "hashing")
     exports_sources = "CMakeLists.txt"
     generators = "cmake"
     options = {

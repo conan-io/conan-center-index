@@ -12,7 +12,7 @@ class CfitsioConan(ConanFile):
     homepage = "https://heasarc.gsfc.nasa.gov/fitsio/"
     url = "https://github.com/conan-io/conan-center-index"
     exports_sources = ["CMakeLists.txt", "patches/**"]
-    generators = "cmake"
+    generators = "cmake", "cmake_find_package"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
@@ -46,6 +46,8 @@ class CfitsioConan(ConanFile):
             del self.options.fPIC
 
     def configure(self):
+        if self.options.shared:
+            del self.options.fPIC
         del self.settings.compiler.libcxx
         del self.settings.compiler.cppstd
         if self.settings.arch not in ["x86", "x86_64"]:
@@ -55,19 +57,18 @@ class CfitsioConan(ConanFile):
             del self.options.with_curl
 
     def requirements(self):
-        self.requires.add("zlib/1.2.11")
+        self.requires("zlib/1.2.11")
         if self.options.threadsafe and self.settings.os == "Windows" and \
            (not self.settings.compiler == "gcc" or self.settings.compiler.threads == "win32"):
-            self.requires.add("pthreads4w/3.0.0")
+            self.requires("pthreads4w/3.0.0")
         if self.options.get_safe("with_bzip2"):
-            self.requires.add("bzip2/1.0.8")
+            self.requires("bzip2/1.0.8")
         if self.options.get_safe("with_curl"):
-            self.requires.add("libcurl/7.68.0")
+            self.requires("libcurl/7.73.0")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
-        url = self.conan_data["sources"][self.version]["url"]
-        extracted_dir = os.path.basename(url).replace(".tar.gz", "").replace(".zip", "")
+        extracted_dir = glob.glob("cfitsio-*")[0]
         os.rename(extracted_dir, self._source_subfolder)
 
     def build(self):
@@ -76,7 +77,7 @@ class CfitsioConan(ConanFile):
         cmake.build()
 
     def _patch_sources(self):
-        for patch in self.conan_data["patches"][self.version]:
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
             tools.patch(**patch)
         # Remove embedded zlib files
         for zlib_file in glob.glob(os.path.join(self._source_subfolder, "zlib", "*")):
@@ -92,7 +93,7 @@ class CfitsioConan(ConanFile):
         self._cmake.definitions["CFITSIO_USE_SSSE3"] = self.options.get_safe("simd_intrinsics") == "ssse3"
         if self.settings.os != "Windows":
             self._cmake.definitions["CFITSIO_USE_BZIP2"] = self.options.with_bzip2
-            self._cmake.definitions["CFITSIO_USE_CURL"] = self.options.with_curl
+            self._cmake.definitions["UseCurl"] = self.options.with_curl
         self._cmake.configure(build_folder=self._build_subfolder)
         return self._cmake
 
@@ -103,8 +104,7 @@ class CfitsioConan(ConanFile):
         tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
 
     def package_info(self):
-        self.cpp_info.libs = tools.collect_libs(self)
-        self.cpp_info.includedirs.append(os.path.join("include", "cfitsio"))
+        self.cpp_info.libs = ["cfitsio"]
         if self.settings.os == "Linux":
             self.cpp_info.system_libs.append("m")
             if self.options.threadsafe:

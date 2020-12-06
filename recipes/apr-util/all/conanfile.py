@@ -188,6 +188,8 @@ class AprUtilConan(ConanFile):
                 self.cpp_info.system_libs = ["dl", "pthread", "rt"]
             elif self.settings.os == "Windows":
                 self.cpp_info.system_libs = ["mswsock", "rpcrt4", "ws2_32"]
+            elif self.settings.os == "Macos":
+                self.cpp_info.system_libs = ["iconv"]
 
         binpath = os.path.join(self.package_folder, "bin")
         self.output.info("Appending PATH env var : {}".format(binpath))

@@ -32,9 +32,8 @@ class MSYS2Conan(ConanFile):
 
     def _download(self, url, sha256):
         from six.moves.urllib.parse import urlparse
-        filename = os.path.basename(urlparse(url).path)
-        tools.download(url, filename)
-        tools.check_sha256(filename, sha256)
+        filename = os.path.basename(urlparse(url[0]).path)
+        tools.download(url=url, filename=filename, sha256=sha256)
         return filename
 
     @property
@@ -43,8 +42,6 @@ class MSYS2Conan(ConanFile):
 
     def build(self):
         arch = 0 if self.settings.arch_build == "x86" else 1  # index in the sources list
-        url = self.conan_data["sources"][self.version][arch]["url"]
-        sha256 = self.conan_data["sources"][self.version][arch]["sha256"]
         filename = self._download(**self.conan_data["sources"][self.version][arch])
         tar_name = filename.replace(".xz", "")
         self.run("7z.exe x {0}".format(filename))
@@ -82,7 +79,6 @@ class MSYS2Conan(ConanFile):
         self.copy("*", dst="bin", src=self._msys_dir, excludes=excludes)
         shutil.copytree(os.path.join(self.package_folder, "bin", "usr", "share", "licenses"),
                         os.path.join(self.package_folder, "licenses"))
-
 
     def package_info(self):
         msys_root = os.path.join(self.package_folder, "bin")

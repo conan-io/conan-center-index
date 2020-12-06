@@ -1,0 +1,10 @@
+sources:
+  "5.1.0":
+    url: "https://github.com/InsightSoftwareConsortium/ITK/releases/download/v5.1.0/InsightToolkit-5.1.0.tar.gz"
+    sha256: "121020a1611508cec8123eb5226215598cec07be627d843a2e6b6da891e61d13"
+patches:
+  "5.1.0":
+    - patch_file: "patches/0001-find-conan-packages.patch"
+      base_path: "source_subfolder"
+    - patch_file: "patches/0002-gdcm-dependencies.patch"  #FIXME: should be removed when gdcm is added as a cci recipe
+      base_path: "source_subfolder"

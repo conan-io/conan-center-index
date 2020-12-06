@@ -1,10 +1,10 @@
-cmake_minimum_required(VERSION 2.8.12)
+cmake_minimum_required(VERSION 3.1)
 project(test_package)
 
 include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
 conan_basic_setup()
 
-find_package(CURL)
+find_package(CURL REQUIRED)
 
 add_executable(${PROJECT_NAME} test_package.cpp)
-target_link_libraries(${PROJECT_NAME} CURL::CURL)
+target_link_libraries(${PROJECT_NAME} CURL::libcurl)

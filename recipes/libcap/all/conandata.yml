@@ -1,0 +1,4 @@
+sources:
+  "2.45":
+    url: "https://www.kernel.org/pub/linux/libs/security/linux-privs/libcap2/libcap-2.45.tar.xz"
+    sha256: "d66639f765c0e10557666b00f519caf0bd07a95f867dddaee131cd284fac3286"

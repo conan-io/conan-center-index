@@ -13,14 +13,24 @@ class OpusConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://opus-codec.org"
     license = "BSD-3-Clause"
-    exports_sources = ["CMakeLists.txt","opus_buildtype.cmake"]
+    exports_sources = "CMakeLists.txt", "patches/**"
     generators = "cmake"
 
     settings = "os", "arch", "compiler", "build_type"
-    options = {"shared": [True, False], "fPIC": [True, False], "fixed_point": [True, False]}
-    default_options = {'shared': False, 'fPIC': True, 'fixed_point': False}
+    options = {
+        "shared": [True, False],
+        "fPIC": [True, False],
+        "fixed_point": [True, False]
+    }
+    default_options = {
+        "shared": False,
+        "fPIC": True,
+        "fixed_point": False,
+    }
 
-    _source_subfolder = "source_subfolder"
+    @property
+    def _source_subfolder(self):
+        return "source_subfolder"
 
     def configure(self):
         del self.settings.compiler.libcxx
@@ -34,15 +44,9 @@ class OpusConan(ConanFile):
         if self.settings.os == "Windows":
              del self.options.fPIC
 
-
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
-        extracted_dir = self.name + "-" + self.version
-        os.rename(extracted_dir, self._source_subfolder)
-
-        # They forgot to package that file into the tarball for 1.3.1
-        # See https://github.com/xiph/opus/issues/129
-        os.rename("opus_buildtype.cmake", os.path.join(self._source_subfolder , "opus_buildtype.cmake"))
+        os.rename("{}-{}".format(self.name, self.version), self._source_subfolder)
 
     def _configure_cmake(self):
         cmake = CMake(self)
@@ -51,6 +55,8 @@ class OpusConan(ConanFile):
         return cmake
 
     def build(self):
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            tools.patch(**patch)
         cmake = self._configure_cmake()
         cmake.build()
 
@@ -58,15 +64,18 @@ class OpusConan(ConanFile):
         self.copy("COPYING", dst="licenses", src=self._source_subfolder, keep_path=False)
         cmake = self._configure_cmake()
         cmake.install()
-        tools.rmdir(os.path.join(self.package_folder, 'lib', 'pkgconfig'))
-        tools.rmdir(os.path.join(self.package_folder, 'lib', 'cmake'))
+        tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
+        tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
 
     def package_info(self):
-        self.cpp_info.names['cmake_find_package'] = 'Opus'
-        self.cpp_info.names['cmake_find_package_multi'] = 'Opus'
-        self.cpp_info.libs = tools.collect_libs(self)
-        if self.settings.os == 'Linux' or self.settings.os == "Android":
-            self.cpp_info.system_libs.append('m')
+        self.cpp_info.names["cmake_find_package"] = "Opus"
+        self.cpp_info.names["cmake_find_package_multi"] = "Opus"
+        self.cpp_info.components["libopus"].libs = ["opus"]
+        self.cpp_info.components["libopus"].includedirs.append(os.path.join("include", "opus"))
+        self.cpp_info.components["libopus"].names["cmake_find_package"] = "opus"
+        self.cpp_info.components["libopus"].names["cmake_find_package_multi"] = "opus"
+        self.cpp_info.components["libopus"].names["pkg_config"] = "opus"
+        if self.settings.os == "Linux" or self.settings.os == "Android":
+            self.cpp_info.components["libopus"].system_libs.append("m")
         if self.settings.os == "Windows" and self.settings.compiler != "Visual Studio":
-            self.cpp_info.system_libs.append("ssp")
-        self.cpp_info.includedirs.append(os.path.join('include', 'opus'))
+            self.cpp_info.components["libopus"].system_libs.append("ssp")

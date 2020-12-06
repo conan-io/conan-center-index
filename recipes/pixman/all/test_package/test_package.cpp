@@ -41,14 +41,12 @@ int main() {
 
     std::cout << "pixman version: " << PIXMAN_VERSION_STRING << std::endl;
 
-#ifndef _WIN32
     c.x = pixman_double_to_fixed (0);
     c.y = pixman_double_to_fixed (0);
 
     angle = (0.5 / NUM_GRADIENTS + 1 / (double)NUM_GRADIENTS) * 720 - 180;
     src_img = pixman_image_create_conical_gradient (&c, pixman_double_to_fixed(angle), stops, NUM_STOPS);
     pixman_image_unref (src_img);
-#endif
 
     return EXIT_SUCCESS;
 }

@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.1.2)
+cmake_minimum_required(VERSION 3.4)
 project(bzip2 C)
 
 include(GNUInstallDirs)
@@ -50,6 +50,7 @@ install(TARGETS ${BZ2_LIBRARY}
 if(BZ2_BUILD_EXE)
     install(TARGETS ${CMAKE_PROJECT_NAME}
             EXPORT ${BZ2_CONFIG}
+            BUNDLE DESTINATION bin
             RUNTIME DESTINATION bin
             LIBRARY DESTINATION lib
             ARCHIVE DESTINATION lib)

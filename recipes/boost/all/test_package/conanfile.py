@@ -16,6 +16,7 @@ class DefaultNameConan(ConanFile):
                 cmake.definitions["Boost_USE_STATIC_LIBS"] = not self.options["boost"].shared
             if not self.options["boost"].without_python:
                 cmake.definitions["WITH_PYTHON"] = "TRUE"
+                cmake.definitions["WITH_PYTHON_VERSION"] = self.options["boost"].python_version
             if not self.options["boost"].without_random:
                 cmake.definitions["WITH_RANDOM"] = "TRUE"
             if not self.options["boost"].without_regex:
@@ -47,7 +48,6 @@ class DefaultNameConan(ConanFile):
         if not self.options["boost"].without_chrono:
             self.run(os.path.join("bin", "chrono_exe"), run_environment=True)
         if not self.options["boost"].without_python:
-            os.chdir("bin")
-            sys.path.append(".")
+            sys.path.append("lib")
             import hello_ext
-            hello_ext.greet()
+            print(hello_ext.greet())

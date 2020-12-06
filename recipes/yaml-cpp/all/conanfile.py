@@ -15,7 +15,12 @@ class YamlCppConan(ConanFile):
     settings = "os", "arch", "compiler", "build_type"
     options = {"shared": [True, False], "fPIC": [True, False]}
     default_options = {"shared": False, "fPIC": True}
-    _source_subfolder = "source_subfolder"
+
+    _cmake = None
+
+    @property
+    def _source_subfolder(self):
+        return "source_subfolder"
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
@@ -27,19 +32,21 @@ class YamlCppConan(ConanFile):
             del self.options.fPIC
 
     def configure(self):
-        if self.settings.compiler == "Visual Studio" and self.settings.compiler.version == "12":
-            raise ConanInvalidConfiguration("Visual Studio 12 not supported: Library needs C++11 standard")
+        if self.settings.compiler.cppstd:
+            tools.check_min_cppstd(self, "11")
 
     def _configure_cmake(self):
-        cmake = CMake(self)
-        cmake.definitions["YAML_CPP_BUILD_TESTS"] = False
-        cmake.definitions["YAML_CPP_BUILD_CONTRIB"] = True
-        cmake.definitions["YAML_CPP_BUILD_TOOLS"] = False
-        cmake.definitions["YAML_BUILD_SHARED_LIBS"] = self.options.shared
-        if self.settings.compiler == "Visual Studio":
-            cmake.definitions["MSVC_SHARED_RT"] = "MD" in self.settings.compiler.runtime
-        cmake.configure()
-        return cmake
+        if self._cmake:
+            return self._cmake
+
+        self._cmake = CMake(self)
+        self._cmake.definitions["YAML_CPP_BUILD_TESTS"] = False
+        self._cmake.definitions["YAML_CPP_BUILD_CONTRIB"] = True
+        self._cmake.definitions["YAML_CPP_BUILD_TOOLS"] = False
+        self._cmake.definitions["YAML_BUILD_SHARED_LIBS"] = self.options.shared
+
+        self._cmake.configure()
+        return self._cmake
 
     def build(self):
         cmake = self._configure_cmake()

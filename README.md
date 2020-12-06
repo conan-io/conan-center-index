@@ -6,15 +6,24 @@ This repository includes a Continuous Integration system that will build automat
 [Pull Request](https://github.com/conan-io/conan-center-index/pulls).
 
 
-### You can learn how to contribute new recipes and how this build service works in [the wiki of the project](https://github.com/conan-io/conan-center-index/wiki).
+### Documentation
+
+All the documentation is available in this same repository in the [`docs/` subfolder](docs/README.md).
+
+This is a list of shortcuts to some interesting topics:
+
+* If you want to learn how to **contribute new recipes**, please read [docs/how_to_add_packages.md](docs/how_to_add_packages.md).
+* **FAQ**: most common questions are listed in [docs/faqs.md](docs/faqs.md).
+* The conan-center **hook errors** reported by CCI Bot can be found in the [docs/error_knowledge_base.md](docs/error_knowledge_base.md).
+* The internal changes related to infrastructure can be checked in [docs/changelog.md](docs/changelog.md).
 
 
 ### Reporting Issues
 
 You can open issues in the [issue tracker](https://github.com/conan-io/conan-center-index/issues) to:
 
-- Report **bugs/issues** in a package: 
-    - Use the `[package]` tag in the title of the issue to help identifying them. 
+- Report **bugs/issues** in a package:
+    - Use the `[package]` tag in the title of the issue to help identifying them.
     - If you detect any issue or missing feature in a package, for example, a build failure or a recipe that not support a specific configuration.
     - Specify the name and version (`zlib/1.2.11`) and any relevant details about the fail configuration: Applied profile, building machine...
 - Request a **new library** to be added:

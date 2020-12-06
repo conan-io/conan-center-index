@@ -26,6 +26,8 @@ class GiflibConan(ConanFile):
             del self.options.fPIC
 
     def configure(self):
+        if self.options.shared:
+            del self.options.fPIC
         del self.settings.compiler.libcxx
         del self.settings.compiler.cppstd
 
@@ -101,8 +103,6 @@ class GiflibConan(ConanFile):
     def build_configure(self):
         env_build = AutoToolsBuildEnvironment(self, win_bash=self.settings.os == "Windows" and
                                               platform.system() == "Windows")
-        if self.settings.os != "Windows":
-            env_build.fpic = self.options.fPIC
 
         prefix = os.path.abspath(self.package_folder)
         if self.settings.os == "Windows":
@@ -131,6 +131,8 @@ class GiflibConan(ConanFile):
         tools.rmdir(os.path.join(self.package_folder, "share"))
 
     def package_info(self):
+        self.cpp_info.names["cmake_find_package"] = "GIF"
+        self.cpp_info.names["cmake_find_package_multi"] = "GIF"
         self.cpp_info.libs = ["gif"]
         if self.settings.compiler == "Visual Studio":
             if self.options.shared:

@@ -17,18 +17,22 @@ class NCursesConan(ConanFile):
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
-        "with_cxx": [True, False],
-        "with_pcre2": [True, False],
-        "with_reentrant": [True, False],
         "with_widec": [True, False],
+        "with_extended_colors": [True, False],
+        "with_cxx": [True, False],
+        "with_progs": [True, False],
+        "with_reentrant": [True, False],
+        "with_pcre2": [True, False],
     }
     default_options = {
         "shared": False,
         "fPIC": True,
+        "with_widec": True,
+        "with_extended_colors": True,
         "with_cxx": True,
-        "with_pcre2": False,
+        "with_progs": True,
         "with_reentrant": False,
-        "with_widec": False,
+        "with_pcre2": False,
     }
 
     _autotools = None
@@ -42,25 +46,25 @@ class NCursesConan(ConanFile):
             del self.options.fPIC
 
     def configure(self):
-        if self.settings.compiler == "Visual Studio":
-            if self.options.with_widec:
-                raise ConanInvalidConfiguration("with_widec is unsupported for Visual Studio")
-            raise ConanInvalidConfiguration("Unsupported on Visual Studio")
         if self.options.shared:
             del self.options.fPIC
         if not self.options.with_cxx:
             del self.settings.compiler.libcxx
             del self.settings.compiler.cppstd
+        if not self.options.with_widec:
+            del self.options.with_extended_colors
 
     def requirements(self):
         if self.options.with_pcre2:
             self.requires("pcre2/10.33")
+        if self.settings.compiler == "Visual Studio":
+            self.requires("getopt-for-visual-studio/20200201")
+            self.requires("dirent/1.23.2")
+            if self.options.get_safe("with_extended_colors", False):
+                self.requires("naive-tsearch/0.1.0")
 
     def build_requirements(self):
-        if self.settings.compiler == "Visual Studio":
-            self.build_requires("getopt-for-visual-studio/20200201")
-            self.build_requires("dirent/1.23.2")
-        if tools.os_info.is_windows and not "CONAN_BASH_PATH" in os.environ and \
+        if tools.os_info.is_windows and not tools.get_env("CONAN_BASH_PATH") and \
                 tools.os_info.detect_windows_subsystem() != "msys2":
             self.build_requires("msys2/20190524")
 
@@ -74,23 +78,13 @@ class NCursesConan(ConanFile):
         self._autotools = AutoToolsBuildEnvironment(self, win_bash=tools.os_info.is_windows)
         build = None
         host = None
-        conf_args = []
-        if self.options.shared:
-            conf_args.extend(["--with-shared", "--without-normal"])
-        else:
-            conf_args.extend(["--without-shared", "--with-normal"])
-        if self.options.with_cxx:
-            conf_args.append("--with-cxx-binding")
-            if self.options.shared:
-                conf_args.append("--with-cxx-shared")
-            else:
-                conf_args.append("--without-cxx-shared")
-        else:
-            conf_args.append("--without-cxx-binding")
-        conf_args.extend([
-            "--enable-reentrant" if self.options.with_reentrant else "--disable-reentrant",
+        conf_args = [
             "--enable-widec" if self.options.with_widec else "--disable-widec",
+            "--enable-ext-colors" if self.options.get_safe("with_extended_colors", False) else "--disable-ext-colors",
+            "--enable-reentrant" if self.options.with_reentrant else "--disable-reentrant",
             "--with-pcre2" if self.options.with_pcre2 else "--without-pcre2",
+            "--with-cxx-binding" if self.options.with_cxx else "--without-cxx-binding",
+            "--with-progs" if self.options.with_progs else "--without-progs",
             "--without-libtool",
             "--without-ada",
             "--without-manpages",
@@ -102,7 +96,11 @@ class NCursesConan(ConanFile):
             "--disable-rpath",
             "--datarootdir={}".format(tools.unix_path(os.path.join(self.package_folder, "bin", "share"))),
             "--disable-pc-files",
-        ])
+        ]
+        if self.options.shared:
+            conf_args.extend(["--with-shared", "--without-normal", "--with-cxx-shared",])
+        else:
+            conf_args.extend(["--without-shared", "--with-normal", "--without-cxx-shared"])
         if self.settings.os == "Windows":
             conf_args.extend([
                 "--disable-macros",
@@ -113,9 +111,6 @@ class NCursesConan(ConanFile):
                 "--enable-interop",
             ])
         if self.settings.compiler == "Visual Studio":
-            self._autotools.defines.append("_WIN32")
-            if self.settings.arch == "x86_64":
-                self._autotools.defines.append("_WIN64")
             conf_args.extend([
                 "ac_cv_func_getopt=yes",
             ])
@@ -137,7 +132,7 @@ class NCursesConan(ConanFile):
                     "CC": "cl -nologo",
                     "CXX": "cl -nologo",
                     "LD": "link -nologo",
-                    "LDFLAGS": "user32.lib",
+                    "LDFLAGS": "",
                     "NM": "dumpbin -symbols",
                     "STRIP": ":",
                     "AR": "lib -nologo",
@@ -150,19 +145,21 @@ class NCursesConan(ConanFile):
 
     def build(self):
         self._patch_sources()
+        # return
         with self._build_context():
             autotools = self._configure_autotools()
-            autotools.make(target="libs" if self.settings.compiler == "Visual Studio" else None)
+            autotools.make()
 
     @property
     def _major_version(self):
         return tools.Version(self.version).major
 
     def package(self):
+        # return
         self.copy("COPYING", src=self._source_subfolder, dst="licenses")
         with self._build_context():
             autotools = AutoToolsBuildEnvironment(self, win_bash=tools.os_info.is_windows)
-            autotools.make(target="install.libs" if self.settings.compiler == "Visual Studio" else "install")
+            autotools.install()
 
             os.unlink(os.path.join(self.package_folder, "bin", "ncurses{}{}-config".format(self._suffix, self._major_version)))
 
@@ -201,3 +198,12 @@ class NCursesConan(ConanFile):
             self.cpp_info.defines = ["NCURSES_STATIC"]
             if self.settings.os == "Linux":
                 self.cpp_info.system_libs = ["dl", "m"]
+
+        if self.options.with_progs:
+            bin_path = os.path.join(self.package_folder, "bin")
+            self.output.info("Appending PATH environment variable: {}".format(bin_path))
+            self.env_info.PATH.append(bin_path)
+
+        terminfo = os.path.join(self.package_folder, "bin", "share", "terminfo")
+        self.output.info("Setting TERMINFO environment variable: {}".format(terminfo))
+        self.env_info.TERMINFO = terminfo

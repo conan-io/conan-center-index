@@ -1,4 +1,5 @@
 from conans import ConanFile, CMake, tools
+from conans.tools import Version
 from conans.errors import ConanInvalidConfiguration
 import os
 
@@ -33,18 +34,16 @@ class CprConan(ConanFile):
     def configure(self):
         if self.options.shared:
             del self.options.fPIC
-        if self.options.with_openssl:
-            # If using OpenSSL, we need it to be active in libcurl too
-            if self.options["libcurl"].with_openssl == False:  # 'is False' doesn't work here (see conan-io/conan#3620)
-                raise ConanInvalidConfiguration("libcurl must be built with openssl support")
-            self.options["libcurl"].with_openssl = True
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
         os.rename("cpr-{}".format(self.version), self._source_subfolder)
 
     def requirements(self):
-        self.requires("libcurl/7.67.0")
+        if Version(self.version) < "1.5.0":
+            self.requires("libcurl/7.67.0")
+        else:
+            self.requires("libcurl/7.69.1")
         if self.options.with_openssl:
             self.output.warn("OpenSSL support is not stable yet. whoshuu/cpr#31")
 
@@ -65,6 +64,8 @@ class CprConan(ConanFile):
         return cmake
 
     def build(self):
+        if self.options.with_openssl and self.options["libcurl"].with_ssl != "openssl":
+            raise ConanInvalidConfiguration("cpr requires libcurl to be built with the option with_ssl=\"openssl\".")
         self._patch_sources()
         cmake = self._configure_cmake()
         cmake.build()

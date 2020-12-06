@@ -61,6 +61,7 @@ class G3logConan(ConanFile):
 
     def _configure_cmake(self):
         cmake = CMake(self)
+        cmake.definitions['VERSION'] = self.version
         cmake.definitions["G3_SHARED_LIB"] = self.options.shared
         cmake.definitions["USE_DYNAMIC_LOGGING_LEVELS"] = self.options.use_dynamic_logging_levels
         cmake.definitions["CHANGE_G3LOG_DEBUG_TO_DBUG"] = self.options.change_debug_to_dbug
@@ -92,4 +93,4 @@ class G3logConan(ConanFile):
     def package_info(self):
         self.cpp_info.libs = ["g3logger"]
         if str(self.settings.os) in ["Linux", "Android"]:
-            self.cpp_info.libs.append('pthread')
+            self.cpp_info.system_libs.append('pthread')

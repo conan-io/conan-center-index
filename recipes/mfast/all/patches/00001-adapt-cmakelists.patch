@@ -1,0 +1,33 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 3721f76..847f587 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -69,9 +72,6 @@ include_directories ("${PROJECT_BINARY_DIR}"
+ ## Setting up Boost Library
+ ################################
+ 
+-find_package( Boost 1.53.0 REQUIRED unit_test_framework system filesystem)
+-include_directories(${Boost_INCLUDE_DIR})
+-link_directories(${Boost_LIBRARY_DIRS})
+ 
+ ################################################################################
+ 
+@@ -174,9 +174,6 @@ endmacro()
+ # Recurse into the "src" and "unit-tests" subdirectories. This does not actually
+ # cause another cmake executable to run. The same process will walk through
+ # the project's entire directory structure.
+-enable_testing()
+-
+-add_subdirectory (tests)
+ 
+ if (BUILD_SHARED_LIBS)
+   set(MFAST_LIBRARIES mfast_coder mfast_xml_parser mfast)
+@@ -185,8 +182,6 @@ else()
+   set(MFAST_LIBRARIES mfast_coder_static mfast_xml_parser_static mfast_static)
+ endif()
+ 
+-add_subdirectory (examples)
+-
+ 
+ # Setting up dist target
+ # ===============================

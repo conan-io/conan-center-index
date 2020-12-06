@@ -25,7 +25,6 @@ add_executable(${BINARY_TO_COMPRESSED_BIN} ${EXTRA_FONTS_DIR}/binary_to_compress
 
 add_library(${PROJECT_NAME} ${SOURCE_FILES})
 target_include_directories(${PROJECT_NAME} PRIVATE ${SOURCE_DIR})
-target_link_libraries(${PROJECT_NAME} PUBLIC ${CONAN_LIBS})
 
 include(GNUInstallDirs)
 

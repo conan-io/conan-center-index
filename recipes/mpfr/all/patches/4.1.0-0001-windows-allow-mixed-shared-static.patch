@@ -1,0 +1,20 @@
+--- configure
++++ configure
+@@ -17533,7 +17533,7 @@
+ 
+   { $as_echo "$as_me:${as_lineno-$LINENO}: result: static" >&5
+ $as_echo "static" >&6; }
+-  as_fn_error $? "libgmp isn't provided as a DLL: use --enable-static --disable-shared" "$LINENO" 5
++  # as_fn_error $? "libgmp isn't provided as a DLL: use --enable-static --disable-shared" "$LINENO" 5
+ fi
+ rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
+    else
+@@ -17561,7 +17561,7 @@
+ 
+   { $as_echo "$as_me:${as_lineno-$LINENO}: result: DLL" >&5
+ $as_echo "DLL" >&6; }
+-  as_fn_error $? "libgmp is provided as a DLL: use --disable-static --enable-shared" "$LINENO" 5
++  # as_fn_error $? "libgmp is provided as a DLL: use --disable-static --enable-shared" "$LINENO" 5
+ fi
+ rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
+   fi

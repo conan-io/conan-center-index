@@ -1,0 +1,10 @@
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -656,6 +656,7 @@ install(
+     EXPORT "${TARGETS_EXPORT_NAME}"
+     LIBRARY DESTINATION "lib"
+     ARCHIVE DESTINATION "lib"
++    RUNTIME DESTINATION "bin"
+     COMPONENT libh3
+ )
+ 

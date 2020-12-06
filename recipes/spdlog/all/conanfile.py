@@ -11,7 +11,7 @@ class SpdlogConan(ConanFile):
     homepage = "https://github.com/gabime/spdlog"
     topics = ("conan", "spdlog", "logging", "header-only")
     license = "MIT"
-    exports_sources = ["CMakeLists.txt", "patches/*"]
+    exports_sources = ["CMakeLists.txt"]
     generators = "cmake", "cmake_find_package"
     settings = "os", "arch", "compiler", "build_type"
     options = {"shared": [True, False],
@@ -45,11 +45,15 @@ class SpdlogConan(ConanFile):
             raise ConanInvalidConfiguration("spdlog shared lib is not yet supported under windows")
         if self.settings.os != "Windows" and \
            (self.options.wchar_support or self.options.wchar_filenames):
-            raise ConanInvalidConfiguration("wchar is not yet supported under windows")
+            raise ConanInvalidConfiguration("wchar is only supported under windows")
+        if self.settings.compiler == "Visual Studio" and self.options.get_safe("shared", False) and "MT" in self.settings.compiler.runtime:
+            raise ConanInvalidConfiguration("Visual Studio build for shared library with MT runtime is not supported")
 
     def requirements(self):
-        if Version(self.version) >= "1.5.0":
-            self.requires("fmt/6.2.0")
+        if Version(self.version) >= "1.7.0":
+            self.requires("fmt/7.1.2")
+        elif Version(self.version) >= "1.5.0":
+            self.requires("fmt/6.2.1")
         else:
             self.requires("fmt/6.0.0")
 
@@ -68,6 +72,7 @@ class SpdlogConan(ConanFile):
         self._cmake.definitions["SPDLOG_BUILD_TESTS_HO"] = False
         self._cmake.definitions["SPDLOG_BUILD_BENCH"] = False
         self._cmake.definitions["SPDLOG_FMT_EXTERNAL"] = True
+        self._cmake.definitions["SPDLOG_FMT_EXTERNAL_HO"] = self.options["fmt"].header_only
         self._cmake.definitions["SPDLOG_BUILD_SHARED"] = not self.options.header_only and self.options.shared
         self._cmake.definitions["SPDLOG_WCHAR_SUPPORT"] = self.options.wchar_support
         self._cmake.definitions["SPDLOG_WCHAR_FILENAMES"] = self.options.wchar_filenames
@@ -82,19 +87,24 @@ class SpdlogConan(ConanFile):
         tools.replace_in_file(os.path.join(self._source_subfolder, "cmake", "utils.cmake"), "/WX", "")
 
     def build(self):
+        if Version(self.version) < "1.7" and Version(self.deps_cpp_info["fmt"].version) >= "7":
+            raise ConanInvalidConfiguration("The project {}/{} requires fmt < 7.x".format(self.name, self.version))
+
         self._disable_werror()
-        if self.options.header_only:
-            tools.patch(**self.conan_data["patches"][self.version])
-        cmake = self._configure_cmake()
-        cmake.build()
+        if not self.options.header_only:
+            cmake = self._configure_cmake()
+            cmake.build()
 
     def package(self):
         self.copy("LICENSE", dst="licenses", src=self._source_subfolder)
-        cmake = self._configure_cmake()
-        cmake.install()
-        tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
-        tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
-        tools.rmdir(os.path.join(self.package_folder, "lib", "spdlog", "cmake"))
+        if self.options.header_only:
+            self.copy(pattern="*.h", dst="include", src=os.path.join(self._source_subfolder, "include"))
+        else:
+            cmake = self._configure_cmake()
+            cmake.install()
+            tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
+            tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
+            tools.rmdir(os.path.join(self.package_folder, "lib", "spdlog", "cmake"))
 
     def package_id(self):
         if self.options.header_only:
@@ -102,15 +112,22 @@ class SpdlogConan(ConanFile):
 
     def package_info(self):
         if self.options.header_only:
-            self.cpp_info.defines = ["SPDLOG_FMT_EXTERNAL"]
+            component_name = "spdlog_header_only"
         else:
-            self.cpp_info.libs = tools.collect_libs(self)
-            self.cpp_info.defines = ["SPDLOG_COMPILED_LIB", "SPDLOG_FMT_EXTERNAL"]
+            component_name = "libspdlog"
+            self.cpp_info.components["libspdlog"].libs = tools.collect_libs(self)
+            self.cpp_info.components["libspdlog"].defines.append("SPDLOG_COMPILED_LIB")
+
+        self.cpp_info.components[component_name].defines.append("SPDLOG_FMT_EXTERNAL")
+        if self.options["fmt"].header_only:
+            self.cpp_info.components[component_name].requires = ["fmt::fmt-header-only"]
+        else:
+            self.cpp_info.components[component_name].requires = ["fmt::fmt"]
         if self.options.wchar_support:
-            self.cpp_info.defines.append("SPDLOG_WCHAR_TO_UTF8_SUPPORT")
+            self.cpp_info.components[component_name].defines.append("SPDLOG_WCHAR_TO_UTF8_SUPPORT")
         if self.options.wchar_filenames:
-            self.cpp_info.defines.append("SPDLOG_WCHAR_FILENAMES")
+            self.cpp_info.components[component_name].defines.append("SPDLOG_WCHAR_FILENAMES")
         if self.options.no_exceptions:
-            self.cpp_info.defines.append("SPDLOG_NO_EXCEPTIONS")
+            self.cpp_info.components[component_name].defines.append("SPDLOG_NO_EXCEPTIONS")
         if self.settings.os == "Linux":
-            self.cpp_info.system_libs = ["pthread"]
+            self.cpp_info.components[component_name].system_libs = ["pthread"]

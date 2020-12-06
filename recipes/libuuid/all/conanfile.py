@@ -1,6 +1,3 @@
-#!/usr/bin/env python
-# -*- coding: utf-8 -*-
-
 from conans import ConanFile, AutoToolsBuildEnvironment, tools
 from conans.errors import ConanInvalidConfiguration
 import os
@@ -11,10 +8,10 @@ class LibuuidConan(ConanFile):
     description = "Portable uuid C library"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://sourceforge.net/projects/libuuid/"
-    author = "Bincrafters <bincrafters@gmail.com>"
     license = "BSD-3-Clause"
     topics = ("conan", "libuuid", "uuid", "unique-id", "unique-identifier")
     settings = "os", "arch", "compiler", "build_type"
+    exports_sources = "patches/**"
     options = {"shared": [True, False], "fPIC": [True, False]}
     default_options = {"shared": False, "fPIC": True}
     _source_subfolder = "source_subfolder"
@@ -23,6 +20,10 @@ class LibuuidConan(ConanFile):
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
         os.rename(self.name + "-" + self.version, self._source_subfolder)
+
+    def _patch_sources(self):
+        for patch in self.conan_data["patches"][self.version]:
+            tools.patch(**patch)
 
     def config_options(self):
         if self.settings.os == 'Windows':
@@ -47,6 +48,7 @@ class LibuuidConan(ConanFile):
         return self._autotools
 
     def build(self):
+        self._patch_sources()
         with tools.chdir(self._source_subfolder):
             autotools = self._configure_autotools()
             autotools.make()

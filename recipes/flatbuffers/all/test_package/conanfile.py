@@ -1,17 +1,15 @@
-#!/usr/bin/env python
-# -*- coding: utf-8 -*-
-
 from conans import ConanFile, CMake, tools
 import os
 
 
 class TestPackageConan(ConanFile):
     settings = "os", "compiler", "build_type", "arch"
-    generators = "cmake"
+    generators = "cmake", "cmake_find_package_multi"
 
     def build(self):
         cmake = CMake(self)
         cmake.definitions["FLATBUFFERS_HEADER_ONLY"] = self.options["flatbuffers"].header_only
+        cmake.definitions["FLATBUFFERS_SHARED"] = not self.options["flatbuffers"].header_only and self.options["flatbuffers"].shared
         cmake.configure()
         cmake.build()
 

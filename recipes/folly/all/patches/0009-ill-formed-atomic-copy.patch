@@ -1,0 +1,13 @@
+diff --git a/folly/fibers/SemaphoreBase.cpp b/folly/fibers/SemaphoreBase.cpp
+index 06e9ecc7111..77e2da75c18 100644
+--- a/folly/fibers/SemaphoreBase.cpp
++++ b/folly/fibers/SemaphoreBase.cpp
+@@ -170,7 +170,7 @@ namespace {
+ class FutureWaiter final : public fibers::Baton::Waiter {
+  public:
+   explicit FutureWaiter(int64_t tokens)
+-      : semaphoreWaiter(SemaphoreBase::Waiter(tokens)) {
++      : semaphoreWaiter(tokens) {
+     semaphoreWaiter.baton.setWaiter(*this);
+   }
+ 

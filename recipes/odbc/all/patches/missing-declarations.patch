@@ -1,0 +1,53 @@
+--- a/DriverManager/SQLError.c
++++ b/DriverManager/SQLError.c
+@@ -184,7 +184,7 @@
+ 
+ static char const rcsid[]= "$RCSfile: SQLError.c,v $ $Revision: 1.11 $";
+ 
+-static SQLRETURN extract_sql_error( EHEAD *head,
++static SQLRETURN cci_extract_sql_error( EHEAD *head,
+         SQLCHAR *sqlstate,
+         SQLINTEGER *native_error,
+         SQLCHAR *message_text,
+@@ -440,7 +440,7 @@ SQLRETURN SQLError( SQLHENV environment_handle,
+         herror->ret_code_deferred = 0;
+     }
+ 
+-    ret = extract_sql_error( herror,
++    ret = cci_extract_sql_error( herror,
+             sqlstate,
+             native_error,
+             message_text,
+--- a/DriverManager/SQLErrorW.c
++++ b/DriverManager/SQLErrorW.c
+@@ -173,7 +173,7 @@ SQLRETURN extract_parent_handle_err( int handle_type,
+  * unicode mapping function
+  */
+ 
+-static SQLRETURN extract_sql_error_w( EHEAD *head,
++static SQLRETURN cci_extract_sql_error_w( EHEAD *head,
+         SQLWCHAR *sqlstate,
+         SQLINTEGER *native_error,
+         SQLWCHAR *message_text,
+@@ -391,7 +391,7 @@ SQLRETURN SQLErrorW( SQLHENV environment_handle,
+         herror->ret_code_deferred = 0;
+     }
+ 
+-    ret = extract_sql_error_w( herror,
++    ret = cci_extract_sql_error_w( herror,
+             sqlstate,
+             native_error,
+             message_text,
+--- a/DriverManager/drivermanager.h
++++ b/DriverManager/drivermanager.h
+@@ -707,6 +707,10 @@ int function_return_ex( int level, void * handle, int ret_code, int save_to_diag
+ void function_entry( void *handle );
+ void setup_error_head( EHEAD *error_header, void *handle, int handle_type );
+ void clear_error_head( EHEAD *error_header );
++void extract_diag_error( int htype, DRV_SQLHANDLE handle, DMHDBC connection, EHEAD *head, int return_code, int save_to_diag );
++void extract_sql_error( DRV_SQLHANDLE henv, DRV_SQLHANDLE hdbc, DRV_SQLHANDLE hstmt, DMHDBC connection, EHEAD *head, int return_code );
++void extract_diag_error_w( int htype, DRV_SQLHANDLE handle, DMHDBC connection, EHEAD *head, int return_code, int save_to_diag );
++void extract_sql_error_w( DRV_SQLHANDLE henv, DRV_SQLHANDLE hdbc, DRV_SQLHANDLE hstmt, DMHDBC connection, EHEAD *head, int return_code );
+ SQLWCHAR *ansi_to_unicode_copy( SQLWCHAR * dest, char *src, SQLINTEGER buffer_len, DMHDBC connection, int *wlen );
+ SQLWCHAR *ansi_to_unicode_alloc( SQLCHAR *str, SQLINTEGER len, DMHDBC connection, int *wlen );
+ char *unicode_to_ansi_copy( char* dest, int dest_len, SQLWCHAR *src, SQLINTEGER len, DMHDBC connection, int *clen );

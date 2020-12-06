@@ -44,7 +44,7 @@ class LibtoolConan(ConanFile):
         os.rename("{}-{}".format(self.name, self.version), self._source_subfolder)
 
     def requirements(self):
-        self.requires("automake/1.16.1")
+        self.requires("automake/1.16.2")
 
     def build_requirements(self):
         if tools.os_info.is_windows and "CONAN_BASH_PATH" not in os.environ \
@@ -203,3 +203,7 @@ class LibtoolConan(ConanFile):
         for key, value in self._libtool_relocatable_env.items():
             self.output.info("Setting {} environment variable to {}".format(key, value))
             setattr(self.env_info, key, value)
+
+        automake_extra_include = tools.unix_path(os.path.join(self.package_folder, "bin", "share", "aclocal"))
+        self.output.info("Appending AUTOMAKE_CONAN_INCLUDES environment variable: {}".format(automake_extra_include))
+        self.env_info.AUTOMAKE_CONAN_INCLUDES.append(automake_extra_include)

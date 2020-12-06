@@ -1,0 +1,85 @@
+diff --git a/libnativeipc/CMakeLists.txt b/libnativeipc/CMakeLists.txt
+index fe5cc30..e8f20cd 100644
+--- a/libnativeipc/CMakeLists.txt
++++ b/libnativeipc/CMakeLists.txt
+@@ -22,7 +22,7 @@ target_sources(nativeipc PRIVATE
+   src/LogMacrosWithHandle.h
+   src/Message.h
+   src/OperationQueue.cpp
+-  src/OperationQUeue.h
++  src/OperationQueue.h
+   src/Pipe-ClientTransport.cpp
+   src/Pipe-ClientTransport.h
+   src/Pipe-ServerTransport.cpp
+diff --git a/libnativeipc/include/nativeipc/ConnectionFactory.h b/libnativeipc/include/nativeipc/ConnectionFactory.h
+index 0dd3aaa..e72682b 100644
+--- a/libnativeipc/include/nativeipc/ConnectionFactory.h
++++ b/libnativeipc/include/nativeipc/ConnectionFactory.h
+@@ -3,6 +3,7 @@
+ #include "ConnectionExports.h"
+ #include "IServerConnection.h"
+ #include <string>
++#include <memory>
+ 
+ namespace Twitch::IPC::ConnectionFactory {
+ NATIVEIPC_LIBSPEC std::unique_ptr<IConnection> newServerConnection(const std::string &endpoint, bool allowMultiuserAccess = false);
+diff --git a/libnativeipc/include/nativeipc/IConnection.h b/libnativeipc/include/nativeipc/IConnection.h
+index 30e4db3..f9a9945 100644
+--- a/libnativeipc/include/nativeipc/IConnection.h
++++ b/libnativeipc/include/nativeipc/IConnection.h
+@@ -3,6 +3,7 @@
+ #include <functional>
+ #include <string>
+ #include <vector>
++#include <cstring>
+ 
+ #include "ConnectionExports.h"
+ 
+diff --git a/libnativeipc/src/ConnectionFactoryPrivate.h b/libnativeipc/src/ConnectionFactoryPrivate.h
+index 9e4aa64..3e194d9 100644
+--- a/libnativeipc/src/ConnectionFactoryPrivate.h
++++ b/libnativeipc/src/ConnectionFactoryPrivate.h
+@@ -2,6 +2,7 @@
+ 
+ #include "IClientTransport.h"
+ #include "IServerTransport.h"
++#include <memory>
+ 
+ namespace Twitch::IPC::ConnectionFactory {
+ 
+diff --git a/libnativeipc/src/OperationQueue.h b/libnativeipc/src/OperationQueue.h
+index 5778382..8fe202f 100644
+--- a/libnativeipc/src/OperationQueue.h
++++ b/libnativeipc/src/OperationQueue.h
+@@ -5,6 +5,7 @@
+ #include <mutex>
+ #include <queue>
+ #include <thread>
++#include <condition_variable>
+ 
+ namespace Twitch::IPC {
+ class OperationQueue {
+diff --git a/tests/ConnectionTests.cpp b/tests/ConnectionTests.cpp
+index 40154b7..9772073 100644
+--- a/tests/ConnectionTests.cpp
++++ b/tests/ConnectionTests.cpp
+@@ -183,7 +183,7 @@ struct TestSettings {
+         return *this;
+     }
+ 
+-    TestSettings &LogLevel(LogLevel level)
++    TestSettings &GetLogLevel(LogLevel level)
+     {
+         InitLogging();
+         _level = level;
+@@ -3319,8 +3319,8 @@ TEST_P(MultiConnectIPCTest, MultiInvokeServerDestroyedTest)
+ auto values = ::testing::Values(
+     TestSettings{}.SleepOnConnect(0ms).SleepOnDisconnect(0ms).SleepOnData(0ms).SleepOnLog(0ms),
+     TestSettings{}.SleepOnConnect(1ms).SleepOnDisconnect(1ms).SleepOnData(1ms).SleepOnLog(1ms),
+-    TestSettings{}.LogLevel(LogLevel::Debug).WriteLogs(true),
+-    TestSettings{}.SleepOnConnect().SleepOnDisconnect().SleepOnData().SleepOnLog().LogLevel(LogLevel::Debug)
++    TestSettings{}.GetLogLevel(LogLevel::Debug).WriteLogs(true),
++    TestSettings{}.SleepOnConnect().SleepOnDisconnect().SleepOnData().SleepOnLog().GetLogLevel(LogLevel::Debug)
+ );
+ 
+ #if DO_EXPLICIT_CHECKS

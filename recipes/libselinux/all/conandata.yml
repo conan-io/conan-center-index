@@ -9,3 +9,8 @@ sources:
       sha256: "2ea2b30f671dae9d6b1391cbe8fb2ce5d36a3ee4fb1cd3c32f0d933c31b82433"
     - url: "https://github.com/SELinuxProject/selinux/releases/download/20191204/libsepol-3.0.tar.gz"
       sha256: "5b7ae1881909f1048b06f7a0c364c5c8a86ec12e0ec76e740fe9595a6033eb79"
+  "3.1":
+    - url: "https://github.com/SELinuxProject/selinux/releases/download/20200710/libselinux-3.1.tar.gz"
+      sha256: "ea5dcbb4d859e3f999c26a13c630da2f16dff9462e3cc8cb7b458ac157d112e7"
+    - url: "https://github.com/SELinuxProject/selinux/releases/download/20200710/libsepol-3.1.tar.gz"
+      sha256: "ae6778d01443fdd38cd30eeee846494e19f4d407b09872580372f4aa4bf8a3cc"

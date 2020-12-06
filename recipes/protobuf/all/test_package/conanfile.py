@@ -1,17 +1,20 @@
+from conans import ConanFile, CMake, RunEnvironment, tools
 import os
-from conans import ConanFile, CMake, tools
 
 
 class TestPackageConan(ConanFile):
     settings = "os", "compiler", "build_type", "arch"
-    generators = "cmake"
+    generators = "cmake", "cmake_find_package_multi"
 
     def build(self):
-        cmake = CMake(self)
-        cmake.configure()
-        cmake.build()
+        if not tools.cross_building(self.settings, skip_x64_x86=True):
+            cmake = CMake(self)
+            cmake.definitions["protobuf_LITE"] = self.options["protobuf"].lite
+            cmake.configure()
+            cmake.build()
 
     def test(self):
         if not tools.cross_building(self.settings):
-            bin_path = os.path.abspath(os.path.join("bin", "test_package"))
-            self.run(bin_path, run_environment=True)
+            self.run("protoc --version", run_environment=True)
+
+            self.run(os.path.join("bin", "test_package"), run_environment=True)

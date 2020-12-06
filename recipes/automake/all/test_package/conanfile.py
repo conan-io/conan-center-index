@@ -7,6 +7,7 @@ import shutil
 class TestPackageConan(ConanFile):
     settings = "os", "compiler", "build_type", "arch"
     exports_sources = "configure.ac", "Makefile.am", "test_package_1.c", "test_package.cpp"
+    # DON'T COPY extra.m4 TO BUILD FOLDER!!!
 
     def build_requirements(self):
         if tools.os_info.is_windows and "CONAN_BASH_PATH" not in os.environ \
@@ -49,7 +50,8 @@ class TestPackageConan(ConanFile):
 
     def _build_autotools(self):
         """Test autoreconf + configure + make"""
-        self.run("{} --verbose --install".format(os.environ["AUTORECONF"]), win_bash=tools.os_info.is_windows)
+        with tools.environment_append({"AUTOMAKE_CONAN_INCLUDES": [tools.unix_path(self.source_folder)]}):
+            self.run("{} -fiv".format(os.environ["AUTORECONF"]), win_bash=tools.os_info.is_windows)
         self.run("{} --help".format(os.path.join(self.build_folder, "configure").replace("\\", "/")), win_bash=tools.os_info.is_windows)
         autotools = AutoToolsBuildEnvironment(self, win_bash=tools.os_info.is_windows)
         with self._build_context():

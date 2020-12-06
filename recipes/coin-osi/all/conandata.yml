@@ -1,0 +1,8 @@
+sources:
+  "0.108.6":
+    url: "https://github.com/coin-or/Osi/archive/releases/0.108.6.tar.gz"
+    sha256: "984a5886825e2da9bf44d8a665f4b92812f0700e451c12baf9883eaa2315fad5"
+patches:
+  "0.108.6":
+    - patch_file: "patches/0001-no-pkg-config-check.patch"
+      base_path: "source_subfolder"

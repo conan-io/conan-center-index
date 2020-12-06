@@ -1,0 +1,11 @@
+--- config.h.in
++++ config.h.in
+@@ -380,7 +380,7 @@
+ # define _GL_EXTERN_INLINE_IN_USE
+ #else
+ # define _GL_INLINE static _GL_UNUSED
+-# define _GL_EXTERN_INLINE static _GL_UNUSED
++# define _GL_EXTERN_INLINE _GL_UNUSED
+ #endif
+ 
+ /* In GCC 4.6 (inclusive) to 5.1 (exclusive),

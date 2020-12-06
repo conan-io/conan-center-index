@@ -19,7 +19,7 @@ class SQLiteCppConan(ConanFile):
                        "fPIC": True,
                        "lint": False
                        }
-    requires = ("sqlite3/3.30.1")
+    requires = ("sqlite3/3.32.3")
 
     @property
     def _source_subfolder(self):
@@ -49,7 +49,8 @@ class SQLiteCppConan(ConanFile):
     def _patch_clang(self):
         if self.settings.compiler == "clang" and \
            Version(self.settings.compiler.version) < "6.0" and \
-           self.settings.compiler.libcxx == "libc++":
+           self.settings.compiler.libcxx == "libc++" and \
+           Version(self.version) < "3":
             tools.replace_in_file(
                 os.path.join(self._source_subfolder, "include", "SQLiteCpp", "Utils.h"),
                 "const nullptr_t nullptr = {};",

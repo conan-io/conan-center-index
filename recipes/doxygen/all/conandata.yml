@@ -1,0 +1,20 @@
+sources:
+  "1.8.20":
+    url: "http://doxygen.nl/files/doxygen-1.8.20.src.tar.gz"
+    sha256: "5a018e57d26d7eeac415e676fe7817ae8be9828ed338d9701a2b26c7630389ce"
+  "1.8.18":
+    url: "https://sourceforge.net/projects/doxygen/files/doxygen-1.8.18.src.tar.gz"
+    sha256: "18173d9edc46d2d116c1f92a95d683ec76b6b4b45b817ac4f245bb1073d00656"
+  "1.8.17":
+    url: "https://sourceforge.net/projects/doxygen/files/doxygen-1.8.17.src.tar.gz"
+    sha256: "2cba988af2d495541cbbe5541b3bee0ee11144dcb23a81eada19f5501fd8b599"
+patches:
+  "1.8.20":
+    - patch_file: "patches/1.8.20-0001-relocatable-cmake.patch"
+      base_path: "source_subfolder"
+  "1.8.18":
+    - patch_file: "patches/1.8.18-0001-relocatable-cmake.patch"
+      base_path: "source_subfolder"
+  "1.8.17":
+    - patch_file: "patches/1.8.17-0001-relocatable-cmake.patch"
+      base_path: "source_subfolder"

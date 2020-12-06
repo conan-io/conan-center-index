@@ -56,7 +56,7 @@ class LibSELinuxConan(ConanFile):
         self.copy(pattern="LICENSE", dst="licenses", src=_selinux_subfolder)
         for library in [_sepol_subfolder, _selinux_subfolder]:
             self.copy(pattern="*.h", dst="include", src=os.path.join(library, "include"), keep_path=True)
-            self.copy(pattern="*.so*", dst="lib", src=library, keep_path=False)
+            self.copy(pattern="*.so*", dst="lib", src=library, keep_path=False, symlinks=True)
             self.copy(pattern="*.a", dst="lib", src=library, keep_path=False)
 
     def package_info(self):

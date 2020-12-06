@@ -1,0 +1,8 @@
+sources:
+  "1.3.7":
+    url: "https://github.com/pyomeca/ezc3d/archive/Release_1.3.7.tar.gz"
+    sha256: "17cd3d4e20840710d58b8987c01ef0f880bc0c063ab52e0cb86ba41665ec33a0"
+patches:
+  "1.3.7":
+    - patch_file: "patches/fix-export-symbols.patch"
+      base_path: "source_subfolder"

@@ -1,0 +1,65 @@
+--- tool/lemon.c
++++ tool/lemon.c
+@@ -3502,11 +3502,53 @@
+   }
+ }
+
++#ifdef _WIN32
++# define WIN32_LEAN_AND_MEAN
++# include <windows.h>
++#else
++# include <libgen.h>
++# include <unistd.h>
++#endif
++#include <string.h>
++
++#define DEFAULT_PATH "."
++
++static char *get_default_template_path(const char *filename) {
++    static char static_path[8192];
++#ifdef _WIN32
++# define JOINER "\\"
++    SetLastError(ERROR_SUCCESS);
++    int result = GetModuleFileNameA(NULL, static_path, sizeof(static_path));
++    if (GetLastError() != ERROR_SUCCESS) {
++        memcpy(static_path, DEFAULT_PATH, strlen(DEFAULT_PATH));
++    }
++    char *pos = strrchr(static_path, '\\');
++    if (pos) {
++        *pos = '\0';
++    }
++#else
++# define JOINER "/"
++    ssize_t nb = readlink("/proc/self/exe", static_path, sizeof(static_path));
++    if (nb != -1) {
++        static_path[nb] = '\0';
++        dirname(static_path);
++    } else {
++        memcpy(static_path, DEFAULT_PATH, strlen(DEFAULT_PATH));
++    }
++#endif
++    if (sizeof(static_path) < (strlen(static_path) + sizeof(JOINER) + strlen(filename) + 1)) {
++        strcpy(static_path, DEFAULT_PATH);
++    }
++    strncat(static_path, JOINER, sizeof(JOINER));
++    strncat(static_path, filename, sizeof(filename));
++    return static_path;
++}
++
+ /* The next function finds the template file and opens it, returning
+ ** a pointer to the opened file. */
+ PRIVATE FILE *tplt_open(struct lemon *lemp)
+ {
+-  static char templatename[] = "lempar.c";
++  char *templatename;
+   char buf[1000];
+   FILE *in;
+   char *tpltname;
+@@ -3530,6 +3572,7 @@
+     return in;
+   }
+
++  templatename = get_default_template_path("lempar.c");
+   cp = strrchr(lemp->filename,'.');
+   if( cp ){
+     lemon_sprintf(buf,"%.*s.lt",(int)(cp-lemp->filename),lemp->filename);

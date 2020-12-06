@@ -1,6 +1,5 @@
 import os
 import shutil
-import time
 
 from conans import ConanFile, CMake, tools
 from conans.errors import ConanInvalidConfiguration
@@ -281,47 +280,62 @@ class PhysXConan(ConanFile):
                 self.copy(pattern=dll_info.get("pattern"), dst="bin", src=dll_dir, keep_path=False)
 
     def package_info(self):
-        self.cpp_info.libs = self._get_cpp_info_ordered_libs()
-        self.output.info("LIBRARIES: %s" % self.cpp_info.libs)
-
-        if self.settings.os == "Linux":
-            self.cpp_info.system_libs.extend(["dl", "pthread", "rt"])
-        elif self.settings.os == "Android":
-            self.cpp_info.system_libs.append("log")
-
         self.cpp_info.names["cmake_find_package"] = "PhysX"
         self.cpp_info.names["cmake_find_package_multi"] = "PhysX"
-
-    def _get_cpp_info_ordered_libs(self):
-        gen_libs = tools.collect_libs(self)
-
-        # Libs ordered following linkage order:
-        # - PhysX is a dependency of PhysXExtensions.
-        # - PhysXPvdSDK is a dependency of PhysXExtensions, PhysX and PhysXVehicle.
-        # - PhysXCommon is a dependency of PhysX and PhysXCooking.
-        # - PhysXFoundation is a dependency of PhysXExtensions, PhysX, PhysXVehicle,
-        #   PhysXPvdSDK, PhysXCooking, PhysXCommon and PhysXCharacterKinematic.
-        # (- PhysXTask is a dependency of PhysX on Windows if shared, order of this one doesn't really matter).
-        lib_list = ["PhysXExtensions", "PhysX", "PhysXVehicle", "PhysXPvdSDK", \
-                    "PhysXCooking", "PhysXCommon", "PhysXCharacterKinematic", \
-                    "PhysXFoundation", "PhysXTask"]
-
-        # List of lists, so if more than one matches the lib both will be added
-        # to the list
-        ordered_libs = [[] for _ in range(len(lib_list))]
-
-        # The order is important, reorder following the lib_list order
-        missing_order_info = []
-        for real_lib_name in gen_libs:
-            for pos, alib in enumerate(lib_list):
-                if os.path.splitext(real_lib_name)[0].split("-")[0].endswith(alib):
-                    ordered_libs[pos].append(real_lib_name)
-                    break
-            else:
-                missing_order_info.append(real_lib_name)
-
-        # Remove PhysXGpu* and PhysXDevice* since they are loaded at runtime
-        missing_order_info = [lib for lib in missing_order_info if not lib.startswith(("PhysXGpu", "PhysXDevice"))]
-
-        # Flat the list
-        return [item for sublist in ordered_libs for item in sublist if sublist] + missing_order_info
+        # PhysXFoundation
+        self.cpp_info.components["physxfoundation"].names["cmake_find_package"] = "PhysXFoundation"
+        self.cpp_info.components["physxfoundation"].names["cmake_find_package_multi"] = "PhysXFoundation"
+        self.cpp_info.components["physxfoundation"].libs = ["PhysXFoundation"]
+        if self.settings.os == "Linux":
+            self.cpp_info.components["physxfoundation"].system_libs = ["m", "pthread", "rt"]
+        elif self.settings.os == "Android":
+            self.cpp_info.components["physxfoundation"].system_libs = ["log"]
+        # PhysXCommon
+        self.cpp_info.components["physxcommon"].names["cmake_find_package"] = "PhysXCommon"
+        self.cpp_info.components["physxcommon"].names["cmake_find_package_multi"] = "PhysXCommon"
+        self.cpp_info.components["physxcommon"].libs = ["PhysXCommon"]
+        if self.settings.os == "Linux":
+            self.cpp_info.components["physxcommon"].system_libs = ["m"]
+        self.cpp_info.components["physxcommon"].requires = ["physxfoundation"]
+        # PhysXPvdSDK
+        self.cpp_info.components["physxpvdsdk"].names["cmake_find_package"] = "PhysXPvdSDK"
+        self.cpp_info.components["physxpvdsdk"].names["cmake_find_package_multi"] = "PhysXPvdSDK"
+        self.cpp_info.components["physxpvdsdk"].libs = ["PhysXPvdSDK"]
+        self.cpp_info.components["physxpvdsdk"].requires = ["physxfoundation"]
+        # PhysX
+        self.cpp_info.components["physxmain"].names["cmake_find_package"] = "PhysX"
+        self.cpp_info.components["physxmain"].names["cmake_find_package_multi"] = "PhysX"
+        self.cpp_info.components["physxmain"].libs = ["PhysX"]
+        if self.settings.os == "Linux":
+            self.cpp_info.components["physxmain"].system_libs = ["m"]
+            if self.settings.arch == "x86_64":
+                self.cpp_info.components["physxmain"].system_libs.append("dl")
+        self.cpp_info.components["physxmain"].requires = ["physxpvdsdk", "physxcommon", "physxfoundation"]
+        # PhysXTask
+        if self.settings.os == "Windows" and self.options.shared:
+            self.cpp_info.components["physxtask"].names["cmake_find_package"] = "PhysXTask"
+            self.cpp_info.components["physxtask"].names["cmake_find_package_multi"] = "PhysXTask"
+            self.cpp_info.components["physxtask"].libs = ["PhysXTask"]
+            self.cpp_info.components["physxmain"].requires.append("physxtask")
+        # PhysXCharacterKinematic
+        self.cpp_info.components["physxcharacterkinematic"].names["cmake_find_package"] = "PhysXCharacterKinematic"
+        self.cpp_info.components["physxcharacterkinematic"].names["cmake_find_package_multi"] = "PhysXCharacterKinematic"
+        self.cpp_info.components["physxcharacterkinematic"].libs = ["PhysXCharacterKinematic"]
+        self.cpp_info.components["physxcharacterkinematic"].requires = ["physxfoundation"]
+        # PhysXCooking
+        self.cpp_info.components["physxcooking"].names["cmake_find_package"] = "PhysXCooking"
+        self.cpp_info.components["physxcooking"].names["cmake_find_package_multi"] = "PhysXCooking"
+        self.cpp_info.components["physxcooking"].libs = ["PhysXCooking"]
+        if self.settings.os == "Linux":
+            self.cpp_info.components["physxcooking"].system_libs = ["m"]
+        self.cpp_info.components["physxcooking"].requires = ["physxfoundation", "physxcommon"]
+        # PhysXVehicle
+        self.cpp_info.components["physxvehicle"].names["cmake_find_package"] = "PhysXVehicle"
+        self.cpp_info.components["physxvehicle"].names["cmake_find_package_multi"] = "PhysXVehicle"
+        self.cpp_info.components["physxvehicle"].libs = ["PhysXVehicle"]
+        self.cpp_info.components["physxvehicle"].requires = ["physxfoundation", "physxpvdsdk"]
+        # PhysXExtensions
+        self.cpp_info.components["physxextensions"].names["cmake_find_package"] = "PhysXExtensions"
+        self.cpp_info.components["physxextensions"].names["cmake_find_package_multi"] = "PhysXExtensions"
+        self.cpp_info.components["physxextensions"].libs = ["PhysXExtensions"]
+        self.cpp_info.components["physxextensions"].requires = ["physxfoundation", "physxpvdsdk", "physxmain"]

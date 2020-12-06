@@ -15,7 +15,7 @@ class libb2Conan(ConanFile):
     exports_sources = ["CMakeLists.txt"]
     generators = ["cmake"]
     options = {"fPIC": [True, False], "shared": [True, False], "use_sse": [True, False], "use_neon": [True, False]}
-    default_options = {"fPIC": True, "shared": True, "use_sse": False, "use_neon": False}
+    default_options = {"fPIC": True, "shared": False, "use_sse": False, "use_neon": False}
     _cmake = None
 
     @property

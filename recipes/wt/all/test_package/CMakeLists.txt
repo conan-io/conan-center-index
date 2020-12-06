@@ -1,20 +1,18 @@
-cmake_minimum_required(VERSION 2.8.11)
-
+cmake_minimum_required(VERSION 3.1)
 project(test_package)
 
 include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
 conan_basic_setup()
 
-file(GLOB SOURCE_FILES *.cpp)
+find_package(wt REQUIRED Wt HTTP CONFIG)
+if(WITH_DBO)
+  find_package(wt REQUIRED Dbo CONFIG)
+endif()
 
-add_executable(${PROJECT_NAME} ${SOURCE_FILES})
-target_link_libraries(${PROJECT_NAME} ${CONAN_LIBS})
+add_executable(${PROJECT_NAME} test_package.cpp)
 set_property(TARGET ${PROJECT_NAME} PROPERTY CXX_STANDARD 11)
-
-function(add_option option)
-    if(${option})
-        target_compile_definitions(${CMAKE_PROJECT_NAME} PRIVATE "${option}")
-    endif()
-endfunction()
-
-add_option(WITH_DBO)
+target_link_libraries(${PROJECT_NAME} Wt::Wt Wt::HTTP)
+if(WITH_DBO)
+  target_link_libraries(${PROJECT_NAME} Wt::Dbo)
+  target_compile_definitions(${PROJECT_NAME} PRIVATE "WITH_DBO")
+endif()
