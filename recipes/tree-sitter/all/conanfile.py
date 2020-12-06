@@ -40,18 +40,15 @@ class TreeSitterConan(ConanFile):
     def build(self):
         autotools = self._configure_autotools()
         with tools.chdir(self._source_subfolder):
+            tools.replace_in_file("Makefile", "PREFIX ?= /usr/local", "PREFIX ?= {}".format(self.package_folder))
             autotools.make()
-
-
 
     def package(self):
         self.copy("LICENSE", src=self._source_subfolder, dst="licenses")
-        shutil.copytree(os.path.join(self._source_subfolder, "lib/include"), os.path.join(self.package_folder, "include"))
-        if self.options.shared:
-            self.copy("*.so*", src=self._source_subfolder, dst=os.path.join(self.package_folder, "lib"))
-            self.copy("*.dylib*", src=self._source_subfolder, dst=os.path.join(self.package_folder, "lib"))
-        else:
-            self.copy("*.a", src=self._source_subfolder, dst=os.path.join(self.package_folder, "lib"))
+
+        autotools = self._configure_autotools()
+        with tools.chdir(self._source_subfolder):
+            autotools.install()
 
     def package_info(self):
         self.cpp_info.names["pkg_config"] = self.name
