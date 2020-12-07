@@ -23,7 +23,7 @@ class TreeSitterConan(ConanFile):
     def _source_subfolder(self):
         return "source_subfolder"
 
-    def requirements(self):
+    def configure(self):
         if self.settings.os == "Windows":
             raise ConanInvalidConfiguration("tree-sitter is not support on {}.".format(self.settings.os))
 
