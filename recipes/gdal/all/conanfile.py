@@ -203,7 +203,7 @@ class GdalConan(ConanFile):
             self.options["qhull"].reentrant = False
 
     def requirements(self):
-        self.requires("json-c/0.14")
+        self.requires("json-c/0.15")
         self.requires("libgeotiff/1.6.0")
         # self.requires("libopencad/0.0.2") # TODO: use conan recipe when available instead of internal one
         self.requires("libtiff/4.1.0")
@@ -219,11 +219,11 @@ class GdalConan(ConanFile):
         if self.options.get_safe("with_zstd"):
             self.requires("zstd/1.4.5")
         if self.options.with_pg:
-            self.requires("libpq/13.0")
+            self.requires("libpq/13.1")
         # if self.options.with_libgrass:
         #     self.requires("libgrass/x.x.x")
         if self.options.with_cfitsio:
-            self.requires("cfitsio/3.480")
+            self.requires("cfitsio/3.490")
         # if self.options.with_pcraster:
         #     self.requires("pcraster-rasterformat/1.3.2")
         if self.options.get_safe("with_png", True):
@@ -237,7 +237,7 @@ class GdalConan(ConanFile):
         if self.options.with_jpeg == "libjpeg":
             self.requires("libjpeg/9d")
         elif self.options.with_jpeg == "libjpeg-turbo":
-            self.requires("libjpeg-turbo/2.0.5")
+            self.requires("libjpeg-turbo/2.0.6")
         if self.options.with_charls:
             self.requires("charls/2.1.0")
         if self.options.with_gif:
@@ -257,7 +257,7 @@ class GdalConan(ConanFile):
         # if self.options.with_netcdf:
         #     self.requires("netcdf-c/4.7.4")
         if self.options.with_jasper:
-            self.requires("jasper/2.0.21")
+            self.requires("jasper/2.0.22")
         if self.options.with_openjpeg:
             self.requires("openjpeg/2.3.1")
         # if self.options.with_fgdb:
@@ -321,7 +321,7 @@ class GdalConan(ConanFile):
         # if not self.options.without_lerc:
         #     self.requires("lerc/2.1") # TODO: use conan recipe (not possible yet because lerc API is broken for GDAL)
         if self.options.get_safe("with_exr"):
-            self.requires("openexr/2.5.2")
+            self.requires("openexr/2.5.3")
         if self.options.get_safe("with_heif"):
             self.requires("libheif/1.9.1")
 
