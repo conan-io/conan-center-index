@@ -54,7 +54,7 @@ index 94ceb127..f10ddb3b 100644
 -                    )
 +    string(COMPARE GREATER_EQUAL ${CMAKE_C_COMPILER_VERSION} "9.0.0" IS_CLANG_9_COMPATIBLE)
 +    if(${IS_CLANG_9_COMPATIBLE} AND CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
-+        message(STATUS "Using Clang ${CMAKE_C_COMPILER_VERSION} version compatible compiler flags")
++        message(STATUS "Using Clang ${CMAKE_C_COMPILER_VERSION} version compatible compiler flags -Qunused-arguments")
 +        add_definitions(-std=c99 -pipe
 +                        -Wall -Wextra -Wpedantic
 +                        -Wno-static-in-inline # clang doesn't like the use of static inline methods inside static inline methods
@@ -73,7 +73,7 @@ index 94ceb127..f10ddb3b 100644
 +                        -fexceptions # recommended for multi-threaded C code, also in combination with C++ code
 +        )
 +    else()
-+        message(STATUS "Using ${CMAKE_CXX_COMPILER_ID} ${CMAKE_C_COMPILER_VERSION} version compatible compiler flags")
++        message(STATUS "Using ${CMAKE_CXX_COMPILER_ID} ${CMAKE_C_COMPILER_VERSION} version compatible compiler flags -Wno-unused-parameter")
 +        add_definitions(-std=c99 -pipe
 +                        -Wall -Wextra -Wpedantic
 +                        -Wno-static-in-inline # clang doesn't like the use of static inline methods inside static inline methods
