@@ -95,6 +95,9 @@ class MongoCxxConan(ConanFile):
             tools.check_min_cppstd(self, self._minimal_std_version)
 
         compiler = str(self.settings.compiler)
+        if self.options.polyfill == "experimental" and compiler == "apple-clang":
+            raise ConanInvalidConfiguration("experimental polyfill is not supported for apple-clang")
+
         if compiler not in self._compilers_minimum_version:
             self.output.warn("Unknown compiler, assuming it supports at least C++{}".format(self._minimal_std_version))
             return
