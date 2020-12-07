@@ -71,7 +71,7 @@ class GdalConan(ConanFile):
         "with_freexl": [True, False],
         "without_pam": [True, False],
         # "with_poppler": [True, False],
-        # "with_podofo": [True, False],
+        "with_podofo": [True, False],
         # "with_pdfium": [True, False],
         # "with_tiledb": [True, False],
         # "with_rasdaman": [True, False],
@@ -135,7 +135,7 @@ class GdalConan(ConanFile):
         "with_freexl": False,
         "without_pam": False,
         # "with_poppler": False,
-        # "with_podofo": False,
+        "with_podofo": False,
         # "with_pdfium": False,
         # "with_tiledb": False,
         # "with_rasdaman": False,
@@ -308,8 +308,8 @@ class GdalConan(ConanFile):
             self.requires("freexl/1.0.6")
         # if self.options.with_poppler:
         #     self.requires("poppler/0.83.0")
-        # if self.options.with_podofo:
-        #     self.requires("podofo/0.9.6")
+        if self.options.with_podofo:
+            self.requires("podofo/0.9.6")
         # if self.options.with_pdfium:
         #     self.requires("pdfium/x.x.x")
         # if self.options.get_safe("with_tiledb"):
@@ -467,6 +467,8 @@ class GdalConan(ConanFile):
         if self.options.get_safe("with_zlib", True):
             args.append("ZLIB_EXTERNAL_LIB=1")
             args.append("ZLIB_INC=\"-I{}\"".format(" -I".join(self.deps_cpp_info["zlib"].include_paths)))
+        if self.options.with_podofo:
+            args.append("PODOFO_ENABLED=YES")
         if self.options.get_safe("with_zstd"):
             args.append("ZSTD_CFLAGS=\"-I{}\"".format(" -I".join(self.deps_cpp_info["zstd"].include_paths)))
         if self.options.with_webp:
@@ -500,6 +502,14 @@ class GdalConan(ConanFile):
 
         self._nmake_args = args
         return self._nmake_args
+
+    def _gather_libs(self, p):
+        libs = self.deps_cpp_info[p].libs + self.deps_cpp_info[p].system_libs
+        for dep in self.deps_cpp_info[p].public_deps:
+            for l in self._gather_libs(dep):
+                if not l in libs:
+                    libs.append(l)
+        return libs
 
     def _configure_autotools(self):
         if self._autotools:
@@ -621,7 +631,13 @@ class GdalConan(ConanFile):
         if self.options.without_pam:
             args.append("--without-pam")
         args.append("--without-poppler") # TODO: to implement when poppler lib available
-        args.append("--without-podofo") # TODO: to implement when podofo lib available
+        if self.options.with_podofo:
+            args.extend([
+                "--with-podofo={}".format(tools.unix_path(self.deps_cpp_info["podofo"].rootpath)),
+                "--with-podofo-lib=-l{}".format(" -l".join(self._gather_libs("podofo")))
+            ])
+        else:
+            args.append("--without-podofo")
         args.append("--without-pdfium") # TODO: to implement when pdfium lib available
         args.append("--without-perl")
         args.append("--without-python")
