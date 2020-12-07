@@ -136,7 +136,7 @@ class Open62541Conan(ConanFile):
                     "Lower Open62541 versions than 1.1.0 do not fully support websockets")
 
         if self.settings.compiler == "clang":
-           if tools.Version(self.settings.compiler.version) <= "4":
+            if tools.Version(self.settings.compiler.version) <= "4":
                 raise ConanInvalidConfiguration(
                     "Older clang compiler version than 4.0 are not supported")
             if not self.options.shared:
