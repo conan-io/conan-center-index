@@ -1,5 +1,5 @@
 diff --git a/CMakeLists.txt b/CMakeLists.txt
-index 94ceb127..29fe3e1d 100644
+index 94ceb127..575963fd 100644
 --- a/CMakeLists.txt
 +++ b/CMakeLists.txt
 @@ -9,7 +9,6 @@ string(TOLOWER "${CMAKE_BUILD_TYPE}" BUILD_TYPE_LOWER_CASE)
@@ -117,6 +117,15 @@ index 94ceb127..29fe3e1d 100644
  # Generate properly versioned shared library links on Linux
  SET_TARGET_PROPERTIES(open62541 PROPERTIES SOVERSION "${OPEN62541_VER_MAJOR}" VERSION "${OPEN62541_VER_MAJOR}.${OPEN62541_VER_MINOR}.${OPEN62541_VER_PATCH}")
  
+@@ -1163,7 +1128,7 @@ install(TARGETS open62541 ${EXTRATARGETS}
+         EXPORT open62541Targets
+         LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+         ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
+-        RUNTIME DESTINATION ${CMAKE_INSTALL_PREFIX}
++        RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
+         INCLUDES DESTINATION include)
+ 
+ if(UA_ENABLE_AMALGAMATION)
 diff --git a/src/server/ua_discovery_manager.h b/src/server/ua_discovery_manager.h
 index 3d1ae299..e7e5e776 100644
 --- a/src/server/ua_discovery_manager.h
