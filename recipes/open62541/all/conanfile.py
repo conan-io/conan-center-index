@@ -36,9 +36,9 @@ class Open62541Conan(ConanFile):
         "discovery": [True, False, "With Multicast"],
         "discovery_semaphore": [True, False],
         "query": [True, False],
-        "encryption": ["None", "openssl", "mbedtls-apache", "mbedtls-gpl"],
+        "encryption": [False, "openssl", "mbedtls-apache", "mbedtls-gpl"],
         "json_support": [True, False],
-        "pub_sub": ["None", "Simple", "Ethernet", "Ethernet_XDP"],
+        "pub_sub": [False, "Simple", "Ethernet", "Ethernet_XDP"],
         "data_access": [True, False],
         "compiled_nodeset_descriptions": [True, False],
         "namespace_zero": ["MINIMAL", "REDUCED", "FULL"],
@@ -63,15 +63,15 @@ class Open62541Conan(ConanFile):
         "discovery": True,
         "discovery_semaphore": True,
         "query": False,
-        "encryption": "None",
+        "encryption": False,
         "json_support": False,
-        "pub_sub": "None",
+        "pub_sub": False,
         "data_access": True,
         "compiled_nodeset_descriptions": True,
         "namespace_zero": "FULL",
         "embedded_profile": False,
         "typenames": True,
-        "hardening": False,
+        "hardening": True,
         "cpp_compatible": False,
         "readable_statuscodes": True
     }
@@ -135,18 +135,20 @@ class Open62541Conan(ConanFile):
                 raise ConanInvalidConfiguration(
                     "Lower Open62541 versions than 1.1.0 are not cpp compatible due to -fpermisive flags")
 
-            if self.settings.compiler == "clang" and tools.Version(self.settings.compiler.version) >= "9":
-                raise ConanInvalidConfiguration(
-                    "Lower Open62541 versions than 1.1.0 do not support Clang 9.x.x and later compiler versions!")
-
         if self.settings.compiler == "clang":
             if tools.Version(self.settings.compiler.version) <= "4":
                 raise ConanInvalidConfiguration(
                     "Older clang compiler version than 4.0 are not supported")
+            if tools.Version(self.settings.compiler.version) >= "9":
+                raise ConanInvalidConfiguration(
+                    "Open62541 does not support Clang 9.x.x and later compiler versions")
 
-        if self.options.pub_sub != "None" and self.settings.os != "Linux":
+        if self.options.pub_sub != False and self.settings.os != "Linux":
             raise ConanInvalidConfiguration(
                 "PubSub over Ethernet is not supported for your OS!")
+
+        if self.options.web_socket:
+            self.options["libwebsockets"].with_ssl = self.options.encryption
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -233,12 +235,12 @@ class Open62541Conan(ConanFile):
                 self._cmake.definitions["UA_ENABLE_DISCOVERY_MULTICAST"] = True
             self._cmake.definitions["UA_ENABLE_DISCOVERY_SEMAPHORE"] = self.options.discovery_semaphore
         self._cmake.definitions["UA_ENABLE_QUERY"] = self.options.query
-        if self.options.encryption != "None":
+        if self.options.encryption != False:
             self._cmake.definitions["UA_ENABLE_ENCRYPTION"] = True
             if self.options.encryption == "openssl":
                 self._cmake.definitions["UA_ENABLE_ENCRYPTION_OPENSSL"] = True
         self._cmake.definitions["UA_ENABLE_JSON_ENCODING"] = self.options.json_support
-        if self.options.pub_sub != "None":
+        if self.options.pub_sub != False:
             self._cmake.definitions["UA_ENABLE_PUBSUB"] = True
             if self.settings.os == "Linux" and self.options.pub_sub == "Ethernet":
                 self._cmake.definitions["UA_ENABLE_PUBSUB_ETH_UADP"] = True
