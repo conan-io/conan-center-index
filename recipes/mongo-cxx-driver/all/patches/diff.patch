@@ -86,19 +86,6 @@ index 7c79f45..0fcb305 100644
  set_local_dist (src_bsoncxx_DIST_local
     CMakeLists.txt
     array/element.cpp
-diff --git a/src/bsoncxx/stdx/make_unique.hpp b/src/bsoncxx/stdx/make_unique.hpp
-index d954eae..737e76b 100644
---- a/src/bsoncxx/stdx/make_unique.hpp
-+++ b/src/bsoncxx/stdx/make_unique.hpp
-@@ -48,7 +48,7 @@ using ::boost::make_unique;
- BSONCXX_INLINE_NAMESPACE_END
- }  // namespace bsoncxx
- 
--#elif __cplusplus >= 201402L
-+#elif defined(BSONCXX_POLY_USE_STD)
- 
- #include <memory>
- 
 diff --git a/src/mongocxx/CMakeLists.txt b/src/mongocxx/CMakeLists.txt
 index f67ae35..c997f25 100644
 --- a/src/mongocxx/CMakeLists.txt
