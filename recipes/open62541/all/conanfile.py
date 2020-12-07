@@ -263,10 +263,6 @@ class Open62541Conan(ConanFile):
         cmake = self._configure_cmake()
         cmake.install()
 
-        if self.settings.os == "Windows" and self.options.shared:
-            self.copy("*.dll", dst="bin", keep_path=False)
-            tools.remove_files_by_mask(self.package_folder, '*.dll')
-
         tools.remove_files_by_mask(os.path.join(
             self.package_folder, "bin"), '*.pdb')
         tools.remove_files_by_mask(os.path.join(
