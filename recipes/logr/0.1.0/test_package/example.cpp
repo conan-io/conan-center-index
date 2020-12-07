@@ -1,12 +1,25 @@
 #include <iostream>
 
-#include <logr/ostream_backend.hpp>
+#include <spdlog/sinks/stdout_sinks.h>
+
 #include <logr/config.hpp>
+#include <logr/spdlog_backend.hpp>
+
+auto make_logger()
+{
+    auto sink = std::make_shared< spdlog::sinks::stdout_sink_st >();
+    sink->set_pattern("[%Y-%m-%d %T][%n][%l] %v [%g]");
+
+    return logr::spdlog_logger_t<>{
+        "console",
+        std::move( sink ),
+        logr::log_message_level::trace
+    };
+}
 
 int main()
 {
-    logr::ostream_logger_t<> logger{ std::cout,
-                                     logr::log_message_level::trace };
+    auto logger = make_logger();
 
     logger.info( []( auto & out ){
         fmt::format_to( out,
