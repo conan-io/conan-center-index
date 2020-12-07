@@ -131,6 +131,10 @@ class Open62541Conan(ConanFile):
                 raise ConanInvalidConfiguration(
                     "Lower Open62541 versions than 1.1.0 do not fully support websockets")
 
+            if self.options.cpp_compatible:
+                raise ConanInvalidConfiguration(
+                    "Lower Open62541 versions than 1.1.0 are not cpp compatible due to -fpermisive flags")
+
         if self.settings.compiler == "clang":
             if tools.Version(self.settings.compiler.version) <= "4":
                 raise ConanInvalidConfiguration(
