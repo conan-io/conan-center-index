@@ -4,7 +4,6 @@ import os
 
 class LogrConan(ConanFile):
     name = "logr"
-    version = "0.1.0"
     license = "BSD 3-Clause License"
     homepage = "https://github.com/ngrodzitski/logr"
     url = "https://github.com/conan-io/conan-center-index"
