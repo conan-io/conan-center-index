@@ -20,27 +20,13 @@ class qt(Generator):
         return "[Paths]\nPrefix = %s\n" % self.conanfile.deps_cpp_info["qt"].rootpath.replace("\\", "/")
 
 
-def _getsubmodules():
-    config = configparser.ConfigParser()
-    config.read('qtmodules.conf')
-    res = {}
-    assert config.sections()
-    for s in config.sections():
-        section = str(s)
-        assert section.startswith("submodule ")
-        assert section.count('"') == 2
-        modulename = section[section.find('"') + 1: section.rfind('"')]
-        status = str(config.get(section, "status"))
-        if status != "obsolete" and status != "ignore":
-            res[modulename] = {"status": status,
-                               "path": str(config.get(section, "path")), "depends": []}
-            if config.has_option(section, "depends"):
-                res[modulename]["depends"] = [str(i) for i in config.get(section, "depends").split()]
-    return res
-
-
 class QtConan(ConanFile):
-    _submodules = _getsubmodules()
+    _submodules = ["qtsvg", "qtdeclarative", "qtactiveqt", "qtscript", "qtmultimedia", "qttools", "qtxmlpatterns", 
+    "qttranslations", "qtdoc", "qtrepotools", "qtqa", "qtlocation", "qtsensors", "qtconnectivity", "qtwayland",
+    "qt3d", "qtimageformats", "qtgraphicaleffects", "qtquickcontrols", "qtserialbus", "qtserialport", "qtx11extras",
+    "qtmacextras", "qtwinextras", "qtandroidextras", "qtwebsockets", "qtwebchannel", "qtwebengine", "qtwebview", 
+    "qtquickcontrols2", "qtpurchasing", "qtcharts", "qtdatavis3d", "qtvirtualkeyboard", "qtgamepad", "qtscxml",
+    "qtspeech", "qtnetworkauth", "qtremoteobjects", "qtwebglplugin", "qtlottie", "qtquicktimeline", "qtquick3d"]
 
     generators = "pkg_config"
     name = "qt"
@@ -49,7 +35,7 @@ class QtConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://www.qt.io"
     license = "LGPL-3.0"
-    exports = ["qtmodules.conf", "patches/*.diff"]
+    exports = ["patches/*.diff"]
     settings = "os", "arch", "compiler", "build_type"
 
     options = {
@@ -86,7 +72,7 @@ class QtConan(ConanFile):
         "config": "ANY",
         "multiconfiguration": [True, False],
     }
-    options.update({module: [True, False] for module in _submodules if module != 'qtbase'})
+    options.update({module: [True, False] for module in _submodules})
 
     no_copy_source = True
     default_options = {
@@ -122,10 +108,13 @@ class QtConan(ConanFile):
         "config": None,
         "multiconfiguration": False,
     }
-    default_options.update({module: False for module in _submodules if module != 'qtbase'})
+    default_options.update({module: False for module in _submodules})
 
     requires = "zlib/1.2.11"
     short_paths = True
+
+    def export(self):
+        self.copy("qtmodules%s.conf" % self.version)
 
     def build_requirements(self):
         if tools.os_info.is_windows and self.settings.compiler == "Visual Studio":
@@ -240,14 +229,30 @@ class QtConan(ConanFile):
         if "MT" in self.settings.get_safe("compiler.runtime", default="") and self.options.shared:
             raise ConanInvalidConfiguration("Qt cannot be built as shared library with static runtime")
 
+        config = configparser.ConfigParser()
+        config.read(os.path.join(self.recipe_folder, 'qtmodules%s.conf' % self.version))
+        submodules_tree = {}
+        assert config.sections()
+        for s in config.sections():
+            section = str(s)
+            assert section.startswith("submodule ")
+            assert section.count('"') == 2
+            modulename = section[section.find('"') + 1: section.rfind('"')]
+            status = str(config.get(section, "status"))
+            if status != "obsolete" and status != "ignore":
+                submodules_tree[modulename] = {"status": status,
+                                "path": str(config.get(section, "path")), "depends": []}
+                if config.has_option(section, "depends"):
+                    submodules_tree[modulename]["depends"] = [str(i) for i in config.get(section, "depends").split()]
+
         def _enablemodule(mod):
             if mod != 'qtbase':
                 setattr(self.options, mod, True)
-            for req in self._submodules[mod]["depends"]:
+            for req in submodules_tree[mod]["depends"]:
                 _enablemodule(req)
 
         for module in self._submodules:
-            if module != 'qtbase' and getattr(self.options, module):
+            if getattr(self.options, module):
                 _enablemodule(module)
 
     def requirements(self):
@@ -439,8 +444,7 @@ class QtConan(ConanFile):
             args.append("-optimize-size")
 
         for module in self._submodules:
-            if module != 'qtbase' and not getattr(self.options, module) \
-                    and os.path.isdir(os.path.join(self.source_folder, 'qt5', self._submodules[module]['path'])):
+            if not getattr(self.options, module):
                 args.append("-skip " + module)
 
         args.append("--zlib=system")
@@ -639,7 +643,7 @@ Documentation = bin/datadir/doc
 Examples = bin/datadir/examples""")
         self.copy("*LICENSE*", src="qt5/", dst="licenses")
         for module in self._submodules:
-            if module != 'qtbase' and not getattr(self.options, module):
+            if not getattr(self.options, module):
                 tools.rmdir(os.path.join(self.package_folder, "licenses", module))
         tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
         tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
