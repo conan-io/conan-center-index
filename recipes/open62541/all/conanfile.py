@@ -33,9 +33,8 @@ class Open62541Conan(ConanFile):
         "multithreading": ["None", "Threadsafe", "Internal threads"],
         "imutable_nodes": [True, False],
         "web_socket": [True, False],
-        "discovery": [True, False],
+        "discovery": [True, False, "With Multicast"],
         "discovery_semaphore": [True, False],
-        "discovery_multicast": [True, False],
         "query": [True, False],
         "encryption": ["None", "openssl", "mbedtls-apache", "mbedtls-gpl"],
         "json_support": [True, False],
@@ -63,7 +62,6 @@ class Open62541Conan(ConanFile):
         "web_socket": False,
         "discovery": True,
         "discovery_semaphore": True,
-        "discovery_multicast": True,
         "query": False,
         "encryption": "None",
         "json_support": False,
@@ -116,9 +114,9 @@ class Open62541Conan(ConanFile):
                     "Open62541 requires subscription option")
 
         if not self.options.discovery:
-            if self.options.discovery_multicast or self.options.discovery_semaphore:
+            if self.options.discovery_semaphore:
                 raise ConanInvalidConfiguration(
-                    "Open62541 requires discovery option")
+                    "Open62541 discovery sempahore option requires discovery option to be enabled")
 
         if tools.Version(self.version) <= "1.1.0":
             if self.options.encryption == "openssl":
@@ -127,7 +125,7 @@ class Open62541Conan(ConanFile):
 
             if self.options.multithreading != "None":
                 raise ConanInvalidConfiguration(
-                    "Lower Open62541 versions than 1.1.0 do not fully support multithreading!")
+                    "Lower Open62541 versions than 1.1.0 do not fully support multithreading")
 
             if self.options.web_socket:
                 raise ConanInvalidConfiguration(
@@ -224,9 +222,11 @@ class Open62541Conan(ConanFile):
             self._cmake.definitions["UA_ENABLE_HISTORIZING"] = True
             if self.options.historize == "Experimental":
                 self._cmake.definitions["UA_ENABLE_EXPERIMENTAL_HISTORIZING"] = True
-        self._cmake.definitions["UA_ENABLE_DISCOVERY"] = self.options.discovery
-        self._cmake.definitions["UA_ENABLE_DISCOVERY_MULTICAST"] = self.options.discovery_multicast
-        self._cmake.definitions["UA_ENABLE_DISCOVERY_SEMAPHORE"] = self.options.discovery_semaphore
+        if self.options.discovery != False:
+            self._cmake.definitions["UA_ENABLE_DISCOVERY"] = self.options.discovery
+            if self.options.discovery == "With Multicast":
+                self._cmake.definitions["UA_ENABLE_DISCOVERY_MULTICAST"] = self.options.discovery_multicast
+            self._cmake.definitions["UA_ENABLE_DISCOVERY_SEMAPHORE"] = self.options.discovery_semaphore
         self._cmake.definitions["UA_ENABLE_QUERY"] = self.options.query
         if self.options.encryption != "None":
             self._cmake.definitions["UA_ENABLE_ENCRYPTION"] = True
