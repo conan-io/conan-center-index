@@ -1,3 +1,4 @@
+from contextlib import contextmanager
 import glob
 import os
 
@@ -649,15 +650,20 @@ class GdalConan(ConanFile):
         self._autotools.configure(args=args, vars=env_build_vars)
         return self._autotools
 
+    @contextmanager
+    def _msvc_build_environment(self):
+        with tools.chdir(self._source_subfolder):
+            with tools.vcvars(self.settings):
+                with tools.environment_append(VisualStudioBuildEnvironment(self).vars):
+                    yield
+
     def build(self):
         self._validate_dependency_graph()
         self._patch_sources()
         if self.settings.compiler == "Visual Studio":
             self._edit_nmake_opt()
-            with tools.chdir(self._source_subfolder):
-                with tools.vcvars(self.settings):
-                    with tools.environment_append(VisualStudioBuildEnvironment(self).vars):
-                        self.run("nmake -f makefile.vc {}".format(" ".join(self._get_nmake_args())))
+            with self._msvc_build_environment():
+                self.run("nmake -f makefile.vc {}".format(" ".join(self._get_nmake_args())))
         else:
             with tools.chdir(self._source_subfolder):
                 self.run("{} -fiv".format(tools.get_env("AUTORECONF")), win_bash=tools.os_info.is_windows)
@@ -667,10 +673,8 @@ class GdalConan(ConanFile):
     def package(self):
         self.copy("LICENSE.TXT", dst="licenses", src=self._source_subfolder)
         if self.settings.compiler == "Visual Studio":
-            with tools.chdir(self._source_subfolder):
-                with tools.vcvars(self.settings):
-                    with tools.environment_append(VisualStudioBuildEnvironment(self).vars):
-                        self.run("nmake -f makefile.vc devinstall {}".format(" ".join(self._get_nmake_args())))
+            with self._msvc_build_environment():
+                self.run("nmake -f makefile.vc devinstall {}".format(" ".join(self._get_nmake_args())))
             for pdb_file in glob.glob(os.path.join(self.package_folder, "lib", "*.pdb")):
                 os.remove(pdb_file)
         else:
