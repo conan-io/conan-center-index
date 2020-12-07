@@ -26,8 +26,7 @@ class Open62541Conan(ConanFile):
         "shared": [True, False],
         "historize": [True, False, "Experimental"],
         "logging_level": ["Fatal", "Error", "Warning", "Info", "Debug", "Trace"],
-        "subscription": [True, False],
-        "subscription_events": [True, False],
+        "subscription": [True, False, "With Events"],
         "methods": [True, False],
         "dynamic_nodes": [True, False],
         "single_header": [True, False],
@@ -56,7 +55,6 @@ class Open62541Conan(ConanFile):
         "historize": False,
         "logging_level": "Info",
         "subscription": True,
-        "subscription_events": False,
         "methods": True,
         "dynamic_nodes": True,
         "single_header": False,
@@ -65,7 +63,7 @@ class Open62541Conan(ConanFile):
         "web_socket": False,
         "discovery": True,
         "discovery_semaphore": True,
-        "discovery_multicast": False,
+        "discovery_multicast": True,
         "query": False,
         "encryption": "None",
         "json_support": False,
@@ -210,8 +208,10 @@ class Open62541Conan(ConanFile):
         self._cmake.definitions["OPEN62541_VER_PATCH"] = version.patch
 
         self._cmake.definitions["UA_LOGLEVEL"] = self._get_log_level()
-        self._cmake.definitions["UA_ENABLE_SUBSCRIPTIONS"] = self.options.subscription
-        self._cmake.definitions["UA_ENABLE_SUBSCRIPTIONS_EVENTS"] = self.options.subscription_events
+        if self.options.subscription != False:
+            self._cmake.definitions["UA_ENABLE_SUBSCRIPTIONS"] = True
+            if self.options.subscription == "With Events":
+                self._cmake.definitions["UA_ENABLE_SUBSCRIPTIONS_EVENTS"] = True
         self._cmake.definitions["UA_ENABLE_METHODCALLS"] = self.options.methods
         self._cmake.definitions["UA_ENABLE_NODEMANAGEMENT"] = self.options.dynamic_nodes
         self._cmake.definitions["UA_ENABLE_AMALGAMATION"] = self.options.single_header
@@ -284,6 +284,7 @@ class Open62541Conan(ConanFile):
             "include",
             os.path.join("include", "plugin")
         ]
+
         if self.options.single_header:
             self.cpp_info.defines.append("UA_ENABLE_AMALGAMATION")
         if self.settings.os == "Windows":
