@@ -331,11 +331,10 @@ class GdalConan(ConanFile):
 
     def build_requirements(self):
         if self.settings.compiler != "Visual Studio":
+            self.build_requires("libtool/2.4.6")
+            self.build_requires("pkgconf/1.7.3")
             if tools.os_info.is_windows and not tools.get_env("CONAN_BASH_PATH"):
                 self.build_requires("msys2/20200517")
-            else:
-                self.build_requires("libtool/2.4.6")
-                self.build_requires("pkgconf/1.7.3")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
@@ -502,9 +501,6 @@ class GdalConan(ConanFile):
         if self._autotools:
             return self._autotools
 
-        configure_dir = self._source_subfolder
-        with tools.chdir(configure_dir):
-            self.run("autoconf -i", win_bash=tools.os_info.is_windows)
         self._autotools = AutoToolsBuildEnvironment(self, win_bash=tools.os_info.is_windows)
 
         args = []
@@ -650,8 +646,7 @@ class GdalConan(ConanFile):
            self.settings.os == "Linux" and tools.stdcpp_library(self) == "c++":
             env_build_vars["LDFLAGS"] = "-stdlib=libc++ {}".format(env_build_vars["LDFLAGS"])
 
-        with tools.chdir(configure_dir):
-            self._autotools.configure(args=args, vars=env_build_vars)
+        self._autotools.configure(args=args, vars=env_build_vars)
         return self._autotools
 
     def build(self):
@@ -664,8 +659,9 @@ class GdalConan(ConanFile):
                     with tools.environment_append(VisualStudioBuildEnvironment(self).vars):
                         self.run("nmake -f makefile.vc {}".format(" ".join(self._get_nmake_args())))
         else:
-            autotools = self._configure_autotools()
             with tools.chdir(self._source_subfolder):
+                self.run("{} -fiv".format(tools.get_env("AUTORECONF")), win_bash=tools.os_info.is_windows)
+                autotools = self._configure_autotools()
                 autotools.make()
 
     def package(self):
@@ -678,8 +674,8 @@ class GdalConan(ConanFile):
             for pdb_file in glob.glob(os.path.join(self.package_folder, "lib", "*.pdb")):
                 os.remove(pdb_file)
         else:
-            autotools = self._configure_autotools()
             with tools.chdir(self._source_subfolder):
+                autotools = self._configure_autotools()
                 autotools.install()
             tools.rmdir(os.path.join(self.package_folder, "lib", "gdalplugins"))
             tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
