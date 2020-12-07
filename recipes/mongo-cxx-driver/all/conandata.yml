@@ -6,3 +6,5 @@ patches:
   "3.6.1":
     - patch_file: "patches/diff.patch"
       base_path: "source_subfolder"
+    - patch_file: "patches/link_conan_boost.patch"
+      base_path: "source_subfolder"
