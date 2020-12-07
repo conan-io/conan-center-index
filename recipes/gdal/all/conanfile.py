@@ -50,7 +50,7 @@ class GdalConan(ConanFile):
         "with_openjpeg": [True, False],
         # "with_fgdb": [True, False],
         "with_gnm": [True, False],
-        "with_mysql": [None, "libmysqlclient"], # TODO: add mariadb-connector-c when available
+        "with_mysql": [None, "libmysqlclient", "mariadb-connector-c"],
         "with_xerces": [True, False],
         "with_expat": [True, False],
         "with_libkml": [True, False],
@@ -268,8 +268,8 @@ class GdalConan(ConanFile):
         #     self.requires("file-geodatabase-api/x.x.x")
         if self.options.with_mysql == "libmysqlclient":
             self.requires("libmysqlclient/8.0.17")
-        # elif self.options.with_mysql == "mariadb-connector-c":
-        #     self.requires("mariadb-connector-c/3.1.8")
+        elif self.options.with_mysql == "mariadb-connector-c":
+            self.requires("mariadb-connector-c/3.1.11")
         if self.options.with_xerces:
             self.requires("xerces-c/3.2.3")
         if self.options.with_expat:
@@ -383,7 +383,7 @@ class GdalConan(ConanFile):
             self._replace_in_nmake_opt("PCIDSK_SETTING=INTERNAL", "")
         if self.options.with_pg:
             self._replace_in_nmake_opt("#PG_LIB = n:\\pkg\\libpq_win32\\lib\\libpqdll.lib wsock32.lib", "PG_LIB=")
-        if self.options.with_mysql == "libmysqlclient":
+        if bool(self.options.with_mysql):
             self._replace_in_nmake_opt("#MYSQL_LIB = D:\\Software\\MySQLServer4.1\\lib\\opt\\libmysql.lib advapi32.lib", "MYSQL_LIB=")
         if self.options.get_safe("with_sqlite3"):
             self._replace_in_nmake_opt("#SQLITE_LIB=N:\\pkg\\sqlite-win32\\sqlite3_i.lib", "SQLITE_LIB=")
@@ -452,6 +452,8 @@ class GdalConan(ConanFile):
             args.append("PG_INC_DIR=\"{}\"".format(" -I".join(self.deps_cpp_info["libpq"].include_paths)))
         if self.options.with_mysql == "libmysqlclient":
             args.append("MYSQL_INC_DIR=\"{}\"".format(" -I".join(self.deps_cpp_info["libmysqlclient"].include_paths)))
+        elif self.options.with_mysql == "mariadb-connector-c":
+            args.append("MYSQL_INC_DIR=\"{}\"".format(" -I".join(self.deps_cpp_info["mariadb-connector-c"].include_paths)))
         if self.options.get_safe("with_sqlite3"):
             args.append("SQLITE_INC=\"-I{}\"".format(" -I".join(self.deps_cpp_info["sqlite3"].include_paths)))
         if self.options.get_safe("with_pcre"):
