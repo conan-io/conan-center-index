@@ -1,5 +1,5 @@
 diff --git a/CMakeLists.txt b/CMakeLists.txt
-index 94ceb127..2bba3d04 100644
+index 94ceb127..80eb36d1 100644
 --- a/CMakeLists.txt
 +++ b/CMakeLists.txt
 @@ -7,9 +7,8 @@ endif()
@@ -131,11 +131,10 @@ index 94ceb127..2bba3d04 100644
  endif()
  
  set(exported_headers ${exported_headers}
-@@ -742,22 +747,6 @@ if(UA_DEBUG_DUMP_PKGS)
-     list(APPEND lib_sources ${PROJECT_SOURCE_DIR}/plugins/ua_debug_dump_pkgs.c)
+@@ -743,18 +748,7 @@ if(UA_DEBUG_DUMP_PKGS)
  endif()
  
--if(UA_ENABLE_DISCOVERY_MULTICAST)
+ if(UA_ENABLE_DISCOVERY_MULTICAST)
 -    # prepend in list, otherwise it complains that winsock2.h has to be included before windows.h
 -    set(internal_headers ${PROJECT_BINARY_DIR}/src_generated/mdnsd_config.h
 -                         ${PROJECT_SOURCE_DIR}/deps/mdnsd/libmdnsd/1035.h
@@ -143,18 +142,15 @@ index 94ceb127..2bba3d04 100644
 -                         ${PROJECT_SOURCE_DIR}/deps/mdnsd/libmdnsd/sdtxt.h
 -                         ${PROJECT_SOURCE_DIR}/deps/mdnsd/libmdnsd/mdnsd.h
 -                         ${internal_headers} )
--    set(lib_sources ${PROJECT_SOURCE_DIR}/src/server/ua_server_discovery_mdns.c
+     set(lib_sources ${PROJECT_SOURCE_DIR}/src/server/ua_server_discovery_mdns.c
 -        ${PROJECT_SOURCE_DIR}/deps/mdnsd/libmdnsd/1035.c
 -        ${PROJECT_SOURCE_DIR}/deps/mdnsd/libmdnsd/xht.c
 -        ${PROJECT_SOURCE_DIR}/deps/mdnsd/libmdnsd/sdtxt.c
 -        ${PROJECT_SOURCE_DIR}/deps/mdnsd/libmdnsd/mdnsd.c
--        ${lib_sources})
--endif()
--
- if(UA_BUILD_FUZZING OR UA_BUILD_OSS_FUZZ)
-     set(lib_sources
-         ${lib_sources}
-@@ -972,6 +961,10 @@ else()
+         ${lib_sources})
+ endif()
+ 
+@@ -972,6 +966,10 @@ else()
                       open62541-generator-namespace
                       )
      target_include_directories(open62541-object PRIVATE ${PROJECT_SOURCE_DIR}/src)
@@ -165,7 +161,7 @@ index 94ceb127..2bba3d04 100644
  
      add_library(open62541-plugins OBJECT ${default_plugin_sources} ${ua_architecture_sources} ${exported_headers})
      add_dependencies(open62541-plugins open62541-generator-types open62541-generator-transport open62541-generator-namespace)
-@@ -1163,7 +1156,7 @@ install(TARGETS open62541 ${EXTRATARGETS}
+@@ -1163,7 +1161,7 @@ install(TARGETS open62541 ${EXTRATARGETS}
          EXPORT open62541Targets
          LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
          ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}

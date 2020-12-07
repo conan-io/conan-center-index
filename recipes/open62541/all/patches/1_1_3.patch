@@ -1,5 +1,5 @@
 diff --git a/CMakeLists.txt b/CMakeLists.txt
-index 2fd6ef29..779c7c2a 100755
+index 2fd6ef29..989a575b 100755
 --- a/CMakeLists.txt
 +++ b/CMakeLists.txt
 @@ -9,7 +9,6 @@ string(TOLOWER "${CMAKE_BUILD_TYPE}" BUILD_TYPE_LOWER_CASE)
@@ -81,11 +81,10 @@ index 2fd6ef29..779c7c2a 100755
  endif()
  
  set(exported_headers ${exported_headers}
-@@ -945,22 +935,6 @@ if(UA_DEBUG_DUMP_PKGS)
-     list(APPEND lib_sources ${PROJECT_SOURCE_DIR}/tests/testing-plugins/testing_networklayers.c)
+@@ -946,18 +936,7 @@ if(UA_DEBUG_DUMP_PKGS)
  endif()
  
--if(UA_ENABLE_DISCOVERY_MULTICAST)
+ if(UA_ENABLE_DISCOVERY_MULTICAST)
 -    # prepend in list, otherwise it complains that winsock2.h has to be included before windows.h
 -    set(internal_headers ${PROJECT_BINARY_DIR}/src_generated/mdnsd_config.h
 -                         ${PROJECT_SOURCE_DIR}/deps/mdnsd/libmdnsd/1035.h
@@ -93,18 +92,15 @@ index 2fd6ef29..779c7c2a 100755
 -                         ${PROJECT_SOURCE_DIR}/deps/mdnsd/libmdnsd/sdtxt.h
 -                         ${PROJECT_SOURCE_DIR}/deps/mdnsd/libmdnsd/mdnsd.h
 -                         ${internal_headers} )
--    set(lib_sources ${PROJECT_SOURCE_DIR}/src/server/ua_server_discovery_mdns.c
+     set(lib_sources ${PROJECT_SOURCE_DIR}/src/server/ua_server_discovery_mdns.c
 -        ${PROJECT_SOURCE_DIR}/deps/mdnsd/libmdnsd/1035.c
 -        ${PROJECT_SOURCE_DIR}/deps/mdnsd/libmdnsd/xht.c
 -        ${PROJECT_SOURCE_DIR}/deps/mdnsd/libmdnsd/sdtxt.c
 -        ${PROJECT_SOURCE_DIR}/deps/mdnsd/libmdnsd/mdnsd.c
--        ${lib_sources})
--endif()
--
- if(UA_BUILD_FUZZING OR UA_BUILD_OSS_FUZZ)
-     set(lib_sources
-         ${lib_sources}
-@@ -1186,6 +1160,9 @@ else()
+         ${lib_sources})
+ endif()
+ 
+@@ -1186,6 +1165,9 @@ else()
                        )
  
      target_include_directories(open62541-object PRIVATE ${PROJECT_SOURCE_DIR}/src)
