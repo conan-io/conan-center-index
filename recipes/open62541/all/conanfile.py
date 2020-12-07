@@ -135,9 +135,6 @@ class Open62541Conan(ConanFile):
             if tools.Version(self.settings.compiler.version) <= "4":
                 raise ConanInvalidConfiguration(
                     "Older clang compiler version than 4.0 are not supported")
-            if not self.options.shared:
-                raise ConanInvalidConfiguration(
-                    "Clang compiler can not be used to build a static library")
 
         if self.options.pub_sub != "None" and self.settings.os != "Linux":
             raise ConanInvalidConfiguration(
