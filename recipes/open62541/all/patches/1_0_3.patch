@@ -1,10 +1,13 @@
 diff --git a/CMakeLists.txt b/CMakeLists.txt
-index 94ceb127..575963fd 100644
+index 94ceb127..2bba3d04 100644
 --- a/CMakeLists.txt
 +++ b/CMakeLists.txt
-@@ -9,7 +9,6 @@ string(TOLOWER "${CMAKE_BUILD_TYPE}" BUILD_TYPE_LOWER_CASE)
+@@ -7,9 +7,8 @@ endif()
  
- set(CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/tools/cmake")
+ string(TOLOWER "${CMAKE_BUILD_TYPE}" BUILD_TYPE_LOWER_CASE)
+ 
+-set(CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/tools/cmake")
++set(CMAKE_MODULE_PATH "${CMAKE_MODULE_PATH};${PROJECT_SOURCE_DIR};${PROJECT_SOURCE_DIR}/tools/cmake")
  find_package(PythonInterp REQUIRED)
 -find_package(Git)
  include(AssignSourceGroup)
@@ -28,17 +31,69 @@ index 94ceb127..575963fd 100644
  
  #################
  # Build Options #
-@@ -343,9 +341,6 @@ mark_as_advanced(UA_PACK_DEBIAN)
- set(UA_DYNAMIC_LINKING OFF)
- if(BUILD_SHARED_LIBS)
-   set(UA_DYNAMIC_LINKING ON)
--  if (UA_ENABLE_DISCOVERY_MULTICAST)
--      set(MDNSD_DYNAMIC_LINKING ON)
--  endif()
- endif()
+@@ -388,23 +386,44 @@ endif()
+ include(CompilerFlags)
+ if(NOT UA_COMPILE_AS_CXX AND (CMAKE_COMPILER_IS_GNUCC OR "x${CMAKE_C_COMPILER_ID}" STREQUAL "xClang"))
+     # Compiler
+-    add_definitions(-std=c99 -pipe
+-                    -Wall -Wextra -Wpedantic
+-                    -Wno-static-in-inline # clang doesn't like the use of static inline methods inside static inline methods
+-                    -Wno-overlength-strings # may happen in the nodeset compiler when complex values are directly encoded
+-                    -Wno-unused-parameter # some methods may require unused arguments to cast to a method pointer
+-                    -Wmissing-prototypes -Wstrict-prototypes -Wredundant-decls
+-                    -Wformat -Wformat-security -Wformat-nonliteral
+-                    -Wuninitialized -Winit-self
+-                    -Wcast-qual
+-                    -Wstrict-overflow
+-                    -Wnested-externs
+-                    -Wmultichar
+-                    -Wundef
+-                    -Wc++-compat
+-                    -fno-strict-aliasing # fewer compiler assumptions about pointer types
+-                    -fexceptions # recommended for multi-threaded C code, also in combination with C++ code
+-                    )
++    string(COMPARE GREATER_EQUAL ${CMAKE_C_COMPILER_VERSION} "9.0.0" IS_CLANG_9_COMPATIBLE)
++    if(${IS_CLANG_9_COMPATIBLE})
++        add_definitions(-std=c99 -pipe
++                        -Wall -Wextra -Wpedantic
++                        -Wno-static-in-inline # clang doesn't like the use of static inline methods inside static inline methods
++                        -Wno-overlength-strings # may happen in the nodeset compiler when complex values are directly encoded
++                        -Qunused-arguments # some methods may require unused arguments to cast to a method pointer
++                        -Wmissing-prototypes -Wstrict-prototypes -Wredundant-decls
++                        -Wformat -Wformat-security -Wformat-nonliteral
++                        -Wuninitialized -Winit-self
++                        -Wcast-qual
++                        -Wstrict-overflow
++                        -Wnested-externs
++                        -Wmultichar
++                        -Wundef
++                        -Wc++-compat
++                        -fno-strict-aliasing # fewer compiler assumptions about pointer types
++                        -fexceptions # recommended for multi-threaded C code, also in combination with C++ code
++        )
++    else()
++        add_definitions(-std=c99 -pipe
++                        -Wall -Wextra -Wpedantic
++                        -Wno-static-in-inline # clang doesn't like the use of static inline methods inside static inline methods
++                        -Wno-overlength-strings # may happen in the nodeset compiler when complex values are directly encoded
++                        -Wno-unused-parameter # some methods may require unused arguments to cast to a method pointer
++                        -Wmissing-prototypes -Wstrict-prototypes -Wredundant-decls
++                        -Wformat -Wformat-security -Wformat-nonliteral
++                        -Wuninitialized -Winit-self
++                        -Wcast-qual
++                        -Wstrict-overflow
++                        -Wnested-externs
++                        -Wmultichar
++                        -Wundef
++                        -Wc++-compat
++                        -fno-strict-aliasing # fewer compiler assumptions about pointer types
++                        -fexceptions # recommended for multi-threaded C code, also in combination with C++ code
++        )
++    endif()
+     set(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} -Werror")
  
- # Warn if experimental features are enabled
-@@ -440,18 +435,6 @@ if(NOT UA_COMPILE_AS_CXX AND (CMAKE_COMPILER_IS_GNUCC OR "x${CMAKE_C_COMPILER_ID
+     if (NOT MINGW)
+@@ -440,18 +459,6 @@ if(NOT UA_COMPILE_AS_CXX AND (CMAKE_COMPILER_IS_GNUCC OR "x${CMAKE_C_COMPILER_ID
      # Linker
      set(CMAKE_SHARED_LIBRARY_LINK_C_FLAGS "") # cmake sets -rdynamic by default
  
@@ -57,7 +112,7 @@ index 94ceb127..575963fd 100644
      if (NOT MINGW)
          if(UA_ENABLE_HARDENING AND ((CMAKE_BUILD_TYPE STREQUAL "Release") OR (CMAKE_BUILD_TYPE STREQUAL "RelWithDebInfo")))
              check_cc_flag("-D_FORTIFY_SOURCE=2") # run-time buffer overflow detection (needs at least -O1)
-@@ -493,8 +476,6 @@ if(APPLE)
+@@ -493,8 +500,6 @@ if(APPLE)
  endif()
  
  if(MSVC)
@@ -66,17 +121,17 @@ index 94ceb127..575963fd 100644
    if(UA_MSVC_FORCE_STATIC_CRT AND NOT BUILD_SHARED_LIBS)
      set(CompilerFlags CMAKE_CXX_FLAGS CMAKE_CXX_FLAGS_DEBUG CMAKE_CXX_FLAGS_RELEASE CMAKE_C_FLAGS
          CMAKE_C_FLAGS_DEBUG CMAKE_C_FLAGS_RELEASE)
-@@ -520,8 +501,8 @@ configure_file(include/open62541/config.h.in ${PROJECT_BINARY_DIR}/src_generated
+@@ -520,8 +525,8 @@ configure_file(include/open62541/config.h.in ${PROJECT_BINARY_DIR}/src_generated
  configure_file(open62541.pc.in ${PROJECT_BINARY_DIR}/src_generated/open62541.pc @ONLY)
  
  if(UA_ENABLE_DISCOVERY_MULTICAST)
-+    find_package(pro-mdnsd)
++    find_package(mdnsd)
      set(MDNSD_LOGLEVEL 300 CACHE STRING "Level at which logs shall be reported" FORCE)
 -    configure_file("deps/mdnsd/libmdnsd/mdnsd_config.h.in" "${PROJECT_BINARY_DIR}/src_generated/mdnsd_config.h")
  endif()
  
  set(exported_headers ${exported_headers}
-@@ -742,22 +723,6 @@ if(UA_DEBUG_DUMP_PKGS)
+@@ -742,22 +747,6 @@ if(UA_DEBUG_DUMP_PKGS)
      list(APPEND lib_sources ${PROJECT_SOURCE_DIR}/plugins/ua_debug_dump_pkgs.c)
  endif()
  
@@ -99,25 +154,18 @@ index 94ceb127..575963fd 100644
  if(UA_BUILD_FUZZING OR UA_BUILD_OSS_FUZZ)
      set(lib_sources
          ${lib_sources}
-@@ -1031,13 +996,13 @@ endif()
- # Ensure that the open62541::open62541 alias can be used inside open62541's build
- add_library(open62541::open62541 ALIAS open62541)
- 
-+if(UA_ENABLE_DISCOVERY_MULTICAST)
-+    target_link_libraries(open62541 PUBLIC pro-mdnsd::pro-mdnsd)
-+endif()
+@@ -972,6 +961,10 @@ else()
+                      open62541-generator-namespace
+                      )
+     target_include_directories(open62541-object PRIVATE ${PROJECT_SOURCE_DIR}/src)
++    if(UA_ENABLE_DISCOVERY_MULTICAST)
++        target_link_libraries(open62541-object PUBLIC mdnsd::mdnsd)
++    endif()
 +
- # Export Symbols
- target_compile_definitions(open62541-object PRIVATE -DUA_DYNAMIC_LINKING_EXPORT)
- target_compile_definitions(open62541 PRIVATE -DUA_DYNAMIC_LINKING_EXPORT)
--if (UA_ENABLE_DISCOVERY_MULTICAST)
--    target_compile_definitions(open62541-object PRIVATE -DMDNSD_DYNAMIC_LINKING_EXPORT)
--    target_compile_definitions(open62541 PRIVATE -DMDNSD_DYNAMIC_LINKING_EXPORT)
--endif()
- # Generate properly versioned shared library links on Linux
- SET_TARGET_PROPERTIES(open62541 PROPERTIES SOVERSION "${OPEN62541_VER_MAJOR}" VERSION "${OPEN62541_VER_MAJOR}.${OPEN62541_VER_MINOR}.${OPEN62541_VER_PATCH}")
  
-@@ -1163,7 +1128,7 @@ install(TARGETS open62541 ${EXTRATARGETS}
+     add_library(open62541-plugins OBJECT ${default_plugin_sources} ${ua_architecture_sources} ${exported_headers})
+     add_dependencies(open62541-plugins open62541-generator-types open62541-generator-transport open62541-generator-namespace)
+@@ -1163,7 +1156,7 @@ install(TARGETS open62541 ${EXTRATARGETS}
          EXPORT open62541Targets
          LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
          ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
@@ -127,7 +175,7 @@ index 94ceb127..575963fd 100644
  
  if(UA_ENABLE_AMALGAMATION)
 diff --git a/src/server/ua_discovery_manager.h b/src/server/ua_discovery_manager.h
-index 3d1ae299..e7e5e776 100644
+index 3d1ae299..7d5f1051 100644
 --- a/src/server/ua_discovery_manager.h
 +++ b/src/server/ua_discovery_manager.h
 @@ -50,7 +50,7 @@ typedef struct periodicServerRegisterCallback_entry {
@@ -135,12 +183,12 @@ index 3d1ae299..e7e5e776 100644
  #ifdef UA_ENABLE_DISCOVERY_MULTICAST
  
 -#include "mdnsd/libmdnsd/mdnsd.h"
-+#include "mdnsd/mdnsd.h"
++#include "libmdnsd/mdnsd.h"
  
  /**
   * TXT record:
 diff --git a/src/server/ua_server_discovery_mdns.c b/src/server/ua_server_discovery_mdns.c
-index fd9c796c..c15d66a5 100644
+index fd9c796c..3417505a 100644
 --- a/src/server/ua_server_discovery_mdns.c
 +++ b/src/server/ua_server_discovery_mdns.c
 @@ -11,8 +11,8 @@
@@ -149,8 +197,8 @@ index fd9c796c..c15d66a5 100644
  #ifndef UA_ENABLE_AMALGAMATION
 -#include "mdnsd/libmdnsd/xht.h"
 -#include "mdnsd/libmdnsd/sdtxt.h"
-+#include "mdnsd/xht.h"
-+#include "mdnsd/sdtxt.h"
++#include "libmdnsd/xht.h"
++#include "libmdnsd/sdtxt.h"
  #endif
  
  #ifdef _WIN32
