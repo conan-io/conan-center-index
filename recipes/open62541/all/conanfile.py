@@ -100,7 +100,7 @@ class Open62541Conan(ConanFile):
             elif self.options.encryption == "mbedtls-gpl":
                 self.requires("mbedtls/2.16.3-gpl")
 
-        if self.options.discovery_multicast:
+        if self.options.discovery == "With Multicast":
             self.requires("pro-mdnsd/0.8.4")
 
     def _patch_sources(self):
@@ -222,7 +222,7 @@ class Open62541Conan(ConanFile):
         if self.options.discovery != False:
             self._cmake.definitions["UA_ENABLE_DISCOVERY"] = self.options.discovery
             if self.options.discovery == "With Multicast":
-                self._cmake.definitions["UA_ENABLE_DISCOVERY_MULTICAST"] = self.options.discovery_multicast
+                self._cmake.definitions["UA_ENABLE_DISCOVERY_MULTICAST"] = True
             self._cmake.definitions["UA_ENABLE_DISCOVERY_SEMAPHORE"] = self.options.discovery_semaphore
         self._cmake.definitions["UA_ENABLE_QUERY"] = self.options.query
         if self.options.encryption != "None":
