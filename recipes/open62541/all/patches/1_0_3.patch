@@ -1,5 +1,5 @@
 diff --git a/CMakeLists.txt b/CMakeLists.txt
-index 94ceb127..80eb36d1 100644
+index 94ceb127..78c71fcc 100644
 --- a/CMakeLists.txt
 +++ b/CMakeLists.txt
 @@ -7,9 +7,8 @@ endif()
@@ -53,7 +53,7 @@ index 94ceb127..80eb36d1 100644
 -                    -fexceptions # recommended for multi-threaded C code, also in combination with C++ code
 -                    )
 +    string(COMPARE GREATER_EQUAL ${CMAKE_C_COMPILER_VERSION} "9.0.0" IS_CLANG_9_COMPATIBLE)
-+    if(${IS_CLANG_9_COMPATIBLE})
++    if(${IS_CLANG_9_COMPATIBLE} AND CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
 +        add_definitions(-std=c99 -pipe
 +                        -Wall -Wextra -Wpedantic
 +                        -Wno-static-in-inline # clang doesn't like the use of static inline methods inside static inline methods
