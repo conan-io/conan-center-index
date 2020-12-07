@@ -5,6 +5,9 @@ import os
 from conans import ConanFile, AutoToolsBuildEnvironment, VisualStudioBuildEnvironment, tools
 from conans.errors import ConanInvalidConfiguration
 
+required_conan_version = ">=1.29.1"
+
+
 class GdalConan(ConanFile):
     name = "gdal"
     description = "GDAL is an open source X/MIT licensed translator library " \
@@ -675,16 +678,14 @@ class GdalConan(ConanFile):
         if self.settings.compiler == "Visual Studio":
             with self._msvc_build_environment():
                 self.run("nmake -f makefile.vc devinstall {}".format(" ".join(self._get_nmake_args())))
-            for pdb_file in glob.glob(os.path.join(self.package_folder, "lib", "*.pdb")):
-                os.remove(pdb_file)
+            tools.remove_files_by_mask(os.path.join(self.package_folder, "lib"), "*.pdb")
         else:
             with tools.chdir(self._source_subfolder):
                 autotools = self._configure_autotools()
                 autotools.install()
             tools.rmdir(os.path.join(self.package_folder, "lib", "gdalplugins"))
             tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
-            for la_file in glob.glob(os.path.join(self.package_folder, "lib", "*.la")):
-                os.remove(la_file)
+            tools.remove_files_by_mask(os.path.join(self.package_folder, "lib"), "*.la")
 
     def package_info(self):
         self.cpp_info.names["cmake_find_package"] = "GDAL"
