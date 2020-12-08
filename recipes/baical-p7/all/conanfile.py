@@ -8,7 +8,7 @@ required_conan_version = ">=1.28.0"
 
 class FlatbuffersConan(ConanFile):
     name = "baical-p7"
-    license = "LGPL-3.0"
+    license = "LGPL-3.0-or-later"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "http://baical.net/p7.html"
     topics = ("p7", "baical", "logging", "telemetry")
