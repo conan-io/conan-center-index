@@ -51,7 +51,7 @@ class PistacheConan(ConanFile):
             if tools.Version(self.settings.compiler.version) < minimum_compiler:
                 raise ConanInvalidConfiguration("Pistache requires c++17, which your compiler does not support.")
         else:
-            self.output.warn("Pistache requires c++17, but is unknown to this recipe. Assuming your compiler supports c++14.")
+            self.output.warn("Pistache requires c++17, but this compiler is unknown to this recipe. Assuming your compiler supports c++17.")
 
     def requirements(self):
         self.requires("rapidjson/1.1.0")
