@@ -31,6 +31,8 @@ class FlatbuffersConan(ConanFile):
     def configure(self):
         if self.options.shared:
             del self.options.fPIC
+        if self.settings.os not in ["Linux", "Windows"]:
+            raise ConanInvalidConfiguration("P7 only supports Windows and Linux at this time")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version], destination= self._source_subfolder)
@@ -59,14 +61,13 @@ class FlatbuffersConan(ConanFile):
     def package_info(self):
         self.cpp_info.names["cmake_find_package"] = "p7"
         self.cpp_info.names["cmake_find_package_multi"] = "p7"
-        
+
         if self.options.shared:
             self.cpp_info.components["p7"].name = "p7-shared"
             self.cpp_info.components["p7"].libs = ["p7-shared"]
         else:
             self.cpp_info.components["p7"].name = "p7"
             self.cpp_info.components["p7"].libs = ["p7"]
-
 
         if self.settings.os == "Linux":
             self.cpp_info.components["p7"].system_libs .append("rt")
