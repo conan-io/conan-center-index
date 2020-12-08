@@ -16,9 +16,9 @@ class PistacheConan(ConanFile):
     description = "Pistache is a modern and elegant HTTP and REST framework for C++"
     settings = "os", "compiler", "arch", "build_type"
     options = {"shared": [True, False], "fPIC": [True, False], "with_ssl": [True, False]}
-    default_options = {"shared": False, "fPIC": True, "with_ssl": True}
-    exports_sources = ["CMakeLists.txt"]
-    generators = "cmake"
+    default_options = {"shared": False, "fPIC": True, "with_ssl": False}
+    exports_sources = ["CMakeLists.txt", "patches/*"]
+    generators = "cmake", "cmake_find_package"
     _cmake = None
 
     @property
@@ -63,15 +63,6 @@ class PistacheConan(ConanFile):
         extracted_dir = glob.glob("pistache-*")[0]
         os.rename(extracted_dir, self._source_subfolder)
 
-    def _patch_sources(self):
-        # https://github.com/pistacheio/pistache/issues/835
-        include_folder = os.path.join(self._source_subfolder, "include", "pistache")
-        os.remove(os.path.join(include_folder, "string_view.h"))
-        tools.replace_in_file(os.path.join(include_folder, "router.h"),
-                              '"pistache/string_view.h"',
-                              "<string_view>")
-        tools.replace_in_file(os.path.join(self._source_subfolder, "CMakeLists.txt"), "14", "17")
-
     def _configure_cmake(self):
         if self._cmake:
             return self._cmake
@@ -82,7 +73,8 @@ class PistacheConan(ConanFile):
         return self._cmake
 
     def build(self):
-        self._patch_sources()
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            tools.patch(**patch)
         cmake = self._configure_cmake()
         cmake.build()
 
@@ -100,6 +92,7 @@ class PistacheConan(ConanFile):
         # TODO: Pistache variables are CamelCase e.g Pistache_BUILD_DIRS
         self.cpp_info.filenames["cmake_find_package"] = "Pistache"
         self.cpp_info.filenames["cmake_find_package_multi"] = "Pistache"
+        self.cpp_info.names["pkg_config"] = "libpistache"
         suffix = "_{}".format("shared" if self.options.shared else "static")
         self.cpp_info.components["libpistache"].names["cmake_find_package"] = "pistache" + suffix
         self.cpp_info.components["libpistache"].names["cmake_find_package_multi"] = "pistache" + suffix
