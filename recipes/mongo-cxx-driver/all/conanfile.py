@@ -24,7 +24,7 @@ class MongoCxxConan(ConanFile):
     default_options = {
         "shared": False,
         "fPIC": True,
-        "polyfill": "std",
+        "polyfill": "boost",
         "with_ssl": True
     }
 
