@@ -81,6 +81,12 @@ class LogrConan(ConanFile):
         extracted_dir = self.name + "-" + self.version
         os.rename(extracted_dir, self._source_subfolder)
 
+    def build(self):
+        if self.options.backend == "log4cplus" and self.options["log4cplus"].unicode:
+            raise ConanInvalidConfiguration("backend='log4cplus' requires log4cplus:unicode=False")
+        elif self.options.backend == "log4cplus-unicode" and not self.options["log4cplus"].unicode:
+            raise ConanInvalidConfiguration("backend='log4cplus-unicode' requires log4cplus:unicode=True")
+
     def package(self):
         self.copy("LICENSE", src=self._source_subfolder, dst="licenses")
         cmake = self._configure_cmake()
