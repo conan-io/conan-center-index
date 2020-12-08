@@ -70,6 +70,7 @@ class PistacheConan(ConanFile):
         tools.replace_in_file(os.path.join(include_folder, "router.h"),
                               '"pistache/string_view.h"',
                               "<string_view>")
+        tools.replace_in_file(os.path.join(self._source_subfolder, "CMakeLists.txt"), "14", "17")
 
     def _configure_cmake(self):
         if self._cmake:
