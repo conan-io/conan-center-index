@@ -63,6 +63,8 @@ class EpoxyConan(ConanFile):
         if self.settings.os == "Linux":
             if self.options.x11:
                 self.requires("xorg/system")
+            if self.options.egl:
+                self.requires("egl/system")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
