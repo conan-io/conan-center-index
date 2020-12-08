@@ -37,7 +37,6 @@ class LogrConan(ConanFile):
             self.requires("log4cplus/2.0.5")
         elif self.options.backend == "log4cplus-unicode":
             self.requires("log4cplus/2.0.5")
-            self.build_requires_options["log4cplus"].unicode = True
 
     def configure(self):
         minimal_cpp_standard = "17"
