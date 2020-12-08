@@ -1,6 +1,5 @@
 import glob
 import os
-import shutil
 from conans import ConanFile, CMake, tools
 from conans.errors import ConanInvalidConfiguration
 
