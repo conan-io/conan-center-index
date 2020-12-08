@@ -8,7 +8,7 @@ required_conan_version = ">=1.29.1"
 class TreeSitterConan(ConanFile):
     name = "tree-sitter"
     description = "Tree-sitter is a parser generator tool and an incremental parsing library. It can build a concrete syntax tree for a source file and efficiently update the syntax tree as the source file is edited."
-    topics = ("parser")
+    topics = ("parser", "incremental", "rust")
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://tree-sitter.github.io/tree-sitter"
     license = "MIT"
@@ -63,4 +63,3 @@ class TreeSitterConan(ConanFile):
     def package_info(self):
         self.cpp_info.names["pkg_config"] = "tree-sitter"
         self.cpp_info.libs = ["tree-sitter"]
-
