@@ -29,10 +29,6 @@ class PistacheConan(ConanFile):
     def _build_subfolder(self):
         return "build_subfolder"
 
-    def config_options(self):
-        if self.settings.os == "Windows":
-            del self.options.fPIC
-
     def configure(self):
         compilers = {
             "gcc": "7",
@@ -69,6 +65,8 @@ class PistacheConan(ConanFile):
         self._cmake = CMake(self)
         self._cmake.definitions["PISTACHE_ENABLE_NETWORK_TESTS"] = False
         self._cmake.definitions["PISTACHE_USE_SSL"] = self.options.with_ssl
+        # pistache requires explicit value for fPIC
+        self._cmake.definitions["CMAKE_POSITION_INDEPENDENT_CODE"] = self.options.get_safe("fPIC", True)
         self._cmake.configure(build_folder=self._build_subfolder)
         return self._cmake
 
