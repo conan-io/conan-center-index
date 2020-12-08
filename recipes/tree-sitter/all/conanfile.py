@@ -19,6 +19,7 @@ class TreeSitterConan(ConanFile):
                        "shared": False}
     _autotools = None
 
+
     @property
     def _source_subfolder(self):
         return "source_subfolder"
