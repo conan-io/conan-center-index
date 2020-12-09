@@ -69,9 +69,10 @@ class LibRealSenseConan(ConanFile):
         self._cmake.definitions["BUILD_GLSL_EXTENSIONS"] = False
         self._cmake.definitions["BUILD_WITH_OPENMP"] = self.options.with_openmp
         self._cmake.definitions["BUILD_UNIT_TESTS"] = False
-        self._cmake.definitions["BUILD_WITH_TM2"] = False
         self._cmake.definitions["BUILD_NETWORK_DEVICE"] = False
-        self._cmake.definitions["IMPORT_DEPTH_CAM_FW"] = False
+        if self.settings.os != "Macos":
+            self._cmake.definitions["BUILD_WITH_TM2"] = False
+            self._cmake.definitions["IMPORT_DEPTH_CAM_FW"] = False
         self._cmake.configure(build_folder=self._build_subfolder)
         return self._cmake
 
