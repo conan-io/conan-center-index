@@ -2,7 +2,7 @@ import os
 from conans import ConanFile, CMake, tools
 from conans.errors import ConanInvalidConfiguration
 
-required_conan_version = ">=1.29.0"
+required_conan_version = ">=1.29.1"
 
 class FlatbuffersConan(ConanFile):
     name = "baical-p7"
