@@ -55,12 +55,12 @@ class OpenH264Conan(ConanFile):
                                 "CFLAGS_DEBUG += -MTd -Gm",
                                 "CFLAGS_DEBUG += -%s -Gm" % str(self.settings.compiler.runtime))
         if self.settings.os == "Android":
-                tools.replace_in_file(os.path.join(self._source_subfolder, "codec", "build", "android", "dec", "jni", "Application.mk"),
-                    "APP_STL := stlport_shared",
-                    "APP_STL := %s" % str(self.settings.compiler.libcxx))
-                tools.replace_in_file(os.path.join(self._source_subfolder, "codec", "build", "android", "dec", "jni", "Application.mk"),
-                    "APP_PLATFORM := android-12",
-                    "APP_PLATFORM := %s" % self._android_target)
+            tools.replace_in_file(os.path.join(self._source_subfolder, "codec", "build", "android", "dec", "jni", "Application.mk"),
+                                  "APP_STL := stlport_shared",
+                                  "APP_STL := %s" % str(self.settings.compiler.libcxx))
+            tools.replace_in_file(os.path.join(self._source_subfolder, "codec", "build", "android", "dec", "jni", "Application.mk"),
+                                  "APP_PLATFORM := android-12",
+                                  "APP_PLATFORM := %s" % self._android_target)
 
     @property
     def _library_filename(self):
