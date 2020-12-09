@@ -13,5 +13,3 @@ if(P7_SHARED)
 else()
   target_link_libraries(${PROJECT_NAME} p7::p7)
 endif()
-
-set_property(TARGET ${PROJECT_NAME} PROPERTY CXX_STANDARD 11)
