@@ -69,7 +69,6 @@ class FlatbuffersConan(ConanFile):
             self.cpp_info.components["p7"].libs = ["p7"]
 
         if self.settings.os == "Linux":
-            self.cpp_info.components["p7"].system_libs .append("rt")
-            self.cpp_info.components["p7"].system_libs .append("pthread")
+            self.cpp_info.components["p7"].system_libs .extends(["rt", "pthread"])
         if self.settings.os == "Windows":
             self.cpp_info.components["p7"].system_libs .append("Ws2_32")
