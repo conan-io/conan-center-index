@@ -29,8 +29,8 @@ class LibRealSenseConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     exports_sources = "CMakeLists.txt"
     settings = "os", "compiler", "build_type", "arch"
-    options = {"shared": [True, False], "fPIC": [True, False], "openmp": [True, False]}
-    default_options = {"shared": False, "fPIC": True, "openmp": True}
+    options = {"shared": [True, False], "fPIC": [True, False], "with_openmp": [True, False]}
+    default_options = {"shared": False, "fPIC": True, "with_openmp": False}
     generators = "cmake"
 
     _cmake = None
@@ -50,9 +50,11 @@ class LibRealSenseConan(ConanFile):
     def configure(self):
         if self.options.shared:
             del self.options.fPIC
+        if self.options.with_openmp:
+            self.output.warn("Conan package for openmp is not available, this package will be used from system.")
 
     def requirements(self):
-        if self.settings.os == "Linux":
+        if self.settings.os != "Windows":
             self.requires("libusb/1.0.23")
 
     def source(self):
@@ -65,7 +67,7 @@ class LibRealSenseConan(ConanFile):
         self._cmake = CMake(self)
         self._cmake.definitions["BUILD_EXAMPLES"] = False
         self._cmake.definitions["BUILD_GLSL_EXTENSIONS"] = False
-        self._cmake.definitions["BUILD_WITH_OPENMP"] = self.options.openmp
+        self._cmake.definitions["BUILD_WITH_OPENMP"] = self.options.with_openmp
         self._cmake.definitions["BUILD_UNIT_TESTS"] = False
         self._cmake.definitions["BUILD_WITH_TM2"] = False
         self._cmake.definitions["BUILD_NETWORK_DEVICE"] = False
