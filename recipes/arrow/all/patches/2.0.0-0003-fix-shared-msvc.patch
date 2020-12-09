@@ -1,0 +1,13 @@
+--- cpp/src/arrow/CMakeLists.txt
++++ cpp/src/arrow/CMakeLists.txt
+@@ -504,6 +504,10 @@
+   target_compile_definitions(arrow_static PUBLIC ARROW_STATIC)
+ endif()
+ 
++if(ARROW_BUILD_SHARED AND WIN32)
++target_compile_definitions(arrow_shared PRIVATE ARROW_EXPORTING)
++endif()
++
+ if(ARROW_WITH_BACKTRACE)
+   find_package(Backtrace)
+ 
