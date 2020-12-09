@@ -4,7 +4,7 @@ from conans.errors import ConanInvalidConfiguration
 
 required_conan_version = ">=1.29.1"
 
-class FlatbuffersConan(ConanFile):
+class BaicalP7Conan(ConanFile):
     name = "baical-p7"
     license = "LGPL-3.0-or-later"
     url = "https://github.com/conan-io/conan-center-index"
