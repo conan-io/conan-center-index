@@ -1,23 +1,7 @@
-from conans import ConanFile, tools, CMake
 import os
 import glob
+from conans import ConanFile, tools, CMake
 
-# TODO:
-# patch 3rd-parties
-# easyloggingpp
-# glad
-# glfw
-# imgui
-# libusb
-# live555
-# rapidxml
-# realsense-file
-# https://github.com/ros/console_bridge
-# https://github.com/ros/roscpp_core
-# https://github.com/ros/ros_comm
-# sqlite
-# tclap
-# tinyfiledialogs
 
 class LibRealSenseConan(ConanFile):
     name = "librealsense"
@@ -29,7 +13,11 @@ class LibRealSenseConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     exports_sources = "CMakeLists.txt"
     settings = "os", "compiler", "build_type", "arch"
-    options = {"shared": [True, False], "fPIC": [True, False], "with_openmp": [True, False]}
+    options = {
+        "shared": [True, False],
+        "fPIC": [True, False],
+        "with_openmp": [True, False]
+    }
     default_options = {"shared": False, "fPIC": True, "with_openmp": False}
     generators = "cmake"
 
@@ -51,7 +39,9 @@ class LibRealSenseConan(ConanFile):
         if self.options.shared:
             del self.options.fPIC
         if self.options.with_openmp:
-            self.output.warn("Conan package for openmp is not available, this package will be used from system.")
+            self.output.warn(
+                "Conan package for openmp is not available, this package will be used from system."
+            )
 
     def requirements(self):
         if self.settings.os != "Windows":
