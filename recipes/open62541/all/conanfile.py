@@ -118,7 +118,7 @@ class Open62541Conan(ConanFile):
                 raise ConanInvalidConfiguration(
                     "Open62541 discovery sempahore option requires discovery option to be enabled")
 
-        if tools.Version(self.version) <= "1.1.0":
+        if tools.Version(self.version) < "1.1.0":
             if self.options.encryption == "openssl":
                 raise ConanInvalidConfiguration(
                     "Lower Open62541 versions than 1.1.0 do not support openssl")
@@ -140,7 +140,7 @@ class Open62541Conan(ConanFile):
                     "Open62541 does not support Clang 9.x.x and later compiler versions")
 
         if self.settings.compiler == "clang":
-            if tools.Version(self.settings.compiler.version) <= "4":
+            if tools.Version(self.settings.compiler.version) < "4":
                 raise ConanInvalidConfiguration(
                     "Older clang compiler version than 4.0 are not supported")
 
@@ -165,7 +165,7 @@ class Open62541Conan(ConanFile):
         os.rename(archive_name, self._source_subfolder)
 
         submodule_filename = os.path.join(
-            os.path.dirname(__file__), 'submoduledata.yml')
+            self.recipe_folder, 'submoduledata.yml')
         with open(submodule_filename, 'r') as submodule_stream:
             submodules_data = yaml.load(submodule_stream)
             for path, submodule in submodules_data["submodules"][self.version].items():
