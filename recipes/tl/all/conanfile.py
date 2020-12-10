@@ -29,11 +29,11 @@ class TlConan(ConanFile):
             "Visual Studio": "15"
         }
 
-        def lt_compiler_version(version1, version2):
+        def lazy_lt_compiler_version(version1, version2):
             v1, *v1_res = version1.split(".", 1)
             v2, *v2_res = version2.split(".", 1)
             if v1 == v2 and v1_res and v2_res:
-                return lt_compiler_version(v1_res, v2_res)
+                return lazy_lt_compiler_version(v1_res, v2_res)
             return v1 < v2
 
         compiler = str(self.settings.compiler)
@@ -42,7 +42,7 @@ class TlConan(ConanFile):
                 "{} recipe lacks information about the {} compiler standard version support".format(self.name, compiler))
             self.output.warn(
                 "{} requires a compiler that supports at least C++{}".format(self.name, minimal_cpp_standard))
-        elif lt_compiler_version(str(self.settings.compiler.version), minimal_version[compiler]):
+        elif lazy_lt_compiler_version(str(self.settings.compiler.version), minimal_version[compiler]):
             raise ConanInvalidConfiguration(
                 "{} requires a compiler that supports at least C++{}".format(self.name, minimal_cpp_standard))
 
