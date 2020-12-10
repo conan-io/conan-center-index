@@ -19,7 +19,7 @@ int main(void) {
   std::thread server_thread(
       [&]() { return_code = UA_Server_run(server, &running); });
 
-  std::this_thread::sleep_for(std::chrono::seconds(1));
+  std::this_thread::sleep_for(std::chrono::milliseconds(1));
   running = false;
 
   server_thread.join();
