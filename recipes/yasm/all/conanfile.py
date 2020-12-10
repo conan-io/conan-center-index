@@ -1,5 +1,6 @@
 from conans import ConanFile, tools, AutoToolsBuildEnvironment, MSBuild
 import os
+import shutil
 
 
 class YASMConan(ConanFile):
@@ -31,13 +32,17 @@ class YASMConan(ConanFile):
         tools.download("https://raw.githubusercontent.com/yasm/yasm/bcc01c59d8196f857989e6ae718458c296ca20e3/YASM-VERSION-GEN.bat",
                        os.path.join(self._source_subfolder, "YASM-VERSION-GEN.bat"))
 
+    @property
+    def _msvc_subfolder(self):
+        return os.path.join(self._source_subfolder, "Mkfiles", "vc10")
+
     def _build_vs(self):
-        with tools.chdir(os.path.join(self._source_subfolder, "Mkfiles", "vc10")):
+        with tools.chdir(self._msvc_subfolder):
             with tools.vcvars(self.settings, force=True):
                 msbuild = MSBuild(self)
-                if self.settings.arch== "x86":
+                if self.settings.arch == "x86":
                     msbuild.build_env.link_flags.append("/MACHINE:X86")
-                elif self.settings.arch== "x86_64":
+                elif self.settings.arch == "x86_64":
                     msbuild.build_env.link_flags.append("/SAFESEH:NO /MACHINE:X64")
                 msbuild.build(project_file="yasm.sln",
                               targets=["yasm"], platforms={"x86": "Win32"}, force_vcvars=True)
@@ -66,7 +71,14 @@ class YASMConan(ConanFile):
         self.copy(pattern="BSD.txt", dst="licenses", src=self._source_subfolder)
         self.copy(pattern="COPYING", dst="licenses", src=self._source_subfolder)
         if self.settings.compiler == "Visual Studio":
-            self.copy(pattern="*.exe", src=self._source_subfolder, dst="bin", keep_path=False)
+            arch = {
+                "x86": "Win32",
+                "x86_64": "x64",
+            }[str(self.settings.arch)]
+            tools.mkdir(os.path.join(self.package_folder, "bin"))
+            shutil.copy(os.path.join(self._msvc_subfolder, arch, str(self.settings.build_type), "yasm.exe"),
+                        os.path.join(self.package_folder, "bin", "yasm.exe"))
+            self.copy(pattern="yasm.exe*", src=self._source_subfolder, dst="bin", keep_path=False)
         else:
             autotools = self._configure_autotools()
             autotools.install()
