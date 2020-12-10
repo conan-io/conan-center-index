@@ -1,7 +1,7 @@
 /* example was taken from https://www.gnu.org/ghm/2011/paris/slides/andreas-enge-mpc.pdf */
 
 #include <stdio.h>
-#include <mpc.h>
+#include "mpc.h"
 
 int main (void) {
     mpc_t z;

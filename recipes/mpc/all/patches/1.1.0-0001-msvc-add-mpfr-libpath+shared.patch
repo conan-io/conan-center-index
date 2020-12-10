@@ -1,0 +1,23 @@
+--- Makefile.vc
++++ Makefile.vc
+@@ -267,7 +267,7 @@
+ #
+ 
+ $(LIBRARY): $(DIRMPC)config.h $(CPPOBJECTS)
+-	$(LINKER) /out:$@ $(CPPLINKOBJECTS) /LIBPATH:"$(GMPDIR)\lib" libmpfr.lib libgmp.lib $(LIBS_LOGGING)
++	$(LINKER) /out:$@ $(CPPLINKOBJECTS) /LIBPATH:"$(MPFR)\lib" /LIBPATH:"$(GMPDIR)\lib" mpfr.lib gmp.lib $(LIBS_LOGGING)
+ 
+ $(DIRMPC)config.h :
+ 	echo #define PACKAGE_STRING "mpc"           >$(DIRMPC)\config.h
+--- src/mpc.h
++++ src/mpc.h
+@@ -109,7 +109,7 @@
+ /* Support for WINDOWS DLL, see
+    http://lists.gforge.inria.fr/pipermail/mpc-discuss/2011-November/000990.html;
+    when building the DLL, export symbols, otherwise behave as GMP           */
+-#if defined (__MPC_LIBRARY_BUILD) && __GMP_LIBGMP_DLL
+-#define __MPC_DECLSPEC __GMP_DECLSPEC_EXPORT
++#if defined (__MPC_LIBRARY_BUILD) && defined(_WIN32) && defined(MPC_SHARED)
++#define __MPC_DECLSPEC __declspec(dllexport)
+ #else
+ #define __MPC_DECLSPEC __GMP_DECLSPEC
