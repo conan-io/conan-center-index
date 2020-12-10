@@ -22,8 +22,8 @@ class CprConan(ConanFile):
     default_options = {
         "shared": False,
         "fPIC": True,
-        "with_openssl": False,
-        "with_winssl": True,
+        "with_openssl": True,
+        "with_winssl": False,
     }
 
     _cmake = None
