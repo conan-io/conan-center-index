@@ -13,7 +13,7 @@ class TlConan(ConanFile):
     license = "CC0-1.0"
     no_copy_source = True
     _source_subfolder = "tl"
-    
+
     def configure(self):
         minimal_cpp_standard = "14"
         if self.settings.compiler.cppstd:
@@ -26,18 +26,22 @@ class TlConan(ConanFile):
             "Visual Studio": "15"
         }
 
+        def lt_compiler_version(version1, version2):
+            v1, *v1_res = version1.split(".", 1)
+            v2, *v2_res = version2.split(".", 1)
+            if v1 == v2 and v1_res and v2_res:
+                return lt_compiler_version(v1_res, v2_res)
+            return v1 < v2
+
         compiler = str(self.settings.compiler)
         if compiler not in minimal_version:
             self.output.warn(
-                "%s recipe lacks information about the %s compiler standard version support" % (self.name, compiler))
+                "{} recipe lacks information about the {} compiler standard version support".format(self.name, compiler))
             self.output.warn(
-                "%s requires a compiler that supports at least C++%s" % (self.name, minimal_cpp_standard))
-            return
-
-        version = tools.Version(self.settings.compiler.version)
-        if version < minimal_version[compiler]:
+                "{} requires a compiler that supports at least C++{}".format(self.name, minimal_cpp_standard))
+        elif lt_compiler_version(str(self.settings.compiler.version), minimal_version[compiler]):
             raise ConanInvalidConfiguration(
-                "%s requires a compiler that supports at least C++%s" % (self.name, minimal_cpp_standard))
+                "{} requires a compiler that supports at least C++{}".format(self.name, minimal_cpp_standard))
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
