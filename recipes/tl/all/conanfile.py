@@ -12,7 +12,10 @@ class TlConan(ConanFile):
     settings = "compiler"
     license = "CC0-1.0"
     no_copy_source = True
-    _source_subfolder = "tl"
+
+    @property
+    def _source_subfolder(self):
+        return "source_subfolder"
 
     def configure(self):
         minimal_cpp_standard = "14"
