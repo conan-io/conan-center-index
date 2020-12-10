@@ -140,9 +140,9 @@ class Open62541Conan(ConanFile):
                     "Open62541 does not support Clang 9.x.x and later compiler versions")
 
         if self.settings.compiler == "clang":
-            if tools.Version(self.settings.compiler.version) < "4":
+            if tools.Version(self.settings.compiler.version) < "5":
                 raise ConanInvalidConfiguration(
-                    "Older clang compiler version than 4.0 are not supported")
+                    "Older clang compiler version than 5.0 are not supported")
 
         if self.options.pub_sub != False and self.settings.os != "Linux":
             raise ConanInvalidConfiguration(
