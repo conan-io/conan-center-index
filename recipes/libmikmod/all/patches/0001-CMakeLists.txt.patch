@@ -1,14 +1,7 @@
+avoid building shared lib when shared=False,
+and a fix to install .dlls correctly on Windows
 --- "CMakeLists.txt"	2017-04-07 16:55:00.000000000 +0200
 +++ CMakeLists.txt	2017-07-21 20:01:33.330845600 +0200
-@@ -25,6 +25,8 @@
- 
- PROJECT(libmikmod C)
- CMAKE_MINIMUM_REQUIRED(VERSION 2.8)
-+include(../conanbuildinfo.cmake)
-+conan_basic_setup()
- LIST(APPEND CMAKE_MODULE_PATH "${libmikmod_SOURCE_DIR}/cmake")
- 
- SET(LIBMIKMOD_MAJOR_VERSION 3)
 @@ -389,12 +391,6 @@
  
  SET (LIBMIKMOD_LIBS)

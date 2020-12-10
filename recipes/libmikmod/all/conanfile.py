@@ -9,7 +9,7 @@ class LibmikmodConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "http://mikmod.sourceforge.net"
     license = "LGPL-2.1-or-later"
-    exports_sources = ["patches/*"]
+    exports_sources = ["patches/*", "CMakeLists.txt"]
     generators = "cmake"
 
     settings = "os", "arch", "compiler", "build_type"
@@ -72,6 +72,8 @@ class LibmikmodConan(ConanFile):
         tools.get(**self.conan_data["sources"][self.version])
         extracted_dir = self.name + "-" + self.version
         os.rename(extracted_dir, self._source_subfolder)
+        tools.replace_in_file(os.path.join(self._source_subfolder, "CMakeLists.txt"),
+                              "CMAKE_SOURCE_DIR", "PROJECT_SOURCE_DIR")
 
     def _configure_cmake(self):
         if self._cmake:
@@ -85,13 +87,10 @@ class LibmikmodConan(ConanFile):
         self._cmake.definitions["ENABLE_OSS"] = self.options.get_safe("with_oss", False)
         self._cmake.definitions["ENABLE_PULSE"] = self.options.get_safe("with_pulse", False)
         self._cmake.definitions["ENABLE_COREAUDIO"] = self.options.get_safe("with_coreaudio", False)
-        self._cmake.configure(build_folder=self._build_subfolder, source_folder=self._source_subfolder)
+        self._cmake.configure(build_folder=self._build_subfolder)
         return self._cmake
 
     def build(self):
-        # 0001:
-        #   Patch CMakeLists.txt to run `conan_basic_setup`, to avoid building shared lib when
-        #   shared=False, and a fix to install .dlls correctly on Windows
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
             tools.patch(**patch)
 
