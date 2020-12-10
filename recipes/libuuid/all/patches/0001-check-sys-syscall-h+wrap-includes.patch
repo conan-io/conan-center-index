@@ -11,12 +11,14 @@
  # Checks for typedefs, structures, and compiler characteristics.
 --- randutils.c
 +++ randutils.c
-@@ -6,14 +6,22 @@
+@@ -6,14 +6,24 @@
   * This file may be redistributed under the terms of the
   * GNU Lesser General Public License.
   */
 +
++#if defined(HAVE_CONFIG_H)
 +#include "config.h"
++#endif
 +
  #include <stdio.h>
  #include <unistd.h>
