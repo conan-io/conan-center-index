@@ -150,7 +150,6 @@ class GLibConan(ConanFile):
         if self.settings.os == "Windows":
             self.cpp_info.components["glib-2.0"].system_libs.extend(["ws2_32", "ole32", "shell32", "user32", "advapi32"])
         if self.settings.os == "Macos":
-            self.cpp_info.components["glib-2.0"].system_libs.append("iconv")
             self.cpp_info.components["glib-2.0"].system_libs.append("resolv")
             self.cpp_info.components["glib-2.0"].frameworks.extend(["Foundation", "CoreServices", "CoreFoundation"])
         self.cpp_info.components["glib-2.0"].includedirs.append(os.path.join("include", "glib-2.0"))
