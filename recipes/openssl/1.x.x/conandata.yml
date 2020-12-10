@@ -65,3 +65,9 @@ sources:
       "https://www.openssl.org/source/openssl-1.1.1h.tar.gz",
       "https://www.openssl.org/source/old/openssl-1.1.1h.tar.gz"
     ]
+  1.1.1i:
+    sha256: e8be6a35fe41d10603c3cc635e93289ed00bf34b79671a3a4de64fcee00d5242
+    url: [
+      "https://www.openssl.org/source/openssl-1.1.1i.tar.gz",
+      "https://www.openssl.org/source/old/openssl-1.1.1i.tar.gz"
+    ]
