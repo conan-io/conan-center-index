@@ -71,6 +71,8 @@ class OssimConan(ConanFile):
         self._cmake.definitions["BUILD_OSSIM_APPS"] = False
         self._cmake.definitions["BUILD_OSSIM_CURL_APPS"] = False
         self._cmake.definitions["BUILD_OSSIM_TESTS"] = False
+        self._cmake.definitions["USE_OSSIM_JSONCPP"] = False  # Don't use vendored jsoncpp
+        # FIXME: add with_zlib option + CMAKE_DISABLE_FIND_PACKAGE_ZLIB (https://github.com/conan-io/conan/issues/8190)
         self._cmake.configure()
         return self._cmake
 
