@@ -19,8 +19,33 @@ class EnttConan(ConanFile):
         return "source_subfolder"
 
     def configure(self):
+        # FIXME: Here we are implementing a workaround because ConanCenter is not generating any configuration with
+        #   C++17 support (either supported by default by a compiler or using 'compiler.cppstd=17' in the Conan profile)
+        #   and ConanCenter requires that at least one package is generated. Once, ConanCenter iterates a profile using
+        #   with C++17 support, only a raw call to `tools.check_mis_cppstd(self, "17")` will be required.
+        minimal_cpp_standard = "17"
         if self.settings.compiler.cppstd:
-            tools.check_min_cppstd(self, "17")
+            tools.check_min_cppstd(self, minimal_cpp_standard)
+
+        minimal_version = {
+            "Visual Studio": "15",
+            "gcc": "7",
+            "clang": "5",
+            "apple-clang": "10"
+        }
+
+        compiler = str(self.settings.compiler)
+        if compiler not in minimal_version:
+            self.output.warn(
+                "%s recipe lacks information about the %s compiler standard version support" % (self.name, compiler))
+            self.output.warn(
+                "%s requires a compiler that supports at least C++%s" % (self.name, minimal_cpp_standard))
+            return
+
+        version = tools.Version(self.settings.compiler.version)
+        if version < minimal_version[compiler]:
+            raise ConanInvalidConfiguration(
+                "%s requires a compiler that supports at least C++%s" % (self.name, minimal_cpp_standard))
 
     def package_id(self):
         self.info.header_only()
