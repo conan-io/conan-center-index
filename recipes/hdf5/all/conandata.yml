@@ -1,15 +1,15 @@
 sources:
   "1.12.0":
-    url: "https://github.com/live-clones/hdf5/archive/hdf5-1_12_0.tar.gz"
+    url: "https://github.com/HDFGroup/hdf5/archive/hdf5-1_12_0.tar.gz"
     sha256: "c64ffec2539ae6b6041f97952a40b0893c3c0df4d5b1c0177fb8aba567808158"
   "1.10.6":
-    url: "https://github.com/live-clones/hdf5/archive/hdf5-1_10_6.tar.gz"
+    url: "https://github.com/HDFGroup/hdf5/archive/hdf5-1_10_6.tar.gz"
     sha256: "e524b374b1c6f14f1aa87595c0761608c861fe7838549dab84639ae564ff48e8"
   "1.10.5":
-    url: "https://github.com/live-clones/hdf5/archive/hdf5-1_10_5.tar.gz"
+    url: "https://github.com/HDFGroup/hdf5/archive/hdf5-1_10_5.tar.gz"
     sha256: "22a4a48f94b013e9fd482c0bb0251de02ff9963787a107c5dde26a3f903b3b90"
   "1.8.21":
-    url: "https://github.com/live-clones/hdf5/archive/hdf5-1_8_21.tar.gz"
+    url: "https://github.com/HDFGroup/hdf5/archive/hdf5-1_8_21.tar.gz"
     sha256: "753520e34a576a64809b8e02d9c015d6126f7974f678c7417a60492d835a88f4"
 patches:
   "1.12.0":
