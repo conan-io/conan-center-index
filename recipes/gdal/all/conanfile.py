@@ -535,8 +535,8 @@ class GdalConan(ConanFile):
             args.extend(["--disable-static", "--enable-shared"])
         else:
             args.extend(["--disable-shared", "--enable-static"])
-        # Enable C++14 if requested in conan profile
-        if self.settings.compiler.cppstd and tools.valid_min_cppstd(self, 14):
+        # Enable C++14 if requested in conan profile or if with_charls enabled
+        if (self.settings.compiler.cppstd and tools.valid_min_cppstd(self, 14)) or self.options.with_charls:
             args.append("--with-cpp14")
         # Debug
         if self.settings.build_type == "Debug":
