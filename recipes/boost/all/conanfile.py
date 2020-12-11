@@ -1174,6 +1174,7 @@ class BoostConan(ConanFile):
 
                 self.cpp_info.components["numpy{}{}".format(pyversion.major, pyversion.minor)].requires = ["numpy"]
 
+            if self._is_msvc or self._is_clang_cl:
                 # https://github.com/conan-community/conan-boost/issues/127#issuecomment-404750974
                 self.cpp_info.components["_libboost"].system_libs.append("bcrypt")
             elif self.settings.os == "Linux":
