@@ -5,6 +5,9 @@ import glob
 import shutil
 
 
+required_conan_version = ">=1.28.0"
+
+
 class MongoCxxConan(ConanFile):
     name = "mongo-cxx-driver"
     license = "Apache-2.0"
