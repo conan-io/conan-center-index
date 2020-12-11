@@ -132,7 +132,7 @@ class ConanSqlite3(ConanFile):
         self.cpp_info.components["sqlite"].names["cmake_find_package"] = "SQLite3"
         self.cpp_info.components["sqlite"].names["cmake_find_package_multi"] = "SQLite3"
         self.cpp_info.components["sqlite"].libs = tools.collect_libs(self)
-        if self.settings.os == "Linux":
+        if self.settings.os in ["Linux", "FreeBSD"]:
             if self.options.threadsafe:
                 self.cpp_info.components["sqlite"].system_libs.append("pthread")
             if not self.options.omit_load_extension:
