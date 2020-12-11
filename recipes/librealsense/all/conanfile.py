@@ -20,7 +20,7 @@ class LibRealSenseConan(ConanFile):
     }
     default_options = {"shared": False, "fPIC": True, "with_openmp": False}
     generators = ["cmake", "cmake_find_package"]
-    requires = ["lz4/1.9.3", "boost/1.69.0"]
+    requires = ["lz4/1.9.3", "boost/1.74.0"]
 
     _cmake = None
 
