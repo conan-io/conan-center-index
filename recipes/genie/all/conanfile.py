@@ -1,5 +1,6 @@
 import os, glob
 from conans import ConanFile, tools
+from conans.errors import ConanInvalidConfiguration
 
 
 class GenieConan(ConanFile):
@@ -58,10 +59,19 @@ class GenieConan(ConanFile):
                     cc = "clang"
                 if not cxx:
                     cxx = "clang"
+            else:
+                if not cc:
+                    cc = "clang" if self.settings.compiler == "clang" else "gcc"
+                if not cxx:
+                    cxx = "clang++" if self.settings.compiler == "clang" else "g++"
             self._patch_compiler(cc, cxx)
 
+            make = tools.get_env("CONAN_MAKE_PROGRAM", tools.which("make") or tools.which("mingw32-make"))
+            if not make:
+                raise ConanInvalidConfiguration("This package needs 'make' in the path to build")
+
             with tools.chdir(self._source_subfolder):
-                self.run("make", win_bash=tools.os_info.is_windows)
+                self.run(make, win_bash=tools.os_info.is_windows)
 
     def package(self):
         self.copy("LICENSE", dst="licenses", src=self._source_subfolder)
