@@ -24,6 +24,8 @@ class MSYS2Conan(ConanFile):
     def configure(self):
         if self.settings.os_build != "Windows":
             raise ConanInvalidConfiguration("Only Windows supported")
+        if self.settings.arch_build == "x86" and self.version >= version("20201109"):
+            raise ConanInvalidConfiguration("Only x86_64 supported for versions after 20201109")
 
     def source(self):
         # build tools have to download files in build method when the
