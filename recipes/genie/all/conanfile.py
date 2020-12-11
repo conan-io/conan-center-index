@@ -67,7 +67,6 @@ class GenieConan(ConanFile):
         self.copy("genie{}".format(bin_ext), dst="bin", src=os.path.join(self._source_subfolder, "bin", self._os))
 
     def package_id(self):
-        self.info.include_build_settings()
         del self.info.settings.compiler
 
     def package_info(self):

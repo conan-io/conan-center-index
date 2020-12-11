@@ -3,10 +3,8 @@ from conans import ConanFile, tools
 
 class TestPackageConan(ConanFile):
 
-    settings = "arch_build", "os_build"
+    settings = "os", "arch"
 
     def test(self):
-        bin_ext = ".exe" if self.settings.os_build == "Windows" else ""
-        print(self.build_folder)
         if not tools.cross_building(self.settings):
-            self.run("genie{} ninja --scripts={}".format(bin_ext, self.source_folder))
+            self.run('genie ninja --scripts="{}"'.format(self.source_folder))
