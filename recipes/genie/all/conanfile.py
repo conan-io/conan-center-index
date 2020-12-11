@@ -1,6 +1,5 @@
 import os, glob
-from conans import ConanFile, tools
-from conans.errors import ConanInvalidConfiguration
+from conans import AutoToolsBuildEnvironment, ConanFile, tools
 
 
 class GenieConan(ConanFile):
@@ -10,7 +9,8 @@ class GenieConan(ConanFile):
     homepage = "https://github.com/bkaradzic/GENie"
     description = "Project generator tool"
     topics = ("conan", "genie", "project", "generator", "build")
-    settings = "os", "arch", "compiler"
+    settings = "os", "arch", "compiler", "build_type"
+    exports_sources = "patches/*"
 
     @property
     def _source_subfolder(self):
@@ -34,18 +34,26 @@ class GenieConan(ConanFile):
 
     @property
     def _os(self):
+        if tools.is_apple_os(self.settings.os):
+            return "darwin"
         return {
             "Windows": "windows",
             "Linux": "linux",
-            "Macos": "darwin",
-            "FreeBSD": "freebsd",
+            "FreeBSD": "bsd",
         }[str(self.settings.os)]
 
     def _patch_compiler(self, cc, cxx):
         tools.replace_in_file(os.path.join(self._source_subfolder, "build", "gmake.{}".format(self._os), "genie.make"), "CC  = gcc", "CC  = {}".format(cc))
         tools.replace_in_file(os.path.join(self._source_subfolder, "build", "gmake.{}".format(self._os), "genie.make"), "CXX = g++", "CXX = {}".format(cxx))
 
+    @property
+    def _genie_config(self):
+        return "debug" if self.settings.build_type == "Debug" else "release"
+
     def build(self):
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            tools.patch(**patch)
+
         if self.settings.compiler == "Visual Studio":
             self._patch_compiler("cccl", "cccl")
             with tools.vcvars(self.settings):
@@ -66,17 +74,15 @@ class GenieConan(ConanFile):
                     cxx = "clang++" if self.settings.compiler == "clang" else "g++"
             self._patch_compiler(cc, cxx)
 
-            make = tools.get_env("CONAN_MAKE_PROGRAM", tools.which("make") or tools.which("mingw32-make"))
-            if not make:
-                raise ConanInvalidConfiguration("This package needs 'make' in the path to build")
-
+            autotools = AutoToolsBuildEnvironment(self, win_bash=tools.os_info.is_windows)
             with tools.chdir(self._source_subfolder):
-                self.run(make, win_bash=tools.os_info.is_windows)
+                autotools.make(args=["OS={}".format(self._os), "config={}".format(self._genie_config)])
 
     def package(self):
         self.copy("LICENSE", dst="licenses", src=self._source_subfolder)
         bin_ext = ".exe" if self.settings.os == "Windows" else ""
         self.copy("genie{}".format(bin_ext), dst="bin", src=os.path.join(self._source_subfolder, "bin", self._os))
+        self.copy("*.lua", dst="res", src=os.path.join(self._source_subfolder, "src"))
 
     def package_id(self):
         del self.info.settings.compiler
@@ -85,3 +91,7 @@ class GenieConan(ConanFile):
         bindir = os.path.join(self.package_folder, "bin")
         self.output.info("Appending PATH environment variable: {}".format(bindir))
         self.env_info.PATH.append(bindir)
+
+        resdir = os.path.join(self.package_folder, "res")
+        self.output.info("Appending PREMAKE_PATH environment variable: {}".format(resdir))
+        self.env_info.PREMAKE_PATH.append(resdir)

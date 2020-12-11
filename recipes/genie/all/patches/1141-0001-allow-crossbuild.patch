@@ -1,0 +1,20 @@
+--- makefile
++++ makefile
+@@ -2,7 +2,7 @@
+ # Copyright 2011-2014 Branimir Karadzic. All rights reserved.
+ # License: http://www.opensource.org/licenses/BSD-2-Clause
+ #
+-
++ifeq ($(OS),)
+ UNAME := $(shell uname)
+ ifeq ($(UNAME),$(filter $(UNAME),Linux Darwin SunOS FreeBSD GNU/kFreeBSD NetBSD OpenBSD GNU))
+ ifeq ($(UNAME),$(filter $(UNAME),Darwin))
+@@ -21,7 +21,7 @@ endif
+ else
+ OS=windows
+ endif
+-
++endif
+ .PHONY: release
+ 
+ GENIE=bin/$(OS)/genie
