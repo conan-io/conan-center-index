@@ -10,7 +10,6 @@ class GenieConan(ConanFile):
     description = "Project generator tool"
     topics = ("conan", "genie", "project", "generator", "build")
     settings = "os", "arch", "compiler", "build_type"
-    exports_sources = "patches/*"
 
     @property
     def _source_subfolder(self):
@@ -21,7 +20,7 @@ class GenieConan(ConanFile):
             self.build_requires("cccl/1.1")
 
         if self.settings.os == "Windows" and tools.os_info.is_windows:
-            if "make" not in os.environ.get("CONAN_MAKE_PROGRAM", ""): # or not tools.which("make"):
+            if "make" not in os.environ.get("CONAN_MAKE_PROGRAM", ""):
                 self.build_requires("make/4.2.1")
 
             if "CONAN_BASH_PATH" not in os.environ and tools.os_info.detect_windows_subsystem() != 'msys2':
@@ -51,9 +50,6 @@ class GenieConan(ConanFile):
         return "debug" if self.settings.build_type == "Debug" else "release"
 
     def build(self):
-        for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            tools.patch(**patch)
-
         if self.settings.compiler == "Visual Studio":
             self._patch_compiler("cccl", "cccl")
             with tools.vcvars(self.settings):
