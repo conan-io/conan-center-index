@@ -60,7 +60,7 @@ class GmpConan(ConanFile):
             configure_args = []
             if self.options.get_safe("disable_assembly", False):
                 configure_args.append("--disable-assembly")
-            if self.options.enable_fat:
+            if self.options.get_safe("enable_fat", False):
                 configure_args.append("--enable-fat")
             if self.options.shared:
                 configure_args.extend(["--enable-shared", "--disable-static"])
