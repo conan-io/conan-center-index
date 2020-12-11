@@ -96,4 +96,4 @@ class GenieConan(ConanFile):
         if self.settings.build_type == "Debug":
             resdir = os.path.join(self.package_folder, "res")
             self.output.info("Appending PREMAKE_PATH environment variable: {}".format(resdir))
-        self.env_info.PREMAKE_PATH.append(resdir)
+            self.env_info.PREMAKE_PATH.append(resdir)
