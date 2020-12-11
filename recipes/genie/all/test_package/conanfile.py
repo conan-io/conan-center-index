@@ -7,4 +7,4 @@ class TestPackageConan(ConanFile):
 
     def test(self):
         if not tools.cross_building(self.settings):
-            self.run('genie ninja --scripts="{}"'.format(self.source_folder))
+            self.run('genie ninja --scripts="{}"'.format(self.source_folder), run_environment=True)

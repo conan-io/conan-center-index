@@ -51,7 +51,15 @@ class GenieConan(ConanFile):
                 with tools.chdir(self._source_subfolder):
                     self.run("make", win_bash=tools.os_info.is_windows)
         else:
-            self._patch_compiler(tools.get_env("CC"), tools.get_env("CXX"))
+            cc = tools.get_env("CC")
+            cxx = tools.get_env("CXX")
+            if tools.is_apple_os(self.settings.os):
+                if not cc:
+                    cc = "clang"
+                if not cxx:
+                    cxx = "clang"
+            self._patch_compiler(cc, cxx)
+
             with tools.chdir(self._source_subfolder):
                 self.run("make", win_bash=tools.os_info.is_windows)
 
