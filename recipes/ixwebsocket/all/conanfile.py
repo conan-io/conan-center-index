@@ -49,7 +49,11 @@ class IXWebSocketConan(ConanFile):
 
     def configure(self):
         if self.settings.compiler.cppstd:
-            tools.check_min_cppstd(self, 14)
+            # Prior to 11.0.4, C++14 was required, but 11.0.4 is C++11 compatible
+            if tools.Version(self.version) >= "11.0.4":
+                tools.check_min_cppstd(self, 11)
+            else:
+                tools.check_min_cppstd(self, 14)
         if self.options.tls == "applessl" and not tools.is_apple_os(self.settings.os):
             raise ConanInvalidConfiguration("Can only use Apple SSL on Apple.")
         elif not self._can_use_openssl() and self.options.tls == "openssl":
