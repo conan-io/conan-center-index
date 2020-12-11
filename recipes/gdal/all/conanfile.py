@@ -41,7 +41,7 @@ class GdalConan(ConanFile):
         "with_gif": [True, False],
         # "with_ogdi": [True, False],
         # "with_sosi": [True, False],
-        # "with_mongocxx": [True, False],
+        "with_mongocxx": [True, False],
         "with_hdf4": [True, False],
         "with_hdf5": [True, False],
         "with_kea": [True, False],
@@ -105,7 +105,7 @@ class GdalConan(ConanFile):
         "with_gif": True,
         # "with_ogdi": False,
         # "with_sosi": False,
-        # "with_mongocxx": False,
+        "with_mongocxx": False,
         "with_hdf4": False,
         "with_hdf5": False,
         "with_kea": False,
@@ -250,8 +250,8 @@ class GdalConan(ConanFile):
         #     self.requires("ogdi/4.1.0")
         # if self.options.with_sosi:
         #     self.requires("fyba/4.1.1")
-        # if self.options.with_mongocxx:
-        #     self.requires("mongocxx/x.x.x")
+        if self.options.with_mongocxx:
+            self.requires("mongo-cxx-driver/3.6.1")
         if self.options.with_hdf4:
             self.requires("hdf4/4.2.15")
         if self.options.with_hdf5:
@@ -332,6 +332,13 @@ class GdalConan(ConanFile):
     def _validate_dependency_graph(self):
         if self.options.with_qhull and self.options["qhull"].reentrant:
             raise ConanInvalidConfiguration("gdal depends on non-reentrant qhull.")
+        if self.options.with_mongocxx:
+            mongocxx_version = tools.Version(self.deps_cpp_info["mongo-cxx-driver"].version)
+            if mongocxx_version < "3.0.0":
+                # TODO: handle mongo-cxx-driver v2
+                raise ConanInvalidConfiguration("gdal with mongo-cxx-driver < 3.0.0 not yet supported in this recipe.")
+            elif mongocxx_version < "3.4.0":
+                raise ConanInvalidConfiguration("gdal with mongo-cxx-driver v3 requires 3.4.0 at least.")
 
     def build_requirements(self):
         if self.settings.compiler != "Visual Studio":
@@ -480,6 +487,8 @@ class GdalConan(ConanFile):
             args.append("LIBXML2_INC=\"-I{}\"".format(" -I".join(self.deps_cpp_info["libxml2"].include_paths)))
         if self.options.with_gta:
             args.append("GTA_CFLAGS=\"-I{}\"".format(" -I".join(self.deps_cpp_info["libgta"].include_paths)))
+        if self.options.with_mongocxx:
+            args.append("MONGOCXXV3_CFLAGS=\"-I{}\"".format(" -I".join(self.deps_cpp_info["mongo-cxx-driver"].include_paths)))
         args.append("QHULL_SETTING={}".format("EXTERNAL" if self.options.with_qhull else "NO"))
         if self.options.with_cryptopp:
             args.append("CRYPTOPP_INC=\"-I{}\"".format(" -I".join(self.deps_cpp_info["cryptopp"].include_paths)))
@@ -587,7 +596,8 @@ class GdalConan(ConanFile):
         args.append("--without-ogdi") # TODO: to implement when ogdi lib available (https://sourceforge.net/projects/ogdi/)
         args.append("--without-fme") # commercial library
         args.append("--without-sosi") # TODO: to implement when fyba lib available
-        args.append("--without-mongocxx") # TODO: to implement when mongocxx lib available
+        args.append("--without-mongocxx") # TODO: handle mongo-cxx-driver v2
+        args.append("--with-mongocxxv3={}".format("yes" if self.options.with_mongocxx else "no"))
         args.append("--with-hdf4={}".format("yes" if self.options.with_hdf4 else "no"))
         args.append("--with-hdf5={}".format("yes" if self.options.with_hdf5 else "no"))
         args.append("--with-kea={}".format("yes" if self.options.with_kea else "no"))
