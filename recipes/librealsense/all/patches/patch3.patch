@@ -1,0 +1,11 @@
+--- third-party/realsense-file/rosbag/roscpp_traits/include/ros/message_traits.h
++++ third-party/realsense-file/rosbag/roscpp_traits/include/ros/message_traits.h
+@@ -33,7 +33,7 @@
+ #include "ros/time.h"
+ 
+ #include <string>
+-#include "boost/enable_if.hpp"
++#include "boost/utility/enable_if.hpp"
+ 
+ #include <memory.h>
+ #include <boost/type_traits/remove_reference.hpp>

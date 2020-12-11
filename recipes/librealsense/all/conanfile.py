@@ -11,7 +11,7 @@ class LibRealSenseConan(ConanFile):
     topics = "conan", "intel", "3d", "computer vision", "robotics"
     license = "Apache-2.0"
     url = "https://github.com/conan-io/conan-center-index"
-    exports_sources = "CMakeLists.txt"
+    exports_sources = ["CMakeLists.txt", "patches/**"]
     settings = "os", "compiler", "build_type", "arch"
     options = {
         "shared": [True, False],
@@ -19,7 +19,8 @@ class LibRealSenseConan(ConanFile):
         "with_openmp": [True, False]
     }
     default_options = {"shared": False, "fPIC": True, "with_openmp": False}
-    generators = "cmake"
+    generators = ["cmake", "cmake_find_package"]
+    requires = ["lz4/1.9.3", "boost/1.69.0"]
 
     _cmake = None
 
@@ -51,10 +52,14 @@ class LibRealSenseConan(ConanFile):
         tools.get(**self.conan_data["sources"][self.version])
         os.rename(glob.glob("librealsense*")[0], self._source_subfolder)
 
+    def _patch_sources(self):
+        for patch in self.conan_data["patches"][self.version]:
+            tools.patch(**patch)
+
     def _configure_cmake(self):
         if self._cmake:
             return self._cmake
-        self._cmake = CMake(self)
+        self._cmake = CMake(self, parallel=False)
         self._cmake.definitions["BUILD_EXAMPLES"] = False
         self._cmake.definitions["BUILD_GLSL_EXTENSIONS"] = False
         self._cmake.definitions["BUILD_WITH_OPENMP"] = self.options.with_openmp
@@ -67,6 +72,7 @@ class LibRealSenseConan(ConanFile):
         return self._cmake
 
     def build(self):
+        self._patch_sources()
         cmake = self._configure_cmake()
         cmake.build()
 
