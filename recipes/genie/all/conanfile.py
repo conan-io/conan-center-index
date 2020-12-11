@@ -1,6 +1,5 @@
 import os, glob
 from conans import ConanFile, tools
-from conans.errors import ConanInvalidConfiguration
 
 
 class GenieConan(ConanFile):
@@ -41,23 +40,18 @@ class GenieConan(ConanFile):
             "FreeBSD": "freebsd",
         }[str(self.settings.os)]
 
-    @property
-    def _cc(self):
-        return {
-            "Visual Studio": "cccl",
-            "gcc": "gcc",
-            "clang": "clang",
-            "apple-clang": "clang",
-        }[str(self.settings.compiler)]
+    def _patch_compiler(self, cc, cxx):
+        tools.replace_in_file(os.path.join(self._source_subfolder, "build", "gmake.{}".format(self._os), "genie.make"), "CC  = gcc", "CC  = {}".format(cc))
+        tools.replace_in_file(os.path.join(self._source_subfolder, "build", "gmake.{}".format(self._os), "genie.make"), "CXX = g++", "CXX = {}".format(cxx))
 
     def build(self):
-        tools.replace_in_file(os.path.join(self._source_subfolder, "build", "gmake.{}".format(self._os), "genie.make"), "CC  = gcc", "CC  = {}".format(self._cc))
-
         if self.settings.compiler == "Visual Studio":
+            self._patch_compiler(self, "cccl", "cccl")
             with tools.vcvars(self.settings):
                 with tools.chdir(self._source_subfolder):
                     self.run("make", win_bash=tools.os_info.is_windows)
         else:
+            self._patch_compiler(self, tools.get_env("CC"), tools.get_env("CXX"))
             with tools.chdir(self._source_subfolder):
                 self.run("make", win_bash=tools.os_info.is_windows)
 
