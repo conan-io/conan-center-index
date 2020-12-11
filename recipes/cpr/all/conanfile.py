@@ -60,7 +60,7 @@ class CprConan(ConanFile):
         if not self._supports_winssl:
             del self.options.with_winssl
 
-        if self._supports_openssl and tools.is_apple_os(self.settings.os)
+        if self._supports_openssl and tools.is_apple_os(self.settings.os):
             self.options.with_openssl = False # Default libcurl in CCI is `with_ssl="darwin"` which is unclear if cpr supports this
             
         # Make sure libcurl uses the same SSL implementation
