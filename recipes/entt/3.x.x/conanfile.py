@@ -43,14 +43,13 @@ class EnttConan(ConanFile):
             return
 
         # Compare versions asuming minor satisfies if not explicitly set
-        def gte_compiler_version(version1, version2):
-            v1, *v1_res = version1.split(".", 1)
-            v2, *v2_res = version2.split(".", 1)
-            if v1 == v2 and v1_res and v2_res:
-                return gte_compiler_version(v1_res, v2_res)
-            return v1 >= v2
+        def lazy_lt_semver(v1, v2):
+            lv1 = v1.split(".")
+            lv2 = v2.split(".")
+            min_length = min(len(lv1), len(lv2))
+            return lv1[:min_length] < lv2[:min_length]
 
-        if not gte_compiler_version(str(self.settings.compiler.version), minimal_version[compiler]):
+        if lazy_lt_semver(str(self.settings.compiler.version), minimal_version[compiler]):
             raise ConanInvalidConfiguration(
                 "%s requires a compiler that supports at least C++%s" % (self.name, minimal_cpp_standard))
 
