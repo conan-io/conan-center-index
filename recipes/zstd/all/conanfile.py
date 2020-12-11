@@ -72,5 +72,5 @@ class ZstdConan(ConanFile):
         self.cpp_info.components["zstdlib"].names["cmake_find_package"] = zstd_cmake
         self.cpp_info.components["zstdlib"].names["cmake_find_package_multi"] = zstd_cmake
         self.cpp_info.components["zstdlib"].libs = tools.collect_libs(self)
-        if self.settings.os == "Linux":
+        if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.components["zstdlib"].system_libs.append("pthread")
