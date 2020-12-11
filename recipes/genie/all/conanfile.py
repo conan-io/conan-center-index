@@ -82,7 +82,8 @@ class GenieConan(ConanFile):
         self.copy("LICENSE", dst="licenses", src=self._source_subfolder)
         bin_ext = ".exe" if self.settings.os == "Windows" else ""
         self.copy("genie{}".format(bin_ext), dst="bin", src=os.path.join(self._source_subfolder, "bin", self._os))
-        self.copy("*.lua", dst="res", src=os.path.join(self._source_subfolder, "src"))
+        if self.settings.build_type == "Debug":
+            self.copy("*.lua", dst="res", src=os.path.join(self._source_subfolder, "src"))
 
     def package_id(self):
         del self.info.settings.compiler
@@ -92,6 +93,7 @@ class GenieConan(ConanFile):
         self.output.info("Appending PATH environment variable: {}".format(bindir))
         self.env_info.PATH.append(bindir)
 
-        resdir = os.path.join(self.package_folder, "res")
-        self.output.info("Appending PREMAKE_PATH environment variable: {}".format(resdir))
+        if self.settings.build_type == "Debug":
+            resdir = os.path.join(self.package_folder, "res")
+            self.output.info("Appending PREMAKE_PATH environment variable: {}".format(resdir))
         self.env_info.PREMAKE_PATH.append(resdir)
