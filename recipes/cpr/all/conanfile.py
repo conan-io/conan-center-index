@@ -76,6 +76,9 @@ class CprConan(ConanFile):
 
         if self.options.get_safe("with_openssl", False) and self.options.get_safe("with_winssl", False):
             raise ConanInvalidConfiguration("cpr can not be built with both openssl and winssl")
+            
+        if self.settings.compiler == "Visual Studio" and self.options.shared and "MT" in self.settings.compiler.runtime:
+            raise ConanInvalidConfiguration("Visual Studio build for shared library with MT runtime is not supported")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
