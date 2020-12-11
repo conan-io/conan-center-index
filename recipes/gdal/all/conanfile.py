@@ -281,13 +281,13 @@ class GdalConan(ConanFile):
         # if self.options.with_dods_root:
         #     self.requires("libdap/3.20.6")
         if self.options.with_curl:
-            self.requires("libcurl/7.73.0")
+            self.requires("libcurl/7.74.0")
         if self.options.with_xml2:
             self.requires("libxml2/2.9.10")
         # if self.options.with_spatialite:
         #     self.requires("libspatialite/4.3.0a")
         if self.options.get_safe("with_sqlite3"):
-            self.requires("sqlite3/3.33.0")
+            self.requires("sqlite3/3.34.0")
         # if self.options.with_rasterlite2:
         #     self.requires("rasterlite2/x.x.x")
         if self.options.get_safe("with_pcre"):
@@ -321,7 +321,7 @@ class GdalConan(ConanFile):
         if self.options.with_cryptopp:
             self.requires("cryptopp/8.2.0")
         if self.options.with_crypto:
-            self.requires("openssl/1.1.1h")
+            self.requires("openssl/1.1.1i")
         # if not self.options.without_lerc:
         #     self.requires("lerc/2.1") # TODO: use conan recipe (not possible yet because lerc API is broken for GDAL)
         if self.options.get_safe("with_exr"):
