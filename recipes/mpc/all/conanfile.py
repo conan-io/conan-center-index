@@ -94,8 +94,9 @@ class MpcConan(ConanFile):
     def package(self):
         self.copy(pattern="COPYING.LESSER", dst="licenses", src=self._source_subfolder)
         if self.settings.compiler == "Visual Studio":
-            # FIXME: determine whether consumers of mpc look for mpc.lib or libmpc.lib
             self.copy("libmpc.lib", src=self._source_subfolder, dst="lib", keep_path=False)
+            os.rename(os.path.join(self.package_folder, "lib", "libmpc.lib"),
+                      os.path.join(self.package_folder, "lib", "mpc.lib"))
             self.copy("libmpc.dll", src=self._source_subfolder, dst="bin", keep_path=False)
             self.copy("mpc.h", src=os.path.join(self._source_subfolder, "src"), dst="include")
         else:
@@ -105,7 +106,4 @@ class MpcConan(ConanFile):
             os.unlink(os.path.join(self.package_folder, "lib", "libmpc.la"))
 
     def package_info(self):
-        libprefix = ""
-        if self.settings.compiler == "Visual Studio":
-            libprefix = "lib"
-        self.cpp_info.libs = ["{}mpc".format(libprefix)]
+        self.cpp_info.libs = ["mpc"]
