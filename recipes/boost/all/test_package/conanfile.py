@@ -50,7 +50,7 @@ class TestPackageConan(ConanFile):
             self.run(os.path.join("bin", "coroutine_exe"), run_environment=True)
         if not self.options["boost"].without_chrono:
             self.run(os.path.join("bin", "chrono_exe"), run_environment=True)
-        if not self._boost_option("without_json"):
+        if not self._boost_option("without_json", False):
             self.run(os.path.join("bin", "json_exe"), run_environment=True)
         if not self.options["boost"].without_python:
             with tools.environment_append({"PYTHONPATH": "{}:{}".format("bin", "lib")}):
