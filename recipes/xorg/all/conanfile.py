@@ -62,6 +62,9 @@ class ConanXOrg(ConanFile):
             elif tools.os_info.with_zypper:
                 packages = ["xorg-x11-devel", "xcb-util-wm-devel", "xcb-util-image-devel", "xcb-util-keysyms-devel",
                             "xcb-util-renderutil-devel", "xkeyboard-config", "xcb-util-devel"]
+            elif tools.os_info.is_freebsd:
+                packages = ["libX11", "xcb-util-wm", "xcb-util-image", "xcb-util-keysyms", "xcb-util-renderutil",
+                            "xkeyboard-config", "xcb-util"]
             else:
                 self.output.warn("Do not know how to install 'xorg' for {}.".format(tools.os_info.linux_distro))
                 packages = []
