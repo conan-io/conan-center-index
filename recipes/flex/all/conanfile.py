@@ -9,7 +9,7 @@ class FlexConan(ConanFile):
     homepage = "https://github.com/westes/flex"
     description = "Flex, the fast lexical analyzer generator"
     topics = ("conan", "flex", "lex", "lexer", "lexical analyzer generator")
-    license = "BSD-2-Clause"    
+    license = "BSD-2-Clause"
 
     settings = "os", "arch", "compiler", "build_type"
     options = {"shared": [True, False], "fPIC": [True, False]}
@@ -72,6 +72,7 @@ class FlexConan(ConanFile):
             autotools.install()
         tools.rmdir(os.path.join(self.package_folder, "share"))
         os.unlink(os.path.join(self.package_folder, "lib", "libfl.la"))
+        os.unlink(os.path.join(self.package_folder, "lib", "libfl_pic.la"))
 
     def package_info(self):
         self.cpp_info.libs = ["fl"]

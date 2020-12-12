@@ -1,4 +1,7 @@
 sources:
+  "2.5.39":
+    sha256: "71dd1b58158c935027104c830c019e48c73250708af5def45ea256c789318948"
+    url: "https://github.com/westes/flex/releases/download/flex-2.5.39/flex-2.5.39.tar.gz"
   "2.6.4":
     sha256: "e87aae032bf07c26f85ac0ed3250998c37621d95f8bd748b31f15b33c45ee995"
     url: "https://github.com/westes/flex/releases/download/v2.6.4/flex-2.6.4.tar.gz"
