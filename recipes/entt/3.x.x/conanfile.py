@@ -19,10 +19,6 @@ class EnttConan(ConanFile):
         return "source_subfolder"
 
     def configure(self):
-        # FIXME: Here we are implementing a workaround because ConanCenter is not generating any configuration with
-        #   C++17 support (either supported by default by a compiler or using 'compiler.cppstd=17' in the Conan profile)
-        #   and ConanCenter requires that at least one package is generated. Once ConanCenter uses a profile
-        #   with C++17 support, only a raw call to `tools.check_mis_cppstd(self, "17")` will be required.
         minimal_cpp_standard = "17"
         if self.settings.compiler.cppstd:
             tools.check_min_cppstd(self, minimal_cpp_standard)
@@ -44,8 +40,8 @@ class EnttConan(ConanFile):
 
         # Compare versions asuming minor satisfies if not explicitly set
         def lazy_lt_semver(v1, v2):
-            lv1 = v1.split(".")
-            lv2 = v2.split(".")
+            lv1 = [int(v) for v in v1.split(".")]
+            lv2 = [int(v) for v in v2.split(".")]
             min_length = min(len(lv1), len(lv2))
             return lv1[:min_length] < lv2[:min_length]
 
