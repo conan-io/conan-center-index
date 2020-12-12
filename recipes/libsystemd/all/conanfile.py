@@ -152,4 +152,8 @@ class LibsystemdConan(ConanFile):
 
     def package_info(self):
         self.cpp_info.libs = ["systemd"]
+        # FIXME: this `.version` should only happen for the `pkg_config`
+        #  generator (see https://github.com/conan-io/conan/issues/8202)
+        # systemd uses only major version in its .pc file
+        self.cpp_info.version = tools.Version(self.version).major
         self.cpp_info.system_libs = ["rt", "pthread", "dl"]
