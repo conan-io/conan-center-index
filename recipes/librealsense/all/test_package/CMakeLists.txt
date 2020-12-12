@@ -2,8 +2,11 @@ cmake_minimum_required(VERSION 3.1.0)
 project(test_package)
 
 include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
-conan_basic_setup()
+conan_basic_setup(TARGETS)
+
+find_package(librealsense REQUIRED)
 
 add_executable(${CMAKE_PROJECT_NAME} test_package.cpp)
 set_property(TARGET ${PROJECT_NAME} PROPERTY CXX_STANDARD 11)
-target_link_libraries(${CMAKE_PROJECT_NAME} ${CONAN_LIBS} realsense-file)
+
+target_link_libraries(${CMAKE_PROJECT_NAME} librealsense::librealsense)

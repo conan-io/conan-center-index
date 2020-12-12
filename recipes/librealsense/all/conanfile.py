@@ -84,4 +84,10 @@ class LibRealSenseConan(ConanFile):
         tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
 
     def package_info(self):
-        self.cpp_info.libs = tools.collect_libs(self)
+        libs = tools.collect_libs(self)
+        self.cpp_info.components["realsense2"].libs = ["realsense2"]
+        self.cpp_info.components["realsense-file"].libs = ["realsense-file"]
+        self.cpp_info.components["realsense-file"].requires = ["lz4::lz4", "boost::boost"]
+        if "fw" in libs:
+            self.cpp_info.components["fw"].libs = ["fw"]
+            self.cpp_info.components["fw"].requires = ["libusb::libusb"]
