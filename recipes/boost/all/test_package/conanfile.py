@@ -7,11 +7,11 @@ class TestPackageConan(ConanFile):
     settings = "os", "compiler", "arch", "build_type"
     generators = "cmake", "cmake_find_package"
 
-    def _boost_option(self, name):
+    def _boost_option(self, name, default):
         try:
-            return getattr(self.options["boost"], name)
+            return getattr(self.options["boost"], name, default)
         except (AttributeError, ConanException):
-            return False
+            return default
 
     def build(self):
         # FIXME: tools.vcvars added for clang-cl. Remove once conan supports clang-cl properly. (https://github.com/conan-io/conan-center-index/pull/1453)
@@ -30,7 +30,7 @@ class TestPackageConan(ConanFile):
             cmake.definitions["WITH_TEST"] = not self.options["boost"].without_test
             cmake.definitions["WITH_COROUTINE"] = not self.options["boost"].without_coroutine
             cmake.definitions["WITH_CHRONO"] = not self.options["boost"].without_chrono
-            cmake.definitions["WITH_JSON"] = not self._boost_option("without_json")
+            cmake.definitions["WITH_JSON"] = not self._boost_option("without_json", True)
             cmake.configure()
             cmake.build()
 
