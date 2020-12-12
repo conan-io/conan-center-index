@@ -38,6 +38,7 @@ CONFIGURE_OPTIONS = (
     "graph",
     "graph_parallel",
     "iostreams",
+    "json",
     "locale",
     "log",
     "math",
@@ -149,6 +150,9 @@ class BoostDependencyBuilder(object):
             print("Re-init git submodules")
             subprocess.check_call(["git", "submodule", "update", "--init"])
 
+            print("Removing unknown files/directories")
+            subprocess.check_call(["git", "clean", "-d", "-f"])
+
     def do_install_boostdep(self):
         with tools.chdir(str(self.boost_path)):
             print("Installing boostdep/{}".format(self.boostdep_version))
@@ -224,8 +228,8 @@ class BoostDependencyBuilder(object):
     def do_boostdep_collect(self) -> BoostDependencies:
         with tools.chdir(str(self.boost_path)):
             with tools.environment_append({"PATH": self._bin_paths}):
-                buildables = subprocess.check_output(["boostdep", "--list-buildable"])
-                buildables = buildables.decode().splitlines()
+                buildables = subprocess.check_output(["boostdep", "--list-buildable"], text=True)
+                buildables = buildables.splitlines()
                 log.debug("`boostdep --list--buildable` returned these buildables: %s", buildables)
 
                 # modules = subprocess.check_output(["boostdep", "--list-modules"])
@@ -234,10 +238,18 @@ class BoostDependencyBuilder(object):
                 dep_modules = buildables
 
                 dependency_tree = {}
-                for module in dep_modules:
-                    module_ts_output = subprocess.check_output(["boostdep", "--track-sources", module])
-                    mod_deps = re.findall("\n([A-Za-z_-]+):\n", module_ts_output.decode())
-                    dependency_tree[module] = mod_deps
+                buildable_dependencies = subprocess.check_output(["boostdep", "--list-buildable-dependencies"], text=True)
+                log.debug("boosdep --list-buildable-dependencies returnes: %s", buildable_dependencies)
+                for line in buildable_dependencies.splitlines():
+                    if re.match(r"^[\s]*#.*", line):
+                        continue
+                    match = re.match(r"([\S]+)\s*=\s*([^;]+)\s*;\s*", line)
+                    if not match:
+                        continue
+                    master = match.group(1)
+                    dependencies = re.split(r"\s+", match.group(2).strip())
+                    dependency_tree[master] = dependencies
+
                 log.debug("Using `boostdep --track-sources`, the following dependency tree was calculated:")
                 log.debug(pprint.pformat(dependency_tree))
 
@@ -307,6 +319,12 @@ class BoostDependencyBuilder(object):
 
         if "mpi_python" in deptree and "python" not in deptree["mpi_python"]:
             deptree["mpi_python"].append("python")
+
+        # Break random/math dependency cycle
+        try:
+            deptree["math"].remove("random")
+        except ValueError:
+            pass
 
         remaining_tree = self.detect_cycles(deptree)
         if remaining_tree:
@@ -389,7 +407,6 @@ class BoostDependencyBuilder(object):
         elif isinstance(item, list):
             return list(cls._sort_item(e) for e in sorted(item))
         else:
-            print("UNKNOWN", type(item), item)
             return item
 
     def do_create_dependency_file(self) -> None:
@@ -413,7 +430,7 @@ def main(args=None) -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--verbose", dest="verbose", action="store_true", help="verbose output")
     parser.add_argument("-t", dest="tmppath", help="temporary folder where to clone boost (default is system temporary folder)")
-    parser.add_argument("-d", dest="boostdep_version", default="1.74.0", type=str, help="boostdep version")
+    parser.add_argument("-d", dest="boostdep_version", default="1.75.0", type=str, help="boostdep version")
     parser.add_argument("-u", dest="git_url", default=BOOST_GIT_URL, help="boost git url")
     parser.add_argument("-U", dest="git_update", action="store_true", help="update the git repo")
     parser.add_argument("-o", dest="outputdir", default=None, type=Path, help="output dependency dir")

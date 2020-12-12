@@ -34,6 +34,7 @@ CONFIGURE_OPTIONS = (
     "graph",
     "graph_parallel",
     "iostreams",
+    "json",
     "locale",
     "log",
     "math",
@@ -140,15 +141,20 @@ class BoostConan(ConanFile):
             raise ConanException("Cannot find {}".format(dependencies_filepath))
         return yaml.load(open(dependencies_filepath))
 
-    def _iter_modules(self):
-        tree = {k: v[:] for k, v in self._dependencies["dependencies"].items()}
-        while tree:
-            nodeps = set(k for k, v in tree.items() if not v)
-            if not nodeps:
-                raise ConanException("cyclic dependency tree detected")
-            for nodep in nodeps:
-                yield nodep
-            tree = {k: [d for d in v if d not in nodeps] for k, v in tree.items() if k not in nodeps}
+    def _all_dependent_modules(self, name):
+        dependencies = {name}
+        new_dependencies = self._dependencies["dependencies"][name]
+        while True:
+            len_before = len(dependencies)
+            dependencies.update(new_dependencies)
+            len_after = len(dependencies)
+            if len_before == len_after:
+                break
+            next_new_dependencies = set()
+            for new_dependency in new_dependencies:
+                next_new_dependencies.update(set(self._dependencies["dependencies"][new_dependency]))
+            new_dependencies = next_new_dependencies
+        return dependencies
 
     @property
     def _source_subfolder(self):
@@ -1131,8 +1137,10 @@ class BoostConan(ConanFile):
             modules_seen = set()
             detected_libraries = set(tools.collect_libs(self))
             used_libraries = set()
-            for module in self._iter_modules():
-                if self.options.get_safe("without_{}".format(module), False) or not all(d in modules_seen for d in self._dependencies["dependencies"][module]):
+
+            for module in self._dependencies["dependencies"].keys():
+                missing_depmodules = list(depmodule for depmodule in self._all_dependent_modules(module) if self.options.get_safe("without_{}".format(depmodule), False))
+                if missing_depmodules:
                     continue
 
                 module_libraries = [add_libprefix(lib.format(**libformatdata)) + libsuffix for lib in self._dependencies["libs"][module]]

@@ -35,6 +35,12 @@ if(NOT HEADER_ONLY)
         target_link_libraries(chrono_exe PRIVATE Boost::chrono)
     endif()
 
+    if(WITH_JSON)
+        find_package(Boost COMPONENTS json REQUIRED)
+        add_executable(json_exe json.cpp)
+        target_link_libraries(json_exe PRIVATE Boost::json)
+    endif()
+
     if(WITH_PYTHON)
         find_package(Boost COMPONENTS python REQUIRED)
         add_library(hello_ext MODULE python.cpp)

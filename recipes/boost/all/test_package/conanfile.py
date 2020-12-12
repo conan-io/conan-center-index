@@ -1,11 +1,17 @@
 from conans import ConanFile, CMake, tools
+from conans.errors import ConanException
 import os
-import sys
 
 
 class TestPackageConan(ConanFile):
     settings = "os", "compiler", "arch", "build_type"
     generators = "cmake", "cmake_find_package"
+
+    def _boost_option(self, name):
+        try:
+            return getattr(self.options["boost"], name)
+        except (AttributeError, ConanException):
+            return False
 
     def build(self):
         # FIXME: tools.vcvars added for clang-cl. Remove once conan supports clang-cl properly. (https://github.com/conan-io/conan-center-index/pull/1453)
@@ -24,6 +30,7 @@ class TestPackageConan(ConanFile):
             cmake.definitions["WITH_TEST"] = not self.options["boost"].without_test
             cmake.definitions["WITH_COROUTINE"] = not self.options["boost"].without_coroutine
             cmake.definitions["WITH_CHRONO"] = not self.options["boost"].without_chrono
+            cmake.definitions["WITH_JSON"] = not self._boost_option("without_json")
             cmake.configure()
             cmake.build()
 
@@ -43,6 +50,8 @@ class TestPackageConan(ConanFile):
             self.run(os.path.join("bin", "coroutine_exe"), run_environment=True)
         if not self.options["boost"].without_chrono:
             self.run(os.path.join("bin", "chrono_exe"), run_environment=True)
+        if not self._boost_option("without_json"):
+            self.run(os.path.join("bin", "json_exe"), run_environment=True)
         if not self.options["boost"].without_python:
             with tools.environment_append({"PYTHONPATH": "{}:{}".format("bin", "lib")}):
                 self.run("{} {}".format(self.options["boost"].python_executable, os.path.join(self.source_folder, "python.py")), run_environment=True)
