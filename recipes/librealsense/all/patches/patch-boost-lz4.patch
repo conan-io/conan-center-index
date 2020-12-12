@@ -45,7 +45,7 @@
  
  set_target_properties (${PROJECT_NAME} PROPERTIES FOLDER Library)
  
-+target_link_libraries(${PROJECT_NAME} CONAN_PKG::boost lz4::lz4)
++target_link_libraries(${PROJECT_NAME} Boost::Boost lz4::lz4)
 +
  set(CMAKECONFIG_INSTALL_DIR "${CMAKE_INSTALL_LIBDIR}/../cmake/realsense2")
  

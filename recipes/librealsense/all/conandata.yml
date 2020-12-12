@@ -4,11 +4,13 @@ sources:
     sha256: "7270081d6a289b1f8eee57b46d0e5bced1f912bbd7630281f7a72a741c98ba3b"
 patches:
   "2.40.0":
-    - patch_file: "patches/patch1.patch"
+    - patch_file: "patches/patch-boost-lz4.patch"
       base_path: "source_subfolder"
-    - patch_file: "patches/patch2.patch"
+    - patch_file: "patches/patch-fix-boost-include.patch"
       base_path: "source_subfolder"
-    - patch_file: "patches/patch3.patch"
+    - patch_file: "patches/patch-json-include.patch"
       base_path: "source_subfolder"
-    - patch_file: "patches/patch4.patch"
+    - patch_file: "patches/patch-libusb-include.patch"
+      base_path: "source_subfolder"
+    - patch_file: "patches/patch-remove-internal-boost-lz4.patch"
       base_path: "source_subfolder"
