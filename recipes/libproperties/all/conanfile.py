@@ -4,7 +4,6 @@ from conans import ConanFile, CMake, tools
 class LibpropertiesConan(ConanFile):
     name = "libproperties"
     license = "Apache-2.0 License"
-    author = "libbylg@126.com"
     homepage = "https://github.com/tinyhubs/libproperties"
     url = "https://github.com/conan-io/conan-center-index"
     description = "libproperties is a library to parse the Java .properties files. It was writen in pure C. And fullly compatible with the Java .properties file format."
