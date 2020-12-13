@@ -25,10 +25,6 @@ class FlexConan(ConanFile):
             del self.options.shared
 
     @property
-    def _is_static(self):
-        return 'shared' not in self.options.values.keys() or not self.options.shared
-
-    @property
     def _source_subfolder(self):
         return "source_subfolder"
 
@@ -48,10 +44,10 @@ class FlexConan(ConanFile):
             return self._autotools
         self._autotools = AutoToolsBuildEnvironment(self)
         configure_args = ["--disable-nls", "HELP2MAN=/bin/true", "M4=m4"]
-        if self._is_static:
-            configure_args.extend(["--disable-shared", "--enable-static"])
-        else:
+        if self.options.get_safe("shared"):
             configure_args.extend(["--enable-shared", "--disable-static"])
+        else:
+            configure_args.extend(["--disable-shared", "--enable-static"])
 
         if self.settings.os == "Linux":
             # https://github.com/westes/flex/issues/247
