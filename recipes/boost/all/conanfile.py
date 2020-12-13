@@ -127,6 +127,13 @@ class BoostConan(ConanFile):
     no_copy_source = True
     exports_sources = ['patches/*']
 
+    @property
+    def _min_compiler_version_default_cxx11(self):
+        return {
+            "gcc": 5,
+            "clang": 5,
+        }.get(str(self.settings.compiler))
+
     def export(self):
         self.copy(self._dependency_filename, src="dependencies", dst="dependencies")
 
@@ -199,6 +206,14 @@ class BoostConan(ConanFile):
             if dep_name not in self._configure_options:
                 delattr(self.options, "without_{}".format(dep_name))
 
+        # json requires a c++11-able compiler: change default to not build on compiler with too old default c++ standard or to low compiler.cppstd
+        version_cxx11_standard = self._min_compiler_version_default_cxx11
+        if self.settings.compiler.cppstd:
+            if not tools.valid_min_cppstd(self, 11):
+                self.options.without_json = True
+        elif tools.Version(self.settings.compiler.version) < version_cxx11_standard:
+            self.options.without_json = True
+
     @property
     def _configure_options(self):
         return self._dependencies["configure_options"]
@@ -234,6 +249,14 @@ class BoostConan(ConanFile):
             if not self.options.python_version:
                 self.options.python_version = self._detect_python_version()
                 self.options.python_executable = self._python_executable
+
+        if not self.options.get_safe("without_json", True):
+            # json requires a c++11-able compiler.
+            version_cxx11_standard = self._min_compiler_version_default_cxx11
+            if self.settings.compiler.cppstd:
+                tools.check_min_cppstd(self, 11)
+            elif tools.Version(self.settings.compiler.version) < version_cxx11_standard:
+                raise ConanInvalidConfiguration("Boost.json requires a c++11 compiler (please set compiler.cppstd or use a newer compiler)")
 
     def build_requirements(self):
         if not self.options.header_only:
@@ -717,8 +740,8 @@ class BoostConan(ConanFile):
             flags.append("variant=release")
 
         for libname in self._configure_options:
-            if getattr(self.options, "without_%s" % libname):
-                flags.append("--without-%s" % libname)
+            if not getattr(self.options, "without_%s" % libname):
+                flags.append("--with-%s" % libname)
 
         flags.append("toolset=%s" % self._toolset)
 
@@ -1166,7 +1189,7 @@ class BoostConan(ConanFile):
                 module_libraries = [add_libprefix(lib.format(**libformatdata)) + libsuffix for lib in self._dependencies["libs"][module]]
                 if all(l in detected_libraries for l in module_libraries):
                     modules_seen.add(module)
-                    used_libraries = used_libraries.union(module_libraries)
+                    used_libraries.update(module_libraries)
                     self.cpp_info.components[module].libs = module_libraries
 
                     self.cpp_info.components[module].requires = self._dependencies["dependencies"][module] + ["_libboost"]
