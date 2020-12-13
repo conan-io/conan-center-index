@@ -41,8 +41,8 @@ class ConanXOrg(ConanFile):
         self.cpp_info.components[name].version = pkg_config.version[0]
 
     def system_requirements(self):
+        packages = []
         if tools.os_info.is_linux and self.settings.os == "Linux":
-            package_tool = tools.SystemPackageTool(conanfile=self, default_mode="verify")
             if tools.os_info.with_apt:
                 packages = ["xorg-dev", "libx11-xcb-dev", "libxcb-render0-dev", "libxcb-render-util0-dev", "libxcb-xkb-dev",
                             "libxcb-icccm4-dev", "libxcb-image0-dev", "libxcb-keysyms1-dev", "libxcb-randr0-dev", "libxcb-shape0-dev",
@@ -66,12 +66,14 @@ class ConanXOrg(ConanFile):
             elif tools.os_info.with_zypper:
                 packages = ["xorg-x11-devel", "xcb-util-wm-devel", "xcb-util-image-devel", "xcb-util-keysyms-devel",
                             "xcb-util-renderutil-devel", "xkeyboard-config", "xcb-util-devel"]
-            elif tools.os_info.is_freebsd:
-                packages = ["libX11", "xcb-util-wm", "xcb-util-image", "xcb-util-keysyms", "xcb-util-renderutil",
-                            "xkeyboard-config", "xcb-util"]
             else:
                 self.output.warn("Do not know how to install 'xorg' for {}.".format(tools.os_info.linux_distro))
-                packages = []
+        
+        elif tools.os_info.is_freebsd and self.settings.os == "FreeBSD":
+            packages = ["libX11", "xcb-util-wm", "xcb-util-image", "xcb-util-keysyms", "xcb-util-renderutil",
+                        "xkeyboard-config", "xcb-util"]
+        if packages:
+            package_tool = tools.SystemPackageTool(conanfile=self, default_mode="verify")
             for p in packages:
                 package_tool.install(update=True, packages=p)
 
