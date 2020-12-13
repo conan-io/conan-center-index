@@ -19,6 +19,14 @@ class FlexConan(ConanFile):
 
     _autotools = None
 
+    def config_options(self):
+        if self.version == "2.5.39" and self.settings.compiler == "apple-clang":
+            del self.options.shared
+
+    @property
+    def _is_static(self):
+        return 'shared' not in self.options.values.keys() or not self.options.shared
+
     @property
     def _source_subfolder(self):
         return "source_subfolder"
@@ -39,10 +47,10 @@ class FlexConan(ConanFile):
             return self._autotools
         self._autotools = AutoToolsBuildEnvironment(self)
         configure_args = ["--disable-nls", "HELP2MAN=/bin/true", "M4=m4"]
-        if self.options.shared:
-            configure_args.extend(["--enable-shared", "--disable-static"])
-        else:
+        if self._is_static:
             configure_args.extend(["--disable-shared", "--enable-static"])
+        else:
+            configure_args.extend(["--enable-shared", "--disable-static"])
 
         if self.settings.os == "Linux":
             # https://github.com/westes/flex/issues/247
@@ -56,7 +64,6 @@ class FlexConan(ConanFile):
 
         self._autotools.configure(args=configure_args)
         return self._autotools
-
 
     def build(self):
         if tools.cross_building(self.settings, skip_x64_x86=True):
