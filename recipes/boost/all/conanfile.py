@@ -201,11 +201,6 @@ class BoostConan(ConanFile):
             if "without_{}".format(opt_name) not in self.options:
                 raise ConanException("{} has the configure options {} which is not available in conanfile.py".format(self._dependency_filename, opt_name))
 
-        # Remove options not supported by this version of boost
-        for dep_name in CONFIGURE_OPTIONS:
-            if dep_name not in self._configure_options:
-                delattr(self.options, "without_{}".format(dep_name))
-
         # json requires a c++11-able compiler: change default to not build on compiler with too old default c++ standard or to low compiler.cppstd
         version_cxx11_standard = self._min_compiler_version_default_cxx11
         if self.settings.compiler.cppstd:
@@ -213,6 +208,11 @@ class BoostConan(ConanFile):
                 self.options.without_json = True
         elif tools.Version(self.settings.compiler.version) < version_cxx11_standard:
             self.options.without_json = True
+
+        # Remove options not supported by this version of boost
+        for dep_name in CONFIGURE_OPTIONS:
+            if dep_name not in self._configure_options:
+                delattr(self.options, "without_{}".format(dep_name))
 
     @property
     def _configure_options(self):
