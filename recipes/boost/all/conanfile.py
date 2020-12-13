@@ -258,11 +258,12 @@ class BoostConan(ConanFile):
 
         if not self.options.get_safe("without_json", True):
             # json requires a c++11-able compiler.
-            version_cxx11_standard = self._min_compiler_version_default_cxx11
             if self.settings.compiler.cppstd:
                 tools.check_min_cppstd(self, 11)
-            elif tools.Version(self.settings.compiler.version) < version_cxx11_standard:
-                raise ConanInvalidConfiguration("Boost.json requires a c++11 compiler (please set compiler.cppstd or use a newer compiler)")
+            else:
+                version_cxx11_standard = self._min_compiler_version_default_cxx11
+                if tools.Version(self.settings.compiler.version) < version_cxx11_standard:
+                    raise ConanInvalidConfiguration("Boost.json requires a c++11 compiler (please set compiler.cppstd or use a newer compiler)")
 
     def build_requirements(self):
         if not self.options.header_only:
