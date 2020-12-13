@@ -3,7 +3,6 @@ from conans import ConanFile, CMake, tools
 
 class LibpropertiesConan(ConanFile):
     name = "libproperties"
-    version = "1.1.2"
     license = "Apache-2.0 License"
     author = "libbylg@126.com"
     url = "https://github.com/tinyhubs/libproperties"
