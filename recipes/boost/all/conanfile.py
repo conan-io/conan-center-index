@@ -129,10 +129,11 @@ class BoostConan(ConanFile):
 
     @property
     def _min_compiler_version_default_cxx11(self):
+        # Minimum compiler version having c++ standard >= 11
         return {
-            "gcc": 5,
-            "clang": 5,
-            "apple-clang": 8,  # guess
+            "gcc": 6,
+            "clang": 6,
+            "apple-clang": 12,  # guess
             "Visual Studio": 14,  # guess
         }.get(str(self.settings.compiler))
 
