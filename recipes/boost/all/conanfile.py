@@ -132,6 +132,8 @@ class BoostConan(ConanFile):
         return {
             "gcc": 5,
             "clang": 5,
+            "apple-clang": 8,  # guess
+            "Visual Studio": 14,  # guess
         }.get(str(self.settings.compiler))
 
     def export(self):
@@ -202,12 +204,14 @@ class BoostConan(ConanFile):
                 raise ConanException("{} has the configure options {} which is not available in conanfile.py".format(self._dependency_filename, opt_name))
 
         # json requires a c++11-able compiler: change default to not build on compiler with too old default c++ standard or to low compiler.cppstd
-        version_cxx11_standard = self._min_compiler_version_default_cxx11
         if self.settings.compiler.cppstd:
             if not tools.valid_min_cppstd(self, 11):
                 self.options.without_json = True
-        elif tools.Version(self.settings.compiler.version) < version_cxx11_standard:
-            self.options.without_json = True
+        else:
+            version_cxx11_standard = self._min_compiler_version_default_cxx11
+            if version_cxx11_standard:
+                if tools.Version(self.settings.compiler.version) < version_cxx11_standard:
+                    self.options.without_json = True
 
         # Remove options not supported by this version of boost
         for dep_name in CONFIGURE_OPTIONS:
