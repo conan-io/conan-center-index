@@ -10,6 +10,7 @@ class FlexConan(ConanFile):
     description = "Flex, the fast lexical analyzer generator"
     topics = ("conan", "flex", "lex", "lexer", "lexical analyzer generator")
     license = "BSD-2-Clause"
+    required_conan_version = ">=1.29"
 
     settings = "os", "arch", "compiler", "build_type"
     options = {"shared": [True, False], "fPIC": [True, False]}
@@ -78,10 +79,7 @@ class FlexConan(ConanFile):
             autotools = self._configure_autotools()
             autotools.install()
         tools.rmdir(os.path.join(self.package_folder, "share"))
-        for la in ["libfl.la", "libfl_pic.la"]:
-            la_path = os.path.join(self.package_folder, "lib", la)
-            if os.path.exists(la_path):
-                os.unlink(la_path)
+        tools.remove_files_by_mask(os.path.join(self.package_folder, "lib"), "*.la")
 
     def package_info(self):
         self.cpp_info.libs = ["fl"]
