@@ -1,5 +1,5 @@
 from conans import ConanFile, tools
-from conans.errors import ConanException
+from conans.errors import ConanException, ConanInvalidConfiguration
 
 required_conan_version = ">=1.29"
 
@@ -9,8 +9,12 @@ class ConanXOrg(ConanFile):
     license = "MIT"
     homepage = "https://www.x.org/wiki/"
     description = "The X.Org project provides an open source implementation of the X Window System."
-    settings = {"os": "Linux"}
+    settings = {"os"}
     topics = ("conan", "x11", "xorg")
+
+    def configure(self):
+        if self.settings.os not in ["Linux", "FreeBSD"]:
+            raise ConanInvalidConfiguration("This recipe supports only Linux and FreeBSD")
 
     def package_id(self):
         self.info.header_only()
