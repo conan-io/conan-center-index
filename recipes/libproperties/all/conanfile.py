@@ -8,7 +8,7 @@ class LibpropertiesConan(ConanFile):
     author = "libbylg@126.com"
     url = "https://github.com/tinyhubs/libproperties"
     description = "libproperties is a library to parse the Java .properties files. It was writen in pure C. And fullly compatible with the Java .properties file format."
-    topics = (".properties", "Java", "pure C")
+    topics = ("properties", "java", "pure-c")
     settings = "os", "compiler", "build_type", "arch"
     options = {"shared": [True, False]}
     default_options = {"shared": False}
@@ -44,4 +44,3 @@ conan_basic_setup()''')
 
     def package_info(self):
         self.cpp_info.libs = ["libproperties"]
-
