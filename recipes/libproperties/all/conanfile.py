@@ -34,6 +34,7 @@ conan_basic_setup()''')
         # self.run("cmake --build . %s" % cmake.build_config)
 
     def package(self):
+        self.copy("LICENSE", src=self._source_subfolder, "licenses")
         self.copy("properties.h", dst="include", src="libproperties")
         self.copy("*properties.lib", dst="lib", keep_path=False)
         self.copy("*.dll", dst="lib", keep_path=False)
