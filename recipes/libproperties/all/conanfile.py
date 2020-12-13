@@ -6,7 +6,7 @@ class LibpropertiesConan(ConanFile):
     license = "Apache-2.0"
     homepage = "https://github.com/tinyhubs/libproperties"
     url = "https://github.com/conan-io/conan-center-index"
-    description = "libproperties is a library to parse the Java .properties files. It was writen in pure C. And fullly compatible with the Java .properties file format."
+    description = "libproperties is a library to parse the Java .properties files. It was writen in pure C. And fully compatible with the Java .properties file format."
     topics = ("properties", "java", "pure-c")
     settings = "os", "compiler", "build_type", "arch"
     options = {"shared": [True, False]}
