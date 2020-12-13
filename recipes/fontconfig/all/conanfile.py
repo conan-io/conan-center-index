@@ -75,8 +75,9 @@ class FontconfigConan(ConanFile):
     def build(self):
         # Patch files from dependencies
         self._patch_files()
-        autotools = self._configure_autotools()
-        autotools.make()
+        with tools.run_environment(self):
+            autotools = self._configure_autotools()
+            autotools.make()
 
     def package(self):
         self.copy("COPYING", dst="licenses", src=self._source_subfolder)
