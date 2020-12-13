@@ -71,8 +71,10 @@ class FlexConan(ConanFile):
             autotools = self._configure_autotools()
             autotools.install()
         tools.rmdir(os.path.join(self.package_folder, "share"))
-        os.unlink(os.path.join(self.package_folder, "lib", "libfl.la"))
-        os.unlink(os.path.join(self.package_folder, "lib", "libfl_pic.la"))
+        for la in ["libfl.la", "libfl_pic.la"]:
+            la_path = os.path.join(self.package_folder, "lib", la)
+            if os.path.exists(la_path):
+                os.unlink(la_path)
 
     def package_info(self):
         self.cpp_info.libs = ["fl"]
