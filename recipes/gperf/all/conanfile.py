@@ -8,6 +8,7 @@ class GperfConan(ConanFile):
     homepage = "https://www.gnu.org/software/gperf"
     description = "GNU gperf is a perfect hash function generator"
     topics = ("conan", "gperf", "hash-generator", "hash")
+    exports_sources = ["patches/*"]
     settings = "os", "arch", "compiler"
     _source_subfolder = "source_subfolder"
     _autotools = None
@@ -61,7 +62,12 @@ class GperfConan(ConanFile):
             autotools = self._configure_autotools()
             autotools.make()
 
+    def _patch_sources(self):
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            tools.patch(**patch)
+    
     def build(self):
+        self._patch_sources()
         if self._is_msvc:
             with tools.vcvars(self.settings):
                 self._build_configure()
