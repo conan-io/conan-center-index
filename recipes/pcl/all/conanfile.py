@@ -59,6 +59,12 @@ class PclConanRecipe(ConanFile):
             "find_package(FLANN 1.7.0 REQUIRED)",
             "find_package(Flann REQUIRED)"
         )
+        # Temporary hack for https://github.com/conan-io/conan/issues/8206
+        tools.replace_in_file(
+            os.path.join(self._source_subfolder, "cmake", "pcl_find_boost.cmake"),
+                "find_package(Boost 1.55.0 QUIET COMPONENTS serialization mpi)",
+                "find_package(Boost 1.55.0 QUIET OPTIONAL_COMPONENTS serialization)"
+        )
         for folder in ["search", "kdtree"]:
             tools.replace_in_file(
                 os.path.join(self._source_subfolder, folder, "CMakeLists.txt"),
@@ -68,7 +74,7 @@ class PclConanRecipe(ConanFile):
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
-    
+
     def _check_msvc(self):
         if (tools.msvs_toolset(self) == "v140" or
                 self.settings.compiler == "Visual Studio" and tools.Version(self.settings.compiler.version) < "15"):
@@ -98,19 +104,19 @@ class PclConanRecipe(ConanFile):
     def _check_libcxx_compatibility(self):
         if self.settings.compiler == "clang" and self.settings.compiler.libcxx == "libc++":
             version = tools.Version(self.settings.compiler.version)
-            minimum_version = 6 
+            minimum_version = 6
             if version < minimum_version:
                 raise ConanInvalidConfiguration("Clang with libc++ is version %s but must be at least version %s" %
                         (version, minimum_version))
-        
+
     def configure(self):
         self._check_msvc()
         self._check_cxx_standard()
         self._check_libcxx_compatibility()
         if self.options["qhull"].reentrant:
             self.output.warn(
-                    "Qhull is set to link the reentrant library. If you experience linking errors, try setting "
-                    "qhull:reentrant=False")
+                "Qhull is set to link the reentrant library. If you experience linking errors, try setting "
+                "qhull:reentrant=False")
 
     def _configure_cmake(self):
         if self._cmake:
