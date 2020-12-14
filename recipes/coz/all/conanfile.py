@@ -24,7 +24,7 @@ class CozConan(ConanFile):
     def configure(self):
         if self.settings.os == "Macos" or self.settings.compiler == "Visual Studio":
             raise ConanInvalidConfiguration(
-                "libelfin doesn't support compiler: {} on OS: {}.".format(
+                "coz doesn't support compiler: {} on OS: {}.".format(
                     self.settings.compiler, self.settings.os))
         if self.settings.compiler.cppstd:
             tools.check_min_cppstd(self, "11")
@@ -53,6 +53,7 @@ class CozConan(ConanFile):
 
     def package_info(self):
         self.cpp_info.names["cmake_find_package"] = "Coz"
+        self.cpp_info.syslibs = ["dl", "rt"]
         if self.settings.os != "Windows":
             self.cpp_info.system_libs = [
                 "-Wl,--push-state,--no-as-needed", "-ldl", "-Wl,--pop-state"
