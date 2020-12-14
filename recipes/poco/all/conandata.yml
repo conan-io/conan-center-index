@@ -36,3 +36,5 @@ patches:
   1.10.1:
     - patch_file: patches/1.10.1.patch
       base_path: source_subfolder
+    - patch_file: patches/1.10.1-fix-postgresql-blob-extractor.patch
+      base_path: source_subfolder

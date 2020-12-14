@@ -1,0 +1,10 @@
+--- Data/PostgreSQL/src/Extractor.cpp	2020-02-17 13:47:53.000000000 +0300
++++ Data/PostgreSQL/src/Extractor.cpp	2020-12-11 17:37:34.929302500 +0300
+@@ -317,6 +317,7 @@
+ 
+ 	const char * pBLOB = reinterpret_cast<const char*>(outputParameter.pData());
+ 	std::size_t BLOBSize  = outputParameter.size();
++	val = Poco::Data::BLOB(); // don't share contents with _default
+ 
+ 	if	(	'\\' == pBLOB[0]
+ 		 && 'x'  == pBLOB[1]	// preamble to BYTEA data format in text form is \x
