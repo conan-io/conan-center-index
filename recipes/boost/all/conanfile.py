@@ -38,6 +38,7 @@ CONFIGURE_OPTIONS = (
     "log",
     "math",
     "mpi",
+    "nowide",
     "program_options",
     "python",
     "random",
