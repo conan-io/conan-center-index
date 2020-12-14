@@ -4,6 +4,7 @@ from conans.tools import Version, cppstd_flag
 from conans.errors import ConanException
 
 from conans.errors import ConanInvalidConfiguration
+import glob
 import os
 import sys
 import shlex
@@ -1020,6 +1021,15 @@ class BoostConan(ConanFile):
                 self.output.info("Unlinking static duplicate library: {}".format(os.path.join(self.package_folder, "lib", "lib{}.lib".format(common_lib))))
                 os.unlink(os.path.join(self.package_folder, "lib", "lib{}.lib".format(common_lib)))
 
+        dll_pdbs = glob.glob(os.path.join(self.package_folder, "lib", "*.dll")) + \
+                    glob.glob(os.path.join(self.package_folder, "lib", "*.pdb"))
+        if dll_pdbs:
+            tools.mkdir(os.path.join(self.package_folder, "bin"))
+            for bin_file in dll_pdbs:
+                os.rename(bin_file, os.path.join(self.package_folder, "bin", os.path.basename(bin_file)))
+
+        tools.remove_files_by_mask(os.path.join(self.package_folder, "bin"), "*.pdb")
+
     def _create_emscripten_libs(self):
         # Boost Build doesn't create the libraries, but it gets close,
         # leaving .bc files where the libraries would be.
@@ -1091,7 +1101,6 @@ class BoostConan(ConanFile):
 
         if not self.options.header_only:
             self.cpp_info.components["_libboost"].requires = ["headers"]
-            self.cpp_info.components["_libboost"].bindirs.append("lib")
 
             self.cpp_info.components["diagnostic_definitions"].libs = []
             self.cpp_info.components["diagnostic_definitions"].names["cmake_find_package"] = "diagnostic_definitions"
