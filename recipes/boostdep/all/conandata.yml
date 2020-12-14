@@ -1,6 +1,6 @@
 sources:
-  1.74.0:
-    - url: "https://github.com/boostorg/boostdep/archive/boost-1.74.0.tar.gz"
-      sha256: "e2bd30a0d5bd96adb53e998e6dd62d007a6be5d98c46b6cb16c8cbba97e1cbd7"
+  1.75.0:
+    - url: "https://github.com/boostorg/boostdep/archive/boost-1.75.0.tar.gz"
+      sha256: "7eecd835eb5b0fd602ff3615a6b663b45917689386d11073d961b86710f428af"
     - url: "http://www.boost.org/LICENSE_1_0.txt"
       sha256: "c9bff75738922193e67fa726fa225535870d2aa1059f91452c411736284ad566"
