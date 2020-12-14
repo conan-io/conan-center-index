@@ -41,6 +41,12 @@ if(NOT HEADER_ONLY)
         target_link_libraries(json_exe PRIVATE Boost::json)
     endif()
 
+    if(WITH_LOCALE)
+        find_package(Boost COMPONENTS locale REQUIRED)
+        add_executable(locale_exe locale.cpp)
+        target_link_libraries(locale_exe PRIVATE Boost::locale)
+    endif()
+
     if(WITH_PYTHON)
         find_package(Boost COMPONENTS python REQUIRED)
         add_library(hello_ext MODULE python.cpp)

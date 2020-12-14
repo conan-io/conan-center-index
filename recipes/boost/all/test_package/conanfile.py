@@ -30,6 +30,7 @@ class TestPackageConan(ConanFile):
             cmake.definitions["WITH_TEST"] = not self.options["boost"].without_test
             cmake.definitions["WITH_COROUTINE"] = not self.options["boost"].without_coroutine
             cmake.definitions["WITH_CHRONO"] = not self.options["boost"].without_chrono
+            cmake.definitions["WITH_LOCALE"] = not self.options["boost"].without_locale
             cmake.definitions["WITH_JSON"] = not self._boost_option("without_json", True)
             cmake.configure()
             cmake.build()
@@ -50,6 +51,8 @@ class TestPackageConan(ConanFile):
             self.run(os.path.join("bin", "coroutine_exe"), run_environment=True)
         if not self.options["boost"].without_chrono:
             self.run(os.path.join("bin", "chrono_exe"), run_environment=True)
+        if not self.options["boost"].without_locale:
+            self.run(os.path.join("bin", "locale_exe"), run_environment=True)
         if not self._boost_option("without_json", True):
             self.run(os.path.join("bin", "json_exe"), run_environment=True)
         if not self.options["boost"].without_python:
