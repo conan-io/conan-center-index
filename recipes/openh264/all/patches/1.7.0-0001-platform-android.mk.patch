@@ -1,5 +1,5 @@
---- platform-android.mk	2017-06-16 12:20:14.000000000 +0800
-+++ platform-android_.mk	2019-11-04 11:20:37.849441400 +0800
+--- build/platform-android.mk
++++ build/platform-android.mk
 @@ -38,23 +38,12 @@
  
  TOOLCHAINPREFIX = $(shell NDK_PROJECT_PATH=$(SRC_PATH)/codec/build/android/dec make --no-print-dir -f $(NDKROOT)/build/core/build-local.mk DUMP_TOOLCHAIN_PREFIX APP_ABI=$(APP_ABI))
