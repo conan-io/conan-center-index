@@ -691,6 +691,9 @@ class BoostConan(ConanFile):
     def _build_flags(self):
         flags = self._build_cross_flags
 
+        # Stop at the first error. No need to continue building.
+        flags.append("-q")
+
         # https://www.boost.org/doc/libs/1_70_0/libs/context/doc/html/context/architectures.html
         if self._b2_os:
             flags.append("target-os=%s" % self._b2_os)
@@ -822,6 +825,11 @@ class BoostConan(ConanFile):
                       "--abbreviate-paths"])
         if self.options.debug_level:
             flags.append("-d%d" % self.options.debug_level)
+
+        if self._with_iconv:
+            flags.append("-sICONV_PATH={}".format(self.deps_cpp_info["libiconv"].rootpath))
+        if self._with_icu:
+            flags.append("-sICU_PATH={}".format(self.deps_cpp_info["icu"].rootpath))
         return flags
 
     @property
