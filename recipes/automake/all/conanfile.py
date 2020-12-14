@@ -28,8 +28,8 @@ class AutomakeConan(ConanFile):
         # automake requires perl-Thread-Queue package
 
     def package_id(self):
-        del self.settings.arch
-        del self.settings.compiler
+        del self.info.settings.arch
+        del self.info.settings.compiler
 
     def build_requirements(self):
         if tools.os_info.is_windows and not tools.get_env("CONAN_BASH_PATH"):
