@@ -1259,3 +1259,10 @@ class BoostConan(ConanFile):
                         self.cpp_info.components["_libboost"].cxxflags.append("-pthread")
                         self.cpp_info.components["_libboost"].sharedlinkflags.extend(["-pthread","--shared-memory"])
                         self.cpp_info.components["_libboost"].exelinkflags.extend(["-pthread","--shared-memory"])
+            elif self.settings.os == "iOS":
+                if self.options.multithreading:
+                    # https://github.com/conan-io/conan-center-index/issues/3867
+                    # runtime crashes occur when using the default platform-specific reference counter/atomic
+                    self.cpp_info.components["headers"].extend(["BOOST_AC_USE_PTHREADS", "BOOST_SP_USE_PTHREADS"])
+                else:
+                    self.cpp_info.components["headers"].extend(["BOOST_AC_DISABLE_THREADS", "BOOST_SP_DISABLE_THREADS"])
