@@ -23,6 +23,10 @@ class AutomakeConan(ConanFile):
         [major, minor, _] = self.version.split(".", 2)
         return '{}.{}'.format(major, minor)
 
+    def configure(self):
+        del self.settings.compiler.cppstd
+        del self.settings.compiler.libcxx
+
     def requirements(self):
         self.requires("autoconf/2.69")
         # automake requires perl-Thread-Queue package
