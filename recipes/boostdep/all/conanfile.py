@@ -1,5 +1,4 @@
 from conans import CMake, ConanFile, tools
-from conans.errors import ConanInvalidConfiguration
 import os
 
 
@@ -27,6 +26,9 @@ class BoostDepConan(ConanFile):
     def requirements(self):
         self.requires("boost/1.74.0")
 
+    def package_id(self):
+        del self.info.settings.compiler
+
     def source(self):
         tools.get(**self.conan_data["sources"][self.version][0])
         os.rename("boostdep-boost-{}".format(self.version), self._source_subfolder)
@@ -42,11 +44,6 @@ class BoostDepConan(ConanFile):
         return self._cmake
 
     def build(self):
-        if self.settings.build_type != "Release":
-            raise ConanInvalidConfiguration("Only Release built_type supported")
-        if self.settings.compiler == "Visual Studio" and self.settings.compiler.runtime != "MT":
-            raise ConanInvalidConfiguration("Only MT runtime supported")
-
         cmake = self._configure_cmake()
         cmake.build()
 
@@ -54,9 +51,6 @@ class BoostDepConan(ConanFile):
         self.copy("LICENSE*", dst="licenses")
         cmake = self._configure_cmake()
         cmake.install()
-
-    def package_id(self):
-        del self.info.settings.compiler
 
     def package_info(self):
         bin_path = os.path.join(self.package_folder, "bin")
