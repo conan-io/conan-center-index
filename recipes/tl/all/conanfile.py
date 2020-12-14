@@ -30,8 +30,8 @@ class TlConan(ConanFile):
         }
 
         def lazy_lt_semver(v1, v2):
-            lv1 = v1.split(".")
-            lv2 = v2.split(".")
+            lv1 = [int(v) for v in v1.split(".")]
+            lv2 = [int(v) for v in v2.split(".")]
             min_length = min(len(lv1), len(lv2))
             return lv1[:min_length] < lv2[:min_length]
 
