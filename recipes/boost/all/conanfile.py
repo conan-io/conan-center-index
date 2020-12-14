@@ -1218,10 +1218,10 @@ class BoostConan(ConanFile):
                         if self.options.get_safe(requirement, None) == False:
                             continue
                         conan_requirement = self._option_to_conan_requirement(requirement)
-                        if not conan_requirement:
+                        if conan_requirement not in self.requires:
                             continue
-                        if conan_requirement in ("icu", "iconv"):
-                            if conan_requirement != self.options.get_safe("i18n_backend"):
+                        if module == "locale" and requirement in ("icu", "iconv"):
+                            if requirement != self.options.get_safe("i18n_backend"):
                                 continue
                         self.cpp_info.components[module].requires.append("{0}::{0}".format(conan_requirement))
 
