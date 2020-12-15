@@ -72,8 +72,6 @@ class LibmikmodConan(ConanFile):
         tools.get(**self.conan_data["sources"][self.version])
         extracted_dir = self.name + "-" + self.version
         os.rename(extracted_dir, self._source_subfolder)
-        tools.replace_in_file(os.path.join(self._source_subfolder, "CMakeLists.txt"),
-                              "CMAKE_SOURCE_DIR", "PROJECT_SOURCE_DIR")
 
     def _configure_cmake(self):
         if self._cmake:
@@ -93,6 +91,10 @@ class LibmikmodConan(ConanFile):
     def build(self):
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
             tools.patch(**patch)
+
+        tools.replace_in_file(os.path.join(self._source_subfolder, "CMakeLists.txt"),
+                              "CMAKE_SOURCE_DIR",
+                              "PROJECT_SOURCE_DIR")
 
          # Ensure missing dependencies yields errors
         tools.replace_in_file(os.path.join(self._source_subfolder, "CMakeLists.txt"),
