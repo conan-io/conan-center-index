@@ -46,8 +46,7 @@ class ZuluOpenJDK(ConanFile):
 
     def package_info(self):
         self.cpp_info.includedirs.append(self._jni_folder)
-        self.cpp_info.libdirs = ["lib"]
-        self.cpp_info.libs = tools.collect_libs(self)
+        self.cpp_info.libdirs = []
 
         java_home = self.package_folder
         bin_path = os.path.join(java_home, "bin")

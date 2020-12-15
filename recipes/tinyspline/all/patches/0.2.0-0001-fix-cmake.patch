@@ -1,6 +1,6 @@
 --- a/CMakeLists.txt
 +++ b/CMakeLists.txt
-@@ -9,7 +9,3 @@ set_property(GLOBAL PROPERTY USE_FOLDERS ON)
+@@ -9,7 +9,10 @@ set_property(GLOBAL PROPERTY USE_FOLDERS ON)
  add_subdirectory(src)
  add_definitions("${TINYSPLINE_DEFINITIONS}")
  
@@ -8,6 +8,16 @@
 -add_subdirectory(test)
 -add_subdirectory(docs)
 -add_subdirectory(tools)
++if(TINYSPLINE_BUILD_EXAMPLES)
++	add_subdirectory(examples)
++endif()
++if(TINYSPLINE_BUILD_TESTS)
++	enable_testing()
++	add_subdirectory(test)
++endif()
++if(TINYSPLINE_BUILD_DOCS)
++	add_subdirectory(docs)
++endif()
 --- a/src/CMakeLists.txt
 +++ b/src/CMakeLists.txt
 @@ -324,14 +324,12 @@ if(CMAKE_CXX_COMPILER_ID MATCHES "GNU")

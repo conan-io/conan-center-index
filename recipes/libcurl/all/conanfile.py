@@ -144,7 +144,7 @@ class LibcurlConan(ConanFile):
         elif self.options.with_ssl == "wolfssl":
             self.requires("wolfssl/4.5.0")
         if self.options.with_nghttp2:
-            self.requires("libnghttp2/1.40.0")
+            self.requires("libnghttp2/1.42.0")
         if self.options.with_libssh2:
             self.requires("libssh2/1.9.0")
         if self.options.with_zlib:
@@ -154,7 +154,7 @@ class LibcurlConan(ConanFile):
         if self.options.get_safe("with_zstd"):
             self.requires("zstd/1.4.5")
         if self.options.with_c_ares:
-            self.requires("c-ares/1.16.1")
+            self.requires("c-ares/1.17.1")
 
     def package_id(self):
         # Deprecated options

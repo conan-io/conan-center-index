@@ -70,6 +70,9 @@ class OpenCVConan(ConanFile):
         self.options["libtiff"].jpeg = self.options.with_jpeg
         self.options["jasper"].with_libjpeg = self.options.with_jpeg
 
+        if self.settings.os == "Android":
+            self.options.with_openexr = False  # disabled because this forces linkage to libc++_shared.so
+
     def requirements(self):
         self.requires("zlib/1.2.11")
         if self.options.with_jpeg == "libjpeg":
@@ -198,7 +201,6 @@ class OpenCVConan(ConanFile):
         self._cmake.definitions["WITH_OPENVX"] = False
         self._cmake.definitions["WITH_PLAIDML"] = False
         self._cmake.definitions["WITH_PROTOBUF"] = False
-        self._cmake.definitions["WITH_PTHREADS_PF"] = False
         self._cmake.definitions["WITH_PVAPI"] = False
         self._cmake.definitions["WITH_QT"] = False
         self._cmake.definitions["WITH_QUIRC"] = False
@@ -242,8 +244,16 @@ class OpenCVConan(ConanFile):
 
         if self.settings.compiler == "Visual Studio":
             self._cmake.definitions["BUILD_WITH_STATIC_CRT"] = "MT" in str(self.settings.compiler.runtime)
-        self._cmake.configure(build_folder=self._build_subfolder)
 
+        if self.settings.os == "Android":
+            self._cmake.definitions["ANDROID_STL"] = "c++_static"
+            self._cmake.definitions["ANDROID_NATIVE_API_LEVEL"] = self.settings.os.api_level
+            self._cmake.definitions["ANDROID_ABI"] = tools.to_android_abi(str(self.settings.arch))
+            self._cmake.definitions["BUILD_ANDROID_EXAMPLES"] = False
+            if "ANDROID_NDK_HOME" in os.environ:
+                self._cmake.definitions["ANDROID_NDK"] = os.environ.get("ANDROID_NDK_HOME")
+
+        self._cmake.configure(build_folder=self._build_subfolder)
         return self._cmake
 
     def build(self):
@@ -284,6 +294,19 @@ class OpenCVConan(ConanFile):
                 if self.settings.os == "Linux":
                     self.cpp_info.components[conan_component].system_libs = ["dl", "m", "pthread", "rt"]
 
+                if self.settings.os == "Android":
+                    self.cpp_info.components[conan_component].includedirs = [
+                        os.path.join("sdk", "native", "jni", "include")]
+                    self.cpp_info.components[conan_component].system_libs.append("log")
+                    if int(str(self.settings.os.api_level)) > 20:
+                        self.cpp_info.components[conan_component].system_libs.append("mediandk")
+                    if not self.options.shared:
+                        self.cpp_info.components[conan_component].libdirs.append(
+                            os.path.join("sdk", "native", "staticlibs", tools.to_android_abi(str(self.settings.arch))))
+                        if conan_component == "opencv_core":
+                            self.cpp_info.components[conan_component].libdirs.append("lib")
+                            self.cpp_info.components[conan_component].libs += tools.collect_libs(self)
+ 
                 # CMake components names
                 conan_component_alias = conan_component + "_alias"
                 cmake_component = component["lib"]

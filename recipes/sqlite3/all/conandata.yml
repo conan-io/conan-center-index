@@ -23,3 +23,6 @@
   "3.33.0":
     "sha256": "b34f4c0c0eefad9a7e515c030c18702e477f4ef7d8ade6142bdab8011b487ac6"
     "url": "https://www.sqlite.org/2020/sqlite-amalgamation-3330000.zip"
+  "3.34.0":
+    "sha256": "8ff0b79fd9118af7a760f1f6a98cac3e69daed325c8f9f0a581ecb62f797fd64"
+    "url": "https://www.sqlite.org/2020/sqlite-amalgamation-3340000.zip"

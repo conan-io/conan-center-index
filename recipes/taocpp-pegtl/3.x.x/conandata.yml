@@ -1,0 +1,4 @@
+sources:
+  "3.0.0":
+    sha256: b47af025450f5c12251cd831f90deab666e18a8029f3dbffb32672b0450af902
+    url: https://github.com/taocpp/PEGTL/archive/3.0.0.tar.gz

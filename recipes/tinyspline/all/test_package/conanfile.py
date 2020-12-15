@@ -9,6 +9,7 @@ class TestPackageConan(ConanFile):
     def build(self):
         cmake = CMake(self)
         cmake.definitions["TINYSPLINE_CXX"] = self.options["tinyspline"].cxx
+        cmake.definitions["TINYSPLINE_API_0_3"] = tools.Version(self.deps_cpp_info["tinyspline"].version) >= "0.3.0"
         cmake.configure()
         cmake.build()
 

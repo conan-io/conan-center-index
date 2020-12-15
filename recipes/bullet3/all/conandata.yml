@@ -5,3 +5,6 @@ sources:
   "3.06":
     url: "https://github.com/bulletphysics/bullet3/archive/3.06.tar.gz"
     sha256: "217c1d198ee00be7e40d4cb4d79882e37ef4a06cbfbe11f5fbc207c347a57020"
+  "3.07":
+    url: "https://github.com/bulletphysics/bullet3/archive/3.07.tar.gz"
+    sha256: "068ecf8acbf256d3976eebee75d7d6f5af16c049f10f6b2d8ba28bb638bef3b0"
