@@ -9,7 +9,7 @@ class TrompeloelConan(ConanFile):
     topics = ("conan", "trompeloeil", "header-only", "mocking")
     homepage = "https://github.com/rollbear/trompeloeil.git"
     url = "https://github.com/conan-io/conan-center-index"
-    license = "Boost Software License - Version 1.0 - August 17th, 2003"
+    license = "BSL-1.0"
     settings = "os", "compiler", "build_type", "arch"
     
     no_copy_source = True
