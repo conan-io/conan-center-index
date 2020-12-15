@@ -306,7 +306,13 @@ class OpenCVConan(ConanFile):
                         if conan_component == "opencv_core":
                             self.cpp_info.components[conan_component].libdirs.append("lib")
                             self.cpp_info.components[conan_component].libs += tools.collect_libs(self)
- 
+
+                if self.settings.os == "iOS":
+                    if not self.options.shared:
+                        if conan_component == "opencv_core":
+                            libs = list(filter(lambda x: not x.startswith("opencv"), tools.collect_libs(self)))
+                            self.cpp_info.components[conan_component].libs += libs
+
                 # CMake components names
                 conan_component_alias = conan_component + "_alias"
                 cmake_component = component["lib"]
