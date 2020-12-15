@@ -13,6 +13,7 @@ class SociConan(ConanFile):
     generators = "cmake"
 
     options = {
+        "fPIC":       [True, False],
         "shared":     [True, False],
         "cxx11":      [True, False],
         "sqlite3":    [True, False],
@@ -27,6 +28,7 @@ class SociConan(ConanFile):
         "postgresql": [True, False]
     }
     default_options = {
+        "fPIC":       True,
         "shared":     False,
         "cxx11":      False,
         "sqlite3":    False,
@@ -74,6 +76,10 @@ class SociConan(ConanFile):
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
         os.rename(self.name + "-" + self.version, self._source_subfolder)
+
+    def config_options(self):
+        if self.settings.os == "Windows":
+            del self.options.fPIC
 
     def _configure_cmake(self):
         if self._cmake:

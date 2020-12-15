@@ -13,6 +13,7 @@ class SociTestConan(ConanFile):
 
     def configure(self):
         self.options["soci"].shared     = True
+        self.options["soci"].fPIC       = True
         self.options["soci"].cxx11      = True
         self.options["soci"].empty      = False
         self.options["soci"].sqlite3    = True
@@ -30,4 +31,4 @@ class SociTestConan(ConanFile):
 
     def test(self):
         if not tools.cross_building(self):
-            self.run("ctest . -VV")
+            self.run("ctest . -Q")
