@@ -1,0 +1,21 @@
+cmake_minimum_required(VERSION 2.8.12)
+
+project(conanSociTests CXX)
+
+add_subdirectory(sqlite3)
+
+set(TEST_NAME main.tests)
+add_executable(${TEST_NAME} main.test.cpp )
+
+target_compile_features(${TEST_NAME} PUBLIC cxx_std_17)
+
+include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
+conan_basic_setup(TARGETS)
+conan_target_link_libraries(${TEST_NAME} ${CONAN_LIBS})
+
+message("-- Conan libs: ${CONAN_LIBS}")
+
+enable_testing()
+add_test(NAME ${TEST_NAME}
+    WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
+    COMMAND ${TEST_NAME})
