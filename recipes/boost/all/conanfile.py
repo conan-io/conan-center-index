@@ -758,6 +758,9 @@ class BoostConan(ConanFile):
         if self.settings.get_safe("compiler.cppstd"):
             flags.append("cxxflags=%s" % cppstd_flag(self.settings))
 
+        # LDFLAGS
+        link_flags = []
+
         # CXX FLAGS
         cxx_flags = []
         # fPIC DEFINITION
@@ -770,18 +773,19 @@ class BoostConan(ConanFile):
             elif self.settings.compiler == "Visual Studio":
                 cxx_flags.append("/Z7")
 
+
         # Standalone toolchain fails when declare the std lib
-        if self.settings.os != "Android" and self.settings.os != "Emscripten":
+        if self.settings.os not in ("Android", "Emscripten"):
             try:
                 if self._gnu_cxx11_abi:
                     flags.append("define=_GLIBCXX_USE_CXX11_ABI=%s" % self._gnu_cxx11_abi)
 
-                if "clang" in str(self.settings.compiler):
-                    if str(self.settings.compiler.libcxx) == "libc++":
-                        cxx_flags.append("-stdlib=libc++")
-                        flags.append('linkflags="-stdlib=libc++"')
-                    else:
-                        cxx_flags.append("-stdlib=libstdc++")
+                if self.settings.compiler in ("clang", "apple-clang"):
+                    libcxx = {
+                        "libstdc++11": "libstdc++",
+                    }.get(str(self.settings.compiler.libcxx), str(self.settings.compiler.libcxx))
+                    cxx_flags.append("-stdlib={}".format(libcxx))
+                    link_flags.append("-stdlib={}".format(libcxx))
             except:
                 pass
 
@@ -813,6 +817,21 @@ class BoostConan(ConanFile):
             cxx_flags.append("-fvisibility-inlines-hidden")
             cxx_flags.append("-fembed-bitcode")
 
+        if self._with_iconv:
+            flags.append("-sICONV_PATH={}".format(self.deps_cpp_info["libiconv"].rootpath))
+        if self._with_icu:
+            flags.append("-sICU_PATH={}".format(self.deps_cpp_info["icu"].rootpath))
+            if not self.options["icu"].shared:
+                # Using ICU_OPTS to pass ICU system libraries is not possible due to Boost.Regex disallowing it.
+                if self.settings.compiler == "Visual Studio":
+                    icu_ldflags = " ".join("{}.lib".format(l) for l in self.deps_cpp_info["icu"].system_libs)
+                else:
+                    icu_ldflags = " ".join("-l{}".format(l) for l in self.deps_cpp_info["icu"].system_libs)
+                link_flags.append(icu_ldflags)
+
+        link_flags = 'linkflags="%s"' % " ".join(link_flags) if link_flags else ""
+        flags.append(link_flags)
+
         cxx_flags = 'cxxflags="%s"' % " ".join(cxx_flags) if cxx_flags else ""
         flags.append(cxx_flags)
 
@@ -825,11 +844,6 @@ class BoostConan(ConanFile):
                       "--abbreviate-paths"])
         if self.options.debug_level:
             flags.append("-d%d" % self.options.debug_level)
-
-        if self._with_iconv:
-            flags.append("-sICONV_PATH={}".format(self.deps_cpp_info["libiconv"].rootpath))
-        if self._with_icu:
-            flags.append("-sICU_PATH={}".format(self.deps_cpp_info["icu"].rootpath))
         return flags
 
     @property
