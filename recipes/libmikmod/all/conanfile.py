@@ -121,6 +121,7 @@ class LibmikmodConan(ConanFile):
         self.cpp_info.libs = tools.collect_libs(self)
         if not self.options.shared:
             self.cpp_info.defines = ["MIKMOD_STATIC"]
+        self.cpp_info.filenames["pkg_config"] = "libmikmod"
 
         if self.options.get_safe("with_dsound"):
             self.cpp_info.system_libs.append("dsound")
