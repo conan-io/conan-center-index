@@ -35,7 +35,7 @@ class FlatccConan(ConanFile):
     }
     settings = "os", "arch", "compiler", "build_type"
     generators = "cmake"
-    exports_sources = ["CMakeLists.txt"]
+    exports_sources = ["CMakeLists.txt", "FlatccGenerateSources.cmake"]
 
     _cmake = None
 
@@ -89,7 +89,6 @@ class FlatccConan(ConanFile):
         cmake = self._configure_cmake()
         cmake.build()
 
-
     def package(self):
         cmake = self._configure_cmake()
         cmake.install()
@@ -99,12 +98,24 @@ class FlatccConan(ConanFile):
                       os.path.join(self.package_folder, "bin", "flatcc"))
         # Copy license file
         self.copy("LICENSE", dst="licenses", src=self._source_subfolder)
+        # Copy file with cmake functions for end user
+        self.copy("FlatccGenerateSources.cmake", dst="cmake")
 
     def package_info(self):
-        bin_path = os.path.join(self.package_folder, "bin")
-        self.output.info('Appending PATH environment variable: %s' % bin_path)
-        self.env_info.PATH.append(bin_path)
         debug_suffix = "_d" if self.settings.build_type == "Debug" else ""
+        #flatcc package provides two components: the flatcc compiler binary and the runtime library
         if not self.options.runtime_lib_only:
-            self.cpp_info.libs.append("flatcc%s" % debug_suffix)
-        self.cpp_info.libs.append("flatccrt%s" % debug_suffix)
+            self.cpp_info.components["flatcc_exe"].names["cmake_find_package"] = "flatcc_exe"
+            self.cpp_info.components["flatcc_exe"].libs = ["flatcc%s" % debug_suffix]
+            #Our FlatccGenerateSources.cmake should be included by the cmake_find_package generated file
+            self.cpp_info.components["flatcc_exe"].build_modules.append(os.path.join(self.package_folder, "cmake", "FlatccGenerateSources.cmake"))
+            bin_path = os.path.join(self.package_folder, "bin")
+            self.env_info.PATH.append(bin_path)
+            #When we are cross-compiling cmake needs to know the location of the flatbuffer compiler executable
+            #compiled for the build architecture. Provide it via environment variable.
+            settings_target = getattr(self, 'settings_target', None)
+            if settings_target != None:
+                self.env_info.FLATCC_BUILD_BIN_PATH = os.path.join(self.package_folder, "bin")
+        self.cpp_info.components["flatcc_rt"].names["cmake_find_package"] = "flatcc_rt"
+        self.cpp_info.components["flatcc_rt"].libs = ["flatccrt%s" % debug_suffix]
+        self.cpp_info.components["flatcc_rt"].includedirs.append(os.path.join("include", "flatcc", "reflection"))
