@@ -13,6 +13,6 @@ part of this repository.
 - If library sources cannot be downloaded from their official origin or cannot be consumed directly due to their format, an issue should be
   opened in order to discuss alternative solutions.
 
-- Library sources that are no publicly available will not be allowed in this repository even if the license allows their redistribution.
+- Library sources that are not publicly available will not be allowed in this repository even if the license allows their redistribution.
 
 - In the remote case of having to package precompiled libraries, those should come from official sources like release/download webpages.
