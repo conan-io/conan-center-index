@@ -35,10 +35,22 @@ if(NOT HEADER_ONLY)
         target_link_libraries(chrono_exe PRIVATE Boost::chrono)
     endif()
 
+    if(WITH_FIBER)
+        find_package(Boost COMPONENTS fiber REQUIRED)
+        add_executable(fiber_exe fiber.cpp)
+        target_link_libraries(fiber_exe PRIVATE Boost::fiber)
+    endif()
+
     if(WITH_JSON)
         find_package(Boost COMPONENTS json REQUIRED)
         add_executable(json_exe json.cpp)
         target_link_libraries(json_exe PRIVATE Boost::json)
+    endif()
+
+    if(WITH_NOWIDE)
+        find_package(Boost COMPONENTS nowide REQUIRED)
+        add_executable(nowide_exe nowide.cpp)
+        target_link_libraries(nowide_exe PRIVATE Boost::nowide)
     endif()
 
     if(WITH_LOCALE)

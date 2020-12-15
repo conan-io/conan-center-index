@@ -43,6 +43,7 @@ CONFIGURE_OPTIONS = (
     "log",
     "math",
     "mpi",
+    "nowide",
     "program_options",
     "python",
     "random",
@@ -455,7 +456,6 @@ def main(args=None) -> int:
     ns.outputdir.mkdir(exist_ok=True)
 
     git_update_done = False
-    boostdep_installed = False
 
     if ns.boost_version is None:
         conan_data = yaml.safe_load(Path("conandata.yml").open())
@@ -484,9 +484,7 @@ def main(args=None) -> int:
 
         boost_collector.do_git_submodule_update()
 
-        if not boostdep_installed:
-            boost_collector.do_install_boostdep()
-            boostdep_installed = True
+        boost_collector.do_install_boostdep()
 
         boost_collector.do_create_dependency_file()
     return 0

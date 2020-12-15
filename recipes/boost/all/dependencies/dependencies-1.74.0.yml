@@ -16,6 +16,7 @@ configure_options:
 - log
 - math
 - mpi
+- nowide
 - program_options
 - python
 - random

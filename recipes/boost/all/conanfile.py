@@ -40,6 +40,7 @@ CONFIGURE_OPTIONS = (
     "log",
     "math",
     "mpi",
+    "nowide",
     "program_options",
     "python",
     "random",
@@ -128,6 +129,9 @@ class BoostConan(ConanFile):
     no_copy_source = True
     exports_sources = ['patches/*']
 
+    def export(self):
+        self.copy(self._dependency_filename, src="dependencies", dst="dependencies")
+
     @property
     def _min_compiler_version_default_cxx11(self):
         # Minimum compiler version having c++ standard >= 11
@@ -138,8 +142,21 @@ class BoostConan(ConanFile):
             "Visual Studio": 14,  # guess
         }.get(str(self.settings.compiler))
 
-    def export(self):
-        self.copy(self._dependency_filename, src="dependencies", dst="dependencies")
+    @property
+    def _min_compiler_version_nowide(self):
+        # Nowide needs c++11 + swappable std::fstream
+        return {
+            "gcc": 5,
+            "clang": 5,
+            "apple-clang": 12,  # guess
+            "Visual Studio": 14,  # guess
+        }.get(str(self.settings.compiler))
+
+    @property
+    def _fiber_minimum_compiler_version(self):
+        return {
+            "clang": "6",
+        }.get(str(self.settings.compiler))
 
     @property
     def _dependency_filename(self):
@@ -205,15 +222,20 @@ class BoostConan(ConanFile):
             if "without_{}".format(opt_name) not in self.options:
                 raise ConanException("{} has the configure options {} which is not available in conanfile.py".format(self._dependency_filename, opt_name))
 
+        # nowide requires a c++11-able compiler + movable std::fstream: change default to not build on compiler with too old default c++ standard or to low compiler.cppstd
         # json requires a c++11-able compiler: change default to not build on compiler with too old default c++ standard or to low compiler.cppstd
         if self.settings.compiler.cppstd:
             if not tools.valid_min_cppstd(self, 11):
+                self.options.without_fiber = True
+                self.options.without_nowide = True
                 self.options.without_json = True
         else:
-            version_cxx11_standard = self._min_compiler_version_default_cxx11
-            if version_cxx11_standard:
-                if tools.Version(self.settings.compiler.version) < version_cxx11_standard:
+            version_cxx11_standard_json = self._min_compiler_version_default_cxx11
+            if version_cxx11_standard_json:
+                if tools.Version(self.settings.compiler.version) < version_cxx11_standard_json:
+                    self.options.without_fiber = True
                     self.options.without_json = True
+                    self.options.without_nowide = True
 
         # Remove options not supported by this version of boost
         for dep_name in CONFIGURE_OPTIONS:
@@ -247,23 +269,45 @@ class BoostConan(ConanFile):
                     if self.options.get_safe("without_{}".format(mod_dep), False):
                         raise ConanInvalidConfiguration("{} requires {}: {} is disabled".format(mod_name, mod_deps, mod_dep))
 
-        # FIXME: check this + shouldn't default be on self._is_msvc?
-        # if self.options.layout == "b2-default":
-        #     self.options.layout = "versioned" if self.settings.os == "Windows" else "system"
-
         if not self.options.without_python:
             if not self.options.python_version:
                 self.options.python_version = self._detect_python_version()
                 self.options.python_executable = self._python_executable
 
-        if not self.options.get_safe("without_json", True):
-            # json requires a c++11-able compiler.
+        if not all((self.options.get_safe("without_nowide", True), self.options.without_fiber)):
+            # nowide require a c++11-able compiler with movable std::fstream
+            mincompiler_version = self._min_compiler_version_nowide
+            if mincompiler_version:
+                if tools.Version(self.settings.compiler.version) < mincompiler_version:
+                    raise ConanInvalidConfiguration("This compiler is too old to build Boost.nowide.")
+
             if self.settings.compiler.cppstd:
                 tools.check_min_cppstd(self, 11)
             else:
                 version_cxx11_standard = self._min_compiler_version_default_cxx11
-                if tools.Version(self.settings.compiler.version) < version_cxx11_standard:
-                    raise ConanInvalidConfiguration("Boost.json requires a c++11 compiler (please set compiler.cppstd or use a newer compiler)")
+                if version_cxx11_standard:
+                    if tools.Version(self.settings.compiler.version) < version_cxx11_standard:
+                        raise ConanInvalidConfiguration("Boost.{fiber,json} require a c++11 compiler (please set compiler.cppstd or use a newer compiler)")
+                else:
+                    self.output.warn("I don't know what the default c++ standard of this compiler is. I suppose it supports c++11 by default.\n"
+                                     "This might cause some boost libraries not being built and conan components to fail.")
+
+        # FIXME: check this + shouldn't default be on self._is_msvc?
+        # if self.options.layout == "b2-default":
+        #     self.options.layout = "versioned" if self.settings.os == "Windows" else "system"
+
+        if not self.options.get_safe("without_json", True):
+            # json require a c++11-able compiler.
+            if self.settings.compiler.cppstd:
+                tools.check_min_cppstd(self, 11)
+            else:
+                version_cxx11_standard = self._min_compiler_version_default_cxx11
+                if version_cxx11_standard:
+                    if tools.Version(self.settings.compiler.version) < version_cxx11_standard:
+                        raise ConanInvalidConfiguration("Boost.json requires a c++11 compiler (please set compiler.cppstd or use a newer compiler)")
+                else:
+                    self.output.warn("I don't know what the default c++ standard of this compiler is. I suppose it supports c++11 by default.\n"
+                                     "This might cause some boost libraries not being built and conan components to fail.")
 
     def build_requirements(self):
         if not self.options.header_only:
@@ -692,7 +736,7 @@ class BoostConan(ConanFile):
         flags = self._build_cross_flags
 
         # Stop at the first error. No need to continue building.
-        flags.append("-q")
+        # flags.append("-q")
 
         # https://www.boost.org/doc/libs/1_70_0/libs/context/doc/html/context/architectures.html
         if self._b2_os:
