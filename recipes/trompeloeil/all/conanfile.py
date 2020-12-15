@@ -11,7 +11,7 @@ class TrompeloelConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     license = "Boost Software License - Version 1.0 - August 17th, 2003"
     settings = "os", "compiler", "build_type", "arch"
-    # exports_sources = "include/*", "LICENSE*.txt", "CMakeLists.txt", "*.cmake", "docs/*"
+    
     no_copy_source = True
 
     @property
