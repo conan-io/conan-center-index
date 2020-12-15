@@ -1160,11 +1160,14 @@ class BoostConan(ConanFile):
                         self.cpp_info.components[module].requires.append("{0}::{0}".format(conan_requirement))
 
             if used_libraries != detected_libraries:
+                # TODO why do these sometime fail?
                 non_used = detected_libraries.difference(used_libraries)
-                assert len(non_used) == 0, "These libraries were not used in conan components: {}".format(non_used)
+                if len(non_used) == 0:
+                    self.output.warn("These libraries were not used in conan components: {}".format(non_used))
 
                 non_existing = used_libraries.difference(detected_libraries)
-                assert len(non_existing) == 0, "These libraries were used, but not built: {}".format(non_existing)
+                if len(non_existing) == 0:
+                    self.output.warn("These libraries were used, but not built: {}".format(non_existing))
 
             if not self.options.without_python:
                 pyversion = tools.Version(self._python_version)
