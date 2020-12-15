@@ -1,0 +1,16 @@
+sources:
+  "35":
+    url: https://github.com/rollbear/trompeloeil/archive/v35.tar.gz
+    sha256: 5F3D8366876C199522F30D7B9C5CE6E489119C126F6E743FFF44FA8539599EC8
+  "36":
+    url: https://github.com/rollbear/trompeloeil/archive/v36.tar.gz
+    sha256: B2F5DB3C9A892B80ED5DC1E09E9528D17F974F02BF0A508CD2A892A6969F0348
+  "37":
+    url: https://github.com/rollbear/trompeloeil/archive/v37.tar.gz
+    sha256: 770555FA8F550B91F239FA4987FABF49C294EAFC9BD73EB081D67D1D58CE51E8
+  "38":
+    url: https://github.com/rollbear/trompeloeil/archive/v38.tar.gz
+    sha256: 7E452AD0FA7CFD84A0AF7BDFE5CDFCC755C902A3B25ACA704865BDF14E538079
+  "39":
+    url: https://github.com/rollbear/trompeloeil/archive/v39.tar.gz
+    sha256: 10506E48ABD605740BC9ED43E34059F5068BC80AF14476BD129A3ED3B54D522F
