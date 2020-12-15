@@ -120,10 +120,12 @@ class SociConan(ConanFile):
         self.copy("*.a",        dst="lib", src=lib_folder, keep_path=False, symlinks=True)
         self.copy("*.dylib",    dst="lib", src=lib_folder, keep_path=False, symlinks=True)
         self.copy("*.dll",      dst="bin", src=bin_folder, keep_path=False, symlinks=True)
+        self.copy("LICENSE_1_0.txt", dst="licenses", src=self._source_subfolder)
 
     def package_info(self):
         self.cpp_info.includedirs = ['include']
-        self.cpp_info.libdirs = ['lib']
+        self.cpp_info.libdirs = ['lib', 'lib64']
+        self.cpp_info.builddirs = ['cmake']
 
         self.cpp_info.libs = ["soci_core"]
         if self.options.empty:
