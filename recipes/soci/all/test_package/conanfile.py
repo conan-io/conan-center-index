@@ -12,6 +12,7 @@ class SociTestConan(ConanFile):
         self.requires("fmt/6.2.0")
 
     def configure(self):
+        self.options["soci"].shared     = True
         self.options["soci"].cxx11      = True
         self.options["soci"].empty      = False
         self.options["soci"].sqlite3    = True

@@ -4,11 +4,11 @@ from conans import ConanFile, CMake, tools
 
 class SociConan(ConanFile):
     name = "soci"
-    license = "Boost"
-    author = "Maciej Sobczak maciej@msobczak"
-    url = "https://github.com/SOCI/soci"
+    homepage = "https://github.com/SOCI/soci"
+    url = "https://github.com/conan-io/conan-center-index"
     description = "The C++ Database Access Library "
     topics = ("C++", "database-library", "oracle", "postgresql", "mysql", "odbc", "db2", "firebird", "sqlite3", "boost" )
+    license = "Boost"
     settings = "os", "compiler", "build_type", "arch"
     generators = "cmake"
 
@@ -27,7 +27,7 @@ class SociConan(ConanFile):
         "postgresql": [True, False]
     }
     default_options = {
-        "shared":     True,
+        "shared":     False,
         "cxx11":      False,
         "sqlite3":    False,
         "empty":      False,

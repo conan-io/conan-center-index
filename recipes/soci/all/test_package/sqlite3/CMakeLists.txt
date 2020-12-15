@@ -1,3 +1,5 @@
+cmake_minimum_required(VERSION 3.1)
+
 # SQLite3 tests target
 set(BACKEND_TEST_NAME conan.soci.sqlite3.tests)
 add_executable(${BACKEND_TEST_NAME} ../main.test.cpp sqlite3.test.cpp)
