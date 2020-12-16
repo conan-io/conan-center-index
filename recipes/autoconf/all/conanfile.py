@@ -10,7 +10,7 @@ class AutoconfConan(ConanFile):
     topics = ("conan", "autoconf", "configure", "build")
     license = ("GPL-2.0-or-later", "GPL-3.0-or-later")
     exports_sources = "patches/**"
-    settings = "os", "arch"
+    settings = "os", "arch", "compiler"
     _autotools = None
 
     @property
@@ -23,6 +23,12 @@ class AutoconfConan(ConanFile):
 
     def requirements(self):
         self.requires("m4/1.4.18")
+
+    def package_id(self):
+        del self.info.settings.arch
+        del self.info.settings.compiler
+        # The m4 requirement does not change the contents of this package
+        self.info.requires.clear()
 
     def build_requirements(self):
         if tools.os_info.is_windows and "CONAN_BASH_PATH" not in os.environ:
@@ -75,10 +81,6 @@ class AutoconfConan(ConanFile):
                 if not os.path.isfile(fullpath):
                     continue
                 os.rename(fullpath, fullpath + ".exe")
-
-    def package_id(self):
-        # The m4 requirement does not change the contents of this package
-        self.info.requires.clear()
 
     def package_info(self):
         bin_path = os.path.join(self.package_folder, "bin")
