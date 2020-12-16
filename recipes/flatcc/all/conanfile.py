@@ -114,6 +114,7 @@ class FlatccConan(ConanFile):
             self.cpp_info.components["flatcc_lib"].names["cmake_find_package"] = "flatcc_lib"
             self.cpp_info.components["flatcc_lib"].libs = ["flatcc%s" % debug_suffix]
             #Our FlatccGenerateSources.cmake should be included by the cmake_find_package generated file
+            self.cpp_info.components["flatcc_exe"].builddirs.append("cmake")
             self.cpp_info.components["flatcc_exe"].build_modules.append(os.path.join(self.package_folder, "cmake", "FlatccGenerateSources.cmake"))
             bin_path = os.path.join(self.package_folder, "bin")
             self.env_info.PATH.append(bin_path)
