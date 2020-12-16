@@ -14,10 +14,10 @@ class CMakeConan(ConanFile):
     settings = "os", "arch", "compiler", "build_type"
 
     options = {
-        "with_openssl": [True, False, "auto"],
+        "with_openssl": [True, False],
     }
     default_options = {
-        "with_openssl": "auto",
+        "with_openssl": True,
     }
 
     _source_subfolder = "source_subfolder"
@@ -25,6 +25,10 @@ class CMakeConan(ConanFile):
 
     def _minor_version(self):
         return ".".join(str(self.version).split(".")[:2])
+    
+    def config_options(self):
+        if self.settings.os == "Windows":
+            self.options.with_openssl = False
 
     def configure(self):
         if self.settings.os == "Macos" and self.settings.arch == "x86":
@@ -53,9 +57,6 @@ class CMakeConan(ConanFile):
         if version < minimal_version[compiler]:
             raise ConanInvalidConfiguration(
                 "{} requires a compiler that supports at least C++{}".format(self.name, minimal_cpp_standard))
-        
-        if self.options.with_openssl == "auto":
-            self.options.with_openssl = (self.settings.os != "Windows")
 
     def requirements(self):
         if self.options.with_openssl:
