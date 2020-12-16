@@ -1,0 +1,12 @@
+diff --git a/src/CMakeLists.txt b/src/CMakeLists.txt
+index 3fd49db86f8b1f973c58d313144343e9b7c62205..ee71a87f75028dfb86630512de72f652c40cbb3d 100644
+--- a/src/CMakeLists.txt
++++ b/src/CMakeLists.txt
+@@ -21,6 +21,6 @@ target_include_directories(svgwrite
+     PRIVATE .
+ )
+ target_link_libraries(svgwrite
+-    PUBLIC span-lite::span-lite
++    PUBLIC nonstd::span-lite
+     PRIVATE fmt::fmt
+ )
