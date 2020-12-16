@@ -59,6 +59,8 @@ class CMakeConan(ConanFile):
         if version < minimal_version[compiler]:
             raise ConanInvalidConfiguration(
                 "{} requires a compiler that supports at least C++{}".format(self.name, minimal_cpp_standard))
+        
+        self.options.with_openssl = self._with_openssl
 
     def requirements(self):
         if self._with_openssl:
@@ -101,7 +103,6 @@ class CMakeConan(ConanFile):
         tools.rmdir(os.path.join(self.package_folder, "doc"))
 
     def package_id(self):
-        self.info.options.with_openssl = self._with_openssl
         del self.info.settings.compiler
 
     def package_info(self):
