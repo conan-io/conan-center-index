@@ -15,8 +15,8 @@ class SysConfigGLUConan(ConanFile):
     requires = "opengl/system"
 
     def system_requirements(self):
+        packages = []
         if tools.os_info.is_linux and self.settings.os == "Linux":
-            package_tool = tools.SystemPackageTool(conanfile=self, default_mode='verify')
             if tools.os_info.with_yum or tools.os_info.with_dnf:
                 packages = ["mesa-libGLU-devel"]
             elif tools.os_info.with_apt:
@@ -26,9 +26,11 @@ class SysConfigGLUConan(ConanFile):
             elif tools.os_info.with_zypper:
                 packages = ["Mesa-libGLU-devel"]
             else:
-                packages = []
                 self.output.warn("Don't know how to install GLU for your distro")
-
+        if tools.os_info.is_freebsd and self.settings.os == "FreeBSD":
+            packages = ["libGLU"]
+        if packages:
+            package_tool = tools.SystemPackageTool(conanfile=self, default_mode='verify')
             for p in packages:
                 package_tool.install(update=True, packages=p)
 
@@ -58,7 +60,7 @@ class SysConfigGLUConan(ConanFile):
 
         if self.settings.os == "Windows":
             self.cpp_info.system_libs = ["Glu32"]
-        elif self.settings.os == "Linux":
+        elif self.settings.os in ["Linux", "FreeBSD"]:
             self._fill_cppinfo_from_pkgconfig("glu")
 
     def package_id(self):
