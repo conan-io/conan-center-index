@@ -10,11 +10,11 @@ class SysConfigEGLConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://www.khronos.org/egl"
     license = "MIT"
-    settings = ("os",)
+    settings = "os"
 
     def configure(self):
-        if self.settings.os != "Linux":
-            raise ConanInvalidConfiguration("This recipes supports only Linux")
+        if self.settings.os not in ["Linux", "FreeBSD"]:
+            raise ConanInvalidConfiguration("This recipes supports only Linux and FreeBSD")
             
     def package_id(self):
         self.info.header_only()
@@ -40,8 +40,8 @@ class SysConfigEGLConan(ConanFile):
         self.cpp_info.cxxflags.extend(cflags)
 
     def system_requirements(self):
+        packages = []
         if tools.os_info.is_linux and self.settings.os == "Linux":
-            package_tool = tools.SystemPackageTool(conanfile=self, default_mode='verify')
             if tools.os_info.with_yum:
                 packages = ["mesa-libEGL-devel"]
             elif tools.os_info.with_apt:
@@ -57,8 +57,11 @@ class SysConfigEGLConan(ConanFile):
             elif tools.os_info.with_zypper:
                 packages = ["Mesa-libEGL-devel"]
             else:
-                packages = []
                 self.output.warn("Don't know how to install EGL for your distro.")
+        if tools.os_info.is_freebsd and self.settings.os == "FreeBSD":
+            packages = ["mesa-libs"]
+        if packages:
+            package_tool = tools.SystemPackageTool(conanfile=self, default_mode='verify')
             for p in packages:
                 package_tool.install(update=True, packages=p)
 
