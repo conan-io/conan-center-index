@@ -26,12 +26,6 @@ class CMakeConan(ConanFile):
     def _minor_version(self):
         return ".".join(str(self.version).split(".")[:2])
 
-    @property
-    def _with_openssl(self):
-        if self.options.with_openssl == "auto":
-            return self.settings.os != "Windows"
-        return self.options.with_openssl
-
     def configure(self):
         if self.settings.os == "Macos" and self.settings.arch == "x86":
             raise ConanInvalidConfiguration("CMake does not support x86 for macOS")
@@ -60,10 +54,11 @@ class CMakeConan(ConanFile):
             raise ConanInvalidConfiguration(
                 "{} requires a compiler that supports at least C++{}".format(self.name, minimal_cpp_standard))
         
-        self.options.with_openssl = self._with_openssl
+        if self.options.with_openssl == "auto":
+            self.options.with_openssl = (self.settings.os != "Windows")
 
     def requirements(self):
-        if self._with_openssl:
+        if self.options.with_openssl:
             self.requires("openssl/1.1.1i")
 
     def source(self):
@@ -78,8 +73,8 @@ class CMakeConan(ConanFile):
                 self._cmake.definitions["CMAKE_CXX_STANDARD"] = 11
             self._cmake.definitions["CMAKE_BOOTSTRAP"] = False
             if self.settings.os == "Linux":
-                self._cmake.definitions["CMAKE_USE_OPENSSL"] = self._with_openssl
-                if self._with_openssl:
+                self._cmake.definitions["CMAKE_USE_OPENSSL"] = self.options.with_openssl
+                if self.options.with_openssl:
                     self._cmake.definitions["OPENSSL_USE_STATIC_LIBS"] = not self.options["openssl"].shared
             self._cmake.configure(source_folder=self._source_subfolder)
         return self._cmake
