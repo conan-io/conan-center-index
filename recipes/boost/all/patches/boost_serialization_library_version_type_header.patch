@@ -1,0 +1,103 @@
+From f72b9fc8d953a5dd39615535b5c6bab5b8be42fe Mon Sep 17 00:00:00 2001
+From: Robert Ramey <ramey@rrsd.com>
+Date: Sat, 26 Sep 2020 22:55:18 -0700
+Subject: [PATCH] included library_version.hpp in all appropriate places. This
+ should permit any header to be compiled without including any other headers.
+
+---
+ boost/serialization/hash_collections_load_imp.hpp      | 1 +
+ boost/serialization/hash_collections_save_imp.hpp      | 1 +
+ boost/serialization/list.hpp                           | 1 +
+ boost/serialization/optional.hpp                       | 2 +-
+ boost/serialization/slist.hpp                          | 1 +
+ boost/serialization/unordered_collections_load_imp.hpp | 1 +
+ boost/serialization/unordered_collections_save_imp.hpp | 1 +
+ boost/serialization/vector.hpp                         | 2 +-
+ 8 files changed, 8 insertions(+), 2 deletions(-)
+
+diff --git a/boost/serialization/hash_collections_load_imp.hpp b/boost/serialization/hash_collections_load_imp.hpp
+index 466fb2bdb..4b7259d42 100644
+--- a/boost/serialization/hash_collections_load_imp.hpp
++++ b/boost/serialization/hash_collections_load_imp.hpp
+@@ -22,6 +22,7 @@
+ #include <boost/serialization/nvp.hpp>
+ #include <boost/serialization/collection_size_type.hpp>
+ #include <boost/serialization/item_version_type.hpp>
++#include <boost/serialization/library_version_type.hpp>
+ 
+ namespace boost{
+ namespace serialization {
+diff --git a/boost/serialization/hash_collections_save_imp.hpp b/boost/serialization/hash_collections_save_imp.hpp
+index 57a6f0cc0..c672a5397 100644
+--- a/boost/serialization/hash_collections_save_imp.hpp
++++ b/boost/serialization/hash_collections_save_imp.hpp
+@@ -23,6 +23,7 @@
+ #include <boost/serialization/serialization.hpp>
+ #include <boost/serialization/collection_size_type.hpp>
+ #include <boost/serialization/item_version_type.hpp>
++#include <boost/serialization/library_version_type.hpp>
+ 
+ namespace boost{
+ namespace serialization {
+diff --git a/boost/serialization/list.hpp b/boost/serialization/list.hpp
+index 52ae0c101..363470ab8 100644
+--- a/boost/serialization/list.hpp
++++ b/boost/serialization/list.hpp
+@@ -27,6 +27,7 @@
+ #include <boost/serialization/nvp.hpp>
+ #include <boost/serialization/collection_size_type.hpp>
+ #include <boost/serialization/item_version_type.hpp>
++#include <boost/serialization/library_version_type.hpp>
+ #include <boost/serialization/split_free.hpp>
+ 
+ namespace boost {
+diff --git a/boost/serialization/slist.hpp b/boost/serialization/slist.hpp
+index 389857dc5..a850b1948 100644
+--- a/boost/serialization/slist.hpp
++++ b/boost/serialization/slist.hpp
+@@ -25,6 +25,7 @@
+ #include <boost/serialization/nvp.hpp>
+ #include <boost/serialization/collection_size_type.hpp>
+ #include <boost/serialization/item_version_type.hpp>
++#include <boost/serialization/library_version_type.hpp>
+ #include <boost/serialization/split_free.hpp>
+ #include <boost/serialization/detail/stack_constructor.hpp>
+ #include <boost/serialization/detail/is_default_constructible.hpp>
+diff --git a/boost/serialization/unordered_collections_load_imp.hpp b/boost/serialization/unordered_collections_load_imp.hpp
+index bba135c6e..f9ebb193e 100644
+--- a/boost/serialization/unordered_collections_load_imp.hpp
++++ b/boost/serialization/unordered_collections_load_imp.hpp
+@@ -34,6 +34,7 @@ namespace std{
+ #include <boost/serialization/nvp.hpp>
+ #include <boost/serialization/collection_size_type.hpp>
+ #include <boost/serialization/item_version_type.hpp>
++#include <boost/serialization/library_version_type.hpp>
+ 
+ namespace boost{
+ namespace serialization {
+diff --git a/boost/serialization/unordered_collections_save_imp.hpp b/boost/serialization/unordered_collections_save_imp.hpp
+index 64bddf872..e79928cf6 100644
+--- a/boost/serialization/unordered_collections_save_imp.hpp
++++ b/boost/serialization/unordered_collections_save_imp.hpp
+@@ -25,6 +25,7 @@
+ #include <boost/serialization/version.hpp>
+ #include <boost/serialization/collection_size_type.hpp>
+ #include <boost/serialization/item_version_type.hpp>
++#include <boost/serialization/library_version_type.hpp>
+ 
+ namespace boost{
+ namespace serialization {
+diff --git a/boost/serialization/vector.hpp b/boost/serialization/vector.hpp
+index dc61b01df..438ff698a 100644
+--- a/boost/serialization/vector.hpp
++++ b/boost/serialization/vector.hpp
+@@ -25,8 +25,8 @@
+ #include <boost/serialization/access.hpp>
+ #include <boost/serialization/nvp.hpp>
+ #include <boost/serialization/collection_size_type.hpp>
+-#include <boost/serialization/library_version_type.hpp>
+ #include <boost/serialization/item_version_type.hpp>
++#include <boost/serialization/library_version_type.hpp>
+ 
+ #include <boost/serialization/collections_save_imp.hpp>
+ #include <boost/serialization/collections_load_imp.hpp>

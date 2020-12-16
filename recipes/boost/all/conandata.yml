@@ -93,3 +93,7 @@ patches:
       base_path: "source_subfolder"
     - patch_file: "patches/python_base_prefix_since_1_74.patch"
       base_path: "source_subfolder"
+    - patch_file: "patches/boost_serialization_library_version_type_header.patch"
+      base_path: "source_subfolder"
+    - patch_file: "patches/boost_serialization_version_header.patch"
+      base_path: "source_subfolder"

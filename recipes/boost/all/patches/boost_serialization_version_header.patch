@@ -1,0 +1,10 @@
+--- a/boost/serialization/optional.hpp	2020-08-11 11:56:51.000000000 -0300
++++ b/boost/serialization/optional.hpp	2020-12-02 12:21:50.522062210 -0300
+@@ -20,6 +20,7 @@
+ #include <boost/move/utility_core.hpp>
+ 
+ #include <boost/serialization/item_version_type.hpp>
++#include <boost/serialization/version.hpp>
+ #include <boost/serialization/split_free.hpp>
+ #include <boost/serialization/level.hpp>
+ #include <boost/serialization/nvp.hpp>
