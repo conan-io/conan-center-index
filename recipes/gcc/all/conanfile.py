@@ -109,7 +109,7 @@ class GccConan(ConanFile):
         else:
             autotools.make(args=["install-strip"] + self._make_args)
         tools.rmdir(os.path.join(self.package_folder, "share"))
-        tools.remove_files_by_mask(self.package_folder, ".la")
+        tools.remove_files_by_mask(self.package_folder, "*.la")
         self.copy(pattern="COPYING*", dst="licenses", src=self._source_subfolder)
 
     def package_info(self):
