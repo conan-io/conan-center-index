@@ -13,5 +13,5 @@ message("-- Conan libs: ${CONAN_LIBS}")
 
 enable_testing()
 add_test(NAME ${BACKEND_TEST_NAME}
-        WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
-        COMMAND ${BACKEND_TEST_NAME})
+    WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
+    COMMAND ${BACKEND_TEST_NAME})
