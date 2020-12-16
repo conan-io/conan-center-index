@@ -62,7 +62,7 @@ class GccConan(ConanFile):
 
     def requirements(self):
         self.requires("mpc/1.1.0")
-        self.requires('mpfr/4.0.2')
+        self.requires("mpfr/4.1.0")
         self.requires("gmp/6.1.2")
         self.requires('zlib/1.2.11')
 
