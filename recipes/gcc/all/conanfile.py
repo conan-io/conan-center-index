@@ -76,7 +76,7 @@ class GccConan(ConanFile):
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
-        extracted_dir = "gcc-releases-gcc-%s" % self.version
+        extracted_dir = "gcc-%s" % self.version
         os.rename(extracted_dir, self._source_subfolder)
 
     @property
