@@ -166,14 +166,14 @@ class BoostConan(ConanFile):
     def _all_dependent_modules(self, name):
         dependencies = {name}
         while True:
-        	new_dependencies = {}
-        	for dependency in dependencies:
-        		new_dependencies.update(set(self._dependencies["dependencies"][dependency]))
-        	new_dependencies.update(dependencies)
-        	if len(new_dependencies) > len(dependencies):
-        		dependencies = new_dependencies
-        	else:
-        		break
+            new_dependencies = set()
+            for dependency in dependencies:
+                new_dependencies.update(set(self._dependencies["dependencies"][dependency]))
+                new_dependencies.update(dependencies)
+            if len(new_dependencies) > len(dependencies):
+                dependencies = new_dependencies
+            else:
+                break
         return dependencies
 
     @property
@@ -239,8 +239,11 @@ class BoostConan(ConanFile):
         return self._dependencies["configure_options"]
 
     def configure(self):
-        if not self.options.i18n_backend and not self.options.without_locale:
-            raise ConanInvalidConfiguration("Boost 'locale' library requires a i18n_backend, either 'icu' or 'iconv'")
+        if self.options.without_locale:
+            self.options.i18n_backend = None
+        else:
+            if not self.options.i18n_backend:
+                raise ConanInvalidConfiguration("Boost.locale library requires a i18n_backend (either 'icu' or 'iconv')")
 
         if not self.options.multithreading:
             # * For the reason 'thread' is deactivate look at https://stackoverflow.com/a/20991533
@@ -266,7 +269,7 @@ class BoostConan(ConanFile):
                 self.options.python_version = self._detect_python_version()
                 self.options.python_executable = self._python_executable
 
-        if not all((self.options.get_safe("without_nowide", True), self.options.without_fiber)):
+        if not self.options.get_safe("without_nowide", True):
             # nowide require a c++11-able compiler with movable std::fstream
             mincompiler_version = self._min_compiler_version_nowide
             if mincompiler_version:
@@ -288,18 +291,21 @@ class BoostConan(ConanFile):
         # if self.options.layout == "b2-default":
         #     self.options.layout = "versioned" if self.settings.os == "Windows" else "system"
 
-        if not self.options.get_safe("without_json", True):
-            # json requires a c++11-able compiler.
+        if not all((self.options.without_fiber, self.options.get_safe("without_json", True))):
+            # fiber/json require a c++11-able compiler.
             if self.settings.compiler.cppstd:
                 tools.check_min_cppstd(self, 11)
             else:
                 version_cxx11_standard = self._min_compiler_version_default_cxx11
                 if version_cxx11_standard:
                     if tools.Version(self.settings.compiler.version) < version_cxx11_standard:
-                        raise ConanInvalidConfiguration("Boost.json requires a c++11 compiler (please set compiler.cppstd or use a newer compiler)")
+                        raise ConanInvalidConfiguration("Boost.{fiber,json} requires a c++11 compiler (please set compiler.cppstd or use a newer compiler)")
                 else:
                     self.output.warn("I don't know what the default c++ standard of this compiler is. I suppose it supports c++11 by default.\n"
                                      "This might cause some boost libraries not being built and conan components to fail.")
+
+        if self.options.layout == "b2-default":
+            self.options.layout = "versioned" if self.settings.os == "Windows" else "system"
 
     def build_requirements(self):
         if not self.options.header_only:
@@ -742,8 +748,7 @@ class BoostConan(ConanFile):
         if self._b2_abi:
             flags.append("abi=%s" % self._b2_abi)
 
-        if self.options.layout != "b2-default":
-            flags.append("--layout=%s" % self.options.layout)
+        flags.append("--layout=%s" % self.options.layout)
         flags.append("--user-config=%s" % os.path.join(self._boost_build_dir, 'user-config.jam'))
         flags.append("-sNO_ZLIB=%s" % ("0" if self._with_zlib else "1"))
         flags.append("-sNO_BZIP2=%s" % ("0" if self._with_bzip2 else "1"))
@@ -1105,11 +1110,6 @@ class BoostConan(ConanFile):
                 self.output.info(cmd)
                 self.run(cmd)
 
-    @property
-    def _is_versioned_include(self):
-        layout = self.options.layout
-        return layout == "versioned" or (layout == "b2-default" and self.settings.os == "Windows")
-
     @staticmethod
     def _option_to_conan_requirement(name):
         return {
@@ -1149,7 +1149,7 @@ class BoostConan(ConanFile):
             if self.options.error_code_header_only:
                 self.cpp_info.components["headers"].defines.append("BOOST_ERROR_CODE_HEADER_ONLY")
 
-        if self._is_versioned_include:
+        if self.options.layout == "versioned":
             version = tools.Version(self.version)
             self.cpp_info.components["headers"].includedirs.append(os.path.join("include", "boost-{}_{}".format(version.major, version.minor)))
 
@@ -1197,16 +1197,11 @@ class BoostConan(ConanFile):
             # - system: ""
             # - versioned: "-vc142-mt-d-x64-1_74"
             # - tagged: "-mt-d-x64"
-            # - b2-default: same as versioned
             libsuffix_lut = {
                 "system": "",
                 "versioned": "{toolset}{threading}{abi}{arch}{version}",
                 "tagged": "{threading}{abi}{arch}",
             }
-            if self._is_msvc:
-                libsuffix_lut["b2-default"] = libsuffix_lut["versioned"]
-            else:
-                libsuffix_lut["b2-default"] = libsuffix_lut["system"]
             libsuffix_data = {
                 "toolset": "-{}".format(self._toolset_tag),
                 "threading": "-mt" if self.options.multithreading else "",
@@ -1279,7 +1274,7 @@ class BoostConan(ConanFile):
                         if conan_requirement not in self.requires:
                             continue
                         if module == "locale" and requirement in ("icu", "iconv"):
-                            if requirement != self.options.get_safe("i18n_backend"):
+                            if requirement != self.options.i18n_backend:
                                 continue
                         self.cpp_info.components[module].requires.append("{0}::{0}".format(conan_requirement))
 
