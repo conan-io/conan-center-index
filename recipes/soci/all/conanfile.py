@@ -53,6 +53,10 @@ class SociConan(ConanFile):
     def _build_subfolder(self):
         return "build_subfolder"
 
+    def config_options(self):
+        if self.settings.os == "Windows":
+            del self.options.fPIC
+
     def requirements(self):
         prefix  = "Dependencies for "
         message = " not configured in this conan package, some features will be disabled."
@@ -77,9 +81,9 @@ class SociConan(ConanFile):
         tools.get(**self.conan_data["sources"][self.version])
         os.rename(self.name + "-" + self.version, self._source_subfolder)
 
-    def config_options(self):
-        if self.settings.os == "Windows":
-            del self.options.fPIC
+    def build(self):
+        cmake = self._configure_cmake()
+        cmake.build()
 
     def _configure_cmake(self):
         if self._cmake:
@@ -110,11 +114,6 @@ class SociConan(ConanFile):
 
         return self._cmake
 
-    def build(self):
-        cmake = self._configure_cmake()
-        cmake.build()
-        cmake.install()
-
     def package(self):
         include_folder  = os.path.join(self._source_subfolder, "include")
         lib_folder      = os.path.join(self._build_subfolder, "lib")
@@ -144,3 +143,6 @@ class SociConan(ConanFile):
             self.cpp_info.libs.append("soci_mysql")
         if self.options.postgresql:
             self.cpp_info.libs.append("soci_postgresql")
+
+        if self._cmake:
+            self._cmake.install()
