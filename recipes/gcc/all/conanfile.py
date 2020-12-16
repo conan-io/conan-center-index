@@ -100,13 +100,6 @@ class GccConan(ConanFile):
     def package_id(self):
         del self.info.settings.compiler
 
-    def _remove_by_mask(self, pattern):
-        import fnmatch
-        for root, _, filenames in os.walk(self.package_folder):
-            for filename in filenames:
-                if fnmatch.fnmatch(filename, pattern):
-                    os.unlink(os.path.join(self.package_folder, root, filename))
-
     def package(self):
         autotools = self._configure_autotools()
         if self.settings.build_type == "Debug":
