@@ -61,7 +61,7 @@ class GccConan(ConanFile):
         return "source_subfolder"
 
     def requirements(self):
-        self.requires("mpc/1.1.0")
+        self.requires("mpc/1.2.0")
         self.requires("mpfr/4.1.0")
         self.requires("gmp/6.1.2")
         self.requires('zlib/1.2.11')
