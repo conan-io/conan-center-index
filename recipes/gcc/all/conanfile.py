@@ -2,6 +2,8 @@ from conans import ConanFile, tools, AutoToolsBuildEnvironment
 from conans.errors import ConanException, ConanInvalidConfiguration
 import os
 
+required_conan_version = ">=1.29.1"
+
 
 class GccConan(ConanFile):
     name = "gcc"
