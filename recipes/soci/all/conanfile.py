@@ -30,7 +30,7 @@ class SociConan(ConanFile):
     default_options = {
         "fPIC":       True,
         "shared":     False,
-        "cxx11":      False,
+        "cxx11":      True,
         "sqlite3":    False,
         "empty":      False,
         "tests":      False,
@@ -109,8 +109,7 @@ class SociConan(ConanFile):
 
         self._cmake.configure(
             source_folder=self._source_subfolder,
-            build_folder=self._build_subfolder
-        )
+            build_folder=self._build_subfolder)
 
         return self._cmake
 
