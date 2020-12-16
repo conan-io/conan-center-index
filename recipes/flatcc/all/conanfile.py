@@ -35,7 +35,7 @@ class FlatccConan(ConanFile):
     }
     settings = "os", "arch", "compiler", "build_type"
     generators = "cmake"
-    exports_sources = ["CMakeLists.txt", "FlatccGenerateSources.cmake"]
+    exports_sources = ["CMakeLists.txt", "patches/**"]
 
     _cmake = None
 
@@ -47,6 +47,10 @@ class FlatccConan(ConanFile):
     @property
     def _build_subfolder(self):
         return "build_subfolder"
+
+    def _patch_sources(self):
+        for patch in self.conan_data["patches"][self.version]:
+            tools.patch(**patch)
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -86,6 +90,7 @@ class FlatccConan(ConanFile):
         return self._cmake
 
     def build(self):
+        self._patch_sources()
         cmake = self._configure_cmake()
         cmake.build()
 
@@ -106,7 +111,8 @@ class FlatccConan(ConanFile):
         #flatcc package provides two components: the flatcc compiler binary and the runtime library
         if not self.options.runtime_lib_only:
             self.cpp_info.components["flatcc_exe"].names["cmake_find_package"] = "flatcc_exe"
-            self.cpp_info.components["flatcc_exe"].libs = ["flatcc%s" % debug_suffix]
+            self.cpp_info.components["flatcc_lib"].names["cmake_find_package"] = "flatcc_lib"
+            self.cpp_info.components["flatcc_lib"].libs = ["flatcc%s" % debug_suffix]
             #Our FlatccGenerateSources.cmake should be included by the cmake_find_package generated file
             self.cpp_info.components["flatcc_exe"].build_modules.append(os.path.join(self.package_folder, "cmake", "FlatccGenerateSources.cmake"))
             bin_path = os.path.join(self.package_folder, "bin")
