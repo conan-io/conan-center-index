@@ -108,6 +108,10 @@ class LibpqConan(ConanFile):
                        'MD': 'MultiThreadedDLL',
                        'MDd': 'MultiThreadedDebugDLL'}.get(str(self.settings.compiler.runtime))
             msbuild_project_pm = os.path.join(self._source_subfolder, "src", "tools", "msvc", "MSBuildProject.pm")
+            tools.replace_in_file(msbuild_project_pm, "</Link>", """</Link>
+    <Lib>
+      <TargetMachine>$targetmachine</TargetMachine>
+    </Lib>""")
             tools.replace_in_file(msbuild_project_pm, "'MultiThreadedDebugDLL'", "'%s'" % runtime)
             tools.replace_in_file(msbuild_project_pm, "'MultiThreadedDLL'", "'%s'" % runtime)
             config_default_pl = os.path.join(self._source_subfolder, "src", "tools", "msvc", "config_default.pl")
