@@ -3,7 +3,7 @@ cmake_minimum_required(VERSION 3.1)
 # Empty backend tests target
 set(BACKEND_TEST_NAME conan.soci.empty.tests)
 add_executable(${BACKEND_TEST_NAME} ../main.test.cpp empty.test.cpp)
-target_compile_features(${BACKEND_TEST_NAME} PUBLIC cxx_std_17)
+target_compile_features(${BACKEND_TEST_NAME} PRIVATE cxx_std_17)
 
 include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
 conan_basic_setup(TARGETS)
