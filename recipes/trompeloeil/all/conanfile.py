@@ -3,7 +3,7 @@ import os
 import glob
 
 
-class TrompeloelConan(ConanFile):
+class TrompeloeilConan(ConanFile):
     name = "trompeloeil"
     description = "Header only C++14 mocking framework"
     topics = ("conan", "trompeloeil", "header-only", "mocking")
