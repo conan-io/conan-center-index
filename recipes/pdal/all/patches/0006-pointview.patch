@@ -1,0 +1,13 @@
+diff --git a/pdal/PointView.hpp b/pdal/PointView.hpp
+index 837cd25b8..4a44e4df3 100644
+--- a/pdal/PointView.hpp
++++ b/pdal/PointView.hpp
+@@ -668,7 +668,7 @@ public:
+ 
+     bool operator==(const PointViewIter& i)
+         { return m_id == i.m_id; }
+-    bool operator!=(const PointViewIter& i)
++    bool operator!=(const PointViewIter& i) const
+         { return m_id != i.m_id; }
+     bool operator<(const PointViewIter& i)
+         { return m_id < i.m_id; }
