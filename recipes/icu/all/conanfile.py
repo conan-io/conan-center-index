@@ -91,11 +91,13 @@ class ICUBase(ConanFile):
                     os.makedirs(os.path.join("data", "out", "tmp"))
 
                     self.run(self._build_config_cmd, win_bash=tools.os_info.is_windows)
-                    command = "make {silent} -j {cpu_count}".format(silent=self._silent,
-                                                                    cpu_count=tools.cpu_count())
+                    make = "make" if self.settings.os != "FreeBSD" else "gmake"
+                    command = "{make} {silent} -j {cpu_count}".format(make=make,
+                                                                      silent=self._silent,
+                                                                      cpu_count=tools.cpu_count())
                     self.run(command, win_bash=tools.os_info.is_windows)
                     if self.options.with_unit_tests:
-                        command = "make {silent} check".format(silent=self._silent)
+                        command = "{make} {silent} check".format(make=make, silent=self._silent)
                         self.run(command, win_bash=tools.os_info.is_windows)
 
     def _configure_autotools(self):
