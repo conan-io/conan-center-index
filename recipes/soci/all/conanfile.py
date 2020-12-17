@@ -31,7 +31,7 @@ class SociConan(ConanFile):
         "static":     True,
         "cxx11":      True,
         "empty":      True,
-        "fPIC":       False,
+        "fPIC":       True,
         "shared":     False,
         "sqlite3":    False,
         "db2":        False,
@@ -54,7 +54,7 @@ class SociConan(ConanFile):
         return "build_subfolder"
 
     def config_options(self):
-        if self.settings.os == "Windows":
+        if self.settings.os == "Windows" or self.settings.compiler == "Visual Studio":
             del self.options.fPIC
 
     def requirements(self):
@@ -62,7 +62,6 @@ class SociConan(ConanFile):
         message = " not configured in this conan package, some features will be disabled."
 
         if self.options.sqlite3:
-            # ToDo check if self.options.shared = True
             self.requires("sqlite3/3.33.0")
         # ToDo add the missing dependencies for the backends
         if self.options.db2:
@@ -133,18 +132,19 @@ class SociConan(ConanFile):
         self.cpp_info.builddirs = ['cmake']
 
         self.cpp_info.libs = [""]
-        if self.options.shared:
-            self.cpp_info.libs.append("soci_core")
         if self.options.empty:
             self.cpp_info.libs.append("soci_empty")
-        if self.options.sqlite3:
-            self.cpp_info.libs.append("soci_sqlite3")
-        if self.options.oracle:
-            self.cpp_info.libs.append("soci_oracle")
-        if self.options.mysql:
-            self.cpp_info.libs.append("soci_mysql")
-        if self.options.postgresql:
-            self.cpp_info.libs.append("soci_postgresql")
+
+        if self.options.shared:
+            self.cpp_info.libs.append("soci_core")
+            if self.options.sqlite3:
+                self.cpp_info.libs.append("soci_sqlite3")
+            if self.options.oracle:
+                self.cpp_info.libs.append("soci_oracle")
+            if self.options.mysql:
+                self.cpp_info.libs.append("soci_mysql")
+            if self.options.postgresql:
+                self.cpp_info.libs.append("soci_postgresql")
 
         if self._cmake:
             self._cmake.install()
