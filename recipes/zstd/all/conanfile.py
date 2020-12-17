@@ -25,11 +25,6 @@ class ZstdConan(ConanFile):
     def _build_subfolder(self):
         return "build_subfolder"
 
-    def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        extracted_dir = self.name + "-" + self.version
-        os.rename(extracted_dir, self._source_subfolder)
-
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
@@ -39,6 +34,11 @@ class ZstdConan(ConanFile):
             del self.options.fPIC
         del self.settings.compiler.libcxx
         del self.settings.compiler.cppstd
+
+    def source(self):
+        tools.get(**self.conan_data["sources"][self.version])
+        extracted_dir = self.name + "-" + self.version
+        os.rename(extracted_dir, self._source_subfolder)
 
     def _configure_cmake(self):
         if self._cmake:
