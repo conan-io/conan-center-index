@@ -62,6 +62,8 @@ class PdalConan(ConanFile):
             del self.options.fPIC
         if self.settings.compiler.cppstd:
             tools.check_min_cppstd(self, 11)
+        if self.settings.compiler == "gcc" and tools.Version(self.settings.compiler.version) < 5:
+            raise ConanInvalidConfiguration ("This compiler version is unsupported")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
