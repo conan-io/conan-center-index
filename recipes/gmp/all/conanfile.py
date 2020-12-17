@@ -14,9 +14,10 @@ class GmpConan(ConanFile):
     license = ("LGPL-3.0", "GPL-2.0")
     homepage = "https://gmplib.org"
     settings = "os", "arch", "compiler", "build_type"
-    options = {"shared": [True, False], "fPIC": [True, False], "disable_assembly": [True, False],
-               "run_checks": [True, False], "enable_cxx" : [True, False]}
-    default_options = {"shared": False, "fPIC": True, "disable_assembly": True, "run_checks": False, "enable_cxx" : True}
+    options = {"shared": [True, False], "fPIC": [True, False],
+               "disable_assembly": [True, False], "enable_fat": [True, False],
+               "run_checks": [True, False], "enable_cxx": [True, False]}
+    default_options = {"shared": False, "fPIC": True, "disable_assembly": True, "enable_fat": False, "run_checks": False, "enable_cxx": True}
     exports_sources = "patches/*"
 
     _autotools = None
@@ -28,12 +29,16 @@ class GmpConan(ConanFile):
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
+        if self.settings.arch not in ["x86", "x86_64"]:
+            del self.options.enable_fat
 
     def configure(self):
         if self.settings.compiler == "Visual Studio" and self.options.shared:
             raise ConanInvalidConfiguration("Cannot build a shared library using Visual Studio: some error occurs at link time")
         if self.options.shared:
             del self.options.fPIC
+        if self.options.enable_fat:
+            del self.options.disable_assembly
         if not self.options.enable_cxx:
             del self.settings.compiler.libcxx
             del self.settings.compiler.cppstd
@@ -63,7 +68,8 @@ class GmpConan(ConanFile):
             os.chmod(configure_file, configure_stats.st_mode | stat.S_IEXEC)
         yes_no = lambda v: "yes" if v else "no"
         configure_args = [
-            "--enable-assembly={}".format(yes_no(not self.options.disable_assembly)),
+            "--enable-assembly={}".format(yes_no(not self.options.get_safe("disable_assembly", False))),
+            "--enable-fat={}".format(yes_no(self.options.get_safe("enable_fat", False))),
             "--enable-cxx={}".format(yes_no(self.options.enable_cxx)),
             "--enable-shared={}".format(yes_no(self.options.shared)),
             "--enable-static={}".format(yes_no(not self.options.shared)),
