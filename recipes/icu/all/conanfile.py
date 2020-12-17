@@ -46,6 +46,10 @@ class ICUBase(ConanFile):
     @property
     def _is_mingw(self):
         return self.settings.os == "Windows" and self.settings.compiler == "gcc"
+    
+    @property
+    def _make_tool(self):
+        return "make" if self.settings.os != "FreeBSD" else "gmake"
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -91,13 +95,13 @@ class ICUBase(ConanFile):
                     os.makedirs(os.path.join("data", "out", "tmp"))
 
                     self.run(self._build_config_cmd, win_bash=tools.os_info.is_windows)
-                    make = "make" if self.settings.os != "FreeBSD" else "gmake"
-                    command = "{make} {silent} -j {cpu_count}".format(make=make,
+                    command = "{make} {silent} -j {cpu_count}".format(make=self._make_tool,
                                                                       silent=self._silent,
                                                                       cpu_count=tools.cpu_count())
                     self.run(command, win_bash=tools.os_info.is_windows)
                     if self.options.with_unit_tests:
-                        command = "{make} {silent} check".format(make=make, silent=self._silent)
+                        command = "{make} {silent} check".format(make=self._make_tool,
+                                                                 silent=self._silent)
                         self.run(command, win_bash=tools.os_info.is_windows)
 
     def _configure_autotools(self):
@@ -198,7 +202,8 @@ class ICUBase(ConanFile):
         with tools.vcvars(self.settings) if self._is_msvc else tools.no_op():
             with tools.environment_append(env_build.vars):
                 with tools.chdir(build_dir):
-                    command = "make {silent} install".format(silent=self._silent)
+                    command = "{make} {silent} install".format(make=self._make_tool,
+                                                               silent=self._silent)
                     self.run(command, win_bash=tools.os_info.is_windows)
         self._install_name_tool()
 
