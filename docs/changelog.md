@@ -1,5 +1,13 @@
 # Changelog
 
+### 14-December-2020 - 09:51 CET
+
+- [feature] Remove repositories after a pull-request is merged.
+- [feature] Run promotion in parallel for merge-commits.
+- [feature] Viewer for summary.json files.
+- [feature] Trigger a BuildSingleReference job at the end of pull-request jobs to build new configurations.
+- [fix] Manage repository permissions independently in pull-requests.
+
 ### 27-November-2020 - 10:14 CEST
 
  - [feature] More (and better) properties are stored in Artifactory for each package.
