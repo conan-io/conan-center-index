@@ -31,6 +31,4 @@ patches:
   "1.5.2":
     - patch_file: "patches/005-fix-curl-components.patch"
       base_path: "source_subfolder"
-  "1.5.2":
-    - patch_file: "patches/001-1.5.2-curl-global-scope.patch"
-      base_path: "source_subfolder"
+ 
