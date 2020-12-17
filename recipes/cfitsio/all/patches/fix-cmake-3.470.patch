@@ -99,7 +99,7 @@
      editcol.c edithdu.c eval_f.c eval_l.c eval_y.c
      f77_wrap1.c f77_wrap2.c f77_wrap3.c f77_wrap4.c
      fits_hcompress.c fits_hdecompress.c fitscore.c
-@@ -123,27 +133,102 @@ SET(SRC_FILES
+@@ -123,27 +133,105 @@ SET(SRC_FILES
  
  # Only include zlib source files if we are building a shared library.
  # Users will need to link their executable with zlib independently.
@@ -196,6 +196,9 @@
  ADD_LIBRARY(${LIB_NAME} ${LIB_TYPE} ${H_FILES} ${SRC_FILES})
 -TARGET_LINK_LIBRARIES(${LIB_NAME} ${PTHREADS_LIBRARY} ${M_LIB} ${CURL_LIBRARIES})
 +TARGET_LINK_LIBRARIES(${LIB_NAME} ${LINK_LIBS} ${M_LIB})
++if(CMAKE_C_COMPILER_ID STREQUAL "AppleClang" AND CMAKE_C_COMPILER_VERSION VERSION_GREATER_EQUAL "12")
++    TARGET_COMPILE_OPTIONS(${LIB_NAME} PRIVATE -Wno-error=implicit-function-declaration)
++endif()
  
  SET_TARGET_PROPERTIES(${LIB_NAME} PROPERTIES VERSION ${${PROJECT_NAME}_VERSION} SOVERSION ${${PROJECT_NAME}_MAJOR_VERSION})
 -install(TARGETS ${LIB_NAME} DESTINATION ${LIB_DESTINATION})
@@ -212,7 +215,7 @@
  
      ENABLE_TESTING()
  
-@@ -173,7 +258,7 @@ IF (BUILD_SHARED_LIBS)
+@@ -173,7 +261,7 @@ IF (BUILD_SHARED_LIBS)
        set_target_properties(FPack Funpack PROPERTIES LINK_FLAGS "setargv.obj")
      endif(MSVC)
  
