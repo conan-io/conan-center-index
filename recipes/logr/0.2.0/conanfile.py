@@ -13,7 +13,7 @@ class LogrConan(ConanFile):
     settings = "os", "compiler", "build_type", "arch"
     no_copy_source = True
 
-    options = { "backend": ["spdlog", "glog", "log4cplus", "log4cplus-unicode", None] }
+    options = { "backend": ["spdlog", "glog", "log4cplus", None] }
     default_options = { "backend": "spdlog"}
 
     _cmake = None
@@ -34,8 +34,6 @@ class LogrConan(ConanFile):
         elif self.options.backend == "glog":
             self.requires("glog/0.4.0")
         elif self.options.backend == "log4cplus":
-            self.requires("log4cplus/2.0.5")
-        elif self.options.backend == "log4cplus-unicode":
             self.requires("log4cplus/2.0.5")
 
     def configure(self):
@@ -68,7 +66,7 @@ class LogrConan(ConanFile):
         self._cmake = CMake(self)
         self._cmake.definitions["LOGR_WITH_SPDLOG_BACKEND"] = self.options.backend == "spdlog"
         self._cmake.definitions["LOGR_WITH_GLOG_BACKEND"] = self.options.backend == "glog"
-        self._cmake.definitions["LOGR_WITH_LOG4CPLUS_BACKEND"] = self.options.backend in ["log4cplus", "log4cplus-unicode"]
+        self._cmake.definitions["LOGR_WITH_LOG4CPLUS_BACKEND"] = self.options.backend == "log4cplus"
 
         self._cmake.definitions["LOGR_INSTALL"] = True
         self._cmake.definitions["LOGR_CONAN_PACKAGING"] = True
@@ -84,12 +82,6 @@ class LogrConan(ConanFile):
         extracted_dir = self.name + "-" + self.version
         os.rename(extracted_dir, self._source_subfolder)
 
-    def build(self):
-        if self.options.backend == "log4cplus" and self.options["log4cplus"].unicode:
-            raise ConanInvalidConfiguration("backend='log4cplus' requires log4cplus:unicode=False")
-        elif self.options.backend == "log4cplus-unicode" and not self.options["log4cplus"].unicode:
-            raise ConanInvalidConfiguration("backend='log4cplus-unicode' requires log4cplus:unicode=True")
-
     def package(self):
         self.copy("LICENSE", src=self._source_subfolder, dst="licenses")
         cmake = self._configure_cmake()
@@ -98,7 +90,7 @@ class LogrConan(ConanFile):
         tools.rmdir(os.path.join(self.package_folder, "lib"))
 
     def package_id(self):
-        self.info.header_only()
+        self.info.settings.clear()
 
     def package_info(self):
         self.cpp_info.names["cmake_find_package"] = "logr"
