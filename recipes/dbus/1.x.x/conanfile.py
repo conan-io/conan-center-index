@@ -17,15 +17,13 @@ class DbusConan(ConanFile):
         "with_x11": [True, False],
         "with_glib": [True, False],
         "enable_assert": [True, False],
-        "enable_checks": [True, False],
-        "install_system_libs": [True, False]}
+        "enable_checks": [True, False]}
 
     default_options = {
         "with_x11": False,
         "with_glib": False,
         "enable_assert": False,
-        "enable_checks": False,
-        "install_system_libs": False}
+        "enable_checks": False}
 
     generators = "cmake", "cmake_find_package"
 
@@ -41,7 +39,7 @@ class DbusConan(ConanFile):
 
     def configure(self):
         if self.settings.os not in ("Linux", "FreeBSD"):
-            raise ConanInvalidConfiguration("dbus is only supported on Linux")
+            raise ConanInvalidConfiguration("dbus is only supported on Linux and FreeBSD")
 
         del self.settings.compiler.libcxx
         del self.settings.compiler.cppstd
@@ -71,7 +69,6 @@ class DbusConan(ConanFile):
             self._cmake.definitions["DBUS_WITH_GLIB"] = self.options.with_glib
             self._cmake.definitions["DBUS_DISABLE_ASSERT"] = not self.options.enable_assert
             self._cmake.definitions["DBUS_DISABLE_CHECKS"] = not self.options.enable_checks
-            self._cmake.definitions["DBUS_INSTALL_SYSTEM_LIBS"] = self.options.install_system_libs
 
             path_to_cmake_lists = os.path.join(self._source_subfolder, "cmake")
 
@@ -83,9 +80,8 @@ class DbusConan(ConanFile):
         dbus_cmake = tools.os.path.join(
             self._source_subfolder, "cmake", "CMakeLists.txt")
 
-        if self.options.with_glib:
-            tools.replace_in_file(dbus_cmake, "GLib2", "glib")
-            tools.replace_in_file(dbus_cmake, "GLIB2", "GLIB")
+        tools.replace_in_file(dbus_cmake, "GLib2", "glib")
+        tools.replace_in_file(dbus_cmake, "GLIB2", "GLIB")
 
         cmake = self._configure_cmake()
         cmake.build()
