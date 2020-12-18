@@ -7,7 +7,7 @@ class Mosquitto(ConanFile):
     name = "mosquitto"
     license = "EPL-2.0"
     url = "https://github.com/conan-io/conan-center-index"
-    homepage = "https://github.com/eclipse/paho.mqtt.c"
+    homepage = "https://mosquitto.org"
     description = """Eclipse Mosquitto MQTT library, broker and more"""
     topics = ("MQTT", "IoT", "eclipse")
     settings = "os", "arch", "compiler", "build_type"
@@ -72,6 +72,8 @@ class Mosquitto(ConanFile):
         self.copy("LICENSE.txt", src=self._source_subfolder, dst="licenses")
         cmake = self._configure_cmake()
         cmake.install()
+
+        tools.rmdir(os.path.join(self.package_folder, "lib","pkgconfig"))
 
     def package_info(self):
         #self.cpp_info.libdirs = ["lib"] # thats default anyway
