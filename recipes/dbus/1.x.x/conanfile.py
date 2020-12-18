@@ -23,11 +23,11 @@ class DbusConan(ConanFile):
     default_options = {
         "with_x11": False,
         "with_glib": False,
-        "enable_assert": True,
-        "enable_checks": True,
+        "enable_assert": False,
+        "enable_checks": False,
         "install_system_libs": False}
 
-    generators = "cmake", "cmake_find_package", "cmake_paths"
+    generators = "cmake", "cmake_find_package"
 
     @property
     def _source_subfolder(self):
@@ -40,10 +40,8 @@ class DbusConan(ConanFile):
     _cmake = None
 
     def configure(self):
-        if self.settings.os == 'Windows':
-            raise ConanInvalidConfiguration("D-Bus is not compatible with Windows")
-        if self.settings.os == "Macos":
-            raise ConanInvalidConfiguration("D-Bus is not compatible with MacOS")
+        if self.settings.os not in ("Linux", "FreeBSD"):
+            raise ConanInvalidConfiguration("dbus is only supported on Linux")
 
         del self.settings.compiler.libcxx
         del self.settings.compiler.cppstd
@@ -105,10 +103,13 @@ class DbusConan(ConanFile):
         tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
 
     def package_info(self):
-        self.cpp_info.names["cmake_find_package"] = "DBus1"
-        self.cpp_info.names["cmake_find_package_multi"] = "DBus1"
+        # FIXME: There should not be a namespace
+        self.cpp_info.filenames["cmake_find_package"] = "DBus1"
+        self.cpp_info.filenames["cmake_find_package_multi"] = "DBus1"
+        self.cpp_info.names["cmake_find_package"] = "dbus-1"
+        self.cpp_info.names["cmake_find_package_multi"] = "dbus-1"
         self.cpp_info.names["pkg_config"] = "dbus-1"
 
-        self.cpp_info.includedirs = [
-            "include/dbus-1.0", "lib/dbus-1.0/include"]
-        self.cpp_info.libs = tools.collect_libs(self)
+        self.cpp_info.includedirs.extend([
+            "include/dbus-1.0", "lib/dbus-1.0/include"])
+        self.cpp_info.libs = ["dbus-1"]
