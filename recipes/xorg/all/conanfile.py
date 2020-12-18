@@ -1,5 +1,5 @@
 from conans import ConanFile, tools
-from conans.errors import ConanException
+from conans.errors import ConanException, ConanInvalidConfiguration
 
 required_conan_version = ">=1.29"
 
@@ -9,8 +9,12 @@ class ConanXOrg(ConanFile):
     license = "MIT"
     homepage = "https://www.x.org/wiki/"
     description = "The X.Org project provides an open source implementation of the X Window System."
-    settings = {"os": "Linux"}
+    settings = "os"
     topics = ("conan", "x11", "xorg")
+
+    def configure(self):
+        if self.settings.os not in ["Linux", "FreeBSD"]:
+            raise ConanInvalidConfiguration("This recipe supports only Linux and FreeBSD")
 
     def package_id(self):
         self.info.header_only()
@@ -37,8 +41,8 @@ class ConanXOrg(ConanFile):
         self.cpp_info.components[name].version = pkg_config.version[0]
 
     def system_requirements(self):
+        packages = []
         if tools.os_info.is_linux and self.settings.os == "Linux":
-            package_tool = tools.SystemPackageTool(conanfile=self, default_mode="verify")
             if tools.os_info.with_apt:
                 packages = ["xorg-dev", "libx11-xcb-dev", "libxcb-render0-dev", "libxcb-render-util0-dev", "libxcb-xkb-dev",
                             "libxcb-icccm4-dev", "libxcb-image0-dev", "libxcb-keysyms1-dev", "libxcb-randr0-dev", "libxcb-shape0-dev",
@@ -64,7 +68,14 @@ class ConanXOrg(ConanFile):
                             "xcb-util-renderutil-devel", "xkeyboard-config", "xcb-util-devel"]
             else:
                 self.output.warn("Do not know how to install 'xorg' for {}.".format(tools.os_info.linux_distro))
-                packages = []
+        
+        elif tools.os_info.is_freebsd and self.settings.os == "FreeBSD":
+            packages = ["libX11", "libfontenc", "libice", "libsm", "libxaw", "libxcomposite", "libxcursor",
+                        "libxdamage", "libxdmcp", "libxft", "libxtst", "libxinerama", "libxkbfile", "libxrandr", "libxres",
+                        "libXScrnSaver", "libxvmc", "xtrans", "xcb-util-wm", "xcb-util-image", "xcb-util-keysyms", "xcb-util-renderutil",
+                        "libxxf86vm", "libxv", "xkeyboard-config", "xcb-util"]
+        if packages:
+            package_tool = tools.SystemPackageTool(conanfile=self, default_mode="verify")
             for p in packages:
                 package_tool.install(update=True, packages=p)
 

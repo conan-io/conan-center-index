@@ -64,6 +64,7 @@ class FontconfigConan(ConanFile):
             args.append("--datarootdir=%s" % tools.unix_path(os.path.join(self.package_folder, "bin", "share")))
             args.append("--localstatedir=%s" % tools.unix_path(os.path.join(self.package_folder, "bin", "var")))
             self._autotools = AutoToolsBuildEnvironment(self, win_bash=tools.os_info.is_windows)
+            self._autotools.libs = []
             self._autotools.configure(configure_dir=self._source_subfolder, args=args)
             tools.replace_in_file("Makefile", "po-conf test", "po-conf")
         return self._autotools
@@ -75,8 +76,9 @@ class FontconfigConan(ConanFile):
     def build(self):
         # Patch files from dependencies
         self._patch_files()
-        autotools = self._configure_autotools()
-        autotools.make()
+        with tools.run_environment(self):
+            autotools = self._configure_autotools()
+            autotools.make()
 
     def package(self):
         self.copy("COPYING", dst="licenses", src=self._source_subfolder)

@@ -1033,10 +1033,10 @@ class BoostConan(ConanFile):
             self.cpp_info.components["headers"].defines.append("BOOST_ASIO_NO_DEPRECATED")
 
         if self.options.filesystem_no_deprecated:
-            self.cpp_info.components["headers"].append("BOOST_FILESYSTEM_NO_DEPRECATED")
+            self.cpp_info.components["headers"].defines.append("BOOST_FILESYSTEM_NO_DEPRECATED")
 
         if self.options.segmented_stacks:
-            self.cpp_info.components["headers"].extend(["BOOST_USE_SEGMENTED_STACKS", "BOOST_USE_UCONTEXT"])
+            self.cpp_info.components["headers"].defines.extend(["BOOST_USE_SEGMENTED_STACKS", "BOOST_USE_UCONTEXT"])
 
         if not self.options.header_only:
             if self.options.error_code_header_only:
