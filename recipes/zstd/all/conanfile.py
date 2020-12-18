@@ -25,11 +25,6 @@ class ZstdConan(ConanFile):
     def _build_subfolder(self):
         return "build_subfolder"
 
-    def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        extracted_dir = self.name + "-" + self.version
-        os.rename(extracted_dir, self._source_subfolder)
-
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
@@ -39,6 +34,11 @@ class ZstdConan(ConanFile):
             del self.options.fPIC
         del self.settings.compiler.libcxx
         del self.settings.compiler.cppstd
+
+    def source(self):
+        tools.get(**self.conan_data["sources"][self.version])
+        extracted_dir = self.name + "-" + self.version
+        os.rename(extracted_dir, self._source_subfolder)
 
     def _configure_cmake(self):
         if self._cmake:
@@ -53,6 +53,10 @@ class ZstdConan(ConanFile):
     def _patch_sources(self):
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
             tools.patch(**patch)
+        # Don't force PIC
+        if tools.Version(self.version) >= "1.4.5":
+            tools.replace_in_file(os.path.join(self._source_subfolder, "build", "cmake", "lib", "CMakeLists.txt"),
+                                  "POSITION_INDEPENDENT_CODE On", "")
 
     def build(self):
         self._patch_sources()
