@@ -1,7 +1,7 @@
 from conans import ConanFile, tools
 from conans.errors import ConanException, ConanInvalidConfiguration
 
-required_conan_version = ">=1.29"
+required_conan_version = ">=1.32"
 
 class ConanXOrg(ConanFile):
     name = "xorg"
@@ -76,8 +76,7 @@ class ConanXOrg(ConanFile):
                         "libxxf86vm", "libxv", "xkeyboard-config", "xcb-util"]
         if packages:
             package_tool = tools.SystemPackageTool(conanfile=self, default_mode="verify")
-            for p in packages:
-                package_tool.install(update=True, packages=p)
+            package_tool.install_packages(update=True, packages=packages)
 
     def package_info(self):
         for name in ["x11", "x11-xcb", "fontenc", "ice", "sm", "xau", "xaw7",
