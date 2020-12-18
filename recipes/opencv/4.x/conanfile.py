@@ -24,7 +24,8 @@ class OpenCVConan(ConanFile):
                "with_openexr": [True, False],
                "with_eigen": [True, False],
                "with_webp": [True, False],
-               "with_gtk": [True, False]}
+               "with_gtk": [True, False],
+               "with_quirc": [True, False]}
     default_options = {"shared": False,
                        "fPIC": True,
                        "parallel": False,
@@ -36,7 +37,8 @@ class OpenCVConan(ConanFile):
                        "with_openexr": True,
                        "with_eigen": True,
                        "with_webp": True,
-                       "with_gtk": True}
+                       "with_gtk": True,
+                       "with_quirc": True}
     exports_sources = "CMakeLists.txt"
     generators = "cmake", "cmake_find_package"
     _cmake = None
@@ -203,7 +205,6 @@ class OpenCVConan(ConanFile):
         self._cmake.definitions["WITH_PROTOBUF"] = False
         self._cmake.definitions["WITH_PVAPI"] = False
         self._cmake.definitions["WITH_QT"] = False
-        self._cmake.definitions["WITH_QUIRC"] = False
         self._cmake.definitions["WITH_V4L"] = False
         self._cmake.definitions["WITH_VA"] = False
         self._cmake.definitions["WITH_VA_INTEL"] = False
@@ -223,6 +224,7 @@ class OpenCVConan(ConanFile):
         self._cmake.definitions["WITH_OPENJPEG"] = self.options.with_jpeg2000 == "openjpeg"
         self._cmake.definitions["WITH_OPENEXR"] = self.options.with_openexr
         self._cmake.definitions["WITH_EIGEN"] = self.options.with_eigen
+        self._cmake.definitions["WITH_QUIRC"] = self.options.with_quirc
         self._cmake.definitions["WITH_DSHOW"] = self.settings.compiler == "Visual Studio"
         self._cmake.definitions["WITH_MSMF"] = self.settings.compiler == "Visual Studio"
         self._cmake.definitions["WITH_MSMF_DXVA"] = self.settings.compiler == "Visual Studio"
@@ -293,6 +295,10 @@ class OpenCVConan(ConanFile):
                 self.cpp_info.components[conan_component].requires = requires
                 if self.settings.os == "Linux":
                     self.cpp_info.components[conan_component].system_libs = ["dl", "m", "pthread", "rt"]
+                    if not self.options.shared:
+                        if conan_component == "opencv_core":
+                            libs = list(filter(lambda x: not x.startswith("opencv"), tools.collect_libs(self)))
+                            self.cpp_info.components[conan_component].libs += libs
 
                 if self.settings.os == "Android":
                     self.cpp_info.components[conan_component].includedirs = [
