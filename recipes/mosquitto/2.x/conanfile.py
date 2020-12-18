@@ -35,15 +35,8 @@ class Mosquitto(ConanFile):
     def _source_subfolder(self):
         return "source_subfolder"
 
-    @property
-    def _ssl_on(self):
-        if self.settings.os == "Windows":
-            return False # for the moment it is like that
-            # however, there might be cygwin and others where it even works on Windows for the moment ...
-        return self.options.with_ssl
-
     def requirements(self):
-        if self._ssl_on:
+        if self.options.with_ssl:
             self.requires("openssl/1.1.1i")
         if self.options.with_cjson:
             self.requires("cjson/1.7.14")
@@ -57,13 +50,14 @@ class Mosquitto(ConanFile):
         if self._cmake:
             return self._cmake
         self._cmake = CMake(self)
-        self._cmake.definitions["WITH_TLS"] = self._ssl_on
+        self._cmake.definitions["WITH_THREADING"] = self.settings.os != "Windows"
+        self._cmake.definitions["WITH_TLS"] = self.options.with_ssl
         self._cmake.definitions["WITH_CLIENTS"] = self.options.clients
         self._cmake.definitions["WITH_BROKER"] = self.options.broker
         self._cmake.definitions["WITH_APPS"] = self.options.apps
         self._cmake.definitions["WITH_PLUGINS"] = self.options.plugins
         self._cmake.definitions["DOCUMENTATION"] = False
-        if self._ssl_on:
+        if self.options.with_ssl:
             self._cmake.definitions["OPENSSL_SEARCH_PATH"] = self.deps_cpp_info["openssl"].rootpath.replace("\\", "/")
             self._cmake.definitions["OPENSSL_ROOT_DIR"] = self.deps_cpp_info["openssl"].rootpath.replace("\\", "/")
         self._cmake.configure(source_folder=self._source_subfolder)
@@ -85,5 +79,4 @@ class Mosquitto(ConanFile):
         #self.cpp_info.libdirs = ["lib"] # thats default anyway
         self.cpp_info.libs = tools.collect_libs(self)
         self.cpp_info.includedirs = ["include",]
-
 
