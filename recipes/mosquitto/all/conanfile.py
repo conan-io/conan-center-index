@@ -6,7 +6,6 @@ from conans import ConanFile, CMake, tools
 class Mosquitto(ConanFile):
     name = "mosquitto"
     license = "EPL-2.0"
-    author = "harald harald.achitz@gmail.com"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/eclipse/paho.mqtt.c"
     description = """Eclipse Mosquitto MQTT library, broker and more"""
