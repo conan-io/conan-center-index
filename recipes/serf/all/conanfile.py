@@ -1,5 +1,4 @@
 from conans import AutoToolsBuildEnvironment, ConanFile, tools
-from conans.client.tools.win import msvs_toolset
 from conans.errors import ConanException
 from contextlib import contextmanager
 import glob
@@ -103,7 +102,7 @@ class SerfConan(ConanFile):
         if self.settings.compiler == "Visual Studio":
             kwargs.update({
                 "TARGET_ARCH": str(self.settings.arch),
-                "MSVC_VERSION": "{:.1f}".format(float(msvs_toolset(self.settings).lstrip("v")) / 10),
+                "MSVC_VERSION": "{:.1f}".format(float(tools.msvs_toolset(self.settings).lstrip("v")) / 10),
             })
 
         escape_str = lambda x : "\"{}\"".format(x)
