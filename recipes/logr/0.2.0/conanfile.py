@@ -72,9 +72,9 @@ class LogrConan(ConanFile):
 
         self._cmake.definitions["LOGR_INSTALL"] = True
         self._cmake.definitions["LOGR_CONAN_PACKAGING"] = True
-        self._cmake.definitions['LOGR_BUILD_TESTS'] = False
-        self._cmake.definitions['LOGR_BUILD_EXAMPLES'] = False
-        self._cmake.definitions['LOGR_BUILD_BENCHMARKS'] = False
+        self._cmake.definitions["LOGR_BUILD_TESTS"] = False
+        self._cmake.definitions["LOGR_BUILD_EXAMPLES"] = False
+        self._cmake.definitions["LOGR_BUILD_BENCHMARKS"] = False
 
         self._cmake.configure(source_folder=self._source_subfolder)
         return self._cmake
