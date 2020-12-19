@@ -153,12 +153,6 @@ class BoostConan(ConanFile):
         }.get(str(self.settings.compiler))
 
     @property
-    def _fiber_minimum_compiler_version(self):
-        return {
-            "clang": "6",
-        }.get(str(self.settings.compiler))
-
-    @property
     def _dependency_filename(self):
         return "dependencies-{}.yml".format(self.version)
 
@@ -171,17 +165,15 @@ class BoostConan(ConanFile):
 
     def _all_dependent_modules(self, name):
         dependencies = {name}
-        new_dependencies = self._dependencies["dependencies"][name]
         while True:
-            len_before = len(dependencies)
-            dependencies.update(new_dependencies)
-            len_after = len(dependencies)
-            if len_before == len_after:
-                break
-            next_new_dependencies = set()
-            for new_dependency in new_dependencies:
-                next_new_dependencies.update(set(self._dependencies["dependencies"][new_dependency]))
-            new_dependencies = next_new_dependencies
+        	new_dependencies = {}
+        	for dependency in dependencies:
+        		new_dependencies.update(set(self._dependencies["dependencies"][dependency]))
+        	new_dependencies.update(dependencies)
+        	if len(new_dependencies) > len(dependencies):
+        		dependencies = new_dependencies
+        	else:
+        		break
         return dependencies
 
     @property
@@ -222,8 +214,8 @@ class BoostConan(ConanFile):
             if "without_{}".format(opt_name) not in self.options:
                 raise ConanException("{} has the configure options {} which is not available in conanfile.py".format(self._dependency_filename, opt_name))
 
-        # nowide requires a c++11-able compiler + movable std::fstream: change default to not build on compiler with too old default c++ standard or to low compiler.cppstd
-        # json requires a c++11-able compiler: change default to not build on compiler with too old default c++ standard or to low compiler.cppstd
+        # nowide requires a c++11-able compiler + movable std::fstream: change default to not build on compiler with too old default c++ standard or too low compiler.cppstd
+        # json requires a c++11-able compiler: change default to not build on compiler with too old default c++ standard or too low compiler.cppstd
         if self.settings.compiler.cppstd:
             if not tools.valid_min_cppstd(self, 11):
                 self.options.without_fiber = True
@@ -297,7 +289,7 @@ class BoostConan(ConanFile):
         #     self.options.layout = "versioned" if self.settings.os == "Windows" else "system"
 
         if not self.options.get_safe("without_json", True):
-            # json require a c++11-able compiler.
+            # json requires a c++11-able compiler.
             if self.settings.compiler.cppstd:
                 tools.check_min_cppstd(self, 11)
             else:
@@ -736,7 +728,7 @@ class BoostConan(ConanFile):
         flags = self._build_cross_flags
 
         # Stop at the first error. No need to continue building.
-        # flags.append("-q")
+        flags.append("-q")
 
         # https://www.boost.org/doc/libs/1_70_0/libs/context/doc/html/context/architectures.html
         if self._b2_os:
@@ -1330,6 +1322,6 @@ class BoostConan(ConanFile):
                 if self.options.multithreading:
                     # https://github.com/conan-io/conan-center-index/issues/3867
                     # runtime crashes occur when using the default platform-specific reference counter/atomic
-                    self.cpp_info.components["headers"].extend(["BOOST_AC_USE_PTHREADS", "BOOST_SP_USE_PTHREADS"])
+                    self.cpp_info.components["headers"].defines.extend(["BOOST_AC_USE_PTHREADS", "BOOST_SP_USE_PTHREADS"])
                 else:
-                    self.cpp_info.components["headers"].extend(["BOOST_AC_DISABLE_THREADS", "BOOST_SP_DISABLE_THREADS"])
+                    self.cpp_info.components["headers"].defines.extend(["BOOST_AC_DISABLE_THREADS", "BOOST_SP_DISABLE_THREADS"])
