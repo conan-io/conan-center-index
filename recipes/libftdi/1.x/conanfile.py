@@ -14,6 +14,11 @@ class LibFtdiConan(ConanFile):
     settings = "os", "arch", "compiler", "build_type"
     options = {"shared": [True, False], "fPIC": [True, False]}
     default_options = {"shared": False, "fPIC": True}
+    requires = (
+            "libusb/1.0.23",
+            "libconfuse/3.2.2",
+            "boost/1.74.0"
+            )
     _cmake = None
 
     @property
@@ -24,11 +29,6 @@ class LibFtdiConan(ConanFile):
         tools.get(**self.conan_data["sources"][self.version])
         extracted_dir = "libftdi1-" + self.version
         os.rename(extracted_dir, self._source_subfolder)
-
-    def requirements(self):
-        self.requires("libusb/1.0.23")
-        self.requires("libconfuse/3.2.2")
-        self.requires("boost/1.73.0")
 
     def _configure_cmake(self):
         if self._cmake:
