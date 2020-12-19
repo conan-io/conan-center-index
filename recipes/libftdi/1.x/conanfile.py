@@ -67,7 +67,5 @@ class LibFtdiConan(ConanFile):
         self.cpp_info.names["cmake_find_package"] = "LibFTDI1"
         self.cpp_info.names["cmake_find_package_multi"] = "LibFTDI1"
         self.cpp_info.names["pkgconfig"] = "libftdi1"
-        self.cpp_info.includedirs.append(
-            os.path.join(self.package_folder, "include", "libftdi1")
-        )
+        self.cpp_info.includedirs.append(os.path.join("include", "libftdi1"))
         self.cpp_info.libs = ["ftdipp1", "ftdi1"]
