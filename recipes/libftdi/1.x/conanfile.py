@@ -10,13 +10,12 @@ class LibFtdiConan(ConanFile):
     homepage = "https://www.intra2net.com/en/developer/libftdi/"
     url = "https://github.com/conan-io/conan-center-index"
     exports_sources = ["CMakeLists.txt"]
-    generators = "cmake", "cmake_find_package"
+    generators = "cmake", "cmake_find_package", "pkg_config"
     settings = "os", "arch", "compiler", "build_type"
     options = {"shared": [True, False], "fPIC": [True, False]}
     default_options = {"shared": False, "fPIC": True}
     requires = (
             "libusb/1.0.23",
-            "libconfuse/3.2.2",
             "boost/1.74.0"
             )
     _cmake = None
@@ -30,15 +29,30 @@ class LibFtdiConan(ConanFile):
         extracted_dir = "libftdi1-" + self.version
         os.rename(extracted_dir, self._source_subfolder)
 
+    def _patch_cmakelists(self, subfolder):
+        cmakelists_path = os.path.join(self._source_subfolder, subfolder, "CMakeLists.txt")
+        tools.replace_in_file(cmakelists_path, "CMAKE_SOURCE_DIR", "PROJECT_SOURCE_DIR", strict=False)
+        tools.replace_in_file(cmakelists_path, "CMAKE_BINARY_DIR", "PROJECT_BINARY_DIR", strict=False)
+
     def _configure_cmake(self):
         if self._cmake:
             return self._cmake
+
         self._cmake = CMake(self)
-        self._cmake.definitions["BUILD_TESTS"] = False
-        self._cmake.configure(source_dir=self._source_subfolder)
+        options = {
+            "BUILD_TESTS": False,
+            "EXAMPLES": False,
+            "FTDI_EEPROM": False,
+            "FTDIPP" : True,
+            "STATICLIBS": not self.options.shared
+        }
+        self._cmake.definitions.update(options)
+        self._cmake.configure()
         return self._cmake
 
     def build(self):
+        self._patch_cmakelists("")
+        self._patch_cmakelists("ftdipp")
         cmake = self._configure_cmake()
         cmake.build()
 
