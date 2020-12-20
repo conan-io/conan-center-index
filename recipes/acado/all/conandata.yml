@@ -1,0 +1,4 @@
+sources:
+  "1.2.2":
+    url: "https://github.com/acado/acado/archive/v1.2.2beta.tar.gz"
+    sha256: "cf0779e64dd5d20989e97340c04ecccf542fe8d993c96b53e5c465693cb354b7"
