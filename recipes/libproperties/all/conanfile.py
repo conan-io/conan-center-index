@@ -14,6 +14,9 @@ class LibpropertiesConan(ConanFile):
     default_options = {"shared": False, "fPIC": True,}
     generators = "cmake"
 
+    @property
+    def _source_subfolder(self):
+        return "sources"
 
     def configure(self):
         del self.settings.compiler.libcxx
