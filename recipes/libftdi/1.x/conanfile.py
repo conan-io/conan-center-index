@@ -60,12 +60,26 @@ class LibFtdiConan(ConanFile):
         self.copy(pattern="LICENSE", dst="licenses", src=self._source_subfolder)
         cmake = self._configure_cmake()
         cmake.install()
-        tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
+        lib_folder = os.path.join(self.package_folder, "lib",)
+        tools.rmdir(os.path.join(lib_folder, "cmake"))
+        tools.rmdir(os.path.join(lib_folder, "pkgconfig"))
+        # STATIC config creates both static and shared libraries
+        if not self.options.shared:
+            tools.remove_files_by_mask(lib_folder, "*.so*")
+
         os.unlink(os.path.join(self.package_folder, "bin", "libftdi1-config"))
 
     def package_info(self):
         self.cpp_info.names["cmake_find_package"] = "LibFTDI1"
         self.cpp_info.names["cmake_find_package_multi"] = "LibFTDI1"
         self.cpp_info.names["pkgconfig"] = "libftdi1"
-        self.cpp_info.includedirs.append(os.path.join("include", "libftdi1"))
-        self.cpp_info.libs = ["ftdipp1", "ftdi1"]
+
+        self.cpp_info.components["ftdi"].names["cmake"] = "libftdi"
+        self.cpp_info.components["ftdi"].libs = ["ftdi1"]
+        self.cpp_info.components["ftdi"].requires = ["libusb::libusb"]
+        self.cpp_info.components["ftdi"].includedirs.append(os.path.join("include", "libftdi1"))
+
+        self.cpp_info.components["ftdipp"].names["cmake"] = "libftdipp"
+        self.cpp_info.components["ftdipp"].libs = ["ftdipp1"]
+        self.cpp_info.components["ftdipp"].requires = ["ftdi", "boost::boost"]
+        self.cpp_info.components["ftdipp"].includedirs.append(os.path.join("include", "libftdipp1"))
