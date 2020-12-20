@@ -14,6 +14,10 @@ class LibpropertiesConan(ConanFile):
     generators = "cmake"
 
     def source(self):
+        tools.get(**self.conan_data["sources"][self.version])
+        os.rename("libproperties-{}".format(self.version), self._source_subfolder)
+
+    def source(self):
         self.run("git clone https://github.com/tinyhubs/libproperties.git")
         # This small hack might be useful to guarantee proper /MT /MD linkage
         # in MSVC if the packaged project doesn't have variables to set it
