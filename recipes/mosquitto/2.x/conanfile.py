@@ -17,15 +17,15 @@ class Mosquitto(ConanFile):
                 "broker": [True, False],
                 "apps": [True, False],
                 "plugins": [True, False],
-                "with_cjson": [True, False],
+#                 "with_cjson": [True, False], TODO , adding a dependency is not enough, it needs also be found
             }
     default_options = {"shared": False,
                         "with_tls": True,
                         "clients": False,
                         "broker": False,
                         "apps": False,
-                        "plugins": False,
-                        "with_cjson": False
+                        "plugins": False,  # TODO, there is some logic, just enabling plugin does not work, needs also something else
+#                        "with_cjson": False , TODO , adding a dependency is not enough, it needs also be found
     }
 
     _cmake = None
@@ -38,8 +38,9 @@ class Mosquitto(ConanFile):
     def requirements(self):
         if self.options.with_tls:
             self.requires("openssl/1.1.1i")
-        if self.options.with_cjson:
-            self.requires("cjson/1.7.14")
+        # TODO
+        # if self.options.with_cjson:
+        #     self.requires("cjson/1.7.14")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
@@ -74,7 +75,10 @@ class Mosquitto(ConanFile):
                 tools.replace_in_file(os.path.join(self._source_subfolder, "src", "CMakeLists.txt"),
                                     "${OPENSSL_LIBRARIES}",
                                     "${OPENSSL_LIBRARIES} crypt32")
-
+                # This is so inconsequent, there is ws2_32 meanwhile in the build, but forgotten here
+                tools.replace_in_file(os.path.join(self._source_subfolder, "apps", "mosquitto_passwd" ,"CMakeLists.txt"),
+                                    "${OPENSSL_LIBRARIES}",
+                                    "${OPENSSL_LIBRARIES} ws2_32 crypt32")
             tools.replace_in_file(os.path.join(self._source_subfolder, "lib", "CMakeLists.txt"),
                                 "install(TARGETS libmosquitto RUNTIME DESTINATION \"${CMAKE_INSTALL_BINDIR}\" LIBRARY DESTINATION \"${CMAKE_INSTALL_LIBDIR}\")",
                                 "install(TARGETS libmosquitto RUNTIME DESTINATION \"${CMAKE_INSTALL_BINDIR}\" LIBRARY DESTINATION \"${CMAKE_INSTALL_LIBDIR}\" ARCHIVE DESTINATION \"${CMAKE_INSTALL_LIBDIR}\")")
