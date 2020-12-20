@@ -74,8 +74,8 @@ class FlatccConan(ConanFile):
         tools.get(**self.conan_data["sources"][self.version])
         #TODO: restore extracted_dir when new release of flatcc is available
         #extracted_dir = self.name + "-" + self.version
-        extracted_dir = "flatcc-cmake_dep"
-        os.rename(extracted_dir, self._source_subfolder)
+        import glob
+        os.rename(glob.glob("flatcc-*")[0], self._source_subfolder)
 
     def _configure_cmake(self):
         if not self._cmake:
