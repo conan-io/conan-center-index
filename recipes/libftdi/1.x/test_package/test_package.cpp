@@ -5,68 +5,45 @@
    This program is distributed under the GPL, version 2
 */
 
-#include "ftdi.hpp"
+#include <ftdi.hpp>
 #include <iostream>
-#include <iomanip>
-#include <cstdlib>
-#include <cstring>
-using namespace Ftdi;
 
 int main(int argc, char **argv)
 {
-    // Show help
-    if (argc > 1)
-    {
-        if (strcmp(argv[1],"-h") == 0 || strcmp(argv[1],"--help") == 0)
-        {
-            std::cout << "Usage: " << argv[0] << " [-v VENDOR_ID] [-p PRODUCT_ID]" << std::endl;
-            return EXIT_SUCCESS;
-        }
-    }
-
-    // Parse args
-    int vid = 0x0403, pid = 0x6010, tmp = 0;
-    for (int i = 0; i < (argc - 1); i++)
-    {
-        if (strcmp(argv[i], "-v") == 0)
-            if ((tmp = strtol(argv[++i], 0, 16)) >= 0)
-                vid = tmp;
-
-        if (strcmp(argv[i], "-p") == 0)
-            if ((tmp = strtol(argv[++i], 0, 16)) >= 0)
-                pid = tmp;
-    }
-
-    // Print header
-    std::cout << std::hex << std::showbase
-    << "Found devices ( VID: " << vid << ", PID: " << pid << " )"
-    << std::endl
-    << "------------------------------------------------"
-    << std::endl << std::dec;
+    int vid = 0x0403;
+    int pid = 0x6001;
 
     // Print whole list
-    Context context;
-    List* list = List::find_all(context, vid, pid);
-    for (List::iterator it = list->begin(); it != list->end(); it++)
-    {
-        std::cout << "FTDI (" << &*it << "): "
-        << it->vendor() << ", "
-        << it->description() << ", "
-        << it->serial();
+    ftdi_version_info version = ftdi_get_library_version();
+    std::cout << "FTDI Library Version: " << version.version_str << "\n";
 
-        // Open test
-        if(it->open() == 0)
-           std::cout << " (Open OK)";
-        else
-           std::cout << " (Open FAILED)";
+    Ftdi::Context context;
+    std::unique_ptr<Ftdi::List> devices(Ftdi::List::find_all(context, vid, pid));
 
-        it->close();
-
-        std::cout << std::endl;
-
+    if (devices->empty()) {
+        std::cout << "No FTDI devices found" << std::endl;
     }
 
-    delete list;
+    for (auto device : *devices)
+    {
+        std::cout << "FTDI (" << &device << "): "
+        << device.vendor() << ", "
+        << device.description() << ", "
+        << device.serial();
+
+        // Open test
+        if(device.open() == 0) {
+           std::cout << " (Open OK)";
+        }
+        else {
+           std::cout << " (Open FAILED)";
+        }
+
+        device.close();
+
+        std::cout << "\n";
+    }
+    std::cout << std::endl;
 
     return EXIT_SUCCESS;
 }
