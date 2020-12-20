@@ -6,6 +6,7 @@
 */
 
 #include <ftdi.hpp>
+
 #include <iostream>
 
 int main(int argc, char **argv)
@@ -18,28 +19,27 @@ int main(int argc, char **argv)
     std::cout << "FTDI Library Version: " << version.version_str << "\n";
 
     Ftdi::Context context;
-    std::unique_ptr<Ftdi::List> devices(Ftdi::List::find_all(context, vid, pid));
+    Ftdi::List *devices = Ftdi::List::find_all(context, vid, pid);
 
     if (devices->empty()) {
         std::cout << "No FTDI devices found" << std::endl;
     }
 
-    for (auto device : *devices)
-    {
-        std::cout << "FTDI (" << &device << "): "
-        << device.vendor() << ", "
-        << device.description() << ", "
-        << device.serial();
+    for (Ftdi::List::iterator it = devices->begin(); it != devices->end(); ++it) {
+        std::cout << "FTDI (" << &*it << "): "
+        << it->vendor() << ", "
+        << it->description() << ", "
+        << it->serial();
 
         // Open test
-        if(device.open() == 0) {
+        if(it->open() == 0) {
            std::cout << " (Open OK)";
         }
         else {
            std::cout << " (Open FAILED)";
         }
 
-        device.close();
+        it->close();
 
         std::cout << "\n";
     }
