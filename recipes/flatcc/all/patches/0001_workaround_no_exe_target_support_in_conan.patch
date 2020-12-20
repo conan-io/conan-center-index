@@ -1,0 +1,15 @@
+diff --git a/cmake/FlatccGenerateSources.cmake b/cmake/FlatccGenerateSources.cmake
+index 0607449..e86c365 100644
+--- a/cmake/FlatccGenerateSources.cmake
++++ b/cmake/FlatccGenerateSources.cmake
+@@ -324,8 +324,8 @@ function(flatcc_generate_sources)
+ 
+     add_custom_command(OUTPUT ${OUTPUT_FILES}
+         COMMAND "${CMAKE_COMMAND}" -E make_directory "${FLATCC_OUTPUT_DIR}"
+-        COMMAND flatcc::cli ${FLATCC_ARGS} ${ABSOLUTE_SCHEMA_FILES}
+-        DEPENDS flatcc::cli ${ABSOLUTE_DEFINITIONS_DEPENDENCIES}
++        COMMAND $ENV{FLATCC_CLI_EXE} ${FLATCC_ARGS} ${ABSOLUTE_SCHEMA_FILES}
++        DEPENDS $ENV{FLATCC_CLI_EXE} ${ABSOLUTE_DEFINITIONS_DEPENDENCIES}
+     )
+ 
+     add_custom_target("flatcc_generated_${FLATCC_NAME}"

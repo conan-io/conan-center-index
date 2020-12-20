@@ -5,3 +5,7 @@ sources:
   "0.7.0pre":
     url: https://github.com/madebr/flatcc/archive/cmake_dep.zip
     sha256: 78522f33d35efe291896b8a5b69b1752eadcd126a259522543cbc7f527772471
+patches:
+  "0.7.0pre":
+    - patch_file: "patches/0001_workaround_no_exe_target_support_in_conan.patch"
+      base_path: "source_subfolder"

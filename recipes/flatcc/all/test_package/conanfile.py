@@ -8,6 +8,13 @@ class FlatccTestConan(ConanFile):
     generators = "cmake"
 
     def build(self):
+        if tools.cross_building(self):
+            pass
+            #Note: if you want to build this test_package also when cross-compiling just add
+            #      the same flatcc version that you are testing to build_requires of
+            #      this test_package. Then the build environment flatcc cli executable location
+            #      will be passed automatically to the flatcc_generate_sources cmake function.
+
         env_build = RunEnvironment(self)
         with tools.environment_append(env_build.vars):
             cmake = CMake(self)

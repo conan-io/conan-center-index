@@ -111,9 +111,6 @@ class FlatccConan(ConanFile):
         os.remove(os.path.join(self.package_folder, "lib", "cmake", "flatcccli", "flatcccli-config.cmake"))
         os.remove(os.path.join(self.package_folder, "lib", "cmake", "flatcccli", "flatcccli-config-version.cmake"))
         tools.remove_files_by_mask(os.path.join(self.package_folder, "lib", "cmake", "flatcccli"), "flatcccli-targets*.cmake")
-        #Patch FlatccGenerateSources.cmake file until Conan supports the flatcc:cli executable target used in FlatccGenerateSources.cmake
-        genSourcesMod = os.path.join(self.package_folder, "lib", "cmake", "flatcccli", "FlatccGenerateSources.cmake")
-        tools.replace_in_file(genSourcesMod, "flatcc::cli", "$ENV{FLATCC_CLI_EXE}", strict=True)
 
     def package_info(self):
         debug_suffix = "_d" if self.settings.build_type == "Debug" else ""
@@ -121,6 +118,13 @@ class FlatccConan(ConanFile):
         if not self.options.runtime_lib_only:
             self.cpp_info.components["cli"].names["cmake_find_package"] = "cli"
             self.cpp_info.components["cli"].libs = ["flatcc%s" % debug_suffix]
+            #FIXME: in the FlatccGenerateSources.cmake module the flatcc compiler exe is called via cmake target flatcc:cli.
+            #Currently this doesn't work when using Conan i.s.o. the (removed) flatcc cmake config files.
+            #We patch the FlatccGenerateSources.cmake module for this until Conan has support for executable targets.
+            #This workaround only succeeds when creating the package via 'conan create'. When calling 'conan install'
+            #and then manually build the flatcc package the FLATCC_CLI_EXE environment variable is not set (see below) and
+            #as a result the flatcc_generate_sources function in the FlatccGenerateSources.cmake module will fail.
+
             #Our FlatccGenerateSources.cmake should be found when using the cmake_find_package generator
             self.cpp_info.components["cli"].builddirs.append(os.path.join(self.package_folder, "lib", "cmake", "flatcccli"))
             bin_path = os.path.join(self.package_folder, "bin")
@@ -131,8 +135,8 @@ class FlatccConan(ConanFile):
             settings_target = getattr(self, 'settings_target', None)
             if settings_target != None:
                 self.env_info.flatccCli_ROOT = self.package_folder
-            #Temporarily also export flatcc cli executable location, see patch in package() function.
-            #Don't overwrite it if already set by build env_info (when cross compiling)
+            #Temporarily also export flatcc cli executable location, see patch 0001_workaround_no_exe_target_support_in_conan.patch.
+            #Don't overwrite it if already set by build env_info (when cross compiling).
             if not self.env_info.FLATCC_CLI_EXE:
                 self.env_info.FLATCC_CLI_EXE = os.path.join(self.package_folder, "bin", "flatcc")
         self.cpp_info.components["runtime"].names["cmake_find_package"] = "runtime"
