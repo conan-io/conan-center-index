@@ -52,6 +52,7 @@ class Mosquitto(ConanFile):
         self._cmake = CMake(self)
         self._cmake.definitions["WITH_THREADING"] = self.settings.os != "Windows"
         self._cmake.definitions["WITH_PIC"] = self.settings.os != "Windows"
+        self._cmake.definitions["WITH_STATIC_LIBRARIES"] = not self.options.shared
         self._cmake.definitions["WITH_TLS"] = self.options.with_ssl
         self._cmake.definitions["WITH_CLIENTS"] = self.options.clients
         self._cmake.definitions["WITH_BROKER"] = self.options.broker
