@@ -1,19 +1,18 @@
 #include <assert>
+#include <string.h>
 
 #include "properties.h"
 
 
-#if ! defined(ASSERT)
-#define ASSERT(x) assert(x)
-#endif
+#define LIBPROPERTIES_TEST_ASSERT do {if(!x) {abort();}} while(0)
 
 
 int check_handler(void* context, char* key, int key_len, char* val, int val_len)
 {
-    ASSERT(key_len == 3);
-    ASSERT(val_len == 3);
-    ASSERT(strncmp("aaa", key, 3) == 0);
-    ASSERT(strncmp("bbb", val, 3) == 0);
+    LIBPROPERTIES_TEST_ASSERT(key_len == 3);
+    LIBPROPERTIES_TEST_ASSERT(val_len == 3);
+    LIBPROPERTIES_TEST_ASSERT(strncmp("aaa", key, 3) == 0);
+    LIBPROPERTIES_TEST_ASSERT(strncmp("bbb", val, 3) == 0);
     return 0;
 }
 
