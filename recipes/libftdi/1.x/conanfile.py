@@ -1,5 +1,6 @@
 import os
 from conans import ConanFile, CMake, tools
+from conans.errors import ConanInvalidConfiguration
 
 
 class LibFtdiConan(ConanFile):
@@ -29,6 +30,14 @@ class LibFtdiConan(ConanFile):
         extracted_dir = "libftdi1-" + self.version
         os.rename(extracted_dir, self._source_subfolder)
 
+    def config_options(self):
+        if self.settings.os == "Windows":
+            del self.options.fPIC
+
+    def configure(self):
+        if self.settings.os == "Macos":
+            raise ConanInvalidConfiguration("Macos is not supported")
+
     def _patch_cmakelists(self, subfolder):
         cmakelists_path = os.path.join(self._source_subfolder, subfolder, "CMakeLists.txt")
         tools.replace_in_file(cmakelists_path, "CMAKE_SOURCE_DIR", "PROJECT_SOURCE_DIR", strict=False)
@@ -49,6 +58,8 @@ class LibFtdiConan(ConanFile):
         self._cmake.definitions.update(options)
         self._cmake.configure()
         return self._cmake
+
+
 
     def build(self):
         self._patch_cmakelists("")
