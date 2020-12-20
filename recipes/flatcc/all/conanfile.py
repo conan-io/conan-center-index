@@ -110,8 +110,7 @@ class FlatccConan(ConanFile):
         tools.rmdir(os.path.join(self.package_folder, "lib", "cmake", "flatccruntime"))
         os.remove(os.path.join(self.package_folder, "lib", "cmake", "flatcccli", "flatcccli-config.cmake"))
         os.remove(os.path.join(self.package_folder, "lib", "cmake", "flatcccli", "flatcccli-config-version.cmake"))
-        os.remove(os.path.join(self.package_folder, "lib", "cmake", "flatcccli", "flatcccli-targets.cmake"))
-        os.remove(os.path.join(self.package_folder, "lib", "cmake", "flatcccli", "flatcccli-targets-release.cmake"))
+        tools.remove_files_by_mask(os.path.join(self.package_folder, "lib", "cmake", "flatcccli"), "flatcccli-targets*.cmake")
         #Patch FlatccGenerateSources.cmake file until Conan supports the flatcc:cli executable target used in FlatccGenerateSources.cmake
         genSourcesMod = os.path.join(self.package_folder, "lib", "cmake", "flatcccli", "FlatccGenerateSources.cmake")
         tools.replace_in_file(genSourcesMod, "flatcc::cli", "$ENV{FLATCC_CLI_EXE}", strict=True)
