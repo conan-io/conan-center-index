@@ -1,4 +1,5 @@
 from conans import ConanFile, CMake, tools
+import os
 
 
 class LibpropertiesConan(ConanFile):
@@ -43,7 +44,8 @@ class LibpropertiesConan(ConanFile):
     #         conan_basic_setup()
     #         ''')
 
-    def build(self):
+    def build(self):import os
+    
         cmake = CMake(self)
         cmake.configure(source_folder="libproperties")
         cmake.build()
