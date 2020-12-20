@@ -3,31 +3,27 @@ import os
 import sys
 
 
-class DefaultNameConan(ConanFile):
+class TestPackageConan(ConanFile):
     settings = "os", "compiler", "arch", "build_type"
-    generators = "cmake"
+    generators = "cmake", "cmake_find_package"
 
     def build(self):
+        # FIXME: tools.vcvars added for clang-cl. Remove once conan supports clang-cl properly. (https://github.com/conan-io/conan-center-index/pull/1453)
         with tools.vcvars(self.settings) if (self.settings.os == "Windows" and self.settings.compiler == "clang") else tools.no_op():
             cmake = CMake(self)
-            if self.options["boost"].header_only:
-                cmake.definitions["HEADER_ONLY"] = "TRUE"
-            else:
+            cmake.definitions["HEADER_ONLY"] = self.options["boost"].header_only
+            if not self.options["boost"].header_only:
                 cmake.definitions["Boost_USE_STATIC_LIBS"] = not self.options["boost"].shared
+            cmake.definitions["WITH_PYTHON"] = not self.options["boost"].without_python
             if not self.options["boost"].without_python:
-                cmake.definitions["WITH_PYTHON"] = "TRUE"
-                cmake.definitions["WITH_PYTHON_VERSION"] = self.options["boost"].python_version
-            if not self.options["boost"].without_random:
-                cmake.definitions["WITH_RANDOM"] = "TRUE"
-            if not self.options["boost"].without_regex:
-                cmake.definitions["WITH_REGEX"] = "TRUE"
-            if not self.options["boost"].without_test:
-                cmake.definitions["WITH_TEST"] = "TRUE"
-            if not self.options["boost"].without_coroutine:
-                cmake.definitions["WITH_COROUTINE"] = "TRUE"
-            if not self.options["boost"].without_chrono:
-                cmake.definitions["WITH_CHRONO"] = "TRUE"
-            cmake.definitions["Boost_NO_BOOST_CMAKE"] = "TRUE"
+                pyversion = tools.Version(self.options["boost"].python_version)
+                cmake.definitions["Python_ADDITIONAL_VERSIONS"] = "{}.{}".format(pyversion.major, pyversion.minor)
+                cmake.definitions["PYTHON_COMPONENT_SUFFIX"] = "{}{}".format(pyversion.major, pyversion.minor)
+            cmake.definitions["WITH_RANDOM"] = not self.options["boost"].without_random
+            cmake.definitions["WITH_REGEX"] = not self.options["boost"].without_regex
+            cmake.definitions["WITH_TEST"] = not self.options["boost"].without_test
+            cmake.definitions["WITH_COROUTINE"] = not self.options["boost"].without_coroutine
+            cmake.definitions["WITH_CHRONO"] = not self.options["boost"].without_chrono
             cmake.configure()
             cmake.build()
 
@@ -48,6 +44,6 @@ class DefaultNameConan(ConanFile):
         if not self.options["boost"].without_chrono:
             self.run(os.path.join("bin", "chrono_exe"), run_environment=True)
         if not self.options["boost"].without_python:
-            sys.path.append("lib")
-            import hello_ext
-            print(hello_ext.greet())
+            with tools.environment_append({"PYTHONPATH": "{}:{}".format("bin", "lib")}):
+                self.run("{} {}".format(self.options["boost"].python_executable, os.path.join(self.source_folder, "python.py")), run_environment=True)
+            self.run(os.path.join("bin", "numpy_exe"), run_environment=True)

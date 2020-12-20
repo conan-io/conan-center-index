@@ -1,5 +1,20 @@
 # Changelog
 
+### 14-December-2020 - 09:51 CET
+
+- [feature] Remove repositories after a pull-request is merged.
+- [feature] Run promotion in parallel for merge-commits.
+- [feature] Viewer for summary.json files.
+- [feature] Trigger a BuildSingleReference job at the end of pull-request jobs to build new configurations.
+- [fix] Manage repository permissions independently in pull-requests.
+
+### 27-November-2020 - 10:14 CEST
+
+ - [feature] More (and better) properties are stored in Artifactory for each package.
+ - [feature] Use modularized jobs in CI to run parts of the pipeline.
+ - [fix] Fix error affecting PRs that were blocked in the past by a team member
+ - [fix] Fix issue with properties associated to new configurations
+
 ### 18-November-2020 - 12:58 CEST
 
 - [fix] Notify unexpected errors to slack channel (add link to message).

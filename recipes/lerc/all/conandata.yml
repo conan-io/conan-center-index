@@ -1,8 +1,14 @@
 sources:
+  "2.2":
+    url: "https://github.com/Esri/lerc/archive/v2.2.tar.gz"
+    sha256: "abc0c5c149144d39a8b351ff5a9a5940c0f66ba908ecf717d58f8f71065d11fe"
   "2.1":
     url: "https://github.com/Esri/lerc/archive/v2.1.tar.gz"
     sha256: "7c48de40cd5f09319de4b39c417ff4eec4ad4b6aa5d6144f6ffa9b10d18ec94e"
 patches:
+  "2.2":
+    - patch_file: "patches/add-CMakeLists-and-static.patch"
+      base_path: "source_subfolder"
   "2.1":
     - patch_file: "patches/add-CMakeLists-and-static.patch"
       base_path: "source_subfolder"

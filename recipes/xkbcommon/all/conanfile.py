@@ -49,8 +49,8 @@ class XkbcommonConan(ConanFile):
             del self.options.xkbregistry
 
     def configure(self):
-        if self.settings.os != "Linux":
-            raise ConanInvalidConfiguration("This library is only compatible with Linux")
+        if self.settings.os not in ["Linux", "FreeBSD"]:
+            raise ConanInvalidConfiguration("This library is only compatible with Linux or FreeBSD")
         del self.settings.compiler.libcxx
         del self.settings.compiler.cppstd
 
