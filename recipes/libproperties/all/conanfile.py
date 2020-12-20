@@ -13,6 +13,11 @@ class LibpropertiesConan(ConanFile):
     default_options = {"shared": False, "fPIC": True,}
     generators = "cmake"
 
+
+    def configure(self):
+        del self.settings.compiler.libcxx
+        del self.settings.compiler.cppstd
+
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
         source_dir="libproperties-{}".format(self.version)
