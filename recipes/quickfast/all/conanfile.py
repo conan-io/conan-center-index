@@ -32,7 +32,6 @@ class QuickfastConan(ConanFile):
     def _configure_cmake(self):
         if not self._cmake:
             self._cmake = CMake(self)
-            self._cmake.definitions["BOOST_BIND_NO_PLACEHOLDERS"] = True
             self._cmake.configure(source_folder=self._source_subfolder, build_folder=self._build_subfolder)
         return self._cmake
 
@@ -55,7 +54,7 @@ class QuickfastConan(ConanFile):
         for patch in patches:
             tools.patch(**patch)
 
-        shutil.copy("CMakeLists.txt",
+        tools.rename("CMakeLists.txt",
                     os.path.join(self._source_subfolder, "CMakeLists.txt"))
 
         cmake = self._configure_cmake()

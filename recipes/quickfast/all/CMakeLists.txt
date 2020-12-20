@@ -31,9 +31,6 @@ project(quickfast CXX)
 include(${PROJECT_BINARY_DIR}/../conanbuildinfo.cmake)
 conan_basic_setup()
 
-option(BUILD_SHARED_LIBS "Build shared instead of static library" ON)
-
-option(BOOST_BIND_NO_PLACEHOLDERS "BOOST_BIND_NO_PLACEHOLDERS" ON)
 
 file(GLOB SOURCES
 	${PROJECT_SOURCE_DIR}/src/Application/*.cpp
@@ -51,19 +48,15 @@ file(GLOB HEADERS RELATIVE ${PROJECT_SOURCE_DIR}
 	${PROJECT_SOURCE_DIR}/src/Messages/*.h
 )
 
+add_library(quickfast ${HEADERS} ${SOURCES})
+
 if(BUILD_SHARED_LIBS)
-	add_library(quickfast SHARED ${HEADERS} ${SOURCES})
 	target_compile_definitions(quickfast PRIVATE -DQUICKFAST_BUILD_DLL)
-else()
-	add_library(quickfast STATIC ${HEADERS} ${SOURCES})
-	target_compile_definitions(quickfast PUBLIC -DQUICKFAST_HAS_DLL=0)
 endif()
 
 target_compile_features(quickfast PUBLIC cxx_std_11)
 
-if(BOOST_BIND_NO_PLACEHOLDERS)
-	target_compile_definitions(quickfast PRIVATE BOOST_BIND_NO_PLACEHOLDERS)
-endif()
+target_compile_definitions(quickfast PRIVATE BOOST_BIND_NO_PLACEHOLDERS)
 
 target_include_directories(quickfast PUBLIC
 	$<INSTALL_INTERFACE:include>
