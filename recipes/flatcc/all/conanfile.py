@@ -49,12 +49,8 @@ class FlatccConan(ConanFile):
         return "build_subfolder"
 
     def _patch_sources(self):
-        try:
-            for patch in self.conan_data["patches"][self.version]:
-                tools.patch(**patch)
-        except KeyError:
-            #no patches defined
-            pass
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            tools.patch(**patch)
 
     def config_options(self):
         if self.settings.os == "Windows":
