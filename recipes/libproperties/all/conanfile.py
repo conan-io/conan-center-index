@@ -15,20 +15,28 @@ class LibpropertiesConan(ConanFile):
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
-        os.rename("libproperties-{}".format(self.version), self._source_subfolder)
-
-    def source(self):
-        self.run("git clone https://github.com/tinyhubs/libproperties.git")
-        # This small hack might be useful to guarantee proper /MT /MD linkage
-        # in MSVC if the packaged project doesn't have variables to set it
-        # properly
-        tools.replace_in_file("libproperties/CMakeLists.txt", 
+        source_dir="libproperties-{}".format(self.version)
+        os.rename(source_dir, self._source_subfolder)
+        tools.replace_in_file(source_dir, 
             "project(libproperties VERSION ${LIBPROPERTIES_VERSION} LANGUAGES C)",
             '''
             project(libproperties VERSION ${LIBPROPERTIES_VERSION} LANGUAGES C)
             include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
             conan_basic_setup()
             ''')
+
+    # def source(self):
+    #     self.run("git clone https://github.com/tinyhubs/libproperties.git")
+    #     # This small hack might be useful to guarantee proper /MT /MD linkage
+    #     # in MSVC if the packaged project doesn't have variables to set it
+    #     # properly
+    #     tools.replace_in_file("libproperties/CMakeLists.txt", 
+    #         "project(libproperties VERSION ${LIBPROPERTIES_VERSION} LANGUAGES C)",
+    #         '''
+    #         project(libproperties VERSION ${LIBPROPERTIES_VERSION} LANGUAGES C)
+    #         include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
+    #         conan_basic_setup()
+    #         ''')
 
     def build(self):
         cmake = CMake(self)
