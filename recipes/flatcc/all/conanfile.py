@@ -1,4 +1,4 @@
-import os
+import os, glob
 from conans import CMake, ConanFile, tools
 from conans.errors import ConanInvalidConfiguration
 
@@ -49,8 +49,12 @@ class FlatccConan(ConanFile):
         return "build_subfolder"
 
     def _patch_sources(self):
-        for patch in self.conan_data["patches"][self.version]:
-            tools.patch(**patch)
+        try:
+            for patch in self.conan_data["patches"][self.version]:
+                tools.patch(**patch)
+        except KeyError:
+            #no patches defined
+            pass
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -68,7 +72,9 @@ class FlatccConan(ConanFile):
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
-        extracted_dir = self.name + "-" + self.version
+        #TODO: restore extracted_dir when new release of flatcc is available
+        #extracted_dir = self.name + "-" + self.version
+        extracted_dir = "flatcc-cmake_dep"
         os.rename(extracted_dir, self._source_subfolder)
 
     def _configure_cmake(self):
@@ -103,26 +109,36 @@ class FlatccConan(ConanFile):
                       os.path.join(self.package_folder, "bin", "flatcc"))
         # Copy license file
         self.copy("LICENSE", dst="licenses", src=self._source_subfolder)
-        # Copy file with cmake functions for end user
-        self.copy("FlatccGenerateSources.cmake", dst="cmake")
+        # Remove cmake config files
+        tools.rmdir(os.path.join(self.package_folder, "lib", "cmake", "flatcc"))
+        tools.rmdir(os.path.join(self.package_folder, "lib", "cmake", "flatccruntime"))
+        os.remove(os.path.join(self.package_folder, "lib", "cmake", "flatcccli", "flatcccli-config.cmake"))
+        os.remove(os.path.join(self.package_folder, "lib", "cmake", "flatcccli", "flatcccli-config-version.cmake"))
+        os.remove(os.path.join(self.package_folder, "lib", "cmake", "flatcccli", "flatcccli-targets.cmake"))
+        os.remove(os.path.join(self.package_folder, "lib", "cmake", "flatcccli", "flatcccli-targets-release.cmake"))
+        #Patch FlatccGenerateSources.cmake file until Conan supports the flatcc:cli executable target used in FlatccGenerateSources.cmake
+        genSourcesMod = os.path.join(self.package_folder, "lib", "cmake", "flatcccli", "FlatccGenerateSources.cmake")
+        tools.replace_in_file(genSourcesMod, "flatcc::cli", "$ENV{FLATCC_CLI_EXE}", strict=True)
 
     def package_info(self):
         debug_suffix = "_d" if self.settings.build_type == "Debug" else ""
         #flatcc package provides two components: the flatcc compiler binary and the runtime library
         if not self.options.runtime_lib_only:
-            self.cpp_info.components["flatcc_exe"].names["cmake_find_package"] = "flatcc_exe"
-            self.cpp_info.components["flatcc_lib"].names["cmake_find_package"] = "flatcc_lib"
-            self.cpp_info.components["flatcc_lib"].libs = ["flatcc%s" % debug_suffix]
-            #Our FlatccGenerateSources.cmake should be included by the cmake_find_package generated file
-            self.cpp_info.components["flatcc_exe"].builddirs.append("cmake")
-            self.cpp_info.components["flatcc_exe"].build_modules.append(os.path.join(self.package_folder, "cmake", "FlatccGenerateSources.cmake"))
+            self.cpp_info.components["cli"].names["cmake_find_package"] = "cli"
+            self.cpp_info.components["cli"].libs = ["flatcc%s" % debug_suffix]
+            #Our FlatccGenerateSources.cmake should be found when using the cmake_find_package generator
+            self.cpp_info.components["cli"].builddirs.append(os.path.join(self.package_folder, "lib", "cmake", "flatcccli"))
             bin_path = os.path.join(self.package_folder, "bin")
             self.env_info.PATH.append(bin_path)
             #When we are cross-compiling cmake needs to know the location of the flatbuffer compiler executable
-            #compiled for the build architecture. Provide it via environment variable.
+            #compiled for the build architecture. Provide it via environment variable flatccCli_ROOT that will be
+            #picked up by the find_package(flatcc ...) command.
             settings_target = getattr(self, 'settings_target', None)
             if settings_target != None:
-                self.env_info.FLATCC_BUILD_BIN_PATH = os.path.join(self.package_folder, "bin")
-        self.cpp_info.components["flatcc_rt"].names["cmake_find_package"] = "flatcc_rt"
-        self.cpp_info.components["flatcc_rt"].libs = ["flatccrt%s" % debug_suffix]
-        self.cpp_info.components["flatcc_rt"].includedirs.append(os.path.join("include", "flatcc", "reflection"))
+                self.env_info.flatccCli_ROOT = self.package_folder
+            #Temporarily also export flatcc cli executable location, see patch in package() function.
+            #Don't overwrite it if already set by build env_info (when cross compiling)
+            if not self.env_info.FLATCC_CLI_EXE:
+                self.env_info.FLATCC_CLI_EXE = os.path.join(self.package_folder, "bin", "flatcc")
+        self.cpp_info.components["runtime"].names["cmake_find_package"] = "runtime"
+        self.cpp_info.components["runtime"].libs = ["flatccrt%s" % debug_suffix]
