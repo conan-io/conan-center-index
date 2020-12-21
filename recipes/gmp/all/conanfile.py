@@ -47,6 +47,7 @@ class GmpConan(ConanFile):
         del self.info.options.run_checks  # run_checks doesn't affect package's ID
 
     def build_requirements(self):
+        self.build_requires("m4/1.4.18")
         if tools.os_info.is_windows and not tools.get_env("CONAN_BASH_PATH"):
             self.build_requires("msys2/20200517")
         if self.settings.compiler == "Visual Studio":
