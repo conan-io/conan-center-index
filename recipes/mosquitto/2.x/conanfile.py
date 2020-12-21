@@ -1,7 +1,7 @@
 import os
 
 from conans import ConanFile, CMake, tools
-
+from conans.errors import ConanInvalidConfiguration
 
 class Mosquitto(ConanFile):
     name = "mosquitto"
@@ -41,6 +41,10 @@ class Mosquitto(ConanFile):
         # TODO
         # if self.options.with_cjson:
         #     self.requires("cjson/1.7.14")
+
+    def configure(self):
+        if self.settings.compiler == "Visual Studio" and "MT" in self.settings.compiler.runtime:
+            raise ConanInvalidConfiguration("Visual Studio build for any MT runtime is not supported")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
