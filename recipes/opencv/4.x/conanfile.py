@@ -298,10 +298,6 @@ class OpenCVConan(ConanFile):
                 self.cpp_info.components[conan_component].requires = requires
                 if self.settings.os == "Linux":
                     self.cpp_info.components[conan_component].system_libs = ["dl", "m", "pthread", "rt"]
-                    if not self.options.shared:
-                        if conan_component == "opencv_core":
-                            libs = list(filter(lambda x: not x.startswith("opencv"), tools.collect_libs(self)))
-                            self.cpp_info.components[conan_component].libs += libs
 
                 if self.settings.os == "Android":
                     self.cpp_info.components[conan_component].includedirs = [
