@@ -60,11 +60,11 @@ class Libxml2Conan(ConanFile):
         if self.options.zlib:
             self.requires("zlib/1.2.11")
         if self.options.lzma:
-            self.requires("xz_utils/5.2.4")
+            self.requires("xz_utils/5.2.5")
         if self.options.iconv:
             self.requires("libiconv/1.16")
         if self.options.icu:
-            self.requires("icu/64.2")
+            self.requires("icu/68.1")
 
     def build_requirements(self):
         if self.settings.compiler != "Visual Studio" and tools.os_info.is_windows and os.environ.get("CONAN_BASH_PATH", None) is None:
@@ -255,7 +255,7 @@ class Libxml2Conan(ConanFile):
             self.output.info("Appending PATH environment variable: {}".format(bindir))
             self.env_info.PATH.append(bindir)
 
-        if self.settings.os == "Linux" or self.settings.os == "Macos":
+        if self.settings.os in ["Linux", "Macos", "FreeBSD"]:
             self.cpp_info.system_libs.append('m')
         if self.settings.os == "Windows":
             self.cpp_info.system_libs.append('ws2_32')
