@@ -7,7 +7,7 @@ class TrompeloeilConan(ConanFile):
     name = "trompeloeil"
     description = "Header only C++14 mocking framework"
     topics = ("conan", "trompeloeil", "header-only", "mocking")
-    homepage = "https://github.com/rollbear/trompeloeil.git"
+    homepage = "https://github.com/rollbear/trompeloeil"
     url = "https://github.com/conan-io/conan-center-index"
     license = "BSL-1.0"
     settings = "os", "compiler", "build_type", "arch"
