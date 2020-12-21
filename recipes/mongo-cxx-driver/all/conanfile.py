@@ -5,6 +5,9 @@ import glob
 import shutil
 
 
+required_conan_version = ">=1.28.0"
+
+
 class MongoCxxConan(ConanFile):
     name = "mongo-cxx-driver"
     license = "Apache-2.0"
@@ -44,7 +47,12 @@ class MongoCxxConan(ConanFile):
 
     @property
     def _minimal_std_version(self):
-        return "17" if self.options.polyfill == "std" else "11"
+        return {
+            "std": "17",
+            "experimental": "14",
+            "boost": "11",
+            "polyfill": "11"
+        }[str(self.options.polyfill)]
 
     @property
     def _compilers_minimum_version(self):
@@ -54,6 +62,14 @@ class MongoCxxConan(ConanFile):
                 "Visual Studio": "15",
                 "gcc": "7",
                 "clang": "5",
+                "apple-clang": "10"
+            }
+        elif self.options.polyfill == "experimental":
+            # C++14
+            return {
+                "Visual Studio": "15",
+                "gcc": "5",
+                "clang": "3.5",
                 "apple-clang": "10"
             }
         elif self.options.polyfill == "boost":
@@ -77,15 +93,14 @@ class MongoCxxConan(ConanFile):
             # TODO: add mnmlstc polyfill support
             # Cannot model mnmlstc (not packaged, is pulled dynamically) polyfill dependencies
             raise ConanInvalidConfiguration("mnmlstc polyfill is not yet supported")
-        if self.options.polyfill == "experimental":
-            # TODO: add experimental support
-            # Cannot model std::experimental (how to check availability in stdlib?)
-            raise ConanInvalidConfiguration("experimental polyfill is not yet supported")
 
         if self.settings.compiler.get_safe("cppstd"):
             tools.check_min_cppstd(self, self._minimal_std_version)
 
         compiler = str(self.settings.compiler)
+        if self.options.polyfill == "experimental" and compiler == "apple-clang":
+            raise ConanInvalidConfiguration("experimental polyfill is not supported for apple-clang")
+
         if compiler not in self._compilers_minimum_version:
             self.output.warn("Unknown compiler, assuming it supports at least C++{}".format(self._minimal_std_version))
             return
