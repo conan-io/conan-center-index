@@ -1,4 +1,3 @@
-import glob
 import os
 from conans import ConanFile, CMake, tools
 
@@ -36,7 +35,7 @@ class ConanRecipe(ConanFile):
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
-        extracted_dir = glob.glob("qpOASES-*/")[0]
+        extracted_dir = "qpOASES-releases-" + self.version
         os.rename(extracted_dir, self._source_subfolder)
 
     def _configure_cmake(self):
