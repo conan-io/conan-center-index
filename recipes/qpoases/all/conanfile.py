@@ -56,6 +56,4 @@ class ConanRecipe(ConanFile):
         self.cpp_info.names["cmake_find_package"] = "qpOASES"
         self.cpp_info.names["cmake_find_package_multi"] = "qpOASES"
 
-        self.cpp_info.components["qpOASES"].names["cmake_find_package"] = "qpOASES"
-        self.cpp_info.components["qpOASES"].names["cmake_find_package_multi"] = "qpOASES"
-        self.cpp_info.components["qpOASES"].libs = ["qpOASES"]
+        self.cpp_info.libs = tools.collect_libs(self)

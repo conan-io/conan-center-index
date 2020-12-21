@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.10)
+cmake_minimum_required(VERSION 3.1)
 project(test_package CXX)
 
 find_package(qpOASES REQUIRED)
