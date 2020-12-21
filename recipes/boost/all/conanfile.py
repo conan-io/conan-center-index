@@ -21,6 +21,7 @@ required_conan_version = ">=1.28.0"
 # When adding (or removing) an option, also add this option to the list in
 # `rebuild-dependencies.yml` and re-run that script.
 CONFIGURE_OPTIONS = (
+    "algorithm",
     "atomic",
     "chrono",
     "container",

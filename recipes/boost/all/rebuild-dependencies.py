@@ -25,6 +25,7 @@ BOOST_GIT_URL = "https://github.com/boostorg/boost.git"
 # When adding (or removing) an option, also add this option to the list in
 # `conanfile.py` and re-run this script.
 CONFIGURE_OPTIONS = (
+    "algorithm",
     "atomic",
     "chrono",
     "container",
