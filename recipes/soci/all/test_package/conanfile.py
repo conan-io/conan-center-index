@@ -9,15 +9,10 @@ class SociTestConan(ConanFile):
         self.requires("catch2/2.13.3")
         self.requires("fmt/6.2.0")
 
-    def config_options(self):
-        if self.settings.os == "Windows":
-            del self.options.fPIC
-
     def configure(self):
         self.options["soci"].static     = True
         self.options["soci"].cxx11      = True
         self.options["soci"].empty      = True
-        self.options["soci"].fPIC       = True
         self.options["soci"].shared     = True
         self.options["soci"].sqlite3    = True
         self.options["soci"].db2        = False
