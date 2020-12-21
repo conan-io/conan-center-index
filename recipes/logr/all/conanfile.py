@@ -4,7 +4,7 @@ import os
 
 class LogrConan(ConanFile):
     name = "logr"
-    license = "BSD 3-Clause License"
+    license = "BSD-3-Clause"
     homepage = "https://github.com/ngrodzitski/logr"
     url = "https://github.com/conan-io/conan-center-index"
     description = "Logger frontend substitution for spdlog, glog, etc for server/desktop applications"
