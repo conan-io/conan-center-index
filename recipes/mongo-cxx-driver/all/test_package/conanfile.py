@@ -9,7 +9,7 @@ class TestPackageConan(ConanFile):
     def build(self):
         cmake = CMake(self)
         cmake.definitions["MONGO-CXX-DRIVER_SHARED"] = self.options["mongo-cxx-driver"].shared
-        cmake.definitions["MONGO-CXX-DRIVER_POLYFILL_STD"] = self.options["mongo-cxx-driver"].polyfill == "std"
+        cmake.definitions["MONGO-CXX-DRIVER_POLYFILL"] = self.options["mongo-cxx-driver"].polyfill
         cmake.configure()
         cmake.build()
 

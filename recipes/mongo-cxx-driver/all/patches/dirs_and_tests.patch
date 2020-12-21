@@ -43,19 +43,6 @@ index b2bc2a1..6b2d5ac 100644
  endif ()
 -
 +endif()
-diff --git a/cmake/BsoncxxUtil.cmake b/cmake/BsoncxxUtil.cmake
-index b38f9af..7ec9d72 100644
---- a/cmake/BsoncxxUtil.cmake
-+++ b/cmake/BsoncxxUtil.cmake
-@@ -36,7 +36,7 @@ function(bsoncxx_add_library TARGET OUTPUT_NAME LINK_TYPE)
- 	if (CMAKE_VERSION VERSION_LESS 3.15.0)
- 	  target_include_directories(${TARGET} PUBLIC ${Boost_INCLUDE_DIRS})
- 	else()
--          target_link_libraries(${TARGET} PUBLIC Boost::boost)
-+          target_link_libraries(${TARGET} PUBLIC CONAN_PKG::boost)
- 	endif()
-     endif()
- 
 diff --git a/src/bsoncxx/CMakeLists.txt b/src/bsoncxx/CMakeLists.txt
 index 7c79f45..0fcb305 100644
 --- a/src/bsoncxx/CMakeLists.txt
@@ -99,19 +86,6 @@ index 7c79f45..0fcb305 100644
  set_local_dist (src_bsoncxx_DIST_local
     CMakeLists.txt
     array/element.cpp
-diff --git a/src/bsoncxx/stdx/make_unique.hpp b/src/bsoncxx/stdx/make_unique.hpp
-index d954eae..737e76b 100644
---- a/src/bsoncxx/stdx/make_unique.hpp
-+++ b/src/bsoncxx/stdx/make_unique.hpp
-@@ -48,7 +48,7 @@ using ::boost::make_unique;
- BSONCXX_INLINE_NAMESPACE_END
- }  // namespace bsoncxx
- 
--#elif __cplusplus >= 201402L
-+#elif defined(BSONCXX_POLY_USE_STD)
- 
- #include <memory>
- 
 diff --git a/src/mongocxx/CMakeLists.txt b/src/mongocxx/CMakeLists.txt
 index f67ae35..c997f25 100644
 --- a/src/mongocxx/CMakeLists.txt
