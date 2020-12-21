@@ -16,6 +16,7 @@ class SociConan(ConanFile):
         "static":     [True, False],
         "cxx11":      [True, False],
         "empty":      [True, False],
+        "fPIC":       [True, False],
         "shared":     [True, False],
         "sqlite3":    [True, False],
         "db2":        [True, False],
@@ -30,6 +31,7 @@ class SociConan(ConanFile):
         "static":     True,
         "cxx11":      True,
         "empty":      True,
+        "fPIC":       True,
         "shared":     False,
         "sqlite3":    False,
         "db2":        False,
@@ -50,6 +52,10 @@ class SociConan(ConanFile):
     @property
     def _build_subfolder(self):
         return "build_subfolder"
+
+    def config_options(self):
+        if self.settings.os == "Windows":
+            del self.options.fPIC
 
     def requirements(self):
         prefix  = "Dependencies for "
