@@ -92,7 +92,7 @@ std::pair<int, std::string> getValues(const std::string& tableName, int idToFind
 
 TEST_CASE("should be connected")
 {
-  CHECK( sql.is_connected() );
+  CHECK( sql.is_connected() ); //! Since soci 4.0.1
 }
 
 TEST_CASE("should try to drop a nonexistent table")
