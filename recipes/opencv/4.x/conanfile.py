@@ -102,6 +102,8 @@ class OpenCVConan(ConanFile):
             self.requires("harfbuzz/2.7.2")
             self.requires("gflags/2.2.2")
             self.requires("glog/0.4.0")
+        if self.options.with_quirc:
+            self.requires("quirc/1.1")
         if self.options.get_safe("with_gtk"):
             self.requires("gtk/system")
 
@@ -205,6 +207,7 @@ class OpenCVConan(ConanFile):
         self._cmake.definitions["WITH_PROTOBUF"] = False
         self._cmake.definitions["WITH_PVAPI"] = False
         self._cmake.definitions["WITH_QT"] = False
+        self._cmake.definitions["WITH_QUIRC"] = False
         self._cmake.definitions["WITH_V4L"] = False
         self._cmake.definitions["WITH_VA"] = False
         self._cmake.definitions["WITH_VA_INTEL"] = False
@@ -224,7 +227,7 @@ class OpenCVConan(ConanFile):
         self._cmake.definitions["WITH_OPENJPEG"] = self.options.with_jpeg2000 == "openjpeg"
         self._cmake.definitions["WITH_OPENEXR"] = self.options.with_openexr
         self._cmake.definitions["WITH_EIGEN"] = self.options.with_eigen
-        self._cmake.definitions["WITH_QUIRC"] = self.options.with_quirc
+        self._cmake.definitions["HAVE_QUIRC"] = self.options.with_quirc  # force usage of quirc reqirement
         self._cmake.definitions["WITH_DSHOW"] = self.settings.compiler == "Visual Studio"
         self._cmake.definitions["WITH_MSMF"] = self.settings.compiler == "Visual Studio"
         self._cmake.definitions["WITH_MSMF_DXVA"] = self.settings.compiler == "Visual Studio"
@@ -355,6 +358,9 @@ class OpenCVConan(ConanFile):
                 return ["tbb::tbb"] if self.options.parallel == "tbb" else ["openmp"]
             return []
 
+        def quirc():
+            return ["quirc::quirc"] if self.options.with_quirc else []
+
         def gtk():
             return ["gtk::gtk"] if self.options.get_safe("with_gtk") else []
 
@@ -378,7 +384,7 @@ class OpenCVConan(ConanFile):
             {"target": "opencv_videoio",    "lib": "videoio",    "requires": ["opencv_core", "opencv_imgproc", "opencv_imgcodecs"] + eigen()},
             {"target": "opencv_calib3d",    "lib": "calib3d",    "requires": ["opencv_core", "opencv_flann", "opencv_imgproc", "opencv_features2d"]+ eigen()},
             {"target": "opencv_highgui",    "lib": "highgui",    "requires": ["opencv_core", "opencv_imgproc", "opencv_imgcodecs", "opencv_videoio"] + freetype() + eigen() + gtk()},
-            {"target": "opencv_objdetect",  "lib": "objdetect",  "requires": ["opencv_core", "opencv_flann", "opencv_imgproc", "opencv_features2d", "opencv_calib3d"] + eigen()},
+            {"target": "opencv_objdetect",  "lib": "objdetect",  "requires": ["opencv_core", "opencv_flann", "opencv_imgproc", "opencv_features2d", "opencv_calib3d"] + eigen() + quirc()},
             {"target": "opencv_stitching",  "lib": "stitching",  "requires": ["opencv_core", "opencv_flann", "opencv_imgproc", "opencv_features2d", "opencv_calib3d"] + xfeatures2d() + eigen()},
             {"target": "opencv_video",      "lib": "video",      "requires": ["opencv_core", "opencv_flann", "opencv_imgproc", "opencv_features2d", "opencv_calib3d"] + eigen()},
         ])
