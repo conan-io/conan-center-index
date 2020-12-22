@@ -11,25 +11,17 @@ class AcadoConan(ConanFile):
     topics = ("conan", "acado", "control", "optimization", "mpc")
     homepage = "https://github.com/acado/acado"
     url = "https://github.com/conan-io/conan-center-index"
-    exports_sources = ["CMakeLists.txt", "cmake/qpoases.cmake"]
+    exports_sources = ["CMakeLists.txt", "cmake/qpoases.cmake", "patches/**"]
     generators = "cmake"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
-        "examples": [True, False],
-        "testing": [True, False],
-        "developer": [True, False],
-        "internal": [True, False],
         "codegen_only": [True, False],
     }
     default_options = {
         "shared": False,
         "fPIC": True,
-        "examples": False,
-        "testing": False,
-        "developer": False,
-        "internal": False,
         "codegen_only": True,
     }
 
@@ -60,17 +52,18 @@ class AcadoConan(ConanFile):
         self._cmake.definitions["ACADO_BUILD_SHARED"] = self.options.shared
         self._cmake.definitions["ACADO_BUILD_STATIC"] = not self.options.shared
 
-        self._cmake.definitions["ACADO_WITH_EXAMPLES"] = self.options.examples
-        self._cmake.definitions["ACADO_WITH_TESTING"] = self.options.testing
-        self._cmake.definitions["ACADO_DEVELOPER"] = self.options.developer
-        self._cmake.definitions["ACADO_INTERNAL"] = self.options.internal
+        self._cmake.definitions["ACADO_WITH_EXAMPLES"] = False
+        self._cmake.definitions["ACADO_WITH_TESTING"] = False
+        self._cmake.definitions["ACADO_DEVELOPER"] = False
+        self._cmake.definitions["ACADO_INTERNAL"] = False
         self._cmake.definitions["ACADO_BUILD_CGT_ONLY"] = self.options.codegen_only
 
         self._cmake.configure()
         return self._cmake
 
     def _patch_sources(self):
-        pass
+        for patch in self.conan_data["patches"][self.version]:
+            tools.patch(**patch)
 
     def build(self):
         self._patch_sources()
