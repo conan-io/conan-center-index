@@ -7,7 +7,7 @@ class PdalConan(ConanFile):
     description = "PDAL is Point Data Abstraction Library. GDAL for point cloud data."
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://pdal.io"
-    license = "BSD"
+    license = "BSD-3-Clause"
     exports_sources = ["CMakeLists.txt", "patches/*"]
     generators = "cmake", "cmake_find_package"
     settings = "os", "arch", "compiler", "build_type"
