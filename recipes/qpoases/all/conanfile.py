@@ -17,11 +17,8 @@ class ConanRecipe(ConanFile):
     generators = "cmake"
 
     settings = "os", "arch", "compiler", "build_type"
-    options = {
-        "fPIC": [True, False],
-        "shared": [False],
-    }
-    default_options = {"fPIC": True, "shared": False}
+    options = {"fPIC": [True, False]}
+    default_options = {"fPIC": True}
 
     _cmake = None
 
