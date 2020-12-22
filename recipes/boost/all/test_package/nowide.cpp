@@ -1,3 +1,5 @@
+#include <ios>
+
 #include <boost/nowide/args.hpp>
 #include <boost/nowide/fstream.hpp>
 #include <boost/nowide/iostream.hpp>
