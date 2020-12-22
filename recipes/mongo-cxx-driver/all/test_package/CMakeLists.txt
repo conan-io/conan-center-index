@@ -8,8 +8,10 @@ find_package(mongocxx REQUIRED CONFIG)
 
 add_executable(${PROJECT_NAME} test_package.cpp)
 
-if(MONGO-CXX-DRIVER_POLYFILL_STD)
+if(${MONGO-CXX-DRIVER_POLYFILL} STREQUAL "std")
   set_property(TARGET ${PROJECT_NAME} PROPERTY CXX_STANDARD 17)
+elseif(${MONGO-CXX-DRIVER_POLYFILL} STREQUAL "experimental")
+  set_property(TARGET ${PROJECT_NAME} PROPERTY CXX_STANDARD 14)
 else()
   set_property(TARGET ${PROJECT_NAME} PROPERTY CXX_STANDARD 11)
 endif()
