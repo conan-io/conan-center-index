@@ -13,11 +13,12 @@ class SociConan(ConanFile):
     generators = "cmake"
 
     options = {
+        "fPIC":       [True, False],
         "static":     [True, False],
         "cxx11":      [True, False],
         "empty":      [True, False],
-        "fPIC":       [True, False],
         "shared":     [True, False],
+        "tests":      [True, False],
         "sqlite3":    [True, False],
         "db2":        [True, False],
         "odbc":       [True, False],
@@ -25,14 +26,17 @@ class SociConan(ConanFile):
         "firebird":   [True, False],
         "mysql":      [True, False],
         "postgresql": [True, False],
-        "tests":      [True, False]
+        "boost":      [True, False],
+        "valgrind":   [True, False]
     }
+
     default_options = {
+        "fPIC":       True,
         "static":     True,
         "cxx11":      True,
         "empty":      True,
-        "fPIC":       True,
         "shared":     False,
+        "tests":      False,
         "sqlite3":    False,
         "db2":        False,
         "odbc":       False,
@@ -40,7 +44,8 @@ class SociConan(ConanFile):
         "firebird":   False,
         "mysql":      False,
         "postgresql": False,
-        "tests":      False
+        "boost":      False,
+        "valgrind":   False
     }
 
     _cmake = None
@@ -92,17 +97,19 @@ class SociConan(ConanFile):
         self._cmake = CMake(self)
 
         self._cmake.definitions["SOCI_STATIC"]     = self.options.static
-        self._cmake.definitions["SOCI_EMPTY"]      = self.options.empty
         self._cmake.definitions["SOCI_CXX11"]      = self.options.cxx11
+        self._cmake.definitions["SOCI_EMPTY"]      = self.options.empty
         self._cmake.definitions["SOCI_SHARED"]     = self.options.shared
         self._cmake.definitions["SOCI_TESTS"]      = self.options.tests
-        self._cmake.definitions["SOCI_SQLITE3"]    = self.options.sqlite3
-        self._cmake.definitions["SOCI_DB2"]        = self.options.db2
-        self._cmake.definitions["SOCI_ODBC"]       = self.options.odbc
-        self._cmake.definitions["SOCI_ORACLE"]     = self.options.oracle
-        self._cmake.definitions["SOCI_FIREBIRD"]   = self.options.firebird
-        self._cmake.definitions["SOCI_MYSQL"]      = self.options.mysql
-        self._cmake.definitions["SOCI_POSTGRESQL"] = self.options.postgresql
+        self._cmake.definitions["WITH_SQLITE3"]    = self.options.sqlite3
+        self._cmake.definitions["WITH_DB2"]        = self.options.db2
+        self._cmake.definitions["WITH_ODBC"]       = self.options.odbc
+        self._cmake.definitions["WITH_ORACLE"]     = self.options.oracle
+        self._cmake.definitions["WITH_FIREBIRD"]   = self.options.firebird
+        self._cmake.definitions["WITH_MYSQL"]      = self.options.mysql
+        self._cmake.definitions["WITH_POSTGRESQL"] = self.options.postgresql
+        self._cmake.definitions["WITH_BOOST"]      = self.options.boost
+        self._cmake.definitions["WITH_VALGRIND"]   = self.options.valgrind
 
         if self.options.cxx11:
             self._cmake.definitions["CMAKE_CXX_STANDARD"] = "11" # ToDo review this. The standard should not be set here
