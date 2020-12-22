@@ -18,7 +18,7 @@ class PdalConan(ConanFile):
                "with_zstd": [True, False],
                "with_laszip": [True, False],
                }
-    default_options = {"shared": False,
+    default_options = {"shared": True,
                        "fPIC": True,
                        "with_unwind": False,
                        "with_xml": True,
