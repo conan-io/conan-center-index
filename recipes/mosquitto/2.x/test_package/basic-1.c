@@ -1,7 +1,3 @@
-/*
- * This example shows how to publish messages from outside of the Mosquitto network loop.
- */
-
 #include <mosquitto.h>
 #include <stdio.h>
 #include <stdlib.h>
