@@ -17,7 +17,7 @@ class Mosquitto(ConanFile):
                 "broker": [True, False],
                 "apps": [True, False],
                 "plugins": [True, False],
-#                 "with_cjson": [True, False], TODO , adding a dependency is not enough, it needs also be found
+                "with_cjson": [True, False],
             }
     default_options = {"shared": False,
                         "with_tls": True,
@@ -25,7 +25,7 @@ class Mosquitto(ConanFile):
                         "broker": False,
                         "apps": False,
                         "plugins": False,  # TODO, there is some logic, just enabling plugin does not work, needs also something else
-#                        "with_cjson": False , TODO , adding a dependency is not enough, it needs also be found
+                        "with_cjson": False ,
     }
 
     _cmake = None
@@ -38,13 +38,14 @@ class Mosquitto(ConanFile):
     def requirements(self):
         if self.options.with_tls:
             self.requires("openssl/1.1.1i")
-        # TODO
-        # if self.options.with_cjson:
-        #     self.requires("cjson/1.7.14")
+        if self.options.with_cjson:
+            self.requires("cjson/1.7.14")
 
     def configure(self):
         if self.settings.compiler == "Visual Studio" and "MT" in self.settings.compiler.runtime:
             raise ConanInvalidConfiguration("Visual Studio build for any MT runtime is not supported")
+        if self.options.with_cjson: # see _configure_cmake for the reason
+            raise ConanInvalidConfiguration("Option with_cjson not yet supported")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
@@ -67,6 +68,12 @@ class Mosquitto(ConanFile):
         if self.options.with_tls:
             self._cmake.definitions["OPENSSL_SEARCH_PATH"] = self.deps_cpp_info["openssl"].rootpath.replace("\\", "/")
             self._cmake.definitions["OPENSSL_ROOT_DIR"] = self.deps_cpp_info["openssl"].rootpath.replace("\\", "/")
+
+        # this does not work, and I do not know how to make cmake of mosquitto FIND_PACKAGE(cJSON) succeed
+        # if self.options.with_cjson:
+        #     self._cmake.definitions["cJSON_SEARCH_PATH"] = self.deps_cpp_info["cjson"].rootpath.replace("\\", "/")
+        #     self._cmake.definitions["cJSON_ROOT_DIR"] = self.deps_cpp_info["cjson"].rootpath.replace("\\", "/")
+
         self._cmake.configure(source_folder=self._source_subfolder)
         return self._cmake
 
