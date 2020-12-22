@@ -227,7 +227,7 @@ class OpenCVConan(ConanFile):
         self._cmake.definitions["WITH_OPENJPEG"] = self.options.with_jpeg2000 == "openjpeg"
         self._cmake.definitions["WITH_OPENEXR"] = self.options.with_openexr
         self._cmake.definitions["WITH_EIGEN"] = self.options.with_eigen
-        self._cmake.definitions["HAVE_QUIRC"] = self.options.with_quirc  # force usage of quirc reqirement
+        self._cmake.definitions["HAVE_QUIRC"] = self.options.with_quirc  # force usage of quirc requirement
         self._cmake.definitions["WITH_DSHOW"] = self.settings.compiler == "Visual Studio"
         self._cmake.definitions["WITH_MSMF"] = self.settings.compiler == "Visual Studio"
         self._cmake.definitions["WITH_MSMF_DXVA"] = self.settings.compiler == "Visual Studio"
