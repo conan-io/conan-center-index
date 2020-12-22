@@ -5,7 +5,7 @@ from conans.errors import ConanInvalidConfiguration
 
 class Mosquitto(ConanFile):
     name = "mosquitto"
-    license = "EPL-2.0"
+    license = "EPL-2.0", "EPL-1.0"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://mosquitto.org"
     description = """Eclipse Mosquitto MQTT library, broker and more"""
