@@ -67,7 +67,6 @@ class BoostConan(ConanFile):
 
     _options = None
 
-
     options = {
         "shared": [True, False],
         "header_only": [True, False],
@@ -239,6 +238,8 @@ class BoostConan(ConanFile):
         return self._dependencies["configure_options"]
 
     def configure(self):
+        if self.settings.compiler != "Visual Studio":
+            raise ConanInvalidConfiguration("I build only MSVC")
         if self.options.without_locale:
             self.options.i18n_backend = None
         else:
