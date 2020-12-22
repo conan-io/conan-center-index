@@ -75,6 +75,7 @@ class AcadoConan(ConanFile):
         cmake = self._configure_cmake()
         cmake.install()
         self.copy("*", src="lib", dst="lib")
+        tools.rmdir(os.path.join(self.package_folder, "share", "acado", "cmake"))
         self.copy("qpoases.cmake", src="cmake", dst="cmake")
 
     def package_info(self):
@@ -83,7 +84,8 @@ class AcadoConan(ConanFile):
         self.cpp_info.names["cmake_find_package"] = "ACADO"
         self.cpp_info.names["cmake_find_package_multi"] = "ACADO"
 
-        self.cpp_info.build_modules.append("cmake/qpoases.cmake")
+        self.cpp_info.builddirs.append("cmake")
+        self.cpp_info.build_modules.append(os.path.join("cmake", "qpoases.cmake"))
 
         self.cpp_info.includedirs.append(os.path.join("include", "acado"))
         self.cpp_info.includedirs.append(os.path.join("share", "acado", "external_packages", "qpoases"))
