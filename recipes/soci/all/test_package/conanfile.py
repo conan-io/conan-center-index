@@ -15,13 +15,6 @@ class SociTestConan(ConanFile):
         self.options["soci"].empty      = True
         self.options["soci"].shared     = True
         self.options["soci"].sqlite3    = True
-        self.options["soci"].db2        = False
-        self.options["soci"].odbc       = False
-        self.options["soci"].oracle     = False
-        self.options["soci"].firebird   = False
-        self.options["soci"].mysql      = False
-        self.options["soci"].postgresql = False
-        self.options["soci"].tests      = False
 
     def build(self):
         cmake = CMake(self)
