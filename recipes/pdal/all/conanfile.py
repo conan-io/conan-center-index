@@ -74,7 +74,6 @@ class PdalConan(ConanFile):
             return self._cmake
 
         self._cmake = CMake(self)
-        self._cmake.definitions["CMAKE_POSITION_INDEPENDENT_CODE"] = self.options.get_safe("fPIC", True)
         self._cmake.definitions["WITH_TESTS"] = False
         self._cmake.definitions["WITH_LAZPERF"] = False
         self._cmake.definitions["WITH_LASZIP"] = self.options.with_laszip
