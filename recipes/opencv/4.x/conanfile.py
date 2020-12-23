@@ -115,7 +115,7 @@ class OpenCVConan(ConanFile):
         os.rename("opencv_contrib-{}".format(self.version), self._contrib_folder)
 
     def _patch_opencv(self):
-        for directory in ['libjasper', 'libjpeg-turbo', 'libjpeg', 'libpng', 'libtiff', 'libwebp', 'openexr', 'protobuf', 'zlib']:
+        for directory in ['libjasper', 'libjpeg-turbo', 'libjpeg', 'libpng', 'libtiff', 'libwebp', 'openexr', 'protobuf', 'zlib', 'quirc']:
             tools.rmdir(os.path.join(self._source_subfolder, '3rdparty', directory))
         if self.options.with_openexr:
             find_openexr = os.path.join(self._source_subfolder, "cmake", "OpenCVFindOpenEXR.cmake")
