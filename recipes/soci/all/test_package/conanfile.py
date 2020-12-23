@@ -10,11 +10,9 @@ class SociTestConan(ConanFile):
         self.options["soci"].static     = True
         self.options["soci"].cxx11      = True
         self.options["soci"].empty      = True
-        self.options["soci"].shared     = True
-        self.options["soci"].sqlite3    = True
 
         if self.settings.compiler == "gcc" and tools.Version(self.settings.compiler.version) < "5.0":
-            raise ConanInvalidConfiguration("{} minimum required version is 5.0".format(self.settings.compiler))
+            raise ConanInvalidConfiguration("gcc minimum required version is 5.0")
 
     def build(self):
         cmake = CMake(self)
