@@ -12,6 +12,7 @@ configure_options:
 - graph
 - graph_parallel
 - iostreams
+- json
 - locale
 - log
 - math
@@ -67,6 +68,10 @@ dependencies:
   iostreams:
   - random
   - regex
+  json:
+  - container
+  - exception
+  - system
   locale:
   - thread
   log:
@@ -183,6 +188,8 @@ libs:
   - boost_graph_parallel
   iostreams:
   - boost_iostreams
+  json:
+  - boost_json
   locale:
   - boost_locale
   log:
@@ -270,4 +277,4 @@ requirements:
 static_only:
 - boost_exception
 - boost_test_exec_monitor
-version: 1.74.0
+version: 1.75.0
