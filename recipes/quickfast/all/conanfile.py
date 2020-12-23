@@ -1,6 +1,7 @@
 from conans import ConanFile, CMake, tools
 import os
 import shutil
+import glob
 
 
 class QuickfastConan(ConanFile):
@@ -16,7 +17,7 @@ class QuickfastConan(ConanFile):
                "shared": [True, False]}
     default_options = {"fPIC": True,
                        "shared": False}
-    requires = ["boost/1.73.0", "xerces-c/3.2.3"]
+    requires = ["boost/1.69.0", "xerces-c/3.2.3"]
     generators = "cmake"
     exports_sources = "CMakeLists.txt", "patches/**"
     _cmake = None
@@ -37,7 +38,13 @@ class QuickfastConan(ConanFile):
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
-        os.rename(self.name + "-" + self.version.replace(".", "_"), self._source_subfolder)
+        extracted_dir = glob.glob("CppCommon-*")[0]
+        os.rename(extracted_dir, self._source_subfolder)
+
+    def source(self):
+        tools.get(**self.conan_data["sources"][self.version])
+        extracted_dir = glob.glob("quickfast-*")[0]
+        os.rename(extracted_dir, self._source_subfolder)
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -54,7 +61,7 @@ class QuickfastConan(ConanFile):
         for patch in patches:
             tools.patch(**patch)
 
-        tools.rename("CMakeLists.txt",
+        shutil.copy("CMakeLists.txt",
                     os.path.join(self._source_subfolder, "CMakeLists.txt"))
 
         cmake = self._configure_cmake()

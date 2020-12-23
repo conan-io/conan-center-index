@@ -31,7 +31,6 @@ project(quickfast CXX)
 include(${PROJECT_BINARY_DIR}/../conanbuildinfo.cmake)
 conan_basic_setup()
 
-
 file(GLOB SOURCES
 	${PROJECT_SOURCE_DIR}/src/Application/*.cpp
 	${PROJECT_SOURCE_DIR}/src/Common/*.cpp
@@ -52,6 +51,8 @@ add_library(quickfast ${HEADERS} ${SOURCES})
 
 if(BUILD_SHARED_LIBS)
 	target_compile_definitions(quickfast PRIVATE -DQUICKFAST_BUILD_DLL)
+else()
+	target_compile_definitions(quickfast PUBLIC -DQUICKFAST_HAS_DLL=0)
 endif()
 
 target_compile_features(quickfast PUBLIC cxx_std_11)
