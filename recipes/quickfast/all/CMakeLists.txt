@@ -1,5 +1,4 @@
 # based on: https://github.com/microsoft/vcpkg/blob/master/ports/quickfast/CMakeLists.txt
-# modified to fix warnings (BOOST_BIND_NO_PLACEHOLDERS)
 
 # Copyright (c) Microsoft Corporation
 
@@ -56,8 +55,6 @@ else()
 endif()
 
 target_compile_features(quickfast PUBLIC cxx_std_11)
-
-target_compile_definitions(quickfast PRIVATE BOOST_BIND_NO_PLACEHOLDERS)
 
 target_include_directories(quickfast PUBLIC
 	$<INSTALL_INTERFACE:include>
