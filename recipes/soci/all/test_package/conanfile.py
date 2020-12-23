@@ -1,13 +1,9 @@
+import os
 from conans import ConanFile, CMake, tools
 
 class SociTestConan(ConanFile):
     settings = "os", "compiler", "build_type", "arch"
     generators = "cmake"
-    requires = ["catch2/2.13.3", "fmt/6.2.0"]
-
-    def requirements(self):
-        self.requires("catch2/2.13.3")
-        self.requires("fmt/6.2.0")
 
     def configure(self):
         self.options["soci"].static     = True
@@ -18,9 +14,10 @@ class SociTestConan(ConanFile):
 
     def build(self):
         cmake = CMake(self)
+        cmake.definitions["SOCI_SHARED"] = self.options["soci"].shared
         cmake.configure()
         cmake.build()
 
     def test(self):
         if not tools.cross_building(self):
-            self.run("ctest . -Q")
+            self.run(".%ssoci.tests" % os.sep)
