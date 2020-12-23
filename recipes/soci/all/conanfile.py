@@ -18,7 +18,6 @@ class SociConan(ConanFile):
         "cxx11":      [True, False],
         "empty":      [True, False],
         "shared":     [True, False],
-        "tests":      [True, False],
         "sqlite3":    [True, False],
         "db2":        [True, False],
         "odbc":       [True, False],
@@ -36,7 +35,6 @@ class SociConan(ConanFile):
         "cxx11":      True,
         "empty":      True,
         "shared":     False,
-        "tests":      False,
         "sqlite3":    False,
         "db2":        False,
         "odbc":       False,
@@ -80,15 +78,12 @@ class SociConan(ConanFile):
         if self.options.mysql:
             self.output.warn(prefix + "MYSQL" + message)
         if self.options.postgresql:
+            # self.requires("libpq/11.5")
             self.output.warn(prefix + "POSTGRESQL" + message)
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
         os.rename(self.name + "-" + self.version, self._source_subfolder)
-
-    def build(self):
-        cmake = self._configure_cmake()
-        cmake.build()
 
     def _configure_cmake(self):
         if self._cmake:
@@ -100,7 +95,6 @@ class SociConan(ConanFile):
         self._cmake.definitions["SOCI_CXX11"]      = self.options.cxx11
         self._cmake.definitions["SOCI_EMPTY"]      = self.options.empty
         self._cmake.definitions["SOCI_SHARED"]     = self.options.shared
-        self._cmake.definitions["SOCI_TESTS"]      = self.options.tests
         self._cmake.definitions["WITH_SQLITE3"]    = self.options.sqlite3
         self._cmake.definitions["WITH_DB2"]        = self.options.db2
         self._cmake.definitions["WITH_ODBC"]       = self.options.odbc
@@ -119,6 +113,10 @@ class SociConan(ConanFile):
             build_folder=self._build_subfolder)
 
         return self._cmake
+
+    def build(self):
+        cmake = self._configure_cmake()
+        cmake.build()
 
     def package(self):
         include_folder  = os.path.join(self._source_subfolder, "include")
