@@ -7,8 +7,10 @@ needed. Packages from Conan Center should fulfill the expectations of anyone
 reading the changelog of the library, the documentation, or any statement by 
 the library maintainers.
 
+These are the rules that apply to regular version of Conan packages:
+
 **Build system patches.-** In order to add libraries into ConanCenter sometimes 
-it is necessary to apply patches so they can consume existing packages 
+it is NEEDED to apply patches so they can consume existing packages 
 for requirements and binaries can be generated. These patches are totally 
 needed for the purpose of ConanCenter and Conan keeps adding features trying 
 to minimize these changes.
@@ -33,5 +35,42 @@ library by maintainers. If a requirement is known not to work, the recipe
 should raise a `ConanInvalidConfiguration` from the `validate()` method.
 
 **Vulnerability patches.-** Patches published to CVE databases or declared as 
-vulnerabilities by the authors in non-mainstream libraries will be applied 
+vulnerabilities by the authors in non-mainstream libraries WILL be applied 
 to packages generated in Conan Center.
+
+**Official release patches.-** If the library documents that a patch should be
+applied to sources when building a tag/release from sources, ConanCenter WILL
+apply that patch too. This is needed to match the documented behavior or the
+binaries of that library offered by other means. [Example here](https://www.boost.org/users/history/version_1_73_0.html).
+
+
+## Exceptions
+
+Exceptionally, we might find libraries that aren't actively developed and consumers
+might benefit from having some bugfixes applied to previous versions while
+waiting for the next release, or because the library is no longer maintained. These
+are the rules for this exceptional scenario:
+ * **new release**, based on some official release and clearly identificable will 
+ be create to apply these patches to: PLACEHOLDER_FOR_RELEASE_FORMAT.
+ * **only patches backporting bugfixes** will be accepted after they have 
+ been submitted to the upstream and there is a consensous that it's a bug and the patch is the solution.
+
+ConanCenter will build this patched release and serve its binaries like it does with
+any other Conan reference. 
+
+Notice that these PLACEHOLDER_FOR_RELEASE_FORMAT releases are unique to ConanCenter
+and they can get new patches or discard existing ones according to upstream 
+considerations. It means that these releases will modify its behavior without previous
+notice, the documentation or changelog for these specific releases won't exist. Use
+them carefully in your projects.
+
+## Patches: format and conventions
+
+Patches are preferred over `replace_in_file` statement. Patches should always include
+a link to the origin where it's taken from (it doesn't apply to build system patches).
+They will be listed in `conandata.yml` file and exported together with the recipe.
+
+TO BE DEFINED.- We will propose some guidelines (and hooks) to define the format to
+use when listing patches in `conandata.yml` file and how to add metadata in the same
+place, it will help consumers to know and track in an easy way which patches 
+are applied.
