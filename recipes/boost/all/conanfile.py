@@ -137,7 +137,7 @@ class BoostConan(ConanFile):
         return {
             "gcc": 6,
             "clang": 6,
-            "apple-clang": 12,  # guess
+            "apple-clang": 10,
             "Visual Studio": 14,  # guess
         }.get(str(self.settings.compiler))
 
@@ -147,7 +147,7 @@ class BoostConan(ConanFile):
         return {
             "gcc": 5,
             "clang": 5,
-            "apple-clang": 12,  # guess
+            "apple-clang": 10,
             "Visual Studio": 14,  # guess
         }.get(str(self.settings.compiler))
 
