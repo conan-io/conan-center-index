@@ -92,7 +92,7 @@ class AcadoConan(ConanFile):
         self.cpp_info.names["cmake_find_package"] = "ACADO"
         self.cpp_info.names["cmake_find_package_multi"] = "ACADO"
 
-        self.cpp_info.builddirs.append("cmake")
+        self.cpp_info.builddirs.append(os.path.join("lib", "cmake"))
         self.cpp_info.build_modules.append(os.path.join("lib", "cmake", "qpoases.cmake"))
 
         self.cpp_info.includedirs.append(os.path.join("include", "acado"))
