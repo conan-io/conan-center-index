@@ -1,3 +1,5 @@
+Adapted from vcpkg recipe
+---
 diff --git a/pdal/PointView.hpp b/pdal/PointView.hpp
 index 837cd25b8..ac9c8bbb6 100644
 --- a/pdal/PointView.hpp
