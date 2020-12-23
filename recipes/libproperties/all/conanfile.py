@@ -24,9 +24,9 @@ class LibpropertiesConan(ConanFile):
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
-        source_dir="libproperties-{}".format(self.version)
+        source_dir = "{}-{}".format(self.name, self.version)
         os.rename(source_dir, self._source_subfolder)
-        tools.replace_in_file(source_dir, 
+        tools.replace_in_file(source_dir,
             "project(libproperties VERSION ${LIBPROPERTIES_VERSION} LANGUAGES C)",
             '''
             project(libproperties VERSION ${LIBPROPERTIES_VERSION} LANGUAGES C)
@@ -39,7 +39,7 @@ class LibpropertiesConan(ConanFile):
     #     # This small hack might be useful to guarantee proper /MT /MD linkage
     #     # in MSVC if the packaged project doesn't have variables to set it
     #     # properly
-    #     tools.replace_in_file("libproperties/CMakeLists.txt", 
+    #     tools.replace_in_file("libproperties/CMakeLists.txt",
     #         "project(libproperties VERSION ${LIBPROPERTIES_VERSION} LANGUAGES C)",
     #         '''
     #         project(libproperties VERSION ${LIBPROPERTIES_VERSION} LANGUAGES C)
