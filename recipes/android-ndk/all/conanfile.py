@@ -27,7 +27,7 @@ class AndroidNDKInstallerConan(ConanFile):
             raise ConanInvalidConfiguration("No binaries available for other than 'x86_64' architectures")
 
     def source(self):
-        tarballs = self.conan_data["sources"][self.version]
+        tarballs = self.conan_data["sources"][self.version]["url"]
         tools.get(**tarballs[str(self.settings.os)])
         extracted_dir = self.name + "-" + self.version
         os.rename(extracted_dir, self._source_subfolder)
