@@ -70,13 +70,21 @@ class AcadoConan(ConanFile):
         cmake = self._configure_cmake()
         cmake.build()
 
+    @property
+    def _qpoases_sources(self):
+        return os.path.join("lib", "cmake", "qpoases")
+
     def package(self):
         self.copy("LICENSE.txt", src=self._source_subfolder, dst="licenses")
         cmake = self._configure_cmake()
         cmake.install()
+
         self.copy("*", src="lib", dst="lib")
-        tools.rmdir(os.path.join(self.package_folder, "share", "acado", "cmake"))
-        self.copy("qpoases.cmake", src="cmake", dst="cmake")
+        self.copy("qpoases.cmake", src="cmake", dst="lib/cmake")
+        qpoases_sources_from = os.path.join(self.package_folder, "share", "acado", "external_packages", "qpoases")
+        self.copy("*", src=qpoases_sources_from, dst=self._qpoases_sources)
+
+        tools.rmdir(os.path.join(self.package_folder, "share"))
 
     def package_info(self):
         self.cpp_info.libs = ["acado_toolkit", "acado_casadi"]
@@ -85,9 +93,9 @@ class AcadoConan(ConanFile):
         self.cpp_info.names["cmake_find_package_multi"] = "ACADO"
 
         self.cpp_info.builddirs.append("cmake")
-        self.cpp_info.build_modules.append(os.path.join("cmake", "qpoases.cmake"))
+        self.cpp_info.build_modules.append(os.path.join("lib", "cmake", "qpoases.cmake"))
 
         self.cpp_info.includedirs.append(os.path.join("include", "acado"))
-        self.cpp_info.includedirs.append(os.path.join("share", "acado", "external_packages", "qpoases"))
-        self.cpp_info.includedirs.append(os.path.join("share", "acado", "external_packages", "qpoases", "INCLUDE"))
-        self.cpp_info.includedirs.append(os.path.join("share", "acado", "external_packages", "qpoases", "SRC"))
+        self.cpp_info.includedirs.append(self._qpoases_sources)
+        self.cpp_info.includedirs.append(os.path.join(self._qpoases_sources, "INCLUDE"))
+        self.cpp_info.includedirs.append(os.path.join(self._qpoases_sources, "SRC"))
