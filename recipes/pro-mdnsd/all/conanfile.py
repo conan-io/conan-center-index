@@ -1,7 +1,6 @@
 import os
 from conans import ConanFile, CMake, tools
 from conans.tools import download, unzip
-from conans.model.version import Version
 
 
 class mdnsdConan(ConanFile):
