@@ -10,6 +10,8 @@ class Mosquitto(ConanFile):
     homepage = "https://mosquitto.org"
     description = """Eclipse Mosquitto MQTT library, broker and more"""
     topics = ("MQTT", "IoT", "eclipse")
+    exports_sources = "CMakeLists.txt"
+    generators = "cmake"
     settings = "os", "arch", "compiler", "build_type"
     options = {"shared": [True, False],
                 "with_tls": [True, False],
@@ -42,6 +44,7 @@ class Mosquitto(ConanFile):
             self.requires("cjson/1.7.14")
 
     def configure(self):
+        ...
         if self.settings.compiler == "Visual Studio" and "MT" in self.settings.compiler.runtime:
             raise ConanInvalidConfiguration("Visual Studio build for any MT runtime is not supported")
         if self.options.with_cjson: # see _configure_cmake for the reason
@@ -69,12 +72,12 @@ class Mosquitto(ConanFile):
             self._cmake.definitions["OPENSSL_SEARCH_PATH"] = self.deps_cpp_info["openssl"].rootpath.replace("\\", "/")
             self._cmake.definitions["OPENSSL_ROOT_DIR"] = self.deps_cpp_info["openssl"].rootpath.replace("\\", "/")
 
-        # this does not work, and I do not know how to make cmake of mosquitto FIND_PACKAGE(cJSON) succeed
+        #  this does not work, and I do not know how to make cmake of mosquitto FIND_PACKAGE(cJSON) succeed
         # if self.options.with_cjson:
         #     self._cmake.definitions["cJSON_SEARCH_PATH"] = self.deps_cpp_info["cjson"].rootpath.replace("\\", "/")
         #     self._cmake.definitions["cJSON_ROOT_DIR"] = self.deps_cpp_info["cjson"].rootpath.replace("\\", "/")
 
-        self._cmake.configure(source_folder=self._source_subfolder)
+        self._cmake.configure()
         return self._cmake
 
     def _patch(self):
