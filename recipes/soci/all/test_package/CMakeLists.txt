@@ -7,11 +7,11 @@ option(ENABLE_CONAN "Enable conan" True)
 set(TEST_NAME soci.tests)
 
 message("** SOCI shared: ${SOCI_SHARED}")
-if (SOCI_SHARED)
-    add_executable(${TEST_NAME} shared.test.cpp)
-else ()
+#if (SOCI_SHARED)
+#    add_executable(${TEST_NAME} shared.test.cpp)
+#else ()
     add_executable(${TEST_NAME} static.test.cpp)
-endif ()
+#endif ()
 
 target_compile_features(${TEST_NAME} PRIVATE cxx_std_11)
 
