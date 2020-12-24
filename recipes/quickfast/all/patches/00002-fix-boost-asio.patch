@@ -1,3 +1,6 @@
+Patch adapted from:
+https://raw.githubusercontent.com/microsoft/vcpkg/master/ports/quickfast/00001-fix-boost-asio.patch
+
 diff --git a/src/Common/QuickFASTPch.h b/src/Common/QuickFASTPch.h
 index 381f846..e6f6b13 100644
 --- a/src/Common/QuickFASTPch.h
