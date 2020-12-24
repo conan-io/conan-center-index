@@ -1,4 +1,5 @@
 #include <acado/acado_code_generation.hpp>
+#include <cstdlib>
 
 USING_NAMESPACE_ACADO
 

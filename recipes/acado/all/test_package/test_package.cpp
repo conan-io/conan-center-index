@@ -1,5 +1,6 @@
 #include <acado_auxiliary_functions.h>
 #include <acado_common.h>
+#include <cstdlib>
 
 ACADOvariables acadoVariables;
 ACADOworkspace acadoWorkspace;

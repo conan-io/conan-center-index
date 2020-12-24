@@ -105,5 +105,3 @@ class AcadoConan(ConanFile):
     def validate(self):
         if self.settings.compiler == "clang":
             raise ConanInvalidConfiguration("clang not supported")
-        elif self.settings.compiler == "gcc" and float(self.settings.compiler.version.value) < 5.0:
-            raise ConanInvalidConfiguration("gcc < 5 not supported")
