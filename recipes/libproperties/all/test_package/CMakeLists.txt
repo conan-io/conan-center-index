@@ -1,8 +1,10 @@
 cmake_minimum_required(VERSION 3.15)
-project(libproperties_test_package C)
+project(test_package C)
 
 include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
-conan_basic_setup()
+conan_basic_setup(TARGETS)
 
-add_executable(libproperties_test_package test_package.c)
-target_link_libraries(libproperties_test_package ${CONAN_LIBS})
+find_package(libproperties REQUIRED)
+
+add_executable("${PROJECT_NAME}" test_package.c)
+target_link_libraries("${PROJECT_NAME}" PRIVATE libproperties::libproperties)
