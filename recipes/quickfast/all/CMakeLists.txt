@@ -69,7 +69,7 @@ install(TARGETS quickfast
 )
 
 foreach (HEADER ${HEADERS})
-	file(RELATIVE_PATH HEADER_REL source_subfolder/src source_subfolder/${HEADER})
+	file(RELATIVE_PATH HEADER_REL ${PROJECT_SOURCE_DIR}/source_subfolder/src ${PROJECT_SOURCE_DIR}/${HEADER})
 	get_filename_component(HEADER_DIR ${HEADER_REL} DIRECTORY)
-    install(FILES source_subfolder/${HEADER} DESTINATION include/quickfast/${HEADER_DIR})
+    install(FILES ${HEADER} DESTINATION include/quickfast/${HEADER_DIR})
 endforeach()
