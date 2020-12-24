@@ -23,10 +23,9 @@ class LibpropertiesConan(ConanFile):
         del self.settings.compiler.cppstd
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        source_dir = "{}-{}".format(self.name, self.version)
-        os.rename(source_dir, self._source_subfolder)
-        tools.replace_in_file(source_dir,
+        source_package_tag = "{}-{}".format(self.name, self.version)
+        tools.get(**self.conan_data["sources"][source_package_tag])
+        tools.replace_in_file(source_package_tag,
             "project(libproperties VERSION ${LIBPROPERTIES_VERSION} LANGUAGES C)",
             '''
             project(libproperties VERSION ${LIBPROPERTIES_VERSION} LANGUAGES C)
@@ -34,37 +33,14 @@ class LibpropertiesConan(ConanFile):
             conan_basic_setup()
             ''')
 
-    # def source(self):
-    #     self.run("git clone https://github.com/tinyhubs/libproperties.git")
-    #     # This small hack might be useful to guarantee proper /MT /MD linkage
-    #     # in MSVC if the packaged project doesn't have variables to set it
-    #     # properly
-    #     tools.replace_in_file("libproperties/CMakeLists.txt",
-    #         "project(libproperties VERSION ${LIBPROPERTIES_VERSION} LANGUAGES C)",
-    #         '''
-    #         project(libproperties VERSION ${LIBPROPERTIES_VERSION} LANGUAGES C)
-    #         include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
-    #         conan_basic_setup()
-    #         ''')
-
     def build(self):
         cmake = CMake(self)
         cmake.configure()
         cmake.build()
 
-        # Explicit way:
-        # self.run('cmake %s/hello %s'
-        #          % (self.source_folder, cmake.command_line))
-        # self.run("cmake --build . %s" % cmake.build_config)
-
     def package(self):
-        self.copy("LICENSE", src=self._source_subfolder, dst="licenses")
-        self.copy("properties.h", dst="include", src="libproperties")
-        self.copy("*properties.lib", dst="lib", keep_path=False)
-        self.copy("*.dll", dst="lib", keep_path=False)
-        self.copy("*.so", dst="lib", keep_path=False)
-        self.copy("*.dylib", dst="lib", keep_path=False)
-        self.copy("*.a", dst="lib", keep_path=False)
+        cmake = CMake(self)
+        cmake.install()
 
     def package_info(self):
         self.cpp_info.libs = ["properties"]
