@@ -33,7 +33,7 @@ class QuickfastConan(ConanFile):
     def _configure_cmake(self):
         if not self._cmake:
             self._cmake = CMake(self)
-            self._cmake.configure(source_folder=self._source_subfolder, build_folder=self._build_subfolder)
+            self._cmake.configure(build_folder=self._build_subfolder)
         return self._cmake
 
     def source(self):

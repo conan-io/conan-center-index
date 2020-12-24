@@ -31,19 +31,19 @@ include(${PROJECT_BINARY_DIR}/../conanbuildinfo.cmake)
 conan_basic_setup()
 
 file(GLOB SOURCES
-	${PROJECT_SOURCE_DIR}/src/Application/*.cpp
-	${PROJECT_SOURCE_DIR}/src/Common/*.cpp
-	${PROJECT_SOURCE_DIR}/src/Codecs/*.cpp
-	${PROJECT_SOURCE_DIR}/src/Communication/*.cpp
-	${PROJECT_SOURCE_DIR}/src/Messages/*.cpp
+	source_subfolder/src/Application/*.cpp
+	source_subfolder/src/Common/*.cpp
+	source_subfolder/src/Codecs/*.cpp
+	source_subfolder/src/Communication/*.cpp
+	source_subfolder/src/Messages/*.cpp
 )
 
 file(GLOB HEADERS RELATIVE ${PROJECT_SOURCE_DIR}
-	${PROJECT_SOURCE_DIR}/src/Application/*.h
-	${PROJECT_SOURCE_DIR}/src/Common/*.h
-	${PROJECT_SOURCE_DIR}/src/Codecs/*.h
-	${PROJECT_SOURCE_DIR}/src/Communication/*.h
-	${PROJECT_SOURCE_DIR}/src/Messages/*.h
+	source_subfolder/src/Application/*.h
+	source_subfolder/src/Common/*.h
+	source_subfolder/src/Codecs/*.h
+	source_subfolder/src/Communication/*.h
+	source_subfolder/src/Messages/*.h
 )
 
 add_library(quickfast ${HEADERS} ${SOURCES})
@@ -57,8 +57,7 @@ endif()
 target_compile_features(quickfast PUBLIC cxx_std_11)
 
 target_include_directories(quickfast PUBLIC
-	$<INSTALL_INTERFACE:include>
-	$<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/src>
+	source_subfolder/src
 )
 
 target_link_libraries(${PROJECT_NAME} ${CONAN_LIBS})
@@ -70,7 +69,7 @@ install(TARGETS quickfast
 )
 
 foreach (HEADER ${HEADERS})
-	file(RELATIVE_PATH HEADER_REL ${PROJECT_SOURCE_DIR}/src ${PROJECT_SOURCE_DIR}/${HEADER})
+	file(RELATIVE_PATH HEADER_REL source_subfolder/src source_subfolder/${HEADER})
 	get_filename_component(HEADER_DIR ${HEADER_REL} DIRECTORY)
-    install(FILES ${PROJECT_SOURCE_DIR}/${HEADER} DESTINATION include/quickfast/${HEADER_DIR})
+    install(FILES source_subfolder/${HEADER} DESTINATION include/quickfast/${HEADER_DIR})
 endforeach()
