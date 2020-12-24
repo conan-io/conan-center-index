@@ -8,4 +8,4 @@ add_executable(test ${PROJECT_SOURCE_DIR}/main.cpp)
 
 target_link_libraries(test ${CONAN_LIBS})
 
-target_compile_features(test PUBLIC cxx_std_11)
+set_property(TARGET test PROPERTY CXX_STANDARD 11)
