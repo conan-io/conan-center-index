@@ -103,5 +103,5 @@ class AcadoConan(ConanFile):
     
 
     def validate(self):
-        if self.settings.compiler == "clang":
-            raise ConanInvalidConfiguration("clang not supported")
+        if self.settings.compiler == "clang" and self.settings.compiler.libcxx != "libstdc++11":
+            raise ConanInvalidConfiguration("clang with libstdc++11 required")
