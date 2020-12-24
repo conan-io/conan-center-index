@@ -34,6 +34,8 @@ class LibpropertiesConan(ConanFile):
         if self._cmake:
             return self._cmake
         self._cmake = CMake(self)
+        self._cmake.definitions["LIBPROPERTIES_INSTALL"] = True
+        self._cmake.definitions["LIBPROPERTIES_TEST"] = False
         self._cmake.configure()
         return self._cmake
 
