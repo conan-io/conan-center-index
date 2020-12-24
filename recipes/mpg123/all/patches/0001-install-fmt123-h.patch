@@ -1,9 +1,0 @@
---- ports/cmake/src/libmpg123/CMakeLists.txt
-+++ ports/cmake/src/libmpg123/CMakeLists.txt
-@@ -166,5 +166,5 @@
-     ARCHIVE DESTINATION "${CMAKE_INSTALL_LIBDIR}/"
-     LIBRARY DESTINATION "${CMAKE_INSTALL_LIBDIR}/"
-     RUNTIME DESTINATION "${CMAKE_INSTALL_BINDIR}/")
--install(FILES "${CMAKE_CURRENT_BINARY_DIR}/mpg123.h"
-+install(FILES "${CMAKE_CURRENT_BINARY_DIR}/mpg123.h" "${CMAKE_CURRENT_SOURCE_DIR}/../../../../src/libmpg123/fmt123.h"
-     DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}")

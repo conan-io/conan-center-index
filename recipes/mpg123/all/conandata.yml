@@ -1,12 +1,4 @@
 sources:
-  "1.26.3":
-    url: "https://sourceforge.net/projects/mpg123/files/mpg123/1.26.3/mpg123-1.26.3.tar.bz2"
-    sha256: "30c998785a898f2846deefc4d17d6e4683a5a550b7eacf6ea506e30a7a736c6e"
-patches:
-  "1.26.3":
-    - base_path: "source_subfolder"
-      patch_file: "patches/0001-install-fmt123-h.patch"
-    - base_path: "source_subfolder"
-      patch_file: "patches/0002-cmake-add-tinyalsa.patch"
-    - base_path: "source_subfolder"
-      patch_file: "patches/0003-yasm-msvc-object-format.patch"
+  "1.26.4":
+    url: "https://sourceforge.net/projects/mpg123/files/mpg123/1.26.4/mpg123-1.26.4.tar.bz2"
+    sha256: "081991540df7a666b29049ad870f293cfa28863b36488ab4d58ceaa7b5846454"
