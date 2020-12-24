@@ -1,5 +1,4 @@
 from conans import ConanFile, CMake, tools
-import os
 
 
 class LibpropertiesConan(ConanFile):
@@ -10,9 +9,13 @@ class LibpropertiesConan(ConanFile):
     description = "libproperties is a library to parse the Java .properties files. It was writen in pure C. And fully compatible with the Java .properties file format."
     topics = ("properties", "java", "pure-c")
     settings = "os", "compiler", "build_type", "arch"
-    options = {"shared": [True, False], "fPIC": [True, False],}
-    default_options = {"shared": False, "fPIC": True,}
+    options = {"shared": [True, False], "fPIC": [True, False], }
+    default_options = {"shared": False, "fPIC": True, }
     generators = "cmake"
+
+    @property
+    def _source_package_tag(self):
+        return "{}-{}".format(self.name, self.version)
 
     @property
     def _source_subfolder(self):
@@ -23,15 +26,15 @@ class LibpropertiesConan(ConanFile):
         del self.settings.compiler.cppstd
 
     def source(self):
-        source_package_tag = "{}-{}".format(self.name, self.version)
-        tools.get(**self.conan_data["sources"][source_package_tag])
-        tools.replace_in_file(source_package_tag,
-            "project(libproperties VERSION ${LIBPROPERTIES_VERSION} LANGUAGES C)",
-            '''
-            project(libproperties VERSION ${LIBPROPERTIES_VERSION} LANGUAGES C)
-            include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
-            conan_basic_setup()
-            ''')
+        #   Have to use self.version to download the code, and the source will be put under the id
+        tools.get(**self.conan_data["sources"][self.version])
+        tools.replace_in_file(_source_package_tag,
+                              "project(libproperties VERSION ${LIBPROPERTIES_VERSION} LANGUAGES C)",
+                              '''
+                              project(libproperties VERSION ${LIBPROPERTIES_VERSION} LANGUAGES C)
+                              include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
+                              conan_basic_setup()
+                              ''')
 
     def build(self):
         cmake = CMake(self)
