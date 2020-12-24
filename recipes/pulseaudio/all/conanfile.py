@@ -95,10 +95,11 @@ class PulseAudioConan(ConanFile):
             else:
                 args.extend(["--enable-shared=no", "--enable-static=yes"])
             args.append("--with-udev-rules-dir=%s" % os.path.join(self.package_folder, "bin", "udev", "rules.d"))
+            args.append("--with-systemduserunitdir=%s" % os.path.join(self.build_folder, "ignore"))
             with tools.environment_append({"PKG_CONFIG_PATH": self.build_folder}):
                 with tools.environment_append({
                         "FFTW_CFLAGS": tools.PkgConfig("fftw").cflags,
-                        "FFTW_LIBS": tools.PkgConfig("fftw").libs} if self.options.with_fftw else tools.no_op()):
+                        "FFTW_LIBS": tools.PkgConfig("fftw").libs}) if self.options.with_fftw else tools.no_op():
                     with tools.environment_append(RunEnvironment(self).vars):
                         self._autotools.configure(args=args,  configure_dir=self._source_subfolder)
         return self._autotools
