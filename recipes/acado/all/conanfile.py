@@ -2,6 +2,7 @@ import os
 import glob
 
 from conans import ConanFile, CMake, tools
+from conans.errors import ConanInvalidConfiguration
 
 
 class AcadoConan(ConanFile):
@@ -99,3 +100,10 @@ class AcadoConan(ConanFile):
         self.cpp_info.includedirs.append(self._qpoases_sources)
         self.cpp_info.includedirs.append(os.path.join(self._qpoases_sources, "INCLUDE"))
         self.cpp_info.includedirs.append(os.path.join(self._qpoases_sources, "SRC"))
+    
+
+    def validate(self):
+        if self.settings.compiler == "clang":
+            raise ConanInvalidConfiguration("clang not supported")
+        elif self.settings.compiler == "gcc" and float(self.settings.compiler.version.value) < 5.0:
+            raise ConanInvalidConfiguration("gcc < 5 not supported")
