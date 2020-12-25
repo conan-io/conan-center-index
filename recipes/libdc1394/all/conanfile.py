@@ -64,6 +64,7 @@ class Libdc1394Conan(ConanFile):
         tools.remove_files_by_mask(os.path.join(self.package_folder, "lib"), "*.la")
 
     def package_info(self):
+        self.cpp_info.names["pkg_config"] = "libdc1394-2.pc"
         self.cpp_info.libs = ["dc1394"]
         if self.settings.os == "Macos":
             self.cpp_info.frameworks.extend(["CoreFoundation", "CoreServices", "IOKit"])
