@@ -15,7 +15,6 @@ class Libdc1394Conan(ConanFile):
     settings = "os", "compiler", "build_type", "arch"
     options = {"shared": [True, False], "fPIC": [True, False]}
     default_options = {"shared": False, "fPIC": True}
-    generators = "cmake"
     _env_build = None
 
     @property
@@ -67,4 +66,3 @@ class Libdc1394Conan(ConanFile):
         self.cpp_info.libs = ["dc1394"]
         if self.settings.os == "Macos":
             self.cpp_info.frameworks.extend(["CoreFoundation", "CoreServices", "IOKit"])
-
