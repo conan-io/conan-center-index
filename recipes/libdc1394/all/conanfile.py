@@ -31,6 +31,8 @@ class Libdc1394Conan(ConanFile):
         return self._env_build
 
     def configure(self):
+        if self.options.shared:
+            del self.options.fPIC
         if self.settings.os == "Windows":
             raise ConanInvalidConfiguration("Windows is not supported")
         if self.settings.compiler == "clang":
