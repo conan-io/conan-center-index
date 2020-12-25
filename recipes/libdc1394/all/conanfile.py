@@ -66,5 +66,5 @@ class Libdc1394Conan(ConanFile):
     def package_info(self):
         self.cpp_info.names["pkg_config"] = "libdc1394-2.pc"
         self.cpp_info.libs = ["dc1394"]
-        if self.settings.os == "Macos":
+        if tools.os_info.is_apple_os(self.settings.os):
             self.cpp_info.frameworks.extend(["CoreFoundation", "CoreServices", "IOKit"])
