@@ -472,7 +472,10 @@ class LibcurlConan(ConanFile):
         self._cmake.definitions["BUILD_SHARED_LIBS"] = self.options.shared
         self._cmake.definitions["CURL_STATICLIB"] = not self.options.shared
         self._cmake.definitions["CMAKE_DEBUG_POSTFIX"] = ""
-        self._cmake.definitions["CMAKE_USE_SCHANNEL"] = self.options.with_ssl == "schannel"
+        if tools.Version(self.version) >= "7.72.0":
+            self._cmake.definitions["CMAKE_USE_SCHANNEL"] = self.options.with_ssl == "schannel"
+        else:
+            self._cmake.definitions["CMAKE_USE_WINSSL"] = self.options.with_ssl == "schannel"
         self._cmake.definitions["CMAKE_USE_OPENSSL"] = self.options.with_ssl == "openssl"
         if tools.Version(self.version) >= "7.70.0":
             self._cmake.definitions["CMAKE_USE_WOLFSSL"] = self.options.with_ssl == "wolfssl"
