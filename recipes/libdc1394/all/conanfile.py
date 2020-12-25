@@ -6,7 +6,6 @@ import os
 
 class Libdc1394Conan(ConanFile):
     name = "libdc1394"
-    version = "2.2.6"
     license = "LGPL-2.1"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = 'https://damien.douxchamps.net/ieee1394/libdc1394/'
