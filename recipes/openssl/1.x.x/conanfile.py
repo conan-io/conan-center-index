@@ -481,8 +481,7 @@ class OpenSSLConan(ConanFile):
         else:
             args.append("-fPIC" if self.options.fPIC else "no-pic")
         if self.settings.os == "Neutrino":
-            args.append("-lsocket no-asm")
-
+            args.append("no-asm -lsocket -latomic")
         if self._full_version < "1.1.0":
             if self.options.get_safe("no_zlib"):
                 args.append("no-zlib")
@@ -799,7 +798,9 @@ class OpenSSLConan(ConanFile):
             if not self.options.no_threads:
                 self.cpp_info.components["crypto"].system_libs.append("pthread")
                 self.cpp_info.components["ssl"].system_libs.append("pthread")
-
+        elif self.settings.os == "Neutrino":
+            self.cpp_info.components["crypto"].system_libs.append("atomic")
+            self.cpp_info.components["ssl"].system_libs.append("atomic")
         self.cpp_info.components["crypto"].names["cmake_find_package"] = "Crypto"
         self.cpp_info.components["crypto"].names["cmake_find_package_multi"] = "Crypto"
         self.cpp_info.components["crypto"].names['pkg_config'] = 'libcrypto'
