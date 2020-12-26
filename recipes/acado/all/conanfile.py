@@ -111,3 +111,5 @@ class AcadoConan(ConanFile):
             raise ConanInvalidConfiguration("libstdc++11 required")
         elif self.settings.compiler == "clang" and self.settings.compiler.libcxx != "libstdc++11":
             raise ConanInvalidConfiguration("libstdc++11 required")
+        elif self.settings.compiler == "apple-clang":
+            raise ConanInvalidConfiguration("apple-clang not supported")
