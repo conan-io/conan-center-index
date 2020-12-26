@@ -102,5 +102,9 @@ class AcadoConan(ConanFile):
         self.cpp_info.includedirs.append(os.path.join(self._qpoases_sources, "SRC"))
 
     def validate(self):
-        if self.settings.compiler.libcxx != "libstdc++11":
+        if self.settings.compiler == "Visual Studio":
+            pass
+        elif self.settings.compiler == "gcc" and self.settings.compiler.libcxx != "libstdc++11":
+            raise ConanInvalidConfiguration("libstdc++11 required")
+        elif self.settings.compiler == "clang" and self.settings.compiler.libcxx != "libstdc++11":
             raise ConanInvalidConfiguration("libstdc++11 required")
