@@ -88,7 +88,10 @@ class AcadoConan(ConanFile):
         tools.rmdir(os.path.join(self.package_folder, "share"))
 
     def package_info(self):
-        self.cpp_info.libs = ["acado_toolkit", "acado_casadi"]
+        if self.options.shared:
+            self.cpp_info.libs = ["acado_toolkit_s", "acado_casadi"]
+        else:
+            self.cpp_info.libs = ["acado_toolkit", "acado_casadi"]
 
         self.cpp_info.names["cmake_find_package"] = "ACADO"
         self.cpp_info.names["cmake_find_package_multi"] = "ACADO"
