@@ -13,7 +13,7 @@ class LibpropertiesConan(ConanFile):
     options = {"shared": [True, False], "fPIC": [True, False],}
     default_options = {"shared": False, "fPIC": True,}
     generators = "cmake"
-    exports_sources = "CMakeLists.txt"
+    exports_sources = "CMakeLists.txt", "patches/**"
 
     _cmake = None
 
@@ -21,7 +21,13 @@ class LibpropertiesConan(ConanFile):
     def _source_subfolder(self):
         return "source_subfolder"
 
+    def config_options(self):
+        if self.settings.os == "Windows":
+            del self.options.fPIC
+
     def configure(self):
+        if self.options.shared:
+            del self.options.fPIC
         del self.settings.compiler.libcxx
         del self.settings.compiler.cppstd
 
@@ -40,6 +46,8 @@ class LibpropertiesConan(ConanFile):
         return self._cmake
 
     def build(self):
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            tools.patch(**patch)
         cmake = self._configure_cmake()
         cmake.build()
 
@@ -51,4 +59,6 @@ class LibpropertiesConan(ConanFile):
         tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
 
     def package_info(self):
+        if not self.options.shared:
+            self.cpp_info.defines = ["LIBPROPERTIES_STATIC"]
         self.cpp_info.libs = ["properties"]
