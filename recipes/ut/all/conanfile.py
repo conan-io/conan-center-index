@@ -24,7 +24,7 @@ class UTConan(ConanFile):
 
     def package(self):
         self.copy("LICENSE", dst="licenses")
-        self.copy(os.path.join("include", "boost", "ut.hpp"), dst=os.path.join("include", "boost"), src=self._source_subfolder)
+        self.copy(os.path.join("include", "boost", "ut.hpp"), src=self._source_subfolder)
 
     def package_id(self):
         self.info.header_only()
@@ -32,4 +32,4 @@ class UTConan(ConanFile):
     def package_info(self):
         self.cpp_info.names["cmake_find_package"] = "UT"
         self.cpp_info.names["cmake_find_package_multi"] = "UT"
-        self.cpp_info.includedirs.append(os.path.join("include", "boost"))
+        # self.cpp_info.includedirs.append(os.path.join("include", "boost"))
