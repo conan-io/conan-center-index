@@ -37,6 +37,12 @@ class LibFtdiConan(ConanFile):
     def configure(self):
         if self.settings.os == "Macos":
             raise ConanInvalidConfiguration("Macos is not supported")
+        if self.settings.compiler == "Visual Studio":
+            raise ConanInvalidConfiguration("Building with Visual Studio is not supported")
+
+    def build_requirements(self):
+        if not tools.which("pkg-config"):
+            self.build_requires("pkgconf/1.7.3")
 
     def _patch_cmakelists(self, subfolder):
         cmakelists_path = os.path.join(self._source_subfolder, subfolder, "CMakeLists.txt")
@@ -58,7 +64,6 @@ class LibFtdiConan(ConanFile):
         self._cmake.definitions.update(options)
         self._cmake.configure()
         return self._cmake
-
 
 
     def build(self):
