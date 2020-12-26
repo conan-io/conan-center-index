@@ -1278,7 +1278,7 @@ class BoostConan(ConanFile):
                     continue
 
                 module_libraries = filter_transform_module_libraries(self._dependencies["libs"][module])
-                module_actual_libraries = set(module_libraries).intersection(all_detected_libraries)
+                module_actual_libraries = list(l for l in module_libraries if l in all_detected_libraries)
 
                 all_expected_libraries.update(module_libraries)
                 all_actual_libraries.update(module_libraries)
