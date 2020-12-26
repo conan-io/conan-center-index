@@ -14,6 +14,9 @@ class UTConan(ConanFile):
     settings = "os", "compiler", "arch", "build_type"
     no_copy_source = True
 
+    def configure(self):
+        self._validate_compiler_settings()
+
     @property
     def _source_subfolder(self):
         return "source_subfolder"
@@ -36,3 +39,18 @@ class UTConan(ConanFile):
     def package_info(self):
         self.cpp_info.names["cmake_find_package"] = "UT"
         self.cpp_info.names["cmake_find_package_multi"] = "UT"
+
+    def _validate_compiler_settings(self):
+        tools.check_min_cppstd(self, "20")
+        self._require_at_least_compiler_version("apple-clang", 11)
+        self._require_at_least_compiler_version("clang", 9)
+        self._require_at_least_compiler_version("gcc", 9)
+        self._require_at_least_compiler_version("Visual Studio", 16)
+
+    def _require_at_least_compiler_version(self, compiler, compiler_version):
+        if self.settings.compiler == compiler \
+                and tools.Version(self.settings.compiler.version) \
+                < compiler_version:
+            raise ConanInvalidConfiguration(
+                "{}/{} with compiler {} requires at least compiler version {}".
+                format(self.name, self.version, compiler, compiler_version))
