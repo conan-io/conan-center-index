@@ -1,10 +1,10 @@
-#include <assert>
-#include <string.h>
-
 #include "properties.h"
 
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 
-#define LIBPROPERTIES_TEST_ASSERT do {if(!x) {abort();}} while(0)
+#define LIBPROPERTIES_TEST_ASSERT(X) do {if(!(X))    {fprintf(stderr, "FAIL: %s\n", #X); abort();}} while(0)
 
 
 int check_handler(void* context, char* key, int key_len, char* val, int val_len)
@@ -25,7 +25,7 @@ int main(int argc, char* argv[])
         str,
         str + strlen(str)
     };
-    properties_parse(&source, properties_source_string_read, NULL, test_handler);
+    properties_parse(&source, properties_source_string_read, NULL, check_handler);
 
     return 0;        
 }
