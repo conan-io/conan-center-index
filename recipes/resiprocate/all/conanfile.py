@@ -33,9 +33,9 @@ class ResiprocateConan(ConanFile):
         if self.settings.os in ("Windows", "Macos"):
             raise ConanInvalidConfiguration("reSIProcate is not support on {}.".format(self.settings.os))
         if self.options.with_ssl:
-            self.requires("openssl/1.1.1h")
+            self.requires("openssl/1.1.1i")
         if self.options.with_postgresql:
-            self.requires("libpq/11.5")
+            self.requires("libpq/11.9")
         if self.options.with_mysql:
             self.requires("libmysqlclient/8.0.17")
 
