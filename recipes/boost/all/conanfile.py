@@ -83,6 +83,7 @@ class BoostConan(ConanFile):
         "namespace": "ANY",  # custom boost namespace for bcp, e.g. myboost
         "namespace_alias": [True, False],  # enable namespace alias for bcp, boost=myboost
         "multithreading": [True, False],  # enables multithreading support
+        "numa": [True, False],
         "zlib": [True, False],
         "bzip2": [True, False],
         "lzma": [True, False],
@@ -111,6 +112,7 @@ class BoostConan(ConanFile):
         "namespace": "boost",
         "namespace_alias": False,
         "multithreading": True,
+        "numa": True,
         "zlib": True,
         "bzip2": True,
         "lzma": False,
@@ -305,6 +307,9 @@ class BoostConan(ConanFile):
 
         if self.options.layout == "b2-default":
             self.options.layout = "versioned" if self.settings.os == "Windows" else "system"
+
+        if self.options.without_fiber:
+            del self.options.numa
 
     def build_requirements(self):
         if not self.options.header_only:
@@ -734,6 +739,9 @@ class BoostConan(ConanFile):
 
         # Stop at the first error. No need to continue building.
         flags.append("-q")
+
+        if self.options.get_safe("numa"):
+            flags.append("numa=on")
 
         # https://www.boost.org/doc/libs/1_70_0/libs/context/doc/html/context/architectures.html
         if self._b2_os:
@@ -1246,45 +1254,62 @@ class BoostConan(ConanFile):
                     libprefix = "lib"
                 return libprefix + n
 
-            modules_seen = set()
-            detected_libraries = set(tools.collect_libs(self))
-            used_libraries = set()
+            all_detected_libraries = set(tools.collect_libs(self))
+            all_actual_libraries = set()
+            all_expected_libraries = set()
+
+            def filter_transform_module_libraries(names):
+                libs = []
+                for name in names:
+                    if "windbg" in name and self.settings.os != "Windows":
+                        continue
+                    if "addr2line" in name and self.settings.compiler == "Visual Studio":
+                        continue
+                    if "backtrace" in name:
+                        continue
+                    if not self.options.get_safe("numa") and "_numa" in name:
+                        continue
+                    libs.append(add_libprefix(name.format(**libformatdata)) + libsuffix)
+                return libs
 
             for module in self._dependencies["dependencies"].keys():
                 missing_depmodules = list(depmodule for depmodule in self._all_dependent_modules(module) if self.options.get_safe("without_{}".format(depmodule), False))
                 if missing_depmodules:
                     continue
 
-                module_libraries = [add_libprefix(lib.format(**libformatdata)) + libsuffix for lib in self._dependencies["libs"][module]]
-                if all(l in detected_libraries for l in module_libraries):
-                    modules_seen.add(module)
-                    used_libraries.update(module_libraries)
-                    self.cpp_info.components[module].libs = module_libraries
+                module_libraries = filter_transform_module_libraries(self._dependencies["libs"][module])
+                module_actual_libraries = set(module_libraries).intersection(all_detected_libraries)
 
-                    self.cpp_info.components[module].requires = self._dependencies["dependencies"][module] + ["_libboost"]
-                    self.cpp_info.components[module].names["cmake_find_package"] = module
-                    self.cpp_info.components[module].names["cmake_find_package_multi"] = module
+                all_expected_libraries.update(module_libraries)
+                all_actual_libraries.update(module_libraries)
 
-                    for requirement in self._dependencies.get("requirements", {}).get(module, []):
-                        if requirement == "backtrace":
-                            # FIXME: backtrace not (yet) available in cci
+                self.cpp_info.components[module].libs = module_actual_libraries
+
+                self.cpp_info.components[module].requires = self._dependencies["dependencies"][module] + ["_libboost"]
+                self.cpp_info.components[module].names["cmake_find_package"] = module
+                self.cpp_info.components[module].names["cmake_find_package_multi"] = module
+
+                for requirement in self._dependencies.get("requirements", {}).get(module, []):
+                    if requirement == "backtrace":
+                        # FIXME: backtrace not (yet) available in cci
+                        continue
+                    if self.options.get_safe(requirement, None) == False:
+                        continue
+                    conan_requirement = self._option_to_conan_requirement(requirement)
+                    if conan_requirement not in self.requires:
+                        continue
+                    if module == "locale" and requirement in ("icu", "iconv"):
+                        if requirement != self.options.i18n_backend:
                             continue
-                        if self.options.get_safe(requirement, None) == False:
-                            continue
-                        conan_requirement = self._option_to_conan_requirement(requirement)
-                        if conan_requirement not in self.requires:
-                            continue
-                        if module == "locale" and requirement in ("icu", "iconv"):
-                            if requirement != self.options.i18n_backend:
-                                continue
-                        self.cpp_info.components[module].requires.append("{0}::{0}".format(conan_requirement))
+                    self.cpp_info.components[module].requires.append("{0}::{0}".format(conan_requirement))
 
-            if used_libraries != detected_libraries:
-                non_used = detected_libraries.difference(used_libraries)
-                assert len(non_used) == 0, "These libraries were not used in conan components: {}".format(non_used)
+            non_used = all_detected_libraries.difference(all_actual_libraries)
+            if non_used:
+                raise RuntimeError("These libraries were built, but were not used in any boost module: {}".format(non_used))
 
-                non_existing = used_libraries.difference(detected_libraries)
-                assert len(non_existing) == 0, "These libraries were used, but not built: {}".format(non_existing)
+            non_built = all_expected_libraries.difference(all_actual_libraries)
+            if non_built:
+                raise RuntimeError("These libraries were expected to be built, but were not built: {}".format(non_built))
 
             if not self.options.without_python:
                 pyversion = tools.Version(self._python_version)
