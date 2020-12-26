@@ -5,7 +5,8 @@ import glob
 
 class UTConan(ConanFile):
     name = "ut"
-    description = "C++20 single header/single module, macro-free micro Unit Testing Framework"
+    description = "C++20 single header/single module, "
+    "macro-free micro Unit Testing Framework"
     topics = ("conan", "UT", "header-only", "unit-test", "tdd", "bdd")
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://boost-ext.github.io/ut/"
@@ -20,11 +21,14 @@ class UTConan(ConanFile):
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
         os.rename("ut-" + self.version, self._source_subfolder)
-        tools.download("https://www.boost.org/LICENSE_1_0.txt", "LICENSE", sha256="c9bff75738922193e67fa726fa225535870d2aa1059f91452c411736284ad566")
+        tools.download("https://www.boost.org/LICENSE_1_0.txt", "LICENSE",
+                       sha256="c9bff75738922193e67fa726fa225535870d2aa1059f914"
+                       "52c411736284ad566")
 
     def package(self):
         self.copy("LICENSE", dst="licenses")
-        self.copy(os.path.join("include", "boost", "ut.hpp"), src=self._source_subfolder)
+        self.copy(os.path.join("include", "boost", "ut.hpp"),
+                  src=self._source_subfolder)
 
     def package_id(self):
         self.info.header_only()
