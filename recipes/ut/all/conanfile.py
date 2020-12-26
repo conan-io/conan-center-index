@@ -7,7 +7,7 @@ class UTConan(ConanFile):
     name = "ut"
     description = "C++20 single header/single module, macro-free micro Unit Testing Framework"
     topics = ("conan", "UT", "header-only", "unit-test", "tdd", "bdd")
-    url = "https://github.com/boost-ext/ut"
+    url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://boost-ext.github.io/ut/"
     license = "Boost"
     settings = "os", "compiler", "arch", "build_type"
