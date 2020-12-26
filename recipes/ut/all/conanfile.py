@@ -11,7 +11,6 @@ class UTConan(ConanFile):
     homepage = "https://boost-ext.github.io/ut/"
     license = "Boost"
     settings = "os", "compiler", "arch", "build_type"
-    exports_sources = "include/*"
     no_copy_source = True
 
     @property
