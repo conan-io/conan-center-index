@@ -54,6 +54,7 @@ class ResiprocateConan(ConanFile):
             "--with-pic={}".format(yes_no(self.options.fPIC))
         ]
 
+        # These options do not support yes/no
         if self.options.with_ssl:
             configure_args.append("--with-ssl")
         if self.options.with_mysql:
@@ -77,7 +78,8 @@ class ResiprocateConan(ConanFile):
 
     def package_info(self):
         self.cpp_info.libs = ["resip", "rutil", "dum", "resipares"]
-        self.cpp_info.system_libs = ["pthread"]
+        if self.settings.os in ("Linux", "FreeBSD"):
+            self.cpp_info.system_libs = ["pthread"]
         bin_path = os.path.join(self.package_folder, "bin")
         self.output.info("Appending PATH environment variable: {}".format(bin_path))
         self.env_info.PATH.append(os.path.join(self.package_folder, "bin"))
