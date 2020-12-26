@@ -4,7 +4,7 @@ import glob
 
 
 class UTConan(ConanFile):
-    name = "UT"
+    name = "ut"
     description = "C++20 single header/single module, macro-free μ(micro)/Unit Testing Framework"
     topics = ("conan", "UT", "header-only", "unit-test", "tdd", "bdd")
     url = "https://github.com/boost-ext/ut"
