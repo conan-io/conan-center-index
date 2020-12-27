@@ -44,7 +44,7 @@ class RootConan(ConanFile):
         # default python=off as there is currently no libpython in Conan center
         "python": PythonOption.OFF,
     }
-    generators = "cmake_find_package"
+    generators = ("cmake", "cmake_find_package")
     requires = (
         "opengl/system",
         "libxml2/2.9.10",
@@ -124,6 +124,11 @@ class RootConan(ConanFile):
             os.sep.join((self._rootsrcdir, "CMakeLists.txt")),
             "project(ROOT)",
             """project(ROOT)
+
+            # cmake script sets the current C runtime on MSVC (MT vs MD vd MTd vs MDd)
+            include(conanbuildinfo.cmake)
+            conan_basic_setup()
+
             find_package(OpenSSL REQUIRED)
             set(OPENSSL_VERSION ${OpenSSL_VERSION})
             find_package(LibXml2 REQUIRED)
