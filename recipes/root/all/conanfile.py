@@ -12,7 +12,7 @@ class PythonOption:
     SYSTEM = "system"
     # in future we may allow the user to specify a version when
     # libPython is available in Conan Center Index.
-     # FIXME: add option to use CCI Python package when it is available
+    # FIXME: add option to use CCI Python package when it is available
     ALL = [OFF, SYSTEM]
 
 
@@ -201,10 +201,10 @@ class RootConan(ConanFile):
                     "pythia8": "OFF",  # FIXME : switch on if pythia8 CCI package available
                     "mysql": "OFF",  # FIXME : switch on if mysql CCI package available
                     "oracle": "OFF",
-                    "pgsql": "OFF", # FIXME: switch on if PostgreSQL CCI package available
-                    "gfal": "OFF", # FIXME: switch on if gfal CCI package available
-                    "tmva-pymva": "OFF", # FIXME: switch on if Python CCI package available
-                    "xrootd": "OFF", # FIXME: switch on if xrootd CCI package available
+                    "pgsql": "OFF",  # FIXME: switch on if PostgreSQL CCI package available
+                    "gfal": "OFF",  # FIXME: switch on if gfal CCI package available
+                    "tmva-pymva": "OFF",  # FIXME: switch on if Python CCI package available
+                    "xrootd": "OFF",  # FIXME: switch on if xrootd CCI package available
                     "pyroot": self._pyrootopt,
                     # Tell CMake where to look for Conan provided depedencies
                     "CMAKE_LIBRARY_PATH": cmakelibpath.replace("\\", "/"),
@@ -218,11 +218,11 @@ class RootConan(ConanFile):
                     "CMAKE_INSTALL_PREFIX": os.sep.join((self.package_folder, "res")),
                     # Fix some Conan-ROOT CMake variable naming differences
                     "PNG_PNG_INCLUDE_DIR": ";".join(
-                        self.deps_cpp_info["libpng"].include_paths.replace("\\", "/")
-                    ),
+                        self.deps_cpp_info["libpng"].include_paths
+                    ).replace("\\", "/"),
                     "LIBLZMA_INCLUDE_DIR": ";".join(
-                        self.deps_cpp_info["xz_utils"].include_paths.replace("\\", "/")
-                    ),
+                        self.deps_cpp_info["xz_utils"].include_paths
+                    ).replace("\\", "/"),
                 },
             )
         return self._cmake
