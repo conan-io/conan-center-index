@@ -1,5 +1,4 @@
 #include "influxdb.hpp"
-#include "influxdb.hpp"
 
 int main()
 {
