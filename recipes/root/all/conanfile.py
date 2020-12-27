@@ -212,10 +212,10 @@ class RootConan(ConanFile):
                     "CMAKE_INSTALL_PREFIX": os.sep.join((self.package_folder, "res")),
                     # Fix some Conan-ROOT CMake variable naming differences
                     "PNG_PNG_INCLUDE_DIR": ";".join(
-                        self.deps_cpp_info["libpng"].include_paths
+                        self.deps_cpp_info["libpng"].include_paths.replace("\\", "/")
                     ),
                     "LIBLZMA_INCLUDE_DIR": ";".join(
-                        self.deps_cpp_info["xz_utils"].include_paths
+                        self.deps_cpp_info["xz_utils"].include_paths.replace("\\", "/")
                     ),
                 },
             )
