@@ -1,9 +1,9 @@
 from conans import ConanFile, CMake, tools
 from conans.errors import ConanInvalidConfiguration
-import os, shutil
+import os
 
 
-class ConanFileDefault(ConanFile):
+class GSoapConan(ConanFile):
     name = "gsoap"
     description = "The gSOAP toolkit is a C and C++ software development toolkit for SOAP and " \
                   "REST XML Web services and generic C/C++ XML data bindings."
@@ -27,6 +27,7 @@ class ConanFileDefault(ConanFile):
 
     settings = "os", "arch", "compiler", "build_type"
     options = {
+        "fPIC": [True, False],
         "tools": [True, False],
         "with_openssl": [True, False],
         "with_ipv6": [True, False],
@@ -34,6 +35,7 @@ class ConanFileDefault(ConanFile):
         "with_c_locale": [True, False],
     }
     default_options = {
+        "fPIC": True,
         "tools": True,
         "with_openssl": True,
         "with_ipv6": True,
@@ -42,6 +44,8 @@ class ConanFileDefault(ConanFile):
     }
 
     def config_options(self):
+        if self.settings.os == "Windows":
+            del self.options.fPIC
         if tools.cross_building(self.settings):
             self.options.tools = False
 
@@ -51,13 +55,8 @@ class ConanFileDefault(ConanFile):
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
-        # Rename to "source_subfolder" is a convention to simplify later steps
         extracted_dir = "gsoap-" + self.version[:self.version.rindex(".")]
         os.rename(extracted_dir, self._source_subfolder)
-
-    def build(self):
-        cmake = self._configure_cmake()
-        cmake.build()
 
     def build_requirements(self):
         if tools.os_info.is_windows:
@@ -68,7 +67,7 @@ class ConanFileDefault(ConanFile):
 
     def requirements(self):
         if self.options.with_openssl:
-            self.requires("openssl/1.1.1h")
+            self.requires("openssl/1.1.1i")
             self.requires("zlib/1.2.11")
 
     def _configure_cmake(self):
@@ -84,6 +83,11 @@ class ConanFileDefault(ConanFile):
         self._cmake.configure(build_folder=self._build_subfolder)
         return self._cmake
 
+    def build(self):
+        # FIXME: use autotools build system instead of custom cmake scripts (the cmake scripts are not building a lot of libraries gsoap, gsoap++, gsoapssl, gsoapssl++, gsoapck, gsoapck++)
+        cmake = self._configure_cmake()
+        cmake.build()
+
     def package(self):
         self.copy(pattern="GPLv2_license.txt", dst="licenses", src=self._source_subfolder)
         self.copy(pattern="LICENSE.txt", dst="licenses", src=self._source_subfolder)
@@ -91,19 +95,18 @@ class ConanFileDefault(ConanFile):
         cmake.install()
 
     def package_info(self):
-        defines = []
-        if self.options.with_openssl:
-            libs = ["gsoapssl++", ]
-            defines.append("WITH_OPENSSL")
-            defines.append("WITH_GZIP")
-        else:
-            libs = ["gsoap++", ]
-        self.cpp_info.libs = libs
-
         if self.options.with_ipv6:
-            defines.append("WITH_IPV6")
+            self.cpp_info.components["libgsoap"].defines.append("WITH_IPV6")
         if self.options.with_cookies:
-            defines.append("WITH_COOKIES")
+            self.cpp_info.components["libgsoap"].defines.append("WITH_COOKIES")
         if self.options.with_c_locale:
-            defines.append("WITH_C_LOCALE")
-        self.cpp_info.defines = defines
+            self.cpp_info.components["libgsoap"].defines.append("WITH_C_LOCALE")
+
+        if self.options.with_openssl:
+            self.cpp_info.components["gsoapssl++"].libs = ["gsoapssl++"]
+            self.cpp_info.components["gsoapssl++"].names["pkg_config"] = ["gsoap++"]
+            self.cpp_info.components["gsoapssl++"].requires = ["openssl::openssl", "zlib::zlib"]
+            self.cpp_info.components["gsoapssl++"].defines.extend(["WITH_OPENSSL", "WITH_GZIP"])
+        else:
+            self.cpp_info.components["gsoap++"].libs = ["gsoap++"]
+            self.cpp_info.components["gsoap++"].names["pkg_config"] = "gsoap++"
