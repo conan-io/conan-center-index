@@ -29,9 +29,17 @@ class ResiprocateConan(ConanFile):
     def _source_subfolder(self):
         return "source_subfolder"
 
-    def requirements(self):
+    def config_options(self):
+        if self.settings.os == 'Windows':
+            del self.options.fPIC
+
+    def configure(self):
         if self.settings.os in ("Windows", "Macos"):
             raise ConanInvalidConfiguration("reSIProcate is not support on {}.".format(self.settings.os))
+        if self.options.shared and self.options.fPIC:
+            raise ConanInvalidConfiguration("fPIC option should be False when shared option is True")
+
+    def requirements(self):
         if self.options.with_ssl:
             self.requires("openssl/1.1.1i")
         if self.options.with_postgresql:
