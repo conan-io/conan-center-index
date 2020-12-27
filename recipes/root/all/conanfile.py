@@ -126,7 +126,7 @@ class RootConan(ConanFile):
             """project(ROOT)
 
             # cmake script sets the current C runtime on MSVC (MT vs MD vd MTd vs MDd)
-            include(conanbuildinfo.cmake)
+            include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
             conan_basic_setup()
 
             find_package(OpenSSL REQUIRED)
