@@ -1266,7 +1266,11 @@ class BoostConan(ConanFile):
                     if "addr2line" in name and self.settings.compiler == "Visual Studio":
                         continue
                     if "backtrace" in name:
-                        continue
+                        if not any(l for l in all_detected_libraries if "backtrace" in l):
+                            continue
+                        # FIXME: Boost.Build sometimes picks up system libbacktrace libraries.
+                        # How to avoid this and force using a conan packaged libbacktrace package.
+                        self.output.warn("Picked up a system libbacktrace library")
                     if not self.options.get_safe("numa") and "_numa" in name:
                         continue
                     libs.append(add_libprefix(name.format(**libformatdata)) + libsuffix)
