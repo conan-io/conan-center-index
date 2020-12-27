@@ -17,5 +17,3 @@ patches:
       base_path: "source_subfolder"
     - patch_file: "patches/00003-define-win32-winnt.patch"
       base_path: "source_subfolder"
-    - patch_file: "patches/00004-add-mbig-obj-to-mingw.patch"
-      base_path: "source_subfolder"
