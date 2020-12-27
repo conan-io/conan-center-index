@@ -41,7 +41,8 @@ class UTConan(ConanFile):
         self.cpp_info.names["cmake_find_package_multi"] = "UT"
 
     def _validate_compiler_settings(self):
-        tools.check_min_cppstd(self, "20")
+        if self.settings.compiler.cppstd:
+            tools.check_min_cppstd(self, "20")
         self._require_at_least_compiler_version("apple-clang", 11)
         self._require_at_least_compiler_version("clang", 9)
         self._require_at_least_compiler_version("gcc", 9)
