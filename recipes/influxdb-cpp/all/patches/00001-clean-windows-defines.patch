@@ -1,3 +1,5 @@
+Upstream PR: https://github.com/orca-zhang/influxdb-cpp/pull/34
+
 diff --git a/influxdb.hpp b/influxdb.hpp
 index 025f01a..5162b57 100644
 --- a/influxdb.hpp
