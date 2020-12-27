@@ -17,7 +17,7 @@ class CppServer(ConanFile):
                "shared": [True, False]}
     default_options = {"fPIC": True,
                        "shared": False}
-    requires = ["asio/1.17.0", "openssl/1.1.1g", "cppcommon/cci.20201104"]
+    requires = ["asio/1.17.0", "openssl/1.1.1i", "cppcommon/cci.20201104"]
     generators = "cmake", "cmake_find_package"
     exports_sources = ["patches/**", "CMakeLists.txt"]
     _cmake = None
@@ -40,8 +40,6 @@ class CppServer(ConanFile):
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
         extracted_dir = glob.glob("CppServer-*")[0]
-        import time
-        time.sleep(30)
         os.rename(extracted_dir, self._source_subfolder)
 
     def config_options(self):
@@ -53,8 +51,7 @@ class CppServer(ConanFile):
             del self.options.fPIC
 
     def build(self):
-        patches = self.conan_data["patches"][self.version]
-        for patch in patches:
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
             tools.patch(**patch)
 
         cmake = self._configure_cmake()
