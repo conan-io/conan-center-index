@@ -8,5 +8,7 @@ set(CMAKE_CXX_EXTENSIONS no)
 include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
 conan_basic_setup()
 
+find_package(ut REQUIRED CONFIG)
+
 add_executable(test_package test_package.cpp)
-target_link_libraries(test_package ${CONAN_LIBS})
+target_link_libraries(test_package boost::ut)
