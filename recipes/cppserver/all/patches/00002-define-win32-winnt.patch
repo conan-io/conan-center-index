@@ -1,13 +1,13 @@
 diff --git a/CMakeLists.txt b/CMakeLists.txt
-index 94135f07..220992bc 100644
+index 94135f07..40dcab45 100644
 --- a/CMakeLists.txt
 +++ b/CMakeLists.txt
 @@ -75,6 +75,10 @@ target_compile_features(cppserver PUBLIC cxx_std_17)
  list(APPEND INSTALL_TARGETS cppserver)
  list(APPEND LINKLIBS cppserver)
  
-+if(WIN32)
-+    target_compile_definitions (cppserver PUBLIC -D_WIN32_WINNT=_WIN32_WINNT_WIN8)
++if(WIN32 AND NOT MSVC)
++    target_compile_definitions(cppserver PUBLIC -D_WIN32_WINNT=_WIN32_WINNT_VISTA)
 +endif()
 +
  # Additional module components: benchmarks, examples, plugins, tests, tools and install
