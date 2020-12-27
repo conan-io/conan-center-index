@@ -35,7 +35,8 @@ class ResiprocateConan(ConanFile):
 
     def configure(self):
         if self.settings.os in ("Windows", "Macos"):
-            raise ConanInvalidConfiguration("reSIProcate is not support on {}.".format(self.settings.os))
+            # FIXME: Visual Studio project & Mac support seems available in resiprocate
+            raise ConanInvalidConfiguration("reSIProcate recipe does not currently support {}.".format(self.settings.os))
         if self.options.shared and self.options.fPIC:
             raise ConanInvalidConfiguration("fPIC option should be False when shared option is True")
 
