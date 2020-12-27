@@ -235,6 +235,10 @@ class BoostConan(ConanFile):
             if dep_name not in self._configure_options:
                 delattr(self.options, "without_{}".format(dep_name))
 
+        if self.settings.compiler == "Visual Studio":
+            # Shared builds of numa do not link on Visual Studio due to missing symbols
+            self.options.numa = False
+
     @property
     def _configure_options(self):
         return self._dependencies["configure_options"]
@@ -257,6 +261,9 @@ class BoostConan(ConanFile):
 
         if self.settings.compiler == "Visual Studio" and "MT" in str(self.settings.compiler.runtime) and self.options.shared:
             raise ConanInvalidConfiguration("Boost can not be built as shared library with MT runtime.")
+
+        if self.settings.compiler == "Visual Studio" and self.options.shared and self.options.numa:
+            raise ConanInvalidConfiguration("Cannot build a shared boost with numa support on Visual Studio")
 
         # Check, when a boost module is enabled, whether the boost modules it depends on are enabled as well.
         for mod_name, mod_deps in self._dependencies["dependencies"].items():
@@ -1141,6 +1148,7 @@ class BoostConan(ConanFile):
         self.cpp_info.components["headers"].libs = []
         self.cpp_info.components["headers"].names["cmake_find_package"] = "headers"
         self.cpp_info.components["headers"].names["cmake_find_package_multi"] = "headers"
+        self.cpp_info.components["headers"].names["pkg_config"] = "boost"
 
         if self.options.system_no_deprecated:
             self.cpp_info.components["headers"].defines.append("BOOST_SYSTEM_NO_DEPRECATED")
@@ -1173,6 +1181,7 @@ class BoostConan(ConanFile):
             self.cpp_info.components["diagnostic_definitions"].libs = []
             self.cpp_info.components["diagnostic_definitions"].names["cmake_find_package"] = "diagnostic_definitions"
             self.cpp_info.components["diagnostic_definitions"].names["cmake_find_package_multi"] = "diagnostic_definitions"
+            self.cpp_info.components["diagnostic_definitions"].names["pkg_config"] = "boost_diagnostic_definitions"  # FIXME: disable on pkg_config
             self.cpp_info.components["_libboost"].requires.append("diagnostic_definitions")
             if self.options.diagnostic_definitions:
                 self.cpp_info.components["diagnostic_definitions"].defines = ["BOOST_LIB_DIAGNOSTIC"]
@@ -1180,6 +1189,7 @@ class BoostConan(ConanFile):
             self.cpp_info.components["disable_autolinking"].libs = []
             self.cpp_info.components["disable_autolinking"].names["cmake_find_package"] = "disable_autolinking"
             self.cpp_info.components["disable_autolinking"].names["cmake_find_package_multi"] = "disable_autolinking"
+            self.cpp_info.components["disable_autolinking"].names["pkg_config"] = "boost_disable_autolinking"  # FIXME: disable on pkg_config
             self.cpp_info.components["_libboost"].requires.append("disable_autolinking")
             if self._is_msvc or self._is_clang_cl:
                 if self.options.magic_autolink:
@@ -1196,6 +1206,7 @@ class BoostConan(ConanFile):
             self.cpp_info.components["dynamic_linking"].libs = []
             self.cpp_info.components["dynamic_linking"].names["cmake_find_package"] = "dynamic_linking"
             self.cpp_info.components["dynamic_linking"].names["cmake_find_package_multi"] = "dynamic_linking"
+            self.cpp_info.components["dynamic_linking"].names["pkg_config"] = "boost_dynamic_linking"  # FIXME: disable on pkg_config
             self.cpp_info.components["_libboost"].requires.append("dynamic_linking")
             if self.options.shared:
                 # A Boost::dynamic_linking cmake target does only make sense for a shared boost package
@@ -1292,6 +1303,7 @@ class BoostConan(ConanFile):
                 self.cpp_info.components[module].requires = self._dependencies["dependencies"][module] + ["_libboost"]
                 self.cpp_info.components[module].names["cmake_find_package"] = module
                 self.cpp_info.components[module].names["cmake_find_package_multi"] = module
+                self.cpp_info.components[module].names["pkg_config"] = "boost_{}".format(module)
 
                 for requirement in self._dependencies.get("requirements", {}).get(module, []):
                     if requirement == "backtrace":
