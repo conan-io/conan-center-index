@@ -10,7 +10,7 @@ class UTConan(ConanFile):
     topics = ("conan", "UT", "header-only", "unit-test", "tdd", "bdd")
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://boost-ext.github.io/ut/"
-    license = "Boost"
+    license = "BSL-1.0"
     settings = "os", "compiler", "arch", "build_type"
     no_copy_source = True
 
