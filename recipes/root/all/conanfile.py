@@ -58,7 +58,7 @@ class RootConan(ConanFile):
         "zstd/1.4.5",
         "lz4/1.9.3",
         "glew/2.1.0",
-        "openssl/1.1.1h",
+        "openssl/1.1.1i",
         "fftw/3.3.8",
         "cfitsio/3.490",
         "tbb/2020.3",
