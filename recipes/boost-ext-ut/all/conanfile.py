@@ -38,12 +38,17 @@ class UTConan(ConanFile):
         min_version = self._minimum_compilers_version.get(
             str(self.settings.compiler))
         if not min_version:
-            self.output.warn("{} recipe lacks information about the {} compiler support.".format(
-                self.name, self.settings.compiler))
+            self.output.warn("{} recipe lacks information about the {} "
+                             "compiler support.".format(
+                                 self.name, self.settings.compiler))
         else:
             if tools.Version(self.settings.compiler.version) < min_version:
-                raise ConanInvalidConfiguration("{} requires C++{} support. The current compiler {} {} does not support it.".format(
-                    self.name, self._minimum_cpp_standard, self.settings.compiler, self.settings.compiler.version))
+                raise ConanInvalidConfiguration(
+                    "{} requires C++{} support. "
+                    "The current compiler {} {} does not support it.".format(
+                        self.name, self._minimum_cpp_standard,
+                        self.settings.compiler,
+                        self.settings.compiler.version))
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
