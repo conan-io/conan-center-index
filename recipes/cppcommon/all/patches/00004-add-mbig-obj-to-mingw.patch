@@ -1,0 +1,15 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index f718b50dc..2cb90c8d0 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -78,6 +78,10 @@ if(WIN32)
+   target_compile_definitions (cppcommon PUBLIC -D_WIN32_WINNT=_WIN32_WINNT_WIN7)
+ endif()
+ 
++if(CYGWIN OR MINGW)
++  add_definitions(-Wa,-mbig-obj)
++endif()
++
+ # Additional module components: benchmarks, examples, plugins, tests, tools and install
+ if(NOT CPPCOMMON_MODULE)
+ 
