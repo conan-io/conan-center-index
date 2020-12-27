@@ -1,8 +1,8 @@
 diff --git a/influxdb.hpp b/influxdb.hpp
-index 025f01a..3c4fa84 100644
+index 025f01a..5162b57 100644
 --- a/influxdb.hpp
 +++ b/influxdb.hpp
-@@ -6,15 +6,17 @@
+@@ -6,6 +6,10 @@
  
    Please see LICENSE file or visit https://github.com/orca-zhang/influxdb-cpp for details.
   */
@@ -13,16 +13,7 @@ index 025f01a..3c4fa84 100644
  #include <sstream>
  #include <cstring>
  #include <cstdio>
- 
- #ifdef _WIN32
-     #define NOMINMAX
-     #include <windows.h>
-     #include <algorithm>
-     #pragma comment(lib, "ws2_32")
-     typedef struct iovec { void* iov_base; size_t iov_len; } iovec;
-     inline __int64 writev(int sock, struct iovec* iov, int cnt) {
-         __int64 r = send(sock, (const char*)iov->iov_base, iov->iov_len, 0);
-@@ -302,5 +302,5 @@ namespace influxdb_cpp {
+@@ -300,3 +304,5 @@ namespace influxdb_cpp {
          }
      }
  }
