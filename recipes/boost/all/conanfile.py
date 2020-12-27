@@ -1250,7 +1250,8 @@ class BoostConan(ConanFile):
             else:
                 libsuffix_data["version"] = "-{}_{}_{}".format(version.major, version.minor, version.patch)
             libsuffix = libsuffix_lut[str(self.options.layout)].format(**libsuffix_data)
-            self.output.info("Library layout suffix: {}".format(repr(libsuffix)))
+            if libsuffix:
+                self.output.info("Library layout suffix: {}".format(repr(libsuffix)))
 
             libformatdata = {}
             if not self.options.without_python:
@@ -1266,8 +1267,8 @@ class BoostConan(ConanFile):
                 return libprefix + n
 
             all_detected_libraries = set(tools.collect_libs(self))
-            all_actual_libraries = set()
             all_expected_libraries = set()
+            incomplete_components = list()
 
             def filter_transform_module_libraries(names):
                 libs = []
@@ -1279,7 +1280,7 @@ class BoostConan(ConanFile):
                     if "backtrace" in name:
                         if not any(l for l in all_detected_libraries if "backtrace" in l):
                             continue
-                        # FIXME: Boost.Build sometimes picks up system libbacktrace libraries.
+                        # FIXME: Boost.Build sometimes picks up a system libbacktrace library.
                         # How to avoid this and force using a conan packaged libbacktrace package.
                         self.output.warn("Picked up a system libbacktrace library")
                     if not self.options.get_safe("numa") and "_numa" in name:
@@ -1293,12 +1294,11 @@ class BoostConan(ConanFile):
                     continue
 
                 module_libraries = filter_transform_module_libraries(self._dependencies["libs"][module])
-                module_actual_libraries = list(l for l in module_libraries if l in all_detected_libraries)
+                all_expected_libraries = all_expected_libraries.union(module_libraries)
+                if set(module_libraries).difference(all_detected_libraries):
+                    incomplete_components.append(module)
 
-                all_expected_libraries.update(module_libraries)
-                all_actual_libraries.update(module_libraries)
-
-                self.cpp_info.components[module].libs = module_actual_libraries
+                self.cpp_info.components[module].libs = module_libraries
 
                 self.cpp_info.components[module].requires = self._dependencies["dependencies"][module] + ["_libboost"]
                 self.cpp_info.components[module].names["cmake_find_package"] = module
@@ -1319,11 +1319,14 @@ class BoostConan(ConanFile):
                             continue
                     self.cpp_info.components[module].requires.append("{0}::{0}".format(conan_requirement))
 
-            non_used = all_detected_libraries.difference(all_actual_libraries)
+            for incomplete_component in incomplete_components:
+                self.output.warn("Boost component '{0}' is missing libraries. Try building boost with '-o boost:without_{0}'.".format(incomplete_component))
+
+            non_used = all_detected_libraries.difference(all_expected_libraries)
             if non_used:
                 raise RuntimeError("These libraries were built, but were not used in any boost module: {}".format(non_used))
 
-            non_built = all_expected_libraries.difference(all_actual_libraries)
+            non_built = all_expected_libraries.difference(all_detected_libraries)
             if non_built:
                 raise RuntimeError("These libraries were expected to be built, but were not built: {}".format(non_built))
 
