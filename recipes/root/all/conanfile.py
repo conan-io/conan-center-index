@@ -201,8 +201,8 @@ class RootConan(ConanFile):
                     "xrootd": "OFF",
                     "pyroot": self._pyrootopt,
                     # Tell CMake where to look for Conan provided depedencies
-                    "CMAKE_LIBRARY_PATH": cmakelibpath,
-                    "CMAKE_INCLUDE_PATH": cmakeincludepath,
+                    "CMAKE_LIBRARY_PATH": cmakelibpath.replace("\\", "/"),
+                    "CMAKE_INCLUDE_PATH": cmakeincludepath.replace("\\", "/"),
                     # Configure install directories
                     # Conan CCI hooks restrict the allowed install directory
                     # names but ROOT is very picky about where build/runtime
