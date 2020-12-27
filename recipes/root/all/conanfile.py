@@ -114,14 +114,24 @@ class RootConan(ConanFile):
         tools.get(**self.conan_data["sources"][self.version])
 
     def _patch_source_cmake(self):
-        os.remove(os.sep.join((self._rootsrcdir, "cmake", "modules", "FindTBB.cmake")))
+        os.remove(
+            os.sep.join(
+                (
+                    self.source_folder,
+                    self._rootsrcdir,
+                    "cmake",
+                    "modules",
+                    "FindTBB.cmake",
+                )
+            )
+        )
         # Conan generated cmake_find_packages names differ from
         # names ROOT expects (usually only due to case differences)
         # There is currently no way to change these names
         # see: https://github.com/conan-io/conan/issues/4430
         # Patch ROOT CMake to use Conan dependencies
         tools.replace_in_file(
-            os.sep.join((self._rootsrcdir, "CMakeLists.txt")),
+            os.sep.join((self.source_folder, self._rootsrcdir, "CMakeLists.txt")),
             "project(ROOT)",
             """project(ROOT)
 
@@ -150,7 +160,7 @@ class RootConan(ConanFile):
                 "**" + os.sep + "*.csh",
                 "**" + os.sep + "*.bat",
             )
-            for filename in glob(pattern, recursive=True)
+            for filename in glob(self.source_folder + os.sep + pattern, recursive=True)
         ]
         for s in scripts:
             self._make_file_executable(s)
