@@ -5,7 +5,7 @@ import glob
 
 class UTConan(ConanFile):
     name = "boost-ext-ut"
-    description = "C++20 single header/single module, "
+    description = "C++17/20 single header/single module, "
     "macro-free micro Unit Testing Framework"
     topics = ("conan", "UT", "header-only", "unit-test", "tdd", "bdd")
     url = "https://github.com/conan-io/conan-center-index"
@@ -16,7 +16,7 @@ class UTConan(ConanFile):
 
     @property
     def _minimum_cpp_standard(self):
-        return 20
+        return 17
 
     @property
     def _minimum_compilers_version(self):
