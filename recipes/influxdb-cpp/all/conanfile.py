@@ -32,7 +32,6 @@ class InfluxDBCppConan(ConanFile):
 
     def package_info(self):
         if self.settings.os == "Windows":
-            self.cpp_info.defines = ["NOMINMAX"]
             self.cpp_info.system_libs = ["ws2_32"]
 
     def package_id(self):

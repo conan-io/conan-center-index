@@ -15,14 +15,14 @@ index 025f01a..3c4fa84 100644
  #include <cstdio>
  
  #ifdef _WIN32
--    #define NOMINMAX
+     #define NOMINMAX
      #include <windows.h>
      #include <algorithm>
--    #pragma comment(lib, "ws2_32")
+     #pragma comment(lib, "ws2_32")
      typedef struct iovec { void* iov_base; size_t iov_len; } iovec;
      inline __int64 writev(int sock, struct iovec* iov, int cnt) {
          __int64 r = send(sock, (const char*)iov->iov_base, iov->iov_len, 0);
-@@ -300,3 +302,5 @@ namespace influxdb_cpp {
+@@ -302,5 +302,5 @@ namespace influxdb_cpp {
          }
      }
  }
