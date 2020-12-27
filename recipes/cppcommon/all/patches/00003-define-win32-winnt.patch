@@ -1,5 +1,5 @@
 diff --git a/CMakeLists.txt b/CMakeLists.txt
-index ad3d53aa8..f718b50dc 100644
+index ad3d53aa8..43418041f 100644
 --- a/CMakeLists.txt
 +++ b/CMakeLists.txt
 @@ -74,6 +74,10 @@ target_link_libraries(cppcommon PUBLIC ${LINKLIBS} CONAN_PKG::fmt)
@@ -7,7 +7,7 @@ index ad3d53aa8..f718b50dc 100644
  list(APPEND LINKLIBS cppcommon)
  
 +if(WIN32)
-+  target_compile_definitions (cppcommon PUBLIC -D_WIN32_WINNT=_WIN32_WINNT_WIN7)
++  target_compile_definitions (cppcommon PUBLIC -D_WIN32_WINNT=_WIN32_WINNT_WIN8)
 +endif()
 +
  # Additional module components: benchmarks, examples, plugins, tests, tools and install
