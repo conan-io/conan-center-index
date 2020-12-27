@@ -12,11 +12,12 @@ class PythonOption:
     SYSTEM = "system"
     # in future we may allow the user to specify a version when
     # libPython is available in Conan Center Index.
+     # FIXME: add option to use CCI Python package when it is available
     ALL = [OFF, SYSTEM]
 
 
-
 required_conan_version = ">=1.29.1"
+
 
 class RootConan(ConanFile):
     name = "root"
@@ -183,22 +184,22 @@ class RootConan(ConanFile):
                     "builtin_davix": "OFF",
                     "builtin_tbb": "OFF",
                     # Enable builtins where there is no Conan package
-                    "builtin_xxhash": "ON",
-                    "builtin_afterimage": "ON",
-                    "builtin_gsl": "ON",
-                    "builtin_gl2ps": "ON",
-                    "builtin_ftgl": "ON",
-                    "builtin_vdt": "ON",
+                    "builtin_xxhash": "ON",  # FIXME : replace with xxhash CCI package when available
+                    "builtin_afterimage": "ON",  # FIXME : replace with afterimage CCI package when available
+                    "builtin_gsl": "ON",  # FIXME : replace with gsl CCI package when available
+                    "builtin_gl2ps": "ON",  # FIXME : replace with gl2ps CCI package when available
+                    "builtin_ftgl": "ON",  # FIXME : replace with ftgl CCI package when available
+                    "builtin_vdt": "ON",  # FIXME : replace with vdt CCI package when available
                     # No Conan packages available for these dependencies yet
-                    "davix": "OFF",
-                    "pythia6": "OFF",
-                    "pythia8": "OFF",
-                    "mysql": "OFF",
+                    "davix": "OFF",  # FIXME : switch on if davix CCI package available
+                    "pythia6": "OFF",  # FIXME : switch on if pythia6 CCI package available
+                    "pythia8": "OFF",  # FIXME : switch on if pythia8 CCI package available
+                    "mysql": "OFF",  # FIXME : switch on if mysql CCI package available
                     "oracle": "OFF",
-                    "pgsql": "OFF",
-                    "gfal": "OFF",
-                    "tmva-pymva": "OFF",
-                    "xrootd": "OFF",
+                    "pgsql": "OFF", # FIXME: switch on if PostgreSQL CCI package available
+                    "gfal": "OFF", # FIXME: switch on if gfal CCI package available
+                    "tmva-pymva": "OFF", # FIXME: switch on if Python CCI package available
+                    "xrootd": "OFF", # FIXME: switch on if xrootd CCI package available
                     "pyroot": self._pyrootopt,
                     # Tell CMake where to look for Conan provided depedencies
                     "CMAKE_LIBRARY_PATH": cmakelibpath.replace("\\", "/"),
