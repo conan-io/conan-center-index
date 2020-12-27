@@ -1,13 +1,17 @@
 diff --git a/CMakeLists.txt b/CMakeLists.txt
-index ad3d53aa8..43418041f 100644
+index ad3d53aa8..1e29cfc1d 100644
 --- a/CMakeLists.txt
 +++ b/CMakeLists.txt
-@@ -74,6 +74,10 @@ target_link_libraries(cppcommon PUBLIC ${LINKLIBS} CONAN_PKG::fmt)
+@@ -74,6 +74,14 @@ target_link_libraries(cppcommon PUBLIC ${LINKLIBS} CONAN_PKG::fmt)
  list(APPEND INSTALL_TARGETS cppcommon)
  list(APPEND LINKLIBS cppcommon)
  
 +if(WIN32)
-+  target_compile_definitions (cppcommon PUBLIC -D_WIN32_WINNT=_WIN32_WINNT_WIN8)
++  if(MSVC)
++      add_definitions(/FI"SDKDDKVer.h")
++  else()
++      add_definitions(-include SDKDDKVer.h)
++  endif()
 +endif()
 +
  # Additional module components: benchmarks, examples, plugins, tests, tools and install
