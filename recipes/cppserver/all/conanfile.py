@@ -71,7 +71,3 @@ class CppServer(ConanFile):
         self.cpp_info.libs = tools.collect_libs(self)
         if self.settings.os == "Windows":
             self.cpp_info.system_libs = ["ws2_32", "crypt32", "mswsock"]
-            self.cpp_info.defines.extend(
-                ["_WIN32_WINNT=_WIN32_WINNT_WIN7",
-                "_WINSOCK_DEPRECATED_NO_WARNINGS",
-                "_SILENCE_CXX17_ALLOCATOR_VOID_DEPRECATION_WARNING"])
