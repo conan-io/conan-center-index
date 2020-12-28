@@ -8,7 +8,7 @@ class tngConan(ConanFile):
     description = "External GROMACS library for loading tng files."
     license = "BSD-3-Clause"
     topics = ("conan", "tng", "gromacs")
-    homepage = "https://github.com/gromacs/tng/"
+    homepage = "https://gitlab.com/gromacs/tng/"
     url = "https://github.com/conan-io/conan-center-index"
     exports_sources = ["CMakeLists.txt", "patches/*"]
     generators = "cmake"
