@@ -5,14 +5,18 @@ part of this repository.
 
 ## Sources
 
-- Recipes should build packages from library sources.
+**Origin of sources:** Library sources should come from an official origin like the library source code repository or the official
+release/download webpage.
 
-- Library sources should come from an official origin like the library source code repository or the official release/download webpage.
-  Source forks or unofficial origin of sources are not allowed.
+**Building from sources:** Recipes should always build packages from library sources.
 
-- If library sources cannot be downloaded from their official origin or cannot be consumed directly due to their format, an issue should be
-  opened in order to discuss alternative solutions.
+**Sources not accessible:**
 
 - Library sources that are not publicly available will not be allowed in this repository even if the license allows their redistribution.
 
-- In the remote case of having to package precompiled libraries, those should come from official sources like release/download webpages.
+- If library sources cannot be downloaded from their official origin or cannot be consumed directly due to their
+  format, the recommendation is to contact the publisher and ask them to provide the sources in a way/format that can be consumed
+  programmatically.
+
+- In case of needing those binaries to use them as a "build require" for some library, we will consider following the approach of adding it
+  as a system recipe (`<build_require>/system``) and making those binaries available in the CI machines (if the license allows it).
