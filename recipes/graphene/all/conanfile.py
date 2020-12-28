@@ -71,6 +71,12 @@ class LibnameConan(ConanFile):
         meson = self._configure_meson()
         with tools.environment_append({"PKG_CONFIG_PATH": self.install_folder}):
             meson.install()
+        
+        if self.settings.compiler == "Visual Studio" and not self.options.shared:
+            with tools.chdir(os.path.join(self.package_folder, "lib")):
+                if os.path.isfile("libgraphene-1.0.a"):
+                    tools.rename("libgraphene-1.0.a", "graphene-1.0.lib")
+                
         tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
 
     def package_info(self):
