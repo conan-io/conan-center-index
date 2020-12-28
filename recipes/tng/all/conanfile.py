@@ -49,7 +49,7 @@ class tngConan(ConanFile):
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
         url = self.conan_data["sources"][self.version]["url"]
-        extracted_dir = self.name + "-" + self.version
+        extracted_dir = self.name + "-v" + self.version
         os.rename(extracted_dir, self._source_subfolder)
 
     def build(self):
