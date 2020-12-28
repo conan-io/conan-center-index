@@ -5,7 +5,7 @@ part of this repository.
 
 ## Sources
 
-- Recipes should always build packages from library sources.
+- Recipes should build packages from library sources.
 
 - Library sources should come from an official origin like the library source code repository or the official release/download webpage.
   Source forks or unofficial origin of sources are not allowed.
