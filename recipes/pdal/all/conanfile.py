@@ -11,7 +11,7 @@ class PdalConan(ConanFile):
     exports_sources = ["CMakeLists.txt", "patches/*"]
     generators = "cmake", "cmake_find_package"
     settings = "os", "arch", "compiler", "build_type"
-    options = {"shared": [True],
+    options = {"shared": [True],  # disallow static builds
                "fPIC": [True, False],
                "with_unwind": [True, False],
                "with_xml": [True, False],
