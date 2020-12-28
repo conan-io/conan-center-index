@@ -47,7 +47,7 @@ class DbusConan(ConanFile):
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
         extracted_dir = self.name + "-" + self.version
-        os.rename(extracted_dir, self._source_subfolder)
+        tools.rename(extracted_dir, self._source_subfolder)
 
     def requirements(self):
         self.requires("expat/2.2.10")
@@ -77,7 +77,7 @@ class DbusConan(ConanFile):
         return self._cmake
 
     def build(self):
-        dbus_cmake = tools.os.path.join(
+        dbus_cmake = os.path.join(
             self._source_subfolder, "cmake", "CMakeLists.txt")
 
         tools.replace_in_file(dbus_cmake, "GLib2", "glib")
