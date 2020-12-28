@@ -51,7 +51,7 @@ class LibnameConan(ConanFile):
         self.requires("glib/2.67.0")
         if self.options.with_x11:
             self.requires("xorg/system")
-        self.requires("dbus/1.12.16")
+        self.requires("dbus/1.12.20")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
