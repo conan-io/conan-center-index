@@ -1273,7 +1273,7 @@ class BoostConan(ConanFile):
             def filter_transform_module_libraries(names):
                 libs = []
                 for name in names:
-                    if name == "boost_stacktrace_windbg" and self.settings.os != "Windows":
+                    if name in ("boost_stacktrace_windbg", "boost_stacktrace_windbg_cached") and self.settings.os != "Windows":
                         continue
                     if name in ("boost_stacktrace_addr2line", "boost_stacktrace_basic") and self.settings.compiler == "Visual Studio":
                         continue
