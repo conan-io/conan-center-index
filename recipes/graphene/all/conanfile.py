@@ -40,6 +40,8 @@ class LibnameConan(ConanFile):
             self.requires("glib/2.67.0")
 
     def configure(self):
+        if self.options.shared:
+            del self.options.fPIC
         del self.settings.compiler.libcxx
         del self.settings.compiler.cppstd
 
