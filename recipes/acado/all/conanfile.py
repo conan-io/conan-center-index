@@ -86,6 +86,7 @@ class AcadoConan(ConanFile):
         self.copy("*", src=qpoases_sources_from, dst=self._qpoases_sources)
 
         tools.rmdir(os.path.join(self.package_folder, "share"))
+        tools.remove_files_by_mask(self.package_folder, "*.pdb")
 
     def package_info(self):
         if self.options.shared:
