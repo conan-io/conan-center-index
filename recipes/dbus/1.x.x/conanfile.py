@@ -27,6 +27,8 @@ class DbusConan(ConanFile):
 
     generators = "cmake", "cmake_find_package"
 
+    exports_sources = ["patches/*"]
+
     @property
     def _source_subfolder(self):
         return "source_subfolder"
@@ -77,11 +79,8 @@ class DbusConan(ConanFile):
         return self._cmake
 
     def build(self):
-        dbus_cmake = os.path.join(
-            self._source_subfolder, "cmake", "CMakeLists.txt")
-
-        tools.replace_in_file(dbus_cmake, "GLib2", "glib")
-        tools.replace_in_file(dbus_cmake, "GLIB2", "GLIB")
+        for patch in self.conan_data["patches"][self.version]:
+            tools.patch(**patch)
 
         cmake = self._configure_cmake()
         cmake.build()
