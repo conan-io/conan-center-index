@@ -1273,12 +1273,12 @@ class BoostConan(ConanFile):
             def filter_transform_module_libraries(names):
                 libs = []
                 for name in names:
-                    if "windbg" in name and self.settings.os != "Windows":
+                    if name == "boost_stacktrace_windbg" and self.settings.os != "Windows":
                         continue
-                    if "addr2line" in name and self.settings.compiler == "Visual Studio":
+                    if name in ("boost_stacktrace_addr2line", "boost_stacktrace_basic") and self.settings.compiler == "Visual Studio":
                         continue
-                    if "backtrace" in name:
-                        if not any(l for l in all_detected_libraries if "backtrace" in l):
+                    if name == "boost_stacktrace_backtrace":
+                        if "boost_stacktrace_backtrace" not in all_detected_libraries:
                             continue
                         # FIXME: Boost.Build sometimes picks up a system libbacktrace library.
                         # How to avoid this and force using a conan packaged libbacktrace package.
