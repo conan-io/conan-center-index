@@ -39,9 +39,11 @@ class AcadoConan(ConanFile):
     def configure(self):
         if self.options.shared:
             del self.options.fPIC
-        if self.settings.compiler == "Visual Studio" and \
-           "MT" in self.settings.compiler.runtime and self.options.shared:
-            raise ConanInvalidConfiguration("Acado does not support MT runtime + shared library.")
+        if self.settings.compiler == "Visual Studio" and self.options.shared:
+            if "MT" in self.settings.compiler.runtime:
+                raise ConanInvalidConfiguration("Acado does not support MT runtime + shared library.")
+            if "MD" in self.settings.compiler.runtime:
+                raise ConanInvalidConfiguration("Acado does not support MD runtime + shared library.")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
