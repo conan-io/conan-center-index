@@ -96,6 +96,7 @@ class OpenjpegConan(ConanFile):
             self.cpp_info.system_libs = ["pthread", "m"]
         elif self.settings.os == "Android":
             self.cpp_info.system_libs = ["m"]
+        # FIXME: CMake imported target should be openjp2
         self.cpp_info.names["cmake_find_package"] = "OpenJPEG"
         self.cpp_info.names["cmake_find_package_multi"] = "OpenJPEG"
-        self.cpp_info.names['pkg_config'] = 'libopenjp2'
+        self.cpp_info.names["pkg_config"] = "libopenjp2"
