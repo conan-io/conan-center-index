@@ -37,6 +37,24 @@ class CppServer(ConanFile):
             self._cmake.configure(build_folder=self._build_subfolder)
         return self._cmake
 
+    @property
+    def _compilers_minimum_version(self):
+        return {
+            "gcc": "9",
+            "Visual Studio": "15",
+            "clang": "5",
+            "apple-clang": "10",
+        }
+
+    def configure(self):
+        if self.settings.compiler.get_safe("cppstd"):
+            tools.check_min_cppstd(self, "17")
+        minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
+        if not minimum_version:
+            self.output.warn("cppserver requires C++17. Your compiler is unknown. Assuming it supports C++17.")
+        elif tools.Version(self.settings.compiler.version) < minimum_version:
+            raise ConanInvalidConfiguration("cppserver requires a compiler that supports at least C++17")
+
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
         extracted_dir = glob.glob("CppServer-*")[0]
