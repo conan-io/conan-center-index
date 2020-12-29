@@ -19,4 +19,4 @@ release/download webpage.
   programmatically.
 
 - In case of needing those binaries to use them as a "build require" for some library, we will consider following the approach of adding it
-  as a system recipe (`<build_require>/system``) and making those binaries available in the CI machines (if the license allows it).
+  as a system recipe (`<build_require>/system`) and making those binaries available in the CI machines (if the license allows it).
