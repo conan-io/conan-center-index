@@ -97,7 +97,6 @@ class AndroidNDKInstallerConan(ConanFile):
 
     def package(self):
         self.copy(pattern="*", dst=".", src=self._source_subfolder, keep_path=True, symlinks=True)
-        self.copy(pattern="*", dst="bin", src=self._source_subfolder, keep_path=True, symlinks=True)
         self.copy(pattern="*NOTICE", dst="licenses", src=self._source_subfolder)
         self.copy(pattern="*NOTICE.toolchain", dst="licenses", src=self._source_subfolder)
         self.copy("cmake-wrapper.cmd")
