@@ -80,16 +80,15 @@ class OpenjpegConan(ConanFile):
         cmake = self._configure_cmake()
         cmake.install()
         self.copy(pattern="LICENSE", dst="licenses", src=self._source_subfolder)
-        # remove pkgconfig
-        tools.rmdir(os.path.join(self.package_folder, 'lib', 'pkgconfig'))
-        # remove cmake
-        for f in glob.glob(os.path.join(self.package_folder, 'lib',
-                                        'openjpeg-%s.%s' % tuple(self.version.split('.')[0:2]),
-                                        "*.cmake")):
-            os.remove(f)
+        tools.rmdir(os.path.join(self.package_folder, "lib", self._openjpeg_subdir))
+
+    @property
+    def _openjpeg_subdir(self):
+        openjpeg_version = tools.Version(self.version)
+        return "openjpeg-{}.{}".format(openjpeg_version.major, openjpeg_version.minor)
 
     def package_info(self):
-        self.cpp_info.includedirs.append(os.path.join('include', 'openjpeg-%s.%s' % tuple(self.version.split('.')[0:2])))
+        self.cpp_info.includedirs.append(os.path.join("include", self._openjpeg_subdir))
         self.cpp_info.libs = tools.collect_libs(self)
         if not self.options.shared:
             self.cpp_info.defines.append('OPJ_STATIC')
