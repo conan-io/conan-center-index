@@ -5,8 +5,8 @@ import os
 
 class UTConan(ConanFile):
     name = "boost-ext-ut"
-    description = "C++17/20 single header/single module, "
-    "macro-free micro Unit Testing Framework"
+    description = ("C++17/20 single header/single module, "
+                   "macro-free micro Unit Testing Framework")
     topics = ("conan", "UT", "header-only", "unit-test", "tdd", "bdd")
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://boost-ext.github.io/ut/"
