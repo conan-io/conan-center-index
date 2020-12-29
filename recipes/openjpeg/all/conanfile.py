@@ -24,7 +24,7 @@ class OpenjpegConan(ConanFile):
     }
 
     exports_sources = "CMakeLists.txt"
-    generators = "cmake", "cmake_find_package"
+    generators = "cmake"
     _cmake = None
 
     @property
@@ -73,43 +73,6 @@ class OpenjpegConan(ConanFile):
         return self._cmake
 
     def build(self):
-        # ensure that bundled cmake files are not used
-        os.unlink(os.path.join(self._source_subfolder, 'cmake', 'FindLCMS.cmake'))
-        os.unlink(os.path.join(self._source_subfolder, 'cmake', 'FindLCMS2.cmake'))
-
-        # fix installing libs when only shared or static library built
-        tools.replace_in_file(os.path.join(self._source_subfolder, 'src', 'lib', 'openjp2', 'CMakeLists.txt'),
-                              'add_library(${OPENJPEG_LIBRARY_NAME} ${OPENJPEG_SRCS})',
-                              'add_library(${OPENJPEG_LIBRARY_NAME} ${OPENJPEG_SRCS})\n'
-                              'set(INSTALL_LIBS ${OPENJPEG_LIBRARY_NAME})')
-
-        # cmake tries to find LCMS2 library with LCMS2 API that is packaged as lcms library
-        # it should not be changed in conan-lcms because both lcms and lcms2 names are widespread
-        tools.replace_in_file(os.path.join(self._source_subfolder, 'thirdparty', 'CMakeLists.txt'),
-                              'find_package(LCMS2)',
-                              'find_package(lcms)')
-        tools.replace_in_file(os.path.join(self._source_subfolder, 'thirdparty', 'CMakeLists.txt'),
-                              'if(LCMS2_FOUND)',
-                              'if(lcms_FOUND)')
-        tools.replace_in_file(os.path.join(self._source_subfolder, 'thirdparty', 'CMakeLists.txt'),
-                              'set(LCMS_LIBNAME ${LCMS2_LIBRARIES} PARENT_SCOPE)',
-                              'set(LCMS_LIBNAME ${lcms_LIBRARIES} PARENT_SCOPE)')
-        tools.replace_in_file(os.path.join(self._source_subfolder, 'thirdparty', 'CMakeLists.txt'),
-                              'set(LCMS_INCLUDE_DIRNAME ${LCMS2_INCLUDE_DIRS} PARENT_SCOPE)',
-                              'set(LCMS_INCLUDE_DIRNAME ${lcms_INCLUDE_DIRS} PARENT_SCOPE)')
-
-        # avoid always linking PNG
-        tools.save(os.path.join(self._source_subfolder, 'thirdparty', 'CMakeLists.txt'),
-                   'set(OPJ_HAVE_PNG_H 0 PARENT_SCOPE)\n' \
-                   'set(OPJ_HAVE_LIBPNG 0 PARENT_SCOPE)\n' \
-                   'set(PNG_LIBNAME "" PARENT_SCOPE)\n',
-                   append=True)
-
-        # fix missing TIFF_INCLUDE_DIR by cmake generator
-        tools.replace_in_file(os.path.join(self._source_subfolder, 'thirdparty', 'CMakeLists.txt'),
-                              'set(TIFF_INCLUDE_DIRNAME ${TIFF_INCLUDE_DIR} PARENT_SCOPE)',
-                              'set(TIFF_INCLUDE_DIRNAME ${TIFF_INCLUDE_DIRS} PARENT_SCOPE)')
-
         cmake = self._configure_cmake()
         cmake.build()
 
