@@ -90,8 +90,8 @@ class OpenjpegConan(ConanFile):
     def package_info(self):
         self.cpp_info.includedirs.append(os.path.join("include", self._openjpeg_subdir))
         self.cpp_info.libs = ["openjp2"]
-        if not self.options.shared:
-            self.cpp_info.defines.append('OPJ_STATIC')
+        if self.settings.os == "Windows" and not self.options.shared:
+            self.cpp_info.defines.append("OPJ_STATIC")
         if self.settings.os == "Linux":
             self.cpp_info.system_libs = ["pthread", "m"]
         elif self.settings.os == "Android":
