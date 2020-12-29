@@ -1,8 +1,4 @@
 sources:
-  'cci.20200712':
-    url: 'https://github.com/orca-zhang/influxdb-cpp/archive/a7888875f39133f36340913a0d6aa6660c496307.tar.gz'
-    sha256: '8f9b4af0ad46323cd7580f13624ece50a221d46420c8431a22cf3dcde0dbda4f'
-patches:
-  "cci.20200712":
-    - patch_file: "patches/00001-clean-windows-defines.patch"
-      base_path: "source_subfolder"
+  'cci.20201227':
+    url: 'https://github.com/orca-zhang/influxdb-cpp/archive/800e0912552bc1b261c2afc6553a95caf5e9c66d.tar.gz'
+    sha256: '456f0160cd6b12f88a19dcd0106dc0ba1935841f53ec642bf368843fa28def0e'

@@ -12,7 +12,7 @@ class InfluxDBCppConan(ConanFile):
     description = "C++ client for InfluxDB."
     topics = ("single-header-lib", "influxdb")
     settings = "os"
-    exports_sources = ["patches/**"]
+    no_copy_source = True
 
     _source_subfolder = "source_subfolder"
 
@@ -20,11 +20,6 @@ class InfluxDBCppConan(ConanFile):
         tools.get(**self.conan_data["sources"][self.version])
         extracted_dir = glob.glob("influxdb-cpp-*")[0]
         os.rename(extracted_dir, self._source_subfolder)
-
-    def build(self):
-        patches = self.conan_data["patches"][self.version]
-        for patch in patches:
-            tools.patch(**patch)
 
     def package(self):
         self.copy('LICENSE', dst='licenses', src=self._source_subfolder)
