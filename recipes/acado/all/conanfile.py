@@ -4,7 +4,7 @@ import glob
 from conans import ConanFile, CMake, tools
 from conans.errors import ConanInvalidConfiguration
 
-required_conan_version = ">=1.32.0"
+required_conan_version = ">=1.31.0"
 
 class AcadoConan(ConanFile):
     name = "acado"
@@ -43,6 +43,8 @@ class AcadoConan(ConanFile):
         if self.settings.compiler == "Visual Studio" and self.options.shared:
             # https://github.com/acado/acado/blob/b4e28f3131f79cadfd1a001e9fff061f361d3a0f/CMakeLists.txt#L77-L80
             raise ConanInvalidConfiguration("Acado does not support shared builds on Windows.")
+        if self.settings.compiler == "apple-clang":
+            raise ConanInvalidConfiguration("apple-clang not supported")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
@@ -109,12 +111,12 @@ class AcadoConan(ConanFile):
         self.cpp_info.includedirs.append(os.path.join(self._qpoases_sources, "INCLUDE"))
         self.cpp_info.includedirs.append(os.path.join(self._qpoases_sources, "SRC"))
 
-    def validate(self):
+    # def validate(self):
         # if self.settings.compiler == "Visual Studio":
         #     pass
         # elif self.settings.compiler == "gcc" and self.settings.compiler.libcxx != "libstdc++11":
         #     raise ConanInvalidConfiguration("libstdc++11 required")
         # elif self.settings.compiler == "clang" and self.settings.compiler.libcxx != "libstdc++11":
         #     raise ConanInvalidConfiguration("libstdc++11 required")
-        if self.settings.compiler == "apple-clang":
-            raise ConanInvalidConfiguration("apple-clang not supported")
+        # if self.settings.compiler == "apple-clang":
+        #     raise ConanInvalidConfiguration("apple-clang not supported")
