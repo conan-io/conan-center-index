@@ -1324,11 +1324,11 @@ class BoostConan(ConanFile):
 
             non_used = all_detected_libraries.difference(all_expected_libraries)
             if non_used:
-                raise RuntimeError("These libraries were built, but were not used in any boost module: {}".format(non_used))
+                raise ConanException("These libraries were built, but were not used in any boost module: {}".format(non_used))
 
             non_built = all_expected_libraries.difference(all_detected_libraries)
             if non_built:
-                raise RuntimeError("These libraries were expected to be built, but were not built: {}".format(non_built))
+                raise ConanException("These libraries were expected to be built, but were not built: {}".format(non_built))
 
             if not self.options.without_python:
                 pyversion = tools.Version(self._python_version)
