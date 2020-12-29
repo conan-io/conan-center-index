@@ -1,5 +1,5 @@
-cmake_minimum_required(VERSION 3.4)
-project(cmake_wrapper)
+cmake_minimum_required(VERSION 2.8)
+project(conan_cmake_wrapper)
 
 include(conanbuildinfo.cmake)
 conan_basic_setup()
