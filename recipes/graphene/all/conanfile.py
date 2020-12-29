@@ -2,6 +2,7 @@ from conans import ConanFile, Meson, tools
 from conans.errors import ConanInvalidConfiguration
 import os
 
+required_conan_version = ">=1.29.0"
 
 class LibnameConan(ConanFile):
     name = "graphene"
