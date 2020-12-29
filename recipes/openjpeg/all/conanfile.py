@@ -8,15 +8,28 @@ class OpenjpegConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     description = "OpenJPEG is an open-source JPEG 2000 codec written in C language."
     topics = ("conan", "jpeg2000", "jp2", "openjpeg", "image", "multimedia", "format", "graphics")
-    options = {"shared": [True, False], "build_codec": [True, False], "fPIC": [True, False]}
-    default_options = {'shared': False, 'build_codec': True, 'fPIC': True}
-    settings = "os", "compiler", "build_type", "arch"
-    generators = "cmake", "cmake_find_package"
     homepage = "https://github.com/uclouvain/openjpeg"
     license = "BSD 2-Clause"
-    exports_sources = ["CMakeLists.txt"]
 
-    _source_subfolder = "source_subfolder"
+    settings = "os", "arch", "compiler", "build_type"
+    options = {
+        "shared": [True, False],
+        "fPIC": [True, False],
+        "build_codec": [True, False]
+    }
+    default_options = {
+        "shared": False,
+        "fPIC": True,
+        "build_codec": False
+    }
+
+    exports_sources = "CMakeLists.txt"
+    generators = "cmake", "cmake_find_package"
+    _cmake = None
+
+    @property
+    def _source_subfolder(self):
+        return "source_subfolder"
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -32,15 +45,27 @@ class OpenjpegConan(ConanFile):
         os.rename(extracted_dir, self._source_subfolder)
 
     def _configure_cmake(self):
-        cmake = CMake(self)
-        cmake.definitions['BUILD_SHARED_LIBS'] = self.options.shared
-        cmake.definitions['BUILD_STATIC_LIBS'] = not self.options.shared
-        cmake.definitions['BUILD_PKGCONFIG_FILES'] = False
-        cmake.definitions['CMAKE_INSTALL_SYSTEM_RUNTIME_LIBS_SKIP'] = True
-        cmake.definitions['BUILD_CODEC'] = False
-
-        cmake.configure()
-        return cmake
+        if self._cmake:
+            return self._cmake
+        self._cmake = CMake(self)
+        self._cmake.definitions["CMAKE_INSTALL_SYSTEM_RUNTIME_LIBS_SKIP"] = True
+        self._cmake.definitions["BUILD_DOC"] = False
+        self._cmake.definitions["BUILD_STATIC_LIBS"] = not self.options.shared
+        self._cmake.definitions["BUILD_LUTS_GENERATOR"] = False
+        self._cmake.definitions["BUILD_PKGCONFIG_FILES"] = False
+        self._cmake.definitions["BUILD_CODEC"] = False
+        self._cmake.definitions["BUILD_MJ2"] = False
+        self._cmake.definitions["BUILD_JPWL"] = False
+        self._cmake.definitions["BUILD_JPIP"] = False
+        self._cmake.definitions["BUILD_VIEWER"] = False
+        self._cmake.definitions["BUILD_JAVA"] = False
+        self._cmake.definitions["BUILD_JP3D"] = False
+        self._cmake.definitions["BUILD_TESTING"] = False
+        self._cmake.definitions["BUILD_PKGCONFIG_FILES"] = False
+        self._cmake.definitions["OPJ_DISABLE_TPSOT_FIX"] = False
+        self._cmake.definitions["OPJ_USE_THREAD"] = True
+        self._cmake.configure()
+        return self._cmake
 
     def build(self):
         # ensure that bundled cmake files are not used
