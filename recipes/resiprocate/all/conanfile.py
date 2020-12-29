@@ -37,8 +37,8 @@ class ResiprocateConan(ConanFile):
         if self.settings.os in ("Windows", "Macos"):
             # FIXME: Visual Studio project & Mac support seems available in resiprocate
             raise ConanInvalidConfiguration("reSIProcate recipe does not currently support {}.".format(self.settings.os))
-        if self.options.shared and self.options.fPIC:
-            raise ConanInvalidConfiguration("fPIC option should be False when shared option is True")
+        if self.options.shared:
+            del self.options.fPIC
 
     def requirements(self):
         if self.options.with_ssl:
@@ -60,7 +60,7 @@ class ResiprocateConan(ConanFile):
         configure_args = [
             "--enable-shared={}".format(yes_no(self.options.shared)),
             "--enable-static={}".format(yes_no(not self.options.shared)),
-            "--with-pic={}".format(yes_no(self.options.fPIC))
+            "--with-pic={}".format(yes_no(self.options.get_safe("fPIC", True)))
         ]
 
         # These options do not support yes/no
