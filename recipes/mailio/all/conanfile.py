@@ -25,6 +25,13 @@ class mailioConan(ConanFile):
     short_paths = True
     _cmake = None
 
+    _compiler_required_cpp17 = {
+        "gcc": "7",
+        "clang": "5",
+        "Visual Studio": "15",
+        "apple-clang": "10",
+    }
+
     @property
     def _source_subfolder(self):
         return "source_subfolder"
@@ -41,8 +48,6 @@ class mailioConan(ConanFile):
             self._cmake.definitions["MAILIO_BUILD_EXAMPLES"] = False
             if not self.settings.compiler.cppstd:
                 self._cmake.definitions["CMAKE_CXX_STANDARD"] = 17
-            else:
-                tools.check_min_cppstd(self, 17)
             self._cmake.configure(build_folder=self._build_subfolder)
         return self._cmake
 
@@ -58,6 +63,15 @@ class mailioConan(ConanFile):
     def configure(self):
         if self.options.shared:
             del self.options.fPIC
+
+        if self.settings.get_safe("compiler.cppstd"):
+            tools.check_min_cppstd(self, "17")
+        try:
+            minimum_required_compiler_version = self._compiler_required_cpp17[str(self.settings.compiler)]
+            if tools.Version(self.settings.compiler.version) < minimum_required_compiler_version:
+                raise ConanInvalidConfiguration("This package requires c++17 support. The current compiler does not support it.")
+        except KeyError:
+            self.output.warn("This recipe has no support for the current compiler. Please consider adding it.")
 
     def build(self):
         patches = self.conan_data["patches"][self.version]
