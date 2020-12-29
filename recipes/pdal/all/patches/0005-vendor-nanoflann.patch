@@ -1,0 +1,13 @@
+diff --git a/pdal/private/KDImpl.hpp b/pdal/private/KDImpl.hpp
+index 473ffba36..3617c4f4e 100644
+--- a/pdal/private/KDImpl.hpp
++++ b/pdal/private/KDImpl.hpp
+@@ -34,7 +34,7 @@
+ 
+ #pragma once
+ 
+-#include <nanoflann/nanoflann.hpp>
++#include <nanoflann.hpp>
+ 
+ namespace pdal
+ {
