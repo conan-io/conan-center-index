@@ -1,0 +1,36 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 9cd343d..da792fe 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -1,8 +1,6 @@
+ cmake_minimum_required (VERSION 3.16.3)
+ 
+ project(mailio VERSION 0.20.0)
+-set(CMAKE_CXX_STANDARD 17)
+-set(CMAKE_CXX_STANDARD_REQUIRED ON)
+ 
+ if(NOT DEFINED LIB_SUFFIX)
+   set(LIB_SUFFIX "" CACHE STRING "Suffix for installed library path. Ex. 64 for lib64")
+@@ -53,10 +51,6 @@ option(MAILIO_BUILD_EXAMPLES "Turn on to build examples." ON)
+ include(CMakeDependentOption)
+ cmake_dependent_option(MAILIO_BUILD_LATEX_DOCUMENTATION "Build latex docs" ON "MAILIO_BUILD_DOCUMENTATION" ON)
+ 
+-if(WIN32)
+-    set(Boost_USE_STATIC_LIBS ON)
+-endif(WIN32)
+-
+ find_package(Boost REQUIRED COMPONENTS system date_time regex)
+ find_package(OpenSSL)
+ set(CMAKE_THREAD_PREFER_PTHREAD)
+@@ -140,9 +134,9 @@ endif(IS_ABSOLUTE "${INCLUDE_INSTALL_DIR}")
+ configure_file(mailio.pc.in ${CMAKE_BINARY_DIR}/mailio.pc IMMEDIATE @ONLY)
+ install(FILES ${CMAKE_BINARY_DIR}/mailio.pc DESTINATION ${LIB_INSTALL_DIR}/pkgconfig)
+ 
+-configure_file(${PROJECT_SOURCE_DIR}/include/version.hpp.in version.hpp)
++configure_file(${CMAKE_CURRENT_SOURCE_DIR}/include/version.hpp.in version.hpp)
+ target_include_directories(${PROJECT_NAME} PUBLIC "${PROJECT_BINARY_DIR}")
+-install(FILES ${CMAKE_BINARY_DIR}/version.hpp DESTINATION ${INCLUDE_INSTALL_DIR}/${PROJECT_NAME})
++install(FILES ${PROJECT_BINARY_DIR}/version.hpp DESTINATION ${INCLUDE_INSTALL_DIR}/${PROJECT_NAME})
+ 
+ # generate the export header for exporting symbols
+ # this is needed to generate a shared library.

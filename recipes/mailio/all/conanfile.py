@@ -36,6 +36,9 @@ class mailioConan(ConanFile):
     def _configure_cmake(self):
         if not self._cmake:
             self._cmake = CMake(self)
+            self._cmake.definitions["MAILIO_BUILD_SHARED_LIBRARY"] = self.options.shared
+            self._cmake.definitions["MAILIO_BUILD_DOCUMENTATION"] = False
+            self._cmake.definitions["MAILIO_BUILD_EXAMPLES"] = False
             if not self.settings.compiler.cppstd:
                 self._cmake.definitions["CMAKE_CXX_STANDARD"] = 17
             else:
@@ -57,9 +60,9 @@ class mailioConan(ConanFile):
             del self.options.fPIC
 
     def build(self):
-        # patches = self.conan_data["patches"][self.version]
-        # for patch in patches:
-        #     tools.patch(**patch)
+        patches = self.conan_data["patches"][self.version]
+        for patch in patches:
+            tools.patch(**patch)
 
         cmake = self._configure_cmake()
         cmake.build()
