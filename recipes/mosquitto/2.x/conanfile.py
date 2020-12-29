@@ -84,6 +84,7 @@ class Mosquitto(ConanFile):
         self._cmake.definitions["WITH_APPS"] = self.options.apps
         self._cmake.definitions["WITH_PLUGINS"] = False
         self._cmake.definitions["WITH_LIB_CPP"] = self.options.build_cpp
+        self._cmake.definitions["WITH_THREADING"] = self.settings.compiler != "Visual Studio"
         self._cmake.definitions["WITH_WEBSOCKETS"] = self.options.get_safe("websockets", False)
         self._cmake.definitions["STATIC_WEBSOCKETS"] = self.options.get_safe("websockets", False) and not self.options["libwebsockets"].shared
         self._cmake.definitions["DOCUMENTATION"] = False
@@ -97,7 +98,12 @@ class Mosquitto(ConanFile):
         tools.replace_in_file(os.path.join(self._source_subfolder, "apps", "mosquitto_ctrl", "CMakeLists.txt"), "static)", "static ${CONAN_LIBS})")
         tools.replace_in_file(os.path.join(self._source_subfolder, "apps", "mosquitto_ctrl", "CMakeLists.txt"), "quitto)", "quitto ${CONAN_LIBS})")
         tools.replace_in_file(os.path.join(self._source_subfolder, "apps", "mosquitto_passwd", "CMakeLists.txt"), "OPENSSL_LIBRARIES", "CONAN_LIBS")
+        tools.replace_in_file(os.path.join(self._source_subfolder, "apps", "mosquitto_ctrl", "CMakeLists.txt"), "OPENSSL_LIBRARIES", "CONAN_LIBS")
+        tools.replace_in_file(os.path.join(self._source_subfolder, "src", "CMakeLists.txt"), "OPENSSL_LIBRARIES", "CONAN_LIBS")
+        tools.replace_in_file(os.path.join(self._source_subfolder, "lib", "CMakeLists.txt"), "OPENSSL_LIBRARIES", "CONAN_LIBS")
         tools.replace_in_file(os.path.join(self._source_subfolder, "src", "CMakeLists.txt"), "MOSQ_LIBS", "CONAN_LIBS")
+        tools.replace_in_file(os.path.join(self._source_subfolder, "include", "mosquitto.h"), "__declspec(dllimport)", "")
+        tools.replace_in_file(os.path.join(self._source_subfolder, "lib", "cpp", "mosquittopp.h"), "__declspec(dllimport)", "")
 
     def build(self):
         self._patch_sources()
@@ -116,6 +122,10 @@ class Mosquitto(ConanFile):
             tools.remove_files_by_mask(os.path.join(self.package_folder, "lib"), "*.so*")
             tools.remove_files_by_mask(os.path.join(self.package_folder, "lib"), "*.dylib")
             tools.remove_files_by_mask(os.path.join(self.package_folder, "bin"), "*.dll")
+        elif self.options.shared and self.settings.compiler == "Visual Studio":
+            self.copy("mosquitto.lib", src=os.path.join(self._build_subfolder, "lib"), dst="lib")
+            if self.options.build_cpp:
+                self.copy("mosquittopp.lib", src=os.path.join(self._build_subfolder, "lib"), dst="lib")
 
         tools.rmdir(os.path.join(self.package_folder, "lib","pkgconfig"))
 

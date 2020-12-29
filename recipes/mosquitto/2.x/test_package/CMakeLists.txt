@@ -5,5 +5,5 @@ include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
 conan_basic_setup(TARGETS)
 
 find_package(mosquitto REQUIRED CONFIG)
-add_executable(${PROJECT_NAME} basic-1.c)
+add_executable(${PROJECT_NAME} test_package.c)
 target_link_libraries(${PROJECT_NAME} mosquitto::mosquitto)
