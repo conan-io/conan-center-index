@@ -1,5 +1,6 @@
 from conans import ConanFile, AutoToolsBuildEnvironment, tools
 from conans.errors import ConanInvalidConfiguration
+import contextlib
 import os
 
 
@@ -15,8 +16,6 @@ class FlexConan(ConanFile):
     options = {"shared": [True, False], "fPIC": [True, False]}
     default_options = {"shared": False, "fPIC": True}
 
-    requires = ("m4/1.4.18",)
-
     _autotools = None
 
     @property
@@ -28,6 +27,9 @@ class FlexConan(ConanFile):
         extracted_dir = self.name + "-" + self.version
         os.rename(extracted_dir, self._source_subfolder)
 
+    def requirements(self):
+        self.requires("m4/1.4.18")
+
     def configure(self):
         del self.settings.compiler.libcxx
         del self.settings.compiler.cppstd
@@ -38,11 +40,14 @@ class FlexConan(ConanFile):
         if self._autotools:
             return self._autotools
         self._autotools = AutoToolsBuildEnvironment(self)
-        configure_args = ["--disable-nls", "HELP2MAN=/bin/true", "M4=m4"]
-        if self.options.shared:
-            configure_args.extend(["--enable-shared", "--disable-static"])
-        else:
-            configure_args.extend(["--disable-shared", "--enable-static"])
+        yes_no = lambda v: "yes" if v else "no"
+        configure_args = [
+            "--enable-shared={}".format(yes_no(self.options.shared)),
+            "--enable-static={}".format(not yes_no(self.options.shared)),
+            "--disable-nls",
+            "HELP2MAN=/bin/true",
+            "M4=m4",
+        ]
 
         if self.settings.os == "Linux":
             # https://github.com/westes/flex/issues/247
@@ -54,20 +59,28 @@ class FlexConan(ConanFile):
         # This requires flex to depend on itself.
         # conan does not support this (currently), so cross build of flex is not possible atm
 
-        self._autotools.configure(args=configure_args)
+        self._autotools.configure(args=configure_args, configure_dir=self._source_subfolder)
         return self._autotools
 
+    @contextlib.contextmanager
+    def _build_context(self):
+        env = {}
+        # FIXME: when conan receives full cross building support, fetch CC_FOR_BUILD from build context
+        if tools.get_env("CC") and not tools.get_env("CC_FOR_BUILD"):
+            env["CC_FOR_BUILD"] = tools.get_env("CC")
+        with tools.environment_append(env):
+            yield
 
     def build(self):
         if tools.cross_building(self.settings, skip_x64_x86=True):
             raise ConanInvalidConfiguration("This recipe does not support cross building atm (missing conan support)")
-        with tools.chdir(self._source_subfolder):
+        with self._build_context():
             autotools = self._configure_autotools()
             autotools.make()
 
     def package(self):
         self.copy(pattern="COPYING", dst="licenses", src=self._source_subfolder)
-        with tools.chdir(self._source_subfolder):
+        with self._build_context():
             autotools = self._configure_autotools()
             autotools.install()
         tools.rmdir(os.path.join(self.package_folder, "share"))
