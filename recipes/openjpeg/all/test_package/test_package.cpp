@@ -1,6 +1,7 @@
+#include <openjpeg.h>
+
 #include <cstdlib>
 #include <iostream>
-#include "openjpeg-2.3/openjpeg.h"
 
 
 int main() {
