@@ -1,5 +1,9 @@
 # Changelog
 
+### 29-December-2020 - 17:18 CET
+
+- Updated Conan client to the 1.32.1 version in Windows and Mac agents.
+
 ### 14-December-2020 - 09:51 CET
 
 - [feature] Remove repositories after a pull-request is merged.
