@@ -45,6 +45,8 @@ class AcadoConan(ConanFile):
             raise ConanInvalidConfiguration("Acado does not support shared builds on Windows.")
         if self.settings.compiler == "apple-clang":
             raise ConanInvalidConfiguration("apple-clang not supported")
+        if self.settings.compiler == "clang" and self.settings.compiler.version == "9":
+            raise ConanInvalidConfiguration("acado can not be built by Clang 9.")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
