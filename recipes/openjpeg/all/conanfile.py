@@ -42,7 +42,7 @@ class OpenjpegConan(ConanFile):
         del self.settings.compiler.cppstd
 
     def package_id(self):
-        self.info.options.build_codec # not used for the moment
+        del self.info.options.build_codec # not used for the moment
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
