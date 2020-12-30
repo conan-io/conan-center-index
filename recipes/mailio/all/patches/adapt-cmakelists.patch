@@ -1,5 +1,5 @@
 diff --git a/CMakeLists.txt b/CMakeLists.txt
-index 9cd343d..5b5ced0 100644
+index 9cd343d..3fa8a34 100644
 --- a/CMakeLists.txt
 +++ b/CMakeLists.txt
 @@ -53,17 +53,6 @@ option(MAILIO_BUILD_EXAMPLES "Turn on to build examples." ON)
@@ -20,12 +20,9 @@ index 9cd343d..5b5ced0 100644
  set(project_sources 
      ${PROJECT_SOURCE_DIR}/src/base64.cpp
      ${PROJECT_SOURCE_DIR}/src/binary.cpp
-@@ -140,9 +129,9 @@ endif(IS_ABSOLUTE "${INCLUDE_INSTALL_DIR}")
- configure_file(mailio.pc.in ${CMAKE_BINARY_DIR}/mailio.pc IMMEDIATE @ONLY)
- install(FILES ${CMAKE_BINARY_DIR}/mailio.pc DESTINATION ${LIB_INSTALL_DIR}/pkgconfig)
+@@ -142,7 +131,7 @@ install(FILES ${CMAKE_BINARY_DIR}/mailio.pc DESTINATION ${LIB_INSTALL_DIR}/pkgco
  
--configure_file(${PROJECT_SOURCE_DIR}/include/version.hpp.in version.hpp)
-+configure_file(${CMAKE_CURRENT_SOURCE_DIR}/include/version.hpp.in version.hpp)
+ configure_file(${PROJECT_SOURCE_DIR}/include/version.hpp.in version.hpp)
  target_include_directories(${PROJECT_NAME} PUBLIC "${PROJECT_BINARY_DIR}")
 -install(FILES ${CMAKE_BINARY_DIR}/version.hpp DESTINATION ${INCLUDE_INSTALL_DIR}/${PROJECT_NAME})
 +install(FILES ${PROJECT_BINARY_DIR}/version.hpp DESTINATION ${INCLUDE_INSTALL_DIR}/${PROJECT_NAME})
