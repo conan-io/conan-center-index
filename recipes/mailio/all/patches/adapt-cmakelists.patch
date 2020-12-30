@@ -1,17 +1,8 @@
 diff --git a/CMakeLists.txt b/CMakeLists.txt
-index 9cd343d..b7cc91c 100644
+index 9cd343d..5b5ced0 100644
 --- a/CMakeLists.txt
 +++ b/CMakeLists.txt
-@@ -1,8 +1,6 @@
- cmake_minimum_required (VERSION 3.16.3)
- 
- project(mailio VERSION 0.20.0)
--set(CMAKE_CXX_STANDARD 17)
--set(CMAKE_CXX_STANDARD_REQUIRED ON)
- 
- if(NOT DEFINED LIB_SUFFIX)
-   set(LIB_SUFFIX "" CACHE STRING "Suffix for installed library path. Ex. 64 for lib64")
-@@ -53,17 +51,6 @@ option(MAILIO_BUILD_EXAMPLES "Turn on to build examples." ON)
+@@ -53,17 +53,6 @@ option(MAILIO_BUILD_EXAMPLES "Turn on to build examples." ON)
  include(CMakeDependentOption)
  cmake_dependent_option(MAILIO_BUILD_LATEX_DOCUMENTATION "Build latex docs" ON "MAILIO_BUILD_DOCUMENTATION" ON)
  
@@ -29,7 +20,7 @@ index 9cd343d..b7cc91c 100644
  set(project_sources 
      ${PROJECT_SOURCE_DIR}/src/base64.cpp
      ${PROJECT_SOURCE_DIR}/src/binary.cpp
-@@ -140,9 +127,9 @@ endif(IS_ABSOLUTE "${INCLUDE_INSTALL_DIR}")
+@@ -140,9 +129,9 @@ endif(IS_ABSOLUTE "${INCLUDE_INSTALL_DIR}")
  configure_file(mailio.pc.in ${CMAKE_BINARY_DIR}/mailio.pc IMMEDIATE @ONLY)
  install(FILES ${CMAKE_BINARY_DIR}/mailio.pc DESTINATION ${LIB_INSTALL_DIR}/pkgconfig)
  
@@ -41,7 +32,7 @@ index 9cd343d..b7cc91c 100644
  
  # generate the export header for exporting symbols
  # this is needed to generate a shared library.
-@@ -155,15 +142,7 @@ target_include_directories(${PROJECT_NAME}
+@@ -155,15 +144,7 @@ target_include_directories(${PROJECT_NAME}
  )
  install(FILES ${CMAKE_CURRENT_BINARY_DIR}/export.hpp DESTINATION "${INCLUDE_INSTALL_DIR}/${PROJECT_NAME}")
  

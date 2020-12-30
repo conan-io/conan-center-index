@@ -47,8 +47,6 @@ class mailioConan(ConanFile):
             self._cmake.definitions["MAILIO_BUILD_SHARED_LIBRARY"] = self.options.shared
             self._cmake.definitions["MAILIO_BUILD_DOCUMENTATION"] = False
             self._cmake.definitions["MAILIO_BUILD_EXAMPLES"] = False
-            if not self.settings.compiler.cppstd:
-                self._cmake.definitions["CMAKE_CXX_STANDARD"] = 17
             self._cmake.configure(build_folder=self._build_subfolder)
         return self._cmake
 
