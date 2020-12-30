@@ -4,7 +4,7 @@ from conans import ConanFile, CMake, tools
 
 class CnpyConan(ConanFile):
     name = "cnpy"
-    description = "cnpy conan package"
+    description = "library to read/write .npy and .npz files in C/C++"
     license = "MIT"
     topics = ("conan", "cnpy")
     homepage = "https://github.com/hongyx11/cnpy"
