@@ -10,4 +10,5 @@ int main() {
   msg.content("Hello, World!");
 
   mailio::smtps conn("smtp.gmail.com", 587);
+  std::cout << msg.content() << "\n";;
 }
