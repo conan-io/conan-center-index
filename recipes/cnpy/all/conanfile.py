@@ -10,7 +10,7 @@ class CnpyConan(ConanFile):
     topics = ("conan", "cnpy")
     homepage = "https://github.com/hongyx11/cnpy"
     url = "https://github.com/conan-io/conan-center-index"
-    exports_sources = ["CMakeLists.txt"]
+    exports_sources = ["CMakeLists.txt", "patches/*"]
     generators = "cmake"
     settings = "os", "arch", "compiler", "build_type"
     _cmake = None
@@ -51,6 +51,8 @@ class CnpyConan(ConanFile):
         os.rename(extracted_dir, self._source_subfolder)
 
     def build(self):
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            tools.patch(**patch)
         cmake = self._configure_cmake()
         cmake.build()
 
@@ -66,10 +68,6 @@ class CnpyConan(ConanFile):
         self.copy("LICENSE", dst="licenses", src=self._source_subfolder)
         cmake = self._configure_cmake()
         cmake.install()
-        if not self.options.shared:
-            tools.remove_files_by_mask(os.path.join(self.package_folder, "lib"), "*.so")
-            tools.remove_files_by_mask(os.path.join(self.package_folder, "lib"), "*.dylib")
-        tools.rmdir(os.path.join(self.package_folder, "bin"))
 
     def package_info(self):
         self.cpp_info.names["cmake_find_package"] = "cnpy"
