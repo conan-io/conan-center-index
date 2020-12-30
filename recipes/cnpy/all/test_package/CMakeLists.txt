@@ -3,6 +3,6 @@ project(test_package CXX)
 
 include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
 conan_basic_setup()
-set(CMAKE_CXX_STANDARD 11)
 add_executable(${PROJECT_NAME} example1.cpp)
 target_link_libraries(${PROJECT_NAME} ${CONAN_LIBS})
+set_property(TARGET ${PROJECT_NAME} PROPERTY CXX_STANDARD 11)
