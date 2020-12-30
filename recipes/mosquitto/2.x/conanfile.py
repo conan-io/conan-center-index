@@ -51,7 +51,7 @@ class Mosquitto(ConanFile):
     def configure(self):
         if self.options.shared:
             del self.options.fPIC
-        if not self.options.clients and not self.options.clients:
+        if not self.options.clients:
             del self.options.cjson
         if not self.options.broker:
             del self.options.websockets
