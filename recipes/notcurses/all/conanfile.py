@@ -12,7 +12,6 @@ class NotcursesConan(ConanFile):
     author = "nick black dank@qemfd.net"
     exports_sources = ["CMakeLists.txt"]
     settings = "os", "compiler", "build_type", "arch"
-    requires = "openimageio/2.2.7.0", "libunistring/0.9.10"
     options = {"shared": [True, False],
                "with_doctest": [True, False]}
     default_options = {"shared": True,

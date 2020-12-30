@@ -1,7 +1,7 @@
 
 variables:
     CONAN_USERNAME: "dankamongmen"
-    CONAN_REFERENCE: "notcurses/2.0.4"
+    CONAN_REFERENCE: "notcurses/2.1.2"
     CONAN_CHANNEL: "channel"
     CONAN_LOGIN_USERNAME: "user"
     
