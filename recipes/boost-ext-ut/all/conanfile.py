@@ -69,4 +69,4 @@ class UTConan(ConanFile):
         self.cpp_info.names["cmake_find_package_multi"] = "boost"
         self.cpp_info.filenames["cmake_find_package"] = "ut"
         self.cpp_info.filenames["cmake_find_package_multi"] = "ut"
-        self.cpp_info.components["ut"].includedirs = ['include']
+        self.cpp_info.components["ut"]
