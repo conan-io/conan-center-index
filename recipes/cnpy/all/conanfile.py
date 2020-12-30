@@ -5,7 +5,7 @@ from conans import ConanFile, CMake, tools
 class CnpyConan(ConanFile):
     name = "cnpy"
     description = "cnpy conan package"
-    license = "MIT License"
+    license = "MIT"
     topics = ("conan", "cnpy")
     homepage = "https://github.com/hongyx11/cnpy"
     url = "https://github.com/conan-io/conan-center-index"
