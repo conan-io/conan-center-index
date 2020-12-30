@@ -57,7 +57,6 @@ class OpenjpegConan(ConanFile):
         self._cmake.definitions["BUILD_DOC"] = False
         self._cmake.definitions["BUILD_STATIC_LIBS"] = not self.options.shared
         self._cmake.definitions["BUILD_LUTS_GENERATOR"] = False
-        self._cmake.definitions["BUILD_PKGCONFIG_FILES"] = False
         self._cmake.definitions["BUILD_CODEC"] = False
         self._cmake.definitions["BUILD_MJ2"] = False
         self._cmake.definitions["BUILD_JPWL"] = False
