@@ -1,4 +1,5 @@
 import os
+import glob
 
 from conans import ConanFile, CMake, tools
 
@@ -13,7 +14,7 @@ class CnpyConan(ConanFile):
     generators = "cmake"
     settings = "os", "arch", "compiler", "build_type"
     _cmake = None
-    
+
     options = {
         "shared": [True, False],
         "fPIC": [True, False]
@@ -25,7 +26,7 @@ class CnpyConan(ConanFile):
 
     @property
     def _source_subfolder(self):
-        return "source_subfolder" 
+        return "source_subfolder"
 
     @property
     def _build_subfolder(self):
@@ -46,7 +47,8 @@ class CnpyConan(ConanFile):
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
-        os.rename(self.name + "-" + self.version, self._source_subfolder)
+        extracted_dir = glob.glob(self.name + "-*")[0]
+        os.rename(extracted_dir, self._source_subfolder)
 
     def build(self):
         cmake = self._configure_cmake()
@@ -54,8 +56,9 @@ class CnpyConan(ConanFile):
 
     def _configure_cmake(self):
         if self._cmake:
-            return self._cmake  
+            return self._cmake
         self._cmake = CMake(self)
+        self._cmake.definitions["ENABLE_STATIC"] = not self.options.shared
         self._cmake.configure(build_folder=self._build_subfolder)
         return self._cmake
 
@@ -63,6 +66,10 @@ class CnpyConan(ConanFile):
         self.copy("LICENSE", dst="licenses", src=self._source_subfolder)
         cmake = self._configure_cmake()
         cmake.install()
+        if not self.options.shared:
+            tools.remove_files_by_mask(os.path.join(self.package_folder, "lib"), "*.so")
+            tools.remove_files_by_mask(os.path.join(self.package_folder, "lib"), "*.dylib")
+        tools.rmdir(os.path.join(self.package_folder, "bin"))
 
     def package_info(self):
         self.cpp_info.names["cmake_find_package"] = "cnpy"
