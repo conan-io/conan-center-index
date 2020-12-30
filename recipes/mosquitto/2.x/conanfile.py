@@ -132,8 +132,6 @@ class Mosquitto(ConanFile):
             if self.options.build_cpp:
                 self.copy("mosquittopp.lib", src=os.path.join(self._build_subfolder, "lib"), dst="lib")
 
-        tools.rmdir(os.path.join(self.package_folder, "lib","pkgconfig"))
-
     def package_info(self):
         libsuffix = "" if self.options.shared else "_static"
         self.cpp_info.components["libmosquitto"].names["pkg_config"] = "libmosquitto"
