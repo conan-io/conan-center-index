@@ -62,4 +62,4 @@ class CnpyConan(ConanFile):
     def package_info(self):
         self.cpp_info.names["cmake_find_package"] = "cnpy"
         self.cpp_info.names["cmake_find_package_multi"] = "cnpy"
-        self.cpp_info.libs = tools.collect_libs(self)
+        self.cpp_info.libs = ["cnpy"]
