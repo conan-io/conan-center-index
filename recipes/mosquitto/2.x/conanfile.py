@@ -104,6 +104,11 @@ class Mosquitto(ConanFile):
         tools.replace_in_file(os.path.join(self._source_subfolder, "src", "CMakeLists.txt"), "MOSQ_LIBS", "CONAN_LIBS")
         tools.replace_in_file(os.path.join(self._source_subfolder, "include", "mosquitto.h"), "__declspec(dllimport)", "")
         tools.replace_in_file(os.path.join(self._source_subfolder, "lib", "cpp", "mosquittopp.h"), "__declspec(dllimport)", "")
+        # dynlibs for apple mobile want code signatures and that will not work here
+        # this would actually be the right patch for static builds also, but this would have other side effects, so
+        if(self.settings.os in ["iOS", "watchOS", "tvOS"]):
+            tools.replace_in_file(os.path.join(self._source_subfolder, "lib", "CMakeLists.txt"), "SHARED", "")
+            tools.replace_in_file(os.path.join(self._source_subfolder, "lib", "cpp", "CMakeLists.txt"), "SHARED", "")
 
     def build(self):
         self._patch_sources()
@@ -112,7 +117,7 @@ class Mosquitto(ConanFile):
 
     def package(self):
         self.copy("edl-v10", src=self._source_subfolder, dst="licenses")
-        self.copy("edl-v20", src=self._source_subfolder, dst="licenses")
+        self.copy("epl-v20", src=self._source_subfolder, dst="licenses")
         self.copy("LICENSE.txt", src=self._source_subfolder, dst="licenses")
         cmake = self._configure_cmake()
         cmake.install()
