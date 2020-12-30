@@ -81,7 +81,7 @@ class MongoCDriverConan(ConanFile):
         if self.options.with_zstd:
             self.requires("zstd/1.4.8")
         if self.options.with_icu:
-            self.requires("icu/68.1")
+            self.requires("icu/68.2")
 
     def build_requirements(self):
         if self.options.with_ssl == "libressl" or self.options.with_zstd:
