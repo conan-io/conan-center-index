@@ -160,7 +160,7 @@ class Mosquitto(ConanFile):
             self.env_info.PATH.append(bin_path)
             if self.options.websockets:
                 self.cpp_info.components["broker"].requires.append("libwebsockets::libwebsockets")
-            if self.settings.os == "Linux":
+            if self.settings.os in ("FreeBSD", "Linux"):
                 self.cpp_info.components["broker"].system_libs = ["pthread", "m"]
             elif self.settings.os == "Windows":
                 self.cpp_info.components["broker"].system_libs = ["ws2_32"]
