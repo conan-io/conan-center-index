@@ -4,7 +4,7 @@ from conans import ConanFile, CMake, tools
 class RaylibConan(ConanFile):
     name = "raylib"
     description = "raylib is a simple and easy-to-use library to enjoy videogames programming."
-    license = "zlib"
+    license = "Zlib"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://www.raylib.com/"
     topics = ("conan", "raylib", "gamedev")
