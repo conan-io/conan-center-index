@@ -4,8 +4,6 @@ import glob
 from conans import ConanFile, CMake, tools
 from conans.errors import ConanInvalidConfiguration
 
-required_conan_version = ">=1.31.0"
-
 class AcadoConan(ConanFile):
     name = "acado"
     description = "ACADO Toolkit is a software environment and algorithm collection for automatic control and dynamic optimization."
@@ -40,17 +38,6 @@ class AcadoConan(ConanFile):
     def configure(self):
         if self.options.shared:
             del self.options.fPIC
-        if self.settings.compiler == "Visual Studio" and self.options.shared:
-            # https://github.com/acado/acado/blob/b4e28f3131f79cadfd1a001e9fff061f361d3a0f/CMakeLists.txt#L77-L80
-            raise ConanInvalidConfiguration("Acado does not support shared builds on Windows.")
-        if self.settings.compiler == "apple-clang":
-            raise ConanInvalidConfiguration("apple-clang not supported")
-        if self.settings.compiler == "clang" and self.settings.compiler.version == "9":
-            raise ConanInvalidConfiguration("acado can not be built by Clang 9.")
-        if self.options.shared and self.settings.compiler == "gcc" and self.settings.compiler.version == "4.9":
-            raise ConanInvalidConfiguration("acado can not be built by gcc 4.9 as shared.")
-        if self.options.shared and self.settings.compiler == "gcc" and self.settings.compiler.version == "6":
-            raise ConanInvalidConfiguration("acado can not be built by gcc 6 as shared.")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
@@ -117,12 +104,13 @@ class AcadoConan(ConanFile):
         self.cpp_info.includedirs.append(os.path.join(self._qpoases_sources, "INCLUDE"))
         self.cpp_info.includedirs.append(os.path.join(self._qpoases_sources, "SRC"))
 
-    # def validate(self):
-        # if self.settings.compiler == "Visual Studio":
-        #     pass
-        # elif self.settings.compiler == "gcc" and self.settings.compiler.libcxx != "libstdc++11":
-        #     raise ConanInvalidConfiguration("libstdc++11 required")
-        # elif self.settings.compiler == "clang" and self.settings.compiler.libcxx != "libstdc++11":
-        #     raise ConanInvalidConfiguration("libstdc++11 required")
-        # if self.settings.compiler == "apple-clang":
-        #     raise ConanInvalidConfiguration("apple-clang not supported")
+    def validate(self):
+        if self.settings.compiler == "Visual Studio" and self.options.shared:
+            # https://github.com/acado/acado/blob/b4e28f3131f79cadfd1a001e9fff061f361d3a0f/CMakeLists.txt#L77-L80
+            raise ConanInvalidConfiguration("Acado does not support shared builds on Windows.")
+        if self.settings.compiler == "apple-clang":
+            raise ConanInvalidConfiguration("apple-clang not supported")
+        if self.settings.compiler == "clang" and self.settings.compiler.version == "9":
+            raise ConanInvalidConfiguration("acado can not be built by Clang 9.")
+        if self.options.shared and self.settings.compiler == "gcc":
+            raise ConanInvalidConfiguration("acado can not be built by gcc as shared.")
