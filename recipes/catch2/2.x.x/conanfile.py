@@ -12,13 +12,12 @@ class ConanRecipe(ConanFile):
     license = "BSL-1.0"
     settings = "os", "compiler", "build_type", "arch"
     generators = "cmake"
-    no_copy_source=True
-    
     _cmake = None
-    
+
     @property
     def _source_subfolder(self):
         return "source_subfolder"
+
     @property
     def _build_subfolder(self):
         return "build_subfolder"
@@ -37,9 +36,13 @@ class ConanRecipe(ConanFile):
         self._cmake.definitions["CATCH_INSTALL_HELPERS"] = "ON"
         self._cmake.configure(
             source_folder=self._source_subfolder,
-            build_folder=self._build_subfolder
+            build_folder=self._build_subfolder,
         )
         return self._cmake
+
+    def build(self):
+        cmake = self._configure_cmake()
+        cmake.build()
 
     def package(self):
         self.copy(pattern="LICENSE.txt", dst="licenses", src=self._source_subfolder)
@@ -48,14 +51,17 @@ class ConanRecipe(ConanFile):
         tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
         tools.rmdir(os.path.join(self.package_folder, "share"))
         for cmake_file in ["ParseAndAddCatchTests.cmake", "Catch.cmake", "CatchAddTests.cmake"]:
-            self.copy(cmake_file,
-                      src=os.path.join(self._source_subfolder, "contrib"),
-                      dst=os.path.join("lib", "cmake", "Catch2"))
-
-    def package_id(self):
-        self.info.header_only()
+            self.copy(
+                cmake_file,
+                src=os.path.join(self._source_subfolder, "contrib"),
+                dst=os.path.join("lib", "cmake", "Catch2"),
+            )
 
     def package_info(self):
-        self.cpp_info.builddirs = [os.path.join("lib", "cmake", "Catch2")]
         self.cpp_info.names["cmake_find_package"] = "Catch2"
         self.cpp_info.names["cmake_find_package_multi"] = "Catch2"
+
+        self.cpp_info.components["Catch2WithMain"].builddirs = [os.path.join("lib", "cmake", "Catch2")]
+        self.cpp_info.components["Catch2WithMain"].libs = ["Catch2WithMain"]
+        self.cpp_info.components["Catch2WithMain"].names["cmake_find_package"] = "Catch2WithMain"
+        self.cpp_info.components["Catch2WithMain"].names["cmake_find_package_multi"] = "Catch2WithMain"
