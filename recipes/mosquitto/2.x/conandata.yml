@@ -1,0 +1,4 @@
+sources:
+  "2.0.3":
+    url: https://github.com/eclipse/mosquitto/archive/v2.0.3.tar.gz
+    sha256: "a0b02ebb32e6bb09da1c15a32eac2332bd803ddbb5129be2d6d584af601adee5"
