@@ -47,6 +47,9 @@ class CppServer(ConanFile):
         }
 
     def configure(self):
+        if self.options.shared:
+            del self.options.fPIC
+
         if self.settings.compiler.get_safe("cppstd"):
             tools.check_min_cppstd(self, "17")
         minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
@@ -62,10 +65,6 @@ class CppServer(ConanFile):
 
     def config_options(self):
         if self.settings.os == "Windows":
-            del self.options.fPIC
-
-    def configure(self):
-        if self.options.shared:
             del self.options.fPIC
 
     def build(self):
