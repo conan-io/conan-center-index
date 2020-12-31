@@ -4,6 +4,7 @@ import glob
 from conans import ConanFile, CMake, tools
 from conans.errors import ConanInvalidConfiguration
 
+
 class AcadoConan(ConanFile):
     name = "acado"
     description = "ACADO Toolkit is a software environment and algorithm collection for automatic control and dynamic optimization."
@@ -112,5 +113,10 @@ class AcadoConan(ConanFile):
             raise ConanInvalidConfiguration("apple-clang not supported")
         if self.settings.compiler == "clang" and self.settings.compiler.version == "9":
             raise ConanInvalidConfiguration("acado can not be built by Clang 9.")
-        if self.options.shared and self.settings.compiler == "gcc":
-            raise ConanInvalidConfiguration("acado can not be built by gcc as shared.")
+
+        # acado requires libstdc++11 for shared builds
+        # https://github.com/conan-io/conan-center-index/pull/3967#issuecomment-752985640
+        if self.options.shared and self.settings.compiler == "clang" and self.settings.compiler.libcxx != "libstdc++11":
+            raise ConanInvalidConfiguration("libstdc++11 required")
+        if self.options.shared and self.settings.compiler == "gcc" and self.settings.compiler.libcxx != "libstdc++11":
+            raise ConanInvalidConfiguration("libstdc++11 required")
