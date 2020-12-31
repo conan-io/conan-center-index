@@ -11,5 +11,5 @@ int main() {
     for(int i = 0;i < Nx*Ny*Nz;i++) data[i] = rand();
     cnpy::npy_save("arr1.npy",&data[0],{Nz,Ny,Nx},"w");
     cnpy::NpyArray arr = cnpy::npy_load("arr1.npy");
-    return EXIT_SUCCESS;
+    return 0;
 }
