@@ -1,5 +1,16 @@
 # Changelog
 
+### 30-December-2020 - 13:24 CET
+
+- [feature] BuildSingleReference: Run tests for packages that already exist.
+- [feature] BuildSingleReference: Add functionality so it is able to build a PR merging into 'master'.
+- [feature] Specify Conan version to use in every node call (decouple from conan-docker-tools updates).
+- [fix] AddBetaUser: Fix "ghost" user added weekly for deleted users.
+
+### 29-December-2020 - 17:18 CET
+
+- Updated Conan client to the 1.32.1 version in Windows and Mac agents.
+
 ### 14-December-2020 - 09:51 CET
 
 - [feature] Remove repositories after a pull-request is merged.
