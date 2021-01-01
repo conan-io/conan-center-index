@@ -19,7 +19,9 @@ class DataFrameConan(ConanFile):
         "cpp",
         "statistical-analysis",
         "financial-data-analysis",
+        "financial-engineering",
         "trading-strategies",
+        "trading-algorithms",
         "machine-learning",
     )
     settings = "os", "compiler", "build_type", "arch"
