@@ -11,7 +11,7 @@ class CnpyConan(ConanFile):
     homepage = "https://github.com/hongyx11/cnpy"
     url = "https://github.com/conan-io/conan-center-index"
     exports_sources = ["CMakeLists.txt", "patches/*"]
-    generators = "cmake"
+    generators = "cmake", "cmake_find_package"
     settings = "os", "arch", "compiler", "build_type"
     _cmake = None
 
