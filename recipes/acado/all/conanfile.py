@@ -66,6 +66,15 @@ class AcadoConan(ConanFile):
         for patch in self.conan_data["patches"][self.version]:
             tools.patch(**patch)
 
+    def deploy(self):
+        # include/acado/code_generation/templates/templates.hpp contains hardcoded paths that need to be adapted
+        new_template_folder = os.path.join(self.package_folder, "include", "acado", "code_generation", "templates")
+        tools.replace_in_file(
+            os.path.join(new_template_folder, "templates.hpp"),
+            "#define TEMPLATE_PATHS",
+            f'#define TEMPLATE_PATHS "{new_template_folder}" \n//',
+        )
+
     def build(self):
         self._patch_sources()
         cmake = self._configure_cmake()
