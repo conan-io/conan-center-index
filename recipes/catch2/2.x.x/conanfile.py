@@ -10,9 +10,9 @@ class ConanRecipe(ConanFile):
     homepage = "https://github.com/catchorg/Catch2"
     url = "https://github.com/conan-io/conan-center-index"
     license = "BSL-1.0"
-    settings = "os", "compiler", "build_type", "arch"
     exports_sources = ["CMakeLists.txt"]
     generators = "cmake"
+    settings = "os", "compiler", "build_type", "arch"
     _cmake = None
 
     @property
@@ -35,15 +35,19 @@ class ConanRecipe(ConanFile):
         self._cmake.definitions["BUILD_TESTING"] = "OFF"
         self._cmake.definitions["CATCH_INSTALL_DOCS"] = "OFF"
         self._cmake.definitions["CATCH_INSTALL_HELPERS"] = "ON"
-        self._cmake.configure(
-            source_folder=self._source_subfolder,
-            build_folder=self._build_subfolder,
-        )
+        self._cmake.configure(build_folder=self._build_subfolder)
         return self._cmake
 
     def build(self):
-        cmake = self._configure_cmake()
-        cmake.build()
+        # Catch2 does skip install if included as subproject:
+        # https://github.com/catchorg/Catch2/blob/79a5cd795c387e2da58c13e9dcbfd9ea7a2cfb30/CMakeLists.txt#L100-L102
+        main_cml = os.path.join(self._source_subfolder, "CMakeLists.txt")
+        tools.replace_in_file(main_cml, "if (NOT_SUBPROJECT)", "if (TRUE)")
+        if self.version >= "2.13.4":
+            cmake = self._configure_cmake()
+            cmake.build()
+        else:
+            no_copy_source = True
 
     def package(self):
         self.copy(pattern="LICENSE.txt", dst="licenses", src=self._source_subfolder)
@@ -57,6 +61,10 @@ class ConanRecipe(ConanFile):
                 src=os.path.join(self._source_subfolder, "contrib"),
                 dst=os.path.join("lib", "cmake", "Catch2"),
             )
+
+    def package_id(self):
+        if self.version < "2.13.4":
+            self.info.header_only()
 
     def package_info(self):
         if self.version < "2.13.4":
