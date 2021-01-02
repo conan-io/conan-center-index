@@ -1,5 +1,4 @@
 from conans import ConanFile, Meson, tools
-from conans.errors import ConanInvalidConfiguration
 import os
 
 
@@ -31,11 +30,6 @@ class LibnameConan(ConanFile):
     @property
     def _build_subfolder(self):
         return "build_subfolder"
-
-    def config_options(self):
-        # FIXME: this package is linux only?
-        if self.settings.os == "Windows":
-            del self.options.fPIC
 
     def configure(self):
         if self.options.shared:
