@@ -35,6 +35,9 @@ class RaylibConan(ConanFile):
         del self.settings.compiler.libcxx
         del self.settings.compiler.cppstd
 
+    def requirements(self):
+        self.requires("opengl/system")
+
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
         os.rename(self.name + "-" + self.version, self._source_subfolder)
@@ -66,4 +69,4 @@ class RaylibConan(ConanFile):
         elif self.settings.os == "Windows":
             self.cpp_info.system_libs.extend(["gdi32", "winmm"])
         elif self.settings.os == "Macos":
-            self.cpp_info.frameworks.extend(["Cocoa", "IOKit", "CoreVideo", "GLUT", "OpenGL"])
+            self.cpp_info.frameworks.extend(["Cocoa", "IOKit", "CoreVideo"])
