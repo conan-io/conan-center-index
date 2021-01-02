@@ -1,6 +1,4 @@
 from conans import ConanFile, tools
-import os
-
 
 class TestPackgeConan(ConanFile):
     settings = "os", "arch"
