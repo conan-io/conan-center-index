@@ -64,6 +64,6 @@ class RaylibConan(ConanFile):
         if self.settings.os == "Linux":
             self.cpp_info.system_libs.extend(["m", "pthread", "dl", "rt"])
         elif self.settings.os == "Windows":
-            self.cpp_info.system_libs.append("gdi32")
+            self.cpp_info.system_libs.extend(["gdi32", "winmm"])
         elif self.settings.os == "Macos":
-            self.cpp_info.frameworks.extend(["Cocoa", "IOKit", "CoreFoundation"])
+            self.cpp_info.frameworks.extend(["Cocoa", "IOKit", "CoreVideo", "GLUT", "OpenGL"])
