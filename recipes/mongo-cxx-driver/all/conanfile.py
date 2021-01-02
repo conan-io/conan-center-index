@@ -94,35 +94,6 @@ class MongoCxxConan(ConanFile):
         if self.options.polyfill == "boost":
             self.requires("boost/1.75.0")
 
-    def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        os.rename(self.name + "-r" + self.version, self._source_subfolder)
-
-    def _configure_cmake(self):
-        if self._cmake:
-            return self._cmake
-
-        self._cmake = CMake(self)
-        self._cmake.definitions["BSONCXX_POLY_USE_MNMLSTC"] = self.options.polyfill == "mnmlstc"
-        self._cmake.definitions["BSONCXX_POLY_USE_STD"] = self.options.polyfill == "std"
-        self._cmake.definitions["BSONCXX_POLY_USE_STD_EXPERIMENTAL"] = self.options.polyfill == "experimental"
-        self._cmake.definitions["BSONCXX_POLY_USE_BOOST"] = self.options.polyfill == "boost"
-        self._cmake.definitions["BUILD_VERSION"] = self.version
-        self._cmake.definitions["BSONCXX_LINK_WITH_STATIC_MONGOC"] = not self.options["mongo-c-driver"].shared
-        self._cmake.definitions["MONGOCXX_LINK_WITH_STATIC_MONGOC"] = not self.options["mongo-c-driver"].shared
-        self._cmake.definitions["MONGOCXX_ENABLE_SSL"] = self.options.with_ssl
-        if self.settings.compiler.get_safe("cppstd") is None:
-            self.output.warn("The recipe will force the cppstd to {}".format(self._minimal_std_version))
-            self._cmake.definitions["CMAKE_CXX_STANDARD"] = self._minimal_std_version
-        # FIXME: two CMake module/config files should be generated (mongoc-1.0-config.cmake and bson-1.0-config.cmake),
-        # but it can't be modeled right now.
-        # Fix should happen in mongo-c-driver recipe
-        if not os.path.exists("Findbson-1.0.cmake"):
-            self.output.info("Copying mongoc config file to bson")
-            shutil.copy("Findmongoc-1.0.cmake", "Findbson-1.0.cmake")
-        self._cmake.configure(build_folder=self._build_subfolder)
-        return self._cmake
-
     def validate(self):
         if self.options.with_ssl and not bool(self.options["mongo-c-driver"].with_ssl):
             raise ConanInvalidConfiguration("mongo-cxx-driver with_ssl=True requires mongo-c-driver with a ssl implementation")
@@ -151,6 +122,35 @@ class MongoCxxConan(ConanFile):
                     self._minimal_std_version
                 )
             )
+
+    def source(self):
+        tools.get(**self.conan_data["sources"][self.version])
+        os.rename(self.name + "-r" + self.version, self._source_subfolder)
+
+    def _configure_cmake(self):
+        if self._cmake:
+            return self._cmake
+
+        self._cmake = CMake(self)
+        self._cmake.definitions["BSONCXX_POLY_USE_MNMLSTC"] = self.options.polyfill == "mnmlstc"
+        self._cmake.definitions["BSONCXX_POLY_USE_STD"] = self.options.polyfill == "std"
+        self._cmake.definitions["BSONCXX_POLY_USE_STD_EXPERIMENTAL"] = self.options.polyfill == "experimental"
+        self._cmake.definitions["BSONCXX_POLY_USE_BOOST"] = self.options.polyfill == "boost"
+        self._cmake.definitions["BUILD_VERSION"] = self.version
+        self._cmake.definitions["BSONCXX_LINK_WITH_STATIC_MONGOC"] = not self.options["mongo-c-driver"].shared
+        self._cmake.definitions["MONGOCXX_LINK_WITH_STATIC_MONGOC"] = not self.options["mongo-c-driver"].shared
+        self._cmake.definitions["MONGOCXX_ENABLE_SSL"] = self.options.with_ssl
+        if self.settings.compiler.get_safe("cppstd") is None:
+            self.output.warn("The recipe will force the cppstd to {}".format(self._minimal_std_version))
+            self._cmake.definitions["CMAKE_CXX_STANDARD"] = self._minimal_std_version
+        # FIXME: two CMake module/config files should be generated (mongoc-1.0-config.cmake and bson-1.0-config.cmake),
+        # but it can't be modeled right now.
+        # Fix should happen in mongo-c-driver recipe
+        if not os.path.exists("Findbson-1.0.cmake"):
+            self.output.info("Copying mongoc config file to bson")
+            shutil.copy("Findmongoc-1.0.cmake", "Findbson-1.0.cmake")
+        self._cmake.configure(build_folder=self._build_subfolder)
+        return self._cmake
 
     def _patch_sources(self):
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
