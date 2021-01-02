@@ -5,7 +5,7 @@ import glob
 import shutil
 
 
-required_conan_version = ">=1.28.0"
+required_conan_version = ">=1.32.0"
 
 
 class MongoCxxConan(ConanFile):
@@ -89,31 +89,6 @@ class MongoCxxConan(ConanFile):
         if self.options.shared:
             del self.options.fPIC
 
-        if self.options.polyfill == "mnmlstc":
-            # TODO: add mnmlstc polyfill support
-            # Cannot model mnmlstc (not packaged, is pulled dynamically) polyfill dependencies
-            raise ConanInvalidConfiguration("mnmlstc polyfill is not yet supported")
-
-        if self.settings.compiler.get_safe("cppstd"):
-            tools.check_min_cppstd(self, self._minimal_std_version)
-
-        compiler = str(self.settings.compiler)
-        if self.options.polyfill == "experimental" and compiler == "apple-clang":
-            raise ConanInvalidConfiguration("experimental polyfill is not supported for apple-clang")
-
-        if compiler not in self._compilers_minimum_version:
-            self.output.warn("Unknown compiler, assuming it supports at least C++{}".format(self._minimal_std_version))
-            return
-
-        version = tools.Version(self.settings.compiler.version)
-        if version < self._compilers_minimum_version[compiler]:
-            raise ConanInvalidConfiguration(
-                "{} requires a compiler that supports at least C++{}".format(
-                    self.name,
-                    self._minimal_std_version
-                )
-            )
-
     def requirements(self):
         self.requires("mongo-c-driver/1.17.2")
         if self.options.polyfill == "boost":
@@ -148,15 +123,41 @@ class MongoCxxConan(ConanFile):
         self._cmake.configure(build_folder=self._build_subfolder)
         return self._cmake
 
+    def validate(self):
+        if self.options.with_ssl and not bool(self.options["mongo-c-driver"].with_ssl):
+            raise ConanInvalidConfiguration("mongo-cxx-driver with_ssl=True requires mongo-c-driver with a ssl implementation")
+
+        if self.options.polyfill == "mnmlstc":
+            # TODO: add mnmlstc polyfill support
+            # Cannot model mnmlstc (not packaged, is pulled dynamically) polyfill dependencies
+            raise ConanInvalidConfiguration("mnmlstc polyfill is not yet supported")
+
+        if self.settings.compiler.get_safe("cppstd"):
+            tools.check_min_cppstd(self, self._minimal_std_version)
+
+        compiler = str(self.settings.compiler)
+        if self.options.polyfill == "experimental" and compiler == "apple-clang":
+            raise ConanInvalidConfiguration("experimental polyfill is not supported for apple-clang")
+
+        if compiler not in self._compilers_minimum_version:
+            self.output.warn("Unknown compiler, assuming it supports at least C++{}".format(self._minimal_std_version))
+            return
+
+        version = tools.Version(self.settings.compiler.version)
+        if version < self._compilers_minimum_version[compiler]:
+            raise ConanInvalidConfiguration(
+                "{} requires a compiler that supports at least C++{}".format(
+                    self.name,
+                    self._minimal_std_version
+                )
+            )
+
     def _patch_sources(self):
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
             tools.patch(**patch)
 
     def build(self):
-        if self.options.with_ssl and not bool(self.options["mongo-c-driver"].with_ssl):
-            raise ConanInvalidConfiguration("mongo-cxx-driver with_ssl=True requires mongo-c-driver with a ssl implementation")
         self._patch_sources()
-
         cmake = self._configure_cmake()
         cmake.build()
 
