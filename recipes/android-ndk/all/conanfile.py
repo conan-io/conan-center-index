@@ -138,6 +138,9 @@ class AndroidNDKInstallerConan(ConanFile):
     def package_info(self):
         # test shall pass, so this runs also in the build as build requirement context
         # ndk-build: https://developer.android.com/ndk/guides/ndk-build
+        if self.settings.os == "Windows":
+            self.env_info.PATH.append(self.package_folder)
+
         self.env_info.PATH.append(os.path.join(self.package_folder, 'bin'))
 
         # this is not enough, I can kill that .....

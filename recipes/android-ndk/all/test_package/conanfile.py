@@ -10,4 +10,7 @@ class TestPackgeConan(ConanFile):
 
     def test(self):
         if not tools.cross_building(self):
-            self.run("ndk-build --version", run_environment=True)
+            if self.settings.os == "Windows":
+                self.run("ndk-build.cmd --version", run_environment=True)
+            else:
+                self.run("ndk-build --version", run_environment=True)
