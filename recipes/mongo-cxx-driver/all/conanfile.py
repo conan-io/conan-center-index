@@ -90,9 +90,9 @@ class MongoCxxConan(ConanFile):
             del self.options.fPIC
 
     def requirements(self):
-        self.requires("mongo-c-driver/1.17.2")
+        self.requires("mongo-c-driver/1.17.3")
         if self.options.polyfill == "boost":
-            self.requires("boost/1.74.0")
+            self.requires("boost/1.75.0")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
