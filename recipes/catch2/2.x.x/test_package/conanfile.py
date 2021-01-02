@@ -1,4 +1,5 @@
 from conans import ConanFile, CMake, tools
+from conans.tools import Version
 import os
 
 
@@ -15,5 +16,5 @@ class TestPackageConan(ConanFile):
         if not tools.cross_building(self.settings):
             self.run(os.path.join("bin", "test_package"), run_environment=True)
 
-            if self.deps_cpp_info["catch2"].version >= "2.13.4":
+            if Version(self.deps_cpp_info["catch2"].version) >= "2.13.4":
                 self.run(os.path.join("bin", "standalone"), run_environment=True)
