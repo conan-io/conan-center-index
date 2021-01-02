@@ -120,12 +120,15 @@ class OpusFileConan(ConanFile):
         self.cpp_info.components["libopusfile"].libs = ["opusfile"]
         self.cpp_info.components["libopusfile"].includedirs.append(os.path.join("include", "opus"))
         self.cpp_info.components["libopusfile"].requires = ["ogg::ogg", "opus::opus"]
-        if self.options.http:
-            self.cpp_info.components["libopusfile"].requires.append("openssl::openssl")
         if self.settings.os in ("FreeBSD", "Linux"):
             self.cpp_info.components["libopusfile"].system_libs = ["m", "dl", "pthread"]
 
-        if not self._is_msvc:
+        if self._is_msvc:
+            if self.options.http:
+                self.cpp_info.components["libopusfile"].requires.append("openssl::openssl")
+        else:
             self.cpp_info.components["opusurl"].names["pkg_config"] = "opusurl"
             self.cpp_info.components["opusurl"].libs = ["opusurl"]
             self.cpp_info.components["opusurl"].requires = ["libopusfile"]
+            if self.options.http:
+                self.cpp_info.components["opusurl"].requires.append("openssl::openssl")
