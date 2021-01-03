@@ -2,7 +2,7 @@ from conans import ConanFile, Meson, tools
 import os
 
 
-class LibnameConan(ConanFile):
+class AtSpi2CoreConan(ConanFile):
     name = "at-spi2-core"
     description = "It provides a Service Provider Interface for the Assistive Technologies available on the GNOME platform and a library against which applications can be linked"
     topics = ("conan", "atk", "accessibility")
