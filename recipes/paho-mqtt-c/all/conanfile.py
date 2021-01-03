@@ -2,13 +2,14 @@ import os
 from conans import CMake, ConanFile, tools
 from conans.errors import ConanInvalidConfiguration
 
+
 class PahoMqttcConan(ConanFile):
     name = "paho-mqtt-c"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/eclipse/paho.mqtt.c"
     topics = ("MQTT", "IoT", "eclipse", "SSL", "paho", "C")
     license = "EPL-2.0"
-    description = """Eclipse Paho MQTT C client library for Linux, Windows and MacOS"""
+    description = "Eclipse Paho MQTT C client library for Linux, Windows and MacOS"
     exports_sources = ["CMakeLists.txt", "patches/*"]
     generators = "cmake"
     settings = "os", "arch", "compiler", "build_type"
@@ -71,7 +72,7 @@ class PahoMqttcConan(ConanFile):
         return self._cmake
 
     def build(self):
-        for patch in self.conan_data["patches"][self.version]:
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
             tools.patch(**patch)
         cmake = self._configure_cmake()
         cmake.build()
