@@ -64,7 +64,7 @@ class OpenCVConan(ConanFile):
            "MT" in str(self.settings.compiler.runtime) and self.options.shared:
             raise ConanInvalidConfiguration("Visual Studio and Runtime MT is not supported for shared library.")
         if self.settings.compiler == "clang" and tools.Version(self.settings.compiler.version) < "4":
-            raise ConanInvalidConfiguration("Clang 3.x can build OpenCV 3.x due an internal bug.")
+            raise ConanInvalidConfiguration("Clang 3.x cannot build OpenCV 3.x due an internal bug.")
         if self.settings.compiler.cppstd and self.options.with_openexr:
             tools.check_min_cppstd(self, 11)
         if self.options.shared:
