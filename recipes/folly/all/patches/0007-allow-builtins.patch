@@ -58,7 +58,7 @@ index e68de4456..30caf4003 100644
  #include <folly/Portability.h>
  #include <intrin.h>
 -- 
-
+see https://github.com/facebook/folly/issues/1412
 diff --git a/folly/portability/Builtins.h b/folly/portability/Builtins.h
 index 30caf4003..e8ef97266 100644
 --- a/folly/portability/Builtins.h
