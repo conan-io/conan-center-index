@@ -3,6 +3,9 @@ from conans import ConanFile, CMake, tools
 from conans.errors import ConanInvalidConfiguration
 
 
+required_conan_version = ">=1.32"
+
+
 class WiringpiConan(ConanFile):
     name = "wiringpi"
     license = "LGPL-3.0"
