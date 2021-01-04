@@ -1,0 +1,12 @@
+sources:
+  "0.20.1":
+    sha256: "66415634c6e8c3fa8b71362879ec7575e27da43da562c798a8a2f223e6e47f5c" 
+    url: "https://ftp.gnu.org/pub/gnu/gettext/gettext-0.20.1.tar.gz"
+patches:
+  "0.20.1":
+    - patch_file: "patches/0001-build-Fix-build-errors-with-MSVC.patch"
+      base_path: "source_subfolder"
+    - patch_file: "patches/0002-memmove-is-intrinsic-function-on-MSVC.patch"
+      base_path: "source_subfolder"
+    - patch_file: "patches/0003-Reported-by-Gabor-Z.-Papp-gzp-papp.hu.patch"
+      base_path: "source_subfolder"

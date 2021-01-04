@@ -1,0 +1,16 @@
+--- CMake/config.cmake	2020-01-01 17:17:32.316731500 -0500
++++ CMake/config.cmake	2020-01-01 17:17:48.430661600 -0500
+@@ -164,13 +164,3 @@
+     VERSION ${RTTR_VERSION_STR}
+     COMPATIBILITY AnyNewerVersion
+ )
+-
+-if (BUILD_INSTALLER)
+-    install(FILES "${CMAKE_CURRENT_BINARY_DIR}/CMake/rttr-config-version.cmake"
+-            DESTINATION ${RTTR_CMAKE_CONFIG_INSTALL_DIR}
+-            COMPONENT Devel)
+-
+-    install(FILES "${LICENSE_FILE}" "${README_FILE}"
+-            DESTINATION ${RTTR_ADDITIONAL_FILES_INSTALL_DIR}
+-            PERMISSIONS OWNER_READ)
+-endif()

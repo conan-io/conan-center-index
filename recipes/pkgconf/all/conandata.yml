@@ -1,0 +1,10 @@
+sources:
+  "1.7.3":
+    url: "https://git.sr.ht/~kaniini/pkgconf/archive/pkgconf-1.7.3.tar.gz"
+    sha256: "88e93bbd1d4dc81fc08bfc7a39b3eca241aee3131091c9ba0684531ee4d9d2b3"
+patches:
+  "1.7.3":
+    - patch_file: "patches/0001-meson-use-declare-dependencies.patch"
+      base_path: "source_subfolder"
+    - patch_file: "patches/0002-c89-compatible.patch"
+      base_path: "source_subfolder"

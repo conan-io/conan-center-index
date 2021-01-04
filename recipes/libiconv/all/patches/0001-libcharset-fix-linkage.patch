@@ -1,0 +1,11 @@
+--- a/libcharset/include/libcharset.h.in
++++ b/libcharset/include/libcharset.h.in
+@@ -33,7 +33,7 @@
+    by the corresponding pathname with the current prefix instead.  Both
+    prefixes should be directory names without trailing slash (i.e. use ""
+    instead of "/").  */
+-extern void libcharset_set_relocation_prefix (const char *orig_prefix,
++extern LIBCHARSET_DLL_EXPORTED void libcharset_set_relocation_prefix (const char *orig_prefix,
+                                               const char *curr_prefix);
+ 
+ 

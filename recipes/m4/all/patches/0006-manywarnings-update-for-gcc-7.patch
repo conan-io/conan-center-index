@@ -1,0 +1,50 @@
+From 5e22aee79f9d02ac37f40f1d18f5696114c3c3c9 Mon Sep 17 00:00:00 2001
+From: Paul Eggert <eggert@cs.ucla.edu>
+Date: Tue, 16 May 2017 09:23:52 -0700
+Subject: manywarnings: update for GCC 7
+
+* build-aux/gcc-warning.spec:
+* m4/manywarnings.m4 (gl_MANYWARN_ALL_GCC):
+Add GCC 7 warnings, notably -Wimplicit-fallthrough=5, which
+requires a non-comment fallthrough attribute.  This is a bit
+cleaner than the comment versions.
+* lib/strftime.c, lib/dfa.c, lib/fnmatch.c, lib/mbrtowc.c:
+* lib/vasnprintf.c, tests/macros.h (FALLTHROUGH): New macro.
+Use it whenever one switch case falls through into the next.
+---
+ lib/vasnprintf.c | 10 +++++++++-
+ 1 file changed, 9 insertions(+), 1 deletion(-)
+
+(limited to 'lib/vasnprintf.c')
+
+diff --git a/lib/vasnprintf.c b/lib/vasnprintf.c
+index 839f79060..9c2af0e45 100644
+--- a/lib/vasnprintf.c
++++ b/lib/vasnprintf.c
+@@ -118,6 +118,14 @@
+ # include "fpucw.h"
+ #endif
+ 
++#ifndef FALLTHROUGH
++# if __GNUC__ < 7
++#  define FALLTHROUGH ((void) 0)
++# else
++#  define FALLTHROUGH __attribute__ ((__fallthrough__))
++# endif
++#endif
++
+ /* Default parameters.  */
+ #ifndef VASNPRINTF
+ # if WIDE_CHAR_VERSION
+@@ -4837,7 +4845,7 @@ VASNPRINTF (DCHAR_T *resultbuf, size_t *lengthp,
+                     *fbp++ = 'l';
+ # endif
+ #endif
+-                    /*FALLTHROUGH*/
++                    FALLTHROUGH;
+                   case TYPE_LONGINT:
+                   case TYPE_ULONGINT:
+ #if HAVE_WINT_T
+-- 
+cgit v1.2.1
+

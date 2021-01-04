@@ -1,0 +1,4 @@
+sources:
+  "3.0.0":
+    sha256: "b81136effb7185c77601fe2e0e6ac19bd996912e4814cebdd3010b0fac9e259b"
+    url: https://sourceforge.net/projects/pthreads4w/files/pthreads4w-code-v3.0.0.zip/download

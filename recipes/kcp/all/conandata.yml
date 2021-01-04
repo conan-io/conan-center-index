@@ -1,0 +1,14 @@
+sources:
+  "1.5":
+    url: "https://github.com/skywind3000/kcp/archive/1.5.tar.gz"
+    sha256: "14c1dfb3485cab635299a698f35db261ab7e74505efd0ec579b71fc7af0dff06"
+  "1.7":
+    url: "https://github.com/skywind3000/kcp/archive/1.7.tar.gz"
+    sha256: "b4d26994d95599ab0c44e1f93002f9fda275094a879d66c192d79d596529199e"
+patches:
+  "1.5":
+    - patch_file: "patches/0001-kcp-remove-add_library-STATIC.patch"
+      base_path: "source_subfolder"
+  "1.7":
+    - patch_file: "patches/0001-kcp-remove-add_library-STATIC.patch"
+      base_path: "source_subfolder"

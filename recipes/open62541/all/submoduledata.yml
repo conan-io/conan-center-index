@@ -1,0 +1,11 @@
+submodules:
+  "1.0.3":
+    deps/ua-nodeset:
+      sha256: 2f6ea6df9fc74daddad287a67bd28c73fcc6d98a560f270a8692e8686b078982
+      url: https://github.com/OPCFoundation/UA-Nodeset/archive/v1.04.zip
+      archive_pattern: "UA-Nodeset-{version}"
+  "1.1.3":
+    deps/ua-nodeset:
+      sha256: 2f6ea6df9fc74daddad287a67bd28c73fcc6d98a560f270a8692e8686b078982
+      url: https://github.com/OPCFoundation/UA-Nodeset/archive/v1.04.zip
+      archive_pattern: "UA-Nodeset-{version}"

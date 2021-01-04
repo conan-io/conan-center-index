@@ -1,0 +1,43 @@
+diff --git a/docopt.h b/docopt.h
+index 4c40741..d11fb25 100644
+--- a/docopt.h
++++ b/docopt.h
+@@ -9,12 +9,6 @@
+ #ifndef docopt__docopt_h_
+ #define docopt__docopt_h_
+ 
+-#include "docopt_value.h"
+-
+-#include <map>
+-#include <vector>
+-#include <string>
+-
+ #ifdef DOCOPT_HEADER_ONLY
+     #define DOCOPT_INLINE inline
+     #define DOCOPT_API
+@@ -40,6 +34,12 @@
+     #endif
+ #endif
+ 
++#include "docopt_value.h"
++
++#include <map>
++#include <vector>
++#include <string>
++
+ namespace docopt {
+ 	
+ 	// Usage string could not be parsed (ie, the developer did something wrong)
+diff --git a/docopt_value.h b/docopt_value.h
+index 829ee55..020634b 100644
+--- a/docopt_value.h
++++ b/docopt_value.h
+@@ -105,7 +105,7 @@ namespace docopt {
+ 	};
+ 
+ 	/// Write out the contents to the ostream
+-	std::ostream& operator<<(std::ostream&, value const&);
++	DOCOPT_API std::ostream& operator<<(std::ostream&, value const&);
+ }
+ 
+ namespace std {

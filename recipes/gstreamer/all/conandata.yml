@@ -1,0 +1,7 @@
+sources:
+  "1.16.2":
+    sha256: "dac037ab84d557f5d4e6e66e833f6bf8cf4f84671a311e0b2df99f9b30a9d693"
+    url: "https://gitlab.freedesktop.org/gstreamer/gstreamer/-/archive/1.16.2/gstreamer-1.16.2.tar.bz2"
+  "1.18.0":
+    sha256: "f072da67b6dad9b4aecf2cb594aaaa66f86c22af9ba80503b90f957d47015ef8"
+    url: "https://gitlab.freedesktop.org/gstreamer/gstreamer/-/archive/1.18.0/gstreamer-1.18.0.tar.bz2"

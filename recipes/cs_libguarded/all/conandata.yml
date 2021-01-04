@@ -1,0 +1,4 @@
+sources:
+  "1.1.0":
+    url: https://github.com/copperspice/cs_libguarded/archive/libguarded-1.1.0.tar.gz
+    sha256: ad51992e5a8ba29ce55e7bd6dfb653f4b483a52edf07806871e8b15e67278af3

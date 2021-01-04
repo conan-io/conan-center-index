@@ -1,0 +1,6 @@
+Name: libexample1
+Description: This is a description of libexample1.
+Requires:
+Version: 0.42
+Libs: -L/usr/lib -lexample1
+Cflags:  -I/usr/include/libexample1 -I/usr/include -DEXAMPLE1_STATIC

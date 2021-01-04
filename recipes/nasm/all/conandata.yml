@@ -1,0 +1,10 @@
+sources:
+  "2.13.01":
+    sha256: f420d01e898d9e15b78316f473040c8b56b72b357edd8ddbcef4387defd74d52
+    url: http://www.nasm.us/pub/nasm/releasebuilds/2.13.01/nasm-2.13.01.tar.gz
+  "2.13.02":
+    sha256: 4749fd76a8a26dc7d8871bc97cc2c16cfa0c933f984a13128e94f464f417531a
+    url: http://www.nasm.us/pub/nasm/releasebuilds/2.13.02/nasm-2.13.02.tar.gz
+  "2.14":
+    sha256: 66305119c8adafa39fb403d2f335ed297579ddc7c7cf79f00c10433691006432
+    url: http://www.nasm.us/pub/nasm/releasebuilds/2.14/nasm-2.14.tar.gz

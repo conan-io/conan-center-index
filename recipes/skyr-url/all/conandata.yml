@@ -1,0 +1,4 @@
+sources:
+  "1.12.0":
+    url: https://github.com/cpp-netlib/url/archive/v1.12.0.tar.gz
+    sha256: 42ede3666a4c40828aa74e4b35bf43dfc79de9329e6463ff90f9bb727b3a06f0

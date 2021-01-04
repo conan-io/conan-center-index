@@ -1,0 +1,29 @@
+From e81ca090d69837e4f1a3c41fe2345c77b38f756a Mon Sep 17 00:00:00 2001
+From: SSE4 <tomskside@gmail.com>
+Date: Fri, 12 Jul 2019 13:11:06 +0200
+Subject: [PATCH 3/3] Reported by Gabor Z. Papp <gzp@papp.hu>.
+
+This is a regression from 2018-11-25.
+
+* gettext-tools/configure.ac (PRELOADABLE_LIBINTL): Set to false if
+--disable-shared was specified.
+---
+ gettext-tools/configure | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/gettext-tools/configure b/gettext-tools/configure
+index 5a831d6da..4be36c383 100755
+--- a/gettext-tools/configure
++++ b/gettext-tools/configure
+@@ -23901,7 +23901,7 @@ else
+   PACKAGE_IS_GETTEXT_TOOLS_FALSE=
+ fi
+ 
+- if test $USE_INCLUDED_LIBINTL = no && test $GLIBC2 = yes; then
++ if test $USE_INCLUDED_LIBINTL = no && test $GLIBC2 = yes && test $enable_shared = yes; then
+   PRELOADABLE_LIBINTL_TRUE=
+   PRELOADABLE_LIBINTL_FALSE='#'
+ else
+-- 
+2.21.0
+

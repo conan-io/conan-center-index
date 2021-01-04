@@ -1,0 +1,124 @@
+--- a/libgeotiff/CMakeLists.txt
++++ b/libgeotiff/CMakeLists.txt
+@@ -80,7 +80,9 @@ SET(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/lib)
+ 
+ IF(WIN32)
+     IF(MSVC)
+-        ADD_DEFINITIONS(-DBUILD_AS_DLL=1)
++        IF(BUILD_SHARED_LIBS)
++            ADD_DEFINITIONS(-DBUILD_AS_DLL=1)
++        ENDIF()
+         ADD_DEFINITIONS(/DW4)
+         if (NOT (MSVC_VERSION VERSION_LESS 1400))
+             ADD_DEFINITIONS(-D_CRT_SECURE_NO_DEPRECATE)
+@@ -92,7 +94,7 @@ IF(WIN32)
+ ENDIF()
+ 
+ IF(CMAKE_COMPILER_IS_GNUCC OR CMAKE_COMPILER_IS_GNUCXX)
+-    SET(COMPILE_FLAGS "-fPIC -Wall -Wno-long-long")
++    SET(COMPILE_FLAGS "-Wall -Wno-long-long")
+     SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${COMPILE_FLAGS} -std=c99")
+     SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${COMPILE_FLAGS} -std=c++98")
+     IF(GEOTIFF_BUILD_PEDANTIC)
+@@ -119,80 +121,6 @@ SET(WITH_UTILITIES TRUE CACHE BOOL "Choose if GeoTIFF utilities should be built"
+ INCLUDE_DIRECTORIES(${PROJECT_SOURCE_DIR})
+ INCLUDE_DIRECTORIES(${PROJECT_SOURCE_DIR}/libxtiff)
+ 
+-# TIFF support - required, default=ON
+-SET(WITH_TIFF TRUE CACHE BOOL "Choose if TIFF support should be built")
+-
+-FIND_PACKAGE(PROJ NO_MODULE QUIET)
+-if (NOT PROJ_FOUND)
+-    FIND_PACKAGE(PROJ)
+-endif ()
+-
+-IF(PROJ_FOUND)
+-    INCLUDE_DIRECTORIES(${PROJ_INCLUDE_DIR})
+-ELSE()
+-    MESSAGE(FATAL_ERROR "Failed to detect PROJ >= 6")
+-ENDIF()
+-
+-# Zlib support - optional, default=OFF
+-SET(WITH_ZLIB FALSE CACHE BOOL "Choose if zlib support should be built")
+-
+-IF(WITH_ZLIB)
+-    FIND_PACKAGE(ZLIB NO_MODULE QUIET)
+-    if (NOT ZLIB_FOUND)
+-      FIND_PACKAGE(ZLIB)
+-    endif ()
+-
+-    IF(ZLIB_FOUND)
+-        SET(HAVE_ZIP 1)
+-        INCLUDE_DIRECTORIES(${ZLIB_INCLUDE_DIR})
+-        ADD_DEFINITIONS(-DHAVE_ZIP=${HAVE_ZIP})
+-    ENDIF()
+-ENDIF()
+-
+-# JPEG support - optional, default=OFF
+-SET(WITH_JPEG FALSE CACHE BOOL "Choose if JPEG support should be built")
+-
+-IF(WITH_JPEG)
+-    FIND_PACKAGE(JPEG NO_MODULE QUIET)
+-    if (NOT JPEG_FOUND)
+-      FIND_PACKAGE(JPEG)
+-    endif ()
+-
+-    IF(JPEG_FOUND)
+-        SET(HAVE_JPEG 1)
+-        INCLUDE_DIRECTORIES(${JPEG_INCLUDE_DIR})
+-        ADD_DEFINITIONS(-DHAVE_JPEG=${HAVE_JPEG})
+-    ENDIF()
+-ENDIF()
+-
+-IF(WITH_TIFF)
+-    FIND_PACKAGE(TIFF NO_MODULE QUIET)
+-    if (NOT TIFF_FOUND)
+-      FIND_PACKAGE(TIFF REQUIRED)
+-    endif ()
+-
+-    IF(TIFF_FOUND)
+-        # Confirm required API is available
+-        INCLUDE(CheckFunctionExists)
+-        SET(CMAKE_REQUIRED_LIBRARIES ${TIFF_LIBRARIES})
+-
+-        CHECK_FUNCTION_EXISTS(TIFFOpen HAVE_TIFFOPEN)
+-        IF(NOT HAVE_TIFFOPEN)
+-            SET(TIFF_FOUND) # ReSET to NOT found for TIFF library
+-            MESSAGE(FATAL_ERROR "Failed to link with libtiff - TIFFOpen function not found")
+-        ENDIF()
+-
+-        CHECK_FUNCTION_EXISTS(TIFFMergeFieldInfo HAVE_TIFFMERGEFIELDINFO)
+-        IF(NOT HAVE_TIFFMERGEFIELDINFO)
+-            SET(TIFF_FOUND) # ReSET to NOT found for TIFF library
+-            MESSAGE(FATAL_ERROR "Failed to link with libtiff - TIFFMergeFieldInfo function not found. libtiff 3.6.0 Beta or later required. Please upgrade or use an older version of libgeotiff")
+-        ENDIF()
+-
+-        INCLUDE_DIRECTORIES(${TIFF_INCLUDE_DIR})
+-        ADD_DEFINITIONS(-DHAVE_TIFF=1)
+-    ENDIF(TIFF_FOUND)
+-ENDIF(WITH_TIFF)
+-
+ # Turn off TOWGS84 support
+ SET(WITH_TOWGS84 TRUE CACHE BOOL "Build with TOWGS84 support")
+ IF (NOT WITH_TOWGS84)
+@@ -300,7 +228,6 @@ INSTALL(FILES ${GEOTIFF_LIB_HEADERS} DESTINATION include)
+ ###############################################################################
+ # Build libxtiff library
+ 
+-ADD_SUBDIRECTORY(libxtiff)
+ 
+ ###############################################################################
+ # Build libgeotiff library
+@@ -361,11 +288,7 @@ ENDIF(UNIX)
+ SET_TARGET_PROPERTIES(${GEOTIFF_LIBRARY_TARGET} PROPERTIES
+    OUTPUT_NAME ${GEOTIFF_LIB_NAME})
+ 
+-TARGET_LINK_LIBRARIES(${GEOTIFF_LIBRARY_TARGET}
+-    ${TIFF_LIBRARIES}
+-    ${PROJ_LIBRARIES}
+-    ${ZLIB_LIBRARIES}
+-    ${JPEG_LIBRARIES})
++TARGET_LINK_LIBRARIES(${GEOTIFF_LIBRARY_TARGET} ${CONAN_LIBS})
+ 
+ # INSTALL(TARGETS ${GEOTIFF_ARCHIVE_TARGET} ${GEOTIFF_LIBRARY_TARGET}
+ #	RUNTIME DESTINATION ${GEOTIFF_BIN_DIR}

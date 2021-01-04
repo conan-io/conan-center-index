@@ -1,0 +1,95 @@
+sources:
+  1.69.0:
+    url: [
+      "https://dl.bintray.com/boostorg/release/1.69.0/source/boost_1_69_0.tar.bz2",
+      "https://sourceforge.net/projects/boost/files/boost/1.69.0/boost_1_69_0.tar.bz2",
+    ]
+    sha256: "8f32d4617390d1c2d16f26a27ab60d97807b35440d45891fa340fc2648b04406"
+  1.70.0:
+    url: [
+      "https://dl.bintray.com/boostorg/release/1.70.0/source/boost_1_70_0.tar.bz2",
+      "https://sourceforge.net/projects/boost/files/boost/1.70.0/boost_1_70_0.tar.bz2",
+    ]
+    sha256: "430ae8354789de4fd19ee52f3b1f739e1fba576f0aded0897c3c2bc00fb38778"
+  1.71.0:
+    url: [
+      "https://dl.bintray.com/boostorg/release/1.71.0/source/boost_1_71_0.tar.bz2",
+    ]
+    sha256: "d73a8da01e8bf8c7eda40b4c84915071a8c8a0df4a6734537ddde4a8580524ee"
+  1.72.0:
+    url: [
+      "https://dl.bintray.com/boostorg/release/1.72.0/source/boost_1_72_0.tar.bz2",
+      "https://sourceforge.net/projects/boost/files/boost/1.72.0/boost_1_72_0.tar.bz2",
+    ]
+    sha256: "59c9b274bc451cf91a9ba1dd2c7fdcaf5d60b1b3aa83f2c9fa143417cc660722"
+  1.73.0:
+    url: [
+      "https://dl.bintray.com/boostorg/release/1.73.0/source/boost_1_73_0.tar.bz2",
+      "https://sourceforge.net/projects/boost/files/boost/1.73.0/boost_1_73_0.tar.bz2",
+    ]
+    sha256: "4eb3b8d442b426dc35346235c8733b5ae35ba431690e38c6a8263dce9fcbb402"
+  1.74.0:
+    url: [
+      "https://dl.bintray.com/boostorg/release/1.74.0/source/boost_1_74_0.tar.bz2",
+      "https://sourceforge.net/projects/boost/files/boost/1.74.0/boost_1_74_0.tar.bz2"
+    ]
+    sha256: "83bfc1507731a0906e387fc28b7ef5417d591429e51e788417fe9ff025e116b1"
+patches:
+  1.69.0:
+    - patch_file: "patches/boost_build_asmflags.patch"
+      base_path: "source_subfolder"
+    - patch_file: "patches/python_base_prefix.patch"
+      base_path: "source_subfolder"
+    - patch_file: "patches/static_object_init.patch"
+      base_path: "source_subfolder"
+    - patch_file: "patches/support_msvc_2019.patch"
+      base_path: "source_subfolder"
+  1.70.0:
+    - patch_file: "patches/0001-beast-fix-moved-from-executor.patch"
+      base_path: "source_subfolder"
+    - patch_file: "patches/bcp_namespace_issues_1_70.patch"
+      base_path: "source_subfolder"
+    - patch_file: "patches/boost_build_qcc_fix_debug_build_parameter.patch"
+      base_path: "source_subfolder"
+    - patch_file: "patches/boost_core_qnx_cxx_provide___cxa_get_globals.patch"
+      base_path: "source_subfolder"
+    - patch_file: "patches/python_base_prefix.patch"
+      base_path: "source_subfolder"
+    - patch_file: "patches/solaris_pthread_data.patch"
+      base_path: "source_subfolder"
+  1.71.0:
+    - patch_file: "patches/bcp_namespace_issues_1_71.patch"
+      base_path: "source_subfolder"
+    - patch_file: "patches/boost_build_qcc_fix_debug_build_parameter.patch"
+      base_path: "source_subfolder"
+    - patch_file: "patches/boost_core_qnx_cxx_provide___cxa_get_globals.patch"
+      base_path: "source_subfolder"
+    - patch_file: "patches/python_base_prefix.patch"
+      base_path: "source_subfolder"
+    - patch_file: "patches/solaris_pthread_data.patch"
+      base_path: "source_subfolder"
+  1.72.0:
+    - patch_file: "patches/bcp_namespace_issues_1_72.patch"
+      base_path: "source_subfolder"
+    - patch_file: "patches/boost_build_qcc_fix_debug_build_parameter.patch"
+      base_path: "source_subfolder"
+    - patch_file: "patches/boost_core_qnx_cxx_provide___cxa_get_globals.patch"
+      base_path: "source_subfolder"
+    - patch_file: "patches/python_base_prefix.patch"
+      base_path: "source_subfolder"
+    - patch_file: "patches/solaris_pthread_data.patch"
+      base_path: "source_subfolder"
+    - patch_file: "patches/0001-revert-cease-dependence-on-range.patch"
+      base_path: "source_subfolder"
+    - patch_file: "patches/boost_log_filesystem_no_deprecated_1_72.patch"
+      base_path: "source_subfolder"
+  1.73.0:
+    - patch_file: "patches/boost_build_qcc_fix_debug_build_parameter.patch"
+      base_path: "source_subfolder"
+    - patch_file: "patches/python_base_prefix.patch"
+      base_path: "source_subfolder"
+  1.74.0:
+    - patch_file: "patches/boost_build_qcc_fix_debug_build_parameter_since_1_74.patch"
+      base_path: "source_subfolder"
+    - patch_file: "patches/python_base_prefix_since_1_74.patch"
+      base_path: "source_subfolder"

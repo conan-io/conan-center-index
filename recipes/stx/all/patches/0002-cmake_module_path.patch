@@ -1,0 +1,13 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 5e155ec..d73691d 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -30,7 +30,7 @@ project(
+   HOMEPAGE_URL "https://github.com/lamarrr/STX"
+   LANGUAGES CXX)
+
+-set(CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake-modules)
++list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake-modules)
+
+ include(CMakeDependentOption)
+ include(HandleFlags)

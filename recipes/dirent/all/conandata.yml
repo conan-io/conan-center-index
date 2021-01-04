@@ -1,0 +1,4 @@
+sources:
+  "1.23.2":
+    url: "https://github.com/tronkko/dirent/archive/1.23.2.tar.gz"
+    sha256: "f72d39e3c39610b6901e391b140aa69b51e0eb99216939ed5e547b5dad03afb1"

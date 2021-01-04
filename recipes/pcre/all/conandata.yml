@@ -1,0 +1,7 @@
+sources:
+  "8.41":
+    url: "https://ftp.pcre.org/pub/pcre/pcre-8.41.tar.gz"
+    sha256: "244838e1f1d14f7e2fa7681b857b3a8566b74215f28133f14a8f5e59241b682c"
+  "8.44":
+    url: "https://ftp.pcre.org/pub/pcre/pcre-8.44.tar.gz"
+    sha256: "aecafd4af3bd0f3935721af77b889d9024b2e01d96b58471bd91a3063fb47728"

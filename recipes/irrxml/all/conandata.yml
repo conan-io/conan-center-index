@@ -1,0 +1,8 @@
+sources:
+  "1.2":
+    sha256: 9b4f80639b2dee3caddbf75862389de684747df27bea7d25f96c7330606d7079
+    url: http://prdownloads.sourceforge.net/irrlicht/irrxml-1.2.zip
+patches:
+  "1.2":
+    - base_path: source_subfolder
+      patch_file: patches/1.2/irrtypes_debug_vs.patch

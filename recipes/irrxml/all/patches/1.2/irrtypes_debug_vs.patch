@@ -1,0 +1,24 @@
+diff --git a/src/irrTypes.h b/src/irrTypes.h
+index aa2254d..280333a 100644
+--- a/src/irrTypes.h
++++ b/src/irrTypes.h
+@@ -5,6 +5,10 @@
+ #ifndef __IRR_TYPES_H_INCLUDED__
+ #define __IRR_TYPES_H_INCLUDED__
+ 
++#if defined(WIN32) && defined(_MSC_VER)
++#include <windows.h>
++#endif
++
+ namespace irr
+ {
+ 
+@@ -80,7 +84,7 @@ typedef unsigned short wchar_t;
+ 
+ //! define a break macro for debugging only in Win32 mode.
+ #if defined(WIN32) && defined(_MSC_VER) && defined(_DEBUG)
+-#define _IRR_DEBUG_BREAK_IF( _CONDITION_ ) if (_CONDITION_) {_asm int 3}
++#define _IRR_DEBUG_BREAK_IF( _CONDITION_ ) if (_CONDITION_) { DebugBreak(); }
+ #else 
+ #define _IRR_DEBUG_BREAK_IF( _CONDITION_ )
+ #endif

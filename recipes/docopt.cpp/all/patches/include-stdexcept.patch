@@ -1,0 +1,11 @@
+diff --git a/docopt_value.h b/docopt_value.h
+index a923219..2003a7a 100644
+--- a/docopt_value.h
++++ b/docopt_value.h
+@@ -13,5 +13,6 @@
+ #include <vector>
+ #include <functional> // std::hash
+ #include <iosfwd>
++#include <stdexcept>
+
+ namespace docopt {

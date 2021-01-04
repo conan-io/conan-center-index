@@ -1,0 +1,4 @@
+sources:
+  "4.1.46":
+    url: "https://github.com/objectcomputing/MPC/archive/MPC_4_1_46.tar.gz"
+    sha256: "7fa43cfe81a5fffdd2e958091661efef08ddcf011f9ef8090e8283d04dd88043"

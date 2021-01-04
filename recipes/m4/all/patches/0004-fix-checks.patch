@@ -1,0 +1,35 @@
+--- checks/check-them
++++ checks/check-them
+@@ -58,12 +58,13 @@
+   shift; shift
+ fi
+ 
+ # Find out how the executable prints argv[0]
+ m4name=`"$m4" --help | ${SED} -e 's/Usage: \(.*\) \[OPTION.*/\1/' \
+   -e 's/\\\\/\\\\\\\\/g' -e 1q`
++m4name=`basename $m4name`
+ 
+ # Find out if we should strip \r in the output
+ "$m4" --version | tee $out
+ "$m4" --version | tr -d '\015' > $xout
+ if cmp -s $out $xout; then
+   :
+
+---checks/Makefile
++++ checks/Makefile.in
+@@ -1612,14 +1612,14 @@
+ $(srcdir)/stamp-checks: $(srcdir)/get-them $(top_srcdir)/doc/m4.texi
+ 	rm -f $(DOC_CHECKS)
+ 	cd $(srcdir) && AWK=$(AWK) ./get-them ../doc/m4.texi
+ 	echo stamp >$@
+
+ check-local: $(srcdir)/stamp-checks
+-	PATH=`pwd`/../src"$(PATH_SEPARATOR)"$$PATH; export PATH; \
+-	$(srcdir)/check-them -I $(srcdir)/../examples $(CHECKS)
++	cd $(srcdir)/.. && PATH=src"$(PATH_SEPARATOR)"$$PATH \
++	$(srcdir)/check-them -I examples $(CHECKS)
+
+ installcheck: $(srcdir)/stamp-checks
+ 	PATH='$(bindir)'"$(PATH_SEPARATOR)"$$PATH; export PATH; \
+ 	$(srcdir)/check-them -I $(srcdir)/../examples \
+ 	-m "`echo m4 | sed '$(program_transform_name)'`" $(CHECKS)

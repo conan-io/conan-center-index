@@ -1,0 +1,14 @@
+sources:
+  "1.6.0":
+    url: "https://github.com/OSGeo/libgeotiff/archive/1.6.0.tar.gz"
+    sha256: "312c52687b56893067b35a47442f0d5a670995bd1dddecbe0dc09d6e60fec1d7"
+  "1.5.1":
+    url: "https://github.com/OSGeo/libgeotiff/archive/1.5.1.tar.gz"
+    sha256: "fb04491572afb25ffe60239fdfdcfa2c64e6cf644cad9b0b922b10115ccbd488"
+patches:
+  "1.6.0":
+    - patch_file: "patches/fix-cmake-1.6.0.patch"
+      base_path: "source_subfolder"
+  "1.5.1":
+    - patch_file: "patches/fix-cmake-1.5.1.patch"
+      base_path: "source_subfolder"

@@ -1,0 +1,60 @@
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -183,6 +183,16 @@ foreach(lib IN LISTS BROTLI_SHARED_LIBS)
+   set_target_properties (${lib} PROPERTIES DEFINE_SYMBOL "${LIB}_SHARED_COMPILATION")
+ endforeach()
+ 
++if(BUILD_SHARED_LIBS)
++  foreach(lib IN LISTS BROTLI_STATIC_LIBS)
++    set_target_properties(${lib} PROPERTIES EXCLUDE_FROM_ALL ON EXCLUDE_FROM_DEFAULT ON)
++  endforeach()
++else()
++  foreach(lib IN LISTS BROTLI_SHARED_LIBS)
++    set_target_properties(${lib} PROPERTIES EXCLUDE_FROM_ALL ON EXCLUDE_FROM_DEFAULT ON)
++  endforeach()
++endif()
++
+ foreach(lib IN LISTS BROTLI_SHARED_LIBS BROTLI_STATIC_LIBS)
+   target_link_libraries(${lib} ${LIBM_LIBRARY})
+   set_property(TARGET ${lib} APPEND PROPERTY INCLUDE_DIRECTORIES ${BROTLI_INCLUDE_DIRS})
+@@ -190,7 +200,6 @@ foreach(lib IN LISTS BROTLI_SHARED_LIBS BROTLI_STATIC_LIBS)
+     VERSION "${BROTLI_ABI_COMPATIBILITY}.${BROTLI_ABI_AGE}.${BROTLI_ABI_REVISION}"
+     SOVERSION "${BROTLI_ABI_COMPATIBILITY}")
+   if(NOT BROTLI_EMSCRIPTEN)
+-    set_target_properties(${lib} PROPERTIES POSITION_INDEPENDENT_CODE TRUE)
+   endif()
+   set_property(TARGET ${lib} APPEND PROPERTY INTERFACE_INCLUDE_DIRECTORIES "${BROTLI_INCLUDE_DIRS}")
+ endforeach()
+@@ -217,15 +226,13 @@ endif()
+ # Build the brotli executable
+ add_executable(brotli ${BROTLI_CLI_C})
+ target_link_libraries(brotli ${BROTLI_LIBRARIES_STATIC})
++set_target_properties(brotli PROPERTIES EXCLUDE_FROM_ALL ON EXCLUDE_FROM_DEFAULT ON)
+ 
+ # Installation
+ if(NOT BROTLI_EMSCRIPTEN)
+ if(NOT BROTLI_BUNDLED_MODE)
+-  install(
+-    TARGETS brotli
+-    RUNTIME DESTINATION "${CMAKE_INSTALL_BINDIR}"
+-  )
+ 
++  if(BUILD_SHARED_LIBS)
+   install(
+     TARGETS ${BROTLI_LIBRARIES_CORE}
+     ARCHIVE DESTINATION "${CMAKE_INSTALL_LIBDIR}"
+@@ -233,12 +240,14 @@ if(NOT BROTLI_BUNDLED_MODE)
+     RUNTIME DESTINATION "${CMAKE_INSTALL_BINDIR}"
+   )
+ 
++  else()
+   install(
+     TARGETS ${BROTLI_LIBRARIES_CORE_STATIC}
+     ARCHIVE DESTINATION "${CMAKE_INSTALL_LIBDIR}"
+     LIBRARY DESTINATION "${CMAKE_INSTALL_LIBDIR}"
+     RUNTIME DESTINATION "${CMAKE_INSTALL_BINDIR}"
+   )
++  endif()
+ 
+   install(
+     DIRECTORY ${BROTLI_INCLUDE_DIRS}/brotli

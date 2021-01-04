@@ -1,0 +1,4 @@
+sources:
+  '1.3.3':
+    url: https://github.com/foonathan/debug_assert/archive/v1.3.3.zip
+    sha256: c0871c7bb8d7e0f36cfae9a5ba526ea0c0fcaa41203ffb4280de27cb030e7383

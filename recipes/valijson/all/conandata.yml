@@ -1,0 +1,8 @@
+sources:
+  "0.3":
+    url: "https://github.com/tristanpenman/valijson/archive/v0.3.zip"
+    sha256: 76f1ad4800fb730b258a6272dfe738b0695101cbbb4e72f9ab75e33b2a90262e
+patches:
+  "0.3":
+    - patch_file: "patches/nlohmann_json.patch"
+      base_path: "source_subfolder"

@@ -1,0 +1,17 @@
+--- a/CMakeModules/CompilerSettings.cmake
++++ b/CMakeModules/CompilerSettings.cmake
+@@ -104,11 +104,13 @@ endif()
+
+ # MinGW
+ if((CMAKE_COMPILER_IS_GNUCXX OR IS_ICPC) AND NOT MINGW)
+-    add_definitions(-fPIC)
+     if(FCL_TREAT_WARNINGS_AS_ERRORS)
+         add_definitions(-Werror)
+     endif()
+ endif()
++if(MINGW)
++  add_definitions(-Wa,-mbig-obj)
++endif()
+
+ # By default CMake sets RPATH for binaries in the build tree, but clears
+ # it when installing. Switch this option off if the default behaviour is

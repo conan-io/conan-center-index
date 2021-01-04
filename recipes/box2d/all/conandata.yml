@@ -1,0 +1,4 @@
+sources:
+  "2.3.1":
+    url: "https://github.com/erincatto/Box2D/archive/v2.3.1.zip"
+    sha256: "8ddd947400c59bcf09774bd75787e6253098a0bd337f5c61dae38b91aea678cf"
