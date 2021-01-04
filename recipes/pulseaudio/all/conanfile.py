@@ -50,8 +50,8 @@ class PulseAudioConan(ConanFile):
             del self.options.fPIC
 
     def configure(self):
-        if self.settings.os != "Linux":
-            raise ConanInvalidConfiguration("pulseaudio supports only linux currently")
+        if self.settings.os not in ["Linux", "FreeBSD"]:
+            raise ConanInvalidConfiguration("pulseaudio supports only linux and FreeBSD currently")
         if self.options.shared:
             del self.options.fPIC
         del self.settings.compiler.libcxx
