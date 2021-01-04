@@ -65,7 +65,14 @@ class AutoconfConan(ConanFile):
     def build(self):
         self._patch_files()
         autotools = self._configure_autotools()
-        autotools.make()
+        try:
+            autotools.make()
+        except:
+            self.run("ls -al")
+            self.run("ls -al bin")
+            self.run("cat bin/autom4te")
+            self.run("./bin/autom4te")
+            raise
 
     def package(self):
         self.copy("COPYING*", src=self._source_subfolder, dst="licenses")
