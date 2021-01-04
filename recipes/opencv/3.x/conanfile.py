@@ -243,7 +243,7 @@ class OpenCVConan(ConanFile):
         if self.settings.compiler == "Visual Studio":
             self._cmake.definitions["BUILD_WITH_STATIC_CRT"] = self.settings.compiler.runtime in ("MT", "MTd")
         if self.options.with_openexr:
-            self._cmake.definitions["OPENEXR_ROOT"] = self.deps_cpp_info['openexr'].rootpath
+            self._cmake.definitions["OPENEXR_ROOT"] = self.deps_cpp_info['openexr'].rootpath.replace("\\", "/")
         self._cmake.definitions["ENABLE_PIC"] = self.options.get_safe("fPIC", True)
 
         self._cmake.configure(build_folder=self._build_subfolder)
