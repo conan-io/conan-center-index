@@ -22,8 +22,7 @@ class PulseAudioConan(ConanFile):
         "with_fftw": [True, False],
         "with_x11": [True, False],
         "with_openssl": [True, False],
-        # FIXME: enable when #2147 is merged
-        # "with_dbus": [True, False],
+        "with_dbus": [True, False],
     }
     default_options = {
         "shared": False,
@@ -33,8 +32,7 @@ class PulseAudioConan(ConanFile):
         "with_fftw": True,
         "with_x11": True,
         "with_openssl": True,
-        # FIXME: enable when #2147 is merged
-        # "with_dbus": False,
+        "with_dbus": False,
     }
 
     build_requires = "gettext/0.20.1", "libtool/2.4.6"
@@ -71,9 +69,8 @@ class PulseAudioConan(ConanFile):
             self.requires("xorg/system")
         if self.options.with_openssl:
             self.requires("openssl/1.1.1i")
-        # FIXME: enable when #2147 is merged
-        # if self.options.with_dbus
-        #     self.requires("dbus/1.12.16")
+        if self.options.with_dbus:
+            self.requires("dbus/1.12.20")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
@@ -85,8 +82,7 @@ class PulseAudioConan(ConanFile):
             self._autotools = AutoToolsBuildEnvironment(self)
             args=[]
 
-            # FIXME: add dbus when #2147 is merged
-            for lib in ["alsa", "x11", "openssl"]:
+            for lib in ["alsa", "x11", "openssl", "dbus"]:
                 args.append("--%s-%s" % ("enable" if getattr(self.options, "with_" + lib) else "disable", lib))
             args.append("--%s-glib2" % ("enable" if self.options.with_glib else "disable"))
             args.append("--%s-fftw" % ("with" if self.options.with_fftw else "without"))
