@@ -19,7 +19,7 @@ class WiringpiConan(ConanFile):
                        "fPIC": True,
                        "wpi_extensions": False,
                        "with_devlib": True}
-    exports_sources = ["CMakeLists.txt", "patches/*"]
+    exports_sources = ["CMakeLists.txt"]
     generators = "cmake"
     _cmake = None
 
