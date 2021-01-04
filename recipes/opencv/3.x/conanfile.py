@@ -77,7 +77,7 @@ class OpenCVConan(ConanFile):
         if self.options.with_jpeg == "libjpeg":
             self.requires("libjpeg/9d")
         elif self.options.with_jpeg == "libjpeg-turbo":
-            self.requires("libjpeg-turbo/2.0.5")
+            self.requires("libjpeg-turbo/2.0.6")
         if self.options.with_png:
             self.requires("libpng/1.6.37")
         if self.options.with_jasper:
