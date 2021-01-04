@@ -24,7 +24,7 @@ class BoostDepConan(ConanFile):
         return "build_subfolder"
 
     def requirements(self):
-        self.requires("boost/1.74.0")
+        self.requires("boost/1.75.0")
 
     def package_id(self):
         del self.info.settings.compiler
