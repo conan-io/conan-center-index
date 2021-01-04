@@ -48,6 +48,8 @@ class PulseAudioConan(ConanFile):
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
+        if self.settings.os == "FreeBSD":
+            self.options.with_alsa = False
 
     def configure(self):
         if self.settings.os not in ["Linux", "FreeBSD"]:
