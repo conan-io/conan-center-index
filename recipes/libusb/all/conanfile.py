@@ -68,7 +68,13 @@ class LibUSBConan(ConanFile):
 
     def _build_visual_studio(self):
         with tools.chdir(self._source_subfolder):
-            solution_file = "libusb_2017.sln"
+            if tools.Version(self.version) >= "1.0.24":
+                solution_file = "libusb_2019.sln"
+            else:
+                solution_file = "libusb_2017.sln"
+
+            if self.settings.compiler.version == "15":
+                solution_file = "libusb_2017.sln"
             if self.settings.compiler.version == "14":
                 solution_file = "libusb_2015.sln"
             if self.settings.compiler.version == "12":
