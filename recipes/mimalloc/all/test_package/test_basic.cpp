@@ -1,9 +1,10 @@
-#include "mimalloc.h"
+#include "mimalloc-new-delete.h"
 
 #include <iostream>
+#include <memory>
 
 int main() {
-    int *data = new int(1337);
+    auto *data = new int(1024);
     delete data;
 
     std::cout << "mimalloc version " << mi_version() << "\n";
