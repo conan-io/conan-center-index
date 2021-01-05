@@ -47,7 +47,6 @@ class LibSigCppConan(ConanFile):
         if (
             not self.options.shared
             and compiler == "Visual Studio"
-            and version <= "16"
         ):
             raise ConanInvalidConfiguration(
                 "{} {} is not supported for static compilation".format(
@@ -62,15 +61,8 @@ class LibSigCppConan(ConanFile):
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
         os.rename("libsigc++-{}".format(self.version), self._source_subfolder)
-        tools.replace_in_file(
-            os.path.join(
-                self.source_folder, self._source_subfolder, "meson.build"
-            ),
-            "subdir('tests')",
-            "",
-        )
 
-    def _configure_build(self):
+    def _configure_meson(self):
         if self._meson:
             return self._meson
         self._meson = Meson(self)
@@ -95,12 +87,19 @@ class LibSigCppConan(ConanFile):
         return self._meson
 
     def build(self):
-        meson = self._configure_build()
+        tools.replace_in_file(
+            os.path.join(
+                self.source_folder, self._source_subfolder, "meson.build"
+            ),
+            "subdir('tests')",
+            "",
+        )
+        meson = self._configure_meson()
         meson.build()
 
     def package(self):
         self.copy("COPYING", dst="licenses", src=self._source_subfolder)
-        meson = self._configure_build()
+        meson = self._configure_meson()
         meson.install()
         tools.remove_files_by_mask(
             os.path.join(self.package_folder, "bin"), "*.pdb"
@@ -117,10 +116,10 @@ class LibSigCppConan(ConanFile):
             )
 
     def package_info(self):
-        self.cpp_info.includedirs = [
+        self.cpp_info.includedirs.extend([
             "include/sigc++-2.0",
             "lib/sigc++-2.0/include",
-        ]
+        ])
         self.cpp_info.libs = tools.collect_libs(self)
 
         self.cpp_info.names["pkg_config"] = "sigc++-2.0"
