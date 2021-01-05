@@ -1,7 +1,7 @@
 #include "mimalloc-override.h"
 
-#include <stdlib.h>
 #include <stdio.h>
+
 
 int main() {
     void *data = malloc(1024);
