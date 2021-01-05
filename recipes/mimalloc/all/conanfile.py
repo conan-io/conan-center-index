@@ -28,6 +28,8 @@ class MimallocConan(ConanFile):
     generators = "cmake"
     exports_sources = "CMakeLists.txt", "patches/*"
 
+    _cmake = None
+
     @property
     def _source_subfolder(self):
         return "source_subfolder"
@@ -57,8 +59,6 @@ class MimallocConan(ConanFile):
                     "MT" in str(self.settings.compiler.runtime):
                 raise ConanInvalidConfiguration(
                     "Cannot use MT(d) runtime when building mimalloc as a shared library for override")
-
-    _cmake = None
 
     def _configure_cmake(self):
         if self._cmake:
