@@ -10,7 +10,8 @@ class MimallocTestConan(ConanFile):
     _build_redefine_malloc = False
 
     def build(self):
-        single_object = self.options["mimalloc"].get_safe("single_object", False)
+        single_object = "single_object" in self.options["mimalloc"] and \
+                        self.options["mimalloc"].single_object
         if not single_object and \
                 not self.options["mimalloc"].shared and \
                 self.options["mimalloc"].override:
