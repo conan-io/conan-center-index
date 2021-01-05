@@ -9,6 +9,10 @@ patches:
   "1.6.4":
     - patch_file: "patches/0001-avoid-symlink-creation.patch"
       base_path: "source_subfolder"
+    - patch_file: "patches/0003-include-cstddef-to-get-std-size-t.patch"
+      base_path: "source_subfolder"
   "1.6.7":
     - patch_file: "patches/0002-avoid-symlink-creation.patch"
+      base_path: "source_subfolder"
+    - patch_file: "patches/0004-include-cstddef-to-get-std-size-t.patch"
       base_path: "source_subfolder"
