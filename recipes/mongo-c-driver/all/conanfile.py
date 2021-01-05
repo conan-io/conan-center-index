@@ -158,7 +158,7 @@ class MongoCDriverConan(ConanFile):
         self._cmake.definitions["ENABLE_APPLE_FRAMEWORK"] = False
         self._cmake.definitions["ENABLE_ICU"] = "ON" if self.options.with_icu else "OFF"
         self._cmake.definitions["ENABLE_UNINSTALL"] = False
-        self._cmake.definitions["ENABLE_CLIENT_SIDE_ENCRYPTION"] = "OFF" # libmongocrypt recipe not yet in CCI
+        self._cmake.definitions["ENABLE_CLIENT_SIDE_ENCRYPTION"] = "OFF"  # libmongocrypt recipe not yet in CCI
         self._cmake.definitions["ENABLE_MONGODB_AWS_AUTH"] = "AUTO"
         self._cmake.definitions["ENABLE_PIC"] = self.options.get_safe("fPIC", True)
         if self.options.with_ssl == "openssl":
