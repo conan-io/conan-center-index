@@ -59,7 +59,12 @@ class AcadoConan(ConanFile):
         self._cmake.definitions["ACADO_INTERNAL"] = False
         self._cmake.definitions["ACADO_BUILD_CGT_ONLY"] = self.options.codegen_only
 
-        self._cmake.definitions["CMAKE_CXX_FLAGS"] = "-w"
+        if self.settings.compiler == "Visual Studio":
+            self._cmake.definitions["CMAKE_C_FLAGS"] = "/w"
+            self._cmake.definitions["CMAKE_CXX_FLAGS"] = "/w"
+        else:
+            self._cmake.definitions["CMAKE_C_FLAGS"] = "-w"
+            self._cmake.definitions["CMAKE_CXX_FLAGS"] = "-w"
 
         self._cmake.configure()
         return self._cmake
