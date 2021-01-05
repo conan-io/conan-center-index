@@ -86,7 +86,17 @@ class LibSigCppConan(ConanFile):
         )
         return self._meson
 
+    def _patch_sources(self):
+        tools.replace_in_file(
+            os.path.join(
+                self.source_folder, self._source_subfolder, "meson.build"
+            ),
+            "subdir('tests')",
+            "",
+        )
+
     def build(self):
+        self._patch_sources()
         tools.replace_in_file(
             os.path.join(
                 self.source_folder, self._source_subfolder, "meson.build"
