@@ -4,7 +4,6 @@ import os
 
 class OcctConan(ConanFile):
     name = "occt"
-    version = "7.5.0"
     description = """a software development platform providing services for 3D
         surface and solid modeling, CAD data exchange, and visualization."""
     homepage = "https://github.com/Open-Cascade-SAS/OCCT"
