@@ -8,6 +8,6 @@ int main() {
     free(data);
 
     printf("mimalloc version %d\n", mi_version());
-    mi_stats_print(0);
+    mi_stats_print_out(NULL, NULL);
     return 0;
 }
