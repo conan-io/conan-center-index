@@ -119,6 +119,6 @@ class PahoMqttcConan(ConanFile):
         target += "a" if self.options.asynchronous else "c"
         if self.options.ssl:
             target += "s"
-        if not self.options.shared:
+        if self.settings.os != "Windows" and not self.options.shared:
             target += "-static"
         return target
