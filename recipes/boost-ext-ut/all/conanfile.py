@@ -5,8 +5,8 @@ import os
 
 class UTConan(ConanFile):
     name = "boost-ext-ut"
-    description = "C++17/20 single header/single module, "
-    "macro-free micro Unit Testing Framework"
+    description = ("C++17/20 single header/single module, "
+                   "macro-free micro Unit Testing Framework")
     topics = ("conan", "UT", "header-only", "unit-test", "tdd", "bdd")
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://boost-ext.github.io/ut/"
@@ -69,4 +69,5 @@ class UTConan(ConanFile):
         self.cpp_info.names["cmake_find_package_multi"] = "boost"
         self.cpp_info.filenames["cmake_find_package"] = "ut"
         self.cpp_info.filenames["cmake_find_package_multi"] = "ut"
-        self.cpp_info.components["ut"].includedirs = []
+        self.cpp_info.components["ut"].names["cmake_find_package"] = "ut"
+        self.cpp_info.components["ut"].names["cmake_find_package_multi"] = "ut"
