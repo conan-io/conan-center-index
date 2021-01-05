@@ -86,7 +86,14 @@ class LibX264Conan(ConanFile):
                 self._autotools.flags.append('-%s' % str(self.settings.compiler.runtime))
                 # cannot open program database ... if multiple CL.EXE write to the same .PDB file, please use /FS
                 self._autotools.flags.append('-FS')
-            self._autotools.configure(args=args, build=False, vars=self._override_env, configure_dir=self._source_subfolder)
+            build_canonical_name = None
+            host_canonical_name = None
+            if self.settings.compiler == "Visual Studio":
+                # autotools does not know about the msvc canonical name(s)
+                build_canonical_name = False
+                host_canonical_name = False
+            self._autotools.configure(args=args, vars=self._override_env, configure_dir=self._source_subfolder, build=build_canonical_name, host=host_canonical_name)
+
         return self._autotools
 
     def build(self):

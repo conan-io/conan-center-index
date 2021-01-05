@@ -1,5 +1,83 @@
 # Changelog
 
+### 30-December-2020 - 13:24 CET
+
+- [feature] BuildSingleReference: Run tests for packages that already exist.
+- [feature] BuildSingleReference: Add functionality so it is able to build a PR merging into 'master'.
+- [feature] Specify Conan version to use in every node call (decouple from conan-docker-tools updates).
+- [fix] AddBetaUser: Fix "ghost" user added weekly for deleted users.
+
+### 29-December-2020 - 17:18 CET
+
+- Updated Conan client to the 1.32.1 version in Windows and Mac agents.
+
+### 14-December-2020 - 09:51 CET
+
+- [feature] Remove repositories after a pull-request is merged.
+- [feature] Run promotion in parallel for merge-commits.
+- [feature] Viewer for summary.json files.
+- [feature] Trigger a BuildSingleReference job at the end of pull-request jobs to build new configurations.
+- [fix] Manage repository permissions independently in pull-requests.
+
+### 27-November-2020 - 10:14 CEST
+
+ - [feature] More (and better) properties are stored in Artifactory for each package.
+ - [feature] Use modularized jobs in CI to run parts of the pipeline.
+ - [fix] Fix error affecting PRs that were blocked in the past by a team member
+ - [fix] Fix issue with properties associated to new configurations
+
+### 18-November-2020 - 12:58 CEST
+
+- [fix] Notify unexpected errors to slack channel (add link to message).
+- [job] AutomaticMerge: Fix PRs blocked by non team member users.
+- [bug] Build everything but OK or INVALID_CONFIG.
+- [fix] Do not use `--all` argument with `conan upload` when the package ID is given.
+- [fix] Fix error getting properties when the recipe doesn't have options.
+- [job] Tapaholes: Propose new profile set including new compiler configurations.
+
+### 18-November-2020 - 11:23 CEST
+
+- Updated Conan client to the 1.31.3 version in Windows and Mac agents.
+
+### 23-October-2020 - 17:13 CEST
+
+- [feature] ListProfiles: Add 'profiles' to inputs, make it required.
+- [feature] Tapaholes: Parameter to accept packages in order from a JSON list.
+- [fix] AutomaticMerge: Consider pagination when reading pull-request reviews.
+- [job] PopulateProperties: Compute and assign properties to packages-revs and recipe-revs.
+- [job] PromotePackages: Copy Conan packages and properties from one repo to another.
+
+### 19-October-2020 - 17:15 CEST
+
+- Updated Conan client to the 1.30.2 version in Windows and Mac agents.
+
+### 14-October-2020 - 17:49 CEST
+
+- [hotfix] Use non greedy regex to capture the pull-request number.
+
+### 10-October-2020 - 21:20 CEST
+
+ - [fix] Wait longer for Artifactory to create new repositories.
+
+### 10-October-2020 - 20:52 CEST
+
+ - [job] TapaholesRepo: use full path to the recipe itself.
+
+### 10-October-2020 - 20:36 CEST
+
+ - [job] BuildSingleReference: assign properties at recipe-revision level
+
+### 10-October-2020 - 15:53 CEST
+
+ - [job] TapaholesRepo: create remote repository for each run.
+ - [job] BuildSingleReference: apply environment to every Conan command.
+
+### 09-October-2020 - 23:43 CEST
+
+ - [fix] AutomaticMerge: if the PR cannot be merged (conflicts) go and try the next one.
+ - [fix] Use existing TMP folder in Windows.
+ - [fix] BuildSingleReference: minor fixes.
+
 ### 07-October-2020 - 17:06 CEST
 
 - [fix] Minor fix to AutomaticMerge job (#390)

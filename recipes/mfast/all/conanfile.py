@@ -1,4 +1,5 @@
 from conans import ConanFile, CMake, tools
+import glob
 import os
 import shutil
 
@@ -17,11 +18,19 @@ class mFASTConan(ConanFile):
                "shared": [True, False]}
     default_options = {"fPIC": True,
                        "shared": False}
-    requires = ["boost/1.73.0", "tinyxml2/8.0.0"]
+    requires = ["boost/1.74.0", "tinyxml2/8.0.0"]
     generators = "cmake"
-    exports_sources = "patches/**"
+    exports_sources = ["CMakeLists.txt", "patches/**"]
     short_paths = True
     _cmake = None
+
+    @property
+    def _old_mfast_config_dir(self):
+        return os.path.join("CMake") if self.settings.os == "Windows" else os.path.join("lib", "cmake", "mFAST")
+
+    @property
+    def _new_mfast_config_dir(self):
+        return os.path.join("res") if self.settings.os == "Windows" else os.path.join("lib", "cmake", "mFAST")
 
     @property
     def _source_subfolder(self):
@@ -34,12 +43,21 @@ class mFASTConan(ConanFile):
     def _configure_cmake(self):
         if not self._cmake:
             self._cmake = CMake(self)
-            self._cmake.configure(source_folder=self._source_subfolder, build_folder=self._build_subfolder)
+            self._cmake.definitions["BUILD_TESTS"] = False
+            self._cmake.definitions["BUILD_EXAMPLES"] = False
+            self._cmake.definitions["BUILD_PACKAGES"] = False
+            if self.version != "1.2.1":
+                if not self.settings.compiler.cppstd:
+                    self._cmake.definitions["CMAKE_CXX_STANDARD"] = 14
+                else:
+                    tools.check_min_cppstd(self, 14)
+            self._cmake.configure(build_folder=self._build_subfolder)
         return self._cmake
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
-        os.rename("mFAST-" + self.version, self._source_subfolder)
+        extracted_dir = glob.glob("mFAST-*/")[0]
+        os.rename(extracted_dir, self._source_subfolder)
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -61,14 +79,18 @@ class mFASTConan(ConanFile):
         cmake = self._configure_cmake()
         cmake.install()
         self.copy("licence.txt", dst="licenses", src=self._source_subfolder)
-        if self.settings.os == "Windows":
-            shutil.move(os.path.join(self.package_folder, "CMake"),
-                        os.path.join(self.package_folder, "lib", "cmake", "mFAST"))
-        os.rename(os.path.join(self.package_folder, "lib", "cmake", "mFAST", "mFASTConfig.cmake"),
-                  os.path.join(self.package_folder, "lib", "cmake", "mFAST", "mFASTTools.cmake"))
+        # This makes hook error go away
+        shutil.move(
+            os.path.join(self.package_folder, self._old_mfast_config_dir),
+            os.path.join(self.package_folder, self._new_mfast_config_dir)
+        )
+        os.rename(
+            os.path.join(self.package_folder, self._new_mfast_config_dir, "mFASTConfig.cmake"),
+            os.path.join(self.package_folder, self._new_mfast_config_dir, "mFASTTools.cmake")
+        )
         tools.rmdir(os.path.join(self.package_folder, "share"))
 
     def package_info(self):
         self.cpp_info.libs = tools.collect_libs(self)
-        self.cpp_info.builddirs = [os.path.join("lib", "cmake", "mFAST")]
-        self.cpp_info.build_modules = [os.path.join("lib", "cmake", "mFAST", "mFASTTools.cmake")]
+        self.cpp_info.builddirs = [self._new_mfast_config_dir]
+        self.cpp_info.build_modules = [os.path.join(self._new_mfast_config_dir, "mFASTTools.cmake")]

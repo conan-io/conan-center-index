@@ -1,0 +1,27 @@
+--- src/Makefile.nmake
++++ src/Makefile.nmake
+@@ -13,12 +13,12 @@
+ # HAVE_STRING_H. 
+ # Rather than hand craft a config.h file we just define them here in CFLAGS
+ # for convenience.
+-CFLAGS = /W4 /D "WIN32" /D "_MBCS" /D "STDC_HEADERS" /D "HAVE_STDLIB_H" /D "HAVE_STRING_H" /nologo 
++CFLAGS = $(CONAN_CFLAGS) $(CONAN_CPPFLAGS) /W4 /D "WIN32" /D "_MBCS" /D "STDC_HEADERS" /D "HAVE_STDLIB_H" /D "HAVE_STRING_H" /nologo 
+ 
+ !IF "$(DEBUG)" == "1"
+-CFLAGS = $(CFLAGS) /D "_DEBUG" /Od /MLd /RTC1 /ZI
++CFLAGS = $(CFLAGS) /D "_DEBUG" /Od /RTC1 /ZI
+ !ELSE
+-CFLAGS = $(CFLAGS) /D "NDEBUG" /O2 /ML /GS /Zi
++CFLAGS = $(CFLAGS) /D "NDEBUG" /O2 /GS /Zi
+ !ENDIF
+   
+ all: argtable2.lib argtable2.dll
+@@ -32,7 +32,7 @@
+ 	LIB /OUT:$@ $**
+ 
+ argtable2.dll: $(OBJS)
+-	link /DLL /OUT:$@ $** /IMPLIB:impargtable2.lib /def:argtable2.def
++	link /DLL /OUT:$@ $** /IMPLIB:impargtable2.lib /def:argtable2.def $(CONAN_LDFLAGS)
+     
+ clean:
+ 	del *.exe *.lib *.obj *.idb *.pdb *.dll *.exp

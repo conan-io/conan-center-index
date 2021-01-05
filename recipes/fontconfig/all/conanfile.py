@@ -16,39 +16,55 @@ class FontconfigConan(ConanFile):
     options = {"shared": [True, False], "fPIC": [True, False]}
     default_options = {"shared": False, "fPIC": True}
     generators = "pkg_config"
-    _source_subfolder = "source_subfolder"
+
     _autotools = None
 
-    def requirements(self):
-        self.requires("freetype/2.10.2")
-        self.requires("expat/2.2.9")
-        if self.settings.os == "Linux":
-            self.requires("libuuid/1.0.3")
+    @property
+    def _source_subfolder(self):
+        return "source_subfolder"
+
+    def config_options(self):
+        if self.settings.os == "Windows":
+            del self.options.fPIC
 
     def configure(self):
-        if self.settings.os == "Windows":
-            raise ConanInvalidConfiguration("Windows builds are not supported.")
+        if self.settings.compiler == "Visual Studio":
+            raise ConanInvalidConfiguration("Visual Studio builds are not supported.")
+        if self.options.shared:
+            del self.options.fPIC
         del self.settings.compiler.libcxx
         del self.settings.compiler.cppstd
+
+    def requirements(self):
+        self.requires("freetype/2.10.4")
+        self.requires("expat/2.2.10")
+        if self.settings.os == "Linux":
+            self.requires("libuuid/1.0.3")
+        elif self.settings.os == "Macos":
+            self.requires("libgettext/0.20.1")
+
+    def build_requirements(self):
+        self.build_requires("gperf/3.1")
+        self.build_requires("pkgconf/1.7.3")
+        if tools.os_info.is_windows and not tools.get_env("CONAN_BASH_PATH"):
+            self.build_requires("msys2/20200517")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
         extrated_dir = self.name + "-" + self.version
         os.rename(extrated_dir, self._source_subfolder)
 
-    def build_requirements(self):
-        self.build_requires("gperf/3.1")
-
     def _configure_autotools(self):
         if not self._autotools:
             args = ["--enable-static=%s" % ("no" if self.options.shared else "yes"),
                     "--enable-shared=%s" % ("yes" if self.options.shared else "no"),
                     "--disable-docs"]
-            args.append("--sysconfdir=%s" % os.path.join(self.package_folder, "bin", "etc"))
-            args.append("--datadir=%s" % os.path.join(self.package_folder, "bin", "share"))
-            args.append("--datarootdir=%s" % os.path.join(self.package_folder, "bin", "share"))
-            args.append("--localstatedir=%s" % os.path.join(self.package_folder, "bin", "var"))
-            self._autotools = AutoToolsBuildEnvironment(self)
+            args.append("--sysconfdir=%s" % tools.unix_path(os.path.join(self.package_folder, "bin", "etc")))
+            args.append("--datadir=%s" % tools.unix_path(os.path.join(self.package_folder, "bin", "share")))
+            args.append("--datarootdir=%s" % tools.unix_path(os.path.join(self.package_folder, "bin", "share")))
+            args.append("--localstatedir=%s" % tools.unix_path(os.path.join(self.package_folder, "bin", "var")))
+            self._autotools = AutoToolsBuildEnvironment(self, win_bash=tools.os_info.is_windows)
+            self._autotools.libs = []
             self._autotools.configure(configure_dir=self._source_subfolder, args=args)
             tools.replace_in_file("Makefile", "po-conf test", "po-conf")
         return self._autotools
@@ -60,26 +76,33 @@ class FontconfigConan(ConanFile):
     def build(self):
         # Patch files from dependencies
         self._patch_files()
-        autotools = self._configure_autotools()
-        autotools.make()
+        with tools.run_environment(self):
+            autotools = self._configure_autotools()
+            autotools.make()
 
     def package(self):
         self.copy("COPYING", dst="licenses", src=self._source_subfolder)
-        autotools = self._configure_autotools()
-        autotools.install()
+        with tools.run_environment(self):
+            autotools = self._configure_autotools()
+            autotools.install()
         os.unlink(os.path.join(self.package_folder, "lib", "libfontconfig.la"))
         tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
         for f in glob.glob(os.path.join(self.package_folder, "bin", "etc", "fonts", "conf.d", "*.conf")):
             if os.path.islink(f):
                 os.unlink(f)
-
+        for def_file in glob.glob(os.path.join(self.package_folder, "lib", "*.def")):
+            os.remove(def_file)
 
     def package_info(self):
         self.cpp_info.libs = ["fontconfig"]
-        if self.settings.os == "Linux":
+        if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.system_libs.extend(["m", "pthread"])
         self.cpp_info.names["cmake_find_package"] = "Fontconfig"
         self.cpp_info.names["cmake_find_package_multi"] = "Fontconfig"
 
-        self.env_info.FONTCONFIG_FILE = os.path.join(self.package_folder, "bin", "etc", "fonts", "fonts.conf")
-        self.env_info.FONTCONFIG_PATH = os.path.join(self.package_folder, "bin", "etc", "fonts")
+        fontconfig_file = os.path.join(self.package_folder, "bin", "etc", "fonts", "fonts.conf")
+        self.output.info("Creating FONTCONFIG_FILE environment variable: {}".format(fontconfig_file))
+        self.env_info.FONTCONFIG_FILE = fontconfig_file
+        fontconfig_path = os.path.join(self.package_folder, "bin", "etc", "fonts")
+        self.output.info("Creating FONTCONFIG_PATH environment variable: {}".format(fontconfig_path))
+        self.env_info.FONTCONFIG_PATH = fontconfig_path

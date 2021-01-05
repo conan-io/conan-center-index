@@ -1,6 +1,6 @@
 import os
 
-from conans import ConanFile, CMake, tools
+from conans import ConanFile, CMake
 
 
 class XsimdTestConan(ConanFile):

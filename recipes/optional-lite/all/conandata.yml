@@ -1,4 +1,10 @@
 sources:
   "3.2.0":
-    sha256: 069c92f6404878588be761d609b917a111b0231633a91f7f908288fc77eb24c8
     url: https://github.com/martinmoene/optional-lite/archive/v3.2.0.tar.gz
+    sha256: 069c92f6404878588be761d609b917a111b0231633a91f7f908288fc77eb24c8
+  "3.3.0":
+    url: https://github.com/martinmoene/optional-lite/archive/v3.3.0.tar.gz
+    sha256: 2760c42acfae97dd31c46dcdf16f979b13fcdb38086d8b3e7e8a14032f3f88f3
+  "3.4.0":
+    url: https://github.com/martinmoene/optional-lite/archive/v3.4.0.tar.gz
+    sha256: 49b9deac842b3698fc9011b7678f943b4e36136e2ab711f535c1961ff2746e14

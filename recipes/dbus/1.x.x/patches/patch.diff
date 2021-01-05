@@ -1,0 +1,23 @@
+--- a/cmake/CMakeLists.txt
++++ b/cmake/CMakeLists.txt
+@@ -5,6 +5,8 @@
+ set(CMAKE_LEGACY_CYGWIN_WIN32 0)
+
+ project(dbus)
++include(../../conanbuildinfo.cmake)
++conan_basic_setup()
+
+ # we need to be up to date
+ CMAKE_MINIMUM_REQUIRED(VERSION 3.0.2 FATAL_ERROR)
+@@ -135,9 +137,9 @@
+
+ find_package(EXPAT)
+ find_package(X11)
+-find_package(GLib2)
++find_package(glib)
+ find_package(GObject)
+-if(GLIB2_FOUND AND GOBJECT_FOUND)
++if(GLIB_FOUND AND GOBJECT_FOUND)
+     option (DBUS_WITH_GLIB "build with glib" ON)
+ endif()
+ 

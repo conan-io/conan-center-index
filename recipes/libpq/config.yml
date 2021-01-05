@@ -1,7 +1,21 @@
 versions:
+  "13.1":
+    folder: all
+  "13.0":
+    folder: all
+  "12.4":
+    folder: all
+  "12.3":
+    folder: all
   "12.2":
+    folder: all
+  "11.9":
     folder: all
   "11.7":
     folder: all
   "11.5":
+    folder: all
+  "10.14":
+    folder: all
+  "9.6.19":
     folder: all

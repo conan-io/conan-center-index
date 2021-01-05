@@ -108,7 +108,7 @@ class WtConan(ConanFile):
         if self.options.get_safe("with_mssql") and self.settings.os != "Windows":
             self.requires("odbc/2.3.7")
         if self.options.get_safe("with_unwind"):
-            self.requires("libunwind/1.3.1")
+            self.requires("libunwind/1.5.0")
 
     # TODO: move this logic in method which might be implemented by https://github.com/conan-io/conan/issues/7591
     def _validate_dependency_graph(self):
@@ -153,11 +153,10 @@ class WtConan(ConanFile):
 
         def _gather_libs(p):
             libs = self.deps_cpp_info[p].libs + self.deps_cpp_info[p].system_libs
-            if not getattr(self.options[p], "shared", False):
-                for dep in self.deps_cpp_info[p].public_deps:
-                    for l in _gather_libs(dep):
-                        if not l in libs:
-                            libs.append(l)
+            for dep in self.deps_cpp_info[p].public_deps:
+                for l in _gather_libs(dep):
+                    if not l in libs:
+                        libs.append(l)
             return libs
 
         if self.options.with_ssl:

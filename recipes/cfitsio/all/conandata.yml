@@ -5,14 +5,22 @@ sources:
   "3.480":
     url: "https://heasarc.gsfc.nasa.gov/FTP/software/fitsio/c/cfitsio-3.48.tar.gz"
     sha256: "fc369363616753fa4dbe9bf28fa7e49cc1b057081229d89b52087d85ef303314"
+  "3.490":
+    url: "https://heasarc.gsfc.nasa.gov/FTP/software/fitsio/c/cfitsio-3.49.tar.gz"
+    sha256: "8cc4beddd0ff389fb81bde9c181e0e3c419c15ec8a66df201ff4619a93715558"
 patches:
   "3.470":
     - patch_file: "patches/windows-use-strtok_s.patch"
       base_path: "source_subfolder"
-    - patch_file: "patches/fix-cmake.patch"
+    - patch_file: "patches/fix-cmake-3.470.patch"
       base_path: "source_subfolder"
   "3.480":
     - patch_file: "patches/windows-use-strtok_s.patch"
       base_path: "source_subfolder"
-    - patch_file: "patches/fix-cmake.patch"
+    - patch_file: "patches/fix-cmake-3.470.patch"
+      base_path: "source_subfolder"
+  "3.490":
+    - patch_file: "patches/windows-use-strtok_s.patch"
+      base_path: "source_subfolder"
+    - patch_file: "patches/fix-cmake-3.490.patch"
       base_path: "source_subfolder"

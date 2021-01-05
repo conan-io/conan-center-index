@@ -12,7 +12,9 @@ class TestPackageConan(ConanFile):
         cmake.build()
 
     def requirements(self):
+        self.requires("nlohmann_json/3.9.1")
         self.requires("rapidjson/cci.20200410")
+        self.requires("picojson/1.3.0")
 
     def test(self):
         if not tools.cross_building(self.settings):

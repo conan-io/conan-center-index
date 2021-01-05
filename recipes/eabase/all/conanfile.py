@@ -9,35 +9,24 @@ class EABaseConan(ConanFile):
     license = "BSD-3-Clause"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/electronicarts/EABase"
-    exports_sources = "CMakeLists.txt", "patches/**"
-    generators = "cmake"
+    no_copy_source = True
     settings = "os", "compiler", "build_type", "arch"
 
-    _source_subfolder = "source_subfolder"
+    @property
+    def _source_subfolder(self):
+        return "source_subfolder"
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
         folder_name = "EABase-{}".format(self.version)
         os.rename(folder_name, self._source_subfolder)
 
-    def _configure_cmake(self):
-        cmake = CMake(self)
-        cmake.configure()
-        return cmake
-
-    def build(self):
-        for patch in self.conan_data["patches"][self.version]:
-            tools.patch(**patch)
-        cmake = self._configure_cmake()
-        cmake.build()
-
     def package_id(self):
         self.info.header_only()
 
     def package(self):
         self.copy("LICENSE", src=self._source_subfolder, dst="licenses")
-        cmake = self._configure_cmake()
-        cmake.install()
+        self.copy("*.h", dst="include", src=os.path.join(self._source_subfolder, "include"))
 
     def package_info(self):
         self.cpp_info.names["cmake_find_package"] = "EABase"

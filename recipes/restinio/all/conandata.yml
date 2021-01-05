@@ -11,3 +11,12 @@ sources:
   "0.6.10":
     url: https://github.com/Stiffstream/restinio/archive/v.0.6.10.tar.gz
     sha256: dc9cad7e19f1bc255532cee53ab2027c93108c79e27f9fbe971f3ea0b10274a5
+  "0.6.11":
+    url: https://github.com/Stiffstream/restinio/archive/v.0.6.11.tar.gz
+    sha256: 66c25c19efd9dc9683d60f540e9ac09b66245c5afde096fc05ec69cbb502fc5d
+  "0.6.12":
+    url: https://github.com/Stiffstream/restinio/archive/v.0.6.12.tar.gz
+    sha256: 7176d608afb8e5cd29eec2216e747be262215f5b3ab3df2b3c86e691f1cec79e
+  "0.6.13":
+    url: https://github.com/Stiffstream/restinio/archive/v.0.6.13.tar.gz
+    sha256: 72d7ad40c8d34e69cd79f42145b4059e8a7356114fb13864c3c0ad5a5607b44f

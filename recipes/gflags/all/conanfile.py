@@ -65,4 +65,4 @@ class GflagsConan(ConanFile):
         if self.settings.os == "Windows":
             self.cpp_info.libs.extend(['shlwapi'])
         elif self.settings.os == "Linux":
-            self.cpp_info.libs.extend(["pthread", "m"])
+            self.cpp_info.system_libs.extend(["pthread", "m"])

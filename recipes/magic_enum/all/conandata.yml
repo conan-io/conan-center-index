@@ -5,3 +5,12 @@ sources:
   "0.6.6":
     sha256: "1033f9a9315023feebb48f20d5a572149ec72c1e95a52bcf7042a412ff9d2e28"
     url: "https://github.com/Neargye/magic_enum/archive/v0.6.6.tar.gz"
+  "0.7.0":
+    sha256: "4fe6627407a656d0d73879c0346b251ccdcfb718c37bef5410ba172c7c7d5f9a"
+    url: "https://github.com/Neargye/magic_enum/archive/v0.7.0.tar.gz"
+  "0.7.1":
+    url: "https://github.com/Neargye/magic_enum/archive/v0.7.1.tar.gz"
+    sha256: "11bb590dd055194e92936fa4d0652084c14bd23ac8e4b5a02271b6259a05cec9"
+  "0.7.2":
+    url: "https://github.com/Neargye/magic_enum/archive/v0.7.2.tar.gz"
+    sha256: "a77895ebc684f7a4dd2e4e06529b22e9ae694037f6dee0753d3ce0bbcd5b3e38"

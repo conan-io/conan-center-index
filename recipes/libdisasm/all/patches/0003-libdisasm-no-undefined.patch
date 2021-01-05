@@ -1,0 +1,11 @@
+--- libdisasm/Makefile.am
++++ libdisasm/Makefile.am
+@@ -27,7 +27,7 @@
+ 	x86_misc.c \
+ 	x86_operand_list.c \
+ 	x86_operand_list.h
+-
++AM_LDFLAGS = -no-undefined
+ # Cheat to get non-autoconf swig into tarball,
+ # even if it doesn't build by default.
+ EXTRA_DIST = \

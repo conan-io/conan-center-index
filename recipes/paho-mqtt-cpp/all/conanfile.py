@@ -11,7 +11,7 @@ class PahoMqttCppConan(ConanFile):
     license = "EPL-1.0"
     description = """The open-source client implementations of MQTT and MQTT-SN"""
     exports_sources = ["CMakeLists.txt", "patches/*"]
-    generators = "cmake"
+    generators = "cmake", "cmake_find_package"
     settings = "os", "arch", "compiler", "build_type"
     options = {"shared": [True, False],
                "fPIC": [True, False],
@@ -19,7 +19,7 @@ class PahoMqttCppConan(ConanFile):
                }
     default_options = {"shared": False,
                        "fPIC": True,
-                       "ssl": False
+                       "ssl": True
                        }
 
     _cmake = None
@@ -46,10 +46,7 @@ class PahoMqttCppConan(ConanFile):
 
 
     def requirements(self):
-        if tools.Version(self.version) >= "1.1":
-            self.requires("paho-mqtt-c/1.3.1")
-        else:
-            self.requires("paho-mqtt-c/1.3.0")
+        self.requires("paho-mqtt-c/1.3.5")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
@@ -83,6 +80,13 @@ class PahoMqttCppConan(ConanFile):
         tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
 
     def package_info(self):
-        self.cpp_info.libs = tools.collect_libs(self)
         self.cpp_info.names["cmake_find_package"] = "PahoMqttCpp"
         self.cpp_info.names["cmake_find_package_multi"] = "PahoMqttCpp"
+        target = "paho-mqttpp3" if self.options.shared else "paho-mqttpp3-static"
+        self.cpp_info.components["paho-mqttpp"].names["cmake_find_package"] = target
+        self.cpp_info.components["paho-mqttpp"].names["cmake_find_package_multi"] = target
+        self.cpp_info.components["paho-mqttpp"].requires = ["paho-mqtt-c::paho-mqtt-c"]
+        if self.settings.os == "Windows":
+            self.cpp_info.components["paho-mqttpp"].libs = [target]
+        else:
+            self.cpp_info.components["paho-mqttpp"].libs = ["paho-mqttpp3"]

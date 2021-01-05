@@ -67,6 +67,17 @@ class LibNlConan(ConanFile):
         tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
 
     def package_info(self):
-        self.cpp_info.includedirs = [os.path.join('include', 'libnl3')]
-        self.cpp_info.libs = ["nl-3", "nl-cli-3", "nl-genl-3", "nl-idiag-3", "nl-nf-3", "nl-route-3"]
-        self.cpp_info.system_libs = ["pthread", "m"]
+        self.cpp_info.components["nl"].libs = ["nl-3"]
+        self.cpp_info.components["nl"].includedirs = [os.path.join('include', 'libnl3')]
+        if not tools.os_info.is_windows:
+            self.cpp_info.components["nl"].system_libs = ["pthread", "m"]
+        self.cpp_info.components["nl-route"].libs = ["nl-route-3"]
+        self.cpp_info.components["nl-route"].requires = ["nl"]
+        self.cpp_info.components["nl-genl"].libs = ["nl-genl-3"]
+        self.cpp_info.components["nl-genl"].requires = ["nl"]
+        self.cpp_info.components["nl-nf"].libs = ["nl-nf-3"]
+        self.cpp_info.components["nl-nf"].requires = ["nl-route"]
+        self.cpp_info.components["nl-cli"].libs = ["nl-cli-3"]
+        self.cpp_info.components["nl-cli"].requires = ["nl-nf", "nl-genl"]
+        self.cpp_info.components["nl-idiag"].libs = ["nl-idiag-3"]
+        self.cpp_info.components["nl-idiag"].requires = ["nl"]

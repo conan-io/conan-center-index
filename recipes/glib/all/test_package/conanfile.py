@@ -7,6 +7,9 @@ class TestPackageConan(ConanFile):
     generators = "cmake", "cmake_find_package", "pkg_config"
 
     def build(self):
+        if self.settings.os != 'Windows':
+            self.run('gdbus-codegen -h', run_environment=True)
+
         cmake = CMake(self)
         cmake.configure()
         cmake.build()
