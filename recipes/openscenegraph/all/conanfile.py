@@ -24,7 +24,7 @@ class ConanFile(ConanFile):
         "enable_windowing_system": [True, False],
         "enable_deprecated_serializers": [True, False],
         "use_fontconfig": [True, False],
-        # "with_asio": [True, False], # osg seems to not work with recent versions of asio
+        # "with_asio": [True, False], # osg seems to not work with recent versions of asio, see https://github.com/openscenegraph/OpenSceneGraph/issues/921
         # "with_collada": [True, False],
         "with_curl": [True, False],
         "with_dcmtk": [True, False],
