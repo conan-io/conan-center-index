@@ -38,18 +38,28 @@ class MimallocConan(ConanFile):
     def _build_subfolder(self):
         return "build_subfolder"
 
-    def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        os.rename("mimalloc-" + self.version, self._source_subfolder)
-
-    def config_options(self):
-        if self.settings.os == "Windows":
-            del self.options.fPIC
+    @property
+    def _compilers_minimum_version(self):
+        return {
+            "gcc": "4.9.3",
+            "Visual Studio": "14.0",
+            "clang": "3.4",
+            "apple-clang": "3.4",
+        }
 
     def configure(self):
-        tools.check_min_cppstd(self, "14")
         if self.options.shared:
             del self.options.fPIC
+
+        if self.settings.compiler.get_safe("cppstd"):
+            tools.check_min_cppstd(self, "14")
+
+        minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
+
+        if not minimum_version:
+            self.output.warn("mimalloc requires C++14. Your compiler is unknown. Assuming it supports C++14.")
+        elif tools.Version(self.settings.compiler.version) < minimum_version:
+            raise ConanInvalidConfiguration("mimalloc requires a compiler that supports at least C++14")
 
         if self.options.shared or self.settings.compiler == "Visual Studio":
             del self.options.single_object
@@ -59,6 +69,14 @@ class MimallocConan(ConanFile):
                     "MT" in str(self.settings.compiler.runtime):
                 raise ConanInvalidConfiguration(
                     "Cannot use MT(d) runtime when building mimalloc as a shared library for override")
+
+    def source(self):
+        tools.get(**self.conan_data["sources"][self.version])
+        os.rename("mimalloc-" + self.version, self._source_subfolder)
+
+    def config_options(self):
+        if self.settings.os == "Windows":
+            del self.options.fPIC
 
     def _configure_cmake(self):
         if self._cmake:
