@@ -68,20 +68,19 @@ class LibUSBConan(ConanFile):
 
     def _build_visual_studio(self):
         with tools.chdir(self._source_subfolder):
-            if tools.Version(self.version) >= "1.0.24":
-                solution_file = "libusb_2019.sln"
-            else:
-                solution_file = "libusb_2017.sln"
+            # Assume we're using the latest Visual Studio and default to libusb_2019.sln
+            # (or libusb_2017.sln for libusb < 1.0.24).
+            # If we're not using the latest Visual Studio, select an appropriate solution file.
+            solution_msvc_year = 2019 if tools.Version(self.version) >= "1.0.24" else 2017
 
-            if self.settings.compiler.version == "15":
-                solution_file = "libusb_2017.sln"
-            if self.settings.compiler.version == "14":
-                solution_file = "libusb_2015.sln"
-            if self.settings.compiler.version == "12":
-                solution_file = "libusb_2013.sln"
-            elif self.settings.compiler.version == "11":
-                solution_file = "libusb_2012.sln"
-            solution_file = os.path.join("msvc", solution_file)
+            solution_msvc_year = {
+                "11": 2012,
+                "12": 2013,
+                "14": 2015,
+                "15": 2017
+            }.get(str(self.settings.compiler.version), solution_msvc_year)
+
+            solution_file = os.path.join("msvc", "libusb_{}.sln".format(solution_msvc_year))
             platforms = {"x86":"Win32"}
             msbuild = MSBuild(self)
             msbuild.build(solution_file, platforms=platforms, upgrade_project=False)
