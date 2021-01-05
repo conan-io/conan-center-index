@@ -83,6 +83,13 @@ class FollyConan(ConanFile):
     def _required_boost_components(self):
         return ["context", "filesystem", "program_options", "regex", "system", "thread"]
 
+    # TODO: Remove CMake from build_requirements when folly/2019.10.21.00 is removed from CCI
+    # Bump max. CMake version to 3.16.2 to fix the Linux build
+    def build_requirements(self):
+        if tools.os_info.is_linux and self.settings.os == "Linux":
+            if Version(self.version) == "2019.10.21.00":
+                self.build_requires("cmake/3.16.2")
+
     def requirements(self):
         self.requires("boost/1.74.0")
         self.requires("bzip2/1.0.8")
