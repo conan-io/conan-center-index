@@ -17,6 +17,7 @@ class CrowConan(ConanFile):
 
     def requirements(self):
         self.requires("boost/1.75.0")
+        self.requires("openssl/1.1.1i")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
