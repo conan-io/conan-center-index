@@ -2,7 +2,7 @@ from conans import ConanFile, CMake, tools
 from conans.errors import ConanInvalidConfiguration
 import os
 
-required_conan_version = ">=1.29.1"
+required_conan_version = ">=1.32.1"
 
 
 class OpenCVConan(ConanFile):
@@ -60,17 +60,20 @@ class OpenCVConan(ConanFile):
             del self.options.with_gtk
 
     def configure(self):
+        if self.settings.compiler.cppstd and self.options.with_openexr:
+            tools.check_min_cppstd(self, 11)
+        if self.options.shared:
+            del self.options.fPIC
+
+    def validate(self):
         if self.settings.compiler == "Visual Studio" and \
            "MT" in str(self.settings.compiler.runtime) and self.options.shared:
             raise ConanInvalidConfiguration("Visual Studio and Runtime MT is not supported for shared library.")
         if self.settings.compiler == "clang" and tools.Version(self.settings.compiler.version) < "4":
             raise ConanInvalidConfiguration("Clang 3.x cannot build OpenCV 3.x due an internal bug.")
-        if self.settings.compiler.cppstd and self.options.with_openexr:
-            tools.check_min_cppstd(self, 11)
-        if self.options.shared:
-            del self.options.fPIC
-        self.options["libtiff"].jpeg = self.options.with_jpeg
-        self.options["jasper"].with_libjpeg = self.options.with_jpeg
+        self.options["*"].jpeg = self.options.with_jpeg
+        self.options["*"].with_libjpeg = self.options.with_jpeg
+        self.options["*"].with_jpeg = self.options.with_jpeg
 
     def requirements(self):
         self.requires("zlib/1.2.11")
