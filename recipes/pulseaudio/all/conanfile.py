@@ -39,6 +39,8 @@ class PulseAudioConan(ConanFile):
 
     build_requires = "gettext/0.20.1", "libtool/2.4.6"
 
+    exports_sources = ["patches/*"]
+
     @property
     def _source_subfolder(self):
         return "source_subfolder"
@@ -108,6 +110,8 @@ class PulseAudioConan(ConanFile):
         return self._autotools
 
     def build(self):
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            tools.patch(**patch)
         autotools = self._configure_autotools()
         autotools.make()
 

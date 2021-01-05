@@ -1,0 +1,1262 @@
+From fbed65a83ed8431d218f5ed22e1e22f95fd1945b Mon Sep 17 00:00:00 2001
+From: Greg V <greg@unrelenting.technology>
+Date: Thu, 2 Apr 2020 17:11:20 +0300
+Subject: [PATCH 01/19] build-sys: meson: set HAVE_DLADDR even if it's in libc
+ (FreeBSD), not libdl
+
+---
+ meson.build | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/meson.build b/meson.build
+index 23e04ef46..df8c2a7b7 100644
+--- a/meson.build
++++ b/meson.build
+@@ -427,7 +427,7 @@ if shm_dep.found()
+ endif
+ 
+ dl_dep = cc.find_library('dl', required : false)
+-if dl_dep.found()
++if cc.has_function('dladdr', dependencies : dl_dep)
+   cdata.set('HAVE_DLADDR', 1)
+ endif
+ 
+-- 
+GitLab
+
+
+From 5e542028db44872ce8071817a86867f3f3d596f7 Mon Sep 17 00:00:00 2001
+From: Greg V <greg@unrelenting.technology>
+Date: Fri, 3 Apr 2020 18:51:59 +0300
+Subject: [PATCH 02/19] build-sys: meson: when libc iconv is used, tell
+ libiconv header to pretend to be libc's iconv
+
+The libiconv header on FreeBSD would be preferred by include path, but
+we don't want to link to libiconv, so tell its header to act like
+the system header.
+---
+ meson.build | 2 ++
+ 1 file changed, 2 insertions(+)
+
+diff --git a/meson.build b/meson.build
+index df8c2a7b7..48cfd83d1 100644
+--- a/meson.build
++++ b/meson.build
+@@ -435,6 +435,8 @@ have_iconv = false
+ if cc.has_function('iconv_open')
+   iconv_dep = dependency('', required : false)
+   have_iconv = true
++  # tell the libiconv header to pretend to be libc iconv
++  cdata.set('LIBICONV_PLUG', 1)
+ else
+   iconv_dep = cc.find_library('iconv', required : false)
+   have_iconv = iconv_dep.found()
+-- 
+GitLab
+
+
+From 3a13cc0f99cd8d6b5b4caa8929f854ec941971a5 Mon Sep 17 00:00:00 2001
+From: Greg V <greg@unrelenting.technology>
+Date: Thu, 2 Apr 2020 17:18:22 +0300
+Subject: [PATCH 03/19] build-sys: meson: check for shm_open even if it's in
+ libc (FreeBSD), not librt
+
+---
+ meson.build | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/meson.build b/meson.build
+index 48cfd83d1..da2798cae 100644
+--- a/meson.build
++++ b/meson.build
+@@ -422,7 +422,7 @@ endforeach
+ cap_dep = cc.find_library('cap', required : false)
+ 
+ shm_dep = cc.find_library('rt', required : false)
+-if shm_dep.found()
++if cc.has_function('shm_open', dependencies : shm_dep)
+   cdata.set('HAVE_SHM_OPEN', 1)
+ endif
+ 
+-- 
+GitLab
+
+
+From c5db7a9f07f0ad05f95912a6d0a22dea91028142 Mon Sep 17 00:00:00 2001
+From: Greg V <greg@unrelenting.technology>
+Date: Thu, 2 Apr 2020 17:31:41 +0300
+Subject: [PATCH 04/19] build-sys: meson: add missing pthread dependency on
+ alsa tests
+
+For symbol 'pthread_setschedparam'
+---
+ src/tests/meson.build | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/src/tests/meson.build b/src/tests/meson.build
+index 5caf3abe6..1e550d5c7 100644
+--- a/src/tests/meson.build
++++ b/src/tests/meson.build
+@@ -169,7 +169,7 @@ endif
+ 
+ if alsa_dep.found()
+   norun_tests += [
+-    [ 'alsa-time-test', 'alsa-time-test.c', [ alsa_dep ] ]
++    [ 'alsa-time-test', 'alsa-time-test.c', [ alsa_dep, thread_dep ] ]
+   ]
+ endif
+ 
+-- 
+GitLab
+
+
+From 41c4e55be189cb87304f59e6e80ff6da1b39189a Mon Sep 17 00:00:00 2001
+From: Greg V <greg@unrelenting.technology>
+Date: Thu, 2 Apr 2020 17:32:37 +0300
+Subject: [PATCH 05/19] padsp: fix build on FreeBSD (use same ioctl signature
+ as glibc)
+
+---
+ src/utils/padsp.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/src/utils/padsp.c b/src/utils/padsp.c
+index a53b161c2..9d1cb5cad 100644
+--- a/src/utils/padsp.c
++++ b/src/utils/padsp.c
+@@ -2394,7 +2394,7 @@ fail:
+     return ret;
+ }
+ 
+-#ifndef __GLIBC__
++#if !defined(__GLIBC__) && !defined(__FreeBSD__)
+ int ioctl(int fd, int request, ...) {
+ #else
+ int ioctl(int fd, unsigned long request, ...) {
+-- 
+GitLab
+
+
+From 36a54b74e9b88a71f1d1e1e5a9db1667fbd5e4a5 Mon Sep 17 00:00:00 2001
+From: Greg V <greg@unrelenting.technology>
+Date: Thu, 2 Apr 2020 17:33:17 +0300
+Subject: [PATCH 06/19] raop: add missing netinet include on FreeBSD
+
+For 'struct sockaddr_in'
+---
+ src/modules/raop/raop-client.c | 4 ++++
+ 1 file changed, 4 insertions(+)
+
+diff --git a/src/modules/raop/raop-client.c b/src/modules/raop/raop-client.c
+index 885b3f157..3bd749075 100644
+--- a/src/modules/raop/raop-client.c
++++ b/src/modules/raop/raop-client.c
+@@ -31,6 +31,10 @@
+ #include <sys/ioctl.h>
+ #include <math.h>
+ 
++#ifdef HAVE_NETINET_IN_H
++#include <netinet/in.h>
++#endif
++
+ #ifdef HAVE_SYS_FILIO_H
+ #include <sys/filio.h>
+ #endif
+-- 
+GitLab
+
+
+From 46800c6f4c61f0df0e100906824cb0b89a06ccaf Mon Sep 17 00:00:00 2001
+From: Greg V <greg@unrelenting.technology>
+Date: Thu, 2 Apr 2020 17:34:32 +0300
+Subject: [PATCH 07/19] build-sys: meson: add execinfo dependency for FreeBSD
+
+For 'backtrace' and related symbols
+---
+ meson.build     | 3 +++
+ src/meson.build | 2 +-
+ 2 files changed, 4 insertions(+), 1 deletion(-)
+
+diff --git a/meson.build b/meson.build
+index da2798cae..631c0a2ce 100644
+--- a/meson.build
++++ b/meson.build
+@@ -453,6 +453,9 @@ size_t iconv (iconv_t cd, char * *inbuf, size_t *inbytesleft, char * *outbuf, si
+   endif
+ endif
+ 
++# Used for backtraces on BSD
++execinfo_dep = cc.find_library('execinfo', required : false)
++
+ # Atomic operations
+ 
+ if get_option('atomic-arm-memory-barrier')
+diff --git a/src/meson.build b/src/meson.build
+index 0842db297..6bde61839 100644
+--- a/src/meson.build
++++ b/src/meson.build
+@@ -201,7 +201,7 @@ libpulsecommon = shared_library('pulsecommon-' + pa_version_major_minor,
+   dependencies : [
+     libm_dep, thread_dep, dl_dep, shm_dep, iconv_dep, sndfile_dep, dbus_dep,
+     x11_dep, libsystemd_dep, glib_dep, gtk_dep, asyncns_dep, libintl_dep,
+-    platform_dep, platform_socket_dep,
++    platform_dep, platform_socket_dep, execinfo_dep,
+   ],
+   implicit_include_directories : false)
+ 
+-- 
+GitLab
+
+
+From 2c0c9860c713f7a10724c20fb18f8f32920fcf9c Mon Sep 17 00:00:00 2001
+From: Greg V <greg@unrelenting.technology>
+Date: Fri, 3 Apr 2020 19:05:22 +0300
+Subject: [PATCH 08/19] build-sys: meson: support memfd without
+ SYS_memfd_create (FreeBSD 13)
+
+---
+ meson.build | 3 ++-
+ 1 file changed, 2 insertions(+), 1 deletion(-)
+
+diff --git a/meson.build b/meson.build
+index 631c0a2ce..593108795 100644
+--- a/meson.build
++++ b/meson.build
+@@ -329,7 +329,8 @@ foreach f : check_functions
+   endif
+ endforeach
+ 
+-if cc.has_header_symbol('sys/syscall.h', 'SYS_memfd_create')
++if cc.has_header_symbol('sys/syscall.h', 'SYS_memfd_create') \
++  or cc.has_function('memfd_create')
+   cdata.set('HAVE_MEMFD', 1)
+ endif
+ 
+-- 
+GitLab
+
+
+From 1643474a501d0645ea7d7d73039be6f99b16f995 Mon Sep 17 00:00:00 2001
+From: Greg V <greg@unrelenting.technology>
+Date: Fri, 3 Apr 2020 19:52:04 +0300
+Subject: [PATCH 09/19] iochannel: support credentials passing on FreeBSD
+
+---
+ src/pulsecore/creds.h     |  2 +-
+ src/pulsecore/iochannel.c | 37 ++++++++++++++++++++++++++++---------
+ 2 files changed, 29 insertions(+), 10 deletions(-)
+
+diff --git a/src/pulsecore/creds.h b/src/pulsecore/creds.h
+index 9fdbb4f7e..b599b569c 100644
+--- a/src/pulsecore/creds.h
++++ b/src/pulsecore/creds.h
+@@ -34,7 +34,7 @@
+ typedef struct pa_creds pa_creds;
+ typedef struct pa_cmsg_ancil_data pa_cmsg_ancil_data;
+ 
+-#if defined(SCM_CREDENTIALS)
++#if defined(SCM_CREDENTIALS) || defined(SCM_CREDS)
+ 
+ #define HAVE_CREDS 1
+ 
+diff --git a/src/pulsecore/iochannel.c b/src/pulsecore/iochannel.c
+index eb93176ec..38b79d173 100644
+--- a/src/pulsecore/iochannel.c
++++ b/src/pulsecore/iochannel.c
+@@ -261,6 +261,13 @@ ssize_t pa_iochannel_read(pa_iochannel*io, void*data, size_t l) {
+ 
+ #ifdef HAVE_CREDS
+ 
++#ifdef __FreeBSD__
++typedef struct cmsgcred pa_ucred_t;
++#define SCM_CREDENTIALS SCM_CREDS
++#else
++typedef struct ucred pa_ucred_t;
++#endif
++
+ bool pa_iochannel_creds_supported(pa_iochannel *io) {
+     struct {
+         struct sockaddr sa;
+@@ -284,15 +291,19 @@ bool pa_iochannel_creds_supported(pa_iochannel *io) {
+ }
+ 
+ int pa_iochannel_creds_enable(pa_iochannel *io) {
++#ifndef __FreeBSD__
+     int t = 1;
++#endif
+ 
+     pa_assert(io);
+     pa_assert(io->ifd >= 0);
+ 
++#ifndef __FreeBSD__
+     if (setsockopt(io->ifd, SOL_SOCKET, SO_PASSCRED, &t, sizeof(t)) < 0) {
+         pa_log_error("setsockopt(SOL_SOCKET, SO_PASSCRED): %s", pa_cstrerror(errno));
+         return -1;
+     }
++#endif
+ 
+     return 0;
+ }
+@@ -303,9 +314,9 @@ ssize_t pa_iochannel_write_with_creds(pa_iochannel*io, const void*data, size_t l
+     struct iovec iov;
+     union {
+         struct cmsghdr hdr;
+-        uint8_t data[CMSG_SPACE(sizeof(struct ucred))];
++        uint8_t data[CMSG_SPACE(sizeof(pa_ucred_t))];
+     } cmsg;
+-    struct ucred *u;
++    pa_ucred_t *u;
+ 
+     pa_assert(io);
+     pa_assert(data);
+@@ -317,12 +328,15 @@ ssize_t pa_iochannel_write_with_creds(pa_iochannel*io, const void*data, size_t l
+     iov.iov_len = l;
+ 
+     pa_zero(cmsg);
+-    cmsg.hdr.cmsg_len = CMSG_LEN(sizeof(struct ucred));
++    cmsg.hdr.cmsg_len = CMSG_LEN(sizeof(pa_ucred_t));
+     cmsg.hdr.cmsg_level = SOL_SOCKET;
+     cmsg.hdr.cmsg_type = SCM_CREDENTIALS;
+ 
+-    u = (struct ucred*) CMSG_DATA(&cmsg.hdr);
++    u = (pa_ucred_t*) CMSG_DATA(&cmsg.hdr);
+ 
++#ifdef __FreeBSD__
++    // the kernel fills everything
++#else
+     u->pid = getpid();
+     if (ucred) {
+         u->uid = ucred->uid;
+@@ -331,6 +345,7 @@ ssize_t pa_iochannel_write_with_creds(pa_iochannel*io, const void*data, size_t l
+         u->uid = getuid();
+         u->gid = getgid();
+     }
++#endif
+ 
+     pa_zero(mh);
+     mh.msg_iov = &iov;
+@@ -403,7 +418,7 @@ ssize_t pa_iochannel_read_with_ancil_data(pa_iochannel*io, void*data, size_t l,
+     struct iovec iov;
+     union {
+         struct cmsghdr hdr;
+-        uint8_t data[CMSG_SPACE(sizeof(struct ucred)) + CMSG_SPACE(sizeof(int) * MAX_ANCIL_DATA_FDS)];
++        uint8_t data[CMSG_SPACE(sizeof(pa_ucred_t)) + CMSG_SPACE(sizeof(int) * MAX_ANCIL_DATA_FDS)];
+     } cmsg;
+ 
+     pa_assert(io);
+@@ -439,12 +454,16 @@ ssize_t pa_iochannel_read_with_ancil_data(pa_iochannel*io, void*data, size_t l,
+                 continue;
+ 
+             if (cmh->cmsg_type == SCM_CREDENTIALS) {
+-                struct ucred u;
+-                pa_assert(cmh->cmsg_len == CMSG_LEN(sizeof(struct ucred)));
+-                memcpy(&u, CMSG_DATA(cmh), sizeof(struct ucred));
+-
++                pa_ucred_t u;
++                pa_assert(cmh->cmsg_len == CMSG_LEN(sizeof(pa_ucred_t)));
++                memcpy(&u, CMSG_DATA(cmh), sizeof(pa_ucred_t));
++#ifdef __FreeBSD__
++                ancil_data->creds.gid = u.cmcred_gid;
++                ancil_data->creds.uid = u.cmcred_uid;
++#else
+                 ancil_data->creds.gid = u.gid;
+                 ancil_data->creds.uid = u.uid;
++#endif
+                 ancil_data->creds_valid = true;
+             }
+             else if (cmh->cmsg_type == SCM_RIGHTS) {
+-- 
+GitLab
+
+
+From e91c990186710183936e2c29bd04179274d3267b Mon Sep 17 00:00:00 2001
+From: Greg V <greg@unrelenting.technology>
+Date: Thu, 2 Apr 2020 18:42:59 +0300
+Subject: [PATCH 10/19] pulsecore: remove ancient __FreeBSD_version < 600000
+ code
+
+None of this is relevant in the modern age
+---
+ src/pulsecore/atomic.h | 33 ---------------------------------
+ 1 file changed, 33 deletions(-)
+
+diff --git a/src/pulsecore/atomic.h b/src/pulsecore/atomic.h
+index e5c140109..7911c0538 100644
+--- a/src/pulsecore/atomic.h
++++ b/src/pulsecore/atomic.h
+@@ -218,39 +218,6 @@ static inline bool pa_atomic_ptr_cmpxchg(pa_atomic_ptr_t *a, void *old_p, void*
+ #include <sys/param.h>
+ #include <machine/atomic.h>
+ 
+-#if __FreeBSD_version < 600000
+-#if defined(__i386__) || defined(__amd64__)
+-#if defined(__amd64__)
+-#define atomic_load_acq_64      atomic_load_acq_long
+-#endif
+-static inline u_int atomic_fetchadd_int(volatile u_int *p, u_int v) {
+-    __asm __volatile(
+-            "   " __XSTRING(MPLOCKED) "         "
+-            "   xaddl   %0, %1 ;        "
+-            "# atomic_fetchadd_int"
+-            : "+r" (v),
+-            "=m" (*p)
+-            : "m" (*p));
+-
+-    return (v);
+-}
+-#elif defined(__sparc__) && defined(__arch64__)
+-#define atomic_load_acq_64      atomic_load_acq_long
+-#define atomic_fetchadd_int     atomic_add_int
+-#elif defined(__ia64__)
+-#define atomic_load_acq_64      atomic_load_acq_long
+-static inline uint32_t
+-atomic_fetchadd_int(volatile uint32_t *p, uint32_t v) {
+-    uint32_t value;
+-
+-    do {
+-        value = *p;
+-    } while (!atomic_cmpset_32(p, value, value + v));
+-    return (value);
+-}
+-#endif
+-#endif
+-
+ typedef struct pa_atomic {
+     volatile unsigned long value;
+ } pa_atomic_t;
+-- 
+GitLab
+
+
+From b0576f502fdc05b0fe8026a9d15e8da780c0d0ab Mon Sep 17 00:00:00 2001
+From: Greg V <greg@unrelenting.technology>
+Date: Thu, 2 Apr 2020 18:49:58 +0300
+Subject: [PATCH 11/19] util: implement pa_get_binary_name on FreeBSD without
+ procfs requirement
+
+procfs is not mounted by default, sysctl offers a bulletproof way
+of requesting this information.
+---
+ src/pulse/util.c | 15 ++++++++++-----
+ 1 file changed, 10 insertions(+), 5 deletions(-)
+
+diff --git a/src/pulse/util.c b/src/pulse/util.c
+index 2be389b22..d5baac83e 100644
+--- a/src/pulse/util.c
++++ b/src/pulse/util.c
+@@ -91,6 +91,10 @@ static int _main() PA_GCC_WEAKREF(main);
+ #include <sys/sysctl.h>
+ #endif
+ 
++#ifdef __FreeBSD__
++#include <sys/sysctl.h>
++#endif
++
+ #ifdef HAVE_DBUS
+ #include <pulsecore/rtkit.h>
+ #endif
+@@ -224,7 +228,7 @@ char *pa_get_binary_name(char *s, size_t l) {
+     }
+ #endif
+ 
+-#if defined(__linux__) || defined(__FreeBSD_kernel__)
++#if defined(__linux__) || (defined(__FreeBSD_kernel__) && !defined(__FreeBSD__))
+     {
+         char *rp;
+         /* This works on Linux and Debian/kFreeBSD */
+@@ -239,11 +243,12 @@ char *pa_get_binary_name(char *s, size_t l) {
+ 
+ #ifdef __FreeBSD__
+     {
+-        char *rp;
++        char path[PATH_MAX + 1];
++        size_t len = PATH_MAX;
++        int mib[] = { CTL_KERN, KERN_PROC, KERN_PROC_PATHNAME, -1 };
+ 
+-        if ((rp = pa_readlink("/proc/curproc/file"))) {
+-            pa_strlcpy(s, pa_path_get_filename(rp), l);
+-            pa_xfree(rp);
++        if (sysctl(mib, 4, &path, &len, NULL, 0) == 0) {
++            pa_strlcpy(s, pa_path_get_filename(path), l);
+             return s;
+         }
+     }
+-- 
+GitLab
+
+
+From 9c2cdc474fbe6a2ebe64c5804f725a68f5b0f018 Mon Sep 17 00:00:00 2001
+From: Greg V <greg@unrelenting.technology>
+Date: Thu, 2 Apr 2020 18:56:53 +0300
+Subject: [PATCH 12/19] detect: fix/improve FreeBSD support
+
+Apply patch from FreeBSD Ports.
+Thanks to: Koop Mast <kwm@FreeBSD.org>, lightside <lightside@gmx.com>
+---
+ src/modules/module-detect.c | 33 +++++++++++++++++++++++++++++++--
+ 1 file changed, 31 insertions(+), 2 deletions(-)
+
+diff --git a/src/modules/module-detect.c b/src/modules/module-detect.c
+index 230cd9d47..072615f51 100644
+--- a/src/modules/module-detect.c
++++ b/src/modules/module-detect.c
+@@ -160,11 +160,40 @@ static int detect_oss(pa_core *c, int just_one) {
+                 continue;
+ 
+         } else if (sscanf(line, "pcm%u: ", &device) == 1) {
+-            /* FreeBSD support, the devices are named /dev/dsp0.0, dsp0.1 and so on */
+-            pa_snprintf(args, sizeof(args), "device=/dev/dsp%u.0", device);
++            pa_snprintf(args, sizeof(args), "device=/dev/dsp%u", device);
+ 
+             if (pa_module_load(&m, c, "module-oss", args) < 0)
+                 continue;
++
++            if (!pa_endswith(line, "default"))
++                continue;
++
++            const char *p = strrchr(line, '(');
++
++            if (!p)
++                continue;
++
++            if (!c->configured_default_sink && (strstr(p, "play") || (strstr(p, "p:") && !strstr(p, "(0p:")))) {
++                uint32_t idx = PA_IDXSET_INVALID;
++                pa_sink *s;
++                PA_IDXSET_FOREACH(s, c->sinks, idx) {
++                    if (s->module == m) {
++                        pa_core_set_configured_default_sink(c, s->name);
++                        break;
++                    }
++                }
++            }
++
++            if (!c->configured_default_source && (strstr(p, "rec") || (strstr(p, "r:") && !strstr(p, "/0r:")))) {
++                uint32_t idx = PA_IDXSET_INVALID;
++                pa_source *s;
++                PA_IDXSET_FOREACH(s, c->sources, idx) {
++                    if (s->module == m) {
++                        pa_core_set_configured_default_source(c, s->name);
++                        break;
++                    }
++                }
++            }
+         }
+ 
+         n++;
+-- 
+GitLab
+
+
+From 0bddb50e91b1f87cd4b312ef7bae3e9b6edbb746 Mon Sep 17 00:00:00 2001
+From: Greg V <greg@unrelenting.technology>
+Date: Thu, 2 Apr 2020 19:13:58 +0300
+Subject: [PATCH 13/19] oss: do not fall back to write() mode on FreeBSD
+
+This has been patched out in FreeBSD Ports for ages.
+---
+ src/modules/oss/module-oss.c | 2 ++
+ 1 file changed, 2 insertions(+)
+
+diff --git a/src/modules/oss/module-oss.c b/src/modules/oss/module-oss.c
+index 6eb025489..a88c77e4d 100644
+--- a/src/modules/oss/module-oss.c
++++ b/src/modules/oss/module-oss.c
+@@ -1229,10 +1229,12 @@ int pa__init(pa_module*m) {
+         use_mmap = false;
+     }
+ 
++#ifndef __FreeBSD__
+     if (use_mmap && mode == O_WRONLY) {
+         pa_log_info("Device opened for playback only, cannot do memory mapping, falling back to UNIX write() mode.");
+         use_mmap = false;
+     }
++#endif
+ 
+     if (pa_oss_get_hw_description(dev, hwdesc, sizeof(hwdesc)) >= 0)
+         pa_log_info("Hardware name is '%s'.", hwdesc);
+-- 
+GitLab
+
+
+From cb8145f7ad0e50b1d05e633d40323ef16e664450 Mon Sep 17 00:00:00 2001
+From: Greg V <greg@unrelenting.technology>
+Date: Thu, 2 Apr 2020 19:15:29 +0300
+Subject: [PATCH 14/19] oss: support 24-bit sample formats
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+This works perfectly fine and is required for bitperfect mode on
+some soundcards, according to Romain Tartière <romain@FreeBSD.org>
+
+ref: https://bugs.freebsd.org/bugzilla/show_bug.cgi?id=198567#c6
+---
+ src/modules/oss/oss-util.c | 5 +++++
+ 1 file changed, 5 insertions(+)
+
+diff --git a/src/modules/oss/oss-util.c b/src/modules/oss/oss-util.c
+index 42ee7f56a..4deef9f16 100644
+--- a/src/modules/oss/oss-util.c
++++ b/src/modules/oss/oss-util.c
+@@ -164,8 +164,13 @@ int pa_oss_auto_format(int fd, pa_sample_spec *ss) {
+         [PA_SAMPLE_FLOAT32BE] = AFMT_QUERY, /* not supported */
+         [PA_SAMPLE_S32LE] = AFMT_QUERY, /* not supported */
+         [PA_SAMPLE_S32BE] = AFMT_QUERY, /* not supported */
++#if defined(AFMT_S24_LE) && defined(AFMT_S24_BE)
++        [PA_SAMPLE_S24LE] = AFMT_S24_LE,
++        [PA_SAMPLE_S24BE] = AFMT_S24_BE,
++#else
+         [PA_SAMPLE_S24LE] = AFMT_QUERY, /* not supported */
+         [PA_SAMPLE_S24BE] = AFMT_QUERY, /* not supported */
++#endif
+         [PA_SAMPLE_S24_32LE] = AFMT_QUERY, /* not supported */
+         [PA_SAMPLE_S24_32BE] = AFMT_QUERY, /* not supported */
+     };
+-- 
+GitLab
+
+
+From 76478da195c5d325ff9cd1a56ef192246c9a74a0 Mon Sep 17 00:00:00 2001
+From: Greg V <greg@unrelenting.technology>
+Date: Thu, 2 Apr 2020 19:18:29 +0300
+Subject: [PATCH 15/19] oss: support hot-unplug on FreeBSD
+
+Patch by Hans Petter Selasky <hselasky@FreeBSD.org>
+
+ref: https://bugs.freebsd.org/bugzilla/show_bug.cgi?id=194727#c27
+---
+ src/modules/oss/module-oss.c | 58 ++++++++++++++++++++++-------------
+ src/modules/oss/oss-util.c   | 59 ++++++++++++++++++------------------
+ 2 files changed, 66 insertions(+), 51 deletions(-)
+
+diff --git a/src/modules/oss/module-oss.c b/src/modules/oss/module-oss.c
+index a88c77e4d..048822c97 100644
+--- a/src/modules/oss/module-oss.c
++++ b/src/modules/oss/module-oss.c
+@@ -126,6 +126,8 @@ struct userdata {
+ 
+     int nfrags, frag_size, orig_frag_size;
+ 
++    bool shutdown;
++
+     bool use_mmap;
+     unsigned out_mmap_current, in_mmap_current;
+     void *in_mmap, *out_mmap;
+@@ -843,14 +845,10 @@ static void sink_set_volume(pa_sink *s) {
+     pa_assert(u->mixer_devmask & (SOUND_MASK_VOLUME|SOUND_MASK_PCM));
+ 
+     if (u->mixer_devmask & SOUND_MASK_VOLUME)
+-        if (pa_oss_set_volume(u->mixer_fd, SOUND_MIXER_WRITE_VOLUME, &s->sample_spec, &s->real_volume) >= 0)
+-            return;
++        (void) pa_oss_set_volume(u->mixer_fd, SOUND_MIXER_WRITE_VOLUME, &s->sample_spec, &s->real_volume);
+ 
+     if (u->mixer_devmask & SOUND_MASK_PCM)
+-        if (pa_oss_get_volume(u->mixer_fd, SOUND_MIXER_WRITE_PCM, &s->sample_spec, &s->real_volume) >= 0)
+-            return;
+-
+-    pa_log_info("Device doesn't support writing mixer settings: %s", pa_cstrerror(errno));
++        (void) pa_oss_set_volume(u->mixer_fd, SOUND_MIXER_WRITE_PCM, &s->sample_spec, &s->real_volume);
+ }
+ 
+ static void source_get_volume(pa_source *s) {
+@@ -858,7 +856,7 @@ static void source_get_volume(pa_source *s) {
+ 
+     pa_assert_se(u = s->userdata);
+ 
+-    pa_assert(u->mixer_devmask & (SOUND_MASK_IGAIN|SOUND_MASK_RECLEV));
++    pa_assert(u->mixer_devmask & (SOUND_MASK_MIC|SOUND_MASK_IGAIN|SOUND_MASK_RECLEV));
+ 
+     if (u->mixer_devmask & SOUND_MASK_IGAIN)
+         if (pa_oss_get_volume(u->mixer_fd, SOUND_MIXER_READ_IGAIN, &s->sample_spec, &s->real_volume) >= 0)
+@@ -868,6 +866,10 @@ static void source_get_volume(pa_source *s) {
+         if (pa_oss_get_volume(u->mixer_fd, SOUND_MIXER_READ_RECLEV, &s->sample_spec, &s->real_volume) >= 0)
+             return;
+ 
++    if (u->mixer_devmask & SOUND_MASK_MIC)
++        if (pa_oss_get_volume(u->mixer_fd, SOUND_MIXER_READ_MIC, &s->sample_spec, &s->real_volume) >= 0)
++            return;
++
+     pa_log_info("Device doesn't support reading mixer settings: %s", pa_cstrerror(errno));
+ }
+ 
+@@ -876,17 +878,16 @@ static void source_set_volume(pa_source *s) {
+ 
+     pa_assert_se(u = s->userdata);
+ 
+-    pa_assert(u->mixer_devmask & (SOUND_MASK_IGAIN|SOUND_MASK_RECLEV));
++    pa_assert(u->mixer_devmask & (SOUND_MASK_MIC|SOUND_MASK_IGAIN|SOUND_MASK_RECLEV));
+ 
+     if (u->mixer_devmask & SOUND_MASK_IGAIN)
+-        if (pa_oss_set_volume(u->mixer_fd, SOUND_MIXER_WRITE_IGAIN, &s->sample_spec, &s->real_volume) >= 0)
+-            return;
++        (void) pa_oss_set_volume(u->mixer_fd, SOUND_MIXER_WRITE_IGAIN, &s->sample_spec, &s->real_volume);
+ 
+     if (u->mixer_devmask & SOUND_MASK_RECLEV)
+-        if (pa_oss_get_volume(u->mixer_fd, SOUND_MIXER_WRITE_RECLEV, &s->sample_spec, &s->real_volume) >= 0)
+-            return;
++        (void) pa_oss_set_volume(u->mixer_fd, SOUND_MIXER_WRITE_RECLEV, &s->sample_spec, &s->real_volume);
+ 
+-    pa_log_info("Device doesn't support writing mixer settings: %s", pa_cstrerror(errno));
++    if (u->mixer_devmask & SOUND_MASK_MIC)
++        (void) pa_oss_set_volume(u->mixer_fd, SOUND_MIXER_WRITE_MIC, &s->sample_spec, &s->real_volume);
+ }
+ 
+ static void thread_func(void *userdata) {
+@@ -1127,15 +1128,22 @@ static void thread_func(void *userdata) {
+             pollfd = pa_rtpoll_item_get_pollfd(u->rtpoll_item, NULL);
+             pollfd->events = (short)
+                 (((u->source && PA_SOURCE_IS_OPENED(u->source->thread_info.state)) ? POLLIN : 0) |
+-                 ((u->sink && PA_SINK_IS_OPENED(u->sink->thread_info.state)) ? POLLOUT : 0));
++                 ((u->sink && PA_SINK_IS_OPENED(u->sink->thread_info.state)) ? POLLOUT : 0) |
++                 POLLHUP);
+         }
+ 
++        /* set a watchdog timeout of one second */
++        pa_rtpoll_set_timer_relative(u->rtpoll, 1000000);
++
+         /* Hmm, nothing to do. Let's sleep */
+-        if ((ret = pa_rtpoll_run(u->rtpoll)) < 0)
++        if ((ret = pa_rtpoll_run(u->rtpoll)) < 0) {
+             goto fail;
++        }
+ 
+-        if (ret == 0)
+-            goto finish;
++        /* check for shutdown */
++        if (u->shutdown) {
++            goto fail;
++        }
+ 
+         if (u->rtpoll_item) {
+             struct pollfd *pollfd;
+@@ -1150,6 +1158,16 @@ static void thread_func(void *userdata) {
+             revents = pollfd->revents;
+         } else
+             revents = 0;
++
++        /* check for mixer shutdown, if any */
++        if ((revents & (POLLOUT | POLLIN)) == 0) {
++            int mixer_fd = u->mixer_fd;
++            int devmask;
++            if (mixer_fd > -1 && ioctl(mixer_fd, SOUND_MIXER_READ_DEVMASK, &devmask) < 0) {
++                pa_log("Mixer shutdown.");
++                goto fail;
++            }
++        }
+     }
+ 
+ fail:
+@@ -1157,9 +1175,6 @@ fail:
+      * processing messages until we received PA_MESSAGE_SHUTDOWN */
+     pa_asyncmsgq_post(u->thread_mq.outq, PA_MSGOBJECT(u->core), PA_CORE_MESSAGE_UNLOAD_MODULE, u->module, 0, NULL, NULL);
+     pa_asyncmsgq_wait_for(u->thread_mq.inq, PA_MESSAGE_SHUTDOWN);
+-
+-finish:
+-    pa_log_debug("Thread shutting down");
+ }
+ 
+ int pa__init(pa_module*m) {
+@@ -1448,7 +1463,7 @@ int pa__init(pa_module*m) {
+                 do_close = false;
+             }
+ 
+-            if (u->source && (u->mixer_devmask & (SOUND_MASK_RECLEV|SOUND_MASK_IGAIN))) {
++            if (u->source && (u->mixer_devmask & (SOUND_MASK_MIC|SOUND_MASK_RECLEV|SOUND_MASK_IGAIN))) {
+                 pa_log_debug("Found hardware mixer track for recording.");
+                 pa_source_set_get_volume_callback(u->source, source_get_volume);
+                 pa_source_set_set_volume_callback(u->source, source_set_volume);
+@@ -1533,6 +1548,7 @@ void pa__done(pa_module*m) {
+         pa_source_unlink(u->source);
+ 
+     if (u->thread) {
++        u->shutdown = true;
+         pa_asyncmsgq_send(u->thread_mq.inq, NULL, PA_MESSAGE_SHUTDOWN, NULL, 0, NULL);
+         pa_thread_free(u->thread);
+     }
+diff --git a/src/modules/oss/oss-util.c b/src/modules/oss/oss-util.c
+index 4deef9f16..f2ce42a26 100644
+--- a/src/modules/oss/oss-util.c
++++ b/src/modules/oss/oss-util.c
+@@ -40,6 +40,7 @@
+ #include "oss-util.h"
+ 
+ int pa_oss_open(const char *device, int *mode, int* pcaps) {
++    static const int nonblock_io = 1;
+     int fd = -1;
+     int caps;
+     char *t;
+@@ -89,6 +90,10 @@ int pa_oss_open(const char *device, int *mode, int* pcaps) {
+     }
+ 
+ success:
++    if (ioctl(fd, FIONBIO, &nonblock_io) < 0) {
++        pa_log("FIONBIO: %s", pa_cstrerror(errno));
++        goto fail;
++    }
+ 
+     t = pa_sprintf_malloc(
+             "%s%s%s%s%s%s%s%s%s%s%s%s%s%s",
+@@ -295,41 +300,35 @@ int pa_oss_set_volume(int fd, unsigned long mixer, const pa_sample_spec *ss, con
+ }
+ 
+ static int get_device_number(const char *dev) {
+-    const char *p, *e;
++    const char *p;
++    const char *e;
+     char *rp = NULL;
+-    int r;
++    int r = -1;
+ 
+     if (!(p = rp = pa_readlink(dev))) {
+-#ifdef ENOLINK
+-        if (errno != EINVAL && errno != ENOLINK) {
+-#else
+-        if (errno != EINVAL) {
+-#endif
+-            r = -1;
+-            goto finish;
+-        }
+-
++        if (errno != EINVAL && errno != ENOLINK)
++            return -2;
+         p = dev;
+     }
+ 
+-    if ((e = strrchr(p, '/')))
+-        p = e+1;
+-
+-    if (p == 0) {
+-        r = 0;
+-        goto finish;
+-    }
+-
+-    p = strchr(p, 0) -1;
+-
+-    if (*p >= '0' && *p <= '9') {
+-        r = *p - '0';
+-        goto finish;
++    /* find the last forward slash */
++    while ((e = strrchr(p, '/')))
++        p = e + 1;
++
++    /* collect unit number at end, if any */
++    while (*p) {
++        if (*p >= '0' && *p <= '9') {
++            if (r < 0)
++                r = 0;
++            else
++                r *= 10;
++            r += *p - '0';
++        } else {
++            r = -1;
++        }
++        p++;
+     }
+ 
+-    r = -1;
+-
+-finish:
+     pa_xfree(rp);
+     return r;
+ }
+@@ -339,7 +338,7 @@ int pa_oss_get_hw_description(const char *dev, char *name, size_t l) {
+     int n, r = -1;
+     int b = 0;
+ 
+-    if ((n = get_device_number(dev)) < 0)
++    if ((n = get_device_number(dev)) == -2)
+         return -1;
+ 
+     if (!(f = pa_fopen_cloexec("/dev/sndstat", "r")) &&
+@@ -405,10 +404,10 @@ int pa_oss_open_mixer_for_device(const char *device) {
+     char *fn;
+     int fd;
+ 
+-    if ((n = get_device_number(device)) < 0)
++    if ((n = get_device_number(device)) == -2)
+         return -1;
+ 
+-    if (n == 0)
++    if (n == -1)
+         if ((fd = open_mixer("/dev/mixer")) >= 0)
+             return fd;
+ 
+-- 
+GitLab
+
+
+From 3177b7d65dc36ede6e28b9d104b53f8c1b7d23ba Mon Sep 17 00:00:00 2001
+From: Greg V <greg@unrelenting.technology>
+Date: Fri, 3 Apr 2020 14:23:34 +0300
+Subject: [PATCH 16/19] oss: parse device names correctly on FreeBSD
+
+This fixes devices being named just "/dev/dspN" instead of actual
+soundcard names.
+
+Also synchronizes some things like the unsigned type with the
+detect module.
+
+Loosely based on patch by lightside <lightside@gmx.com>.
+
+ref: https://bugs.freebsd.org/bugzilla/show_bug.cgi?id=245156
+---
+ src/modules/oss/oss-util.c | 15 +++++++++------
+ 1 file changed, 9 insertions(+), 6 deletions(-)
+
+diff --git a/src/modules/oss/oss-util.c b/src/modules/oss/oss-util.c
+index f2ce42a26..80b6c8c63 100644
+--- a/src/modules/oss/oss-util.c
++++ b/src/modules/oss/oss-util.c
+@@ -352,8 +352,8 @@ int pa_oss_get_hw_description(const char *dev, char *name, size_t l) {
+     }
+ 
+     while (!feof(f)) {
+-        char line[64];
+-        int device;
++        char line[1024] = { 0 };
++        unsigned device;
+ 
+         if (!fgets(line, sizeof(line), f))
+             break;
+@@ -361,26 +361,29 @@ int pa_oss_get_hw_description(const char *dev, char *name, size_t l) {
+         line[strcspn(line, "\r\n")] = 0;
+ 
+         if (!b) {
+-            b = pa_streq(line, "Audio devices:");
++            b = pa_streq(line, "Audio devices:") || pa_streq(line, "Installed devices:");
+             continue;
+         }
+ 
+         if (line[0] == 0)
+             break;
+ 
+-        if (sscanf(line, "%i: ", &device) != 1)
++        if (sscanf(line, "%u: ", &device) != 1 && sscanf(line, "pcm%u: ", &device) != 1)
+             continue;
+ 
+         if (device == n) {
+             char *k = strchr(line, ':');
+             pa_assert(k);
+             k++;
+-            k += strspn(k, " ");
++            k += strspn(k, " <");
+ 
+             if (pa_endswith(k, " (DUPLEX)"))
+                 k[strlen(k)-9] = 0;
+ 
+-            pa_strlcpy(name, k, l);
++            k[strcspn(k, ">")] = 0;
++
++            // Include the number to disambiguate devices with the same name
++            pa_snprintf(name, l, "%u - %s", device, k);
+             r = 0;
+             break;
+         }
+-- 
+GitLab
+
+
+From c445b33aa614e73e4be4d585ee55a003269213d3 Mon Sep 17 00:00:00 2001
+From: Greg V <greg@unrelenting.technology>
+Date: Fri, 3 Apr 2020 15:37:24 +0300
+Subject: [PATCH 17/19] module-devd-detect: new module for soundcard hotplug on
+ FreeBSD
+
+Used in addition to module-detect, since devd only provides hotplug events.
+---
+ meson.build                      |   2 +
+ src/daemon/default.pa.in         |   6 ++
+ src/daemon/system.pa.in          |   6 ++
+ src/modules/meson.build          |   4 +
+ src/modules/module-devd-detect.c | 135 +++++++++++++++++++++++++++++++
+ 5 files changed, 153 insertions(+)
+ create mode 100644 src/modules/module-devd-detect.c
+
+diff --git a/meson.build b/meson.build
+index 593108795..24850a750 100644
+--- a/meson.build
++++ b/meson.build
+@@ -183,6 +183,8 @@ elif host_machine.system() == 'windows'
+   pcreposix_dep = meson.get_compiler('c').find_library('pcreposix')
+   platform_socket_dep = [ws2_32_dep, winsock_dep]
+   platform_dep = [ole32_dep, ssp_dep, pcreposix_dep]
++elif host_machine.system() == 'freebsd'
++  cdata.set('OS_IS_FREEBSD', 1)
+ #elif host_machine.system() == 'solaris'
+ #  # Apparently meson has no solaris support?
+ #  # Needed to get declarations for msg_control and msg_controllen on Solaris
+diff --git a/src/daemon/default.pa.in b/src/daemon/default.pa.in
+index 3468a89b9..1d6b64cb8 100755
+--- a/src/daemon/default.pa.in
++++ b/src/daemon/default.pa.in
+@@ -67,6 +67,12 @@ load-module module-coreaudio-detect
+ ### Use the static hardware detection module (for systems that lack udev support)
+ load-module module-detect
+ .endif
++ifelse(@OS_IS_FREEBSD@, 1, [dnl
++### FreeBSD devd is used in addition to static detection (only handles hotplug)
++.ifexists module-devd-detect@PA_SOEXT@
++load-module module-devd-detect
++.endif
++])dnl
+ 
+ ### Automatically connect sink and source if JACK server is present
+ .ifexists module-jackdbus-detect@PA_SOEXT@
+diff --git a/src/daemon/system.pa.in b/src/daemon/system.pa.in
+index 1470e2368..989fcb4f3 100755
+--- a/src/daemon/system.pa.in
++++ b/src/daemon/system.pa.in
+@@ -39,6 +39,12 @@ load-module module-coreaudio-detect
+ ### Use the static hardware detection module (for systems that lack udev/hal support)
+ load-module module-detect
+ .endif
++ifelse(@OS_IS_FREEBSD@, 1, [dnl
++### FreeBSD devd is used in addition to static detection (only handles hotplug)
++.ifexists module-devd-detect@PA_SOEXT@
++load-module module-devd-detect
++.endif
++])dnl
+ 
+ ### Load several protocols
+ .ifexists module-esound-protocol-unix@PA_SOEXT@
+diff --git a/src/modules/meson.build b/src/modules/meson.build
+index dcfc432d8..bda48cc27 100644
+--- a/src/modules/meson.build
++++ b/src/modules/meson.build
+@@ -217,6 +217,10 @@ if udev_dep.found()
+   endif
+ endif
+ 
++if host_machine.system() == 'freebsd'
++  all_modules += [ [ 'module-devd-detect', 'module-devd-detect.c', [], [], [] ] ]
++endif
++
+ if x11_dep.found()
+   all_modules += [
+     [ 'module-x11-bell', 'x11/module-x11-bell.c', [], [], [x11_dep] ],
+diff --git a/src/modules/module-devd-detect.c b/src/modules/module-devd-detect.c
+new file mode 100644
+index 000000000..db3c6453b
+--- /dev/null
++++ b/src/modules/module-devd-detect.c
+@@ -0,0 +1,135 @@
++/***
++  This file is part of PulseAudio.
++
++  Copyright 2020 Greg V
++
++  PulseAudio is free software; you can redistribute it and/or modify
++  it under the terms of the GNU Lesser General Public License as published
++  by the Free Software Foundation; either version 2.1 of the License,
++  or (at your option) any later version.
++
++  PulseAudio is distributed in the hope that it will be useful, but
++  WITHOUT ANY WARRANTY; without even the implied warranty of
++  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
++  General Public License for more details.
++
++  You should have received a copy of the GNU Lesser General Public License
++  along with PulseAudio; if not, see <http://www.gnu.org/licenses/>.
++***/
++
++#ifdef HAVE_CONFIG_H
++#include <config.h>
++#endif
++
++#include <stdio.h>
++#include <stdint.h>
++#include <stdbool.h>
++#include <unistd.h>
++#include <string.h>
++#include <sys/socket.h>
++#include <sys/un.h>
++
++#include <pulsecore/core-util.h>
++#include <pulsecore/module.h>
++#include <pulsecore/hashmap.h>
++#include <pulsecore/iochannel.h>
++#include <pulsecore/ioline.h>
++#include <pulsecore/log.h>
++
++PA_MODULE_AUTHOR("Greg V");
++PA_MODULE_DESCRIPTION("Detect hotplugged audio hardware and load matching drivers");
++PA_MODULE_VERSION(PACKAGE_VERSION);
++PA_MODULE_LOAD_ONCE(true);
++PA_MODULE_USAGE("");
++
++struct userdata {
++    pa_core *core;
++    pa_hashmap *devices;
++    pa_iochannel *io;
++    pa_ioline *line;
++};
++
++static void line_callback(pa_ioline *line, const char *s, void *userdata) {
++    struct userdata *u = userdata;
++    pa_module *m = NULL;
++    unsigned devnum;
++    uint32_t modidx;
++    char args[64];
++
++    pa_assert(line);
++    pa_assert(u);
++
++    if (sscanf(s, "+pcm%u", &devnum) == 1) {
++        pa_snprintf(args, sizeof(args), "device=/dev/dsp%u", devnum);
++        pa_module_load(&m, u->core, "module-oss", args);
++
++        if (m) {
++            pa_hashmap_put(u->devices, (void *)(uintptr_t)devnum, (void *)(uintptr_t)m->index);
++            pa_log_info("Card %u module loaded (%u).", devnum, m->index);
++        } else {
++            pa_log_info("Card %u failed to load module.", devnum);
++        }
++    } else if (sscanf(s, "-pcm%u", &devnum) == 1) {
++        if (!(modidx = (uint32_t)pa_hashmap_remove(u->devices, (void *)(uintptr_t)devnum)))
++            return;
++
++        pa_log_info("Card %u (module %u) removed.", devnum, modidx);
++
++        if (modidx != PA_INVALID_INDEX)
++            pa_module_unload_request_by_index(u->core, modidx, true);
++    }
++}
++
++static void device_free(void *a) {
++}
++
++int pa__init(pa_module *m) {
++    struct userdata *u = NULL;
++    struct sockaddr_un addr = { .sun_family = AF_UNIX };
++    int fd;
++
++    pa_assert(m);
++
++    m->userdata = u = pa_xnew0(struct userdata, 1);
++    u->core = m->core;
++    u->devices = pa_hashmap_new_full(pa_idxset_trivial_hash_func, pa_idxset_trivial_compare_func, NULL, (pa_free_cb_t) device_free);
++
++    if ((fd = socket(AF_UNIX, SOCK_SEQPACKET, 0)) < 0) {
++        pa_log("Failed to open socket for devd.");
++        return -1;
++    }
++
++    strncpy(addr.sun_path, "/var/run/devd.seqpacket.pipe", sizeof(addr.sun_path) - 1);
++
++    if (connect(fd, (struct sockaddr *)&addr, sizeof(addr)) < 0) {
++        pa_log("Failed to connect to devd.");
++        close(fd);
++        return -1;
++    }
++
++    pa_assert_se(u->io = pa_iochannel_new(m->core->mainloop, fd, -1));
++    pa_assert_se(u->line = pa_ioline_new(u->io));
++    pa_ioline_set_callback(u->line, line_callback, m->userdata);
++
++    return 0;
++}
++
++void pa__done(pa_module *m) {
++    struct userdata *u;
++
++    pa_assert(m);
++
++    if (!(u = m->userdata))
++        return;
++
++    if (u->devices)
++        pa_hashmap_free(u->devices);
++
++    if (u->line)
++        pa_ioline_close(u->line);
++
++    if (u->io)
++        pa_iochannel_free(u->io);
++
++    pa_xfree(u);
++}
+-- 
+GitLab
+
+
+From 2f789536415be5434a3da37194573c6552e6a701 Mon Sep 17 00:00:00 2001
+From: Greg V <greg@unrelenting.technology>
+Date: Sun, 29 Nov 2020 21:31:27 +0300
+Subject: [PATCH 18/19] atomic-test: unbreak on FreeBSD (cpuset_t)
+
+---
+ src/tests/atomic-test.c | 11 +++++++++--
+ 1 file changed, 9 insertions(+), 2 deletions(-)
+
+diff --git a/src/tests/atomic-test.c b/src/tests/atomic-test.c
+index eb986e79d..86b3d77a9 100644
+--- a/src/tests/atomic-test.c
++++ b/src/tests/atomic-test.c
+@@ -47,6 +47,9 @@
+ #include <pulse/xmalloc.h>
+ #include <pulsecore/semaphore.h>
+ #include <pthread.h>
++#ifdef __FreeBSD__
++#include <pthread_np.h>
++#endif
+ #include <pulsecore/atomic.h>
+ 
+ #define MEMORY_SIZE (8 * 2 * 1024 * 1024)
+@@ -55,14 +58,18 @@
+ typedef struct io_t {
+    pa_atomic_t *flag;
+    char* memory;
++#ifdef __FreeBSD__
++   cpuset_t cpuset;
++#else
+    cpu_set_t cpuset;
++#endif
+ } io_t;
+ 
+ static void read_func(void* data) {
+    io_t *io = (io_t *) data;
+    size_t expect = 0;
+    size_t value = 0;
+-   pthread_setaffinity_np(pthread_self(), sizeof(cpu_set_t), &io->cpuset);
++   pthread_setaffinity_np(pthread_self(), sizeof(io->cpuset), &io->cpuset);
+    while(1) {
+       if(pa_atomic_load(io->flag) == 1) {
+          memcpy(&value, io->memory, sizeof(value));
+@@ -76,7 +83,7 @@ static void read_func(void* data) {
+ static void write_func(void* data) {
+    io_t *io = (io_t *) data;
+    size_t value = 0;
+-   pthread_setaffinity_np(pthread_self(), sizeof(cpu_set_t), &io->cpuset);
++   pthread_setaffinity_np(pthread_self(), sizeof(io->cpuset), &io->cpuset);
+    while(1) {
+       if(pa_atomic_load(io->flag) == 0) {
+          memcpy(io->memory, &value, sizeof(value));
+-- 
+GitLab
+
+
+From ad046616e87a0f53faf4320853dd30698174b5bb Mon Sep 17 00:00:00 2001
+From: Greg V <greg@unrelenting.technology>
+Date: Wed, 6 Jan 2021 14:43:14 +0300
+Subject: [PATCH 19/19] build-sys: meson: only warn about lack of udev on Linux
+
+---
+ meson.build | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/meson.build b/meson.build
+index 24850a750..89646dee1 100644
+--- a/meson.build
++++ b/meson.build
+@@ -934,7 +934,7 @@ if host_machine.system() != 'windows'
+     ]
+     warning('\n' + '\n'.join(message))
+   endif
+-  if not udev_dep.found()
++  if host_machine.system() == 'linux' and not udev_dep.found()
+     message = [
+       'You do not have udev support enabled. It is strongly recommended',
+       'that you enable udev support if your platform supports it as it is',
+-- 
+GitLab
+
