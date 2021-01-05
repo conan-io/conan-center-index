@@ -1,4 +1,5 @@
 import os
+import glob
 from conans import ConanFile, CMake, tools
 from conans.errors import ConanInvalidConfiguration
 
@@ -44,8 +45,7 @@ class TinyDnnConan(ConanFile):
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
-        extracted_dir = self.name + "-" + self.version
-        os.rename(extracted_dir, self._source_subfolder)
+        os.rename(glob.glob("tiny-dnn-*")[0], self._source_subfolder)
 
     def package(self):
         self.copy("LICENSE", dst="licenses", src=self._source_subfolder)
