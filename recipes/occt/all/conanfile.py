@@ -94,17 +94,4 @@ class OcctConan(ConanFile):
                     os.remove(file)
 
     def package_info(self):
-        libs: List[str] = []
-        libdirs = []
-        bindirs = []
-        for root, dirs, _ in os.walk(self.package_folder):
-            if "lib" in dirs:
-                libdir = os.path.join(root, "lib")
-                libdirs.append(libdir)
-                libs.extend(tools.collect_libs(self, libdir))
-            if "bin" in dirs:
-                bindir = os.path.join(root, "bin")
-                bindirs.append(bindir)
-        self.cpp_info.libs = libs
-        self.cpp_info.libdirs = libdirs
-        self.cpp_info.bindirs = bindirs
+        self.cpp_info.libs = os.listdir("lib")
