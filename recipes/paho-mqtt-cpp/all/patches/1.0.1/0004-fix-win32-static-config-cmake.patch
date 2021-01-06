@@ -1,0 +1,17 @@
+diff --git a/cmake/FindPahoMqttC.cmake b/cmake/FindPahoMqttC.cmake
+index 53f15a3..7e2d756 100644
+--- a/cmake/FindPahoMqttC.cmake
++++ b/cmake/FindPahoMqttC.cmake
+@@ -6,8 +6,10 @@ else()
+     set(_PAHO_MQTT_C_LIB_NAME paho-mqtt3a)
+ endif()
+ # add suffix when using static Paho MQTT C library variant
+-if(PAHO_BUILD_STATIC)
+-    set(_PAHO_MQTT_C_LIB_NAME ${_PAHO_MQTT_C_LIB_NAME}-static)
++if(WIN32)
++       if(PAHO_BUILD_STATIC)
++       set(_PAHO_MQTT_C_LIB_NAME ${_PAHO_MQTT_C_LIB_NAME}-static)
++       endif()
+ endif()
+
+ find_library(PAHO_MQTT_C_LIBRARIES NAMES ${_PAHO_MQTT_C_LIB_NAME})
