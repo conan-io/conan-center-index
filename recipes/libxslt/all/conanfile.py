@@ -125,9 +125,9 @@ class LibxsltConan(ConanFile):
         else:
             configure_args.extend(['--enable-static', '--disable-shared'])
 
-        xml_config = tools.unix_path(self.deps_cpp_info["libxml2"].rootpath) + "/bin/xml2-config"
-
-        configure_args.append('XML_CONFIG=%s' % xml_config)
+        libxml2_path = tools.unix_path(self.deps_cpp_info["libxml2"].rootpath)
+        libxml_src = ("--with-libxml-src=%s" %libxml2_path)
+        configure_args.append(libxml_src)
 
         for name in self._option_names:
             value = getattr(self.options, name)
