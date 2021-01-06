@@ -2,6 +2,6 @@
 
 int main(void) {
     InitWindow(100, 100, "basic window");
-    CloseWindow();
+    if (IsWindowReady()) CloseWindow();
     return 0;
 }
