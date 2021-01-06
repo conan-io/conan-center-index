@@ -44,8 +44,6 @@ class GhcFilesystemRecipe(ConanFile):
         self._cmake.definitions["GHC_FILESYSTEM_BUILD_TESTING"] = self.options.run_tests
         self._cmake.definitions["GHC_FILESYSTEM_BUILD_EXAMPLES"] = False
         self._cmake.definitions["GHC_FILESYSTEM_WITH_INSTALL"] = True
-#        if self.options.run_tests:
-#            os.environ["CXXFLAGS"] = "-Wno-deprecated-declarations"  # TODO required? compiler specific!
         self._cmake.configure(
             source_folder=self._source_subfolder,
             build_folder=self._build_subfolder
