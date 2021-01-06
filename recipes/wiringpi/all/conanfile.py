@@ -1,10 +1,6 @@
 import os
 from conans import ConanFile, CMake, tools
 from conans.errors import ConanInvalidConfiguration
-from conans import __version__ as client_version
-
-
-required_conan_version = ">=1.32"
 
 
 class WiringpiConan(ConanFile):
@@ -36,14 +32,12 @@ class WiringpiConan(ConanFile):
         return "build_subfolder"
 
     def configure(self):
-        del self.settings.compiler.libcxx
-        del self.settings.compiler.cppstd
-        if self.settings.os == "Windows":
-            del self.options.fPIC
-
-    def validate(self):
         if self.settings.os != "Linux":
             raise ConanInvalidConfiguration("WiringPi only works for Linux.")
+        if self.options.shared:
+            del self.options.fPIC
+        del self.settings.compiler.libcxx
+        del self.settings.compiler.cppstd
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
