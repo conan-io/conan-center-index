@@ -28,4 +28,6 @@ int main()
 
 	// allocate and initialize the SRTP session
 	srtp_create(&session, &policy);
+
+	return 0;
 }
