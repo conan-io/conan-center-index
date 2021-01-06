@@ -2,7 +2,7 @@
 
 #include <srtp2/srtp.h>
 
-#include <cstring>
+#include <string.h>
 
 int main()
 {

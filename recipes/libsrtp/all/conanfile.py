@@ -4,14 +4,15 @@ from conans import ConanFile, CMake, tools
 
 class ConanRecipe(ConanFile):
     name = "libsrtp"
-
-    description = "This package provides an implementation of the Secure Real-time Transport Protocol (SRTP), the Universal Security Transform (UST), and a supporting cryptographic kernel."
+    description = ("This package provides an implementation of the Secure Real-time Transport"
+                   "Protocol (SRTP), the Universal Security Transform (UST), and a supporting"
+                   "cryptographic kernel.")
     topics = ("conan", "libsrtp", "srtp")
     homepage = "https://github.com/cisco/libsrtp"
     url = "https://github.com/conan-io/conan-center-index"
-    license = "Copyright (c) 2001-2017 Cisco Systems, Inc. All rights reserved"
+    license = "BSD-3-Clause"
     exports_sources = ["CMakeLists.txt"]
-    generators = "cmake", "cmake_find_package"
+    generators = "cmake"
 
     settings = "os", "arch", "compiler", "build_type"
     options = {
@@ -38,6 +39,8 @@ class ConanRecipe(ConanFile):
     def configure(self):
         if self.options.shared:
             del self.options.fPIC
+        del self.settings.compiler.cppstd
+        del self.settings.compiler.libcxx
 
     def requirements(self):
         if self.options.enable_openssl:
@@ -52,8 +55,8 @@ class ConanRecipe(ConanFile):
         if self._cmake:
             return self._cmake
         self._cmake = CMake(self)
-        self._cmake.definitions["BUILD_SHARED_LIBS"] = self.options.shared
         self._cmake.definitions["ENABLE_OPENSSL"] = self.options.enable_openssl
+        self._cmake.definitions["TEST_APPS"] = False
         self._cmake.configure()
         return self._cmake
 
