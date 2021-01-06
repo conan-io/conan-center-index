@@ -4,7 +4,7 @@
 
 #include <string.h>
 
-int main()
+int main(void)
 {
 	srtp_t session;
 	srtp_policy_t policy;
