@@ -17,9 +17,12 @@ class OcctConan(ConanFile):
     requires = [("tcl/8.6.10"),
                 ("tk/8.6.10"),
                 ("freetype/2.10.2")]
-    _source_subfolder = "src"
     _cmake = None
 
+    @property
+    def _source_subfolder(self):
+        return "source_subfolder"
+ 
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
@@ -78,7 +81,6 @@ class OcctConan(ConanFile):
         cmake = self._configure_cmake()
         cmake.install()
         with tools.chdir(self.package_folder):
-            print()
             tools.mkdir("licenses")
             tools.rename(
                 "LICENSE_LGPL_21.txt",
