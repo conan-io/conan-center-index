@@ -17,11 +17,13 @@ class PackioConan(ConanFile):
         "standalone_asio": [True, False],
         "msgpack": [True, False],
         "nlohmann_json": [True, False],
+        "boost_json": [True, False, "default"],
     }
     default_options = {
         "standalone_asio": False,
         "msgpack": True,
         "nlohmann_json": True,
+        "boost_json": "default",
     }
 
     @property
@@ -43,6 +45,8 @@ class PackioConan(ConanFile):
         if tools.Version(self.version) < "2.0.0":
             del self.options.msgpack
             del self.options.nlohmann_json
+        if tools.Version(self.version) < "2.1.0":
+            del self.options.boost_json
 
     def requirements(self):
         if self.options.get_safe("msgpack") or tools.Version(self.version) < "2.0.0":
@@ -51,10 +55,15 @@ class PackioConan(ConanFile):
         if self.options.get_safe("nlohmann_json"):
             self.requires("nlohmann_json/3.9.1")
 
+         # defaults to True if using boost.asio, False if using asio
+        if self.options.get_safe("boost_json") == "default":
+            self.options.boost_json = not self.options.standalone_asio
+
+        if self.options.get_safe("boost_json") or not self.options.get_safe("standalone_asio"):
+            self.requires("boost/1.75.0")
+
         if self.options.get_safe("standalone_asio"):
-            self.requires("asio/1.16.1")
-        else:
-            self.requires("boost/1.74.0")
+            self.requires("asio/1.18.1")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
@@ -80,5 +89,12 @@ class PackioConan(ConanFile):
         self.info.header_only()
 
     def package_info(self):
-        if self.options.get_safe("standalone_asio"):
-            self.cpp_info.defines.append("PACKIO_STANDALONE_ASIO")
+        if tools.Version(self.version) < "2.1.0":
+            if self.options.get_safe("standalone_asio"):
+                self.cpp_info.defines.append("PACKIO_STANDALONE_ASIO")
+        else:
+            # Starting from 2.1.0, preprocessor defines can be defined to 0 to force-disable
+            self.cpp_info.defines.append(f"PACKIO_STANDALONE_ASIO={1 if self.options.get_safe('standalone_asio') else 0}")
+            self.cpp_info.defines.append(f"PACKIO_HAS_MSGPACK={1 if self.options.get_safe('msgpack') else 0}")
+            self.cpp_info.defines.append(f"PACKIO_HAS_NLOHMANN_JSON={1 if self.options.get_safe('nlohmann_json') else 0}")
+            self.cpp_info.defines.append(f"PACKIO_HAS_BOOST_JSON={1 if self.options.get_safe('boost_json') else 0}")
