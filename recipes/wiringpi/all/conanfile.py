@@ -37,6 +37,8 @@ class WiringpiConan(ConanFile):
     def configure(self):
         del self.settings.compiler.libcxx
         del self.settings.compiler.cppstd
+        if self.settings.os == "Windows":
+            del self.options.fPIC
 
     def validate(self):
         if self.settings.os in ("Windows", "Macos"):
