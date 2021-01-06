@@ -93,14 +93,15 @@ class OcctConan(ConanFile):
     def package(self):
         cmake = self._configure_cmake()
         cmake.install()
+        self.copy(
+            "LICENSE_LGPL_21.txt",
+            src=self._source_subfolder,
+            dst="licenses")
+        self.copy(
+            "OCCT_LGPL_EXCEPTION.txt",
+            src=self._source_subfolder,
+            dst="licenses")
         with tools.chdir(self.package_folder):
-            tools.mkdir("licenses")
-            tools.rename(
-                "LICENSE_LGPL_21.txt",
-                os.path.join("licenses", "LICENSE_LGPL_21.txt"))
-            tools.rename(
-                "OCCT_LGPL_EXCEPTION.txt",
-                os.path.join("licenses", "OCCT_LGPL_EXCEPTION.txt"))
             for item in os.listdir():
                 if os.path.isfile(item):
                     os.remove(item)
