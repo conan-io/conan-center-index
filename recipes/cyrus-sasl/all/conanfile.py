@@ -43,7 +43,7 @@ class CyrusSaslConan(ConanFile):
         "with_scram": True,
         "with_otp": True,
         "with_krb4": True,
-        "with_gssapi": True,
+        "with_gssapi": False, # FIXME: should be True
         "with_plain": True,
         "with_anon": True,
         "with_postgresql": False,
@@ -80,6 +80,9 @@ class CyrusSaslConan(ConanFile):
             self.requires("libmysqlclient/8.0.17")
         if self.options.with_sqlite3:
             self.requires("sqlite3/3.34.0")
+        if self.options.with_gssapi:
+            raise ConanInvalidConfiguration("with_gssapi requires krb5 recipe, not yet available in CCI")
+            self.requires("krb5/1.18.3")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
