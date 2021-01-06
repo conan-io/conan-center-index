@@ -1,5 +1,7 @@
 from conans import ConanFile, CMake, tools
+from conans.errors import ConanInvalidConfiguration
 import os
+import shutil
 
 
 class OcctConan(ConanFile):
@@ -73,7 +75,7 @@ class OcctConan(ConanFile):
         self._cmake.definitions["INSTALL_DIR_INCLUDE"] = "include"
         self._cmake.definitions["INSTALL_DIR_LIB"] = "lib"
         self._cmake.definitions["INSTALL_DIR_RESOURCE"] = "res"
-        
+
         self._cmake.configure(source_folder=self._source_subfolder)
         return self._cmake
 
@@ -82,7 +84,8 @@ class OcctConan(ConanFile):
             if not self.options["tcl"].shared or \
                     not self.options["tk"].shared or \
                     not self.options["freetype"].shared:
-                raise ConanInvalidConfiguration("tcl, tk and freetype must be shared when occt is shared.")
+                raise ConanInvalidConfiguration(
+                    "tcl, tk and freetype must be shared when occt is shared.")
         self._patch_sources()
         cmake = self._configure_cmake()
         cmake.build()
@@ -98,10 +101,11 @@ class OcctConan(ConanFile):
             tools.rename(
                 "OCCT_LGPL_EXCEPTION.txt",
                 os.path.join("licenses", "OCCT_LGPL_EXCEPTION.txt"))
-            tools.rmdir("cmake")
-            for file in os.listdir():
-                if ".bat" in file:
-                    os.remove(file)
+            for item in os.listdir():
+                if os.path.isfile(item):
+                    os.remove(item)
+                elif item not in ["lib", "bin", "include", "res", "licenses"]:
+                    shutil.rmtree(item)
 
     def package_info(self):
         self.cpp_info.libs = os.listdir("lib")
