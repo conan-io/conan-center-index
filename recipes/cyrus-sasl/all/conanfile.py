@@ -35,7 +35,7 @@ class CyrusSaslConan(ConanFile):
         "with_sqlite3": [True, False],
     }
     default_options = {
-        "shared": True,
+        "shared": False,
         "fPIC": True,
         "with_openssl": True,
         "with_cram": True,
@@ -69,10 +69,6 @@ class CyrusSaslConan(ConanFile):
         if self.settings.os == "Windows":
             raise ConanInvalidConfiguration(
                 "Cyrus SASL package is not compatible with Windows yet."
-            )
-        if self.options.with_gssapi and not self.options.shared:
-            raise ConanInvalidConfiguration(
-                "Cyrus SASL package cannot link statically to libkrb5"
             )
 
     def requirements(self):
