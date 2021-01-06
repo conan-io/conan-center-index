@@ -42,9 +42,8 @@ class WiringpiConan(ConanFile):
             del self.options.fPIC
 
     def validate(self):
-        self.output.info("CONAN VERSION: {}".format(client_version))
-        if self.settings.os in ("Windows", "Macos"):
-            raise ConanInvalidConfiguration("This library is not suitable for Windows/Macos")
+        if self.settings.os != "Linux":
+            raise ConanInvalidConfiguration("WiringPi only works for Linux.")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
