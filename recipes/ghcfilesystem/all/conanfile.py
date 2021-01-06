@@ -13,9 +13,9 @@ class GhcFilesystemRecipe(ConanFile):
     settings = "os", "compiler", "build_type", "arch"
     generators = "cmake"
     no_copy_source=True
-    
+
     _cmake = None
-    
+
     options = {
         "run_tests": [True, False]
     }
@@ -23,7 +23,7 @@ class GhcFilesystemRecipe(ConanFile):
     default_options = {
         "run_tests": False
     }
-   
+
     @property
     def _source_subfolder(self):
         return "source_subfolder"
@@ -62,12 +62,12 @@ class GhcFilesystemRecipe(ConanFile):
         self.copy(pattern="LICENSE", dst="licenses", src=self._source_subfolder)
         cmake = self._configure_cmake()
         cmake.install()
+        tools.rmdir(os.path.join(self.package_folder, "lib"))
 
     def package_id(self):
         self.info.header_only()
 
     def package_info(self):
-        self.cpp_info.builddirs = [os.path.join("lib", "cmake", "ghcFilesystem")]
         self.cpp_info.names["cmake_find_package"] = "ghcFilesystem"
         self.cpp_info.names["cmake_find_package_multi"] = "ghcFilesystem"
 
