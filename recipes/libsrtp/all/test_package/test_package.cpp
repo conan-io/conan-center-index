@@ -25,7 +25,7 @@ int main()
 	srtp_crypto_policy_set_rtp_default(&policy.rtp);
 	srtp_crypto_policy_set_rtcp_default(&policy.rtcp);
 	policy.key = key;
-	policy.next = nullptr;
+	policy.next = ((void*)0);
 
 	// allocate and initialize the SRTP session
 	srtp_create(&session, &policy);
