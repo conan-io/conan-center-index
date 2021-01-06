@@ -3,8 +3,10 @@
 #include "raylib.h"
 
 int main(void) {
-  if (CheckCollisionSpheres({0, 0, 0}, 1, {0, 0, 0}, 1)) {
-    std::cout << "spheres colliding!" << std::endl;
+  Vector3 center = {0, 0, 0};
+  float r = 1.0;
+  if (CheckCollisionSpheres(center, r, center, r)) {
+    std::cout << "unit sphere collides with itself!" << std::endl;
   }
   return 0;
 }
