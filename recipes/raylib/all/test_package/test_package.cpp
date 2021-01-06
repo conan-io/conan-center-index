@@ -1,7 +1,10 @@
-#include <raylib.h>
+#include <iostream>
+
+#include "raylib.h"
 
 int main(void) {
-    InitWindow(100, 100, "basic window");
-    if (IsWindowReady()) CloseWindow();
-    return 0;
+  if (CheckCollisionSpheres({0, 0, 0}, 1, {0, 0, 0}, 1)) {
+    std::cout << "spheres colliding!" << std::endl;
+  }
+  return 0;
 }
