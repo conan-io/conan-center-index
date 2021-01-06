@@ -15,4 +15,3 @@ index 53f15a3..7e2d756 100644
  endif()
 
  find_library(PAHO_MQTT_C_LIBRARIES NAMES ${_PAHO_MQTT_C_LIB_NAME})
- 
