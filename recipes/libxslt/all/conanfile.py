@@ -180,7 +180,7 @@ class LibxsltConan(ConanFile):
         self.cpp_info.includedirs.append(os.path.join("include", "libxslt"))
         if not self.options.shared:
             self.cpp_info.defines = ["LIBXSLT_STATIC"]
-        if self.settings.os == "Linux" or self.settings.os == "Macos":
+        if self.settings.os in ["Linux", "Macos", "FreeBSD", "Android"]:
             self.cpp_info.system_libs.append('m')
         if self.settings.os == "Windows":
             self.cpp_info.system_libs.append('ws2_32')
