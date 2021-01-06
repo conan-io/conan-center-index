@@ -45,7 +45,7 @@ class HiredisConan(ConanFile):
 
     def requirements(self):
         if self.options.with_ssl:
-            self.requires("openssl/1.1.1i")
+            self.requires("openssl/1.1.1g")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
