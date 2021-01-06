@@ -1,6 +1,7 @@
 import os
 from conans import ConanFile, CMake, tools
 from conans.errors import ConanInvalidConfiguration
+from conans import __version__ as client_version
 
 
 required_conan_version = ">=1.32"
@@ -41,6 +42,7 @@ class WiringpiConan(ConanFile):
             del self.options.fPIC
 
     def validate(self):
+        self.output.info("CONAN VERSION: {}".format(client_version))
         if self.settings.os in ("Windows", "Macos"):
             raise ConanInvalidConfiguration("This library is not suitable for Windows/Macos")
 
