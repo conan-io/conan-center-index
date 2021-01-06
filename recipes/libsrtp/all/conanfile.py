@@ -71,3 +71,5 @@ class ConanRecipe(ConanFile):
 
     def package_info(self):
         self.cpp_info.libs = tools.collect_libs(self)
+        if self.settings.os == "Windows":
+            self.cpp_info.system_libs = ["ws2_32"]
