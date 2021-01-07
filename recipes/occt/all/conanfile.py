@@ -41,7 +41,15 @@ class OcctConan(ConanFile):
             "project (OCCT)",
             '''project (OCCT)
                 include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
-                conan_basic_setup()''')
+                conan_basic_setup(TARGETS)''')
+
+        tools.replace_in_file(
+            os.path.join(self._source_subfolder,
+                         "adm/cmake/occt_toolkit.cmake"),
+            "${USED_EXTERNAL_LIBS_BY_CURRENT_PROJECT}",
+            """${USED_EXTERNAL_LIBS_BY_CURRENT_PROJECT}
+            CONAN_PKG::tcl CONAN_PKG::tk CONAN_PKG::freetype""")
+
         tcl_libs = self.deps_cpp_info["tcl"].libs
         tcl_lib = next(filter(lambda lib: "tcl8" in lib, tcl_libs))
         tools.replace_in_file(
@@ -74,18 +82,16 @@ class OcctConan(ConanFile):
         self._cmake.definitions["INSTALL_DIR_BIN"] = "bin"
         self._cmake.definitions["INSTALL_DIR_INCLUDE"] = "include"
         self._cmake.definitions["INSTALL_DIR_LIB"] = "lib"
-        self._cmake.definitions["INSTALL_DIR_RESOURCE"] = "res"
+        self._cmake.definitions["INSTALL_DIR_RESOURCE"] = "res/resource"
+        self._cmake.definitions["INSTALL_DIR_DATA"] = "res/data"
+        self._cmake.definitions["INSTALL_DIR_SAMPLES"] = "res/samples"
+        self._cmake.definitions["INSTALL_DIR_DOC"] = "res/doc"
+        self._cmake.definitions["INSTALL_DIR_LAYOUT"] = "Unix"
 
         self._cmake.configure(source_folder=self._source_subfolder)
         return self._cmake
 
     def build(self):
-        if self.options.shared:
-            if not self.options["tcl"].shared or \
-                    not self.options["tk"].shared or \
-                    not self.options["freetype"].shared:
-                raise ConanInvalidConfiguration(
-                    "tcl, tk and freetype must be shared when occt is shared.")
         self._patch_sources()
         cmake = self._configure_cmake()
         cmake.build()
@@ -101,12 +107,8 @@ class OcctConan(ConanFile):
             "OCCT_LGPL_EXCEPTION.txt",
             src=self._source_subfolder,
             dst="licenses")
-        with tools.chdir(self.package_folder):
-            for item in os.listdir():
-                if os.path.isfile(item):
-                    os.remove(item)
-                elif item not in ["lib", "bin", "include", "res", "licenses"]:
-                    shutil.rmtree(item)
+        tools.rmdir(os.path.join(self.package_folder, "cmake"))
+        tools.rmdir(os.path.join(self.package_folder, "lib/cmake"))
 
     def package_info(self):
         self.cpp_info.libs = os.listdir("lib")
