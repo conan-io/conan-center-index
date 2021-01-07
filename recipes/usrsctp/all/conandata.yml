@@ -1,0 +1,4 @@
+sources:
+  "0.9.4.0":
+    url: https://github.com/sctplab/usrsctp/archive/0.9.4.0.tar.gz
+    sha256: e7b8f908d71dc69c9a2bf55d609e8fdbb2fa7cc647f8b23a837d36a05c59cd77
