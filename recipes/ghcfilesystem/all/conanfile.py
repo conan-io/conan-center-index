@@ -10,7 +10,6 @@ class GhcFilesystemRecipe(ConanFile):
     homepage = "https://github.com/gulrak/filesystem"
     url = "https://github.com/conan-io/conan-center-index"
     license = "MIT"
-    settings = "os", "compiler", "build_type", "arch"
     generators = "cmake"
     no_copy_source = True
     _cmake = None
