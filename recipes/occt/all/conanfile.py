@@ -18,7 +18,8 @@ class OcctConan(ConanFile):
     generators = "cmake"
     requires = [("tcl/8.6.10"),
                 ("tk/8.6.10"),
-                ("freetype/2.10.4")]
+                ("freetype/2.10.4"),
+                ("opengl/system")]
     _cmake = None
 
     @property
