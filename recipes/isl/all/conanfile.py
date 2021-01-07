@@ -82,7 +82,10 @@ class IslConan(ConanFile):
             return self._autotools
         self._autotools = AutoToolsBuildEnvironment(self, win_bash=tools.os_info.is_windows)
         self._autotools.libs = []
-        self._autotools.link_flags.append("-Wl,-no-undefined")
+        if self.settings.compiler == "apple-clang":
+            self._autotools.link_flags.append("-no-undefined")
+        else:
+            self._autotools.link_flags.append("-Wl,-no-undefined")
         yes_no = lambda v: "yes" if v else "no"
         conf_args = [
             "--with-int={}".format(self.options.with_int),
