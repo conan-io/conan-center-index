@@ -221,7 +221,7 @@ class GdalConan(ConanFile):
         if self.options.get_safe("with_libiconv", True):
             self.requires("libiconv/1.16")
         if self.options.get_safe("with_zstd"):
-            self.requires("zstd/1.4.5")
+            self.requires("zstd/1.4.8")
         if self.options.with_pg:
             self.requires("libpq/13.1")
         # if self.options.with_libgrass:
@@ -257,13 +257,13 @@ class GdalConan(ConanFile):
         if self.options.with_hdf5:
             self.requires("hdf5/1.12.0")
         if self.options.with_kea:
-            self.requires("kealib/1.4.13")
+            self.requires("kealib/1.4.14")
         # if self.options.with_netcdf:
         #     self.requires("netcdf-c/4.7.4")
         if self.options.with_jasper:
-            self.requires("jasper/2.0.22")
+            self.requires("jasper/2.0.23")
         if self.options.with_openjpeg:
-            self.requires("openjpeg/2.3.1")
+            self.requires("openjpeg/2.4.0")
         # if self.options.with_fgdb:
         #     self.requires("file-geodatabase-api/x.x.x")
         if self.options.with_mysql == "libmysqlclient":
