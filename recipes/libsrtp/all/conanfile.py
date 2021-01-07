@@ -4,9 +4,11 @@ from conans import ConanFile, CMake, tools
 
 class ConanRecipe(ConanFile):
     name = "libsrtp"
-    description = ("This package provides an implementation of the Secure Real-time Transport"
-                   "Protocol (SRTP), the Universal Security Transform (UST), and a supporting"
-                   "cryptographic kernel.")
+    description = (
+        "This package provides an implementation of the Secure Real-time Transport"
+        "Protocol (SRTP), the Universal Security Transform (UST), and a supporting"
+        "cryptographic kernel."
+    )
     topics = ("conan", "libsrtp", "srtp")
     homepage = "https://github.com/cisco/libsrtp"
     url = "https://github.com/conan-io/conan-center-index"
@@ -50,6 +52,18 @@ class ConanRecipe(ConanFile):
         tools.get(**self.conan_data["sources"][self.version])
         extracted_dir = self.name + "-" + self.version
         os.rename(extracted_dir, self._source_subfolder)
+
+        if self.options.shared:
+            tools.replace_in_file(
+                os.path.join(self._source_subfolder, "CMakeLists.txt"),
+                "install(TARGETS srtp2 DESTINATION lib)",
+                (
+                    "install(TARGETS srtp2\n"
+                    "RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}\n"
+                    "LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}\n"
+                    "ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR})"
+                ),
+            )
 
     def _configure_cmake(self):
         if self._cmake:
