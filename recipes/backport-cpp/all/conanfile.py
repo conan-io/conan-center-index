@@ -4,13 +4,12 @@ from conans import ConanFile, CMake, tools
 
 
 class BackportCppRecipe(ConanFile):
-    name = "backportcpp"
+    name = "backport-cpp"
     description = "An ongoing effort to bring modern C++ utilities to be compatible with C++11"
-    topics = ("conan", "backportcpp", "header-only", "backport")
+    topics = ("conan", "backport-cpp", "header-only", "backport")
     homepage = "https://github.com/bitwizeshift/BackportCpp"
     url = "https://github.com/conan-io/conan-center-index"
     license = "MIT"
-    settings = "os", "compiler", "build_type", "arch"
     generators = "cmake"
     no_copy_source=True
 
