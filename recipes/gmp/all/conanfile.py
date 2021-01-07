@@ -37,9 +37,8 @@ class GmpConan(ConanFile):
             raise ConanInvalidConfiguration("Cannot build a shared library using Visual Studio: some error occurs at link time")
         if self.options.shared:
             del self.options.fPIC
-        if 'enable_fat' in self.options:
-            if self.options.enable_fat:
-                del self.options.disable_assembly
+        if self.options.get_safe("enable_fat"):
+            del self.options.disable_assembly
         if not self.options.enable_cxx:
             del self.settings.compiler.libcxx
             del self.settings.compiler.cppstd
