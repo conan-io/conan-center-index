@@ -4,9 +4,9 @@ from conans import ConanFile, CMake, tools
 
 
 class GhcFilesystemRecipe(ConanFile):
-    name = "ghcfilesystem"
+    name = "ghc-filesystem"
     description = "A header-only single-file std::filesystem compatible helper library"
-    topics = ("conan", "bhcfilesystem", "header-only", "filesystem")
+    topics = ("conan", "ghc-filesystem", "header-only", "filesystem")
     homepage = "https://github.com/gulrak/filesystem"
     url = "https://github.com/conan-io/conan-center-index"
     license = "MIT"
