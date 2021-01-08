@@ -26,6 +26,44 @@ class OcctConan(ConanFile):
     def _source_subfolder(self):
         return "source_subfolder"
 
+    '''
+    Modules taken from 'adm/MODULES'.
+    Each module depends on modules after it.
+    '''
+    @property
+    def _modules(self):
+        return ['FoundationClasses', 'ModelingData', 'ModelingAlgorithms',
+                'Visualization', 'ApplicationFramework', 'DataExchange',
+                'Draw']
+
+    '''
+    Toolkits in each module taken from 'adm/MODULES'.
+    Each toolkit may depend on toolkits after it but not ones before it.
+    '''
+    @property
+    def _modules_toolkits(self):
+        return {
+            'FoundationClasses': ['TKernel', 'TKMath'],
+            'ModelingData': ['TKG2d', 'TKG3d', 'TKGeomBase', 'TKBRep'],
+            'ModelingAlgorithms': [
+                'TKGeomAlgo', 'TKTopAlgo', 'TKPrim', 'TKBO', 'TKBool', 'TKHLR',
+                'TKFillet', 'TKOffset', 'TKFeat', 'TKMesh', 'TKXMesh',
+                'TKShHealing'],
+            'Visualization': [
+                'TKService', 'TKV3d', 'TKOpenGl', 'TKMeshVS', 'TKIVtk',
+                'TKD3DHost'],
+            'ApplicationFramework': [
+                'TKCDF', 'TKLCAF', 'TKCAF', 'TKBinL', 'TKXmlL', 'TKBin',
+                'TKXml', 'TKStdL', 'TKStd', 'TKTObj', 'TKBinTObj', 'TKXmlTObj',
+                'TKVCAF'],
+            'DataExchange': [
+                'TKXSBase', 'TKSTEPBase', 'TKSTEPAttr', 'TKSTEP209', 'TKSTEP',
+                'TKIGES', 'TKXCAF', 'TKXDEIGES', 'TKXDESTEP', 'TKSTL',
+                'TKVRML', 'TKXmlXCAF', 'TKBinXCAF', 'TKRWMesh'],
+            'Draw': [
+                'TKDraw', 'TKTopTest', 'TKViewerTest', 'TKXSDRAW', 'TKDCAF',
+                'TKXDEDRAW', 'TKTObjDRAW', 'TKQADraw', 'TKIVtkDraw']}
+
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
@@ -43,6 +81,11 @@ class OcctConan(ConanFile):
             '''project (OCCT)
                 include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
                 conan_basic_setup(TARGETS)''')
+
+        tools.replace_in_file(
+            os.path.join(self._source_subfolder, "CMakeLists.txt"),
+            "${3RDPARTY_INCLUDE_DIRS}",
+            "${CONAN_INCLUDE_DIRS}")
 
         tools.replace_in_file(
             os.path.join(self._source_subfolder,
@@ -112,4 +155,11 @@ class OcctConan(ConanFile):
         tools.rmdir(os.path.join(self.package_folder, "lib/cmake"))
 
     def package_info(self):
-        self.cpp_info.libs = os.listdir("lib")
+        libs = set(tools.collect_libs(self))
+        modules = self._modules
+        modules_tks = self._modules_toolkits
+        tks = [tk
+               for module in reversed(modules)
+               for tk in reversed(modules_tks[module])
+               if tk in libs]
+        self.cpp_info.libs = tks
