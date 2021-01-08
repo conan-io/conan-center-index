@@ -225,6 +225,11 @@ class BoostConan(ConanFile):
                     self.options.without_fiber = True
                     self.options.without_json = True
                     self.options.without_nowide = True
+            else:
+                self.options.without_fiber = True
+                self.options.without_json = True
+                self.options.without_nowide = True
+
 
         # Remove options not supported by this version of boost
         for dep_name in CONFIGURE_OPTIONS:
