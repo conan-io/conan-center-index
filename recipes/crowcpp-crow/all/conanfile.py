@@ -8,7 +8,6 @@ class CrowConan(ConanFile):
     topics = ("conan", "web", "microframework", "header-only")
     url = "https://github.com/conan-io/conan-center-index"
     settings = "os", "compiler", "arch", "build_type"
-    exports_sources = ["patches/*"]
     license = "BSD-3-Clause"
 
     @property
@@ -17,6 +16,7 @@ class CrowConan(ConanFile):
 
     def requirements(self):
         self.requires("boost/1.75.0")
+        '''To be removed in next released versions'''
         self.requires("openssl/1.1.1i")
 
     def source(self):
@@ -25,8 +25,6 @@ class CrowConan(ConanFile):
         os.rename(extracted_dir, self._source_subfolder)
 
     def build(self):
-        for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            tools.patch(**patch)
         cmake = CMake(self)
         cmake.configure(source_folder=self._source_subfolder)
         cmake.build(target="amalgamation")
