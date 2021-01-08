@@ -37,11 +37,17 @@ class libsvmConan(ConanFile):
             del self.options.fPIC
 
     def validate(self):
-        if self.settings.compiler == "Visual Studio" and \
-           "MT" in self.settings.compiler.runtime and \
-           self.options.shared:
-            raise ConanInvalidConfiguration("{} can not be built as shared library + runtime {}.".
-                                            format(self.name, self.settings.compiler.runtime))
+        if (
+            self.settings.compiler == "Visual Studio" and
+            "MT" in self.settings.compiler.runtime and
+            self.options.shared
+        ):
+            raise ConanInvalidConfiguration(
+                "{} can not be built as shared library + runtime {}.".format(
+                    self.name,
+                    self.settings.compiler.runtime
+                )
+            )
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
