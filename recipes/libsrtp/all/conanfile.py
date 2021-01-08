@@ -53,6 +53,16 @@ class ConanRecipe(ConanFile):
         extracted_dir = self.name + "-" + self.version
         os.rename(extracted_dir, self._source_subfolder)
 
+    def _configure_cmake(self):
+        if self._cmake:
+            return self._cmake
+        self._cmake = CMake(self)
+        self._cmake.definitions["ENABLE_OPENSSL"] = self.options.with_openssl
+        self._cmake.definitions["TEST_APPS"] = False
+        self._cmake.configure()
+        return self._cmake
+
+    def build(self):
         tools.replace_in_file(
             os.path.join(self._source_subfolder, "CMakeLists.txt"),
             "install(TARGETS srtp2 DESTINATION lib)",
@@ -64,17 +74,6 @@ class ConanRecipe(ConanFile):
                 "ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR})"
             ),
         )
-
-    def _configure_cmake(self):
-        if self._cmake:
-            return self._cmake
-        self._cmake = CMake(self)
-        self._cmake.definitions["ENABLE_OPENSSL"] = self.options.with_openssl
-        self._cmake.definitions["TEST_APPS"] = False
-        self._cmake.configure()
-        return self._cmake
-
-    def build(self):
         cmake = self._configure_cmake()
         cmake.build()
 
