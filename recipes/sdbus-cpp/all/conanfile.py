@@ -3,6 +3,8 @@ import os
 from conans import ConanFile, CMake, tools
 from conans.errors import ConanInvalidConfiguration
 
+required_conan_version = ">=1.32.0"
+
 
 class SdbusCppConan(ConanFile):
     name = "sdbus-cpp"
@@ -47,8 +49,6 @@ class SdbusCppConan(ConanFile):
         }
 
     def configure(self):
-        if self.settings.os != "Linux":
-            raise ConanInvalidConfiguration("Only Linux supported")
         if self.options.shared:
             del self.options.fPIC
 
@@ -62,6 +62,10 @@ class SdbusCppConan(ConanFile):
             if tools.Version(self.settings.compiler.version) < min_version:
                 raise ConanInvalidConfiguration("{} requires C++{} support. The current compiler {} {} does not support it.".format(
                     self.name, self._minimum_cpp_standard, self.settings.compiler, self.settings.compiler.version))
+
+    def validate(self):
+        if self.settings.os != "Linux":
+            raise ConanInvalidConfiguration("Only Linux supported")
 
     def build_requirements(self):
         self.build_requires("pkgconf/1.7.3")
@@ -87,7 +91,7 @@ class SdbusCppConan(ConanFile):
         self._cmake.configure()
         return self._cmake
 
-    def fix_tools_cmake(self):
+    def _patch_sources(self):
         cmake_file = os.path.join(self._source_subfolder,
                                   "tools", "CMakeLists.txt")
         tools.replace_in_file(
@@ -101,9 +105,8 @@ class SdbusCppConan(ConanFile):
 
     def build(self):
         if self.options.with_code_gen:
-            # FIXME: remove after
-            #  https://github.com/Kistler-Group/sdbus-cpp/pull/136
-            self.fix_tools_cmake()
+            # FIXME: remove after https://github.com/Kistler-Group/sdbus-cpp/pull/136
+            self._patch_sources()
         cmake = self._configure_cmake()
         cmake.build()
 
@@ -126,4 +129,5 @@ class SdbusCppConan(ConanFile):
         self.cpp_info.components["sdbus-c++"].names["pkg_config"] = "sdbus-c++"
         if self.options.with_code_gen:
             bin_path = os.path.join(self.package_folder, "bin")
+            self.output.info("Appending PATH env var with : {}".format(bin_path))
             self.env_info.PATH.append(bin_path)
