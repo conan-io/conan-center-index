@@ -70,7 +70,7 @@ class GdalConan(ConanFile):
         # "with_opencl": [True, False],
         "with_freexl": [True, False],
         "without_pam": [True, False],
-        # "with_poppler": [True, False],
+        "with_poppler": [True, False],
         "with_podofo": [True, False],
         # "with_pdfium": [True, False],
         # "with_tiledb": [True, False],
@@ -134,7 +134,7 @@ class GdalConan(ConanFile):
         # "with_opencl": False,
         "with_freexl": False,
         "without_pam": False,
-        # "with_poppler": False,
+        "with_poppler": False,
         "with_podofo": False,
         # "with_pdfium": False,
         # "with_tiledb": False,
@@ -306,8 +306,8 @@ class GdalConan(ConanFile):
         #     self.requires("opencl-headers/x.x.x")
         if self.options.with_freexl:
             self.requires("freexl/1.0.6")
-        # if self.options.with_poppler:
-        #     self.requires("poppler/0.83.0")
+        if self.options.with_poppler:
+            self.requires("poppler/20.09.0")
         if self.options.with_podofo:
             self.requires("podofo/0.9.6")
         # if self.options.with_pdfium:
@@ -476,6 +476,13 @@ class GdalConan(ConanFile):
         if self.options.get_safe("with_zlib", True):
             args.append("ZLIB_EXTERNAL_LIB=1")
             args.append("ZLIB_INC=\"-I{}\"".format(" -I".join(self.deps_cpp_info["zlib"].include_paths)))
+        if self.options.with_poppler:
+            poppler_version = tools.Version(self.deps_cpp_info["poppler"].version)
+            args.extend([
+                "POPPLER_ENABLED=YES",
+                "POPPLER_MAJOR_VERSION={}".format(poppler_version.major),
+                "POPPLER_MINOR_VERSION={}".format(poppler_version.minor)
+            ])
         if self.options.with_podofo:
             args.append("PODOFO_ENABLED=YES")
         if self.options.get_safe("with_zstd"):
@@ -642,7 +649,7 @@ class GdalConan(ConanFile):
         args.append("--with-libjson-c={}".format(tools.unix_path(self.deps_cpp_info["json-c"].rootpath))) # always required !
         if self.options.without_pam:
             args.append("--without-pam")
-        args.append("--without-poppler") # TODO: to implement when poppler lib available
+        args.append("--with-poppler={}".format("yes" if self.options.with_poppler else "no"))
         if self.options.with_podofo:
             args.extend([
                 "--with-podofo={}".format(tools.unix_path(self.deps_cpp_info["podofo"].rootpath)),
