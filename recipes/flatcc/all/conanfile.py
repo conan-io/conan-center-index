@@ -5,7 +5,7 @@ from conans.errors import ConanInvalidConfiguration
 class FlatccConan(ConanFile):
     name = "flatcc"
     description = "C language binding for Flatbuffers, an efficient cross platform serialization library"
-    topics = "conan", "flatbuffers", "serialization"
+    topics = ("conan", "flatbuffers", "serialization")
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/dvidelabs/flatcc"
     license = "Apache-2.0"

@@ -1,0 +1,11 @@
+--- CMakeLists.txt
++++ CMakeLists.txt
+@@ -615,7 +615,7 @@
+     # examples, even though the previous version of what we
+     # had worked.
+     #####
+-    IF(MSVC)
++    IF(0)#MSVC)
+       SET(SEARCH_PACKAGE_NAME ${HDF5_PACKAGE_NAME})
+       FIND_PACKAGE(HDF5 NAMES ${SEARCH_PACKAGE_NAME} COMPONENTS C HL CONFIG REQUIRED ${NC_HDF5_LINK_TYPE})
+     ELSE(MSVC)
