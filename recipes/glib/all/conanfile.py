@@ -66,7 +66,7 @@ class GLibConan(ConanFile):
             self.requires("libmount/2.36")
         if self.options.get_safe("with_selinux"):
             self.requires("libselinux/3.1")
-        if self.settings.os not in ["Linux", "FreeBSD"]:
+        if self.settings.os != "Linux":
             # for Linux, gettext is provided by libc
             self.requires("libgettext/0.20.1")
 
@@ -114,7 +114,7 @@ class GLibConan(ConanFile):
         tools.replace_in_file(os.path.join(self._source_subfolder, "gio", "gdbus-2.0", "codegen", "gdbus-codegen.in"),
                               "'share'",
                               "'res'")
-        if self.settings.os not in ["Linux", "FreeBSD"]:
+        if self.settings.os != "Linux":
             tools.replace_in_file(os.path.join(self._source_subfolder, "meson.build"),
                                 "if cc.has_function('ngettext')",
                                 "if false #cc.has_function('ngettext')")
@@ -159,7 +159,7 @@ class GLibConan(ConanFile):
         self.cpp_info.components["glib-2.0"].includedirs.append(os.path.join("lib", "glib-2.0", "include"))
         if self.options.with_pcre:
             self.cpp_info.components["glib-2.0"].requires.append("pcre::pcre")
-        if self.settings.os not in ["Linux", "FreeBSD"]:
+        if self.settings.os != "Linux":
             self.cpp_info.components["glib-2.0"].requires.append("libgettext::libgettext")
         if tools.is_apple_os(self.settings.os):
             self.cpp_info.components["glib-2.0"].requires.append("libiconv::libiconv")
