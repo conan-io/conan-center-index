@@ -47,7 +47,7 @@ class GLibConan(ConanFile):
         if self.settings.os == "Windows":
             del self.options.fPIC
             self.options.shared = True
-        if self.settings.os not in ["Linux", "FreeBSD"]:
+        if self.settings.os != "Linux":
             del self.options.with_mount
             del self.options.with_selinux
 
