@@ -46,8 +46,6 @@ class ConanRecipe(ConanFile):
         if self.version >= "2.13.4":
             cmake = self._configure_cmake()
             cmake.build()
-        else:
-            no_copy_source = True
 
     def package(self):
         self.copy(pattern="LICENSE.txt", dst="licenses", src=self._source_subfolder)
@@ -67,12 +65,12 @@ class ConanRecipe(ConanFile):
             self.info.header_only()
 
     def package_info(self):
-        if self.version < "2.13.4":
-            self.cpp_info.builddirs = [os.path.join("lib", "cmake", "Catch2")]
         self.cpp_info.names["cmake_find_package"] = "Catch2"
         self.cpp_info.names["cmake_find_package_multi"] = "Catch2"
 
-        if self.version >= "2.13.4":
+        if self.version < "2.13.4":
+            self.cpp_info.builddirs = [os.path.join("lib", "cmake", "Catch2")]
+        else:
             self.cpp_info.components["Catch2"].names["cmake_find_package"] = "Catch2"
             self.cpp_info.components["Catch2"].names["cmake_find_package_multi"] = "Catch2"
 
