@@ -29,7 +29,7 @@ class CrowConan(ConanFile):
             tools.patch(**patch)
         cmake = CMake(self)
         cmake.configure(source_folder=self._source_subfolder)
-        cmake.build()
+        cmake.build(target="amalgamation")
 
     def package(self):
         self.copy(pattern="LICENSE*", dst="licenses", src=self._source_subfolder)
