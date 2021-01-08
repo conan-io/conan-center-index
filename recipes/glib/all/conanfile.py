@@ -47,7 +47,7 @@ class GLibConan(ConanFile):
         if self.settings.os == "Windows":
             del self.options.fPIC
             self.options.shared = True
-        if self.settings.os != "Linux":
+        if self.settings.os not in ["Linux", "FreeBSD"]:
             del self.options.with_mount
             del self.options.with_selinux
 
@@ -62,12 +62,11 @@ class GLibConan(ConanFile):
             self.requires("pcre/8.44")
         if self.options.with_elf:
             self.requires("libelf/0.8.13")
-        if self.settings.os == "Linux":
-            if self.options.with_mount:
-                self.requires("libmount/2.36")
-            if self.options.with_selinux:
-                self.requires("libselinux/3.1")
-        else:
+        if self.options.get_safe("with_mount"):
+            self.requires("libmount/2.36")
+        if self.options.get_safe("with_selinux"):
+            self.requires("libselinux/3.1")
+        if self.settings.os not in ["Linux", "FreeBSD"]:
             # for Linux, gettext is provided by libc
             self.requires("libgettext/0.20.1")
 
@@ -84,11 +83,12 @@ class GLibConan(ConanFile):
         defs = dict()
         if tools.is_apple_os(self.settings.os):
             defs["iconv"] = "external"  # https://gitlab.gnome.org/GNOME/glib/issues/1557
-        if self.settings.os == "Linux":
-            defs["selinux"] = "enabled" if self.options.with_selinux else "disabled"
-            defs["libmount"] = "enabled" if self.options.with_mount else "disabled"
+        defs["selinux"] = "enabled" if self.options.get_safe("with_selinux") else "disabled"
+        defs["libmount"] = "enabled" if self.options.get_safe("with_mount") else "disabled"
         defs["internal_pcre"] = not self.options.with_pcre
 
+        if self.settings.os == "FreeBSD":
+            defs["xattr"] = "false"
         meson.configure(source_folder=self._source_subfolder, args=["--wrap-mode=nofallback"],
                         build_folder=self._build_subfolder, defs=defs)
         return meson
@@ -112,7 +112,7 @@ class GLibConan(ConanFile):
         tools.replace_in_file(os.path.join(self._source_subfolder, "gio", "gdbus-2.0", "codegen", "gdbus-codegen.in"),
                               "'share'",
                               "'res'")
-        if self.settings.os != "Linux":
+        if self.settings.os not in ["Linux", "FreeBSD"]:
             tools.replace_in_file(os.path.join(self._source_subfolder, "meson.build"),
                                 "if cc.has_function('ngettext')",
                                 "if false #cc.has_function('ngettext')")
@@ -145,7 +145,7 @@ class GLibConan(ConanFile):
     def package_info(self):
 
         self.cpp_info.components["glib-2.0"].libs = ["glib-2.0"]
-        if self.settings.os == "Linux":
+        if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.components["glib-2.0"].system_libs.append("pthread")
         if self.settings.os == "Windows":
             self.cpp_info.components["glib-2.0"].system_libs.extend(["ws2_32", "ole32", "shell32", "user32", "advapi32"])
@@ -157,23 +157,23 @@ class GLibConan(ConanFile):
         self.cpp_info.components["glib-2.0"].includedirs.append(os.path.join("lib", "glib-2.0", "include"))
         if self.options.with_pcre:
             self.cpp_info.components["glib-2.0"].requires.append("pcre::pcre")
-        if self.settings.os != "Linux":
+        if self.settings.os not in ["Linux", "FreeBSD"]:
             self.cpp_info.components["glib-2.0"].requires.append("libgettext::libgettext")
         if tools.is_apple_os(self.settings.os):
             self.cpp_info.components["glib-2.0"].requires.append("libiconv::libiconv")
 
         self.cpp_info.components["gmodule-no-export-2.0"].libs = ["gmodule-2.0"]
-        if self.settings.os == "Linux":
+        if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.components["gmodule-no-export-2.0"].system_libs.append("pthread")
             self.cpp_info.components["gmodule-no-export-2.0"].system_libs.append("dl")
         self.cpp_info.components["gmodule-no-export-2.0"].requires.append("glib-2.0")
 
         self.cpp_info.components["gmodule-export-2.0"].requires.extend(["gmodule-no-export-2.0", "glib-2.0"])
-        if self.settings.os == "Linux":
+        if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.components["gmodule-export-2.0"].sharedlinkflags.append("-Wl,--export-dynamic")
 
         self.cpp_info.components["gmodule-2.0"].requires.extend(["gmodule-no-export-2.0", "glib-2.0"])
-        if self.settings.os == "Linux":
+        if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.components["gmodule-2.0"].sharedlinkflags.append("-Wl,--export-dynamic")
 
         self.cpp_info.components["gobject-2.0"].libs = ["gobject-2.0"]
@@ -181,22 +181,21 @@ class GLibConan(ConanFile):
         self.cpp_info.components["gobject-2.0"].requires.append("libffi::libffi")
 
         self.cpp_info.components["gthread-2.0"].libs = ["gthread-2.0"]
-        if self.settings.os == "Linux":
+        if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.components["gthread-2.0"].system_libs.append("pthread")
         self.cpp_info.components["gthread-2.0"].requires.append("glib-2.0")
 
         self.cpp_info.components["gio-2.0"].libs = ["gio-2.0"]
-        if self.settings.os == "Linux":
+        if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.components["gio-2.0"].system_libs.append("resolv")
             self.cpp_info.components["gio-2.0"].system_libs.append("dl")
         self.cpp_info.components["gio-2.0"].requires.extend(["glib-2.0", "gobject-2.0", "gmodule-2.0", "zlib::zlib"])
         if self.settings.os == "Macos":
             self.cpp_info.components["gio-2.0"].frameworks.append("AppKit")
-        if self.settings.os == "Linux":
-            if self.options.with_mount:
-                self.cpp_info.components["gio-2.0"].requires.append("libmount::libmount")
-            if self.options.with_selinux:
-                self.cpp_info.components["gio-2.0"].requires.append("libselinux::libselinux")
+        if self.options.get_safe("with_mount"):
+            self.cpp_info.components["gio-2.0"].requires.append("libmount::libmount")
+        if self.options.get_safe("with_selinux"):
+            self.cpp_info.components["gio-2.0"].requires.append("libselinux::libselinux")
         if self.settings.os == "Windows":
             self.cpp_info.components["gio-windows-2.0"].requires = ["gobject-2.0", "gmodule-no-export-2.0", "gio-2.0"]
             self.cpp_info.components["gio-windows-2.0"].includedirs = [os.path.join('include', 'gio-win32-2.0')]
