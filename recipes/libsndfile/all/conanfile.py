@@ -111,7 +111,7 @@ class LibsndfileConan(ConanFile):
         self.cpp_info.names["pkg_config"] = "sndfile"
         self.cpp_info.components["sndfile"].libs = ["sndfile"]
         if self.options.with_external_libs:
-            self.cpp_info.components["sndfile"].requires.extend(["ogg::ogg", "vorbis::vorbis", "flac::flac", "opus::opus"])
+            self.cpp_info.components["sndfile"].requires.extend(["ogg::ogg", "vorbis::vorbismain", "vorbis::vorbisenc", "flac::flac", "opus::opus"])
         if not self.options.shared:
             if self.settings.os == "Linux":
                 self.cpp_info.components["sndfile"].system_libs = ["m", "dl", "pthread", "rt"]
