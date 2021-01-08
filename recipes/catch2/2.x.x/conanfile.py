@@ -43,7 +43,7 @@ class ConanRecipe(ConanFile):
         # https://github.com/catchorg/Catch2/blob/79a5cd795c387e2da58c13e9dcbfd9ea7a2cfb30/CMakeLists.txt#L100-L102
         main_cml = os.path.join(self._source_subfolder, "CMakeLists.txt")
         tools.replace_in_file(main_cml, "if (NOT_SUBPROJECT)", "if (TRUE)")
-        if self.version >= "2.13.4":
+        if tools.Version(self.version) >= "2.13.4":
             cmake = self._configure_cmake()
             cmake.build()
 
@@ -61,7 +61,7 @@ class ConanRecipe(ConanFile):
             )
 
     def package_id(self):
-        if self.version < "2.13.4":
+        if tools.Version(self.version) < "2.13.4":
             self.info.header_only()
 
     def package_info(self):
