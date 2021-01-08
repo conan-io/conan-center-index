@@ -45,7 +45,10 @@ class PulseAudioConan(ConanFile):
 
     def validate(self):
         if self.options.get_safe("with_fftw") and self.options["fftw"].precision != "single":
-            raise ConanInvalidConfiguration("Pulse audio cannot use fftw %s precision. Either set option fftw:precision=single or pulseaudio:with_fftw=False" % self.options["fftw"].precision)
+            raise ConanInvalidConfiguration("Pulse audio cannot use fftw %s precision."
+                                            "Either set option fftw:precision=single"
+                                            "or pulseaudio:with_fftw=False"
+                                            % self.options["fftw"].precision)
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -99,11 +102,12 @@ class PulseAudioConan(ConanFile):
             args.append("--with-udev-rules-dir=%s" % os.path.join(self.package_folder, "bin", "udev", "rules.d"))
             args.append("--with-systemduserunitdir=%s" % os.path.join(self.build_folder, "ignore"))
             with tools.environment_append({"PKG_CONFIG_PATH": self.build_folder}):
-                with tools.environment_append({
-                        "FFTW_CFLAGS": tools.PkgConfig("fftwf").cflags,
-                        "FFTW_LIBS": tools.PkgConfig("fftwf").libs}) if self.options.get_safe("with_fftw") else tools.no_op():
-                    with tools.environment_append(RunEnvironment(self).vars):
-                        self._autotools.configure(args=args,  configure_dir=self._source_subfolder)
+                env = RunEnvironment(self).vars
+                if self.options.get_safe("with_fftw"):
+                    env["FFTW_CFLAGS"] = tools.PkgConfig("fftwf").cflags
+                    env["FFTW_LIBS"] = tools.PkgConfig("fftwf").libs
+                with tools.environment_append(env):
+                    self._autotools.configure(args=args,  configure_dir=self._source_subfolder)
         return self._autotools
 
     def build(self):
