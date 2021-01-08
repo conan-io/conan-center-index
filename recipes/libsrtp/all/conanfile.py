@@ -20,12 +20,12 @@ class ConanRecipe(ConanFile):
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
-        "enable_openssl": [True, False],
+        "with_openssl": [True, False],
     }
     default_options = {
         "shared": False,
         "fPIC": True,
-        "enable_openssl": False,
+        "with_openssl": False,
     }
 
     _cmake = None
@@ -45,7 +45,7 @@ class ConanRecipe(ConanFile):
         del self.settings.compiler.libcxx
 
     def requirements(self):
-        if self.options.enable_openssl:
+        if self.options.with_openssl:
             self.requires("openssl/1.1.1i")
 
     def source(self):
@@ -53,23 +53,23 @@ class ConanRecipe(ConanFile):
         extracted_dir = self.name + "-" + self.version
         os.rename(extracted_dir, self._source_subfolder)
 
-        if self.options.shared:
-            tools.replace_in_file(
-                os.path.join(self._source_subfolder, "CMakeLists.txt"),
-                "install(TARGETS srtp2 DESTINATION lib)",
-                (
-                    "install(TARGETS srtp2\n"
-                    "RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}\n"
-                    "LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}\n"
-                    "ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR})"
-                ),
-            )
+        tools.replace_in_file(
+            os.path.join(self._source_subfolder, "CMakeLists.txt"),
+            "install(TARGETS srtp2 DESTINATION lib)",
+            (
+                "include(GNUInstallDirs)\n"
+                "install(TARGETS srtp2\n"
+                "RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}\n"
+                "LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}\n"
+                "ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR})"
+            ),
+        )
 
     def _configure_cmake(self):
         if self._cmake:
             return self._cmake
         self._cmake = CMake(self)
-        self._cmake.definitions["ENABLE_OPENSSL"] = self.options.enable_openssl
+        self._cmake.definitions["ENABLE_OPENSSL"] = self.options.with_openssl
         self._cmake.definitions["TEST_APPS"] = False
         self._cmake.configure()
         return self._cmake
