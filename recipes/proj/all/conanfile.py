@@ -1,6 +1,6 @@
 import os
 
-from conans import ConanFile, CMake, tools, RunEnvironment
+from conans import ConanFile, CMake, tools
 
 required_conan_version = ">=1.28.0"
 
