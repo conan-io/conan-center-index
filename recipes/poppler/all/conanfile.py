@@ -189,7 +189,8 @@ class PopplerConan(ConanFile):
         self._cmake.definitions["ENABLE_DCTDECODER"] = self._dct_decoder
         self._cmake.definitions["USE_FLOAT"] = self.options.float
         self._cmake.definitions["RUN_GPERF_IF_PRESENT"] = False
-        self._cmake.definitions["ENABLE_RELOCATABLE"] = True
+        if self.settings.os == "Windows":
+            self._cmake.definitions["ENABLE_RELOCATABLE"] = self.options.shared
         self._cmake.definitions["EXTRA_WARN"] = False
         self._cmake.configure(build_folder=self._build_subfolder)
         return self._cmake
