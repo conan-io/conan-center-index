@@ -89,14 +89,16 @@ class GLibConan(ConanFile):
 
         if self.settings.os == "FreeBSD":
             defs["xattr"] = "false"
+        defs["tests"] = "false"
         meson.configure(source_folder=self._source_subfolder, args=["--wrap-mode=nofallback"],
                         build_folder=self._build_subfolder, defs=defs)
         return meson
 
     def _patch_sources(self):
-        tools.replace_in_file(os.path.join(self._source_subfolder, "meson.build"), \
-            "build_tests = not meson.is_cross_build() or (meson.is_cross_build() and meson.has_exe_wrapper())", \
-            "build_tests = false")
+        if self.version < "2.67.2":
+            tools.replace_in_file(os.path.join(self._source_subfolder, "meson.build"), \
+                "build_tests = not meson.is_cross_build() or (meson.is_cross_build() and meson.has_exe_wrapper())", \
+                "build_tests = false")
         tools.replace_in_file(os.path.join(self._source_subfolder, "meson.build"), \
             "subdir('fuzzing')", \
             "#subdir('fuzzing')") # https://gitlab.gnome.org/GNOME/glib/-/issues/2152

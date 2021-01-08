@@ -26,3 +26,6 @@ sources:
   "2.67.1":
     url: "https://gitlab.gnome.org/GNOME/glib/-/archive/2.67.1/glib-2.67.1.tar.gz"
     sha256: "99861fb444a2801c1885c63504efb4cbff4d1acc0cf276c21f2c96f6b95020ad"
+  "2.67.2":
+    url: "https://gitlab.gnome.org/GNOME/glib/-/archive/2.67.2/glib-2.67.2.tar.gz"
+    sha256: "2ea1676b9247ffee99cbd35e8ebbba6d093707c8fa9bdfaa54e3029af208ffe0"
