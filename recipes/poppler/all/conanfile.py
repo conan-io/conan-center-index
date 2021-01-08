@@ -216,7 +216,7 @@ class PopplerConan(ConanFile):
 
     def package_info(self):
         self.cpp_info.components["libpoppler"].libs = ["poppler"]
-        self.cpp_info.components["libpoppler"].names["pkg_config"] = ["poppler"]
+        self.cpp_info.components["libpoppler"].names["pkg_config"] = "poppler"
         if not self.options.shared:
             self.cpp_info.components["libpoppler"].defines = ["POPPLER_STATIC"]
 
@@ -248,7 +248,7 @@ class PopplerConan(ConanFile):
         if self.options.cpp:
             self.cpp_info.components["libpoppler-cpp"].libs = ["poppler-cpp"]
             self.cpp_info.components["libpoppler-cpp"].includedirs.append(os.path.join("include", "poppler", "cpp"))
-            self.cpp_info.components["libpoppler-cpp"].names["pkg_config"] = ["poppler-cpp"]
+            self.cpp_info.components["libpoppler-cpp"].names["pkg_config"] = "poppler-cpp"
             self.cpp_info.components["libpoppler-cpp"].requires = ["libpoppler"]
             if self.options.get_safe("with_libiconv"):
                 self.cpp_info.components["libpoppler-cpp"].requires.append("libiconv::libiconv")
