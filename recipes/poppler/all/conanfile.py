@@ -100,11 +100,11 @@ class PopplerConan(ConanFile):
         if self.options.get_safe("with_libiconv"):
             self.requires("libiconv/1.16")
         if self.options.fontconfiguration == "fontconfig":
-            self.require("fontconfig/2.13.91")
+            self.require("fontconfig/2.13.92")
         if self.options.with_cairo:
             self.requirse("cairo/1.17.2")
         if self.options.get_safe("with_glib"):
-            self.requires("glib/2.66.2")
+            self.requires("glib/2.67.1")
         if self.options.get_safe("with_gobject_introspection"):
             # FIXME: missing gobject_introspection recipe
             raise ConanInvalidConfiguration("gobject_introspection is not (yet) available on cci")
@@ -115,7 +115,7 @@ class PopplerConan(ConanFile):
             # FIXME: missing gtk recipe
             raise ConanInvalidConfiguration("gtk is not (yet) available on cii")
         if self.options.with_openjpeg:
-            self.requires("openjpeg/2.3.1")
+            self.requires("openjpeg/2.4.0")
         if self.options.with_lcms:
             self.requires("lcms/2.11")
         if self.options.with_libjpeg == "libjpeg":
@@ -128,9 +128,9 @@ class PopplerConan(ConanFile):
         if self.options.with_tiff:
             self.requires("libtiff/4.1.0")
         if self.options.splash:
-            self.requires("boost/1.74.0")
+            self.requires("boost/1.75.0")
         if self.options.with_libcurl:
-            self.requires("libcurl/7.73.0")
+            self.requires("libcurl/7.74.0")
         if self.options.with_zlib:
             self.requires("zlib/1.2.11")
 
