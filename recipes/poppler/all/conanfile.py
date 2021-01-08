@@ -150,7 +150,7 @@ class PopplerConan(ConanFile):
             return self._cmake
         self._cmake = CMake(self)
 
-        self._cmake.definitions["ENABLE_UNSTABLE_API_ABI_HEADERS"] = False
+        self._cmake.definitions["ENABLE_UNSTABLE_API_ABI_HEADERS"] = True
         self._cmake.definitions["BUILD_GTK_TESTS"] = False
         self._cmake.definitions["BUILD_QT5_TESTS"] = False
         self._cmake.definitions["BUILD_QT6_TESTS"] = False
