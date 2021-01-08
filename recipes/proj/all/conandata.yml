@@ -1,4 +1,7 @@
 sources:
+  "7.2.1":
+    url: "https://github.com/OSGeo/PROJ/releases/download/7.2.1/proj-7.2.1.tar.gz"
+    sha256: "b384f42e5fb9c6d01fe5fa4d31da2e91329668863a684f97be5d4760dbbf0a14"
   "7.2.0":
     url: "https://github.com/OSGeo/PROJ/releases/download/7.2.0/proj-7.2.0.tar.gz"
     sha256: "2957798e5fe295ff96a2af1889d0428e486363d210889422f76dd744f7885763"
@@ -18,6 +21,9 @@ sources:
     url: "https://github.com/OSGeo/PROJ/releases/download/6.3.1/proj-6.3.1.tar.gz"
     sha256: "6de0112778438dcae30fcc6942dee472ce31399b9e5a2b67e8642529868c86f8"
 patches:
+  "7.2.1":
+    - patch_file: "patches/use-cmake-targets-7.2.1.patch"
+      base_path: "source_subfolder"
   "7.2.0":
     - patch_file: "patches/use-cmake-targets-7.2.0.patch"
       base_path: "source_subfolder"
