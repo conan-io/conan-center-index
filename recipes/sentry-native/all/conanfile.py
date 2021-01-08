@@ -67,11 +67,10 @@ class SentryNativeConan(ConanFile):
         if self._cmake:
             return self._cmake
         self._cmake = CMake(self)
-        self._cmake.definitions["CMAKE_POSITION_INDEPENDENT_CODE"] = self.options.get_safe("fPIC", True)
         self._cmake.definitions["SENTRY_BACKEND"] = self.options.backend
         self._cmake.definitions["SENTRY_ENABLE_INSTALL"] = True
         self._cmake.definitions["SENTRY_TRANSPORT"] = self.options.transport
-        self._cmake.definitions["SENTRY_PIC"] = self.options.get_safe("fPIC", False)
+        self._cmake.definitions["SENTRY_PIC"] = self.options.get_safe("fPIC", True)
         self._cmake.configure()
         return self._cmake
 
