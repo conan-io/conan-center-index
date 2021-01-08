@@ -34,23 +34,25 @@ class LibsassConan(ConanFile):
     def _configure_autotools(self):
         if self._autotools:
             return self._autotools
-        with tools.chdir(self._source_subfolder):
-            self.run("autoreconf -fiv", run_environment=True)
+        self.run("autoreconf -fiv", run_environment=True)
         self._autotools = AutoToolsBuildEnvironment(self)
         args = []
         args.append("--disable-tests")
         args.append("--enable-%s" % ("shared" if self.options.shared else "static"))
         args.append("--disable-%s" % ("static" if self.options.shared else "shared"))
-        self._autotools.configure(args=args, configure_dir=self._source_subfolder)
+        self._autotools.configure(args=args)
         return self._autotools
 
     def build(self):
-        autotools = self._configure_autotools()
-        autotools.make()
+        with tools.chdir(self._source_subfolder):
+            tools.save(path="VERSION", content="%s" % self.version)
+            autotools = self._configure_autotools()
+            autotools.make()
 
     def package(self):
-        autotools = self._configure_autotools()
-        autotools.install()
+        with tools.chdir(self._source_subfolder):
+            autotools = self._configure_autotools()
+            autotools.install()
         self.copy("LICENSE", src=self._source_subfolder, dst="licenses")
         tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
         tools.remove_files_by_mask(self.package_folder, "*.la")
