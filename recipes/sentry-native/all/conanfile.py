@@ -52,7 +52,7 @@ class SentryNativeConan(ConanFile):
 
     def requirements(self):
         if self.options.transport == "curl":
-            self.requires("libcurl/7.72.0")
+            self.requires("libcurl/7.74.0")
         if self.options.backend == "crashpad":
             raise ConanInvalidConfiguration("crashpad not available yet in CCI")
         elif self.options.backend == "breakpad":
