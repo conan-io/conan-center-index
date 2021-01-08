@@ -1,4 +1,4 @@
-from conans import ConanFile, tools, AutoToolsBuildEnvironment, RunEnvironment
+from conans import ConanFile, tools, Meson, RunEnvironment
 from conans.errors import ConanInvalidConfiguration
 import os
 
@@ -24,17 +24,21 @@ class PulseAudioConan(ConanFile):
         "with_openssl": [True, False],
         # FIXME: enable when #2147 is merged
         # "with_dbus": [True, False],
+        "database": ['gdbm', 'tdb', 'simple'],
+        "bluez5": [True, False],
     }
     default_options = {
         "shared": False,
         "fPIC": True,
         "with_alsa": True,
         "with_glib": False,
-        "with_fftw": True,
+        "with_fftw": False,
         "with_x11": True,
         "with_openssl": True,
         # FIXME: enable when #2147 is merged
         # "with_dbus": False,
+        "database": 'simple',
+        "bluez5": False,
     }
 
     build_requires = "gettext/0.20.1", "libtool/2.4.6"
@@ -45,7 +49,11 @@ class PulseAudioConan(ConanFile):
     def _source_subfolder(self):
         return "source_subfolder"
 
-    _autotools = None
+    @property
+    def _build_subfolder(self):
+        return "build_subfolder"
+
+    _meson = None
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -60,6 +68,9 @@ class PulseAudioConan(ConanFile):
             del self.options.fPIC
         del self.settings.compiler.libcxx
         del self.settings.compiler.cppstd
+
+    def build_requirements(self):
+        self.build_requires("meson/0.56.1")
 
 
     def requirements(self):
@@ -85,40 +96,41 @@ class PulseAudioConan(ConanFile):
         extracted_dir = self.name + "-" + self.version
         os.rename(extracted_dir, self._source_subfolder)
 
-    def _configure_autotools(self):
-        if not self._autotools:
-            self._autotools = AutoToolsBuildEnvironment(self)
-            args=[]
+    def _configure_meson(self):
+        if not self._meson:
+            self._meson = Meson(self)
+            defs={}
 
             # FIXME: add dbus when #2147 is merged
-            for lib in ["alsa", "x11", "openssl"]:
-                args.append("--%s-%s" % ("enable" if getattr(self.options, "with_" + lib) else "disable", lib))
-            args.append("--%s-glib2" % ("enable" if self.options.with_glib else "disable"))
-            args.append("--%s-fftw" % ("with" if self.options.with_fftw else "without"))
-            if self.options.shared:
-                args.extend(["--enable-shared=yes", "--enable-static=no"])
-            else:
-                args.extend(["--enable-shared=no", "--enable-static=yes"])
-            args.append("--with-udev-rules-dir=%s" % os.path.join(self.package_folder, "bin", "udev", "rules.d"))
-            args.append("--with-systemduserunitdir=%s" % os.path.join(self.build_folder, "ignore"))
+            for lib in ["alsa", "x11", "openssl", "glib2", "fftw"]:
+                defs[lib] = ("enabled" if self.options.get_safe("with_" + lib) else "disabled")
+            defs["udevrulesdir"] = os.path.join(self.package_folder, "bin", "udev", "rules.d")
+            defs["systemduserunitdir"] = os.path.join(self.build_folder, "ignore")
+            defs["database"] = self.options.database
+            defs["bluez5"] = self.options.bluez5
+            defs["tests"] = False
+
             with tools.environment_append({"PKG_CONFIG_PATH": self.build_folder}):
                 with tools.environment_append({
                         "FFTW_CFLAGS": tools.PkgConfig("fftw").cflags,
                         "FFTW_LIBS": tools.PkgConfig("fftw").libs}) if self.options.with_fftw else tools.no_op():
                     with tools.environment_append(RunEnvironment(self).vars):
-                        self._autotools.configure(args=args,  configure_dir=self._source_subfolder)
-        return self._autotools
+                        self._meson.configure(defs=defs,  source_folder=self._source_subfolder, build_folder = self._build_subfolder)
+        return self._meson
 
     def build(self):
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
             tools.patch(**patch)
-        autotools = self._configure_autotools()
-        autotools.make()
+        tools.replace_in_file(os.path.join(self._source_subfolder, "meson.build"),
+                              "bash_completion_dep.found()",
+                              "false")
+        meson = self._configure_meson()
+        meson.build()
 
     def package(self):
         self.copy(pattern="LICENSE", dst="licenses", src=self._source_subfolder)
-        autotools = self._configure_autotools()
-        autotools.install()
+        meson = self._configure_meson()
+        meson.install()
         tools.rmdir(os.path.join(self.package_folder, "etc"))
         tools.rmdir(os.path.join(self.package_folder, "share"))
         tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
