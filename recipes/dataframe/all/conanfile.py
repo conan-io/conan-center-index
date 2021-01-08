@@ -82,7 +82,7 @@ class DataFrameConan(ConanFile):
         if compiler_version < minimal_version[compiler]:
             raise ConanInvalidConfiguration(
                 "{} requires a compiler that supports at least C++17. {} {} is not supported.".format(
-                    self.name, compiler, tools.Version(self.settings.compiler.version.value)
+                    self.name, compiler, tools.Version(self.settings.compiler.version)
                 )
             )
 
