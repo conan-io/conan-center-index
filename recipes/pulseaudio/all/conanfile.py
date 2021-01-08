@@ -29,7 +29,7 @@ class PulseAudioConan(ConanFile):
         "fPIC": True,
         "with_alsa": True,
         "with_glib": False,
-        "with_fftw": True,
+        "with_fftw": False,
         "with_x11": True,
         "with_openssl": True,
         "with_dbus": False,
@@ -43,6 +43,10 @@ class PulseAudioConan(ConanFile):
 
     _autotools = None
 
+    def validate(self):
+        if self.options.get_safe("with_fftw") and self.options["fftw"].precision != "single":
+            raise ConanInvalidConfiguration("Pulse audio cannot use fftw %s precision. Either set option fftw:precision=single or pulseaudio:with_fftw=False" % self.options["fftw"].precision)
+
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
@@ -54,6 +58,8 @@ class PulseAudioConan(ConanFile):
             del self.options.fPIC
         del self.settings.compiler.libcxx
         del self.settings.compiler.cppstd
+        if not self.options.with_dbus:
+            del self.options.with_fftw
 
 
     def requirements(self):
@@ -63,7 +69,7 @@ class PulseAudioConan(ConanFile):
             self.requires("libalsa/1.2.4")
         if self.options.with_glib:
             self.requires("glib/2.64.0")
-        if self.options.with_fftw:
+        if self.options.get_safe("with_fftw"):
             self.requires("fftw/3.3.8")
         if self.options.with_x11:
             self.requires("xorg/system")
@@ -85,7 +91,7 @@ class PulseAudioConan(ConanFile):
             for lib in ["alsa", "x11", "openssl", "dbus"]:
                 args.append("--%s-%s" % ("enable" if getattr(self.options, "with_" + lib) else "disable", lib))
             args.append("--%s-glib2" % ("enable" if self.options.with_glib else "disable"))
-            args.append("--%s-fftw" % ("with" if self.options.with_fftw else "without"))
+            args.append("--%s-fftw" % ("with" if self.options.get_safe("with_fftw") else "without"))
             if self.options.shared:
                 args.extend(["--enable-shared=yes", "--enable-static=no"])
             else:
@@ -94,8 +100,8 @@ class PulseAudioConan(ConanFile):
             args.append("--with-systemduserunitdir=%s" % os.path.join(self.build_folder, "ignore"))
             with tools.environment_append({"PKG_CONFIG_PATH": self.build_folder}):
                 with tools.environment_append({
-                        "FFTW_CFLAGS": tools.PkgConfig("fftw").cflags,
-                        "FFTW_LIBS": tools.PkgConfig("fftw").libs}) if self.options.with_fftw else tools.no_op():
+                        "FFTW_CFLAGS": tools.PkgConfig("fftwf").cflags,
+                        "FFTW_LIBS": tools.PkgConfig("fftwf").libs}) if self.options.get_safe("with_fftw") else tools.no_op():
                     with tools.environment_append(RunEnvironment(self).vars):
                         self._autotools.configure(args=args,  configure_dir=self._source_subfolder)
         return self._autotools
