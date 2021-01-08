@@ -4,33 +4,19 @@ from conans import ConanFile, CMake, tools
 
 
 class GhcFilesystemRecipe(ConanFile):
-    name = "ghcfilesystem"
+    name = "ghc-filesystem"
     description = "A header-only single-file std::filesystem compatible helper library"
-    topics = ("conan", "bhcfilesystem", "header-only", "filesystem")
+    topics = ("conan", "ghc-filesystem", "header-only", "filesystem")
     homepage = "https://github.com/gulrak/filesystem"
     url = "https://github.com/conan-io/conan-center-index"
     license = "MIT"
-    settings = "os", "compiler", "build_type", "arch"
     generators = "cmake"
-    no_copy_source=True
-
+    no_copy_source = True
     _cmake = None
-
-    options = {
-        "run_tests": [True, False]
-    }
-
-    default_options = {
-        "run_tests": False
-    }
 
     @property
     def _source_subfolder(self):
         return "source_subfolder"
-
-    @property
-    def _build_subfolder(self):
-        return "build_subfolder"
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
@@ -41,20 +27,11 @@ class GhcFilesystemRecipe(ConanFile):
         if self._cmake:
             return self._cmake
         self._cmake = CMake(self)
-        self._cmake.definitions["GHC_FILESYSTEM_BUILD_TESTING"] = self.options.run_tests
+        self._cmake.definitions["GHC_FILESYSTEM_BUILD_TESTING"] = False
         self._cmake.definitions["GHC_FILESYSTEM_BUILD_EXAMPLES"] = False
         self._cmake.definitions["GHC_FILESYSTEM_WITH_INSTALL"] = True
-        self._cmake.configure(
-            source_folder=self._source_subfolder,
-            build_folder=self._build_subfolder
-        )
+        self._cmake.configure(source_folder=self._source_subfolder)
         return self._cmake
-
-    def build(self):
-        if self.options.run_tests:
-            cmake = self._configure_cmake()
-            cmake.build()
-            cmake.test()
 
     def package(self):
         self.copy(pattern="LICENSE", dst="licenses", src=self._source_subfolder)
@@ -68,4 +45,5 @@ class GhcFilesystemRecipe(ConanFile):
     def package_info(self):
         self.cpp_info.names["cmake_find_package"] = "ghcFilesystem"
         self.cpp_info.names["cmake_find_package_multi"] = "ghcFilesystem"
-
+        self.cpp_info.components["filesystem"].names["cmake_find_package"] = "ghc_filesystem"
+        self.cpp_info.components["filesystem"].names["cmake_find_package_multi"] = "ghc_filesystem"
