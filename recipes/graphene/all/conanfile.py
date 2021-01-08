@@ -93,4 +93,4 @@ class LibnameConan(ConanFile):
         if self.options.with_glib:
             self.cpp_info.components["graphene-gobject-1.0"].includedirs = [os.path.join("include", "graphene-1.0")]
             self.cpp_info.components["graphene-gobject-1.0"].names["pkg_config"] = "graphene-gobject-1.0"
-            self.cpp_info.components["graphene-gobject-1.0"].require = ["graphene-1.0", "glib::gobject-2.0"]
+            self.cpp_info.components["graphene-gobject-1.0"].requires = ["graphene-1.0", "glib::gobject-2.0"]
