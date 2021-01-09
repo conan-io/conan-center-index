@@ -3,6 +3,8 @@ import os
 from conans import CMake, ConanFile, tools
 from conans.errors import ConanInvalidConfiguration
 
+required_conan_version = ">=1.29.1"
+
 
 class IgnitionMathConan(ConanFile):
     name = "ignition-math"
@@ -35,18 +37,6 @@ class IgnitionMathConan(ConanFile):
     @property
     def _source_subfolder(self):
         return "source_subfolder"
-
-    @property
-    def _cmake_source_subfolder(self):
-        return "cmake_source_subfolder"
-
-    @property
-    def _cmake_build_subfolder(self):
-        return "cmake_build_subfolder"
-
-    @property
-    def _cmake_prefix_subfolder(self):
-        return "cmake_prefix_subfolder"
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
@@ -83,19 +73,17 @@ class IgnitionMathConan(ConanFile):
                 )
 
     def requirements(self):
-        self.requires("eigen/3.3.7")
+        self.requires("eigen/3.3.9")
 
     def build_requirements(self):
         self.build_requires("pkgconf/1.7.3")
         self.build_requires("ignition-cmake/2.5.0")
 
     def _configure_cmake(self):
-        if self._cmake is not None:
+        if self._cmake:
             return self._cmake
         self._cmake = CMake(self)
-        self._cmake.verbose = True
         self._cmake.definitions["BUILD_TESTING"] = False
-        # self._cmake.definitions["CMAKE_PREFIX_PATH"] = os.path.join(self.build_folder, self._cmake_prefix_subfolder)
         self._cmake.configure()
         return self._cmake
 
