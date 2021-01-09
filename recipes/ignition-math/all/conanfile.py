@@ -76,7 +76,6 @@ class IgnitionMathConan(ConanFile):
         self.requires("eigen/3.3.9")
 
     def build_requirements(self):
-        self.build_requires("pkgconf/1.7.3")
         self.build_requires("ignition-cmake/2.5.0")
 
     def _configure_cmake(self):
