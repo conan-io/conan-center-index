@@ -9,6 +9,7 @@ class TestPackageConan(ConanFile):
 
     def build(self):
         cmake = CMake(self)
+        cmake.definitions["WITH_MAIN"] = self.options["catch2"].with_main
         cmake.configure()
         cmake.build()
 
@@ -16,5 +17,5 @@ class TestPackageConan(ConanFile):
         if not tools.cross_building(self.settings):
             self.run(os.path.join("bin", "test_package"), run_environment=True)
 
-            if Version(self.deps_cpp_info["catch2"].version) >= "2.13.4":
+            if self.options["catch2"].with_main:
                 self.run(os.path.join("bin", "standalone"), run_environment=True)
