@@ -100,11 +100,11 @@ class PopplerConan(ConanFile):
         if self.options.get_safe("with_libiconv"):
             self.requires("libiconv/1.16")
         if self.options.fontconfiguration == "fontconfig":
-            self.require("fontconfig/2.13.91")
+            self.require("fontconfig/2.13.92")
         if self.options.with_cairo:
             self.requirse("cairo/1.17.2")
         if self.options.get_safe("with_glib"):
-            self.requires("glib/2.66.2")
+            self.requires("glib/2.67.1")
         if self.options.get_safe("with_gobject_introspection"):
             # FIXME: missing gobject_introspection recipe
             raise ConanInvalidConfiguration("gobject_introspection is not (yet) available on cci")
@@ -115,7 +115,7 @@ class PopplerConan(ConanFile):
             # FIXME: missing gtk recipe
             raise ConanInvalidConfiguration("gtk is not (yet) available on cii")
         if self.options.with_openjpeg:
-            self.requires("openjpeg/2.3.1")
+            self.requires("openjpeg/2.4.0")
         if self.options.with_lcms:
             self.requires("lcms/2.11")
         if self.options.with_libjpeg == "libjpeg":
@@ -128,9 +128,9 @@ class PopplerConan(ConanFile):
         if self.options.with_tiff:
             self.requires("libtiff/4.1.0")
         if self.options.splash:
-            self.requires("boost/1.74.0")
+            self.requires("boost/1.75.0")
         if self.options.with_libcurl:
-            self.requires("libcurl/7.73.0")
+            self.requires("libcurl/7.74.0")
         if self.options.with_zlib:
             self.requires("zlib/1.2.11")
 
@@ -150,7 +150,7 @@ class PopplerConan(ConanFile):
             return self._cmake
         self._cmake = CMake(self)
 
-        self._cmake.definitions["ENABLE_UNSTABLE_API_ABI_HEADERS"] = False
+        self._cmake.definitions["ENABLE_UNSTABLE_API_ABI_HEADERS"] = True
         self._cmake.definitions["BUILD_GTK_TESTS"] = False
         self._cmake.definitions["BUILD_QT5_TESTS"] = False
         self._cmake.definitions["BUILD_QT6_TESTS"] = False
@@ -189,7 +189,8 @@ class PopplerConan(ConanFile):
         self._cmake.definitions["ENABLE_DCTDECODER"] = self._dct_decoder
         self._cmake.definitions["USE_FLOAT"] = self.options.float
         self._cmake.definitions["RUN_GPERF_IF_PRESENT"] = False
-        self._cmake.definitions["ENABLE_RELOCATABLE"] = True
+        if self.settings.os == "Windows":
+            self._cmake.definitions["ENABLE_RELOCATABLE"] = self.options.shared
         self._cmake.definitions["EXTRA_WARN"] = False
         self._cmake.configure(build_folder=self._build_subfolder)
         return self._cmake
@@ -216,7 +217,7 @@ class PopplerConan(ConanFile):
 
     def package_info(self):
         self.cpp_info.components["libpoppler"].libs = ["poppler"]
-        self.cpp_info.components["libpoppler"].names["pkg_config"] = ["poppler"]
+        self.cpp_info.components["libpoppler"].names["pkg_config"] = "poppler"
         if not self.options.shared:
             self.cpp_info.components["libpoppler"].defines = ["POPPLER_STATIC"]
 
@@ -248,7 +249,7 @@ class PopplerConan(ConanFile):
         if self.options.cpp:
             self.cpp_info.components["libpoppler-cpp"].libs = ["poppler-cpp"]
             self.cpp_info.components["libpoppler-cpp"].includedirs.append(os.path.join("include", "poppler", "cpp"))
-            self.cpp_info.components["libpoppler-cpp"].names["pkg_config"] = ["poppler-cpp"]
+            self.cpp_info.components["libpoppler-cpp"].names["pkg_config"] = "poppler-cpp"
             self.cpp_info.components["libpoppler-cpp"].requires = ["libpoppler"]
             if self.options.get_safe("with_libiconv"):
                 self.cpp_info.components["libpoppler-cpp"].requires.append("libiconv::libiconv")
