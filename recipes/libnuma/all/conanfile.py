@@ -19,6 +19,7 @@ class LibnumaConan(ConanFile):
         "shared": False,
         "fPIC": True,
     }
+    exports_sources = "patches/**"
 
     _autotools = None
 
@@ -40,6 +41,10 @@ class LibnumaConan(ConanFile):
         if self.options.shared:
             del self.options.fPIC
 
+    def _patch_sources(self):
+        for patch in self.conan_data.get("patches",{}).get(self.version, []):
+            tools.patch(**patch)
+
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
         os.rename("numactl-" + self.version, self._source_subfolder)
@@ -60,6 +65,7 @@ class LibnumaConan(ConanFile):
         return self._autotools
 
     def build(self):
+        self._patch_sources()
         autotools = self._configure_autotools()
         autotools.make()
 
