@@ -29,6 +29,11 @@ class ConanRecipe(ConanFile):
     def config_options(self):
         if self.settings.os == "Windows" or not self.options.with_main:
             del self.options.fPIC
+        if not self.options.with_main:
+            del self.settings.os
+            del self.settings.compiler
+            del self.settings.build_type
+            del self.settings.arch
 
     def configure(self):
         if self.options.with_main and tools.Version(self.version) < "2.13.4":
