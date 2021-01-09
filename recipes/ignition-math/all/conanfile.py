@@ -16,7 +16,7 @@ class IgnitionMathConan(ConanFile):
     settings = "os", "compiler", "build_type", "arch"
     options = {"shared": [True, False], "fPIC": [True, False]}
     default_options = {"shared": False, "fPIC": True}
-    generators = "cmake", "cmake_find_package_multi", "pkg_config"
+    generators = "cmake", "cmake_find_package_multi"
     exports_sources = "CMakeLists.txt", "patches/**"
 
     _cmake = None
@@ -37,14 +37,6 @@ class IgnitionMathConan(ConanFile):
     @property
     def _source_subfolder(self):
         return "source_subfolder"
-
-    def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        version_major = self.version.split(".")[0]
-        os.rename(
-            "ign-math-ignition-math{}_{}".format(version_major, self.version),
-            self._source_subfolder,
-        )
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -77,6 +69,14 @@ class IgnitionMathConan(ConanFile):
 
     def build_requirements(self):
         self.build_requires("ignition-cmake/2.5.0")
+
+    def source(self):
+        tools.get(**self.conan_data["sources"][self.version])
+        version_major = self.version.split(".")[0]
+        os.rename(
+            "ign-math-ignition-math{}_{}".format(version_major, self.version),
+            self._source_subfolder,
+        )
 
     def _configure_cmake(self):
         if self._cmake:
