@@ -60,5 +60,4 @@ class LibsassConan(ConanFile):
     def package_info(self):
         self.cpp_info.libs = ["sass"]
         if self.settings.os in ["Linux", "FreeBSD"]:
-            self.cpp_info.system_libs = ["dl"]
-
+            self.cpp_info.system_libs = ["dl", "m"]
