@@ -8,11 +8,19 @@ using Poco::Net::Context;
 using Poco::Net::HTTPSClientSession;
 using Poco::URI;
 
+class SSLInitializer {
+public:
+   SSLInitializer() { Poco::Net::initializeSSL(); }
+
+   ~SSLInitializer() { Poco::Net::uninitializeSSL(); }
+};
+
 int main()
 {
+   SSLInitializer sslInitializer;
+   URI uri("https://pocoproject.org/");
+   const Context::Ptr context = SSLManager::instance().defaultClientContext();
    try {
-      URI uri("https://pocoproject.org/");
-      const Context::Ptr context = SSLManager::instance().defaultClientContext();
       HTTPSClientSession session(uri.getHost(), uri.getPort(), context);
    } catch (...) { }
 
