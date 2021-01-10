@@ -25,7 +25,7 @@ class CMakeConan(ConanFile):
 
     def _minor_version(self):
         return ".".join(str(self.version).split(".")[:2])
-    
+
     def config_options(self):
         if self.settings.os == "Windows":
             self.options.with_openssl = False
@@ -39,7 +39,7 @@ class CMakeConan(ConanFile):
             tools.check_min_cppstd(self, minimal_cpp_standard)
 
         minimal_version = {
-            "gcc": "5",
+            "gcc": "4.8",
             "clang": "3.3",
             "apple-clang": "9",
             "Visual Studio": "14",

@@ -186,7 +186,6 @@ class MongoCxxConan(ConanFile):
         self.cpp_info.components["mongocxx"].names["cmake_find_package"] = "mongocxx_shared" if self.options.shared else "mongocxx_static"
         self.cpp_info.components["mongocxx"].names["cmake_find_package_multi"] = "mongocxx_shared" if self.options.shared else "mongocxx_static"
         self.cpp_info.components["mongocxx"].names["pkg_config"] = "libmongocxx"
-        self.cpp_info.components["mongocxx"].includedirs = [os.path.join("include", "lib", "v_noabi", "mongocxx")]
         self.cpp_info.components["mongocxx"].libs = ["mongocxx" if self.options.shared else "mongocxx-static"]
         if not self.options.shared:
             self.cpp_info.components["mongocxx"].defines.append("MONGOCXX_STATIC")
@@ -196,7 +195,6 @@ class MongoCxxConan(ConanFile):
         self.cpp_info.components["bsoncxx"].names["cmake_find_package"] = "bsoncxx_shared" if self.options.shared else "bsoncxx_static"
         self.cpp_info.components["bsoncxx"].names["cmake_find_package_multi"] = "bsoncxx_shared" if self.options.shared else "bsoncxx_static"
         self.cpp_info.components["bsoncxx"].names["pkg_config"] = "libbsoncxx" if self.options.shared else "libbsoncxx-static"
-        self.cpp_info.components["bsoncxx"].includedirs = [os.path.join("include", "lib", "v_noabi", "bsoncxx")]
         self.cpp_info.components["bsoncxx"].libs = ["bsoncxx" if self.options.shared else "bsoncxx-static"]
         if not self.options.shared:
             self.cpp_info.components["bsoncxx"].defines = ["BSONCXX_STATIC"]
