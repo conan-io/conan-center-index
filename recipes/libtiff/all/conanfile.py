@@ -98,9 +98,10 @@ class LibtiffConan(ConanFile):
                                   r"WINDOWS_EXPORT_ALL_SYMBOLS ON)")
         cmakefile = os.path.join(self._source_subfolder, "CMakeLists.txt")
         if self.settings.os == "Windows" and self.settings.compiler != "Visual Studio":
-            tools.replace_in_file(cmakefile,
-                                  "find_library(M_LIBRARY m)",
-                                  "if (NOT MINGW)\n  find_library(M_LIBRARY m)\nendif()")
+            if tools.Version(self.version) < "4.2.0":
+                tools.replace_in_file(cmakefile,
+                                    "find_library(M_LIBRARY m)",
+                                    "if (NOT MINGW)\n  find_library(M_LIBRARY m)\nendif()")
             if tools.Version(self.version) < "4.0.9":
                 tools.replace_in_file(cmakefile, "if (UNIX)", "if (UNIX OR MINGW)")
         tools.replace_in_file(cmakefile,
@@ -115,6 +116,8 @@ class LibtiffConan(ConanFile):
             self._cmake.definitions["jpeg"] = self.options.jpeg != False
             self._cmake.definitions["jbig"] = self.options.jbig
             self._cmake.definitions["zlib"] = self.options.zlib
+            if tools.Version(self.version) >= "4.2.0":
+                self._cmake.definitions["libdeflate"] = False # TODO: add libdeflate support (since 4.2.0)
             if self._has_zstd_option:
                 self._cmake.definitions["zstd"] = self.options.zstd
             if self._has_web_option:
