@@ -109,6 +109,8 @@ class PulseAudioConan(ConanFile):
             defs["database"] = self.options.database
             defs["bluez5"] = self.options.bluez5
             defs["tests"] = False
+            if self.settings.os == "FreeBSD":
+                defs["b_lundef"] = False
 
             with tools.environment_append({"PKG_CONFIG_PATH": self.build_folder}):
                 with tools.environment_append({
