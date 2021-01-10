@@ -82,7 +82,7 @@ class PDCursesConan(ConanFile):
                 args.append("DLL=Y")
             args = " ".join(args)
             if self.settings.compiler == "Visual Studio":
-                with tools.vcvars(self.settings):
+                with tools.vcvars(self):
                     self.run("nmake -f Makefile.vc {}".format(args))
             else:
                 self.run("{} libs {}".format(os.environ["CONAN_MAKE_PROGRAM"], args))
@@ -92,9 +92,6 @@ class PDCursesConan(ConanFile):
             tools.replace_in_file(os.path.join(self._source_subfolder, "wincon", "Makefile.vc"),
                                   "$(CFLAGS)",
                                   "$(CFLAGS) -{}".format(self.settings.compiler.runtime))
-            tools.replace_in_file(os.path.join(self._source_subfolder, "wincon", "Makefile.vc"),
-                                  "$(LDFLAGS)",
-                                  "$(LDFLAGS) -{}".format(self.settings.compiler.runtime))
         tools.replace_in_file(os.path.join(self._source_subfolder, "x11", "Makefile.in"),
                               "$(INSTALL) -c -m 644 $(osdir)/libXCurses.a $(libdir)/libXCurses.a",
                               "-$(INSTALL) -c -m 644 $(osdir)/libXCurses.a $(libdir)/libXCurses.a")
