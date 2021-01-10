@@ -1,8 +1,8 @@
 from conans import ConanFile, CMake, tools
+import os
 
 class NotcursesConan(ConanFile):
     name = "notcurses"
-    version = "2.1.4"
     description = "a blingful TUI/character graphics library"
     topics = ("graphics", "curses", "tui", "console", "ncurses")
     url = "https://github.com/conan-io/conan-center-index"
@@ -27,17 +27,20 @@ class NotcursesConan(ConanFile):
     def package(self):
         cmake = self._configure_cmake()
         cmake.install()
+        tools.rmdir(os.path.join(self.package_folder, "share"))
+        tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
+        tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
 
     def _configure_cmake(self):
         if self._cmake:
             return self._cmake
         self._cmake = CMake(self)
-        self._cmake.definitions["BUILD_TESTING"] = False
+        self._cmake.definitions["BUILD_TESTING"] = "OFF"
         self._cmake.definitions["USE_MULTIMEDIA"] = "oiio"
-        self._cmake.definitions["USE_PANDOC"] = False
-        self._cmake.definitions["USE_POC"] = False
-        self._cmake.definitions["USE_QRCODEGEN"] = False
-        self._cmake.definitions["USE_STATIC"] = False if self.options.shared else True
+        self._cmake.definitions["USE_PANDOC"] = "OFF"
+        self._cmake.definitions["USE_POC"] = "OFF"
+        self._cmake.definitions["USE_QRCODEGEN"] = "OFF"
+        self._cmake.definitions["USE_STATIC"] = "OFF" if self.options.shared else "ON"
         self._cmake.configure(source_folder="notcurses-" + self.version)
         return self._cmake
 
