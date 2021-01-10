@@ -1,4 +1,5 @@
 from conans import ConanFile, Meson, tools
+from conans.errors import ConanInvalidConfiguration
 import os
 
 
@@ -29,6 +30,10 @@ class AtSPI2AtkConan(ConanFile):
     @property
     def _build_subfolder(self):
         return "build_subfolder"
+    
+    def validate(self):
+        if self.settings.os not in ("Linux", "FreeBSD"):
+            raise ConanInvalidConfiguration("at-spi2-atk is only supported on Linux and FreeBSD")
 
     def configure(self):
         if self.options.shared:
