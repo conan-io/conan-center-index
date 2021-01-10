@@ -39,26 +39,26 @@ class PDCursesConan(ConanFile):
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
-        if self.settings.os != "Linux":
+        if self.settings.os not in ("FreeBSD", "Linux"):
             del self.options.enable_widec
 
     def configure(self):
-        if self.settings.os == "Macos":
-            raise ConanInvalidConfiguration("pdcurses does not support Macos")
-        if self.settings.os == "Linux":
-            if not tools.get_env("PDCURSES_OVERRIDE_X11", False):
-                raise ConanInvalidConfiguration("conan-center-index has no packages for X11 (yet)")
+        if tools.is_apple_os(self.settings.os):
+            raise ConanInvalidConfiguration("pdcurses does not support Apple")
         if self.options.with_sdl:
-            raise ConanInvalidConfiguration("conan-center-index has no packages for sdl2 (yet)")
+            raise ConanInvalidConfiguration("conan-center-index has no packages for sdl (yet)")
         if self.options.shared:
             del self.options.fPIC
         del self.settings.compiler.cppstd
         del self.settings.compiler.libcxx
 
+    def requirements(self):
+        if self.settings.os in ("FreeBSD", "Linux"):
+            self.requires("xorg/system")
+
     def build_requirements(self):
         if self.settings.compiler != "Visual Studio":
-            if not tools.which("make"):
-                self.build_requires("make/4.2.1")
+            self.build_requires("make/4.2.1")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
@@ -117,7 +117,7 @@ class PDCursesConan(ConanFile):
     @property
     def _license_text(self):
         readme = tools.load(os.path.join(self._source_subfolder, self._subsystem_folder, "README.md"))
-        match = re.search("Distribution Status\n[\\-]+(?:[\r\n])+((?:[0-9a-z .,;*]+[\r\n])+)", readme,
+        match = re.search(r"Distribution Status\n[\-]+(?:[\r\n])+((?:[0-9a-z .,;*]+[\r\n])+)", readme,
                           re.IGNORECASE | re.MULTILINE)
         if not match:
             raise ConanException("Cannot extract distribution status")
@@ -144,9 +144,6 @@ class PDCursesConan(ConanFile):
     def package_info(self):
         if self.settings.os == "Windows":
             self.cpp_info.libs = ["pdcurses"]
-        else:
+        elif self.settings.os in ("FreeBSD", "Linux"):
             self.cpp_info.includedirs.append(os.path.join("include", "xcurses"))
             self.cpp_info.libs = ["XCurses"]
-            if not self.options.shared:
-                if self.settings.os == "Linux":
-                    self.cpp_info.system_libs = ["Xaw", "Xmu", "Xt", "X11", "Xpm", "SM", "ICE", "Xext", "xcb", "Xau"]
