@@ -61,6 +61,8 @@ class LibtiffConan(ConanFile):
             del self.options.zstd
 
     def configure(self):
+        if self.options.shared:
+            del self.options.fPIC
         if not self.options.cxx:
             del self.settings.compiler.libcxx
             del self.settings.compiler.cppstd
