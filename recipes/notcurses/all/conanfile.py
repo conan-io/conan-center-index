@@ -17,15 +17,28 @@ class NotcursesConan(ConanFile):
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
+        os.rename(self.name + "-" + self.version, self._source_subfolder)
 
     def build(self):
         cmake = CMake(self)
-        cmake.configure(source_folder="notcurses")
+        cmake = self._configure_cmake()
         cmake.build()
 
     def package(self):
         cmake = self._configure_cmake()
         cmake.install()
+
+    def _configure_cmake(self):
+        if self._cmake:
+            return self._cmake
+        self._cmake = CMake(self)
+        self._cmake.definitions["BUILD_TESTING"] = False
+        self._cmake.definitions["USE_MULTIMEDIA"] = "oiio"
+        self._cmake.definitions["USE_PANDOC"] = False
+        self._cmake.definitions["USE_POC"] = False
+        self._cmake.definitions["USE_QRCODEGEN"] = False
+        self._cmake.configure(build_folder=self._build_subfolder)
+        return self._cmake
 
     def package_info(self):
         self.cpp_info.libs = ["notcurses", "notcurses++"]
