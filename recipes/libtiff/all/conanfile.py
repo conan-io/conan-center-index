@@ -64,11 +64,11 @@ class LibtiffConan(ConanFile):
         if self.options.jpeg == "libjpeg":
             self.requires("libjpeg/9d")
         if self.options.jpeg == "libjpeg-turbo":
-            self.requires("libjpeg-turbo/2.0.5")
+            self.requires("libjpeg-turbo/2.0.6")
         if self.options.jbig:
             self.requires("jbig/20160605")
         if self.options.get_safe("zstd"):
-            self.requires("zstd/1.4.5")
+            self.requires("zstd/1.4.8")
         if self.options.get_safe("webp"):
             self.requires("libwebp/1.1.0")
 
