@@ -1,7 +1,5 @@
 from conans import ConanFile, Meson, tools
-from conans.errors import ConanInvalidConfiguration
 import os
-import shutil
 
 
 class AtSPI2AtkConan(ConanFile):
@@ -22,6 +20,8 @@ class AtSPI2AtkConan(ConanFile):
         "fPIC": True,
         }
 
+    _meson = None
+
     @property
     def _source_subfolder(self):
         return "source_subfolder"
@@ -37,7 +37,7 @@ class AtSPI2AtkConan(ConanFile):
         del self.settings.compiler.cppstd
 
     def build_requirements(self):
-        self.build_requires('meson/0.54.2')
+        self.build_requires('meson/0.56.1')
         self.build_requires('pkgconf/1.7.3')
 
     def requirements(self):
@@ -52,11 +52,13 @@ class AtSPI2AtkConan(ConanFile):
         os.rename(extracted_dir, self._source_subfolder)
 
     def _configure_meson(self):
-        meson = Meson(self)
+        if self._meson:
+            return self._meson
+        self._meson = Meson(self)
         args=[]
         args.append('--wrap-mode=nofallback')
-        meson.configure(build_folder=self._build_subfolder, source_folder=self._source_subfolder, pkg_config_paths='.', args=args)
-        return meson
+        self._meson.configure(build_folder=self._build_subfolder, source_folder=self._source_subfolder, pkg_config_paths='.', args=args)
+        return self._meson
 
     def build(self):
         meson = self._configure_meson()
