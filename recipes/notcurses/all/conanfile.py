@@ -2,7 +2,7 @@ from conans import ConanFile, CMake, tools
 
 class NotcursesConan(ConanFile):
     name = "notcurses"
-    version = "2.1.2"
+    version = "2.1.4"
     description = "a blingful TUI/character graphics library"
     topics = ("graphics", "curses", "tui", "console", "ncurses")
     url = "https://github.com/conan-io/conan-center-index"
@@ -15,12 +15,12 @@ class NotcursesConan(ConanFile):
     default_options = {"shared": True}
     generators = "cmake", "pkg_config"
 
+    _cmake = None
+
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
-        os.rename(self.name + "-" + self.version, self._source_subfolder)
 
     def build(self):
-        cmake = CMake(self)
         cmake = self._configure_cmake()
         cmake.build()
 
@@ -37,7 +37,8 @@ class NotcursesConan(ConanFile):
         self._cmake.definitions["USE_PANDOC"] = False
         self._cmake.definitions["USE_POC"] = False
         self._cmake.definitions["USE_QRCODEGEN"] = False
-        self._cmake.configure(build_folder=self._build_subfolder)
+        self._cmake.definitions["USE_STATIC"] = False if self.options.shared else True
+        self._cmake.configure(source_folder="notcurses-" + self.version)
         return self._cmake
 
     def package_info(self):
