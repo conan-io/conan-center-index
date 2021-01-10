@@ -19,6 +19,11 @@ class NotcursesConan(ConanFile):
     def requirements(self):
         self.requires("openimageio/2.2.7.0")
         self.requires("libunistring/0.9.10")
+        # we only want the tinfo component of NCURSES
+        self.requires("ncurses/6.2")
+
+    def build_requirements(self):
+        self.build_requires("pkgconf/1.7.3")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
