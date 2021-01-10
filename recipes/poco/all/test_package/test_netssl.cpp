@@ -19,10 +19,5 @@ int main()
 {
    SSLInitializer sslInitializer;
    URI uri("https://pocoproject.org/");
-   const Context::Ptr context = SSLManager::instance().defaultClientContext();
-   try {
-      HTTPSClientSession session(uri.getHost(), uri.getPort(), context);
-   } catch (...) { }
-
    return 0;
 }
