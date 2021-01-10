@@ -10,12 +10,15 @@ class NotcursesConan(ConanFile):
     license = "Apache-2.0"
     exports_sources = ["CMakeLists.txt"]
     settings = "os", "compiler", "build_type", "arch"
-    requires = "openimageio/2.2.7.0", "libunistring/0.9.10"
     options = {"shared": [True, False]}
     default_options = {"shared": True}
     generators = "cmake", "pkg_config"
 
     _cmake = None
+
+    def requirements(self):
+        self.requires("openimageio/2.2.7.0")
+        self.requires("libunistring/0.9.10")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
