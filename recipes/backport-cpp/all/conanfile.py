@@ -44,3 +44,5 @@ class BackportCppRecipe(ConanFile):
     def package_info(self):
         self.cpp_info.names["cmake_find_package"] = "Backport"
         self.cpp_info.names["cmake_find_package_multi"] = "Backport"
+        self.cpp_info.components["Backport"].names["cmake_find_package"] = "Backport"
+        self.cpp_info.components["Backport"].names["cmake_find_package_multi"] = "Backport"

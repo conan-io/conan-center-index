@@ -1,7 +1,7 @@
 #include <bpstd/optional.hpp>
 #include <iostream>
 
-int main(int argc, char** argv) {
+int main() {
     bpstd::optional<int> optional{};
     std::cout << std::boolalpha;
     std::cout << "default optional: " << optional.has_value() << std::endl;
