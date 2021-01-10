@@ -94,6 +94,14 @@ class OcctConan(ConanFile):
             """${USED_EXTERNAL_LIBS_BY_CURRENT_PROJECT}
             CONAN_PKG::tcl CONAN_PKG::tk CONAN_PKG::freetype""")
 
+        tools.replace_in_file(
+            os.path.join(self._source_subfolder,
+                         "adm/cmake/occt_toolkit.cmake"),
+            """    install (FILES  ${CMAKE_BINARY_DIR}/${OS_WITH_BIT}/${COMPILER}/bin\\${OCCT_INSTALL_BIN_LETTER}/${PROJECT_NAME}.pdb
+             CONFIGURATIONS Debug RelWithDebInfo
+             DESTINATION "${INSTALL_DIR_BIN}\${OCCT_INSTALL_BIN_LETTER}")""",
+            "")
+
         tcl_libs = self.deps_cpp_info["tcl"].libs
         tcl_lib = next(filter(lambda lib: "tcl8" in lib, tcl_libs))
         tools.replace_in_file(
@@ -153,6 +161,12 @@ class OcctConan(ConanFile):
             dst="licenses")
         tools.rmdir(os.path.join(self.package_folder, "cmake"))
         tools.rmdir(os.path.join(self.package_folder, "lib/cmake"))
+        if self.settings.build_type == "Debug":
+            if os.path.isdir(os.path.join(self.package_folder, "libd")):
+                tools.rmdir(os.path.join(self.package_folder, "lib"))
+                tools.rename(
+                    os.path.join(self.package_folder, "libd"),
+                    os.path.join(self.package_folder, "lib"))
 
     def package_info(self):
         libs = set(tools.collect_libs(self))
