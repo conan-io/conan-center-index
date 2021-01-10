@@ -189,7 +189,7 @@ class FollyConan(ConanFile):
                 self.cpp_info.components["libfolly"].defines.append("FOLLY_HAVE_ELF")
 
         elif self.settings.os == "Windows":
-            self.cpp_info.components["libfolly"].system_libs.extend(["ws2_32", "Iphlpapi", "Crypt32"])
+            self.cpp_info.components["libfolly"].system_libs.extend(["ws2_32", "iphlpapi", "crypt32"])
 
         if (self.settings.os == "Linux" and self.settings.compiler == "clang" and
             self.settings.compiler.libcxx == "libstdc++") or \
