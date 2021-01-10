@@ -4,7 +4,7 @@ import glob
 
 
 class UTMLatLongConvertorConan(ConanFile):
-    name = "ofxGeo"
+    name = "ofxgeo"
     description = "A convertor for Latitude Longitude to UTM Co-ordinate and vice versa."
     topics = ("conan", "utm_latlong_convertor", "utm", "latitude", "longitude")
     url = "https://github.com/conan-io/conan-center-index"
