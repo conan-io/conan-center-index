@@ -1,6 +1,6 @@
 import os
 
-from conans import ConanFile, CMake, tools
+from conans import ConanFile, tools
 
 
 class BackportCppRecipe(ConanFile):
@@ -10,10 +10,7 @@ class BackportCppRecipe(ConanFile):
     homepage = "https://github.com/bitwizeshift/BackportCpp"
     url = "https://github.com/conan-io/conan-center-index"
     license = "MIT"
-    generators = "cmake"
     no_copy_source=True
-
-    _cmake = None
 
     @property
     def _source_subfolder(self):
