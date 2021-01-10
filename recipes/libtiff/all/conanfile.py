@@ -44,11 +44,20 @@ class LibtiffConan(ConanFile):
     def _build_subfolder(self):
         return "build_subfolder"
 
+    @property
+    def _has_web_option(self):
+        return tools.Version(self.version) >= "4.0.10"
+
+    @property
+    def _has_zstd_option(self):
+        return tools.Version(self.version) >= "4.0.10"
+
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
-        if tools.Version(self.version) < "4.1.0":
+        if not self._has_web_option:
             del self.options.webp
+        if not self._has_zstd_option:
             del self.options.zstd
 
     def configure(self):
@@ -104,8 +113,10 @@ class LibtiffConan(ConanFile):
             self._cmake.definitions["jpeg"] = self.options.jpeg != False
             self._cmake.definitions["jbig"] = self.options.jbig
             self._cmake.definitions["zlib"] = self.options.zlib
-            self._cmake.definitions["zstd"] = self.options.get_safe("zstd", False)
-            self._cmake.definitions["webp"] = self.options.get_safe("webp", False)
+            if self._has_zstd_option:
+                self._cmake.definitions["zstd"] = self.options.zstd
+            if self._has_web_option:
+                self._cmake.definitions["webp"] = self.options.webp
             self._cmake.definitions["cxx"] = self.options.cxx
             self._cmake.configure(build_folder=self._build_subfolder)
         return self._cmake
