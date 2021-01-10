@@ -102,6 +102,12 @@ class OcctConan(ConanFile):
              DESTINATION "${INSTALL_DIR_BIN}\${OCCT_INSTALL_BIN_LETTER}")""",
             "")
 
+        tools.replace_in_file(
+            os.path.join(self._source_subfolder,
+                        "src/Font/Font_Fontmgr.cxx"),
+            "#pragma comment (lib, \"freetype.lib\")",
+            "")
+
         tcl_libs = self.deps_cpp_info["tcl"].libs
         tcl_lib = next(filter(lambda lib: "tcl8" in lib, tcl_libs))
         tools.replace_in_file(
@@ -148,6 +154,14 @@ class OcctConan(ConanFile):
         cmake = self._configure_cmake()
         cmake.build()
 
+    def _replace_package_folder(self, source, target):
+        new_name = ""
+        if os.path.isdir(os.path.join(self.package_folder, source)):
+            tools.rmdir(os.path.join(self.package_folder, target))
+            tools.rename(
+                os.path.join(self.package_folder, source),
+                os.path.join(self.package_folder, target))
+
     def package(self):
         cmake = self._configure_cmake()
         cmake.install()
@@ -162,11 +176,11 @@ class OcctConan(ConanFile):
         tools.rmdir(os.path.join(self.package_folder, "cmake"))
         tools.rmdir(os.path.join(self.package_folder, "lib/cmake"))
         if self.settings.build_type == "Debug":
-            if os.path.isdir(os.path.join(self.package_folder, "libd")):
-                tools.rmdir(os.path.join(self.package_folder, "lib"))
-                tools.rename(
-                    os.path.join(self.package_folder, "libd"),
-                    os.path.join(self.package_folder, "lib"))
+            self._replace_package_folder("libd", "lib")
+            self._replace_package_folder("bind", "bin")
+        elif self.settings.build_type == "RelWithDebInfo":
+            self._replace_package_folder("libi", "lib")
+            self._replace_package_folder("bini", "bin")
 
     def package_info(self):
         libs = set(tools.collect_libs(self))
