@@ -12,12 +12,18 @@ class TinyDnnConan(ConanFile):
     description = "tiny-dnn is a C++14 implementation of deep learning."
     topics = ("header-only", "deep-learning", "embedded", "iot", "computational")
     settings = "compiler", "os"
-    requires = "cereal/1.3.0"
-    no_copy_source = True
+    options = {"with_tbb": [True, False]}
+    default_options = {"with_tbb": False}
 
     @property
     def _source_subfolder(self):
         return "source_subfolder"
+
+    def requirements(self):
+        self.requires("cereal/1.3.0")
+        self.requires("stb/20200203")
+        if self.options.with_tbb:
+            self.requires("tbb/2020.3")
 
     def configure(self):
         minimal_cpp_standard = "14"
@@ -47,10 +53,14 @@ class TinyDnnConan(ConanFile):
         tools.get(**self.conan_data["sources"][self.version])
         os.rename(glob.glob("tiny-dnn-*")[0], self._source_subfolder)
 
+    def build(self):
+        tools.replace_in_file(os.path.join(self._source_subfolder, "tiny_dnn", "util", "image.h"), "third_party/", "")
+
     def package(self):
         self.copy("LICENSE", dst="licenses", src=self._source_subfolder)
-        self.copy("*.h", dst=os.path.join("include", "third_party"), src=os.path.join(self._source_subfolder, "third_party"))
         cmake = CMake(self)
+        cmake.definitions["USE_TBB"] = self.options.with_tbb
+        cmake.definitions["USE_GEMMLOWP"] = False
         cmake.configure(source_folder=self._source_subfolder)
         cmake.install()
         tools.rmdir(os.path.join(self.package_folder, "share"))
@@ -62,6 +72,9 @@ class TinyDnnConan(ConanFile):
         self.cpp_info.names["cmake_find_package_multi"] = "TinyDNN"
         self.cpp_info.components["tinydnn"].names["cmake_find_package"] = "tiny_dnn"
         self.cpp_info.components["tinydnn"].names["cmake_find_package_multi"] = "tiny_dnn"
-        self.cpp_info.components["tinydnn"].requires = ["cereal::cereal"]
+        self.cpp_info.components["tinydnn"].requires = ["cereal::cereal", "stb::stb"]
         if self.settings.os == "Linux":
             self.cpp_info.components["tinydnn"].system_libs = ["pthread"]
+        if self.options.with_tbb:
+            self.cpp_info.components["tinydnn"].requires.append("tbb::tbb")
+            self.cpp_info.components["tinydnn"].defines = ["CNN_USE_TBB=1"]
