@@ -1,0 +1,6 @@
+sources:
+  cci.20210111:
+    - url: https://raw.githubusercontent.com/lava/matplotlib-cpp/70d508fcb7febc66535ba923eac1b1a4e571e4d1/matplotlibcpp.h
+      sha256: 8fbc9e3613cfce3dd76b3c854d9c6ccb1229ec639e34052948f1209939b97a1f
+    - url: https://raw.githubusercontent.com/lava/matplotlib-cpp/70d508fcb7febc66535ba923eac1b1a4e571e4d1/LICENSE
+      sha256: d0dc4eae3be039d576e127912d16f78a7ba4e0e6205cd75103efd1a45b89a4ba
