@@ -38,5 +38,5 @@ class CrowConan(ConanFile):
         self.info.header_only()
 
     def package_info(self):
-        if self.settings.os == "Linux":
+        if self.settings.os in ("FreeBSD", "Linux"):
             self.cpp_info.system_libs = ["pthread"]
