@@ -66,8 +66,8 @@ class LibnameConan(ConanFile):
         if self.settings.os == "Linux":
             self.requires("at-spi2-atk/2.38.0")
             if self.options.with_wayland:
-                self.requires("xkbcommon/0.10.0")
-                self.requires("wayland") # FIXME: Create an actual Wayland package(s)
+                self.requires("xkbcommon/1.0.3")
+                self.requires("wayland/1.18.0")
             if self.options.with_x11:
                 self.requires("xorg/system")
         self.requires("atk/2.36.0")
@@ -92,6 +92,9 @@ class LibnameConan(ConanFile):
         defs["tests"] = "false"
         defs["examples"] = "false"
         defs["demos"] = "false"
+        defs["datadir"] = os.path.join(self.package_folder, "res", "share")
+        defs["localedir"] = os.path.join(self.package_folder, "res", "share", "locale")
+        defs["sysconfdir"] = os.path.join(self.package_folder, "res", "etc")
         args=[]
         args.append("--wrap-mode=nofallback")
         meson.configure(defs=defs, build_folder=self._build_subfolder, source_folder=self._source_subfolder, pkg_config_paths=[self.install_folder], args=args)
@@ -118,6 +121,9 @@ class LibnameConan(ConanFile):
         self.copy(pattern="*.so*", dst="lib", keep_path=False)
         self.copy(pattern="*.dylib", dst="lib", keep_path=False)
 
+        self.copy(pattern="COPYING", src=self._source_subfolder, dst="licenses")
+        tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
+
     def package_info(self):
         self.cpp_info.libs = ["gailutil-3", "gtk-3", "gdk-3"]
         self.cpp_info.includedirs.append(os.path.join("include", "gtk-3.0"))
@@ -125,3 +131,5 @@ class LibnameConan(ConanFile):
         self.cpp_info.names["pkg_config"] = "gtk+-3.0"
         if self.settings.os == "Macos":
             self.cpp_info.frameworks = ["AppKit", "Carbon"]
+
+        # FIXME add components for : gail-3.0 gdk-3.0 gdk-x11-3.0 gtk+-3.0.pc gtk+-unix-print-3.0.pc gtk+-x11-3.0.pc
