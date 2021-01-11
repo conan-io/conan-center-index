@@ -104,7 +104,7 @@ class OcctConan(ConanFile):
 
         tools.replace_in_file(
             os.path.join(self._source_subfolder,
-                        "src/Font/Font_Fontmgr.cxx"),
+                         "src/Font/Font_FontMgr.cxx"),
             "#pragma comment (lib, \"freetype.lib\")",
             "")
 
