@@ -21,9 +21,9 @@ class MatplotlibCppConan(ConanFile):
             tools.download(url_sha["url"], os.path.basename(url_sha["url"]))
             tools.check_sha256(os.path.basename(url_sha["url"]), url_sha["sha256"])
 
-    def package(self):        
-        self.copy(pattern="LICENSE", dst="licenses" )
-        self.copy(pattern="matplotlibcpp.h", dst="include" )
+    def package(self):
+        self.copy(pattern="LICENSE", dst="licenses")
+        self.copy(pattern="matplotlibcpp.h", dst="include")
 
     def package_id(self):
         self.info.header_only()
