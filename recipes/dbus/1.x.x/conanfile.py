@@ -1,6 +1,6 @@
 import os
 import shutil
-from conans import CMake, ConanFile, tools
+from conans import AutoToolsBuildEnvironment, ConanFile, tools
 from conans.errors import ConanInvalidConfiguration
 
 
@@ -15,29 +15,19 @@ class DbusConan(ConanFile):
 
     options = {
         "with_x11": [True, False],
-        "with_glib": [True, False],
-        "enable_assert": [True, False],
-        "enable_checks": [True, False]}
+        "with_glib": [True, False]}
 
     default_options = {
         "with_x11": False,
-        "with_glib": False,
-        "enable_assert": False,
-        "enable_checks": False}
+        "with_glib": False}
 
-    generators = "cmake", "cmake_find_package"
-
-    exports_sources = ["patches/*"]
+    generators = "pkg_config"
 
     @property
     def _source_subfolder(self):
         return "source_subfolder"
 
-    @property
-    def _build_subfolder(self):
-        return "build_subfolder"
-
-    _cmake = None
+    _autotools = None
 
     def configure(self):
         if self.settings.os not in ("Linux", "FreeBSD"):
@@ -59,43 +49,38 @@ class DbusConan(ConanFile):
         if self.options.with_x11:
             self.requires("xorg/system")
 
-    def _configure_cmake(self):
-        if not self._cmake:
-            self._cmake = CMake(self)
+    def _configure_autotools(self):
+        if not self._autotools:
+            self._autotools = AutoToolsBuildEnvironment(self)
 
-            self._cmake.definitions["DBUS_BUILD_TESTS"] = False
-            self._cmake.definitions["DBUS_ENABLE_DOXYGEN_DOCS"] = False
-            self._cmake.definitions["DBUS_ENABLE_XML_DOCS"] = False
+            args = []
+            args.append("--disable-tests")
+            args.append("--disable-doxygen-docs")
+            args.append("--disable-xml-docs")
 
-            self._cmake.definitions["DBUS_BUILD_X11"] = self.options.with_x11
-            self._cmake.definitions["DBUS_WITH_GLIB"] = self.options.with_glib
-            self._cmake.definitions["DBUS_DISABLE_ASSERT"] = not self.options.enable_assert
-            self._cmake.definitions["DBUS_DISABLE_CHECKS"] = not self.options.enable_checks
+            args.append("--%s-x11-autolaunch" % ("enable" if self.options.with_x11 else "disable"))
+            args.append("--disable-asserts")
+            args.append("--disable-checks")
 
-            path_to_cmake_lists = os.path.join(self._source_subfolder, "cmake")
-
-            self._cmake.configure(source_folder=path_to_cmake_lists,
-                                  build_folder=self._build_subfolder)
-        return self._cmake
+            self._autotools.configure(args=args, configure_dir=self._source_subfolder)
+        return self._autotools
 
     def build(self):
-        for patch in self.conan_data["patches"][self.version]:
-            tools.patch(**patch)
-
-        cmake = self._configure_cmake()
-        cmake.build()
+        autotools = self._configure_autotools()
+        autotools.make()
 
     def package(self):
         self.copy(pattern="COPYING", dst="licenses",
                   src=self._source_subfolder)
-        cmake = self._configure_cmake()
-        cmake.install()
+        autotools = self._configure_autotools()
+        autotools.install()
 
         for i in ["var", "share", "etc"]:
             shutil.move(os.path.join(self.package_folder, i), os.path.join(self.package_folder, "res", i))
 
         tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
         tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
+        tools.remove_files_by_mask(self.package_folder, "*.la")
 
     def package_info(self):
         # FIXME: There should not be a namespace

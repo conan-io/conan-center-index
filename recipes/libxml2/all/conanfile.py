@@ -254,8 +254,7 @@ class Libxml2Conan(ConanFile):
             bindir = os.path.join(self.package_folder, "bin")
             self.output.info("Appending PATH environment variable: {}".format(bindir))
             self.env_info.PATH.append(bindir)
-
-        if self.settings.os in ["Linux", "Macos", "FreeBSD"]:
+        if self.settings.os in ["Linux", "Macos", "FreeBSD", "Android"]:
             self.cpp_info.system_libs.append('m')
         if self.settings.os == "Windows":
             self.cpp_info.system_libs.append('ws2_32')

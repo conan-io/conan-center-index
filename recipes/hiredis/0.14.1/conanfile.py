@@ -9,7 +9,7 @@ class HiredisConan(ConanFile):
     version = "0.14.1"
 
     description = "Minimalistic C client for Redis >= 1.2"
-    topics = "conan", "c", "redis"
+    topics = ("conan", "c", "redis")
 
     license = "BSD-3-Clause"
     settings = "os", "arch", "compiler", "build_type"
