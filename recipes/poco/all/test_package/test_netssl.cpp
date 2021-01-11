@@ -25,7 +25,7 @@ int main(int argc, char** argv) {
     SSLInitializer sslInitializer;
 
     SharedPtr<InvalidCertificateHandler> ptrCert = new AcceptCertificateHandler(false);
-    Context::Ptr ptrContext = new Context(Context::CLIENT_USE, "", "", "", Context::VERIFY_NONE, 9, false, "ALL:!ADH:!LOW:!EXP:!MD5:@STRENGTH");
+    Context::Ptr ptrContext = new Context(Context::CLIENT_USE, "", Context::VERIFY_NONE);
     SSLManager::instance().initializeClient(0, ptrCert, ptrContext);
 
     try {
