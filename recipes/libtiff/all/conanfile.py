@@ -31,7 +31,7 @@ class LibtiffConan(ConanFile):
         "lzma": True,
         "jpeg": "libjpeg",
         "zlib": True,
-        "libdeflate": False, # FIXME: should be True
+        "libdeflate": True,
         "zstd": True,
         "jbig": True,
         "webp": True,
@@ -82,8 +82,6 @@ class LibtiffConan(ConanFile):
         if self.options.zlib:
             self.requires("zlib/1.2.11")
         if self.options.get_safe("libdeflate"):
-            # FIXME: remove ConanInvalidConfiguration when libdeflate recipe available in CCI
-            raise ConanInvalidConfiguration("libdeflate recipe not yet available in CCI")
             self.requires("libdeflate/1.7")
         if self.options.lzma:
             self.requires("xz_utils/5.2.5")
@@ -133,6 +131,8 @@ class LibtiffConan(ConanFile):
             self._cmake.definitions["zlib"] = self.options.zlib
             if self._has_libdeflate_option:
                 self._cmake.definitions["libdeflate"] = self.options.libdeflate
+                if self.options.libdeflate:
+                    self._cmake.definitions["DEFLATE_NAMES"] = self.deps_cpp_info["libdeflate"].libs[0]
             if self._has_zstd_option:
                 self._cmake.definitions["zstd"] = self.options.zstd
             if self._has_web_option:
