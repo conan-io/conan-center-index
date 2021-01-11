@@ -42,6 +42,10 @@ class LibnameConan(ConanFile):
             del self.options.with_wayland
             del self.options.with_x11
 
+    def validate(self):
+        if self.settings.compiler == "gcc" and tools.Version(self.settings.compiler.version) < "5":
+            raise ConanInvalidConfiguration("this recipes does not support GCC before version 5. contributions are welcome") 
+
     def configure(self):
         if self.options.shared:
             del self.options.fPIC
@@ -111,25 +115,42 @@ class LibnameConan(ConanFile):
         meson = self._configure_meson()
         with tools.environment_append({"PKG_CONFIG_PATH": self.install_folder}):
             meson.install()
-        # If the CMakeLists.txt has a proper install method, the steps below may be redundant
-        # If so, you can just remove the lines below
-        include_folder = os.path.join(self._source_subfolder, "include")
-        self.copy(pattern="*", dst="include", src=include_folder)
-        self.copy(pattern="*.dll", dst="bin", keep_path=False)
-        self.copy(pattern="*.lib", dst="lib", keep_path=False)
-        self.copy(pattern="*.a", dst="lib", keep_path=False)
-        self.copy(pattern="*.so*", dst="lib", keep_path=False)
-        self.copy(pattern="*.dylib", dst="lib", keep_path=False)
 
         self.copy(pattern="COPYING", src=self._source_subfolder, dst="licenses")
         tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
 
     def package_info(self):
-        self.cpp_info.libs = ["gailutil-3", "gtk-3", "gdk-3"]
-        self.cpp_info.includedirs.append(os.path.join("include", "gtk-3.0"))
-        self.cpp_info.includedirs.append(os.path.join("include", "gail-3.0"))
-        self.cpp_info.names["pkg_config"] = "gtk+-3.0"
-        if self.settings.os == "Macos":
-            self.cpp_info.frameworks = ["AppKit", "Carbon"]
+        self.cpp_info.components["gdk-3.0"].libs = ["gdk-3"]
+        self.cpp_info.components["gdk-3.0"].includedirs = [os.path.join("include", "gtk-3.0")]
+        self.cpp_info.components["gdk-3.0"].requires = []
+        if self.options.with_pango:
+            self.cpp_info.components["gdk-3.0"].requires.extend(["pango::pango_", "pango::pangocairo"])
+        self.cpp_info.components["gdk-3.0"].requires.append("gdk-pixbuf::gdk-pixbuf")
+        if self.settings.compiler != "Visual Studio":
+            self.cpp_info.components["gdk-3.0"].requires.extend(["cairo::cairo", "cairo::cairo-gobject"])
+        if self.settings.os == "Linux":
+            self.cpp_info.components["gdk-3.0"].requires.extend(["glib::gio-unix-2.0" "cairo::cairo-xlib"])
+            if self.options.with_x11:
+                self.cpp_info.components["gdk-3.0"].requires.append("xorg::xorg")
+        self.cpp_info.components["gdk-3.0"].requires.append("libepoxy::libepoxy")
+        self.cpp_info.components["gdk-3.0"].names["pkg_config"] = "gdk-3.0"
 
-        # FIXME add components for : gail-3.0 gdk-3.0 gdk-x11-3.0 gtk+-3.0.pc gtk+-unix-print-3.0.pc gtk+-x11-3.0.pc
+        self.cpp_info.components["gtk+-3.0"].libs = ["gtk-3"]
+        self.cpp_info.components["gtk+-3.0"].requires = ["gdk-3.0", "atk::atk"]
+        if self.settings.compiler != "Visual Studio":
+             self.cpp_info.components["gtk+-3.0"].requires.extend(["cairo::cairo", "cairo::cairo-gobject"])
+        self.cpp_info.components["gtk+-3.0"].requires.extend(["gdk-pixbuf::gdk-pixbuf", "glib::gio-2.0"])
+        if self.settings.os == "Linux":
+            self.cpp_info.components["gtk+-3.0"].requires.append("at-spi2-atk::at-spi2-atk")
+        self.cpp_info.components["gtk+-3.0"].requires.append("libepoxy::libepoxy")
+        if self.options.with_pango:
+            self.cpp_info.components["gtk+-3.0"].requires.append('pango::pangoft2')
+        if self.settings.os == "Linux":
+            self.cpp_info.components["gtk+-3.0"].requires.append("glib::gio-unix-2.0")
+        self.cpp_info.components["gtk+-3.0"].includedirs = [os.path.join("include", "gtk-3.0")]
+        self.cpp_info.components["gtk+-3.0"].names["pkg_config"] = "gtk+-3.0"
+
+        self.cpp_info.components["gail-3.0"].libs = ["gailutil-3"]
+        self.cpp_info.components["gail-3.0"].requires = ["gtk+-3.0", "atk::atk"]
+        self.cpp_info.components["gail-3.0"].includedirs = [os.path.join("include", "gail-3.0")]
+        self.cpp_info.components["gail-3.0"].names["pkg_config"] = "gail-3.0"
