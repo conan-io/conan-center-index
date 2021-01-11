@@ -17,13 +17,13 @@ class MatplotlibCppConan(ConanFile):
         return "source_subfolder"
 
     def source(self):
-        for url_sha in self.conan_data["sources"][self.version]:
-            tools.download(url_sha["url"], os.path.basename(url_sha["url"]))
-            tools.check_sha256(os.path.basename(url_sha["url"]), url_sha["sha256"])
+        tools.get(**self.conan_data["sources"][self.version])
+        extracted_dir = glob.glob("matplotlib-cpp-*/")[0]
+        os.rename(extracted_dir, self._source_subfolder)
 
     def package(self):
-        self.copy(pattern="LICENSE", dst="licenses")
-        self.copy(pattern="matplotlibcpp.h", dst="include")
+        self.copy(pattern="LICENSE", src=self._source_subfolder, dst="licenses")
+        self.copy(pattern="matplotlibcpp.h", src=self._source_subfolder, dst="include")
 
     def package_id(self):
         self.info.header_only()
