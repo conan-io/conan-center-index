@@ -95,7 +95,15 @@ class LibarchiveConan(ConanFile):
             self.requires("libiconv/1.16")
         if self.options.with_pcreposix:
             self.requires("pcre/8.44")
-        # TODO: deps not covered yet: cng, nettle, libb2
+        if self.options.with_cng:
+            # TODO: add cng when available in CCI
+            raise ConanInvalidConfiguration("cng recipe not yet available in CCI.")
+        if self.options.with_nettle:
+            self.requires("nettle/3.6")
+        if self.options.with_libb2:
+            self.requires("libb2/20190723")
+        if self.options.with_lzo:
+            self.requires("lzo/2.10")
 
     def validate(self):
         if self.options.with_expat and self.options.with_libxml2:
