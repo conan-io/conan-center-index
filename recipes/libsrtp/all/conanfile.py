@@ -83,6 +83,8 @@ class ConanRecipe(ConanFile):
         cmake.install()
 
     def package_info(self):
+        libsrtp_major = tools.Version(self.version).major
+        self.cpp_info.names["pkg_config"] = "libsrtp{}".format(libsrtp_major if int(libsrtp_major) > 1 else "")
         self.cpp_info.libs = tools.collect_libs(self)
         if self.settings.os == "Windows":
             self.cpp_info.system_libs = ["ws2_32"]
