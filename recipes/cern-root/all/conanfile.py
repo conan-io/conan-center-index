@@ -265,7 +265,7 @@ class CernRootConan(ConanFile):
 
     def package(self):
         self._configured_cmake.install()
-        self.copy("LICENSE.txt", dst="licenses")
+        self.copy("LICENSE", dst="licenses", src=self._source_subfolder)
         for dir in ["include", "lib", "bin"]:
             os.symlink(
                 os.sep.join((self.package_folder, "res", dir)),
