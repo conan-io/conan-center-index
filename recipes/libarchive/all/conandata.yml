@@ -5,3 +5,7 @@ sources:
   "3.4.3":
     url: "https://github.com/libarchive/libarchive/releases/download/v3.4.3/libarchive-3.4.3.tar.gz"
     sha256: "ee1e749213c108cb60d53147f18c31a73d6717d7e3d2481c157e1b34c881ea39"
+patches:
+  "3.4.0":
+    - patch_file: "patches/msvc-no-we4061.patch"
+      base_path: "source_subfolder"

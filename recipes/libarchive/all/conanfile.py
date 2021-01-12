@@ -12,7 +12,7 @@ class LibarchiveConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://libarchive.org"
     license = "BSD"
-    exports_sources = ["CMakeLists.txt"]
+    exports_sources = ["CMakeLists.txt", "patches/**"]
     generators = "cmake", "cmake_find_package"
     settings = "os", "arch", "compiler", "build_type"
     options = {
@@ -95,10 +95,6 @@ class LibarchiveConan(ConanFile):
         # TODO: deps not covered yet: cng, nettle, libb2
 
     def validate(self):
-        if self.version == "3.4.0":
-            # https://github.com/libarchive/libarchive/pull/1395
-            if self.settings.compiler == "Visual Studio" and self.settings.compiler.version == "16":
-                raise ConanInvalidConfiguration("Visual Studio 16 is not supported")
         if self.options.with_expat and self.options.with_libxml2:
             raise ConanInvalidConfiguration("libxml2 and expat options are exclusive. They cannot be used together as XML engine")
 
@@ -142,6 +138,9 @@ class LibarchiveConan(ConanFile):
         return self._cmake
 
     def _patch_sources(self):
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            tools.patch(**patch)
+
         cmakelists_path = os.path.join(self._source_subfolder, "CMakeLists.txt")
 
         # it can possibly override CMAKE_MODULE_PATH provided by generator
