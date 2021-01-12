@@ -44,7 +44,7 @@ class LibnameConan(ConanFile):
 
     def validate(self):
         if self.settings.compiler == "gcc" and tools.Version(self.settings.compiler.version) < "5":
-            raise ConanInvalidConfiguration("this recipes does not support GCC before version 5. contributions are welcome") 
+            raise ConanInvalidConfiguration("this recipes does not support GCC before version 5. contributions are welcome")
 
     def configure(self):
         if self.options.shared:
@@ -57,11 +57,11 @@ class LibnameConan(ConanFile):
                     raise ConanInvalidConfiguration("with_pango option is mandatory when with_wayland or with_x11 is used")
         if self.settings.os == "Windows":
             raise ConanInvalidConfiguration("GTK recipe is not yet compatible with Windows. Contributions are welcome.")
-    
+
     def build_requirements(self):
         self.build_requires("meson/0.54.2")
         self.build_requires("pkgconf/1.7.3")
-    
+
     def requirements(self):
         self.requires("gdk-pixbuf/2.42.0")
         self.requires("glib/2.67.0")
@@ -129,7 +129,7 @@ class LibnameConan(ConanFile):
         if self.settings.compiler != "Visual Studio":
             self.cpp_info.components["gdk-3.0"].requires.extend(["cairo::cairo", "cairo::cairo-gobject"])
         if self.settings.os == "Linux":
-            self.cpp_info.components["gdk-3.0"].requires.extend(["glib::gio-unix-2.0" "cairo::cairo-xlib"])
+            self.cpp_info.components["gdk-3.0"].requires.extend(["glib::gio-unix-2.0", "cairo::cairo-xlib"])
             if self.options.with_x11:
                 self.cpp_info.components["gdk-3.0"].requires.append("xorg::xorg")
         self.cpp_info.components["gdk-3.0"].requires.append("libepoxy::libepoxy")
@@ -138,7 +138,7 @@ class LibnameConan(ConanFile):
         self.cpp_info.components["gtk+-3.0"].libs = ["gtk-3"]
         self.cpp_info.components["gtk+-3.0"].requires = ["gdk-3.0", "atk::atk"]
         if self.settings.compiler != "Visual Studio":
-             self.cpp_info.components["gtk+-3.0"].requires.extend(["cairo::cairo", "cairo::cairo-gobject"])
+            self.cpp_info.components["gtk+-3.0"].requires.extend(["cairo::cairo", "cairo::cairo-gobject"])
         self.cpp_info.components["gtk+-3.0"].requires.extend(["gdk-pixbuf::gdk-pixbuf", "glib::gio-2.0"])
         if self.settings.os == "Linux":
             self.cpp_info.components["gtk+-3.0"].requires.append("at-spi2-atk::at-spi2-atk")
