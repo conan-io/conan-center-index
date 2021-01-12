@@ -11,7 +11,7 @@ class LibarchiveConan(ConanFile):
     topics = ("conan", "libarchive", "tar", "data-compressor", "file-compression")
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://libarchive.org"
-    license = "BSD"
+    license = "BSD-2-Clause"
     exports_sources = ["CMakeLists.txt", "patches/**"]
     generators = "cmake", "cmake_find_package"
     settings = "os", "arch", "compiler", "build_type"
