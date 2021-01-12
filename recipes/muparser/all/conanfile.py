@@ -77,3 +77,5 @@ class MuParserConan(ConanFile):
         self.cpp_info.libs = ["muparser"]
         if not self.options.shared:
             self.cpp_info.defines = ["MUPARSER_STATIC=1"]
+        if not self.options.shared and tools.stdcpp_library(self):
+            self.cpp_info.system_libs.append(tools.stdcpp_library(self))
