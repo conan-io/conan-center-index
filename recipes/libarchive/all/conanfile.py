@@ -52,8 +52,15 @@ class LibarchiveConan(ConanFile):
         'with_zstd': False
     }
 
-    _source_subfolder = "source_subfolder"
-    _build_subfolder = "build_subfolder"
+    _cmake = None
+
+    @property
+    def _source_subfolder(self):
+        return "source_subfolder"
+
+    @property
+    def _build_subfolder(self):
+        return "build_subfolder"
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
@@ -101,36 +108,38 @@ class LibarchiveConan(ConanFile):
         # TODO: deps not covered yet: cng, nettle, libb2
 
     def _configure_cmake(self):
-        cmake = CMake(self)
+        if self._cmake:
+            return self._cmake
+        self._cmake = CMake(self)
         # turn off deps to avoid picking up them accidentally
-        cmake.definitions["ENABLE_NETTLE"] = self.options.with_nettle
-        cmake.definitions["ENABLE_OPENSSL"] = self.options.with_openssl
-        cmake.definitions["ENABLE_LIBB2"] = self.options.with_libb2
-        cmake.definitions["ENABLE_LZ4"] = self.options.with_lz4
-        cmake.definitions["ENABLE_LZO"] = self.options.with_lzo
-        cmake.definitions["ENABLE_LZMA"] = self.options.with_lzma
-        cmake.definitions["ENABLE_ZSTD"] = self.options.with_zstd
-        cmake.definitions["ENABLE_ZLIB"] = True
-        cmake.definitions["ENABLE_BZip2"] = self.options.with_bzip2
+        self._cmake.definitions["ENABLE_NETTLE"] = self.options.with_nettle
+        self._cmake.definitions["ENABLE_OPENSSL"] = self.options.with_openssl
+        self._cmake.definitions["ENABLE_LIBB2"] = self.options.with_libb2
+        self._cmake.definitions["ENABLE_LZ4"] = self.options.with_lz4
+        self._cmake.definitions["ENABLE_LZO"] = self.options.with_lzo
+        self._cmake.definitions["ENABLE_LZMA"] = self.options.with_lzma
+        self._cmake.definitions["ENABLE_ZSTD"] = self.options.with_zstd
+        self._cmake.definitions["ENABLE_ZLIB"] = True
+        self._cmake.definitions["ENABLE_BZip2"] = self.options.with_bzip2
         # requires LibXml2 cmake name
-        cmake.definitions["ENABLE_LIBXML2"] = self.options.with_libxml2
-        cmake.definitions["ENABLE_ICONV"] = self.options.with_iconv
-        cmake.definitions["ENABLE_EXPAT"] = self.options.with_expat
-        cmake.definitions["ENABLE_PCREPOSIX"] = self.options.with_pcreposix
-        cmake.definitions["ENABLE_LibGCC"] = False
-        cmake.definitions["ENABLE_CNG"] = self.options.with_cng
+        self._cmake.definitions["ENABLE_LIBXML2"] = self.options.with_libxml2
+        self._cmake.definitions["ENABLE_ICONV"] = self.options.with_iconv
+        self._cmake.definitions["ENABLE_EXPAT"] = self.options.with_expat
+        self._cmake.definitions["ENABLE_PCREPOSIX"] = self.options.with_pcreposix
+        self._cmake.definitions["ENABLE_LibGCC"] = False
+        self._cmake.definitions["ENABLE_CNG"] = self.options.with_cng
         # turn off features
-        cmake.definitions["ENABLE_ACL"] = self.options.with_acl
+        self._cmake.definitions["ENABLE_ACL"] = self.options.with_acl
         # turn off components
-        cmake.definitions["ENABLE_TAR"] = False
-        cmake.definitions["ENABLE_CPIO"] = False
-        cmake.definitions["ENABLE_CAT"] = False
-        cmake.definitions["ENABLE_TEST"] = False
+        self._cmake.definitions["ENABLE_TAR"] = False
+        self._cmake.definitions["ENABLE_CPIO"] = False
+        self._cmake.definitions["ENABLE_CAT"] = False
+        self._cmake.definitions["ENABLE_TEST"] = False
         # too strict check
-        cmake.definitions["ENABLE_WERROR"] = False
+        self._cmake.definitions["ENABLE_WERROR"] = False
 
-        cmake.configure(build_folder=self._build_subfolder)
-        return cmake
+        self._cmake.configure(build_folder=self._build_subfolder)
+        return self._cmake
 
     def _patch_sources(self):
         cmakelists_path = os.path.join(self._source_subfolder, "CMakeLists.txt")
