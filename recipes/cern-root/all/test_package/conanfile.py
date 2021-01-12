@@ -3,7 +3,7 @@ import os
 from conans import CMake, ConanFile, RunEnvironment, tools
 
 
-class RootTestConan(ConanFile):
+class CernRootTestConan(ConanFile):
     settings = "os", "compiler", "build_type", "arch"
     generators = "cmake_find_package"
 

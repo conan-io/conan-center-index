@@ -19,8 +19,8 @@ class PythonOption:
 required_conan_version = ">=1.29.1"
 
 
-class RootConan(ConanFile):
-    name = "root"
+class CernRootConan(ConanFile):
+    name = "cern-root"
     version = "v6-22-02"
     license = "LGPL-2.1-or-later"  # of ROOT itself, the recipe is under MIT license.
     homepage = "https://root.cern/"
