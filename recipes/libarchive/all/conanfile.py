@@ -81,21 +81,21 @@ class LibarchiveConan(ConanFile):
         if self.options.with_bzip2:
             self.requires("bzip2/1.0.8")
         if self.options.with_openssl:
-            self.requires("openssl/1.1.1d")
+            self.requires("openssl/1.1.1i")
         if self.options.with_lz4:
-            self.requires("lz4/1.9.2")
+            self.requires("lz4/1.9.3")
         if self.options.with_zstd:
-            self.requires("zstd/1.4.3")
+            self.requires("zstd/1.4.8")
         if self.options.with_lzma:
-            self.requires("xz_utils/5.2.4")
+            self.requires("xz_utils/5.2.5")
         if self.options.with_libxml2:
-            self.requires("libxml2/2.9.9")
+            self.requires("libxml2/2.9.10")
         if self.options.with_expat:
-            self.requires("expat/2.2.7")
+            self.requires("expat/2.2.10")
         if self.options.with_iconv:
-            self.requires("libiconv/1.15")
+            self.requires("libiconv/1.16")
         if self.options.with_pcreposix:
-            self.requires("pcre/8.41")
+            self.requires("pcre/8.44")
         # TODO: deps not covered yet: cng, nettle, libb2
 
     def _configure_cmake(self):
