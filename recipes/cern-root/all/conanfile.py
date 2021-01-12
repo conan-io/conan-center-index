@@ -69,6 +69,14 @@ class CernRootConan(ConanFile):
     _cmake = None
 
     @property
+    def _source_subfolder(self):
+        return "source_subfolder"
+
+    @property
+    def _build_subfolder(self):
+        return "build_subfolder"
+
+    @property
     def _minimum_cpp_standard(self):
         return 11
 
@@ -80,11 +88,6 @@ class CernRootConan(ConanFile):
             "clang": "3.4",
             "apple-clang": "5.1",
         }
-
-    @property
-    def _rootsrcdir(self):
-        version = self.version.replace("v", "")
-        return "root-{}".format(version)
 
     def configure(self):
         if self.settings.compiler.get_safe("cppstd"):
@@ -108,17 +111,14 @@ class CernRootConan(ConanFile):
                 )
 
     def source(self):
-        self._checkout_source()
-
-    def _checkout_source(self):
         tools.get(**self.conan_data["sources"][self.version])
+        os.rename("root-{}".format(self.version.replace("v", ""), self._source_subfolder)```
 
     def _patch_source_cmake(self):
         os.remove(
             os.sep.join(
                 (
-                    self.source_folder,
-                    self._rootsrcdir,
+                    self._source_subfolder,
                     "cmake",
                     "modules",
                     "FindTBB.cmake",
@@ -131,7 +131,7 @@ class CernRootConan(ConanFile):
         # see: https://github.com/conan-io/conan/issues/4430
         # Patch ROOT CMake to use Conan dependencies
         tools.replace_in_file(
-            os.sep.join((self.source_folder, self._rootsrcdir, "CMakeLists.txt")),
+            os.path.join(self._source_subfolder, "CMakeLists.txt"),
             "project(ROOT)",
             """project(ROOT)
 
@@ -178,7 +178,8 @@ class CernRootConan(ConanFile):
             cmakelibpath = ";".join(self.deps_cpp_info.lib_paths)
             cmakeincludepath = ";".join(self.deps_cpp_info.include_paths)
             self._cmake.configure(
-                source_folder="root-{}".format(version),
+                source_folder=self._source_subfolder,
+                build_folder=self._build_subfolder,
                 defs={
                     # TODO: Remove BUILD_SHARED_LIBS option when hooks issue is resolved
                     # (see: https://github.com/conan-io/hooks/issues/252)
@@ -241,7 +242,7 @@ class CernRootConan(ConanFile):
         for f in ["opengl_system", "GLEW", "glu", "TBB", "LibXml2", "ZLIB", "SQLite3"]:
             shutil.copy(
                 "Find{}.cmake".format(f),
-                os.sep.join((self.source_folder, self._rootsrcdir, "cmake", "modules")),
+                os.path.join(self._source_subfolder, "cmake", "modules"),
             )
 
     @property
@@ -306,11 +307,11 @@ class CernRootConan(ConanFile):
             "MultiProc",
             "ROOTDataFrame",
         ]
-        self.cpp_info.builddirs = ["res" + os.sep + "cmake"]
+        self.cpp_info.builddirs = [os.path.join("res", "cmake")]
         self.cpp_info.build_modules.extend(
             [
-                os.sep.join(("res", "cmake", "RootMacros.cmake")),
-                # os.sep.join(("res", "cmake", "ROOTUseFile.cmake")),
+                os.path.join("res", "cmake", "RootMacros.cmake"),
+                # os.path.join("res", "cmake", "ROOTUseFile.cmake"),
             ]
         )
         self.cpp_info.resdirs = ["res"]
