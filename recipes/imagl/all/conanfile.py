@@ -1,5 +1,4 @@
-from conans import ConanFile, CMake, tools
-
+from conans import ConanFile, CMake, tools, errors
 
 class ImaglConan(ConanFile):
     name = "imagl"
@@ -50,4 +49,18 @@ conan_basic_setup()''')
         if self.settings.build_type == "Debug": debug_suffix = "d"
         if not(self.options.shared): static_suffix = "s"
         self.cpp_info.libs = ["imaGL{debug}{static}".format(debug = debug_suffix, static = static_suffix)]
+
+    def configure(self):
+        if (self.settings.compiler == "clang"
+                and tools.Version(self.settings.compiler.version) < "10.0.0"):
+            raise errors.ConanInvalidConfiguration("Library imaGL need clang 10+")
+        if (self.settings.compiler == "gcc"
+                and tools.Version(self.settings.compiler.version) < "9.0.0"):
+            raise errors.ConanInvalidConfiguration("Library imaGL need gcc 9+")
+        if (self.settings.compiler == "apple-clang"
+                and tools.Version(self.settings.compiler.version) < "11.0.3"):
+            raise errors.ConanInvalidConfiguration("Library imaGL need apple-clang 11.0.3+")
+        if (self.settings.compiler == "Visual Studio"
+                and tools.Version(self.settings.compiler.version) < "16.5"):
+            raise errors.ConanInvalidConfiguration("Library imaGL need Visual Studio 16.5+")
 
