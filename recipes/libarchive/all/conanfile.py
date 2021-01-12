@@ -2,6 +2,8 @@ from conans import ConanFile, CMake, tools
 from conans.errors import ConanInvalidConfiguration
 import os
 
+required_conan_version = ">=1.32.0"
+
 
 class LibarchiveConan(ConanFile):
     name = "libarchive"
@@ -58,6 +60,14 @@ class LibarchiveConan(ConanFile):
         extracted_dir = self.name + "-" + self.version
         os.rename(extracted_dir, self._source_subfolder)
 
+    def validate(self):
+        if self.version == "3.4.0":
+            # https://github.com/libarchive/libarchive/pull/1395
+            if self.settings.compiler == "Visual Studio" and self.settings.compiler.version == "16":
+                raise ConanInvalidConfiguration("Visual Studio 16 is not supported")
+        if self.options.with_expat and self.options.with_libxml2:
+            raise ConanInvalidConfiguration("libxml2 and expat options are exclusive. They cannot be used together as XML engine")
+
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
@@ -65,9 +75,6 @@ class LibarchiveConan(ConanFile):
     def configure(self):
         del self.settings.compiler.libcxx
         del self.settings.compiler.cppstd
-
-        if self.options.with_expat and self.options.with_libxml2:
-            raise ConanInvalidConfiguration("libxml2 and expat options are exclusive. They cannot be used together as XML engine")
 
     def requirements(self):
         self.requires("zlib/1.2.11")
