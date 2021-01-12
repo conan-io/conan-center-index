@@ -133,21 +133,19 @@ class CernRootConan(ConanFile):
         tools.replace_in_file(
             os.path.join(self._source_subfolder, "CMakeLists.txt"),
             "project(ROOT)",
-            """project(ROOT)
-
-            # sets the current C runtime on MSVC (MT vs MD vd MTd vs MDd)
-            include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
-            conan_set_vs_runtime()
-
-            find_package(OpenSSL REQUIRED)
-            set(OPENSSL_VERSION ${OpenSSL_VERSION})
-            find_package(LibXml2 REQUIRED)
-            set(LIBXML2_INCLUDE_DIR ${LibXml2_INCLUDE_DIR})
-            set(LIBXML2_LIBRARIES ${LibXml2_LIBRARIES})
-            find_package(SQLite3 REQUIRED)
-            set(SQLITE_INCLUDE_DIR ${SQLITE3_INCLUDE_DIRS})
-            set(SQLITE_LIBRARIES SQLite::SQLite)
-            """,
+            "\n".join(("project(ROOT)",
+            "# sets the current C runtime on MSVC (MT vs MD vd MTd vs MDd)",
+            "include({}/conanbuildinfo.cmake)".format(self.install_folder.replace("\\", "/")),
+            "conan_set_vs_runtime()",
+            "find_package(OpenSSL REQUIRED)",
+            "set(OPENSSL_VERSION ${OpenSSL_VERSION})",
+            "find_package(LibXml2 REQUIRED)",
+            "set(LIBXML2_INCLUDE_DIR ${LibXml2_INCLUDE_DIR})",
+            "set(LIBXML2_LIBRARIES ${LibXml2_LIBRARIES})",
+            "find_package(SQLite3 REQUIRED)",
+            "set(SQLITE_INCLUDE_DIR ${SQLITE3_INCLUDE_DIRS})",
+            "set(SQLITE_LIBRARIES SQLite::SQLite)",
+            ))
         )
 
     def _fix_source_permissions(self):
