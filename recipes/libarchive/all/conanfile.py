@@ -34,22 +34,22 @@ class LibarchiveConan(ConanFile):
         "with_zstd": [True, False]
     }
     default_options = {
-        'shared': False,
-        'fPIC': True,
-        'with_acl': True,
-        'with_bzip2': False,
-        'with_libxml2': False,
-        'with_expat': False,
-        'with_iconv': True,
-        'with_pcreposix': False,
-        'with_cng': False,
-        'with_nettle': False,
-        'with_openssl': False,
-        'with_libb2': False,
-        'with_lz4': False,
-        'with_lzo': False,
-        'with_lzma': False,
-        'with_zstd': False
+        "shared": False,
+        "fPIC": True,
+        "with_acl": True,
+        "with_bzip2": False,
+        "with_libxml2": False,
+        "with_expat": False,
+        "with_iconv": True,
+        "with_pcreposix": False,
+        "with_cng": False,
+        "with_nettle": False,
+        "with_openssl": False,
+        "with_libb2": False,
+        "with_lz4": False,
+        "with_lzo": False,
+        "with_lzma": False,
+        "with_zstd": False
     }
 
     _cmake = None
@@ -193,10 +193,10 @@ class LibarchiveConan(ConanFile):
         cmake = self._configure_cmake()
         cmake.install()
         # drop pc and cmake file
-        tools.rmdir(os.path.join(self.package_folder, 'lib', 'pkgconfig'))
-        tools.rmdir(os.path.join(self.package_folder, 'lib', 'cmake'))
-        tools.rmdir(os.path.join(self.package_folder, 'cmake'))
-        tools.rmdir(os.path.join(self.package_folder, 'share'))
+        tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
+        tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
+        tools.rmdir(os.path.join(self.package_folder, "cmake"))
+        tools.rmdir(os.path.join(self.package_folder, "share"))
 
     def package_info(self):
         self.cpp_info.libs = tools.collect_libs(self)
