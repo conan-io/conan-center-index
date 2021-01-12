@@ -112,7 +112,7 @@ class CernRootConan(ConanFile):
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
-        os.rename("root-{}".format(self.version.replace("v", ""), self._source_subfolder)```
+        os.rename("root-{}".format(self.version.replace("v", "")), self._source_subfolder)
 
     def _patch_source_cmake(self):
         os.remove(
