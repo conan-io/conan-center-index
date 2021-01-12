@@ -19,6 +19,7 @@ class LibarchiveConan(ConanFile):
         "shared": [True, False],
         "fPIC": [True, False],
         "with_acl": [True, False],
+        "with_zlib": [True, False],
         "with_bzip2": [True, False],
         "with_libxml2": [True, False],
         "with_expat": [True, False],
@@ -37,6 +38,7 @@ class LibarchiveConan(ConanFile):
         "shared": False,
         "fPIC": True,
         "with_acl": True,
+        "with_zlib": True,
         "with_bzip2": False,
         "with_libxml2": False,
         "with_expat": False,
@@ -73,7 +75,8 @@ class LibarchiveConan(ConanFile):
         del self.settings.compiler.cppstd
 
     def requirements(self):
-        self.requires("zlib/1.2.11")
+        if self.options.with_zlib:
+            self.requires("zlib/1.2.11")
         if self.options.with_bzip2:
             self.requires("bzip2/1.0.8")
         if self.options.with_openssl:
@@ -115,7 +118,7 @@ class LibarchiveConan(ConanFile):
         self._cmake.definitions["ENABLE_LZO"] = self.options.with_lzo
         self._cmake.definitions["ENABLE_LZMA"] = self.options.with_lzma
         self._cmake.definitions["ENABLE_ZSTD"] = self.options.with_zstd
-        self._cmake.definitions["ENABLE_ZLIB"] = True
+        self._cmake.definitions["ENABLE_ZLIB"] = self.options.with_zlib
         self._cmake.definitions["ENABLE_BZip2"] = self.options.with_bzip2
         # requires LibXml2 cmake name
         self._cmake.definitions["ENABLE_LIBXML2"] = self.options.with_libxml2
