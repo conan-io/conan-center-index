@@ -122,6 +122,11 @@ class LibjpegConan(ConanFile):
                 if file.endswith(".exe"):
                     os.unlink(os.path.join(bindir, file))
 
+        for fn in ("jpegint.h", "transupp.h",):
+            self.copy(fn, src=self._source_subfolder, dst="include")
+        for fn in ("jinclude.h", "transupp.c",):
+            self.copy(fn, src=self._source_subfolder, dst="res")
+
     def package_info(self):
         self.cpp_info.names["cmake_find_package"] = "JPEG"
         self.cpp_info.names["cmake_find_package_multi"] = "JPEG"
