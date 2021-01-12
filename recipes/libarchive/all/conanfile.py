@@ -62,19 +62,6 @@ class LibarchiveConan(ConanFile):
     def _build_subfolder(self):
         return "build_subfolder"
 
-    def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        extracted_dir = self.name + "-" + self.version
-        os.rename(extracted_dir, self._source_subfolder)
-
-    def validate(self):
-        if self.version == "3.4.0":
-            # https://github.com/libarchive/libarchive/pull/1395
-            if self.settings.compiler == "Visual Studio" and self.settings.compiler.version == "16":
-                raise ConanInvalidConfiguration("Visual Studio 16 is not supported")
-        if self.options.with_expat and self.options.with_libxml2:
-            raise ConanInvalidConfiguration("libxml2 and expat options are exclusive. They cannot be used together as XML engine")
-
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
@@ -106,6 +93,19 @@ class LibarchiveConan(ConanFile):
         if self.options.with_pcreposix:
             self.requires("pcre/8.44")
         # TODO: deps not covered yet: cng, nettle, libb2
+
+    def validate(self):
+        if self.version == "3.4.0":
+            # https://github.com/libarchive/libarchive/pull/1395
+            if self.settings.compiler == "Visual Studio" and self.settings.compiler.version == "16":
+                raise ConanInvalidConfiguration("Visual Studio 16 is not supported")
+        if self.options.with_expat and self.options.with_libxml2:
+            raise ConanInvalidConfiguration("libxml2 and expat options are exclusive. They cannot be used together as XML engine")
+
+    def source(self):
+        tools.get(**self.conan_data["sources"][self.version])
+        extracted_dir = self.name + "-" + self.version
+        os.rename(extracted_dir, self._source_subfolder)
 
     def _configure_cmake(self):
         if self._cmake:
