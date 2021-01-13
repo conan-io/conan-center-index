@@ -16,8 +16,6 @@ class LibsassConan(ConanFile):
     options = {"shared": [True, False], "fPIC": [True, False]}
     default_options = {"shared": False, "fPIC": True}
 
-    build_requires = "autoconf/2.69", "libtool/2.4.6"
-
     _autotools = None
 
     @property
@@ -27,6 +25,10 @@ class LibsassConan(ConanFile):
     def validate(self):
         if self.settings.os not in ["Linux", "FreeBSD", "Macos"]:
             raise ConanInvalidConfiguration("libsass supports only Linux, FreeBSD and Macos")
+
+    def build_requirements(self):
+        self.build_requires("autoconf/2.69")
+        self.build_requires("libtool/2.4.6")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
