@@ -22,6 +22,10 @@ class LibsassConan(ConanFile):
     def _source_subfolder(self):
         return "source_subfolder"
 
+    def configure(self):
+        if self.options.shared:
+            del self.options.fPIC
+
     def validate(self):
         if self.settings.os not in ["Linux", "FreeBSD", "Macos"]:
             raise ConanInvalidConfiguration("libsass supports only Linux, FreeBSD and Macos")
