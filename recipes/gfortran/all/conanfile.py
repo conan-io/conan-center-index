@@ -27,10 +27,14 @@ class GFortranConan(ConanFile):
         if str(self.settings.os) not in ("Windows", "Linux", "Macos"):
             raise ConanInvalidConfiguration("No binaries available for the OS '{}'.".format(self.settings.os))
 
+    def build_requirements(self):
+        if self.settings.os == "Windows":
+            self.build_requires("7zip/19.00")
+
     def source(self):
         url = self.conan_data["sources"][self.version]["url"]
         for it in url.keys():
-            if it == "Windows":
+            if self.settings.os == "Windows":
                 filename = url[it]["filename"]
                 tools.download(**url[it])
                 self.run("7z x {0}".format(filename))
