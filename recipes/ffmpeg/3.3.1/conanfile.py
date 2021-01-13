@@ -70,7 +70,7 @@ class FFMpegConan(ConanFile):
                        'x264': False,
                        'x265': False,
                        'vpx': False,
-                       'mp3lame': False,
+                       'mp3lame': False,  # Most probably I'll need to enable this
                        'fdk_aac': False,
                        'webp': False,
                        'openssl': False,
@@ -127,8 +127,8 @@ class FFMpegConan(ConanFile):
 
     def build_requirements(self):
         self.build_requires("yasm/1.3.0")
-        if self.settings.os == 'Windows':
-            self.build_requires("msys2_installer/latest@bincrafters/stable")
+        if self.settings.os == 'Windows' and "CONAN_MSYS_PATH" not in os.environ:
+            self.build_requires("msys2/20200517")
 
     def requirements(self):
         if self.options.zlib:
@@ -172,7 +172,7 @@ class FFMpegConan(ConanFile):
                 self.requires.add("libva/1.5.1")
         if self.settings.os == "Windows":
             if self.options.qsv:
-                self.requires.add("intel_media_sdk/2018R2")
+                self.requires.add("intel_media_sdk/2018R2_1")
 
     def system_requirements(self):
         if self.settings.os == "Linux" and tools.os_info.is_linux:
@@ -216,7 +216,10 @@ class FFMpegConan(ConanFile):
     def build(self):
         self._patch_sources()
         if self._is_msvc or self._is_mingw_windows:
-            msys_bin = self.deps_env_info['msys2_installer'].MSYS_BIN
+            if "CONAN_MSYS_PATH" in os.environ:
+                msys_bin = os.environ["CONAN_MSYS_PATH"]
+            else:
+                msys_bin = self.deps_env_info['msys2'].MSYS_BIN
             with tools.environment_append({'PATH': [msys_bin],
                                            'CONAN_BASH_PATH': os.path.join(msys_bin, 'bash.exe')}):
                 if self._is_msvc:
@@ -275,8 +278,11 @@ class FFMpegConan(ConanFile):
 
             #if self.options.x264 or self.options.x265 or self.options.postproc:
             #    args.append('--enable-gpl')
+            assert not (self.options.x264 or self.options.x265 or self.options.postproc)
             args.append('--disable-gpl')
 
+            # NOTE(a.kamyshev): Commented out lines are wrong, fdk_aac with lgpl does not require nonfree, it does so only for gpl license,
+            # see https://www.ffmpeg.org/general.html#toc-OpenCORE_002c-VisualOn_002c-and-Fraunhofer-libraries
             #if self.options.fdk_aac:
             #    args.append('--enable-nonfree')
             args.append('--disable-nonfree')
@@ -311,6 +317,7 @@ class FFMpegConan(ConanFile):
             # thanks to generators = "pkg_config", we will have all dependency
             # *.pc files in build folder, so pointing pkg-config there is enough
             pkg_config_path = os.path.abspath(self.build_folder)
+            print("pkg_config_path or build_folder: " + pkg_config_path)
             pkg_config_path = tools.unix_path(pkg_config_path) if self.settings.os == 'Windows' else pkg_config_path
 
             try:
@@ -322,7 +329,18 @@ class FFMpegConan(ConanFile):
                                   % (pkg_config_path, filename)
                         tools.run_in_windows_bash(self, command)
 
+                    # looks like msys2 package has pkg-config preinstalled,
+                    # but we need to install it ourselves in case the msys in CONAN_MSYS_PATH does not have it
+                    pkg_config_find_or_install_command = "pacman -Qs pkg-config || pacman -S --noconfirm pkg-config"
+                    tools.run_in_windows_bash(self, pkg_config_find_or_install_command)
+
+                    # intel_media_sdk.pc contains info on a package libmfx, but ffmpeg's configure script doesn't recognize it
+                    tools.run_in_windows_bash(self, 'mv %s/intel_media_sdk.pc %s/libmfx.pc' % (pkg_config_path, pkg_config_path))
+
                 env_build = AutoToolsBuildEnvironment(self, win_bash=self._is_mingw_windows or self._is_msvc)
+                if self.settings.os == "Windows" and self.settings.build_type == "Debug":
+                    # see https://trac.ffmpeg.org/ticket/6429 (ffmpeg does not build without compiler optimizations)
+                    env_build.flags = ["-Zi", "-O2"]
                 # ffmpeg's configure is not actually from autotools, so it doesn't understand standard options like
                 # --host, --build, --target
                 env_build.configure(args=args, build=False, host=False, target=False,
