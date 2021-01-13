@@ -116,4 +116,6 @@ class LibsassConan(ConanFile):
         self.cpp_info.names["pkg_config"] = "libsass"
         self.cpp_info.libs = ["sass"]
         if self.settings.os in ["Linux", "FreeBSD"]:
-            self.cpp_info.system_libs = ["dl", "m"]
+            self.cpp_info.system_libs.extend(["dl", "m"])
+        if not self.options.shared and tools.stdcpp_library(self):
+            self.cpp_info.system_libs.append(tools.stdcpp_library(self))
