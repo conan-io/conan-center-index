@@ -133,7 +133,6 @@ class LibwebsocketsConan(ConanFile):
         "enable_server_status": False,
         "enable_threadpool": False,
         "enable_http_stream_compression": False,
-        "enable_http_stream_compression": False,
         "enable_http_brotli": False,
         "enable_acme": False,
         "enable_fts": False,
@@ -418,7 +417,7 @@ class LibwebsocketsConan(ConanFile):
         self._cmake.definitions["LWS_WITH_ALSA"] = False
         self._cmake.definitions["LWS_WITH_GTK"] = False
 
-        self._cmake.definitions["LWS_WITH_SYS_SMD"] = False if self.settings.os == "Windows" else True # New in 4.1.4
+        self._cmake.definitions["LWS_WITH_SYS_SMD"] = self.settings.os != "Windows"  # New in 4.1.4
 
         self._cmake.configure()
         return self._cmake
