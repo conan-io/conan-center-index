@@ -203,7 +203,7 @@ class LibwebsocketsConan(ConanFile):
             self.requires("libuv/1.38.0")
 
         if self.options.with_libevent == "libevent":
-            self.requires("libevent/2.1.11")
+            self.requires("libevent/2.1.12")
         elif self.options.with_libevent == "libev":
             self.requires("libev/4.27")
 
@@ -213,13 +213,13 @@ class LibwebsocketsConan(ConanFile):
             self.requires("miniz/2.1.0")
 
         if self.options.with_libmount:
-            self.requires("libmount/2.33.1")
+            self.requires("libmount/2.36")
 
         if self.options.with_sqlite3:
             self.requires("sqlite3/3.33.0")
 
         if self.options.with_ssl == "openssl":
-            self.requires("openssl/1.1.1h")
+            self.requires("openssl/1.1.1i")
 
         if self.options.with_ssl == "mbedtls-apache":
             self.requires("mbedtls/2.16.3-apache")
