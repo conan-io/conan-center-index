@@ -66,6 +66,7 @@ class LibsassConan(ConanFile):
         tools.remove_files_by_mask(self.package_folder, "*.la")
 
     def package_info(self):
+        self.cpp_info.names["pkg_config"] = "libsass"
         self.cpp_info.libs = ["sass"]
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.system_libs = ["dl", "m"]
