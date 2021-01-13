@@ -2,7 +2,8 @@ from conans import ConanFile, tools, AutoToolsBuildEnvironment, RunEnvironment
 from conans.errors import ConanInvalidConfiguration
 import os
 
-required_conan_version = ">=1.29.0"
+required_conan_version = ">=1.32.0"
+
 
 class PulseAudioConan(ConanFile):
     name = "pulseaudio"
