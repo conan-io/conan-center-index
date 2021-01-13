@@ -48,7 +48,7 @@ class LibtiffConan(ConanFile):
         return "build_subfolder"
 
     @property
-    def _has_web_option(self):
+    def _has_webp_option(self):
         return tools.Version(self.version) >= "4.0.10"
 
     @property
@@ -62,7 +62,7 @@ class LibtiffConan(ConanFile):
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
-        if not self._has_web_option:
+        if not self._has_webp_option:
             del self.options.webp
         if not self._has_zstd_option:
             del self.options.zstd
@@ -135,7 +135,7 @@ class LibtiffConan(ConanFile):
                     self._cmake.definitions["DEFLATE_NAMES"] = self.deps_cpp_info["libdeflate"].libs[0]
             if self._has_zstd_option:
                 self._cmake.definitions["zstd"] = self.options.zstd
-            if self._has_web_option:
+            if self._has_webp_option:
                 self._cmake.definitions["webp"] = self.options.webp
             self._cmake.definitions["cxx"] = self.options.cxx
             self._cmake.configure(build_folder=self._build_subfolder)
