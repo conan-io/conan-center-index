@@ -20,7 +20,10 @@ class LibDispatchConan(ConanFile):
 
     def validate(self):
         if self.settings.compiler != "clang":
-            raise ConanInvalidConfiguration("Clang compiler required")
+            raise ConanInvalidConfiguration("Clang 10 or greater required.")
+
+        if self.settings.compiler.version < tools.Version("10"):
+            raise ConanInvalidConfiguration("Clang 10 or greater required.")
 
     @property
     def _source_subfolder(self):
