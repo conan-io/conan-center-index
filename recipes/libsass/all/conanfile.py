@@ -2,6 +2,8 @@ from conans import ConanFile, AutoToolsBuildEnvironment, tools
 from conans.errors import ConanInvalidConfiguration
 import os
 
+required_conan_version = ">=1.32.0"
+
 
 class LibsassConan(ConanFile):
     name = "libsass"
