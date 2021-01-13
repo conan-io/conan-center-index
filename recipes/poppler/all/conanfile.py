@@ -100,9 +100,9 @@ class PopplerConan(ConanFile):
         if self.options.get_safe("with_libiconv"):
             self.requires("libiconv/1.16")
         if self.options.fontconfiguration == "fontconfig":
-            self.require("fontconfig/2.13.92")
+            self.requires("fontconfig/2.13.92")
         if self.options.with_cairo:
-            self.requirse("cairo/1.17.2")
+            self.requires("cairo/1.17.2")
         if self.options.get_safe("with_glib"):
             self.requires("glib/2.67.1")
         if self.options.get_safe("with_gobject_introspection"):
