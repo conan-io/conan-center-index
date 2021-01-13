@@ -1,6 +1,5 @@
 import os
 from conans import ConanFile, CMake, tools
-from conans.tools import Version
 from conans.errors import ConanInvalidConfiguration
 
 
@@ -79,11 +78,11 @@ class DataFrameConan(ConanFile):
             )
             return
 
-        # Exclude compilers not supported by cpp-taskflow
+        # Exclude compilers not supported
         if compiler_version < minimal_version[compiler]:
             raise ConanInvalidConfiguration(
                 "{} requires a compiler that supports at least C++17. {} {} is not supported.".format(
-                    self.name, compiler, Version(self.settings.compiler.version.value)
+                    self.name, compiler, tools.Version(self.settings.compiler.version)
                 )
             )
 

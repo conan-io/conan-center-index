@@ -83,6 +83,10 @@ class FollyConan(ConanFile):
     def _required_boost_components(self):
         return ["context", "filesystem", "program_options", "regex", "system", "thread"]
 
+    # Freeze max. CMake version at 3.16.2 to fix the Linux build
+    def build_requirements(self):
+        self.build_requires("cmake/3.16.2")
+
     def requirements(self):
         self.requires("boost/1.74.0")
         self.requires("bzip2/1.0.8")
@@ -91,7 +95,7 @@ class FollyConan(ConanFile):
         self.requires("glog/0.4.0")
         self.requires("libevent/2.1.12")
         self.requires("lz4/1.9.2")
-        self.requires("openssl/1.1.1h")
+        self.requires("openssl/1.1.1i")
         self.requires("snappy/1.1.8")
         self.requires("zlib/1.2.11")
         self.requires("zstd/1.4.5")
@@ -101,7 +105,7 @@ class FollyConan(ConanFile):
             self.requires("xz_utils/5.2.4")
             if self.settings.os == "Linux":
                 self.requires("libiberty/9.1.0")
-                self.requires("libunwind/1.3.1")
+                self.requires("libunwind/1.5.0")
         if Version(self.version) >= "2020.08.10.00":
             self.requires("fmt/7.0.3")
 

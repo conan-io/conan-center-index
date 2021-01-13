@@ -108,6 +108,10 @@ class LibpqConan(ConanFile):
                        'MD': 'MultiThreadedDLL',
                        'MDd': 'MultiThreadedDebugDLL'}.get(str(self.settings.compiler.runtime))
             msbuild_project_pm = os.path.join(self._source_subfolder, "src", "tools", "msvc", "MSBuildProject.pm")
+            tools.replace_in_file(msbuild_project_pm, "</Link>", """</Link>
+    <Lib>
+      <TargetMachine>$targetmachine</TargetMachine>
+    </Lib>""")
             tools.replace_in_file(msbuild_project_pm, "'MultiThreadedDebugDLL'", "'%s'" % runtime)
             tools.replace_in_file(msbuild_project_pm, "'MultiThreadedDLL'", "'%s'" % runtime)
             config_default_pl = os.path.join(self._source_subfolder, "src", "tools", "msvc", "config_default.pl")
@@ -160,7 +164,11 @@ class LibpqConan(ConanFile):
             else:
                 globs = [os.path.join(self.package_folder, "lib", "*.a")]
         else:
-            globs = [os.path.join(self.package_folder, "lib", "libpq.so*"), os.path.join(self.package_folder, "bin", "*.dll")]
+            globs = [
+                os.path.join(self.package_folder, "lib", "libpq.so*"),
+                os.path.join(self.package_folder, "bin", "*.dll"),
+                os.path.join(self.package_folder, "lib", "libpq*.dylib")
+            ]
         if self.settings.os == "Windows":
             os.unlink(os.path.join(self.package_folder, "lib", "libpq.dll"))
         for globi in globs:

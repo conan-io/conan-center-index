@@ -24,7 +24,8 @@ class OpenCVConan(ConanFile):
                "with_openexr": [True, False],
                "with_eigen": [True, False],
                "with_webp": [True, False],
-               "with_gtk": [True, False]}
+               "with_gtk": [True, False],
+               "with_quirc": [True, False]}
     default_options = {"shared": False,
                        "fPIC": True,
                        "parallel": False,
@@ -36,7 +37,8 @@ class OpenCVConan(ConanFile):
                        "with_openexr": True,
                        "with_eigen": True,
                        "with_webp": True,
-                       "with_gtk": True}
+                       "with_gtk": True,
+                       "with_quirc": True}
     exports_sources = "CMakeLists.txt"
     generators = "cmake", "cmake_find_package"
     _cmake = None
@@ -100,6 +102,8 @@ class OpenCVConan(ConanFile):
             self.requires("harfbuzz/2.7.2")
             self.requires("gflags/2.2.2")
             self.requires("glog/0.4.0")
+        if self.options.with_quirc:
+            self.requires("quirc/1.1")
         if self.options.get_safe("with_gtk"):
             self.requires("gtk/system")
 
@@ -111,7 +115,7 @@ class OpenCVConan(ConanFile):
         os.rename("opencv_contrib-{}".format(self.version), self._contrib_folder)
 
     def _patch_opencv(self):
-        for directory in ['libjasper', 'libjpeg-turbo', 'libjpeg', 'libpng', 'libtiff', 'libwebp', 'openexr', 'protobuf', 'zlib']:
+        for directory in ['libjasper', 'libjpeg-turbo', 'libjpeg', 'libpng', 'libtiff', 'libwebp', 'openexr', 'protobuf', 'zlib', 'quirc']:
             tools.rmdir(os.path.join(self._source_subfolder, '3rdparty', directory))
         if self.options.with_openexr:
             find_openexr = os.path.join(self._source_subfolder, "cmake", "OpenCVFindOpenEXR.cmake")
@@ -223,6 +227,7 @@ class OpenCVConan(ConanFile):
         self._cmake.definitions["WITH_OPENJPEG"] = self.options.with_jpeg2000 == "openjpeg"
         self._cmake.definitions["WITH_OPENEXR"] = self.options.with_openexr
         self._cmake.definitions["WITH_EIGEN"] = self.options.with_eigen
+        self._cmake.definitions["HAVE_QUIRC"] = self.options.with_quirc  # force usage of quirc requirement
         self._cmake.definitions["WITH_DSHOW"] = self.settings.compiler == "Visual Studio"
         self._cmake.definitions["WITH_MSMF"] = self.settings.compiler == "Visual Studio"
         self._cmake.definitions["WITH_MSMF_DXVA"] = self.settings.compiler == "Visual Studio"
@@ -306,7 +311,13 @@ class OpenCVConan(ConanFile):
                         if conan_component == "opencv_core":
                             self.cpp_info.components[conan_component].libdirs.append("lib")
                             self.cpp_info.components[conan_component].libs += tools.collect_libs(self)
- 
+
+                if self.settings.os == "iOS":
+                    if not self.options.shared:
+                        if conan_component == "opencv_core":
+                            libs = list(filter(lambda x: not x.startswith("opencv"), tools.collect_libs(self)))
+                            self.cpp_info.components[conan_component].libs += libs
+
                 # CMake components names
                 conan_component_alias = conan_component + "_alias"
                 cmake_component = component["lib"]
@@ -343,6 +354,9 @@ class OpenCVConan(ConanFile):
                 return ["tbb::tbb"] if self.options.parallel == "tbb" else ["openmp"]
             return []
 
+        def quirc():
+            return ["quirc::quirc"] if self.options.with_quirc else []
+
         def gtk():
             return ["gtk::gtk"] if self.options.get_safe("with_gtk") else []
 
@@ -366,7 +380,7 @@ class OpenCVConan(ConanFile):
             {"target": "opencv_videoio",    "lib": "videoio",    "requires": ["opencv_core", "opencv_imgproc", "opencv_imgcodecs"] + eigen()},
             {"target": "opencv_calib3d",    "lib": "calib3d",    "requires": ["opencv_core", "opencv_flann", "opencv_imgproc", "opencv_features2d"]+ eigen()},
             {"target": "opencv_highgui",    "lib": "highgui",    "requires": ["opencv_core", "opencv_imgproc", "opencv_imgcodecs", "opencv_videoio"] + freetype() + eigen() + gtk()},
-            {"target": "opencv_objdetect",  "lib": "objdetect",  "requires": ["opencv_core", "opencv_flann", "opencv_imgproc", "opencv_features2d", "opencv_calib3d"] + eigen()},
+            {"target": "opencv_objdetect",  "lib": "objdetect",  "requires": ["opencv_core", "opencv_flann", "opencv_imgproc", "opencv_features2d", "opencv_calib3d"] + eigen() + quirc()},
             {"target": "opencv_stitching",  "lib": "stitching",  "requires": ["opencv_core", "opencv_flann", "opencv_imgproc", "opencv_features2d", "opencv_calib3d"] + xfeatures2d() + eigen()},
             {"target": "opencv_video",      "lib": "video",      "requires": ["opencv_core", "opencv_flann", "opencv_imgproc", "opencv_features2d", "opencv_calib3d"] + eigen()},
         ])

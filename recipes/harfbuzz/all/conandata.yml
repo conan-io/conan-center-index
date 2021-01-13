@@ -11,6 +11,9 @@ sources:
   "2.7.2":
     sha256: "8ec112ee108642477478b75fc7906422abed404d7530e47ba0a4875f553f1b59"
     url: "https://github.com/harfbuzz/harfbuzz/archive/2.7.2.tar.gz"
+  "2.7.4":
+    sha256: "daff8a4003ac420a8550760ed303ce33b310c8ea17b7f15b307d1969cabcebcb"
+    url: "https://github.com/harfbuzz/harfbuzz/archive/2.7.4.tar.gz"
 patches:
   "2.6.8":
     - patch_file: "patches/source_subfolder.patch"
@@ -22,5 +25,8 @@ patches:
     - patch_file: "patches/source_subfolder.patch"
       base_path: "."
   "2.7.2":
+    - patch_file: "patches/source_subfolder.patch"
+      base_path: "."
+  "2.7.4":
     - patch_file: "patches/source_subfolder.patch"
       base_path: "."

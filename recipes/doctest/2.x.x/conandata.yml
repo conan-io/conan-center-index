@@ -17,3 +17,9 @@ sources:
   "2.4.1":
     url: "https://github.com/onqtam/doctest/archive/2.4.1.tar.gz"
     sha256: "0a0f0be21ee23e36ff6b8b9d63c06a7792e04cce342e1df3dee0e40d1e21b9f0"
+  "2.4.3":
+    url: "https://github.com/onqtam/doctest/archive/2.4.3.tar.gz"
+    sha256: "18c0f87f526bf34bb595c2841a2f0f33b28ab8c817d7c71ed1ba4665815d9ef6"
+  "2.4.4":
+    url: "https://github.com/onqtam/doctest/archive/2.4.4.tar.gz"
+    sha256: "3bcb62ad316bf4230873a336fcc6eb6292116568a6e19ab8cdd37a1610773d70"
