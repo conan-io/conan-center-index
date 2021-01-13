@@ -2,8 +2,6 @@ from conans import ConanFile, AutoToolsBuildEnvironment, tools
 from conans.errors import ConanInvalidConfiguration
 import os
 
-required_conan_version = ">=1.32.0"
-
 
 class LibsassConan(ConanFile):
     name = "libsass"
@@ -25,8 +23,6 @@ class LibsassConan(ConanFile):
     def configure(self):
         if self.options.shared:
             del self.options.fPIC
-
-    def validate(self):
         if self.settings.os not in ["Linux", "FreeBSD", "Macos"]:
             raise ConanInvalidConfiguration("libsass supports only Linux, FreeBSD and Macos")
 
