@@ -28,7 +28,7 @@ class GFortranConan(ConanFile):
             raise ConanInvalidConfiguration("No binaries available for the OS '{}'.".format(self.settings.os))
 
     def source(self):
-        url = self.conan_data["sources"][self.version]
+        url = self.conan_data["sources"][self.version]["url"]
         for it in url.keys():
             if it == "Windows":
                 filename = url[it]["filename"]
