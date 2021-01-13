@@ -30,12 +30,6 @@ class LibDispatchConan(ConanFile):
     def _build_subfolder(self):
         return "build_subfolder"
 
-    def configure(self):
-        if self.options.shared:
-            del self.options.fPIC
-            if self.settings.compiler == "Visual Studio" and "MT" in self.settings.compiler.runtime:
-                raise ConanInvalidConfiguration("Visual Studio build for shared library with MT runtime is not supported")
-
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
         extracted_dir = f'swift-corelibs-{self.name}-swift-{self.version}-RELEASE'
