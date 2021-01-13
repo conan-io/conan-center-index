@@ -228,7 +228,7 @@ class LibwebsocketsConan(ConanFile):
             self.requires("mbedtls/2.16.3-gpl")
 
         if self.options.with_ssl == "wolfssl":
-            self.requires("wolfssl/4.4.0")
+            self.requires("wolfssl/4.5.0")
 
         if self.options.with_hubbub:
             raise ConanInvalidConfiguration("Library hubbub not implemented (yet) in CCI")
