@@ -200,12 +200,12 @@ class LibwebsocketsConan(ConanFile):
 
     def requirements(self):
         if self.options.with_libuv:
-            self.requires("libuv/1.38.0")
+            self.requires("libuv/1.40.0")
 
         if self.options.with_libevent == "libevent":
             self.requires("libevent/2.1.12")
         elif self.options.with_libevent == "libev":
-            self.requires("libev/4.27")
+            self.requires("libev/4.33")
 
         if self.options.with_zlib == "zlib":
             self.requires("zlib/1.2.11")
@@ -216,7 +216,7 @@ class LibwebsocketsConan(ConanFile):
             self.requires("libmount/2.36")
 
         if self.options.with_sqlite3:
-            self.requires("sqlite3/3.33.0")
+            self.requires("sqlite3/3.34.0")
 
         if self.options.with_ssl == "openssl":
             self.requires("openssl/1.1.1i")
@@ -417,7 +417,8 @@ class LibwebsocketsConan(ConanFile):
         self._cmake.definitions["LWS_WITH_ALSA"] = False
         self._cmake.definitions["LWS_WITH_GTK"] = False
 
-        self._cmake.definitions["LWS_WITH_SYS_SMD"] = self.settings.os != "Windows"  # New in 4.1.4
+        if tools.Version(self.version) >= "4.1.0":
+            self._cmake.definitions["LWS_WITH_SYS_SMD"] = self.settings.os != "Windows"
 
         self._cmake.configure()
         return self._cmake
