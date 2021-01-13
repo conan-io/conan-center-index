@@ -34,7 +34,7 @@ class GFortranConan(ConanFile):
     def source(self):
         url = self.conan_data["sources"][self.version]["url"]
         for it in url.keys():
-            if self.settings.os == "Windows"
+            if self.settings.os == "Windows":
                 if it == "Windows":
                     filename = url[it]["filename"]
                     tools.download(**url[it])
