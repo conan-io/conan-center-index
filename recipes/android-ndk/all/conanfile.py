@@ -155,6 +155,9 @@ class AndroidNDKInstallerConan(ConanFile):
 
         self.output.info('Creating NDK_ROOT environment variable: %s' % self._ndk_root)
         self.env_info.NDK_ROOT = self._ndk_root
+        
+        self.output.info('Creating ANDROID_NDK_HOME environment variable: %s' % self.package_folder)
+        self.env_info.ANDROID_NDK_HOME = self.package_folder
 
         self.output.info('Creating CHOST environment variable: %s' % self._llvm_triplet)
         self.env_info.CHOST = self._llvm_triplet
