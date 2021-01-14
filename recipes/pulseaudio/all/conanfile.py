@@ -2,7 +2,8 @@ from conans import ConanFile, tools, AutoToolsBuildEnvironment, RunEnvironment
 from conans.errors import ConanInvalidConfiguration
 import os
 
-required_conan_version = ">=1.29.0"
+required_conan_version = ">=1.32.0"
+
 
 class PulseAudioConan(ConanFile):
     name = "pulseaudio"
@@ -35,20 +36,11 @@ class PulseAudioConan(ConanFile):
         "with_dbus": False,
     }
 
-    build_requires = "gettext/0.20.1", "libtool/2.4.6"
+    _autotools = None
 
     @property
     def _source_subfolder(self):
         return "source_subfolder"
-
-    _autotools = None
-
-    def validate(self):
-        if self.options.get_safe("with_fftw") and self.options["fftw"].precision != "single":
-            raise ConanInvalidConfiguration("Pulse audio cannot use fftw %s precision."
-                                            "Either set option fftw:precision=single"
-                                            "or pulseaudio:with_fftw=False"
-                                            % self.options["fftw"].precision)
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -64,10 +56,9 @@ class PulseAudioConan(ConanFile):
         if not self.options.with_dbus:
             del self.options.with_fftw
 
-
     def requirements(self):
         self.requires("libsndfile/1.0.30")
-        self.requires("libcap/2.45")
+        self.requires("libcap/2.46")
         if self.options.with_alsa:
             self.requires("libalsa/1.2.4")
         if self.options.with_glib:
@@ -80,6 +71,17 @@ class PulseAudioConan(ConanFile):
             self.requires("openssl/1.1.1i")
         if self.options.with_dbus:
             self.requires("dbus/1.12.20")
+
+    def validate(self):
+        if self.options.get_safe("with_fftw") and self.options["fftw"].precision != "single":
+            raise ConanInvalidConfiguration("Pulse audio cannot use fftw %s precision."
+                                            "Either set option fftw:precision=single"
+                                            "or pulseaudio:with_fftw=False"
+                                            % self.options["fftw"].precision)
+
+    def build_requirements(self):
+        self.build_requires("gettext/0.20.1")
+        self.build_requires("libtool/2.4.6")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
