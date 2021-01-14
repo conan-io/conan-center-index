@@ -1,3 +1,4 @@
+Fix msvc compilation 3.7.1 only (https://github.com/jtv/libpqxx/pull/406)
 diff --git a/include/pqxx/binarystring.hxx b/include/pqxx/binarystring.hxx
 index 780cd6ec..433854ca 100644
 --- a/include/pqxx/binarystring.hxx
