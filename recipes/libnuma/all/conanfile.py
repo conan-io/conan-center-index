@@ -70,7 +70,7 @@ class LibnumaConan(ConanFile):
         autotools.make()
 
     def package(self):
-        self.copy("LICENSE.GPL2", dst="licenses", src=self._source_subfolder)
+        self.copy("LICENSE.LGPL2.1", dst="licenses", src=self._source_subfolder)
         autotools = self._configure_autotools()
         autotools.install()
         tools.rmdir(os.path.join(self.package_folder, "bin"))
