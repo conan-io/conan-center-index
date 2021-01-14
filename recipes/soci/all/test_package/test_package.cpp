@@ -6,9 +6,8 @@ int main()
 {
   const auto& connectString{"../database0.empty.db"};
   const auto& table{"table1"};
-  const soci::backend_factory& backEnd = *soci::factory_empty();
-  soci::session sql(backEnd, connectString);
-  std::cout << "soci database connected successfully\n";
+  const soci::backend_factory& backEnd = soci::empty;
+  std::cout << "soci empty test\n";
 
   return 0;
 }
