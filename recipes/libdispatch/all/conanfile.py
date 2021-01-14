@@ -22,7 +22,7 @@ class LibDispatchConan(ConanFile):
         if self.settings.build_type != "Release":
             raise ConanInvalidConfiguration("Just Release builds allowed.")
 
-        if self.settings.build_type != "clang":
+        if self.settings.compiler != "clang":
             raise ConanInvalidConfiguration("Clang 9 or greater required.")
 
         # if self.settings.compiler.version < tools.Version("9"):
