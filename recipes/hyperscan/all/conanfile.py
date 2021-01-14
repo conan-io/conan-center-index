@@ -55,7 +55,7 @@ class HyperscanConan(ConanFile):
 
     def requirements(self):
         if self.options.build_chimera:
-            self.required("pcre/8.41")
+            self.requires("pcre/8.44")
 
     def _configure_cmake(self):
         if self._cmake:
