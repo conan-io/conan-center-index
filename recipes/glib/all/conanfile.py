@@ -64,7 +64,7 @@ class GLibConan(ConanFile):
         self.requires("libffi/3.3")
         if self.options.with_pcre:
             self.requires("pcre/8.44")
-        if self.options.with_elf:
+        if self.options.get_safe("with_elf", True):
             self.requires("libelf/0.8.13")
         if self.options.get_safe("with_mount"):
             self.requires("libmount/2.36")
@@ -153,7 +153,6 @@ class GLibConan(ConanFile):
             os.unlink(pdb_file)
 
     def package_info(self):
-
         self.cpp_info.components["glib-2.0"].libs = ["glib-2.0"]
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.components["glib-2.0"].system_libs.append("pthread")
