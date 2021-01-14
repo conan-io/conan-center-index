@@ -67,9 +67,6 @@ class LibpqxxRecipe(ConanFile):
             self._cmake = CMake(self)
             self._cmake.definitions["BUILD_DOC"] = False
             self._cmake.definitions["BUILD_TEST"] = False
-            if Version(self.version) >= "7.3.1":
-                self._cmake.definitions["INSTALL_TEST"] = False
-
             self._cmake.configure(build_folder=self._build_subfolder)
         return self._cmake
 
