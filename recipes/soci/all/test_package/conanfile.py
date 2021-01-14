@@ -13,8 +13,9 @@ class SociTestConan(ConanFile):
         cmake = CMake(self)
         cmake.definitions["SOCI_SHARED"] = self.options["soci"].shared
         cmake.configure()
+        cmake.verbose = True
         cmake.build()
 
     def test(self):
         if not tools.cross_building(self):
-            self.run(".%ssoci.tests" % os.sep)
+            self.run(".%ssoci.tests" % os.sep, run_environment=True)
