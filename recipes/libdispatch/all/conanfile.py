@@ -19,11 +19,14 @@ class LibDispatchConan(ConanFile):
     _cmake = None
 
     def validate(self):
-        if self.settings.compiler != "clang":
+        if self.settings.build_type != "Release":
+            raise ConanInvalidConfiguration("Just Release builds allowed.")
+
+        if self.settings.build_type != "clang":
             raise ConanInvalidConfiguration("Clang 9 or greater required.")
 
-        if self.settings.compiler.version < tools.Version("9"):
-            raise ConanInvalidConfiguration("Clang 9 or greater required.")
+        # if self.settings.compiler.version < tools.Version("9"):
+        #     raise ConanInvalidConfiguration("Clang 9 or greater required.")
 
     @property
     def _source_subfolder(self):
