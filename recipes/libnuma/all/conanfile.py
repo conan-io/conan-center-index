@@ -32,7 +32,7 @@ class LibnumaConan(ConanFile):
         return "build_subfolder"
 
     def validate(self):
-        if not self.settings.os != "Linux":
+        if self.settings.os != "Linux":
             raise ConanInvalidConfiguration("{} is only supported on Linux".format(self.name))
 
     def configure(self):
