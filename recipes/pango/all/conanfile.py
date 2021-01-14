@@ -38,10 +38,10 @@ class PangoConan(ConanFile):
         del self.settings.compiler.libcxx
         del self.settings.compiler.cppstd
 
-        if(self.options.xft == "auto"):
-            self.options.xft = (self.settings.os == 'Linux' or self.settings.os == 'FreeBSD')
-        if(self.options.fontconfig == "auto"):
-            self.options.fontconfig = (self.settings.os != 'Windows' and self.settings.os != 'Macos')
+        if self.options.xft == "auto":
+            self.options.xft = self.settings.os in ["Linux", "FreeBSD"]
+        if self.options.fontconfig == "auto":
+            self.options.fontconfig = not self.settings.os in ["Windows", "Macos"]
 
         if self.options.xft and self.settings.os != 'Linux' and self.settings.os != 'FreeBSD':
             raise ConanInvalidConfiguration('Xft can only be used on Linux and FreeBSD')
