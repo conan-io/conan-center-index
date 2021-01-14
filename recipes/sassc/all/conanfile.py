@@ -27,7 +27,7 @@ class SasscConan(ConanFile):
 
     def configure(self):
         if self.settings.os not in ["Linux", "FreeBSD", "Macos"]:
-            raise ConanInvalidConfiguration("sassc supports only Linux, FreeBSD and Macos")
+            raise ConanInvalidConfiguration("sassc supports only Linux, FreeBSD and Macos at this time, contributions are welcomed")
             
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
@@ -39,9 +39,7 @@ class SasscConan(ConanFile):
             return self._autotools
         self.run("autoreconf -fiv", run_environment=True)
         self._autotools = AutoToolsBuildEnvironment(self)
-        args = []
-        args.append("--disable-tests")
-        self._autotools.configure(args=args)
+        self._autotools.configure(args=["--disable-tests"])
         return self._autotools
 
     def build(self):
