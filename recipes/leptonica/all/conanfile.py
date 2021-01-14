@@ -81,8 +81,6 @@ class LeptonicaConan(ConanFile):
         cmake.definitions['CMAKE_DISABLE_FIND_PACKAGE_PNG'] = not self.options.with_png
         cmake.definitions['CMAKE_DISABLE_FIND_PACKAGE_TIFF'] = not self.options.with_tiff
         cmake.definitions['CMAKE_DISABLE_FIND_PACKAGE_JPEG'] = not self.options.with_jpeg
-        cmake.definitions['CMAKE_DISABLE_FIND_PACKAGE_webp'] = not self.options.with_webp
-        cmake.definitions['CMAKE_DISABLE_FIND_PACKAGE_openjp2'] = not self.options.with_openjpeg
 
         cmake.definitions['SW_BUILD'] = False
 
@@ -90,10 +88,41 @@ class LeptonicaConan(ConanFile):
         return cmake
 
     def build(self):
+        cmake_original = os.path.join(self._source_subfolder,
+                                      "CMakeListsOriginal.txt")
         # disable pkgconfig
-        tools.replace_in_file(os.path.join(self._source_subfolder, "CMakeListsOriginal.txt"),
+        tools.replace_in_file(cmake_original,
                               "if (PKG_CONFIG_FOUND)",
                               "if (FALSE)")
+
+        # short out conditionals that don't respect
+        # CMAKE_DISABLE_FIND_PACKAGE_x
+        if not self.options.with_webp:
+            tools.replace_in_file(cmake_original,
+                                  "if(NOT WEBP)",
+                                  "if(FALSE)")
+            tools.replace_in_file(cmake_original,
+                                  "if(NOT WEBPMUX)",
+                                  "if(FALSE)")
+        if not self.options.with_openjpeg:
+            tools.replace_in_file(cmake_original,
+                                  "if(NOT JP2K)",
+                                  "if(FALSE)")
+
+        # Remove detection of fmemopen() on macOS < 10.13
+        # CheckFunctionExists will find it in the link library.
+        # There's no error because it's not including the header with the
+        # deprecation macros.
+        if self.settings.os == 'Macos' and self.settings.os.version:
+            if tools.Version(self.settings.os.version) < '10.13':
+                configure_cmake = os.path.join(self._source_subfolder,
+                                               'cmake',
+                                               'Configure.cmake')
+                tools.replace_in_file(configure_cmake,
+                                      'set(functions_list\n    '
+                                      'fmemopen\n    fstatat\n)',
+                                      'set(functions_list\n    '
+                                      'fstatat\n)')
 
         # upstream uses obsolete FOO_LIBRARY that is not generated
         # by cmake_find_package generator (upstream PR 456)

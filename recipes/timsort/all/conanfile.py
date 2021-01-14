@@ -20,7 +20,8 @@ class TimsortConan(ConanFile):
 
     def configure(self):
         if self.settings.compiler.cppstd:
-            tools.check_min_cppstd(self, 11)
+            if tools.Version(self.version) >= "2.0.0":
+                tools.check_min_cppstd(self, 11)
 
     def package_id(self):
         self.info.header_only()

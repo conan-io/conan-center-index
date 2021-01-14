@@ -1,19 +1,20 @@
 sources:
-  "1.8.17":
-    - url: "http://downloads.sourceforge.net/project/doxygen/rel-1.8.17/doxygen-1.8.17.windows.bin.zip"
-      sha256: "5adf183f2591fc6590e57e11c929758bda6229486fce17aee248329da85e34fa"
-    - url: "http://downloads.sourceforge.net/project/doxygen/rel-1.8.17/doxygen-1.8.17.windows.x64.bin.zip"
-      sha256: "49051ae149715b765d94d51eb8c4c6043636464cb27ba5f75c14f71ab81d8740"
-    - url: "http://downloads.sourceforge.net/project/doxygen/rel-1.8.17/Doxygen-1.8.17.dmg"
-      sha256: "bf051b2c26ad5569efe9ca09396199340d03c6c96d61b730d50d5cd8f547425b"
-    - url: "http://downloads.sourceforge.net/project/doxygen/rel-1.8.17/doxygen-1.8.17.linux.bin.tar.gz"
-      sha256: "2ca403e7b9c37c6ca7d9a44c717ba5388500b99ee707d474d159ced11c53242c"
+  "1.8.20":
+    url: "http://doxygen.nl/files/doxygen-1.8.20.src.tar.gz"
+    sha256: "5a018e57d26d7eeac415e676fe7817ae8be9828ed338d9701a2b26c7630389ce"
   "1.8.18":
-    - url: "http://downloads.sourceforge.net/project/doxygen/rel-1.8.18/doxygen-1.8.18.windows.bin.zip"
-      sha256: "979106f0bdda354efce64e45c98eb5033ff020a30b026cb313af1501e6c8884f"
-    - url: "http://downloads.sourceforge.net/project/doxygen/rel-1.8.18/doxygen-1.8.18.windows.x64.bin.zip"
-      sha256: "d83bf91ce448e4f935ce0a834360da7d767ef1805afef16d624ce9a86aa6f211"
-    - url: "http://downloads.sourceforge.net/project/doxygen/rel-1.8.18/Doxygen-1.8.18.dmg"
-      sha256: "472d6bbf61621a3c3a7f9492ae604c2befb58a4b18d144166a674f398734864b"
-    - url: "http://downloads.sourceforge.net/project/doxygen/rel-1.8.18/doxygen-1.8.18.linux.bin.tar.gz"
-      sha256: "d589d17c1a5eec7586904a6df4bcdba585ed8e2a0c6afc825bb77e5cb17c275f"
+    url: "https://sourceforge.net/projects/doxygen/files/doxygen-1.8.18.src.tar.gz"
+    sha256: "18173d9edc46d2d116c1f92a95d683ec76b6b4b45b817ac4f245bb1073d00656"
+  "1.8.17":
+    url: "https://sourceforge.net/projects/doxygen/files/doxygen-1.8.17.src.tar.gz"
+    sha256: "2cba988af2d495541cbbe5541b3bee0ee11144dcb23a81eada19f5501fd8b599"
+patches:
+  "1.8.20":
+    - patch_file: "patches/1.8.20-0001-relocatable-cmake.patch"
+      base_path: "source_subfolder"
+  "1.8.18":
+    - patch_file: "patches/1.8.18-0001-relocatable-cmake.patch"
+      base_path: "source_subfolder"
+  "1.8.17":
+    - patch_file: "patches/1.8.17-0001-relocatable-cmake.patch"
+      base_path: "source_subfolder"

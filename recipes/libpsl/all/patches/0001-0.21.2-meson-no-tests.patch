@@ -1,0 +1,11 @@
+--- meson.build
++++ meson.build
+@@ -148,5 +148,5 @@
+ subdir('include')
+ subdir('src')
+-subdir('tools')
+-subdir('tests')
+-subdir('fuzz')
++#subdir('tools')  # FIXME!!!! https://github.com/rockdaboot/libpsl/issues/160
++#subdir('tests')
++#subdir('fuzz')

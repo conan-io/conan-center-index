@@ -161,3 +161,5 @@ class gtsamConan(ConanFile):
 
     def package_info(self):
         self.cpp_info.libs = tools.collect_libs(self)
+        if self.settings.os == "Windows" and tools.Version(self.version) >= "4.0.3":
+            self.cpp_info.system_libs = ["dbghelp"]

@@ -1,6 +1,5 @@
-cmake_minimum_required(VERSION 2.8.11)
+cmake_minimum_required(VERSION 3.4)
 
-message(STATUS "Conan CMake Wrapper")
 include(conanbuildinfo.cmake)
 conan_basic_setup()
 

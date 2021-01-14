@@ -5,3 +5,6 @@ sources:
   "2.2.0":
     url: https://github.com/jarro2783/cxxopts/archive/v2.2.0.zip
     sha256: f9640c00d9938bedb291a21f9287902a3a8cee38db6910b905f8eba4a6416204
+  "2.2.1":
+    url: https://github.com/jarro2783/cxxopts/archive/v2.2.1.zip
+    sha256: 7021ce97f51a40f7fd3558da416ab6914b1d3f758ccf68a1e8734ad10b49b676

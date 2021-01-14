@@ -1,0 +1,14 @@
+patches:
+  "1.0.0.0":
+    - patch_file: "patches/00001-update-cmakelists.patch"
+      base_path: "source_subfolder"
+  "cci.20201029":
+    - patch_file: "patches/00001-update-cmakelists.patch"
+      base_path: "source_subfolder"
+sources:
+  "1.0.0.0":
+    url: "https://github.com/chronoxor/CppBenchmark/archive/1.0.0.0.tar.gz"
+    sha256: "8c043731e979ef570e3744484e6644de6e47db228b9543ec6433401e4e2f09b8"
+  "cci.20201029":
+    url: "https://github.com/chronoxor/CppBenchmark/archive/8605a8e886647e964180cb7a622424404a1da01f.tar.gz"
+    sha256: "f0b88802b4418b13c04ae4dfdb859b2cb81142a47ca473ad447a8be087e0adee"

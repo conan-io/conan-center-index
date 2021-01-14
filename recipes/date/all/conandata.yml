@@ -2,6 +2,9 @@ sources:
   "2.4.1":
     sha256: 98907d243397483bd7ad889bf6c66746db0d7d2a39cc9aacc041834c40b65b98
     url: https://github.com/HowardHinnant/date/archive/v2.4.1.tar.gz
+  "3.0.0":
+    sha256: 87bba2eaf0ebc7ec539e5e62fc317cb80671a337c1fb1b84cb9e4d42c6dbebe3
+    url: https://github.com/HowardHinnant/date/archive/v3.0.0.tar.gz
 patches:
   "2.4.1":
     - base_path: source_subfolder
@@ -10,3 +13,6 @@ patches:
       patch_file: patches/cmake.patch
     - base_path: source_subfolder
       patch_file: patches/string_view.patch
+  "3.0.0":
+    - base_path: source_subfolder
+      patch_file: patches/cmake-3.0.0.patch

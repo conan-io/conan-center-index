@@ -11,7 +11,7 @@ class CppZmqConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     exports_sources = "CMakeLists.txt", "patches/**"
     generators = "cmake", "cmake_find_package"
-    requires = "zeromq/4.3.2"
+    requires = "zeromq/4.3.3"
     settings = "os", "compiler", "build_type", "arch"
 
     _cmake = None

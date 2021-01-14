@@ -1,0 +1,12 @@
+sources:
+  "3.6.1":
+    url: https://github.com/mongodb/mongo-cxx-driver/archive/r3.6.1.tar.gz
+    sha256: c6d1b307f7b074d178c4a815d8739195fb4d7870701064bdad6f1f2360ae0af9
+patches:
+  "3.6.1":
+    - patch_file: "patches/dirs_and_tests.patch"
+      base_path: "source_subfolder"
+    - patch_file: "patches/link_conan_boost.patch"
+      base_path: "source_subfolder"
+    - patch_file: "patches/poly_use_std_define.patch"
+      base_path: "source_subfolder"

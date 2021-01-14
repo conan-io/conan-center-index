@@ -13,6 +13,8 @@ class DepotToolsConan(ConanFile):
     no_copy_source = True
     short_paths = True
     settings = "os_build"
+    exports_sources = ["patches/**"]
+
 
     @property
     def _source_subfolder(self):
@@ -39,6 +41,9 @@ class DepotToolsConan(ConanFile):
     def source(self):
         tools.get(**self.conan_data["sources"][self.version], destination=self._source_subfolder)
         self._dereference_symlinks()
+
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            tools.patch(**patch)
 
     def package(self):
         self.copy(pattern="LICENSE", dst="licenses", src=self._source_subfolder)

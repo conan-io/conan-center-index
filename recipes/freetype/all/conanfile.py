@@ -21,13 +21,15 @@ class FreetypeConan(ConanFile):
         "with_png": [True, False],
         "with_zlib": [True, False],
         "with_bzip2": [True, False],
+        "with_brotli": [True, False],
     }
     default_options = {
         "shared": False,
         "fPIC": True,
         "with_png": True,
         "with_zlib": True,
-        "with_bzip2": True
+        "with_bzip2": True,
+        "with_brotli": True
     }
 
     _cmake = None
@@ -43,6 +45,8 @@ class FreetypeConan(ConanFile):
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
+        if tools.Version(self.version) < "2.10.2":
+            del self.options.with_brotli
 
     def configure(self):
         if self.options.shared:
@@ -57,6 +61,8 @@ class FreetypeConan(ConanFile):
             self.requires("zlib/1.2.11")
         if self.options.with_bzip2:
             self.requires("bzip2/1.0.8")
+        if self.options.get_safe("with_brotli"):
+            self.requires("brotli/1.0.9")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
@@ -76,6 +82,9 @@ class FreetypeConan(ConanFile):
         # TODO: Harfbuzz can be added as an option as soon as it is available.
         self._cmake.definitions["FT_WITH_HARFBUZZ"] = False
         self._cmake.definitions["CMAKE_DISABLE_FIND_PACKAGE_HarfBuzz"] = True
+        if "with_brotli" in self.options:
+            self._cmake.definitions["FT_WITH_BROTLI"] = self.options.with_brotli
+            self._cmake.definitions["CMAKE_DISABLE_FIND_PACKAGE_BrotliDec"] = not self.options.with_brotli
         self._cmake.configure(build_dir=self._build_subfolder)
         return self._cmake
 

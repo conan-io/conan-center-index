@@ -31,7 +31,7 @@ class Tabulate(ConanFile):
         else:
             self.output.warn("%s recipe lacks information about the %s compiler"
                              " standard version support" % (self.name, compiler))
-        
+
         minimal_version = {
             "Visual Studio": "16",
             "gcc": "7.3",
@@ -39,14 +39,14 @@ class Tabulate(ConanFile):
             "apple-clang": "10.0"
         }
 
-        if compiler not in minimal_version:            
+        if compiler not in minimal_version:
             self.output.info("%s requires a compiler that supports at least"
                              " C++17" % self.name)
             return
 
         if compiler_version < minimal_version[compiler]:
             raise ConanInvalidConfiguration("%s requires a compiler that supports"
-                                            " at least C++17. %s %s is not" 
+                                            " at least C++17. %s %s is not"
                                             " supported." % (self.name, compiler, Version(self.settings.compiler.version)))
 
     def package(self):

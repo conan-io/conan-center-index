@@ -51,7 +51,7 @@ class GetTextConan(ConanFile):
         if tools.os_info.is_windows:
             if "CONAN_BASH_PATH" not in os.environ and \
                tools.os_info.detect_windows_subsystem() != "msys2":
-                self.build_requires("msys2/20190524")
+                self.build_requires("msys2/20200517")
         if self._is_msvc:
             self.build_requires("automake/1.16.2")
 
@@ -120,11 +120,11 @@ class GetTextConan(ConanFile):
         self.copy(pattern="*libgnuintl.h", dst="include", src=self._source_subfolder, keep_path=False, symlinks=True)
         os.rename(os.path.join(self.package_folder, "include", "libgnuintl.h"),
                   os.path.join(self.package_folder, "include", "libintl.h"))
+        if self._is_msvc and self.options.shared:
+            os.rename(os.path.join(self.package_folder, "lib", "gnuintl.dll.lib"),
+                      os.path.join(self.package_folder, "lib", "gnuintl.lib"))
 
     def package_info(self):
-        if self._is_msvc and self.options.shared:
-            self.cpp_info.libs = ["gnuintl.dll.lib"]
-        else:
-            self.cpp_info.libs = ["gnuintl"]
+        self.cpp_info.libs = ["gnuintl"]
         if self.settings.os == "Macos":
             self.cpp_info.frameworks.extend(['CoreFoundation'])

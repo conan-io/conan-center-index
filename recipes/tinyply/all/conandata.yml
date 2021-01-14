@@ -1,0 +1,4 @@
+sources:
+  "2.3.2":
+    url: "https://github.com/ddiakopoulos/tinyply/archive/2.3.2.tar.gz"
+    sha256: "4da8744a9cf6810c6cfe015106cb87352e8bb7c125162170eb4e30fa51e8894e"

@@ -1,0 +1,12 @@
+--- a/Makefile	2019-11-20 12:30:15.000000000 +0300
++++ b/Makefile	2020-12-02 10:27:54.156848500 +0300
+@@ -68,6 +68,9 @@
+ 	$(LD) -r -o $@ $^
+ 	$(OBJCOPY) --keep-global-symbols=lib/exports.txt $@
+ 
++lib/libbase64.a: $(OBJS)
++	$(AR) rc $@ $^
++
+ lib/config.h:
+ 	@echo "#define HAVE_AVX2                  $(HAVE_AVX2)"                   > $@
+ 	@echo "#define HAVE_NEON32                $(HAVE_NEON32)"                >> $@

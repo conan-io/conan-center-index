@@ -1,4 +1,4 @@
 sources:
-  1.4.0:
+  "1.4.0":
     url: "https://github.com/mpark/variant/archive/v1.4.0.tar.gz"
     sha256: "8f6b28ab3640b5d76d5b6664dda7257a4405ce59179220431b8fd196c79b2ecb"

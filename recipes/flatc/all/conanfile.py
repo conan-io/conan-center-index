@@ -6,6 +6,7 @@ from conans import ConanFile, CMake, tools
 
 class FlatcConan(ConanFile):
     name = "flatc"
+    deprecated = "flatbuffers"
     license = "Apache-2.0"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "http://google.github.io/flatbuffers/"
@@ -22,11 +23,11 @@ class FlatcConan(ConanFile):
     @property
     def _build_subfolder(self):
         return "build_subfolder"
-    
+
     def _patch_sources(self):
         for patch in self.conan_data["patches"][self.version]:
             tools.patch(**patch)
-            
+
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
         extracted_dir = "flatbuffers-" + self.version
