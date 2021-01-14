@@ -2,6 +2,8 @@ from conans import ConanFile, CMake, tools
 from conans.errors import ConanInvalidConfiguration
 import os
 
+required_conan_version = ">=1.32.0"
+
 class LibDispatchConan(ConanFile):
     name = "libdispatch"
     homepage = "https://github.com/apple/swift-corelibs-libdispatch"
