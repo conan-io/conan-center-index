@@ -8,7 +8,7 @@ class LibDispatchConan(ConanFile):
     description = "Grand Central Dispatch (GCD or libdispatch) provides comprehensive support for concurrent code execution on multicore hardware.."
     topics = ("conan", "libdispatch", "apple", "GCD", "concurrency")
     url = "https://github.com/conan-io/conan-center-index"
-    license = "MIT"
+    license = "Apache-2.0"
     exports_sources = ["CMakeLists.txt"]
     generators = "cmake"
     settings = "os", "compiler", "build_type", "arch"
