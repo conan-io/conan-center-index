@@ -6,7 +6,7 @@ from conans.errors import ConanInvalidConfiguration
 class LibnumaConan(ConanFile):
     name = "libnuma"
     description = "NUMA support for Linux."
-    license = "GPL-2.0-or-later"
+    license = "LGPL-2.1-or-later"
     topics = ("conan", "numa")
     homepage = "https://github.com/numactl/numactl"
     url = "https://github.com/conan-io/conan-center-index"
