@@ -3,6 +3,8 @@ import os
 from conans import ConanFile, AutoToolsBuildEnvironment, tools
 from conans.errors import ConanInvalidConfiguration
 
+required_conan_version = ">=1.32.0"
+
 class LibnumaConan(ConanFile):
     name = "libnuma"
     description = "NUMA support for Linux."
@@ -34,11 +36,6 @@ class LibnumaConan(ConanFile):
     def validate(self):
         if self.settings.os != "Linux":
             raise ConanInvalidConfiguration("{} is only supported on Linux".format(self.name))
-
-    def config_options(self):
-        # calm down KB-H007
-        if self.settings.os == "Windows":
-            del self.options.fPIC
 
     def configure(self):
         del self.settings.compiler.libcxx
