@@ -43,8 +43,8 @@ class PangoConan(ConanFile):
         if self.options.fontconfig == "auto":
             self.options.fontconfig = not self.settings.os in ["Windows", "Macos"]
 
-        if self.options.xft and self.settings.os != 'Linux' and self.settings.os != 'FreeBSD':
-            raise ConanInvalidConfiguration('Xft can only be used on Linux and FreeBSD')
+        if self.options.xft and not self.settings.os in ["Linux", "FreeBSD"]:
+            raise ConanInvalidConfiguration("Xft can only be used on Linux and FreeBSD")
 
     def build_requirements(self):
         self.build_requires("pkgconf/1.7.3")
