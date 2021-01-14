@@ -24,7 +24,7 @@ class GdalConan(ConanFile):
         "simd_intrinsics": [None, "sse", "ssse3", "avx"],
         "threadsafe": [True, False],
         "with_zlib": [True, False],
-        # "with_libdeflate": [True, False],
+        "with_libdeflate": [True, False],
         "with_libiconv": [True, False],
         "with_zstd": [True, False],
         "with_pg": [True, False],
@@ -88,7 +88,7 @@ class GdalConan(ConanFile):
         "simd_intrinsics": "sse",
         "threadsafe": True,
         "with_zlib": True,
-        # "with_libdeflate": True,
+        "with_libdeflate": True,
         "with_libiconv": True,
         "with_zstd": False,
         "with_pg": False,
@@ -159,6 +159,10 @@ class GdalConan(ConanFile):
         return tools.Version(self.version) >= "3.1.0"
 
     @property
+    def _has_with_libdeflate_option(self):
+        return tools.Version(self.version) >= "3.2.0"
+
+    @property
     def _has_with_heif_option(self):
         return tools.Version(self.version) >= "3.2.0"
 
@@ -169,8 +173,8 @@ class GdalConan(ConanFile):
         #     del self.options.with_tiledb
         if not self._has_with_exr_option:
             del self.options.with_exr
-        # if tools.Version(self.version) < "3.2.0":
-            # del self.options.with_libdeflate
+        if not self._has_with_libdeflate_option:
+            del self.options.with_libdeflate
         if not self._has_with_heif_option:
             del self.options.with_heif
 
@@ -195,6 +199,8 @@ class GdalConan(ConanFile):
             del self.options.with_png  # and it's not trivial to fix
         else:
             del self.options.with_libiconv
+        if self.options.get_safe("with_libdeflate") and not self.options.get_safe("with_zlib", True):
+            raise ConanInvalidConfiguration("gdal:with_libdeflate=True requires gdal:with_zlib=True")
         self._strict_options_requirements()
 
     def _strict_options_requirements(self):
@@ -211,8 +217,8 @@ class GdalConan(ConanFile):
             self.requires("flatbuffers/1.12.0")
         if self.options.get_safe("with_zlib", True):
             self.requires("zlib/1.2.11")
-        # if self.options.get_safe("with_libdeflate"):
-        #     self.requires("libdeflate/1.6")
+        if self.options.get_safe("with_libdeflate"):
+            self.requires("libdeflate/1.7")
         if self.options.get_safe("with_libiconv", True):
             self.requires("libiconv/1.16")
         if self.options.get_safe("with_zstd"):
@@ -473,6 +479,8 @@ class GdalConan(ConanFile):
         if self.options.get_safe("with_zlib", True):
             args.append("ZLIB_EXTERNAL_LIB=1")
             args.append("ZLIB_INC=\"-I{}\"".format(" -I".join(self.deps_cpp_info["zlib"].include_paths)))
+        if self.options.get_safe("with_libdeflate"):
+            args.append("LIBDEFLATE_CFLAGS=\"-I{}\"".format(" -I".join(self.deps_cpp_info["libdeflate"].include_paths)))
         if self.options.with_poppler:
             poppler_version = tools.Version(self.deps_cpp_info["poppler"].version)
             args.extend([
@@ -566,11 +574,11 @@ class GdalConan(ConanFile):
         # Depencencies:
         args.append("--with-proj=yes") # always required !
         args.append("--with-libz={}".format("yes" if self.options.with_zlib else "no"))
+        if self._has_with_libdeflate_option:
+            args.append("--with-libdeflate={}".format("yes" if self.options.with_libdeflate else "no"))
         args.append("--with-libiconv-prefix={}".format(tools.unix_path(self.deps_cpp_info["libiconv"].rootpath)))
         args.append("--with-liblzma=no") # always disabled: liblzma is an optional transitive dependency of gdal (through libtiff).
         args.append("--with-zstd={}".format("yes" if self.options.get_safe("with_zstd") else "no")) # Optional direct dependency of gdal only if lerc lib enabled
-        if tools.Version(self.version) >= "3.2.0":
-            args.append("--without-libdeflate") # TODO: to implement when libdeflate recipe available
         # Drivers:
         if not (self.options.with_zlib and self.options.with_png and bool(self.options.with_jpeg)):
             # MRF raster driver always depends on zlib, libpng and libjpeg: https://github.com/OSGeo/gdal/issues/2581
