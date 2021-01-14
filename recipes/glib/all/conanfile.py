@@ -289,7 +289,7 @@ class GLibConan(ConanFile):
         if self.options.get_safe("with_elf", True):
             self.cpp_info.components["gresource"].requires.append(
                 "libelf::libelf"
-            )  # this is actualy an executable
+            )  # this is actually an executable
 
         bin_path = os.path.join(self.package_folder, "bin")
         self.output.info("Appending PATH env var with: {}".format(bin_path))
