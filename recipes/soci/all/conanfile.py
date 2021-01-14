@@ -11,6 +11,7 @@ class SociConan(ConanFile):
     license = "BSL-1.0"
     settings = "os", "compiler", "build_type", "arch"
     generators = "cmake"
+    _cmake = None
 
     options = {
         "fPIC":             [True, False],
@@ -39,8 +40,6 @@ class SociConan(ConanFile):
         "with_postgresql":  False,
         "with_boost":       False
     }
-
-    _cmake = None
 
     @property
     def _source_subfolder(self):
@@ -77,16 +76,21 @@ class SociConan(ConanFile):
 
         if self.options.with_sqlite3:
             self.requires("sqlite3/3.33.0")
-        # ToDo add the missing dependencies for the backends
+        if self.options.with_db2:
+            # self.requires("db2/0.0.0") # TODO add support for db2
+            raise ConanInvalidConfiguration(prefix + "DB2" + message)
+        if self.options.with_odbc:
+            self.requires("odbc/2.3.7")
         if self.options.with_oracle:
-            # self.requires("oracle_db/0.0.0")
+            # self.requires("oracle_db/0.0.0") # TODO add support for oracle
             raise ConanInvalidConfiguration(prefix + "ORACLE" + message)
+        if self.options.with_firebird:
+            # self.requires("firebird/0.0.0") # TODO add support for firebird
+            raise ConanInvalidConfiguration(prefix + "firebird" + message)
         if self.options.with_mysql:
-            # self.requires("libmysqlclient/8.0.17")
-            raise ConanInvalidConfiguration(prefix + "MYSQL" + message)
+            self.requires("libmysqlclient/8.0.17")
         if self.options.with_postgresql:
-            # self.requires("libpq/11.5")
-            raise ConanInvalidConfiguration(prefix + "POSTGRESQL" + message)
+            self.requires("libpq/11.5")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
@@ -98,18 +102,17 @@ class SociConan(ConanFile):
 
         self._cmake = CMake(self)
 
-        self._cmake.definitions["SOCI_EMPTY"]      = self.options.empty
-        self._cmake.definitions["SOCI_SHARED"]     = self.options.shared
-        self._cmake.definitions["WITH_SQLITE3"]    = self.options.with_sqlite3
-        self._cmake.definitions["WITH_DB2"]        = self.options.with_db2
-        self._cmake.definitions["WITH_ODBC"]       = self.options.with_odbc
-        self._cmake.definitions["WITH_ORACLE"]     = self.options.with_oracle
-        self._cmake.definitions["WITH_FIREBIRD"]   = self.options.with_firebird
-        self._cmake.definitions["WITH_MYSQL"]      = self.options.with_mysql
-        self._cmake.definitions["WITH_POSTGRESQL"] = self.options.with_postgresql
-        self._cmake.definitions["WITH_BOOST"]      = self.options.with_boost
-
-        self._cmake.definitions["SOCI_CXX11"] = True
+        self._cmake.definitions["SOCI_EMPTY"]       = self.options.empty
+        self._cmake.definitions["SOCI_SHARED"]      = self.options.shared
+        self._cmake.definitions["WITH_SQLITE3"]     = self.options.with_sqlite3
+        self._cmake.definitions["WITH_DB2"]         = self.options.with_db2
+        self._cmake.definitions["WITH_ODBC"]        = self.options.with_odbc
+        self._cmake.definitions["WITH_ORACLE"]      = self.options.with_oracle
+        self._cmake.definitions["WITH_FIREBIRD"]    = self.options.with_firebird
+        self._cmake.definitions["WITH_MYSQL"]       = self.options.with_mysql
+        self._cmake.definitions["WITH_POSTGRESQL"]  = self.options.with_postgresql
+        self._cmake.definitions["WITH_BOOST"]       = self.options.with_boost
+        self._cmake.definitions["SOCI_CXX11"]       = True
 
         self._cmake.configure(
             source_folder=self._source_subfolder,
@@ -135,9 +138,9 @@ class SociConan(ConanFile):
         self.copy("LICENSE_1_0.txt", dst="licenses", src=self._source_subfolder)
 
     def package_info(self):
-        self.cpp_info.includedirs = ['include']
-        self.cpp_info.libdirs = ['lib', 'lib64']
-        self.cpp_info.builddirs = ['cmake']
+        self.cpp_info.includedirs   = ['include']
+        self.cpp_info.libdirs       = ['lib', 'lib64']
+        self.cpp_info.builddirs     = ['cmake']
 
         self.cpp_info.libs = [""]
         if self.options.empty:
