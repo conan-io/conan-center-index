@@ -1,4 +1,5 @@
 from conans import ConanFile, tools, CMake
+from conans.errors import ConanInvalidConfiguration
 import os
 
 class CrowConan(ConanFile):
@@ -41,5 +42,5 @@ class CrowConan(ConanFile):
         self.info.header_only()
 
     def package_info(self):
-        if self.settings.os == "Linux":
+        if self.settings.os in ("Linux", "FreeBSD"):
             self.cpp_info.system_libs = ["pthread"]
