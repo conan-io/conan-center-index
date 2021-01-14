@@ -57,6 +57,10 @@ class HyperscanConan(ConanFile):
         if self.options.build_chimera:
             self.requires("pcre/8.44")
 
+    def config_options(self):
+        if self.settings.os == "Windows":
+            del self.options.fPIC
+
     def _configure_cmake(self):
         if self._cmake:
             return self._cmake
