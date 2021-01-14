@@ -29,7 +29,7 @@ class SociConan(ConanFile):
 
     default_options = {
         "fPIC":             True,
-        "empty":            True,
+        "empty":            False,
         "shared":           False,
         "with_sqlite3":     False,
         "with_db2":         False,
@@ -112,6 +112,7 @@ class SociConan(ConanFile):
         self._cmake.definitions["WITH_MYSQL"]       = self.options.with_mysql
         self._cmake.definitions["WITH_POSTGRESQL"]  = self.options.with_postgresql
         self._cmake.definitions["WITH_BOOST"]       = self.options.with_boost
+        self._cmake.definitions["SOCI_TESTS"]       = False
         self._cmake.definitions["SOCI_CXX11"]       = True
 
         self._cmake.configure(
