@@ -33,16 +33,9 @@ class LibnumaConan(ConanFile):
     def _build_subfolder(self):
         return "build_subfolder"
 
-    def validate(self):
+    def configure(self):
         if self.settings.os != "Linux":
             raise ConanInvalidConfiguration("{} is only supported on Linux".format(self.name))
-
-    def config_options(self):
-        # calm down KB-H007
-        if self.settings.os == "Windows":
-            del self.options.fPIC
-
-    def configure(self):
         del self.settings.compiler.libcxx
         del self.settings.compiler.cppstd
         if self.options.shared:
