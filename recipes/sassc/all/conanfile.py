@@ -53,3 +53,8 @@ class SasscConan(ConanFile):
             autotools = self._configure_autotools()
             autotools.install()
         self.copy("LICENSE", src=self._source_subfolder, dst="licenses")
+
+    def package_info(self):
+        bin_path = os.path.join(self.package_folder, "bin")
+        self.output.info("Appending PATH env var with : {}".format(bin_path))
+        self.env_info.PATH.append(bin_path)
