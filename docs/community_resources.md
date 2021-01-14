@@ -20,3 +20,4 @@ and being pull requested on a selection of Linux distributions and FreeBSD
 - [FreeBSD Testing](https://github.com/ericLemanissier/conan-center-index/tree/freebsd): Detects pull requests with `FreeBSD` in the description and runs a test for
 one configuration on that platform
   - The results can be found here: https://github.com/ericLemanissier/conan-center-index/actions?query=workflow%3ACI
+- [Bincrafters Conventions](https://github.com/bincrafters/bincrafters-conventions): Automatically updates Conan recipes to the latest conventions and rules
