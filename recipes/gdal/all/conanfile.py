@@ -5,7 +5,7 @@ import os
 from conans import ConanFile, AutoToolsBuildEnvironment, VisualStudioBuildEnvironment, tools
 from conans.errors import ConanInvalidConfiguration
 
-required_conan_version = ">=1.29.1"
+required_conan_version = ">=1.32.0"
 
 
 class GdalConan(ConanFile):
@@ -329,9 +329,11 @@ class GdalConan(ConanFile):
         if self.options.get_safe("with_heif"):
             self.requires("libheif/1.9.1")
 
-    def _validate_dependency_graph(self):
+    def validate(self):
         if self.options.with_qhull and self.options["qhull"].reentrant:
             raise ConanInvalidConfiguration("gdal depends on non-reentrant qhull.")
+
+    def _validate_dependency_graph(self):
         if self.options.with_mongocxx:
             mongocxx_version = tools.Version(self.deps_cpp_info["mongo-cxx-driver"].version)
             if mongocxx_version < "3.0.0":
