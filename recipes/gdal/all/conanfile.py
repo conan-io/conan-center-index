@@ -1,5 +1,4 @@
 from contextlib import contextmanager
-import glob
 import os
 
 from conans import ConanFile, AutoToolsBuildEnvironment, VisualStudioBuildEnvironment, tools
@@ -154,10 +153,6 @@ class GdalConan(ConanFile):
     @property
     def _source_subfolder(self):
         return "source_subfolder"
-
-    @property
-    def _build_subfolder(self):
-        return "build_subfolder"
 
     @property
     def _has_with_exr_option(self):
