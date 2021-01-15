@@ -108,7 +108,6 @@ class GLibConan(ConanFile):
             build_folder=self._build_subfolder,
             defs=defs,
         )
-
         return meson
 
     def _patch_sources(self):
