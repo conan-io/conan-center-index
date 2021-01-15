@@ -9,7 +9,7 @@ class NormConan(ConanFile):
     topics = ("conan", "norm", "multicast", "transport protocol")
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://www.nrl.navy.mil/itd/ncs/products/norm"
-    exports_sources = ["CMakeLists.txt"]
+    exports_sources = ["LICENSE"]
     generators = "cmake", "cmake_find_package"
     _cmake = None
     license = "MIT"
