@@ -1,4 +1,9 @@
 sources:
+  "4.1.2":
+    - sha256: 385dd0a9c25e67ef0dd60e022d2a2d7b17e2f36819cf3cb46aa8cdff5c5282c9
+      url: https://github.com/opencv/opencv/archive/4.1.2.tar.gz
+    - sha256: 0f6c3d30baa39e3e7611afb481ee86dea45dafb182cac87d570c95dccd83eb8b
+      url: https://github.com/opencv/opencv_contrib/archive/4.1.2.tar.gz
   "4.5.0":
     - sha256: dde4bf8d6639a5d3fe34d5515eab4a15669ded609a1d622350c7ff20dace1907
       url: https://github.com/opencv/opencv/archive/4.5.0.tar.gz

@@ -82,7 +82,11 @@ class OpenCVConan(ConanFile):
         elif self.options.with_jpeg == "libjpeg-turbo":
             self.requires("libjpeg-turbo/2.0.5")
         if self.options.with_jpeg2000 == "jasper":
-            self.requires("jasper/2.0.21")
+            if tools.Version(self.version) >= "4.5.0":
+                self.requires("jasper/2.0.21")
+            else:
+                #https://github.com/opencv/opencv/issues/17984
+                self.requires("jasper/2.0.16")
         elif self.options.with_jpeg2000 == "openjpeg":
             self.requires("openjpeg/2.3.1")
         if self.options.with_png:
