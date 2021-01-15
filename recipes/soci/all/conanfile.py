@@ -15,8 +15,8 @@ class SociConan(ConanFile):
 
     options = {
         "fPIC":             [True, False],
-        "empty":            [True, False],
         "shared":           [True, False],
+        "empty":            [True, False],
         "with_sqlite3":     [True, False],
         "with_db2":         [True, False],
         "with_odbc":        [True, False],
@@ -29,8 +29,8 @@ class SociConan(ConanFile):
 
     default_options = {
         "fPIC":             True,
-        "empty":            False,
         "shared":           False,
+        "empty":            False,
         "with_sqlite3":     False,
         "with_db2":         False,
         "with_odbc":        False,
@@ -102,8 +102,8 @@ class SociConan(ConanFile):
 
         self._cmake = CMake(self)
 
-        self._cmake.definitions["SOCI_EMPTY"]       = self.options.empty
         self._cmake.definitions["SOCI_SHARED"]      = self.options.shared
+        self._cmake.definitions["SOCI_EMPTY"]       = self.options.empty
         self._cmake.definitions["WITH_SQLITE3"]     = self.options.with_sqlite3
         self._cmake.definitions["WITH_DB2"]         = self.options.with_db2
         self._cmake.definitions["WITH_ODBC"]        = self.options.with_odbc
@@ -114,6 +114,9 @@ class SociConan(ConanFile):
         self._cmake.definitions["WITH_BOOST"]       = self.options.with_boost
         self._cmake.definitions["SOCI_TESTS"]       = False
         self._cmake.definitions["SOCI_CXX11"]       = True
+
+        if self.options.shared:
+            self._cmake.definitions["SOCI_STATIC"]  = False
 
         self._cmake.configure(
             source_folder=self._source_subfolder,
@@ -144,19 +147,19 @@ class SociConan(ConanFile):
         self.cpp_info.builddirs     = ['cmake']
 
         self.cpp_info.libs = [""]
-        if self.options.empty:
-            self.cpp_info.libs.append("soci_empty")
 
         if self.options.shared:
             self.cpp_info.libs.append("soci_core")
-            if self.options.with_sqlite3:
-                self.cpp_info.libs.append("soci_sqlite3")
-            if self.options.with_oracle:
-                self.cpp_info.libs.append("soci_oracle")
-            if self.options.with_mysql:
-                self.cpp_info.libs.append("soci_mysql")
-            if self.options.with_postgresql:
-                self.cpp_info.libs.append("soci_postgresql")
+        if self.options.empty:
+            self.cpp_info.libs.append("soci_empty")
+        if self.options.with_sqlite3:
+            self.cpp_info.libs.append("soci_sqlite3")
+        if self.options.with_oracle:
+            self.cpp_info.libs.append("soci_oracle")
+        if self.options.with_mysql:
+            self.cpp_info.libs.append("soci_mysql")
+        if self.options.with_postgresql:
+            self.cpp_info.libs.append("soci_postgresql")
 
         if self._cmake:
             self._cmake.install()
