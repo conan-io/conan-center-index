@@ -29,10 +29,6 @@ class LibnumaConan(ConanFile):
     def _source_subfolder(self):
         return "source_subfolder"
 
-    @property
-    def _build_subfolder(self):
-        return "build_subfolder"
-
     def configure(self):
         if self.settings.os != "Linux":
             raise ConanInvalidConfiguration("{} is only supported on Linux".format(self.name))
