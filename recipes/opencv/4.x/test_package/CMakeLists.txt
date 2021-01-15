@@ -2,10 +2,10 @@ cmake_minimum_required(VERSION 3.1)
 project(test_package)
 
 include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
-conan_basic_setup()
+conan_basic_setup(TARGETS)
 
 find_package(OpenCV REQUIRED imgcodecs highgui objdetect CONFIG)
 
-add_executable(test_package test_package.cpp)
-target_link_libraries(test_package opencv::opencv_imgcodecs opencv::opencv_highgui opencv::opencv_objdetect)
-set_property(TARGET test_package PROPERTY CXX_STANDARD 11)
+add_executable(${PROJECT_NAME} test_package.cpp)
+target_link_libraries(${PROJECT_NAME} opencv_imgcodecs opencv_highgui opencv_objdetect)
+set_property(TARGET ${PROJECT_NAME} PROPERTY CXX_STANDARD 11)
