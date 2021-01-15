@@ -48,10 +48,8 @@ class GLibConan(ConanFile):
                 "glib can not be built as static library on Windows. "
                 "see https://gitlab.gnome.org/GNOME/glib/-/issues/692"
             )
-        if tools.Version(self.version) < "2.67.0":
-            if not self.options.with_elf:
-                self.output.warn("libelf dependency can't be disabled in glib < 2.67.0")
-            del self.options.with_elf
+        if tools.Version(self.version) < "2.67.0" and not self.options.with_elf:
+            raise ConanInvalidConfiguration("libelf dependency can't be disabled in glib < 2.67.0")        
 
     def config_options(self):
         if self.settings.os == "Windows":
