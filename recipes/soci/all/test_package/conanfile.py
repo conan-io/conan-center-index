@@ -5,6 +5,10 @@ class SociTestConan(ConanFile):
     settings = "os", "compiler", "build_type", "arch"
     generators = "cmake"
 
+    def configure(self):
+        self.options["soci"].shared     = True
+        self.options["soci"].empty      = True
+
     def build(self):
         cmake = CMake(self)
         cmake.configure()
