@@ -319,16 +319,17 @@ class OpenCVConan(ConanFile):
                             self.cpp_info.components[conan_component].libs += libs
 
                 # CMake components names
-                conan_component_alias = conan_component + "_alias"
                 cmake_component = component["lib"]
-                self.cpp_info.components[conan_component_alias].names["cmake_find_package"] = cmake_component
-                self.cpp_info.components[conan_component_alias].names["cmake_find_package_multi"] = cmake_component
-                self.cpp_info.components[conan_component_alias].requires = [conan_component]
-                self.cpp_info.components[conan_component_alias].includedirs.append(os.path.join("include", "opencv4"))
-                self.cpp_info.components[conan_component_alias].libdirs = []
-                self.cpp_info.components[conan_component_alias].resdirs = []
-                self.cpp_info.components[conan_component_alias].bindirs = []
-                self.cpp_info.components[conan_component_alias].frameworkdirs = []
+                if cmake_component != cmake_target:
+                    conan_component_alias = conan_component + "_alias"
+                    self.cpp_info.components[conan_component_alias].names["cmake_find_package"] = cmake_component
+                    self.cpp_info.components[conan_component_alias].names["cmake_find_package_multi"] = cmake_component
+                    self.cpp_info.components[conan_component_alias].requires = [conan_component]
+                    self.cpp_info.components[conan_component_alias].includedirs.append(os.path.join("include", "opencv4"))
+                    self.cpp_info.components[conan_component_alias].libdirs = []
+                    self.cpp_info.components[conan_component_alias].resdirs = []
+                    self.cpp_info.components[conan_component_alias].bindirs = []
+                    self.cpp_info.components[conan_component_alias].frameworkdirs = []
 
         def imageformats_deps():
             components = []
