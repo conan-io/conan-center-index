@@ -6,7 +6,7 @@ import os
 class SasscConan(ConanFile):
     name = "sassc"
     license = "MIT"
-    homepage = "libsass.org"
+    homepage = "https://sass-lang.com/libsass"
     url = "https://github.com/conan-io/conan-center-index"
     description = "libsass command line driver"
     topics = ("Sass", "sassc", "compiler")
