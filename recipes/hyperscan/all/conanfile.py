@@ -50,10 +50,10 @@ class HyperscanConan(ConanFile):
         os.rename("hyperscan-{0}".format(self.version), self._source_subfolder)
 
     def build_requirements(self):
-        self.build_requires("boost/1.75.0");
         self.build_requires("ragel/6.10");
 
     def requirements(self):
+        self.requires("boost/1.75.0");
         if self.options.build_chimera:
             self.requires("pcre/8.44")
 
