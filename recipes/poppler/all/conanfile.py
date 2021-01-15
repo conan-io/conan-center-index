@@ -112,8 +112,7 @@ class PopplerConan(ConanFile):
             # FIXME: missing qt recipe
             raise ConanInvalidConfiguration("qt is not (yet) available on cii")
         if self.options.get_safe("with_gtk"):
-            # FIXME: missing gtk recipe
-            raise ConanInvalidConfiguration("gtk is not (yet) available on cii")
+            self.requires("gtk/3.24.24")
         if self.options.with_openjpeg:
             self.requires("openjpeg/2.4.0")
         if self.options.with_lcms:
@@ -202,6 +201,9 @@ class PopplerConan(ConanFile):
             poppler_global = os.path.join(self._source_subfolder, "cpp", "poppler-global.h")
             tools.replace_in_file(poppler_global, "__declspec(dllimport)", "")
             tools.replace_in_file(poppler_global, "__declspec(dllexport)", "")
+        tools.replace_in_file(os.path.join(self._source_subfolder, "CMakeLists.txt"),
+                              "FREETYPE_INCLUDE_DIRS",
+                              "Freetype_INCLUDE_DIRS")
 
 
     def build(self):
