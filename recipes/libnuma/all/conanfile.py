@@ -75,7 +75,6 @@ class LibnumaConan(ConanFile):
         tools.remove_files_by_mask(os.path.join(self.package_folder, "lib"), "*.la")
 
     def package_info(self):
-        self.cpp_info.components["numa"].libs = ["numa"]
-        self.cpp_info.components["numa"].names["pkg_config"] = "numa"
-        self.cpp_info.components["numa"].names["pkg_config"] = "numa"
-        self.cpp_info.components["numa"].system_libs.extend(["dl", "pthread"])
+        self.cpp_info.libs = ["numa"]
+        self.cpp_info.names["pkg_config"] = "numa"
+        self.cpp_info.system_libs = ["dl", "pthread"]
