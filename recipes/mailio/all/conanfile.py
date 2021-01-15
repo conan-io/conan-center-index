@@ -10,7 +10,7 @@ class mailioConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/karastojko/mailio"
     description = "mailio is a cross platform C++ library for MIME format and SMTP, POP3 and IMAP protocols."
-    topics = ("conan", "smpt", "imap", "email", "mail", "libraries", "cpp")
+    topics = ("conan", "smtp", "imap", "email", "mail", "libraries", "cpp")
     settings = "os", "compiler", "build_type", "arch"
     options = {
         "fPIC": [True, False],

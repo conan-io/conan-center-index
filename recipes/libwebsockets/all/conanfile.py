@@ -133,7 +133,6 @@ class LibwebsocketsConan(ConanFile):
         "enable_server_status": False,
         "enable_threadpool": False,
         "enable_http_stream_compression": False,
-        "enable_http_stream_compression": False,
         "enable_http_brotli": False,
         "enable_acme": False,
         "enable_fts": False,
@@ -201,12 +200,12 @@ class LibwebsocketsConan(ConanFile):
 
     def requirements(self):
         if self.options.with_libuv:
-            self.requires("libuv/1.38.0")
+            self.requires("libuv/1.40.0")
 
         if self.options.with_libevent == "libevent":
-            self.requires("libevent/2.1.11")
+            self.requires("libevent/2.1.12")
         elif self.options.with_libevent == "libev":
-            self.requires("libev/4.27")
+            self.requires("libev/4.33")
 
         if self.options.with_zlib == "zlib":
             self.requires("zlib/1.2.11")
@@ -214,13 +213,13 @@ class LibwebsocketsConan(ConanFile):
             self.requires("miniz/2.1.0")
 
         if self.options.with_libmount:
-            self.requires("libmount/2.33.1")
+            self.requires("libmount/2.36")
 
         if self.options.with_sqlite3:
-            self.requires("sqlite3/3.33.0")
+            self.requires("sqlite3/3.34.0")
 
         if self.options.with_ssl == "openssl":
-            self.requires("openssl/1.1.1h")
+            self.requires("openssl/1.1.1i")
 
         if self.options.with_ssl == "mbedtls-apache":
             self.requires("mbedtls/2.16.3-apache")
@@ -229,7 +228,7 @@ class LibwebsocketsConan(ConanFile):
             self.requires("mbedtls/2.16.3-gpl")
 
         if self.options.with_ssl == "wolfssl":
-            self.requires("wolfssl/4.4.0")
+            self.requires("wolfssl/4.5.0")
 
         if self.options.with_hubbub:
             raise ConanInvalidConfiguration("Library hubbub not implemented (yet) in CCI")
@@ -418,7 +417,8 @@ class LibwebsocketsConan(ConanFile):
         self._cmake.definitions["LWS_WITH_ALSA"] = False
         self._cmake.definitions["LWS_WITH_GTK"] = False
 
-        self._cmake.definitions["LWS_WITH_SYS_SMD"] = False if self.settings.os == "Windows" else True # New in 4.1.4
+        if tools.Version(self.version) >= "4.1.0":
+            self._cmake.definitions["LWS_WITH_SYS_SMD"] = self.settings.os != "Windows"
 
         self._cmake.configure()
         return self._cmake
