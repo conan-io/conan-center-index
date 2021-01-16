@@ -51,13 +51,13 @@ class LibrdkafkaConan(ConanFile):
             self.output.warn("lz4 option is deprecated. Actually, librdkafka always depends on lz4.")
 
     def requirements(self):
-        self.requires("lz4/1.9.2")
+        self.requires("lz4/1.9.3")
         if self.options.zlib:
             self.requires("zlib/1.2.11")
         if self.options.zstd:
-            self.requires("zstd/1.4.5")
+            self.requires("zstd/1.4.8")
         if self.options.ssl:
-            self.requires("openssl/1.1.1g")
+            self.requires("openssl/1.1.1i")
         if self.options.sasl and self.settings.os != "Windows":
             self.requires("cyrus-sasl/2.1.27")
 
