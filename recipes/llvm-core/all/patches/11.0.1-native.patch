@@ -1,6 +1,6 @@
 --- CMakeLists.txt
 +++ CMakeLists.txt
-@@ -943,10 +943,6 @@
+@@ -942,10 +942,6 @@
  include_directories( ${LLVM_INCLUDE_DIR} ${LLVM_MAIN_INCLUDE_DIR})
  
  # when crosscompiling import the executable targets from a file
