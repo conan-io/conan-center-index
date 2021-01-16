@@ -16,8 +16,14 @@ class TesseractConan(ConanFile):
     settings = "os", "arch", "compiler", "build_type"
     options = {"shared": [True, False],
                "fPIC": [True, False],
+               "with_auto_optimize": [True, False],
+               "with_march_native": [True, False],
                "with_training": [True, False]}
-    default_options = {"shared": False, "fPIC": True, "with_training": False}
+    default_options = {"shared": False,
+                       "fPIC": True,
+                       "with_auto_optimize": False,
+                       "with_march_native": False,
+                       "with_training": False}
 
     _cmake = None
 
@@ -72,6 +78,8 @@ class TesseractConan(ConanFile):
         cmake.definitions["CPPAN_BUILD"] = False
         cmake.definitions["SW_BUILD"] = False
 
+        cmake.definitions["AUTO_OPTIMIZE"] = self.options.with_auto_optimize
+
         # avoid accidentally picking up system libarchive
         cmake.definitions["CMAKE_DISABLE_FIND_PACKAGE_LIBARCHIVE"] = True
 
@@ -84,6 +92,12 @@ class TesseractConan(ConanFile):
     def _patch_sources(self):
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
             tools.patch(**patch)
+
+        if not self.options.with_march_native:
+            tools.replace_in_file(
+                os.path.join(self._source_subfolder, "CMakeLists.txt"),
+                "if(COMPILER_SUPPORTS_MARCH_NATIVE)",
+                "if(False)")
 
     def build(self):
         self._patch_sources()
