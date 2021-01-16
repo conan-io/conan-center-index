@@ -119,7 +119,7 @@ class TesseractConan(ConanFile):
         self.cpp_info.names["cmake_find_package"] = "Tesseract"
         self.cpp_info.names["cmake_find_package_multi"] = "Tesseract"
 
-        self.cpp_info.components["libtesseract"].libs = ["tesseract"]
+        self.cpp_info.components["libtesseract"].libs = tools.collect_libs(self)
         self.cpp_info.components["libtesseract"].requires = ["leptonica::leptonica", "libarchive::libarchive" ]
 
         self.cpp_info.components["libtesseract"].names["cmake_find_package"] = "libtesseract"
