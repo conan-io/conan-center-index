@@ -80,9 +80,6 @@ class TesseractConan(ConanFile):
 
         cmake.definitions["AUTO_OPTIMIZE"] = self.options.with_auto_optimize
 
-        # avoid accidentally picking up system libarchive
-        cmake.definitions["CMAKE_DISABLE_FIND_PACKAGE_LIBARCHIVE"] = True
-
         # Set Leptonica_DIR to ensure that find_package will be called in original CMake file
         cmake.definitions["Leptonica_DIR"] = self.deps_cpp_info["leptonica"].rootpath
 
