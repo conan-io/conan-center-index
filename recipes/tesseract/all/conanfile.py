@@ -101,6 +101,8 @@ class TesseractConan(ConanFile):
         tools.rmdir(os.path.join(self.package_folder, 'lib', 'pkgconfig'))
         # remove cmake
         tools.rmdir(os.path.join(self.package_folder, 'cmake'))
+        # required for 5.0
+        tools.rmdir(os.path.join(self.package_folder, 'lib', 'cmake'))
 
     def package_info(self):
         self.cpp_info.libs = tools.collect_libs(self)
