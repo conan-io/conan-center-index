@@ -60,4 +60,3 @@ class LibDispatchConan(ConanFile):
             self.cpp_info.system_libs = ["pthread"]
         else:
             self.cpp_info.libs = tools.collect_libs(self)
-    
