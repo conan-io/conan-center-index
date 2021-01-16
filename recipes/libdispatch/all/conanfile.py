@@ -20,12 +20,12 @@ class LibDispatchConan(ConanFile):
 
     _cmake = None
 
-    def validate(self):
-        if self.settings.build_type != "Release":
-            raise ConanInvalidConfiguration("Just Release builds allowed.")
+    # def validate(self):
+    #     if self.settings.build_type != "Release":
+    #         raise ConanInvalidConfiguration("Just Release builds allowed.")
 
-        if self.settings.compiler != "clang":
-            raise ConanInvalidConfiguration("Clang compiler is required.")
+    #     if self.settings.compiler != "clang":
+    #         raise ConanInvalidConfiguration("Clang compiler is required.")
 
     @property
     def _source_subfolder(self):
