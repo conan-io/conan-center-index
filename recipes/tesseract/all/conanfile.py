@@ -116,11 +116,18 @@ class TesseractConan(ConanFile):
         tools.rmdir(os.path.join(self.package_folder, 'lib', 'cmake'))
 
     def package_info(self):
-        self.cpp_info.libs = tools.collect_libs(self)
-        if self.settings.os == "Linux":
-            self.cpp_info.system_libs = ["pthread"]
-        elif self.settings.compiler == "Visual Studio":
-            if not self.options.shared:
-                self.cpp_info.system_libs = ["ws2_32"]
         self.cpp_info.names["cmake_find_package"] = "Tesseract"
         self.cpp_info.names["cmake_find_package_multi"] = "Tesseract"
+
+        self.cpp_info.components["libtesseract"].libs = ["tesseract"]
+        self.cpp_info.components["libtesseract"].requires = ["leptonica::leptonica", "libarchive::libarchive" ]
+
+        self.cpp_info.components["libtesseract"].names["cmake_find_package"] = "libtesseract"
+        self.cpp_info.components["libtesseract"].names["cmake_find_package_multi"] = "libtesseract"
+        self.cpp_info.components["libtesseract"].names["pkg_config"] = "libtesseract"
+
+        if self.settings.os == "Linux":
+            self.cpp_info.components["libtesseract"].system_libs = ["pthread"]
+        elif self.settings.compiler == "Visual Studio" and not self.options.shared:
+            self.cpp_info.components["libtesseract"].system_libs = ["ws2_32"]
+
