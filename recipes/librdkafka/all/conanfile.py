@@ -32,7 +32,7 @@ class LibrdkafkaConan(ConanFile):
         "sasl": False,
         "lz4": False,
     }
-    generators = "cmake", "cmake_find_package"
+    generators = "cmake", "cmake_find_package", "pkg_config"
     exports_sources = "CMakeLists.txt", "patches/**"
     _cmake = None
 
@@ -59,6 +59,10 @@ class LibrdkafkaConan(ConanFile):
             self.requires("cyrus-sasl/2.1.27")
         if self.options.lz4:
             self.requires("lz4/1.9.2")
+
+    def build_requirements(self):
+        if self.options.sasl and self.settings.os != "Windows":
+            self.build_requires("pkgconf/1.7.3")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
