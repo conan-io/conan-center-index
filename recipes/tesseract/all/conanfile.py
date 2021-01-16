@@ -47,13 +47,15 @@ class TesseractConan(ConanFile):
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
+
+    def configure(self):
         if self.options.shared:
             del self.options.fPIC
         if self.options.with_training:
             # do not enforce failure and allow user to build with system cairo, pango, fontconfig
             self.output.warn("*** Build with training is not yet supported, continue on your own")
 
-    def configure(self):
+        # Check compiler version
         compiler = str(self.settings.compiler)
         compiler_version = Version(self.settings.compiler.version.value)
 
