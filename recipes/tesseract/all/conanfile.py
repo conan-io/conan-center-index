@@ -17,12 +17,20 @@ class TesseractConan(ConanFile):
     options = {"shared": [True, False],
                "fPIC": [True, False],
                "with_training": [True, False]}
-    default_options = {'shared': False, 'fPIC': True, 'with_training': False}
-    _source_subfolder = "source_subfolder"
-    _build_subfolder = "build_subfolder"
+    default_options = {"shared": False, "fPIC": True, "with_training": False}
+
     _cmake = None
 
-    requires = "leptonica/1.79.0"
+    @property
+    def _source_subfolder(self):
+        return "source_subfolder"
+
+    @property
+    def _build_subfolder(self):
+        return "build_subfolder"
+
+    def requirements(self):
+        self.requires("leptonica/1.79.0")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
@@ -47,17 +55,17 @@ class TesseractConan(ConanFile):
         if self._cmake:
             return self._cmake
         cmake = self._cmake = CMake(self)
-        cmake.definitions['BUILD_TRAINING_TOOLS'] = self.options.with_training
+        cmake.definitions["BUILD_TRAINING_TOOLS"] = self.options.with_training
         cmake.definitions["STATIC"] = not self.options.shared
         # Use CMake-based package build and dependency detection, not the pkg-config, cppan or SW
-        cmake.definitions['CPPAN_BUILD'] = False
-        cmake.definitions['SW_BUILD'] = False
+        cmake.definitions["CPPAN_BUILD"] = False
+        cmake.definitions["SW_BUILD"] = False
 
         # avoid accidentally picking up system libarchive
-        cmake.definitions['CMAKE_DISABLE_FIND_PACKAGE_LIBARCHIVE'] = True
+        cmake.definitions["CMAKE_DISABLE_FIND_PACKAGE_LIBARCHIVE"] = True
 
         # Set Leptonica_DIR to ensure that find_package will be called in original CMake file
-        cmake.definitions['Leptonica_DIR'] = self.deps_cpp_info['leptonica'].rootpath
+        cmake.definitions["Leptonica_DIR"] = self.deps_cpp_info["leptonica"].rootpath
 
         cmake.configure(build_folder=self._build_subfolder)
         return cmake
