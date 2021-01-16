@@ -1,19 +1,17 @@
 --- a/src/CMakeLists.txt
 +++ b/src/CMakeLists.txt
-@@ -209,9 +209,9 @@ if(WITH_ZLIB)
+@@ -209,9 +209,7 @@ if(WITH_ZLIB)
  endif()
  
  if(WITH_ZSTD)
 -  target_link_libraries(rdkafka PUBLIC ${ZSTD_LIBRARY})
 -  target_include_directories(rdkafka PUBLIC ${ZSTD_INCLUDE_DIR})
 -  message(STATUS "Found ZSTD: ${ZSTD_LIBRARY}")
-+  target_link_libraries(rdkafka PUBLIC ${zstd_LIBRARIES})
-+  target_include_directories(rdkafka PUBLIC ${zstd_INCLUDE_DIR})
-+  message(STATUS "Found ZSTD: ${zstd_LIBRARIES}")
++  target_link_libraries(rdkafka PUBLIC CONAN_PKG::zstd)
  endif()
  
  if(WITH_SSL)
-@@ -246,8 +246,7 @@ if(WITH_LIBDL)
+@@ -246,8 +244,7 @@ if(WITH_LIBDL)
  endif()
  
  if(WITH_LZ4_EXT)
