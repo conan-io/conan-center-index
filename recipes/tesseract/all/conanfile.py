@@ -45,11 +45,19 @@ class TesseractConan(ConanFile):
             self.output.warn("*** Build with training is not yet supported, continue on your own")
 
     def configure(self):
-        # Exclude old compilers not supported by tesseract
-        compiler_version = tools.Version(self.settings.compiler.version)
-        if (self.settings.compiler == "gcc" and compiler_version < "5") or \
-                (self.settings.compiler == "clang" and compiler_version < "5"):
-            raise ConanInvalidConfiguration("tesseract/{} requires Clang >= 5".format(self.version))
+        compiler = str(self.settings.compiler)
+        compiler_version = Version(self.settings.compiler.version.value)
+
+        minimal_version = {
+            "Visual Studio": "14",
+            "gcc": "5",
+            "clang": "5",
+            "apple-clang": "6"
+        }
+
+        if compiler in minimal_version and \
+           compiler_version < minimal_version[compiler]:
+            raise ConanInvalidConfiguration("%s requires a {} version >= {}" % (self.name, compiler, compiler_version))
 
     def _configure_cmake(self):
         if self._cmake:
