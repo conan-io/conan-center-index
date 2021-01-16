@@ -66,7 +66,7 @@ class TesseractConan(ConanFile):
 
         if compiler in minimal_version and \
            compiler_version < minimal_version[compiler]:
-            raise ConanInvalidConfiguration("%s requires a {} version >= {}" % (self.name, compiler, compiler_version))
+            raise ConanInvalidConfiguration("{} requires a {} version >= {}".format(self.name, compiler, compiler_version))
 
     def _configure_cmake(self):
         if self._cmake:
@@ -130,4 +130,3 @@ class TesseractConan(ConanFile):
             self.cpp_info.components["libtesseract"].system_libs = ["pthread"]
         elif self.settings.compiler == "Visual Studio" and not self.options.shared:
             self.cpp_info.components["libtesseract"].system_libs = ["ws2_32"]
-
