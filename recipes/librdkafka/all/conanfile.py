@@ -78,7 +78,7 @@ class LibrdkafkaConan(ConanFile):
             tools.patch(**patch)
 
     def _configure_cmake(self):
-        if self._cmake is not None:
+        if self._cmake:
             return self._cmake
         self._cmake = CMake(self)
         self._cmake.definitions["WITHOUT_OPTIMIZATION"] = self.settings.build_type == "Debug"
