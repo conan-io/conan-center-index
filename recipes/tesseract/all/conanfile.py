@@ -63,9 +63,10 @@ class TesseractConan(ConanFile):
             "clang": "5",
             "apple-clang": "6"
         }
-
-        if compiler in minimal_version and \
-           compiler_version < minimal_version[compiler]:
+        if compiler not in minimal_version:
+            self.output.warn(
+                "%s recipe lacks information about the %s compiler standard version support" % (self.name, compiler))
+        elif compiler_version < minimal_version[compiler]:
             raise ConanInvalidConfiguration("{} requires a {} version >= {}".format(self.name, compiler, compiler_version))
 
     def _configure_cmake(self):
