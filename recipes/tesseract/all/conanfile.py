@@ -30,7 +30,8 @@ class TesseractConan(ConanFile):
         return "build_subfolder"
 
     def requirements(self):
-        self.requires("leptonica/1.79.0")
+        self.requires("leptonica/1.80.0")
+        self.requires("libarchive/3.5.1")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
