@@ -130,7 +130,7 @@ class PangoConan(ConanFile):
             self.cpp_info.components['pango_'].requires.append('cairo::cairo_')
         self.cpp_info.components['pango_'].includedirs = [os.path.join(self.package_folder, "include", "pango-1.0")]
         
-        if self.options.with_freetype:
+        if self.options.with_freetype and self.options.with_fontconfig:
             self.cpp_info.components['pangoft2'].libs = ['pangoft2-1.0']
             self.cpp_info.components['pangoft2'].names['pkg_config'] = 'pangoft2'
             self.cpp_info.components['pangoft2'].requires = ['pango_', 'freetype::freetype']
