@@ -61,11 +61,13 @@ class Recipe(ConanFile):
             self._install_tool('node-' + self._node_version, 'node')
             self._install_tool('python-' + self._python_version, 'python')
             self._install_tool(self.version, 'upstream')
-            self.run('{} activate {}'.format(self._emsdk_exec, self.version))
+            self.run('{} activate --embedded {}'.format(self._emsdk_exec, self.version))
 
     def package(self):
         self.copy(pattern="LICENSE", dst="licenses", src=self._source_subfolder)
         self.copy(pattern='*', dst='.', src=self._source_subfolder) # TODO: Not everything is needed
+        self.copy("cmake-wrapper.cmd")
+        self.copy("cmake-wrapper")
     
     def package_info(self):
         # Usable only as a build-require, it populates the same environment as activating 'emsdk_env.sh'
@@ -81,4 +83,6 @@ class Recipe(ConanFile):
         self.env_info.EMSDK_PYTHON = os.path.join(self.package_folder, 'python', self._python_version.replace('-64bit', '_64bit'), 'bin', 'python3')
         self.env_info.SSL_CERT_FILE = os.path.join(self.package_folder, 'python', self._python_version.replace('-64bit', '_64bit'), 'lib', 'python3.7', 'site-package', 'certifi', 'cacert.pem')
 
-        self.env_info.CONAN_CMAKE_PROGRAM = 'emcmake cmake'
+        cmake_wrapper = "cmake-wrapper.cmd" if self.settings.os == "Windows" else "cmake-wrapper"
+        cmake_wrapper = os.path.join(self.package_folder, cmake_wrapper)
+        self.env_info.CONAN_CMAKE_PROGRAM = cmake_wrapper
