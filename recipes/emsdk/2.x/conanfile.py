@@ -18,6 +18,7 @@ class Recipe(ConanFile):
 
     short_paths = True
     _source_subfolder = "source_subfolder"
+    exports_sources = ["cmake-wrapper.cmd", "cmake-wrapper"]
 
     @property
     def _emsdk_exec(self):
@@ -77,3 +78,5 @@ class Recipe(ConanFile):
         self.env_info.EMSDK_NODE = os.path.join(self.package_folder, 'node', self._node_version, 'bin', 'node')
         self.env_info.EMSDK_PYTHON = os.path.join(self.package_folder, 'python', self._python_version.replace('-64bit', '_64bit'), 'bin', 'python3')
         self.env_info.SSL_CERT_FILE = os.path.join(self.package_folder, 'python', self._python_version.replace('-64bit', '_64bit'), 'lib', 'python3.7', 'site-package', 'certifi', 'cacert.pem')
+
+        self.env_info.CONAN_CMAKE_PROGRAM = 'emcmake cmake'
