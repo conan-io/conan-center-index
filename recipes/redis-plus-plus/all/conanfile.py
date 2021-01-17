@@ -10,7 +10,7 @@ class RedisPlusPlusConan(ConanFile):
     topics = ("conan", "database", "redis", "client", "tls")
     url = "https://github.com/conan-io/conan-center-index"
     license = "Apache-2.0"
-    exports_sources = ["CMakeLists.txt"]
+    exports_sources = ["CMakeLists.txt", "patches/**"]
     generators = "cmake", "cmake_find_package"
     settings = "os", "compiler", "build_type", "arch"
     options = {"shared": [True, False], "fPIC": [True, False], "with_tls": [True, False]}
@@ -37,6 +37,7 @@ class RedisPlusPlusConan(ConanFile):
     def validate(self):
         if self.settings.compiler == "Visual Studio" and self.options.shared:
             raise ConanInvalidConfiguration("redis-plus-plus does not support begin compiled as shared on Visual Studio.")
+
         if self.options.with_tls != self.options["hiredis"].with_ssl:
             raise ConanInvalidConfiguration("with_tls must match hiredis.with_ssl option")
 
@@ -61,6 +62,8 @@ class RedisPlusPlusConan(ConanFile):
         return self._cmake
 
     def build(self):
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            tools.patch(**patch)
         cmake = self._configure_cmake()
         cmake.build()
 
