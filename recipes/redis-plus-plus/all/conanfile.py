@@ -13,8 +13,8 @@ class RedisPlusPlusConan(ConanFile):
     exports_sources = ["CMakeLists.txt"]
     generators = "cmake", "cmake_find_package"
     settings = "os", "compiler", "build_type", "arch"
-    options = {"shared": [True, False], "fPIC": [True, False], "with_tls": [True, False], "with_cxx": [11, 17]}
-    default_options = {"shared": False, "fPIC": True, "with_tls": False, "with_cxx": 11}
+    options = {"shared": [True, False], "fPIC": [True, False], "with_tls": [True, False]}
+    default_options = {"shared": False, "fPIC": True, "with_tls": False}
 
     _cmake = None
 
@@ -53,7 +53,6 @@ class RedisPlusPlusConan(ConanFile):
     def _configure_cmake(self):
         if not self._cmake:
             self._cmake = CMake(self)
-            self._cmake.definitions["REDIS_PLUS_PLUS_CXX_STANDARD"] = self.options.with_cxx
             self._cmake.definitions["REDIS_PLUS_PLUS_USE_TLS"] = self.options.with_tls
             self._cmake.definitions["REDIS_PLUS_PLUS_BUILD_TEST"] = False
             self._cmake.definitions["REDIS_PLUS_PLUS_BUILD_STATIC"] = not self.options.shared
