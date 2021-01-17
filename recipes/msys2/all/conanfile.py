@@ -43,8 +43,7 @@ class MSYS2Conan(ConanFile):
 
     @property
     def _msys_dir(self):
-        if tools.Version(self.version) >= "20210105" return "msys64"
-        return "msys64" if self.settings.arch == "x86_64" else "msys32"
+        return "msys64" if (tools.Version(self.version) >= "20210105" or self.settings.arch == "x86_64") else "msys32"
 
     def build(self):
         arch = 1 if self.settings.arch == "x86" else 0  # index in the sources list
