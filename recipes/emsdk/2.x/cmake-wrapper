@@ -1,0 +1,24 @@
+#!/usr/bin/env bash
+
+echo "Calling CMake via EMSDK wrapper"
+
+ALL_ARGS=$@
+
+BUILD=no
+for i in "$@":
+do
+  case $i in
+    --build)
+    BUILD=yes
+    ;;
+    *)
+    ;;
+  esac
+done
+
+if [ $BUILD == "yes" ]; then
+  cmake "$@"
+else
+  emcmake cmake \
+      "$@"
+fi

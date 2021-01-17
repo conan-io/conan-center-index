@@ -43,6 +43,7 @@ class Recipe(ConanFile):
             retries += 1
             mybuf = StringIO()
             self.run('{} install {}'.format(self._emsdk_exec, tool_name), output=mybuf)
+
             if 'failed with error code 1' not in mybuf.getvalue():
                 self.output.info(mybuf.getvalue())
                 self.output.info("Suceed to install {} in retry {}/{}".format(tool_name, retries, n_retries))
@@ -52,6 +53,7 @@ class Recipe(ConanFile):
                 self.output.warn("Failed to install {} in retry {}/{}".format(tool_name, retries, n_retries))
                 if os.path.exists(directory):
                     shutil.rmtree(directory)
+        raise ConanException("Failed to install '{}'".format(tool_name))
 
     def build(self):
         with tools.chdir(self._source_subfolder):
