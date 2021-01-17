@@ -33,8 +33,9 @@ class RedisPlusPlusConan(ConanFile):
     def configure(self):
         if self.options.shared:
             del self.options.fPIC
+
     def validate(self):
-        if self.settings.compiler == "Visual Studio" and self.optioins.shared:
+        if self.settings.compiler == "Visual Studio" and self.options.shared:
             raise ConanInvalidConfiguration("redis-plus-plus does not support begin compiled as shared on Visual Studio.")
         if self.options.with_tls != self.options["hiredis"].with_ssl:
             raise ConanInvalidConfiguration("with_tls must match hiredis.with_ssl option")
