@@ -1,0 +1,4 @@
+sources:
+  "2.0.12":
+    sha256: a5dfff8e1616cc5b558fbd85dc2d8f7a4d80e6b85f8fa6168ec92df52b3da9ff
+    url: https://github.com/emscripten-core/emsdk/archive/2.0.12.tar.gz
