@@ -28,13 +28,13 @@ class Recipe(ConanFile):
     }
 
     def _modules_activated(self):
-        for opt in self.options:
-            option_name = str(opt)
+        for option_name in self.options.values.fields:
             if option_name.startswith('qt') and getattr(self.options, option_name):
                 yield 'module-{}'.format(option_name)
 
     def build_requirements(self):
         if self.options.target == 'wasm':
+            # Use recommended versions
             emsdk = {'5.15.2': 'emsdk/1.39.8'}.get(self.version)
             #self.build_requires('emsdk/2.0.12')
             self.build_requires(emsdk)
@@ -52,8 +52,8 @@ class Recipe(ConanFile):
                 raise Exception("Not implemented")
 
             # Probably common to all builds
-            self.run('make {}'.format(' '.join(self._modules_activated())))
-            self.run('make install')
+            self.run('make -j{} {}'.format(tools.cpu_count(), ' '.join(self._modules_activated())), run_environment=True)
+            self.run('make -j{} install'.format(tools.cpu_count()), run_environment=True)
 
     def _build_emscripten(self):
         emsdk = 'em++' if self.settings.os == 'Windows' else 'emcc'
@@ -70,5 +70,5 @@ class Recipe(ConanFile):
             self.run('./configure -xplatform wasm-emscripten {}'.format(' '.join(args)), run_environment=True)
 
     def package_info(self):
-        # As build-requires I want to use 'qmake'
-        self.env_info.PATH.append(os.path.join(self.package_folder))
+        # As build-requires I want to use 'qmake'. It will work as a cross-compiler with libraries embedded
+        self.env_info.PATH.append(os.path.join(self.package_folder, 'bin'))
