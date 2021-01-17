@@ -4,6 +4,7 @@ class TestPackgeConan(ConanFile):
     settings = "os", "arch", "compiler", "build_type"
 
     def build(self):
+        # To use the build-helper we need a cross-building scenario
         self.run('emcmake cmake "{}"'.format(self.source_folder), run_environment=True)
         self.run('emmake make', run_environment=True)
 
