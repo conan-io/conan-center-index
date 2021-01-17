@@ -2,6 +2,7 @@ from conans import ConanFile, tools
 from conans.errors import ConanInvalidConfiguration
 import os
 import shutil
+import platform
 
 
 class MSYS2Conan(ConanFile):
@@ -11,7 +12,6 @@ class MSYS2Conan(ConanFile):
     homepage = "http://www.msys2.org"
     license = "MSYS license"
     topics = ("conan", "msys", "unix", "subsystem")
-    build_requires = "7zip/19.00"
     short_paths = True
     options = {"exclude_files": "ANY",  # Comma separated list of file patterns to exclude from the package
                "packages": "ANY",  # Comma separated
@@ -19,11 +19,16 @@ class MSYS2Conan(ConanFile):
     default_options = {"exclude_files": "*/link.exe",
                        "packages": "base-devel,binutils,gcc",
                        "additional_packages": None}
-    settings = "os_build", "arch_build"
+    settings = "os", "arch"
 
-    def configure(self):
-        if self.settings.os_build != "Windows":
+    def validate(self):
+        if not tools.os_info.is_windows:
             raise ConanInvalidConfiguration("Only Windows supported")
+        if tools.Version(self.version) >= "20210105" and "86" in platform.machine():
+            raise ConanInvalidConfiguration("Only Windows x64 supported")
+
+    def build_requirements(self):
+        self.build_requires("7zip/19.00")
 
     def source(self):
         # build tools have to download files in build method when the
@@ -38,10 +43,11 @@ class MSYS2Conan(ConanFile):
 
     @property
     def _msys_dir(self):
-        return "msys64" if self.settings.arch_build == "x86_64" else "msys32"
+        if tools.Version(self.version) >= "20210105" return "msys64"
+        return "msys64" if self.settings.arch == "x86_64" else "msys32"
 
     def build(self):
-        arch = 0 if self.settings.arch_build == "x86" else 1  # index in the sources list
+        arch = 1 if self.settings.arch == "x86" else 0  # index in the sources list
         filename = self._download(**self.conan_data["sources"][self.version][arch])
         tar_name = filename.replace(".xz", "")
         self.run("7z.exe x {0}".format(filename))
@@ -56,6 +62,7 @@ class MSYS2Conan(ConanFile):
             packages.extend(str(self.options.additional_packages).split(","))
 
         with tools.chdir(os.path.join(self._msys_dir, "usr", "bin")):
+            self.run('bash -l -c "pacman -Syu --noconfirm"')
             for package in packages:
                 self.run('bash -l -c "pacman -S %s --noconfirm"' % package)
 
