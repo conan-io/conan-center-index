@@ -26,11 +26,17 @@ class Recipe(ConanFile):
 
     @property
     def _node_version(self):
-        return '12.18.1-64bit'
+        return {
+            '2.0.12': '12.18.1-64bit', 
+            '1.39.8': '12.9.1-64bit',
+        }.get(self.version)
 
     @property
     def _python_version(self):
-        return '3.7.4-2-64bit'
+        return {
+            '2.0.12': '3.7.4-2-64bit',
+            '1.39.8': None,
+        }.get(self.version)
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
@@ -58,8 +64,11 @@ class Recipe(ConanFile):
     def build(self):
         with tools.chdir(self._source_subfolder):
             # En Macos estos install fallan como una escopeta de feria
-            self._install_tool('node-' + self._node_version, 'node')
-            self._install_tool('python-' + self._python_version, 'python')
+            self.run('{} list'.format(self._emsdk_exec))
+            if self._node_version:
+                self._install_tool('node-' + self._node_version, 'node')
+            if self._python_version:
+                self._install_tool('python-' + self._python_version, 'python')
             self._install_tool(self.version, 'upstream')
             self.run('{} activate --embedded {}'.format(self._emsdk_exec, self.version))
 
@@ -74,14 +83,16 @@ class Recipe(ConanFile):
         self.env_info.PATH.append(self.package_folder)
         self.env_info.PATH.append(os.path.join(self.package_folder, 'upstream', 'emscripten'))
         self.env_info.PATH.append(os.path.join(self.package_folder, 'node', self._node_version, 'bin'))
-        self.env_info.PATH.append(os.path.join(self.package_folder, 'python', self._python_version, 'bin'))
+        if self._python_version:
+            self.env_info.PATH.append(os.path.join(self.package_folder, 'python', self._python_version, 'bin'))
 
         self.env_info.EMSDK = os.path.join(self.package_folder)
         self.env_info.EM_CONFIG = os.path.join(self.package_folder, '.emscripten')
         self.env_info.EM_CACHE = os.path.join(self.package_folder, 'upstream', 'emscripten', 'cache')
         self.env_info.EMSDK_NODE = os.path.join(self.package_folder, 'node', self._node_version, 'bin', 'node')
-        self.env_info.EMSDK_PYTHON = os.path.join(self.package_folder, 'python', self._python_version.replace('-64bit', '_64bit'), 'bin', 'python3')
-        self.env_info.SSL_CERT_FILE = os.path.join(self.package_folder, 'python', self._python_version.replace('-64bit', '_64bit'), 'lib', 'python3.7', 'site-package', 'certifi', 'cacert.pem')
+        if self._python_version:
+            self.env_info.EMSDK_PYTHON = os.path.join(self.package_folder, 'python', self._python_version.replace('-64bit', '_64bit'), 'bin', 'python3')
+            self.env_info.SSL_CERT_FILE = os.path.join(self.package_folder, 'python', self._python_version.replace('-64bit', '_64bit'), 'lib', 'python3.7', 'site-package', 'certifi', 'cacert.pem')
 
         cmake_wrapper = "cmake-wrapper.cmd" if self.settings.os == "Windows" else "cmake-wrapper"
         cmake_wrapper = os.path.join(self.package_folder, cmake_wrapper)
