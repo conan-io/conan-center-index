@@ -11,8 +11,8 @@ class SociTestConan(ConanFile):
 
     def build(self):
         cmake = CMake(self)
-        cmake.definitions["SOCI_SHARED"] = self.options["soci"].shared
-        cmake.definitions["SOCI_EMPTY"]  = self.options["soci"].empty
+        # cmake.definitions["SOCI_SHARED"] = self.options["soci"].shared
+        # cmake.definitions["SOCI_EMPTY"]  = self.options["soci"].empty
         cmake.configure()
         cmake.build()
 
