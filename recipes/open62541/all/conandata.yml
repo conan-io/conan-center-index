@@ -13,14 +13,14 @@ sources:
     sha256: "a3e689216d75c3313bffdbb1cb7190d63b173410f392b8c558062fdd667635d7"
 patches:
   "1.0.3":
-    - patch_file: "patches/1_0_3.patch"
+    - patch_file: "patches/1_0_x.patch"
       base_path: "source_subfolder"
   "1.0.6":
-    - patch_file: "patches/1_0_3.patch"
+    - patch_file: "patches/1_0_x.patch"
       base_path: "source_subfolder"
   "1.1.3":
-    - patch_file: "patches/1_1_3.patch"
+    - patch_file: "patches/1_1_x.patch"
       base_path: "source_subfolder"
   "1.1.5":
-    - patch_file: "patches/1_1_3.patch"
+    - patch_file: "patches/1_1_x.patch"
       base_path: "source_subfolder"

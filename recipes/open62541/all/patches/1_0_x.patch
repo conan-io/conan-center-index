@@ -1,5 +1,5 @@
 diff --git a/CMakeLists.txt b/CMakeLists.txt
-index 2fd6ef29..e74915c2 100755
+index 94ceb127..00b7ca1d 100644
 --- a/CMakeLists.txt
 +++ b/CMakeLists.txt
 @@ -7,9 +7,8 @@ endif()
@@ -13,7 +13,7 @@ index 2fd6ef29..e74915c2 100755
  include(AssignSourceGroup)
  include(GNUInstallDirs)
  
-@@ -33,12 +32,11 @@ set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
+@@ -32,12 +31,11 @@ set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
  # Version #
  ###########
  
@@ -31,44 +31,15 @@ index 2fd6ef29..e74915c2 100755
  
  #################
  # Build Options #
-@@ -456,13 +454,13 @@ if(UA_ENABLE_ENCRYPTION)
-         # use the OpenSSL encryption library
-         # https://cmake.org/cmake/help/v3.0/module/FindOpenSSL.html
-         find_package(OpenSSL REQUIRED)
--        list(APPEND open62541_LIBRARIES ${OPENSSL_LIBRARIES})
-+        list(APPEND open62541_LIBRARIES ${OpenSSL_LIBRARIES})
-     else()
-         # The recommended way is to install mbedtls via the OS package manager. If
-         # that is not possible, manually compile mbedTLS and set the cmake variables
-         # defined in /tools/cmake/FindMbedTLS.cmake.
-         find_package(MbedTLS REQUIRED)
--        list(APPEND open62541_LIBRARIES ${MBEDTLS_LIBRARIES})
-+        list(APPEND open62541_LIBRARIES ${MbedTLS_LIBRARIES})
-     endif()
- endif()
+@@ -405,7 +403,6 @@ if(NOT UA_COMPILE_AS_CXX AND (CMAKE_COMPILER_IS_GNUCC OR "x${CMAKE_C_COMPILER_ID
+                     -fno-strict-aliasing # fewer compiler assumptions about pointer types
+                     -fexceptions # recommended for multi-threaded C code, also in combination with C++ code
+                     )
+-    set(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} -Werror")
  
-@@ -470,8 +468,10 @@ if(UA_ENABLE_WEBSOCKET_SERVER)
-     # The recommended way is to install libwebsockets via the OS package manager. If
-     # that is not possible, manually compile libwebsockets and set the cmake variables
-     # defined in /tools/cmake/Findlibwebsockets.cmake
--    find_package(libwebsockets REQUIRED)
--    list(APPEND open62541_LIBRARIES ${LIBWEBSOCKETS_LIBRARIES})
-+    find_package(Libwebsockets REQUIRED)
-+    list(APPEND open62541_LIBRARIES ${Libwebsockets_LIBRARIES})
-+    message(STATUS "Libwebsockets library: ${Libwebsockets_LIBRARIES}")
-+    message(STATUS "Libwebsockets includes: ${Libwebsockets_INCLUDE_DIRS}")
- endif()
- 
- if(MINGW)
-@@ -509,6 +509,7 @@ if(NOT UA_FORCE_CPP AND (CMAKE_COMPILER_IS_GNUCC OR "x${CMAKE_C_COMPILER_ID}" ST
-     check_add_cc_flag("-Wno-static-in-inline") # Clang doesn't like the use of static inline methods inside static inline methods
-     check_add_cc_flag("-Wno-overlength-strings") # May happen in the nodeset compiler when complex values are directly encoded
-     check_add_cc_flag("-Wno-unused-parameter") # some methods may require unused arguments to cast to a method pointer
-+    check_add_cc_flag("-Wno-unused-command-line-argument")
- 
-     # Use a strict subset of the C and C++ languages
-     check_add_cc_flag("-Wc++-compat")
-@@ -576,18 +577,6 @@ if(NOT UA_FORCE_CPP AND (CMAKE_COMPILER_IS_GNUCC OR "x${CMAKE_C_COMPILER_ID}" ST
+     if (NOT MINGW)
+         if(UA_ENABLE_HARDENING)
+@@ -440,18 +437,6 @@ if(NOT UA_COMPILE_AS_CXX AND (CMAKE_COMPILER_IS_GNUCC OR "x${CMAKE_C_COMPILER_ID
      # Linker
      set(CMAKE_SHARED_LIBRARY_LINK_C_FLAGS "") # cmake sets -rdynamic by default
  
@@ -86,8 +57,8 @@ index 2fd6ef29..e74915c2 100755
 -
      if (NOT MINGW)
          if(UA_ENABLE_HARDENING AND ((CMAKE_BUILD_TYPE STREQUAL "Release") OR (CMAKE_BUILD_TYPE STREQUAL "RelWithDebInfo")))
-             check_add_cc_flag("-D_FORTIFY_SOURCE=2") # run-time buffer overflow detection (needs at least -O1)
-@@ -632,8 +621,6 @@ if(APPLE)
+             check_cc_flag("-D_FORTIFY_SOURCE=2") # run-time buffer overflow detection (needs at least -O1)
+@@ -493,8 +478,6 @@ if(APPLE)
  endif()
  
  if(MSVC)
@@ -96,7 +67,7 @@ index 2fd6ef29..e74915c2 100755
    if(UA_MSVC_FORCE_STATIC_CRT AND NOT BUILD_SHARED_LIBS)
      set(CompilerFlags CMAKE_CXX_FLAGS CMAKE_CXX_FLAGS_DEBUG CMAKE_CXX_FLAGS_RELEASE CMAKE_C_FLAGS
          CMAKE_C_FLAGS_DEBUG CMAKE_C_FLAGS_RELEASE)
-@@ -659,8 +646,8 @@ configure_file(include/open62541/config.h.in ${PROJECT_BINARY_DIR}/src_generated
+@@ -520,8 +503,8 @@ configure_file(include/open62541/config.h.in ${PROJECT_BINARY_DIR}/src_generated
  configure_file(open62541.pc.in ${PROJECT_BINARY_DIR}/src_generated/open62541.pc @ONLY)
  
  if(UA_ENABLE_DISCOVERY_MULTICAST)
@@ -106,7 +77,7 @@ index 2fd6ef29..e74915c2 100755
  endif()
  
  set(exported_headers ${exported_headers}
-@@ -946,18 +933,7 @@ if(UA_DEBUG_DUMP_PKGS)
+@@ -743,18 +726,7 @@ if(UA_DEBUG_DUMP_PKGS)
  endif()
  
  if(UA_ENABLE_DISCOVERY_MULTICAST)
@@ -125,58 +96,28 @@ index 2fd6ef29..e74915c2 100755
          ${lib_sources})
  endif()
  
-@@ -1147,10 +1123,13 @@ if(UA_ENABLE_AMALGAMATION)
-     target_include_directories(open62541-object PRIVATE ${PROJECT_BINARY_DIR})
-     target_include_directories(open62541-object PRIVATE "${ua_architecture_directories_to_include}")
-     if(UA_ENABLE_ENCRYPTION_MBEDTLS)
--        target_include_directories(open62541-object PRIVATE ${MBEDTLS_INCLUDE_DIRS})
-+        target_include_directories(open62541-object PRIVATE ${MbedTLS_INCLUDE_DIRS})
-     endif()
-     if(UA_ENABLE_ENCRYPTION_OPENSSL)
--        target_include_directories(open62541-object PRIVATE ${OPENSSL_INCLUDE_DIR})
-+        target_include_directories(open62541-object PRIVATE ${OpenSSL_INCLUDE_DIR})
-+    endif()
-+    if(UA_ENABLE_WEBSOCKET_SERVER)
-+        target_include_directories(open62541-plugins PRIVATE ${Libwebsockets_INCLUDE_DIR})
-     endif()
- 
-     # make sure the open62541_amalgamation target builds before so that amalgamation is finished and it is not executed again for open62541-object
-@@ -1186,6 +1165,9 @@ else()
-                       )
- 
+@@ -972,6 +944,10 @@ else()
+                      open62541-generator-namespace
+                      )
      target_include_directories(open62541-object PRIVATE ${PROJECT_SOURCE_DIR}/src)
 +    if(UA_ENABLE_DISCOVERY_MULTICAST)
 +        target_link_libraries(open62541-object PUBLIC mdnsd::mdnsd)
 +    endif()
++
  
      add_library(open62541-plugins OBJECT ${default_plugin_sources} ${ua_architecture_sources} ${exported_headers})
      add_dependencies(open62541-plugins open62541-generator-types open62541-generator-transport open62541-generator-namespace)
-@@ -1194,6 +1176,10 @@ else()
-     target_compile_definitions(open62541-plugins PRIVATE -DUA_DYNAMIC_LINKING_EXPORT)
-     set_target_properties(open62541-plugins PROPERTIES FOLDER "open62541/lib")
+@@ -1163,7 +1139,7 @@ install(TARGETS open62541 ${EXTRATARGETS}
+         EXPORT open62541Targets
+         LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+         ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
+-        RUNTIME DESTINATION ${CMAKE_INSTALL_PREFIX}
++        RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
+         INCLUDES DESTINATION include)
  
-+    if(UA_ENABLE_WEBSOCKET_SERVER)
-+        target_link_libraries(open62541-plugins PRIVATE Libwebsockets::Libwebsockets)
-+    endif()
-+
-     if(UA_PACK_DEBIAN)
-         add_library(open62541-static STATIC $<TARGET_OBJECTS:open62541-object> $<TARGET_OBJECTS:open62541-plugins>)
-         set_target_properties(open62541-static PROPERTIES OUTPUT_NAME open62541)
-@@ -1232,10 +1218,10 @@ else()
-     include_directories_private("${PROJECT_BINARY_DIR}")
- 
-     if(UA_ENABLE_ENCRYPTION_MBEDTLS)
--        include_directories_private(${MBEDTLS_INCLUDE_DIRS})
-+        include_directories_private(${MbedTLS_INCLUDE_DIRS})
-     endif()
-     if(UA_ENABLE_ENCRYPTION_OPENSSL)
--        include_directories_private(${OPENSSL_INCLUDE_DIR})
-+        include_directories_private(${OpenSSL_INCLUDE_DIR})
-     endif()
- 
-     # Option-specific includes
+ if(UA_ENABLE_AMALGAMATION)
 diff --git a/src/server/ua_discovery_manager.h b/src/server/ua_discovery_manager.h
-index 7787b40e..99dc884b 100644
+index 3d1ae299..7d5f1051 100644
 --- a/src/server/ua_discovery_manager.h
 +++ b/src/server/ua_discovery_manager.h
 @@ -50,7 +50,7 @@ typedef struct periodicServerRegisterCallback_entry {
@@ -189,7 +130,7 @@ index 7787b40e..99dc884b 100644
  /**
   * TXT record:
 diff --git a/src/server/ua_server_discovery_mdns.c b/src/server/ua_server_discovery_mdns.c
-index 6121b8c3..e4cae7c5 100644
+index fd9c796c..3417505a 100644
 --- a/src/server/ua_server_discovery_mdns.c
 +++ b/src/server/ua_server_discovery_mdns.c
 @@ -11,8 +11,8 @@
