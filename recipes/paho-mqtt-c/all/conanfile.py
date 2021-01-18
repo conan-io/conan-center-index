@@ -8,7 +8,7 @@ class PahoMqttcConan(ConanFile):
     homepage = "https://github.com/eclipse/paho.mqtt.c"
     topics = ("MQTT", "IoT", "eclipse", "SSL", "paho", "C")
     license = "EPL-2.0"
-    description = """Eclipse Paho MQTT C client library for Linux, Windows and MacOS"""
+    description = "Eclipse Paho MQTT C client library for Linux, Windows and MacOS"
     exports_sources = ["CMakeLists.txt", "patches/*"]
     generators = "cmake"
     settings = "os", "arch", "compiler", "build_type"
@@ -32,7 +32,8 @@ class PahoMqttcConan(ConanFile):
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
-            if tools.Version(self.version) < "1.3.4": # Static linking before 1.3.4 isn't supported on Windows
+            # Static linking before 1.3.4 isn't supported on Windows
+            if tools.Version(self.version) < "1.3.4":
                 self.options.shared = True
 
     def configure(self):
@@ -70,7 +71,7 @@ class PahoMqttcConan(ConanFile):
         return self._cmake
 
     def build(self):
-        for patch in self.conan_data["patches"][self.version]:
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
             tools.patch(**patch)
         cmake = self._configure_cmake()
         cmake.build()
