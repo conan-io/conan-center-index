@@ -1,7 +1,7 @@
 #include "soci/soci.h"
-#ifdef SOCI_EMPTY
-#include "soci/empty/soci-empty.h"
-#endif
+//#ifdef SOCI_EMPTY
+//#include "soci/empty/soci-empty.h"
+//#endif
 #include <iostream>
 
 int main()
