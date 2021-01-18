@@ -36,12 +36,6 @@ class WinflexbisonConan(ConanFile):
         return self._cmake
 
     def build(self):
-        tools.replace_in_file(os.path.join(self._source_subfolder, "CMakeLists.txt"),
-            'set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG "${OUTPUT_DEBUG}")',
-            '')
-        tools.replace_in_file(os.path.join(self._source_subfolder, "CMakeLists.txt"),
-            'set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_RELEASE "${OUTPUT_RELEASE}")',
-            '')
         cmake = self._configure_cmake()
         cmake.build()
 
@@ -54,7 +48,11 @@ class WinflexbisonConan(ConanFile):
         tools.save("COPYING.GPL3", "\n".join(license_content))
 
     def package(self):
-        self.copy(pattern="*.exe", dst="bin", src="bin", keep_path=False)
+        if self.settings.build_type in ("Release", "Debug"):
+            actual_build_path = "{0}/bin/{1}".format(self._source_subfolder, self.settings.build_type)
+            self.copy(pattern="*.exe", dst="bin", src=actual_build_path, keep_path=False)
+        else:
+            self.copy(pattern="*.exe", dst="bin", src="bin", keep_path=False)
         self.copy(pattern="data/*", dst="bin", src="{}/bison".format(self._source_subfolder), keep_path=True)
         self.copy(pattern="FlexLexer.h", dst="include", src=os.path.join(self._source_subfolder, "flex", "src"), keep_path=False)
 
