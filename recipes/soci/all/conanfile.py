@@ -105,15 +105,15 @@ class SociConan(ConanFile):
         self._cmake.definitions["SOCI_SHARED"]      = self.options.shared
         if self.options.shared:
             self._cmake.definitions["SOCI_STATIC"]      = False
-            self._cmake.definitions["SOCI_EMPTY"]       = self.options.empty
-            self._cmake.definitions["WITH_SQLITE3"]     = False #self.options.with_sqlite3
-            self._cmake.definitions["WITH_DB2"]         = False #self.options.with_db2
-            self._cmake.definitions["WITH_ODBC"]        = False #self.options.with_odbc
-            self._cmake.definitions["WITH_ORACLE"]      = False #self.options.with_oracle
-            self._cmake.definitions["WITH_FIREBIRD"]    = False #self.options.with_firebird
-            self._cmake.definitions["WITH_MYSQL"]       = False #self.options.with_mysql
-            self._cmake.definitions["WITH_POSTGRESQL"]  = False #self.options.with_postgresql
-            self._cmake.definitions["WITH_BOOST"]       = False #self.options.with_boost
+        self._cmake.definitions["SOCI_EMPTY"]       = self.options.empty
+        self._cmake.definitions["WITH_SQLITE3"]     = False #self.options.with_sqlite3
+        self._cmake.definitions["WITH_DB2"]         = False #self.options.with_db2
+        self._cmake.definitions["WITH_ODBC"]        = False #self.options.with_odbc
+        self._cmake.definitions["WITH_ORACLE"]      = False #self.options.with_oracle
+        self._cmake.definitions["WITH_FIREBIRD"]    = False #self.options.with_firebird
+        self._cmake.definitions["WITH_MYSQL"]       = False #self.options.with_mysql
+        self._cmake.definitions["WITH_POSTGRESQL"]  = False #self.options.with_postgresql
+        self._cmake.definitions["WITH_BOOST"]       = False #self.options.with_boost
 
         self._cmake.definitions["SOCI_TESTS"]       = False
         self._cmake.definitions["SOCI_CXX11"]       = True
