@@ -14,7 +14,7 @@ class TestPackageConan(ConanFile):
     def test(self):
         assert os.path.isfile(os.path.join(self.deps_cpp_info["bzip2"].rootpath, "licenses", "LICENSE"))
         assert os.path.isfile(os.path.join(self.build_folder, "bzip2.pc"))
-        if tools.cross_building(self.settings):
+        if tools.cross_building(self.settings, skip_x64_x86=(self.settings.os == "Windows")):
             self.output.warn("Skipping run cross built package")
             return
 
