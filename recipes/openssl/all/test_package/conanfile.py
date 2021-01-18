@@ -28,7 +28,7 @@ class DefaultNameConan(ConanFile):
         self._build_cmake(use_find_package=False)
 
     def test(self):
-        if not tools.cross_building(self.settings):
+        if not tools.cross_building(self.settings, skip_x64_x86=(self.settings.os == "Windows")):
             bin_path = os.path.join("bin", "digest")
             self.run(bin_path, run_environment=True)
         assert os.path.exists(os.path.join(self.deps_cpp_info["openssl"].rootpath, "licenses", "LICENSE"))
