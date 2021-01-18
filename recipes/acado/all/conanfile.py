@@ -93,6 +93,8 @@ class AcadoConan(ConanFile):
         tools.remove_files_by_mask(self.package_folder, "*.pdb")
 
     def package_info(self):
+        self.env_info.ACADO_TEMPLATE_PATHS = os.path.join(self.package_folder, "include", "acado", "code_generation", "templates")
+
         if self.options.shared:
             self.cpp_info.libs = ["acado_toolkit_s", "acado_casadi"]
         else:
