@@ -24,7 +24,7 @@ class SociConan(ConanFile):
         "with_firebird":    [True, False],
         "with_mysql":       [True, False],
         "with_postgresql":  [True, False],
-        # "with_boost":       [True, False]
+        "with_boost":       [True, False]
     }
 
     default_options = {
@@ -38,7 +38,7 @@ class SociConan(ConanFile):
         "with_firebird":    False,
         "with_mysql":       False,
         "with_postgresql":  False,
-        # "with_boost":       False
+        "with_boost":       False
     }
 
     @property
@@ -116,7 +116,7 @@ class SociConan(ConanFile):
             self.options.with_firebird      = False
             self.options.with_mysql         = False
             self.options.with_postgresql    = False
-            # self.options.with_boost         = False
+            self.options.with_boost         = False
 
         self._cmake.definitions["SOCI_EMPTY"]       = self.options.empty
         self._cmake.definitions["WITH_SQLITE3"]     = self.options.with_sqlite3
@@ -126,7 +126,7 @@ class SociConan(ConanFile):
         self._cmake.definitions["WITH_FIREBIRD"]    = self.options.with_firebird
         self._cmake.definitions["WITH_MYSQL"]       = self.options.with_mysql
         self._cmake.definitions["WITH_POSTGRESQL"]  = self.options.with_postgresql
-        self._cmake.definitions["WITH_BOOST"]       = False #self.options.with_boost
+        self._cmake.definitions["WITH_BOOST"]       = self.options.with_boost
 
         self._cmake.configure(
             source_folder=self._source_subfolder,
