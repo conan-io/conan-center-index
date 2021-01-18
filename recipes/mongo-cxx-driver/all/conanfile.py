@@ -5,7 +5,7 @@ import glob
 import shutil
 
 
-required_conan_version = ">=1.28.0"
+required_conan_version = ">=1.32.0"
 
 
 class MongoCxxConan(ConanFile):
@@ -89,6 +89,15 @@ class MongoCxxConan(ConanFile):
         if self.options.shared:
             del self.options.fPIC
 
+    def requirements(self):
+        self.requires("mongo-c-driver/1.17.2")
+        if self.options.polyfill == "boost":
+            self.requires("boost/1.75.0")
+
+    def validate(self):
+        if self.options.with_ssl and not bool(self.options["mongo-c-driver"].with_ssl):
+            raise ConanInvalidConfiguration("mongo-cxx-driver with_ssl=True requires mongo-c-driver with a ssl implementation")
+
         if self.options.polyfill == "mnmlstc":
             # TODO: add mnmlstc polyfill support
             # Cannot model mnmlstc (not packaged, is pulled dynamically) polyfill dependencies
@@ -113,11 +122,6 @@ class MongoCxxConan(ConanFile):
                     self._minimal_std_version
                 )
             )
-
-    def requirements(self):
-        self.requires("mongo-c-driver/1.17.2")
-        if self.options.polyfill == "boost":
-            self.requires("boost/1.74.0")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
@@ -153,10 +157,7 @@ class MongoCxxConan(ConanFile):
             tools.patch(**patch)
 
     def build(self):
-        if self.options.with_ssl and not bool(self.options["mongo-c-driver"].with_ssl):
-            raise ConanInvalidConfiguration("mongo-cxx-driver with_ssl=True requires mongo-c-driver with a ssl implementation")
         self._patch_sources()
-
         cmake = self._configure_cmake()
         cmake.build()
 
