@@ -71,6 +71,8 @@ class OcctConan(ConanFile):
     def validate(self):
         if self.settings.compiler == "clang" and self.settings.compiler.version == "6.0":
             raise ConanInvalidConfiguration("Clang 6.0 is not supported.")
+        if self.settings.compiler == "Visual Studio" and self.settings.compiler.version == "14":
+            raise ConanInvalidConfiguration("Visual Studio 14 is not supported.")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
