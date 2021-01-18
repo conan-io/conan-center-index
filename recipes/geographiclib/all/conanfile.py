@@ -1,4 +1,5 @@
 from conans import ConanFile, CMake, tools
+from conans.errors import ConanInvalidConfiguration
 import os
 
 required_conan_version = ">=1.28.0"
@@ -23,9 +24,24 @@ class GeographiclibConan(ConanFile):
         if self.settings.os == "Windows":
             del self.options.fPIC
 
+    @property
+    def _min_compiler_version_default_cxx11(self):
+        # Minimum compiler version having c++ standard >= 11
+        return {
+            "gcc": 6,
+            "clang": 6,
+            "Visual Studio": 14,  # guess
+        }.get(str(self.settings.compiler))
+
     def configure(self):
         if self.options.shared:
             del self.options.fPIC
+        if tools.Version(self.version) >= "1.51":
+            if self.settings.compiler.cppstd:
+                tools.min_cppstd(self, 11)
+            elif tools.Version(self.settings.compiler.version) < self._min_compiler_version_default_cxx11:
+                raise ConanInvalidConfiguration("C++11 support needed for version >= 1.51")
+
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
