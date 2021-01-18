@@ -20,7 +20,8 @@ class TestZlibConan(ConanFile):
     def test(self):
         assert os.path.exists(os.path.join(self.deps_cpp_info["zlib"].rootpath, "licenses", "LICENSE"))
         assert os.path.exists(os.path.join(self.build_folder, "zlib.pc"))
-        if "x86" in self.settings.arch and not tools.cross_building(self.settings):
+        if "x86" in self.settings.arch and\
+                not tools.cross_building(self.settings, skip_x64_x86=(self.settings.os == "Windows")):
             self.run(os.path.join("bin", "test"), run_environment=True)
             if self.options["zlib"].minizip:
                 self.run(os.path.join("bin", "test_minizip"), run_environment=True)
