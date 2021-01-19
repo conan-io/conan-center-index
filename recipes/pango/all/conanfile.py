@@ -13,8 +13,8 @@ class PangoConan(ConanFile):
     homepage = "https://www.pango.org/"
     topics = ("conan", "fontconfig", "fonts", "freedesktop")
     settings = "os", "compiler", "build_type", "arch"
-    options = {"shared": [True, False], "fPIC": [True, False], "with_libthai": [True, False], "with_cairo": [True, False], "with_xft": [True, False, "auto"], "with_freetype": [True, False], "with_fontconfig": [True, False, "auto"]}
-    default_options = {"shared": False, "fPIC": True, "with_libthai": False, "with_cairo": True, "with_xft": "auto", "with_freetype": True, "with_fontconfig": "auto"}
+    options = {"shared": [True, False], "fPIC": [True, False], "with_libthai": [True, False], "with_cairo": [True, False], "with_xft": [True, False, "auto"], "with_freetype": [True, False, "auto"], "with_fontconfig": [True, False, "auto"]}
+    default_options = {"shared": False, "fPIC": True, "with_libthai": False, "with_cairo": True, "with_xft": "auto", "with_freetype": "auto", "with_fontconfig": "auto"}
     generators = "pkg_config"
     _autotools = None
     
@@ -40,11 +40,16 @@ class PangoConan(ConanFile):
 
         if self.options.with_xft == "auto":
             self.options.with_xft = self.settings.os in ["Linux", "FreeBSD"]
+        if self.options.with_freetype == "auto":
+            self.options.with_freetype = not self.settings.os in ["Windows", "Macos"]
         if self.options.with_fontconfig == "auto":
             self.options.with_fontconfig = not self.settings.os in ["Windows", "Macos"]
 
         if self.options.with_xft and not self.settings.os in ["Linux", "FreeBSD"]:
             raise ConanInvalidConfiguration("Xft can only be used on Linux and FreeBSD")
+
+        if self.options.with_xft and (not self.options.with_freetype or not self.options.with_fontconfig):
+            raise ConanInvalidConfiguration("Xft requires freetype and fontconfig")
 
     def build_requirements(self):
         self.build_requires("pkgconf/1.7.3")
@@ -130,7 +135,7 @@ class PangoConan(ConanFile):
             self.cpp_info.components['pango_'].requires.append('cairo::cairo_')
         self.cpp_info.components['pango_'].includedirs = [os.path.join(self.package_folder, "include", "pango-1.0")]
         
-        if self.options.with_freetype and self.options.with_fontconfig:
+        if self.options.with_freetype:
             self.cpp_info.components['pangoft2'].libs = ['pangoft2-1.0']
             self.cpp_info.components['pangoft2'].names['pkg_config'] = 'pangoft2'
             self.cpp_info.components['pangoft2'].requires = ['pango_', 'freetype::freetype']
@@ -138,11 +143,13 @@ class PangoConan(ConanFile):
 
         if self.options.with_fontconfig:
             self.cpp_info.components['pangofc'].names['pkg_config'] = 'pangofc'
-            self.cpp_info.components['pangofc'].requires = ['pangoft2']
+            if self.options.with_freetype:
+                self.cpp_info.components['pangofc'].requires = ['pangoft2']
 
         if self.settings.os != "Windows":
             self.cpp_info.components['pangoroot'].names['pkg_config'] = 'pangoroot'
-            self.cpp_info.components['pangoroot'].requires = ['pangoft2']
+            if self.options.with_freetype:
+                self.cpp_info.components['pangoroot'].requires = ['pangoft2']
             
         if self.options.with_xft:
             self.cpp_info.components['pangoxft'].libs = ['pangoxft-1.0']
@@ -160,7 +167,7 @@ class PangoConan(ConanFile):
             self.cpp_info.components['pangocairo'].libs = ['pangocairo-1.0']
             self.cpp_info.components['pangocairo'].names['pkg_config'] = 'pangocairo'
             self.cpp_info.components['pangocairo'].requires = ['pango_']
-            if self.settings.os != "Windows":
+            if self.options.with_freetype:
                 self.cpp_info.components['pangocairo'].requires.append('pangoft2')
             if self.settings.os == "Windows":
                 self.cpp_info.components['pangocairo'].requires.append('pangowin32')
