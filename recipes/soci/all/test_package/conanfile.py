@@ -12,4 +12,4 @@ class SociTestConan(ConanFile):
 
     def test(self):
         if not tools.cross_building(self):
-            self.run(".%ssoci.tests" % os.sep, run_environment=True)
+            self.run(".%stest_package" % os.sep, run_environment=True)
