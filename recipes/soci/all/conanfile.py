@@ -12,6 +12,7 @@ class SociConan(ConanFile):
     license = "BSL-1.0"
     settings = "os", "compiler", "build_type", "arch"
     generators = "cmake"
+    exports_sources = ["CMakeLists.txt"]
     _cmake = None
 
     options = {
@@ -45,10 +46,6 @@ class SociConan(ConanFile):
     @property
     def _source_subfolder(self):
         return "source_subfolder"
-
-    @property
-    def _build_subfolder(self):
-        return "build_subfolder"
 
     @property
     def _minimum_cpp_standard(self):
@@ -131,9 +128,7 @@ class SociConan(ConanFile):
         self._cmake.definitions["WITH_POSTGRESQL"]  = self.options.with_postgresql
         self._cmake.definitions["WITH_BOOST"]       = self.options.with_boost
 
-        self._cmake.configure(
-            source_folder=self._source_subfolder,
-            build_folder=self._build_subfolder)
+        self._cmake.configure()
 
         return self._cmake
 
@@ -142,16 +137,6 @@ class SociConan(ConanFile):
         cmake.build()
 
     def package(self):
-        include_folder  = os.path.join(self._source_subfolder, "include")
-        lib_folder      = os.path.join(self._build_subfolder, "lib")
-        bin_folder      = os.path.join(self._build_subfolder, "bin")
-
-        self.copy("*.h",    dst="include", src=include_folder)
-        self.copy("*soci*.lib", dst="lib", src=lib_folder, keep_path=False, symlinks=True)
-        self.copy("*soci*.so*", dst="lib", src=lib_folder, keep_path=False, symlinks=True)
-        self.copy("*.a",        dst="lib", src=lib_folder, keep_path=False, symlinks=True)
-        self.copy("*.dylib",    dst="lib", src=lib_folder, keep_path=False, symlinks=True)
-        self.copy("*.dll",      dst="bin", src=bin_folder, keep_path=False, symlinks=True)
         self.copy("LICENSE_1_0.txt", dst="licenses", src=self._source_subfolder)
 
     def package_info(self):
