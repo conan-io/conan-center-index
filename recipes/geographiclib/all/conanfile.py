@@ -28,10 +28,11 @@ class GeographiclibConan(ConanFile):
     def _min_compiler_version_default_cxx11(self):
         # Minimum compiler version having c++ standard >= 11
         return {
-            "gcc": 6,
-            "clang": 6,
-            "Visual Studio": 14,  # guess
-        }.get(str(self.settings.compiler))
+            "apple-clang": "3.3",
+            "gcc": "4.9",
+            "clang": "6",
+            "Visual Studio": "14",  # guess
+        }.get(str(self.settings.compiler), False)
 
     def configure(self):
         if self.options.shared:
@@ -39,9 +40,18 @@ class GeographiclibConan(ConanFile):
         if tools.Version(self.version) >= "1.51":
             if self.settings.compiler.cppstd:
                 tools.min_cppstd(self, 11)
-            elif tools.Version(self.settings.compiler.version) < self._min_compiler_version_default_cxx11:
-                raise ConanInvalidConfiguration("C++11 support needed for version >= 1.51")
 
+            def lazy_lt_semver(v1, v2):
+                lv1 = [int(v) for v in v1.split(".")]
+                lv2 = [int(v) for v in v2.split(".")]
+                min_length = min(len(lv1), len(lv2))
+                return lv1[:min_length] < lv2[:min_length]
+
+            minimum_version = self._min_compiler_version_default_cxx11
+            if not minimum_version:
+                self.output.warn("geographiclib {} requires C++11 math functions. Your compiler is unknown. Assuming it supports this feature.".format(self.version))
+            elif lazy_lt_semver(str(self.settings.compiler.version), minimum_version):
+                raise ConanInvalidConfiguration("geographiclib {} requires C++11 math functions, which your compiler does not support.".format(self.version))
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
