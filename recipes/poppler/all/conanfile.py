@@ -106,8 +106,7 @@ class PopplerConan(ConanFile):
         if self.options.get_safe("with_glib"):
             self.requires("glib/2.67.1")
         if self.options.get_safe("with_gobject_introspection"):
-            # FIXME: missing gobject_introspection recipe
-            raise ConanInvalidConfiguration("gobject_introspection is not (yet) available on cci")
+            self.requires("gobject-introspection/1.66.1")
         if self.options.with_qt:
             # FIXME: missing qt recipe
             raise ConanInvalidConfiguration("qt is not (yet) available on cii")
@@ -273,7 +272,7 @@ class PopplerConan(ConanFile):
             if self.options.get_safe("with_gtk"):
                 self.cpp_info.components["libpoppler-glib"].requires.append("gtk::gtk")
             if self.options.get_safe("with_gobject_introspection"):
-                self.cpp_info.components["libpoppler-glib"].requires.append("gobject_introspection::gobject_introspection")
+                self.cpp_info.components["libpoppler-glib"].requires.append("gobject-introspection::gobject-introspection")
 
         if self.options.with_qt:
             qt_major = tools.Version(self.deps_cpp_info["qt"].version).major
