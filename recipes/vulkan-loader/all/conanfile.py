@@ -65,6 +65,10 @@ class VulkanLoaderConan(ConanFile):
         if self.options.get_safe("with_wsi_wayland"):
             self.requires("wayland/1.18.0")
 
+    def package_id(self):
+        if self.settings.compiler == "Visual Studio":
+            self.info.settings.compiler.runtime = str(self.info.settings.compiler.runtime).replace("MD", "MT")
+
     def build_requirements(self):
         if self.options.get_safe("with_wsi_xcb") or self.options.get_safe("with_wsi_xlib") or \
            self.options.get_safe("with_wsi_wayland") or self.options.get_safe("with_wsi_directfb"):
