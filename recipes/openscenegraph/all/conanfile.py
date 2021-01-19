@@ -112,26 +112,26 @@ class ConanFile(ConanFile):
         self.requires("opengl/system")
 
         if self.options.use_fontconfig:
-            self.requires("fontconfig/2.13.91")
+            self.requires("fontconfig/2.13.92")
 
         if self.options.get_safe("with_asio", False):
             # Should these be private requires?
-            self.requires("asio/1.16.0")
-            self.requires("boost/1.73.0")
+            self.requires("asio/1.18.1")
+            self.requires("boost/1.75.0")
         if self.options.with_curl:
-            self.requires("libcurl/7.73.0")
+            self.requires("libcurl/7.74.0")
         if self.options.get_safe("with_dcmtk"):
             self.requires("dcmtk/3.6.5")
         if self.options.with_freetype:
-            self.requires("freetype/2.10.2")
+            self.requires("freetype/2.10.4")
         if self.options.with_gdal:
-            self.requires("gdal/3.1.2")
+            self.requires("gdal/3.1.4")
         if self.options.get_safe("with_gif"):
             self.requires("giflib/5.2.1")
         if self.options.with_gta:
             self.requires("libgta/1.2.1")
         if self.options.with_jasper:
-            self.requires("jasper/2.0.21")
+            self.requires("jasper/2.0.24")
         if self.options.get_safe("with_jpeg"):
             self.requires("libjpeg/9d")
         if self.options.get_safe("with_openexr"):
@@ -139,7 +139,7 @@ class ConanFile(ConanFile):
         if self.options.get_safe("with_png"):
             self.requires("libpng/1.6.37")
         if self.options.with_tiff:
-            self.requires("libtiff/4.1.0")
+            self.requires("libtiff/4.2.0")
         if self.options.with_zlib:
             self.requires("zlib/1.2.11")
 
