@@ -16,8 +16,8 @@ class GlfwConan(ConanFile):
     topics = ("conan", "gflw", "opengl", "vulkan", "opengl-es")
 
     settings = "os", "arch", "build_type", "compiler"
-    options = {"shared": [True, False], "fPIC": [True, False], "vulkanStatic": [True, False]}
-    default_options = {"shared": False, "fPIC": True, "vulkanStatic": False}
+    options = {"shared": [True, False], "fPIC": [True, False]}
+    default_options = {"shared": False, "fPIC": True}
 
     exports_sources = ["CMakeLists.txt", "patches/**"]
     generators = "cmake"
@@ -63,7 +63,7 @@ class GlfwConan(ConanFile):
             self._cmake.definitions["GLFW_INSTALL"] = True
             if self.settings.compiler == "Visual Studio":
                 self._cmake.definitions["USE_MSVC_RUNTIME_LIBRARY_DLL"] = "MD" in self.settings.compiler.runtime
-            self._cmake.definitions["GLFW_VULKAN_STATIC"] = self.options.vulkanStatic
+            self._cmake.definitions["GLFW_VULKAN_STATIC"] = "vulkan-loader" in self.options and not self.options["vulkan-loader"].shared
             self._cmake.configure()
         return self._cmake
 
