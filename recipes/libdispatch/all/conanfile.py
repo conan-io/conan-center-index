@@ -21,9 +21,6 @@ class LibDispatchConan(ConanFile):
     _cmake = None
 
     def validate(self):
-        if self.settings.build_type != "Release":
-            raise ConanInvalidConfiguration("Just Release builds allowed.")
-
         if self.settings.compiler != "clang":
             raise ConanInvalidConfiguration("Clang compiler is required.")
 
@@ -58,6 +55,12 @@ class LibDispatchConan(ConanFile):
         tools.rmdir(os.path.join(self.package_folder, "share"))
 
     def package_info(self):
-        self.cpp_info.libs = tools.collect_libs(self)
+        if self.settings.os == "Macos":
+            self.cpp_info.libs = ["dispatch"]
+        else:
+            self.cpp_info.libs = ["dispatch", "BlocksRuntime"]
+
         if self.settings.os == "Linux":
-            self.cpp_info.system_libs = ["pthread"]
+            self.cpp_info.system_libs = ["pthread", "rt"]
+        elif self.settings.os == "Windows":
+            self.cpp_info.system_libs = ["ShLwApi", "WS2_32", "WinMM", "synchronization"]
