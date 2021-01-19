@@ -119,7 +119,7 @@ class VulkanLoaderConan(ConanFile):
         self.cpp_info.names["pkg_config"] = "vulkan"
         suffix = "-1" if self.settings.os == "Windows" else ""
         self.cpp_info.libs = ["vulkan" + suffix]
-        if self.settings.os != "Windows":
+        if self.settings.os == "Linux":
             self.cpp_info.system_libs = ["dl", "pthread", "m"]
-        if self.settings.os == "Macos":
+        elif self.settings.os == "Macos":
             self.cpp_info.frameworks = ["CoreFoundation"]
