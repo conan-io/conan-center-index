@@ -1,8 +1,7 @@
 import os
 import fnmatch
-import platform
 from functools import total_ordering
-from conans.errors import ConanInvalidConfiguration, ConanException
+from conans.errors import ConanInvalidConfiguration
 from conans import ConanFile, AutoToolsBuildEnvironment, tools
 
 
@@ -92,7 +91,6 @@ class OpenSSLConan(ConanFile):
                "no_aria": [True, False],
                "no_blake2": [True, False],
                "no_camellia": [True, False],
-               "no_cast": [True, False],
                "no_chacha": [True, False],
                "no_cms": [True, False],
                "no_comp": [True, False],
@@ -127,31 +125,31 @@ class OpenSSLConan(ConanFile):
 
     def config_options(self):
         if self._full_version >= "1.1.0":
-              del self.options.no_md2
-              del self.options.no_rc4
-              del self.options.no_rc5
-              del self.options.no_zlib
+            del self.options.no_md2
+            del self.options.no_rc4
+            del self.options.no_rc5
+            del self.options.no_zlib
 
         if self._full_version < "1.1.0":
-              del self.options.no_camellia
-              del self.options.no_cast
-              del self.options.no_cms
-              del self.options.no_comp
-              del self.options.no_dgram
-              del self.options.no_engine
-              del self.options.no_idea
-              del self.options.no_md4
-              del self.options.no_ocsp
-              del self.options.no_srp
-              del self.options.no_ts
-              del self.options.no_whirlpool
+            del self.options.no_camellia
+            del self.options.no_cast
+            del self.options.no_cms
+            del self.options.no_comp
+            del self.options.no_dgram
+            del self.options.no_engine
+            del self.options.no_idea
+            del self.options.no_md4
+            del self.options.no_ocsp
+            del self.options.no_srp
+            del self.options.no_ts
+            del self.options.no_whirlpool
 
         if self._full_version < "1.1.1":
-              del self.options.no_aria
-              del self.options.no_pinshared
-              del self.options.no_sm2
-              del self.options.no_sm3
-              del self.options.no_sm4
+            del self.options.no_aria
+            del self.options.no_pinshared
+            del self.options.no_sm2
+            del self.options.no_sm3
+            del self.options.no_sm4
 
         if self.settings.os != "Windows":
             del self.options.capieng_dialog
@@ -164,7 +162,7 @@ class OpenSSLConan(ConanFile):
             if not self._win_bash:
                 self.build_requires("strawberryperl/5.30.0.1")
             if not self.options.no_asm and not tools.which("nasm"):
-                self.build_requires("nasm/2.14")
+                self.build_requires("nasm/2.15.05")
         if self._win_bash:
             if "CONAN_BASH_PATH" not in os.environ:
                 self.build_requires("msys2/20200517")
@@ -499,9 +497,9 @@ class OpenSSLConan(ConanFile):
                     lib_path = lib_path.replace('\\', '/')
 
                 if zlib_info.shared:
-                  args.append("zlib-dynamic")
+                    args.append("zlib-dynamic")
                 else:
-                  args.append("zlib")
+                    args.append("zlib")
 
                 args.extend(['--with-zlib-include="%s"' % include_path,
                              '--with-zlib-lib="%s"' % lib_path])
