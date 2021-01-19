@@ -65,10 +65,6 @@ class VulkanLoaderConan(ConanFile):
         if self.options.get_safe("with_wsi_wayland"):
             self.requires("wayland/1.18.0")
 
-    def package_id(self):
-        if self.settings.compiler == "Visual Studio":
-            self.info.settings.compiler.runtime = str(self.info.settings.compiler.runtime).replace("MD", "MT")
-
     def build_requirements(self):
         if self.options.get_safe("with_wsi_xcb") or self.options.get_safe("with_wsi_xlib") or \
            self.options.get_safe("with_wsi_wayland") or self.options.get_safe("with_wsi_directfb"):
@@ -82,6 +78,10 @@ class VulkanLoaderConan(ConanFile):
         tools.replace_in_file(os.path.join(self._source_subfolder, "cmake", "FindVulkanHeaders.cmake"),
                               "HINTS ${VULKAN_HEADERS_INSTALL_DIR}/share/vulkan/registry",
                               "HINTS ${VULKAN_HEADERS_INSTALL_DIR}/res/vulkan/registry")
+        # Honor settings.compiler.runtime
+        tools.replace_in_file(os.path.join(self._source_subfolder, "loader", "CMakeLists.txt"),
+                              "if(${configuration} MATCHES \"/MD\")",
+                              "if(FALSE)")
 
     def _configure_cmake(self):
         if self._cmake:
