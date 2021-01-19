@@ -1,5 +1,6 @@
 import os
 from conans import ConanFile, CMake, tools
+from conans.tools import Version
 from conans.errors import ConanInvalidConfiguration, ConanException
 
 class SociConan(ConanFile):
@@ -62,17 +63,6 @@ class SociConan(ConanFile):
             "apple-clang": "10.0",
         }
 
-    # def _validate_compiler_settings(self):
-    #     tools.check_min_cppstd(self, "11")
-    #     if self.settings.compiler == "gcc" and tools.Version(self.settings.compiler.version) < "5.0":
-    #         raise ConanInvalidConfiguration("gcc minimum required version is 5.0")
-    #     elif self.settings.compiler == "clang" and tools.Version(self.settings.compiler.version) < "3.8":
-    #         raise ConanInvalidConfiguration("clang minimum required version is 3.8")
-    #     elif self.settings.compiler == "apple-clang" and tools.Version(self.settings.compiler.version) < "10.0":
-    #         raise ConanInvalidConfiguration("apple-clang minimum required version is 10.0")
-    #     elif self.settings.compiler == "Visual Studio" and tools.Version(self.settings.compiler.version) < "19":
-    #         raise ConanInvalidConfiguration("Visual Studio minimum required version is 19")
-
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
@@ -81,17 +71,14 @@ class SociConan(ConanFile):
         if self.options.shared:
             del self.options.fPIC
 
-        # self._validate_compiler_settings()
-        if self.settings.compiler.get_safe("cppstd"):
-            tools.check_min_cppstd(self, self._minimum_cpp_standard)
-            min_version = self._minimum_compilers_version.get(str(self.settings.compiler))
-            if not min_version:
-                self.output.warn("{} recipe lacks information about the {} compiler support.".format(
-                    self.name, self.settings.compiler))
-            else:
-                if tools.Version(self.settings.compiler.version) < min_version:
-                    raise ConanInvalidConfiguration("{} requires C++{} support. The current compiler {} {} does not support it.".format(
-                        self.name, self._minimum_cpp_standard, self.settings.compiler, self.settings.compiler.version))
+        compiler = str(self.settings.compiler)
+        compiler_version = Version(self.settings.compiler.version.value)
+        tools.check_min_cppstd(self, self._minimum_cpp_standard)
+
+        if compiler not in self._minimum_compilers_version:
+            self.output.warn("{} recipe lacks information about the {} compiler support.".format(self.name, self.settings.compiler))
+        elif compiler_version < self._minimum_compilers_version[compiler]:
+            raise ConanInvalidConfiguration("{} requires a {} version >= {}".format(self.name, compiler, compiler_version))
 
     def requirements(self):
         prefix  = "Dependencies for "
@@ -133,15 +120,6 @@ class SociConan(ConanFile):
 
         if self.options.shared:
             self._cmake.definitions["SOCI_STATIC"] = False
-        # else:
-        #     self.options.with_sqlite3       = False
-        #     self.options.with_db2           = False
-        #     self.options.with_odbc          = False
-        #     self.options.with_oracle        = False
-        #     self.options.with_firebird      = False
-        #     self.options.with_mysql         = False
-        #     self.options.with_postgresql    = False
-        #     self.options.with_boost         = False
 
         self._cmake.definitions["SOCI_EMPTY"]       = self.options.empty
         self._cmake.definitions["WITH_SQLITE3"]     = self.options.with_sqlite3
