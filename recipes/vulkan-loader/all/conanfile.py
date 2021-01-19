@@ -104,6 +104,8 @@ class VulkanLoaderConan(ConanFile):
         return self._cmake
 
     def build(self):
+        if self.deps_cpp_info["vulkan-headers"].version != self.version:
+            raise ConanInvalidConfiguration("vulkan-loader must be built with the same version than vulkan-headers.")
         self._patch_sources()
         cmake = self._configure_cmake()
         cmake.build()
@@ -116,6 +118,8 @@ class VulkanLoaderConan(ConanFile):
         tools.rmdir(os.path.join(self.package_folder, "loader"))
 
     def package_info(self):
+        if self.deps_cpp_info["vulkan-headers"].version != self.version:
+            self.output.warn("vulkan-headers version is different than vulkan-loader. Several symbols might be missing.")
         self.cpp_info.names["pkg_config"] = "vulkan"
         suffix = "-1" if self.settings.os == "Windows" else ""
         self.cpp_info.libs = ["vulkan" + suffix]
