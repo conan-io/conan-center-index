@@ -89,13 +89,17 @@ class VulkanLoaderConan(ConanFile):
         self._cmake = CMake(self)
         self._cmake.definitions["VULKAN_HEADERS_INSTALL_DIR"] = self.deps_cpp_info["vulkan-headers"].rootpath
         self._cmake.definitions["BUILD_TESTS"] = False
+        self._cmake.definitions["USE_CCACHE"] = False
         if self.settings.os == "Linux":
             self._cmake.definitions["BUILD_WSI_XCB_SUPPORT"] = self.options.with_wsi_xcb
             self._cmake.definitions["BUILD_WSI_XLIB_SUPPORT"] = self.options.with_wsi_xlib
             self._cmake.definitions["BUILD_WSI_WAYLAND_SUPPORT"] = self.options.with_wsi_wayland
             self._cmake.definitions["BUILD_WSI_DIRECTFB_SUPPORT"] = self.options.with_wsi_directfb
+        if self.settings.os == "Windows":
+            self._cmake.definitions["ENABLE_WIN10_ONECORE"] = False
         if tools.is_apple_os(self.settings.os):
             self._cmake.definitions["BUILD_STATIC_LOADER"] = not self.options.shared
+        self._cmake.definitions["BUILD_LOADER"] = True
         self._cmake.configure()
         return self._cmake
 
