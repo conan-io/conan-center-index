@@ -44,7 +44,7 @@ class EasyhttpcppConan(ConanFile):
     def requirements(self):
         self.requires("poco/1.10.1")
         if self.settings.os != "Windows":
-            self.requires("openssl/1.1.1g")
+            self.requires("openssl/1.1.1i")
 
     @property
     def _required_poco_components(self):
