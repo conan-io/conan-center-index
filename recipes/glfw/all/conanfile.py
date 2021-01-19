@@ -63,8 +63,7 @@ class GlfwConan(ConanFile):
             self._cmake.definitions["GLFW_INSTALL"] = True
             if self.settings.compiler == "Visual Studio":
                 self._cmake.definitions["USE_MSVC_RUNTIME_LIBRARY_DLL"] = "MD" in self.settings.compiler.runtime
-            if self.options.vulkanStatic:
-                self._cmake.definitions["GLFW_VULKAN_STATIC"] = True
+            self._cmake.definitions["GLFW_VULKAN_STATIC"] = self.options.vulkanStatic
             self._cmake.configure()
         return self._cmake
 
