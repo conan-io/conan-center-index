@@ -16,6 +16,7 @@ class MimallocConan(ConanFile):
         "fPIC": [True, False],
         "secure": [True, False],
         "override": [True, False],
+        "inject": [True, False],
         "single_object": [True, False]
     }
     default_options = {
@@ -23,6 +24,7 @@ class MimallocConan(ConanFile):
         "fPIC": True,
         "secure": False,
         "override": False,
+        "inject": True,
         "single_object": False
     }
     generators = "cmake"
@@ -51,6 +53,25 @@ class MimallocConan(ConanFile):
         if self.options.shared:
             del self.options.fPIC
 
+        # Shared overriding requires dynamic runtime for MSVC:
+        if self.options.override and \
+           self.options.shared and \
+           self.settings.compiler == "Visual Studio" and \
+           "MT" in str(self.settings.compiler.runtime):
+            raise ConanInvalidConfiguration(
+                "Dynamic runtime (MD/MDd) is required when using mimalloc as a shared library for override")
+
+        # single_object and inject are options
+        # only when overriding on Unix-like platforms:
+        if not self.options.override:
+            del self.options.single_object
+            del self.options.inject
+
+        if self.options.override and \
+           self.options.get_safe("single_object") and \
+           self.options.get_safe("inject"):
+            raise ConanInvalidConfiguration("Single object is incompatible with implicit linkage override");
+
         if self.settings.compiler.get_safe("cppstd"):
             tools.check_min_cppstd(self, "14")
 
@@ -61,15 +82,6 @@ class MimallocConan(ConanFile):
         elif tools.Version(self.settings.compiler.version) < minimum_version:
             raise ConanInvalidConfiguration("mimalloc requires a compiler that supports at least C++14")
 
-        if self.options.shared or self.settings.compiler == "Visual Studio":
-            del self.options.single_object
-
-        if self.options.override:
-            if self.options.shared and self.settings.compiler == "Visual Studio" and \
-                    "MT" in str(self.settings.compiler.runtime):
-                raise ConanInvalidConfiguration(
-                    "Cannot use MT(d) runtime when building mimalloc as a shared library for override")
-
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
         os.rename("mimalloc-" + self.version, self._source_subfolder)
@@ -77,6 +89,12 @@ class MimallocConan(ConanFile):
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
+
+        # single_object and inject are options
+        # only when overriding on Unix-like platforms:
+        if self.settings.compiler == "Visual Studio":
+            del self.options.single_object
+            del self.options.inject
 
     def _configure_cmake(self):
         if self._cmake:
@@ -145,6 +163,13 @@ class MimallocConan(ConanFile):
         return name
 
     def package_info(self):
+        if self.options.get_safe("inject"):
+            self.cpp_info.includedirs = []
+            self.cpp_info.libdirs = []
+            self.cpp_info.resdirs = []
+            self.cpp_info.bindirs = [self._install_prefix]
+            return
+
         self.cpp_info.includedirs = [os.path.join(self._install_prefix, "include")]
         if self.options.get_safe("single_object"):
             obj_ext = "obj" if self.settings.os == "Windows" else "o"

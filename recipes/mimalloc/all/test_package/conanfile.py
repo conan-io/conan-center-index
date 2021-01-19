@@ -5,32 +5,39 @@ import os
 class MimallocTestConan(ConanFile):
     settings = "os", "compiler", "build_type", "arch"
     generators = "cmake"
-    _test_file = "test_basic"
-    _build_basic = False
-    _build_redefine_malloc = False
 
     def build(self):
-        single_object = "single_object" in self.options["mimalloc"] and \
-                        self.options["mimalloc"].single_object
-        if not single_object and \
-                not self.options["mimalloc"].shared and \
-                self.options["mimalloc"].override:
-            self._test_file = "test_redefine_malloc"
-            self._build_redefine_malloc = True
+        # No override:
+        if not self.options["mimalloc"].override:
+            self._test_files = ["mi_api"]
+
+        # Visual Studio:
+        elif self.settings.compiler == "Visual Studio" and self.options["mimalloc"].shared:
+            self._test_files = ["no_changes", "include_override", "mi_api"]
+        elif self.settings.compiler == "Visual Studio" and not self.options["mimalloc"].shared:
+            self._test_files = ["include_override", "mi_api"]
+
+        # Unix-like:
+        elif self.options["mimalloc"].inject:
+            self._test_files = ["no_changes"]
         else:
-            self._build_basic = True
+            self._test_files = ["no_changes", "include_override", "mi_api"]
 
         cmake = CMake(self)
-        cmake.definitions["BUILD_BASIC"] = self._build_basic
-        cmake.definitions["BUILD_REDEFINE_MALLOC"] = self._build_redefine_malloc
+        cmake.definitions["BUILD_NO_CHANGES"] = "no_changes" in self._test_files
+        cmake.definitions["BUILD_INCLUDE_OVERRIDE"] = "include_override" in self._test_files
+        cmake.definitions["BUILD_MI_API"] = "mi_api" in self._test_files
         cmake.configure()
         cmake.build()
 
     def test(self):
-        if not tools.cross_building(self.settings):
-            test_package = os.path.join("bin", self._test_file)
-            self.run(test_package, run_environment=True)
+        if tools.cross_building(self.settings):
+            return
 
-            if not self._build_redefine_malloc:
-                test_package_cpp = os.path.join("bin", self._test_file + "_cpp")
+        with tools.environment_append({"MIMALLOC_VERBOSE": "1"}):
+            for file in self._test_files:
+                test_package = os.path.join("bin", file)
+                self.run(test_package, run_environment=True)
+
+                test_package_cpp = os.path.join("bin", file + "_cpp")
                 self.run(test_package_cpp, run_environment=True)
