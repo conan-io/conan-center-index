@@ -57,7 +57,7 @@ class SociConan(ConanFile):
             "Visual Studio": "14",
             "gcc": "4.8",
             "clang": "3.8",
-            "apple-clang": "8.0",
+            "apple-clang": "8.0"
         }
 
     def config_options(self):
