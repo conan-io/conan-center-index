@@ -1,4 +1,4 @@
 sources:
-  "1.2.148.0":
-    url: "https://github.com/KhronosGroup/Vulkan-Loader/archive/v1.2.148.tar.gz"
-    sha256: "8f4dca3d125965dcb4c4f19ff9dddae893b5f071d63cfd9e47658ccae2414843"
+  "1.2.154.0":
+    url: "https://github.com/KhronosGroup/Vulkan-Loader/archive/sdk-1.2.154.0.tar.gz"
+    sha256: "418017d7bab907e72291476df231dd0e7dc7fe20b97e55389c975bcfc48d6433"
