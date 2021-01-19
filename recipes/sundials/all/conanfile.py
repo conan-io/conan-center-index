@@ -1,5 +1,7 @@
 from conans import CMake, ConanFile, tools
+import glob
 import os
+import shutil
 
 
 class SundialsConan(ConanFile):
@@ -38,14 +40,15 @@ class SundialsConan(ConanFile):
     def _source_subfolder(self):
         return "source_subfolder"
 
-    def _patch_sources(self):
-        if self.version in self.conan_data["patches"]:
-            for patch in self.conan_data["patches"][self.version]:
-                tools.patch(**patch)
-
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
+
+    def configure(self):
+        if self.options.shared:
+            del self.options.fPIC
+        del self.settings.compiler.libcxx
+        del self.settings.compiler.cppstd
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
@@ -69,7 +72,8 @@ class SundialsConan(ConanFile):
         return self._cmake
 
     def build(self):
-        self._patch_sources()
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            tools.patch(**patch)
         cmake = self._configure_cmake()
         cmake.build()
 
@@ -77,8 +81,62 @@ class SundialsConan(ConanFile):
         self.copy(pattern="LICENSE", src=self._source_subfolder, dst="licenses")
         cmake = self._configure_cmake()
         cmake.install()
+        if self.settings.os == "Windows" and self.options.shared:
+            tools.mkdir(os.path.join(self.package_folder, "bin"))
+            for dll_path in glob.glob(os.path.join(self.package_folder, "lib", "*.dll")):
+                shutil.move(dll_path, os.path.join(self.package_folder, "bin", os.path.basename(dll_path)))
 
     def package_info(self):
-        self.cpp_info.libs = tools.collect_libs(self)
+        self.cpp_info.components["sundials_nvecmanyvector"].libs = ["sundials_nvecmanyvector"]
+        self.cpp_info.components["sundials_nvecserial"].libs = ["sundials_nvecserial"]
+        self.cpp_info.components["sundials_sunlinsolband"].libs = ["sundials_sunlinsolband"]
+        self.cpp_info.components["sundials_sunlinsolband"].requires = ["sundials_sunmatrixband"]
+        self.cpp_info.components["sundials_sunlinsoldense"].libs = ["sundials_sunlinsoldense"]
+        self.cpp_info.components["sundials_sunlinsoldense"].requires = ["sundials_sunmatrixdense"]
+        self.cpp_info.components["sundials_sunlinsolpcg"].libs = ["sundials_sunlinsolpcg"]
+        self.cpp_info.components["sundials_sunlinsolspbcgs"].libs = ["sundials_sunlinsolspbcgs"]
+        self.cpp_info.components["sundials_sunlinsolspfgmr"].libs = ["sundials_sunlinsolspfgmr"]
+        self.cpp_info.components["sundials_sunlinsolspgmr"].libs = ["sundials_sunlinsolspgmr"]
+        self.cpp_info.components["sundials_sunlinsolsptfqmr"].libs = ["sundials_sunlinsolsptfqmr"]
+        self.cpp_info.components["sundials_sunmatrixband"].libs = ["sundials_sunmatrixband"]
+        self.cpp_info.components["sundials_sunmatrixdense"].libs = ["sundials_sunmatrixdense"]
+        self.cpp_info.components["sundials_sunmatrixsparse"].libs = ["sundials_sunmatrixsparse"]
+        self.cpp_info.components["sundials_sunnonlinsolfixedpoint"].libs = ["sundials_sunnonlinsolfixedpoint"]
+        self.cpp_info.components["sundials_sunnonlinsolnewton"].libs = ["sundials_sunnonlinsolnewton"]
         if self.settings.os == "Linux":
-            self.cpp_info.system_libs = ["m"]
+            self.cpp_info.components["sundials_nvecmanyvector"].system_libs = ["m"]
+            self.cpp_info.components["sundials_nvecserial"].system_libs = ["m"]
+            self.cpp_info.components["sundials_sunlinsolpcg"].system_libs = ["m"]
+            self.cpp_info.components["sundials_sunlinsolspbcgs"].system_libs = ["m"]
+            self.cpp_info.components["sundials_sunlinsolspfgmr"].system_libs = ["m"]
+            self.cpp_info.components["sundials_sunlinsolspgmr"].system_libs = ["m"]
+            self.cpp_info.components["sundials_sunlinsolsptfqmr"].system_libs = ["m"]
+            self.cpp_info.components["sundials_sunmatrixband"].system_libs = ["m"]
+            self.cpp_info.components["sundials_sunmatrixdense"].system_libs = ["m"]
+            self.cpp_info.components["sundials_sunmatrixsparse"].system_libs = ["m"]
+            self.cpp_info.components["sundials_sunnonlinsolfixedpoint"].system_libs = ["m"]
+            self.cpp_info.components["sundials_sunnonlinsolnewton"].system_libs = ["m"]
+        if self.options.build_arkode:
+            self.cpp_info.components["sundials_arkode"].libs = ["sundials_arkode"]
+            if self.settings.os == "Linux":
+                self.cpp_info.components["sundials_arkode"].system_libs = ["m"]
+        if self.options.build_cvode:
+            self.cpp_info.components["sundials_cvode"].libs = ["sundials_cvode"]
+            if self.settings.os == "Linux":
+                self.cpp_info.components["sundials_cvode"].system_libs = ["m"]
+        if self.options.build_cvodes:
+            self.cpp_info.components["sundials_cvodes"].libs = ["sundials_cvodes"]
+            if self.settings.os == "Linux":
+                self.cpp_info.components["sundials_cvodes"].system_libs = ["m"]
+        if self.options.build_ida:
+            self.cpp_info.components["sundials_ida"].libs = ["sundials_ida"]
+            if self.settings.os == "Linux":
+                self.cpp_info.components["sundials_ida"].system_libs = ["m"]
+        if self.options.build_idas:
+            self.cpp_info.components["sundials_idas"].libs = ["sundials_idas"]
+            if self.settings.os == "Linux":
+                self.cpp_info.components["sundials_idas"].system_libs = ["m"]
+        if self.options.build_kinsol:
+            self.cpp_info.components["sundials_kinsol"].libs = ["sundials_kinsol"]
+            if self.settings.os == "Linux":
+                self.cpp_info.components["sundials_kinsol"].system_libs = ["m"]

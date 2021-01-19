@@ -1,0 +1,11 @@
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -98,7 +98,7 @@ IF(MSVC)
+   # Speedup system tests
+   INCLUDE(${CC_SOURCE_DIR}/cmake/WindowsCache.cmake)
+   ADD_DEFINITIONS(-DWIN32_LEAN_AND_MEAN)
+-  IF (MSVC)
++  IF (FALSE)
+     SET(CONFIG_TYPES "DEBUG" "RELEASE" "RELWITHDEBINFO")
+     FOREACH(BUILD_TYPE ${CONFIG_TYPES})
+       FOREACH(COMPILER CXX C)

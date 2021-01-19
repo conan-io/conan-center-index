@@ -1,6 +1,7 @@
 from conans import CMake, ConanFile, tools
 import os
 
+required_conan_version = ">=1.28.0"
 
 class AwsChecksums(ConanFile):
     name = "aws-checksums"
@@ -67,4 +68,10 @@ class AwsChecksums(ConanFile):
         tools.rmdir(os.path.join(self.package_folder, "lib", "aws-checksums"))
 
     def package_info(self):
-        self.cpp_info.libs = ["aws-checksums"]
+        self.cpp_info.filenames["cmake_find_package"] = "aws-checksums"
+        self.cpp_info.filenames["cmake_find_package_multi"] = "aws-checksums"
+        self.cpp_info.names["cmake_find_package"] = "AWS"
+        self.cpp_info.names["cmake_find_package_multi"] = "AWS"
+        self.cpp_info.components["aws-checksums-lib"].names["cmake_find_package"] = "aws-checksums"
+        self.cpp_info.components["aws-checksums-lib"].names["cmake_find_package_multi"] = "aws-checksums"
+        self.cpp_info.components["aws-checksums-lib"].libs = ["aws-checksums"]

@@ -6,6 +6,7 @@ class Box2dConan(ConanFile):
     name = "box2d"
     license = "Zlib"
     description = "Box2D is a 2D physics engine for games"
+    topics = ("physics", "engine", "game development")
     homepage = "http://box2d.org/"
     url = "https://github.com/conan-io/conan-center-index"
     settings = "os", "compiler", "build_type", "arch"

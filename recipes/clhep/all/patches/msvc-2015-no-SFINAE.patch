@@ -1,0 +1,67 @@
+--- a/CLHEP/Geometry/Geometry/BasicVector3D.h
++++ b/CLHEP/Geometry/Geometry/BasicVector3D.h
+@@ -52,6 +52,7 @@ namespace HepGeom {
+      * Constructor from three numbers. */
+     BasicVector3D(T x1, T y1, T z1) { v_[0] = x1; v_[1] = y1; v_[2] = z1; }
+ 
++#if !defined(_MSC_VER) || _MSC_VER >= 1910
+     /**
+      * Copy constructor. */
+     BasicVector3D(const BasicVector3D<T> &) = default;
+@@ -67,6 +68,11 @@ namespace HepGeom {
+     /**
+      * Move constructor. */
+     BasicVector3D(BasicVector3D<T> &&) = default;
++#else
++    BasicVector3D(const BasicVector3D<float> & v) {
++      v_[0] = v.x(); v_[1] = v.y(); v_[2] = v.z();
++    }
++#endif
+ 
+     /**
+      * Destructor. */
+@@ -98,9 +104,11 @@ namespace HepGeom {
+     /**
+      * Assignment. */
+     BasicVector3D<T> & operator= (const BasicVector3D<T> &) = default;
++#if !defined(_MSC_VER) || _MSC_VER >= 1910
+     /**
+      * Move assignment. */
+     BasicVector3D<T> & operator= (BasicVector3D<T> &&) = default;
++#endif
+     /**
+      * Addition. */
+     BasicVector3D<T> & operator+=(const BasicVector3D<T> & v) {
+--- a/CLHEP/Geometry/Geometry/Plane3D.h
++++ b/CLHEP/Geometry/Geometry/Plane3D.h
+@@ -54,6 +54,7 @@ namespace HepGeom {
+       a_ = n.x(); b_ = n.y(); c_ = n.z(); d_ = -n*p1;
+     }
+ 
++#if !defined(_MSC_VER) || _MSC_VER >= 1910
+     /**
+      * Copy constructor. */
+     Plane3D(const Plane3D<T> &) = default;
+@@ -68,6 +69,10 @@ namespace HepGeom {
+     /**
+      * Move constructor. */
+     Plane3D(Plane3D<T> &&) = default;
++#else
++    Plane3D(const Plane3D<float> & p)
++      : a_(p.a_), b_(p.b_), c_(p.c_), d_(p.d_) {}
++#endif
+ 
+     /**
+      * Destructor. */
+@@ -77,9 +82,11 @@ namespace HepGeom {
+      * Assignment. */
+     Plane3D<T> & operator=(const Plane3D<T> &) = default;
+ 
++#if !defined(_MSC_VER) || _MSC_VER >= 1910
+     /**
+      * Move assignment. */
+     Plane3D<T> & operator=(Plane3D<T> &&) = default;
++#endif
+ 
+     /**
+      * Returns the a-coefficient in the plane equation: a*x+b*y+c*z+d=0. */

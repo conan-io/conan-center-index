@@ -5,7 +5,6 @@ from conans import ConanFile, CMake, tools
 class SundialsTestConan(ConanFile):
     settings = "os", "compiler", "build_type", "arch"
     generators = "cmake"
-    short_paths = True
 
     def build(self):
         cmake = CMake(self)

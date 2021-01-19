@@ -1,0 +1,19 @@
+sources:
+  "1.0.0.0":
+    url: "https://github.com/chronoxor/CppCommon/archive/1.0.0.0.tar.gz"
+    sha256: "d6124dd4cd430e5f10c2942ff02a95636369875b652e66a499b01f1fb3ecfd6d"
+  "cci.20201104":
+    url: "https://github.com/chronoxor/CppCommon/archive/cacfa9554d367467808663d9d5a695933ae566bb.tar.gz"
+    sha256: "d2e717798e1668c831ee977763eaff7413ef48e6e0914a6322c9918016092048"
+
+patches:
+  "1.0.0.0":
+    - patch_file: "patches/00001-update-cmakelists.patch"
+      base_path: "source_subfolder"
+    - patch_file: "patches/00002-fix-cross-platform-issues.patch"
+      base_path: "source_subfolder"
+  "cci.20201104":
+    - patch_file: "patches/00001-update-cmakelists.patch"
+      base_path: "source_subfolder"
+    - patch_file: "patches/00003-define-win32-winnt.patch"
+      base_path: "source_subfolder"

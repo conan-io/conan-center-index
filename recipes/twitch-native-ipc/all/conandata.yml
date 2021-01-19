@@ -1,0 +1,12 @@
+sources:
+  "3.1.1":
+    url: https://github.com/twitchtv/twitch-native-ipc/archive/v3.1.1.tar.gz
+    sha256: "f8c322bb30e68607e5fd632ae70e84983830e2bdade7a9b0ce5d8a09c5fa775b"
+patches:
+  "3.1.1":
+    - patch_file: "patches/cmake-fixes.patch"
+      base_path: "source_subfolder"
+    - patch_file: "patches/linux-build-fixes.patch"
+      base_path: "source_subfolder"
+    - patch_file: "patches/export-fixes.patch"
+      base_path: "source_subfolder"

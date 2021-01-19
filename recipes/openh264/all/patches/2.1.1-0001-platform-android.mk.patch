@@ -1,0 +1,18 @@
+--- build/platform-android.mk
++++ build/platform-android.mk
+@@ -40,14 +40,9 @@
+ TOOLCHAIN_NAME = $(shell NDK_TOOLCHAIN_VERSION= NDK_PROJECT_PATH=$(SRC_PATH)/codec/build/android/dec make --no-print-dir -f $(NDKROOT)/build/core/build-local.mk DUMP_TOOLCHAIN_NAME APP_ABI=$(APP_ABI))
+ GCC_TOOLCHAIN_PATH = $(shell dirname $(TOOLCHAINPREFIX) | xargs dirname )
+ 
+-SYSROOT = $(NDKROOT)/platforms/android-$(NDKLEVEL)/arch-$(ARCH)
+-CXX = $(TOOLCHAINPREFIX)g++
+-CC = $(TOOLCHAINPREFIX)gcc
+-AR = $(TOOLCHAINPREFIX)ar
+-CFLAGS += -DANDROID_NDK -fpic --sysroot=$(SYSROOT) -MMD -MP -fstack-protector-all
++CFLAGS += -DANDROID_NDK -fpic -MMD -MP -fstack-protector-all
+ CFLAGS += -isystem $(NDKROOT)/sysroot/usr/include -isystem $(NDKROOT)/sysroot/usr/include/$(TOOLCHAIN_NAME) -D__ANDROID_API__=$(NDKLEVEL)
+ CXXFLAGS += -fno-rtti -fno-exceptions
+-LDFLAGS += --sysroot=$(SYSROOT)
+ SHLDFLAGS = -Wl,--no-undefined -Wl,-z,relro -Wl,-z,now -Wl,-soname,lib$(PROJECT_NAME).so
+ UTSHLDFLAGS = -Wl,-soname,libut.so
+ 

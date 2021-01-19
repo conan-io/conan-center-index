@@ -1,0 +1,8 @@
+sources:
+  "cci.20200430":
+    sha256: fef43742cba828a35640eefba774be11562cab6d7bcbdcfd62613019965f87c3
+    url: https://github.com/cose-wg/COSE-C/archive/4432ae11f7a9711c46e8b4442fa2b35055c5cf98.zip
+patches:
+  "cci.20200430":
+    - patch_file: "patches/001-fix-cmake-targets.patch"
+      base_path: "source_subfolder"

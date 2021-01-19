@@ -62,5 +62,3 @@ class Box2dConan(ConanFile):
 
     def package_info(self):
         self.cpp_info.libs = ["box2d"]
-        self.cpp_info.names["cmake_find_package"] = "Box2D"
-        self.cpp_info.names["cmake_find_package_multi"] = "Box2D"

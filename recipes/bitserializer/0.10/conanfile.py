@@ -1,7 +1,9 @@
 from conans import ConanFile, tools
 from conans.errors import ConanInvalidConfiguration
+import glob
 import os
 
+required_conan_version = ">=1.28.0"
 
 class BitserializerConan(ConanFile):
     name = "bitserializer"
@@ -10,9 +12,18 @@ class BitserializerConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://bitbucket.org/Pavel_Kisliak/bitserializer"
     license = "MIT"
-    settings = ("os", "compiler",)
+    settings = "os", "compiler"
     no_copy_source = True
-    requires = ("rapidjson/1.1.0")
+    options = {
+        "with_cpprestsdk": [True, False],
+        "with_rapidjson": [True, False],
+        "with_pugixml": [True, False]
+    }
+    default_options = {
+        "with_cpprestsdk": True,
+        "with_rapidjson": True,
+        "with_pugixml": True
+    }
 
     @property
     def _supported_compilers(self):
@@ -37,25 +48,43 @@ class BitserializerConan(ConanFile):
         except KeyError:
             self.output.warn("This recipe has no support for the current compiler. Please consider adding it.")
 
-    def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        # Find and rename folder in the extracted sources
-        # This workaround used in connection that zip-archive from BitBucket contains folder with some hash in name
-        for dirname in os.listdir(self.source_folder):
-            if "-bitserializer-" in dirname:
-                os.rename(dirname, self._source_subfolder)
-                break
-
-    def package(self):
-        self.copy(pattern="license.txt", dst="licenses", src=self._source_subfolder)
-        # Install Core
-        include_folder = os.path.join(self._source_subfolder, "include")
-        self.copy(pattern=os.path.join("bitserializer", "*.h"), dst="include", src=include_folder)
+    def requirements(self):
+        if self.options.with_cpprestsdk:
+            self.requires("cpprestsdk/2.10.16")
+        if self.options.with_rapidjson:
+            self.requires("rapidjson/1.1.0")
+        if self.options.with_pugixml:
+            self.requires("pugixml/1.10")
 
     def package_id(self):
         self.info.header_only()
 
+    def source(self):
+        tools.get(**self.conan_data["sources"][self.version])
+        extracted_dir = glob.glob("*-bitserializer-*")[0]
+        os.rename(extracted_dir, self._source_subfolder)
+
+    def package(self):
+        self.copy(pattern="license.txt", dst="licenses", src=self._source_subfolder)
+        self.copy(pattern="*.h", dst="include", src=os.path.join(self._source_subfolder, "include"))
+
     def package_info(self):
+        self.cpp_info.filenames["cmake_find_package"] = "bitserializer"
+        self.cpp_info.filenames["cmake_find_package_multi"] = "bitserializer"
+        self.cpp_info.names["cmake_find_package"] = "BitSerializer"
+        self.cpp_info.names["cmake_find_package_multi"] = "BitSerializer"
+        # core
+        self.cpp_info.components["core"].names["cmake_find_package"] = "core"
+        self.cpp_info.components["core"].names["cmake_find_package_multi"] = "core"
         if self.settings.compiler == "gcc" or (self.settings.os == "Linux" and self.settings.compiler == "clang"):
             if tools.Version(self.settings.compiler.version) < 9:
-                self.cpp_info.libs = ["stdc++fs"]
+                self.cpp_info.components["core"].system_libs = ["stdc++fs"]
+        # cpprestjson-archive
+        if self.options.with_cpprestsdk:
+            self.cpp_info.components["cpprestjson-archive"].requires = ["core", "cpprestsdk::cpprestsdk"]
+        # rapidjson-archive
+        if self.options.with_rapidjson:
+            self.cpp_info.components["rapidjson-archive"].requires = ["core", "rapidjson::rapidjson"]
+        # pugixml-archive
+        if self.options.with_pugixml:
+            self.cpp_info.components["pugixml-archive"].requires = ["core", "pugixml::pugixml"]

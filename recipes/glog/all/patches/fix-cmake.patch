@@ -1,6 +1,16 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 808330e..9b0f2c4 100644
 --- a/CMakeLists.txt
 +++ b/CMakeLists.txt
-@@ -489,7 +489,7 @@ if (WIN32 AND HAVE_SNPRINTF)
+@@ -469,7 +469,6 @@ add_library (glog
+ )
+ add_library(glog::glog ALIAS glog)
+ 
+-set_target_properties (glog PROPERTIES POSITION_INDEPENDENT_CODE ON)
+ 
+ if (UNWIND_LIBRARY)
+   target_link_libraries (glog PUBLIC ${UNWIND_LIBRARY})
+@@ -489,7 +488,7 @@ if (WIN32 AND HAVE_SNPRINTF)
  endif (WIN32 AND HAVE_SNPRINTF)
  
  if (gflags_FOUND)

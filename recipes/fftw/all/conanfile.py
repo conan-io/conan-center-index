@@ -1,6 +1,8 @@
 from conans import ConanFile, CMake, tools
+from conans.errors import ConanInvalidConfiguration
 import os
 
+required_conan_version = ">=1.28.0"
 
 class FFTWConan(ConanFile):
     name = "fftw"
@@ -9,7 +11,7 @@ class FFTWConan(ConanFile):
     homepage = "http://www.fftw.org/"
     license = "GPL-2.0"
     topics = ("conan", "fftw", "dft", "dct", "dst")
-    exports_sources = ["CMakeLists.txt"]
+    exports_sources = ["CMakeLists.txt", "patches/**"]
     generators = "cmake"
     settings = "os", "arch", "compiler", "build_type"
     options = {"shared": [True, False],
@@ -18,22 +20,39 @@ class FFTWConan(ConanFile):
                "openmp": [True, False],
                "threads": [True, False],
                "combinedthreads": [True, False]}
-    default_options = {'shared': False,
-                       'fPIC': True,
-                       'precision': 'double',
-                       'openmp': False,
-                       'threads': False,
-                       'combinedthreads': False}
-    _source_subfolder = "source_subfolder"
-    _build_subfolder = "build_subfolder"
+    default_options = {"shared": False,
+                       "fPIC": True,
+                       "precision": "double",
+                       "openmp": False,
+                       "threads": False,
+                       "combinedthreads": False}
 
-    def configure(self):
-        del self.settings.compiler.libcxx
-        del self.settings.compiler.cppstd
+    _cmake = None
+
+    @property
+    def _source_subfolder(self):
+        return "source_subfolder"
+
+    @property
+    def _build_subfolder(self):
+        return "build_subfolder"
 
     def config_options(self):
-        if self.settings.os == 'Windows':
+        if self.settings.os == "Windows":
             del self.options.fPIC
+
+    def configure(self):
+        if self.options.shared:
+            del self.options.fPIC
+        del self.settings.compiler.libcxx
+        del self.settings.compiler.cppstd
+        if not self.options.threads:
+            del self.options.combinedthreads
+        if self.settings.os == "Windows" and self.options.shared:
+            if self.options.openmp:
+                raise ConanInvalidConfiguration("Shared fftw with openmp can't be built on Windows")
+            if self.options.threads and not self.options.combinedthreads:
+                raise ConanInvalidConfiguration("Shared fftw with threads and not combinedthreads can't be built on Windows")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
@@ -41,17 +60,21 @@ class FFTWConan(ConanFile):
         os.rename(extracted_dir, self._source_subfolder)
 
     def _configure_cmake(self):
-        cmake = CMake(self)
-        cmake.definitions["BUILD_TESTS"] = False
-        cmake.definitions["ENABLE_OPENMP"] = self.options.openmp
-        cmake.definitions["ENABLE_THREADS"] = self.options.threads
-        cmake.definitions["WITH_COMBINED_THREADS"] = self.options.combinedthreads
-        cmake.definitions["ENABLE_FLOAT"] = self.options.precision == "single"
-        cmake.definitions["ENABLE_LONG_DOUBLE"] = self.options.precision == "longdouble"
-        cmake.configure(build_folder=self._build_subfolder)
-        return cmake
+        if self._cmake:
+            return self._cmake
+        self._cmake = CMake(self)
+        self._cmake.definitions["BUILD_TESTS"] = False
+        self._cmake.definitions["ENABLE_OPENMP"] = self.options.openmp
+        self._cmake.definitions["ENABLE_THREADS"] = self.options.threads
+        self._cmake.definitions["WITH_COMBINED_THREADS"] = self.options.get_safe("combinedthreads", False)
+        self._cmake.definitions["ENABLE_FLOAT"] = self.options.precision == "single"
+        self._cmake.definitions["ENABLE_LONG_DOUBLE"] = self.options.precision == "longdouble"
+        self._cmake.configure(build_folder=self._build_subfolder)
+        return self._cmake
 
     def build(self):
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            tools.patch(**patch)
         cmake = self._configure_cmake()
         cmake.build()
 
@@ -63,6 +86,34 @@ class FFTWConan(ConanFile):
         tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
 
     def package_info(self):
-        self.cpp_info.libs = tools.collect_libs(self)
+        prec_suffix = self._prec_suffix[str(self.options.precision)]
+        cmake_config_name = "FFTW3" + prec_suffix
+        cmake_namespace = "FFTW3"
+        cmake_target_name = "fftw3" + prec_suffix
+        pkgconfig_name = "fftw" + prec_suffix
+        lib_name = "fftw3" + prec_suffix
+        self.cpp_info.filenames["cmake_find_package"] = cmake_config_name
+        self.cpp_info.filenames["cmake_find_package_multi"] = cmake_config_name
+        self.cpp_info.names["cmake_find_package"] = cmake_namespace
+        self.cpp_info.names["cmake_find_package_multi"] = cmake_namespace
+        self.cpp_info.names["pkg_config"] = pkgconfig_name
+        self.cpp_info.components["fftwlib"].names["cmake_find_package"] = cmake_target_name
+        self.cpp_info.components["fftwlib"].names["cmake_find_package_multi"] = cmake_target_name
+        self.cpp_info.components["fftwlib"].names["pkg_config"] = pkgconfig_name
+        if self.options.openmp:
+            self.cpp_info.components["fftwlib"].libs.append(lib_name + "_omp")
+        if self.options.threads and not self.options.combinedthreads:
+            self.cpp_info.components["fftwlib"].libs.append(lib_name + "_threads")
+        self.cpp_info.components["fftwlib"].libs.append(lib_name)
         if self.settings.os == "Linux":
-            self.cpp_info.system_libs = ["m"]
+            self.cpp_info.components["fftwlib"].system_libs.append("m")
+            if self.options.threads:
+                self.cpp_info.components["fftwlib"].system_libs.append("pthread")
+
+    @property
+    def _prec_suffix(self):
+        return {
+            "double": "",
+            "single": "f",
+            "longdouble": "l"
+        }

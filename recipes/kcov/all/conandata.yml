@@ -1,0 +1,10 @@
+sources:
+  "38":
+    url: "https://github.com/SimonKagstrom/kcov/archive/38.tar.gz"
+    sha256: "b37af60d81a9b1e3b140f9473bdcb7975af12040feb24cc666f9bb2bb0be68b4"
+patches:
+  "38":
+    - patch_file: "patches/0001-fix-SOLIB-path.patch"
+      base_path: "source_subfolder"
+    - patch_file: "patches/0002-fix-missing-libssl-dependency.patch"
+      base_path: "source_subfolder"

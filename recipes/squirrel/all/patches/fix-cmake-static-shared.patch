@@ -1,0 +1,94 @@
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -9,7 +9,7 @@ set(CMAKE_BUILD_TYPE "Release" CACHE STRING "")
+ 
+ project(squirrel C CXX)
+ 
+-include_directories(${CMAKE_SOURCE_DIR}/include)
++include_directories(${CMAKE_CURRENT_SOURCE_DIR}/include)
+ 
+ if(CMAKE_COMPILER_IS_GNUCXX)
+   set(SQ_FLAGS -fno-exceptions -fno-strict-aliasing -Wall -Wextra -pedantic -Wcast-qual)
+@@ -52,10 +52,12 @@ add_subdirectory(sqstdlib)
+ add_subdirectory(sq)
+ 
+ if(NOT WIN32)
++if(NOT DISABLE_DYNAMIC)
+   set_target_properties(squirrel sqstdlib PROPERTIES SOVERSION 0 VERSION 0.0.0)
+ endif()
++endif()
+ 
+-if(DEFINED INSTALL_INC_DIR)
++if(TRUE)
+   set(SQ_PUB_HEADERS include/sqconfig.h
+                      include/sqstdaux.h
+                      include/sqstdblob.h
+@@ -64,5 +66,5 @@ if(DEFINED INSTALL_INC_DIR)
+                      include/sqstdstring.h
+                      include/sqstdsystem.h
+                      include/squirrel.h)
+-  install(FILES ${SQ_PUB_HEADERS} DESTINATION ${INSTALL_INC_DIR})
++  install(FILES ${SQ_PUB_HEADERS} DESTINATION include)
+ endif()
+--- a/sq/CMakeLists.txt
++++ b/sq/CMakeLists.txt
+@@ -1,9 +1,11 @@
++if(NOT DISABLE_DYNAMIC)
+ add_executable(sq sq.c)
+ set_target_properties(sq PROPERTIES LINKER_LANGUAGE C)
+ target_link_libraries(sq squirrel sqstdlib)
+ install(TARGETS sq RUNTIME DESTINATION ${INSTALL_BIN_DIR})
++endif()
+ 
+-if(NOT DEFINED DISABLE_STATIC)
++if(NOT DISABLE_STATIC)
+   add_executable(sq_static sq.c)
+   set_target_properties(sq_static PROPERTIES LINKER_LANGUAGE C)
+   target_link_libraries(sq_static squirrel_static sqstdlib_static)
+@@ -18,6 +20,6 @@ if(DEFINED LONG_OUTPUT_NAMES)
+   endif()
+ endif()
+ 
+-if(CMAKE_COMPILER_IS_GNUCXX AND (NOT DEFINED DISABLE_STATIC))
++if(CMAKE_COMPILER_IS_GNUCXX AND (NOT DISABLE_STATIC))
+   set_target_properties(sq_static PROPERTIES COMPILE_FLAGS "-static -Wl,-static")
+ endif()
+--- a/sqstdlib/CMakeLists.txt
++++ b/sqstdlib/CMakeLists.txt
+@@ -6,14 +6,14 @@ set(SQSTDLIB_SRC sqstdaux.cpp
+                  sqstdstream.cpp
+                  sqstdstring.cpp
+                  sqstdsystem.cpp)
+-
++if(NOT DISABLE_DYNAMIC)
+ add_library(sqstdlib SHARED ${SQSTDLIB_SRC})
+ target_link_libraries(sqstdlib squirrel)
+ install(TARGETS sqstdlib RUNTIME DESTINATION ${INSTALL_BIN_DIR}
+                          LIBRARY DESTINATION ${INSTALL_LIB_DIR}
+                          ARCHIVE DESTINATION ${INSTALL_LIB_DIR})
+-
+-if(NOT DEFINED DISABLE_STATIC)
++endif()
++if(NOT DISABLE_STATIC)
+   add_library(sqstdlib_static STATIC ${SQSTDLIB_SRC})
+   install(TARGETS sqstdlib_static ARCHIVE DESTINATION ${INSTALL_LIB_DIR})
+ endif()
+--- a/squirrel/CMakeLists.txt
++++ b/squirrel/CMakeLists.txt
+@@ -10,13 +10,13 @@ set(SQUIRREL_SRC sqapi.cpp
+                  sqstate.cpp
+                  sqtable.cpp
+                  sqvm.cpp)
+-
++if(NOT DISABLE_DYNAMIC)
+ add_library(squirrel SHARED ${SQUIRREL_SRC})
+ install(TARGETS squirrel RUNTIME DESTINATION ${INSTALL_BIN_DIR}
+                          LIBRARY DESTINATION ${INSTALL_LIB_DIR}
+                          ARCHIVE DESTINATION ${INSTALL_LIB_DIR})
+-
+-if(NOT DEFINED DISABLE_STATIC)
++endif()
++if(NOT DISABLE_STATIC)
+   add_library(squirrel_static STATIC ${SQUIRREL_SRC})
+   install(TARGETS squirrel_static ARCHIVE DESTINATION ${INSTALL_LIB_DIR})
+ endif()

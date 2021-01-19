@@ -1,4 +1,24 @@
 versions:
+  "0.8.0":
+    folder: all
+  "0.7.18":
+    folder: all
+  "0.7.15":
+    folder: all
+  "0.7.12":
+    folder: all
+  "0.7.10":
+    folder: all
+  "0.7.9":
+    folder: all
+  "0.7.8":
+    folder: all
+  "0.7.7":
+    folder: all
+  "0.7.6":
+    folder: all
+  "0.7.5":
+    folder: all
   "0.7.0":
     folder: all
   "0.6.6":

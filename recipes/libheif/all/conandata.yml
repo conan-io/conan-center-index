@@ -1,0 +1,8 @@
+sources:
+  "1.9.1":
+    sha256: 5f65ca2bd2510eed4e13bdca123131c64067e9dd809213d7aef4dc5e37948bca
+    url: https://github.com/strukturag/libheif/releases/download/v1.9.1/libheif-1.9.1.tar.gz
+patches:
+  "1.9.1":
+    - base_path: "source_subfolder"
+      patch_file: "patches/0001-cmake.patch"

@@ -1,0 +1,15 @@
+--- CMakeLists.txt
++++ CMakeLists.txt
+@@ -215,9 +215,9 @@ else()
+   message(STATUS "nanodbc build: Enable nanodbc target - STATIC")
+ endif()
+ 
+-if(WIN32 AND NOT MINGW AND BUILD_SHARED_LIBS)
+-  message(FATAL_ERROR "Building shared libraries on Windows needs MinGW")
+-endif()
++#if(WIN32 AND NOT MINGW AND BUILD_SHARED_LIBS)
++#  message(FATAL_ERROR "Building shared libraries on Windows needs MinGW")
++#endif()
+ 
+ add_library(nanodbc nanodbc/nanodbc.cpp nanodbc/nanodbc.h)
+ 

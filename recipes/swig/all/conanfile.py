@@ -27,10 +27,10 @@ class SwigConan(ConanFile):
         if tools.os_info.is_windows and not tools.get_env("CONAN_BASH_PATH") \
                 and tools.os_info.detect_windows_subsystem() != "msys2":
             self.build_requires("msys2/20190524")
-        if tools.os_info.is_windows:
+        if self.settings.compiler == "Visual Studio":
             self.build_requires("winflexbison/2.5.22")
         else:
-            self.build_requires("bison/3.5.3")
+            self.build_requires("bison/3.7.1")
         self.build_requires("automake/1.16.2")
 
     def requirements(self):
@@ -42,18 +42,22 @@ class SwigConan(ConanFile):
 
     @contextmanager
     def _build_context(self):
+        env = {}
+        if self.settings.compiler != "Visual Studio":
+            env["YACC"] = self.deps_user_info["bison"].YACC
         if self.settings.compiler == "Visual Studio":
             with tools.vcvars(self.settings):
-                env = {
+                env.update({
                     "CC": "{} cl -nologo".format(tools.unix_path(self.deps_user_info["automake"].compile)),
                     "CXX": "{} cl -nologo".format(tools.unix_path(self.deps_user_info["automake"].compile)),
                     "AR": "{} link".format(self.deps_user_info["automake"].ar_lib),
                     "LD": "link",
-                }
+                })
                 with tools.environment_append(env):
                     yield
         else:
-            yield
+            with tools.environment_append(env):
+                yield
 
     def _configure_autotools(self):
         if self._autotools:
@@ -73,15 +77,21 @@ class SwigConan(ConanFile):
             "--host={}".format(self.settings.arch),
             "--with-swiglibdir={}".format(self._swiglibdir),
         ]
+
+        host, build = None, None
+
         if self.settings.compiler == "Visual Studio":
             self.output.warn("Visual Studio compiler cannot create ccache-swig. Disabling ccache-swig.")
             args.append("--disable-ccache")
             self._autotools.flags.append("-FS")
+            # MSVC canonical names aren't understood
+            host, build = False, False
 
         self._autotools.libs = []
         self._autotools.library_paths = []
 
-        self._autotools.configure(args=args, configure_dir=self._source_subfolder)
+        self._autotools.configure(args=args, configure_dir=self._source_subfolder,
+                                  host=host, build=build)
         return self._autotools
 
     def _patch_sources(self):
@@ -102,14 +112,6 @@ class SwigConan(ConanFile):
         with self._build_context():
             autotools = self._configure_autotools()
             autotools.install()
-
-        if self.settings.compiler != "Visual Studio":
-            with tools.chdir(os.path.join(self.package_folder, "bin")):
-                strip = tools.get_env("STRIP") or tools.which("strip")
-                ext = ".exe" if tools.os_info.is_windows else ""
-                if strip:
-                    self.run("{} swig{}".format(strip, ext), win_bash=tools.os_info.is_windows)
-                    self.run("{} ccache-swig{}".format(strip, ext), win_bash=tools.os_info.is_windows)
 
     @property
     def _swiglibdir(self):

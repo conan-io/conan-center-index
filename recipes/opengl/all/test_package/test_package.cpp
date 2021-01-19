@@ -10,7 +10,7 @@
 #include <Windows.h>
 #endif
 
-#if defined(__linux__)
+#if defined(__linux__) or defined(__FreeBSD__)
 
 bool init_context() { return true; }
 

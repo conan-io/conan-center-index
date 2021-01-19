@@ -1,11 +1,11 @@
-cmake_minimum_required(VERSION 3.1.2)
-project(PackageTest CXX)
-
-set(CMAKE_CXX_STANDARD 11)
-set(CMAKE_CXX_EXTENSIONS OFF)
+cmake_minimum_required(VERSION 3.1)
+project(test_package CXX)
 
 include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
-conan_basic_setup(TARGETS)
+conan_basic_setup()
 
-add_executable(example example.cpp)
-target_link_libraries(example CONAN_PKG::enum-flags)
+find_package(enumflags REQUIRED CONFIG)
+
+add_executable(${PROJECT_NAME} test_package.cpp)
+target_link_libraries(${PROJECT_NAME} EnumFlags::EnumFlags)
+set_property(TARGET ${PROJECT_NAME} PROPERTY CXX_STANDARD 11)
