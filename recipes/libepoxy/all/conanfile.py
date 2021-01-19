@@ -25,13 +25,19 @@ class EpoxyConan(ConanFile):
         "shared": False,
         "fPIC": True,
         "glx": True,
-        "egl": False,
+        "egl": True,
         "x11": True
     }
 
     _meson = None
-    _source_subfolder = "source_subfolder"
-    _build_subfolder = "build_subfolder"
+    
+    @property
+    def _source_subfolder(self):
+        return "source_subfolder"
+    
+    @property
+    def _build_subfolder(self):
+        return "build_subfolder"
 
     def configure(self):
         del self.settings.compiler.libcxx
@@ -43,6 +49,7 @@ class EpoxyConan(ConanFile):
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
+            self.options.shared = True
         if self.settings.os != "Linux":
             del self.options.glx
             del self.options.egl
@@ -56,6 +63,8 @@ class EpoxyConan(ConanFile):
         if self.settings.os == "Linux":
             if self.options.x11:
                 self.requires("xorg/system")
+            if self.options.egl:
+                self.requires("egl/system")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
@@ -70,9 +79,9 @@ class EpoxyConan(ConanFile):
         defs["docs"] = "false"
         defs["tests"] = "false"
         for opt in ["glx", "egl"]:
-            defs[opt] = "yes" if self.settings.os == "Linux" and getattr(self.options, opt) else "no"
+            defs[opt] = "yes" if self.options.get_safe(opt, False) else "no"
         for opt in ["x11"]:
-            defs[opt] = "true" if self.settings.os == "Linux" and getattr(self.options, opt) else "false"
+            defs[opt] = "true" if self.options.get_safe(opt, False) else "false"
         args=[]
         args.append("--wrap-mode=nofallback")
         self._meson.configure(defs=defs, build_folder=self._build_subfolder, source_folder=self._source_subfolder, pkg_config_paths=[self.install_folder], args=args)

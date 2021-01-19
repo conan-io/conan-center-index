@@ -54,6 +54,9 @@ class LibFlannConan(ConanFile):
         extracted_dir = self.name + "-" + self.version
         os.rename(extracted_dir, self._source_subfolder)
 
+    def _patch_sources(self):
+        for patch in self.conan_data.get("patches", {}).get(self.version, {}):
+            tools.patch(**patch)
         # Workaround issue with empty sources for a CMake target
         flann_cpp_dir = os.path.join(self._source_subfolder, "src", "cpp")
         tools.save(os.path.join(flann_cpp_dir, "empty.cpp"), "\n")
@@ -68,10 +71,6 @@ class LibFlannConan(ConanFile):
             'add_library(flann SHARED "")',
             'add_library(flann SHARED empty.cpp)'
         )
-
-    def _patch_sources(self):
-        for patch in self.conan_data.get("patches", {}).get(self.version, {}):
-            tools.patch(**patch)
         # remove embeded lz4
         tools.rmdir(os.path.join(self._source_subfolder, "src", "cpp", "flann", "ext"))
 

@@ -1,8 +1,8 @@
 diff --git a/CMakeLists.txt b/CMakeLists.txt
-index fc45f80..d6b69f3 100644
+index fc45f80..e3b0dbf 100644
 --- a/CMakeLists.txt
 +++ b/CMakeLists.txt
-@@ -152,8 +152,17 @@ foreach(lib brotlicommon brotlidec brotlienc)
+@@ -152,15 +152,24 @@ foreach(lib brotlicommon brotlidec brotlienc)
    target_compile_definitions(${lib} PUBLIC "BROTLI_SHARED_COMPILATION" )
    string(TOUPPER "${lib}" LIB)
    set_target_properties (${lib} PROPERTIES DEFINE_SYMBOL "${LIB}_SHARED_COMPILATION" )
@@ -20,6 +20,14 @@ index fc45f80..d6b69f3 100644
  foreach(lib brotlicommon brotlidec brotlienc brotlicommon-static brotlidec-static brotlienc-static)
    target_link_libraries(${lib} ${LIBM_LIBRARY})
    set_property(TARGET ${lib} APPEND PROPERTY INCLUDE_DIRECTORIES ${BROTLI_INCLUDE_DIRS})
+   set_target_properties(${lib} PROPERTIES
+     VERSION "${BROTLI_ABI_COMPATIBILITY}.${BROTLI_ABI_AGE}.${BROTLI_ABI_REVISION}"
+     SOVERSION "${BROTLI_ABI_COMPATIBILITY}"
+-    POSITION_INDEPENDENT_CODE TRUE)
++  )
+   set_property(TARGET ${lib} APPEND PROPERTY INTERFACE_INCLUDE_DIRECTORIES "${BROTLI_INCLUDE_DIRS}")
+ endforeach()
+ 
 @@ -184,27 +193,33 @@ endif()
  # Build the brotli executable
  add_executable(brotli ${BROTLI_CLI_C})

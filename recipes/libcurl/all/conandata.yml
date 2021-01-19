@@ -1,4 +1,10 @@
 sources:
+  "7.74.0":
+    sha256: e56b3921eeb7a2951959c02db0912b5fcd5fdba5aca071da819e1accf338bbd7
+    url: https://curl.haxx.se/download/curl-7.74.0.tar.gz
+  "7.73.0":
+    sha256: ba98332752257b47b9dea6d8c0ad25ec1745c20424f1dd3ff2c99ab59e97cf91
+    url: https://curl.haxx.se/download/curl-7.73.0.tar.gz
   "7.72.0":
     sha256: d4d5899a3868fbb6ae1856c3e55a32ce35913de3956d1973caccd37bd0174fa2
     url: https://curl.haxx.se/download/curl-7.72.0.tar.gz
@@ -27,6 +33,9 @@ sources:
     sha256: 432d3f466644b9416bc5b649d344116a753aeaa520c8beaf024a90cba9d3d35d
     url: https://curl.haxx.se/download/curl-7.64.1.tar.gz
 patches:
+  "7.72.0":
+    - patch_file: "patches/002-add-missing-file-FindZstd.patch"
+      base_path: "source_subfolder"
   "7.67.0":
     - patch_file: "patches/001-Update-FindLibSSH2.cmake-add-libssh2-as-possible-nam.patch"
       base_path: "source_subfolder"

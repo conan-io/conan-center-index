@@ -1,5 +1,6 @@
 from conans import ConanFile, tools
 from conans.errors import ConanInvalidConfiguration
+import glob
 import os
 
 required_conan_version = ">=1.28.0"
@@ -60,12 +61,8 @@ class BitserializerConan(ConanFile):
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
-        # Find and rename folder in the extracted sources
-        # This workaround used in connection that zip-archive from BitBucket contains folder with some hash in name
-        for dirname in os.listdir(self.source_folder):
-            if "-bitserializer-" in dirname:
-                os.rename(dirname, self._source_subfolder)
-                break
+        extracted_dir = glob.glob("*-bitserializer-*")[0]
+        os.rename(extracted_dir, self._source_subfolder)
 
     def package(self):
         self.copy(pattern="license.txt", dst="licenses", src=self._source_subfolder)
@@ -89,5 +86,5 @@ class BitserializerConan(ConanFile):
         if self.options.with_rapidjson:
             self.cpp_info.components["rapidjson-archive"].requires = ["core", "rapidjson::rapidjson"]
         # pugixml-archive
-        if self.options.with_rapidjson:
+        if self.options.with_pugixml:
             self.cpp_info.components["pugixml-archive"].requires = ["core", "pugixml::pugixml"]

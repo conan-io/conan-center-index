@@ -55,7 +55,9 @@ class IMGUIConan(ConanFile):
 
     def package(self):
         self.copy(pattern="LICENSE.txt", dst="licenses", src=self._source_subfolder)
-        self.copy(pattern="examples/imgui_impl_*", dst="res/bindings", src=self._source_subfolder, keep_path=False)
+        self.copy(pattern="imgui_impl_*",
+                  dst=os.path.join("res", "bindings"),
+                  src=os.path.join(self._source_subfolder, "examples"))
         cmake = self._configure_cmake()
         cmake.install()
 
@@ -63,6 +65,7 @@ class IMGUIConan(ConanFile):
         self.cpp_info.libs = tools.collect_libs(self)
         if self.settings.os == "Linux":
             self.cpp_info.system_libs.append("m")
+        self.cpp_info.srcdirs = [os.path.join("res", "bindings")]
 
         bin_path = os.path.join(self.package_folder, "bin")
         self.output.info("Appending PATH env var with : {}".format(bin_path))

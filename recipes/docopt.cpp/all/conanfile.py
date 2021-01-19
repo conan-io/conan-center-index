@@ -37,7 +37,7 @@ class DocoptCppConan(ConanFile):
 
     def requirements(self):
         if self.options.boost_regex:
-            self.requires("boost/1.73.0")
+            self.requires("boost/1.74.0")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
@@ -78,3 +78,5 @@ class DocoptCppConan(ConanFile):
             self.cpp_info.components["docopt"].system_libs = ["m"]
         if self.settings.compiler == "Visual Studio" and self.options.shared:
             self.cpp_info.components["docopt"].defines = ["DOCOPT_DLL"]
+        if self.options.boost_regex:
+            self.cpp_info.components["docopt"].requires.append("boost::boost")

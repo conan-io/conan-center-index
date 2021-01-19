@@ -5,3 +5,6 @@ sources:
   "1.1.0":
     url: "https://github.com/oatpp/oatpp/archive/1.1.0.tar.gz"
     sha256: "fcc59615e1282d51826093f95b6c0ded3240ea5c1f322bc253bc36da1f0d3c1c"
+  "1.2.0":
+    url: "https://github.com/oatpp/oatpp/archive/1.2.0.tar.gz"
+    sha256: "7f55669827ece429b6d85f4403b76da717d3fdf0e92721e9a0229cf8168e8e37"

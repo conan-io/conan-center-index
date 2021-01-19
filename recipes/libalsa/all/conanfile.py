@@ -30,20 +30,23 @@ class LibalsaConan(ConanFile):
         tools.get(**self.conan_data["sources"][self.version])
         os.rename("alsa-lib-{}".format(self.version), self._source_subfolder)
 
+    def build_requirements(self):
+        self.build_requires("libtool/2.4.6")
+
     def _configure_autotools(self):
         if not self._autotools:
-            self._autotools = AutoToolsBuildEnvironment(self)
-            with tools.environment_append(self._autotools.vars):
-                self.run("touch ltconfig")
-                self.run("libtoolize --force --copy --automake")
-                self.run("aclocal $ACLOCAL_FLAGS")
-                self.run("autoheader")
-                self.run("automake --foreign --copy --add-missing")
-                self.run("touch depcomp")
-                self.run("autoconf")
+            self.run("touch ltconfig", run_environment=True)
+            self.run("libtoolize --force --copy --automake", run_environment=True)
+            self.run("aclocal $ACLOCAL_FLAGS", run_environment=True)
+            self.run("autoheader", run_environment=True)
+            self.run("automake --foreign --copy --add-missing", run_environment=True)
+            self.run("touch depcomp", run_environment=True)
+            self.run("autoconf", run_environment=True)
 
+            self._autotools = AutoToolsBuildEnvironment(self)
             args = ["--enable-static=yes", "--enable-shared=no"] \
                     if not self.options.shared else ["--enable-static=no", "--enable-shared=yes"]
+            args.append("--datarootdir=%s" % os.path.join(self.package_folder, "res"))
             if self.options.disable_python:
                 args.append("--disable-python")
             self._autotools.configure(args=args)
@@ -59,7 +62,6 @@ class LibalsaConan(ConanFile):
         with tools.chdir(self._source_subfolder):
             autotools = self._configure_autotools()
             autotools.install()
-        tools.rmdir(os.path.join(self.package_folder, "share"))
         tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))        
         for l in ["asound", "atopology"]:
             la_file = os.path.join(self.package_folder, "lib", "lib%s.la" % l)
@@ -70,3 +72,6 @@ class LibalsaConan(ConanFile):
         self.cpp_info.libs = ["asound"]
         self.cpp_info.system_libs = ["dl", "m", "rt", "pthread"]
         self.cpp_info.names['pkg_config'] = 'alsa'
+        self.cpp_info.names["cmake_find_package"] = "ALSA"
+        self.cpp_info.names["cmake_find_package_multi"] = "ALSA"
+        self.env_info.ALSA_CONFIG_DIR = os.path.join(self.package_folder, "res", "alsa")

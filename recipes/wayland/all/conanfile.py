@@ -26,8 +26,13 @@ class WaylandConan(ConanFile):
         "enable_dtd_validation": True,
     }
 
-    _source_subfolder = "source_subfolder"
-    _build_subfolder = "build_subfolder"
+    @property
+    def _source_subfolder(self):
+        return "source_subfolder"
+    
+    @property
+    def _build_subfolder(self):
+        return "build_subfolder"
     _meson = None
 
     def requirements(self):
@@ -35,7 +40,7 @@ class WaylandConan(ConanFile):
             self.requires("libffi/3.3")
         if self.options.enable_dtd_validation:
             self.requires("libxml2/2.9.10")
-        self.requires("expat/2.2.9")
+        self.requires("expat/2.2.10")
 
     def build_requirements(self):
         self.build_requires('meson/0.54.2')
@@ -59,7 +64,8 @@ class WaylandConan(ConanFile):
                 'libraries': 'true' if self.options.enable_libraries else 'false',
                 'dtd_validation': 'true' if self.options.enable_dtd_validation else 'false',
                 'documentation': 'false',
-            })
+            },
+            args=['--datadir=%s' % os.path.join(self.package_folder, "res")])
         return self._meson
 
     def build(self):
@@ -71,8 +77,31 @@ class WaylandConan(ConanFile):
         meson = self._configure_meson()
         meson.install()
         tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
-        tools.rmdir(os.path.join(self.package_folder, "share"))
 
     def package_info(self):
-        self.cpp_info.libs = tools.collect_libs(self)
+        self.cpp_info.components["wayland-scanner"].names["pkg_config"] = "wayland-scanner"
+        self.cpp_info.components["wayland-scanner"].requires = ["expat::expat"]
+        if self.options.enable_dtd_validation:
+            self.cpp_info.components["wayland-scanner"].requires.append("libxml2::libxml2")
 
+        if self.options.enable_libraries:
+            self.cpp_info.components["wayland-server"].libs = ["wayland-server"]
+            self.cpp_info.components["wayland-server"].names["pkg_config"] = "wayland-server"
+            self.cpp_info.components["wayland-server"].requires = ["libffi::libffi"]
+            self.cpp_info.components["wayland-server"].system_libs = ["pthread", "m"]
+            
+            self.cpp_info.components["wayland-client"].libs = ["wayland-client"]
+            self.cpp_info.components["wayland-client"].names["pkg_config"] = "wayland-client"
+            self.cpp_info.components["wayland-client"].requires = ["libffi::libffi"]
+            self.cpp_info.components["wayland-client"].system_libs = ["pthread", "m"]
+
+            self.cpp_info.components["wayland-cursor"].libs = ["wayland-cursor"]
+            self.cpp_info.components["wayland-cursor"].names["pkg_config"] = "wayland-cursor"
+            self.cpp_info.components["wayland-cursor"].requires = ["wayland-client"]
+
+            self.cpp_info.components["wayland-egl"].libs = ["wayland-egl"]
+            self.cpp_info.components["wayland-egl"].names["pkg_config"] = "wayland-egl"
+            self.cpp_info.components["wayland-egl"].requires = ["wayland-client"]
+
+            self.cpp_info.components["wayland-egl-backend"].names["pkg_config"] = "wayland-egl-backend"
+            self.cpp_info.components["wayland-egl-backend"].version = "3"

@@ -20,15 +20,21 @@ endif()
 
 include(GNUInstallDirs)
 
-add_executable(pbmtojbg source_subfolder/pbmtools/pbmtojbg.c)
-target_link_libraries(pbmtojbg ${CMAKE_PROJECT_NAME})
-target_include_directories(pbmtojbg PRIVATE source_subfolder/libjbig)
+set(OTHER_TARGETS)
 
-add_executable(jbgtopbm source_subfolder/pbmtools/jbgtopbm.c)
-target_link_libraries(jbgtopbm ${CMAKE_PROJECT_NAME})
-target_include_directories(jbgtopbm PRIVATE source_subfolder/libjbig)
+if (BUILD_EXECUTABLES)
+    add_executable(pbmtojbg source_subfolder/pbmtools/pbmtojbg.c)
+    target_link_libraries(pbmtojbg ${CMAKE_PROJECT_NAME})
+    target_include_directories(pbmtojbg PRIVATE source_subfolder/libjbig)
 
-install(TARGETS ${CMAKE_PROJECT_NAME} jbgtopbm pbmtojbg
+    add_executable(jbgtopbm source_subfolder/pbmtools/jbgtopbm.c)
+    target_link_libraries(jbgtopbm ${CMAKE_PROJECT_NAME})
+    target_include_directories(jbgtopbm PRIVATE source_subfolder/libjbig)
+
+    set(OTHER_TARGETS jbgtopbm pbmtojbg)
+endif()
+
+install(TARGETS ${CMAKE_PROJECT_NAME} ${OTHER_TARGETS}
         RUNTIME DESTINATION bin
         LIBRARY DESTINATION lib
         ARCHIVE DESTINATION lib)

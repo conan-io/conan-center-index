@@ -7,7 +7,7 @@ from conans.errors import ConanInvalidConfiguration
 class EnttConan(ConanFile):
     name = "entt"
     description = "Gaming meets modern C++ - a fast and reliable entity-component system (ECS) and much more"
-    topics = ("conan," "entt", "gaming", "entity", "ecs")
+    topics = ("conan", "entt", "gaming", "entity", "ecs")
     homepage = "https://github.com/skypjack/entt"
     url = "https://github.com/conan-io/conan-center-index"
     license = "MIT"
@@ -38,8 +38,14 @@ class EnttConan(ConanFile):
                 "%s requires a compiler that supports at least C++%s" % (self.name, minimal_cpp_standard))
             return
 
-        version = tools.Version(self.settings.compiler.version)
-        if version < minimal_version[compiler]:
+        # Compare versions asuming minor satisfies if not explicitly set
+        def lazy_lt_semver(v1, v2):
+            lv1 = [int(v) for v in v1.split(".")]
+            lv2 = [int(v) for v in v2.split(".")]
+            min_length = min(len(lv1), len(lv2))
+            return lv1[:min_length] < lv2[:min_length]
+
+        if lazy_lt_semver(str(self.settings.compiler.version), minimal_version[compiler]):
             raise ConanInvalidConfiguration(
                 "%s requires a compiler that supports at least C++%s" % (self.name, minimal_cpp_standard))
 

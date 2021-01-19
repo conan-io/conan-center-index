@@ -2,7 +2,7 @@ from conans import ConanFile, CMake, tools
 import os
 
 
-class QuickfixConan(ConanFile):
+class HdrhistogramcConan(ConanFile):
     name = "hdrhistogram-c"
     license = ("BSD-2-Clause", "CC0-1.0")
     url = "https://github.com/conan-io/conan-center-index"
@@ -22,10 +22,6 @@ class QuickfixConan(ConanFile):
     @property
     def _source_subfolder(self):
         return "source_subfolder"
-
-    @property
-    def _build_subfolder(self):
-        return "build_subfolder"
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -53,7 +49,7 @@ class QuickfixConan(ConanFile):
             self._cmake.definitions["HDR_HISTOGRAM_BUILD_STATIC"] = not self.options.shared
             self._cmake.definitions["HDR_HISTOGRAM_INSTALL_STATIC"] = not self.options.shared
             self._cmake.definitions["CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS"] = self.options.shared
-            self._cmake.configure(build_dir=self._build_subfolder)
+            self._cmake.configure()
         return self._cmake
 
     def build(self):

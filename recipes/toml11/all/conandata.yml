@@ -8,3 +8,6 @@ sources:
   "3.5.0":
     url: https://github.com/ToruNiina/toml11/archive/v3.5.0.tar.gz
     sha256: fc613874c6e80dc740134a7353cf23c7f834b59cd601af84ab535ee16a53b1c3
+  "3.6.0":
+    url: https://github.com/ToruNiina/toml11/archive/v3.6.0.tar.gz
+    sha256: 39e8d651db346ae8c7e3b39d6338a37232b9af3bba36ade45b241bf105c2226c

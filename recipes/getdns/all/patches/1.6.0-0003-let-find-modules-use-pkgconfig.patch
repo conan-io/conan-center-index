@@ -1,0 +1,641 @@
+--- CMakeLists.txt
++++ CMakeLists.txt
+@@ -659,9 +659,9 @@
+   target_include_directories(getdns_objects PRIVATE src/ssl_dane)
+   set(USE_DANESSL 1)
+ endif ()
+-if (Libidn_FOUND)
+-  target_include_directories(getdns_objects PRIVATE ${LIBIDN_INCLUDE_DIR})
+-endif ()
++#if (Libidn_FOUND)
++#  target_include_directories(getdns_objects PRIVATE ${LIBIDN_INCLUDE_DIR})
++#endif ()
+ if (Libidn2_FOUND)
+   target_include_directories(getdns_objects PRIVATE ${LIBIDN2_INCLUDE_DIR})
+ endif ()
+@@ -695,9 +695,9 @@
+   if (Libunbound_FOUND)
+     target_link_libraries(getdns PUBLIC Libunbound::Libunbound)
+   endif ()
+-  if (Libidn_FOUND)
+-    target_link_libraries(getdns PUBLIC Libidn::Libidn)
+-  endif ()
++# if (Libidn_FOUND)
++#   target_link_libraries(getdns PUBLIC Libidn::Libidn)
++# endif ()
+   if (Libidn2_FOUND)
+     target_link_libraries(getdns PUBLIC Libidn2::Libidn2)
+   endif ()
+--- cmake/modules/FindGnuTLS.cmake
++++ cmake/modules/FindGnuTLS.cmake
+@@ -30,51 +30,65 @@
+ 
+ #]=======================================================================]
+ 
+-find_path(GNUTLS_INCLUDE_DIR gnutls/gnutls.h
+-  HINTS
+-  "${GNUTLS_DIR}"
+-  "${GNUTLS_DIR}/include"
+-)
+-
+-find_library(GNUTLS_LIBRARY NAMES gnutls libgnutls
+-  HINTS
+-  "${GNUTLS_DIR}"
+-  "${GNUTLS_DIR}/lib"
+-)
+-
+-find_library(GNUTLS_DANE_LIBRARY NAMES gnutls-dane libgnutls-dane
+-  HINTS
+-  "${GNUTLS_DIR}"
+-  "${GNUTLS_DIR}/lib"
+-)
+-
+-set(GNUTLS_LIBRARIES "")
+-
+-if (GNUTLS_INCLUDE_DIR AND GNUTLS_LIBRARY AND GNUTLS_DANE_LIBRARY)
+-  if (NOT TARGET GnuTLS::GnuTLS)
+-    add_library(GnuTLS::GnuTLS UNKNOWN IMPORTED)
+-    set_target_properties(GnuTLS::GnuTLS PROPERTIES
+-      INTERFACE_INCLUDE_DIRECTORIES "${GNUTLS_INCLUDE_DIR}"
+-      IMPORTED_LINK_INTERFACE_LANGUAGES "C"
+-      IMPORTED_LOCATION "${GNUTLS_LIBRARY}"
+-      )
+-  endif ()
+-  if (NOT TARGET GnuTLS::Dane)
+-    add_library(GnuTLS::Dane UNKNOWN IMPORTED)
+-    set_target_properties(GnuTLS::Dane PROPERTIES
+-      INTERFACE_INCLUDE_DIRECTORIES "${GNUTLS_INCLUDE_DIR}"
+-      IMPORTED_LINK_INTERFACE_LANGUAGES "C"
+-      IMPORTED_LOCATION "${GNUTLS_DANE_LIBRARY}"
+-      )
+-  endif ()
+-
+-  if (NOT GNUTLS_VERSION AND GNUTLS_INCLUDE_DIR)
+-    file(STRINGS "${GNUTLS_INCLUDE_DIR}/gnutls/gnutls.h" GNUTLS_VER_H REGEX "^#define GNUTLS_VERSION_(MAJOR|MINOR|PATCH) ")
+-    string(REGEX REPLACE "^.*_MAJOR ([0-9]+).*_MINOR ([0-9]+).*_PATCH ([0-9]+).*$" "\\1.\\2.\\3c" GNUTLS_VERSION "${GNUTLS_VER_H}")
+-  endif ()
++include(FindPkgConfig)
++if(PKG_CONFIG_FOUND)
++    pkg_check_modules(PkgGnuTLS IMPORTED_TARGET GLOBAL QUIET gnutls)
++    pkg_check_modules(PkgGnuTLSDane IMPORTED_TARGET GLOBAL QUIET gnutls-dane)
+ endif()
+ 
+-list(APPEND GNUTLS_LIBRARIES "${GNUTLS_LIBRARY}" "${GNUTLS_DANE_LIBRARY}")
++if(PkgGnuTLS_FOUND AND PkgGnuTLSDane_FOUND)
++  set(GNUTLS_INCLUDE_DIR ${PkgGnuTLS_INCLUDE_DIRS} $PkgGnuTLSDane_INCLUDE_DIRS})
++  set(NETTLE_LIBRARIES ${PkgGnuTLS_LIBRARIES} ${PkgGnuTLSDane_LIBRARIES})
++  set(NETTLE_VERSION ${PkgGnuTLS_VERSION})
++  add_library(GnuTLS::GnuTLS ALIAS PkgConfig::PkgGnuTLS)
++  add_library(GnuTLS::Dane ALIAS PkgConfig::PkgGnuTLSDane)
++else()
++  find_path(GNUTLS_INCLUDE_DIR gnutls/gnutls.h
++    HINTS
++    "${GNUTLS_DIR}"
++    "${GNUTLS_DIR}/include"
++  )
++  
++  find_library(GNUTLS_LIBRARY NAMES gnutls libgnutls
++    HINTS
++    "${GNUTLS_DIR}"
++    "${GNUTLS_DIR}/lib"
++  )
++  
++  find_library(GNUTLS_DANE_LIBRARY NAMES gnutls-dane libgnutls-dane
++    HINTS
++    "${GNUTLS_DIR}"
++    "${GNUTLS_DIR}/lib"
++  )
++  
++  set(GNUTLS_LIBRARIES "")
++  
++  if (GNUTLS_INCLUDE_DIR AND GNUTLS_LIBRARY AND GNUTLS_DANE_LIBRARY)
++    if (NOT TARGET GnuTLS::GnuTLS)
++      add_library(GnuTLS::GnuTLS UNKNOWN IMPORTED)
++      set_target_properties(GnuTLS::GnuTLS PROPERTIES
++        INTERFACE_INCLUDE_DIRECTORIES "${GNUTLS_INCLUDE_DIR}"
++        IMPORTED_LINK_INTERFACE_LANGUAGES "C"
++        IMPORTED_LOCATION "${GNUTLS_LIBRARY}"
++        )
++    endif ()
++    if (NOT TARGET GnuTLS::Dane)
++      add_library(GnuTLS::Dane UNKNOWN IMPORTED)
++      set_target_properties(GnuTLS::Dane PROPERTIES
++        INTERFACE_INCLUDE_DIRECTORIES "${GNUTLS_INCLUDE_DIR}"
++        IMPORTED_LINK_INTERFACE_LANGUAGES "C"
++        IMPORTED_LOCATION "${GNUTLS_DANE_LIBRARY}"
++        )
++    endif ()
++  
++    if (NOT GNUTLS_VERSION AND GNUTLS_INCLUDE_DIR)
++      file(STRINGS "${GNUTLS_INCLUDE_DIR}/gnutls/gnutls.h" GNUTLS_VER_H REGEX "^#define GNUTLS_VERSION_(MAJOR|MINOR|PATCH) ")
++      string(REGEX REPLACE "^.*_MAJOR ([0-9]+).*_MINOR ([0-9]+).*_PATCH ([0-9]+).*$" "\\1.\\2.\\3c" GNUTLS_VERSION "${GNUTLS_VER_H}")
++    endif ()
++  endif()
++  
++  list(APPEND GNUTLS_LIBRARIES "${GNUTLS_LIBRARY}" "${GNUTLS_DANE_LIBRARY}")
++endif()
+ 
+ include(FindPackageHandleStandardArgs)
+ find_package_handle_standard_args(GnuTLS
+--- cmake/modules/FindLibevent2.cmake
++++ cmake/modules/FindLibevent2.cmake
+@@ -28,37 +28,49 @@
+ 
+ #]=======================================================================]
+ 
+-find_path(LIBEVENT2_INCLUDE_DIR event2/event.h
+-  HINTS
+-  "${LIBEVENT2_DIR}"
+-  "${LIBEVENT2_DIR}/include"
+-)
+-
+-find_library(LIBEVENT2_LIBRARY NAMES event_core libevent_core
+-  HINTS
+-  "${LIBEVENT2_DIR}"
+-  "${LIBEVENT2_DIR}/lib"
+-)
+-
+-set(LIBEVENT2_LIBRARIES "")
+-
+-if (LIBEVENT2_INCLUDE_DIR AND LIBEVENT2_LIBRARY)
+-  if (NOT TARGET Libevent2::Libevent_core)
+-    add_library(Libevent2::Libevent_core UNKNOWN IMPORTED)
+-    set_target_properties(Libevent2::Libevent_core PROPERTIES
+-      INTERFACE_INCLUDE_DIRECTORIES "${LIBEVENT2_INCLUDE_DIR}"
+-      IMPORTED_LINK_INTERFACE_LANGUAGES "C"
+-      IMPORTED_LOCATION "${LIBEVENT2_LIBRARY}"
+-      )
+-  endif ()
+-
+-  if (NOT LIBEVENT2_VERSION AND LIBEVENT2_INCLUDE_DIR AND EXISTS "${LIBEVENT2_INCLUDE_DIR}/event2/event.h")
+-    file(STRINGS "${LIBEVENT2_INCLUDE_DIR}/event2/event-config.h" LIBEVENT2_H REGEX "^#define _?EVENT_+VERSION ")
+-    string(REGEX REPLACE "^.*EVENT_+VERSION \"([^\"]+)\".*$" "\\1" LIBEVENT2_VERSION "${LIBEVENT2_H}")
+-  endif ()
++include(FindPkgConfig)
++if(PKG_CONFIG_FOUND)
++    pkg_check_modules(PkgLibevent IMPORTED_TARGET GLOBAL QUIET libevent>=2)
+ endif()
+ 
+-list(APPEND LIBEVENT2_LIBRARIES "${LIBEVENT2_LIBRARY}")
++if(PkgLibevent_FOUND)
++  set(LIBEVENT2_INCLUDE_DIR ${PkgLibevent_INCLUDE_DIRS})
++  set(LIBEVENT2_LIBRARIES ${PkgLibevent_LIBRARIES})
++  set(LIBEVENT2_VERSION ${PkgLibevent_VERSION})
++  add_library(Libevent2::Libevent_core ALIAS PkgConfig::PkgLibevent)
++else()
++  find_path(LIBEVENT2_INCLUDE_DIR event2/event.h
++    HINTS
++    "${LIBEVENT2_DIR}"
++    "${LIBEVENT2_DIR}/include"
++  )
++  
++  find_library(LIBEVENT2_LIBRARY NAMES event_core libevent_core
++    HINTS
++    "${LIBEVENT2_DIR}"
++    "${LIBEVENT2_DIR}/lib"
++  )
++  
++  set(LIBEVENT2_LIBRARIES "")
++  
++  if (LIBEVENT2_INCLUDE_DIR AND LIBEVENT2_LIBRARY)
++    if (NOT TARGET Libevent2::Libevent_core)
++      add_library(Libevent2::Libevent_core UNKNOWN IMPORTED)
++      set_target_properties(Libevent2::Libevent_core PROPERTIES
++        INTERFACE_INCLUDE_DIRECTORIES "${LIBEVENT2_INCLUDE_DIR}"
++        IMPORTED_LINK_INTERFACE_LANGUAGES "C"
++        IMPORTED_LOCATION "${LIBEVENT2_LIBRARY}"
++        )
++    endif ()
++  
++    if (NOT LIBEVENT2_VERSION AND LIBEVENT2_INCLUDE_DIR AND EXISTS "${LIBEVENT2_INCLUDE_DIR}/event2/event.h")
++      file(STRINGS "${LIBEVENT2_INCLUDE_DIR}/event2/event-config.h" LIBEVENT2_H REGEX "^#define _?EVENT_+VERSION ")
++      string(REGEX REPLACE "^.*EVENT_+VERSION \"([^\"]+)\".*$" "\\1" LIBEVENT2_VERSION "${LIBEVENT2_H}")
++    endif ()
++  endif()
++  
++  list(APPEND LIBEVENT2_LIBRARIES "${LIBEVENT2_LIBRARY}")
++endif()
+ 
+ include(FindPackageHandleStandardArgs)
+ find_package_handle_standard_args(Libevent2
+--- cmake/modules/FindLibidn2.cmake
++++ cmake/modules/FindLibidn2.cmake
+@@ -28,37 +28,49 @@
+ 
+ #]=======================================================================]
+ 
+-find_path(LIBIDN2_INCLUDE_DIR idn2.h
+-  HINTS
+-  "${LIBIDN2_DIR}"
+-  "${LIBIDN2_DIR}/include"
+-)
+-
+-find_library(LIBIDN2_LIBRARY NAMES idn2 libidn2
+-  HINTS
+-  "${LIBIDN2_DIR}"
+-  "${LIBIDN2_DIR}/lib"
+-)
+-
+-set(LIBIDN2_LIBRARIES "")
+-
+-if (LIBIDN2_INCLUDE_DIR AND LIBIDN2_LIBRARY)
+-  if (NOT TARGET Libidn2::Libidn2)
+-    add_library(Libidn2::Libidn2 UNKNOWN IMPORTED)
+-    set_target_properties(Libidn2::Libidn2 PROPERTIES
+-      INTERFACE_INCLUDE_DIRECTORIES "${LIBIDN2_INCLUDE_DIR}"
+-      IMPORTED_LINK_INTERFACE_LANGUAGES "C"
+-      IMPORTED_LOCATION "${LIBIDN2_LIBRARY}"
++include(FindPkgConfig)
++if(PKG_CONFIG_FOUND)
++    pkg_check_modules(PkgLibIdn2 IMPORTED_TARGET GLOBAL libidn2)
++endif()
++
++if(PkgLibIdn2_FOUND)
++  set(LIBIDN2_INCLUDE_DIR ${PkgLibIdn2_INCLUDE_DIRS})
++  set(LIBIDN2_LIBRARIES ${PkgLibIdn2_LIBRARIES})
++  set(LIBIDN2_VERSION ${PkgLibIdn2_VERSION})
++  add_library(Libidn2::Libidn2 ALIAS PkgConfig::PkgLibIdn2)
++else()
++  find_path(LIBIDN2_INCLUDE_DIR idn2.h
++    HINTS
++      "${LIBIDN2_DIR}"
++      "${LIBIDN2_DIR}/include"
++  )
++
++  find_library(LIBIDN2_LIBRARY NAMES idn2 libidn2
++    HINTS
++      "${LIBIDN2_DIR}"
++      "${LIBIDN2_DIR}/lib"
++  )
++
++  set(LIBIDN2_LIBRARIES "")
++
++  if (LIBIDN2_INCLUDE_DIR AND LIBIDN2_LIBRARY)
++    if (NOT TARGET Libidn2::Libidn2)
++      add_library(Libidn2::Libidn2 UNKNOWN IMPORTED)
++      set_target_properties(Libidn2::Libidn2 PROPERTIES
++        INTERFACE_INCLUDE_DIRECTORIES "${LIBIDN2_INCLUDE_DIR}"
++        IMPORTED_LINK_INTERFACE_LANGUAGES "C"
++        IMPORTED_LOCATION "${LIBIDN2_LIBRARY}"
+       )
+-  endif ()
++    endif ()
+ 
+-  if (NOT LIBIDN2_VERSION AND LIBIDN2_INCLUDE_DIR AND EXISTS "${LIBIDN2_INCLUDE_DIR}/unbound.h")
+-    file(STRINGS "${LIBIDN2_INCLUDE_DIR}/idn2.h" LIBIDN2_H REGEX "^#define IDN2_VERSION ")
+-    string(REGEX REPLACE "^.*IDN2_VERSION \"([0-9.]+)\".*$" "\\1" LIBIDN2_VERSION "${LIBIDN2_H}")
+-  endif ()
+-endif()
++    if (NOT LIBIDN2_VERSION AND LIBIDN2_INCLUDE_DIR AND EXISTS "${LIBIDN2_INCLUDE_DIR}/unbound.h")
++      file(STRINGS "${LIBIDN2_INCLUDE_DIR}/idn2.h" LIBIDN2_H REGEX "^#define IDN2_VERSION ")
++      string(REGEX REPLACE "^.*IDN2_VERSION \"([0-9.]+)\".*$" "\\1" LIBIDN2_VERSION "${LIBIDN2_H}")
++    endif ()
+ 
+-list(APPEND LIBIDN2_LIBRARIES "${LIBIDN2_LIBRARY}")
++    list(APPEND LIBIDN2_LIBRARIES "${LIBIDN2_LIBRARY}")
++  endif()
++endif()
+ 
+ include(FindPackageHandleStandardArgs)
+ find_package_handle_standard_args(Libidn2
+--- cmake/modules/FindLibunbound.cmake
++++ cmake/modules/FindLibunbound.cmake
+@@ -28,58 +28,70 @@
+ 
+ #]=======================================================================]
+ 
+-find_path(LIBUNBOUND_INCLUDE_DIR unbound.h
+-  HINTS
+-  "${LIBUNBOUND_DIR}"
+-  "${LIBUNBOUND_DIR}/include"
+-)
+-
+-find_library(LIBUNBOUND_LIBRARY NAMES unbound
+-  HINTS
+-  "${LIBUNBOUND_DIR}"
+-  "${LIBUNBOUND_DIR}/lib"
+-)
+-
+-set(LIBUNBOUND_LIBRARIES "")
+-
+-if (UNIX)
+-  find_package(Threads REQUIRED)
+-  find_package(OpenSSL REQUIRED)
+-
+-  list(APPEND LIBUNBOUND_LIBRARIES "${CMAKE_THREAD_LIBS_INIT}")
+-  list(APPEND LIBUNBOUND_LIBRARIES "${OPENSSL_LIBRARIES}")
++include(FindPkgConfig)
++if(PKG_CONFIG_FOUND)
++    pkg_check_modules(PkgLibunbound IMPORTED_TARGET GLOBAL QUIET libunbound)
+ endif()
+ 
+-if (LIBUNBOUND_INCLUDE_DIR AND LIBUNBOUND_LIBRARY)
+-  if (NOT TARGET Libunbound::Libunbound)
+-    add_library(Libunbound::Libunbound UNKNOWN IMPORTED)
+-    set_target_properties(Libunbound::Libunbound PROPERTIES
+-      INTERFACE_INCLUDE_DIRECTORIES "${LIBUNBOUND_INCLUDE_DIR}"
+-      IMPORTED_LINK_INTERFACE_LANGUAGES "C"
+-      IMPORTED_LOCATION "${LIBUNBOUND_LIBRARY}"
+-      )
+-
+-    if(UNIX AND TARGET Threads::Threads)
+-      set_property(TARGET Libunbound::Libunbound APPEND PROPERTY
+-        INTERFACE_LINK_LIBRARIES Threads::Threads)
+-    endif ()
+-    if(UNIX AND TARGET OpenSSL::SSL)
+-      set_property(TARGET Libunbound::Libunbound APPEND PROPERTY
+-        INTERFACE_LINK_LIBRARIES OpenSSL::SSL)
++if(PkgLibunbound_FOUND)
++  set(LIBUNBOUND_INCLUDE_DIR ${PkgLibunbound_INCLUDE_DIRS})
++  set(LIBUNBOUND_LIBRARIES ${PkgLibunbound_LIBRARIES})
++  set(LIBUNBOUND_VERSION ${PkgLibunbound_VERSION})
++  add_library(Libunbound::Libunbound ALIAS PkgConfig::PkgLibunbound)
++else()
++  find_path(LIBUNBOUND_INCLUDE_DIR unbound.h
++    HINTS
++    "${LIBUNBOUND_DIR}"
++    "${LIBUNBOUND_DIR}/include"
++  )
++  
++  find_library(LIBUNBOUND_LIBRARY NAMES unbound
++    HINTS
++    "${LIBUNBOUND_DIR}"
++    "${LIBUNBOUND_DIR}/lib"
++  )
++  
++  set(LIBUNBOUND_LIBRARIES "")
++  
++  if (UNIX)
++    find_package(Threads REQUIRED)
++    find_package(OpenSSL REQUIRED)
++  
++    list(APPEND LIBUNBOUND_LIBRARIES "${CMAKE_THREAD_LIBS_INIT}")
++    list(APPEND LIBUNBOUND_LIBRARIES "${OPENSSL_LIBRARIES}")
++  endif()
++  
++  if (LIBUNBOUND_INCLUDE_DIR AND LIBUNBOUND_LIBRARY)
++    if (NOT TARGET Libunbound::Libunbound)
++      add_library(Libunbound::Libunbound UNKNOWN IMPORTED)
++      set_target_properties(Libunbound::Libunbound PROPERTIES
++        INTERFACE_INCLUDE_DIRECTORIES "${LIBUNBOUND_INCLUDE_DIR}"
++        IMPORTED_LINK_INTERFACE_LANGUAGES "C"
++        IMPORTED_LOCATION "${LIBUNBOUND_LIBRARY}"
++        )
++  
++      if(UNIX AND TARGET Threads::Threads)
++        set_property(TARGET Libunbound::Libunbound APPEND PROPERTY
++          INTERFACE_LINK_LIBRARIES Threads::Threads)
++      endif ()
++      if(UNIX AND TARGET OpenSSL::SSL)
++        set_property(TARGET Libunbound::Libunbound APPEND PROPERTY
++          INTERFACE_LINK_LIBRARIES OpenSSL::SSL)
++      endif ()
++      if(UNIX AND TARGET OpenSSL::Crypto)
++        set_property(TARGET Libunbound::Libunbound APPEND PROPERTY
++          INTERFACE_LINK_LIBRARIES OpenSSL::Crypto)
++      endif ()
+     endif ()
+-    if(UNIX AND TARGET OpenSSL::Crypto)
+-      set_property(TARGET Libunbound::Libunbound APPEND PROPERTY
+-        INTERFACE_LINK_LIBRARIES OpenSSL::Crypto)
++  
++    if (NOT LIBUNBOUND_VERSION AND LIBUNBOUND_INCLUDE_DIR AND EXISTS "${LIBUNBOUND_INCLUDE_DIR}/unbound.h")
++      file(STRINGS "${LIBUNBOUND_INCLUDE_DIR}/unbound.h" LIBUNBOUND_H REGEX "^#define UNBOUND_VERSION_M[A-Z]+")
++      string(REGEX REPLACE "^.*MAJOR ([0-9]+).*MINOR ([0-9]+).*MICRO ([0-9]+).*$" "\\1.\\2.\\3" LIBUNBOUND_VERSION "${LIBUNBOUND_H}")
+     endif ()
+-  endif ()
+-
+-  if (NOT LIBUNBOUND_VERSION AND LIBUNBOUND_INCLUDE_DIR AND EXISTS "${LIBUNBOUND_INCLUDE_DIR}/unbound.h")
+-    file(STRINGS "${LIBUNBOUND_INCLUDE_DIR}/unbound.h" LIBUNBOUND_H REGEX "^#define UNBOUND_VERSION_M[A-Z]+")
+-    string(REGEX REPLACE "^.*MAJOR ([0-9]+).*MINOR ([0-9]+).*MICRO ([0-9]+).*$" "\\1.\\2.\\3" LIBUNBOUND_VERSION "${LIBUNBOUND_H}")
+-  endif ()
+-endif()
+-
+-list(APPEND LIBUNBOUND_LIBRARIES "${LIBUNBOUND_LIBRARY}")
++  endif()
++  
++  list(APPEND LIBUNBOUND_LIBRARIES "${LIBUNBOUND_LIBRARY}")
++endif
+ 
+ include(FindPackageHandleStandardArgs)
+ find_package_handle_standard_args(Libunbound
+--- cmake/modules/FindLibuv.cmake
++++ cmake/modules/FindLibuv.cmake
+@@ -28,42 +28,54 @@
+ 
+ #]=======================================================================]
+ 
+-find_path(LIBUV_INCLUDE_DIR uv.h
+-  HINTS
+-  "${LIBUV_DIR}"
+-  "${LIBUV_DIR}/include"
+-)
+-
+-find_library(LIBUV_LIBRARY NAMES uv libuv
+-  HINTS
+-  "${LIBUV_DIR}"
+-  "${LIBUV_DIR}/lib"
+-)
+-
+-set(LIBUV_LIBRARIES "")
+-
+-if (LIBUV_INCLUDE_DIR AND LIBUV_LIBRARY)
+-  if (NOT TARGET Libuv::Libuv)
+-    add_library(Libuv::Libuv UNKNOWN IMPORTED)
+-    set_target_properties(Libuv::Libuv PROPERTIES
+-      INTERFACE_INCLUDE_DIRECTORIES "${LIBUV_INCLUDE_DIR}"
+-      IMPORTED_LINK_INTERFACE_LANGUAGES "C"
+-      IMPORTED_LOCATION "${LIBUV_LIBRARY}"
+-      )
+-  endif ()
++include(FindPkgConfig)
++if(PKG_CONFIG_FOUND)
++    pkg_check_modules(PkgLibuv IMPORTED_TARGET GLOBAL QUIET libuv)
++endif()
+ 
+-  if (NOT LIBUV_VERSION AND LIBUV_INCLUDE_DIR)
+-    if (EXISTS "${LIBUV_INCLUDE_DIR}/uv-version.h")
+-      file(STRINGS "${LIBUV_INCLUDE_DIR}/uv-version.h" LIBUV_VER_H REGEX "^#define UV_VERSION_(MAJOR|MINOR|PATCH) ")
+-    elseif (EXISTS "${LIBUV_INCLUDE_DIR}/uv/version.h")
+-      file(STRINGS "${LIBUV_INCLUDE_DIR}/uv/version.h" LIBUV_VER_H REGEX "^#define UV_VERSION_(MAJOR|MINOR|PATCH) ")
++if(PkgLibuv_FOUND)
++  set(LIBUV_INCLUDE_DIR ${PkgLibuv_INCLUDE_DIRS})
++  set(LIBUV_LIBRARIES ${PkgLibuv_LIBRARIES})
++  set(LIBUV_VERSION ${PkgLibuv_VERSION})
++  add_library(Libuv::Libuv ALIAS PkgConfig::PkgLibuv)
++else()
++  find_path(LIBUV_INCLUDE_DIR uv.h
++    HINTS
++    "${LIBUV_DIR}"
++    "${LIBUV_DIR}/include"
++  )
++  
++  find_library(LIBUV_LIBRARY NAMES uv libuv
++    HINTS
++    "${LIBUV_DIR}"
++    "${LIBUV_DIR}/lib"
++  )
++  
++  set(LIBUV_LIBRARIES "")
++  
++  if (LIBUV_INCLUDE_DIR AND LIBUV_LIBRARY)
++    if (NOT TARGET Libuv::Libuv)
++      add_library(Libuv::Libuv UNKNOWN IMPORTED)
++      set_target_properties(Libuv::Libuv PROPERTIES
++        INTERFACE_INCLUDE_DIRECTORIES "${LIBUV_INCLUDE_DIR}"
++        IMPORTED_LINK_INTERFACE_LANGUAGES "C"
++        IMPORTED_LOCATION "${LIBUV_LIBRARY}"
++        )
+     endif ()
+-    string(REGEX REPLACE "^.*_MAJOR ([0-9]+).*_MINOR ([0-9]+).*_PATCH ([0-9]+).*$" "\\1.\\2.\\3" LIBUV_VERSION "${LIBUV_VER_H}")
+-  endif ()
++  
++    if (NOT LIBUV_VERSION AND LIBUV_INCLUDE_DIR)
++      if (EXISTS "${LIBUV_INCLUDE_DIR}/uv-version.h")
++        file(STRINGS "${LIBUV_INCLUDE_DIR}/uv-version.h" LIBUV_VER_H REGEX "^#define UV_VERSION_(MAJOR|MINOR|PATCH) ")
++      elseif (EXISTS "${LIBUV_INCLUDE_DIR}/uv/version.h")
++        file(STRINGS "${LIBUV_INCLUDE_DIR}/uv/version.h" LIBUV_VER_H REGEX "^#define UV_VERSION_(MAJOR|MINOR|PATCH) ")
++      endif ()
++      string(REGEX REPLACE "^.*_MAJOR ([0-9]+).*_MINOR ([0-9]+).*_PATCH ([0-9]+).*$" "\\1.\\2.\\3" LIBUV_VERSION "${LIBUV_VER_H}")
++    endif ()
++  endif()
++  
++  list(APPEND LIBUV_LIBRARIES "${LIBUV_LIBRARY}")
+ endif()
+ 
+-list(APPEND LIBUV_LIBRARIES "${LIBUV_LIBRARY}")
+-
+ include(FindPackageHandleStandardArgs)
+ find_package_handle_standard_args(Libuv
+   REQUIRED_VARS LIBUV_LIBRARIES LIBUV_INCLUDE_DIR
+--- cmake/modules/FindNettle.cmake
++++ cmake/modules/FindNettle.cmake
+@@ -30,62 +30,76 @@
+ 
+ #]=======================================================================]
+ 
+-find_path(NETTLE_INCLUDE_DIR nettle/version.h
+-  HINTS
+-  "${NETTLE_DIR}"
+-  "${NETTLE_DIR}/include"
+-)
+-
+-find_library(NETTLE_LIBRARY NAMES nettle libnettle
+-  HINTS
+-  "${NETTLE_DIR}"
+-  "${NETTLE_DIR}/lib"
+-)
+-
+-find_library(HOGWEED_LIBRARY NAMES hogweed libhogweed
+-  HINTS
+-  "${NETTLE_DIR}"
+-  "${NETTLE_DIR}/lib"
+-)
+-
+-set(NETTLE_LIBRARIES "")
+-
+-# May need gmp library on Unix.
+-if (UNIX)
+-  find_library(NETTLE_GMP_LIBRARY gmp)
+-
+-  if (NETTLE_GMP_LIBRARY)
+-    list(APPEND NETTLE_LIBRARIES "${NETTLE_GMP_LIBRARY}")
+-  endif ()
+-endif ()
+-
+-if (NETTLE_INCLUDE_DIR AND NETTLE_LIBRARY AND HOGWEED_LIBRARY)
+-  if (NOT TARGET Nettle::Nettle)
+-    add_library(Nettle::Nettle UNKNOWN IMPORTED)
+-    set_target_properties(Nettle::Nettle PROPERTIES
+-      INTERFACE_INCLUDE_DIRECTORIES "${NETTLE_INCLUDE_DIR}"
+-      INTERFACE_LINK_LIBRARIES "${NETTLE_LIBRARIES}"
+-      IMPORTED_LINK_INTERFACE_LANGUAGES "C"
+-      IMPORTED_LOCATION "${NETTLE_LIBRARY}"
+-      )
+-  endif ()
+-  if (NOT TARGET Nettle::Hogweed)
+-    add_library(Nettle::Hogweed UNKNOWN IMPORTED)
+-    set_target_properties(Nettle::Hogweed PROPERTIES
+-      INTERFACE_INCLUDE_DIRECTORIES "${NETTLE_INCLUDE_DIR}"
+-      IMPORTED_LINK_INTERFACE_LANGUAGES "C"
+-      IMPORTED_LOCATION "${HOGWEED_LIBRARY}"
+-      )
+-  endif ()
++include(FindPkgConfig)
++if(PKG_CONFIG_FOUND)
++    pkg_check_modules(PkgNettle IMPORTED_TARGET GLOBAL nettle)
++    pkg_check_modules(PkgHogweed IMPORTED_TARGET GLOBAL QUIET hogweed)
++endif()
+ 
+-  if (NOT NETTLE_VERSION AND NETTLE_INCLUDE_DIR)
+-    file(STRINGS "${NETTLE_INCLUDE_DIR}/nettle/version.h" NETTLE_VER_H REGEX "^#define NETTLE_VERSION_(MAJOR|MINOR) ")
+-    string(REGEX REPLACE "^.*_MAJOR ([0-9]+).*_MINOR ([0-9]+).*$" "\\1.\\2" NETTLE_VERSION "${NETTLE_VER_H}")
++if(PkgNettle_FOUND AND PkHogweed_FOUND)
++  set(NETTLE_INCLUDE_DIR ${PkgNettle_INCLUDE_DIRS} ${PkgHogweed_INCLUDE_DIRS})
++  set(NETTLE_LIBRARIES ${PkgNettle_LIBRARIES} ${PkgHogweed_LIBRARIES})
++  set(NETTLE_VERSION ${PkgNettle_VERSION})
++  add_library(Nettle::Nettle ALIAS PkgConfig::PkgNettle)
++  add_library(Nettle::Hogweed ALIAS PkgConfig::PkgHogweed)
++else()
++  find_path(NETTLE_INCLUDE_DIR nettle/version.h
++    HINTS
++    "${NETTLE_DIR}"
++    "${NETTLE_DIR}/include"
++  )
++  
++  find_library(NETTLE_LIBRARY NAMES nettle libnettle
++    HINTS
++    "${NETTLE_DIR}"
++    "${NETTLE_DIR}/lib"
++  )
++  
++  find_library(HOGWEED_LIBRARY NAMES hogweed libhogweed
++    HINTS
++    "${NETTLE_DIR}"
++    "${NETTLE_DIR}/lib"
++  )
++  
++  set(NETTLE_LIBRARIES "")
++  
++  # May need gmp library on Unix.
++  if (UNIX)
++    find_library(NETTLE_GMP_LIBRARY gmp)
++  
++    if (NETTLE_GMP_LIBRARY)
++      list(APPEND NETTLE_LIBRARIES "${NETTLE_GMP_LIBRARY}")
++    endif ()
+   endif ()
++  
++  if (NETTLE_INCLUDE_DIR AND NETTLE_LIBRARY AND HOGWEED_LIBRARY)
++    if (NOT TARGET Nettle::Nettle)
++      add_library(Nettle::Nettle UNKNOWN IMPORTED)
++      set_target_properties(Nettle::Nettle PROPERTIES
++        INTERFACE_INCLUDE_DIRECTORIES "${NETTLE_INCLUDE_DIR}"
++        INTERFACE_LINK_LIBRARIES "${NETTLE_LIBRARIES}"
++        IMPORTED_LINK_INTERFACE_LANGUAGES "C"
++        IMPORTED_LOCATION "${NETTLE_LIBRARY}"
++        )
++    endif ()
++    if (NOT TARGET Nettle::Hogweed)
++      add_library(Nettle::Hogweed UNKNOWN IMPORTED)
++      set_target_properties(Nettle::Hogweed PROPERTIES
++        INTERFACE_INCLUDE_DIRECTORIES "${NETTLE_INCLUDE_DIR}"
++        IMPORTED_LINK_INTERFACE_LANGUAGES "C"
++        IMPORTED_LOCATION "${HOGWEED_LIBRARY}"
++        )
++    endif ()
++  
++    if (NOT NETTLE_VERSION AND NETTLE_INCLUDE_DIR)
++      file(STRINGS "${NETTLE_INCLUDE_DIR}/nettle/version.h" NETTLE_VER_H REGEX "^#define NETTLE_VERSION_(MAJOR|MINOR) ")
++      string(REGEX REPLACE "^.*_MAJOR ([0-9]+).*_MINOR ([0-9]+).*$" "\\1.\\2" NETTLE_VERSION "${NETTLE_VER_H}")
++    endif ()
++  endif()
++  
++  list(APPEND NETTLE_LIBRARIES "${NETTLE_LIBRARY}" "${HOGWEED_LIBRARY}")
+ endif()
+ 
+-list(APPEND NETTLE_LIBRARIES "${NETTLE_LIBRARY}" "${HOGWEED_LIBRARY}")
+-
+ include(FindPackageHandleStandardArgs)
+ find_package_handle_standard_args(Nettle
+   REQUIRED_VARS NETTLE_LIBRARIES NETTLE_INCLUDE_DIR

@@ -1,7 +1,6 @@
 from conans import ConanFile, tools, AutoToolsBuildEnvironment, RunEnvironment
 from conans.errors import ConanInvalidConfiguration
 import os
-import shutil
 import glob
 
 
@@ -40,7 +39,7 @@ class LibnameConan(ConanFile):
         if self.options.with_external_libs:
             self.requires("flac/1.3.3")
             self.requires("ogg/1.3.4")
-            self.requires("vorbis/1.3.6")
+            self.requires("vorbis/1.3.7")
 
     def config_options(self):
         if self.settings.os == 'Windows':
@@ -74,8 +73,6 @@ class LibnameConan(ConanFile):
         return self._autotools
 
     def build(self):
-        if self.options.with_external_libs:
-            shutil.copyfile('vorbis.pc', 'vorbisenc.pc')
         with tools.environment_append(RunEnvironment(self).vars):
             autotools = self._configure_autotools()
             autotools.make()

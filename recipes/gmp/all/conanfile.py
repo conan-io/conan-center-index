@@ -1,7 +1,9 @@
-import os
-import stat
 from conans import ConanFile, AutoToolsBuildEnvironment, tools
 from conans.errors import ConanInvalidConfiguration
+from contextlib import contextmanager
+import os
+import stat
+import textwrap
 
 
 class GmpConan(ConanFile):
@@ -12,22 +14,31 @@ class GmpConan(ConanFile):
     license = ("LGPL-3.0", "GPL-2.0")
     homepage = "https://gmplib.org"
     settings = "os", "arch", "compiler", "build_type"
-    options = {"shared": [True, False], "fPIC": [True, False], "disable_assembly": [True, False],
-               "run_checks": [True, False], "enable_cxx" : [True, False]}
-    default_options = {"shared": False, "fPIC": True, "disable_assembly": True, "run_checks": False, "enable_cxx" : True}
+    options = {"shared": [True, False], "fPIC": [True, False],
+               "disable_assembly": [True, False], "enable_fat": [True, False],
+               "run_checks": [True, False], "enable_cxx": [True, False]}
+    default_options = {"shared": False, "fPIC": True, "disable_assembly": True, "enable_fat": False, "run_checks": False, "enable_cxx": True}
+    exports_sources = "patches/*"
 
-    _source_subfolder = "source_subfolder"
     _autotools = None
+
+    @property
+    def _source_subfolder(self):
+        return "source_subfolder"
 
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
+        if self.settings.arch not in ["x86", "x86_64"]:
+            del self.options.enable_fat
 
     def configure(self):
-        if self.settings.compiler == "Visual Studio":
-            raise ConanInvalidConfiguration("The gmp package cannot be built on Visual Studio.")
+        if self.settings.compiler == "Visual Studio" and self.options.shared:
+            raise ConanInvalidConfiguration("Cannot build a shared library using Visual Studio: some error occurs at link time")
         if self.options.shared:
             del self.options.fPIC
+        if self.options.get_safe("enable_fat"):
+            del self.options.disable_assembly
         if not self.options.enable_cxx:
             del self.settings.compiler.libcxx
             del self.settings.compiler.cppstd
@@ -36,46 +47,81 @@ class GmpConan(ConanFile):
         del self.info.options.run_checks  # run_checks doesn't affect package's ID
 
     def build_requirements(self):
-        if self.settings.os == "Windows" and self.settings.compiler != "Visual Studio" and \
-           "CONAN_BASH_PATH" not in os.environ and tools.os_info.detect_windows_subsystem() != "msys2":
+        self.build_requires("m4/1.4.18")
+        if tools.os_info.is_windows and not tools.get_env("CONAN_BASH_PATH"):
             self.build_requires("msys2/20200517")
+        if self.settings.compiler == "Visual Studio":
+            self.build_requires("yasm/1.3.0")
+            self.build_requires("automake/1.16.3")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
         os.rename("gmp-" + self.version, self._source_subfolder)
 
     def _configure_autotools(self):
-        if not self._autotools:
-            self._autotools = AutoToolsBuildEnvironment(self, win_bash=tools.os_info.is_windows)
-            if self.settings.os == "Macos":
-                configure_file = "configure"
-                tools.replace_in_file(configure_file, r"-install_name \$rpath/", "-install_name ")
-                configure_stats = os.stat(configure_file)
-                os.chmod(configure_file, configure_stats.st_mode | stat.S_IEXEC)
-            configure_args = []
-            if self.options.disable_assembly:
-                configure_args.append("--disable-assembly")
-            if self.options.shared:
-                configure_args.extend(["--enable-shared", "--disable-static"])
-            else:
-                configure_args.extend(["--disable-shared", "--enable-static"])
-            if self.options.enable_cxx:
-                configure_args.append("--enable-cxx")
-            self._autotools.configure(args=configure_args)
+        if self._autotools:
+            return self._autotools
+        self._autotools = AutoToolsBuildEnvironment(self, win_bash=tools.os_info.is_windows)
+        if tools.is_apple_os(self.settings.os):
+            configure_file = os.path.join(self._source_subfolder, "configure")
+            tools.replace_in_file(configure_file, r"-install_name \$rpath/", "-install_name ")
+            configure_stats = os.stat(configure_file)
+            os.chmod(configure_file, configure_stats.st_mode | stat.S_IEXEC)
+        yes_no = lambda v: "yes" if v else "no"
+        configure_args = [
+            "--enable-assembly={}".format(yes_no(not self.options.get_safe("disable_assembly", False))),
+            "--enable-fat={}".format(yes_no(self.options.get_safe("enable_fat", False))),
+            "--enable-cxx={}".format(yes_no(self.options.enable_cxx)),
+            "--enable-shared={}".format(yes_no(self.options.shared)),
+            "--enable-static={}".format(yes_no(not self.options.shared)),
+            "--srcdir={}".format(os.path.join(self.source_folder, self._source_subfolder).replace("\\", "/")),
+        ]
+        if self.settings.compiler == "Visual Studio":
+            configure_args.extend([
+                "ac_cv_c_restrict=restrict",
+                "gmp_cv_asm_label_suffix=:",
+                "lt_cv_sys_global_symbol_pipe=cat",  # added to get further in shared MSVC build, but it gets stuck later
+            ])
+            self._autotools.flags.append("-FS")
+            # self._autotools.cxx_flags.append("-EHsc")
+        self._autotools.configure(args=configure_args, configure_dir=self._source_subfolder)
         return self._autotools
 
+    @contextmanager
+    def _build_context(self):
+        if self.settings.compiler == "Visual Studio":
+            with tools.vcvars(self.settings):
+                yasm_machine = {
+                    "x86": "x86",
+                    "x86_64": "amd64",
+                }[str(self.settings.arch)]
+                env = {
+                    "CC": "cl -nologo",
+                    "CCAS": "{} -a x86 -m {} -p gas -r raw -f win32 -g null -X gnu".format(os.path.join(self.build_folder, "yasm_wrapper.sh").replace("\\", "/"), yasm_machine),
+                    "CXX": "cl -nologo",
+                    "AR": "{} lib".format(self.deps_user_info["automake"].ar_lib.replace("\\", "/")),
+                    "LD": "link -nologo",
+                    "NM": "python {}/{}".format(self.build_folder.replace("\\", "/"), "dumpbin_nm.py"),
+                }
+                with tools.environment_append(env):
+                    yield
+        else:
+            yield
+
     def build(self):
-        with tools.chdir(self._source_subfolder):
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            tools.patch(**patch)
+        with self._build_context():
             autotools = self._configure_autotools()
             autotools.make()
-        # INFO: According to the gmp readme file, make check should not be omitted, but it causes timeouts on the CI server.
-        if self.options.run_checks:
-            autotools.make(args=["check"])
+            # INFO: According to the gmp readme file, make check should not be omitted, but it causes timeouts on the CI server.
+            if self.options.run_checks:
+                autotools.make(args=["check"])
 
     def package(self):
         self.copy("COPYINGv2", dst="licenses", src=self._source_subfolder)
         self.copy("COPYING.LESSERv3", dst="licenses", src=self._source_subfolder)
-        with tools.chdir(self._source_subfolder):
+        with self._build_context():
             autotools = self._configure_autotools()
             autotools.install()
 

@@ -26,6 +26,10 @@ class SrtConan(ConanFile):
     def _build_subfolder(self):
         return "build_subfolder"
 
+    @property
+    def _has_stdcxx_sync(self):
+        return tools.Version(self.version) >= "1.4.2"
+
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
@@ -35,8 +39,8 @@ class SrtConan(ConanFile):
             del self.options.fPIC
 
     def requirements(self):
-        self.requires("openssl/1.1.1g")
-        if self.settings.os == "Windows":
+        self.requires("openssl/1.1.1h")
+        if self.settings.os == "Windows" and not self._has_stdcxx_sync:
             self.requires("pthreads4w/3.0.0")
 
     def source(self):
@@ -52,6 +56,7 @@ class SrtConan(ConanFile):
         self._cmake.definitions["ENABLE_LOGGING"] = False
         self._cmake.definitions["ENABLE_SHARED"] = self.options.shared
         self._cmake.definitions["ENABLE_STATIC"] = not self.options.shared
+        self._cmake.definitions["ENABLE_STDCXX_SYNC"] = self._has_stdcxx_sync
         self._cmake.configure(build_folder=self._build_subfolder)
         return self._cmake
 
@@ -70,3 +75,5 @@ class SrtConan(ConanFile):
         self.cpp_info.libs = tools.collect_libs(self)
         if self.settings.os == "Linux":
             self.cpp_info.system_libs = ["pthread"]
+        if self.settings.os == "Windows":
+            self.cpp_info.system_libs = ["ws2_32"]

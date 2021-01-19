@@ -1,0 +1,8 @@
+sources:
+  "cci.20200511":
+    url: "https://github.com/recastnavigation/recastnavigation/archive/df27e4eb1a4ade9912f8b7d75c25769a3193dbd0.tar.gz"
+    sha256: "299fdcfe14749a26041f54b4a018b8c4918e0dd0283f77823b96247bc97c9400"
+patches:
+  "cci.20200511":
+    - patch_file: "patches/001_fix_shared_option.patch"
+      base_path: "source_subfolder"

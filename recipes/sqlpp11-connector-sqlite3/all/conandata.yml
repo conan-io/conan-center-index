@@ -1,4 +1,14 @@
 sources:
   "0.29":
     url: "https://github.com/rbock/sqlpp11-connector-sqlite3/archive/0.29.tar.gz"
-    sha256: 2904ddd578adb0e122a70f73a80bae4843434d685b7a23ae3ab43471c35efc4f
+    sha256: "2904ddd578adb0e122a70f73a80bae4843434d685b7a23ae3ab43471c35efc4f"
+  "0.30":
+    url: "https://github.com/rbock/sqlpp11-connector-sqlite3/archive/0.30.tar.gz"
+    sha256: "e39f420312d311f3eaa162e201883b4594c34e04739b39a4563f84be920e654f"
+patches:
+  "0.29":
+    - patch_file: "patches/cmake-dependencies.patch"
+      base_path: "source_subfolder"
+  "0.30":
+    - patch_file: "patches/cmake-dependencies.patch"
+      base_path: "source_subfolder"

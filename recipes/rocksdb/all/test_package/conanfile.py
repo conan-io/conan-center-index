@@ -4,12 +4,11 @@ import os
 
 class TestPackageConan(ConanFile):
     settings = "os", "compiler", "build_type", "arch"
-    generators = "cmake"
+    generators = "cmake", "cmake_find_package_multi"
 
     def build(self):
         cmake = CMake(self)
-        cmake.definitions["ROCKSDB_DLL"] = self.options["rocksdb"].shared
-
+        cmake.definitions["ROCKSDB_SHARED"] = self.options["rocksdb"].shared
         cmake.configure()
         cmake.build()
 

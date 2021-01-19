@@ -9,7 +9,7 @@ class BotanConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/randombit/botan"
     license = "BSD-2-Clause"
-    exports = ["dll-dir.patch"]
+    exports = ["patches/*"]
     description = "Botan is a cryptography library written in C++11."
     topics = ("cryptography", "crypto", "C++11", "tls")
     settings = 'os', 'arch', 'compiler', 'build_type'
@@ -38,7 +38,8 @@ class BotanConan(ConanFile):
         'with_armv8crypto': [True, False],
         'with_powercrypto': [True, False],
         'enable_modules': "ANY",
-        'system_cert_bundle': "ANY"
+        'system_cert_bundle': "ANY",
+        'module_policy': [None, 'bsi', 'modern', 'nist']
     }
     default_options = {'amalgamation': True,
                        'with_bzip2': False,
@@ -64,7 +65,8 @@ class BotanConan(ConanFile):
                        'with_armv8crypto': True,
                        'with_powercrypto': True,
                        'enable_modules': None,
-                       'system_cert_bundle': None}
+                       'system_cert_bundle': None,
+                       'module_policy': None}
 
     @property
     def _is_x86(self):
@@ -97,7 +99,7 @@ class BotanConan(ConanFile):
         if self.options.with_bzip2:
             self.requires("bzip2/1.0.6")
         if self.options.with_openssl:
-            self.requires("openssl/1.0.2u")
+            self.requires("openssl/1.1.1i")
         if self.options.with_zlib:
             self.requires("zlib/1.2.11")
         if self.options.with_sqlite3:
@@ -281,7 +283,7 @@ class BotanConan(ConanFile):
 
         if self.options.with_openssl:
             build_flags.append('--with-openssl')
-            build_flags.extend(self._dependency_build_flags("OpenSSL"))
+            build_flags.extend(self._dependency_build_flags("openssl"))
 
         if self.options.with_sqlite3:
             build_flags.append('--with-sqlite3')
@@ -294,6 +296,9 @@ class BotanConan(ConanFile):
         if self.options.with_boost:
             build_flags.append('--with-boost')
             build_flags.extend(self._dependency_build_flags("boost"))
+
+        if self.options.module_policy:
+            build_flags.append('--module-policy={}'.format(self.options.module_policy))
 
         if self.settings.build_type == 'RelWithDebInfo':
             build_flags.append('--with-debug-info')

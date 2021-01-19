@@ -1,0 +1,66 @@
+--- tinyexr.h
++++ tinyexr.h
+@@ -547,10 +547,11 @@
+ #endif
+ 
+ #if TINYEXR_USE_MINIZ
++#include <miniz.h>
+ #else
+ //  Issue #46. Please include your own zlib-compatible API header before
+ //  including `tinyexr.h`
+-//#include "zlib.h"
++#include "zlib.h"
+ #endif
+ 
+ #if TINYEXR_USE_ZFP
+@@ -588,6 +589,7 @@
+ #endif
+ #endif
+ 
++#if 0
+ #if TINYEXR_USE_MINIZ
+ 
+ namespace miniz {
+@@ -7048,6 +7050,7 @@
+ #endif
+ 
+ #endif  // TINYEXR_USE_MINIZ
++#endif  // 0
+ 
+ // static bool IsBigEndian(void) {
+ //  union {
+@@ -7650,11 +7653,11 @@
+   // Compress the data using miniz
+   //
+ 
+-  miniz::mz_ulong outSize = miniz::mz_compressBound(src_size);
+-  int ret = miniz::mz_compress(
++  mz_ulong outSize = mz_compressBound(src_size);
++  int ret = mz_compress(
+       dst, &outSize, static_cast<const unsigned char *>(&tmpBuf.at(0)),
+       src_size);
+-  assert(ret == miniz::MZ_OK);
++  assert(ret == MZ_OK);
+   (void)ret;
+ 
+   compressedSize = outSize;
+@@ -7687,8 +7690,8 @@
+ 
+ #if TINYEXR_USE_MINIZ
+   int ret =
+-      miniz::mz_uncompress(&tmpBuf.at(0), uncompressed_size, src, src_size);
+-  if (miniz::MZ_OK != ret) {
++      mz_uncompress(&tmpBuf.at(0), uncompressed_size, src, src_size);
++  if (MZ_OK != ret) {
+     return false;
+   }
+ #else
+@@ -12518,7 +12521,7 @@
+     } else if ((exr_header->compression_type == TINYEXR_COMPRESSIONTYPE_ZIPS) ||
+                (exr_header->compression_type == TINYEXR_COMPRESSIONTYPE_ZIP)) {
+ #if TINYEXR_USE_MINIZ
+-      std::vector<unsigned char> block(tinyexr::miniz::mz_compressBound(
++      std::vector<unsigned char> block(mz_compressBound(
+           static_cast<unsigned long>(buf.size())));
+ #else
+       std::vector<unsigned char> block(

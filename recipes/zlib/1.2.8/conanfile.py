@@ -2,12 +2,10 @@ import os
 import stat
 import shutil
 from conans import ConanFile, tools, CMake, AutoToolsBuildEnvironment
-from conans.errors import ConanException, NotFoundException
 
 
 class ZlibConan(ConanFile):
     name = "zlib"
-    version = "1.2.8"
     description = ("A Massively Spiffy Yet Delicately Unobtrusive Compression Library "
                   "(Also Free, Not to Mention Unencumbered by Patents)")
     topics = ("conan", "zlib", "compression")
@@ -33,6 +31,8 @@ class ZlibConan(ConanFile):
             del self.options.fPIC
 
     def configure(self):
+        if self.options.shared:
+            del self.options.fPIC
         del self.settings.compiler.libcxx
         del self.settings.compiler.cppstd
 
@@ -50,11 +50,11 @@ class ZlibConan(ConanFile):
             with tools.chdir(self._source_subfolder):
                 env_build = AutoToolsBuildEnvironment(self)
                 if self.settings.arch == "x86" or self.settings.arch == "x86_64":
-                    env_build.flags.append('-mstackrealign')
+                    env_build.flags.append("-mstackrealign")
 
                 if self.settings.os == "Macos":
-                    old_str = '-install_name $libdir/$SHAREDLIBM'
-                    new_str = '-install_name $SHAREDLIBM'
+                    old_str = "-install_name $libdir/$SHAREDLIBM"
+                    new_str = "-install_name $SHAREDLIBM"
                     tools.replace_in_file("./configure", old_str, new_str)
 
                 # Zlib configure doesnt allow this parameters (in 1.2.8)
@@ -108,9 +108,12 @@ class ZlibConan(ConanFile):
                 self.copy(pattern="*.a", dst="lib", src=self._source_subfolder, keep_path=False)
 
     def package_info(self):
+        self.cpp_info.names["cmake_find_package"] = "ZLIB"
+        self.cpp_info.names["cmake_find_package_multi"] = "ZLIB"
+        self.cpp_info.names["pkg_config"] = "zlib"
         if self.settings.os == "Windows":
-            self.cpp_info.libs = ['zlib']
+            self.cpp_info.libs = ["zlib"]
             if self.settings.build_type == "Debug" and self.settings.compiler == "Visual Studio":
                 self.cpp_info.libs[0] += "d"
         else:
-            self.cpp_info.libs = ['z']
+            self.cpp_info.libs = ["z"]

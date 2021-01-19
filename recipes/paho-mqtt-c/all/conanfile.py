@@ -2,13 +2,14 @@ import os
 from conans import CMake, ConanFile, tools
 from conans.errors import ConanInvalidConfiguration
 
+
 class PahoMqttcConan(ConanFile):
     name = "paho-mqtt-c"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/eclipse/paho.mqtt.c"
     topics = ("MQTT", "IoT", "eclipse", "SSL", "paho", "C")
     license = "EPL-2.0"
-    description = """Eclipse Paho MQTT C client library for Linux, Windows and MacOS"""
+    description = "Eclipse Paho MQTT C client library for Linux, Windows and MacOS"
     exports_sources = ["CMakeLists.txt", "patches/*"]
     generators = "cmake"
     settings = "os", "arch", "compiler", "build_type"
@@ -44,7 +45,7 @@ class PahoMqttcConan(ConanFile):
 
     def requirements(self):
         if self.options.ssl:
-            self.requires("openssl/1.1.1g")
+            self.requires("openssl/1.1.1i")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
@@ -57,6 +58,8 @@ class PahoMqttcConan(ConanFile):
         self._cmake = CMake(self)
         self._cmake.definitions["PAHO_ENABLE_TESTING"] = False
         self._cmake.definitions["PAHO_BUILD_DOCUMENTATION"] = False
+        self._cmake.definitions["PAHO_ENABLE_CPACK"] = False
+        self._cmake.definitions["PAHO_BUILD_DEB_PACKAGE"] = False
         self._cmake.definitions["PAHO_BUILD_ASYNC"] = self.options.asynchronous
         self._cmake.definitions["PAHO_BUILD_STATIC"] = not self.options.shared
         self._cmake.definitions["PAHO_BUILD_SHARED"] = self.options.shared
@@ -69,7 +72,7 @@ class PahoMqttcConan(ConanFile):
         return self._cmake
 
     def build(self):
-        for patch in self.conan_data["patches"][self.version]:
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
             tools.patch(**patch)
         cmake = self._configure_cmake()
         cmake.build()
@@ -85,23 +88,38 @@ class PahoMqttcConan(ConanFile):
         cmake = self._configure_cmake()
         cmake.install()
         tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
+        tools.rmdir(os.path.join(self.package_folder, "share"))
 
     def package_info(self):
-        self.cpp_info.libs = tools.collect_libs(self)
+        self.cpp_info.names["cmake_find_package"] = "eclipse-paho-mqtt-c"
+        self.cpp_info.names["cmake_find_package_multi"] = "eclipse-paho-mqtt-c"
+        self.cpp_info.components["_paho-mqtt-c"].names["cmake_find_package"] = self._cmake_target
+        self.cpp_info.components["_paho-mqtt-c"].names["cmake_find_package_multi"] = self._cmake_target
+        self.cpp_info.components["_paho-mqtt-c"].libs = tools.collect_libs(self)
         if self.settings.os == "Windows":
             if not self.options.shared:
-                self.cpp_info.system_libs.append("ws2_32")
+                self.cpp_info.components["_paho-mqtt-c"].system_libs.append("ws2_32")
                 if self.settings.compiler == "gcc":
-                    self.cpp_info.system_libs.extend(
+                    self.cpp_info.components["_paho-mqtt-c"].system_libs.extend(
                         ["wsock32", "uuid", "crypt32", "rpcrt4"])
         else:
             if self.settings.os == "Linux":
-                self.cpp_info.system_libs.extend(["c", "dl", "pthread"])
+                self.cpp_info.components["_paho-mqtt-c"].system_libs.extend(["c", "dl", "pthread"])
             elif self.settings.os == "FreeBSD":
-                self.cpp_info.system_libs.extend(["compat", "pthread"])
+                self.cpp_info.components["_paho-mqtt-c"].system_libs.extend(["compat", "pthread"])
             elif self.settings.os == "Android":
-                self.cpp_info.system_libs.extend(["c"])
+                self.cpp_info.components["_paho-mqtt-c"].system_libs.extend(["c"])
             else:
-                self.cpp_info.system_libs.extend(["c", "pthread"])
-        self.cpp_info.names["cmake_find_package"] = "PahoMqttC"
-        self.cpp_info.names["cmake_find_package_multi"] = "PahoMqttC"
+                self.cpp_info.components["_paho-mqtt-c"].system_libs.extend(["c", "pthread"])
+        if self.options.ssl:
+            self.cpp_info.components["_paho-mqtt-c"].requires = ["openssl::openssl"]
+
+    @property
+    def _cmake_target(self):
+        target = "paho-mqtt3"
+        target += "a" if self.options.asynchronous else "c"
+        if self.options.ssl:
+            target += "s"
+        if not self.options.shared:
+            target += "-static"
+        return target

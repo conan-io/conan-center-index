@@ -51,7 +51,7 @@ No, recipes do not need to export a recipe license. Recipes and all files contri
 
 ## Why recipes that use build tools (like CMake) that have packages in Conan Center do not use it as a build require by default?
 
-We generally consider tools like CMake as a standard tool to have installed in your system. Having the `cmake` package as a build require in all the recipes that use it will be an overkill, as every build required is installed like a requirement and takes time to download. However, `cmake` could be useful to use in your profile:
+We generally consider tools like CMake as a standard tool to have installed in your system. Having the `cmake` package as a build require in **all** the recipes that use it will be an overkill, as every build requirement is installed like a requirement and takes time to download. However, `cmake` could still be useful to use in your profile:
 
 ```
 [build_requires]
@@ -60,9 +60,9 @@ cmake/3.17.2
 
 Other packages using more unusual build tools, like `OpenSSL` using `strawberryperl`, will have the build require in the recipe as it is likely that the user that want to build it from sources will not have it installed in their system
 
-## Are python requires allowed in the conan-center-index?
+## Are python requires allowed in the `conan-center-index`?
 
-Unless they are a general and extended utility in recipes (in which case, we should study its inclusion in the Conan tools module), python requires are not allowed in conan-center-index.
+Unless they are a general and extended utility in recipes (in which case, we should study its inclusion in the Conan tools module), python requires are not allowed in `conan-center-index` repository.
 
 ## What version should packages use for libraries without official releases?
 
@@ -96,3 +96,13 @@ However, there are ways to get around this, one of them is through the [/Z7](htt
 #### Why is there no option for PDB, as there is for fPIC?
 
 Adding one more common option, it seems the most simple and obvious solution, but it contains a side effect already seen with fPIC. It is necessary to manage the entire recipe, it has become a Boilerplate. So, adding PDB would be one more point to be reviewed for each recipe. In addition, in the future new options could arise, such as sanity or benchmark, further inflating the recipes. For this reason, a new option will not be added. However, the inclusion of the PDB files is discussed in issue [#1982](https://github.com/conan-io/conan-center-index/issues/1982) and there are some ideas for making this possible through a new feature. If you want to comment on the subject, please visit issue.
+
+
+## Why _installer_ packages remove some settings from their package ID?
+
+There are some recipes in `conan-center-index` that provide packages that contain only executables (some examples are `b2`, `cmake` or `make`), these packages are used in
+`conan-center-index` itself as `build_require` and they are consumed as utilities or tools by other users. In these contexts, the expectations are to consume an optimized binary (`build_type=Release`) and it is not important the compiler used to build it.
+
+We decided that these packages (as long as they match the premises) should list all the settings needed to build, so building from sources will generate the expected binary, but they will **remove `compiler` setting inside the `package_id()` method**. As a consequence, the CI will generate packages only for one compiler reducing the workload in the pipeline and the number of possible package IDs.
+
+Note about `build_type`.- We retain the `build_type` setting to make it possible for the users to _debug_ these installer packages. We considered removing this settings and it would be possible to compile these packages in _debug_ mode, but if we remove it from the packageID, the compiled package would override the existing _release_ binary, and it'd be quite inconvenient for the users to compile the binary every time they need to switch from _debug_ to _release_.

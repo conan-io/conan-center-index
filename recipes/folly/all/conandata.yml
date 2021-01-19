@@ -2,6 +2,9 @@ sources:
   "2019.10.21.00":
     url: "https://github.com/facebook/folly/archive/v2019.10.21.00.tar.gz"
     sha256: "6efcc2b2090691a9fe3d339c433d102d6399bbdc6dc4893080d59f15f648f393"
+  "2020.08.10.00":
+    url: "https://github.com/facebook/folly/archive/v2020.08.10.00.tar.gz"
+    sha256: "e81140d04a4e89e3f848e528466a9b3d3ae37d7eeb9e65467fca50d70918eef6"
 patches:
   "2019.10.21.00":
     - patch_file: "patches/0001-find-packages.patch"
@@ -17,4 +20,21 @@ patches:
     - patch_file: "patches/0006-duplicate-hash.patch"
       base_path: "source_subfolder"
     - patch_file: "patches/0007-allow-builtins.patch"
+      base_path: "source_subfolder"
+    - patch_file: "patches/0013-include-bit.patch"
+      base_path: "source_subfolder"
+  "2020.08.10.00":
+    - patch_file: "patches/0008-find-packages.patch"
+      base_path: "source_subfolder"
+    - patch_file: "patches/0009-ill-formed-atomic-copy.patch"
+      base_path: "source_subfolder"
+    - patch_file: "patches/0010-duplicate-hash.patch"
+      base_path: "source_subfolder"
+    - patch_file: "patches/0011-disable-logger-example.patch"
+      base_path: "source_subfolder"
+    - patch_file: "patches/0012-compiler-flags.patch"
+      base_path: "source_subfolder"
+    - patch_file: "patches/0014-find-librt.patch"
+      base_path: "source_subfolder"
+    - patch_file: "patches/0015-benchmark-format-macros.patch"
       base_path: "source_subfolder"

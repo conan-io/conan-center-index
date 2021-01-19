@@ -1,6 +1,5 @@
 from conans import ConanFile, tools
 from conans.errors import ConanException
-import os
 
 
 class SysConfigOpenGLConan(ConanFile):
@@ -11,7 +10,7 @@ class SysConfigOpenGLConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://www.opengl.org/"
     license = "MIT"
-    settings = ("os",)
+    settings = "os"
 
     def package_id(self):
         self.info.header_only()
@@ -37,8 +36,8 @@ class SysConfigOpenGLConan(ConanFile):
         self.cpp_info.cxxflags.extend(cflags)
 
     def system_requirements(self):
+        packages = []
         if tools.os_info.is_linux and self.settings.os == "Linux":
-            package_tool = tools.SystemPackageTool(conanfile=self, default_mode='verify')
             if tools.os_info.with_yum:
                 if tools.os_info.linux_distro == "fedora" and tools.os_info.os_version >= "32":
                     packages = ["libglvnd-devel"]
@@ -57,12 +56,19 @@ class SysConfigOpenGLConan(ConanFile):
             elif tools.os_info.with_zypper:
                 packages = ["Mesa-libGL-devel"]
             else:
-                packages = []
                 self.output.warn("Don't know how to install OpenGL for your distro.")
+        elif tools.os_info.is_freebsd and self.settings.os == "FreeBSD":
+            packages = ["mesa-libs"]
+        if packages:
+            package_tool = tools.SystemPackageTool(conanfile=self, default_mode='verify')
             for p in packages:
                 package_tool.install(update=True, packages=p)
 
     def package_info(self):
+        # TODO: Workaround for #2311 until a better solution can be found
+        self.cpp_info.filenames["cmake_find_package"] = "opengl_system"
+        self.cpp_info.filenames["cmake_find_package_multi"] = "opengl_system"
+
         self.cpp_info.includedirs = []
         self.cpp_info.libdirs = []
         if self.settings.os == "Macos":
@@ -70,5 +76,5 @@ class SysConfigOpenGLConan(ConanFile):
             self.cpp_info.frameworks.append("OpenGL")
         elif self.settings.os == "Windows":
             self.cpp_info.system_libs = ["opengl32"]
-        elif self.settings.os == "Linux":
+        elif self.settings.os in ["Linux", "FreeBSD"]:
             self._fill_cppinfo_from_pkgconfig('gl')

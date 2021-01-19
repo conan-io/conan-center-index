@@ -1,0 +1,7 @@
+sources:
+  "2.38.0":
+    url: "http://ftp.gnome.org/pub/gnome/sources/at-spi2-core/2.38/at-spi2-core-2.38.0.tar.xz"
+    sha256: "84e36c3fe66862133f5fe229772b76aa2526e10de5014a3778f2fa46ce550da5"
+  "2.39.1":
+    url: "http://ftp.gnome.org/pub/gnome/sources/at-spi2-core/2.39/at-spi2-core-2.39.1.tar.xz"
+    sha256: "44d2b042e47d25571581efff673af0a8cd79531babbad2b043784879e15e4228"

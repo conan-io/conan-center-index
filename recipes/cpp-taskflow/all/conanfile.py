@@ -1,7 +1,6 @@
 import os
 from conans import ConanFile, tools
 from conans.errors import ConanInvalidConfiguration
-from conans.model.version import Version
 
 required_conan_version = ">=1.28.0"
 
@@ -54,7 +53,7 @@ class CppTaskflowConan(ConanFile):
         if compiler_version < minimal_version[min_req_cppstd][compiler]:
             raise ConanInvalidConfiguration("%s requires a compiler that supports"
                                             " at least C++%s. %s %s is not"
-                                            " supported." % (self.name, min_req_cppstd, compiler, Version(self.settings.compiler.version.value)))
+                                            " supported." % (self.name, min_req_cppstd, compiler, tools.Version(self.settings.compiler.version.value)))
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
