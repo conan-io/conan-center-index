@@ -100,6 +100,7 @@ class MosquittoConan(ConanFile):
         if not self.options.shared:
             tools.remove_files_by_mask(os.path.join(self.package_folder, "lib"), "*.so*")
             tools.remove_files_by_mask(os.path.join(self.package_folder, "lib"), "*.dll*")
+            tools.remove_files_by_mask(os.path.join(self.package_folder, "lib"), "*.dylib")
 
     def package_info(self):
         lib_suffix = "_static" if not self.options.shared else ""
