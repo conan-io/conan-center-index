@@ -121,7 +121,8 @@ class VulkanLoaderConan(ConanFile):
         self.cpp_info.filenames["cmake_find_package_multi"] = "VulkanLoader"
         self.cpp_info.names["cmake_find_package"] = "Vulkan"
         self.cpp_info.names["cmake_find_package_multi"] = "Vulkan"
-        self.cpp_info.libs = tools.collect_libs(self)
+        suffix = "-1" if self.settings.os == "Windows" else ""
+        self.cpp_info.libs = ["vulkan" + suffix]
         if self.settings.os != "Windows":
             self.cpp_info.system_libs = ["dl", "pthread", "m"]
         if self.settings.os == "Macos":
