@@ -52,24 +52,18 @@ class VulkanLoaderConan(ConanFile):
             del self.options.fPIC
         del self.settings.compiler.libcxx
         del self.settings.compiler.cppstd
-        if self.settings.os == "Linux":
-            if self.options.with_wsi_wayland:
-                # TODO wayland package
-                self.output.warn("Conan package for Wayland is not available, this package will be used from system.")
-            if self.options.with_wsi_directfb:
-                # TODO directfb package
-                self.output.warn("Conan package for DirectFB is not available, this package will be used from system.")
-
+        if self.options.get_safe("with_wsi_directfb"):
+            # TODO: directfb package
+            raise ConanInvalidConfiguration("Conan recipe for DirectFB is not available yet.")
         if not tools.is_apple_os(self.settings.os) and not self.options.shared:
             raise ConanInvalidConfiguration("Static builds are not supported on {}".format(self.settings.os))
 
     def requirements(self):
         self.requires("vulkan-headers/{}".format(self.version))
-        if self.settings.os == "Linux":
-            if self.options.with_wsi_xcb or self.options.with_wsi_xlib:
-                self.requires("xorg/system")
-            if self.options.with_wsi_wayland:
-                self.requires("wayland/1.18.0")
+        if self.options.get_safe("with_wsi_xcb") or self.options.get_safe("with_wsi_xlib"):
+            self.requires("xorg/system")
+        if self.options.get_safe("with_wsi_wayland"):
+            self.requires("wayland/1.18.0")
 
     def build_requirements(self):
         if self.options.get_safe("with_wsi_xcb") or self.options.get_safe("with_wsi_xlib") or \
