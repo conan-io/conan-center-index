@@ -31,7 +31,7 @@ class VulkanLoaderConan(ConanFile):
     }
 
     exports_sources = "CMakeLists.txt"
-    generators = "cmake", "cmake_find_package"
+    generators = "cmake", "pkg_config"
     _cmake = None
 
     @property
@@ -74,6 +74,11 @@ class VulkanLoaderConan(ConanFile):
                 self.requires("xorg/system")
             if self.options.with_wsi_wayland:
                 self.requires("wayland/1.18.0")
+
+    def build_requirements(self):
+        if self.options.get_safe("with_wsi_xcb") or self.options.get_safe("with_wsi_xlib") or \
+           self.options.get_safe("with_wsi_wayland") or self.options.get_safe("with_wsi_directfb"):
+            self.build_requires("pkgconf/1.7.3")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
