@@ -78,10 +78,16 @@ class VulkanLoaderConan(ConanFile):
         tools.get(**self.conan_data["sources"][self.version])
         os.rename(glob.glob("Vulkan-Loader-*")[0], self._source_subfolder)
 
+    def _patch_sources(self):
+        tools.replace_in_file(os.path.join(self._source_subfolder, "cmake", "FindVulkanHeaders.cmake"),
+                              "HINTS ${VULKAN_HEADERS_INSTALL_DIR}/share/vulkan/registry",
+                              "HINTS ${VULKAN_HEADERS_INSTALL_DIR}/res/vulkan/registry")
+
     def _configure_cmake(self):
         if self._cmake:
             return self._cmake
         self._cmake = CMake(self)
+        self._cmake.definitions["VULKAN_HEADERS_INSTALL_DIR"] = self.deps_cpp_info["vulkan-headers"].rootpath
         self._cmake.definitions["BUILD_TESTS"] = False
         if self.settings.os == "Linux":
             self._cmake.definitions["BUILD_WSI_XCB_SUPPORT"] = self.options.with_wsi_xcb
@@ -94,6 +100,7 @@ class VulkanLoaderConan(ConanFile):
         return self._cmake
 
     def build(self):
+        self._patch_sources()
         cmake = self._configure_cmake()
         cmake.build()
 
