@@ -51,7 +51,6 @@ class ConanRecipe(ConanFile):
 
     def _patch_sources(self):
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            print("aplying patch %s" % (patch,))
             tools.patch(**patch)
 
     def build(self):
