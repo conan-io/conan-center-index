@@ -1,49 +1,23 @@
 --- a/src/CMakeLists.txt
 +++ b/src/CMakeLists.txt
-@@ -182,9 +182,9 @@ if(WITH_ZLIB)
+@@ -182,9 +182,7 @@ if(WITH_ZLIB)
  endif()
-
+ 
  if(WITH_ZSTD)
 -  target_link_libraries(rdkafka PUBLIC ${ZSTD_LIBRARY})
 -  target_include_directories(rdkafka PUBLIC ${ZSTD_INCLUDE_DIR})
 -  message(STATUS "Found ZSTD: ${ZSTD_LIBRARY}")
-+  target_link_libraries(rdkafka PUBLIC ${zstd_LIBRARY})
-+  target_include_directories(rdkafka PUBLIC ${zstd_INCLUDE_DIR})
-+  message(STATUS "Found ZSTD: ${zstd_LIBRARY}")
++  target_link_libraries(rdkafka PUBLIC CONAN_PKG::zstd)
  endif()
-
+ 
  if(WITH_SSL)
-@@ -197,8 +197,8 @@ if(WITH_SSL)
-     add_dependencies(rdkafka bundled-ssl)
-   else()
-     find_package(OpenSSL REQUIRED)
--    target_include_directories(rdkafka PUBLIC ${OPENSSL_INCLUDE_DIR})
--    target_link_libraries(rdkafka PUBLIC OpenSSL::SSL OpenSSL::Crypto)
-+    target_include_directories(rdkafka PUBLIC ${OpenSSL_INCLUDE_DIR})
-+    target_link_libraries(rdkafka PUBLIC OpenSSL::OpenSSL)
-   endif()
+@@ -219,8 +217,7 @@ if(WITH_LIBDL)
  endif()
-
-@@ -210,8 +210,9 @@ find_package(Threads REQUIRED)
- target_link_libraries(rdkafka PUBLIC Threads::Threads)
-
- if(WITH_SASL_CYRUS)
--  target_include_directories(rdkafka PUBLIC ${SASL_INCLUDE_DIRS})
--  target_link_libraries(rdkafka PUBLIC ${SASL_LIBRARIES})
-+  find_package(cyrus-sasl REQUIRED)
-+  target_include_directories(rdkafka PUBLIC ${cyrus-sasl_INCLUDE_DIRS})
-+  target_link_libraries(rdkafka PUBLIC ${cyrus-sasl_LIBRARIES})
- endif()
-
- if(WITH_LIBDL)
-@@ -219,8 +220,8 @@ if(WITH_LIBDL)
- endif()
-
+ 
  if(WITH_LZ4_EXT)
 -  target_include_directories(rdkafka PUBLIC ${LZ4_INCLUDE_DIRS})
 -  target_link_libraries(rdkafka PUBLIC LZ4::LZ4)
-+  target_include_directories(rdkafka PUBLIC ${lz4_INCLUDE_DIRS})
-+  target_link_libraries(rdkafka PUBLIC lz4::lz4)
++  target_link_libraries(rdkafka PUBLIC CONAN_PKG::lz4)
  endif()
-
+ 
  # Set up path to these sources for other sub-projects (tests, examples)
