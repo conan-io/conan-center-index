@@ -11,9 +11,8 @@ class VulkanLoaderConan(ConanFile):
     homepage = "https://github.com/KhronosGroup/Vulkan-Loader"
     url = "https://github.com/conan-io/conan-center-index"
     license = "Apache-2.0"
-    exports_sources = ["CMakeLists.txt"]
-    settings = "os", "arch", "build_type", "compiler"
-    generators = "cmake", "cmake_find_package"
+
+    settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
@@ -31,6 +30,8 @@ class VulkanLoaderConan(ConanFile):
         "with_wsi_directfb": False,
     }
 
+    exports_sources = "CMakeLists.txt"
+    generators = "cmake", "cmake_find_package"
     _cmake = None
 
     @property
@@ -51,6 +52,8 @@ class VulkanLoaderConan(ConanFile):
             del self.options.with_wsi_directfb
 
     def configure(self):
+        if self.options.shared:
+            del self.options.fPIC
         del self.settings.compiler.libcxx
         del self.settings.compiler.cppstd
         if self.settings.os == "Linux":
@@ -63,8 +66,6 @@ class VulkanLoaderConan(ConanFile):
 
         if self.settings.os not in self._apple_os and not self.options.shared:
             raise ConanInvalidConfiguration("Static builds are not supported on {}".format(self.settings.os))
-        if self.options.shared:
-            del self.options.fPIC
 
     def requirements(self):
         self.requires("vulkan-headers/{}".format(self.version))
@@ -81,7 +82,6 @@ class VulkanLoaderConan(ConanFile):
     def _configure_cmake(self):
         if self._cmake:
             return self._cmake
-
         self._cmake = CMake(self)
         self._cmake.definitions["BUILD_TESTS"] = False
         if self.settings.os == "Linux":
@@ -91,7 +91,6 @@ class VulkanLoaderConan(ConanFile):
             self._cmake.definitions["BUILD_WSI_DIRECTFB_SUPPORT"] = self.options.with_wsi_directfb
         if self.settings.os in self._apple_os:
             self._cmake.definitions["BUILD_STATIC_LOADER"] = not self.options.shared
-
         self._cmake.configure()
         return self._cmake
 
