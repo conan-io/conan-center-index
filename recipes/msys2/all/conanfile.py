@@ -29,11 +29,6 @@ class MSYS2Conan(ConanFile):
     def build_requirements(self):
         self.build_requires("7zip/19.00")
 
-    def source(self):
-        # build tools have to download files in build method when the
-        # source files downloaded will be different based on architecture or OS
-        pass
-
     def _download(self, url, sha256):
         from six.moves.urllib.parse import urlparse
         filename = os.path.basename(urlparse(url[0]).path)
@@ -44,7 +39,7 @@ class MSYS2Conan(ConanFile):
     def _msys_dir(self):
         return "msys64" if (tools.Version(self.version) >= "20210105" or self.settings.arch == "x86_64") else "msys32"
 
-    def build(self):
+    def source(self):
         arch = 1 if self.settings.arch == "x86" else 0  # index in the sources list
         filename = self._download(**self.conan_data["sources"][self.version][arch])
         tar_name = filename.replace(".xz", "")
@@ -53,6 +48,7 @@ class MSYS2Conan(ConanFile):
         os.unlink(filename)
         os.unlink(tar_name)
 
+    def build(self):
         packages = []
         if self.options.packages:
             packages.extend(str(self.options.packages).split(","))
