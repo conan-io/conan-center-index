@@ -29,7 +29,7 @@ class JwasmConan(ConanFile):
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
-        os.rename(self.name + "-" + self.version, self._source_subfolder)
+        os.rename("JWasm-" + self.version, self._source_subfolder)
 
     def _patch_sources(self):
         tools.replace_in_file(os.path.join(self._source_subfolder, "CMakeLists.txt"),
