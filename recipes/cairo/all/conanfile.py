@@ -205,6 +205,7 @@ class CairoConan(ConanFile):
             self.cpp_info.components["cairo_"].requires.append("freetype::freetype")
 
         if self.settings.os == "Windows":
+            self.cpp_info.components["cairo_"].system_libs.extend(['gdi32','msimg32','user32'])
             if not self.options.shared:
                 self.cpp_info.components["cairo_"].defines.append('CAIRO_WIN32_STATIC_BUILD=1')
         else:
