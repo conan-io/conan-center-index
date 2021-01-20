@@ -51,6 +51,10 @@ class ImaglConan(ConanFile):
         else:
             self.output.warn("imagl requires C++20. Your compiler is unknown. Assuming it supports C++20.")
 
+    def config_options(self):
+        if self.settings.os == "Windows":
+            del self.options.fPIC
+
     def requirements(self):
         if self.options.with_png:
             self.requires("libpng/1.6.37")
@@ -79,3 +83,4 @@ class ImaglConan(ConanFile):
         self.cpp_info.libs = ["imaGL{}{}".format(debug_suffix, static_suffix)]
         if not self.options.shared:
             self.cpp_info.defines = ["IMAGL_STATIC=1"]
+
