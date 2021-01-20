@@ -1,8 +1,6 @@
+import os
 from conans import ConanFile, tools
 from conans.errors import ConanInvalidConfiguration
-from conans.tools import Version
-from collections import namedtuple
-import os
 
 
 class MingwConan(ConanFile):
