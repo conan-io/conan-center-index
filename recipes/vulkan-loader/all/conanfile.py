@@ -22,7 +22,7 @@ class VulkanLoaderConan(ConanFile):
         "with_wsi_directfb": [True, False],
     }
     default_options = {
-        "shared": True,
+        "shared": False,
         "fPIC": True,
         "with_wsi_xcb": True,
         "with_wsi_xlib": True,
@@ -50,6 +50,9 @@ class VulkanLoaderConan(ConanFile):
             del self.options.with_wsi_xlib
             del self.options.with_wsi_wayland
             del self.options.with_wsi_directfb
+        # default shared on non-Apple OS
+        if not tools.is_apple_os(self.settings.os):
+            self.options.shared = True
 
     def configure(self):
         if self.options.shared:
