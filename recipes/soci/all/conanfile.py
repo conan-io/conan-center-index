@@ -78,22 +78,22 @@ class SociConan(ConanFile):
             raise ConanInvalidConfiguration("{} requires a {} version >= {}".format(self.name, compiler, compiler_version))
 
     def requirements(self):
-        prefix  = "Dependencies for "
-        message = " not configured in this conan package."
+        prefix  = "Dependencies for"
+        message = "not configured in this conan package."
 
         if self.options.with_sqlite3:
             self.requires("sqlite3/3.33.0")
         if self.options.with_db2:
             # self.requires("db2/0.0.0") # TODO add support for db2
-            raise ConanInvalidConfiguration(prefix + "DB2" + message)
+            raise ConanInvalidConfiguration("{} DB2 {} ".format(prefix, message))
         if self.options.with_odbc:
             self.requires("odbc/2.3.7")
         if self.options.with_oracle:
             # self.requires("oracle_db/0.0.0") # TODO add support for oracle
-            raise ConanInvalidConfiguration(prefix + "ORACLE" + message)
+            raise ConanInvalidConfiguration("{} ORACLE {} ".format(prefix, message))
         if self.options.with_firebird:
             # self.requires("firebird/0.0.0") # TODO add support for firebird
-            raise ConanInvalidConfiguration(prefix + "firebird" + message)
+            raise ConanInvalidConfiguration("{} firebird {} ".format(prefix, message))
         if self.options.with_mysql:
             self.requires("libmysqlclient/8.0.17")
         if self.options.with_postgresql:
@@ -152,20 +152,31 @@ class SociConan(ConanFile):
         self.cpp_info.libdirs       = ['lib', 'lib64']
         self.cpp_info.builddirs     = ['cmake']
 
-        self.cpp_info.libs = [""]
+        self.cpp_info.libs = ["soci_core"]
+        if self.options.empty:
+            self.cpp_info.libs.append("soci_empty")
+        if self.options.with_sqlite3:
+            self.cpp_info.libs.append("soci_sqlite3")
+        if self.options.with_oracle:
+            self.cpp_info.libs.append("soci_oracle")
+        if self.options.with_mysql:
+            self.cpp_info.libs.append("soci_mysql")
+        if self.options.with_postgresql:
+            self.cpp_info.libs.append("soci_postgresql")
 
-        if self.options.shared:
-            self.cpp_info.libs.append("soci_core")
-            if self.options.empty:
-                self.cpp_info.libs.append("soci_empty")
-            if self.options.with_sqlite3:
-                self.cpp_info.libs.append("soci_sqlite3")
-            if self.options.with_oracle:
-                self.cpp_info.libs.append("soci_oracle")
-            if self.options.with_mysql:
-                self.cpp_info.libs.append("soci_mysql")
-            if self.options.with_postgresql:
-                self.cpp_info.libs.append("soci_postgresql")
+        if self.settings.os == "Windows":
+            for index, name in enumerate(self.cpp_info.libs):
+                self.cpp_info.libs[index] = self._rename_library_win(name)
 
         if self._cmake:
             self._cmake.install()
+
+    def _rename_library_win(self, name):
+        if self.options.shared:
+            prefix = ""
+        else:
+            prefix = "lib"
+
+        abi_version = tools.Version(self.version)
+        sufix = "_{}_{}".format(abi_version.major, abi_version.minor)
+        return "{}{}{}".format(prefix, name, sufix)
