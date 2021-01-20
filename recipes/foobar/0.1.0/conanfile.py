@@ -24,8 +24,8 @@ class FoobarConan(ConanFile):
             del self.options.fPIC
 
     def validate(self):
-        if self.settings.os == "Windows":
-            raise ConanInvalidConfiguration("Window not supported")
+        if self.settings.os != "Windows":
+            raise ConanInvalidConfiguration("Window only")
 
     def build(self):
         cmake = CMake(self)
@@ -40,7 +40,7 @@ class FoobarConan(ConanFile):
         self.copy("*.so", dst="lib", keep_path=False)
         self.copy("*.a", dst="lib", keep_path=False)
         os.mkdir(os.path.join(self.package_folder, "licenses"))
-        with open(os.path.join(self.package_folder, "licenses", "LICENSE")) as fd:
+        with open(os.path.join(self.package_folder, "licenses", "LICENSE"), "w") as fd:
             fd.write("Fake")
 
 
