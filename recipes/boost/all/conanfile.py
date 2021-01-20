@@ -139,7 +139,6 @@ class BoostConan(ConanFile):
         return {
             "gcc": 6,
             "clang": 6,
-            "apple-clang": 12,  # guess
             "Visual Studio": 14,  # guess
         }.get(str(self.settings.compiler))
 
@@ -149,7 +148,6 @@ class BoostConan(ConanFile):
         return {
             "gcc": 5,
             "clang": 5,
-            "apple-clang": 12,  # guess
             "Visual Studio": 14,  # guess
         }.get(str(self.settings.compiler))
 
@@ -229,6 +227,11 @@ class BoostConan(ConanFile):
                     self.options.without_fiber = True
                     self.options.without_json = True
                     self.options.without_nowide = True
+            else:
+                self.options.without_fiber = True
+                self.options.without_json = True
+                self.options.without_nowide = True
+
 
         # Remove options not supported by this version of boost
         for dep_name in CONFIGURE_OPTIONS:
