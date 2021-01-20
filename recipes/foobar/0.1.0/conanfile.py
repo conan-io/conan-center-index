@@ -1,3 +1,4 @@
+import os
 from conans import ConanFile, CMake
 from conans.errors import ConanInvalidConfiguration
 
@@ -18,6 +19,10 @@ class FoobarConan(ConanFile):
     generators = "cmake"
     exports_sources = "src/*"
 
+    def configure(self):
+        if self.options.shared:
+            del self.options.fPIC
+
     def validate(self):
         if self.settings.os == "Windows":
             raise ConanInvalidConfiguration("Window not supported")
@@ -34,6 +39,10 @@ class FoobarConan(ConanFile):
         self.copy("*.dylib*", dst="lib", keep_path=False)
         self.copy("*.so", dst="lib", keep_path=False)
         self.copy("*.a", dst="lib", keep_path=False)
+        os.mkdir(os.path.join(self.package_folder, "licenses"))
+        with open(os.path.join(self.package_folder, "licenses", "LICENSE")) as fd:
+            fd.write("Fake")
+
 
     def package_info(self):
         self.cpp_info.libs = ["foobar"]
