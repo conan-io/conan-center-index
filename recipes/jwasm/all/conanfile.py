@@ -12,7 +12,7 @@ class JwasmConan(ConanFile):
 
     settings = "os", "arch", "compiler", "build_type"
 
-    exports_sources = "CMakeLists.txt"
+    exports_sources = "CMakeLists.txt", "patches/*"
     generators = "cmake"
 
     @property
@@ -31,6 +31,8 @@ class JwasmConan(ConanFile):
         os.rename("JWasm-" + self.version, self._source_subfolder)
 
     def _patch_sources(self):
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            tools.patch(**patch)
         tools.replace_in_file(os.path.join(self._source_subfolder, "CMakeLists.txt"),
                               'string(REPLACE "/MD" "/MT" ${CompilerFlag} "${${CompilerFlag}}")',
                               "")
