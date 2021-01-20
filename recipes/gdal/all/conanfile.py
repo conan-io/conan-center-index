@@ -211,7 +211,7 @@ class GdalConan(ConanFile):
         self.requires("json-c/0.15")
         self.requires("libgeotiff/1.6.0")
         # self.requires("libopencad/0.0.2") # TODO: use conan recipe when available instead of internal one
-        self.requires("libtiff/4.1.0")
+        self.requires("libtiff/4.2.0")
         self.requires("proj/7.2.1")
         if tools.Version(self.version) >= "3.1.0":
             self.requires("flatbuffers/1.12.0")
@@ -262,7 +262,7 @@ class GdalConan(ConanFile):
         # if self.options.with_netcdf:
         #     self.requires("netcdf-c/4.7.4")
         if self.options.with_jasper:
-            self.requires("jasper/2.0.23")
+            self.requires("jasper/2.0.24")
         if self.options.with_openjpeg:
             self.requires("openjpeg/2.4.0")
         # if self.options.with_fgdb:
