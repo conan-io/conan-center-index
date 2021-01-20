@@ -1,24 +1,16 @@
+import os
 from conans import ConanFile, tools
-from conans.errors import ConanException
-from io import StringIO
 
-class TestPackage(ConanFile):
-        
+
+class MinGWTestConan(ConanFile):
+    generators = "gcc"
+    settings = "os", "arch", "compiler", "build_type"
+
+    def build(self):
+        source_file = os.path.join(self.source_folder, "main.cpp")
+        self.run("gcc {} @conanbuildinfo.gcc -lstdc++ -o main".format(source_file), run_environment=True)
+
     def test(self):
-        bash = tools.which("bash.exe")
-        
-        if bash:
-            self.output.info("using bash.exe from: " + bash)
-        else:
-            raise ConanException("No instance of bash.exe could be found on %PATH%")
-        
-        self.run('bash.exe -c ^"make --version^"')
-        self.run('bash.exe -c ^"! test -f /bin/link^"')
-        self.run('bash.exe -c ^"! test -f /usr/bin/link^"')
-
-        secret_value = "SECRET_CONAN_PKG_VARIABLE"
-        with tools.environment_append({"PKG_CONFIG_PATH": secret_value}):
-            output = StringIO()
-            self.run('bash.exe -c "echo $PKG_CONFIG_PATH"', output=output)
-            print(output.getvalue())
-            assert secret_value in output.getvalue()
+        if not tools.cross_building(self.settings):
+            self.run("gcc --version", run_environment=True)
+            self.run("main")

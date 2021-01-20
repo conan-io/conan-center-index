@@ -1,34 +1,19 @@
 sources:
-  "20161025":
-    - url: [
-             "http://repo.msys2.org/distrib/i686/msys2-base-i686-20161025.tar.xz",
-             "https://sourceforge.net/projects/msys2/files/Base/i686/msys2-base-i686-20161025.tar.xz",
-      ]
-      sha256: "8bafd3d52f5a51528a8671c1cae5591b36086d6ea5b1e76e17e390965cf6768f"
-    - url: [
-             "http://repo.msys2.org/distrib/x86_64/msys2-base-x86_64-20161025.tar.xz",
-             "https://sourceforge.net/projects/msys2/files/Base/x86_64/msys2-base-x86_64-20161025.tar.xz"
-    ]
-      sha256: "bb1f1a0b35b3d96bf9c15092da8ce969a84a134f7b08811292fbc9d84d48c65d"
-  "20190524":
-    - url: [
-             "http://repo.msys2.org/distrib/i686/msys2-base-i686-20190524.tar.xz",
-             "https://sourceforge.net/projects/msys2/files/Base/i686/msys2-base-i686-20190524.tar.xz",
-    ]
-      sha256: "7a463afae8bf6ce8262f010a9a1648d056ad5cefc66d6eb69fe948c57d4ccb53"
-    - url: [
-             "http://repo.msys2.org/distrib/x86_64/msys2-base-x86_64-20190524.tar.xz",
-             "https://sourceforge.net/projects/msys2/files/Base/x86_64/msys2-base-x86_64-20190524.tar.xz",
-      ]
-      sha256: "168e156fa9f00d90a8445676c023c63be6e82f71487f4e2688ab5cb13b345383"
-  "20200517":
-    - url: [
-             "http://repo.msys2.org/distrib/i686/msys2-base-i686-20200517.tar.xz",
-             "https://sourceforge.net/projects/msys2/files/Base/i686/msys2-base-i686-20200517.tar.xz",
-    ]
-      sha256: "4dbdde708a4bcf3c056e8f4f28b1b0e7a3210ffacc6296a7d11fdaf076fd431e"
-    - url: [
-             "http://repo.msys2.org/distrib/x86_64/msys2-base-x86_64-20200517.tar.xz",
-             "https://sourceforge.net/projects/msys2/files/Base/x86_64/msys2-base-x86_64-20200517.tar.xz",
-      ]
-      sha256: "c4443113497acb2d2e285d40b929fc55f33f8f669902595ecdf66a655b63dc60"
+  "cci.20210120":
+    url:
+      "8":
+        x86_64:
+          posix:
+            seh:
+              url: "http://sourceforge.net/projects/mingw-w64/files/Toolchains%20targetting%20Win64/Personal%20Builds/mingw-builds/8.1.0/threads-posix/seh/x86_64-8.1.0-release-posix-seh-rt_v6-rev0.7z"
+              sha256: "853970527b5de4a55ec8ca4d3fd732c00ae1c69974cc930c82604396d43e79f8"
+            sjlj:
+              url: "http://sourceforge.net/projects/mingw-w64/files/Toolchains%20targetting%20Win64/Personal%20Builds/mingw-builds/8.1.0/threads-posix/sjlj/x86_64-8.1.0-release-posix-sjlj-rt_v6-rev0.7z"
+              sha256: "0e994b33dc92576ba92377e2c18c0f96a04c684fa2d7a3546890819964275a1f"
+          win32:
+            seh:
+              url: "http://sourceforge.net/projects/mingw-w64/files/Toolchains%20targetting%20Win64/Personal%20Builds/mingw-builds/8.1.0/threads-win32/seh/x86_64-8.1.0-release-win32-seh-rt_v6-rev0.7z"
+              sha256: "73797b9a1d0b007dbdd6f010e6064dc0aa4df835b042f6947f73a3bf9cc348c5"
+            sjlj:
+              url: "https://sourceforge.net/projects/mingw-w64/files/Toolchains%20targetting%20Win64/Personal%20Builds/mingw-builds/7.3.0/threads-win32/sjlj/x86_64-7.3.0-release-win32-sjlj-rt_v5-rev0.7z"
+              sha256: "f5d3add9afe6ef0b8ff07250076aa1410f238bcbf15b45c245a06cbf7111e645"
