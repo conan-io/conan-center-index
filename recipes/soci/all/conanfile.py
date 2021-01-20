@@ -137,19 +137,21 @@ class SociConan(ConanFile):
         cmake.build()
 
     def package(self):
-        include_folder  = os.path.join(self._source_subfolder, "include")
-
-        self.copy("*.h",    dst="include", src=include_folder)
+        self.copy("LICENSE_1_0.txt", dst="licenses", src=self._source_subfolder)
         self.copy("*soci*.lib", dst="lib", src="lib", keep_path=False, symlinks=True)
         self.copy("*soci*.so*", dst="lib", src="lib", keep_path=False, symlinks=True)
         self.copy("*.a",        dst="lib", src="lib", keep_path=False, symlinks=True)
         self.copy("*.dylib",    dst="lib", src="lib", keep_path=False, symlinks=True)
         self.copy("*.dll",      dst="bin", src="bin", keep_path=False, symlinks=True)
-        self.copy("LICENSE_1_0.txt", dst="licenses", src=self._source_subfolder)
+
+        if self._cmake:
+            self._cmake.install()
+            tools.rmdir(os.path.join(self.package_folder, "cmake"))
+            tools.rmdir(os.path.join(self.package_folder, "lib64"))
 
     def package_info(self):
         self.cpp_info.includedirs   = ['include']
-        self.cpp_info.libdirs       = ['lib', 'lib64']
+        self.cpp_info.libdirs       = ['lib']
         self.cpp_info.builddirs     = ['cmake']
 
         self.cpp_info.libs = ["soci_core"]
@@ -167,9 +169,6 @@ class SociConan(ConanFile):
         if self.settings.os == "Windows":
             for index, name in enumerate(self.cpp_info.libs):
                 self.cpp_info.libs[index] = self._rename_library_win(name)
-
-        if self._cmake:
-            self._cmake.install()
 
     def _rename_library_win(self, name):
         if self.options.shared:
