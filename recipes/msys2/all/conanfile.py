@@ -2,7 +2,6 @@ from conans import ConanFile, tools
 from conans.errors import ConanInvalidConfiguration
 import os
 import shutil
-import platform
 
 
 class MSYS2Conan(ConanFile):
@@ -22,9 +21,9 @@ class MSYS2Conan(ConanFile):
     settings = "os", "arch"
 
     def validate(self):
-        if not tools.os_info.is_windows:
+        if self.settings.os != "Windows":
             raise ConanInvalidConfiguration("Only Windows supported")
-        if tools.Version(self.version) >= "20210105" and "86" in platform.machine():
+        if tools.Version(self.version) >= "20210105" and self.settings.arch != "x86_64":
             raise ConanInvalidConfiguration("Only Windows x64 supported")
 
     def build_requirements(self):
