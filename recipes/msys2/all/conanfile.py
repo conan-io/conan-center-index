@@ -26,9 +26,6 @@ class MSYS2Conan(ConanFile):
         if tools.Version(self.version) >= "20210105" and self.settings.arch != "x86_64":
             raise ConanInvalidConfiguration("Only Windows x64 supported")
 
-    def build_requirements(self):
-        self.build_requires("7zip/19.00")
-
     def _download(self, url, sha256):
         from six.moves.urllib.parse import urlparse
         filename = os.path.basename(urlparse(url[0]).path)
@@ -42,11 +39,7 @@ class MSYS2Conan(ConanFile):
     def source(self):
         arch = 1 if self.settings.arch == "x86" else 0  # index in the sources list
         filename = self._download(**self.conan_data["sources"][self.version][arch])
-        tar_name = filename.replace(".xz", "")
-        self.run("7z.exe x {0}".format(filename))
-        self.run("7z.exe x {0}".format(tar_name))
-        os.unlink(filename)
-        os.unlink(tar_name)
+        tools.unzip(filename)
 
     def build(self):
         packages = []
