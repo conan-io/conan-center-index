@@ -38,6 +38,10 @@ class VulkanLoaderConan(ConanFile):
     def _source_subfolder(self):
         return "source_subfolder"
 
+    @property
+    def _is_mingw(self):
+        return self.settings.os == "Windows" and self.settings.compiler == "gcc"
+
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
@@ -82,6 +86,11 @@ class VulkanLoaderConan(ConanFile):
         tools.replace_in_file(os.path.join(self._source_subfolder, "loader", "CMakeLists.txt"),
                               "if(${configuration} MATCHES \"/MD\")",
                               "if(FALSE)")
+        # FIXME: might work with a jwasm recipe in build_requirement for MinGW
+        if self._is_mingw:
+            tools.replace_in_file(os.path.join(self._source_subfolder, "loader", "CMakeLists.txt"),
+                                  "if(CMAKE_ASM_MASM_COMPILER_WORKS OR JWASM_FOUND)",
+                                  "if(FALSE)")
 
     def _configure_cmake(self):
         if self._cmake:
@@ -100,6 +109,8 @@ class VulkanLoaderConan(ConanFile):
         if tools.is_apple_os(self.settings.os):
             self._cmake.definitions["BUILD_STATIC_LOADER"] = not self.options.shared
         self._cmake.definitions["BUILD_LOADER"] = True
+        if self.settings.os == "Windows": # FIXME: might work with a jwasm recipe in build_requirement for MinGW
+            self._cmake.definitions["USE_MASM"] = not self.settings.compiler == "gcc"
         self._cmake.configure()
         return self._cmake
 
