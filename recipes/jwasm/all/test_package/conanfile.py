@@ -14,4 +14,4 @@ class TestPackageConan(ConanFile):
                 bin_file = os.path.join(self.build_folder, "Lin64_1")
                 self.run("jwasm -elf64 -Fo={obj} {asm}".format(asm=asm_file, obj=obj_file), run_environment=True)
                 self.run("ld {obj} -o {bin}".format(obj=obj_file, bin=bin_file))
-                self.run(bin_file)
+                self.run(bin_file, ignore_errors=True)
