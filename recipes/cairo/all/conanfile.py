@@ -81,7 +81,7 @@ class CairoConan(ConanFile):
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
-        os.rename('cairo-%s' % self.version, self._source_subfolder)        
+        os.rename('cairo-%s' % self.version, self._source_subfolder)
 
     def build(self):
         for patch in self.conan_data["patches"][self.version]:
@@ -118,7 +118,7 @@ class CairoConan(ConanFile):
                         "FREETYPE_PATH={}".format(self.deps_cpp_info['freetype'].rootpath),
                         "GOBJECT_PATH={}".format(self.deps_cpp_info['glib'].rootpath)
                     ]
-                    
+
                     env_build.make(args=args)
                     env_build.make(args=['-C', os.path.join('util', 'cairo-gobject')] + args)
 
@@ -153,7 +153,7 @@ class CairoConan(ConanFile):
             if self.options.with_freetype:
                 tools.replace_in_file(os.path.join(self.source_folder, self._source_subfolder, "src", "cairo-ft-font.c"),
                                       '#if HAVE_UNISTD_H', '#ifdef HAVE_UNISTD_H')
-            
+
             with tools.environment_append({"NOCONFIGURE": "1"}):
                 self.run("./autogen.sh", win_bash=tools.os_info.is_windows, run_environment=True)
             env_build = self._get_env_build()
@@ -165,7 +165,7 @@ class CairoConan(ConanFile):
             src = os.path.join(self._source_subfolder, 'src')
             cairo_gobject = os.path.join(self._source_subfolder, 'util', 'cairo-gobject')
             inc = os.path.join('include', 'cairo')
-            self.copy(pattern="cairo-version.h", dst=inc, src=self._source_subfolder)
+            self.copy(pattern="cairo-version.h", dst=inc, src=(src if tools.Version(self.version) >= "1.17.4" else self._source_subfolder))
             self.copy(pattern="cairo-features.h", dst=inc, src=src)
             self.copy(pattern="cairo.h", dst=inc, src=src)
             self.copy(pattern="cairo-deprecated.h", dst=inc, src=src)
@@ -191,7 +191,7 @@ class CairoConan(ConanFile):
                 env_build = self._get_env_build()
                 env_build.install()
         tools.remove_files_by_mask(self.package_folder, "*.la")
-        
+
         self.copy("COPYING*", src=self._source_subfolder, dst="licenses", keep_path=False)
         tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
 
@@ -203,8 +203,9 @@ class CairoConan(ConanFile):
         self.cpp_info.components["cairo_"].requires = ["pixman::pixman", "libpng::libpng", "zlib::zlib"]
         if self.options.with_freetype:
             self.cpp_info.components["cairo_"].requires.append("freetype::freetype")
-        
+
         if self.settings.os == "Windows":
+            self.cpp_info.components["cairo_"].system_libs.extend(['gdi32','msimg32','user32'])
             if not self.options.shared:
                 self.cpp_info.components["cairo_"].defines.append('CAIRO_WIN32_STATIC_BUILD=1')
         else:
@@ -222,6 +223,8 @@ class CairoConan(ConanFile):
                 self.cpp_info.components["cairo_"].requires.extend(["xorg::xcb-render"])
             if self.options.with_xlib:
                 self.cpp_info.components["cairo_"].requires.extend(["xorg::x11", "xorg::xext"])
+        if tools.is_apple_os(self.settings.os):
+            self.cpp_info.components["cairo_"].frameworks.append("CoreGraphics")
 
 
         if self.settings.os == "Windows":
@@ -246,3 +249,9 @@ class CairoConan(ConanFile):
             if self.options.with_xlib:
                 self.cpp_info.components["cairo-xlib"].names["pkg_config"] = "cairo-xlib"
                 self.cpp_info.components["cairo-xlib"].requires = ["cairo_", "xorg::x11", "xorg::xext"]
+
+        if tools.is_apple_os(self.settings.os):
+            self.cpp_info.components["cairo-quartz"].names["pkg_config"] = "cairo-quartz"
+            self.cpp_info.components["cairo-quartz"].requires = ["cairo_"]
+            self.cpp_info.components["cairo-quartz-font"].names["pkg_config"] = "cairo-quartz-font"
+            self.cpp_info.components["cairo-quartz-font"].requires = ["cairo_"]

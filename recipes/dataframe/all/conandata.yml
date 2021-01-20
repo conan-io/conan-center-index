@@ -1,4 +1,7 @@
 sources:
+  "1.15.0":
+    sha256: 68eb3fca66dff3f8473722d561e9391800957a09c2c6d4dde5f9ad37cbf88954
+    url: https://github.com/hosseinmoein/DataFrame/archive/1.15.0.tar.gz
   "1.14.0":
     sha256: 45991cc16e478b24641d0548aab24fd59ad534ada30fca8776fd9990e1914ac7
     url: https://github.com/hosseinmoein/DataFrame/archive/1.14.0.tar.gz

@@ -85,8 +85,35 @@ class CjsonConan(ConanFile):
         tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
         tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
 
+        targets = [{"official": "cjson", "namespaced": "cJSON::cjson"}]
+        if self.options.utils:
+            targets.append({"official": "cjson_utils", "namespaced": "cJSON::cjson_utils"})
+        self._create_module_official_cmake_targets(
+            os.path.join(self.package_folder, self._module_folder, self._module_file),
+            targets
+        )
+
+    @staticmethod
+    def _create_module_official_cmake_targets(module_file, targets):
+        content = ""
+        for target in targets:
+            content += (
+                "if(TARGET {namespaced} AND NOT TARGET {official})\n"
+                "    add_library({official} INTERFACE IMPORTED)\n"
+                "    target_link_libraries({official} INTERFACE {namespaced})\n"
+                "endif()\n"
+            ).format(official=target["official"], namespaced=target["namespaced"])
+        tools.save(module_file, content)
+
+    @property
+    def _module_folder(self):
+        return os.path.join("lib", "cmake")
+
+    @property
+    def _module_file(self):
+        return "conan-official-{}-targets.cmake".format(self.name)
+
     def package_info(self):
-        # FIXME: CMake imported targets shouldn't be namespaced (requires https://github.com/conan-io/conan/issues/7615)
         self.cpp_info.names["cmake_find_package"] = "cJSON"
         self.cpp_info.names["cmake_find_package_multi"] = "cJSON"
 
@@ -94,6 +121,8 @@ class CjsonConan(ConanFile):
         self.cpp_info.components["_cjson"].names["cmake_find_package_multi"] = "cjson"
         self.cpp_info.components["_cjson"].names["pkg_config"] = "libcjson"
         self.cpp_info.components["_cjson"].libs = ["cjson"]
+        self.cpp_info.components["_cjson"].builddirs = [self._module_folder]
+        self.cpp_info.components["_cjson"].build_modules = [os.path.join(self._module_folder, self._module_file)]
         if self.settings.os == "Linux":
             self.cpp_info.components["_cjson"].system_libs = ["m"]
 
@@ -103,3 +132,5 @@ class CjsonConan(ConanFile):
             self.cpp_info.components["cjson_utils"].names["pkg_config"] = "libcjson_utils"
             self.cpp_info.components["cjson_utils"].libs = ["cjson_utils"]
             self.cpp_info.components["cjson_utils"].requires = ["_cjson"]
+            self.cpp_info.components["cjson_utils"].builddirs = [self._module_folder]
+            self.cpp_info.components["cjson_utils"].build_modules = [os.path.join(self._module_folder, self._module_file)]

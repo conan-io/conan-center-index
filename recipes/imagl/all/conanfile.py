@@ -32,7 +32,7 @@ class ImaglConan(ConanFile):
     def _compilers_minimum_version(self):
         return {
             "gcc": "9",
-            "Visual Studio": "16",
+            "Visual Studio": "16.5",
             "clang": "10",
             "apple-clang": "11"
         }

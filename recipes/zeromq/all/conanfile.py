@@ -15,11 +15,13 @@ class ZeroMQConan(ConanFile):
         "shared": [True, False],
         "fPIC": [True, False],
         "encryption": [None, "libsodium", "tweetnacl"],
+        "poller": [None, "kqueue", "epoll", "devpoll", "pollset", "poll", "select"]
     }
     default_options = {
         "shared": False,
         "fPIC": True,
         "encryption": "libsodium",
+        "poller": None,
     }
     generators = "cmake", "cmake_find_package"
 
@@ -63,6 +65,8 @@ class ZeroMQConan(ConanFile):
         self._cmake.definitions["ENABLE_CPACK"] = False
         self._cmake.definitions["WITH_DOCS"] = False
         self._cmake.definitions["WITH_DOC"] = False
+        if self.options.poller:
+            self._cmake.definitions["POLLER"] = self.options.poller
         self._cmake.configure(build_folder=self._build_subfolder)
         return self._cmake
 
