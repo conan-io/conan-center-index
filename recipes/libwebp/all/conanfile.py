@@ -81,10 +81,6 @@ class LibwebpConan(ConanFile):
         tools.replace_in_file(os.path.join(self._source_subfolder, "CMakeLists.txt"),
                               "if(WEBP_BUILD_GIF2WEBP OR WEBP_BUILD_IMG2WEBP)",
                               "if(TRUE)")
-        # fix for QNX that does supply pthread with its lib
-        tools.replace_in_file(os.path.join(self._source_subfolder, "cmake", "deps.cmake"),
-                            'if(CMAKE_USE_PTHREADS_INIT)',
-                            'if(CMAKE_USE_PTHREADS_INIT AND NOT CMAKE_SYSTEM_NAME STREQUAL "QNX")')
         cmake = self._configure_cmake()
         cmake.build()
 
