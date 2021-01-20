@@ -7,7 +7,7 @@ index f19c0378..7b2d7cd7 100644
  find_package(Threads)
  if(Threads_FOUND)
 -  if(CMAKE_USE_PTHREADS_INIT)
-+  # work around cmake bug on QNX (https://cmake.org/Bug/view.php?id=11333)
++  # work around cmake bug on QNX (https://chromium-review.googlesource.com/c/webm/libwebp/+/2637274)
 +  if(CMAKE_USE_PTHREADS_INIT AND NOT CMAKE_SYSTEM_NAME STREQUAL "QNX")
      set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -pthread")
    endif()
