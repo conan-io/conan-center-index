@@ -2,3 +2,6 @@ sources:
   "3.1":
     url: "https://ftp.gnu.org/pub/gnu/gperf/gperf-3.1.tar.gz"
     sha256: "588546b945bba4b70b6a3a616e80b4ab466e3f33024a352fc2198112cdbb3ae2"
+  "cci.20201208":
+    url: "https://git.savannah.gnu.org/gitweb/?p=gperf.git;a=snapshot;h=556e87b5c52b0c03a1e7418f45225a9b664f83c5;sf=tgz"
+    sha256: "588546b945bba4b70b6a3a616e80b4ab466e3f33024a352fc2198112cdbb3ae2"   
