@@ -139,7 +139,6 @@ class BoostConan(ConanFile):
         return {
             "gcc": 6,
             "clang": 6,
-            "apple-clang": 12,  # guess
             "Visual Studio": 14,  # guess
         }.get(str(self.settings.compiler))
 
@@ -149,7 +148,6 @@ class BoostConan(ConanFile):
         return {
             "gcc": 5,
             "clang": 5,
-            "apple-clang": 12,  # guess
             "Visual Studio": 14,  # guess
         }.get(str(self.settings.compiler))
 
@@ -162,7 +160,7 @@ class BoostConan(ConanFile):
         dependencies_filepath = os.path.join(self.recipe_folder, "dependencies", self._dependency_filename)
         if not os.path.isfile(dependencies_filepath):
             raise ConanException("Cannot find {}".format(dependencies_filepath))
-        return yaml.load(open(dependencies_filepath))
+        return yaml.safe_load(open(dependencies_filepath))
 
     def _all_dependent_modules(self, name):
         dependencies = {name}
@@ -229,6 +227,11 @@ class BoostConan(ConanFile):
                     self.options.without_fiber = True
                     self.options.without_json = True
                     self.options.without_nowide = True
+            else:
+                self.options.without_fiber = True
+                self.options.without_json = True
+                self.options.without_nowide = True
+
 
         # Remove options not supported by this version of boost
         for dep_name in CONFIGURE_OPTIONS:

@@ -62,7 +62,7 @@ class CprConan(ConanFile):
 
         if self._supports_openssl and tools.is_apple_os(self.settings.os):
             self.options.with_openssl = False # Default libcurl in CCI is `with_ssl="darwin"` which is unclear if cpr supports this
-            
+
         # Make sure libcurl uses the same SSL implementation
         if self.options.get_safe("with_openssl", False):
             # self.options["libcurl"].with_openssl = True # deprecated in https://github.com/conan-io/conan-center-index/pull/2880
@@ -76,7 +76,7 @@ class CprConan(ConanFile):
 
         if self.options.get_safe("with_openssl", False) and self.options.get_safe("with_winssl", False):
             raise ConanInvalidConfiguration("cpr can not be built with both openssl and winssl")
-            
+
         if self.settings.compiler == "Visual Studio" and self.options.shared and "MT" in self.settings.compiler.runtime:
             raise ConanInvalidConfiguration("Visual Studio build for shared library with MT runtime is not supported")
 
@@ -110,7 +110,7 @@ class CprConan(ConanFile):
     def build(self):
         if self.options.get_safe("with_openssl", False) and self.options["libcurl"].with_ssl != "openssl":
             raise ConanInvalidConfiguration("cpr requires libcurl to be built with the option with_ssl='openssl'.")
-        if self.options.get_safe("with_winssl", False) and self.options["libcurl"].with_ssl != "openssl":
+        if self.options.get_safe("with_winssl", False) and self.options["libcurl"].with_ssl != "schannel":
             raise ConanInvalidConfiguration("cpr requires libcurl to be built with the option with_ssl='schannel'.")
 
         self._patch_sources()

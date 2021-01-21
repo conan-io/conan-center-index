@@ -35,6 +35,14 @@ class LibnameConan(ConanFile):
     def _build_subfolder(self):
         return "build_subfolder"
 
+    @property
+    def _gtk4(self):
+        return tools.Version("4.0.0") <= tools.Version(self.version) < tools.Version("5.0.0")
+    @property
+
+    def _gtk3(self):
+        return tools.Version("3.0.0") <= tools.Version(self.version) < tools.Version("4.0.0")
+
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
@@ -59,22 +67,31 @@ class LibnameConan(ConanFile):
             raise ConanInvalidConfiguration("GTK recipe is not yet compatible with Windows. Contributions are welcome.")
 
     def build_requirements(self):
-        self.build_requires("meson/0.54.2")
+        self.build_requires("meson/0.56.2")
         self.build_requires("pkgconf/1.7.3")
+        if self._gtk4:
+            self.build_requires("sassc/3.6.1")
 
     def requirements(self):
         self.requires("gdk-pixbuf/2.42.0")
         self.requires("glib/2.67.0")
         if self.settings.compiler != "Visual Studio":
             self.requires("cairo/1.17.2")
+        if self._gtk4:
+            self.requires("graphene/1.10.2")
         if self.settings.os == "Linux":
-            self.requires("at-spi2-atk/2.38.0")
-            if self.options.with_wayland:
+            if self._gtk4:
                 self.requires("xkbcommon/1.0.3")
+            if self._gtk3:
+                self.requires("at-spi2-atk/2.38.0")
+            if self.options.with_wayland:
+                if self._gtk3:
+                    self.requires("xkbcommon/1.0.3")
                 self.requires("wayland/1.18.0")
             if self.options.with_x11:
                 self.requires("xorg/system")
-        self.requires("atk/2.36.0")
+        if self._gtk3:
+            self.requires("atk/2.36.0")
         self.requires("libepoxy/1.5.4")
         if self.options.with_pango:
             self.requires("pango/1.48.0")
@@ -82,19 +99,21 @@ class LibnameConan(ConanFile):
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
         extracted_dir = self.name + "-" + self.version
-        os.rename(extracted_dir.replace("gtk", "gtk+"), self._source_subfolder)
+        if self._gtk3:
+            extracted_dir = extracted_dir.replace("gtk", "gtk+")
+        os.rename(extracted_dir, self._source_subfolder)
 
     def _configure_meson(self):
         meson = Meson(self)
         defs = {}
         if self.settings.os == "Linux":
-            defs["wayland_backend"] = "true" if self.options.with_wayland else "false"
-            defs["x11_backend"] = "true" if self.options.with_x11 else "false"
-        defs["introspection"] = "false"
+            defs["wayland_backend" if self._gtk3 else "wayland-backend"] = "true" if self.options.with_wayland else "false"
+            defs["x11_backend" if self._gtk3 else "x11-backend"] = "true" if self.options.with_x11 else "false"
+        defs["introspection"] = "false" if self._gtk3 else "disabled"
         defs["documentation"] = "false"
         defs["man-pages"] = "false"
-        defs["tests"] = "false"
-        defs["examples"] = "false"
+        defs["tests" if self._gtk3 else "build-tests"] = "false"
+        defs["examples" if self._gtk3 else "build-examples"] = "false"
         defs["demos"] = "false"
         defs["datadir"] = os.path.join(self.package_folder, "res", "share")
         defs["localedir"] = os.path.join(self.package_folder, "res", "share", "locale")
@@ -105,7 +124,8 @@ class LibnameConan(ConanFile):
         return meson
 
     def build(self):
-        tools.replace_in_file(os.path.join(self._source_subfolder, "meson.build"), "\ntest(\n", "\nfalse and test(\n")
+        if self._gtk3:
+            tools.replace_in_file(os.path.join(self._source_subfolder, "meson.build"), "\ntest(\n", "\nfalse and test(\n")
         with tools.environment_append(tools.RunEnvironment(self).vars):
             meson = self._configure_meson()
             meson.build()
@@ -113,44 +133,51 @@ class LibnameConan(ConanFile):
     def package(self):
         self.copy(pattern="LICENSE", dst="licenses", src=self._source_subfolder)
         meson = self._configure_meson()
-        with tools.environment_append({"PKG_CONFIG_PATH": self.install_folder}):
+        with tools.environment_append({
+            "PKG_CONFIG_PATH": self.install_folder,
+            "PATH": [os.path.join(self.package_folder, "bin")]}):
             meson.install()
 
         self.copy(pattern="COPYING", src=self._source_subfolder, dst="licenses")
         tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
 
     def package_info(self):
-        self.cpp_info.components["gdk-3.0"].libs = ["gdk-3"]
-        self.cpp_info.components["gdk-3.0"].includedirs = [os.path.join("include", "gtk-3.0")]
-        self.cpp_info.components["gdk-3.0"].requires = []
-        if self.options.with_pango:
-            self.cpp_info.components["gdk-3.0"].requires.extend(["pango::pango_", "pango::pangocairo"])
-        self.cpp_info.components["gdk-3.0"].requires.append("gdk-pixbuf::gdk-pixbuf")
-        if self.settings.compiler != "Visual Studio":
-            self.cpp_info.components["gdk-3.0"].requires.extend(["cairo::cairo", "cairo::cairo-gobject"])
-        if self.settings.os == "Linux":
-            self.cpp_info.components["gdk-3.0"].requires.extend(["glib::gio-unix-2.0", "cairo::cairo-xlib"])
-            if self.options.with_x11:
-                self.cpp_info.components["gdk-3.0"].requires.append("xorg::xorg")
-        self.cpp_info.components["gdk-3.0"].requires.append("libepoxy::libepoxy")
-        self.cpp_info.components["gdk-3.0"].names["pkg_config"] = "gdk-3.0"
+        if self._gtk3:
+            self.cpp_info.components["gdk-3.0"].libs = ["gdk-3"]
+            self.cpp_info.components["gdk-3.0"].includedirs = [os.path.join("include", "gtk-3.0")]
+            self.cpp_info.components["gdk-3.0"].requires = []
+            if self.options.with_pango:
+                self.cpp_info.components["gdk-3.0"].requires.extend(["pango::pango_", "pango::pangocairo"])
+            self.cpp_info.components["gdk-3.0"].requires.append("gdk-pixbuf::gdk-pixbuf")
+            if self.settings.compiler != "Visual Studio":
+                self.cpp_info.components["gdk-3.0"].requires.extend(["cairo::cairo", "cairo::cairo-gobject"])
+            if self.settings.os == "Linux":
+                self.cpp_info.components["gdk-3.0"].requires.extend(["glib::gio-unix-2.0", "cairo::cairo-xlib"])
+                if self.options.with_x11:
+                    self.cpp_info.components["gdk-3.0"].requires.append("xorg::xorg")
+            self.cpp_info.components["gdk-3.0"].requires.append("libepoxy::libepoxy")
+            self.cpp_info.components["gdk-3.0"].names["pkg_config"] = "gdk-3.0"
 
-        self.cpp_info.components["gtk+-3.0"].libs = ["gtk-3"]
-        self.cpp_info.components["gtk+-3.0"].requires = ["gdk-3.0", "atk::atk"]
-        if self.settings.compiler != "Visual Studio":
-            self.cpp_info.components["gtk+-3.0"].requires.extend(["cairo::cairo", "cairo::cairo-gobject"])
-        self.cpp_info.components["gtk+-3.0"].requires.extend(["gdk-pixbuf::gdk-pixbuf", "glib::gio-2.0"])
-        if self.settings.os == "Linux":
-            self.cpp_info.components["gtk+-3.0"].requires.append("at-spi2-atk::at-spi2-atk")
-        self.cpp_info.components["gtk+-3.0"].requires.append("libepoxy::libepoxy")
-        if self.options.with_pango:
-            self.cpp_info.components["gtk+-3.0"].requires.append('pango::pangoft2')
-        if self.settings.os == "Linux":
-            self.cpp_info.components["gtk+-3.0"].requires.append("glib::gio-unix-2.0")
-        self.cpp_info.components["gtk+-3.0"].includedirs = [os.path.join("include", "gtk-3.0")]
-        self.cpp_info.components["gtk+-3.0"].names["pkg_config"] = "gtk+-3.0"
+            self.cpp_info.components["gtk+-3.0"].libs = ["gtk-3"]
+            self.cpp_info.components["gtk+-3.0"].requires = ["gdk-3.0", "atk::atk"]
+            if self.settings.compiler != "Visual Studio":
+                self.cpp_info.components["gtk+-3.0"].requires.extend(["cairo::cairo", "cairo::cairo-gobject"])
+            self.cpp_info.components["gtk+-3.0"].requires.extend(["gdk-pixbuf::gdk-pixbuf", "glib::gio-2.0"])
+            if self.settings.os == "Linux":
+                self.cpp_info.components["gtk+-3.0"].requires.append("at-spi2-atk::at-spi2-atk")
+            self.cpp_info.components["gtk+-3.0"].requires.append("libepoxy::libepoxy")
+            if self.options.with_pango:
+                self.cpp_info.components["gtk+-3.0"].requires.append('pango::pangoft2')
+            if self.settings.os == "Linux":
+                self.cpp_info.components["gtk+-3.0"].requires.append("glib::gio-unix-2.0")
+            self.cpp_info.components["gtk+-3.0"].includedirs = [os.path.join("include", "gtk-3.0")]
+            self.cpp_info.components["gtk+-3.0"].names["pkg_config"] = "gtk+-3.0"
 
-        self.cpp_info.components["gail-3.0"].libs = ["gailutil-3"]
-        self.cpp_info.components["gail-3.0"].requires = ["gtk+-3.0", "atk::atk"]
-        self.cpp_info.components["gail-3.0"].includedirs = [os.path.join("include", "gail-3.0")]
-        self.cpp_info.components["gail-3.0"].names["pkg_config"] = "gail-3.0"
+            self.cpp_info.components["gail-3.0"].libs = ["gailutil-3"]
+            self.cpp_info.components["gail-3.0"].requires = ["gtk+-3.0", "atk::atk"]
+            self.cpp_info.components["gail-3.0"].includedirs = [os.path.join("include", "gail-3.0")]
+            self.cpp_info.components["gail-3.0"].names["pkg_config"] = "gail-3.0"
+        elif self._gtk4:
+            self.cpp_info.names["pkg_config"] = "gtk4"
+            self.cpp_info.libs = ["gtk-4"]
+            self.cpp_info.includedirs.append(os.path.join("include", "gtk-4.0"))
