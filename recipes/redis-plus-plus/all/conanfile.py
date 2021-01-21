@@ -66,7 +66,7 @@ class RedisPlusPlusConan(ConanFile):
 
     def _patch_sources(self):
         tools.replace_in_file(os.path.join(self._source_subfolder, "CMakeLists.txt"),
-                              "set_target_properties(${STATIC_LIB} PROPERTIES POSITION_INDEPENDENT_CODE ON)"
+                              "set_target_properties(${STATIC_LIB} PROPERTIES POSITION_INDEPENDENT_CODE ON)",
                               "")
 
     def build(self):
