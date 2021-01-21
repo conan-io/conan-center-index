@@ -248,8 +248,9 @@ class GLibConan(ConanFile):
         self.cpp_info.components["gthread-2.0"].requires.append("glib-2.0")
 
         self.cpp_info.components["gio-2.0"].libs = ["gio-2.0"]
-        if self.settings.os in ["Linux", "FreeBSD"]:
+        if self.settings.os == "Linux":
             self.cpp_info.components["gio-2.0"].system_libs.append("resolv")
+        if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.components["gio-2.0"].system_libs.append("dl")
         self.cpp_info.components["gio-2.0"].requires.extend(
             ["glib-2.0", "gobject-2.0", "gmodule-2.0", "zlib::zlib"]
