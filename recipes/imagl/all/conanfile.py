@@ -32,7 +32,7 @@ class ImaglConan(ConanFile):
     def _compilers_minimum_version(self):
         return {
             "gcc": "9",
-            "Visual Studio": "16.5",
+            "Visual Studio": "16",
             "clang": "10",
             "apple-clang": "11"
         }
@@ -50,6 +50,10 @@ class ImaglConan(ConanFile):
                 raise ConanInvalidConfiguration("imagl requires C++20, which your compiler does not fully support.")
         else:
             self.output.warn("imagl requires C++20. Your compiler is unknown. Assuming it supports C++20.")
+
+    def config_options(self):
+        if self.settings.os == "Windows":
+            del self.options.fPIC
 
     def requirements(self):
         if self.options.with_png:
@@ -79,3 +83,4 @@ class ImaglConan(ConanFile):
         self.cpp_info.libs = ["imaGL{}{}".format(debug_suffix, static_suffix)]
         if not self.options.shared:
             self.cpp_info.defines = ["IMAGL_STATIC=1"]
+
