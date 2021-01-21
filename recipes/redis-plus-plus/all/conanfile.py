@@ -4,6 +4,7 @@ import os
 
 required_conan_version = ">=1.32.0"
 
+
 class RedisPlusPlusConan(ConanFile):
     name = "redis-plus-plus"
     homepage = "https://github.com/sewenew/redis-plus-plus"
@@ -11,11 +12,19 @@ class RedisPlusPlusConan(ConanFile):
     topics = ("conan", "database", "redis", "client", "tls")
     url = "https://github.com/conan-io/conan-center-index"
     license = "Apache-2.0"
-    exports_sources = ["CMakeLists.txt"]
-    generators = "cmake", "cmake_find_package"
+    exports_sources = ["CMakeLists.txt", "patches/**"]
+    generators = "cmake", "cmake_find_package_multi"
     settings = "os", "compiler", "build_type", "arch"
-    options = {"shared": [True, False], "fPIC": [True, False], "with_tls": [True, False]}
-    default_options = {"shared": False, "fPIC": True, "with_tls": False}
+    options = {
+        "shared": [True, False],
+        "fPIC": [True, False],
+        "with_tls": [True, False]
+    }
+    default_options = {
+        "shared": False,
+        "fPIC": True,
+        "with_tls": False
+    }
 
     _cmake = None
 
@@ -37,17 +46,12 @@ class RedisPlusPlusConan(ConanFile):
         if self.settings.compiler.get_safe("cppstd"):
             tools.check_min_cppstd(self, 11)
 
-        if self.settings.compiler == "Visual Studio" and self.options.shared:
-            raise ConanInvalidConfiguration("redis-plus-plus does not support begin compiled as shared library with Visual Studio")
+    def requirements(self):
+        self.requires("hiredis/1.0.0")
 
     def validate(self):
         if self.options.with_tls != self.options["hiredis"].with_ssl:
             raise ConanInvalidConfiguration("with_tls must match hiredis.with_ssl option")
-
-    def requirements(self):
-        self.requires("hiredis/1.0.0")
-        if self.options.with_tls:
-            self.requires("openssl/1.1.1i")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
@@ -65,6 +69,8 @@ class RedisPlusPlusConan(ConanFile):
         return self._cmake
 
     def _patch_sources(self):
+        for patch in self.conan_data.get("patches", {}).get(self.version, []):
+            tools.patch(**patch)
         tools.replace_in_file(os.path.join(self._source_subfolder, "CMakeLists.txt"),
                               "set_target_properties(${STATIC_LIB} PROPERTIES POSITION_INDEPENDENT_CODE ON)",
                               "")
@@ -82,5 +88,6 @@ class RedisPlusPlusConan(ConanFile):
     def package_info(self):
         suffix = "_static" if self.settings.os == "Windows" and not self.options.shared else ""
         self.cpp_info.libs = ["redis++" + suffix]
-        if self.settings.os == "Windows":
-            self.cpp_info.system_libs = ["ws2_32"]
+        self.cpp_info.requires = ["hiredis::hiredislib"]
+        if self.options.with_tls:
+            self.cpp_info.requires.append("hiredis::hiredis_ssl")
