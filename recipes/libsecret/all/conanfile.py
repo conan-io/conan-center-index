@@ -2,6 +2,7 @@ from conans import ConanFile, Meson, tools
 from conans.errors import ConanInvalidConfiguration
 import os
 
+required_conan_version = ">=1.32.0"
 
 class LibsecretConan(ConanFile):
     name = "libsecret"
@@ -9,7 +10,7 @@ class LibsecretConan(ConanFile):
     topics = ("conan", "libsecret", "gobject", "password", "secret")
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://wiki.gnome.org/Projects/Libsecret"
-    license = "LGPL-2.1"
+    license = "LGPL-2.1-or-later"
     generators = "pkg_config"
 
     settings = "os", "arch", "compiler", "build_type"
