@@ -2,6 +2,7 @@ from conans import ConanFile, CMake, tools
 from conans.errors import ConanInvalidConfiguration
 import os
 
+required_conan_version = ">=1.32.0"
 
 class RedisPlusPlusConan(ConanFile):
     name = "redis-plus-plus"
@@ -33,6 +34,8 @@ class RedisPlusPlusConan(ConanFile):
     def configure(self):
         if self.options.shared:
             del self.options.fPIC
+        if self.settings.compiler.get_safe("cppstd"):
+            tools.check_min_cppstd(self, 11)
 
         if self.settings.compiler == "Visual Studio" and self.options.shared:
             raise ConanInvalidConfiguration("redis-plus-plus does not support begin compiled as shared library with Visual Studio")
@@ -61,7 +64,13 @@ class RedisPlusPlusConan(ConanFile):
             self._cmake.configure(build_folder=self._build_subfolder)
         return self._cmake
 
+    def _patch_sources(self):
+        tools.replace_in_file(os.path.join(self._source_subfolder, "CMakeLists.txt"),
+                              "set_target_properties(${STATIC_LIB} PROPERTIES POSITION_INDEPENDENT_CODE ON)"
+                              "")
+
     def build(self):
+        self._patch_sources()
         cmake = self._configure_cmake()
         cmake.build()
 
@@ -71,6 +80,7 @@ class RedisPlusPlusConan(ConanFile):
         cmake.install()
 
     def package_info(self):
-        self.cpp_info.libs = tools.collect_libs(self)
+        suffix = "_static" if self.settings.os == "Windows" and not self.options.shared else ""
+        self.cpp_info.libs = ["redis++" + suffix]
         if self.settings.os == "Windows":
             self.cpp_info.system_libs = ["ws2_32"]
