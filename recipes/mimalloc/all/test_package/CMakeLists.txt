@@ -15,7 +15,7 @@ if (BUILD_NO_CHANGES)
 
     add_executable(no_changes_cpp no_changes.cpp)
     target_link_libraries(no_changes_cpp ${CONAN_LIBS})
-    target_compile_features(no_changes_cpp PUBLIC cxx_std_14)
+    target_compile_features(no_changes_cpp PUBLIC cxx_std_17)
 endif (BUILD_NO_CHANGES)
 
 if (BUILD_INCLUDE_OVERRIDE)
@@ -25,7 +25,7 @@ if (BUILD_INCLUDE_OVERRIDE)
 
     add_executable(include_override_cpp include_override.cpp)
     target_link_libraries(include_override_cpp ${CONAN_LIBS})
-    target_compile_features(include_override_cpp PUBLIC cxx_std_14)
+    target_compile_features(include_override_cpp PUBLIC cxx_std_17)
 endif (BUILD_INCLUDE_OVERRIDE)
 
 if (BUILD_MI_API)
@@ -35,5 +35,5 @@ if (BUILD_MI_API)
 
     add_executable(mi_api_cpp mi_api.cpp)
     target_link_libraries(mi_api_cpp ${CONAN_LIBS})
-    target_compile_features(mi_api_cpp PUBLIC cxx_std_14)
+    target_compile_features(mi_api_cpp PUBLIC cxx_std_17)
 endif (BUILD_MI_API)

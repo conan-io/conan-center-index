@@ -43,10 +43,10 @@ class MimallocConan(ConanFile):
     @property
     def _compilers_minimum_version(self):
         return {
-            "gcc": "4.9.3",
-            "Visual Studio": "14.0",
-            "clang": "3.4",
-            "apple-clang": "3.4",
+            "gcc": "9",
+            "Visual Studio": "15",
+            "clang": "5",
+            "apple-clang": "10",
         }
 
     def configure(self):
@@ -73,14 +73,14 @@ class MimallocConan(ConanFile):
             raise ConanInvalidConfiguration("Single object is incompatible with implicit linkage override");
 
         if self.settings.compiler.get_safe("cppstd"):
-            tools.check_min_cppstd(self, "14")
+            tools.check_min_cppstd(self, "17")
 
         minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
 
         if not minimum_version:
-            self.output.warn("mimalloc requires C++14. Your compiler is unknown. Assuming it supports C++14.")
+            self.output.warn("mimalloc requires C++17. Your compiler is unknown. Assuming it supports C++17.")
         elif tools.Version(self.settings.compiler.version) < minimum_version:
-            raise ConanInvalidConfiguration("mimalloc requires a compiler that supports at least C++14")
+            raise ConanInvalidConfiguration("mimalloc requires a compiler that supports at least C++17")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
