@@ -45,7 +45,9 @@ class MimallocTestConan(ConanFile):
     def _environment(self):
         environment = {"MIMALLOC_VERBOSE": "1"}
 
-        if not self.options["mimalloc"].override or not self.options["mimalloc"].inject
+        if self.settings.compiler == "Visual Studio" or \
+           not self.options["mimalloc"].override or \
+           not self.options["mimalloc"].inject:
             return environment
 
         if self.settings.os == "Linux":
