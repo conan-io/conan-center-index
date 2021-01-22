@@ -19,8 +19,8 @@ class NotcursesConan(ConanFile):
     def requirements(self):
         self.requires("openimageio/2.2.7.0")
         self.requires("libunistring/0.9.10")
-        # we only want the tinfo component of NCURSES
-        self.requires("ncurses/6.2")
+        self.requires("readline/8.0")
+        self.requires("ncurses.tinfo/6.2")
 
     def build_requirements(self):
         self.build_requires("pkgconf/1.7.3")
@@ -53,4 +53,12 @@ class NotcursesConan(ConanFile):
         return self._cmake
 
     def package_info(self):
-        self.cpp_info.libs = ["notcurses", "notcurses++"]
+        self.cpp_info.name = "Notcurses"
+        self.cpp_info.components["notcurses-core"].names["cmake"] = "NotcursesCore"
+        self.cpp_info.components["notcurses-core"].libs = ["libnotcurses-core"]
+        self.cpp_info.components["notcurses"].names["cmake"] = "Notcurses"
+        self.cpp_info.components["notcurses"].libs = ["libnotcurses"]
+        self.cpp_info.components["notcurses"].requires = ["notcurses-core"]
+        self.cpp_info.components["notcurses++"].names["cmake"] = "Notcurses++"
+        self.cpp_info.components["notcurses++"].libs = ["libnotcurses++"]
+        self.cpp_info.components["notcurses++"].requires = ["notcurses"]
