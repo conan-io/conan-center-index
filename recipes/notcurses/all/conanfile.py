@@ -53,7 +53,7 @@ class NotcursesConan(ConanFile):
         return self._cmake
 
     def package_info(self):
-        self.cpp_info.name = "Notcurses"
+        self.cpp_info.names = "Notcurses"
         self.cpp_info.components["notcurses-core"].names["cmake"] = "NotcursesCore"
         self.cpp_info.components["notcurses-core"].libs = ["libnotcurses-core"]
         self.cpp_info.components["notcurses"].names["cmake"] = "Notcurses"
