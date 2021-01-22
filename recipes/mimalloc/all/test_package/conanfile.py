@@ -18,7 +18,7 @@ class MimallocTestConan(ConanFile):
             self._test_files = ["include_override", "mi_api"]
 
         # Unix-like:
-        elif self.options["mimalloc"].inject:
+        elif self.options["mimalloc"].override and self.options["mimalloc"].inject:
             self._test_files = ["no_changes"]
         else:
             self._test_files = ["no_changes", "include_override", "mi_api"]
@@ -30,11 +30,37 @@ class MimallocTestConan(ConanFile):
         cmake.configure()
         cmake.build()
 
+    @property
+    def _lib_name(self):
+        name = "mimalloc" if self.settings.os == "Windows" else "libmimalloc"
+        if self.settings.os == "Windows" and not self.options.shared:
+            name += "-static"
+        if self.options.secure:
+            name += "-secure"
+        if self.settings.build_type not in ("Release", "RelWithDebInfo", "MinSizeRel"):
+            name += "-{}".format(str(self.settings.build_type).lower())
+        return name
+
+    @property
+    def _environment(self):
+        environment = {"MIMALLOC_VERBOSE": "1"}
+
+        if not self.options["mimalloc"].override or not self.options["mimalloc"].inject
+            return environment
+
+        if self.settings.os == "Linux":
+            environment["LD_PRELOAD"] = self._lib_name + ".so"
+        elif self.settings.os == "Macos":
+            environment["DYLD_FORCE_FLAT_NAMESPACE"] = "1"
+            environment["DYLD_INSERT_LIBRARIES"] = self._lib_name +".dylib"
+
+        return environment
+
     def test(self):
         if tools.cross_building(self.settings):
             return
 
-        with tools.environment_append({"MIMALLOC_VERBOSE": "1"}):
+        with tools.environment_append(self._environment):
             for file in self._test_files:
                 test_package = os.path.join("bin", file)
                 self.output.info(f"test: {test_package}")
