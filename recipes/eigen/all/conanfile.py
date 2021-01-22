@@ -49,4 +49,4 @@ class EigenConan(ConanFile):
         if self.settings.os == "Linux":
             self.cpp_info.components["eigen3"].system_libs = ["m"]
         if self.options.MPL2_only:
-            self.cpp_info.defines = ["EIGEN_MPL2_ONLY"]
+            self.cpp_info.components["eigen3"].defines = ["EIGEN_MPL2_ONLY"]
