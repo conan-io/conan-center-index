@@ -13,7 +13,7 @@ class MimallocTestConan(ConanFile):
 
         # Visual Studio:
         elif self.settings.compiler == "Visual Studio" and self.options["mimalloc"].shared:
-            self._test_files = ["no_changes", "include_override", "mi_api"]
+            self._test_files = ["include_override", "mi_api"]
         elif self.settings.compiler == "Visual Studio" and not self.options["mimalloc"].shared:
             self._test_files = ["include_override", "mi_api"]
 
