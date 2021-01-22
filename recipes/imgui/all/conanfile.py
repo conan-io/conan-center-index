@@ -55,9 +55,13 @@ class IMGUIConan(ConanFile):
 
     def package(self):
         self.copy(pattern="LICENSE.txt", dst="licenses", src=self._source_subfolder)
+        backends_folder = src=os.path.join(
+            self._source_subfolder,
+            "backends" if tools.Version(self.version) >= "1.80" else "examples"
+        )
         self.copy(pattern="imgui_impl_*",
                   dst=os.path.join("res", "bindings"),
-                  src=os.path.join(self._source_subfolder, "examples"))
+                  src=backends_folder)
         cmake = self._configure_cmake()
         cmake.install()
 
