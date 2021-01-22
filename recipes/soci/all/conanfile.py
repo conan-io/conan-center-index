@@ -138,22 +138,21 @@ class SociConan(ConanFile):
 
     def package(self):
         self.copy("LICENSE_1_0.txt", dst="licenses", src=self._source_subfolder)
-        self.copy("*soci*.lib", dst="lib", src="lib", keep_path=False, symlinks=True)
-        self.copy("*soci*.so*", dst="lib", src="lib", keep_path=False, symlinks=True)
-        self.copy("*.a",        dst="lib", src="lib", keep_path=False, symlinks=True)
-        self.copy("*.dylib",    dst="lib", src="lib", keep_path=False, symlinks=True)
-        self.copy("*.dll",      dst="bin", src="bin", keep_path=False, symlinks=True)
 
-        if self._cmake:
-            self._cmake.install()
-            tools.rmdir(os.path.join(self.package_folder, "cmake"))
-            tools.rmdir(os.path.join(self.package_folder, "lib64"))
+        cmake = self._configure_cmake()
+        cmake.install()
+        tools.rmdir(os.path.join(self.package_folder, "cmake"))
+
+        if os.path.isdir(os.path.join(self.package_folder, "lib64")):
+            if os.path.isdir(os.path.join(self.package_folder, "lib")):
+                self.copy("*", dst="lib", src="lib64", keep_path=False, symlinks=True)
+                tools.rmdir(os.path.join(self.package_folder, "lib64"))
+            else:
+                tools.rename(os.path.join(self.package_folder, "lib64"), os.path.join(self.package_folder, "lib"))
+
+        os.remove(os.path.join(self.package_folder, "include", "soci", "soci-config.h.in"))
 
     def package_info(self):
-        self.cpp_info.includedirs   = ['include']
-        self.cpp_info.libdirs       = ['lib']
-        self.cpp_info.builddirs     = ['cmake']
-
         self.cpp_info.libs = ["soci_core"]
         if self.options.empty:
             self.cpp_info.libs.append("soci_empty")
