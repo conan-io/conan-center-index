@@ -1,0 +1,2 @@
+https://github.com/bincrafters/conan-intel_media_sdk
+f4901c44a0e8bf91473f8ed541f86a8bd4366718 (branch: stable/2018R2_1)
