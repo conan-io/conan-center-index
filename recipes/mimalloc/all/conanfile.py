@@ -53,6 +53,16 @@ class MimallocConan(ConanFile):
         if self.options.shared:
             del self.options.fPIC
 
+            # single_object is valid only for static
+            # override:
+            del self.options.single_object
+
+        # single_object and inject are valid only when
+        # overriding on Unix-like platforms:
+        if not self.options.override:
+            del self.options.single_object
+            del self.options.inject
+
         # Shared overriding requires dynamic runtime for MSVC:
         if self.options.override and \
            self.options.shared and \
@@ -61,16 +71,10 @@ class MimallocConan(ConanFile):
             raise ConanInvalidConfiguration(
                 "Dynamic runtime (MD/MDd) is required when using mimalloc as a shared library for override")
 
-        # single_object and inject are options
-        # only when overriding on Unix-like platforms:
-        if not self.options.override:
-            del self.options.single_object
-            del self.options.inject
-
         if self.options.override and \
            self.options.get_safe("single_object") and \
            self.options.get_safe("inject"):
-            raise ConanInvalidConfiguration("Single object is incompatible with implicit linkage override");
+            raise ConanInvalidConfiguration("Single object is incompatible with library injection");
 
         if self.settings.compiler.get_safe("cppstd"):
             tools.check_min_cppstd(self, "17")
@@ -104,7 +108,7 @@ class MimallocConan(ConanFile):
             self._cmake.definitions["CMAKE_BUILD_TYPE"] = self.settings.build_type
         self._cmake.definitions["MI_BUILD_TESTS"] = "OFF"
         self._cmake.definitions["MI_BUILD_SHARED"] = self.options.shared
-        self._cmake.definitions["MI_BUILD_STATIC"] = not self.options.shared and not self.options.get_safe("single_object", False)
+        self._cmake.definitions["MI_BUILD_STATIC"] = not self.options.shared
         self._cmake.definitions["MI_BUILD_OBJECT"] = self.options.get_safe("single_object", False)
         self._cmake.definitions["MI_OVERRIDE"] = "ON" if self.options.override else "OFF"
         self._cmake.definitions["MI_SECURE"] = "ON" if self.options.secure else "OFF"
