@@ -8,7 +8,7 @@ class EigenConan(ConanFile):
     homepage = "http://eigen.tuxfamily.org"
     description = "Eigen is a C++ template library for linear algebra: matrices, vectors, \
                    numerical solvers, and related algorithms."
-    license = "MPL-2.0"
+    license = ("MPL-2.0", "LGPL-3.0-or-later")
     topics = ("eigen", "algebra", "linear-algebra", "vector", "numerical")
     settings = "os", "compiler", "build_type", "arch"
     options = {"MPL2_only": [True, False]}
