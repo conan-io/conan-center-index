@@ -10,7 +10,7 @@ class MingwConan(ConanFile):
     homepage = "https://www.mingw.org"
     license = "ZPL-2.1", "MIT", "GPL-2.0-or-later"
     topics = ("gcc", "gnu", "unix", "mingw32", "binutils")
-    settings = "os", "arch"
+    settings = "os", "arch", "compiler"
     options = {"threads": ["posix", "win32"], "exception": ["seh", "sjlj"]}
     default_options = {"threads": "posix", "exception": "seh"}
     build_requires = "7zip/19.00"
@@ -19,6 +19,13 @@ class MingwConan(ConanFile):
     def validate(self):
         if self.settings.os != "Windows":
             raise ConanInvalidConfiguration("MinGW is only supported by Windows.")
+        if self.settings.compiler == "gcc":
+            if str(self.settings.compiler.threads) != str(self.options.threads):
+                self.output.warn("MinGW threads may not differ from 'settings.compiler.threads'.")
+            if str(self.settings.compiler.exception) != str(self.options.exception):
+                self.output.warn("MinGW exception may not differ from 'settings.compiler.exception'.")
+        else:
+            self.output.warn("Only 'gcc' should be used as compiler.")
 
     def source(self):
         url = self.conan_data["sources"][self.version]["url"][str(self.settings.arch)] \
@@ -33,6 +40,9 @@ class MingwConan(ConanFile):
         self.copy("*", dst="", src=target)
         tools.rmdir(target)
         tools.rmdir(os.path.join(self.package_folder, "share"))
+
+    def package_id(self):
+        del self.info.settings.compiler
 
     def package_info(self):
         bin_path = os.path.join(self.package_folder, "bin")
