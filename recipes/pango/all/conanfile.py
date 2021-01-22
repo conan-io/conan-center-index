@@ -3,7 +3,7 @@ import shutil
 import glob
 
 from conans import ConanFile, tools, Meson, VisualStudioBuildEnvironment
-
+from conans.errors import ConanInvalidConfiguration
 
 class PangoConan(ConanFile):
     name = "pango"
@@ -13,8 +13,8 @@ class PangoConan(ConanFile):
     homepage = "https://www.pango.org/"
     topics = ("conan", "fontconfig", "fonts", "freedesktop")
     settings = "os", "compiler", "build_type", "arch"
-    options = {"shared": [True, False], "fPIC": [True, False]}
-    default_options = {"shared": False, "fPIC": True}
+    options = {"shared": [True, False], "fPIC": [True, False], "with_libthai": [True, False], "with_cairo": [True, False], "with_xft": [True, False, "auto"], "with_freetype": [True, False, "auto"], "with_fontconfig": [True, False, "auto"]}
+    default_options = {"shared": False, "fPIC": True, "with_libthai": False, "with_cairo": True, "with_xft": "auto", "with_freetype": "auto", "with_fontconfig": "auto"}
     generators = "pkg_config"
     _autotools = None
     
@@ -38,16 +38,33 @@ class PangoConan(ConanFile):
         del self.settings.compiler.libcxx
         del self.settings.compiler.cppstd
 
+        if self.options.with_xft == "auto":
+            self.options.with_xft = self.settings.os in ["Linux", "FreeBSD"]
+        if self.options.with_freetype == "auto":
+            self.options.with_freetype = not self.settings.os in ["Windows", "Macos"]
+        if self.options.with_fontconfig == "auto":
+            self.options.with_fontconfig = not self.settings.os in ["Windows", "Macos"]
+
+        if self.options.with_xft and not self.settings.os in ["Linux", "FreeBSD"]:
+            raise ConanInvalidConfiguration("Xft can only be used on Linux and FreeBSD")
+
+        if self.options.with_xft and (not self.options.with_freetype or not self.options.with_fontconfig):
+            raise ConanInvalidConfiguration("Xft requires freetype and fontconfig")
+
     def build_requirements(self):
         self.build_requires("pkgconf/1.7.3")
         self.build_requires("meson/0.54.2")
 
     def requirements(self):
-        if self.settings.os != "Windows":
+        if self.options.with_freetype:
+            self.requires("freetype/2.10.4")
+
+        if self.options.with_fontconfig:
             self.requires("fontconfig/2.13.92")
-        if self.settings.os == "Linux":
+        if self.options.with_xft:
             self.requires("xorg/system")
-        self.requires("cairo/1.17.2")
+        if self.options.with_cairo:
+            self.requires("cairo/1.17.2")
         self.requires("harfbuzz/2.7.2")
         self.requires("glib/2.67.0")
         self.requires("fribidi/1.0.9")
@@ -60,6 +77,13 @@ class PangoConan(ConanFile):
     def _configure_meson(self):
         defs = dict()
         defs["introspection"] = "disabled"
+
+        defs["libthai"] = "enabled" if self.options.with_libthai else "disabled"
+        defs["cairo"] = "enabled" if self.options.with_cairo else "disabled"
+        defs["xft"] = "enabled" if self.options.with_xft else "disabled"
+        defs["fontconfig"] = "enabled" if self.options.with_fontconfig else "disabled"
+        defs["freetype"] = "enabled" if self.options.with_freetype else "disabled"
+
         meson = Meson(self)
         meson.configure(build_folder=self._build_subfolder, source_folder=self._source_subfolder, defs=defs, args=['--wrap-mode=nofallback'])
         return meson
@@ -98,31 +122,40 @@ class PangoConan(ConanFile):
         self.cpp_info.components['pango_'].requires.append('glib::gio-2.0')
         self.cpp_info.components['pango_'].requires.append('fribidi::fribidi')
         self.cpp_info.components['pango_'].requires.append('harfbuzz::harfbuzz')
-        if self.settings.os != "Windows":
+        if self.options.with_fontconfig:
             self.cpp_info.components['pango_'].requires.append('fontconfig::fontconfig')
-            if self.settings.os == "Linux":
+
+
+        if self.options.with_xft:
+            self.cpp_info.components['pango_'].requires.append('xorg::xft')
+            # Pango only uses xrender when Xft, fontconfig and freetype are enabled
+            if self.options.with_fontconfig and self.options.with_freetype:
                 self.cpp_info.components['pango_'].requires.append('xorg::xrender')
-                self.cpp_info.components['pango_'].requires.append('xorg::xft')
-        self.cpp_info.components['pango_'].requires.append('cairo::cairo_')
+        if self.options.with_cairo:
+            self.cpp_info.components['pango_'].requires.append('cairo::cairo_')
         self.cpp_info.components['pango_'].includedirs = [os.path.join(self.package_folder, "include", "pango-1.0")]
         
-        if self.settings.os != "Windows":
+        if self.options.with_freetype:
             self.cpp_info.components['pangoft2'].libs = ['pangoft2-1.0']
             self.cpp_info.components['pangoft2'].names['pkg_config'] = 'pangoft2'
-            self.cpp_info.components['pangoft2'].requires = ['pango_']
+            self.cpp_info.components['pangoft2'].requires = ['pango_', 'freetype::freetype']
             self.cpp_info.components['pangoft2'].includedirs = [os.path.join(self.package_folder, "include", "pango-1.0")]
 
+        if self.options.with_fontconfig:
             self.cpp_info.components['pangofc'].names['pkg_config'] = 'pangofc'
-            self.cpp_info.components['pangofc'].requires = ['pangoft2']
+            if self.options.with_freetype:
+                self.cpp_info.components['pangofc'].requires = ['pangoft2']
 
+        if self.settings.os != "Windows":
             self.cpp_info.components['pangoroot'].names['pkg_config'] = 'pangoroot'
-            self.cpp_info.components['pangoroot'].requires = ['pangoft2']
+            if self.options.with_freetype:
+                self.cpp_info.components['pangoroot'].requires = ['pangoft2']
             
-            if self.settings.os == "Linux":
-                self.cpp_info.components['pangoxft'].libs = ['pangoxft-1.0']
-                self.cpp_info.components['pangoxft'].names['pkg_config'] = 'pangoxft'
-                self.cpp_info.components['pangoxft'].requires = ['pango_', 'pangoft2']
-                self.cpp_info.components['pangoxft'].includedirs = [os.path.join(self.package_folder, "include", "pango-1.0")]
+        if self.options.with_xft:
+            self.cpp_info.components['pangoxft'].libs = ['pangoxft-1.0']
+            self.cpp_info.components['pangoxft'].names['pkg_config'] = 'pangoxft'
+            self.cpp_info.components['pangoxft'].requires = ['pango_', 'pangoft2']
+            self.cpp_info.components['pangoxft'].includedirs = [os.path.join(self.package_folder, "include", "pango-1.0")]
 
         if self.settings.os == "Windows":
             self.cpp_info.components['pangowin32'].libs = ['pangowin32-1.0']
@@ -130,15 +163,16 @@ class PangoConan(ConanFile):
             self.cpp_info.components['pangowin32'].requires = ['pango_']
             self.cpp_info.components['pangowin32'].system_libs.append('gdi32')
 
-        self.cpp_info.components['pangocairo'].libs = ['pangocairo-1.0']
-        self.cpp_info.components['pangocairo'].names['pkg_config'] = 'pangocairo'
-        self.cpp_info.components['pangocairo'].requires = ['pango_']
-        if self.settings.os != "Windows":
-            self.cpp_info.components['pangocairo'].requires.append('pangoft2')
-        if self.settings.os == "Windows":
-            self.cpp_info.components['pangocairo'].requires.append('pangowin32')
-            self.cpp_info.components['pangocairo'].system_libs.append('gdi32')
-        self.cpp_info.components['pangocairo'].includedirs = [os.path.join(self.package_folder, "include", "pango-1.0")]
+        if self.options.with_cairo:
+            self.cpp_info.components['pangocairo'].libs = ['pangocairo-1.0']
+            self.cpp_info.components['pangocairo'].names['pkg_config'] = 'pangocairo'
+            self.cpp_info.components['pangocairo'].requires = ['pango_']
+            if self.options.with_freetype:
+                self.cpp_info.components['pangocairo'].requires.append('pangoft2')
+            if self.settings.os == "Windows":
+                self.cpp_info.components['pangocairo'].requires.append('pangowin32')
+                self.cpp_info.components['pangocairo'].system_libs.append('gdi32')
+            self.cpp_info.components['pangocairo'].includedirs = [os.path.join(self.package_folder, "include", "pango-1.0")]
 
 
 
