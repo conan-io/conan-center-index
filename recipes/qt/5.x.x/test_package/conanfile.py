@@ -13,7 +13,7 @@ class TestPackageConan(ConanFile):
         if tools.os_info.is_windows and self.settings.compiler == "Visual Studio":
             self.build_requires("jom/1.1.3")
         if self._meson_supported():
-            self.build_requires("meson/0.54.2")
+            self.build_requires("meson/0.56.2")
 
     def _is_mingw(self):
         return self.settings.os == "Windows" and self.settings.compiler == "gcc"

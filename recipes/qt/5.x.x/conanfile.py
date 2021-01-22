@@ -120,7 +120,7 @@ class QtConan(ConanFile):
         if tools.os_info.is_windows and self.settings.compiler == "Visual Studio":
             self.build_requires("jom/1.1.3")
         if self.options.qtwebengine:
-            self.build_requires("ninja/1.10.1")
+            self.build_requires("ninja/1.10.2")
             # gperf, bison, flex, python >= 2.7.5 & < 3
             if self.settings.os != "Windows":
                 self.build_requires("bison/3.7.1")
@@ -257,12 +257,12 @@ class QtConan(ConanFile):
 
     def requirements(self):
         if self.options.openssl:
-            self.requires("openssl/1.1.1h")
+            self.requires("openssl/1.1.1i")
         if self.options.with_pcre2:
             self.requires("pcre2/10.35")
 
         if self.options.with_glib:
-            self.requires("glib/2.67.0")
+            self.requires("glib/2.67.1")
         # if self.options.with_libiconv: # QTBUG-84708
         #     self.requires("libiconv/1.16")# QTBUG-84708
         if self.options.with_doubleconversion and not self.options.multiconfiguration:
@@ -272,12 +272,12 @@ class QtConan(ConanFile):
         if self.options.get_safe("with_fontconfig", False):
             self.requires("fontconfig/2.13.92")
         if self.options.get_safe("with_icu", False):
-            self.requires("icu/68.1")
+            self.requires("icu/68.2")
         if self.options.get_safe("with_harfbuzz", False) and not self.options.multiconfiguration:
-            self.requires("harfbuzz/2.7.2")
+            self.requires("harfbuzz/2.7.4")
         if self.options.get_safe("with_libjpeg", False) and not self.options.multiconfiguration:
             if self.options.with_libjpeg == "libjpeg-turbo":
-                self.requires("libjpeg-turbo/2.0.5")
+                self.requires("libjpeg-turbo/2.0.6")
             else:
                 self.requires("libjpeg/9d")
         if self.options.get_safe("with_libpng", False) and not self.options.multiconfiguration:
@@ -303,7 +303,7 @@ class QtConan(ConanFile):
         if self.options.get_safe("opengl", "no") != "no":
             self.requires("opengl/system")
         if self.options.with_zstd:
-            self.requires("zstd/1.4.5")
+            self.requires("zstd/1.4.8")
         if self.options.qtwebengine and self.settings.os == "Linux":
             self.requires("expat/2.2.10")
             self.requires("opus/1.3.1")
