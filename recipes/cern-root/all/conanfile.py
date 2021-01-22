@@ -50,13 +50,13 @@ class CernRootConan(ConanFile):
         "libxml2/2.9.10",
         "glu/system",
         "xorg/system",
-        "sqlite3/3.33.0",
+        "sqlite3/3.34.0",
         "libjpeg/9d",
         "libpng/1.6.37",
-        "libcurl/7.73.0",
+        "libcurl/7.74.0",
         "pcre/8.44",
         "xz_utils/5.2.5",
-        "zstd/1.4.5",
+        "zstd/1.4.8",
         "lz4/1.9.3",
         "glew/2.1.0",
         "openssl/1.1.1i",
@@ -144,7 +144,7 @@ class CernRootConan(ConanFile):
             "set(LIBXML2_LIBRARIES ${LibXml2_LIBRARIES})",
             "find_package(SQLite3 REQUIRED)",
             "set(SQLITE_INCLUDE_DIR ${SQLITE3_INCLUDE_DIRS})",
-            "set(SQLITE_LIBRARIES SQLite::SQLite)",
+            "set(SQLITE_LIBRARIES SQLite::SQLite3)",
             ))
         )
 
