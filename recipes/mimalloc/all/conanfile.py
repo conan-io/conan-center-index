@@ -23,7 +23,7 @@ class MimallocConan(ConanFile):
         "shared": False,
         "fPIC": True,
         "secure": False,
-        "override": False,
+        "override": True,
         "inject": True,
         "single_object": False
     }
