@@ -71,3 +71,6 @@ jobs:
           CONAN_ARCHS: ${{ matrix.archs }}
           CONAN_BUILD_TYPES: ${{ matrix.build_types }}
           DEVELOPER_DIR: /Applications/Xcode_${{ matrix.xcode_version }}.app/Contents/Developer
+
+# trigger rebuild:
+# 22.01.2020 - rebuild due to erroneous deletion of them from bintray.
