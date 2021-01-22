@@ -11,6 +11,8 @@ class EigenConan(ConanFile):
     license = "MPL-2.0"
     topics = ("eigen", "algebra", "linear-algebra", "vector", "numerical")
     settings = "os", "compiler", "build_type", "arch"
+    options = {"MPL2_only": [True, False]}
+    default_options = {"MPL2_only": False}
     exports_sources = ["patches/*"]
     no_copy_source = True
 
@@ -46,3 +48,5 @@ class EigenConan(ConanFile):
         self.cpp_info.components["eigen3"].includedirs = [os.path.join("include", "eigen3")]
         if self.settings.os == "Linux":
             self.cpp_info.components["eigen3"].system_libs = ["m"]
+        if self.options.MPL2_only:
+            self.cpp_info.defines = ["EIGEN_MPL2_ONLY"]
