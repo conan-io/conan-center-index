@@ -11,7 +11,7 @@ class NotcursesConan(ConanFile):
     exports_sources = ["CMakeLists.txt"]
     settings = "os", "compiler", "build_type", "arch"
     options = {"shared": [True, False]}
-    default_options = {"shared": True}
+    default_options = {"shared": False}
     generators = "cmake", "pkg_config"
 
     _cmake = None
