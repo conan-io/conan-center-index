@@ -1,4 +1,8 @@
-#include "mimalloc-new-delete.h"
+#ifdef _WIN32
+#include <mimalloc-new-delete.h>
+#else
+#include <mimalloc.h>
+#endif
 
 #include <iostream>
 #include <memory>
