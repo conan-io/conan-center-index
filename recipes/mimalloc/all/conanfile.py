@@ -55,13 +55,20 @@ class MimallocConan(ConanFile):
 
             # single_object is valid only for static
             # override:
-            del self.options.single_object
+            if self.options.get_safe("single_object"):
+                del self.options.single_object
+
+        # inject is valid only for Unix-like dynamic override:
+        if not self.options.shared and self.options.get_safe("inject"):
+            del self.options.inject
 
         # single_object and inject are valid only when
         # overriding on Unix-like platforms:
         if not self.options.override:
-            del self.options.single_object
-            del self.options.inject
+            if self.options.get_safe("single_object"):
+                del self.options.single_object
+            if self.options.get_safe("inject"):
+                del self.options.inject
 
         # Shared overriding requires dynamic runtime for MSVC:
         if self.options.override and \

@@ -18,15 +18,17 @@ class MimallocTestConan(ConanFile):
             self._test_files = ["include_override", "mi_api"]
 
         # Non Macos injected override:
-        elif self.options["mimalloc"].override and \
-             self.options["mimalloc"].inject and \
-             self.settings.os != "Macos":
+        elif self.settings.os != "Macos" and \
+             self.options["mimalloc"].override and \
+             self.options["mimalloc"].shared and \
+             self.options["mimalloc"].inject:
             self._test_files = ["no_changes"]
 
         # Could not simulate Macos preload, so just ignore it:
-        elif self.options["mimalloc"].override and \
-             self.options["mimalloc"].inject and \
-             self.settings.os == "Macos":
+        elif self.settings.os == "Macos" and \
+             self.options["mimalloc"].override and \
+             self.options["mimalloc"].shared and \
+             self.options["mimalloc"].inject:
             self._test_files = []
 
         # Unix-like non injected override:
