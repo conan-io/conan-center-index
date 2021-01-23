@@ -46,6 +46,7 @@ class MimallocTestConan(ConanFile):
         environment = {"MIMALLOC_VERBOSE": "1"}
 
         if self.settings.compiler == "Visual Studio" or \
+           not self.options["mimalloc"].shared or \
            not self.options["mimalloc"].override or \
            not self.options["mimalloc"].inject:
             return environment
