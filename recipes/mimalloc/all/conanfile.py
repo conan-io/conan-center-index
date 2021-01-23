@@ -24,8 +24,8 @@ class MimallocConan(ConanFile):
         "shared": False,
         "fPIC": True,
         "secure": False,
-        "override": True,
-        "inject": True,
+        "override": False,
+        "inject": False,
         "single_object": False
     }
     generators = "cmake"
