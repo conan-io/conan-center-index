@@ -33,7 +33,7 @@ class MimallocTestConan(ConanFile):
 
         # Unix-like non injected override:
         else:
-            self._test_files = ["no_changes", "include_override", "mi_api"]
+            self._test_files = ["include_override", "mi_api"]
 
         cmake = CMake(self)
         cmake.definitions["BUILD_NO_CHANGES"] = "no_changes" in self._test_files
