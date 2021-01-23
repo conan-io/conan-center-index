@@ -139,9 +139,13 @@ class MimallocConan(ConanFile):
             cmake = self._configure_cmake()
             cmake.install()
 
+        tools.rmdir(os.path.join(self.package_folder, "cmake"))
+
         if self.options.get_safe("single_object"):
             tools.remove_files_by_mask(os.path.join(self.package_folder, "lib"),
                                        "*.a")
+            shutil.move(os.path.join(self.package_folder, self._obj_name + ".o"),
+                        os.path.join(self.package_folder, "lib"))
             shutil.copy(os.path.join(self.package_folder, "lib", self._obj_name + ".o"),
                         os.path.join(self.package_folder, "lib", self._obj_name))
 
