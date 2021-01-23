@@ -27,7 +27,7 @@ class GperfConan(ConanFile):
 
     def source(self):
         extracted_dir = self.name + "-" + self.version
-        tools.get(**self.conan_data["sources"][self.version], filename=extracted_dir)
+        tools.get(**self.conan_data["sources"][self.version], filename=extracted_dir + ".tar.gz")
         os.rename(extracted_dir, self._source_subfolder)
 
     def _configure_autotools(self):
