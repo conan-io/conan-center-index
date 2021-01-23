@@ -11,15 +11,25 @@ class MimallocTestConan(ConanFile):
         if not self.options["mimalloc"].override:
             self._test_files = ["mi_api"]
 
-        # Visual Studio:
+        # Visual Studio overriding:
         elif self.settings.compiler == "Visual Studio" and self.options["mimalloc"].shared:
             self._test_files = ["include_override", "mi_api"]
         elif self.settings.compiler == "Visual Studio" and not self.options["mimalloc"].shared:
             self._test_files = ["include_override", "mi_api"]
 
-        # Unix-like:
-        elif self.options["mimalloc"].override and self.options["mimalloc"].inject:
+        # Non Macos injected override:
+        elif self.options["mimalloc"].override and \
+             self.options["mimalloc"].inject and \
+             self.settings.os != "Macos":
             self._test_files = ["no_changes"]
+
+        # Could not simulate Macos preload, so just ignore it:
+        elif self.options["mimalloc"].override and \
+             self.options["mimalloc"].inject and \
+             self.settings.os == "Macos":
+            self._test_files = []
+
+        # Unix-like non injected override:
         else:
             self._test_files = ["no_changes", "include_override", "mi_api"]
 
