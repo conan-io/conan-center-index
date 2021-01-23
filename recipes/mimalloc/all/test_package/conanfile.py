@@ -87,5 +87,5 @@ class MimallocTestConan(ConanFile):
                 self.run(test_package, run_environment=True)
 
                 test_package_cpp = os.path.join("bin", file + "_cpp")
-                self.output.info(f"test: {test_package_cpp}")
+                self.output.info("test: {}".format(test_package_cpp))
                 self.run(test_package_cpp, run_environment=True)
