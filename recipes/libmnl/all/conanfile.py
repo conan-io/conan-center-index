@@ -1,5 +1,6 @@
 import os, glob
 from conans import ConanFile, tools, AutoToolsBuildEnvironment
+from conans.errors import ConanInvalidConfiguration
 
 class LibmnlConan(ConanFile):
     name = "libmnl"
