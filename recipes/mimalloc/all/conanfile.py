@@ -180,6 +180,7 @@ class MimallocConan(ConanFile):
             obj_file = "{}.{}".format(self._obj_name, obj_ext)
             obj_path = os.path.join(self.package_folder, self._install_prefix, obj_file)
             self.cpp_info.exelinkflags = [obj_path]
+            self.cpp_info.sharedlinkflags = [obj_path]
             self.cpp_info.libdirs = []
             self.cpp_info.bindirs = []
         else:
