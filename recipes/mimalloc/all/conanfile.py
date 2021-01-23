@@ -1,6 +1,7 @@
 from conans import ConanFile, CMake, tools
 from conans.errors import ConanInvalidConfiguration
 import os
+import shutil
 
 
 class MimallocConan(ConanFile):
@@ -137,6 +138,12 @@ class MimallocConan(ConanFile):
         with tools.vcvars(self.settings) if self.settings.compiler == "Visual Studio" else tools.no_op():
             cmake = self._configure_cmake()
             cmake.install()
+
+        if self.options.get_safe("single_object"):
+            tools.remove_files_by_mask(os.path.join(self.package_folder, "lib"),
+                                       "*.a")
+            shutil.copy(os.path.join(self.package_folder, "lib", self._obj_name + ".o"),
+                        os.path.join(self.package_folder, "lib", self._obj_name))
 
         if self.settings.os == "Windows" and self.options.shared:
             if self.settings.arch == "x86_64":
