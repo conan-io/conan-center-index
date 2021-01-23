@@ -83,7 +83,7 @@ class MimallocTestConan(ConanFile):
         with tools.environment_append(self._environment):
             for file in self._test_files:
                 test_package = os.path.join("bin", file)
-                self.output.info(f"test: {test_package}")
+                self.output.info("test: {}".format(test_package))
                 self.run(test_package, run_environment=True)
 
                 test_package_cpp = os.path.join("bin", file + "_cpp")
