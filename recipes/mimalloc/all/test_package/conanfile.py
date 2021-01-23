@@ -55,7 +55,7 @@ class MimallocTestConan(ConanFile):
             environment["LD_PRELOAD"] = self._lib_name + ".so"
         elif self.settings.os == "Macos":
             env_build = RunEnvironment(self)
-            insert_library = os.join(env_build.vars["DYLD_LIBRARY_PATH"], self._lib_name +".dylib")
+            insert_library = os.path.join(env_build.vars["DYLD_LIBRARY_PATH"], self._lib_name +".dylib")
 
             environment["DYLD_FORCE_FLAT_NAMESPACE"] = "1"
             environment["DYLD_INSERT_LIBRARIES"] = insert_library
