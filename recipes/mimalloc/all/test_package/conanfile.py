@@ -1,4 +1,4 @@
-from conans import ConanFile, CMake, tools
+from conans import ConanFile, CMake, RunEnvironment, tools
 import os
 
 
@@ -54,8 +54,11 @@ class MimallocTestConan(ConanFile):
         if self.settings.os == "Linux":
             environment["LD_PRELOAD"] = self._lib_name + ".so"
         elif self.settings.os == "Macos":
+            env_build = RunEnvironment(self)
+            insert_library = os.join(env_build.vars["DYLD_LIBRARY_PATH"], self._lib_name +".dylib")
+
             environment["DYLD_FORCE_FLAT_NAMESPACE"] = "1"
-            environment["DYLD_INSERT_LIBRARIES"] = self._lib_name +".dylib"
+            environment["DYLD_INSERT_LIBRARIES"] = insert_library
 
         return environment
 
