@@ -134,17 +134,10 @@ class MimallocConan(ConanFile):
         if self.settings.os == "Windows" and self.options.shared:
             if self.settings.arch == "x86_64":
                 self.copy("mimalloc-redirect.dll", src=os.path.join(self._source_subfolder, "bin"),
-                          dst=self._install_prefix)
+                          dst="bin")
             elif self.settings.arch == "x86":
                 self.copy("mimalloc-redirect32.dll", src=os.path.join(self._source_subfolder, "bin"),
-                          dst=self._install_prefix)
-
-        tools.rmdir(os.path.join(self.package_folder, self._install_prefix, "cmake"))
-
-    @property
-    def _install_prefix(self):
-        version = tools.Version(self.version)
-        return os.path.join("lib", "{}-{}.{}".format(self.name, version.major, version.minor))
+                          dst="bin")
 
     @property
     def _obj_name(self):
@@ -158,6 +151,7 @@ class MimallocConan(ConanFile):
     @property
     def _lib_name(self):
         name = "mimalloc" if self.settings.os == "Windows" else "libmimalloc"
+
         if self.settings.os == "Windows" and not self.options.shared:
             name += "-static"
         if self.options.secure:
@@ -171,22 +165,18 @@ class MimallocConan(ConanFile):
             self.cpp_info.includedirs = []
             self.cpp_info.libdirs = []
             self.cpp_info.resdirs = []
-            self.cpp_info.bindirs = [self._install_prefix]
             return
 
-        self.cpp_info.includedirs = [os.path.join(self._install_prefix, "include")]
         if self.options.get_safe("single_object"):
-            obj_ext = "obj" if self.settings.os == "Windows" else "o"
+            obj_ext = "o"
             obj_file = "{}.{}".format(self._obj_name, obj_ext)
-            obj_path = os.path.join(self.package_folder, self._install_prefix, obj_file)
+            obj_path = os.path.join(self.package_folder, "lib", obj_file)
             self.cpp_info.exelinkflags = [obj_path]
             self.cpp_info.sharedlinkflags = [obj_path]
             self.cpp_info.libdirs = []
             self.cpp_info.bindirs = []
         else:
             self.cpp_info.libs = [self._lib_name]
-            self.cpp_info.libdirs = [self._install_prefix]
-            self.cpp_info.bindirs = [self._install_prefix]
 
         if self.settings.os == "Linux":
             self.cpp_info.system_libs.append("pthread")

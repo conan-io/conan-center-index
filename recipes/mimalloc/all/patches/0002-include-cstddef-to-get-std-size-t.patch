@@ -1,7 +1,3 @@
-Tentative patch to fix "no type named 'size_t' in namespace 'std'" errors.
-
-If this works, a PR will be submitted upstream.
-
 diff --git a/include/mimalloc.h b/include/mimalloc.h
 index 254a7d9..3c3142b 100644
 --- a/include/mimalloc.h

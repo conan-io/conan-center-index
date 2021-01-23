@@ -1,0 +1,91 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 71772d8..6fe421a 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -206,7 +206,7 @@ endif()
+ # Install and output names
+ # -----------------------------------------------------------------------------
+ 
+-set(mi_install_dir "${CMAKE_INSTALL_PREFIX}/lib/mimalloc-${mi_version}")
++# set(mi_install_dir "${CMAKE_INSTALL_PREFIX}/lib/mimalloc-${mi_version}")
+ if(MI_SECURE MATCHES "ON")
+   set(mi_basename "mimalloc-secure")
+ else()
+@@ -236,7 +236,7 @@ if(MI_USE_CXX MATCHES "ON")
+ else()
+   message(STATUS "Compiler         : ${CMAKE_C_COMPILER}")
+ endif()
+-message(STATUS "Install directory: ${mi_install_dir}")
++# message(STATUS "Install directory: ${mi_install_dir}")
+ message(STATUS "Build targets    : ${mi_build_targets}")
+ message(STATUS "")
+ 
+@@ -253,7 +253,7 @@ if(MI_BUILD_SHARED)
+   target_link_libraries(mimalloc PUBLIC ${mi_libraries})
+   target_include_directories(mimalloc PUBLIC
+       $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+-      $<INSTALL_INTERFACE:${mi_install_dir}/include>
++      # $<INSTALL_INTERFACE:${mi_install_dir}/include>
+   )
+   if(WIN32)
+     # On windows copy the mimalloc redirection dll too.
+@@ -263,8 +263,8 @@ if(MI_BUILD_SHARED)
+       COMMENT "Copy mimalloc-redirect.dll to output directory")
+   endif()
+ 
+-  install(TARGETS mimalloc EXPORT mimalloc DESTINATION ${mi_install_dir} LIBRARY)
+-  install(EXPORT mimalloc DESTINATION ${mi_install_dir}/cmake)
++  install(TARGETS mimalloc RUNTIME DESTINATION bin LIBRARY DESTINATION lib ARCHIVE DESTINATION lib)
++  # install(EXPORT mimalloc DESTINATION ${mi_install_dir}/cmake)
+ endif()
+ 
+ # static library
+@@ -276,7 +276,7 @@ if (MI_BUILD_STATIC)
+   target_link_libraries(mimalloc-static PUBLIC ${mi_libraries})
+   target_include_directories(mimalloc-static PUBLIC
+       $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+-      $<INSTALL_INTERFACE:${mi_install_dir}/include>
++      # $<INSTALL_INTERFACE:${mi_install_dir}/include>
+   )
+   if(WIN32)
+     # When building both static and shared libraries on Windows, a static library should use a
+@@ -287,15 +287,15 @@ if (MI_BUILD_STATIC)
+     set_target_properties(mimalloc-static PROPERTIES OUTPUT_NAME ${mi_basename})
+   endif()
+ 
+-  install(TARGETS mimalloc-static EXPORT mimalloc DESTINATION ${mi_install_dir})
++  install(TARGETS mimalloc-static RUNTIME DESTINATION bin LIBRARY DESTINATION lib ARCHIVE DESTINATION lib)
+ endif()
+ 
+ # install include files
+-install(FILES include/mimalloc.h DESTINATION ${mi_install_dir}/include)
+-install(FILES include/mimalloc-override.h DESTINATION ${mi_install_dir}/include)
+-install(FILES include/mimalloc-new-delete.h DESTINATION ${mi_install_dir}/include)
+-install(FILES cmake/mimalloc-config.cmake DESTINATION ${mi_install_dir}/cmake)
+-install(FILES cmake/mimalloc-config-version.cmake DESTINATION ${mi_install_dir}/cmake)
++install(FILES include/mimalloc.h DESTINATION include)
++install(FILES include/mimalloc-override.h DESTINATION include)
++install(FILES include/mimalloc-new-delete.h DESTINATION include)
++# install(FILES cmake/mimalloc-config.cmake DESTINATION ${mi_install_dir}/cmake)
++# install(FILES cmake/mimalloc-config-version.cmake DESTINATION ${mi_install_dir}/cmake)
+ 
+ if(FALSE)
+   # install a symlink in the /usr/local/lib to the versioned library
+@@ -313,7 +313,7 @@ if (MI_BUILD_OBJECT)
+   target_compile_options(mimalloc-obj PRIVATE ${mi_cflags})
+   target_include_directories(mimalloc-obj PUBLIC
+       $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+-      $<INSTALL_INTERFACE:${mi_install_dir}/include>
++      # $<INSTALL_INTERFACE:${mi_install_dir}/include>
+   )
+ 
+   # the following seems to lead to cmake warnings/errors on some systems, disable for now :-(
+@@ -322,7 +322,7 @@ if (MI_BUILD_OBJECT)
+   # the FILES expression can also be: $<TARGET_OBJECTS:mimalloc-obj>
+   # but that fails cmake versions less than 3.10 so we leave it as is for now
+   install(FILES ${CMAKE_CURRENT_BINARY_DIR}/CMakeFiles/mimalloc-obj.dir/src/static.c${CMAKE_C_OUTPUT_EXTENSION}
+-          DESTINATION ${mi_install_dir}
++          DESTINATION lib
+           RENAME ${mi_basename}${CMAKE_C_OUTPUT_EXTENSION} )
+ endif()
+ 

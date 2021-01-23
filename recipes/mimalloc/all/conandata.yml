@@ -4,7 +4,9 @@ sources:
     sha256: "111b718b496f297f128d842880e72e90e33953cf00b45ba0ccd2167e7340ed17"
 patches:
   "1.6.7":
-    - patch_file: "patches/0002-avoid-symlink-creation.patch"
+    - patch_file: "patches/0001-avoid-symlink-creation.patch"
       base_path: "source_subfolder"
-    - patch_file: "patches/0004-include-cstddef-to-get-std-size-t.patch"
+    - patch_file: "patches/0002-include-cstddef-to-get-std-size-t.patch"
+      base_path: "source_subfolder"
+    - patch_file: "patches/0003-get-rid-of-mi_install_dir.patch"
       base_path: "source_subfolder"
