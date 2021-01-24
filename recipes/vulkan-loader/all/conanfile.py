@@ -145,3 +145,7 @@ class VulkanLoaderConan(ConanFile):
             self.cpp_info.system_libs = ["dl", "pthread", "m"]
         elif self.settings.os == "Macos":
             self.cpp_info.frameworks = ["CoreFoundation"]
+
+        vulkan_sdk_path = self.package_folder
+        self.output.info("Create VULKAN_SDK environment variable: {}".format(vulkan_sdk_path))
+        self.env_info.VULKAN_SDK = vulkan_sdk_path
