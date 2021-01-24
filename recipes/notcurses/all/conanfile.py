@@ -50,7 +50,7 @@ class NotcursesConan(ConanFile):
         self._cmake.definitions["USE_PANDOC"] = "OFF"
         self._cmake.definitions["USE_POC"] = "OFF"
         self._cmake.definitions["USE_QRCODEGEN"] = "OFF"
-        self._cmake.definitions["USE_STATIC"] = "OFF" if self.options.shared else "ON"
+        self._cmake.definitions["USE_STATIC"] = not self.options.shared
         self._cmake.configure(source_folder="notcurses-" + self.version)
         return self._cmake
 
