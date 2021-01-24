@@ -53,9 +53,6 @@ sources:
     ]
     sha256: "83bfc1507731a0906e387fc28b7ef5417d591429e51e788417fe9ff025e116b1"
 patches:
-  1.66.0: []
-  1.67.0: []
-  1.68.0: []
   1.69.0:
     - patch_file: "patches/boost_build_asmflags.patch"
       base_path: "source_subfolder"
