@@ -82,6 +82,8 @@ class LibavrocppConan(ConanFile):
             self.requires("snappy/1.1.8")
 
     def package(self):
+        self.copy("LICENSE", dst="licenses", src=self._source_subfolder)
+        self.copy("NOTICE", dst="licenses", src=self._source_subfolder)
         cmake = CMake(self)
         cmake.configure(source_folder=self._source_subfolder)
         cmake.install()
