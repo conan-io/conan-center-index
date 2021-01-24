@@ -76,6 +76,8 @@ class VulkanLoaderConan(ConanFile):
         if self.options.get_safe("with_wsi_xcb") or self.options.get_safe("with_wsi_xlib") or \
            self.options.get_safe("with_wsi_wayland") or self.options.get_safe("with_wsi_directfb"):
             self.build_requires("pkgconf/1.7.3")
+        if self._is_mingw:
+            self.build_requires("jwasm/2.13")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
@@ -89,11 +91,6 @@ class VulkanLoaderConan(ConanFile):
         tools.replace_in_file(os.path.join(self._source_subfolder, "loader", "CMakeLists.txt"),
                               "if(${configuration} MATCHES \"/MD\")",
                               "if(FALSE)")
-        # FIXME: might work with a jwasm recipe in build_requirement for MinGW
-        if self._is_mingw:
-            tools.replace_in_file(os.path.join(self._source_subfolder, "loader", "CMakeLists.txt"),
-                                  "if(CMAKE_ASM_MASM_COMPILER_WORKS OR JWASM_FOUND)",
-                                  "if(FALSE)")
 
     def _configure_cmake(self):
         if self._cmake:
@@ -112,8 +109,8 @@ class VulkanLoaderConan(ConanFile):
         if tools.is_apple_os(self.settings.os):
             self._cmake.definitions["BUILD_STATIC_LOADER"] = not self.options.shared
         self._cmake.definitions["BUILD_LOADER"] = True
-        if self.settings.os == "Windows": # FIXME: might work with a jwasm recipe in build_requirement for MinGW
-            self._cmake.definitions["USE_MASM"] = not self.settings.compiler == "gcc"
+        if self.settings.os == "Windows":
+            self._cmake.definitions["USE_MASM"] = True
         self._cmake.configure()
         return self._cmake
 
