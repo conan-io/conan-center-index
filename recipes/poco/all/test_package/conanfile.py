@@ -41,8 +41,9 @@ class TestPackageConan(ConanFile):
             if self.options["poco"].enable_crypto:
                 self.run("{} {}".format(os.path.join("bin", "crypto"), os.path.join(self.source_folder, "conanfile.py")), run_environment=True)
             if self.options["poco"].enable_net:
-                self.run(os.path.join("bin", "net"), run_environment=True)
-                self.run(os.path.join("bin", "net_2"), run_environment=True)
+                # self.run(os.path.join("bin", "net"), run_environment=True)
+                # self.run(os.path.join("bin", "net_2"), run_environment=True)
+                pass
             if self._with_netssl:
                 self.run(os.path.join("bin", "netssl"), run_environment=True)
             if self.options["poco"].enable_data_sqlite:
