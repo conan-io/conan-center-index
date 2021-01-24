@@ -112,7 +112,9 @@ class CernRootConan(ConanFile):
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
-        os.rename("root-{}".format(self.version.replace("v", "")), self._source_subfolder)
+        os.rename(
+            "root-{}".format(self.version.replace("v", "")), self._source_subfolder
+        )
 
     def _patch_source_cmake(self):
         os.remove(
@@ -133,19 +135,24 @@ class CernRootConan(ConanFile):
         tools.replace_in_file(
             os.path.join(self._source_subfolder, "CMakeLists.txt"),
             "project(ROOT)",
-            "\n".join(("project(ROOT)",
-            "# sets the current C runtime on MSVC (MT vs MD vd MTd vs MDd)",
-            "include({}/conanbuildinfo.cmake)".format(self.install_folder.replace("\\", "/")),
-            "conan_set_vs_runtime()",
-            "find_package(OpenSSL REQUIRED)",
-            "set(OPENSSL_VERSION ${OpenSSL_VERSION})",
-            "find_package(LibXml2 REQUIRED)",
-            "set(LIBXML2_INCLUDE_DIR ${LibXml2_INCLUDE_DIR})",
-            "set(LIBXML2_LIBRARIES ${LibXml2_LIBRARIES})",
-            "find_package(SQLite3 REQUIRED)",
-            "set(SQLITE_INCLUDE_DIR ${SQLITE3_INCLUDE_DIRS})",
-            "set(SQLITE_LIBRARIES SQLite::SQLite3)",
-            ))
+            "\n".join(
+                (
+                    "project(ROOT)",
+                    "# sets the current C runtime on MSVC (MT vs MD vd MTd vs MDd)",
+                    "include({}/conanbuildinfo.cmake)".format(
+                        self.install_folder.replace("\\", "/")
+                    ),
+                    "conan_set_vs_runtime()",
+                    "find_package(OpenSSL REQUIRED)",
+                    "set(OPENSSL_VERSION ${OpenSSL_VERSION})",
+                    "find_package(LibXml2 REQUIRED)",
+                    "set(LIBXML2_INCLUDE_DIR ${LibXml2_INCLUDE_DIR})",
+                    "set(LIBXML2_LIBRARIES ${LibXml2_LIBRARIES})",
+                    "find_package(SQLite3 REQUIRED)",
+                    "set(SQLITE_INCLUDE_DIR ${SQLITE3_INCLUDE_DIRS})",
+                    "set(SQLITE_LIBRARIES SQLite::SQLite3)",
+                )
+            ),
         )
 
     def _fix_source_permissions(self):
