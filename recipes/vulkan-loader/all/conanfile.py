@@ -134,6 +134,9 @@ class VulkanLoaderConan(ConanFile):
     def package_info(self):
         if self.deps_cpp_info["vulkan-headers"].version != self.version:
             self.output.warn("vulkan-headers version is different than vulkan-loader. Several symbols might be missing.")
+
+        self.cpp_info.names["cmake_find_package"] = "Vulkan"
+        self.cpp_info.names["cmake_find_package_multi"] = "Vulkan"
         self.cpp_info.names["pkg_config"] = "vulkan"
         suffix = "-1" if self.settings.os == "Windows" else ""
         self.cpp_info.libs = ["vulkan" + suffix]
