@@ -1,0 +1,4 @@
+sources:
+  1.8.2:
+    url: "https://github.com/apache/avro/archive/release-1.8.2.tar.gz"
+    sha256: "19040889f2c822445b6ccf14e6f13ccf2d7851458790ae1539a2688d21c76ae0"
