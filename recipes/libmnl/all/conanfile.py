@@ -1,6 +1,8 @@
-import os, glob
+import os
 from conans import ConanFile, tools, AutoToolsBuildEnvironment
 from conans.errors import ConanInvalidConfiguration
+
+required_conan_version = ">=1.29.1"
 
 class LibmnlConan(ConanFile):
     name = "libmnl"
@@ -35,15 +37,12 @@ class LibmnlConan(ConanFile):
         if self._autotools:
             return self._autotools
         self._autotools = AutoToolsBuildEnvironment(self)
-        config_args = [
-            "--prefix={}".format(tools.unix_path(self.package_folder)),
-        ]
+        conf_args = []
         if self.options.shared:
-            config_args.extend(["--enable-shared=yes", "--enable-static=no"])
+            conf_args.extend(["--enable-shared", "--disable-static"])
         else:
-            config_args.extend(["--enable-shared=no", "--enable-static=yes"])
-
-        self._autotools.configure(configure_dir=self._source_subfolder, args=config_args)
+            conf_args.extend(["--disable-shared", "--enable-static"])
+        self._autotools.configure(configure_dir=self._source_subfolder, args=conf_args)
         return self._autotools
 
     def build(self):
@@ -51,13 +50,11 @@ class LibmnlConan(ConanFile):
         autotools.make()
 
     def package(self):
+        self.copy("COPYING", dst="licenses", src=self._source_subfolder)
         autotools = self._configure_autotools()
         autotools.install()
-        self.copy("COPYING", dst="licenses", src=self._source_subfolder)
-        la_pattern = os.path.join(self.package_folder, "lib", "**", "*.la")
-        la_files = glob.glob(la_pattern, recursive=True)
-        for next_file in la_files:
-            os.remove(next_file)
+
+        tools.remove_files_by_mask(os.path.join(self.package_folder, "lib"), "*.la")
         tools.rmdir(os.path.join(self.package_folder, "share"))
         tools.rmdir(os.path.join(self.package_folder, "etc"))
         tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
