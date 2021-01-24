@@ -12,12 +12,17 @@ class MSYS2Conan(ConanFile):
     license = "MSYS license"
     topics = ("conan", "msys", "unix", "subsystem")
     short_paths = True
-    options = {"exclude_files": "ANY",  # Comma separated list of file patterns to exclude from the package
-               "packages": "ANY",  # Comma separated
-               "additional_packages": "ANY"}    # Comma separated
-    default_options = {"exclude_files": "*/link.exe",
-                       "packages": "base-devel,binutils,gcc",
-                       "additional_packages": None}
+    # "exclude_files" "packages" "additional_packages" values are a comma separated list
+    options = {
+        "exclude_files": "ANY",
+        "packages": "ANY",
+        "additional_packages": "ANY"
+    }
+    default_options = {
+        "exclude_files": "*/link.exe",
+        "packages": "base-devel,binutils,gcc",
+        "additional_packages": None
+    }
     settings = "os", "arch"
 
     def validate(self):
@@ -33,6 +38,44 @@ class MSYS2Conan(ConanFile):
         return filename
 
     @property
+    def _keyring_subfolder(self):
+        return os.path.join(self.source_folder, "keyring")
+
+    @property
+    def _keyring_file(self):
+        return os.path.join(self._keyring_subfolder, "msys2-keyring-r21.b39fb11-1-any.pkg.tar.xz")
+    
+    @property
+    def _keyring_sig(self):
+        return os.path.join(self._keyring_subfolder, "msys2-keyring-r21.b39fb11-1-any.pkg.tar.xz.sig")    
+
+    # download the new keyring
+    # https://www.msys2.org/news/#2020-06-29-new-packagers
+    def _download_keyring(self):
+        tools.download( "http://repo.msys2.org/msys/x86_64/msys2-keyring-r21.b39fb11-1-any.pkg.tar.xz",
+                        self._keyring_file,
+                        sha256="f1cc152902fd6018868b64d015cab9bf547ff9789d8bd7c0d798fb2b22367b2b" )
+        tools.download( "http://repo.msys2.org/msys/x86_64/msys2-keyring-r21.b39fb11-1-any.pkg.tar.xz.sig",
+                        self._keyring_sig,
+                        sha256="bbd22e88f33c81c40b145c34d8027d60f714d4fd1d0dccd456895f398cc56297" )
+
+    def _install_pacman_keyring(self):
+        with tools.chdir(os.path.join(self._msys_dir, "usr", "bin")):
+            self.run('bash -l -c  "pacman-key --init;pacman-key --populate"')
+            verify_command = 'bash -l -c "pacman-key --verify %s"' % self._keyring_sig.replace("\\", "/")
+            self.run(verify_command)
+
+            update_command = 'bash -l -c "pacman -U %s --noconfirm"' % self._keyring_file.replace("\\", "/")
+            self.run(update_command)
+
+    def _update_pacman(self):
+        with tools.chdir(os.path.join(self._msys_dir, "usr", "bin")):
+            self.run('bash -l -c "pacman -Sy pacman --noconfirm"')
+            self.run('bash -l -c "pacman -Rc dash --noconfirm"')
+            self.run('bash -l -c "pacman -Syu --noconfirm"')
+
+
+    @property
     def _msys_dir(self):
         return "msys64" if (tools.Version(self.version) >= "20210105" or self.settings.arch == "x86_64") else "msys32"
 
@@ -40,6 +83,7 @@ class MSYS2Conan(ConanFile):
         arch = 1 if self.settings.arch == "x86" else 0  # index in the sources list
         filename = self._download(**self.conan_data["sources"][self.version][arch])
         tools.unzip(filename)
+        self._download_keyring()
 
     def build(self):
         packages = []
@@ -48,8 +92,11 @@ class MSYS2Conan(ConanFile):
         if self.options.additional_packages:
             packages.extend(str(self.options.additional_packages).split(","))
 
+        if (tools.Version(self.version) < "20210105"):
+            self._install_pacman_keyring()
+            self._update_pacman()
+
         with tools.chdir(os.path.join(self._msys_dir, "usr", "bin")):
-            self.run('bash -l -c "pacman -Syu --noconfirm"')
             for package in packages:
                 self.run('bash -l -c "pacman -S %s --noconfirm"' % package)
 
