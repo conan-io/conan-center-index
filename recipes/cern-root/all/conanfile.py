@@ -34,7 +34,7 @@ class CernRootConan(ConanFile):
     options = {
         # Don't allow static build as it is not supported
         # see: https://sft.its.cern.ch/jira/browse/ROOT-6446
-        # TODO: shared option should be reinstated when hooks issue is resolved
+        # FIXME: shared option should be reinstated when hooks issue is resolved
         # (see: https://github.com/conan-io/hooks/issues/252)
         # "shared": [True],
         "fPIC": [True, False],
