@@ -140,7 +140,7 @@ class VulkanLoaderConan(ConanFile):
         self.cpp_info.names["pkg_config"] = "vulkan"
         suffix = "-1" if self.settings.os == "Windows" else ""
         self.cpp_info.libs = ["vulkan" + suffix]
-        self.cpp_info.includedirs = [] # no include dir by itself, public headers come from vulkan-headers
+        self.cpp_info.includedirs = self.deps_cpp_info["vulkan-headers"].include_paths # allow to properly set Vulkan_INCLUDE_DIRS in cmake_find_package(_multi) generators
         if self.settings.os == "Linux":
             self.cpp_info.system_libs = ["dl", "pthread", "m"]
         elif self.settings.os == "Macos":
