@@ -1,13 +1,7 @@
 diff --git CMakeLists.txt CMakeLists.txt
-index 8bc6077..60c2ffd 100644
+index 8bc6077..579a7b4 100644
 --- CMakeLists.txt
 +++ CMakeLists.txt
-@@ -1,4 +1,4 @@
--cmake_minimum_required (VERSION 2.8.11)
-+cmake_minimum_required (VERSION 3.0.0)
- project (hyperscan C CXX)
- 
- set (HS_MAJOR_VERSION 5)
 @@ -6,7 +6,7 @@ set (HS_MINOR_VERSION 4)
  set (HS_PATCH_VERSION 0)
  set (HS_VERSION ${HS_MAJOR_VERSION}.${HS_MINOR_VERSION}.${HS_PATCH_VERSION})

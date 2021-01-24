@@ -4,14 +4,14 @@ import os
 
 class HyperscanConan(ConanFile):
     name = "hyperscan"
-    license = "BSD-2-Clause"
+    license = "BSD-3-Clause"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://www.hyperscan.io"
     description = "High-performance regular expression matching library"
     topics = ("regex", "regular expressions")
     settings = "os", "compiler", "build_type", "arch"
     exports_sources = ["CMakeLists.txt", "patches/**"]
-    generators = "cmake"
+    generators = "cmake", "cmake_find_package"
 
     _cmake = None
 
