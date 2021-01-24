@@ -21,7 +21,9 @@ required_conan_version = ">=1.29.1"
 
 class CernRootConan(ConanFile):
     name = "cern-root"
-    version = "v6-22-02"
+    # version format is intentional, ROOT does not follow strict SemVer.
+    # see: https://root.cern/about/versioning/
+    version = "v6-22-06"
     license = "LGPL-2.1-or-later"  # of ROOT itself, the recipe is under MIT license.
     homepage = "https://root.cern/"
     # ROOT itself is located at: https://github.com/root-project/root
