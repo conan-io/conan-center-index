@@ -18,23 +18,23 @@ class HyperscanConan(ConanFile):
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
-        "optimise": [True, False],
-        "debug_output": [True, False],
+        "optimise": [True, False, "auto"],
+        "debug_output": [True, False, "auto"],
         "build_avx512": [True, False],
         "fat_runtime": [True, False],
         "build_chimera": [True, False],
-        "dump_support": [True, False]
+        "dump_support": [True, False, "auto"]
     }
 
     default_options = {
         "shared": False,
         "fPIC": True,
-        "optimise": True,
-        "debug_output": False,
+        "optimise": "auto",
+        "debug_output": "auto",
         "build_avx512": False,
         "fat_runtime": False,
         "build_chimera": False,
-        "dump_support": False
+        "dump_support": "auto"
     }
 
     @property
@@ -65,12 +65,15 @@ class HyperscanConan(ConanFile):
         if self._cmake:
             return self._cmake
         self._cmake = CMake(self);
-        self._cmake.definitions["OPTIMISE"] = self.options.optimise
-        self._cmake.definitions["DEBUG_OUTPUT"] = self.options.debug_output
+        if self.options.optimise != "auto":
+            self._cmake.definitions["OPTIMISE"] = self.options.optimise
+        if self.options.debug_output != "auto":
+            self._cmake.definitions["DEBUG_OUTPUT"] = self.options.debug_output
         self._cmake.definitions["BUILD_AVX512"] = self.options.build_avx512
         self._cmake.definitions["FAT_RUNTIME"] = self.options.fat_runtime
         self._cmake.definitions["BUILD_CHIMERA"] = self.options.build_chimera
-        self._cmake.definitions["DUMP_SUPPORT"] = self.options.dump_support
+        if self.options.dump_support != "auto":
+            self._cmake.definitions["DUMP_SUPPORT"] = self.options.dump_support
         self._cmake.configure(build_folder=self._build_subfolder)
         return self._cmake
 
