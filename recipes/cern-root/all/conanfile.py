@@ -288,6 +288,7 @@ class CernRootConan(ConanFile):
         )
 
     def package_info(self):
+        # FIXME: ROOT generates multiple CMake files
         self.cpp_info.names["cmake_find_package"] = "ROOT"
         self.cpp_info.names["cmake_find_package_multi"] = "ROOT"
         self.cpp_info.names["cmake_find_package"] = "ROOT"
