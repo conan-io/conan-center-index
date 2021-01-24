@@ -149,7 +149,7 @@ class CernRootConan(ConanFile):
                     "include({}/conanbuildinfo.cmake)".format(
                         self.install_folder.replace("\\", "/")
                     ),
-                    "conan_set_vs_runtime()",
+                    "conan_basic_setup(NO_OUTPUT_DIRS)",
                     "find_package(OpenSSL REQUIRED)",
                     "set(OPENSSL_VERSION ${OpenSSL_VERSION})",
                     "find_package(LibXml2 REQUIRED)",
@@ -196,7 +196,6 @@ class CernRootConan(ConanFile):
                     # (see: https://github.com/conan-io/hooks/issues/252)
                     "BUILD_SHARED_LIBS": "ON",
                     "fail-on-missing": "ON",
-                    "CMAKE_CXX_STANDARD": self._cmake_cxx_standard,
                     "gnuinstall": "OFF",
                     "soversion": "ON",
                     # Disable builtins and use Conan deps where available
@@ -253,16 +252,10 @@ class CernRootConan(ConanFile):
         for f in ["opengl_system", "GLEW", "glu", "TBB", "LibXml2", "ZLIB", "SQLite3"]:
             shutil.copy(
                 "Find{}.cmake".format(f),
-                os.path.join(self._source_subfolder, "cmake", "modules"),
+                os.path.join(
+                    self.source_folder, self._source_subfolder, "cmake", "modules"
+                ),
             )
-
-    @property
-    def _cmake_cxx_standard(self):
-        compileropt = self.settings.compiler.get_safe("cppstd")
-        if compileropt:
-            return str(compileropt)
-        else:
-            return "11"
 
     @property
     def _pyrootopt(self):
