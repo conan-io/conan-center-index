@@ -186,7 +186,6 @@ class CernRootConan(ConanFile):
         if self._cmake is None:
             self._move_findcmake_conan_to_root_dir()
             self._cmake = CMake(self)
-            version = self.version.replace("v", "")
             cmakelibpath = ";".join(self.deps_cpp_info.lib_paths)
             cmakeincludepath = ";".join(self.deps_cpp_info.include_paths)
             self._cmake.configure(
