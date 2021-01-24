@@ -11,7 +11,9 @@ class NotcursesConan(ConanFile):
     exports_sources = ["CMakeLists.txt"]
     settings = "os", "compiler", "build_type", "arch"
     options = {"shared": [True, False]}
-    default_options = {"shared": False}
+    default_options = {"shared": False,
+                       "readline:with_library":"curses"
+                      }
     generators = "cmake", "pkg_config"
 
     _cmake = None
@@ -20,7 +22,7 @@ class NotcursesConan(ConanFile):
         self.requires("openimageio/2.2.7.0")
         self.requires("libunistring/0.9.10")
         self.requires("readline/8.0")
-        self.requires("ncurses.tinfo/6.2")
+        self.requires("ncurses/6.2")
 
     def build_requirements(self):
         self.build_requires("pkgconf/1.7.3")
