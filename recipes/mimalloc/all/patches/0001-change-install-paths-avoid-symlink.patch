@@ -1,5 +1,5 @@
 diff --git a/CMakeLists.txt b/CMakeLists.txt
-index 35460e8..be0ab3f 100644
+index 35460e8..e5340d5 100644
 --- a/CMakeLists.txt
 +++ b/CMakeLists.txt
 @@ -206,7 +206,7 @@ endif()
@@ -16,7 +16,7 @@ index 35460e8..be0ab3f 100644
    endif()
  
 -  install(TARGETS mimalloc EXPORT mimalloc DESTINATION ${mi_install_dir} LIBRARY)
-+  install(TARGETS mimalloc EXPORT mimalloc RUNTIME LIBRARY ARCHIVE)
++  install(TARGETS mimalloc EXPORT mimalloc RUNTIME DESTINATION bin LIBRARY DESTINATION lib ARCHIVE DESTINATION lib)
    install(EXPORT mimalloc DESTINATION ${mi_install_dir}/cmake)
  endif()
  
@@ -25,7 +25,7 @@ index 35460e8..be0ab3f 100644
    endif()
  
 -  install(TARGETS mimalloc-static EXPORT mimalloc DESTINATION ${mi_install_dir})
-+  install(TARGETS mimalloc-static EXPORT mimalloc RUNTIME LIBRARY ARCHIVE)
++  install(TARGETS mimalloc-static EXPORT mimalloc RUNTIME DESTINATION bin LIBRARY DESTINATION lib ARCHIVE DESTINATION lib)
  endif()
  
  # install include files
