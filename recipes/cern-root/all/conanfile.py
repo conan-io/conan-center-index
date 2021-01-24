@@ -115,27 +115,32 @@ class CernRootConan(ConanFile):
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
         os.rename(
-            "root-{}".format(self.version.replace("v", "")), self._source_subfolder
+            "root-{}".format(self.version.replace("v", "")),
+            self._source_subfolder,
         )
 
     def _patch_source_cmake(self):
-        os.remove(
-            os.sep.join(
-                (
-                    self._source_subfolder,
-                    "cmake",
-                    "modules",
-                    "FindTBB.cmake",
+        try:
+            os.remove(
+                os.sep.join(
+                    (
+                        self.source_folder,
+                        self._source_subfolder,
+                        "cmake",
+                        "modules",
+                        "FindTBB.cmake",
+                    )
                 )
             )
-        )
+        except OSError:
+            pass
         # Conan generated cmake_find_packages names differ from
         # names ROOT expects (usually only due to case differences)
         # There is currently no way to change these names
         # see: https://github.com/conan-io/conan/issues/4430
         # Patch ROOT CMake to use Conan dependencies
         tools.replace_in_file(
-            os.path.join(self._source_subfolder, "CMakeLists.txt"),
+            os.path.join(self.source_folder, self._source_subfolder, "CMakeLists.txt"),
             "project(ROOT)",
             "\n".join(
                 (
